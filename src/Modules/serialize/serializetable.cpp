@@ -15,18 +15,18 @@
 namespace Engine {
 namespace Serialize {
 
-    void SerializeTable::writeState(const SerializableUnitBase *unit, SerializeOutStream &out) const
+    void SerializeTable::writeState(const SerializableUnitBase *unit, SerializeOutStream &out, CallerHierarchyBasePtr hierarchy) const
     {
         const SerializeTable *table = this;
         while (table) {
             for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                it->second.mWriteState(unit, out, it->second.mFieldName);
+                it->second.mWriteState(unit, out, it->second.mFieldName, hierarchy);
             }
             table = table->mBaseType ? &table->mBaseType() : nullptr;
         }
     }
 
-    void SerializeTable::readState(SerializableUnitBase *unit, SerializeInStream &in, StateTransmissionFlags flags) const
+    void SerializeTable::readState(SerializableUnitBase *unit, SerializeInStream &in, StateTransmissionFlags flags, CallerHierarchyBasePtr hierarchy) const
     {
         Formatter &format = in.format();
 
@@ -43,7 +43,7 @@ namespace Serialize {
                 while (table && !found) {
                     for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
                         if (name == it->second.mFieldName) {
-                            it->second.mReadState(unit, in, it->second.mFieldName);
+                            it->second.mReadState(unit, in, it->second.mFieldName, hierarchy);
                             found = true;
                             break;
                         }
@@ -58,7 +58,7 @@ namespace Serialize {
             const SerializeTable *table = this;
             while (table) {
                 for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                    it->second.mReadState(unit, in, it->second.mFieldName);
+                    it->second.mReadState(unit, in, it->second.mFieldName, hierarchy);
                 }
                 table = table->mBaseType ? &table->mBaseType() : nullptr;
             }

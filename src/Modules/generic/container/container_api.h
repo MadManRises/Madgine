@@ -8,10 +8,13 @@ namespace Engine {
 
 	
 template <typename C, typename Base>
-struct container_api_impl;
+struct container_api_impl : container_api_impl<C, typename underlying_container<Base>::type> {
+    using container_api_impl<C, typename underlying_container<Base>::type>::operator=;
+};
+
 
 template <typename C>
-using container_api = container_api_impl<C, typename base_container<C>::type>;
+using container_api = container_api_impl<C, C>;
 
 template <typename C, typename Base>
 struct underlying_container<container_api_impl<C, Base>> {

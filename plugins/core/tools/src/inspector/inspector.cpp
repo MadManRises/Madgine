@@ -55,9 +55,9 @@ namespace Tools {
             }
         }
 
-        for (Resources::ResourceLoaderBase *loader : uniquePtrToPtr(Resources::ResourceManager::getSingleton().mCollector)) {
+        for (std::unique_ptr<Resources::ResourceLoaderBase> &loader : Resources::ResourceManager::getSingleton().mCollector) {
             for (const MetaTable *type : loader->resourceTypes()) {
-                addObjectSuggestion(type, [=]() {
+                addObjectSuggestion(type, [&]() {
                     return loader->resources();
                 });
             }

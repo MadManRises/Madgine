@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../generic/callerhierarchy.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -7,8 +9,8 @@ namespace Serialize {
         const char *mFieldName;
         size_t (*mOffset)() = nullptr;
 
-        void (*mWriteState)(const SerializableUnitBase *, SerializeOutStream &, const char *) = nullptr;
-        void (*mReadState)(SerializableUnitBase *, SerializeInStream &, const char *) = nullptr;
+        void (*mWriteState)(const SerializableUnitBase *, SerializeOutStream &, const char *, CallerHierarchyBasePtr) = nullptr;
+        void (*mReadState)(SerializableUnitBase *, SerializeInStream &, const char *, CallerHierarchyBasePtr) = nullptr;
 
         void (*mReadAction)(SerializableUnitBase *, SerializeInStream &, PendingRequest *) = nullptr;
         void (*mReadRequest)(SerializableUnitBase *, BufferedInOutStream &, TransactionId) = nullptr;

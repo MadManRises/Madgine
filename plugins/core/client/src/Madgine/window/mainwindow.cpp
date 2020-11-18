@@ -23,10 +23,10 @@
 #include "Modules/serialize/container/controlledconfig.h"
 
 #include "Interfaces/window/windowsettings.h"
-
 #include "filesystem/filesystemlib.h"
-#include "filesystem/filemanager.h"
 #include "Interfaces/filesystem/api.h"
+#include "filesystem/filemanager.h"
+
 
 #include "ini/inilib.h"
 #include "ini/iniformatter.h"
@@ -89,7 +89,7 @@ namespace Window {
     {
         WindowSettings settings = mSettings;
 
-        Filesystem::FileManager mgr{"MainWindow-Layout"};
+        Filesystem::FileManager mgr { "MainWindow-Layout" };
 
         if (Serialize::SerializeInStream in = mgr.openRead(Filesystem::appDataPath() / "mainwindow.ini", std::make_unique<Ini::IniFormatter>())) {
             in >> settings.mData;
@@ -105,7 +105,7 @@ namespace Window {
 
         addFrameListener(this);
 
-        for (MainWindowComponentBase *comp : components()) {
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : components()) {
             bool result = comp->callInit();
             assert(result);
         }
@@ -121,7 +121,7 @@ namespace Window {
             out << mOsWindow->data();
         }
 
-        for (MainWindowComponentBase *comp : components()) {
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : components()) {
             comp->callFinalize();
         }
 
@@ -149,7 +149,7 @@ namespace Window {
 
     bool MainWindow::injectKeyPress(const Input::KeyEventArgs &arg)
     {
-        for (MainWindowComponentBase *comp : reverseIt(components())) {
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
             if (comp->injectKeyPress(arg))
                 return true;
         }
@@ -158,7 +158,7 @@ namespace Window {
 
     bool MainWindow::injectKeyRelease(const Input::KeyEventArgs &arg)
     {
-        for (MainWindowComponentBase *comp : reverseIt(components())) {
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
             if (comp->injectKeyRelease(arg))
                 return true;
         }
@@ -168,7 +168,7 @@ namespace Window {
     bool MainWindow::injectPointerPress(const Input::PointerEventArgs &arg)
     {
 
-        for (MainWindowComponentBase *comp : reverseIt(components())) {
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
             if (comp->injectPointerPress(arg))
                 return true;
         }
@@ -179,7 +179,7 @@ namespace Window {
     bool MainWindow::injectPointerRelease(const Input::PointerEventArgs &arg)
     {
 
-        for (MainWindowComponentBase *comp : reverseIt(components())) {
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
             if (comp->injectPointerRelease(arg))
                 return true;
         }
@@ -190,7 +190,7 @@ namespace Window {
     bool MainWindow::injectPointerMove(const Input::PointerEventArgs &arg)
     {
 
-        for (MainWindowComponentBase *comp : reverseIt(components())) {
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
             if (comp->injectPointerMove(arg))
                 return true;
         }
@@ -235,9 +235,9 @@ namespace Window {
         else
             space = component->getChildClientSpace();
 
-        for (MainWindowComponentBase *comp : reverseIt(components())) {
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
             if (component) {
-                if (component == comp) {
+                if (component == comp.get()) {
                     component = nullptr;
                 }
             } else {

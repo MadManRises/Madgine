@@ -1,8 +1,13 @@
 #pragma once
 
-#include "entitycomponentlistbase.h"
 #include "Modules/generic/container/generationvector.h"
+#include "Modules/generic/container/multivector.h"
 #include "entitycomponentcollector.h"
+#include "entitycomponentlistbase.h"
+#include "entityhandle.h"
+#include "entityptr.h"
+#include "Modules/generic/container/container_api.h"
+#include "../scenemanager.h"
 
 namespace Engine {
 namespace Scene {
@@ -11,36 +16,50 @@ namespace Scene {
         template <typename T>
         struct EntityComponentList : EntityComponentListComponent<EntityComponentList<T>> {
 
-            GenerationVector<T>* operator->() override final {
-                return &mData;
-            }
+            using Vector = container_api<GenerationContainer<MultiVector<T, EntityHandle>>>;
 
-            const GenerationVector<T> *operator->() const
+            Vector *operator->() override final
             {
                 return &mData;
             }
 
-            T *get(GenerationVectorIndex &index) override final
+            const Vector *operator->() const
             {
-                return &mData.at(index);
+                return &mData;
             }
 
-            const T *get(GenerationVectorIndex &index) const
+            T *get(GenerationContainerIndex &index) override final
             {
-                return &mData.at(index);
+                return &mData.at(index).template get<0>();
             }
 
-            EntityComponentOwningHandle<EntityComponentBase> emplace(const ObjectPtr &table) override final
+            const T *get(GenerationContainerIndex &index) const
             {
-                return { mData.emplace(table).copyIndex() };
+                return &mData.at(index).template get<0>();
             }
 
-            void erase(GenerationVectorIndex &index) override final
+            EntityHandle getEntity(GenerationContainerIndex& index, SceneManager *mgr) const override final {
+                mData.update(index);
+                if (index)
+                    return mgr->copyEntityHandle(mData.at(index).template get<1>());
+                else
+                    return {};
+            }
+
+            EntityComponentOwningHandle<EntityComponentBase> emplace(const ObjectPtr &table, const EntityPtr &entity) override final
             {
+                return {
+                    mData.emplace(std::piecewise_construct, std::forward_as_tuple(table), std::make_tuple(entity)).copyIndex()
+                };
+            }
+
+            void erase(GenerationContainerIndex &index, GenerationVector<Entity> &vec) override final
+            {
+                vec.reset(mData.at(index).template get<1>().mIndex);
                 mData.erase(index);
             }
 
-            bool empty() override final 
+            bool empty() override final
             {
                 return mData.empty();
             }
@@ -50,16 +69,21 @@ namespace Scene {
                 mData.clear();
             }
 
-            typename GenerationVector<T>::iterator begin() {
-                return mData.begin();
-            }
-
-            typename GenerationVector<T>::iterator end()
+            typename std::vector<T>::iterator begin()
             {
-                return mData.end();
+                return mData.template get<0>().begin();
             }
 
-            GenerationVector<T> mData;
+            typename std::vector<T>::iterator end()
+            {
+                return mData.template get<0>().end();
+            }
+
+            T& front() {
+                return mData.template get<0>().front();
+            }
+
+            Vector mData;
         };
 
     }

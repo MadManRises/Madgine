@@ -29,19 +29,19 @@ namespace Derive_impl {
     template <typename... Args>                                                                                                                                                                  \
     struct Derive_impl_##Name##_def {                                                                                                                                                            \
         template <typename T>                                                                                                                                                                    \
-        static auto derive(T &&t, Engine::Derive_impl::prio<0>) -> decltype(std::forward<T>(t).Name(std::declval<Args>()...));                                                                   \
+        static auto derive(T &&t, Engine::Derive_impl::prio<0>) -> decltype(std::forward<T>(t).Fn(std::declval<Args>()...));                                                                   \
         template <typename T>                                                                                                                                                                    \
-        static auto derive(T &&t, Engine::Derive_impl::upToPrio<0>) -> decltype(std::forward<T>(t).Name(std::declval<Args>()...));                                                               \
+        static auto derive(T &&t, Engine::Derive_impl::upToPrio<0>) -> decltype(std::forward<T>(t).Fn(std::declval<Args>()...));                                                               \
                                                                                                                                                                                                  \
         template <typename T>                                                                                                                                                                    \
-        static auto derive(T &&t, Engine::Derive_impl::prio<1>) -> decltype(std::forward<T>(t).Name(std::declval<Args>()..., Engine::Derive_impl::Dummy {}));                                    \
+        static auto derive(T &&t, Engine::Derive_impl::prio<1>) -> decltype(std::forward<T>(t).Fn(std::declval<Args>()..., Engine::Derive_impl::Dummy {}));                                    \
         template <typename T>                                                                                                                                                                    \
-        static auto derive(T &&t, Engine::Derive_impl::upToPrio<1>) -> decltype(std::forward<T>(t).Name(std::declval<Args>()..., Engine::Derive_impl::Dummy {}));                                \
+        static auto derive(T &&t, Engine::Derive_impl::upToPrio<1>) -> decltype(std::forward<T>(t).Fn(std::declval<Args>()..., Engine::Derive_impl::Dummy {}));                                \
                                                                                                                                                                                                  \
         template <typename T>                                                                                                                                                                    \
-        static auto derive(T &&t, Engine::Derive_impl::prio<2>) -> decltype(std::forward<T>(t).Name(std::declval<Args>()..., Engine::Derive_impl::Dummy {}, Engine::Derive_impl::Dummy {}));     \
+        static auto derive(T &&t, Engine::Derive_impl::prio<2>) -> decltype(std::forward<T>(t).Fn(std::declval<Args>()..., Engine::Derive_impl::Dummy {}, Engine::Derive_impl::Dummy {}));     \
         template <typename T>                                                                                                                                                                    \
-        static auto derive(T &&t, Engine::Derive_impl::upToPrio<2>) -> decltype(std::forward<T>(t).Name(std::declval<Args>()..., Engine::Derive_impl::Dummy {}, Engine::Derive_impl::Dummy {})); \
+        static auto derive(T &&t, Engine::Derive_impl::upToPrio<2>) -> decltype(std::forward<T>(t).Fn(std::declval<Args>()..., Engine::Derive_impl::Dummy {}, Engine::Derive_impl::Dummy {})); \
     };                                                                                                                                                                                           \
     template <typename... Args>                                                                                                                                                                  \
     struct Derive_impl_##Name##_helper {                                                                                                                                                         \

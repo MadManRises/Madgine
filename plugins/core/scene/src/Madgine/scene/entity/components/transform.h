@@ -17,6 +17,9 @@ namespace Scene {
 
 
         struct MADGINE_SCENE_EXPORT Transform : EntityComponent<Transform> {
+
+            SERIALIZABLEUNIT(Transform);
+
             using EntityComponent<Transform>::EntityComponent;
 
             Transform(Transform &&) = default;

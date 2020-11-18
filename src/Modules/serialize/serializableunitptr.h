@@ -1,6 +1,7 @@
 #pragma once
 
 #include "serializetable.h"
+#include "../generic/callerhierarchy.h"
 
 namespace Engine {
 namespace Serialize {
@@ -72,7 +73,7 @@ namespace Serialize {
 
         bool isActive(size_t offset) const;
 
-        void writeState(SerializeOutStream &out, const char *name = nullptr, StateTransmissionFlags flags = 0) const;
+        void writeState(SerializeOutStream &out, const char *name = nullptr, StateTransmissionFlags flags = 0, CallerHierarchyBasePtr hierarchy = {}) const;
 
         void writeAction(uint8_t index, int op, const void *data, ParticipantId answerTarget, TransactionId answerId) const;
         void writeRequest(uint8_t index, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const;
@@ -124,7 +125,7 @@ namespace Serialize {
             return mUnit != nullptr;
         }
 
-        void readState(SerializeInStream &in, const char *name = nullptr, StateTransmissionFlags flags = 0) const;
+        void readState(SerializeInStream &in, const char *name = nullptr, StateTransmissionFlags flags = 0, CallerHierarchyBasePtr hierarchy = {}) const;
 
         void readAction(BufferedInOutStream &in, PendingRequest *request) const;
         void readRequest(BufferedInOutStream &in, TransactionId id) const;

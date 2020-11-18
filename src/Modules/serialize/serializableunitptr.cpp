@@ -25,18 +25,18 @@ namespace Serialize {
         return mType->getIndex(offset) < mUnit->mActiveIndex;
     }
 
-    void SerializableUnitConstPtr::writeState(SerializeOutStream &out, const char *name, StateTransmissionFlags flags) const
+    void SerializableUnitConstPtr::writeState(SerializeOutStream &out, const char *name, StateTransmissionFlags flags, CallerHierarchyBasePtr hierarchy) const
     {
         if (out.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
             out.format().beginExtended(out, name, 1);
             write(out, static_cast<uint64_t>(reinterpret_cast<uintptr_t>(mUnit)) >> 2, "id");
         }
         out.format().beginCompound(out, name);
-        mType->writeState(mUnit, out);
+        mType->writeState(mUnit, out, hierarchy);
         out.format().endCompound(out, name);
     }
 
-    void SerializableUnitPtr::readState(SerializeInStream &in, const char *name, StateTransmissionFlags flags) const
+    void SerializableUnitPtr::readState(SerializeInStream &in, const char *name, StateTransmissionFlags flags, CallerHierarchyBasePtr hierarchy) const
     {
         SerializableMapHolder holder;
         in.startSerializableRead(&holder);
@@ -49,7 +49,7 @@ namespace Serialize {
             assert(result);
         }
         in.format().beginCompound(in, name);
-        mType->readState(unit(), in, flags);
+        mType->readState(unit(), in, flags, hierarchy);
         in.format().endCompound(in, name);
     }
 

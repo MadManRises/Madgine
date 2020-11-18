@@ -124,4 +124,8 @@ PROPERTY(Orientation, getOrientation, setOrientation)
 METATABLE_END(Engine::Scene::Entity::Transform)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Transform)
+FIELD(mParent)
+FIELD(mPosition)
+FIELD(mScale)
+FIELD(mOrientation)
 SERIALIZETABLE_END(Engine::Scene::Entity::Transform)

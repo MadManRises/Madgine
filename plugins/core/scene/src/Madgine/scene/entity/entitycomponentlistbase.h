@@ -10,10 +10,11 @@ namespace Scene {
         struct EntityComponentListBase {
             virtual ~EntityComponentListBase() = default;
 
-            virtual GenerationVectorBase *operator->() = 0;
-            virtual EntityComponentBase *get(GenerationVectorIndex &index) = 0;
-            virtual EntityComponentOwningHandle<EntityComponentBase> emplace(const ObjectPtr &table) = 0;
-            virtual void erase(GenerationVectorIndex &index) = 0;
+            virtual GenerationContainerBase *operator->() = 0;
+            virtual EntityComponentBase *get(GenerationContainerIndex &index) = 0;
+            virtual EntityHandle getEntity(GenerationContainerIndex &index, SceneManager *mgr) const = 0; 
+            virtual EntityComponentOwningHandle<EntityComponentBase> emplace(const ObjectPtr &table, const EntityPtr &entity) = 0;
+            virtual void erase(GenerationContainerIndex &index, GenerationVector<Entity> &vec) = 0;
             virtual bool empty() = 0;
             virtual void clear() = 0;
         };

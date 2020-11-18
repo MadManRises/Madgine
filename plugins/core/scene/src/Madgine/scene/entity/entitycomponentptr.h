@@ -12,7 +12,7 @@ namespace Scene {
         template <typename T>
         struct EntityComponentPtrBase;
 
-       template <>
+        template <>
         struct EntityComponentPtrBase<EntityComponentBase> {
             EntityComponentPtrBase() = default;
 
@@ -46,6 +46,11 @@ namespace Scene {
             const EntityComponentHandle<EntityComponentBase> &handle() const
             {
                 return mHandle;
+            }
+
+            explicit operator EntityComponentHandle<EntityComponentBase>() const
+            {
+                return { mHandle.mIndex ? mEntity.sceneMgr()->entityComponentList(mIndex)->copy(mHandle.mIndex) : GenerationContainerIndex {} };
             }
 
             const EntityPtr &entity() const
@@ -116,6 +121,11 @@ namespace Scene {
                 return mHandle;
             }
 
+            explicit operator EntityComponentHandle<const EntityComponentBase>() const
+            {
+                return { mHandle.mIndex ? mEntity.sceneMgr()->entityComponentList(mIndex)->copy(mHandle.mIndex) : GenerationContainerIndex {} };
+            }
+
             const EntityPtr &entity() const
             {
                 return mEntity;
@@ -143,7 +153,7 @@ namespace Scene {
             }
 
             explicit EntityComponentPtrBase(const EntityComponentPtrBase<EntityComponentBase> &other)
-                : mHandle { other.handle().mIndex ? other.entity().sceneMgr()->entityComponentList(other.index())->copy(other.handle().mIndex) : GenerationVectorIndex {} }
+                : mHandle { other.handle().mIndex ? other.entity().sceneMgr()->entityComponentList(other.index())->copy(other.handle().mIndex) : GenerationContainerIndex {} }
                 , mEntity(other.entity())
             {
                 assert(!other || component_index<T>() == other.index());
@@ -196,10 +206,11 @@ namespace Scene {
 
             explicit operator EntityComponentHandle<T>() const
             {
-                return { mHandle.mIndex ? mEntity.sceneMgr()->template entityComponentList<T>()->copy(mHandle.mIndex) : GenerationVectorIndex {} };
+                return { mHandle.mIndex ? mEntity.sceneMgr()->template entityComponentList<T>()->copy(mHandle.mIndex) : GenerationContainerIndex {} };
             }
 
-            bool operator!=(const EntityComponentHandle<T>& handle) const {
+            bool operator!=(const EntityComponentHandle<T> &handle) const
+            {
                 if (mEntity) {
                     mEntity.sceneMgr()->template entityComponentList<T>()->update(mHandle.mIndex);
                     mEntity.sceneMgr()->template entityComponentList<T>()->update(handle.mIndex);
@@ -223,15 +234,16 @@ namespace Scene {
 
             T *operator->() const
             {
-                return mHandle.mIndex ? &mEntity.sceneMgr()->template entityComponentList<T>()->at(mHandle.mIndex) : nullptr;
+                return mHandle.mIndex ? mEntity.sceneMgr()->template entityComponentList<T>().get(mHandle.mIndex) : nullptr;
             }
 
             operator T *() const
             {
-                return mHandle.mIndex ? &mEntity.sceneMgr()->template entityComponentList<T>()->at(mHandle.mIndex) : nullptr;
+                return mHandle.mIndex ? mEntity.sceneMgr()->template entityComponentList<T>().get(mHandle.mIndex) : nullptr;
             }
 
-            void update() {
+            void update()
+            {
                 mEntity.sceneMgr()->template entityComponentList<T>()->update(mHandle.mIndex);
                 mEntity.update();
             }
@@ -241,7 +253,6 @@ namespace Scene {
             EntityPtr mEntity;
         };
 
-        
         template <typename T>
         struct EntityComponentPtr : EntityComponentPtrBase<T> {
             using EntityComponentPtrBase<T>::EntityComponentPtrBase;

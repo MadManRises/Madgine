@@ -28,7 +28,6 @@ namespace NodeGraph {
 
     size_t NodePrototypeBase::flowOutCount() const
     {
-        auto [a, b] = mDataInPins[0];
         return mFlowOutPins.size();
     }
 

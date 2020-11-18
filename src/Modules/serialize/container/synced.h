@@ -148,10 +148,10 @@ namespace Serialize {
         {
             if (synced.isMaster()) {
                 SyncedOperation::Value op;
-                Serialize::read(inout, op);
+                Serialize::read(inout, op, nullptr);
                 T old = synced.mData;
                 T value;
-                Serialize::read(inout, value);
+                Serialize::read(inout, value, nullptr);
                 switch (op) {
                 case SyncedOperation::SET:
                     synced.mData = value;
@@ -181,7 +181,7 @@ namespace Serialize {
         static void writeRequest(const Synced<T, Observer, OffsetPtr> &synced, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback, Args &&... args)
         {
             BufferedOutStream *out = synced.getSlaveActionMessageTarget(requester, requesterTransactionId, std::move(callback));
-            Serialize::write(*out, op);
+            Serialize::write(*out, op, nullptr);
             Serialize::write(*out, *static_cast<const T *>(data), nullptr);
             out->endMessage();
         }
@@ -190,10 +190,10 @@ namespace Serialize {
         static void readAction(Synced<T, Observer, OffsetPtr> &synced, SerializeInStream &in, PendingRequest *request, Args&&... args)
         {
             SyncedOperation::Value op;
-            Serialize::read(in, op);
+            Serialize::read(in, op, nullptr);
             T old = synced.mData;
             T value;
-            Serialize::read(in, value);
+            Serialize::read(in, value, nullptr);
             switch (op) {
             case SyncedOperation::SET:
                 synced.mData = value;
@@ -218,7 +218,7 @@ namespace Serialize {
         static void writeAction(const Synced<T, Observer, OffsetPtr> &synced, int op, const void *data, ParticipantId answerTarget, TransactionId answerId, Args &&... args)
         {
             for (BufferedOutStream *out : synced.getMasterActionMessageTargets()) {
-                Serialize::write(*out, op);
+                Serialize::write(*out, op, nullptr);
                 Serialize::write(*out, *static_cast<const T *>(data), nullptr);
                 out->endMessage();
             }

@@ -87,9 +87,9 @@ namespace Window {
 
         OSWindow *osWindow() const;
 
-        decltype(auto) components()
+        auto &components()
         {
-            return uniquePtrToPtr(mComponents);
+            return mComponents;
         }
 
         Render::RenderContext *getRenderer();

@@ -87,10 +87,11 @@ namespace Scene {
             bool hasComponent(size_t i);
             bool hasComponent(const std::string_view &name);
 
-            Future<EntityComponentPtr<EntityComponentBase>> addComponent(const std::string_view &name, const EntityPtr &self, const ObjectPtr &table = {});
-            Future<EntityComponentPtr<EntityComponentBase>> addComponent(size_t i, const EntityPtr &self, const ObjectPtr &table = {});
+            EntityComponentPtr<EntityComponentBase> addComponent(const std::string_view &name, const EntityPtr &self, const ObjectPtr &table = {});
+            EntityComponentPtr<EntityComponentBase> addComponent(size_t i, const EntityPtr &self, const ObjectPtr &table = {});
             void removeComponent(const std::string_view &name);
             void removeComponent(size_t i);
+            void clearComponents();
 
             SceneManager &sceneMgr(bool = true) const;
 
@@ -125,7 +126,7 @@ namespace Scene {
 
             bool mLocal;
 
-            SYNCABLE_CONTAINER(mComponents, std::map<uint32_t, EntityComponentOwningHandle<EntityComponentBase>>, Serialize::ContainerPolicies::masterOnly, ParentFunctor<&Entity::handleEntityEvent>);
+            SERIALIZABLE_CONTAINER(mComponents, std::map<uint32_t, EntityComponentOwningHandle<EntityComponentBase>>, ParentFunctor<&Entity::handleEntityEvent>);
 
             SceneManager &mSceneManager;
         };

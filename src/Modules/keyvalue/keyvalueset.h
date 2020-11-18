@@ -55,6 +55,11 @@ struct SetIterator {
         return mIterator == other.mIterator;
     }
 
+    bool operator==(const SetConstIterator<T, Cmp, It> &other) const
+    {
+        return mIterator == other.mIterator;
+    }
+
     SetIterator<T, Cmp, It> &
     operator++()
     {

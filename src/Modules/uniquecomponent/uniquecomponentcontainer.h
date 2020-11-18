@@ -4,9 +4,8 @@
 
 #include "uniquecomponent.h"
 
-
 #if ENABLE_PLUGINS
-#include "../generic/container/compoundatomicoperation.h"
+#    include "../generic/container/compoundatomicoperation.h"
 #endif
 
 namespace Engine {
@@ -15,7 +14,7 @@ template <typename C, typename Registry, typename __dont_remove_Base, typename..
 struct UniqueComponentContainer : C
 #if ENABLE_PLUGINS
     ,
-                                      ComponentRegistryListener
+                                  ComponentRegistryListener
 #endif
 {
 
@@ -24,9 +23,7 @@ struct UniqueComponentContainer : C
     typedef typename Registry::F F;
     typedef typename Registry::Base Base;
 
-    typedef typename container::value_type value_type;    
-
-    typedef typename container_traits<container>::const_iterator const_iterator;
+    typedef typename container::value_type value_type;
 
     UniqueComponentContainer(_Ty... arg)
 #if ENABLE_PLUGINS
@@ -48,7 +45,8 @@ struct UniqueComponentContainer : C
 #endif
     }
 
-    ~UniqueComponentContainer() {
+    ~UniqueComponentContainer()
+    {
 #if ENABLE_PLUGINS
         Registry::removeListener(this);
 #endif
@@ -56,16 +54,6 @@ struct UniqueComponentContainer : C
 
     UniqueComponentContainer(const UniqueComponentContainer &) = delete;
     void operator=(const UniqueComponentContainer &) = delete;
-
-    const_iterator begin() const
-    {
-        return container::begin();
-    }
-
-    const_iterator end() const
-    {
-        return container::end();
-    }
 
     template <typename T>
     T &get()
@@ -125,6 +113,14 @@ private:
 template <typename C, typename Registry, typename __dont_remove_Base, typename... _Ty>
 struct underlying_container<UniqueComponentContainer<C, Registry, __dont_remove_Base, _Ty...>> {
     typedef C type;
+};
+
+template <typename C, typename Registry, typename __dont_remove_Base, typename... _Ty>
+struct container_traits<UniqueComponentContainer<C, Registry, __dont_remove_Base, _Ty...>> : container_traits<C> {
+    typedef typename UniqueComponentContainer<C, Registry, __dont_remove_Base, _Ty...>::iterator iterator;
+    typedef typename UniqueComponentContainer<C, Registry, __dont_remove_Base, _Ty...>::const_iterator const_iterator;
+    typedef typename UniqueComponentContainer<C, Registry, __dont_remove_Base, _Ty...>::reverse_iterator reverse_iterator;
+    typedef typename UniqueComponentContainer<C, Registry, __dont_remove_Base, _Ty...>::const_reverse_iterator const_reverse_iterator;
 };
 
 }

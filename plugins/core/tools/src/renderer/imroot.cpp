@@ -168,8 +168,8 @@ namespace Tools {
                 for (const std::unique_ptr<ToolBase> &tool : mCollector) {
                     bool visible = tool->isVisible();
                     std::string name = std::string { tool->key() };
-                    ImGui::MenuItem(name.c_str(), "", &visible);
-                    tool->setVisible(visible);
+                    if (ImGui::MenuItem(name.c_str(), "", &visible))
+                        tool->setVisible(visible);
                 }
                 ImGui::EndMenu();
             }

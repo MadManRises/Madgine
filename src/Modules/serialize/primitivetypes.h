@@ -61,7 +61,7 @@ namespace Serialize {
     const constexpr bool PrimitiveTypesContain_v = PrimitiveTypesContain<T>::value;
 
     template <typename T>
-    const constexpr bool isPrimitiveType_v = PrimitiveTypesContain_v<T> || std::is_convertible_v<T, const SerializableUnitBase *> || std::is_enum_v<T>;
+    const constexpr bool isPrimitiveType_v = PrimitiveTypesContain_v<T> || std::is_convertible_v<T, const SerializableUnitBase *> || std::is_convertible_v<T, const SyncableUnitBase*> || std::is_enum_v<T>;
 
 }
 }

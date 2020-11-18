@@ -8,35 +8,35 @@ namespace Scene {
     namespace Entity {
 
         EntityPtr::EntityPtr(const EntityPtr &other)
-            : mIndex(other.mSceneMgr->entities().copy(other.mIndex))
+            : mHandle { other.mSceneMgr->entities().copy(other.mHandle.mIndex) }
             , mSceneMgr(other.mSceneMgr)
         {
         }
 
         EntityPtr::EntityPtr(const typename GenerationVector<Entity>::iterator &it)
-            : mIndex(it.copyIndex())
+            : mHandle { it.copyIndex() }
             , mSceneMgr(it.valid() ? &it->sceneMgr() : nullptr)
         {
         }
 
         EntityPtr &EntityPtr::operator=(const EntityPtr &other)
         {
-            if (mIndex)
-                mSceneMgr->entities().reset(mIndex);
-            if (other.mIndex)
-                mIndex = other.mSceneMgr->entities().copy(other.mIndex);
+            if (mHandle.mIndex)
+                mSceneMgr->entities().reset(mHandle.mIndex);
+            if (other.mHandle.mIndex)
+                mHandle.mIndex = other.mSceneMgr->entities().copy(other.mHandle.mIndex);
             mSceneMgr = other.mSceneMgr;
             return *this;
         }
 
         EntityPtr::~EntityPtr()
         {
-            mSceneMgr->entities().reset(mIndex);
+            mSceneMgr->entities().reset(mHandle.mIndex);
         }
 
         Entity *EntityPtr::operator->() const
         {
-            return &mSceneMgr->entities()[mIndex];
+            return &mSceneMgr->entities()[mHandle.mIndex];
         }
 
         SceneManager *EntityPtr::sceneMgr() const
@@ -46,18 +46,23 @@ namespace Scene {
 
         uint32_t EntityPtr::update() const
         {
-            return mSceneMgr->entities().update(mIndex);
+            return mSceneMgr->entities().update(mHandle.mIndex);
         }
 
         EntityPtr::operator bool() const
         {
             update();
-            return mIndex;
+            return mHandle.mIndex;
         }
 
         EntityPtr::operator Entity *() const
         {
-            return &mSceneMgr->entities()[mIndex];
+            return get();
+        }
+
+        Entity *EntityPtr::get() const
+        {
+            return mHandle.mIndex ? &mSceneMgr->entities()[mHandle.mIndex] : nullptr;
         }
 
         bool EntityPtr::operator==(const EntityPtr &other) const
@@ -65,51 +70,56 @@ namespace Scene {
             assert(mSceneMgr == other.mSceneMgr || !mSceneMgr || !other.mSceneMgr);
             update();
             other.update();
-            return mIndex == other.mIndex;
+            return mHandle == other.mHandle;
         }
 
         bool EntityPtr::operator!=(const typename GenerationVector<Entity>::iterator &it) const
         {
             update();
-            if (!mIndex || !it.valid())
-                return it.valid() != mIndex;
+            if (!mHandle.mIndex || !it.valid())
+                return it.valid() != mHandle.mIndex;
             assert(&mSceneMgr->entities() == it.mVector);
-            return mIndex != it.mIndex;
+            return mHandle.mIndex != it.mIndex;
         }
 
         EntityPtr &EntityPtr::operator++()
         {
             //TODO: physical() is not good here
-            mSceneMgr->entities().increment(mIndex, physical(mSceneMgr->entities()).size());
+            mSceneMgr->entities().increment(mHandle.mIndex, physical(mSceneMgr->entities()).size());
             return *this;
         }
 
         EntityComponentPtr<EntityComponentBase> EntityPtr::getComponent(size_t i) const
         {
-            return (*this)->getComponent(i, *this);
+            return mHandle.mIndex ? get()->getComponent(i, *this) : EntityComponentPtr<EntityComponentBase>{};
         }
 
         Future<EntityComponentPtr<EntityComponentBase>> EntityPtr::addComponent(size_t i, const ObjectPtr &table) const
         {
-            return (*this)->addComponent(i, *this, table);
+            return get()->addComponent(i, *this, table);
         }
 
         Future<EntityComponentPtr<EntityComponentBase>> EntityPtr::addComponent(const std::string_view &name, const ObjectPtr &table) const
         {
-            return (*this)->addComponent(name, *this, table);
+            return get()->addComponent(name, *this, table);
         }
 
         bool EntityPtr::hasComponent(size_t i) const
         {
-            return (*this)->hasComponent(i);
+            return get()->hasComponent(i);
         }
 
-        GenerationVector<Entity>::iterator EntityPtr::it()
+        EntityPtr::operator EntityHandle() const
         {
-            return { mSceneMgr->entities().copy(mIndex), &mSceneMgr->entities() };
+            return { mHandle.mIndex ? mSceneMgr->entities().copy(mHandle.mIndex) : GenerationContainerIndex {} };
         }
 
-        void EntityPtr::remove()
+        GenerationVector<Entity>::iterator EntityPtr::it() const
+        {
+            return { mSceneMgr->entities().copy(mHandle.mIndex), &mSceneMgr->entities() };
+        }
+
+        void EntityPtr::remove() const
         {
             mSceneMgr->remove(*this);
         }

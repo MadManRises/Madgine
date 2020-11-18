@@ -42,10 +42,10 @@ namespace Scene {
         void update();
 
         Future<Entity::EntityPtr> createEntity(const std::string &behavior = "", const std::string &name = "",
-            const std::function<void(Entity::Entity &)> &init = {});
+            const std::function<void(const Entity::EntityPtr &)> &init = {});
         Entity::EntityPtr createLocalEntity(const std::string &behavior = "", const std::string &name = "");
         Entity::EntityPtr findEntity(const std::string &name);
-        void remove(Entity::EntityPtr &e);
+        void remove(const Entity::EntityPtr &e);
 
         //Entity::Entity *makeLocalCopy(Entity::Entity &e);
         Entity::Entity *makeLocalCopy(Entity::Entity &&e);
@@ -72,7 +72,9 @@ namespace Scene {
 
         Threading::SignalStub<const GenerationVector<Engine::Scene::Entity::Entity>::iterator &, int> &entitiesSignal();
 
-        Entity::EntityPtr toEntityPtr(Engine::Scene::Entity::Entity *e);
+        Entity::EntityPtr toEntityPtr(Entity::Entity *e);
+        Entity::EntityPtr toEntityPtr(const Entity::EntityHandle &);
+        Entity::EntityHandle copyEntityHandle(const Entity::EntityHandle &h);
 
         template <typename T>
         Entity::EntityComponentList<T>& entityComponentList() {
@@ -82,6 +84,11 @@ namespace Scene {
         Entity::EntityComponentListBase &entityComponentList(size_t index)
         {
             return *mEntityComponentLists.at(index);
+        }
+
+        template <typename T>
+        Entity::EntityComponentPtr<T> toEntityComponentPtr(T* comp, const Entity::EntityPtr &e) {
+            return { { entityComponentList<T>()->generate(comp - &entityComponentList<T>().front()) }, e };
         }
 
     protected:

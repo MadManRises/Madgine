@@ -51,7 +51,7 @@ namespace Scene {
     {
         markInitialized();
 
-        for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
+        for (std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
             if (!component->callInit())
                 return false;
         }
@@ -69,7 +69,7 @@ namespace Scene {
 
         Threading::DefaultTaskQueue::getSingleton().removeRepeatedTasks(this);
 
-        for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
+        for (std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
             component->callFinalize();
         }
     }
@@ -112,7 +112,7 @@ namespace Scene {
         std::chrono::steady_clock::duration timeSinceLastFrame = now - mLastFrame;
         mLastFrame = now;
 
-        for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
+        for (std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
             //PROFILE(component->componentName());
             component->update(std::chrono::duration_cast<std::chrono::microseconds>(timeSinceLastFrame));
         }
@@ -137,7 +137,7 @@ namespace Scene {
         return "Madgine_AutoGen_Name_"s + std::to_string(++mItemCount);
     }
 
-    void SceneManager::remove(Entity::EntityPtr &e)
+    void SceneManager::remove(const Entity::EntityPtr &e)
     {
 
         if (e->isLocal()) {
@@ -190,7 +190,7 @@ namespace Scene {
     }*/
 
     Future<Entity::EntityPtr> SceneManager::createEntity(const std::string &behavior, const std::string &name,
-        const std::function<void(Entity::Entity &)> &init)
+        const std::function<void(const Entity::EntityPtr &)> &init)
     {
         //ValueType behaviorTable /* = app().table()[behavior]*/;
         ObjectPtr table;
@@ -202,8 +202,12 @@ namespace Scene {
                 LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
         }
         Future<typename GenerationVector<Entity::Entity>::iterator> f;
-        if (init)
-            f = TupleUnpacker::invokeExpand(&decltype(mEntities)::emplace<SceneManager &, bool, std::string, ObjectPtr>, &mEntities, mEntities.end(), tuple_cat(createEntityData(name, false), std::make_tuple(table))).init(init);
+        if (init) {
+            auto initWrap = [&](Entity::Entity &e) {
+                init(toEntityPtr(&e));
+            };
+            f = TupleUnpacker::invokeExpand(&decltype(mEntities)::emplace<SceneManager &, bool, std::string, ObjectPtr>, &mEntities, mEntities.end(), tuple_cat(createEntityData(name, false), std::make_tuple(table))).init(initWrap);
+        }
         else
             f = TupleUnpacker::invokeExpand(&decltype(mEntities)::emplace<SceneManager &, bool, std::string, ObjectPtr>, &mEntities, mEntities.end(), tuple_cat(createEntityData(name, false), std::make_tuple(table)));
         return std::move(f);
@@ -226,7 +230,17 @@ namespace Scene {
 
     Entity::EntityPtr SceneManager::toEntityPtr(Entity::Entity *e)
     {
-        return std::next(mEntities.begin(), e - &mEntities.front());
+        return e ? std::next(mEntities.begin(), e - &mEntities.front()) : Entity::EntityPtr{};
+    }
+
+    Entity::EntityPtr SceneManager::toEntityPtr(const Entity::EntityHandle &e)
+    {
+        return mEntities.fetch(e.mIndex);
+    }
+
+    Entity::EntityHandle SceneManager::copyEntityHandle(const Entity::EntityHandle &h)
+    {
+        return { mEntities.copy(h.mIndex) };
     }
 
     Threading::SignalStub<const GenerationVector<Entity::Entity>::iterator &, int> &SceneManager::entitiesSignal()

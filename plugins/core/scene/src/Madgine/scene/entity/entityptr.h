@@ -3,6 +3,7 @@
 #include "Modules/generic/container/generationvector.h"
 #include "Modules/keyvalue/objectptr.h"
 #include "Modules/generic/future.h"
+#include "entityhandle.h"
 
 namespace Engine {
 namespace Scene {
@@ -28,6 +29,7 @@ namespace Scene {
             operator bool() const;
 
             operator Entity *() const;
+            Entity *get() const;
 
             bool operator==(const EntityPtr &other) const;
             bool operator!=(const typename GenerationVector<Entity>::iterator &it) const;
@@ -56,11 +58,18 @@ namespace Scene {
 
             bool hasComponent(size_t i) const;
 
-            typename GenerationVector<Entity>::iterator it();
-            void remove();
+            typename GenerationVector<Entity>::iterator it() const;
+            void remove() const;
+
+            const EntityHandle &handle() const
+            {
+                return mHandle;
+            }
+
+            explicit operator EntityHandle() const;   
 
         private:
-            mutable GenerationVectorIndex mIndex;
+            EntityHandle mHandle;
             SceneManager *mSceneMgr = nullptr;
         };
 

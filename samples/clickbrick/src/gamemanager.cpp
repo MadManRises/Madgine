@@ -31,6 +31,7 @@
 
 #include "Modules/serialize/serializetable_impl.h"
 
+
 UNIQUECOMPONENT(ClickBrick::UI::GameManager)
 
 METATABLE_BEGIN_BASE(ClickBrick::UI::GameManager, Engine::UI::GameHandlerBase)

@@ -26,6 +26,15 @@ struct MemberFunctor {
     }
 };
 
+template <auto F>
+struct UnpackingMemberFunctor {
+    template <typename T, typename... Args>
+    decltype(auto) operator()(T *t, Args &&... args)
+    {
+        return TupleUnpacker::invoke(F, t, std::forward<Args>(args)...);
+    }
+};
+
 template <auto f, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
 struct ParentFunctor {
     template <typename... Args>

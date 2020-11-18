@@ -8,14 +8,14 @@
 
 namespace Engine {
 
-struct GenerationVectorIndex {
+struct GenerationContainerIndex {
 
     static constexpr uint16_t INVALID_GENERATION = std::numeric_limits<uint16_t>::max();
     static constexpr uint32_t INVALID_INDEX = std::numeric_limits<uint32_t>::max();
 
-    GenerationVectorIndex() = default;
-    GenerationVectorIndex(const GenerationVectorIndex &) = delete;
-    GenerationVectorIndex(GenerationVectorIndex &&other)
+    GenerationContainerIndex() = default;
+    GenerationContainerIndex(const GenerationContainerIndex &) = delete;
+    GenerationContainerIndex(GenerationContainerIndex &&other)
         : mIndex(std::exchange(other.mIndex, INVALID_INDEX))
         , mGeneration(std::exchange(other.mGeneration, INVALID_GENERATION))
 #if ENABLE_MEMTRACKING
@@ -24,7 +24,7 @@ struct GenerationVectorIndex {
     {
     }
 
-    ~GenerationVectorIndex()
+    ~GenerationContainerIndex()
     {
         assert(!*this);
 #if ENABLE_MEMTRACKING
@@ -42,7 +42,7 @@ struct GenerationVectorIndex {
         }
     }
 
-    bool operator==(const GenerationVectorIndex &other) const
+    bool operator==(const GenerationContainerIndex &other) const
     {
         if (mGeneration == INVALID_GENERATION || other.mGeneration == INVALID_GENERATION)
             return mGeneration == other.mGeneration;
@@ -50,7 +50,7 @@ struct GenerationVectorIndex {
         return mIndex == other.mIndex;
     }
 
-    bool operator!=(const GenerationVectorIndex &other) const
+    bool operator!=(const GenerationContainerIndex &other) const
     {
         if (mGeneration == INVALID_GENERATION || other.mGeneration == INVALID_GENERATION)
             return mGeneration != other.mGeneration;
@@ -58,7 +58,7 @@ struct GenerationVectorIndex {
         return mIndex != other.mIndex;
     }
 
-    void operator=(GenerationVectorIndex &&other)
+    void operator=(GenerationContainerIndex &&other)
     {
         std::swap(mIndex, other.mIndex);
         std::swap(mGeneration, other.mGeneration);
@@ -68,9 +68,9 @@ struct GenerationVectorIndex {
     }
 
 private:
-    friend struct GenerationVectorBase;
+    friend struct GenerationContainerBase;
 
-    GenerationVectorIndex(uint32_t index, uint32_t generation)
+    GenerationContainerIndex(uint32_t index, uint32_t generation)
         : mIndex(index)
         , mGeneration(generation)
     {
@@ -90,27 +90,27 @@ private:
 #endif
 };
 
-struct GenerationVectorBase {
-    GenerationVectorBase(uint16_t bufferSize = 64)
+struct GenerationContainerBase {
+    GenerationContainerBase(uint16_t bufferSize = 64)
         : mHistory(bufferSize)
     {
-        assert(bufferSize < GenerationVectorIndex::INVALID_GENERATION);
+        assert(bufferSize < GenerationContainerIndex::INVALID_GENERATION);
     }
 
-    GenerationVectorBase(const GenerationVectorBase &) = delete;
-    GenerationVectorBase(GenerationVectorBase &&) = delete;
+    GenerationContainerBase(const GenerationContainerBase &) = delete;
+    GenerationContainerBase(GenerationContainerBase &&) = delete;
 
-    ~GenerationVectorBase()
+    ~GenerationContainerBase()
     {
         for (Entry &entry : mHistory)
             assert(entry.mRefCount == 0);
     }
 
-    GenerationVectorIndex generate(uint32_t index) const
+    GenerationContainerIndex generate(uint32_t index) const
     {
         uint16_t gen = mGeneration.load();
         incRef(gen);
-        GenerationVectorIndex result { index, gen };
+        GenerationContainerIndex result { index, gen };
 #if ENABLE_MEMTRACKING
         std::lock_guard lock { mDebugMutex };
         result.mDebugMarker = ++mDebugCounter;
@@ -121,7 +121,7 @@ struct GenerationVectorBase {
         return result;
     }
 
-    void reset(GenerationVectorIndex &index) const
+    void reset(GenerationContainerIndex &index) const
     {
         if (index) {
             decRef(index.mGeneration);
@@ -137,7 +137,7 @@ struct GenerationVectorBase {
         }
     }
 
-    GenerationVectorIndex copy(GenerationVectorIndex &other) const
+    GenerationContainerIndex copy(GenerationContainerIndex &other) const
     {
         update(other);
         if (!other)
@@ -145,7 +145,7 @@ struct GenerationVectorBase {
         return generate(other.mIndex);
     }
 
-    void increment(GenerationVectorIndex &index, size_t size, ptrdiff_t diff = 1) const
+    void increment(GenerationContainerIndex &index, size_t size, ptrdiff_t diff = 1) const
     {
         update(index);
         assert(index || diff == 0);
@@ -155,7 +155,7 @@ struct GenerationVectorBase {
             reset(index);
     }
 
-    uint32_t update(GenerationVectorIndex &index) const
+    uint32_t update(GenerationContainerIndex &index) const
     {
         uint32_t oldIndex = index.mIndex;
         if (index && index.mGeneration != mGeneration) {
@@ -252,13 +252,13 @@ protected:
             throw "Concurrent writes!!";
     }
 
-    uint32_t get(const GenerationVectorIndex &index) const
+    uint32_t getIndex(const GenerationContainerIndex &index) const
     {
         assert(index);
         return index.mIndex;
     }
 
-    uint32_t get(const GenerationVectorIndex &index, uint32_t end) const
+    uint32_t getIndex(const GenerationContainerIndex &index, uint32_t end) const
     {
         return index ? index.mIndex : end;
     }
@@ -290,31 +290,35 @@ private:
 #endif
 };
 
-template <typename T>
-struct GenerationVector : GenerationVectorBase {
+template <typename C>
+struct GenerationContainer : GenerationContainerBase, protected C {
 
-    using value_type = T;
+    using value_type = typename C::value_type;
+    using reference = typename C::reference;
+    using const_reference = typename C::const_reference;
+    using pointer = typename C::pointer;
+    using const_pointer = typename C::const_pointer;
 
-    using GenerationVectorBase::GenerationVectorBase;
+    using GenerationContainerBase::GenerationContainerBase;
 
     struct iterator {
 
-        using iterator_category = typename std::vector<T>::iterator::iterator_category;
-        using value_type = T;
-        using difference_type = ptrdiff_t;
-        using pointer = T *;
-        using reference = T &;
+        using iterator_category = typename C::iterator::iterator_category;
+        using value_type = typename C::iterator::value_type;
+        using difference_type = typename C::iterator::difference_type;
+        using pointer = typename C::iterator::pointer;
+        using reference = typename C::iterator::reference;
 
         iterator() = default;
 
-        iterator(GenerationVectorIndex index, GenerationVector<T> *vector)
+        iterator(GenerationContainerIndex index, GenerationContainer<C> *vector)
             : mIndex(std::move(index))
             , mVector(vector)
         {
         }
 
         iterator(const iterator &other)
-            : mIndex(other.mIndex ? other.mVector->copy(other.mIndex) : GenerationVectorIndex {})
+            : mIndex(other.mIndex ? other.mVector->copy(other.mIndex) : GenerationContainerIndex {})
             , mVector(other.mVector)
         {
         }
@@ -326,12 +330,12 @@ struct GenerationVector : GenerationVectorBase {
             mVector->reset(mIndex);
         }
 
-        T &operator*() const
+        reference operator*() const
         {
             return (*mVector)[mIndex];
         }
 
-        T *operator->() const
+        pointer operator->() const
         {
             return &(*mVector)[mIndex];
         }
@@ -377,7 +381,7 @@ struct GenerationVector : GenerationVectorBase {
             assert(mVector == other.mVector);
             mVector->update(mIndex);
             mVector->update(other.mIndex);
-            return mVector->get(mIndex, mVector->size()) - mVector->get(other.mIndex, mVector->size());
+            return mVector->getIndex(mIndex, mVector->size()) - mVector->getIndex(other.mIndex, mVector->size());
         }
 
         iterator &operator+=(ptrdiff_t diff)
@@ -388,7 +392,7 @@ struct GenerationVector : GenerationVectorBase {
 
         iterator operator+(ptrdiff_t diff) const
         {
-            GenerationVectorIndex index = mVector->copy(mIndex);
+            GenerationContainerIndex index = mVector->copy(mIndex);
             mVector->increment(index, mVector->size(), diff);
             return { std::move(index), mVector };
         }
@@ -399,14 +403,14 @@ struct GenerationVector : GenerationVectorBase {
                 mVector->update(mIndex);
         }
 
-        GenerationVectorIndex copyIndex() const
+        GenerationContainerIndex copyIndex() const
         {
             return mVector->copy(mIndex);
         }
 
         uint32_t index() const
         {
-            return mVector->get(mIndex);
+            return mVector->getIndex(mIndex);
         }
 
         bool valid() const
@@ -415,17 +419,17 @@ struct GenerationVector : GenerationVectorBase {
             return mIndex;
         }
 
-        mutable GenerationVectorIndex mIndex;
-        GenerationVector<T> *mVector = nullptr;
+        mutable GenerationContainerIndex mIndex;
+        GenerationContainer<C> *mVector = nullptr;
     };
 
     struct const_iterator {
 
-        using iterator_category = typename std::vector<T>::const_iterator::iterator_category;
-        using value_type = T;
-        using difference_type = ptrdiff_t;
-        using pointer = const T *;
-        using reference = const T &;
+        using iterator_category = typename C::const_iterator::iterator_category;
+        using value_type = typename C::const_iterator::value_type;
+        using difference_type = typename C::const_iterator::difference_type;
+        using pointer = typename C::const_iterator::pointer;
+        using reference = typename C::const_iterator::reference;
 
         const_iterator() = default;
 
@@ -443,7 +447,7 @@ struct GenerationVector : GenerationVectorBase {
 
         const_iterator(const_iterator &&) = default;
 
-        const_iterator(GenerationVectorIndex index, const GenerationVector<T> *vector)
+        const_iterator(GenerationContainerIndex index, const GenerationContainer<C> *vector)
             : mIndex(std::move(index))
             , mVector(vector)
         {
@@ -454,12 +458,12 @@ struct GenerationVector : GenerationVectorBase {
             mVector->reset(mIndex);
         }
 
-        const T &operator*() const
+        reference operator *() const
         {
             return (*mVector)[mIndex];
         }
 
-        const T *operator->() const
+        pointer operator->() const
         {
             return &(*mVector)[mIndex];
         }
@@ -483,26 +487,32 @@ struct GenerationVector : GenerationVectorBase {
             assert(mVector == other.mVector);
             mVector->update(mIndex);
             mVector->update(other.mIndex);
-            return mVector->get(mIndex, mVector->size()) - mVector->get(other.mIndex, mVector->size());
+            return mVector->getIndex(mIndex, mVector->size()) - mVector->getIndex(other.mIndex, mVector->size());
         }
 
         const_iterator operator+(ptrdiff_t diff) const
         {
-            GenerationVectorIndex index = mVector->copy(mIndex);
+            GenerationContainerIndex index = mVector->copy(mIndex);
             mVector->increment(index, mVector->size(), diff);
             return { std::move(index), mVector };
         }
 
-        GenerationVectorIndex copyIndex() const
+        GenerationContainerIndex copyIndex() const
         {
             return mVector->copy(mIndex);
         }
 
-        mutable GenerationVectorIndex mIndex;
-        const GenerationVector<T> *mVector;
+        mutable GenerationContainerIndex mIndex;
+        const GenerationContainer<C> *mVector;
     };
 
     struct reverse_iterator {
+
+        using iterator_category = typename C::reverse_iterator::iterator_category;
+        using value_type = typename C::reverse_iterator::value_type;
+        using difference_type = typename C::reverse_iterator::difference_type;
+        using pointer = typename C::reverse_iterator::pointer;
+        using reference = typename C::reverse_iterator::reference;
 
         ~reverse_iterator()
         {
@@ -517,18 +527,18 @@ struct GenerationVector : GenerationVectorBase {
 
         reverse_iterator(reverse_iterator &&) = default;
 
-        reverse_iterator(GenerationVectorIndex index, GenerationVector<T> *vector)
+        reverse_iterator(GenerationContainerIndex index, GenerationContainer<C> *vector)
             : mIndex(std::move(index))
             , mVector(vector)
         {
         }
 
-        T &operator*() const
+        reference operator*() const
         {
             return (*mVector)[mIndex];
         }
 
-        T *operator->() const
+        pointer operator->() const
         {
             return &(*mVector)[mIndex];
         }
@@ -555,16 +565,23 @@ struct GenerationVector : GenerationVectorBase {
             return mVector->get(other.mIndex, std::numeric_limits<uint32_t>::max()) - mVector->get(mIndex, std::numeric_limits<uint32_t>::max());
         }
 
-        GenerationVectorIndex copyIndex() const
+        GenerationContainerIndex copyIndex() const
         {
             return mVector->copy(mIndex);
         }
 
-        mutable GenerationVectorIndex mIndex;
-        GenerationVector<T> *mVector;
+        mutable GenerationContainerIndex mIndex;
+        GenerationContainer<C> *mVector;
     };
 
     struct const_reverse_iterator {
+
+        using iterator_category = typename C::const_reverse_iterator::iterator_category;
+        using value_type = typename C::const_reverse_iterator::value_type;
+        using difference_type = typename C::const_reverse_iterator::difference_type;
+        using pointer = typename C::const_reverse_iterator::pointer;
+        using reference = typename C::const_reverse_iterator::reference;
+
         ~const_reverse_iterator()
         {
             mVector->reset(mIndex);
@@ -578,18 +595,18 @@ struct GenerationVector : GenerationVectorBase {
 
         const_reverse_iterator(const_reverse_iterator &&) = default;
 
-        const_reverse_iterator(GenerationVectorIndex index, const GenerationVector<T> *vector)
+        const_reverse_iterator(GenerationContainerIndex index, const GenerationContainer<C> *vector)
             : mIndex(std::move(index))
             , mVector(vector)
         {
         }
 
-        const T &operator*() const
+        reference operator*() const
         {
             return (*mVector)[mIndex];
         }
 
-        const T *operator->() const
+        pointer operator->() const
         {
             return &(*mVector)[mIndex];
         }
@@ -608,20 +625,20 @@ struct GenerationVector : GenerationVectorBase {
             return mIndex != other.mIndex;
         }
 
-        GenerationVectorIndex copyIndex() const
+        GenerationContainerIndex copyIndex() const
         {
             return mVector->copy(mIndex);
         }
 
-        mutable GenerationVectorIndex mIndex;
-        const GenerationVector<T> *mVector;
+        mutable GenerationContainerIndex mIndex;
+        const GenerationContainer<C> *mVector;
     };
 
     template <typename... Args>
     iterator emplace(Args &&... args)
     {
-        T *t = &mData.emplace_back(std::forward<Args>(args)...);
-        uint32_t index = t - &mData.front();
+        pointer t = &C::emplace_back(std::forward<Args>(args)...);
+        uint32_t index = t - &C::front();
         return { generate(index), this };
     }
 
@@ -630,23 +647,23 @@ struct GenerationVector : GenerationVectorBase {
         return erase(it.mIndex);
     }
 
-    iterator erase(GenerationVectorIndex &it)
+    iterator erase(GenerationContainerIndex &it)
     {
         update(it);
 
-        uint32_t size = mData.size();
-        uint32_t index = get(it);
+        uint32_t size = C::size();
+        uint32_t index = getIndex(it);
 
         assert(index < size);
 
         if (index != size - 1) {
             using std::swap;
-            swap(mData[index], mData[size - 1]);
+            swap(C::operator[](index), C::operator[](size - 1));
             onSwapErase(index, size - 1);
         } else {
             onErase(index);
         }
-        mData.pop_back();
+        C::pop_back();
         reset(it);
         return iterator { generate(index), this };
     }
@@ -654,74 +671,74 @@ struct GenerationVector : GenerationVectorBase {
     void clear()
     {
         onClear();
-        mData.clear();
+        C::clear();
     }
 
     size_t size() const
     {
-        return mData.size();
+        return C::size();
     }
 
     bool empty() const
     {
-        return mData.empty();
+        return C::empty();
     }
 
-    T &front()
+    reference front()
     {
-        return mData.front();
+        return C::front();
     }
 
-    T& operator[](size_t i) {
-        return mData[i];
+    reference operator[](size_t i) {
+        return C::operator[](i);
     }
 
-    const T &operator[](size_t i) const
+    const_reference operator[](size_t i) const
     {
-        return mData[i];
+        return C::operator[](i);
     }
 
-    T &operator[](GenerationVectorIndex &index)
-    {
-        update(index);
-        assert(index);
-        return mData[get(index)];
-    }
-
-    const T &operator[](GenerationVectorIndex &index) const
+    reference operator[](GenerationContainerIndex &index)
     {
         update(index);
         assert(index);
-        return mData[get(index)];
+        return C::operator[](getIndex(index));
     }
 
-    T &at(size_t i)
-    {
-        return mData.at(i);
-    }
-
-    const T &at(size_t i) const
-    {
-        return mData.at(i);
-    }
-
-    T &at(GenerationVectorIndex &index)
+    const_reference operator[](GenerationContainerIndex &index) const
     {
         update(index);
         assert(index);
-        return mData.at(get(index));
+        return C::operator[](getIndex(index));
     }
 
-    const T &at(GenerationVectorIndex &index) const
+    reference at(size_t i)
+    {
+        return C::at(i);
+    }
+
+    const_reference at(size_t i) const
+    {
+        return C::at(i);
+    }
+
+    reference at(GenerationContainerIndex &index)
     {
         update(index);
         assert(index);
-        return mData.at(get(index));
+        return C::at(getIndex(index));
+    }
+
+    const_reference at(GenerationContainerIndex &index) const
+    {
+        update(index);
+        assert(index);
+        return C::at(getIndex(index));
     }
 
     iterator begin()
     {
-        if (mData.empty())
+        if (C::empty())
             return end();
         return { generate(0), this };
     }
@@ -733,7 +750,7 @@ struct GenerationVector : GenerationVectorBase {
 
     const_iterator begin() const
     {
-        if (mData.empty())
+        if (C::empty())
             return end();
         return { generate(0), this };
     }
@@ -745,7 +762,7 @@ struct GenerationVector : GenerationVectorBase {
 
     reverse_iterator rbegin()
     {
-        if (mData.empty())
+        if (C::empty())
             return rend();
         return { generate(size() - 1), this };
     }
@@ -757,7 +774,7 @@ struct GenerationVector : GenerationVectorBase {
 
     const_reverse_iterator rbegin() const
     {
-        if (mData.empty())
+        if (C::empty())
             return rend();
         return { generate(size() - 1), this };
     }
@@ -767,18 +784,29 @@ struct GenerationVector : GenerationVectorBase {
         return { {}, this };
     }
 
-private:
-    std::vector<T> mData;
+    iterator fetch(GenerationContainerIndex& index) {        
+        return { copy(index), this };
+    }
+
 };
 
 template <typename T>
-struct container_traits<GenerationVector<T>, void> {
+using GenerationVector = GenerationContainer<std::vector<T>>;
+
+
+template <typename C>
+struct underlying_container<GenerationContainer<C>> {
+    typedef C type;
+};
+
+template <typename C>
+struct container_traits<GenerationContainer<C>, void> {
     static constexpr const bool sorted = true;
     static constexpr const bool has_dependent_handle = true;
     static constexpr const bool remove_invalidates_handles = true;
     static constexpr const bool is_fixed_size = false;
 
-    typedef GenerationVector<T> container;
+    typedef GenerationContainer<C> container;
     typedef typename container::iterator iterator;
     typedef typename container::const_iterator const_iterator;
     typedef typename container::reverse_iterator reverse_iterator;
@@ -868,10 +896,10 @@ struct container_traits<GenerationVector<T>, void> {
     }
 };
 
-template <typename C, typename... Ty>
-struct container_api_impl<C, GenerationVector<Ty...>> : C {
+template <typename C, typename C2>
+struct container_api_impl<C, GenerationContainer<C2>> : container_api_impl<C, C2> {
 
-    using C::C;
+    using container_api_impl<C, C2>::container_api_impl;
 
     using C::operator=;
 

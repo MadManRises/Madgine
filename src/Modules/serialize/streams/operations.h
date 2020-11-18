@@ -9,6 +9,7 @@
 #include "bufferedstream.h"
 #include "pendingrequest.h"
 #include "../serializableunitptr.h"
+#include "../../generic/callerhierarchy.h"
 
 namespace Engine {
 namespace Serialize {
@@ -32,8 +33,8 @@ namespace Serialize {
     template <typename C, typename Config = DefaultCreator<typename C::value_type>>
     struct ContainerOperations {
 
-        template <typename Op, typename... Args>
-        static void readOp(SerializeInStream &in, Op &op, const char *name, Args &&... args)
+        template <typename Op, typename Hierarchy = std::monostate>
+        static void readOp(SerializeInStream &in, Op &op, const char *name, const Hierarchy &hierarchy = {})
         {
             using T = typename C::value_type;
 
@@ -43,10 +44,10 @@ namespace Serialize {
             in.format().beginCompound(in, name);
 
             if constexpr (!container_traits<C>::is_fixed_size) {
-                TupleUnpacker::invoke(&Config::template clear<Op>, op, size);
+                TupleUnpacker::invoke(&Config::template clear<Op>, op, size, hierarchy);
 
                 while (size--) {
-                    TupleUnpacker::invoke(&Config::template readItem<Op>, in, op, physical(op).end(), std::forward<Args>(args)...);
+                    TupleUnpacker::invoke(&Config::template readItem<Op>, in, op, physical(op).end(), hierarchy);
                 }
             } else {
                 assert(op.size() == size);
@@ -228,10 +229,10 @@ namespace Serialize {
 
     template <typename T, typename... Configs>
     struct BaseOperations {
-        template <typename... Args>
-        static void read(SerializeInStream &in, T &t, const char *name, Args &&... args)
+        template <typename Hierarchy = std::monostate>
+        static void read(SerializeInStream &in, T &t, const char *name, const Hierarchy &hierarchy = {})
         {
-            if constexpr (PrimitiveTypesContain_v<T> || std::is_enum_v<T>) {
+            if constexpr (isPrimitiveType_v<T>) {
                 in.format().beginPrimitive(in, name, PrimitiveTypeIndex_v<T>);
                 in.readUnformatted(t);
                 in.format().endPrimitive(in, name, PrimitiveTypeIndex_v<T>);
@@ -240,10 +241,12 @@ namespace Serialize {
                 //Don't do anything here
             } else if constexpr (has_function_readState_v<T>) {
                 t.readState(in, name);
+            } else if constexpr (has_function_readState_upTo_v<T, 1>) {
+                t.readState(in, name, hierarchy);
             } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>) {
-                SerializableUnitPtr { &t }.readState(in, name);
+                SerializableUnitPtr { &t }.readState(in, name, 0, CallerHierarchyPtr { hierarchy });
             } else if constexpr (is_iterable_v<T>) {
-                ContainerOperations<T, Configs...>::read(in, t, name, std::forward<Args>(args)...);
+                ContainerOperations<T, Configs...>::read(in, t, name, hierarchy);
             } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
                 Operations<decltype(TupleUnpacker::toTuple(std::declval<T&>())), Configs...>::read(in, TupleUnpacker::toTuple(t), name);
             } else {
@@ -251,10 +254,10 @@ namespace Serialize {
             }
         }
 
-        template <typename... Args>
-        static void write(SerializeOutStream &out, const T &t, const char *name, Args &&... args)
+        template <typename Hierarchy = std::monostate>
+        static void write(SerializeOutStream &out, const T &t, const char *name, const Hierarchy &hierarchy = {})
         {
-            if constexpr (PrimitiveTypesContain_v<T> || std::is_enum_v<T>) {
+            if constexpr (isPrimitiveType_v<T>) {
                 out.format().beginPrimitive(out, name, PrimitiveTypeIndex_v<T>);
                 out.writeUnformatted(t);
                 out.format().endPrimitive(out, name, PrimitiveTypeIndex_v<T>);
@@ -263,10 +266,12 @@ namespace Serialize {
                 //Don't do anything here
             } else if constexpr (has_function_writeState_v<T>) {
                 t.writeState(out, name);
+            } else if constexpr (has_function_writeState_upTo_v<T, 1>) {
+                t.writeState(out, name, hierarchy);
             } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>){
-                SerializableUnitConstPtr { &t }.writeState(out, name);
+                SerializableUnitConstPtr { &t }.writeState(out, name, 0, CallerHierarchyPtr { hierarchy });
             } else if constexpr (is_iterable_v<T>) {
-                ContainerOperations<T, Configs...>::write(out, t, name, std::forward<Args>(args)...);
+                ContainerOperations<std::remove_const_t<T>, Configs...>::write(out, t, name, hierarchy);
             } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
                 Operations<decltype(TupleUnpacker::toTuple(std::declval<T&>())), Configs...>::write(out, TupleUnpacker::toTuple(t), name);
             } else {

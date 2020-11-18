@@ -253,27 +253,26 @@ namespace TupleUnpacker {
         }
     }
 
-    template <typename T>
-    auto toTuple(T &&t)
-    {
-        constexpr size_t elementCount = detect_fields_count<std::remove_reference_t<T>>(std::make_index_sequence<sizeof(T)>());
-        return toTupleImpl(std::forward<T>(t), std::integral_constant<size_t, elementCount> {});
-    }
-
     //TODO: Use only is_standard_layout as soon as UnitHelper is cleaned up
     template <typename T>
     struct is_tuplefyable : std::bool_constant<std::is_standard_layout_v<T> && std::is_trivially_copyable_v<T> && !std::is_fundamental_v<T> && !std::is_pointer_v<T> && !std::is_enum_v<T>> {
+        static constexpr size_t elementCount = detect_fields_count<std::remove_reference_t<T>>(std::make_index_sequence<sizeof(T)>());
     };
 
     template <typename T>
-    constexpr const bool is_tuplefyable_v = is_tuplefyable<T>::value;
-
-#define MAKE_TUPLEFYABLE(Type)                         \
-    namespace Engine::TupleUnpacker {                  \
-        template <>                                    \
-        struct is_tuplefyable<Type> : std::true_type { \
-        };                                             \
+    auto toTuple(T &&t)
+    {
+        return toTupleImpl(std::forward<T>(t), std::integral_constant<size_t, is_tuplefyable<std::remove_const_t<std::remove_reference_t<T>>>::elementCount> {});
     }
+
+    template <typename T>
+    constexpr const bool is_tuplefyable_v = is_tuplefyable < std::remove_const_t<std::remove_reference_t<T>>>::value;
+
+#define MAKE_TUPLEFYABLE(Type, Count)                                     \
+    template <>                                                           \
+    struct ::Engine::TupleUnpacker::is_tuplefyable<Type> : std::true_type { \
+        static constexpr size_t elementCount = Count;                     \
+    };
 
     template <typename Tuple, typename F, size_t... Is>
     void forEach(Tuple &&t, F &&f, std::index_sequence<Is...>)

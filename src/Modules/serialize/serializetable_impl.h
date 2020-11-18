@@ -31,14 +31,14 @@ namespace Serialize {
             []() {
                 return size_t { 0 };
             },
-            [](const SerializableUnitBase *_unit, SerializeOutStream &out, const char *name) {
+            [](const SerializableUnitBase *_unit, SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
-                write(out, (unit->*Getter)(), name);
+                    write(out, (unit->*Getter)(), name, CallerHierarchyPtr { hierarchy.append(unit) } );
             },
-            [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name) {
+            [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) {
                 Unit *unit = static_cast<Unit *>(_unit);
                 (unit->*Setter)(nullptr);
-                read(in, unit->*P, name);
+                read(in, unit->*P, name, CallerHierarchyPtr { hierarchy.append(unit) } );
             },
             [](SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) {
                 throw "Unsupported";
@@ -93,14 +93,14 @@ namespace Serialize {
             []() {
                 return size_t { 0 };
             },
-            [](const SerializableUnitBase *_unit, SerializeOutStream &out, const char *name) {
+            [](const SerializableUnitBase *_unit, SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
-                write(out, (unit->*Getter)(), name);
+                write(out, (unit->*Getter)(), name, hierarchy.append(unit));
             },
-            [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name) {
+            [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) {
                 Unit *unit = static_cast<Unit *>(_unit);
                 T dummy;
-                read(in, dummy, name);
+                read(in, dummy, name, CallerHierarchyPtr { hierarchy.append(unit) });
                 (unit->*Setter)(std::move(dummy));
             },
             [](SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) {
@@ -126,7 +126,7 @@ namespace Serialize {
         };
     }
 
-    template <typename _disambiguate__dont_remove, auto P, typename... Args>
+    template <typename _disambiguate__dont_remove, auto P, typename... Configs>
     constexpr Serializer field(const char *name)
     {
         using traits = CallableTraits<decltype(P)>;
@@ -138,25 +138,25 @@ namespace Serialize {
             []() {
                 return OffsetPtr<Unit, T> { P }.template offset<SerializableUnitBase>();
             },
-            [](const SerializableUnitBase *_unit, SerializeOutStream &out, const char *name) {
+            [](const SerializableUnitBase *_unit, SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
-                write<T, Args...>(out, unit->*P, name, unit);
+                write<T, Configs...>(out, unit->*P, name, CallerHierarchyPtr { hierarchy.append(unit) });
             },
-            [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name) {
+            [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) {
                 Unit *unit = static_cast<Unit *>(_unit);
-                read<T, Args...>(in, unit->*P, name, unit);
+                read<T, Configs...>(in, unit->*P, name, CallerHierarchyPtr { hierarchy.append(unit) });
             },
             [](SerializableUnitBase *_unit, SerializeInStream &in, PendingRequest *request) {
                 Unit *unit = static_cast<Unit *>(_unit);
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
-                    Operations<T, Args...>::readAction(unit->*P, in, request, unit);
+                    Operations<T, Configs...>::readAction(unit->*P, in, request, unit);
                 else
                     throw "Unsupported";
             },
             [](SerializableUnitBase *_unit, BufferedInOutStream &inout, TransactionId id) {
                 Unit *unit = static_cast<Unit *>(_unit);
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
-                    Operations<T, Args...>::readRequest(unit->*P, inout, id, unit);
+                    Operations<T, Configs...>::readRequest(unit->*P, inout, id, unit);
                 else
                     throw "Unsupported";
             },
@@ -175,21 +175,21 @@ namespace Serialize {
             [](const SerializableUnitBase *_unit, int op, const void *data, ParticipantId answerTarget, TransactionId answerId) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
-                    Operations<T, Args...>::writeAction(unit->*P, op, data, answerTarget, answerId, unit);
+                    Operations<T, Configs...>::writeAction(unit->*P, op, data, answerTarget, answerId, unit);
                 else
                     throw "Unsupported";
             },
             [](const SerializableUnitBase *_unit, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
-                    Operations<T, Args...>::writeRequest(unit->*P, op, data, requester, requesterTransactionId, std::move(callback), unit);
+                    Operations<T, Configs...>::writeRequest(unit->*P, op, data, requester, requesterTransactionId, std::move(callback), unit);
                 else
                     throw "Unsupported";
             }
         };
     }
 
-    template <typename _disambiguate__dont_remove, auto P, typename... Args>
+    template <typename _disambiguate__dont_remove, auto P, typename... Configs>
     constexpr Serializer sync(const char *name)
     {
         using traits = CallableTraits<decltype(P)>;
@@ -210,11 +210,11 @@ namespace Serialize {
             },
             [](SerializableUnitBase *_unit, SerializeInStream &in, PendingRequest *request) {
                 Unit *unit = static_cast<Unit *>(_unit);
-                Operations<T, Args...>::readAction(unit->*P, in, request, unit);
+                Operations<T, Configs...>::readAction(unit->*P, in, request, unit);
             },
             [](SerializableUnitBase *_unit, BufferedInOutStream &inout, TransactionId id) {
                 Unit *unit = static_cast<Unit *>(_unit);
-                Operations<T, Args...>::readRequest(unit->*P, inout, id, unit);
+                Operations<T, Configs...>::readRequest(unit->*P, inout, id, unit);
             },
             [](SerializableUnitBase *unit, SerializeInStream &in) {
             },
@@ -229,11 +229,11 @@ namespace Serialize {
             },
             [](const SerializableUnitBase *_unit, int op, const void *data, ParticipantId answerTarget, TransactionId answerId) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
-                Operations<T, Args...>::writeAction(unit->*P, op, data, answerTarget, answerId, unit);
+                Operations<T, Configs...>::writeAction(unit->*P, op, data, answerTarget, answerId, unit);
             },
             [](const SerializableUnitBase *_unit, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
-                Operations<T, Args...>::writeRequest(unit->*P, op, data, requester, requesterTransactionId, std::move(callback), unit);
+                Operations<T, Configs...>::writeRequest(unit->*P, op, data, requester, requesterTransactionId, std::move(callback), unit);
             }
         };
     }

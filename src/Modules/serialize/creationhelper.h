@@ -1,7 +1,9 @@
 #pragma once
 
-#include "streams/serializestream.h"
+#include "../generic/callerhierarchy.h"
+#include "../generic/functor.h"
 #include "formatter.h"
+#include "streams/serializestream.h"
 
 namespace Engine {
 namespace Serialize {
@@ -14,7 +16,7 @@ namespace Serialize {
         using ArgsTuple = std::tuple<std::piecewise_construct_t, typename FirstCreator::ArgsTuple, typename SecondCreator::ArgsTuple>;
 
         static auto readCreationData(SerializeInStream &in)
-        {            
+        {
             auto &&first = FirstCreator::readCreationData(in);
             return std::make_tuple(std::piecewise_construct, first, SecondCreator::readCreationData(in));
         }
@@ -93,24 +95,33 @@ namespace Serialize {
 		using CustomCreator = typename CallableTraits<F>::template instance<__creationhelper__impl__::_CustomCreator>::type;*/
 
     namespace __creationhelper__impl__ {
-        template <auto reader, typename WriteFunctor, typename R, typename T, typename... _Ty>
+
+        struct DefaultClear {
+            template <typename T, typename Op>
+            void operator()(T &&t, Op &op)
+            {
+                op.clear();
+            }
+        };
+
+        template <auto reader, typename WriteFunctor, typename ClearFunctor, typename R, typename T, typename... _Ty>
         struct _ParentCreator : WriteFunctor {
 
             static const constexpr bool controlled = false;
 
             using ArgsTuple = R;
 
-            static R readCreationData(SerializeInStream &in, T *parent)
+            static R readCreationData(SerializeInStream &in, const CallerHierarchy<T *> &parent)
             {
-                assert(parent);
+                assert(parent.mData);
                 in.format().beginExtended(in, "Item", sizeof...(_Ty));
                 std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> tuple;
                 TupleUnpacker::forEach(tuple, [&](auto &e) { in >> e; });
-                return TupleUnpacker::invokeExpand(reader, parent, std::move(tuple));
+                return TupleUnpacker::invokeExpand(reader, parent.mData, std::move(tuple));
             }
 
             template <typename Op>
-            static typename container_traits<Op>::emplace_return readItem(SerializeInStream &in, Op &op, const typename container_traits<Op>::const_iterator &where, T *parent)
+            static typename container_traits<Op>::emplace_return readItem(SerializeInStream &in, Op &op, const typename container_traits<Op>::const_iterator &where, const CallerHierarchy<T *> &parent)
             {
                 typename container_traits<Op>::emplace_return it;
                 if constexpr (std::is_const_v<typename container_traits<Op>::value_type>) {
@@ -126,32 +137,32 @@ namespace Serialize {
             }
 
             template <typename Op>
-            static void clear(Op &op)
+            static void clear(Op &op, uint32_t, const CallerHierarchy<T *> &parent)
             {
-                op.clear();
+                ClearFunctor {}(parent.mData, op);
             }
         };
 
         template <auto writer, typename R, typename T, typename Arg>
         struct _ParentCreatorWriter {
 
-            static void writeCreationData(SerializeOutStream &out, Arg arg, T *parent)
+            static void writeCreationData(SerializeOutStream &out, Arg arg, const CallerHierarchy<const T *> &parent)
             {
-                assert(parent);
+                assert(parent.mData);
                 out.format().beginExtended(out, "Item", std::tuple_size_v<R>);
-                R tuple = (parent->*writer)(arg);
+                R tuple = (parent.mData->*writer)(arg);
                 TupleUnpacker::forEach(tuple, [&](auto &e) { write(out, e.second, e.first); });
             }
 
-            static void writeItem(SerializeOutStream &out, Arg arg, T *parent)
+            static void writeItem(SerializeOutStream &out, Arg arg, const CallerHierarchy<const T *> &parent)
             {
                 writeCreationData(out, arg, parent);
-                write(out, arg, "Item", parent);
+                write(out, arg, "Item", CallerHierarchyPtr { parent });
             }
         };
     }
 
-    template <auto reader, auto writer>
-    using ParentCreator = typename MemberFunctionCapture<__creationhelper__impl__::_ParentCreator, reader, typename MemberFunctionCapture<__creationhelper__impl__::_ParentCreatorWriter, writer>::type>::type;
+    template <auto reader, auto writer, auto clear = nullptr>
+    using ParentCreator = typename MemberFunctionCapture<__creationhelper__impl__::_ParentCreator, reader, typename MemberFunctionCapture<__creationhelper__impl__::_ParentCreatorWriter, writer>::type, std::conditional_t<std::is_same_v<decltype(clear), nullptr_t>, __creationhelper__impl__::DefaultClear, UnpackingMemberFunctor<clear>>>::type;
 }
 }

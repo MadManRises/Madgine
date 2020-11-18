@@ -94,7 +94,7 @@ namespace Serialize {
         static void writeAction(const Action<f, Config, OffsetPtr> &action, int op, const void *data, ParticipantId answerTarget, TransactionId answerId, Args &&... args)
         {
             for (BufferedOutStream *out : action.getMasterActionMessageTargets(answerTarget, answerId)) {
-                *out << *static_cast<const std::tuple<_Ty...> *>(data);
+                TupleUnpacker::forEach(*static_cast<const std::tuple<_Ty...> *>(data), [&](auto &field) { write(*out, field, nullptr, args...); });                            
                 out->endMessage();
             }
         }
@@ -103,7 +103,7 @@ namespace Serialize {
         static void readAction(Action<f, Config, OffsetPtr> &action, SerializeInStream &in, PendingRequest *request, Args &&... args)
         {
             std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> data;
-            in >> data;
+            TupleUnpacker::forEach(data, [&](auto &field) { read(in, field, nullptr, args...); });            
             UnitHelper<decltype(data)>::applyMap(in, data);
             TupleUnpacker::invokeExpand(&Action<f, Config, OffsetPtr>::call, action, std::set<ParticipantId> {}, std::move(data));
         }
@@ -112,7 +112,7 @@ namespace Serialize {
         static void writeRequest(const Action<f, Config, OffsetPtr> &action, int op, const void *data, ParticipantId requesterId, TransactionId requesterTransactionId, std::function<void(void *)> callback, Args &&... args)
         {
             BufferedOutStream *out = action.getSlaveActionMessageTarget(requesterId, requesterTransactionId, std::move(callback));
-            *out << *static_cast<const std::tuple<_Ty...> *>(data);
+            TupleUnpacker::forEach(*static_cast<const std::tuple<_Ty...> *>(data), [&](auto &field) { write(*out, field, nullptr, args...); });                            
             out->endMessage();
         }
 
@@ -121,7 +121,7 @@ namespace Serialize {
         {
             if (!Config::sCallByMasterOnly) {
                 std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> data;
-                in >> data;
+                TupleUnpacker::forEach(data, [&](auto &field) { read(in, field, nullptr, args...); });            
                 UnitHelper<decltype(data)>::applyMap(in, data);
                 TupleUnpacker::invokeExpand(&Action<f, Config, OffsetPtr>::tryCall, action, in.id(), std::set<ParticipantId> {}, std::move(data));
             }

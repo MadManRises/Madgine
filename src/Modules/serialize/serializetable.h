@@ -1,6 +1,7 @@
 #pragma once
 
 #include "statetransmissionflags.h"
+#include "../generic/callerhierarchy.h"
 
 namespace Engine {
 namespace Serialize {
@@ -28,8 +29,8 @@ namespace Serialize {
         const std::pair<const char *, Serializer> *mFields;
         bool mIsTopLevelUnit;
 
-        void writeState(const SerializableUnitBase *unit, SerializeOutStream &out) const;
-        void readState(SerializableUnitBase *unit, SerializeInStream &in, StateTransmissionFlags flags = 0) const;
+        void writeState(const SerializableUnitBase *unit, SerializeOutStream &out, CallerHierarchyBasePtr hierarchy = {}) const;
+        void readState(SerializableUnitBase *unit, SerializeInStream &in, StateTransmissionFlags flags = 0, CallerHierarchyBasePtr hierarchy = {}) const;
 
         void readAction(SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) const;
         void readRequest(SerializableUnitBase *unit, BufferedInOutStream &in, TransactionId id) const;

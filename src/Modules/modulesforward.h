@@ -62,8 +62,11 @@ template <typename Registry, typename __Base, typename... _Ty>
 struct UniqueComponentCollector;
 
 
+template <typename C>
+struct GenerationContainer;
+
 template <typename T>
-struct GenerationVector;
+using GenerationVector = GenerationContainer<std::vector<T>>;
 
 struct ComponentRegistryBase;
 

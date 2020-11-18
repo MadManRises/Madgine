@@ -58,16 +58,16 @@ namespace Serialize {
         return *this;
     }
 
-    void SyncableUnitBase::writeState(SerializeOutStream &out, const char *name, StateTransmissionFlags flags) const
+    void SyncableUnitBase::writeState(SerializeOutStream &out, const char *name, StateTransmissionFlags flags, CallerHierarchyBasePtr hierarchy) const
     {
         if (out.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
             out.format().beginExtended(out, name, 1);
             write(out, mMasterId, "id");
         }
-        SerializableUnitConstPtr { this, mType }.writeState(out, name, flags | StateTransmissionFlags_SkipId);
+        SerializableUnitConstPtr { this, mType }.writeState(out, name, flags | StateTransmissionFlags_SkipId, hierarchy);
     }
 
-    void SyncableUnitBase::readState(SerializeInStream &in, const char *name, StateTransmissionFlags flags)
+    void SyncableUnitBase::readState(SerializeInStream &in, const char *name, StateTransmissionFlags flags, CallerHierarchyBasePtr hierarchy)
     {
         if (!in.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
             in.format().beginExtended(in, name, 1);
@@ -81,7 +81,7 @@ namespace Serialize {
                 }
             }
         }
-        SerializableUnitPtr { this, mType }.readState(in, name, flags | StateTransmissionFlags_SkipId);
+        SerializableUnitPtr { this, mType }.readState(in, name, flags | StateTransmissionFlags_SkipId, hierarchy);
     }
 
     void SyncableUnitBase::readAction(BufferedInOutStream &in, PendingRequest *request)

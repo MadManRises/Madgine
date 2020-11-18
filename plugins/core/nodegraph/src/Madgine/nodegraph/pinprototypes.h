@@ -44,4 +44,4 @@ namespace NodeGraph {
 }
 }
 
-MAKE_TUPLEFYABLE(Engine::NodeGraph::DataInPinPrototype)
+MAKE_TUPLEFYABLE(Engine::NodeGraph::DataInPinPrototype, 2)
