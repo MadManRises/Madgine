@@ -49,7 +49,7 @@ struct MultiVector {
         ptrdiff_t operator-(const pointer &other) const
         {
             ptrdiff_t diff = std::get<0>(mData) - std::get<0>(other.mData);
-            assert((std::get<Ty *>(mData) - std::get<Ty *>(other.mData) == diff) && ...);
+            assert(((std::get<Ty *>(mData) - std::get<Ty *>(other.mData) == diff) && ...));
             return diff;
         }
 
