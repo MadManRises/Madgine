@@ -104,7 +104,7 @@ def staticTask = {
 				stage("Deploy") {
 					sh """
 					mkdir -p /var/www/html/latest/${env.BRANCH_NAME}
-					cp ${name}/bin/MadgineLauncher.* /var/www/html/latest/${env.BRANCH_NAME}
+					cp ${name}/bin/MadgineLauncher_plugins_tools.* /var/www/html/latest/${env.BRANCH_NAME}
 					"""
 				}
 			}
