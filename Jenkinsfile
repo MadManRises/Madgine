@@ -30,7 +30,7 @@
 
 def staticConfigs = [
 	[
-		name : "OpenGL_tools"
+		name : "OpenGL"
 	]
 ]
 
