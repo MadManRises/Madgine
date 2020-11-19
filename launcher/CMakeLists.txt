@@ -14,6 +14,8 @@ add_workspace_application(MadgineLauncher ${sources})
 if (MADGINE_AS_SDK)
 	MESSAGE(${MADGINE_BINARY_NAME})
 	set_target_properties(MadgineLauncher PROPERTIES OUTPUT_NAME ${MADGINE_BINARY_NAME})
+elseif (NOT MODULES_ENABLE_PLUGINS)
+	set_target_properties(MadgineLauncher PROPERTIES OUTPUT_NAME MadgineLauncher_${PLUGIN_DEFINITION_NAME})
 endif()
 
 target_link_plugins(MadgineLauncher Base Client)

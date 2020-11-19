@@ -44,6 +44,7 @@ if (UNIX)
 		add_custom_command(TARGET Interfaces POST_BUILD
 			COMMAND npm install ws bufferutil utf-8-validate
 			WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+		target_link_libraries(Interfaces PRIVATE -lidbfs.js)
 	elseif (ANDROID)
 	else ()
 		find_package(X11 REQUIRED)

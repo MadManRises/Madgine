@@ -56,10 +56,10 @@ namespace Window {
             emscripten_set_mousemove_callback("#canvas", this, 0, EmscriptenWindow::handleMouseEvent);
 
             emscripten_set_mousedown_callback("#canvas", this, 0, EmscriptenWindow::handleMouseEvent);
-            emscripten_set_mouseup_callback("#document", this, 0, EmscriptenWindow::handleMouseEvent);
+            emscripten_set_mouseup_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT, this, 0, EmscriptenWindow::handleMouseEvent);
 
-            emscripten_set_keydown_callback("#window", this, 0, EmscriptenWindow::handleKeyEvent);
-            emscripten_set_keyup_callback("#window", this, 0, EmscriptenWindow::handleKeyEvent);
+            emscripten_set_keydown_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, 0, EmscriptenWindow::handleKeyEvent);
+            emscripten_set_keyup_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, 0, EmscriptenWindow::handleKeyEvent);
         }
 
         virtual void update() override
@@ -274,12 +274,12 @@ namespace Window {
 
         EmscriptenWindow *window = &pib.first->second;
 
-        emscripten_set_resize_callback("#window", window, false, &eventCallback);
+        emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, window, false, &eventCallback);
 
         double w;
         double h;
 
-        emscripten_get_element_css_size(nullptr, &w, &h);
+        emscripten_get_element_css_size("#canvas", &w, &h);
         window->setSize({ static_cast<int>(w), static_cast<int>(h) });
 
         return window;
@@ -295,7 +295,7 @@ namespace Window {
         double w;
         double h;
 
-        emscripten_get_element_css_size(nullptr, &w, &h);
+        emscripten_get_element_css_size("#canvas", &w, &h);
 
         MonitorInfo info { 0, 0, static_cast<int>(w), static_cast<int>(h) };
 
