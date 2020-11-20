@@ -54,6 +54,7 @@ if (GCC OR CLANG)
 	endif()
 	if (EMSCRIPTEN) #TODO add more
 		set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
+		add_compile_options(-Wno-implicit-function-declaration)
 	endif()
 endif ()
 
@@ -61,6 +62,7 @@ if (MSVC)
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4217")
 	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /ignore:4217")
 endif ()
+
 
 macro(cmake_log)
 	if (USE_CMAKE_LOG)
