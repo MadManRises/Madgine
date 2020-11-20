@@ -14,8 +14,6 @@ if (BUILD_TESTING)
 
 	add_subdirectory(test/googletest)
 
-	find_package( Threads REQUIRED )
-
 	function(add_test_impl name)
 	
 		add_executable(${name} ${ARGN})
