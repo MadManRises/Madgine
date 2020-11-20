@@ -227,7 +227,7 @@ namespace Window {
         double w;
         double h;
 
-        emscripten_get_element_css_size(nullptr, &w, &h);
+        emscripten_get_element_css_size("#canvas", &w, &h);
 
         static_cast<EmscriptenWindow *>(userData)->setSize({ static_cast<int>(w), static_cast<int>(h) });
         return true;

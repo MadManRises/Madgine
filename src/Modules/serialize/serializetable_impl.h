@@ -69,7 +69,7 @@ namespace Serialize {
             [](const SerializableUnitBase *unit, int op, const void *data, ParticipantId answerTarget, TransactionId answerId) {
                 throw "Unsupported";
             },
-            [](const SerializableUnitBase *_unit, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) {
+            [](const SerializableUnitBase *_unit, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> &&callback) {
                 throw "Unsupported";
             }
         };
@@ -120,7 +120,7 @@ namespace Serialize {
             [](const SerializableUnitBase *unit, int op, const void *data, ParticipantId answerTarget, TransactionId answerId) {
                 throw "Unsupported";
             },
-            [](const SerializableUnitBase *_unit, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) {
+            [](const SerializableUnitBase *_unit, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> &&callback) {
                 throw "Unsupported";
             }
         };
@@ -179,7 +179,7 @@ namespace Serialize {
                 else
                     throw "Unsupported";
             },
-            [](const SerializableUnitBase *_unit, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) {
+            [](const SerializableUnitBase *_unit, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> &&callback) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
                     Operations<T, Configs...>::writeRequest(unit->*P, op, data, requester, requesterTransactionId, std::move(callback), unit);

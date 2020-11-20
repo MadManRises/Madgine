@@ -13,7 +13,7 @@ namespace Serialize {
     DERIVE_FUNCTION(setParent, SerializableUnitBase *);
 
     MODULES_EXPORT SyncableUnitBase *convertSyncablePtr(SerializeInStream &in, UnitId id);
-    MODULES_EXPORT SerializableUnitBase *convertSerializablePtr(SerializeInStream &in, uint64_t id);
+    MODULES_EXPORT SerializableUnitBase *convertSerializablePtr(SerializeInStream &in, uint32_t id);
 
     template <typename T>
     struct UnitHelper {
@@ -22,7 +22,7 @@ namespace Serialize {
         {
             if constexpr (std::is_pointer_v<T>) {
                 static_assert(std::is_base_of_v<SerializableUnitBase, std::remove_pointer_t<T>>);
-                uintptr_t ptr = reinterpret_cast<uintptr_t>(item);
+                uint32_t ptr = reinterpret_cast<uintptr_t>(item);
                 if (ptr & 0x3) {
                     switch (static_cast<UnitIdTag>(ptr & 0x3)) {
                     case UnitIdTag::SYNCABLE:
@@ -35,7 +35,7 @@ namespace Serialize {
                         break;
                     case UnitIdTag::SERIALIZABLE:
                         if constexpr (!std::is_base_of_v<SyncableUnitBase, std::remove_pointer_t<T>>) {
-                            uintptr_t id = (ptr >> 2);
+                            uint32_t id = (ptr >> 2);
                             item = static_cast<T>(convertSerializablePtr(in, id));
                         } else {
                             throw 0;

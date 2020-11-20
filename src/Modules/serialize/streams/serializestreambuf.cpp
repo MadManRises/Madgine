@@ -46,13 +46,28 @@ namespace Serialize {
         return *mFormatter;
     }
 
+    SerializableUnitList &SerializeStreambuf::serializableList()
+    {
+        assert(mSerializableList);
+        return *mSerializableList;
+    }
+
+    void SerializeStreambuf::startSerializableRead(SerializableListHolder *list)
+    {
+        assert(!list->mBuffer);
+        if (!mSerializableList) {
+            list->mBuffer = this;
+            mSerializableList = &list->mList;
+        }
+    }
+
     SerializableUnitMap &SerializeStreambuf::serializableMap()
     {
         assert(mSerializableMap);
         return *mSerializableMap;
     }
 
-    void SerializeStreambuf::startSerializableRead(SerializableMapHolder *map)
+    void SerializeStreambuf::startSerializableWrite(SerializableMapHolder *map)
     {
         assert(!map->mBuffer);
         if (!mSerializableMap) {

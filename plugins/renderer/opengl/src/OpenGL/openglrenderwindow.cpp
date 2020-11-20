@@ -45,7 +45,7 @@ namespace Engine {
 namespace Render {
 
 #if !ANDROID && !EMSCRIPTEN
-    static void glDebugOutput(GLenum source,
+    static void __stdcall glDebugOutput(GLenum source,
         GLenum type,
         GLuint id,
         GLenum severity,

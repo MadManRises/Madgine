@@ -14,5 +14,13 @@ namespace Serialize {
         }
     }
 
+    SerializableListHolder::~SerializableListHolder()
+    {
+        if (mBuffer) {
+            assert(mBuffer->mSerializableList == &mList);
+            mBuffer->mSerializableList = nullptr;
+        }
+    }
+
 }
 }

@@ -55,9 +55,9 @@ namespace Serialize {
 
     void SerializeInStream::readUnformatted(SerializableUnitBase *&p)
     {
-        uint64_t ptr;
+        uint32_t ptr;
         readUnformatted(ptr);
-        assert(ptr <= (std::numeric_limits<uint64_t>::max() >> 2));
+        assert(ptr <= (std::numeric_limits<uint32_t>::max() >> 2));
         if (ptr)
             ptr = (ptr << 2) | static_cast<UnitId>(UnitIdTag::SERIALIZABLE);
         p = reinterpret_cast<SerializableUnitBase *>(ptr);
@@ -213,14 +213,14 @@ namespace Serialize {
         return static_cast<SerializeStreambuf &>(InStream::buffer());
     }
 
-    SerializableUnitMap &SerializeInStream::serializableMap()
+    SerializableUnitList &SerializeInStream::serializableList()
     {
-        return buffer().serializableMap();
+        return buffer().serializableList();
     }
 
-    void SerializeInStream::startSerializableRead(SerializableMapHolder *map)
+    void SerializeInStream::startSerializableRead(SerializableListHolder *list)
     {
-        buffer().startSerializableRead(map);
+        buffer().startSerializableRead(list);
     }
 
     SerializeOutStream::SerializeOutStream()        
@@ -258,10 +258,9 @@ namespace Serialize {
 
     void SerializeOutStream::writeUnformatted(const SerializableUnitBase *p)
     {
-        static_assert(std::alignment_of_v<SerializableUnitBase> >= 4);
-        uintptr_t ptr = reinterpret_cast<uintptr_t>(p);
-        assert((ptr & 0x3) == 0);
-        writeUnformatted(ptr >> 2);
+        SerializableUnitMap &map = serializableMap();
+        auto it = map.try_emplace(p, map.size() + 1).first;
+        writeUnformatted(it->second);
     }
 
     void SerializeOutStream::writeRaw(const void *buffer, size_t size)
@@ -318,6 +317,16 @@ namespace Serialize {
 
     void SerializeOutStream::writeUnformatted(const std::monostate &)
     {
+    }
+
+    SerializableUnitMap &SerializeOutStream::serializableMap()
+    {
+        return buffer().serializableMap();
+    }
+
+    void SerializeOutStream::startSerializableWrite(SerializableMapHolder *map)
+    {
+        buffer().startSerializableWrite(map);
     }
 
 }

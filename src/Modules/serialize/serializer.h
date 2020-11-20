@@ -21,7 +21,7 @@ namespace Serialize {
         void (*mSetParent)(SerializableUnitBase *) = nullptr;
 
         void (*mWriteAction)(const SerializableUnitBase *, int, const void *, ParticipantId, TransactionId) = nullptr;
-        void (*mWriteRequest)(const SerializableUnitBase *, int, const void *, ParticipantId, TransactionId, std::function<void(void *)>) = nullptr;
+        void (*mWriteRequest)(const SerializableUnitBase *, int, const void *, ParticipantId, TransactionId, std::function<void(void *)>&&) = nullptr;
     };
 
 }

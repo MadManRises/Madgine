@@ -4,8 +4,8 @@ namespace Engine {
 
 
 struct Accessor {
-    void (*mGetter)(ValueType &, TypedScopePtr);
-    void (*mSetter)(TypedScopePtr, const ValueType &);
+    void (*mGetter)(ValueType &, const TypedScopePtr &);
+    void (*mSetter)(const TypedScopePtr &, const ValueType &);
 };
 
 }

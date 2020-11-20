@@ -16,9 +16,9 @@ namespace Serialize {
         return in.manager()->convertPtr(in, id);
     }
     
-    SerializableUnitBase *convertSerializablePtr(SerializeInStream &in, uint64_t id)
+    SerializableUnitBase *convertSerializablePtr(SerializeInStream &in, uint32_t id)
     {
-        return in.serializableMap().at(id);        
+        return in.serializableList().at(id);        
     }
 }
 }

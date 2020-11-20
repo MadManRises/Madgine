@@ -150,9 +150,11 @@ namespace Serialize {
 
     
     using SyncableUnitMap = std::map<UnitId, SyncableUnitBase *>;
-    using SerializableUnitMap = std::map<uint64_t, SerializableUnitBase *>;
+    using SerializableUnitMap = std::map<const SerializableUnitBase *, uint32_t>;
+    using SerializableUnitList = std::vector<SerializableUnitBase*>;
 
     struct SerializableMapHolder;
+    struct SerializableListHolder;
 
     enum MessageType {
         STATE,

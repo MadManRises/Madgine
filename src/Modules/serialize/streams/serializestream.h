@@ -84,8 +84,8 @@ namespace Serialize {
 
         void setNextFormattedStringDelimiter(char c);
 
-        SerializableUnitMap &serializableMap();
-        void startSerializableRead(SerializableMapHolder *map);
+        SerializableUnitList &serializableList();
+        void startSerializableRead(SerializableListHolder *list);
 
     protected:
         SerializeInStream(SerializeStreambuf *buffer);
@@ -147,6 +147,9 @@ namespace Serialize {
         bool isMaster();
 
         SerializeStreambuf &buffer() const;
+
+        SerializableUnitMap &serializableMap();
+        void startSerializableWrite(SerializableMapHolder *map);
 
     };
 

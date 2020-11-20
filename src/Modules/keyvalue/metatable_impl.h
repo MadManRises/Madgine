@@ -24,7 +24,7 @@ constexpr Accessor property()
     using GetterScope = typename getter_traits::class_type;
     using T = typename getter_traits::return_type;
 
-    void (*setter)(TypedScopePtr, const ValueType &) = nullptr;
+    void (*setter)(const TypedScopePtr &, const ValueType &) = nullptr;
 
     if constexpr (Setter != nullptr) {
         using setter_traits = CallableTraits<decltype(Setter)>;
@@ -33,7 +33,7 @@ constexpr Accessor property()
         //TODO remove const in tuple types
         //static_assert(std::is_same_v<typename setter_traits::argument_types, std::tuple<T>>);
 
-        setter = [](TypedScopePtr scope, const ValueType &v) {
+        setter = [](const TypedScopePtr &scope, const ValueType &v) {
             if constexpr (std::is_same_v<SetterScope, void>) {
                 using SetterScope = std::remove_pointer_t<std::tuple_element_t<0, typename setter_traits::argument_types>>;
                 if constexpr (std::is_convertible_v<Scope &, SetterScope &>) {
@@ -49,7 +49,7 @@ constexpr Accessor property()
     }
 
     return {
-        [](ValueType &retVal, TypedScopePtr scope) {
+        [](ValueType &retVal, const TypedScopePtr &scope) {
             T value = [=]() -> T {
                 if constexpr (std::is_same_v<GetterScope, void>) {
                     using GetterScope = std::remove_pointer_t<std::tuple_element_t<0, typename getter_traits::argument_types>>;

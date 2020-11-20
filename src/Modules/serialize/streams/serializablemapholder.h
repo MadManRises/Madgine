@@ -14,5 +14,16 @@ namespace Serialize {
         SerializeStreambuf *mBuffer = nullptr;
     };
 
+    struct SerializableListHolder {
+
+        SerializableListHolder() = default;
+        SerializableListHolder(const SerializableListHolder &) = delete;
+        SerializableListHolder(SerializableListHolder &&) = delete;
+        ~SerializableListHolder();
+
+        SerializableUnitList mList;
+        SerializeStreambuf *mBuffer = nullptr;
+    };
+
 }
 }

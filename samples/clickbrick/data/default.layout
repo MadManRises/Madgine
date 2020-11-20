@@ -1,11 +1,11 @@
 <Item id=258>
     <mComponents size=3>
-        <Item key="WidgetManager" id=557513925202>
-            <mStartupWidget>557543954870</mStartupWidget>
+        <Item key="WidgetManager" id=1>
+            <mStartupWidget>2</mStartupWidget>
             <mTopLevelWidgets size=3>
-                <Item name="MainMenu" type=0 id=557543954870>
+                <Item name="MainMenu" type=0 id=2>
                     <mChildren size=1>
-                        <Item name="StartGameButton" type=6 id=557543988006>
+                        <Item name="StartGameButton" type=6 id=3>
                             <mText>StartGame</mText>
                             <mFontSize>5</mFontSize>
                             <mFont>OpenSans-Regular</mFont>
@@ -21,11 +21,11 @@
                     <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
                     <mName>MainMenu</mName>
                 </Item>
-                <Item name="Ingame" type=0 id=557544039698>
+                <Item name="Ingame" type=0 id=4>
                     <mChildren size=1>
-                        <Item name="GameView" type=1 id=557544039826>
+                        <Item name="GameView" type=1 id=5>
                             <mChildren size=2>
-                                <Item name="Score" type=8 id=557544046774>
+                                <Item name="Score" type=8 id=6>
                                     <mFontSize>3</mFontSize>
                                     <mText>Score:123</mText>
                                     <mFont>OpenSans-Bold</mFont>
@@ -35,7 +35,7 @@
                                     <mSize>[0.2, 0, 0, 0, 0, 40, 0, 0, 1]</mSize>
                                     <mName>Score</mName>
                                 </Item>
-                                <Item name="Life" type=8 id=557544047838>
+                                <Item name="Life" type=8 id=7>
                                     <mFontSize>3</mFontSize>
                                     <mText>Life: 99999</mText>
                                     <mFont>OpenSans-Bold</mFont>
@@ -55,9 +55,9 @@
                     <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
                     <mName>Ingame</mName>
                 </Item>
-                <Item name="GameOver" type=0 id=557544047978>
+                <Item name="GameOver" type=0 id=8>
                     <mChildren size=2>
-                        <Item name="GameOverLabel" type=8 id=557544048106>
+                        <Item name="GameOverLabel" type=8 id=9>
                             <mFontSize>9</mFontSize>
                             <mText>Game Over</mText>
                             <mFont>OpenSans-Bold</mFont>
@@ -67,7 +67,7 @@
                             <mSize>[0.7, 0, 0, 0, 0.11, 0, 0, 0, 1]</mSize>
                             <mName>GameOverLabel</mName>
                         </Item>
-                        <Item name="ScoreLabel" type=8 id=557544048246>
+                        <Item name="ScoreLabel" type=8 id=10>
                             <mFontSize>4</mFontSize>
                             <mText>Your Score: </mText>
                             <mFont>OpenSans-Regular</mFont>
@@ -84,25 +84,25 @@
                 </Item>
             </mTopLevelWidgets>
         </Item>
-        <Item key="UI" id=557513896734>
+        <Item key="UI" id=11>
             <mGuiHandlers size=3>
-                <Item key="GameHandler" id=557513925462>
-                    <mWidget>557544039698</mWidget>
+                <Item key="GameHandler" id=12>
+                    <mWidget>4</mWidget>
                 </Item>
-                <Item key="GameOverHandler" id=557513925610>
-                    <mWidget>557544047978</mWidget>
+                <Item key="GameOverHandler" id=13>
+                    <mWidget>8</mWidget>
                 </Item>
-                <Item key="MainMenuHandler" id=557513925274>
-                    <mWidget>557543954870</mWidget>
+                <Item key="MainMenuHandler" id=14>
+                    <mWidget>2</mWidget>
                 </Item>
             </mGuiHandlers>
             <mGameHandlers size=1>
-                <Item key="GameManager" id=557513925798>
-                    <mWidget>557544039826</mWidget>
+                <Item key="GameManager" id=15>
+                    <mWidget>5</mWidget>
                 </Item>
             </mGameHandlers>
         </Item>
-        <Item key="ClientImRoot" id=557513896646>
+        <Item key="ClientImRoot" id=16>
         </Item>
     </mComponents>
 </Item>

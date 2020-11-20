@@ -343,14 +343,17 @@ namespace Window {
 
     static std::vector<MonitorInfo> sBuffer;
 
+    static BOOL __stdcall MonitorEnumerator(HMONITOR, HDC, LPRECT rect, LPARAM)
+    {
+        sBuffer.push_back({ rect->left, rect->top, rect->right - rect->left, rect->bottom - rect->top });
+        return BOOL(true);
+    }
+
     static void updateMonitors()
     {
         sBuffer.clear();
         auto result = EnumDisplayMonitors(
-            NULL, NULL, [](HMONITOR, HDC, LPRECT rect, LPARAM) {
-                sBuffer.push_back({ rect->left, rect->top, rect->right - rect->left, rect->bottom - rect->top });
-                return BOOL(true);
-            },
+            NULL, NULL, &MonitorEnumerator,
             NULL);
         assert(result);
     }
