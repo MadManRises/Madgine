@@ -37,7 +37,7 @@ namespace Serialize {
 
     SyncableUnitBase::~SyncableUnitBase()
     {
-        if (!mSlaveId)
+        if (mSlaveId)
             LOG_ERROR_ONCE("Fix SyncableUnitBase::clearSlaveId calls!");
         SerializeManager::deleteMasterId(mMasterId, this);
     }
