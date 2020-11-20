@@ -46,8 +46,9 @@ namespace Serialize {
 
         if (!in.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
             in.format().beginExtended(in, name, 1);
-            uint32_t id;
-            read(in, id, "id");
+            SerializableUnitBase *idHelper;
+            read(in, idHelper, "id");
+            uint32_t id = reinterpret_cast<uint32_t>(idHelper) >> 2;
             SerializableUnitList &list = in.serializableList();
             if (list.size() <= id)
                 list.resize(id + 1);
