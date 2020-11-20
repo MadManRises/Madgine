@@ -48,7 +48,7 @@ namespace Serialize {
             in.format().beginExtended(in, name, 1);
             SerializableUnitBase *idHelper;
             read(in, idHelper, "id");
-            uint32_t id = reinterpret_cast<uint32_t>(idHelper) >> 2;
+            uint32_t id = reinterpret_cast<uintptr_t>(idHelper) >> 2;
             SerializableUnitList &list = in.serializableList();
             if (list.size() <= id)
                 list.resize(id + 1);
