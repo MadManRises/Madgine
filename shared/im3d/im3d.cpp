@@ -64,6 +64,15 @@ namespace Im3D {
                 p.second.mIndices[i].clear();
                 p.second.mVertices[i].clear();
                 p.second.mVertexBase[i] = 0;
+                for (auto it = p.second.mPersistentMeshes[i].begin(); it != p.second.mPersistentMeshes[i].end();) {
+                    if (std::chrono::steady_clock::now() <= std::get<0>(*it)) {
+                        std::transform(std::get<2>(*it).begin(), std::get<2>(*it).end(), std::back_inserter(p.second.mIndices[i]), [&](unsigned short j) { return j + p.second.mVertices[i].size(); });
+                        std::copy(std::get<1>(*it).begin(), std::get<1>(*it).end(), std::back_inserter(p.second.mVertices[i]));
+                        ++it;
+                    } else {
+                        it = p.second.mPersistentMeshes[i].erase(it);
+                    }
+                }
                 p.second.mIndices2[i].clear();
                 p.second.mVertices2[i].clear();
                 p.second.mVertexBase2[i] = 0;
@@ -154,7 +163,7 @@ namespace Im3D {
         }
     }
 
-    void Mesh(Im3DMeshType type, const Render::Vertex *vertices, size_t vertexCount, const Matrix4 &transform, const unsigned short *indices, size_t indexCount)
+    void Mesh(Im3DMeshType type, const Render::Vertex *vertices, size_t vertexCount, const MeshParameters &param, const unsigned short *indices, size_t indexCount)
     {
         Im3DContext &c = *sContext;
 
@@ -163,13 +172,16 @@ namespace Im3D {
         Vector3 minP { std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max() };
         Vector3 maxP { std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest() };
 
+        size_t vertexPivot = c.mRenderData[0].mVertexBase[type];
+        size_t indexPivot = c.mRenderData[0].mIndices[type].size();
+
         std::transform(vertices, vertices + vertexCount, std::back_inserter(c.mRenderData[0].mVertices[type]), [&](const Render::Vertex &v) {
             Render::Vertex result = v;
 
             minP = min(v.mPos, minP);
             maxP = max(v.mPos, maxP);
 
-            result.mPos = (transform * Vector4 { v.mPos, 1.0f }).xyz();
+            result.mPos = (param.mTransform * Vector4 { v.mPos, 1.0f }).xyz();
 
             /*if (c.mHoveredObject == object)
                 result.mColor *= 2.f;*/
@@ -178,22 +190,26 @@ namespace Im3D {
         });
 
         c.mTemp.mLastAABB = { minP, maxP };
-        c.mTemp.mLastTransform = transform;
+        c.mTemp.mLastTransform = param.mTransform;
 
         size_t groupSize = (size_t)type + 1;
 
         if (indices) {
             assert(indexCount % groupSize == 0);
-            std::transform(indices, indices + indexCount, std::back_inserter(c.mRenderData[0].mIndices[type]), [&](unsigned int i) { return i + c.mRenderData[0].mVertexBase[type]; });
+            std::transform(indices, indices + indexCount, std::back_inserter(c.mRenderData[0].mIndices[type]), [&](unsigned int i) { return i + vertexPivot; });
         } else {
             assert(vertexCount % groupSize == 0);
-            size_t oldIndexCount = c.mRenderData[0].mIndices[type].size();
-            c.mRenderData[0].mIndices[type].resize(oldIndexCount + vertexCount);
-            std::iota(c.mRenderData[0].mIndices[type].begin() + oldIndexCount, c.mRenderData[0].mIndices[type].end(), c.mRenderData[0].mVertexBase[type]);
+            c.mRenderData[0].mIndices[type].resize(indexPivot + vertexCount);
+            std::iota(c.mRenderData[0].mIndices[type].begin() + indexPivot, c.mRenderData[0].mIndices[type].end(), vertexPivot);
+        }
+
+        if (param.mDuration != std::chrono::microseconds::zero()) {
+            auto &data = c.mRenderData[0].mPersistentMeshes[type].emplace_back(std::chrono::steady_clock::now() + param.mDuration, std::vector<Render::Vertex> { c.mRenderData[0].mVertices[type].begin() + vertexPivot, c.mRenderData[0].mVertices[type].end() }, std::vector<unsigned short> {});
+            std::transform(c.mRenderData[0].mIndices[type].begin() + indexPivot, c.mRenderData[0].mIndices[type].end(), std::back_inserter(std::get<2>(data)), [&](unsigned int i) { return i - vertexPivot; });
         }
     }
 
-    void Mesh(Im3DMeshType type, Render::RenderPassFlags flags, const Render::Vertex2 *vertices, size_t vertexCount, const Matrix4 &transform, const unsigned short *indices, size_t indexCount, Im3DTextureId texId)
+    void Mesh(Im3DMeshType type, Render::RenderPassFlags flags, const Render::Vertex2 *vertices, size_t vertexCount, const MeshParameters &param, const unsigned short *indices, size_t indexCount, Im3DTextureId texId)
     {
         Im3DContext &c = *sContext;
 
@@ -208,7 +224,7 @@ namespace Im3D {
             minP = min(v.mPos, minP);
             maxP = max(v.mPos, maxP);
 
-            result.mPos = (transform * Vector4 { v.mPos, 1.0f }).xyz();
+            result.mPos = (param.mTransform * Vector4 { v.mPos, 1.0f }).xyz();
 
             /*if (c.mHoveredObject == object)
                 result.mColor *= 2.f;*/
@@ -217,7 +233,7 @@ namespace Im3D {
         });
 
         c.mTemp.mLastAABB = { minP, maxP };
-        c.mTemp.mLastTransform = transform;
+        c.mTemp.mLastTransform = param.mTransform;
 
         size_t groupSize = (size_t)type + 1;
 
@@ -245,16 +261,16 @@ namespace Im3D {
         c.mTemp.mLastTransform = transform;
     }
 
-    void Text(const char *text, const Matrix4 &transform, float fontSize, bool facingX, bool facingY, const char *fontName, Vector2 pivot)
+    void Text(const char *text, const TextParameters &param)
     {
-        Im3DFont font = GetIO().mFetchFont(fontName);
+        Im3DFont font = GetIO().mFetchFont(param.mFontName);
 
         size_t textLen = strlen(text);
 
         if (textLen == 0)
             return;
 
-        float scale = fontSize / 5000.0f;
+        float scale = param.mFontSize / 5000.0f;
 
         const float padding = 1.0f * scale;
 
@@ -272,8 +288,8 @@ namespace Im3D {
 
         float fullHeight = maxY - minY;
 
-        float xLeft = -fullWidth * pivot.x;
-        float yTop = fullHeight * pivot.y;
+        float xLeft = -fullWidth * param.mPivot.x;
+        float yTop = fullHeight * param.mPivot.y;
 
         std::unique_ptr<Render::Vertex2[]> vertices = std::make_unique<Render::Vertex2[]>(4 * textLen);
         std::unique_ptr<unsigned short[]> indices = std::make_unique<unsigned short[]>(6 * textLen);
@@ -294,7 +310,7 @@ namespace Im3D {
             Vector3 v11 = { 0, 0, 0 }, v12 = { 0, 0, 0 }, v21 = { 0, 0, 0 }, v22 = { 0, 0, 0 };
             Vector2 v211 = { 0, 0 }, v212 = { 0, 0 }, v221 = { 0, 0 }, v222 = { 0, 0 };
 
-            if (facingX) {
+            if (param.mFacingX) {
                 v211.x = vPosX1;
                 v212.x = vPosX2;
                 v221.x = vPosX1;
@@ -306,7 +322,7 @@ namespace Im3D {
                 v22.x = vPosX2;
             }
 
-            if (facingY) {
+            if (param.mFacingY) {
                 v211.y = vPosY1;
                 v212.y = vPosY1;
                 v221.y = vPosY2;
@@ -349,27 +365,22 @@ namespace Im3D {
             cursorX += g.mAdvance / 64.0f * scale;
         }
 
-        Mesh(IM3D_TRIANGLES, Render::RenderPassFlags_NoLighting | Render::RenderPassFlags_DistanceField, vertices.get(), 4 * textLen, transform, indices.get(), 6 * textLen, *font.mTexture);
+        Mesh(IM3D_TRIANGLES, Render::RenderPassFlags_NoLighting | Render::RenderPassFlags_DistanceField, vertices.get(), 4 * textLen, param, indices.get(), 6 * textLen, *font.mTexture);
 
         if (GetIO().mReleaseFont)
             GetIO().mReleaseFont(font);
     }
 
-    void Line(const Vector3 &a, const Vector3 &b, const Vector4 &color)
-    {
-        Line(a, b, color, color);
-    }
-
-    void Line(const Vector3 &a, const Vector3 &b, const Vector4 &colorA, const Vector4 &colorB)
+    void Line(const Vector3 &a, const Vector3 &b, const LineParameters &param)
     {
         Render::Vertex vertices[] = {
-            { a, colorA, Vector3::ZERO },
-            { b, colorB, Vector3::ZERO }
+            { a, param.mColor, Vector3::ZERO },
+            { b, param.mColorB, Vector3::ZERO }
         };
-        Mesh(IM3D_LINES, vertices, 2);
+        Mesh(IM3D_LINES, vertices, 2, param);
     }
 
-    void Arrow(Im3DMeshType type, float radius, const Vector3 &a, const Vector3 &b, const Vector4 &color)
+    void Arrow(Im3DMeshType type, float radius, const Vector3 &a, const Vector3 &b, const Parameters &param)
     {
         Vector3 dist = b - a;
         Vector3 d1 = dist.perpendicular();
@@ -381,12 +392,12 @@ namespace Im3D {
         Vector3 d0 = radius * dist.normalizedCopy();
 
         const Render::Vertex vertices[]
-            = { { a, color, -dist },
-                  { a + d0 + d1, color, d1 },
-                  { a + d0 + d2, color, d2 },
-                  { a + d0 - d1, color, -d1 },
-                  { a + d0 - d2, color, -d2 },
-                  { b, color, dist } };
+            = { { a, param.mColor, -dist },
+                  { a + d0 + d1, param.mColor, d1 },
+                  { a + d0 + d2, param.mColor, d2 },
+                  { a + d0 - d1, param.mColor, -d1 },
+                  { a + d0 - d2, param.mColor, -d2 },
+                  { b, param.mColor, dist } };
 
         switch (type) {
         case IM3D_TRIANGLES: {
@@ -394,7 +405,7 @@ namespace Im3D {
                 0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 1, 1, 2, 5, 2, 3, 5, 3, 4, 5, 4, 1, 5
             };
 
-            Mesh(IM3D_TRIANGLES, vertices, 6, Matrix4::IDENTITY, indices, 24);
+            Mesh(IM3D_TRIANGLES, vertices, 6, param, indices, 24);
             break;
         }
         case IM3D_LINES: {
@@ -402,7 +413,7 @@ namespace Im3D {
                 0, 1, 0, 2, 0, 3, 0, 4, 1, 5, 2, 5, 3, 5, 4, 5, 1, 2, 2, 3, 3, 4, 4, 1
             };
 
-            Mesh(IM3D_LINES, vertices, 6, Matrix4::IDENTITY, indices, 24);
+            Mesh(IM3D_LINES, vertices, 6, param, indices, 24);
             break;
         }
         default:
@@ -410,82 +421,82 @@ namespace Im3D {
         }
     }
 
-    void Sphere(const Vector3 &center, float radius, const Vector4 &color, size_t detail)
+    void Sphere(const Vector3 &center, float radius, const SphereParameters &param)
     {
-        size_t faceVertexCount = (detail + 2) * (detail + 3) / 2 - 3;
+        size_t faceVertexCount = (param.mDetail + 2) * (param.mDetail + 3) / 2 - 3;
         size_t vertexCount = 20 * faceVertexCount + 12;
         std::unique_ptr<Render::Vertex[]> vertices = std::make_unique<Render::Vertex[]>(vertexCount);
 
-        size_t indexCount = 60 * (detail + 1) * (detail + 2);
+        size_t indexCount = 60 * (param.mDetail + 1) * (param.mDetail + 2);
         std::unique_ptr<unsigned short[]> indices = std::make_unique<unsigned short[]>(indexCount);
 
         auto vertexIndex = [=](size_t face, size_t x, size_t y) {
-            return 12 + face * faceVertexCount + ((5 * y + 2 * detail * y - y * y) / 2) - (y > 0 ? 2 : 1) + x;
+            return 12 + face * faceVertexCount + ((5 * y + 2 * param.mDetail * y - y * y) / 2) - (y > 0 ? 2 : 1) + x;
         };
 
         constexpr float coeff = (1.0f + sqrtf(5.0f)) / 2.0f;
         constexpr float coeff2 = sqrtf(2.5f + sqrtf(5.0f) / 2.0f);
         radius /= coeff2;
-        const float t = radius * coeff;        
+        const float t = radius * coeff;
 
         vertices[0] = {
             Vector3 { -radius, t, 0 },
-            color,
+            param.mColor,
             { 1, 1, 1 }
         };
         vertices[1] = {
             Vector3 { radius, t, 0 },
-            color,
+            param.mColor,
             { 1, 1, 1 }
         };
         vertices[2] = {
             Vector3 { -radius, -t, 0 },
-            color,
+            param.mColor,
             { 1, 1, 1 }
         };
         vertices[3] = {
             Vector3 { radius, -t, 0 },
-            color,
+            param.mColor,
             { 1, 1, 1 }
         };
         vertices[4] = {
             Vector3 { 0, -radius, t },
-            color,
+            param.mColor,
             { 1, 1, 1 }
         };
         vertices[5] = {
             Vector3 { 0, radius, t },
-            color,
+            param.mColor,
             { 1, 1, 1 }
         };
         vertices[6] = {
             Vector3 { 0, -radius, -t },
-            color,
+            param.mColor,
             { 1, 1, 1 }
         };
         vertices[7] = {
             Vector3 { 0, radius, -t },
-            color,
+            param.mColor,
             { 1, 1, 1 }
         };
         vertices[8] = {
             Vector3 { t, 0, -radius },
-            color,
+            param.mColor,
             { 1, 1, 1 }
         };
         vertices[9] = {
             Vector3 { t, 0, radius },
-            color,
+            param.mColor,
             { 1, 1, 1 }
         };
         vertices[10] = {
             Vector3 { -t, 0, -radius },
-            color,
+            param.mColor,
             { 1, 1, 1 }
         };
         vertices[11] = {
             Vector3 { -t, 0, radius },
-            color,
+            param.mColor,
             { 1, 1, 1 }
         };
 
@@ -517,17 +528,17 @@ namespace Im3D {
             Vector3 bottomLeft = vertices[cornerIndices[face][0]].mPos;
             Vector3 bottomRight = vertices[cornerIndices[face][1]].mPos;
             Vector3 top = vertices[cornerIndices[face][2]].mPos;
-            for (size_t y = 0; y <= detail + 1; ++y) {
+            for (size_t y = 0; y <= param.mDetail + 1; ++y) {
 
-                Vector3 left = Slerp(bottomLeft, top, y / float(detail + 1));
-                Vector3 right = Slerp(bottomRight, top, y / float(detail + 1));
+                Vector3 left = Slerp(bottomLeft, top, y / float(param.mDetail + 1));
+                Vector3 right = Slerp(bottomRight, top, y / float(param.mDetail + 1));
 
-                for (size_t x = 0; x <= detail + 1 - y; ++x) {
-                    if ((y == 0 && (x == 0 || x == detail + 1)) || y == detail + 1)
+                for (size_t x = 0; x <= param.mDetail + 1 - y; ++x) {
+                    if ((y == 0 && (x == 0 || x == param.mDetail + 1)) || y == param.mDetail + 1)
                         continue;
                     vertices[vertexCounter++] = {
-                        Slerp(left, right, x / float(detail + 1 - y)),
-                        color,
+                        Slerp(left, right, x / float(param.mDetail + 1 - y)),
+                        param.mColor,
                         { 1, 1, 1 }
                     };
                 }
@@ -537,23 +548,25 @@ namespace Im3D {
 
         size_t indexCounter = 0;
         for (size_t face = 0; face < 20; ++face) {
-            for (size_t y = 0; y <= detail; ++y) {
-                for (size_t x = 0; x <= detail - y; ++x) {
+            for (size_t y = 0; y <= param.mDetail; ++y) {
+                for (size_t x = 0; x <= param.mDetail - y; ++x) {
                     unsigned short bottomLeft = (x == 0 && y == 0) ? cornerIndices[face][0] : vertexIndex(face, x, y);
-                    unsigned short bottomRight = (x == detail && y == 0) ? cornerIndices[face][1] : vertexIndex(face, x + 1, y);
-                    unsigned short top = (y == detail) ? cornerIndices[face][2] : vertexIndex(face, x, y + 1);
+                    unsigned short bottomRight = (x == param.mDetail && y == 0) ? cornerIndices[face][1] : vertexIndex(face, x + 1, y);
+                    unsigned short top = (y == param.mDetail) ? cornerIndices[face][2] : vertexIndex(face, x, y + 1);
                     indices[indexCounter++] = bottomLeft;
                     indices[indexCounter++] = bottomRight;
                     indices[indexCounter++] = bottomLeft;
                     indices[indexCounter++] = top;
                     indices[indexCounter++] = top;
-                    indices[indexCounter++] = bottomRight;   
-                }                
+                    indices[indexCounter++] = bottomRight;
+                }
             }
         }
         assert(indexCounter == indexCount);
 
-        Mesh(IM3D_LINES, vertices.get(), vertexCount, TranslationMatrix(center), indices.get(), indexCounter);
+        MeshParameters meshParam = param;
+        meshParam.mTransform = meshParam.mTransform * TranslationMatrix(center);
+        Mesh(IM3D_LINES, vertices.get(), vertexCount, meshParam, indices.get(), indexCounter);
     }
 
     bool BoundingSphere(const char *name, Im3DBoundingObjectFlags flags, size_t priority)
@@ -675,5 +688,4 @@ namespace Im3D {
     }
 
 }
-
 }

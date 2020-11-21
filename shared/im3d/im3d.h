@@ -11,6 +11,8 @@
 #include "Modules/math/vector2i.h"
 #include "render/vertex.h"
 
+#include "im3d_parameters.h"
+
 namespace Engine {
 
 enum Im3DMeshType {
@@ -61,17 +63,16 @@ namespace Im3D {
     MADGINE_IM3D_EXPORT void PushID(const void *ptr);
     MADGINE_IM3D_EXPORT void PopID();
 
-    MADGINE_IM3D_EXPORT void Mesh(Im3DMeshType type, const Render::Vertex *vertices, size_t vertexCount, const Matrix4 &transform = Matrix4::IDENTITY, const unsigned short *indices = nullptr, size_t indexCount = 0);
-    MADGINE_IM3D_EXPORT void Mesh(Im3DMeshType type, Render::RenderPassFlags flags, const Render::Vertex2 *vertices, size_t vertexCount, const Matrix4 &transform = Matrix4::IDENTITY, const unsigned short *indices = nullptr, size_t indexCount = 0, Im3DTextureId texId = 0);
+    MADGINE_IM3D_EXPORT void Mesh(Im3DMeshType type, const Render::Vertex *vertices, size_t vertexCount, const MeshParameters &param = {}, const unsigned short *indices = nullptr, size_t indexCount = 0);
+    MADGINE_IM3D_EXPORT void Mesh(Im3DMeshType type, Render::RenderPassFlags flags, const Render::Vertex2 *vertices, size_t vertexCount, const MeshParameters &param = {}, const unsigned short *indices = nullptr, size_t indexCount = 0, Im3DTextureId texId = 0);
 
     MADGINE_IM3D_EXPORT void NativeMesh(Im3DNativeMesh mesh, const AABB &bb, const Matrix4 &transform = Matrix4::IDENTITY);
 
-    MADGINE_IM3D_EXPORT void Text(const char *text, const Matrix4 &transform, float fontSize = 24, bool facingX = true, bool facingY = true, const char *fontName = "OpenSans-Regular", Vector2 pivot = { 0.5f, 0.5f });
+    MADGINE_IM3D_EXPORT void Text(const char *text, const TextParameters &param);
 
-    MADGINE_IM3D_EXPORT void Line(const Vector3 &a, const Vector3 &b, const Vector4 &color = { 1, 1, 1, 1 });
-    MADGINE_IM3D_EXPORT void Line(const Vector3 &a, const Vector3 &b, const Vector4 &colorA, const Vector4 &colorB);
-    MADGINE_IM3D_EXPORT void Arrow(Im3DMeshType type, float radius, const Vector3 &a, const Vector3 &b, const Vector4 &color = { 1, 1, 1, 1 });
-    MADGINE_IM3D_EXPORT void Sphere(const Vector3 &center, float radius, const Vector4 &color = { 1, 1, 1, 1 }, size_t detail = 2);
+    MADGINE_IM3D_EXPORT void Line(const Vector3 &a, const Vector3 &b, const LineParameters &param = {});
+    MADGINE_IM3D_EXPORT void Arrow(Im3DMeshType type, float radius, const Vector3 &a, const Vector3 &b, const Parameters &param = {});
+    MADGINE_IM3D_EXPORT void Sphere(const Vector3 &center, float radius, const SphereParameters &param = {});
 
     MADGINE_IM3D_EXPORT bool BoundingSphere(const char *name, Im3DBoundingObjectFlags flags = 0, size_t priority = 1);
     MADGINE_IM3D_EXPORT bool BoundingSphere(Im3DID id, Im3DBoundingObjectFlags flags = 0, size_t priority = 1);

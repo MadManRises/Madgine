@@ -31,6 +31,10 @@
 
 #include "Modules/serialize/serializetable_impl.h"
 
+#include "im3d/im3d.h"
+#include "Madgine_Tools/clienttoolslib.h"
+#include "Madgine_Tools/im3d/im3drenderpass.h"
+
 
 UNIQUECOMPONENT(ClickBrick::UI::GameManager)
 
@@ -66,6 +70,7 @@ namespace UI {
 
         if (mGameWindow) {
             mGameWindow->getRenderTarget()->addRenderPass(&mSceneRenderer);
+            mGameWindow->getRenderTarget()->addRenderPass(new Engine::Render::Im3DRenderPass(&mCamera, 75));
         }
 
         return GameHandlerBase::init();
@@ -77,6 +82,7 @@ namespace UI {
 
         if (widget()) {
             mGameWindow->getRenderTarget()->addRenderPass(&mSceneRenderer);
+            mGameWindow->getRenderTarget()->addRenderPass(new Engine::Render::Im3DRenderPass(&mCamera, 75));
         }
     }
 
@@ -164,6 +170,8 @@ namespace UI {
 
         Engine::Scene::Entity::EntityPtr hit;
         float distance = std::numeric_limits<float>::max();
+
+        Engine::Im3D::Arrow(Engine::IM3D_TRIANGLES, 0.4f, ray.mPoint + 10.0f * ray.mDir, ray.mPoint + 20.0f * ray.mDir, Engine::Im3D::Parameters { std::chrono::seconds { 1 } });
 
         for (const Engine::Scene::Entity::EntityPtr &e : mBricks) {
             const Engine::AABB &aabb = e.getComponent<Engine::Scene::Entity::Mesh>()->aabb();

@@ -63,9 +63,9 @@ struct MODULES_EXPORT Matrix4 {
     */
     inline Matrix4() {}
     inline constexpr explicit Matrix4(const Matrix3 &in)
-        : m { { in[0][0], in[0][1], in[0][2], 0.0f },
-            { in[1][0], in[1][1], in[1][2], 0.0f },
-            { in[2][0], in[2][1], in[2][2], 0.0f },
+        : m { { in[0][0], in[1][0], in[2][0], 0.0f },
+            { in[0][1], in[1][1], in[2][1], 0.0f },
+            { in[0][2], in[1][2], in[2][2], 0.0f },
             { 0.0f, 0.0f, 0.0f, 1.0f } }
     {
     }
@@ -76,9 +76,12 @@ struct MODULES_EXPORT Matrix4 {
             { arr[0][3], arr[1][3], arr[2][3], arr[3][3] } }
     {
     }
-    inline Matrix4(const Matrix4 &rkMatrix)
+    inline constexpr Matrix4(const Matrix4 &in)
+        : m { { in[0][0], in[1][0], in[2][0], in[3][0] },
+            { in[0][1], in[1][1], in[2][1], in[3][1] },
+            { in[0][2], in[1][2], in[2][2], in[3][2] },
+            { in[0][3], in[1][3], in[2][3], in[3][3] } }
     {
-        memcpy(m, rkMatrix.m, 16 * sizeof(float));
     }
     constexpr Matrix4(float fEntry00, float fEntry01, float fEntry02, float fEntry03,
         float fEntry10, float fEntry11, float fEntry12, float fEntry13,

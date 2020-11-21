@@ -49,7 +49,7 @@ public:
     {
     }
 
-    Vector2(const float fX, const float fY)
+    constexpr Vector2(const float fX, const float fY)
         : x(fX)
         , y(fY)
     {

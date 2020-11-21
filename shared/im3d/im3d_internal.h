@@ -31,6 +31,7 @@ namespace Im3D {
             std::vector<Render::Vertex> mVertices[IM3D_MESHTYPE_COUNT];
             std::vector<unsigned short> mIndices[IM3D_MESHTYPE_COUNT];
             size_t mVertexBase[IM3D_MESHTYPE_COUNT];
+            std::list<std::tuple<std::chrono::steady_clock::time_point, std::vector<Render::Vertex>, std::vector<unsigned short>>> mPersistentMeshes[IM3D_MESHTYPE_COUNT];
             std::vector<Render::Vertex2> mVertices2[IM3D_MESHTYPE_COUNT];
             std::vector<unsigned short> mIndices2[IM3D_MESHTYPE_COUNT];
             size_t mVertexBase2[IM3D_MESHTYPE_COUNT];

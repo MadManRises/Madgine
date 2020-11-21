@@ -73,7 +73,7 @@ namespace Tools {
 
             //Resources::ImageLoader::load("Grass-01", true);
 
-            Im3D::Text("Test_1234 Hallo\n wie gehts", Matrix4::IDENTITY);
+            Im3D::Text("Test_1234 Hallo\n wie gehts", Matrix4 { Matrix4::IDENTITY });
 
             static std::vector<Render::Vertex> vertices;
             static std::vector<unsigned short> indices;
@@ -115,11 +115,11 @@ namespace Tools {
                 }
             }
 
-            Im3D::Mesh(IM3D_LINES, vertices.data(), vertices.size(), Matrix4::IDENTITY, indices.data(), indices.size());
+            Im3D::Mesh(IM3D_LINES, vertices.data(), vertices.size(), {}, indices.data(), indices.size());
 
             ImGui::DragInt("Sphere-Detail", &mSphereDetail, 1.0f, 0, 100);
 
-            Im3D::Sphere({ 0, 0, 0 }, 1.0f, { 1, 1, 1, 1 }, mSphereDetail);
+            Im3D::Sphere({ 0, 0, 0 }, 1.0f, Im3D::SphereParameters { static_cast<size_t>(mSphereDetail) });
 
             ImGui::DragFloat2("Scale", &ImGui::GetIO().DisplayFramebufferScale.x, 0.1f, 0.1f, 2.0f);
 

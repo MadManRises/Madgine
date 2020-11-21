@@ -84,12 +84,12 @@ namespace Tools {
 
     void BulletDebug::drawLine(const btVector3 &from, const btVector3 &to, const btVector3 &fromColor, const btVector3 &toColor)
     {
-        Im3D::Line(Vector3 { from }, Vector3 { to }, Vector4 { Vector3 { fromColor }, 1 }, Vector4 { Vector3 { toColor }, 1 });
+        Im3D::Line(Vector3 { from }, Vector3 { to }, Im3D::LineParameters { Vector4 { Vector3 { fromColor }, 1 }, Vector4 { Vector3 { toColor }, 1 } });
     }
 
     void BulletDebug::drawLine(const btVector3 &from, const btVector3 &to, const btVector3 &color)
     {
-        Im3D::Line(Vector3 { from }, Vector3 { to }, Vector4 { Vector3 { color }, 1 });
+        Im3D::Line(Vector3 { from }, Vector3 { to }, Im3D::LineParameters { Vector4 { Vector3 { color }, 1 } });
     }
 
     void BulletDebug::drawSphere(const btVector3 &p, btScalar radius, const btVector3 &color)
@@ -104,7 +104,7 @@ namespace Tools {
 
     void BulletDebug::drawContactPoint(const btVector3 &PointOnB, const btVector3 &normalOnB, btScalar distance, int lifeTime, const btVector3 &color)
     {
-        Im3D::Sphere(Vector3 { PointOnB }, distance + 0.01f, Vector4 { Vector3 { color }, 1 }, 0);
+        Im3D::Sphere(Vector3 { PointOnB }, distance + 0.01f, Im3D::SphereParameters { Vector4 { Vector3 { color }, 1 }, 0 });
     }
 
     void BulletDebug::reportErrorWarning(const char *warningString)

@@ -314,7 +314,7 @@ namespace Tools {
                         Matrix4 world = t->worldMatrix(entity.sceneMgr()->entityComponentList<Scene::Entity::Transform>());
 
                         if (mShowBoneNames)
-                            Im3D::Text(bone.mName.c_str(), world * m, 2.0f);
+                            Im3D::Text(bone.mName.c_str(), Im3D::TextParameters { world * m, 2.0f });
 
                         Vector4 start = world * m * Vector4::UNIT_W;
                         Vector4 end;
