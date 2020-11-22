@@ -134,9 +134,9 @@ struct Quaternion {
     Matrix3 toMatrix() const
     {
         return Matrix3 {
-            1 - 2 * (v.y * v.y + v.z * v.z), 2 * (v.x * v.y + v.z * w), 2 * (v.x * v.z - v.y * w),
-            2 * (v.x * v.y - v.z * w), 1 - 2 * (v.x * v.x + v.z * v.z), 2 * (v.y * v.z + v.x * w),
-            2 * (v.x * v.z + v.y * w), 2 * (v.y * v.z - v.x * w), 1 - 2 * (v.x * v.x + v.y * v.y)
+            1 - 2 * (v.y * v.y + v.z * v.z), 2 * (v.x * v.y - v.z * w), 2 * (v.x * v.z + v.y * w),
+            2 * (v.x * v.y + v.z * w), 1 - 2 * (v.x * v.x + v.z * v.z), 2 * (v.y * v.z - v.x * w),
+            2 * (v.x * v.z - v.y * w), 2 * (v.y * v.z + v.x * w), 1 - 2 * (v.x * v.x + v.y * v.y)
         };
     }
 

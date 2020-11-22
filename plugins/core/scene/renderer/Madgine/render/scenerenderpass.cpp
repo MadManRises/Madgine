@@ -31,17 +31,17 @@ namespace Render {
         if (!mProgram) {
             mProgram.create("scene");
 
-            Vector2i size = target->size();
-
-            float aspectRatio = float(size.x) / size.y;
-
-            mPerApplication.p = mCamera->getProjectionMatrix(aspectRatio);
-
-            mProgram.setParameters(mPerApplication, 0);
-
             mPerFrame.lightColor = { 1.0f, 1.0f, 1.0f };
             mPerFrame.lightDir = Vector3 { 0.1f, 0.1f, 1.0f }.normalizedCopy();
         }
+
+        Vector2i size = target->size();
+
+        float aspectRatio = float(size.x) / size.y;
+
+        mPerApplication.p = mCamera->getProjectionMatrix(aspectRatio);
+
+        mProgram.setParameters(mPerApplication, 0);
 
         mPerFrame.v = mCamera->getViewMatrix();
 

@@ -65,6 +65,15 @@ bool Matrix3::operator==(const Matrix3 &rkMatrix) const
         && m10 == rkMatrix.m10 && m11 == rkMatrix.m11 && m12 == rkMatrix.m12
         && m20 == rkMatrix.m20 && m21 == rkMatrix.m21 && m22 == rkMatrix.m22;
 }
+
+//-----------------------------------------------------------------------
+bool Matrix3::equalsWithEpsilon(const Matrix3 &rkMatrix, float epsilon)
+{
+    return isEqual(m00, rkMatrix.m00, epsilon) && isEqual(m01, rkMatrix.m01, epsilon) && isEqual(m02, rkMatrix.m02, epsilon)
+        && isEqual(m10, rkMatrix.m10, epsilon) && isEqual(m11, rkMatrix.m11, epsilon) && isEqual(m12, rkMatrix.m12, epsilon)
+        && isEqual(m20, rkMatrix.m20, epsilon) && isEqual(m21, rkMatrix.m21, epsilon) && isEqual(m22, rkMatrix.m22, epsilon);
+}
+
 //-----------------------------------------------------------------------
 Matrix3 &Matrix3::operator+=(const Matrix3 &rkMatrix)
 {

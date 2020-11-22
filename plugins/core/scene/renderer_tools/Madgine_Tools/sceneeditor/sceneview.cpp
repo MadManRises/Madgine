@@ -109,6 +109,10 @@ namespace Tools {
 
             const Ray &ray = Im3D::GetCurrentContext()->mMouseRay;
 
+            LOG(ray.mDir);
+
+            Im3D::Arrow(IM3D_LINES, 0.3f, ray.mPoint + 10.0f * ray.mDir, ray.mPoint + 20.0f * ray.mDir);
+
             constexpr Vector3 axes[3] = {
                 { 1, 0, 0 },
                 { 0, 1, 0 },
@@ -172,7 +176,7 @@ namespace Tools {
             }
 
             if (mDragging[1]) {
-                mCamera.mOrientation = Quaternion { -dragDistance.y / 200.0f, Vector3::UNIT_X } * mCamera.mOrientation * Quaternion { -dragDistance.x / 200.0f, Vector3::UNIT_Y };
+                mCamera.mOrientation = Quaternion { dragDistance.x / 200.0f, Vector3::UNIT_Y } * mCamera.mOrientation * Quaternion { dragDistance.y / 200.0f, Vector3::UNIT_X };
             }
 
             if (mDragging[0]) {

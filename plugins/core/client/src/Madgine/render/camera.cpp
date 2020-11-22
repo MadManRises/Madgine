@@ -31,7 +31,7 @@ namespace Render {
 
     Matrix4 Camera::getViewMatrix()
     {
-        Matrix4 rotate = Matrix4(mOrientation.toMatrix());		
+        Matrix4 rotate = Matrix4(mOrientation.inverse().toMatrix());		
 
         Matrix4 translate = TranslationMatrix(-mPosition);
 

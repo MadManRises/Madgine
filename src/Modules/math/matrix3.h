@@ -154,6 +154,8 @@ struct MODULES_EXPORT Matrix3 {
         return !operator==(rkMatrix);
     }
 
+    bool equalsWithEpsilon(const Matrix3 &rkMatrix, float epsilon = floatZeroThreshold);
+
     // arithmetic operations
     /** Matrix addition.
          */

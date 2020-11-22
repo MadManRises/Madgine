@@ -171,13 +171,15 @@ namespace Window {
 
             switch (eventType) {
             case EMSCRIPTEN_EVENT_MOUSEMOVE:
-                return _this->injectPointerMove({ { mouseEvent->targetX, mouseEvent->targetY }, { mouseEvent->screenX, mouseEvent->screenY },
+                _this->mLastMousePosition = { mouseEvent->targetX, mouseEvent->targetY };
+                return _this->injectPointerMove({ _this->mLastMousePosition, { mouseEvent->screenX, mouseEvent->screenY },
                     { mouseEvent->movementX, mouseEvent->movementY } });
             case EMSCRIPTEN_EVENT_MOUSEDOWN:
-                return _this->injectPointerPress({ { mouseEvent->targetX, mouseEvent->targetY }, { mouseEvent->screenX, mouseEvent->screenY },
+                _this->mLastMousePosition = { mouseEvent->targetX, mouseEvent->targetY };
+                return _this->injectPointerPress({ _this->mLastMousePosition, { mouseEvent->screenX, mouseEvent->screenY },
                     convertMouseButton(mouseEvent->button) });
             case EMSCRIPTEN_EVENT_MOUSEUP:
-                return _this->injectPointerRelease({ { mouseEvent->targetX, mouseEvent->targetY }, { mouseEvent->screenX, mouseEvent->screenY },
+                return _this->injectPointerRelease({ _this->mLastMousePosition, { mouseEvent->screenX, mouseEvent->screenY },
                     convertMouseButton(mouseEvent->button) });
             }
 
@@ -208,7 +210,8 @@ namespace Window {
         }
 
     private:
-        InterfacesVector mSize;        
+        InterfacesVector mSize;   
+        InterfacesVector mLastMousePosition;
 
         //Input
         bool mKeyDown[512];

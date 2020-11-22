@@ -9,9 +9,14 @@ constexpr float abs(float f)
     return f < 0.0f ? -f : f;
 }
 
-constexpr bool isZero(float f)
+constexpr bool isZero(float f, float epsilon = floatZeroThreshold)
 {
-    return abs(f) < floatZeroThreshold;
+    return abs(f) < epsilon;
+}
+
+constexpr bool isEqual(float a, float b, float epsilon = floatZeroThreshold)
+{
+    return isZero(a - b, epsilon);
 }
 
 namespace Detail {
@@ -31,7 +36,8 @@ constexpr float sqrtf(float x)
 }
 
 template <typename T>
-T min(const T& a, const T& b) {
+T min(const T &a, const T &b)
+{
     return a < b ? a : b;
 }
 
@@ -42,11 +48,13 @@ T max(const T &a, const T &b)
 }
 
 template <typename T>
-T clamp(const T& v, const T& minV, const T& maxV) {
+T clamp(const T &v, const T &minV, const T &maxV)
+{
     return min(max(v, minV), maxV);
 }
 
-constexpr int sign(int i) {
+constexpr int sign(int i)
+{
     return i == 0 ? 0 : (i < 0 ? -1 : 1);
 }
 
