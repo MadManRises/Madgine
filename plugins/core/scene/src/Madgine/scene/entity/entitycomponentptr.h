@@ -119,8 +119,8 @@ namespace Scene {
 
             template <typename U, typename = std::enable_if_t<std::is_convertible_v<T *, U *>>>
             explicit EntityComponentPtrBase(const EntityComponentPtrBase<U> &other)
-                : mHandle { other.entity().sceneMgr()->template entityComponentList<U>()->copy(other.handle().mIndex) }
-                , mEntity(other.entity())
+                : mHandle { other.sceneMgr()->template entityComponentList<U>()->copy(other.handle().mIndex) }
+                , mSceneMgr(other.sceneMgr())
             {
             }
 
