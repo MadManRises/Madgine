@@ -100,6 +100,9 @@ namespace Scene {
             SceneManager *mSceneMgr;
         };
 
+        template struct MODULES_EXPORT EntityComponentPtrBase<EntityComponentBase>;
+        template struct MODULES_EXPORT EntityComponentPtrBase<const EntityComponentBase>;
+
         template <typename T>
         struct EntityComponentPtrBase : ScopeBase {
             EntityComponentPtrBase() = default;
