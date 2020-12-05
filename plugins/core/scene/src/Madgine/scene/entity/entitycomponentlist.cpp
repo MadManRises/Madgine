@@ -1,3 +1,5 @@
+#include "../../scenelib.h"
+
 #include "entitycomponentlist.h"
 
 #include "../scenemanager.h"
