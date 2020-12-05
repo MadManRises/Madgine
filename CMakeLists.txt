@@ -55,7 +55,14 @@ add_subdirectory(plugins)
 
 add_subdirectory(samples)
 
-add_subdirectory(launcher)
+if (MADGINE_AS_SDK)
+	set (LAUNCHER_LOCATION ${CMAKE_CURRENT_LIST_DIR}/launcher CACHE INTERNAL "")
+	function(create_launcher)
+		add_subdirectory(${LAUNCHER_LOCATION} launcher)
+	endfunction()
+else()
+	add_subdirectory(launcher)
+endif()
 
 
 if (BUILD_TESTING)

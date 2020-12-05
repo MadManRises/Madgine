@@ -15,6 +15,8 @@
 
 #include "Modules/math/boundingbox.h"
 
+#include "Modules/math/quaternion.h"
+
 #include "glyph.h"
 
 #include "Modules/math/transformation.h"
@@ -207,6 +209,8 @@ namespace Im3D {
             auto &data = c.mRenderData[0].mPersistentMeshes[type].emplace_back(std::chrono::steady_clock::now() + param.mDuration, std::vector<Render::Vertex> { c.mRenderData[0].mVertices[type].begin() + vertexPivot, c.mRenderData[0].mVertices[type].end() }, std::vector<unsigned short> {});
             std::transform(c.mRenderData[0].mIndices[type].begin() + indexPivot, c.mRenderData[0].mIndices[type].end(), std::back_inserter(std::get<2>(data)), [&](unsigned int i) { return i - vertexPivot; });
         }
+
+        assert(c.mRenderData[0].mIndices[type].size() % groupSize == 0);
     }
 
     void Mesh(Im3DMeshType type, Render::RenderPassFlags flags, const Render::Vertex2 *vertices, size_t vertexCount, const MeshParameters &param, const unsigned short *indices, size_t indexCount, Im3DTextureId texId)
@@ -247,6 +251,8 @@ namespace Im3D {
             std::iota(c.mRenderData[texId].mIndices2[type].begin() + oldIndexCount, c.mRenderData[texId].mIndices2[type].end(), c.mRenderData[texId].mVertexBase2[type]);
         }
         c.mRenderData[texId].mFlags = flags;
+
+        assert(c.mRenderData[texId].mIndices2[type].size() % groupSize == 0);
     }
 
     void NativeMesh(Im3DNativeMesh mesh, const AABB &bb, const Matrix4 &transform)
@@ -380,7 +386,42 @@ namespace Im3D {
         Mesh(IM3D_LINES, vertices, 2, param);
     }
 
-    void Arrow(Im3DMeshType type, float radius, const Vector3 &a, const Vector3 &b, const Parameters &param)
+    void Arrow(float radius, const Vector3 &a, const Vector3 &b, const Parameters &param)
+    {
+        constexpr int segments = 6;
+
+        Render::Vertex vertices[2 + segments];
+        unsigned short indices[2 + 2 * segments];
+
+        Vector3 d = b - a;
+
+        vertices[0] = {
+            a, param.mColor, -d
+        };
+        indices[0] = 0;
+        vertices[1] = {
+            b, param.mColor, d
+        };
+        indices[1] = 1;
+
+        constexpr float sqrt2 = sqrtf(2.0f);
+
+        Vector3 p = d.perpendicular();
+        p.normalize();
+        p -= d.normalizedCopy();
+        p *= radius /* / sqrt2*/;
+
+        for (int i = 0; i < segments; ++i) {
+            Vector3 dir = Quaternion { i * 2 * PI / segments, d } * p;
+            vertices[2 + i] = { b + dir, param.mColor, dir };
+            indices[2 + 2 * i] = 1;
+            indices[2 + 2 * i + 1] = 2 + i;
+        }
+
+        Mesh(IM3D_LINES, vertices, 2 + segments, param, indices, 2 + 2 * segments);
+    }
+
+    void Arrow3D(Im3DMeshType type, float radius, const Vector3 &a, const Vector3 &b, const Parameters &param)
     {
         Vector3 dist = b - a;
         Vector3 d1 = dist.perpendicular();

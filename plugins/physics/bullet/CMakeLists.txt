@@ -13,7 +13,7 @@ add_plugin(Bullet Madgine Physics ${sources} PRECOMPILED_HEADER src/Madgine/bull
 
 target_link_plugins(Bullet Scene)
 
-target_link_libraries(Bullet PRIVATE BulletDynamics BulletCollision LinearMath)
+target_link_libraries(Bullet PRIVATE BulletDynamics BulletCollision LinearMath Im3D)
 
 set(sources "")
 FolderSources(sources "" tools)

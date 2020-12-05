@@ -110,7 +110,7 @@ namespace Render {
 
         if (!mInstances[index].first) {
 
-            std::string filename = mResource->path().stem();
+            std::string_view filename = mResource->path().stem();
 
             std::string profile = "latest";
             if (profile == "latest")
@@ -150,7 +150,7 @@ namespace Render {
                 flags, 0, &pShaderBlob, &pErrorBlob);
 
             if (FAILED(hr)) {
-                LOG_ERROR("Loading of Shader '"s + filename + "' failed:");
+                LOG_ERROR("Loading of Shader '" << filename << "' failed:");
                 if (pErrorBlob) {
                     LOG_ERROR((char *)pErrorBlob->GetBufferPointer());
 

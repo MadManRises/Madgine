@@ -5,5 +5,6 @@
 #include "Modules/keyvalue/metatable_impl.h"
 
 METATABLE_BEGIN(Engine::Render::MeshData)
-MEMBER(mAABB)
+//TODO
+//MEMBER(mAABB)
 METATABLE_END(Engine::Render::MeshData)

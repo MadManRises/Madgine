@@ -11,8 +11,8 @@ namespace Scene {
         struct MADGINE_SCENE_EXPORT Skeleton : EntityComponent<Skeleton> {
             Skeleton(const ObjectPtr &init);
 
-            std::string getName() const;
-            void setName(const std::string &name);
+            std::string_view getName() const;
+            void setName(const std::string_view &name);
 
             Render::SkeletonDescriptor *data() const;
 
@@ -29,6 +29,8 @@ namespace Scene {
 
 			std::vector<Matrix4> mBoneMatrices;
         };
+
+        using SkeletonPtr = EntityComponentPtr<Skeleton>;
 
     }
 }

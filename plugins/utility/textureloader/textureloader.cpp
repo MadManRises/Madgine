@@ -20,7 +20,7 @@ METATABLE_END(Engine::Render::TextureLoader::ResourceType)
         {
         }
 
-        void TextureLoader::HandleType::create(const std::string &name, DataFormat format, TextureLoader *loader)
+        void TextureLoader::HandleType::create(const std::string_view &name, DataFormat format, TextureLoader *loader)
         {
             *this = TextureLoader::loadManual(
                 name, {}, [=](TextureLoader *loader, Texture &texture, const TextureLoader::ResourceType *res) { return loader->create(texture, format); }, {},

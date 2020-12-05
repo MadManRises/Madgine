@@ -3,6 +3,8 @@
 #include "entity.h"
 #include "entityptr.h"
 
+#include "../scenemanager.h"
+
 namespace Engine {
 namespace Scene {
     namespace Entity {
@@ -26,6 +28,13 @@ namespace Scene {
             if (other.mHandle.mIndex)
                 mHandle.mIndex = other.mSceneMgr->entities().copy(other.mHandle.mIndex);
             mSceneMgr = other.mSceneMgr;
+            return *this;
+        }
+
+        EntityPtr &EntityPtr::operator=(EntityPtr &&other)
+        {
+            mHandle = std::move(other.mHandle);
+            std::swap(mSceneMgr, other.mSceneMgr);
             return *this;
         }
 

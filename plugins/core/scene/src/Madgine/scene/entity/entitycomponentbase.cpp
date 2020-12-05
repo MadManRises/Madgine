@@ -14,18 +14,6 @@ namespace Scene {
         {
         }
 
-        EntityComponentBase::~EntityComponentBase()
-        {
-        }
-
-        void EntityComponentBase::init(const EntityPtr &entity)
-        {
-        }
-
-        void EntityComponentBase::finalize(const EntityPtr &entity)
-        {
-        }
-
     }
 }
 }

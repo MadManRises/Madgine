@@ -152,7 +152,7 @@ UNIQUECOMPONENT(Engine::Tools::ProjectManager)
             std::vector<std::string> result;
             for (const Filesystem::Path &p : Filesystem::listFiles(mProjectRoot)) {
                 if (p.extension() == ".cfg" && p.str().find('(') == std::string::npos) {
-                    result.push_back(p.stem());
+                    result.push_back(std::string { p.stem() });
                 }
             }
             return result;

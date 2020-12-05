@@ -24,7 +24,7 @@ private:
 public:
     constexpr TypedScopePtr() = default;
 
-    template <typename T, typename = std::enable_if_t<!std::is_same_v<ScopeBase, T> && std::is_base_of_v<ScopeBase, T>>>
+    template <typename T, typename = std::enable_if_t<!std::is_same_v<ScopeBase, T> && (std::is_base_of_v<ScopeBase, T> || has_function_customScopePtr_v<T>)>>
     TypedScopePtr(T *t)
         : TypedScopePtr(t, has_function_customScopePtr<T> {})
     {

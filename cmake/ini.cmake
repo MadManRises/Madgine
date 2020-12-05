@@ -20,7 +20,7 @@ function (read_ini_file filepath prefix)
 			if (NOT current_group)
 				MESSAGE(SEND_ERROR "Field without group in Ini-file: ${filepath}!")
 			endif()
-			set(${prefix}_${current_group}_${CMAKE_MATCH_1} ${CMAKE_MATCH_2} PARENT_SCOPE)
+			set(${prefix}_${current_group}_${CMAKE_MATCH_1} ${CMAKE_MATCH_2} CACHE INTERNAL "")
 			#MESSAGE(STATUS "Setting ${prefix}_${current_group}_${CMAKE_MATCH_1} to ${CMAKE_MATCH_2}")
 		endif()
 

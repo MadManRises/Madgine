@@ -34,7 +34,7 @@ namespace Tools {
         }
 
         int hoveredAxis() const;
-        Scene::Entity::Transform *hoveredTransform() const;
+        const Engine::Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> &hoveredTransform() const;
 
         void deselect();
         void select(Render::Camera *camera);
@@ -64,7 +64,7 @@ namespace Tools {
         bool mSettingsVisible = false;
 
         int mHoveredAxis = -1;
-        Scene::Entity::Transform *mHoveredTransform = nullptr;
+        Engine::Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> mHoveredTransform;
 
         //Entity-Cache
         struct EntityNode {

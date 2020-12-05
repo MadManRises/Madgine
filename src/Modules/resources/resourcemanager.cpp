@@ -13,6 +13,8 @@
 
 #include "resourceloaderbase.h"
 
+#include "../threading/defaulttaskqueue.h"
+
 namespace Engine {
 namespace Resources {
 
@@ -54,8 +56,10 @@ namespace Resources {
             return;
 
         auto [it, b] = mResourcePaths.try_emplace(path, priority);
-        /*if (!b)
-				std::terminate();*/
+        if (b)
+            mFileWatcher.addWatch(path);
+        /*else
+			std::terminate();*/
 
         if (mInitialized) {
             updateResources(path, priority);
@@ -66,7 +70,7 @@ namespace Resources {
     {
         mInitialized = true;
 
-        std::map<std::string, std::vector<ResourceLoaderBase *>> loaderByExtension = getLoaderByExtension();
+        std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> loaderByExtension = getLoaderByExtension();
 
         for (const std::pair<const Filesystem::Path, int> &p : mResourcePaths) {
             updateResources(p.first, p.second, loaderByExtension);
@@ -87,7 +91,7 @@ namespace Resources {
 #if ENABLE_PLUGINS
     void ResourceManager::onPluginLoad(const Plugins::Plugin *plugin)
     {
-        std::map<std::string, std::vector<ResourceLoaderBase *>> loaderByExtension = getLoaderByExtension();
+        std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> loaderByExtension = getLoaderByExtension();
 
         if (mInitialized) {
             for (const std::pair<const Filesystem::Path, int> &p : mResourcePaths) {
@@ -110,21 +114,29 @@ namespace Resources {
     }
 #endif
 
+    void ResourceManager::update()
+    {
+        std::vector<Filesystem::FileEvent> events = mFileWatcher.fetchChanges();
+        for (const Filesystem::FileEvent &event : events) {
+            LOG(event.mType);
+        }
+    }
+
     void ResourceManager::updateResources(const Filesystem::Path &path, int priority)
     {
         updateResources(path, priority, getLoaderByExtension());
     }
 
-    void ResourceManager::updateResources(const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>> &loaderByExtension)
+    void ResourceManager::updateResources(const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> &loaderByExtension)
     {
         for (Filesystem::Path p : Filesystem::listFilesRecursive(path)) {
             updateResource(p, priority, loaderByExtension);
         }
     }
 
-    void ResourceManager::updateResource(const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>> &loaderByExtension)
+    void ResourceManager::updateResource(const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> &loaderByExtension)
     {
-        std::string extension = path.extension();
+        std::string_view extension = path.extension();
 
         auto it = loaderByExtension.find(extension);
         if (it != loaderByExtension.end()) {
@@ -141,9 +153,9 @@ namespace Resources {
         }
     }
 
-    std::map<std::string, std::vector<ResourceLoaderBase *>> ResourceManager::getLoaderByExtension()
+    std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> ResourceManager::getLoaderByExtension()
     {
-        std::map<std::string, std::vector<ResourceLoaderBase *>> loaderByExtension;
+        std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> loaderByExtension;
 
         for (const std::unique_ptr<ResourceLoaderBase> &loader : mCollector) {
             for (const std::string &ext : loader->fileExtensions()) {
@@ -158,7 +170,7 @@ namespace Resources {
         auto [firstEnd, secondEnd] = std::mismatch(first.str().begin(), first.str().end(), second.str().begin(), second.str().end());
         if (firstEnd == first.str().end() || secondEnd == second.str().end())
             return false;
-        return first.str() < second.str();
+        return first < second;
     }
 
 #if ENABLE_PLUGINS

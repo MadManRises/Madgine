@@ -21,11 +21,13 @@ namespace Physics {
 
         RigidBody &operator=(RigidBody &&other);
 
-        virtual void init(const Scene::Entity::EntityPtr &entity) override;
-        virtual void finalize(const Scene::Entity::EntityPtr &entity) override;
+        void init(const Scene::Entity::EntityPtr &entity);
+        void finalize(const Scene::Entity::EntityPtr &entity);
 
         btRigidBody *get();
         void activate();
+
+        const Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> &transform();
 
         float mass() const;
         void setMass(float mass);
@@ -42,11 +44,17 @@ namespace Physics {
         void setShapeName(const std::string_view &name);
         CollisionShapeManager::ResourceType *getShape() const;
 
+        friend struct PhysicsManager;
+
     private:
         typename CollisionShapeManager::HandleType mShapeHandle;
         struct Data;
         std::unique_ptr<Data> mData;
+
+        static Scene::SceneManager *sceneMgrFromData(Data *data);
     };
+
+    using RigidBodyPtr = Scene::Entity::EntityComponentPtr<RigidBody>;
 
 }
 }

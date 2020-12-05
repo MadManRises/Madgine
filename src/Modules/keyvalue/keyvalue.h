@@ -72,6 +72,11 @@ struct KeyValue<T *const> {
 
 template <typename K, typename T>
 struct KeyValue<std::pair<K, T>> {
+
+    static T value(std::pair<K, T>&& p) {
+        return std::move(p.second);
+    }
+
     static T &value(std::pair<K, T> &p)
     {
         return p.second;

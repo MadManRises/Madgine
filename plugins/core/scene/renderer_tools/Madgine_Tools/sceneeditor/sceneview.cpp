@@ -107,11 +107,9 @@ namespace Tools {
 
             Vector2 dragDistance = io.MouseDelta;
 
-            const Ray &ray = Im3D::GetCurrentContext()->mMouseRay;
+            const Ray &ray = Im3D::GetCurrentContext()->mMouseRay;            
 
-            LOG(ray.mDir);
-
-            Im3D::Arrow(IM3D_LINES, 0.3f, ray.mPoint + 10.0f * ray.mDir, ray.mPoint + 20.0f * ray.mDir);
+            Im3D::Arrow3D(IM3D_LINES, 0.3f, ray.mPoint + 10.0f * ray.mDir, ray.mPoint + 20.0f * ray.mDir);
 
             constexpr Vector3 axes[3] = {
                 { 1, 0, 0 },
@@ -196,7 +194,7 @@ namespace Tools {
                     if (mDraggedAxis != 2)
                         distance.z = 0.0f;
 
-                    mDragTransform->setPosition(mDragStoredPosition + distance);
+                    mDragTransform->setPosition(mDragStoredPosition + mDragTransform.parentMatrix().ToMat3().Inverse() * distance);
                 }
             }
 

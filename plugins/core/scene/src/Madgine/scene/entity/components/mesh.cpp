@@ -11,6 +11,8 @@
 
 #include "meshdata.h"
 
+#include "../entitycomponentptr.h"
+
 namespace Engine {
 namespace Scene {
     namespace Entity {
@@ -26,12 +28,12 @@ namespace Scene {
             return mMesh;
         }
 
-        std::string Mesh::getName() const
+        std::string_view Mesh::getName() const
         {
             return mMesh.name();
         }
 
-        void Mesh::setName(const std::string &name)
+        void Mesh::setName(const std::string_view &name)
         {
             mMesh.load(name);
         }

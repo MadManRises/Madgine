@@ -23,7 +23,7 @@ UNIQUECOMPONENT(Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>);
 
 METATABLE_BEGIN(Engine::Scene::SceneManager)
 //TODO
-//SERIALIZABLEUNIT_MEMBERS()
+//SYNCABLEUNIT_MEMBERS()
 READONLY_PROPERTY(entities, entities)
 MEMBER(mSceneComponents)
 METATABLE_END(Engine::Scene::SceneManager)

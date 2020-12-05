@@ -44,12 +44,12 @@ namespace Widgets {
         return {};
     }
 
-    std::string Label::getFontName() const
+    std::string_view Label::getFontName() const
     {
         return mFont.name();
     }
 
-    void Label::setFontName(const std::string &name)
+    void Label::setFontName(const std::string_view &name)
     {
         mFont.load(name);
     }

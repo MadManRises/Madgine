@@ -2,7 +2,7 @@
 
 #include "Modules/madgineobject/madgineobject.h"
 
-#include "Modules/keyvalueutil/virtualscopebase.h"
+#include "Modules/keyvalue/virtualscopebase.h"
 
 #include "Modules/serialize/virtualserializableunit.h"
 
@@ -13,7 +13,7 @@
 namespace Engine {
 namespace Window {
 
-    struct MADGINE_CLIENT_EXPORT MainWindowComponentBase : VirtualScopeBase<Serialize::VirtualSerializableUnitBase<>>, MadgineObject<MainWindowComponentBase> {
+    struct MADGINE_CLIENT_EXPORT MainWindowComponentBase : Serialize::VirtualSerializableUnitBase<VirtualScopeBase, Serialize::SerializableUnitBase>, MadgineObject<MainWindowComponentBase> {
         MainWindowComponentBase(MainWindow &window, int priority);
         virtual ~MainWindowComponentBase() = default;
 

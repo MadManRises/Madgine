@@ -7,11 +7,12 @@
 #include "entityhandle.h"
 #include "entityptr.h"
 #include "Modules/generic/container/container_api.h"
-#include "../scenemanager.h"
 
 namespace Engine {
 namespace Scene {
     namespace Entity {
+
+        MODULES_EXPORT EntityHandle copyEntityHandle(SceneManager *mgr, const EntityHandle &entity);
 
         template <typename T>
         struct EntityComponentList : EntityComponentListComponent<EntityComponentList<T>> {
@@ -33,6 +34,19 @@ namespace Scene {
                 return &mData.at(index).template get<0>();
             }
 
+            TypedScopePtr getTyped(GenerationContainerIndex &index) override final
+            {
+                return &mData.at(index).template get<0>();
+            }
+
+            void init(GenerationContainerIndex &index, const EntityPtr &entity) override final
+            {
+            }
+
+            void finalize(GenerationContainerIndex &index, const EntityPtr &entity) override final
+            {
+            }
+
             const T *get(GenerationContainerIndex &index) const
             {
                 return &mData.at(index).template get<0>();
@@ -41,7 +55,7 @@ namespace Scene {
             EntityHandle getEntity(GenerationContainerIndex& index, SceneManager *mgr) const override final {
                 mData.update(index);
                 if (index)
-                    return mgr->copyEntityHandle(mData.at(index).template get<1>());
+                    return copyEntityHandle(mgr, mData.at(index).template get<1>());
                 else
                     return {};
             }

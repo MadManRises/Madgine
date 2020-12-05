@@ -26,7 +26,7 @@ namespace Scene {
 
             Transform &operator=(Transform &&) = default;
 
-            void finalize(const EntityPtr &e) override;
+            void finalize(const EntityPtr &e);
 
             const Vector3 &getPosition() const;
             const Vector3 &getScale() const;
@@ -63,6 +63,8 @@ namespace Scene {
             Matrix4 worldMatrix() const;
             Matrix4 parentMatrix() const;
         };
+
+        using TransformPtr = EntityComponentPtr<Transform>;
 
     }
 }

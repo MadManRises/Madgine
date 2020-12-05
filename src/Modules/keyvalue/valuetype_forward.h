@@ -6,6 +6,8 @@
 
 #include "../generic/functor.h"
 
+#include "virtualscopebase.h"
+
 namespace Engine {
 
 MODULES_EXPORT ValueType &KeyValuePair_key(KeyValuePair &p);
@@ -44,7 +46,8 @@ static constexpr bool ValueType_is_base_of_v = ValueType_is_base_of<Base, Derive
 template <typename T>
 using isScopeRef = std::bool_constant<
     (std::is_pointer_v<T> && ValueType_is_base_of_v<ScopeBase, std::remove_pointer_t<T>> && !std::is_same_v<ScopeBase, std::remove_pointer_t<T>>)
-    || (std::is_reference_v<T> && ValueType_is_base_of_v<ScopeBase, std::remove_pointer_t<std::remove_reference_t<T>>> && !std::is_same_v<ScopeBase, std::remove_pointer_t<std::remove_reference_t<T>>>)>;
+    || (!std::is_pointer_v<T> && ValueType_is_base_of_v<ScopeBase, std::remove_pointer_t<std::remove_reference_t<T>>> && !std::is_same_v<ScopeBase, std::remove_pointer_t<std::remove_reference_t<T>>>)
+    || has_function_customScopePtr_v<T>>;
 
 template <typename T>
 static constexpr bool isScopeRef_v = isScopeRef<T>::value;
@@ -106,8 +109,10 @@ decltype(auto) convert_ValueType(T &&t)
     } else if constexpr (isScopeRef_v<T>) {
         if constexpr (std::is_pointer_v<std::decay_t<T>>) {
             return TypedScopePtr { t };
-        } else {
+        } else if constexpr (std::is_reference_v<T>){
             return TypedScopePtr { &t };
+        } else {
+            return std::shared_ptr<VirtualScopeBase> { std::make_shared<VirtualScopeWrapper<T>>(std::move(t)) };
         }
     } else if constexpr (is_iterable_v<T>) {
         return KeyValueVirtualRange { std::forward<T>(t), type_holder<Functor<to_KeyValuePair<decltype(*std::declval<typename derive_iterator<T>::iterator>())>>> };

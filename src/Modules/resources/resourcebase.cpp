@@ -34,12 +34,12 @@ namespace Resources {
         return mPath;
     }
 
-    std::string ResourceBase::extension()
+    std::string_view ResourceBase::extension()
     {
         return mPath.extension();
     }
 
-    std::string ResourceBase::name()
+    std::string_view ResourceBase::name()
     {
         return mPath.stem();
     }

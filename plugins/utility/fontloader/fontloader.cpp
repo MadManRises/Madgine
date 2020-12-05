@@ -110,7 +110,7 @@ namespace Render {
         if (res->path().extension() == ".msdf") {
 
             Filesystem::FileManager cache("msdf_cache");
-            Serialize::SerializeInStream in = cache.openRead(res->path().parentPath() / (res->name() + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
+            Serialize::SerializeInStream in = cache.openRead(res->path().parentPath() / (std::string { res->name() } + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
             assert(in);
             in >> font.mGlyphs;
             in >> font.mTextureSize;
@@ -245,7 +245,7 @@ namespace Render {
             font.mTexture.setData(font.mTextureSize, { texBuffer.get(), 4 * byteSize });
 
             Filesystem::FileManager cache("msdf_cache");
-            Serialize::SerializeOutStream out = cache.openWrite(res->path().parentPath() / (res->name() + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
+            Serialize::SerializeOutStream out = cache.openWrite(res->path().parentPath() / (std::string { res->name() } + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
             if (out) {
                 out << font.mGlyphs;
                 out << font.mTextureSize;

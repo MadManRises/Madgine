@@ -32,7 +32,7 @@ namespace Serialize {
 
         if (out.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
             out.format().beginExtended(out, name, 1);
-            write(out, mUnit, "id");
+            write(out, mUnit, "serId");
         }
         out.format().beginCompound(out, name);
         mType->writeState(mUnit, out, hierarchy);
@@ -47,7 +47,7 @@ namespace Serialize {
         if (!in.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
             in.format().beginExtended(in, name, 1);
             SerializableUnitBase *idHelper;
-            read(in, idHelper, "id");
+            read(in, idHelper, "serId");
             uint32_t id = reinterpret_cast<uintptr_t>(idHelper) >> 2;
             SerializableUnitList &list = in.serializableList();
             if (list.size() <= id)

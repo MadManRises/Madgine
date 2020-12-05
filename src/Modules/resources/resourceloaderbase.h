@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../keyvalueutil/virtualscopebase.h"
+#include "../keyvalue/virtualscopebase.h"
 
 namespace Engine {
 namespace Resources {
 
-    struct MODULES_EXPORT ResourceLoaderBase : VirtualScopeBase<> {
+    struct MODULES_EXPORT ResourceLoaderBase : VirtualScopeBase {
 
         using ResourceType = ResourceBase;
 

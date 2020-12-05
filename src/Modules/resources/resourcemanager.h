@@ -2,8 +2,9 @@
 
 #include "../keyvalue/scopebase.h"
 #include "../plugins/pluginlistener.h"
+#include "../uniquecomponent/uniquecomponentcontainer.h"
+#include "Interfaces/filesystem/filewatcher.h"
 #include "resourceloadercollector.h"
-#include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 
 namespace Engine {
 namespace Resources {
@@ -43,6 +44,8 @@ namespace Resources {
 
         Filesystem::Path findResourceFile(const std::string &fileName);
 
+        void update();
+
 #if ENABLE_PLUGINS
         int priority() const override;
 #endif
@@ -53,18 +56,21 @@ namespace Resources {
         Future<void> aboutToUnloadPlugin(const Plugins::Plugin *plugin) override;
 #endif
 
-    private:
+    private:        
+
         void updateResources(const Filesystem::Path &path, int priority);
-        void updateResources(const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>> &loaderByExtension);
+        void updateResources(const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> &loaderByExtension);
 
-        void updateResource(const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>> &loaderByExtension);
+        void updateResource(const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> &loaderByExtension);
 
-        std::map<std::string, std::vector<ResourceLoaderBase *>> getLoaderByExtension();
+        std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> getLoaderByExtension();
 
     private:
         struct SubDirCompare {
             bool operator()(const Filesystem::Path &first, const Filesystem::Path &second) const;
         };
+
+        Filesystem::FileWatcher mFileWatcher;
 
         std::map<Filesystem::Path, int, SubDirCompare> mResourcePaths;
 

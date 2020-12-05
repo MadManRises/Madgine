@@ -9,7 +9,6 @@ struct KeyValuePair;
 struct ScopeBase;
 template <typename T, typename Base>
 struct VirtualScope;
-template <typename Base>
 struct VirtualScopeBase;
 struct MetaTable;
 struct ScopeIterator;

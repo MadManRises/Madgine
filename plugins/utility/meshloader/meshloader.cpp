@@ -8,6 +8,7 @@
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 #include "../assimptools.h"
 
@@ -143,7 +144,7 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
 
             std::vector<unsigned char> buffer = res->readAsBlob();
 
-            const aiScene *scene = importer.ReadFileFromMemory(buffer.data(), buffer.size(), 0);
+            const aiScene *scene = importer.ReadFileFromMemory(buffer.data(), buffer.size(), aiProcess_MakeLeftHanded);
 
             if (!scene) {
                 LOG_ERROR(importer.GetErrorString());

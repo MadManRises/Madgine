@@ -19,6 +19,7 @@ namespace Scene {
             ~EntityPtr();
 
             EntityPtr &operator=(const EntityPtr &other);
+            EntityPtr &operator=(EntityPtr &&other);
 
             Entity *operator->() const;
 

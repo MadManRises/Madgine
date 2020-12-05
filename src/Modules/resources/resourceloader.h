@@ -12,6 +12,8 @@
 #include "../uniquecomponent/uniquecomponent.h"
 #include "../uniquecomponent/uniquecomponentcollector.h"
 
+#include "../keyvalueutil/virtualscope.h"
+
 namespace Engine {
 namespace Resources {
 
@@ -221,7 +223,7 @@ namespace Resources {
         //void unload(Data &data) = 0;
         std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path, const std::string_view &name = {}) override
         {
-            auto pib = mResources.try_emplace(name.empty() ? path.stem() : std::string { name }, path);
+            auto pib = mResources.try_emplace(std::string{name.empty() ? path.stem() : name }, path);
 
             if (pib.second)
                 this->resourceAdded(&pib.first->second);

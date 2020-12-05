@@ -32,7 +32,7 @@ namespace Render {
 
     bool OpenGLShaderLoader::loadImpl(OpenGLShader &shader, ResourceType *res)
     {
-        std::string filename = res->path().stem();
+        std::string_view filename = res->path().stem();
 
         ShaderType type;
         if (StringUtil::endsWith(filename, "_VS")) {
@@ -58,7 +58,7 @@ namespace Render {
         glGetShaderiv(handle, GL_COMPILE_STATUS, &success);
         if (!success) {
             glGetShaderInfoLog(handle, 512, NULL, infoLog);
-            LOG_ERROR("Loading of Shader '"s + filename + "' failed:");
+            LOG_ERROR("Loading of Shader '" << filename << "' failed:");
             LOG_ERROR(infoLog);
             return false;
         }

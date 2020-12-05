@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../generic/linestruct.h"
 #include "../generic/container/virtualiterator.h"
+#include "../generic/linestruct.h"
 #include "accessor.h"
 #include "apifunction.h"
 #include "functiontable_impl.h"
@@ -14,8 +14,8 @@ namespace Engine {
 
 struct MetaTableTag;
 
-template <size_t Line>
-using MetaTableLineStruct = LineStruct<MetaTableTag, Line>;
+template <size_t... Ids>
+using MetaTableLineStruct = LineStruct<MetaTableTag, Ids...>;
 
 template <typename Scope, auto Getter, auto Setter>
 constexpr Accessor property()
@@ -91,7 +91,7 @@ constexpr Accessor member()
 
     if constexpr (std::is_reference_v<T> && std::is_convertible_v<T, ScopeBase &>) {
         return property<Scope, &getFieldPtr<P, DerivedScope, std::remove_reference_t<T>>, nullptr>();
-    } else if constexpr (std::is_const_v<DerivedScope> || !std::is_assignable_v<T &, const T &> || (is_iterable_v<T> && !std::is_same_v<std::string &, T>) || TupleUnpacker::is_tuplefyable_v<std::remove_reference_t<T>>) {
+    } else if constexpr (std::is_const_v<DerivedScope> || !std::is_assignable_v<T &, const T &> || (is_iterable_v<T> && !std::is_same_v<std::string &, T>)) {
         return property<Scope, P, nullptr>();
     } else {
         return property<Scope, P, &setField<P, DerivedScope, std::remove_reference_t<T>>>();
@@ -114,14 +114,16 @@ static constexpr std::array<std::pair<const char *, ::Engine::Accessor>, std::tu
 }*/
 }
 
-#define METATABLE_BEGIN(T) _METATABLE_BEGIN_IMPL(T, nullptr)
+#define METATABLE_BEGIN(T) _METATABLE_BEGIN_IMPL(T, nullptr, __LINE__)
 
-#define METATABLE_BEGIN_BASE(T, Base) _METATABLE_BEGIN_IMPL(T, &table<Base>)
+#define METATABLE_BEGIN_EX(T, ...) _METATABLE_BEGIN_IMPL(T, nullptr, __LINE__, __VA_ARGS__)
 
-#define _METATABLE_BEGIN_IMPL(T, BasePtr)                                    \
+#define METATABLE_BEGIN_BASE(T, Base) _METATABLE_BEGIN_IMPL(T, &table<Base>, __LINE__)
+
+#define _METATABLE_BEGIN_IMPL(T, BasePtr, ...)                               \
     namespace Engine {                                                       \
         template <>                                                          \
-        struct LineStruct<MetaTableTag, __LINE__> {                          \
+        struct LineStruct<MetaTableTag, __VA_ARGS__> {                       \
             using Ty = T;                                                    \
             static constexpr const MetaTable **baseClass = BasePtr;          \
             static constexpr const bool base = true;                         \
@@ -129,29 +131,35 @@ static constexpr std::array<std::pair<const char *, ::Engine::Accessor>, std::tu
         };                                                                   \
     }
 
-#define METATABLE_ENTRY(Name, ...)                                                      \
-    namespace Engine {                                                                  \
-        template <>                                                                     \
-        struct LineStruct<MetaTableTag, __LINE__> : MetaTableLineStruct<__LINE__ - 1> { \
-            constexpr const std::pair<const char *, Accessor> *data() const             \
-            {                                                                           \
-                if constexpr (MetaTableLineStruct<__LINE__ - 1>::base)                  \
-                    return &mData;                                                      \
-                else                                                                    \
-                    return MetaTableLineStruct<__LINE__ - 1>::data();                   \
-            }                                                                           \
-            static constexpr const bool base = false;                                   \
-            std::pair<const char *, Accessor> mData = { Name, __VA_ARGS__ };            \
-        };                                                                              \
+#define METATABLE_ENTRY(Name, Acc, ...)                                                       \
+    namespace Engine {                                                                        \
+        template <>                                                                           \
+        struct LineStruct<MetaTableTag, __VA_ARGS__> : MetaTableLineStruct<__VA_ARGS__ - 1> { \
+            constexpr const std::pair<const char *, Accessor> *data() const                   \
+            {                                                                                 \
+                if constexpr (MetaTableLineStruct<__VA_ARGS__ - 1>::base)                     \
+                    return &mData;                                                            \
+                else                                                                          \
+                    return MetaTableLineStruct<__VA_ARGS__ - 1>::data();                      \
+            }                                                                                 \
+            static constexpr const bool base = false;                                         \
+            std::pair<const char *, Accessor> mData = { Name, Acc };                          \
+        };                                                                                    \
     }
 
-#define METATABLE_END(T)                                                        \
-    METATABLE_ENTRY(nullptr, { nullptr, nullptr })                              \
-    namespace Meta_##T                                                          \
-    {                                                                           \
-        static constexpr ::Engine::MetaTableLineStruct<__LINE__> sMembers = {}; \
-    }                                                                           \
-    DLL_EXPORT_VARIABLE(constexpr, const ::Engine::MetaTable, , table, SINGLE_ARG({ &::table<T>, #T, ::Engine::MetaTableLineStruct<__LINE__>::baseClass, Meta_##T::sMembers.data() }), T);
+#define METATABLE_END(T) \
+    _METATABLE_END_IMPL(T, __LINE__)
+
+#define METATABLE_END_EX(T, ...) \
+    _METATABLE_END_IMPL(T, __LINE__, __VA_ARGS__)
+
+#define _METATABLE_END_IMPL(T, ...)                                                \
+    METATABLE_ENTRY(nullptr, SINGLE_ARG({ nullptr, nullptr }), __VA_ARGS__)        \
+    namespace Meta_##T                                                             \
+    {                                                                              \
+        static constexpr ::Engine::MetaTableLineStruct<__VA_ARGS__> sMembers = {}; \
+    }                                                                              \
+    DLL_EXPORT_VARIABLE(constexpr, const ::Engine::MetaTable, , table, SINGLE_ARG({ &::table<T>, #T, ::Engine::MetaTableLineStruct<__VA_ARGS__>::baseClass, Meta_##T::sMembers.data() }), T);
 
 /*#define STRUCT_METATABLE(T)                                                                                              \
     namespace {                                                                                                          \
@@ -164,14 +172,17 @@ static constexpr std::array<std::pair<const char *, ::Engine::Accessor>, std::tu
 */
 
 #define MEMBER(M) \
-    METATABLE_ENTRY(#M, ::Engine::member<Ty, &Ty::M>())
+    METATABLE_ENTRY(#M, SINGLE_ARG(::Engine::member<Ty, &Ty::M>()), __LINE__)
 
 #define READONLY_PROPERTY(Name, Getter) \
-    METATABLE_ENTRY(#Name, ::Engine::property<Ty, &Ty::Getter, nullptr>())
+    METATABLE_ENTRY(#Name, SINGLE_ARG(::Engine::property<Ty, &Ty::Getter, nullptr>()), __LINE__)
+
+#define READONLY_PROPERTY_EX(Name, Getter, ...) \
+    METATABLE_ENTRY(#Name, SINGLE_ARG(::Engine::property<Ty, &Ty::Getter, nullptr>()), __LINE__, __VA_ARGS__)
 
 #define PROPERTY(Name, Getter, Setter) \
-    METATABLE_ENTRY(#Name, ::Engine::property<Ty, &Ty::Getter, &Ty::Setter>())
+    METATABLE_ENTRY(#Name, SINGLE_ARG(::Engine::property<Ty, &Ty::Getter, &Ty::Setter>()), __LINE__)
 
 #define FUNCTION(/*F, */...)                                                    \
     FUNCTIONTABLE(::Engine::MetaTableLineStruct<__LINE__ - 1>::Ty::__VA_ARGS__) \
-    METATABLE_ENTRY(STRINGIFY2(FIRST(__VA_ARGS__)), ::Engine::property<Ty, &::Engine::method<&Ty::FIRST(__VA_ARGS__)>, nullptr>())
+    METATABLE_ENTRY(STRINGIFY2(FIRST(__VA_ARGS__)), SINGLE_ARG(::Engine::property<Ty, &::Engine::method<&Ty::FIRST(__VA_ARGS__)>, nullptr>()), __LINE__)

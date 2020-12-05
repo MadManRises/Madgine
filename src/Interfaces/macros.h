@@ -34,3 +34,5 @@
 
 #define NUM_ARGS(...) SELECT_5(__VA_ARGS__, 5, 4, 3, 2, 1, 0)
 
+#define DEBUG_MACRO2(...) static_assert(false, #__VA_ARGS__);
+#define DEBUG_MACRO(...) DEBUG_MACRO2(__VA_ARGS__)

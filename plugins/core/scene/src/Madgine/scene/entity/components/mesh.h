@@ -11,8 +11,8 @@ namespace Scene {
         struct MADGINE_SCENE_EXPORT Mesh : EntityComponent<Mesh> {
             Mesh(const ObjectPtr &init);
 
-            std::string getName() const;
-            void setName(const std::string &name);
+            std::string_view getName() const;
+            void setName(const std::string_view &name);
 
             Render::GPUMeshData *data() const;
 
@@ -29,6 +29,8 @@ namespace Scene {
         private:
             typename Render::GPUMeshLoader::HandleType mMesh;
         };
+
+        using MeshPtr = EntityComponentPtr<Mesh>;
 
     }
 }

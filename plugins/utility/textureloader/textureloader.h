@@ -36,7 +36,7 @@ namespace Render {
             {
             }
 
-			void create(const std::string &name, DataFormat format, TextureLoader *loader = nullptr);
+			void create(const std::string_view &name, DataFormat format, TextureLoader *loader = nullptr);
 
             void bind(TextureLoader *loader = nullptr);
 

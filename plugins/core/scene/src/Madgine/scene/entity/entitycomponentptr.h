@@ -1,9 +1,12 @@
 #pragma once
 
-#include "../scenemanager.h"
 #include "entitycomponenthandle.h"
 #include "entitycomponentlist.h"
-#include "entityptr.h"
+
+#include "Modules/keyvalue/scopebase.h"
+
+//TODO
+#include "../scenemanager.h"
 
 namespace Engine {
 namespace Scene {
@@ -13,122 +16,77 @@ namespace Scene {
         struct EntityComponentPtrBase;
 
         template <>
-        struct EntityComponentPtrBase<EntityComponentBase> {
-            EntityComponentPtrBase() = default;
+        struct MODULES_EXPORT EntityComponentPtrBase<EntityComponentBase> : ScopeBase {
+            EntityComponentPtrBase();
 
-            EntityComponentPtrBase(EntityComponentHandle<EntityComponentBase> data, size_t index, EntityPtr entity)
-                : mHandle(std::move(data))
-                , mIndex(index)
-                , mEntity(std::move(entity))
-            {
-            }
-            EntityComponentPtrBase(const EntityComponentPtrBase<EntityComponentBase> &other)
-                : mHandle { other.entity().sceneMgr()->entityComponentList(other.mIndex)->copy(other.mHandle.mIndex) }
-                , mIndex(other.mIndex)
-                , mEntity(other.mEntity)
-            {
-            }
+            EntityComponentPtrBase(EntityComponentHandle<EntityComponentBase> data, size_t index, SceneManager *sceneMgr);
+            EntityComponentPtrBase(const EntityComponentPtrBase<EntityComponentBase> &other);
 
-            EntityComponentPtrBase(EntityComponentPtrBase<EntityComponentBase> &&other)
-                : mHandle(std::move(other.mHandle))
-                , mIndex(other.mIndex)
-                , mEntity(std::move(other.mEntity))
-            {
-            }
+            EntityComponentPtrBase(EntityComponentPtrBase<EntityComponentBase> &&other);
 
-            ~EntityComponentPtrBase()
-            {
-                if (mHandle.mIndex) {
-                    mEntity.sceneMgr()->entityComponentList(mIndex)->reset(mHandle.mIndex);
-                }
-            }
+            ~EntityComponentPtrBase();
 
-            const EntityComponentHandle<EntityComponentBase> &handle() const
-            {
-                return mHandle;
-            }
+            const EntityComponentHandle<EntityComponentBase> &handle() const;
 
-            explicit operator EntityComponentHandle<EntityComponentBase>() const
-            {
-                return { mHandle.mIndex ? mEntity.sceneMgr()->entityComponentList(mIndex)->copy(mHandle.mIndex) : GenerationContainerIndex {} };
-            }
+            explicit operator EntityComponentHandle<EntityComponentBase>() const;
 
-            const EntityPtr &entity() const
+            /*const EntityPtr &entity() const
             {
                 return mEntity;
-            }
+            }*/
 
-            size_t index() const
-            {
-                return mIndex;
-            }
+            SceneManager *sceneMgr() const;
 
-            EntityComponentBase *get() const
-            {
-                return mEntity.sceneMgr()->entityComponentList(mIndex).get(mHandle.mIndex);
-            }
+            size_t index() const;
+
+            EntityComponentBase *get() const;
 
             EntityComponentBase *operator->() const
             {
                 return get();
             }
 
-            operator bool() const
-            {
-                return mHandle.mIndex;
-            }
+            operator EntityComponentBase *() const;
+
+            operator bool() const;
+
+            std::string_view name() const;
+
+            TypedScopePtr getTyped() const;
 
         protected:
             EntityComponentHandle<EntityComponentBase> mHandle;
             size_t mIndex;
-            EntityPtr mEntity;
+            SceneManager *mSceneMgr;
         };
 
         template <>
-        struct EntityComponentPtrBase<const EntityComponentBase> {
-            EntityComponentPtrBase() = default;
+        struct MODULES_EXPORT EntityComponentPtrBase<const EntityComponentBase> : ScopeBase {
+            EntityComponentPtrBase();
 
-            EntityComponentPtrBase(EntityComponentHandle<const EntityComponentBase> data, size_t index, EntityPtr entity)
-                : mHandle(std::move(data))
-                , mIndex(index)
-                , mEntity(std::move(entity))
-            {
-            }
+            EntityComponentPtrBase(EntityComponentHandle<const EntityComponentBase> data, size_t index, SceneManager *sceneMgr);
 
-            EntityComponentPtrBase(const EntityComponentPtrBase<const EntityComponentBase> &other)
-                : mHandle { other.entity().sceneMgr()->entityComponentList(other.mIndex)->copy(other.mHandle.mIndex) }
-                , mIndex(other.mIndex)
-                , mEntity(other.mEntity)
-            {
-            }
+            EntityComponentPtrBase(const EntityComponentPtrBase<const EntityComponentBase> &other);
 
-            EntityComponentPtrBase(const EntityComponentPtrBase<EntityComponentBase> &other)
-                : mHandle { other.entity().sceneMgr()->entityComponentList(other.index())->copy(other.handle().mIndex) }
-                , mIndex(other.index())
-                , mEntity(other.entity())
-            {
-            }
+            EntityComponentPtrBase(const EntityComponentPtrBase<EntityComponentBase> &other);
 
-            ~EntityComponentPtrBase()
-            {
-                if (mHandle.mIndex) {
-                    mEntity.sceneMgr()->entityComponentList(mIndex)->reset(mHandle.mIndex);
-                }
-            }
+            ~EntityComponentPtrBase();
 
             const EntityComponentHandle<const EntityComponentBase> &handle() const
             {
                 return mHandle;
             }
 
-            explicit operator EntityComponentHandle<const EntityComponentBase>() const
-            {
-                return { mHandle.mIndex ? mEntity.sceneMgr()->entityComponentList(mIndex)->copy(mHandle.mIndex) : GenerationContainerIndex {} };
-            }
+            explicit operator EntityComponentHandle<const EntityComponentBase>() const;
 
-            const EntityPtr &entity() const
+            /*const EntityPtr &entity() const
             {
                 return mEntity;
+            }*/
+
+            SceneManager *sceneMgr() const
+            {
+                return mSceneMgr;
             }
 
             size_t index() const
@@ -139,22 +97,22 @@ namespace Scene {
         protected:
             EntityComponentHandle<const EntityComponentBase> mHandle;
             size_t mIndex;
-            EntityPtr mEntity;
+            SceneManager *mSceneMgr;
         };
 
         template <typename T>
-        struct EntityComponentPtrBase {
+        struct EntityComponentPtrBase : ScopeBase {
             EntityComponentPtrBase() = default;
 
             EntityComponentPtrBase(const EntityComponentPtrBase<T> &other)
-                : mHandle { other.mEntity.sceneMgr()->template entityComponentList<T>()->copy(other.mHandle.mIndex) }
-                , mEntity(other.mEntity)
+                : mHandle { other.sceneMgr()->template entityComponentList<T>()->copy(other.mHandle.mIndex) }
+                , mSceneMgr(other.mSceneMgr)
             {
             }
 
             explicit EntityComponentPtrBase(const EntityComponentPtrBase<EntityComponentBase> &other)
-                : mHandle { other.handle().mIndex ? other.entity().sceneMgr()->entityComponentList(other.index())->copy(other.handle().mIndex) : GenerationContainerIndex {} }
-                , mEntity(other.entity())
+                : mHandle { other.handle().mIndex ? other.sceneMgr()->entityComponentList(other.index())->copy(other.handle().mIndex) : GenerationContainerIndex {} }
+                , mSceneMgr(other.sceneMgr())
             {
                 assert(!other || component_index<T>() == other.index());
             }
@@ -166,36 +124,39 @@ namespace Scene {
             {
             }
 
-            EntityComponentPtrBase(EntityComponentHandle<T> &&data, EntityPtr entity)
+            EntityComponentPtrBase(EntityComponentHandle<T> &&data, SceneManager *sceneMgr)
                 : mHandle(std::move(data))
-                , mEntity(std::move(entity))
+                , mSceneMgr(sceneMgr)
             {
             }
 
-            EntityComponentPtrBase(const EntityComponentHandle<T> &data, EntityPtr entity)
-                : mHandle { entity.sceneMgr()->template entityComponentList<T>()->copy(data.mIndex) }
-                , mEntity(std::move(entity))
+            EntityComponentPtrBase(const EntityComponentHandle<T> &data, SceneManager *sceneMgr)
+                : mHandle { sceneMgr->template entityComponentList<T>()->copy(data.mIndex) }
+                , mSceneMgr(sceneMgr)
             {
             }
 
             ~EntityComponentPtrBase()
             {
                 if (mHandle.mIndex) {
-                    mEntity.sceneMgr()->template entityComponentList<T>()->reset(mHandle.mIndex);
+                    mSceneMgr->template entityComponentList<T>()->reset(mHandle.mIndex);
                 }
             }
 
             EntityComponentPtrBase<T> &operator=(const EntityComponentPtrBase<T> &other)
             {
-                mHandle = { other.mEntity.sceneMgr()->template entityComponentList<T>()->copy(other.mHandle.mIndex) };
-                mEntity = other.mEntity;
+                if (mHandle.mIndex)
+                    mSceneMgr->template entityComponentList<T>()->reset(mHandle.mIndex);
+                if (other.mHandle.mIndex)
+                    mHandle.mIndex = other.mSceneMgr->template entityComponentList<T>()->copy(other.mHandle.mIndex);
+                mSceneMgr = other.mSceneMgr;
                 return *this;
             }
 
             EntityComponentPtrBase<T> &operator=(EntityComponentPtrBase<T> &&other)
             {
                 mHandle = std::move(other.mHandle);
-                mEntity = other.mEntity;
+                std::swap(mSceneMgr, other.mSceneMgr);
                 return *this;
             }
 
@@ -206,51 +167,59 @@ namespace Scene {
 
             explicit operator EntityComponentHandle<T>() const
             {
-                return { mHandle.mIndex ? mEntity.sceneMgr()->template entityComponentList<T>()->copy(mHandle.mIndex) : GenerationContainerIndex {} };
+                return { mHandle.mIndex ? mSceneMgr->template entityComponentList<T>()->copy(mHandle.mIndex) : GenerationContainerIndex {} };
             }
 
             bool operator!=(const EntityComponentHandle<T> &handle) const
             {
-                if (mEntity) {
-                    mEntity.sceneMgr()->template entityComponentList<T>()->update(mHandle.mIndex);
-                    mEntity.sceneMgr()->template entityComponentList<T>()->update(handle.mIndex);
+                if (mSceneMgr) {
+                    mSceneMgr->template entityComponentList<T>()->update(mHandle.mIndex);
+                    mSceneMgr->template entityComponentList<T>()->update(handle.mIndex);
                 }
                 return mHandle != handle;
             }
 
             bool operator==(const EntityComponentHandle<T> &handle) const
             {
-                if (mEntity) {
-                    mEntity.sceneMgr()->template entityComponentList<T>()->update(mHandle.mIndex);
-                    mEntity.sceneMgr()->template entityComponentList<T>()->update(handle.mIndex);
+                if (mSceneMgr) {
+                    mSceneMgr->template entityComponentList<T>()->update(mHandle.mIndex);
+                    mSceneMgr->template entityComponentList<T>()->update(handle.mIndex);
                 }
                 return mHandle == handle;
             }
 
-            const EntityPtr &entity() const
+            /*const EntityPtr &entity() const
             {
                 return mEntity;
+            }*/
+
+            SceneManager *sceneMgr() const
+            {
+                return mSceneMgr;
+            }
+
+            T* get() const {
+                return mHandle.mIndex ? mSceneMgr->template entityComponentList<T>().get(mHandle.mIndex) : nullptr;
             }
 
             T *operator->() const
             {
-                return mHandle.mIndex ? mEntity.sceneMgr()->template entityComponentList<T>().get(mHandle.mIndex) : nullptr;
+                return get();
             }
 
             operator T *() const
             {
-                return mHandle.mIndex ? mEntity.sceneMgr()->template entityComponentList<T>().get(mHandle.mIndex) : nullptr;
+                return get();
             }
 
             void update()
             {
-                mEntity.sceneMgr()->template entityComponentList<T>()->update(mHandle.mIndex);
-                mEntity.update();
+                mSceneMgr->template entityComponentList<T>()->update(mHandle.mIndex);
             }
 
         protected:
             EntityComponentHandle<T> mHandle;
-            EntityPtr mEntity;
+            SceneManager *mSceneMgr;
         };
 
         template <typename T>

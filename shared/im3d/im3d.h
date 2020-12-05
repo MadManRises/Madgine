@@ -71,7 +71,8 @@ namespace Im3D {
     MADGINE_IM3D_EXPORT void Text(const char *text, const TextParameters &param);
 
     MADGINE_IM3D_EXPORT void Line(const Vector3 &a, const Vector3 &b, const LineParameters &param = {});
-    MADGINE_IM3D_EXPORT void Arrow(Im3DMeshType type, float radius, const Vector3 &a, const Vector3 &b, const Parameters &param = {});
+    MADGINE_IM3D_EXPORT void Arrow(float radius, const Vector3 &a, const Vector3 &b, const Parameters &param = {});
+    MADGINE_IM3D_EXPORT void Arrow3D(Im3DMeshType type, float radius, const Vector3 &a, const Vector3 &b, const Parameters &param = {});
     MADGINE_IM3D_EXPORT void Sphere(const Vector3 &center, float radius, const SphereParameters &param = {});
 
     MADGINE_IM3D_EXPORT bool BoundingSphere(const char *name, Im3DBoundingObjectFlags flags = 0, size_t priority = 1);

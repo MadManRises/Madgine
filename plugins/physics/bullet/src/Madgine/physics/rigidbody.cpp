@@ -39,7 +39,8 @@ namespace Physics {
         {
             mRigidBody.setAngularFactor({ 0, 0, 1 });
             mRigidBody.setLinearFactor({ 1, 1, 0 });
-            mRigidBody.setFriction(0.01f);
+            //mRigidBody.setFriction(0.01f);
+            mRigidBody.setUserPointer(this);
         }
 
         virtual void setWorldTransform(const btTransform &transform) override
@@ -75,12 +76,12 @@ namespace Physics {
 
         void add()
         {
-            mTransform.entity()->sceneMgr().getComponent<PhysicsManager>().world().addRigidBody(&mRigidBody);
+            mTransform.sceneMgr()->getComponent<PhysicsManager>().world().addRigidBody(&mRigidBody);
         }
 
         void remove()
         {
-            mTransform.entity()->sceneMgr().getComponent<PhysicsManager>().world().removeRigidBody(&mRigidBody);
+            mTransform.sceneMgr()->getComponent<PhysicsManager>().world().removeRigidBody(&mRigidBody);
         }
 
         Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> mTransform;
@@ -100,8 +101,6 @@ namespace Physics {
 
     void RigidBody::init(const Scene::Entity::EntityPtr &entity)
     {
-        EntityComponent::init(entity);
-
         assert(!mData);
 
         mShapeHandle.load("Cube");
@@ -117,9 +116,7 @@ namespace Physics {
 
         mData->remove();
 
-        mData.reset();
-
-        EntityComponent::finalize(entity);
+        mData.reset();        
     }
 
     btRigidBody *RigidBody::get()
@@ -130,6 +127,11 @@ namespace Physics {
     void RigidBody::activate()
     {
         mData->mRigidBody.activate(true);
+    }
+
+    const Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> &Engine::Physics::RigidBody::transform()
+    {
+        return mData->mTransform;
     }
 
     float RigidBody::mass() const
@@ -174,6 +176,7 @@ namespace Physics {
         if (kinematic) {
             mData->mRigidBody.setCollisionFlags(mData->mRigidBody.getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
             mData->mRigidBody.setActivationState(DISABLE_DEACTIVATION);
+            mData->mRigidBody.setCollisionFlags(mData->mRigidBody.getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
         } else {
             mData->mRigidBody.setCollisionFlags(mData->mRigidBody.getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
             mData->mRigidBody.forceActivationState(ISLAND_SLEEPING);
@@ -209,9 +212,14 @@ namespace Physics {
         mData->mRigidBody.setCollisionShape(mShapeHandle->get()->get());
     }
 
-    CollisionShapeManager::ResourceType *Engine::Physics::RigidBody::getShape() const
+    CollisionShapeManager::ResourceType *RigidBody::getShape() const
     {
         return mShapeHandle.resource();
+    }
+
+    Scene::SceneManager *RigidBody::sceneMgrFromData(Data *data)
+    {
+        return data->mTransform.sceneMgr();
     }
 
 }

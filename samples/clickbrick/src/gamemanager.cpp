@@ -31,10 +31,6 @@
 
 #include "Modules/serialize/serializetable_impl.h"
 
-#include "im3d/im3d.h"
-#include "Madgine_Tools/clienttoolslib.h"
-#include "Madgine_Tools/im3d/im3drenderpass.h"
-
 
 UNIQUECOMPONENT(ClickBrick::UI::GameManager)
 
@@ -69,8 +65,7 @@ namespace UI {
         mCamera.mOrientation = {};
 
         if (mGameWindow) {
-            mGameWindow->getRenderTarget()->addRenderPass(&mSceneRenderer);
-            mGameWindow->getRenderTarget()->addRenderPass(new Engine::Render::Im3DRenderPass(&mCamera, 75));
+            mGameWindow->getRenderTarget()->addRenderPass(&mSceneRenderer);            
         }
 
         return GameHandlerBase::init();
@@ -81,8 +76,7 @@ namespace UI {
         GameHandlerBase::setWidget(w);
 
         if (widget()) {
-            mGameWindow->getRenderTarget()->addRenderPass(&mSceneRenderer);
-            mGameWindow->getRenderTarget()->addRenderPass(new Engine::Render::Im3DRenderPass(&mCamera, 75));
+            mGameWindow->getRenderTarget()->addRenderPass(&mSceneRenderer);            
         }
     }
 
@@ -169,9 +163,7 @@ namespace UI {
         Engine::Ray ray = mCamera.mousePointToRay(Engine::Vector2 { evt.windowPosition }, mGameWindow->getActualSize().xy());
 
         Engine::Scene::Entity::EntityPtr hit;
-        float distance = std::numeric_limits<float>::max();
-
-        Engine::Im3D::Arrow(Engine::IM3D_TRIANGLES, 0.4f, ray.mPoint + 10.0f * ray.mDir, ray.mPoint + 20.0f * ray.mDir, Engine::Im3D::Parameters { std::chrono::seconds { 1 } });
+        float distance = std::numeric_limits<float>::max();        
 
         for (const Engine::Scene::Entity::EntityPtr &e : mBricks) {
             const Engine::AABB &aabb = e.getComponent<Engine::Scene::Entity::Mesh>()->aabb();

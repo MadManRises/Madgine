@@ -38,6 +38,8 @@ namespace Scene {
             float mCurrentStep = 0.0f;
         };
 
+        using AnimationPtr = EntityComponentPtr<Animation>;
+
     }
 }
 }

@@ -4,6 +4,8 @@
 
 #include "Modules/serialize/virtualserializableunit.h"
 
+#include "Modules/keyvalueutil/virtualscope.h"
+
 DECLARE_UNIQUE_COMPONENT(Engine::Window, MainWindowComponent, MainWindowComponentBase, MainWindow &);
 
 

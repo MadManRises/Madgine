@@ -9,14 +9,17 @@
 
 #include "Modules/generic/proxy.h"
 
+#include "Modules/math/vector3.h"
+
 namespace Engine {
 namespace Physics {
 
     struct PhysicsData;
+    struct PhysicsListener;
 
     struct MADGINE_BULLET_EXPORT ContactPoint {
 
-        void setFriction(float motion, const Vector3 &dir);
+        void setFriction(float motion, const Vector3 &dir, const Vector3 &dir2);
 
         btManifoldPoint &mPoint;
         const btCollisionObject *mObj0, *mObj1;
@@ -55,14 +58,22 @@ namespace Physics {
 
         ContactPointList contactPoints();
 
+        void addListener(PhysicsListener *listener);
+        void removeListener(PhysicsListener *listener);
+
     protected:
         virtual bool init() override;
         virtual void finalize() override;
 
         virtual void update(std::chrono::microseconds) override;
 
+        static bool sContactCallback(btManifoldPoint &cp, const btCollisionObjectWrapper *colObj0, int partId0, int index0, const btCollisionObjectWrapper *colObj1, int partId1, int index1);
+        bool contactCallback(ContactPoint &p);
+
     private:
         std::unique_ptr<PhysicsData> mData;
+        
+        std::vector<PhysicsListener *> mListener;
     };
 
 }

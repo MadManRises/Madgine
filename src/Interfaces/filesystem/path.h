@@ -22,6 +22,7 @@ namespace Filesystem {
 
         bool operator==(const Path &other) const;
         bool operator!=(const Path &other) const;
+        bool operator<(const Path &other) const;
 
         Path parentPath() const;
         Path relative() const;
@@ -32,8 +33,8 @@ namespace Filesystem {
 		void normalize();
 
         Path filename() const;
-        std::string stem() const;
-        std::string extension() const;
+        std::string_view stem() const;
+        std::string_view extension() const;
 
         bool isAbsolute() const;
         bool isRelative() const;

@@ -7,6 +7,8 @@
 
 #include "entity.h"
 
+#include "../scenemanager.h"
+
 namespace Engine {
 namespace Scene {
 

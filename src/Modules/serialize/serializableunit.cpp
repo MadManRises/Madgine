@@ -50,6 +50,11 @@ namespace Serialize {
         return *this;
     }
 
+    bool SerializableUnitBase::isSynced() const
+    {
+        return mSynced;
+    }
+
 
 } // namespace Serialize
 } // namespace Core

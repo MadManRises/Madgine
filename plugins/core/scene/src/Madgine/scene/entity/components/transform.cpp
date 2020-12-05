@@ -11,6 +11,8 @@
 
 #include "../entitycomponentptr.h"
 
+#include "../../scenemanager.h"
+
 namespace Engine {
 
 namespace Scene {
@@ -53,7 +55,7 @@ namespace Scene {
                 return;
             EntityComponentPtr<Transform> ptr = parent;
             while (ptr) {
-                EntityComponentPtr<Transform> next { ptr->mParent, ptr.entity() };
+                EntityComponentPtr<Transform> next { ptr->mParent, ptr.sceneMgr() };
                 if (next == this) {
                     ptr->setParent({});
                     ptr = {};
@@ -104,12 +106,12 @@ namespace Scene {
 
         Matrix4 EntityComponentPtr<Transform>::worldMatrix() const
         {
-            return (*this)->worldMatrix(mEntity.sceneMgr()->entityComponentList<Transform>());
+            return (*this)->worldMatrix(mSceneMgr->entityComponentList<Transform>());
         }
 
         Matrix4 EntityComponentPtr<Transform>::parentMatrix() const
         {
-            return (*this)->parentMatrix(mEntity.sceneMgr()->entityComponentList<Transform>());
+            return (*this)->parentMatrix(mSceneMgr->entityComponentList<Transform>());
         }
     }
 }

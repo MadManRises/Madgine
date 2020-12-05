@@ -53,6 +53,11 @@ namespace Filesystem {
         return mPath != other.mPath;
     }
 
+    bool Path::operator<(const Path &other) const
+    {
+        return mPath < other.mPath;
+    }
+
     Path Path::parentPath() const
     {
         auto sep = mPath.rfind('/');
@@ -171,18 +176,44 @@ namespace Filesystem {
         return sep == std::string::npos ? mPath : mPath.substr(sep + 1);
     }
 
-    std::string Path::stem() const
+    std::string_view Path::stem() const
     {
-        std::string name = filename().mPath;
-        auto pos = name.rfind('.');
-        return pos == std::string::npos ? name : name.substr(0, pos);
+        auto sep = mPath.rfind('/');
+        auto pos = mPath.rfind('.');
+        if (pos != std::string::npos) {
+            if (sep != std::string::npos) {
+                if (pos > sep)
+                    return { mPath.data() + sep + 1, pos - sep - 1 };
+                else
+                    return { mPath.data() + sep + 1 };
+            } else {
+                return { mPath.data(), pos };
+            }
+        } else {
+            if (sep != std::string::npos) {
+                return { mPath.data() + sep + 1 };
+            } else {
+                return mPath;
+            }
+        }
     }
 
-    std::string Path::extension() const
+    std::string_view Path::extension() const
     {
-        std::string name = filename().mPath;
-        auto pos = name.rfind('.');
-        return pos == std::string::npos ? std::string {} : name.substr(pos);
+        auto sep = mPath.rfind('/');
+        auto pos = mPath.rfind('.');
+        if (pos != std::string::npos) {
+            if (sep != std::string::npos) {
+                if (pos > sep)
+                    return { mPath.data() + pos };
+                else
+                    return { };
+            } else {
+                return { mPath.data() + pos };
+            }
+        } else {
+            return {};
+        }
     }
 
     bool Path::isAbsolute() const

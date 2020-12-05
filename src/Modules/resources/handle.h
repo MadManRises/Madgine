@@ -64,7 +64,7 @@ namespace Resources {
             return Loader::get(*this);
         }
 
-        std::string name() const
+        std::string_view name() const
         {
             typename Loader::ResourceType *res = resource();
             return res ? res->name() : "";

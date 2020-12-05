@@ -5,7 +5,7 @@
 
 #include "Modules/serialize/syncableunit.h"
 
-#include "Modules/keyvalueutil/virtualscopebase.h"
+#include "Modules/keyvalueutil/virtualscope.h"
 
 DECLARE_UNIQUE_COMPONENT(Engine::Scene, SceneComponent, SceneComponentBase, SceneManager &);
 

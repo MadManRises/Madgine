@@ -43,7 +43,7 @@ namespace Filesystem {
         auto result = GetModuleFileName(nullptr, buffer, sizeof(buffer));
         assert(result > 0);
 
-        return Path(buffer).stem();
+        return std::string { Path(buffer).stem() };
     }
 
     Path appDataPath()

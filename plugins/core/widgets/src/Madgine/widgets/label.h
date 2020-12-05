@@ -13,8 +13,8 @@ namespace Widgets {
 
         virtual WidgetClass getClass() const override;
 
-        std::string getFontName() const;
-        void setFontName(const std::string &name);
+        std::string_view getFontName() const;
+        void setFontName(const std::string_view &name);
 
         Render::FontLoader::ResourceType *getFont() const;
         void setFont(Render::FontLoader::ResourceType *font);

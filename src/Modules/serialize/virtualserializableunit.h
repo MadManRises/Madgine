@@ -7,8 +7,8 @@
 namespace Engine {
 namespace Serialize {
 
-    template <typename Base = SerializableUnitBase>
-    struct VirtualSerializableUnitBase : Base {
+    template <typename Base = SerializableUnitBase, typename... Bases>
+    struct DLL_EXPORT VirtualSerializableUnitBase : Base, Bases... {
 
         using Base::Base;
 

@@ -22,6 +22,8 @@ namespace Scene {
         float mQAcc, mQSpeed;
     };
 
+    using BrickPtr = Engine::Scene::Entity::EntityComponentPtr<Brick>;
+
 
 }
 }

@@ -2,13 +2,13 @@
 
 #include "Modules/madgineobject/madgineobject.h"
 
-#include "Modules/keyvalueutil/virtualscopebase.h"
+#include "Modules/keyvalue/virtualscopebase.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
 namespace Engine {
 namespace App {
-    struct MADGINE_BASE_EXPORT GlobalAPIBase : VirtualScopeBase<>, MadgineObject<GlobalAPIBase> {
+    struct MADGINE_BASE_EXPORT GlobalAPIBase : VirtualScopeBase, MadgineObject<GlobalAPIBase> {
         GlobalAPIBase(App::Application &app);
 
         template <typename T>

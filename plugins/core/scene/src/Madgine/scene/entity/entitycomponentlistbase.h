@@ -12,6 +12,9 @@ namespace Scene {
 
             virtual GenerationContainerBase *operator->() = 0;
             virtual EntityComponentBase *get(GenerationContainerIndex &index) = 0;
+            virtual TypedScopePtr getTyped(GenerationContainerIndex &index) = 0;
+            virtual void init(GenerationContainerIndex &index, const EntityPtr &entity) = 0;
+            virtual void finalize(GenerationContainerIndex &index, const EntityPtr &entity) = 0;
             virtual EntityHandle getEntity(GenerationContainerIndex &index, SceneManager *mgr) const = 0; 
             virtual EntityComponentOwningHandle<EntityComponentBase> emplace(const ObjectPtr &table, const EntityPtr &entity) = 0;
             virtual void erase(GenerationContainerIndex &index, GenerationVector<Entity> &vec) = 0;

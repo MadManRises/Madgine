@@ -12,10 +12,10 @@ namespace Widgets {
         using Widget::Widget;
         virtual ~Button() = default;
 
-        void setImageByName(const std::string &name);
+        void setImageByName(const std::string_view &name);
         void setImage(Resources::ResourceType<Resources::ImageLoader> *image);
 
-        std::string getImageName() const;
+        std::string_view getImageName() const;
         Resources::ResourceType<Resources::ImageLoader> *image() const;
 
         Resources::ResourceType<Resources::ImageLoader> *resource() const override;
@@ -26,8 +26,8 @@ namespace Widgets {
 
         virtual WidgetClass getClass() const override;
 
-        std::string getFontName() const;
-        void setFontName(const std::string &name);
+        std::string_view getFontName() const;
+        void setFontName(const std::string_view &name);
 
         Render::FontLoader::ResourceType *getFont() const;
         void setFont(Render::FontLoader::ResourceType *font);

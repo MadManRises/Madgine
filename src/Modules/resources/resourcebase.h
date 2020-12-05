@@ -17,8 +17,8 @@ namespace Resources {
         bool isPersistent() const;
 
         const Filesystem::Path &path();
-        std::string extension();
-        std::string name();
+        std::string_view extension();
+        std::string_view name();
 
         void updatePath(const Filesystem::Path &path) { LOG_WARNING("Implement updatePath!"); } //TODO
 

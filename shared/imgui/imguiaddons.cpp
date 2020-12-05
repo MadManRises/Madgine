@@ -8,6 +8,7 @@
 #include "Modules/math/matrix3.h"
 
 #include "Modules/keyvalue/typedscopeptr.h"
+#include "Modules/keyvalue/virtualscopebase.h"
 
 #include "Modules/keyvalue/boundapifunction.h"
 
@@ -42,6 +43,16 @@ bool ValueTypeDrawer::draw(const Engine::TypedScopePtr &scope)
     }
     ImGui::Text("<scope>");
     return false;
+}
+
+bool ValueTypeDrawer::draw(std::shared_ptr<Engine::VirtualScopeBase> &scope)
+{
+    return draw(scope->customScopePtr());
+}
+
+bool ValueTypeDrawer::draw(const std::shared_ptr<Engine::VirtualScopeBase> &scope)
+{
+    return draw(scope->customScopePtr());
 }
 
 bool ValueTypeDrawer::draw(bool &b)

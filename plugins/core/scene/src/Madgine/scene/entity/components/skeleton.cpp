@@ -11,6 +11,8 @@
 
 #include "skeletondescriptor.h"
 
+#include "../entitycomponentptr.h"
+
 namespace Engine {
 namespace Scene {
     namespace Entity {
@@ -26,12 +28,12 @@ namespace Scene {
             return mSkeleton;
         }
 
-        std::string Skeleton::getName() const
+        std::string_view Skeleton::getName() const
         {
             return mSkeleton.name();
         }
 
-        void Skeleton::setName(const std::string &name)
+        void Skeleton::setName(const std::string_view &name)
         {
             mSkeleton.load(name);
             resetMatrices();

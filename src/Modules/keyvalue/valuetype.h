@@ -48,19 +48,19 @@ struct MODULES_EXPORT ValueType {
     {
     }
 
-    template <typename T, typename _ = std::enable_if_t<std::is_enum<T>::value>>
+    template <typename T, typename _ = std::enable_if_t<std::is_enum_v<T>>>
     explicit ValueType(T val)
         : ValueType(static_cast<int>(val))
     {
     }
 
-    template <typename T, typename _ = std::enable_if_t<std::is_base_of<ScopeBase, T>::value && !std::is_same<ScopeBase, T>::value>>
+    template <typename T, typename _ = std::enable_if_t<std::is_base_of_v<ScopeBase, T> && !std::is_same_v<ScopeBase, T>>>
     explicit ValueType(T *val)
         : ValueType(TypedScopePtr(val))
     {
     }
 
-    template <typename T, typename _ = std::enable_if_t<std::is_base_of<ScopeBase, T>::value && !std::is_same<ScopeBase, T>::value>>
+    template <typename T, typename _ = std::enable_if_t<std::is_base_of_v<ScopeBase, T> && !std::is_same_v<ScopeBase, T>>>
     explicit ValueType(T &val)
         : ValueType(TypedScopePtr(&val))
     {

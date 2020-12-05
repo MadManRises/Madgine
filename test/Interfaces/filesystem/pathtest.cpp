@@ -12,4 +12,9 @@ TEST(Path, Basic)
     ASSERT_EQ(p2.str(), "foo/test2/mixed");
     ASSERT_EQ(p1.str(), "foo/test");
     ASSERT_EQ(p1.parentPath().str(), "foo");
+
+    Engine::Filesystem::Path p3 { "foo/test.txt" };
+
+    ASSERT_EQ(p3.stem(), "test");
+    ASSERT_EQ(p3.extension(), ".txt");
 }

@@ -632,7 +632,7 @@ namespace Tools {
         if (!mGraph)
             return {};
 
-        return mGraph.resource()->path().parentPath() / (mGraph.resource()->name() + ".json");
+        return mGraph.resource()->path().parentPath() / (std::string { mGraph.resource()->name() } + ".json");
     }
 
     void NodeGraphEditor::createEditor()

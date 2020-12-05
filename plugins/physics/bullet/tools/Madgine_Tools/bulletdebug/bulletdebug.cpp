@@ -15,6 +15,7 @@
 
 #include "Madgine/app/application.h"
 #include "Madgine/physics/physicsmanager.h"
+#include "Madgine/physics/rigidbody.h"
 #include "Madgine/scene/scenemanager.h"
 
 namespace Engine {
@@ -61,6 +62,12 @@ namespace Tools {
             ImGui::CheckboxFlags("DBG_DrawFrames", &mDebugMode, DBG_DrawFrames);
         }
         ImGui::End();
+
+        for (Physics::RigidBody &rigidBody : mManager->sceneMgr().entityComponentList<Physics::RigidBody>()) {
+            Vector3 pos = rigidBody.transform()->getPosition();
+            Im3D::Arrow(0.1f, pos, pos + Vector3 { rigidBody.get()->getLinearVelocity() }, Vector4 { 1, 0, 0, 1 });
+            LOG(Vector3 { rigidBody.get()->getLinearVelocity() });            
+        }
     }
 
     void BulletDebug::renderMenu()

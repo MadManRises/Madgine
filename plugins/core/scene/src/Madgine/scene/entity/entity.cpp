@@ -96,7 +96,7 @@ namespace Scene {
             auto it = mComponents.physical().find(i);
             if (it == mComponents.physical().end())
                 return {};
-            return { { mSceneManager.entityComponentList(i)->copy(it->second.mIndex) }, i, self };
+            return { { mSceneManager.entityComponentList(i)->copy(it->second.mIndex) }, i, self.sceneMgr() };
         }
 
         EntityComponentPtr<const EntityComponentBase> Entity::getComponent(size_t i, const EntityPtr &self) const
@@ -104,7 +104,7 @@ namespace Scene {
             auto it = mComponents.physical().find(i);
             if (it == mComponents.physical().end())
                 return {};
-            return { { mSceneManager.entityComponentList(i)->copy(it->second.mIndex) }, i, self };
+            return { { mSceneManager.entityComponentList(i)->copy(it->second.mIndex) }, i, self.sceneMgr() };
         }
 
         EntityComponentPtr<EntityComponentBase> Entity::getComponent(const std::string_view &name, const EntityPtr &self)
@@ -117,9 +117,9 @@ namespace Scene {
             return getComponent(sComponentsByName()[name], self);
         }
 
-        EntityComponentBase *Entity::toEntityComponentPtr(const std::pair<const uint32_t, EntityComponentOwningHandle<EntityComponentBase>> &p)
+        EntityComponentPtr<EntityComponentBase> Entity::toEntityComponentPtr(const std::pair<const uint32_t, EntityComponentOwningHandle<EntityComponentBase>> &p)
         {
-            return mSceneManager.entityComponentList(p.first).get(p.second.mIndex);
+            return { EntityComponentHandle<EntityComponentBase> { mSceneManager.entityComponentList(p.first)->copy(p.second.mIndex) }, p.first, &mSceneManager };
         }
 
         bool Entity::hasComponent(size_t i)
@@ -141,10 +141,10 @@ namespace Scene {
         {
             auto it = mComponents.physical().find(i);
             if (it != mComponents.physical().end()) {
-                return { { mSceneManager.entityComponentList(i)->copy(it->second.mIndex) }, i, self };
+                return { { mSceneManager.entityComponentList(i)->copy(it->second.mIndex) }, i, self.sceneMgr() };
             } else {
                 auto pib = mComponents.try_emplace(i, mSceneManager.entityComponentList(i).emplace(table, self));
-                return EntityComponentPtr<EntityComponentBase> { { self.sceneMgr()->entityComponentList(i)->copy(pib.first->second.mIndex) }, i, self };
+                return EntityComponentPtr<EntityComponentBase> { { self.sceneMgr()->entityComponentList(i)->copy(pib.first->second.mIndex) }, i, self.sceneMgr() };
             }
         }
 
@@ -216,10 +216,10 @@ namespace Scene {
             case AFTER | RESET:
                 throw "TODO";
             case AFTER | EMPLACE:
-                mSceneManager.entityComponentList(it->first).get(it->second.mIndex)->init(mSceneManager.toEntityPtr(this));
+                mSceneManager.entityComponentList(it->first).init(it->second.mIndex, mSceneManager.toEntityPtr(this));
                 break;
             case BEFORE | ERASE:
-                mSceneManager.entityComponentList(it->first).get(it->second.mIndex)->finalize(mSceneManager.toEntityPtr(this));
+                mSceneManager.entityComponentList(it->first).finalize(it->second.mIndex, mSceneManager.toEntityPtr(this));
                 break;
             }
         }

@@ -93,7 +93,7 @@ namespace Tools {
         return mHoveredAxis;
     }
 
-    Scene::Entity::Transform *SceneEditor::hoveredTransform() const
+    const Engine::Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> &SceneEditor::hoveredTransform() const
     {
         return mHoveredTransform;
     }
@@ -245,12 +245,13 @@ namespace Tools {
 
         ImGui::InputText("Name", &entity->mName);
 
-        for (Scene::Entity::EntityComponentBase *component : entity->components()) {
-            std::string name = std::string { component->key() };
+        for (const Scene::Entity::EntityComponentPtr<Scene::Entity::EntityComponentBase> &component : entity->components()) {
+            std::string name = std::string { component.name() };
             bool open = ImGui::TreeNode(name.c_str());
-            ImGui::DraggableValueTypeSource(name.c_str(), this, ValueType { component });
+            //TODO
+            //ImGui::DraggableValueTypeSource(name.c_str(), this, ValueType { Scene::Entity::EntityComponentPtr<Scene::Entity::EntityComponentBase> { component } });
             if (open) {
-                mInspector->draw(component);
+                mInspector->draw(component.getTyped());
                 ImGui::TreePop();
             }
         }
@@ -274,7 +275,7 @@ namespace Tools {
             ImGui::EndPopup();
         }
 
-        if (Scene::Entity::Transform *t = entity.getComponent<Scene::Entity::Transform>()) {
+        if (Engine::Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> t = entity.getComponent<Scene::Entity::Transform>()) {
             constexpr Vector4 colors[] = {
                 { 0.5f, 0, 0, 0.5f },
                 { 0, 0.5f, 0, 0.5f },
@@ -293,12 +294,12 @@ namespace Tools {
             };
 
             mHoveredAxis = -1;
-            mHoveredTransform = nullptr;
+            mHoveredTransform = {};
 
             Vector3 pos = (t->worldMatrix(entity.sceneMgr()->entityComponentList<Scene::Entity::Transform>()) * Vector4::UNIT_W).xyz();
 
             for (size_t i = 0; i < 3; ++i) {
-                Im3D::Arrow(IM3D_TRIANGLES, 0.1f, pos, pos + offsets[i], colors[i]);
+                Im3D::Arrow3D(IM3D_TRIANGLES, 0.1f, pos, pos + offsets[i], colors[i]);
                 if (Im3D::BoundingBox(labels[i], 0, 2)) {
                     mHoveredAxis = i;
                     mHoveredTransform = t;
@@ -326,7 +327,7 @@ namespace Tools {
                             end = world * m * skeleton->mMatrix * (mBoneForward * mDefaultBoneLength) + (1.0f - mBoneForward.w) * start;
                         }
                         float length = (end - start).xyz().length();
-                        Im3D::Arrow(IM3D_LINES, 0.1f * length, start.xyz(), end.xyz());
+                        Im3D::Arrow3D(IM3D_LINES, 0.1f * length, start.xyz(), end.xyz());
                     }
                 }
             }

@@ -1,11 +1,11 @@
-<Item id=258>
+<Item syncId=258>
     <mComponents size=3>
-        <Item key="WidgetManager" id=1>
+        <Item key="WidgetManager" serId=1>
             <mStartupWidget>2</mStartupWidget>
             <mTopLevelWidgets size=3>
-                <Item name="MainMenu" type=0 id=2>
+                <Item name="MainMenu" type=0 serId=2>
                     <mChildren size=1>
-                        <Item name="StartGameButton" type=6 id=3>
+                        <Item name="StartGameButton" type=6 serId=3>
                             <mText>StartGame</mText>
                             <mFontSize>5</mFontSize>
                             <mFont>OpenSans-Regular</mFont>
@@ -21,11 +21,11 @@
                     <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
                     <mName>MainMenu</mName>
                 </Item>
-                <Item name="Ingame" type=0 id=4>
+                <Item name="Ingame" type=0 serId=4>
                     <mChildren size=1>
-                        <Item name="GameView" type=1 id=5>
+                        <Item name="GameView" type=1 serId=5>
                             <mChildren size=2>
-                                <Item name="Score" type=8 id=6>
+                                <Item name="Score" type=8 serId=6>
                                     <mFontSize>3</mFontSize>
                                     <mText>Score:123</mText>
                                     <mFont>OpenSans-Bold</mFont>
@@ -35,7 +35,7 @@
                                     <mSize>[0.2, 0, 0, 0, 0, 40, 0, 0, 1]</mSize>
                                     <mName>Score</mName>
                                 </Item>
-                                <Item name="Life" type=8 id=7>
+                                <Item name="Life" type=8 serId=7>
                                     <mFontSize>3</mFontSize>
                                     <mText>Life: 99999</mText>
                                     <mFont>OpenSans-Bold</mFont>
@@ -55,9 +55,9 @@
                     <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
                     <mName>Ingame</mName>
                 </Item>
-                <Item name="GameOver" type=0 id=8>
+                <Item name="GameOver" type=0 serId=8>
                     <mChildren size=2>
-                        <Item name="GameOverLabel" type=8 id=9>
+                        <Item name="GameOverLabel" type=8 serId=9>
                             <mFontSize>9</mFontSize>
                             <mText>Game Over</mText>
                             <mFont>OpenSans-Bold</mFont>
@@ -67,7 +67,7 @@
                             <mSize>[0.7, 0, 0, 0, 0.11, 0, 0, 0, 1]</mSize>
                             <mName>GameOverLabel</mName>
                         </Item>
-                        <Item name="ScoreLabel" type=8 id=10>
+                        <Item name="ScoreLabel" type=8 serId=10>
                             <mFontSize>4</mFontSize>
                             <mText>Your Score: </mText>
                             <mFont>OpenSans-Regular</mFont>
@@ -84,25 +84,25 @@
                 </Item>
             </mTopLevelWidgets>
         </Item>
-        <Item key="UI" id=11>
+        <Item key="UI" serId=11>
             <mGuiHandlers size=3>
-                <Item key="GameHandler" id=12>
+                <Item key="GameHandler" serId=12>
                     <mWidget>4</mWidget>
                 </Item>
-                <Item key="GameOverHandler" id=13>
+                <Item key="GameOverHandler" serId=13>
                     <mWidget>8</mWidget>
                 </Item>
-                <Item key="MainMenuHandler" id=14>
+                <Item key="MainMenuHandler" serId=14>
                     <mWidget>2</mWidget>
                 </Item>
             </mGuiHandlers>
             <mGameHandlers size=1>
-                <Item key="GameManager" id=15>
+                <Item key="GameManager" serId=15>
                     <mWidget>5</mWidget>
                 </Item>
             </mGameHandlers>
         </Item>
-        <Item key="ClientImRoot" id=16>
+        <Item key="ClientImRoot" serId=16>
         </Item>
     </mComponents>
 </Item>

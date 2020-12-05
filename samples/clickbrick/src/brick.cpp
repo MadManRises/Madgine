@@ -7,6 +7,8 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
+#include "Madgine/scene/entity/entitycomponentptr.h"
+
 ENTITYCOMPONENT_IMPL(Brick, ClickBrick::Scene::Brick)
 
 METATABLE_BEGIN(ClickBrick::Scene::Brick)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Modules/keyvalueutil/virtualscopebase.h"
+#include "Modules/keyvalue/virtualscopebase.h"
 #include "Modules/madgineobject/madgineobject.h"
 #include "Modules/serialize/syncableunit.h"
 
@@ -9,7 +9,7 @@
 namespace Engine {
 namespace Scene {
 
-    struct MADGINE_SCENE_EXPORT SceneComponentBase : VirtualScopeBase<>, Serialize::SyncableUnitBase, MadgineObject<SceneComponentBase> {    
+    struct MADGINE_SCENE_EXPORT SceneComponentBase : VirtualScopeBase, Serialize::SyncableUnitBase, MadgineObject<SceneComponentBase> {    
         virtual ~SceneComponentBase() = default;
 
         SceneComponentBase(SceneManager &sceneMgr);

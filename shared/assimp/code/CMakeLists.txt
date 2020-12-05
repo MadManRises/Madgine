@@ -1059,6 +1059,3 @@ if (ASSIMP_COVERALLS)
         "${PROJECT_SOURCE_DIR}/cmake-modules/") # (Optional) Alternate project cmake module path.
 ENDIF()
 
-install_to_workspace(assimp TARGETS assimp EXPORT_LIB)
-
-export_to_workspace(assimp)

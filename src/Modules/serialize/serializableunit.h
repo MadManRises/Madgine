@@ -22,6 +22,9 @@ namespace Serialize {
         SerializableUnitBase &operator=(const SerializableUnitBase &other);
         SerializableUnitBase &operator=(SerializableUnitBase &&other);
 
+    public:
+        bool isSynced() const;
+
     protected:
         friend struct SyncableBase;
         friend struct SerializableUnitPtr;

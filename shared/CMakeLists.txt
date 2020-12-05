@@ -3,6 +3,10 @@ set(ASSIMP_BUILD_FBX_IMPORTER ON)
 set(ASSIMP_BUILD_COLLADA_IMPORTER ON)
 add_subdirectory(assimp)
 
+install_to_workspace(assimp TARGETS assimp EXPORT_LIB)
+
+export_to_workspace(assimp)
+
 set(DISABLE_FORCE_DEBUG_POSTFIX ON)
 add_subdirectory(freetype-2.10.1)
 set_target_properties(freetype PROPERTIES EXCLUDE_FROM_ALL TRUE)
@@ -48,7 +52,12 @@ set (BUILD_UNIT_TESTS OFF CACHE BOOL "" FORCE)
 set (BUILD_EXTRAS OFF CACHE BOOL "" FORCE)
 set (BUILD_BULLET2_DEMOS OFF CACHE BOOL "" FORCE)
 add_subdirectory(bullet3-2.89)
-target_include_directories(LinearMath PUBLIC ${CMAKE_CURRENT_LIST_DIR}/bullet3-2.89/src)
+target_include_directories(LinearMath PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/bullet3-2.89/src>)
+
+install_to_workspace(BulletLib TARGETS BulletDynamics BulletCollision LinearMath EXPORT_LIB)
+
+export_to_workspace(BulletLib)
+
 
 set(BUILD_SHARED_LIBS ${OLD_BUILD_SHARED_LIBS})
 

@@ -53,7 +53,7 @@ namespace Render {
         }
 
         if (!mesh.mTexturePath.empty()) {
-            std::string imageName = mesh.mTexturePath.stem();
+            std::string_view imageName = mesh.mTexturePath.stem();
             Resources::ImageLoader::HandleType tex;
             tex.load(imageName);
 

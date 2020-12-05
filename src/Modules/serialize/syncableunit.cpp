@@ -62,7 +62,7 @@ namespace Serialize {
     {
         if (out.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
             out.format().beginExtended(out, name, 1);
-            write(out, mMasterId, "id");
+            write(out, mMasterId, "syncId");
         }
         SerializableUnitConstPtr { this, mType }.writeState(out, name, flags | StateTransmissionFlags_SkipId, hierarchy);
     }
@@ -72,7 +72,7 @@ namespace Serialize {
         if (!in.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
             in.format().beginExtended(in, name, 1);
             UnitId id;
-            read(in, id, "id");
+            read(in, id, "syncId");
 
             if (in.manager() && in.manager()->getSlaveStreambuf() == &in.buffer()) {
                 setSlaveId(id, in.manager());

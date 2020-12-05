@@ -119,7 +119,9 @@ namespace Tools {
 
             ImGui::DragInt("Sphere-Detail", &mSphereDetail, 1.0f, 0, 100);
 
-            Im3D::Sphere({ 0, 0, 0 }, 1.0f, Im3D::SphereParameters { static_cast<size_t>(mSphereDetail) });
+            //Im3D::Sphere({ 0, 0, 0 }, 1.0f, Im3D::SphereParameters { static_cast<size_t>(mSphereDetail) });
+
+            Im3D::Arrow(0.15f, Vector3::ZERO, Vector3::UNIT_X);
 
             ImGui::DragFloat2("Scale", &ImGui::GetIO().DisplayFramebufferScale.x, 0.1f, 0.1f, 2.0f);
 

@@ -13,6 +13,8 @@
 
 #include "gridpass.h"
 
+#include "Madgine/scene/entity/entitycomponentptr.h"
+#include "Madgine/scene/entity/components/transform.h"
 
 namespace Engine {
 namespace Tools {
@@ -38,7 +40,7 @@ namespace Tools {
 		bool mMouseClicked[3] = { false, false, false };
         int mDraggedAxis;
         Ray mDragStartRay;
-        Scene::Entity::Transform *mDragTransform;
+        Engine::Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> mDragTransform;
         Matrix4 mDragStoredMatrix;
         Vector3 mDragStoredPosition;
         Vector3 mDragRelMousePosition;

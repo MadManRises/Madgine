@@ -12,6 +12,8 @@
 
 #include "entitycomponentptr.h"
 
+#include "Modules/serialize/syncableunit.h"
+
 namespace Engine {
 namespace Scene {
     namespace Entity {
@@ -64,13 +66,13 @@ namespace Scene {
             EntityComponentPtr<EntityComponentBase> getComponent(const std::string_view &name, const EntityPtr &self);
             EntityComponentPtr<const EntityComponentBase> getComponent(const std::string_view &name, const EntityPtr &self) const;
 
-            EntityComponentBase *toEntityComponentPtr(const std::pair<const uint32_t, EntityComponentOwningHandle<EntityComponentBase>> &p);
+            EntityComponentPtr<EntityComponentBase> toEntityComponentPtr(const std::pair<const uint32_t, EntityComponentOwningHandle<EntityComponentBase>> &p);
 
             decltype(auto) components()
             {
                 struct Helper {
                     Entity *mEntity;
-                    EntityComponentBase *operator()(const std::pair<const uint32_t, EntityComponentOwningHandle<EntityComponentBase>> &p)
+                    EntityComponentPtr<EntityComponentBase> operator()(const std::pair<const uint32_t, EntityComponentOwningHandle<EntityComponentBase>> &p)
                     {
                         return mEntity->toEntityComponentPtr(p);
                     }

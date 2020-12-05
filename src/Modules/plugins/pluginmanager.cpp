@@ -118,14 +118,14 @@ namespace Plugins {
                     saveSelection(barrier, file, hasTools);
                     file.saveToDisk(path);
 
-                    Filesystem::Path exportPath = path.parentPath() / ("components_" + path.stem() + ".cpp");
+                    Filesystem::Path exportPath = path.parentPath() / ("components_" + std::string { path.stem() } + ".cpp");
 
                     exportStaticComponentHeader(exportPath, hasTools); //TODO Consider using a signal to remove dependency plugin->uniquecomponent
                 };
 
                 Filesystem::Path p = *exportPlugins;
                 helper(p, false);
-                Filesystem::Path p_tools = p.parentPath() / (p.stem() + "_tools" + p.extension());
+                Filesystem::Path p_tools = p.parentPath() / (std::string { p.stem() } + "_tools" + std::string { p.extension() });
                 helper(p_tools, true);
 
                 return Threading::RETURN;

@@ -5,6 +5,7 @@
 #include "serializetable.h"
 #include "streams/operations.h"
 #include "unithelper.h"
+#include "../generic/makeowning.h"
 
 namespace Engine {
 namespace Serialize {
@@ -99,7 +100,7 @@ namespace Serialize {
             },
             [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) {
                 Unit *unit = static_cast<Unit *>(_unit);
-                T dummy;
+                MakeOwning_t<T> dummy;
                 read(in, dummy, name, CallerHierarchyPtr { hierarchy.append(unit) });
                 (unit->*Setter)(std::move(dummy));
             },

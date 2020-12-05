@@ -9,10 +9,10 @@ namespace Widgets {
         using Widget::Widget;
         virtual ~Image() = default;
 
-        void setImageByName(const std::string &name);
+        void setImageByName(const std::string_view &name);
         void setImage(Resources::ResourceType<Resources::ImageLoader> *image);
 
-        std::string getImageName() const;
+        std::string_view getImageName() const;
         Resources::ResourceType<Resources::ImageLoader> *image() const;
 
         Resources::ResourceType<Resources::ImageLoader> *resource() const override;

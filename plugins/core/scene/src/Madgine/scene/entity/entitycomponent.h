@@ -17,17 +17,19 @@ namespace Scene {
         using VirtualEntityComponentBase = NamedComponent<T, EntityComponentVirtualBase<T>>;
 
         template <typename T, typename Base = EntityComponentBase>
-        struct EntityComponent : VirtualScope<T, Serialize::VirtualUnit<T, NamedComponent<T, EntityComponentComponent<T, Base>>>> {
-            using VirtualScope<T, Serialize::VirtualUnit<T, NamedComponent<T, EntityComponentComponent<T, Base>>>>::VirtualScope;
-
-            const std::string_view &key() const override
-            {
-                return this->componentName();
-            }
+        struct EntityComponent : NamedComponent<T, EntityComponentComponent<T, Base>> {
+            using NamedComponent<T, EntityComponentComponent<T, Base>>::NamedComponent;
         };
 
-#define REGISTER_ENTITYCOMPONENT(Name, target) \
-    Engine::Threading::TaskGuard __##Name##_guard { []() { Engine::Scene::Entity::sComponentsByName()[#Name] = target; }, []() { Engine::Scene::Entity::sComponentsByName().erase(#Name); } };
+#define REGISTER_ENTITYCOMPONENT(Name, target)                               \
+    Engine::Threading::TaskGuard __##Name##_guard {                          \
+        []() {                                                               \
+            Engine::Scene::Entity::sComponentsByName()[#Name] = target;      \
+        },                                                                   \
+        []() {                                                               \
+            Engine::Scene::Entity::sComponentsByName().erase(#Name);         \
+        }                                                                    \
+    };
 
 #define ENTITYCOMPONENTVIRTUALBASE_IMPL(Name, FullType) \
     COMPONENT_NAME(Name, FullType)                      \
@@ -40,7 +42,10 @@ namespace Scene {
     NAMED_UNIQUECOMPONENT(Name, FullType)                                      \
     RegisterType(Engine::Scene::Entity::EntityComponentList<FullType>);        \
     UNIQUECOMPONENT2(Engine::Scene::Entity::EntityComponentList<FullType>, _2) \
-    REGISTER_ENTITYCOMPONENT(Name, Engine::indexRef<FullType>())
+    REGISTER_ENTITYCOMPONENT(Name, Engine::indexRef<FullType>())               \
+    METATABLE_BEGIN_EX(FullType##Ptr, 1)                                       \
+    READONLY_PROPERTY_EX(Get, get, 2)                                          \
+    METATABLE_END_EX(FullType##Ptr, 3)
 
     }
 }

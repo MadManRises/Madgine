@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Modules/keyvalueutil/virtualscopebase.h"
+#include "Modules/keyvalue/virtualscopebase.h"
 #include "Modules/madgineobject/madgineobject.h"
-#include "Modules/threading/slot.h"
 #include "Modules/serialize/virtualserializableunit.h"
+#include "Modules/threading/slot.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
@@ -15,7 +15,7 @@ namespace UI {
         std::function<bool(Widgets::WidgetBase *)> mInit;
     };
 
-    struct MADGINE_UI_EXPORT Handler : MadgineObject<Handler>, VirtualScopeBase<Serialize::VirtualSerializableUnitBase<>> {
+    struct MADGINE_UI_EXPORT Handler : MadgineObject<Handler>, Serialize::VirtualSerializableUnitBase<VirtualScopeBase, Serialize::SerializableUnitBase> {
         SERIALIZABLEUNIT(Handler);
 
         Handler(UIManager &ui);
