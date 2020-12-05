@@ -16,7 +16,7 @@ namespace Scene {
         struct EntityComponentPtrBase;
 
         template <>
-        struct MODULES_EXPORT EntityComponentPtrBase<EntityComponentBase> : ScopeBase {
+        struct MADGINE_SCENE_EXPORT EntityComponentPtrBase<EntityComponentBase> : ScopeBase {
             EntityComponentPtrBase();
 
             EntityComponentPtrBase(EntityComponentHandle<EntityComponentBase> data, size_t index, SceneManager *sceneMgr);
@@ -61,7 +61,7 @@ namespace Scene {
         };
 
         template <>
-        struct MODULES_EXPORT EntityComponentPtrBase<const EntityComponentBase> : ScopeBase {
+        struct MADGINE_SCENE_EXPORT EntityComponentPtrBase<const EntityComponentBase> : ScopeBase {
             EntityComponentPtrBase();
 
             EntityComponentPtrBase(EntityComponentHandle<const EntityComponentBase> data, size_t index, SceneManager *sceneMgr);
@@ -99,9 +99,6 @@ namespace Scene {
             size_t mIndex;
             SceneManager *mSceneMgr;
         };
-
-        template struct MODULES_EXPORT EntityComponentPtrBase<EntityComponentBase>;
-        template struct MODULES_EXPORT EntityComponentPtrBase<const EntityComponentBase>;
 
         template <typename T>
         struct EntityComponentPtrBase : ScopeBase {
