@@ -7,6 +7,7 @@
 #include "entityhandle.h"
 #include "entityptr.h"
 #include "Modules/generic/container/container_api.h"
+#include "Modules/keyvalue/typedscopeptr.h"
 
 namespace Engine {
 namespace Scene {
