@@ -61,7 +61,7 @@ namespace Filesystem {
         auto result = readlink("/proc/self/exe", buffer, sizeof(buffer));
         assert(result > 0);
 
-        return Path(buffer).stem();
+        return std::string { Path(buffer).stem() };
     }
 
     Path appDataPath()
