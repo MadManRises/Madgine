@@ -18,13 +18,6 @@ namespace Engine {
 namespace Scene {
     namespace Entity {
 
-        void Transform::finalize(const EntityPtr &e)
-        {
-            if (mParent.mIndex) {
-                e.sceneMgr()->entityComponentList<Transform>()->reset(mParent.mIndex);
-            }
-        }
-
         Matrix4 Transform::matrix() const
         {
             return TransformMatrix(mPosition, mScale, mOrientation);
@@ -37,16 +30,10 @@ namespace Scene {
 
         Matrix4 Transform::parentMatrix(const EntityComponentList<Transform> &transforms) const
         {
-            transforms->update(mParent.mIndex);
-            if (mParent.mIndex)
-                return transforms.get(mParent.mIndex)->worldMatrix(transforms);
+            if (mParent)
+                return transforms.get(mParent)->worldMatrix(transforms);
             else
                 return Matrix4::IDENTITY;
-        }
-
-        void Transform::updateParent(const EntityComponentList<Transform> &transforms) const
-        {
-            transforms->update(mParent.mIndex);
         }
 
         void Transform::setParent(const EntityComponentPtr<Transform> &parent)

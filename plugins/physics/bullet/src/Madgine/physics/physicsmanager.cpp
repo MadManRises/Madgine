@@ -109,10 +109,6 @@ namespace Physics {
     void PhysicsManager::update(std::chrono::microseconds timeSinceLastFrame)
     {
         mData->mWorld.stepSimulation(timeSinceLastFrame.count() / 1000000.0f, 1, 1.0f / 30.0f);
-
-        for (RigidBody &rigidBody : sceneMgr().entityComponentList<RigidBody>()) {            
-            rigidBody.update();
-        }
     }
 
     ContactPointIterator ContactPointList::begin()

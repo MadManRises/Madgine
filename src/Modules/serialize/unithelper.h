@@ -73,7 +73,7 @@ namespace Serialize {
             } else if constexpr (is_instance_v<std::remove_const_t<T>, std::unique_ptr>) {
                 UnitHelper<typename T::element_type>::setItemDataSynced(*item, b);
             } else if constexpr (is_iterable_v<T>) {
-                for (auto &t : physical(item)) {
+                for (auto &&t : physical(item)) {
                     UnitHelper<std::remove_reference_t<decltype(t)>>::setItemDataSynced(t, b);
                 }
             } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {

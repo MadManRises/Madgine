@@ -32,8 +32,6 @@ namespace Physics {
         float mass() const;
         void setMass(float mass);
 
-        void update();
-
         bool kinematic() const;
         void setKinematic(bool kinematic);
 

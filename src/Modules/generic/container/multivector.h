@@ -71,6 +71,11 @@ struct MultiVector {
         using pointer = typename MultiVector<Ty...>::pointer;
         using reference = typename MultiVector<Ty...>::reference;
 
+        iterator operator+(ptrdiff_t diff) const
+        {
+            return { mIndex + diff };
+        }
+
         size_t mIndex;
     };
 
@@ -92,6 +97,26 @@ struct MultiVector {
     reference emplace_back(std::piecewise_construct_t, Tuples &&... tuples)
     {
         return { { TupleUnpacker::invokeFromTuple(LIFT(std::get<std::vector<Ty>>(mData).emplace_back, &), std::forward<Tuples>(tuples))... } };
+    }
+
+    iterator erase(const iterator &where)
+    {
+        (std::get<std::vector<Ty>>(mData).erase(std::get<std::vector<Ty>>(mData).begin() + where.mIndex), ...);
+        return {
+            where.mIndex
+        };
+    }
+
+    iterator begin()
+    {
+        return { 0 };
+    }
+
+    pointer data()
+    {
+        return {
+            { std::get<std::vector<Ty>>(mData).data()... }
+        };
     }
 
     reference front()
@@ -129,14 +154,14 @@ struct MultiVector {
     }
 
     template <size_t I>
-    decltype(auto) get() {
+    decltype(auto) get()
+    {
         return std::get<I>(mData);
     }
 
 private:
     std::tuple<std::vector<Ty>...> mData;
 };
-
 
 template <typename C, typename... Ty>
 struct container_api_impl<C, MultiVector<Ty...>> : C {
@@ -182,7 +207,7 @@ struct container_api_impl<C, MultiVector<Ty...>> : C {
     template <typename... _Ty>
     decltype(auto) emplace_back(_Ty &&... args)
     {
-        return this->emplace(this->end(), std::forward<_Ty>(args)...);
+        return C::emplace_back(std::forward<_Ty>(args)...);
     }
 
     reference at(size_t i)
@@ -206,12 +231,10 @@ struct container_api_impl<C, MultiVector<Ty...>> : C {
     }
 
     template <size_t I>
-    decltype(auto) get() {
+    decltype(auto) get()
+    {
         return C::template get<I>();
     }
-    
 };
-
-
 
 }

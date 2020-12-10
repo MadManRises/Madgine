@@ -10,8 +10,6 @@
 
 #include "Modules/generic/future.h"
 
-#include "entitycomponentptr.h"
-
 #include "Modules/serialize/syncableunit.h"
 
 namespace Engine {
@@ -38,9 +36,9 @@ namespace Scene {
             const std::string &name() const;
 
             template <typename T>
-            auto addComponent(const EntityPtr &self, const ObjectPtr &table = {})
+            auto addComponent(const ObjectPtr &table = {})
             {
-                return addComponent(component_index<T>(), self, table).then([](const EntityComponentPtr<EntityComponentBase> &comp) { return static_cast<EntityComponentPtr<T>>(comp); });
+                return EntityComponentPtr<T> { addComponent(component_index<T>(), table) };
             }
 
             template <typename T>
@@ -50,33 +48,30 @@ namespace Scene {
             }
 
             template <typename T>
-            EntityComponentPtr<T> getComponent(const EntityPtr &self)
+            EntityComponentPtr<T> getComponent()
             {
-                return static_cast<EntityComponentPtr<T>>(getComponent(component_index<T>(), self));
+                return static_cast<EntityComponentPtr<T>>(getComponent(component_index<T>()));
             }
 
             template <typename T>
-            EntityComponentPtr<const T> getComponent(const EntityPtr &self) const
+            EntityComponentPtr<const T> getComponent() const
             {
-                return static_cast<EntityComponentPtr<const T>>(getComponent(component_index<T>(), self));
+                return static_cast<EntityComponentPtr<const T>>(getComponent(component_index<T>()));
             }
 
-            EntityComponentPtr<EntityComponentBase> getComponent(size_t i, const EntityPtr &self);
-            EntityComponentPtr<const EntityComponentBase> getComponent(size_t i, const EntityPtr &self) const;
-            EntityComponentPtr<EntityComponentBase> getComponent(const std::string_view &name, const EntityPtr &self);
-            EntityComponentPtr<const EntityComponentBase> getComponent(const std::string_view &name, const EntityPtr &self) const;
+            EntityComponentPtr<EntityComponentBase> getComponent(uint32_t i);
+            EntityComponentPtr<const EntityComponentBase> getComponent(uint32_t i) const;
+            EntityComponentPtr<EntityComponentBase> getComponent(const std::string_view &name);
+            EntityComponentPtr<const EntityComponentBase> getComponent(const std::string_view &name) const;
 
-            EntityComponentPtr<EntityComponentBase> toEntityComponentPtr(const std::pair<const uint32_t, EntityComponentOwningHandle<EntityComponentBase>> &p);
+            EntityComponentPtr<EntityComponentBase> toEntityComponentPtr(EntityComponentOwningHandle<EntityComponentBase> p);
 
+            struct MADGINE_SCENE_EXPORT Helper {
+                Entity *mEntity;
+                EntityComponentPtr<EntityComponentBase> operator()(EntityComponentOwningHandle<EntityComponentBase> p);
+            };
             decltype(auto) components()
-            {
-                struct Helper {
-                    Entity *mEntity;
-                    EntityComponentPtr<EntityComponentBase> operator()(const std::pair<const uint32_t, EntityComponentOwningHandle<EntityComponentBase>> &p)
-                    {
-                        return mEntity->toEntityComponentPtr(p);
-                    }
-                };
+            {                
                 return transformIt(mComponents, Helper { this });
             }
 
@@ -89,8 +84,8 @@ namespace Scene {
             bool hasComponent(size_t i);
             bool hasComponent(const std::string_view &name);
 
-            EntityComponentPtr<EntityComponentBase> addComponent(const std::string_view &name, const EntityPtr &self, const ObjectPtr &table = {});
-            EntityComponentPtr<EntityComponentBase> addComponent(size_t i, const EntityPtr &self, const ObjectPtr &table = {});
+            EntityComponentPtr<EntityComponentBase> addComponent(const std::string_view &name, const ObjectPtr &table = {});
+            EntityComponentPtr<EntityComponentBase> addComponent(size_t i, const ObjectPtr &table = {});
             void removeComponent(const std::string_view &name);
             void removeComponent(size_t i);
             void clearComponents();
@@ -115,20 +110,18 @@ namespace Scene {
 
             App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
-            void handleEntityEvent(const typename std::map<uint32_t, EntityComponentOwningHandle<EntityComponentBase>>::iterator &it, int op);
-
-            void update();
+            void handleEntityEvent(const typename std::set<EntityComponentOwningHandle<EntityComponentBase>>::iterator &it, int op);
 
         public:
             std::string mName;
 
         private:
-            std::tuple<uint32_t, EntityComponentOwningHandle<EntityComponentBase>> createComponentTuple(const std::string &name);
-            std::tuple<std::pair<const char *, std::string_view>> storeComponentCreationData(const std::pair<const uint32_t, EntityComponentOwningHandle<EntityComponentBase>> &comp) const;
+            std::tuple<EntityComponentOwningHandle<EntityComponentBase>> createComponentTuple(const std::string &name);
+            std::tuple<std::pair<const char *, std::string_view>> storeComponentCreationData(const EntityComponentOwningHandle<EntityComponentBase> &comp) const;
 
             bool mLocal;
 
-            SERIALIZABLE_CONTAINER(mComponents, std::map<uint32_t, EntityComponentOwningHandle<EntityComponentBase>>, ParentFunctor<&Entity::handleEntityEvent>);
+            SERIALIZABLE_CONTAINER(mComponents, std::set<EntityComponentOwningHandle<EntityComponentBase>, std::less<>>, ParentFunctor<&Entity::handleEntityEvent>);
 
             SceneManager &mSceneManager;
         };

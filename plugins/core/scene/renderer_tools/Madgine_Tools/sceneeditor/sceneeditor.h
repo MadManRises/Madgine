@@ -72,13 +72,13 @@ namespace Tools {
             std::list<EntityNode> mChildren;
         };
         std::list<EntityNode> mEntityCache;
-        std::vector<EntityNode *> mEntityMapping;
+        std::map<Scene::Entity::EntityPtr, EntityNode *> mEntityMapping;
 
         void updateEntityCache();
         bool updateEntityCache(EntityNode &node, const Scene::Entity::EntityPtr &parent = {});
-        void createEntityMapping(size_t index);
-        void iterateMapping(EntityNode &node);
+        void createEntityMapping(Scene::Entity::EntityPtr e);
         void renderHierarchyEntity(EntityNode &entity);
+        void eraseNode(EntityNode &node);
 
         //Settings
         Vector4 mBoneForward = { 1, 0, 0, 0 };

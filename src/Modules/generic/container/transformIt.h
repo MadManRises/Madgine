@@ -54,9 +54,14 @@ struct TransformItContainer {
             return mIt == other.mIt;
         }
 
-        std::ptrdiff_t operator-(const TransformIterator<It> &other) const
+        difference_type operator-(const TransformIterator<It> &other) const
         {
             return mIt - other.mIt;
+        }
+
+        TransformIterator<It> operator+(difference_type diff) const
+        {
+            return { mIt + diff, mConverter };
         }
 
     private:
@@ -127,6 +132,10 @@ public:
         return mContainer.empty();
     }
 
+    size_t size() const {
+        return mContainer.size();
+    }
+
 private:
     T mContainer;
     mutable Converter mConverter;
@@ -135,7 +144,7 @@ private:
 template <typename Converter, typename T>
 TransformItContainer<T, Converter> transformIt(T &&t, Converter conv = {})
 {
-    return { t, conv };
+    return { std::forward<T>(t), conv };
 }
 
 struct ToPointerConverter {

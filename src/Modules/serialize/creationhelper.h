@@ -126,11 +126,11 @@ namespace Serialize {
                 typename container_traits<Op>::emplace_return it;
                 if constexpr (std::is_const_v<typename container_traits<Op>::value_type>) {
                     std::remove_const_t<typename container_traits<Op>::value_type> temp = TupleUnpacker::constructFromTuple<std::remove_const_t<typename container_traits<Op>::value_type>>(readCreationData(in, parent));
-                    read(in, temp, "Item", parent);
+                    read(in, temp, "Item", CallerHierarchyPtr { parent });
                     it = container_traits<Op>::emplace(op, where, std::move(temp));
                 } else {
                     it = TupleUnpacker::invokeExpand(LIFT(container_traits<Op>::emplace), op, where, readCreationData(in, parent));
-                    read(in, *it, "Item", parent);
+                    read(in, *it, "Item", CallerHierarchyPtr { parent });
                 }
                 assert(container_traits<Op>::was_emplace_successful(it));
                 return it;

@@ -265,8 +265,10 @@ struct container_traits<KeyValueSet<T, Cmp>> : container_traits<std::set<T, Cmp>
     {
     }
 
-    static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const const_iterator &it, size_t count = 1)
+    static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const iterator &it, bool wasIn, size_t count = 1)
     {
+        if (wasIn)
+            handle = it;
     }
 
     static iterator toIterator(container &c, const position_handle &handle)

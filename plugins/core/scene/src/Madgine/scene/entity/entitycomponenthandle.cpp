@@ -9,21 +9,26 @@
 
 #include "../scenemanager.h"
 
+#include "entitycomponentlistbase.h"
+
+#include "entitycomponentptr.h"
+
 namespace Engine {
 namespace Scene {
+    namespace Entity {
 
-    void Entity::entityComponentHelperWrite(Serialize::SerializeOutStream &out, GenerationContainerIndex &index, const char *name, SceneManager *mgr, size_t componentIndex)
-    {        
-        write(out, mgr->toEntityPtr(mgr->entityComponentList(componentIndex).getEntity(index, mgr)).get(), name);
+        void entityComponentHelperWrite(Serialize::SerializeOutStream &out, const EntityComponentHandle<EntityComponentBase> &index, const char *name, SceneManager *mgr)
+        {
+            write(out, mgr->entityComponentList(index.mType).getEntity(index), name);
+        }
+
+        void entityComponentHelperRead(Serialize::SerializeInStream &in, EntityComponentHandle<EntityComponentBase> &index, const char *name, SceneManager *mgr)
+        {
+            Entity *entity;
+            read(in, entity, name);
+            index = entity->getComponent(index.mType).handle();
+        }
+
     }
-
-    void Entity::entityComponentHelperRead(Serialize::SerializeInStream &in, GenerationContainerIndex &index, const char *name, SceneManager *mgr, size_t componentIndex)
-    {
-        Entity *entity;
-        read(in, entity, name);
-        EntityComponentPtr<EntityComponentBase> ptr = mgr->toEntityPtr(entity).getComponent(index);
-        index = static_cast<EntityComponentHandle<EntityComponentBase>>(ptr).mIndex;
-    }
-
 }
 }

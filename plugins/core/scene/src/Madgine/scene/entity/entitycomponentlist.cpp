@@ -10,11 +10,6 @@ namespace Engine {
 namespace Scene {
     namespace Entity {
 
-        EntityHandle copyEntityHandle(SceneManager *mgr, const EntityHandle &entity)
-        {
-            return mgr->copyEntityHandle(entity);
-        }
-
     }
 }
 }

@@ -872,12 +872,16 @@ struct container_traits<GenerationContainer<C>, void> {
             ++handle;
     }
 
-    static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const const_iterator &it, size_t count = 1)
+    static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const const_iterator &it, bool wasIn, size_t count = 1)
     {
         size_t pivot = std::distance(c.begin(), it);
-        assert(handle < pivot || handle >= pivot + count);
-        if (handle > pivot)
-            handle -= count;
+        if (wasIn) {
+            handle = pivot;
+        } else {
+            assert(handle < pivot || handle >= pivot + count);
+            if (handle > pivot)
+                handle -= count;
+        }
     }
 
     static iterator toIterator(container &c, const position_handle &handle)

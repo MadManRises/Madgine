@@ -1,13 +1,13 @@
 #pragma once
 
+#include "Modules/generic/container/container_api.h"
 #include "Modules/generic/container/generationvector.h"
 #include "Modules/generic/container/multivector.h"
+#include "Modules/keyvalue/typedscopeptr.h"
 #include "entitycomponentcollector.h"
 #include "entitycomponentlistbase.h"
 #include "entityhandle.h"
 #include "entityptr.h"
-#include "Modules/generic/container/container_api.h"
-#include "Modules/keyvalue/typedscopeptr.h"
 
 namespace Engine {
 namespace Scene {
@@ -18,9 +18,9 @@ namespace Scene {
         template <typename T>
         struct EntityComponentList : EntityComponentListComponent<EntityComponentList<T>> {
 
-            using Vector = container_api<GenerationContainer<MultiVector<T, EntityHandle>>>;
+            using Vector = container_api<MultiVector<T, Entity *>>;
 
-            Vector *operator->() override final
+            Vector *operator->()
             {
                 return &mData;
             }
@@ -30,48 +30,54 @@ namespace Scene {
                 return &mData;
             }
 
-            T *get(GenerationContainerIndex &index) override final
+            T *get(const EntityComponentHandle<EntityComponentBase> &index) override final
             {
-                return &mData.at(index).template get<0>();
+                return &mData.at(index.mIndex).template get<0>();
             }
 
-            TypedScopePtr getTyped(GenerationContainerIndex &index) override final
+            TypedScopePtr getTyped(const EntityComponentHandle<EntityComponentBase> &index) override final
             {
-                return &mData.at(index).template get<0>();
+                return &mData.at(index.mIndex).template get<0>();
             }
 
-            void init(GenerationContainerIndex &index, const EntityPtr &entity) override final
-            {
-            }
-
-            void finalize(GenerationContainerIndex &index, const EntityPtr &entity) override final
+            void init(const EntityComponentHandle<EntityComponentBase> &index, Entity *entity) override final
             {
             }
 
-            const T *get(GenerationContainerIndex &index) const
+            void finalize(const EntityComponentHandle<EntityComponentBase> &index, Entity *entity) override final
             {
-                return &mData.at(index).template get<0>();
             }
 
-            EntityHandle getEntity(GenerationContainerIndex& index, SceneManager *mgr) const override final {
-                mData.update(index);
+            T *get(const EntityComponentHandle<T> &index)
+            {
+                return &mData.at(index.mIndex).template get<0>();
+            }
+
+            const T *get(const EntityComponentHandle<T> &index) const
+            {
+                return &mData.at(index.mIndex).template get<0>();
+            }
+
+            Entity *getEntity(const EntityComponentHandle<EntityComponentBase> &index) const override final
+            {
+                assert(index.mType == component_index<T>());
                 if (index)
-                    return copyEntityHandle(mgr, mData.at(index).template get<1>());
+                    return mData.at(index.mIndex).template get<1>();
                 else
                     return {};
             }
 
-            EntityComponentOwningHandle<EntityComponentBase> emplace(const ObjectPtr &table, const EntityPtr &entity) override final
+            EntityComponentOwningHandle<EntityComponentBase> emplace(const ObjectPtr &table, Entity *entity) override final
             {
-                return {
-                    mData.emplace(std::piecewise_construct, std::forward_as_tuple(table), std::make_tuple(entity)).copyIndex()
+                return
+                {
+                    static_cast<uint32_t>(&mData.emplace_back(std::piecewise_construct, std::forward_as_tuple(table), std::make_tuple(entity)) - mData.data()), static_cast<uint32_t>(component_index<T>())
                 };
             }
 
-            void erase(GenerationContainerIndex &index, GenerationVector<Entity> &vec) override final
+            void erase(const EntityComponentHandle<EntityComponentBase> &index) override final
             {
-                vec.reset(mData.at(index).template get<1>().mIndex);
-                mData.erase(index);
+                //mData.erase(mData.begin() + index.mIndex);
             }
 
             bool empty() override final
@@ -94,7 +100,8 @@ namespace Scene {
                 return mData.template get<0>().end();
             }
 
-            T& front() {
+            T &front()
+            {
                 return mData.template get<0>().front();
             }
 

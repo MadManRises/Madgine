@@ -81,6 +81,9 @@ struct OffsetPtrTag;
 template <typename T, size_t>
 struct TaggedPlaceholder;
 
+template <typename T>
+struct ControlBlock;
+
 namespace CLI {
     struct CLICore;
     struct ParameterBase;

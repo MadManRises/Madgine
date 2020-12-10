@@ -32,7 +32,8 @@ struct Pib {
         return first;
     }
 
-    bool success() const {
+    bool success() const
+    {
         return second;
     }
 
@@ -44,7 +45,6 @@ template <typename C, typename = void>
 struct container_traits : container_traits<typename underlying_container<C>::type> {
     typedef C container;
 };
-
 
 template <typename T>
 struct container_traits<std::list<T>, void> {
@@ -66,7 +66,6 @@ struct container_traits<std::list<T>, void> {
 
     typedef iterator emplace_return;
 
-    
     template <typename... _Ty>
     static emplace_return emplace(container &c, const const_iterator &where, _Ty &&... args)
     {
@@ -94,8 +93,10 @@ struct container_traits<std::list<T>, void> {
     {
     }
 
-    static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const const_iterator &it, size_t count = 1)
+    static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const iterator &it, bool wasIn, size_t count = 1)
     {
+        if (wasIn)
+            handle = it;
     }
 
     static iterator toIterator(container &c, const position_handle &handle)
@@ -154,13 +155,12 @@ struct container_traits<std::vector<T>, void> {
 
     typedef iterator emplace_return;
 
-
     template <typename... _Ty>
     static emplace_return emplace(container &c, const const_iterator &where, _Ty &&... args)
     {
         return c.emplace(where, std::forward<_Ty>(args)...);
     }
-    
+
     static bool was_emplace_successful(const emplace_return &)
     {
         return true;
@@ -190,12 +190,16 @@ struct container_traits<std::vector<T>, void> {
             ++handle;
     }
 
-    static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const const_iterator &it, size_t count = 1)
+    static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const const_iterator &it, bool wasIn, size_t count = 1)
     {
         size_t pivot = std::distance(c.begin(), it);
-        assert(handle < pivot || handle >= pivot + count);
-        if (handle > pivot)
-            handle -= count;
+        if (wasIn) {
+            handle = pivot;
+        } else {
+            assert(handle < pivot || handle >= pivot + count);
+            if (handle > pivot)
+                handle -= count;
+        }
     }
 
     static iterator toIterator(container &c, const position_handle &handle)
@@ -262,8 +266,10 @@ struct container_traits<std::set<T, Cmp>, void> {
     {
     }
 
-    static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const const_iterator &it, size_t count = 1)
+    static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const iterator &it, bool wasIn, size_t count = 1)
     {
+        if (wasIn)
+            handle = it;
     }
 
     static iterator toIterator(container &c, const position_handle &handle)
@@ -303,7 +309,6 @@ struct container_traits<std::map<K, T, Cmp>, void> {
 
     typedef Pib<iterator> emplace_return;
 
-    
     template <typename... _Ty>
     static emplace_return emplace(container &c, const const_iterator &where, _Ty &&... args)
     {
@@ -331,8 +336,10 @@ struct container_traits<std::map<K, T, Cmp>, void> {
     {
     }
 
-    static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const const_iterator &it, size_t count = 1)
+    static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const iterator &it, bool wasIn, size_t count = 1)
     {
+        if (wasIn)
+            handle = it;
     }
 
     static iterator toIterator(container &c, const position_handle &handle)

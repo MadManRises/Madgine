@@ -19,6 +19,8 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
+#include "entity/entitycomponentlistbase.h"
+
 UNIQUECOMPONENT(Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>);
 
 METATABLE_BEGIN(Engine::Scene::SceneManager)
@@ -74,11 +76,6 @@ namespace Scene {
         }
     }
 
-    decltype(SceneManager::mEntities) &SceneManager::entities()
-    {
-        return mEntities;
-    }
-
     SceneComponentBase &SceneManager::getComponent(size_t i, bool init)
     {
         return getChild(mSceneComponents.get(i), init);
@@ -116,20 +113,17 @@ namespace Scene {
             //PROFILE(component->componentName());
             component->update(std::chrono::duration_cast<std::chrono::microseconds>(timeSinceLastFrame));
         }
-
-        for (Entity::Entity &entity : mEntities)
-            entity.update();
     }
 
     Entity::EntityPtr SceneManager::findEntity(const std::string &name)
     {
-        auto it = std::find_if(mEntities.begin(), mEntities.end(), [&](const Entity::Entity &e) {
+        auto it = std::find_if(mEntities.refcounted_begin(), mEntities.refcounted_end(), [&](const Entity::Entity &e) {
             return e.key() == name;
         });
         if (it == mEntities.end()) {
             std::terminate();
         }
-        return it;
+        return *it;
     }
 
     std::string SceneManager::generateUniqueName()
@@ -137,13 +131,15 @@ namespace Scene {
         return "Madgine_AutoGen_Name_"s + std::to_string(++mItemCount);
     }
 
-    void SceneManager::remove(const Entity::EntityPtr &e)
+    void SceneManager::remove(Entity::Entity *e)
     {
-
+        
         if (e->isLocal()) {
-            mLocalEntities.erase(e.it());
+            auto it = std::find_if(mLocalEntities.begin(), mLocalEntities.end(), [=](Entity::Entity &ent) { return &ent == e; });
+            mLocalEntities.erase(it);
         } else {
-            mEntities.erase(e.it());
+            auto it = std::find_if(mEntities.begin(), mEntities.end(), [=](Entity::Entity &ent) { return &ent == e; });
+            mEntities.erase(it);
         }
     }
 
@@ -163,7 +159,7 @@ namespace Scene {
 
     Entity::Entity *SceneManager::makeLocalCopy(Entity::Entity &&e)
     {
-        return &*mLocalEntities.emplace(std::move(e), true);
+        return &mLocalEntities.emplace_back(std::move(e), true);
     }
 
     std::tuple<SceneManager &, bool, std::string> SceneManager::createNonLocalEntityData(const std::string &name)
@@ -190,7 +186,7 @@ namespace Scene {
     }*/
 
     Future<Entity::EntityPtr> SceneManager::createEntity(const std::string &behavior, const std::string &name,
-        const std::function<void(const Entity::EntityPtr &)> &init)
+        const std::function<void(Entity::Entity &)> &init)
     {
         //ValueType behaviorTable /* = app().table()[behavior]*/;
         ObjectPtr table;
@@ -201,16 +197,15 @@ namespace Scene {
             if (!behavior.empty())
                 LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
         }
-        Future<typename GenerationVector<Entity::Entity>::iterator> f;
+        Future<typename refcounted_deque<Entity::Entity>::iterator> f;
         if (init) {
             auto initWrap = [&](Entity::Entity &e) {
-                init(toEntityPtr(&e));
+                init(e);
             };
             f = TupleUnpacker::invokeExpand(&decltype(mEntities)::emplace<SceneManager &, bool, std::string, ObjectPtr>, &mEntities, mEntities.end(), tuple_cat(createEntityData(name, false), std::make_tuple(table))).init(initWrap);
-        }
-        else
+        } else
             f = TupleUnpacker::invokeExpand(&decltype(mEntities)::emplace<SceneManager &, bool, std::string, ObjectPtr>, &mEntities, mEntities.end(), tuple_cat(createEntityData(name, false), std::make_tuple(table)));
-        return std::move(f);
+        return std::move(f).then([](const typename refcounted_deque<Entity::Entity>::iterator &it) { return Entity::EntityPtr { it.get_refcounted() }; });
     }
 
     Entity::EntityPtr SceneManager::createLocalEntity(const std::string &behavior, const std::string &name)
@@ -225,25 +220,10 @@ namespace Scene {
                 LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
         }
         const std::tuple<SceneManager &, bool, std::string> &data = createEntityData(name, true);
-        return mLocalEntities.emplace(std::get<0>(data), std::get<1>(data), std::get<2>(data), table);
+        return mLocalEntities.emplace(mLocalEntities.end(), std::get<0>(data), std::get<1>(data), std::get<2>(data), table).get_refcounted();
     }
 
-    Entity::EntityPtr SceneManager::toEntityPtr(Entity::Entity *e)
-    {
-        return e ? std::next(mEntities.begin(), e - &mEntities.front()) : Entity::EntityPtr{};
-    }
-
-    Entity::EntityPtr SceneManager::toEntityPtr(const Entity::EntityHandle &e)
-    {
-        return mEntities.fetch(e.mIndex);
-    }
-
-    Entity::EntityHandle SceneManager::copyEntityHandle(const Entity::EntityHandle &h)
-    {
-        return { mEntities.copy(h.mIndex) };
-    }
-
-    Threading::SignalStub<const GenerationVector<Entity::Entity>::iterator &, int> &SceneManager::entitiesSignal()
+    Threading::SignalStub<const refcounted_deque<Entity::Entity>::iterator &, int> &SceneManager::entitiesSignal()
     {
         return mEntities.observer().signal();
     }

@@ -14,11 +14,12 @@ namespace Scene {
         struct Mesh;
 
         struct EntityPtr;
-        struct EntityHandle;
         template <typename T>
         struct EntityComponentPtr;
         template <typename T>
         struct EntityComponentList;
+        template <typename T>
+        struct EntityComponentOwningHandle;
     }
 
     struct LightManager;

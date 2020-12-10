@@ -510,10 +510,7 @@ namespace Serialize {
         {
             bool test = mActiveIterator == _traits::toPositionHandle(*this, it);
             iterator newIt = Base::erase(it);
-            if (test)
-                mActiveIterator = _traits::toPositionHandle(*this, newIt);
-            else
-                _traits::revalidateHandleAfterRemove(mActiveIterator, *this, newIt);
+            _traits::revalidateHandleAfterRemove(mActiveIterator, *this, newIt, test);
             return newIt;
         }
 
@@ -527,17 +524,15 @@ namespace Serialize {
                 ++count;
             }
             iterator newIt = Base::erase(from, to);
-            if (test)
-                mActiveIterator = _traits::toPositionHandle(*this, newIt);
-            else
-                _traits::revalidateHandleAfterRemove(mActiveIterator, *this, newIt, count);
+            _traits::revalidateHandleAfterRemove(mActiveIterator, *this, newIt, test, count);
             return newIt;
         }
 
         void clear_intern()
         {
+            size_t oldSize = size();
             Base::clear();
-            mActiveIterator = _traits::toPositionHandle(*this, Base::begin());
+            _traits::revalidateHandleAfterRemove(mActiveIterator, *this, Base::begin(), true, oldSize);
         }
 
     protected:

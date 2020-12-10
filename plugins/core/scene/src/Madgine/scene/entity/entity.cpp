@@ -1,5 +1,7 @@
 #include "../../scenelib.h"
 
+#include "entitycomponentptr.h"
+
 #include "entity.h"
 
 #include "componentexception.h"
@@ -91,35 +93,35 @@ namespace Scene {
             return mName;
         }
 
-        EntityComponentPtr<EntityComponentBase> Entity::getComponent(size_t i, const EntityPtr &self)
+        EntityComponentPtr<EntityComponentBase> Entity::getComponent(uint32_t i)
         {
             auto it = mComponents.physical().find(i);
             if (it == mComponents.physical().end())
                 return {};
-            return { { mSceneManager.entityComponentList(i)->copy(it->second.mIndex) }, i, self.sceneMgr() };
+            return { *it, &mSceneManager };
         }
 
-        EntityComponentPtr<const EntityComponentBase> Entity::getComponent(size_t i, const EntityPtr &self) const
+        EntityComponentPtr<const EntityComponentBase> Entity::getComponent(uint32_t i) const
         {
             auto it = mComponents.physical().find(i);
             if (it == mComponents.physical().end())
                 return {};
-            return { { mSceneManager.entityComponentList(i)->copy(it->second.mIndex) }, i, self.sceneMgr() };
+            return { { *it }, &mSceneManager };
         }
 
-        EntityComponentPtr<EntityComponentBase> Entity::getComponent(const std::string_view &name, const EntityPtr &self)
+        EntityComponentPtr<EntityComponentBase> Entity::getComponent(const std::string_view &name)
         {
-            return getComponent(sComponentsByName()[name], self);
+            return getComponent(sComponentsByName()[name]);
         }
 
-        EntityComponentPtr<const EntityComponentBase> Entity::getComponent(const std::string_view &name, const EntityPtr &self) const
+        EntityComponentPtr<const EntityComponentBase> Entity::getComponent(const std::string_view &name) const
         {
-            return getComponent(sComponentsByName()[name], self);
+            return getComponent(sComponentsByName()[name]);
         }
 
-        EntityComponentPtr<EntityComponentBase> Entity::toEntityComponentPtr(const std::pair<const uint32_t, EntityComponentOwningHandle<EntityComponentBase>> &p)
+        EntityComponentPtr<EntityComponentBase> Entity::toEntityComponentPtr(EntityComponentOwningHandle<EntityComponentBase> p)
         {
-            return { EntityComponentHandle<EntityComponentBase> { mSceneManager.entityComponentList(p.first)->copy(p.second.mIndex) }, p.first, &mSceneManager };
+            return { p, &mSceneManager };
         }
 
         bool Entity::hasComponent(size_t i)
@@ -132,19 +134,19 @@ namespace Scene {
             return hasComponent(sComponentsByName()[name]);
         }
 
-        EntityComponentPtr<EntityComponentBase> Entity::addComponent(const std::string_view &name, const EntityPtr &self, const ObjectPtr &table)
+        EntityComponentPtr<EntityComponentBase> Entity::addComponent(const std::string_view &name, const ObjectPtr &table)
         {
-            return addComponent(sComponentsByName().at(name), self, table);
+            return addComponent(sComponentsByName().at(name), table);
         }
 
-        EntityComponentPtr<EntityComponentBase> Entity::addComponent(size_t i, const EntityPtr &self, const ObjectPtr &table)
+        EntityComponentPtr<EntityComponentBase> Entity::addComponent(size_t i, const ObjectPtr &table)
         {
             auto it = mComponents.physical().find(i);
             if (it != mComponents.physical().end()) {
-                return { { mSceneManager.entityComponentList(i)->copy(it->second.mIndex) }, i, self.sceneMgr() };
+                return { *it, &mSceneManager };
             } else {
-                auto pib = mComponents.try_emplace(i, mSceneManager.entityComponentList(i).emplace(table, self));
-                return EntityComponentPtr<EntityComponentBase> { { self.sceneMgr()->entityComponentList(i)->copy(pib.first->second.mIndex) }, i, self.sceneMgr() };
+                auto pib = mComponents.emplace(mSceneManager.entityComponentList(i).emplace(table, this));
+                return EntityComponentPtr<EntityComponentBase> { *pib.first, &mSceneManager };
             }
         }
 
@@ -157,35 +159,34 @@ namespace Scene {
         {
             auto it = mComponents.find(i);
             assert(it != mComponents.physical().end());
-            mSceneManager.entityComponentList(i).erase(it->second.mIndex, mSceneManager.entities());
+            mSceneManager.entityComponentList(i).erase(*it);
             mComponents.erase(it);
         }
 
         void Entity::clearComponents()
         {
             while (!mComponents.empty())
-                removeComponent(mComponents.begin()->first);
-        }
-
-        std::tuple<uint32_t, EntityComponentOwningHandle<EntityComponentBase>> Entity::createComponentTuple(const std::string &name)
-        {
-            uint32_t i = sComponentsByName().at(name);
-            return std::make_tuple(i, mSceneManager.entityComponentList(i).emplace({}, mSceneManager.toEntityPtr(this)));
-        }
-
-        std::tuple<std::pair<const char *, std::string_view>> Entity::storeComponentCreationData(const std::pair<const uint32_t, EntityComponentOwningHandle<EntityComponentBase>> &comp) const
-        {
-            for (const auto &p : sComponentsByName()) {
-                if (p.second == comp.first)
-                    return std::make_tuple(std::make_pair("type", p.first));
-            }
-            throw 0;
+                removeComponent(mComponents.begin()->mHandle.mType);
         }
 
         void Entity::remove()
         {
-            EntityPtr p = mSceneManager.toEntityPtr(this);
-            mSceneManager.remove(p);
+            mSceneManager.remove(this);
+        }
+
+        std::tuple<EntityComponentOwningHandle<EntityComponentBase>> Entity::createComponentTuple(const std::string &name)
+        {
+            uint32_t i = sComponentsByName().at(name);
+            return std::make_tuple(mSceneManager.entityComponentList(i).emplace({}, this));
+        }
+
+        std::tuple<std::pair<const char *, std::string_view>> Entity::storeComponentCreationData(const EntityComponentOwningHandle<EntityComponentBase> &comp) const
+        {
+            for (const auto &p : sComponentsByName()) {
+                if (p.second == comp.mHandle.mType)
+                    return std::make_tuple(std::make_pair("type", p.first));
+            }
+            throw 0;
         }
 
         SceneComponentBase &Entity::getSceneComponent(size_t i, bool init)
@@ -208,7 +209,7 @@ namespace Scene {
             return mLocal;
         }
 
-        void Entity::handleEntityEvent(const typename std::map<uint32_t, EntityComponentOwningHandle<EntityComponentBase>>::iterator &it, int op)
+        void Entity::handleEntityEvent(const typename std::set<EntityComponentOwningHandle<EntityComponentBase>>::iterator &it, int op)
         {
             switch (op) {
             case BEFORE | RESET:
@@ -216,19 +217,17 @@ namespace Scene {
             case AFTER | RESET:
                 throw "TODO";
             case AFTER | EMPLACE:
-                mSceneManager.entityComponentList(it->first).init(it->second.mIndex, mSceneManager.toEntityPtr(this));
+                mSceneManager.entityComponentList(it->mHandle.mType).init(*it, this);
                 break;
             case BEFORE | ERASE:
-                mSceneManager.entityComponentList(it->first).finalize(it->second.mIndex, mSceneManager.toEntityPtr(this));
+                mSceneManager.entityComponentList(it->mHandle.mType).finalize(*it, this);
                 break;
             }
         }
 
-        void Entity::update()
+        EntityComponentPtr<EntityComponentBase> Entity::Helper::operator()(EntityComponentOwningHandle<EntityComponentBase> p)
         {
-            for (const std::pair<const uint32_t, EntityComponentOwningHandle<EntityComponentBase>> &p : mComponents) {
-                mSceneManager.entityComponentList(p.first)->update(p.second.mIndex);
-            }
+            return mEntity->toEntityComponentPtr(p);
         }
     }
 }

@@ -26,8 +26,6 @@ namespace Scene {
 
             Transform &operator=(Transform &&) = default;
 
-            void finalize(const EntityPtr &e);
-
             const Vector3 &getPosition() const;
             const Vector3 &getScale() const;
             const Quaternion &getOrientation() const;
@@ -45,7 +43,6 @@ namespace Scene {
             Matrix4 worldMatrix(const EntityComponentList<Transform> &transforms) const;
             Matrix4 parentMatrix(const EntityComponentList<Transform> &transforms) const;
 
-            void updateParent(const EntityComponentList<Transform> &transforms) const;
             void setParent(const EntityComponentPtr<Transform> &parent);
             const EntityComponentHandle<Transform> &parent() const;
 

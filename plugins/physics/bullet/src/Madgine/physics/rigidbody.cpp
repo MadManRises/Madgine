@@ -105,7 +105,7 @@ namespace Physics {
 
         mShapeHandle.load("Cube");
 
-        mData = std::make_unique<Data>(entity.getComponent<Scene::Entity::Transform>(), mShapeHandle ? mShapeHandle->get()->get() : nullptr);
+        mData = std::make_unique<Data>(entity->getComponent<Scene::Entity::Transform>(), mShapeHandle ? mShapeHandle->get()->get() : nullptr);
 
         mData->add();
     }
@@ -159,11 +159,6 @@ namespace Physics {
                 mData->mRigidBody.clearForces();
             }
         }
-    }
-
-    void RigidBody::update()
-    {
-        mData->mTransform.update();
     }
 
     bool RigidBody::kinematic() const

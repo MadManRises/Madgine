@@ -10,14 +10,13 @@ namespace Scene {
         struct EntityComponentListBase {
             virtual ~EntityComponentListBase() = default;
 
-            virtual GenerationContainerBase *operator->() = 0;
-            virtual EntityComponentBase *get(GenerationContainerIndex &index) = 0;
-            virtual TypedScopePtr getTyped(GenerationContainerIndex &index) = 0;
-            virtual void init(GenerationContainerIndex &index, const EntityPtr &entity) = 0;
-            virtual void finalize(GenerationContainerIndex &index, const EntityPtr &entity) = 0;
-            virtual EntityHandle getEntity(GenerationContainerIndex &index, SceneManager *mgr) const = 0; 
-            virtual EntityComponentOwningHandle<EntityComponentBase> emplace(const ObjectPtr &table, const EntityPtr &entity) = 0;
-            virtual void erase(GenerationContainerIndex &index, GenerationVector<Entity> &vec) = 0;
+            virtual EntityComponentBase *get(const EntityComponentHandle<EntityComponentBase> &index) = 0;
+            virtual TypedScopePtr getTyped(const EntityComponentHandle<EntityComponentBase> &index) = 0;
+            virtual void init(const EntityComponentHandle<EntityComponentBase> &index, Entity *entity) = 0;
+            virtual void finalize(const EntityComponentHandle<EntityComponentBase> &index, Entity *entity) = 0;
+            virtual Entity *getEntity(const EntityComponentHandle<EntityComponentBase> &index) const = 0; 
+            virtual EntityComponentOwningHandle<EntityComponentBase> emplace(const ObjectPtr &table, Entity *entity) = 0;
+            virtual void erase(const EntityComponentHandle<EntityComponentBase> &index) = 0;
             virtual bool empty() = 0;
             virtual void clear() = 0;
         };

@@ -100,9 +100,9 @@ namespace UI {
 
         float ratio = (timeSinceLastFrame.count() / 1000000.0f);
 
-        mBricks.erase(std::remove_if(mBricks.begin(), mBricks.end(), [=](const Engine::Scene::Entity::EntityPtr &e) {
-            Scene::Brick *brick = e.getComponent<Scene::Brick>();
-            Engine::Scene::Entity::Transform *t = e.getComponent<Engine::Scene::Entity::Transform>();
+        mBricks.remove_if([=](const Engine::Scene::Entity::EntityPtr &e) {
+            Scene::Brick *brick = e->getComponent<Scene::Brick>();
+            Engine::Scene::Entity::Transform *t = e->getComponent<Engine::Scene::Entity::Transform>();
             t->translate(brick->mSpeed * ratio * brick->mDir);
 
             if (t->getPosition().length() > 10.5f) {
@@ -124,8 +124,7 @@ namespace UI {
             t->setOrientation(Engine::Slerp(brick->mQ0, brick->mQ1, brick->mQAcc));
 
             return false;
-        }),
-            mBricks.end());
+        });
     }
 
     void ClickBrick::UI::GameManager::spawnBrick()
@@ -134,7 +133,7 @@ namespace UI {
 
         Engine::Scene::Entity::EntityPtr brick = Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>().createEntity();
 
-        Engine::Scene::Entity::Transform *t = brick.addComponent<Engine::Scene::Entity::Transform>().get();
+        Engine::Scene::Entity::Transform *t = brick->addComponent<Engine::Scene::Entity::Transform>().get();
         t->setScale({ 0.01f, 0.01f, 0.01f });
 
         Engine::Vector3 dir = { static_cast<float>(rand() - RAND_MAX / 2), static_cast<float>(rand() - RAND_MAX / 2), static_cast<float>(rand() - RAND_MAX / 2) };
@@ -145,9 +144,9 @@ namespace UI {
         Engine::Quaternion q { static_cast<float>(rand()), orientation };
         t->setOrientation(q);
 
-        brick.addComponent<Engine::Scene::Entity::Mesh>().get()->setName("Brick");
+        brick->addComponent<Engine::Scene::Entity::Mesh>().get()->setName("Brick");
 
-        Scene::Brick *b = brick.addComponent<Scene::Brick>().get();
+        Scene::Brick *b = brick->addComponent<Scene::Brick>().get();
         b->mSpeed = rand() / float(RAND_MAX) * 2.0f + 1.0f;
         b->mDir = dir;
 
@@ -166,8 +165,8 @@ namespace UI {
         float distance = std::numeric_limits<float>::max();        
 
         for (const Engine::Scene::Entity::EntityPtr &e : mBricks) {
-            const Engine::AABB &aabb = e.getComponent<Engine::Scene::Entity::Mesh>()->aabb();
-            Engine::BoundingBox bb = e.getComponent<Engine::Scene::Entity::Transform>()->matrix() * aabb;
+            const Engine::AABB &aabb = e->getComponent<Engine::Scene::Entity::Mesh>()->aabb();
+            Engine::BoundingBox bb = e->getComponent<Engine::Scene::Entity::Transform>()->matrix() * aabb;
             if (Engine::UpTo<float, 2> hits = Engine::Intersect(ray, bb)) {
                 if (hits[0] < distance) {
                     hit = e;

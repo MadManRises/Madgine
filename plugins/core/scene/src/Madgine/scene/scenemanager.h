@@ -6,8 +6,8 @@
 
 #include "Modules/serialize/container/syncablecontainer.h"
 
-#include "Madgine/app/globalapicollector.h"
 #include "Madgine/app/globalapibase.h"
+#include "Madgine/app/globalapicollector.h"
 #include "Modules/madgineobject/madgineobjectobserver.h"
 #include "Modules/serialize/container/noparent.h"
 
@@ -29,6 +29,9 @@
 
 #include "entity/entitycomponentcollector.h"
 
+#include "Modules/generic/container/refcounted_deque.h"
+#include "entity/entity.h"
+
 namespace Engine {
 namespace Scene {
     struct MADGINE_SCENE_EXPORT SceneManager : Serialize::TopLevelUnit<SceneManager>,
@@ -42,10 +45,10 @@ namespace Scene {
         void update();
 
         Future<Entity::EntityPtr> createEntity(const std::string &behavior = "", const std::string &name = "",
-            const std::function<void(const Entity::EntityPtr &)> &init = {});
+            const std::function<void(Entity::Entity&)> &init = {});
         Entity::EntityPtr createLocalEntity(const std::string &behavior = "", const std::string &name = "");
         Entity::EntityPtr findEntity(const std::string &name);
-        void remove(const Entity::EntityPtr &e);
+        void remove(Entity::Entity *e);
 
         //Entity::Entity *makeLocalCopy(Entity::Entity &e);
         Entity::Entity *makeLocalCopy(Entity::Entity &&e);
@@ -68,26 +71,24 @@ namespace Scene {
 
         App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
-        Threading::DataMutex &mutex();        
+        Threading::DataMutex &mutex();
 
-        Threading::SignalStub<const GenerationVector<Engine::Scene::Entity::Entity>::iterator &, int> &entitiesSignal();
-
-        Entity::EntityPtr toEntityPtr(Entity::Entity *e);
-        Entity::EntityPtr toEntityPtr(const Entity::EntityHandle &);
-        Entity::EntityHandle copyEntityHandle(const Entity::EntityHandle &h);
+        Threading::SignalStub<const refcounted_deque<Entity::Entity>::iterator &, int> &entitiesSignal();
 
         template <typename T>
-        Entity::EntityComponentList<T>& entityComponentList() {
+        Entity::EntityComponentList<T> &entityComponentList()
+        {
             return static_cast<Entity::EntityComponentList<T> &>(*mEntityComponentLists.at(Engine::component_index<T>()));
         }
-        
+
         Entity::EntityComponentListBase &entityComponentList(size_t index)
         {
             return *mEntityComponentLists.at(index);
         }
 
         template <typename T>
-        Entity::EntityComponentPtr<T> toEntityComponentPtr(T* comp, const Entity::EntityPtr &e) {
+        Entity::EntityComponentPtr<T> toEntityComponentPtr(T *comp, const Entity::EntityPtr &e)
+        {
             return { { entityComponentList<T>()->generate(comp - &entityComponentList<T>().front()) }, e };
         }
 
@@ -100,8 +101,7 @@ namespace Scene {
 
         std::tuple<SceneManager &, bool, std::string> createNonLocalEntityData(const std::string &name);
         std::tuple<SceneManager &, bool, std::string> createEntityData(const std::string &name, bool local);
-        std::tuple<std::pair<const char *, std::string>> storeEntityCreationData(const Entity::Entity &entity) const;   
-        
+        std::tuple<std::pair<const char *, std::string>> storeEntityCreationData(const Entity::Entity &entity) const;
 
     public:
         OFFSET_CONTAINER(mSceneComponents, SceneComponentContainer<Serialize::SerializableContainer<KeyValueSet<Placeholder<0>>, MadgineObjectObserver, std::true_type>>);
@@ -109,8 +109,8 @@ namespace Scene {
     private:
         Entity::EntityComponentListContainer<std::vector<Placeholder<0>>> mEntityComponentLists;
 
-        SYNCABLE_CONTAINER(mEntities, GenerationVector<Entity::Entity>, Serialize::ContainerPolicies::masterOnly, Threading::SignalFunctor<const GenerationVector<Engine::Scene::Entity::Entity>::iterator &, int>);
-        GenerationVector<Entity::Entity> mLocalEntities;
+        SYNCABLE_CONTAINER(mEntities, refcounted_deque<Entity::Entity>, Serialize::ContainerPolicies::masterOnly, Threading::SignalFunctor<const refcounted_deque<Entity::Entity>::iterator &, int>);
+        refcounted_deque<Entity::Entity> mLocalEntities;
 
         Threading::DataMutex mMutex;
 
@@ -119,7 +119,16 @@ namespace Scene {
         size_t mItemCount = 0;
 
     public:
-        decltype(mEntities) &entities();
+        decltype(auto) entities()
+        {
+            struct Helper {
+                Entity::EntityPtr operator()(ControlBlock<Entity::Entity> &ref)
+                {
+                    return { ref };
+                }
+            };
+            return transformIt<Helper>(mEntities.refcounted());
+        }
 
         //Threading::SignalStub<const decltype(mEntities)::iterator &, int> &entitiesSignal();
     };

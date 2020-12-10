@@ -191,25 +191,23 @@ namespace Tools {
             select(node.mEntity);
         }
 
-        Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> transform = node.mEntity.getComponent<Engine::Scene::Entity::Transform>();
+        Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> transform = node.mEntity->getComponent<Engine::Scene::Entity::Transform>();
         if (transform) {
             ImGui::DraggableValueTypeSource(name, this, ValueType { *node.mEntity });
             if (ImGui::BeginDragDropTarget()) {
                 Scene::Entity::Entity *newChild;
                 if (ImGui::AcceptDraggableValueType(newChild)) {
-                    Scene::Entity::EntityPtr child = mSceneMgr->toEntityPtr(newChild);
-                    Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::Transform> childTransform = child.getComponent<Engine::Scene::Entity::Transform>();
+                    Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::Transform> childTransform = newChild->getComponent<Engine::Scene::Entity::Transform>();
                     assert(childTransform);
                     childTransform->setParent(transform);
-
                 }
                 ImGui::EndDragDropTarget();
             }
 
             Matrix4 transformM = transform->worldMatrix(mSceneMgr->entityComponentList<Engine::Scene::Entity::Transform>());
             AABB bb = { { -0.2f, -0.2f, -0.2f }, { 0.2f, 0.2f, 0.2f } };
-            if (node.mEntity->hasComponent<Scene::Entity::Mesh>() && node.mEntity.getComponent<Scene::Entity::Mesh>()->data())
-                bb = node.mEntity.getComponent<Scene::Entity::Mesh>()->aabb();
+            if (node.mEntity->hasComponent<Scene::Entity::Mesh>() && node.mEntity->getComponent<Scene::Entity::Mesh>()->data())
+                bb = node.mEntity->getComponent<Scene::Entity::Mesh>()->aabb();
 
             Im3DBoundingObjectFlags flags = Im3DBoundingObjectFlags_ShowOnHover;
             if (hovered)
@@ -229,11 +227,18 @@ namespace Tools {
         }
     }
 
+    void SceneEditor::eraseNode(EntityNode &node)
+    {
+        for (EntityNode &child : node.mChildren)
+            eraseNode(child);
+        mEntityMapping.erase(node.mEntity);
+    }
+
     void SceneEditor::renderEntity(Scene::Entity::EntityPtr &entity)
     {
         bool found = false;
-        for (Scene::Entity::Entity &e : mSceneMgr->entities()) {
-            if (&e == entity) {
+        for (const Scene::Entity::EntityPtr &e : mSceneMgr->entities()) {
+            if (e == entity) {
                 found = true;
                 break;
             }
@@ -264,9 +269,9 @@ namespace Tools {
             for (const std::pair<const std::string_view, IndexRef> &componentDesc : Scene::Entity::sComponentsByName()) {
                 if (componentDesc.second.isValid() && !entity->hasComponent(componentDesc.first)) {
                     if (ImGui::Selectable(componentDesc.first.data())) {
-                        entity.addComponent(componentDesc.first);
+                        entity->addComponent(componentDesc.first);
                         if (componentDesc.first == "Transform") {
-                            entity.getComponent<Scene::Entity::Transform>()->setPosition({ 0, 0, 0 });
+                            entity->getComponent<Scene::Entity::Transform>()->setPosition({ 0, 0, 0 });
                         }
                         ImGui::CloseCurrentPopup();
                     }
@@ -275,7 +280,7 @@ namespace Tools {
             ImGui::EndPopup();
         }
 
-        if (Engine::Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> t = entity.getComponent<Scene::Entity::Transform>()) {
+        if (Engine::Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> t = entity->getComponent<Scene::Entity::Transform>()) {
             constexpr Vector4 colors[] = {
                 { 0.5f, 0, 0, 0.5f },
                 { 0, 0.5f, 0, 0.5f },
@@ -296,7 +301,7 @@ namespace Tools {
             mHoveredAxis = -1;
             mHoveredTransform = {};
 
-            Vector3 pos = (t->worldMatrix(entity.sceneMgr()->entityComponentList<Scene::Entity::Transform>()) * Vector4::UNIT_W).xyz();
+            Vector3 pos = (t->worldMatrix(entity->sceneMgr().entityComponentList<Scene::Entity::Transform>()) * Vector4::UNIT_W).xyz();
 
             for (size_t i = 0; i < 3; ++i) {
                 Im3D::Arrow3D(IM3D_TRIANGLES, 0.1f, pos, pos + offsets[i], colors[i]);
@@ -306,13 +311,13 @@ namespace Tools {
                 }
             }
 
-            if (Scene::Entity::Skeleton *s = entity.getComponent<Scene::Entity::Skeleton>()) {
+            if (Scene::Entity::Skeleton *s = entity->getComponent<Scene::Entity::Skeleton>()) {
                 if (Render::SkeletonDescriptor *skeleton = s->data()) {
                     for (size_t i = 0; i < skeleton->mBones.size(); ++i) {
                         const Engine::Render::Bone &bone = skeleton->mBones[i];
 
                         Matrix4 m = s->matrices()[i] * bone.mOffsetMatrix.Inverse() * skeleton->mMatrix.Inverse();
-                        Matrix4 world = t->worldMatrix(entity.sceneMgr()->entityComponentList<Scene::Entity::Transform>());
+                        Matrix4 world = t->worldMatrix(entity->sceneMgr().entityComponentList<Scene::Entity::Transform>());
 
                         if (mShowBoneNames)
                             Im3D::Text(bone.mName.c_str(), Im3D::TextParameters { world * m, 2.0f });
@@ -344,70 +349,54 @@ namespace Tools {
         //Update + Remove deleted Entities
         mEntityCache.erase(std::remove_if(mEntityCache.begin(), mEntityCache.end(), [this](EntityNode &node) { return updateEntityCache(node); }), mEntityCache.end());
 
-        for (EntityNode &node : mEntityCache)
-            iterateMapping(node);
-
         //Add missing Entities
-        size_t size = mSceneMgr->entities().size();
-        mEntityMapping.resize(size);
-        for (size_t i = 0; i < size; ++i) {
-            if (!mEntityMapping[i])
-                createEntityMapping(i);
+        for (Scene::Entity::EntityPtr entity : mSceneMgr->entities()) {            
+            if (!mEntityMapping.count(entity))
+                createEntityMapping(std::move(entity));
         }
     }
 
     bool SceneEditor::updateEntityCache(EntityNode &node, const Scene::Entity::EntityPtr &parent)
     {
-        uint32_t oldIndex = node.mEntity.update();
-        if (!node.mEntity || 
-            (!node.mEntity.hasComponent<Scene::Entity::Transform>() && parent) || 
-            (node.mEntity.hasComponent<Scene::Entity::Transform>() && 
-                ((parent && parent.getComponent<Scene::Entity::Transform>() != node.mEntity.getComponent<Scene::Entity::Transform>()->parent()) ||
-                    (!parent && node.mEntity.getComponent<Scene::Entity::Transform>()->parent().mIndex)))) {
-            mEntityMapping[oldIndex] = nullptr;
+        if (node.mEntity.isDead() || 
+            (!node.mEntity->hasComponent<Scene::Entity::Transform>() && parent) || 
+            (node.mEntity->hasComponent<Scene::Entity::Transform>() && 
+                ((parent && parent->getComponent<Scene::Entity::Transform>() != node.mEntity->getComponent<Scene::Entity::Transform>()->parent()) ||
+                    (!parent && node.mEntity->getComponent<Scene::Entity::Transform>()->parent().mIndex)))) {
+            eraseNode(node);
             return true;
-        } else if (node.mEntity.it().index() != oldIndex) {
-            mEntityMapping[oldIndex] = nullptr;
         }
         node.mChildren.erase(std::remove_if(node.mChildren.begin(), node.mChildren.end(), [&](EntityNode &childNode) { return updateEntityCache(childNode, node.mEntity); }), node.mChildren.end());
         return false;
     }
 
-    void SceneEditor::createEntityMapping(size_t index)
+    void SceneEditor::createEntityMapping(Scene::Entity::EntityPtr e)
     {
-        Scene::Entity::EntityPtr e = mSceneMgr->entities().begin() + index;
-
-        Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> transform = e.getComponent<Scene::Entity::Transform>();
+        Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> transform = e->getComponent<Scene::Entity::Transform>();
 
         Scene::Entity::EntityPtr parent;
 
         if (transform) {
             const Scene::Entity::EntityComponentHandle<Scene::Entity::Transform> &parentTransform = transform->parent();
             if (parentTransform.mIndex) {
-                for (parent = mSceneMgr->entities().begin(); parent != mSceneMgr->entities().end(); ++parent) {
-                    if (parent.getComponent<Scene::Entity::Transform>() == parentTransform)
+                for (Scene::Entity::EntityPtr p : mSceneMgr->entities()) {
+                    if (p->getComponent<Scene::Entity::Transform>() == parentTransform) {
+                        parent = p;
                         break;
+                    }
                 }
             }
         }
 
         if (parent) {
-            uint32_t parentIndex = parent.it().index();
-            if (!mEntityMapping[parentIndex])
-                createEntityMapping(parentIndex);
+            if (!mEntityMapping.count(parent))
+                createEntityMapping(parent);
         }
 
-        std::list<EntityNode> &container = parent ? mEntityMapping[parent.it().index()]->mChildren : mEntityCache;
+        std::list<EntityNode> &container = parent ? mEntityMapping[parent]->mChildren : mEntityCache;
 
         container.push_back({ std::move(e) });
-        mEntityMapping[index] = &container.back();
-    }
-
-    void SceneEditor::iterateMapping(EntityNode &node)
-    {
-        mEntityMapping[node.mEntity.it().index()] = &node;
-        for (EntityNode &node : node.mChildren)
-            iterateMapping(node);
+        mEntityMapping[e] = &container.back();
     }
 
 }
