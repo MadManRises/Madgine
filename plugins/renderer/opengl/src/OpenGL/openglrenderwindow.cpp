@@ -418,9 +418,9 @@ namespace Render {
 #if WINDOWS
         SwapBuffers(GetDC((HWND)mOsWindow->mHandle));
 #elif LINUX
-        glXSwapBuffers(sDisplay(), mOsWindow->mHandle);
+        glXSwapBuffers(Window::sDisplay(), mOsWindow->mHandle);
 #elif ANDROID || EMSCRIPTEN
-        eglSwapBuffers(sDisplay, (EGLSurface)mOsWindow->mHandle);
+        eglSwapBuffers(Window::sDisplay, (EGLSurface)mOsWindow->mHandle);
 #elif OSX
         OSXBridge::swapBuffers(mContext);
 #else
