@@ -121,11 +121,6 @@ namespace Window {
             return size();
         }
 
-        virtual void swapBuffers() override
-        {
-            glXSwapBuffers(sDisplay(), mHandle);
-        }
-
         virtual InterfacesVector pos() override
         {
             XWindowAttributes xwa;

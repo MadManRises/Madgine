@@ -93,11 +93,6 @@ namespace Window {
             return size();
         }
 
-        virtual void swapBuffers() override
-        {
-            eglSwapBuffers(sDisplay, (EGLSurface)mHandle);
-        }
-
         virtual InterfacesVector pos() override
         {
             return { 0, 0 };

@@ -6,17 +6,14 @@
 #include "Interfaces/window/windowapi.h"
 #include "Interfaces/window/windowsettings.h"
 
-
 #include "fontloader.h"
 #include "openglmeshloader.h"
 #include "openglprogramloader.h"
 #include "openglshaderloader.h"
 #include "opengltextureloader.h"
 
-
-
 #if WINDOWS
-    typedef HGLRC(WINAPI *PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC hDC, HGLRC hShareContext, const int *attribList);
+typedef HGLRC(WINAPI *PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC hDC, HGLRC hShareContext, const int *attribList);
 typedef BOOL(WINAPI *PFNWGLSWAPINTERVALEXTPROC)(int interval);
 
 static PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = nullptr;
@@ -25,22 +22,20 @@ static PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = nullptr;
 #elif LINUX
 #    include <GL/glx.h>
 #    include <X11/Xlib.h>
-    namespace Engine
-{
-    namespace Window {
-        extern Display *sDisplay();
-    }
+namespace Engine {
+namespace Window {
+    extern Display *sDisplay();
+}
 }
 #elif ANDROID || EMSCRIPTEN
 #    include <EGL/egl.h>
-    namespace Engine
-{
-    namespace Window {
-        extern EGLDisplay sDisplay;
-    }
+namespace Engine {
+namespace Window {
+    extern EGLDisplay sDisplay;
+}
 }
 #elif OSX
-#   include "osxopengl.h"
+#    include "osxopengl.h"
 #endif
 
 namespace Engine {
@@ -261,14 +256,14 @@ namespace Render {
         }
 
 #elif OSX
-        
+
         ContextHandle context;
         if (reusedContext) {
             context = reusedContext;
         } else {
             context = OSXBridge::createContext(window);
         }
-        
+
 #endif
 
         if (!reusedContext) {
@@ -352,7 +347,7 @@ namespace Render {
         }
 
         mContext = setupWindowInternal(w, reusedContext);
-        
+
 #if !ANDROID && !EMSCRIPTEN && !OSX
         glEnable(GL_DEBUG_OUTPUT);
         GL_CHECK();
@@ -378,7 +373,6 @@ namespace Render {
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
         //glDepthRange(0.0, 1.0);
-        
     }
 
     OpenGLRenderWindow::~OpenGLRenderWindow()
@@ -421,7 +415,17 @@ namespace Render {
     {
         OpenGLRenderTarget::endFrame();
 
+#if WINDOWS
+        SwapBuffers(GetDC((HWND)mOsWindow->mHandle));
+#elif LINUX
+        glXSwapBuffers(sDisplay(), mOsWindow->mHandle);
+#elif ANDROID || EMSCRIPTEN
+        eglSwapBuffers(sDisplay, (EGLSurface)mOsWindow->mHandle);
+#elif OSX
         OSXBridge::swapBuffers(mContext);
+#else
+#    error "Unsupported Platform!"
+#endif
     }
 
     Texture *OpenGLRenderWindow::texture() const

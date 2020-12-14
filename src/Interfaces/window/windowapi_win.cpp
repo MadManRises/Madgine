@@ -122,11 +122,6 @@ namespace Window {
             return { rect.right - rect.left, rect.bottom - rect.top };
         }
 
-        virtual void swapBuffers() override
-        {
-            SwapBuffers(GetDC((HWND)mHandle));
-        }
-
         virtual void destroy() override
         {
             DestroyWindow((HWND)mHandle);
