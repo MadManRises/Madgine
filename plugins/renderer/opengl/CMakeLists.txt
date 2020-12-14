@@ -30,6 +30,10 @@ add_plugin(OpenGL Madgine Renderer ${sources} PRECOMPILED_HEADER src/OpenGL/open
 target_link_libraries(OpenGL PRIVATE ${OPENGL_LIBRARIES} Client)
 target_include_directories(OpenGL PRIVATE ${OPENGL_INCLUDE_DIR})
 
+if (OSX)
+    target_sources(OpenGL PRIVATE src/OpenGL/osxopengl.mm)
+    target_link_libraries(OpenGL PRIVATE "-framework Cocoa")
+endif ()
 
 set(sources "")
 FolderSources(sources "" tools)

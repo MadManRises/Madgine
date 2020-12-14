@@ -104,6 +104,9 @@ bool ImGui_ImplOpenGL3_Init(const char *glsl_version)
 #if OPENGL_ES
     if (glsl_version == NULL)
         glsl_version = "#version 300 es";
+#elif OSX
+    if (glsl_version == NULL)
+        glsl_version = "#version 410 core";
 #else
     if (glsl_version == NULL)
         glsl_version = "#version 130";

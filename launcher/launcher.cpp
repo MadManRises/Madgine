@@ -67,7 +67,7 @@ int launch(Engine::Window::MainWindow **topLevelPointer)
     return scheduler.go();
 }
 
-#if !EMSCRIPTEN
+#if !EMSCRIPTEN && !OSX && !ANDROID
 DLL_EXPORT_TAG int main(int argc, char **argv)
 {
     Engine::Filesystem::setup();

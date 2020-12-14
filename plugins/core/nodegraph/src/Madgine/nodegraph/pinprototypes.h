@@ -7,7 +7,7 @@ namespace NodeGraph {
 
     struct MADGINE_NODEGRAPH_EXPORT TargetPin {
         GraphExecutable *mNode = nullptr;
-        size_t mIndex = 0;
+        uint32_t mIndex = 0;
 
         operator bool() const;
     };
@@ -38,7 +38,7 @@ namespace NodeGraph {
     struct PinDesc {
         PinDir mDir;
         PinType mType;
-        size_t mIndex;
+        uint32_t mIndex;
     };
 
 }

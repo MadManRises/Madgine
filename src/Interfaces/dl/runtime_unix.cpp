@@ -7,7 +7,11 @@
 
 #    include <unistd.h>
 
+#include "../filesystem/api.h"
+
+#if LINUX
 #    include <link.h>
+#endif
 
 namespace Engine {
 namespace Dl {
@@ -59,14 +63,8 @@ namespace Dl {
 
     SharedLibraryQuery listSharedLibraries()
     {
-#    if LINUX
-        char buffer[512];
-
-        auto result = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
-        assert(result > 0);
-        buffer[result] = '\0';
-
-        return SharedLibraryQuery { Filesystem::Path { buffer }.parentPath() };
+#    if LINUX || OSX
+        return SharedLibraryQuery{Filesystem::executablePath()};
 #    elif ANDROID
         return SharedLibraryQuery { Filesystem::Path { "/data/data/com.Madgine.MadgineLauncher/lib" } }; //TODO
 #    elif EMSCRIPTEN

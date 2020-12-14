@@ -26,7 +26,15 @@ once()
 
 if (CMAKE_ANDROID_ARCH_ABI)
 	set (ANDROID 1)
-endif ()
+endif()
+
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+	set (LINUX 1)
+endif()
+
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+	set (OSX 1)
+endif() 
   
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	set(GCC 1)

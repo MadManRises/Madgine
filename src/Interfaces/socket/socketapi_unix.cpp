@@ -30,7 +30,7 @@ void SocketAPI::closeSocket(SocketId id)
 
 int SocketAPI::send(SocketId id, char *buf, size_t len)
 {
-    return ::send(id, buf, len, MSG_NOSIGNAL);
+    return ::send(id, buf, len, 0);
 }
 
 int SocketAPI::recv(SocketId id, char *buf, size_t len)
@@ -66,12 +66,14 @@ SocketAPIResult preInitSock(SocketId s)
 {
 #    if !EMSCRIPTEN
     int on = 1;
-    if (setsockopt(s, SOL_TCP, TCP_NODELAY, &on, sizeof(on)) < 0) {
-        return SocketAPI::getError("setsockopt");
-    }
     if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
         return SocketAPI::getError("setsockopt");
     }
+    #    if LINUX || ANDROID
+        if (setsockopt(s, SOL_TCP, TCP_NODELAY, &on, sizeof(on)) < 0) {
+            return SocketAPI::getError("setsockopt");
+        }
+    #endif
 #    endif
 
     return SocketAPIResult::SUCCESS;
@@ -148,11 +150,15 @@ std::pair<SocketId, SocketAPIResult> SocketAPI::accept(SocketId s, TimeOut timeo
 
     int retval = select(s + 1, &readfds, NULL, NULL, &tv);
     if (retval > 0) {
+#if OSX
+        int socket = ::accept(s, NULL, NULL);
+#else
         int socket = accept4(s, NULL, NULL, O_NONBLOCK);
+#endif
         if (socket >= 0)
             return { socket, SocketAPIResult::SUCCESS };
         else
-            return { Invalid_Socket, getError("accept4") };
+            return { Invalid_Socket, getError("accept") };
     } else {
         if (retval == 0)
             return { Invalid_Socket, SocketAPIResult::TIMEOUT };

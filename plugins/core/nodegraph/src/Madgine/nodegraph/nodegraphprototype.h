@@ -31,8 +31,8 @@ namespace NodeGraph {
 
         const std::vector<std::unique_ptr<NodePrototypeBase>> &nodes() const;
 
-        void connectFlow(NodePrototypeBase *source, size_t sourceIndex, GraphExecutable *target, size_t targetIndex);
-        void connectData(GraphExecutable *source, size_t sourceIndex, NodePrototypeBase *target, size_t targetIndex);
+        void connectFlow(NodePrototypeBase *source, uint32_t sourceIndex, GraphExecutable *target, uint32_t targetIndex);
+        void connectData(GraphExecutable *source, uint32_t sourceIndex, NodePrototypeBase *target, uint32_t targetIndex);
 
         
         virtual void execute(NodeInstance *instance, uint32_t flowIndex, ArgumentList *out = nullptr) const override;

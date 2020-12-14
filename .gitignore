@@ -260,3 +260,5 @@ build/
 
 /test/local
 /CMakeGraphVizOptions.cmake
+
+**/.DS_Store

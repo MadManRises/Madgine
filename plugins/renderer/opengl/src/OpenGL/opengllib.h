@@ -63,6 +63,11 @@ typedef GLXContext ContextHandle;
 typedef void *EGLContext;
 typedef EGLContext ContextHandle;
 
+#elif OSX
+
+
+typedef void *ContextHandle;
+
 #else
 
 #    error "Unsupported Platform!"

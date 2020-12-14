@@ -34,8 +34,6 @@ namespace Window {
 
         virtual void update() = 0;
 
-        virtual void swapBuffers() = 0;
-
         virtual InterfacesVector size() = 0;
 
         virtual InterfacesVector renderSize() = 0;

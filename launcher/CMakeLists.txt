@@ -8,6 +8,9 @@ endif(EMSCRIPTEN)
 if (ANDROID)
 	FolderSources(sources "" android android_main.cpp androidlauncher.cpp androidlauncher.h)
 endif(ANDROID)
+if (OSX)
+    FolderSources(sources "" osx osx_main.mm)
+endif (OSX)
 
 add_workspace_application(MadgineLauncher ${sources})
 
@@ -25,6 +28,8 @@ if (EMSCRIPTEN)
 	_target_link_libraries(MadgineLauncher PRIVATE "--shell-file ${CMAKE_CURRENT_SOURCE_DIR}/emscripten/template.html")
 elseif (ANDROID)
 	target_link_libraries(MadgineLauncher PRIVATE android)	
+elseif (OSX)
+    target_link_libraries(MadgineLauncher PRIVATE "-framework Cocoa")
 endif()
 
 target_depend_on_all_plugins(MadgineLauncher)

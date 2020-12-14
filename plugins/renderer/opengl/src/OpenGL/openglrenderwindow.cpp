@@ -39,12 +39,14 @@ static PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = nullptr;
         extern EGLDisplay sDisplay;
     }
 }
+#elif OSX
+#   include "osxopengl.h"
 #endif
 
 namespace Engine {
 namespace Render {
 
-#if !ANDROID && !EMSCRIPTEN
+#if !ANDROID && !EMSCRIPTEN && !OSX
     static void __stdcall glDebugOutput(GLenum source,
         GLenum type,
         GLuint id,
@@ -138,6 +140,8 @@ namespace Render {
         glXMakeCurrent(Window::sDisplay(), None, NULL);
 #elif ANDROID || EMSCRIPTEN
         eglMakeCurrent(Window::sDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+#elif OSX
+        OSXBridge::resetContext();
 #endif
     }
 
@@ -161,6 +165,8 @@ namespace Render {
             LOG_ERROR("Error-Code: " << errno);
             std::terminate();
         }
+#elif OSX
+        OSXBridge::makeCurrent(context);
 #endif
     }
 
@@ -254,6 +260,15 @@ namespace Render {
             context = eglCreateContext(Window::sDisplay, config, /*sharedContext*/ nullptr, contextAttribs);
         }
 
+#elif OSX
+        
+        ContextHandle context;
+        if (reusedContext) {
+            context = reusedContext;
+        } else {
+            context = OSXBridge::createContext(window);
+        }
+        
 #endif
 
         if (!reusedContext) {
@@ -286,6 +301,9 @@ namespace Render {
 #elif ANDROID || EMSCRIPTEN
         if (!reusedContext)
             eglDestroyContext(Window::sDisplay, context);
+#elif OSX
+        if (!reusedContext)
+            OSXBridge::destroyContext(context);
 #endif
     }
 
@@ -334,8 +352,8 @@ namespace Render {
         }
 
         mContext = setupWindowInternal(w, reusedContext);
-
-#if !ANDROID && !EMSCRIPTEN
+        
+#if !ANDROID && !EMSCRIPTEN && !OSX
         glEnable(GL_DEBUG_OUTPUT);
         GL_CHECK();
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -360,6 +378,7 @@ namespace Render {
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
         //glDepthRange(0.0, 1.0);
+        
     }
 
     OpenGLRenderWindow::~OpenGLRenderWindow()
@@ -402,8 +421,7 @@ namespace Render {
     {
         OpenGLRenderTarget::endFrame();
 
-        mOsWindow->swapBuffers();
-        GL_CHECK();
+        OSXBridge::swapBuffers(mContext);
     }
 
     Texture *OpenGLRenderWindow::texture() const

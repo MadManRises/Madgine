@@ -47,6 +47,8 @@ namespace Debug {
         memcpy(buffer, tmpBuffer + skip + 1, size * sizeof(void *));
 #elif EMSCRIPTEN
         trace = 0;
+#elif OSX
+        trace = 0;
 #else
 #    error "Unsupported Platform!"
 #endif
@@ -144,6 +146,7 @@ namespace Debug {
                 result.emplace_back(data[i], symbols[i]);
             }
 #elif EMSCRIPTEN
+#elif OSX
 #else
 #    error "Unsupported Platform!"
 #endif

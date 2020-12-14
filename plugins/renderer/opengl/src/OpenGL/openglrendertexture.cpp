@@ -102,6 +102,7 @@ namespace Render {
     void OpenGLRenderTexture::endFrame()
     {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        GL_CHECK();
     }
 
     const OpenGLTexture *OpenGLRenderTexture::texture() const

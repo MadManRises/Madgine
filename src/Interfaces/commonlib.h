@@ -8,6 +8,10 @@
 #    define WINDOWS 0
 #endif
 
+#if __APPLE__
+#   define __unix__ 1
+#endif
+
 #if __unix__
 #    define UNIX 1
 #    if __EMSCRIPTEN__
@@ -24,11 +28,17 @@
 #            define ANDROID 0
 #        endif
 #    endif
+#    if __APPLE__
+#        define OSX 1
+#    else
+#        define OSX 0
+#    endif
 #else
 #    define UNIX 0
 #    define ANDROID 0
 #    define LINUX 0
 #    define EMSCRIPTEN 0
+#    define OSX 0
 #endif
 
 #ifdef _WIN32

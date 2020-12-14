@@ -114,7 +114,7 @@ namespace NodeGraph {
         return mNodes;
     }
 
-    void NodeGraphPrototype::connectFlow(NodePrototypeBase *source, size_t sourceIndex, GraphExecutable *target, size_t targetIndex)
+    void NodeGraphPrototype::connectFlow(NodePrototypeBase *source, uint32_t sourceIndex, GraphExecutable *target, uint32_t targetIndex)
     {
         if (!target) {
             assert(mFlowOutPinCount >= targetIndex);
@@ -132,7 +132,7 @@ namespace NodeGraph {
         }
     }
 
-    void NodeGraphPrototype::connectData(GraphExecutable *source, size_t sourceIndex, NodePrototypeBase *target, size_t targetIndex)
+    void NodeGraphPrototype::connectData(GraphExecutable *source, uint32_t sourceIndex, NodePrototypeBase *target, uint32_t targetIndex)
     {
         assert(source || target);
         if (!source) {

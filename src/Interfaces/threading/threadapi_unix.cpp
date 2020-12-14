@@ -2,37 +2,43 @@
 
 #if UNIX
 
+#if LINUX || ANDROID
 #include <sys/prctl.h>
+#endif
 
 #include "threadapi.h"
 
 namespace Engine {
 	namespace Threading {
 
-#if !EMSCRIPTEN //TODO
 		void setCurrentThreadName(const std::string & name)
 		{
-			prctl(PR_SET_NAME, name.c_str(), 0, 0, 0);
+#if LINUX || ANDROID
+            prctl(PR_SET_NAME, name.c_str(), 0, 0, 0);
+#elif EMSCRIPTEN
+#elif OSX
+            pthread_setname_np(name.c_str());
+#else
+#error "Unsupported Platform!"
+#endif
 		}
 
 
 		std::string getCurrentThreadName()
 		{
+#if LINUX || ANDROID
 			char buffer[17];
 			prctl(PR_GET_NAME, buffer, 0, 0, 0);
 			return buffer;
-		}
+#elif EMSCRIPTEN
+#elif OSX
+            char buffer[512];
+            pthread_getname_np(pthread_self(), buffer, 512);
+            return buffer;
 #else
-		void setCurrentThreadName(const std::string &)
-		{
-
-		}
-
-		std::string getCurrentThreadName()
-		{
-			return "<unknown>";
-		}
+#error "Unsupported Platform!"
 #endif
+        }
 
 	}
 }

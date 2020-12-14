@@ -84,6 +84,7 @@ public:
 
         size_t index() const override
         {
+            assert(isValid());
             return mIndex + mBaseIndex;
         }
 
