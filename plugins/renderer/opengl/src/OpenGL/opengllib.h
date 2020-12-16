@@ -15,9 +15,12 @@
 #include "programloaderlib.h"
 #include "fontloaderlib.h"
 
-#if !ANDROID && !EMSCRIPTEN
+#if !ANDROID && !EMSCRIPTEN && !IOS
 #    include "../glad/glad.h"
 #    define OPENGL_ES 0
+#elif IOS
+#   include <OpenGLES/ES3/gl.h>
+#   define OPENGL_ES 1
 #else
 #    include <GLES3/gl32.h>
 #    define OPENGL_ES 1
@@ -65,6 +68,9 @@ typedef EGLContext ContextHandle;
 
 #elif OSX
 
+typedef void *ContextHandle;
+
+#elif IOS
 
 typedef void *ContextHandle;
 

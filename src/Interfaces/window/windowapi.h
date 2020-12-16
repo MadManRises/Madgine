@@ -11,6 +11,7 @@ namespace Window {
 
     struct PlatformCapabilities {
         bool mSupportMultipleWindows;
+        float mScalingFactor;
     };
 
     INTERFACES_EXPORT extern const PlatformCapabilities platformCapabilities;

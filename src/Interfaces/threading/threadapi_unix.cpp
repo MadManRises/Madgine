@@ -16,7 +16,7 @@ namespace Engine {
 #if LINUX || ANDROID
             prctl(PR_SET_NAME, name.c_str(), 0, 0, 0);
 #elif EMSCRIPTEN
-#elif OSX
+#elif OSX || IOS
             pthread_setname_np(name.c_str());
 #else
 #error "Unsupported Platform!"
@@ -31,7 +31,7 @@ namespace Engine {
 			prctl(PR_GET_NAME, buffer, 0, 0, 0);
 			return buffer;
 #elif EMSCRIPTEN
-#elif OSX
+#elif OSX || IOS
             char buffer[512];
             pthread_getname_np(pthread_self(), buffer, 512);
             return buffer;

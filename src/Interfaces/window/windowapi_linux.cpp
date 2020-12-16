@@ -14,7 +14,8 @@ namespace Engine {
 namespace Window {
 
     DLL_EXPORT const PlatformCapabilities platformCapabilities {
-        true
+        true,
+        1.0f
     };
 
     static Atom WM_DELETE_WINDOW;

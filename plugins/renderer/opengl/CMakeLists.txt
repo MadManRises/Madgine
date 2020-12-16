@@ -4,11 +4,17 @@ Project(OpenGL)
 
 
 
-if (NOT ANDROID)
+if (NOT ANDROID AND NOT IOS AND NOT OSX)
 	find_package(OpenGL REQUIRED)
-else()
+elseif(ANDROID)
 	set(OPENGL_LIBRARIES EGL GLESv3)
 	set(OPENGL_INCLUDE_DIR "")
+elseif(OSX)
+    set(OPENGL_LIBRARIES "-framework Cocoa")
+    set(OPENGL_INCLUDE_DIR "")
+elseif(IOS)
+    set(OPENGL_LIBRARIES "-framework UIKit" "-framework GLKit" "-framework OpenGLES")
+    set(OPENGL_INCLUDE_DIR "")
 endif()
 
 if (EMSCRIPTEN)
@@ -19,7 +25,7 @@ endif()
 
 set(sources "")
 FolderSources(sources "" src)
-if (NOT ANDROID AND NOT EMSCRIPTEN)
+if (NOT ANDROID AND NOT EMSCRIPTEN AND NOT IOS)
 	FolderSources(sources src glad glad.c glad.h)
 endif()
 FolderSources(sources src OpenGL openglforward.h opengllib.h openglmeshdata.h openglmeshloader.cpp openglmeshloader.h openglprogramloader.cpp openglprogramloader.h openglrendertexture.cpp openglrendertexture.h openglrenderwindow.cpp openglrenderwindow.h openglshaderloader.cpp openglshaderloader.h opengltextureloader.cpp opengltextureloader.h openglrendertarget.cpp openglrendertarget.h openglrendercontext.cpp openglrendercontext.h)
@@ -32,7 +38,8 @@ target_include_directories(OpenGL PRIVATE ${OPENGL_INCLUDE_DIR})
 
 if (OSX)
     target_sources(OpenGL PRIVATE src/OpenGL/osxopengl.mm)
-    target_link_libraries(OpenGL PRIVATE "-framework Cocoa")
+elseif(IOS)
+    target_sources(OpenGL PRIVATE src/OpenGL/iosopengl.mm)
 endif ()
 
 set(sources "")

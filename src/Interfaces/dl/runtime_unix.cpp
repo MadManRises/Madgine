@@ -63,7 +63,7 @@ namespace Dl {
 
     SharedLibraryQuery listSharedLibraries()
     {
-#    if LINUX || OSX
+#    if LINUX || OSX || IOS
         return SharedLibraryQuery{Filesystem::executablePath()};
 #    elif ANDROID
         return SharedLibraryQuery { Filesystem::Path { "/data/data/com.Madgine.MadgineLauncher/lib" } }; //TODO

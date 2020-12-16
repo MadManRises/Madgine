@@ -146,9 +146,7 @@ namespace Tools {
 
         io.IniFilename = mImGuiIniFilePath.c_str();
 
-#if ANDROID
-        io.DisplayFramebufferScale = ImVec2(3.0f, 3.0f);
-#endif
+        io.DisplayFramebufferScale = ImVec2{Window::platformCapabilities.mScalingFactor,Window::platformCapabilities.mScalingFactor};
 
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 

@@ -29,9 +29,19 @@
 #        endif
 #    endif
 #    if __APPLE__
-#        define OSX 1
+#       include <TargetConditionals.h>
+#       if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
+#           define IOS 1
+#           define OSX 0
+#       elif TARGET_OS_MAC
+#           define OSX 1
+#           define IOS 0
+#       else
+#           error "Unknown Apple platform"
+#       endif
 #    else
 #        define OSX 0
+#       define IOS 0
 #    endif
 #else
 #    define UNIX 0
@@ -39,6 +49,7 @@
 #    define LINUX 0
 #    define EMSCRIPTEN 0
 #    define OSX 0
+#   define IOS 0
 #endif
 
 #ifdef _WIN32

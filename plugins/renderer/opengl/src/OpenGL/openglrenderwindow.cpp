@@ -36,12 +36,14 @@ namespace Window {
 }
 #elif OSX
 #    include "osxopengl.h"
+#elif IOS
+#   include "iosopengl.h"
 #endif
 
 namespace Engine {
 namespace Render {
 
-#if !ANDROID && !EMSCRIPTEN && !OSX
+#if !ANDROID && !EMSCRIPTEN && !OSX && !IOS
     static void __stdcall glDebugOutput(GLenum source,
         GLenum type,
         GLuint id,
@@ -263,6 +265,15 @@ namespace Render {
         } else {
             context = OSXBridge::createContext(window);
         }
+        
+#elif IOS
+        
+        ContextHandle context;
+        if (reusedContext) {
+            context = reusedContext;
+        } else {
+            context = IOSBridge::createContext(window);
+        }
 
 #endif
 
@@ -302,7 +313,7 @@ namespace Render {
 #endif
     }
 
-#if !ANDROID && !EMSCRIPTEN
+#if !ANDROID && !EMSCRIPTEN && !IOS
     namespace {
         void OpenGLInit()
         {
@@ -337,7 +348,7 @@ namespace Render {
         , mOsWindow(w)
         , mReusedContext(reusedResources)
     {
-#if !ANDROID && !EMSCRIPTEN
+#if !ANDROID && !EMSCRIPTEN && !IOS
         OpenGLInit();
 #endif
 
@@ -348,7 +359,7 @@ namespace Render {
 
         mContext = setupWindowInternal(w, reusedContext);
 
-#if !ANDROID && !EMSCRIPTEN && !OSX
+#if !ANDROID && !EMSCRIPTEN && !OSX && !IOS
         glEnable(GL_DEBUG_OUTPUT);
         GL_CHECK();
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -423,6 +434,8 @@ namespace Render {
         eglSwapBuffers(Window::sDisplay, (EGLSurface)mOsWindow->mHandle);
 #elif OSX
         OSXBridge::swapBuffers(mContext);
+#elif IOS
+        IOSBridge::swapBuffers(mContext);
 #else
 #    error "Unsupported Platform!"
 #endif

@@ -49,6 +49,8 @@ namespace Debug {
         trace = 0;
 #elif OSX
         trace = 0;
+#elif IOS
+        trace = 0;
 #else
 #    error "Unsupported Platform!"
 #endif
@@ -147,6 +149,7 @@ namespace Debug {
             }
 #elif EMSCRIPTEN
 #elif OSX
+#elif IOS
 #else
 #    error "Unsupported Platform!"
 #endif

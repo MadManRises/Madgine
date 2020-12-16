@@ -16,7 +16,8 @@ namespace Engine {
 namespace Window {
 
     DLL_EXPORT const PlatformCapabilities platformCapabilities {
-        true
+        true,
+        1.0f
     };
 
     struct WindowsWindow final : OSWindow {

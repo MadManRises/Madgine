@@ -150,7 +150,7 @@ std::pair<SocketId, SocketAPIResult> SocketAPI::accept(SocketId s, TimeOut timeo
 
     int retval = select(s + 1, &readfds, NULL, NULL, &tv);
     if (retval > 0) {
-#if OSX
+#if OSX || IOS
         int socket = ::accept(s, NULL, NULL);
 #else
         int socket = accept4(s, NULL, NULL, O_NONBLOCK);

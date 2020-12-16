@@ -17,7 +17,8 @@ namespace Engine {
 namespace Window {
 
     DLL_EXPORT const PlatformCapabilities platformCapabilities {
-        false
+        false,
+        1.0f
     };
 
     //DLL_EXPORT Threading::SystemVariable<ANativeWindow*> sNativeWindow = nullptr;

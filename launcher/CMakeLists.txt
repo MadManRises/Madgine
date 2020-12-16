@@ -1,5 +1,4 @@
 
-
 set(sources "")
 FolderSources(sources "" "" launcher.cpp)
 if (EMSCRIPTEN)
@@ -30,7 +29,11 @@ elseif (ANDROID)
 	target_link_libraries(MadgineLauncher PRIVATE android)	
 elseif (OSX)
     target_link_libraries(MadgineLauncher PRIVATE "-framework Cocoa")
+elseif (IOS)
+    target_link_libraries(MadgineLauncher PRIVATE "-framework Foundation")
 endif()
+
+
 
 target_depend_on_all_plugins(MadgineLauncher)
 

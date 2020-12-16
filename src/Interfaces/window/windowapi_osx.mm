@@ -26,7 +26,8 @@ namespace Engine {
 namespace Window {
 
     DLL_EXPORT const PlatformCapabilities platformCapabilities {
-        true
+        true,
+        static_cast<float>([[NSScreen mainScreen] backingScaleFactor])
     };
 
 
@@ -81,7 +82,7 @@ namespace Window {
         virtual InterfacesVector renderSize() override
         {
             //TODO
-            return {size().x * 2, size().y * 2};
+            return {static_cast<int>(size().x * platformCapabilities.mScalingFactor), static_cast<int>(size().y * platformCapabilities.mScalingFactor)};
         }
 
         virtual InterfacesVector pos() override
@@ -92,7 +93,7 @@ namespace Window {
 
         virtual InterfacesVector renderPos() override
         {
-            return {pos().x * 2, pos().y * 2};
+            return {static_cast<int>(pos().x * platformCapabilities.mScalingFactor), static_cast<int>(pos().y * platformCapabilities.mScalingFactor)};
         }
 
         virtual void setSize(const InterfacesVector &size) override
@@ -103,7 +104,7 @@ namespace Window {
 
         virtual void setRenderSize(const InterfacesVector &size) override
         {
-            setSize({size.x / 2, size.y / 2});
+            setSize({static_cast<int>(size.x / platformCapabilities.mScalingFactor), static_cast<int>(size.y / platformCapabilities.mScalingFactor)});
         }
 
         virtual void setPos(const InterfacesVector &size) override
@@ -174,9 +175,9 @@ namespace Window {
                     case NSEventTypeLeftMouseDragged:
                     {
                         const NSPoint screenLocation = [NSEvent mouseLocation];
-                        InterfacesVector screenPos {static_cast<int>(2 * screenLocation.x), static_cast<int>(2 * ([[reinterpret_cast<NSWindow*>(mHandle) screen] frame].size.height - screenLocation.y))};
+                        InterfacesVector screenPos {static_cast<int>(platformCapabilities.mScalingFactor * screenLocation.x), static_cast<int>(platformCapabilities.mScalingFactor * ([[reinterpret_cast<NSWindow*>(mHandle) screen] frame].size.height - screenLocation.y))};
                         const NSPoint windowLocation = [reinterpret_cast<NSWindow*>(mHandle) convertPointFromScreen:screenLocation];
-                        InterfacesVector windowPos {static_cast<int>(2 * windowLocation.x), renderSize().y - static_cast<int>(2 * windowLocation.y)};
+                        InterfacesVector windowPos {static_cast<int>(platformCapabilities.mScalingFactor * windowLocation.x), renderSize().y - static_cast<int>(platformCapabilities.mScalingFactor * windowLocation.y)};
                         
                         switch([ev type]){
                             case NSEventTypeMouseMoved:
