@@ -58,11 +58,11 @@ install_to_workspace(BulletLib TARGETS BulletDynamics BulletCollision LinearMath
 
 export_to_workspace(BulletLib)
 
-
+set(ALSOFT_INSTALL OFF CACHE BOOL "" FORCE)
 set (ALSOFT_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(openal-soft)
 
-install_to_workspace(OpenAL TARGETS OpenAL common)
+install_to_workspace(OpenAL TARGETS OpenAL common EXPORT_LIB)
 
 export_to_workspace(OpenAL)
 
