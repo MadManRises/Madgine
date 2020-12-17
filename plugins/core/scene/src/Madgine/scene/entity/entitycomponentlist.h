@@ -38,6 +38,11 @@ namespace Scene {
                 return &mData.at(index.mIndex).template get<0>();
             }
 
+            const T *get(const EntityComponentHandle<EntityComponentBase> &index) const override final
+            {
+                return &mData.at(index.mIndex).template get<0>();
+            }
+
             TypedScopePtr getTyped(const EntityComponentHandle<EntityComponentBase> &index) override final
             {
                 return &mData.at(index.mIndex).template get<0>();
@@ -76,8 +81,7 @@ namespace Scene {
 
             EntityComponentOwningHandle<EntityComponentBase> emplace(const ObjectPtr &table, Entity *entity) override final
             {
-                return
-                {
+                return {
                     static_cast<uint32_t>(&mData.emplace_back(std::piecewise_construct, std::forward_as_tuple(table), std::make_tuple(entity)) - mData.data()), static_cast<uint32_t>(component_index<T>())
                 };
             }

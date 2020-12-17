@@ -11,6 +11,7 @@ namespace Scene {
             virtual ~EntityComponentListBase() = default;
 
             virtual EntityComponentBase *get(const EntityComponentHandle<EntityComponentBase> &index) = 0;
+            virtual const EntityComponentBase *get(const EntityComponentHandle<EntityComponentBase> &index) const = 0;
             virtual TypedScopePtr getTyped(const EntityComponentHandle<EntityComponentBase> &index) = 0;
             virtual void init(const EntityComponentHandle<EntityComponentBase> &index, Entity *entity) = 0;
             virtual void finalize(const EntityComponentHandle<EntityComponentBase> &index, Entity *entity) = 0;
