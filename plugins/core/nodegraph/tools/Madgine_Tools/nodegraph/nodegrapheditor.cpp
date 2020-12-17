@@ -20,7 +20,7 @@
 
 UNIQUECOMPONENT(Engine::Tools::NodeGraphEditor);
 
-METATABLE_BEGIN(Engine::Tools::NodeGraphEditor)
+METATABLE_BEGIN_BASE(Engine::Tools::NodeGraphEditor, Engine::Tools::ToolBase)
 METATABLE_END(Engine::Tools::NodeGraphEditor)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::NodeGraphEditor, Engine::Tools::ToolBase)

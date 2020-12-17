@@ -99,7 +99,7 @@ namespace Physics {
 
     RigidBody &RigidBody::operator=(RigidBody &&) = default;
 
-    void RigidBody::init(const Scene::Entity::EntityPtr &entity)
+    void RigidBody::init(Scene::Entity::Entity *entity)
     {
         assert(!mData);
 
@@ -110,7 +110,7 @@ namespace Physics {
         mData->add();
     }
 
-    void RigidBody::finalize(const Scene::Entity::EntityPtr &entity)
+    void RigidBody::finalize(Scene::Entity::Entity *entity)
     {
         assert(mData);
 

@@ -65,8 +65,7 @@ namespace Tools {
 
         for (Physics::RigidBody &rigidBody : mManager->sceneMgr().entityComponentList<Physics::RigidBody>()) {
             Vector3 pos = rigidBody.transform()->getPosition();
-            Im3D::Arrow(0.1f, pos, pos + Vector3 { rigidBody.get()->getLinearVelocity() }, Vector4 { 1, 0, 0, 1 });
-            LOG(Vector3 { rigidBody.get()->getLinearVelocity() });            
+            Im3D::Arrow(0.1f, pos, pos + Vector3 { rigidBody.get()->getLinearVelocity() }, Vector4 { 1, 0, 0, 1 });          
         }
     }
 
@@ -134,7 +133,7 @@ namespace Tools {
 
 UNIQUECOMPONENT(Engine::Tools::BulletDebug);
 
-METATABLE_BEGIN(Engine::Tools::BulletDebug)
+METATABLE_BEGIN_BASE(Engine::Tools::BulletDebug, Engine::Tools::ToolBase)
 METATABLE_END(Engine::Tools::BulletDebug)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::BulletDebug, Engine::Tools::ToolBase)

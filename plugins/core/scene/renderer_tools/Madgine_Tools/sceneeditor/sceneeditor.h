@@ -42,6 +42,8 @@ namespace Tools {
 
         Scene::SceneManager &sceneMgr();
 
+        bool render3DCursor() const;
+
     private:
         void renderSelection();
         void renderHierarchy();
@@ -84,6 +86,7 @@ namespace Tools {
         Vector4 mBoneForward = { 1, 0, 0, 0 };
         float mDefaultBoneLength = 1.0f;
         bool mShowBoneNames = true;
+        bool mRender3DCursor = false;
     };
 
 }

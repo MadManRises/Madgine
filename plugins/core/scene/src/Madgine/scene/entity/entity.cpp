@@ -119,11 +119,6 @@ namespace Scene {
             return getComponent(sComponentsByName()[name]);
         }
 
-        EntityComponentPtr<EntityComponentBase> Entity::toEntityComponentPtr(EntityComponentOwningHandle<EntityComponentBase> p)
-        {
-            return { p, &mSceneManager };
-        }
-
         bool Entity::hasComponent(size_t i)
         {
             return mComponents.contains(i);
@@ -189,21 +184,6 @@ namespace Scene {
             throw 0;
         }
 
-        SceneComponentBase &Entity::getSceneComponent(size_t i, bool init)
-        {
-            return mSceneManager.getComponent(i, init);
-        }
-
-        App::GlobalAPIBase &Entity::getGlobalAPIComponent(size_t i, bool init)
-        {
-            return mSceneManager.getGlobalAPIComponent(i, init);
-        }
-
-        SceneManager &Entity::sceneMgr(bool init) const
-        {
-            return static_cast<SceneManager &>(mSceneManager.getSelf(init));
-        }
-
         bool Entity::isLocal() const
         {
             return mLocal;
@@ -227,7 +207,7 @@ namespace Scene {
 
         EntityComponentPtr<EntityComponentBase> Entity::Helper::operator()(EntityComponentOwningHandle<EntityComponentBase> p)
         {
-            return mEntity->toEntityComponentPtr(p);
+            return { p, &mEntity->mSceneManager };
         }
     }
 }

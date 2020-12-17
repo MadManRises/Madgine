@@ -439,7 +439,7 @@ namespace Tools {
 }
 }
 
-METATABLE_BEGIN(Engine::Tools::GuiEditor)
+METATABLE_BEGIN_BASE(Engine::Tools::GuiEditor, Engine::Tools::ToolBase)
 METATABLE_END(Engine::Tools::GuiEditor)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::GuiEditor, Engine::Tools::ToolBase)

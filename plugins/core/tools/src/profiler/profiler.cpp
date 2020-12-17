@@ -79,7 +79,7 @@ namespace Tools {
 }
 }
 
-METATABLE_BEGIN(Engine::Tools::Profiler)
+METATABLE_BEGIN_BASE(Engine::Tools::Profiler, Engine::Tools::ToolBase)
 METATABLE_END(Engine::Tools::Profiler)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::Profiler, Engine::Tools::ToolBase)

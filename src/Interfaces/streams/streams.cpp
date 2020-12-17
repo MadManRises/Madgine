@@ -36,9 +36,10 @@ std::istreambuf_iterator<char> InStream::end()
     return std::istreambuf_iterator<char>();
 }
 
-std::ios::iostate InStream::readRaw(void *buffer, size_t size)
+size_t InStream::readRaw(void *buffer, size_t size)
 {
-    return mStream.read(static_cast<char *>(buffer), size).rdstate();
+    mStream.read(static_cast<char *>(buffer), size);
+    return mStream.gcount();
 }
 
 pos_type InStream::tell()
@@ -46,9 +47,14 @@ pos_type InStream::tell()
     return mStream.tellg();
 }
 
-void InStream::seek(pos_type p)
+bool InStream::seek(pos_type p)
 {
-    mStream.seekg(p);
+    return static_cast<bool>(mStream.seekg(p));
+}
+
+bool InStream::seek(off_type p, std::ios::seekdir dir)
+{
+    return static_cast<bool>(mStream.seekg(p, dir));
 }
 
 void InStream::skipWs()

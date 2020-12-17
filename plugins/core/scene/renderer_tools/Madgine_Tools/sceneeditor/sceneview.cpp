@@ -109,7 +109,8 @@ namespace Tools {
 
             const Ray &ray = Im3D::GetCurrentContext()->mMouseRay;            
 
-            Im3D::Arrow3D(IM3D_LINES, 0.3f, ray.mPoint + 10.0f * ray.mDir, ray.mPoint + 20.0f * ray.mDir);
+            if (mEditor->render3DCursor())
+                Im3D::Arrow3D(IM3D_LINES, 0.3f, ray.mPoint + 10.0f * ray.mDir, ray.mPoint + 20.0f * ray.mDir);
 
             constexpr Vector3 axes[3] = {
                 { 1, 0, 0 },

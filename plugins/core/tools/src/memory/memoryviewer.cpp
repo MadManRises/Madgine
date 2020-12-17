@@ -471,7 +471,7 @@ namespace Engine
 }
 
 
-METATABLE_BEGIN(Engine::Tools::MemoryViewer)
+METATABLE_BEGIN_BASE(Engine::Tools::MemoryViewer, Engine::Tools::ToolBase)
 METATABLE_END(Engine::Tools::MemoryViewer)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::MemoryViewer, Engine::Tools::ToolBase)

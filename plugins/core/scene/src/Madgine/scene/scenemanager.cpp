@@ -120,7 +120,7 @@ namespace Scene {
         auto it = std::find_if(mEntities.refcounted_begin(), mEntities.refcounted_end(), [&](const Entity::Entity &e) {
             return e.key() == name;
         });
-        if (it == mEntities.end()) {
+        if (it == mEntities.refcounted_end()) {
             std::terminate();
         }
         return *it;
@@ -205,7 +205,7 @@ namespace Scene {
             f = TupleUnpacker::invokeExpand(&decltype(mEntities)::emplace<SceneManager &, bool, std::string, ObjectPtr>, &mEntities, mEntities.end(), tuple_cat(createEntityData(name, false), std::make_tuple(table))).init(initWrap);
         } else
             f = TupleUnpacker::invokeExpand(&decltype(mEntities)::emplace<SceneManager &, bool, std::string, ObjectPtr>, &mEntities, mEntities.end(), tuple_cat(createEntityData(name, false), std::make_tuple(table)));
-        return std::move(f).then([](const typename refcounted_deque<Entity::Entity>::iterator &it) { return Entity::EntityPtr { it.get_refcounted() }; });
+        return std::move(f).then([](const typename refcounted_deque<Entity::Entity>::iterator &it) { return Entity::EntityPtr { it.get_block() }; });
     }
 
     Entity::EntityPtr SceneManager::createLocalEntity(const std::string &behavior, const std::string &name)
@@ -220,7 +220,7 @@ namespace Scene {
                 LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
         }
         const std::tuple<SceneManager &, bool, std::string> &data = createEntityData(name, true);
-        return mLocalEntities.emplace(mLocalEntities.end(), std::get<0>(data), std::get<1>(data), std::get<2>(data), table).get_refcounted();
+        return mLocalEntities.emplace(mLocalEntities.end(), std::get<0>(data), std::get<1>(data), std::get<2>(data), table).get_block();
     }
 
     Threading::SignalStub<const refcounted_deque<Entity::Entity>::iterator &, int> &SceneManager::entitiesSignal()

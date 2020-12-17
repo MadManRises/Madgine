@@ -21,7 +21,7 @@
 
 UNIQUECOMPONENT(Engine::Tools::TestTool);
 
-METATABLE_BEGIN(Engine::Tools::TestTool)
+METATABLE_BEGIN_BASE(Engine::Tools::TestTool, Engine::Tools::ToolBase)
 FUNCTION(logTest)
 FUNCTION(logValue, value)
 FUNCTION(dummy)

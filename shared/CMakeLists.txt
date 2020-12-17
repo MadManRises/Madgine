@@ -59,6 +59,15 @@ install_to_workspace(BulletLib TARGETS BulletDynamics BulletCollision LinearMath
 export_to_workspace(BulletLib)
 
 
+set (ALSOFT_EXAMPLES OFF CACHE BOOL "" FORCE)
+add_subdirectory(openal-soft)
+
+add_subdirectory(libogg-1.3.4)
+
+add_library(Ogg::ogg ALIAS ogg)
+
+add_subdirectory(libvorbis-1.3.7)
+
 set(BUILD_SHARED_LIBS ${OLD_BUILD_SHARED_LIBS})
 
 

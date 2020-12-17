@@ -21,8 +21,8 @@ namespace Physics {
 
         RigidBody &operator=(RigidBody &&other);
 
-        void init(const Scene::Entity::EntityPtr &entity);
-        void finalize(const Scene::Entity::EntityPtr &entity);
+        void init(Scene::Entity::Entity *entity);
+        void finalize(Scene::Entity::Entity *entity);
 
         btRigidBody *get();
         void activate();

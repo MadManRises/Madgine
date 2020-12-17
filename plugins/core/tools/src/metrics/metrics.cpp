@@ -70,7 +70,7 @@ namespace Tools {
 }
 }
 
-METATABLE_BEGIN(Engine::Tools::Metrics)
+METATABLE_BEGIN_BASE(Engine::Tools::Metrics, Engine::Tools::ToolBase)
 METATABLE_END(Engine::Tools::Metrics)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::Metrics, Engine::Tools::ToolBase)

@@ -13,7 +13,7 @@
 #include "Modules/resources/resourcemanager.h"
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-METATABLE_BEGIN(Engine::Tools::ProjectManager)
+METATABLE_BEGIN_BASE(Engine::Tools::ProjectManager, Engine::Tools::ToolBase)
 METATABLE_END(Engine::Tools::ProjectManager)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::ProjectManager, Engine::Tools::ToolBase)

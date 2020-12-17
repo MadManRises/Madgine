@@ -3,6 +3,7 @@
 namespace Engine {
 
 typedef std::istream::pos_type pos_type;
+typedef std::istream::off_type off_type;
 
 struct INTERFACES_EXPORT InStream {
     InStream();
@@ -20,12 +21,13 @@ struct INTERFACES_EXPORT InStream {
     std::istreambuf_iterator<char> iterator();
     std::istreambuf_iterator<char> end();
 
-    std::ios::iostate readRaw(void *buffer, size_t size);
+    size_t readRaw(void *buffer, size_t size);
 
     operator bool() const;
 
     pos_type tell();
-    void seek(pos_type p);
+    bool seek(pos_type p);
+    bool seek(off_type p, std::ios::seekdir dir);
 
     void skipWs();
 

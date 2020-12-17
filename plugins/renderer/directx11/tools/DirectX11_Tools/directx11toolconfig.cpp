@@ -61,7 +61,7 @@ namespace Tools {
 
 UNIQUECOMPONENT(Engine::Tools::DirectX11ToolConfig);
 
-METATABLE_BEGIN(Engine::Tools::DirectX11ToolConfig)
+METATABLE_BEGIN_BASE(Engine::Tools::DirectX11ToolConfig, Engine::Tools::ToolBase)
 METATABLE_END(Engine::Tools::DirectX11ToolConfig)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::DirectX11ToolConfig, Engine::Tools::ToolBase)

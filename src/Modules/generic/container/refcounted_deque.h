@@ -72,7 +72,6 @@ private:
     union {
         T mData;
     };
-    
 };
 
 template <typename T>
@@ -80,7 +79,7 @@ struct refcounted_deque {
 
     using value_type = T;
 
-    template <typename It, typename Val>
+    template <typename It, typename Val, bool refcounted>
     struct IteratorImpl {
 
         using iterator_category = typename It::iterator_category;
@@ -96,13 +95,15 @@ struct refcounted_deque {
             : mIt(std::move(it))
             , mContainer(&cont)
         {
+            if constexpr (!refcounted)
+                update();
         }
 
-        template <typename It2, typename Val2>
+        template <typename It2, typename Val2, bool>
         friend struct IteratorImpl;
 
         template <typename It2, typename Val2>
-        IteratorImpl(const IteratorImpl<It2, Val2> &other)
+        IteratorImpl(const IteratorImpl<It2, Val2, refcounted> &other)
             : mIt(other.mIt)
             , mContainer(other.mContainer)
         {
@@ -110,17 +111,15 @@ struct refcounted_deque {
 
         reference operator*() const
         {
-            update();
             return *mIt;
         }
 
         pointer operator->() const
         {
-            update();
             return &*mIt;
         }
 
-        decltype(auto) get_refcounted() const
+        decltype(auto) get_block() const
         {
             return *mIt;
         }
@@ -155,13 +154,16 @@ struct refcounted_deque {
 
         void operator++()
         {
-            ++mIt;            
+            ++mIt;
+            if constexpr (!refcounted)
+                update();
         }
 
         void operator--()
         {
-            --mIt;            
-            updateBack();
+            --mIt;
+            if constexpr (!refcounted)
+                updateBack();
         }
 
         void update() const
@@ -188,10 +190,10 @@ struct refcounted_deque {
         const std::deque<ControlBlock<T>> *mContainer = nullptr;
     };
 
-    using iterator = IteratorImpl<typename std::deque<ControlBlock<T>>::iterator, T>;
-    using reverse_iterator = IteratorImpl<typename std::deque<ControlBlock<T>>::reverse_iterator, T>;
-    using const_iterator = IteratorImpl<typename std::deque<ControlBlock<T>>::const_iterator, const T>;
-    using const_reverse_iterator = IteratorImpl<typename std::deque<ControlBlock<T>>::const_reverse_iterator, const T>;
+    using iterator = IteratorImpl<typename std::deque<ControlBlock<T>>::iterator, T, false>;
+    using reverse_iterator = IteratorImpl<typename std::deque<ControlBlock<T>>::reverse_iterator, T, false>;
+    using const_iterator = IteratorImpl<typename std::deque<ControlBlock<T>>::const_iterator, const T, false>;
+    using const_reverse_iterator = IteratorImpl<typename std::deque<ControlBlock<T>>::const_reverse_iterator, const T, false>;
 
     iterator begin()
     {
@@ -213,10 +215,20 @@ struct refcounted_deque {
         return { mData.end(), mData };
     }
 
-    using refcounted_iterator = IteratorImpl<typename std::deque<ControlBlock<T>>::iterator, ControlBlock<T>>;
-    using refcounted_reverse_iterator = IteratorImpl<typename std::deque<ControlBlock<T>>::reverse_iterator, ControlBlock<T>>;
-    using refcounted_const_iterator = IteratorImpl<typename std::deque<ControlBlock<T>>::const_iterator, const ControlBlock<T>>;
-    using refcounted_const_reverse_iterator = IteratorImpl<typename std::deque<ControlBlock<T>>::const_reverse_iterator, const ControlBlock<T>>;
+    iterator it(size_t where)
+    {
+        return { mData.begin() + where, mData };
+    }
+
+    const_iterator it(size_t where) const
+    {
+        return { mData.begin() + where, mData };
+    }
+
+    using refcounted_iterator = IteratorImpl<typename std::deque<ControlBlock<T>>::iterator, ControlBlock<T>, true>;
+    using refcounted_reverse_iterator = IteratorImpl<typename std::deque<ControlBlock<T>>::reverse_iterator, ControlBlock<T>, true>;
+    using refcounted_const_iterator = IteratorImpl<typename std::deque<ControlBlock<T>>::const_iterator, const ControlBlock<T>, true>;
+    using refcounted_const_reverse_iterator = IteratorImpl<typename std::deque<ControlBlock<T>>::const_reverse_iterator, const ControlBlock<T>, true>;
 
     refcounted_iterator refcounted_begin()
     {
@@ -234,6 +246,31 @@ struct refcounted_deque {
     }
 
     refcounted_const_iterator refcounted_end() const
+    {
+        return { mData.end(), mData };
+    }
+
+    using blocks_iterator = IteratorImpl<typename std::deque<ControlBlock<T>>::iterator, ControlBlock<T>, false>;
+    using blocks_reverse_iterator = IteratorImpl<typename std::deque<ControlBlock<T>>::reverse_iterator, ControlBlock<T>, false>;
+    using blocks_const_iterator = IteratorImpl<typename std::deque<ControlBlock<T>>::const_iterator, const ControlBlock<T>, false>;
+    using blocks_const_reverse_iterator = IteratorImpl<typename std::deque<ControlBlock<T>>::const_reverse_iterator, const ControlBlock<T>, false>;
+
+    blocks_iterator blocks_begin()
+    {
+        return { mData.begin(), mData };
+    }
+
+    blocks_const_iterator blocks_begin() const
+    {
+        return { mData.begin(), mData };
+    }
+
+    blocks_iterator blocks_end()
+    {
+        return { mData.end(), mData };
+    }
+
+    blocks_const_iterator blocks_end() const
     {
         return { mData.end(), mData };
     }
@@ -257,7 +294,7 @@ struct refcounted_deque {
     iterator erase(const iterator &where)
     {
         --mSize;
-        where.get_refcounted().destroy();
+        where.get_block().destroy();
         return { where.it(), mData };
     }
 
@@ -272,7 +309,7 @@ struct refcounted_deque {
         return mSize;
     }
 
-    size_t internal_size() const
+    size_t blocks_size() const
     {
         return mData.size();
     }
@@ -294,6 +331,27 @@ struct refcounted_deque {
     };
 
     RefcountedView refcounted()
+    {
+        return { *this };
+    }
+
+    struct BlocksView {
+        refcounted_deque<T> &mData;
+        blocks_iterator begin() const
+        {
+            return mData.blocks_begin();
+        }
+        blocks_iterator end() const
+        {
+            return mData.blocks_end();
+        }
+        size_t size() const
+        {
+            return mData.size();
+        }
+    };
+
+    BlocksView blocks()
     {
         return { *this };
     }
@@ -355,7 +413,7 @@ struct container_traits<refcounted_deque<T>, void> {
 
     static position_handle toPositionHandle(container &c, const iterator &it)
     {
-        return std::distance(c.begin(), it);
+        return std::distance(c.refcounted_begin().it(), it.it());
     }
 
     static handle toHandle(container &c, const iterator &it)
@@ -367,7 +425,7 @@ struct container_traits<refcounted_deque<T>, void> {
 
     static void revalidateHandleAfterInsert(position_handle &handle, const container &c, const const_iterator &it)
     {
-        if (std::next(it) == c.end() && handle == c.internal_size() - 1) {
+        if (std::next(it) == c.end() && handle == c.blocks_size() - 1) {
             ++handle;
         }
     }
@@ -378,12 +436,12 @@ struct container_traits<refcounted_deque<T>, void> {
 
     static iterator toIterator(container &c, const position_handle &handle)
     {
-        return c.begin() + handle;
+        return c.it(handle);
     }
 
     static const_iterator toIterator(const container &c, const const_position_handle &handle)
     {
-        return c.begin() + handle;
+        return c.it(handle);
     }
 
     static position_handle next(const position_handle &handle)

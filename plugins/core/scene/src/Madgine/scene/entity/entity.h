@@ -36,7 +36,7 @@ namespace Scene {
             const std::string &name() const;
 
             template <typename T>
-            auto addComponent(const ObjectPtr &table = {})
+            EntityComponentPtr<T> addComponent(const ObjectPtr &table = {})
             {
                 return EntityComponentPtr<T> { addComponent(component_index<T>(), table) };
             }
@@ -64,8 +64,6 @@ namespace Scene {
             EntityComponentPtr<EntityComponentBase> getComponent(const std::string_view &name);
             EntityComponentPtr<const EntityComponentBase> getComponent(const std::string_view &name) const;
 
-            EntityComponentPtr<EntityComponentBase> toEntityComponentPtr(EntityComponentOwningHandle<EntityComponentBase> p);
-
             struct MADGINE_SCENE_EXPORT Helper {
                 Entity *mEntity;
                 EntityComponentPtr<EntityComponentBase> operator()(EntityComponentOwningHandle<EntityComponentBase> p);
@@ -90,25 +88,7 @@ namespace Scene {
             void removeComponent(size_t i);
             void clearComponents();
 
-            SceneManager &sceneMgr(bool = true) const;
-
             bool isLocal() const;
-
-            template <typename T>
-            T &getSceneComponent(bool init = true)
-            {
-                return static_cast<T &>(getSceneComponent(component_index<T>(), init));
-            }
-
-            SceneComponentBase &getSceneComponent(size_t i, bool = true);
-
-            template <typename T>
-            T &getGlobalAPIComponent(bool init = true)
-            {
-                return static_cast<T &>(getGlobalAPIComponent(component_index<T>(), init));
-            }
-
-            App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
             void handleEntityEvent(const typename std::set<EntityComponentOwningHandle<EntityComponentBase>>::iterator &it, int op);
 

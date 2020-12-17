@@ -146,7 +146,7 @@ namespace Tools {
 }
 }
 
-METATABLE_BEGIN(Engine::Tools::FunctionTool)
+METATABLE_BEGIN_BASE(Engine::Tools::FunctionTool, Engine::Tools::ToolBase)
 METATABLE_END(Engine::Tools::FunctionTool)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::FunctionTool, Engine::Tools::ToolBase)

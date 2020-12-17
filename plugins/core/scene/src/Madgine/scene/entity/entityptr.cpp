@@ -52,8 +52,10 @@ namespace Scene {
             return get();
         }
 
-        void EntityPtr::update() const {
-
+        void EntityPtr::update() const
+        {
+            if (mEntity && mEntity->dead())
+                mEntity = nullptr;
         }
 
         /*EntityPtr::operator bool() const
@@ -62,14 +64,14 @@ namespace Scene {
         }*/
 
         EntityPtr::operator Entity *() const
-        {            
+        {
             return get();
         }
 
         Entity *EntityPtr::get() const
         {
             update();
-            return mEntity ? mEntity->get() : nullptr;            
+            return mEntity ? mEntity->get() : nullptr;
         }
 
         bool EntityPtr::operator==(const EntityPtr &other) const

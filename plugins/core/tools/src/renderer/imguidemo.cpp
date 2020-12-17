@@ -32,7 +32,7 @@ namespace Tools {
 
 UNIQUECOMPONENT(Engine::Tools::ImGuiDemo);
 
-METATABLE_BEGIN(Engine::Tools::ImGuiDemo)
+METATABLE_BEGIN_BASE(Engine::Tools::ImGuiDemo, Engine::Tools::ToolBase)
 METATABLE_END(Engine::Tools::ImGuiDemo)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::ImGuiDemo, Engine::Tools::ToolBase)

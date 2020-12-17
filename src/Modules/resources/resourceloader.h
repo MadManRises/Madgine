@@ -59,7 +59,11 @@ namespace Resources {
 
         struct ResourceType;
 
-        using DataContainer = typename replace<Container>::template type<std::pair<ResourceType *, Data>>;
+        struct InfoBlock {
+            ResourceType *mResource;
+        };
+
+        using DataContainer = typename replace<Container>::template type<std::pair<InfoBlock, Data>>;
 
         using HandleType = Handle<T, typename container_traits<DataContainer>::handle>;
         using OriginalHandleType = HandleType;
@@ -336,7 +340,7 @@ namespace Resources {
                     loader = &Base::getSingleton();
                 return loader->getVImpl(handle);
             } else {
-                return handle.mData->first;
+                return handle.mData->first.mResource;
             }
         }
 

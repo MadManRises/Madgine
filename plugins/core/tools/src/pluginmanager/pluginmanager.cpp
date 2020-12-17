@@ -201,7 +201,7 @@ namespace Tools {
 }
 }
 
-METATABLE_BEGIN(Engine::Tools::PluginManager)
+METATABLE_BEGIN_BASE(Engine::Tools::PluginManager, Engine::Tools::ToolBase)
 METATABLE_END(Engine::Tools::PluginManager)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::PluginManager, Engine::Tools::ToolBase)

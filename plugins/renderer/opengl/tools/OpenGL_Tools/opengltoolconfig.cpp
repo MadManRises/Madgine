@@ -63,7 +63,7 @@ namespace Tools {
 
 UNIQUECOMPONENT(Engine::Tools::OpenGLToolConfig);
 
-METATABLE_BEGIN(Engine::Tools::OpenGLToolConfig)
+METATABLE_BEGIN_BASE(Engine::Tools::OpenGLToolConfig, Engine::Tools::ToolBase)
 METATABLE_END(Engine::Tools::OpenGLToolConfig)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::OpenGLToolConfig, Engine::Tools::ToolBase)

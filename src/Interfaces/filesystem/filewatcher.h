@@ -27,9 +27,10 @@ namespace Filesystem {
         void addWatch(const Path &path);
         void removeWatch(const Path &path);
 
-        std::vector<FileEvent> fetchChanges();
+        std::optional<FileEvent> fetchChange();
 
     private:
+        std::queue<FileEvent> mQueue;
         std::map<Path, uintptr_t> mWatches;
     };
 

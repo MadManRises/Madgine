@@ -111,7 +111,8 @@ namespace Serialize {
 
     void SerializeInStream::readRaw(void *buffer, size_t size)
     {
-        if (std::ios::iostate state = InStream::readRaw(buffer, size); state) {
+        InStream::readRaw(buffer, size);
+        if (!*this) {
             throw SerializeException(
                 "Deserialization Failure");
             }
@@ -146,15 +147,17 @@ namespace Serialize {
 
         char firstNonWs = ' ';
 
-        while (std::isspace(firstNonWs))
-            if (InStream::readRaw(&firstNonWs, 1))
+        while (std::isspace(firstNonWs)) {
+           
+            if (InStream::readRaw(&firstNonWs, 1) == 0)
                 return {};
+        }
 
         char buffer[255];
         size_t i = 0;
         buffer[i++] = firstNonWs;
         do {
-            if (InStream::readRaw(&buffer[i], 1))
+            if (InStream::readRaw(&buffer[i], 1) == 0)
                 break;
             ++i;
         } while (!strchr(c, buffer[i - 1]));

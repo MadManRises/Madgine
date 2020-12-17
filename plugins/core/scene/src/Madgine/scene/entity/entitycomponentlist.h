@@ -13,6 +13,9 @@ namespace Engine {
 namespace Scene {
     namespace Entity {
 
+        DERIVE_FUNCTION(init, Entity *);
+        DERIVE_FUNCTION(finalize, Entity *);
+
         MODULES_EXPORT EntityHandle copyEntityHandle(SceneManager *mgr, const EntityHandle &entity);
 
         template <typename T>
@@ -42,10 +45,14 @@ namespace Scene {
 
             void init(const EntityComponentHandle<EntityComponentBase> &index, Entity *entity) override final
             {
+                if constexpr (has_function_init_v<T>)
+                    mData.at(index.mIndex).template get<0>().init(entity);
             }
 
             void finalize(const EntityComponentHandle<EntityComponentBase> &index, Entity *entity) override final
             {
+                if constexpr (has_function_finalize_v<T>)
+                    mData.at(index.mIndex).template get<0>().finalize(entity);
             }
 
             T *get(const EntityComponentHandle<T> &index)

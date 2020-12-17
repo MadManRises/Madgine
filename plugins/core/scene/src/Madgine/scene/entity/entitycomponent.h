@@ -21,14 +21,14 @@ namespace Scene {
             using NamedComponent<T, EntityComponentComponent<T, Base>>::NamedComponent;
         };
 
-#define REGISTER_ENTITYCOMPONENT(Name, target)                               \
-    Engine::Threading::TaskGuard __##Name##_guard {                          \
-        []() {                                                               \
-            Engine::Scene::Entity::sComponentsByName()[#Name] = target;      \
-        },                                                                   \
-        []() {                                                               \
-            Engine::Scene::Entity::sComponentsByName().erase(#Name);         \
-        }                                                                    \
+#define REGISTER_ENTITYCOMPONENT(Name, target)                          \
+    Engine::Threading::TaskGuard __##Name##_guard {                     \
+        []() {                                                          \
+            Engine::Scene::Entity::sComponentsByName()[#Name] = target; \
+        },                                                              \
+        []() {                                                          \
+            Engine::Scene::Entity::sComponentsByName().erase(#Name);    \
+        }                                                               \
     };
 
 #define ENTITYCOMPONENTVIRTUALBASE_IMPL(Name, FullType) \
@@ -42,10 +42,7 @@ namespace Scene {
     NAMED_UNIQUECOMPONENT(Name, FullType)                                      \
     RegisterType(Engine::Scene::Entity::EntityComponentList<FullType>);        \
     UNIQUECOMPONENT2(Engine::Scene::Entity::EntityComponentList<FullType>, _2) \
-    REGISTER_ENTITYCOMPONENT(Name, Engine::indexRef<FullType>())               \
-    METATABLE_BEGIN_EX(FullType##Ptr, 1)                                       \
-    READONLY_PROPERTY_EX(Get, get, 2)                                          \
-    METATABLE_END_EX(FullType##Ptr, 3)
+    REGISTER_ENTITYCOMPONENT(Name, Engine::indexRef<FullType>())
 
     }
 }

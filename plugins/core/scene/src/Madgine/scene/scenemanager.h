@@ -86,12 +86,6 @@ namespace Scene {
             return *mEntityComponentLists.at(index);
         }
 
-        template <typename T>
-        Entity::EntityComponentPtr<T> toEntityComponentPtr(T *comp, const Entity::EntityPtr &e)
-        {
-            return { { entityComponentList<T>()->generate(comp - &entityComponentList<T>().front()) }, e };
-        }
-
     protected:
         virtual bool init() final;
         virtual void finalize() final;
@@ -127,7 +121,7 @@ namespace Scene {
                     return { ref };
                 }
             };
-            return transformIt<Helper>(mEntities.refcounted());
+            return transformIt<Helper>(mEntities.blocks());
         }
 
         //Threading::SignalStub<const decltype(mEntities)::iterator &, int> &entitiesSignal();

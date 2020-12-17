@@ -124,6 +124,11 @@ namespace Tools {
         return *mSceneMgr;
     }
 
+    bool SceneEditor::render3DCursor() const
+    {
+        return mRender3DCursor;
+    }
+
     void SceneEditor::renderSelection()
     {
         if (ImGui::Begin("SceneEditor", &mVisible)) {
@@ -165,6 +170,7 @@ namespace Tools {
             ImGui::ValueTypeDrawer { "Bone-Forward" }.draw(mBoneForward);
             ImGui::DragFloat("Default Bone Length", &mDefaultBoneLength);
             ImGui::Checkbox("Show Bone Names", &mShowBoneNames);
+            ImGui::Checkbox("Render 3D-Cursor", &mRender3DCursor);
         }
         ImGui::End();
     }
@@ -301,7 +307,7 @@ namespace Tools {
             mHoveredAxis = -1;
             mHoveredTransform = {};
 
-            Vector3 pos = (t->worldMatrix(entity->sceneMgr().entityComponentList<Scene::Entity::Transform>()) * Vector4::UNIT_W).xyz();
+            Vector3 pos = (t->worldMatrix(mSceneMgr->entityComponentList<Scene::Entity::Transform>()) * Vector4::UNIT_W).xyz();
 
             for (size_t i = 0; i < 3; ++i) {
                 Im3D::Arrow3D(IM3D_TRIANGLES, 0.1f, pos, pos + offsets[i], colors[i]);
@@ -317,7 +323,7 @@ namespace Tools {
                         const Engine::Render::Bone &bone = skeleton->mBones[i];
 
                         Matrix4 m = s->matrices()[i] * bone.mOffsetMatrix.Inverse() * skeleton->mMatrix.Inverse();
-                        Matrix4 world = t->worldMatrix(entity->sceneMgr().entityComponentList<Scene::Entity::Transform>());
+                        Matrix4 world = t->worldMatrix(mSceneMgr->entityComponentList<Scene::Entity::Transform>());
 
                         if (mShowBoneNames)
                             Im3D::Text(bone.mName.c_str(), Im3D::TextParameters { world * m, 2.0f });
@@ -362,7 +368,7 @@ namespace Tools {
             (!node.mEntity->hasComponent<Scene::Entity::Transform>() && parent) || 
             (node.mEntity->hasComponent<Scene::Entity::Transform>() && 
                 ((parent && parent->getComponent<Scene::Entity::Transform>() != node.mEntity->getComponent<Scene::Entity::Transform>()->parent()) ||
-                    (!parent && node.mEntity->getComponent<Scene::Entity::Transform>()->parent().mIndex)))) {
+                    (!parent && node.mEntity->getComponent<Scene::Entity::Transform>()->parent())))) {
             eraseNode(node);
             return true;
         }
@@ -404,7 +410,7 @@ namespace Tools {
 
 UNIQUECOMPONENT(Engine::Tools::SceneEditor);
 
-METATABLE_BEGIN(Engine::Tools::SceneEditor)
+METATABLE_BEGIN_BASE(Engine::Tools::SceneEditor, Engine::Tools::ToolBase)
 READONLY_PROPERTY(Views, views)
 METATABLE_END(Engine::Tools::SceneEditor)
 

@@ -101,6 +101,8 @@ namespace Window {
                     EndPaint((HWND)mHandle, &ps);
                     break;
                 }
+                default:
+                    LOG_WARNING("Unhandled Event type: " << msg);
                 }
             }
 
