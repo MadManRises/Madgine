@@ -51,17 +51,18 @@ namespace Filesystem {
         return p->NextEntryOffset == 0 ? nullptr : reinterpret_cast<PFILE_NOTIFY_INFORMATION>(reinterpret_cast<char *>(p) + p->NextEntryOffset);
     }
 
-    std::optional<FileEvent> FileWatcher::fetchChange()
+    std::vector<FileEvent> FileWatcher::fetchChanges()
     {
-        std::optional<FileEvent> event;
+        /*std::optional<FileEvent> event;
         std::scoped_lock lock { sFilewatcherMutex };
         if (!mQueue.empty()) {
             event = mQueue.front();
             mQueue.pop();
         }
-        return event;
+        return event;*/
 
-        /*for (const std::pair<const Path, uintptr_t> &watch : mWatches) {
+        std::vector<FileEvent> result;
+        for (const std::pair<const Path, uintptr_t> &watch : mWatches) {
             FILE_NOTIFY_INFORMATION info[10];
             DWORD bytes;
             bool b = ReadDirectoryChangesW((HANDLE)watch.second, info, sizeof(info), true, FILE_NOTIFY_CHANGE_LAST_WRITE, &bytes, NULL, NULL);
@@ -107,7 +108,7 @@ namespace Filesystem {
                 }
             }
         }
-        return result.front();*/
+        return result;
     }
 
 }

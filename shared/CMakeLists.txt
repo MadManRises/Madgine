@@ -62,6 +62,10 @@ export_to_workspace(BulletLib)
 set (ALSOFT_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(openal-soft)
 
+install_to_workspace(OpenAL TARGETS OpenAL common)
+
+export_to_workspace(OpenAL)
+
 add_subdirectory(libogg-1.3.4)
 
 add_library(Ogg::ogg ALIAS ogg)
