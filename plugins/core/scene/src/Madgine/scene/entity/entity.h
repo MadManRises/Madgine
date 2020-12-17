@@ -93,6 +93,7 @@ namespace Scene {
             void handleEntityEvent(const typename std::set<EntityComponentOwningHandle<EntityComponentBase>>::iterator &it, int op);
 
             SceneManager &sceneMgr();
+            const SceneManager &sceneMgr() const;
 
         public:
             std::string mName;

@@ -5,10 +5,10 @@
 namespace Engine {
 namespace Audio {
 
-    template <auto f, typename... Args>
-    static auto delegate2(Args... args, void *buf)
+    template <auto f>
+    static auto delegate2(void *destination, size_t size1, size_t size2, void *buf)
     {
-        return (static_cast<OggDecodeBuf *>(buf)->*f)(args...);
+        return (static_cast<OggDecodeBuf *>(buf)->*f)(destination, size1, size2);
     }
 
     template <auto f, typename... Args>
@@ -24,7 +24,7 @@ namespace Audio {
 
         ov_callbacks callbacks;
         callbacks.close_func = nullptr;
-        callbacks.read_func = delegate2<&OggDecodeBuf::ogg_read, void *, size_t, size_t>;
+        callbacks.read_func = delegate2<&OggDecodeBuf::ogg_read>;
         callbacks.seek_func = delegate<&OggDecodeBuf::ogg_seek, int64_t, int32_t>;
         callbacks.tell_func = delegate<&OggDecodeBuf::ogg_tell>;
 

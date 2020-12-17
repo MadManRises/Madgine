@@ -210,6 +210,11 @@ namespace Scene {
             return mSceneManager;
         }
 
+        const SceneManager &Entity::sceneMgr() const
+        {
+            return mSceneManager;
+        }
+
         EntityComponentPtr<EntityComponentBase> Entity::Helper::operator()(EntityComponentOwningHandle<EntityComponentBase> p)
         {
             return { p, &mEntity->mSceneManager };
