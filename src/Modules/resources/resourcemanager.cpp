@@ -116,8 +116,8 @@ namespace Resources {
 
     void ResourceManager::update()
     {        
-        while (std::optional<Filesystem::FileEvent> event = mFileWatcher.fetchChange()) {
-            LOG(event->mType);
+        for (const Filesystem::FileEvent &event : mFileWatcher.fetchChanges()){        
+            LOG(event.mType);
         }
     }
 
