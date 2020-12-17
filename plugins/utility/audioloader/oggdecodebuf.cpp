@@ -24,9 +24,9 @@ namespace Audio {
 
         ov_callbacks callbacks;
         callbacks.close_func = nullptr;
-        callbacks.read_func = delegate2<&OggDecodeBuf::read, void *, size_t, size_t>;
-        callbacks.seek_func = delegate<&OggDecodeBuf::seek, int64_t, int32_t>;
-        callbacks.tell_func = delegate<&OggDecodeBuf::tell>;
+        callbacks.read_func = delegate2<&OggDecodeBuf::ogg_read, void *, size_t, size_t>;
+        callbacks.seek_func = delegate<&OggDecodeBuf::ogg_seek, int64_t, int32_t>;
+        callbacks.tell_func = delegate<&OggDecodeBuf::ogg_tell>;
 
         auto result = ov_open_callbacks(this, &mFile, nullptr, -1, callbacks);
         if (result)
@@ -81,12 +81,12 @@ namespace Audio {
         return 0;
     }
 
-    size_t OggDecodeBuf::read(void *destination, size_t size1, size_t size2)
+    size_t OggDecodeBuf::ogg_read(void *destination, size_t size1, size_t size2)
     {
         return mBase.readRaw(destination, size1 * size2);
     }
 
-    int32_t OggDecodeBuf::seek(int64_t to, int32_t type)
+    int32_t OggDecodeBuf::ogg_seek(int64_t to, int32_t type)
     {
         std::ios::seekdir dir;
         switch (type) {
@@ -106,7 +106,7 @@ namespace Audio {
         return mBase.seek(to, dir) ? 0 : -1;
     }
 
-    long int OggDecodeBuf::tell()
+    long int OggDecodeBuf::ogg_tell()
     {
         return mBase.tell();
     }

@@ -25,9 +25,9 @@ namespace Audio {
 
         int sync() override;
 
-        size_t read(void *destination, size_t size1, size_t size2);
-        int32_t seek(int64_t to, int32_t type);
-        long int tell();
+        size_t ogg_read(void *destination, size_t size1, size_t size2);
+        int32_t ogg_seek(int64_t to, int32_t type);
+        long int ogg_tell();
 
     private:
         InStream mBase;
