@@ -91,13 +91,13 @@ namespace Audio {
         std::ios::seekdir dir;
         switch (type) {
         case SEEK_CUR:
-            dir = std::ios::_Seekcur;
+            dir = std::ios_base::cur;
             break;
         case SEEK_END:
-            dir = std::ios::_Seekend;
+            dir = std::ios_base::end;
             break;
         case SEEK_SET:
-            dir = std::ios::_Seekbeg;
+            dir = std::ios_base::beg;
             break;
         default:
             std::terminate();
