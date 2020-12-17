@@ -86,6 +86,11 @@ namespace Scene {
             return *mEntityComponentLists.at(index);
         }
 
+        const Entity::EntityComponentListBase &entityComponentList(size_t index) const
+        {
+            return *mEntityComponentLists.at(index);
+        }
+
     protected:
         virtual bool init() final;
         virtual void finalize() final;
