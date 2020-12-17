@@ -20,6 +20,8 @@ namespace Window {
         1.0f
     };
 
+    void setupRawInput(HWND handle);
+
     struct WindowsWindow final : OSWindow {
         WindowsWindow(HWND hwnd)
             : OSWindow((uintptr_t)hwnd)
@@ -300,7 +302,7 @@ namespace Window {
                 x = settings.mData.mPosition.x;
                 y = settings.mData.mPosition.y;
             }
-            
+
             handle = CreateWindow(windowClass, settings.mTitle,
                 style,
                 x, y, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance,
@@ -325,8 +327,10 @@ namespace Window {
                 SetWindowPlacement(handle, &wndpl);
             } else {
                 ShowWindow(handle, showCmd);
-            }                        
+            }
         }
+
+        setupRawInput(handle);
 
         auto pib = sWindows.try_emplace(handle, handle);
         assert(pib.second);
@@ -374,6 +378,53 @@ namespace Window {
         if (sBuffer.empty())
             updateMonitors();
         return sBuffer;
+    }
+
+    ////RAWINPUT
+
+    static std::mutex sRawInputDevicesMutex;
+    static std::atomic_flag sRawInputInitialized = ATOMIC_FLAG_INIT;
+
+    struct RawInputDevice {
+    };
+
+    std::map<HANDLE, RawInputDevice> sRawInputDevices;
+
+    void addRawInputDevice(HANDLE device) {
+
+        RID_DEVICE_INFO rdi;
+        UINT rdi_size = sizeof(rdi);
+
+        auto result = GetRawInputDeviceInfoA(device, RIDI_DEVICEINFO, &rdi, &rdi_size);
+        assert(result > 0);
+        assert(rdi.dwType == RIM_TYPEHID);
+
+
+    }
+
+    void listRawInputDevices()
+    {
+        std::scoped_lock lock { sRawInputDevicesMutex };
+
+        UINT device_count = 0;
+
+        if ((GetRawInputDeviceList(NULL, &device_count, sizeof(RAWINPUTDEVICELIST)) != -1) && device_count > 0) {
+            std::unique_ptr<RAWINPUTDEVICELIST[]> devices = std::make_unique<RAWINPUTDEVICELIST[]>(device_count);
+
+            if (GetRawInputDeviceList(devices.get(), &device_count, sizeof(RAWINPUTDEVICELIST)) != -1) {
+                for (size_t i = 0; i < device_count; ++i) {
+                    if (devices[i].dwType == RIM_TYPEHID)
+                        addRawInputDevice(devices[i].hDevice);
+                }
+            }
+        }        
+    }
+
+    void setupRawInput(HWND handle)
+    {
+        if (!sRawInputInitialized.test_and_set()) {
+            listRawInputDevices();
+        }
     }
 
 }

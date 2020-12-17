@@ -44,9 +44,11 @@ set_target_properties(stb PROPERTIES EXCLUDE_FROM_ALL TRUE)
 ######################## Static Libs #################
 
 set(OLD_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
+set(OLD_BUILD_TESTING ${BUILD_TESTING})
 
 set(USE_MSVC_RUNTIME_LIBRARY_DLL ${BUILD_SHARED_LIBS} CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF)
+set(BUILD_TESTING OFF)
 
 set (BUILD_UNIT_TESTS OFF CACHE BOOL "" FORCE)
 set (BUILD_EXTRAS OFF CACHE BOOL "" FORCE)
@@ -61,6 +63,7 @@ export_to_workspace(BulletLib)
 if (NOT ANDROID AND NOT EMSCRIPTEN)
 	set(ALSOFT_INSTALL OFF CACHE BOOL "" FORCE)
 	set (ALSOFT_EXAMPLES OFF CACHE BOOL "" FORCE)
+	set(LIBTYPE STATIC)
 	add_subdirectory(openal-soft)
 
 	install_to_workspace(OpenAL TARGETS OpenAL common EXPORT_LIB)
@@ -75,7 +78,6 @@ add_library(Ogg::ogg ALIAS ogg)
 add_subdirectory(libvorbis-1.3.7)
 
 set(BUILD_SHARED_LIBS ${OLD_BUILD_SHARED_LIBS})
-
-
+set(BUILD_TESTING ${OLD_BUILD_TESTING})
 
 
