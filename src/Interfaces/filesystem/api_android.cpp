@@ -50,6 +50,7 @@ namespace Filesystem {
 
         auto result = readlink("/proc/self/exe", buffer, sizeof(buffer));
         assert(result > 0);
+        buffer[result] = '\0';
 
         return Path(buffer).parentPath();
     }
@@ -60,6 +61,7 @@ namespace Filesystem {
 
         auto result = readlink("/proc/self/exe", buffer, sizeof(buffer));
         assert(result > 0);
+        buffer[result] = '\0';
 
         return std::string { Path(buffer).stem() };
     }
