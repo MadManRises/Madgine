@@ -8,18 +8,20 @@ namespace Threading {
     enum class TaskMask : uint8_t {
         NONE = 0,
         DEFAULT = 1 << 0,
-        BARRIER = 1 << 1
+        BARRIER = 1 << 1,
+        ALL = (1 << 8) - 1
     };
 
     MODULES_EXPORT bool match(TaskMask v, TaskMask values, TaskMask mask = TaskMask::NONE);
 
     struct MODULES_EXPORT TaskTracker {
-        TaskTracker(TaskHandle &&task, std::atomic<size_t> &tracker);
+        TaskTracker(TaskHandle &&task, TaskMask mask, std::atomic<size_t> &tracker);
         TaskTracker(const TaskTracker &) = delete;
         TaskTracker(TaskTracker &&other);
         ~TaskTracker();
 
         TaskHandle mTask;
+        TaskMask mMask;
 
     private:
         std::atomic<size_t> *mTracker;
@@ -29,11 +31,11 @@ namespace Threading {
         TaskQueue(const std::string &name, bool wantsMainThread = false);
         virtual ~TaskQueue();
 
-        void queue(TaskHandle &&task, const std::vector<Threading::DataMutex *> &dependencies = {});
-        void queue_after(TaskHandle &&task, std::chrono::steady_clock::duration duration, const std::vector<Threading::DataMutex *> &dependencies = {});
-        void queue_for(TaskHandle &&task, std::chrono::steady_clock::time_point time_point, const std::vector<Threading::DataMutex *> &dependencies = {});
+        void queue(TaskHandle &&task, TaskMask mask, const std::vector<Threading::DataMutex *> &dependencies = {});
+        void queue_after(TaskHandle &&task, TaskMask mask, std::chrono::steady_clock::duration duration, const std::vector<Threading::DataMutex *> &dependencies = {});
+        void queue_for(TaskHandle &&task, TaskMask mask, std::chrono::steady_clock::time_point time_point, const std::vector<Threading::DataMutex *> &dependencies = {});
 
-        void addRepeatedTask(TaskHandle &&task, std::chrono::steady_clock::duration interval = std::chrono::steady_clock::duration::zero(), void *owner = nullptr);
+        void addRepeatedTask(TaskHandle &&task, TaskMask mask, std::chrono::steady_clock::duration interval = std::chrono::steady_clock::duration::zero(), void *owner = nullptr);
         void removeRepeatedTasks(void *owner);
 
         virtual std::optional<TaskTracker> fetch(TaskMask taskMask, const std::atomic<bool> *interruptFlag, std::chrono::steady_clock::time_point &nextTask, int &idleCount, int &repeatedCount);
@@ -56,7 +58,8 @@ namespace Threading {
 
     protected:
         struct ScheduledTask {
-            TaskTracker mTask;
+            TaskHandle mTask;
+            TaskMask mMask;
             std::chrono::steady_clock::time_point mScheduledFor = std::chrono::steady_clock::time_point::min();
         };
 
@@ -64,7 +67,7 @@ namespace Threading {
 
         virtual std::optional<TaskTracker> fetch_on_idle();
 
-        TaskTracker wrapTask(TaskHandle &&task);
+        TaskTracker wrapTask(TaskHandle &&task, TaskMask mask);
 
     private:
         std::string mName;
@@ -74,6 +77,7 @@ namespace Threading {
 
         struct RepeatedTask {
             TaskHandle mTask;
+            TaskMask mMask;
             void *mOwner = nullptr;
             std::chrono::steady_clock::duration mInterval = std::chrono::steady_clock::duration::zero();
             std::chrono::steady_clock::time_point mNextExecuted = std::chrono::steady_clock::time_point::min();

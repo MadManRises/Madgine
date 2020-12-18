@@ -17,7 +17,7 @@ namespace Threading {
         : mName(name)
         , mSetupState(mSetupSteps.begin())
         , mWantsMainThread(wantsMainThread)
-    {        
+    {
         WorkGroup::self().addTaskQueue(this);
     }
 
@@ -46,9 +46,9 @@ namespace Threading {
         return {};
     }
 
-    TaskTracker TaskQueue::wrapTask(TaskHandle &&task)
+    TaskTracker TaskQueue::wrapTask(TaskHandle &&task, TaskMask mask)
     {
-        return TaskTracker { std::move(task), mTaskCount };
+        return TaskTracker { std::move(task), mask, mTaskCount };
     }
 
     const std::string &TaskQueue::name() const
@@ -67,8 +67,8 @@ namespace Threading {
 
     void TaskQueue::waitForTasks(const std::atomic<bool> *interruptFlag, std::chrono::steady_clock::time_point until)
     {
-        std::unique_lock<std::mutex> lock(mMutex);        
-        
+        std::unique_lock<std::mutex> lock(mMutex);
+
         if (until == std::chrono::steady_clock::time_point::max()) {
             auto cond = [=, &interruptFlag]() { return interruptFlag || !mQueue.empty() || !mRunning || !mRepeatedTasks.empty(); };
             mCv.wait(lock, cond);
@@ -94,26 +94,26 @@ namespace Threading {
         mCv.notify_all();
     }
 
-    void TaskQueue::queue(TaskHandle &&task, const std::vector<Threading::DataMutex *> &dependencies)
+    void TaskQueue::queue(TaskHandle &&task, TaskMask mask, const std::vector<Threading::DataMutex *> &dependencies)
     {
-        queueInternal({ wrapTask(std::move(task)) });
+        queueInternal({ std::move(task), mask });
     }
 
-    void TaskQueue::queue_after(TaskHandle &&task, std::chrono::steady_clock::duration duration, const std::vector<Threading::DataMutex *> &dependencies)
+    void TaskQueue::queue_after(TaskHandle &&task, TaskMask mask, std::chrono::steady_clock::duration duration, const std::vector<Threading::DataMutex *> &dependencies)
     {
-        queue_for(std::move(task), std::chrono::steady_clock::now() + duration);
+        queue_for(std::move(task), mask, std::chrono::steady_clock::now() + duration);
     }
 
-    void TaskQueue::queue_for(TaskHandle &&task, std::chrono::steady_clock::time_point time_point, const std::vector<Threading::DataMutex *> &dependencies)
+    void TaskQueue::queue_for(TaskHandle &&task, TaskMask mask, std::chrono::steady_clock::time_point time_point, const std::vector<Threading::DataMutex *> &dependencies)
     {
-        queueInternal({ wrapTask(std::move(task)), time_point });
+        queueInternal({std::move(task), mask, time_point });
     }
 
-    void TaskQueue::addRepeatedTask(TaskHandle &&task, std::chrono::steady_clock::duration interval, void *owner)
+    void TaskQueue::addRepeatedTask(TaskHandle &&task, TaskMask mask, std::chrono::steady_clock::duration interval, void *owner)
     {
         {
             std::lock_guard<std::mutex> lock(mMutex);
-            mRepeatedTasks.emplace_back(RepeatedTask { std::move(task), owner, interval });
+            mRepeatedTasks.emplace_back(RepeatedTask { std::move(task), mask, owner, interval });
         }
         mCv.notify_one();
     }
@@ -121,48 +121,51 @@ namespace Threading {
     void TaskQueue::removeRepeatedTasks(void *owner)
     {
         std::lock_guard<std::mutex> lock(mMutex);
-        mRepeatedTasks.erase(std::remove_if(mRepeatedTasks.begin(), mRepeatedTasks.end(), [owner](const RepeatedTask &task) { return task.mOwner == owner; }), mRepeatedTasks.end());        
+        mRepeatedTasks.erase(std::remove_if(mRepeatedTasks.begin(), mRepeatedTasks.end(), [owner](const RepeatedTask &task) { return task.mOwner == owner; }), mRepeatedTasks.end());
     }
 
     std::optional<TaskTracker> TaskQueue::fetch(TaskMask taskMask, const std::atomic<bool> *interruptFlag, std::chrono::steady_clock::time_point &nextTask, int &idleCount, int &repeatedCount)
     {
         std::chrono::steady_clock::time_point nextTaskTimepoint = nextTask;
 
-        if (mRunning && match(taskMask, TaskMask::DEFAULT)) {
+        if (mRunning && match(TaskMask::DEFAULT, taskMask)) {
             while (mSetupState != mSetupSteps.end()) {
                 std::optional<Threading::TaskHandle> init = std::move(mSetupState->first);
                 ++mSetupState;
                 if (init) {
-                    return wrapTask(std::move(*init));
+                    return wrapTask(std::move(*init), TaskMask::DEFAULT);
                 }
             }
         }
 
         {
             std::lock_guard<std::mutex> lock(mMutex);
-            if (!mQueue.empty()) {
-                ScheduledTask &task = mQueue.front();
-                if (task.mScheduledFor <= std::chrono::steady_clock::now()) {
-                    TaskTracker f = std::move(task.mTask);
-                    mQueue.pop_front();
+            for (auto it = mQueue.begin(); it != mQueue.end(); ++it) {
+                if (!match(it->mMask, taskMask))
+                    continue;
+                if (it->mScheduledFor <= std::chrono::steady_clock::now()) {
+                    TaskTracker f = wrapTask(std::move(it->mTask), it->mMask);
+                    mQueue.erase(it);
                     return f;
                 } else {
-                    nextTaskTimepoint = std::min(task.mScheduledFor, nextTaskTimepoint);
+                    nextTaskTimepoint = std::min(it->mScheduledFor, nextTaskTimepoint);
                 }
             }
             if (mRunning && repeatedCount != 0 && (!interruptFlag || !*interruptFlag)) {
                 RepeatedTask *nextTask = nullptr;
-                for (RepeatedTask &task : mRepeatedTasks) {                    
+                for (RepeatedTask &task : mRepeatedTasks) {
+                    if (!match(task.mMask, taskMask))
+                        continue;
                     if (task.mNextExecuted < nextTaskTimepoint) {
                         nextTask = &task;
-                        nextTaskTimepoint = task.mNextExecuted;                    
+                        nextTaskTimepoint = task.mNextExecuted;
                     }
                 }
                 if (nextTask && nextTaskTimepoint <= std::chrono::steady_clock::now()) {
                     if (repeatedCount > 0)
                         --repeatedCount;
                     nextTask->mNextExecuted = std::chrono::steady_clock::now() + nextTask->mInterval;
-                    return wrapTask([=]() { nextTask->mTask(); });
+                    return wrapTask([=]() { nextTask->mTask(); }, nextTask->mMask);
                 }
             }
         }
@@ -180,13 +183,13 @@ namespace Threading {
             }
         }
 
-        if (!mRunning && match(taskMask, TaskMask::DEFAULT) && nextTaskTimepoint == std::chrono::steady_clock::time_point::max()) {
+        if (!mRunning && match(TaskMask::DEFAULT, taskMask) && nextTaskTimepoint == std::chrono::steady_clock::time_point::max()) {
 
             while (mSetupState != mSetupSteps.begin()) {
                 --mSetupState;
                 Threading::TaskHandle finalize = std::move(mSetupState->second);
                 if (finalize) {
-                    return wrapTask(std::move(finalize));
+                    return wrapTask(std::move(finalize), TaskMask::DEFAULT);
                 }
             }
         }
@@ -197,7 +200,14 @@ namespace Threading {
 
     bool TaskQueue::idle(TaskMask taskMask) const
     {
-        return mTaskCount == 0 && (!match(taskMask, TaskMask::DEFAULT) || mSetupState == mSetupSteps.end() || !mRunning);
+        if (match(TaskMask::DEFAULT, taskMask) && mSetupState != mSetupSteps.end() & mRunning)
+            return false;
+
+        for (const ScheduledTask &task : mQueue)
+            if (match(task.mMask, taskMask))
+                return false;
+
+        return mTaskCount == 0;
     }
 
     void TaskQueue::addSetupSteps(std::function<bool()> &&init, TaskHandle &&finalize)
@@ -227,8 +237,9 @@ namespace Threading {
         }
     }
 
-    TaskTracker::TaskTracker(TaskHandle &&task, std::atomic<size_t> &tracker)
+    TaskTracker::TaskTracker(TaskHandle &&task, TaskMask mask, std::atomic<size_t> &tracker)
         : mTask(std::move(task))
+        , mMask(mask)
         , mTracker(&tracker)
     {
         assert(mTask);
@@ -237,6 +248,7 @@ namespace Threading {
 
     TaskTracker::TaskTracker(TaskTracker &&other)
         : mTask(std::move(other.mTask))
+        , mMask(other.mMask)
         , mTracker(std::exchange(other.mTracker, nullptr))
     {
     }

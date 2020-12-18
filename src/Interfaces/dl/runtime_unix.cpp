@@ -16,63 +16,7 @@
 namespace Engine {
 namespace Dl {
 
-    struct SharedLibraryQueryState {
-        dirent *mData;
-    };
 
-    static bool skipSymbolic(void *handle, SharedLibraryQueryState &data)
-    {
-        while (strcmp(data.mData->d_name, ".") == 0 || strcmp(data.mData->d_name, "..") == 0) {
-            data.mData = readdir((DIR *)handle);
-            if (!data.mData)
-                return false;
-        }
-
-        return true;
-    }
-
-    SharedLibraryIterator::SharedLibraryIterator(const SharedLibraryQuery *query)
-        : mQuery(query)
-        , mBuffer { new SharedLibraryQueryState, [](SharedLibraryQueryState *s) { delete s; } }
-        , mHandle(opendir(query->path().c_str()))
-    {
-        if (mHandle) {
-            ++(*this);
-        }
-    }
-
-    void SharedLibraryIterator::close()
-    {
-        if (mHandle) {
-            closedir((DIR *)mHandle);
-            mHandle = nullptr;
-        }
-    }
-
-    void SharedLibraryIterator::operator++()
-    {
-        mBuffer->mData = readdir((DIR *)mHandle);
-        if (!mBuffer->mData || !skipSymbolic(mHandle, *mBuffer))
-            close();
-    }
-
-    const char *filename(SharedLibraryQueryState &data)
-    {
-        return data.mData->d_name;
-    }
-
-    SharedLibraryQuery listSharedLibraries()
-    {
-#    if LINUX || OSX || IOS
-        return SharedLibraryQuery{Filesystem::executablePath()};
-#    elif ANDROID
-        return SharedLibraryQuery { Filesystem::Path { "/data/data/com.Madgine.MadgineLauncher/lib" } }; //TODO
-#    elif EMSCRIPTEN
-        std::terminate();
-#    else
-#        error "Unsupported Platform!"
-#    endif
-    }
 
     /*static int visitModule(struct dl_phdr_info *info, size_t size, void *data) {
 			if (info->dlpi_name)

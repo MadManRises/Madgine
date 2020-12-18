@@ -35,11 +35,12 @@ namespace Plugins {
     {
         const std::regex e { SHARED_LIB_PREFIX "Plugin_([a-zA-Z0-9]*)_" + mName + "_([a-zA-Z0-9]*)\\" SHARED_LIB_SUFFIX };
         std::smatch match;
-        for (auto path : Dl::listSharedLibraries()) {
-            if (std::regex_match(path.str(), match, e)) {
+        for (auto result : Dl::listSharedLibraries()) {
+            auto file = result.path().filename();
+            if (std::regex_match(file.str(), match, e)) {
                 std::string project = match[1];
                 std::string name = match[2];
-                auto pib = mPlugins.try_emplace(name, name, this, project, path);
+                auto pib = mPlugins.try_emplace(name, name, this, project, result.path());
                 assert(pib.second);
             }
         }

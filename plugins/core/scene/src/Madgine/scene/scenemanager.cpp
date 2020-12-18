@@ -60,7 +60,7 @@ namespace Scene {
 
         mLastFrame = std::chrono::steady_clock::now();
 
-        Threading::DefaultTaskQueue::getSingleton().addRepeatedTask([this]() { update(); }, std::chrono::microseconds { 30 /*0000*/ }, this);
+        Threading::DefaultTaskQueue::getSingleton().addRepeatedTask([this]() { update(); }, Threading::TaskMask::DEFAULT, std::chrono::microseconds { 30 /*0000*/ }, this);
 
         return true;
     }

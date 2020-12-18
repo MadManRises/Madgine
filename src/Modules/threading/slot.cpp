@@ -29,7 +29,7 @@ namespace Threading {
 
     void SlotBase::queue(TaskHandle &&task, const std::vector<Threading::DataMutex *> &dependencies) const
     {
-        mQueue->queue(std::move(task), dependencies);
+        mQueue->queue(std::move(task), TaskMask::ALL, dependencies);
     }
 }
 }

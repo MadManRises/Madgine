@@ -14,7 +14,7 @@ namespace Server {
     {
         Util::setLog(&mLog);
         mLog.startConsole();
-        addRepeatedTask([this]() { consoleCheck(); }, std::chrono::milliseconds(20));
+        addRepeatedTask([this]() { consoleCheck(); }, Threading::TaskMask::ALL, std::chrono::milliseconds(20));
     }
 
     ServerBase::~ServerBase()

@@ -103,7 +103,7 @@ namespace Filesystem {
                 return false;
             if (p.size() == 1)
                 return true;
-            if (!std::isalnum(p[1]) && !isSeparator(p[1]) && p[1] != ':')
+            if (!std::isalnum(p[1]) && !isSeparator(p[1]) && !std::ispunct(p[1]) && p[1] != ':')
                 return false;
             c = p.data() + 2;
         }

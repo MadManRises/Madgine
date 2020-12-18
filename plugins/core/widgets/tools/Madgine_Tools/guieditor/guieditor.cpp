@@ -60,7 +60,7 @@ namespace Tools {
 
         mWindow->frameLoop().queue([this]() {
             loadLayout();
-        });
+        }, Threading::TaskMask::DEFAULT);
 #endif
 
         return ToolBase::init();

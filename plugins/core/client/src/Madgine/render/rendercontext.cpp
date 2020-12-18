@@ -58,7 +58,7 @@
         void RenderContext::queueRenderTask(Threading::TaskHandle &&task)
         {
             assert(sContext);
-            sContext->mRenderQueue->queue(std::move(task));
+            sContext->mRenderQueue->queue(std::move(task), Threading::TaskMask::ALL);
         }
 
         bool RenderContext::isRenderThread()

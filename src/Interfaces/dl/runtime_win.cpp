@@ -8,60 +8,10 @@
 #    include <Windows.h>
 #    include <Psapi.h>
 
+#include "../filesystem/api.h"
+
 namespace Engine {
 namespace Dl {
-
-    struct SharedLibraryQueryState {
-        WIN32_FIND_DATA mData;
-    };
-
-    static bool skipSymbolic(void *handle, SharedLibraryQueryState &data)
-    {
-        while (strcmp(data.mData.cFileName, ".") == 0 || strcmp(data.mData.cFileName, "..") == 0)
-            if (!FindNextFile(handle, &data.mData))
-                return false;
-        return true;
-    }
-
-    SharedLibraryIterator::SharedLibraryIterator(const SharedLibraryQuery *query)
-        : mQuery(query)
-        , mBuffer { new SharedLibraryQueryState, [](SharedLibraryQueryState *s) { delete s; } }
-        , mHandle(FindFirstFile((query->path().str() + "/*").c_str(), &mBuffer->mData))
-    {
-        if (mHandle == INVALID_HANDLE_VALUE)
-            mHandle = nullptr;
-        else if (!skipSymbolic(mHandle, *mBuffer))
-            close();
-    }
-
-    void SharedLibraryIterator::close()
-    {
-        if (mHandle) {
-            FindClose(mHandle);
-            mHandle = nullptr;
-        }
-    }
-
-    void SharedLibraryIterator::operator++()
-    {
-        if (!FindNextFile(mHandle, &mBuffer->mData))
-            close();
-    }
-
-    const char *filename(SharedLibraryQueryState &data)
-    {
-        return data.mData.cFileName;
-    }
-
-    SharedLibraryQuery listSharedLibraries()
-    {
-        char buffer[512];
-
-        auto result = GetModuleFileName(nullptr, buffer, sizeof(buffer));
-        assert(result > 0);
-
-        return SharedLibraryQuery { Filesystem::Path(buffer).parentPath() };
-    }
 
     /*std::set<std::string> listLoadedLibraries()
 		{

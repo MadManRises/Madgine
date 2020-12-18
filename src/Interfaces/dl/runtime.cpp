@@ -2,59 +2,22 @@
 
 #include "runtime.h"
 
+#include "../filesystem/api.h"
+
 namespace Engine {
 namespace Dl {
-
-    extern const char *filename(SharedLibraryQueryState &data);
-
-    SharedLibraryQuery::SharedLibraryQuery(Filesystem::Path p)
-        : mPath(std::move(p))
+    
+    Filesystem::FileQuery listSharedLibraries()
     {
-    }
-
-    SharedLibraryIterator SharedLibraryQuery::begin() const
-    {
-        return SharedLibraryIterator(this);
-    }
-
-    SharedLibraryIterator SharedLibraryQuery::end() const
-    {
-        return SharedLibraryIterator(this, end_tag {});
-    }
-
-    const Filesystem::Path &SharedLibraryQuery::path() const
-    {
-        return mPath;
-    }
-
-    SharedLibraryIterator::SharedLibraryIterator(const SharedLibraryQuery *query, end_tag)
-        : mQuery(query)
-        , mBuffer(nullptr, nullptr)
-        , mHandle(nullptr)
-    {
-    }
-
-    SharedLibraryIterator::SharedLibraryIterator(SharedLibraryIterator &&other)
-        : mQuery(other.mQuery)
-        , mBuffer(std::move(other.mBuffer))
-        , mHandle(std::exchange(other.mHandle, nullptr))
-    {
-    }
-
-    SharedLibraryIterator::~SharedLibraryIterator()
-    {
-        close();
-    }
-
-    bool SharedLibraryIterator::operator!=(const SharedLibraryIterator &other) const
-    {
-        assert(mQuery == other.mQuery);
-        return other.mHandle != mHandle;
-    }
-
-    Filesystem::Path SharedLibraryIterator::operator*() const
-    {
-        return Filesystem::Path(filename(*mBuffer));
+#if LINUX || OSX || IOS || WINDOWS
+        return Filesystem::FileQuery { Filesystem::executablePath() };
+#elif ANDROID
+        return SharedLibraryQuery { Filesystem::Path { "/data/data/com.Madgine.MadgineLauncher/lib" } }; //TODO
+#elif EMSCRIPTEN
+        std::terminate();
+#else
+#    error "Unsupported Platform!"
+#endif
     }
 
 }

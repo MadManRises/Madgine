@@ -10,10 +10,13 @@
 
 #    define NOMINMAX
 #    include <Windows.h>
+#    include <hidsdi.h>
 #    include <windowsx.h>
 
 namespace Engine {
 namespace Window {
+
+#    define USB_PACKET_LENGTH 64
 
     DLL_EXPORT const PlatformCapabilities platformCapabilities {
         true,
@@ -21,6 +24,7 @@ namespace Window {
     };
 
     void setupRawInput(HWND handle);
+    void handleRawInput(PRAWINPUT input);
 
     struct WindowsWindow final : OSWindow {
         WindowsWindow(HWND hwnd)
@@ -103,8 +107,17 @@ namespace Window {
                     EndPaint((HWND)mHandle, &ps);
                     break;
                 }
-                default:
-                    LOG_WARNING("Unhandled Event type: " << msg);
+                case WM_INPUT: {
+                    std::byte data[sizeof(RAWINPUTHEADER) + sizeof(RAWHID) + USB_PACKET_LENGTH];
+                    UINT buffer_size = sizeof(data);
+
+                    if ((int)GetRawInputData((HRAWINPUT)lParam, RID_INPUT, data, &buffer_size, sizeof(RAWINPUTHEADER)) > 0) {
+                        PRAWINPUT raw_input = (PRAWINPUT)data;
+                        handleRawInput(raw_input);
+                    }
+                } break;
+                //default:
+                    //LOG_WARNING("Unhandled Event type: " << msg);
                 }
             }
 
@@ -382,15 +395,75 @@ namespace Window {
 
     ////RAWINPUT
 
+
     static std::mutex sRawInputDevicesMutex;
     static std::atomic_flag sRawInputInitialized = ATOMIC_FLAG_INIT;
 
+    decltype(&HidD_GetManufacturerString) sGetManufacturerString;
+    decltype(&HidD_GetProductString) sGetProductString;
+    decltype(&HidD_GetPreparsedData) sGetPreparsedData;
+    decltype(&HidP_GetCaps) sGetCaps;
+    decltype(&HidP_GetValueCaps) sGetValueCaps;
+    decltype(&HidP_GetButtonCaps) sGetButtonCaps;
+    decltype(&HidP_GetUsageValue) sGetUsageValue;
+    decltype(&HidP_GetData) sGetData;
+    decltype(&HidP_MaxDataListLength) sMaxDataListLength;
+
+    void loadHID(void)
+    {
+        HMODULE handle = LoadLibrary("hid.dll");
+        assert(handle);
+
+        sGetManufacturerString = (decltype(&HidD_GetManufacturerString))GetProcAddress(handle, "HidD_GetManufacturerString");
+        sGetProductString = (decltype(&HidD_GetProductString))GetProcAddress(handle, "HidD_GetProductString");
+        sGetPreparsedData = (decltype(&HidD_GetPreparsedData))GetProcAddress(handle, "HidD_GetPreparsedData");
+        sGetCaps = (decltype(&HidP_GetCaps))GetProcAddress(handle, "HidP_GetCaps");
+        sGetData = (decltype(&HidP_GetData))GetProcAddress(handle, "HidP_GetData");
+        sGetValueCaps = (decltype(&HidP_GetValueCaps))GetProcAddress(handle, "HidP_GetValueCaps");
+        sGetButtonCaps = (decltype(&HidP_GetButtonCaps))GetProcAddress(handle, "HidP_GetButtonCaps");
+        sGetUsageValue = (decltype(&HidP_GetUsageValue))GetProcAddress(handle, "HidP_GetUsageValue");
+        sMaxDataListLength = (decltype(&HidP_MaxDataListLength))GetProcAddress(handle, "HidP_MaxDataListLength");
+
+    }
+
     struct RawInputDevice {
+        RawInputDevice(HANDLE handle, std::string manufacturer, std::string product, PHIDP_PREPARSED_DATA preparsedData)
+            : mHandle(handle)
+            , mManufacturer(std::move(manufacturer))
+            , mProduct(std::move(product))
+            , mPreparsedData(preparsedData)
+        {
+            HIDP_CAPS caps;
+            auto result = sGetCaps(mPreparsedData, &caps);
+            assert(result == HIDP_STATUS_SUCCESS);
+
+            std::unique_ptr<HIDP_BUTTON_CAPS[]> buttonCaps = std::make_unique<HIDP_BUTTON_CAPS[]>(caps.NumberInputButtonCaps);
+
+            result = sGetButtonCaps(HidP_Input, buttonCaps.get(), &caps.NumberInputButtonCaps, mPreparsedData);
+            assert(result == HIDP_STATUS_SUCCESS);
+
+            std::unique_ptr<HIDP_VALUE_CAPS[]> valueCaps = std::make_unique<HIDP_VALUE_CAPS[]>(caps.NumberInputValueCaps);
+
+            result = sGetValueCaps(HidP_Input, valueCaps.get(), &caps.NumberInputValueCaps, mPreparsedData);
+            assert(result == HIDP_STATUS_SUCCESS);
+
+
+        }
+
+        HANDLE mHandle;
+        std::string mManufacturer;
+        std::string mProduct;
+
+        PHIDP_PREPARSED_DATA mPreparsedData;
     };
 
     std::map<HANDLE, RawInputDevice> sRawInputDevices;
 
-    void addRawInputDevice(HANDLE device) {
+    void addRawInputDevice(HANDLE device)
+    {
+
+        if (sRawInputDevices.count(device) > 0)
+            return;
 
         RID_DEVICE_INFO rdi;
         UINT rdi_size = sizeof(rdi);
@@ -399,7 +472,42 @@ namespace Window {
         assert(result > 0);
         assert(rdi.dwType == RIM_TYPEHID);
 
+        if (rdi.hid.usUsagePage != HID_USAGE_PAGE_GENERIC || (rdi.hid.usUsage != HID_USAGE_GENERIC_JOYSTICK && rdi.hid.usUsage != HID_USAGE_GENERIC_GAMEPAD))
+            return;
 
+        char device_name[MAX_PATH];
+        UINT name_size = sizeof(device_name);
+        result = GetRawInputDeviceInfoA(device, RIDI_DEVICENAME, device_name, &name_size);
+        assert(result > 0);
+
+        HANDLE hFile = CreateFileA(device_name, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+        assert(hFile != INVALID_HANDLE_VALUE);
+
+        std::string manufacturer, product;
+        {
+            WCHAR string[128];
+
+            if (sGetManufacturerString(hFile, string, sizeof(string))) {
+                std::wstring ws = string;
+                manufacturer = { ws.begin(), ws.end() };
+            }
+            if (sGetProductString(hFile, string, sizeof(string))) {
+                std::wstring ws = string;
+                product = { ws.begin(), ws.end() };
+            }
+
+            //device->name = SDL_CreateJoystickName(device->vendor_id, device->product_id, manufacturer_string, product_string);
+        }
+
+        PHIDP_PREPARSED_DATA preparsedData;
+        result = sGetPreparsedData(hFile, &preparsedData);
+        assert(result);
+
+        //CHECK(SDL_HidD_GetPreparsedData(hFile, &device->preparsed_data));
+        CloseHandle(hFile);
+        hFile = INVALID_HANDLE_VALUE;
+
+        sRawInputDevices.try_emplace(device, device, std::move(manufacturer), std::move(product), preparsedData);
     }
 
     void listRawInputDevices()
@@ -417,13 +525,68 @@ namespace Window {
                         addRawInputDevice(devices[i].hDevice);
                 }
             }
-        }        
+        }
     }
 
     void setupRawInput(HWND handle)
     {
         if (!sRawInputInitialized.test_and_set()) {
+            loadHID();
             listRawInputDevices();
+
+            RAWINPUTDEVICE rid[2];
+
+            rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC;
+            rid[0].usUsage = HID_USAGE_GENERIC_JOYSTICK;
+            rid[0].dwFlags = RIDEV_DEVNOTIFY; /* Receive messages when in background, including device add/remove */
+            rid[0].hwndTarget = NULL;
+
+            rid[1].usUsagePage = HID_USAGE_PAGE_GENERIC;
+            rid[1].usUsage = HID_USAGE_GENERIC_GAMEPAD;
+            rid[1].dwFlags = RIDEV_DEVNOTIFY; /* Receive messages when in background, including device add/remove */
+            rid[1].hwndTarget = NULL;
+
+            auto result = RegisterRawInputDevices(rid, 2, sizeof(RAWINPUTDEVICE));
+            assert(result);
+        }
+    }
+
+    void handleRawInputStatePacket(RawInputDevice &device, BYTE *data, int bytesize, int count)
+    {
+        LOG(device.mProduct << "(" << bytesize << ")");
+
+        ULONG size = sMaxDataListLength(HidP_Input, device.mPreparsedData);
+        std::unique_ptr<HIDP_DATA[]> list = std::make_unique<HIDP_DATA[]>(size);
+
+        auto result = sGetData(HidP_Input, list.get(), &size, device.mPreparsedData, (PCHAR)data, bytesize);
+        assert(result = HIDP_STATUS_SUCCESS);
+        
+        {
+            Util::LogDummy out { Util::LOG_TYPE };
+            for (int i = 0; i < size; ++i) {
+                out << list[i].RawValue << "(" << list[i].DataIndex << "), ";
+            }
+        }
+
+        ULONG value;
+        result = sGetUsageValue(HidP_Input, HID_USAGE_PAGE_GENERIC, 0, HID_USAGE_GENERIC_Z, &value, device.mPreparsedData, (PCHAR)data, bytesize);
+        assert(result = HIDP_STATUS_SUCCESS);
+        LOG("GENERIC_Z: " << value);
+
+        result = sGetUsageValue(HidP_Input, HID_USAGE_PAGE_GENERIC, 0, HID_USAGE_GENERIC_RZ, &value, device.mPreparsedData, (PCHAR)data, bytesize);
+        assert(result = HIDP_STATUS_SUCCESS);
+        LOG("GENERIC_RZ: " << value);
+
+        result = sGetUsageValue(HidP_Input, HID_USAGE_PAGE_GENERIC, 0, HID_USAGE_GENERIC_X, &value, device.mPreparsedData, (PCHAR)data, bytesize);
+        assert(result = HIDP_STATUS_SUCCESS);
+        LOG("GENERIC_X: " << value);
+    }
+
+    void handleRawInput(PRAWINPUT input)
+    {
+        auto it = sRawInputDevices.find(input->header.hDevice);        
+        if (it != sRawInputDevices.end()) {            
+            handleRawInputStatePacket(it->second, input->data.hid.bRawData, input->data.hid.dwSizeHid, input->data.hid.dwCount);
         }
     }
 

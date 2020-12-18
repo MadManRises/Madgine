@@ -38,7 +38,7 @@ namespace Threading {
                     std::unique_lock lock { mMutex };
                     for (std::pair<TaskQueue *const, std::vector<TaskHandle>> &tasks : mTaskLists) {
                         for (TaskHandle &task : tasks.second)
-                            tasks.first->queue(std::move(task));
+                            tasks.first->queue(std::move(task), TaskMask::BARRIER);
                     }
                     mTaskLists.clear();
                     mState = State::RUN;
@@ -123,7 +123,7 @@ namespace Threading {
             std::lock_guard lock { mMutex };
             mTaskLists[queue].emplace_back(std::move(task));
         } else {
-            queue->queue(std::move(task));
+            queue->queue(std::move(task), TaskMask::BARRIER);
         }
     }
 
