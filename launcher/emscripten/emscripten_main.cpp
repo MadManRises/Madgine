@@ -22,7 +22,7 @@ void mainImpl()
     static Engine::Threading::WorkGroup workGroup { "Launcher" };
     Engine::Threading::DefaultTaskQueue::getSingleton().addRepeatedTask([]() {
         Engine::Filesystem::sync();
-    },
+    }, Engine::Threading::TaskMask::ALL,
         std::chrono::seconds { 15 });
     static Engine::Core::Root root;
     launch();
