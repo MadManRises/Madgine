@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Modules/generic/container/generationvector.h"
-#include "Modules/keyvalue/objectptr.h"
 #include "Modules/generic/future.h"
-#include "entityhandle.h"
+#include "Modules/keyvalue/objectptr.h"
 #include "Modules/keyvalue/scopebase.h"
+#include "entityhandle.h"
 
 namespace Engine {
 namespace Scene {
@@ -17,7 +17,6 @@ namespace Scene {
 
             EntityPtr(const EntityPtr &other);
             EntityPtr(ControlBlock<Entity> &entity);
-            
 
             EntityPtr &operator=(const EntityPtr &other);
             EntityPtr &operator=(EntityPtr &&other);
@@ -30,14 +29,19 @@ namespace Scene {
             operator Entity *() const;
             Entity *get() const;
 
-            bool operator==(const EntityPtr &other) const;            
+            bool operator==(const EntityPtr &other) const;
+            bool operator<(const EntityPtr &other) const;
 
             TypedScopePtr customScopePtr() const;
 
             bool isDead() const;
 
-        private:            
-            mutable ControlBlock<Entity> *mEntity = nullptr;
+        private:
+            bool holdsRef() const;
+            ControlBlock<Entity> *getBlock() const;
+
+        private:
+            mutable uintptr_t mEntity = 0;
         };
 
     }

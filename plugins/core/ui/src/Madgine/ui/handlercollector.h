@@ -12,8 +12,10 @@ DECLARE_UNIQUE_COMPONENT(Engine::UI, GameHandler, GameHandlerBase, UIManager &);
 namespace Engine {
 namespace UI {
 
+    struct GuiHandlerBase;
     template <typename T>
     using GuiHandler = Serialize::VirtualUnit<T, VirtualScope<T, GuiHandlerComponent<T>>>;
+    struct GameHandlerBase;
     template <typename T>
     using GameHandler = Serialize::VirtualUnit<T, VirtualScope<T, GameHandlerComponent<T>>>;
 

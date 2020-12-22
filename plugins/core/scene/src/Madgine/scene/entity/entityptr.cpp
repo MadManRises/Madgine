@@ -14,30 +14,29 @@ namespace Scene {
         EntityPtr::EntityPtr(const EntityPtr &other)
             : mEntity(other.mEntity)
         {
-            if (mEntity)
-                mEntity->incRef();
+            if (holdsRef())
+                getBlock()->decRef();
         }
 
         EntityPtr::~EntityPtr()
         {
-            if (mEntity)
-                mEntity->decRef();
+            if (holdsRef())
+                getBlock()->decRef();
         }
 
         EntityPtr::EntityPtr(ControlBlock<Entity> &entity)
-            : mEntity(&entity)
+            : mEntity(reinterpret_cast<uintptr_t>(&entity) | 1)
         {
-            if (mEntity)
-                mEntity->incRef();
+            entity.incRef();
         }
 
         EntityPtr &EntityPtr::operator=(const EntityPtr &other)
         {
-            if (mEntity)
-                mEntity->decRef();
+            if (holdsRef())
+                getBlock()->decRef();
             mEntity = other.mEntity;
-            if (mEntity)
-                mEntity->incRef();
+            if (holdsRef())
+                getBlock()->incRef();
             return *this;
         }
 
@@ -54,8 +53,10 @@ namespace Scene {
 
         void EntityPtr::update() const
         {
-            if (mEntity && mEntity->dead())
-                mEntity = nullptr;
+            if (holdsRef() && getBlock()->dead()) {
+                getBlock()->decRef();
+                mEntity &= ~1;
+            }
         }
 
         /*EntityPtr::operator bool() const
@@ -71,7 +72,7 @@ namespace Scene {
         Entity *EntityPtr::get() const
         {
             update();
-            return mEntity ? mEntity->get() : nullptr;
+            return getBlock() ? getBlock()->get() : nullptr;
         }
 
         bool EntityPtr::operator==(const EntityPtr &other) const
@@ -81,16 +82,32 @@ namespace Scene {
             return mEntity == other.mEntity;
         }
 
+        bool EntityPtr::operator<(const EntityPtr &other) const
+        {
+            update();
+            other.update();
+            return get() < other.get();
+        }
+
         TypedScopePtr EntityPtr::customScopePtr() const
         {
-            return mEntity->get();
+            return get();
         }
 
         bool EntityPtr::isDead() const
         {
-            return mEntity->dead();
+            return !holdsRef() || getBlock()->dead();
         }
 
+        bool EntityPtr::holdsRef() const
+        {
+            return mEntity & 1;
+        }
+
+        ControlBlock<Entity> *EntityPtr::getBlock() const
+        {
+            return reinterpret_cast<ControlBlock<Entity> *>(mEntity & ~1);
+        }
     }
 }
 }

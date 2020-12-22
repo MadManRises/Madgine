@@ -353,7 +353,7 @@ namespace Tools {
     void SceneEditor::updateEntityCache()
     {
         //Update + Remove deleted Entities
-        mEntityCache.erase(std::remove_if(mEntityCache.begin(), mEntityCache.end(), [this](EntityNode &node) { return updateEntityCache(node); }), mEntityCache.end());
+        mEntityCache.remove_if([this](EntityNode &node) { return updateEntityCache(node); });
 
         //Add missing Entities
         for (Scene::Entity::EntityPtr entity : mSceneMgr->entities()) {            
@@ -372,7 +372,7 @@ namespace Tools {
             eraseNode(node);
             return true;
         }
-        node.mChildren.erase(std::remove_if(node.mChildren.begin(), node.mChildren.end(), [&](EntityNode &childNode) { return updateEntityCache(childNode, node.mEntity); }), node.mChildren.end());
+        node.mChildren.remove_if([&](EntityNode &childNode) { return updateEntityCache(childNode, node.mEntity); });
         return false;
     }
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "handler.h"
 #include "Madgine/threading/contextmasks.h"
+#include "handler.h"
 
 #include "Interfaces/input/inputevents.h"
 
@@ -9,74 +9,73 @@
 
 #include "handlercollector.h"
 
-namespace Engine
-{
-	namespace UI
-	{
-		struct MADGINE_UI_EXPORT GameHandlerBase : Handler
-		{		
-			GameHandlerBase(UIManager &ui, Threading::ContextMask context = Threading::ContextMask::SceneContext);
+namespace Engine {
+namespace UI {
+    struct MADGINE_UI_EXPORT GameHandlerBase : Handler {
+        static constexpr float sDefaultDragStartThreshold = 80.0f;
 
-			void abortDrag();
+        GameHandlerBase(UIManager &ui, Threading::ContextMask context = Threading::ContextMask::SceneContext);
 
-			void update(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask mask);
-			void fixedUpdate(std::chrono::microseconds timeStep, Threading::ContextMask mask);
+        void abortDrag();
 
-		protected:
-			void onPointerMove(const Input::PointerEventArgs& me) override;
+        void update(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask mask);
+        void fixedUpdate(std::chrono::microseconds timeStep, Threading::ContextMask mask);
 
-			void onPointerDown(const Input::PointerEventArgs& me) override;
+    protected:
+        void onPointerMove(const Input::PointerEventArgs &me) override;
 
-			void onPointerUp(const Input::PointerEventArgs& me) override;
+        void onPointerDown(const Input::PointerEventArgs &me) override;
 
-			virtual void onPointerHover(const Input::PointerEventArgs& evt);
+        void onPointerUp(const Input::PointerEventArgs &me) override;
 
-			virtual void onPointerClick(const Input::PointerEventArgs& evt);
+        virtual void onPointerHover(const Input::PointerEventArgs &evt);
 
-			virtual void onPointerDragBegin(const Input::PointerEventArgs& evt);
+        virtual void onPointerClick(const Input::PointerEventArgs &evt);
 
-			virtual void onPointerDrag(const Input::PointerEventArgs& evt);
+        virtual void onPointerDragBegin(const Input::PointerEventArgs &evt);
 
-			virtual void onPointerDragEnd(const Input::PointerEventArgs& evt);
+        virtual void onPointerDrag(const Input::PointerEventArgs &evt);
 
-			virtual void onPointerDragAbort();
+        virtual void onPointerDragEnd(const Input::PointerEventArgs &evt);
 
-			virtual void update(std::chrono::microseconds timeSinceLastFrame);
-			virtual void fixedUpdate(std::chrono::microseconds timeStep);
+        virtual void onPointerDragAbort();
 
+        virtual void update(std::chrono::microseconds timeSinceLastFrame);
+        virtual void fixedUpdate(std::chrono::microseconds timeStep);
 
-			void clampToWindow(Input::PointerEventArgs& me);
+        void clampToWindow(Input::PointerEventArgs &me);
 
-			enum class MouseDragMode
-			{
-				DISABLED = 0,
-				ENABLED,
-				ENABLED_HIDECURSOR
-			};
+        enum class MouseDragMode {
+            DISABLED = 0,
+            ENABLED,
+            ENABLED_HIDECURSOR
+        };
 
-			void setPointerDragMode(Input::MouseButton::MouseButton button, MouseDragMode mode);
+        void setPointerDragMode(Input::MouseButton::MouseButton button, MouseDragMode mode, float threshold = sDefaultDragStartThreshold);
 
-			const Vector2& dragStart() const;
+        const Vector2 &dragStart() const;
 
-		private:
-			static const float mDragStartThreshold;
-
-			std::array<MouseDragMode, Input::MouseButton::BUTTON_COUNT> mPointerDragModes;
-
-			Input::MouseButton::MouseButton mCurrentMouseButton;
-
-			bool mDragging, mSingleClick;
-
-			Vector2 mDragStart;
-
-			Threading::ContextMask mContext;
-		};
+    private:
 
 
-	} // namespace UI
+        struct MouseDragInfo {
+            MouseDragMode mMode;
+            float mThreshold = sDefaultDragStartThreshold;
+        };
+
+        std::array<MouseDragInfo, Input::MouseButton::BUTTON_COUNT> mPointerDragModes;
+
+        Input::MouseButton::MouseButton mCurrentMouseButton;
+
+        bool mDragging, mSingleClick;
+
+        Vector2 mDragStart;
+
+        Threading::ContextMask mContext;
+    };
+
+} // namespace UI
 
 }
 
 RegisterType(Engine::UI::GameHandlerBase);
-
-

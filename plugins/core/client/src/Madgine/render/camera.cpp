@@ -77,6 +77,7 @@ namespace Render {
 METATABLE_BEGIN(Engine::Render::Camera)
 MEMBER(mName)
 MEMBER(mPosition)
+MEMBER(mOrientation)
 MEMBER(mN)
 MEMBER(mF)
 MEMBER(mFOV)
