@@ -30,8 +30,7 @@ endif(MADGINE_AS_SDK)
 include(Workspace)
 include(Packaging)
 include(PrecompiledHeader)
-include(Project)
-include(multiConfig)
+include(util/Project)
 include(Plugins)
 include(Tools)
 include(Testing)
@@ -42,8 +41,6 @@ set (CPACK_PACKAGE_VENDOR "MadMan Studios")
 #set (CPACK_PACKAGE_EXECUTABLES "Maditor;Maditor")
 
 enable_packaging()
-
-multiConfig(Madgine) 
 
 
 

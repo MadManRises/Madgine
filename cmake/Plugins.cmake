@@ -3,7 +3,7 @@ include(Util)
 once()
 
 include(Workspace)
-include(ini)
+include(util/ini)
 include(Packaging)
 
 set (PLUGIN_DEFINITION_FILE "" CACHE FILEPATH "Provide path to fixed plugin selection (optional)")
