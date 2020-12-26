@@ -54,7 +54,7 @@ namespace Render {
             mPerObject.hasTexture = p.first != 0;
             mPerObject.hasDistanceField = bool(p.second.mFlags & RenderPassFlags_DistanceField);
             mProgram.setParameters(mPerObject, 2);
-            TextureLoader::getSingleton().bind(p.first);
+            target->bindTexture(p.first);
 
             for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
                 target->renderVertices(mProgram, i + 1, p.second.mVertices[i], p.second.mIndices[i]);

@@ -23,7 +23,7 @@ FolderSources(sources "" renderer)
 
 add_plugin(SceneRenderer Madgine Core ${sources} SOURCE_ROOT renderer PRECOMPILED_HEADER renderer/Madgine/scenerendererlib.h)
 
-target_link_plugins(SceneRenderer Scene Client)
+target_link_plugins(SceneRenderer Scene Client ProgramLoader)
 
 set(sources "")
 FolderSources(sources "" renderer_tools)

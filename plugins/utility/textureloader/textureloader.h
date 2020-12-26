@@ -38,8 +38,6 @@ namespace Render {
 
 			void create(const std::string_view &name, DataFormat format, TextureLoader *loader = nullptr);
 
-            void bind(TextureLoader *loader = nullptr);
-
             void setData(Vector2i size, const ByteBuffer &data, TextureLoader *loader = nullptr);
             void setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data, TextureLoader *loader = nullptr);
 
@@ -50,9 +48,6 @@ namespace Render {
         TextureLoader();
 
         virtual bool create(Texture &tex, DataFormat format) = 0;
-
-        virtual void bind(const Texture &tex) = 0;
-        virtual void bind(TextureHandle textureHandle) = 0;
 
         virtual void setData(Texture &tex, Vector2i size, const ByteBuffer &data) = 0;
         virtual void setSubData(Texture &tex, Vector2i offset, Vector2i size, const ByteBuffer &data) = 0;

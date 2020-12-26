@@ -9,20 +9,6 @@
 #endif
 
 #include "Modules/moduleslib.h"
-#include "programloaderlib.h"
-#include "imageloaderlib.h"
-#include "meshloaderlib.h"
-#include "textureloaderlib.h"
-#include "fontloaderlib.h"
-
-#include <array>
-#include <future>
-#include <map>
-#include <memory>
-#include <sstream>
-#include <stack>
-#include <typeindex>
-#include <vector>
 
 #include "clientforward.h"
 

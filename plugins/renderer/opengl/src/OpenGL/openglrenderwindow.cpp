@@ -6,7 +6,6 @@
 #include "Interfaces/window/windowapi.h"
 #include "Interfaces/window/windowsettings.h"
 
-#include "fontloader.h"
 #include "openglmeshloader.h"
 #include "openglprogramloader.h"
 #include "openglshaderloader.h"
@@ -389,9 +388,6 @@ namespace Render {
     OpenGLRenderWindow::~OpenGLRenderWindow()
     {
         if (!mReusedContext) {
-            for (std::pair<const std::string, FontLoader::ResourceType> &p : FontLoader::getSingleton()) {
-                p.second.unloadData();
-            }
 
             for (std::pair<const std::string, OpenGLMeshLoader::ResourceType> &p : OpenGLMeshLoader::getSingleton()) {
                 p.second.unloadData();

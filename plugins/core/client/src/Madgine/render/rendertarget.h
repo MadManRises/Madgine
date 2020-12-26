@@ -1,6 +1,7 @@
 #pragma once
 
 #include "render/vertex.h"
+#include "render/renderforward.h"
 
 namespace Engine {
 namespace Render {
@@ -19,6 +20,8 @@ namespace Render {
         virtual void clearDepthBuffer() = 0;		
 
         virtual const Texture *texture() const = 0;
+
+        virtual void bindTexture(TextureHandle tex) = 0;
 
         virtual bool resize(const Vector2i &size) = 0;
         virtual Vector2i size() const = 0;

@@ -8,5 +8,6 @@
 
 #include "Madgine_Tools/clienttoolslib.h"
 #include "DirectX11/directx11lib.h"
+#include "fontloaderlib.h"
 
 #include "directx11toolsforward.h"

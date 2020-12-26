@@ -44,16 +44,6 @@ namespace Render {
         return true;
     }
 
-    void DirectX11TextureLoader::bind(const Texture &texture)
-    {
-        static_cast<const DirectX11Texture &>(texture).bind();
-    }
-
-    void DirectX11TextureLoader::bind(TextureHandle textureHandle)
-    {
-        sDeviceContext->PSSetShaderResources(0, 1, reinterpret_cast<ID3D11ShaderResourceView*const*>(&textureHandle));
-    }
-
     void DirectX11TextureLoader::setData(Texture &tex, Vector2i size, const ByteBuffer &data)
     {
         static_cast<DirectX11Texture &>(tex).setData(size, data);

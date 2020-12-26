@@ -104,5 +104,12 @@ namespace Render {
         glClear(GL_DEPTH_BUFFER_BIT);
         GL_CHECK();
     }
+
+    void OpenGLRenderTarget::bindTexture(TextureHandle tex)
+    {
+        glBindTexture(GL_TEXTURE_2D, tex);
+        GL_CHECK();
+    }
+
 }
 }

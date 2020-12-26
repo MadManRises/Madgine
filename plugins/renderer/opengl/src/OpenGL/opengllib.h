@@ -13,7 +13,7 @@
 #include "Madgine/clientlib.h"
 #include "meshloaderlib.h"
 #include "programloaderlib.h"
-#include "fontloaderlib.h"
+#include "textureloaderlib.h"
 
 #if !ANDROID && !EMSCRIPTEN && !IOS
 #    include "../glad/glad.h"

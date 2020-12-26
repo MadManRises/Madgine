@@ -7,8 +7,6 @@
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/serialize/serializetable_impl.h"
 
-#include "textureloader.h"
-
 #include "widgetmanager.h"
 
 #include "imageloader.h"

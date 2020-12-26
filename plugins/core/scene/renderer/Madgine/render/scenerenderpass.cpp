@@ -14,8 +14,6 @@
 #include "Madgine/render/rendertarget.h"
 #include "meshdata.h"
 
-#include "textureloader.h"
-
 namespace Engine {
 namespace Render {
 
@@ -67,7 +65,7 @@ namespace Render {
 
                     mPerObject.hasTexture = meshData->mTextureHandle != 0;
 
-                    TextureLoader::getSingleton().bind(meshData->mTextureHandle);
+                    target->bindTexture(meshData->mTextureHandle);
 
                     mPerObject.m = transform->worldMatrix(mScene.entityComponentList<Scene::Entity::Transform>());
                     mPerObject.anti_m = mPerObject.m.mValue

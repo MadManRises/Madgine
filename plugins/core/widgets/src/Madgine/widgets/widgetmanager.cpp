@@ -710,9 +710,9 @@ namespace Widgets {
                 mData->mProgram.setParameters(mData->mParameters, 2);
 
                 if (p.first.mTextureHandle)
-                    Render::TextureLoader::getSingleton().bind(p.first.mTextureHandle);
+                    target->bindTexture(p.first.mTextureHandle);
                 else
-                    mData->mUIAtlasTexture.bind();
+                    target->bindTexture(mData->mUIAtlasTexture->mTextureHandle);
 
                 mData->mMesh.update({ 3, std::move(p.second) });
 

@@ -36,6 +36,8 @@ add_plugin(OpenGL Madgine Renderer ${sources} PRECOMPILED_HEADER src/OpenGL/open
 target_link_libraries(OpenGL PRIVATE ${OPENGL_LIBRARIES} Client)
 target_include_directories(OpenGL PRIVATE ${OPENGL_INCLUDE_DIR})
 
+target_link_plugins(OpenGL MeshLoader ProgramLoader TextureLoader ImageLoader)
+
 if (OSX)
     target_sources(OpenGL PRIVATE src/OpenGL/osxopengl.mm)
 elseif(IOS)
@@ -50,7 +52,7 @@ FolderSources(sources "" tools)
 
 add_tools(OpenGL ${sources} PRECOMPILED_HEADER tools/OpenGL_Tools/opengltoolslib.h)
 
-target_link_plugins(OpenGLTools ClientTools)
+target_link_plugins(OpenGLTools ClientTools FontLoader)
 target_link_libraries(OpenGLTools PRIVATE ${OPENGL_LIBRARIES})
 target_include_directories(OpenGLTools PRIVATE ${OPENGL_INCLUDE_DIR})
 

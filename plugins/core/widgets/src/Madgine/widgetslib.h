@@ -9,7 +9,10 @@
 #endif
 
 #include "Madgine/clientlib.h"
-
+#include "imageloaderlib.h"
+#include "fontloaderlib.h"
+#include "meshloaderlib.h"
+#include "programloaderlib.h"
 
 #include "widgetsforward.h"
 

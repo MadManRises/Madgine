@@ -50,17 +50,6 @@ namespace Render {
         return true;
     }
 
-    void OpenGLTextureLoader::bind(const Texture &texture)
-    {
-        static_cast<const OpenGLTexture &>(texture).bind();
-    }
-
-    void OpenGLTextureLoader::bind(TextureHandle textureHandle)
-    {
-        glBindTexture(GL_TEXTURE_2D, textureHandle);
-        GL_CHECK();
-    }
-
     void OpenGLTextureLoader::setData(Texture &tex, Vector2i size, const ByteBuffer &data)
     {
         static_cast<OpenGLTexture &>(tex).setData(size, data);

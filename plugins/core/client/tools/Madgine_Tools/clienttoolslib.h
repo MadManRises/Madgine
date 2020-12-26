@@ -10,5 +10,7 @@
 
 #include "toolslib.h"
 #include "Madgine/clientlib.h"
+#include "programloaderlib.h"
+#include "textureloaderlib.h"
 
 #include "clienttoolsforward.h"

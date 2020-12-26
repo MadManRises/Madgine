@@ -16,9 +16,6 @@ namespace Render {
         void unloadImpl(DirectX11Texture &tex, ResourceType *res);
         bool create(Texture &texture, DataFormat format/*, D3D11_BIND_FLAG bind*/) override;
 
-        virtual void bind(const Texture &texture) override;
-        virtual void bind(TextureHandle textureHandle) override;
-
 		virtual void setData(Texture &tex, Vector2i size, const ByteBuffer &data) override;
         virtual void setSubData(Texture &tex, Vector2i offset, Vector2i size, const ByteBuffer &data) override;
 

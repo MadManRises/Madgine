@@ -27,13 +27,6 @@ METATABLE_END(Engine::Render::TextureLoader::ResourceType)
                 loader);
         }
 
-        void TextureLoader::HandleType::bind(TextureLoader *loader)
-        {
-            if (!loader)
-                loader = &TextureLoader::getSingleton();
-            loader->bind(getData(*this, loader));
-        }
-
         void TextureLoader::HandleType::setData(Vector2i size, const ByteBuffer &data, TextureLoader *loader)
         {
             if (!loader)

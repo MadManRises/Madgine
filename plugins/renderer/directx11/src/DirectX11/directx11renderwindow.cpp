@@ -13,10 +13,6 @@
 
 #include "Interfaces/window/windowapi.h"
 
-#include "imagedata.h"
-
-#include "fontloader.h"
-
 #include "directx11meshloader.h"
 #include "directx11pixelshaderloader.h"
 #include "directx11programloader.h"
@@ -132,10 +128,6 @@ namespace Render {
         }
 
         if (!mReusedContext) {
-            for (std::pair<const std::string, FontLoader::ResourceType> &p : FontLoader::getSingleton()) {
-                p.second.unloadData();
-            }
-
             for (std::pair<const std::string, DirectX11MeshLoader::ResourceType> &p : DirectX11MeshLoader::getSingleton()) {
                 p.second.unloadData();
             }

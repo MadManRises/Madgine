@@ -13,10 +13,11 @@ add_plugin(Client Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/clientl
 
 plugin_group(Renderer EXCLUSIVE ATLEAST_ONE)
 
-target_link_plugins(Client MeshLoader ImageLoader ProgramLoader TextureLoader FontLoader)
+target_link_plugins(Client)
 target_link_plugin_groups(Client Renderer Input)
 
-target_link_libraries(Client PRIVATE Ini)
+target_link_libraries(Client PUBLIC Modules Render)
+target_link_libraries(Client PRIVATE Ini Filesystem)
 
 set(sources "")
 FolderSources(sources "" tools)
@@ -26,5 +27,5 @@ FolderSources(sources "" tools)
 
 add_tools(Client ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/clienttoolslib.h)
 
-target_link_plugins(ClientTools Tools)
+target_link_plugins(ClientTools Tools ProgramLoader TextureLoader)
 

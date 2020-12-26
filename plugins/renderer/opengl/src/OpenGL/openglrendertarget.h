@@ -18,6 +18,8 @@ namespace Render {
         virtual void renderMesh(GPUMeshData *mesh, Program *program) override;
         virtual void clearDepthBuffer() override;
 
+        virtual void bindTexture(TextureHandle tex) override;
+
         //void setupProgram(RenderPassFlags flags = RenderPassFlags_None, unsigned int textureId = 0) override;
     };
 
