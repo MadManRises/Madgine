@@ -33,6 +33,15 @@ namespace Window {
         return &mWindow;
     }
 
+    bool MainWindowComponentBase::init()
+    {
+        return true;
+    }
+
+    void MainWindowComponentBase::finalize()
+    {
+    }
+
     void MainWindowComponentBase::onResize(const Rect2i &space)
     {
         mClientSpace = space;

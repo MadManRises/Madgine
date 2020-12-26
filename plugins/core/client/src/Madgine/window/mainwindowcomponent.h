@@ -21,8 +21,8 @@ namespace Window {
 
         const MainWindow *parent() const;
 
-        virtual bool init() = 0;
-        virtual void finalize() = 0;
+        virtual bool init();
+        virtual void finalize();
 
         virtual std::string_view key() const = 0;
 

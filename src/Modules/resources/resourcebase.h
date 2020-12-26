@@ -22,6 +22,7 @@ namespace Resources {
 
         void updatePath(const Filesystem::Path &path) { LOG_WARNING("Implement updatePath!"); } //TODO
 
+        InStream readAsStream(bool isBinary = false);
         std::string readAsText();
         std::vector<unsigned char> readAsBlob();
 

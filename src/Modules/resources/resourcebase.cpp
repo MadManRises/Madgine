@@ -44,15 +44,20 @@ namespace Resources {
         return mPath.stem();
     }
 
+    InStream ResourceBase::readAsStream(bool isBinary)
+    {
+        return Filesystem::openFileRead(mPath, isBinary);
+    }
+
     std::string ResourceBase::readAsText()
     {
-        InStream buffer = Filesystem::openFileRead(mPath);
+        InStream buffer = readAsStream();
         return std::string { buffer.iterator(), buffer.end() };
     }
 
     std::vector<unsigned char> Engine::Resources::ResourceBase::readAsBlob()
     {
-        InStream buffer = Filesystem::openFileRead(mPath, true);
+        InStream buffer = readAsStream(true);
         return std::vector<unsigned char> { buffer.iterator(), buffer.end() };
     }
 

@@ -7,7 +7,7 @@
 template <typename T>
 extern const Engine::TypeInfo typeInfo;
 
-#define RegisterType(T) template <> inline constexpr const ::Engine::TypeInfo typeInfo<T> = { #T, __FILE__, ::Engine::type_holder<T> }
+#define RegisterType(T) template <> inline constexpr const ::Engine::TypeInfo typeInfo<T> = { #T, __FILE__, ::Engine::type_holder<T> };
 
 
 namespace Engine {
