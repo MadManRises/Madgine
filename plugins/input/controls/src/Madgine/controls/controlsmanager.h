@@ -31,12 +31,12 @@ namespace Controls {
         const ActionDescriptor *action(std::string_view name);
 
         template <auto f>
-        void addListener(std::string_view action, typename CallableTraits<Functor<f>>::class_type *item)
+        void addListener(std::string_view action, typename CallableTraits<decltype(f)>::class_type *item)
         {
             addListener(
                 action, 
                 [](ActionDescriptor *desc, void *self) { 
-                    TupleUnpacker::invoke(f, reinterpret_cast<CallableTraits<Functor<f>>::class_type *>(self), desc); 
+                    TupleUnpacker::invoke(f, reinterpret_cast<typename CallableTraits<decltype(f)>::class_type *>(self), desc); 
                 }, 
                 item
             );
