@@ -12,22 +12,13 @@
 #include "Modules/generic/bytebuffer.h"
 
 #include "meshdata.h"
-#include "..\..\physics\bullet\src\Madgine\physics\collisionshapemanager.h"
 
 namespace Engine {
 namespace Render {
 
-    struct MADGINE_MESHLOADER_EXPORT MeshLoader : Resources::ResourceLoader<MeshLoader, MeshData, std::list<Placeholder<0>>> {
+    struct MADGINE_MESHLOADER_EXPORT MeshLoader : Resources::ResourceLoader<MeshLoader, MeshData> {
 
-        using Base = ResourceLoader<MeshLoader, MeshData, std::list<Placeholder<0>>, Threading::WorkGroupStorage>;
-
-        struct HandleType : Base::HandleType {
-            using Base::HandleType::HandleType;
-            HandleType(Base::HandleType handle)
-                : Base::HandleType(handle)
-            {
-            }
-        };
+        using Base = ResourceLoader<MeshLoader, MeshData>;
 
         MeshLoader();
 
