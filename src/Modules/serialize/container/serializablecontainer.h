@@ -174,7 +174,7 @@ namespace Serialize {
             if (active) {
                 while (mActiveIterator != _traits::toPositionHandle(*this, Base::end())) {
                     iterator it = _traits::toIterator(*this, mActiveIterator);
-                    ++mActiveIterator;
+                    mActiveIterator = _traits::next(*this, mActiveIterator);
                     if (existenceChange) {
                         Observer::operator()(it, BEFORE | EMPLACE);
                         Observer::operator()(it, AFTER | EMPLACE);
@@ -185,7 +185,7 @@ namespace Serialize {
                 }
             } else {
                 while (mActiveIterator != _traits::toPositionHandle(*this, Base::begin())) {
-                    --mActiveIterator;
+                    mActiveIterator = _traits::prev(*this, mActiveIterator);
                     iterator it = _traits::toIterator(*this, mActiveIterator);
                     Observer::operator()(it, BEFORE | DEACTIVATE_ITEM);
                     ItemUnitHelper::setItemActive(*it, active, existenceChange || !controlled::value);
@@ -499,7 +499,7 @@ namespace Serialize {
             if (_traits::was_emplace_successful(it)) {
                 _traits::revalidateHandleAfterInsert(mActiveIterator, *this, { it });
                 position_handle newHandle = _traits::toPositionHandle(*this, it);
-                if (_traits::next(newHandle) == mActiveIterator && !this->isActive())
+                if (_traits::next(*this, newHandle) == mActiveIterator && !this->isActive())
                     mActiveIterator = newHandle;
                 ItemUnitHelper::setItemParent(*it, OffsetPtr::parent(this));
             }
@@ -530,9 +530,10 @@ namespace Serialize {
 
         void clear_intern()
         {
-            size_t oldSize = size();
+            //size_t oldSize = size();
             Base::clear();
-            _traits::revalidateHandleAfterRemove(mActiveIterator, *this, Base::begin(), true, oldSize);
+            mActiveIterator = _traits::toPositionHandle(*this, Base::begin());
+            //_traits::revalidateHandleAfterRemove(mActiveIterator, *this, Base::begin(), true, oldSize);
         }
 
     protected:

@@ -277,7 +277,7 @@ struct refcounted_deque {
 
     void clear()
     {
-        for (ControlBlock<T> &ref : refcounted()) {
+        for (ControlBlock<T> &ref : blocks()) {
             ref.destroy();
         }
         mSize = 0;
@@ -443,10 +443,27 @@ struct container_traits<refcounted_deque<T>, void> {
     {
         return c.it(handle);
     }
-
-    static position_handle next(const position_handle &handle)
+    
+    static position_handle next(container &c, const position_handle &handle)
     {
-        return handle + 1;
+        position_handle result = handle + 1;
+        auto it = c.refcounted_begin() + result;
+        while (it != c.refcounted_end() && it->dead()) {
+            ++it;
+            ++result;
+        }
+        return result;
+    }
+
+    static position_handle prev(container &c, const position_handle &handle)
+    {
+        position_handle result = handle - 1;
+        auto it = c.refcounted_begin() + result;
+        while (it->dead()) {
+            --it;
+            --result;
+        }
+        return result;
     }
 };
 

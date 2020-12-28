@@ -160,8 +160,6 @@ struct KeyValueSet : std::set<T, Cmp> {
     typedef SetIterator<T, Cmp, typename std::set<T, Cmp>::reverse_iterator> reverse_iterator;
     typedef SetConstIterator<T, Cmp, typename std::set<T, Cmp>::const_reverse_iterator> const_reverse_iterator;
 
-    
-
     template <typename Arg>
     iterator find(Arg &&arg)
     {
@@ -281,9 +279,14 @@ struct container_traits<KeyValueSet<T, Cmp>> : container_traits<std::set<T, Cmp>
         return handle;
     }
 
-    static position_handle next(const position_handle &handle)
+    static position_handle next(container &c, const position_handle &handle)
     {
         return std::next(handle);
+    }
+
+    static position_handle prev(container &c, const position_handle &handle)
+    {
+        return std::prev(handle);
     }
 };
 

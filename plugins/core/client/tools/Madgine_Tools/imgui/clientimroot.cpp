@@ -309,9 +309,9 @@ namespace Tools {
 
         io.KeysDown[arg.scancode] = true;
 
-        io.KeyShift = mWindow.osWindow()->isKeyDown(Input::Key::LShift) || mWindow.osWindow()->isKeyDown(Input::Key::RShift);
-        io.KeyCtrl = mWindow.osWindow()->isKeyDown(Input::Key::LControl) || mWindow.osWindow()->isKeyDown(Input::Key::RControl);
-        io.KeyAlt = mWindow.osWindow()->isKeyDown(Input::Key::LAlt) || mWindow.osWindow()->isKeyDown(Input::Key::RAlt);
+        io.KeyShift = mWindow.osWindow()->isKeyDown(Input::Key::Shift);
+        io.KeyCtrl = mWindow.osWindow()->isKeyDown(Input::Key::Control);
+        io.KeyAlt = mWindow.osWindow()->isKeyDown(Input::Key::Alt);
 
         io.AddInputCharacter(arg.text);
 

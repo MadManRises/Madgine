@@ -109,9 +109,14 @@ struct container_traits<std::list<T>, void> {
         return handle;
     }
 
-    static position_handle next(const position_handle &handle)
+    static position_handle next(container &c, const position_handle &handle)
     {
         return std::next(handle);
+    }
+
+    static position_handle prev(container &c, const position_handle &handle)
+    {
+        return std::prev(handle);
     }
 };
 
@@ -212,9 +217,14 @@ struct container_traits<std::vector<T>, void> {
         return c.begin() + handle;
     }
 
-    static position_handle next(const position_handle &handle)
+    static position_handle next(container &c, const position_handle &handle)
     {
         return handle + 1;
+    }
+
+    static position_handle prev(container &c, const position_handle &handle)
+    {
+        return handle - 1;
     }
 };
 
@@ -282,9 +292,14 @@ struct container_traits<std::set<T, Cmp>, void> {
         return handle;
     }
 
-    static position_handle next(const position_handle &handle)
+    static position_handle next(container &c, const position_handle &handle)
     {
         return std::next(handle);
+    }
+
+    static position_handle prev(container &c, const position_handle &handle)
+    {
+        return std::prev(handle);
     }
 };
 
@@ -352,9 +367,14 @@ struct container_traits<std::map<K, T, Cmp>, void> {
         return handle;
     }
 
-    static position_handle next(const position_handle &handle)
+    static position_handle next(container &c, const position_handle &handle)
     {
         return std::next(handle);
+    }
+
+    static position_handle prev(container &c, const position_handle &handle)
+    {
+        return std::prev(handle);
     }
 };
 
@@ -458,9 +478,14 @@ struct container_traits<std::array<T, Size>, void> {
         return c.begin() + handle;
     }
 
-    static position_handle next(const position_handle &handle)
+    static position_handle next(container &c, const position_handle &handle)
     {
         return handle + 1;
+    }
+
+    static position_handle prev(container &c, const position_handle &handle)
+    {
+        return handle - 1;
     }
 };
 

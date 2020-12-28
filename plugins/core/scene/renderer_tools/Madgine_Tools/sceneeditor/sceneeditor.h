@@ -51,6 +51,8 @@ namespace Tools {
         void renderEntity(Scene::Entity::EntityPtr &entity);
         void renderCamera(Render::Camera *camera);
 
+        void handleInputs();
+
     private:
         Window::MainWindow &mWindow;
 

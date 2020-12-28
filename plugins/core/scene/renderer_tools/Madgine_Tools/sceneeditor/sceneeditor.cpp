@@ -30,6 +30,8 @@
 
 #include "Madgine/scene/entity/entity.h"
 
+#include "Interfaces/input/inputevents.h"
+
 namespace Engine {
 namespace Tools {
 
@@ -66,6 +68,7 @@ namespace Tools {
         for (SceneView &sceneView : mSceneViews) {
             sceneView.render();
         }
+        handleInputs();
     }
 
     void SceneEditor::renderMenu()
@@ -348,6 +351,14 @@ namespace Tools {
     void SceneEditor::renderCamera(Render::Camera *camera)
     {
         mInspector->draw(camera);
+    }
+
+    void SceneEditor::handleInputs()
+    {
+        if (ImGui::IsKeyPressed(Input::Key::Delete)) {
+            if (mSelectedEntity)
+                mSelectedEntity->remove();
+        }
     }
 
     void SceneEditor::updateEntityCache()
