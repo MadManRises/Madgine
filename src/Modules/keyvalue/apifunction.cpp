@@ -11,9 +11,9 @@ void ApiFunction::operator()(ValueType &retVal, const ArgumentList &args) const
     mTable->mFunctionPtr(mTable, retVal, args);
 }
 
-size_t ApiFunction::argumentsCount() const
+size_t ApiFunction::argumentsCount(bool excludeThis) const
 {
-    return mTable->mArgumentsCount;
+    return mTable->mArgumentsCount - (excludeThis && mTable->mIsMemberFunction);
 }
 
 bool ApiFunction::isMemberFunction() const

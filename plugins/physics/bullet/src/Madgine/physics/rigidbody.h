@@ -41,11 +41,12 @@ namespace Physics {
         void setShape(typename CollisionShapeManager::HandleType handle);
         void setShapeName(const std::string_view &name);
         CollisionShapeManager::ResourceType *getShape() const;
+        CollisionShapeInstance *getShapeInstance() const;
 
         friend struct PhysicsManager;
 
     private:
-        typename CollisionShapeManager::HandleType mShapeHandle;
+        typename CollisionShapeManager::InstanceHandle mShapeHandle;
         struct Data;
         std::unique_ptr<Data> mData;
 

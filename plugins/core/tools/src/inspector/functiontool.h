@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../toolscollector.h"
 #include "../toolbase.h"
+#include "../toolscollector.h"
 #include "Modules/keyvalue/boundapifunction.h"
 
 namespace Engine {
@@ -19,10 +19,15 @@ namespace Tools {
 
         void setCurrentFunction(const std::string &name, const BoundApiFunction &method);
 
+        bool renderFunction(BoundApiFunction &function, const std::string &functionName, ArgumentList &args);
+        bool renderFunctionSelect(BoundApiFunction &function, std::string &functionName, ArgumentList &args);
+
     protected:
         void refreshMethodCache();
 
         void parseMethods(TypedScopePtr scope);
+
+        bool renderFunctionDetails(BoundApiFunction &function, ArgumentList &args);
 
     private:
         std::string mCurrentFunctionName;
@@ -30,6 +35,8 @@ namespace Tools {
         ArgumentList mCurrentArguments;
 
         std::vector<std::pair<std::string, BoundApiFunction>> mMethodCache;
+
+        Inspector *mInspector;
     };
 
 }

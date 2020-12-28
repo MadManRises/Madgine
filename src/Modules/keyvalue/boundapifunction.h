@@ -12,9 +12,9 @@ struct MODULES_EXPORT BoundApiFunction {
         return mMethod == other.mMethod && mScope == other.mScope;
     }
 
-    uint32_t argumentsCount() const
+    uint32_t argumentsCount(bool excludeThis = false) const
     {
-        return mMethod.argumentsCount();
+        return mMethod.argumentsCount(excludeThis);
     }
 
     bool isMemberFunction() const

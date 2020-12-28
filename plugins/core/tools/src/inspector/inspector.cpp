@@ -198,14 +198,15 @@ namespace Tools {
                                                          }
                                                          return false;
                                                      },
-                                                     [&](BoundApiFunction &method) {
+                                                     [&](ApiFunction &function) {
                                                          std::string extended = "-> " + id;
                                                          if (ImGui::Button(extended.c_str())) {
-                                                             getTool<FunctionTool>().setCurrentFunction(id, method);
+                                                             getTool<FunctionTool>().setCurrentFunction(id, { function, parent });
                                                          }
                                                          ImGui::DraggableValueTypeSource(id, parent, value);
                                                          return false;
-                                                     } },
+                                                     }
+                                                      },
             id.c_str());
 
         if (!editable && !cannotBeDisabled)

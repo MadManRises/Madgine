@@ -12,6 +12,7 @@
 #include "Modules/generic/bytebuffer.h"
 
 #include "meshdata.h"
+#include "..\..\physics\bullet\src\Madgine\physics\collisionshapemanager.h"
 
 namespace Engine {
 namespace Render {

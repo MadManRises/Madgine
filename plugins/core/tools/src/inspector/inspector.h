@@ -3,6 +3,7 @@
 #include "../toolbase.h"
 
 #include "Modules/keyvalue/typedscopeptr.h"
+#include "Modules/keyvalue/boundapifunction.h"
 
 //#include "inspectorlayout.h"
 
@@ -19,6 +20,7 @@ namespace Tools {
         void drawRemainingMembers(TypedScopePtr scope, std::set<std::string> &drawn);
         void drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, const ScopeIterator &it);
         //void drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, std::string id, std::string key, ValueType value, bool editable);
+        bool drawValueImpl(tinyxml2::XMLElement *element, TypedScopePtr parent, const std::string &id, ValueType &value, bool editable);
 
         void draw(TypedScopePtr scope, std::set<std::string> drawn = {}, const char *layoutName = nullptr);
 
@@ -50,8 +52,7 @@ namespace Tools {
         void drawConstantString(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
         void drawSingleLine(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
 
-		bool drawValueImpl(tinyxml2::XMLElement *element, TypedScopePtr parent, const std::string &id, ValueType &value, bool editable);
-
+		
     private:
         std::map<std::string, InspectorLayout *> mAssociations;
         std::map<std::string, InspectorLayout> mLayouts;
@@ -60,6 +61,11 @@ namespace Tools {
         std::map<const MetaTable *, std::function<void(TypedScopePtr)>> mPreviews;
 
         static std::map<std::string, void (Inspector::*)(tinyxml2::XMLElement *, TypedScopePtr, std::set<std::string> &)> sElements;
+
+        //FunctionTool
+        std::string mCurrentPopupFunctionName;
+        BoundApiFunction mCurrentPopupFunction;
+        ArgumentList mCurrentPopupArguments;
     };
 }
 }

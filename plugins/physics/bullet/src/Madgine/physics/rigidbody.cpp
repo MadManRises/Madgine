@@ -23,6 +23,7 @@ PROPERTY(Mass, mass, setMass)
 PROPERTY(Friction, friction, setFriction)
 PROPERTY(Kinematic, kinematic, setKinematic)
 PROPERTY(Shape, getShape, setShape)
+READONLY_PROPERTY(ShapeData, getShapeInstance)
 METATABLE_END(Engine::Physics::RigidBody)
 
 SERIALIZETABLE_BEGIN(Engine::Physics::RigidBody)
@@ -105,7 +106,7 @@ namespace Physics {
 
         mShapeHandle.load("Cube");
 
-        mData = std::make_unique<Data>(entity->getComponent<Scene::Entity::Transform>(), mShapeHandle ? mShapeHandle->get()->get() : nullptr);
+        mData = std::make_unique<Data>(entity->addComponent<Scene::Entity::Transform>(), mShapeHandle ? mShapeHandle->get() : nullptr);
 
         mData->add();
     }
@@ -145,7 +146,7 @@ namespace Physics {
         if (mass != oldMass) {
             mData->remove();
             btVector3 inertia;
-            mShapeHandle->get()->get()->calculateLocalInertia(mass, inertia);
+            mShapeHandle->get()->calculateLocalInertia(mass, inertia);
             mData->mRigidBody.setMassProps(mass, inertia);
             mData->add();
             mData->mRigidBody.activate(true);
@@ -197,19 +198,24 @@ namespace Physics {
     {
         mShapeHandle = handle;
 
-        mData->mRigidBody.setCollisionShape(mShapeHandle->get()->get());
+        mData->mRigidBody.setCollisionShape(mShapeHandle->get());
     }
 
     void RigidBody::setShapeName(const std::string_view &name)
     {
         mShapeHandle.load(name);
 
-        mData->mRigidBody.setCollisionShape(mShapeHandle->get()->get());
+        mData->mRigidBody.setCollisionShape(mShapeHandle->get());
     }
 
     CollisionShapeManager::ResourceType *RigidBody::getShape() const
     {
-        return mShapeHandle.resource();
+        return mShapeHandle->mShape.resource();
+    }
+
+    CollisionShapeInstance *Engine::Physics::RigidBody::getShapeInstance() const
+    {
+        return mShapeHandle;
     }
 
     Scene::SceneManager *RigidBody::sceneMgrFromData(Data *data)

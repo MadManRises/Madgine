@@ -16,7 +16,7 @@ struct MODULES_EXPORT ApiFunction {
 
     void operator()(ValueType &retVal, const ArgumentList &args) const;
 
-    size_t argumentsCount() const;
+    size_t argumentsCount(bool excludeThis = false) const;
     bool isMemberFunction() const;
     
     const FunctionTable *mTable = nullptr;

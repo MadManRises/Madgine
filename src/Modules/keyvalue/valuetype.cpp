@@ -353,6 +353,11 @@ void ValueType::setType(ValueTypeDesc type)
 {
     if (this->type() != type) {
         setTypeHelper(mUnion, type, std::make_index_sequence<std::variant_size_v<Union>>());
+        if (type.mType == ValueTypeEnum::ScopeValue) {
+            std::get<TypedScopePtr>(mUnion).mType = *type.mSecondary.mMetaTable;
+        } else if (type.mType == ValueTypeEnum::ApiFunctionValue) {
+            std::get<ApiFunction>(mUnion).mTable = *type.mSecondary.mFunctionTable;
+        }
     }
 }
 
