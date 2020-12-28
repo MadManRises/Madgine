@@ -54,10 +54,11 @@ add_subdirectory(samples)
 
 if (MADGINE_AS_SDK)
 	set (LAUNCHER_LOCATION ${CMAKE_CURRENT_LIST_DIR}/launcher CACHE INTERNAL "")
-	function(create_launcher)
+	function(create_launcher MADGINE_BINARY_NAME)
 		add_subdirectory(${LAUNCHER_LOCATION} launcher)
 	endfunction()
 else()
+	set(MADGINE_BINARY_NAME "MadgineLauncher")
 	add_subdirectory(launcher)
 endif()
 
