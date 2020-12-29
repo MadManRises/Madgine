@@ -101,6 +101,9 @@ namespace Scene {
 
     void SceneManager::update()
     {
+        if (mPauseStack > 0)
+            return;
+
         PROFILE();
 
         Threading::DataLock lock(mMutex, Threading::AccessMode::WRITE);
@@ -133,7 +136,7 @@ namespace Scene {
 
     void SceneManager::remove(Entity::Entity *e)
     {
-        
+
         if (e->isLocal()) {
             auto it = std::find_if(mLocalEntities.begin(), mLocalEntities.end(), [=](Entity::Entity &ent) { return &ent == e; });
             mLocalEntities.erase(it);
@@ -150,6 +153,21 @@ namespace Scene {
 
         mEntities.clear();
         mLocalEntities.clear();
+    }
+
+    void SceneManager::pause()
+    {
+        ++mPauseStack;
+    }
+
+    bool SceneManager::unpause()
+    {
+        return --mPauseStack == 0;
+    }
+
+    bool SceneManager::isPaused() const
+    {
+        return mPauseStack > 0;
     }
 
     /*Entity::Entity *SceneManager::makeLocalCopy(Entity::Entity &e)

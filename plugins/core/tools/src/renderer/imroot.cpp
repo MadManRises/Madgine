@@ -14,8 +14,8 @@
 #include "Modules/serialize/streams/serializestream.h"
 #include "Modules/serialize/streams/wrappingserializestreambuf.h"
 
-#include "ini/inilib.h"
-#include "ini/iniformatter.h"
+#include "serialize/ini/inilib.h"
+#include "serialize/ini/iniformatter.h"
 
 #include "Modules/generic/container/safeiterator.h"
 

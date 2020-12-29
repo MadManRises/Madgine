@@ -44,10 +44,15 @@ namespace Tools {
 
         bool render3DCursor() const;
 
+        void play();
+        void pause();
+        void stop();
+
     private:
         void renderSelection();
         void renderHierarchy();
         void renderSettings();
+        void renderToolbar();
         void renderEntity(Scene::Entity::EntityPtr &entity);
         void renderCamera(Render::Camera *camera);
 
@@ -66,9 +71,16 @@ namespace Tools {
 
         bool mHierarchyVisible = false;
         bool mSettingsVisible = false;
+        bool mToolbarVisible = false;
 
         int mHoveredAxis = -1;
         Engine::Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> mHoveredTransform;
+
+        enum { PLAY,
+            STOP,
+            PAUSE } mMode;
+
+        std::vector<char> mStartBuffer;
 
         //Entity-Cache
         struct EntityNode {

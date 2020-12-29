@@ -82,6 +82,9 @@ namespace UI {
 
     void GameManager::update(std::chrono::microseconds timeSinceLastFrame)
     {
+        if (mSceneMgr.isPaused())
+            return;
+
         updateBricks(timeSinceLastFrame);
 
         mAcc += timeSinceLastFrame;

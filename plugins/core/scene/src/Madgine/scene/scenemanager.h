@@ -53,6 +53,10 @@ namespace Scene {
 
         void clear();
 
+        void pause();
+        bool unpause();
+        bool isPaused() const;
+
         template <typename T>
         T &getComponent(bool init = true)
         {
@@ -114,6 +118,8 @@ namespace Scene {
         std::chrono::steady_clock::time_point mLastFrame;
 
         size_t mItemCount = 0;
+
+        std::atomic<size_t> mPauseStack = 0;
 
     public:
         decltype(auto) entities()

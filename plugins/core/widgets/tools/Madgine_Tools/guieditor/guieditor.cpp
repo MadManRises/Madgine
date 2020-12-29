@@ -24,13 +24,13 @@
 #include "Modules/serialize/streams/serializestream.h"
 #include "Modules/serialize/streams/wrappingserializestreambuf.h"
 
-#include "xml/xmllib.h"
-#include "xml/xmlformatter.h"
+#include "serialize/xml/xmllib.h"
+#include "serialize/xml/xmlformatter.h"
 
 #include "Modules/serialize/serializemanager.h"
 
-#include "filesystem/filesystemlib.h"
-#include "filesystem/filemanager.h"
+#include "serialize/filesystem/filesystemlib.h"
+#include "serialize/filesystem/filemanager.h"
 
 #include "Madgine/widgets/widgetclass.h"
 

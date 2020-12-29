@@ -14,10 +14,10 @@
 #include "Modules/threading/scheduler.h"
 #include "Modules/threading/workgroup.h"
 
-#include "filesystem/filesystemlib.h"
-#include "filesystem/filemanager.h"
-#include "xml/xmllib.h"
-#include "xml/xmlformatter.h"
+#include "serialize/filesystem/filesystemlib.h"
+#include "serialize/filesystem/filemanager.h"
+#include "serialize/xml/xmllib.h"
+#include "serialize/xml/xmlformatter.h"
 
 #include "Modules/resources/resourcemanager.h"
 

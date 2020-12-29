@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "network/networklib.h"
+#include "serialize/network/networklib.h"
 
-#include "network/networkmanager.h"
+#include "serialize/network/networkmanager.h"
 
 #include "Modules/threading/workgroup.h"
 

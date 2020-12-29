@@ -23,13 +23,13 @@
 #include "Modules/serialize/container/controlledconfig.h"
 
 #include "Interfaces/window/windowsettings.h"
-#include "filesystem/filesystemlib.h"
+#include "serialize/filesystem/filesystemlib.h"
 #include "Interfaces/filesystem/api.h"
-#include "filesystem/filemanager.h"
+#include "serialize/filesystem/filemanager.h"
 
 
-#include "ini/inilib.h"
-#include "ini/iniformatter.h"
+#include "serialize/ini/inilib.h"
+#include "serialize/ini/iniformatter.h"
 
 #include "Modules/serialize/serializableunitptr.h"
 

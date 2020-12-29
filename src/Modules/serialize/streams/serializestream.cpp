@@ -298,9 +298,13 @@ namespace Serialize {
 
     void SerializeOutStream::writeUnformatted(const std::string &s)
     {
+        writeUnformatted(std::string_view { s });
+    }
+
+    void SerializeOutStream::writeUnformatted(const std::string_view& s) {
         if (format().mBinary) {
             writeRaw<uint32_t>(s.size());
-            writeRaw(s.c_str(), s.size());
+            writeRaw(s.data(), s.size());
         } else {
             OutStream::operator<<(s);
         }

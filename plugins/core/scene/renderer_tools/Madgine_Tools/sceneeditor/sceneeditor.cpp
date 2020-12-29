@@ -32,6 +32,22 @@
 
 #include "Interfaces/input/inputevents.h"
 
+#include "serialize/memory/memorylib.h"
+#include "serialize/memory/memorymanager.h"
+
+#include "Modules/serialize/formatter/safebinaryformatter.h"
+
+UNIQUECOMPONENT(Engine::Tools::SceneEditor);
+
+METATABLE_BEGIN_BASE(Engine::Tools::SceneEditor, Engine::Tools::ToolBase)
+READONLY_PROPERTY(Views, views)
+METATABLE_END(Engine::Tools::SceneEditor)
+
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::SceneEditor, Engine::Tools::ToolBase)
+FIELD(mHierarchyVisible)
+FIELD(mToolbarVisible)
+SERIALIZETABLE_END(Engine::Tools::SceneEditor)
+
 namespace Engine {
 namespace Tools {
 
@@ -46,6 +62,9 @@ namespace Tools {
         mSceneMgr = &App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>();
         mInspector = &mRoot.getTool<Inspector>();
         mSceneViews.emplace_back(this, mWindow.getRenderer());
+
+        mSceneMgr->pause();
+        mMode = STOP;
 
         return ToolBase::init();
     }
@@ -64,6 +83,8 @@ namespace Tools {
             renderHierarchy();
         if (mSettingsVisible)
             renderSettings();
+        if (mToolbarVisible)
+            renderToolbar();
         renderSelection();
         for (SceneView &sceneView : mSceneViews) {
             sceneView.render();
@@ -81,6 +102,8 @@ namespace Tools {
 
                 ImGui::MenuItem("Settings", nullptr, &mSettingsVisible);
 
+                ImGui::MenuItem("Toolbar", nullptr, &mToolbarVisible);
+
                 ImGui::EndMenu();
             }
         }
@@ -96,7 +119,7 @@ namespace Tools {
         return mHoveredAxis;
     }
 
-    const Engine::Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> &SceneEditor::hoveredTransform() const
+    const Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> &SceneEditor::hoveredTransform() const
     {
         return mHoveredTransform;
     }
@@ -130,6 +153,44 @@ namespace Tools {
     bool SceneEditor::render3DCursor() const
     {
         return mRender3DCursor;
+    }
+
+    void SceneEditor::play()
+    {
+        if (mMode == PLAY)
+            return;
+
+        if (mMode == STOP) {
+            Memory::MemoryManager mgr { "Tmp" };
+            Serialize::SerializeOutStream out = mgr.openWrite(mStartBuffer, std::make_unique<Serialize::SafeBinaryFormatter>());
+            mSceneMgr->writeState(out);
+        }
+
+        mSceneMgr->unpause();
+        mMode = PLAY;
+    }
+
+    void SceneEditor::pause()
+    {
+        if (mMode != PLAY)
+            return;
+
+        mSceneMgr->pause();
+        mMode = PAUSE;
+    }
+
+    void SceneEditor::stop()
+    {
+        if (mMode == STOP)
+            return;
+
+        if (mMode == PLAY)
+            mSceneMgr->pause();
+        mMode = STOP;
+
+        Memory::MemoryManager mgr { "Tmp" };
+        Serialize::SerializeInStream in = mgr.openRead(mStartBuffer, std::make_unique<Serialize::SafeBinaryFormatter>());
+        mSceneMgr->readState(in);
     }
 
     void SceneEditor::renderSelection()
@@ -174,6 +235,41 @@ namespace Tools {
             ImGui::DragFloat("Default Bone Length", &mDefaultBoneLength);
             ImGui::Checkbox("Show Bone Names", &mShowBoneNames);
             ImGui::Checkbox("Render 3D-Cursor", &mRender3DCursor);
+        }
+        ImGui::End();
+    }
+
+    void SceneEditor::renderToolbar()
+    {
+        if (ImGui::Begin("SceneEditor - Toolbar", &mToolbarVisible, ImGuiWindowFlags_NoTitleBar)) {
+         
+            auto pre = [](bool b) { if (b) ImGui::PushDisabled(); };
+            auto post = [](bool b) { if (b) ImGui::PopDisabled(); };
+            
+            bool b = mMode == PLAY;
+            pre(b);
+            if (ImGui::Button(mSceneMgr->isPaused() && b ? "Halted" : "Play")) {
+                play();
+            }
+            post(b);
+
+            ImGui::SameLine(0,0);
+
+            b = mMode == PAUSE || mMode == STOP;
+            pre(b);
+            if (ImGui::Button("Pause")) {
+                pause();
+            }
+            post(b);
+
+            ImGui::SameLine(0, 0);
+
+            b = mMode == STOP;
+            pre(b);
+            if (ImGui::Button("Stop")) {
+                stop();
+            }
+            post(b);
         }
         ImGui::End();
     }
@@ -367,7 +463,7 @@ namespace Tools {
         mEntityCache.remove_if([this](EntityNode &node) { return updateEntityCache(node); });
 
         //Add missing Entities
-        for (Scene::Entity::EntityPtr entity : mSceneMgr->entities()) {            
+        for (Scene::Entity::EntityPtr entity : mSceneMgr->entities()) {
             if (!mEntityMapping.count(entity))
                 createEntityMapping(std::move(entity));
         }
@@ -375,11 +471,7 @@ namespace Tools {
 
     bool SceneEditor::updateEntityCache(EntityNode &node, const Scene::Entity::EntityPtr &parent)
     {
-        if (node.mEntity.isDead() || 
-            (!node.mEntity->hasComponent<Scene::Entity::Transform>() && parent) || 
-            (node.mEntity->hasComponent<Scene::Entity::Transform>() && 
-                ((parent && parent->getComponent<Scene::Entity::Transform>() != node.mEntity->getComponent<Scene::Entity::Transform>()->parent()) ||
-                    (!parent && node.mEntity->getComponent<Scene::Entity::Transform>()->parent())))) {
+        if (node.mEntity.isDead() || (!node.mEntity->hasComponent<Scene::Entity::Transform>() && parent) || (node.mEntity->hasComponent<Scene::Entity::Transform>() && ((parent && parent->getComponent<Scene::Entity::Transform>() != node.mEntity->getComponent<Scene::Entity::Transform>()->parent()) || (!parent && node.mEntity->getComponent<Scene::Entity::Transform>()->parent())))) {
             eraseNode(node);
             return true;
         }
@@ -418,13 +510,3 @@ namespace Tools {
 
 }
 }
-
-UNIQUECOMPONENT(Engine::Tools::SceneEditor);
-
-METATABLE_BEGIN_BASE(Engine::Tools::SceneEditor, Engine::Tools::ToolBase)
-READONLY_PROPERTY(Views, views)
-METATABLE_END(Engine::Tools::SceneEditor)
-
-SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::SceneEditor, Engine::Tools::ToolBase)
-FIELD(mHierarchyVisible)
-SERIALIZETABLE_END(Engine::Tools::SceneEditor)

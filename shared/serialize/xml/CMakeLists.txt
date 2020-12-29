@@ -2,7 +2,7 @@ Project(Xml)
 
 set(sources xmlformatter.cpp xmlformatter.h)
 	
-add_workspace_library(Xml ${sources} SOURCE_ROOT ..)
+add_workspace_library(Xml ${sources} SOURCE_ROOT ../..)
 
 target_link_libraries(Xml PUBLIC Modules)
 

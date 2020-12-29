@@ -125,7 +125,7 @@ namespace Serialize {
         void writeUnformatted(const SerializableUnitBase *p);
 
         void writeUnformatted(const std::string &s);
-        // void writeUnformatted(const std::string_view &s);
+        void writeUnformatted(const std::string_view &s);
         void writeUnformatted(const Filesystem::Path &p);
 
         void writeUnformatted(const ByteBuffer &b);
