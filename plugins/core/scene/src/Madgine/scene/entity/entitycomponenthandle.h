@@ -40,7 +40,7 @@ namespace Scene {
                 return mIndex == other.mIndex;
             }
 
-            operator bool() const
+            explicit operator bool() const
             {
                 return mIndex != std::numeric_limits<uint32_t>::max();
             }
@@ -76,7 +76,7 @@ namespace Scene {
                 return mIndex == other.mIndex;
             }
 
-            operator bool() const
+            explicit operator bool() const
             {
                 return mIndex != std::numeric_limits<uint32_t>::max();
             }
@@ -121,7 +121,7 @@ namespace Scene {
                 return mIndex == other.mIndex;
             }
 
-            operator bool() const
+            explicit operator bool() const
             {
                 return mIndex != std::numeric_limits<uint32_t>::max();
             }

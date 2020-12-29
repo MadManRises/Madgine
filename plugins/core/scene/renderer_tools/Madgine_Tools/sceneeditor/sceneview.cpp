@@ -210,7 +210,7 @@ namespace Tools {
                 } else if (ImGui::IsDraggableValueTypeBeingAccepted(resource)) {
                     resource->setPersistent(true);
                     Render::GPUMeshLoader::HandleType handle = resource->loadData();
-                    Im3D::NativeMesh(handle, handle->mAABB, TranslationMatrix(pos));
+                    Im3D::NativeMesh(handle->mTextureHandle, handle->mAABB, TranslationMatrix(pos));
                 }
                 ImGui::EndDragDropTarget();
             }

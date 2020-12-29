@@ -261,6 +261,9 @@ std::string ValueType::toString() const
         [](const KeyValueVirtualRange &) {
             return "<range>"s;
         },
+        [](const ObjectPtr &) {
+            return "<object>"s;
+        },
         [](const auto &v) {
             return std::to_string(v);
         } });
@@ -307,6 +310,9 @@ std::string ValueType::toShortString() const
         },
         [](const KeyValueVirtualRange &) {
             return "<range>"s;
+        },
+        [](const ObjectPtr &) {
+            return "<object>"s;
         },
         [](const auto &v) {
             return std::to_string(v);

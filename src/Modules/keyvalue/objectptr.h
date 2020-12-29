@@ -17,7 +17,9 @@ struct MODULES_EXPORT ObjectPtr {
     ObjectFieldAccessor operator[](const char *name);
     ValueType operator[](const std::string &name) const;
     ValueType operator[](const char *name) const;
-    operator bool() const;
+    explicit operator bool() const;
+
+    bool operator==(const ObjectPtr &other) const;
 
 private:
     std::shared_ptr<ObjectInstance> mInstance;

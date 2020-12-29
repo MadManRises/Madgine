@@ -55,7 +55,7 @@ namespace Engine
 				return mTask->execute();
 			}
 
-			operator bool()
+			explicit operator bool()
 			{
 				return mTask.operator bool();
 			}

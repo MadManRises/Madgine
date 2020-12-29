@@ -30,7 +30,7 @@ struct OneTimeFunctor {
         return std::move(f)(std::forward<Args>(args)...);
     }
 
-    operator bool() const {
+    explicit operator bool() const {
         return mF.has_value();
     }
 

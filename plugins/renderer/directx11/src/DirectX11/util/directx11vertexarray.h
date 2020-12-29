@@ -18,7 +18,7 @@ namespace Render {
 
         DirectX11VertexArray &operator=(DirectX11VertexArray &&other);
 
-		operator bool() const;
+		explicit operator bool() const;
 
         static DirectX11VertexArray *getCurrent();
 

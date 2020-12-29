@@ -32,7 +32,7 @@ struct GenerationContainerIndex {
 #endif
     }
 
-    operator bool() const
+    explicit operator bool() const
     {
         if (mGeneration != INVALID_GENERATION) {
             return true;

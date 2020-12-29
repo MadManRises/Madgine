@@ -66,7 +66,7 @@ namespace Serialize {
             return static_cast<T *>(mScope);
         }*/
 
-        operator bool() const
+        explicit operator bool() const
         {
             return mUnit != nullptr;
         }
@@ -120,7 +120,7 @@ namespace Serialize {
             return static_cast<T *>(mScope);
         }*/
 
-        operator bool() const
+        explicit operator bool() const
         {
             return mUnit != nullptr;
         }

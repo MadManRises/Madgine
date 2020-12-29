@@ -53,4 +53,10 @@ ValueType ObjectPtr::getValue(const std::string &name) const
 {
     return mInstance ? mInstance->getValue(name) : ValueType();
 }
+
+bool ObjectPtr::operator==(const ObjectPtr &other) const
+{
+    return mInstance == other.mInstance;
+}
+
 }

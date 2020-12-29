@@ -48,7 +48,7 @@ namespace Scene {
 
             operator EntityComponentBase *() const;
 
-            operator bool() const;
+            explicit operator bool() const;
 
             std::string_view name() const;
 

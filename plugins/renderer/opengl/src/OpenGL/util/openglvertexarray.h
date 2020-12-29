@@ -16,7 +16,7 @@ namespace Render {
 
         OpenGLVertexArray &operator=(OpenGLVertexArray &&other);
 
-		operator bool() const;
+		explicit operator bool() const;
 
         static unsigned int getCurrent();
 

@@ -9,7 +9,7 @@ namespace NodeGraph {
         GraphExecutable *mNode = nullptr;
         uint32_t mIndex = 0;
 
-        operator bool() const;
+        explicit operator bool() const;
     };
 
     struct FlowOutPinPrototype {

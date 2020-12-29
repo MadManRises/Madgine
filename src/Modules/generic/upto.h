@@ -42,7 +42,7 @@ struct UpTo {
         return mData[i];
     }
 
-    operator bool() const
+    explicit operator bool() const
     {
         return mCount > 0;
     }

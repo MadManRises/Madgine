@@ -14,7 +14,7 @@ namespace Render {
         DirectX11Buffer &operator=(const DirectX11Buffer &) = delete;
         DirectX11Buffer &operator=(DirectX11Buffer &&);
 
-        operator bool() const;
+        explicit operator bool() const;
 
         void bindVertex(UINT stride) const;
         void bindIndex() const;

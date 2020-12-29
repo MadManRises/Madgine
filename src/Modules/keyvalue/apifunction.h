@@ -9,7 +9,7 @@ struct MODULES_EXPORT ApiFunction {
         return mTable == other.mTable;
     }
 
-    operator bool() const
+    explicit operator bool() const
     {
         return mTable != nullptr;
     }

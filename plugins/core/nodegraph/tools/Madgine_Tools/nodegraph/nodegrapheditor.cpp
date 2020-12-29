@@ -106,7 +106,7 @@ namespace Tools {
     {
         uintptr_t id = 4000 * nodeId + NodeGraph::NodePrototypeBase::dataInId(pinId);
         ed::BeginPin(id, ed::PinKind::Input);
-        DataPinIcon(type, source);
+        DataPinIcon(type, bool(source));
         if (name) {
             ImGui::SameLine();
             ImGui::Text("%s", name);

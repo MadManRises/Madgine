@@ -70,7 +70,7 @@ namespace Resources {
             return res ? res->name() : "";
         }
 
-        operator bool() const
+        explicit operator bool() const
         {
             return mData != Data {};
         }

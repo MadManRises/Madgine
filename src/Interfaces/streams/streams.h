@@ -23,7 +23,7 @@ struct INTERFACES_EXPORT InStream {
 
     size_t readRaw(void *buffer, size_t size);
 
-    operator bool() const;
+    explicit operator bool() const;
 
     pos_type tell();
     bool seek(pos_type p);
@@ -61,7 +61,7 @@ struct INTERFACES_EXPORT OutStream {
 
     void writeRaw(const void *data, size_t count);
 
-    operator bool() const;
+    explicit operator bool() const;
 
     std::unique_ptr<std::streambuf> release();
 

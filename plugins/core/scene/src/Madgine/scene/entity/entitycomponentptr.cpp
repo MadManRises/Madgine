@@ -85,7 +85,7 @@ namespace Scene {
 
         EntityComponentPtrBase<EntityComponentBase>::operator bool() const
         {
-            return mHandle;
+            return mHandle.operator bool();
         }
 
         EntityComponentPtrBase<const EntityComponentBase>::EntityComponentPtrBase() = default;

@@ -14,7 +14,7 @@ namespace Render {
         OpenGLBuffer &operator=(const OpenGLBuffer &) = delete;
         OpenGLBuffer &operator=(OpenGLBuffer &&);
 
-        operator bool() const;
+        explicit operator bool() const;
 
         void bind() const;
 

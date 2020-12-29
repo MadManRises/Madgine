@@ -20,7 +20,7 @@ namespace Filesystem {
         ~FileQueryHandle();
 
         bool advance(FileQueryState &data);
-        operator bool();
+        explicit operator bool();
         bool operator==(const FileQueryHandle &other) const;
 
         const Path &path() const;
