@@ -416,7 +416,7 @@ struct GenerationContainer : GenerationContainerBase, protected C {
         bool valid() const
         {
             update();
-            return mIndex;
+            return mIndex.operator bool();
         }
 
         mutable GenerationContainerIndex mIndex;

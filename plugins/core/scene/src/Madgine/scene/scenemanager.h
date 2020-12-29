@@ -23,8 +23,6 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 
-#include "Modules/generic/container/generationvector.h"
-
 #include "entity/entityptr.h"
 
 #include "entity/entitycomponentcollector.h"
