@@ -19,9 +19,9 @@ namespace Memory {
         , mReadBuffer(std::move(buffer))
     {
         setg(
-            const_cast<char *>(reinterpret_cast<const char *>(mReadBuffer.mData)), 
-            const_cast<char *>(reinterpret_cast<const char *>(mReadBuffer.mData)), 
-            const_cast<char *>(reinterpret_cast<const char *>(mReadBuffer.mData) + mReadBuffer.mSize)
+            const_cast<char *>(static_cast<const char *>(mReadBuffer.mData)), 
+            const_cast<char *>(static_cast<const char *>(mReadBuffer.mData)), 
+            const_cast<char *>(static_cast<const char *>(mReadBuffer.mData) + mReadBuffer.mSize)
         );
     }
 
@@ -46,9 +46,8 @@ namespace Memory {
         }
         mWriteBuffer->resize(newSize);
         char *data = mWriteBuffer->data();
-        setp(data, data + oldSize, data + newSize);
         data[oldSize] = c;
-        pbump(1);
+        setp(data + oldSize + 1, data + newSize);
         return c;
     }
 
