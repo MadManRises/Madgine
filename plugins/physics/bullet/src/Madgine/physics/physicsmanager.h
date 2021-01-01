@@ -65,7 +65,7 @@ namespace Physics {
         virtual bool init() override;
         virtual void finalize() override;
 
-        virtual void update(std::chrono::microseconds) override;
+        virtual void update(std::chrono::microseconds, bool paused) override;
 
         static bool sContactCallback(btManifoldPoint &cp, const btCollisionObjectWrapper *colObj0, int partId0, int index0, const btCollisionObjectWrapper *colObj1, int partId1, int index1);
         bool contactCallback(ContactPoint &p);

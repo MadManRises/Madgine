@@ -23,8 +23,8 @@ namespace Serialize {
         SyncableUnitBase &operator=(SyncableUnitBase &&other);
 
     public:
-        void writeState(SerializeOutStream &out, const char *name = nullptr, StateTransmissionFlags flags = 0, CallerHierarchyBasePtr hierarchy = {}) const;
-        void readState(SerializeInStream &in, const char *name = nullptr, StateTransmissionFlags flags = 0, CallerHierarchyBasePtr hierarchy = {});
+        void writeState(SerializeOutStream &out, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0) const;
+        void readState(SerializeInStream &in, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0);
 
         void readAction(BufferedInOutStream &in, PendingRequest *request);
         void readRequest(BufferedInOutStream &in, TransactionId id);

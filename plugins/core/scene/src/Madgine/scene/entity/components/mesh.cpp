@@ -13,6 +13,18 @@
 
 #include "../entitycomponentptr.h"
 
+
+ENTITYCOMPONENT_IMPL(Mesh, Engine::Scene::Entity::Mesh);
+
+METATABLE_BEGIN(Engine::Scene::Entity::Mesh)
+PROPERTY(Mesh, get, set)
+METATABLE_END(Engine::Scene::Entity::Mesh)
+
+SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Mesh)
+ENCAPSULATED_FIELD(Mesh, getName, setName)
+SERIALIZETABLE_END(Engine::Scene::Entity::Mesh)
+
+
 namespace Engine {
 namespace Scene {
     namespace Entity {
@@ -64,15 +76,5 @@ namespace Scene {
     }
 }
 }
-
-ENTITYCOMPONENT_IMPL(Mesh, Engine::Scene::Entity::Mesh);
-
-METATABLE_BEGIN(Engine::Scene::Entity::Mesh)
-PROPERTY(Mesh, get, set)
-METATABLE_END(Engine::Scene::Entity::Mesh)
-
-SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Mesh)
-ENCAPSULATED_FIELD(Mesh, getName, setName)
-SERIALIZETABLE_END(Engine::Scene::Entity::Mesh)
 
 

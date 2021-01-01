@@ -1,10 +1,10 @@
 #include "../moduleslib.h"
 
 #include "streams/bufferedstream.h"
-#include "syncable.h"
-#include "toplevelunit.h"
 #include "streams/operations.h"
+#include "syncable.h"
 #include "syncableunit.h"
+#include "toplevelunit.h"
 
 namespace Engine {
 namespace Serialize {

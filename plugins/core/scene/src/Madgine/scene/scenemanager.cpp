@@ -101,9 +101,6 @@ namespace Scene {
 
     void SceneManager::update()
     {
-        if (mPauseStack > 0)
-            return;
-
         PROFILE();
 
         Threading::DataLock lock(mMutex, Threading::AccessMode::WRITE);
@@ -114,7 +111,7 @@ namespace Scene {
 
         for (std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
             //PROFILE(component->componentName());
-            component->update(std::chrono::duration_cast<std::chrono::microseconds>(timeSinceLastFrame));
+            component->update(std::chrono::duration_cast<std::chrono::microseconds>(timeSinceLastFrame), mPauseStack > 0);
         }
     }
 

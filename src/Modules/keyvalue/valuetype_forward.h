@@ -90,8 +90,10 @@ decltype(auto) ValueType_as(const ValueType &v)
         return ValueType_as_impl<TypedScopePtr>(v).safe_cast<std::remove_pointer_t<T>>();
     } else if constexpr (isValueTypePrimitive_v<T>) {
         return ValueType_as_impl<T>(v);
+    } else if constexpr (is_iterable_v<T>) {
+        return ValueType_as_impl<KeyValueVirtualRange>(v).safe_cast<T>();
     } else {
-        static_assert(dependent_bool<T, false>::value, "The provided type can not be converted to a ValueType");
+        static_assert(dependent_bool<T, false>::value, "A ValueType can not be converted to the given target type");
     }
 }
 

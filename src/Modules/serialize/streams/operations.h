@@ -1,24 +1,24 @@
 #pragma once
 
+#include "../../generic/callerhierarchy.h"
 #include "../../generic/container/atomiccontaineroperation.h"
 #include "../../generic/container/containerevent.h"
 #include "../container/physical.h"
 #include "../creationhelper.h"
 #include "../formatter.h"
 #include "../primitivetypes.h"
+#include "../serializableunitptr.h"
 #include "bufferedstream.h"
 #include "pendingrequest.h"
-#include "../serializableunitptr.h"
-#include "../../generic/callerhierarchy.h"
 
 namespace Engine {
 namespace Serialize {
 
     DERIVE_TYPENAME(Config);
     DERIVE_FUNCTION(writeState, SerializeOutStream &, const char *)
-    //DERIVE_FUNCTION(writeState, writeState2, SerializeOutStream &, const char *, StateTransmissionFlags)
+    DERIVE_FUNCTION2(writeState2, writeState, SerializeOutStream &, const char *, CallerHierarchyBasePtr)
     DERIVE_FUNCTION(readState, SerializeInStream &, const char *)
-    //DERIVE_FUNCTION(readState, readState2, SerializeInStream &, const char *, StateTransmissionFlags)
+    DERIVE_FUNCTION2(readState2, readState, SerializeInStream &, const char *, CallerHierarchyBasePtr)
     /*DERIVE_FUNCTION(readAction, SerializeInStream &, PendingRequest*)
     DERIVE_FUNCTION(readRequest, BufferedInOutStream &, TransactionId)
     DERIVE_FUNCTION(writeAction, int, const void *, ParticipantId, TransactionId)
@@ -232,23 +232,23 @@ namespace Serialize {
         template <typename Hierarchy = std::monostate>
         static void read(SerializeInStream &in, T &t, const char *name, const Hierarchy &hierarchy = {})
         {
-            if constexpr (isPrimitiveType_v<T>) {
+            if constexpr (has_function_readState2_v<T>) {
+                t.readState(in, name, CallerHierarchyPtr { hierarchy });
+            } else if constexpr (has_function_readState_v<T>) {
+                t.readState(in, name);
+            } else if constexpr (isPrimitiveType_v<T>) {
                 in.format().beginPrimitive(in, name, PrimitiveTypeIndex_v<T>);
                 in.readUnformatted(t);
                 in.format().endPrimitive(in, name, PrimitiveTypeIndex_v<T>);
                 //mLog.log(t);
             } else if constexpr (PrimitiveTypesContain_v<std::remove_const_t<T>> || std::is_enum_v<std::remove_const_t<T>>) {
                 //Don't do anything here
-            } else if constexpr (has_function_readState_v<T>) {
-                t.readState(in, name);
-            } else if constexpr (has_function_readState_upTo_v<T, 1>) {
-                t.readState(in, name, hierarchy);
             } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>) {
-                SerializableUnitPtr { &t }.readState(in, name, 0, CallerHierarchyPtr { hierarchy });
+                SerializableUnitPtr { &t }.readState(in, name, CallerHierarchyPtr { hierarchy });
             } else if constexpr (is_iterable_v<T>) {
                 ContainerOperations<T, Configs...>::read(in, t, name, hierarchy);
             } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
-                Operations<decltype(TupleUnpacker::toTuple(std::declval<T&>())), Configs...>::read(in, TupleUnpacker::toTuple(t), name, hierarchy);
+                Operations<decltype(TupleUnpacker::toTuple(std::declval<T &>())), Configs...>::read(in, TupleUnpacker::toTuple(t), name, hierarchy);
             } else {
                 static_assert(dependent_bool<T, false>::value, "Invalid Type");
             }
@@ -257,23 +257,23 @@ namespace Serialize {
         template <typename Hierarchy = std::monostate>
         static void write(SerializeOutStream &out, const T &t, const char *name, const Hierarchy &hierarchy = {})
         {
-            if constexpr (isPrimitiveType_v<T>) {
+            if constexpr (has_function_writeState2_v<T>) {
+                t.writeState(out, name, CallerHierarchyPtr { hierarchy });
+            } else if constexpr (has_function_writeState_v<T>) {
+                t.writeState(out, name);
+            } else if constexpr (isPrimitiveType_v<T>) {
                 out.format().beginPrimitive(out, name, PrimitiveTypeIndex_v<T>);
                 out.writeUnformatted(t);
                 out.format().endPrimitive(out, name, PrimitiveTypeIndex_v<T>);
                 //mLog.log(t);
             } else if constexpr (PrimitiveTypesContain_v<std::remove_const_t<T>> || std::is_enum_v<std::remove_const_t<T>>) {
                 //Don't do anything here
-            } else if constexpr (has_function_writeState_v<T>) {
-                t.writeState(out, name);
-            } else if constexpr (has_function_writeState_upTo_v<T, 1>) {
-                t.writeState(out, name, hierarchy);
-            } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>){
-                SerializableUnitConstPtr { &t }.writeState(out, name, 0, CallerHierarchyPtr { hierarchy });
+            } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>) {
+                SerializableUnitConstPtr { &t }.writeState(out, name, CallerHierarchyPtr { hierarchy });
             } else if constexpr (is_iterable_v<T>) {
                 ContainerOperations<std::remove_const_t<T>, Configs...>::write(out, t, name, hierarchy);
             } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
-                Operations<decltype(TupleUnpacker::toTuple(std::declval<T&>())), Configs...>::write(out, TupleUnpacker::toTuple(t), name, hierarchy);
+                Operations<decltype(TupleUnpacker::toTuple(std::declval<T &>())), Configs...>::write(out, TupleUnpacker::toTuple(t), name, hierarchy);
             } else {
                 static_assert(dependent_bool<T, false>::value, "Invalid Type");
             }
@@ -388,7 +388,7 @@ namespace Serialize {
     struct Operations<std::tuple<Ty...>, Configs...> {
 
         template <typename... Args, size_t... Is>
-        static void read(SerializeInStream &in, std::tuple<Ty ...> &t, const char *name, std::index_sequence<Is...>, Args &&... args)
+        static void read(SerializeInStream &in, std::tuple<Ty...> &t, const char *name, std::index_sequence<Is...>, Args &&... args)
         {
             in.format().beginCompound(in, name);
             (Serialize::read<Ty>(in, std::get<Is>(t), nullptr, args...), ...);
@@ -396,13 +396,13 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static void read(SerializeInStream &in, std::tuple<Ty ...> &t, const char *name, Args &&... args)
+        static void read(SerializeInStream &in, std::tuple<Ty...> &t, const char *name, Args &&... args)
         {
             read(in, t, name, std::make_index_sequence<sizeof...(Ty)> {}, std::forward<Args>(args)...);
         }
 
         template <typename... Args, size_t... Is>
-        static void write(SerializeOutStream &out, const std::tuple<Ty ...> &t, const char *name, std::index_sequence<Is...>, Args &&... args)
+        static void write(SerializeOutStream &out, const std::tuple<Ty...> &t, const char *name, std::index_sequence<Is...>, Args &&... args)
         {
             out.format().beginCompound(out, name);
             (Serialize::write<Ty>(out, std::get<Is>(t), "Element", args...), ...);
@@ -410,7 +410,7 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static void write(SerializeOutStream &out, const std::tuple<Ty ...> &t, const char *name, Args &&... args)
+        static void write(SerializeOutStream &out, const std::tuple<Ty...> &t, const char *name, Args &&... args)
         {
             write(out, t, name, std::make_index_sequence<sizeof...(Ty)> {}, std::forward<Args>(args)...);
         }
@@ -423,7 +423,7 @@ namespace Serialize {
         static void read(SerializeInStream &in, std::tuple<Ty &...> t, const char *name, std::index_sequence<Is...>, Args &&... args)
         {
             in.format().beginCompound(in, name);
-            (Serialize::read<Ty>(in, std::get<Is>(t), static_cast<const char*>(nullptr), args...), ...);
+            (Serialize::read<Ty>(in, std::get<Is>(t), static_cast<const char *>(nullptr), args...), ...);
             in.format().endCompound(in, name);
         }
 

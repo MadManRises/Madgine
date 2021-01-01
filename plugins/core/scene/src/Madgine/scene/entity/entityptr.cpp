@@ -86,7 +86,7 @@ namespace Scene {
         {
             update();
             other.update();
-            return get() < other.get();
+            return mEntity < other.mEntity;
         }
 
         TypedScopePtr EntityPtr::customScopePtr() const

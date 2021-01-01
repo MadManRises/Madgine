@@ -27,6 +27,8 @@ READONLY_PROPERTY(ShapeData, getShapeInstance)
 METATABLE_END(Engine::Physics::RigidBody)
 
 SERIALIZETABLE_BEGIN(Engine::Physics::RigidBody)
+FIELD(mShapeHandle)
+ENCAPSULATED_FIELD(Kinematic, kinematic, setKinematic)
 SERIALIZETABLE_END(Engine::Physics::RigidBody)
 
 namespace Engine {
@@ -34,9 +36,8 @@ namespace Physics {
 
     struct RigidBody::Data : btMotionState {
 
-        Data(Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> transform, btCollisionShape *shape = nullptr)
-            : mTransform(std::move(transform))
-            , mRigidBody(btRigidBody::btRigidBodyConstructionInfo { 0.0f, this, shape, { 0.0f, 0.0f, 0.0f } })
+        Data()
+            : mRigidBody(btRigidBody::btRigidBodyConstructionInfo { 0.0f, this, nullptr, { 0.0f, 0.0f, 0.0f } })
         {
             mRigidBody.setAngularFactor({ 0, 0, 1 });
             mRigidBody.setLinearFactor({ 1, 1, 0 });
@@ -60,6 +61,7 @@ namespace Physics {
                 mTransform->setOrientation(orientation);
             }
         }
+
         virtual void getWorldTransform(btTransform &transform) const override
         {
             if (mTransform) {
@@ -91,6 +93,7 @@ namespace Physics {
 
     RigidBody::RigidBody(const Engine::ObjectPtr &data)
         : EntityComponent(data)
+        , mData(std::make_unique<Data>())
     {
     }
 
@@ -102,22 +105,19 @@ namespace Physics {
 
     void RigidBody::init(Scene::Entity::Entity *entity)
     {
-        assert(!mData);
+        if (!mShapeHandle)
+            mShapeHandle.load("Cube");
 
-        mShapeHandle.load("Cube");
-
-        mData = std::make_unique<Data>(entity->addComponent<Scene::Entity::Transform>(), mShapeHandle ? mShapeHandle->get() : nullptr);
+        mData->mTransform = entity->addComponent<Scene::Entity::Transform>();
+        if (mShapeHandle)
+            mData->mRigidBody.setCollisionShape(mShapeHandle->get());
 
         mData->add();
     }
 
     void RigidBody::finalize(Scene::Entity::Entity *entity)
     {
-        assert(mData);
-
         mData->remove();
-
-        mData.reset();        
     }
 
     btRigidBody *RigidBody::get()
@@ -210,10 +210,10 @@ namespace Physics {
 
     CollisionShapeManager::ResourceType *RigidBody::getShape() const
     {
-        return mShapeHandle->mShape.resource();
+        return mShapeHandle ? mShapeHandle->mShape.resource() : nullptr;
     }
 
-    CollisionShapeInstance *Engine::Physics::RigidBody::getShapeInstance() const
+    CollisionShapeInstance *RigidBody::getShapeInstance() const
     {
         return mShapeHandle;
     }

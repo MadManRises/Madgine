@@ -15,7 +15,7 @@ namespace Serialize {
         const SyncableUnitMap &slavesMap() const;
         const SyncableUnitMap &mastersMap() const;
 
-        void addSlaveMapping(SyncableUnitBase *item);
+        void addSlaveMapping(UnitId id, SyncableUnitBase *item);
         void removeSlaveMapping(SyncableUnitBase *item);
 
         static UnitId generateMasterId(UnitId id, SyncableUnitBase *unit);

@@ -104,6 +104,8 @@ namespace UI {
         float ratio = (timeSinceLastFrame.count() / 1000000.0f);
 
         mBricks.remove_if([=](const Engine::Scene::Entity::EntityPtr &e) {
+            if (e.isDead())
+                return true;
             Scene::Brick *brick = e->getComponent<Scene::Brick>();
             Engine::Scene::Entity::Transform *t = e->getComponent<Engine::Scene::Entity::Transform>();
             t->translate(brick->mSpeed * ratio * brick->mDir);
@@ -153,6 +155,7 @@ namespace UI {
         b->mSpeed = rand() / float(RAND_MAX) * 2.0f + 1.0f;
         b->mDir = dir;
 
+        b->mQ0 = q;
         b->mQ1 = q;
         b->mQAcc = 1.0f;
         b->mQSpeed = 1.0f;

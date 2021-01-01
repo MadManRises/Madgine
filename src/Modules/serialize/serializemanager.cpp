@@ -44,10 +44,10 @@ namespace Serialize {
         return sMasterMappings;
     }
 
-    void SerializeManager::addSlaveMapping(SyncableUnitBase *item)
+    void SerializeManager::addSlaveMapping(UnitId id, SyncableUnitBase *item)
     {
-        assert(mSlaveMappings.find(item->slaveId()) == mSlaveMappings.end());
-        mSlaveMappings[item->slaveId()] = item;
+        assert(mSlaveMappings.find(id) == mSlaveMappings.end());
+        mSlaveMappings[id] = item;
         // std::cout << "Slave: " << item->slaveId() << " -> add " <<
         // typeid(*item).name() << std::endl;
     }

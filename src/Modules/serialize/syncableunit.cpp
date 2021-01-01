@@ -2,7 +2,7 @@
 
 #include "syncableunit.h"
 
-#include "serializemanager.h"
+#include "syncmanager.h"
 
 #include "streams/serializestream.h"
 
@@ -58,16 +58,16 @@ namespace Serialize {
         return *this;
     }
 
-    void SyncableUnitBase::writeState(SerializeOutStream &out, const char *name, StateTransmissionFlags flags, CallerHierarchyBasePtr hierarchy) const
+    void SyncableUnitBase::writeState(SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags) const
     {
         if (out.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
             out.format().beginExtended(out, name, 1);
             write(out, mMasterId, "syncId");
         }
-        SerializableUnitConstPtr { this, mType }.writeState(out, name, flags | StateTransmissionFlags_SkipId, hierarchy);
+        SerializableUnitConstPtr { this, mType }.writeState(out, name, hierarchy, flags | StateTransmissionFlags_SkipId);
     }
 
-    void SyncableUnitBase::readState(SerializeInStream &in, const char *name, StateTransmissionFlags flags, CallerHierarchyBasePtr hierarchy)
+    void SyncableUnitBase::readState(SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags)
     {
         if (!in.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
             in.format().beginExtended(in, name, 1);
@@ -81,7 +81,7 @@ namespace Serialize {
                 }
             }
         }
-        SerializableUnitPtr { this, mType }.readState(in, name, flags | StateTransmissionFlags_SkipId, hierarchy);
+        SerializableUnitPtr { this, mType }.readState(in, name, hierarchy, flags | StateTransmissionFlags_SkipId);
     }
 
     void SyncableUnitBase::readAction(BufferedInOutStream &in, PendingRequest *request)
@@ -132,12 +132,17 @@ namespace Serialize {
 
     void SyncableUnitBase::setSlaveId(UnitId id, SerializeManager *mgr)
     {
+        if (mTopLevel->getSlaveManager() != mgr) {
+            assert(!mTopLevel->getSlaveManager());
+            assert(mSlaveId == 0);
+        }
         if (mSlaveId != id) {
             if (mSlaveId != 0) {
                 mgr->removeSlaveMapping(this);
             }
-            mSlaveId = id;
-            mgr->addSlaveMapping(this);
+            if (mTopLevel->getSlaveManager() == mgr)    
+                mSlaveId = id;
+            mgr->addSlaveMapping(id, this);
         }
     }
 

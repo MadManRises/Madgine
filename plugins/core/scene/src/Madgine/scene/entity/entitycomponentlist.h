@@ -116,6 +116,15 @@ namespace Scene {
                 return mData.template get<0>().front();
             }
 
+            virtual void readState(const EntityComponentHandle<EntityComponentBase>& index, Serialize::SerializeInStream& in, const char* name, CallerHierarchyBasePtr hierarchy) override {
+                Serialize::read(in, *get(index), name, hierarchy);
+            }
+
+            virtual void writeState(const EntityComponentHandle<EntityComponentBase> &index, Serialize::SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) const override
+            {
+                Serialize::write(out, *get(index), name, hierarchy);
+            }
+
             Vector mData;
         };
 

@@ -13,6 +13,22 @@
 
 #include "../../scenemanager.h"
 
+
+ENTITYCOMPONENT_IMPL(Transform, Engine::Scene::Entity::Transform);
+
+METATABLE_BEGIN(Engine::Scene::Entity::Transform)
+PROPERTY(Position, getPosition, setPosition)
+PROPERTY(Scale, getScale, setScale)
+PROPERTY(Orientation, getOrientation, setOrientation)
+METATABLE_END(Engine::Scene::Entity::Transform)
+
+SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Transform)
+FIELD(mParent)
+FIELD(mPosition)
+FIELD(mScale)
+FIELD(mOrientation)
+SERIALIZETABLE_END(Engine::Scene::Entity::Transform)
+
 namespace Engine {
 
 namespace Scene {
@@ -104,17 +120,3 @@ namespace Scene {
 }
 }
 
-ENTITYCOMPONENT_IMPL(Transform, Engine::Scene::Entity::Transform);
-
-METATABLE_BEGIN(Engine::Scene::Entity::Transform)
-PROPERTY(Position, getPosition, setPosition)
-PROPERTY(Scale, getScale, setScale)
-PROPERTY(Orientation, getOrientation, setOrientation)
-METATABLE_END(Engine::Scene::Entity::Transform)
-
-SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Transform)
-FIELD(mParent)
-FIELD(mPosition)
-FIELD(mScale)
-FIELD(mOrientation)
-SERIALIZETABLE_END(Engine::Scene::Entity::Transform)

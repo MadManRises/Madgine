@@ -13,8 +13,9 @@ METATABLE_END(Engine::Resources::ResourceBase)
 
 namespace Engine {
 namespace Resources {
-    ResourceBase::ResourceBase(Filesystem::Path path)
+    ResourceBase::ResourceBase(const std::string &name, Filesystem::Path path)
         : mIsPersistent(false)
+        , mName(name)
         , mPath(std::move(path))
     {
     }
@@ -41,7 +42,7 @@ namespace Resources {
 
     std::string_view ResourceBase::name()
     {
-        return mPath.stem();
+        return mName;
     }
 
     InStream ResourceBase::readAsStream(bool isBinary)

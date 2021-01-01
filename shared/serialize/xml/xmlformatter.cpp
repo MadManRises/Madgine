@@ -125,7 +125,7 @@ namespace XML {
             assert(mCurrentExtended);
             --mCurrentExtendedCount;
             out.writeUnformatted(" " + std::string(name) + "=");
-            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<std::string_view> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>)
+            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>)
                 out.writeUnformatted("\"");
         } else {
             if (!mCurrentExtended) {
@@ -140,7 +140,7 @@ namespace XML {
     void XMLFormatter::endPrimitive(Serialize::SerializeOutStream &out, const char *name, uint8_t typeId)
     {
         if (mCurrentExtended) {
-            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<std::string_view> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>)
+            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>)
                 out.writeUnformatted("\"");
         } else
             out.writeUnformatted("</" + std::string(name) + ">\n");

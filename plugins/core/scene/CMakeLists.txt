@@ -13,7 +13,6 @@ add_plugin(Scene Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/scenelib
 
 target_link_plugins(Scene MeshLoader SkeletonLoader AnimationLoader Base)
 
-
 Project(SceneRenderer)
 
 set(sources "")
@@ -34,4 +33,4 @@ add_tools(SceneRenderer ${sources} PRECOMPILED_HEADER renderer_tools/Madgine_Too
 
 target_link_plugins(SceneRendererTools ClientTools ProgramLoader)
 
-target_link_libraries(SceneRendererTools PRIVATE Memory)
+target_link_libraries(SceneRendererTools PRIVATE Memory Xml)

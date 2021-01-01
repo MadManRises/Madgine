@@ -16,7 +16,7 @@ namespace Scene {
 
         SceneManager &sceneMgr(bool = true) const;
 
-        virtual void update(std::chrono::microseconds);
+        virtual void update(std::chrono::microseconds, bool paused);
 
         std::string_view key() const;
 

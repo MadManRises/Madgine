@@ -266,12 +266,12 @@ namespace TupleUnpacker {
     }
 
     template <typename T>
-    constexpr const bool is_tuplefyable_v = is_tuplefyable < std::remove_const_t<std::remove_reference_t<T>>>::value;
+    constexpr const bool is_tuplefyable_v = is_tuplefyable<std::remove_const_t<std::remove_reference_t<T>>>::value;
 
-#define MAKE_TUPLEFYABLE(Type, Count)                                     \
-    template <>                                                           \
+#define MAKE_TUPLEFYABLE(Type, Count)                                       \
+    template <>                                                             \
     struct ::Engine::TupleUnpacker::is_tuplefyable<Type> : std::true_type { \
-        static constexpr size_t elementCount = Count;                     \
+        static constexpr size_t elementCount = Count;                       \
     };
 
     template <typename Tuple, typename F, size_t... Is>

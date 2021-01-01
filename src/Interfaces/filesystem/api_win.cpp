@@ -133,7 +133,7 @@ namespace Filesystem {
 
     bool isEqual(const Path &p1, const Path &p2)
     {
-        return ((p1.str().size() == p2.str().size()) && std::equal(p1.str().begin(), p1.str().end(), p2.str().begin(), &compareChar));
+        return (p1.str().size() == p2.str().size()) && std::equal(p1.str().begin(), p1.str().end(), p2.str().begin(), &compareChar);
     }
 
     InStream openFileRead(const Path &p, bool isBinary)

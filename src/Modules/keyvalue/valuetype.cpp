@@ -324,6 +324,20 @@ std::string ValueType::getTypeString() const
     return type().toString();
 }
 
+bool ValueType::isReference() const
+{
+    return visit(overloaded {
+        [](const TypedScopePtr &) {
+            return true;
+        },
+        [](const KeyValueVirtualRange &range) {
+            return range.isReference();
+        },
+        [](const auto &) {
+            return false;
+        } });
+}
+
 ValueTypeDesc ValueType::type() const
 {
     ValueTypeIndex i = index();
@@ -412,7 +426,6 @@ ValueTypeRef &ValueTypeRef::operator=(ValueTypeRef &&other)
     mData = std::exchange(other.mData, nullptr);
     return *this;
 }
-
 }
 
 std::ostream &operator<<(std::ostream &stream,

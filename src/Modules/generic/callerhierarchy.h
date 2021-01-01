@@ -5,7 +5,6 @@ namespace Engine {
 struct CallerHierarchyBase {
     const std::type_info &mType;
     const CallerHierarchyBase *mParent = nullptr;
-
 };
 
 template <typename T>
@@ -31,11 +30,18 @@ struct CallerHierarchyBasePtr {
     }
 
     template <typename U, typename = std::enable_if_t<!is_instance_v<U, CallerHierarchy>>>
-    operator const U& () const {
+    operator const U &() const
+    {
         const CallerHierarchyBase *ptr = mPtr;
         while (ptr) {
             if (ptr->mType == typeid(U))
-                return static_cast<const CallerHierarchy<U>*>(ptr)->mData;
+                return static_cast<const CallerHierarchy<U> *>(ptr)->mData;
+            ptr = ptr->mParent;
+        }
+        LOG_ERROR("Cannot find type '" << typeid(U).name() << "' in caller hierarchy. Containing:");
+        ptr = mPtr;
+        while (ptr) {
+            LOG_ERROR(ptr->mType.name());
             ptr = ptr->mParent;
         }
         throw 0;
@@ -59,11 +65,20 @@ struct CallerHierarchyPtr : CallerHierarchyBasePtr {
 
     operator const T &() const
     {
-        return static_cast<const CallerHierarchy<T>*>(mPtr)->mData;
+        return static_cast<const CallerHierarchy<T> *>(mPtr)->mData;
     }
 
-    operator const CallerHierarchy<T>& () const {
+    operator const CallerHierarchy<T> &() const
+    {
         return *static_cast<const CallerHierarchy<T> *>(mPtr);
+    }
+};
+
+template <>
+struct CallerHierarchyPtr<CallerHierarchyBasePtr> : CallerHierarchyBasePtr {
+    CallerHierarchyPtr(const CallerHierarchyBasePtr &ptr)
+        : CallerHierarchyBasePtr { ptr }
+    {
     }
 };
 

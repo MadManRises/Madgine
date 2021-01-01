@@ -59,7 +59,7 @@ namespace Scene {
         return &mSceneMgr;
     }
 
-    void SceneComponentBase::update(std::chrono::microseconds)
+    void SceneComponentBase::update(std::chrono::microseconds, bool paused)
     {
     }
 

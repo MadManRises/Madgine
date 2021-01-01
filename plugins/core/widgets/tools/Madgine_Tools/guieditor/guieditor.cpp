@@ -142,7 +142,7 @@ namespace Tools {
             Filesystem::FileManager file("Layout");
             Serialize::SerializeInStream in = file.openRead(filePath, std::make_unique<XML::XMLFormatter>());
             if (in) {
-                mWindow->readState(in, nullptr, Serialize::StateTransmissionFlags_ApplyMap);
+                mWindow->readState(in, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap);
             }
         }
     }

@@ -20,6 +20,9 @@ namespace Scene {
             virtual void erase(const EntityComponentHandle<EntityComponentBase> &index) = 0;
             virtual bool empty() = 0;
             virtual void clear() = 0;
+
+            virtual void readState(const EntityComponentHandle<EntityComponentBase> &index, Serialize::SerializeInStream &in, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}) = 0;
+            virtual void writeState(const EntityComponentHandle<EntityComponentBase> &index, Serialize::SerializeOutStream &out, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}) const = 0;
         };
 
     }

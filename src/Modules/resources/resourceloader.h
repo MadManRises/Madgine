@@ -22,8 +22,8 @@ namespace Resources {
     template <typename Loader>
     struct ResourceType : Loader::Interface::ResourceType {
 
-        ResourceType(const Filesystem::Path &path, typename Loader::Ctor ctor = {}, typename Loader::Dtor dtor = {})
-            : Loader::Interface::ResourceType(path)
+        ResourceType(const std::string &name, const Filesystem::Path &path, typename Loader::Ctor ctor = {}, typename Loader::Dtor dtor = {})
+            : Loader::Interface::ResourceType(name, path)
             , mCtor(ctor ? std::move(ctor) : [](Loader *loader, typename Loader::Data &data, ResourceType *res) { return loader->loadImpl(data, res); })
             , mDtor(dtor ? std::move(dtor) : [](Loader *loader, typename Loader::Data &data, ResourceType *res) { loader->unloadImpl(data, res); })
         {
@@ -164,7 +164,7 @@ namespace Resources {
         {
             if (!loader)
                 loader = &getSingleton();
-            return &loader->mResources.try_emplace(std::string { name }, path, ctor, dtor).first->second;
+            return &loader->mResources.try_emplace(std::string { name }, std::string { name }, path, ctor, dtor).first->second;
         }
 
         static HandleType load(ResourceType *resource, bool persistent = false, T *loader = nullptr)
@@ -227,7 +227,8 @@ namespace Resources {
         //void unload(Data &data) = 0;
         std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path, const std::string_view &name = {}) override
         {
-            auto pib = mResources.try_emplace(std::string{name.empty() ? path.stem() : name }, path);
+            std::string actualName { name.empty() ? path.stem() : name };
+            auto pib = mResources.try_emplace(actualName, actualName, path);
 
             if (pib.second)
                 this->resourceAdded(&pib.first->second);

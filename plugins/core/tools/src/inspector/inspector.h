@@ -17,12 +17,12 @@ namespace Tools {
 
         virtual void render() override;
 
-        void drawRemainingMembers(TypedScopePtr scope, std::set<std::string> &drawn);
-        void drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, const ScopeIterator &it);
+        bool drawRemainingMembers(TypedScopePtr scope, std::set<std::string> &drawn);
+        bool drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, const ScopeIterator &it);
         //void drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, std::string id, std::string key, ValueType value, bool editable);
-        bool drawValueImpl(tinyxml2::XMLElement *element, TypedScopePtr parent, const std::string &id, ValueType &value, bool editable);
+        std::pair<bool, bool> drawValueImpl(tinyxml2::XMLElement *element, TypedScopePtr parent, const std::string &id, ValueType &value, bool editable);
 
-        void draw(TypedScopePtr scope, std::set<std::string> drawn = {}, const char *layoutName = nullptr);
+        bool draw(TypedScopePtr scope, std::set<std::string> drawn = {}, const char *layoutName = nullptr);
 
         InspectorLayout *getLayout(const std::string &name);
 
@@ -43,14 +43,14 @@ namespace Tools {
         }
 
     private:
-        void draw(InspectorLayout *layout, TypedScopePtr scope, std::set<std::string> &drawn);
-        void drawElement(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
+        bool draw(InspectorLayout *layout, TypedScopePtr scope, std::set<std::string> &drawn);
+        bool drawElement(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
 
-        void drawSingleElement(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
-        void drawElementList(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
-        void inheritLayout(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
-        void drawConstantString(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
-        void drawSingleLine(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
+        bool drawSingleElement(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
+        bool drawElementList(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
+        bool inheritLayout(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
+        bool drawConstantString(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
+        bool drawSingleLine(tinyxml2::XMLElement *element, TypedScopePtr scope, std::set<std::string> &drawn);
 
 		
     private:
@@ -60,7 +60,7 @@ namespace Tools {
         std::map<const MetaTable *, std::function<std::vector<std::pair<std::string_view, TypedScopePtr>>()>> mObjectSuggestionsByType;
         std::map<const MetaTable *, std::function<void(TypedScopePtr)>> mPreviews;
 
-        static std::map<std::string, void (Inspector::*)(tinyxml2::XMLElement *, TypedScopePtr, std::set<std::string> &)> sElements;
+        static std::map<std::string, bool (Inspector::*)(tinyxml2::XMLElement *, TypedScopePtr, std::set<std::string> &)> sElements;
 
         //FunctionTool
         std::string mCurrentPopupFunctionName;

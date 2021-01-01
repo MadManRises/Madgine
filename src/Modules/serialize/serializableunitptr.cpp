@@ -25,7 +25,7 @@ namespace Serialize {
         return mType->getIndex(offset) < mUnit->mActiveIndex;
     }
 
-    void SerializableUnitConstPtr::writeState(SerializeOutStream &out, const char *name, StateTransmissionFlags flags, CallerHierarchyBasePtr hierarchy) const
+    void SerializableUnitConstPtr::writeState(SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags) const
     {
         SerializableMapHolder holder;
         out.startSerializableWrite(&holder);
@@ -39,7 +39,7 @@ namespace Serialize {
         out.format().endCompound(out, name);
     }
 
-    void SerializableUnitPtr::readState(SerializeInStream &in, const char *name, StateTransmissionFlags flags, CallerHierarchyBasePtr hierarchy) const
+    void SerializableUnitPtr::readState(SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags) const
     {
         SerializableListHolder holder;
         in.startSerializableRead(&holder);

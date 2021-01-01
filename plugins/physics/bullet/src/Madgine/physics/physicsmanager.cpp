@@ -106,9 +106,14 @@ namespace Physics {
         VirtualScope::finalize();
     }
 
-    void PhysicsManager::update(std::chrono::microseconds timeSinceLastFrame)
+    void PhysicsManager::update(std::chrono::microseconds timeSinceLastFrame, bool paused)
     {
-        mData->mWorld.stepSimulation(timeSinceLastFrame.count() / 1000000.0f, 1, 1.0f / 30.0f);
+        //TODO
+        //if (!paused)
+            mData->mWorld.stepSimulation(timeSinceLastFrame.count() / 1000000.0f, 1, 1.0f / 30.0f);
+        //else {
+        //    mData->mWorld.synchronizeMotionStates();
+        //}
     }
 
     ContactPointIterator ContactPointList::begin()

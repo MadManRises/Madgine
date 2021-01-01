@@ -35,7 +35,13 @@
 #include "serialize/memory/memorylib.h"
 #include "serialize/memory/memorymanager.h"
 
+#include "serialize/xml/xmllib.h"
+#include "serialize/xml/xmlformatter.h"
+
+#include "Modules/serialize/streams/wrappingserializestreambuf.h"
+
 #include "Modules/serialize/formatter/safebinaryformatter.h"
+
 
 UNIQUECOMPONENT(Engine::Tools::SceneEditor);
 
@@ -78,7 +84,7 @@ namespace Tools {
 
     void SceneEditor::render()
     {
-        Engine::Threading::DataLock lock(mSceneMgr->mutex(), Engine::Threading::AccessMode::READ);
+        Engine::Threading::DataLock lock(mSceneMgr->mutex(), Engine::Threading::AccessMode::WRITE);
         if (mHierarchyVisible)
             renderHierarchy();
         if (mSettingsVisible)
@@ -165,6 +171,13 @@ namespace Tools {
             Serialize::SerializeOutStream out = mgr.openWrite(mStartBuffer, std::make_unique<Serialize::SafeBinaryFormatter>());
             mSceneMgr->writeState(out);
         }
+
+        Serialize::SerializeManager mgr { "cout" };
+        std::unique_ptr<std::stringbuf> buf = std::make_unique<std::stringbuf>();
+        std::stringbuf *pBuf = buf.get();
+        Serialize::SerializeOutStream out { std::make_unique<Serialize::WrappingSerializeStreambuf>(std::move(buf), std::make_unique<XML::XMLFormatter>(), mgr, 1) };
+        mSceneMgr->writeState(out);
+        LOG(pBuf->str());
 
         mSceneMgr->unpause();
         mMode = PLAY;

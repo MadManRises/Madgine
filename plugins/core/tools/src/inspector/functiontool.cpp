@@ -129,7 +129,7 @@ namespace Tools {
 
                 ImGui::PushID(i);
                 ValueType v = i == 0 ? ValueType { function.mScope } : args[i - 1];
-                bool changed = mInspector->drawValueImpl(nullptr, {}, "", v, true);
+                bool changed = mInspector->drawValueImpl(nullptr, {}, "", v, true).first;
                 //ImGui::ValueType(&args[i], function.mMethod.mTable->mArguments[i].mType);
                 if (ImGui::BeginDragDropTarget()) {
                     changed |= ImGui::AcceptDraggableValueType(v, function.mMethod.mTable->mArguments[i].mType);

@@ -8,7 +8,7 @@ namespace Engine {
 namespace Resources {
 
     struct MODULES_EXPORT ResourceBase : ScopeBase {
-        ResourceBase(Filesystem::Path path = {});
+        ResourceBase(const std::string &name, Filesystem::Path path = {});
 
         ~ResourceBase() = default;
 
@@ -29,6 +29,7 @@ namespace Resources {
     private:
         bool mIsPersistent;
 
+        std::string mName;
         Filesystem::Path mPath;
     };
 

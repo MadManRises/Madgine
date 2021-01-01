@@ -14,6 +14,7 @@ namespace Engine {
 namespace Physics {
 
     struct MADGINE_BULLET_EXPORT RigidBody : Engine::Scene::Entity::EntityComponent<RigidBody> {
+        SERIALIZABLEUNIT(RigidBody);
 
         RigidBody(const Engine::ObjectPtr &data = {});
         RigidBody(RigidBody &&other);

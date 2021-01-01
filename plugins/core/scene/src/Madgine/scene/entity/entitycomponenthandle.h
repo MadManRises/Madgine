@@ -2,6 +2,8 @@
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
+#include "Modules/generic/callerhierarchy.h"
+
 namespace Engine {
 namespace Scene {
 
@@ -10,8 +12,12 @@ namespace Scene {
         template <typename T>
         struct EntityComponentHandle;
 
-        void entityComponentHelperWrite(Serialize::SerializeOutStream &out, const EntityComponentHandle<EntityComponentBase> &index, const char *name, SceneManager *mgr);
+        void entityComponentHelperWrite(Serialize::SerializeOutStream &out, const EntityComponentHandle<EntityComponentBase> &index, const char *name, const SceneManager *mgr);
         void entityComponentHelperRead(Serialize::SerializeInStream &in, EntityComponentHandle<EntityComponentBase> &index, const char *name, SceneManager *mgr);
+
+        void entityComponentOwningHelperWrite(Serialize::SerializeOutStream &out, const EntityComponentHandle<EntityComponentBase> &index, const char *name, CallerHierarchyBasePtr hierarchy);
+        void entityComponentOwningHelperRead(Serialize::SerializeInStream &in, const EntityComponentHandle<EntityComponentBase> &index, const char *name, CallerHierarchyBasePtr hierarchy);
+
 
         template <>
         struct EntityComponentHandle<EntityComponentBase> {
@@ -106,7 +112,7 @@ namespace Scene {
                 mIndex = handle.mIndex;
             }
 
-            void writeState(Serialize::SerializeOutStream &out, const char *name, SceneManager *mgr) const
+            void writeState(Serialize::SerializeOutStream &out, const char *name, const SceneManager *mgr) const
             {
                 entityComponentHelperWrite(out, *this, name, mgr);
             }
@@ -141,9 +147,22 @@ namespace Scene {
         struct EntityComponentOwningHandle {
             EntityComponentHandle<T> mHandle;
 
+            EntityComponentOwningHandle(const EntityComponentOwningHandle<T> &other) = delete;
+            EntityComponentOwningHandle(EntityComponentOwningHandle<T> &&other) = default;
+
             operator EntityComponentHandle<T>() const
             {
                 return mHandle;
+            }
+
+            void readState(Serialize::SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy)
+            {
+                entityComponentOwningHelperRead(in, mHandle, name, hierarchy);
+            }
+
+            void writeState(Serialize::SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) const
+            {
+                entityComponentOwningHelperWrite(out, mHandle, name, hierarchy);
             }
 
             bool operator<(const EntityComponentOwningHandle<T> &other) const

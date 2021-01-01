@@ -66,7 +66,7 @@ namespace Scene {
 
             struct MADGINE_SCENE_EXPORT Helper {
                 Entity *mEntity;
-                EntityComponentPtr<EntityComponentBase> operator()(EntityComponentOwningHandle<EntityComponentBase> p);
+                EntityComponentPtr<EntityComponentBase> operator()(const EntityComponentOwningHandle<EntityComponentBase> &p);
             };
             decltype(auto) components()
             {                
