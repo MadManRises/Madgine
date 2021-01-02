@@ -8,6 +8,7 @@
 #include "entitycomponentlistbase.h"
 #include "entityhandle.h"
 #include "entityptr.h"
+#include "Modules/serialize/streams/operations.h"
 
 namespace Engine {
 namespace Scene {
