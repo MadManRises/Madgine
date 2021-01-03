@@ -51,6 +51,8 @@ struct IMGUI_API ValueTypeDrawer {
     bool draw(const Engine::Quaternion &q);
     bool draw(Engine::ObjectPtr &o);
     bool draw(const Engine::ObjectPtr &o);
+    bool draw(Engine::Filesystem::Path &p);
+    bool draw(const Engine::Filesystem::Path &p);
 
     const char *mName;
     bool mMinified;

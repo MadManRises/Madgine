@@ -33,4 +33,4 @@ add_tools(SceneRenderer ${sources} PRECOMPILED_HEADER renderer_tools/Madgine_Too
 
 target_link_plugins(SceneRendererTools ClientTools ProgramLoader)
 
-target_link_libraries(SceneRendererTools PRIVATE Memory Xml)
+target_link_libraries(SceneRendererTools PRIVATE Memory Xml Filesystem)

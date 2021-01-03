@@ -306,13 +306,13 @@ bool ValueTypeDrawer::draw(Engine::Quaternion &q)
     if (draw(v)) {
         q = Engine::Quaternion::FromDegrees(v);
         return true;
-    }    
+    }
     return false;
 }
 
 bool ValueTypeDrawer::draw(const Engine::Quaternion &q)
 {
-    const Engine::Vector3 v= q.toDegrees();
+    const Engine::Vector3 v = q.toDegrees();
     return draw(v);
 }
 
@@ -333,6 +333,26 @@ bool ValueTypeDrawer::draw(const Engine::ObjectPtr &o)
         ImGui::SameLine();
     }
     ImGui::Text("<object>");
+    return false;
+}
+
+bool ValueTypeDrawer::draw(Engine::Filesystem::Path &p)
+{
+    if (strlen(mName)) {
+        ImGui::Text("%s: ", mName);
+        ImGui::SameLine();
+    }
+    ImGui::Text("%s", p.c_str());
+    return false;
+}
+
+bool ValueTypeDrawer::draw(const Engine::Filesystem::Path &p)
+{
+    if (strlen(mName)) {
+        ImGui::Text("%s: ", mName);
+        ImGui::SameLine();
+    }
+    ImGui::Text("%s", p.c_str());
     return false;
 }
 
@@ -756,7 +776,7 @@ void BeginFilesystemPicker(Engine::Filesystem::Path *path, Engine::Filesystem::P
     }
 }
 
-bool EndFilesystemPicker(bool valid, bool &accepted, bool askForConfirmation = false, bool alreadyClicked = false)
+bool EndFilesystemPicker(bool valid, bool &accepted, bool openWrite = false, bool askForConfirmation = false, bool alreadyClicked = false)
 {
     bool closed = false;
 
@@ -767,7 +787,7 @@ bool EndFilesystemPicker(bool valid, bool &accepted, bool askForConfirmation = f
     ImGui::SameLine();
     if (!valid)
         PushDisabled();
-    if (ImGui::Button("Open") || alreadyClicked) {
+    if (ImGui::Button(openWrite ? "Save" : "Open") || alreadyClicked) {
         if (!askForConfirmation) {
             accepted = true;
             closed = true;
@@ -856,20 +876,22 @@ bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *select
 
     bool confirmed = false;
 
-    if (ImGui::BeginPopup("Confirmation")) {
-        ImGui::Text("Are you sure you want to overwrite file '%s'?", selection->c_str());
-        if (ImGui::Button("Yes")) {
-            confirmed = true;
-            clicked = true;
-            ImGui::CloseCurrentPopup();
+    if (openWrite) {
+        if (ImGui::BeginPopup("Confirmation")) {
+            ImGui::Text("Are you sure you want to overwrite file '%s'?", selection->c_str());
+            if (ImGui::Button("Yes")) {
+                confirmed = true;
+                clicked = true;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("No")) {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
         }
-        ImGui::SameLine();
-        if (ImGui::Button("No")) {
-            ImGui::CloseCurrentPopup();
-        }
-        ImGui::EndPopup();
     }
 
-    return EndFilesystemPicker(validPath && (selectedIsFile || (openWrite && !selectedIsDir)), accepted, openWrite && selectedIsFile && !confirmed, clicked);
+    return EndFilesystemPicker(validPath && (selectedIsFile || (openWrite && !selectedIsDir)), accepted, openWrite, openWrite && selectedIsFile && !confirmed, clicked);
 }
 }

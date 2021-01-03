@@ -28,6 +28,8 @@ namespace Tools {
 
         std::string_view key() const override;
 
+        const Filesystem::Path &currentSceneFile() const;
+
         std::vector<SceneView> &views()
         {
             return mSceneViews;
@@ -48,6 +50,9 @@ namespace Tools {
         void pause();
         void stop();
 
+        void openScene(const Filesystem::Path &p);
+        void saveScene(const Filesystem::Path &p);
+
     private:
         void renderSelection();
         void renderHierarchy();
@@ -55,6 +60,7 @@ namespace Tools {
         void renderToolbar();
         void renderEntity(Scene::Entity::EntityPtr &entity);
         void renderCamera(Render::Camera *camera);
+        void renderPopups();
 
         void handleInputs();
 
@@ -73,14 +79,16 @@ namespace Tools {
         bool mSettingsVisible = false;
         bool mToolbarVisible = false;
 
-        int mHoveredAxis = -1;
-        Engine::Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> mHoveredTransform;
-
         enum { PLAY,
             STOP,
             PAUSE } mMode;
 
+        //Save/Load
         std::vector<char> mStartBuffer;
+
+        Filesystem::Path mFilepickerCache;
+        Filesystem::Path mFilepickerSelectionCache;
+        Filesystem::Path mCurrentSceneFile;
 
         //Entity-Cache
         struct EntityNode {
@@ -95,6 +103,10 @@ namespace Tools {
         void createEntityMapping(Scene::Entity::EntityPtr e);
         void renderHierarchyEntity(EntityNode &entity);
         void eraseNode(EntityNode &node);
+
+        int mHoveredAxis = -1;
+        Engine::Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> mHoveredTransform;
+
 
         //Settings
         Vector4 mBoneForward = { 1, 0, 0, 0 };

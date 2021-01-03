@@ -31,6 +31,8 @@ VALUETYPE_SEP
 VALUETYPE_TYPE(ApiFunction, ApiFunction, const ApiFunction&)
 VALUETYPE_SEP
 VALUETYPE_TYPE(Object, ObjectPtr, const ObjectPtr&)
+VALUETYPE_SEP
+VALUETYPE_TYPE(Path, CoWPath, Filesystem::Path)
 
 #undef VALUETYPE_TYPE
 #undef VALUETYPE_SEP

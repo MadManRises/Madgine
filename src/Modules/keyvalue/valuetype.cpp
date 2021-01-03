@@ -264,6 +264,9 @@ std::string ValueType::toString() const
         [](const ObjectPtr &) {
             return "<object>"s;
         },
+        [](const CoWPath &p) {
+            return p.str();
+        },
         [](const auto &v) {
             return std::to_string(v);
         } });
@@ -313,6 +316,9 @@ std::string ValueType::toShortString() const
         },
         [](const ObjectPtr &) {
             return "<object>"s;
+        },
+        [](const CoWPath &p) {
+            return p.str();
         },
         [](const auto &v) {
             return std::to_string(v);

@@ -15,10 +15,13 @@
 
 #include "typedscopeptr.h"
 
+#include "Interfaces/filesystem/path.h"
+
 #include "valuetypeexception.h"
 
 #include "../generic/cow.h"
 #include "../generic/cowstring.h"
+#include "../generic/cowpath.h"
 
 #include "valuetype_desc.h"
 #include "valuetype_forward.h"
@@ -44,7 +47,7 @@ struct MODULES_EXPORT ValueType {
 
     template <typename T, typename _ = std::enable_if_t<isValueTypePrimitive_v<std::decay_t<T>>>>
     explicit ValueType(T &&v)
-        : mUnion(static_cast<std::variant_alternative_t<type_pack_index_v<size_t, ValueTypeList, std::decay_t<T>>, Union>>(std::forward<T>(v)))
+        : mUnion(std::in_place_index<type_pack_index_v<size_t, ValueTypeList, std::decay_t<T>>>, std::forward<T>(v))
     {
     }
 

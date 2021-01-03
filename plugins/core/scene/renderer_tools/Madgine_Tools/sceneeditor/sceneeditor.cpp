@@ -38,6 +38,9 @@
 #include "serialize/xml/xmllib.h"
 #include "serialize/xml/xmlformatter.h"
 
+#include "serialize/filesystem/filesystemlib.h"
+#include "serialize/filesystem/filemanager.h"
+
 #include "Modules/serialize/streams/wrappingserializestreambuf.h"
 
 #include "Modules/serialize/formatter/safebinaryformatter.h"
@@ -47,11 +50,13 @@ UNIQUECOMPONENT(Engine::Tools::SceneEditor);
 
 METATABLE_BEGIN_BASE(Engine::Tools::SceneEditor, Engine::Tools::ToolBase)
 READONLY_PROPERTY(Views, views)
+READONLY_PROPERTY(CurrentScene, currentSceneFile)
 METATABLE_END(Engine::Tools::SceneEditor)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::SceneEditor, Engine::Tools::ToolBase)
 FIELD(mHierarchyVisible)
 FIELD(mToolbarVisible)
+FIELD(mCurrentSceneFile)
 SERIALIZETABLE_END(Engine::Tools::SceneEditor)
 
 namespace Engine {
@@ -71,6 +76,9 @@ namespace Tools {
 
         mSceneMgr->pause();
         mMode = STOP;
+
+        if (!mCurrentSceneFile.empty())
+            openScene(mCurrentSceneFile);
 
         return ToolBase::init();
     }
@@ -95,6 +103,7 @@ namespace Tools {
         for (SceneView &sceneView : mSceneViews) {
             sceneView.render();
         }
+        renderPopups();
         handleInputs();
     }
 
@@ -102,22 +111,53 @@ namespace Tools {
     {
         if (mVisible) {
 
+            bool openOpenScenePopup = false;
+            bool openSaveScenePopup = false;
+            
             if (ImGui::BeginMenu("SceneEditor")) {
+                
+                bool isStopped = mMode == STOP;
 
-                ImGui::MenuItem("Hierarchy", nullptr, &mHierarchyVisible);
+                if (ImGui::MenuItem("Open", nullptr, nullptr, isStopped))
+                    openOpenScenePopup = true;
+                if (ImGui::MenuItem("Save", nullptr, nullptr, isStopped)) {
+                    if (mCurrentSceneFile.empty())
+                        openSaveScenePopup = true;
+                    else
+                        saveScene(mCurrentSceneFile);
+                }
+                if (ImGui::MenuItem("Save As...", nullptr, nullptr, isStopped))
+                    openSaveScenePopup = true;
 
-                ImGui::MenuItem("Settings", nullptr, &mSettingsVisible);
+                ImGui::Separator();
+                
+                if (ImGui::BeginMenu("Views")) {
+                    ImGui::MenuItem("Hierarchy", nullptr, &mHierarchyVisible);
 
-                ImGui::MenuItem("Toolbar", nullptr, &mToolbarVisible);
+                    ImGui::MenuItem("Settings", nullptr, &mSettingsVisible);
 
+                    ImGui::MenuItem("Toolbar", nullptr, &mToolbarVisible);
+                    
+                    ImGui::EndMenu();
+                }
                 ImGui::EndMenu();
             }
+
+            if (openOpenScenePopup)
+                ImGui::OpenPopup("openScene");
+            if (openSaveScenePopup)
+                ImGui::OpenPopup("saveScene");
         }
     }
 
     std::string_view SceneEditor::key() const
     {
         return "SceneEditor";
+    }
+
+    const Filesystem::Path &SceneEditor::currentSceneFile() const
+    {
+        return mCurrentSceneFile;
     }
 
     int SceneEditor::hoveredAxis() const
@@ -204,6 +244,28 @@ namespace Tools {
         Memory::MemoryManager mgr { "Tmp" };
         Serialize::SerializeInStream in = mgr.openRead(mStartBuffer, std::make_unique<Serialize::SafeBinaryFormatter>());
         mSceneMgr->readState(in);
+    }
+
+    void SceneEditor::openScene(const Filesystem::Path &p)
+    {
+        mCurrentSceneFile = p;
+
+        Engine::Threading::DataLock lock(mSceneMgr->mutex(), Engine::Threading::AccessMode::WRITE);
+    
+        Filesystem::FileManager mgr { "Scene" };
+        Serialize::SerializeInStream in = mgr.openRead(mCurrentSceneFile, std::make_unique<XML::XMLFormatter>());
+        mSceneMgr->readState(in, "Scene");
+    }
+
+    void SceneEditor::saveScene(const Filesystem::Path &p)
+    {
+        mCurrentSceneFile = p;
+
+        Engine::Threading::DataLock lock(mSceneMgr->mutex(), Engine::Threading::AccessMode::READ);
+
+        Filesystem::FileManager mgr { "Scene" };
+        Serialize::SerializeOutStream out = mgr.openWrite(mCurrentSceneFile, std::make_unique<XML::XMLFormatter>());
+        mSceneMgr->writeState(out, "Scene");
     }
 
     void SceneEditor::renderSelection()
@@ -460,6 +522,30 @@ namespace Tools {
     void SceneEditor::renderCamera(Render::Camera *camera)
     {
         mInspector->draw(camera);
+    }
+
+    void SceneEditor::renderPopups()
+    {
+        if (ImGui::BeginPopup("openScene")) {
+            bool accepted;
+            if (ImGui::FilePicker(&mFilepickerCache, &mFilepickerSelectionCache, accepted, true)) {
+                if (accepted) {
+                    openScene(mFilepickerSelectionCache);
+                }
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+        if (ImGui::BeginPopup("saveScene")) {
+            bool accepted;
+            if (ImGui::FilePicker(&mFilepickerCache, &mFilepickerSelectionCache, accepted, true)) {
+                if (accepted) {
+
+                }
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
     }
 
     void SceneEditor::handleInputs()

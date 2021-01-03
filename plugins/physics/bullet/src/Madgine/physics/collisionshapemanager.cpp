@@ -18,6 +18,7 @@
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btBoxShape.h"
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btCompoundShape.h"
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btConvexHullShape.h"
+#include "bullet3-2.89/src/BulletCollision/CollisionShapes/btStaticPlaneShape.h"
 
 UNIQUECOMPONENT(Engine::Physics::CollisionShapeManager);
 
@@ -106,6 +107,39 @@ namespace Physics {
         virtual BoxShapeInstance *create() override
         {
             return new BoxShapeInstance;
+        }
+    };
+
+    
+    struct PlaneShapeInstance : Serialize::VirtualUnit<PlaneShapeInstance, VirtualScope<PlaneShapeInstance, CollisionShapeInstance>> {
+        PlaneShapeInstance()
+            : mShape({ 0, 1, 0 }, 0.0f)
+        {
+        }
+
+        virtual btCollisionShape *get() override
+        {
+            return &mShape;
+        }
+
+        virtual bool isInstance() override
+        {
+            return true;
+        }
+
+        virtual PlaneShapeInstance *clone() override
+        {
+            return new PlaneShapeInstance(*this);
+        }
+
+        btStaticPlaneShape mShape;
+    };
+
+    struct PlaneShape : CollisionShape {
+
+        virtual PlaneShapeInstance *create() override
+        {
+            return new PlaneShapeInstance;
         }
     };
 
@@ -290,11 +324,19 @@ namespace Physics {
             {}, this);
 
         getOrCreateManual(
+            "Plane", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceType *res) {
+                data = std::make_unique<PlaneShape>();
+                return true;
+            },
+            {}, this);
+
+        getOrCreateManual(
             "Compound", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceType *res) {
                 data = std::make_unique<CompoundShape>();
                 return true;
             },
             {}, this);
+        
     }
 
     bool CollisionShapeManager::loadImpl(std::unique_ptr<CollisionShape> &shape, ResourceType *res)
@@ -328,6 +370,12 @@ METATABLE_END(Engine::Physics::BoxShapeInstance)
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Physics::BoxShapeInstance, Engine::Physics::CollisionShapeInstance)
 ENCAPSULATED_FIELD(halfExtends, getHalfExtends, setHalfExtends)
 SERIALIZETABLE_END(Engine::Physics::BoxShapeInstance)
+
+METATABLE_BEGIN_BASE(Engine::Physics::PlaneShapeInstance, Engine::Physics::CollisionShapeInstance)
+METATABLE_END(Engine::Physics::PlaneShapeInstance)
+
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Physics::PlaneShapeInstance, Engine::Physics::CollisionShapeInstance)
+SERIALIZETABLE_END(Engine::Physics::PlaneShapeInstance)
 
 METATABLE_BEGIN_BASE(Engine::Physics::CompoundShapeInstance, Engine::Physics::CollisionShapeInstance)
 PROPERTY(Shapes, shapes, setShapes)
