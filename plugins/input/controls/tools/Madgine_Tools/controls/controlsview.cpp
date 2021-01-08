@@ -55,7 +55,6 @@ RegisterType(Engine::Tools::ControlsView)
 
 
                 const ImGuiStyle &Style = ImGui::GetStyle();
-                const ImGuiIO &IO = ImGui::GetIO();
                 ImDrawList *DrawList = ImGui::GetWindowDrawList();
                 ImGuiWindow *window = ImGui::GetCurrentWindow();
 
@@ -66,7 +65,7 @@ RegisterType(Engine::Tools::ControlsView)
 
                 ImRect bb(window->DC.CursorPos, window->DC.CursorPos + Canvas);
                 ImGui::ItemSize(bb);
-                if (ImGui::ItemAdd(bb, NULL)) {
+                if (ImGui::ItemAdd(bb, 0)) {
 
                     ImGui::RenderFrame(bb.Min, bb.Max, ImGui::GetColorU32(ImGuiCol_FrameBg, 1), true, Style.FrameRounding);
 

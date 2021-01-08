@@ -2,13 +2,13 @@
 
 #include "Madgine/scene/entity/entitycomponent.h"
 
-#include "bullet3-2.89/src/btBulletDynamicsCommon.h"
-
 #include "Madgine/scene/entity/entitycomponentptr.h"
 
 #include "Madgine/scene/entity/components/transform.h"
 
 #include "collisionshapemanager.h"
+
+class btRigidBody;
 
 namespace Engine {
 namespace Physics {
