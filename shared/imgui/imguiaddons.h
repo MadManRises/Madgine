@@ -5,6 +5,8 @@
 #include "Modules/keyvalue/typedscopeptr.h"
 #include "Modules/keyvalue/valuetype.h"
 
+#include "imgui/imgui_internal.h"
+
 namespace ImGui {
 
 typedef int ImGuiDragDropFlags;
