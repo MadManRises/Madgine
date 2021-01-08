@@ -5,8 +5,6 @@
 #include "Modules/keyvalue/typedscopeptr.h"
 #include "Modules/keyvalue/valuetype.h"
 
-#include "imgui_internal.h"
-
 namespace ImGui {
 
 typedef int ImGuiDragDropFlags;
@@ -85,6 +83,8 @@ bool ValueType(Engine::ValueType *v, F &&f, const char *name = "", bool minified
     });
 }
 
+IMGUI_API bool showDebugData();
+
 IMGUI_API void Text(const std::string &s);
 IMGUI_API void Text(const std::string_view &s);
 IMGUI_API bool InputText(const char *label, std::string *s);
@@ -126,7 +126,7 @@ bool AcceptDraggableValueType(
                 result = payload->mValue.as<T>();
                 return true;
             } else {
-                if (ImGui::GetIO().KeyShift)
+                if (showDebugData())
                     payload->mStatusMessage = "Payload does not validate";
                 return false;
             }
@@ -138,14 +138,14 @@ bool AcceptDraggableValueType(
                     result = *payload->mValue.as<T *>();
                     return true;
                 } else {
-                    if (ImGui::GetIO().KeyShift)
+                    if (showDebugData())
                         payload->mStatusMessage = "Payload does not validate";
                     return false;
                 }
             }
         }
 
-        if (ImGui::GetIO().KeyShift)
+        if (showDebugData())
             payload->mStatusMessage = "Payload incompatible with target type: "s + typeid(T).name();
     }
     return false;
@@ -161,7 +161,7 @@ bool AcceptDraggableValueType(
                 result = &payload->mValue.as<T>();
                 return true;
             } else {
-                if (ImGui::GetIO().KeyShift)
+                if (showDebugData())
                     payload->mStatusMessage = "Payload does not validate";
             }
         } else if (payload->mValue.is<T *>()) {
@@ -169,11 +169,11 @@ bool AcceptDraggableValueType(
                 result = payload->mValue.as<T *>();
                 return true;
             } else {
-                if (ImGui::GetIO().KeyShift)
+                if (showDebugData())
                     payload->mStatusMessage = "Payload does not validate";
             }
         } else {
-            if (ImGui::GetIO().KeyShift)
+            if (showDebugData())
                 payload->mStatusMessage = "Payload incompatible with target type: "s + typeid(T).name();
         }
     }
@@ -204,11 +204,11 @@ bool IsDraggableValueTypeBeingAccepted(
                 result = payload->mValue.as<T>();
                 return true;
             } else {
-                if (ImGui::GetIO().KeyShift)
+                if (showDebugData())
                     payload->mStatusMessage = "Payload does not validate";
             }
         } else {
-            if (ImGui::GetIO().KeyShift)
+            if (showDebugData())
                 payload->mStatusMessage = "Payload incompatible with target type: "s + typeid(T).name();
         }
     }

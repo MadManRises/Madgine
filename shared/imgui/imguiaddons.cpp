@@ -358,6 +358,10 @@ bool ValueTypeDrawer::draw(const Engine::Filesystem::Path &p)
     return false;
 }
 
+bool showDebugData() {
+    return ImGui::GetIO().KeyShift;
+}
+
 void Text(const std::string &s)
 {
     Text("%s", s.c_str());
