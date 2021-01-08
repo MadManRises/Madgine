@@ -22,11 +22,11 @@
 
 #include "Modules/serialize/container/controlledconfig.h"
 
-#include "Interfaces/window/windowsettings.h"
-#include "serialize/filesystem/filesystemlib.h"
 #include "Interfaces/filesystem/api.h"
-#include "serialize/filesystem/filemanager.h"
+#include "Interfaces/window/windowsettings.h"
 
+#include "serialize/filesystem/filesystemlib.h"
+#include "serialize/filesystem/filemanager.h"
 
 #include "serialize/ini/inilib.h"
 #include "serialize/ini/iniformatter.h"
@@ -192,6 +192,16 @@ namespace Window {
 
         for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
             if (comp->injectPointerMove(arg))
+                return true;
+        }
+
+        return false;
+    }
+
+    bool MainWindow::injectAxisEvent(const Input::AxisEventArgs &arg)
+    {
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
+            if (comp->injectAxisEvent(arg))
                 return true;
         }
 

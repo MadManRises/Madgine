@@ -64,7 +64,7 @@ constexpr Accessor property()
                 }
             }();
 
-            to_ValueType(retVal, std::forward<T>(value));
+            to_ValueType<true>(retVal, std::forward<T>(value));
         },
         setter
     };
@@ -76,12 +76,6 @@ void setField(Scope *s, const T &t)
     s->*P = t;
 }
 
-template <auto P, typename Scope, typename T>
-T *getFieldPtr(Scope *s)
-{
-    return &(s->*P);
-}
-
 template <typename Scope, auto P>
 constexpr Accessor member()
 {
@@ -89,9 +83,7 @@ constexpr Accessor member()
     using DerivedScope = typename traits::class_type;
     using T = typename traits::return_type;
 
-    if constexpr (std::is_reference_v<T> && std::is_convertible_v<T, ScopeBase &>) {
-        return property<Scope, &getFieldPtr<P, DerivedScope, std::remove_reference_t<T>>, nullptr>();
-    } else if constexpr (std::is_const_v<DerivedScope> || !std::is_assignable_v<T&, const T&> || (is_iterable_v<T> && !std::is_same_v<std::string &, T>)) {
+    if constexpr (std::is_const_v<DerivedScope> || !std::is_assignable_v<T &, const T &> || (is_iterable_v<T> && !std::is_same_v<std::string &, T>)) {
         return property<Scope, P, nullptr>();
     } else {
         return property<Scope, P, &setField<P, DerivedScope, std::remove_reference_t<T>>>();
@@ -183,6 +175,15 @@ static constexpr std::array<std::pair<const char *, ::Engine::Accessor>, std::tu
 #define PROPERTY(Name, Getter, Setter) \
     METATABLE_ENTRY(#Name, SINGLE_ARG(::Engine::property<Ty, &Ty::Getter, &Ty::Setter>()), __LINE__)
 
-#define FUNCTION(/*F, */...)                                                    \
+#define NAMED_FUNCTION(Name, /*F, */...)                                        \
     FUNCTIONTABLE(::Engine::MetaTableLineStruct<__LINE__ - 1>::Ty::__VA_ARGS__) \
-    METATABLE_ENTRY(STRINGIFY2(FIRST(__VA_ARGS__)), SINGLE_ARG(::Engine::property<Ty, &::Engine::method<&Ty::FIRST(__VA_ARGS__)>, nullptr>()), __LINE__)
+    METATABLE_ENTRY(#Name, SINGLE_ARG(::Engine::property<Ty, &::Engine::method<&Ty::FIRST(__VA_ARGS__)>, nullptr>()), __LINE__)
+
+#define NAMED_FUNCTION_EX1(Name, I, /*F, */...)                                                            \
+    FUNCTIONTABLE(::Engine::MetaTableLineStruct<SINGLE_ARG(SINGLE_ARG(__LINE__, I - 1))>::Ty::__VA_ARGS__) \
+    METATABLE_ENTRY(#Name, SINGLE_ARG(::Engine::property<Ty, &::Engine::method<&Ty::FIRST(__VA_ARGS__)>, nullptr>()), __LINE__, I)
+
+#define FUNCTION(/*F, */...) NAMED_FUNCTION(FIRST(__VA_ARGS__), __VA_ARGS__)
+
+#define PROXY(Getter) \
+    READONLY_PROPERTY(__proxy, Getter)

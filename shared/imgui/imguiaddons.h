@@ -13,8 +13,8 @@ typedef int ImGuiTreeNodeFlags;
 struct IMGUI_API ValueTypeDrawer {
     bool draw(Engine::TypedScopePtr &scope);
     bool draw(const Engine::TypedScopePtr &scope);
-    bool draw(std::shared_ptr<Engine::VirtualScopeBase> &scope);
-    bool draw(const std::shared_ptr<Engine::VirtualScopeBase> &scope);
+    bool draw(Engine::OwnedScopePtr &scope);
+    bool draw(const Engine::OwnedScopePtr &scope);
     bool draw(bool &b);
     bool draw(const bool &b);
     bool draw(Engine::CoWString &s);
@@ -62,6 +62,7 @@ struct ValueTypePayload {
     std::string mName;
     Engine::TypedScopePtr mSender;
     Engine::ValueType mValue;
+    mutable std::string mStatusMessage;
 };
 
 namespace details {
@@ -122,7 +123,56 @@ bool AcceptDraggableValueType(
             if (validate(payload->mValue.as<T>()) && AcceptDraggableValueType(payloadPointer)) {
                 result = payload->mValue.as<T>();
                 return true;
+            } else {
+                if (ImGui::GetIO().KeyShift)
+                    payload->mStatusMessage = "Payload does not validate";
+                return false;
             }
+        }
+
+        if constexpr (std::is_base_of_v<Engine::ScopeBase, T>) {
+            if (payload->mValue.is<T *>()) {
+                if (validate(*payload->mValue.as<T *>()) && AcceptDraggableValueType(payloadPointer)) {
+                    result = *payload->mValue.as<T *>();
+                    return true;
+                } else {
+                    if (ImGui::GetIO().KeyShift)
+                        payload->mStatusMessage = "Payload does not validate";
+                    return false;
+                }
+            }
+        }
+
+        if (ImGui::GetIO().KeyShift)
+            payload->mStatusMessage = "Payload incompatible with target type: "s + typeid(T).name();
+    }
+    return false;
+}
+template <typename T, typename Validator = bool (*)(const T *)>
+bool AcceptDraggableValueType(
+    T *&result, const ValueTypePayload **payloadPointer = nullptr, Validator &&validate = [](const T *t) { return true; })
+{
+    const ValueTypePayload *payload = GetValuetypePayload();
+    if (payload) {
+        if (payload->mValue.is<T>()) {
+            if (validate(&payload->mValue.as<T>()) && AcceptDraggableValueType(payloadPointer)) {
+                result = &payload->mValue.as<T>();
+                return true;
+            } else {
+                if (ImGui::GetIO().KeyShift)
+                    payload->mStatusMessage = "Payload does not validate";
+            }
+        } else if (payload->mValue.is<T *>()) {
+            if (validate(payload->mValue.as<T *>()) && AcceptDraggableValueType(payloadPointer)) {
+                result = payload->mValue.as<T *>();
+                return true;
+            } else {
+                if (ImGui::GetIO().KeyShift)
+                    payload->mStatusMessage = "Payload does not validate";
+            }
+        } else {
+            if (ImGui::GetIO().KeyShift)
+                payload->mStatusMessage = "Payload incompatible with target type: "s + typeid(T).name();
         }
     }
     return false;
@@ -151,7 +201,13 @@ bool IsDraggableValueTypeBeingAccepted(
             if (validate(payload->mValue.as<T>()) && IsDraggableValueTypeBeingAccepted(payloadPointer)) {
                 result = payload->mValue.as<T>();
                 return true;
+            } else {
+                if (ImGui::GetIO().KeyShift)
+                    payload->mStatusMessage = "Payload does not validate";
             }
+        } else {
+            if (ImGui::GetIO().KeyShift)
+                payload->mStatusMessage = "Payload incompatible with target type: "s + typeid(T).name();
         }
     }
     return false;
@@ -159,5 +215,4 @@ bool IsDraggableValueTypeBeingAccepted(
 
 IMGUI_API bool DirectoryPicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *selection, bool &accepted);
 IMGUI_API bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *selection, bool &accepted, bool allowNewFile = false);
-
 }

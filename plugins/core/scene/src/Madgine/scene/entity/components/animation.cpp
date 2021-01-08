@@ -130,9 +130,9 @@ namespace Scene {
                             float orientation_blend = (step - it_orientation->mTime) / (it_orientation_end->mTime - it_orientation->mTime);
 
                             matrices[i] = TransformMatrix(
-                                Lerp(it_position->mValue, it_position_end->mValue, position_blend),
-                                Lerp(it_scale->mValue, it_scale_end->mValue, scale_blend),
-                                Slerp(it_orientation->mValue, it_orientation_end->mValue, orientation_blend));
+                                lerp(it_position->mValue, it_position_end->mValue, position_blend),
+                                lerp(it_scale->mValue, it_scale_end->mValue, scale_blend),
+                                slerp(it_orientation->mValue, it_orientation_end->mValue, orientation_blend));
 
                             uint32_t parent = mSkeletonCache->mBones[i].mParent;
                             if (parent != std::numeric_limits<uint32_t>::max()) {

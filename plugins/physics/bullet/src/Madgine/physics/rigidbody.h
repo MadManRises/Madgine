@@ -39,6 +39,14 @@ namespace Physics {
         float friction() const;
         void setFriction(float friction);
 
+        Vector3 linearFactor() const;
+        void setLinearFactor(const Vector3 &factor);
+
+        Vector3 angularFactor() const;
+        void setAngularFactor(const Vector3 &factor);
+
+        void setVelocity(const Vector3 &v);
+
         void setShape(typename CollisionShapeManager::HandleType handle);
         void setShapeName(const std::string_view &name);
         CollisionShapeManager::ResourceType *getShape() const;

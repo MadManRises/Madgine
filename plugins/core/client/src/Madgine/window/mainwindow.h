@@ -84,6 +84,7 @@ namespace Window {
         bool injectPointerPress(const Input::PointerEventArgs &arg) override;
         bool injectPointerRelease(const Input::PointerEventArgs &arg) override;
         bool injectPointerMove(const Input::PointerEventArgs &arg) override;
+        bool injectAxisEvent(const Input::AxisEventArgs &arg) override;
 
         OSWindow *osWindow() const;
 

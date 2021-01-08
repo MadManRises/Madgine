@@ -2,7 +2,7 @@
 
 #include "Modules/madgineobject/madgineobject.h"
 
-#include "Modules/keyvalue/virtualscopebase.h"
+#include "Modules/keyvalueutil/virtualscope.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
@@ -20,6 +20,7 @@ namespace App {
         GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
         const App::Application *parent() const;
+        App::Application &app();
 
     protected:
         virtual bool init();

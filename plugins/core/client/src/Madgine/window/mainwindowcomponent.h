@@ -2,7 +2,7 @@
 
 #include "Modules/madgineobject/madgineobject.h"
 
-#include "Modules/keyvalue/virtualscopebase.h"
+#include "Modules/keyvalueutil/virtualscope.h"
 
 #include "Modules/serialize/virtualserializableunit.h"
 
@@ -45,6 +45,7 @@ namespace Window {
         virtual bool injectPointerPress(const Input::PointerEventArgs &arg) { return false; }
         virtual bool injectPointerRelease(const Input::PointerEventArgs &arg) { return false; }
         virtual bool injectPointerMove(const Input::PointerEventArgs &arg) { return false; }
+        virtual bool injectAxisEvent(const Input::AxisEventArgs &arg) { return false; }
 
         const int mPriority;
 

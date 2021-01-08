@@ -45,7 +45,6 @@
 
 #include "Modules/serialize/formatter/safebinaryformatter.h"
 
-
 UNIQUECOMPONENT(Engine::Tools::SceneEditor);
 
 METATABLE_BEGIN_BASE(Engine::Tools::SceneEditor, Engine::Tools::ToolBase)
@@ -56,7 +55,7 @@ METATABLE_END(Engine::Tools::SceneEditor)
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::SceneEditor, Engine::Tools::ToolBase)
 FIELD(mHierarchyVisible)
 FIELD(mToolbarVisible)
-FIELD(mCurrentSceneFile)
+ENCAPSULATED_FIELD(mCurrentSceneFile, currentSceneFile, openScene)
 SERIALIZETABLE_END(Engine::Tools::SceneEditor)
 
 namespace Engine {
@@ -76,9 +75,6 @@ namespace Tools {
 
         mSceneMgr->pause();
         mMode = STOP;
-
-        if (!mCurrentSceneFile.empty())
-            openScene(mCurrentSceneFile);
 
         return ToolBase::init();
     }
@@ -103,7 +99,6 @@ namespace Tools {
         for (SceneView &sceneView : mSceneViews) {
             sceneView.render();
         }
-        renderPopups();
         handleInputs();
     }
 
@@ -113,9 +108,9 @@ namespace Tools {
 
             bool openOpenScenePopup = false;
             bool openSaveScenePopup = false;
-            
+
             if (ImGui::BeginMenu("SceneEditor")) {
-                
+
                 bool isStopped = mMode == STOP;
 
                 if (ImGui::MenuItem("Open", nullptr, nullptr, isStopped))
@@ -130,14 +125,14 @@ namespace Tools {
                     openSaveScenePopup = true;
 
                 ImGui::Separator();
-                
+
                 if (ImGui::BeginMenu("Views")) {
                     ImGui::MenuItem("Hierarchy", nullptr, &mHierarchyVisible);
 
                     ImGui::MenuItem("Settings", nullptr, &mSettingsVisible);
 
                     ImGui::MenuItem("Toolbar", nullptr, &mToolbarVisible);
-                    
+
                     ImGui::EndMenu();
                 }
                 ImGui::EndMenu();
@@ -147,6 +142,8 @@ namespace Tools {
                 ImGui::OpenPopup("openScene");
             if (openSaveScenePopup)
                 ImGui::OpenPopup("saveScene");
+
+            renderPopups();
         }
     }
 
@@ -212,13 +209,6 @@ namespace Tools {
             mSceneMgr->writeState(out);
         }
 
-        Serialize::SerializeManager mgr { "cout" };
-        std::unique_ptr<std::stringbuf> buf = std::make_unique<std::stringbuf>();
-        std::stringbuf *pBuf = buf.get();
-        Serialize::SerializeOutStream out { std::make_unique<Serialize::WrappingSerializeStreambuf>(std::move(buf), std::make_unique<XML::XMLFormatter>(), mgr, 1) };
-        mSceneMgr->writeState(out);
-        LOG(pBuf->str());
-
         mSceneMgr->unpause();
         mMode = PLAY;
     }
@@ -243,18 +233,21 @@ namespace Tools {
 
         Memory::MemoryManager mgr { "Tmp" };
         Serialize::SerializeInStream in = mgr.openRead(mStartBuffer, std::make_unique<Serialize::SafeBinaryFormatter>());
-        mSceneMgr->readState(in);
+        mSceneMgr->readState(in, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap);
     }
 
     void SceneEditor::openScene(const Filesystem::Path &p)
     {
+        if (p.empty())
+            return;
+
         mCurrentSceneFile = p;
 
         Engine::Threading::DataLock lock(mSceneMgr->mutex(), Engine::Threading::AccessMode::WRITE);
-    
+
         Filesystem::FileManager mgr { "Scene" };
         Serialize::SerializeInStream in = mgr.openRead(mCurrentSceneFile, std::make_unique<XML::XMLFormatter>());
-        mSceneMgr->readState(in, "Scene");
+        mSceneMgr->readState(in, "Scene", {}, Serialize::StateTransmissionFlags_ApplyMap);
     }
 
     void SceneEditor::saveScene(const Filesystem::Path &p)
@@ -317,10 +310,10 @@ namespace Tools {
     void SceneEditor::renderToolbar()
     {
         if (ImGui::Begin("SceneEditor - Toolbar", &mToolbarVisible, ImGuiWindowFlags_NoTitleBar)) {
-         
+
             auto pre = [](bool b) { if (b) ImGui::PushDisabled(); };
             auto post = [](bool b) { if (b) ImGui::PopDisabled(); };
-            
+
             bool b = mMode == PLAY;
             pre(b);
             if (ImGui::Button(mSceneMgr->isPaused() && b ? "Halted" : "Play")) {
@@ -328,7 +321,7 @@ namespace Tools {
             }
             post(b);
 
-            ImGui::SameLine(0,0);
+            ImGui::SameLine(0, 0);
 
             b = mMode == PAUSE || mMode == STOP;
             pre(b);
@@ -371,13 +364,14 @@ namespace Tools {
             select(node.mEntity);
         }
 
+        ImGui::DraggableValueTypeSource(name, this, ValueType { node.mEntity });
+
         Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> transform = node.mEntity->getComponent<Engine::Scene::Entity::Transform>();
         if (transform) {
-            ImGui::DraggableValueTypeSource(name, this, ValueType { *node.mEntity });
             if (ImGui::BeginDragDropTarget()) {
-                Scene::Entity::Entity *newChild;
-                if (ImGui::AcceptDraggableValueType(newChild)) {
-                    Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::Transform> childTransform = newChild->getComponent<Engine::Scene::Entity::Transform>();
+                Scene::Entity::EntityPtr *newChild;
+                if (ImGui::AcceptDraggableValueType(newChild, nullptr, [](Scene::Entity::EntityPtr *child) { return (*child)->hasComponent<Scene::Entity::Transform>(); })) {
+                    Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::Transform> childTransform = (*newChild)->getComponent<Engine::Scene::Entity::Transform>();
                     assert(childTransform);
                     childTransform->setParent(transform);
                 }
@@ -526,9 +520,10 @@ namespace Tools {
 
     void SceneEditor::renderPopups()
     {
+        ImGui::SetNextWindowSize({ 500, 400 }, ImGuiCond_FirstUseEver);
         if (ImGui::BeginPopup("openScene")) {
             bool accepted;
-            if (ImGui::FilePicker(&mFilepickerCache, &mFilepickerSelectionCache, accepted, true)) {
+            if (ImGui::FilePicker(&mFilepickerCache, &mFilepickerSelectionCache, accepted, false)) {
                 if (accepted) {
                     openScene(mFilepickerSelectionCache);
                 }
@@ -536,11 +531,12 @@ namespace Tools {
             }
             ImGui::EndPopup();
         }
+        ImGui::SetNextWindowSize({ 500, 400 }, ImGuiCond_FirstUseEver);
         if (ImGui::BeginPopup("saveScene")) {
             bool accepted;
             if (ImGui::FilePicker(&mFilepickerCache, &mFilepickerSelectionCache, accepted, true)) {
                 if (accepted) {
-
+                    saveScene(mFilepickerSelectionCache);
                 }
                 ImGui::CloseCurrentPopup();
             }

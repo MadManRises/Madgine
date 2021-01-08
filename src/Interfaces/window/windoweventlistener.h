@@ -17,6 +17,9 @@ namespace Window {
         virtual bool injectPointerPress(const Input::PointerEventArgs &arg) { return false; }
         virtual bool injectPointerRelease(const Input::PointerEventArgs &arg) { return false; }
         virtual bool injectPointerMove(const Input::PointerEventArgs &arg) { return false; }
+        virtual bool injectAxisEvent(const Input::AxisEventArgs &arg) { return false; }
+
+
     };
 
 }

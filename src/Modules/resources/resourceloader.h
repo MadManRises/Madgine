@@ -14,6 +14,8 @@
 
 #include "../keyvalueutil/virtualscope.h"
 
+#include "../keyvalue/typedscopeptr.h"
+
 namespace Engine {
 namespace Resources {
 

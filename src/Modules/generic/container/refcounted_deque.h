@@ -68,6 +68,10 @@ struct ControlBlock : ControlBlockBase {
         return *get();
     }
 
+    static ControlBlock<T>* fromPtr(T* ptr) {
+        return static_cast<ControlBlock<T> *>(reinterpret_cast<ControlBlockBase *>(ptr) - 1);
+    }
+
 private:
     union {
         T mData;

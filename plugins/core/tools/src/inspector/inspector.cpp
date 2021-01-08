@@ -119,13 +119,16 @@ namespace Tools {
 
     bool Inspector::drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, const ScopeIterator &it)
     {
+        if (streq(it->key(), "__proxy")) {
+            return draw(it->value().as<TypedScopePtr>(), {});
+        }
+
         bool showName = !element || !style("noname", element);
         std::string id = (showName ? std::string() : "##"s) + it->key();
         bool editable = it->isEditable();
 
         ValueType value = *it;
         std::pair<bool, bool> modified = drawValueImpl(element, parent, id, value, editable);
-
 
         if (modified.first || (modified.second && !value.isReference()))
             *it = value;
@@ -173,13 +176,18 @@ namespace Tools {
                                                                              value = scope;
                                                                              modified = true;
                                                                          }
+                                                                         OwnedScopePtr dummy;
+                                                                         if (ImGui::AcceptDraggableValueType(dummy, nullptr, [&](const OwnedScopePtr &ptr) {
+                                                                                 return ptr.type()->isDerivedFrom(scope.mType);
+                                                                             })) {
+                                                                             value = dummy;
+                                                                             modified = true;
+                                                                         }
                                                                          ImGui::EndDragDropTarget();
                                                                      }
 
                                                                      if (open) {
-                                                                         if (scope) {
-                                                                             changed |= draw(scope, {}, element ? element->Attribute("layout") : nullptr);
-                                                                         }
+                                                                         changed |= draw(scope, {}, element ? element->Attribute("layout") : nullptr);
                                                                          ImGui::TreePop();
                                                                      }
                                                                      return std::make_pair(modified, changed);

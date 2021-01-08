@@ -166,7 +166,7 @@ struct Quaternion {
     float w;
 };
 
-MODULES_EXPORT Quaternion Slerp(Quaternion q1, Quaternion q2, float ratio);
+MODULES_EXPORT Quaternion slerp(Quaternion q1, Quaternion q2, float ratio);
 
 MAKE_TUPLEFYABLE(Quaternion, 2);
 }

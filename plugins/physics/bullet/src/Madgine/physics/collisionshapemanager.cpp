@@ -12,10 +12,11 @@
 #include "Modules/serialize/streams/operations.h"
 
 #include "Madgine/app/application.h"
-#include "Modules/threading/datamutex.h"
 #include "Madgine/scene/scenemanager.h"
+#include "Modules/threading/datamutex.h"
 
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btBoxShape.h"
+#include "bullet3-2.89/src/BulletCollision/CollisionShapes/btCapsuleShape.h"
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btCompoundShape.h"
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btConvexHullShape.h"
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btStaticPlaneShape.h"
@@ -110,7 +111,6 @@ namespace Physics {
         }
     };
 
-    
     struct PlaneShapeInstance : Serialize::VirtualUnit<PlaneShapeInstance, VirtualScope<PlaneShapeInstance, CollisionShapeInstance>> {
         PlaneShapeInstance()
             : mShape({ 0, 1, 0 }, 0.0f)
@@ -143,13 +143,45 @@ namespace Physics {
         }
     };
 
+    struct CapsuleShapeInstance : Serialize::VirtualUnit<CapsuleShapeInstance, VirtualScope<CapsuleShapeInstance, CollisionShapeInstance>> {
+        CapsuleShapeInstance()
+            : mShape(0.5f, 2.0f)
+        {
+        }
+
+        virtual btCollisionShape *get() override
+        {
+            return &mShape;
+        }
+
+        virtual bool isInstance() override
+        {
+            return true;
+        }
+
+        virtual CapsuleShapeInstance *clone() override
+        {
+            return new CapsuleShapeInstance(*this);
+        }
+
+        btCapsuleShape mShape;
+    };
+
+    struct CapsuleShape : CollisionShape {
+
+        virtual CapsuleShapeInstance *create() override
+        {
+            return new CapsuleShapeInstance;
+        }
+    };
+
     struct CompoundShapeInstance : Serialize::VirtualUnit<CompoundShapeInstance, VirtualScope<CompoundShapeInstance, CollisionShapeInstance>> {
 
         void addShape(CollisionShapeManager::ResourceType *res)
         {
             //TODO
             //Engine::Threading::DataLock lock { Engine::App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>().mutex(), Engine::Threading::AccessMode::WRITE };
-            
+
             CollisionShapeManager::InstanceHandle &instance = mChildren.emplace_back(res);
             mShape.addChildShape(btTransform { btQuaternion { 0, 0, 0 } }, instance->get());
         }
@@ -159,7 +191,8 @@ namespace Physics {
             Quaternion mOrientation;
             CollisionShapeManager::InstanceHandle mShape;
 
-            CollisionShapeInstance* shapeInstance() {
+            CollisionShapeInstance *shapeInstance()
+            {
                 return mShape;
             }
         };
@@ -331,12 +364,18 @@ namespace Physics {
             {}, this);
 
         getOrCreateManual(
+            "Capsule", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceType *res) {
+                data = std::make_unique<CapsuleShape>();
+                return true;
+            },
+            {}, this);
+
+        getOrCreateManual(
             "Compound", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceType *res) {
                 data = std::make_unique<CompoundShape>();
                 return true;
             },
             {}, this);
-        
     }
 
     bool CollisionShapeManager::loadImpl(std::unique_ptr<CollisionShape> &shape, ResourceType *res)
@@ -376,6 +415,12 @@ METATABLE_END(Engine::Physics::PlaneShapeInstance)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Physics::PlaneShapeInstance, Engine::Physics::CollisionShapeInstance)
 SERIALIZETABLE_END(Engine::Physics::PlaneShapeInstance)
+
+METATABLE_BEGIN_BASE(Engine::Physics::CapsuleShapeInstance, Engine::Physics::CollisionShapeInstance)
+METATABLE_END(Engine::Physics::CapsuleShapeInstance)
+
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Physics::CapsuleShapeInstance, Engine::Physics::CollisionShapeInstance)
+SERIALIZETABLE_END(Engine::Physics::CapsuleShapeInstance)
 
 METATABLE_BEGIN_BASE(Engine::Physics::CompoundShapeInstance, Engine::Physics::CollisionShapeInstance)
 PROPERTY(Shapes, shapes, setShapes)

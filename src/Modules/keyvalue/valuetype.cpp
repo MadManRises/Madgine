@@ -1,6 +1,6 @@
 #include "../moduleslib.h"
 #include "valuetype.h"
-#include "virtualscopebase.h"
+#include "proxyscopebase.h"
 
 namespace Engine {
 
@@ -234,8 +234,8 @@ std::string ValueType::toString() const
         [](const TypedScopePtr &scope) {
             return scope.name();
         },
-        [](const std::shared_ptr<VirtualScopeBase> &scope) {
-            return scope->customScopePtr().name();
+        [](const OwnedScopePtr &scope) {
+            return scope.name();
         },
         [](const Vector2 &v) {
             return "["s + std::to_string(v.x) + ", " + std::to_string(v.y) + "]";
@@ -287,8 +287,8 @@ std::string ValueType::toShortString() const
         [](const TypedScopePtr &scope) {
             return scope.name();
         },
-        [](const std::shared_ptr<VirtualScopeBase> &scope) {
-            return scope->customScopePtr().name();
+        [](const OwnedScopePtr &scope) {
+            return scope.name();
         },
         [](const Vector2 &v) {
             return "["s + std::to_string(v.x) + ", " + std::to_string(v.y) + "]";

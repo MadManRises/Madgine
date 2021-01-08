@@ -4,6 +4,8 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 
+#include "axiseventlistener.h"
+
 RegisterType(Engine::Controls::ControlsManager)
 
 UNIQUECOMPONENT(Engine::Controls::ControlsManager)
@@ -34,6 +36,19 @@ namespace Controls {
         for (const ActionListener& listener : action->mListeners) {
             listener.mF(action, listener.mUserData);
         }
+    }
+
+    void ControlsManager::addAxisEventListener(AxisEventListener *listener)
+    {
+        mAxisEventListeners.push_back(listener);
+    }
+
+    bool ControlsManager::injectAxisEvent(const Input::AxisEventArgs &arg)
+    {
+        for (AxisEventListener *listener : mAxisEventListeners)
+            if (listener->onAxisEvent(arg))
+                return true;
+        return false;
     }
 
 }

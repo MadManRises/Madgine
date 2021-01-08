@@ -5,27 +5,34 @@
 
 #include "../scenemanager.h"
 
-#include "entitycontrolblock.h"
+#include "Modules/keyvalue/metatable_impl.h"
+
+#include "Modules/serialize/streams/operations.h"
+
+METATABLE_BEGIN(Engine::Scene::Entity::EntityPtr)
+PROXY(get)
+METATABLE_END(Engine::Scene::Entity::EntityPtr)
 
 namespace Engine {
 namespace Scene {
     namespace Entity {
 
+        static constexpr uintptr_t mask = 3 ^ static_cast<uintptr_t>(Serialize::UnitIdTag::SYNCABLE);
+
         EntityPtr::EntityPtr(const EntityPtr &other)
             : mEntity(other.mEntity)
         {
             if (holdsRef())
-                getBlock()->decRef();
+                getBlock()->incRef();
         }
 
         EntityPtr::~EntityPtr()
         {
-            if (holdsRef())
-                getBlock()->decRef();
+            reset();
         }
 
         EntityPtr::EntityPtr(ControlBlock<Entity> &entity)
-            : mEntity(reinterpret_cast<uintptr_t>(&entity) | 1)
+            : mEntity(reinterpret_cast<uintptr_t>(&entity) | mask)
         {
             entity.incRef();
         }
@@ -55,8 +62,15 @@ namespace Scene {
         {
             if (holdsRef() && getBlock()->dead()) {
                 getBlock()->decRef();
-                mEntity &= ~1;
+                mEntity &= ~mask;
             }
+        }
+
+        void EntityPtr::reset()
+        {
+            if (holdsRef())
+                getBlock()->decRef();
+            mEntity = 0;
         }
 
         /*EntityPtr::operator bool() const
@@ -89,24 +103,40 @@ namespace Scene {
             return mEntity < other.mEntity;
         }
 
-        TypedScopePtr EntityPtr::customScopePtr() const
-        {
-            return get();
-        }
-
         bool EntityPtr::isDead() const
         {
             return !holdsRef() || getBlock()->dead();
         }
 
+        void EntityPtr::readState(Serialize::SerializeInStream &in, const char *name)
+        {
+            Entity *ptr;
+            Serialize::read(in, ptr, name);
+            mEntity = reinterpret_cast<uintptr_t>(ptr);
+        }
+
+        void EntityPtr::writeState(Serialize::SerializeOutStream &out, const char *name) const
+        {
+            Serialize::write(out, get(), name);
+        }
+
+        void EntityPtr::applySerializableMap(Serialize::SerializeInStream &in)
+        {            
+            if (mEntity & static_cast<uintptr_t>(Serialize::UnitIdTag::SYNCABLE)) {
+                Entity *ptr = reinterpret_cast<Entity *>(mEntity);
+                Serialize::UnitHelper<Entity *>::applyMap(in, ptr);
+                *this = *ControlBlock<Entity>::fromPtr(ptr); //TODO
+            }
+        }
+
         bool EntityPtr::holdsRef() const
         {
-            return mEntity & 1;
+            return mEntity & mask;
         }
 
         ControlBlock<Entity> *EntityPtr::getBlock() const
         {
-            return reinterpret_cast<ControlBlock<Entity> *>(mEntity & ~1);
+            return reinterpret_cast<ControlBlock<Entity> *>(mEntity & ~mask);
         }
     }
 }

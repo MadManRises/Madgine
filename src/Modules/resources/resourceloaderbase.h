@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../keyvalue/virtualscopebase.h"
+#include "../keyvalueutil/virtualscope.h"
 
 namespace Engine {
 namespace Resources {

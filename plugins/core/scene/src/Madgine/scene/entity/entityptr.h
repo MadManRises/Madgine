@@ -4,7 +4,6 @@
 #include "Modules/generic/future.h"
 #include "Modules/keyvalue/objectptr.h"
 #include "Modules/keyvalue/scopebase.h"
-#include "entityhandle.h"
 
 namespace Engine {
 namespace Scene {
@@ -24,6 +23,7 @@ namespace Scene {
             Entity *operator->() const;
 
             void update() const;
+            void reset();
             //operator bool() const;
 
             operator Entity *() const;
@@ -32,9 +32,12 @@ namespace Scene {
             bool operator==(const EntityPtr &other) const;
             bool operator<(const EntityPtr &other) const;
 
-            TypedScopePtr customScopePtr() const;
-
             bool isDead() const;
+
+            void readState(Serialize::SerializeInStream &in, const char *name = nullptr);
+            void writeState(Serialize::SerializeOutStream &out, const char *name = nullptr) const;
+
+            void applySerializableMap(Serialize::SerializeInStream &in);
 
         private:
             bool holdsRef() const;

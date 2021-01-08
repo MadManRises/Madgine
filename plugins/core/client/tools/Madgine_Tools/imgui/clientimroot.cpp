@@ -146,7 +146,7 @@ namespace Tools {
 
         io.IniFilename = mImGuiIniFilePath.c_str();
 
-        io.DisplayFramebufferScale = ImVec2{Window::platformCapabilities.mScalingFactor,Window::platformCapabilities.mScalingFactor};
+        io.DisplayFramebufferScale = ImVec2 { Window::platformCapabilities.mScalingFactor, Window::platformCapabilities.mScalingFactor };
 
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
@@ -273,6 +273,11 @@ namespace Tools {
 
     bool ClientImRoot::frameStarted(std::chrono::microseconds timeSinceLastFrame)
     {
+        ImGuiIO &io = ImGui::GetIO();
+        io.KeyShift = mWindow.osWindow()->isKeyDown(Input::Key::Shift);
+        io.KeyCtrl = mWindow.osWindow()->isKeyDown(Input::Key::Control);
+        io.KeyAlt = mWindow.osWindow()->isKeyDown(Input::Key::Alt);
+
         newFrame((float)timeSinceLastFrame.count() / 1000000.0f);
 
         return true;
@@ -309,10 +314,6 @@ namespace Tools {
 
         io.KeysDown[arg.scancode] = true;
 
-        io.KeyShift = mWindow.osWindow()->isKeyDown(Input::Key::Shift);
-        io.KeyCtrl = mWindow.osWindow()->isKeyDown(Input::Key::Control);
-        io.KeyAlt = mWindow.osWindow()->isKeyDown(Input::Key::Alt);
-
         io.AddInputCharacter(arg.text);
 
         return io.WantCaptureKeyboard;
@@ -323,10 +324,6 @@ namespace Tools {
         ImGuiIO &io = ImGui::GetIO();
 
         io.KeysDown[arg.scancode] = false;
-
-        io.KeyShift = mWindow.osWindow()->isKeyDown(Input::Key::LShift) || mWindow.osWindow()->isKeyDown(Input::Key::RShift);
-        io.KeyCtrl = mWindow.osWindow()->isKeyDown(Input::Key::LControl) || mWindow.osWindow()->isKeyDown(Input::Key::RControl);
-        io.KeyAlt = mWindow.osWindow()->isKeyDown(Input::Key::LAlt) || mWindow.osWindow()->isKeyDown(Input::Key::RAlt);
 
         return io.WantCaptureKeyboard;
     }
@@ -358,10 +355,16 @@ namespace Tools {
 
         //LOG(io.MousePos.x << ", " << io.MousePos.y);
 
-        io.MouseWheel += arg.scrollWheel;
-
         //LOG(arg.scrollWheel);
 
+        return io.WantCaptureMouse;
+    }
+
+    bool ClientImRoot::injectAxisEvent(const Engine::Input::AxisEventArgs &arg)
+    {
+        ImGuiIO &io = ImGui::GetIO();
+        if (arg.mAxisType == Input::AxisEventArgs::WHEEL)
+            io.MouseWheel += arg.mAxis1;
         return io.WantCaptureMouse;
     }
 

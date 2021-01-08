@@ -6,7 +6,6 @@
 #include "Modules/keyvalue/typedscopeptr.h"
 #include "entitycomponentcollector.h"
 #include "entitycomponentlistbase.h"
-#include "entityhandle.h"
 #include "entityptr.h"
 #include "Modules/serialize/streams/operations.h"
 
@@ -16,8 +15,6 @@ namespace Scene {
 
         DERIVE_FUNCTION(init, Entity *);
         DERIVE_FUNCTION(finalize, Entity *);
-
-        MODULES_EXPORT EntityHandle copyEntityHandle(SceneManager *mgr, const EntityHandle &entity);
 
         template <typename T>
         struct EntityComponentList : EntityComponentListComponent<EntityComponentList<T>> {

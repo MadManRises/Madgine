@@ -50,6 +50,7 @@ namespace Dl {
 namespace Input {
     struct KeyEventArgs;
     struct PointerEventArgs;
+    struct AxisEventArgs;
 
     namespace MouseButton {
         enum MouseButton : unsigned char;

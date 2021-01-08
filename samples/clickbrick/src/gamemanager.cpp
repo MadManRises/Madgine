@@ -126,7 +126,7 @@ namespace UI {
                 brick->mQ1 = { static_cast<float>(rand()), orientation };
             }
 
-            t->setOrientation(Engine::Slerp(brick->mQ0, brick->mQ1, brick->mQAcc));
+            t->setOrientation(Engine::slerp(brick->mQ0, brick->mQ1, brick->mQAcc));
 
             return false;
         });

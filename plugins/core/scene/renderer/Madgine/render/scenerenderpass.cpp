@@ -30,7 +30,7 @@ namespace Render {
             mProgram.create("scene");
 
             mPerFrame.lightColor = { 1.0f, 1.0f, 1.0f };
-            mPerFrame.lightDir = Vector3 { 0.1f, 0.1f, 1.0f }.normalizedCopy();
+            mPerFrame.lightDir = Vector3 { 0.2f, -0.2f, 1.0f }.normalizedCopy();
         }
 
         Vector2i size = target->size();

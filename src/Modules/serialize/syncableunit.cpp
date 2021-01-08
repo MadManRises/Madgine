@@ -120,6 +120,16 @@ namespace Serialize {
         }
     }
 
+    SerializableUnitPtr SyncableUnitBase::customUnitPtr()
+    {
+        return { this, mType };
+    }
+
+    SerializableUnitConstPtr SyncableUnitBase::customUnitPtr() const
+    {
+        return { this, mType };
+    }
+
     UnitId SyncableUnitBase::slaveId() const
     {
         return mSlaveId;

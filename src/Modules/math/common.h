@@ -36,19 +36,19 @@ constexpr float sqrtf(float x)
 }
 
 template <typename T>
-T min(const T &a, const T &b)
+constexpr T min(const T &a, const T &b)
 {
     return a < b ? a : b;
 }
 
 template <typename T>
-T max(const T &a, const T &b)
+constexpr T max(const T &a, const T &b)
 {
     return a > b ? a : b;
 }
 
 template <typename T>
-T clamp(const T &v, const T &minV, const T &maxV)
+constexpr T clamp(const T &v, const T &minV, const T &maxV)
 {
     return min(max(v, minV), maxV);
 }
@@ -56,6 +56,11 @@ T clamp(const T &v, const T &minV, const T &maxV)
 constexpr int sign(int i)
 {
     return i == 0 ? 0 : (i < 0 ? -1 : 1);
+}
+
+constexpr float lerp(float a, float b, float t)
+{
+    return (1.0f - t) * a + t * b;
 }
 
 }

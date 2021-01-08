@@ -45,8 +45,13 @@ namespace Controls {
 
         void trigger(const ActionDescriptor *action);
 
+        void addAxisEventListener(AxisEventListener *listener);
+
+        bool injectAxisEvent(const Input::AxisEventArgs &arg);
+
     private:
         std::map<std::string, ActionDescriptor> mControlsMap;
+        std::vector<AxisEventListener *> mAxisEventListeners;
     };
 
 }

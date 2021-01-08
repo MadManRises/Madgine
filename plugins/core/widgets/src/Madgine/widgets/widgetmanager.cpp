@@ -453,6 +453,8 @@ namespace Widgets {
         Input::PointerEventArgs widgetArg = arg;
         widgetArg.windowPosition = { widgetArg.windowPosition.x - mClientSpace.mTopLeft.x, widgetArg.windowPosition.y - mClientSpace.mTopLeft.y };
 
+        LOG("Press: " << widgetArg.windowPosition.y);
+
         for (WidgetBase *modalWidget : mModalWidgetList) {
             if (propagateInput(modalWidget, widgetArg, &WidgetBase::injectPointerPress))
                 return true;
@@ -470,6 +472,8 @@ namespace Widgets {
     {
         Input::PointerEventArgs widgetArg = arg;
         widgetArg.windowPosition = { widgetArg.windowPosition.x - mClientSpace.mTopLeft.x, widgetArg.windowPosition.y - mClientSpace.mTopLeft.y };
+
+        LOG("Release: " << widgetArg.windowPosition.y);
 
         for (WidgetBase *modalWidget : mModalWidgetList) {
             if (propagateInput(modalWidget, widgetArg, &WidgetBase::injectPointerRelease))
@@ -522,21 +526,23 @@ namespace Widgets {
         Input::PointerEventArgs widgetArg = arg;
         widgetArg.windowPosition = { widgetArg.windowPosition.x - mClientSpace.mTopLeft.x, widgetArg.windowPosition.y - mClientSpace.mTopLeft.y };
 
+        LOG("Move: " << widgetArg.windowPosition.y);
+
         WidgetBase *hoveredWidget = getHoveredWidget(Vector2 { widgetArg.windowPosition }, mHoveredWidget);
 
         if (mHoveredWidget != hoveredWidget) {
 
             if (mHoveredWidget)
-                mHoveredWidget->injectPointerLeave(arg);
+                mHoveredWidget->injectPointerLeave(widgetArg);
 
             mHoveredWidget = hoveredWidget;
 
             if (mHoveredWidget)
-                mHoveredWidget->injectPointerEnter(arg);
+                mHoveredWidget->injectPointerEnter(widgetArg);
         }
 
         if (mHoveredWidget)
-            return mHoveredWidget->injectPointerMove(arg);
+            return mHoveredWidget->injectPointerMove(widgetArg);
 
         return false;
     }

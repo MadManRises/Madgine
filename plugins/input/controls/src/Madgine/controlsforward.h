@@ -7,6 +7,7 @@ namespace Controls {
 
     struct ActionDescriptor;
     struct ControlsManager;
+    struct AxisEventListener;
 
 }
 }

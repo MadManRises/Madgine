@@ -19,6 +19,8 @@
 
 #include "valuetypeexception.h"
 
+#include "ownedscopeptr.h"
+
 #include "../generic/cow.h"
 #include "../generic/cowstring.h"
 #include "../generic/cowpath.h"
@@ -45,9 +47,9 @@ struct MODULES_EXPORT ValueType {
 
     ValueType(ValueType &&other) noexcept;
 
-    template <typename T, typename _ = std::enable_if_t<isValueTypePrimitive_v<std::decay_t<T>>>>
+    template <typename T, typename _ = std::enable_if_t<isValueTypePrimitive_v<std::decay_t<T>> || (std::is_base_of_v<ScopeBase, std::decay_t<T>> && !std::is_same_v<ScopeBase, std::decay_t<T>>)>>
     explicit ValueType(T &&v)
-        : mUnion(std::in_place_index<type_pack_index_v<size_t, ValueTypeList, std::decay_t<T>>>, std::forward<T>(v))
+        : mUnion(std::in_place_index<static_cast<size_t>(static_cast<ValueTypeEnum>(toValueTypeIndex<std::decay_t<T>>()))>, std::forward<T>(v))
     {
     }
 
@@ -60,12 +62,6 @@ struct MODULES_EXPORT ValueType {
     template <typename T, typename _ = std::enable_if_t<std::is_base_of_v<ScopeBase, T> && !std::is_same_v<ScopeBase, T>>>
     explicit ValueType(T *val)
         : ValueType(TypedScopePtr(val))
-    {
-    }
-
-    template <typename T, typename _ = std::enable_if_t<std::is_base_of_v<ScopeBase, T> && !std::is_same_v<ScopeBase, T>>>
-    explicit ValueType(T &val)
-        : ValueType(TypedScopePtr(&val))
     {
     }
 
@@ -180,7 +176,7 @@ public:
     template <typename T, typename _ = std::enable_if_t<isValueType_v<T>>>
     explicit ValueTypeRef(T &&val)
         : mValue(std::forward<T>(val))
-        , mData(toPtrHelper(convert_ValueType(std::forward<T>(val))))
+        , mData(toPtrHelper(convert_ValueType<false>(std::forward<T>(val))))
     {
     }
 
@@ -221,8 +217,7 @@ ValueType_Return<T> ValueType::as() const
         if constexpr (std::is_pointer_v<T>) {
             return std::get<TypedScopePtr>(mUnion).safe_cast<std::remove_pointer_t<T>>();
         } else {
-            static_assert(dependent_bool<T, false>::value, "References are currently not supported!");
-            return *std::get<TypedScopePtr>(mUnion).safe_cast<std::remove_reference_t<T>>();
+            return std::get<OwnedScopePtr>(mUnion).safe_cast<T>();
         }
     } else if constexpr (std::is_enum_v<T>) {
         return static_cast<T>(std::get<int>(mUnion));

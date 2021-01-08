@@ -16,7 +16,6 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-#include "entitycomponentserialize.h"
 
 METATABLE_BEGIN(Engine::Scene::Entity::Entity)
 READONLY_PROPERTY(Components, components)

@@ -8,7 +8,7 @@
 #include "Modules/math/matrix3.h"
 
 #include "Modules/keyvalue/typedscopeptr.h"
-#include "Modules/keyvalue/virtualscopebase.h"
+#include "Modules/keyvalue/proxyscopebase.h"
 
 #include "Modules/keyvalue/boundapifunction.h"
 
@@ -24,6 +24,8 @@ ImGuiContext *&getImGuiContext()
 }
 
 namespace ImGui {
+
+    ValueTypePayload sPayload;
 
 bool ValueTypeDrawer::draw(Engine::TypedScopePtr &scope)
 {
@@ -45,14 +47,14 @@ bool ValueTypeDrawer::draw(const Engine::TypedScopePtr &scope)
     return false;
 }
 
-bool ValueTypeDrawer::draw(std::shared_ptr<Engine::VirtualScopeBase> &scope)
+bool ValueTypeDrawer::draw(Engine::OwnedScopePtr &scope)
 {
-    return draw(scope->customScopePtr());
+    return draw(static_cast<Engine::TypedScopePtr>(scope));
 }
 
-bool ValueTypeDrawer::draw(const std::shared_ptr<Engine::VirtualScopeBase> &scope)
+bool ValueTypeDrawer::draw(const Engine::OwnedScopePtr &scope)
 {
-    return draw(scope->customScopePtr());
+    return draw(static_cast<Engine::TypedScopePtr>(scope));
 }
 
 bool ValueTypeDrawer::draw(bool &b)
@@ -696,9 +698,17 @@ bool MethodPicker(const char *label, const std::vector<std::pair<std::string, En
 void DraggableValueTypeSource(const std::string &name, Engine::TypedScopePtr scope, const Engine::ValueType &value, ImGuiDragDropFlags flags)
 {
     if (ImGui::BeginDragDropSource(flags)) {
-        ValueTypePayload payload { name, scope, value };
+        ValueTypePayload *payload = &sPayload;
+        payload->mName = name;
+        payload->mSender = scope;
+        payload->mValue = value;        
         ImGui::SetDragDropPayload("ValueType", &payload, sizeof(payload), ImGuiCond_Once);
         ImGui::Text(name);
+        ImGui::Text(value.toShortString());
+        if (!payload->mStatusMessage.empty()) {
+            ImGui::Text(payload->mStatusMessage);
+            payload->mStatusMessage.clear();
+        }
         ImGui::EndDragDropSource();
     }
 }
@@ -708,7 +718,7 @@ const ValueTypePayload *GetValuetypePayload()
     const ImGuiPayload *payload = ImGui::GetDragDropPayload();
 
     if (payload && payload->IsDataType("ValueType")) {
-        return static_cast<const ValueTypePayload *>(payload->Data);
+        return *static_cast<const ValueTypePayload **>(payload->Data);
     }
 
     return nullptr;

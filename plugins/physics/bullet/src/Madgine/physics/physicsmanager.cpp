@@ -109,7 +109,7 @@ namespace Physics {
     void PhysicsManager::update(std::chrono::microseconds timeSinceLastFrame, bool paused)
     {
         //TODO
-        //if (!paused)
+        if (!paused)
             mData->mWorld.stepSimulation(timeSinceLastFrame.count() / 1000000.0f, 1, 1.0f / 30.0f);
         //else {
         //    mData->mWorld.synchronizeMotionStates();

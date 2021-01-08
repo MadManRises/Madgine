@@ -423,7 +423,7 @@ namespace Serialize {
         static void read(SerializeInStream &in, std::tuple<Ty &...> t, const char *name, std::index_sequence<Is...>, Args &&... args)
         {
             in.format().beginCompound(in, name);
-            (Serialize::read<Ty>(in, std::get<Is>(t), static_cast<const char *>(nullptr), args...), ...);
+            (Serialize::read<Ty>(in, std::get<Is>(t), nullptr, args...), ...);
             in.format().endCompound(in, name);
         }
 
@@ -496,7 +496,7 @@ namespace Serialize {
 
     inline SerializeOutStream &SerializeOutStream::operator<<(const char *s)
     {
-        write(*this, std::string { s }, nullptr);
+        write(*this, std::string_view { s }, nullptr);
         return *this;
     }
 

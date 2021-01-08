@@ -4,7 +4,7 @@
 
 namespace Engine {
 
-Quaternion Slerp(Quaternion q1, Quaternion q2, float ratio)
+Quaternion slerp(Quaternion q1, Quaternion q2, float ratio)
 {
 
     // Compute the cosine of the angle between the two vectors.

@@ -136,6 +136,13 @@ namespace Window {
                     return true;
             return false;
         }
+        bool injectAxisEvent(const Input::AxisEventArgs &arg)
+        {
+            for (WindowEventListener *listener : mListeners)
+                if (listener->injectAxisEvent(arg))
+                    return true;
+            return false;
+        }
 
     private:
         std::vector<WindowEventListener *> mListeners;

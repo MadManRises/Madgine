@@ -571,14 +571,14 @@ namespace Im3D {
             Vector3 top = vertices[cornerIndices[face][2]].mPos;
             for (size_t y = 0; y <= param.mDetail + 1; ++y) {
 
-                Vector3 left = Slerp(bottomLeft, top, y / float(param.mDetail + 1));
-                Vector3 right = Slerp(bottomRight, top, y / float(param.mDetail + 1));
+                Vector3 left = slerp(bottomLeft, top, y / float(param.mDetail + 1));
+                Vector3 right = slerp(bottomRight, top, y / float(param.mDetail + 1));
 
                 for (size_t x = 0; x <= param.mDetail + 1 - y; ++x) {
                     if ((y == 0 && (x == 0 || x == param.mDetail + 1)) || y == param.mDetail + 1)
                         continue;
                     vertices[vertexCounter++] = {
-                        Slerp(left, right, x / float(param.mDetail + 1 - y)),
+                        slerp(left, right, x / float(param.mDetail + 1 - y)),
                         param.mColor,
                         { 1, 1, 1 }
                     };

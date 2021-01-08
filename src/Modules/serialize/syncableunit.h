@@ -49,6 +49,8 @@ namespace Serialize {
 
         friend struct SyncManager;
         friend struct SerializeUnitHelper;
+        friend struct SerializableUnitPtr;
+        friend struct SerializableUnitConstPtr;
         friend struct SyncableBase;
         friend struct SerializeTable;
         template <typename T>
@@ -63,6 +65,10 @@ namespace Serialize {
         DERIVE_FRIEND(setDataSynced);
         DERIVE_FRIEND(setActive);
         DERIVE_FRIEND(setParent);
+        DERIVE_FRIEND(customUnitPtr);
+
+        SerializableUnitPtr customUnitPtr();
+        SerializableUnitConstPtr customUnitPtr() const;
 
     private:
         UnitId mSlaveId = 0;

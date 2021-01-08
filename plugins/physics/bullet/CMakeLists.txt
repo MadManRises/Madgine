@@ -26,6 +26,18 @@ target_link_plugins(BulletTools Bullet ClientTools)
 target_link_libraries(BulletTools PRIVATE LinearMath)
 
 
+
+Project(PlayerControls)
+
+set(sources "")
+FolderSources(sources "" controls)
+	FolderSources(sources controls Madgine playercontrolsforward.h playercontrolslib.h)
+		FolderSources(sources Madgine controls playercontroller.cpp playercontroller.h)
+
+add_plugin(PlayerControls Madgine Core ${sources} SOURCE_ROOT controls PRECOMPILED_HEADER controls/Madgine/playercontrolslib.h)
+
+target_link_plugins(PlayerControls Scene Controls Bullet)
+
 if (BUILD_TESTING)
 	add_subdirectory(test)
 endif()

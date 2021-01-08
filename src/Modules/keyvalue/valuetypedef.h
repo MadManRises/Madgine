@@ -12,7 +12,7 @@ VALUETYPE_TYPE(Float, float, float)
 VALUETYPE_SEP
 VALUETYPE_TYPE(Scope, TypedScopePtr, const TypedScopePtr&)
 VALUETYPE_SEP
-VALUETYPE_TYPE(OwnedScope, std::shared_ptr<VirtualScopeBase>, const std::shared_ptr<VirtualScopeBase>&)
+VALUETYPE_TYPE(OwnedScope, OwnedScopePtr, const OwnedScopePtr&)
 VALUETYPE_SEP
 VALUETYPE_TYPE(Matrix3, CoW<Matrix3>, const Matrix3&)
 VALUETYPE_SEP

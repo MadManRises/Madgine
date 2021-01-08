@@ -139,7 +139,8 @@ struct MODULES_EXPORT ValueTypeDesc {
     bool canAccept(const ValueTypeDesc &valueType);
     std::string toString() const;
 
-    bool operator==(const ValueTypeDesc& other) const {
+    bool operator==(const ValueTypeDesc &other) const
+    {
         return mType == other.mType && mSecondary == other.mSecondary;
     }
 
@@ -172,7 +173,13 @@ struct MODULES_EXPORT ExtendedValueTypeDesc {
 template <typename T>
 constexpr ValueTypeIndex toValueTypeIndex()
 {
-    return static_cast<ValueTypeEnum>(type_pack_index_v<size_t, ValueTypeList, T>);
+    if constexpr (std::is_pointer_v<T>) {
+        return ValueTypeEnum::ScopeValue;
+    } else if constexpr (std::is_base_of_v<ScopeBase, T> && !::std::is_same_v<T, ScopeBase>) {
+        return ValueTypeEnum::OwnedScopeValue;
+    } else {
+        return static_cast<ValueTypeEnum>(type_pack_index_v<size_t, ValueTypeList, T>);
+    }
 }
 
 template <typename T>

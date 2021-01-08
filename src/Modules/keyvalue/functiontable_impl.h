@@ -31,15 +31,21 @@ static constexpr std::array<FunctionArgument, sizeof...(Args) + 1> metafunctionA
     return metafunctionArgsMemberHelper<R, T, Args...>(args, std::make_index_sequence<sizeof...(Args)>());
 }
 
+template <typename R, typename T, typename... Args>
+static constexpr std::array<FunctionArgument, sizeof...(Args) + 1> metafunctionArgs(R (T::*f)(Args...) const, std::string_view args)
+{
+    return metafunctionArgsMemberHelper<R, T, Args...>(args, std::make_index_sequence<sizeof...(Args)>());
+}
+
 template <auto F, typename R, typename T, typename... Args, size_t... I>
 static void unpackMemberHelper(const FunctionTable *table, ValueType &retVal, const ArgumentList &args, std::index_sequence<I...>)
 {
     T *t = ValueType_as<TypedScopePtr>(getArgument(args, 0)).safe_cast<T>();
     if constexpr (std::is_same_v<R, void>) {
         (t->*F)(ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...);
-        to_ValueType(retVal, std::monostate {});
+        to_ValueType<true>(retVal, std::monostate {});
     } else {
-        to_ValueType(retVal, (t->*F)(ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...));
+        to_ValueType<true>(retVal, (t->*F)(ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...));
     }
 }
 
@@ -51,6 +57,12 @@ static void unpackMemberApiMethod(const FunctionTable *table, ValueType &retVal,
 
 template <auto F, typename R, typename T, typename... Args>
 static constexpr typename FunctionTable::FPtr wrapHelper(R (T::*f)(Args...))
+{
+    return &unpackMemberApiMethod<F, R, T, Args...>;
+}
+
+template <auto F, typename R, typename T, typename... Args>
+static constexpr typename FunctionTable::FPtr wrapHelper(R (T::*f)(Args...) const)
 {
     return &unpackMemberApiMethod<F, R, T, Args...>;
 }

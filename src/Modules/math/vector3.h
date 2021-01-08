@@ -826,12 +826,12 @@ constexpr Vector3 max(const Vector3 &v1, const Vector3 &v2)
     };
 }
 
-constexpr Vector3 Lerp(const Vector3 &v1, const Vector3 &v2, float ratio)
+constexpr Vector3 lerp(const Vector3 &v1, const Vector3 &v2, float ratio)
 {
     return (1.0f - ratio) * v1 + ratio * v2;
 }
 
-inline Vector3 Slerp(const Vector3 &v1, const Vector3 &v2, float ratio)
+inline Vector3 slerp(const Vector3 &v1, const Vector3 &v2, float ratio)
 {
     float theta = acosf(v1.normalizedCopy().dotProduct(v2.normalizedCopy()));
     float sinTheta = sinf(theta);

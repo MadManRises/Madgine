@@ -11,6 +11,15 @@ add_plugin(Controls Madgine Input ${sources} PRECOMPILED_HEADER src/Madgine/cont
 target_link_plugins(Controls Base)
 
 
+set(sources "")
+FolderSources(sources "" tools)
+	FolderSources(sources tools Madgine_Tools controlstoolslib.h controlstoolsforward.h)
+		FolderSources(sources Madgine_Tools controls controlsview.cpp controlsview.h)
+
+add_tools(Controls ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/controlstoolslib.h SOURCE_ROOT tools)
+
+target_link_plugins(ControlsTools Tools)
+
 Project(ClientControls)
 
 set(sources "")
@@ -22,11 +31,4 @@ add_plugin(ClientControls Madgine Input ${sources} SOURCE_ROOT client PRECOMPILE
 
 target_link_plugins(ClientControls Client Controls)
 
-#set(sources "")
-#FolderSources(sources "" renderer_tools)
-#	FolderSources(sources renderer_tools Madgine_Tools)
-#		FolderSources(sources Madgine_Tools sceneeditor gridpass.cpp gridpass.h sceneeditor.cpp sceneeditor.h sceneview.cpp sceneview.h)
 
-#add_tools(SceneRenderer ${sources} PRECOMPILED_HEADER renderer_tools/Madgine_Tools/scenerenderertoolslib.h SOURCE_ROOT renderer_tools)
-
-#target_link_plugins(SceneRendererTools ClientTools ProgramLoader)

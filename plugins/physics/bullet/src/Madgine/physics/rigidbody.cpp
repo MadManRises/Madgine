@@ -22,6 +22,8 @@ METATABLE_BEGIN(Engine::Physics::RigidBody)
 PROPERTY(Mass, mass, setMass)
 PROPERTY(Friction, friction, setFriction)
 PROPERTY(Kinematic, kinematic, setKinematic)
+PROPERTY(LinearFactor, linearFactor, setLinearFactor)
+PROPERTY(AngularFactor, angularFactor, setAngularFactor)
 PROPERTY(Shape, getShape, setShape)
 READONLY_PROPERTY(ShapeData, getShapeInstance)
 METATABLE_END(Engine::Physics::RigidBody)
@@ -29,6 +31,10 @@ METATABLE_END(Engine::Physics::RigidBody)
 SERIALIZETABLE_BEGIN(Engine::Physics::RigidBody)
 FIELD(mShapeHandle)
 ENCAPSULATED_FIELD(Kinematic, kinematic, setKinematic)
+ENCAPSULATED_FIELD(Mass, mass, setMass)
+ENCAPSULATED_FIELD(Friction, friction, setFriction)
+ENCAPSULATED_FIELD(LinearFactor, linearFactor, setLinearFactor)
+ENCAPSULATED_FIELD(AngularFactor, angularFactor, setAngularFactor)
 SERIALIZETABLE_END(Engine::Physics::RigidBody)
 
 namespace Engine {
@@ -39,8 +45,6 @@ namespace Physics {
         Data()
             : mRigidBody(btRigidBody::btRigidBodyConstructionInfo { 0.0f, this, nullptr, { 0.0f, 0.0f, 0.0f } })
         {
-            mRigidBody.setAngularFactor({ 0, 0, 1 });
-            mRigidBody.setLinearFactor({ 1, 1, 0 });
             //mRigidBody.setFriction(0.01f);
             mRigidBody.setUserPointer(this);
         }
@@ -109,6 +113,15 @@ namespace Physics {
             mShapeHandle.load("Cube");
 
         mData->mTransform = entity->addComponent<Scene::Entity::Transform>();
+
+        Matrix4 m = mData->mTransform.worldMatrix();
+
+        Vector3 pos;
+        Vector3 scale;
+        Quaternion orientation;
+        std::tie(pos, scale, orientation) = DecomposeTransformMatrix(m);
+        mData->mRigidBody.setWorldTransform(btTransform { { orientation.v.x, orientation.v.y, orientation.v.z, orientation.w }, { pos.x, pos.y, pos.z } });
+        
         if (mShapeHandle)
             mData->mRigidBody.setCollisionShape(mShapeHandle->get());
 
@@ -144,20 +157,23 @@ namespace Physics {
     {
         float oldMass = mData->mRigidBody.getMass();
         if (mass != oldMass) {
-            mData->remove();
+            if (mData->mTransform)
+                mData->remove();
             btVector3 inertia;
             mShapeHandle->get()->calculateLocalInertia(mass, inertia);
             mData->mRigidBody.setMassProps(mass, inertia);
-            mData->add();
-            mData->mRigidBody.activate(true);
-            if (oldMass == 0.0f) {
-                Engine::Scene::Entity::Transform *component = mData->mTransform;
-                if (component) {
-                    const Vector3 &pos = component->getPosition();
-                    const Quaternion &orientation = component->getOrientation();
-                    mData->mRigidBody.setWorldTransform(btTransform { { orientation.v.x, orientation.v.y, orientation.v.z, orientation.w }, { pos.x, pos.y, pos.z } });
+            if (mData->mTransform) {
+                mData->add();
+                mData->mRigidBody.activate(true);
+                if (oldMass == 0.0f) {
+                    Engine::Scene::Entity::Transform *component = mData->mTransform;
+                    if (component) {
+                        const Vector3 &pos = component->getPosition();
+                        const Quaternion &orientation = component->getOrientation();
+                        mData->mRigidBody.setWorldTransform(btTransform { { orientation.v.x, orientation.v.y, orientation.v.z, orientation.w }, { pos.x, pos.y, pos.z } });
+                    }
+                    mData->mRigidBody.clearForces();
                 }
-                mData->mRigidBody.clearForces();
             }
         }
     }
@@ -192,6 +208,31 @@ namespace Physics {
     void RigidBody::setFriction(float friction)
     {
         mData->mRigidBody.setFriction(friction);
+    }
+
+    Vector3 RigidBody::linearFactor() const
+    {
+        return mData->mRigidBody.getLinearFactor().m_floats;
+    }
+
+    void RigidBody::setLinearFactor(const Vector3 &factor)
+    {
+        mData->mRigidBody.setLinearFactor({ factor.x, factor.y, factor.z });
+    }
+
+    Vector3 RigidBody::angularFactor() const
+    {
+        return mData->mRigidBody.getAngularFactor().m_floats;
+    }
+
+    void RigidBody::setAngularFactor(const Vector3 &factor)
+    {
+        mData->mRigidBody.setAngularFactor({ factor.x, factor.y, factor.z });
+    }
+
+    void RigidBody::setVelocity(const Vector3 &v)
+    {
+        mData->mRigidBody.setLinearVelocity({ v.x, v.y, v.z });
     }
 
     void RigidBody::setShape(typename CollisionShapeManager::HandleType handle)

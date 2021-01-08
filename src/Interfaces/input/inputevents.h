@@ -160,7 +160,6 @@ namespace Input {
             , text(text)
         {
         }
-
     };
 
     struct PointerEventArgs {
@@ -168,23 +167,43 @@ namespace Input {
             : windowPosition(windowPos)
             , screenPosition(screenPos)
             , button(button)
-            , scrollWheel(0.0f)
         {
         }
 
-        PointerEventArgs(const InterfacesVector &windowPos, const InterfacesVector &screenPos, const InterfacesVector &move, float scroll = 0.0f,
+        PointerEventArgs(const InterfacesVector &windowPos, const InterfacesVector &screenPos, const InterfacesVector &move,
             MouseButton::MouseButton button = MouseButton::NO_BUTTON)
             : windowPosition(windowPos)
             , screenPosition(screenPos)
             , moveDelta(move)
             , button(button)
-            , scrollWheel(scroll)
         {
         }
 
         InterfacesVector windowPosition, screenPosition, moveDelta;
         MouseButton::MouseButton button;
-        float scrollWheel;
+    };
+
+    struct AxisEventArgs {
+
+        enum AxisType {
+            LEFT,
+            RIGHT,
+            Z,
+            WHEEL = Z
+        };
+
+        AxisEventArgs() = default;
+
+        AxisEventArgs(AxisType type, float axis1, float axis2 = 0.0f)
+            : mAxisType(type)
+            , mAxis1(axis1)
+            , mAxis2(axis2)
+        {
+        }
+
+        AxisType mAxisType;
+        float mAxis1;
+        float mAxis2;
     };
 }
 }

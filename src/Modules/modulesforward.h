@@ -10,11 +10,13 @@ struct ScopeBase;
 template <typename T, typename Base>
 struct VirtualScope;
 struct VirtualScopeBase;
+struct ProxyScopeBase;
 struct MetaTable;
 struct ScopeIterator;
 struct Accessor;
 struct ScopeField;
 struct TypedScopePtr;
+struct OwnedScopePtr;
 struct TypeInfo;
 struct ApiFunction;
 struct BoundApiFunction;

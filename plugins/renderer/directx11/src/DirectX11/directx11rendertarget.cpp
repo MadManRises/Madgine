@@ -108,9 +108,8 @@ namespace Render {
 
         if (!mBlendState) {
             D3D11_BLEND_DESC omDesc;
-            ZeroMemory(&omDesc,
+            ZeroMemory(&omDesc, sizeof(D3D11_BLEND_DESC));
 
-                sizeof(D3D11_BLEND_DESC));
             omDesc.RenderTarget[0].BlendEnable = true;
             omDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
             omDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
@@ -119,7 +118,6 @@ namespace Render {
             omDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
             omDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
             omDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
- 
 
             hr = sDevice->CreateBlendState(&omDesc, &mBlendState);
             DX11_CHECK(hr);
