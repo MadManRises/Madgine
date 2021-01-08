@@ -5,7 +5,7 @@
 #include "Modules/keyvalue/typedscopeptr.h"
 #include "Modules/keyvalue/valuetype.h"
 
-#include "imgui/imgui_internal.h"
+#include "imgui_internal.h"
 
 namespace ImGui {
 
