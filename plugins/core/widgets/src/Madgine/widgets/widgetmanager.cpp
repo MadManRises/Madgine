@@ -526,8 +526,6 @@ namespace Widgets {
         Input::PointerEventArgs widgetArg = arg;
         widgetArg.windowPosition = { widgetArg.windowPosition.x - mClientSpace.mTopLeft.x, widgetArg.windowPosition.y - mClientSpace.mTopLeft.y };
 
-        LOG("Move: " << widgetArg.windowPosition.y);
-
         WidgetBase *hoveredWidget = getHoveredWidget(Vector2 { widgetArg.windowPosition }, mHoveredWidget);
 
         if (mHoveredWidget != hoveredWidget) {
