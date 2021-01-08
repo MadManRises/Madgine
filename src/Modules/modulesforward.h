@@ -129,6 +129,9 @@ namespace Serialize {
     struct SyncManager;
     struct SerializeStreambuf;
 
+    struct SerializableUnitPtr;
+    struct SerializableUnitConstPtr;
+
 	struct Serializer;
 
     struct Formatter;
