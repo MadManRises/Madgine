@@ -14,6 +14,11 @@ MODULES_EXPORT ValueType &KeyValuePair_key(KeyValuePair &p);
 MODULES_EXPORT ValueTypeRef &KeyValuePair_value(KeyValuePair &p);
 
 template <bool reference_to_ptr, typename T>
+void to_ValueType(ValueType &v, T &&t);
+template <bool reference_to_ptr, typename T>
+void to_ValueTypeRef(ValueTypeRef &v, T &&t);
+
+template <bool reference_to_ptr, typename T>
 void to_KeyValuePair(KeyValuePair &p, T &&t)
 {
     to_ValueType<reference_to_ptr>(KeyValuePair_key(p), kvKey(t));
