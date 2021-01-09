@@ -43,6 +43,8 @@
 
 #include "Modules/math/transformation.h"
 
+#include "Madgine/render/rendertarget.h"
+
 
 namespace Engine {
 namespace Tools {
@@ -85,6 +87,8 @@ namespace Tools {
 		
 		mRenderTarget->addRenderPass(&mIm3DRenderer);		
     }
+
+    SceneView::SceneView(SceneView &&) = default;
 
     SceneView::~SceneView()
     {

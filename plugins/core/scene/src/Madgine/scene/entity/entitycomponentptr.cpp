@@ -8,6 +8,8 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
+#include "entitycomponentlist.h"
+
 using EntityComponentBasePtr = Engine::Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::EntityComponentBase>;
 
 METATABLE_BEGIN(EntityComponentBasePtr);
@@ -18,6 +20,11 @@ namespace Engine {
 
 namespace Scene {
     namespace Entity {
+
+        EntityComponentBase *resolveEntityComponentHandle(SceneManager *sceneMgr, size_t index, EntityComponentHandle<EntityComponentBase> handle)
+        {
+            return sceneMgr->entityComponentList(index).get(handle);
+        }
 
         EntityComponentPtrBase<EntityComponentBase>::EntityComponentPtrBase() = default;
 

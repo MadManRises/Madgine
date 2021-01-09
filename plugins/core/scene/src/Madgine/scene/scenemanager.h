@@ -17,8 +17,6 @@
 
 #include "Modules/keyvalue/keyvalueset.h"
 
-#include "Modules/serialize/container/controlledconfig.h"
-
 #include "scenecomponentbase.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"

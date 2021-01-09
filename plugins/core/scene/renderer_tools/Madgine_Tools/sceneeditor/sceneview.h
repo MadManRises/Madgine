@@ -2,8 +2,6 @@
 
 #include "Madgine/render/camera.h"
 
-#include "Madgine/render/rendertarget.h"
-
 #include "Modules/math/matrix4.h"
 #include "Modules/math/ray.h"
 
@@ -22,7 +20,7 @@ namespace Tools {
     struct SceneView : ScopeBase {
 
         SceneView(SceneEditor *editor, Render::RenderContext *renderer);
-        SceneView(SceneView &&) = default;
+        SceneView(SceneView &&);
         ~SceneView();
 
         void render();

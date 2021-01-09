@@ -1,12 +1,8 @@
 #pragma once
 
 #include "entitycomponenthandle.h"
-#include "entitycomponentlist.h"
 
 #include "Modules/keyvalue/scopebase.h"
-
-//TODO
-#include "../scenemanager.h"
 
 namespace Engine {
 namespace Scene {
@@ -14,6 +10,8 @@ namespace Scene {
 
         template <typename T>
         struct EntityComponentPtrBase;
+
+        MADGINE_SCENE_EXPORT EntityComponentBase *resolveEntityComponentHandle(SceneManager *sceneMgr, size_t index, EntityComponentHandle<EntityComponentBase> handle);
 
         template <>
         struct MADGINE_SCENE_EXPORT EntityComponentPtrBase<EntityComponentBase> : ScopeBase {
@@ -109,7 +107,7 @@ namespace Scene {
             }
 
             explicit EntityComponentPtrBase(const EntityComponentPtrBase<EntityComponentBase> &other)
-                : mHandle { other.handle()}
+                : mHandle { other.handle() }
                 , mSceneMgr(other.sceneMgr())
             {
                 assert(!other || component_index<T>() == other.type());
@@ -176,8 +174,9 @@ namespace Scene {
                 return mSceneMgr;
             }
 
-            T* get() const {
-                return mHandle ? mSceneMgr->template entityComponentList<T>().get(mHandle) : nullptr;
+            T *get() const
+            {
+                return mHandle ? static_cast<T *>(resolveEntityComponentHandle(mSceneMgr, component_index<T>(), mHandle)) : nullptr;
             }
 
             T *operator->() const

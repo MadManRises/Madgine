@@ -4,8 +4,6 @@
 
 #include "programloader.h"
 
-#include "Madgine/render/camera.h"
-
 #include "Madgine/render/shadinglanguage/sl.h"
 
 #define SL_SHADER scene

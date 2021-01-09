@@ -13,6 +13,8 @@
 
 #include "im3d/im3d.h"
 
+#include "Madgine/scene/scenemanager.h"
+
 UNIQUECOMPONENT(Engine::Physics::PhysicsManager)
 
 METATABLE_BEGIN(Engine::Physics::PhysicsManager)

@@ -1,13 +1,11 @@
 #pragma once
 
 #include "Modules/generic/container/container_api.h"
-#include "Modules/generic/container/generationvector.h"
 #include "Modules/generic/container/multivector.h"
 #include "Modules/keyvalue/typedscopeptr.h"
 #include "entitycomponentcollector.h"
 #include "entitycomponentlistbase.h"
 #include "entityptr.h"
-#include "Modules/serialize/streams/operations.h"
 
 namespace Engine {
 namespace Scene {
@@ -42,6 +40,16 @@ namespace Scene {
             }
 
             TypedScopePtr getTyped(const EntityComponentHandle<EntityComponentBase> &index) override final
+            {
+                return &mData.at(index.mIndex).template get<0>();
+            }
+
+            Serialize::SerializableUnitPtr getSerialized(const EntityComponentHandle<EntityComponentBase> &index) override final
+            {
+                return &mData.at(index.mIndex).template get<0>();
+            }
+
+            Serialize::SerializableUnitConstPtr getSerialized(const EntityComponentHandle<EntityComponentBase> &index) const override final
             {
                 return &mData.at(index.mIndex).template get<0>();
             }
@@ -112,15 +120,6 @@ namespace Scene {
             T &front()
             {
                 return mData.template get<0>().front();
-            }
-
-            virtual void readState(const EntityComponentHandle<EntityComponentBase>& index, Serialize::SerializeInStream& in, const char* name, CallerHierarchyBasePtr hierarchy) override {
-                Serialize::read(in, *get(index), name, hierarchy);
-            }
-
-            virtual void writeState(const EntityComponentHandle<EntityComponentBase> &index, Serialize::SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) const override
-            {
-                Serialize::write(out, *get(index), name, hierarchy);
             }
 
             Vector mData;

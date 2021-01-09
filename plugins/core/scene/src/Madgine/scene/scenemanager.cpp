@@ -21,6 +21,8 @@
 
 #include "entity/entitycomponentlistbase.h"
 
+#include "Modules/serialize/container/controlledconfig.h"
+
 UNIQUECOMPONENT(Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>);
 
 METATABLE_BEGIN(Engine::Scene::SceneManager)
