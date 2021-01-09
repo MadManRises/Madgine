@@ -2,8 +2,6 @@
 
 #include "entitycomponenthandle.h"
 
-#include "Modules/keyvalue/scopebase.h"
-
 namespace Engine {
 namespace Scene {
     namespace Entity {

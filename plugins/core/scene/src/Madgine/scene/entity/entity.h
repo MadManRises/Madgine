@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Modules/keyvalue/scopebase.h"
-
 #include "Modules/keyvalue/objectptr.h"
 
 #include "Modules/serialize/container/serializablecontainer.h"

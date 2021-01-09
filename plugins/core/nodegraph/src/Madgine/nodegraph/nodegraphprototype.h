@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Modules/keyvalue/scopebase.h"
-
 #include "Interfaces/filesystem/path.h"
 
 #include "graphexecutable.h"

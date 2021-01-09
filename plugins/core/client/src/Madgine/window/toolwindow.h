@@ -3,8 +3,6 @@
 #include "Interfaces/window/windoweventlistener.h"
 #include "Modules/uniquecomponent/uniquecomponentselector.h"
 
-#include "Modules/keyvalue/scopebase.h"
-
 namespace Engine {
 namespace Window {
 

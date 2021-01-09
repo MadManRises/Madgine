@@ -4,8 +4,6 @@
 
 #include "globalapicollector.h"
 
-#include "Modules/keyvalue/scopebase.h"
-
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 
 #include "Modules/threading/defaulttaskqueue.h"

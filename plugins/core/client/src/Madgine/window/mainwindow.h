@@ -16,8 +16,6 @@
 
 #include "Modules/keyvalue/keyvalueset.h"
 
-#include "Modules/keyvalue/scopebase.h"
-
 #include "Modules/madgineobject/madgineobject.h"
 
 #include "Modules/serialize/container/serializablecontainer.h"

@@ -2,8 +2,6 @@
 
 #include "../reflection/decay.h"
 
-#include "../keyvalue/scopebase.h"
-
 #include "../keyvalue/typedscopeptr.h"
 
 namespace Engine {

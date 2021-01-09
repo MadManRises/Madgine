@@ -2,8 +2,6 @@
 
 #include "Interfaces/filesystem/path.h"
 
-#include "../keyvalue/scopebase.h"
-
 namespace Engine {
 namespace Resources {
 

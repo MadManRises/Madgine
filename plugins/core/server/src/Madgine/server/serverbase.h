@@ -2,7 +2,6 @@
 
 #if ENABLE_THREADING
 
-#    include "Modules/keyvalue/scopebase.h"
 #    include "serverlog.h"
 
 #    include "Modules/threading/taskqueue.h"

@@ -2,7 +2,6 @@
 
 #include "Modules/math/boundingbox.h"
 #include "render/attributedescriptor.h"
-#include "Modules/keyvalue/scopebase.h"
 #include "Modules/generic/bytebuffer.h"
 #include "Interfaces/filesystem/path.h"
 #include "render/vertex.h"

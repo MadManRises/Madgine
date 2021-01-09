@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../keyvalue/scopebase.h"
 #include "../plugins/pluginlistener.h"
 #include "../uniquecomponent/uniquecomponentcontainer.h"
 #include "Interfaces/filesystem/filewatcher.h"
