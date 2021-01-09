@@ -10,6 +10,7 @@ namespace Engine {
 namespace App {
     struct MADGINE_BASE_EXPORT GlobalAPIBase : VirtualScopeBase, MadgineObject<GlobalAPIBase> {
         GlobalAPIBase(App::Application &app);
+        virtual ~GlobalAPIBase() = default;
 
         template <typename T>
         T &getGlobalAPIComponent(bool init = true)
