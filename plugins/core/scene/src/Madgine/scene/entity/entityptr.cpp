@@ -9,6 +9,8 @@
 
 #include "Modules/serialize/streams/operations.h"
 
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
+
 METATABLE_BEGIN(Engine::Scene::Entity::EntityPtr)
 PROXY(get)
 METATABLE_END(Engine::Scene::Entity::EntityPtr)

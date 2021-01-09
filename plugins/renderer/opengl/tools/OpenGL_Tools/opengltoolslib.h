@@ -1,7 +1,5 @@
 #pragma once
 
-/// @cond
-
 #if defined(OpenGLTools_EXPORTS)
 #    define MADGINE_OPENGL_TOOLS_EXPORT DLL_EXPORT
 #else

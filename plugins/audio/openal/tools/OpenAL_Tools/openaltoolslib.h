@@ -1,7 +1,5 @@
 #pragma once
 
-/// @cond
-
 #if defined(OpenALPluginTools_EXPORTS)
 #    define MADGINE_OPENAL_TOOLS_EXPORT DLL_EXPORT
 #else

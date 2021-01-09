@@ -13,6 +13,8 @@
 
 #include "entitycomponentptr.h"
 
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
+
 namespace Engine {
 namespace Scene {
     namespace Entity {

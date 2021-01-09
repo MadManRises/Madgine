@@ -1,7 +1,5 @@
 #pragma once
 
-/// @cond
-
 #if defined(SceneRendererTools_EXPORTS)
 #    define MADGINE_SCENE_RENDERER_TOOLS_EXPORT DLL_EXPORT
 #else

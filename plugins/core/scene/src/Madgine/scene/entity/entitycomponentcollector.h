@@ -1,11 +1,5 @@
 #pragma once
 
-#include "Modules/plugins/pluginlocal.h"
-
-#include "Modules/keyvalue/objectptr.h"
-
-#include "Modules/keyvalue/metatable.h"
-
 #include "Modules/uniquecomponent/uniquecomponentdefine.h"
 #include "Modules/uniquecomponent/indexref.h"
 

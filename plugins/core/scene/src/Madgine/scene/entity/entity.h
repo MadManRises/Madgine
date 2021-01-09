@@ -2,7 +2,7 @@
 
 #include "Modules/keyvalue/scopebase.h"
 
-#include "entitycomponentbase.h"
+#include "Modules/keyvalue/objectptr.h"
 
 #include "Modules/serialize/container/syncablecontainer.h"
 

@@ -1,7 +1,5 @@
 #pragma once
 
-/// @cond
-
 #if defined(ClientTools_EXPORTS)
 #    define MADGINE_CLIENT_TOOLS_EXPORT DLL_EXPORT
 #else
