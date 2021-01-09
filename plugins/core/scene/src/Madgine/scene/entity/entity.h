@@ -12,6 +12,8 @@
 
 #include "Modules/serialize/syncableunit.h"
 
+#include "Modules/uniquecomponent/uniquecomponent.h"
+
 namespace Engine {
 namespace Scene {
     namespace Entity {
