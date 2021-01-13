@@ -15,8 +15,10 @@ namespace Serialize {
     struct SerializableContainerImpl : Serializable<OffsetPtr>,
                                        C,
                                        Observer {
-
+    private:
         using _traits = container_traits<C>;
+
+    public:
         using container = SerializableContainerImpl<C, Observer, controlled, OffsetPtr>;
 
         typedef typename _traits::container Base;
@@ -28,9 +30,11 @@ namespace Serialize {
 
         typedef typename _traits::value_type value_type;
 
+    protected:
         typedef UnitHelper<C> ContainerUnitHelper;
         typedef UnitHelper<value_type> ItemUnitHelper;
 
+    public:
         SerializableContainerImpl()
             : mActiveIterator(_traits::toPositionHandle(*this, Base::begin()))
         {
@@ -206,24 +210,6 @@ namespace Serialize {
         C &physical()
         {
             return *this;
-        }
-
-        template <typename T>
-        iterator find(T &&t)
-        {
-            iterator it = Base::find(std::forward<T>(t));
-            if (it == Base::end())
-                it = end();
-            return it;
-        }
-
-        template <typename T>
-        const_iterator find(T &&t) const
-        {
-            const_iterator it = Base::find(std::forward<T>(t));
-            if (it == Base::end())
-                it = end();
-            return it;
         }
 
         struct Operation : AtomicContainerOperationBase<container> {

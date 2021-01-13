@@ -1,6 +1,6 @@
-<Graph id=386>
+<Graph serId=386>
     <mNodes size=2>
-        <Item type="TestNode" id=419>
+        <Item type="TestNode" serId=419>
             <mFlowOutPins size=1>
                 <Item>
                     <Element>
@@ -26,7 +26,7 @@
                 </Item>
             </mDataInPins>
         </Item>
-        <Item type="TestNode" id=476>
+        <Item type="TestNode" serId=476>
             <mFlowOutPins size=1>
                 <Item>
                     <Element>

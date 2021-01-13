@@ -7,12 +7,12 @@ namespace StringUtil {
         return c == ' ';
     }
 
-    inline bool startsWith(const std::string_view &s, const std::string_view &prefix)
+    constexpr bool startsWith(const std::string_view &s, const std::string_view &prefix)
     {
         return s.substr(0, prefix.size()) == prefix;
     }
 
-    inline bool endsWith(const std::string_view &s, const std::string_view &suffix)
+    constexpr bool endsWith(const std::string_view &s, const std::string_view &suffix)
     {
         return s.size() >= suffix.size() ? (s.substr(s.size() - suffix.size(), suffix.size()) == suffix) : false;
     }

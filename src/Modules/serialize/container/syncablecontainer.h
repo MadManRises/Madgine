@@ -94,7 +94,15 @@ namespace Serialize {
 
         void clear()
         {
-            ResetOperation { *this }.clear();
+            if (this->isMaster()) {
+                ResetOperation { *this }.clear();
+            } else {
+                if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
+                    this->writeRequest(RESET, nullptr);
+                } else {
+                    std::terminate();
+                }
+            }
         }
 
         template <typename... _Ty>
@@ -224,7 +232,7 @@ namespace Serialize {
                 : Base::RemoveRangeOperation(c, from, to)
             {
                 if (this->mContainer.isSynced()) {
-                    std::pair<const_iterator, const_iterator> data { from, to };
+                    std::pair<iterator, iterator> data { from, to };
                     this->writeAction(ERASE_RANGE, &data, answerTarget, answerId);
                 }
             }
@@ -272,6 +280,7 @@ namespace Serialize {
         using RemoveOperation = AtomicContainerOperation<_RemoveOperation>;
         using RemoveRangeOperation = AtomicContainerOperation<_RemoveRangeOperation>;
         using ResetOperation = AtomicContainerOperation<_ResetOperation>;
+        //TODO: MultiInsertOperation
 
     private:
         template <typename T, typename... Callbacks>

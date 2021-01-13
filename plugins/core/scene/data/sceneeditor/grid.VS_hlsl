@@ -19,5 +19,7 @@ VertexShaderOutput main( AppData IN )
     VertexShaderOutput OUT;
     OUT.worldPos = IN.aPos;
     OUT.pos = mul( vp, IN.aPos );
+    OUT.pos.z += OUT.pos.w;
+    OUT.pos.z /= 2;
     return OUT;
 }
