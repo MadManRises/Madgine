@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Modules/uniquecomponent/uniquecomponentdefine.h"
 
 #include "Modules/threading/taskguard.h"
