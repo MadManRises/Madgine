@@ -6,6 +6,10 @@
 
 #include "Modules/serialize/formatter/safebinaryformatter.h"
 
+#include "serialize/xml/xmllib.h"
+
+#include "serialize/xml/xmlformatter.h"
+
 using namespace Engine::Serialize;
 
 struct Buffer {
@@ -13,9 +17,11 @@ struct Buffer {
     uint64_t mWrittenCount[2] = { 0, 0 };
 };
 
+using TestFormatter = Engine::Serialize::SafeBinaryFormatter;
+
 struct BufferedTestBuf : Engine::Serialize::buffered_streambuf {
     BufferedTestBuf(Buffer &buffer, Engine::Serialize::SyncManager &mgr, Engine::Serialize::ParticipantId id)
-        : buffered_streambuf(std::make_unique<SafeBinaryFormatter>(), mgr, id)
+        : buffered_streambuf(std::make_unique<TestFormatter>(), mgr, id)
         , mBuffer(buffer)
     {
     }
@@ -53,13 +59,13 @@ struct BufferedTestBuf : Engine::Serialize::buffered_streambuf {
 
 struct TestBuf : Engine::Serialize::SerializeStreambuf {
     TestBuf(Buffer &buffer, Engine::Serialize::SyncManager &mgr)
-        : SerializeStreambuf(std::make_unique<SafeBinaryFormatter>())
+        : SerializeStreambuf(std::make_unique<TestFormatter>())
         , mBuffer(buffer)
     {
     }
 
     TestBuf(Buffer &buffer, Engine::Serialize::SyncManager &mgr, Engine::Serialize::ParticipantId id)
-        : SerializeStreambuf(std::make_unique<SafeBinaryFormatter>(), mgr, id)
+        : SerializeStreambuf(std::make_unique<TestFormatter>(), mgr, id)
         , mBuffer(buffer)
     {
         size_t index = isMaster(StreamMode::WRITE) ? 1 : 0;
@@ -69,7 +75,7 @@ struct TestBuf : Engine::Serialize::SerializeStreambuf {
     }
 
     TestBuf(Buffer &buffer)
-        : SerializeStreambuf(std::make_unique<SafeBinaryFormatter>())
+        : SerializeStreambuf(std::make_unique<TestFormatter>())
         , mBuffer(buffer)
     {
         size_t index = 1;

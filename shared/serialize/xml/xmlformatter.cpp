@@ -121,6 +121,8 @@ namespace XML {
 
     void XMLFormatter::beginPrimitive(Serialize::SerializeOutStream &out, const char *name, uint8_t typeId)
     {
+        if (!name)
+            name = "Element";
         if (mCurrentExtendedCount > 0) {
             assert(mCurrentExtended);
             --mCurrentExtendedCount;
@@ -139,6 +141,8 @@ namespace XML {
 
     void XMLFormatter::endPrimitive(Serialize::SerializeOutStream &out, const char *name, uint8_t typeId)
     {
+        if (!name)
+            name = "Element";
         if (mCurrentExtended) {
             if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>)
                 out.writeUnformatted("\"");

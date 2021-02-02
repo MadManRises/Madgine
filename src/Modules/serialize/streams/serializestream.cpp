@@ -261,7 +261,7 @@ namespace Serialize {
 
     void SerializeOutStream::writeUnformatted(const SerializableUnitBase *p)
     {
-        size_t id = 0;
+        uint32_t id = 0;
         if (p) {
             SerializableUnitMap &map = serializableMap();
             auto it = map.try_emplace(p, map.size() + 1).first;
