@@ -10,6 +10,7 @@
 #include "../serializableunitptr.h"
 #include "bufferedstream.h"
 #include "pendingrequest.h"
+#include "comparestreamid.h"
 
 namespace Engine {
 namespace Serialize {
@@ -125,6 +126,7 @@ namespace Serialize {
             return it;
         }
 
+        //TODO: Maybe move loop out of this function
         template <typename... Args>
         static void writeAction(const C &c, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, Args &&... args)
         {
