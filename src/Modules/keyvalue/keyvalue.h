@@ -191,6 +191,9 @@ struct KeyType {
 template <typename T>
 using KeyType_t = typename KeyType<T>::type;
 
+template <typename T>
+using ValueType_t = std::decay_t<decltype(kvValue(std::declval<T>()))>;
+
 template <typename _Ty>
 struct KeyCompare {
 

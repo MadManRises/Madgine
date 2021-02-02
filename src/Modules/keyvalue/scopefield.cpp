@@ -41,4 +41,9 @@ bool ScopeField::isEditable() const
     return mPointer->second.mSetter;
 }
 
+bool ScopeField::isGeneric() const
+{
+    return mPointer->second.mIsGeneric;
+}
+
 }

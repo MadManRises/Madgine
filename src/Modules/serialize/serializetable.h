@@ -40,8 +40,8 @@ namespace Serialize {
         void setActive(SerializableUnitBase *unit, bool active, bool existenceChanged) const;
         void setParent(SerializableUnitBase *unit) const;
 
-        void writeAction(const SerializableUnitBase *parent, uint8_t index, int op, const void *data, ParticipantId answerTarget, TransactionId answerId) const;
-        void writeRequest(const SerializableUnitBase *parent, uint8_t index, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const;
+        void writeAction(const SerializableUnitBase *parent, uint8_t index, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams) const;
+        void writeRequest(const SerializableUnitBase *parent, uint8_t index, int op, const void *data, BufferedOutStream *out) const;
 
         uint8_t getIndex(size_t offset) const;
         const Serializer &get(uint8_t index) const;

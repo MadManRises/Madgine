@@ -3,15 +3,18 @@
 namespace Engine {
 namespace NodeGraph {
 
-    struct NodePrototypeBase;
-    struct NodeGraphInstance;
-    struct NodeInstance;
+    struct NodeBase;    
+    struct NodeGraph;
 
-    struct GraphExecutable;
+    struct NodeInterpreter;
+    struct NodeInterpreterData;
+
+    struct TargetPin;
 
     struct FlowOutPinPrototype;
     struct DataInPinPrototype;
     struct DataOutPinPrototype;
-
+    struct DataReceiverPinPrototype;
+    struct DataProviderPinPrototype;
 }
 }

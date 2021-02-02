@@ -178,9 +178,8 @@ namespace Serialize {
         }
 
                 template <typename... Args>
-        static void writeRequest(const Synced<T, Observer, OffsetPtr> &synced, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback, Args &&... args)
+        static void writeRequest(const Synced<T, Observer, OffsetPtr> &synced, int op, const void *data, BufferedOutStream *out, Args &&... args)
         {
-            BufferedOutStream *out = synced.getSlaveActionMessageTarget(requester, requesterTransactionId, std::move(callback));
             Serialize::write(*out, op, nullptr);
             Serialize::write(*out, *static_cast<const T *>(data), nullptr);
             out->endMessage();
@@ -215,9 +214,9 @@ namespace Serialize {
         }
 
                 template <typename... Args>
-        static void writeAction(const Synced<T, Observer, OffsetPtr> &synced, int op, const void *data, ParticipantId answerTarget, TransactionId answerId, Args &&... args)
+        static void writeAction(const Synced<T, Observer, OffsetPtr> &synced, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, Args &&... args)
         {
-            for (BufferedOutStream *out : synced.getMasterActionMessageTargets()) {
+            for (BufferedOutStream *out : outStreams) {
                 Serialize::write(*out, op, nullptr);
                 Serialize::write(*out, *static_cast<const T *>(data), nullptr);
                 out->endMessage();

@@ -126,21 +126,25 @@ namespace Tools {
         bool showName = !element || !style("noname", element);
         std::string id = (showName ? std::string() : "##"s) + it->key();
         bool editable = it->isEditable();
+        bool generic = it->isGeneric();
 
         ValueType value = *it;
-        std::pair<bool, bool> modified = drawValueImpl(element, parent, id, value, editable);
+        std::pair<bool, bool> modified = drawValueImpl(element, parent, id, value, editable, generic);
 
         if (modified.first || (modified.second && !value.isReference()))
             *it = value;
         return modified.first || modified.second;
     }
 
-    std::pair<bool, bool> Inspector::drawValueImpl(tinyxml2::XMLElement *element, TypedScopePtr parent, const std::string &id, ValueType &value, bool editable)
+    std::pair<bool, bool> Inspector::drawValueImpl(tinyxml2::XMLElement *element, TypedScopePtr parent, const std::string &id, ValueType &value, bool editable, bool generic)
     {
         bool cannotBeDisabled = value.index() == Engine::ValueTypeEnum::ScopeValue || value.index() == Engine::ValueTypeEnum::KeyValueVirtualRangeValue || value.index() == Engine::ValueTypeEnum::ApiFunctionValue;
 
         if (!editable && !cannotBeDisabled)
             ImGui::PushDisabled();
+
+        if (generic)
+            ImGui::BeginValueType({ ExtendedValueTypeEnum::GenericType }, id.c_str());
 
         std::pair<bool, bool> modified = value.visit(overloaded { [&](TypedScopePtr scope) {
                                                                      bool modified = false;
@@ -206,7 +210,7 @@ namespace Tools {
                         } else if (value.is<TypedScopePtr>()) {
                             key = "[" + std::to_string(i) + "] " + value.as<TypedScopePtr>().name() + "##" + key;
                         }
-                        std::pair<bool, bool> result = drawValueImpl(element, {}, key, value, /*editable && */ vValue.isEditable());
+                        std::pair<bool, bool> result = drawValueImpl(element, {}, key, value, /*editable && */ vValue.isEditable(), false);
                         if (result.first)
                             vValue = value;
                         changed |= result.second;
@@ -227,6 +231,9 @@ namespace Tools {
             [&](auto &other) {
                 return std::make_pair(ImGui::ValueTypeDrawer { id.c_str(), false }.draw(other), false);
             } });
+
+        if (generic)
+            modified.first |= ImGui::EndValueType(&value, { ExtendedValueTypeEnum::GenericType });
 
         if (!editable && !cannotBeDisabled)
             ImGui::PopDisabled();

@@ -15,7 +15,7 @@ namespace UI {
         std::function<bool(Widgets::WidgetBase *)> mInit;
     };
 
-    struct MADGINE_UI_EXPORT Handler : MadgineObject<Handler>, Serialize::VirtualSerializableUnitBase<VirtualScopeBase, Serialize::SerializableUnitBase> {
+    struct MADGINE_UI_EXPORT Handler : MadgineObject<Handler>, Serialize::VirtualSerializableUnitBase<VirtualScopeBase<>, Serialize::SerializableUnitBase> {
         SERIALIZABLEUNIT(Handler);
 
         Handler(UIManager &ui);

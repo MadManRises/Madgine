@@ -18,7 +18,7 @@
 
 namespace Engine {
 namespace Widgets {
-    struct MADGINE_WIDGETS_EXPORT WidgetBase : VirtualScope<WidgetBase, Serialize::VirtualUnit<WidgetBase, Serialize::VirtualSerializableUnitBase<VirtualScopeBase, Serialize::SerializableUnitBase>>> {
+    struct MADGINE_WIDGETS_EXPORT WidgetBase : VirtualScope<WidgetBase, Serialize::VirtualUnit<WidgetBase, Serialize::VirtualSerializableUnitBase<VirtualScopeBase<>, Serialize::SerializableUnitBase>>> {
         SERIALIZABLEUNIT(WidgetBase);
 
         WidgetBase(const std::string &name, WidgetBase *parent);

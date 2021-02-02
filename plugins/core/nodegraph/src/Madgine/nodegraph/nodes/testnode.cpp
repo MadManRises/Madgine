@@ -4,28 +4,27 @@
 
 #include "Modules/keyvalue/metatable_impl.h"
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
-//#include "Modules/serialize/serializetable_impl.h"
+#include "Modules/serialize/serializetable_impl.h"
+
+#include "../nodeinterpreter.h"
 
 NODE(TestNode, Engine::NodeGraph::TestNode)
 
-METATABLE_BEGIN(Engine::NodeGraph::TestNode)
+METATABLE_BEGIN_BASE(Engine::NodeGraph::TestNode, Engine::NodeGraph::NodeBase)
+MEMBER(mDummy)
 METATABLE_END(Engine::NodeGraph::TestNode)
-/*
-SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Skeleton)
-ENCAPSULATED_FIELD(Skeleton, getName, setName)
-SERIALIZETABLE_END(Engine::Scene::Entity::Skeleton)
-*/
+
+SERIALIZETABLE_INHERIT_BEGIN(Engine::NodeGraph::TestNode, Engine::NodeGraph::NodeBase)
+SERIALIZETABLE_END(Engine::NodeGraph::TestNode)
 
 
 namespace Engine {
 namespace NodeGraph {
 
-    TestNode::TestNode()
+    TestNode::TestNode(NodeGraph &graph)
+        : Node(graph)
     {
-        mFlowOutPins.emplace_back();
-        mDataOutPins.emplace_back(DataOutPinPrototype { ValueTypeIndex { ValueTypeEnum::IntValue } });
-        mDataInPins.emplace_back();
-        mDataInPins.emplace_back();
+        setup();
     }
 
     size_t TestNode::flowInCount() const
@@ -38,9 +37,19 @@ namespace NodeGraph {
         return "execute";
     }
 
+    size_t TestNode::flowOutCount() const
+    {
+        return 1;
+    }
+
     std::string_view TestNode::flowOutName(uint32_t index) const
     {
         return "1";
+    }
+
+    size_t TestNode::dataInCount() const
+    {
+        return 2;
     }
 
     std::string_view TestNode::dataInName(uint32_t index) const
@@ -48,19 +57,32 @@ namespace NodeGraph {
         return "data_in";
     }
 
+    ExtendedValueTypeDesc TestNode::dataInType(uint32_t index) const
+    {
+        return { ValueTypeIndex { index == 0 ? ValueTypeEnum::IntValue : ValueTypeEnum::FloatValue } };
+    }
+
+    size_t TestNode::dataOutCount() const
+    {
+        return 1;
+    }
+
     std::string_view TestNode::dataOutName(uint32_t index) const
     {
         return "data_out";
     }
 
-    void TestNode::execute(NodeInstance *instance, uint32_t flowIndex, ArgumentList *out) const
+    ExtendedValueTypeDesc TestNode::dataOutType(uint32_t index) const
     {
-        throw 0;
+        return { ValueTypeIndex { ValueTypeEnum::FloatValue } };
     }
 
-    ExtendedValueTypeDesc TestNode::dataInExpectedType(uint32_t index) const
+    uint32_t TestNode::interpret(NodeInterpreter &interpreter, uint32_t flowIn, std::unique_ptr<NodeInterpreterData> &data) const
     {
-        return { ValueTypeIndex { index == 0 ? ValueTypeEnum::IntValue : ValueTypeEnum::FloatValue } };
+        float f = interpreter.read(1).as<float>();
+        LOG(f << " -> " << f * 2.0f);
+        interpreter.write(0, ValueType { 2.0f * f });
+        return 0;
     }
 
 }

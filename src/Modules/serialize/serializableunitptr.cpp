@@ -60,9 +60,9 @@ namespace Serialize {
         in.format().endCompound(in, name);
     }
 
-    void SerializableUnitConstPtr::writeAction(uint8_t index, int op, const void *data, ParticipantId answerTarget, TransactionId answerId) const
+    void SerializableUnitConstPtr::writeAction(uint8_t index, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams) const
     {
-        mType->writeAction(mUnit, index, op, data, answerTarget, answerId);
+        mType->writeAction(mUnit, index, op, data, outStreams);
     }
 
     void SerializableUnitPtr::readAction(BufferedInOutStream &in, PendingRequest *request) const
@@ -70,9 +70,9 @@ namespace Serialize {
         mType->readAction(unit(), in, request);
     }
 
-    void SerializableUnitConstPtr::writeRequest(uint8_t index, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const
+    void SerializableUnitConstPtr::writeRequest(uint8_t index, int op, const void *data, BufferedOutStream *out) const
     {
-        mType->writeRequest(mUnit, index, op, data, requester, requesterTransactionId, callback);
+        mType->writeRequest(mUnit, index, op, data, out);
     }
 
     void SerializableUnitPtr::readRequest(BufferedInOutStream &in, TransactionId id) const

@@ -10,6 +10,7 @@ struct MODULES_EXPORT ScopeBase {
 };
 template <typename T, typename Base>
 struct VirtualScope;
+template <typename Base>
 struct VirtualScopeBase;
 struct ProxyScopeBase;
 struct MetaTable;
@@ -116,6 +117,7 @@ namespace Ini {
 namespace Serialize {
     struct SerializeInStream;
     struct SerializeOutStream;
+    struct SerializableDataUnit;
     struct SerializableUnitBase;
     struct SyncableUnitBase;
     struct BufferedInOutStream;

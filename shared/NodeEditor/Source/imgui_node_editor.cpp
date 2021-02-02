@@ -1225,12 +1225,12 @@ void ed::EditorContext::End()
         // Copy group nodes
         std::for_each(m_Nodes.begin(), groupsItEnd, copyNode);
 
+        // Copy normal nodes
+        std::for_each(groupsItEnd, m_Nodes.end(), copyNode);
+
         // Copy links
         for (int i = 0; i < c_LinkChannelCount; ++i, ++targetChannel)
             ImDrawList_SwapChannels(drawList, c_LinkStartChannel + i, targetChannel);
-
-        // Copy normal nodes
-        std::for_each(groupsItEnd, m_Nodes.end(), copyNode);
     }
 #endif
 
@@ -1991,7 +1991,7 @@ ed::Control ed::EditorContext::BuildControl(bool allowOffscreen)
         hotObject = FindLinkAt(mousePos);
 
     // Check for interaction with background.
-    auto backgroundClicked = emitInteractiveArea(NodeId(0), editorRect);    
+    auto backgroundClicked = emitInteractiveArea(NodeId(0), editorRect);
     auto backgroundDoubleClicked = !doubleClickedObject && ImGui::IsItemHovered() ? ImGui::IsMouseDoubleClicked(0) : false;
     auto isBackgroundActive = ImGui::IsItemActive();
     auto isBackgroundHot = !hotObject;

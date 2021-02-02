@@ -75,8 +75,8 @@ namespace Serialize {
 
         void writeState(SerializeOutStream &out, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0) const;
 
-        void writeAction(uint8_t index, int op, const void *data, ParticipantId answerTarget, TransactionId answerId) const;
-        void writeRequest(uint8_t index, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const;
+        void writeAction(uint8_t index, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams) const;
+        void writeRequest(uint8_t index, int op, const void *data, BufferedOutStream *out) const;
 
         const SerializableUnitBase *mUnit = nullptr;
         const SerializeTable *mType = nullptr;

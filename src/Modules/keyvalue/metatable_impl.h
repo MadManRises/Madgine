@@ -66,7 +66,8 @@ constexpr Accessor property()
 
             to_ValueType<true>(retVal, std::forward<T>(value));
         },
-        setter
+        setter,
+        std::is_same_v<ValueType, std::decay_t<T>>
     };
 }
 

@@ -1,10 +1,10 @@
-<Graph serId=386>
-    <mNodes size=2>
-        <Item type="TestNode" serId=419>
+<Graph serId=1>
+    <mNodes size=5>
+        <Item type="TestNode" serId=2>
             <mFlowOutPins size=1>
                 <Item>
                     <Element>
-                        <Element>476</Element>
+                        <Element>2</Element>
                         <Element>0</Element>
                     </Element>
                 </Item>
@@ -12,25 +12,31 @@
             <mDataInPins size=2>
                 <Item>
                     <Element>
-                        <Element>386</Element>
                         <Element>0</Element>
+                        <Element>4294967295</Element>
                     </Element>
-                    <Element type=3>0</Element>
                 </Item>
                 <Item>
                     <Element>
-                        <Element>0</Element>
+                        <Element>4</Element>
                         <Element>0</Element>
                     </Element>
-                    <Element type=5>0</Element>
                 </Item>
             </mDataInPins>
+            <mDataOutPins size=1>
+                <Item>
+                    <Element>
+                        <Element>5</Element>
+                        <Element>0</Element>
+                    </Element>
+                </Item>
+            </mDataOutPins>
         </Item>
-        <Item type="TestNode" serId=476>
+        <Item type="TestNode" serId=3>
             <mFlowOutPins size=1>
                 <Item>
                     <Element>
-                        <Element>386</Element>
+                        <Element>0</Element>
                         <Element>0</Element>
                     </Element>
                 </Item>
@@ -38,36 +44,64 @@
             <mDataInPins size=2>
                 <Item>
                     <Element>
-                        <Element>419</Element>
                         <Element>0</Element>
+                        <Element>4294967295</Element>
                     </Element>
-                    <Element type=3>0</Element>
                 </Item>
                 <Item>
                     <Element>
-                        <Element>0</Element>
+                        <Element>5</Element>
                         <Element>0</Element>
                     </Element>
-                    <Element type=5>0</Element>
                 </Item>
             </mDataInPins>
+            <mDataOutPins size=1>
+                <Item>
+                    <Element>
+                        <Element>3</Element>
+                        <Element>0</Element>
+                    </Element>
+                </Item>
+            </mDataOutPins>
+        </Item>
+        <Item type="VariableNode" serId=4>
+            <mDefaultValue type=5>0</mDefaultValue>
+            <mFlowOutPins size=0>
+            </mFlowOutPins>
+            <mDataInPins size=0>
+            </mDataInPins>
+            <mDataOutPins size=0>
+            </mDataOutPins>
+        </Item>
+        <Item type="VariableNode" serId=5>
+            <mDefaultValue type=5>1</mDefaultValue>
+            <mFlowOutPins size=0>
+            </mFlowOutPins>
+            <mDataInPins size=0>
+            </mDataInPins>
+            <mDataOutPins size=0>
+            </mDataOutPins>
+        </Item>
+        <Item type="VariableNode" serId=6>
+            <mDefaultValue type=5>0</mDefaultValue>
+            <mFlowOutPins size=0>
+            </mFlowOutPins>
+            <mDataInPins size=0>
+            </mDataInPins>
+            <mDataOutPins size=0>
+            </mDataOutPins>
         </Item>
     </mNodes>
     <mFlowInPins size=1>
         <Item>
             <Element>
-                <Element>419</Element>
+                <Element>1</Element>
                 <Element>0</Element>
             </Element>
         </Item>
     </mFlowInPins>
-    <mDataOutPins size=1>
-        <Item>
-            <Element>
-                <Element>476</Element>
-                <Element>0</Element>
-            </Element>
-            <Element type=0></Element>
-        </Item>
-    </mDataOutPins>
+    <mDataReceiverPins size=0>
+    </mDataReceiverPins>
+    <mDataProviderPins size=0>
+    </mDataProviderPins>
 </Graph>

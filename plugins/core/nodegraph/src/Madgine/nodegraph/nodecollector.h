@@ -5,16 +5,18 @@
 #include "Modules/uniquecomponent/uniquecomponent.h"
 #include "Modules/uniquecomponent/indexref.h"
 
-DECLARE_UNIQUE_COMPONENT(Engine::NodeGraph, NodePrototype, NodePrototypeBase);
+#include "Modules/serialize/virtualserializableunit.h"
+
+DECLARE_UNIQUE_COMPONENT(Engine::NodeGraph, Node, NodeBase, NodeGraph &);
 
 namespace Engine {
 namespace NodeGraph {
 
     template <typename T>
-    struct NodePrototype : NamedComponent<T, NodePrototypeComponent<T>> {
-        using NamedComponent<T, NodePrototypeComponent<T>>::NamedComponent;
+    struct Node : Serialize::VirtualUnit<T, VirtualScope<T, NamedComponent<T, NodeComponent<T>>>> {
+        using Serialize::VirtualUnit<T, VirtualScope<T, NamedComponent<T, NodeComponent<T>>>>::VirtualUnit;
 
-        virtual const std::string_view& name() const override {
+        virtual std::string_view name() const override {
             return this->componentName();
         }
     };

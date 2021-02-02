@@ -7,8 +7,8 @@
 
 #include "Modules/math/matrix3.h"
 
-#include "Modules/keyvalue/typedscopeptr.h"
 #include "Modules/keyvalue/proxyscopebase.h"
+#include "Modules/keyvalue/typedscopeptr.h"
 
 #include "Modules/keyvalue/boundapifunction.h"
 
@@ -25,7 +25,7 @@ ImGuiContext *&getImGuiContext()
 
 namespace ImGui {
 
-    ValueTypePayload sPayload;
+ValueTypePayload sPayload;
 
 bool ValueTypeDrawer::draw(Engine::TypedScopePtr &scope)
 {
@@ -358,7 +358,8 @@ bool ValueTypeDrawer::draw(const Engine::Filesystem::Path &p)
     return false;
 }
 
-bool showDebugData() {
+bool showDebugData()
+{
     return ImGui::GetIO().KeyShift;
 }
 
@@ -424,7 +425,7 @@ struct ValueTypeFilterImpl {
     static constexpr bool value = Engine::type_pack_contains_v<Engine::ValueType::NonDefaultConstructibleTypes, Engine::type_pack_select_t<0, T>>;
 };
 
-bool ValueType(Engine::ValueType *v, Engine::ExtendedValueTypeDesc type, const char *name, bool minified)
+void BeginValueType(Engine::ExtendedValueTypeDesc type, const char *name)
 {
     if (type.mType == Engine::ExtendedValueTypeEnum::GenericType) {
         const float width = CalcItemWidth() - GetFrameHeight();
@@ -433,23 +434,23 @@ bool ValueType(Engine::ValueType *v, Engine::ExtendedValueTypeDesc type, const c
         BeginGroup();
         ImGui::PushItemWidth(width);
     }
+}
 
-    bool result = v->visit([&](auto &tmp) {
-        return ValueTypeDrawer { name, minified }.draw(tmp);
-    });
-
+bool EndValueType(Engine::ValueType *v, Engine::ExtendedValueTypeDesc type)
+{
+    bool changed = false;
     if (type.mType == Engine::ExtendedValueTypeEnum::GenericType) {
         ImGui::PopItemWidth();
         ImGui::SameLine(0, 0.0f);
         if (ImGui::BeginCombo("##combo", "", ImGuiComboFlags_NoPreview | ImGuiComboFlags_PopupAlignLeft)) {
-
+            changed = true;
             SelectValueTypeTypes(Engine::type_pack_filter_if_t<Engine::ValueTypeList, ValueTypeFilterImpl> {}, v);
             ImGui::EndCombo();
         }
         EndGroup();
         ImGui::PopID();
     }
-    return result;
+    return changed;
 }
 
 void PushDisabled()
@@ -705,7 +706,7 @@ void DraggableValueTypeSource(const std::string &name, Engine::TypedScopePtr sco
         ValueTypePayload *payload = &sPayload;
         payload->mName = name;
         payload->mSender = scope;
-        payload->mValue = value;        
+        payload->mValue = value;
         ImGui::SetDragDropPayload("ValueType", &payload, sizeof(payload), ImGuiCond_Once);
         ImGui::Text(name);
         ImGui::Text(value.toShortString());

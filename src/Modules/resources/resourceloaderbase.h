@@ -5,7 +5,7 @@
 namespace Engine {
 namespace Resources {
 
-    struct MODULES_EXPORT ResourceLoaderBase : VirtualScopeBase {
+    struct MODULES_EXPORT ResourceLoaderBase : VirtualScopeBase<> {
 
         using ResourceType = ResourceBase;
 

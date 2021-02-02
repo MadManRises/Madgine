@@ -47,4 +47,16 @@ const ValueType &getArgument(const ArgumentList &args, size_t index)
 #include "valuetypedef.h"
 #undef VALUETYPE_IMPL
 
+template <>
+MODULES_EXPORT void to_ValueType_impl<ValueType>(ValueType &v, ValueType &&t)
+{
+    v = std::move(t);
+}
+
+template <>
+MODULES_EXPORT void to_ValueType_impl<ValueType &>(ValueType &v, ValueType &t)
+{
+    v = t;
+}
+
 }

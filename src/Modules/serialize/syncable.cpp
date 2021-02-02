@@ -49,7 +49,7 @@ namespace Serialize {
 
     void SyncableBase::writeAction(const SyncableUnitBase *parent, uint8_t index, int op, const void *data, ParticipantId answerTarget, TransactionId answerId) const
     {
-        parent->serializeType()->writeAction(parent, index, op, data, answerTarget, answerId);
+        parent->serializeType()->writeAction(parent, index, op, data, getMasterActionMessageTargets(parent, index, answerTarget, answerId));
     }
 
     BufferedOutStream *SyncableBase::getSlaveActionMessageTarget(const SyncableUnitBase *parent, uint8_t index, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const
@@ -62,7 +62,7 @@ namespace Serialize {
 
     void SyncableBase::writeRequest(const SyncableUnitBase *parent, uint8_t index, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const
     {
-        parent->serializeType()->writeRequest(parent, index, op, data, requester, requesterTransactionId, std::move(callback));
+        parent->serializeType()->writeRequest(parent, index, op, data, getSlaveActionMessageTarget(parent, index, requester, requesterTransactionId, std::move(callback)));
     }
 
     void SyncableBase::beginActionResponseMessage(const SyncableUnitBase *parent, uint8_t index, BufferedOutStream *stream, TransactionId id) const

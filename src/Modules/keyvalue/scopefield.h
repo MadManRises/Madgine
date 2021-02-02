@@ -16,6 +16,7 @@ struct MODULES_EXPORT ScopeField {
     const char *key() const;
 
     bool isEditable() const;
+    bool isGeneric() const;
 
 private:
     TypedScopePtr mScope;

@@ -13,7 +13,7 @@
 namespace Engine {
 namespace Window {
 
-    struct MADGINE_CLIENT_EXPORT MainWindowComponentBase : Serialize::VirtualSerializableUnitBase<VirtualScopeBase, Serialize::SerializableUnitBase>, MadgineObject<MainWindowComponentBase> {
+    struct MADGINE_CLIENT_EXPORT MainWindowComponentBase : Serialize::VirtualSerializableUnitBase<VirtualScopeBase<>, Serialize::SerializableUnitBase>, MadgineObject<MainWindowComponentBase> {
         MainWindowComponentBase(MainWindow &window, int priority);
         virtual ~MainWindowComponentBase() = default;
 

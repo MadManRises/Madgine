@@ -55,7 +55,7 @@ namespace Physics {
     };
 
     
-    struct CollisionShapeInstance : Serialize::VirtualSerializableUnitBase<VirtualScopeBase, Serialize::SerializableUnitBase> {
+    struct CollisionShapeInstance : Serialize::VirtualSerializableUnitBase<VirtualScopeBase<>, Serialize::SerializableUnitBase> {
         virtual ~CollisionShapeInstance() = default;
         virtual btCollisionShape *get() = 0;
         virtual bool isInstance() = 0;

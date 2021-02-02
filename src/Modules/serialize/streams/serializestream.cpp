@@ -261,9 +261,13 @@ namespace Serialize {
 
     void SerializeOutStream::writeUnformatted(const SerializableUnitBase *p)
     {
-        SerializableUnitMap &map = serializableMap();
-        auto it = map.try_emplace(p, map.size() + 1).first;
-        writeUnformatted(it->second);
+        size_t id = 0;
+        if (p) {
+            SerializableUnitMap &map = serializableMap();
+            auto it = map.try_emplace(p, map.size() + 1).first;
+            id = it->second;
+        }
+        writeUnformatted(id);
     }
 
     void SerializeOutStream::writeRaw(const void *buffer, size_t size)

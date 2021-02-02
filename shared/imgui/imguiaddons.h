@@ -65,23 +65,6 @@ struct ValueTypePayload {
     mutable std::string mStatusMessage;
 };
 
-namespace details {
-    template <typename F, typename T>
-    using F_supports = decltype(std::declval<F>()(std::declval<T>()));
-}
-
-template <typename F>
-bool ValueType(Engine::ValueType *v, F &&f, const char *name = "", bool minified = false)
-{
-
-    return v->visit([&](auto &tmp) {
-        if constexpr (Engine::can_apply<details::F_supports, F, decltype(tmp)>::value) {
-            return f(std::forward<decltype(tmp)>(tmp));
-        } else {
-            return ValueTypeDrawer { name, minified }.draw(tmp);
-        }
-    });
-}
 
 IMGUI_API bool showDebugData();
 
@@ -90,7 +73,8 @@ IMGUI_API void Text(const std::string_view &s);
 IMGUI_API bool InputText(const char *label, std::string *s);
 IMGUI_API bool InputText(const char *label, Engine::CoWString *s);
 
-IMGUI_API bool ValueType(Engine::ValueType *v, Engine::ExtendedValueTypeDesc type, const char *name = "", bool minified = false);
+IMGUI_API void BeginValueType(Engine::ExtendedValueTypeDesc type, const char *name = "");
+IMGUI_API bool EndValueType(Engine::ValueType *v, Engine::ExtendedValueTypeDesc type);
 
 IMGUI_API void PushDisabled();
 IMGUI_API void PopDisabled();

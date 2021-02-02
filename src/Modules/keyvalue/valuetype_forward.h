@@ -8,6 +8,8 @@
 
 #include "ownedscopeptr.h"
 
+#include "../generic/container/virtualiterator.h"
+
 namespace Engine {
 
 MODULES_EXPORT ValueType &KeyValuePair_key(KeyValuePair &p);
@@ -114,7 +116,7 @@ decltype(auto) ValueType_as(const ValueType &v)
 template <bool reference_to_ptr, typename T>
 decltype(auto) convert_ValueType(T &&t)
 {
-    if constexpr (isValueTypePrimitive_v<std::decay_t<T>>) {
+    if constexpr (isValueTypePrimitive_v<std::decay_t<T>> || std::is_same_v<ValueType, std::decay_t<T>>) {
         return std::forward<T>(t);
     } else if constexpr (std::is_enum_v<std::decay_t<T>>) {
         if constexpr (std::is_reference_v<T>) {
@@ -132,18 +134,18 @@ decltype(auto) convert_ValueType(T &&t)
         }
     } else if constexpr (is_iterable_v<T>) {
         return KeyValueVirtualRange { std::forward<T>(t), type_holder<Functor<to_KeyValuePair<true, decltype(*std::declval<typename derive_iterator<T>::iterator>())>>> };
-    } else if constexpr (TupleUnpacker::is_tuplefyable_v<std::remove_reference_t<T>>) {
+    } /*else if constexpr (TupleUnpacker::is_tuplefyable_v<std::remove_reference_t<T>>) {
         throw "TODO";
         return 3;
-    } else {
+    } */else {
         static_assert(dependent_bool<T, false>::value, "The provided type can not be converted to a ValueType");
     }
 }
 
-template <typename T, typename = std::enable_if_t<isValueTypePrimitive_v<std::decay_t<T>>>>
+template <typename T, typename = std::enable_if_t<isValueTypePrimitive_v<std::decay_t<T>> || std::is_same_v<ValueType, std::decay_t<T>>>>
 MODULES_EXPORT void to_ValueType_impl(ValueType &v, T &&t);
 
-template <typename T, typename = std::enable_if_t<isValueTypePrimitive_v<std::decay_t<T>>>>
+template <typename T, typename = std::enable_if_t<isValueTypePrimitive_v<std::decay_t<T>> || std::is_same_v<ValueType, std::decay_t<T>>>>
 MODULES_EXPORT void to_ValueTypeRef_impl(ValueTypeRef &v, T &&t);
 
 template <bool reference_to_ptr, typename T>

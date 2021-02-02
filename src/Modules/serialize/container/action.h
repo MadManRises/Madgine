@@ -91,9 +91,9 @@ namespace Serialize {
     template <auto f, typename Config, typename OffsetPtr, typename R, typename T, typename... _Ty, typename... Configs>
     struct Operations<__action__impl__::ActionImpl<f, Config, OffsetPtr, R, T, _Ty...>, Configs...> {
         template <typename... Args>
-        static void writeAction(const Action<f, Config, OffsetPtr> &action, int op, const void *data, ParticipantId answerTarget, TransactionId answerId, Args &&... args)
+        static void writeAction(const Action<f, Config, OffsetPtr> &action, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, Args &&... args)
         {
-            for (BufferedOutStream *out : action.getMasterActionMessageTargets(answerTarget, answerId)) {
+            for (BufferedOutStream *out : outStreams) {
                 TupleUnpacker::forEach(*static_cast<const std::tuple<_Ty...> *>(data), [&](auto &field) { write(*out, field, nullptr, args...); });                            
                 out->endMessage();
             }
@@ -109,9 +109,8 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static void writeRequest(const Action<f, Config, OffsetPtr> &action, int op, const void *data, ParticipantId requesterId, TransactionId requesterTransactionId, std::function<void(void *)> callback, Args &&... args)
+        static void writeRequest(const Action<f, Config, OffsetPtr> &action, int op, const void *data, BufferedOutStream *out, Args &&... args)
         {
-            BufferedOutStream *out = action.getSlaveActionMessageTarget(requesterId, requesterTransactionId, std::move(callback));
             TupleUnpacker::forEach(*static_cast<const std::tuple<_Ty...> *>(data), [&](auto &field) { write(*out, field, nullptr, args...); });                            
             out->endMessage();
         }

@@ -6,8 +6,8 @@ namespace Engine {
 namespace NodeGraph {
 
     struct MADGINE_NODEGRAPH_EXPORT TargetPin {
-        GraphExecutable *mNode = nullptr;
-        uint32_t mIndex = 0;
+        uint32_t mNode = 0;
+        uint32_t mIndex = std::numeric_limits<uint32_t>::max();
 
         explicit operator bool() const;
     };
@@ -18,10 +18,17 @@ namespace NodeGraph {
 
     struct DataInPinPrototype {
         TargetPin mSource;
-        ValueType mDefaultValue;
     };
 
     struct DataOutPinPrototype {
+        TargetPin mTarget;
+    };
+
+    struct DataReceiverPinPrototype {
+        ExtendedValueTypeDesc mType;
+    };
+
+    struct DataProviderPinPrototype {
         ExtendedValueTypeDesc mType;
     };
 
@@ -32,16 +39,24 @@ namespace NodeGraph {
 
     enum class PinType {
         Flow,
-        Data
+        Data,
+        DataInstance
     };
 
     struct PinDesc {
         PinDir mDir;
         PinType mType;
         uint32_t mIndex;
+
+        bool isCompatible(const PinDesc& other) const {
+            if (mDir == other.mDir)
+                return false;
+            if (mType == PinType::Flow || other.mType == PinType::Flow)
+                return mType == other.mType;
+            return mType != other.mType;
+        }
     };
 
 }
 }
 
-MAKE_TUPLEFYABLE(Engine::NodeGraph::DataInPinPrototype, 2)

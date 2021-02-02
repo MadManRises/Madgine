@@ -11,7 +11,7 @@
 namespace Engine {
 namespace Tools {
 
-    struct MADGINE_TOOLS_EXPORT ToolBase : Serialize::VirtualSerializableUnitBase<VirtualScopeBase, Serialize::SerializableUnitBase>, MadgineObject<ToolBase> {
+    struct MADGINE_TOOLS_EXPORT ToolBase : Serialize::VirtualSerializableUnitBase<VirtualScopeBase<>, Serialize::SerializableUnitBase>, MadgineObject<ToolBase> {
         SERIALIZABLEUNIT(ToolBase);
 
         ToolBase (ImRoot &root);

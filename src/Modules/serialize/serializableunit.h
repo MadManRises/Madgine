@@ -6,13 +6,15 @@
 
 #include "statetransmissionflags.h"
 
+#include "serializabledataunit.h"
+
 namespace Engine {
 namespace Serialize {
 
 #define SERIALIZABLEUNIT_MEMBERS() \
     READONLY_PROPERTY(Synced, isSynced)
 
-    struct MODULES_EXPORT SerializableUnitBase {
+    struct MODULES_EXPORT SerializableUnitBase : SerializableDataUnit {
     protected:
         SerializableUnitBase();
         SerializableUnitBase(const SerializableUnitBase &other);

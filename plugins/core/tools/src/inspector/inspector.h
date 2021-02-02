@@ -20,7 +20,7 @@ namespace Tools {
         bool drawRemainingMembers(TypedScopePtr scope, std::set<std::string> &drawn);
         bool drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, const ScopeIterator &it);
         //void drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, std::string id, std::string key, ValueType value, bool editable);
-        std::pair<bool, bool> drawValueImpl(tinyxml2::XMLElement *element, TypedScopePtr parent, const std::string &id, ValueType &value, bool editable);
+        std::pair<bool, bool> drawValueImpl(tinyxml2::XMLElement *element, TypedScopePtr parent, const std::string &id, ValueType &value, bool editable, bool generic);
 
         bool draw(TypedScopePtr scope, std::set<std::string> drawn = {}, const char *layoutName = nullptr);
 

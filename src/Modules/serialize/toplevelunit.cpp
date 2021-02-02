@@ -77,6 +77,7 @@ namespace Serialize {
 
     std::set<BufferedOutStream *, CompareStreamId> TopLevelUnitBase::getMasterMessageTargets() const
     {
+        //TODO: maybe return std::vector
         std::set<BufferedOutStream *, CompareStreamId> result;
         for (SyncManager *mgr : mMasterManagers) {
             const std::set<BufferedOutStream *, CompareStreamId> &targets = mgr->getMasterMessageTargets();

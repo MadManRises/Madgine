@@ -3,8 +3,8 @@
 #include "toolscollector.h"
 #include "toolbase.h"
 
-#include "Madgine/nodegraph/nodegraphprototypeloader.h"
-#include "Madgine/nodegraph/pinprototypes.h"
+#include "Madgine/nodegraph/nodegraphloader.h"
+#include "Madgine/nodegraph/pins.h"
 
 namespace ed = ax::NodeEditor;
 
@@ -45,8 +45,11 @@ namespace Tools {
     private:
         ed::EditorContext *mEditor = nullptr;
         bool mHierarchyVisible;
+        bool mNodeDetailsVisible;
 
-        NodeGraph::NodeGraphPrototypeLoader::HandleType mGraph;
+        NodeGraph::NodeGraphLoader::HandleType mGraph;
+
+        uintptr_t mSelectedNodeIndex = std::numeric_limits<uintptr_t>::max();
 
         Filesystem::Path mDirBuffer, mSelectionBuffer;
         std::string mSelectionTargetBuffer;
