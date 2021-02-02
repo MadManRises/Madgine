@@ -32,12 +32,12 @@ namespace Serialize {
         std::set<BufferedOutStream *, CompareStreamId> getMasterActionMessageTargets(ParticipantId answerTarget = 0, TransactionId answerId = 0,
             const std::set<ParticipantId> &targets = {}) const
         {
-            return SyncableBase::getMasterActionMessageTargets(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableUnitBase>()), answerTarget, answerId, targets);
+            return SyncableBase::getMasterActionMessageTargets(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableDataUnit>()), answerTarget, answerId, targets);
         }
 
         BufferedOutStream *getSlaveActionMessageTarget(ParticipantId requester = 0, TransactionId requesterTransactionId = 0, std::function<void(void *)> callback = {}) const
         {
-            return SyncableBase::getSlaveActionMessageTarget(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableUnitBase>()), requester, requesterTransactionId, std::move(callback));
+            return SyncableBase::getSlaveActionMessageTarget(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableDataUnit>()), requester, requesterTransactionId, std::move(callback));
         }
         
         ParticipantId participantId()
@@ -47,22 +47,22 @@ namespace Serialize {
 
         void writeAction(int op, const void *data, ParticipantId answerTarget = 0, TransactionId answerId = 0) const
         {
-            SyncableBase::writeAction(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableUnitBase>()), op, data, answerTarget, answerId);
+            SyncableBase::writeAction(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableDataUnit>()), op, data, answerTarget, answerId);
         }
 
         void writeRequest(int op, const void *data, ParticipantId requester = 0, TransactionId requesterTransactionId = 0, std::function<void(void *)> callback = {}) const
         {
-            SyncableBase::writeRequest(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableUnitBase>()), op, data, requester, requesterTransactionId, std::move(callback));
+            SyncableBase::writeRequest(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableDataUnit>()), op, data, requester, requesterTransactionId, std::move(callback));
         }
 
         void beginActionResponseMessage(BufferedOutStream *stream, TransactionId id) const
         {
-            SyncableBase::beginActionResponseMessage(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableUnitBase>()), stream, id);
+            SyncableBase::beginActionResponseMessage(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableDataUnit>()), stream, id);
         }    
 
         BufferedOutStream *beginActionResponseMessage(ParticipantId stream, TransactionId id) const
         {
-            return SyncableBase::beginActionResponseMessage(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableUnitBase>()), stream, id);
+            return SyncableBase::beginActionResponseMessage(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableDataUnit>()), stream, id);
         }   
 
         bool isMaster() const
@@ -77,7 +77,7 @@ namespace Serialize {
 
 		/*bool isActive() const
         {
-                    return !parent() || parent()->isActive(parent()->type()->getIndex(OffsetPtr::template offset<SerializableUnitBase>()));
+                    return !parent() || parent()->isActive(parent()->type()->getIndex(OffsetPtr::template offset<SerializableDataUnit>()));
         }*/
     };
 }

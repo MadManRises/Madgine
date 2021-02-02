@@ -45,12 +45,12 @@ namespace Scene {
                 return &mData.at(index.mIndex).template get<0>();
             }
 
-            Serialize::SerializableUnitPtr getSerialized(const EntityComponentHandle<EntityComponentBase> &index) override final
+            Serialize::SerializableDataPtr getSerialized(const EntityComponentHandle<EntityComponentBase> &index) override final
             {
                 return &mData.at(index.mIndex).template get<0>();
             }
 
-            Serialize::SerializableUnitConstPtr getSerialized(const EntityComponentHandle<EntityComponentBase> &index) const override final
+            Serialize::SerializableDataConstPtr getSerialized(const EntityComponentHandle<EntityComponentBase> &index) const override final
             {
                 return &mData.at(index.mIndex).template get<0>();
             }

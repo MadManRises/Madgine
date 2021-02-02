@@ -32,28 +32,28 @@ namespace Serialize {
             []() {
                 return size_t { 0 };
             },
-            [](const SerializableUnitBase *_unit, SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
+            [](const SerializableDataUnit *_unit, SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                     write(out, (unit->*Getter)(), name, CallerHierarchyPtr { hierarchy.append(unit) } );
             },
-            [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) {
+            [](SerializableDataUnit *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) {
                 Unit *unit = static_cast<Unit *>(_unit);
                 (unit->*Setter)(nullptr);
                 read(in, unit->*P, name, CallerHierarchyPtr { hierarchy.append(unit) } );
             },
-            [](SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) {
+            [](SerializableDataUnit *unit, SerializeInStream &in, PendingRequest *request) {
                 throw "Unsupported";
             },
-            [](SerializableUnitBase *unit, BufferedInOutStream &inout, TransactionId id) {
+            [](SerializableDataUnit *unit, BufferedInOutStream &inout, TransactionId id) {
                 throw "Unsupported";
             },
-            [](SerializableUnitBase *_unit, SerializeInStream &in) {
+            [](SerializableDataUnit *_unit, SerializeInStream &in) {
                 Unit *unit = static_cast<Unit *>(_unit);
                 UnitHelper<T>::applyMap(in, unit->*P);
             },
-            [](SerializableUnitBase *unit, bool b) {
+            [](SerializableDataUnit *unit, bool b) {
             },
-            [](SerializableUnitBase *_unit, bool active, bool existenceChanged) {
+            [](SerializableDataUnit *_unit, bool active, bool existenceChanged) {
                 Unit *unit = static_cast<Unit *>(_unit);
                 if (active) {
                     T val = unit->*P;
@@ -65,12 +65,12 @@ namespace Serialize {
                     unit->*P = val;
                 }
             },
-            [](SerializableUnitBase *unit) {
+            [](SerializableDataUnit *unit) {
             },
-            [](const SerializableUnitBase *unit, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams) {
+            [](const SerializableDataUnit *unit, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams) {
                 throw "Unsupported";
             },
-            [](const SerializableUnitBase *_unit, int op, const void *data, BufferedOutStream *out) {
+            [](const SerializableDataUnit *_unit, int op, const void *data, BufferedOutStream *out) {
                 throw "Unsupported";
             }
         };
@@ -94,34 +94,34 @@ namespace Serialize {
             []() {
                 return size_t { 0 };
             },
-            [](const SerializableUnitBase *_unit, SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
+            [](const SerializableDataUnit *_unit, SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 write(out, (unit->*Getter)(), name, hierarchy.append(unit));
             },
-            [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) {
+            [](SerializableDataUnit *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) {
                 Unit *unit = static_cast<Unit *>(_unit);
                 MakeOwning_t<T> dummy;
                 read(in, dummy, name, CallerHierarchyPtr { hierarchy.append(unit) });
                 (unit->*Setter)(std::move(dummy));
             },
-            [](SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) {
+            [](SerializableDataUnit *unit, SerializeInStream &in, PendingRequest *request) {
                 throw "Unsupported";
             },
-            [](SerializableUnitBase *unit, BufferedInOutStream &inout, TransactionId id) {
+            [](SerializableDataUnit *unit, BufferedInOutStream &inout, TransactionId id) {
                 throw "Unsupported";
             },
-            [](SerializableUnitBase *_unit, SerializeInStream &in) {
+            [](SerializableDataUnit *_unit, SerializeInStream &in) {
             },
-            [](SerializableUnitBase *unit, bool b) {
+            [](SerializableDataUnit *unit, bool b) {
             },
-            [](SerializableUnitBase *unit, bool active, bool existenceChanged) {
+            [](SerializableDataUnit *unit, bool active, bool existenceChanged) {
             },
-            [](SerializableUnitBase *unit) {
+            [](SerializableDataUnit *unit) {
             },
-            [](const SerializableUnitBase *unit, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams) {
+            [](const SerializableDataUnit *unit, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams) {
                 throw "Unsupported";
             },
-            [](const SerializableUnitBase *_unit, int op, const void *data, BufferedOutStream *out) {
+            [](const SerializableDataUnit *_unit, int op, const void *data, BufferedOutStream *out) {
                 throw "Unsupported";
             }
         };
@@ -137,50 +137,51 @@ namespace Serialize {
         return {
             name,
             []() {
-                return OffsetPtr<Unit, T> { P }.template offset<SerializableUnitBase>();
+                return OffsetPtr<Unit, T> { P }.template offset<SerializableDataUnit>();
             },
-            [](const SerializableUnitBase *_unit, SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
+            [](const SerializableDataUnit *_unit, SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 write<T, Configs...>(out, unit->*P, name, CallerHierarchyPtr { hierarchy.append(unit) });
             },
-            [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) {
+            [](SerializableDataUnit *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) {
                 Unit *unit = static_cast<Unit *>(_unit);
                 read<T, Configs...>(in, unit->*P, name, CallerHierarchyPtr { hierarchy.append(unit) });
             },
-            [](SerializableUnitBase *_unit, SerializeInStream &in, PendingRequest *request) {
+            [](SerializableDataUnit *_unit, SerializeInStream &in, PendingRequest *request) {
                 Unit *unit = static_cast<Unit *>(_unit);
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
                     Operations<T, Configs...>::readAction(unit->*P, in, request, unit);
                 else
                     throw "Unsupported";
             },
-            [](SerializableUnitBase *_unit, BufferedInOutStream &inout, TransactionId id) {
+            [](SerializableDataUnit *_unit, BufferedInOutStream &inout, TransactionId id) {
                 Unit *unit = static_cast<Unit *>(_unit);
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
                     Operations<T, Configs...>::readRequest(unit->*P, inout, id, unit);
                 else
                     throw "Unsupported";
             },
-            [](SerializableUnitBase *unit, SerializeInStream &in) {
+            [](SerializableDataUnit *unit, SerializeInStream &in) {
                 UnitHelper<T>::applyMap(in, static_cast<Unit *>(unit)->*P);
             },
-            [](SerializableUnitBase *unit, bool b) {
+            [](SerializableDataUnit *unit, bool b) {
                 UnitHelper<T>::setItemDataSynced(static_cast<Unit *>(unit)->*P, b);
             },
-            [](SerializableUnitBase *unit, bool active, bool existenceChanged) {
+            [](SerializableDataUnit *unit, bool active, bool existenceChanged) {
                 UnitHelper<T>::setItemActive(static_cast<Unit *>(unit)->*P, active, existenceChanged);
             },
-            [](SerializableUnitBase *unit) {
-                UnitHelper<T>::setItemParent(static_cast<Unit *>(unit)->*P, unit);
+            [](SerializableDataUnit *unit) {
+                if constexpr (std::is_base_of_v<SerializableUnitBase, T>)
+                    UnitHelper<T>::setItemParent(static_cast<Unit *>(unit)->*P, unit);
             },
-            [](const SerializableUnitBase *_unit, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams) {
+            [](const SerializableDataUnit *_unit, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
                     Operations<T, Configs...>::writeAction(unit->*P, op, data, outStreams, unit);
                 else
                     throw "Unsupported";
             },
-            [](const SerializableUnitBase *_unit, int op, const void *data, BufferedOutStream *out) {
+            [](const SerializableDataUnit *_unit, int op, const void *data, BufferedOutStream *out) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
                     Operations<T, Configs...>::writeRequest(unit->*P, op, data, out, unit);
@@ -201,7 +202,7 @@ namespace Serialize {
         return {
             name,
             []() {
-                return OffsetPtr<Unit, T> { P }.template offset<SerializableUnitBase>();
+                return OffsetPtr<Unit, T> { P }.template offset<SerializableDataUnit>();
             },
             [](const SerializableUnitBase *_unit, SerializeOutStream &out, const char *name) {
 

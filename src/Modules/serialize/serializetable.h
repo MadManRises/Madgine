@@ -29,13 +29,14 @@ namespace Serialize {
         const std::pair<const char *, Serializer> *mFields;
         bool mIsTopLevelUnit;
 
-        void writeState(const SerializableUnitBase *unit, SerializeOutStream &out, CallerHierarchyBasePtr hierarchy = {}) const;
+        void writeState(const SerializableDataUnit *unit, SerializeOutStream &out, CallerHierarchyBasePtr hierarchy = {}) const;
+        void readState(SerializableDataUnit *unit, SerializeInStream &in, StateTransmissionFlags flags = 0, CallerHierarchyBasePtr hierarchy = {}) const;
         void readState(SerializableUnitBase *unit, SerializeInStream &in, StateTransmissionFlags flags = 0, CallerHierarchyBasePtr hierarchy = {}) const;
 
         void readAction(SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) const;
         void readRequest(SerializableUnitBase *unit, BufferedInOutStream &in, TransactionId id) const;
 
-        void applySerializableMap(SerializableUnitBase *unit, SerializeInStream &in) const;
+        void applySerializableMap(SerializableDataUnit *unit, SerializeInStream &in) const;
         void setDataSynced(SerializableUnitBase *unit, bool b) const;
         void setActive(SerializableUnitBase *unit, bool active, bool existenceChanged) const;
         void setParent(SerializableUnitBase *unit) const;

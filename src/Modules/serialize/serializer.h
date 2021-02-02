@@ -9,19 +9,19 @@ namespace Serialize {
         const char *mFieldName;
         size_t (*mOffset)() = nullptr;
 
-        void (*mWriteState)(const SerializableUnitBase *, SerializeOutStream &, const char *, CallerHierarchyBasePtr) = nullptr;
-        void (*mReadState)(SerializableUnitBase *, SerializeInStream &, const char *, CallerHierarchyBasePtr) = nullptr;
+        void (*mWriteState)(const SerializableDataUnit *, SerializeOutStream &, const char *, CallerHierarchyBasePtr) = nullptr;
+        void (*mReadState)(SerializableDataUnit *, SerializeInStream &, const char *, CallerHierarchyBasePtr) = nullptr;
 
-        void (*mReadAction)(SerializableUnitBase *, SerializeInStream &, PendingRequest *) = nullptr;
-        void (*mReadRequest)(SerializableUnitBase *, BufferedInOutStream &, TransactionId) = nullptr;
+        void (*mReadAction)(SerializableDataUnit *, SerializeInStream &, PendingRequest *) = nullptr;
+        void (*mReadRequest)(SerializableDataUnit *, BufferedInOutStream &, TransactionId) = nullptr;
 
-        void (*mApplySerializableMap)(SerializableUnitBase *, SerializeInStream &) = nullptr;
-        void (*mSetDataSynced)(SerializableUnitBase *, bool) = nullptr;
-        void (*mSetActive)(SerializableUnitBase *, bool, bool) = nullptr;
-        void (*mSetParent)(SerializableUnitBase *) = nullptr;
+        void (*mApplySerializableMap)(SerializableDataUnit *, SerializeInStream &) = nullptr;
+        void (*mSetDataSynced)(SerializableDataUnit *, bool) = nullptr;
+        void (*mSetActive)(SerializableDataUnit *, bool, bool) = nullptr;
+        void (*mSetParent)(SerializableDataUnit *) = nullptr;
 
-        void (*mWriteAction)(const SerializableUnitBase *, int, const void *, const std::set<BufferedOutStream *, CompareStreamId> &outStreams) = nullptr;
-        void (*mWriteRequest)(const SerializableUnitBase *, int, const void *, BufferedOutStream *out) = nullptr;
+        void (*mWriteAction)(const SerializableDataUnit *, int, const void *, const std::set<BufferedOutStream *, CompareStreamId> &outStreams) = nullptr;
+        void (*mWriteRequest)(const SerializableDataUnit *, int, const void *, BufferedOutStream *out) = nullptr;
     };
 
 }

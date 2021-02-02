@@ -18,7 +18,7 @@ namespace Serialize {
 
         bool isActive() const
         {
-            return !OffsetPtr::parent(this) || SerializableUnitConstPtr { OffsetPtr::parent(this) }.isActive(OffsetPtr::template offset<SerializableUnitBase>());            
+            return !OffsetPtr::parent(this) || SerializableUnitConstPtr { OffsetPtr::parent(this) }.isActive(OffsetPtr::template offset<SerializableDataUnit>());            
         }
     };
 }

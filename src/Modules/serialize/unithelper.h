@@ -47,8 +47,8 @@ namespace Serialize {
                 }
             } else if constexpr (has_function_applySerializableMap_v<T>) {
                 item.applySerializableMap(in);
-            } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>){
-                SerializableUnitPtr { &item }.applySerializableMap(in);
+            } else if constexpr (std::is_base_of_v<SerializableDataUnit, T>){
+                SerializableDataPtr { &item }.applySerializableMap(in);
             } else if constexpr (is_instance_v<std::remove_const_t<T>, std::unique_ptr>) {
                 UnitHelper<typename T::element_type>::applyMap(in, *item);
             } else if constexpr (is_iterable_v<T>) {
@@ -104,6 +104,10 @@ namespace Serialize {
             } else {
                 //static_assert(isPrimitiveType_v<T>, "Invalid Type");
             }
+        }
+
+        static void setItemParent(T &item, SerializableDataUnit *parent)
+        {
         }
 
         static void setItemParent(T &item, SerializableUnitBase *parent)

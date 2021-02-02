@@ -134,6 +134,8 @@ namespace Serialize {
 
     struct SerializableUnitPtr;
     struct SerializableUnitConstPtr;
+    struct SerializableDataPtr;
+    struct SerializableDataConstPtr;
 
 	struct Serializer;
 

@@ -10,7 +10,7 @@ namespace Scene {
         
         void EntityComponentListBase::readState(const EntityComponentHandle<EntityComponentBase> &index, Serialize::SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy)
         {
-            Serialize::SerializableUnitPtr ptr = getSerialized(index);
+            Serialize::SerializableDataPtr ptr = getSerialized(index);
             Serialize::read(in, ptr, name, hierarchy);
         }
 

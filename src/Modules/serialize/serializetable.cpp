@@ -15,7 +15,7 @@
 namespace Engine {
 namespace Serialize {
 
-    void SerializeTable::writeState(const SerializableUnitBase *unit, SerializeOutStream &out, CallerHierarchyBasePtr hierarchy) const
+    void SerializeTable::writeState(const SerializableDataUnit *unit, SerializeOutStream &out, CallerHierarchyBasePtr hierarchy) const
     {
         const SerializeTable *table = this;
         while (table) {
@@ -26,14 +26,9 @@ namespace Serialize {
         }
     }
 
-    void SerializeTable::readState(SerializableUnitBase *unit, SerializeInStream &in, StateTransmissionFlags flags, CallerHierarchyBasePtr hierarchy) const
+    void SerializeTable::readState(SerializableDataUnit *unit, SerializeInStream &in, StateTransmissionFlags flags, CallerHierarchyBasePtr hierarchy) const
     {
         Formatter &format = in.format();
-
-        bool wasActive = unit->mActiveIndex > 0; //Not exact, but active unit with 0 members doesn't matter
-        if (wasActive) {
-            setActive(unit, false, false);
-        }
 
         if (format.mSupportNameLookup) {
             std::string name = format.lookupFieldName(in);
@@ -68,7 +63,17 @@ namespace Serialize {
             assert(in.manager());
             applySerializableMap(unit, in);
         }
+    }
 
+    void SerializeTable::readState(SerializableUnitBase *unit, SerializeInStream &in, StateTransmissionFlags flags, CallerHierarchyBasePtr hierarchy) const
+    {
+        bool wasActive = unit->mActiveIndex > 0; //Not exact, but active unit with 0 members doesn't matter
+        if (wasActive) {
+            setActive(unit, false, false);
+        }
+
+        readState(static_cast<SerializableDataUnit *>(unit), in, flags, hierarchy);
+        
         if (wasActive) {
             setActive(unit, true, false);
         }
@@ -88,7 +93,7 @@ namespace Serialize {
         get(index).mReadRequest(unit, inout, id);
     }
 
-    void SerializeTable::applySerializableMap(SerializableUnitBase *unit, SerializeInStream &in) const
+    void SerializeTable::applySerializableMap(SerializableDataUnit *unit, SerializeInStream &in) const
     {
         const SerializeTable *table = this;
         while (table) {

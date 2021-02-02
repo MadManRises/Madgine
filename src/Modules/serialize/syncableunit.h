@@ -51,6 +51,8 @@ namespace Serialize {
         friend struct SerializeUnitHelper;
         friend struct SerializableUnitPtr;
         friend struct SerializableUnitConstPtr;
+        friend struct SerializableDataPtr;
+        friend struct SerializableDataConstPtr;
         friend struct SyncableBase;
         friend struct SerializeTable;
         template <typename T>
