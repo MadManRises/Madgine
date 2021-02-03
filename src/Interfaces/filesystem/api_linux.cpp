@@ -75,6 +75,9 @@ namespace Filesystem {
 
     void makeNormalized(std::string &p)
     {
+        if (p.empty())
+            return;
+
         wordexp_t word;
 
         wordexp(p.c_str(), &word, 0);
