@@ -138,9 +138,10 @@ bool isValidPath(const std::string &p)
 
 FileInfo fileInfo(const Path &path)
 {
-    throw "TODO";
+    struct stat stats;
+    stat(path.c_str(), &stats);
     return {
-        0
+        static_cast<size_t>(stats.st_size)
     };
 }
 

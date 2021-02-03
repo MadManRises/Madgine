@@ -262,6 +262,15 @@ namespace Filesystem {
                 return false;
         return true;
     }
+        
+    FileInfo fileInfo(const Path &path)
+    {
+        struct stat stats;
+        stat(path.c_str(), &stats);
+        return {
+            static_cast<size_t>(stats.st_size)
+        };
+    }
 
 }
 }
