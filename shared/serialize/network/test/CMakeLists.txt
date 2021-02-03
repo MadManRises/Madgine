@@ -1,7 +1,7 @@
 
 project(Network_Test)
 
-set(sources networkmanagertest.cpp)
+set(sources networkmanagertest.cpp ../../../../test/Modules/Modules_gtest_main.cc)
 
 add_gtest(Network_Test ${sources})
 

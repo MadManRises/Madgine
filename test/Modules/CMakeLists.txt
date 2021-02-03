@@ -32,7 +32,7 @@ target_link_plugins(LibB LibA)
 
 
 set(sources "")
-FolderSources(sources "" "" integrationtests.cpp)
+FolderSources(sources "" "" integrationtests.cpp Modules_gtest_main.cc)
 	FolderSources(sources "" generic areaviewtest.cpp bitstest.cpp tupleunpackertest.cpp valuetypetest.cpp)
 		FolderSources(sources generic container generationvectortest.cpp)
 	FolderSources(sources "" math matrixtest.cpp quaterniontest.cpp)
