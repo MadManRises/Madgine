@@ -21,7 +21,7 @@ namespace Filesystem {
     INTERFACES_EXPORT std::string executableName();
     INTERFACES_EXPORT Path appDataPath();
 
-    INTERFACES_EXPORT void makeNormalized(Path &p);
+    INTERFACES_EXPORT void makeNormalized(std::string &p);
     INTERFACES_EXPORT bool isValidPath(const std::string &p);
 
     INTERFACES_EXPORT Path getCwd();

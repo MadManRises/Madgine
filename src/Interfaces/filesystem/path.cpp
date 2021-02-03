@@ -109,6 +109,8 @@ namespace Filesystem {
 
     void Path::normalize()
     {
+        Filesystem::makeNormalized(mPath);
+
         if (!isValidPath(mPath)) {
             mPath.clear();
             return;

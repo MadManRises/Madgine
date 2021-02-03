@@ -49,7 +49,6 @@ std::string fixInclude(const char *pStr, const Plugins::BinaryInfo *binInfo)
     Filesystem::Path p = pStr;
     if (p.isRelative())
         p = Filesystem::Path { BINARY_OUT_DIR } / p;
-    Filesystem::makeNormalized(p);
     return p.relative(binInfo->mSourceRoot).str();
 };
 

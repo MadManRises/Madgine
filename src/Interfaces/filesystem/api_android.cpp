@@ -111,7 +111,7 @@ namespace Filesystem {
         return ::remove(p.c_str());
     }
 
-    void makeNormalized(Path &p)
+    void makeNormalized(std::string &p)
     {        
     }
 

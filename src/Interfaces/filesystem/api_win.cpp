@@ -84,11 +84,18 @@ namespace Filesystem {
         return DeleteFile(p.c_str());
     }
 
-    void makeNormalized(Path &p)
+    void makeNormalized(std::string &p)
     {
+        if (p.find('\\') == std::string::npos && p.find('/') == std::string::npos)
+            return;
+
         char buffer[1024];
         auto result = GetLongPathNameA(p.c_str(), buffer, sizeof(buffer));
-        assert(result > 0 && result < sizeof(buffer));
+        if (result == 0) {
+            auto error = GetLastError();
+            assert(false);
+        }
+        assert(result < sizeof(buffer));
         buffer[0] = toupper(buffer[0]);
         p = buffer;
     }
