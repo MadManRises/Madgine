@@ -109,8 +109,6 @@ namespace Filesystem {
 
     void Path::normalize()
     {
-        Filesystem::makeNormalized(mPath);
-
         if (!isValidPath(mPath)) {
             mPath.clear();
             return;
@@ -170,6 +168,8 @@ namespace Filesystem {
         }
 
         mPath.resize(cursor);
+
+        Filesystem::makeNormalized(mPath);
     }
 
     Path Path::filename() const
@@ -209,7 +209,7 @@ namespace Filesystem {
                 if (pos > sep)
                     return { mPath.data() + pos };
                 else
-                    return { };
+                    return {};
             } else {
                 return { mPath.data() + pos };
             }
