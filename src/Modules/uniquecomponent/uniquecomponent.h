@@ -53,10 +53,10 @@ protected:
     }
 };
 
-DLL_IMPORT_VARIABLE2(typename Collector::template ComponentRegistrator<T>, _reg, typename T, typename Collector);
+DLL_IMPORT_VARIABLE2(typename T::Collector::template ComponentRegistrator<T>, _reg, typename T);
 
-#    define UNIQUECOMPONENT(Name) DLL_EXPORT_VARIABLE2(, Name::Collector::ComponentRegistrator<Name>, Engine::, _reg, {}, Name, Name::Collector)
-#    define UNIQUECOMPONENT2(Name, ext) DLL_EXPORT_VARIABLE3(, Name::Collector::ComponentRegistrator<Name>, Engine::, _reg, ext, {}, Name, Name::Collector)
+#    define UNIQUECOMPONENT(Name) DLL_EXPORT_VARIABLE2(, Name::Collector::ComponentRegistrator<Name>, Engine::, _reg, {}, Name)
+#    define UNIQUECOMPONENT2(Name, ext) DLL_EXPORT_VARIABLE3(, Name::Collector::ComponentRegistrator<Name>, Engine::, _reg, ext, {}, Name)
 
 template <typename T, typename _Collector, typename _Base>
 struct UniqueComponent : _Base {
@@ -66,7 +66,7 @@ struct UniqueComponent : _Base {
 
     static size_t component_index()
     {
-        return _reg<T, Collector>().index();
+        return _reg<T>().index();
     }
 };
 

@@ -54,7 +54,7 @@ namespace Tools {
         Filesystem::Path mDirBuffer, mSelectionBuffer;
         std::string mSelectionTargetBuffer;
 
-        ImVec2 mPopupPosition;
+        Vector2 mPopupPosition;
 
         std::optional<NodeGraph::PinDesc> mDragPin;
         std::optional<ExtendedValueTypeDesc> mDragType;

@@ -23,7 +23,7 @@ struct IndexRef {
 template <typename T>
 IndexRef indexRef()
 {
-    return { &_reg<T, typename T::Collector>() };
+    return { &_reg<T>() };
 }
 
 template <typename T>
