@@ -22,6 +22,7 @@ template <size_t Count, size_t MemberSize = 1, typename type = MinimalHoldingUIn
 struct BitArray {
 
     static constexpr uint64_t Mask = (1 << MemberSize) - 1;
+    static constexpr size_t InternalArraySize = (Count * MemberSize - 1) / 8 + 1;
 
     constexpr BitArray() = default;
 
@@ -158,7 +159,11 @@ struct BitArray {
 
     bool operator==(const BitArray &other) const
     {
-        return mData == other.mData;
+        for (size_t i = 0; i < InternalArraySize; ++i) {
+            if (mData[i] != other.mData[i])
+                return false;
+        }
+        return true;
     }
 
     bool operator!=(const BitArray &other) const
@@ -166,8 +171,19 @@ struct BitArray {
         return !(*this == other);
     }
 
+    bool operator<(const BitArray &other) const
+    {
+        for (size_t i = 0; i < InternalArraySize; ++i) {
+            if (mData[i] < other.mData[i])
+                return true;
+            if (mData[i] > other.mData[i])
+                return false;
+        }
+        return false;
+    }
+
 private:
-    uint8_t mData[(Count * MemberSize - 1) / 8 + 1] = {};
+    uint8_t mData[InternalArraySize] = {};
 };
 
 }

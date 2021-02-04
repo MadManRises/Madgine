@@ -25,8 +25,6 @@ METATABLE_END(Engine::Tools::ControlsView)
 
 UNIQUECOMPONENT(Engine::Tools::ControlsView)
 
-RegisterType(Engine::Tools::ControlsView)
-
     namespace Engine
 {
     namespace Tools {

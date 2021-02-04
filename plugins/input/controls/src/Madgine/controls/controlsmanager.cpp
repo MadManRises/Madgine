@@ -6,7 +6,7 @@
 
 #include "axiseventlistener.h"
 
-RegisterType(Engine::Controls::ControlsManager)
+
 
 UNIQUECOMPONENT(Engine::Controls::ControlsManager)
 

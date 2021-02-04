@@ -27,3 +27,5 @@ namespace Tools {
 
 }
 }
+
+RegisterType(Engine::Tools::ControlsView)

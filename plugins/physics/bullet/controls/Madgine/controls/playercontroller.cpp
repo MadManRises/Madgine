@@ -24,7 +24,6 @@ METATABLE_END(Engine::Controls::PlayerController)
 
 UNIQUECOMPONENT(Engine::Controls::PlayerController)
 
-RegisterType(Engine::Controls::PlayerController)
 
     namespace Engine
 {

@@ -68,3 +68,4 @@ namespace Physics {
 }
 
 RegisterType(Engine::Physics::RigidBody);
+RegisterType(Engine::Scene::Entity::EntityComponentList<Engine::Physics::RigidBody>);

@@ -10,6 +10,8 @@
 
 #    include "Interfaces/filesystem/api.h"
 
+#include "codegen/codegen_cpp.h"
+
 namespace Engine {
 
 static size_t sLevel = 0;
@@ -98,15 +100,18 @@ void exportStaticComponentHeader(const Filesystem::Path &outFile, bool hasTools)
         }
     }
 
-    std::ofstream file(outFile.str());
-    assert(file);
+    CodeGen::CppFile file;
 
-    include(file, "Modules/moduleslib.h");
-    include(file, "Modules/uniquecomponent/uniquecomponentregistry.h");
+    file.include(0, "Modules/moduleslib.h");
+    file.include(0, "Modules/uniquecomponent/uniquecomponentregistry.h");
+
+
 
     for (const Plugins::BinaryInfo *bin : binaries) {
         if (strlen(bin->mPrecompiledHeaderPath)) {
-            include(file, bin->mPrecompiledHeaderPath, bin);
+            file.beginCondition("BUILD_"s + bin->mName);
+            file.include(0, bin->mPrecompiledHeaderPath);
+            file.endCondition("BUILD_"s + bin->mName);
         }
     }
 
@@ -114,32 +119,30 @@ void exportStaticComponentHeader(const Filesystem::Path &outFile, bool hasTools)
         const Plugins::BinaryInfo *bin = reg->mBinary;
         if (skipBinary(bin))
             continue;
-        include(file, fixInclude(reg->type_info()->mHeaderPath, bin), bin);
+        file.beginCondition("BUILD_"s + bin->mName);
+        file.include(1, fixInclude(reg->type_info()->mHeaderPath, bin));
 
         for (CollectorInfoBase *collector : *reg) {
             if (skipBinary(collector->mBinary))
                 continue;
             for (const std::vector<const TypeInfo *> &typeInfos : collector->mElementInfos) {
                 const TypeInfo *typeInfo = typeInfos.front();
-                if (notInSkip(typeInfo))
-                    include(
-                        file,
-                        fixInclude(typeInfo->mHeaderPath, collector->mBinary),
-                        collector->mBinary);
+                if (notInSkip(typeInfo)) {
+                    file.beginCondition("BUILD_"s + collector->mBinary->mName);
+                    file.include(1, fixInclude(typeInfo->mHeaderPath, collector->mBinary));
+                    file.endCondition("BUILD_"s + collector->mBinary->mName);
+                }
             }
         }
+        file.endCondition("BUILD_"s + bin->mName);
     }
 
-    file << R"(
-
-namespace Engine {
-
-)";
+    file.beginNamespace("Engine");
 
     for (auto &[name, reg] : registryRegistry()) {
         if (skipBinary(reg->mBinary))
             continue;
-        GuardGuard g2(file, reg->mBinary);
+        file.beginCondition("BUILD_"s + reg->mBinary->mName);
         
         file << R"(template <>
 std::vector<)"
@@ -152,13 +155,14 @@ std::vector<)"
         for (CollectorInfoBase *collector : *reg) {
             if (skipBinary(collector->mBinary))
                 continue;
-            GuardGuard g(file, collector->mBinary);
+            file.beginCondition("BUILD_"s + collector->mBinary->mName);
             for (const std::vector<const TypeInfo *> &typeInfos : collector->mElementInfos) {
                 const TypeInfo *typeInfo = typeInfos.front();
                 if (notInSkip(typeInfo))
                     file << "		createComponent<"
                          << typeInfo->mFullName << ">,\n";
             }
+            file.endCondition("BUILD_"s + collector->mBinary->mName);
         }
 
         file << R"(
@@ -172,7 +176,7 @@ std::vector<)"
         for (CollectorInfoBase *collector : *reg) {
             if (skipBinary(collector->mBinary))
                 continue;
-            GuardGuard g(file, collector->mBinary);
+            file.beginCondition("BUILD_"s + collector->mBinary->mName);            
             file << "constexpr size_t CollectorBaseIndex_"
                  << collector->mBaseInfo->mTypeName << "_"
                  << collector->mBinary->mName << " = ACC;\n";
@@ -198,12 +202,20 @@ size_t component_index<)"
                  << "#        define ACC CollectorBaseIndex_"
                  << collector->mBaseInfo->mTypeName << "_"
                  << collector->mBinary->mName << " + " << i << "\n";
+            file.endCondition("BUILD_"s + collector->mBinary->mName);
         }
 
         file << "\n#    undef ACC\n\n";
+
+        file.endCondition("BUILD_"s + reg->mBinary->mName);
     }
 
-    file << "}\n";
+    file.endNamespace();
+
+    std::ofstream stream(outFile.str());
+    assert(stream);
+
+    file.generate(stream);
 }
 
 MODULES_EXPORT std::map<std::string, ComponentRegistryBase *> &

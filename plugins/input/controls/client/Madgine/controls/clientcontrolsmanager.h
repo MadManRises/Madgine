@@ -23,3 +23,5 @@ namespace Controls {
 
 }
 }
+
+RegisterType(Engine::Controls::ClientControlsManager)

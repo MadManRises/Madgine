@@ -27,3 +27,5 @@ namespace Controls {
 
 }
 }
+
+RegisterType(Engine::Controls::PlayerController)

@@ -56,3 +56,5 @@ namespace Controls {
 
 }
 }
+
+RegisterType(Engine::Controls::ControlsManager)

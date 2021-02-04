@@ -40,7 +40,6 @@ namespace Scene {
 
 #define ENTITYCOMPONENT_IMPL(Name, FullType)                                   \
     NAMED_UNIQUECOMPONENT(Name, FullType)                                      \
-    RegisterType(Engine::Scene::Entity::EntityComponentList<FullType>);        \
     UNIQUECOMPONENT2(Engine::Scene::Entity::EntityComponentList<FullType>, _2) \
     REGISTER_ENTITYCOMPONENT(Name, Engine::indexRef<FullType>())
 

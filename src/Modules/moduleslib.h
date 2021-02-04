@@ -3,6 +3,7 @@
 /// @cond
 
 #include "Interfaces/interfaceslib.h"
+#include "codegen/codegenlib.h"
 
 #include "modulesconfig.h"
 

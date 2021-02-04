@@ -12,8 +12,6 @@
 
 UNIQUECOMPONENT(Engine::Controls::ClientControlsManager)
 
-RegisterType(Engine::Controls::ClientControlsManager)
-
 METATABLE_BEGIN_BASE(Engine::Controls::ClientControlsManager, Engine::Window::MainWindowComponentBase)
 METATABLE_END(Engine::Controls::ClientControlsManager)
 
