@@ -89,6 +89,9 @@ namespace Filesystem {
         if (p.find('\\') == std::string::npos && p.find('/') == std::string::npos)
             return;
 
+        if (GetFileAttributes(p.c_str()) == INVALID_FILE_ATTRIBUTES)
+            return; //TODO ???
+
         char buffer[1024];
         auto result = GetLongPathNameA(p.c_str(), buffer, sizeof(buffer));
         if (result == 0) {

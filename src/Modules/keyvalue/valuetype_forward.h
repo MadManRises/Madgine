@@ -51,10 +51,7 @@ template <typename Base, typename Derived>
 static constexpr bool ValueType_is_base_of_v = ValueType_is_base_of<Base, Derived>::value;
 
 template <typename T>
-using isScopeRef = std::bool_constant<
-    (std::is_pointer_v<T> && ValueType_is_base_of_v<ScopeBase, std::remove_pointer_t<T>> && !std::is_same_v<ScopeBase, std::remove_pointer_t<T>>)
-    || (!std::is_pointer_v<T> && ValueType_is_base_of_v<ScopeBase, std::decay_t<T>> && !std::is_same_v<ScopeBase, std::decay_t<T>>)
-    || has_function_customScopePtr_v<T>>;
+using isScopeRef = std::bool_constant<!is_iterable_v<T> && !isValueTypePrimitive_v<T>>;
 
 template <typename T>
 static constexpr bool isScopeRef_v = isScopeRef<T>::value;
@@ -74,12 +71,12 @@ using QualifiedValueTypePrimitiveSubList = type_pack_select_t<type_pack_index_v<
 
 template <typename T, typename = void>
 struct ValueType_ReturnHelper {
-    typedef type_pack_select_t<type_pack_index_v<size_t, ValueTypePrimitiveSubList<T>, T>, QualifiedValueTypePrimitiveSubList<T>> type;
+    typedef T &type;
 };
 
 template <typename T>
-struct ValueType_ReturnHelper<T, std::enable_if_t<std::is_base_of_v<ScopeBase, T>>> {
-    typedef T &type;
+struct ValueType_ReturnHelper<T, std::enable_if_t<isValueTypePrimitive_v<T>>> {
+    typedef type_pack_select_t<type_pack_index_v<size_t, ValueTypePrimitiveSubList<T>, T>, QualifiedValueTypePrimitiveSubList<T>> type;
 };
 
 template <typename T>
@@ -118,6 +115,8 @@ decltype(auto) convert_ValueType(T &&t)
 {
     if constexpr (isValueTypePrimitive_v<std::decay_t<T>> || std::is_same_v<ValueType, std::decay_t<T>>) {
         return std::forward<T>(t);
+    } else if constexpr (is_iterable_v<T>) {
+        return KeyValueVirtualRange { std::forward<T>(t), type_holder<Functor<to_KeyValuePair<true, decltype(*std::declval<typename derive_iterator<T>::iterator>())>>> };
     } else if constexpr (std::is_enum_v<std::decay_t<T>>) {
         if constexpr (std::is_reference_v<T>) {
             return static_cast<int &>(t);
@@ -132,12 +131,7 @@ decltype(auto) convert_ValueType(T &&t)
         } else {
             return OwnedScopePtr { std::forward<T>(t) };
         }
-    } else if constexpr (is_iterable_v<T>) {
-        return KeyValueVirtualRange { std::forward<T>(t), type_holder<Functor<to_KeyValuePair<true, decltype(*std::declval<typename derive_iterator<T>::iterator>())>>> };
-    } /*else if constexpr (TupleUnpacker::is_tuplefyable_v<std::remove_reference_t<T>>) {
-        throw "TODO";
-        return 3;
-    } */else {
+    } else {
         static_assert(dependent_bool<T, false>::value, "The provided type can not be converted to a ValueType");
     }
 }

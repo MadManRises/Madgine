@@ -116,7 +116,7 @@ bool AcceptDraggableValueType(
             }
         }
 
-        if constexpr (std::is_base_of_v<Engine::ScopeBase, T>) {
+        if constexpr (!Engine::isValueTypePrimitive_v<T>) {
             if (payload->mValue.is<T *>()) {
                 if (validate(*payload->mValue.as<T *>()) && AcceptDraggableValueType(payloadPointer)) {
                     result = *payload->mValue.as<T *>();

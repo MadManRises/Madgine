@@ -47,7 +47,7 @@ struct MODULES_EXPORT ValueType {
 
     ValueType(ValueType &&other) noexcept;
 
-    template <typename T, typename _ = std::enable_if_t<isValueTypePrimitive_v<std::decay_t<T>> || (std::is_base_of_v<ScopeBase, std::decay_t<T>> && !std::is_same_v<ScopeBase, std::decay_t<T>>)>>
+    template <typename T, typename = std::enable_if_t<!std::is_same_v<std::decay_t<T>, ValueType>>>
     explicit ValueType(T &&v)
         : mUnion(std::in_place_index<static_cast<size_t>(static_cast<ValueTypeEnum>(toValueTypeIndex<std::decay_t<T>>()))>, std::forward<T>(v))
     {
@@ -59,7 +59,7 @@ struct MODULES_EXPORT ValueType {
     {
     }
 
-    template <typename T, typename _ = std::enable_if_t<std::is_base_of_v<ScopeBase, T> && !std::is_same_v<ScopeBase, T>>>
+    template <typename T>
     explicit ValueType(T *val)
         : ValueType(TypedScopePtr(val))
     {

@@ -24,6 +24,6 @@ DLL_IMPORT_VARIABLE(const Engine::MetaTable, table, typename);
 template <typename T>
 bool Engine::MetaTable::isDerivedFrom() const
 {
-    static_assert(std::is_base_of_v<ScopeBase, T>, "Only can check ScopeBase types");
+    //static_assert(std::is_base_of_v<ScopeBase, T>, "Only can check ScopeBase types");
     return isDerivedFrom(table<T>);
 }

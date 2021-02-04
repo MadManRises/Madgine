@@ -66,7 +66,7 @@ struct MODULES_EXPORT ExtendedValueTypeIndex {
             --mark;
             mTypeList[i + 2] = innerValue.mTypeList[i];
             ++i;
-            if (mTypeList[i] == static_cast<ExtendedValueTypeEnum>(ValueTypeEnum::KeyValueVirtualRangeValue)) {
+            if (mTypeList[i + 2] == static_cast<ExtendedValueTypeEnum>(ValueTypeEnum::KeyValueVirtualRangeValue)) {
                 assert(mark == 0);
                 mark = 2;
             } 
@@ -217,10 +217,8 @@ constexpr ValueTypeIndex toValueTypeIndex()
         return static_cast<ValueTypeEnum>(type_pack_index_v<size_t, ValueTypeList, T>);
     } else if constexpr (std::is_pointer_v<T>) {
         return ValueTypeEnum::ScopeValue;
-    } else if constexpr (std::is_base_of_v<ScopeBase, T> && !::std::is_same_v<T, ScopeBase>) {
-        return ValueTypeEnum::OwnedScopeValue;
     } else {
-        static_assert(dependent_bool<T, false>::value, "Can't create index for type!");
+        return ValueTypeEnum::OwnedScopeValue;
     }
 }
 
@@ -231,17 +229,15 @@ constexpr ExtendedValueTypeDesc toValueTypeDesc()
         return { toValueTypeIndex<T>() };
     } else if constexpr (std::is_same_v<T, ValueType>) {
         return { ExtendedValueTypeEnum::GenericType };
-    } else if constexpr (std::is_pointer_v<T>) {
-        return { { ValueTypeEnum::ScopeValue }, &table<std::remove_pointer_t<T>> };
     } else if constexpr (std::is_same_v<T, TypedScopePtr>) {
         return { { ValueTypeEnum::ScopeValue }, static_cast<const MetaTable **>(nullptr) };
-    } else if constexpr (std::is_base_of_v<ScopeBase, T> && !::std::is_same_v<T, ScopeBase>) {
-        return { { ValueTypeEnum::OwnedScopeValue }, &table<T> };
     } else if constexpr (is_iterable_v<T>) {
         return { { ValueTypeEnum::KeyValueVirtualRangeValue }, toValueTypeDesc<KeyType_t<typename T::iterator::value_type>>(), toValueTypeDesc<ValueType_t<typename T::iterator::value_type>>() };
+    } else if constexpr (std::is_pointer_v<T>) {
+        return { { ValueTypeEnum::ScopeValue }, &table<std::remove_pointer_t<T>> };
     } else {
-        static_assert(dependent_bool<T, false>::value, "Can't create descriptor for type!");
-    }
+        return { { ValueTypeEnum::OwnedScopeValue }, &table<T> };
+    } 
 }
 
 }

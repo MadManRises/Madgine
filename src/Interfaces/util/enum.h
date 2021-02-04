@@ -136,7 +136,7 @@ private:
     };                                                                                                                                                       \
     inline std::ostream &operator<<(std::ostream &stream, typename Name##Representation::EnumType value)                                                     \
     {                                                                                                                                                        \
-        return stream << Engine::Enum<Name##Representation> { value };                                                                       \
+        return stream << Engine::Enum<Name##Representation> { value };                                                                                       \
     }
 
 #define ENUM_BASE(Name, Base, ...)                  \
