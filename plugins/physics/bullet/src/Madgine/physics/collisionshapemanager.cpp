@@ -186,7 +186,7 @@ namespace Physics {
             mShape.addChildShape(btTransform { btQuaternion { 0, 0, 0 } }, instance->get());
         }
 
-        struct CompoundShapeElement : ScopeBase, SerializableUnitBase {
+        struct CompoundShapeElement : SerializableDataUnit {
             Vector3 mPos;
             Quaternion mOrientation;
             CollisionShapeManager::InstanceHandle mShape;

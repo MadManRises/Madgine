@@ -7,10 +7,9 @@
 
 namespace Engine {
 namespace Resources {
-    struct MODULES_EXPORT ResourceManager final : ScopeBase
+    struct MODULES_EXPORT ResourceManager final
 #if ENABLE_PLUGINS
-        ,
-                                                  Plugins::PluginListener
+        : Plugins::PluginListener
 #endif
     {
         static ResourceManager &getSingleton();
@@ -55,8 +54,7 @@ namespace Resources {
         Future<void> aboutToUnloadPlugin(const Plugins::Plugin *plugin) override;
 #endif
 
-    private:        
-
+    private:
         void updateResources(const Filesystem::Path &path, int priority);
         void updateResources(const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> &loaderByExtension);
 

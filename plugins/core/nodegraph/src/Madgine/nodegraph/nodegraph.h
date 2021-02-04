@@ -9,7 +9,7 @@
 namespace Engine {
 namespace NodeGraph {
 
-    struct MADGINE_NODEGRAPH_EXPORT NodeGraph : ScopeBase, Serialize::SerializableUnitBase {
+    struct MADGINE_NODEGRAPH_EXPORT NodeGraph : Serialize::SerializableUnitBase {
 
         SERIALIZABLEUNIT(NodeGraph);
 

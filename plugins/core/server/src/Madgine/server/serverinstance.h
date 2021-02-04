@@ -30,7 +30,7 @@ namespace Server {
         }
 
     private:
-        ScopeBase *mHandle = nullptr;
+        void *mHandle = nullptr;
 
         std::string mName;
         static size_t sInstanceCounter;

@@ -5,7 +5,7 @@
 namespace Engine {
 namespace Resources {
 
-    struct MODULES_EXPORT ResourceBase : ScopeBase {
+    struct MODULES_EXPORT ResourceBase {
         ResourceBase(const std::string &name, Filesystem::Path path = {});
 
         ~ResourceBase() = default;

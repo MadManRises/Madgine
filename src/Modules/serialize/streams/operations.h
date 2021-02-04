@@ -9,8 +9,8 @@
 #include "../primitivetypes.h"
 #include "../serializableunitptr.h"
 #include "bufferedstream.h"
-#include "pendingrequest.h"
 #include "comparestreamid.h"
+#include "pendingrequest.h"
 
 namespace Engine {
 namespace Serialize {
@@ -246,6 +246,8 @@ namespace Serialize {
                 //Don't do anything here
             } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>) {
                 SerializableUnitPtr { &t }.readState(in, name, CallerHierarchyPtr { hierarchy });
+            } else if constexpr (std::is_base_of_v<SerializableDataUnit, T>) {
+                SerializableDataPtr { &t }.readState(in, name, CallerHierarchyPtr { hierarchy });
             } else if constexpr (is_iterable_v<T>) {
                 ContainerOperations<T, Configs...>::read(in, t, name, hierarchy);
             } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
@@ -271,6 +273,8 @@ namespace Serialize {
                 //Don't do anything here
             } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>) {
                 SerializableUnitConstPtr { &t }.writeState(out, name, CallerHierarchyPtr { hierarchy });
+            } else if constexpr (std::is_base_of_v<SerializableDataUnit, T>) {
+                SerializableDataConstPtr { &t }.writeState(out, name, CallerHierarchyPtr { hierarchy });
             } else if constexpr (is_iterable_v<T>) {
                 ContainerOperations<std::remove_const_t<T>, Configs...>::write(out, t, name, hierarchy);
             } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {

@@ -6,7 +6,7 @@
 namespace Engine {
 namespace Window {
 
-    struct MADGINE_CLIENT_EXPORT ToolWindow : ScopeBase, WindowEventListener {    
+    struct MADGINE_CLIENT_EXPORT ToolWindow : WindowEventListener {    
         ToolWindow(MainWindow &parent, const WindowSettings &settings);
         virtual ~ToolWindow();
 

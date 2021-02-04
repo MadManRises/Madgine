@@ -9,7 +9,7 @@
 
 namespace Engine {
 namespace Server {
-    struct MADGINE_SERVER_EXPORT ServerBase : public ScopeBase, public Threading::TaskQueue {    
+    struct MADGINE_SERVER_EXPORT ServerBase : Threading::TaskQueue {    
         ServerBase(const std::string &name);
         virtual ~ServerBase();
 

@@ -17,7 +17,7 @@
 namespace Engine {
 namespace Tools {
 
-    struct SceneView : ScopeBase {
+    struct SceneView {
 
         SceneView(SceneEditor *editor, Render::RenderContext *renderer);
         SceneView(SceneView &&);

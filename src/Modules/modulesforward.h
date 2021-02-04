@@ -6,8 +6,6 @@ struct ValueType;
 struct ValueTypeRef;
 struct KeyValuePair;
 
-struct MODULES_EXPORT ScopeBase {
-};
 template <typename T, typename Base>
 struct VirtualScope;
 template <typename Base>

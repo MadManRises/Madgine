@@ -36,7 +36,7 @@ public:
     {
     }
 
-    TypedScopePtr(ScopeBase *scope, const MetaTable *type)
+    TypedScopePtr(void *scope, const MetaTable *type)
         : mScope(scope)
         , mType(type)
     {
@@ -61,6 +61,7 @@ public:
     {
         if (!mType->isDerivedFrom<std::remove_const_t<T>>())
             std::terminate();
+
         return static_cast<T *>(mScope);
     }
 
@@ -77,7 +78,7 @@ public:
 
     std::string name() const;
 
-    ScopeBase *mScope = nullptr;
+    void *mScope = nullptr;
     const MetaTable * mType = nullptr;
 };
 

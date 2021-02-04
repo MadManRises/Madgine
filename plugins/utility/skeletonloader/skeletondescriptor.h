@@ -5,12 +5,7 @@
 namespace Engine {
 namespace Render {
 
-    struct Bone : ScopeBase {
-        Bone(std::string name)
-            : mName(std::move(name))
-        {
-        }
-
+    struct Bone {
         std::string mName;
         Matrix4 mOffsetMatrix;
         Matrix4 mTTransform;
@@ -18,7 +13,7 @@ namespace Render {
         uint32_t mFirstChild = std::numeric_limits<uint32_t>::max();
     };
 
-    struct SkeletonDescriptor : ScopeBase {
+    struct SkeletonDescriptor {
         std::vector<Bone> mBones;     
         Matrix4 mMatrix;
     };

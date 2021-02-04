@@ -26,7 +26,7 @@ namespace Render {
         void setParameters(const ByteBuffer &data, size_t index);
         void setDynamicParameters(const ByteBuffer &data, size_t index);
 
-        struct UniformBufferDescriptor : ScopeBase {
+        struct UniformBufferDescriptor {
             std::string mName;
             uint32_t mSlot;
             uint32_t mSize;

@@ -11,8 +11,7 @@
 namespace Engine {
 namespace App {
 
-    struct MADGINE_BASE_EXPORT Application : ScopeBase,
-                                             MadgineObject<Application> {
+    struct MADGINE_BASE_EXPORT Application : MadgineObject<Application> {
         Application(const AppSettings &settings);
         ~Application();
 

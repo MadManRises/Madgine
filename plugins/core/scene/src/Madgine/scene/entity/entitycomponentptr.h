@@ -12,7 +12,7 @@ namespace Scene {
         MADGINE_SCENE_EXPORT EntityComponentBase *resolveEntityComponentHandle(SceneManager *sceneMgr, size_t index, EntityComponentHandle<EntityComponentBase> handle);
 
         template <>
-        struct MADGINE_SCENE_EXPORT EntityComponentPtrBase<EntityComponentBase> : ScopeBase {
+        struct MADGINE_SCENE_EXPORT EntityComponentPtrBase<EntityComponentBase> {
             EntityComponentPtrBase();
 
             EntityComponentPtrBase(EntityComponentHandle<EntityComponentBase> data, SceneManager *sceneMgr);
@@ -56,7 +56,7 @@ namespace Scene {
         };
 
         template <>
-        struct MADGINE_SCENE_EXPORT EntityComponentPtrBase<const EntityComponentBase> : ScopeBase {
+        struct MADGINE_SCENE_EXPORT EntityComponentPtrBase<const EntityComponentBase> {
             EntityComponentPtrBase();
 
             EntityComponentPtrBase(EntityComponentHandle<const EntityComponentBase> data, SceneManager *sceneMgr);
@@ -95,7 +95,7 @@ namespace Scene {
         };
 
         template <typename T>
-        struct EntityComponentPtrBase : ScopeBase {
+        struct EntityComponentPtrBase {
             EntityComponentPtrBase() = default;
 
             EntityComponentPtrBase(const EntityComponentPtrBase<T> &other)

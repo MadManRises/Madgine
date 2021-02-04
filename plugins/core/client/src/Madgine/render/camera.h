@@ -6,7 +6,7 @@
 namespace Engine {
 namespace Render {
 
-    struct MADGINE_CLIENT_EXPORT Camera : ScopeBase {
+    struct MADGINE_CLIENT_EXPORT Camera {
         Camera(std::string name = "");
         //Camera(const Camera &) = delete;
         ~Camera() = default;

@@ -188,7 +188,7 @@ namespace Render {
             glGetActiveUniformBlockiv(mHandle, i, GL_UNIFORM_BLOCK_BINDING, &index);
             GL_CHECK();
 
-            result.push_back({ {}, name.get(), static_cast<uint32_t>(index), static_cast<uint32_t>(size) });
+            result.push_back({ name.get(), static_cast<uint32_t>(index), static_cast<uint32_t>(size) });
         }
 
         return result;

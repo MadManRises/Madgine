@@ -3,7 +3,7 @@
 namespace Engine {
 namespace Render {
 
-    struct Program : ScopeBase{
+    struct Program{
 
     };
 

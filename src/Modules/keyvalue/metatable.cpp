@@ -65,9 +65,12 @@ bool MetaTable::isEditable(const std::string &key) const
     }
 }*/
 
-bool MetaTable::isDerivedFrom(const MetaTable *baseType) const
+bool MetaTable::isDerivedFrom(const MetaTable *baseType, size_t *offset) const
 {
-    return this == baseType || (mBase && (*mBase)->isDerivedFrom(baseType));
+    if (this == baseType)
+        return true;
+    assert(!offset);
+    return mBase && (*mBase)->isDerivedFrom(baseType);
 }
 
 std::string MetaTable::name(TypedScopePtr scope) const

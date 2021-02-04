@@ -6,7 +6,7 @@
 namespace Engine {
 namespace Scene {
     namespace Entity {
-        struct MADGINE_SCENE_EXPORT EntityComponentBase : ScopeBase, Serialize::SerializableDataUnit{ 
+        struct MADGINE_SCENE_EXPORT EntityComponentBase : Serialize::SerializableDataUnit{ 
             EntityComponentBase(const ObjectPtr &initTable = {});
         };
     }

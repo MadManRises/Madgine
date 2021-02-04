@@ -9,7 +9,7 @@
 namespace Engine {
 namespace Render {
 
-    struct MeshData : ScopeBase {
+    struct MeshData {
 
         template <typename VertexType>
         static AABB calculateAABB(const std::vector<VertexType> &vertices)

@@ -65,8 +65,7 @@ namespace Window {
         };
     };
 
-    struct MADGINE_CLIENT_EXPORT MainWindow : ScopeBase,
-                                              WindowEventListener,
+    struct MADGINE_CLIENT_EXPORT MainWindow : WindowEventListener,
                                               Threading::FrameListener,
                                               Serialize::TopLevelUnit<MainWindow>,
                                               MadgineObject<MainWindow> {

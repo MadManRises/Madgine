@@ -8,14 +8,7 @@ namespace Engine {
 namespace Render {
 
     template <typename T>
-    struct KeyFrame : ScopeBase {
-
-        KeyFrame(float time, T value)
-            : mTime(time)
-            , mValue(value)
-        {
-        }
-
+    struct KeyFrame {
         float mTime;
         T mValue;
     };
@@ -23,13 +16,13 @@ namespace Render {
     using VectorKeyFrame = KeyFrame<Vector3>;
     using QuaternionKeyFrame = KeyFrame<Quaternion>;
 
-    struct AnimationBone : ScopeBase {
+    struct AnimationBone {
         std::vector<VectorKeyFrame> mPositions;
         std::vector<QuaternionKeyFrame> mOrientations;
         std::vector<VectorKeyFrame> mScalings;
     };
 
-    struct AnimationDescriptor : ScopeBase {
+    struct AnimationDescriptor {
         std::string mName;
         float mDuration;
         float mTicksPerSecond;
@@ -37,7 +30,7 @@ namespace Render {
         std::vector<AnimationBone> mBones;
     };
 
-    struct MADGINE_ANIMATIONLOADER_EXPORT AnimationList : ScopeBase {
+    struct MADGINE_ANIMATIONLOADER_EXPORT AnimationList {
         AnimationList() = default;
 		AnimationList(const AnimationList &) = delete;
         AnimationList(AnimationList &&) = default;

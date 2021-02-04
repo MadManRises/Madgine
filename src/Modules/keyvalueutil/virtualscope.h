@@ -6,8 +6,13 @@
 
 namespace Engine {
 
-template <typename _Base = ScopeBase>
+template <typename _Base = void>
 struct VirtualScopeBase : _Base {
+    virtual TypedScopePtr customScopePtr() = 0;
+};
+
+template <>
+struct VirtualScopeBase<void> {
     virtual TypedScopePtr customScopePtr() = 0;
 };
 

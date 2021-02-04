@@ -4,7 +4,7 @@
 
 namespace Engine {
 
-struct MODULES_EXPORT ProxyScopeBase : ScopeBase {
+struct MODULES_EXPORT ProxyScopeBase {
     inline virtual ~ProxyScopeBase() = default;
     virtual TypedScopePtr proxyScopePtr() = 0;
 };

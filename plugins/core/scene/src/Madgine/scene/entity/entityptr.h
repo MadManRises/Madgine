@@ -4,7 +4,7 @@ namespace Engine {
 namespace Scene {
     namespace Entity {
 
-        struct MADGINE_SCENE_EXPORT EntityPtr : ScopeBase {
+        struct MADGINE_SCENE_EXPORT EntityPtr {
 
             EntityPtr() = default;
             ~EntityPtr();
