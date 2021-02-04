@@ -10,6 +10,8 @@
 
 #include "../generic/container/virtualiterator.h"
 
+#include "keyvalue.h"
+
 namespace Engine {
 
 MODULES_EXPORT ValueType &KeyValuePair_key(KeyValuePair &p);
