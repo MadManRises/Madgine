@@ -14,6 +14,10 @@ struct MADGINE_CODEGEN_EXPORT CppFile : File {
     void endNamespace();
 
     struct MADGINE_CODEGEN_EXPORT CustomCodeBuilder {
+        CustomCodeBuilder(CppFile *file)
+            : mFile(file)
+        {
+        }
         CustomCodeBuilder(CustomCodeBuilder &&) = default;
         ~CustomCodeBuilder();
 

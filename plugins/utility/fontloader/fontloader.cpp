@@ -1,4 +1,5 @@
 #include "fontloaderlib.h"
+#include "serialize/filesystem/filesystemlib.h"
 
 #include "Modules/keyvalue/metatable_impl.h"
 
@@ -7,10 +8,10 @@
 #include "Modules/math/atlas2.h"
 #include "Modules/math/vector2i.h"
 
-#include "serialize/filesystem/filesystemlib.h"
-#include "serialize/filesystem/filemanager.h"
 #include "Modules/serialize/formatter/safebinaryformatter.h"
 #include "Modules/serialize/streams/operations.h"
+#include "serialize/filesystem/filemanager.h"
+
 
 #include "Modules/generic/areaview.h"
 #include "Modules/generic/bytebuffer.h"
@@ -41,56 +42,54 @@ UNIQUECOMPONENT(Engine::Render::FontLoader)
 METATABLE_BEGIN_BASE(Engine::Render::FontLoader::ResourceType, Engine::Resources::ResourceBase)
 METATABLE_END(Engine::Render::FontLoader::ResourceType)
 
+METATABLE_BEGIN(Engine::Render::FontLoader)
+MEMBER(mResources)
+METATABLE_END(Engine::Render::FontLoader)
 
-    METATABLE_BEGIN(Engine::Render::FontLoader)
-        MEMBER(mResources)
-            METATABLE_END(Engine::Render::FontLoader)
+namespace msdfgen {
 
-                namespace msdfgen
+struct FtContext {
+    Point2 position;
+    Shape *shape;
+    Contour *contour;
+};
+
+static Point2 ftPoint2(const FT_Vector &vector)
 {
+    return Point2(vector.x / 64., vector.y / 64.);
+}
 
-    struct FtContext {
-        Point2 position;
-        Shape *shape;
-        Contour *contour;
-    };
+static int ftMoveTo(const FT_Vector *to, void *user)
+{
+    FtContext *context = reinterpret_cast<FtContext *>(user);
+    context->contour = &context->shape->addContour();
+    context->position = ftPoint2(*to);
+    return 0;
+}
 
-    static Point2 ftPoint2(const FT_Vector &vector)
-    {
-        return Point2(vector.x / 64., vector.y / 64.);
-    }
+static int ftLineTo(const FT_Vector *to, void *user)
+{
+    FtContext *context = reinterpret_cast<FtContext *>(user);
+    context->contour->addEdge(new LinearSegment(context->position, ftPoint2(*to)));
+    context->position = ftPoint2(*to);
+    return 0;
+}
 
-    static int ftMoveTo(const FT_Vector *to, void *user)
-    {
-        FtContext *context = reinterpret_cast<FtContext *>(user);
-        context->contour = &context->shape->addContour();
-        context->position = ftPoint2(*to);
-        return 0;
-    }
+static int ftConicTo(const FT_Vector *control, const FT_Vector *to, void *user)
+{
+    FtContext *context = reinterpret_cast<FtContext *>(user);
+    context->contour->addEdge(new QuadraticSegment(context->position, ftPoint2(*control), ftPoint2(*to)));
+    context->position = ftPoint2(*to);
+    return 0;
+}
 
-    static int ftLineTo(const FT_Vector *to, void *user)
-    {
-        FtContext *context = reinterpret_cast<FtContext *>(user);
-        context->contour->addEdge(new LinearSegment(context->position, ftPoint2(*to)));
-        context->position = ftPoint2(*to);
-        return 0;
-    }
-
-    static int ftConicTo(const FT_Vector *control, const FT_Vector *to, void *user)
-    {
-        FtContext *context = reinterpret_cast<FtContext *>(user);
-        context->contour->addEdge(new QuadraticSegment(context->position, ftPoint2(*control), ftPoint2(*to)));
-        context->position = ftPoint2(*to);
-        return 0;
-    }
-
-    static int ftCubicTo(const FT_Vector *control1, const FT_Vector *control2, const FT_Vector *to, void *user)
-    {
-        FtContext *context = reinterpret_cast<FtContext *>(user);
-        context->contour->addEdge(new CubicSegment(context->position, ftPoint2(*control1), ftPoint2(*control2), ftPoint2(*to)));
-        context->position = ftPoint2(*to);
-        return 0;
-    }
+static int ftCubicTo(const FT_Vector *control1, const FT_Vector *control2, const FT_Vector *to, void *user)
+{
+    FtContext *context = reinterpret_cast<FtContext *>(user);
+    context->contour->addEdge(new CubicSegment(context->position, ftPoint2(*control1), ftPoint2(*control2), ftPoint2(*to)));
+    context->position = ftPoint2(*to);
+    return 0;
+}
 }
 
 namespace Engine {
