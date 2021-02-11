@@ -10,16 +10,16 @@
 
 #include "Modules/plugins/plugin.h"
 
-#include "Modules/resources/resourcemanager.h"
+#include "Madgine/resources/resourcemanager.h"
 
 #include "../tinyxml/tinyxml2.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
-#include "Modules/keyvalue/scopeiterator.h"
+#include "Meta/keyvalue/scopeiterator.h"
 
-#include "Modules/keyvalue/keyvaluepair.h"
+#include "Meta/keyvalue/keyvaluepair.h"
 
 #include "functiontool.h"
 
@@ -27,7 +27,7 @@
 
 #include "inspectorlayout.h"
 
-#include "Modules/keyvalueutil/keyvalueregistry.h"
+#include "Madgine/core/keyvalueregistry.h"
 
 UNIQUECOMPONENT(Engine::Tools::Inspector);
 

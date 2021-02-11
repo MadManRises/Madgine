@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../threading/signal.h"
-#include "../threading/slot.h"
+#include "signal.h"
+#include "slot.h"
 
 namespace Engine 
 {

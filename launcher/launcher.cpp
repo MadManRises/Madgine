@@ -8,9 +8,9 @@
 #include "Madgine/app/appsettings.h"
 #include "Madgine/core/root.h"
 #include "Madgine/window/mainwindow.h"
-#include "Modules/cli/parameter.h"
-#include "Modules/keyvalueutil/keyvalueregistry.h"
-#include "Modules/serialize/streams/serializestream.h"
+#include "cli/parameter.h"
+#include "Madgine/core/keyvalueregistry.h"
+#include "Meta/serialize/streams/serializestream.h"
 #include "Modules/threading/scheduler.h"
 #include "Modules/threading/workgroup.h"
 
@@ -19,7 +19,7 @@
 #include "serialize/xml/xmllib.h"
 #include "serialize/xml/xmlformatter.h"
 
-#include "Modules/resources/resourcemanager.h"
+#include "Madgine/resources/resourcemanager.h"
 
 #include "Interfaces/debug/stacktrace.h"
 #include "Modules/threading/taskguard.h"

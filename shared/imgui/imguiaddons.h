@@ -2,8 +2,8 @@
 
 #include "imconfig.h"
 
-#include "Modules/keyvalue/typedscopeptr.h"
-#include "Modules/keyvalue/valuetype.h"
+#include "Meta/keyvalue/typedscopeptr.h"
+#include "Meta/keyvalue/valuetype.h"
 
 namespace ImGui {
 

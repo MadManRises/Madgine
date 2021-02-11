@@ -4,7 +4,7 @@
 
 #include "../tinyxml/tinyxml2.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
 
 UNIQUECOMPONENT(Engine::Tools::LayoutLoader);
 

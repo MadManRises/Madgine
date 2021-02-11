@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Modules/math/quaternion.h"
-#include "Modules/math/vector3.h"
+#include "Meta/math/quaternion.h"
+#include "Meta/math/vector3.h"
 
 namespace Engine {
 namespace Render {

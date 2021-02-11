@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../generic/copy_traits.h"
+#include "Generic/copy_traits.h"
 
 namespace Engine
 {

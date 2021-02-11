@@ -32,19 +32,12 @@ target_link_plugins(LibB LibA)
 
 
 set(sources "")
-FolderSources(sources "" "" integrationtests.cpp Modules_gtest_main.cc)
-	FolderSources(sources "" generic areaviewtest.cpp bitstest.cpp tupleunpackertest.cpp valuetypetest.cpp)
-		FolderSources(sources generic container generationvectortest.cpp)
-	FolderSources(sources "" keyvalue typedscopeptrtest.cpp)
-	FolderSources(sources "" math matrixtest.cpp quaterniontest.cpp)
-	FolderSources(sources "" serialize)
-		FolderSources(sources serialize container containertest.cpp)
-		FolderSources(sources serialize table serializetabletest.cpp)
+FolderSources(sources "" "" Modules_gtest_main.cc)	
 	FolderSources(sources "" uniquecomponent uniquecomponentshared.h uniquecomponenttest.cpp)		
 
 add_gtest(Modules_Test ${sources})
 
-target_link_libraries(Modules_Test PRIVATE Modules Xml)
+target_link_libraries(Modules_Test PRIVATE Modules)
 
 target_link_plugins(Modules_Test LibB)
 

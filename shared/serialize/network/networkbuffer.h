@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Modules/serialize/streams/buffered_streambuf.h"
+#include "Meta/serialize/streams/buffered_streambuf.h"
 
 #include "Interfaces/socket/socketapi.h"
 

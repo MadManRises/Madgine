@@ -4,8 +4,8 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-#include "Modules//keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Interfaces/input/inputevents.h"
 

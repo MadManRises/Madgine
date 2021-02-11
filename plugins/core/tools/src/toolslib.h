@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Modules/moduleslib.h"
+#include "Madgine/baselib.h"
+#include "Madgine/resourceslib.h"
 
 #include "toolsforward.h"
 

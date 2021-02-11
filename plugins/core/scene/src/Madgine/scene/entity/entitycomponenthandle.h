@@ -2,7 +2,7 @@
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
-#include "Modules/generic/callerhierarchy.h"
+#include "Generic/callerhierarchy.h"
 
 namespace Engine {
 namespace Scene {

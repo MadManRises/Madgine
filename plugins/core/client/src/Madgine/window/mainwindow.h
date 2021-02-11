@@ -3,10 +3,10 @@
 #include "Interfaces/window/windoweventlistener.h"
 #include "Modules/uniquecomponent/uniquecomponentselector.h"
 
-#include "Modules/generic/container/transformIt.h"
+#include "Generic/container/transformIt.h"
 
-#include "Modules/madgineobject/madgineobjectobserver.h"
-#include "Modules/serialize/toplevelunit.h"
+#include "madgineobject/madgineobjectobserver.h"
+#include "Meta/serialize/toplevelunit.h"
 
 #include "../render/rendercontextcollector.h"
 
@@ -14,11 +14,9 @@
 
 #include "mainwindowcomponentcollector.h"
 
-#include "Modules/keyvalue/keyvalueset.h"
+#include "madgineobject/madgineobject.h"
 
-#include "Modules/madgineobject/madgineobject.h"
-
-#include "Modules/serialize/container/serializablecontainer.h"
+#include "Meta/serialize/container/serializablecontainer.h"
 
 #include "../threading/framelistener.h"
 
@@ -138,7 +136,7 @@ namespace Window {
     private:
         const WindowSettings &mSettings;
 
-        OFFSET_CONTAINER(mComponents, MainWindowComponentContainer<Serialize::SerializableContainer<KeyValueSet<Placeholder<0>, MainWindowComponentComparator>, MainWindowComponentObserver<>, std::true_type>>);
+        OFFSET_CONTAINER(mComponents, MainWindowComponentContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, MainWindowComponentComparator>, MainWindowComponentObserver<>, std::true_type>>);
 
         std::vector<std::unique_ptr<ToolWindow>> mToolWindows;
 

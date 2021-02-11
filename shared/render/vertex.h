@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Modules/math/vector4.h"
-#include "Modules/generic/compound.h"
+#include "Meta/math/vector4.h"
+#include "Generic/compound.h"
 
 namespace Engine {
 namespace Render {

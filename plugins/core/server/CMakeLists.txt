@@ -10,6 +10,6 @@ FolderSources(sources "" src)
 
 add_plugin(Server Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/serverlib.h)
 
-target_link_libraries(Server PUBLIC Modules)
+target_link_libraries(Server PUBLIC Modules Meta)
 target_link_libraries(Server PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 

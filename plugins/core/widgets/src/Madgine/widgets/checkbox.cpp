@@ -2,8 +2,8 @@
 
 #include "checkbox.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 METATABLE_BEGIN_BASE(Engine::Widgets::Checkbox, Engine::Widgets::WidgetBase)
 METATABLE_END(Engine::Widgets::Checkbox)

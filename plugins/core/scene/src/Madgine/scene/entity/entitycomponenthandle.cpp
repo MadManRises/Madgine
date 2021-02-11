@@ -3,7 +3,7 @@
 
 #include "entitycomponenthandle.h"
 
-#include "Modules/serialize/streams/operations.h"
+#include "Meta/serialize/streams/operations.h"
 
 #include "entity.h"
 

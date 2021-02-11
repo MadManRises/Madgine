@@ -2,7 +2,7 @@
 
 #if ENABLE_PLUGINS
 
-#include "../generic/future.h"
+#include "Generic/future.h"
 
 namespace Engine {
 namespace Plugins {

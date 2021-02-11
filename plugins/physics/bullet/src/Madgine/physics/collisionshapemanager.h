@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Modules/resources/resourceloader.h"
+#include "Madgine/resources/resourceloader.h"
 
-#include "Modules/serialize/virtualserializableunit.h"
+#include "Meta/serialize/virtualserializableunit.h"
 
 class btCollisionShape;
 

@@ -24,6 +24,10 @@ endif()
 
 once()
 
+if (WIN32)
+	set (WINDOWS 1)
+endif()
+
 if (CMAKE_ANDROID_ARCH_ABI)
 	set (ANDROID 1)
 endif()

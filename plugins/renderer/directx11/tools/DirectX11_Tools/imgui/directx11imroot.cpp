@@ -2,7 +2,7 @@
 
 #include "directx11imroot.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
 
 #include "imgui/imgui.h"
 #include "imgui_impl_dx11.h"

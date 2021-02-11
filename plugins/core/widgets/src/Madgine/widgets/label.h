@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Modules/generic/virtualbase.h"
+#include "Generic/virtualbase.h"
 #include "widget.h"
 
 #include "fontloader.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Modules/serialize/syncmanager.h"
+#include "Meta/serialize/syncmanager.h"
 #include "Modules/threading/signal.h"
 #include "Modules/threading/slot.h"
 #include "networkbuffer.h"

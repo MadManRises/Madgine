@@ -9,17 +9,17 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
 
-#include "Modules/serialize/streams/serializestream.h"
-#include "Modules/serialize/streams/wrappingserializestreambuf.h"
+#include "Meta/serialize/streams/serializestream.h"
+#include "Meta/serialize/streams/wrappingserializestreambuf.h"
 
 #include "serialize/ini/inilib.h"
 #include "serialize/ini/iniformatter.h"
 
-#include "Modules/generic/container/safeiterator.h"
+#include "Generic/container/safeiterator.h"
 
-#include "Modules/serialize/streams/operations.h"
+#include "Meta/serialize/streams/operations.h"
 
 /*
 METATABLE_BEGIN(Engine::Tools::ImRoot)

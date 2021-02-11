@@ -6,6 +6,11 @@
 
 #include "../../threading/workgroup.h"
 
+
+#if ENABLE_THREADING
+#    include "Interfaces/threading/threadapi.h"
+#endif
+
 namespace Engine {
 
 namespace Debug {

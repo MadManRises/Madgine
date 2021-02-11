@@ -12,3 +12,5 @@
 #include "Madgine_Tools/clienttoolslib.h"
 
 #include "widgetstoolsforward.h"
+
+/// @endcond

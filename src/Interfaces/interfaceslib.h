@@ -1,10 +1,10 @@
 #pragma once
 
-/// @cond
+#include "Generic/genericlib.h"
 
 #include "interfacesconfig.h"
 
-#include "commonlib.h"
+/// @cond
 
 #if defined(Interfaces_EXPORTS)
 #    define INTERFACES_EXPORT DLL_EXPORT
@@ -26,32 +26,12 @@
 
 #include "debug/memory/memoryglobal.h"
 
-#include <algorithm>
-#include <array>
-#include <atomic>
-#include <cstring>
-#include <fstream>
-#include <functional>
-#include <future>
-#include <iomanip>
-#include <list>
-#include <map>
-#include <memory>
-#include <mutex>
-#include <optional>
-#include <queue>
-#include <regex>
-#include <set>
+
 #include <sstream>
-#include <stack>
-#include <stdlib.h>
-#include <string>
-#include <thread>
-#include <type_traits>
+#include <array>
+#include <fstream>
 #include <unordered_map>
-#include <unordered_set>
-#include <variant>
-#include <vector>
+#include <optional>
 
 #if WINDOWS
 #    include <memory_resource>
@@ -75,14 +55,6 @@ namespace pmr = experimental::pmr;
 }
 #endif
 
-#include <optional>
-#include <string_view>
-
-#include <chrono>
-
-#include <math.h>
-
-#include <assert.h>
 
 #include "interfacesforward.h"
 #include "util/utilmethods.h"

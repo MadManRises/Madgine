@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../generic/proxy.h"
+#include "Generic/proxy.h"
 
 namespace Engine {
 namespace Threading {

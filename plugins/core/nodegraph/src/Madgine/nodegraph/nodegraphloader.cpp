@@ -2,7 +2,7 @@
 
 #include "nodegraphloader.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
 
 UNIQUECOMPONENT(Engine::NodeGraph::NodeGraphLoader)
 

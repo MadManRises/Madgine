@@ -2,15 +2,15 @@
 
 #include "projectmanager.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imguiaddons.h"
 
 #include "Interfaces/filesystem/api.h"
 
-#include "Modules/resources/resourcemanager.h"
+#include "Madgine/resources/resourcemanager.h"
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 METATABLE_BEGIN_BASE(Engine::Tools::ProjectManager, Engine::Tools::ToolBase)

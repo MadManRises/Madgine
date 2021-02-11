@@ -1,4 +1,6 @@
 #include "../clientlib.h"
+#include "serialize/filesystem/filesystemlib.h"
+#include "serialize/ini/inilib.h"
 
 #include "mainwindow.h"
 
@@ -6,32 +8,30 @@
 
 #include "../render/rendercontext.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
 
-#include "Modules/serialize/serializetable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "toolwindow.h"
 
 #include "Interfaces/util/exception.h"
 
-#include "Modules/generic/container/reverseIt.h"
+#include "Generic/container/reverseIt.h"
 
 #include "../render/rendertarget.h"
 
 #include "mainwindowcomponent.h"
 
-#include "Modules/serialize/container/controlledconfig.h"
+#include "Meta/serialize/container/controlledconfig.h"
 
 #include "Interfaces/filesystem/api.h"
 #include "Interfaces/window/windowsettings.h"
 
-#include "serialize/filesystem/filesystemlib.h"
 #include "serialize/filesystem/filemanager.h"
 
-#include "serialize/ini/inilib.h"
 #include "serialize/ini/iniformatter.h"
 
-#include "Modules/serialize/serializableunitptr.h"
+#include "Meta/serialize/serializableunitptr.h"
 
 METATABLE_BEGIN(Engine::Window::MainWindow)
 READONLY_PROPERTY(Components, components)
@@ -82,7 +82,10 @@ namespace Window {
     {
         if (!mOsWindow)
             return { { 0, 0 }, { 0, 0 } };
-        return { mOsWindow->renderPos(), mOsWindow->renderSize() };
+        InterfacesVector pos = mOsWindow->renderPos(), size = mOsWindow->renderSize();
+        return {
+            { pos.x, pos.y }, { size.x, size.y }
+        };
     }
 
     bool MainWindow::init()
@@ -230,7 +233,7 @@ namespace Window {
 
     void MainWindow::onResize(const InterfacesVector &size)
     {
-        mRenderWindow->resize(size);
+        mRenderWindow->resize({ size.x, size.y });
         applyClientSpaceResize();
     }
 
@@ -240,9 +243,12 @@ namespace Window {
             return;
 
         Rect2i space;
-        if (!component)
-            space = { { 0, 0 }, mOsWindow->renderSize() };
-        else
+        if (!component) {
+            InterfacesVector size = mOsWindow->renderSize();
+            space = {
+                { 0, 0 }, { size.x, size.y }
+            };
+        } else
             space = component->getChildClientSpace();
 
         for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {

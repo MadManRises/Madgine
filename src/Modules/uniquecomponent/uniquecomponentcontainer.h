@@ -5,7 +5,7 @@
 #include "uniquecomponent.h"
 
 #if ENABLE_PLUGINS
-#    include "../generic/container/compoundatomicoperation.h"
+#    include "Generic/container/compoundatomicoperation.h"
 #endif
 
 namespace Engine {

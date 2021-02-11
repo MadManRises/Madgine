@@ -2,8 +2,8 @@
 #include "../toolscollector.h"
 #include "../toolbase.h"
 
-#include "Modules/keyvalue/typedscopeptr.h"
-#include "Modules/keyvalue/boundapifunction.h"
+#include "Meta/keyvalue/typedscopeptr.h"
+#include "Meta/keyvalue/boundapifunction.h"
 
 //#include "inspectorlayout.h"
 

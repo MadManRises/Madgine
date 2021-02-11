@@ -8,7 +8,7 @@
 
 #include "../render/rendercontext.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
 
 #include "../render/rendertarget.h"
 
@@ -49,7 +49,8 @@ namespace Window {
 
     Vector3 ToolWindow::getScreenSize()
     {
-        return Vector3{ Vector2 { mOsWindow->renderSize() }, 1.0f };
+        InterfacesVector size = mOsWindow->renderSize();
+        return Vector3{ Vector2 { static_cast<float>(size.x), static_cast<float>(size.y) }, 1.0f };
     }
 
     OSWindow *ToolWindow::osWindow()
@@ -74,7 +75,7 @@ namespace Window {
 
     void ToolWindow::onResize(const InterfacesVector &size)
     {
-        mRenderWindow->resize(size);
+        mRenderWindow->resize({ size.x, size.y });
     }
 
     bool ToolWindow::injectKeyPress(const Input::KeyEventArgs &arg)

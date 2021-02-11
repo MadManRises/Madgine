@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Modules/math/boundingbox.h"
-#include "Modules/math/sphere.h"
+#include "Meta/math/boundingbox.h"
+#include "Meta/math/sphere.h"
 
 #include "render/renderpassflags.h"
 

@@ -248,5 +248,10 @@ namespace Filesystem {
         return mPath.c_str();
     }
 
+    Path::operator const std::string &() const
+    {
+        return mPath;
+    }
+
 }
 }

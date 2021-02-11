@@ -2,8 +2,8 @@
 
 #include "opengltexture.h"
 
-#include "Modules/generic/areaview.h"
-#include "Modules/generic/bytebuffer.h"
+#include "Generic/areaview.h"
+#include "Generic/bytebuffer.h"
 
 namespace Engine {
 namespace Render {

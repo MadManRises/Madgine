@@ -2,13 +2,13 @@
 
 #include "directx11vertexshaderloader.h"
 
-#include "Interfaces/util/stringutil.h"
+#include "Generic/stringutil.h"
 
 #include "util/directx11vertexshader.h"
 
 #include "directx11rendercontext.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
 
 UNIQUECOMPONENT(Engine::Render::DirectX11VertexShaderLoader);
 

@@ -1,17 +1,17 @@
 #pragma once
 
-#include "Modules/math/matrix3.h"
+#include "Meta/math/matrix3.h"
 
 #include "Modules/threading/signal.h"
 #include "widgetclass.h"
 
-#include "Modules/generic/container/transformIt.h"
+#include "Generic/container/transformIt.h"
 
-#include "Modules/serialize/container/serializablecontainer.h"
+#include "Meta/serialize/container/serializablecontainer.h"
 
-#include "Modules/serialize/virtualserializableunit.h"
+#include "Meta/serialize/virtualserializableunit.h"
 
-#include "Modules/keyvalueutil/virtualscope.h"
+#include "Meta/keyvalue/virtualscope.h"
 
 #include "render/texturedescriptor.h"
 #include "vertex.h"

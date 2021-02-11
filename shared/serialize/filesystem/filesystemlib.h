@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Modules/moduleslib.h"
+#include "Meta/metalib.h"
+#include "Interfaces/interfaceslib.h"
 
 #if defined(Filesystem_EXPORTS)
 #    define MADGINE_FILESYSTEM_EXPORT DLL_EXPORT

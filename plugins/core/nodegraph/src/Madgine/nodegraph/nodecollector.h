@@ -7,7 +7,7 @@
 #include "Modules/uniquecomponent/uniquecomponent.h"
 #include "Modules/uniquecomponent/indexref.h"
 
-#include "Modules/serialize/virtualserializableunit.h"
+#include "Meta/serialize/virtualserializableunit.h"
 
 DECLARE_UNIQUE_COMPONENT(Engine::NodeGraph, Node, NodeBase, NodeGraph &);
 

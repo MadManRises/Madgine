@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Modules/madgineobject/madgineobject.h"
+#include "madgineobject/madgineobject.h"
 
-#include "Modules/keyvalueutil/virtualscope.h"
+#include "Meta/keyvalue/virtualscope.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Modules/moduleslib.h"
+#include "Meta/metalib.h"
 
 #if defined(Xml_EXPORTS)
 #    define MADGINE_XML_EXPORT DLL_EXPORT

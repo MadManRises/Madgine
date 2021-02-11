@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Modules/resources/resourceloader.h"
+#include "Madgine/resources/resourceloader.h"
 
 #include "programloader.h"
 

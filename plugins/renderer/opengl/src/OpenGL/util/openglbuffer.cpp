@@ -2,7 +2,7 @@
 
 #include "openglbuffer.h"
 
-#include "Modules/generic/bytebuffer.h"
+#include "Generic/bytebuffer.h"
 
 #if OPENGL_ES
 #    include "openglvertexarray.h"

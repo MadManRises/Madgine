@@ -7,12 +7,12 @@
 
 #        define THREADLOCAL(T) ::Engine::Threading::Global<T, ::Engine::Threading::ThreadStorage>
 #    else
-#        include "../generic/proxy.h"
+#        include "Generic/proxy.h"
 
 #        define THREADLOCAL(T) thread_local ::Engine::Proxy<T>
 #    endif
 #else
-#        include "../generic/proxy.h"
+#    include "Generic/proxy.h"
 
 #    define THREADLOCAL(T) ::Engine::Proxy<T>
 #endif

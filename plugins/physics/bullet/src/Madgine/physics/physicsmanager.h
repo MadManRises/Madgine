@@ -7,9 +7,9 @@
 
 #include "bullet3-2.89/src/btBulletDynamicsCommon.h"
 
-#include "Modules/generic/proxy.h"
+#include "Generic/proxy.h"
 
-#include "Modules/math/vector3.h"
+#include "Meta/math/vector3.h"
 
 namespace Engine {
 namespace Physics {

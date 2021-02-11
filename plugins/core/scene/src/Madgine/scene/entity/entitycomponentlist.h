@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Modules/generic/container/container_api.h"
-#include "Modules/generic/container/multivector.h"
-#include "Modules/keyvalue/typedscopeptr.h"
+#include "Generic/container/container_api.h"
+#include "Generic/container/multivector.h"
+#include "Meta/keyvalue/typedscopeptr.h"
 #include "entitycomponentcollector.h"
 #include "entitycomponentlistbase.h"
 #include "entityptr.h"
-#include "Modules/serialize/serializableunitptr.h"
+#include "Meta/serialize/serializableunitptr.h"
 
 namespace Engine {
 namespace Scene {

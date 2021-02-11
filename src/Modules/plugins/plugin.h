@@ -2,11 +2,9 @@
 
 #if ENABLE_PLUGINS
 
-#include "loadstate.h"
-
 #include "Interfaces/filesystem/path.h"
 
-#include "../generic/future.h"
+#include "Generic/future.h"
 
 namespace Engine {
 namespace Plugins {

@@ -5,6 +5,6 @@ set(sources imgui.cpp imgui.h imguiaddons.cpp imguiaddons.h imgui_demo.cpp imgui
 	
 add_workspace_library(ImGui ${sources} SOURCE_ROOT ..)
 
-target_link_libraries(ImGui PUBLIC Modules)
+target_link_libraries(ImGui PUBLIC Meta Modules)
 
 install_to_workspace(Madgine EXPORT_LIB TARGETS ImGui)

@@ -444,7 +444,8 @@ namespace Render {
 
     Vector2i OpenGLRenderWindow::size() const
     {
-        return mOsWindow->renderSize();
+        InterfacesVector size;
+        return { size.x, size.y };
     }
 
     bool OpenGLRenderWindow::resize(const Vector2i &size)

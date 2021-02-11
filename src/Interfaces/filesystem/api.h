@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../streams/streams.h"
+#include "Generic/streams.h"
 #include "filequery.h"
 
 namespace Engine {

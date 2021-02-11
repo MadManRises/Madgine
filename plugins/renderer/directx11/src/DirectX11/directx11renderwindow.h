@@ -7,7 +7,7 @@
 #include "util/directx11vertexarray.h"
 #include "util/directx11buffer.h"
 
-#include "Modules/math/atlas2.h"
+#include "Meta/math/atlas2.h"
 
 namespace Engine {
 namespace Render {

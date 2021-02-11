@@ -12,7 +12,7 @@
 #include "Modules/plugins/pluginmanager.h"
 
 
-#include "Modules/keyvalue/metatable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
 
 
 
@@ -23,9 +23,9 @@
 
 #include "Madgine/scene/entity/components/transform.h"
 
-#include "Modules/math/plane.h"
+#include "Meta/math/plane.h"
 
-#include "Modules/math/geometry3.h"
+#include "Meta/math/geometry3.h"
 
 #include "Madgine/app/application.h"
 
@@ -41,7 +41,7 @@
 
 #include "texture.h"
 
-#include "Modules/math/transformation.h"
+#include "Meta/math/transformation.h"
 
 #include "Madgine/render/rendertarget.h"
 

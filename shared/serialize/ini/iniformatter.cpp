@@ -2,9 +2,9 @@
 
 #include "iniformatter.h"
 
-#include "Modules/serialize/streams/serializestream.h"
+#include "Meta/serialize/streams/serializestream.h"
 
-#include "Modules/serialize/primitivetypes.h"
+#include "Meta/serialize/primitivetypes.h"
 
 namespace Engine {
 namespace Ini {
@@ -36,7 +36,7 @@ namespace Ini {
         } else
             prefix = in.readUntil("=");
 
-        if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>) {
+        if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>) {
             in.setNextFormattedStringDelimiter('\n');
         }
     }

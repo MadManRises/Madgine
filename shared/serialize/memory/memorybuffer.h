@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Modules/serialize/streams/serializestreambuf.h"
+#include "Meta/serialize/streams/serializestreambuf.h"
 
-#include "Modules/generic/bytebuffer.h"
+#include "Generic/bytebuffer.h"
 
 namespace Engine {
 namespace Memory {

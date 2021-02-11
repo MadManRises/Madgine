@@ -14,11 +14,12 @@
 #pragma once
 
 #include "Modules/moduleslib.h"
+#include "Meta/metalib.h"
 
-#include "Modules/math/vector2.h"
-#include "Modules/math/vector2i.h"
-#include "Modules/math/vector4.h"
-#include "Modules/moduleslib.h"
+#include "Meta/math/vector2.h"
+#include "Meta/math/vector2i.h"
+#include "Meta/math/vector4.h"
+
 #include "Modules/threading/workgroup.h"
 
 //---- Define assertion handler. Defaults to calling assert().

@@ -2,11 +2,11 @@
 
 #include "openglshaderloader.h"
 
-#include "Interfaces/util/stringutil.h"
+#include "Generic/stringutil.h"
 
 #include "util/openglshader.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
 
 UNIQUECOMPONENT(Engine::Render::OpenGLShaderLoader);
 

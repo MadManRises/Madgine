@@ -4,10 +4,10 @@
 
 #include "Modules/debug/profiler/profile.h"
 
-#include "Modules/math/vector2i.h"
-#include "Modules/math/vector3.h"
-#include "Modules/math/vector3i.h"
-#include "Modules/math/vector4.h"
+#include "Meta/math/vector2i.h"
+#include "Meta/math/vector3.h"
+#include "Meta/math/vector3i.h"
+#include "Meta/math/vector4.h"
 
 #include "directx11rendertexture.h"
 
@@ -20,7 +20,7 @@
 #include "directx11textureloader.h"
 #include "directx11vertexshaderloader.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
 
 namespace Engine {
 namespace Render {
@@ -115,7 +115,8 @@ namespace Render {
             backBuffer = nullptr;
         }
 
-        setup(targetView, w->renderSize());
+        InterfacesVector size = w->renderSize();
+        setup(targetView, { size.x, size.y });
     }
 
     DirectX11RenderWindow::~DirectX11RenderWindow()
@@ -180,7 +181,8 @@ namespace Render {
 
     Vector2i DirectX11RenderWindow::size() const
     {
-        return mWindow->renderSize();
+        InterfacesVector size = mWindow->renderSize();
+        return { size.x, size.y };
     }
 
     bool DirectX11RenderWindow::resize(const Vector2i &size)

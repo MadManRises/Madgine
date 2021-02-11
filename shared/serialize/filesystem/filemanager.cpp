@@ -6,11 +6,11 @@
 
 #include "Interfaces/filesystem/api.h"
 
-#include "Modules/serialize/streams/wrappingserializestreambuf.h"
+#include "Meta/serialize/streams/wrappingserializestreambuf.h"
 
-#include "Modules/serialize/streams/serializestream.h"
+#include "Meta/serialize/streams/serializestream.h"
 
-#include "Modules/serialize/formatter.h"
+#include "Meta/serialize/formatter.h"
 
 namespace Engine {
 namespace Filesystem {

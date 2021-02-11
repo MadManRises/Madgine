@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Modules/generic/bits.h"
+#include "Generic/bits.h"
 
 namespace CodeGen {
 

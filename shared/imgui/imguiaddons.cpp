@@ -1,16 +1,16 @@
-#include "Modules/moduleslib.h"
+#include "Meta/metalib.h"
 
 #include "imguiaddons.h"
 
 #include "../imgui/imgui.h"
 #include "../imgui/imgui_internal.h"
 
-#include "Modules/math/matrix3.h"
+#include "Meta/math/matrix3.h"
 
-#include "Modules/keyvalue/proxyscopebase.h"
-#include "Modules/keyvalue/typedscopeptr.h"
+#include "Meta/keyvalue/proxyscopebase.h"
+#include "Meta/keyvalue/typedscopeptr.h"
 
-#include "Modules/keyvalue/boundapifunction.h"
+#include "Meta/keyvalue/boundapifunction.h"
 
 #include "Interfaces/filesystem/api.h"
 #include "Interfaces/filesystem/path.h"

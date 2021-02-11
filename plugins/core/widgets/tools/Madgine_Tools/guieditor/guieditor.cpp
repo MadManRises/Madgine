@@ -9,9 +9,9 @@
 
 #include "inspector/inspector.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/math/bounds.h"
-#include "Modules/serialize/serializetable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/math/bounds.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Madgine/window/mainwindow.h"
 #include "Madgine/widgets/widget.h"
@@ -21,13 +21,13 @@
 
 #include "project/projectmanager.h"
 
-#include "Modules/serialize/streams/serializestream.h"
-#include "Modules/serialize/streams/wrappingserializestreambuf.h"
+#include "Meta/serialize/streams/serializestream.h"
+#include "Meta/serialize/streams/wrappingserializestreambuf.h"
 
 #include "serialize/xml/xmllib.h"
 #include "serialize/xml/xmlformatter.h"
 
-#include "Modules/serialize/serializemanager.h"
+#include "Meta/serialize/serializemanager.h"
 
 #include "serialize/filesystem/filesystemlib.h"
 #include "serialize/filesystem/filemanager.h"
@@ -157,8 +157,9 @@ namespace Tools {
 
             Rect2i screenSpace = mWidgetManager->getClientSpace();
 
+            InterfacesVector pos = mWidgetManager->window().osWindow()->renderPos();
             Vector3i windowPos = Vector3i{
-                mWidgetManager->window().osWindow()->renderPos(), 0
+                pos.x, pos.y, 0
             };
 
             ImGuiIO &io = ImGui::GetIO();

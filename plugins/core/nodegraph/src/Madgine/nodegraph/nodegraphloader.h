@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Modules/resources/resourceloader.h"
+#include "Madgine/resources/resourceloader.h"
 
 #include "nodegraph.h"
 
-#include "Modules/serialize/container/noparent.h"
+#include "Meta/serialize/container/noparent.h"
 
 namespace Engine {
 namespace NodeGraph {

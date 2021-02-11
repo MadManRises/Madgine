@@ -1,6 +1,6 @@
 
 add_subdirectory(opengl)
 
-if (WIN32)
+if (WINDOWS)
 	add_subdirectory(directx11)
 endif ()

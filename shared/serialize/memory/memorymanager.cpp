@@ -2,13 +2,11 @@
 
 #include "memorymanager.h"
 
-#include "Modules/serialize/formatter/safebinaryformatter.h"
+#include "Meta/serialize/formatter/safebinaryformatter.h"
 
-#include "Modules/threading/workgroup.h"
+#include "Meta/serialize/streams/serializestream.h"
 
-#include "Modules/serialize/streams/serializestream.h"
-
-#include "Modules/serialize/formatter.h"
+#include "Meta/serialize/formatter.h"
 
 namespace Engine {
 namespace Memory {

@@ -4,6 +4,7 @@ cmake_minimum_required (VERSION 3.8)
 cmake_policy(SET CMP0048 NEW)
 cmake_policy(SET CMP0011 NEW)
 cmake_policy(SET CMP0049 NEW)
+cmake_policy(SET CMP0070 NEW)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -74,5 +75,6 @@ cpack_add_component(Madgine REQUIRED)
 
 cpack_add_component_group(Renderer EXPANDED)
 
-configure_file(docs/Doxyfile.in Doxyfile)
+configure_file(docs/Doxyfile.in Doxyfile.in)
+file(GENERATE OUTPUT Doxyfile INPUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.in)
 

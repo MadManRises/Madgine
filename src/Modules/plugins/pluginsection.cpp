@@ -16,9 +16,9 @@
 
 #    include "Interfaces/dl/runtime.h"
 
-#    include "../keyvalue/keyvalue.h"
+#    include "Generic/keyvalue.h"
 
-#    include "../ini/inisection.h"
+#    include "ini/inisection.h"
 
 #    include "../threading/workgroup.h"
 

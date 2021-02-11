@@ -9,7 +9,7 @@
 
 #include "Madgine/render/renderpass.h"
 
-#include "Modules/math/vector2.h"
+#include "Meta/math/vector2.h"
 
 #include "Interfaces/filesystem/path.h"
 

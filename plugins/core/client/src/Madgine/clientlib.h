@@ -9,6 +9,7 @@
 #endif
 
 #include "Modules/moduleslib.h"
+#include "Meta/metalib.h"
 
 #include "clientforward.h"
 

@@ -2,8 +2,8 @@
 
 #include "Madgine/scene/entity/entitycomponent.h"
 
-#include "Modules/math/vector3.h"
-#include "Modules/math/quaternion.h"
+#include "Meta/math/vector3.h"
+#include "Meta/math/quaternion.h"
 
 namespace ClickBrick {
 namespace Scene {

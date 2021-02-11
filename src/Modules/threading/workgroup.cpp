@@ -1,6 +1,7 @@
 #include "../moduleslib.h"
 
 #if ENABLE_THREADING
+#    include "Interfaces/threading/threadapi.h"
 #    include "threadlocal.h"
 #    include "threadstorage.h"
 #endif

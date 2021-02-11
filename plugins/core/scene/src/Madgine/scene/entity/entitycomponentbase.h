@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Modules/serialize/serializabledataunit.h"
-#include "Modules/keyvalue/objectptr.h"
+#include "Meta/serialize/serializabledataunit.h"
+#include "Meta/keyvalue/objectptr.h"
 
 namespace Engine {
 namespace Scene {

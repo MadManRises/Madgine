@@ -2,7 +2,7 @@
 
 #include "connectionstore.h"
 
-#include "../generic/onetimefunctor.h"
+#include "Generic/onetimefunctor.h"
 
 #include "task.h"
 

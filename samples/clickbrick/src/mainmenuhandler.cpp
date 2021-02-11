@@ -2,7 +2,7 @@
 
 #include "mainmenuhandler.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
 
 #include "Madgine/widgets/button.h"
 
@@ -10,7 +10,7 @@
 
 #include "gamemanager.h"
 
-#include "Modules/serialize/serializetable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 UNIQUECOMPONENT(ClickBrick::UI::MainMenuHandler)
 

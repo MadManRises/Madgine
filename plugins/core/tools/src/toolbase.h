@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Modules/madgineobject/madgineobject.h"
+#include "madgineobject/madgineobject.h"
 
-#include "Modules/keyvalueutil/virtualscope.h"
+#include "Meta/keyvalue/virtualscope.h"
 
-#include "Modules/serialize/virtualserializableunit.h"
+#include "Meta/serialize/virtualserializableunit.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 

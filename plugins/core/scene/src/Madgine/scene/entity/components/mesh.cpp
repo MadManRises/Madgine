@@ -2,12 +2,12 @@
 
 #include "mesh.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
-#include "Modules/math/boundingbox.h"
+#include "Meta/math/boundingbox.h"
 
-#include "Modules/keyvalue/valuetype.h"
+#include "Meta/keyvalue/valuetype.h"
 
 #include "meshdata.h"
 

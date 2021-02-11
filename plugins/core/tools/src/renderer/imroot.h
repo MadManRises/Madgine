@@ -2,13 +2,13 @@
 
 #include "../toolscollector.h"
 
-#include "Modules/madgineobject/madgineobject.h"
+#include "madgineobject/madgineobject.h"
 
-#include "Modules/generic/container/observablecontainer.h"
+#include "Generic/container/observablecontainer.h"
 
-#include "Modules/madgineobject/madgineobjectobserver.h"
+#include "madgineobject/madgineobjectobserver.h"
 
-#include "Modules/keyvalue/typedscopeptr.h"
+#include "Meta/keyvalue/typedscopeptr.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 

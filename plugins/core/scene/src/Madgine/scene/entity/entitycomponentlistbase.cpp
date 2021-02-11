@@ -2,7 +2,7 @@
 
 #include "entitycomponentlistbase.h"
 
-#include "Modules/serialize/streams/operations.h"
+#include "Meta/serialize/streams/operations.h"
 
 namespace Engine {
 namespace Scene {

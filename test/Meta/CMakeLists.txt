@@ -1,0 +1,15 @@
+
+project(Meta_Test)
+
+
+set(sources "")
+FolderSources(sources "" "" Meta_gtest_main.cc)
+	FolderSources(sources "" keyvalue typedscopeptrtest.cpp valuetypetest.cpp)
+	FolderSources(sources "" math matrixtest.cpp quaterniontest.cpp)
+	FolderSources(sources "" serialize)
+		FolderSources(sources serialize container containertest.cpp)
+		FolderSources(sources serialize table serializetabletest.cpp)	
+
+add_gtest(Meta_Test ${sources})
+
+target_link_libraries(Meta_Test PRIVATE Interfaces Meta CLI)

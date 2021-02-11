@@ -7,23 +7,23 @@
 #include "imgui/imgui.h"
 #include "imgui/imguiaddons.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 //#include "Madgine/app/application.h"
 
 #include "inspector.h"
 
-#include "Modules/keyvalue/keyvaluevirtualiterator.h"
-#include "Modules/keyvalue/scopefield.h"
-#include "Modules/keyvalue/scopeiterator.h"
+#include "Meta/keyvalue/keyvaluevirtualiterator.h"
+#include "Meta/keyvalue/scopefield.h"
+#include "Meta/keyvalue/scopeiterator.h"
 
-#include "Modules/keyvalue/keyvaluepair.h"
+#include "Meta/keyvalue/keyvaluepair.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-#include "Modules/keyvalue/keyvaluescan.h"
-#include "Modules/keyvalueutil/keyvalueregistry.h"
+#include "Meta/keyvalue/keyvaluescan.h"
+#include "Madgine/core/keyvalueregistry.h"
 
 UNIQUECOMPONENT(Engine::Tools::FunctionTool);
 

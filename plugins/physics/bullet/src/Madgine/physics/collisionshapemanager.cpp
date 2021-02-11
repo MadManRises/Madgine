@@ -2,14 +2,14 @@
 
 #include "collisionshapemanager.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "meshloader.h"
 
-#include "Modules/math/quaternion.h"
+#include "Meta/math/quaternion.h"
 
-#include "Modules/serialize/streams/operations.h"
+#include "Meta/serialize/streams/operations.h"
 
 #include "Madgine/app/application.h"
 #include "Madgine/scene/scenemanager.h"

@@ -2,25 +2,17 @@
 
 #include "xmlformatter.h"
 
-#include "Modules/serialize/streams/serializestream.h"
+#include "Meta/serialize/streams/serializestream.h"
 
-#include "Interfaces/util/stringutil.h"
+#include "Generic/stringutil.h"
 
-#include "Modules/serialize/primitivetypes.h"
+#include "Meta/serialize/primitivetypes.h"
 
 namespace Engine {
 namespace XML {
 
     XMLFormatter::XMLFormatter()
         : Formatter(false, true)
-    {
-    }
-
-    void XMLFormatter::setupStream(std::istream &in)
-    {
-    }
-
-    void XMLFormatter::setupStream(std::ostream &out)
     {
     }
 
@@ -127,7 +119,7 @@ namespace XML {
             assert(mCurrentExtended);
             --mCurrentExtendedCount;
             out.writeUnformatted(" " + std::string(name) + "=");
-            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>)
+            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>)
                 out.writeUnformatted("\"");
         } else {
             if (!mCurrentExtended) {
@@ -144,7 +136,7 @@ namespace XML {
         if (!name)
             name = "Element";
         if (mCurrentExtended) {
-            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>)
+            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>)
                 out.writeUnformatted("\"");
         } else
             out.writeUnformatted("</" + std::string(name) + ">\n");
@@ -163,7 +155,7 @@ namespace XML {
                 if (in.readUntil("=").size() <= 1)
                     std::terminate();
             }
-            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>) {
+            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>) {
                 if (in.readN(1) != "\"")
                     std::terminate();
                 in.setNextFormattedStringDelimiter('"');
@@ -187,7 +179,7 @@ namespace XML {
             if (prefix != ">")
                 std::terminate();
 
-            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>) {
+            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>) {
                 in.setNextFormattedStringDelimiter('<');
             }
         }
@@ -196,7 +188,7 @@ namespace XML {
     void XMLFormatter::endPrimitive(Serialize::SerializeInStream &in, const char *name, uint8_t typeId)
     {
         if (!mCurrentExtended) {
-            const char *cPrefix = ((typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<Filesystem::Path>) ? "/" : "</");
+            const char *cPrefix = ((typeId == Serialize::PrimitiveTypeIndex_v<std::string>) ? "/" : "</");
             if (name) {
                 std::string prefix = in.readN(strlen(name) + 1 + strlen(cPrefix));
                 if (prefix != cPrefix + std::string(name) + ">")

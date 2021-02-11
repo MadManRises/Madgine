@@ -2,7 +2,9 @@
 
 #if ENABLE_PLUGINS
 
-#include "../generic/future.h"
+#include "Generic/future.h"
+
+#include "../threading/signal.h"
 
 namespace Engine {
 namespace Plugins {
@@ -35,6 +37,8 @@ namespace Plugins {
         std::mutex mListenersMutex;
         std::mutex mDependenciesMutex;
 
+        Threading::SignalStub<Filesystem::Path, bool> &exportSignal();
+
     protected:
         void setupListenerOnSectionAdded(PluginListener *listener, PluginSection *section);
         void shutdownListenerAboutToRemoveSection(PluginListener *listener, PluginSection *section);
@@ -56,6 +60,8 @@ namespace Plugins {
         static PluginManager *sSingleton;
 
         bool mLoadingSelectionFile = false;
+
+        Threading::Signal<Filesystem::Path, bool> mExportSignal;
     };
 
 }

@@ -2,7 +2,7 @@
 
 #include "gamemanager.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
 
 #include "Madgine/scene/scenemanager.h"
 
@@ -13,9 +13,9 @@
 
 #include "brick.h"
 
-#include "Modules/math/geometry3.h"
+#include "Meta/math/geometry3.h"
 
-#include "Modules/math/boundingbox.h"
+#include "Meta/math/boundingbox.h"
 
 #include "Madgine/widgets/label.h"
 
@@ -23,13 +23,13 @@
 
 #include "Madgine/app/application.h"
 
-#include "Modules/math/ray.h"
+#include "Meta/math/ray.h"
 
 #include "Madgine/scene/entity/entity.h"
 
 #include "Modules/threading/datamutex.h"
 
-#include "Modules/serialize/serializetable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 
 UNIQUECOMPONENT(ClickBrick::UI::GameManager)
@@ -165,7 +165,7 @@ namespace UI {
 
     void GameManager::onPointerClick(const Engine::Input::PointerEventArgs &evt)
     {
-        Engine::Ray ray = mCamera.mousePointToRay(Engine::Vector2 { evt.windowPosition }, mGameWindow->getActualSize().xy());
+        Engine::Ray ray = mCamera.mousePointToRay(Engine::Vector2 { static_cast<float>(evt.windowPosition.x), static_cast<float>(evt.windowPosition.y) }, mGameWindow->getActualSize().xy());
 
         Engine::Scene::Entity::EntityPtr hit;
         float distance = std::numeric_limits<float>::max();        

@@ -3,11 +3,11 @@
 #include "openglprogram.h"
 #include "openglshader.h"
 
-#include "Modules/math/matrix4.h"
+#include "Meta/math/matrix4.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
 
-#include "Modules/generic/bytebuffer.h"
+#include "Generic/bytebuffer.h"
 
 METATABLE_BEGIN(Engine::Render::OpenGLProgram)
 READONLY_PROPERTY(UniformBuffers, uniformBuffers)

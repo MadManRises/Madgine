@@ -2,7 +2,7 @@
 
 #include "networkmanager.h"
 
-#include "Modules/serialize/formatter/safebinaryformatter.h"
+#include "Meta/serialize/formatter/safebinaryformatter.h"
 
 #include "Modules/threading/workgroup.h"
 

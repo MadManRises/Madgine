@@ -6,12 +6,12 @@
 
 #include "imgui/imguiaddons.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Interfaces/window/windowapi.h"
 
-#include "Modules/math/atlas2.h"
+#include "Meta/math/atlas2.h"
 
 #include "im3d/im3d.h"
 

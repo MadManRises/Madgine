@@ -2,15 +2,15 @@
 
 #include "camera.h"
 
-#include "Modules/math/matrix4.h"
+#include "Meta/math/matrix4.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
 
-#include "Modules/math/pi.h"
+#include "Meta/math/pi.h"
 
-#include "Modules/math/ray.h"
+#include "Meta/math/ray.h"
 
-#include "Modules/math/transformation.h"
+#include "Meta/math/transformation.h"
 
 namespace Engine {
 namespace Render {

@@ -6,8 +6,8 @@
 #include "imgui/imgui.h"
 #include "imgui/imguiaddons.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Madgine/app/application.h"
 #include "Madgine/scene/entity/entitycomponentcollector.h"
@@ -22,9 +22,9 @@
 
 #include "im3d/im3d.h"
 
-#include "Modules/resources/resourcemanager.h"
+#include "Madgine/resources/resourcemanager.h"
 
-#include "Modules/math/boundingbox.h"
+#include "Meta/math/boundingbox.h"
 
 #include "Madgine/window/mainwindow.h"
 
@@ -41,9 +41,9 @@
 #include "serialize/filesystem/filesystemlib.h"
 #include "serialize/filesystem/filemanager.h"
 
-#include "Modules/serialize/streams/wrappingserializestreambuf.h"
+#include "Meta/serialize/streams/wrappingserializestreambuf.h"
 
-#include "Modules/serialize/formatter/safebinaryformatter.h"
+#include "Meta/serialize/formatter/safebinaryformatter.h"
 
 UNIQUECOMPONENT(Engine::Tools::SceneEditor);
 

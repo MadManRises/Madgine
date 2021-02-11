@@ -14,16 +14,15 @@ option(INTERFACES_ENABLE_MEMTRACKING "Enables Memory Tracking for Heap-Allocatio
 
 set(sources)
 
-FolderSources(sources "" "" commonlib.h interfacesforward.h interfaceslib.h)
+FolderSources(sources "" "" interfacesforward.h interfaceslib.h)
 	FolderSources(sources "" debug stacktrace.cpp stacktrace.h traceback.cpp traceback.h)
 		FolderSources(sources debug memory memory.cpp memory.h statsmemoryresource.cpp statsmemoryresource.h untrackedmemoryresource.cpp untrackedmemoryresource.h)
 	FolderSources(sources "" dl dlapi_unix.cpp dlapi_win.cpp dlapi.h runtime.cpp runtime.h runtime_unix.cpp runtime_win.cpp)
 	FolderSources(sources "" filesystem api.cpp api.h api_android.cpp api_emscripten.cpp api_linux.cpp api_osx.cpp api_win.cpp filequery.cpp filequery_android.cpp filequery_emscripten.cpp filequery_linux.cpp filequery_osx.cpp filequery_ios.cpp filequery_win.cpp filequery.h filewatcher_win.cpp filewatcher_emscripten.cpp filewatcher_linux.cpp filewatcher_android.cpp filewatcher_osx.cpp filewatcher_ios.cpp filewatcher.h path.cpp path.h)
 	FolderSources(sources "" input rawinput_win.cpp rawinput_win.h)
 	FolderSources(sources "" socket socketapi.h socketapi_unix.cpp socketapi_win.cpp)
-	FolderSources(sources "" streams streams.cpp streams.h)
 	FolderSources(sources "" threading threadapi.h threadapi_unix.cpp threadapi_win.cpp)
-	FolderSources(sources "" util exception.cpp exception.h log.cpp log.h standardlog.cpp standardlog.h stringutil.h utilmethods.cpp utilmethods.h)
+	FolderSources(sources "" util exception.cpp exception.h log.cpp log.h standardlog.cpp standardlog.h utilmethods.cpp utilmethods.h)
 	FolderSources(sources "" window windowapi.h windowapi_android.cpp windowapi_emscripten.cpp windowapi_linux.cpp windowapi_win.cpp windoweventlistener.h)
 
 add_workspace_library(Interfaces ${sources} SOURCE_ROOT .. PRECOMPILED_HEADER interfaceslib.h)
@@ -31,8 +30,9 @@ add_workspace_library(Interfaces ${sources} SOURCE_ROOT .. PRECOMPILED_HEADER in
 configure_file(interfacesconfig.in.h interfacesconfig.h)
 target_include_directories(Interfaces PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
+target_link_libraries(Interfaces PUBLIC Generic)
 
-if (WIN32)
+if (WINDOWS)
 	target_link_libraries (Interfaces PRIVATE ws2_32 DbgHelp)	
 endif()
 

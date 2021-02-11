@@ -1,21 +1,19 @@
 #pragma once
 
-#include "Modules/serialize/toplevelunit.h"
+#include "Meta/serialize/toplevelunit.h"
 
 #include "scenecomponentcollector.h"
 
-#include "Modules/serialize/container/syncablecontainer.h"
+#include "Meta/serialize/container/syncablecontainer.h"
 
 #include "Madgine/app/globalapibase.h"
 #include "Madgine/app/globalapicollector.h"
-#include "Modules/madgineobject/madgineobjectobserver.h"
-#include "Modules/serialize/container/noparent.h"
+#include "madgineobject/madgineobjectobserver.h"
+#include "Meta/serialize/container/noparent.h"
 
 #include "Modules/threading/datamutex.h"
 
 #include "Modules/threading/signalfunctor.h"
-
-#include "Modules/keyvalue/keyvalueset.h"
 
 #include "scenecomponentbase.h"
 
@@ -25,8 +23,10 @@
 
 #include "entity/entitycomponentcollector.h"
 
-#include "Modules/generic/container/refcounted_deque.h"
+#include "Generic/container/refcounted_deque.h"
 #include "entity/entity.h"
+
+#include "Generic/keyvalue.h"
 
 namespace Engine {
 namespace Scene {
@@ -103,7 +103,7 @@ namespace Scene {
         std::tuple<std::pair<const char *, std::string>> storeEntityCreationData(const Entity::Entity &entity) const;
 
     public:
-        OFFSET_CONTAINER(mSceneComponents, SceneComponentContainer<Serialize::SerializableContainer<KeyValueSet<Placeholder<0>>, MadgineObjectObserver, std::true_type>>);
+        OFFSET_CONTAINER(mSceneComponents, SceneComponentContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, MadgineObjectObserver, std::true_type>>);
 
     private:
         Entity::EntityComponentListContainer<std::vector<Placeholder<0>>> mEntityComponentLists;

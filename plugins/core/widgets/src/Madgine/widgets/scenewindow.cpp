@@ -4,7 +4,7 @@
 
 #include "widgetmanager.h"
 
-#include "Modules/math/vector4.h"
+#include "Meta/math/vector4.h"
 
 #include "vertex.h"
 
@@ -14,8 +14,8 @@
 
 #include "Madgine/render/rendercontext.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "textureloader.h"
 

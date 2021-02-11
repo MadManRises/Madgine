@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Meta/metalib.h"
 #include "Modules/moduleslib.h"
 
 #if defined(Network_EXPORTS)

@@ -2,12 +2,12 @@
 
 #include "nodebase.h"
 
-#include "Modules/serialize/streams/serializestream.h"
+#include "Meta/serialize/streams/serializestream.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
-#include "Modules/keyvalueutil/valuetypeserialize.h"
+#include "Meta/keyvalueutil/valuetypeserialize.h"
 
 METATABLE_BEGIN(Engine::NodeGraph::NodeBase)
 METATABLE_END(Engine::NodeGraph::NodeBase)

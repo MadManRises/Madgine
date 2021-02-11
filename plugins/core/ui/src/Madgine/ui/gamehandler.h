@@ -5,7 +5,7 @@
 
 #include "Interfaces/input/inputevents.h"
 
-#include "Modules/math/vector2.h"
+#include "Meta/math/vector2.h"
 
 #include "handlercollector.h"
 

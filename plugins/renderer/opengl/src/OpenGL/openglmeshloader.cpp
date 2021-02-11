@@ -4,7 +4,7 @@
 
 #include "openglmeshdata.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
 
 #include "imageloaderlib.h"
 #include "imagedata.h"

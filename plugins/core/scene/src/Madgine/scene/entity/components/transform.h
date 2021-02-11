@@ -1,11 +1,11 @@
 #pragma once
 
 #include "../entitycomponent.h"
-#include "Modules/math/matrix4.h"
-#include "Modules/math/quaternion.h"
-#include "Modules/math/vector3.h"
+#include "Meta/math/matrix4.h"
+#include "Meta/math/quaternion.h"
+#include "Meta/math/vector3.h"
 
-#include "Modules/serialize/container/serialized.h"
+#include "Meta/serialize/container/serialized.h"
 
 #include "../entitycomponenthandle.h"
 

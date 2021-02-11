@@ -1,8 +1,0 @@
-add_subdirectory(audioloader)
-add_subdirectory(imageloader)
-add_subdirectory(meshloader)
-add_subdirectory(programloader)
-add_subdirectory(textureloader)
-add_subdirectory(fontloader)
-add_subdirectory(skeletonloader)
-add_subdirectory(animationloader)

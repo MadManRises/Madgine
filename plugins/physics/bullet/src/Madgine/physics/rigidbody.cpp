@@ -9,12 +9,12 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Madgine/scene/entity/entity.h"
 
-#include "Modules/math/transformation.h"
+#include "Meta/math/transformation.h"
 
 ENTITYCOMPONENT_IMPL(RigidBody, Engine::Physics::RigidBody)
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../threading/taskqueue.h"
+#include "taskqueue.h"
 
 namespace Engine {
 namespace Threading {

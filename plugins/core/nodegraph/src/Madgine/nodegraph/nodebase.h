@@ -2,9 +2,9 @@
 
 #include "pins.h"
 
-#include "Modules/serialize/virtualserializableunit.h"
+#include "Meta/serialize/virtualserializableunit.h"
 
-#include "Modules/keyvalueutil/virtualscope.h"
+#include "Meta/keyvalue/virtualscope.h"
 
 namespace Engine {
 namespace NodeGraph {

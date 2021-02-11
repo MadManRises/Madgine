@@ -1,7 +1,7 @@
 #pragma once
 
 #include "uniquecomponentregistry.h"
-#include "../generic/container/containerevent.h"
+#include "Generic/container/containerevent.h"
 
 namespace Engine {
 

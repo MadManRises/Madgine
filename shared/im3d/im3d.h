@@ -6,9 +6,9 @@
 #    define MADGINE_IM3D_EXPORT DLL_IMPORT
 #endif
 
-#include "Modules/math/matrix4.h"
-#include "Modules/math/ray.h"
-#include "Modules/math/vector2i.h"
+#include "Meta/math/matrix4.h"
+#include "Meta/math/ray.h"
+#include "Meta/math/vector2i.h"
 #include "render/vertex.h"
 
 #include "im3d_parameters.h"

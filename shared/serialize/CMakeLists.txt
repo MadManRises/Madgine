@@ -1,6 +1,6 @@
 
 add_subdirectory(ini)
-set_target_properties(Ini PROPERTIES EXCLUDE_FROM_ALL TRUE)
+set_target_properties(IniSerialize PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 add_subdirectory(xml)
 set_target_properties(Xml PROPERTIES EXCLUDE_FROM_ALL TRUE)

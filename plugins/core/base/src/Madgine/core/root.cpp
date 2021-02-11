@@ -3,12 +3,12 @@
 #include "root.h"
 
 #include "Interfaces/debug/memory/memory.h"
-#include "Modules/keyvalueutil/keyvalueregistry.h"
+#include "keyvalueregistry.h"
 #include "Modules/plugins/pluginmanager.h"
-#include "Modules/resources/resourcemanager.h"
+#include "Madgine/resources/resourcemanager.h"
 #include "Modules/threading/workgroup.h"
 
-#include "Modules/cli/cli.h"
+#include "cli/cli.h"
 #include "Modules/uniquecomponent/uniquecomponentcollectormanager.h"
 
 #include "Modules/plugins/pluginsection.h"

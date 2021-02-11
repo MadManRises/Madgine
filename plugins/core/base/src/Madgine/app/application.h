@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Modules/madgineobject/madgineobject.h"
+#include "madgineobject/madgineobject.h"
 
 #include "globalapicollector.h"
 

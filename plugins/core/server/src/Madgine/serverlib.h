@@ -3,6 +3,7 @@
 /// @cond
 
 #include "Modules/moduleslib.h"
+#include "Meta/metalib.h"
 
 #if defined(Server_EXPORTS)
 #    define MADGINE_SERVER_EXPORT DLL_EXPORT

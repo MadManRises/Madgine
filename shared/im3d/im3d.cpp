@@ -1,4 +1,5 @@
 #include "Modules/moduleslib.h"
+#include "Meta/metalib.h"
 
 #include "im3d.h"
 
@@ -11,15 +12,15 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
 
-#include "Modules/math/geometry3.h"
+#include "Meta/math/geometry3.h"
 
-#include "Modules/math/boundingbox.h"
+#include "Meta/math/boundingbox.h"
 
-#include "Modules/math/quaternion.h"
+#include "Meta/math/quaternion.h"
 
 #include "glyph.h"
 
-#include "Modules/math/transformation.h"
+#include "Meta/math/transformation.h"
 
 #include <numeric>
 

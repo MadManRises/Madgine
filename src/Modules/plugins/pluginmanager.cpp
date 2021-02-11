@@ -6,21 +6,19 @@
 
 #    include "plugin.h"
 
-#    include "../uniquecomponent/uniquecomponentregistry.h"
-
 #    include "Interfaces/dl/runtime.h"
 
-#    include "../keyvalue/keyvalue.h"
+#    include "Generic/keyvalue.h"
 
 #    include "../threading/defaulttaskqueue.h"
 
-#    include "../cli/parameter.h"
+#    include "cli/parameter.h"
 
-#    include "../ini/inisection.h"
+#    include "ini/inisection.h"
 
 #    include "pluginsection.h"
 
-#    include "../ini/inifile.h"
+#    include "ini/inifile.h"
 
 #    include "../threading/workgroup.h"
 
@@ -76,7 +74,7 @@ namespace Plugins {
 
         if (loadCache && (!noPluginCache || !loadPlugins->empty())) {
             barrier.queue(nullptr, [this, &barrier, p { std::move(p1) }]() mutable {
-                Filesystem::Path pluginFile = !loadPlugins->empty() ? *loadPlugins : cacheFileName();
+                Filesystem::Path pluginFile = !loadPlugins->empty() ? Filesystem::Path { *loadPlugins } : cacheFileName();
 
                 Ini::IniFile file;
                 if (file.loadFromDisk(pluginFile)) {
@@ -121,7 +119,7 @@ namespace Plugins {
 
                     Filesystem::Path exportPath = path.parentPath() / ("components_" + std::string { path.stem() } + ".cpp");
 
-                    exportStaticComponentHeader(exportPath, hasTools); //TODO Consider using a signal to remove dependency plugin->uniquecomponent
+                    mExportSignal.emit(exportPath, hasTools);
                 };
 
                 Filesystem::Path p = *exportPlugins;
@@ -326,6 +324,11 @@ namespace Plugins {
         for (PluginListener *listener : mListeners) {
             setupListenerOnSectionAdded(listener, &pib.first->second);
         }
+    }
+
+    Threading::SignalStub<Filesystem::Path, bool> &PluginManager::exportSignal()
+    {
+        return mExportSignal;
     }
 }
 }

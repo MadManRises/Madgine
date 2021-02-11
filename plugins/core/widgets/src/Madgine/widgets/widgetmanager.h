@@ -3,12 +3,12 @@
 #include "Madgine/window/mainwindowcomponentcollector.h"
 #include "Madgine/window/mainwindowcomponent.h"
 
-#include "Modules/serialize/container/serializablecontainer.h"
+#include "Meta/serialize/container/serializablecontainer.h"
 
 
 #include "Madgine/render/renderpass.h"
 
-#include "Modules/generic/container/transformIt.h"
+#include "Generic/container/transformIt.h"
 
 
 

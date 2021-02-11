@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../util/enum.h"
+#include "Generic/enum.h"
 
 #include "path.h"
 

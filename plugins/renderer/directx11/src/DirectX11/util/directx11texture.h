@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Modules/math/vector2i.h"
+#include "Meta/math/vector2i.h"
 
 #include "texture.h"
 
 #include "textureloader.h"
 
-#include "Modules/generic/bytebuffer.h"
+#include "Generic/bytebuffer.h"
 
 namespace Engine {
 namespace Render {

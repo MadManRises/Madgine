@@ -5,8 +5,8 @@
 #include "imgui/imgui_internal.h"
 #include "imgui/imguiaddons.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Madgine/nodegraph/nodecollector.h"
 #include "nodegrapheditor.h"

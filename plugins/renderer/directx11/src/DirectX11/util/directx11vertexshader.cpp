@@ -6,7 +6,7 @@
 
 #include "directx11vertexarray.h"
 
-#include "Modules/resources/resourcebase.h"
+#include "Madgine/resources/resourcebase.h"
 
 namespace Engine {
 namespace Render {

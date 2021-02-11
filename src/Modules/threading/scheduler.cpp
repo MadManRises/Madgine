@@ -8,6 +8,8 @@
 
 #include "barrier.h"
 
+#include "Interfaces/threading/threadapi.h"
+
 #if EMSCRIPTEN
 
 #    include <emscripten.h>

@@ -10,7 +10,7 @@
 
 #    include "../plugins/plugin.h"
 
-#include "../generic/container/compoundatomicoperation.h"
+#include "Generic/container/compoundatomicoperation.h"
 
 namespace Engine {
 
@@ -18,6 +18,7 @@ UniqueComponentCollectorManager::UniqueComponentCollectorManager(Plugins::Plugin
     : mMgr(pluginMgr)
 {
     mMgr.addListener(this);
+    mMgr.exportSignal().connect(&exportStaticComponentHeader);
 }
 
 UniqueComponentCollectorManager::~UniqueComponentCollectorManager()

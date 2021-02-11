@@ -11,7 +11,7 @@
 #define __IMGUI_NODE_EDITOR_H__
 #pragma once
 
-#include "Interfaces/commonlib.h"
+#include "Generic/commonlib.h"
 #if defined(imgui_node_editor_EXPORTS)
 #    define IMGUI_NODE_EDITOR_EXPORT DLL_EXPORT
 #else

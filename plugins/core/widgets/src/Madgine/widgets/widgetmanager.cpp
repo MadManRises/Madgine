@@ -2,8 +2,8 @@
 
 #include "widgetmanager.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "gpumeshloader.h"
 #include "programloader.h"
@@ -28,7 +28,7 @@
 
 #include "Interfaces/window/windowapi.h"
 
-#include "Modules/math/atlas2.h"
+#include "Meta/math/atlas2.h"
 
 #include "imageloader.h"
 #include "meshloader.h"
@@ -438,7 +438,7 @@ namespace Widgets {
         if (!w->mVisible)
             return false;
 
-        if (!w->containsPoint(Vector2 { arg.windowPosition }, { { 0, 0 }, mClientSpace.mSize }))
+        if (!w->containsPoint(Vector2 { static_cast<float>(arg.windowPosition.x), static_cast<float>(arg.windowPosition.y) }, { { 0, 0 }, mClientSpace.mSize }))
             return false;
 
         for (WidgetBase *c : w->children()) {
@@ -526,7 +526,7 @@ namespace Widgets {
         Input::PointerEventArgs widgetArg = arg;
         widgetArg.windowPosition = { widgetArg.windowPosition.x - mClientSpace.mTopLeft.x, widgetArg.windowPosition.y - mClientSpace.mTopLeft.y };
 
-        WidgetBase *hoveredWidget = getHoveredWidget(Vector2 { widgetArg.windowPosition }, mHoveredWidget);
+        WidgetBase *hoveredWidget = getHoveredWidget(Vector2 { static_cast<float>(widgetArg.windowPosition.x), static_cast<float>(widgetArg.windowPosition.y) }, mHoveredWidget);
 
         if (mHoveredWidget != hoveredWidget) {
 

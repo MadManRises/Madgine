@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Modules/math/vector2i.h"
+#include "Meta/math/vector2i.h"
 
 #include "Modules/threading/task.h"
 

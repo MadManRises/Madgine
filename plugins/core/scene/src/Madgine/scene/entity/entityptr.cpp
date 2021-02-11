@@ -5,9 +5,9 @@
 
 #include "../scenemanager.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
 
-#include "Modules/serialize/streams/operations.h"
+#include "Meta/serialize/streams/operations.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 

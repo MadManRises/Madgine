@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Modules/serialize/formatter.h"
+#include "Meta/serialize/formatter.h"
 
 namespace Engine {
 namespace XML {
@@ -8,9 +8,6 @@ namespace XML {
     struct MADGINE_XML_EXPORT XMLFormatter : Serialize::Formatter {
 
         XMLFormatter();
-
-		virtual void setupStream(std::istream &) override;
-        virtual void setupStream(std::ostream &) override;
 
         virtual void beginExtended(Serialize::SerializeOutStream &, const char *name, size_t count) override;
 

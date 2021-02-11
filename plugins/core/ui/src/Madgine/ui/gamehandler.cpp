@@ -3,8 +3,8 @@
 #include "Madgine/widgets/widget.h"
 #include "uimanager.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 
 DEFINE_UNIQUE_COMPONENT(Engine::UI, GameHandler)
@@ -76,7 +76,7 @@ namespace UI {
         if (mCurrentMouseButton == Input::MouseButton::NO_BUTTON) {
             mCurrentMouseButton = me.button;
             mSingleClick = true;
-            mDragStart = Vector2 { me.windowPosition };
+            mDragStart = Vector2 { static_cast<float>(me.windowPosition.x), static_cast<float>(me.windowPosition.y) };
         }
     }
 

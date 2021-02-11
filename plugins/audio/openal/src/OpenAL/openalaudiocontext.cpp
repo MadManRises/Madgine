@@ -4,7 +4,7 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
 
 #include <AL/al.h>
 #include <AL/alc.h>

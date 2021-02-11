@@ -3,6 +3,7 @@
 /// @cond
 
 #include "Modules/moduleslib.h"
+#include "Madgine/resourceslib.h"
 
 #if defined(NodeGraph_EXPORTS)
 #    define MADGINE_NODEGRAPH_EXPORT DLL_EXPORT

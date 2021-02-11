@@ -1,11 +1,8 @@
 #pragma once
 
-#include "../generic/future.h"
+#include "Generic/future.h"
 
 
-#if ENABLE_THREADING
-#    include "Interfaces/threading/threadapi.h"
-#endif
 
 namespace Engine {
 namespace Threading {

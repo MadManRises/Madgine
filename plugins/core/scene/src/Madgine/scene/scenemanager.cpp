@@ -2,7 +2,7 @@
 
 #include "scenemanager.h"
 
-#include "Modules/serialize/serializableids.h"
+#include "Meta/serialize/serializableids.h"
 
 #include "scenecomponentbase.h"
 
@@ -10,8 +10,8 @@
 
 #include "Modules/debug/profiler/profile.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Modules/threading/defaulttaskqueue.h"
 
@@ -21,7 +21,7 @@
 
 #include "entity/entitycomponentlistbase.h"
 
-#include "Modules/serialize/container/controlledconfig.h"
+#include "Meta/serialize/container/controlledconfig.h"
 
 UNIQUECOMPONENT(Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>);
 
@@ -55,7 +55,7 @@ namespace Scene {
     {
         markInitialized();
 
-        for (std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
+        for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
             if (!component->callInit())
                 return false;
         }
@@ -73,7 +73,7 @@ namespace Scene {
 
         Threading::DefaultTaskQueue::getSingleton().removeRepeatedTasks(this);
 
-        for (std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
+        for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
             component->callFinalize();
         }
     }
@@ -111,7 +111,7 @@ namespace Scene {
         std::chrono::steady_clock::duration timeSinceLastFrame = now - mLastFrame;
         mLastFrame = now;
 
-        for (std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
+        for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
             //PROFILE(component->componentName());
             component->update(std::chrono::duration_cast<std::chrono::microseconds>(timeSinceLastFrame), mPauseStack > 0);
         }

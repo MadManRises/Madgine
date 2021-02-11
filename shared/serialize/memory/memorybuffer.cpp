@@ -2,7 +2,7 @@
 
 #include "memorybuffer.h"
 
-#include "Modules/serialize/formatter.h"
+#include "Meta/serialize/formatter.h"
 
 namespace Engine {
 namespace Memory {

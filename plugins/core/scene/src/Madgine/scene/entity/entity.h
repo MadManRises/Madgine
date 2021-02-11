@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Modules/keyvalue/objectptr.h"
+#include "Meta/keyvalue/objectptr.h"
 
-#include "Modules/serialize/container/serializablecontainer.h"
+#include "Meta/serialize/container/serializablecontainer.h"
 
-#include "Modules/serialize/syncableunit.h"
+#include "Meta/serialize/syncableunit.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
-#include "Modules/generic/container/transformIt.h"
+#include "Generic/container/transformIt.h"
 
 namespace Engine {
 namespace Scene {

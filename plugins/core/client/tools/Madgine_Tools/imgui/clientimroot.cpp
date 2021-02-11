@@ -10,9 +10,9 @@
 
 #include "im3d/im3d.h"
 
-#include "Modules/serialize/serializetable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
 
 #include "Madgine/render/rendertarget.h"
 
@@ -349,9 +349,9 @@ namespace Tools {
         ImGuiIO &io = ImGui::GetIO();
 
         if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-            io.MousePos = Vector2 { arg.screenPosition } / io.DisplayFramebufferScale;
+            io.MousePos = Vector2 { static_cast<float>(arg.screenPosition.x), static_cast<float>(arg.screenPosition.y) } / io.DisplayFramebufferScale;
         else
-            io.MousePos = Vector2 { arg.windowPosition } / io.DisplayFramebufferScale;
+            io.MousePos = Vector2 { static_cast<float>(arg.windowPosition.x), static_cast<float>(arg.windowPosition.y) } / io.DisplayFramebufferScale;
 
         //LOG(io.MousePos.x << ", " << io.MousePos.y);
 

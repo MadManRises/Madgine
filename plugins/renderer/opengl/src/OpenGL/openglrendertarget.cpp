@@ -8,7 +8,7 @@
 #include "meshloader.h"
 #include "openglmeshloader.h"
 
-#include "Modules/math/rect2i.h"
+#include "Meta/math/rect2i.h"
 
 #include "util/openglprogram.h"
 

@@ -2,8 +2,8 @@
 
 #include "Madgine/render/camera.h"
 
-#include "Modules/math/matrix4.h"
-#include "Modules/math/ray.h"
+#include "Meta/math/matrix4.h"
+#include "Meta/math/ray.h"
 
 #include "Madgine/render/scenerenderpass.h"
 

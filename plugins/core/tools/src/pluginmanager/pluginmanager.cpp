@@ -11,8 +11,8 @@
 
 #    include "Modules/plugins/pluginmanager.h"
 
-#    include "Modules/keyvalue/metatable_impl.h"
-#    include "Modules/serialize/serializetable_impl.h"
+#    include "Meta/keyvalue/metatable_impl.h"
+#    include "Meta/serialize/serializetable_impl.h"
 
 #    include "Modules/threading/taskguard.h"
 
@@ -23,7 +23,7 @@
 #    include "Modules/plugins/plugin.h"
 #    include "Modules/plugins/pluginsection.h"
 
-#    include "Modules/ini/inifile.h"
+#    include "ini/inifile.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 

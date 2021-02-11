@@ -6,16 +6,15 @@
 #include "Madgine/window/mainwindowcomponentcollector.h"
 #include "Madgine/window/mainwindowcomponent.h"
 
-#include "Modules/madgineobject/madgineobjectobserver.h"
+#include "madgineobject/madgineobjectobserver.h"
 
-#include "Modules/keyvalue/keyvalueset.h"
+#include "Meta/serialize/container/serializablecontainer.h"
 
-#include "Modules/serialize/container/serializablecontainer.h"
-
+#include "Generic/keyvalue.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 
-#include "Modules/math/vector2.h"
+#include "Meta/math/vector2.h"
 
 
 namespace Engine {
@@ -65,8 +64,8 @@ namespace UI {
 
         GameHandlerBase &getGameHandler(size_t i, bool = true);
 
-        OFFSET_CONTAINER(mGuiHandlers, GuiHandlerContainer<Serialize::SerializableContainer<KeyValueSet<Placeholder<0>>, MadgineObjectObserver, std::true_type>>);
-        OFFSET_CONTAINER(mGameHandlers, GameHandlerContainer<Serialize::SerializableContainer<KeyValueSet<Placeholder<0>>, MadgineObjectObserver, std::true_type>>)
+        OFFSET_CONTAINER(mGuiHandlers, GuiHandlerContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, MadgineObjectObserver, std::true_type>>);
+        OFFSET_CONTAINER(mGameHandlers, GameHandlerContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, MadgineObjectObserver, std::true_type>>)
 
     protected:
         bool init() override;
