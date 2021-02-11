@@ -38,7 +38,7 @@ struct CallerHierarchyBasePtr {
                 return static_cast<const CallerHierarchy<U> *>(ptr)->mData;
             ptr = ptr->mParent;
         }
-        LOG_ERROR("Cannot find type '" << typeid(U).name() << "' in caller hierarchy. Containing:");
+        throw 0;//LOG_ERROR("Cannot find type '" << typeid(U).name() << "' in caller hierarchy. Containing:");
         ptr = mPtr;
         while (ptr) {
             LOG_ERROR(ptr->mType.name());
