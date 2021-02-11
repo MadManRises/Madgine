@@ -17,7 +17,6 @@
 #include <queue>
 #include <optional>
 #include <stack>
-#include <sstream>
 
 
 #include "metaforward.h"

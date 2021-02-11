@@ -22,6 +22,7 @@
 #include <chrono>
 #include <future>
 #include <array>
+#include <sstring>
 
 #include <assert.h>
 
