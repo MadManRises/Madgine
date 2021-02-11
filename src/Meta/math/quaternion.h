@@ -48,9 +48,9 @@ struct Quaternion {
     Vector3 toDegrees() const
     {
         return {
-            atan2(2 * (w * v.x + v.y * v.z), 1 - 2 * (v.x * v.x + v.y * v.y)) / PI * 180.0f,
-            asin(2 * (w * v.y - v.z * v.x)) / PI * 180.0f,
-            atan2(2 * (w * v.z + v.x * v.y), 1 - 2 * (v.y * v.y + v.z * v.z)) / PI * 180.0f
+            std::atan2(2 * (w * v.x + v.y * v.z), 1 - 2 * (v.x * v.x + v.y * v.y)) / PI * 180.0f,
+            std::asin(2 * (w * v.y - v.z * v.x)) / PI * 180.0f,
+            std::atan2(2 * (w * v.z + v.x * v.y), 1 - 2 * (v.y * v.y + v.z * v.z)) / PI * 180.0f
         };
     }
 
