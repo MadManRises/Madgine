@@ -36,12 +36,12 @@ namespace Math {
 
     float Bounds::width() const
     {
-        return abs(mRight - mLeft);
+        return std::abs(mRight - mLeft);
     }
 
     float Bounds::height() const
     {
-        return abs(mTop - mBottom);
+        return std::abs(mTop - mBottom);
     }
 
     Vector2 Bounds::size() const
