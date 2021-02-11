@@ -31,6 +31,7 @@
 #include <fstream>
 #include <unordered_map>
 #include <optional>
+#include <cstring>
 
 #if WINDOWS
 #    include <memory_resource>

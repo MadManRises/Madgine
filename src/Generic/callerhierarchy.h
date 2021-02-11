@@ -39,12 +39,6 @@ struct CallerHierarchyBasePtr {
             ptr = ptr->mParent;
         }
         throw 0;//LOG_ERROR("Cannot find type '" << typeid(U).name() << "' in caller hierarchy. Containing:");
-        ptr = mPtr;
-        while (ptr) {
-            LOG_ERROR(ptr->mType.name());
-            ptr = ptr->mParent;
-        }
-        throw 0;
     }
 
     template <typename U>
