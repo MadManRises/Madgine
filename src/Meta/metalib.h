@@ -12,7 +12,6 @@
 #endif
 
 #include <variant>
-#include <functional>
 #include <array>
 #include <queue>
 #include <optional>

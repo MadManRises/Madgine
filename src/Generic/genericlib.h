@@ -23,6 +23,7 @@
 #include <future>
 #include <array>
 #include <sstream>
+#include <functional>
 
 #include <assert.h>
 
