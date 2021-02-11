@@ -17,6 +17,7 @@
 #include <optional>
 #include <stack>
 #include <cmath>
+#include <cstring>
 
 
 #include "metaforward.h"
