@@ -30,5 +30,28 @@ namespace Serialize {
         }
     };
 
+    template <typename Base = SerializableDataUnit, typename... Bases>
+    struct DLL_EXPORT VirtualSerializableDataBase : Base, Bases... {
+
+        using Base::Base;
+
+        virtual SerializableDataPtr customUnitPtr() = 0;
+        virtual SerializableDataConstPtr customUnitPtr() const = 0;
+    };
+
+    template <typename T, typename _Base = VirtualSerializableDataBase<>>
+    struct VirtualData : _Base {
+        using _Base::_Base;
+        virtual ~VirtualData() = default;
+        virtual SerializableDataPtr customUnitPtr() override
+        {
+            return { this, &serializeTable<decayed_t<T>>() };
+        }
+        virtual SerializableDataConstPtr customUnitPtr() const override
+        {
+            return { this, &serializeTable<decayed_t<T>>() };
+        }
+    };
+
 } // namespace Serialize
 } // namespace Core

@@ -49,7 +49,7 @@ namespace Tools {
             Serialize::SerializeInStream in { std::make_unique<Serialize::WrappingSerializeStreambuf>(std::move(buf), std::make_unique<Ini::IniFormatter>()) };
 
             ToolBase *tool = static_cast<ToolBase *>(entry);
-            Serialize::SerializableUnitPtr { tool }.readState(in, nullptr, {}, Serialize::StateTransmissionFlags_SkipId);
+            Serialize::read(in, *tool, nullptr, {}, Serialize::StateTransmissionFlags_SkipId);
         }
     }
 

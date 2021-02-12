@@ -15,8 +15,8 @@ namespace Engine {
 namespace NodeGraph {
 
     template <typename T>
-    struct Node : Serialize::VirtualUnit<T, VirtualScope<T, NamedComponent<T, NodeComponent<T>>>> {
-        using Serialize::VirtualUnit<T, VirtualScope<T, NamedComponent<T, NodeComponent<T>>>>::VirtualUnit;
+    struct Node : Serialize::VirtualData<T, VirtualScope<T, NamedComponent<T, NodeComponent<T>>>> {
+        using Serialize::VirtualData<T, VirtualScope<T, NamedComponent<T, NodeComponent<T>>>>::VirtualData;
 
         virtual std::string_view name() const override {
             return this->componentName();

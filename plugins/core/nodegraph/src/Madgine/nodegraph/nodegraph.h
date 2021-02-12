@@ -9,7 +9,7 @@
 namespace Engine {
 namespace NodeGraph {
 
-    struct MADGINE_NODEGRAPH_EXPORT NodeGraph : Serialize::SerializableUnitBase {
+    struct MADGINE_NODEGRAPH_EXPORT NodeGraph : Serialize::SerializableDataUnit {
 
         SERIALIZABLEUNIT(NodeGraph);
 
@@ -58,7 +58,7 @@ namespace NodeGraph {
     private:
         Filesystem::Path mPath;
 
-        SERIALIZABLE_CONTAINER(mNodes, std::vector<std::unique_ptr<NodeBase>>, NoOpFunctor);
+        std::vector<std::unique_ptr<NodeBase>> mNodes;
     };
 
 }

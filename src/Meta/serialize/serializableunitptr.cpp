@@ -21,6 +21,14 @@ namespace Serialize {
 
     void SerializableDataConstPtr::writeState(SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags) const
     {
+        SerializableMapHolder holder;
+        out.startSerializableWrite(&holder);
+
+        if (out.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
+            out.format().beginExtended(out, name, 1);
+            write(out, mUnit, "serId");
+        }
+
         out.format().beginCompound(out, name);
         mType->writeState(mUnit, out, hierarchy);
         out.format().endCompound(out, name);
@@ -28,12 +36,27 @@ namespace Serialize {
 
     void SerializableDataPtr::readState(SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags) const
     {
+        SerializableListHolder holder;
+        in.startSerializableRead(&holder);
+
+        if (!in.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
+            in.format().beginExtended(in, name, 1);
+            SerializableUnitBase *idHelper;
+            read(in, idHelper, "serId");
+            uint32_t id = reinterpret_cast<uintptr_t>(idHelper) >> 2;
+            SerializableUnitList &list = in.serializableList();
+            if (list.size() <= id)
+                list.resize(id + 1);
+            assert(!list[id]);
+            list[id] = unit();
+        }
+
         in.format().beginCompound(in, name);
         mType->readState(unit(), in, flags, hierarchy);
         in.format().endCompound(in, name);
     }
 
-            SerializableDataPtr::SerializableDataPtr(const SerializableUnitPtr &other)
+    SerializableDataPtr::SerializableDataPtr(const SerializableUnitPtr &other)
         : SerializableDataPtr(other.unit(), other.mType)
     {
     }
@@ -59,20 +82,6 @@ namespace Serialize {
         return mType->getIndex(offset) < unit()->mActiveIndex;
     }
 
-    void SerializableUnitConstPtr::writeState(SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags) const
-    {
-        SerializableMapHolder holder;
-        out.startSerializableWrite(&holder);
-
-        if (out.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
-            out.format().beginExtended(out, name, 1);
-            write(out, unit(), "serId");
-        }
-        out.format().beginCompound(out, name);
-        mType->writeState(unit(), out, hierarchy);
-        out.format().endCompound(out, name);
-    }
-
     void SerializableUnitPtr::readState(SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags) const
     {
         SerializableListHolder holder;
@@ -89,6 +98,7 @@ namespace Serialize {
             assert(!list[id]);
             list[id] = unit();
         }
+
         in.format().beginCompound(in, name);
         mType->readState(unit(), in, flags, hierarchy);
         in.format().endCompound(in, name);

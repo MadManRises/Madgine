@@ -25,11 +25,11 @@ namespace Serialize {
     DERIVE_FUNCTION(writeAction, int, const void *, ParticipantId, TransactionId)
     DERIVE_FUNCTION(writeRequest, int, const void *, ParticipantId, TransactionId, std::function<void(void*)>)*/
 
-    template <typename T, typename... Configs, typename... Args>
-    void read(SerializeInStream &in, T &t, const char *name, Args &&... args);
+    template <typename T, typename... Configs, typename Hierarchy = std::monostate>
+    void read(SerializeInStream &in, T &t, const char *name, const Hierarchy &hierarchy = {}, StateTransmissionFlags flags = 0);
 
-    template <typename T, typename... Configs, typename... Args>
-    void write(SerializeOutStream &out, const T &t, const char *name, Args &&... args);
+    template <typename T, typename... Configs, typename Hierarchy = std::monostate>
+    void write(SerializeOutStream &out, const T &t, const char *name, const Hierarchy &hierarchy = {}, StateTransmissionFlags flags = 0);
 
     template <typename C, typename Config = DefaultCreator<typename C::value_type>>
     struct ContainerOperations {
@@ -231,7 +231,7 @@ namespace Serialize {
     template <typename T, typename... Configs>
     struct BaseOperations {
         template <typename Hierarchy = std::monostate>
-        static void read(SerializeInStream &in, T &t, const char *name, const Hierarchy &hierarchy = {})
+        static void read(SerializeInStream &in, T &t, const char *name, const Hierarchy &hierarchy = {}, StateTransmissionFlags flags = 0)
         {
             if constexpr (has_function_readState2_v<T>) {
                 t.readState(in, name, CallerHierarchyPtr { hierarchy });
@@ -245,9 +245,9 @@ namespace Serialize {
             } else if constexpr (PrimitiveTypesContain_v<std::remove_const_t<T>> || std::is_enum_v<std::remove_const_t<T>>) {
                 //Don't do anything here
             } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>) {
-                SerializableUnitPtr { &t }.readState(in, name, CallerHierarchyPtr { hierarchy });
+                SerializableUnitPtr { &t }.readState(in, name, CallerHierarchyPtr { hierarchy }, flags);
             } else if constexpr (std::is_base_of_v<SerializableDataUnit, T>) {
-                SerializableDataPtr { &t }.readState(in, name, CallerHierarchyPtr { hierarchy });
+                SerializableDataPtr { &t }.readState(in, name, CallerHierarchyPtr { hierarchy }, flags);
             } else if constexpr (is_string_like_v<T>) {
                 std::string s;
                 Serialize::read<std::string>(in, s, name, hierarchy);
@@ -262,7 +262,7 @@ namespace Serialize {
         }
 
         template <typename Hierarchy = std::monostate>
-        static void write(SerializeOutStream &out, const T &t, const char *name, const Hierarchy &hierarchy = {})
+        static void write(SerializeOutStream &out, const T &t, const char *name, const Hierarchy &hierarchy = {}, StateTransmissionFlags flags = 0)
         {
             if constexpr (has_function_writeState2_v<T>) {
                 t.writeState(out, name, CallerHierarchyPtr { hierarchy });
@@ -276,9 +276,9 @@ namespace Serialize {
             } else if constexpr (PrimitiveTypesContain_v<std::remove_const_t<T>> || std::is_enum_v<std::remove_const_t<T>>) {
                 //Don't do anything here
             } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>) {
-                SerializableUnitConstPtr { &t }.writeState(out, name, CallerHierarchyPtr { hierarchy });
+                SerializableUnitConstPtr { &t }.writeState(out, name, CallerHierarchyPtr { hierarchy }, flags);
             } else if constexpr (std::is_base_of_v<SerializableDataUnit, T>) {
-                SerializableDataConstPtr { &t }.writeState(out, name, CallerHierarchyPtr { hierarchy });
+                SerializableDataConstPtr { &t }.writeState(out, name, CallerHierarchyPtr { hierarchy }, flags);
             } else if constexpr (is_string_like_v<T>) {
                 Serialize::write<std::string>(out, t, name, hierarchy);
             } else if constexpr (is_iterable_v<T>) {
@@ -495,16 +495,16 @@ namespace Serialize {
         }
     };
 
-    template <typename T, typename... Configs, typename... Args>
-    void read(SerializeInStream &in, T &t, const char *name, Args &&... args)
+    template <typename T, typename... Configs, typename Hierarchy>
+    void read(SerializeInStream &in, T &t, const char *name, const Hierarchy &hierarchy, StateTransmissionFlags flags)
     {
-        Operations<T, Configs...>::read(in, t, name, std::forward<Args>(args)...);
+        Operations<T, Configs...>::read(in, t, name, hierarchy, flags);
     }
 
-    template <typename T, typename... Configs, typename... Args>
-    void write(SerializeOutStream &out, const T &t, const char *name, Args &&... args)
+    template <typename T, typename... Configs, typename Hierarchy>
+    void write(SerializeOutStream &out, const T &t, const char *name, const Hierarchy &hierarchy, StateTransmissionFlags flags)
     {
-        Operations<T, Configs...>::write(out, t, name, std::forward<Args>(args)...);
+        Operations<T, Configs...>::write(out, t, name, hierarchy, flags);
     }
 
     template <typename T>

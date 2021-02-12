@@ -9,7 +9,7 @@
 namespace Engine {
 namespace NodeGraph {
 
-    struct MADGINE_NODEGRAPH_EXPORT NodeGraphLoader : Resources::ResourceLoader<NodeGraphLoader, Serialize::NoParentUnit<NodeGraph>, std::list<Placeholder<0>>> {
+    struct MADGINE_NODEGRAPH_EXPORT NodeGraphLoader : Resources::ResourceLoader<NodeGraphLoader, NodeGraph, std::list<Placeholder<0>>> {
 
         using Base = Resources::ResourceLoader<NodeGraphLoader, NodeGraph, std::list<Placeholder<0>>>;
 
@@ -25,8 +25,8 @@ namespace NodeGraph {
 
         NodeGraphLoader();
 
-        bool loadImpl(Serialize::NoParentUnit<NodeGraph> &graph, ResourceType *res);
-        void unloadImpl(Serialize::NoParentUnit<NodeGraph> &graph, ResourceType *res);
+        bool loadImpl(NodeGraph &graph, ResourceType *res);
+        void unloadImpl(NodeGraph &graph, ResourceType *res);
 
     };
 

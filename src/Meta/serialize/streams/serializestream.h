@@ -40,14 +40,14 @@ namespace Serialize {
                 readUnformatted(unit);
                 p = reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(unit));
             } else {
-                SerializableUnitBase *unit;
+                SerializableDataUnit *unit;
                 readUnformatted(unit);
                 p = reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(unit));
             }
         }
 
         void readUnformatted(SyncableUnitBase *&p);
-        void readUnformatted(SerializableUnitBase *&p);
+        void readUnformatted(SerializableDataUnit *&p);
 
         void readUnformatted(std::string &s);
         void readUnformatted(std::string_view &s) = delete;
@@ -121,7 +121,7 @@ namespace Serialize {
         }
 
         void writeUnformatted(const SyncableUnitBase *p);
-        void writeUnformatted(const SerializableUnitBase *p);
+        void writeUnformatted(const SerializableDataUnit *p);
 
         void writeUnformatted(const std::string &s);
         void writeUnformatted(const std::string_view &s);

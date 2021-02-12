@@ -17,7 +17,7 @@ namespace Serialize {
         int64_t,
         float,
         SyncableUnitBase *,
-        SerializableUnitBase *,
+        SerializableDataUnit *,
         type_pack<std::string, std::string_view>,
         ByteBuffer,
         std::monostate,
@@ -34,8 +34,8 @@ namespace Serialize {
     };
 
     template <typename T>
-    struct PrimitiveReducer<T, std::enable_if_t<!std::is_convertible_v<T, const SyncableUnitBase *> && std::is_convertible_v<T, const SerializableUnitBase *>>> {
-        typedef SerializableUnitBase *type;
+    struct PrimitiveReducer<T, std::enable_if_t<!std::is_convertible_v<T, const SyncableUnitBase *> && std::is_convertible_v<T, const SerializableDataUnit *>>> {
+        typedef SerializableDataUnit *type;
     };
 
     template <typename T>
@@ -58,7 +58,7 @@ namespace Serialize {
     const constexpr bool PrimitiveTypesContain_v = PrimitiveTypesContain<T>::value;
 
     template <typename T>
-    const constexpr bool isPrimitiveType_v = PrimitiveTypesContain_v<T> || std::is_convertible_v<T, const SerializableUnitBase *> || std::is_convertible_v<T, const SyncableUnitBase *> || std::is_enum_v<T>;
+    const constexpr bool isPrimitiveType_v = PrimitiveTypesContain_v<T> || std::is_convertible_v<T, const SerializableDataUnit *> || std::is_convertible_v<T, const SyncableUnitBase *> || std::is_enum_v<T>;
 
 }
 }

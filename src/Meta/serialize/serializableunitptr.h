@@ -185,8 +185,6 @@ namespace Serialize {
 
         bool isActive(size_t offset) const;
 
-        void writeState(SerializeOutStream &out, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0) const;
-
         void writeAction(uint8_t index, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams) const;
         void writeRequest(uint8_t index, int op, const void *data, BufferedOutStream *out) const;
 

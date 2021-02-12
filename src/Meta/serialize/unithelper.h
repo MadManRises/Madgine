@@ -13,7 +13,7 @@ namespace Serialize {
     DERIVE_FUNCTION(setParent, SerializableUnitBase *);
 
     META_EXPORT SyncableUnitBase *convertSyncablePtr(SerializeInStream &in, UnitId id);
-    META_EXPORT SerializableUnitBase *convertSerializablePtr(SerializeInStream &in, uint32_t id);
+    META_EXPORT SerializableDataUnit *convertSerializablePtr(SerializeInStream &in, uint32_t id);
 
     template <typename T>
     struct UnitHelper {
@@ -21,7 +21,7 @@ namespace Serialize {
         static void applyMap(SerializeInStream &in, T &item)
         {
             if constexpr (std::is_pointer_v<T>) {
-                static_assert(std::is_base_of_v<SerializableUnitBase, std::remove_pointer_t<T>>);
+                static_assert(std::is_base_of_v<SerializableDataUnit, std::remove_pointer_t<T>>);
                 uint32_t ptr = reinterpret_cast<uintptr_t>(item);
                 if (ptr & 0x3) {
                     switch (static_cast<UnitIdTag>(ptr & 0x3)) {

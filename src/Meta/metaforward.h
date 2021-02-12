@@ -117,8 +117,8 @@ namespace Serialize {
 
     
     using SyncableUnitMap = std::map<UnitId, SyncableUnitBase *>;
-    using SerializableUnitMap = std::map<const SerializableUnitBase *, uint32_t>;
-    using SerializableUnitList = std::vector<SerializableUnitBase*>;
+    using SerializableUnitMap = std::map<const SerializableDataUnit *, uint32_t>;
+    using SerializableUnitList = std::vector<SerializableDataUnit*>;
 
     struct SerializableMapHolder;
     struct SerializableListHolder;

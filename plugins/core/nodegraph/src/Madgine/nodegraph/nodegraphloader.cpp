@@ -30,14 +30,14 @@ METATABLE_END(Engine::NodeGraph::NodeGraphLoader::ResourceType)
         {
         }
 
-        bool NodeGraphLoader::loadImpl(Serialize::NoParentUnit<NodeGraph> &graph, ResourceType *res)
+        bool NodeGraphLoader::loadImpl(NodeGraph &graph, ResourceType *res)
         {   
             graph.loadFromFile(res->path());
 
             return true;
         }
 
-        void NodeGraphLoader::unloadImpl(Serialize::NoParentUnit<NodeGraph> &graph, ResourceType *res)
+        void NodeGraphLoader::unloadImpl(NodeGraph &graph, ResourceType *res)
         {
         }
 

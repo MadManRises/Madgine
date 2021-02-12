@@ -51,14 +51,14 @@ namespace Serialize {
         p = reinterpret_cast<SyncableUnitBase *>(ptr);
     }
 
-    void SerializeInStream::readUnformatted(SerializableUnitBase *&p)
+    void SerializeInStream::readUnformatted(SerializableDataUnit *&p)
     {
         uint32_t ptr;
         readUnformatted(ptr);
         assert(ptr <= (std::numeric_limits<uint32_t>::max() >> 2));
         if (ptr)
             ptr = (ptr << 2) | static_cast<UnitId>(UnitIdTag::SERIALIZABLE);
-        p = reinterpret_cast<SerializableUnitBase *>(ptr);
+        p = reinterpret_cast<SerializableDataUnit *>(ptr);
     }
 
     void SerializeInStream::setNextFormattedStringDelimiter(char c)
@@ -250,7 +250,7 @@ namespace Serialize {
         writeUnformatted(SerializeManager::convertPtr(manager(), *this, p));
     }
 
-    void SerializeOutStream::writeUnformatted(const SerializableUnitBase *p)
+    void SerializeOutStream::writeUnformatted(const SerializableDataUnit *p)
     {
         uint32_t id = 0;
         if (p) {
