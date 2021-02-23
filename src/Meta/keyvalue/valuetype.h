@@ -33,10 +33,7 @@ struct META_EXPORT ValueType {
 #define VALUETYPE_SEP ,
 #define VALUETYPE_TYPE(Name, Storage, ...) Storage
 #include "valuetypedefinclude.h"
-        >;    
-
-    
-    using NonDefaultConstructibleTypes = Engine::type_pack<Engine::KeyValueVirtualRange>;
+        >;
 
     ValueType();
 
@@ -83,27 +80,6 @@ struct META_EXPORT ValueType {
 
     bool operator!=(const ValueType &other) const;
 
-    bool operator<(const ValueType &other) const;
-
-    bool operator>(const ValueType &other) const;
-
-    void operator+=(const ValueType &other);
-
-    ValueType operator+(const ValueType &other) const;
-
-    void operator-=(const ValueType &other);
-
-    ValueType operator-(const ValueType &other) const;
-
-    void operator/=(const ValueType &other);
-
-    ValueType operator/(const ValueType &other) const;
-
-    void operator*=(const ValueType &other);
-
-    ValueType operator*(const ValueType &other) const;
-
-    std::string toString() const;
     std::string toShortString() const;
 
     std::string getTypeString() const;
@@ -151,7 +127,7 @@ struct META_EXPORT ValueType {
 
     ValueTypeIndex index() const;
     ValueTypeDesc type() const;
-    
+
     void setType(ValueTypeDesc type);
 
 private:
@@ -174,7 +150,7 @@ private:
 public:
     ValueTypeRef() = default;
 
-    template <typename T, typename _ = std::enable_if_t<isValueType_v<T>>>
+    template <typename T>
     explicit ValueTypeRef(T &&val)
         : mValue(std::forward<T>(val))
         , mData(toPtrHelper(convert_ValueType<false>(std::forward<T>(val))))
@@ -214,20 +190,19 @@ ValueType_Return<T> ValueType::as() const
         return std::get<static_cast<size_t>(toValueTypeIndex<T>().mIndex)>(mUnion);
     } else if constexpr (std::is_same_v<T, ValueType>) {
         return *this;
-    } else if constexpr (isScopeRef_v<T>) {
+    } else if constexpr (std::is_enum_v<T>) {
+        return static_cast<T>(std::get<int>(mUnion));
+    } else {
         if constexpr (std::is_pointer_v<T>) {
             return std::get<TypedScopePtr>(mUnion).safe_cast<std::remove_pointer_t<T>>();
         } else {
             return std::get<OwnedScopePtr>(mUnion).safe_cast<T>();
         }
-    } else if constexpr (std::is_enum_v<T>) {
-        return static_cast<T>(std::get<int>(mUnion));
-    } else {
-        static_assert(dependent_bool<T, false>::value, "Invalid target type for Valuetype cast provided!");
     }
+    //static_assert(dependent_bool<T, false>::value, "Invalid target type for Valuetype cast provided!");
 }
 
 }
 
-std::ostream &operator<<(std::ostream &stream,
+META_EXPORT std::ostream &operator<<(std::ostream &stream,
     const Engine::ValueType &v);

@@ -4,6 +4,13 @@
 
 namespace Engine {
 
+struct EnumMetaTable {
+    const EnumMetaTable *mBase;
+    std::string_view mName;
+    const std::string_view *mValueNames;
+    int32_t mMin, mMax;
+};
+
 template <typename _Representation>
 struct Enum : _Representation {
 
@@ -45,7 +52,7 @@ struct Enum : _Representation {
 
     static const std::string_view &sTypeName()
     {
-        return Representation::sName;
+        return Representation::sTable.mName;
     }
 
 protected:
@@ -123,7 +130,7 @@ private:
 
 }
 
-#define ENUM_REGISTRY(Name, MIN_VAL, ...)                                                                                                                    \
+#define ENUM_REGISTRY(Name, MIN_VAL, Base, ...)                                                                                                              \
     struct Name##Representation {                                                                                                                            \
         enum EnumType {                                                                                                                                      \
             MIN = MIN_VAL,                                                                                                                                   \
@@ -131,18 +138,20 @@ private:
             MAX,                                                                                                                                             \
             COUNT = MAX - MIN - 1                                                                                                                            \
         };                                                                                                                                                   \
-        static inline const constexpr std::string_view sName = #Name;                                                                                        \
         static inline const constexpr auto sIdentifiers = Engine::StringUtil::tokenize<static_cast<size_t>(Name##Representation::COUNT)>(#__VA_ARGS__, ','); \
+        static inline const constexpr EnumMetaTable sTable {                                                                                                 \
+            Base, #Name, sIdentifiers.data(), MIN, MAX                                                                                                       \
+        };                                                                                                                                                   \
     };                                                                                                                                                       \
     inline std::ostream &operator<<(std::ostream &stream, typename Name##Representation::EnumType value)                                                     \
     {                                                                                                                                                        \
         return stream << Engine::Enum<Name##Representation> { value };                                                                                       \
     }
 
-#define ENUM_BASE(Name, Base, ...)                  \
-    ENUM_REGISTRY(Name, Base::MAX - 1, __VA_ARGS__) \
+#define ENUM_BASE(Name, Base, ...)                                                 \
+    ENUM_REGISTRY(Name, Base::MAX - 1, &Base##Representation::sTable, __VA_ARGS__) \
     using Name = Engine::BaseEnum<Name##Representation, Base>;
 
-#define ENUM(Name, ...)                  \
-    ENUM_REGISTRY(Name, -1, __VA_ARGS__) \
+#define ENUM(Name, ...)                           \
+    ENUM_REGISTRY(Name, -1, nullptr, __VA_ARGS__) \
     using Name = Engine::Enum<Name##Representation>;

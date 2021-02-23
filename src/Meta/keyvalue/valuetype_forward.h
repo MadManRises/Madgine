@@ -8,7 +8,7 @@
 
 #include "ownedscopeptr.h"
 
-#include "Generic/container/virtualiterator.h"
+#include "Generic/container/virtualrange.h"
 
 #include "Generic/keyvalue.h"
 
@@ -36,34 +36,6 @@ using isValueTypePrimitive = type_pack_contains<ValueTypeList, T>;
 
 template <typename T>
 static constexpr bool isValueTypePrimitive_v = isValueTypePrimitive<T>::value;
-
-template <typename Base, typename Derived>
-struct ValueType_is_base_of : std::is_base_of<Base, Derived> {
-};
-
-template <typename Base, typename T>
-struct ValueType_is_base_of<Base, VirtualIterator<T>> : std::false_type {
-};
-
-template <typename Base>
-struct ValueType_is_base_of<Base, ValueType> : std::false_type {
-};
-
-template <typename Base, typename Derived>
-static constexpr bool ValueType_is_base_of_v = ValueType_is_base_of<Base, Derived>::value;
-
-template <typename T>
-using isScopeRef = std::bool_constant<!is_iterable_v<T> && !isValueTypePrimitive_v<T>>;
-
-template <typename T>
-static constexpr bool isScopeRef_v = isScopeRef<T>::value;
-
-template <typename T>
-using isValueType = std::bool_constant<
-    isValueTypePrimitive_v<std::decay_t<T>> || std::is_enum_v<std::decay_t<T>> || isScopeRef_v<T> || is_iterable_v<T>>;
-
-template <typename T>
-static constexpr bool isValueType_v = isValueType<T>::value;
 
 template <typename T>
 using ValueTypePrimitiveSubList = type_pack_select_t<type_pack_index_v<size_t, ValueTypeList, T>, ValueTypeList>;
@@ -97,19 +69,18 @@ decltype(auto) ValueType_as(const ValueType &v)
 {
     if constexpr (std::is_same_v<T, ValueType>) {
         return v;
-    } else if constexpr (isScopeRef_v<T>) {
-        if constexpr (std::is_pointer_v<T>) {
-            return ValueType_as_impl<TypedScopePtr>(v).safe_cast<std::remove_pointer_t<T>>();
-        } else {
-            return ValueType_as_impl<OwnedScopePtr>(v).safe_cast<T>();
-        }
     } else if constexpr (isValueTypePrimitive_v<T>) {
         return ValueType_as_impl<T>(v);
     } else if constexpr (is_iterable_v<T>) {
         return ValueType_as_impl<KeyValueVirtualRange>(v).safe_cast<T>();
     } else {
-        static_assert(dependent_bool<T, false>::value, "A ValueType can not be converted to the given target type");
+        if constexpr (std::is_pointer_v<T>) {
+            return ValueType_as_impl<TypedScopePtr>(v).safe_cast<std::remove_pointer_t<T>>();
+        } else {
+            return ValueType_as_impl<OwnedScopePtr>(v).safe_cast<T>();
+        }
     }
+    //static_assert(dependent_bool<T, false>::value, "A ValueType can not be converted to the given target type");
 }
 
 template <bool reference_to_ptr, typename T>
@@ -127,7 +98,7 @@ decltype(auto) convert_ValueType(T &&t)
         } else {
             return static_cast<int>(t);
         }
-    } else if constexpr (isScopeRef_v<std::decay_t<T>>) {
+    } else {
         if constexpr (std::is_pointer_v<std::decay_t<T>>) {
             return TypedScopePtr { t };
         } else if constexpr (std::is_reference_v<T> && reference_to_ptr) {
@@ -135,9 +106,8 @@ decltype(auto) convert_ValueType(T &&t)
         } else {
             return OwnedScopePtr { std::forward<T>(t) };
         }
-    } else {
-        static_assert(dependent_bool<T, false>::value, "The provided type can not be converted to a ValueType");
     }
+    //static_assert(dependent_bool<T, false>::value, "The provided type can not be converted to a ValueType");
 }
 
 template <typename T, typename = std::enable_if_t<isValueTypePrimitive_v<std::decay_t<T>> || std::is_same_v<ValueType, std::decay_t<T>>>>
@@ -157,5 +127,4 @@ void to_ValueTypeRef(ValueTypeRef &v, T &&t)
 {
     to_ValueTypeRef_impl(v, convert_ValueType<reference_to_ptr>(std::forward<T>(t)));
 }
-
 }

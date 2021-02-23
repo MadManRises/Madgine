@@ -25,6 +25,7 @@ METATABLE_BEGIN_BASE(Engine::Tools::TestTool, Engine::Tools::ToolBase)
 FUNCTION(logTest)
 FUNCTION(logValue, value)
 FUNCTION(dummy)
+MEMBER(mV)
 METATABLE_END(Engine::Tools::TestTool)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::TestTool, Engine::Tools::ToolBase)
@@ -180,7 +181,7 @@ namespace Tools {
 
     void TestTool::logValue(const ValueType &v)
     {
-        LOG(v.toString());
+        LOG(v);
     }
 
     int TestTool::dummy()

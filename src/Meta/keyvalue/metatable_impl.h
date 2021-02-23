@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Generic/container/virtualiterator.h"
+#include "Generic/container/virtualrange.h"
 #include "Generic/linestruct.h"
 #include "accessor.h"
 #include "apifunction.h"
@@ -178,11 +178,11 @@ static constexpr std::array<std::pair<const char *, ::Engine::Accessor>, std::tu
 
 #define NAMED_FUNCTION(Name, /*F, */...)                                        \
     FUNCTIONTABLE(::Engine::MetaTableLineStruct<__LINE__ - 1>::Ty::__VA_ARGS__) \
-    METATABLE_ENTRY(#Name, SINGLE_ARG(::Engine::property<Ty, &::Engine::method<&Ty::FIRST(__VA_ARGS__)>, nullptr>()), __LINE__)
+    METATABLE_ENTRY(STRINGIFY(Name), SINGLE_ARG(::Engine::property<Ty, &::Engine::method<&Ty::FIRST(__VA_ARGS__)>, nullptr>()), __LINE__)
 
 #define NAMED_FUNCTION_EX1(Name, I, /*F, */...)                                                            \
     FUNCTIONTABLE(::Engine::MetaTableLineStruct<SINGLE_ARG(SINGLE_ARG(__LINE__, I - 1))>::Ty::__VA_ARGS__) \
-    METATABLE_ENTRY(#Name, SINGLE_ARG(::Engine::property<Ty, &::Engine::method<&Ty::FIRST(__VA_ARGS__)>, nullptr>()), __LINE__, I)
+    METATABLE_ENTRY(STRINGIFY(Name), SINGLE_ARG(::Engine::property<Ty, &::Engine::method<&Ty::FIRST(__VA_ARGS__)>, nullptr>()), __LINE__, I)
 
 #define FUNCTION(/*F, */...) NAMED_FUNCTION(FIRST(__VA_ARGS__), __VA_ARGS__)
 

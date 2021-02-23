@@ -59,7 +59,8 @@ namespace Tools {
         mCurrentArguments.clear();
         mCurrentArguments.resize(method.argumentsCount(true));
         for (size_t i = 0; i < method.argumentsCount(true); ++i) {
-            mCurrentArguments[i].setType(method.mMethod.mTable->mArguments[i + method.isMemberFunction()].mType);
+            if (method.mMethod.mTable->mArguments[i + method.isMemberFunction()].mType.mType.isRegular())
+                mCurrentArguments[i].setType(method.mMethod.mTable->mArguments[i + method.isMemberFunction()].mType);
         }
     }
 
@@ -129,7 +130,7 @@ namespace Tools {
 
                 ImGui::PushID(i);
                 ValueType v = i == 0 ? ValueType { function.mScope } : args[i - 1];
-                bool changed = mInspector->drawValueImpl(nullptr, {}, "", v, true, false).first;
+                bool changed = mInspector->drawValueImpl(nullptr, {}, "", v, true, !function.mMethod.mTable->mArguments[i].mType.mType.isRegular()).first;
                 //ImGui::ValueType(&args[i], function.mMethod.mTable->mArguments[i].mType);
                 if (ImGui::BeginDragDropTarget()) {
                     changed |= ImGui::AcceptDraggableValueType(v, function.mMethod.mTable->mArguments[i].mType);
@@ -144,7 +145,7 @@ namespace Tools {
 
                 ImGui::PopID();
                 ImGui::SameLine();
-                ImGui::Text(function.mMethod.mTable->mArguments[i].mType.toString());
+                ImGui::Text(function.mMethod.mTable->mArguments[i].mType.toString()); //TODO: Hover only
             }
 
             ImGui::Text(")");

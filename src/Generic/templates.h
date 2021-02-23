@@ -18,6 +18,16 @@ struct first {
     typedef V type;
 };
 
+template <template <typename> typename Cond>
+struct negate {
+    template <typename T>
+    struct type {
+        static constexpr bool value = !Cond<T>::value;
+    };
+    template <typename T>
+    static constexpr bool type_v = type<T>::value;
+};
+
 template <typename...>
 using void_t = void;
 

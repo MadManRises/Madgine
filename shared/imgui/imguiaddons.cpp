@@ -417,13 +417,8 @@ bool SelectValueTypeType(Engine::ValueType *v)
 template <typename... Ty>
 bool SelectValueTypeTypes(Engine::type_pack<Ty...>, Engine::ValueType *v)
 {
-    return (SelectValueTypeType<Engine::type_pack_select_t<0, Ty>>(v) | ...);
+    return (SelectValueTypeType<Ty>(v) | ...);
 }
-
-template <typename T>
-struct ValueTypeFilterImpl {
-    static constexpr bool value = Engine::type_pack_contains_v<Engine::ValueType::NonDefaultConstructibleTypes, Engine::type_pack_select_t<0, T>>;
-};
 
 void BeginValueType(Engine::ExtendedValueTypeDesc type, const char *name)
 {
@@ -444,7 +439,7 @@ bool EndValueType(Engine::ValueType *v, Engine::ExtendedValueTypeDesc type)
         ImGui::SameLine(0, 0.0f);
         if (ImGui::BeginCombo("##combo", "", ImGuiComboFlags_NoPreview | ImGuiComboFlags_PopupAlignLeft)) {
             changed = true;
-            SelectValueTypeTypes(Engine::type_pack_filter_if_t<Engine::ValueTypeList, ValueTypeFilterImpl> {}, v);
+            SelectValueTypeTypes(Engine::type_pack_filter_if_t<Engine::type_pack_apply_t<Engine::type_pack_first_t, Engine::ValueTypeList>, Engine::negate<std::is_default_constructible>::type> {}, v);
             ImGui::EndCombo();
         }
         EndGroup();
@@ -709,7 +704,7 @@ void DraggableValueTypeSource(const std::string &name, Engine::TypedScopePtr sco
         payload->mValue = value;
         ImGui::SetDragDropPayload("ValueType", &payload, sizeof(payload), ImGuiCond_Once);
         ImGui::Text(name);
-        ImGui::Text(value.toShortString());
+        ImGui::Text(value.getTypeString());
         if (!payload->mStatusMessage.empty()) {
             ImGui::Text(payload->mStatusMessage);
             payload->mStatusMessage.clear();

@@ -20,7 +20,7 @@ inline const char *typeName()
 }
 
 struct TypeInfo {
-    static constexpr const char *fix(const char *s)
+    static constexpr std::string_view fix(const char *s)
     {
         //TODO <> templates
         const char *f = strrchr(s, ':');
@@ -38,11 +38,11 @@ struct TypeInfo {
 
     inline std::string namespaceName() const
     {
-        return std::string { mFullName, strlen(mFullName) - 2 - strlen(mTypeName) };
+        return std::string { mFullName, strlen(mFullName) - 2 - mTypeName.size() };
     }
 
     const char *mFullName;
-    const char *mTypeName;
+    std::string_view mTypeName;
     const char *mHeaderPath;
     const TypeInfo *mDecayType;
 };

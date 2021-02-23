@@ -18,7 +18,7 @@
 namespace Engine {
 namespace Resources {
 
-    MODULES_EXPORT ResourceLoaderBase &getLoaderByIndex(size_t i);
+    MADGINE_RESOURCES_EXPORT ResourceLoaderBase &getLoaderByIndex(size_t i);
 
     template <typename Loader>
     struct ResourceType : Loader::Interface::ResourceType {

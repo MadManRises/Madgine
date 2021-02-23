@@ -3,6 +3,8 @@
 #include "../toolbase.h"
 #include "../toolscollector.h"
 
+#include "Meta/keyvalue/valuetype.h"
+
 namespace Engine {
 namespace Tools {
 
@@ -18,6 +20,8 @@ namespace Tools {
         void logTest();
         void logValue(const ValueType &v);
         int dummy();
+
+        ValueType mV;
 
     private:
         int mSphereDetail = 1;

@@ -44,6 +44,12 @@ struct type_pack_select<0, type_pack<Head, Tail...>> {
 template <size_t I, typename T>
 using type_pack_select_t = typename type_pack_select<I, T>::type;
 
+template <typename T>
+using type_pack_first = type_pack_select<0, T>;
+
+template <typename T>
+using type_pack_first_t = typename type_pack_first<T>::type;
+
 template <typename Pack, typename Is>
 struct type_pack_select_multiple;
 
