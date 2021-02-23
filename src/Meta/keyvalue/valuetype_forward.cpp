@@ -44,7 +44,7 @@ const ValueType &getArgument(const ArgumentList &args, size_t index)
 
 #define VALUETYPE_TYPE(Name, Storage, ...) FOR_EACH(VALUETYPE_IMPL, VALUETYPE_SEP, __VA_ARGS__)
 
-#include "valuetypedef.h"
+#include "valuetypedefinclude.h"
 #undef VALUETYPE_IMPL
 
 template <>

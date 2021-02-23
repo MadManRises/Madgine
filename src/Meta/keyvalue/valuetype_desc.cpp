@@ -11,7 +11,7 @@ std::string_view ValueTypeIndex::toString() const
 #define VALUETYPE_TYPE(Name, Storage, ...) \
     case ValueTypeEnum::Name##Value:       \
         return #Name;
-#include "valuetypedef.h"
+#include "valuetypedefinclude.h"
     default:
         std::terminate();
     }

@@ -2,14 +2,25 @@
 
 namespace Engine {
 
-struct GENERIC_EXPORT ControlBlockBase {
-    ControlBlockBase();
+struct ControlBlockBase {
+    ControlBlockBase()
+        : mDeadFlag(false)
+        , mRefCount(0)
+    {
+    }
 
-    void incRef();
+    void incRef()
+    {
+    }
 
-    void decRef();
+    void decRef()
+    {
+    }
 
-    bool dead() const;
+    bool dead() const
+    {
+        return mDeadFlag;
+    }
 
 protected:
     bool mDeadFlag : 1;
@@ -170,7 +181,7 @@ struct refcounted_deque {
                 updateBack();
         }
 
-        void update() const
+        void update()
         {
             while (mIt != mContainer->end() && mIt->dead()) {
                 ++mIt;
@@ -190,7 +201,7 @@ struct refcounted_deque {
         }
 
     private:
-        mutable It mIt;
+        It mIt;
         const std::deque<ControlBlock<T>> *mContainer = nullptr;
     };
 

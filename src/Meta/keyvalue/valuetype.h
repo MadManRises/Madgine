@@ -32,7 +32,7 @@ struct META_EXPORT ValueType {
     using Union = std::variant<
 #define VALUETYPE_SEP ,
 #define VALUETYPE_TYPE(Name, Storage, ...) Storage
-#include "valuetypedef.h"
+#include "valuetypedefinclude.h"
         >;    
 
     

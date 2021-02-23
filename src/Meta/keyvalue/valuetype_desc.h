@@ -15,7 +15,7 @@ namespace Engine {
 enum class ValueTypeEnum : unsigned char {
 #define VALUETYPE_SEP ,
 #define VALUETYPE_TYPE(Name, Storage, ...) Name##Value
-#include "valuetypedef.h"
+#include "valuetypedefinclude.h"
     ,
     MAX_VALUETYPE_TYPE
 };

@@ -72,7 +72,8 @@ struct AreaView {
         mFlipped[mAxisMapping[dim]] = !mFlipped[mAxisMapping[dim]];
     }
 
-    void swapAxis(size_t a1, size_t a2) {
+    void swapAxis(size_t a1, size_t a2)
+    {
         std::swap(mAxisMapping[a1], mAxisMapping[a2]);
     }
 
@@ -138,6 +139,8 @@ struct AreaView {
                 if (mIndices[i] == mView->mSizes[axis]) {
                     mIndices[i] = 0;
                     ++mIndices[i + 1];
+                } else {
+                    break;
                 }
             }
         }
@@ -193,6 +196,8 @@ struct AreaView {
                 if (mIndices[i] == mView->mSizes[axis]) {
                     mIndices[i] = 0;
                     ++mIndices[i + 1];
+                } else {
+                    break;
                 }
             }
         }
@@ -211,7 +216,7 @@ struct AreaView {
     {
         std::array<size_t, Dim> endSizes;
         endSizes.fill(0);
-        endSizes[Dim - 1] = mSizes[Dim - 1];
+        endSizes[Dim - 1] = mSizes[mAxisMapping[Dim - 1]];
         return { this, endSizes };
     }
 

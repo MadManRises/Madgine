@@ -5,11 +5,25 @@ namespace Engine {
 typedef std::istream::pos_type pos_type;
 typedef std::istream::off_type off_type;
 
-struct GENERIC_EXPORT InStream {
-    InStream();
-    InStream(std::unique_ptr<std::streambuf> &&buffer);
-    InStream(InStream &&other);
-    ~InStream();
+struct  InStream {
+    InStream()
+        : mStream(nullptr)
+    {
+    }
+    InStream(std::unique_ptr<std::streambuf> &&buffer)
+        : mStream(buffer.release())
+    {
+    }
+    InStream(InStream &&other)
+        : mStream(other.mStream.rdbuf(nullptr))
+        , mOwning(std::exchange(other.mOwning, false))
+    {
+    }
+    ~InStream()
+    {
+        if (mOwning && mStream.rdbuf())
+            delete mStream.rdbuf();
+    }
 
     template <typename T>
     InStream &operator>>(T &t)
@@ -18,25 +32,63 @@ struct GENERIC_EXPORT InStream {
         return *this;
     }
 
-    std::istreambuf_iterator<char> iterator();
-    std::istreambuf_iterator<char> end();
+    std::istreambuf_iterator<char> iterator()
+    {
+        return std::istreambuf_iterator<char>(mStream);
+    }
+    std::istreambuf_iterator<char> end()
+    {
+        return std::istreambuf_iterator<char>();
+    }
 
-    size_t readRaw(void *buffer, size_t size);
+    size_t readRaw(void *buffer, size_t size)
+    {
+        mStream.read(static_cast<char *>(buffer), size);
+        return mStream.gcount();
+    }
 
-    explicit operator bool() const;
+    explicit operator bool() const
+    {
+        return mStream.rdbuf() != nullptr && static_cast<bool>(mStream);
+    }
 
-    pos_type tell();
-    bool seek(pos_type p);
-    bool seek(off_type p, std::ios::seekdir dir);
+    pos_type tell()
+    {
+        return mStream.tellg();
+    }
+    bool seek(pos_type p)
+    {
+        return static_cast<bool>(mStream.seekg(p));
+    }
+    bool seek(off_type p, std::ios::seekdir dir)
+    {
+        return static_cast<bool>(mStream.seekg(p, dir));
+    }
 
-    void skipWs();
+    void skipWs()
+    {
+        if (mStream.flags() & std::ios_base::skipws) {
+            mStream >> std::ws;
+        }
+    }
 
-	std::unique_ptr<std::streambuf> release();
+	std::unique_ptr<std::streambuf> release()
+    {
+        assert(mOwning);
+        return std::unique_ptr<std::streambuf>(mStream.rdbuf(nullptr));
+    }
 
 protected:
-    InStream(std::streambuf *buffer);
+        InStream(std::streambuf *buffer)
+            : mStream(buffer)
+            , mOwning(false)
+        {
+        }
 
-    std::streambuf &buffer() const;
+    std::streambuf &buffer() const
+        {
+            return *mStream.rdbuf();
+        }
 
     std::istream mStream;
 
@@ -46,11 +98,24 @@ private:
     bool mOwning = true;
 };
 
-struct GENERIC_EXPORT OutStream {
-    OutStream();
-    OutStream(std::unique_ptr<std::streambuf> &&buffer);
-    OutStream(OutStream &&other);
-    ~OutStream();
+struct OutStream {
+    OutStream()
+        : mStream(nullptr)
+    {
+    }
+    OutStream(std::unique_ptr<std::streambuf> &&buffer)
+        : mStream(buffer.release())
+    {
+    }
+    OutStream(OutStream &&other)
+        : mStream(other.mStream.rdbuf(nullptr))
+    {
+    }
+    ~OutStream()
+    {
+        if (mStream.rdbuf())
+            delete mStream.rdbuf();
+    }
 
     template <typename T>
     OutStream &operator<<(const T &t)
@@ -59,24 +124,43 @@ struct GENERIC_EXPORT OutStream {
         return *this;
     }
 
-    void writeRaw(const void *data, size_t count);
+    void writeRaw(const void *data, size_t count)
+    {
+        mStream.write(static_cast<const char *>(data), count);
+    }
 
-    explicit operator bool() const;
+    explicit operator bool() const
+    {
+        return mStream.rdbuf() != nullptr && static_cast<bool>(mStream);
+    }
 
-    std::unique_ptr<std::streambuf> release();
+    std::unique_ptr<std::streambuf> release()
+    {
+        return std::unique_ptr<std::streambuf>(mStream.rdbuf(nullptr));
+    }
 
-    void pipe(InStream &in);
+    void pipe(InStream &in)
+    {
+        mStream << &in.buffer();
+    }
 
 protected:
-    std::streambuf &buffer() const;
+    std::streambuf &buffer() const
+    {
+        return *mStream.rdbuf();
+    }
 
     std::ostream mStream;
 };
 
-struct GENERIC_EXPORT Stream : InStream, OutStream {
-    Stream(std::unique_ptr<std::streambuf> &&buffer);
+/*struct Stream : InStream, OutStream {
+    Stream(std::unique_ptr<std::streambuf> &&buffer)
+        : InStream(buffer.get())
+        , OutStream(std::move(buffer))
+    {
+    }
 
     using InStream::buffer;
-};
+};*/
 
 }

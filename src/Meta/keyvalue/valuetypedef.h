@@ -31,6 +31,3 @@ VALUETYPE_SEP
 VALUETYPE_TYPE(ApiFunction, ApiFunction, const ApiFunction&)
 VALUETYPE_SEP
 VALUETYPE_TYPE(Object, ObjectPtr, const ObjectPtr&)
-
-#undef VALUETYPE_TYPE
-#undef VALUETYPE_SEP

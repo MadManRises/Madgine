@@ -414,7 +414,7 @@ ValueTypeRef &ValueTypeRef::operator=(const ValueType &v)
     [this](T t) {                                   \
         *static_cast<std::decay_t<T> *>(mData) = t; \
     }
-#include "valuetypedef.h"
+#include "valuetypedefinclude.h"
     });
 
     return *this;

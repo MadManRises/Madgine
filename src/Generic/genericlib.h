@@ -4,12 +4,6 @@
 
 /// @cond
 
-#if defined(Generic_EXPORTS)
-#    define GENERIC_EXPORT DLL_EXPORT
-#else
-#    define GENERIC_EXPORT DLL_IMPORT
-#endif
-
 #include <algorithm>
 #include <deque>
 #include <list>

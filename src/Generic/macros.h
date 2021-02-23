@@ -5,7 +5,7 @@
 
 #define EVAL(x) x
 
-#define INVOKE(f, ...) f(__VA_ARGS__)
+#define APPLY(f, ...) f(__VA_ARGS__)
 
 #define CONCAT(a, b) a##b
 #define CONCAT2(a, b) CONCAT(a, b)
@@ -23,14 +23,14 @@
 #define HEAD(...) SELECT_0(__VA_ARGS__)
 #define TAIL(a, ...) __VA_ARGS__
 
-#define SELECT(n, ...) INVOKE(CONCAT2(SELECT_, n), __VA_ARGS__)
+#define SELECT(n, ...) APPLY(CONCAT2(SELECT_, n), __VA_ARGS__)
 
 #define FOR_EACH1(f, sep, a) f(a)
 #define FOR_EACH2(f, sep, a, b) f(a) sep f(b)
 #define FOR_EACH3(f, sep, a, b, c) f(a) sep f(b) sep f(c)
 #define FOR_EACH4(f, sep, a, b, c, d) f(a) sep f(b) sep f(c) sep f(d)
 
-#define FOR_EACH(f, sep, ...) INVOKE(CONCAT2(FOR_EACH, NUM_ARGS(__VA_ARGS__)), f, sep, __VA_ARGS__)
+#define FOR_EACH(f, sep, ...) APPLY(CONCAT2(FOR_EACH, NUM_ARGS(__VA_ARGS__)), f, sep, __VA_ARGS__)
 
 #define NUM_ARGS(...) SELECT_5(__VA_ARGS__, 5, 4, 3, 2, 1, 0)
 
