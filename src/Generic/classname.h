@@ -14,7 +14,7 @@ extern const Engine::TypeInfo typeInfo;
 namespace Engine {
 
 template <typename T>
-inline const char *typeName()
+inline std::string_view typeName()
 {
     return typeInfo<T>.mTypeName;
 }
