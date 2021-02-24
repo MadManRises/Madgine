@@ -141,9 +141,9 @@ namespace Tools {
                                 if (ImGui::TreeNode("UniqueComponents")) {
                                     for (ComponentRegistryBase *reg : kvValues(registryRegistry())) {
                                         for (CollectorInfoBase *info : *reg) {
-                                            if (info->mBinary == binInfo && ImGui::TreeNode(info->mBaseInfo->mTypeName)) {
+                                            if (info->mBinary == binInfo && ImGui::TreeNode(info->mBaseInfo->mTypeName.data(), "%.*s", static_cast<int>(info->mBaseInfo->mTypeName.size()), info->mBaseInfo->mTypeName.data())) {
                                                 for (const std::vector<const TypeInfo *> &components : info->mElementInfos) {
-                                                    ImGui::Text("%s", components.front()->mTypeName);
+                                                    ImGui::Text("%.*s", static_cast<int>(components.front()->mTypeName.size()), components.front()->mTypeName.data());
                                                 }
                                                 ImGui::TreePop();
                                             }
