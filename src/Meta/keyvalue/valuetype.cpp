@@ -209,7 +209,6 @@ ValueTypeRef &ValueTypeRef::operator=(ValueTypeRef &&other)
     mData = std::exchange(other.mData, nullptr);
     return *this;
 }
-}
 
 DERIVE_OPERATOR(StreamOut, <<)
 
@@ -225,3 +224,7 @@ std::ostream &operator<<(std::ostream &stream,
 
     return stream;
 }
+
+
+}
+

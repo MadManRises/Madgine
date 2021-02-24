@@ -202,7 +202,8 @@ ValueType_Return<T> ValueType::as() const
     //static_assert(dependent_bool<T, false>::value, "Invalid target type for Valuetype cast provided!");
 }
 
-}
 
 META_EXPORT std::ostream &operator<<(std::ostream &stream,
     const Engine::ValueType &v);
+
+}
