@@ -6,7 +6,7 @@
 
 namespace ImGui {
 
-    struct ValueTypePayload;
+struct ValueTypePayload;
 
 typedef int ImGuiDragDropFlags;
 typedef int ImGuiTreeNodeFlags;
@@ -59,8 +59,6 @@ struct IMGUI_API ValueTypeDrawer {
     bool mMinified;
 };
 
-
-
 IMGUI_API void setPayloadStatus(const std::string &);
 
 IMGUI_API void Text(const std::string &s);
@@ -112,8 +110,8 @@ bool AcceptDraggableValueType(
         }
 
         if constexpr (!Engine::isValueTypePrimitive_v<T>) {
-            if (Engine::ValueType_is<T*>(*payload)) {
-                const T *t = Engine::ValueType_as<T*>(*payload);
+            if (Engine::ValueType_is<T *>(*payload)) {
+                const T *t = Engine::ValueType_as<T *>(*payload);
                 if (validate(*t) && AcceptDraggableValueType(payloadPointer)) {
                     result = *t;
                     return true;
@@ -142,8 +140,8 @@ bool AcceptDraggableValueType(
             } else {
                 setPayloadStatus("Payload does not validate");
             }
-        } else if (Engine::ValueType_is<T*>(*payload)) {
-            T *t = Engine::ValueType_as<T*>(*payload);
+        } else if (Engine::ValueType_is<T *>(*payload)) {
+            T *t = Engine::ValueType_as<T *>(*payload);
             if (validate(t) && AcceptDraggableValueType(payloadPointer)) {
                 result = t;
                 return true;
@@ -156,19 +154,9 @@ bool AcceptDraggableValueType(
     }
     return false;
 }
-template <typename Validator = bool (*)(const Engine::ValueType &)>
-bool AcceptDraggableValueType(
-    Engine::ValueType &result, Engine::ExtendedValueTypeDesc type, const ValueTypePayload **payloadPointer = nullptr, Validator &&validate = [](const Engine::ValueType &t) { return true; })
-{
-    const Engine::ValueType *payload = GetValuetypePayload();
-    if (payload) {
-        if (validate(*payload) && type.canAccept(payload->type()) && AcceptDraggableValueType(payloadPointer)) {
-            result = *payload;
-            return true;
-        }
-    }
-    return false;
-}
+
+IMGUI_API bool AcceptDraggableValueType(
+    Engine::ValueType &result, Engine::ExtendedValueTypeDesc type, const ValueTypePayload **payloadPointer = nullptr, std::function<bool(const Engine::ValueType &)> validate = [](const Engine::ValueType &t) { return true; });
 IMGUI_API bool IsDraggableValueTypeBeingAccepted(const ValueTypePayload **payloadPointer = nullptr);
 template <typename T, typename Validator = bool (*)(const T &)>
 bool IsDraggableValueTypeBeingAccepted(

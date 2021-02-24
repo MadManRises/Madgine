@@ -736,6 +736,19 @@ const Engine::ValueType *GetValuetypePayload()
     return nullptr;
 }
 
+bool AcceptDraggableValueType(
+    Engine::ValueType &result, Engine::ExtendedValueTypeDesc type, const ValueTypePayload **payloadPointer, std::function<bool(const Engine::ValueType &)> validate)
+{
+    const Engine::ValueType *payload = GetValuetypePayload();
+    if (payload) {
+        if (validate(*payload) && type.canAccept(payload->type()) && AcceptDraggableValueType(payloadPointer)) {
+            result = *payload;
+            return true;
+        }
+    }
+    return false;
+}
+
 bool AcceptDraggableValueType(const ValueTypePayload **payloadPointer)
 {
     if (ImGui::AcceptDragDropPayload("ValueType")) {
