@@ -6,11 +6,16 @@
 
 #include "Generic/bits.h"
 
-#include "valuetype_forward.h"
-
 #include "Generic/keyvalue.h"
 
 namespace Engine {
+
+    template <typename T>
+using isValueTypePrimitive = type_pack_contains<ValueTypeList, T>;
+
+template <typename T>
+static constexpr bool isValueTypePrimitive_v = isValueTypePrimitive<T>::value;
+
 
 enum class ValueTypeEnum : unsigned char {
 #define VALUETYPE_SEP ,

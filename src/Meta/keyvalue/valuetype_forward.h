@@ -2,8 +2,6 @@
 
 #include "typedscopeptr.h"
 
-#include "valuetype_types.h"
-
 #include "Generic/functor.h"
 
 #include "ownedscopeptr.h"
@@ -11,6 +9,8 @@
 #include "Generic/container/virtualrange.h"
 
 #include "Generic/keyvalue.h"
+
+#include "valuetype_desc.h"
 
 namespace Engine {
 
@@ -31,11 +31,6 @@ void to_KeyValuePair(KeyValuePair &p, T &&t)
 
 META_EXPORT const ValueType &getArgument(const ArgumentList &args, size_t index);
 
-template <typename T>
-using isValueTypePrimitive = type_pack_contains<ValueTypeList, T>;
-
-template <typename T>
-static constexpr bool isValueTypePrimitive_v = isValueTypePrimitive<T>::value;
 
 template <typename T>
 using ValueTypePrimitiveSubList = type_pack_select_t<type_pack_index_v<size_t, ValueTypeList, T>, ValueTypeList>;
