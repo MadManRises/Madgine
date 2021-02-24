@@ -2,6 +2,8 @@
 
 #include "imconfig.h"
 
+#include "Meta/keyvalue/valuetype_forward.h"
+
 namespace ImGui {
 
     struct ValueTypePayload;
