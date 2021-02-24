@@ -15,6 +15,8 @@
 #include "Interfaces/filesystem/api.h"
 #include "Interfaces/filesystem/path.h"
 
+#include "valuetypepayload.h"
+
 Engine::Threading::WorkgroupLocal<ImGuiContext *>
     sContext;
 
@@ -358,9 +360,10 @@ bool ValueTypeDrawer::draw(const Engine::Filesystem::Path &p)
     return false;
 }
 
-bool showDebugData()
+void setPayloadStatus(const std::string &msg)
 {
-    return ImGui::GetIO().KeyShift;
+    if (ImGui::GetIO().KeyShift)
+        sPayload.mStatusMessage = msg;
 }
 
 void Text(const std::string &s)
@@ -713,7 +716,7 @@ void DraggableValueTypeSource(const std::string &name, Engine::TypedScopePtr sco
     }
 }
 
-const ValueTypePayload *GetValuetypePayload()
+const ValueTypePayload *GetValuetypePayloadData()
 {
     const ImGuiPayload *payload = ImGui::GetDragDropPayload();
 
@@ -724,11 +727,20 @@ const ValueTypePayload *GetValuetypePayload()
     return nullptr;
 }
 
+const Engine::ValueType *GetValuetypePayload()
+{
+    const ValueTypePayload *payload = GetValuetypePayloadData();
+    if (payload) {
+        return &payload->mValue;
+    }
+    return nullptr;
+}
+
 bool AcceptDraggableValueType(const ValueTypePayload **payloadPointer)
 {
     if (ImGui::AcceptDragDropPayload("ValueType")) {
         if (payloadPointer)
-            *payloadPointer = GetValuetypePayload();
+            *payloadPointer = GetValuetypePayloadData();
         return true;
     }
     return false;
@@ -760,7 +772,7 @@ bool IsDraggableValueTypeBeingAccepted(const ValueTypePayload **payloadPointer)
 
     if (g.DragDropAcceptIdPrev == id) {
         if (payloadPointer)
-            *payloadPointer = GetValuetypePayload();
+            *payloadPointer = GetValuetypePayloadData();
         return true;
     }
     return false;

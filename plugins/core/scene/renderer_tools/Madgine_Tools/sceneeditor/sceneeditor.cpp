@@ -45,6 +45,8 @@
 
 #include "Meta/serialize/formatter/safebinaryformatter.h"
 
+#include "Meta/keyvalue/valuetype.h"
+
 UNIQUECOMPONENT(Engine::Tools::SceneEditor);
 
 METATABLE_BEGIN_BASE(Engine::Tools::SceneEditor, Engine::Tools::ToolBase)

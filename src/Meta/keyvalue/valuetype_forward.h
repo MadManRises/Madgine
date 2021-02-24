@@ -83,6 +83,14 @@ decltype(auto) ValueType_as(const ValueType &v)
     //static_assert(dependent_bool<T, false>::value, "A ValueType can not be converted to the given target type");
 }
 
+META_EXPORT ValueTypeDesc ValueType_type(const ValueType &v);
+
+template <typename T>
+bool ValueType_is(const ValueType &v)
+{
+    return toValueTypeDesc<T>().canAccept(ValueType_type(v));
+}
+
 template <bool reference_to_ptr, typename T>
 decltype(auto) convert_ValueType(T &&t)
 {

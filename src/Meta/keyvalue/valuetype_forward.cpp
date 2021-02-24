@@ -19,6 +19,11 @@ const ValueType &getArgument(const ArgumentList &args, size_t index)
     return args.at(index);
 }
 
+ValueTypeDesc ValueType_type(const ValueType &v)
+{
+    return v.type();
+}
+
 #define VALUETYPE_SEP
 #define VALUETYPE_IMPL(Type)                                                                                                                       \
     template <>                                                                                                                                    \

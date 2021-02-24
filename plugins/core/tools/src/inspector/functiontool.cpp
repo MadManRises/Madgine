@@ -25,6 +25,8 @@
 #include "Meta/keyvalue/keyvaluescan.h"
 #include "Madgine/core/keyvalueregistry.h"
 
+#include "imgui/valuetypepayload.h"
+
 UNIQUECOMPONENT(Engine::Tools::FunctionTool);
 
 namespace Engine {

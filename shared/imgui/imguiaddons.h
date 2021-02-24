@@ -2,10 +2,9 @@
 
 #include "imconfig.h"
 
-#include "Meta/keyvalue/typedscopeptr.h"
-#include "Meta/keyvalue/valuetype.h"
-
 namespace ImGui {
+
+    struct ValueTypePayload;
 
 typedef int ImGuiDragDropFlags;
 typedef int ImGuiTreeNodeFlags;
@@ -58,15 +57,9 @@ struct IMGUI_API ValueTypeDrawer {
     bool mMinified;
 };
 
-struct ValueTypePayload {
-    std::string mName;
-    Engine::TypedScopePtr mSender;
-    Engine::ValueType mValue;
-    mutable std::string mStatusMessage;
-};
 
 
-IMGUI_API bool showDebugData();
+IMGUI_API void setPayloadStatus(const std::string &);
 
 IMGUI_API void Text(const std::string &s);
 IMGUI_API void Text(const std::string_view &s);
@@ -97,40 +90,39 @@ IMGUI_API bool DragMatrix4(const char *label, Engine::Matrix4 *m, float *v_speed
 IMGUI_API bool MethodPicker(const char *label, const std::vector<std::pair<std::string, Engine::BoundApiFunction>> &methods, Engine::BoundApiFunction *m, std::string *currentName, std::string *filter = nullptr, int expectedArgumentCount = -1);
 
 IMGUI_API void DraggableValueTypeSource(const std::string &name, Engine::TypedScopePtr scope, const Engine::ValueType &value, ImGuiDragDropFlags flags = 0);
-IMGUI_API const ValueTypePayload *GetValuetypePayload();
+IMGUI_API const Engine::ValueType *GetValuetypePayload();
 IMGUI_API bool AcceptDraggableValueType(const ValueTypePayload **payloadPointer = nullptr);
 template <typename T, typename Validator = bool (*)(const T &)>
 bool AcceptDraggableValueType(
     T &result, const ValueTypePayload **payloadPointer = nullptr, Validator &&validate = [](const T &t) { return true; })
 {
-    const ValueTypePayload *payload = GetValuetypePayload();
+    const Engine::ValueType *payload = GetValuetypePayload();
     if (payload) {
-        if (payload->mValue.is<T>()) {
-            if (validate(payload->mValue.as<T>()) && AcceptDraggableValueType(payloadPointer)) {
-                result = payload->mValue.as<T>();
+        if (Engine::ValueType_is<T>(*payload)) {
+            const T &t = Engine::ValueType_as<T>(*payload);
+            if (validate(t) && AcceptDraggableValueType(payloadPointer)) {
+                result = t;
                 return true;
             } else {
-                if (showDebugData())
-                    payload->mStatusMessage = "Payload does not validate";
+                setPayloadStatus("Payload does not validate");
                 return false;
             }
         }
 
         if constexpr (!Engine::isValueTypePrimitive_v<T>) {
-            if (payload->mValue.is<T *>()) {
-                if (validate(*payload->mValue.as<T *>()) && AcceptDraggableValueType(payloadPointer)) {
-                    result = *payload->mValue.as<T *>();
+            if (Engine::ValueType_is<T*>(*payload)) {
+                const T *t = Engine::ValueType_as<T*>(*payload);
+                if (validate(*t) && AcceptDraggableValueType(payloadPointer)) {
+                    result = *t;
                     return true;
                 } else {
-                    if (showDebugData())
-                        payload->mStatusMessage = "Payload does not validate";
+                    setPayloadStatus("Payload does not validate");
                     return false;
                 }
             }
         }
 
-        if (showDebugData())
-            payload->mStatusMessage = "Payload incompatible with target type: "s + typeid(T).name();
+        setPayloadStatus("Payload incompatible with target type: "s + typeid(T).name());
     }
     return false;
 }
@@ -138,27 +130,26 @@ template <typename T, typename Validator = bool (*)(const T *)>
 bool AcceptDraggableValueType(
     T *&result, const ValueTypePayload **payloadPointer = nullptr, Validator &&validate = [](const T *t) { return true; })
 {
-    const ValueTypePayload *payload = GetValuetypePayload();
+    const Engine::ValueType *payload = GetValuetypePayload();
     if (payload) {
-        if (payload->mValue.is<T>()) {
-            if (validate(&payload->mValue.as<T>()) && AcceptDraggableValueType(payloadPointer)) {
-                result = &payload->mValue.as<T>();
+        if (Engine::ValueType_is<T>(*payload)) {
+            T &t = Engine::ValueType_as<T>(*payload);
+            if (validate(&t) && AcceptDraggableValueType(payloadPointer)) {
+                result = &t;
                 return true;
             } else {
-                if (showDebugData())
-                    payload->mStatusMessage = "Payload does not validate";
+                setPayloadStatus("Payload does not validate");
             }
-        } else if (payload->mValue.is<T *>()) {
-            if (validate(payload->mValue.as<T *>()) && AcceptDraggableValueType(payloadPointer)) {
-                result = payload->mValue.as<T *>();
+        } else if (Engine::ValueType_is<T*>(*payload)) {
+            T *t = Engine::ValueType_as<T*>(*payload);
+            if (validate(t) && AcceptDraggableValueType(payloadPointer)) {
+                result = t;
                 return true;
             } else {
-                if (showDebugData())
-                    payload->mStatusMessage = "Payload does not validate";
+                setPayloadStatus("Payload does not validate");
             }
         } else {
-            if (showDebugData())
-                payload->mStatusMessage = "Payload incompatible with target type: "s + typeid(T).name();
+            setPayloadStatus("Payload incompatible with target type: "s + typeid(T).name());
         }
     }
     return false;
@@ -167,10 +158,10 @@ template <typename Validator = bool (*)(const Engine::ValueType &)>
 bool AcceptDraggableValueType(
     Engine::ValueType &result, Engine::ExtendedValueTypeDesc type, const ValueTypePayload **payloadPointer = nullptr, Validator &&validate = [](const Engine::ValueType &t) { return true; })
 {
-    const ValueTypePayload *payload = GetValuetypePayload();
+    const Engine::ValueType *payload = GetValuetypePayload();
     if (payload) {
-        if (validate(payload->mValue) && type.canAccept(payload->mValue.type()) && AcceptDraggableValueType(payloadPointer)) {
-            result = payload->mValue;
+        if (validate(*payload) && type.canAccept(payload->type()) && AcceptDraggableValueType(payloadPointer)) {
+            result = *payload;
             return true;
         }
     }
@@ -181,19 +172,18 @@ template <typename T, typename Validator = bool (*)(const T &)>
 bool IsDraggableValueTypeBeingAccepted(
     T &result, const ValueTypePayload **payloadPointer = nullptr, Validator &&validate = [](const T &t) { return true; })
 {
-    const ValueTypePayload *payload = GetValuetypePayload();
+    const Engine::ValueType *payload = GetValuetypePayload();
     if (payload) {
-        if (payload->mValue.is<T>()) {
-            if (validate(payload->mValue.as<T>()) && IsDraggableValueTypeBeingAccepted(payloadPointer)) {
-                result = payload->mValue.as<T>();
+        if (Engine::ValueType_is<T>(*payload)) {
+            const T &t = Engine::ValueType_as<T>(*payload);
+            if (validate(t) && IsDraggableValueTypeBeingAccepted(payloadPointer)) {
+                result = t;
                 return true;
             } else {
-                if (showDebugData())
-                    payload->mStatusMessage = "Payload does not validate";
+                setPayloadStatus("Payload does not validate");
             }
         } else {
-            if (showDebugData())
-                payload->mStatusMessage = "Payload incompatible with target type: "s + typeid(T).name();
+            setPayloadStatus("Payload incompatible with target type: "s + typeid(T).name());
         }
     }
     return false;

@@ -2,7 +2,7 @@
 
 namespace Engine {
 
-template <typename T>
+template <typename T, typename Holder = std::unique_ptr<T>>
 struct HeapMember {
 
     template <typename... Args>
@@ -11,20 +11,25 @@ struct HeapMember {
     {
     }
 
-    HeapMember(const HeapMember<T> &other)
+    HeapMember(Holder holder)
+        : mObject(std::move(holder))
+    {
+    }
+
+    HeapMember(const HeapMember<T, Holder> &other)
         : mObject(std::make_unique<T>(*other))
     {
     }
 
-	HeapMember(HeapMember<T> &&) = default;
+	HeapMember(HeapMember<T, Holder> &&) = default;
 
-    HeapMember<T> &operator=(const HeapMember<T> &other)
+    HeapMember<T, Holder> &operator=(const HeapMember<T, Holder> &other)
     {
         *mObject = *other;
         return *this;
     }
 
-    bool operator==(const HeapMember<T> &other) const
+    bool operator==(const HeapMember<T, Holder> &other) const
     {
         return *mObject == *other;
     }
@@ -60,7 +65,7 @@ struct HeapMember {
     }
 
 private:
-    std::unique_ptr<T> mObject;
+    Holder mObject;
 };
 
 }

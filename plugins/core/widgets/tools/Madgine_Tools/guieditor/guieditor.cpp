@@ -38,6 +38,8 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
+#include "Meta/keyvalue/valuetype.h"
+
 UNIQUECOMPONENT(Engine::Tools::GuiEditor);
 
 namespace Engine {

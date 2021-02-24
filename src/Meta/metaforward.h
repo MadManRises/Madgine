@@ -23,6 +23,8 @@ struct BoundApiFunction;
 struct FunctionTable;
 using ArgumentList = std::vector<ValueType>;
 
+struct ExtendedValueTypeDesc;
+struct ValueTypeDesc;
 	
 
 struct ObjectInstance;
@@ -42,32 +44,7 @@ using KeyValueVirtualRange = VirtualRange<KeyValuePair>;
 template <typename T>
 struct MadgineObject;
 
-struct IndexHolder;
 
-
-struct ComponentRegistryBase;
-
-
-namespace Debug {
-
-    struct TraceBack;
-    struct StackTraceIterator;
-
-    namespace Memory {
-        struct StatsMemoryResource;
-        struct MemoryTracker;
-    }
-
-    namespace Profiler {
-        struct Profiler;
-        struct ProfilerThread;
-    }
-}
-
-namespace Ini {
-    struct IniFile;
-    struct IniSection;
-}
 
 namespace Serialize {
     struct SerializeInStream;

@@ -4,6 +4,8 @@
 
 #include "../defaultassign.h"
 
+#include "../heapmember.h"
+
 namespace Engine {
 
 template <typename RefT>
@@ -166,11 +168,13 @@ struct VirtualRangeImpl : VirtualRangeSecondBase<RefT, std::remove_reference_t<C
         return { mContainer.end(), self, type_holder<Assign> };
     }
 
-    virtual C& get() override {
+    virtual C &get() override
+    {
         return mContainer;
     }
 
-    virtual bool isReference() const override {
+    virtual bool isReference() const override
+    {
         return std::is_reference_v<C>;
     }
 
@@ -198,13 +202,47 @@ struct VirtualRange {
     }
 
     template <typename C>
-    C &safe_cast()
+    HeapMember<C, std::shared_ptr<C>> safe_cast()
+    {
+        VirtualRangeSecondBase<RefT, C> *typed = dynamic_cast<VirtualRangeSecondBase<RefT, C> *>(mRange.get());
+        if (typed) {
+            if (isReference()) {
+                return std::shared_ptr<C> { &typed->get(), [](C *) {} };
+            } else {
+                return std::shared_ptr<C> { mRange, &typed->get() };
+            }
+        } else {
+            std::shared_ptr<C> result = std::make_shared<C>();
+            throw 0;
+            return result;
+        }
+    }
+
+    template <typename C>
+    HeapMember<const C, std::shared_ptr<const C>> safe_cast() const
+    {
+        VirtualRangeSecondBase<RefT, C> *typed = dynamic_cast<VirtualRangeSecondBase<RefT, C> *>(mRange.get());
+        if (typed) {
+            if (isReference()) {
+                return std::shared_ptr<const C> { &typed->get(), [](C *) {} };
+            } else {
+                return std::shared_ptr<const C> { mRange, &typed->get() };
+            }
+        } else {
+            std::shared_ptr<C> result = std::make_shared<C>();
+            throw 0;
+            return std::shared_ptr<const C> { result };
+        }
+    }
+
+    template <typename C>
+    C &unsafe_cast()
     {
         return dynamic_cast<VirtualRangeSecondBase<RefT, C> *>(mRange.get())->get();
     }
 
     template <typename C>
-    const C &safe_cast() const
+    const C &unsafe_cast() const
     {
         return dynamic_cast<VirtualRangeSecondBase<RefT, C> *>(mRange.get())->get();
     }
