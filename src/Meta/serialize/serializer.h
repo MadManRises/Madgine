@@ -20,8 +20,8 @@ namespace Serialize {
         void (*mSetActive)(SerializableDataUnit *, bool, bool) = nullptr;
         void (*mSetParent)(SerializableDataUnit *) = nullptr;
 
-        void (*mWriteAction)(const SerializableDataUnit *, int, const void *, const std::set<BufferedOutStream *, CompareStreamId> &outStreams) = nullptr;
-        void (*mWriteRequest)(const SerializableDataUnit *, int, const void *, BufferedOutStream *out) = nullptr;
+        void (*mWriteAction)(const SerializableDataUnit *, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *) = nullptr;
+        void (*mWriteRequest)(const SerializableDataUnit *, BufferedOutStream &out, const void *) = nullptr;
     };
 
 }

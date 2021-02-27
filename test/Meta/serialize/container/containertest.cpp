@@ -68,7 +68,7 @@ TEST(Serialize_Container, SyncedUnit)
     ASSERT_EQ(unit1.list2.back(), 6);
 
     mgr1.sendMessages();
-    mgr2.receiveMessages(1, 1000ms);    
+    mgr2.receiveMessages(1, 0ms);    
 
     ASSERT_EQ(unit1.list2, unit2.list2);
 
@@ -78,13 +78,13 @@ TEST(Serialize_Container, SyncedUnit)
     ASSERT_EQ(unit1.list2, unit2.list2);
 
     mgr2.sendMessages();
-    mgr1.receiveMessages(1, 1000ms);
+    mgr1.receiveMessages(1, 0ms);
 
     ASSERT_EQ(unit1.list2.back(), 7);
 
     mgr1.sendMessages();
     ASSERT_FALSE(called);
-    mgr2.receiveMessages(1, 1000ms);
+    mgr2.receiveMessages(1, 0ms);
     ASSERT_TRUE(called);
 
     ASSERT_EQ(unit1.list2, unit2.list2);
@@ -96,7 +96,7 @@ TEST(Serialize_Container, SyncedUnit)
     ASSERT_EQ(unit1.list2.size(), 3);
 
     mgr1.sendMessages();
-    mgr2.receiveMessages(1, 1000ms);
+    mgr2.receiveMessages(1, 0ms);
 
     ASSERT_EQ(unit2.list2.size(), 3);
     ASSERT_EQ(unit1.list2, unit2.list2);

@@ -127,15 +127,18 @@ namespace Serialize {
         }
 
         //TODO: Maybe move loop out of this function
-        template <typename... Args>
-        static void writeAction(const C &c, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, Args &&... args)
-        {
+        template <typename... Args> 
+        static void writeAction(const C &c, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *_data, Args &&... args)
+        {         
+            const std::tuple<ContainerEvent, typename C::const_iterator> &data = *static_cast<const std::tuple<ContainerEvent, typename C::const_iterator> *>(_data);
+
+            ContainerEvent op = std::get<0>(data);
+            const typename C::const_iterator &it = std::get<1>(data);
 
             for (BufferedOutStream *out : outStreams) {
                 Serialize::write(*out, op, "op");
                 switch (op) {
                 case EMPLACE: {
-                    const typename C::iterator &it = *static_cast<const typename C::iterator *>(data);
                     if constexpr (!container_traits<C>::sorted) {
                         writeIterator(*out, c, it);
                     }
@@ -143,7 +146,6 @@ namespace Serialize {
                     break;
                 }
                 case ERASE: {
-                    const typename C::iterator &it = *static_cast<const typename C::iterator *>(data);
                     writeIterator(*out, c, it);
                     break;
                 }
@@ -170,9 +172,9 @@ namespace Serialize {
             } else {
                 if (request) {
                     if (request->mRequesterTransactionId) {
-                        BufferedOutStream *out = c.beginActionResponseMessage(request->mRequester, request->mRequesterTransactionId);
-                        *out << op;
-                        out->endMessage();
+                        BufferedOutStream &out = c.getActionResponseTarget(request->mRequester, request->mRequesterTransactionId);
+                        out << op;
+                        out.endMessage();
                     }
                     (*request)(nullptr);
                 }
@@ -180,22 +182,23 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static void writeRequest(const C &c, int op, const void *data, BufferedOutStream *out, Args &&... args)
+        static void writeRequest(const C &c, BufferedOutStream &out, const void *_data, Args &&... args)
         {
-            *out << op;
+            const std::tuple<ContainerEvent, typename C::const_iterator, typename C::value_type &> &data = *static_cast<const std::tuple<ContainerEvent, typename C::const_iterator, typename C::value_type &> *>(_data);
+            ContainerEvent op = std::get<0>(data);
+            out << op;
             switch (op) {
             case EMPLACE: {
-                const std::pair<typename C::const_iterator, typename C::value_type &> &it = *static_cast<const std::pair<typename C::const_iterator, typename C::value_type &> *>(data);
                 if constexpr (!container_traits<C>::sorted) {
-                    writeIterator(*out, c, it.first);
+                    writeIterator(out, c, std::get<1>(data));
                 }
-                TupleUnpacker::invoke(&Config::writeItem, *out, it.second, std::forward<Args>(args)...);
+                TupleUnpacker::invoke(&Config::writeItem, out, std::get<2>(data), std::forward<Args>(args)...);
                 break;
             }
             default:
                 throw 0;
             }
-            out->endMessage();
+            out.endMessage();
         }
 
         template <typename... Args>
@@ -204,11 +207,11 @@ namespace Serialize {
             bool accepted = true; //(Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS); //Check TODO
 
             ContainerEvent op;
-            inout >> reinterpret_cast<int &>(op);
+            inout >> op;
 
             if (!accepted) {
                 if (id) {
-                    c.beginActionResponseMessage(&inout, id);
+                    c.beginActionResponseMessage(inout, id);
                     Serialize::write(inout, op | ABORTED, "op");
                     inout.endMessage();
                 }
@@ -216,10 +219,10 @@ namespace Serialize {
                 if (c.isMaster()) {
                     performOperation(c, op, inout, inout.id(), id, std::forward<Args>(args)...);
                 } else {
-                    BufferedOutStream *out = c.getSlaveActionMessageTarget(inout.id(), id);
-                    Serialize::write(*out, op, "op");
-                    out->pipe(inout);
-                    out->endMessage();
+                    BufferedOutStream &out = c.getSlaveActionMessageTarget(inout.id(), id);
+                    Serialize::write(out, op, "op");
+                    out.pipe(inout);
+                    out.endMessage();
                 }
             }
         }
@@ -291,7 +294,7 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static void writeAction(const T &t, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, Args &&... args)
+        static void writeAction(const T &t, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *data, Args &&... args)
         {
             /*if constexpr (PrimitiveTypesContain_v<T> || std::is_enum_v<T>) {
             out.format().beginPrimitive(out, name, PrimitiveTypeIndex_v<T>);
@@ -302,7 +305,7 @@ namespace Serialize {
             t.writeAction(op, data, answerTarget, answerId);
         } else */
             if constexpr (is_iterable_v<T>) {
-                ContainerOperations<T, Configs...>::writeAction(t, op, data, outStreams, std::forward<Args>(args)...);
+                ContainerOperations<T, Configs...>::writeAction(t, outStreams, data, std::forward<Args>(args)...);
             } /*else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
             write(out, TupleUnpacker::toTuple(t), name);
         } */
@@ -333,7 +336,7 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static void writeRequest(const T &t, int op, const void *data, BufferedOutStream *out, Args &&... args)
+        static void writeRequest(const T &t, BufferedOutStream &out, const void *data, Args &&... args)
         {
             /*if constexpr (PrimitiveTypesContain_v<T> || std::is_enum_v<T>) {
             out.format().beginPrimitive(out, name, PrimitiveTypeIndex_v<T>);
@@ -344,7 +347,7 @@ namespace Serialize {
             t.writeRequest(op, data, requester ,requesterTransactionId, callback);
         } else */
             if constexpr (is_iterable_v<T>) {
-                ContainerOperations<T, Configs...>::writeRequest(t, op, data, out, std::forward<Args>(args)...);
+                ContainerOperations<T, Configs...>::writeRequest(t, out, data, std::forward<Args>(args)...);
             } /*else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
             write(out, TupleUnpacker::toTuple(t), name);
         } */

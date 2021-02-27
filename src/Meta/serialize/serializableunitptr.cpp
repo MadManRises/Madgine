@@ -104,9 +104,9 @@ namespace Serialize {
         in.format().endCompound(in, name);
     }
 
-    void SerializableUnitConstPtr::writeAction(uint8_t index, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams) const
+    void SerializableUnitConstPtr::writeAction(uint8_t index, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *data) const
     {
-        mType->writeAction(unit(), index, op, data, outStreams);
+        mType->writeAction(unit(), index, outStreams, data);
     }
 
     void SerializableUnitPtr::readAction(BufferedInOutStream &in, PendingRequest *request) const
@@ -114,9 +114,9 @@ namespace Serialize {
         mType->readAction(unit(), in, request);
     }
 
-    void SerializableUnitConstPtr::writeRequest(uint8_t index, int op, const void *data, BufferedOutStream *out) const
+    void SerializableUnitConstPtr::writeRequest(uint8_t index, BufferedOutStream &out, const void *data) const
     {
-        mType->writeRequest(unit(), index, op, data, out);
+        mType->writeRequest(unit(), index, out, data);
     }
 
     void SerializableUnitPtr::readRequest(BufferedInOutStream &in, TransactionId id) const

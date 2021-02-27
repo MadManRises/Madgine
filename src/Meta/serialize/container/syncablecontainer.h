@@ -73,13 +73,9 @@ namespace Serialize {
                 ResetOperation { *this } = std::forward<T>(arg);
             } else {
                 if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
-                    Base temp(std::forward<T>(arg));
+                    std::pair<ContainerEvent, Base> temp { RESET, std::forward<T>(arg) };
 
-                    /*BufferedOutStream *out = this->getSlaveActionMessageTarget();
-                    *out << RESET;
-                    temp.writeState(*out);
-                    out->endMessage();*/
-                    this->writeRequest(RESET, &temp);
+                    this->writeRequest(&temp);//??? Is the temp object used?
                 } else {
                     std::terminate();
                 }
@@ -98,7 +94,8 @@ namespace Serialize {
                 ResetOperation { *this }.clear();
             } else {
                 if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
-                    this->writeRequest(RESET, nullptr);
+                    ContainerEvent op = RESET;
+                    this->writeRequest(&op);
                 } else {
                     std::terminate();
                 }
@@ -121,8 +118,8 @@ namespace Serialize {
 
                             value_type temp = TupleUnpacker::constructFromTuple<value_type>(std::move(args));
                             TupleUnpacker::forEach(std::forward<decltype(init)>(init), [&](auto &&f) { TupleUnpacker::invoke(f, temp); });
-                            std::pair<const_iterator, const value_type &> data { where, temp };
-                            this->writeRequest(EMPLACE, &data, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
+                            std::tuple<ContainerEvent, const_iterator, const value_type &> data { EMPLACE, where, temp };
+                            this->writeRequest(&data, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
 
                             return future;
                         } else {
@@ -146,7 +143,9 @@ namespace Serialize {
                             std::promise<iterator> p;
                             Future<iterator> future = p.get_future();
 
-                            this->writeRequest(ERASE, &where, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
+                            std::tuple<ContainerEvent, const_iterator> data { ERASE, where };
+
+                            this->writeRequest(&data, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
 
                             return future;
                         } else {
@@ -171,10 +170,10 @@ namespace Serialize {
                             std::promise<iterator> p;
                             Future<iterator> future = p.get_future();
 
-                            std::pair<iterator, iterator> data { from,
+                            std::tuple<ContainerEvent, const_iterator, const_iterator> data { ERASE_RANGE, from,
                                 to };
 
-                            this->writeRequest(ERASE_RANGE, &data, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
+                            this->writeRequest(&data, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
 
                             return future;
                         } else {
@@ -197,7 +196,8 @@ namespace Serialize {
                 assert(this->mCalled);
                 if (this->mInserted) {
                     if (this->mContainer.isSynced()) {
-                        container().writeAction(EMPLACE, &this->mIt, mAnswerTarget, mAnswerId);
+                        std::tuple<ContainerEvent, const_iterator> data { EMPLACE, this->mIt };
+                        container().writeAction(&data, mAnswerTarget, mAnswerId);
                     }
                 }
             }
@@ -217,7 +217,8 @@ namespace Serialize {
                 : Base::RemoveOperation(c, it)
             {
                 if (this->mContainer.isSynced()) {
-                    container().writeAction(ERASE, &it, answerTarget, answerId);
+                    std::tuple<ContainerEvent, const_iterator> data { ERASE, it };
+                    container().writeAction(&data, answerTarget, answerId);
                 }
             }
 
@@ -232,8 +233,8 @@ namespace Serialize {
                 : Base::RemoveRangeOperation(c, from, to)
             {
                 if (this->mContainer.isSynced()) {
-                    std::pair<iterator, iterator> data { from, to };
-                    this->writeAction(ERASE_RANGE, &data, answerTarget, answerId);
+                    std::tuple<ContainerEvent, const_iterator, const_iterator> data { ERASE_RANGE, from, to };
+                    this->writeAction(&data, answerTarget, answerId);
                 }
             }
 
@@ -252,14 +253,9 @@ namespace Serialize {
             }
             ~_ResetOperation()
             {
-                if (this->mContainer.isSynced()) {
-                    /*for (BufferedOutStream *out : container().getMasterActionMessageTargets(mAnswerTarget, mAnswerId)) {
-                        *out << RESET;
-                        write(*out, this->mContainer, nullptr);
-                        out->endMessage();
-
-                    }*/
-                    container().writeAction(RESET, &container(), mAnswerTarget, mAnswerId);
+                if (this->mContainer.isSynced()) {                    
+                    ContainerEvent op = RESET;
+                    container().writeAction(&op, mAnswerTarget, mAnswerId);
                 }
             }
 

@@ -152,9 +152,10 @@ namespace Serialize {
         addTopLevelItem(newUnit, false);
     }
 
-    BufferedOutStream *SyncManager::getSlaveMessageTarget()
+    BufferedOutStream &SyncManager::getSlaveMessageTarget()
     {
-        return &*mSlaveStream;
+        assert(mSlaveStream);
+        return *mSlaveStream;
     }
 
     bool SyncManager::isMessageAvailable()

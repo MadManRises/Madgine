@@ -1,7 +1,7 @@
 #pragma once
 
-#include "wrapreference.h"
 #include "copy_traits.h"
+#include "wrapreference.h"
 
 namespace Engine {
 
@@ -78,90 +78,88 @@ struct Future {
     T get() &&
     {
         return std::visit(overloaded {
-                              [](T &&t) -> T {
-            return std::move(t); },
-                              [](std::future<T> &&f) -> T {
-            return std::move(f).get(); },
-                              [](std::shared_future<T> &&f) -> T {
-            return std::move(f).get(); },
-                              [](const DeferredPtr &d) -> T { return std::move(*d).get();
-    } },
+                              [](T &&t) -> T { return std::move(t); },
+                              [](std::future<T> &&f) -> T { return std::move(f).get(); },
+                              [](std::shared_future<T> &&f) -> T { return std::move(f).get(); },
+                              [](const DeferredPtr &d) -> T {
+                                  return std::move(*d).get();
+                              } },
             std::move(mValue));
-}
-
-bool isAvailable() const
-{
-    return std::visit(overloaded {
-                          [](const T &t) { return true; },
-                          [](const std::future<T> &f) { return f.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready; },
-                          [](const std::shared_future<T> &f) { return f.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready; },
-                          [](const DeferredPtr &d) { return d->isAvailable(); } },
-        mValue);
-}
-
-Future<T> share()
-{
-    if (std::holds_alternative<std::future<T>>(mValue)) {
-        std::future<T> f{std::move(std::get<std::future<T>>(mValue))}; 
-        mValue.template emplace<std::shared_future<T>>(std::move(f));
     }
-    return std::visit(overloaded {
-                          [](const T &t) -> Future<T> { return t; },
-                          [](const std::future<T> &f) -> Future<T> { throw 0; },
-                          [](const std::shared_future<T> &f) -> Future<T> { return f; },
-                          [](const DeferredPtr &d) -> Future<T> { return d->clone(); } },
-        mValue);
-}
+
+    bool isAvailable() const
+    {
+        return std::visit(overloaded {
+                              [](const T &t) { return true; },
+                              [](const std::future<T> &f) { return f.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready; },
+                              [](const std::shared_future<T> &f) { return f.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready; },
+                              [](const DeferredPtr &d) { return d->isAvailable(); } },
+            mValue);
+    }
+
+    Future<T> share()
+    {
+        if (std::holds_alternative<std::future<T>>(mValue)) {
+            std::future<T> f { std::move(std::get<std::future<T>>(mValue)) };
+            mValue.template emplace<std::shared_future<T>>(std::move(f));
+        }
+        return std::visit(overloaded {
+                              [](const T &t) -> Future<T> { return t; },
+                              [](const std::future<T> &f) -> Future<T> { throw 0; },
+                              [](const std::shared_future<T> &f) -> Future<T> { return f; },
+                              [](const DeferredPtr &d) -> Future<T> { return d->clone(); } },
+            mValue);
+    }
 
 private:
-struct DeferredBase;
-using DeferredPtr = std::unique_ptr<DeferredBase>;
+    struct DeferredBase;
+    using DeferredPtr = std::unique_ptr<DeferredBase>;
 
-struct DeferredBase {
-    virtual ~DeferredBase() = default;
-    virtual bool isAvailable() = 0;
-    virtual T get() && = 0;
-    virtual DeferredPtr clone() = 0;
+    struct DeferredBase {
+        virtual ~DeferredBase() = default;
+        virtual bool isAvailable() = 0;
+        virtual T get() && = 0;
+        virtual DeferredPtr clone() = 0;
+    };
+
+    template <typename U, typename F>
+    struct DeferredImpl : DeferredBase {
+
+        DeferredImpl(Future<U> future, F &&f)
+            : mFuture(std::move(future))
+            , mF(std::forward<F>(f))
+        {
+        }
+
+        bool isAvailable() override
+        {
+            return mFuture.isAvailable();
+        }
+
+        T get() && override
+        {
+            return std::move(mF)(std::move(mFuture).get());
+        }
+
+        virtual DeferredPtr clone() override
+        {
+            return std::make_unique<DeferredImpl<U, F>>(mFuture.share(), tryCopy(mF));
+        }
+
+    private:
+        Future<U> mFuture;
+        std::remove_reference_t<F> mF;
+    };
+
+    Future(DeferredPtr &&ptr)
+        : mValue(std::move(ptr))
+    {
+        assert(std::get<DeferredPtr>(mValue));
+    }
+
+private:
+    std::variant<wrap_reference_t<T>, std::future<T>, std::shared_future<T>, DeferredPtr> mValue;
 };
-
-template <typename U, typename F>
-struct DeferredImpl : DeferredBase {
-
-    DeferredImpl(Future<U> future, F &&f)
-        : mFuture(std::move(future))
-        , mF(std::forward<F>(f))
-    {
-    }
-
-    bool isAvailable() override
-    {
-        return mFuture.isAvailable();
-    }
-
-    T get() && override
-    {
-        return std::move(mF)(std::move(mFuture).get());
-    }
-
-    virtual DeferredPtr clone() override {
-        return std::make_unique<DeferredImpl<U, F>>(mFuture.share(), tryCopy(mF));
-    }
-
-private:
-    Future<U> mFuture;
-    std::remove_reference_t<F> mF;
-};
-
-Future(DeferredPtr &&ptr)
-    : mValue(std::move(ptr))
-{
-    assert(std::get<DeferredPtr>(mValue));
-}
-
-private:
-std::variant<wrap_reference_t<T>, std::future<T>, std::shared_future<T>, DeferredPtr> mValue;
-}
-;
 
 template <>
 struct Future<void> {

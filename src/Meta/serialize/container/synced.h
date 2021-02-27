@@ -5,9 +5,9 @@
 #include "../../generic/offsetptr.h"
 #include "../serializable.h"
 #include "../streams/bufferedstream.h"
+#include "../streams/operations.h"
 #include "../syncable.h"
 #include "../unithelper.h"
-#include "../streams/operations.h"
 
 //TODO rewrite to modern operations
 namespace Engine {
@@ -51,8 +51,8 @@ namespace Serialize {
                     mData = std::forward<Ty>(v);
                     notify(old);
                 } else {
-                    T data = std::forward<Ty>(v);
-                    this->writeRequest(SyncedOperation::SET, &data);
+                    std::pair<SyncedOperation, T> data { SyncedOperation::SET, std::forward<Ty>(v) };
+                    this->writeRequest(&data);
                 }
             }
         }
@@ -65,8 +65,8 @@ namespace Serialize {
                 mData += std::forward<Ty>(v);
                 notify(old);
             } else {
-                T data = std::forward<Ty>(v);
-                this->writeRequest(SyncedOperation::ADD, &data);
+                std::pair<SyncedOperation, T> data { SyncedOperation::ADD, std::forward<Ty>(v) };
+                this->writeRequest(&data);
             }
         }
 
@@ -78,8 +78,8 @@ namespace Serialize {
                 mData -= std::forward<Ty>(v);
                 notify(old);
             } else {
-                T data = std::forward<Ty>(v);
-                this->writeRequest(SyncedOperation::SUB, &data);
+                std::pair<SyncedOperation, T> data { SyncedOperation::SUB, std::forward<Ty>(v) };
+                this->writeRequest(, &data);
             }
         }
 
@@ -130,7 +130,8 @@ namespace Serialize {
         void notify(const T &old, ParticipantId answerTarget = 0, TransactionId answerId = 0)
         {
             if (this->isSynced()) {
-                this->writeAction(SyncedOperation::SET, &mData, answerTarget, answerId);
+                std::pair<SyncedOperation, T> data { SyncedOperation::SET, mData };
+                this->writeAction(&data, answerTarget, answerId);
             }
             if (this->isActive()) {
                 Observer::operator()(mData, old);
@@ -177,16 +178,17 @@ namespace Serialize {
             }
         }
 
-                template <typename... Args>
-        static void writeRequest(const Synced<T, Observer, OffsetPtr> &synced, int op, const void *data, BufferedOutStream *out, Args &&... args)
+        template <typename... Args>
+        static void writeRequest(const Synced<T, Observer, OffsetPtr> &synced, BufferedOutStream &out, const void *_data, Args &&... args)
         {
-            Serialize::write(*out, op, nullptr);
-            Serialize::write(*out, *static_cast<const T *>(data), nullptr);
-            out->endMessage();
+            std::pair<SyncedOperation, T> &data = *static_cast<std::pair<SyncedOperation, T> *>(_data);
+            Serialize::write(out, data.first, nullptr);
+            Serialize::write(out, data.second, nullptr);
+            out.endMessage();
         }
 
         template <typename... Args>
-        static void readAction(Synced<T, Observer, OffsetPtr> &synced, SerializeInStream &in, PendingRequest *request, Args&&... args)
+        static void readAction(Synced<T, Observer, OffsetPtr> &synced, SerializeInStream &in, PendingRequest *request, Args &&... args)
         {
             SyncedOperation::Value op;
             Serialize::read(in, op, nullptr);
@@ -213,12 +215,13 @@ namespace Serialize {
             synced.notify(old);
         }
 
-                template <typename... Args>
-        static void writeAction(const Synced<T, Observer, OffsetPtr> &synced, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, Args &&... args)
+        template <typename... Args>
+        static void writeAction(const Synced<T, Observer, OffsetPtr> &synced, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *_data, Args &&... args)
         {
+            std::pair<SyncedOperation, T> &data = *static_cast<std::pair<SyncedOperation, T> *>(_data);
             for (BufferedOutStream *out : outStreams) {
-                Serialize::write(*out, op, nullptr);
-                Serialize::write(*out, *static_cast<const T *>(data), nullptr);
+                Serialize::write(*out, data.first, nullptr);
+                Serialize::write(*out, data.second, nullptr);
                 out->endMessage();
             }
         }

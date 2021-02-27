@@ -4,7 +4,7 @@
 
 #include "../defaultassign.h"
 
-#include "../heapmember.h"
+#include "../heapobject.h"
 
 namespace Engine {
 
@@ -202,7 +202,7 @@ struct VirtualRange {
     }
 
     template <typename C>
-    HeapMember<C, std::shared_ptr<C>> safe_cast()
+    HeapObject<C, std::shared_ptr<C>> safe_cast()
     {
         VirtualRangeSecondBase<RefT, C> *typed = dynamic_cast<VirtualRangeSecondBase<RefT, C> *>(mRange.get());
         if (typed) {
@@ -219,7 +219,7 @@ struct VirtualRange {
     }
 
     template <typename C>
-    HeapMember<const C, std::shared_ptr<const C>> safe_cast() const
+    HeapObject<const C, std::shared_ptr<const C>> safe_cast() const
     {
         VirtualRangeSecondBase<RefT, C> *typed = dynamic_cast<VirtualRangeSecondBase<RefT, C> *>(mRange.get());
         if (typed) {

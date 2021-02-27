@@ -185,8 +185,8 @@ namespace Serialize {
 
         bool isActive(size_t offset) const;
 
-        void writeAction(uint8_t index, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams) const;
-        void writeRequest(uint8_t index, int op, const void *data, BufferedOutStream *out) const;
+        void writeAction(uint8_t index, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *data) const;
+        void writeRequest(uint8_t index, BufferedOutStream &out, const void *data) const;
 
         const SerializableUnitBase *unit() const;
     };

@@ -154,14 +154,14 @@ namespace Serialize {
         }
     }
 
-    void SerializeTable::writeAction(const SerializableUnitBase *parent, uint8_t index, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams) const
+    void SerializeTable::writeAction(const SerializableUnitBase *parent, uint8_t index, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *data) const
     {
-        get(index).mWriteAction(parent, op, data, outStreams);
+        get(index).mWriteAction(parent, outStreams, data);
     }
 
-    void SerializeTable::writeRequest(const SerializableUnitBase *parent, uint8_t index, int op, const void *data, BufferedOutStream *out) const
+    void SerializeTable::writeRequest(const SerializableUnitBase *parent, uint8_t index, BufferedOutStream &out, const void *data) const
     {
-        get(index).mWriteRequest(parent, op, data, out);
+        get(index).mWriteRequest(parent, out, data);
     }
 
     uint8_t SerializeTable::getIndex(size_t offset) const

@@ -42,45 +42,51 @@ namespace Serialize {
         return result;
     }
 
+    BufferedOutStream &SyncableBase::getMasterActionResponseTarget(const SyncableUnitBase *parent, uint8_t index, ParticipantId answerTarget, TransactionId answerId) const
+    {
+        for (BufferedOutStream *out : parent->getMasterMessageTargets()) {
+            if (out->id() == answerTarget) {
+                beginActionResponseMessage(parent, index, *out, answerId);
+                return *out;
+            }
+        }
+        throw 0;
+    }
+
     ParticipantId SyncableBase::participantId(const SerializableUnitBase *parent)
     {
         return parent->mTopLevel->participantId();
     }
 
-    void SyncableBase::writeAction(const SyncableUnitBase *parent, uint8_t index, int op, const void *data, ParticipantId answerTarget, TransactionId answerId) const
+    void SyncableBase::writeAction(const SyncableUnitBase *parent, uint8_t index, const void *data, ParticipantId answerTarget, TransactionId answerId, const std::set<ParticipantId> &targets) const
     {
-        parent->serializeType()->writeAction(parent, index, op, data, getMasterActionMessageTargets(parent, index, answerTarget, answerId));
+        parent->serializeType()->writeAction(parent, index, getMasterActionMessageTargets(parent, index, answerTarget, answerId, targets), data);
     }
 
-    BufferedOutStream *SyncableBase::getSlaveActionMessageTarget(const SyncableUnitBase *parent, uint8_t index, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const
+    BufferedOutStream &SyncableBase::getSlaveActionMessageTarget(const SyncableUnitBase *parent, uint8_t index, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const
     {
-        BufferedOutStream *out = parent->getSlaveMessageTarget();
-        out->beginMessage(parent, REQUEST, out->createRequest(requester, requesterTransactionId, std::move(callback)));
-        *out << index;
+        BufferedOutStream &out = parent->getSlaveMessageTarget();
+        out.beginMessage(parent, REQUEST, out.createRequest(requester, requesterTransactionId, std::move(callback)));
+        out << index;
         return out;
     }
 
-    void SyncableBase::writeRequest(const SyncableUnitBase *parent, uint8_t index, int op, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const
+    void SyncableBase::writeRequest(const SyncableUnitBase *parent, uint8_t index, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const
     {
-        parent->serializeType()->writeRequest(parent, index, op, data, getSlaveActionMessageTarget(parent, index, requester, requesterTransactionId, std::move(callback)));
+        parent->serializeType()->writeRequest(parent, index, getSlaveActionMessageTarget(parent, index, requester, requesterTransactionId, std::move(callback)), data);
     }
 
-    void SyncableBase::beginActionResponseMessage(const SyncableUnitBase *parent, uint8_t index, BufferedOutStream *stream, TransactionId id) const
+    void SyncableBase::writeActionResponse(const SyncableUnitBase *parent, uint8_t index, const void *data, ParticipantId answerTarget, TransactionId answerId) const
     {
-        stream->beginMessage(parent, ACTION, id);
-        *stream << index;
-    }
-
-    BufferedOutStream *SyncableBase::beginActionResponseMessage(const SyncableUnitBase *parent, uint8_t index, ParticipantId stream, TransactionId id) const
-    {
-        //TODO: non-linear lookup?
-        for (BufferedOutStream *out : parent->getMasterMessageTargets()) {
-            if (out->id() == stream) {
-                beginActionResponseMessage(parent, index, out, id);
-                return out;
-            }
+        if (answerTarget != 0) {
+            parent->serializeType()->writeAction(parent, index, { &getMasterActionResponseTarget(parent, index, answerTarget, answerId) }, data);
         }
-        throw 0; //TODO: Client disconnected after request
+    }
+
+    void SyncableBase::beginActionResponseMessage(const SyncableUnitBase *parent, uint8_t index, BufferedOutStream &stream, TransactionId id) const
+    {
+        stream.beginMessage(parent, ACTION, id);
+        stream << index;
     }
 
     bool SyncableBase::isMaster(const SyncableUnitBase *parent) const

@@ -26,21 +26,15 @@ namespace Serialize {
         : SyncableUnitBase(other.moveMasterId())
         , mStaticSlaveId(other.mStaticSlaveId)
     {
-        if (other.mSlaveManager) {
-            other.mSlaveManager->moveTopLevelItem(&other, this);
-        }
-        while (!other.mMasterManagers.empty()) {
-            other.mMasterManagers.front()->moveTopLevelItem(&other, this);
+        while (!other.mManagers.empty()) {
+            other.mManagers.front()->moveTopLevelItem(&other, this);
         }
     }
 
     TopLevelUnitBase::~TopLevelUnitBase()
     {
-        if (mSlaveManager) {
-            mSlaveManager->removeTopLevelItem(this);
-        }
-        while (!mMasterManagers.empty()) {
-            mMasterManagers.front()->removeTopLevelItem(this);
+        while (!mManagers.empty()) {
+            mManagers.front()->removeTopLevelItem(this);
         }
     }
 
@@ -53,7 +47,7 @@ namespace Serialize {
 
     void TopLevelUnitBase::unsync()
     {
-        SerializableUnitPtr self{ this, serializeType() };
+        SerializableUnitPtr self { this, serializeType() };
         self.setDataSynced(false);
         self.setActive(false, true);
     }
@@ -79,7 +73,7 @@ namespace Serialize {
     {
         //TODO: maybe return std::vector
         std::set<BufferedOutStream *, CompareStreamId> result;
-        for (SyncManager *mgr : mMasterManagers) {
+        for (SyncManager *mgr : mManagers) {
             const std::set<BufferedOutStream *, CompareStreamId> &targets = mgr->getMasterMessageTargets();
             std::set<BufferedOutStream *, CompareStreamId> temp;
             set_union(result.begin(), result.end(), targets.begin(), targets.end(), inserter(temp, temp.begin()),
@@ -89,17 +83,15 @@ namespace Serialize {
         return result;
     }
 
-    BufferedOutStream *TopLevelUnitBase::getSlaveMessageTarget() const
+    BufferedOutStream &TopLevelUnitBase::getSlaveMessageTarget() const
     {
-        if (mSlaveManager) {
-            return mSlaveManager->getSlaveMessageTarget();
-        }
-        return nullptr;
+        assert(mSlaveManager);
+        return mSlaveManager->getSlaveMessageTarget();
     }
 
-    const std::vector<SyncManager *> &TopLevelUnitBase::getMasterManagers() const
+    const std::vector<SyncManager *> &TopLevelUnitBase::getManagers() const
     {
-        return mMasterManagers;
+        return mManagers;
     }
 
     SyncManager *TopLevelUnitBase::getSlaveManager() const
@@ -109,21 +101,19 @@ namespace Serialize {
 
     bool TopLevelUnitBase::addManager(SyncManager *mgr)
     {
-        if (mgr->isMaster()) {
-            mMasterManagers.push_back(mgr);
-        } else {
+        if (!mgr->isMaster()) {
             if (mSlaveManager)
                 return false;
             mSlaveManager = mgr;
         }
+        mManagers.push_back(mgr);
         return true;
     }
 
     void TopLevelUnitBase::removeManager(SyncManager *mgr)
     {
-        if (mgr->isMaster()) {
-            mMasterManagers.erase(std::remove(mMasterManagers.begin(), mMasterManagers.end(), mgr), mMasterManagers.end());
-        } else {
+        mManagers.erase(std::remove(mManagers.begin(), mManagers.end(), mgr));
+        if (!mgr->isMaster()) {
             assert(mSlaveManager == mgr);
             mSlaveManager = nullptr;
         }
@@ -132,12 +122,11 @@ namespace Serialize {
     bool TopLevelUnitBase::updateManagerType(SyncManager *mgr, bool isMaster)
     {
         if (isMaster) {
-            removeManager(mgr);
-            mMasterManagers.push_back(mgr);
-        } else {
+            assert(mSlaveManager == mgr);
+            mSlaveManager = nullptr;
+        }else{
             if (mSlaveManager)
                 return false;
-            removeManager(mgr);
             mSlaveManager = mgr;
         }
         return true;

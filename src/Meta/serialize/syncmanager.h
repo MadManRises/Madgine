@@ -34,7 +34,7 @@ namespace Serialize {
         void removeTopLevelItem(TopLevelUnitBase *unit);
         void moveTopLevelItem(TopLevelUnitBase *oldUnit, TopLevelUnitBase *newUnit);
 
-        BufferedOutStream *getSlaveMessageTarget();
+        BufferedOutStream &getSlaveMessageTarget();
 
         bool isMessageAvailable();
         void receiveMessages(int msgCount = -1, TimeOut timeout = {});

@@ -1,128 +1,123 @@
 #pragma once
 
-#include "../../generic/offsetptr.h"
 #include "../streams/bufferedstream.h"
 #include "../streams/operations.h"
 #include "../syncable.h"
+#include "Generic/future.h"
+#include "Generic/offsetptr.h"
+#include "Generic/onetimefunctor.h"
 
 namespace Engine {
 namespace Serialize {
     namespace __action__impl__ {
-        template <bool executeOnMasterOnly, bool callByMasterOnly>
+        template <bool callByMasterOnly>
         struct _ActionPolicy {
-            static constexpr bool sExecuteOnMasterOnly = executeOnMasterOnly;
             static constexpr bool sCallByMasterOnly = callByMasterOnly;
+
+            template <typename... Args>
+            static bool verify(ParticipantId requester, Args &&... args)
+            {
+                return true;
+            }
         };
 
-        template <auto f, typename Config, typename OffsetPtr, typename R, typename T, typename... _Ty>
+        template <auto f, typename OffsetPtr, typename R, typename T, typename... _Ty>
         struct ActionImpl : Syncable<OffsetPtr> {
 
-            friend struct Operations<ActionImpl<f, Config, OffsetPtr, R, T, _Ty...>>;
+            template <typename, typename... Configs>
+            friend struct Serialize::Operations;
 
-            ActionImpl()
+            Future<R> operator()(_Ty... args, const std::set<ParticipantId> &targets = {})
             {
-            }
-
-            void operator()(_Ty... args, const std::set<ParticipantId> &targets = {})
-            {
-                tryCall(this->participantId(), targets, args...);
-            }
-
-            void setVerify(std::function<bool(ParticipantId, _Ty...)> verify)
-            {
-                mVerify = verify;
-            }
-
-        protected:
-            bool verify(ParticipantId id, _Ty... args)
-            {
-                return !mVerify || mVerify(id, args...);
+                return tryCall({ args... }, 0, 0, targets);
             }
 
         private:
-            void call(const std::set<ParticipantId> &targets, _Ty... args)
+            R call(std::tuple<_Ty...> args, ParticipantId answerTarget = 0, TransactionId answerId = 0, const std::set<ParticipantId> &targets = {})
             {
-                if (!Config::sExecuteOnMasterOnly) {
-                    std::tuple<_Ty...> arg_tuple { args... };
-                    this->writeAction(0, &arg_tuple);
+                this->writeAction(&args, answerTarget, answerId, targets);
+
+                return TupleUnpacker::invokeExpand(f, OffsetPtr::parent(this), args);
+            }
+
+            Future<R> tryCall(std::tuple<_Ty...> args, ParticipantId requester = 0, TransactionId requesterTransactionId = 0, const std::set<ParticipantId> &targets = {})
+            {
+                if (this->isMaster()) {
+                    return call(args, requester, requesterTransactionId, targets);
                 } else {
                     assert(targets.empty());
-                }
-
-                (OffsetPtr::parent(this)->*f)(args...);
-            }
-
-            void tryCall(ParticipantId id, const std::set<ParticipantId> &targets, _Ty... args)
-            {
-                if (verify(id, args...)) {
-                    if (this->isMaster()) {
-                        call(targets, args...);
-                    } else {
-                        if (!Config::sCallByMasterOnly && targets.empty()) {
-                            std::tuple<_Ty...> arg_tuple { args... };
-                            this->writeRequest(0, &arg_tuple);
-                        } else {
-                            std::terminate();
-                        }
-                    }
+                    std::promise<R> p;
+                    Future<R> f { p.get_future() };
+                    this->writeRequest(&args, requester, requesterTransactionId, oneTimeFunctor([p { std::move(p) }](void *data) mutable { p.set_value(*static_cast<R *>(data)); }));
+                    return f;
                 }
             }
-
-        private:
-            std::function<bool(ParticipantId, _Ty...)> mVerify;
         };
     }
 
     struct ActionPolicy {
-        //using masterOnly = _ActionPolicy<true, true>;
-        using request = __action__impl__::_ActionPolicy<true, false>;
-        using broadcast = __action__impl__::_ActionPolicy<false, false>;
-        using notification = __action__impl__::_ActionPolicy<false, true>;
+        using broadcast = __action__impl__::_ActionPolicy<false>;
+        using notification = __action__impl__::_ActionPolicy<true>;
     };
 
     /*template <typename F, F f, class C>
 		using Action = typename MemberFunctionCapture<__actionpolicy__impl__::ActionImpl, F, f, C>::type;*/
 
-    template <auto f, typename C, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
-    using Action = typename MemberFunctionCapture<__action__impl__::ActionImpl, f, C, OffsetPtr>::type;
+    template <auto f, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
+    using Action = typename MemberFunctionCapture<__action__impl__::ActionImpl, f, OffsetPtr>::type;
 
-#define ACTION(Name, ...) OFFSET_CONTAINER(Name, ::Engine::Serialize::Action<__VA_ARGS__>)
+#define ACTION(Name, f) OFFSET_CONTAINER(Name, ::Engine::Serialize::Action<&Self::f>)
 
-    template <auto f, typename Config, typename OffsetPtr, typename R, typename T, typename... _Ty, typename... Configs>
-    struct Operations<__action__impl__::ActionImpl<f, Config, OffsetPtr, R, T, _Ty...>, Configs...> {
+    template <auto f, typename OffsetPtr, typename R, typename T, typename... _Ty, typename... Configs>
+    struct Operations<__action__impl__::ActionImpl<f, OffsetPtr, R, T, _Ty...>, Configs...> {
+        using Config = type_pack_first_t<type_pack<Configs...>>;
+
         template <typename... Args>
-        static void writeAction(const Action<f, Config, OffsetPtr> &action, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, Args &&... args)
+        static void writeAction(const Action<f, OffsetPtr> &action, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *data, Args &&... args)
         {
             for (BufferedOutStream *out : outStreams) {
-                TupleUnpacker::forEach(*static_cast<const std::tuple<_Ty...> *>(data), [&](auto &field) { write(*out, field, nullptr, args...); });                            
+                TupleUnpacker::forEach(*static_cast<const std::tuple<_Ty...> *>(data), [&](auto &field) { write(*out, field, nullptr, args...); });
                 out->endMessage();
             }
         }
 
         template <typename... Args>
-        static void readAction(Action<f, Config, OffsetPtr> &action, SerializeInStream &in, PendingRequest *request, Args &&... args)
+        static void readAction(Action<f, OffsetPtr> &action, SerializeInStream &in, PendingRequest *request, Args &&... args)
         {
             std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> data;
-            TupleUnpacker::forEach(data, [&](auto &field) { read(in, field, nullptr, args...); });            
+            TupleUnpacker::forEach(data, [&](auto &field) { read(in, field, nullptr, args...); });
             UnitHelper<decltype(data)>::applyMap(in, data);
-            TupleUnpacker::invokeExpand(&Action<f, Config, OffsetPtr>::call, action, std::set<ParticipantId> {}, std::move(data));
+            R result = action.call(std::move(data), request ? request->mRequester : 0, request ? request->mRequesterTransactionId : 0);
+            if (request) {
+                (*request)(&result);
+            }
         }
 
         template <typename... Args>
-        static void writeRequest(const Action<f, Config, OffsetPtr> &action, int op, const void *data, BufferedOutStream *out, Args &&... args)
+        static void writeRequest(const Action<f, OffsetPtr> &action, BufferedOutStream &out, const void *data, Args &&... args)
         {
-            TupleUnpacker::forEach(*static_cast<const std::tuple<_Ty...> *>(data), [&](auto &field) { write(*out, field, nullptr, args...); });                            
-            out->endMessage();
+            if constexpr (!Config::sCallByMasterOnly) {
+                TupleUnpacker::forEach(*static_cast<const std::tuple<_Ty...> *>(data), [&](auto &field) { write(out, field, nullptr, args...); });
+                out.endMessage();
+            } else {
+                throw 0;
+            }
         }
 
         template <typename... Args>
-        static void readRequest(Action<f, Config, OffsetPtr> &action, BufferedInOutStream &in, TransactionId id, Args &&... args)
+        static void readRequest(Action<f, OffsetPtr> &action, BufferedInOutStream &in, TransactionId id, Args &&... args)
         {
-            if (!Config::sCallByMasterOnly) {
+            if constexpr (!Config::sCallByMasterOnly) {
                 std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> data;
-                TupleUnpacker::forEach(data, [&](auto &field) { read(in, field, nullptr, args...); });            
+                TupleUnpacker::forEach(data, [&](auto &field) { read(in, field, nullptr, args...); });
                 UnitHelper<decltype(data)>::applyMap(in, data);
-                TupleUnpacker::invokeExpand(&Action<f, Config, OffsetPtr>::tryCall, action, in.id(), std::set<ParticipantId> {}, std::move(data));
+                if (Config::verify(id, data)) {
+                    action.tryCall(data, in.id(), id);
+                } else {
+                    throw 0;
+                }
+            } else {
+                throw 0;
             }
         }
     };

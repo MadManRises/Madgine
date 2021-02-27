@@ -102,13 +102,10 @@ namespace Serialize {
         return result;
     }
 
-    BufferedOutStream *SyncableUnitBase::getSlaveMessageTarget() const
+    BufferedOutStream &SyncableUnitBase::getSlaveMessageTarget() const
     {
-        BufferedOutStream *result = nullptr;
-        if (mSynced) {
-            result = mTopLevel->getSlaveMessageTarget();
-        }
-        return result;
+        assert(mSynced);
+        return mTopLevel->getSlaveMessageTarget();
     }
 
     void SyncableUnitBase::clearSlaveId(SerializeManager *mgr)

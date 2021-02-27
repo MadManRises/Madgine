@@ -67,10 +67,10 @@ namespace Serialize {
             },
             [](SerializableDataUnit *unit) {
             },
-            [](const SerializableDataUnit *unit, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams) {
+            [](const SerializableDataUnit *unit, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *data) {
                 throw "Unsupported";
             },
-            [](const SerializableDataUnit *_unit, int op, const void *data, BufferedOutStream *out) {
+            [](const SerializableDataUnit *_unit, BufferedOutStream &out, const void *data) {
                 throw "Unsupported";
             }
         };
@@ -118,10 +118,10 @@ namespace Serialize {
             },
             [](SerializableDataUnit *unit) {
             },
-            [](const SerializableDataUnit *unit, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams) {
+            [](const SerializableDataUnit *unit, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *data) {
                 throw "Unsupported";
             },
-            [](const SerializableDataUnit *_unit, int op, const void *data, BufferedOutStream *out) {
+            [](const SerializableDataUnit *_unit, BufferedOutStream &out, const void *data) {
                 throw "Unsupported";
             }
         };
@@ -174,17 +174,17 @@ namespace Serialize {
                 if constexpr (std::is_base_of_v<SerializableUnitBase, T>)
                     UnitHelper<T>::setItemParent(static_cast<Unit *>(unit)->*P, unit);
             },
-            [](const SerializableDataUnit *_unit, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams) {
+            [](const SerializableDataUnit *_unit, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *data) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
-                    Operations<T, Configs...>::writeAction(unit->*P, op, data, outStreams, unit);
+                    Operations<T, Configs...>::writeAction(unit->*P, outStreams, data, unit);
                 else
                     throw "Unsupported";
             },
-            [](const SerializableDataUnit *_unit, int op, const void *data, BufferedOutStream *out) {
+            [](const SerializableDataUnit *_unit, BufferedOutStream &out, const void *data) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
-                    Operations<T, Configs...>::writeRequest(unit->*P, op, data, out, unit);
+                    Operations<T, Configs...>::writeRequest(unit->*P, out, data, unit);
                 else
                     throw "Unsupported";
             }
@@ -204,38 +204,38 @@ namespace Serialize {
             []() {
                 return OffsetPtr<Unit, T> { P }.template offset<SerializableDataUnit>();
             },
-            [](const SerializableUnitBase *_unit, SerializeOutStream &out, const char *name) {
+            [](const SerializableDataUnit *_unit, SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
 
             },
-            [](SerializableUnitBase *_unit, SerializeInStream &in, const char *name) {
+            [](SerializableDataUnit *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) {
 
             },
-            [](SerializableUnitBase *_unit, SerializeInStream &in, PendingRequest *request) {
+            [](SerializableDataUnit *_unit, SerializeInStream &in, PendingRequest *request) {
                 Unit *unit = static_cast<Unit *>(_unit);
                 Operations<T, Configs...>::readAction(unit->*P, in, request, unit);
             },
-            [](SerializableUnitBase *_unit, BufferedInOutStream &inout, TransactionId id) {
+            [](SerializableDataUnit *_unit, BufferedInOutStream &inout, TransactionId id) {
                 Unit *unit = static_cast<Unit *>(_unit);
                 Operations<T, Configs...>::readRequest(unit->*P, inout, id, unit);
             },
-            [](SerializableUnitBase *unit, SerializeInStream &in) {
+            [](SerializableDataUnit *unit, SerializeInStream &in) {
             },
-            [](SerializableUnitBase *unit, bool b) {
+            [](SerializableDataUnit *unit, bool b) {
                 //UnitHelper<T>::setItemDataSynced(static_cast<Unit *>(unit)->*P, b);
             },
-            [](SerializableUnitBase *unit, bool active, bool existenceChanged) {
+            [](SerializableDataUnit *unit, bool active, bool existenceChanged) {
                 //UnitHelper<T>::setItemActive(static_cast<Unit *>(unit)->*P, b);
             },
-            [](SerializableUnitBase *unit) {
+            [](SerializableDataUnit *unit) {
                 //UnitHelper<T>::setItemParent(static_cast<Unit *>(unit)->*P, unit);
             },
-            [](const SerializableUnitBase *_unit, int op, const void *data, const std::set<BufferedOutStream *, CompareStreamId> &outStreams) {
+            [](const SerializableDataUnit *_unit, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *data) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
-                Operations<T, Configs...>::writeAction(unit->*P, op, data, outStreams, unit);
+                Operations<T, Configs...>::writeAction(unit->*P, outStreams, data, unit);
             },
-            [](const SerializableUnitBase *_unit, int op, const void *data, BufferedOutStream *out) {
+            [](const SerializableDataUnit *_unit, BufferedOutStream &out, const void *data) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
-                Operations<T, Configs...>::writeRequest(unit->*P, op, data, out, unit);
+                Operations<T, Configs...>::writeRequest(unit->*P, out, data, unit);
             }
         };
     }

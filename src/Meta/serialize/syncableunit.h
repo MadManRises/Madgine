@@ -43,7 +43,7 @@ namespace Serialize {
 
     private:
         std::set<BufferedOutStream *, CompareStreamId> getMasterMessageTargets() const;
-        BufferedOutStream *getSlaveMessageTarget() const;
+        BufferedOutStream &getSlaveMessageTarget() const;
 
         void clearSlaveId(SerializeManager *mgr);
 

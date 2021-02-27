@@ -136,8 +136,11 @@ std::pair<SocketId, SocketAPIResult> SocketAPI::accept(SocketId s, TimeOut timeo
     struct timeval tv;
     fd_set readfds;
 
-    if (timeout.isInfinite()) {
+    if (timeout.isZero()) {
         tv.tv_sec = 0;
+        tv.tv_usec = 0;
+    }else  if (timeout.isInfinite()) {
+        tv.tv_sec = std::numeric_limits<long>::max();
         tv.tv_usec = 0;
     } else {
         std::chrono::milliseconds remainder = std::chrono::duration_cast<std::chrono::milliseconds>(timeout.remainder());

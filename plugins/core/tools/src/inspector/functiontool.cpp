@@ -146,8 +146,8 @@ namespace Tools {
                 }
 
                 ImGui::PopID();
-                ImGui::SameLine();
-                ImGui::Text(function.mMethod.mTable->mArguments[i].mType.toString()); //TODO: Hover only
+                if(ImGui::IsItemHovered())
+                    ImGui::SetTooltip("%s", function.mMethod.mTable->mArguments[i].mType.toString().c_str());
             }
 
             ImGui::Text(")");

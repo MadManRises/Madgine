@@ -26,10 +26,11 @@ namespace Network {
 
         void close();
 
-        NetworkManagerResult acceptConnection(TimeOut timeout);
-        int acceptConnections(int limit = -1);
+        NetworkManagerResult acceptConnection(TimeOut timeout = {});
+        int acceptConnections(int limit = -1, TimeOut timeout = 0ms);
 
         bool isConnected() const;
+        bool isServer() const;
 
         NetworkManagerResult moveMasterStream(Serialize::ParticipantId streamId,
             NetworkManager *target);
@@ -42,9 +43,7 @@ namespace Network {
         NetworkManagerResult recordSocketError(SocketAPIResult error);
 
     private:
-        SocketId mSocket;
-
-        bool mIsServer;
+        SocketId mSocket, mServerSocket;        
 
         SocketAPIResult mSocketAPIError = SocketAPIResult::SUCCESS;
 

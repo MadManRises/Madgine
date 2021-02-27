@@ -13,7 +13,7 @@ namespace Network {
     NetworkManager::NetworkManager(const std::string &name)
         : SyncManager(name)
         , mSocket(Invalid_Socket)
-        , mIsServer(false)
+        , mServerSocket(Invalid_Socket)
     {
         if (sManagerCount == 0) {
             if (SocketAPI::init() != SocketAPIResult::SUCCESS)
@@ -25,7 +25,7 @@ namespace Network {
     NetworkManager::NetworkManager(NetworkManager &&other) noexcept
         : SyncManager(std::forward<NetworkManager>(other))
         , mSocket(std::exchange(other.mSocket, Invalid_Socket))
-        , mIsServer(std::exchange(other.mIsServer, false))
+        , mServerSocket(std::exchange(other.mServerSocket, Invalid_Socket))
     {
         ++sManagerCount;
     }
@@ -41,20 +41,19 @@ namespace Network {
 
     NetworkManagerResult NetworkManager::startServer(int port)
     {
-        if (isConnected())
+        if (isServer())
             return NetworkManagerResult::ALREADY_CONNECTED;
 
         SocketAPIResult error;
 
-        std::tie(mSocket, error) = SocketAPI::socket(port);
+        std::tie(mServerSocket, error) = SocketAPI::socket(port);
 
-        if (!isConnected()) {
+        if (!isServer()) {
             NetworkManagerResult result = recordSocketError(error);
             mConnectionResult.emit(result);
             return result;
         }
 
-        mIsServer = true;
         return NetworkManagerResult::SUCCESS;
     }
 
@@ -84,23 +83,23 @@ namespace Network {
 
     void NetworkManager::close()
     {
-        if (isConnected()) {
+        if (isConnected() || isServer()) {
             removeAllStreams();
-            if (mIsServer) {
-                SocketAPI::closeSocket(mSocket);
-                mIsServer = false;
+            if (mServerSocket != Invalid_Socket) {
+                SocketAPI::closeSocket(mServerSocket);
+                mServerSocket = Invalid_Socket;
             }
             mSocket = Invalid_Socket;
         }
     }
 
-    int NetworkManager::acceptConnections(int limit)
+    int NetworkManager::acceptConnections(int limit, TimeOut timeout)
     {
         int count = 0;
-        if (isConnected() && mIsServer) {
+        if (isServer()) {
             SocketAPIResult error;
             SocketId sock;
-            std::tie(sock, error) = SocketAPI::accept(mSocket);
+            std::tie(sock, error) = SocketAPI::accept(mServerSocket, timeout);
             while (error != SocketAPIResult::TIMEOUT && (limit == -1 || count < limit)) {
                 if (sock != Invalid_Socket) {
                     if (addMasterStream(Serialize::BufferedInOutStream { std::make_unique<NetworkBuffer>(sock, std::make_unique<Serialize::SafeBinaryFormatter>(), *this, createStreamId()) }) == Serialize::SyncManagerResult::SUCCESS) {
@@ -115,22 +114,27 @@ namespace Network {
 
     NetworkManagerResult NetworkManager::acceptConnection(TimeOut timeout)
     {
-        if (!isConnected() || !mIsServer)
+        if (!isServer())
             return NetworkManagerResult::NO_SERVER;
 
         SocketAPIResult error;
         SocketId sock;
-        std::tie(sock, error) = SocketAPI::accept(mSocket, timeout);
+        std::tie(sock, error) = SocketAPI::accept(mServerSocket, timeout);
         if (sock == Invalid_Socket)
             return recordSocketError(error);
 
         Serialize::BufferedInOutStream stream { std::make_unique<NetworkBuffer>(sock, std::make_unique<Serialize::SafeBinaryFormatter>(), *this, createStreamId()) };
-        return addMasterStream(std::move(stream));        
+        return addMasterStream(std::move(stream));
     }
 
     bool NetworkManager::isConnected() const
     {
         return mSocket != Invalid_Socket;
+    }
+
+    bool NetworkManager::isServer() const
+    {
+        return mServerSocket != Invalid_Socket;
     }
 
     NetworkManagerResult NetworkManager::moveMasterStream(
@@ -151,7 +155,7 @@ namespace Network {
 
     NetworkManagerResult NetworkManager::recordSocketError(SocketAPIResult error)
     {
-        mSocketAPIError = error; 
+        mSocketAPIError = error;
         return NetworkManagerResult::SOCKET_ERROR;
     }
 
