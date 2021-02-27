@@ -5,7 +5,7 @@ namespace Engine {
 typedef std::istream::pos_type pos_type;
 typedef std::istream::off_type off_type;
 
-struct  InStream {
+struct InStream {
     InStream()
         : mStream(nullptr)
     {
@@ -21,8 +21,11 @@ struct  InStream {
     }
     ~InStream()
     {
-        if (mOwning && mStream.rdbuf())
+        if (mOwning) {
+            assert(mStream.rdbuf());
             delete mStream.rdbuf();
+        }
+        mStream.rdbuf(nullptr);
     }
 
     template <typename T>
@@ -72,23 +75,24 @@ struct  InStream {
         }
     }
 
-	std::unique_ptr<std::streambuf> release()
+    std::unique_ptr<std::streambuf> release()
     {
         assert(mOwning);
+        mOwning = false;
         return std::unique_ptr<std::streambuf>(mStream.rdbuf(nullptr));
     }
 
 protected:
-        InStream(std::streambuf *buffer)
-            : mStream(buffer)
-            , mOwning(false)
-        {
-        }
+    InStream(std::streambuf *buffer)
+        : mStream(buffer)
+        , mOwning(false)
+    {
+    }
 
     std::streambuf &buffer() const
-        {
-            return *mStream.rdbuf();
-        }
+    {
+        return *mStream.rdbuf();
+    }
 
     std::istream mStream;
 
@@ -114,7 +118,7 @@ struct OutStream {
     ~OutStream()
     {
         if (mStream.rdbuf())
-            delete mStream.rdbuf();
+            delete mStream.rdbuf(nullptr);
     }
 
     template <typename T>

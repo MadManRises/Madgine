@@ -6,6 +6,7 @@
 #include "Generic/future.h"
 #include "Generic/offsetptr.h"
 #include "Generic/onetimefunctor.h"
+#include "../unithelper.h"
 
 namespace Engine {
 namespace Serialize {
