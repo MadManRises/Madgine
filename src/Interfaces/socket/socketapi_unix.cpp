@@ -38,7 +38,7 @@ int SocketAPI::recv(SocketId id, char *buf, size_t len)
     return ::read(id, buf, len);
 }
 
-int SocketAPI::in_available(SocketID id)
+int SocketAPI::in_available(SocketId id)
 {
     int bytes_available = 0;
     if (ioctl(fd, FIONREAD, &bytes_available) < 0)
