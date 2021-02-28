@@ -8,6 +8,7 @@
 #    include <fcntl.h>
 #    include <netinet/ip.h>
 #    include <netinet/tcp.h>
+#    include <sys/ioctl.h>
 #    include <sys/socket.h>
 #    include <unistd.h>
 
@@ -41,7 +42,7 @@ int SocketAPI::recv(SocketId id, char *buf, size_t len)
 int SocketAPI::in_available(SocketId id)
 {
     int bytes_available = 0;
-    if (ioctl(fd, FIONREAD, &bytes_available) < 0)
+    if (ioctl(id, FIONREAD, &bytes_available) < 0)
         return -1;
     return bytes_available;
 }
