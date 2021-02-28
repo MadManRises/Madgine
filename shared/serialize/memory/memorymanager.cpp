@@ -27,14 +27,14 @@ namespace Memory {
 
     Serialize::SerializeInStream MemoryManager::openRead(ByteBuffer buffer, std::unique_ptr<Serialize::Formatter> format)
     {
-        Serialize::SerializeInStream stream { std::make_unique<MemoryBuffer>(std::move(buffer), std::move(format), *this, createStreamId()) };
-        setSlaveStreambuf(&stream.buffer());
+        Serialize::SerializeInStream stream { std::make_unique<MemoryBuffer>(std::move(buffer)), std::make_unique<Serialize::SerializeStreamData>(std::move(format), *this, createStreamId()) };
+        setSlaveStreamData(&stream.data());
         return stream;
     }
 
     Serialize::SerializeOutStream MemoryManager::openWrite(std::vector<char> &buffer, std::unique_ptr<Serialize::Formatter> format)
     {
-        return { std::make_unique<MemoryBuffer>(buffer, std::move(format), *this, createStreamId()) };
+        return { std::make_unique<MemoryBuffer>(buffer), std::make_unique<Serialize::SerializeStreamData>(std::move(format), *this, createStreamId()) };
     } 
 
 }

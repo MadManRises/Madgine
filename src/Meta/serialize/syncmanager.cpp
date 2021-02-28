@@ -50,16 +50,13 @@ namespace Serialize {
         MessageHeader header;
         stream.readHeader(header);
 
-        if (header.mObject == SERIALIZE_MANAGER) {            
+        if (header.mObject == SERIALIZE_MANAGER) {
             ParticipantId id;
             switch (header.mCmd) {
             case INITIAL_STATE_DONE:
                 mReceivingMasterState = false;
                 stream >> id;
                 stream.setId(id);
-                break;
-            case STREAM_EOF:
-                stream.close();
                 break;
             default:
                 throw SerializeException(
@@ -93,9 +90,9 @@ namespace Serialize {
         std::set<BufferedOutStream *, CompareStreamId> result;
 
         for (const BufferedInOutStream &stream : mMasterStreams) {
-            if (!stream.isClosed()) {
-                result.insert(const_cast<BufferedInOutStream *>(&stream));
-            }
+            //if (!stream.isClosed()) {
+            result.insert(const_cast<BufferedInOutStream *>(&stream));
+            //}
         }
         return result;
     }
@@ -123,8 +120,8 @@ namespace Serialize {
         }
 
         if (sendStateFlag && unit->mSynced) {
-            for (const BufferedInOutStream &stream : mMasterStreams) {
-                this->sendState(const_cast<BufferedInOutStream &>(stream), unit);
+            for (BufferedInOutStream &stream : mMasterStreams) {
+                this->sendState(stream, unit);
             }
         }
         return true;
@@ -162,7 +159,7 @@ namespace Serialize {
     {
         if (mSlaveStream && mSlaveStream->isMessageAvailable())
             return true;
-        for (const BufferedInOutStream &stream : mMasterStreams) {
+        for (BufferedInOutStream &stream : mMasterStreams) {
             if (stream.isMessageAvailable())
                 return true;
         }
@@ -194,7 +191,7 @@ namespace Serialize {
         }
 
         mSlaveStream.emplace(std::move(stream));
-        setSlaveStreambuf(&mSlaveStream->buffer());
+        setSlaveStreamData(&mSlaveStream->data());
 
         if (receiveState) {
             if (state == SyncManagerResult::SUCCESS) {
@@ -205,7 +202,8 @@ namespace Serialize {
                 while (mReceivingMasterState) {
                     int msgCount = -1;
                     if (!receiveMessages(*mSlaveStream, msgCount)) {
-                        state = recordStreamError(mSlaveStream->state());
+                        throw 0;
+                        //state = recordStreamError(mSlaveStream->state());
                         mReceivingMasterState = false;
                     }
                     if (mReceivingMasterState && timeout.expired()) {
@@ -226,7 +224,7 @@ namespace Serialize {
                 bool result = (*it2)->updateManagerType(this, true);
                 assert(result);
             }
-            setSlaveStreambuf(nullptr);
+            setSlaveStreamData(nullptr);
             mSlaveStream.reset();
         }
 
@@ -260,7 +258,8 @@ namespace Serialize {
         }
 
         if (!stream)
-            return recordStreamError(stream.state());
+            throw 0;
+        //return recordStreamError(stream.state());
 
         mMasterStreams.emplace(std::move(stream));
         return SyncManagerResult::SUCCESS;
@@ -273,11 +272,10 @@ namespace Serialize {
         if (it == mMasterStreams.end())
             std::terminate();
         if (SyncManagerResult result = target->addMasterStream(
-                std::move(const_cast<BufferedInOutStream &>(*it)), false);
+                std::move(*it), false);
             result != SyncManagerResult::SUCCESS)
             return result;
-        BufferedInOutStream &stream = const_cast<BufferedInOutStream &>(
-            *target->mMasterStreams.find(streamId));
+        BufferedInOutStream &stream = *target->mMasterStreams.find(streamId);
         std::vector<TopLevelUnitBase *> newTopLevels;
         newTopLevels.reserve(16);
         set_difference(target->getTopLevelUnits().begin(),
@@ -311,7 +309,7 @@ namespace Serialize {
             }
         }
         for (auto it = mMasterStreams.begin(); it != mMasterStreams.end();) {
-            if (!receiveMessages(const_cast<BufferedInOutStream &>(*it), msgCount,
+            if (!receiveMessages(*it, msgCount,
                     timeout)) {
                 it = mMasterStreams.erase(it);
             } else {
@@ -323,12 +321,12 @@ namespace Serialize {
     void SyncManager::sendMessages()
     {
         if (mSlaveStream && !mSlaveStreamInvalid) {
-            if (mSlaveStream->sendMessages() == -1) {
+            if (!mSlaveStream->sendMessages()) {
                 removeSlaveStream();
             }
         }
         for (auto it = mMasterStreams.begin(); it != mMasterStreams.end();) {
-            if (const_cast<BufferedInOutStream &>(*it).sendMessages() == -1) {
+            if (!it->sendMessages()) {
                 it = mMasterStreams.erase(it);
             } else {
                 ++it;
@@ -396,14 +394,14 @@ namespace Serialize {
         int &msgCount, TimeOut timeout)
     {
 
-        while (!stream.isClosed() && ((stream.isMessageAvailable() && msgCount == -1) || msgCount > 0)) {
+        while (stream && ((stream.isMessageAvailable() && msgCount == -1) || msgCount > 0)) {
             while (stream.isMessageAvailable() && msgCount != 0) {
                 //try {
-                    readMessage(stream);
+                readMessage(stream);
                 /*} catch (const SerializeException &e) {
                     LOG_ERROR(e.what());
                 }*/
-                if (msgCount > 0) 
+                if (msgCount > 0)
                     --msgCount;
                 if (!timeout.isZero() && timeout.expired())
                     break;
@@ -412,21 +410,14 @@ namespace Serialize {
                 break;
         }
 
-        return !stream.isClosed();
+        return bool(stream);
     }
 
     bool SyncManager::sendAllMessages(BufferedInOutStream &stream,
         TimeOut timeout)
     {
-        while (int result = stream.sendMessages()) {
-            if (result == -1) {
-                return false;
-            }
-            if (timeout.expired()) {
-                return false;
-            }
-        }
-        return true;
+        //TODO: Use Timeout (possibly pass down)
+        return bool(stream.sendMessages());
     }
 
     BufferedInOutStream *SyncManager::getSlaveStream()
@@ -445,7 +436,10 @@ namespace Serialize {
         return mTopLevelUnits;
     }
 
-    size_t SyncManager::clientCount() const { return mMasterStreams.size(); }
+    size_t SyncManager::clientCount() const
+    {
+        return mMasterStreams.size();
+    }
 
     void SyncManager::sendState(BufferedInOutStream &stream,
         SyncableUnitBase *unit)

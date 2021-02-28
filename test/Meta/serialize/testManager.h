@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Meta/serialize/streams/buffered_streambuf.h"
-
 #include "Meta/serialize/syncmanager.h"
 
 #include "Meta/serialize/formatter/safebinaryformatter.h"
@@ -19,33 +17,33 @@ struct Buffer {
 
 using TestFormatter = Engine::Serialize::SafeBinaryFormatter;
 
-struct BufferedTestBuf : Engine::Serialize::buffered_streambuf {
-    BufferedTestBuf(Buffer &buffer, Engine::Serialize::SyncManager &mgr, Engine::Serialize::ParticipantId id)
-        : buffered_streambuf(std::make_unique<TestFormatter>(), mgr, id)
-        , mBuffer(buffer)
+struct BufferedTestBuf : std::basic_streambuf<char> {
+    BufferedTestBuf(Buffer &buffer, bool isMaster)
+        : mBuffer(buffer)
+        , mIsMaster(isMaster)
     {
     }
 
-    virtual void handleError() override
+    /*virtual void handleError() override
     {        
-    }
+    }*/
 
-    virtual int recv(char *buffer, uint64_t count) override
+    virtual std::streamsize xsgetn(char *buffer, std::streamsize count) override
     {
-        size_t index = isMaster(StreamMode::READ) ? 0 : 1;
+        size_t index = mIsMaster ? 0 : 1;
 
-        uint64_t avail = mBuffer.mWrittenCount[index] - mReadOffset;
-        uint64_t readCount = std::min(count, avail);
+        std::streamsize avail = mBuffer.mWrittenCount[index] - mReadOffset;
+        std::streamsize readCount = std::min(count, avail);
         if (readCount == 0)
-            return -1;
+            return 0;
         std::memcpy(buffer, mBuffer.mBuffer[index].data() + mReadOffset, readCount);
         mReadOffset += readCount;
         return static_cast<int>(readCount);
     }
 
-    virtual int send(char *buffer, uint64_t count) override
+    virtual std::streamsize xsputn(const char *buffer, std::streamsize count) override
     {
-        size_t index = isMaster(StreamMode::WRITE) ? 1 : 0;
+        size_t index = mIsMaster ? 1 : 0;
 
         assert(mBuffer.mWrittenCount[index] + count <= mBuffer.mBuffer[index].size());
         std::memcpy(mBuffer.mBuffer[index].data() + mBuffer.mWrittenCount[index], buffer, count);
@@ -53,38 +51,28 @@ struct BufferedTestBuf : Engine::Serialize::buffered_streambuf {
         return static_cast<int>(count);
     }
 
-    Buffer &mBuffer;
-    uint64_t mReadOffset = 0;
-};
-
-struct TestBuf : Engine::Serialize::SerializeStreambuf {
-    TestBuf(Buffer &buffer, Engine::Serialize::SyncManager &mgr)
-        : SerializeStreambuf(std::make_unique<TestFormatter>())
-        , mBuffer(buffer)
+    virtual std::streamsize showmanyc() override
     {
+        size_t index = mIsMaster ? 0 : 1;
+        return mBuffer.mWrittenCount[index] - mReadOffset;
     }
 
-    TestBuf(Buffer &buffer, Engine::Serialize::SyncManager &mgr, Engine::Serialize::ParticipantId id)
-        : SerializeStreambuf(std::make_unique<TestFormatter>(), mgr, id)
-        , mBuffer(buffer)
+    Buffer &mBuffer;
+    uint64_t mReadOffset = 0;
+    bool mIsMaster;
+};
+
+struct TestBuf : std::basic_streambuf<char> {
+    TestBuf(Buffer &buffer, bool isMaster = true)
+        : mBuffer(buffer)
     {
-        size_t index = isMaster(StreamMode::WRITE) ? 1 : 0;
+        size_t index = isMaster ? 1 : 0;
         setp(mBuffer.mBuffer[index].data(), mBuffer.mBuffer[index].data());
 
         setg(mBuffer.mBuffer[1 - index].data(), mBuffer.mBuffer[1 - index].data(), mBuffer.mBuffer[1 - index].data() + mBuffer.mWrittenCount[1 - index]);
     }
 
-    TestBuf(Buffer &buffer)
-        : SerializeStreambuf(std::make_unique<TestFormatter>())
-        , mBuffer(buffer)
-    {
-        size_t index = 1;
-        setp(mBuffer.mBuffer[index].data(), mBuffer.mBuffer[index].data());
-
-        setg(mBuffer.mBuffer[index].data(), mBuffer.mBuffer[index].data(), mBuffer.mBuffer[index].data() + mBuffer.mWrittenCount[index]);
-    }
-
-    SerializeStreambuf::int_type overflow(int c) override
+    std::basic_streambuf<char>::int_type overflow(int c) override
     {
         if (c != EOF) {
             size_t index = 1;
@@ -99,12 +87,12 @@ struct TestBuf : Engine::Serialize::SerializeStreambuf {
         return traits_type::eof();
     }
 
-    SerializeStreambuf::int_type underflow() override
+    std::basic_streambuf<char>::int_type underflow() override
     {
         size_t index = 1;
         if (mBuffer.mWrittenCount[index] > (egptr() - eback())) {
             setg(eback(), gptr(), eback() + mBuffer.mWrittenCount[index]);
-            SerializeStreambuf::int_type c = *gptr();
+            std::basic_streambuf<char>::int_type c = *gptr();
             //gbump(1);
             return c;
         }
@@ -122,11 +110,12 @@ struct TestManager : Engine::Serialize::SyncManager {
 
     BufferedInOutStream &setBuffer(Buffer &buffer, bool slave, bool shareState = true)
     {
+        std::unique_ptr<BufferedTestBuf> buf = std::make_unique<BufferedTestBuf>(buffer, !slave);
         if (slave) {
-            setSlaveStream(Engine::Serialize::BufferedInOutStream { std::make_unique<BufferedTestBuf>(buffer, *this, 0) }, shareState, std::chrono::milliseconds { 1000 });
+            setSlaveStream(Engine::Serialize::BufferedInOutStream { std::move(buf), std::make_unique<Engine::Serialize::SafeBinaryFormatter>(), *this, 0 }, shareState, std::chrono::milliseconds { 1000 });
             return *getSlaveStream();
         } else {
-            addMasterStream(Engine::Serialize::BufferedInOutStream { std::make_unique<BufferedTestBuf>(buffer, *this, 1) }, shareState);
+            addMasterStream(Engine::Serialize::BufferedInOutStream { std::move(buf), std::make_unique<Engine::Serialize::SafeBinaryFormatter>(), *this, 1 }, shareState);
             return const_cast<BufferedInOutStream &>(*getMasterStreams().find(1));
         }
     }

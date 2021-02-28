@@ -98,7 +98,6 @@ protected:
 
     friend struct OutStream;
 
-private:
     bool mOwning = true;
 };
 

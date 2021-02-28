@@ -5,6 +5,8 @@
 #include "Meta/serialize/container/syncablecontainer.h"
 #include "Meta/serialize/serializableunit.h"
 
+#include "Meta/serialize/streams/serializestreambuf.h"
+
 #include "Meta/serialize/toplevelunit.h"
 
 #include "Meta/serialize/container/noparent.h"
@@ -113,12 +115,12 @@ TEST(Serialize_Container, Array)
     for (size_t i = 0; i < 128; ++i)
         array[i] = 2 * i;
 
-    Buffer buffer2;
+    Buffer buffer;
     SerializeOutStream stream1 {
-        std::make_unique<TestBuf>(buffer2)
+        std::make_unique<TestBuf>(buffer, true), std::make_unique<SerializeStreamData>(std::make_unique<SafeBinaryFormatter>())
     };
     SerializeInStream stream2 {
-        std::make_unique<TestBuf>(buffer2)
+        std::make_unique<TestBuf>(buffer, false), std::make_unique<SerializeStreamData>(std::make_unique<SafeBinaryFormatter>())
     };
 
     stream1 << array;

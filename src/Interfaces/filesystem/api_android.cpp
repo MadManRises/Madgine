@@ -182,25 +182,15 @@ namespace Filesystem {
             return pos_type(off_type(pos));
         }
 
-        int underflow() override
+        std::streamsize xsgetn(char *buffer, std::streamsize count) override;
         {
-            return fetch();
-        }
-
-        int fetch()
-        {
-            int count = AAsset_read(mAsset, mBuffer.data(), BUFFER_SIZE);
-            if (count < 0)
+            std::streamsize readCount = AAsset_read(mAsset, buffer, count);
+            if (readCount < 0)
                 std::terminate();
-            setg(mBuffer.data(), mBuffer.data(), mBuffer.data() + count);
-            if (count == 0)
-                return EOF;
-            return int((unsigned char)(*gptr()));
+            return readCount;
         }
 
     private:
-        static const constexpr size_t BUFFER_SIZE = 100;
-        std::array<char, BUFFER_SIZE> mBuffer;
         AAsset *mAsset;
     };
 

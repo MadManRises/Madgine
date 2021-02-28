@@ -11,7 +11,7 @@ namespace Serialize {
         ~SerializableMapHolder();
 
         SerializableUnitMap mMap;    
-        SerializeStreambuf *mBuffer = nullptr;
+        SerializeStreamData *mData = nullptr;
     };
 
     struct SerializableListHolder {
@@ -22,7 +22,7 @@ namespace Serialize {
         ~SerializableListHolder();
 
         SerializableUnitList mList;
-        SerializeStreambuf *mBuffer = nullptr;
+        SerializeStreamData *mData = nullptr;
     };
 
 }

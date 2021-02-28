@@ -28,7 +28,7 @@ void SocketAPI::closeSocket(SocketId id)
     assert(result == 0);
 }
 
-int SocketAPI::send(SocketId id, char *buf, size_t len)
+int SocketAPI::send(SocketId id, const char *buf, size_t len)
 {
     return ::send(id, buf, len, 0);
 }
@@ -36,6 +36,14 @@ int SocketAPI::send(SocketId id, char *buf, size_t len)
 int SocketAPI::recv(SocketId id, char *buf, size_t len)
 {
     return ::read(id, buf, len);
+}
+
+int SocketAPI::in_available(SocketID id)
+{
+    int bytes_available = 0;
+    if (ioctl(fd, FIONREAD, &bytes_available) < 0)
+        return -1;
+    return bytes_available;
 }
 
 SocketAPIResult SocketAPI::getError(const char *op)
@@ -69,11 +77,11 @@ SocketAPIResult preInitSock(SocketId s)
     if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
         return SocketAPI::getError("setsockopt");
     }
-    #    if LINUX || ANDROID
-        if (setsockopt(s, SOL_TCP, TCP_NODELAY, &on, sizeof(on)) < 0) {
-            return SocketAPI::getError("setsockopt");
-        }
-    #endif
+#        if LINUX || ANDROID
+    if (setsockopt(s, SOL_TCP, TCP_NODELAY, &on, sizeof(on)) < 0) {
+        return SocketAPI::getError("setsockopt");
+    }
+#        endif
 #    endif
 
     return SocketAPIResult::SUCCESS;
@@ -139,7 +147,7 @@ std::pair<SocketId, SocketAPIResult> SocketAPI::accept(SocketId s, TimeOut timeo
     if (timeout.isZero()) {
         tv.tv_sec = 0;
         tv.tv_usec = 0;
-    }else  if (timeout.isInfinite()) {
+    } else if (timeout.isInfinite()) {
         tv.tv_sec = std::numeric_limits<long>::max();
         tv.tv_usec = 0;
     } else {
@@ -153,11 +161,11 @@ std::pair<SocketId, SocketAPIResult> SocketAPI::accept(SocketId s, TimeOut timeo
 
     int retval = select(s + 1, &readfds, NULL, NULL, &tv);
     if (retval > 0) {
-#if OSX || IOS
+#    if OSX || IOS
         int socket = ::accept(s, NULL, NULL);
-#else
+#    else
         int socket = accept4(s, NULL, NULL, O_NONBLOCK);
-#endif
+#    endif
         if (socket >= 0)
             return { socket, SocketAPIResult::SUCCESS };
         else

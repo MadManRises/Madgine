@@ -8,9 +8,10 @@ namespace Serialize {
     struct META_EXPORT SerializeInStream : InStream {
     public:
         SerializeInStream();
-        SerializeInStream(std::unique_ptr<SerializeStreambuf> &&buffer);
+        SerializeInStream(std::unique_ptr<std::basic_streambuf<char>> buffer, std::unique_ptr<SerializeStreamData> data);
         SerializeInStream(SerializeInStream &&other);
         SerializeInStream(SerializeInStream &&other, SerializeManager *mgr);
+        ~SerializeInStream();
 
         template <typename T>
         SerializeInStream &operator>>(T &t);
@@ -79,7 +80,7 @@ namespace Serialize {
 
         bool isMaster();
 
-        SerializeStreambuf &buffer() const;
+        SerializeStreamData &data() const;
 
         void setNextFormattedStringDelimiter(char c);
 
@@ -87,18 +88,20 @@ namespace Serialize {
         void startSerializableRead(SerializableListHolder *list);
 
     protected:
-        SerializeInStream(SerializeStreambuf *buffer);
+        SerializeInStream(std::basic_streambuf<char> *buffer, SerializeStreamData *data);
 
     protected:
         char mNextFormattedStringDelimiter = 0;
+        SerializeStreamData *mData;
     };
 
     struct META_EXPORT SerializeOutStream : OutStream {
     public:
         SerializeOutStream();
-        SerializeOutStream(std::unique_ptr<SerializeStreambuf> &&buffer);
+        SerializeOutStream(std::unique_ptr<std::basic_streambuf<char>> buffer, std::unique_ptr<SerializeStreamData> data);
         SerializeOutStream(SerializeOutStream &&other);
         SerializeOutStream(SerializeOutStream &&other, SerializeManager *mgr);
+        ~SerializeOutStream();
 
         ParticipantId id() const;
 
@@ -144,13 +147,14 @@ namespace Serialize {
 
         bool isMaster();
 
-        SerializeStreambuf &buffer() const;
+        SerializeStreamData &data() const;
 
         SerializableUnitMap &serializableMap();
         void startSerializableWrite(SerializableMapHolder *map);
 
+    protected:
+        std::unique_ptr<SerializeStreamData> mData;
     };
 
 }
 }
-

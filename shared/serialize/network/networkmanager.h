@@ -1,8 +1,6 @@
 #pragma once
 
 #include "Meta/serialize/syncmanager.h"
-#include "Modules/threading/signal.h"
-#include "Modules/threading/slot.h"
 #include "networkbuffer.h"
 
 namespace Engine {
@@ -35,8 +33,6 @@ namespace Network {
         NetworkManagerResult moveMasterStream(Serialize::ParticipantId streamId,
             NetworkManager *target);
 
-        Threading::SignalStub<NetworkManagerResult> &connectionResult();
-
         SocketAPIResult getSocketAPIError() const;
 
     protected:
@@ -46,13 +42,6 @@ namespace Network {
         SocketId mSocket, mServerSocket;        
 
         SocketAPIResult mSocketAPIError = SocketAPIResult::SUCCESS;
-
-        //std::map<Serialize::ParticipantId, NetworkStream> mStreams;
-        //std::unique_ptr<NetworkStream> mSlaveStream;
-
-        //static constexpr UINT sMessageSignature = 1048;
-
-        Threading::Signal<NetworkManagerResult> mConnectionResult;
     };
 }
 }

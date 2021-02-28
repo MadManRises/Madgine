@@ -6,17 +6,14 @@
 namespace Engine {
 namespace Serialize {
 
-    buffered_streambuf::buffered_streambuf(std::unique_ptr<Formatter> format, SyncManager &mgr, ParticipantId id)
-        : SerializeStreambuf(std::move(format), mgr, id)
-        , mIsClosed(false)
-        , mBytesToRead(sizeof(BufferedMessageHeader))
+    buffered_streambuf::buffered_streambuf(std::unique_ptr<std::basic_streambuf<char>> buffer)
+        : mBytesToRead(sizeof(BufferedMessageHeader))
+        , mBuffer(std::move(buffer))
     {
-        extend();
     }
 
     buffered_streambuf::buffered_streambuf(buffered_streambuf &&other) noexcept
-        : SerializeStreambuf(std::move(other))
-        , mIsClosed(other.mIsClosed)
+        : std::basic_streambuf<char>(std::move(other))
         , mBytesToRead(other.mBytesToRead)
         , mReceiveMessageHeader(other.mReceiveMessageHeader)
         , mRecBuffer(std::forward<std::vector<char>>(other.mRecBuffer))
@@ -26,7 +23,6 @@ namespace Serialize {
         setg(mRecBuffer.data(), mRecBuffer.data() + (other.gptr() - other.eback()), mRecBuffer.data() + mRecBuffer.size());
         setp(mSendBuffer.data(), mSendBuffer.data() + mSendBuffer.size());
         pbump(static_cast<int>(other.pptr() - other.pbase()));
-        other.mIsClosed = true;
     }
 
     buffered_streambuf::~buffered_streambuf()
@@ -70,23 +66,12 @@ namespace Serialize {
         return pos_type(off_type(-1));
     }
 
-    bool buffered_streambuf::isClosed()
-    {
-        return mState != StreamState::OK;
-    }
-
-    void buffered_streambuf::close(StreamState cause)
-    {
-        assert(!isClosed());
-        assert(cause != StreamState::OK);
-        mState = cause;
-    }
-
     void buffered_streambuf::extend()
     {
         if (mSendBuffer.empty()) {
             mSendBuffer.resize(128);
             setp(mSendBuffer.data(), mSendBuffer.data() + mSendBuffer.size());
+            pbump(sizeof(BufferedMessageHeader));
         } else {
             size_t index = pptr() - pbase();
             mSendBuffer.resize(2 * mSendBuffer.capacity());
@@ -95,17 +80,7 @@ namespace Serialize {
         }
     }
 
-    bool buffered_streambuf::isMessageAvailable()
-    {
-        if (isClosed())
-            return false;
-        if (!mRecBuffer.empty() && mBytesToRead == 0 && gptr() == eback())
-            return true;
-        receive();
-        return !mRecBuffer.empty() && mBytesToRead == 0 && gptr() == eback();
-    }
-
-    PendingRequest *buffered_streambuf::fetchRequest(TransactionId id)
+    PendingRequest *BufferedStreamData::fetchRequest(TransactionId id)
     {
         if (id == 0)
             return nullptr;
@@ -113,7 +88,7 @@ namespace Serialize {
         return &mPendingRequests.front();
     }
 
-    void buffered_streambuf::popRequest(TransactionId id)
+    void BufferedStreamData::popRequest(TransactionId id)
     {
         assert(id != 0);
         assert(mPendingRequests.front().mId == id);
@@ -133,10 +108,16 @@ namespace Serialize {
 
     int buffered_streambuf::sync()
     {
-        return sendMessages() == 0 ? 0 : -1; // TODO return value
+        if (sendMessages() < 0)
+            return -1;
+        if (mBuffer->pubsync() < 0)
+            return -1;
+        if (receiveMessages() < 0)
+            return -1;
+        return 0;
     }
 
-    TransactionId buffered_streambuf::createRequest(ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback)
+    TransactionId BufferedStreamData::createRequest(ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback)
     {
         if (requesterTransactionId == 0 && !callback)
             return 0;
@@ -149,65 +130,29 @@ namespace Serialize {
 
     void buffered_streambuf::beginMessage()
     {
-        if (mIsClosed)
-            return;
-        if (pptr() != pbase())
-            std::terminate();
+        assert(pptr() == pbase());
     }
 
     void buffered_streambuf::endMessage()
     {
-        if (mIsClosed)
-            return;
-
         BufferedSendMessage &msg = mBufferedSendMsgs.emplace_back();
-        msg.mHeaderSent = false;
-        msg.mBytesSent = 0;
-        msg.mHeader.mMsgSize = pptr() - pbase();
-        mSendBuffer.resize(msg.mHeader.mMsgSize);
+        BufferedMessageHeader *header = reinterpret_cast<BufferedMessageHeader*>(mSendBuffer.data());
+        header->mMsgSize = pptr() - pbase() - sizeof(BufferedMessageHeader);
+        mSendBuffer.resize(pptr() - pbase());
         mSendBuffer.shrink_to_fit();
         mSendBuffer.swap(msg.mData);
-
-        extend();
+        setp(nullptr, nullptr);
     }
 
-    int buffered_streambuf::sendMessages()
+    std::streamsize buffered_streambuf::sendMessages()
     {
-        if (mIsClosed)
-            return -1;
         for (auto it = mBufferedSendMsgs.begin(); it != mBufferedSendMsgs.end(); it = mBufferedSendMsgs.erase(it)) {
-            if (!it->mHeaderSent) {
-                int num = send(reinterpret_cast<char *>(&it->mHeader), sizeof it->mHeader);
-                if (num == -1) {
-                    handleError();
-                    return mIsClosed ? -1 : static_cast<int>(mBufferedSendMsgs.size());
-                }
-                if (num != sizeof it->mHeader) {
-                    std::terminate();
-                }
-                it->mHeaderSent = true;
-            }
-            while (it->mBytesSent < it->mHeader.mMsgSize) {
-
-                size_t count = it->mHeader.mMsgSize - it->mBytesSent;
-                int num = send(it->mData.data() + it->mBytesSent, count);
-                if (num == 0) {
-                    close(StreamState::SEND_FAILURE);
-                    return -1;
-                }
-                if (num == -1) {
-                    handleError();
-                    return mIsClosed ? -1 : static_cast<int>(mBufferedSendMsgs.size());
-                }
-                it->mBytesSent += num;
+            int num = mBuffer->sputn(it->mData.data(), it->mData.size());
+            if (num != it->mData.size()) {
+                return -1;
             }
         }
         return 0;
-    }
-
-    StreamState buffered_streambuf::state() const
-    {
-        return mState;
     }
 
     buffered_streambuf::int_type buffered_streambuf::underflow()
@@ -215,8 +160,16 @@ namespace Serialize {
         return traits_type::eof();
     }
 
-    void buffered_streambuf::receive()
+    std::streamsize buffered_streambuf::showmanyc()
     {
+        if (receiveMessages() < 0)
+            return -1;
+        return egptr() - gptr();
+    }
+
+    std::streamsize buffered_streambuf::receiveMessages()
+    {
+        int readCount = 0;
         if (!mRecBuffer.empty() && mBytesToRead == 0) {
             if (gptr() != egptr()) {
                 throw 0; //LOG_WARNING("Message not fully read! (" << manager()->name() << ")");
@@ -226,42 +179,56 @@ namespace Serialize {
         }
         if (mRecBuffer.empty()) {
             assert(mBytesToRead > 0);
-            int num = recv(reinterpret_cast<char *>(&mReceiveMessageHeader + 1) - mBytesToRead, mBytesToRead);
-            if (num == 0) {
-                close(StreamState::RECEIVE_FAILURE);
-                return;
-            }
-            if (num == -1) {
-                handleError();
-                return;
-            }
-            mBytesToRead -= num;
-            if (mBytesToRead == 0) {
-                mBytesToRead = mReceiveMessageHeader.mMsgSize;
-                mRecBuffer.resize(mBytesToRead);
+            std::streamsize avail = mBuffer->in_avail();
+            if (avail < 0) {
+                return avail;
+            } else {
+                if (avail > mBytesToRead) {
+                    avail = mBytesToRead;
+                }
+                int num = mBuffer->sgetn(reinterpret_cast<char *>(&mReceiveMessageHeader + 1) - mBytesToRead, avail);
+                if (num != avail) {
+                    return -1;
+                }
+                readCount += num;
+                mBytesToRead -= num;
+                if (mBytesToRead == 0) {
+                    mBytesToRead = mReceiveMessageHeader.mMsgSize;
+                    mRecBuffer.resize(mBytesToRead);
+                }
             }
         }
 
         if (!mRecBuffer.empty() && mBytesToRead > 0) {
-            int num = recv(mRecBuffer.data() + mReceiveMessageHeader.mMsgSize - mBytesToRead, mBytesToRead);
-            if (num == 0) {
-                close(StreamState::RECEIVE_FAILURE);
-                return;
-            }
-            if (num == -1) {
-                handleError();
-                return;
-            }
-            mBytesToRead -= num;
-            if (mBytesToRead == 0) {
-                setg(mRecBuffer.data(), mRecBuffer.data(), mRecBuffer.data() + mReceiveMessageHeader.mMsgSize);
+            std::streamsize avail = mBuffer->in_avail();
+            if (avail < 0) {
+                return avail;
+            } else {
+                if (avail > mBytesToRead) {
+                    avail = mBytesToRead;
+                }
+                int num = mBuffer->sgetn(mRecBuffer.data() + mReceiveMessageHeader.mMsgSize - mBytesToRead, avail);
+                if (num != avail) {
+                    return -1;
+                }
+                readCount += num;
+                mBytesToRead -= num;
+                if (mBytesToRead == 0) {
+                    setg(mRecBuffer.data(), mRecBuffer.data(), mRecBuffer.data() + mReceiveMessageHeader.mMsgSize);
+                }
             }
         }
+        return readCount;
     }
 
-    SyncManager *buffered_streambuf::manager()
+    BufferedStreamData::BufferedStreamData(std::unique_ptr<Formatter> format, SyncManager &mgr, ParticipantId id)
+        : SerializeStreamData(std::move(format), mgr, id)
     {
-        return static_cast<SyncManager *>(SerializeStreambuf::manager());
+    }
+
+    SyncManager *BufferedStreamData::manager()
+    {
+        return static_cast<SyncManager *>(SerializeStreamData::manager());
     }
 
 }

@@ -8,12 +8,12 @@ namespace Serialize {
         WRITE
     };
 
-    struct META_EXPORT SerializeStreambuf : std::basic_streambuf<char> {
+    struct META_EXPORT SerializeStreamData {
     public:
-        SerializeStreambuf(std::unique_ptr<Formatter> format);
-        SerializeStreambuf(SerializeStreambuf &&);
-        SerializeStreambuf(std::unique_ptr<Formatter> format, SerializeManager &mgr, ParticipantId id);
-        virtual ~SerializeStreambuf();
+        SerializeStreamData(std::unique_ptr<Formatter> format);
+        SerializeStreamData(SerializeStreamData &&) = delete;
+        SerializeStreamData(std::unique_ptr<Formatter> format, SerializeManager &mgr, ParticipantId id);
+        virtual ~SerializeStreamData();
 
         void setManager(SerializeManager *mgr);
         SerializeManager *manager();

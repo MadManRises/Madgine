@@ -62,7 +62,8 @@ namespace Serialize {
     struct MessageHeader;
     struct SerializeManager;
     struct SyncManager;
-    struct SerializeStreambuf;
+    struct SerializeStreamData;
+    struct BufferedStreamData;
 
     struct SerializableUnitPtr;
     struct SerializableUnitConstPtr;
@@ -107,8 +108,7 @@ namespace Serialize {
     };
 
     enum Command {
-        INITIAL_STATE_DONE,
-        STREAM_EOF
+        INITIAL_STATE_DONE
     };
 }
 

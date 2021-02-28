@@ -9,11 +9,11 @@ namespace Serialize {
     struct META_EXPORT BufferedInStream : SerializeInStream {
         friend struct BufferedOutStream;
 
-        BufferedInStream(std::unique_ptr<buffered_streambuf> &&buffer);
+        BufferedInStream(std::unique_ptr<std::basic_streambuf<char>> buffer, std::unique_ptr<BufferedStreamData> data);
         BufferedInStream(BufferedInStream &&other);
         BufferedInStream(BufferedInStream &&other, SerializeManager *mgr);
 
-        bool isMessageAvailable() const;
+        bool isMessageAvailable();
 
         void readHeader(MessageHeader &header);
 
@@ -23,14 +23,16 @@ namespace Serialize {
         void popRequest(TransactionId id);
 
     protected:
-        BufferedInStream(buffered_streambuf *buffer);
+        BufferedInStream(buffered_streambuf *buffer, BufferedStreamData *data);
+        BufferedInStream(std::unique_ptr<buffered_streambuf> buffer, std::unique_ptr<BufferedStreamData> data);
 
+        BufferedStreamData &data() const;
         buffered_streambuf &buffer() const;
     };
 
     struct META_EXPORT BufferedOutStream : SerializeOutStream {
     public:
-        BufferedOutStream(std::unique_ptr<buffered_streambuf> &&buffer);
+        BufferedOutStream(std::unique_ptr<std::basic_streambuf<char>> buffer, std::unique_ptr<BufferedStreamData> data);
         BufferedOutStream(BufferedOutStream &&other);
         BufferedOutStream(BufferedOutStream &&other, SerializeManager *mgr);
 
@@ -38,7 +40,7 @@ namespace Serialize {
         void beginMessage(Command cmd);
         void endMessage();
 
-        int sendMessages();
+        BufferedOutStream &sendMessages();
 
         template <typename... _Ty>
         void writeCommand(Command cmd, const _Ty &... args)
@@ -55,25 +57,29 @@ namespace Serialize {
         TransactionId createRequest(ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback);
 
     protected:
+        BufferedOutStream(std::unique_ptr<buffered_streambuf> buffer, std::unique_ptr<BufferedStreamData> data);
+
+        BufferedStreamData &data() const;
         buffered_streambuf &buffer() const;
     };
 
     struct META_EXPORT BufferedInOutStream : BufferedInStream,
-                                                BufferedOutStream {
+                                             BufferedOutStream {
         friend struct SerializeManager;
 
-        BufferedInOutStream(std::unique_ptr<buffered_streambuf> &&buffer);
+        BufferedInOutStream(std::unique_ptr<std::basic_streambuf<char>> buffer, std::unique_ptr<BufferedStreamData> data);
+        BufferedInOutStream(std::unique_ptr<std::basic_streambuf<char>> buffer, std::unique_ptr<Formatter> format, SyncManager &mgr, ParticipantId id = 0);
         BufferedInOutStream(BufferedInOutStream &&other);
         BufferedInOutStream(BufferedInOutStream &&other, SerializeManager *mgr);
 
-        StreamState state() const;
-        bool isClosed() const;
-        void close();
-
         explicit operator bool() const;
 
-        using BufferedInStream::id;
         using BufferedInStream::buffer;
+        using BufferedInStream::data;
+        using BufferedInStream::id;
+
+    protected:
+        BufferedInOutStream(std::unique_ptr<buffered_streambuf> buffer, std::unique_ptr<BufferedStreamData> data);
     };
 } // namespace Serialize
 } // namespace Engine

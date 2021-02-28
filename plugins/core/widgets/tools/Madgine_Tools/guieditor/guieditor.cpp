@@ -22,7 +22,6 @@
 #include "project/projectmanager.h"
 
 #include "Meta/serialize/streams/serializestream.h"
-#include "Meta/serialize/streams/wrappingserializestreambuf.h"
 
 #include "serialize/xml/xmllib.h"
 #include "serialize/xml/xmlformatter.h"
@@ -39,6 +38,8 @@
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 #include "Meta/keyvalue/valuetype.h"
+
+#include "Meta/serialize/streams/serializestreambuf.h"
 
 UNIQUECOMPONENT(Engine::Tools::GuiEditor);
 
@@ -126,7 +127,7 @@ namespace Tools {
 
         auto buf = std::make_unique<std::filebuf>();
         buf->open(filePath.str(), std::ios::out);
-        Serialize::SerializeOutStream out { std::make_unique<Serialize::WrappingSerializeStreambuf>(std::move(buf), std::make_unique<XML::XMLFormatter>()) };
+        Serialize::SerializeOutStream out { std::move(buf), std::make_unique<Serialize::SerializeStreamData>(std::make_unique<XML::XMLFormatter>()) };
 
         mWindow->writeState(out);
     }

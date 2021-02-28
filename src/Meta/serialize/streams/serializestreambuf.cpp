@@ -11,84 +11,80 @@
 namespace Engine {
 namespace Serialize {
 
-    SerializeStreambuf::SerializeStreambuf(std::unique_ptr<Formatter> format)
+    SerializeStreamData::SerializeStreamData(std::unique_ptr<Formatter> format)
         : mFormatter(std::move(format))
     {
     }
 
-    SerializeStreambuf::SerializeStreambuf(SerializeStreambuf &&)
-    {
-    }
-
-    SerializeStreambuf::SerializeStreambuf(std::unique_ptr<Formatter> format, SerializeManager &mgr, ParticipantId id)
+    SerializeStreamData::SerializeStreamData(std::unique_ptr<Formatter> format, SerializeManager &mgr, ParticipantId id)
         : mManager(&mgr)
         , mId(id)
         , mFormatter(std::move(format))
     {
     }
 
-    SerializeStreambuf::~SerializeStreambuf()
+    SerializeStreamData::~SerializeStreamData()
     {
     }
 
-    void SerializeStreambuf::setManager(SerializeManager *mgr)
+    void SerializeStreamData::setManager(SerializeManager *mgr)
     {
         mManager = mgr;
     }
 
-    SerializeManager *SerializeStreambuf::manager()
+    SerializeManager *SerializeStreamData::manager()
     {
         return mManager;
     }
 
-    Formatter &SerializeStreambuf::format() const
+    Formatter &SerializeStreamData::format() const
     {
         return *mFormatter;
     }
 
-    SerializableUnitList &SerializeStreambuf::serializableList()
+    SerializableUnitList &SerializeStreamData::serializableList()
     {
         assert(mSerializableList);
         return *mSerializableList;
     }
 
-    void SerializeStreambuf::startSerializableRead(SerializableListHolder *list)
+    void SerializeStreamData::startSerializableRead(SerializableListHolder *list)
     {
-        assert(!list->mBuffer);
+        assert(!list->mData);
         if (!mSerializableList) {
-            list->mBuffer = this;
+            list->mData = this;
             mSerializableList = &list->mList;
         }
     }
 
-    SerializableUnitMap &SerializeStreambuf::serializableMap()
+    SerializableUnitMap &SerializeStreamData::serializableMap()
     {
         assert(mSerializableMap);
         return *mSerializableMap;
     }
 
-    void SerializeStreambuf::startSerializableWrite(SerializableMapHolder *map)
+    void SerializeStreamData::startSerializableWrite(SerializableMapHolder *map)
     {
-        assert(!map->mBuffer);
+        assert(!map->mData);
         if (!mSerializableMap) {
-            map->mBuffer = this;
+            map->mData = this;
             mSerializableMap = &map->mMap;
         }
     }
 
-    bool SerializeStreambuf::isMaster(StreamMode mode)
+    bool SerializeStreamData::isMaster(StreamMode mode)
     {
         if (mManager)
             return mManager->isMaster(this);
         return mode == StreamMode::WRITE;
     }
 
-    ParticipantId SerializeStreambuf::id() const
+    ParticipantId SerializeStreamData::id() const
     {
         return mId;
     }
 
-    void SerializeStreambuf::setId(ParticipantId id)
+    void SerializeStreamData::setId(ParticipantId id)
     {
         mId = id;
     }

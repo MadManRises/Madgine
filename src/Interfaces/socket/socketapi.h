@@ -27,8 +27,10 @@ namespace Engine {
         static std::pair<SocketId, SocketAPIResult> accept(SocketId s, TimeOut timeout = {});
         static std::pair<SocketId, SocketAPIResult> connect(const std::string &url, int portNr);
 
-        static int send(SocketId id, char *buf, size_t len);
+        static int send(SocketId id, const char *buf, size_t len);
         static int recv(SocketId id, char *buf, size_t len);
+
+        static int in_available(SocketId id);
 
         static SocketAPIResult getError(const char *operation);
         static int getOSError();

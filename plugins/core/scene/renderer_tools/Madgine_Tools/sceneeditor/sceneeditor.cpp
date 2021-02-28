@@ -41,7 +41,6 @@
 #include "serialize/filesystem/filesystemlib.h"
 #include "serialize/filesystem/filemanager.h"
 
-#include "Meta/serialize/streams/wrappingserializestreambuf.h"
 
 #include "Meta/serialize/formatter/safebinaryformatter.h"
 

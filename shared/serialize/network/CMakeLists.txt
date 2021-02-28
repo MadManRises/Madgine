@@ -4,7 +4,7 @@ set(sources networkbuffer.cpp networkbuffer.h networkmanager.cpp networkmanager.
 	
 add_workspace_library(Network ${sources} SOURCE_ROOT ../..)
 
-target_link_libraries(Network PUBLIC Meta Modules)
+target_link_libraries(Network PUBLIC Meta Interfaces)
 
 install_to_workspace(Madgine EXPORT_LIB TARGETS Network)
 

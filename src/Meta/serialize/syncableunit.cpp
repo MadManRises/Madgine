@@ -73,7 +73,7 @@ namespace Serialize {
             UnitId id;
             read(in, id, "syncId");
 
-            if (in.manager() && in.manager()->getSlaveStreambuf() == &in.buffer()) {
+            if (in.manager() && in.manager()->getSlaveStreamData() == &in.data()) {
                 setSlaveId(id, in.manager());
                 if (serializeType()->mIsTopLevelUnit) {
                     static_cast<TopLevelUnitBase *>(this)->setStaticSlaveId(id);

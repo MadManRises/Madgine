@@ -6,17 +6,16 @@
 
 namespace Engine {
 namespace Network {
-    NetworkBuffer::NetworkBuffer(SocketId socket, std::unique_ptr<Serialize::Formatter> format, Serialize::SyncManager &mgr, Serialize::ParticipantId id)
-        : buffered_streambuf(std::move(format), mgr, id)
-        , mSocket(socket)
+    NetworkBuffer::NetworkBuffer(SocketId socket)
+        : mSocket(socket)
     {
     }
 
-    NetworkBuffer::NetworkBuffer(NetworkBuffer &&other) noexcept
+    /*NetworkBuffer::NetworkBuffer(NetworkBuffer &&other) noexcept
         : buffered_streambuf(std::move(other))
         , mSocket(std::exchange(other.mSocket, Invalid_Socket))
     {
-    }
+    }*/
 
     NetworkBuffer::~NetworkBuffer()
     {
@@ -24,17 +23,38 @@ namespace Network {
             SocketAPI::closeSocket(mSocket);
     }
 
-    int NetworkBuffer::recv(char *buf, uint64_t len)
+    std::streamsize NetworkBuffer::xsgetn(char *buf, std::streamsize len)
     {
-        return SocketAPI::recv(mSocket, buf, len);
+        int result = SocketAPI::recv(mSocket, buf, len);
+        if (result == -1) {
+            switch (SocketAPI::getError("recv")) {
+            case SocketAPIResult::WOULD_BLOCK:
+                return 0;
+            default:
+                return 0;
+            }
+        }
+        return result;
     }
 
-    int NetworkBuffer::send(char *buf, uint64_t len)
+    std::streamsize NetworkBuffer::xsputn(const char *buf, std::streamsize len)
     {
-        return SocketAPI::send(mSocket, buf, len);
+        int result = SocketAPI::send(mSocket, buf, len);
+        if (result == -1) {
+            switch (SocketAPI::getError("recv")) {
+            default:
+                return 0;
+            }
+        }
+        return result;
     }
-    
-    void NetworkBuffer::handleError()
+
+    std::streamsize NetworkBuffer::showmanyc()
+    {
+        return SocketAPI::in_available(mSocket);
+    }
+
+    /*void NetworkBuffer::handleError()
     {
         switch (SocketAPI::getError("unknown")) {
         case SocketAPIResult::WOULD_BLOCK:
@@ -42,6 +62,6 @@ namespace Network {
         default:
             close(Serialize::StreamState::UNKNOWN_ERROR);
         }
-    }
+    }*/
 }
 }

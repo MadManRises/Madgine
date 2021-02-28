@@ -6,27 +6,24 @@
 
 namespace Engine {
 namespace Memory {
-    MemoryBuffer::MemoryBuffer(std::vector<char> &buffer, std::unique_ptr<Serialize::Formatter> format, Serialize::SerializeManager &mgr, Serialize::ParticipantId id)
-        : SerializeStreambuf(std::move(format), mgr, id)
-        , mWriteBuffer(&buffer)
+    MemoryBuffer::MemoryBuffer(std::vector<char> &buffer)
+        : mWriteBuffer(&buffer)
     {
         //TODO: remove this later
         mWriteBuffer->clear();
     }
 
-    MemoryBuffer::MemoryBuffer(ByteBuffer buffer, std::unique_ptr<Serialize::Formatter> format, Serialize::SerializeManager &mgr, Serialize::ParticipantId id)
-        : SerializeStreambuf(std::move(format), mgr, id)
-        , mReadBuffer(std::move(buffer))
+    MemoryBuffer::MemoryBuffer(ByteBuffer buffer)
+        : mReadBuffer(std::move(buffer))
     {
         setg(
-            const_cast<char *>(static_cast<const char *>(mReadBuffer.mData)), 
-            const_cast<char *>(static_cast<const char *>(mReadBuffer.mData)), 
-            const_cast<char *>(static_cast<const char *>(mReadBuffer.mData) + mReadBuffer.mSize)
-        );
+            const_cast<char *>(static_cast<const char *>(mReadBuffer.mData)),
+            const_cast<char *>(static_cast<const char *>(mReadBuffer.mData)),
+            const_cast<char *>(static_cast<const char *>(mReadBuffer.mData) + mReadBuffer.mSize));
     }
 
     MemoryBuffer::MemoryBuffer(MemoryBuffer &&other) noexcept
-        : SerializeStreambuf(std::move(other))
+        : std::basic_streambuf<char>(std::move(other))
         , mWriteBuffer(std::exchange(other.mWriteBuffer, nullptr))
         , mReadBuffer(std::move(other.mReadBuffer))
     {

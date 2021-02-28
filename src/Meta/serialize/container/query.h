@@ -39,9 +39,9 @@ namespace Serialize {
                     return call(args, requester, requesterTransactionId);
                 } else {
                     std::promise<R> p;
-                    Future<R> f { p.get_future() };
+                    Future<R> fut { p.get_future() };
                     this->writeRequest(&args, requester, requesterTransactionId, oneTimeFunctor([p { std::move(p) }](void *data) mutable { p.set_value(*static_cast<R *>(data)); }));
-                    return f;
+                    return fut;
                 }
             }
         };

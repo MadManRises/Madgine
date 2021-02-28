@@ -53,7 +53,7 @@ namespace Engine {
         assert(result == 0);
     }
 
-    int SocketAPI::send(SocketId id, char *buf, size_t len)
+    int SocketAPI::send(SocketId id, const char *buf, size_t len)
     {
         return ::send(id, buf, static_cast<int>(len), 0);
     }
@@ -61,6 +61,14 @@ namespace Engine {
     int SocketAPI::recv(SocketId id, char *buf, size_t len)
     {
         return ::recv(id, buf, static_cast<int>(len), 0);
+    }
+
+    int SocketAPI::in_available(SocketId id)
+    {
+        u_long bytes_available;
+        if (ioctlsocket(id, FIONREAD, &bytes_available) == SOCKET_ERROR)
+            return -1;
+        return bytes_available;
     }
 
     SocketAPIResult SocketAPI::getError(const char *op)

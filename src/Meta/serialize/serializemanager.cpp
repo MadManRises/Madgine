@@ -25,7 +25,7 @@ namespace Serialize {
 
     SerializeManager::SerializeManager(SerializeManager &&other) noexcept
         : mSlaveMappings(std::move(other.mSlaveMappings))
-        , mSlaveStreambuf(std::exchange(other.mSlaveStreambuf, nullptr))
+        , mSlaveStreamData(std::exchange(other.mSlaveStreamData, nullptr))
         , mFilters(std::move(other.mFilters))
         , mName(std::move(other.mName))
     {
@@ -100,14 +100,14 @@ namespace Serialize {
         }
     }
 
-    bool SerializeManager::isMaster(SerializeStreambuf *stream) const
+    bool SerializeManager::isMaster(SerializeStreamData *stream) const
     {
-        return !mSlaveStreambuf || mSlaveStreambuf != stream;
+        return !mSlaveStreamData || mSlaveStreamData != stream;
     }
 
     bool SerializeManager::isMaster() const
     {
-        return !mSlaveStreambuf;
+        return !mSlaveStreamData;
     }
 
     bool SerializeManager::filter(const SerializableUnitBase *unit,
@@ -132,7 +132,7 @@ namespace Serialize {
     {
         return unit == nullptr
             ? NULL_UNIT_ID
-            : (!mgr || mgr->isMaster(&out.buffer())) ? unit->masterId()
+            : (!mgr || mgr->isMaster(&out.data())) ? unit->masterId()
                                                      : unit->slaveId();
     }
 
@@ -142,7 +142,7 @@ namespace Serialize {
         if (unit == NULL_UNIT_ID)
             return nullptr;
         try {
-            if (mSlaveStreambuf && (&in.buffer() == mSlaveStreambuf)) {
+            if (mSlaveStreamData && (&in.data() == mSlaveStreamData)) {
                 return mSlaveMappings.at(unit);
             } else {
                 return getByMasterId(unit);
@@ -155,16 +155,16 @@ namespace Serialize {
         }
     }
 
-    SerializeStreambuf *SerializeManager::getSlaveStreambuf()
+    SerializeStreamData *SerializeManager::getSlaveStreamData()
     {
-        return mSlaveStreambuf;
+        return mSlaveStreamData;
     }
 
-    void SerializeManager::setSlaveStreambuf(SerializeStreambuf *buf)
+    void SerializeManager::setSlaveStreamData(SerializeStreamData *data)
     {
-        if (mSlaveStreambuf && buf)
+        if (mSlaveStreamData && data)
             std::terminate();
-        mSlaveStreambuf = buf;
+        mSlaveStreamData = data;
     }
 
     ParticipantId SerializeManager::createStreamId() { return ++sRunningStreamId; }

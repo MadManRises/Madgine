@@ -30,7 +30,7 @@ namespace Audio {
         long int ogg_tell();
 
     private:
-        InStream mBase;
+        std::unique_ptr<std::basic_streambuf<char>> mBase;
 
         std::array<char, BUFFER_SIZE> mBuffer;
 

@@ -83,7 +83,7 @@ namespace Audio {
 
     size_t OggDecodeBuf::ogg_read(void *destination, size_t size1, size_t size2)
     {
-        return mBase.readRaw(destination, size1 * size2);
+        return mBase->sgetn(reinterpret_cast<char*>(destination), size1 * size2);
     }
 
     int32_t OggDecodeBuf::ogg_seek(int64_t to, int32_t type)
@@ -103,12 +103,12 @@ namespace Audio {
             std::terminate();
         }
 
-        return mBase.seek(to, dir) ? 0 : -1;
+        return mBase->pubseekoff(to, dir);
     }
 
     long int OggDecodeBuf::ogg_tell()
     {
-        return mBase.tell();
+        return mBase->pubseekoff(0, std::ios_base::cur, std::ios_base::in);;
     }
 
 }

@@ -1,23 +1,23 @@
 #pragma once
 
-#include "Meta/serialize/streams/buffered_streambuf.h"
-
 #include "Interfaces/socket/socketapi.h"
 
 namespace Engine {
 namespace Network {
-    struct MADGINE_NETWORK_EXPORT NetworkBuffer : Serialize::buffered_streambuf {
-        NetworkBuffer(SocketId socket, std::unique_ptr<Serialize::Formatter> format, Serialize::SyncManager &mgr, Serialize::ParticipantId id = 0);
+    struct MADGINE_NETWORK_EXPORT NetworkBuffer : std::basic_streambuf<char> {
+        NetworkBuffer(SocketId socket);
         NetworkBuffer(const NetworkBuffer &) = delete;
-        NetworkBuffer(NetworkBuffer &&other) noexcept;
+        NetworkBuffer(NetworkBuffer &&other) noexcept = delete;
         virtual ~NetworkBuffer();
 
     protected:        
-        void handleError() override;
+        //void handleError() override;
 
-        int recv(char *, uint64_t) override;
+        std::streamsize xsgetn(char *, std::streamsize) override;
 
-        int send(char *, uint64_t) override;
+        std::streamsize xsputn(const char *, std::streamsize) override;
+
+        std::streamsize showmanyc() override;
 
     private:
         SocketId mSocket; // = SOCKET

@@ -22,7 +22,7 @@ namespace Serialize {
         static UnitId updateMasterId(UnitId id, SyncableUnitBase *unit);
         static void deleteMasterId(UnitId id, SyncableUnitBase *unit);
 
-        bool isMaster(SerializeStreambuf *stream) const;
+        bool isMaster(SerializeStreamData *stream) const;
         bool isMaster() const;
 
         bool filter(const SerializableUnitBase *unit, ParticipantId id);
@@ -33,10 +33,10 @@ namespace Serialize {
 
         const std::string &name() const;
 
-		SerializeStreambuf *getSlaveStreambuf();        
+		SerializeStreamData *getSlaveStreamData();        
 
     protected:
-        void setSlaveStreambuf(SerializeStreambuf *buf);
+                void setSlaveStreamData(SerializeStreamData *data);
 
         static ParticipantId createStreamId();
 
@@ -46,7 +46,7 @@ namespace Serialize {
 
         SyncableUnitMap mSlaveMappings;        
 
-		SerializeStreambuf *mSlaveStreambuf = nullptr;
+		SerializeStreamData *mSlaveStreamData = nullptr;
 
         std::list<std::function<bool(const SerializableUnitBase *, ParticipantId)>> mFilters;
 

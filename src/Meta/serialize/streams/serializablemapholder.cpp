@@ -8,17 +8,17 @@ namespace Serialize {
 
     SerializableMapHolder::~SerializableMapHolder()
     {
-        if (mBuffer) {
-            assert(mBuffer->mSerializableMap == &mMap);
-            mBuffer->mSerializableMap = nullptr;
+        if (mData) {
+            assert(mData->mSerializableMap == &mMap);
+            mData->mSerializableMap = nullptr;
         }
     }
 
     SerializableListHolder::~SerializableListHolder()
     {
-        if (mBuffer) {
-            assert(mBuffer->mSerializableList == &mList);
-            mBuffer->mSerializableList = nullptr;
+        if (mData) {
+            assert(mData->mSerializableList == &mList);
+            mData->mSerializableList = nullptr;
         }
     }
 

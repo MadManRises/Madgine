@@ -8,6 +8,8 @@
 
 #include "../messageheader.h"
 
+#include "../formatter.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -35,8 +37,8 @@ namespace Serialize {
         return first.id() < second.id();
     }
 
-    BufferedInStream::BufferedInStream(std::unique_ptr<buffered_streambuf> &&buffer)
-        : SerializeInStream(std::move(buffer))
+    BufferedInStream::BufferedInStream(std::unique_ptr<std::basic_streambuf<char>> buffer, std::unique_ptr<BufferedStreamData> data)
+        : BufferedInStream(std::make_unique<buffered_streambuf>(std::move(buffer)), std::move(data))
     {
     }
 
@@ -50,31 +52,44 @@ namespace Serialize {
     {
     }
 
-    bool BufferedInStream::isMessageAvailable() const
+    BufferedInStream::BufferedInStream(std::unique_ptr<buffered_streambuf> buffer, std::unique_ptr<BufferedStreamData> data)
+        : SerializeInStream(std::move(buffer), std::move(data))
     {
-        if (!*this)
-            return false;
-        return buffer().isMessageAvailable();
+    }
+
+    bool BufferedInStream::isMessageAvailable()
+    {
+        int avail = 0;
+
+        std::ios_base::iostate _State = std::ios_base::goodbit;
+        if (!*this) {
+            _State |= std::ios_base::failbit;
+        } else if ((avail = buffer().in_avail()) < 0) {
+            _State |= std::ios_base::eofbit;
+        }
+        mStream.setstate(_State);
+
+        return avail > 0;
     }
 
     PendingRequest *BufferedInStream::fetchRequest(TransactionId id)
     {
-        return buffer().fetchRequest(id);
+        return data().fetchRequest(id);
     }
 
     void BufferedInStream::popRequest(TransactionId id)
     {
-        buffer().popRequest(id);
+        data().popRequest(id);
     }
 
-    BufferedInStream::BufferedInStream(buffered_streambuf *buffer)
-        : SerializeInStream(buffer)
+    BufferedInStream::BufferedInStream(buffered_streambuf *buffer, BufferedStreamData *data)
+        : SerializeInStream(buffer, data)
     {
     }
 
-    buffered_streambuf &BufferedInStream::buffer() const
+    BufferedStreamData &BufferedInStream::data() const
     {
-        return static_cast<buffered_streambuf &>(SerializeInStream::buffer());
+        return static_cast<BufferedStreamData &>(SerializeInStream::data());
     }
 
     void BufferedInStream::readHeader(MessageHeader &header)
@@ -85,8 +100,8 @@ namespace Serialize {
     }
 
     BufferedOutStream::BufferedOutStream(
-        std::unique_ptr<buffered_streambuf> &&buffer)
-        : SerializeOutStream(std::move(buffer))
+        std::unique_ptr<std::basic_streambuf<char>> buffer, std::unique_ptr<BufferedStreamData> data)
+        : BufferedOutStream(std::make_unique<buffered_streambuf>(std::move(buffer)), std::move(data))
     {
     }
 
@@ -98,6 +113,21 @@ namespace Serialize {
     BufferedOutStream::BufferedOutStream(BufferedOutStream &&other, SerializeManager *mgr)
         : SerializeOutStream(std::move(other), mgr)
     {
+    }
+
+    BufferedOutStream::BufferedOutStream(
+        std::unique_ptr<buffered_streambuf> buffer, std::unique_ptr<BufferedStreamData> data)
+        : SerializeOutStream(std::move(buffer), std::move(data))
+    {
+    }
+
+    buffered_streambuf& BufferedOutStream::buffer() const {
+        return static_cast<buffered_streambuf &>(SerializeOutStream::buffer());
+    }
+
+    buffered_streambuf &BufferedInStream::buffer() const
+    {
+        return static_cast<buffered_streambuf &>(SerializeInStream::buffer());
     }
 
     void BufferedOutStream::beginMessage(const SyncableUnitBase *unit,
@@ -115,18 +145,20 @@ namespace Serialize {
     {
         MessageHeader header;
         header.mCmd = cmd;
-        header.mObject = SERIALIZE_MANAGER;        
+        header.mObject = SERIALIZE_MANAGER;
         buffer().beginMessage();
         writeRaw(header);
     }
 
-    void BufferedOutStream::endMessage() { buffer().endMessage(); }
-
-    int BufferedOutStream::sendMessages()
+    void BufferedOutStream::endMessage()
     {
-        if (!*this)
-            return -1;
-        return buffer().sendMessages();
+        buffer().endMessage();
+    }
+
+    BufferedOutStream &BufferedOutStream::sendMessages()
+    {
+        mStream.flush();
+        return *this;
     }
 
     SyncManager *BufferedOutStream::manager() const
@@ -136,18 +168,29 @@ namespace Serialize {
 
     TransactionId BufferedOutStream::createRequest(ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback)
     {
-        return buffer().createRequest(requester, requesterTransactionId, std::move(callback));
+        return data().createRequest(requester, requesterTransactionId, std::move(callback));
     }
 
-    buffered_streambuf &BufferedOutStream::buffer() const
+    BufferedStreamData &BufferedOutStream::data() const
     {
-        return static_cast<buffered_streambuf &>(SerializeOutStream::buffer());
+        return static_cast<BufferedStreamData &>(SerializeOutStream::data());
     }
 
     BufferedInOutStream::BufferedInOutStream(
-        std::unique_ptr<buffered_streambuf> &&buffer)
-        : BufferedInStream(buffer.get())
-        , BufferedOutStream(std::move(buffer))
+        std::unique_ptr<std::basic_streambuf<char>> buffer, std::unique_ptr<BufferedStreamData> data)
+        : BufferedInOutStream(std::make_unique<buffered_streambuf>(std::move(buffer)), std::move(data))
+    {
+    }
+
+    BufferedInOutStream::BufferedInOutStream(
+        std::unique_ptr<buffered_streambuf> buffer, std::unique_ptr<BufferedStreamData> data)
+        : BufferedInStream(buffer.get(), data.get())
+        , BufferedOutStream(std::move(buffer), std::move(data))
+    {
+    }
+
+    BufferedInOutStream::BufferedInOutStream(std::unique_ptr<std::basic_streambuf<char>> buffer, std::unique_ptr<Formatter> format, SyncManager &mgr, ParticipantId id)
+        : BufferedInOutStream(std::make_unique<buffered_streambuf>(std::move(buffer)), std::make_unique<BufferedStreamData>(std::move(format), mgr, id))
     {
     }
 
@@ -162,19 +205,6 @@ namespace Serialize {
         : BufferedInStream(std::move(other), mgr)
         , BufferedOutStream(std::move(other), mgr)
     {
-    }
-
-    StreamState BufferedInOutStream::state() const { return buffer().state(); }
-
-    bool BufferedInOutStream::isClosed() const
-    {
-        return !bool(*this) || buffer().isClosed();
-    }
-
-    void BufferedInOutStream::close()
-    {
-        writeCommand(STREAM_EOF);
-        buffer().close(StreamState::CLOSED_BY_USER);
     }
 
     BufferedInOutStream::operator bool() const

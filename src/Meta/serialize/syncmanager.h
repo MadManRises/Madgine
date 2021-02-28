@@ -12,6 +12,8 @@
 
 #include "Generic/genericresult.h"
 
+#include "Generic/container/nonconst_set.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -74,7 +76,7 @@ namespace Serialize {
 
         bool mReceivingMasterState;
 
-        std::set<BufferedInOutStream, CompareStreamId> mMasterStreams;
+        NonConstSet<BufferedInOutStream, CompareStreamId> mMasterStreams;
         std::optional<BufferedInOutStream> mSlaveStream;
 
         std::set<TopLevelUnitBase *> mTopLevelUnits; //TODO: Sort by MasterId    
