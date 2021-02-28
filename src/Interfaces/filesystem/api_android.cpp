@@ -163,9 +163,6 @@ namespace Filesystem {
             }
 
             off_t pos = AAsset_seek(mAsset, off, whence);
-            if (pos != (off_t)-1) {
-                fetch();
-            }
             return pos_type(off_type(pos));
         }
 
@@ -175,9 +172,6 @@ namespace Filesystem {
             assert(mode & std::ios_base::in);
 
             off_t newPos = AAsset_seek(mAsset, pos, SEEK_SET);
-            if (newPos != (off_t)-1) {
-                fetch();
-            }
 
             return pos_type(off_type(pos));
         }
