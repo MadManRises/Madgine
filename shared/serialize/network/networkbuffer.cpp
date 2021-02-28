@@ -7,7 +7,7 @@
 namespace Engine {
 namespace Network {
     NetworkBuffer::NetworkBuffer(SocketId socket)
-        : mSocket(socket)
+        : mSocket(std::move(socket))
     {
     }
 
@@ -19,7 +19,7 @@ namespace Network {
 
     NetworkBuffer::~NetworkBuffer()
     {
-        if (mSocket != Invalid_Socket)
+        if (mSocket)
             SocketAPI::closeSocket(mSocket);
     }
 
@@ -28,8 +28,6 @@ namespace Network {
         int result = SocketAPI::recv(mSocket, buf, len);
         if (result == -1) {
             switch (SocketAPI::getError("recv")) {
-            case SocketAPIResult::WOULD_BLOCK:
-                return 0;
             default:
                 return 0;
             }

@@ -47,23 +47,24 @@ namespace Engine {
         WSACleanup();
     }
 
-    void SocketAPI::closeSocket(SocketId id)
+    void SocketAPI::closeSocket(SocketId &id)
     {
         int result = closesocket(id);
         assert(result == 0);
+        id.mSocket = SocketId::Invalid_Socket;
     }
 
-    int SocketAPI::send(SocketId id, const char *buf, size_t len)
+    int SocketAPI::send(const SocketId &id, const char *buf, size_t len)
     {
         return ::send(id, buf, static_cast<int>(len), 0);
     }
 
-    int SocketAPI::recv(SocketId id, char *buf, size_t len)
+    int SocketAPI::recv(const SocketId &id, char *buf, size_t len)
     {
         return ::recv(id, buf, static_cast<int>(len), 0);
     }
 
-    int SocketAPI::in_available(SocketId id)
+    int SocketAPI::in_available(const SocketId &id)
     {
         u_long bytes_available;
         if (ioctlsocket(id, FIONREAD, &bytes_available) == SOCKET_ERROR)
@@ -93,25 +94,25 @@ namespace Engine {
         SocketId s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
         if (s == INVALID_SOCKET) {
-            return { Invalid_Socket, getError("socket") };
+            return { std::move(s), getError("socket") };
         }
 
         if (bind(s, LPSOCKADDR(&addr), sizeof addr) == SOCKET_ERROR) {
             SocketAPIResult result = getError("bind");
             closeSocket(s);
-            return { Invalid_Socket, result };
+            return { std::move(s), result };
         }
 
         int result = listen(s, SOMAXCONN);
         if (result == SOCKET_ERROR) {
             SocketAPIResult result = getError("listen");
             closeSocket(s);
-            return { Invalid_Socket, result };
+            return { std::move(s), result };
         }
-        return { s, SocketAPIResult::SUCCESS };
+        return { std::move(s), SocketAPIResult::SUCCESS };
     }
 
-    std::pair<SocketId, SocketAPIResult> SocketAPI::accept(SocketId s, TimeOut timeout)
+    std::pair<SocketId, SocketAPIResult> SocketAPI::accept(const SocketId &s, TimeOut timeout)
     {
         fd_set readSet;
         FD_ZERO(&readSet);
@@ -127,9 +128,9 @@ namespace Engine {
         }
         if (int error = select(static_cast<int>(s), &readSet, nullptr, nullptr, &timeout_s); error <= 0) {
             if (error == 0)
-                return { Invalid_Socket, SocketAPIResult::TIMEOUT };
+                return { SocketId {}, SocketAPIResult::TIMEOUT };
             else
-                return { Invalid_Socket, getError("select") };
+                return { SocketId {}, getError("select") };
         }
 
         SocketId sock = ::accept(s, nullptr, nullptr);
@@ -137,9 +138,9 @@ namespace Engine {
         if (ioctlsocket(sock, FIONBIO, &iMode) == SOCKET_ERROR) {
             SocketAPIResult result = getError("accept");
             closeSocket(sock);
-            return { Invalid_Socket, result };
+            return { std::move(sock), result };
         }
-        return { sock, SocketAPIResult::SUCCESS };
+        return { std::move(sock), SocketAPIResult::SUCCESS };
     }
 
     std::pair<SocketId, SocketAPIResult> SocketAPI::connect(const std::string &url, int portNr)
@@ -151,28 +152,30 @@ namespace Engine {
         target.sin_port = htons(portNr); //Port to connect on
         InetPton(AF_INET, url.c_str(), &target.sin_addr.s_addr);
 
-        SocketId s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); //Create socket
+        int s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); //Create socket
 
         if (s == INVALID_SOCKET) {
-            return { Invalid_Socket, getError("socket") };
+            return { SocketId::Invalid_Socket, getError("socket") };
         }
+
+        SocketId sock = s;
 
         //Try connecting...
 
-        if (::connect(s, reinterpret_cast<SOCKADDR *>(&target), sizeof target) == SOCKET_ERROR) {
+        if (::connect(sock, reinterpret_cast<SOCKADDR *>(&target), sizeof target) == SOCKET_ERROR) {
             SocketAPIResult error = getError("connect");
-            closeSocket(s);
-            return { Invalid_Socket, error };
+            closeSocket(sock);
+            return { std::move(sock), error };
         }
 
         u_long iMode = 1;
-        if (ioctlsocket(s, FIONBIO, &iMode)) {
+        if (ioctlsocket(sock, FIONBIO, &iMode)) {
             SocketAPIResult error = getError("ioctlsocket");
-            closeSocket(s);
-            return { Invalid_Socket, error };
+            closeSocket(sock);
+            return { std::move(sock), error };
         }
 
-        return { s, SocketAPIResult::SUCCESS };
+        return { std::move(sock), SocketAPIResult::SUCCESS };
     }
 }
 

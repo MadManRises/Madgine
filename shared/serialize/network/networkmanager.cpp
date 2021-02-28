@@ -10,9 +10,7 @@ namespace Network {
     static int sManagerCount = 0;
 
     NetworkManager::NetworkManager(const std::string &name)
-        : SyncManager(name)
-        , mSocket(Invalid_Socket)
-        , mServerSocket(Invalid_Socket)
+        : SyncManager(name)        
     {
         if (sManagerCount == 0) {
             if (SocketAPI::init() != SocketAPIResult::SUCCESS)
@@ -22,9 +20,8 @@ namespace Network {
     }
 
     NetworkManager::NetworkManager(NetworkManager &&other) noexcept
-        : SyncManager(std::forward<NetworkManager>(other))
-        , mSocket(std::exchange(other.mSocket, Invalid_Socket))
-        , mServerSocket(std::exchange(other.mServerSocket, Invalid_Socket))
+        : SyncManager(std::forward<NetworkManager>(other))        
+        , mServerSocket(std::move(other.mServerSocket))
     {
         ++sManagerCount;
     }
@@ -63,14 +60,15 @@ namespace Network {
 
         SocketAPIResult error;
 
-        std::tie(mSocket, error) = SocketAPI::connect(url, portNr);
+        SocketId socket;
+        std::tie(socket, error) = SocketAPI::connect(url, portNr);
 
-        if (!isConnected()) {
+        if (!socket) {
             NetworkManagerResult result = recordSocketError(error);
             return result;
         }
 
-        NetworkManagerResult result = setSlaveStream(Serialize::BufferedInOutStream { std::make_unique<NetworkBuffer>(mSocket), std::make_unique<Serialize::SafeBinaryFormatter>(), *this }, true, timeout);
+        NetworkManagerResult result = setSlaveStream(Serialize::BufferedInOutStream { std::make_unique<NetworkBuffer>(std::move(socket)), std::make_unique<Serialize::SafeBinaryFormatter>(), *this }, true, timeout);
 
         return result;
     }
@@ -79,11 +77,9 @@ namespace Network {
     {
         if (isConnected() || isServer()) {
             removeAllStreams();
-            if (mServerSocket != Invalid_Socket) {
+            if (mServerSocket) {
                 SocketAPI::closeSocket(mServerSocket);
-                mServerSocket = Invalid_Socket;
             }
-            mSocket = Invalid_Socket;
         }
     }
 
@@ -95,12 +91,12 @@ namespace Network {
             SocketId sock;
             std::tie(sock, error) = SocketAPI::accept(mServerSocket, timeout);
             while (error != SocketAPIResult::TIMEOUT && (limit == -1 || count < limit)) {
-                if (sock != Invalid_Socket) {
-                    if (addMasterStream(Serialize::BufferedInOutStream { std::make_unique<NetworkBuffer>(sock), std::make_unique<Serialize::SafeBinaryFormatter>(), *this, createStreamId() }) == Serialize::SyncManagerResult::SUCCESS) {
+                if (sock) {
+                    if (addMasterStream(Serialize::BufferedInOutStream { std::make_unique<NetworkBuffer>(std::move(sock)), std::make_unique<Serialize::SafeBinaryFormatter>(), *this, createStreamId() }) == Serialize::SyncManagerResult::SUCCESS) {
                         ++count;
                     }
                 }
-                std::tie(sock, error) = SocketAPI::accept(mSocket);
+                std::tie(sock, error) = SocketAPI::accept(mServerSocket);
             }
         }
         return count;
@@ -114,21 +110,21 @@ namespace Network {
         SocketAPIResult error;
         SocketId sock;
         std::tie(sock, error) = SocketAPI::accept(mServerSocket, timeout);
-        if (sock == Invalid_Socket)
+        if (!sock)
             return recordSocketError(error);
 
-        Serialize::BufferedInOutStream stream { std::make_unique<NetworkBuffer>(sock), std::make_unique<Serialize::SafeBinaryFormatter>(), *this, createStreamId() };
+        Serialize::BufferedInOutStream stream { std::make_unique<NetworkBuffer>(std::move(sock)), std::make_unique<Serialize::SafeBinaryFormatter>(), *this, createStreamId() };
         return addMasterStream(std::move(stream));
     }
 
     bool NetworkManager::isConnected() const
     {
-        return mSocket != Invalid_Socket;
+        return !isMaster();
     }
 
     bool NetworkManager::isServer() const
     {
-        return mServerSocket != Invalid_Socket;
+        return bool(mServerSocket);
     }
 
     NetworkManagerResult NetworkManager::moveMasterStream(
