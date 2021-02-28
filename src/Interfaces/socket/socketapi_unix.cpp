@@ -72,7 +72,7 @@ int SocketAPI::getOSError()
     return errno;
 }
 
-SocketAPIResult preInitSock(const SocketId &s)
+SocketAPIResult preInitSock(unsigned long long s)
 {
 #    if !EMSCRIPTEN
     int on = 1;
@@ -89,7 +89,7 @@ SocketAPIResult preInitSock(const SocketId &s)
     return SocketAPIResult::SUCCESS;
 }
 
-SocketAPIResult postInitSock(const SocketId &s)
+SocketAPIResult postInitSock(unsigned long long s)
 {
     int flags = fcntl(s, F_GETFL, 0);
     if (flags < 0) {
@@ -189,7 +189,7 @@ std::pair<SocketId, SocketAPIResult> SocketAPI::connect(const std::string &url, 
     target.sin_port = htons(portNr); //Port to connect on
 
     if (inet_pton(AF_INET, url.c_str(), &target.sin_addr) <= 0) {
-        return { Invalid_Socket, getError("inet_pton") };
+        return { SocketId::Invalid_Socket, getError("inet_pton") };
     }
 
     int s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); //Create socket
