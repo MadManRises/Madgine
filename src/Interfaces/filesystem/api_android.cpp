@@ -182,7 +182,7 @@ namespace Filesystem {
             return pos_type(off_type(pos));
         }
 
-        std::streamsize xsgetn(char *buffer, std::streamsize count) override;
+        std::streamsize xsgetn(char *buffer, std::streamsize count) override
         {
             std::streamsize readCount = AAsset_read(mAsset, buffer, count);
             if (readCount < 0)
