@@ -172,7 +172,7 @@ std::pair<Socket, SocketAPIResult> Socket::accept(TimeOut timeout) const
         int socket = accept4(mSocket, NULL, NULL, O_NONBLOCK);
 #    endif
         if (socket >= 0)
-            return { Socket { socket }, SocketAPIResult::SUCCESS };
+            return { static_cast<unsigned long long>(socket), SocketAPIResult::SUCCESS };
         else
             return { Socket {}, SocketAPI::getError("accept") };
     } else {
