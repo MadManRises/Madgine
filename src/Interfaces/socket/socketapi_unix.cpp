@@ -172,14 +172,14 @@ std::pair<Socket, SocketAPIResult> Socket::accept(TimeOut timeout) const
         int socket = accept4(mSocket, NULL, NULL, O_NONBLOCK);
 #    endif
         if (socket >= 0)
-            return { socket, SocketAPIResult::SUCCESS };
+            return { Socket { socket }, SocketAPIResult::SUCCESS };
         else
-            return { Socket {}, getError("accept") };
+            return { Socket {}, SocketAPI::getError("accept") };
     } else {
         if (retval == 0)
             return { Socket {}, SocketAPIResult::TIMEOUT };
         else
-            return { Socket {}, getError("select") };
+            return { Socket {}, SocketAPI::getError("select") };
     }
 }
 
