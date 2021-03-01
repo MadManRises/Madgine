@@ -48,7 +48,7 @@ struct INTERFACES_EXPORT Socket {
     }
 
 private:
-    Socket(unsigned long long socket)
+    explicit Socket(unsigned long long socket)
         : mSocket(socket)
     {
     }
