@@ -117,7 +117,7 @@ std::pair<Socket, SocketAPIResult> SocketAPI::socket(int port)
         return { Socket {}, getError("socket") };
     }
 
-    Socket sock { s };
+    Socket sock { static_cast<unsigned long long>(s) };
 
     if (SocketAPIResult result = preInitSock(sock); result != SocketAPIResult::SUCCESS) {
         sock.close();
@@ -200,7 +200,7 @@ std::pair<Socket, SocketAPIResult> SocketAPI::connect(const std::string &url, in
         return { Socket {}, getError("socket") };
     }
 
-    Socket sock { s };
+    Socket sock { static_cast<unsigned long long>(s) };
 
     if (SocketAPIResult result = preInitSock(sock); result != SocketAPIResult::SUCCESS) {
         sock.close();
