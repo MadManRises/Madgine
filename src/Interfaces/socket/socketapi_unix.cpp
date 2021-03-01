@@ -164,7 +164,7 @@ std::pair<Socket, SocketAPIResult> Socket::accept(TimeOut timeout) const
     FD_ZERO(&readfds);
     FD_SET(mSocket, &readfds);
 
-    int retval = select(s + 1, &readfds, NULL, NULL, &tv);
+    int retval = select(mSocket + 1, &readfds, NULL, NULL, &tv);
     if (retval > 0) {
 #    if OSX || IOS
         int socket = ::accept(mSocket, NULL, NULL);
