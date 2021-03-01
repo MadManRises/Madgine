@@ -5,7 +5,7 @@
 namespace Engine {
 namespace Network {
     struct MADGINE_NETWORK_EXPORT NetworkBuffer : std::basic_streambuf<char> {
-        NetworkBuffer(SocketId socket);
+        NetworkBuffer(Socket socket);
         NetworkBuffer(const NetworkBuffer &) = delete;
         NetworkBuffer(NetworkBuffer &&other) noexcept = delete;
         virtual ~NetworkBuffer();
@@ -20,7 +20,7 @@ namespace Network {
         std::streamsize showmanyc() override;
 
     private:
-        SocketId mSocket; // = SOCKET
+        Socket mSocket; // = SOCKET
     };
 }
 }

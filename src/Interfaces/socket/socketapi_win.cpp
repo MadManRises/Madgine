@@ -47,27 +47,28 @@ namespace Engine {
         WSACleanup();
     }
 
-    void SocketAPI::closeSocket(SocketId &id)
+    void Socket::close()
     {
-        int result = closesocket(id);
+        assert(mSocket);
+        int result = closesocket(mSocket);
         assert(result == 0);
-        id.mSocket = SocketId::Invalid_Socket;
+        mSocket = Invalid_Socket;
     }
 
-    int SocketAPI::send(const SocketId &id, const char *buf, size_t len)
+    int Socket::send(const char *buf, size_t len) const
     {
-        return ::send(id, buf, static_cast<int>(len), 0);
+        return ::send(mSocket, buf, static_cast<int>(len), 0);
     }
 
-    int SocketAPI::recv(const SocketId &id, char *buf, size_t len)
+    int Socket::recv(char *buf, size_t len) const
     {
-        return ::recv(id, buf, static_cast<int>(len), 0);
+        return ::recv(mSocket, buf, static_cast<int>(len), 0);
     }
 
-    int SocketAPI::in_available(const SocketId &id)
+    int Socket::in_available() const
     {
         u_long bytes_available;
-        if (ioctlsocket(id, FIONREAD, &bytes_available) == SOCKET_ERROR)
+        if (ioctlsocket(mSocket, FIONREAD, &bytes_available) == SOCKET_ERROR)
             return -1;
         return bytes_available;
     }
@@ -82,7 +83,7 @@ namespace Engine {
         return WSAGetLastError();
     }
 
-    std::pair<SocketId, SocketAPIResult> SocketAPI::socket(int port)
+    std::pair<Socket, SocketAPIResult> SocketAPI::socket(int port)
     {
         SOCKADDR_IN addr;
         memset(&addr, 0, sizeof addr);
@@ -91,32 +92,34 @@ namespace Engine {
 
         addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-        SocketId s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        SOCKET s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
         if (s == INVALID_SOCKET) {
-            return { std::move(s), getError("socket") };
+            return { Socket {}, getError("socket") };
         }
 
-        if (bind(s, LPSOCKADDR(&addr), sizeof addr) == SOCKET_ERROR) {
+        Socket sock = s;
+
+        if (bind(sock, LPSOCKADDR(&addr), sizeof addr) == SOCKET_ERROR) {
             SocketAPIResult result = getError("bind");
-            closeSocket(s);
-            return { std::move(s), result };
+            sock.close();
+            return { std::move(sock), result };
         }
 
-        int result = listen(s, SOMAXCONN);
+        int result = listen(sock, SOMAXCONN);
         if (result == SOCKET_ERROR) {
             SocketAPIResult result = getError("listen");
-            closeSocket(s);
-            return { std::move(s), result };
+            sock.close();
+            return { std::move(sock), result };
         }
-        return { std::move(s), SocketAPIResult::SUCCESS };
+        return { std::move(sock), SocketAPIResult::SUCCESS };
     }
 
-    std::pair<SocketId, SocketAPIResult> SocketAPI::accept(const SocketId &s, TimeOut timeout)
+    std::pair<Socket, SocketAPIResult> Socket::accept(TimeOut timeout) const
     {
         fd_set readSet;
         FD_ZERO(&readSet);
-        FD_SET(s, &readSet);
+        FD_SET(mSocket, &readSet);
         timeval timeout_s;
         if (timeout.isInfinite()) {
             timeout_s.tv_sec = 0;
@@ -126,24 +129,27 @@ namespace Engine {
             timeout_s.tv_sec = static_cast<long>(remainder.count()) / 1000;
             timeout_s.tv_usec = static_cast<long>(remainder.count()) % 1000 * 1000;
         }
-        if (int error = select(static_cast<int>(s), &readSet, nullptr, nullptr, &timeout_s); error <= 0) {
+        if (int error = select(static_cast<int>(mSocket), &readSet, nullptr, nullptr, &timeout_s); error <= 0) {
             if (error == 0)
-                return { SocketId {}, SocketAPIResult::TIMEOUT };
+                return { Socket {}, SocketAPIResult::TIMEOUT };
             else
-                return { SocketId {}, getError("select") };
+                return { Socket {}, SocketAPI::getError("select") };
         }
 
-        SocketId sock = ::accept(s, nullptr, nullptr);
+        SOCKET s = ::accept(mSocket, nullptr, nullptr);
+        assert(s != INVALID_SOCKET);
+        Socket sock = s;
+
         u_long iMode = 1;
         if (ioctlsocket(sock, FIONBIO, &iMode) == SOCKET_ERROR) {
-            SocketAPIResult result = getError("accept");
-            closeSocket(sock);
+            SocketAPIResult result = SocketAPI::getError("accept");
+            sock.close();
             return { std::move(sock), result };
         }
         return { std::move(sock), SocketAPIResult::SUCCESS };
     }
 
-    std::pair<SocketId, SocketAPIResult> SocketAPI::connect(const std::string &url, int portNr)
+    std::pair<Socket, SocketAPIResult> SocketAPI::connect(const std::string &url, int portNr)
     {
         //Fill out the information needed to initialize a socket…
         SOCKADDR_IN target; //Socket address information
@@ -155,23 +161,23 @@ namespace Engine {
         int s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); //Create socket
 
         if (s == INVALID_SOCKET) {
-            return { SocketId::Invalid_Socket, getError("socket") };
+            return { Socket {}, getError("socket") };
         }
 
-        SocketId sock = s;
+        Socket sock = s;
 
         //Try connecting...
 
         if (::connect(sock, reinterpret_cast<SOCKADDR *>(&target), sizeof target) == SOCKET_ERROR) {
             SocketAPIResult error = getError("connect");
-            closeSocket(sock);
+            sock.close();
             return { std::move(sock), error };
         }
 
         u_long iMode = 1;
         if (ioctlsocket(sock, FIONBIO, &iMode)) {
             SocketAPIResult error = getError("ioctlsocket");
-            closeSocket(sock);
+            sock.close();
             return { std::move(sock), error };
         }
 

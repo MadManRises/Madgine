@@ -23,27 +23,28 @@ void SocketAPI::finalize()
 {
 }
 
-void SocketAPI::closeSocket(SocketId &id)
+void Socket::close()
 {
-    int result = close(id);
+    assert(mSocket);
+    int result = ::close(mSocket);
     assert(result == 0);
-    id.mSocket = SocketId::Invalid_Socket;
+    mSocket = Invalid_Socket;
 }
 
-int SocketAPI::send(const SocketId &id, const char *buf, size_t len)
+int Socket::send(const char *buf, size_t len) const
 {
-    return ::send(id, buf, len, 0);
+    return ::send(mSocket, buf, len, 0);
 }
 
-int SocketAPI::recv(const SocketId &id, char *buf, size_t len)
+int Socket::recv(char *buf, size_t len) const
 {
-    return ::read(id, buf, len);
+    return ::read(mSocket, buf, len);
 }
 
-int SocketAPI::in_available(const SocketId &id)
+int Socket::in_available() const
 {
     int bytes_available = 0;
-    if (ioctl(id, FIONREAD, &bytes_available) < 0)
+    if (ioctl(mSocket, FIONREAD, &bytes_available) < 0)
         return -1;
     return bytes_available;
 }
@@ -102,7 +103,7 @@ SocketAPIResult postInitSock(unsigned long long s)
     return SocketAPIResult::SUCCESS;
 }
 
-std::pair<SocketId, SocketAPIResult> SocketAPI::socket(int port)
+std::pair<Socket, SocketAPIResult> SocketAPI::socket(int port)
 {
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
@@ -111,37 +112,39 @@ std::pair<SocketId, SocketAPIResult> SocketAPI::socket(int port)
 
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    SocketId s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    int s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (s < 0) {
-        return { SocketId::Invalid_Socket, getError("socket") };
+        return { Socket {}, getError("socket") };
     }
 
-    if (SocketAPIResult result = preInitSock(s); result != SocketAPIResult::SUCCESS) {
-        closeSocket(s);
-        return { std::move(s), result };
+    Socket sock = s;
+
+    if (SocketAPIResult result = preInitSock(sock); result != SocketAPIResult::SUCCESS) {
+        sock.close();
+        return { std::move(sock), result };
     }
 
-    if (SocketAPIResult result = postInitSock(s); result != SocketAPIResult::SUCCESS) {
-        closeSocket(s);
-        return { std::move(s), result };
+    if (SocketAPIResult result = postInitSock(sock); result != SocketAPIResult::SUCCESS) {
+        sock.close();
+        return { std::move(sock), result };
     }
 
-    if (bind(s, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
+    if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
         SocketAPIResult result = getError("bind");
-        closeSocket(s);
-        return { std::move(s), result };
+        sock.close();
+        return { std::move(sock), result };
     }
 
-    int result = listen(s, SOMAXCONN);
+    int result = listen(sock, SOMAXCONN);
     if (result != 0) {
         SocketAPIResult result = getError("listen");
-        closeSocket(s);
-        return { std::move(s), result };
+        sock.close();
+        return { std::move(sock), result };
     }
-    return { std::move(s), SocketAPIResult::SUCCESS };
+    return { std::move(sock), SocketAPIResult::SUCCESS };
 }
 
-std::pair<SocketId, SocketAPIResult> SocketAPI::accept(const SocketId &s, TimeOut timeout)
+std::pair<Socket, SocketAPIResult> Socket::accept(TimeOut timeout) const
 {
     struct timeval tv;
     fd_set readfds;
@@ -159,28 +162,28 @@ std::pair<SocketId, SocketAPIResult> SocketAPI::accept(const SocketId &s, TimeOu
     }
 
     FD_ZERO(&readfds);
-    FD_SET(s, &readfds);
+    FD_SET(mSocket, &readfds);
 
-    int retval = select(s + 1, &readfds, NULL, NULL, &tv);
+    int retval = select(1, &readfds, NULL, NULL, &tv);
     if (retval > 0) {
 #    if OSX || IOS
-        int socket = ::accept(s, NULL, NULL);
+        int socket = ::accept(mSocket, NULL, NULL);
 #    else
-        int socket = accept4(s, NULL, NULL, O_NONBLOCK);
+        int socket = accept4(mSocket, NULL, NULL, O_NONBLOCK);
 #    endif
         if (socket >= 0)
             return { socket, SocketAPIResult::SUCCESS };
         else
-            return { SocketId::Invalid_Socket, getError("accept") };
+            return { Socket {}, getError("accept") };
     } else {
         if (retval == 0)
-            return { SocketId::Invalid_Socket, SocketAPIResult::TIMEOUT };
+            return { Socket {}, SocketAPIResult::TIMEOUT };
         else
-            return { SocketId::Invalid_Socket, getError("select") };
+            return { Socket {}, getError("select") };
     }
 }
 
-std::pair<SocketId, SocketAPIResult> SocketAPI::connect(const std::string &url, int portNr)
+std::pair<Socket, SocketAPIResult> SocketAPI::connect(const std::string &url, int portNr)
 {
     //Fill out the information needed to initialize a socket…
     struct sockaddr_in target; //Socket address information
@@ -189,18 +192,18 @@ std::pair<SocketId, SocketAPIResult> SocketAPI::connect(const std::string &url, 
     target.sin_port = htons(portNr); //Port to connect on
 
     if (inet_pton(AF_INET, url.c_str(), &target.sin_addr) <= 0) {
-        return { SocketId::Invalid_Socket, getError("inet_pton") };
+        return { Socket {}, getError("inet_pton") };
     }
 
     int s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); //Create socket
     if (s < 0) {
-        return { SocketId::Invalid_Socket, getError("socket") };
+        return { Socket {}, getError("socket") };
     }
 
-    SocketId sock = s;
+    Socket sock = s;
 
     if (SocketAPIResult result = preInitSock(sock); result != SocketAPIResult::SUCCESS) {
-        closeSocket(sock);
+        sock.close();
         return { std::move(sock), result };
     }
 
@@ -208,12 +211,12 @@ std::pair<SocketId, SocketAPIResult> SocketAPI::connect(const std::string &url, 
 
     if (::connect(sock, (struct sockaddr *)&target, sizeof(target)) < 0) {
         SocketAPIResult error = getError("connect");
-        closeSocket(sock);
+        sock.close();
         return { std::move(sock), error };
     }
 
     if (SocketAPIResult result = postInitSock(sock); result != SocketAPIResult::SUCCESS) {
-        closeSocket(sock);
+        sock.close();
         return { std::move(sock), result };
     }
 

@@ -39,7 +39,7 @@ namespace Network {
         NetworkManagerResult recordSocketError(SocketAPIResult error);
 
     private:
-        SocketId mServerSocket;                
+        Socket mServerSocket;                
 
         SocketAPIResult mSocketAPIError = SocketAPIResult::SUCCESS;
     };

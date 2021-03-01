@@ -13,25 +13,30 @@ ENUM_BASE(SocketAPIResult, GenericResult,
     ALREADY_IN_USE,
     API_VERSION_MISMATCH);
 
-struct SocketId {
-
-    SocketId(unsigned long long socket = Invalid_Socket)
-        : mSocket(socket)
-    {
-    }
-
-    SocketId(const SocketId &) = delete;
-    SocketId(SocketId &&other)
+struct INTERFACES_EXPORT Socket {
+    Socket() = default;
+    Socket(const Socket &) = delete;
+    Socket(Socket &&other)
         : mSocket(std::exchange(other.mSocket, Invalid_Socket))
     {
     }
 
-    ~SocketId()
+    ~Socket()
     {
-        assert(!(*this));
+        if (*this)
+            close();
     }
 
-    SocketId& operator=(SocketId&& other) {
+    void close();
+
+    int send(const char *buf, size_t len) const;
+    int recv(char *buf, size_t len) const;
+
+    std::pair<Socket, SocketAPIResult> accept(TimeOut timeout = {}) const;
+
+    int in_available() const;
+
+    Socket& operator=(Socket&& other) {
         assert(!(*this));
         mSocket = std::exchange(other.mSocket, Invalid_Socket);
         return *this;
@@ -43,6 +48,11 @@ struct SocketId {
     }
 
 private:
+    Socket(unsigned long long socket)
+        : mSocket(socket)
+    {
+    }
+
     operator unsigned long long() const
     {
         return mSocket;
@@ -59,15 +69,9 @@ struct INTERFACES_EXPORT SocketAPI {
     static SocketAPIResult init();
     static void finalize();
 
-    static void closeSocket(SocketId &id);
-    static std::pair<SocketId, SocketAPIResult> socket(int port);
-    static std::pair<SocketId, SocketAPIResult> accept(const SocketId &s, TimeOut timeout = {});
-    static std::pair<SocketId, SocketAPIResult> connect(const std::string &url, int portNr);
+    static std::pair<Socket, SocketAPIResult> socket(int port);
+    static std::pair<Socket, SocketAPIResult> connect(const std::string &url, int portNr);
 
-    static int send(const SocketId &id, const char *buf, size_t len);
-    static int recv(const SocketId &id, char *buf, size_t len);
-
-    static int in_available(const SocketId &id);
 
     static SocketAPIResult getError(const char *operation);
     static int getOSError();

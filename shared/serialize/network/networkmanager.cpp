@@ -60,7 +60,7 @@ namespace Network {
 
         SocketAPIResult error;
 
-        SocketId socket;
+        Socket socket;
         std::tie(socket, error) = SocketAPI::connect(url, portNr);
 
         if (!socket) {
@@ -78,7 +78,7 @@ namespace Network {
         if (isConnected() || isServer()) {
             removeAllStreams();
             if (mServerSocket) {
-                SocketAPI::closeSocket(mServerSocket);
+                mServerSocket.close();
             }
         }
     }
@@ -88,15 +88,15 @@ namespace Network {
         int count = 0;
         if (isServer()) {
             SocketAPIResult error;
-            SocketId sock;
-            std::tie(sock, error) = SocketAPI::accept(mServerSocket, timeout);
+            Socket sock;
+            std::tie(sock, error) = mServerSocket.accept(timeout);
             while (error != SocketAPIResult::TIMEOUT && (limit == -1 || count < limit)) {
                 if (sock) {
                     if (addMasterStream(Serialize::BufferedInOutStream { std::make_unique<NetworkBuffer>(std::move(sock)), std::make_unique<Serialize::SafeBinaryFormatter>(), *this, createStreamId() }) == Serialize::SyncManagerResult::SUCCESS) {
                         ++count;
                     }
                 }
-                std::tie(sock, error) = SocketAPI::accept(mServerSocket);
+                std::tie(sock, error) = mServerSocket.accept(timeout);
             }
         }
         return count;
@@ -108,8 +108,8 @@ namespace Network {
             return NetworkManagerResult::NO_SERVER;
 
         SocketAPIResult error;
-        SocketId sock;
-        std::tie(sock, error) = SocketAPI::accept(mServerSocket, timeout);
+        Socket sock;
+        std::tie(sock, error) = mServerSocket.accept(timeout);
         if (!sock)
             return recordSocketError(error);
 

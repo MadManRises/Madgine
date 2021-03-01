@@ -6,7 +6,7 @@
 
 namespace Engine {
 namespace Network {
-    NetworkBuffer::NetworkBuffer(SocketId socket)
+    NetworkBuffer::NetworkBuffer(Socket socket)
         : mSocket(std::move(socket))
     {
     }
@@ -19,13 +19,11 @@ namespace Network {
 
     NetworkBuffer::~NetworkBuffer()
     {
-        if (mSocket)
-            SocketAPI::closeSocket(mSocket);
     }
 
     std::streamsize NetworkBuffer::xsgetn(char *buf, std::streamsize len)
     {
-        int result = SocketAPI::recv(mSocket, buf, len);
+        int result = mSocket.recv(buf, len);
         if (result == -1) {
             switch (SocketAPI::getError("recv")) {
             default:
@@ -37,7 +35,7 @@ namespace Network {
 
     std::streamsize NetworkBuffer::xsputn(const char *buf, std::streamsize len)
     {
-        int result = SocketAPI::send(mSocket, buf, len);
+        int result = mSocket.send(buf, len);
         if (result == -1) {
             switch (SocketAPI::getError("recv")) {
             default:
@@ -49,7 +47,7 @@ namespace Network {
 
     std::streamsize NetworkBuffer::showmanyc()
     {
-        return SocketAPI::in_available(mSocket);
+        return mSocket.in_available();
     }
 
     /*void NetworkBuffer::handleError()
