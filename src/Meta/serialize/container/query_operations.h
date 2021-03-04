@@ -3,6 +3,7 @@
 #include "query.h"
 #include "../streams/pendingrequest.h"
 #include "../streams/bufferedstream.h"
+#include "../unithelper.h"
 
 namespace Engine {
 namespace Serialize {
