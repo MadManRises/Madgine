@@ -3,6 +3,8 @@
 #include "copy_traits.h"
 #include "wrapreference.h"
 
+#include <experimental/future>
+
 namespace Engine {
 
 #if !defined(__cpp_lib_experimental_future_continuations) || __cpp_lib_experimental_future_continuations < 201505
@@ -270,7 +272,7 @@ private:
     struct DeferredBase {
         virtual ~DeferredBase() = default;
         virtual bool isAvailable() = 0;
-        virtual T get() && = 0;
+        virtual T get() = 0;
     };
 
     template <typename U, typename F>
@@ -287,7 +289,7 @@ private:
             return mFuture.isAvailable();
         }
 
-        T get() && override
+        T get() override
         {
             return std::move(mF)(std::move(mFuture).get());
         }
