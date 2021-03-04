@@ -100,7 +100,7 @@ namespace Plugins {
                 for (Plugin *dep : mDependencies) {
                     if (mName == dep->mName + "Tools") {
                         SharedFuture<bool> f = dep->state();
-                        if (f.isAvailable() && !f)
+                        if (f.is_ready() && !f)
                             dependencyList.emplace_back(dep->mSection->loadPlugin(barrier, dep));
                     } else {
                         dependencyList.emplace_back(dep->mSection->loadPlugin(barrier, dep));
@@ -114,7 +114,7 @@ namespace Plugins {
             barrier.queue(nullptr, [this, &manager, dependencyList { std::move(dependencyList) }, promise { std::move(promise) }, name { mName }]() mutable {
                 bool wait = false;
                 for (SharedFuture<bool> &f : dependencyList) {
-                    if (!f.isAvailable()) {
+                    if (!f.is_ready()) {
                         wait = true;
                     } else if (!f) {
                         LOG_ERROR("Load of dependency for plugin \"" << mName << "\" failed!");
@@ -148,7 +148,7 @@ namespace Plugins {
         barrier.queue(nullptr, [this, &manager, dependentList { std::move(dependentList) }, promise { std::move(promise) }]() mutable {
             bool wait = false;
             for (SharedFuture<bool> &f : dependentList) {
-                if (!f.isAvailable()) {
+                if (!f.is_ready()) {
                     wait = true;
                 } else if (f) {
                     LOG_ERROR("Unload of dependent for plugin \"" << mName << "\" failed!");
@@ -217,7 +217,7 @@ namespace Plugins {
     SharedFuture<bool> Plugin::startOperation(Operation op, std::optional<std::promise<bool>> &promise, std::optional<SharedFuture<bool>> &&future)
     {
         std::lock_guard lock { mMutex };
-        if (mState.isAvailable()) {
+        if (mState.is_ready()) {
             if (mState == (op == LOADING)) {
                 if (promise) {
                     promise->set_value(mState);
@@ -248,13 +248,13 @@ namespace Plugins {
     SharedFuture<bool> Plugin::state(Operation op)
     {
         std::lock_guard lock { mMutex };
-        assert(mState.isAvailable() || mOperation == op);
+        assert(mState.is_ready() || mOperation == op);
         return mState;
     }
 
     bool Plugin::isLoaded()
     {
-        return mState.isAvailable() && mState;
+        return mState.is_ready() && mState;
     }
 
     void Plugin::addDependency(PluginManager &manager, Plugin *dependency)

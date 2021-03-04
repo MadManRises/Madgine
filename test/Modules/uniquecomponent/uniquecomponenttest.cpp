@@ -39,17 +39,17 @@ TEST(UniqueComponent, Registry)
     ASSERT_EQ(v.size(), 0);
 
     Engine::SharedFuture<bool> f = pmgr["Test"].loadPlugin("LibA");
-    ASSERT_FALSE(f.isAvailable());
+    ASSERT_FALSE(f.is_ready());
     wg.enterCurrentBarrier(&taskQueue, 0, true);
-    ASSERT_TRUE(f.isAvailable());
+    ASSERT_TRUE(f.is_ready());
     ASSERT_EQ(f.get(), true);
 
     ASSERT_EQ(v.size(), 1);
 
     f = pmgr["Test"].loadPlugin("LibB");
-    ASSERT_FALSE(f.isAvailable());
+    ASSERT_FALSE(f.is_ready());
     wg.enterCurrentBarrier(&taskQueue, 0, true);
-    ASSERT_TRUE(f.isAvailable());
+    ASSERT_TRUE(f.is_ready());
     ASSERT_EQ(f.get(), true);
 
 
@@ -62,9 +62,9 @@ TEST(UniqueComponent, Registry)
 
 
     f = pmgr["Test"].unloadPlugin("LibB");
-    ASSERT_FALSE(f.isAvailable());
+    ASSERT_FALSE(f.is_ready());
     wg.enterCurrentBarrier(&taskQueue, 0, true);
-    ASSERT_TRUE(f.isAvailable());
+    ASSERT_TRUE(f.is_ready());
     ASSERT_EQ(f.get(), false);
 
     ASSERT_EQ(v.size(), 1);

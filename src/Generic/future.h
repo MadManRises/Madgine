@@ -3,9 +3,19 @@
 #include "copy_traits.h"
 #include "wrapreference.h"
 
+#ifdef __has_include // Check if __has_include is present
+#    if __has_include(<experimental/future>) // Check for an experimental version
+#        include <experimental/future>
+#    endif
+#endif
+
 namespace Engine {
 
-#if !defined(__cpp_lib_experimental_future_continuations) || __cpp_lib_experimental_future_continuations < 201505
+#if defined(__cpp_lib_experimental_future_continuations) && __cpp_lib_experimental_future_continuations < 201505
+
+#    define FUTURE_NAMESPACE std::experimental::
+
+#else
 
 template <typename T>
 std::future<T> make_ready_future(T &&t)
@@ -63,11 +73,11 @@ struct shared_future {
             std::move(mValue));
     }
 
-    bool isAvailable() const
+    bool is_ready() const
     {
         return std::visit(overloaded {
                               [](const std::shared_future<T> &f) { return f.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready; },
-                              [](const DeferredPtr &d) { return d->isAvailable(); } },
+                              [](const DeferredPtr &d) { return d->is_ready(); } },
             mValue);
     }
 
@@ -85,7 +95,7 @@ private:
 
     struct DeferredBase {
         virtual ~DeferredBase() = default;
-        virtual bool isAvailable() = 0;
+        virtual bool is_ready() = 0;
         virtual T &get() = 0;
     };
 
@@ -98,9 +108,9 @@ private:
         {
         }
 
-        bool isAvailable() override
+        bool is_ready() override
         {
-            return mResult || mFuture.isAvailable();
+            return mResult || mFuture.is_ready();
         }
 
         T &get() override
@@ -161,18 +171,18 @@ struct shared_future<void> {
         return { std::move(*this), std::forward<F>(f) };
     }
 
-    bool isAvailable() const
+    bool is_ready() const
     {
         return std::visit(overloaded {
                               [](const std::shared_future<void> &f) { return f.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready; },
-                              [](const std::unique_ptr<DeferredBase> &d) { return d->isAvailable(); } },
+                              [](const std::unique_ptr<DeferredBase> &d) { return d->is_ready(); } },
             mValue);
     }
 
 private:
     struct DeferredBase {
         virtual ~DeferredBase() = default;
-        virtual bool isAvailable() = 0;
+        virtual bool is_ready() = 0;
         virtual void get() = 0;
     };
 
@@ -185,9 +195,9 @@ private:
         {
         }
 
-        bool isAvailable() override
+        bool is_ready() override
         {
-            return mFuture.isAvailable();
+            return mFuture.is_ready();
         }
 
         void get() override
@@ -247,11 +257,11 @@ struct future {
             mValue);
     }
 
-    bool isAvailable() const
+    bool is_ready() const
     {
         return std::visit(overloaded {
                               [](const std::future<T> &f) { return f.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready; },
-                              [](const DeferredPtr &d) { return d->isAvailable(); } },
+                              [](const DeferredPtr &d) { return d->is_ready(); } },
             mValue);
     }
 
@@ -269,7 +279,7 @@ private:
 
     struct DeferredBase {
         virtual ~DeferredBase() = default;
-        virtual bool isAvailable() = 0;
+        virtual bool is_ready() = 0;
         virtual T get() = 0;
     };
 
@@ -282,9 +292,9 @@ private:
         {
         }
 
-        bool isAvailable() override
+        bool is_ready() override
         {
-            return mFuture.isAvailable();
+            return mFuture.is_ready();
         }
 
         T get() override
@@ -337,18 +347,18 @@ struct future<void> {
         return { std::move(*this), std::forward<F>(f) };
     }
 
-    bool isAvailable() const
+    bool is_ready() const
     {
         return std::visit(overloaded {
                               [](const std::future<void> &f) { return f.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready; },
-                              [](const std::unique_ptr<DeferredBase> &d) { return d->isAvailable(); } },
+                              [](const std::unique_ptr<DeferredBase> &d) { return d->is_ready(); } },
             mValue);
     }
 
 private:
     struct DeferredBase {
         virtual ~DeferredBase() = default;
-        virtual bool isAvailable() = 0;
+        virtual bool is_ready() = 0;
         virtual void get() = 0;
     };
 
@@ -361,9 +371,9 @@ private:
         {
         }
 
-        bool isAvailable() override
+        bool is_ready() override
         {
-            return mFuture.isAvailable();
+            return mFuture.is_ready();
         }
 
         void get() override
@@ -432,7 +442,7 @@ struct FutureWrapper : Fut<T> {
 
     operator decltype(std::declval<Fut<T>>().get())()
     {
-        if (!this->isAvailable())
+        if (!this->is_ready())
             throw 0;
         return this->get();
     }

@@ -87,7 +87,7 @@ namespace Tools {
                             }
                             bool loaded;
                             SharedFuture<bool> state = plugin.state();
-                            bool available = state.isAvailable();
+                            bool available = state.is_ready();
                             if (available)
                                 loaded = state.get();
                             else

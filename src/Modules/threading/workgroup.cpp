@@ -101,7 +101,7 @@ namespace Threading {
     {
         auto pivot = std::remove_if(mSubThreads.begin(), mSubThreads.end(),
             [](Future<int> &f) {
-                return f.isAvailable();
+                return f.is_ready();
             });
 
         for (auto it = pivot; it != mSubThreads.end(); ++it) {

@@ -96,7 +96,7 @@ namespace Plugins {
             std::promise<bool> p2;
             f2 = p2.get_future();
             barrier.queue(nullptr, [this, &barrier, f { std::move(f1) }, p { std::move(p2) }]() mutable {
-                if (!f.isAvailable())
+                if (!f.is_ready())
                     return Threading::YIELD;
                 Plugin exe { "MadgineLauncher", nullptr, {}, "" };
                 exe.load(*this, barrier, std::move(p));
@@ -109,7 +109,7 @@ namespace Plugins {
 
         if (!exportPlugins->empty()) {
             barrier.queue(nullptr, [this, &barrier, f { std::move(f2) }]() mutable {
-                if (!f.isAvailable())
+                if (!f.is_ready())
                     return Threading::YIELD;
 
                 auto helper = [this, &barrier](const Filesystem::Path &path, bool hasTools) {
@@ -152,7 +152,7 @@ namespace Plugins {
         barrier.enter(&queue, 0, true);
 
         for (Future<bool> &result : results) {
-            if (!result.isAvailable() || result)
+            if (!result.is_ready() || result)
                 throw 0;
         }
     }
@@ -236,7 +236,7 @@ namespace Plugins {
         barrier.queue(nullptr, [this, &barrier, futures { std::move(futures) }, p { std::move(p) }]() mutable {
             bool wait = false;
             for (auto it = futures.begin(); it != futures.end();) {
-                if (!it->isAvailable()) {
+                if (!it->is_ready()) {
                     wait = true;
                     ++it;
                 } else if (!*it) {

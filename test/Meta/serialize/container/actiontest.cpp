@@ -62,7 +62,7 @@ TEST(Serialize_Action, Action)
 
     Engine::Future<int> f1 = unit1.foo(1);
 
-    ASSERT_TRUE(f1.isAvailable());
+    ASSERT_TRUE(f1.is_ready());
     ASSERT_EQ(f1.get(), 2);
 
     ASSERT_EQ(unit1.mCallCount, 1);
@@ -76,7 +76,7 @@ TEST(Serialize_Action, Action)
 
     Engine::Future<int> f2 = unit2.foo(2);
 
-    ASSERT_FALSE(f2.isAvailable());
+    ASSERT_FALSE(f2.is_ready());
 
     ASSERT_EQ(unit1.mCallCount, 1);
     ASSERT_EQ(unit2.mCallCount, 1);
@@ -84,7 +84,7 @@ TEST(Serialize_Action, Action)
     mgr2.sendMessages();
     mgr1.receiveMessages(1, 1000ms);
 
-    ASSERT_FALSE(f2.isAvailable());
+    ASSERT_FALSE(f2.is_ready());
 
     ASSERT_EQ(unit1.mCallCount, 2);
     ASSERT_EQ(unit2.mCallCount, 1);
@@ -92,7 +92,7 @@ TEST(Serialize_Action, Action)
     mgr1.sendMessages();
     mgr2.receiveMessages(1, 1000ms);
 
-    ASSERT_TRUE(f2.isAvailable());
+    ASSERT_TRUE(f2.is_ready());
     ASSERT_EQ(f2.get(), 3);
 
     ASSERT_EQ(unit1.mCallCount, 2);
@@ -130,7 +130,7 @@ TEST(Serialize_Action, Action_Hierarchical)
 
     Engine::Future<int> f1 = unit1.foo(1);
 
-    ASSERT_TRUE(f1.isAvailable());
+    ASSERT_TRUE(f1.is_ready());
     ASSERT_EQ(f1.get(), 2);
 
     ASSERT_EQ(unit1.mCallCount, 1);
@@ -153,7 +153,7 @@ TEST(Serialize_Action, Action_Hierarchical)
 
     Engine::Future<int> f2 = unit3.foo(2);
 
-    ASSERT_FALSE(f2.isAvailable());
+    ASSERT_FALSE(f2.is_ready());
 
     ASSERT_EQ(unit1.mCallCount, 1);
     ASSERT_EQ(unit2.mCallCount, 1);
@@ -162,7 +162,7 @@ TEST(Serialize_Action, Action_Hierarchical)
     mgr3.sendMessages();
     mgr2.receiveMessages(1, 0ms);
 
-    ASSERT_FALSE(f2.isAvailable());
+    ASSERT_FALSE(f2.is_ready());
 
     ASSERT_EQ(unit1.mCallCount, 1);
     ASSERT_EQ(unit2.mCallCount, 1);
@@ -171,7 +171,7 @@ TEST(Serialize_Action, Action_Hierarchical)
     mgr2.sendMessages();
     mgr1.receiveMessages(1, 0ms);
 
-    ASSERT_FALSE(f2.isAvailable());
+    ASSERT_FALSE(f2.is_ready());
 
     ASSERT_EQ(unit1.mCallCount, 2);
     ASSERT_EQ(unit2.mCallCount, 1);
@@ -180,7 +180,7 @@ TEST(Serialize_Action, Action_Hierarchical)
     mgr1.sendMessages();
     mgr2.receiveMessages(1, 0ms);
 
-    ASSERT_FALSE(f2.isAvailable());
+    ASSERT_FALSE(f2.is_ready());
 
     ASSERT_EQ(unit1.mCallCount, 2);
     ASSERT_EQ(unit2.mCallCount, 2);
@@ -189,7 +189,7 @@ TEST(Serialize_Action, Action_Hierarchical)
     mgr2.sendMessages();
     mgr3.receiveMessages(1, 0ms);
     
-    ASSERT_TRUE(f2.isAvailable());
+    ASSERT_TRUE(f2.is_ready());
     ASSERT_EQ(f2.get(), 3);
 
     ASSERT_EQ(unit1.mCallCount, 2);
