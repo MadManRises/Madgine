@@ -110,6 +110,9 @@ namespace Serialize {
     enum Command {
         INITIAL_STATE_DONE
     };
+
+    template <typename, typename... Configs>
+    struct Operations;
 }
 
 namespace Network {

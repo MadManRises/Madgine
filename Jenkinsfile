@@ -3,7 +3,12 @@
  def axisList = [
     [//toolchains
 		[
-			name : "clang-linux",
+			name : "clang-linux-17",
+			dockerImage : 'schuetzo/linux-test-env:latest',
+			args : "-DCXX_STANDARD_OVERRIDE=17"
+		],
+		[
+			name : "clang-linux-20",
 			dockerImage : 'schuetzo/linux-test-env:latest',
 			args : ""
 		],

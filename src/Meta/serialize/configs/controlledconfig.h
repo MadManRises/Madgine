@@ -1,19 +1,23 @@
 #pragma once
 
-#include "Generic/comparator_traits.h"
-#include "physical.h"
-#include "Generic/makeowning.h"
-#include "../streams/serializestream.h"
 #include "../formatter.h"
+#include "../streams/serializestream.h"
+#include "Generic/comparator_traits.h"
+#include "Generic/makeowning.h"
+#include "../container/physical.h"
 
 namespace Engine {
 namespace Serialize {
 
-	template <typename Cmp>
-    struct ControlledConfig : comparator_traits<Cmp>{
-    
+    struct CreatorCategory;
+
+    template <typename Cmp>
+    struct ControlledConfig {
+
+        using Category = CreatorCategory;
+
         static const constexpr bool controlled = true;
-    
+
         static void writeItem(SerializeOutStream &out, const typename comparator_traits<Cmp>::item_type &t)
         {
             out.format().beginExtended(out, "Item", 1);
@@ -22,7 +26,8 @@ namespace Serialize {
         }
 
         template <typename Op>
-        static typename container_traits<Op>::iterator readItem(SerializeInStream& in, Op &op) {
+        static typename container_traits<Op>::iterator readItem(SerializeInStream &in, Op &op)
+        {
 
             in.format().beginExtended(in, "Item", 1);
             MakeOwning_t<typename comparator_traits<Cmp>::type> key;
@@ -33,7 +38,7 @@ namespace Serialize {
             if (it == physical(op).end())
                 std::terminate();
 
-            read(in, *it, "Item");     
+            read(in, *it, "Item");
 
             return it;
         }
@@ -44,7 +49,6 @@ namespace Serialize {
             if (op.size() < expected) //TODO: ?
                 std::terminate();
         }
-
     };
 
 }

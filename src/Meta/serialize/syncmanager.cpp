@@ -38,8 +38,8 @@ namespace Serialize {
             mSlaveStream.emplace(std::move(*other.mSlaveStream), this);
             other.mSlaveStream.reset();
         }
-        for (const BufferedInOutStream &stream : other.mMasterStreams) {
-            mMasterStreams.emplace(std::move(const_cast<BufferedInOutStream &>(stream)), this);
+        for (BufferedInOutStream &stream : other.mMasterStreams) {
+            mMasterStreams.emplace(std::move(stream), this);
         }
     }
 
@@ -89,9 +89,9 @@ namespace Serialize {
     {
         std::set<BufferedOutStream *, CompareStreamId> result;
 
-        for (const BufferedInOutStream &stream : mMasterStreams) {
+        for (BufferedInOutStream &stream : mMasterStreams) {
             //if (!stream.isClosed()) {
-            result.insert(const_cast<BufferedInOutStream *>(&stream));
+            result.insert(&stream);
             //}
         }
         return result;
@@ -202,8 +202,7 @@ namespace Serialize {
                 while (mReceivingMasterState) {
                     int msgCount = -1;
                     if (!receiveMessages(*mSlaveStream, msgCount)) {
-                        throw 0;
-                        //state = recordStreamError(mSlaveStream->state());
+                        state = recordStreamError(StreamState::UNKNOWN_ERROR);
                         mReceivingMasterState = false;
                     }
                     if (mReceivingMasterState && timeout.expired()) {
@@ -258,8 +257,7 @@ namespace Serialize {
         }
 
         if (!stream)
-            throw 0;
-        //return recordStreamError(stream.state());
+            return recordStreamError(StreamState::UNKNOWN_ERROR);
 
         mMasterStreams.emplace(std::move(stream));
         return SyncManagerResult::SUCCESS;
@@ -425,9 +423,9 @@ namespace Serialize {
         return mSlaveStream ? &*mSlaveStream : nullptr;
     }
 
-    std::set<BufferedInOutStream, CompareStreamId> &SyncManager::getMasterStreams()
+    BufferedInOutStream &SyncManager::getMasterStream(ParticipantId id)
     {
-        return mMasterStreams;
+        return *mMasterStreams.find(id);
     }
 
     const std::set<TopLevelUnitBase *> &

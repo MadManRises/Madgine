@@ -3,6 +3,7 @@
 #include "Meta/metalib.h"
 
 #include "Meta/serialize/container/query.h"
+#include "Meta/serialize/container/query_operations.h"
 #include "Meta/serialize/serializableunit.h"
 
 #include "Meta/serialize/toplevelunit.h"

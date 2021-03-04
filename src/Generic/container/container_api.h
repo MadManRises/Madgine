@@ -1,17 +1,15 @@
 #pragma once
 
+#include "../then.h"
 #include "sortedcontainerapi.h"
 #include "underlying_container.h"
-#include "../then.h"
 
 namespace Engine {
 
-	
 template <typename C, typename Base>
 struct container_api_impl : container_api_impl<C, typename underlying_container<Base>::type> {
     using container_api_impl<C, typename underlying_container<Base>::type>::operator=;
 };
-
 
 template <typename C>
 using container_api = container_api_impl<C, C>;
@@ -60,7 +58,6 @@ struct container_api_impl<C, std::list<Ty...>> : C {
         return C::back();
     }
 };
-
 
 template <typename C, typename... Ty>
 struct container_api_impl<C, std::vector<Ty...>> : C {
@@ -128,9 +125,9 @@ struct container_api_impl<C, std::vector<Ty...>> : C {
     }
 };
 
-
 template <typename C, typename... Ty>
 struct container_api_impl<C, std::set<Ty...>> : SortedContainerApi<C> {
+    using C::operator=;
 };
 
 template <typename C, typename K, typename T, typename... Ty>
@@ -155,6 +152,5 @@ struct container_api_impl<C, std::map<K, T, Ty...>> : SortedContainerApi<C> {
         return C::emplace(it, std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(std::forward<_Ty>(args)...));
     }
 };
-
 
 }

@@ -12,7 +12,7 @@
 
 #include "Generic/genericresult.h"
 
-#include "Generic/container/nonconst_set.h"
+#include "Generic/container/mutable_set.h"
 
 namespace Engine {
 namespace Serialize {
@@ -57,7 +57,7 @@ namespace Serialize {
         bool sendAllMessages(BufferedInOutStream &stream, TimeOut timeout = {});
 
         BufferedInOutStream *getSlaveStream();
-        std::set<BufferedInOutStream, CompareStreamId> &getMasterStreams();
+        BufferedInOutStream &getMasterStream(ParticipantId id);
 
         void removeAllStreams();
         SyncManagerResult setSlaveStream(BufferedInOutStream &&stream, bool receiveState = true, TimeOut timeout = {});
@@ -76,7 +76,7 @@ namespace Serialize {
 
         bool mReceivingMasterState;
 
-        NonConstSet<BufferedInOutStream, CompareStreamId> mMasterStreams;
+        mutable_set<BufferedInOutStream, CompareStreamId> mMasterStreams;
         std::optional<BufferedInOutStream> mSlaveStream;
 
         std::set<TopLevelUnitBase *> mTopLevelUnits; //TODO: Sort by MasterId    

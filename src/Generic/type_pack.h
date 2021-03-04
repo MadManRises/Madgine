@@ -209,13 +209,12 @@ private:
 public:
     using type = std::conditional_t<
         Filter<T>::value,
-        base,
-        type_pack_append_t<base, T>>;
+        type_pack_append_t<base, T>,
+        base>;
 };
 
 template <typename Pack, template <typename> typename Filter>
 using type_pack_filter_if_t = typename type_pack_filter_if<Pack, Filter>::type;
-
 
 template <typename V, typename T>
 struct variant_contains;
@@ -233,5 +232,27 @@ struct variant_index;
 template <typename T, typename... _Ty>
 struct variant_index<std::variant<_Ty...>, T> : type_pack_index<size_t, type_pack<_Ty...>, T> {
 };
+
+template <typename Pack, typename Default = void>
+struct type_pack_unpack_unique {
+    static_assert(dependent_bool<Pack, false>::value, "type_pack containing 2 elements passed to type_pack_unpack_unique");
+};
+
+template <typename Unique, typename Default>
+struct type_pack_unpack_unique<type_pack<Unique>, Default> {
+    using type = Unique;
+};
+
+template <typename Default>
+struct type_pack_unpack_unique<type_pack<>, Default> {
+    using type = Default;
+};
+
+template <>
+struct type_pack_unpack_unique<type_pack<>, void> {
+};
+
+template <typename Pack, typename Default = void>
+using type_pack_unpack_unique_t = typename type_pack_unpack_unique<Pack, Default>::type;
 
 }

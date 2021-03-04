@@ -88,9 +88,7 @@ namespace Scene {
 
             EntityComponentOwningHandle<EntityComponentBase> emplace(const ObjectPtr &table, Entity *entity) override final
             {
-                return {
-                    static_cast<uint32_t>(&mData.emplace_back(std::piecewise_construct, std::forward_as_tuple(table), std::make_tuple(entity)) - mData.data()), static_cast<uint32_t>(component_index<T>())
-                };
+                return { { static_cast<uint32_t>(&mData.emplace_back(std::piecewise_construct, std::forward_as_tuple(table), std::make_tuple(entity)) - mData.data()), static_cast<uint32_t>(component_index<T>()) } };
             }
 
             void erase(const EntityComponentHandle<EntityComponentBase> &index) override final

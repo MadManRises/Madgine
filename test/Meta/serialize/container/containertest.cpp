@@ -27,12 +27,16 @@ struct TestUnit : TopLevelUnit<TestUnit> {
     }
 
     SERIALIZABLE_CONTAINER(list1, std::list<int>);
-    SYNCABLE_CONTAINER(list2, std::list<int>, ContainerPolicies::allowAll);
+    SERIALIZABLE_CONTAINER(set1, std::set<int>);
+    SYNCABLE_CONTAINER(list2, std::list<int>);
+    SYNCABLE_CONTAINER(set2, std::set<int>);
 };
 
 SERIALIZETABLE_BEGIN(TestUnit)
 FIELD(list1)
 FIELD(list2)
+FIELD(set1)
+FIELD(set2)
 SERIALIZETABLE_END(TestUnit)
 
 TEST(Serialize_Container, SyncedUnit)
@@ -51,6 +55,9 @@ TEST(Serialize_Container, SyncedUnit)
     unit1.list2.emplace(unit1.list2.end(), 1);
     unit1.list2.emplace(unit1.list2.end(), 2);
 
+    unit1.set1 = { 1, 2, 3 };
+    unit2.set1 = { 4, 5, 6 };
+
     ASSERT_TRUE(mgr1.addTopLevelItem(&unit1));
     ASSERT_TRUE(mgr2.addTopLevelItem(&unit2));
 
@@ -61,6 +68,7 @@ TEST(Serialize_Container, SyncedUnit)
 
     ASSERT_EQ(unit1.list1, unit2.list1);
     ASSERT_EQ(unit1.list2, unit2.list2);
+    ASSERT_EQ(unit1.set1, unit2.set1);
 
     bool called = false;
     unit1.list2.emplace(unit1.list2.end(), 6).onSuccess([&](auto &&pib) {

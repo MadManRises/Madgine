@@ -3,6 +3,7 @@
 #include "Meta/metalib.h"
 
 #include "Meta/serialize/container/action.h"
+#include "Meta/serialize/container/action_operations.h"
 #include "Meta/serialize/serializableunit.h"
 
 #include "Meta/serialize/toplevelunit.h"
@@ -36,7 +37,7 @@ struct ActionTestUnit : TopLevelUnit<ActionTestUnit> {
 };
 
 SERIALIZETABLE_BEGIN(ActionTestUnit)
-SYNC(foo, Engine::Serialize::ActionPolicy::broadcast)
+SYNC(foo)
 SERIALIZETABLE_END(ActionTestUnit)
 
 TEST(Serialize_Action, Action)

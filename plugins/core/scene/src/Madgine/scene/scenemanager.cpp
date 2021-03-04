@@ -21,7 +21,7 @@
 
 #include "entity/entitycomponentlistbase.h"
 
-#include "Meta/serialize/container/controlledconfig.h"
+#include "Meta/serialize/configs/controlledconfig.h"
 
 UNIQUECOMPONENT(Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>);
 
@@ -33,7 +33,7 @@ MEMBER(mSceneComponents)
 METATABLE_END(Engine::Scene::SceneManager)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::SceneManager)
-FIELD(mEntities, Serialize::ParentCreator<&Engine::Scene::SceneManager::createNonLocalEntityData, &Engine::Scene::SceneManager::storeEntityCreationData>)
+FIELD(mEntities, Serialize::ParentCreator<&Engine::Scene::SceneManager::createNonLocalEntityData, &Engine::Scene::SceneManager::storeEntityCreationData>, Serialize::RequestPolicy::no_requests)
 FIELD(mSceneComponents, Serialize::ControlledConfig<KeyCompare<std::unique_ptr<Engine::Scene::SceneComponentBase>>>)
 SERIALIZETABLE_END(Engine::Scene::SceneManager)
 
@@ -147,9 +147,6 @@ namespace Scene {
 
     void SceneManager::clear()
     {
-        //for (const std::unique_ptr<Entity::EntityComponentListBase> &list : mEntityComponentLists)
-        //    list->clear();
-
         mEntities.clear();
         mLocalEntities.clear();
     }
@@ -168,11 +165,6 @@ namespace Scene {
     {
         return mPauseStack > 0;
     }
-
-    /*Entity::Entity *SceneManager::makeLocalCopy(Entity::Entity &e)
-    {
-        return &mLocalEntities.emplace_back(e, true);
-    }*/
 
     Entity::Entity *SceneManager::makeLocalCopy(Entity::Entity &&e)
     {
@@ -196,11 +188,6 @@ namespace Scene {
         return std::make_tuple(
             std::make_pair("name", entity.name()));
     }
-
-    /*Threading::SignalStub<const decltype(SceneManager::mEntities)::iterator &, int> &SceneManager::entitiesSignal()
-    {
-        return mEntities.observer().signal();
-    }*/
 
     Future<Entity::EntityPtr> SceneManager::createEntity(const std::string &behavior, const std::string &name,
         const std::function<void(Entity::Entity &)> &init)

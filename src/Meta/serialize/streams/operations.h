@@ -1,7 +1,9 @@
 #pragma once
 
+#include "../configs/configselector.h"
+#include "../configs/creationconfig.h"
+#include "../configs/requestpolicy.h"
 #include "../container/physical.h"
-#include "../creationhelper.h"
 #include "../formatter.h"
 #include "../primitivetypes.h"
 #include "../serializableunitptr.h"
@@ -31,8 +33,11 @@ namespace Serialize {
     template <typename T, typename... Configs, typename Hierarchy = std::monostate>
     void write(SerializeOutStream &out, const T &t, const char *name, const Hierarchy &hierarchy = {}, StateTransmissionFlags flags = 0);
 
-    template <typename C, typename Config = DefaultCreator<typename C::value_type>>
+    template <typename C, typename... Configs>
     struct ContainerOperations {
+
+        using Creator = ConfigSelectorDefault<CreatorCategory, DefaultCreator<typename C::value_type>, Configs...>;
+        using RequestPolicy = ConfigSelectorDefault<RequestPolicyCategory, RequestPolicy::all_requests, Configs...>;
 
         template <typename Op, typename Hierarchy = std::monostate>
         static void readOp(SerializeInStream &in, Op &op, const char *name, const Hierarchy &hierarchy = {})
@@ -45,10 +50,10 @@ namespace Serialize {
             in.format().beginCompound(in, name);
 
             if constexpr (!container_traits<C>::is_fixed_size) {
-                TupleUnpacker::invoke(&Config::template clear<Op>, op, size, hierarchy);
+                TupleUnpacker::invoke(&Creator::template clear<Op>, op, size, hierarchy);
 
                 while (size--) {
-                    TupleUnpacker::invoke(&Config::template readItem<Op>, in, op, physical(op).end(), hierarchy);
+                    TupleUnpacker::invoke(&Creator::template readItem<Op>, in, op, physical(op).end(), hierarchy);
                 }
             } else {
                 assert(op.size() == size);
@@ -74,7 +79,7 @@ namespace Serialize {
             Serialize::write<uint32_t>(out, container.size(), "size");
             out.format().beginCompound(out, name);
             for (const auto &t : container) {
-                TupleUnpacker::invoke(&Config::writeItem, out, t, std::forward<Args>(args)...);
+                TupleUnpacker::invoke(&Creator::writeItem, out, t, std::forward<Args>(args)...);
             }
             out.format().endCompound(out, name);
         }
@@ -102,7 +107,7 @@ namespace Serialize {
                 }
                 decltype(auto) op = insertOperation(c, it, answerTarget, answerId);
                 typename container_traits<C>::const_iterator cit = static_cast<const typename container_traits<C>::iterator &>(it);
-                it = TupleUnpacker::invoke(&Config::template readItem<InsertOperation_t<C>>, in, op, cit, std::forward<Args>(args)...);
+                it = TupleUnpacker::invoke(&Creator::template readItem<InsertOperation_t<C>>, in, op, cit, std::forward<Args>(args)...);
                 break;
             }
             case ERASE: {
@@ -127,9 +132,9 @@ namespace Serialize {
         }
 
         //TODO: Maybe move loop out of this function
-        template <typename... Args> 
+        template <typename... Args>
         static void writeAction(const C &c, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *_data, Args &&... args)
-        {         
+        {
             const std::tuple<ContainerEvent, typename C::const_iterator> &data = *static_cast<const std::tuple<ContainerEvent, typename C::const_iterator> *>(_data);
 
             ContainerEvent op = std::get<0>(data);
@@ -142,7 +147,7 @@ namespace Serialize {
                     if constexpr (!container_traits<C>::sorted) {
                         writeIterator(*out, c, it);
                     }
-                    TupleUnpacker::invoke(&Config::writeItem, *out, *it, std::forward<Args>(args)...);
+                    TupleUnpacker::invoke(&Creator::writeItem, *out, *it, std::forward<Args>(args)...);
                     break;
                 }
                 case ERASE: {
@@ -170,20 +175,22 @@ namespace Serialize {
                     (*request)(&it);
                 }
             } else {
-                if (request) {
-                    if (request->mRequesterTransactionId) {
-                        BufferedOutStream &out = c.getActionResponseTarget(request->mRequester, request->mRequesterTransactionId);
-                        out << op;
-                        out.endMessage();
-                    }
-                    (*request)(nullptr);
+                assert(request);
+                if (request->mRequesterTransactionId) {
+                    BufferedOutStream &out = c.getActionResponseTarget(request->mRequester, request->mRequesterTransactionId);
+                    out << op;
+                    out.endMessage();
                 }
+                (*request)(nullptr);
             }
         }
 
         template <typename... Args>
         static void writeRequest(const C &c, BufferedOutStream &out, const void *_data, Args &&... args)
         {
+            if (RequestPolicy::sCallByMasterOnly)
+                throw 0;
+
             const std::tuple<ContainerEvent, typename C::const_iterator, typename C::value_type &> &data = *static_cast<const std::tuple<ContainerEvent, typename C::const_iterator, typename C::value_type &> *>(_data);
             ContainerEvent op = std::get<0>(data);
             out << op;
@@ -192,7 +199,7 @@ namespace Serialize {
                 if constexpr (!container_traits<C>::sorted) {
                     writeIterator(out, c, std::get<1>(data));
                 }
-                TupleUnpacker::invoke(&Config::writeItem, out, std::get<2>(data), std::forward<Args>(args)...);
+                TupleUnpacker::invoke(&Creator::writeItem, out, std::get<2>(data), std::forward<Args>(args)...);
                 break;
             }
             default:
@@ -204,7 +211,7 @@ namespace Serialize {
         template <typename... Args>
         static void readRequest(C &c, BufferedInOutStream &inout, TransactionId id, Args &&... args)
         {
-            bool accepted = true; //(Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS); //Check TODO
+            bool accepted = !RequestPolicy::sCallByMasterOnly;
 
             ContainerEvent op;
             inout >> op;

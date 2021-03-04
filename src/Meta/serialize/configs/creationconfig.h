@@ -2,14 +2,18 @@
 
 #include "Generic/callerhierarchy.h"
 #include "Generic/functor.h"
-#include "formatter.h"
-#include "streams/serializestream.h"
+#include "../formatter.h"
+#include "../streams/serializestream.h"
 
 namespace Engine {
 namespace Serialize {
 
+    struct CreatorCategory;
+
     template <typename FirstCreator, typename SecondCreator>
     struct PairCreator : private FirstCreator, private SecondCreator {
+
+        using Category = CreatorCategory;
 
         static const constexpr bool controlled = false;
 
@@ -24,6 +28,7 @@ namespace Serialize {
 
     template <typename T>
     struct DefaultCreator {
+        using Category = CreatorCategory;
 
         static const constexpr bool controlled = false;
 
@@ -68,32 +73,6 @@ namespace Serialize {
         }
     };
 
-    /*namespace __creationhelper__impl__{
-			template <typename R, typename T, typename... _Ty>
-			struct _CustomCreator
-			{
-				using ArgsTuple = R;
-
-				void setCreator(const std::function<R(_Ty ...)>& f)
-				{
-					mCallback = f;
-				}
-
-				R readCreationData(SerializeInStream& in)
-				{
-					std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> tuple;
-					in >> tuple;
-					return TupleUnpacker::invokeExpand(mCallback, std::move(tuple));
-				}
-
-			private:
-				std::function<R(_Ty ...)> mCallback;
-			};
-		}
-
-		template <typename F>
-		using CustomCreator = typename CallableTraits<F>::template instance<__creationhelper__impl__::_CustomCreator>::type;*/
-
     namespace __creationhelper__impl__ {
 
         struct DefaultClear {
@@ -106,6 +85,8 @@ namespace Serialize {
 
         template <auto reader, typename WriteFunctor, typename ClearFunctor, typename R, typename T, typename... _Ty>
         struct _ParentCreator : WriteFunctor {
+
+            using Category = CreatorCategory;
 
             static const constexpr bool controlled = false;
 

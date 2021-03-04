@@ -2,40 +2,38 @@
 
 #if WINDOWS
 
-#define NOMINMAX
-#include <Windows.h>
+#    define NOMINMAX
+#    include <Windows.h>
 
-#include "threadapi.h"
+#    include "threadapi.h"
 
 namespace Engine {
-	namespace Threading {
+namespace Threading {
 
-		void setCurrentThreadName(const std::string & name)
-		{
-			std::wstring wstring;
-			wstring.reserve(name.size());
-			std::copy(name.begin(), name.end(), std::back_inserter(wstring));
-			SetThreadDescription(
-				GetCurrentThread(),
-				wstring.c_str()
-			);			
-		}
+    void setCurrentThreadName(const std::string &name)
+    {
+        std::wstring wstring;
+        wstring.reserve(name.size());
+        std::copy(name.begin(), name.end(), std::back_inserter(wstring));
+        SetThreadDescription(
+            GetCurrentThread(),
+            wstring.c_str());
+    }
 
-		std::string getCurrentThreadName()
-		{
-			std::string result;
-			PWSTR buffer;
-			if (SUCCEEDED(GetThreadDescription(GetCurrentThread(), &buffer)))
-			{
-				size_t len = wcslen(buffer);
-				result.reserve(len);
-				std::copy(buffer, buffer + len, std::back_inserter(result));
-				LocalFree(buffer);
-			}
-			return result;
-		}
+    std::string getCurrentThreadName()
+    {
+        std::string result;
+        PWSTR buffer;
+        if (SUCCEEDED(GetThreadDescription(GetCurrentThread(), &buffer))) {
+            size_t len = wcslen(buffer);
+            result.reserve(len);
+            std::copy(buffer, buffer + len, std::back_inserter(result));
+            LocalFree(buffer);
+        }
+        return result;
+    }
 
-	}
+}
 }
 
 #endif

@@ -147,6 +147,10 @@ namespace Scene {
         struct EntityComponentOwningHandle {
             EntityComponentHandle<T> mHandle;
 
+            EntityComponentOwningHandle(EntityComponentHandle<T> handle)
+                : mHandle(std::move(handle))
+            {
+            }
             EntityComponentOwningHandle(const EntityComponentOwningHandle<T> &other) = delete;
             EntityComponentOwningHandle(EntityComponentOwningHandle<T> &&other) = default;
 

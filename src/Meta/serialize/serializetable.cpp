@@ -186,7 +186,7 @@ namespace Serialize {
             tables.pop();
         }
 
-        std::terminate();
+        throw 0;
     }
 
     const Serializer &SerializeTable::get(uint8_t index) const

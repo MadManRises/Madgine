@@ -116,7 +116,7 @@ struct TestManager : Engine::Serialize::SyncManager {
             return *getSlaveStream();
         } else {
             addMasterStream(Engine::Serialize::BufferedInOutStream { std::move(buf), std::make_unique<Engine::Serialize::SafeBinaryFormatter>(), *this, 1 }, shareState);
-            return const_cast<BufferedInOutStream &>(*getMasterStreams().find(1));
+            return getMasterStream(1);
         }
     }
 };

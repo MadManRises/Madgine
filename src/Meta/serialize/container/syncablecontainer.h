@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Generic/container/container_api.h"
-#include "Generic/container/containerevent.h"
-#include "Generic/future.h"
-#include "Generic/functor.h"
-#include "Generic/onetimefunctor.h"
 #include "../streams/pendingrequest.h"
 #include "../syncable.h"
+#include "Generic/container/container_api.h"
+#include "Generic/container/containerevent.h"
+#include "Generic/functor.h"
+#include "Generic/future.h"
+#include "Generic/onetimefunctor.h"
 #include "requestbuilder.h"
 #include "serializablecontainer.h"
 
@@ -31,28 +31,11 @@ namespace Serialize {
     template <typename F>
     EmplaceRequestBuilder(F &&f) -> EmplaceRequestBuilder<Builder<F, EmplaceRequestBuilder, 4>>;
 
-    namespace __syncablecontainer__impl__ {
-        enum RequestMode {
-            ALL_REQUESTS,
-            NO_REQUESTS
-        };
-
-        template <RequestMode mode>
-        struct ContainerPolicy {
-            static constexpr RequestMode requestMode = mode;
-        };
-    }
-
-    struct ContainerPolicies {
-        using allowAll = __syncablecontainer__impl__::ContainerPolicy<__syncablecontainer__impl__::ALL_REQUESTS>;
-        using masterOnly = __syncablecontainer__impl__::ContainerPolicy<__syncablecontainer__impl__::NO_REQUESTS>;
-    };
-
-    template <typename C, typename Config, typename Observer = NoOpFunctor, typename controlled = std::false_type, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
+    template <typename C, typename Observer = NoOpFunctor, typename controlled = std::false_type, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
     struct SyncableContainerImpl : SerializableContainerImpl<C, Observer, controlled, OffsetPtr>, Syncable<OffsetPtr> {
 
         using _traits = container_traits<C>;
-        using container_t = SyncableContainerImpl<C, Config, Observer, controlled, OffsetPtr>;
+        using container_t = SyncableContainerImpl<C, Observer, controlled, OffsetPtr>;
 
         typedef SerializableContainerImpl<C, Observer, controlled, OffsetPtr> Base;
 
@@ -67,23 +50,20 @@ namespace Serialize {
         SyncableContainerImpl(SyncableContainerImpl &&other) = default;
 
         template <typename T>
-        SyncableContainerImpl<C, Config, Observer, controlled, OffsetPtr> &operator=(T &&arg)
+        SyncableContainerImpl<C, Observer, controlled, OffsetPtr> &operator=(T &&arg)
         {
             if (this->isMaster()) {
                 ResetOperation { *this } = std::forward<T>(arg);
             } else {
-                if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
-                    std::pair<ContainerEvent, Base> temp { RESET, std::forward<T>(arg) };
+                std::pair<ContainerEvent, Base> temp { RESET, std::forward<T>(arg) };
 
-                    this->writeRequest(&temp);//??? Is the temp object used?
-                } else {
-                    std::terminate();
-                }
+                this->writeRequest(&temp); //??? Is the temp object used?
             }
             return *this;
         }
 
-        SyncableContainerImpl<C, Config, Observer, controlled, OffsetPtr>& operator=(SyncableContainerImpl<C, Config, Observer, controlled, OffsetPtr>&& other) {
+        SyncableContainerImpl<C, Observer, controlled, OffsetPtr> &operator=(SyncableContainerImpl<C, Observer, controlled, OffsetPtr> &&other)
+        {
             Base::operator=(std::move(other));
             return *this;
         }
@@ -93,12 +73,8 @@ namespace Serialize {
             if (this->isMaster()) {
                 ResetOperation { *this }.clear();
             } else {
-                if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
-                    ContainerEvent op = RESET;
-                    this->writeRequest(&op);
-                } else {
-                    std::terminate();
-                }
+                ContainerEvent op = RESET;
+                this->writeRequest(&op);
             }
         }
 
@@ -112,19 +88,15 @@ namespace Serialize {
                         executeCallbacks(it, std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onResult)>(onResult));
                         return it;
                     } else {
-                        if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
-                            std::promise<typename _traits::emplace_return> p;
-                            Future<typename _traits::emplace_return> future = p.get_future();
+                        std::promise<typename _traits::emplace_return> p;
+                        Future<typename _traits::emplace_return> future = p.get_future();
 
-                            value_type temp = TupleUnpacker::constructFromTuple<value_type>(std::move(args));
-                            TupleUnpacker::forEach(std::forward<decltype(init)>(init), [&](auto &&f) { TupleUnpacker::invoke(f, temp); });
-                            std::tuple<ContainerEvent, const_iterator, const value_type &> data { EMPLACE, where, temp };
-                            this->writeRequest(&data, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
+                        value_type temp = TupleUnpacker::constructFromTuple<value_type>(std::move(args));
+                        TupleUnpacker::forEach(std::forward<decltype(init)>(init), [&](auto &&f) { TupleUnpacker::invoke(f, temp); });
+                        std::tuple<ContainerEvent, const_iterator, const value_type &> data { EMPLACE, where, temp };
+                        this->writeRequest(&data, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
 
-                            return future;
-                        } else {
-                            std::terminate();
-                        }
+                        return future;
                     }
                 }
             };
@@ -139,18 +111,14 @@ namespace Serialize {
                         executeCallbacks(it, std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onResult)>(onResult));
                         return it;
                     } else {
-                        if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
-                            std::promise<iterator> p;
-                            Future<iterator> future = p.get_future();
+                        std::promise<iterator> p;
+                        Future<iterator> future = p.get_future();
 
-                            std::tuple<ContainerEvent, const_iterator> data { ERASE, where };
+                        std::tuple<ContainerEvent, const_iterator> data { ERASE, where };
 
-                            this->writeRequest(&data, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
+                        this->writeRequest(&data, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
 
-                            return future;
-                        } else {
-                            std::terminate();
-                        }
+                        return future;
                     }
                 }
             };
@@ -166,19 +134,15 @@ namespace Serialize {
                         executeCallbacks(it, std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onResult)>(onResult));
                         return it;
                     } else {
-                        if constexpr (Config::requestMode == __syncablecontainer__impl__::ALL_REQUESTS) {
-                            std::promise<iterator> p;
-                            Future<iterator> future = p.get_future();
+                        std::promise<iterator> p;
+                        Future<iterator> future = p.get_future();
 
-                            std::tuple<ContainerEvent, const_iterator, const_iterator> data { ERASE_RANGE, from,
-                                to };
+                        std::tuple<ContainerEvent, const_iterator, const_iterator> data { ERASE_RANGE, from,
+                            to };
 
-                            this->writeRequest(&data, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
+                        this->writeRequest(&data, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
 
-                            return future;
-                        } else {
-                            std::terminate();
-                        }
+                        return future;
                     }
                 }
             };
@@ -253,7 +217,7 @@ namespace Serialize {
             }
             ~_ResetOperation()
             {
-                if (this->mContainer.isSynced()) {                    
+                if (this->mContainer.isSynced()) {
                     ContainerEvent op = RESET;
                     container().writeAction(&op, mAnswerTarget, mAnswerId);
                 }
@@ -264,7 +228,6 @@ namespace Serialize {
                 return static_cast<container_t &>(this->mContainer);
             }
 
-            
             using Base::ResetOperation::operator=;
 
         private:
@@ -320,21 +283,21 @@ namespace Serialize {
         }
     };
 
-    template <typename C, typename Config, typename Observer = NoOpFunctor, typename controlled = std::false_type, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
-    using SyncableContainer = container_api<SyncableContainerImpl<C, Config, Observer, controlled, OffsetPtr>>;
+    template <typename C, typename Observer = NoOpFunctor, typename controlled = std::false_type, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
+    using SyncableContainer = container_api<SyncableContainerImpl<C, Observer, controlled, OffsetPtr>>;
 
 #define SYNCABLE_CONTAINER(Name, ...) OFFSET_CONTAINER(Name, ::Engine::Serialize::SyncableContainer<__VA_ARGS__>)
 
 }
 
-template <typename C, typename Config, typename Observer, typename controlled, typename _OffsetPtr>
-struct underlying_container<Serialize::SyncableContainerImpl<C, Config, Observer, controlled, _OffsetPtr>> {
+template <typename C, typename Observer, typename controlled, typename _OffsetPtr>
+struct underlying_container<Serialize::SyncableContainerImpl<C, Observer, controlled, _OffsetPtr>> {
     typedef C type;
 };
 
-template <typename C, typename Config, typename Observer, typename controlled, typename _OffsetPtr>
-struct container_traits<Serialize::SyncableContainerImpl<C, Config, Observer, controlled, _OffsetPtr>> : container_traits<C> {
-    typedef Serialize::SyncableContainerImpl<C, Config, Observer, controlled, _OffsetPtr> container;
+template <typename C, typename Observer, typename controlled, typename _OffsetPtr>
+struct container_traits<Serialize::SyncableContainerImpl<C, Observer, controlled, _OffsetPtr>> : container_traits<C> {
+    typedef Serialize::SyncableContainerImpl<C, Observer, controlled, _OffsetPtr> container;
 
     using _traits = container_traits<C>;
 

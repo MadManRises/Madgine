@@ -108,7 +108,7 @@ namespace Scene {
     private:
         Entity::EntityComponentListContainer<std::vector<Placeholder<0>>> mEntityComponentLists;
 
-        SYNCABLE_CONTAINER(mEntities, refcounted_deque<Entity::Entity>, Serialize::ContainerPolicies::masterOnly, Threading::SignalFunctor<const refcounted_deque<Entity::Entity>::iterator &, int>);
+        SYNCABLE_CONTAINER(mEntities, refcounted_deque<Entity::Entity>, Threading::SignalFunctor<const refcounted_deque<Entity::Entity>::iterator &, int>);
         refcounted_deque<Entity::Entity> mLocalEntities;
 
         Threading::DataMutex mMutex;
@@ -130,8 +130,6 @@ namespace Scene {
             };
             return transformIt<Helper>(mEntities.blocks());
         }
-
-        //Threading::SignalStub<const decltype(mEntities)::iterator &, int> &entitiesSignal();
     };
 
 }
