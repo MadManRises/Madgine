@@ -5,127 +5,92 @@
 
 namespace Engine {
 
-template <typename T, typename F>
+template <typename T>
+std::future<T> make_ready_future(T &&t)
+{
+    std::promise<T> p;
+    p.set_value(std::forward<T>(t));
+    return p.get_future();
+}
+
+inline std::future<void> make_ready_future()
+{
+    std::promise<void> p;
+    p.set_value();
+    return p.get_future();
+}
+
+template <typename T, template <typename> typename Fut, typename F>
 struct DeferredFuture;
 
 template <typename T>
-struct Future {
+struct shared_future {
 
-    Future() = default;
+    shared_future() = default;
+    shared_future(const shared_future<T> &) = default;
+    shared_future(shared_future<T> &&) = default;
 
-    Future(Future<T> &&) = default;
+    shared_future<T> &operator=(shared_future<T> &&) = default;
 
-    Future<T> &operator=(Future<T> &&) = default;
-
-    Future(T value)
-        : mValue(std::move(value))
-    {
-    }
-
-    Future(std::future<T> future)
-        : mValue(std::move(future))
-    {
-        assert(std::get<std::future<T>>(mValue).valid());
-    }
-
-    Future(std::shared_future<T> future)
+    shared_future(std::shared_future<T> future)
         : mValue(std::move(future))
     {
         assert(std::get<std::shared_future<T>>(mValue).valid());
     }
 
     template <typename U, typename F>
-    Future(Future<U> deferred, F &&f)
+    shared_future(shared_future<U> deferred, F &&f)
         : mValue(std::make_unique<DeferredImpl<U, F>>(std::move(deferred), std::forward<F>(f)))
     {
     }
 
-    template <typename, typename>
+    template <typename, template <typename> typename, typename>
     friend struct DeferredFuture;
 
     template <typename F>
-    DeferredFuture<T, F> then(F &&f) &&
+    DeferredFuture<T, shared_future, F> then(F &&f) &&
     {
         return { std::move(*this), std::forward<F>(f) };
     }
 
-    template <typename U, typename = std::enable_if_t<std::is_constructible_v<U, T>>>
-    operator Future<U>() &&
-    {
-        return std::move(*this).then([](T &&t) { return U { std::forward<T>(t) }; });
-    }
-
-    operator const T &()
-    {
-        if (!isAvailable())
-            throw 0;
-        return get();
-    }
-
-    const T &get() &
-    {
-        if (!std::holds_alternative<T>(mValue)) {
-            mValue.template emplace<T>(std::visit(overloaded {
-                                                      [](const T &t) -> T { throw 0; },
-                                                      [](std::future<T> &f) -> T { return f.get(); },
-                                                      [](std::shared_future<T> &f) -> T { return f.get(); },
-                                                      [](const DeferredPtr &d) -> T { return std::move(*d).get(); } },
-                mValue));
-        }
-        return std::get<0>(mValue);
-    }
-
-    T get() &&
+    const T &get() const
     {
         return std::visit(overloaded {
-                              [](T &&t) -> T { return std::move(t); },
-                              [](std::future<T> &&f) -> T { return std::move(f).get(); },
-                              [](std::shared_future<T> &&f) -> T { return std::move(f).get(); },
-                              [](const DeferredPtr &d) -> T {
-                                  return std::move(*d).get();
-                              } },
+                              [](const std::shared_future<T> &f) -> const T & { return f.get(); },
+                              [](const DeferredPtr &d) -> const T & { return std::move(*d).get(); } },
             std::move(mValue));
     }
 
     bool isAvailable() const
     {
         return std::visit(overloaded {
-                              [](const T &t) { return true; },
-                              [](const std::future<T> &f) { return f.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready; },
                               [](const std::shared_future<T> &f) { return f.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready; },
                               [](const DeferredPtr &d) { return d->isAvailable(); } },
             mValue);
     }
 
-    Future<T> share()
+    shared_future<T> share() const
     {
-        if (std::holds_alternative<std::future<T>>(mValue)) {
-            std::future<T> f { std::move(std::get<std::future<T>>(mValue)) };
-            mValue.template emplace<std::shared_future<T>>(std::move(f));
-        }
         return std::visit(overloaded {
-                              [](const T &t) -> Future<T> { return t; },
-                              [](const std::future<T> &f) -> Future<T> { throw 0; },
-                              [](const std::shared_future<T> &f) -> Future<T> { return f; },
-                              [](const DeferredPtr &d) -> Future<T> { return d->clone(); } },
+                              [](const std::shared_future<T> &f) -> shared_future<T> { return f; },
+                              [](const DeferredPtr &d) -> shared_future<T> { return d; } },
             mValue);
     }
 
 private:
     struct DeferredBase;
-    using DeferredPtr = std::unique_ptr<DeferredBase>;
+    using DeferredPtr = std::shared_ptr<DeferredBase>;
 
     struct DeferredBase {
         virtual ~DeferredBase() = default;
         virtual bool isAvailable() = 0;
-        virtual T get() && = 0;
-        virtual DeferredPtr clone() = 0;
+        virtual T &get() = 0;
     };
 
     template <typename U, typename F>
     struct DeferredImpl : DeferredBase {
 
-        DeferredImpl(Future<U> future, F &&f)
+        DeferredImpl(shared_future<U> future, F &&f)
             : mFuture(std::move(future))
             , mF(std::forward<F>(f))
         {
@@ -133,12 +98,14 @@ private:
 
         bool isAvailable() override
         {
-            return mFuture.isAvailable();
+            return mResult || mFuture.isAvailable();
         }
 
-        T get() && override
+        T &get() override
         {
-            return std::move(mF)(std::move(mFuture).get());
+            if (!mResult)
+                mResult = std::move(mF)(mFuture.get());
+            return mResult;
         }
 
         virtual DeferredPtr clone() override
@@ -147,46 +114,47 @@ private:
         }
 
     private:
-        Future<U> mFuture;
+        std::optional<T> mResult;
+        shared_future<U> mFuture;
         std::remove_reference_t<F> mF;
     };
 
-    Future(DeferredPtr &&ptr)
-        : mValue(std::move(ptr))
+    shared_future(const DeferredPtr ptr)
+        : mValue(ptr)
     {
         assert(std::get<DeferredPtr>(mValue));
     }
 
 private:
-    std::variant<wrap_reference_t<T>, std::future<T>, std::shared_future<T>, DeferredPtr> mValue;
+    std::variant<std::shared_future<T>, DeferredPtr> mValue;
 };
 
 template <>
-struct Future<void> {
+struct shared_future<void> {
 
-    Future() = default;
+    shared_future() = default;
 
-    Future(Future<void> &&) = default;
+    shared_future(shared_future<void> &&) = default;
 
-    Future<void> &operator=(Future<void> &&) = default;
+    shared_future<void> &operator=(shared_future<void> &&) = default;
 
-    Future(std::future<void> future)
+    shared_future(std::shared_future<void> future)
         : mValue(std::move(future))
     {
-        assert(std::get<std::future<void>>(mValue).valid());
+        assert(std::get<std::shared_future<void>>(mValue).valid());
     }
 
     template <typename U, typename F>
-    Future(Future<U> deferred, F &&f)
+    shared_future(shared_future<U> deferred, F &&f)
         : mValue(std::make_unique<DeferredImpl<U, F>>(std::move(deferred), std::forward<F>(f)))
     {
     }
 
-    template <typename, typename>
+    template <typename, template <typename> typename, typename>
     friend struct DeferredFuture;
 
     template <typename F>
-    DeferredFuture<void, F> then(F &&f) &&
+    DeferredFuture<void, shared_future, F> then(F &&f) &&
     {
         return { std::move(*this), std::forward<F>(f) };
     }
@@ -194,8 +162,7 @@ struct Future<void> {
     bool isAvailable() const
     {
         return std::visit(overloaded {
-                              [](const std::monostate &t) { return true; },
-                              [](const std::future<void> &f) { return f.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready; },
+                              [](const std::shared_future<void> &f) { return f.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready; },
                               [](const std::unique_ptr<DeferredBase> &d) { return d->isAvailable(); } },
             mValue);
     }
@@ -210,7 +177,7 @@ private:
     template <typename U, typename F>
     struct DeferredImpl : DeferredBase {
 
-        DeferredImpl(Future<U> future, F &&f)
+        DeferredImpl(shared_future<U> future, F &&f)
             : mFuture(std::move(future))
             , mF(std::forward<F>(f))
         {
@@ -227,39 +194,210 @@ private:
         }
 
     private:
-        Future<U> mFuture;
+        shared_future<U> mFuture;
         std::remove_reference_t<F> mF;
     };
 
 private:
-    std::variant<std::monostate, std::future<void>, std::unique_ptr<DeferredBase>> mValue;
+    std::variant<std::shared_future<void>, std::unique_ptr<DeferredBase>> mValue;
 };
 
-template <typename T, typename F>
+template <typename T>
+struct future {
+
+    future() = default;
+
+    future(future<T> &&) = default;
+
+    future<T> &operator=(future<T> &&) = default;
+
+    future(T value)
+        : mValue(make_ready_future(std::forward<T>(value)))
+    {
+    }
+
+    future(std::future<T> future)
+        : mValue(std::move(future))
+    {
+        assert(std::get<std::future<T>>(mValue).valid());
+    }
+
+    template <typename U, typename F>
+    future(future<U> deferred, F &&f)
+        : mValue(std::make_unique<DeferredImpl<U, F>>(std::move(deferred), std::forward<F>(f)))
+    {
+    }
+
+    template <typename, template <typename> typename, typename>
+    friend struct DeferredFuture;
+
+    template <typename F>
+    DeferredFuture<T, future, F> then(F &&f)
+    {
+        return { std::move(*this), std::forward<F>(f) };
+    }
+
+    T get()
+    {
+        return std::visit(overloaded {
+                              [](std::future<T> &&f) -> T { return std::move(f).get(); },
+                              [](const DeferredPtr &d) -> T { return std::move(*d).get(); } },
+            std::move(mValue));
+    }
+
+    bool isAvailable() const
+    {
+        return std::visit(overloaded {
+                              [](const std::future<T> &f) { return f.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready; },
+                              [](const DeferredPtr &d) { return d->isAvailable(); } },
+            mValue);
+    }
+
+    shared_future<T> share()
+    {
+        return std::visit(overloaded {
+                              [](const std::future<T> &f) -> shared_future<T> { return f.share() },
+                              [](const DeferredPtr &d) -> shared_future<T> { return d->clone(); } },
+            mValue);
+    }
+
+private:
+    struct DeferredBase;
+    using DeferredPtr = std::unique_ptr<DeferredBase>;
+
+    struct DeferredBase {
+        virtual ~DeferredBase() = default;
+        virtual bool isAvailable() = 0;
+        virtual T get() && = 0;
+    };
+
+    template <typename U, typename F>
+    struct DeferredImpl : DeferredBase {
+
+        DeferredImpl(future<U> future, F &&f)
+            : mFuture(std::move(future))
+            , mF(std::forward<F>(f))
+        {
+        }
+
+        bool isAvailable() override
+        {
+            return mFuture.isAvailable();
+        }
+
+        T get() && override
+        {
+            return std::move(mF)(std::move(mFuture).get());
+        }
+
+    private:
+        future<U> mFuture;
+        std::remove_reference_t<F> mF;
+    };
+
+    future(DeferredPtr &&ptr)
+        : mValue(std::move(ptr))
+    {
+        assert(std::get<DeferredPtr>(mValue));
+    }
+
+private:
+    std::variant<std::future<T>, DeferredPtr> mValue;
+};
+
+template <>
+struct future<void> {
+
+    future() = default;
+
+    future(future<void> &&) = default;
+
+    future<void> &operator=(future<void> &&) = default;
+
+    future(std::future<void> future)
+        : mValue(std::move(future))
+    {
+        assert(std::get<std::future<void>>(mValue).valid());
+    }
+
+    template <typename U, typename F>
+    future(future<U> deferred, F &&f)
+        : mValue(std::make_unique<DeferredImpl<U, F>>(std::move(deferred), std::forward<F>(f)))
+    {
+    }
+
+    template <typename, template <typename> typename, typename>
+    friend struct DeferredFuture;
+
+    template <typename F>
+    DeferredFuture<void, future, F> then(F &&f)
+    {
+        return { std::move(*this), std::forward<F>(f) };
+    }
+
+    bool isAvailable() const
+    {
+        return std::visit(overloaded {
+                              [](const std::future<void> &f) { return f.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready; },
+                              [](const std::unique_ptr<DeferredBase> &d) { return d->isAvailable(); } },
+            mValue);
+    }
+
+private:
+    struct DeferredBase {
+        virtual ~DeferredBase() = default;
+        virtual bool isAvailable() = 0;
+        virtual void get() = 0;
+    };
+
+    template <typename U, typename F>
+    struct DeferredImpl : DeferredBase {
+
+        DeferredImpl(future<U> future, F &&f)
+            : mFuture(std::move(future))
+            , mF(std::forward<F>(f))
+        {
+        }
+
+        bool isAvailable() override
+        {
+            return mFuture.isAvailable();
+        }
+
+        void get() override
+        {
+            mF(mFuture.get());
+        }
+
+    private:
+        future<U> mFuture;
+        std::remove_reference_t<F> mF;
+    };
+
+private:
+    std::variant<std::future<void>, std::unique_ptr<DeferredBase>> mValue;
+};
+
+template <typename T, template <typename> typename Fut, typename F>
 struct DeferredFuture {
 
-    DeferredFuture(Future<T> future, F &&f)
+    DeferredFuture(Fut<T> future, F &&f)
         : mFuture(std::move(future))
         , mF(std::forward<F>(f))
     {
     }
 
-    std::invoke_result_t<F, T> get()
+    std::invoke_result_t<F, T> get() &&
     {
         return mF(mFuture.get());
     }
 
-    operator Future<std::invoke_result_t<F, T>>() &&
+    operator future<std::invoke_result_t<F, T>>() &&
     {
         return std::visit(overloaded {
-                              [this](T &&t) { return Future<std::invoke_result_t<F, T>> { mF(std::forward<T>(t)) }; },
-                              [this](auto &&other) { return Future<std::invoke_result_t<F, T>> { std::move(mFuture), std::move(mF) }; } },
+                              [this](T &&t) { return future<std::invoke_result_t<F, T>> { mF(std::forward<T>(t)) }; },
+                              [this](auto &&other) { return future<std::invoke_result_t<F, T>> { std::move(mFuture), std::move(mF) }; } },
             std::move(mFuture.mValue));
-    }
-
-    operator std::invoke_result_t<F, T>()
-    {
-        return get();
     }
 
     template <typename G>
@@ -268,11 +406,58 @@ struct DeferredFuture {
         auto modified_f = [g { std::forward<G>(g) }, f { std::move(mF) }](auto &&arg) {
             return g(f(std::forward<decltype(arg)>(arg)));
         };
-        return DeferredFuture<T, decltype(modified_f)> { std::move(mFuture), std::move(modified_f) };
+        return DeferredFuture<T, Fut, decltype(modified_f)> { std::move(mFuture), std::move(modified_f) };
     }
 
 private:
-    Future<T> mFuture;
+    Fut<T> mFuture;
     F mF;
 };
+
+template <typename T, template <typename> typename Fut>
+struct FutureWrapper : Fut<T> {
+    using Fut<T>::Fut;
+
+    FutureWrapper(Fut<T> f)
+        : Fut<T>(std::move(f))
+    {
+    }
+
+    FutureWrapper(T value)
+        : Fut<T>(make_ready_future(std::forward<T>(value)))
+    {
+    }
+
+    operator decltype(std::declval<Fut<T>>().get())()
+    {
+        if (!this->isAvailable())
+            throw 0;
+        return this->get();
+    }
+
+    template <typename U, typename = std::enable_if_t<std::is_constructible_v<U, T>>>
+    operator FutureWrapper<U, Fut>()
+    {
+        return this->then([](T &&t) { return U { std::forward<T>(t) }; });
+    }
+};
+
+#define FUTURE_NAMESPACE
+
+template <template <typename> typename Fut>
+struct FutureWrapper<void, Fut> : Fut<void> {
+    using Fut<void>::Fut;
+
+    FutureWrapper()
+        : Fut<void>(FUTURE_NAMESPACE make_ready_future())
+    {
+    }
+};
+
+template <typename T>
+using Future = FutureWrapper<T, FUTURE_NAMESPACE future>;
+
+template <typename T>
+using SharedFuture = FutureWrapper<T, FUTURE_NAMESPACE shared_future>;
+
 }

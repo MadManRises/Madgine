@@ -38,7 +38,7 @@ TEST(UniqueComponent, Registry)
 
     ASSERT_EQ(v.size(), 0);
 
-    Engine::Future<bool> f = pmgr["Test"].loadPlugin("LibA");
+    Engine::SharedFuture<bool> f = pmgr["Test"].loadPlugin("LibA");
     ASSERT_FALSE(f.isAvailable());
     wg.enterCurrentBarrier(&taskQueue, 0, true);
     ASSERT_TRUE(f.isAvailable());

@@ -33,7 +33,8 @@ namespace Plugins {
     CLI::Parameter<std::string> loadPlugins { { "--load-plugins", "-lp" }, "", "If set the pluginmanager will load the specified config file after loading the cached plugin-file." };
     CLI::Parameter<std::string> exportPlugins { { "--export-plugins", "-ep" }, "", "If set the pluginmanager will save the current plugin selection after the boot to the specified config file and will export a corresponding uniquecomponent configuration source file." };
 
-    static Filesystem::Path cacheFileName() {
+    static Filesystem::Path cacheFileName()
+    {
         return Filesystem::appDataPath() / ("plugins.cfg");
     }
 
@@ -110,7 +111,7 @@ namespace Plugins {
             barrier.queue(nullptr, [this, &barrier, f { std::move(f2) }]() mutable {
                 if (!f.isAvailable())
                     return Threading::YIELD;
-                
+
                 auto helper = [this, &barrier](const Filesystem::Path &path, bool hasTools) {
                     Ini::IniFile file;
                     LOG("Saving Plugins to '" << path << "'");
@@ -152,7 +153,7 @@ namespace Plugins {
 
         for (Future<bool> &result : results) {
             if (!result.isAvailable() || result)
-                std::terminate();
+                throw 0;
         }
     }
 
@@ -234,12 +235,15 @@ namespace Plugins {
 
         barrier.queue(nullptr, [this, &barrier, futures { std::move(futures) }, p { std::move(p) }]() mutable {
             bool wait = false;
-            for (Future<bool> &f : futures) {
-                if (!f.isAvailable())
+            for (auto it = futures.begin(); it != futures.end();) {
+                if (!it->isAvailable()) {
                     wait = true;
-                else if (!f) {
+                    ++it;
+                } else if (!*it) {
                     p.set_value(false);
                     return Threading::RETURN;
+                } else {
+                    it = futures.erase(it);
                 }
             }
             if (wait)

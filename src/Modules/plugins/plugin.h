@@ -35,10 +35,10 @@ namespace Plugins {
             UNLOADING
         };
 
-        Future<bool> startOperation(Operation op, std::optional<std::promise<bool>> &promise, std::optional<Future<bool>> &&future);
+        SharedFuture<bool> startOperation(Operation op, std::optional<std::promise<bool>> &promise, std::optional<SharedFuture<bool>> &&future);
 
-        Future<bool> state();
-        Future<bool> state(Operation op);
+        SharedFuture<bool> state();
+        SharedFuture<bool> state(Operation op);
         bool isLoaded();
 
         friend struct PluginManager;
@@ -61,7 +61,7 @@ namespace Plugins {
         std::string mName;
         Filesystem::Path mPath;
         
-        Future<bool> mState;
+        SharedFuture<bool> mState;
 
         std::vector<Plugin *> mDependencies;
         std::vector<Plugin *> mDependents;

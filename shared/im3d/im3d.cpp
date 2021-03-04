@@ -405,7 +405,6 @@ namespace Im3D {
         };
         indices[1] = 1;
 
-        constexpr float sqrt2 = sqrtf(2.0f);
 
         Vector3 p = d.perpendicular();
         p.normalize();

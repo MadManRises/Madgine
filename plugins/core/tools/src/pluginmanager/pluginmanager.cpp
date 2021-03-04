@@ -86,10 +86,10 @@ namespace Tools {
                                 ImGui::PushDisabled();
                             }
                             bool loaded;
-                            Future<bool> state = plugin.state();
+                            SharedFuture<bool> state = plugin.state();
                             bool available = state.isAvailable();
                             if (available)
-                                loaded = state;
+                                loaded = state.get();
                             else
                                 ImGui::PushItemFlag(ImGuiItemFlags_MixedValue, true);
                             bool clicked = false;

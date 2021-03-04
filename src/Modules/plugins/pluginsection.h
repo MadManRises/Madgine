@@ -19,7 +19,7 @@ namespace Plugins {
         bool isAtleastOne() const;
         bool isExclusive() const;
 
-        Future<bool> load(Threading::Barrier &barrier);
+        SharedFuture<bool> load(Threading::Barrier &barrier);
         Future<bool> unload(Threading::Barrier &barrier);
 
         enum State {
@@ -29,10 +29,10 @@ namespace Plugins {
         };
 
         State isLoaded(const std::string &name);
-        Future<bool> loadPlugin(const std::string &name);
-        Future<bool> unloadPlugin(const std::string &name);
+        SharedFuture<bool> loadPlugin(const std::string &name);
+        SharedFuture<bool> unloadPlugin(const std::string &name);
 
-        bool loadPluginByFilename(const std::string &name);
+        SharedFuture<bool> loadPluginByFilename(const std::string &name);
 
         void addListener(PluginListener *listener);
         void removeListener(PluginListener *listener);
@@ -56,8 +56,8 @@ namespace Plugins {
         Plugin *getPlugin(const std::string &name);
 
     private:
-        Future<bool> loadPlugin(Threading::Barrier &barrier, Plugin *p, std::optional<std::promise<bool>> &&promise = {}, std::optional<Future<bool>> &&future = {});
-        Future<bool> unloadPlugin(Threading::Barrier &barrier, Plugin *p, std::optional<std::promise<bool>> &&promise = {}, std::optional<Future<bool>> &&future = {});
+        SharedFuture<bool> loadPlugin(Threading::Barrier &barrier, Plugin *p, std::optional<std::promise<bool>> &&promise = {}, std::optional<SharedFuture<bool>> &&future = {});
+        SharedFuture<bool> unloadPlugin(Threading::Barrier &barrier, Plugin *p, std::optional<std::promise<bool>> &&promise = {}, std::optional<SharedFuture<bool>> &&future = {});
 
         friend struct Plugin;
 

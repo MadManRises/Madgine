@@ -94,12 +94,12 @@ namespace Plugins {
             return;
         } else {
 
-            std::vector<Future<bool>> dependencyList;
+            std::vector<SharedFuture<bool>> dependencyList;
             {
                 std::lock_guard lock { mMutex };
                 for (Plugin *dep : mDependencies) {
                     if (mName == dep->mName + "Tools") {
-                        Future<bool> f = dep->state();
+                        SharedFuture<bool> f = dep->state();
                         if (f.isAvailable() && !f)
                             dependencyList.emplace_back(dep->mSection->loadPlugin(barrier, dep));
                     } else {
@@ -113,7 +113,7 @@ namespace Plugins {
 
             barrier.queue(nullptr, [this, &manager, dependencyList { std::move(dependencyList) }, promise { std::move(promise) }, name { mName }]() mutable {
                 bool wait = false;
-                for (Future<bool> &f : dependencyList) {
+                for (SharedFuture<bool> &f : dependencyList) {
                     if (!f.isAvailable()) {
                         wait = true;
                     } else if (!f) {
@@ -138,7 +138,7 @@ namespace Plugins {
 
     void Plugin::unload(PluginManager &manager, Threading::Barrier &barrier, std::promise<bool> &&promise)
     {
-        std::vector<Future<bool>> dependentList;
+        std::vector<SharedFuture<bool>> dependentList;
         std::vector<Plugin *> dependents = mDependents;
         for (Plugin *dep : dependents) {
             std::promise<bool> depPromise;
@@ -147,7 +147,7 @@ namespace Plugins {
 
         barrier.queue(nullptr, [this, &manager, dependentList { std::move(dependentList) }, promise { std::move(promise) }]() mutable {
             bool wait = false;
-            for (Future<bool> &f : dependentList) {
+            for (SharedFuture<bool> &f : dependentList) {
                 if (!f.isAvailable()) {
                     wait = true;
                 } else if (f) {
@@ -214,7 +214,7 @@ namespace Plugins {
         return mSection;
     }
 
-    Future<bool> Plugin::startOperation(Operation op, std::optional<std::promise<bool>> &promise, std::optional<Future<bool>> &&future)
+    SharedFuture<bool> Plugin::startOperation(Operation op, std::optional<std::promise<bool>> &promise, std::optional<SharedFuture<bool>> &&future)
     {
         std::lock_guard lock { mMutex };
         if (mState.isAvailable()) {
@@ -230,26 +230,26 @@ namespace Plugins {
                 if (future)
                     mState = std::move(*future);
                 else
-                    mState = promise->get_future();
+                    mState = promise->get_future().share();
             }
         } else {
             assert(!promise);
             assert(mOperation == op);
         }
-        return mState.share();
+        return mState;
     }
 
-    Future<bool> Plugin::state()
+    SharedFuture<bool> Plugin::state()
     {
         std::lock_guard lock { mMutex };
-        return mState.share();
+        return mState;
     }
 
-    Future<bool> Plugin::state(Operation op)
+    SharedFuture<bool> Plugin::state(Operation op)
     {
         std::lock_guard lock { mMutex };
         assert(mState.isAvailable() || mOperation == op);
-        return mState.share();
+        return mState;
     }
 
     bool Plugin::isLoaded()

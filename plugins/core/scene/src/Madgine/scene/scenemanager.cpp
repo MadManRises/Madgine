@@ -209,7 +209,7 @@ namespace Scene {
             f = TupleUnpacker::invokeExpand(&decltype(mEntities)::emplace<SceneManager &, bool, std::string, ObjectPtr>, &mEntities, mEntities.end(), tuple_cat(createEntityData(name, false), std::make_tuple(table))).init(initWrap);
         } else
             f = TupleUnpacker::invokeExpand(&decltype(mEntities)::emplace<SceneManager &, bool, std::string, ObjectPtr>, &mEntities, mEntities.end(), tuple_cat(createEntityData(name, false), std::make_tuple(table)));
-        return std::move(f).then([](const typename refcounted_deque<Entity::Entity>::iterator &it) { return Entity::EntityPtr { it.get_block() }; });
+        return { f.then([](const typename refcounted_deque<Entity::Entity>::iterator &it) { return Entity::EntityPtr { it.get_block() }; }) };
     }
 
     Entity::EntityPtr SceneManager::createLocalEntity(const std::string &behavior, const std::string &name)

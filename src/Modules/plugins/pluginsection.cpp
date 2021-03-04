@@ -61,13 +61,13 @@ namespace Plugins {
         return mExclusive;
     }
 
-    Future<bool> PluginSection::load(Threading::Barrier &barrier)
+    SharedFuture<bool> PluginSection::load(Threading::Barrier &barrier)
     {
         if (mAtleastOne) {
             if (mPlugins.empty())
                 throw exception("No plugin available in Section tagged as atleastOne: "s + mName);
             for (std::pair<const std::string, Plugin> &p : mPlugins) {
-                Future<bool> state = p.second.state(Plugin::LOADING);
+                SharedFuture<bool> state = p.second.state(Plugin::LOADING);
                 if (!state.isAvailable() || state)
                     return state;
             }
@@ -79,7 +79,7 @@ namespace Plugins {
 
     Future<bool> PluginSection::unload(Threading::Barrier &barrier)
     {
-        std::vector<Future<bool>> dependentsList;
+        std::vector<SharedFuture<bool>> dependentsList;
 
         for (Plugin *p : mDependents) {
             dependentsList.emplace_back(p->section()->unloadPlugin(barrier, p));
@@ -90,7 +90,7 @@ namespace Plugins {
 
         barrier.queue(nullptr, [this, &barrier, dependentsList { std::move(dependentsList) }, promise { std::move(promise) }]() mutable {
             bool wait = false;
-            for (Future<bool> &f : dependentsList) {
+            for (SharedFuture<bool> &f : dependentsList) {
                 if (!f.isAvailable()) {
                     wait = true;
                 } else if (f) {
@@ -101,13 +101,13 @@ namespace Plugins {
             if (wait) {
                 return Threading::YIELD;
             } else {
-                std::vector<Future<bool>> results;
+                std::vector<SharedFuture<bool>> results;
                 for (Plugin &p : kvValues(mPlugins)) {
                     results.emplace_back(unloadPlugin(barrier, &p));
                 }
                 barrier.queue(nullptr, [this, results { std::move(results) }, promise { std::move(promise) }]() mutable {
                     bool wait = false;
-                    for (Future<bool> &f : results) {
+                    for (SharedFuture<bool> &f : results) {
                         if (!f.isAvailable()) {
                             wait = true;
                         } else if (f) {
@@ -133,7 +133,7 @@ namespace Plugins {
     {
         auto it = mPlugins.find(name);
         if (it != mPlugins.end()) {
-            Future<bool> state = it->second.state();
+            SharedFuture<bool> state = it->second.state();
             if (!state.isAvailable())
                 return UNDEFINED;
             return state ? LOADED : UNLOADED;
@@ -141,37 +141,37 @@ namespace Plugins {
         return UNLOADED;
     }
 
-    Future<bool> PluginSection::loadPlugin(const std::string &name)
+    SharedFuture<bool> PluginSection::loadPlugin(const std::string &name)
     {
         Plugin *plugin = getPlugin(name);
         if (!plugin)
             return false;
         std::promise<bool> p;
-        Future<bool> f { p.get_future() };
+        SharedFuture<bool> f { p.get_future().share() };
         Threading::Barrier &barrier = Threading::WorkGroup::barrier(Threading::Barrier::RUN_ONLY_ON_MAIN_THREAD);
-        barrier.queue(nullptr, [=, &barrier, p { std::move(p) }, f { f.share() }]() mutable {
+        barrier.queue(nullptr, [=, &barrier, p { std::move(p) }]() mutable {
             loadPlugin(barrier, plugin, std::move(p), std::move(f));
             mMgr.onUpdate(barrier);
         });
         return f;
     }
 
-    Future<bool> PluginSection::unloadPlugin(const std::string &name)
+    SharedFuture<bool> PluginSection::unloadPlugin(const std::string &name)
     {
         Plugin *plugin = getPlugin(name);
         if (!plugin)
             return false;
         std::promise<bool> p;
-        Future<bool> f { p.get_future() };
+        SharedFuture<bool> f { p.get_future().share() };
         Threading::Barrier &barrier = Threading::WorkGroup::barrier(Threading::Barrier::RUN_ONLY_ON_MAIN_THREAD);
-        barrier.queue(nullptr, [=, &barrier, p { std::move(p) }, f { f.share() }]() mutable {
+        barrier.queue(nullptr, [=, &barrier, p { std::move(p) }]() mutable {
             unloadPlugin(barrier, plugin, std::move(p), std::move(f));
             mMgr.onUpdate(barrier);
         });
         return f;
     }
 
-    bool PluginSection::loadPluginByFilename(const std::string &name)
+    SharedFuture<bool> PluginSection::loadPluginByFilename(const std::string &name)
     {
         auto pib = mPlugins.try_emplace(name, name);
         assert(pib.second);
@@ -206,11 +206,11 @@ namespace Plugins {
         return &it->second;
     }
 
-    Future<bool> PluginSection::loadPlugin(Threading::Barrier &barrier, Plugin *p, std::optional<std::promise<bool>> &&promise, std::optional<Future<bool>> &&future)
+    SharedFuture<bool> PluginSection::loadPlugin(Threading::Barrier &barrier, Plugin *p, std::optional<std::promise<bool>> &&promise, std::optional<SharedFuture<bool>> &&future)
     {
         assert(p->section() == this);
 
-        Future<bool> resultFuture = p->startOperation(Plugin::LOADING, promise, std::move(future));
+        SharedFuture<bool> resultFuture = p->startOperation(Plugin::LOADING, promise, std::move(future));
 
         if (promise) {
             std::vector<Future<void>> listenerFeedbacks;
@@ -220,12 +220,12 @@ namespace Plugins {
                     listenerFeedbacks.emplace_back(listener->aboutToLoadPlugin(p));
             }
 
-            barrier.queue(nullptr, [this, p, &barrier, promise { std::move(*promise) }, listenerFeedbacks { std::move(listenerFeedbacks) }, resultFuture { resultFuture.share() }]() mutable {
+            barrier.queue(nullptr, [this, p, &barrier, promise { std::move(*promise) }, listenerFeedbacks { std::move(listenerFeedbacks) }, resultFuture]() mutable {
                 for (Future<void> &f : listenerFeedbacks)
                     if (!f.isAvailable())
                         return Threading::YIELD;
 
-                Future<bool> result = true;
+                SharedFuture<bool> result = true;
                 Plugin *unloadExclusive
                     = nullptr;
                 if (mExclusive) {
@@ -284,11 +284,11 @@ namespace Plugins {
         return resultFuture;
     }
 
-    Future<bool> PluginSection::unloadPlugin(Threading::Barrier &barrier, Plugin *p, std::optional<std::promise<bool>> &&promise, std::optional<Future<bool>> &&future)
+    SharedFuture<bool> PluginSection::unloadPlugin(Threading::Barrier &barrier, Plugin *p, std::optional<std::promise<bool>> &&promise, std::optional<SharedFuture<bool>> &&future)
     {
         assert(p->section() == this);
 
-        Future<bool> result = p->startOperation(Plugin::UNLOADING, promise, std::move(future));
+        SharedFuture<bool> result = p->startOperation(Plugin::UNLOADING, promise, std::move(future));
 
         if (promise) {
 
@@ -348,7 +348,7 @@ namespace Plugins {
 
     Future<bool> PluginSection::loadFromIni(Threading::Barrier &barrier, const Ini::IniSection &sec)
     {
-        std::vector<std::pair<Future<bool>, bool>> futures;
+        std::vector<std::pair<SharedFuture<bool>, bool>> futures;
 
         for (const std::pair<const std::string, std::string> &p : sec) {
             Plugin *plugin = getPlugin(p.first);
@@ -368,7 +368,7 @@ namespace Plugins {
 
         barrier.queue(nullptr, [futures { std::move(futures) }, promise { std::move(p) }]() mutable {
             bool wait = false;
-            for (std::pair<Future<bool>, bool> &p : futures) {
+            for (std::pair<SharedFuture<bool>, bool> &p : futures) {
                 if (!p.first.isAvailable())
                     wait = true;
                 else if (p.first != p.second) {
