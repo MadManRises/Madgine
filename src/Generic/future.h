@@ -5,6 +5,8 @@
 
 namespace Engine {
 
+#if !defined(__cpp_lib_experimental_future_continuations) || __cpp_lib_experimental_future_continuations < 201505
+
 template <typename T>
 std::future<T> make_ready_future(T &&t)
 {
@@ -240,9 +242,9 @@ struct future {
     T get()
     {
         return std::visit(overloaded {
-                              [](std::future<T> &&f) -> T { return std::move(f).get(); },
-                              [](const DeferredPtr &d) -> T { return std::move(*d).get(); } },
-            std::move(mValue));
+                              [](std::future<T> &f) -> T { return f.get(); },
+                              [](const DeferredPtr &d) -> T { return d->get(); } },
+            mValue);
     }
 
     bool isAvailable() const
@@ -256,8 +258,8 @@ struct future {
     shared_future<T> share()
     {
         return std::visit(overloaded {
-                              [](const std::future<T> &f) -> shared_future<T> { return f.share() },
-                              [](const DeferredPtr &d) -> shared_future<T> { return d->clone(); } },
+                              [](std::future<T> &f) -> shared_future<T> { return f.share(); },
+                              [](DeferredPtr &d) -> shared_future<T> { return std::move(d); } },
             mValue);
     }
 
@@ -436,13 +438,15 @@ struct FutureWrapper : Fut<T> {
     }
 
     template <typename U, typename = std::enable_if_t<std::is_constructible_v<U, T>>>
-    operator FutureWrapper<U, Fut>()
+    operator FutureWrapper<U, future>()
     {
         return this->then([](T &&t) { return U { std::forward<T>(t) }; });
     }
 };
 
-#define FUTURE_NAMESPACE
+#    define FUTURE_NAMESPACE
+
+#endif
 
 template <template <typename> typename Fut>
 struct FutureWrapper<void, Fut> : Fut<void> {
