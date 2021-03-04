@@ -11,7 +11,7 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "Meta/serialize/configs/controlledconfig.h"
+#include "Meta/serialize/configs/controlled.h"
 
 #include "guihandler.h"
 #include "gamehandler.h"

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "query.h"
+#include "../streams/pendingrequest.h"
+#include "../streams/bufferedstream.h"
 
 namespace Engine {
 namespace Serialize {

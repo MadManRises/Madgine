@@ -22,7 +22,7 @@
 
 #include "mainwindowcomponent.h"
 
-#include "Meta/serialize/configs/controlledconfig.h"
+#include "Meta/serialize/configs/controlled.h"
 
 #include "Interfaces/filesystem/api.h"
 #include "Interfaces/window/windowsettings.h"

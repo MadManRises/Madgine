@@ -2,8 +2,10 @@
 
 #include "action.h"
 #include "../configs/configselector.h"
-#include "../configs/verifierconfig.h"
+#include "../configs/verifier.h"
 #include "../configs/requestpolicy.h"
+#include "../streams/pendingrequest.h"
+#include "../streams/bufferedstream.h"
 
 namespace Engine {
 namespace Serialize {

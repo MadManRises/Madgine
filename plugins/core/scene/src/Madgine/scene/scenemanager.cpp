@@ -21,7 +21,7 @@
 
 #include "entity/entitycomponentlistbase.h"
 
-#include "Meta/serialize/configs/controlledconfig.h"
+#include "Meta/serialize/configs/controlled.h"
 
 UNIQUECOMPONENT(Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>);
 
