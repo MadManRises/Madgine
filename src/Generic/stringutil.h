@@ -20,7 +20,7 @@ namespace StringUtil {
     constexpr std::string_view trim(std::string_view s) {
         auto begin = std::find_if_not(s.begin(), s.end(), [](char c) { return std::isspace(c); });
         auto end = std::find_if_not(s.rbegin(), s.rend(), [](char c) { return std::isspace(c); });
-        return { begin, end.base() };
+        return { &*begin, static_cast<size_t>(end.base() - begin) };
     }
 
     constexpr std::string_view substr(std::string_view s, int start, int end) {
