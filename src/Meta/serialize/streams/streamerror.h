@@ -27,6 +27,14 @@ namespace Serialize {
         size_t mLine;
         std::stringstream mMsg;
 
+        StreamResultBuilder(StreamState type, SerializeInStream &stream, const char *file, size_t line)
+            : mType(type)
+            , mStream(stream)
+            , mFile(file)
+            , mLine(line)
+        {
+        }
+
         operator StreamResult();
 
         template <typename T>
@@ -37,7 +45,7 @@ namespace Serialize {
         }
     };
 
-#define STREAM_ERROR(Stream, Type, ...) ::Engine::Serialize::StreamResultBuilder { Type, Stream, __FILE__, __LINE__ , {}} << __VA_ARGS__;
+#define STREAM_ERROR(Stream, Type, ...) ::Engine::Serialize::StreamResultBuilder { Type, Stream, __FILE__, __LINE__ } << __VA_ARGS__;
 #define STREAM_PARSE_ERROR(Stream, ...) STREAM_ERROR(Stream, ::Engine::Serialize::StreamState::PARSE_ERROR, __VA_ARGS__);
 #define STREAM_PERMISSION_ERROR(Stream, ...) STREAM_ERROR(Stream, ::Engine::Serialize::StreamState::PERMISSION_ERROR, __VA_ARGS__);
 
