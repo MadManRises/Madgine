@@ -51,7 +51,7 @@ int launch(Engine::Window::MainWindow **topLevelPointer)
     window.frameLoop()
         .addSetupSteps([&]() {
             Engine::Filesystem::FileManager mgr { "Layout" };
-            Engine::Serialize::SerializeInStream file = mgr.openRead(Engine::Resources::ResourceManager::getSingleton().findResourceFile("default.layout"), std::make_unique<Engine::XML::XMLFormatter>());
+            Engine::Serialize::SerializeInStream file = mgr.openRead(Engine::Resources::ResourceManager::getSingleton().findResourceFile("default.layout"), std::make_unique<Engine::Serialize::XMLFormatter>());
 
             if (file) {
                 window.readState(file, nullptr, {}, Engine::Serialize::StateTransmissionFlags_ApplyMap);
