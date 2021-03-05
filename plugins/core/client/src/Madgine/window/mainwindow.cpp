@@ -36,8 +36,6 @@ METATABLE_BEGIN(Engine::Window::MainWindow)
 READONLY_PROPERTY(Components, components)
 METATABLE_END(Engine::Window::MainWindow)
 
-RegisterType(Engine::Window::MainWindow);
-
 SERIALIZETABLE_BEGIN(Engine::Window::MainWindow)
 FIELD(mComponents, Serialize::ControlledConfig<KeyCompare<std::unique_ptr<Engine::Window::MainWindowComponentBase>>>)
 SERIALIZETABLE_END(Engine::Window::MainWindow)

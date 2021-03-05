@@ -30,5 +30,3 @@ namespace Render {
 
 }
 }
-
-RegisterType(Engine::Render::Camera);

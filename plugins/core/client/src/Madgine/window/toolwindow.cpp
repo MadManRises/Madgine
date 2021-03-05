@@ -108,5 +108,3 @@ namespace Window {
 
 METATABLE_BEGIN(Engine::Window::ToolWindow)
 METATABLE_END(Engine::Window::ToolWindow)
-
-RegisterType(Engine::Window::ToolWindow);

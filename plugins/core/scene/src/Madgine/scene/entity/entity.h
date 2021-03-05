@@ -110,5 +110,3 @@ namespace Scene {
     }
 }
 }
-
-RegisterType(Engine::Scene::Entity::Entity);

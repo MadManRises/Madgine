@@ -1,8 +1,12 @@
 #pragma once
 
-#include "type_holder.h"
 #include "decay.h"
 #include "stringutil.h"
+#include "type_holder.h"
+
+#ifdef __GNUG__
+#    include <cxxabi.h>
+#endif
 
 namespace Engine {
 struct TypeInfo;
@@ -14,9 +18,22 @@ extern const Engine::TypeInfo typeInfo;
 namespace Engine {
 
 template <typename T>
-inline std::string_view typeName()
+inline std::string typeName()
 {
-    return typeInfo<T>.mTypeName;
+#ifdef __GNUG__
+    int status = -4;
+    
+    std::unique_ptr<char, void (*)(void *)> res {
+        abi::__cxa_demangle(name, NULL, NULL, &status),
+        std::free
+    };
+
+    assert(status == 0);
+
+    return res.get();
+#else
+    return typeid(T).name();
+#endif
 }
 
 struct TypeInfo {

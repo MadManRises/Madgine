@@ -34,7 +34,7 @@ namespace Serialize {
                     InStream::operator>>(t);
             }
             if (!*this)
-                return STREAM_PARSE_ERROR(*this, "Expected: <" << typeid(T).name() << ">");
+                return STREAM_PARSE_ERROR(*this, "Expected: <" << typeName<T>() << ">");
             return {};
         }
 
