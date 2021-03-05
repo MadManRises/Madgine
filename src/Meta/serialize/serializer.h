@@ -10,10 +10,10 @@ namespace Serialize {
         size_t (*mOffset)() = nullptr;
 
         void (*mWriteState)(const SerializableDataUnit *, SerializeOutStream &, const char *, CallerHierarchyBasePtr) = nullptr;
-        void (*mReadState)(SerializableDataUnit *, SerializeInStream &, const char *, CallerHierarchyBasePtr) = nullptr;
+        StreamResult (*mReadState)(SerializableDataUnit *, SerializeInStream &, const char *, CallerHierarchyBasePtr) = nullptr;
 
-        void (*mReadAction)(SerializableDataUnit *, SerializeInStream &, PendingRequest *) = nullptr;
-        void (*mReadRequest)(SerializableDataUnit *, BufferedInOutStream &, TransactionId) = nullptr;
+        StreamResult (*mReadAction)(SerializableDataUnit *, SerializeInStream &, PendingRequest *) = nullptr;
+        StreamResult (*mReadRequest)(SerializableDataUnit *, BufferedInOutStream &, TransactionId) = nullptr;
 
         void (*mApplySerializableMap)(SerializableDataUnit *, SerializeInStream &) = nullptr;
         void (*mSetDataSynced)(SerializableDataUnit *, bool) = nullptr;

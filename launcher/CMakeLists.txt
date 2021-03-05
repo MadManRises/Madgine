@@ -21,7 +21,6 @@ elseif (NOT MODULES_ENABLE_PLUGINS)
 endif()
 
 target_link_plugins(MadgineLauncher Base Client)
-target_link_libraries(MadgineLauncher PRIVATE Xml)
 
 if (EMSCRIPTEN)
 	_target_link_libraries(MadgineLauncher PRIVATE "--shell-file ${CMAKE_CURRENT_SOURCE_DIR}/emscripten/template.html")

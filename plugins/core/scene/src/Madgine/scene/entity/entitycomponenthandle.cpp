@@ -25,12 +25,13 @@ namespace Scene {
             write(out, mgr->entityComponentList(index.mType).getEntity(index), name);
         }
 
-        void entityComponentHelperRead(Serialize::SerializeInStream &in, EntityComponentHandle<EntityComponentBase> &index, const char *name, SceneManager *mgr)
+        Serialize::StreamResult entityComponentHelperRead(Serialize::SerializeInStream &in, EntityComponentHandle<EntityComponentBase> &index, const char *name, SceneManager *mgr)
         {
             Entity *entity;
-            read(in, entity, name);
+            STREAM_PROPAGATE_ERROR(read(in, entity, name));
             if (entity)
                 index = entity->getComponent(index.mType).handle();
+            return {};
         }
 
         void entityComponentOwningHelperWrite(Serialize::SerializeOutStream &out, const EntityComponentHandle<EntityComponentBase> &index, const char *name, CallerHierarchyBasePtr hierarchy)
@@ -39,10 +40,10 @@ namespace Scene {
             mgr->entityComponentList(index.mType).writeState(index, out, name, hierarchy);
         }
 
-        void entityComponentOwningHelperRead(Serialize::SerializeInStream &in, const EntityComponentHandle<EntityComponentBase> &index, const char *name, CallerHierarchyBasePtr hierarchy)
+        Serialize::StreamResult entityComponentOwningHelperRead(Serialize::SerializeInStream &in, const EntityComponentHandle<EntityComponentBase> &index, const char *name, CallerHierarchyBasePtr hierarchy)
         {
             SceneManager *mgr = hierarchy;
-            mgr->entityComponentList(index.mType).readState(index, in, name, hierarchy);
+            return mgr->entityComponentList(index.mType).readState(index, in, name, hierarchy);
         }
 
     }

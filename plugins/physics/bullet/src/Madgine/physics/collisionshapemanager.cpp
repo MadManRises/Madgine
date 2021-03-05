@@ -316,20 +316,21 @@ namespace Physics {
         return mInstance;
     }
 
-    void CollisionShapeManager::InstanceHandle::readState(Serialize::SerializeInStream &in, const char *name)
+    Serialize::StreamResult CollisionShapeManager::InstanceHandle::readState(Serialize::SerializeInStream &in, const char *name)
     {
         std::string resName;
-        in.format().beginExtended(in, name, 1);
-        Serialize::read(in, resName, "name");
+        STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, name, 1));
+        STREAM_PROPAGATE_ERROR(Serialize::read(in, resName, "name"));
         if (resName.empty()) {
             reset();
-            in.format().beginCompound(in, name);
-            in.format().endCompound(in, name);
+            STREAM_PROPAGATE_ERROR(in.format().beginCompound(in, name));
+            STREAM_PROPAGATE_ERROR(in.format().endCompound(in, name));
         } else {
             load(resName);
             assert(mInstance);
-            Serialize::read(in, *mInstance, name);
+            STREAM_PROPAGATE_ERROR(Serialize::read(in, *mInstance, name));
         }
+        return {};
     }
 
     void CollisionShapeManager::InstanceHandle::writeState(Serialize::SerializeOutStream &out, const char *name) const

@@ -1,6 +1,5 @@
 #include "../clientlib.h"
 #include "serialize/filesystem/filesystemlib.h"
-#include "serialize/ini/inilib.h"
 
 #include "mainwindow.h"
 
@@ -29,7 +28,7 @@
 
 #include "serialize/filesystem/filemanager.h"
 
-#include "serialize/ini/iniformatter.h"
+#include "Meta/serialize/formatter/iniformatter.h"
 
 #include "Meta/serialize/serializableunitptr.h"
 
@@ -94,7 +93,7 @@ namespace Window {
 
         Filesystem::FileManager mgr { "MainWindow-Layout" };
 
-        if (Serialize::SerializeInStream in = mgr.openRead(Filesystem::appDataPath() / "mainwindow.ini", std::make_unique<Ini::IniFormatter>())) {
+        if (Serialize::SerializeInStream in = mgr.openRead(Filesystem::appDataPath() / "mainwindow.ini", std::make_unique<Serialize::IniFormatter>())) {
             in >> settings.mData;
         }
 
@@ -120,7 +119,7 @@ namespace Window {
     {
         Filesystem::FileManager mgr { "MainWindow-Layout" };
 
-        if (Serialize::SerializeOutStream out = mgr.openWrite(Filesystem::appDataPath() / "mainwindow.ini", std::make_unique<Ini::IniFormatter>())) {
+        if (Serialize::SerializeOutStream out = mgr.openWrite(Filesystem::appDataPath() / "mainwindow.ini", std::make_unique<Serialize::IniFormatter>())) {
             out << mOsWindow->data();
         }
 

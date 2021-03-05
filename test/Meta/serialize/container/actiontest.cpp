@@ -2,43 +2,18 @@
 
 #include "Meta/metalib.h"
 
-#include "Meta/serialize/container/action.h"
-#include "Meta/serialize/container/action_operations.h"
-#include "Meta/serialize/serializableunit.h"
 
-#include "Meta/serialize/toplevelunit.h"
+#include "Meta/serialize/serializableunit.h"
 
 #include "Meta/serialize/container/noparent.h"
 
-#include "Meta/serialize/serializetable_impl.h"
 
 #include "../testManager.h"
+#include "../testunit.h"
 
 using namespace Engine::Serialize;
 using namespace std::chrono_literals;
 
-struct ActionTestUnit : TopLevelUnit<ActionTestUnit> {
-    SERIALIZABLEUNIT(ActionTestUnit);
-
-    ActionTestUnit()
-        : TopLevelUnit<ActionTestUnit>(10)
-    {
-    }
-
-    int fooImpl(int i)
-    {
-        ++mCallCount;
-        return i + 1;
-    }
-
-    int mCallCount = 0;
-
-    ACTION(foo, fooImpl);
-};
-
-SERIALIZETABLE_BEGIN(ActionTestUnit)
-SYNC(foo)
-SERIALIZETABLE_END(ActionTestUnit)
 
 TEST(Serialize_Action, Action)
 {
@@ -46,8 +21,8 @@ TEST(Serialize_Action, Action)
     TestManager mgr1("container1");
     TestManager mgr2("container2");
 
-    NoParentUnit<ActionTestUnit> unit1;
-    NoParentUnit<ActionTestUnit> unit2;
+    NoParentUnit<TestUnit> unit1;
+    NoParentUnit<TestUnit> unit2;
 
     ASSERT_TRUE(mgr1.addTopLevelItem(&unit1));
     ASSERT_TRUE(mgr2.addTopLevelItem(&unit2));
@@ -60,7 +35,7 @@ TEST(Serialize_Action, Action)
     ASSERT_EQ(unit1.mCallCount, 0);
     ASSERT_EQ(unit2.mCallCount, 0);
 
-    Engine::Future<int> f1 = unit1.foo(1);
+    Engine::Future<int> f1 = unit1.action(1);
 
     ASSERT_TRUE(f1.is_ready());
     ASSERT_EQ(f1.get(), 2);
@@ -74,7 +49,7 @@ TEST(Serialize_Action, Action)
     ASSERT_EQ(unit1.mCallCount, 1);
     ASSERT_EQ(unit2.mCallCount, 1);
 
-    Engine::Future<int> f2 = unit2.foo(2);
+    Engine::Future<int> f2 = unit2.action(2);
 
     ASSERT_FALSE(f2.is_ready());
 
@@ -106,9 +81,9 @@ TEST(Serialize_Action, Action_Hierarchical)
     TestManager mgr2("container2");
     TestManager mgr3("container3");
 
-    NoParentUnit<ActionTestUnit> unit1;
-    NoParentUnit<ActionTestUnit> unit2;
-    NoParentUnit<ActionTestUnit> unit3;
+    NoParentUnit<TestUnit> unit1;
+    NoParentUnit<TestUnit> unit2;
+    NoParentUnit<TestUnit> unit3;
 
     ASSERT_TRUE(mgr1.addTopLevelItem(&unit1));
     ASSERT_TRUE(mgr2.addTopLevelItem(&unit2));    
@@ -128,7 +103,7 @@ TEST(Serialize_Action, Action_Hierarchical)
     ASSERT_EQ(unit2.mCallCount, 0);
     ASSERT_EQ(unit3.mCallCount, 0);
 
-    Engine::Future<int> f1 = unit1.foo(1);
+    Engine::Future<int> f1 = unit1.action(1);
 
     ASSERT_TRUE(f1.is_ready());
     ASSERT_EQ(f1.get(), 2);
@@ -151,7 +126,7 @@ TEST(Serialize_Action, Action_Hierarchical)
     ASSERT_EQ(unit2.mCallCount, 1);
     ASSERT_EQ(unit3.mCallCount, 1);
 
-    Engine::Future<int> f2 = unit3.foo(2);
+    Engine::Future<int> f2 = unit3.action(2);
 
     ASSERT_FALSE(f2.is_ready());
 

@@ -122,7 +122,7 @@ namespace Serialize {
             return mUnit != nullptr;
         }
 
-        void readState(SerializeInStream &in, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0) const;
+        StreamResult readState(SerializeInStream &in, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0) const;
 
         void applySerializableMap(SerializeInStream &in) const;
 
@@ -234,10 +234,10 @@ namespace Serialize {
             return mUnit != nullptr;
         }
 
-        void readState(SerializeInStream &in, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0) const;
+        StreamResult readState(SerializeInStream &in, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0) const;
 
-        void readAction(BufferedInOutStream &in, PendingRequest *request) const;
-        void readRequest(BufferedInOutStream &in, TransactionId id) const;
+        StreamResult readAction(BufferedInOutStream &in, PendingRequest *request) const;
+        StreamResult readRequest(BufferedInOutStream &in, TransactionId id) const;
 
         void setDataSynced(bool b) const;
         void setActive(bool active, bool existenceChanged) const;

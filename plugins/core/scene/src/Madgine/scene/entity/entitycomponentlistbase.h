@@ -23,7 +23,7 @@ namespace Scene {
             virtual void clear() = 0;
 
             
-            void readState(const EntityComponentHandle<EntityComponentBase> &index, Serialize::SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy);
+            Serialize::StreamResult readState(const EntityComponentHandle<EntityComponentBase> &index, Serialize::SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy);
 
             void writeState(const EntityComponentHandle<EntityComponentBase> &index, Serialize::SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) const;
 

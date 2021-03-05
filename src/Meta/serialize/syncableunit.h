@@ -24,10 +24,10 @@ namespace Serialize {
 
     public:
         void writeState(SerializeOutStream &out, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0) const;
-        void readState(SerializeInStream &in, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0);
+        StreamResult readState(SerializeInStream &in, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0);
 
-        void readAction(BufferedInOutStream &in, PendingRequest *request);
-        void readRequest(BufferedInOutStream &in, TransactionId id);
+        StreamResult readAction(BufferedInOutStream &in, PendingRequest *request);
+        StreamResult readRequest(BufferedInOutStream &in, TransactionId id);
 
         UnitId slaveId() const;
         UnitId masterId() const;

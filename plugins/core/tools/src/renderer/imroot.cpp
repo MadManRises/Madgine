@@ -13,8 +13,7 @@
 
 #include "Meta/serialize/streams/serializestream.h"
 
-#include "serialize/ini/inilib.h"
-#include "serialize/ini/iniformatter.h"
+#include "Meta/serialize/formatter/iniformatter.h"
 
 #include "Generic/container/safeiterator.h"
 
@@ -47,7 +46,7 @@ namespace Tools {
     {
         if (strlen(line) > 0) {
             auto buf = std::make_unique<std::stringbuf>(line + "\n"s);
-            Serialize::SerializeInStream in { std::move(buf), std::make_unique<Serialize::SerializeStreamData>(std::make_unique<Ini::IniFormatter>())};
+            Serialize::SerializeInStream in { std::move(buf), std::make_unique<Serialize::SerializeStreamData>(std::make_unique<Serialize::IniFormatter>())};
 
             ToolBase *tool = static_cast<ToolBase *>(entry);
             Serialize::read(in, *tool, nullptr, {}, Serialize::StateTransmissionFlags_SkipId);
@@ -58,7 +57,7 @@ namespace Tools {
     {
         auto buf = std::make_unique<std::stringbuf>();
         std::stringbuf *outBuffer = buf.get();
-        Serialize::SerializeOutStream out { std::move(buf), std::make_unique<Serialize::SerializeStreamData>(std::make_unique<Ini::IniFormatter>()) };
+        Serialize::SerializeOutStream out { std::move(buf), std::make_unique<Serialize::SerializeStreamData>(std::make_unique<Serialize::IniFormatter>()) };
 
         ImRoot *root = static_cast<ImRoot *>(handler->UserData);
         for (ToolBase *tool : uniquePtrToPtr(root->tools())) {

@@ -44,7 +44,7 @@ namespace Serialize {
     }
 
     template <auto f, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
-    using Action = typename MemberFunctionCapture<__action__impl__::ActionImpl, f, OffsetPtr>::type;
+    using Action = typename FunctionCapture<__action__impl__::ActionImpl, f, OffsetPtr>::type;
 
 #define ACTION(Name, f) OFFSET_CONTAINER(Name, ::Engine::Serialize::Action<&Self::f>)
 

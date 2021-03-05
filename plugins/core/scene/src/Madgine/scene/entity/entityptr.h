@@ -29,7 +29,7 @@ namespace Scene {
 
             bool isDead() const;
 
-            void readState(Serialize::SerializeInStream &in, const char *name = nullptr);
+            Serialize::StreamResult readState(Serialize::SerializeInStream &in, const char *name = nullptr);
             void writeState(Serialize::SerializeOutStream &out, const char *name = nullptr) const;
 
             void applySerializableMap(Serialize::SerializeInStream &in);

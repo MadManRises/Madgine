@@ -35,8 +35,8 @@
 #include "serialize/memory/memorylib.h"
 #include "serialize/memory/memorymanager.h"
 
-#include "serialize/xml/xmllib.h"
-#include "serialize/xml/xmlformatter.h"
+
+#include "Meta/serialize/formatter/xmlformatter.h"
 
 #include "serialize/filesystem/filesystemlib.h"
 #include "serialize/filesystem/filemanager.h"
@@ -247,7 +247,7 @@ namespace Tools {
         Engine::Threading::DataLock lock(mSceneMgr->mutex(), Engine::Threading::AccessMode::WRITE);
 
         Filesystem::FileManager mgr { "Scene" };
-        Serialize::SerializeInStream in = mgr.openRead(mCurrentSceneFile, std::make_unique<XML::XMLFormatter>());
+        Serialize::SerializeInStream in = mgr.openRead(mCurrentSceneFile, std::make_unique<Serialize::XMLFormatter>());
         mSceneMgr->readState(in, "Scene", {}, Serialize::StateTransmissionFlags_ApplyMap);
     }
 
@@ -258,7 +258,7 @@ namespace Tools {
         Engine::Threading::DataLock lock(mSceneMgr->mutex(), Engine::Threading::AccessMode::READ);
 
         Filesystem::FileManager mgr { "Scene" };
-        Serialize::SerializeOutStream out = mgr.openWrite(mCurrentSceneFile, std::make_unique<XML::XMLFormatter>());
+        Serialize::SerializeOutStream out = mgr.openWrite(mCurrentSceneFile, std::make_unique<Serialize::XMLFormatter>());
         mSceneMgr->writeState(out, "Scene");
     }
 

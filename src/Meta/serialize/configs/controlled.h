@@ -26,28 +26,26 @@ namespace Serialize {
         }
 
         template <typename Op>
-        static typename container_traits<Op>::iterator readItem(SerializeInStream &in, Op &op)
+        static StreamResult readItem(SerializeInStream &in, Op &op, typename container_traits<Op>::iterator &it)
         {
 
-            in.format().beginExtended(in, "Item", 1);
+            STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, "Item", 1));
             MakeOwning_t<typename comparator_traits<Cmp>::type> key;
-            read(in, key, "key");
-            typename container_traits<Op>::iterator it = std::find_if(physical(op).begin(), physical(op).end(), [&](const auto &t) {
+            STREAM_PROPAGATE_ERROR(read(in, key, "key"));
+            it = std::find_if(physical(op).begin(), physical(op).end(), [&](const auto &t) {
                 return comparator_traits<Cmp>::to_cmp_type(t) == key;
             });
             if (it == physical(op).end())
-                std::terminate();
+                return STREAM_ERROR(in, StreamState::UNKNOWN_ERROR, "Reading currently only supported at end()");
 
-            read(in, *it, "Item");
-
-            return it;
+            return read(in, *it, "Item");
         }
 
         template <typename Op>
-        static void clear(Op &op, uint32_t expected)
+        static void clear(Op &op)
         {
-            if (op.size() < expected) //TODO: ?
-                std::terminate();
+            /*if (op.size() < expected) //TODO: ?
+                std::terminate();*/
         }
     };
 

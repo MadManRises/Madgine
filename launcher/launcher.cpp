@@ -16,8 +16,7 @@
 
 #include "serialize/filesystem/filesystemlib.h"
 #include "serialize/filesystem/filemanager.h"
-#include "serialize/xml/xmllib.h"
-#include "serialize/xml/xmlformatter.h"
+#include "Meta/serialize/formatter/xmlformatter.h"
 
 #include "Madgine/resources/resourcemanager.h"
 

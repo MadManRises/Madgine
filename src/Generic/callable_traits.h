@@ -107,5 +107,5 @@ struct Callable {
 };
 
 template <template <auto, typename, typename, typename...> typename C, auto f, typename... Args>
-using MemberFunctionCapture = typename Callable<f>::template instance<C, Args...>::type;
+using FunctionCapture = typename Callable<f>::template instance<C, Args...>::type;
 }

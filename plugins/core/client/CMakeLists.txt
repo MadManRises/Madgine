@@ -17,7 +17,7 @@ target_link_plugins(Client)
 target_link_plugin_groups(Client Renderer)
 
 target_link_libraries(Client PUBLIC Modules Render Meta)
-target_link_libraries(Client PRIVATE IniSerialize Filesystem)
+target_link_libraries(Client PRIVATE Filesystem)
 
 set(sources "")
 FolderSources(sources "" tools)

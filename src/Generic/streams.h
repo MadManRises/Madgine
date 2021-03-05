@@ -68,6 +68,19 @@ struct InStream {
         return static_cast<bool>(mStream.seekg(p, dir));
     }
 
+    std::ios_base::iostate state() const {
+        return mStream.rdstate();
+    }
+
+    void clear()
+    {
+        mStream.clear();
+    }
+
+    void setState(std::ios_base::iostate state) {
+        mStream.setstate(state);
+    }
+
     void skipWs()
     {
         if (mStream.flags() & std::ios_base::skipws) {

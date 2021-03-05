@@ -8,6 +8,8 @@ namespace Serialize {
     ENUM(StreamState,
         OK,
         UNKNOWN_ERROR,
+        PERMISSION_ERROR,
+        PARSE_ERROR,
         CLOSED_BY_USER,
         SEND_FAILURE,
         RECEIVE_FAILURE);

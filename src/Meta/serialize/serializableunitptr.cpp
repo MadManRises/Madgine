@@ -34,7 +34,7 @@ namespace Serialize {
         out.format().endCompound(out, name);
     }
 
-    void SerializableDataPtr::readState(SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags) const
+    StreamResult SerializableDataPtr::readState(SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags) const
     {
         SerializableListHolder holder;
         in.startSerializableRead(&holder);
@@ -42,7 +42,7 @@ namespace Serialize {
         if (!in.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
             in.format().beginExtended(in, name, 1);
             SerializableUnitBase *idHelper;
-            read(in, idHelper, "serId");
+            STREAM_PROPAGATE_ERROR(read(in, idHelper, "serId"));
             uint32_t id = reinterpret_cast<uintptr_t>(idHelper) >> 2;
             SerializableUnitList &list = in.serializableList();
             if (list.size() <= id)
@@ -51,9 +51,9 @@ namespace Serialize {
             list[id] = unit();
         }
 
-        in.format().beginCompound(in, name);
-        mType->readState(unit(), in, flags, hierarchy);
-        in.format().endCompound(in, name);
+        STREAM_PROPAGATE_ERROR(in.format().beginCompound(in, name));
+        STREAM_PROPAGATE_ERROR(mType->readState(unit(), in, flags, hierarchy));
+        return in.format().endCompound(in, name);
     }
 
     SerializableDataPtr::SerializableDataPtr(const SerializableUnitPtr &other)
@@ -82,15 +82,15 @@ namespace Serialize {
         return mType->getIndex(offset) < unit()->mActiveIndex;
     }
 
-    void SerializableUnitPtr::readState(SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags) const
+    StreamResult SerializableUnitPtr::readState(SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags) const
     {
         SerializableListHolder holder;
         in.startSerializableRead(&holder);
 
         if (!in.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
-            in.format().beginExtended(in, name, 1);
+            STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, name, 1));
             SerializableUnitBase *idHelper;
-            read(in, idHelper, "serId");
+            STREAM_PROPAGATE_ERROR(read(in, idHelper, "serId"));
             uint32_t id = reinterpret_cast<uintptr_t>(idHelper) >> 2;
             SerializableUnitList &list = in.serializableList();
             if (list.size() <= id)
@@ -99,9 +99,9 @@ namespace Serialize {
             list[id] = unit();
         }
 
-        in.format().beginCompound(in, name);
-        mType->readState(unit(), in, flags, hierarchy);
-        in.format().endCompound(in, name);
+        STREAM_PROPAGATE_ERROR(in.format().beginCompound(in, name));
+        STREAM_PROPAGATE_ERROR(mType->readState(unit(), in, flags, hierarchy));
+        return in.format().endCompound(in, name);
     }
 
     void SerializableUnitConstPtr::writeAction(uint8_t index, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *data) const
@@ -109,9 +109,9 @@ namespace Serialize {
         mType->writeAction(unit(), index, outStreams, data);
     }
 
-    void SerializableUnitPtr::readAction(BufferedInOutStream &in, PendingRequest *request) const
+    StreamResult SerializableUnitPtr::readAction(BufferedInOutStream &in, PendingRequest *request) const
     {
-        mType->readAction(unit(), in, request);
+        return mType->readAction(unit(), in, request);
     }
 
     void SerializableUnitConstPtr::writeRequest(uint8_t index, BufferedOutStream &out, const void *data) const
@@ -119,9 +119,9 @@ namespace Serialize {
         mType->writeRequest(unit(), index, out, data);
     }
 
-    void SerializableUnitPtr::readRequest(BufferedInOutStream &in, TransactionId id) const
+    StreamResult SerializableUnitPtr::readRequest(BufferedInOutStream &in, TransactionId id) const
     {
-        mType->readRequest(unit(), in, id);
+        return mType->readRequest(unit(), in, id);
     }
 
     void SerializableUnitPtr::setParent(SerializableUnitBase *parent) const

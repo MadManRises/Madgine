@@ -1,6 +1,5 @@
 #include "../nodegraphlib.h"
 #include "serialize/filesystem/filesystemlib.h"
-#include "serialize/xml/xmllib.h"
 
 #include "Meta/keyvalueutil/valuetypeserialize.h"
 
@@ -18,7 +17,7 @@
 
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "serialize/xml/xmlformatter.h"
+#include "Meta/serialize/formatter/xmlformatter.h"
 
 #include "nodecollector.h"
 
@@ -48,7 +47,7 @@ namespace NodeGraph {
         mPath = path;
         if (Filesystem::exists(mPath)) {
             Filesystem::FileManager mgr("Graph-Serializer");
-            Serialize::SerializeInStream in = mgr.openRead(mPath, std::make_unique<XML::XMLFormatter>());
+            Serialize::SerializeInStream in = mgr.openRead(mPath, std::make_unique<Serialize::XMLFormatter>());
             Serialize::read(in, *this, "Graph", {}, Serialize::StateTransmissionFlags_ApplyMap);
             std::vector<bool> outFlows;
             std::vector<std::optional<DataProviderPinPrototype>> inPins;
@@ -104,7 +103,7 @@ namespace NodeGraph {
     void NodeGraph::saveToFile()
     {
         Filesystem::FileManager mgr("Graph-Serializer");
-        Serialize::SerializeOutStream out = mgr.openWrite(mPath, std::make_unique<XML::XMLFormatter>());
+        Serialize::SerializeOutStream out = mgr.openWrite(mPath, std::make_unique<Serialize::XMLFormatter>());
         Serialize::SerializableDataPtr { this }.writeState(out, "Graph");
     }
 

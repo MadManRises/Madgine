@@ -2,6 +2,10 @@
 
 #include "Generic/streams.h"
 
+#include "../serializeexception.h"
+
+#include "streamerror.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -17,7 +21,7 @@ namespace Serialize {
         SerializeInStream &operator>>(T &t);
 
         template <typename T>
-        void readUnformatted(T &t)
+        StreamResult readUnformatted(T &t)
         {
             if constexpr (std::is_enum_v<T>) {
                 int buffer;
@@ -29,44 +33,48 @@ namespace Serialize {
                 else
                     InStream::operator>>(t);
             }
+            if (!*this)
+                return STREAM_PARSE_ERROR(*this, "Expected: <" << typeid(T).name() << ">");
+            return {};
         }
 
         template <typename T>
-        void readUnformatted(T *&p)
+        StreamResult readUnformatted(T *&p)
         {
             static_assert(std::is_base_of_v<SerializableUnitBase, T>);
 
             if constexpr (std::is_base_of_v<SyncableUnitBase, T>) {
                 SyncableUnitBase *unit;
-                readUnformatted(unit);
-                p = reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(unit));
+                STREAM_PROPAGATE_ERROR(readUnformatted(unit));
+                p = reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(unit));                
             } else {
                 SerializableDataUnit *unit;
-                readUnformatted(unit);
+                STREAM_PROPAGATE_ERROR(readUnformatted(unit));
                 p = reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(unit));
             }
+            return {};
         }
 
-        void readUnformatted(SyncableUnitBase *&p);
-        void readUnformatted(SerializableDataUnit *&p);
+        StreamResult readUnformatted(SyncableUnitBase *&p);
+        StreamResult readUnformatted(SerializableDataUnit *&p);
 
-        void readUnformatted(std::string &s);
-        void readUnformatted(std::string_view &s) = delete;
+        StreamResult readUnformatted(std::string &s);
+        StreamResult readUnformatted(std::string_view &s) = delete;
 
-        void readUnformatted(ByteBuffer &b);
+        StreamResult readUnformatted(ByteBuffer &b);
 
-        void readUnformatted(std::monostate &);
+        StreamResult readUnformatted(std::monostate &);
 
         std::string readN(size_t n);
         std::string peekN(size_t n);
         std::string readUntil(const char *set);
         std::string peekUntil(const char *set);
 
-        void readRaw(void *buffer, size_t size);
+        StreamResult readRaw(void *buffer, size_t size);
         template <typename T>
-        void readRaw(T &t)
+        StreamResult readRaw(T &t)
         {
-            readRaw(&t, sizeof(T));
+            return readRaw(&t, sizeof(T));
         }
 
         SerializeManager *manager() const;

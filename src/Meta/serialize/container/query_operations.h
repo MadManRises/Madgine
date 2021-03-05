@@ -22,14 +22,15 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static void readAction(Query<f, OffsetPtr> &query, SerializeInStream &in, PendingRequest *request, Args &&... args)
+        static StreamResult readAction(Query<f, OffsetPtr> &query, SerializeInStream &in, PendingRequest *request, Args &&... args)
         {
-            R result;
-            read(in, result, nullptr, args...);
-            UnitHelper<R>::applyMap(in, result);
+            R returnValue;
+            STREAM_PROPAGATE_ERROR(read(in, returnValue, nullptr, args...));
+            UnitHelper<R>::applyMap(in, returnValue);
             assert(request);
-            query.writeActionResponse(&result, request->mRequester, request->mRequesterTransactionId);
-            (*request)(&result);
+            query.writeActionResponse(&returnValue, request->mRequester, request->mRequesterTransactionId);
+            (*request)(&returnValue);
+            return {};
         }
 
         template <typename... Args>
@@ -40,12 +41,13 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static void readRequest(Query<f, OffsetPtr> &query, BufferedInOutStream &in, TransactionId id, Args &&... args)
+        static StreamResult readRequest(Query<f, OffsetPtr> &query, BufferedInOutStream &in, TransactionId id, Args &&... args)
         {
             std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> data;
-            TupleUnpacker::forEach(data, [&](auto &field) { read(in, field, nullptr, args...); });
+            TupleUnpacker::forEach(data, [&](auto &field) { read(in, field, nullptr, args...); }); //TODO
             UnitHelper<decltype(data)>::applyMap(in, data);
             query.tryCall(data, in.id(), id);
+            return {};
         }
     };
 

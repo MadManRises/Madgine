@@ -24,6 +24,8 @@ struct container_api_impl<C, std::list<Ty...>> : C {
 
     using C::C;
 
+    using C::operator=;
+
     void remove(const typename C::value_type &item)
     {
         for (typename C::iterator it = this->begin(); it != this->end();) {
@@ -133,6 +135,8 @@ struct container_api_impl<C, std::set<Ty...>> : SortedContainerApi<C> {
 template <typename C, typename K, typename T, typename... Ty>
 struct container_api_impl<C, std::map<K, T, Ty...>> : SortedContainerApi<C> {
     using SortedContainerApi<C>::SortedContainerApi;
+
+    using C::operator=;
 
     T &operator[](const K &key)
     {

@@ -45,7 +45,7 @@ namespace Serialize {
     }
 
     template <auto f, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
-    using Query = typename MemberFunctionCapture<__query__impl__::QueryImpl, f, OffsetPtr>::type;
+    using Query = typename FunctionCapture<__query__impl__::QueryImpl, f, OffsetPtr>::type;
 
 #define QUERY(Name, f) OFFSET_CONTAINER(Name, ::Engine::Serialize::Query<&Self::f>)
 

@@ -4,6 +4,8 @@
 
 #include "Generic/callerhierarchy.h"
 
+#include "Meta/serialize/streams/streamerror.h"
+
 namespace Engine {
 namespace Scene {
 
@@ -13,10 +15,10 @@ namespace Scene {
         struct EntityComponentHandle;
 
         void entityComponentHelperWrite(Serialize::SerializeOutStream &out, const EntityComponentHandle<EntityComponentBase> &index, const char *name, const SceneManager *mgr);
-        void entityComponentHelperRead(Serialize::SerializeInStream &in, EntityComponentHandle<EntityComponentBase> &index, const char *name, SceneManager *mgr);
+        Serialize::StreamResult entityComponentHelperRead(Serialize::SerializeInStream &in, EntityComponentHandle<EntityComponentBase> &index, const char *name, SceneManager *mgr);
 
         void entityComponentOwningHelperWrite(Serialize::SerializeOutStream &out, const EntityComponentHandle<EntityComponentBase> &index, const char *name, CallerHierarchyBasePtr hierarchy);
-        void entityComponentOwningHelperRead(Serialize::SerializeInStream &in, const EntityComponentHandle<EntityComponentBase> &index, const char *name, CallerHierarchyBasePtr hierarchy);
+        Serialize::StreamResult entityComponentOwningHelperRead(Serialize::SerializeInStream &in, const EntityComponentHandle<EntityComponentBase> &index, const char *name, CallerHierarchyBasePtr hierarchy);
 
 
         template <>
@@ -24,9 +26,9 @@ namespace Scene {
             uint32_t mIndex = std::numeric_limits<uint32_t>::max();
             uint32_t mType = std::numeric_limits<uint32_t>::max();
 
-            void readState(Serialize::SerializeInStream &in, const char *name, SceneManager *mgr)
+            Serialize::StreamResult readState(Serialize::SerializeInStream &in, const char *name, SceneManager *mgr)
             {
-                entityComponentHelperRead(in, *this, name, mgr);
+                return entityComponentHelperRead(in, *this, name, mgr);
             }
 
             void writeState(Serialize::SerializeOutStream &out, const char *name, SceneManager *mgr) const
@@ -105,11 +107,12 @@ namespace Scene {
                 assert(!other || component_index<T>() == other.mType);
             }
 
-            void readState(Serialize::SerializeInStream &in, const char *name, SceneManager *mgr)
+            Serialize::StreamResult readState(Serialize::SerializeInStream &in, const char *name, SceneManager *mgr)
             {
                 EntityComponentHandle<EntityComponentBase> handle { std::numeric_limits<uint32_t>::max(), type() };
-                entityComponentHelperRead(in, handle, name, mgr);
+                STREAM_PROPAGATE_ERROR(entityComponentHelperRead(in, handle, name, mgr));
                 mIndex = handle.mIndex;
+                return {};
             }
 
             void writeState(Serialize::SerializeOutStream &out, const char *name, const SceneManager *mgr) const
@@ -159,9 +162,9 @@ namespace Scene {
                 return mHandle;
             }
 
-            void readState(Serialize::SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy)
+            Serialize::StreamResult readState(Serialize::SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy)
             {
-                entityComponentOwningHelperRead(in, mHandle, name, hierarchy);
+                return entityComponentOwningHelperRead(in, mHandle, name, hierarchy);
             }
 
             void writeState(Serialize::SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) const

@@ -49,13 +49,12 @@ namespace Serialize {
 
         SyncableContainerImpl(SyncableContainerImpl &&other) = default;
 
-        template <typename T>
-        SyncableContainerImpl<C, Observer, controlled, OffsetPtr> &operator=(T &&arg)
+        SyncableContainerImpl<C, Observer, controlled, OffsetPtr> &operator=(const typename Base::Base &other)
         {
             if (this->isMaster()) {
-                ResetOperation { *this } = std::forward<T>(arg);
+                ResetOperation { *this } = other;
             } else {
-                std::pair<ContainerEvent, Base> temp { RESET, std::forward<T>(arg) };
+                std::pair<ContainerEvent, typename Base::Base> temp { RESET, other };
 
                 this->writeRequest(&temp); //??? Is the temp object used?
             }

@@ -30,11 +30,11 @@ namespace Serialize {
         bool mIsTopLevelUnit;
 
         void writeState(const SerializableDataUnit *unit, SerializeOutStream &out, CallerHierarchyBasePtr hierarchy = {}) const;
-        void readState(SerializableDataUnit *unit, SerializeInStream &in, StateTransmissionFlags flags = 0, CallerHierarchyBasePtr hierarchy = {}) const;
-        void readState(SerializableUnitBase *unit, SerializeInStream &in, StateTransmissionFlags flags = 0, CallerHierarchyBasePtr hierarchy = {}) const;
+        StreamResult readState(SerializableDataUnit *unit, SerializeInStream &in, StateTransmissionFlags flags = 0, CallerHierarchyBasePtr hierarchy = {}) const;
+        StreamResult readState(SerializableUnitBase *unit, SerializeInStream &in, StateTransmissionFlags flags = 0, CallerHierarchyBasePtr hierarchy = {}) const;
 
-        void readAction(SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) const;
-        void readRequest(SerializableUnitBase *unit, BufferedInOutStream &in, TransactionId id) const;
+        StreamResult readAction(SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) const;
+        StreamResult readRequest(SerializableUnitBase *unit, BufferedInOutStream &in, TransactionId id) const;
 
         void applySerializableMap(SerializableDataUnit *unit, SerializeInStream &in) const;
         void setDataSynced(SerializableUnitBase *unit, bool b) const;

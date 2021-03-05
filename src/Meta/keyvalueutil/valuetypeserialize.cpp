@@ -9,18 +9,18 @@
 namespace Engine {
 namespace Serialize {
 
-    void Operations<ValueType>::read(SerializeInStream &in, ValueType &v, const char *name)
+    StreamResult Operations<ValueType>::read(SerializeInStream &in, ValueType &v, const char *name)
     {
-        in.format().beginExtended(in, name, 1);
+        STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, name, 1));
         ValueTypeEnum type;
-        Serialize::read(in, type, "type");
+        STREAM_PROPAGATE_ERROR(Serialize::read(in, type, "type"));
         v.setType(ValueTypeDesc { type });
-        v.visit([&](auto &value) {
+        return v.visit([&](auto &value) -> StreamResult {
             using T = std::remove_reference_t<decltype(value)>;
             if constexpr (isPrimitiveType_v<T>) {
-                in.format().beginPrimitive(in, name, PrimitiveTypeIndex_v<T>);
-                in.readUnformatted(value);
-                in.format().endPrimitive(in, name, PrimitiveTypeIndex_v<T>);
+                STREAM_PROPAGATE_ERROR(in.format().beginPrimitive(in, name, PrimitiveTypeIndex_v<T>));
+                STREAM_PROPAGATE_ERROR(in.readUnformatted(value));
+                return in.format().endPrimitive(in, name, PrimitiveTypeIndex_v<T>);
             } else
                 throw 0;
         });

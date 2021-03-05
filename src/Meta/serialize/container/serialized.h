@@ -68,9 +68,9 @@ namespace Serialize {
             mData -= std::forward<Ty>(v);
         }
 
-        void readState(SerializeInStream &in, const char *name = nullptr)
+        StreamResult readState(SerializeInStream &in, const char *name = nullptr)
         {
-            read(in, mData, name);
+            return read(in, mData, name);
         }
 
         void writeState(SerializeOutStream &out, const char *name = nullptr) const

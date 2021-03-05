@@ -55,23 +55,25 @@ namespace Serialize {
         }
     }
 
-    void SerializeInStream::readUnformatted(SyncableUnitBase *&p)
+    StreamResult SerializeInStream::readUnformatted(SyncableUnitBase *&p)
     {
         UnitId ptr;
-        readUnformatted(ptr);
+        STREAM_PROPAGATE_ERROR(readUnformatted(ptr));
         if (ptr)
             ptr = (ptr << 2) | static_cast<UnitId>(UnitIdTag::SYNCABLE);
         p = reinterpret_cast<SyncableUnitBase *>(ptr);
+        return {};
     }
 
-    void SerializeInStream::readUnformatted(SerializableDataUnit *&p)
+    StreamResult SerializeInStream::readUnformatted(SerializableDataUnit *&p)
     {
         uint32_t ptr;
-        readUnformatted(ptr);
+        STREAM_PROPAGATE_ERROR(readUnformatted(ptr));
         assert(ptr <= (std::numeric_limits<uint32_t>::max() >> 2));
         if (ptr)
             ptr = (ptr << 2) | static_cast<UnitId>(UnitIdTag::SERIALIZABLE);
         p = reinterpret_cast<SerializableDataUnit *>(ptr);
+        return {};
     }
 
     void SerializeInStream::setNextFormattedStringDelimiter(char c)
@@ -80,13 +82,13 @@ namespace Serialize {
         mNextFormattedStringDelimiter = c;
     }
 
-    void SerializeInStream::readUnformatted(std::string &s)
+    StreamResult SerializeInStream::readUnformatted(std::string &s)
     {
         if (format().mBinary) {
             uint32_t size;
-            readRaw(size);
+            STREAM_PROPAGATE_ERROR(readRaw(size));
             s.resize(size);
-            readRaw(&s[0], size);
+            STREAM_PROPAGATE_ERROR(readRaw(&s[0], size));
         } else {
             if (mNextFormattedStringDelimiter) {
                 if (!std::getline(mStream, s, mNextFormattedStringDelimiter))
@@ -94,32 +96,34 @@ namespace Serialize {
                 mNextFormattedStringDelimiter = 0;
             } else {
                 if (!InStream::operator>>(s))
-                    std::terminate();
+                    return STREAM_PARSE_ERROR(*this, "Expected <string>");
             }
         }
+        return {};
     }
 
-    void SerializeInStream::readUnformatted(ByteBuffer &b)
+    StreamResult SerializeInStream::readUnformatted(ByteBuffer &b)
     {
         assert(format().mBinary);
         uint32_t size;
-        readRaw(size);
+        STREAM_PROPAGATE_ERROR(readRaw(size));
         std::unique_ptr<std::byte[]> buffer = std::make_unique<std::byte[]>(size);
-        readRaw(buffer.get(), size);
+        STREAM_PROPAGATE_ERROR(readRaw(buffer.get(), size));
         b = ByteBuffer { std::move(buffer), size };
+        return {};
     }
 
-    void SerializeInStream::readUnformatted(std::monostate &)
+    StreamResult SerializeInStream::readUnformatted(std::monostate &)
     {
+        return {};
     }
 
-    void SerializeInStream::readRaw(void *buffer, size_t size)
+    StreamResult SerializeInStream::readRaw(void *buffer, size_t size)
     {
         InStream::readRaw(buffer, size);
-        if (!*this) {
-            throw SerializeException(
-                "Deserialization Failure");
-        }
+        if (!*this)
+            return STREAM_PARSE_ERROR(*this, "Unexpected EOF");
+        return {};
     }
 
     std::string SerializeInStream::readN(size_t n)

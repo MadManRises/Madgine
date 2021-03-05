@@ -110,11 +110,12 @@ namespace Scene {
             return !holdsRef() || getBlock()->dead();
         }
 
-        void EntityPtr::readState(Serialize::SerializeInStream &in, const char *name)
+        Serialize::StreamResult EntityPtr::readState(Serialize::SerializeInStream &in, const char *name)
         {
             Entity *ptr;
-            Serialize::read(in, ptr, name);
+            STREAM_PROPAGATE_ERROR(Serialize::read(in, ptr, name));
             mEntity = reinterpret_cast<uintptr_t>(ptr);
+            return {};
         }
 
         void EntityPtr::writeState(Serialize::SerializeOutStream &out, const char *name) const

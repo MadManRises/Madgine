@@ -2,42 +2,20 @@
 
 #include "Meta/metalib.h"
 
-#include "Meta/serialize/container/syncablecontainer.h"
 #include "Meta/serialize/serializableunit.h"
 
 #include "Meta/serialize/streams/serializestreambuf.h"
 
-#include "Meta/serialize/toplevelunit.h"
-
 #include "Meta/serialize/container/noparent.h"
 
-#include "Meta/serialize/serializetable_impl.h"
-
 #include "../testManager.h"
+#include "../testunit.h"
+
+#include "Meta/serialize/streams/operations.h"
 
 using namespace Engine::Serialize;
 using namespace std::chrono_literals;
 
-struct TestUnit : TopLevelUnit<TestUnit> {
-    SERIALIZABLEUNIT(TestUnit);
-
-    TestUnit()
-        : TopLevelUnit<TestUnit>(10)
-    {
-    }
-
-    SERIALIZABLE_CONTAINER(list1, std::list<int>);
-    SERIALIZABLE_CONTAINER(set1, std::set<int>);
-    SYNCABLE_CONTAINER(list2, std::list<int>);
-    SYNCABLE_CONTAINER(set2, std::set<int>);
-};
-
-SERIALIZETABLE_BEGIN(TestUnit)
-FIELD(list1)
-FIELD(list2)
-FIELD(set1)
-FIELD(set2)
-SERIALIZETABLE_END(TestUnit)
 
 TEST(Serialize_Container, SyncedUnit)
 {

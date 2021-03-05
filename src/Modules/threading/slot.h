@@ -58,7 +58,7 @@ namespace Threading {
     };
 
     template <auto f>
-    using Slot = typename MemberFunctionCapture<SlotImpl, f>::type;
+    using Slot = typename FunctionCapture<SlotImpl, f>::type;
 
 }
 }

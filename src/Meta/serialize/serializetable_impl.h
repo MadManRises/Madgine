@@ -36,15 +36,15 @@ namespace Serialize {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                     write(out, (unit->*Getter)(), name, CallerHierarchyPtr { hierarchy.append(unit) } );
             },
-            [](SerializableDataUnit *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) {
+            [](SerializableDataUnit *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
                 (unit->*Setter)(nullptr);
-                read(in, unit->*P, name, CallerHierarchyPtr { hierarchy.append(unit) } );
+                return read(in, unit->*P, name, CallerHierarchyPtr { hierarchy.append(unit) } );
             },
-            [](SerializableDataUnit *unit, SerializeInStream &in, PendingRequest *request) {
+            [](SerializableDataUnit *unit, SerializeInStream &in, PendingRequest *request) -> StreamResult {
                 throw "Unsupported";
             },
-            [](SerializableDataUnit *unit, BufferedInOutStream &inout, TransactionId id) {
+            [](SerializableDataUnit *unit, BufferedInOutStream &inout, TransactionId id) -> StreamResult {
                 throw "Unsupported";
             },
             [](SerializableDataUnit *_unit, SerializeInStream &in) {
@@ -98,16 +98,17 @@ namespace Serialize {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 write(out, (unit->*Getter)(), name, hierarchy.append(unit));
             },
-            [](SerializableDataUnit *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) {
+            [](SerializableDataUnit *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
                 MakeOwning_t<T> dummy;
-                read(in, dummy, name, CallerHierarchyPtr { hierarchy.append(unit) });
+                STREAM_PROPAGATE_ERROR(read(in, dummy, name, CallerHierarchyPtr { hierarchy.append(unit) }));
                 (unit->*Setter)(std::move(dummy));
+                return {};
             },
-            [](SerializableDataUnit *unit, SerializeInStream &in, PendingRequest *request) {
+            [](SerializableDataUnit *unit, SerializeInStream &in, PendingRequest *request) -> StreamResult {
                 throw "Unsupported";
             },
-            [](SerializableDataUnit *unit, BufferedInOutStream &inout, TransactionId id) {
+            [](SerializableDataUnit *unit, BufferedInOutStream &inout, TransactionId id) -> StreamResult {
                 throw "Unsupported";
             },
             [](SerializableDataUnit *_unit, SerializeInStream &in) {
@@ -143,21 +144,21 @@ namespace Serialize {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 write<T, Configs...>(out, unit->*P, name, CallerHierarchyPtr { hierarchy.append(unit) });
             },
-            [](SerializableDataUnit *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) {
+            [](SerializableDataUnit *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
-                read<T, Configs...>(in, unit->*P, name, CallerHierarchyPtr { hierarchy.append(unit) });
+                return read<T, Configs...>(in, unit->*P, name, CallerHierarchyPtr { hierarchy.append(unit) });
             },
-            [](SerializableDataUnit *_unit, SerializeInStream &in, PendingRequest *request) {
+            [](SerializableDataUnit *_unit, SerializeInStream &in, PendingRequest *request) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
-                    Operations<T, Configs...>::readAction(unit->*P, in, request, unit);
+                    return Operations<T, Configs...>::readAction(unit->*P, in, request, unit);
                 else
                     throw "Unsupported";
             },
-            [](SerializableDataUnit *_unit, BufferedInOutStream &inout, TransactionId id) {
+            [](SerializableDataUnit *_unit, BufferedInOutStream &inout, TransactionId id) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
                 if constexpr (std::is_base_of_v<SyncableBase, T>)
-                    Operations<T, Configs...>::readRequest(unit->*P, inout, id, unit);
+                    return Operations<T, Configs...>::readRequest(unit->*P, inout, id, unit);
                 else
                     throw "Unsupported";
             },
@@ -207,16 +208,16 @@ namespace Serialize {
             [](const SerializableDataUnit *_unit, SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
 
             },
-            [](SerializableDataUnit *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) {
-
+            [](SerializableDataUnit *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) -> StreamResult {
+                return {};
             },
-            [](SerializableDataUnit *_unit, SerializeInStream &in, PendingRequest *request) {
+            [](SerializableDataUnit *_unit, SerializeInStream &in, PendingRequest *request) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
-                Operations<T, Configs...>::readAction(unit->*P, in, request, unit);
+                return Operations<T, Configs...>::readAction(unit->*P, in, request, unit);
             },
-            [](SerializableDataUnit *_unit, BufferedInOutStream &inout, TransactionId id) {
+            [](SerializableDataUnit *_unit, BufferedInOutStream &inout, TransactionId id) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
-                Operations<T, Configs...>::readRequest(unit->*P, inout, id, unit);
+                return Operations<T, Configs...>::readRequest(unit->*P, inout, id, unit);
             },
             [](SerializableDataUnit *unit, SerializeInStream &in) {
             },

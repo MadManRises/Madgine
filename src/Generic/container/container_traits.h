@@ -27,6 +27,11 @@ struct Pib {
         return *first;
     }
 
+    operator It &()
+    {
+        return first;
+    }
+
     operator const It &() const
     {
         return first;
@@ -391,7 +396,8 @@ struct container_traits<std::array<T, Size>, void> {
     typedef typename container::reverse_iterator reverse_iterator;
     typedef typename container::const_reverse_iterator const_reverse_iterator;
 
-    typedef void emplace_return;
+    struct emplace_return {
+    };
 
     struct handle_t {
         handle_t(size_t index = std::numeric_limits<size_t>::max())

@@ -2,45 +2,16 @@
 
 #include "Meta/metalib.h"
 
-#include "Meta/serialize/container/query.h"
-#include "Meta/serialize/container/query_operations.h"
 #include "Meta/serialize/serializableunit.h"
-
-#include "Meta/serialize/toplevelunit.h"
 
 #include "Meta/serialize/container/noparent.h"
 
-#include "Meta/serialize/serializetable_impl.h"
-
 #include "../testManager.h"
+#include "../testunit.h"
 
 using namespace Engine::Serialize;
 using namespace std::chrono_literals;
 
-struct QueryTestUnit : TopLevelUnit<QueryTestUnit> {
-    SERIALIZABLEUNIT(QueryTestUnit);
-
-    QueryTestUnit(int data)
-        : TopLevelUnit<QueryTestUnit>(10)
-        , mData(data)
-    {
-    }
-
-    int fooImpl(int i)
-    {
-        ++mCallCount;
-        return i + mData;
-    }
-
-    int mCallCount = 0;
-    int mData;
-
-    QUERY(foo, fooImpl);
-};
-
-SERIALIZETABLE_BEGIN(QueryTestUnit)
-SYNC(foo)
-SERIALIZETABLE_END(QueryTestUnit)
 
 TEST(Serialize_Query, Query)
 {
@@ -48,8 +19,8 @@ TEST(Serialize_Query, Query)
     TestManager mgr1("container1");
     TestManager mgr2("container2");
 
-    NoParentUnit<QueryTestUnit> unit1 { 1 };
-    NoParentUnit<QueryTestUnit> unit2 { 2 };
+    NoParentUnit<TestUnit> unit1 { 1 };
+    NoParentUnit<TestUnit> unit2 { 2 };
 
     ASSERT_TRUE(mgr1.addTopLevelItem(&unit1));
     ASSERT_TRUE(mgr2.addTopLevelItem(&unit2));
@@ -62,7 +33,7 @@ TEST(Serialize_Query, Query)
     ASSERT_EQ(unit1.mCallCount, 0);
     ASSERT_EQ(unit2.mCallCount, 0);
 
-    Engine::Future<int> f1 = unit1.foo(10);
+    Engine::Future<int> f1 = unit1.query(10);
 
     ASSERT_TRUE(f1.is_ready());
     ASSERT_EQ(f1.get(), 11);
@@ -76,7 +47,7 @@ TEST(Serialize_Query, Query)
     ASSERT_EQ(unit1.mCallCount, 1);
     ASSERT_EQ(unit2.mCallCount, 0);
 
-    Engine::Future<int> f2 = unit2.foo(20);
+    Engine::Future<int> f2 = unit2.query(20);
 
     ASSERT_FALSE(f2.is_ready());
 
@@ -108,9 +79,9 @@ TEST(Serialize_Query, Query_Hierarchical)
     TestManager mgr2("container2");    
     TestManager mgr3("container3");
 
-    NoParentUnit<QueryTestUnit> unit1 { 1 };
-    NoParentUnit<QueryTestUnit> unit2 { 2 };
-    NoParentUnit<QueryTestUnit> unit3 { 3 };
+    NoParentUnit<TestUnit> unit1 { 1 };
+    NoParentUnit<TestUnit> unit2 { 2 };
+    NoParentUnit<TestUnit> unit3 { 3 };
 
     ASSERT_TRUE(mgr1.addTopLevelItem(&unit1));
     ASSERT_TRUE(mgr2.addTopLevelItem(&unit2));
@@ -130,7 +101,7 @@ TEST(Serialize_Query, Query_Hierarchical)
     ASSERT_EQ(unit2.mCallCount, 0);
     ASSERT_EQ(unit3.mCallCount, 0);
 
-    Engine::Future<int> f1 = unit1.foo(10);
+    Engine::Future<int> f1 = unit1.query(10);
 
     ASSERT_TRUE(f1.is_ready());
     ASSERT_EQ(f1.get(), 11);
@@ -153,7 +124,7 @@ TEST(Serialize_Query, Query_Hierarchical)
     ASSERT_EQ(unit2.mCallCount, 0);
     ASSERT_EQ(unit3.mCallCount, 0);
 
-    Engine::Future<int> f2 = unit3.foo(20);
+    Engine::Future<int> f2 = unit3.query(20);
 
     ASSERT_FALSE(f2.is_ready());
 

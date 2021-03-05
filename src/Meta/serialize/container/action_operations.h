@@ -30,15 +30,16 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static void readAction(Action<f, OffsetPtr> &action, SerializeInStream &in, PendingRequest *request, Args &&... args)
+        static StreamResult readAction(Action<f, OffsetPtr> &action, SerializeInStream &in, PendingRequest *request, Args &&... args)
         {
             std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> data;
-            TupleUnpacker::forEach(data, [&](auto &field) { read(in, field, nullptr, args...); });
+            TupleUnpacker::forEach(data, [&](auto &field) { read(in, field, nullptr, args...); }); //TODO
             UnitHelper<decltype(data)>::applyMap(in, data);
             R result = action.call(std::move(data), request ? request->mRequester : 0, request ? request->mRequesterTransactionId : 0);
             if (request) {
                 (*request)(&result);
             }
+            return {};
         }
 
         template <typename... Args>
@@ -53,20 +54,21 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static void readRequest(Action<f, OffsetPtr> &action, BufferedInOutStream &in, TransactionId id, Args &&... args)
+        static StreamResult readRequest(Action<f, OffsetPtr> &action, BufferedInOutStream &in, TransactionId id, Args &&... args)
         {
             if constexpr (!RequestPolicy::sCallByMasterOnly) {
                 std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> data;
-                TupleUnpacker::forEach(data, [&](auto &field) { read(in, field, nullptr, args...); });
+                TupleUnpacker::forEach(data, [&](auto &field) { read(in, field, nullptr, args...); }); //TODO
                 UnitHelper<decltype(data)>::applyMap(in, data);
                 if (Verifier::verify(id, data)) {
                     action.tryCall(data, in.id(), id);
                 } else {
-                    throw 0;
+                    return STREAM_PERMISSION_ERROR(in, "Request for action not verified");
                 }
             } else {
-                throw 0;
+                return STREAM_PERMISSION_ERROR(in, "Request for action not allowed");
             }
+            return {};
         }
     };
 

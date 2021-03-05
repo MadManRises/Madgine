@@ -26,7 +26,7 @@ namespace Serialize {
         }
     }
 
-    void SerializeTable::readState(SerializableDataUnit *unit, SerializeInStream &in, StateTransmissionFlags flags, CallerHierarchyBasePtr hierarchy) const
+    StreamResult SerializeTable::readState(SerializableDataUnit *unit, SerializeInStream &in, StateTransmissionFlags flags, CallerHierarchyBasePtr hierarchy) const
     {
         Formatter &format = in.format();
 
@@ -38,7 +38,7 @@ namespace Serialize {
                 while (table && !found) {
                     for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
                         if (name == it->second.mFieldName) {
-                            it->second.mReadState(unit, in, it->second.mFieldName, hierarchy);
+                            STREAM_PROPAGATE_ERROR(it->second.mReadState(unit, in, it->second.mFieldName, hierarchy));
                             found = true;
                             break;
                         }
@@ -46,14 +46,14 @@ namespace Serialize {
                     table = table->mBaseType ? &table->mBaseType() : nullptr;
                 }
                 if (!found)
-                    std::terminate();
+                    return STREAM_PARSE_ERROR(in, "Could not find field '" << name << "'");
                 name = format.lookupFieldName(in);
             }
         } else {
             const SerializeTable *table = this;
             while (table) {
                 for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                    it->second.mReadState(unit, in, it->second.mFieldName, hierarchy);
+                    STREAM_PROPAGATE_ERROR(it->second.mReadState(unit, in, it->second.mFieldName, hierarchy));
                 }
                 table = table->mBaseType ? &table->mBaseType() : nullptr;
             }
@@ -63,34 +63,37 @@ namespace Serialize {
             assert(in.manager());
             applySerializableMap(unit, in);
         }
+        return {};
     }
 
-    void SerializeTable::readState(SerializableUnitBase *unit, SerializeInStream &in, StateTransmissionFlags flags, CallerHierarchyBasePtr hierarchy) const
+    StreamResult SerializeTable::readState(SerializableUnitBase *unit, SerializeInStream &in, StateTransmissionFlags flags, CallerHierarchyBasePtr hierarchy) const
     {
         bool wasActive = unit->mActiveIndex > 0; //Not exact, but active unit with 0 members doesn't matter
         if (wasActive) {
             setActive(unit, false, false);
         }
 
-        readState(static_cast<SerializableDataUnit *>(unit), in, flags, hierarchy);
+        StreamResult result = readState(static_cast<SerializableDataUnit *>(unit), in, flags, hierarchy);
         
         if (wasActive) {
             setActive(unit, true, false);
         }
+
+        return result;
     }
 
-    void SerializeTable::readAction(SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) const
+    StreamResult SerializeTable::readAction(SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) const
     {
         uint8_t index;
         in >> index;
-        get(index).mReadAction(unit, in, request);
+        return get(index).mReadAction(unit, in, request);
     }
 
-    void SerializeTable::readRequest(SerializableUnitBase *unit, BufferedInOutStream &inout, TransactionId id) const
+    StreamResult SerializeTable::readRequest(SerializableUnitBase *unit, BufferedInOutStream &inout, TransactionId id) const
     {
         uint8_t index;
         inout >> index;
-        get(index).mReadRequest(unit, inout, id);
+        return get(index).mReadRequest(unit, inout, id);
     }
 
     void SerializeTable::applySerializableMap(SerializableDataUnit *unit, SerializeInStream &in) const
@@ -186,6 +189,7 @@ namespace Serialize {
             tables.pop();
         }
 
+        assert(false);
         throw 0;
     }
 

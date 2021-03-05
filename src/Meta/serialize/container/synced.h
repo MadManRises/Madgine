@@ -188,13 +188,13 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static void readAction(Synced<T, Observer, OffsetPtr> &synced, SerializeInStream &in, PendingRequest *request, Args &&... args)
+        static StreamResult readAction(Synced<T, Observer, OffsetPtr> &synced, SerializeInStream &in, PendingRequest *request, Args &&... args)
         {
             SyncedOperation::Value op;
-            Serialize::read(in, op, nullptr);
+            STREAM_PROPAGATE_ERROR(Serialize::read(in, op, nullptr));
             T old = synced.mData;
             T value;
-            Serialize::read(in, value, nullptr);
+            STREAM_PROPAGATE_ERROR(Serialize::read(in, value, nullptr));
             switch (op) {
             case SyncedOperation::SET:
                 synced.mData = value;
@@ -213,6 +213,7 @@ namespace Serialize {
                 break;
             }
             synced.notify(old);
+            return {};
         }
 
         template <typename... Args>
@@ -227,11 +228,12 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static void read(SerializeInStream &in, Synced<T, Observer, OffsetPtr> &synced, const char *name, Args &&... args)
+        static StreamResult read(SerializeInStream &in, Synced<T, Observer, OffsetPtr> &synced, const char *name, Args &&... args)
         {
             T old = synced.mData;
-            Serialize::read(in, synced.mData, name);
+            STREAM_PROPAGATE_ERROR(Serialize::read(in, synced.mData, name));
             synced.notify(old);
+            return {};
         }
 
         template <typename... Args>

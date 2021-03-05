@@ -28,7 +28,7 @@ namespace Serialize {
     DERIVE_FUNCTION(writeRequest, int, const void *, ParticipantId, TransactionId, std::function<void(void*)>)*/
 
     template <typename T, typename... Configs, typename Hierarchy = std::monostate>
-    void read(SerializeInStream &in, T &t, const char *name, const Hierarchy &hierarchy = {}, StateTransmissionFlags flags = 0);
+    StreamResult read(SerializeInStream &in, T &t, const char *name, const Hierarchy &hierarchy = {}, StateTransmissionFlags flags = 0);
 
     template <typename T, typename... Configs, typename Hierarchy = std::monostate>
     void write(SerializeOutStream &out, const T &t, const char *name, const Hierarchy &hierarchy = {}, StateTransmissionFlags flags = 0);
@@ -40,55 +40,54 @@ namespace Serialize {
         using RequestPolicy = ConfigSelectorDefault<RequestPolicyCategory, RequestPolicy::all_requests, Configs...>;
 
         template <typename Op, typename Hierarchy = std::monostate>
-        static void readOp(SerializeInStream &in, Op &op, const char *name, const Hierarchy &hierarchy = {})
+        static StreamResult readOp(SerializeInStream &in, Op &op, const char *name, const Hierarchy &hierarchy = {})
         {
             using T = typename C::value_type;
 
-            in.format().beginExtended(in, name, 1);
-            uint32_t size;
-            Serialize::read(in, size, "size");
-            in.format().beginCompound(in, name);
+            STREAM_PROPAGATE_ERROR(in.format().beginContainer(in, name, !container_traits<C>::is_fixed_size));
 
             if constexpr (!container_traits<C>::is_fixed_size) {
-                TupleUnpacker::invoke(&Creator::template clear<Op>, op, size, hierarchy);
+                TupleUnpacker::invoke(&Creator::template clear<Op>, op, hierarchy);
 
-                while (size--) {
-                    TupleUnpacker::invoke(&Creator::template readItem<Op>, in, op, physical(op).end(), hierarchy);
+                while (in.format().hasContainerItem(in)) {
+                    typename container_traits<Op>::emplace_return it;
+                    STREAM_PROPAGATE_ERROR(TupleUnpacker::invoke(&Creator::template readItem<Op>, in, op, it, physical(op).end(), hierarchy));
                 }
             } else {
-                assert(op.size() == size);
                 for (T &t : physical(op)) {
-                    Serialize::read(in, t, "Item");
-                }
+                    STREAM_PROPAGATE_ERROR(Serialize::read(in, t, "Item"));
+                }                
             }
 
-            in.format().endCompound(in, name);
+            return in.format().endContainer(in, name);
         }
 
         template <typename... Args>
-        static void read(SerializeInStream &in, C &container, const char *name, Args &&... args)
+        static StreamResult read(SerializeInStream &in, C &container, const char *name, Args &&... args)
         {
             decltype(auto) op = resetOperation(container);
-            readOp(in, op, name, std::forward<Args>(args)...);
+            return readOp(in, op, name, std::forward<Args>(args)...);
         }
 
         template <typename... Args>
         static void write(SerializeOutStream &out, const C &container, const char *name, Args &&... args)
         {
-            out.format().beginExtended(out, name, 1);
-            Serialize::write<uint32_t>(out, container.size(), "size");
-            out.format().beginCompound(out, name);
+            if constexpr (container_traits<C>::is_fixed_size)
+                out.format().beginContainer(out, name);
+            else
+                out.format().beginContainer(out, name, container.size());
             for (const auto &t : container) {
                 TupleUnpacker::invoke(&Creator::writeItem, out, t, std::forward<Args>(args)...);
             }
-            out.format().endCompound(out, name);
+            out.format().endContainer(out, name);
         }
 
-        static typename C::iterator readIterator(SerializeInStream &in, C &c)
+        static StreamResult readIterator(SerializeInStream &in, C &c, typename C::iterator &it)
         {
             int32_t dist;
-            Serialize::read(in, dist, "it");
-            return std::next(c.begin(), dist);
+            STREAM_PROPAGATE_ERROR(Serialize::read(in, dist, "it"));
+            it = std::next(c.begin(), dist);
+            return {};
         }
 
         static void writeIterator(SerializeOutStream &out, const C &c, const typename C::const_iterator &it)
@@ -97,21 +96,21 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static typename container_traits<C>::emplace_return performOperation(C &c, ContainerEvent op, SerializeInStream &in, ParticipantId answerTarget, TransactionId answerId, Args &&... args)
+        static StreamResult performOperation(C &c, ContainerEvent op, SerializeInStream &in, typename container_traits<C>::emplace_return &it, ParticipantId answerTarget, TransactionId answerId, Args &&... args)
         {
-            typename container_traits<C>::emplace_return it = c.end();
+            it = c.end();
             switch (op) {
             case EMPLACE: {
                 if constexpr (!container_traits<C>::sorted) {
-                    it = readIterator(in, c);
+                    readIterator(in, c, it);
                 }
                 decltype(auto) op = insertOperation(c, it, answerTarget, answerId);
                 typename container_traits<C>::const_iterator cit = static_cast<const typename container_traits<C>::iterator &>(it);
-                it = TupleUnpacker::invoke(&Creator::template readItem<InsertOperation_t<C>>, in, op, cit, std::forward<Args>(args)...);
+                return TupleUnpacker::invoke(&Creator::template readItem<InsertOperation_t<C>>, in, op, it, cit, std::forward<Args>(args)...);
                 break;
             }
             case ERASE: {
-                it = readIterator(in, c);
+                readIterator(in, c, it);
                 it = removeOperation(c, it, answerTarget, answerId).erase(it);
                 break;
             }
@@ -128,7 +127,7 @@ namespace Serialize {
             default:
                 throw 0;
             }
-            return it;
+            return {};
         }
 
         //TODO: Maybe move loop out of this function
@@ -162,7 +161,7 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static void readAction(C &c, SerializeInStream &in, PendingRequest *request, Args &&... args)
+        static StreamResult readAction(C &c, SerializeInStream &in, PendingRequest *request, Args &&... args)
         {
             ContainerEvent op;
             in >> op;
@@ -170,7 +169,8 @@ namespace Serialize {
             bool accepted = (op & ~MASK) != ABORTED;
 
             if (accepted) {
-                typename container_traits<C>::emplace_return it = performOperation(c, op, in, request ? request->mRequester : 0, request ? request->mRequesterTransactionId : 0, std::forward<Args>(args)...);
+                typename container_traits<C>::emplace_return it;
+                STREAM_PROPAGATE_ERROR(performOperation(c, op, in, it, request ? request->mRequester : 0, request ? request->mRequesterTransactionId : 0, std::forward<Args>(args)...));
                 if (request) {
                     (*request)(&it);
                 }
@@ -183,6 +183,7 @@ namespace Serialize {
                 }
                 (*request)(nullptr);
             }
+            return {};
         }
 
         template <typename... Args>
@@ -209,7 +210,7 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static void readRequest(C &c, BufferedInOutStream &inout, TransactionId id, Args &&... args)
+        static StreamResult readRequest(C &c, BufferedInOutStream &inout, TransactionId id, Args &&... args)
         {
             bool accepted = !RequestPolicy::sCallByMasterOnly;
 
@@ -224,7 +225,8 @@ namespace Serialize {
                 }
             } else {
                 if (c.isMaster()) {
-                    performOperation(c, op, inout, inout.id(), id, std::forward<Args>(args)...);
+                    typename container_traits<C>::emplace_return it;
+                    STREAM_PROPAGATE_ERROR(performOperation(c, op, inout, it, inout.id(), id, std::forward<Args>(args)...));
                 } else {
                     BufferedOutStream &out = c.getSlaveActionMessageTarget(inout.id(), id);
                     Serialize::write(out, op, "op");
@@ -232,6 +234,7 @@ namespace Serialize {
                     out.endMessage();
                 }
             }
+            return {};
         }
     };
 
@@ -241,31 +244,33 @@ namespace Serialize {
     template <typename T, typename... Configs>
     struct BaseOperations {
         template <typename Hierarchy = std::monostate>
-        static void read(SerializeInStream &in, T &t, const char *name, const Hierarchy &hierarchy = {}, StateTransmissionFlags flags = 0)
+        static StreamResult read(SerializeInStream &in, T &t, const char *name, const Hierarchy &hierarchy = {}, StateTransmissionFlags flags = 0)
         {
             if constexpr (has_function_readState2_v<T>) {
-                t.readState(in, name, CallerHierarchyPtr { hierarchy });
+                return t.readState(in, name, CallerHierarchyPtr { hierarchy });
             } else if constexpr (has_function_readState_v<T>) {
-                t.readState(in, name);
+                return t.readState(in, name);
             } else if constexpr (isPrimitiveType_v<T>) {
-                in.format().beginPrimitive(in, name, PrimitiveTypeIndex_v<T>);
-                in.readUnformatted(t);
-                in.format().endPrimitive(in, name, PrimitiveTypeIndex_v<T>);
+                STREAM_PROPAGATE_ERROR(in.format().beginPrimitive(in, name, PrimitiveTypeIndex_v<T>));
+                STREAM_PROPAGATE_ERROR(in.readUnformatted(t));
+                return in.format().endPrimitive(in, name, PrimitiveTypeIndex_v<T>);
                 //mLog.log(t);
-            } else if constexpr (PrimitiveTypesContain_v<std::remove_const_t<T>> || std::is_enum_v<std::remove_const_t<T>>) {
+            } else if constexpr (std::is_const_v<T>) {
                 //Don't do anything here
+                return {};
             } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>) {
-                SerializableUnitPtr { &t }.readState(in, name, CallerHierarchyPtr { hierarchy }, flags);
+                return SerializableUnitPtr { &t }.readState(in, name, CallerHierarchyPtr { hierarchy }, flags);
             } else if constexpr (std::is_base_of_v<SerializableDataUnit, T>) {
-                SerializableDataPtr { &t }.readState(in, name, CallerHierarchyPtr { hierarchy }, flags);
+                return SerializableDataPtr { &t }.readState(in, name, CallerHierarchyPtr { hierarchy }, flags);
             } else if constexpr (is_string_like_v<T>) {
                 std::string s;
-                Serialize::read<std::string>(in, s, name, hierarchy);
+                StreamResult result = Serialize::read<std::string>(in, s, name, hierarchy);
                 t = s;
+                return result;
             } else if constexpr (is_iterable_v<T>) {
-                ContainerOperations<T, Configs...>::read(in, t, name, hierarchy);
+                return ContainerOperations<T, Configs...>::read(in, t, name, hierarchy);
             } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
-                Operations<decltype(TupleUnpacker::toTuple(std::declval<T &>())), Configs...>::read(in, TupleUnpacker::toTuple(t), name, hierarchy);
+                return Operations<decltype(TupleUnpacker::toTuple(std::declval<T &>())), Configs...>::read(in, TupleUnpacker::toTuple(t), name, hierarchy);
             } else {
                 static_assert(dependent_bool<T, false>::value, "Invalid Type");
             }
@@ -283,7 +288,7 @@ namespace Serialize {
                 out.writeUnformatted(t);
                 out.format().endPrimitive(out, name, PrimitiveTypeIndex_v<T>);
                 //mLog.log(t);
-            } else if constexpr (PrimitiveTypesContain_v<std::remove_const_t<T>> || std::is_enum_v<std::remove_const_t<T>>) {
+            } else if constexpr (std::is_const_v<T>) {
                 //Don't do anything here
             } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>) {
                 SerializableUnitConstPtr { &t }.writeState(out, name, CallerHierarchyPtr { hierarchy }, flags);
@@ -322,7 +327,7 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static void readAction(T &t, SerializeInStream &in, PendingRequest *request, Args &&... args)
+        static StreamResult readAction(T &t, SerializeInStream &in, PendingRequest *request, Args &&... args)
         {
             /*if constexpr (PrimitiveTypesContain_v<T> || std::is_enum_v<T>) {
             out.format().beginPrimitive(out, name, PrimitiveTypeIndex_v<T>);
@@ -333,7 +338,7 @@ namespace Serialize {
              t.readAction(in, request);
         } else */
             if constexpr (is_iterable_v<T>) {
-                ContainerOperations<T, Configs...>::readAction(t, in, request, std::forward<Args>(args)...);
+                return ContainerOperations<T, Configs...>::readAction(t, in, request, std::forward<Args>(args)...);
             } /*else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
             write(out, TupleUnpacker::toTuple(t), name);
         } */
@@ -364,7 +369,7 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static void readRequest(T &t, BufferedInOutStream &inout, TransactionId id, Args &&... args)
+        static StreamResult readRequest(T &t, BufferedInOutStream &inout, TransactionId id, Args &&... args)
         {
             /*if constexpr (PrimitiveTypesContain_v<T> || std::is_enum_v<T>) {
             out.format().beginPrimitive(out, name, PrimitiveTypeIndex_v<T>);
@@ -375,7 +380,7 @@ namespace Serialize {
             t.readRequest(inout, id);
         } else */
             if constexpr (is_iterable_v<T>) {
-                ContainerOperations<T, Configs...>::readRequest(t, inout, id, std::forward<Args>(args)...);
+                return ContainerOperations<T, Configs...>::readRequest(t, inout, id, std::forward<Args>(args)...);
             } /*else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
             write(out, TupleUnpacker::toTuple(t), name);
         } */
@@ -393,9 +398,9 @@ namespace Serialize {
     struct Operations<std::unique_ptr<T>, Configs...> {
 
         template <typename... Args>
-        static void read(SerializeInStream &in, const std::unique_ptr<T> &p, const char *name, Args &&... args)
+        static StreamResult read(SerializeInStream &in, const std::unique_ptr<T> &p, const char *name, Args &&... args)
         {
-            Operations<T, Configs...>::read(in, *p, name, std::forward<Args>(args)...);
+            return Operations<T, Configs...>::read(in, *p, name, std::forward<Args>(args)...);
         }
 
         template <typename... Args>
@@ -409,9 +414,9 @@ namespace Serialize {
     struct Operations<const std::unique_ptr<T>, Configs...> {
 
         template <typename... Args>
-        static void read(SerializeInStream &in, const std::unique_ptr<T> &p, const char *name, Args &&... args)
+        static StreamResult read(SerializeInStream &in, const std::unique_ptr<T> &p, const char *name, Args &&... args)
         {
-            Operations<T, Configs...>::read(in, *p, name, std::forward<Args>(args)...);
+            return Operations<T, Configs...>::read(in, *p, name, std::forward<Args>(args)...);
         }
 
         template <typename... Args>
@@ -425,25 +430,25 @@ namespace Serialize {
     struct Operations<std::tuple<Ty...>, Configs...> {
 
         template <typename... Args, size_t... Is>
-        static void read(SerializeInStream &in, std::tuple<Ty...> &t, const char *name, std::index_sequence<Is...>, Args &&... args)
+        static StreamResult read(SerializeInStream &in, std::tuple<Ty...> &t, const char *name, std::index_sequence<Is...>, Args &&... args)
         {
-            in.format().beginCompound(in, name);
-            (Serialize::read<Ty>(in, std::get<Is>(t), nullptr, args...), ...);
-            in.format().endCompound(in, name);
+            STREAM_PROPAGATE_ERROR(in.format().beginContainer(in, name, false));
+            STREAM_PROPAGATE_ERROR((Serialize::read<Ty>(in, std::get<Is>(t), nullptr, args...), ...));
+            return in.format().endContainer(in, name);
         }
 
         template <typename... Args>
-        static void read(SerializeInStream &in, std::tuple<Ty...> &t, const char *name, Args &&... args)
+        static StreamResult read(SerializeInStream &in, std::tuple<Ty...> &t, const char *name, Args &&... args)
         {
-            read(in, t, name, std::make_index_sequence<sizeof...(Ty)> {}, std::forward<Args>(args)...);
+            return read(in, t, name, std::make_index_sequence<sizeof...(Ty)> {}, std::forward<Args>(args)...);
         }
 
         template <typename... Args, size_t... Is>
         static void write(SerializeOutStream &out, const std::tuple<Ty...> &t, const char *name, std::index_sequence<Is...>, Args &&... args)
         {
-            out.format().beginCompound(out, name);
+            out.format().beginContainer(out, name);
             (Serialize::write<Ty>(out, std::get<Is>(t), "Element", args...), ...);
-            out.format().endCompound(out, name);
+            out.format().endContainer(out, name);
         }
 
         template <typename... Args>
@@ -457,25 +462,25 @@ namespace Serialize {
     struct Operations<std::tuple<Ty &...>, Configs...> {
 
         template <typename... Args, size_t... Is>
-        static void read(SerializeInStream &in, std::tuple<Ty &...> t, const char *name, std::index_sequence<Is...>, Args &&... args)
+        static StreamResult read(SerializeInStream &in, std::tuple<Ty &...> t, const char *name, std::index_sequence<Is...>, Args &&... args)
         {
-            in.format().beginCompound(in, name);
-            (Serialize::read<Ty>(in, std::get<Is>(t), nullptr, args...), ...);
-            in.format().endCompound(in, name);
+            STREAM_PROPAGATE_ERROR(in.format().beginContainer(in, name, false));
+            STREAM_PROPAGATE_ERROR((Serialize::read<Ty>(in, std::get<Is>(t), nullptr, args...), ...));
+            return in.format().endContainer(in, name);
         }
 
         template <typename... Args>
-        static void read(SerializeInStream &in, std::tuple<Ty &...> t, const char *name, Args &&... args)
+        static StreamResult read(SerializeInStream &in, std::tuple<Ty &...> t, const char *name, Args &&... args)
         {
-            read(in, t, name, std::make_index_sequence<sizeof...(Ty)> {}, std::forward<Args>(args)...);
+            return read(in, t, name, std::make_index_sequence<sizeof...(Ty)> {}, std::forward<Args>(args)...);
         }
 
         template <typename... Args, size_t... Is>
         static void write(SerializeOutStream &out, const std::tuple<const Ty &...> t, const char *name, std::index_sequence<Is...>, Args &&... args)
         {
-            out.format().beginCompound(out, name);
+            out.format().beginContainer(out, name);
             (Serialize::write<Ty>(out, std::get<Is>(t), "Element", args...), ...);
-            out.format().endCompound(out, name);
+            out.format().endContainer(out, name);
         }
 
         template <typename... Args>
@@ -488,27 +493,29 @@ namespace Serialize {
     template <typename U, typename V, typename... Configs>
     struct Operations<std::pair<U, V>, Configs...> {
 
-        static void read(SerializeInStream &in, std::pair<U, V> &t, const char *name = nullptr)
+        template <typename... Args>
+        static StreamResult read(SerializeInStream &in, std::pair<U, V> &t, const char *name, Args &&... args)
         {
-            in.format().beginCompound(in, name);
-            Serialize::read<U>(in, t.first);
-            Serialize::read<V>(in, t.second);
-            in.format().endCompound(in, name);
+            STREAM_PROPAGATE_ERROR(in.format().beginCompound(in, name));
+            STREAM_PROPAGATE_ERROR(Serialize::read<U>(in, t.first, nullptr, args...));
+            STREAM_PROPAGATE_ERROR(Serialize::read<V>(in, t.second, nullptr, args...));
+            return in.format().endCompound(in, name);
         }
 
-        static void write(SerializeOutStream &out, const std::pair<U, V> &t, const char *name = nullptr)
+        template <typename... Args>
+        static void write(SerializeOutStream &out, const std::pair<U, V> &t, const char *name, Args &&... args)
         {
             out.format().beginCompound(out, name);
-            Serialize::write<U>(out, t.first, "Element");
-            Serialize::write<V>(out, t.second, "Element");
+            Serialize::write<U>(out, t.first, "First", args...);
+            Serialize::write<V>(out, t.second, "Second", args...);
             out.format().endCompound(out, name);
         }
     };
 
     template <typename T, typename... Configs, typename Hierarchy>
-    void read(SerializeInStream &in, T &t, const char *name, const Hierarchy &hierarchy, StateTransmissionFlags flags)
+    StreamResult read(SerializeInStream &in, T &t, const char *name, const Hierarchy &hierarchy, StateTransmissionFlags flags)
     {
-        Operations<T, Configs...>::read(in, t, name, hierarchy, flags);
+        return Operations<T, Configs...>::read(in, t, name, hierarchy, flags);
     }
 
     template <typename T, typename... Configs, typename Hierarchy>
@@ -520,7 +527,11 @@ namespace Serialize {
     template <typename T>
     inline SerializeInStream &SerializeInStream::operator>>(T &t)
     {
-        read(*this, t, nullptr);
+        StreamResult result = read(*this, t, nullptr);
+        if (result.mState != StreamState::OK) {
+            setState(state() | std::ios_base::failbit);
+            throw result;
+        }
         return *this;
     }
 

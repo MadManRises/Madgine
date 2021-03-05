@@ -4,18 +4,12 @@
 
 #include "Meta/serialize/formatter/safebinaryformatter.h"
 
-#include "serialize/xml/xmllib.h"
-
-#include "serialize/xml/xmlformatter.h"
-
 using namespace Engine::Serialize;
 
 struct Buffer {
     std::array<char, 4096> mBuffer[2];
     uint64_t mWrittenCount[2] = { 0, 0 };
 };
-
-using TestFormatter = Engine::Serialize::SafeBinaryFormatter;
 
 struct BufferedTestBuf : std::basic_streambuf<char> {
     BufferedTestBuf(Buffer &buffer, bool isMaster)
@@ -108,14 +102,14 @@ struct TestManager : Engine::Serialize::SyncManager {
     {
     }
 
-    BufferedInOutStream &setBuffer(Buffer &buffer, bool slave, bool shareState = true)
+    BufferedInOutStream &setBuffer(Buffer &buffer, bool slave, bool shareState = true, std::unique_ptr<Engine::Serialize::Formatter> format = std::make_unique<Engine::Serialize::SafeBinaryFormatter>())
     {
         std::unique_ptr<BufferedTestBuf> buf = std::make_unique<BufferedTestBuf>(buffer, !slave);
         if (slave) {
-            setSlaveStream(Engine::Serialize::BufferedInOutStream { std::move(buf), std::make_unique<Engine::Serialize::SafeBinaryFormatter>(), *this, 0 }, shareState, std::chrono::milliseconds { 1000 });
+            setSlaveStream(Engine::Serialize::BufferedInOutStream { std::move(buf), std::move(format), *this, 0 }, shareState, std::chrono::milliseconds { 1000 });
             return *getSlaveStream();
         } else {
-            addMasterStream(Engine::Serialize::BufferedInOutStream { std::move(buf), std::make_unique<Engine::Serialize::SafeBinaryFormatter>(), *this, 1 }, shareState);
+            addMasterStream(Engine::Serialize::BufferedInOutStream { std::move(buf), std::move(format), *this, 1 }, shareState);
             return getMasterStream(1);
         }
     }

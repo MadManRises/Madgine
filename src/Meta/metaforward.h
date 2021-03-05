@@ -65,6 +65,8 @@ namespace Serialize {
     struct SerializeStreamData;
     struct BufferedStreamData;
 
+    struct StreamResult;
+
     struct SerializableUnitPtr;
     struct SerializableUnitConstPtr;
     struct SerializableDataPtr;

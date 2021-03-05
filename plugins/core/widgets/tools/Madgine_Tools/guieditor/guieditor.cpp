@@ -23,8 +23,7 @@
 
 #include "Meta/serialize/streams/serializestream.h"
 
-#include "serialize/xml/xmllib.h"
-#include "serialize/xml/xmlformatter.h"
+#include "Meta/serialize/formatter/xmlformatter.h"
 
 #include "Meta/serialize/serializemanager.h"
 
@@ -127,7 +126,7 @@ namespace Tools {
 
         auto buf = std::make_unique<std::filebuf>();
         buf->open(filePath.str(), std::ios::out);
-        Serialize::SerializeOutStream out { std::move(buf), std::make_unique<Serialize::SerializeStreamData>(std::make_unique<XML::XMLFormatter>()) };
+        Serialize::SerializeOutStream out { std::move(buf), std::make_unique<Serialize::SerializeStreamData>(std::make_unique<Serialize::XMLFormatter>()) };
 
         mWindow->writeState(out);
     }
@@ -143,7 +142,7 @@ namespace Tools {
             Filesystem::Path filePath = root / "data" / (config + ".layout");
 
             Filesystem::FileManager file("Layout");
-            Serialize::SerializeInStream in = file.openRead(filePath, std::make_unique<XML::XMLFormatter>());
+            Serialize::SerializeInStream in = file.openRead(filePath, std::make_unique<Serialize::XMLFormatter>());
             if (in) {
                 mWindow->readState(in, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap);
             }

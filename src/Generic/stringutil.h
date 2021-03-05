@@ -7,14 +7,26 @@ namespace StringUtil {
         return c == ' ';
     }
 
-    constexpr bool startsWith(const std::string_view &s, const std::string_view &prefix)
+    constexpr bool startsWith(std::string_view s, std::string_view prefix)
     {
         return s.substr(0, prefix.size()) == prefix;
     }
 
-    constexpr bool endsWith(const std::string_view &s, const std::string_view &suffix)
+    constexpr bool endsWith(std::string_view s, std::string_view suffix)
     {
         return s.size() >= suffix.size() ? (s.substr(s.size() - suffix.size(), suffix.size()) == suffix) : false;
+    }
+
+    constexpr std::string_view trim(std::string_view s) {
+        auto begin = std::find_if_not(s.begin(), s.end(), std::isspace);
+        auto end = std::find_if_not(s.rbegin(), s.rend(), std::isspace);
+        return { begin, end.base() };
+    }
+
+    constexpr std::string_view substr(std::string_view s, int start, int end) {
+        if (end < 0)
+            end += s.size();
+        return s.substr(start, end - start);
     }
 
     inline std::string &replace(std::string &s, char old, char rep)
