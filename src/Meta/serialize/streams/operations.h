@@ -27,12 +27,6 @@ namespace Serialize {
     DERIVE_FUNCTION(writeAction, int, const void *, ParticipantId, TransactionId)
     DERIVE_FUNCTION(writeRequest, int, const void *, ParticipantId, TransactionId, std::function<void(void*)>)*/
 
-    template <typename T, typename... Configs, typename Hierarchy = std::monostate>
-    StreamResult read(SerializeInStream &in, T &t, const char *name, const Hierarchy &hierarchy = {}, StateTransmissionFlags flags = 0);
-
-    template <typename T, typename... Configs, typename Hierarchy = std::monostate>
-    void write(SerializeOutStream &out, const T &t, const char *name, const Hierarchy &hierarchy = {}, StateTransmissionFlags flags = 0);
-
     template <typename C, typename... Configs>
     struct ContainerOperations {
 

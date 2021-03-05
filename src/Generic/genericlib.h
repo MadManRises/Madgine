@@ -21,6 +21,8 @@
 
 #include <assert.h>
 
+#include "compatibility.h"
+
 #include "genericforward.h"
 
 #include "callable_traits.h"

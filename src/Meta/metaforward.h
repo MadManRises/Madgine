@@ -80,6 +80,8 @@ namespace Serialize {
 
     struct PendingRequest;
 
+    typedef int StateTransmissionFlags;
+
     typedef uint32_t ParticipantId;
     typedef uint32_t TransactionId;
     typedef uint32_t UnitId;

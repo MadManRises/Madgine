@@ -3,8 +3,9 @@
 namespace Engine {
 namespace StringUtil {
 
-    constexpr bool isspace(char c) {
-        return c == ' ';
+    constexpr bool isspace(char c)
+    {
+        return c == ' ' || c == '\n' || c == '\t';
     }
 
     constexpr bool startsWith(std::string_view s, std::string_view prefix)
@@ -17,13 +18,15 @@ namespace StringUtil {
         return s.size() >= suffix.size() ? (s.substr(s.size() - suffix.size(), suffix.size()) == suffix) : false;
     }
 
-    constexpr std::string_view trim(std::string_view s) {
-        auto begin = std::find_if_not(s.begin(), s.end(), [](char c) { return std::isspace(c); });
-        auto end = std::find_if_not(s.rbegin(), s.rend(), [](char c) { return std::isspace(c); });
+    CONSTEXPR_ALGORITHM std::string_view trim(std::string_view s)
+    {
+        auto begin = std::find_if_not(s.begin(), s.end(), isspace);
+        auto end = std::find_if_not(s.rbegin(), s.rend(), isspace);
         return { &*begin, static_cast<size_t>(end.base() - begin) };
     }
 
-    constexpr std::string_view substr(std::string_view s, int start, int end) {
+    constexpr std::string_view substr(std::string_view s, int start, int end)
+    {
         if (end < 0)
             end += s.size();
         return s.substr(start, end - start);
@@ -38,7 +41,7 @@ namespace StringUtil {
         return s;
     }
 
-	template <typename String>
+    template <typename String>
     inline String &replace(String &s, std::string_view old, std::string_view rep)
     {
         size_t pos = s.find(old);
@@ -46,7 +49,7 @@ namespace StringUtil {
         size_t repLen = rep.size();
 
         while (pos != std::string::npos) {
-            s.replace(pos, oldLen, rep);            
+            s.replace(pos, oldLen, rep);
             pos = s.find(old, pos + repLen);
         }
         return s;
@@ -86,7 +89,7 @@ namespace StringUtil {
         return std::move(s);
     }
 
-	template <typename Cont>
+    template <typename Cont>
     std::string join(Cont &&cont, const char *sep)
     {
         std::stringstream ss;
@@ -102,7 +105,8 @@ namespace StringUtil {
     }
 
     template <size_t S>
-    constexpr std::array<std::string_view, S> tokenize(std::string_view string, char token) {
+    constexpr std::array<std::string_view, S> tokenize(std::string_view string, char token)
+    {
         std::array<std::string_view, S> result = {};
         size_t pivot = 0;
         for (size_t i = 0; i < S; ++i) {
