@@ -24,7 +24,7 @@ inline std::string typeName()
     int status = -4;
     
     std::unique_ptr<char, void (*)(void *)> res {
-        abi::__cxa_demangle(name, NULL, NULL, &status),
+        abi::__cxa_demangle(typeid(T).name(), NULL, NULL, &status),
         std::free
     };
 
