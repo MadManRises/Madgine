@@ -115,6 +115,12 @@ namespace Serialize {
 
     template <typename, typename... Configs>
     struct Operations;
+
+        template <typename T, typename... Configs, typename Hierarchy = std::monostate>
+    StreamResult read(SerializeInStream &in, T &t, const char *name, const Hierarchy &hierarchy = {}, StateTransmissionFlags flags = 0);
+
+    template <typename T, typename... Configs, typename Hierarchy = std::monostate>
+    void write(SerializeOutStream &out, const T &t, const char *name, const Hierarchy &hierarchy = {}, StateTransmissionFlags flags = 0);
 }
 
 namespace Network {
