@@ -138,7 +138,7 @@ namespace Tools {
 
     std::pair<bool, bool> Inspector::drawValueImpl(tinyxml2::XMLElement *element, TypedScopePtr parent, const std::string &id, ValueType &value, bool editable, bool generic)
     {
-        bool cannotBeDisabled = value.index() == Engine::ValueTypeEnum::ScopeValue || value.index() == Engine::ValueTypeEnum::KeyValueVirtualRangeValue || value.index() == Engine::ValueTypeEnum::ApiFunctionValue;
+        bool cannotBeDisabled = value.index() == Engine::ValueTypeEnum::ScopeValue || value.index() == Engine::ValueTypeEnum::OwnedScopeValue || value.index() == Engine::ValueTypeEnum::KeyValueVirtualRangeValue || value.index() == Engine::ValueTypeEnum::ApiFunctionValue;
 
         if (!editable && !cannotBeDisabled)
             ImGui::PushDisabled();
@@ -196,6 +196,10 @@ namespace Tools {
                                                                      }
                                                                      return std::make_pair(modified, changed);
                                                                  },
+            [&](OwnedScopePtr scope) {
+                ValueType v { scope.get() };
+                return drawValueImpl(element, parent, id, v, editable, false);
+            },
             [&](KeyValueVirtualRange &range) {
                 bool changed = false;
                 bool b = ImGui::TreeNodeEx(id.c_str());
@@ -209,6 +213,8 @@ namespace Tools {
                             key = vKey.toShortString() + "##" + key;
                         } else if (value.is<TypedScopePtr>()) {
                             key = "[" + std::to_string(i) + "] " + value.as<TypedScopePtr>().name() + "##" + key;
+                        } else if (value.is<OwnedScopePtr>()) {
+                            key = "[" + std::to_string(i) + "] " + value.as<OwnedScopePtr>().name() + "##" + key;
                         }
                         std::pair<bool, bool> result = drawValueImpl(element, {}, key, value, /*editable && */ vValue.isEditable(), false);
                         if (result.first)

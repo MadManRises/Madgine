@@ -124,7 +124,7 @@ namespace Serialize {
 
         StreamResult readState(SerializeInStream &in, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0) const;
 
-        void applySerializableMap(SerializeInStream &in) const;
+        void applySerializableMap(SerializeInStream &in, bool success) const;
 
         SerializableDataUnit *unit() const;
     };

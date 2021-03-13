@@ -24,6 +24,7 @@ namespace UI {
         , mPointerMoveSlot(this)
         , mPointerDownSlot(this)
         , mPointerUpSlot(this)
+        , mAxisEventSlot(this)
     {
     }
 
@@ -89,6 +90,7 @@ namespace UI {
                 mPointerMoveSlot.disconnectAll();
                 mPointerDownSlot.disconnectAll();
                 mPointerUpSlot.disconnectAll();
+                mAxisEventSlot.disconnectAll();
             }
             mWidget = widget;
 
@@ -96,6 +98,7 @@ namespace UI {
                 mWidget->pointerMoveEvent().connect(mPointerMoveSlot);
                 mWidget->pointerDownEvent().connect(mPointerDownSlot);
                 mWidget->pointerUpEvent().connect(mPointerUpSlot);
+                mWidget->axisEvent().connect(mAxisEventSlot);
 
                 for (const WindowDescriptor &des : mWidgets) {
                     Widgets::WidgetBase *child = widget->getChildRecursive(des.mWidgetName);
@@ -135,6 +138,11 @@ namespace UI {
         return onKeyPress(evt);
     }
 
+    void Handler::injectAxisEvent(const Input::AxisEventArgs &evt)
+    {
+        onAxisEvent(evt);
+    }
+
     void Handler::onPointerMove(const Input::PointerEventArgs &me)
     {
     }
@@ -150,6 +158,10 @@ namespace UI {
     bool Handler::onKeyPress(const Input::KeyEventArgs &evt)
     {
         return false;
+    }
+
+    void Handler::onAxisEvent(const Input::AxisEventArgs& evt)
+    {
     }
 
     void Handler::registerWidget(const std::string &name, std::function<bool(Widgets::WidgetBase *)> init)

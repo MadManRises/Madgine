@@ -113,4 +113,16 @@ using is_string_like = std::bool_constant<std::is_convertible_v<T&, const std::s
 template <typename T>
 constexpr const bool is_string_like_v = is_string_like<T>::value;
 
+
+template <size_t add, typename Sequence>
+struct index_range_add;
+
+template <size_t add, size_t... Is>
+struct index_range_add<add, std::index_sequence<Is...>> {
+    using type = std::index_sequence<(Is + add)...>;
+};
+
+template <size_t from, size_t to>
+using make_index_range = typename index_range_add<from, std::make_index_sequence<to - from>>::type;
+
 }

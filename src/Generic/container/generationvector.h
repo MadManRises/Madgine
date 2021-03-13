@@ -34,17 +34,17 @@ struct GenerationContainerIndex {
 
     explicit operator bool() const
     {
-        if (mGeneration != INVALID_GENERATION) {
+        if (mGeneration) {
             return true;
         } else {
-            assert(mIndex == INVALID_INDEX);
+            assert(!mIndex);
             return false;
         }
     }
 
     bool operator==(const GenerationContainerIndex &other) const
     {
-        if (mGeneration == INVALID_GENERATION || other.mGeneration == INVALID_GENERATION)
+        if (!mGeneration || !other.mGeneration)
             return mGeneration == other.mGeneration;
         assert(mGeneration == other.mGeneration);
         return mIndex == other.mIndex;
@@ -52,7 +52,7 @@ struct GenerationContainerIndex {
 
     bool operator!=(const GenerationContainerIndex &other) const
     {
-        if (mGeneration == INVALID_GENERATION || other.mGeneration == INVALID_GENERATION)
+        if (!mGeneration || !other.mGeneration)
             return mGeneration != other.mGeneration;
         assert(mGeneration == other.mGeneration);
         return mIndex != other.mIndex;
@@ -78,12 +78,12 @@ private:
 
     void reset()
     {
-        mIndex = INVALID_INDEX;
-        mGeneration = INVALID_GENERATION;
+        mIndex.reset();
+        mGeneration.reset();
     }
 
-    uint32_t mIndex = INVALID_INDEX;
-    uint16_t mGeneration = INVALID_GENERATION;
+    IndexType<uint32_t> mIndex;
+    IndexType<uint16_t> mGeneration;
 
 #if ENABLE_MEMTRACKING
     mutable uint32_t mDebugMarker = 0;
@@ -150,8 +150,8 @@ struct GenerationContainerBase {
         update(index);
         assert(index || diff == 0);
         index.mIndex += diff;
-        assert(index.mIndex <= size || index.mIndex == std::numeric_limits<uint32_t>::max());
-        if (index.mIndex == size || index.mIndex == std::numeric_limits<uint32_t>::max())
+        assert(index.mIndex <= size || !index.mIndex);
+        if (index.mIndex == size || !index.mIndex)
             reset(index);
     }
 
@@ -260,7 +260,7 @@ protected:
 
     uint32_t getIndex(const GenerationContainerIndex &index, uint32_t end) const
     {
-        return index ? index.mIndex : end;
+        return index ? uint32_t { index.mIndex } : end;
     }
 
 private:
@@ -562,7 +562,7 @@ struct GenerationContainer : GenerationContainerBase, protected C {
             assert(mVector == other.mVector);
             mVector->update(mIndex);
             mVector->update(other.mIndex);
-            return mVector->get(other.mIndex, std::numeric_limits<uint32_t>::max()) - mVector->get(mIndex, std::numeric_limits<uint32_t>::max());
+            return mVector->getIndex(other.mIndex, mVector->size()) - mVector->getIndex(mIndex, mVector->size());
         }
 
         GenerationContainerIndex copyIndex() const
@@ -812,29 +812,10 @@ struct container_traits<GenerationContainer<C>, void> {
     typedef typename container::reverse_iterator reverse_iterator;
     typedef typename container::const_reverse_iterator const_reverse_iterator;
 
-    struct handle_t {
-        handle_t(size_t index = std::numeric_limits<size_t>::max())
-            : mIndex(index)
-        {
-        }
-
-        operator size_t() const { return mIndex; }
-
-        void operator++() { ++mIndex; }
-        void operator--() { --mIndex; }
-        handle_t &operator-=(size_t s)
-        {
-            mIndex -= s;
-            return *this;
-        }
-
-        size_t mIndex;
-    };
-
-    typedef handle_t handle;
-    typedef handle_t const_handle;
-    typedef handle_t position_handle;
-    typedef handle_t const_position_handle;
+    typedef IndexType<size_t> handle;
+    typedef IndexType<size_t> const_handle;
+    typedef IndexType<size_t> position_handle;
+    typedef IndexType<size_t> const_position_handle;
     typedef typename container::value_type value_type;
 
     typedef iterator emplace_return;

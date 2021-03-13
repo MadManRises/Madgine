@@ -49,7 +49,7 @@ METATABLE_END(Engine::Widgets::WidgetManager)
 
 SERIALIZETABLE_BEGIN(Engine::Widgets::WidgetManager)
 FIELD(mStartupWidget)
-FIELD(mTopLevelWidgets, Serialize::ParentCreator<&Engine::Widgets::WidgetManager::createWidgetClassTuple, &Engine::Widgets::WidgetManager::storeWidgetCreationData>)
+FIELD(mTopLevelWidgets, Serialize::ParentCreator<&Engine::Widgets::WidgetManager::widgetCreationNames, &Engine::Widgets::WidgetManager::createWidgetClassTuple, &Engine::Widgets::WidgetManager::storeWidgetCreationData>)
 SERIALIZETABLE_END(Engine::Widgets::WidgetManager)
 
 namespace Engine {
@@ -114,7 +114,7 @@ namespace Widgets {
         mData->mProgram.create("ui");
 
         mData->mMesh = Render::GPUMeshLoader::loadManual("widgetMesh", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &mesh, Render::GPUMeshLoader::ResourceType *res) {
-            return loader->generate(mesh, {3, std::vector<Vertex>{}});
+            return loader->generate(mesh, { 3, std::vector<Vertex> {} });
         });
 
         mData->mUIAtlasTexture.create("widgetUIAtlas", Render::FORMAT_FLOAT8);
@@ -122,105 +122,6 @@ namespace Widgets {
         mData->mDefaultTexture.load("default_tex");
 
         mWindow.getRenderWindow()->addRenderPass(this);
-
-        /*WidgetBase *loading = createTopLevelImage("Loading");
-        WidgetBase *progress = loading->createChildBar("ProgressBar");
-        progress->setSize({ 0.8f, 0, 0, 0, 0.1f, 0, 0, 0, 1 });
-        progress->setPos({ 0.1f, 0, 0, 0, 0.85f, 0, 0, 0, 0 });
-        WidgetBase *loadMsg = loading->createChildLabel("LoadingMsg");
-        WidgetBase *ingame = createTopLevelWidget("ingame");
-        SceneWindow *game = ingame->createChildSceneWindow("game");
-        //game->setCamera(gui.sceneMgr().createCamera());
-        game->setSize({ 0.8f, 0, 0, 0, 1, 0, 0, 0, 1 });
-        WidgetBase *placeBaseButton = game->createChildButton("PlaceBaseButton");
-        placeBaseButton->setPos({ 1, 0, -120, 0, 0, 30, 0, 0, 0 });
-        placeBaseButton->setSize({ 0, 0, 100, 0, 0, 30, 0, 0, 1 });
-        WidgetBase *endTurnButton = game->createChildButton("EndTurnButton");
-        endTurnButton->setPos({ 1, 0, -120, 0, 0, 30, 0, 0, 0 });
-        endTurnButton->setSize({ 0, 0, 100, 0, 0, 30, 0, 0, 1 });
-        WidgetBase *unitUI = ingame->createChildWidget("UnitUI");
-        unitUI->setPos({ 0.8f, 0, 0, 0, 0, 0, 0, 0, 0 });
-        unitUI->setSize({ 0.2f, 0, 0, 0, 1, 0, 0, 0, 1 });
-        WidgetBase *fieldImage = unitUI->createChildImage("FieldImage");
-        fieldImage->setPos({ 0, 0, 0, 0, 0, 0, 0, 0, 0 });
-        fieldImage->setSize({ 0.5f, 0, 0, 0.5f, 0, 0, 0, 0, 1 });
-        WidgetBase *defenderImage = unitUI->createChildImage("DefenderImage");
-        defenderImage->setPos({ 0.5f, 0, 0, 0.5f, 0, 0, 0, 0, 0 });
-        defenderImage->setSize({ 0.5f, 0, 0, 0.5f, 0, 0, 0, 0, 1 });
-        WidgetBase *defenderHealth = defenderImage->createChildBar("DefenderHealth");
-        defenderHealth->setPos({ 0, 0, 0, 0, 0.85f, 0, 0, 0, 0 });
-        defenderHealth->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        WidgetBase *defenderExp = defenderImage->createChildBar("DefenderExp");
-        defenderExp->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
-        defenderExp->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        WidgetBase *attackerImage = unitUI->createChildImage("AttackerImage");
-        attackerImage->setPos({ 0, 0, 0, 0.5f, 0, 0, 0, 0, 0 });
-        attackerImage->setSize({ 0.5f, 0, 0, 0.5f, 0, 0, 0, 0, 1 });
-        WidgetBase *attackerHealth = attackerImage->createChildBar("AttackerHealth");
-        attackerHealth->setPos({ 0, 0, 0, 0, 0.85f, 0, 0, 0, 0 });
-        attackerHealth->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        WidgetBase *attackerExp = attackerImage->createChildBar("AttackerExp");
-        attackerExp->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
-        attackerExp->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        WidgetBase *modifierImage = unitUI->createChildImage("ModifierImage");
-        modifierImage->setPos({ 1.15f, 0, 0, 0.15f, 0, 0, 0, 0, 0 });
-        modifierImage->setSize({ 0.2f, 0, 0, 0.2f, 0, 0, 0, 0, 1 });
-        Image *attackerStrengthIcon = unitUI->createChildImage("AttackerStrengthIcon");
-        attackerStrengthIcon->setPos({ 0.025f, 0, 0, 1.025f, 0, 0, 0, 0, 0 });
-        attackerStrengthIcon->setSize({ 0.15f, 0, 0, 0.15f, 0, 0, 0, 0, 1 });
-        attackerStrengthIcon->setImageByName("Sword-01");
-        WidgetBase *attackerStrength = unitUI->createChildLabel("AttackerStrength");
-        attackerStrength->setPos({ 0.2f, 0, 0, 1.025f, 0, 0, 0, 0, 0 });
-        attackerStrength->setSize({ 0.2f, 0, 0, 0.15f, 0, 0, 0, 0, 1 });
-        WidgetBase *strengthArrow = unitUI->createChildImage("StrengthArrow");
-        strengthArrow->setPos({ 0.4f, 0, 0, 1.075f, 0, 0, 0, 0, 0 });
-        strengthArrow->setSize({ 0.2f, 0, 0, 0.05f, 0, 0, 0, 0, 1 });
-        WidgetBase *defenderStrength = unitUI->createChildLabel("DefenderStrength");
-        defenderStrength->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
-        defenderStrength->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        WidgetBase *defenderStrengthIcon = unitUI->createChildImage("DefenderStrengthIcon");
-        defenderStrengthIcon->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
-        defenderStrengthIcon->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        WidgetBase *contentWindow = unitUI->createChildWidget("ContentWindow");
-        contentWindow->setPos({ 0, 0, 0, 1, 0, 0, 0, 0, 0 });
-        contentWindow->setSize({ 1, 0, 0, -1, 1, 0, 0, 0, 1 });
-        WidgetBase *movementIcon = unitUI->createChildImage("MovementIcon");
-        movementIcon->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
-        movementIcon->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        WidgetBase *movement = unitUI->createChildLabel("Movement");
-        movement->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
-        movement->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        WidgetBase *health = unitUI->createChildLabel("Health");
-        health->setPos({ 0, 0, 0, 0, 0.7f, 0, 0, 0, 0 });
-        health->setSize({ 1, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        WidgetBase *mainMenu = createTopLevelWidget("MainMenu");
-        WidgetBase *optionsButton = mainMenu->createChildButton("OptionsButton");
-        optionsButton->setSize({ 0.4f, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        optionsButton->setPos({ 0.55f, 0, 0, 0, 0.55f, 0, 0, 0, 0 });
-        WidgetBase *findMatchButton = mainMenu->createChildButton("FindMatchButton");
-        findMatchButton->setSize({ 0.4f, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        findMatchButton->setPos({ 0.55f, 0, 0, 0, 0.8f, 0, 0, 0, 0 });
-        WidgetBase *playButton = mainMenu->createChildButton("PlayButton");
-        playButton->setSize({ 0.4f, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        playButton->setPos({ 0.05f, 0, 0, 0, 0.55f, 0, 0, 0, 0 });
-        WidgetBase *quitButton = mainMenu->createChildButton("QuitButton");
-        quitButton->setSize({ 0.4f, 0, 0, 0, 0.15f, 0, 0, 0, 1 });
-        quitButton->setPos({ 0.05f, 0, 0, 0, 0.8f, 0, 0, 0, 0 });
-        Image *titleScreen = mainMenu->createChildImage("noname");
-        titleScreen->setImageByName("TitleScreen");
-        titleScreen->setSize({ 0.8f, 0, 0, 0.1f, 0, 0, 0, 0, 1 });
-        titleScreen->setPos({ 0.1f, 0, 0, 0, 0.05f, 0, 0, 0, 0 });
-        WidgetBase *connectionFailureWindow = createTopLevelWidget("ConnectionFailureWindow");
-        WidgetBase *connectionLabel = connectionFailureWindow->createChildLabel("ConnectionLabel");
-        WidgetBase *retryButton = connectionFailureWindow->createChildButton("RetryButton");
-        WidgetBase *abortButton = connectionFailureWindow->createChildButton("AbortButton");
-        WidgetBase *lobbyMenu = createTopLevelWidget("LobbyMenu");
-        WidgetBase *startGameButton = lobbyMenu->createChildButton("StartGameButton");
-        WidgetBase *lobbyListMenu = createTopLevelWidget("LobbyListMenu");
-        WidgetBase *createLobbyButton = lobbyListMenu->createChildButton("CreateLobbyButton");
-        WidgetBase *joinLobbyButton = lobbyListMenu->createChildButton("JoinLobbyButton");
-        WidgetBase *backButton = lobbyListMenu->createChildButton("BackButton");
-        WidgetBase *lobbyList = lobbyListMenu->createChildCombobox("LobbyList");*/
 
         return true;
     }
@@ -313,6 +214,15 @@ namespace Widgets {
         return t;
     }
 
+    const char *WidgetManager::widgetCreationNames(size_t index)
+    {
+        static constexpr std::array<const char *, 2> names {
+            "name",
+            "type"
+        };
+        return names[index];
+    }
+
     std::unique_ptr<WidgetBase> WidgetManager::createWidgetClass(const std::string &name, WidgetClass _class)
     {
         switch (_class) {
@@ -346,11 +256,9 @@ namespace Widgets {
         return { createWidgetClass(name, _class) };
     }
 
-    std::tuple<std::pair<const char *, std::string>, std::pair<const char *, WidgetClass>> WidgetManager::storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const
+    std::tuple<std::string, WidgetClass> WidgetManager::storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const
     {
-        return std::make_tuple(
-            std::make_pair("name", widget->getName()),
-            std::make_pair("type", widget->getClass()));
+        return std::make_tuple(widget->getName(), widget->getClass());
     }
 
     std::unique_ptr<WidgetBase> WidgetManager::createWidget(const std::string &name)
@@ -544,6 +452,18 @@ namespace Widgets {
 
         return false;
     }
+
+    bool WidgetManager::injectAxisEvent(const Input::AxisEventArgs &arg)
+    {
+        if (std::find_if(mWidgets.begin(), mWidgets.end(), [&](const std::pair<const std::string, WidgetBase *> &p) { return p.second == mHoveredWidget; }) == mWidgets.end())
+            mHoveredWidget = nullptr;
+
+        if (mHoveredWidget)
+            return mHoveredWidget->injectAxisEvent(arg);
+
+        return false;
+    }
+
 
     WidgetBase *WidgetManager::currentRoot()
     {

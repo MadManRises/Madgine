@@ -9,8 +9,8 @@ namespace Render {
         std::string mName;
         Matrix4 mOffsetMatrix;
         Matrix4 mTTransform;
-        uint32_t mParent = std::numeric_limits<uint32_t>::max();
-        uint32_t mFirstChild = std::numeric_limits<uint32_t>::max();
+        IndexType<uint32_t> mParent;
+        IndexType<uint32_t> mFirstChild;
     };
 
     struct SkeletonDescriptor {

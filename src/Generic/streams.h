@@ -12,6 +12,7 @@ struct InStream {
     }
     InStream(std::unique_ptr<std::streambuf> &&buffer)
         : mStream(buffer.release())
+        , mOwning(true)
     {
     }
     InStream(InStream &&other)
@@ -68,7 +69,8 @@ struct InStream {
         return static_cast<bool>(mStream.seekg(p, dir));
     }
 
-    std::ios_base::iostate state() const {
+    std::ios_base::iostate state() const
+    {
         return mStream.rdstate();
     }
 
@@ -77,7 +79,8 @@ struct InStream {
         mStream.clear();
     }
 
-    void setState(std::ios_base::iostate state) {
+    void setState(std::ios_base::iostate state)
+    {
         mStream.setstate(state);
     }
 
@@ -98,7 +101,6 @@ struct InStream {
 protected:
     InStream(std::streambuf *buffer)
         : mStream(buffer)
-        , mOwning(false)
     {
     }
 
@@ -111,7 +113,7 @@ protected:
 
     friend struct OutStream;
 
-    bool mOwning = true;
+    bool mOwning = false;
 };
 
 struct OutStream {

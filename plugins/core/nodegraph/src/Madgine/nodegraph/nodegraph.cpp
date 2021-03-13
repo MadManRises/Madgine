@@ -27,7 +27,7 @@ METATABLE_BEGIN(Engine::NodeGraph::NodeGraph)
 METATABLE_END(Engine::NodeGraph::NodeGraph)
 
 SERIALIZETABLE_BEGIN(Engine::NodeGraph::NodeGraph)
-FIELD(mNodes, Serialize::ParentCreator<&Engine::NodeGraph::NodeGraph::createNodeTuple, &Engine::NodeGraph::NodeGraph::storeNodeCreationData>)
+FIELD(mNodes, Serialize::ParentCreator<&Engine::NodeGraph::NodeGraph::nodeCreationNames, &Engine::NodeGraph::NodeGraph::createNodeTuple, &Engine::NodeGraph::NodeGraph::storeNodeCreationData>)
 FIELD(mFlowInPins)
 FIELD(mDataReceiverPins)
 FIELD(mDataProviderPins)
@@ -237,6 +237,12 @@ namespace NodeGraph {
         mDataReceiverPins.erase(mDataReceiverPins.begin() + index);
     }
 
+    const char *NodeGraph::nodeCreationNames(size_t index)
+    {
+        assert(index == 0);
+        return "type";
+    }
+
     std::unique_ptr<NodeBase> NodeGraph::createNode(const std::string_view &name)
     {
         return NodeRegistry::getConstructor(sNodesByName().at(name))(*this);
@@ -247,9 +253,9 @@ namespace NodeGraph {
         return { createNode(name) };
     }
 
-    std::tuple<std::pair<const char *, std::string_view>> NodeGraph::storeNodeCreationData(const std::unique_ptr<NodeBase> &node) const
+    std::tuple<std::string_view> NodeGraph::storeNodeCreationData(const std::unique_ptr<NodeBase> &node) const
     {
-        return std::make_tuple(std::make_pair("type", node->name()));
+        return std::make_tuple(node->name());
     }
 
 }

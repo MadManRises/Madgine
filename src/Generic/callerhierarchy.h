@@ -15,6 +15,13 @@ struct CallerHierarchy : CallerHierarchyBase {
     {
     }
 
+    template <typename U, typename = std::enable_if_t<std::is_convertible_v<U, T>>>
+    CallerHierarchy(const CallerHierarchy<U> &other)
+        : CallerHierarchyBase { other }
+        , mData(other.mData)
+    {
+    }
+
     T mData;
 };
 
@@ -38,7 +45,7 @@ struct CallerHierarchyBasePtr {
                 return static_cast<const CallerHierarchy<U> *>(ptr)->mData;
             ptr = ptr->mParent;
         }
-        throw 0;//LOG_ERROR("Cannot find type '" << typeid(U).name() << "' in caller hierarchy. Containing:");
+        throw 0; //LOG_ERROR("Cannot find type '" << typeid(U).name() << "' in caller hierarchy. Containing:");
     }
 
     template <typename U>
@@ -63,6 +70,12 @@ struct CallerHierarchyPtr : CallerHierarchyBasePtr {
     }
 
     operator const CallerHierarchy<T> &() const
+    {
+        return *static_cast<const CallerHierarchy<T> *>(mPtr);
+    }
+
+    template <typename U, typename = std::enable_if_t<std::is_convertible_v<T, U>>>
+    operator CallerHierarchy<U>() const
     {
         return *static_cast<const CallerHierarchy<T> *>(mPtr);
     }

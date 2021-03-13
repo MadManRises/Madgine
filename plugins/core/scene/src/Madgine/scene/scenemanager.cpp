@@ -33,7 +33,7 @@ MEMBER(mSceneComponents)
 METATABLE_END(Engine::Scene::SceneManager)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::SceneManager)
-FIELD(mEntities, Serialize::ParentCreator<&Engine::Scene::SceneManager::createNonLocalEntityData, &Engine::Scene::SceneManager::storeEntityCreationData>, Serialize::RequestPolicy::no_requests)
+FIELD(mEntities, Serialize::ParentCreator<&Engine::Scene::SceneManager::entityCreationNames, &Engine::Scene::SceneManager::createNonLocalEntityData, &Engine::Scene::SceneManager::storeEntityCreationData>, Serialize::RequestPolicy::no_requests)
 FIELD(mSceneComponents, Serialize::ControlledConfig<KeyCompare<std::unique_ptr<Engine::Scene::SceneComponentBase>>>)
 SERIALIZETABLE_END(Engine::Scene::SceneManager)
 
@@ -119,13 +119,13 @@ namespace Scene {
 
     Entity::EntityPtr SceneManager::findEntity(const std::string &name)
     {
-        auto it = std::find_if(mEntities.refcounted_begin(), mEntities.refcounted_end(), [&](const Entity::Entity &e) {
+        auto it = std::find_if(mEntities.begin(), mEntities.end(), [&](const Entity::Entity &e) {
             return e.key() == name;
         });
-        if (it == mEntities.refcounted_end()) {
+        if (it == mEntities.end()) {
             std::terminate();
         }
-        return *it;
+        return &*it;
     }
 
     std::string SceneManager::generateUniqueName()
@@ -171,6 +171,12 @@ namespace Scene {
         return &mLocalEntities.emplace_back(std::move(e), true);
     }
 
+    const char *SceneManager::entityCreationNames(size_t index)
+    {
+        assert(index == 0);
+        return "name";
+    }
+
     std::tuple<SceneManager &, bool, std::string> SceneManager::createNonLocalEntityData(const std::string &name)
     {
         return createEntityData(name, false);
@@ -183,10 +189,9 @@ namespace Scene {
         return make_tuple(std::ref(*this), local, actualName);
     }
 
-    std::tuple<std::pair<const char *, std::string>> SceneManager::storeEntityCreationData(const Entity::Entity &entity) const
+    std::tuple<std::string> SceneManager::storeEntityCreationData(const Entity::Entity &entity) const
     {
-        return std::make_tuple(
-            std::make_pair("name", entity.name()));
+        return std::make_tuple(entity.name());
     }
 
     Future<Entity::EntityPtr> SceneManager::createEntity(const std::string &behavior, const std::string &name,
@@ -203,13 +208,10 @@ namespace Scene {
         }
         Future<typename refcounted_deque<Entity::Entity>::iterator> f;
         if (init) {
-            auto initWrap = [&](Entity::Entity &e) {
-                init(e);
-            };
-            f = TupleUnpacker::invokeExpand(&decltype(mEntities)::emplace<SceneManager &, bool, std::string, ObjectPtr>, &mEntities, mEntities.end(), tuple_cat(createEntityData(name, false), std::make_tuple(table))).init(initWrap);
+            f = TupleUnpacker::invokeExpand(&decltype(mEntities)::emplace<SceneManager &, bool, std::string, ObjectPtr>, &mEntities, mEntities.end(), tuple_cat(createEntityData(name, false), std::make_tuple(table))).init(init);
         } else
             f = TupleUnpacker::invokeExpand(&decltype(mEntities)::emplace<SceneManager &, bool, std::string, ObjectPtr>, &mEntities, mEntities.end(), tuple_cat(createEntityData(name, false), std::make_tuple(table)));
-        return { f.then([](const typename refcounted_deque<Entity::Entity>::iterator &it) { return Entity::EntityPtr { it.get_block() }; }) };
+        return { f.then([](const typename refcounted_deque<Entity::Entity>::iterator &it) { return Entity::EntityPtr { &*it }; }) };
     }
 
     Entity::EntityPtr SceneManager::createLocalEntity(const std::string &behavior, const std::string &name)
@@ -224,7 +226,7 @@ namespace Scene {
                 LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
         }
         const std::tuple<SceneManager &, bool, std::string> &data = createEntityData(name, true);
-        return mLocalEntities.emplace(mLocalEntities.end(), std::get<0>(data), std::get<1>(data), std::get<2>(data), table).get_block();
+        return &*mLocalEntities.emplace(mLocalEntities.end(), std::get<0>(data), std::get<1>(data), std::get<2>(data), table);
     }
 
     Threading::SignalStub<const refcounted_deque<Entity::Entity>::iterator &, int> &SceneManager::entitiesSignal()

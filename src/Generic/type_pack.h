@@ -61,6 +61,12 @@ struct type_pack_select_multiple<Pack, std::index_sequence<Is...>> {
 template <typename Pack, size_t n>
 using type_pack_select_first_n = typename type_pack_select_multiple<Pack, std::make_index_sequence<n>>::type;
 
+template <typename T>
+using type_pack_pop_front = type_pack_select_multiple<T, make_index_range<1, type_pack_size_v<T>>>;
+
+template <typename T>
+using type_pack_pop_front_t = typename type_pack_pop_front<T>::type;
+
 template <template <typename> typename F, typename Pack>
 struct type_pack_apply;
 

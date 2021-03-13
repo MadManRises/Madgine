@@ -10,7 +10,7 @@ namespace Scene {
             ~EntityPtr();
 
             EntityPtr(const EntityPtr &other);
-            EntityPtr(ControlBlock<Entity> &entity);
+            EntityPtr(Entity *entity);
 
             EntityPtr &operator=(const EntityPtr &other);
             EntityPtr &operator=(EntityPtr &&other);
@@ -25,6 +25,7 @@ namespace Scene {
             Entity *get() const;
 
             bool operator==(const EntityPtr &other) const;
+            bool operator==(Entity *other) const;
             bool operator<(const EntityPtr &other) const;
 
             bool isDead() const;
@@ -32,7 +33,7 @@ namespace Scene {
             Serialize::StreamResult readState(Serialize::SerializeInStream &in, const char *name = nullptr);
             void writeState(Serialize::SerializeOutStream &out, const char *name = nullptr) const;
 
-            void applySerializableMap(Serialize::SerializeInStream &in);
+            void applySerializableMap(Serialize::SerializeInStream &in, bool success);
 
         private:
             bool holdsRef() const;

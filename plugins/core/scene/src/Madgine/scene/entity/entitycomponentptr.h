@@ -113,7 +113,7 @@ namespace Scene {
 
             template <typename U, typename = std::enable_if_t<std::is_convertible_v<T *, U *>>>
             explicit EntityComponentPtrBase(const EntityComponentPtrBase<U> &other)
-                : mHandle { other.mHandle }
+                : mHandle { other.handle() }
                 , mSceneMgr(other.sceneMgr())
             {
             }

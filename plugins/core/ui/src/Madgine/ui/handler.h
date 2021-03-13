@@ -66,11 +66,14 @@ namespace UI {
 
         virtual bool onKeyPress(const Input::KeyEventArgs &evt);
 
+        virtual void onAxisEvent(const Input::AxisEventArgs &evt);
+
     public:
         void injectPointerMove(const Input::PointerEventArgs &evt);
         void injectPointerDown(const Input::PointerEventArgs &evt);
         void injectPointerUp(const Input::PointerEventArgs &evt);
         bool injectKeyPress(const Input::KeyEventArgs &evt);
+        void injectAxisEvent(const Input::AxisEventArgs &evt);
 
     protected:
         Widgets::WidgetBase *mWidget = nullptr;
@@ -83,6 +86,7 @@ namespace UI {
         Threading::Slot<&Handler::injectPointerMove> mPointerMoveSlot;
         Threading::Slot<&Handler::injectPointerDown> mPointerDownSlot;
         Threading::Slot<&Handler::injectPointerUp> mPointerUpSlot;
+        Threading::Slot<&Handler::injectAxisEvent> mAxisEventSlot;
     };
 }
 }

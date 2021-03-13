@@ -38,9 +38,11 @@ namespace Serialize {
 
             ss << mLineNumber << ", ";
 
-            std::string area;
-            in.readUnformatted(area);
-            notes << "Note: next to '" << area << "'\n";
+            if (in) {
+                std::string area;
+                in.InStream::operator>>(area);
+                notes << "Note: next to '" << area << "'\n";
+            }
         }
 
         notes << "Note: in file '" << file << "':" << sourceLine << "\n";

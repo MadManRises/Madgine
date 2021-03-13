@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Generic/defaultassign.h"
+
 namespace Engine {
 namespace TupleUnpacker {
 
@@ -274,16 +276,61 @@ namespace TupleUnpacker {
         static constexpr size_t elementCount = Count;                       \
     };
 
+#define MAKE_NOT_TUPLEFYABLE(Type, ...)                                           \
+    template <__VA_ARGS__>                                                              \
+    struct ::Engine::TupleUnpacker::is_tuplefyable<Type> : std::false_type { \
+    };
+
     template <typename Tuple, typename F, size_t... Is>
-    void forEach(Tuple &&t, F &&f, std::index_sequence<Is...>)
+    auto forEach(Tuple &&t, F &&f, std::index_sequence<Is...>)
     {
-        (f(std::get<Is>(std::forward<Tuple>(t))), ...);
+        if constexpr (((!std::is_same_v<std::invoke_result_t<F, decltype(std::get<Is>(std::forward<Tuple>(t)))>, void>)&&...))
+            return std::tuple<std::invoke_result_t<F, decltype(std::get<Is>(std::forward<Tuple>(t)))>...> { f(std::get<Is>(std::forward<Tuple>(t)))... };
+        else
+            (f(std::get<Is>(std::forward<Tuple>(t))), ...);
     }
 
     template <typename Tuple, typename F>
-    void forEach(Tuple &&t, F &&f)
+    auto forEach(Tuple &&t, F &&f)
     {
-        forEach(std::forward<Tuple>(t), std::forward<F>(f), std::make_index_sequence<std::tuple_size<std::remove_reference_t<Tuple>>::value>());
+        return forEach(std::forward<Tuple>(t), std::forward<F>(f), std::make_index_sequence<std::tuple_size<std::remove_reference_t<Tuple>>::value>());
+    }
+
+    template <typename Tuple, typename F, typename T, size_t... Is>
+    T accumulate(Tuple &&tuple, F &&f, T &&t, std::index_sequence<Is...>)
+    {
+        DefaultAssign assign;
+        (assign(t, f(std::get<Is>(std::forward<Tuple>(tuple)), std::forward<T>(t))), ...);
+        return std::forward<T>(t);
+    }
+
+    template <typename Tuple, typename F, typename T>
+    T accumulate(Tuple &&tuple, F &&f, T &&t)
+    {
+        return accumulate(std::forward<Tuple>(tuple), std::forward<F>(f), std::forward<T>(t), std::make_index_sequence<std::tuple_size<std::remove_reference_t<Tuple>>::value>());
+    }
+
+    template <typename Tuple, typename F, size_t... Is>
+    decltype(auto) select(Tuple &&t, F &&f, size_t index, std::index_sequence<Is...>)
+    {
+        /*if constexpr (((!std::is_same_v<std::invoke_result_t<F, decltype(std::get<Is>(std::forward<Tuple>(t)))>, void>)&&...))
+            return std::tuple<std::invoke_result_t<F, decltype(std::get<Is>(std::forward<Tuple>(t)))>...> { f(std::get<Is>(std::forward<Tuple>(t)))... };
+        else
+            (f(std::get<Is>(std::forward<Tuple>(t))), ...);*/
+        using R = std::invoke_result_t<F, decltype(std::get<0>(std::forward<Tuple>(t)))>;
+        using Fs = R (*)(Tuple &&, F &&);
+        constexpr Fs fs[] = {
+            [](Tuple &&t, F &&f) -> R {
+                return std::forward<F>(f)(std::get<Is>(std::forward<Tuple>(t)));
+            }...
+        };
+        return fs[index](std::forward<Tuple>(t), std::forward<F>(f));
+    }
+
+    template <typename Tuple, typename F>
+    decltype(auto) select(Tuple &&t, F &&f, size_t index)
+    {
+        return select(std::forward<Tuple>(t), std::forward<F>(f), index, std::make_index_sequence<std::tuple_size<std::remove_reference_t<Tuple>>::value>());
     }
 
 };

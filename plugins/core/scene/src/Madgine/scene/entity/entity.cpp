@@ -19,11 +19,12 @@
 #include "entitycomponentlist.h"
 
 METATABLE_BEGIN(Engine::Scene::Entity::Entity)
+NAMED_MEMBER(Name, mName)
 READONLY_PROPERTY(Components, components)
 METATABLE_END(Engine::Scene::Entity::Entity)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Entity)
-FIELD(mComponents, Serialize::ParentCreator<&Engine::Scene::Entity::Entity::createComponentTuple, &Engine::Scene::Entity::Entity::storeComponentCreationData, &Engine::Scene::Entity::Entity::clearComponents>)
+FIELD(mComponents, Serialize::ParentCreator<&Engine::Scene::Entity::Entity::componentCreationNames, &Engine::Scene::Entity::Entity::createComponentTuple, &Engine::Scene::Entity::Entity::storeComponentCreationData, &Engine::Scene::Entity::Entity::clearComponents>)
 SERIALIZETABLE_END(Engine::Scene::Entity::Entity)
 
 namespace Engine {
@@ -169,17 +170,23 @@ namespace Scene {
             mSceneManager.remove(this);
         }
 
+        const char *Engine::Scene::Entity::Entity::componentCreationNames(size_t index)
+        {
+            assert(index == 0);
+            return "type";
+        }
+
         std::tuple<EntityComponentOwningHandle<EntityComponentBase>> Entity::createComponentTuple(const std::string &name)
         {
             uint32_t i = sComponentsByName().at(name);
             return std::make_tuple(mSceneManager.entityComponentList(i).emplace({}, this));
         }
 
-        std::tuple<std::pair<const char *, std::string_view>> Entity::storeComponentCreationData(const EntityComponentOwningHandle<EntityComponentBase> &comp) const
+        std::tuple<std::string_view> Entity::storeComponentCreationData(const EntityComponentOwningHandle<EntityComponentBase> &comp) const
         {
             for (const auto &p : sComponentsByName()) {
                 if (p.second == comp.mHandle.mType)
-                    return std::make_tuple(std::make_pair("type", p.first));
+                    return p.first;
             }
             throw 0;
         }

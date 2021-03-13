@@ -62,7 +62,7 @@ private:
         sInstance().mInfo.mElementInfos[i].clear();
     }
 
-    static size_t &baseIndex()
+    static IndexType<size_t> &baseIndex()
     {
         return sInstance().mInfo.mBaseIndex;
     }
@@ -79,7 +79,7 @@ public:
         ~ComponentRegistrator()
         {
             unregisterComponent(mIndex);
-            mIndex = std::numeric_limits<size_t>::max();
+            mIndex.reset();
         }
 
         size_t index() const override
@@ -90,13 +90,13 @@ public:
 
         bool isValid() const override
         {
-            return mIndex != std::numeric_limits<size_t>::max() && mBaseIndex != std::numeric_limits<size_t>::max();
+            return mIndex && mBaseIndex;
         }
 
     private:
-        size_t mIndex = std::numeric_limits<size_t>::max();
+        IndexType<size_t> mIndex;
         //Make it a member to prevent problems through weak symbols during link time
-        size_t &mBaseIndex;
+        IndexType<size_t> &mBaseIndex;
     };
 };
 

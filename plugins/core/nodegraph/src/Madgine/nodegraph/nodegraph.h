@@ -51,9 +51,10 @@ namespace NodeGraph {
         std::vector<DataProviderPinPrototype> mDataInPins;
 
     protected:
+        static const char *nodeCreationNames(size_t index);
         std::unique_ptr<NodeBase> createNode(const std::string_view &name);
         std::tuple<std::unique_ptr<NodeBase>> createNodeTuple(const std::string &name);
-        std::tuple<std::pair<const char *, std::string_view>> storeNodeCreationData(const std::unique_ptr<NodeBase> &node) const;
+        std::tuple<std::string_view> storeNodeCreationData(const std::unique_ptr<NodeBase> &node) const;
 
     private:
         Filesystem::Path mPath;

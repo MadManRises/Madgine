@@ -14,7 +14,17 @@ namespace Serialize {
     JSONFormatter::JSONFormatter()
         : Formatter(false, true)
     {
-        mContainerLevel.push(false);
+        mParseLevel.emplace(false);
+    }
+
+    void JSONFormatter::setupStream(std::istream &in)
+    {
+        in >> std::boolalpha;
+    }
+
+    void JSONFormatter::setupStream(std::ostream &out)
+    {
+        out << std::boolalpha;
     }
 
     void JSONFormatter::beginExtended(SerializeOutStream &out, const char *name, size_t count)
@@ -25,12 +35,12 @@ namespace Serialize {
                 mAfterItem = false;
             }
             out.writeUnformatted("\n" + indent());            
-            if (!mContainerLevel.top()) {
+            if (!mParseLevel.top().mIsContainer) {
                 if (!name)
                     name = "Item";
                 out.writeUnformatted("\"" + std::string(name) + "\" : ");
             }
-            mContainerLevel.push(false);
+            mParseLevel.emplace(false);
             out.writeUnformatted("{\n");
             mCurrentExtended = true;
             ++mLevel;
@@ -50,13 +60,13 @@ namespace Serialize {
                     return STREAM_PARSE_ERROR(in, "Expected ','");
                 mAfterItem = false;
             }
-            if (!mContainerLevel.top())
-                readFieldName(in, name);
-            mContainerLevel.push(false);
+            if (!mParseLevel.top().mIsContainer)
+                STREAM_PROPAGATE_ERROR(readFieldName(in, name));
+            mParseLevel.emplace(false);
             if (in.readN(1) != "{")
                 return STREAM_PARSE_ERROR(in, "Expected '{'");
             mCurrentExtended = true;
-            readFieldName(in, "__extended");
+            STREAM_PROPAGATE_ERROR(readFieldName(in, "__extended"));
             if (in.readN(1) != "{")
                 return STREAM_PARSE_ERROR(in, "Expected '{'");
         }
@@ -74,12 +84,12 @@ namespace Serialize {
                 mAfterItem = false;
             }
             out.writeUnformatted("\n" + indent());            
-            if (!mContainerLevel.top()) {
+            if (!mParseLevel.top().mIsContainer) {
                 if (!name)
                     name = "Item";
                 out.writeUnformatted("\"" + std::string(name) + "\" : ");
             }
-            mContainerLevel.push(false);
+            mParseLevel.emplace(false);
             out.writeUnformatted("{");
             ++mLevel;
         } else {
@@ -99,9 +109,9 @@ namespace Serialize {
                     return STREAM_PARSE_ERROR(in, "Expected ','");
                 mAfterItem = false;
             }
-            if (!mContainerLevel.top())
-                readFieldName(in, name);
-            mContainerLevel.push(false);
+            if (!mParseLevel.top().mIsContainer)
+                STREAM_PROPAGATE_ERROR(readFieldName(in, name));
+            mParseLevel.emplace(false);
             if (in.readN(1) != "{")
                 return STREAM_PARSE_ERROR(in, "Expected '{'");
         } else {
@@ -121,8 +131,8 @@ namespace Serialize {
         }
         --mLevel;
         out.writeUnformatted("\n" + indent() + "}");
-        assert(!mContainerLevel.top());
-        mContainerLevel.pop();
+        assert(!mParseLevel.top().mIsContainer);
+        mParseLevel.pop();
         mAfterItem = true;
         mLastPrimitive = false;
     }
@@ -134,8 +144,8 @@ namespace Serialize {
         }
         if (in.readN(1) != "}")
             return STREAM_PARSE_ERROR(in, "Expected '}'");
-        assert(!mContainerLevel.top());
-        mContainerLevel.pop();
+        assert(!mParseLevel.top().mIsContainer);
+        mParseLevel.pop();
         mAfterItem = true;
         return {};
     }
@@ -150,7 +160,7 @@ namespace Serialize {
             assert(mCurrentExtended);
             --mCurrentExtendedCount;
         }
-        if (!mContainerLevel.top()) {
+        if (!mParseLevel.top().mIsContainer) {
             if (!name)
                 name = "Element";
             out.writeUnformatted("\n" + indent() + "\"" + name + "\" : ");
@@ -170,8 +180,8 @@ namespace Serialize {
             assert(mCurrentExtended);
             --mCurrentExtendedCount;
         }
-        if (!mContainerLevel.top())
-            readFieldName(in, name);
+        if (!mParseLevel.top().mIsContainer)
+            STREAM_PROPAGATE_ERROR(readFieldName(in, name));
         if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>) {
             if (in.readN(1) != "\"")
                 return STREAM_PARSE_ERROR(in, "Expected '\"'");
@@ -200,7 +210,7 @@ namespace Serialize {
         std::string_view trimmed { prefix.c_str(), prefix.size() - 1 };
         trimmed = StringUtil::trim(trimmed);
         if (name && StringUtil::substr(trimmed, 1, -1) != name)
-            return STREAM_PARSE_ERROR(in, "Expected key '" << name << "', found " << trimmed);
+            return STREAM_PARSE_ERROR(in, "Expected key \"" << name << "\", found " << trimmed);
         if (!StringUtil::startsWith(trimmed, "\"") || !StringUtil::endsWith(trimmed, "\""))
             return STREAM_PARSE_ERROR(in, "Expected key in '\"\"'");
         if (trimmed.size() <= 1)
@@ -243,7 +253,7 @@ namespace Serialize {
             name = "Item";
         out.writeUnformatted(indent() + "\"" + std::string(name) + "\" : [");
         ++mLevel;
-        mContainerLevel.push(true);
+        mParseLevel.emplace(true);
     }
 
     StreamResult JSONFormatter::beginContainer(SerializeInStream &in, const char *name, bool sized)
@@ -257,14 +267,14 @@ namespace Serialize {
         std::string bracket = sized ? in.peekN(1) : in.readN(1);
         if (bracket != "[")
             return STREAM_PARSE_ERROR(in, "Expected '['");
-        mContainerLevel.push(true);
+        mParseLevel.emplace(true);
         return {};
     }
 
     void JSONFormatter::endContainer(SerializeOutStream &out, const char *name)
     {
-        assert(mContainerLevel.top());
-        mContainerLevel.pop();
+        assert(mParseLevel.top().mIsContainer);
+        mParseLevel.pop();
         if (mAfterItem) {
             mAfterItem = false;
         }
@@ -277,8 +287,8 @@ namespace Serialize {
 
     StreamResult JSONFormatter::endContainer(SerializeInStream &in, const char *name)
     {
-        assert(mContainerLevel.top());
-        mContainerLevel.pop();
+        assert(mParseLevel.top().mIsContainer);
+        mParseLevel.pop();
         if (mAfterItem) {
             mAfterItem = false;
         }

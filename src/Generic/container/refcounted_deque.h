@@ -80,6 +80,8 @@ struct ControlBlock : ControlBlockBase {
     }
 
     static ControlBlock<T>* fromPtr(T* ptr) {
+        if (!ptr)
+            return nullptr;
         return static_cast<ControlBlock<T> *>(reinterpret_cast<ControlBlockBase *>(ptr) - 1);
     }
 
@@ -343,6 +345,10 @@ struct refcounted_deque {
         {
             return mData.size();
         }
+        constexpr bool isReference() const
+        {
+            return true;
+        }
     };
 
     RefcountedView refcounted()
@@ -364,6 +370,9 @@ struct refcounted_deque {
         {
             return mData.size();
         }
+        constexpr bool isReference() const {
+            return true;
+        }
     };
 
     BlocksView blocks()
@@ -383,25 +392,6 @@ struct container_traits<refcounted_deque<T>, void> {
     static constexpr const bool remove_invalidates_handles = false;
     static constexpr const bool is_fixed_size = false;
 
-    struct handle_t {
-        handle_t(size_t index = std::numeric_limits<size_t>::max())
-            : mIndex(index)
-        {
-        }
-
-        operator size_t() const { return mIndex; }
-
-        void operator++() { ++mIndex; }
-        void operator--() { --mIndex; }
-        handle_t &operator-=(size_t s)
-        {
-            mIndex -= s;
-            return *this;
-        }
-
-        size_t mIndex;
-    };
-
     typedef refcounted_deque<T> container;
     typedef typename container::iterator iterator;
     typedef typename container::const_iterator const_iterator;
@@ -409,8 +399,8 @@ struct container_traits<refcounted_deque<T>, void> {
     typedef typename container::const_reverse_iterator const_reverse_iterator;
     typedef T *handle;
     typedef const T *const_handle;
-    typedef handle_t position_handle;
-    typedef handle_t const_position_handle;
+    typedef IndexType<size_t> position_handle;
+    typedef IndexType<size_t> const_position_handle;
     typedef typename container::value_type value_type;
 
     typedef iterator emplace_return;

@@ -47,9 +47,9 @@ namespace Serialize {
             [](SerializableDataUnit *unit, BufferedInOutStream &inout, TransactionId id) -> StreamResult {
                 throw "Unsupported";
             },
-            [](SerializableDataUnit *_unit, SerializeInStream &in) {
+            [](SerializableDataUnit *_unit, SerializeInStream &in, bool success) {
                 Unit *unit = static_cast<Unit *>(_unit);
-                UnitHelper<T>::applyMap(in, unit->*P);
+                UnitHelper<T>::applyMap(in, unit->*P, success);
             },
             [](SerializableDataUnit *unit, bool b) {
             },
@@ -111,7 +111,7 @@ namespace Serialize {
             [](SerializableDataUnit *unit, BufferedInOutStream &inout, TransactionId id) -> StreamResult {
                 throw "Unsupported";
             },
-            [](SerializableDataUnit *_unit, SerializeInStream &in) {
+            [](SerializableDataUnit *_unit, SerializeInStream &in, bool success) {
             },
             [](SerializableDataUnit *unit, bool b) {
             },
@@ -162,8 +162,8 @@ namespace Serialize {
                 else
                     throw "Unsupported";
             },
-            [](SerializableDataUnit *unit, SerializeInStream &in) {
-                UnitHelper<T>::applyMap(in, static_cast<Unit *>(unit)->*P);
+            [](SerializableDataUnit *unit, SerializeInStream &in, bool success) {
+                UnitHelper<T>::applyMap(in, static_cast<Unit *>(unit)->*P, success);
             },
             [](SerializableDataUnit *unit, bool b) {
                 UnitHelper<T>::setItemDataSynced(static_cast<Unit *>(unit)->*P, b);
@@ -219,7 +219,7 @@ namespace Serialize {
                 Unit *unit = static_cast<Unit *>(_unit);
                 return Operations<T, Configs...>::readRequest(unit->*P, inout, id, unit);
             },
-            [](SerializableDataUnit *unit, SerializeInStream &in) {
+            [](SerializableDataUnit *unit, SerializeInStream &in, bool success) {
             },
             [](SerializableDataUnit *unit, bool b) {
                 //UnitHelper<T>::setItemDataSynced(static_cast<Unit *>(unit)->*P, b);

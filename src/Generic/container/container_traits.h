@@ -1,6 +1,7 @@
 #pragma once
 
 #include "underlying_container.h"
+#include "../indextype.h"
 
 namespace Engine {
 
@@ -136,31 +137,12 @@ struct container_traits<std::vector<T>, void> {
     typedef typename container::iterator iterator;
     typedef typename container::const_iterator const_iterator;
     typedef typename container::reverse_iterator reverse_iterator;
-    typedef typename container::const_reverse_iterator const_reverse_iterator;
+    typedef typename container::const_reverse_iterator const_reverse_iterator;    
 
-    struct handle_t {
-        handle_t(size_t index = std::numeric_limits<size_t>::max())
-            : mIndex(index)
-        {
-        }
-
-        operator size_t() const { return mIndex; }
-
-        void operator++() { ++mIndex; }
-        void operator--() { --mIndex; }
-        handle_t &operator-=(size_t s)
-        {
-            mIndex -= s;
-            return *this;
-        }
-
-        size_t mIndex;
-    };
-
-    typedef handle_t handle;
-    typedef handle_t const_handle;
-    typedef handle_t position_handle;
-    typedef handle_t const_position_handle;
+    typedef IndexType<size_t> handle;
+    typedef IndexType<size_t> const_handle;
+    typedef IndexType<size_t> position_handle;
+    typedef IndexType<size_t> const_position_handle;
     typedef typename container::value_type value_type;
 
     typedef iterator emplace_return;

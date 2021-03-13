@@ -131,9 +131,9 @@ namespace Serialize {
         mType->setParent(unit());
     }
 
-    void SerializableDataPtr::applySerializableMap(SerializeInStream &in) const
+    void SerializableDataPtr::applySerializableMap(SerializeInStream &in, bool success) const
     {
-        mType->applySerializableMap(unit(), in);
+        mType->applySerializableMap(unit(), in, success);
     }
 
     void SerializableUnitPtr::setDataSynced(bool b) const

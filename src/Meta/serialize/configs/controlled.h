@@ -28,6 +28,8 @@ namespace Serialize {
         template <typename Op>
         static StreamResult readItem(SerializeInStream &in, Op &op, typename container_traits<Op>::iterator &it)
         {
+            /*if (it != physical(op).end())
+                return STREAM_ERROR(in, StreamState::UNKNOWN_ERROR, "Reading currently only supported at end()");*/
 
             STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, "Item", 1));
             MakeOwning_t<typename comparator_traits<Cmp>::type> key;
@@ -36,7 +38,7 @@ namespace Serialize {
                 return comparator_traits<Cmp>::to_cmp_type(t) == key;
             });
             if (it == physical(op).end())
-                return STREAM_ERROR(in, StreamState::UNKNOWN_ERROR, "Reading currently only supported at end()");
+                return STREAM_ERROR(in, StreamState::UNKNOWN_ERROR, "Missing item of name '" << key << "' in controlled container");
 
             return read(in, *it, "Item");
         }

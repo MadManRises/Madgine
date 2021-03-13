@@ -9,6 +9,9 @@ namespace Serialize {
 
         JSONFormatter();
 
+        virtual void setupStream(std::istream &) override;
+        virtual void setupStream(std::ostream &) override;
+
         virtual void beginExtended(SerializeOutStream &, const char *name, size_t count) override;
 
         virtual void beginCompound(SerializeOutStream &, const char *name) override;
@@ -38,6 +41,8 @@ namespace Serialize {
     private:
         StreamResult readFieldName(SerializeInStream &in, const char *name);
 
+        StreamResult prefetchFields(SerializeInStream &in, const char *name = nullptr);
+
     private:
         size_t mLevel = 0;
         bool mCurrentExtended = false;
@@ -45,7 +50,20 @@ namespace Serialize {
         bool mAfterItem = false;
         bool mLastPrimitive;
 
-        std::stack<bool> mContainerLevel;
+        std::istream::pos_type mExtendedLookupPos = -1;
+
+        struct ParseLevel {
+        
+            ParseLevel(bool isContainer)
+                : mIsContainer(isContainer)
+            {
+            }
+
+            bool mIsContainer;
+            std::map<std::string, std::istream::pos_type, std::less<>> mPrefetchedFields;
+        };
+
+        std::stack<ParseLevel> mParseLevel;
     };
 
 }

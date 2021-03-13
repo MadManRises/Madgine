@@ -77,12 +77,14 @@ namespace Widgets {
         virtual bool injectPointerMove(const Input::PointerEventArgs &arg);
         virtual bool injectPointerEnter(const Input::PointerEventArgs &arg);
         virtual bool injectPointerLeave(const Input::PointerEventArgs &arg);
+        virtual bool injectAxisEvent(const Input::AxisEventArgs &arg);
 
         Threading::SignalStub<const Input::PointerEventArgs &> &pointerMoveEvent();
         Threading::SignalStub<const Input::PointerEventArgs &> &pointerDownEvent();
         Threading::SignalStub<const Input::PointerEventArgs &> &pointerUpEvent();
         Threading::SignalStub<const Input::PointerEventArgs &> &pointerEnterEvent();
         Threading::SignalStub<const Input::PointerEventArgs &> &pointerLeaveEvent();
+        Threading::SignalStub<const Input::AxisEventArgs &> &axisEvent();
 
         decltype(auto) children() const
         {
@@ -105,9 +107,10 @@ namespace Widgets {
         WidgetManager &manager();
 
     protected:
+        static const char *widgetCreationNames(size_t index);
         std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, WidgetClass _class);
         std::tuple<std::unique_ptr<WidgetBase>> createWidgetClassTuple(const std::string &name, WidgetClass _class);
-        std::tuple<std::pair<const char *, std::string>, std::pair<const char *, WidgetClass>> storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const;
+        std::tuple<std::string, WidgetClass> storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const;
 
         std::unique_ptr<WidgetBase> createWidget(const std::string &name);
         std::unique_ptr<Bar> createBar(const std::string &name);
@@ -128,6 +131,7 @@ namespace Widgets {
         void destroyChild(WidgetBase *w);
 
         Threading::Signal<const Input::PointerEventArgs &> mPointerMoveSignal, mPointerDownSignal, mPointerUpSignal, mPointerEnterSignal, mPointerLeaveSignal;
+        Threading::Signal<const Input::AxisEventArgs &> mAxisEventSignal;
 
     private:
         std::string mName;

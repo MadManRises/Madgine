@@ -36,9 +36,15 @@ namespace Serialize {
         std::string indent();
 
     private:
+        StreamResult prefetchAttributes(SerializeInStream &in, const char *name = nullptr);
+        StreamResult skipValue(SerializeInStream &);
+
+    private:
         size_t mLevel = 0;
         bool mCurrentExtended = false;
         size_t mCurrentExtendedCount = 0;
+        std::istream::pos_type mExtendedLookupPos = -1;
+        std::map<std::string, std::istream::pos_type, std::less<>> mPrefetchedAttributes;
     };
 
 }

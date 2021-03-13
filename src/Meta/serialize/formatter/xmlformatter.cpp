@@ -74,6 +74,10 @@ namespace Serialize {
             in.seek(in.tell() - off_type { 1 });
         } else {
             assert(mCurrentExtendedCount == 0);
+            STREAM_PROPAGATE_ERROR(prefetchAttributes(in));
+            std::string next = in.peekN(1);
+            if (next != ">")
+                return STREAM_PARSE_ERROR(in, "Expected '>'");            
         }
         std::string prefix = in.readN(1);
         if (prefix != ">")
@@ -124,11 +128,14 @@ namespace Serialize {
         if (mCurrentExtendedCount > 0) {
             assert(mCurrentExtended);
             --mCurrentExtendedCount;
-            std::string prefix = in.readUntil("=");
-            if (prefix.size() <= 1)
-                return STREAM_PARSE_ERROR(in, "Syntax error");
-            if (name && prefix != std::string(name) + "=")
-                return STREAM_PARSE_ERROR(in, "Expected: '" << name << "'");
+            auto it = mPrefetchedAttributes.find(name);
+            if (it != mPrefetchedAttributes.end()) {
+                mExtendedLookupPos = in.tell();
+                in.seek(it->second);
+                mPrefetchedAttributes.erase(it);
+            } else {
+                STREAM_PROPAGATE_ERROR(prefetchAttributes(in, name));
+            }
             if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>) {
                 if (in.readN(1) != "\"")
                     return STREAM_PARSE_ERROR(in, "Expected '\"'");
@@ -141,7 +148,7 @@ namespace Serialize {
                     return STREAM_PARSE_ERROR(in, "Syntax error");
                 if (name && prefix != "<" + std::string(name) + ">")
                     return STREAM_PARSE_ERROR(in, "Expected: '" << name << "'");
-                in.readN(prefix.size() - 1);                
+                in.readN(prefix.size() - 1);
             } else {
                 mCurrentExtended = false;
             }
@@ -150,7 +157,7 @@ namespace Serialize {
                 return STREAM_PARSE_ERROR(in, "Expected '>'");
 
             if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>)
-                in.setNextFormattedStringDelimiter('<');            
+                in.setNextFormattedStringDelimiter('<');
         }
         return {};
     }
@@ -168,13 +175,18 @@ namespace Serialize {
 
     StreamResult XMLFormatter::endPrimitive(SerializeInStream &in, const char *name, uint8_t typeId)
     {
-        if (!mCurrentExtended) {
+        if (mCurrentExtended) {
+            if (mExtendedLookupPos != -1) {
+                in.seek(mExtendedLookupPos);
+                mExtendedLookupPos = -1;
+            }
+        } else {
             const char *cPrefix = ((typeId == Serialize::PrimitiveTypeIndex_v<std::string>) ? "/" : "</");
             std::string prefix = in.readUntil(">");
             if (prefix.size() <= 1)
                 return STREAM_PARSE_ERROR(in, "Syntax error");
             if (name && prefix != cPrefix + std::string(name) + ">")
-                return STREAM_PARSE_ERROR(in, "Expected: '" << name << "'");      
+                return STREAM_PARSE_ERROR(in, "Expected: '" << name << "'");
         }
         return {};
     }
@@ -223,6 +235,35 @@ namespace Serialize {
     std::string XMLFormatter::indent()
     {
         return std::string(4 * mLevel, ' ');
+    }
+
+    StreamResult XMLFormatter::prefetchAttributes(SerializeInStream &in, const char *name)
+    {
+        std::string prefix = in.peekN(1);
+        while (prefix != ">") {
+            prefix = in.readUntil("=");
+            if (name && prefix == name + "="s)
+                return {};
+            mPrefetchedAttributes.try_emplace(std::string { StringUtil::substr(prefix, 0, -1) }, in.tell());
+            STREAM_PROPAGATE_ERROR(skipValue(in));
+            prefix = in.peekN(1);
+        }        
+        if (name)
+            return STREAM_PARSE_ERROR(in, "Missing attribute '" << name << "'");
+        return {};
+    }
+
+    StreamResult XMLFormatter::skipValue(SerializeInStream &in)
+    {
+        std::string next = in.peekN(1);
+        if (next == "\"") {
+            in.readN(1);
+            in.readUntil("\"");
+        } else {
+            float dummy; //TODO Is this catching all cases?
+            STREAM_PROPAGATE_ERROR(in.readUnformatted(dummy));
+        }
+        return {};
     }
 
 }

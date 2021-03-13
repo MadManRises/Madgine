@@ -585,10 +585,10 @@ namespace Tools {
                     if (nodeId < std::numeric_limits<int>::max() - 2) {
                         mSelectedNodeIndex = nodeId / 6000 - 1;
                     } else {
-                        mSelectedNodeIndex = std::numeric_limits<uintptr_t>::max();
+                        mSelectedNodeIndex.reset();
                     }
                 } else {
-                    mSelectedNodeIndex = std::numeric_limits<uintptr_t>::max();
+                    mSelectedNodeIndex.reset();
                 }
 
                 ed::Resume();
@@ -609,7 +609,7 @@ namespace Tools {
 
         if (mNodeDetailsVisible) {
             if (ImGui::Begin("Node graph - Node Details")) {
-                if (mSelectedNodeIndex != std::numeric_limits<uintptr_t>::max()) {
+                if (mSelectedNodeIndex) {
                     mIsDirty |= getTool<Inspector>().draw(mGraph->nodes()[mSelectedNodeIndex].get());
                 }
             }

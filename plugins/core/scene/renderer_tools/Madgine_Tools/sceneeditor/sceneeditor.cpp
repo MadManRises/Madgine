@@ -500,7 +500,7 @@ namespace Tools {
                         Vector4 start = world * m * Vector4::UNIT_W;
                         Vector4 end;
 
-                        if (bone.mFirstChild != std::numeric_limits<uint32_t>::max()) {
+                        if (bone.mFirstChild) {
                             Matrix4 m_child = s->matrices()[bone.mFirstChild] * skeleton->mBones[bone.mFirstChild].mOffsetMatrix.Inverse() * skeleton->mMatrix.Inverse();
                             end = world * m_child * Vector4::UNIT_W;
                         } else {

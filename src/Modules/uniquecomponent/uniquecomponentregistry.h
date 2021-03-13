@@ -24,7 +24,7 @@ struct CollectorInfoBase {
     const TypeInfo *mBaseInfo;
     const Plugins::BinaryInfo *mBinary;
     std::vector<std::vector<const TypeInfo *>> mElementInfos;
-    size_t mBaseIndex = std::numeric_limits<size_t>::max();
+    IndexType<size_t> mBaseIndex;
 };
 
 struct ComponentRegistryListener {
@@ -181,7 +181,7 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
                     listener(info, false, clearV, op);
                 }
 
-                info->mBaseIndex = std::numeric_limits<size_t>::max();
+                info->mBaseIndex.reset();
             } else {
                 ++it;
             }

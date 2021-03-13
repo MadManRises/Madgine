@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../../generic/copy_traits.h"
-#include "../../generic/functor.h"
-#include "../../generic/offsetptr.h"
+#include "Generic/copy_traits.h"
+#include "Generic/functor.h"
+#include "Generic/offsetptr.h"
 #include "../serializable.h"
 #include "../streams/bufferedstream.h"
 #include "../streams/operations.h"
@@ -51,7 +51,7 @@ namespace Serialize {
                     mData = std::forward<Ty>(v);
                     notify(old);
                 } else {
-                    std::pair<SyncedOperation, T> data { SyncedOperation::SET, std::forward<Ty>(v) };
+                    std::pair<SyncedOperation::Value, T> data { SyncedOperation::SET, std::forward<Ty>(v) };
                     this->writeRequest(&data);
                 }
             }
@@ -65,7 +65,7 @@ namespace Serialize {
                 mData += std::forward<Ty>(v);
                 notify(old);
             } else {
-                std::pair<SyncedOperation, T> data { SyncedOperation::ADD, std::forward<Ty>(v) };
+                std::pair<SyncedOperation::Value, T> data { SyncedOperation::ADD, std::forward<Ty>(v) };
                 this->writeRequest(&data);
             }
         }
@@ -78,7 +78,7 @@ namespace Serialize {
                 mData -= std::forward<Ty>(v);
                 notify(old);
             } else {
-                std::pair<SyncedOperation, T> data { SyncedOperation::SUB, std::forward<Ty>(v) };
+                std::pair<SyncedOperation::Value, T> data { SyncedOperation::SUB, std::forward<Ty>(v) };
                 this->writeRequest(, &data);
             }
         }
@@ -116,9 +116,9 @@ namespace Serialize {
             }
         }
 
-        void applySerializableMap(SerializeInStream &in)
+        void applySerializableMap(SerializeInStream &in, bool success)
         {
-            UnitHelper<T>::applyMap(in, mData);
+            UnitHelper<T>::applyMap(in, mData, success);
         }
 
         void setParent(SerializableUnitBase *parent)
@@ -130,7 +130,7 @@ namespace Serialize {
         void notify(const T &old, ParticipantId answerTarget = 0, TransactionId answerId = 0)
         {
             if (this->isSynced()) {
-                std::pair<SyncedOperation, T> data { SyncedOperation::SET, mData };
+                std::pair<SyncedOperation::Value, T> data { SyncedOperation::SET, mData };
                 this->writeAction(&data, answerTarget, answerId);
             }
             if (this->isActive()) {
@@ -145,14 +145,14 @@ namespace Serialize {
     template <typename T, typename Observer, typename OffsetPtr>
     struct Operations<Synced<T, Observer, OffsetPtr>> {
         template <typename... Args>
-        static void readRequest(Synced<T, Observer, OffsetPtr> &synced, BufferedInOutStream &inout, TransactionId id, Args &&... args)
+        static StreamResult readRequest(Synced<T, Observer, OffsetPtr> &synced, BufferedInOutStream &inout, TransactionId id, Args &&... args)
         {
             if (synced.isMaster()) {
                 SyncedOperation::Value op;
-                Serialize::read(inout, op, nullptr);
+                STREAM_PROPAGATE_ERROR(Serialize::read(inout, op, nullptr));
                 T old = synced.mData;
                 T value;
-                Serialize::read(inout, value, nullptr);
+                STREAM_PROPAGATE_ERROR(Serialize::read(inout, value, nullptr));
                 switch (op) {
                 case SyncedOperation::SET:
                     synced.mData = value;
@@ -172,16 +172,17 @@ namespace Serialize {
                 }
                 synced.notify(old, inout.id(), id);
             } else {
-                BufferedOutStream *out = synced.getSlaveActionMessageTarget(inout.id(), id);
-                out->pipe(inout);
-                out->endMessage();
+                BufferedOutStream &out = synced.getSlaveActionMessageTarget(inout.id(), id);
+                out.pipe(inout);
+                out.endMessage();
             }
+            return {};
         }
 
         template <typename... Args>
         static void writeRequest(const Synced<T, Observer, OffsetPtr> &synced, BufferedOutStream &out, const void *_data, Args &&... args)
         {
-            std::pair<SyncedOperation, T> &data = *static_cast<std::pair<SyncedOperation, T> *>(_data);
+            const std::pair<SyncedOperation::Value, T> &data = *static_cast<const std::pair<SyncedOperation::Value, T> *>(_data);
             Serialize::write(out, data.first, nullptr);
             Serialize::write(out, data.second, nullptr);
             out.endMessage();
@@ -219,7 +220,7 @@ namespace Serialize {
         template <typename... Args>
         static void writeAction(const Synced<T, Observer, OffsetPtr> &synced, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *_data, Args &&... args)
         {
-            std::pair<SyncedOperation, T> &data = *static_cast<std::pair<SyncedOperation, T> *>(_data);
+            const std::pair<SyncedOperation::Value, T> &data = *static_cast<const std::pair<SyncedOperation::Value, T> *>(_data);
             for (BufferedOutStream *out : outStreams) {
                 Serialize::write(*out, data.first, nullptr);
                 Serialize::write(*out, data.second, nullptr);

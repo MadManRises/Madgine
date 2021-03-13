@@ -29,13 +29,10 @@ READONLY_PROPERTY(Size, getSize)
 MEMBER(mVisible)
 METATABLE_END(Engine::Widgets::WidgetBase)
 
-
-
 SERIALIZETABLE_BEGIN(Engine::Widgets::WidgetBase)
-FIELD(mChildren, Serialize::ParentCreator<&Engine::Widgets::WidgetBase::createWidgetClassTuple, &Engine::Widgets::WidgetBase::storeWidgetCreationData>)
+FIELD(mChildren, Serialize::ParentCreator<&Engine::Widgets::WidgetBase::widgetCreationNames, &Engine::Widgets::WidgetBase::createWidgetClassTuple, &Engine::Widgets::WidgetBase::storeWidgetCreationData>)
 FIELD(mPos)
 FIELD(mSize)
-FIELD(mName)
 SERIALIZETABLE_END(Engine::Widgets::WidgetBase)
 
 namespace Engine {
@@ -357,6 +354,12 @@ namespace Widgets {
         return true;
     }
 
+    bool WidgetBase::injectAxisEvent(const Input::AxisEventArgs &arg)
+    {
+        mAxisEventSignal.emit(arg);
+        return true;
+    }
+
     Threading::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerMoveEvent()
     {
         return mPointerMoveSignal;
@@ -382,6 +385,11 @@ namespace Widgets {
         return mPointerLeaveSignal;
     }
 
+    Threading::SignalStub<const Input::AxisEventArgs &> &WidgetBase::axisEvent()
+    {
+        return mAxisEventSignal;
+    }
+
     bool WidgetBase::containsPoint(const Vector2 &point, const Rect2i &screenSpace, float extend) const
     {
         Vector3 min = mAbsolutePos * Vector3 { Vector2 { screenSpace.mSize }, 1.0f } + Vector3 { Vector2 { screenSpace.mTopLeft }, 0.0f } - extend;
@@ -402,6 +410,15 @@ namespace Widgets {
     void WidgetBase::setUserData(void *userData)
     {
         mUserData = userData;
+    }
+
+    const char *WidgetBase::widgetCreationNames(size_t index)
+    {
+        static constexpr std::array<const char *, 2> names {
+            "name",
+            "type"
+        };
+        return names[index];
     }
 
     std::unique_ptr<WidgetBase> WidgetBase::createWidgetClass(const std::string &name, WidgetClass _class)
@@ -437,11 +454,9 @@ namespace Widgets {
             createWidgetClass(name, _class)
         };
     }
-    std::tuple<std::pair<const char *, std::string>, std::pair<const char *, WidgetClass>> WidgetBase::storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const
+    std::tuple<std::string, WidgetClass> WidgetBase::storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const
     {
-        return std::make_tuple(
-            std::make_pair("name", widget->getName()),
-            std::make_pair("type", widget->getClass()));
+        return std::make_tuple(widget->getName(), widget->getClass());
     }
     std::unique_ptr<WidgetBase> WidgetBase::createWidget(const std::string &name)
     {

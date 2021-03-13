@@ -26,7 +26,7 @@ namespace Serialize {
         {
             R returnValue;
             STREAM_PROPAGATE_ERROR(read(in, returnValue, nullptr, args...));
-            UnitHelper<R>::applyMap(in, returnValue);
+            UnitHelper<R>::applyMap(in, returnValue, true);
             assert(request);
             query.writeActionResponse(&returnValue, request->mRequester, request->mRequesterTransactionId);
             (*request)(&returnValue);
@@ -44,8 +44,13 @@ namespace Serialize {
         static StreamResult readRequest(Query<f, OffsetPtr> &query, BufferedInOutStream &in, TransactionId id, Args &&... args)
         {
             std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> data;
-            TupleUnpacker::forEach(data, [&](auto &field) { read(in, field, nullptr, args...); }); //TODO
-            UnitHelper<decltype(data)>::applyMap(in, data);
+            STREAM_PROPAGATE_ERROR(TupleUnpacker::accumulate(
+                data, [&](auto &field, StreamResult r) {
+                    STREAM_PROPAGATE_ERROR(std::move(r));
+                    return read(in, field, nullptr, args...);
+                },
+                StreamResult {}));
+            UnitHelper<decltype(data)>::applyMap(in, data, true);
             query.tryCall(data, in.id(), id);
             return {};
         }

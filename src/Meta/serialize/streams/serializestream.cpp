@@ -153,17 +153,10 @@ namespace Serialize {
     {
         assert(!format().mBinary);
 
-        char firstNonWs = ' ';
-
-        while (std::isspace(firstNonWs)) {
-
-            if (InStream::readRaw(&firstNonWs, 1) == 0)
-                return {};
-        }
+        skipWs();
 
         char buffer[255];
         size_t i = 0;
-        buffer[i++] = firstNonWs;
         do {
             if (InStream::readRaw(&buffer[i], 1) == 0)
                 break;

@@ -97,8 +97,9 @@ namespace Scene {
             std::string mName;
 
         private:
+            static const char *componentCreationNames(size_t index);
             std::tuple<EntityComponentOwningHandle<EntityComponentBase>> createComponentTuple(const std::string &name);
-            std::tuple<std::pair<const char *, std::string_view>> storeComponentCreationData(const EntityComponentOwningHandle<EntityComponentBase> &comp) const;
+            std::tuple<std::string_view> storeComponentCreationData(const EntityComponentOwningHandle<EntityComponentBase> &comp) const;
 
             bool mLocal;
 

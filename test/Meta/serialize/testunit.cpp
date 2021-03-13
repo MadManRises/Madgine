@@ -13,17 +13,29 @@
 SERIALIZETABLE_BEGIN(ComplexDataType)
 SERIALIZETABLE_END(ComplexDataType)
 
-std::tuple<std::pair<const char *, int>, std::pair<const char *, float>, std::pair<const char *, std::string>> writeList1(const ComplexDataType &data)
+constexpr const char *list1ArgNames(size_t index)
+{
+    constexpr std::array<const char *, 4> names = {
+        "first",
+        "second",
+        "third",
+        "fourth"
+    };
+    return names[index];
+}
+
+std::tuple<int, float, std::string, bool> writeList1(const ComplexDataType &data)
 {
     return {
-        { "first", data.i },
-        { "second", data.f },
-        { "third", data.s }
+        data.i,
+        data.f,
+        data.s,
+        data.b
     };
 }
-std::tuple<int, float, std::string> readList1(int i, float f, std::string s)
+std::tuple<int, float, std::string, bool> readList1(int i, float f, std::string s, bool b)
 {
-    return { i, f, s };
+    return { i, f, s, b };
 }
 
 SERIALIZETABLE_BEGIN(TestUnit)
@@ -34,9 +46,9 @@ FIELD(list1)
 FIELD(list2)
 FIELD(set1)
 FIELD(set2)
-FIELD(map1, PairCreator<DefaultCreator<const std::pair<int, float>>, DefaultCreator<int>>)
+FIELD(map1, KeyValueCreator<DefaultCreator<const std::pair<int, float>>, DefaultCreator<int>>)
 
-FIELD(complexList1, CustomCreator<&readList1, &writeList1>)
+FIELD(complexList1, CustomCreator<&list1ArgNames, &readList1, &writeList1>)
 FIELD(complexList2)
 FIELD(complexList3)
 

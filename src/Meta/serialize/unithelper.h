@@ -7,7 +7,7 @@
 namespace Engine {
 namespace Serialize {
 
-    DERIVE_FUNCTION(applySerializableMap, SerializeInStream &);
+    DERIVE_FUNCTION(applySerializableMap, SerializeInStream &, bool);
     DERIVE_FUNCTION(setDataSynced, bool);
     DERIVE_FUNCTION(setActive, bool, bool);
     DERIVE_FUNCTION(setParent, SerializableUnitBase *);
@@ -18,46 +18,50 @@ namespace Serialize {
     template <typename T>
     struct UnitHelper {
 
-        static void applyMap(SerializeInStream &in, T &item)
+        static void applyMap(SerializeInStream &in, T &item, bool success)
         {
             if constexpr (std::is_pointer_v<T>) {
-                static_assert(std::is_base_of_v<SerializableDataUnit, std::remove_pointer_t<T>>);
-                uint32_t ptr = reinterpret_cast<uintptr_t>(item);
-                if (ptr & 0x3) {
-                    switch (static_cast<UnitIdTag>(ptr & 0x3)) {
-                    case UnitIdTag::SYNCABLE:
-                        if constexpr (std::is_base_of_v<SyncableUnitBase, std::remove_pointer_t<T>>) {
-                            UnitId id = (ptr >> 2);
-                            item = static_cast<T>(convertSyncablePtr(in, id));
-                        } else {
+                if (success) {
+                    static_assert(std::is_base_of_v<SerializableDataUnit, std::remove_pointer_t<T>>);
+                    uint32_t ptr = reinterpret_cast<uintptr_t>(item);
+                    if (ptr & 0x3) {
+                        switch (static_cast<UnitIdTag>(ptr & 0x3)) {
+                        case UnitIdTag::SYNCABLE:
+                            if constexpr (std::is_base_of_v<SyncableUnitBase, std::remove_pointer_t<T>>) {
+                                UnitId id = (ptr >> 2);
+                                item = static_cast<T>(convertSyncablePtr(in, id));
+                            } else {
+                                throw 0;
+                            }
+                            break;
+                        case UnitIdTag::SERIALIZABLE:
+                            if constexpr (!std::is_base_of_v<SyncableUnitBase, std::remove_pointer_t<T>>) {
+                                uint32_t id = (ptr >> 2);
+                                item = static_cast<T>(convertSerializablePtr(in, id));
+                            } else {
+                                throw 0;
+                            }
+                            break;
+                        default:
                             throw 0;
                         }
-                        break;
-                    case UnitIdTag::SERIALIZABLE:
-                        if constexpr (!std::is_base_of_v<SyncableUnitBase, std::remove_pointer_t<T>>) {
-                            uint32_t id = (ptr >> 2);
-                            item = static_cast<T>(convertSerializablePtr(in, id));
-                        } else {
-                            throw 0;
-                        }
-                        break;
-                    default:
-                        throw 0;
-                    }                    
+                    }
+                } else {
+                    item = nullptr;
                 }
             } else if constexpr (has_function_applySerializableMap_v<T>) {
-                item.applySerializableMap(in);
+                item.applySerializableMap(in, success);
             } else if constexpr (std::is_base_of_v<SerializableDataUnit, T>){
-                SerializableDataPtr { &item }.applySerializableMap(in);
+                SerializableDataPtr { &item }.applySerializableMap(in, success);
             } else if constexpr (is_instance_v<std::remove_const_t<T>, std::unique_ptr>) {
-                UnitHelper<typename T::element_type>::applyMap(in, *item);
+                UnitHelper<typename T::element_type>::applyMap(in, *item, success);
             } else if constexpr (is_iterable_v<T>) {
                 for (auto &t : physical(item)) {
-                    UnitHelper<std::remove_reference_t<decltype(t)>>::applyMap(in, t);
+                    UnitHelper<std::remove_reference_t<decltype(t)>>::applyMap(in, t, success);
                 }
             } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
                 TupleUnpacker::forEach(TupleUnpacker::toTuple(item), [&](auto &t) {
-                    UnitHelper<std::remove_reference_t<decltype(t)>>::applyMap(in, t);
+                    UnitHelper<std::remove_reference_t<decltype(t)>>::applyMap(in, t, success);
                 });
             } else {
                 //static_assert(isPrimitiveType_v<T>, "Invalid Type");

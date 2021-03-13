@@ -15,20 +15,23 @@ struct PODDataType {
 
 struct ComplexDataType : SerializableDataUnit {
 
-    ComplexDataType(int i = 2, float f = 4.0f, std::string s = "default")
+    ComplexDataType(int i = 2, float f = 4.0f, std::string s = "default", bool b = true)
         : i(i)
         , f(f)
         , s(std::move(s))
+        , b(b)
     {
     }
 
-    bool operator==(const ComplexDataType& other) const {
-        return i == other.i && f == other.f && s == other.s;
+    bool operator==(const ComplexDataType &other) const
+    {
+        return i == other.i && f == other.f && s == other.s && b == other.b;
     }
 
     int i;
     float f;
     std::string s;
+    bool b;
 };
 
 struct TestUnit : TopLevelUnit<TestUnit> {

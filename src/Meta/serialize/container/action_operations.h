@@ -1,18 +1,15 @@
 #pragma once
 
-#include "action.h"
 #include "../configs/configselector.h"
-#include "../configs/verifier.h"
 #include "../configs/requestpolicy.h"
-#include "../streams/pendingrequest.h"
+#include "../configs/verifier.h"
 #include "../streams/bufferedstream.h"
+#include "../streams/pendingrequest.h"
 #include "../unithelper.h"
+#include "action.h"
 
 namespace Engine {
 namespace Serialize {
-
-
-
 
     template <auto f, typename OffsetPtr, typename R, typename T, typename... _Ty, typename... Configs>
     struct Operations<__action__impl__::ActionImpl<f, OffsetPtr, R, T, _Ty...>, Configs...> {
@@ -33,11 +30,23 @@ namespace Serialize {
         static StreamResult readAction(Action<f, OffsetPtr> &action, SerializeInStream &in, PendingRequest *request, Args &&... args)
         {
             std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> data;
-            TupleUnpacker::forEach(data, [&](auto &field) { read(in, field, nullptr, args...); }); //TODO
-            UnitHelper<decltype(data)>::applyMap(in, data);
-            R result = action.call(std::move(data), request ? request->mRequester : 0, request ? request->mRequesterTransactionId : 0);
-            if (request) {
-                (*request)(&result);
+            STREAM_PROPAGATE_ERROR(TupleUnpacker::accumulate(
+                data, [&](auto &field, StreamResult r) {
+                    STREAM_PROPAGATE_ERROR(std::move(r));
+                    return read(in, field, nullptr, args...);
+                },
+                StreamResult {}));
+            UnitHelper<decltype(data)>::applyMap(in, data, true);
+            if constexpr (std::is_same_v<R, void>) {
+                action.call(std::move(data), request ? request->mRequester : 0, request ? request->mRequesterTransactionId : 0);
+                if (request) {
+                    (*request)(nullptr);
+                }
+            } else {
+                R result = action.call(std::move(data), request ? request->mRequester : 0, request ? request->mRequesterTransactionId : 0);
+                if (request) {
+                    (*request)(&result);
+                }
             }
             return {};
         }
@@ -58,9 +67,14 @@ namespace Serialize {
         {
             if constexpr (!RequestPolicy::sCallByMasterOnly) {
                 std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> data;
-                TupleUnpacker::forEach(data, [&](auto &field) { read(in, field, nullptr, args...); }); //TODO
-                UnitHelper<decltype(data)>::applyMap(in, data);
-                if (Verifier::verify(id, data)) {
+                STREAM_PROPAGATE_ERROR(TupleUnpacker::accumulate(
+                    data, [&](auto &field, StreamResult r) {
+                        STREAM_PROPAGATE_ERROR(std::move(r));
+                        return read(in, field, nullptr, args...);
+                    },
+                    StreamResult {}));
+                UnitHelper<decltype(data)>::applyMap(in, data, true);
+                if (TupleUnpacker::invokeExpand(Verifier::verify, OffsetPtr::parent(&action), id, data)) {
                     action.tryCall(data, in.id(), id);
                 } else {
                     return STREAM_PERMISSION_ERROR(in, "Request for action not verified");

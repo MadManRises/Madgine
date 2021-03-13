@@ -71,6 +71,7 @@ namespace Widgets {
         virtual bool injectPointerPress(const Input::PointerEventArgs &arg) override;
         virtual bool injectPointerRelease(const Input::PointerEventArgs &arg) override;
         virtual bool injectPointerMove(const Input::PointerEventArgs &arg) override;
+        virtual bool injectAxisEvent(const Input::AxisEventArgs &arg) override;
 
         virtual void onResize(const Rect2i &space) override;
         virtual void render(Render::RenderTarget *target) override;
@@ -85,9 +86,10 @@ namespace Widgets {
         WidgetBase *getHoveredWidgetDown(const Vector2 &pos, WidgetBase *current);
         bool propagateInput(WidgetBase *w, const Input::PointerEventArgs &arg, bool (WidgetBase::*f)(const Input::PointerEventArgs &));
 
+        static const char *widgetCreationNames(size_t index);
         std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, WidgetClass _class);
         std::tuple<std::unique_ptr<WidgetBase>> createWidgetClassTuple(const std::string &name, WidgetClass _class);
-        std::tuple<std::pair<const char *, std::string>, std::pair<const char *, WidgetClass>> storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const;
+        std::tuple<std::string, WidgetClass> storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const;
 
         std::unique_ptr<WidgetBase> createWidget(const std::string &name);
         std::unique_ptr<Bar> createBar(const std::string &name);

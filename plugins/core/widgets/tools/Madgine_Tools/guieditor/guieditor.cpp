@@ -144,7 +144,12 @@ namespace Tools {
             Filesystem::FileManager file("Layout");
             Serialize::SerializeInStream in = file.openRead(filePath, std::make_unique<Serialize::XMLFormatter>());
             if (in) {
-                mWindow->readState(in, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap);
+                Serialize::StreamResult result = mWindow->readState(in, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap);
+                if (result.mState != Serialize::StreamState::OK) {
+                    LOG_ERROR("Failed loading '" << filePath << "' with following Error: "
+                                                 << "\n"
+                                                 << *result.mError);
+                }
             }
         }
     }

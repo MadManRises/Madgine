@@ -49,7 +49,7 @@ namespace Tools {
 
         NodeGraph::NodeGraphLoader::HandleType mGraph;
 
-        uintptr_t mSelectedNodeIndex = std::numeric_limits<uintptr_t>::max();
+        IndexType<uintptr_t> mSelectedNodeIndex;
 
         Filesystem::Path mDirBuffer, mSelectionBuffer;
         std::string mSelectionTargetBuffer;

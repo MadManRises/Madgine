@@ -30,40 +30,43 @@ namespace Serialize {
     {
         Formatter &format = in.format();
 
-        if (format.mSupportNameLookup) {
-            std::string name = format.lookupFieldName(in);
-            while (!name.empty()) {
-                bool found = false;
-                const SerializeTable *table = this;
-                while (table && !found) {
-                    for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                        if (name == it->second.mFieldName) {
-                            STREAM_PROPAGATE_ERROR(it->second.mReadState(unit, in, it->second.mFieldName, hierarchy));
-                            found = true;
-                            break;
+        StreamResult result = [&]() -> StreamResult {
+            if (format.mSupportNameLookup) {
+                std::string name = format.lookupFieldName(in);
+                while (!name.empty()) {
+                    bool found = false;
+                    const SerializeTable *table = this;
+                    while (table && !found) {
+                        for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
+                            if (name == it->second.mFieldName) {
+                                STREAM_PROPAGATE_ERROR(it->second.mReadState(unit, in, it->second.mFieldName, hierarchy));
+                                found = true;
+                                break;
+                            }
                         }
+                        table = table->mBaseType ? &table->mBaseType() : nullptr;
+                    }
+                    if (!found)
+                        return STREAM_PARSE_ERROR(in, "Could not find field '" << name << "'");
+                    name = format.lookupFieldName(in);
+                }
+            } else {
+                const SerializeTable *table = this;
+                while (table) {
+                    for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
+                        STREAM_PROPAGATE_ERROR(it->second.mReadState(unit, in, it->second.mFieldName, hierarchy));
                     }
                     table = table->mBaseType ? &table->mBaseType() : nullptr;
                 }
-                if (!found)
-                    return STREAM_PARSE_ERROR(in, "Could not find field '" << name << "'");
-                name = format.lookupFieldName(in);
             }
-        } else {
-            const SerializeTable *table = this;
-            while (table) {
-                for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                    STREAM_PROPAGATE_ERROR(it->second.mReadState(unit, in, it->second.mFieldName, hierarchy));
-                }
-                table = table->mBaseType ? &table->mBaseType() : nullptr;
-            }
-        }
+            return {};
+        }();
 
         if (flags & StateTransmissionFlags_ApplyMap) {
             assert(in.manager());
-            applySerializableMap(unit, in);
+            applySerializableMap(unit, in, result.mState == StreamState::OK);
         }
-        return {};
+        return result;
     }
 
     StreamResult SerializeTable::readState(SerializableUnitBase *unit, SerializeInStream &in, StateTransmissionFlags flags, CallerHierarchyBasePtr hierarchy) const
@@ -96,12 +99,12 @@ namespace Serialize {
         return get(index).mReadRequest(unit, inout, id);
     }
 
-    void SerializeTable::applySerializableMap(SerializableDataUnit *unit, SerializeInStream &in) const
+    void SerializeTable::applySerializableMap(SerializableDataUnit *unit, SerializeInStream &in, bool success) const
     {
         const SerializeTable *table = this;
         while (table) {
             for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                it->second.mApplySerializableMap(unit, in);
+                it->second.mApplySerializableMap(unit, in, success);
             }
             table = table->mBaseType ? &table->mBaseType() : nullptr;
         }

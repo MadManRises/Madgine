@@ -9,16 +9,14 @@
 
 #include "../renderer/imroot.h"
 
-#include "Modules/keyvalue/scopebase.h"
-
 //#include "Modules/math/math.h"
 
 #include "Interfaces/debug/memory/memory.h"
 
 #include "Interfaces/debug/memory/untrackedmemoryresource.h"
 
-#include "Modules/keyvalue/metatable_impl.h"
-#include "Modules/serialize/serializetable_impl.h"
+#include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 

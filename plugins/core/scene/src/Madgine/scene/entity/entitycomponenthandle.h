@@ -23,8 +23,8 @@ namespace Scene {
 
         template <>
         struct EntityComponentHandle<EntityComponentBase> {
-            uint32_t mIndex = std::numeric_limits<uint32_t>::max();
-            uint32_t mType = std::numeric_limits<uint32_t>::max();
+            IndexType<uint32_t> mIndex;
+            IndexType<uint32_t> mType;
 
             Serialize::StreamResult readState(Serialize::SerializeInStream &in, const char *name, SceneManager *mgr)
             {
@@ -50,7 +50,7 @@ namespace Scene {
 
             explicit operator bool() const
             {
-                return mIndex != std::numeric_limits<uint32_t>::max();
+                return bool(mIndex);
             }
 
             uint32_t type() const
@@ -61,8 +61,8 @@ namespace Scene {
 
         template <>
         struct EntityComponentHandle<const EntityComponentBase> {
-            uint32_t mIndex = std::numeric_limits<uint32_t>::max();
-            uint32_t mType = std::numeric_limits<uint32_t>::max();
+            IndexType<uint32_t> mIndex;
+            IndexType<uint32_t> mType;
 
             EntityComponentHandle() = default;
 
@@ -86,7 +86,7 @@ namespace Scene {
 
             explicit operator bool() const
             {
-                return mIndex != std::numeric_limits<uint32_t>::max();
+                return bool(mIndex);
             }
 
             uint32_t type() const
@@ -97,19 +97,19 @@ namespace Scene {
 
         template <typename T>
         struct EntityComponentHandle {
-            uint32_t mIndex = std::numeric_limits<uint32_t>::max();
+            IndexType<uint32_t> mIndex;
 
             EntityComponentHandle() = default;
 
-            EntityComponentHandle(const EntityComponentHandle<EntityComponentBase> &other)
+            EntityComponentHandle(const EntityComponentHandle<std::conditional_t<std::is_const_v<T>, const EntityComponentBase, EntityComponentBase>> &other)
                 : mIndex(other.mIndex)
             {
                 assert(!other || component_index<T>() == other.mType);
-            }
+            }            
 
             Serialize::StreamResult readState(Serialize::SerializeInStream &in, const char *name, SceneManager *mgr)
             {
-                EntityComponentHandle<EntityComponentBase> handle { std::numeric_limits<uint32_t>::max(), type() };
+                EntityComponentHandle<EntityComponentBase> handle { IndexType<uint32_t>::sInvalid, type() };
                 STREAM_PROPAGATE_ERROR(entityComponentHelperRead(in, handle, name, mgr));
                 mIndex = handle.mIndex;
                 return {};
@@ -132,7 +132,7 @@ namespace Scene {
 
             explicit operator bool() const
             {
-                return mIndex != std::numeric_limits<uint32_t>::max();
+                return bool(mIndex);
             }
 
             uint32_t type() const

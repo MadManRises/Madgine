@@ -134,8 +134,8 @@ namespace Scene {
                                 lerp(it_scale->mValue, it_scale_end->mValue, scale_blend),
                                 slerp(it_orientation->mValue, it_orientation_end->mValue, orientation_blend));
 
-                            uint32_t parent = mSkeletonCache->mBones[i].mParent;
-                            if (parent != std::numeric_limits<uint32_t>::max()) {
+                            IndexType<uint32_t> parent = mSkeletonCache->mBones[i].mParent;
+                            if (parent) {
                                 /*if (parent < i && parentTransformToDos.count(parent) == 0)
                                     matrices[i] = matrices[parent] * matrices[i];
                                 else*/

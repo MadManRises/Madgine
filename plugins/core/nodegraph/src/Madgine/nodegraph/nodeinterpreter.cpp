@@ -21,8 +21,8 @@ namespace NodeGraph {
 
         while (pin && pin.mNode) {
             mCurrentNode = mGraph.node(pin.mNode);
-            uint32_t flowOutIndex = mCurrentNode->interpret(*this, pin.mIndex, mData[pin.mNode - 1]);
-            if (flowOutIndex != std::numeric_limits<uint32_t>::max())
+            IndexType<uint32_t> flowOutIndex = mCurrentNode->interpret(*this, pin.mIndex, mData[pin.mNode - 1]);
+            if (flowOutIndex)
                 pin = mCurrentNode->flowOutTarget(flowOutIndex);
             else
                 pin = {};

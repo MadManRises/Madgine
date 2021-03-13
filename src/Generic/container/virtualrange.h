@@ -150,6 +150,8 @@ struct VirtualRangeSecondBase : VirtualRangeBase<RefT> {
     virtual C &get() = 0;
 };
 
+DERIVE_FUNCTION(isReference)
+
 template <typename RefT, typename C, typename Assign>
 struct VirtualRangeImpl : VirtualRangeSecondBase<RefT, std::remove_reference_t<C>> {
 
@@ -175,7 +177,12 @@ struct VirtualRangeImpl : VirtualRangeSecondBase<RefT, std::remove_reference_t<C
 
     virtual bool isReference() const override
     {
-        return std::is_reference_v<C>;
+        if constexpr (std::is_reference_v<C>)
+            return true;
+        else if constexpr (has_function_isReference_v<C>)
+            return mContainer.isReference();
+        else
+            return false;
     }
 
 private:

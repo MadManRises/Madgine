@@ -8,7 +8,7 @@ namespace Engine {
 
 std::string OwnedScopePtr::name() const
 {
-    return mScope->proxyScopePtr().name();
+    return get().name();
 }
 
 bool OwnedScopePtr::operator==(const OwnedScopePtr &other) const
@@ -17,12 +17,17 @@ bool OwnedScopePtr::operator==(const OwnedScopePtr &other) const
 }
 
 OwnedScopePtr::operator TypedScopePtr() const {
+    return get();
+}
+
+TypedScopePtr OwnedScopePtr::get() const
+{
     return mScope->proxyScopePtr();
 }
 
 const MetaTable *OwnedScopePtr::type() const
 {
-    return mScope->proxyScopePtr().mType;
+    return get().mType;
 }
 
 }

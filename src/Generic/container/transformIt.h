@@ -136,6 +136,15 @@ public:
         return mContainer.size();
     }
 
+    bool isReference() const {
+        if constexpr (std::is_reference_v<T>)
+            return true;
+        else if constexpr (has_function_isReference_v<T>)
+            return mContainer.isReference();
+        else
+            return false;
+    }
+
 private:
     T mContainer;
     mutable Converter mConverter;

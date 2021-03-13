@@ -10,6 +10,7 @@
 #include "Generic/callerhierarchy.h"
 #include "Generic/container/atomiccontaineroperation.h"
 #include "Generic/container/containerevent.h"
+#include "Generic/indextype.h"
 #include "bufferedstream.h"
 #include "comparestreamid.h"
 #include "pendingrequest.h"
@@ -50,7 +51,7 @@ namespace Serialize {
             } else {
                 for (T &t : physical(op)) {
                     STREAM_PROPAGATE_ERROR(Serialize::read(in, t, "Item"));
-                }                
+                }
             }
 
             return in.format().endContainer(in, name);
@@ -417,6 +418,22 @@ namespace Serialize {
         static void write(SerializeOutStream &out, const std::unique_ptr<T> &p, const char *name, Args &&... args)
         {
             Operations<T, Configs...>::write(out, *p, name, std::forward<Args>(args)...);
+        }
+    };
+
+    template <typename T, T defaultValue, typename... Configs>
+    struct Operations<IndexType<T, defaultValue>, Configs...> {
+
+        template <typename... Args>
+        static StreamResult read(SerializeInStream &in, IndexType<T, defaultValue> &t, const char *name, Args &&... args)
+        {
+            return Operations<T, Configs...>::read(in, t, name, std::forward<Args>(args)...);
+        }
+
+        template <typename... Args>
+        static void write(SerializeOutStream &out, const IndexType<T, defaultValue> &t, const char *name, Args &&... args)
+        {
+            Operations<T, Configs...>::write(out, t, name, std::forward<Args>(args)...);
         }
     };
 

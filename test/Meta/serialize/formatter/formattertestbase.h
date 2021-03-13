@@ -47,7 +47,8 @@ void FormatterBaseTest(const std::string_view &expected = "")
 
     SerializeInStream in { out.release(), std::make_unique<SerializeStreamData>(std::make_unique<Formatter>()) };
 
-    in >> unit2;
+    StreamResult result = read(in, unit2, nullptr);
+    ASSERT_EQ(result.mState, StreamState::OK);
 
     ASSERT_EQ(unit1, unit2);
 }

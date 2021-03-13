@@ -1,13 +1,14 @@
 #pragma once
 
 #include "Meta/keyvalue/valuetype.h"
+#include "Generic/indextype.h"
 
 namespace Engine {
 namespace NodeGraph {
 
     struct MADGINE_NODEGRAPH_EXPORT TargetPin {
-        uint32_t mNode = 0;
-        uint32_t mIndex = std::numeric_limits<uint32_t>::max();
+        IndexType<uint32_t, 0> mNode;
+        IndexType<uint32_t> mIndex;
 
         explicit operator bool() const;
     };

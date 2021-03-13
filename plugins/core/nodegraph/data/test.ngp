@@ -1,7 +1,7 @@
 <Graph serId=1>
-    <mNodes size=5>
+    <mNodes>
         <Item type="TestNode" serId=2>
-            <mFlowOutPins size=1>
+            <mFlowOutPins>
                 <Item>
                     <Element>
                         <Element>2</Element>
@@ -9,7 +9,7 @@
                     </Element>
                 </Item>
             </mFlowOutPins>
-            <mDataInPins size=2>
+            <mDataInPins>
                 <Item>
                     <Element>
                         <Element>0</Element>
@@ -23,7 +23,7 @@
                     </Element>
                 </Item>
             </mDataInPins>
-            <mDataOutPins size=1>
+            <mDataOutPins>
                 <Item>
                     <Element>
                         <Element>5</Element>
@@ -33,7 +33,7 @@
             </mDataOutPins>
         </Item>
         <Item type="TestNode" serId=3>
-            <mFlowOutPins size=1>
+            <mFlowOutPins>
                 <Item>
                     <Element>
                         <Element>0</Element>
@@ -41,7 +41,7 @@
                     </Element>
                 </Item>
             </mFlowOutPins>
-            <mDataInPins size=2>
+            <mDataInPins>
                 <Item>
                     <Element>
                         <Element>0</Element>
@@ -55,7 +55,7 @@
                     </Element>
                 </Item>
             </mDataInPins>
-            <mDataOutPins size=1>
+            <mDataOutPins>
                 <Item>
                     <Element>
                         <Element>3</Element>
@@ -66,33 +66,33 @@
         </Item>
         <Item type="VariableNode" serId=4>
             <mDefaultValue type=5>0</mDefaultValue>
-            <mFlowOutPins size=0>
+            <mFlowOutPins>
             </mFlowOutPins>
-            <mDataInPins size=0>
+            <mDataInPins>
             </mDataInPins>
-            <mDataOutPins size=0>
+            <mDataOutPins>
             </mDataOutPins>
         </Item>
         <Item type="VariableNode" serId=5>
             <mDefaultValue type=5>1</mDefaultValue>
-            <mFlowOutPins size=0>
+            <mFlowOutPins>
             </mFlowOutPins>
-            <mDataInPins size=0>
+            <mDataInPins>
             </mDataInPins>
-            <mDataOutPins size=0>
+            <mDataOutPins>
             </mDataOutPins>
         </Item>
         <Item type="VariableNode" serId=6>
             <mDefaultValue type=5>0</mDefaultValue>
-            <mFlowOutPins size=0>
+            <mFlowOutPins>
             </mFlowOutPins>
-            <mDataInPins size=0>
+            <mDataInPins>
             </mDataInPins>
-            <mDataOutPins size=0>
+            <mDataOutPins>
             </mDataOutPins>
         </Item>
     </mNodes>
-    <mFlowInPins size=1>
+    <mFlowInPins>
         <Item>
             <Element>
                 <Element>1</Element>
@@ -100,8 +100,8 @@
             </Element>
         </Item>
     </mFlowInPins>
-    <mDataReceiverPins size=0>
+    <mDataReceiverPins>
     </mDataReceiverPins>
-    <mDataProviderPins size=0>
+    <mDataProviderPins>
     </mDataProviderPins>
 </Graph>

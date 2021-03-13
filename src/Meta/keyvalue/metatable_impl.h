@@ -164,8 +164,11 @@ static constexpr std::array<std::pair<const char *, ::Engine::Accessor>, std::tu
     DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::MetaTable, ::, table, SINGLE_ARG3({ #T, nullptr, Meta_##T::members.data() }), T);
 */
 
+#define NAMED_MEMBER(Name, M) \
+    METATABLE_ENTRY(STRINGIFY(Name), SINGLE_ARG(::Engine::member<Ty, &Ty::M>()), __LINE__)
+
 #define MEMBER(M) \
-    METATABLE_ENTRY(#M, SINGLE_ARG(::Engine::member<Ty, &Ty::M>()), __LINE__)
+    NAMED_MEMBER(M, M)
 
 #define READONLY_PROPERTY(Name, Getter) \
     METATABLE_ENTRY(#Name, SINGLE_ARG(::Engine::property<Ty, &Ty::Getter, nullptr>()), __LINE__)

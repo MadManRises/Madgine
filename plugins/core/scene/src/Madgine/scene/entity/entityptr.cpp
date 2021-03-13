@@ -33,10 +33,13 @@ namespace Scene {
             reset();
         }
 
-        EntityPtr::EntityPtr(ControlBlock<Entity> &entity)
-            : mEntity(reinterpret_cast<uintptr_t>(&entity) | mask)
+        EntityPtr::EntityPtr(Entity *entity)
+            : mEntity(reinterpret_cast<uintptr_t>(ControlBlock<Entity>::fromPtr(entity)))
         {
-            entity.incRef();
+            if (mEntity) {
+                mEntity |= mask;
+                getBlock()->incRef();
+            }
         }
 
         EntityPtr &EntityPtr::operator=(const EntityPtr &other)
@@ -98,6 +101,12 @@ namespace Scene {
             return mEntity == other.mEntity;
         }
 
+        bool EntityPtr::operator==(Entity *other) const
+        {
+            update();
+            return get() == other;
+        }
+
         bool EntityPtr::operator<(const EntityPtr &other) const
         {
             update();
@@ -123,12 +132,12 @@ namespace Scene {
             Serialize::write(out, get(), name);
         }
 
-        void EntityPtr::applySerializableMap(Serialize::SerializeInStream &in)
+        void EntityPtr::applySerializableMap(Serialize::SerializeInStream &in, bool success)
         {            
             if (mEntity & static_cast<uintptr_t>(Serialize::UnitIdTag::SYNCABLE)) {
                 Entity *ptr = reinterpret_cast<Entity *>(mEntity);
-                Serialize::UnitHelper<Entity *>::applyMap(in, ptr);
-                *this = *ControlBlock<Entity>::fromPtr(ptr); //TODO
+                Serialize::UnitHelper<Entity *>::applyMap(in, ptr, success);
+                *this = ptr;
             }
         }
 

@@ -31,12 +31,23 @@ namespace Serialize {
             Future<R> tryCall(std::tuple<_Ty...> args, ParticipantId requester = 0, TransactionId requesterTransactionId = 0, const std::set<ParticipantId> &targets = {})
             {
                 if (this->isMaster()) {
-                    return call(args, requester, requesterTransactionId, targets);
+                    if constexpr (std::is_same_v<R, void>) {
+                        call(args, requester, requesterTransactionId, targets);
+                        return make_ready_future();
+                    } else {
+                        return call(args, requester, requesterTransactionId, targets);
+                    }
                 } else {
                     assert(targets.empty());
                     std::promise<R> p;
                     Future<R> fut { p.get_future() };
-                    this->writeRequest(&args, requester, requesterTransactionId, oneTimeFunctor([p { std::move(p) }](void *data) mutable { p.set_value(*static_cast<R *>(data)); }));
+                    this->writeRequest(&args, requester, requesterTransactionId, oneTimeFunctor([p { std::move(p) }](void *data) mutable {
+                        if constexpr (std::is_same_v<R, void>) {
+                            p.set_value();
+                        } else {
+                            p.set_value(*static_cast<R *>(data));
+                        }
+                    }));
                     return fut;
                 }
             }

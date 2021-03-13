@@ -36,7 +36,7 @@ namespace Serialize {
         StreamResult readAction(SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) const;
         StreamResult readRequest(SerializableUnitBase *unit, BufferedInOutStream &in, TransactionId id) const;
 
-        void applySerializableMap(SerializableDataUnit *unit, SerializeInStream &in) const;
+        void applySerializableMap(SerializableDataUnit *unit, SerializeInStream &in, bool success) const;
         void setDataSynced(SerializableUnitBase *unit, bool b) const;
         void setActive(SerializableUnitBase *unit, bool active, bool existenceChanged) const;
         void setParent(SerializableUnitBase *unit) const;

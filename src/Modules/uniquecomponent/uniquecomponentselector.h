@@ -15,11 +15,8 @@ struct UniqueComponentSelector : Observer
     typedef typename Registry::F F;
     typedef typename Registry::Base Base;
 
-    static const constexpr size_t INVALID = std::numeric_limits<size_t>::max();
-
     UniqueComponentSelector(_Ty... arg, size_t index = 0)
-        : mIndex(INVALID)
-        , mArg(arg...)
+        : mArg(arg...)
     {
         set(index);
 #if ENABLE_PLUGINS
@@ -53,18 +50,18 @@ struct UniqueComponentSelector : Observer
         return mValue.get();
     }
 
-    void set(size_t index)
+    void set(IndexType<size_t> index)
     {
         if (index >= Registry::sComponents().size())
-            index = INVALID;
+            index.reset();
         if (index != mIndex) {
-            if (mIndex != INVALID) {
+            if (mIndex) {
                 Observer::operator()(mValue.get(), BEFORE | ERASE);
                 mValue.reset();
                 Observer::operator()(mValue.get(), AFTER | ERASE);
             }
             mIndex = index;
-            if (mIndex != INVALID) {
+            if (mIndex) {
                 Observer::operator()(mValue.get(), BEFORE | EMPLACE);
                 mValue = TupleUnpacker::invokeFromTuple(Registry::sComponents().at(index), mArg);
                 Observer::operator()(mValue.get(), AFTER | EMPLACE);
@@ -74,12 +71,12 @@ struct UniqueComponentSelector : Observer
 
     void reset()
     {
-        set(INVALID);
+        set(IndexType<size_t>::sInvalid);
     }
 
 private:
     std::unique_ptr<Base> mValue;
-    size_t mIndex;
+    IndexType<size_t> mIndex;
     std::tuple<_Ty...> mArg;
 
 #if ENABLE_PLUGINS
@@ -93,11 +90,11 @@ protected:
     void updateComponents(CollectorInfoBase *info, bool add, const std::vector<F> &vals, CompoundAtomicOperation &op)
     {
         if (add) {
-            if (mIndex == INVALID && vals.size() > 0) {
+            if (!mIndex && vals.size() > 0) {
                 set(info->mBaseIndex);
             }
         } else {
-            if (mIndex != INVALID) {
+            if (mIndex) {
                 size_t count = static_cast<typename Registry::CollectorInfo *>(info)->mComponents.size();
                 if (mIndex >= info->mBaseIndex && mIndex < info->mBaseIndex + count) {
                     reset();

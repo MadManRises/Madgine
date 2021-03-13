@@ -23,7 +23,7 @@ namespace NodeGraph {
 
     TargetPin::operator bool() const
     {
-        return mIndex != std::numeric_limits<uint32_t>::max();
+        return bool(mIndex);
     }
 
     NodeBase::NodeBase(NodeGraph &graph)

@@ -76,9 +76,13 @@ bool MetaTable::isDerivedFrom(const MetaTable *baseType, size_t *offset) const
 std::string MetaTable::name(TypedScopePtr scope) const
 {
     ScopeIterator name = find("Name", scope);
-    if (name != ScopeIterator{ scope, nullptr } && (*name).value().is<std::string>()) {
-        return (*name).value().as<std::string>();
+    if (name != ScopeIterator{ scope, nullptr } && name->value().is<std::string>()) {
+        return name->value().as<std::string>();
     } else {
+        ScopeIterator proxy = find("__proxy", scope);
+        if (proxy != ScopeIterator{ scope, nullptr } && proxy->value().is<TypedScopePtr>()) {
+            return proxy->value().as<TypedScopePtr>().name();
+        }
         return "<"s + mTypeName + ">";
     }
 }

@@ -1,4 +1,5 @@
 #pragma once
+#pragma once
 
 #include "Meta/serialize/toplevelunit.h"
 
@@ -27,6 +28,8 @@
 #include "entity/entity.h"
 
 #include "Generic/keyvalue.h"
+
+#include "Generic/container/concatIt.h"
 
 namespace Engine {
 namespace Scene {
@@ -98,9 +101,10 @@ namespace Scene {
     private:
         std::string generateUniqueName();
 
+        static const char *entityCreationNames(size_t index);
         std::tuple<SceneManager &, bool, std::string> createNonLocalEntityData(const std::string &name);
         std::tuple<SceneManager &, bool, std::string> createEntityData(const std::string &name, bool local);
-        std::tuple<std::pair<const char *, std::string>> storeEntityCreationData(const Entity::Entity &entity) const;
+        std::tuple<std::string> storeEntityCreationData(const Entity::Entity &entity) const;
 
     public:
         OFFSET_CONTAINER(mSceneComponents, SceneComponentContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, MadgineObjectObserver, std::true_type>>);
@@ -109,7 +113,7 @@ namespace Scene {
         Entity::EntityComponentListContainer<std::vector<Placeholder<0>>> mEntityComponentLists;
 
         SYNCABLE_CONTAINER(mEntities, refcounted_deque<Entity::Entity>, Threading::SignalFunctor<const refcounted_deque<Entity::Entity>::iterator &, int>);
-        refcounted_deque<Entity::Entity> mLocalEntities;
+        refcounted_deque<Serialize::NoParentUnit<Entity::Entity>> mLocalEntities;
 
         Threading::DataMutex mMutex;
 
@@ -119,16 +123,17 @@ namespace Scene {
 
         std::atomic<size_t> mPauseStack = 0;
 
+        struct EntityHelper {
+            Entity::EntityPtr operator()(Entity::Entity &ref)
+            {
+                return { &ref };
+            }
+        };
+
     public:
         decltype(auto) entities()
-        {
-            struct Helper {
-                Entity::EntityPtr operator()(ControlBlock<Entity::Entity> &ref)
-                {
-                    return { ref };
-                }
-            };
-            return transformIt<Helper>(mEntities.blocks());
+        {            
+            return transformIt<EntityHelper>(concatIt(mEntities, mLocalEntities));
         }
     };
 

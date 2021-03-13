@@ -13,7 +13,7 @@
 using EntityComponentBasePtr = Engine::Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::EntityComponentBase>;
 
 METATABLE_BEGIN(EntityComponentBasePtr);
-READONLY_PROPERTY(Get, getTyped)
+PROXY(getTyped)
 METATABLE_END(EntityComponentBasePtr);
 
 namespace Engine {

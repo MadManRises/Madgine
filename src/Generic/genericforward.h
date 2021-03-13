@@ -12,6 +12,9 @@ struct GenerationContainer;
 template <typename T>
 using GenerationVector = GenerationContainer<std::vector<T>>;
 
+template <typename...>
+struct type_pack;
+
 
 struct CompoundAtomicOperation;
 
