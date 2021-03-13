@@ -3,6 +3,8 @@
 #include "underlying_container.h"
 #include "../indextype.h"
 
+DERIVE_FUNCTION(isReference)
+
 namespace Engine {
 
 template <typename It>

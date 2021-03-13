@@ -150,8 +150,6 @@ struct VirtualRangeSecondBase : VirtualRangeBase<RefT> {
     virtual C &get() = 0;
 };
 
-DERIVE_FUNCTION(isReference)
-
 template <typename RefT, typename C, typename Assign>
 struct VirtualRangeImpl : VirtualRangeSecondBase<RefT, std::remove_reference_t<C>> {
 
