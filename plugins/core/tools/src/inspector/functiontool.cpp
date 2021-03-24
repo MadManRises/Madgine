@@ -19,6 +19,7 @@
 #include "Meta/keyvalue/scopeiterator.h"
 
 #include "Meta/keyvalue/keyvaluepair.h"
+#include "Meta/keyvalue/functionargument.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 

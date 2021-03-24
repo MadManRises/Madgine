@@ -78,6 +78,8 @@ public:
 
     std::string name() const;
 
+    void call(ValueType &retVal, const ArgumentList &args) const;
+
     void *mScope = nullptr;
     const MetaTable * mType = nullptr;
 };

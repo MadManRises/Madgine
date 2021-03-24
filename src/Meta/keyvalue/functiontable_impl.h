@@ -1,9 +1,11 @@
 #pragma once
 
+#include "Generic/linestruct.h"
 #include "valuetype_forward.h"
 
 #include "Generic/stringutil.h"
 #include "functiontable.h"
+#include "functionargument.h"
 
 namespace Engine {
 
@@ -12,17 +14,25 @@ struct MetaFunctionTag;
 template <size_t Line>
 using MetaFunctionLineStruct = LineStruct<MetaFunctionTag, Line>;
 
-/*template <typename R, typename T>
-static constexpr std::array<FunctionArgument, 0> metafunctionArgs(R (T::*f)(), const char *args)
+template <typename R, typename... Args, size_t... Is>
+static constexpr std::array<FunctionArgument, sizeof...(Args)> metafunctionArgsHelper(std::string_view args, std::index_sequence<Is...>)
 {
-    return { { { toValueTypeDesc<T*>() } } };
-}*/
+    std::array<std::string_view, sizeof...(Args)> argumentNames = StringUtil::tokenize<sizeof...(Args)>(args, ',');
+    return { { { toValueTypeDesc<std::remove_const_t<std::remove_reference_t<Args>>>(), argumentNames[Is] }... } };
+}
 
 template <typename R, typename T, typename... Args, size_t... Is>
 static constexpr std::array<FunctionArgument, sizeof...(Args) + 1> metafunctionArgsMemberHelper(std::string_view args, std::index_sequence<Is...>)
 {
     std::array<std::string_view, sizeof...(Args)> argumentNames = StringUtil::tokenize<sizeof...(Args)>(args, ',');
     return { { { toValueTypeDesc<T *>(), "this" }, { toValueTypeDesc<std::remove_const_t<std::remove_reference_t<Args>>>(), argumentNames[Is] }... } };
+}
+
+
+template <typename R, typename... Args>
+static constexpr std::array<FunctionArgument, sizeof...(Args)> metafunctionArgs(R (*f)(Args...), std::string_view args)
+{
+    return metafunctionArgsHelper<R, Args...>(args, std::make_index_sequence<sizeof...(Args)> ());
 }
 
 template <typename R, typename T, typename... Args>
@@ -49,10 +59,34 @@ static void unpackMemberHelper(const FunctionTable *table, ValueType &retVal, co
     }
 }
 
+template <auto F, typename R, typename... Args, size_t... I>
+static void unpackHelper(const FunctionTable *table, ValueType &retVal, const ArgumentList &args, std::index_sequence<I...>)
+{
+    if constexpr (std::is_same_v<R, void>) {
+        F(ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I))...);
+        to_ValueType<true>(retVal, std::monostate {});
+    } else {
+        to_ValueType<true>(retVal, F(ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I))...));
+    }
+}
+
+
 template <auto F, typename R, typename T, typename... Args>
 static void unpackMemberApiMethod(const FunctionTable *table, ValueType &retVal, const ArgumentList &args)
 {
     unpackMemberHelper<F, R, T, Args...>(table, retVal, args, std::make_index_sequence<sizeof...(Args)>());
+}
+
+template <auto F, typename R, typename... Args>
+static void unpackApiMethod(const FunctionTable *table, ValueType &retVal, const ArgumentList &args)
+{
+    unpackHelper<F, R, Args...>(table, retVal, args, std::make_index_sequence<sizeof...(Args)>());
+}
+
+template <auto F, typename R, typename... Args>
+static constexpr typename FunctionTable::FPtr wrapHelper(R (*f)(Args...))
+{
+    return &unpackApiMethod<F, R, Args...>;
 }
 
 template <auto F, typename R, typename T, typename... Args>

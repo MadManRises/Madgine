@@ -20,20 +20,23 @@ namespace Threading {
 
         void emit(_Ty... args)
         {
-            size_t end = this->mConnectedSlots.size();
+            std::vector<std::shared_ptr<Connection<_Ty...>>> connections;
 
-            size_t marker = 0;
+            this->mConnectedSlots.erase(
+                std::remove_if(this->mConnectedSlots.begin(), this->mConnectedSlots.end(),
+                    [&](const std::weak_ptr<Connection<_Ty...>> &weak) {
+                        if (std::shared_ptr<Connection<_Ty...>> ptr = weak.lock()) {
+                            connections.emplace_back(std::move(ptr));
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    }),
+                this->mConnectedSlots.end());
 
-            for (size_t i = 0; i < end; ++i) {
-                if (std::shared_ptr<Connection<_Ty...>> ptr = this->mConnectedSlots[i].lock()) {
-                    if (marker < i)
-                        this->mConnectedSlots[marker] = ptr;
-                    ++marker;
-                    (*ptr)(args...);
-                }
+            for (std::shared_ptr<Connection<_Ty...>> &con : connections) {
+                (*con)(args...);
             }
-
-            this->mConnectedSlots.erase(this->mConnectedSlots.begin() + marker, this->mConnectedSlots.begin() + end);
         }
     };
 }

@@ -37,6 +37,7 @@ namespace Scene {
             : mEntity(reinterpret_cast<uintptr_t>(ControlBlock<Entity>::fromPtr(entity)))
         {
             if (mEntity) {
+                assert(!getBlock()->dead());
                 mEntity |= mask;
                 getBlock()->incRef();
             }

@@ -2,6 +2,7 @@
 
 #include "valuetype_types.h"
 
+#include "functiontable.h"
 #include "metatable.h"
 
 #include "Generic/bits.h"
@@ -10,12 +11,11 @@
 
 namespace Engine {
 
-    template <typename T>
+template <typename T>
 using isValueTypePrimitive = type_pack_contains<ValueTypeList, T>;
 
 template <typename T>
 static constexpr bool isValueTypePrimitive_v = isValueTypePrimitive<T>::value;
-
 
 enum class ValueTypeEnum : unsigned char {
 #define VALUETYPE_SEP ,
@@ -74,7 +74,7 @@ struct META_EXPORT ExtendedValueTypeIndex {
             if (mTypeList[i + 2] == static_cast<ExtendedValueTypeEnum>(ValueTypeEnum::KeyValueVirtualRangeValue)) {
                 assert(mark == 0);
                 mark = 2;
-            } 
+            }
         } while (mark > 0);
     }
 
@@ -218,10 +218,18 @@ struct META_EXPORT ExtendedValueTypeDesc {
 template <typename T>
 constexpr ValueTypeIndex toValueTypeIndex()
 {
+    static_assert(!std::is_same_v<T, ValueType>);
     if constexpr (isValueTypePrimitive_v<T>) {
         return static_cast<ValueTypeEnum>(type_pack_index_v<size_t, ValueTypeList, T>);
+    } else if constexpr (is_iterable_v<T>) {
+        return ValueTypeEnum::KeyValueVirtualRangeValue;
     } else if constexpr (std::is_pointer_v<T>) {
-        return ValueTypeEnum::ScopeValue;
+        if constexpr (std::is_function_v<std::remove_pointer_t<T>>)
+            return ValueTypeEnum::FunctionValue;
+        else if constexpr (std::is_same_v<std::remove_cv_t<std::remove_pointer_t<T>>, FunctionTable>)
+            return ValueTypeEnum::ApiFunctionValue;
+        else
+            return ValueTypeEnum::ScopeValue;
     } else {
         return ValueTypeEnum::OwnedScopeValue;
     }
@@ -239,10 +247,12 @@ constexpr ExtendedValueTypeDesc toValueTypeDesc()
     } else if constexpr (is_iterable_v<T>) {
         return { { ValueTypeEnum::KeyValueVirtualRangeValue }, toValueTypeDesc<KeyType_t<typename T::iterator::value_type>>(), toValueTypeDesc<ValueType_t<typename T::iterator::value_type>>() };
     } else if constexpr (std::is_pointer_v<T>) {
-        return { { ValueTypeEnum::ScopeValue }, &table<std::remove_pointer_t<T>> };
+        if constexpr (std::is_function_v<std::remove_pointer_t<T>> || std::is_same_v<std::remove_cv_t<std::remove_pointer_t<T>>, FunctionTable>)
+            return { { ValueTypeEnum::ApiFunctionValue }, &function<T> };
+        else
+            return { { ValueTypeEnum::ScopeValue }, &table<std::remove_pointer_t<T>> };
     } else {
         return { { ValueTypeEnum::OwnedScopeValue }, &table<T> };
-    } 
+    }
 }
-
 }

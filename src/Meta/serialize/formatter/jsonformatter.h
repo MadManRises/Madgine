@@ -43,14 +43,14 @@ namespace Serialize {
 
         StreamResult prefetchFields(SerializeInStream &in, const char *name = nullptr);
 
+        StreamResult skipObject(SerializeInStream &in);
+
     private:
         size_t mLevel = 0;
         bool mCurrentExtended = false;
         size_t mCurrentExtendedCount = 0;
         bool mAfterItem = false;
         bool mLastPrimitive;
-
-        std::istream::pos_type mExtendedLookupPos = -1;
 
         struct ParseLevel {
         
@@ -61,6 +61,7 @@ namespace Serialize {
 
             bool mIsContainer;
             std::map<std::string, std::istream::pos_type, std::less<>> mPrefetchedFields;
+            std::istream::pos_type mLookupPos = -1;
         };
 
         std::stack<ParseLevel> mParseLevel;

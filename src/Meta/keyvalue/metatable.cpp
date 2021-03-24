@@ -1,10 +1,10 @@
 #include "../metalib.h"
 
-#include "metatable.h"
-#include "scopeiterator.h"
 #include "accessor.h"
-#include "valuetype.h"
+#include "metatable.h"
 #include "scopefield.h"
+#include "scopeiterator.h"
+#include "valuetype.h"
 
 namespace Engine {
 
@@ -22,48 +22,15 @@ ScopeIterator MetaTable::find(const std::string &key, TypedScopePtr scope) const
     }
 }
 
-/*std::optional<ValueType> MetaTable::get(const std::string &key, TypedScopePtr scope) const
+void MetaTable::call(TypedScopePtr scope, ValueType &retVal, const ArgumentList &args) const
 {
-    for (const std::pair<const char *, Accessor> *p = mMember; p->first; ++p) {
-        if (key == p->first) {
-            return p->second.mGetter(scope);            
-        }
-    }
-    if (mBaseGetter) {
-        return mBaseGetter().get(key, scope);
-    } else {
-        return {};
-    }
+    ScopeIterator op = find("__call", scope);
+    if (op == scope.end())
+        throw "No call-operator for type!";
+    ArgumentList actualArgs = args;
+    actualArgs.emplace(actualArgs.begin(), scope);
+    op->value().as<ApiFunction>()(retVal, actualArgs);
 }
-
-void MetaTable::set(const std::string &key, const ValueType &value, TypedScopePtr scope) const
-{
-    for (const std::pair<const char *, Accessor> *p = mMember; p->first; ++p) {
-        if (key == p->first) {
-            p->second.mSetter(scope, value);
-            return;
-        }
-    }
-    if (mBaseGetter) {
-        mBaseGetter().set(key, value, scope);
-    } else {
-        std::terminate();
-    }
-}
-
-bool MetaTable::isEditable(const std::string &key) const
-{
-    for (const std::pair<const char *, Accessor> *p = mMember; p->first; ++p) {
-        if (key == p->first) {
-            return p->second.mSetter != nullptr;
-        }
-    }
-    if (mBaseGetter) {
-        return mBaseGetter().isEditable(key);
-    } else {
-        std::terminate();
-    }
-}*/
 
 bool MetaTable::isDerivedFrom(const MetaTable *baseType, size_t *offset) const
 {
@@ -76,11 +43,11 @@ bool MetaTable::isDerivedFrom(const MetaTable *baseType, size_t *offset) const
 std::string MetaTable::name(TypedScopePtr scope) const
 {
     ScopeIterator name = find("Name", scope);
-    if (name != ScopeIterator{ scope, nullptr } && name->value().is<std::string>()) {
+    if (name != scope.end() && name->value().is<std::string>()) {
         return name->value().as<std::string>();
     } else {
         ScopeIterator proxy = find("__proxy", scope);
-        if (proxy != ScopeIterator{ scope, nullptr } && proxy->value().is<TypedScopePtr>()) {
+        if (proxy != scope.end() && proxy->value().is<TypedScopePtr>()) {
             return proxy->value().as<TypedScopePtr>().name();
         }
         return "<"s + mTypeName + ">";

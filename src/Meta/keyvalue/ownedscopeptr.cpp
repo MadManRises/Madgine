@@ -6,6 +6,11 @@
 
 namespace Engine {
 
+OwnedScopePtr::OwnedScopePtr(std::shared_ptr<ProxyScopeBase> ptr)
+    : mScope(std::move(ptr))
+{
+}
+
 std::string OwnedScopePtr::name() const
 {
     return get().name();
@@ -16,7 +21,8 @@ bool OwnedScopePtr::operator==(const OwnedScopePtr &other) const
     return mScope == other.mScope;
 }
 
-OwnedScopePtr::operator TypedScopePtr() const {
+OwnedScopePtr::operator TypedScopePtr() const
+{
     return get();
 }
 

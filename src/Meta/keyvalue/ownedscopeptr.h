@@ -10,6 +10,7 @@ struct META_EXPORT OwnedScopePtr {
     OwnedScopePtr(const OwnedScopePtr &) = default;
     //OwnedScopePtr(OwnedScopePtr &) = default;
     OwnedScopePtr(OwnedScopePtr &&) = default;
+    OwnedScopePtr(std::shared_ptr<ProxyScopeBase> ptr);
 
     OwnedScopePtr &operator=(const OwnedScopePtr &) = default;
     OwnedScopePtr &operator=(OwnedScopePtr &&) = default;
@@ -18,6 +19,13 @@ struct META_EXPORT OwnedScopePtr {
     explicit OwnedScopePtr(T &&t)
         : mScope(std::make_shared<ScopeWrapper<std::remove_reference_t<T>>>(std::forward<T>(t)))
     {
+    }
+
+    template <typename T, typename = std::enable_if_t<!std::is_same_v<std::decay_t<T>, OwnedScopePtr>>>
+    OwnedScopePtr &operator=(T &&t)
+    {
+        mScope = std::make_shared<ScopeWrapper<std::remove_reference_t<T>>>(std::forward<T>(t));
+        return *this;
     }
 
     std::string name() const;
@@ -31,7 +39,7 @@ struct META_EXPORT OwnedScopePtr {
     template <typename T>
     T &safe_cast() const
     {
-        return *mScope->proxyScopePtr().safe_cast<T>();
+        return *get().safe_cast<T>();
     }
 
 private:

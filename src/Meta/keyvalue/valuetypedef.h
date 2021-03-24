@@ -30,4 +30,6 @@ VALUETYPE_TYPE(KeyValueVirtualRange, KeyValueVirtualRange, const KeyValueVirtual
 VALUETYPE_SEP
 VALUETYPE_TYPE(ApiFunction, ApiFunction, const ApiFunction&)
 VALUETYPE_SEP
+VALUETYPE_TYPE(Function, Function, const Function&)
+VALUETYPE_SEP
 VALUETYPE_TYPE(Object, ObjectPtr, const ObjectPtr&)

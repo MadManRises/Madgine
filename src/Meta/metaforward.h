@@ -21,6 +21,8 @@ struct TypeInfo;
 struct ApiFunction;
 struct BoundApiFunction;
 struct FunctionTable;
+struct FunctionArgument;
+struct Function;
 using ArgumentList = std::vector<ValueType>;
 
 struct ExtendedValueTypeDesc;
@@ -33,13 +35,16 @@ struct ObjectFieldAccessor;
 
 template <typename RefT>
 struct VirtualIterator;
-template <typename RefT>
+template <typename RefT, typename AssignDefault = DefaultAssign>
 struct VirtualRange;
 
 enum KeyValueValueFlags : uint8_t;
 
+template <bool reference_to_ptr>
+struct Functor_to_KeyValuePair;
+
 using KeyValueVirtualIterator = VirtualIterator<KeyValuePair>;
-using KeyValueVirtualRange = VirtualRange<KeyValuePair>;
+using KeyValueVirtualRange = VirtualRange<KeyValuePair, Functor_to_KeyValuePair<true>>;
 
 template <typename T>
 struct MadgineObject;

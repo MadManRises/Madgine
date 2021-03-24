@@ -8,6 +8,7 @@
 #include "../math/vector4.h"
 
 #include "apifunction.h"
+#include "function.h"
 
 #include "keyvaluevirtualiterator.h"
 
@@ -79,6 +80,13 @@ struct META_EXPORT ValueType {
     bool operator==(const ValueType &other) const;
 
     bool operator!=(const ValueType &other) const;
+
+    ValueType operator()(const ArgumentList &args) const;
+    template <typename... Args>
+    ValueType operator()(Args &&... args)
+    {
+        return (*this)({ ValueType { std::forward<Args>(args)... } });
+    }
 
     std::string toShortString() const;
 

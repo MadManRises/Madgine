@@ -191,3 +191,6 @@ static constexpr std::array<std::pair<const char *, ::Engine::Accessor>, std::tu
 
 #define PROXY(Getter) \
     READONLY_PROPERTY(__proxy, Getter)
+
+#define CALL_OPERATOR(...) \
+    NAMED_FUNCTION(__call, operator(), __VA_ARGS__)

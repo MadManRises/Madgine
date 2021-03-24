@@ -5,6 +5,6 @@
 namespace Engine {
 
 using KeyValueVirtualIterator = VirtualIterator<KeyValuePair>;
-using KeyValueVirtualRange = VirtualRange<KeyValuePair>;
+using KeyValueVirtualRange = VirtualRange<KeyValuePair, Functor_to_KeyValuePair<true>>;
 
 }

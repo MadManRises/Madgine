@@ -10,6 +10,8 @@ struct META_EXPORT MetaTable {
 
     ScopeIterator find(const std::string &key, TypedScopePtr scope) const;
 
+    void call(TypedScopePtr scope, ValueType &retVal, const ArgumentList &args) const;
+
     template <typename T>
     bool isDerivedFrom(size_t *offset = nullptr) const;
     bool isDerivedFrom(const MetaTable *baseType, size_t *offset = nullptr) const;

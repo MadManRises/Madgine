@@ -2,7 +2,6 @@
 
 #include "scopeiterator.h"
 #include "typedscopeptr.h"
-#include "valuetype.h"
 #include "scopefield.h"
 
 namespace Engine {
@@ -38,6 +37,11 @@ std::string TypedScopePtr::name() const
         return mType->name(*this);
     else
         return "<NULL>";
+}
+
+void TypedScopePtr::call(ValueType &retVal, const ArgumentList &args) const
+{
+    return mType->call(*this, retVal, args);
 }
 
 }

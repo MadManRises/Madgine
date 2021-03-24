@@ -17,11 +17,6 @@ ValueType::ValueType(ValueType &&other) noexcept
 {
 }
 
-/*ValueType::ValueType(const char *s)
-    : ValueType(std::string(s))
-{
-}*/
-
 ValueType::~ValueType()
 {
     clear();
@@ -50,6 +45,34 @@ bool ValueType::operator==(const ValueType &other) const
 bool ValueType::operator!=(const ValueType &other) const
 {
     return !(*this == other);
+}
+
+ValueType ValueType::operator()(const ArgumentList &args) const
+{
+    return visit(overloaded {
+        [&](const ApiFunction &function) {
+            ValueType result;
+            function(result, args);
+            return result;
+        },
+        [&](const Function &function) {
+            ValueType result;
+            function(result, args);
+            return result;
+        },
+        [&](const TypedScopePtr &scope) {
+            ValueType result;
+            scope.call(result, args);
+            return result;
+        },
+        [&](const OwnedScopePtr &scope) {            
+            ValueType result;
+            scope.get().call(result, args);
+            return result;
+        },
+        [](const auto &) -> ValueType {
+            throw "calling operator is not supported";
+        } });
 }
 
 std::string ValueType::toShortString() const
@@ -89,6 +112,9 @@ std::string ValueType::toShortString() const
             return "Matrix4[...]"s;
         },
         [](const ApiFunction &) {
+            return "<api-function>"s;
+        },
+        [](const Function &) {
             return "<function>"s;
         },
         [](const KeyValueVirtualRange &) {
@@ -225,6 +251,4 @@ std::ostream &operator<<(std::ostream &stream,
     return stream;
 }
 
-
 }
-

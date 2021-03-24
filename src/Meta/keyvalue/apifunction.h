@@ -4,6 +4,13 @@ namespace Engine {
 
 struct META_EXPORT ApiFunction {    
 
+    constexpr ApiFunction() = default;
+
+    constexpr ApiFunction(const FunctionTable *table)
+        : mTable(table)
+    {
+    }
+
     bool operator==(const ApiFunction &other) const
     {
         return mTable == other.mTable;

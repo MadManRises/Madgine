@@ -12,6 +12,8 @@
 
 #include "valuetype_desc.h"
 
+#include "accessor.h"
+
 namespace Engine {
 
 META_EXPORT ValueType &KeyValuePair_key(KeyValuePair &p);
@@ -22,6 +24,7 @@ void to_ValueType(ValueType &v, T &&t);
 template <bool reference_to_ptr, typename T>
 void to_ValueTypeRef(ValueTypeRef &v, T &&t);
 
+
 template <bool reference_to_ptr, typename T>
 void to_KeyValuePair(KeyValuePair &p, T &&t)
 {
@@ -29,8 +32,16 @@ void to_KeyValuePair(KeyValuePair &p, T &&t)
     to_ValueTypeRef<reference_to_ptr>(KeyValuePair_value(p), kvValue(std::forward<T>(t)));
 }
 
-META_EXPORT const ValueType &getArgument(const ArgumentList &args, size_t index);
+template <bool reference_to_ptr>
+struct Functor_to_KeyValuePair {
+    template <typename... Args>
+    decltype(auto) operator()(Args &&... args)
+    {
+        return to_KeyValuePair<reference_to_ptr>(std::forward<Args>(args)...);
+    }
+};
 
+META_EXPORT const ValueType &getArgument(const ArgumentList &args, size_t index);
 
 template <typename T>
 using ValueTypePrimitiveSubList = type_pack_select_t<type_pack_index_v<size_t, ValueTypeList, T>, ValueTypeList>;
@@ -86,6 +97,7 @@ bool ValueType_is(const ValueType &v)
     return toValueTypeDesc<T>().canAccept(ValueType_type(v));
 }
 
+
 template <bool reference_to_ptr, typename T>
 decltype(auto) convert_ValueType(T &&t)
 {
@@ -94,7 +106,7 @@ decltype(auto) convert_ValueType(T &&t)
     } else if constexpr (is_string_like_v<std::decay_t<T>>) {
         return std::string { std::forward<T>(t) };
     } else if constexpr (is_iterable_v<T>) {
-        return KeyValueVirtualRange { std::forward<T>(t), type_holder<Functor<to_KeyValuePair<true, decltype(*std::declval<typename derive_iterator<T>::iterator>())>>> };
+        return KeyValueVirtualRange { std::forward<T>(t) };
     } else if constexpr (std::is_enum_v<std::decay_t<T>>) {
         if constexpr (std::is_reference_v<T>) {
             return static_cast<int &>(t);
@@ -130,4 +142,5 @@ void to_ValueTypeRef(ValueTypeRef &v, T &&t)
 {
     to_ValueTypeRef_impl(v, convert_ValueType<reference_to_ptr>(std::forward<T>(t)));
 }
+
 }

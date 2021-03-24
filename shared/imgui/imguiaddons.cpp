@@ -49,16 +49,6 @@ bool ValueTypeDrawer::draw(const Engine::TypedScopePtr &scope)
     return false;
 }
 
-bool ValueTypeDrawer::draw(Engine::OwnedScopePtr &scope)
-{
-    return draw(static_cast<Engine::TypedScopePtr>(scope));
-}
-
-bool ValueTypeDrawer::draw(const Engine::OwnedScopePtr &scope)
-{
-    return draw(static_cast<Engine::TypedScopePtr>(scope));
-}
-
 bool ValueTypeDrawer::draw(bool &b)
 {
     return ImGui::Checkbox(mName, &b);
@@ -243,13 +233,33 @@ bool ValueTypeDrawer::draw(const Engine::KeyValueVirtualRange &it)
     return false;
 }
 
+bool ValueTypeDrawer::draw(Engine::Function &m)
+{
+    if (strlen(mName)) {
+        ImGui::Text("%s: ", mName);
+        ImGui::SameLine();
+    }
+    ImGui::Text("<function>");
+    return false;
+}
+
+bool ValueTypeDrawer::draw(const Engine::Function &m)
+{
+    if (strlen(mName)) {
+        ImGui::Text("%s: ", mName);
+        ImGui::SameLine();
+    }
+    ImGui::Text("<function>");
+    return false;
+}
+
 bool ValueTypeDrawer::draw(Engine::ApiFunction &m)
 {
     if (strlen(mName)) {
         ImGui::Text("%s: ", mName);
         ImGui::SameLine();
     }
-    ImGui::Text("<method>");
+    ImGui::Text("<api-function>");
     return false;
 }
 
@@ -259,7 +269,7 @@ bool ValueTypeDrawer::draw(const Engine::ApiFunction &m)
         ImGui::Text("%s: ", mName);
         ImGui::SameLine();
     }
-    ImGui::Text("<method>");
+    ImGui::Text("<api-function>");
     return false;
 }
 
@@ -269,7 +279,7 @@ bool ValueTypeDrawer::draw(Engine::BoundApiFunction &m)
         ImGui::Text("%s: ", mName);
         ImGui::SameLine();
     }
-    ImGui::Text("<boundmethod>");
+    ImGui::Text("<bound api-function>");
     return false;
 }
 
@@ -279,7 +289,7 @@ bool ValueTypeDrawer::draw(const Engine::BoundApiFunction &m)
         ImGui::Text("%s: ", mName);
         ImGui::SameLine();
     }
-    ImGui::Text("<boundmethod>");
+    ImGui::Text("<bound api-function>");
     return false;
 }
 

@@ -187,14 +187,31 @@ private:
     C mContainer;
 };
 
-template <typename RefT>
+template <typename RefT, typename AssignDefault>
 struct VirtualRange {
 
-    template <typename C, typename Assign = DefaultAssign>
+    template <typename C, typename Assign = AssignDefault, typename = std::enable_if_t<!std::is_same_v<std::decay_t<C>, VirtualRange<RefT, AssignDefault>>>>
     explicit VirtualRange(C &&c, type_holder_t<Assign> = {})
         : mRange(std::make_shared<VirtualRangeImpl<RefT, C, Assign>>(std::forward<C>(c)))
     {
     }
+
+    VirtualRange(const VirtualRange &) = default;
+    VirtualRange(VirtualRange &&) = default;
+
+    template <typename Assign, typename C>
+    void assign(C&& c) {
+        mRange = std::make_shared<VirtualRangeImpl<RefT, C, Assign>>(std::forward<C>(c));
+    }
+
+    template <typename C, typename = std::enable_if_t<!std::is_same_v<std::decay_t<C>, VirtualRange<RefT, AssignDefault>>>>
+    VirtualRange& operator=(C&& c) {
+        assign<AssignDefault>(std::forward<C>(c));
+        return *this;
+    }
+
+    VirtualRange &operator=(const VirtualRange &) = default;
+    VirtualRange &operator=(VirtualRange &&) = default;
 
     VirtualIterator<RefT> begin() const
     {
@@ -257,7 +274,7 @@ struct VirtualRange {
         return mRange->isReference();
     }
 
-    bool operator==(const VirtualRange<RefT> &other) const
+    bool operator==(const VirtualRange &other) const
     {
         throw "TODO";
         return false;

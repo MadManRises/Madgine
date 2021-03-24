@@ -14,8 +14,6 @@ typedef int ImGuiTreeNodeFlags;
 struct IMGUI_API ValueTypeDrawer {
     bool draw(Engine::TypedScopePtr &scope);
     bool draw(const Engine::TypedScopePtr &scope);
-    bool draw(Engine::OwnedScopePtr &scope);
-    bool draw(const Engine::OwnedScopePtr &scope);
     bool draw(bool &b);
     bool draw(const bool &b);
     bool draw(Engine::CoWString &s);
@@ -42,6 +40,8 @@ struct IMGUI_API ValueTypeDrawer {
     bool draw(const Engine::Vector4 &v);
     bool draw(Engine::KeyValueVirtualRange &range);
     bool draw(const Engine::KeyValueVirtualRange &range);
+    bool draw(Engine::Function &m);
+    bool draw(const Engine::Function &m);
     bool draw(Engine::ApiFunction &m);
     bool draw(const Engine::ApiFunction &m);
     bool draw(Engine::BoundApiFunction &m);
