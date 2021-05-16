@@ -8,6 +8,8 @@
 
 #include "../nodeinterpreter.h"
 
+#include "Meta/keyvalue/valuetype.h"
+
 NODE(TestNode, Engine::NodeGraph::TestNode)
 
 METATABLE_BEGIN_BASE(Engine::NodeGraph::TestNode, Engine::NodeGraph::NodeBase)
@@ -77,12 +79,14 @@ namespace NodeGraph {
         return { ValueTypeIndex { ValueTypeEnum::FloatValue } };
     }
 
-    uint32_t TestNode::interpret(NodeInterpreter &interpreter, uint32_t flowIn, std::unique_ptr<NodeInterpreterData> &data) const
+    void TestNode::interpret(NodeInterpreter &interpreter, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeInterpreterData> &data) const
     {
-        float f = interpreter.read(1).as<float>();
+        ValueType v;
+        interpreter.read(v, 1);
+        float f = v.as<float>();
         LOG(f << " -> " << f * 2.0f);
         interpreter.write(0, ValueType { 2.0f * f });
-        return 0;
+        flowInOut = 0;
     }
 
 }

@@ -172,7 +172,7 @@ namespace Serialize {
             } else {
                 assert(request);
                 if (request->mRequesterTransactionId) {
-                    BufferedOutStream &out = c.getActionResponseTarget(request->mRequester, request->mRequesterTransactionId);
+                    BufferedOutStream &out = c.getRequestResponseTarget(request->mRequester, request->mRequesterTransactionId);
                     out << op;
                     out.endMessage();
                 }
@@ -214,7 +214,7 @@ namespace Serialize {
 
             if (!accepted) {
                 if (id) {
-                    c.beginActionResponseMessage(inout, id);
+                    c.beginRequestResponseMessage(inout, id);
                     Serialize::write(inout, op | ABORTED, "op");
                     inout.endMessage();
                 }

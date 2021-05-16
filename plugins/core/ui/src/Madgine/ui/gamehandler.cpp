@@ -76,7 +76,7 @@ namespace UI {
         if (mCurrentMouseButton == Input::MouseButton::NO_BUTTON) {
             mCurrentMouseButton = me.button;
             mSingleClick = true;
-            mDragStart = Vector2 { static_cast<float>(me.windowPosition.x), static_cast<float>(me.windowPosition.y) };
+            mDragStart = me.windowPosition;
         }
     }
 
@@ -141,7 +141,7 @@ namespace UI {
         mPointerDragModes[button] = { mode, threshold };
     }
 
-    const Vector2 &GameHandlerBase::dragStart() const
+    const InterfacesVector &GameHandlerBase::dragStart() const
     {
         return mDragStart;
     }

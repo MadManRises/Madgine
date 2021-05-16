@@ -61,6 +61,26 @@ struct META_EXPORT ExtendedValueTypeIndex {
         mTypeList[0] = t;
     }
 
+    constexpr ExtendedValueTypeIndex(ExtendedValueTypeIndex t, const ExtendedValueTypeIndex &inner)
+    {
+        mTypeList[0] = t;
+        size_t i = 0;
+        int mark = 1;
+        do {
+            --mark;
+            mTypeList[i + 1] = inner.mTypeList[i];
+            ++i;
+            if (mTypeList[i + 1] == static_cast<ExtendedValueTypeEnum>(ValueTypeEnum::KeyValueVirtualAssociativeRangeValue)) {
+                assert(mark == 0);
+                mark = 2;
+            }
+            if (mTypeList[i + 1] == static_cast<ExtendedValueTypeEnum>(ValueTypeEnum::KeyValueVirtualSequenceRangeValue)) {
+                assert(mark == 0);
+                mark = 1;
+            }
+        } while (mark > 0);
+    }
+
     constexpr ExtendedValueTypeIndex(ExtendedValueTypeIndex t, const ExtendedValueTypeIndex &innerKey, const ExtendedValueTypeIndex &innerValue)
     {
         mTypeList[0] = t;
@@ -71,9 +91,13 @@ struct META_EXPORT ExtendedValueTypeIndex {
             --mark;
             mTypeList[i + 2] = innerValue.mTypeList[i];
             ++i;
-            if (mTypeList[i + 2] == static_cast<ExtendedValueTypeEnum>(ValueTypeEnum::KeyValueVirtualRangeValue)) {
+            if (mTypeList[i + 2] == static_cast<ExtendedValueTypeEnum>(ValueTypeEnum::KeyValueVirtualAssociativeRangeValue)) {
                 assert(mark == 0);
                 mark = 2;
+            }
+            if (mTypeList[i + 2] == static_cast<ExtendedValueTypeEnum>(ValueTypeEnum::KeyValueVirtualSequenceRangeValue)) {
+                assert(mark == 0);
+                mark = 1;
             }
         } while (mark > 0);
     }
@@ -186,6 +210,12 @@ struct META_EXPORT ExtendedValueTypeDesc {
     {
     }
 
+    constexpr ExtendedValueTypeDesc(ExtendedValueTypeIndex type, const ExtendedValueTypeDesc &innerDesc)
+        : mType(type, innerDesc.mType)
+        , mSecondary(innerDesc.mSecondary)
+    {
+    }
+
     constexpr ExtendedValueTypeDesc(ExtendedValueTypeIndex type, const ExtendedValueTypeDesc &innerKeyDesc, const ExtendedValueTypeDesc &innerValueDesc)
         : mType(type, innerKeyDesc.mType, innerValueDesc.mType)
         , mSecondary(innerValueDesc.mSecondary)
@@ -222,7 +252,10 @@ constexpr ValueTypeIndex toValueTypeIndex()
     if constexpr (isValueTypePrimitive_v<T>) {
         return static_cast<ValueTypeEnum>(type_pack_index_v<size_t, ValueTypeList, T>);
     } else if constexpr (is_iterable_v<T>) {
-        return ValueTypeEnum::KeyValueVirtualRangeValue;
+        if constexpr (std::is_same_v<KeyType_t<typename T::iterator::value_type>, std::monostate>)
+            return ValueTypeEnum::KeyValueVirtualSequenceRangeValue;
+        else
+            return ValueTypeEnum::KeyValueVirtualAssociativeRangeValue;
     } else if constexpr (std::is_pointer_v<T>) {
         if constexpr (std::is_function_v<std::remove_pointer_t<T>>)
             return ValueTypeEnum::FunctionValue;
@@ -245,7 +278,10 @@ constexpr ExtendedValueTypeDesc toValueTypeDesc()
     } else if constexpr (std::is_same_v<T, TypedScopePtr>) {
         return { { ValueTypeEnum::ScopeValue }, static_cast<const MetaTable **>(nullptr) };
     } else if constexpr (is_iterable_v<T>) {
-        return { { ValueTypeEnum::KeyValueVirtualRangeValue }, toValueTypeDesc<KeyType_t<typename T::iterator::value_type>>(), toValueTypeDesc<ValueType_t<typename T::iterator::value_type>>() };
+        if constexpr (std::is_same_v<KeyType_t<typename T::iterator::value_type>, std::monostate>)
+            return { { ValueTypeEnum::KeyValueVirtualSequenceRangeValue }, toValueTypeDesc<typename T::iterator::value_type>() };
+        else
+            return { { ValueTypeEnum::KeyValueVirtualAssociativeRangeValue }, toValueTypeDesc<KeyType_t<typename T::iterator::value_type>>(), toValueTypeDesc<ValueType_t<typename T::iterator::value_type>>() };
     } else if constexpr (std::is_pointer_v<T>) {
         if constexpr (std::is_function_v<std::remove_pointer_t<T>> || std::is_same_v<std::remove_cv_t<std::remove_pointer_t<T>>, FunctionTable>)
             return { { ValueTypeEnum::ApiFunctionValue }, &function<T> };

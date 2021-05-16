@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Meta/math/boundingbox.h"
-#include "render/attributedescriptor.h"
 #include "Generic/bytebuffer.h"
 #include "Interfaces/filesystem/path.h"
+#include "Meta/math/boundingbox.h"
+#include "render/attributedescriptor.h"
 #include "render/vertex.h"
 
 namespace Engine {
@@ -27,41 +27,28 @@ namespace Render {
         }
 
         template <typename VertexType>
-        static std::vector<std::optional<AttributeDescriptor>> generateAttributeList()
+        static std::array<AttributeDescriptor, 7> generateAttributeList()
         {
-            std::vector<std::optional<Render::AttributeDescriptor>> attributeList;
+            std::array<Render::AttributeDescriptor, 7> attributeList;
 
             if constexpr (VertexType::template holds<Render::VertexPos_4D> || VertexType::template holds<Render::VertexPos_3D>)
-                attributeList.emplace_back(std::in_place, &VertexType::mPos, "POSITION", 0, type_holder<VertexType>);
-            else
-                attributeList.emplace_back();
+                attributeList[0] = { &VertexType::mPos, "POSITION", 0, type_holder<VertexType> };
 
             if constexpr (VertexType::template holds<Render::VertexPos2>)
-                attributeList.emplace_back(std::in_place, &VertexType::mPos2, "POSITION", 1, type_holder<VertexType>);
-            else
-                attributeList.emplace_back();
+                attributeList[1] = { &VertexType::mPos2, "POSITION", 1, type_holder<VertexType> };
 
             if constexpr (VertexType::template holds<Render::VertexColor>)
-                attributeList.emplace_back(std::in_place, &VertexType::mColor, "COLOR", 0, type_holder<VertexType>);
-            else
-                attributeList.emplace_back();
+                attributeList[2] = { &VertexType::mColor, "COLOR", 0, type_holder<VertexType> };
 
             if constexpr (VertexType::template holds<Render::VertexNormal>)
-                attributeList.emplace_back(std::in_place, &VertexType::mNormal, "NORMAL", 0, type_holder<VertexType>);
-            else
-                attributeList.emplace_back();
+                attributeList[3] = { &VertexType::mNormal, "NORMAL", 0, type_holder<VertexType> };
 
             if constexpr (VertexType::template holds<Render::VertexUV>)
-                attributeList.emplace_back(std::in_place, &VertexType::mUV, "TEXCOORD", 0, type_holder<VertexType>);
-            else
-                attributeList.emplace_back();
+                attributeList[4] = { &VertexType::mUV, "TEXCOORD", 0, type_holder<VertexType> };
 
             if constexpr (VertexType::template holds<Render::VertexBoneMappings>) {
-                attributeList.emplace_back(std::in_place, &VertexType::mBoneIndices, "BONEINDICES", 0, type_holder<VertexType>);
-                attributeList.emplace_back(std::in_place, &VertexType::mBoneWeights, "WEIGHTS", 0, type_holder<VertexType>);
-            } else {
-                attributeList.emplace_back();
-                attributeList.emplace_back();
+                attributeList[5] = { &VertexType::mBoneIndices, "BONEINDICES", 0, type_holder<VertexType> };
+                attributeList[6] = { &VertexType::mBoneWeights, "WEIGHTS", 0, type_holder<VertexType> };
             }
             return attributeList;
         }
@@ -70,7 +57,7 @@ namespace Render {
 
         template <typename VertexType>
         MeshData(size_t groupSize, std::vector<VertexType> vertices, std::vector<unsigned short> indices = {}, Filesystem::Path texturePath = {})
-            : mAttributeList(generateAttributeList<VertexType>())
+            : mAttributeList(generateAttributeList<VertexType>)
             , mAABB(calculateAABB(vertices))
             , mGroupSize(groupSize)
             , mVertices(std::move(vertices))
@@ -80,7 +67,7 @@ namespace Render {
         {
         }
 
-        std::vector<std::optional<Render::AttributeDescriptor>> mAttributeList;
+        std::array<Render::AttributeDescriptor, 7> (*mAttributeList)();
         AABB mAABB;
         size_t mGroupSize;
         ByteBuffer mVertices;

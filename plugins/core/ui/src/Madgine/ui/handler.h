@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Meta/keyvalue/virtualscope.h"
-#include "madgineobject/madgineobject.h"
 #include "Meta/serialize/virtualserializableunit.h"
-#include "Modules/threading/slot.h"
+#include "madgineobject/madgineobject.h"
+#include "Modules/threading/connectionstore.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
@@ -80,13 +80,10 @@ namespace UI {
 
         UIManager &mUI;
 
+        Engine::Threading::ConnectionStore mConStore;
+
     private:
         std::list<WindowDescriptor> mWidgets;
-
-        Threading::Slot<&Handler::injectPointerMove> mPointerMoveSlot;
-        Threading::Slot<&Handler::injectPointerDown> mPointerDownSlot;
-        Threading::Slot<&Handler::injectPointerUp> mPointerUpSlot;
-        Threading::Slot<&Handler::injectAxisEvent> mAxisEventSlot;
     };
 }
 }

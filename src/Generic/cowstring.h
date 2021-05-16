@@ -51,9 +51,11 @@ struct CoWString {
 
     CoWString &operator=(const CoWString &other)
     {
-        reset();
-        mString = other.mString;
-        mSize = other.mSize;
+        if (other.mOwning) {
+            *this = std::string { other };
+        } else {
+            *this = std::string_view { other };
+        }
         return *this;
     }
 
@@ -147,6 +149,19 @@ struct CoWString {
     constexpr size_t size() const
     {
         return mSize;
+    }
+
+    friend std::ostream &operator<<(std::ostream &stream, const CoWString &s)
+    {
+        return stream << static_cast<std::string_view>(s);
+    }
+
+    friend std::istream &operator>>(std::istream &stream, CoWString &s)
+    {
+        std::string buffer;
+        stream >> buffer;
+        s = std::move(buffer);
+        return stream;
     }
 
 private:

@@ -17,6 +17,8 @@
 
 #include "valuetypepayload.h"
 
+#include "Generic/enum.h"
+
 Engine::Threading::WorkgroupLocal<ImGuiContext *>
     sContext;
 
@@ -213,7 +215,7 @@ bool ValueTypeDrawer::draw(const Engine::Vector4 &v)
     return false;
 }
 
-bool ValueTypeDrawer::draw(Engine::KeyValueVirtualRange &it)
+bool ValueTypeDrawer::draw(Engine::KeyValueVirtualSequenceRange &it)
 {
     if (strlen(mName)) {
         ImGui::Text("%s: ", mName);
@@ -223,13 +225,33 @@ bool ValueTypeDrawer::draw(Engine::KeyValueVirtualRange &it)
     return false;
 }
 
-bool ValueTypeDrawer::draw(const Engine::KeyValueVirtualRange &it)
+bool ValueTypeDrawer::draw(const Engine::KeyValueVirtualSequenceRange &it)
 {
     if (strlen(mName)) {
         ImGui::Text("%s: ", mName);
         ImGui::SameLine();
     }
     ImGui::Text("<range>");
+    return false;
+}
+
+bool ValueTypeDrawer::draw(Engine::KeyValueVirtualAssociativeRange &it)
+{
+    if (strlen(mName)) {
+        ImGui::Text("%s: ", mName);
+        ImGui::SameLine();
+    }
+    ImGui::Text("<map>");
+    return false;
+}
+
+bool ValueTypeDrawer::draw(const Engine::KeyValueVirtualAssociativeRange &it)
+{
+    if (strlen(mName)) {
+        ImGui::Text("%s: ", mName);
+        ImGui::SameLine();
+    }
+    ImGui::Text("<map>");
     return false;
 }
 
@@ -370,6 +392,37 @@ bool ValueTypeDrawer::draw(const Engine::Filesystem::Path &p)
     return false;
 }
 
+bool ValueTypeDrawer::draw(Engine::EnumHolder &e)
+{
+    bool changed = false;
+    std::string name { e.toString() };
+    if (ImGui::BeginCombo(mName, name.c_str())) {
+        for (int32_t i = e.table()->mMin + 1; i < e.table()->mMax; ++i) {
+            bool isSelected = e.value() == i;
+            std::string valueName { e.table()->toString(i) };
+            if (ImGui::Selectable(valueName.c_str(), isSelected)) {
+                e.setValue(i);
+                changed = true;
+            }
+            if (isSelected)
+                ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
+    return changed;
+}
+
+bool ValueTypeDrawer::draw(const Engine::EnumHolder &e)
+{
+    if (strlen(mName)) {
+        ImGui::Text("%s: ", mName);
+        ImGui::SameLine();
+    }
+    const std::string_view &name = e.toString();
+    ImGui::Text("\"%.*s\"", static_cast<int>(name.size()), name.data());
+    return false;
+}
+
 void setPayloadStatus(const std::string &msg)
 {
     if (ImGui::GetIO().KeyShift)
@@ -386,7 +439,7 @@ void Text(const std::string_view &s)
     Text("%.*s", static_cast<int>(s.size()), s.data());
 }
 
-bool InputText(const char *label, std::string *s)
+bool InputText(const char *label, std::string *s, ImGuiInputTextFlags flags)
 {
     char buf[255];
 #if WINDOWS
@@ -395,14 +448,15 @@ bool InputText(const char *label, std::string *s)
     strcpy(buf, s->c_str());
 #endif
 
-    if (ImGui::InputText(label, buf, sizeof(buf))) {
+    bool result = ImGui::InputText(label, buf, sizeof(buf), flags);
+    if (result || (flags & ImGuiInputTextFlags_EnterReturnsTrue)) {
         *s = buf;
-        return true;
+        return result;
     }
     return false;
 }
 
-bool InputText(const char *label, Engine::CoWString *s)
+bool InputText(const char *label, Engine::CoWString *s, ImGuiInputTextFlags flags)
 {
     char buf[255];
 #if WINDOWS
@@ -411,9 +465,11 @@ bool InputText(const char *label, Engine::CoWString *s)
     strncpy(buf, s->data(), s->size());
 #endif
 
-    if (ImGui::InputText(label, buf, sizeof(buf))) {
+    bool result = ImGui::InputText(label, buf, sizeof(buf), flags);
+
+    if (result || (flags & ImGuiInputTextFlags_EnterReturnsTrue)) {
         *s = std::string { buf };
-        return true;
+        return result;
     }
     return false;
 }
@@ -684,7 +740,7 @@ bool MethodPicker(const char *label, const std::vector<std::pair<std::string, En
 
     std::string current;
     if (m->mScope)
-        current = m->mScope.name() + ("." + *currentName);
+        current = m->scope().name() + ("." + *currentName);
     if (ImGui::BeginCombo(label, current.c_str())) {
         if (filter)
             ImGui::InputText("filter", filter);
@@ -692,7 +748,7 @@ bool MethodPicker(const char *label, const std::vector<std::pair<std::string, En
             if (!filter) {
                 if (expectedArgumentCount == -1 || method.argumentsCount() == expectedArgumentCount) {
                     bool is_selected = (method == *m);
-                    std::string fullItemName = method.mScope.name() + ("." + name);
+                    std::string fullItemName = method.scope().name() + ("." + name);
                     if (ImGui::Selectable(fullItemName.c_str(), is_selected)) {
                         *currentName = name;
                         *m = method;
@@ -708,16 +764,16 @@ bool MethodPicker(const char *label, const std::vector<std::pair<std::string, En
     return result;
 }
 
-void DraggableValueTypeSource(const std::string &name, Engine::TypedScopePtr scope, const Engine::ValueType &value, ImGuiDragDropFlags flags)
+void DraggableValueTypeSource(const std::string_view &name, Engine::TypedScopePtr scope, void (*source)(Engine::ValueType &, void *), void *data, ImGuiDragDropFlags flags)
 {
     if (ImGui::BeginDragDropSource(flags)) {
         ValueTypePayload *payload = &sPayload;
         payload->mName = name;
         payload->mSender = scope;
-        payload->mValue = value;
+        source(payload->mValue, data);
         ImGui::SetDragDropPayload("ValueType", &payload, sizeof(payload), ImGuiCond_Once);
         ImGui::Text(name);
-        ImGui::Text(value.getTypeString());
+        ImGui::Text(payload->mValue.getTypeString());
         if (!payload->mStatusMessage.empty()) {
             ImGui::Text(payload->mStatusMessage);
             payload->mStatusMessage.clear();

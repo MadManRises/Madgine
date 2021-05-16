@@ -18,6 +18,8 @@ struct META_EXPORT ScopeIterator {
 
     void operator++();
 
+    ScopeIterator end() const;
+
 private:
     void checkDerived();
 

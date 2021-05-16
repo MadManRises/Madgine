@@ -3,8 +3,6 @@
 #include "scopefield.h"
 #include "typedscopeptr.h"
 
-#include "valuetype.h"
-
 #include "accessor.h"
 
 namespace Engine {
@@ -13,26 +11,22 @@ ScopeField::ScopeField(const TypedScopePtr &ptr, const std::pair<const char *, A
     : mScope(ptr)
     , mPointer(pointer)
 {
+    assert(ptr);
 }
 
-ValueType ScopeField::value() const
+void ScopeField::value(ValueType &retVal) const
 {
-    ValueType result; 
-    mPointer->second.mGetter(result, mScope);
-    return result;
-}
-
-ScopeField::operator ValueType() const {
-    return value();
+    mPointer->second.mGetter(retVal, mScope);
 }
 
 ScopeField &ScopeField::operator=(const ValueType &v)
 {
-    mPointer->second.mSetter(mScope, v);    
+    mPointer->second.mSetter(mScope, v);
     return *this;
 }
 
-const char* ScopeField::key() const {
+const char *ScopeField::key() const
+{
     return mPointer->first;
 }
 

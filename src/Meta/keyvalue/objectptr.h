@@ -8,15 +8,11 @@ struct META_EXPORT ObjectPtr {
     ObjectPtr();
     ObjectPtr(const std::shared_ptr<ObjectInstance> &instance);
 
-    void setValue(const std::string &name, const ValueType &value);
-    ValueType getValue(const std::string &name) const;
+    void setValue(const std::string_view &name, const ValueType &value);
+    bool getValue(ValueType &retVal, const std::string_view &name) const;
 
-    void clear();
+    void reset();
 
-    ObjectFieldAccessor operator[](const std::string &name);
-    ObjectFieldAccessor operator[](const char *name);
-    ValueType operator[](const std::string &name) const;
-    ValueType operator[](const char *name) const;
     explicit operator bool() const;
 
     bool operator==(const ObjectPtr &other) const;

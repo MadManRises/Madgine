@@ -164,6 +164,12 @@ struct Quaternion {
 
     Vector3 v;
     float w;
+
+    friend std::ostream &operator<<(std::ostream &o, const Quaternion &q)
+    {
+        o << "{" << q.v.x << ", " << q.v.y << ", " << q.v.z << ", " << q.w << "}";
+        return o;
+    }
 };
 
 META_EXPORT Quaternion slerp(Quaternion q1, Quaternion q2, float ratio);

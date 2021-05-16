@@ -21,7 +21,7 @@ namespace NodeGraph {
         virtual ExtendedValueTypeDesc dataReceiverType(uint32_t index) const override;
 
 
-        virtual ValueType interpretRead(NodeInterpreter &interpreter, uint32_t providerIndex, std::unique_ptr<NodeInterpreterData> &data) const override;
+        virtual void interpretRead(NodeInterpreter &interpreter, ValueType &retVal, uint32_t providerIndex, std::unique_ptr<NodeInterpreterData> &data) const override;
         virtual void interpretWrite(NodeInterpreter &interpreter, uint32_t receiverIndex, std::unique_ptr<NodeInterpreterData> &data, const ValueType &v) const override;
 
 

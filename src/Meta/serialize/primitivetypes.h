@@ -18,7 +18,7 @@ namespace Serialize {
         float,
         SyncableUnitBase *,
         SerializableDataUnit *,
-        type_pack<std::string, std::string_view>,
+        type_pack<std::string, std::string_view, CoWString>,
         ByteBuffer,
         std::monostate,
         Matrix3>;
@@ -40,7 +40,7 @@ namespace Serialize {
 
     template <typename T>
     struct PrimitiveReducer<T, std::enable_if_t<std::is_enum_v<T>>> {
-        typedef int type;
+        typedef std::underlying_type_t<T> type;
     };
 
     template <typename T, typename = void>

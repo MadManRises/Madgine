@@ -10,6 +10,7 @@ struct ValueTypePayload;
 
 typedef int ImGuiDragDropFlags;
 typedef int ImGuiTreeNodeFlags;
+typedef int ImGuiInputTextFlags;
 
 struct IMGUI_API ValueTypeDrawer {
     bool draw(Engine::TypedScopePtr &scope);
@@ -38,8 +39,10 @@ struct IMGUI_API ValueTypeDrawer {
     bool draw(const Engine::Vector3 &v);
     bool draw(Engine::Vector4 &v);
     bool draw(const Engine::Vector4 &v);
-    bool draw(Engine::KeyValueVirtualRange &range);
-    bool draw(const Engine::KeyValueVirtualRange &range);
+    bool draw(Engine::KeyValueVirtualSequenceRange &range);
+    bool draw(const Engine::KeyValueVirtualSequenceRange &range);
+    bool draw(Engine::KeyValueVirtualAssociativeRange &range);
+    bool draw(const Engine::KeyValueVirtualAssociativeRange &range);
     bool draw(Engine::Function &m);
     bool draw(const Engine::Function &m);
     bool draw(Engine::ApiFunction &m);
@@ -54,6 +57,8 @@ struct IMGUI_API ValueTypeDrawer {
     bool draw(const Engine::ObjectPtr &o);
     bool draw(Engine::Filesystem::Path &p);
     bool draw(const Engine::Filesystem::Path &p);
+    bool draw(Engine::EnumHolder &e);
+    bool draw(const Engine::EnumHolder &e);
 
     const char *mName;
     bool mMinified;
@@ -63,8 +68,8 @@ IMGUI_API void setPayloadStatus(const std::string &);
 
 IMGUI_API void Text(const std::string &s);
 IMGUI_API void Text(const std::string_view &s);
-IMGUI_API bool InputText(const char *label, std::string *s);
-IMGUI_API bool InputText(const char *label, Engine::CoWString *s);
+IMGUI_API bool InputText(const char *label, std::string *s, ImGuiInputTextFlags flags = 0);
+IMGUI_API bool InputText(const char *label, Engine::CoWString *s, ImGuiInputTextFlags flags = 0);
 
 IMGUI_API void BeginValueType(Engine::ExtendedValueTypeDesc type, const char *name = "");
 IMGUI_API bool EndValueType(Engine::ValueType *v, Engine::ExtendedValueTypeDesc type);
@@ -89,7 +94,13 @@ IMGUI_API bool DragMatrix4(const char *label, Engine::Matrix4 *m, float *v_speed
 
 IMGUI_API bool MethodPicker(const char *label, const std::vector<std::pair<std::string, Engine::BoundApiFunction>> &methods, Engine::BoundApiFunction *m, std::string *currentName, std::string *filter = nullptr, int expectedArgumentCount = -1);
 
-IMGUI_API void DraggableValueTypeSource(const std::string &name, Engine::TypedScopePtr scope, const Engine::ValueType &value, ImGuiDragDropFlags flags = 0);
+IMGUI_API void DraggableValueTypeSource(const std::string_view &name, Engine::TypedScopePtr scope, void(*source)(Engine::ValueType &, void*), void *data, ImGuiDragDropFlags flags = 0);
+template <typename T>
+void DraggableValueTypeSource(const std::string_view& name, Engine::TypedScopePtr scope, T&& data, ImGuiDragDropFlags flags = 0) {
+    DraggableValueTypeSource(
+        name, scope, [](Engine::ValueType &retVal, void *data) { Engine::to_ValueType<true>(retVal, reinterpret_cast<T &&>(*data)); }, &data, flags);
+}
+
 IMGUI_API const Engine::ValueType *GetValuetypePayload();
 IMGUI_API bool AcceptDraggableValueType(const ValueTypePayload **payloadPointer = nullptr);
 template <typename T, typename Validator = bool (*)(const T &)>

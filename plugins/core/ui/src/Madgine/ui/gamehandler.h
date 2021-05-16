@@ -53,7 +53,7 @@ namespace UI {
 
         void setPointerDragMode(Input::MouseButton::MouseButton button, MouseDragMode mode, float threshold = sDefaultDragStartThreshold);
 
-        const Vector2 &dragStart() const;
+        const InterfacesVector &dragStart() const;
 
     private:
 
@@ -69,7 +69,7 @@ namespace UI {
 
         bool mDragging, mSingleClick;
 
-        Vector2 mDragStart;
+        InterfacesVector mDragStart;
 
         Threading::ContextMask mContext;
     };

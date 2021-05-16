@@ -71,10 +71,10 @@ namespace Tools {
     void Inspector::render()
     {
         if (ImGui::Begin("Inspector", &mVisible)) {
-            auto drawList = [this](const std::map<TypedScopePtr, const char *> &items) {
-                for (const std::pair<const TypedScopePtr, const char *> &p : items) {
-                    if (ImGui::TreeNode(p.second)) {
-                        draw(p.first, {}, p.second);
+            auto drawList = [this](const std::map<std::string_view, TypedScopePtr> &items) {
+                for (const std::pair<const std::string_view, TypedScopePtr> &p : items) {
+                    if (ImGui::TreeNode(p.first.data())) {
+                        draw(p.second, {}, p.first.data());
                         ImGui::TreePop();
                     }
                 }
@@ -119,8 +119,10 @@ namespace Tools {
 
     bool Inspector::drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, const ScopeIterator &it)
     {
+        ValueType value;
         if (streq(it->key(), "__proxy")) {
-            return draw(it->value().as<TypedScopePtr>(), {});
+            it->value(value);
+            return draw(value.as<TypedScopePtr>(), {});
         }
 
         bool showName = !element || !style("noname", element);
@@ -128,7 +130,7 @@ namespace Tools {
         bool editable = it->isEditable();
         bool generic = it->isGeneric();
 
-        ValueType value = *it;
+        it->value(value);
         std::pair<bool, bool> modified = drawValueImpl(element, parent, id, value, editable, generic);
 
         if (modified.first || (modified.second && !value.isReference()))
@@ -138,7 +140,7 @@ namespace Tools {
 
     std::pair<bool, bool> Inspector::drawValueImpl(tinyxml2::XMLElement *element, TypedScopePtr parent, const std::string &id, ValueType &value, bool editable, bool generic)
     {
-        bool cannotBeDisabled = value.index() == Engine::ValueTypeEnum::ScopeValue || value.index() == Engine::ValueTypeEnum::OwnedScopeValue || value.index() == Engine::ValueTypeEnum::KeyValueVirtualRangeValue || value.index() == Engine::ValueTypeEnum::ApiFunctionValue;
+        bool cannotBeDisabled = value.index() == Engine::ValueTypeEnum::ScopeValue || value.index() == Engine::ValueTypeEnum::OwnedScopeValue || value.index() == Engine::ValueTypeEnum::KeyValueVirtualSequenceRangeValue || value.index() == Engine::ValueTypeEnum::KeyValueVirtualAssociativeRangeValue || value.index() == Engine::ValueTypeEnum::BoundApiFunctionValue;
 
         if (!editable && !cannotBeDisabled)
             ImGui::PushDisabled();
@@ -200,18 +202,16 @@ namespace Tools {
                 ValueType v { scope.get() };
                 return drawValueImpl(element, parent, id, v, editable, false);
             },
-            [&](KeyValueVirtualRange &range) {
+            [&](KeyValueVirtualSequenceRange &range) {
                 bool changed = false;
                 bool b = ImGui::TreeNodeEx(id.c_str());
                 ImGui::DraggableValueTypeSource(id, parent, value);
                 if (b) {
                     size_t i = 0;
-                    for (auto [vKey, vValue] : range) {
+                    for (auto vValue : range) {
                         ValueType value = vValue;
                         std::string key = std::to_string(i);
-                        if (!vKey.is<std::monostate>()) {
-                            key = vKey.toShortString() + "##" + key;
-                        } else if (value.is<TypedScopePtr>()) {
+                        if (value.is<TypedScopePtr>()) {
                             key = "[" + std::to_string(i) + "] " + value.as<TypedScopePtr>().name() + "##" + key;
                         } else if (value.is<OwnedScopePtr>()) {
                             key = "[" + std::to_string(i) + "] " + value.as<OwnedScopePtr>().name() + "##" + key;
@@ -226,10 +226,29 @@ namespace Tools {
                 }
                 return std::make_pair(false, changed);
             },
-            [&](ApiFunction &function) {
+            [&](KeyValueVirtualAssociativeRange &range) {
+                bool changed = false;
+                bool b = ImGui::TreeNodeEx(id.c_str());
+                ImGui::DraggableValueTypeSource(id, parent, value);
+                if (b) {
+                    size_t i = 0;
+                    for (auto [vKey, vValue] : range) {
+                        ValueType value = vValue;
+                        std::string key = vKey.toShortString() + "##" + std::to_string(i);
+                        std::pair<bool, bool> result = drawValueImpl(element, {}, key, value, /*editable && */ vValue.isEditable(), false);
+                        if (result.first)
+                            vValue = value;
+                        changed |= result.second;
+                        ++i;
+                    }
+                    ImGui::TreePop();
+                }
+                return std::make_pair(false, changed);
+            },
+            [&](BoundApiFunction &function) {
                 std::string extended = "-> " + id;
                 if (ImGui::Button(extended.c_str())) {
-                    getTool<FunctionTool>().setCurrentFunction(id, { function, parent });
+                    getTool<FunctionTool>().setCurrentFunction(id, function);
                 }
                 ImGui::DraggableValueTypeSource(id, parent, value);
                 return std::make_pair(false, false);
@@ -336,7 +355,9 @@ namespace Tools {
                 bool skip = false;
                 for (tinyxml2::XMLElement *condition = element->FirstChildElement("Condition"); condition; condition = condition->NextSiblingElement("Condition")) {
                     const char *expectedType = condition->Attribute("type");
-                    std::string type = it->value().is<TypedScopePtr>() ? it->value().as<TypedScopePtr>().mType->mTypeName : "";
+                    ValueType typeV;
+                    it->value(typeV);
+                    std::string type = typeV.is<TypedScopePtr>() ? typeV.as<TypedScopePtr>().mType->mTypeName : "";
                     if (expectedType && type != expectedType) {
                         skip = true;
                         break;

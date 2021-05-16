@@ -1,31 +1,36 @@
 #pragma once
 
 #include "apifunction.h"
-#include "typedscopeptr.h"
 
 namespace Engine {
 
 struct META_EXPORT BoundApiFunction {
 
+    constexpr BoundApiFunction() = default;
+
+    BoundApiFunction(const ApiFunction &f, const TypedScopePtr &scope);
+
     bool operator==(const BoundApiFunction &other) const
     {
-        return mMethod == other.mMethod && mScope == other.mScope;
+        return mFunction == other.mFunction && mScope == other.mScope;
     }
 
     uint32_t argumentsCount(bool excludeThis = false) const
     {
-        return mMethod.argumentsCount(excludeThis);
+        return mFunction.argumentsCount(excludeThis);
     }
 
     bool isMemberFunction() const
     {
-        return mMethod.isMemberFunction();
+        return mFunction.isMemberFunction();
     }
+
+    TypedScopePtr scope() const;
 
     void operator()(ValueType &retVal, const ArgumentList &args) const;
 
-	ApiFunction mMethod;
-    TypedScopePtr mScope;
+    ApiFunction mFunction;
+    void *mScope = nullptr;
 };
 
 }

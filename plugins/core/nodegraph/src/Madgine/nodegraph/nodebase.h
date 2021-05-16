@@ -17,6 +17,7 @@ namespace NodeGraph {
         virtual ~NodeBase() = default;
 
         virtual std::string_view name() const = 0;
+        virtual std::string_view className() const = 0;
 
         virtual size_t flowInCount() const { return 0; }
         virtual std::string_view flowInName(uint32_t index) const { throw 0; }
@@ -59,8 +60,8 @@ namespace NodeGraph {
         void disconnectDataIn(uint32_t index);
         void disconnectDataOut(uint32_t index);
 
-        virtual uint32_t interpret(NodeInterpreter &interpreter, uint32_t flowIn, std::unique_ptr<NodeInterpreterData> &data) const;
-        virtual ValueType interpretRead(NodeInterpreter &interpreter, uint32_t providerIndex, std::unique_ptr<NodeInterpreterData> &data) const;
+        virtual void interpret(NodeInterpreter &interpreter, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeInterpreterData> &data) const;
+        virtual void interpretRead(NodeInterpreter &interpreter, ValueType &retVal, uint32_t providerIndex, std::unique_ptr<NodeInterpreterData> &data) const;
         virtual void interpretWrite(NodeInterpreter &interpreter, uint32_t receiverIndex, std::unique_ptr<NodeInterpreterData> &data, const ValueType &v) const;
 
     protected:

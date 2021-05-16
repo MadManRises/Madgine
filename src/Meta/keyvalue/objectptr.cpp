@@ -1,8 +1,6 @@
 #include "../metalib.h"
 #include "objectptr.h"
-#include "objectfieldaccessor.h"
 #include "objectinstance.h"
-#include "valuetype.h"
 
 namespace Engine {
 ObjectPtr::ObjectPtr()
@@ -14,29 +12,9 @@ ObjectPtr::ObjectPtr(const std::shared_ptr<ObjectInstance> &instance)
 {
 }
 
-void ObjectPtr::clear()
+void ObjectPtr::reset()
 {
     mInstance.reset();
-}
-
-ObjectFieldAccessor ObjectPtr::operator[](const std::string &name)
-{
-    return ObjectFieldAccessor(mInstance, name);
-}
-
-ObjectFieldAccessor ObjectPtr::operator[](const char *name)
-{
-    return ObjectFieldAccessor(mInstance, name);
-}
-
-ValueType ObjectPtr::operator[](const std::string &name) const
-{
-    return getValue(name);
-}
-
-ValueType ObjectPtr::operator[](const char *name) const
-{
-    return getValue(name);
 }
 
 ObjectPtr::operator bool() const
@@ -44,14 +22,16 @@ ObjectPtr::operator bool() const
     return mInstance.operator bool();
 }
 
-void ObjectPtr::setValue(const std::string &name, const ValueType &value)
+void ObjectPtr::setValue(const std::string_view &name, const ValueType &value)
 {
     mInstance->setValue(name, value);
 }
 
-ValueType ObjectPtr::getValue(const std::string &name) const
+bool ObjectPtr::getValue(ValueType &retVal, const std::string_view &name) const
 {
-    return mInstance ? mInstance->getValue(name) : ValueType();
+    if (!mInstance)
+        return false;
+    return mInstance->getValue(retVal, name);
 }
 
 bool ObjectPtr::operator==(const ObjectPtr &other) const

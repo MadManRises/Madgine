@@ -14,9 +14,9 @@ namespace NodeGraph {
 
         NodeInterpreter &operator=(const NodeInterpreter &) = delete;
 
-        uint32_t interpret(uint32_t flowIn = 0);
+        void interpret(IndexType<uint32_t> &flowIn);
 
-        ValueType read(uint32_t dataInIndex);
+        void read(ValueType &retVal, uint32_t dataInIndex);
         void write(uint32_t dataOutIndex, const ValueType &v);
 
     private:

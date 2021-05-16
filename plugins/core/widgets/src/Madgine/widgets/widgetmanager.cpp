@@ -536,6 +536,7 @@ namespace Widgets {
     {
         if (mCurrentRoot)
             mCurrentRoot->hide();
+        mHoveredWidget = nullptr;
         mCurrentRoot = newRoot;
         newRoot->show();
     }

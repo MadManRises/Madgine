@@ -20,7 +20,7 @@ namespace NodeGraph {
 
         NodeGraph &operator=(const NodeGraph &) = delete;
 
-        void loadFromFile(const Filesystem::Path &path);
+        Serialize::StreamResult loadFromFile(const Filesystem::Path &path);
         void saveToFile();
 
         NodeBase *addNode(std::unique_ptr<NodeBase> node);
@@ -37,8 +37,8 @@ namespace NodeGraph {
 
         void connectFlow(uint32_t source, uint32_t sourceIndex, uint32_t target, uint32_t targetIndex);
         void connectDataIn(uint32_t target, uint32_t targetIndex, uint32_t source, uint32_t sourceIndex);
-        void connectDataOut(uint32_t source, uint32_t sourceIndex, uint32_t target, uint32_t targetIndex);        
-        
+        void connectDataOut(uint32_t source, uint32_t sourceIndex, uint32_t target, uint32_t targetIndex);
+
         void disconnectFlow(uint32_t index);
         void disconnectDataIn(uint32_t index);
         void disconnectDataOut(uint32_t index);

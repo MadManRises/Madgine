@@ -50,7 +50,6 @@ struct BitArray {
 
         operator type() const
         {
-
             uint64_t value = readPtrAsUInt64(mPointer, mOffset) >> (mOffset % 8);
             value &= Mask;
             return static_cast<type>(value);

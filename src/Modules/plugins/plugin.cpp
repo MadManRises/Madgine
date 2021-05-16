@@ -11,8 +11,6 @@
 #    include "pluginmanager.h"
 #    include "pluginsection.h"
 
-#    include "../threading/defaulttaskqueue.h"
-
 #    include "../threading/barrier.h"
 
 namespace Engine {
@@ -46,7 +44,7 @@ namespace Plugins {
 
     Plugin::~Plugin()
     {
-        if (mPath.empty()) {
+        if (mModule && mPath.empty()) {
             Dl::closeDll(mModule);
             mModule = nullptr;
         }

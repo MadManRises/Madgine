@@ -5,13 +5,6 @@
 
 namespace Engine {
 namespace Threading {
-    struct DirectConnectionType {
-    };
-    struct QueuedConnectionType {
-    };
-
-    static const constexpr QueuedConnectionType queuedConnection {};
-    static const constexpr DirectConnectionType directConnection {};
 
     struct MODULES_EXPORT ConnectionBase {
         virtual ~ConnectionBase() = default;

@@ -44,7 +44,6 @@
 
 #include "Meta/serialize/formatter/safebinaryformatter.h"
 
-#include "Meta/keyvalue/valuetype.h"
 
 UNIQUECOMPONENT(Engine::Tools::SceneEditor);
 
@@ -365,7 +364,7 @@ namespace Tools {
             select(node.mEntity);
         }
 
-        ImGui::DraggableValueTypeSource(name, this, ValueType { node.mEntity });
+        ImGui::DraggableValueTypeSource(name, this, node.mEntity);
 
         Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> transform = node.mEntity->getComponent<Engine::Scene::Entity::Transform>();
         if (transform) {

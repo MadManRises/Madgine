@@ -3,14 +3,15 @@
 #if ENABLE_PLUGINS
 
 #    include "../tinyxml/tinyxml2.h"
+#    include "../toolbase.h"
 #    include "../toolscollector.h"
-#include "../toolbase.h"
-#    include "Modules/threading/slot.h"
 
 namespace Engine {
 namespace Tools {
 
     struct PluginManager : Tool<PluginManager> {
+        SERIALIZABLEUNIT(PluginManager);
+
         PluginManager(ImRoot &root);
 
         virtual void render() override;
@@ -26,7 +27,6 @@ namespace Tools {
 
     private:
         Plugins::PluginManager &mManager;
-        Threading::Slot<&PluginManager::setCurrentConfig> mUpdateConfigSlot;
     };
 
 }

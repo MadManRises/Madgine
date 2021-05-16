@@ -37,11 +37,15 @@ namespace Render {
             }
         }
 
-        size_t mArraySize;
+        explicit operator bool() const {
+            return mArraySize > 0;
+        }
+
+        size_t mArraySize = 0;
         AttributeType mType;
         size_t mStride;
         size_t mOffset;
-        const char *mSemantic;
+        const char *mSemantic = nullptr;
         size_t mSemanticIndex;
     };
 

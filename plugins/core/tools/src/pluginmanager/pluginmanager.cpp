@@ -42,7 +42,6 @@ namespace Tools {
     PluginManager::PluginManager(ImRoot &root)
         : Tool<PluginManager>(root)
         , mManager(Plugins::PluginManager::getSingleton())
-        , mUpdateConfigSlot(this)
     {
     }
 
@@ -103,10 +102,9 @@ namespace Tools {
                             if (available) {
                                 if (clicked) {
                                     if (loaded)
-                                        section.loadPlugin(pluginName);
+                                        section.loadPlugin(pluginName, [this]() { updateConfigFile(); });
                                     else
-                                        section.unloadPlugin(pluginName);
-                                    updateConfigFile();
+                                        section.unloadPlugin(pluginName, [this]() { updateConfigFile(); });
                                 }
                             } else {
                                 ImGui::PopItemFlag();
@@ -166,7 +164,7 @@ namespace Tools {
     {
         ProjectManager &project = getTool<ProjectManager>();
 
-        project.mProjectChanged.connect(mUpdateConfigSlot);
+        project.mProjectChanged.connect(&PluginManager::updateConfigFile, this);
         setCurrentConfig(project.projectRoot(), project.config());
 
         return ToolBase::init();

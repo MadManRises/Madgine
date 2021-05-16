@@ -150,39 +150,39 @@ namespace Render {
 #endif
     }
 
-    void OpenGLVertexArray::enableVertexAttribute(unsigned int index, AttributeDescriptor attribute)
+    void OpenGLVertexArray::setVertexAttribute(unsigned int index, AttributeDescriptor attribute)
     {
-        if (attribute.mType == ATTRIBUTE_FLOAT) {
-            glVertexAttribPointer(index, attribute.mArraySize, glType(attribute.mType), GL_FALSE, attribute.mStride, reinterpret_cast<void *>(attribute.mOffset));
+        if (attribute) {
+
+            if (attribute.mType == ATTRIBUTE_FLOAT) {
+                glVertexAttribPointer(index, attribute.mArraySize, glType(attribute.mType), GL_FALSE, attribute.mStride, reinterpret_cast<void *>(attribute.mOffset));
+            } else {
+                glVertexAttribIPointer(index, attribute.mArraySize, glType(attribute.mType), attribute.mStride, reinterpret_cast<void *>(attribute.mOffset));
+            }
+            glEnableVertexAttribArray(index);
+
+#if OPENGL_ES
+            assert(sCurrentBound == this);
+            if (mAttributes.size() <= index) {
+                if (mAttributes.size() < index)
+                    LOG_WARNING("Non consecutive Vertex Attribute!");
+                mAttributes.resize(index + 1);
+            }
+            mAttributes[index] = { true, attribute };
+#endif
         } else {
-            glVertexAttribIPointer(index, attribute.mArraySize, glType(attribute.mType), attribute.mStride, reinterpret_cast<void *>(attribute.mOffset));
-        }
-        glEnableVertexAttribArray(index);
+            glDisableVertexAttribArray(index);
 
 #if OPENGL_ES
-        assert(sCurrentBound == this);
-        if (mAttributes.size() <= index) {
-            if (mAttributes.size() < index)
-                LOG_WARNING("Non consecutive Vertex Attribute!");
-            mAttributes.resize(index + 1);
-        }
-        mAttributes[index] = { true, attribute };
+            assert(sCurrentBound == this);
+            if (mAttributes.size() <= index) {
+                if (mAttributes.size() < index)
+                    LOG_WARNING("Non consecutive Vertex Attribute!");
+                mAttributes.resize(index + 1);
+            }
+            mAttributes[index].mEnabled = false;
 #endif
-    }
-
-    void OpenGLVertexArray::disableVertexAttribute(unsigned int index)
-    {
-        glDisableVertexAttribArray(index);
-
-#if OPENGL_ES
-        assert(sCurrentBound == this);
-        if (mAttributes.size() <= index) {
-            if (mAttributes.size() < index)
-                LOG_WARNING("Non consecutive Vertex Attribute!");
-            mAttributes.resize(index + 1);
         }
-        mAttributes[index].mEnabled = false;
-#endif
     }
 
 #if OPENGL_ES

@@ -641,7 +641,8 @@ namespace Tools {
 
                 if (ImGui::MenuItem("Debug", "", false, mGraph)) {
                     NodeGraph::NodeInterpreter interpreter { *mGraph };
-                    interpreter.interpret();
+                    IndexType<uint32_t> index = 0;
+                    interpreter.interpret(index);
                 }
 
                 ImGui::Separator();

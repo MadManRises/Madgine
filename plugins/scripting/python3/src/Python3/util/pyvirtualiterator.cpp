@@ -1,0 +1,81 @@
+#include "../python3lib.h"
+
+#include "pyvirtualiterator.h"
+
+#include "pyobjectutil.h"
+
+#include "Meta/keyvalue/valuetype.h"
+
+#include "Meta/keyvalue/keyvaluepair.h"
+
+namespace Engine {
+namespace Scripting {
+    namespace Python3 {
+
+        static PyObject *
+        PyVirtualSequenceIterator_iter(PyObject *self)
+        {
+            Py_INCREF(self);
+            return self;
+        }
+
+        static PyObject *
+        PyVirtualSequenceIterator_next(PyVirtualSequenceIterator *self)
+        {
+            if (self->mIt == self->mIt.end())
+                return NULL;
+            PyObject *result = toPyObject(*self->mIt);
+            ++self->mIt;
+            return result;
+        }
+
+        PyTypeObject PyVirtualSequenceIteratorType = {
+            PyVarObject_HEAD_INIT(NULL, 0)
+                .tp_name
+            = "Environment.VirtualSequenceIterator",
+            .tp_doc = "Python implementation of VirtualSequenceIterator",
+            .tp_basicsize = sizeof(PyVirtualSequenceIterator),
+            .tp_itemsize = 0,
+            .tp_flags = Py_TPFLAGS_DEFAULT,
+            .tp_new = PyType_GenericNew,
+            //.tp_init = &PyInit<&PyVirtualSequenceIterator::mIt>,
+            .tp_dealloc = &PyDealloc<PyVirtualSequenceIterator, &PyVirtualSequenceIterator::mIt>,
+            .tp_iter = (getiterfunc)PyVirtualSequenceIterator_iter,
+            .tp_iternext = (iternextfunc)PyVirtualSequenceIterator_next,
+        };
+
+        static PyObject *
+        PyVirtualAssociativeIterator_iter(PyObject *self)
+        {
+            Py_INCREF(self);
+            return self;
+        }
+
+        static PyObject *
+        PyVirtualAssociativeIterator_next(PyVirtualAssociativeIterator *self)
+        {
+            if (self->mIt == self->mIt.end())
+                return NULL;
+            PyObject *result = Py_BuildValue("NN", toPyObject(self->mIt->mKey), toPyObject(self->mIt->mValue));
+            ++self->mIt;
+            return result;
+        }
+
+        PyTypeObject PyVirtualAssociativeIteratorType = {
+            PyVarObject_HEAD_INIT(NULL, 0)
+                .tp_name
+            = "Environment.VirtualAssociativeIterator",
+            .tp_doc = "Python implementation of VirtualAssociativeIterator",
+            .tp_basicsize = sizeof(PyVirtualAssociativeIterator),
+            .tp_itemsize = 0,
+            .tp_flags = Py_TPFLAGS_DEFAULT,
+            .tp_new = PyType_GenericNew,
+            //.tp_init = &PyInit<&PyVirtualAssociativeIterator::mIt>,
+            .tp_dealloc = &PyDealloc<PyVirtualAssociativeIterator, &PyVirtualAssociativeIterator::mIt>,
+            .tp_iter = (getiterfunc)PyVirtualAssociativeIterator_iter,
+            .tp_iternext = (iternextfunc)PyVirtualAssociativeIterator_next,
+        };
+
+    }
+}
+}

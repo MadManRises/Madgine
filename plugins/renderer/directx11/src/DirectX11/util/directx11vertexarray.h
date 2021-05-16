@@ -13,7 +13,7 @@ namespace Render {
         DirectX11VertexArray() = default;
         DirectX11VertexArray(const DirectX11VertexArray &) = delete;
         DirectX11VertexArray(DirectX11VertexArray &&);
-        DirectX11VertexArray(const std::vector<std::optional<AttributeDescriptor>> &attributes);
+        DirectX11VertexArray(const std::array<AttributeDescriptor, 7> &attributes);
         ~DirectX11VertexArray();
 
         DirectX11VertexArray &operator=(DirectX11VertexArray &&other);

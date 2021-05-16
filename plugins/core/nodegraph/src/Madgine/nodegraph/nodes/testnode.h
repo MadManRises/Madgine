@@ -24,7 +24,7 @@ namespace NodeGraph {
         virtual std::string_view dataOutName(uint32_t index) const override;
         virtual ExtendedValueTypeDesc dataOutType(uint32_t index) const override;
 
-        virtual uint32_t interpret(NodeInterpreter &interpreter, uint32_t flowIn, std::unique_ptr<NodeInterpreterData> &data) const override;
+        virtual void interpret(NodeInterpreter &interpreter, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeInterpreterData> &data) const override;
 
         int mDummy;
     };

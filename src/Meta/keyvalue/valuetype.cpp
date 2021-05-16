@@ -65,7 +65,7 @@ ValueType ValueType::operator()(const ArgumentList &args) const
             scope.call(result, args);
             return result;
         },
-        [&](const OwnedScopePtr &scope) {            
+        [&](const OwnedScopePtr &scope) {
             ValueType result;
             scope.get().call(result, args);
             return result;
@@ -94,16 +94,16 @@ std::string ValueType::toShortString() const
             return scope.name();
         },
         [](const Vector2 &v) {
-            return "["s + std::to_string(v.x) + ", " + std::to_string(v.y) + "]";
+            return (std::stringstream {} << v).str();
         },
         [](const Vector3 &v) {
-            return "["s + std::to_string(v.x) + ", " + std::to_string(v.y) + ", " + std::to_string(v.z) + "]";
+            return (std::stringstream {} << v).str();
         },
         [](const Vector4 &v) {
-            return "["s + std::to_string(v.x) + ", " + std::to_string(v.y) + ", " + std::to_string(v.z) + ", " + std::to_string(v.w) + "]";
+            return (std::stringstream {} << v).str();
         },
         [](const Quaternion &q) {
-            return "{"s + std::to_string(q.v.x) + ", " + std::to_string(q.v.y) + ", " + std::to_string(q.v.z) + ", " + std::to_string(q.w) + "}";
+            return (std::stringstream {} << q).str();
         },
         [](const CoW<Matrix3> &) {
             return "Matrix3[...]"s;
@@ -114,14 +114,23 @@ std::string ValueType::toShortString() const
         [](const ApiFunction &) {
             return "<api-function>"s;
         },
+        [](const BoundApiFunction &) {
+            return "<bound-api-function>"s;
+        },
         [](const Function &) {
             return "<function>"s;
         },
-        [](const KeyValueVirtualRange &) {
+        [](const KeyValueVirtualSequenceRange &) {
             return "<range>"s;
+        },
+        [](const KeyValueVirtualAssociativeRange &) {
+            return "<map>"s;
         },
         [](const ObjectPtr &) {
             return "<object>"s;
+        },
+        [](const EnumHolder &e) {
+            return std::string { e.toString() };
         },
         [](const auto &v) {
             return std::to_string(v);
@@ -139,7 +148,10 @@ bool ValueType::isReference() const
         [](const TypedScopePtr &) {
             return true;
         },
-        [](const KeyValueVirtualRange &range) {
+        [](const KeyValueVirtualSequenceRange &range) {
+            return range.isReference();
+        },
+        [](const KeyValueVirtualAssociativeRange &range) {
             return range.isReference();
         },
         [](const auto &) {
@@ -182,10 +194,15 @@ void ValueType::setType(ValueTypeDesc type)
 {
     if (this->type() != type) {
         setTypeHelper(mUnion, type, std::make_index_sequence<std::variant_size_v<Union>>());
-        if (type.mType == ValueTypeEnum::ScopeValue) {
+        switch (type.mType) {
+        case ValueTypeEnum::ScopeValue:
             std::get<TypedScopePtr>(mUnion).mType = *type.mSecondary.mMetaTable;
-        } else if (type.mType == ValueTypeEnum::ApiFunctionValue) {
+            break;
+        case ValueTypeEnum::ApiFunctionValue:
             std::get<ApiFunction>(mUnion).mTable = *type.mSecondary.mFunctionTable;
+            break;
+        default:
+            break;
         }
     }
 }

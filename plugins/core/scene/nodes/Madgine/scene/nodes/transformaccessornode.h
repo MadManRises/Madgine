@@ -6,7 +6,7 @@
 namespace Engine {
 namespace Scene {
 
-    struct MADGINE_SCENE_EXPORT TransformAccessorNode : NodeGraph::Node<TransformAccessorNode> {
+    struct MADGINE_SCENE_NODES_EXPORT TransformAccessorNode : NodeGraph::Node<TransformAccessorNode> {
 
         TransformAccessorNode(NodeGraph::NodeGraph &graph);
 
@@ -18,7 +18,7 @@ namespace Scene {
         virtual std::string_view dataReceiverName(uint32_t index) const override;
         virtual ExtendedValueTypeDesc dataReceiverType(uint32_t index) const override;
 
-        virtual ValueType interpretRead(NodeGraph::NodeInterpreter &interpreter, uint32_t providerIndex, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const override;
+        virtual void interpretRead(NodeGraph::NodeInterpreter &interpreter, ValueType &retVal, uint32_t providerIndex, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const override;
         virtual void interpretWrite(NodeGraph::NodeInterpreter &interpreter, uint32_t receiverIndex, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, const ValueType &v) const override;
 
     };

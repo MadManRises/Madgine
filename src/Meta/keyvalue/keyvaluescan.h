@@ -11,8 +11,10 @@ void kvScan(F &&f, const TypedScopePtr &scope, std::string_view name = {}, Typed
         f(scope, name, parent);
     }
 
+    ValueType v;
     for (ScopeField field : scope) {
-        field.value().visit([&](auto &&v) { kvScan(f, std::forward<decltype(v)>(v), field.key(), scope); });
+        field.value(v);
+        v.visit([&](auto &&v) { kvScan(f, std::forward<decltype(v)>(v), field.key(), scope); });
     }
 } 
     

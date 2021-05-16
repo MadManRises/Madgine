@@ -23,8 +23,6 @@ METATABLE_END(Engine::Render::OpenGLMeshLoader)
 METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader::ResourceType, Engine::Render::GPUMeshLoader::ResourceType)
 METATABLE_END(Engine::Render::OpenGLMeshLoader::ResourceType)
 
-
-
 namespace Engine {
 namespace Render {
 
@@ -32,7 +30,8 @@ namespace Render {
     {
     }
 
-    void OpenGLMeshLoader::generateImpl(OpenGLMeshData& data, const MeshData& mesh) {
+    void OpenGLMeshLoader::generateImpl(OpenGLMeshData &data, const MeshData &mesh)
+    {
         data.mVAO = create;
         data.mVAO.bind();
 
@@ -59,11 +58,10 @@ namespace Render {
 
         updateImpl(data, mesh);
 
-        for (int i = 0; i < mesh.mAttributeList.size(); ++i) {
-            if (mesh.mAttributeList[i])
-                data.mVAO.enableVertexAttribute(i, *mesh.mAttributeList[i]);
-            else
-                data.mVAO.disableVertexAttribute(i);
+        auto attributes = mesh.mAttributeList();
+
+        for (int i = 0; i < attributes.size(); ++i) {
+            data.mVAO.setVertexAttribute(i, attributes[i]);
         }
 
         data.mVAO.unbind();
@@ -81,7 +79,7 @@ namespace Render {
         return true;
     }
 
-       bool OpenGLMeshLoader::generate(GPUMeshData &_data, MeshData &&mesh)
+    bool OpenGLMeshLoader::generate(GPUMeshData &_data, MeshData &&mesh)
     {
         OpenGLMeshData &data = static_cast<OpenGLMeshData &>(_data);
         data.mAABB = mesh.mAABB;
@@ -118,7 +116,7 @@ namespace Render {
         });
     }
 
-        void OpenGLMeshLoader::update(GPUMeshData &_data, MeshData &&mesh)
+    void OpenGLMeshLoader::update(GPUMeshData &_data, MeshData &&mesh)
     {
         OpenGLMeshData &data = static_cast<OpenGLMeshData &>(_data);
 

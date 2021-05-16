@@ -196,7 +196,7 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
 
         void MeshLoader::unloadImpl(MeshData &data, ResourceType *res)
         {
-            data.mAttributeList.clear();
+            data.mAttributeList = nullptr;
             data.mGroupSize = 0;
             data.mIndices.clear();
             data.mTexturePath.clear();

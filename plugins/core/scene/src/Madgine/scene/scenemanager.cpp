@@ -13,8 +13,6 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "Modules/threading/defaulttaskqueue.h"
-
 #include "entity/entity.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
@@ -62,7 +60,7 @@ namespace Scene {
 
         mLastFrame = std::chrono::steady_clock::now();
 
-        Threading::DefaultTaskQueue::getSingleton().addRepeatedTask([this]() { update(); }, Threading::TaskMask::DEFAULT, std::chrono::microseconds { 30 /*0000*/ }, this);
+        mApp.taskQueue()->addRepeatedTask([this]() { update(); }, Threading::TaskMask::DEFAULT, std::chrono::microseconds { 30 /*0000*/ }, this);
 
         return true;
     }
@@ -71,7 +69,7 @@ namespace Scene {
     {
         clear();
 
-        Threading::DefaultTaskQueue::getSingleton().removeRepeatedTasks(this);
+        mApp.taskQueue()->removeRepeatedTasks(this);
 
         for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
             component->callFinalize();

@@ -21,10 +21,6 @@ namespace Engine {
 namespace UI {
     Handler::Handler(UIManager &ui)
         : mUI(ui)
-        , mPointerMoveSlot(this)
-        , mPointerDownSlot(this)
-        , mPointerUpSlot(this)
-        , mAxisEventSlot(this)
     {
     }
 
@@ -87,18 +83,15 @@ namespace UI {
     {
         if (mWidget != widget) {
             if (mWidget) {
-                mPointerMoveSlot.disconnectAll();
-                mPointerDownSlot.disconnectAll();
-                mPointerUpSlot.disconnectAll();
-                mAxisEventSlot.disconnectAll();
+                mConStore.clear();
             }
             mWidget = widget;
 
             if (mWidget) {
-                mWidget->pointerMoveEvent().connect(mPointerMoveSlot);
-                mWidget->pointerDownEvent().connect(mPointerDownSlot);
-                mWidget->pointerUpEvent().connect(mPointerUpSlot);
-                mWidget->axisEvent().connect(mAxisEventSlot);
+                mWidget->pointerMoveEvent().connect(&Handler::injectPointerMove, this, &mConStore);
+                mWidget->pointerDownEvent().connect(&Handler::injectPointerDown, this, &mConStore);
+                mWidget->pointerUpEvent().connect(&Handler::injectPointerUp, this, &mConStore);
+                mWidget->axisEvent().connect(&Handler::injectAxisEvent, this, &mConStore);
 
                 for (const WindowDescriptor &des : mWidgets) {
                     Widgets::WidgetBase *child = widget->getChildRecursive(des.mWidgetName);

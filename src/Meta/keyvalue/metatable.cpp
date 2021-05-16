@@ -8,7 +8,7 @@
 
 namespace Engine {
 
-ScopeIterator MetaTable::find(const std::string &key, TypedScopePtr scope) const
+ScopeIterator MetaTable::find(const std::string_view &key, TypedScopePtr scope) const
 {
     for (const std::pair<const char *, Accessor> *p = mMember; p->first; ++p) {
         if (key == p->first) {
@@ -27,9 +27,9 @@ void MetaTable::call(TypedScopePtr scope, ValueType &retVal, const ArgumentList 
     ScopeIterator op = find("__call", scope);
     if (op == scope.end())
         throw "No call-operator for type!";
-    ArgumentList actualArgs = args;
-    actualArgs.emplace(actualArgs.begin(), scope);
-    op->value().as<ApiFunction>()(retVal, actualArgs);
+    ValueType f;
+    op->value(f);
+    BoundApiFunction { f.as<ApiFunction>(), scope }(retVal, args);
 }
 
 bool MetaTable::isDerivedFrom(const MetaTable *baseType, size_t *offset) const
@@ -42,15 +42,22 @@ bool MetaTable::isDerivedFrom(const MetaTable *baseType, size_t *offset) const
 
 std::string MetaTable::name(TypedScopePtr scope) const
 {
-    ScopeIterator name = find("Name", scope);
-    if (name != scope.end() && name->value().is<std::string>()) {
-        return name->value().as<std::string>();
-    } else {
-        ScopeIterator proxy = find("__proxy", scope);
-        if (proxy != scope.end() && proxy->value().is<TypedScopePtr>()) {
-            return proxy->value().as<TypedScopePtr>().name();
+    ScopeIterator nameIt = find("Name", scope);
+    if (nameIt != scope.end()) {
+        ValueType name;
+        nameIt->value(name);
+        if (name.is<std::string>()) {
+            return name.as<std::string>();
         }
-        return "<"s + mTypeName + ">";
     }
+    ScopeIterator proxyIt = find("__proxy", scope);
+    if (proxyIt != scope.end()){
+        ValueType proxy;
+        proxyIt->value(proxy);
+        if (proxy.is<TypedScopePtr>()) {
+            return proxy.as<TypedScopePtr>().name();
+        }
+    }
+    return "<"s + mTypeName + ">";
 }
 }

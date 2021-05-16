@@ -5,6 +5,30 @@
 namespace Engine {
 
 struct EnumMetaTable {
+
+    constexpr bool isBase(int32_t value) const
+    {
+        assert(value > mMin);
+        return mBase && value < mBase->mMax;
+    }
+
+    constexpr const std::string_view &toString(int32_t value) const
+    {
+        if (isBase(value)) {
+            return mBase->toString(value);
+        } else {
+            assert(value > mMin && value < mMax);
+            return mValueNames[value - mMin - 1];
+        }
+    }
+
+    std::ostream &print(std::ostream &stream, int32_t value, const std::string_view &actualType) const
+    {
+        if (isBase(value))
+            return mBase->print(stream, value, actualType);
+        return stream << actualType << "::" << toString(value) << " (" << value << ")";
+    }
+
     const EnumMetaTable *mBase;
     std::string_view mName;
     const std::string_view *mValueNames;
@@ -29,25 +53,14 @@ struct Enum : _Representation {
         return mValue;
     }
 
-    static const std::string_view &toString(EnumType value)
-    {
-        assert(value > Representation::MIN && value < Representation::MAX);
-        return Representation::sIdentifiers[value - Representation::MIN - 1];
-    }
-
     const std::string_view &toString() const
     {
-        return toString(mValue);
-    }
-
-    std::ostream &print(std::ostream &stream, const std::string_view &actualType) const
-    {
-        return stream << actualType << "::" << toString() << " (" << static_cast<int>(mValue) << ")";
+        return Representation::sTable.toString(mValue);
     }
 
     friend std::ostream &operator<<(std::ostream &stream, const Enum<Representation> &value)
     {
-        return value.print(stream, sTypeName());
+        return Representation::sTable.print(stream, value.mValue, sTypeName());
     }
 
     static const std::string_view &sTypeName()
@@ -98,33 +111,18 @@ public:
 
     const std::string_view &toString() const
     {
-        if (isBase())
-            return toBase().toString();
-        return EnumBase::toString();
-    }
-
-    std::ostream &print(std::ostream &stream, const std::string_view &actualType) const
-    {
-        if (isBase())
-            return toBase().print(stream, actualType);
-        return EnumBase::print(stream, actualType);
+        return _Representation::sTable.toString(this->mValue);
     }
 
     friend std::ostream &operator<<(std::ostream &stream, const BaseEnum<_Representation, Base> &value)
     {
-        return value.print(stream, EnumBase::sTypeName());
+        return _Representation::sTable.print(stream, value.mValue, EnumBase::sTypeName());
     }
 
 private:
     Base toBase() const
     {
         return { static_cast<typename Base::EnumType>(this->mValue) };
-    }
-
-    bool isBase() const
-    {
-        assert(static_cast<int>(this->mValue) > MIN);
-        return static_cast<int>(this->mValue) < static_cast<int>(Base::MAX);
     }
 };
 
@@ -139,13 +137,13 @@ private:
             COUNT = MAX - MIN - 1                                                                                                                            \
         };                                                                                                                                                   \
         static inline const constexpr auto sIdentifiers = Engine::StringUtil::tokenize<static_cast<size_t>(Name##Representation::COUNT)>(#__VA_ARGS__, ','); \
-        static inline const constexpr EnumMetaTable sTable {                                                                                                 \
+        static inline const constexpr Engine::EnumMetaTable sTable {                                                                                         \
             Base, #Name, sIdentifiers.data(), MIN, MAX                                                                                                       \
         };                                                                                                                                                   \
     };                                                                                                                                                       \
     inline std::ostream &operator<<(std::ostream &stream, typename Name##Representation::EnumType value)                                                     \
     {                                                                                                                                                        \
-        return stream << Engine::Enum<Name##Representation> { value };                                                                                       \
+        return Name##Representation::sTable.print(stream, value, Name##Representation::sTable.mName);                                                        \
     }
 
 #define ENUM_BASE(Name, Base, ...)                                                 \

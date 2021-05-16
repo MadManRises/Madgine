@@ -28,7 +28,7 @@ namespace Serialize {
             STREAM_PROPAGATE_ERROR(read(in, returnValue, nullptr, args...));
             UnitHelper<R>::applyMap(in, returnValue, true);
             assert(request);
-            query.writeActionResponse(&returnValue, request->mRequester, request->mRequesterTransactionId);
+            query.writeRequestResponse(&returnValue, request->mRequester, request->mRequesterTransactionId);
             (*request)(&returnValue);
             return {};
         }

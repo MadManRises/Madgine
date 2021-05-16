@@ -1,4 +1,4 @@
-#include "../../scenelib.h"
+#include "../../scenenodeslib.h"
 
 #include "transformaccessornode.h"
 
@@ -10,7 +10,7 @@
 
 #include "Madgine/nodegraph/nodeinterpreter.h"
 
-#include "../entity/components/transform.h"
+#include "Madgine/scene/entity/components/transform.h"
 
 NODE(TransformAccessorNode, Engine::Scene::TransformAccessorNode)
 
@@ -66,13 +66,12 @@ namespace Scene {
         
     };
 
-    ValueType TransformAccessorNode::interpretRead(NodeGraph::NodeInterpreter &interpreter, uint32_t providerIndex, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const
+    void TransformAccessorNode::interpretRead(NodeGraph::NodeInterpreter &interpreter, ValueType &retVal, uint32_t providerIndex, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const
     {
         if (!data) {
             data = std::make_unique<TransformAccessorNodeInterpret>();
         }
         TransformAccessorNodeInterpret *variable = static_cast<TransformAccessorNodeInterpret *>(data.get());
-        return {};
     }
 
     void TransformAccessorNode::interpretWrite(NodeGraph::NodeInterpreter &interpreter, uint32_t receiverIndex, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, const ValueType &v) const

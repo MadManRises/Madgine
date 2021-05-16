@@ -71,5 +71,5 @@ TEST(ValueType, Construct)
     
     std::vector<int> v = { 1, 2, 3 };
     test = v;
-    std::next(test.as<KeyValueVirtualRange>().begin())->mValue = ValueType { 4 };
+    *std::next(test.as<KeyValueVirtualSequenceRange>().begin()) = ValueType { 4 };
 }

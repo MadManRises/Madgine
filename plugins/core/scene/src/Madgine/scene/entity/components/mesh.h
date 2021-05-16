@@ -28,6 +28,7 @@ namespace Scene {
 
         private:
             typename Render::GPUMeshLoader::HandleType mMesh;
+            bool mIsVisible = true;
         };
 
         using MeshPtr = EntityComponentPtr<Mesh>;

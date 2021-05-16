@@ -7,7 +7,7 @@
 #    include "windowsettings.h"
 
 #    include "../input/inputevents.h"
-#include "../input/rawinput_win.h"
+#    include "../input/rawinput_win.h"
 
 #    define NOMINMAX
 #    include <Windows.h>
@@ -37,7 +37,7 @@ namespace Window {
             }
         }
 
-        bool handle(UINT msg, WPARAM wParam, LPARAM lParam)
+        bool handle(UINT msg, WPARAM wParam, LPARAM lParam, bool &ignore)
         {
             if (msg >= WM_MOUSEFIRST && msg <= WM_MOUSELAST) {
                 InterfacesVector windowPos = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
@@ -74,15 +74,19 @@ namespace Window {
                 UINT scancode = (lParam >> 16) & 0xFF;
                 switch (msg) {
                 case WM_KEYDOWN:
+                case WM_SYSKEYDOWN:
                     mKeyDown[keycode] = std::numeric_limits<BYTE>::max();
                     WORD buffer;
                     ToAscii(keycode, scancode, mKeyDown, &buffer, 0);
                     injectKeyPress(Input::KeyEventArgs { keycode, static_cast<char>(buffer) });
                     break;
                 case WM_KEYUP:
+                case WM_SYSKEYUP:
                     mKeyDown[keycode] = 0;
                     injectKeyRelease(Input::KeyEventArgs { keycode, 0 });
                     break;
+                default:
+                    LOG("Unknown KeyEvent " << msg);
                 }
             } else {
                 switch (msg) {
@@ -107,8 +111,13 @@ namespace Window {
                     Input::AxisEventArgs arg;
                     while (device.fetchEvent(arg))
                         injectAxisEvent(arg);
-                } break;
-                    //default:
+                    break;
+                }
+                case WM_SYSCOMMAND:
+                    if (wParam == SC_KEYMENU)
+                        ignore = true;
+                    break;
+                //default:
                     //LOG_WARNING("Unhandled Event type: " << msg);
                 }
             }
@@ -367,14 +376,17 @@ namespace Window {
 
     LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
+        bool ignore = false;
         auto it = sWindows.find(hwnd);
         if (it != sWindows.end()) {
             if (msg == WM_DISPLAYCHANGE) {
                 if (it == sWindows.begin())
                     updateMonitors();
-            } else if (!it->second.handle(msg, wParam, lParam))
+            } else if (!it->second.handle(msg, wParam, lParam, ignore))
                 sWindows.erase(it);
         }
+        if (ignore)
+            return 0;
         return DefWindowProc(hwnd, msg, wParam, lParam);
     }
 

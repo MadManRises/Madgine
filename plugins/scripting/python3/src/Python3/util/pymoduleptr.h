@@ -1,0 +1,18 @@
+#pragma once
+
+#include "pyobjectptr.h"
+
+namespace Engine {
+namespace Scripting {
+    namespace Python3 {
+    
+        struct MADGINE_PYTHON3_EXPORT PyModulePtr : PyObjectPtr {
+            PyModulePtr() = default;
+            PyModulePtr(const std::string_view &name);
+
+            using PyObjectPtr::operator=;
+        };
+    
+    }
+}
+}

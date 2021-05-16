@@ -23,6 +23,7 @@ struct BoundApiFunction;
 struct FunctionTable;
 struct FunctionArgument;
 struct Function;
+struct EnumHolder;
 using ArgumentList = std::vector<ValueType>;
 
 struct ExtendedValueTypeDesc;
@@ -42,9 +43,13 @@ enum KeyValueValueFlags : uint8_t;
 
 template <bool reference_to_ptr>
 struct Functor_to_KeyValuePair;
+template <bool reference_to_ptr>
+struct Functor_to_ValueTypeRef;
 
-using KeyValueVirtualIterator = VirtualIterator<KeyValuePair>;
-using KeyValueVirtualRange = VirtualRange<KeyValuePair, Functor_to_KeyValuePair<true>>;
+using KeyValueVirtualAssociativeIterator = VirtualIterator<KeyValuePair>;
+using KeyValueVirtualAssociativeRange = VirtualRange<KeyValuePair, Functor_to_KeyValuePair<true>>;
+using KeyValueVirtualSequenceIterator = VirtualIterator<ValueTypeRef>;
+using KeyValueVirtualSequenceRange = VirtualRange<ValueTypeRef, Functor_to_ValueTypeRef<true>>;
 
 template <typename T>
 struct MadgineObject;

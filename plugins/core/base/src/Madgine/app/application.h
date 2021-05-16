@@ -6,7 +6,7 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 
-#include "Modules/threading/defaulttaskqueue.h"
+#include "Modules/threading/taskqueue.h"
 
 namespace Engine {
 namespace App {
@@ -27,6 +27,8 @@ namespace App {
 
         static Application &getSingleton();
 
+        Threading::TaskQueue *taskQueue();
+
     protected:
         bool init();
         void finalize();
@@ -37,7 +39,7 @@ namespace App {
 
         int mGlobalAPIInitCounter = 0;
 
-        Threading::DefaultTaskQueue mTaskQueue;
+        Threading::TaskQueue mTaskQueue;
 
     public:
         GlobalAPIContainer<std::vector<Placeholder<0>>> mGlobalAPIs;

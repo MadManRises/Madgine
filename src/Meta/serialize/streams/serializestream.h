@@ -4,7 +4,7 @@
 
 #include "../serializeexception.h"
 
-#include "streamerror.h"
+#include "streamresult.h"
 
 namespace Engine {
 namespace Serialize {
@@ -24,7 +24,7 @@ namespace Serialize {
         StreamResult readUnformatted(T &t)
         {
             if constexpr (std::is_enum_v<T>) {
-                int buffer;
+                int32_t buffer;
                 readUnformatted(buffer);
                 t = static_cast<T>(buffer);
             } else {
@@ -60,6 +60,7 @@ namespace Serialize {
 
         StreamResult readUnformatted(std::string &s);
         StreamResult readUnformatted(std::string_view &s) = delete;
+        StreamResult readUnformatted(CoWString &s);
 
         StreamResult readUnformatted(ByteBuffer &b);
 
@@ -122,7 +123,7 @@ namespace Serialize {
         void writeUnformatted(const T &t)
         {
             if constexpr (std::is_enum_v<T>) {
-                writeUnformatted(static_cast<int>(t));
+                writeUnformatted(static_cast<int32_t>(t));
             } else {
                 if (isBinary())
                     writeRaw(t);
@@ -136,6 +137,7 @@ namespace Serialize {
 
         void writeUnformatted(const std::string &s);
         void writeUnformatted(const std::string_view &s);
+        void writeUnformatted(const CoWString &s);
 
         void writeUnformatted(const ByteBuffer &b);
 

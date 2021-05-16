@@ -3,9 +3,8 @@
 #include "Generic/container/virtualrange.h"
 #include "Generic/linestruct.h"
 #include "accessor.h"
-#include "apifunction.h"
+#include "boundapifunction.h"
 #include "functiontable_impl.h"
-#include "keyvalueiterator.h"
 #include "metatable.h"
 #include "typedscopeptr.h"
 #include "valuetype_forward.h"
@@ -92,9 +91,9 @@ constexpr Accessor member()
 }
 
 template <auto F>
-static constexpr ApiFunction method(TypedScopePtr scope)
+static constexpr BoundApiFunction method(TypedScopePtr scope)
 {
-    return { &function<F>() };
+    return { &function<F>(), scope };
 }
 
 /*template <typename T, size_t... Is>

@@ -19,50 +19,41 @@ namespace Threading {
         {
         }
 
-        ~SignalStub() = default;
+        ~SignalStub()
+        {
+            disconnectAll();
+        }
 
         SignalStub<_Ty...> &operator=(const SignalStub<_Ty...> &other) = delete;
 
-        template <typename T, typename _ = std::enable_if_t<has_store<T>::value>>
-        std::weak_ptr<ConnectionBase> connect(T &slot, DirectConnectionType = {})
-        {
-            std::weak_ptr<Connection<_Ty...>> conn = slot.connectionStore().template emplace_front<DirectConnection<T *, _Ty...>>(
-                &slot);
-            std::lock_guard<std::mutex> guard(sSignalConnectMutex);
-            mConnectedSlots.emplace_back(conn);
-            return conn;
+        template <typename T, typename R, typename... Args>
+        std::weak_ptr<ConnectionBase> connect(R(T::* f)(Args...), T* t, ConnectionStore* store = nullptr) {
+            return connect([t, f](Args... args) { return (t->*f)(std::forward<Args>(args)...); });
         }
 
-        template <typename T, typename _ = std::enable_if_t<has_store<T>::value>>
-        std::weak_ptr<ConnectionBase> connect(T &slot, QueuedConnectionType)
-        {
-            std::weak_ptr<Connection<_Ty...>> conn = slot.connectionStore().template emplace_front<QueuedConnection<T *, _Ty...>>(
-                &slot, slot.taskQueue());
+        template <typename T>
+        std::weak_ptr<ConnectionBase> connect(T&& slot, ConnectionStore* store = nullptr) {
+            if (!store)
+                store = &ConnectionStore::globalStore();
             std::lock_guard<std::mutex> guard(sSignalConnectMutex);
-            mConnectedSlots.emplace_back(conn);
-            return conn;
-        }
-
-        template <typename T, typename _ = std::enable_if_t<!has_store<T>::value>>
-        std::weak_ptr<ConnectionBase> connect(T &&slot, DirectConnectionType = {})
-        {
-            std::weak_ptr<Connection<_Ty...>> conn = ConnectionStore::globalStore().emplace_front<DirectConnection<T, _Ty...>>(
+            std::weak_ptr<Connection<_Ty...>> conn = store->template emplace_front<DirectConnection<T, _Ty...>>(
                 std::forward<T>(slot));
-            std::lock_guard<std::mutex> guard(sSignalConnectMutex);
             mConnectedSlots.emplace_back(conn);
             return conn;
         }
 
-        //TODO how to deal with DefaultTaskQueue in Threading
-        /*template <typename T, typename _ = std::enable_if_t<!has_store<T>::value>>
-			std::weak_ptr<ConnectionBase> connect(T&& slot, QueuedConnectionType)
-			{
-				std::weak_ptr<Connection<_Ty...>> conn = ConnectionStore::globalStore().emplace_front<QueuedConnection<T, _Ty...>>(
-					std::forward<T>(slot), DefaultTaskQueue::getSingleton());
-				std::lock_guard<std::mutex> guard(sSignalConnectMutex);
-				mConnectedSlots.emplace_back(conn);
-				return conn;
-			}*/
+        template <typename T>
+        std::weak_ptr<ConnectionBase> connect(
+            T &&slot, TaskQueue *queue, const std::vector<DataMutex *> &dependencies = {}, ConnectionStore * store = nullptr)
+        {
+            if (!store)
+                store = &ConnectionStore::globalStore();
+            std::lock_guard<std::mutex> guard(sSignalConnectMutex);
+            std::weak_ptr<Connection<_Ty...>> conn = store->template emplace_front<QueuedConnection<T, _Ty...>>(
+                std::forward<T>(slot), queue);
+            mConnectedSlots.emplace_back(conn);
+            return conn;
+        }
 
     protected:
         void disconnectAll()

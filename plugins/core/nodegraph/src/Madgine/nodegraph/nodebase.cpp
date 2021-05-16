@@ -116,12 +116,12 @@ namespace NodeGraph {
         mDataOutPins[index].mTarget = {};
     }
 
-    uint32_t NodeBase::interpret(NodeInterpreter &interpreter, uint32_t flowIn, std::unique_ptr<NodeInterpreterData> &data) const
+    void NodeBase::interpret(NodeInterpreter &interpreter, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeInterpreterData> &data) const
     {
         throw 0;
     }
 
-    ValueType NodeBase::interpretRead(NodeInterpreter &interpreter, uint32_t providerIndex, std::unique_ptr<NodeInterpreterData> &data) const
+    void NodeBase::interpretRead(NodeInterpreter &interpreter, ValueType &retVal, uint32_t providerIndex, std::unique_ptr<NodeInterpreterData> &data) const
     {
         throw 0;
     }
@@ -133,11 +133,8 @@ namespace NodeGraph {
 
     void NodeBase::setup()
     {
-        mFlowOutPins.clear();
         mFlowOutPins.resize(flowOutCount());
-        mDataInPins.clear();
         mDataInPins.resize(dataInCount());
-        mDataOutPins.clear();
         mDataOutPins.resize(dataOutCount());
     }
 

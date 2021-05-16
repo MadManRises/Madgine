@@ -13,36 +13,38 @@ namespace NodeGraph {
     {
     }
 
-    uint32_t NodeInterpreter::interpret(uint32_t flowIn)
+    void NodeInterpreter::interpret(IndexType<uint32_t> &flowInOut)
     {
         const NodeBase *oldCurrentNode = mCurrentNode;
 
-        TargetPin pin = mGraph.mFlowInPins[flowIn].mTarget;
+        TargetPin pin = mGraph.mFlowInPins[flowInOut].mTarget;
 
         while (pin && pin.mNode) {
             mCurrentNode = mGraph.node(pin.mNode);
-            IndexType<uint32_t> flowOutIndex = mCurrentNode->interpret(*this, pin.mIndex, mData[pin.mNode - 1]);
-            if (flowOutIndex)
-                pin = mCurrentNode->flowOutTarget(flowOutIndex);
+            IndexType<uint32_t> flowIndex = pin.mIndex;
+            mCurrentNode->interpret(*this, flowIndex, mData[pin.mNode - 1]);
+            if (flowIndex)
+                pin = mCurrentNode->flowOutTarget(flowIndex);
             else
                 pin = {};
         }
 
         mCurrentNode = oldCurrentNode;
 
-        return pin.mIndex;
+        flowInOut = pin.mIndex;
     }
 
-    ValueType NodeInterpreter::read(uint32_t dataInIndex)
+    void NodeInterpreter::read(ValueType &retVal, uint32_t dataInIndex)
     {
         TargetPin pin = mCurrentNode->dataInSource(dataInIndex);
-        return mGraph.node(pin.mNode)->interpretRead(*this, pin.mIndex, mData[pin.mNode - 1]);
+        mGraph.node(pin.mNode)->interpretRead(*this, retVal, pin.mIndex, mData[pin.mNode - 1]);
     }
 
     void NodeInterpreter::write(uint32_t dataOutIndex, const ValueType &v)
     {
         TargetPin pin = mCurrentNode->dataOutTarget(dataOutIndex);
-        mGraph.node(pin.mNode)->interpretWrite(*this, pin.mIndex, mData[pin.mNode - 1], v);
+        if (pin)
+            mGraph.node(pin.mNode)->interpretWrite(*this, pin.mIndex, mData[pin.mNode - 1], v);
     }
 
 }

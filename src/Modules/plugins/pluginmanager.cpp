@@ -10,8 +10,6 @@
 
 #    include "Generic/keyvalue.h"
 
-#    include "../threading/defaulttaskqueue.h"
-
 #    include "cli/parameter.h"
 
 #    include "ini/inisection.h"
@@ -285,6 +283,7 @@ namespace Plugins {
 
     Future<bool> PluginManager::loadFromFile(const Filesystem::Path &p)
     {
+        LOG("Loading Plugins: " << p);
         if (!Filesystem::exists(p))
             return false;
         std::promise<bool> promise;
@@ -303,6 +302,7 @@ namespace Plugins {
 
     void PluginManager::saveToFile(const Filesystem::Path &p, bool withTools)
     {
+        LOG("Writing Plugins: " << p);
         Threading::Barrier &barrier = Threading::WorkGroup::barrier();
         barrier.queue(nullptr, [=, &barrier]() {
             Ini::IniFile file;

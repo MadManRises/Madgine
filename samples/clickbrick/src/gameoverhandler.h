@@ -4,12 +4,11 @@
 
 #include "Madgine/ui/widgetptr.h"
 
-#include "Modules/threading/slot.h"
-
 namespace ClickBrick {
 namespace UI {
 
     struct GameOverHandler : Engine::UI::GuiHandler<GameOverHandler> {
+        SERIALIZABLEUNIT(GameOverHandler);
 
         GameOverHandler(Engine::UI::UIManager &ui);
 
@@ -19,11 +18,9 @@ namespace UI {
 
         void restartGame();
 
-		void setScore(int score);
+        void setScore(int score);
 
     private:
-        Engine::Threading::Slot<&GameOverHandler::restartGame> mRestartGameSlot;
-
         Engine::UI::WidgetPtr<Engine::Widgets::Label> mScoreLabel;
     };
 

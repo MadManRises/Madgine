@@ -25,7 +25,7 @@ namespace Serialize {
             {
                 R result = TupleUnpacker::invokeExpand(f, OffsetPtr::parent(this), args);
 
-                this->writeActionResponse(&result, answerTarget, answerId);
+                this->writeRequestResponse(&result, answerTarget, answerId);
 
                 return result;
             }

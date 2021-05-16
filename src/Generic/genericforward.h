@@ -26,11 +26,16 @@ template <typename T>
 struct ControlBlock;
 
 
-
 struct Any;
 
 struct ByteBuffer;
 
 struct CoWString;
+
+template <typename>
+struct Enum;
+template <typename, typename>
+struct BaseEnum;
+struct EnumMetaTable;
 
 }

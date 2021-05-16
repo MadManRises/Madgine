@@ -8,7 +8,7 @@ struct META_EXPORT MetaTable {
     const MetaTable **mBase;    
     const std::pair<const char *, Accessor> *mMember;
 
-    ScopeIterator find(const std::string &key, TypedScopePtr scope) const;
+    ScopeIterator find(const std::string_view &key, TypedScopePtr scope) const;
 
     void call(TypedScopePtr scope, ValueType &retVal, const ArgumentList &args) const;
 

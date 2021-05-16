@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Meta/keyvalue/valuetype.h"
 #include "Generic/indextype.h"
+#include "Meta/keyvalue/valuetype_desc.h"
 
 namespace Engine {
 namespace NodeGraph {

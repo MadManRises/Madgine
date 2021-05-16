@@ -32,7 +32,7 @@ namespace Render {
     {
         data.mGroupSize = mesh.mGroupSize;
 
-        data.mVAO = { mesh.mAttributeList };
+        data.mVAO = { mesh.mAttributeList() };
         data.mVAO.bind();
 
         data.mVertices = {

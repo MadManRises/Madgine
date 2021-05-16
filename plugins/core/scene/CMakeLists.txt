@@ -8,11 +8,22 @@ FolderSources(sources "" src)
 		FolderSources(sources Madgine scene scenemanager.cpp scenemanager.h scenecomponentcollector.cpp scenecomponentcollector.h scenecomponentbase.cpp scenecomponentbase.h)
 			FolderSources(sources scene entity entitycomponentbase.cpp entitycomponentbase.h entitycomponentcollector.cpp entitycomponentcollector.h entitycomponentptr.cpp componentexception.h entityptr.cpp entityptr.h entity.cpp entity.h entitycomponent.h entitycomponentlistbase.cpp entitycomponentlist.cpp entitycomponenthandle.cpp entitycomponenthandle.h masks.h)
 				FolderSources(sources entity components animation.cpp animation.h mesh.cpp mesh.h skeleton.cpp skeleton.h transform.cpp transform.h)
-			FolderSources(sources scene nodes transformaccessornode.cpp transformaccessornode.h)
 
 add_plugin(Scene Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/scenelib.h)
 
-target_link_plugins(Scene MeshLoader SkeletonLoader AnimationLoader Base NodeGraph)
+target_link_plugins(Scene MeshLoader SkeletonLoader AnimationLoader Base)
+
+project(SceneNodes)
+set(sources "")
+FolderSources(sources "" nodes)
+	FolderSources(sources nodes Madgine scenenodesforward.h scenenodeslib.h)
+		FolderSources(sources Madgine scene)
+			FolderSources(sources scene nodes transformaccessornode.cpp transformaccessornode.h)
+
+add_plugin(SceneNodes Madgine Core ${sources} PRECOMPILED_HEADER nodes/Madgine/scenenodeslib.h)
+
+target_link_plugins(SceneNodes Scene NodeGraph)
+
 
 Project(SceneRenderer)
 

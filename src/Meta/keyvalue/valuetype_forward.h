@@ -12,7 +12,7 @@
 
 #include "valuetype_desc.h"
 
-#include "accessor.h"
+#include "enumholder.h"
 
 namespace Engine {
 
@@ -23,7 +23,6 @@ template <bool reference_to_ptr, typename T>
 void to_ValueType(ValueType &v, T &&t);
 template <bool reference_to_ptr, typename T>
 void to_ValueTypeRef(ValueTypeRef &v, T &&t);
-
 
 template <bool reference_to_ptr, typename T>
 void to_KeyValuePair(KeyValuePair &p, T &&t)
@@ -38,6 +37,15 @@ struct Functor_to_KeyValuePair {
     decltype(auto) operator()(Args &&... args)
     {
         return to_KeyValuePair<reference_to_ptr>(std::forward<Args>(args)...);
+    }
+};
+
+template <bool reference_to_ptr>
+struct Functor_to_ValueTypeRef {
+    template <typename... Args>
+    decltype(auto) operator()(Args &&... args)
+    {
+        return to_ValueTypeRef<reference_to_ptr>(std::forward<Args>(args)...);
     }
 };
 
@@ -78,7 +86,12 @@ decltype(auto) ValueType_as(const ValueType &v)
     } else if constexpr (isValueTypePrimitive_v<T>) {
         return ValueType_as_impl<T>(v);
     } else if constexpr (is_iterable_v<T>) {
-        return ValueType_as_impl<KeyValueVirtualRange>(v).safe_cast<T>();
+        if constexpr (std::is_same_v<KeyType_t<typename T::iterator::value_type>, std::monostate>)
+            return ValueType_as_impl<KeyValueVirtualSequenceRange>(v).safe_cast<T>();
+        else
+            return ValueType_as_impl<KeyValueVirtualAssociativeRange>(v).safe_cast<T>();
+    } else if constexpr (is_instance_v<T, Enum> || is_instance_v<T, BaseEnum>) {
+        return ValueType_as_impl<EnumHolder>(v).safe_cast<T>();
     } else {
         if constexpr (std::is_pointer_v<T>) {
             return ValueType_as_impl<TypedScopePtr>(v).safe_cast<std::remove_pointer_t<T>>();
@@ -97,7 +110,6 @@ bool ValueType_is(const ValueType &v)
     return toValueTypeDesc<T>().canAccept(ValueType_type(v));
 }
 
-
 template <bool reference_to_ptr, typename T>
 decltype(auto) convert_ValueType(T &&t)
 {
@@ -106,16 +118,23 @@ decltype(auto) convert_ValueType(T &&t)
     } else if constexpr (is_string_like_v<std::decay_t<T>>) {
         return std::string { std::forward<T>(t) };
     } else if constexpr (is_iterable_v<T>) {
-        return KeyValueVirtualRange { std::forward<T>(t) };
+        if constexpr (std::is_same_v<KeyType_t<typename std::remove_reference_t<T>::iterator::value_type>, std::monostate>)
+            return KeyValueVirtualSequenceRange { std::forward<T>(t) };
+        else
+            return KeyValueVirtualAssociativeRange { std::forward<T>(t) };
     } else if constexpr (std::is_enum_v<std::decay_t<T>>) {
         if constexpr (std::is_reference_v<T>) {
-            return static_cast<int &>(t);
+            return static_cast<std::underlying_type_t<T> &>(t);
         } else {
-            return static_cast<int>(t);
+            return static_cast<std::underlying_type_t<T>>(t);
         }
+    } else if constexpr (is_instance_v<T, Enum> || is_instance_v<T, BaseEnum>) {
+        return EnumHolder { std::forward<T>(t) };
     } else {
         if constexpr (std::is_pointer_v<std::decay_t<T>>) {
             return TypedScopePtr { t };
+        } else if constexpr (is_instance_v<std::decay_t<T>, std::unique_ptr>) {
+            return TypedScopePtr { t.get() };
         } else if constexpr (std::is_reference_v<T> && reference_to_ptr) {
             return TypedScopePtr { &t };
         } else {

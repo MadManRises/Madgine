@@ -16,6 +16,8 @@
 
 #include "../serializableunit.h"
 
+#include "Generic/cowstring.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -99,6 +101,14 @@ namespace Serialize {
                     return STREAM_PARSE_ERROR(*this, "Expected <string>");
             }
         }
+        return {};
+    }
+
+    StreamResult SerializeInStream::readUnformatted(CoWString &s)
+    {
+        std::string string;
+        STREAM_PROPAGATE_ERROR(readUnformatted(string));
+        s = std::move(string);
         return {};
     }
 
@@ -321,6 +331,11 @@ namespace Serialize {
         } else {
             OutStream::operator<<(s);
         }
+    }
+
+    void SerializeOutStream::writeUnformatted(const CoWString &s)
+    {
+        writeUnformatted(std::string_view { s });
     }
 
     void SerializeOutStream::writeUnformatted(const ByteBuffer &b)

@@ -16,7 +16,6 @@ namespace Threading {
         template <typename Con, typename... Args>
         std::weak_ptr<Con> emplace_front(Args &&... args)
         {
-            std::lock_guard lock(mMutex);
             std::shared_ptr<Con> ptr = create<Con>(&mBegin, std::forward<Args>(args)...);
             mBegin = ptr;
             return ptr;
@@ -32,13 +31,7 @@ namespace Threading {
         static std::shared_ptr<ConnectionBase> make_shared_connection(std::unique_ptr<ConnectionBase> &&conn);
 
         std::shared_ptr<ConnectionBase> mBegin;
-        std::mutex mMutex;
     };
-
-	DERIVE_FUNCTION(connectionStore);
-
-    template <typename T>
-    using has_store = std::is_same<typename has_function_connectionStore<T>::return_type, ConnectionStore &>;
 
 }
 }

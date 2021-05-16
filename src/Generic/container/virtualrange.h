@@ -24,6 +24,11 @@ struct VirtualIteratorBase {
         return mContainer;
     }
 
+    VirtualIterator<RefT> end()
+    {
+        return mContainer->end(mContainer);
+    }
+
 protected:
     VirtualIteratorBase(const std::shared_ptr<VirtualRangeBase<RefT>> &container)
         : mContainer(container)
@@ -133,6 +138,11 @@ struct VirtualIterator {
         return !mImpl->equals(*other.mImpl);
     }
 
+    VirtualIterator<RefT> end() const
+    {
+        return mImpl->end();
+    }
+
 private:
     std::unique_ptr<VirtualIteratorBase<RefT>> mImpl;
 };
@@ -200,12 +210,14 @@ struct VirtualRange {
     VirtualRange(VirtualRange &&) = default;
 
     template <typename Assign, typename C>
-    void assign(C&& c) {
+    void assign(C &&c)
+    {
         mRange = std::make_shared<VirtualRangeImpl<RefT, C, Assign>>(std::forward<C>(c));
     }
 
     template <typename C, typename = std::enable_if_t<!std::is_same_v<std::decay_t<C>, VirtualRange<RefT, AssignDefault>>>>
-    VirtualRange& operator=(C&& c) {
+    VirtualRange &operator=(C &&c)
+    {
         assign<AssignDefault>(std::forward<C>(c));
         return *this;
     }

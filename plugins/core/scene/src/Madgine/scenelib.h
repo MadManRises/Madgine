@@ -6,7 +6,6 @@
 #include "meshloaderlib.h"
 #include "skeletonloaderlib.h"
 #include "animationloaderlib.h"
-#include "Madgine/nodegraphlib.h"
 
 #if defined(Scene_EXPORTS)
 #    define MADGINE_SCENE_EXPORT DLL_EXPORT

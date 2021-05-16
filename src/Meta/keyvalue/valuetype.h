@@ -7,10 +7,10 @@
 #include "../math/vector3.h"
 #include "../math/vector4.h"
 
-#include "apifunction.h"
+#include "boundapifunction.h"
 #include "function.h"
 
-#include "keyvaluevirtualiterator.h"
+#include "keyvaluevirtualrange.h"
 
 #include "objectptr.h"
 
@@ -50,7 +50,7 @@ struct META_EXPORT ValueType {
 
     template <typename T, typename _ = std::enable_if_t<std::is_enum_v<T>>>
     explicit ValueType(T val)
-        : ValueType(static_cast<int>(val))
+        : ValueType(static_cast<std::underlying_type_t<T>>(val))
     {
     }
 
@@ -199,7 +199,7 @@ ValueType_Return<T> ValueType::as() const
     } else if constexpr (std::is_same_v<T, ValueType>) {
         return *this;
     } else if constexpr (std::is_enum_v<T>) {
-        return static_cast<T>(std::get<int>(mUnion));
+        return static_cast<T>(std::get<std::underlying_type_t<T>>(mUnion));
     } else {
         if constexpr (std::is_pointer_v<T>) {
             return std::get<TypedScopePtr>(mUnion).safe_cast<std::remove_pointer_t<T>>();

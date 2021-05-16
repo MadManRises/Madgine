@@ -34,9 +34,7 @@ namespace Render {
         GLuint handle();
 #endif
 
-        void enableVertexAttribute(unsigned int index, AttributeDescriptor attribute);
-
-        void disableVertexAttribute(unsigned int index);
+        void setVertexAttribute(unsigned int index, AttributeDescriptor attribute);
 
     private:
 #if !OPENGL_ES

@@ -13,8 +13,6 @@
 
 #include "resourceloaderbase.h"
 
-#include "Modules/threading/defaulttaskqueue.h"
-
 namespace Engine {
 namespace Resources {
 

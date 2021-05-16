@@ -1,6 +1,6 @@
 #include "../../metalib.h"
 
-#include "streamerror.h"
+#include "streamresult.h"
 
 #include "serializestream.h"
 

@@ -33,7 +33,6 @@ struct META_EXPORT OwnedScopePtr {
 
     bool operator==(const OwnedScopePtr &other) const;
 
-    operator TypedScopePtr() const;
     TypedScopePtr get() const;
 
     template <typename T>

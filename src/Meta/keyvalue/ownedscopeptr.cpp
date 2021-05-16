@@ -21,11 +21,6 @@ bool OwnedScopePtr::operator==(const OwnedScopePtr &other) const
     return mScope == other.mScope;
 }
 
-OwnedScopePtr::operator TypedScopePtr() const
-{
-    return get();
-}
-
 TypedScopePtr OwnedScopePtr::get() const
 {
     return mScope->proxyScopePtr();

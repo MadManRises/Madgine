@@ -6,7 +6,7 @@
 
 namespace Engine {
 
-ScopeField TypedScopePtr::operator[](const std::string &key) const
+ScopeField TypedScopePtr::operator[](const std::string_view &key) const
 {
     return *find(key);
 }
@@ -16,7 +16,7 @@ ScopeField TypedScopePtr::operator[](const std::string &key) const
     return (*find(key)).isEditable();
 }*/
 
-ScopeIterator TypedScopePtr::find(const std::string &key) const
+ScopeIterator TypedScopePtr::find(const std::string_view &key) const
 {
     return mType->find(key, *this);
 }

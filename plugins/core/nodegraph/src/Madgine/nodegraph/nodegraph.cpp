@@ -42,13 +42,13 @@ namespace NodeGraph {
     NodeGraph::~NodeGraph()
     {
     }
-    void NodeGraph::loadFromFile(const Filesystem::Path &path)
+    Serialize::StreamResult NodeGraph::loadFromFile(const Filesystem::Path &path)
     {
         mPath = path;
         if (Filesystem::exists(mPath)) {
             Filesystem::FileManager mgr("Graph-Serializer");
             Serialize::SerializeInStream in = mgr.openRead(mPath, std::make_unique<Serialize::XMLFormatter>());
-            Serialize::read(in, *this, "Graph", {}, Serialize::StateTransmissionFlags_ApplyMap);
+            STREAM_PROPAGATE_ERROR(Serialize::read(in, *this, "Graph", {}, Serialize::StateTransmissionFlags_ApplyMap));
             std::vector<bool> outFlows;
             std::vector<std::optional<DataProviderPinPrototype>> inPins;
             std::vector<std::optional<DataReceiverPinPrototype>> outPins;
@@ -98,6 +98,7 @@ namespace NodeGraph {
         } else {
             saveToFile();
         }
+        return {};
     }
 
     void NodeGraph::saveToFile()
@@ -255,7 +256,7 @@ namespace NodeGraph {
 
     std::tuple<std::string_view> NodeGraph::storeNodeCreationData(const std::unique_ptr<NodeBase> &node) const
     {
-        return std::make_tuple(node->name());
+        return std::make_tuple(node->className());
     }
 
 }

@@ -17,6 +17,7 @@ struct IndexType {
 
     IndexType &operator=(T t)
     {
+        assert(t != invalid);
         mIndex = t;
         return *this;
     }

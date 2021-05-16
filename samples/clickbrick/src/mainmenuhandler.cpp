@@ -28,7 +28,6 @@ UNIQUECOMPONENT(ClickBrick::UI::MainMenuHandler)
 
         MainMenuHandler::MainMenuHandler(Engine::UI::UIManager &ui)
             : Engine::UI::GuiHandler<MainMenuHandler>(ui, Engine::UI::GuiHandlerBase::WindowType::ROOT_WINDOW)
-            , mStartGameSlot(this)
             , mStartGameButton(this, "StartGameButton")
         {
         }
@@ -40,12 +39,9 @@ UNIQUECOMPONENT(ClickBrick::UI::MainMenuHandler)
 
         void ClickBrick::UI::MainMenuHandler::setWidget(Engine::Widgets::WidgetBase *w)
         {
-            if (widget()) {
-                mStartGameSlot.disconnectAll();
-            }
             Engine::UI::GuiHandlerBase::setWidget(w);
             if (widget()) {
-                mStartGameButton->clickEvent().connect(mStartGameSlot);
+                mStartGameButton->clickEvent().connect(&MainMenuHandler::startGame, this, &mConStore);
             }
         }
 

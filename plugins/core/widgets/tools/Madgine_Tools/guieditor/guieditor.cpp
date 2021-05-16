@@ -36,8 +36,6 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-#include "Meta/keyvalue/valuetype.h"
-
 #include "Meta/serialize/streams/serializestreambuf.h"
 
 UNIQUECOMPONENT(Engine::Tools::GuiEditor);
@@ -388,7 +386,7 @@ namespace Tools {
 
         bool open = ImGui::TreeNodeEx(w->getName().c_str(), flags);
 
-        ImGui::DraggableValueTypeSource(w->getName(), w, Engine::ValueType { w });
+        ImGui::DraggableValueTypeSource(w->getName(), w, w);
         if (ImGui::BeginDragDropTarget()) {
             Widgets::WidgetBase *newChild = nullptr;
             if (ImGui::AcceptDraggableValueType(newChild)) {

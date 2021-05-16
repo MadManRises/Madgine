@@ -84,6 +84,11 @@ namespace App {
     {
         return *sApp;
     }
+
+    Threading::TaskQueue *Application::taskQueue()
+    {
+        return &mTaskQueue;
+    }
 }
 
 }

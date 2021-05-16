@@ -4,7 +4,7 @@
 
 #include "Generic/callerhierarchy.h"
 
-#include "Meta/serialize/streams/streamerror.h"
+#include "Meta/serialize/streams/streamresult.h"
 
 namespace Engine {
 namespace Scene {

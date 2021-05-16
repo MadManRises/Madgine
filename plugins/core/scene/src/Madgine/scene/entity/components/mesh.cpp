@@ -18,6 +18,7 @@ ENTITYCOMPONENT_IMPL(Mesh, Engine::Scene::Entity::Mesh);
 
 METATABLE_BEGIN(Engine::Scene::Entity::Mesh)
 PROPERTY(Mesh, get, set)
+PROPERTY(Visible, isVisible, setVisible)
 METATABLE_END(Engine::Scene::Entity::Mesh)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Mesh)
@@ -31,7 +32,8 @@ namespace Scene {
         Mesh::Mesh(const ObjectPtr &data)
             : EntityComponent(data)
         {
-            if (const Engine::ValueType &v = data["mesh"]; v.is<std::string>()) {
+            Engine::ValueType v;
+            if (data.getValue(v, "mesh") && v.is<std::string>()) {
                 setName(v.as<std::string>());
             }
         }
@@ -52,11 +54,12 @@ namespace Scene {
 
         void Mesh::setVisible(bool vis)
         {
+            mIsVisible = vis;
         }
 
         bool Mesh::isVisible() const
         {
-            return true;
+            return mIsVisible;
         }
 
         AABB Mesh::aabb() const

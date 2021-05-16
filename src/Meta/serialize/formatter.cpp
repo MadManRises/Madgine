@@ -2,7 +2,7 @@
 
 #include "formatter.h"
 
-#include "streams/streamerror.h"
+#include "streams/streamresult.h"
 
 namespace Engine {
 namespace Serialize {

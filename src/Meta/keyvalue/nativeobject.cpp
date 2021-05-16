@@ -7,27 +7,30 @@
 namespace Engine {
 
 struct NativeObjectInstance : ObjectInstance {
-    NativeObjectInstance(std::map<std::string, ValueType> data)
+    NativeObjectInstance(std::map<std::string, ValueType, std::less<>> data)
         : mData(std::move(data))
     {
     }
 
-    virtual ValueType getValue(const std::string &name) const override
+    virtual bool getValue(ValueType &retVal, const std::string_view &name) const override
     {
         auto it = mData.find(name);
-        return it == mData.end() ? ValueType {} : it->second;
+        if (it == mData.end())
+            return false;
+        retVal = it->second;
+        return true;
     }
 
-    virtual void setValue(const std::string &name, const ValueType &value) override
+    virtual void setValue(const std::string_view &name, const ValueType &value) override
     {
-        mData[name] = value;
+        mData[std::string{name}] = value;
     }
 
 private:
-    std::map<std::string, ValueType> mData;
+    std::map<std::string, ValueType, std::less<>> mData;
 };
 
-NativeObject::NativeObject(std::map<std::string, ValueType> data)
+NativeObject::NativeObject(std::map<std::string, ValueType, std::less<>> data)
     : ObjectPtr(std::make_shared<NativeObjectInstance>(std::move(data)))
 {
 }

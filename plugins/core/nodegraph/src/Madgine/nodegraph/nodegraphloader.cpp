@@ -4,6 +4,8 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
+#include "Meta/serialize/streams/streamresult.h"
+
 UNIQUECOMPONENT(Engine::NodeGraph::NodeGraphLoader)
 
 METATABLE_BEGIN(Engine::NodeGraph::NodeGraphLoader)
@@ -32,7 +34,12 @@ METATABLE_END(Engine::NodeGraph::NodeGraphLoader::ResourceType)
 
         bool NodeGraphLoader::loadImpl(NodeGraph &graph, ResourceType *res)
         {   
-            graph.loadFromFile(res->path());
+            Serialize::StreamResult result = graph.loadFromFile(res->path());
+
+            if (result.mState != Serialize::StreamState::OK) {
+                LOG(*result.mError);
+                return false;
+            }
 
             return true;
         }

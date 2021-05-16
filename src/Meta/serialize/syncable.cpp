@@ -42,11 +42,11 @@ namespace Serialize {
         return result;
     }
 
-    BufferedOutStream &SyncableBase::getMasterActionResponseTarget(const SyncableUnitBase *parent, uint8_t index, ParticipantId answerTarget, TransactionId answerId) const
+    BufferedOutStream &SyncableBase::getMasterRequestResponseTarget(const SyncableUnitBase *parent, uint8_t index, ParticipantId answerTarget, TransactionId answerId) const
     {
         for (BufferedOutStream *out : parent->getMasterMessageTargets()) {
             if (out->id() == answerTarget) {
-                beginActionResponseMessage(parent, index, *out, answerId);
+                beginRequestResponseMessage(parent, index, *out, answerId);
                 return *out;
             }
         }
@@ -76,14 +76,14 @@ namespace Serialize {
         parent->serializeType()->writeRequest(parent, index, getSlaveActionMessageTarget(parent, index, requester, requesterTransactionId, std::move(callback)), data);
     }
 
-    void SyncableBase::writeActionResponse(const SyncableUnitBase *parent, uint8_t index, const void *data, ParticipantId answerTarget, TransactionId answerId) const
+    void SyncableBase::writeRequestResponse(const SyncableUnitBase *parent, uint8_t index, const void *data, ParticipantId answerTarget, TransactionId answerId) const
     {
         if (answerTarget != 0) {
-            parent->serializeType()->writeAction(parent, index, { &getMasterActionResponseTarget(parent, index, answerTarget, answerId) }, data);
+            parent->serializeType()->writeAction(parent, index, { &getMasterRequestResponseTarget(parent, index, answerTarget, answerId) }, data);
         }
     }
 
-    void SyncableBase::beginActionResponseMessage(const SyncableUnitBase *parent, uint8_t index, BufferedOutStream &stream, TransactionId id) const
+    void SyncableBase::beginRequestResponseMessage(const SyncableUnitBase *parent, uint8_t index, BufferedOutStream &stream, TransactionId id) const
     {
         stream.beginMessage(parent, ACTION, id);
         stream << index;

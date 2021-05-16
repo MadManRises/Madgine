@@ -11,8 +11,8 @@ struct MADGINE_BASE_EXPORT KeyValueRegistry {
     static void unregisterGlobal(TypedScopePtr ptr);
     static void unregisterWorkGroupLocal(TypedScopePtr ptr);
 
-    static const std::map<TypedScopePtr, const char *> &globals();
-    static const std::map<TypedScopePtr, const char *> &workgroupLocals();
+    static const std::map<std::string_view, TypedScopePtr> &globals();
+    static const std::map<std::string_view, TypedScopePtr> &workgroupLocals();
 };
 
 template <typename T>

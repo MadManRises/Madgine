@@ -19,6 +19,7 @@ private:
         : mScope(t)
         , mType(table<decayed_t<T>>)
     {
+        static_assert(!is_instance_v<T, std::unique_ptr>);
     }
 
 public:
@@ -70,8 +71,8 @@ public:
         return mScope != nullptr;
     }
 
-    ScopeIterator find(const std::string &key) const;
-    ScopeField operator[](const std::string &key) const;
+    ScopeIterator find(const std::string_view &key) const;
+    ScopeField operator[](const std::string_view &key) const;
     //bool isEditable(const std::string &key) const;
     ScopeIterator begin() const;
     ScopeIterator end() const;

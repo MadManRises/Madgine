@@ -68,13 +68,13 @@ namespace NodeGraph {
         ValueType mData;
     };
 
-    ValueType VariableNode::interpretRead(NodeInterpreter &interpreter, uint32_t providerIndex, std::unique_ptr<NodeInterpreterData> &data) const
+    void VariableNode::interpretRead(NodeInterpreter &interpreter, ValueType &retVal, uint32_t providerIndex, std::unique_ptr<NodeInterpreterData> &data) const
     {
         if (!data) {
             data = std::make_unique<VariableNodeInterpret>(mDefaultValue);
         }
         VariableNodeInterpret *variable = static_cast<VariableNodeInterpret *>(data.get());
-        return variable->mData;
+        retVal = variable->mData;
     }
 
     void VariableNode::interpretWrite(NodeInterpreter &interpreter, uint32_t receiverIndex, std::unique_ptr<NodeInterpreterData> &data, const ValueType &v) const

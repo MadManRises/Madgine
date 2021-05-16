@@ -11,19 +11,19 @@ namespace Render {
 
     static thread_local DirectX11VertexArray *sCurrentBound = nullptr;
 
-    DirectX11VertexArray::DirectX11VertexArray(const std::vector<std::optional<AttributeDescriptor>> &attributes)
+    DirectX11VertexArray::DirectX11VertexArray(const std::array<AttributeDescriptor, 7> &attributes)
     {
         uint8_t acc = 1;
 
-        for (const std::optional<AttributeDescriptor> &attribute : attributes) {
+        for (const AttributeDescriptor &attribute : attributes) {
             if (attribute) {
                 mFormat += acc;
 
-                mAttributes.push_back(*attribute);
+                mAttributes.push_back(attribute);
                 if (mStride == 0)
-                    mStride = attribute->mStride;
+                    mStride = attribute.mStride;
                 else {
-                    assert(mStride == attribute->mStride);
+                    assert(mStride == attribute.mStride);
                 }
             }
             acc <<= 1;

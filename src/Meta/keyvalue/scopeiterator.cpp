@@ -13,7 +13,7 @@ namespace Engine {
 ScopeIterator::ScopeIterator(TypedScopePtr scope, const std::pair<const char *, Accessor> *pointer)
     : mScope(scope)
     , mCurrentTable(scope.mType)
-    , mPointer(pointer)
+    , mPointer(scope ? pointer : nullptr)
 {
     if (mPointer) {
         checkDerived();
@@ -65,6 +65,11 @@ void ScopeIterator::checkDerived()
         mCurrentTable = *mCurrentTable->mBase;
         mPointer = mCurrentTable->mMember;
     }
+}
+
+ScopeIterator ScopeIterator::end() const
+{
+    return { mScope, nullptr };
 }
 
 }

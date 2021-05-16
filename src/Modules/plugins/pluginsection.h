@@ -3,6 +3,7 @@
 #if ENABLE_PLUGINS
 
 #    include "Generic/future.h"
+#include "../threading/task.h"
 
 namespace Engine {
 namespace Plugins {
@@ -29,8 +30,8 @@ namespace Plugins {
         };
 
         State isLoaded(const std::string &name);
-        SharedFuture<bool> loadPlugin(const std::string &name);
-        SharedFuture<bool> unloadPlugin(const std::string &name);
+        SharedFuture<bool> loadPlugin(const std::string &name, Threading::TaskHandle onSuccess = {});
+        SharedFuture<bool> unloadPlugin(const std::string &name, Threading::TaskHandle onSuccess = {});
 
         SharedFuture<bool> loadPluginByFilename(const std::string &name);
 
@@ -56,8 +57,8 @@ namespace Plugins {
         Plugin *getPlugin(const std::string &name);
 
     private:
-        SharedFuture<bool> loadPlugin(Threading::Barrier &barrier, Plugin *p, std::optional<std::promise<bool>> &&promise = {}, std::optional<SharedFuture<bool>> &&future = {});
-        SharedFuture<bool> unloadPlugin(Threading::Barrier &barrier, Plugin *p, std::optional<std::promise<bool>> &&promise = {}, std::optional<SharedFuture<bool>> &&future = {});
+        SharedFuture<bool> loadPlugin(Threading::Barrier &barrier, Plugin *p, std::optional<std::promise<bool>> &&promise = {}, std::optional<SharedFuture<bool>> &&future = {}, Threading::TaskHandle onSuccess = {});
+        SharedFuture<bool> unloadPlugin(Threading::Barrier &barrier, Plugin *p, std::optional<std::promise<bool>> &&promise = {}, std::optional<SharedFuture<bool>> &&future = {}, Threading::TaskHandle onSuccess = {});
 
         friend struct Plugin;
 
