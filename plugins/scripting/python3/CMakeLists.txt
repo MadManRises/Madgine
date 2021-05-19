@@ -1,8 +1,5 @@
 project(Python3)
 
-set(PYTHON3_DIR "C:\\Python39" CACHE PATH "Root-folder of Python3 installation to use")
-
-
 
 set(sources "")
 FolderSources(sources "" src)
@@ -39,24 +36,7 @@ add_tools(Python3 ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/Python3/pyth
 target_link_plugins(Python3Tools Tools)
 
 
-if (NOT WINDOWS)
-	find_file (PYTHON3_LIB "python3.so" ${PYTHON3_DIR}/libs)
+find_package (Python3 COMPONENTS Development.Embed REQUIRED)
 
-	if (NOT PYTHON3_LIB)
-		message(SEND_ERROR "Could not find file '${PYTHON3_LIB_NAME}' in PYTHON3_DIR (${PYTHON3_DIR})!")
-	endif()
-
-	target_link_libraries(Python3 PUBLIC ${PYTHON3_LIB})
-else()
-	target_link_directories(Python3 PUBLIC ${PYTHON3_DIR}/libs)
-endif()
-
-
-find_path (PYTHON3_INCLUDE "Python.h" ${PYTHON3_DIR}/include)
-
-if (NOT PYTHON3_INCLUDE)
-	message(SEND_ERROR "Could not find file 'Python.h' in PYTHON3_DIR (${PYTHON3_DIR})!")
-endif()
-
-target_include_directories(Python3 PUBLIC ${PYTHON3_INCLUDE})
+target_link_libraries(Python3 PUBLIC Python3::Python)
 
