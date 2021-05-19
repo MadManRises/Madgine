@@ -36,7 +36,7 @@ add_tools(Python3 ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/Python3/pyth
 target_link_plugins(Python3Tools Tools)
 
 
-find_package (Python3 COMPONENTS Development.Embed REQUIRED)
+find_package (Python3 COMPONENTS Development.Embed)
 
 target_link_libraries(Python3 PUBLIC Python3::Python)
 
