@@ -10,7 +10,7 @@ add_plugin(Ulam Madgine Math ${sources} PRECOMPILED_HEADER ulamlib.h SOURCE_ROOT
 target_link_libraries(Ulam PUBLIC Modules)
 
 set(sources "")
-FolderSources(sources "" tools ulamtool.cpp)
+FolderSources(sources "" tools ulamtool.cpp heroeseditor.cpp)
 
 add_tools(Ulam ${sources} PRECOMPILED_HEADER tools/ulamtoolslib.h SOURCE_ROOT tools)
 
