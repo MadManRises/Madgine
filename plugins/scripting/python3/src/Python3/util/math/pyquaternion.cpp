@@ -11,7 +11,9 @@ namespace Scripting {
         static PyObject *
         PyQuaternion_str(PyQuaternion *self)
         {
-            return PyUnicode_FromString((std::stringstream {} << self->mQuaternion).str().c_str());
+            std::stringstream ss;
+            ss << self->mQuaternion;
+            return PyUnicode_FromString(ss.str().c_str());
         }
 
         PyTypeObject PyQuaternionType = {

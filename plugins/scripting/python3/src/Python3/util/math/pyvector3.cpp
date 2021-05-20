@@ -11,7 +11,9 @@ namespace Scripting {
         static PyObject *
         PyVector3_str(PyVector3 *self)
         {
-            return PyUnicode_FromString((std::stringstream {} << self->mVector).str().c_str());
+            std::stringstream ss;
+            ss << self->mVector;
+            return PyUnicode_FromString(ss.str().c_str());
         }
 
         PyTypeObject PyVector3Type = {
