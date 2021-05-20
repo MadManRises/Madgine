@@ -34,6 +34,7 @@ namespace Scripting {
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(std::monostate);
 
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(int i);
+        MADGINE_PYTHON3_EXPORT PyObject *toPyObject(uint64_t i);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(bool b);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(float f);
 
@@ -47,8 +48,15 @@ namespace Scripting {
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const VirtualIterator<KeyValuePair> &it);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const VirtualIterator<ValueTypeRef> &it);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const CoWString &s);
+        MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const Vector4 &v);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const Vector3 &v);
+        MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const Vector2 &v);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const Quaternion &v);
+        MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const ObjectPtr &o);
+        MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const CoW<Matrix3> &m);
+        MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const CoW<Matrix4> &m);
+        MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const EnumHolder &e);
+        MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const Function &f);
 
         MADGINE_PYTHON3_EXPORT void fromPyObject(ValueType &retVal, PyObject *obj);
 

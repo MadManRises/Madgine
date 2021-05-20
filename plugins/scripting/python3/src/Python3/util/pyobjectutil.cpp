@@ -21,12 +21,7 @@ namespace Scripting {
         PyObject *toPyObject(const ValueType &val)
         {
             return val.visit([](const auto &e) -> PyObject * {
-                if constexpr (requires { toPyObject(e); }) {
-                    return toPyObject(e);
-                } else {
-                    PyErr_Format(PyExc_NotImplementedError, "Can't convert type <%s> yet", typeid(decltype(e)).name());
-                    return NULL;
-                }
+                return toPyObject(e);
             });
         }
 
@@ -36,6 +31,11 @@ namespace Scripting {
         }
 
         PyObject *toPyObject(int i)
+        {
+            return PyLong_FromLong(i);
+        }
+
+        PyObject *toPyObject(uint64_t i)
         {
             return PyLong_FromLong(i);
         }
@@ -118,6 +118,12 @@ namespace Scripting {
             return PyUnicode_FromStringAndSize(s.data(), s.size());
         }
 
+        PyObject *toPyObject(const Vector2 &v)
+        {
+            PyErr_SetString(PyExc_NotImplementedError, "Can't convert type <Vector2> yet");
+            return NULL;
+        }
+
         PyObject *toPyObject(const Vector3 &v)
         {
             PyObject *obj = PyObject_CallObject((PyObject *)&PyVector3Type, NULL);
@@ -125,11 +131,47 @@ namespace Scripting {
             return obj;
         }
 
+        PyObject *toPyObject(const Vector4 &v)
+        {
+            PyErr_SetString(PyExc_NotImplementedError, "Can't convert type <Vector4> yet");
+            return NULL;
+        }
+
         PyObject *toPyObject(const Quaternion &q)
         {
             PyObject *obj = PyObject_CallObject((PyObject *)&PyQuaternionType, NULL);
             new (&reinterpret_cast<PyQuaternion *>(obj)->mQuaternion) Quaternion(q);
             return obj;
+        }
+
+        PyObject *toPyObject(const ObjectPtr &o)
+        {
+            PyErr_SetString(PyExc_NotImplementedError, "Can't convert type <ObjectPtr> yet");
+            return NULL;
+        }
+
+        PyObject *toPyObject(const CoW<Matrix3> &m)
+        {
+            PyErr_SetString(PyExc_NotImplementedError, "Can't convert type <Matrix3> yet");
+            return nullptr;
+        }
+
+        PyObject *toPyObject(const CoW<Matrix4> &m)
+        {
+            PyErr_SetString(PyExc_NotImplementedError, "Can't convert type <Matrix4> yet");
+            return nullptr;
+        }
+
+        PyObject *toPyObject(const EnumHolder &e)
+        {
+            PyErr_SetString(PyExc_NotImplementedError, "Can't convert type <EnumHolder> yet");
+            return nullptr;
+        }
+
+        PyObject *toPyObject(const Function &f)
+        {
+            PyErr_SetString(PyExc_NotImplementedError, "Can't convert type <Function> yet");
+            return nullptr;
         }
 
         void fromPyObject(ValueType &retVal, PyObject *obj)
