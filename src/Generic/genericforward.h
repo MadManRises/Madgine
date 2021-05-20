@@ -31,6 +31,8 @@ struct Any;
 struct ByteBuffer;
 
 struct CoWString;
+template <typename T>
+struct CoW;
 
 template <typename>
 struct Enum;
