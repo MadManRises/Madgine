@@ -1,3 +1,5 @@
 project(Scripting)
 
-add_subdirectory(python3)
+if (NOT ANDROID AND NOT EMSCRIPTEN)
+	add_subdirectory(python3)
+endif()
