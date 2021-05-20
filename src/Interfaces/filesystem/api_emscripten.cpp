@@ -17,6 +17,7 @@ namespace Filesystem {
 
     EMSCRIPTEN_KEEPALIVE DLL_EXPORT_TAG extern "C" void setupDoneImpl() {
         sSetupSuccessFunction();
+        emscripten_set_interval(&sync, 15000, nullptr);
     }
 
     DLL_EXPORT void setup(void *fn)
@@ -35,7 +36,7 @@ namespace Filesystem {
         setCwd("/cwd");
     }
 
-    void sync()
+    void sync(void *)
     {
         EM_ASM(
             FS.syncfs(

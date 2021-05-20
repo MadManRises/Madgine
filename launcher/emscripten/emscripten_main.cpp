@@ -5,25 +5,15 @@
 
 #    include "Interfaces/filesystem/api.h"
 #    include "Madgine/core/root.h"
-#    include "Modules/threading/defaulttaskqueue.h"
 #    include "Modules/threading/workgroup.h"
 #include "../launcher.h"
+#include "Madgine/app/application.h"
 #include <emscripten.h>
-
-namespace Engine {
-namespace Filesystem {
-    extern void sync();
-}
-}
 
 void mainImpl()
 {
     emscripten_cancel_main_loop();
     static Engine::Threading::WorkGroup workGroup { "Launcher" };
-    Engine::Threading::DefaultTaskQueue::getSingleton().addRepeatedTask([]() {
-        Engine::Filesystem::sync();
-    }, Engine::Threading::TaskMask::ALL,
-        std::chrono::seconds { 15 });
     static Engine::Core::Root root;
     launch();
 }
