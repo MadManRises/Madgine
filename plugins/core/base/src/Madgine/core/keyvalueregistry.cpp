@@ -23,14 +23,14 @@ void KeyValueRegistry::registerWorkGroupLocal(const char *name, TypedScopePtr pt
 
 void KeyValueRegistry::unregisterGlobal(TypedScopePtr ptr)
 {
-    size_t count = std::erase_if(sGlobalRegistry, [=](auto &p) { return p.second == ptr; });
-    assert(count == 1);
+    auto it = std::find_if(sGlobalRegistry.begin(), sGlobalRegistry.end(), [=](auto &p) { return p.second == ptr; });
+    sGlobalRegistry.erase(it);
 }
 
 void KeyValueRegistry::unregisterWorkGroupLocal(TypedScopePtr ptr)
 {
-    size_t count = std::erase_if(*sWorkGroupLocalRegistry, [=](auto &p) { return p.second == ptr; });
-    assert(count == 1);
+    auto it = std::find_if(sWorkGroupLocalRegistry->begin(), sWorkGroupLocalRegistry->end(), [=](auto &p) { return p.second == ptr; });
+    sWorkGroupLocalRegistry->erase(it);
 }
 
 const std::map<std::string_view, TypedScopePtr> &KeyValueRegistry::globals()
