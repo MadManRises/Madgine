@@ -1,22 +1,10 @@
 #include "Modules/moduleslib.h"
 #include "Modules/uniquecomponent/uniquecomponentregistry.h"
-#if defined(BUILD_Base)
-#include "Madgine/baselib.h"
-#endif
-#if defined(BUILD_Client)
-#include "Madgine/clientlib.h"
-#endif
-#if defined(BUILD_SkeletonLoader)
-#include "skeletonloaderlib.h"
-#endif
-#if defined(BUILD_AnimationLoader)
-#include "animationloaderlib.h"
+#if defined(BUILD_MeshLoader)
+#include "meshloaderlib.h"
 #endif
 #if defined(BUILD_Widgets)
 #include "Madgine/widgetslib.h"
-#endif
-#if defined(BUILD_MeshLoader)
-#include "meshloaderlib.h"
 #endif
 #if defined(BUILD_FontLoader)
 #include "fontloaderlib.h"
@@ -24,14 +12,17 @@
 #if defined(BUILD_UI)
 #include "Madgine/uilib.h"
 #endif
-#if defined(BUILD_ClickBrick)
-#include "clickbricklib.h"
-#endif
 #if defined(BUILD_ImageLoader)
 #include "imageloaderlib.h"
 #endif
-#if defined(BUILD_SceneRendererTools)
-#include "Madgine_Tools/scenerenderertoolslib.h"
+#if defined(BUILD_ClickBrick)
+#include "clickbricklib.h"
+#endif
+#if defined(BUILD_Client)
+#include "Madgine/clientlib.h"
+#endif
+#if defined(BUILD_Base)
+#include "Madgine/baselib.h"
 #endif
 #if defined(BUILD_Tools)
 #include "toolslib.h"
@@ -39,29 +30,25 @@
 #if defined(BUILD_OpenGL)
 #include "OpenGL/opengllib.h"
 #endif
+#if defined(BUILD_Scene)
+#include "Madgine/scenelib.h"
+#endif
 #if defined(BUILD_WidgetsTools)
 #include "Madgine_Tools/widgetstoolslib.h"
 #endif
-#if defined(BUILD_NodeGraphTools)
-#include "Madgine_Tools/nodegraphtoolslib.h"
+#if defined(BUILD_SceneRendererTools)
+#include "Madgine_Tools/scenerenderertoolslib.h"
 #endif
 #if defined(BUILD_OpenGLTools)
 #include "OpenGL_Tools/opengltoolslib.h"
 #endif
-#if defined(BUILD_NodeGraph)
-#include "Madgine/nodegraphlib.h"
+#if defined(BUILD_SkeletonLoader)
+#include "skeletonloaderlib.h"
 #endif
-#if defined(BUILD_Scene)
-#include "Madgine/scenelib.h"
+#if defined(BUILD_AnimationLoader)
+#include "animationloaderlib.h"
 #endif
 
-#if defined(BUILD_Base)
-#include "Madgine/app/globalapicollector.h"
-#endif
-#if defined(BUILD_Client)
-#include "Madgine/render/rendercontextcollector.h"
-#include "Madgine/window/mainwindowcomponentcollector.h"
-#endif
 #if defined(BUILD_Resources)
 #include "Madgine/resources/resourceloadercollector.h"
 #endif
@@ -74,15 +61,6 @@
 #if defined(BUILD_TestShared) && defined(BUILD_LibB)
 #include "uniquecomponent/libB.h"
 #endif
-#if defined(BUILD_SkeletonLoader) && defined(BUILD_Resources)
-#include "skeletonloader.h"
-#endif
-#if defined(BUILD_AnimationLoader) && defined(BUILD_Resources)
-#include "animationloader.h"
-#endif
-#if defined(BUILD_Widgets) && defined(BUILD_Client)
-#include "Madgine/widgets/widgetmanager.h"
-#endif
 #if defined(BUILD_MeshLoader) && defined(BUILD_Resources)
 #include "meshloader.h"
 #endif
@@ -92,8 +70,8 @@
 #if defined(BUILD_UI)
 #include "Madgine/ui/handlercollector.h"
 #endif
-#if defined(BUILD_UI) && defined(BUILD_Client)
-#include "Madgine/ui/uimanager.h"
+#if defined(BUILD_ImageLoader) && defined(BUILD_Resources)
+#include "imageloader.h"
 #endif
 #if defined(BUILD_UI) && defined(BUILD_ClickBrick)
 #include "gamehandler.h"
@@ -101,8 +79,18 @@
 #include "gameoverhandler.h"
 #include "mainmenuhandler.h"
 #endif
-#if defined(BUILD_ImageLoader) && defined(BUILD_Resources)
-#include "imageloader.h"
+#if defined(BUILD_Client)
+#include "Madgine/render/rendercontextcollector.h"
+#include "Madgine/window/mainwindowcomponentcollector.h"
+#endif
+#if defined(BUILD_Widgets) && defined(BUILD_Client)
+#include "Madgine/widgets/widgetmanager.h"
+#endif
+#if defined(BUILD_UI) && defined(BUILD_Client)
+#include "Madgine/ui/uimanager.h"
+#endif
+#if defined(BUILD_Base)
+#include "Madgine/app/globalapicollector.h"
 #endif
 #if defined(BUILD_Tools)
 #include "inspector/functiontool.h"
@@ -117,37 +105,14 @@
 #if defined(BUILD_Tools) && defined(BUILD_Resources)
 #include "inspector/layoutloader.h"
 #endif
-#if defined(BUILD_SceneRendererTools) && defined(BUILD_Tools)
-#include "Madgine_Tools/sceneeditor/sceneeditor.h"
-#endif
-#if defined(BUILD_OpenGL) && defined(BUILD_Client)
-#include "OpenGL/openglrendercontext.h"
-#endif
 #if defined(BUILD_OpenGL) && defined(BUILD_Resources)
 #include "OpenGL/openglmeshloader.h"
 #include "OpenGL/openglprogramloader.h"
 #include "OpenGL/openglshaderloader.h"
 #include "OpenGL/opengltextureloader.h"
 #endif
-#if defined(BUILD_Tools) && defined(BUILD_WidgetsTools)
-#include "Madgine_Tools/guieditor/guieditor.h"
-#endif
-#if defined(BUILD_Tools) && defined(BUILD_NodeGraphTools)
-#include "Madgine_Tools/nodegraph/nodegrapheditor.h"
-#endif
-#if defined(BUILD_OpenGLTools) && defined(BUILD_Client)
-#include "OpenGL_Tools/imgui/openglimroot.h"
-#endif
-#if defined(BUILD_Tools) && defined(BUILD_OpenGLTools)
-#include "OpenGL_Tools/opengltoolconfig.h"
-#endif
-#if defined(BUILD_NodeGraph)
-#include "Madgine/nodegraph/nodecollector.h"
-#include "Madgine/nodegraph/nodes/testnode.h"
-#include "Madgine/nodegraph/nodes/variablenode.h"
-#endif
-#if defined(BUILD_NodeGraph) && defined(BUILD_Resources)
-#include "Madgine/nodegraph/nodegraphloader.h"
+#if defined(BUILD_OpenGL) && defined(BUILD_Client)
+#include "OpenGL/openglrendercontext.h"
 #endif
 #if defined(BUILD_Scene)
 #include "Madgine/scene/entity/components/animation.h"
@@ -157,14 +122,29 @@
 #include "Madgine/scene/entity/entitycomponentcollector.h"
 #include "Madgine/scene/scenecomponentcollector.h"
 #endif
-#if defined(BUILD_Scene) && defined(BUILD_Base)
-#include "Madgine/scene/scenemanager.h"
-#endif
 #if defined(BUILD_Scene) && defined(BUILD_ClickBrick)
 #include "brick.h"
 #endif
-#if defined(BUILD_NodeGraph) && defined(BUILD_Scene)
-#include "Madgine/scene/nodes/transformaccessornode.h"
+#if defined(BUILD_Scene) && defined(BUILD_Base)
+#include "Madgine/scene/scenemanager.h"
+#endif
+#if defined(BUILD_Tools) && defined(BUILD_WidgetsTools)
+#include "Madgine_Tools/guieditor/guieditor.h"
+#endif
+#if defined(BUILD_Tools) && defined(BUILD_SceneRendererTools)
+#include "Madgine_Tools/sceneeditor/sceneeditor.h"
+#endif
+#if defined(BUILD_OpenGLTools) && defined(BUILD_Client)
+#include "OpenGL_Tools/imgui/openglimroot.h"
+#endif
+#if defined(BUILD_Tools) && defined(BUILD_OpenGLTools)
+#include "OpenGL_Tools/opengltoolconfig.h"
+#endif
+#if defined(BUILD_SkeletonLoader) && defined(BUILD_Resources)
+#include "skeletonloader.h"
+#endif
+#if defined(BUILD_AnimationLoader) && defined(BUILD_Resources)
+#include "animationloader.h"
 #endif
 
 
@@ -202,60 +182,6 @@ size_t component_index<Engine::Scene::SceneManager>() { return CollectorBaseInde
 #        define ACC CollectorBaseIndex_GlobalAPIBase_Scene + 1
 #endif
 #if defined(BUILD_Base)
-
-#    undef ACC
-
-#endif
-#if defined(BUILD_NodeGraph)
-template <>
-std::vector<Engine::NodeGraph::NodeRegistry::F> Engine::NodeGraph::NodeRegistry::sComponents()
-{
-	return {
-#endif
-#if defined(BUILD_NodeGraph)
-		createComponent<Engine::NodeGraph::TestNode>,
-#endif
-#if defined(BUILD_NodeGraph)
-		createComponent<Engine::NodeGraph::VariableNode>,
-#endif
-#if defined(BUILD_NodeGraph) && defined(BUILD_Scene)
-		createComponent<Engine::Scene::TransformAccessorNode>,
-#endif
-#if defined(BUILD_NodeGraph)
-
-	}; 
-}
-
-#    define ACC 0
-
-#endif
-#if defined(BUILD_NodeGraph)
-constexpr size_t CollectorBaseIndex_NodeBase_NodeGraph = ACC;
-#endif
-#if defined(BUILD_NodeGraph)
-template <>
-size_t component_index<Engine::NodeGraph::TestNode>() { return CollectorBaseIndex_NodeBase_NodeGraph + 0; }
-#endif
-#if defined(BUILD_NodeGraph)
-template <>
-size_t component_index<Engine::NodeGraph::VariableNode>() { return CollectorBaseIndex_NodeBase_NodeGraph + 1; }
-#endif
-#if defined(BUILD_NodeGraph)
-#        undef ACC
-#        define ACC CollectorBaseIndex_NodeBase_NodeGraph + 2
-#endif
-#if defined(BUILD_NodeGraph) && defined(BUILD_Scene)
-constexpr size_t CollectorBaseIndex_NodeBase_Scene = ACC;
-#endif
-#if defined(BUILD_NodeGraph) && defined(BUILD_Scene)
-template <>
-size_t component_index<Engine::Scene::TransformAccessorNode>() { return CollectorBaseIndex_NodeBase_Scene + 0; }
-#endif
-#if defined(BUILD_NodeGraph) && defined(BUILD_Scene)
-#        undef ACC
-#        define ACC CollectorBaseIndex_NodeBase_Scene + 1
-#endif
-#if defined(BUILD_NodeGraph)
 
 #    undef ACC
 
@@ -325,9 +251,6 @@ std::vector<Engine::Resources::ResourceLoaderRegistry::F> Engine::Resources::Res
 #endif
 #if defined(BUILD_AnimationLoader) && defined(BUILD_Resources)
 		createComponent<Engine::Render::AnimationLoader>,
-#endif
-#if defined(BUILD_NodeGraph) && defined(BUILD_Resources)
-		createComponent<Engine::NodeGraph::NodeGraphLoader>,
 #endif
 #if defined(BUILD_Tools) && defined(BUILD_Resources)
 		createComponent<Engine::Tools::LayoutLoader>,
@@ -429,17 +352,6 @@ size_t component_index<Engine::Render::AnimationLoader>() { return CollectorBase
 #if defined(BUILD_AnimationLoader) && defined(BUILD_Resources)
 #        undef ACC
 #        define ACC CollectorBaseIndex_ResourceLoaderBase_AnimationLoader + 1
-#endif
-#if defined(BUILD_NodeGraph) && defined(BUILD_Resources)
-constexpr size_t CollectorBaseIndex_ResourceLoaderBase_NodeGraph = ACC;
-#endif
-#if defined(BUILD_NodeGraph) && defined(BUILD_Resources)
-template <>
-size_t component_index<Engine::NodeGraph::NodeGraphLoader>() { return CollectorBaseIndex_ResourceLoaderBase_NodeGraph + 0; }
-#endif
-#if defined(BUILD_NodeGraph) && defined(BUILD_Resources)
-#        undef ACC
-#        define ACC CollectorBaseIndex_ResourceLoaderBase_NodeGraph + 1
 #endif
 #if defined(BUILD_Tools) && defined(BUILD_Resources)
 constexpr size_t CollectorBaseIndex_ResourceLoaderBase_Tools = ACC;
@@ -642,14 +554,11 @@ std::vector<Engine::Tools::ToolsRegistry::F> Engine::Tools::ToolsRegistry::sComp
 #if defined(BUILD_Tools) && defined(BUILD_OpenGLTools)
 		createComponent<Engine::Tools::OpenGLToolConfig>,
 #endif
-#if defined(BUILD_Tools) && defined(BUILD_NodeGraphTools)
-		createComponent<Engine::Tools::NodeGraphEditor>,
+#if defined(BUILD_Tools) && defined(BUILD_SceneRendererTools)
+		createComponent<Engine::Tools::SceneEditor>,
 #endif
 #if defined(BUILD_Tools) && defined(BUILD_WidgetsTools)
 		createComponent<Engine::Tools::GuiEditor>,
-#endif
-#if defined(BUILD_SceneRendererTools) && defined(BUILD_Tools)
-		createComponent<Engine::Tools::SceneEditor>,
 #endif
 #if defined(BUILD_Tools)
 
@@ -705,16 +614,16 @@ size_t component_index<Engine::Tools::OpenGLToolConfig>() { return CollectorBase
 #        undef ACC
 #        define ACC CollectorBaseIndex_ToolBase_OpenGLTools + 1
 #endif
-#if defined(BUILD_Tools) && defined(BUILD_NodeGraphTools)
-constexpr size_t CollectorBaseIndex_ToolBase_NodeGraphTools = ACC;
+#if defined(BUILD_Tools) && defined(BUILD_SceneRendererTools)
+constexpr size_t CollectorBaseIndex_ToolBase_SceneRendererTools = ACC;
 #endif
-#if defined(BUILD_Tools) && defined(BUILD_NodeGraphTools)
+#if defined(BUILD_Tools) && defined(BUILD_SceneRendererTools)
 template <>
-size_t component_index<Engine::Tools::NodeGraphEditor>() { return CollectorBaseIndex_ToolBase_NodeGraphTools + 0; }
+size_t component_index<Engine::Tools::SceneEditor>() { return CollectorBaseIndex_ToolBase_SceneRendererTools + 0; }
 #endif
-#if defined(BUILD_Tools) && defined(BUILD_NodeGraphTools)
+#if defined(BUILD_Tools) && defined(BUILD_SceneRendererTools)
 #        undef ACC
-#        define ACC CollectorBaseIndex_ToolBase_NodeGraphTools + 1
+#        define ACC CollectorBaseIndex_ToolBase_SceneRendererTools + 1
 #endif
 #if defined(BUILD_Tools) && defined(BUILD_WidgetsTools)
 constexpr size_t CollectorBaseIndex_ToolBase_WidgetsTools = ACC;
@@ -726,17 +635,6 @@ size_t component_index<Engine::Tools::GuiEditor>() { return CollectorBaseIndex_T
 #if defined(BUILD_Tools) && defined(BUILD_WidgetsTools)
 #        undef ACC
 #        define ACC CollectorBaseIndex_ToolBase_WidgetsTools + 1
-#endif
-#if defined(BUILD_SceneRendererTools) && defined(BUILD_Tools)
-constexpr size_t CollectorBaseIndex_ToolBase_SceneRendererTools = ACC;
-#endif
-#if defined(BUILD_SceneRendererTools) && defined(BUILD_Tools)
-template <>
-size_t component_index<Engine::Tools::SceneEditor>() { return CollectorBaseIndex_ToolBase_SceneRendererTools + 0; }
-#endif
-#if defined(BUILD_SceneRendererTools) && defined(BUILD_Tools)
-#        undef ACC
-#        define ACC CollectorBaseIndex_ToolBase_SceneRendererTools + 1
 #endif
 #if defined(BUILD_Tools)
 

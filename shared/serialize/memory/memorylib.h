@@ -2,8 +2,8 @@
 
 #include "Meta/metalib.h"
 
-#if defined(Memory_EXPORTS)
-#    define MADGINE_MEMORY_EXPORT DLL_EXPORT
+#if defined(MemorySerialize_EXPORTS)
+#    define MADGINE_MEMORY_SERIALIZE_EXPORT DLL_EXPORT
 #else
-#    define MADGINE_MEMORY_EXPORT DLL_IMPORT
+#    define MADGINE_MEMORY_SERIALIZE_EXPORT DLL_IMPORT
 #endif

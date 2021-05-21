@@ -7,7 +7,7 @@ namespace Engine {
 namespace Memory {
 
     
-    struct MADGINE_MEMORY_EXPORT MemoryManager : Serialize::SerializeManager {
+    struct MADGINE_MEMORY_SERIALIZE_EXPORT MemoryManager : Serialize::SerializeManager {
         MemoryManager(const std::string &name);
         MemoryManager(const MemoryManager &) = delete;
         MemoryManager(MemoryManager &&) noexcept;

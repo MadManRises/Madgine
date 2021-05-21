@@ -11,7 +11,7 @@ namespace Network {
         NO_SERVER,
         SOCKET_ERROR);
 
-    struct MADGINE_NETWORK_EXPORT NetworkManager : Serialize::SyncManager {
+    struct MADGINE_NETWORK_SERIALIZE_EXPORT NetworkManager : Serialize::SyncManager {
         NetworkManager(const std::string &name);
         NetworkManager(const NetworkManager &) = delete;
         NetworkManager(NetworkManager &&) noexcept;

@@ -14,38 +14,6 @@
 
 namespace Engine {
 
-static size_t sLevel = 0;
-
-struct CompareTypeInfo {
-    bool operator()(const TypeInfo *t1, const TypeInfo *t2) const
-    {
-        return strcmp(t1->mFullName, t2->mFullName) == -1;
-    }
-};
-
-struct GuardGuard {
-    GuardGuard(std::ostream &o, const Plugins::BinaryInfo *b)
-        : out(o)
-        , bin(b)
-    {
-        if (bin) {
-            out << "#" << std::string(4 * sLevel, ' ') << "ifdef BUILD_" << bin->mName << "\n";
-            ++sLevel;
-        }
-    }
-
-    ~GuardGuard()
-    {
-        if (bin) {
-            --sLevel;
-            out << "#" << std::string(4 * sLevel, ' ') << "endif\n";
-        }
-    }
-
-    std::ostream &out;
-    const Plugins::BinaryInfo *bin;
-};
-
 std::string fixInclude(const char *pStr, const Plugins::BinaryInfo *binInfo)
 {
     Filesystem::Path p = pStr;
@@ -53,13 +21,6 @@ std::string fixInclude(const char *pStr, const Plugins::BinaryInfo *binInfo)
         p = Filesystem::Path { BINARY_OUT_DIR } / p;
     return p.relative(binInfo->mSourceRoot).str();
 };
-
-void include(std::ostream &out, std::string header,
-    const Plugins::BinaryInfo *bin = nullptr)
-{
-    GuardGuard g(out, bin);
-    out << "#" << std::string(4 * sLevel, ' ') << "include \"" << StringUtil::replace(header, ".cpp", ".h") << "\"\n";
-}
 
 static std::vector<const TypeInfo *> &sSkip()
 {

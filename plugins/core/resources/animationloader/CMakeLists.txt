@@ -7,7 +7,6 @@ FolderSources(sources "" "" animationdescriptor.h animationloader.cpp animationl
 
 add_plugin(AnimationLoader Madgine Utility ${sources} PRECOMPILED_HEADER animationloaderlib.h SOURCE_ROOT .)
 
-target_link_libraries(AnimationLoader PUBLIC Modules)
 target_link_libraries(AnimationLoader PRIVATE assimp)
 
 target_link_plugins(AnimationLoader SkeletonLoader Resources)

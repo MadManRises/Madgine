@@ -6,7 +6,7 @@
 
 namespace Engine {
 namespace Memory {
-    struct MADGINE_MEMORY_EXPORT MemoryBuffer : std::basic_streambuf<char> {
+    struct MADGINE_MEMORY_SERIALIZE_EXPORT MemoryBuffer : std::basic_streambuf<char> {
         MemoryBuffer(std::vector<char> &buffer);
         MemoryBuffer(ByteBuffer buffer);
         MemoryBuffer(const MemoryBuffer &) = delete;

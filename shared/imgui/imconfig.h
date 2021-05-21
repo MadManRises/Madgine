@@ -13,14 +13,12 @@
 
 #pragma once
 
-#include "Modules/moduleslib.h"
 #include "Meta/metalib.h"
 
 #include "Meta/math/vector2.h"
 #include "Meta/math/vector2i.h"
 #include "Meta/math/vector4.h"
 
-#include "Modules/threading/workgroup.h"
 
 //---- Define assertion handler. Defaults to calling assert().
 //#define IM_ASSERT(_EXPR)  MyAssert(_EXPR)
@@ -97,8 +95,6 @@ namespace ImGui
     void MyFunction(const char* name, const MyMatrix44& v);
 }
 */
-
-#include "Modules/threading/workgroupstorage.h"
 
 struct ImGuiContext;
 IMGUI_API ImGuiContext *&getImGuiContext();

@@ -4,7 +4,7 @@
 
 namespace Engine {
 namespace Network {
-    struct MADGINE_NETWORK_EXPORT NetworkBuffer : std::basic_streambuf<char> {
+    struct MADGINE_NETWORK_SERIALIZE_EXPORT NetworkBuffer : std::basic_streambuf<char> {
         NetworkBuffer(Socket socket);
         NetworkBuffer(const NetworkBuffer &) = delete;
         NetworkBuffer(NetworkBuffer &&other) noexcept = delete;

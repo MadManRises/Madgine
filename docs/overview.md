@@ -10,5 +10,6 @@ parts of the code as possible.
 
 ![libraries](img/libraries.svg)
 
+\dotfile Madgine.dot
 
 [Plugins]: plugins.md

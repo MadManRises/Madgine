@@ -9,5 +9,5 @@ add_plugin(FontLoader Madgine Utility ${sources} PRECOMPILED_HEADER fontloaderli
 
 target_link_plugins(FontLoader TextureLoader Resources)
 
-target_link_libraries(FontLoader PUBLIC Modules stb Filesystem)
+target_link_libraries(FontLoader PUBLIC stb FilesystemSerialize)
 target_link_libraries(FontLoader PRIVATE freetype lib_msdfgen)

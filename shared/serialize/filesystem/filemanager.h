@@ -5,7 +5,7 @@
 
 namespace Engine {
 namespace Filesystem {
-    struct MADGINE_FILESYSTEM_EXPORT FileManager : Serialize::SerializeManager {    
+    struct MADGINE_FILESYSTEM_SERIALIZE_EXPORT FileManager : Serialize::SerializeManager {    
         FileManager(const std::string &name);
         FileManager(const FileManager &) = delete;
         FileManager(FileManager &&) noexcept = default; 

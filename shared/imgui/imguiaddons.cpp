@@ -1,4 +1,5 @@
 #include "Meta/metalib.h"
+#include "Modules/moduleslib.h"
 
 #include "imguiaddons.h"
 
@@ -18,6 +19,8 @@
 #include "valuetypepayload.h"
 
 #include "Generic/enum.h"
+
+#include "Modules/threading/workgroupstorage.h"
 
 Engine::Threading::WorkgroupLocal<ImGuiContext *>
     sContext;

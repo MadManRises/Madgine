@@ -7,6 +7,6 @@ FolderSources(sources "" "" audiobuffer.h audiostream.h audiobufferloader.cpp au
 
 add_plugin(AudioLoader Madgine Utility ${sources} PRECOMPILED_HEADER audioloaderlib.h SOURCE_ROOT .)
 
-target_link_libraries(AudioLoader PUBLIC Modules vorbisfile)
+target_link_libraries(AudioLoader PUBLIC vorbisfile)
 
 target_link_plugins(AudioLoader Resources)

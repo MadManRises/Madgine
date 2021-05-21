@@ -11,7 +11,7 @@ FolderSources(sources "" src)
 add_plugin(NodeGraph Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/nodegraphlib.h)
 
 target_link_plugins(NodeGraph Resources)
-target_link_libraries(NodeGraph PUBLIC Modules Filesystem)
+target_link_libraries(NodeGraph PUBLIC Modules FilesystemSerialize)
 
 
 Project(SceneRenderer)

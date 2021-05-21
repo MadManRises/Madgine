@@ -24,6 +24,8 @@
 
 #include <numeric>
 
+#include "Modules/threading/workgroupstorage.h"
+
 namespace Engine {
 
 namespace Im3D {

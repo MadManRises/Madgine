@@ -7,6 +7,6 @@ FolderSources(sources "" "" imagedata.h imageloader.cpp imageloader.h imageloade
 
 add_plugin(ImageLoader Madgine Utility ${sources} PRECOMPILED_HEADER imageloaderlib.h SOURCE_ROOT .)
 
-target_link_libraries(ImageLoader PUBLIC Modules stb)
+target_link_libraries(ImageLoader PUBLIC stb)
 
 target_link_plugins(ImageLoader Resources)

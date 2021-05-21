@@ -1,9 +1,9 @@
-Project(Memory)
+Project(MemorySerialize)
 
 set(sources memorybuffer.cpp memorybuffer.h memorymanager.cpp memorymanager.h)
 	
-add_workspace_library(Memory ${sources} SOURCE_ROOT ../..)
+add_workspace_library(MemorySerialize ${sources} SOURCE_ROOT ../..)
 
-target_link_libraries(Memory PUBLIC Meta)
+target_link_libraries(MemorySerialize PUBLIC Meta)
 
-install_to_workspace(Madgine EXPORT_LIB TARGETS Memory)
+install_to_workspace(Madgine EXPORT_LIB TARGETS MemorySerialize)
