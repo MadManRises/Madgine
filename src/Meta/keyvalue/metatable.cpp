@@ -29,7 +29,7 @@ void MetaTable::call(TypedScopePtr scope, ValueType &retVal, const ArgumentList 
         throw "No call-operator for type!";
     ValueType f;
     op->value(f);
-    BoundApiFunction { f.as<ApiFunction>(), scope }(retVal, args);
+    f.as<BoundApiFunction>()(retVal, args);
 }
 
 bool MetaTable::isDerivedFrom(const MetaTable *baseType, size_t *offset) const
