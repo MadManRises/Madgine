@@ -1,6 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
-
-Project(Interfaces)
+Project(Interfaces VERSION 1.0.0)
 
 CMAKE_DEPENDENT_OPTION(INTERFACES_ENABLE_THREADING "Enable multithreading utilities like thread local or workgroups" ON
                        "NOT EMSCRIPTEN" OFF)

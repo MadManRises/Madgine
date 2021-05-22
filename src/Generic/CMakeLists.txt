@@ -1,6 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
-
-Project(Generic)
+Project(Generic VERSION 1.0.0)
 
 add_workspace_interface_library(Generic SOURCE_ROOT ..)
 
