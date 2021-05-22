@@ -1,5 +1,11 @@
 project(Python3)
 
+find_package (Python3 COMPONENTS Development.Embed)
+
+if (NOT Python_Development.Module_FOUND)
+	return()
+endif()
+
 
 set(sources "")
 FolderSources(sources "" src)
@@ -11,19 +17,7 @@ add_plugin(Python3 Madgine Scripting ${sources} PRECOMPILED_HEADER src/Python3/p
 
 target_link_plugins(Python3 Base)
 
-target_link_libraries(Python3 PUBLIC Meta)
-
-project(Python3Nodes)
-set(sources "")
-FolderSources(sources "" nodes)
-	FolderSources(sources nodes Madgine python3nodesforward.h python3nodeslib.h)
-		FolderSources(sources Madgine scripting)
-			FolderSources(sources scripting Python3)
-				FolderSources(sources Python3 nodes python3functionnode.cpp python3functionnode.h)
-
-add_plugin(Python3Nodes Madgine Scripting ${sources} PRECOMPILED_HEADER nodes/Madgine/python3nodeslib.h)
-
-target_link_plugins(Python3Nodes Python3 NodeGraph)
+target_link_libraries(Python3 PUBLIC Meta Python3::Python)
 
 
 set(sources "")
@@ -36,7 +30,20 @@ add_tools(Python3 ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/Python3/pyth
 target_link_plugins(Python3Tools Tools)
 
 
-find_package (Python3 COMPONENTS Development.Embed)
+project(Python3Nodes)
 
-target_link_libraries(Python3 PUBLIC Python3::Python)
+set(sources "")
+FolderSources(sources "" nodes)
+	FolderSources(sources nodes Madgine python3nodesforward.h python3nodeslib.h)
+		FolderSources(sources Madgine scripting)
+			FolderSources(sources scripting Python3)
+				FolderSources(sources Python3 nodes python3functionnode.cpp python3functionnode.h)
+
+add_plugin(Python3Nodes Madgine Scripting ${sources} PRECOMPILED_HEADER nodes/Madgine/python3nodeslib.h)
+
+target_link_plugins(Python3Nodes Python3 NodeGraph)
+
+
+
+
 

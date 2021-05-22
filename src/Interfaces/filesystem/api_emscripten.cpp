@@ -17,6 +17,15 @@ namespace Filesystem {
 
     void (*sSetupSuccessFunction)() = nullptr;
 
+    void sync(void *)
+    {
+        EM_ASM(
+            FS.syncfs(
+                false, function(err) {
+                    assert(!err);
+                }););
+    }
+
     EMSCRIPTEN_KEEPALIVE DLL_EXPORT_TAG extern "C" void setupDoneImpl() {
         sSetupSuccessFunction();
         emscripten_set_interval(&sync, 15000, nullptr);
@@ -36,15 +45,6 @@ namespace Filesystem {
                     _setupDoneImpl();
                 }););
         setCwd("/cwd");
-    }
-
-    void sync(void *)
-    {
-        EM_ASM(
-            FS.syncfs(
-                false, function(err) {
-                    assert(!err);
-                }););
     }
 
     Path executablePath()
