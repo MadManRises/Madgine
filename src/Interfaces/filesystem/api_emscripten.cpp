@@ -9,6 +9,8 @@
 #    include <unistd.h>
 #    include <emscripten.h>
 
+#    include <emscripten/html5.h>
+
 
 namespace Engine {
 namespace Filesystem {    
