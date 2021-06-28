@@ -54,7 +54,7 @@ namespace Tools {
         return true;
     }
 
-    void FunctionTool::setCurrentFunction(const std::string &name, const BoundApiFunction &method)
+    void FunctionTool::setCurrentFunction(std::string_view name, const BoundApiFunction &method)
     {
         mVisible = true;
         mCurrentFunctionName = name;
@@ -67,7 +67,7 @@ namespace Tools {
         }
     }
 
-    bool FunctionTool::renderFunction(BoundApiFunction &function, const std::string &functionName, ArgumentList &args)
+    bool FunctionTool::renderFunction(BoundApiFunction &function, std::string_view functionName, ArgumentList &args)
     {
         ImGui::Text(functionName);
         return renderFunctionDetails(function, args);
@@ -78,10 +78,8 @@ namespace Tools {
         bool changed = ImGui::MethodPicker(nullptr, mMethodCache, &function, &functionName);
         if (ImGui::BeginDragDropTarget()) {
             const ImGui::ValueTypePayload *payload;
-            ApiFunction f;
-            if (ImGui::AcceptDraggableValueType(f, &payload)) {
+            if (ImGui::AcceptDraggableValueType(function, &payload)) {
                 functionName = payload->mName;
-                function = { f, payload->mSender };
                 changed = true;
             }
             ImGui::EndDragDropTarget();
@@ -133,7 +131,7 @@ namespace Tools {
 
                 ImGui::PushID(i);
                 ValueType v = i == 0 ? ValueType { function.scope() } : args[i - 1];
-                bool changed = mInspector->drawValueImpl(nullptr, {}, "", v, true, !function.mFunction.mTable->mArguments[i].mType.mType.isRegular()).first;
+                bool changed = mInspector->drawValue("", v, true, !function.mFunction.mTable->mArguments[i].mType.mType.isRegular()).first;
                 //ImGui::ValueType(&args[i], function.mMethod.mTable->mArguments[i].mType);
                 if (ImGui::BeginDragDropTarget()) {
                     changed |= ImGui::AcceptDraggableValueType(v, function.mFunction.mTable->mArguments[i].mType);

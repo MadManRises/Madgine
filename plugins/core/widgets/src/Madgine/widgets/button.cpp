@@ -32,7 +32,7 @@ SERIALIZETABLE_END(Engine::Widgets::Button)
 namespace Engine {
 namespace Widgets {
 
-        void Button::setImageByName(const std::string_view &name)
+        void Button::setImageByName(std::string_view name)
     {
         setImage(Resources::ImageLoader::getSingleton().get(name));
     }
@@ -139,7 +139,7 @@ namespace Widgets {
         return mFont.name();
     }
 
-    void Button::setFontName(const std::string_view &name)
+    void Button::setFontName(std::string_view name)
     {
         mFont.load(name);
     }

@@ -2,7 +2,6 @@
 
 namespace Engine {
 
-	
 template <typename T>
 struct MakeOwning {
     static T apply(T &&t)
@@ -24,7 +23,7 @@ struct MakeOwning<const char *> {
 
 template <>
 struct MakeOwning<std::string_view> {
-    static std::string apply(const std::string_view &s)
+    static std::string apply(std::string_view s)
     {
         return std::string { s };
     }
@@ -32,7 +31,15 @@ struct MakeOwning<std::string_view> {
 };
 
 template <typename T>
-using MakeOwning_t = typename MakeOwning<T>::type;
+struct MakeOwning<CoW<T>> {
+    static T apply(const CoW<T> &c)
+    {
+        return c;
+    }
+    using type = T;
+};
 
+template <typename T>
+using MakeOwning_t = typename MakeOwning<T>::type;
 
 }

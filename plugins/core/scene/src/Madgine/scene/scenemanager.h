@@ -24,7 +24,7 @@
 
 #include "entity/entitycomponentcollector.h"
 
-#include "Generic/container/refcounted_deque.h"
+#include "Generic/container/refcountedcontainer.h"
 #include "entity/entity.h"
 
 #include "Generic/keyvalue.h"
@@ -76,7 +76,7 @@ namespace Scene {
 
         Threading::DataMutex &mutex();
 
-        Threading::SignalStub<const refcounted_deque<Entity::Entity>::iterator &, int> &entitiesSignal();
+        Threading::SignalStub<const RefcountedContainer<std::deque<Entity::Entity>>::iterator &, int> &entitiesSignal();
 
         template <typename T>
         Entity::EntityComponentList<T> &entityComponentList()
@@ -112,8 +112,9 @@ namespace Scene {
     private:
         Entity::EntityComponentListContainer<std::vector<Placeholder<0>>> mEntityComponentLists;
 
-        SYNCABLE_CONTAINER(mEntities, refcounted_deque<Entity::Entity>, Threading::SignalFunctor<const refcounted_deque<Entity::Entity>::iterator &, int>);
-        refcounted_deque<Serialize::NoParentUnit<Entity::Entity>> mLocalEntities;
+        using EntityContainer = RefcountedContainer<std::deque<Entity::Entity>>;
+        SYNCABLE_CONTAINER(mEntities, RefcountedContainer<std::deque<Entity::Entity>>, Threading::SignalFunctor<const EntityContainer::iterator &, int>);
+        EntityContainer mLocalEntities;
 
         Threading::DataMutex mMutex;
 
@@ -131,6 +132,8 @@ namespace Scene {
         };
 
     public:
+        using ControlBlock = typename EntityContainer::ControlBlock;
+
         decltype(auto) entities()
         {            
             return transformIt<EntityHelper>(concatIt(mEntities, mLocalEntities));

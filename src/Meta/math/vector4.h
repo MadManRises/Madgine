@@ -843,3 +843,5 @@ public:
 };
 
 }
+
+RegisterType(Engine::Vector4)

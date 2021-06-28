@@ -87,6 +87,7 @@ private:
 
     static const constexpr FunctionTable sFunctionTable {
         wrapHelper<&Functor::operator()>(&Functor::operator()),
+        "Lambda",
         CallableTraits<decltype(&Functor::operator())>::argument_count,
         true,
         sArgs.data()

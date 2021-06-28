@@ -50,7 +50,7 @@ void exportStaticComponentHeader(const Filesystem::Path &outFile, bool hasTools)
         return !hasTools && StringUtil::endsWith(bin->mName, "Tools");
     };
 
-    for (auto &[name, reg] : registryRegistry()) {
+    for (UniqueComponentRegistryBase *reg : registryRegistry()) {
         if (skipBinary(reg->mBinary))
             continue;
         binaries.insert(reg->mBinary);
@@ -76,7 +76,7 @@ void exportStaticComponentHeader(const Filesystem::Path &outFile, bool hasTools)
         }
     }
 
-    for (auto &[name, reg] : registryRegistry()) {
+    for (UniqueComponentRegistryBase *reg : registryRegistry()) {
         const Plugins::BinaryInfo *bin = reg->mBinary;
         if (skipBinary(bin))
             continue;
@@ -100,14 +100,14 @@ void exportStaticComponentHeader(const Filesystem::Path &outFile, bool hasTools)
 
     file.beginNamespace("Engine");
 
-    for (auto &[name, reg] : registryRegistry()) {
+    for (UniqueComponentRegistryBase *reg : registryRegistry()) {
         if (skipBinary(reg->mBinary))
             continue;
         file.beginCondition("BUILD_"s + reg->mBinary->mName);
         
         file << R"(template <>
 std::vector<)"
-             << name << "::F> " << name
+             << reg->type_info()->mFullName << "::F> " << reg->type_info()->mFullName
              << R"(::sComponents()
 {
 	return {
@@ -179,10 +179,10 @@ size_t component_index<)"
     file.generate(stream);
 }
 
-MODULES_EXPORT std::map<std::string, ComponentRegistryBase *> &
+MODULES_EXPORT std::vector<UniqueComponentRegistryBase *> &
 registryRegistry()
 {
-    static std::map<std::string, ComponentRegistryBase *> dummy;
+    static std::vector<UniqueComponentRegistryBase *> dummy;
     return dummy;
 }
 

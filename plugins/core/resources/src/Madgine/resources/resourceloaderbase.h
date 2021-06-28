@@ -5,22 +5,29 @@
 namespace Engine {
 namespace Resources {
 
+    struct ResourceLoaderSettings {
+        bool mAutoLoad = false;
+        bool mAutoReload = true;
+        bool mInplaceReload = false;
+    };
+
     struct MADGINE_RESOURCES_EXPORT ResourceLoaderBase : VirtualScopeBase<> {
 
         using ResourceType = ResourceBase;
 
-        ResourceLoaderBase(std::vector<std::string> &&extensions, bool autoLoad = false);
+        ResourceLoaderBase(std::vector<std::string> &&extensions, const ResourceLoaderSettings &settings = {});
         ResourceLoaderBase(const ResourceLoaderBase &) = delete;
         virtual ~ResourceLoaderBase() = default;
 
-		ResourceLoaderBase &operator=(const ResourceLoaderBase &) = delete;
+        ResourceLoaderBase &operator=(const ResourceLoaderBase &) = delete;
 
-        virtual std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path, const std::string_view &name = {}) = 0;
+        virtual std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path, std::string_view name = {}) = 0;
+        virtual void updateResourceData(ResourceBase *res) = 0;
 
         template <typename T>
         void resourceAdded(T *res)
         {
-            if (mAutoLoad) {
+            if (mSettings.mAutoLoad) {
                 res->setPersistent(true);
                 res->loadData();
             }
@@ -28,19 +35,18 @@ namespace Resources {
 
         const std::vector<std::string> &fileExtensions() const;
 
-        size_t extensionIndex(const std::string_view &ext) const;
+        size_t extensionIndex(std::string_view ext) const;
 
         virtual std::vector<std::pair<std::string_view, TypedScopePtr>> resources() = 0;
         virtual std::vector<const MetaTable *> resourceTypes() const = 0;
 
-    private:
+    protected:
         std::vector<std::string> mExtensions;
 
-        bool mAutoLoad;
+        ResourceLoaderSettings mSettings;
     };
 
 }
 }
-
 
 RegisterType(Engine::Resources::ResourceLoaderBase);

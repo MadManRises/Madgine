@@ -16,7 +16,7 @@ namespace Render {
 
         void bind();
 
-        ID3D11PixelShader *mShader;        
+        ID3D11PixelShader *mShader = nullptr;        
     };
 
 }

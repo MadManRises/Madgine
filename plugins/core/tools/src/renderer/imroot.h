@@ -37,9 +37,14 @@ namespace Tools {
         ImGuiDockNode *dockNode() const;
 
         bool isInitialized() const;
+        
+        std::stringstream mToolReadBuffer;
+        ToolBase *mToolReadTool = nullptr;
+
+        void finishToolRead();
 
     protected:
-        void checkInitState();        
+        void checkInitState();
 
     private:
         MadgineObjectState *mState;

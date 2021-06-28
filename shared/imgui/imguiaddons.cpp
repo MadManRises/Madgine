@@ -218,6 +218,51 @@ bool ValueTypeDrawer::draw(const Engine::Vector4 &v)
     return false;
 }
 
+bool ValueTypeDrawer::draw(Engine::Vector2i &v)
+{
+    PushItemWidth(100);
+    return ImGui::DragInt2(mName, v.ptr());
+}
+
+bool ValueTypeDrawer::draw(const Engine::Vector2i &v)
+{
+    PushDisabled();
+    PushItemWidth(100);
+    ImGui::DragInt2(mName, const_cast<int *>(v.ptr()));
+    PopDisabled();
+    return false;
+}
+
+bool ValueTypeDrawer::draw(Engine::Vector3i &v)
+{
+    PushItemWidth(100);
+    return ImGui::DragInt3(mName, v.ptr());
+}
+
+bool ValueTypeDrawer::draw(const Engine::Vector3i &v)
+{
+    PushDisabled();
+    PushItemWidth(100);
+    ImGui::DragInt3(mName, const_cast<int *>(v.ptr()));
+    PopDisabled();
+    return false;
+}
+
+bool ValueTypeDrawer::draw(Engine::Vector4i &v)
+{
+    PushItemWidth(100);
+    return ImGui::DragInt4(mName, v.ptr());
+}
+
+bool ValueTypeDrawer::draw(const Engine::Vector4i &v)
+{
+    PushDisabled();
+    PushItemWidth(100);
+    ImGui::DragInt4(mName, const_cast<int *>(v.ptr()));
+    PopDisabled();
+    return false;
+}
+
 bool ValueTypeDrawer::draw(Engine::KeyValueVirtualSequenceRange &it)
 {
     if (strlen(mName)) {
@@ -421,7 +466,7 @@ bool ValueTypeDrawer::draw(const Engine::EnumHolder &e)
         ImGui::Text("%s: ", mName);
         ImGui::SameLine();
     }
-    const std::string_view &name = e.toString();
+    std::string_view name = e.toString();
     ImGui::Text("\"%.*s\"", static_cast<int>(name.size()), name.data());
     return false;
 }
@@ -437,7 +482,7 @@ void Text(const std::string &s)
     Text("%s", s.c_str());
 }
 
-void Text(const std::string_view &s)
+void Text(std::string_view s)
 {
     Text("%.*s", static_cast<int>(s.size()), s.data());
 }
@@ -767,12 +812,11 @@ bool MethodPicker(const char *label, const std::vector<std::pair<std::string, En
     return result;
 }
 
-void DraggableValueTypeSource(const std::string_view &name, Engine::TypedScopePtr scope, void (*source)(Engine::ValueType &, void *), void *data, ImGuiDragDropFlags flags)
+void DraggableValueTypeSource(std::string_view name, void (*source)(Engine::ValueType &, void *), void *data, ImGuiDragDropFlags flags)
 {
     if (ImGui::BeginDragDropSource(flags)) {
         ValueTypePayload *payload = &sPayload;
         payload->mName = name;
-        payload->mSender = scope;
         source(payload->mValue, data);
         ImGui::SetDragDropPayload("ValueType", &payload, sizeof(payload), ImGuiCond_Once);
         ImGui::Text(name);
@@ -998,4 +1042,41 @@ bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *select
 
     return EndFilesystemPicker(validPath && (selectedIsFile || (openWrite && !selectedIsDir)), accepted, openWrite, openWrite && selectedIsFile && !confirmed, clicked);
 }
+
+
+bool InteractiveView(InteractiveViewState &state)
+{
+    state.mActive = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+
+    ImGuiIO &io = ImGui::GetIO();
+
+    if (state.mActive) {
+        for (int i = 0; i < 3; ++i) {
+            if (io.MouseClicked[i]) {
+                state.mMouseDown[i] = true;
+            }
+        }
+    }
+
+    for (int i = 0; i < 3; ++i) {
+        state.mMouseClicked[i] = false;
+        if (state.mMouseDown[i]) {
+
+            if (Engine::Vector2 { io.MouseDelta }.length() >= io.MouseDragThreshold / 3.0f && !state.mDragging[0] && !state.mDragging[1] && !state.mDragging[2]) {
+                state.mDragging[i] = true;
+            }
+
+            if (io.MouseReleased[i]) {
+                state.mMouseDown[i] = false;
+                if (!state.mDragging[i]) {
+                    state.mMouseClicked[i] = true;
+                }
+                state.mDragging[i] = false;
+            }
+        }
+    }
+
+    return state.mActive;
+}
+
 }

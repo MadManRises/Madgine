@@ -8,6 +8,8 @@
 
 #include "../directx11rendercontext.h"
 
+#include "Generic/bytebuffer.h"
+
 namespace Engine {
 namespace Render {
 
@@ -17,8 +19,8 @@ namespace Render {
     }
 
     DirectX11Program::DirectX11Program(DirectX11Program &&other)
-        : mVertexShader(std::exchange(other.mVertexShader, nullptr))
-        , mPixelShader(std::exchange(other.mPixelShader, nullptr))
+        : mVertexShader(std::move(other.mVertexShader))
+        , mPixelShader(std::move(other.mPixelShader))
     {
     }
 
@@ -29,7 +31,7 @@ namespace Render {
         return *this;
     }
 
-    bool DirectX11Program::link(DirectX11VertexShader *vertexShader, DirectX11PixelShader *pixelShader)
+    bool DirectX11Program::link(typename DirectX11VertexShaderLoader::HandleType vertexShader, typename DirectX11PixelShaderLoader::HandleType pixelShader)
     {
         reset();
 
@@ -53,16 +55,16 @@ namespace Render {
             LOG_ERROR(infoLog);
         }*/
 
-        mVertexShader = vertexShader;
-        mPixelShader = pixelShader;
+        mVertexShader = std::move(vertexShader);
+        mPixelShader = std::move(pixelShader);
 
         return true;
     }
 
     void DirectX11Program::reset()
     {
-        mVertexShader = nullptr;
-        mPixelShader = nullptr;
+        mVertexShader.reset();
+        mPixelShader.reset();
     }
 
     void DirectX11Program::bind(DirectX11VertexArray *format)
@@ -92,6 +94,11 @@ namespace Render {
         } else {
             mConstantBuffers[index].setData(data);
         }
+    }
+
+    WritableByteBuffer DirectX11Program::mapParameters(size_t index)
+    {
+        return mConstantBuffers[index].mapData();
     }
 
 	void DirectX11Program::setDynamicParameters(const ByteBuffer &data, size_t index)

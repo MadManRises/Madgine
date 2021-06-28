@@ -200,8 +200,15 @@ namespace Threading {
 
     bool TaskQueue::idle(TaskMask taskMask) const
     {
-        if (match(TaskMask::DEFAULT, taskMask) && mSetupState != mSetupSteps.end() & mRunning)
-            return false;
+        if (match(TaskMask::DEFAULT, taskMask)) {
+            if (mRunning) {
+                if (mSetupState != mSetupSteps.end())
+                    return false;
+            } else {
+                if (mSetupState != mSetupSteps.begin())
+                    return false;
+            }
+        }
 
         for (const ScheduledTask &task : mQueue)
             if (match(task.mMask, taskMask))

@@ -138,11 +138,11 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
             return true;
         }
 
-        bool MeshLoader::loadImpl(MeshData &mesh, ResourceType *res)
+        bool MeshLoader::loadImpl(MeshData &mesh, ResourceDataInfo &info)
         {
             Assimp::Importer importer;
 
-            std::vector<unsigned char> buffer = res->readAsBlob();
+            std::vector<unsigned char> buffer = info.resource()->readAsBlob();
 
             const aiScene *scene = importer.ReadFileFromMemory(buffer.data(), buffer.size(), aiProcess_MakeLeftHanded);
 
@@ -152,7 +152,7 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
             }
 
             if (scene->mNumMeshes == 0) {
-                LOG_ERROR("No mesh in file '" << res->path().str() << "'");
+                LOG_ERROR("No mesh in file '" << info.resource()->path().str() << "'");
                 return false;
             }
 
@@ -194,7 +194,7 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
             }
         }
 
-        void MeshLoader::unloadImpl(MeshData &data, ResourceType *res)
+        void MeshLoader::unloadImpl(MeshData &data, ResourceDataInfo &info)
         {
             data.mAttributeList = nullptr;
             data.mGroupSize = 0;

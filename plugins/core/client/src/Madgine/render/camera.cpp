@@ -12,6 +12,20 @@
 
 #include "Meta/math/transformation.h"
 
+
+METATABLE_BEGIN(Engine::Render::Camera)
+CONSTRUCTOR()
+MEMBER(mName)
+MEMBER(mPosition)
+MEMBER(mOrientation)
+MEMBER(mN)
+MEMBER(mF)
+MEMBER(mFOV)
+FUNCTION(getViewMatrix)
+FUNCTION(getViewProjectionMatrix, aspectRatio)
+METATABLE_END(Engine::Render::Camera)
+
+
 namespace Engine {
 namespace Render {
 
@@ -73,14 +87,5 @@ namespace Render {
 
 }
 }
-
-METATABLE_BEGIN(Engine::Render::Camera)
-MEMBER(mName)
-MEMBER(mPosition)
-MEMBER(mOrientation)
-MEMBER(mN)
-MEMBER(mF)
-MEMBER(mFOV)
-METATABLE_END(Engine::Render::Camera)
 
 

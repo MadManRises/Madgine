@@ -9,12 +9,17 @@ namespace NodeGraph {
     struct NodeInterpreter;
     struct NodeInterpreterData;
 
-    struct TargetPin;
+    struct CodeGenerator;
+    struct CodeGeneratorData;
+
+    struct Pin;
 
     struct FlowOutPinPrototype;
     struct DataInPinPrototype;
     struct DataOutPinPrototype;
     struct DataReceiverPinPrototype;
     struct DataProviderPinPrototype;
+
+    enum EdgeEvent;
 }
 }

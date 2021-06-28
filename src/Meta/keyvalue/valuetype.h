@@ -6,6 +6,9 @@
 #include "../math/vector2.h"
 #include "../math/vector3.h"
 #include "../math/vector4.h"
+#include "../math/vector2i.h"
+#include "../math/vector3i.h"
+#include "../math/vector4i.h"
 
 #include "boundapifunction.h"
 #include "function.h"
@@ -195,7 +198,13 @@ ValueType_Return<T> ValueType::as() const
 {
 
     if constexpr (isValueTypePrimitive_v<T>) {
-        return std::get<static_cast<size_t>(toValueTypeIndex<T>().mIndex)>(mUnion);
+        return visit([](const auto &v) -> ValueType_Return<T> {
+            if constexpr (std::is_convertible_v<decltype(v), ValueType_Return<T>>)
+                return v;
+            else
+                throw 0;
+        });
+        //return std::get<static_cast<size_t>(toValueTypeIndex<T>().mIndex)>(mUnion);
     } else if constexpr (std::is_same_v<T, ValueType>) {
         return *this;
     } else if constexpr (std::is_enum_v<T>) {

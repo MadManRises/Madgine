@@ -32,11 +32,11 @@ namespace Render {
 
             using Base::HandleType::HandleType;
             HandleType(Base::HandleType handle)
-                : Base::HandleType(handle)
+                : Base::HandleType(std::move(handle))
             {
             }
 
-			void create(const std::string_view &name, DataFormat format, TextureLoader *loader = nullptr);
+			void create(std::string_view name, DataFormat format, TextureLoader *loader = nullptr);
 
             void setData(Vector2i size, const ByteBuffer &data, TextureLoader *loader = nullptr);
             void setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data, TextureLoader *loader = nullptr);

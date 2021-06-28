@@ -386,7 +386,7 @@ namespace Tools {
 
         bool open = ImGui::TreeNodeEx(w->getName().c_str(), flags);
 
-        ImGui::DraggableValueTypeSource(w->getName(), w, w);
+        ImGui::DraggableValueTypeSource(w->getName(), w);
         if (ImGui::BeginDragDropTarget()) {
             Widgets::WidgetBase *newChild = nullptr;
             if (ImGui::AcceptDraggableValueType(newChild)) {

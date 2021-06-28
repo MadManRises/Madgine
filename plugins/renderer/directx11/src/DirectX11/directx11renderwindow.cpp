@@ -129,26 +129,6 @@ namespace Render {
         }
 
         if (!mReusedContext) {
-            for (std::pair<const std::string, DirectX11MeshLoader::ResourceType> &p : DirectX11MeshLoader::getSingleton()) {
-                p.second.unloadData();
-            }
-
-            for (std::pair<const std::string, DirectX11ProgramLoader::ResourceType> &p : DirectX11ProgramLoader::getSingleton()) {
-                p.second.unloadData();
-            }
-
-            for (std::pair<const std::string, DirectX11PixelShaderLoader::ResourceType> &p : DirectX11PixelShaderLoader::getSingleton()) {
-                p.second.unloadData();
-            }
-
-            for (std::pair<const std::string, DirectX11VertexShaderLoader::ResourceType> &p : DirectX11VertexShaderLoader::getSingleton()) {
-                p.second.unloadData();
-            }
-
-            for (std::pair<const std::string, DirectX11TextureLoader::ResourceType> &p : DirectX11TextureLoader::getSingleton()) {
-                p.second.unloadData();
-            }
-
             if (sDeviceContext) {
                 sDeviceContext->Release();
                 sDeviceContext = nullptr;

@@ -34,7 +34,7 @@ UNIQUECOMPONENT(Engine::Tools::Inspector);
 namespace Engine {
 namespace Tools {
 
-    std::map<std::string, bool (Inspector::*)(tinyxml2::XMLElement *, TypedScopePtr, std::set<std::string> &)> Inspector::sElements = {
+    std::map<std::string, bool (Inspector::*)(TypedScopePtr, std::set<std::string> &, tinyxml2::XMLElement *)> Inspector::sElements = {
         { "Member", &Inspector::drawSingleElement },
         { "MemberList", &Inspector::drawElementList },
         { "Inherit", &Inspector::inheritLayout },
@@ -62,6 +62,16 @@ namespace Tools {
                 });
             }
         }
+
+        addObjectSuggestion<FunctionTable>([]() {
+            std::vector<std::pair<std::string_view, TypedScopePtr>> result;
+            const FunctionTable *table = sFunctionList();
+            while (table) {
+                result.emplace_back(table->mName, const_cast<FunctionTable*>(table));
+                table = table->mNext;
+            }
+            return result;
+        });
     }
 
     Inspector::~Inspector()
@@ -74,7 +84,7 @@ namespace Tools {
             auto drawList = [this](const std::map<std::string_view, TypedScopePtr> &items) {
                 for (const std::pair<const std::string_view, TypedScopePtr> &p : items) {
                     if (ImGui::TreeNode(p.first.data())) {
-                        draw(p.second, {}, p.first.data());
+                        drawMembers(p.second, {}, p.first.data());
                         ImGui::TreePop();
                     }
                 }
@@ -92,7 +102,7 @@ namespace Tools {
 
         for (ScopeIterator it = scope.begin(); it != scope.end(); ++it) {
             if (drawn.count(it->key()) == 0) {
-                changed |= drawValue(nullptr, scope, it);
+                changed |= drawMember(scope, it);
                 drawn.insert(it->key());
             }
         }
@@ -117,12 +127,12 @@ namespace Tools {
         return false;
     }
 
-    bool Inspector::drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, const ScopeIterator &it)
+    bool Inspector::drawMember(TypedScopePtr parent, const ScopeIterator &it, tinyxml2::XMLElement *element)
     {
         ValueType value;
         if (streq(it->key(), "__proxy")) {
             it->value(value);
-            return draw(value.as<TypedScopePtr>(), {});
+            return drawMembers(value.as<TypedScopePtr>(), {});
         }
 
         bool showName = !element || !style("noname", element);
@@ -131,142 +141,165 @@ namespace Tools {
         bool generic = it->isGeneric();
 
         it->value(value);
-        std::pair<bool, bool> modified = drawValueImpl(element, parent, id, value, editable, generic);
+        std::pair<bool, bool> modified = drawValue(id, value, editable, generic, element);
 
         if (modified.first || (modified.second && !value.isReference()))
             *it = value;
         return modified.first || modified.second;
     }
 
-    std::pair<bool, bool> Inspector::drawValueImpl(tinyxml2::XMLElement *element, TypedScopePtr parent, const std::string &id, ValueType &value, bool editable, bool generic)
+    std::pair<bool, bool> Inspector::drawValue(std::string_view id, ValueType &value, bool editable, bool generic, tinyxml2::XMLElement *element)
     {
-        bool cannotBeDisabled = value.index() == Engine::ValueTypeEnum::ScopeValue || value.index() == Engine::ValueTypeEnum::OwnedScopeValue || value.index() == Engine::ValueTypeEnum::KeyValueVirtualSequenceRangeValue || value.index() == Engine::ValueTypeEnum::KeyValueVirtualAssociativeRangeValue || value.index() == Engine::ValueTypeEnum::BoundApiFunctionValue;
-
-        if (!editable && !cannotBeDisabled)
-            ImGui::PushDisabled();
-
         if (generic)
-            ImGui::BeginValueType({ ExtendedValueTypeEnum::GenericType }, id.c_str());
+            ImGui::BeginValueType({ ExtendedValueTypeEnum::GenericType }, id.data());
 
-        std::pair<bool, bool> modified = value.visit(overloaded { [&](TypedScopePtr scope) {
-                                                                     bool modified = false;
-                                                                     bool changed = false;
-
-                                                                     auto it = mObjectSuggestionsByType.find(scope.mType);
-                                                                     bool hasSuggestions = editable && it != mObjectSuggestionsByType.end();
-
-                                                                     bool open;
-
-                                                                     if (hasSuggestions) {
-                                                                         ImGui::BeginTreeArrow(id.c_str());
-                                                                         ImGui::SameLine();
-                                                                         if (ImGui::BeginCombo((id + "##suggestions").c_str(), scope.name().c_str())) {
-                                                                             for (std::pair<std::string_view, TypedScopePtr> p : it->second()) {
-                                                                                 if (ImGui::Selectable(p.first.data())) {
-                                                                                     value = p.second;
-                                                                                     modified = true;
-                                                                                 }
-                                                                             }
-                                                                             ImGui::EndCombo();
-                                                                         }
-                                                                         open = ImGui::EndTreeArrow();
-                                                                     } else {
-                                                                         open = ImGui::TreeNode(id.c_str());
-                                                                     }
-
-                                                                     ImGui::DraggableValueTypeSource(id, parent, value, ImGuiDragDropFlags_SourceAllowNullID);
-                                                                     if (editable && ImGui::BeginDragDropTarget()) {
-                                                                         if (ImGui::AcceptDraggableValueType(scope, nullptr, [&](const TypedScopePtr &ptr) {
-                                                                                 return ptr.mType->isDerivedFrom(scope.mType);
-                                                                             })) {
-                                                                             value = scope;
-                                                                             modified = true;
-                                                                         }
-                                                                         OwnedScopePtr dummy;
-                                                                         if (ImGui::AcceptDraggableValueType(dummy, nullptr, [&](const OwnedScopePtr &ptr) {
-                                                                                 return ptr.type()->isDerivedFrom(scope.mType);
-                                                                             })) {
-                                                                             value = dummy;
-                                                                             modified = true;
-                                                                         }
-                                                                         ImGui::EndDragDropTarget();
-                                                                     }
-
-                                                                     if (open) {
-                                                                         changed |= draw(scope, {}, element ? element->Attribute("layout") : nullptr);
-                                                                         ImGui::TreePop();
-                                                                     }
-                                                                     return std::make_pair(modified, changed);
+        std::pair<bool, bool> modified = value.visit(overloaded { [&](TypedScopePtr& scope) {
+                                                                     return drawValue(id, scope, editable, element);                                                        
                                                                  },
             [&](OwnedScopePtr scope) {
-                ValueType v { scope.get() };
-                return drawValueImpl(element, parent, id, v, editable, false);
+                return drawValue(id, scope, editable, element);
             },
             [&](KeyValueVirtualSequenceRange &range) {
-                bool changed = false;
-                bool b = ImGui::TreeNodeEx(id.c_str());
-                ImGui::DraggableValueTypeSource(id, parent, value);
-                if (b) {
-                    size_t i = 0;
-                    for (auto vValue : range) {
-                        ValueType value = vValue;
-                        std::string key = std::to_string(i);
-                        if (value.is<TypedScopePtr>()) {
-                            key = "[" + std::to_string(i) + "] " + value.as<TypedScopePtr>().name() + "##" + key;
-                        } else if (value.is<OwnedScopePtr>()) {
-                            key = "[" + std::to_string(i) + "] " + value.as<OwnedScopePtr>().name() + "##" + key;
-                        }
-                        std::pair<bool, bool> result = drawValueImpl(element, {}, key, value, /*editable && */ vValue.isEditable(), false);
-                        if (result.first)
-                            vValue = value;
-                        changed |= result.second;
-                        ++i;
-                    }
-                    ImGui::TreePop();
-                }
-                return std::make_pair(false, changed);
+                
+                return std::make_pair(false, drawValue(id, range, editable, element));
             },
             [&](KeyValueVirtualAssociativeRange &range) {
-                bool changed = false;
-                bool b = ImGui::TreeNodeEx(id.c_str());
-                ImGui::DraggableValueTypeSource(id, parent, value);
-                if (b) {
-                    size_t i = 0;
-                    for (auto [vKey, vValue] : range) {
-                        ValueType value = vValue;
-                        std::string key = vKey.toShortString() + "##" + std::to_string(i);
-                        std::pair<bool, bool> result = drawValueImpl(element, {}, key, value, /*editable && */ vValue.isEditable(), false);
-                        if (result.first)
-                            vValue = value;
-                        changed |= result.second;
-                        ++i;
-                    }
-                    ImGui::TreePop();
-                }
-                return std::make_pair(false, changed);
+                
+                return std::make_pair(false, drawValue(id, range, editable, element));
             },
             [&](BoundApiFunction &function) {
-                std::string extended = "-> " + id;
-                if (ImGui::Button(extended.c_str())) {
-                    getTool<FunctionTool>().setCurrentFunction(id, function);
-                }
-                ImGui::DraggableValueTypeSource(id, parent, value);
+                drawValue(id, function, editable, element);
                 return std::make_pair(false, false);
             },
             [&](auto &other) {
-                return std::make_pair(ImGui::ValueTypeDrawer { id.c_str(), false }.draw(other), false);
+                if (!editable)
+                    ImGui::PushDisabled();
+                std::pair<bool, bool> result = std::make_pair(ImGui::ValueTypeDrawer { id.data(), false }.draw(other), false);
+                if (!editable)
+                    ImGui::PopDisabled();
+                return result;
             } });
 
         if (generic)
             modified.first |= ImGui::EndValueType(&value, { ExtendedValueTypeEnum::GenericType });
 
-        if (!editable && !cannotBeDisabled)
-            ImGui::PopDisabled();
-
         return modified;
     }
 
-    bool Inspector::draw(TypedScopePtr scope, std::set<std::string> drawn, const char *layoutName)
+    std::pair<bool, bool> Inspector::drawValue(std::string_view id, TypedScopePtr &scope, bool editable, tinyxml2::XMLElement *element)
+    {
+        bool modified = false;
+        bool changed = false;
+
+        auto it = mObjectSuggestionsByType.find(scope.mType);
+        bool hasSuggestions = editable && it != mObjectSuggestionsByType.end();
+
+        bool open;
+
+        if (hasSuggestions) {
+            ImGui::BeginTreeArrow(id.data());
+            ImGui::SameLine();
+            if (ImGui::BeginCombo((std::string { id } + "##suggestions").c_str(), scope.name().c_str())) {
+                for (std::pair<std::string_view, TypedScopePtr> p : it->second()) {
+                    if (ImGui::Selectable(p.first.data())) {
+                        scope = p.second;
+                        modified = true;
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            open = ImGui::EndTreeArrow();
+        } else {
+            open = ImGui::TreeNode(id.data());
+        }
+
+        ImGui::DraggableValueTypeSource(id, scope, ImGuiDragDropFlags_SourceAllowNullID);
+        if (editable && ImGui::BeginDragDropTarget()) {
+            if (ImGui::AcceptDraggableValueType(scope, nullptr, [&](const TypedScopePtr &ptr) {
+                    return ptr.mType->isDerivedFrom(scope.mType);
+                })) {
+                modified = true;
+            }
+            /*OwnedScopePtr dummy;
+                                                                         if (ImGui::AcceptDraggableValueType(dummy, nullptr, [&](const OwnedScopePtr &ptr) {
+                                                                                 return ptr.type()->isDerivedFrom(scope.mType);
+                                                                             })) {
+                                                                             scope = dummy;
+                                                                             modified = true;
+                                                                         }*/
+            ImGui::EndDragDropTarget();
+        }
+
+        if (open) {
+            changed |= drawMembers(scope, {}, element ? element->Attribute("layout") : nullptr);
+            ImGui::TreePop();
+        }
+        return std::make_pair(modified, changed);
+    }
+
+    std::pair<bool, bool> Inspector::drawValue(std::string_view id, OwnedScopePtr &scope, bool editable, tinyxml2::XMLElement *element)
+    {        
+        TypedScopePtr ptr = scope.get();
+        return drawValue(id, ptr, editable, element);
+    }
+
+    bool Inspector::drawValue(std::string_view id, KeyValueVirtualSequenceRange &range, bool editable, tinyxml2::XMLElement *element)
+    {
+        bool changed = false;
+        bool b = ImGui::TreeNodeEx(id.data());
+        ImGui::DraggableValueTypeSource(id, range);
+        if (b) {
+            size_t i = 0;
+            for (auto vValue : range) {
+                ValueType value = vValue;
+                std::string key = std::to_string(i);
+                if (value.is<TypedScopePtr>()) {
+                    key = "[" + std::to_string(i) + "] " + value.as<TypedScopePtr>().name() + "##" + key;
+                } else if (value.is<OwnedScopePtr>()) {
+                    key = "[" + std::to_string(i) + "] " + value.as<OwnedScopePtr>().name() + "##" + key;
+                }
+                std::pair<bool, bool> result = drawValue(key, value, /*editable && */ vValue.isEditable(), false, element);
+                if (result.first)
+                    vValue = value;
+                changed |= result.second;
+                ++i;
+            }
+            ImGui::TreePop();
+        }
+        return changed;
+    }
+
+    bool Inspector::drawValue(std::string_view id, KeyValueVirtualAssociativeRange &range, bool editable, tinyxml2::XMLElement *element)
+    {
+        bool changed = false;
+        bool b = ImGui::TreeNodeEx(id.data());
+        ImGui::DraggableValueTypeSource(id, range);
+        if (b) {
+            size_t i = 0;
+            for (auto [vKey, vValue] : range) {
+                ValueType value = vValue;
+                std::string key = vKey.toShortString() + "##" + std::to_string(i);
+                std::pair<bool, bool> result = drawValue(key, value, /*editable && */ vValue.isEditable(), false, element);
+                if (result.first)
+                    vValue = value;
+                changed |= result.second;
+                ++i;
+            }
+            ImGui::TreePop();
+        }
+        return changed;
+    }
+
+    void Inspector::drawValue(std::string_view id, BoundApiFunction &function, bool editable, tinyxml2::XMLElement *element)
+    {
+        std::string extended = "-> " + std::string { id };
+        if (ImGui::Button(extended.c_str())) {
+            getTool<FunctionTool>().setCurrentFunction(id, function);
+        }
+        ImGui::DraggableValueTypeSource(id, function);
+    }
+
+    bool Inspector::drawMembers(TypedScopePtr scope, std::set<std::string> drawn, const char *layoutName)
     {
         if (!scope) {
             ImGui::Text("<NULL>");
@@ -307,33 +340,33 @@ namespace Tools {
     {
         bool changed = false;
         for (tinyxml2::XMLElement *el = layout->rootElement()->FirstChildElement(); el; el = el->NextSiblingElement()) {
-            changed |= drawElement(el, scope, drawn);
+            changed |= drawElement(scope, drawn, el);
         }
         return changed;
     }
 
-    bool Inspector::drawElement(tinyxml2::XMLElement *element, TypedScopePtr scope,
-        std::set<std::string> &drawn)
+    bool Inspector::drawElement(TypedScopePtr scope,
+        std::set<std::string> &drawn, tinyxml2::XMLElement *element)
     {
         auto it = sElements.find(element->Name());
         if (it != sElements.end()) {
             if (it->second)
-                return (this->*it->second)(element, scope, drawn);
+                return (this->*it->second)(scope, drawn, element);
         } else {
             ImGui::Text("Unsupported Tag-Type: %s", element->Name());
         }
         return false;
     }
 
-    bool Inspector::drawSingleElement(tinyxml2::XMLElement *element, TypedScopePtr scope,
-        std::set<std::string> &drawn)
+    bool Inspector::drawSingleElement(TypedScopePtr scope,
+        std::set<std::string> &drawn, tinyxml2::XMLElement *element)
     {
         const char *name = element->Attribute("name");
         ScopeIterator value = scope.find(name);
         if (value != scope.end()) {
             drawn.insert(name);
             if (!style("hide", element)) {
-                return drawValue(element, scope, value);
+                return drawMember(scope, value, element);
             }
         } else {
             if (!style("optional", element)) {
@@ -343,8 +376,8 @@ namespace Tools {
         return false;
     }
 
-    bool Inspector::drawElementList(tinyxml2::XMLElement *element, TypedScopePtr scope,
-        std::set<std::string> &drawn)
+    bool Inspector::drawElementList(TypedScopePtr scope,
+        std::set<std::string> &drawn, tinyxml2::XMLElement *element)
     {
         bool changed = false;
 
@@ -374,7 +407,7 @@ namespace Tools {
                             rule = child;
                         }
                     }
-                    changed |= drawValue(rule, scope, it);
+                    changed |= drawMember(scope, it, rule);
                 }
                 drawn.insert(it->key());
             }
@@ -385,8 +418,8 @@ namespace Tools {
         return changed;
     }
 
-    bool Inspector::inheritLayout(tinyxml2::XMLElement *element, TypedScopePtr scope,
-        std::set<std::string> &drawn)
+    bool Inspector::inheritLayout(TypedScopePtr scope,
+        std::set<std::string> &drawn, tinyxml2::XMLElement *element)
     {
         InspectorLayout *layout = getLayout(element->Attribute("name"));
         if (layout) {
@@ -397,22 +430,22 @@ namespace Tools {
         }
     }
 
-    bool Inspector::drawConstantString(tinyxml2::XMLElement *element, TypedScopePtr scope,
-        std::set<std::string> &drawn)
+    bool Inspector::drawConstantString(TypedScopePtr scope,
+        std::set<std::string> &drawn, tinyxml2::XMLElement *element)
     {
         ImGui::Text("%s", element->GetText());
         return false;
     }
 
-    bool Inspector::drawSingleLine(tinyxml2::XMLElement *element, TypedScopePtr scope,
-        std::set<std::string> &drawn)
+    bool Inspector::drawSingleLine(TypedScopePtr scope,
+        std::set<std::string> &drawn, tinyxml2::XMLElement *element)
     {
         int count = 0;
         for (tinyxml2::XMLElement *child = element->FirstChildElement(); child; child = child->NextSiblingElement())
             ++count;
         ImGui::PushMultiItemsWidths(count, 100.0f); //TODO
         for (tinyxml2::XMLElement *child = element->FirstChildElement(); child; child = child->NextSiblingElement()) {
-            drawElement(child, scope, drawn);
+            drawElement(scope, drawn, child);
             if (--count > 0)
                 ImGui::SameLine();
             ImGui::PopItemWidth();
@@ -437,6 +470,11 @@ namespace Tools {
     void Inspector::addObjectSuggestion(const MetaTable *type, std::function<std::vector<std::pair<std::string_view, TypedScopePtr>>()> getter)
     {
         mObjectSuggestionsByType[type] = getter;
+    }
+
+    bool Inspector::hasObjectSuggestion(const MetaTable *type) const
+    {
+        return mObjectSuggestionsByType.contains(type);
     }
 
     void Inspector::addPreviewDefinition(const MetaTable *type, std::function<void(TypedScopePtr)> preview)

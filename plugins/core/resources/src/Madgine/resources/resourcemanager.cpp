@@ -25,20 +25,15 @@ namespace Resources {
     }
 
     ResourceManager::ResourceManager()
-        : mCollector()
+        : mIOQueue("IO")
     {
         assert(!sSingleton);
         sSingleton = this;
 
-#if ENABLE_PLUGINS
-        Plugins::PluginManager::getSingleton().addListener(this);
-#endif
-
-        registerResourceLocation(Filesystem::executablePath().parentPath() / "data", 50);
-
-#if ANDROID
-        registerResourceLocation("assets:", 25);
-#endif
+        mIOQueue.addSetupSteps([this]() { return init(); },
+            [this]() {
+                finalize();
+            });
     }
 
     ResourceManager::~ResourceManager()
@@ -59,20 +54,46 @@ namespace Resources {
         /*else
 			std::terminate();*/
 
-        if (mInitialized) {
-            updateResources(path, priority);
+        if (mInitialized.test()) {
+            updateResources(Filesystem::FileEventType::FILE_CREATED, path, priority);
         }
     }
 
-    void ResourceManager::init()
+    bool ResourceManager::init()
     {
-        mInitialized = true;
+#if ENABLE_PLUGINS
+        Plugins::PluginManager::getSingleton().addListener(this);
+#endif
+
+        registerResourceLocation(Filesystem::executablePath().parentPath() / "data", 50);
+
+#if ANDROID
+        registerResourceLocation("assets:", 25);
+#endif
 
         std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> loaderByExtension = getLoaderByExtension();
 
         for (const std::pair<const Filesystem::Path, int> &p : mResourcePaths) {
-            updateResources(p.first, p.second, loaderByExtension);
+            updateResources(Filesystem::FileEventType::FILE_CREATED, p.first, p.second, loaderByExtension);
         }
+
+        mIOQueue.addRepeatedTask([this]() { update(); }, Engine::Threading::TaskMask::DEFAULT, std::chrono::seconds { 1 });
+
+        bool last = mInitialized.test_and_set();
+        assert(!last);
+
+        return true;
+    }
+
+    void ResourceManager::finalize()
+    {
+        mFileWatcher.clear();
+
+        mInitialized.clear();
+
+#if ENABLE_PLUGINS
+        Plugins::PluginManager::getSingleton().removeListener(this);
+#endif
     }
 
     Filesystem::Path ResourceManager::findResourceFile(const std::string &fileName)
@@ -91,9 +112,9 @@ namespace Resources {
     {
         std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> loaderByExtension = getLoaderByExtension();
 
-        if (mInitialized) {
+        if (mInitialized.test()) {
             for (const std::pair<const Filesystem::Path, int> &p : mResourcePaths) {
-                updateResources(p.first, p.second, loaderByExtension);
+                updateResources(Filesystem::FileEventType::FILE_CREATED, p.first, p.second, loaderByExtension);
             }
         }
 
@@ -113,38 +134,56 @@ namespace Resources {
 #endif
 
     void ResourceManager::update()
-    {        
-        for (const Filesystem::FileEvent &event : mFileWatcher.fetchChanges()){        
-            LOG(event.mType);
+    {
+        std::vector<Filesystem::FileEvent> events = mFileWatcher.fetchChangesReduced();
+        
+        std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> loaderByExtension = getLoaderByExtension();
+
+        for (const Filesystem::FileEvent &event : events) {
+            updateResource(event.mType, event.mPath, mResourcePaths.at(event.mPath), loaderByExtension);
         }
     }
 
-    void ResourceManager::updateResources(const Filesystem::Path &path, int priority)
+    void ResourceManager::waitForInit()
     {
-        updateResources(path, priority, getLoaderByExtension());
+        mInitialized.wait(false);
     }
 
-    void ResourceManager::updateResources(const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> &loaderByExtension)
+    void ResourceManager::updateResources(Filesystem::FileEventType event, const Filesystem::Path &path, int priority)
+    {
+        updateResources(event, path, priority, getLoaderByExtension());
+    }
+
+    void ResourceManager::updateResources(Filesystem::FileEventType event, const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> &loaderByExtension)
     {
         for (Filesystem::Path p : Filesystem::listFilesRecursive(path)) {
-            updateResource(p, priority, loaderByExtension);
+            updateResource(event, p, priority, loaderByExtension);
         }
     }
 
-    void ResourceManager::updateResource(const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> &loaderByExtension)
+    void ResourceManager::updateResource(Filesystem::FileEventType event, const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> &loaderByExtension)
     {
         std::string_view extension = path.extension();
 
         auto it = loaderByExtension.find(extension);
         if (it != loaderByExtension.end()) {
             for (ResourceLoaderBase *loader : it->second) {
-                auto [resource, b] = loader->addResource(path);
-
-                if (!b) {
-                    int otherPriority = mResourcePaths.at(resource->path());
-                    if (priority > otherPriority || (priority == otherPriority && loader->extensionIndex(extension) < loader->extensionIndex(resource->path().extension()))) {
-                        resource->updatePath(path);
+                auto [resource, created] = loader->addResource(path);
+                
+                switch (event) {
+                case Filesystem::FileEventType::FILE_CREATED:
+                    if (!created && path != resource->path()) {
+                        int otherPriority = mResourcePaths.at(resource->path());
+                        if (priority > otherPriority || (priority == otherPriority && loader->extensionIndex(extension) < loader->extensionIndex(resource->path().extension()))) {
+                            resource->setPath(path);
+                            loader->updateResourceData(resource);
+                        }
                     }
+                    break;
+                case Filesystem::FileEventType::FILE_MODIFIED:
+                    if (!created)
+                        loader->updateResourceData(resource);
+                    break;
                 }
             }
         }

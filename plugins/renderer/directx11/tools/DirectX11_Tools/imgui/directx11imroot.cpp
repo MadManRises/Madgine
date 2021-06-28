@@ -50,7 +50,7 @@ METATABLE_END(Engine::Tools::DirectX11ImRoot)
 				font.load(fontName);
 
                 return Im3DFont {
-                    font->mTextureHandle,
+                    (Im3DTextureId)font->mTexture->mTextureHandle,
                     font->mTextureSize,
                     font->mGlyphs.data()
                 };

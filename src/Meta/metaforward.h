@@ -32,7 +32,6 @@ struct ValueTypeDesc;
 
 struct ObjectInstance;
 struct ObjectPtr;
-struct ObjectFieldAccessor;
 
 template <typename RefT>
 struct VirtualIterator;
@@ -203,6 +202,7 @@ struct Vector4;
 
 struct Vector2i;
 struct Vector3i;
+struct Vector4i;
 
 struct Rect2i;
 

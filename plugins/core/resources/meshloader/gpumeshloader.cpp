@@ -32,12 +32,12 @@ METATABLE_END(Engine::Render::GPUMeshLoader::ResourceType)
         {
         }
 
-        bool GPUMeshLoader::loadImpl(GPUMeshData &mesh, ResourceType *res)
+        bool GPUMeshLoader::loadImpl(GPUMeshData &mesh, ResourceDataInfo &info)
         {
-            return generate(mesh, *MeshLoader::load(res->name()));
+            return generate(mesh, *MeshLoader::load(info.resource()->name()));
         }
 
-        void GPUMeshLoader::unloadImpl(GPUMeshData &data, ResourceType *res)
+        void GPUMeshLoader::unloadImpl(GPUMeshData &data, ResourceDataInfo &info)
         {
             reset(data);
         }

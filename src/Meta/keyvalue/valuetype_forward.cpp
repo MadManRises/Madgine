@@ -19,32 +19,37 @@ const ValueType &getArgument(const ArgumentList &args, size_t index)
     return args.at(index);
 }
 
+bool ValueType_isNull(const ValueType &v)
+{
+    return v.is<std::monostate>();
+}
+
 ValueTypeDesc ValueType_type(const ValueType &v)
 {
     return v.type();
 }
 
 #define VALUETYPE_SEP
-#define VALUETYPE_IMPL(Type)                                                                                                                       \
-    template <>                                                                                                                                    \
+#define VALUETYPE_IMPL(Type)                                                                                                                    \
+    template <>                                                                                                                                 \
     META_EXPORT void to_ValueType_impl<std::decay_t<Type>>(ValueType & v, std::decay_t<Type> && t) { v = std::move(t); }                        \
-                                                                                                                                                   \
-    template <>                                                                                                                                    \
+                                                                                                                                                \
+    template <>                                                                                                                                 \
     META_EXPORT void to_ValueType_impl<std::decay_t<Type> &>(ValueType & v, std::decay_t<Type> & t) { v = t; }                                  \
-                                                                                                                                                   \
-    template <>                                                                                                                                    \
+                                                                                                                                                \
+    template <>                                                                                                                                 \
     META_EXPORT void to_ValueType_impl<const std::decay_t<Type>>(ValueType & v, const std::decay_t<Type> &&t) { v = std::move(t); }             \
-                                                                                                                                                   \
-    template <>                                                                                                                                    \
+                                                                                                                                                \
+    template <>                                                                                                                                 \
     META_EXPORT void to_ValueType_impl<const std::decay_t<Type> &>(ValueType & v, const std::decay_t<Type> &t) { v = t; }                       \
-                                                                                                                                                   \
-    template <>                                                                                                                                    \
+                                                                                                                                                \
+    template <>                                                                                                                                 \
     META_EXPORT void to_ValueTypeRef_impl<std::decay_t<Type>>(ValueTypeRef & v, std::decay_t<Type> && t) { v = ValueTypeRef { std::move(t) }; } \
-                                                                                                                                                   \
-    template <>                                                                                                                                    \
+                                                                                                                                                \
+    template <>                                                                                                                                 \
     META_EXPORT void to_ValueTypeRef_impl<std::decay_t<Type> &>(ValueTypeRef & v, std::decay_t<Type> & t) { v = ValueTypeRef { t }; }           \
-                                                                                                                                                   \
-    template <>                                                                                                                                    \
+                                                                                                                                                \
+    template <>                                                                                                                                 \
     META_EXPORT ValueType_Return<std::decay_t<Type>> ValueType_as_impl<std::decay_t<Type>>(const ValueType &v) { return v.as<std::decay_t<Type>>(); }
 
 #define VALUETYPE_TYPE(Name, Storage, ...) FOR_EACH(VALUETYPE_IMPL, VALUETYPE_SEP, __VA_ARGS__)

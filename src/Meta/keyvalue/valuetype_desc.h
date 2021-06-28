@@ -43,6 +43,7 @@ struct META_EXPORT ValueTypeIndex {
 
 enum class ExtendedValueTypeEnum : unsigned char {
     GenericType = static_cast<unsigned char>(ValueTypeEnum::MAX_VALUETYPE_TYPE),
+    OptionalType,
     MAX_EXTENDEDVALUETYPE_TYPE
 };
 
@@ -123,15 +124,8 @@ struct META_EXPORT ExtendedValueTypeIndex {
         return static_cast<ValueTypeEnum>(static_cast<ExtendedValueTypeEnum>(mTypeList[0]));
     }
 
-    constexpr bool operator==(const ExtendedValueTypeIndex &other) const
-    {
-        return mTypeList == other.mTypeList;
-    }
-
-    constexpr bool operator!=(const ExtendedValueTypeIndex &other) const
-    {
-        return mTypeList != other.mTypeList;
-    }
+    constexpr std::strong_ordering operator<=>(const ExtendedValueTypeIndex &other) const = default;
+    constexpr bool operator==(const ExtendedValueTypeIndex &other) const = default;
 
     constexpr bool operator==(const ValueTypeIndex &other) const
     {
@@ -167,14 +161,17 @@ union ValueTypeSecondaryTypeInfo {
     {
     }
 
-    bool operator==(const ValueTypeSecondaryTypeInfo &other) const
+    std::strong_ordering compare(ValueTypeIndex index, const ValueTypeSecondaryTypeInfo &other) const
     {
-        return mDummy == other.mDummy;
-    }
-
-    bool operator!=(const ValueTypeSecondaryTypeInfo &other) const
-    {
-        return mDummy == other.mDummy;
+        switch (index) {
+        case ValueTypeEnum::ScopeValue:
+            return *mMetaTable <=> *other.mMetaTable;
+        case ValueTypeEnum::ApiFunctionValue:
+        case ValueTypeEnum::BoundApiFunctionValue:
+            return *mFunctionTable <=> *other.mFunctionTable;
+        default:
+            return mDummy <=> other.mDummy;
+        }
     }
 
     const void *mDummy;
@@ -189,14 +186,15 @@ struct META_EXPORT ValueTypeDesc {
     bool canAccept(const ValueTypeDesc &valueType);
     std::string toString() const;
 
+    std::strong_ordering operator<=>(const ValueTypeDesc &other) const
+    {
+        if (auto cmp = mType <=> other.mType; cmp != 0)
+            return cmp;
+        return mSecondary.compare(mType, other.mSecondary);
+    }
     bool operator==(const ValueTypeDesc &other) const
     {
-        return mType == other.mType && mSecondary == other.mSecondary;
-    }
-
-    bool operator!=(const ValueTypeDesc &other) const
-    {
-        return mType != other.mType || mSecondary != other.mSecondary;
+        return mType == other.mType && mSecondary.compare(mType, other.mSecondary) == 0;
     }
 };
 
@@ -229,17 +227,36 @@ struct META_EXPORT ExtendedValueTypeDesc {
     {
     }
 
-    constexpr bool canAccept(const ValueTypeDesc &valueType)
+    constexpr bool canAccept(const ValueTypeDesc &valueType) const
     {
         if (mType == ExtendedValueTypeEnum::GenericType)
             return true;
         return static_cast<ValueTypeDesc>(*this).canAccept(valueType);
     }
 
+    constexpr bool isCompatible(const ExtendedValueTypeDesc &valueType)
+    {
+        if (mType.isRegular())
+            return valueType.canAccept(*this);
+        if (valueType.mType.isRegular())
+            return canAccept(valueType);
+        return mType == valueType.mType;
+    }
+
     constexpr operator ValueTypeDesc() const
     {
         assert(mType.isRegular());
         return { mType, mSecondary };
+    }
+
+    constexpr std::strong_ordering operator<=>(const ExtendedValueTypeDesc &other) const
+    {
+        if (auto cmp = mType <=> other.mType; cmp != 0)
+            return cmp;
+        return mSecondary.compare(mType, other.mSecondary);
+    }
+    constexpr bool operator==(const ExtendedValueTypeDesc& other) const {
+        return mType == other.mType && mSecondary.compare(mType, other.mSecondary) == 0;
     }
 
     std::string toString(size_t level = 0) const;
@@ -271,7 +288,9 @@ constexpr ValueTypeIndex toValueTypeIndex()
 template <typename T>
 constexpr ExtendedValueTypeDesc toValueTypeDesc()
 {
-    if constexpr (isValueTypePrimitive_v<T>) {
+    if constexpr (is_instance_v<T, std::optional>) {
+        return { { ExtendedValueTypeEnum::OptionalType }, toValueTypeDesc<type_pack_unpack_unique_t<typename is_instance<T, std::optional>::argument_types>>() };
+    } else if constexpr (isValueTypePrimitive_v<T>) {
         return { toValueTypeIndex<T>() };
     } else if constexpr (std::is_same_v<T, ValueType>) {
         return { ExtendedValueTypeEnum::GenericType };

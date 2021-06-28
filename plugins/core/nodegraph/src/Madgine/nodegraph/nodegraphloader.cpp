@@ -28,13 +28,13 @@ METATABLE_END(Engine::NodeGraph::NodeGraphLoader::ResourceType)
         }
 
         NodeGraphLoader::NodeGraphLoader()
-            : ResourceLoader({ ".ngp" })
+            : ResourceLoader({ ".ngp" }, { .mAutoReload = false })
         {
         }
 
-        bool NodeGraphLoader::loadImpl(NodeGraph &graph, ResourceType *res)
+        bool NodeGraphLoader::loadImpl(NodeGraph &graph, ResourceDataInfo &info)
         {   
-            Serialize::StreamResult result = graph.loadFromFile(res->path());
+            Serialize::StreamResult result = graph.loadFromFile(info.resource()->path());
 
             if (result.mState != Serialize::StreamState::OK) {
                 LOG(*result.mError);
@@ -44,7 +44,7 @@ METATABLE_END(Engine::NodeGraph::NodeGraphLoader::ResourceType)
             return true;
         }
 
-        void NodeGraphLoader::unloadImpl(NodeGraph &graph, ResourceType *res)
+        void NodeGraphLoader::unloadImpl(NodeGraph &graph, ResourceDataInfo &info)
         {
         }
 

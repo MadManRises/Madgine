@@ -95,7 +95,7 @@ namespace Physics {
         btRigidBody mRigidBody;
     };
 
-    RigidBody::RigidBody(const Engine::ObjectPtr &data)
+    RigidBody::RigidBody(const ObjectPtr &data)
         : EntityComponent(data)
         , mData(std::make_unique<Data>())
     {
@@ -237,12 +237,12 @@ namespace Physics {
 
     void RigidBody::setShape(typename CollisionShapeManager::HandleType handle)
     {
-        mShapeHandle = handle;
+        mShapeHandle = std::move(handle);
 
         mData->mRigidBody.setCollisionShape(mShapeHandle->get());
     }
 
-    void RigidBody::setShapeName(const std::string_view &name)
+    void RigidBody::setShapeName(std::string_view name)
     {
         mShapeHandle.load(name);
 

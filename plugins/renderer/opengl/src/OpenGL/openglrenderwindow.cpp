@@ -387,25 +387,6 @@ namespace Render {
 
     OpenGLRenderWindow::~OpenGLRenderWindow()
     {
-        if (!mReusedContext) {
-
-            for (std::pair<const std::string, OpenGLMeshLoader::ResourceType> &p : OpenGLMeshLoader::getSingleton()) {
-                p.second.unloadData();
-            }
-
-            for (std::pair<const std::string, OpenGLProgramLoader::ResourceType> &p : OpenGLProgramLoader::getSingleton()) {
-                p.second.unloadData();
-            }
-
-            for (std::pair<const std::string, OpenGLShaderLoader::ResourceType> &p : OpenGLShaderLoader::getSingleton()) {
-                p.second.unloadData();
-            }
-
-            for (std::pair<const std::string, OpenGLTextureLoader::ResourceType> &p : OpenGLTextureLoader::getSingleton()) {
-                p.second.unloadData();
-            }
-        }
-
         shutdownWindow(mOsWindow, mContext, mReusedContext);
     }
 

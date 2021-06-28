@@ -6,12 +6,10 @@ namespace CodeGen {
 
 struct MADGINE_CODEGEN_EXPORT File {
 
+    void beginCondition(std::string_view cond);
+    void endCondition(std::string_view cond);
 
-
-    void beginCondition(const std::string_view &cond);
-    void endCondition(const std::string_view &cond);
-
-
+    virtual void statement(Statement statement) = 0;
 
     std::vector<size_t> mConditionalsStack;
     std::vector<std::string> mConditionalTokenList;

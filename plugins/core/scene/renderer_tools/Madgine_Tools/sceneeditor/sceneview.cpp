@@ -45,6 +45,8 @@
 
 #include "Madgine/render/rendertarget.h"
 
+#include "Madgine_Tools/interactivecamera.h"
+
 
 namespace Engine {
 namespace Tools {
@@ -99,22 +101,6 @@ namespace Tools {
         ImGui::PushID(this);
         ImGui::SetNextWindowSizeConstraints({ 100, 100 }, { 1000000, 1000000 });
         if (ImGui::Begin("SceneView")) {
-            ImVec2 region = ImGui::GetContentRegionAvail();
-            mRenderTarget->resize({ static_cast<int>(region.x), static_cast<int>(region.y) });
-            bool pressed = ImGui::ImageButton((void *)mRenderTarget->texture()->mTextureHandle, region, { 0, 0 }, { 1, 1 }, 0);
-			if (pressed && !mDragging[0])
-                if (!Im3D::IsAnyObjectHovered())
-                    mEditor->deselect();
-
-            ImGuiIO &io = ImGui::GetIO();
-            Im3DIO &io3D = Im3D::GetIO();
-
-            Vector2 dragDistance = io.MouseDelta;
-
-            const Ray &ray = Im3D::GetCurrentContext()->mMouseRay;            
-
-            if (mEditor->render3DCursor())
-                Im3D::Arrow3D(IM3D_LINES, 0.3f, ray.mPoint + 10.0f * ray.mDir, ray.mPoint + 20.0f * ray.mDir);
 
             constexpr Vector3 axes[3] = {
                 { 1, 0, 0 },
@@ -122,29 +108,45 @@ namespace Tools {
                 { 0, 0, 1 }
             };
 
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem)) {
+            ImGuiIO &io = ImGui::GetIO();
+            Im3DIO &io3D = Im3D::GetIO();
 
-                if (io.MouseClicked[0] && mEditor->hoveredAxis() >= 0) {
-                    mDraggedAxis = mEditor->hoveredAxis();
-                    mDragStartRay = ray;
-                    mDragStoredPosition = mEditor->hoveredTransform()->getPosition();
+            const Ray &ray = Im3D::GetCurrentContext()->mMouseRay;            
 
-                    Vector3 axis = axes[mDraggedAxis];
+            if (mEditor->render3DCursor())
+                Im3D::Arrow3D(IM3D_LINES, 0.3f, ray.mPoint + 10.0f * ray.mDir, ray.mPoint + 20.0f * ray.mDir);
 
-                    Plane plane = cameraPlane(mCamera, mDragStoredPosition, &axis);
 
-                    if (auto intersection = Intersect(mDragStartRay, plane)) {
+            ImVec2 region = ImGui::GetContentRegionAvail();
+            mRenderTarget->resize({ static_cast<int>(region.x), static_cast<int>(region.y) });
+            bool pressed = ImGui::ImageButton((void *)mRenderTarget->texture()->mTextureHandle, region, { 0, 0 }, { 1, 1 }, 0);
+			if (pressed && !mState.mDragging[0])
+                if (!Im3D::IsAnyObjectHovered())
+                    mEditor->deselect();
 
-                        mMouseDown[0] = true;
-                        mDragTransform = mEditor->hoveredTransform();
-                        mDragStoredMatrix = mEditor->hoveredTransform()->matrix();
-                        mDragRelMousePosition = mDragStartRay.point(intersection[0]) - mDragStoredPosition;
-                    }
-                }
+            
+            if (ImGui::InteractiveView(mState)) {
 
-                for (int i = 1; i < 3; ++i) {
-                    if (io.MouseClicked[i]) {
-                        mMouseDown[i] = true;
+                if (io.MouseClicked[0]){
+                    if (mEditor->hoveredAxis() >= 0) {
+                        mDraggedAxis = mEditor->hoveredAxis();
+                        mDragStartRay = ray;
+                        mDragStoredPosition = mEditor->hoveredTransform()->getPosition();
+
+                        Vector3 axis = axes[mDraggedAxis];
+
+                        Plane plane = cameraPlane(mCamera, mDragStoredPosition, &axis);
+
+                        if (auto intersection = Intersect(mDragStartRay, plane)) {
+                            mDragTransform = mEditor->hoveredTransform();
+                            mDragStoredMatrix = mEditor->hoveredTransform()->matrix();
+                            mDragRelMousePosition = mDragStartRay.point(intersection[0]) - mDragStoredPosition;
+                            mAxisDragging = true;
+                        } else {
+                            mAxisDragging = false;
+                        }
+                    } else {
+                        mAxisDragging = false;
                     }
                 }
 
@@ -152,37 +154,11 @@ namespace Tools {
                 Vector2 size = ImGui::GetItemRectSize();
 
                 io3D.mNextFrameMouseRay = mCamera.mousePointToRay(Vector2 { io.MousePos } - pos, size);
+            }      
 
-                mCamera.mPosition += mCamera.mOrientation * Vector3 { Vector3::UNIT_Z } * io.MouseWheel / 5.0f;
-            }
-
-            for (int i = 0; i < 3; ++i) {
-                mMouseClicked[i] = false;
-                if (mMouseDown[i]) {
-
-                    if (dragDistance.length() >= io.MouseDragThreshold / 3.0f && !mDragging[0] && !mDragging[1] && !mDragging[2]) {
-                        mDragging[i] = true;
-                    }
-
-                    if (io.MouseReleased[i]) {
-                        mMouseDown[i] = false;
-                        if (!mDragging[i]) {
-                            mMouseClicked[i] = true;
-                        }
-                        mDragging[i] = false;
-                    }
-                }
-            }
-
-            if (mDragging[2]) {
-                mCamera.mPosition += mCamera.mOrientation * Vector3 { -dragDistance.x / 50.0f, dragDistance.y / 50.0f, 0.0f };
-            }
-
-            if (mDragging[1]) {
-                mCamera.mOrientation = Quaternion { dragDistance.x / 200.0f, Vector3::UNIT_Y } * mCamera.mOrientation * Quaternion { dragDistance.y / 200.0f, Vector3::UNIT_X };
-            }
-
-            if (mDragging[0]) {
+            InteractiveCamera(mState, mCamera);
+                        
+            if (mState.mDragging[0] && mAxisDragging) {
 
                 Vector3 axis = axes[mDraggedAxis];
 

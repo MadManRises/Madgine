@@ -16,7 +16,7 @@ namespace Physics {
     struct MADGINE_BULLET_EXPORT RigidBody : Engine::Scene::Entity::EntityComponent<RigidBody> {
         SERIALIZABLEUNIT(RigidBody);
 
-        RigidBody(const Engine::ObjectPtr &data = {});
+        RigidBody(const ObjectPtr &data = {});
         RigidBody(RigidBody &&other);
         ~RigidBody();
 
@@ -48,7 +48,7 @@ namespace Physics {
         void setVelocity(const Vector3 &v);
 
         void setShape(typename CollisionShapeManager::HandleType handle);
-        void setShapeName(const std::string_view &name);
+        void setShapeName(std::string_view name);
         CollisionShapeManager::ResourceType *getShape() const;
         CollisionShapeInstance *getShapeInstance() const;
 

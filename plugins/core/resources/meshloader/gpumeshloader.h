@@ -16,7 +16,7 @@ namespace Render {
         struct HandleType : Base::HandleType {
             using Base::HandleType::HandleType;
             HandleType(Base::HandleType handle)
-                : Base::HandleType(handle)
+                : Base::HandleType(std::move(handle))
             {
             }
 
@@ -24,21 +24,21 @@ namespace Render {
             {
                 if (!loader)
                     loader = &GPUMeshLoader::getSingleton();
-                loader->update(getData(*this, loader), mesh);
+                loader->update(*getDataPtr(*this, loader), mesh);
             }
 
             void update(MeshData &&mesh, GPUMeshLoader *loader = nullptr)
             {
                 if (!loader)
                     loader = &GPUMeshLoader::getSingleton();
-                loader->update(getData(*this, loader), std::move(mesh));
+                loader->update(*getDataPtr(*this, loader), std::move(mesh));
             }
         };
 
         GPUMeshLoader();
 
-        bool loadImpl(GPUMeshData &data, ResourceType *res);
-        void unloadImpl(GPUMeshData &data, ResourceType *res);
+        bool loadImpl(GPUMeshData &data, ResourceDataInfo &info);
+        void unloadImpl(GPUMeshData &data, ResourceDataInfo &info);
 
         virtual bool generate(GPUMeshData &data, const MeshData &mesh) = 0;
         virtual bool generate(GPUMeshData &data, MeshData &&mesh) = 0;

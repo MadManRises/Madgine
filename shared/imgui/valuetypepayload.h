@@ -7,7 +7,6 @@ namespace ImGui {
 
 struct ValueTypePayload {
     std::string mName;
-    Engine::TypedScopePtr mSender;
     Engine::ValueType mValue;
     mutable std::string mStatusMessage;
 };

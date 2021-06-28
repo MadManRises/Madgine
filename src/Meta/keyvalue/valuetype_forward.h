@@ -75,13 +75,28 @@ struct ValueType_ReturnHelper<T *, void> {
 template <typename T>
 using ValueType_Return = typename ValueType_ReturnHelper<T>::type;
 
+META_EXPORT bool ValueType_isNull(const ValueType &v);
+META_EXPORT ValueTypeDesc ValueType_type(const ValueType &v);
+
+template <typename T>
+bool ValueType_is(const ValueType &v)
+{
+    return toValueTypeDesc<T>().canAccept(ValueType_type(v));
+}
+
 template <typename T, typename = std::enable_if_t<isValueTypePrimitive_v<T>>>
 META_EXPORT ValueType_Return<T> ValueType_as_impl(const ValueType &v);
 
 template <typename T>
 decltype(auto) ValueType_as(const ValueType &v)
 {
-    if constexpr (std::is_same_v<T, ValueType>) {
+    if constexpr (is_instance_v<T, std::optional>) {
+        if (ValueType_isNull(v))
+            return T {};
+        else {
+            return T { ValueType_as<type_pack_unpack_unique_t<typename is_instance<T, std::optional>::argument_types>>(v) };
+        }
+    } else if constexpr (std::is_same_v<T, ValueType>) {
         return v;
     } else if constexpr (isValueTypePrimitive_v<T>) {
         return ValueType_as_impl<T>(v);
@@ -102,18 +117,12 @@ decltype(auto) ValueType_as(const ValueType &v)
     //static_assert(dependent_bool<T, false>::value, "A ValueType can not be converted to the given target type");
 }
 
-META_EXPORT ValueTypeDesc ValueType_type(const ValueType &v);
-
-template <typename T>
-bool ValueType_is(const ValueType &v)
-{
-    return toValueTypeDesc<T>().canAccept(ValueType_type(v));
-}
-
 template <bool reference_to_ptr, typename T>
 decltype(auto) convert_ValueType(T &&t)
 {
-    if constexpr (isValueTypePrimitive_v<std::decay_t<T>> || std::is_same_v<ValueType, std::decay_t<T>>) {
+    if constexpr (is_instance_v<T, std::optional>) {
+        return std::forward<T>(t);
+    } else if constexpr (isValueTypePrimitive_v<std::decay_t<T>> || std::is_same_v<ValueType, std::decay_t<T>>) {
         return std::forward<T>(t);
     } else if constexpr (is_string_like_v<std::decay_t<T>>) {
         return std::string { std::forward<T>(t) };

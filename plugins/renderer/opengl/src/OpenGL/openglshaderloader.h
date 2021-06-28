@@ -9,11 +9,11 @@
 namespace Engine {
 namespace Render {
 
-    struct OpenGLShaderLoader : Resources::ResourceLoader<OpenGLShaderLoader, OpenGLShader, std::vector<Placeholder<0>>, Threading::WorkGroupStorage> {
+    struct OpenGLShaderLoader : Resources::ResourceLoader<OpenGLShaderLoader, OpenGLShader, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
         OpenGLShaderLoader();
 
-        bool loadImpl(OpenGLShader &shader, ResourceType *res);
-        void unloadImpl(OpenGLShader &shader, ResourceType *res);
+        bool loadImpl(OpenGLShader &shader, ResourceDataInfo &info);
+        void unloadImpl(OpenGLShader &shader, ResourceDataInfo &info);
     };
 
 }

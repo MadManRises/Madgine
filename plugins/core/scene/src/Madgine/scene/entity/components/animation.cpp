@@ -19,9 +19,9 @@ namespace Engine {
 namespace Scene {
     namespace Entity {
 
-        void Animation::set(const Render::AnimationLoader::HandleType &handle)
+        void Animation::set(Render::AnimationLoader::HandleType handle)
         {
-            mAnimationList = handle;
+            mAnimationList = std::move(handle);
             setCurrentAnimation(nullptr);
             refreshCache();
         }

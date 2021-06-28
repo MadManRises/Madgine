@@ -6,31 +6,38 @@
 namespace Engine {
 namespace NodeGraph {
 
-    struct MADGINE_NODEGRAPH_EXPORT TargetPin {
+    struct MADGINE_NODEGRAPH_EXPORT Pin {
         IndexType<uint32_t, 0> mNode;
         IndexType<uint32_t> mIndex;
 
         explicit operator bool() const;
+        bool operator==(const Pin& other) {
+            return mNode == other.mNode && mIndex == other.mIndex;
+        }
     };
 
     struct FlowOutPinPrototype {
-        TargetPin mTarget;
+        Pin mTarget;
+    };
+
+    struct FlowInPinPrototype {
+        std::vector<Pin> mSources;
     };
 
     struct DataInPinPrototype {
-        TargetPin mSource;
+        Pin mSource;
     };
 
     struct DataOutPinPrototype {
-        TargetPin mTarget;
+        Pin mTarget;
     };
 
-    struct DataReceiverPinPrototype {
-        ExtendedValueTypeDesc mType;
+    struct DataReceiverPinPrototype {        
+        std::vector<Pin> mSources;
     };
 
     struct DataProviderPinPrototype {
-        ExtendedValueTypeDesc mType;
+        std::vector<Pin> mTargets;
     };
 
     enum class PinDir {
@@ -47,7 +54,7 @@ namespace NodeGraph {
     struct PinDesc {
         PinDir mDir;
         PinType mType;
-        uint32_t mIndex;
+        Pin mPin;
 
         bool isCompatible(const PinDesc& other) const {
             if (mDir == other.mDir)

@@ -30,6 +30,11 @@ namespace Resources {
         return mIsPersistent;
     }
 
+    void ResourceBase::setPath(const Filesystem::Path &path)
+    {
+        mPath = path;
+    }
+
     const Filesystem::Path &ResourceBase::path()
     {
         return mPath;

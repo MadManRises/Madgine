@@ -34,8 +34,6 @@ namespace Core {
 #endif
 
         KeyValueRegistry::registerGlobal("ResourceManager", mResources.get());
-
-        mResources->init();
     }
 
     Root::~Root()

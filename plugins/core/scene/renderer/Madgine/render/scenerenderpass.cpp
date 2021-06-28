@@ -16,6 +16,13 @@
 
 #include "Madgine/render/camera.h"
 
+
+#include "Madgine/render/shadinglanguage/sl.h"
+
+#define SL_SHADER scene
+#include INCLUDE_SL_SHADER
+
+
 namespace Engine {
 namespace Render {
 
@@ -31,21 +38,25 @@ namespace Render {
         if (!mProgram) {
             mProgram.create("scene");
 
-            mPerFrame.lightColor = { 1.0f, 1.0f, 1.0f };
-            mPerFrame.lightDir = Vector3 { 0.2f, -0.2f, 1.0f }.normalizedCopy();
+            mProgram.setParameters({ nullptr, sizeof(ScenePerApplication) }, 0);
+            mProgram.setParameters({ nullptr, sizeof(ScenePerFrame) }, 1);
+            mProgram.setParameters({ nullptr, sizeof(ScenePerObject) }, 2);
         }
 
         Vector2i size = target->size();
 
         float aspectRatio = float(size.x) / size.y;
 
-        mPerApplication.p = mCamera->getProjectionMatrix(aspectRatio);
+        auto perApplication = mProgram.mapParameters(0).cast<ScenePerApplication>();
 
-        mProgram.setParameters(mPerApplication, 0);
+        perApplication->p = mCamera->getProjectionMatrix(aspectRatio);
 
-        mPerFrame.v = mCamera->getViewMatrix();
+        auto perFrame = mProgram.mapParameters(1).cast<ScenePerFrame>();
+        
+        perFrame->v = mCamera->getViewMatrix();     
 
-        mProgram.setParameters(mPerFrame, 1);
+        perFrame->lightColor = { 1.0f, 1.0f, 1.0f };
+        perFrame->lightDir = Vector3 { 0.2f, -0.2f, 1.0f }.normalizedCopy();
 
         //TODO Culling
 
@@ -61,23 +72,26 @@ namespace Render {
             if (mesh && mesh->isVisible() && transform) {
                 GPUMeshData *meshData = mesh->data();
                 if (meshData) {
-                    mPerObject.hasLight = true;
-
-                    mPerObject.hasDistanceField = false;
-
-                    mPerObject.hasTexture = meshData->mTextureHandle != 0;
 
                     target->bindTexture(meshData->mTextureHandle);
 
-                    mPerObject.m = transform->worldMatrix(mScene.entityComponentList<Scene::Entity::Transform>());
-                    mPerObject.anti_m = mPerObject.m.mValue
+                    Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
+
+                    auto perObject = mProgram.mapParameters(2).cast<ScenePerObject>();
+
+                    perObject->hasLight = true;
+
+                    perObject->hasDistanceField = false;
+
+                    perObject->hasTexture = meshData->mTextureHandle != 0;
+
+                    perObject->m = transform->worldMatrix(mScene.entityComponentList<Scene::Entity::Transform>());
+                    perObject->anti_m = perObject->m.mValue
                                             .Inverse()
                                             .Transpose();
+                    
+                    perObject->hasSkeleton = skeleton != nullptr;
 
-                    Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
-                    mPerObject.hasSkeleton = skeleton != nullptr;
-
-                    mProgram.setParameters(mPerObject, 2);
 
                     if (skeleton) {
                         mProgram.setDynamicParameters(skeleton->matrices(), 0);

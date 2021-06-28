@@ -44,20 +44,20 @@ struct ComponentRegistryListenerEntry {
 MODULES_EXPORT void skipUniqueComponentOnExport(const TypeInfo *t);
 MODULES_EXPORT void exportStaticComponentHeader(const Filesystem::Path &outFile, bool hasTools);
 
-MODULES_EXPORT std::map<std::string, ComponentRegistryBase *> &registryRegistry();
+MODULES_EXPORT std::vector<UniqueComponentRegistryBase *> &registryRegistry();
 
-struct MODULES_EXPORT ComponentRegistryBase {
-    ComponentRegistryBase(const TypeInfo *ti, const Plugins::BinaryInfo *binary)
+struct MODULES_EXPORT UniqueComponentRegistryBase {
+    UniqueComponentRegistryBase(const TypeInfo *ti, const Plugins::BinaryInfo *binary)
         : mBinary(binary)
         , mTi(ti)
     {
         LOG("Adding: " << ti->mTypeName);
-        registryRegistry()[ti->mFullName] = this;
+        registryRegistry().push_back(this);
     }
 
-    ~ComponentRegistryBase()
+    ~UniqueComponentRegistryBase()
     {
-        registryRegistry().erase(mTi->mFullName);
+        registryRegistry().erase(std::find(registryRegistry().begin(), registryRegistry().end(), this));
     }
 
     virtual void onPluginLoad(const Plugins::BinaryInfo *, CompoundAtomicOperation &) = 0;
@@ -90,7 +90,7 @@ private:
 DLL_IMPORT_VARIABLE2(Registry, uniqueComponentRegistry, typename Registry);
 
 template <typename _Base, typename... _Ty>
-struct UniqueComponentRegistry : ComponentRegistryBase {
+struct UniqueComponentRegistry : UniqueComponentRegistryBase {
 
     typedef _Base Base;
     typedef std::tuple<_Ty...> Ty;
@@ -103,7 +103,7 @@ struct UniqueComponentRegistry : ComponentRegistryBase {
     };
 
     UniqueComponentRegistry()
-        : ComponentRegistryBase(&typeInfo<UniqueComponentRegistry>, &Plugins::PLUGIN_LOCAL(binaryInfo))
+        : UniqueComponentRegistryBase(&typeInfo<UniqueComponentRegistry>, &Plugins::PLUGIN_LOCAL(binaryInfo))
     {
     }
 

@@ -115,7 +115,7 @@ template <typename T, typename Base>
 struct NamedComponent : Base {
     using Base::Base;
 
-    static const std::string_view &componentName()
+    static std::string_view componentName()
     {
         return _componentName<T>();
     }

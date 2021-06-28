@@ -31,23 +31,36 @@ namespace Tools {
         std::string_view key() const override;
 
         void save();
-        void load(const std::string &name);
+        void load(std::string_view name);
         void create(const Filesystem::Path &path);
+        std::string_view getCurrentName() const;
+
 
     protected:
-        bool onSave(const std::string_view &view, ed::SaveReasonFlags reason);
+        bool onSave(std::string_view view, ed::SaveReasonFlags reason);
         size_t onLoad(char *data);
 
         Filesystem::Path layoutPath() const;
 
         void createEditor();
 
+        void queryLink();
+
+        void verify();
+
     private:
         ed::EditorContext *mEditor = nullptr;
         bool mHierarchyVisible;
         bool mNodeDetailsVisible;
 
-        NodeGraph::NodeGraphLoader::HandleType mGraph;
+        NodeGraph::NodeGraphLoader::HandleType mGraphHandle;
+        NodeGraph::NodeGraph mGraph;
+
+        struct NodeMessages {
+            std::vector<std::string> mErrorMessages;
+            std::vector<std::string> mWarningMessages;
+        };
+        std::map<NodeGraph::NodeBase *, NodeMessages> mNodeMessages;
 
         IndexType<uintptr_t> mSelectedNodeIndex;
 
@@ -58,6 +71,7 @@ namespace Tools {
 
         std::optional<NodeGraph::PinDesc> mDragPin;
         std::optional<ExtendedValueTypeDesc> mDragType;
+        uint32_t mDragMask;
 
         bool mSaveQueued = false;
         bool mIsDirty = false;

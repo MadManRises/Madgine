@@ -18,6 +18,16 @@ namespace Render {
         GL_CHECK();
     }
 
+    OpenGLBuffer::OpenGLBuffer(GLenum target, const ByteBuffer &data)
+        : mTarget(target)
+    {
+        glGenBuffers(1, &mHandle);
+        GL_CHECK();
+
+        if (data.mData)
+            setData(data);
+    }
+
     OpenGLBuffer::OpenGLBuffer(OpenGLBuffer &&other)
         : mHandle(std::exchange(other.mHandle, 0))
         , mTarget(std::exchange(other.mTarget, 0))

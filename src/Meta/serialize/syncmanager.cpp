@@ -267,8 +267,7 @@ namespace Serialize {
         SyncManager *target)
     {
         auto it = mMasterStreams.find(streamId);
-        if (it == mMasterStreams.end())
-            std::terminate();
+        assert(it != mMasterStreams.end());            
         if (SyncManagerResult result = target->addMasterStream(
                 std::move(*it), false);
             result != SyncManagerResult::SUCCESS)

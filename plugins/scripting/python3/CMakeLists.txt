@@ -2,7 +2,7 @@ project(Python3)
 
 find_package (Python3 COMPONENTS Development.Embed)
 
-if (NOT Python_Development.Module_FOUND)
+if (NOT Python3_Development.Embed_FOUND)
 	return()
 endif()
 
@@ -10,8 +10,8 @@ endif()
 set(sources "")
 FolderSources(sources "" src)
 FolderSources(sources src Python3 python3env.cpp python3env.h python3fileloader.cpp python3fileloader.h python3lib.h python3forward.h python3streamredirect.cpp python3streamredirect.h)
-	FolderSources(sources Python3 util pyapifunction.cpp pyapifunction.h pyboundapifunction.cpp pyboundapifunction.h pymoduleptr.cpp pymoduleptr.h pyobjectptr.cpp pyobjectptr.h pyobjectutil.cpp pyobjectutil.h pyownedscopeptr.cpp pyownedscopeptr.h pyscopeiterator.cpp pyscopeiterator.h python3lock.cpp python3lock.h pytypedscopeptr.cpp pytypedscopeptr.h pyvirtualiterator.cpp pyvirtualiterator.h pyvirtualrange.cpp pyvirtualrange.h)
-		FolderSources(sources util math pyquaternion.cpp pyquaternion.h pyvector3.cpp pyvector3.h)
+	FolderSources(sources Python3 util pyapifunction.cpp pyapifunction.h pyboundapifunction.cpp pyboundapifunction.h pydictptr.cpp pydictptr.h pymoduleptr.cpp pymoduleptr.h pyobjectptr.cpp pyobjectptr.h pyobjectutil.cpp pyobjectutil.h pyownedscopeptr.cpp pyownedscopeptr.h pyscopeiterator.cpp pyscopeiterator.h python3lock.cpp python3lock.h pytypedscopeptr.cpp pytypedscopeptr.h pyvirtualiterator.cpp pyvirtualiterator.h pyvirtualrange.cpp pyvirtualrange.h)
+		FolderSources(sources util math pymatrix3.cpp pymatrix3.h pyquaternion.cpp pyquaternion.h pyvector3.cpp pyvector3.h)
 
 add_plugin(Python3 Madgine Scripting ${sources} PRECOMPILED_HEADER src/Python3/python3lib.h)
 

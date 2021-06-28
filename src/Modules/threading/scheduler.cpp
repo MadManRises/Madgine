@@ -81,13 +81,13 @@ namespace Threading {
     void Scheduler::schedulerLoop(Threading::TaskQueue *queue)
     {
         setCurrentThreadName(mWorkgroup.name() + "_" + queue->name());
-        while (!queue->idle(TaskMask::DEFAULT) || queue->running()) {
+        while (queue->running() || !queue->idle(TaskMask::DEFAULT)) {
             while (mWorkgroup.hasInterrupt()) {
                 mWorkgroup.enterCurrentBarrier(queue, 0, false);
             }
             std::chrono::steady_clock::time_point nextAvailableTaskTime = queue->update(TaskMask::DEFAULT, &mWorkgroup.hasInterrupt());
             queue->waitForTasks(&mWorkgroup.hasInterrupt(), nextAvailableTaskTime);
-        }
+        }        
     }
 #endif
 

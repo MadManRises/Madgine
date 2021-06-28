@@ -7,15 +7,13 @@
 namespace Engine {
 namespace Resources {
 
-	struct MADGINE_IMAGELOADER_EXPORT ImageLoader : ResourceLoader<ImageLoader, ImageData> {
-    
-		ImageLoader();
+    struct MADGINE_IMAGELOADER_EXPORT ImageLoader : ResourceLoader<ImageLoader, ImageData> {
 
-		bool loadImpl(ImageData &data, ResourceType *res);
-        void unloadImpl(ImageData &data, ResourceType *res);
+        ImageLoader();
 
-	};
-
+        bool loadImpl(ImageData &data, ResourceDataInfo &info);
+        void unloadImpl(ImageData &data, ResourceDataInfo &info);
+    };
 
 }
 }

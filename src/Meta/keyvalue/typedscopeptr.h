@@ -71,8 +71,8 @@ public:
         return mScope != nullptr;
     }
 
-    ScopeIterator find(const std::string_view &key) const;
-    ScopeField operator[](const std::string_view &key) const;
+    ScopeIterator find(std::string_view key) const;
+    ScopeField operator[](std::string_view key) const;
     //bool isEditable(const std::string &key) const;
     ScopeIterator begin() const;
     ScopeIterator end() const;

@@ -51,6 +51,9 @@ namespace Scripting {
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const Vector4 &v);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const Vector3 &v);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const Vector2 &v);
+        MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const Vector4i &v);
+        MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const Vector3i &v);
+        MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const Vector2i &v);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const Quaternion &v);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const ObjectPtr &o);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const CoW<Matrix3> &m);

@@ -3,7 +3,8 @@
 #include "objectinstance.h"
 
 namespace Engine {
-ObjectPtr::ObjectPtr()
+
+ObjectPtr::ObjectPtr(std::monostate)
 {
 }
 
@@ -17,17 +18,27 @@ void ObjectPtr::reset()
     mInstance.reset();
 }
 
+ObjectInstance *ObjectPtr::get()
+{
+    return mInstance.get();
+}
+
+const ObjectInstance *ObjectPtr::get() const
+{
+    return mInstance.get();
+}
+
 ObjectPtr::operator bool() const
 {
     return mInstance.operator bool();
 }
 
-void ObjectPtr::setValue(const std::string_view &name, const ValueType &value)
+void ObjectPtr::setValue(std::string_view name, const ValueType &value)
 {
     mInstance->setValue(name, value);
 }
 
-bool ObjectPtr::getValue(ValueType &retVal, const std::string_view &name) const
+bool ObjectPtr::getValue(ValueType &retVal, std::string_view name) const
 {
     if (!mInstance)
         return false;

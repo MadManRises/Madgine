@@ -8,9 +8,11 @@ namespace Scripting {
     
         struct MADGINE_PYTHON3_EXPORT PyModulePtr : PyObjectPtr {
             PyModulePtr() = default;
-            PyModulePtr(const std::string_view &name);
+            PyModulePtr(std::string_view name);
 
             using PyObjectPtr::operator=;
+
+            static PyModulePtr create(std::string_view name);
         };
     
     }

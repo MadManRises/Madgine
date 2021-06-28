@@ -2,7 +2,7 @@
 
 /// @cond
 
-#include "Madgine_Tools/clienttoolslib.h"
+#include "toolslib.h"
 #include "Madgine/nodegraphlib.h"
 
 #if defined(NodeGraphTools_EXPORTS)

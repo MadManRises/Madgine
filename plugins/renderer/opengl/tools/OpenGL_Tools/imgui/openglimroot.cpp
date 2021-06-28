@@ -48,7 +48,7 @@ METATABLE_END(Engine::Tools::OpenGLImRoot)
 				font.load(fontName);
 
                 return Im3DFont {
-                    font->mTextureHandle,
+                    (Im3DTextureId)font->mTexture->mTextureHandle,
                     font->mTextureSize,
                     font->mGlyphs.data()
                 };

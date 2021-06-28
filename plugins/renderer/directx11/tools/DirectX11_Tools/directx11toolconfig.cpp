@@ -30,7 +30,7 @@ namespace Tools {
 
         getTool<Inspector>().addPreviewDefinition<Render::FontLoader::ResourceType>([](Render::FontLoader::ResourceType *font) {
             font->setPersistent(true);
-            ImGui::Image((void *)(uintptr_t)*font->loadData()->mTextureHandle, { 100, 100 });
+            ImGui::Image((void *)font->loadData()->mTexture->mTextureHandle, { 100, 100 });
         });
 
         getTool<Inspector>().addPreviewDefinition<Resources::ImageLoader::ResourceType>([this](Resources::ImageLoader::ResourceType *image) {
@@ -38,7 +38,7 @@ namespace Tools {
             Resources::ImageLoader::HandleType data = image->loadData();
 
             mImageTexture.setData({ data->mWidth, data->mHeight }, { data->mBuffer, static_cast<size_t>(data->mWidth * data->mHeight) });
-            ImGui::Image((void *)(uintptr_t)mImageTexture.handle(), { static_cast<float>(data->mWidth), static_cast<float>(data->mHeight) });
+            ImGui::Image((void *)mImageTexture.handle(), { static_cast<float>(data->mWidth), static_cast<float>(data->mHeight) });
         });
 
         return ToolBase::init();

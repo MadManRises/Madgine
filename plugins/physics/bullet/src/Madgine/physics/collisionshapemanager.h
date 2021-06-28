@@ -32,7 +32,7 @@ namespace Physics {
             InstanceHandle &operator=(const InstanceHandle &other);
             InstanceHandle &operator=(InstanceHandle &&other);
 
-            void load(const std::string_view &name, CollisionShapeManager *loader = nullptr);
+            void load(std::string_view name, CollisionShapeManager *loader = nullptr);
             void reset();
 
             ResourceType *resource() const;
@@ -50,8 +50,8 @@ namespace Physics {
 
         CollisionShapeManager();
 
-        bool loadImpl(std::unique_ptr<CollisionShape> &shape, ResourceType *res);
-        void unloadImpl(std::unique_ptr<CollisionShape> &shape, ResourceType *res);
+        bool loadImpl(std::unique_ptr<CollisionShape> &shape, ResourceDataInfo &info);
+        void unloadImpl(std::unique_ptr<CollisionShape> &shape, ResourceDataInfo &info);
     };
 
     

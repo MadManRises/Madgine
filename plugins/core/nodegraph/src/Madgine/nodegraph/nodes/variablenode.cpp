@@ -3,12 +3,16 @@
 #include "variablenode.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
-#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 #include "Meta/serialize/serializetable_impl.h"
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 #include "Meta/keyvalueutil/valuetypeserialize.h"
 
 #include "../nodeinterpreter.h"
+
+#include "../codegenerator.h"
+
+#include "codegen/codegen.h"
 
 NODE(VariableNode, Engine::NodeGraph::VariableNode)
 
@@ -29,6 +33,12 @@ namespace NodeGraph {
         setup();
     }
 
+    VariableNode::VariableNode(const VariableNode &other, NodeGraph &graph)
+        : Node(other, graph)
+        , mDefaultValue(other.mDefaultValue)
+    {
+    }
+
     size_t VariableNode::dataProviderCount() const
     {
         return 1;
@@ -39,7 +49,7 @@ namespace NodeGraph {
         return "out";
     }
 
-    ExtendedValueTypeDesc VariableNode::dataProviderType(uint32_t index) const
+    ExtendedValueTypeDesc VariableNode::dataProviderType(uint32_t index, bool bidir) const
     {
         return mDefaultValue.type();
     }
@@ -54,7 +64,7 @@ namespace NodeGraph {
         return "in";
     }
 
-    ExtendedValueTypeDesc VariableNode::dataReceiverType(uint32_t index) const
+    ExtendedValueTypeDesc VariableNode::dataReceiverType(uint32_t index, bool bidir) const
     {
         return mDefaultValue.type();
     }
@@ -84,6 +94,19 @@ namespace NodeGraph {
         }
         VariableNodeInterpret *variable = static_cast<VariableNodeInterpret *>(data.get());
         variable->mData = v;
+    }
+
+    CodeGen::Statement VariableNode::generateRead(CodeGenerator &generator, uint32_t providerIndex, std::unique_ptr<CodeGeneratorData> &data) const
+    {
+        std::string varName = "var_" + std::to_string(reinterpret_cast<uintptr_t>(this));
+
+        if (!data) {
+            data = std::make_unique<CodeGeneratorData>();
+
+            generator.file().statement(CodeGen::VariableDefinition { { varName, mDefaultValue.type() }, mDefaultValue });
+        }
+
+        return CodeGen::VariableRead { varName };
     }
 
 }

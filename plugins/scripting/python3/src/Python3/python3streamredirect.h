@@ -10,10 +10,10 @@ namespace Scripting {
             Python3StreamRedirect(const Python3StreamRedirect &) = delete;
             ~Python3StreamRedirect();
 
-            void redirect(const std::string_view &name);
-            void reset(const std::string_view &name);
+            void redirect(std::string_view name);
+            void reset(std::string_view name);
 
-            int write(const std::string_view &text);
+            int write(std::string_view text);
 
             void setBuf(std::streambuf *buf);
             std::streambuf *buf() const;

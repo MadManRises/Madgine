@@ -4,6 +4,7 @@
 #include "../streams/serializestream.h"
 #include "Generic/callerhierarchy.h"
 #include "Generic/functor.h"
+#include "Generic/makeowning.h"
 
 namespace Engine {
 namespace Serialize {
@@ -204,7 +205,7 @@ namespace Serialize {
 
             static const constexpr bool controlled = false;
 
-            using ArgsTuple = std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...>;
+            using ArgsTuple = std::tuple<MakeOwning_t<std::remove_const_t<std::remove_reference_t<_Ty>>>...>;
 
             static StreamResult readCreationData(SerializeInStream &in, std::optional<R> &result, const CallerHierarchy<T *> &parent)
             {

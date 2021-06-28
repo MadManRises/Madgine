@@ -4,7 +4,7 @@
 
 namespace CodeGen {
 
-void File::beginCondition(const std::string_view &cond)
+void File::beginCondition(std::string_view cond)
 {
     auto it = std::find(mConditionalTokenList.begin(), mConditionalTokenList.end(), cond);
     if (it == mConditionalTokenList.end()) {
@@ -19,7 +19,7 @@ void File::beginCondition(const std::string_view &cond)
         mConditionalsBitMask[index] = true;
 }
 
-void File::endCondition(const std::string_view &cond)
+void File::endCondition(std::string_view cond)
 {
     auto it = std::find(mConditionalTokenList.begin(), mConditionalTokenList.end(), cond);
     assert(it != mConditionalTokenList.end());

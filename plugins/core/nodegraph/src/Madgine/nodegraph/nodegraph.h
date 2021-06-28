@@ -14,52 +14,81 @@ namespace NodeGraph {
         SERIALIZABLEUNIT(NodeGraph);
 
         NodeGraph();
-        NodeGraph(const NodeGraph &) = delete;
+        NodeGraph(const NodeGraph &other);
         NodeGraph(NodeGraph &&);
         ~NodeGraph();
 
-        NodeGraph &operator=(const NodeGraph &) = delete;
+        NodeGraph &operator=(const NodeGraph &other);
+
+        std::string_view name() const;
+        uint32_t generation() const;
 
         Serialize::StreamResult loadFromFile(const Filesystem::Path &path);
         void saveToFile();
 
         NodeBase *addNode(std::unique_ptr<NodeBase> node);
-        NodeBase *addNode(const std::string_view &name);
-        void removeNode(NodeBase *node);
+        NodeBase *addNode(std::string_view name);
+        void removeNode(uint32_t index);
 
         const std::vector<std::unique_ptr<NodeBase>> &nodes() const;
-        const NodeBase *node(uint32_t index) const;
-        NodeBase *node(uint32_t index);
+        const NodeBase *node(IndexType<uint32_t,0> index) const;
+        NodeBase *node(IndexType<uint32_t, 0> index);
+        uint32_t nodeIndex(const NodeBase *node) const;
 
-        TargetPin flowOutTarget(uint32_t source, uint32_t sourceIndex);
-        TargetPin dataInSource(uint32_t target, uint32_t targetIndex);
-        TargetPin dataOutTarget(uint32_t source, uint32_t sourceIndex);
+        Pin flowOutTarget(Pin source);
+        Pin dataInSource(Pin target);
+        Pin dataOutTarget(Pin source);
 
-        void connectFlow(uint32_t source, uint32_t sourceIndex, uint32_t target, uint32_t targetIndex);
-        void connectDataIn(uint32_t target, uint32_t targetIndex, uint32_t source, uint32_t sourceIndex);
-        void connectDataOut(uint32_t source, uint32_t sourceIndex, uint32_t target, uint32_t targetIndex);
+        ExtendedValueTypeDesc dataReceiverType(Pin source, bool bidir = true);
+        ExtendedValueTypeDesc dataProviderType(Pin target, bool bidir = true);
+        ExtendedValueTypeDesc dataInType(Pin source, bool bidir = true);
+        ExtendedValueTypeDesc dataOutType(Pin target, bool bidir = true);
 
-        void disconnectFlow(uint32_t index);
-        void disconnectDataIn(uint32_t index);
-        void disconnectDataOut(uint32_t index);
+        uint32_t flowOutMask(Pin source, bool bidir = true);
+        uint32_t flowInMask(Pin target, bool bidir = true);
+        uint32_t dataReceiverMask(Pin source, bool bidir = true);
+        uint32_t dataProviderMask(Pin target, bool bidir = true);
+        uint32_t dataInMask(Pin source, bool bidir = true);
+        uint32_t dataOutMask(Pin target, bool bidir = true);
 
-        std::vector<FlowOutPinPrototype> mFlowInPins;
-        size_t mFlowOutPinCount = 0;
-        std::vector<DataOutPinPrototype> mDataReceiverPins;
-        std::vector<DataInPinPrototype> mDataProviderPins;
-        std::vector<DataReceiverPinPrototype> mDataOutPins;
-        std::vector<DataProviderPinPrototype> mDataInPins;
+        std::string_view flowOutName(Pin source);
+        std::string_view flowInName(Pin target);
+        std::string_view dataReceiverName(Pin source);
+        std::string_view dataProviderName(Pin target);
+        std::string_view dataInName(Pin source);
+        std::string_view dataOutName(Pin target);        
+
+        void connectFlow(Pin source, Pin target);
+        void connectDataIn(Pin target, Pin source);
+        void connectDataOut(Pin source, Pin target);
+
+        void disconnectFlow(Pin source);
+        void disconnectDataIn(Pin target);
+        void disconnectDataOut(Pin source);
+
+        bool checkDataProvider(uint32_t index);
+
+        void onDataProviderRemove(const NodeBase *node, uint32_t index);
+
+        std::vector<FlowOutPinPrototype> mFlowOutPins;
+        std::vector<FlowInPinPrototype> mFlowInPins;
+        std::vector<DataOutPinPrototype> mDataOutPins;
+        std::vector<DataInPinPrototype> mDataInPins;
+        std::vector<DataProviderPinPrototype> mDataProviderPins;
+        std::vector<DataReceiverPinPrototype> mDataReceiverPins;
 
     protected:
         static const char *nodeCreationNames(size_t index);
-        std::unique_ptr<NodeBase> createNode(const std::string_view &name);
-        std::tuple<std::unique_ptr<NodeBase>> createNodeTuple(const std::string &name);
+        std::unique_ptr<NodeBase> createNode(std::string_view name);
+        std::tuple<std::unique_ptr<NodeBase>> createNodeTuple(std::string_view name);
         std::tuple<std::string_view> storeNodeCreationData(const std::unique_ptr<NodeBase> &node) const;
 
     private:
         Filesystem::Path mPath;
 
         std::vector<std::unique_ptr<NodeBase>> mNodes;
+
+        uint32_t mGeneration = 0;
     };
 
 }

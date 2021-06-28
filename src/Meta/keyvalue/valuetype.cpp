@@ -108,6 +108,21 @@ std::string ValueType::toShortString() const
             ss << v;
             return ss.str();
         },
+        [](const Vector2i &v) {
+            std::stringstream ss;
+            ss << v;
+            return ss.str();
+        },
+        [](const Vector3i &v) {
+            std::stringstream ss;
+            ss << v;
+            return ss.str();
+        },
+        [](const Vector4i &v) {
+            std::stringstream ss;
+            ss << v;
+            return ss.str();
+        },
         [](const Quaternion &q) {
             std::stringstream ss;
             ss << q;
@@ -208,6 +223,9 @@ void ValueType::setType(ValueTypeDesc type)
             break;
         case ValueTypeEnum::ApiFunctionValue:
             std::get<ApiFunction>(mUnion).mTable = *type.mSecondary.mFunctionTable;
+            break;
+        case ValueTypeEnum::OwnedScopeValue:
+            std::get<OwnedScopePtr>(mUnion).construct(*type.mSecondary.mMetaTable);
             break;
         default:
             break;

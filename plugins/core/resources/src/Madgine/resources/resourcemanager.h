@@ -4,6 +4,7 @@
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 #include "Interfaces/filesystem/filewatcher.h"
 #include "resourceloadercollector.h"
+#include "Modules/threading/taskqueue.h"
 
 namespace Engine {
 namespace Resources {
@@ -36,13 +37,16 @@ namespace Resources {
             return mCollector.get(i);
         }
 
-        void init();
+        bool init();
+        void finalize();
 
         ResourceLoaderContainer<std::vector<Placeholder<0>>> mCollector;
 
         Filesystem::Path findResourceFile(const std::string &fileName);
 
         void update();
+
+        void waitForInit();
 
 #if ENABLE_PLUGINS
         int priority() const override;
@@ -55,10 +59,10 @@ namespace Resources {
 #endif
 
     private:
-        void updateResources(const Filesystem::Path &path, int priority);
-        void updateResources(const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> &loaderByExtension);
+        void updateResources(Filesystem::FileEventType event, const Filesystem::Path &path, int priority);
+        void updateResources(Filesystem::FileEventType event, const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> &loaderByExtension);
 
-        void updateResource(const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> &loaderByExtension);
+        void updateResource(Filesystem::FileEventType event, const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> &loaderByExtension);
 
         std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> getLoaderByExtension();
 
@@ -71,7 +75,9 @@ namespace Resources {
 
         std::map<Filesystem::Path, int, SubDirCompare> mResourcePaths;
 
-        bool mInitialized = false;
+        std::atomic_flag mInitialized;
+
+        Threading::TaskQueue mIOQueue;
     };
 
 }

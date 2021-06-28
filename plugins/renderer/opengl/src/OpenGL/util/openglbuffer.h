@@ -7,6 +7,7 @@ namespace Render {
 
         OpenGLBuffer() = default;
         OpenGLBuffer(GLenum target);
+        OpenGLBuffer(GLenum target, const ByteBuffer &data);
         OpenGLBuffer(const OpenGLBuffer &) = delete;
         OpenGLBuffer(OpenGLBuffer &&);
         ~OpenGLBuffer();

@@ -17,9 +17,9 @@ namespace Tools {
 
         virtual void render() override;
 
-        void setCurrentFunction(const std::string &name, const BoundApiFunction &method);
+        void setCurrentFunction(std::string_view name, const BoundApiFunction &method);
 
-        bool renderFunction(BoundApiFunction &function, const std::string &functionName, ArgumentList &args);
+        bool renderFunction(BoundApiFunction &function, std::string_view functionName, ArgumentList &args);
         bool renderFunctionSelect(BoundApiFunction &function, std::string &functionName, ArgumentList &args);
 
     protected:

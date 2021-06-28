@@ -14,9 +14,9 @@ VALUETYPE_TYPE(Scope, TypedScopePtr, const TypedScopePtr &)
 VALUETYPE_SEP
 VALUETYPE_TYPE(OwnedScope, OwnedScopePtr, const OwnedScopePtr &)
 VALUETYPE_SEP
-VALUETYPE_TYPE(Matrix3, CoW<Matrix3>, const Matrix3 &)
+VALUETYPE_TYPE(Matrix3, CoW<Matrix3>, const CoW<Matrix3>&, const Matrix3 &)
 VALUETYPE_SEP
-VALUETYPE_TYPE(Matrix4, CoW<Matrix4>, const Matrix4 &)
+VALUETYPE_TYPE(Matrix4, CoW<Matrix4>, const CoW<Matrix4> &, const Matrix4 &)
 VALUETYPE_SEP
 VALUETYPE_TYPE(Quaternion, Quaternion, const Quaternion &)
 VALUETYPE_SEP
@@ -25,6 +25,12 @@ VALUETYPE_SEP
 VALUETYPE_TYPE(Vector3, Vector3, const Vector3 &)
 VALUETYPE_SEP
 VALUETYPE_TYPE(Vector2, Vector2, const Vector2 &)
+VALUETYPE_SEP
+VALUETYPE_TYPE(Vector4i, Vector4i, const Vector4i &)
+VALUETYPE_SEP
+VALUETYPE_TYPE(Vector3i, Vector3i, const Vector3i &)
+VALUETYPE_SEP
+VALUETYPE_TYPE(Vector2i, Vector2i, const Vector2i &)
 VALUETYPE_SEP
 VALUETYPE_TYPE(KeyValueVirtualAssociativeRange, KeyValueVirtualAssociativeRange, const KeyValueVirtualAssociativeRange &)
 VALUETYPE_SEP

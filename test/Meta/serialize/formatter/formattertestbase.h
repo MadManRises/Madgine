@@ -11,7 +11,7 @@
 #include "Meta/serialize/streams/operations.h"
 
 template <typename Formatter>
-void FormatterBaseTest(const std::string_view &expected = "")
+void FormatterBaseTest(std::string_view expected = "")
 {
     NoParentUnit<TestUnit> unit1;
     NoParentUnit<TestUnit> unit2;

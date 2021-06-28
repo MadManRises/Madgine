@@ -23,12 +23,6 @@ SERIALIZETABLE_END(Engine::Scene::TransformAccessorNode)
 namespace Engine {
 namespace Scene {
 
-    TransformAccessorNode::TransformAccessorNode(NodeGraph::NodeGraph &graph)
-        : Node(graph)
-    {
-        setup();
-    }
-
     size_t TransformAccessorNode::dataProviderCount() const
     {
         return 1;
@@ -39,7 +33,7 @@ namespace Scene {
         return "out";
     }
 
-    ExtendedValueTypeDesc TransformAccessorNode::dataProviderType(uint32_t index) const
+    ExtendedValueTypeDesc TransformAccessorNode::dataProviderType(uint32_t index, bool bidir) const
     {
         return toValueTypeDesc<std::vector<Entity::Transform>>();
     }
@@ -54,7 +48,7 @@ namespace Scene {
         return "in";
     }
 
-    ExtendedValueTypeDesc TransformAccessorNode::dataReceiverType(uint32_t index) const
+    ExtendedValueTypeDesc TransformAccessorNode::dataReceiverType(uint32_t index, bool bidir) const
     {
         return toValueTypeDesc<std::vector<Entity::Transform>>();
     }

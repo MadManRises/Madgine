@@ -8,7 +8,7 @@
 
 namespace Engine {
 
-ScopeIterator MetaTable::find(const std::string_view &key, TypedScopePtr scope) const
+ScopeIterator MetaTable::find(std::string_view key, TypedScopePtr scope) const
 {
     for (const std::pair<const char *, Accessor> *p = mMember; p->first; ++p) {
         if (key == p->first) {

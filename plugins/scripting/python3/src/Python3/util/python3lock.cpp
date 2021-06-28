@@ -8,20 +8,20 @@ namespace Engine {
 namespace Scripting {
     namespace Python3 {
 
-        Python3Lock::Python3Lock(std::streambuf *o) : mHolding(true)
+        Python3Lock::Python3Lock(std::streambuf *o)
+            : mState(Python3Environment::lock(o))
         {
-            Python3Environment::lock(o);
         }
 
         Python3Lock::Python3Lock(Python3Lock &&other)
-            : mHolding(std::exchange(other.mHolding, false))
+            : mState(std::exchange(other.mState, std::nullopt))
         {
         }
 
         Python3Lock::~Python3Lock()
         {
-            if (mHolding)
-                Python3Environment::unlock();
+            if (mState)
+                Python3Environment::unlock(*mState);
         }
 
     }

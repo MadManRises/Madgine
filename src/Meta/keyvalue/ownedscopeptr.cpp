@@ -26,6 +26,11 @@ TypedScopePtr OwnedScopePtr::get() const
     return mScope->proxyScopePtr();
 }
 
+void OwnedScopePtr::construct(const MetaTable *type)
+{
+    *this = type->mConstructors[0]();
+}
+
 const MetaTable *OwnedScopePtr::type() const
 {
     return get().mType;

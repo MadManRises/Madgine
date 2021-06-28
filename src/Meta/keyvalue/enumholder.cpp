@@ -15,7 +15,7 @@ bool EnumHolder::operator==(const EnumHolder &other) const
     return mValue == other.mValue;
 }
 
-const std::string_view &EnumHolder::toString() const
+std::string_view EnumHolder::toString() const
 {
     return mTable->toString(mValue);
 }

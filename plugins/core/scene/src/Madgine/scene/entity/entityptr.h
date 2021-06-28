@@ -37,7 +37,8 @@ namespace Scene {
 
         private:
             bool holdsRef() const;
-            ControlBlock<Entity> *getBlock() const;
+            struct ControlBlockDummy;
+            ControlBlockDummy getBlock() const;
 
         private:
             mutable uintptr_t mEntity = 0;

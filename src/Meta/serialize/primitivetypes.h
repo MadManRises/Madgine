@@ -21,6 +21,8 @@ namespace Serialize {
         type_pack<std::string, std::string_view, CoWString>,
         ByteBuffer,
         std::monostate,
+        Vector3,
+        Vector4,
         Matrix3>;
 
     template <typename T, typename = void>

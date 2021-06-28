@@ -16,14 +16,14 @@ namespace Tools {
     {
     }
 
-    bool LayoutLoader::loadImpl(XMLDocument &doc, ResourceType *res)
+    bool LayoutLoader::loadImpl(XMLDocument &doc, ResourceDataInfo &info)
     {
-        std::string content = res->readAsText();
+        std::string content = info.resource()->readAsText();
 
         return !doc->Parse(content.c_str());
     }
 
-    void LayoutLoader::unloadImpl(XMLDocument &doc, ResourceType *res)
+    void LayoutLoader::unloadImpl(XMLDocument &doc, ResourceDataInfo &info)
     {
         doc->Clear();
     }

@@ -14,7 +14,7 @@ namespace Render {
         struct HandleType : Base::HandleType {
             using Base::HandleType::HandleType;
             HandleType(Base::HandleType handle)
-                : Base::HandleType(handle)
+                : Base::HandleType(std::move(handle))
             {
             }
 
@@ -22,8 +22,8 @@ namespace Render {
 
         AnimationLoader();
 
-        bool loadImpl(AnimationList &data, ResourceType *res);
-        void unloadImpl(AnimationList &data, ResourceType *res);
+        bool loadImpl(AnimationList &data, ResourceDataInfo &info);
+        void unloadImpl(AnimationList &data, ResourceDataInfo &info);
 
     };
 

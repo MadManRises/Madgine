@@ -12,5 +12,10 @@ namespace Resources {
         return ResourceManager::getSingleton().get(i);
     }
 
+    void waitForIOThread()
+    {
+        ResourceManager::getSingleton().waitForInit();
+    }
+
 }
 }

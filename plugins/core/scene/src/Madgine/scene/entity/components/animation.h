@@ -13,7 +13,7 @@ namespace Scene {
             using EntityComponent<Animation>::EntityComponent;
             virtual ~Animation() = default;
 
-            void set(const Render::AnimationLoader::HandleType &handle);
+            void set(Render::AnimationLoader::HandleType handle);
             void setName(const std::string &name);
             Render::AnimationLoader::ResourceType *get() const;
 

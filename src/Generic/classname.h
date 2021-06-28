@@ -22,7 +22,7 @@ inline std::string typeName()
 {
 #ifdef __GNUG__
     int status = -4;
-    
+
     std::unique_ptr<char, void (*)(void *)> res {
         abi::__cxa_demangle(typeid(T).name(), NULL, NULL, &status),
         std::free
@@ -56,6 +56,11 @@ struct TypeInfo {
     inline std::string namespaceName() const
     {
         return std::string { mFullName, strlen(mFullName) - 2 - mTypeName.size() };
+    }
+
+    bool operator<(const TypeInfo &other) const
+    {
+        return strcmp(mFullName, other.mFullName) < 0;
     }
 
     const char *mFullName;

@@ -48,7 +48,7 @@ struct BitArray {
 
     struct const_reference {
 
-        operator type() const
+        constexpr operator type() const
         {
             uint64_t value = readPtrAsUInt64(mPointer, mOffset) >> (mOffset % 8);
             value &= Mask;
@@ -69,7 +69,7 @@ struct BitArray {
             return *this;
         }
 
-        operator type() const
+        constexpr operator type() const
         {
             uint64_t value = readPtrAsUInt64(mPointer, mOffset) >> (mOffset % 8);
             value &= Mask;
@@ -82,17 +82,17 @@ struct BitArray {
 
     struct const_pointer {
 
-        const_reference operator*() const
+        constexpr const_reference operator*() const
         {
             return { mPointer, mOffset };
         }
 
-        void operator++()
+        constexpr void operator++()
         {
             mOffset += MemberSize;
         }
 
-        bool operator!=(const const_pointer &other) const
+        constexpr bool operator!=(const const_pointer &other) const
         {
             assert(mPointer == other.mPointer);
             return mOffset != other.mOffset;
@@ -104,17 +104,17 @@ struct BitArray {
 
     struct pointer {
 
-        reference operator*() const
+        constexpr reference operator*() const
         {
             return { mPointer, mOffset };
         }
 
-        void operator++()
+        constexpr void operator++()
         {
             mOffset += MemberSize;
         }
 
-        bool operator!=(const pointer &other) const
+        constexpr bool operator!=(const pointer &other) const
         {
             assert(mPointer == other.mPointer);
             return mOffset != other.mOffset;
@@ -136,27 +136,27 @@ struct BitArray {
         return { mData, i * MemberSize };
     }
 
-    const_pointer begin() const
+    constexpr const_pointer begin() const
     {
         return { mData, 0 };
     }
 
-    const_pointer end() const
+    constexpr const_pointer end() const
     {
         return { mData, Count * MemberSize };
     }
 
-    pointer begin()
+    constexpr pointer begin()
     {
         return { mData, 0 };
     }
 
-    pointer end()
+    constexpr pointer end()
     {
         return { mData, Count * MemberSize };
     }
 
-    bool operator==(const BitArray &other) const
+    constexpr bool operator==(const BitArray &other) const
     {
         for (size_t i = 0; i < InternalArraySize; ++i) {
             if (mData[i] != other.mData[i])
@@ -165,12 +165,12 @@ struct BitArray {
         return true;
     }
 
-    bool operator!=(const BitArray &other) const
+    constexpr bool operator!=(const BitArray &other) const
     {
         return !(*this == other);
     }
 
-    bool operator<(const BitArray &other) const
+    constexpr bool operator<(const BitArray &other) const
     {
         for (size_t i = 0; i < InternalArraySize; ++i) {
             if (mData[i] < other.mData[i])

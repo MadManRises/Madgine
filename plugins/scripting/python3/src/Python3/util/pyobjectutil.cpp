@@ -2,6 +2,7 @@
 
 #include "pyobjectutil.h"
 
+#include "math/pymatrix3.h"
 #include "math/pyquaternion.h"
 #include "math/pyvector3.h"
 #include "pyapifunction.h"
@@ -14,9 +15,40 @@
 
 #include "Meta/keyvalue/valuetype.h"
 
+#include "Meta/keyvalue/objectinstance.h"
+#include "Meta/keyvalue/objectptr.h"
+
+#include "pyobjectptr.h"
+
 namespace Engine {
 namespace Scripting {
     namespace Python3 {
+
+        struct PyObjectInstance : ObjectInstance {
+
+            PyObjectInstance(PyObject *obj)
+                : mPtr(obj)
+            {
+            }
+
+            virtual bool getValue(ValueType &retVal, std::string_view name) const override
+            {
+                fromPyObject(retVal, mPtr.get(name));
+                return true;
+            }
+
+            virtual void setValue(std::string_view name, const ValueType &value) override
+            {
+                throw 0;
+            }
+
+            PyObject *get() const
+            {
+                return mPtr;
+            }
+
+            PyObjectPtr mPtr;
+        };
 
         PyObject *toPyObject(const ValueType &val)
         {
@@ -137,6 +169,25 @@ namespace Scripting {
             return NULL;
         }
 
+        PyObject *toPyObject(const Vector2i &v)
+        {
+            PyErr_SetString(PyExc_NotImplementedError, "Can't convert type <Vector2> yet");
+            return NULL;
+        }
+
+        PyObject *toPyObject(const Vector3i &v)
+        {
+            PyObject *obj = PyObject_CallObject((PyObject *)&PyVector3Type, NULL);
+            new (&reinterpret_cast<PyVector3 *>(obj)->mVector) Vector3(v);
+            return obj;
+        }
+
+        PyObject *toPyObject(const Vector4i &v)
+        {
+            PyErr_SetString(PyExc_NotImplementedError, "Can't convert type <Vector4> yet");
+            return NULL;
+        }
+
         PyObject *toPyObject(const Quaternion &q)
         {
             PyObject *obj = PyObject_CallObject((PyObject *)&PyQuaternionType, NULL);
@@ -146,14 +197,22 @@ namespace Scripting {
 
         PyObject *toPyObject(const ObjectPtr &o)
         {
+            if (!o)
+                Py_RETURN_NONE;
+            if (const PyObjectInstance *instance = dynamic_cast<const PyObjectInstance *>(o.get())) {
+                PyObject *ptr = instance->get();
+                Py_INCREF(ptr);
+                return ptr;
+            }
             PyErr_SetString(PyExc_NotImplementedError, "Can't convert type <ObjectPtr> yet");
             return NULL;
         }
 
         PyObject *toPyObject(const CoW<Matrix3> &m)
         {
-            PyErr_SetString(PyExc_NotImplementedError, "Can't convert type <Matrix3> yet");
-            return nullptr;
+            PyObject *obj = PyObject_CallObject((PyObject *)&PyMatrix3Type, NULL);
+            new (&reinterpret_cast<PyMatrix3 *>(obj)->mMatrix) Matrix3(m);
+            return obj;
         }
 
         PyObject *toPyObject(const CoW<Matrix4> &m)
@@ -176,7 +235,12 @@ namespace Scripting {
 
         void fromPyObject(ValueType &retVal, PyObject *obj)
         {
-            if (PyUnicode_Check(obj)) {
+            if (!obj) {
+                PyErr_Print();
+                throw 0;
+            } else if (obj == Py_None) {
+                retVal = std::monostate {};
+            } else if (PyUnicode_Check(obj)) {
                 const char *s;
                 if (!PyArg_Parse(obj, "s", &s))
                     throw 0;
@@ -186,8 +250,11 @@ namespace Scripting {
                 if (!PyArg_Parse(obj, "i", &i))
                     throw 0;
                 retVal = i;
+            } else if (obj->ob_type == &PyTypedScopePtrType){
+                retVal = reinterpret_cast<PyTypedScopePtr *>(obj)->mPtr;
             } else {
-                throw 0;
+                Py_INCREF(obj);
+                retVal = ObjectPtr { std::make_unique<PyObjectInstance>(obj) };
             }
         }
 

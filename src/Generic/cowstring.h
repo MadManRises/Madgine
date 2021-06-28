@@ -25,7 +25,7 @@ struct CoWString {
     {
     }
 
-    CoWString(const std::string_view &s)
+    CoWString(std::string_view s)
         : mString(s.data())
         , mSize(s.size())
     {
@@ -80,9 +80,9 @@ struct CoWString {
         reset();
         mSize = s.size();
         char *temp = new char[mSize];
+        strncpy(temp, s.c_str(), mSize);
         mString = temp;
         mOwning = true;
-        strncpy(temp, s.c_str(), mSize);
         return *this;
     }
 
@@ -92,7 +92,7 @@ struct CoWString {
         return *this;
     }
 
-    CoWString &operator=(const std::string_view &s)
+    CoWString &operator=(std::string_view s)
     {
         reset();
         mString = s.data();
@@ -135,10 +135,10 @@ struct CoWString {
     {
         if (mOwning) {
             delete[] mString;
-            mString = nullptr;
-            mSize = 0;
             mOwning = false;
         }
+        mString = nullptr;
+        mSize = 0;
     }
 
     constexpr const char *data() const

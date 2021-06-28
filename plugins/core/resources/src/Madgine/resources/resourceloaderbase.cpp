@@ -10,9 +10,9 @@ METATABLE_END(Engine::Resources::ResourceLoaderBase)
 namespace Engine {
 namespace Resources {
 
-    ResourceLoaderBase::ResourceLoaderBase(std::vector<std::string> &&extensions, bool autoLoad)
+    ResourceLoaderBase::ResourceLoaderBase(std::vector<std::string> &&extensions, const ResourceLoaderSettings &settings)
         : mExtensions(std::forward<std::vector<std::string>>(extensions))
-        , mAutoLoad(autoLoad)
+        , mSettings(settings)
     {
     }
 
@@ -21,7 +21,7 @@ namespace Resources {
         return mExtensions;
     }
 
-    size_t ResourceLoaderBase::extensionIndex(const std::string_view &ext) const
+    size_t ResourceLoaderBase::extensionIndex(std::string_view ext) const
     {
         return std::find(mExtensions.begin(), mExtensions.end(), ext) - mExtensions.begin();
     }

@@ -27,7 +27,6 @@ READONLY_PROPERTY(Tools, tools)
 METATABLE_END(Engine::Tools::ImRoot)
 */
 
-
 namespace Engine {
 
 namespace Tools {
@@ -35,9 +34,15 @@ namespace Tools {
     void *ToolReadOpen(ImGuiContext *ctx, ImGuiSettingsHandler *handler, const char *name) // Read: Called when entering into a new ini entry e.g. "[Window][Name]"
     {
         ImRoot *root = static_cast<ImRoot *>(handler->UserData);
+
+        root->finishToolRead();
+
+        root->mToolReadBuffer.str("");
         for (ToolBase *tool : uniquePtrToPtr(root->tools())) {
-            if (tool->key() == name)
+            if (tool->key() == name) {
+                root->mToolReadTool = tool;
                 return tool;
+            }
         }
         return nullptr;
     }
@@ -45,11 +50,7 @@ namespace Tools {
     void ToolReadLine(ImGuiContext *ctx, ImGuiSettingsHandler *handler, void *entry, const char *line) // Read: Called for every line of text within an ini entry
     {
         if (strlen(line) > 0) {
-            auto buf = std::make_unique<std::stringbuf>(line + "\n"s);
-            Serialize::SerializeInStream in { std::move(buf), std::make_unique<Serialize::SerializeStreamData>(std::make_unique<Serialize::IniFormatter>())};
-
-            ToolBase *tool = static_cast<ToolBase *>(entry);
-            Serialize::read(in, *tool, nullptr, {}, Serialize::StateTransmissionFlags_SkipId);
+            static_cast<ImRoot *>(handler->UserData)->mToolReadBuffer << line << "\n";
         }
     }
 
@@ -73,8 +74,8 @@ namespace Tools {
     }
 
     ImRoot::ImRoot(MadgineObjectState *state)
-        : mState(state),
-        mCollector(*this)
+        : mState(state)
+        , mCollector(*this)
     {
     }
 
@@ -179,6 +180,8 @@ namespace Tools {
             ImGui::EndMainMenuBar();
         }
 
+        finishToolRead();
+
         for (ToolBase *tool : safeIterate(uniquePtrToPtr(mCollector))) {
             tool->update();
         }
@@ -218,6 +221,22 @@ namespace Tools {
     void ImRoot::checkInitState()
     {
         mState->checkInitState();
+    }
+
+    void ImRoot::finishToolRead()
+    {
+        if (mToolReadTool) {
+
+            auto buf = std::make_unique<std::stringbuf>(mToolReadBuffer.str());
+            Serialize::SerializeInStream in { std::move(buf), std::make_unique<Serialize::SerializeStreamData>(std::make_unique<Serialize::IniFormatter>()) };
+
+            Serialize::StreamResult result = Serialize::read(in, *mToolReadTool, nullptr, {}, Serialize::StateTransmissionFlags_SkipId);
+            if (result.mState != Serialize::StreamState::OK) {
+                LOG_ERROR(*result.mError);
+            }
+
+            mToolReadTool = nullptr;
+        }
     }
 
 }

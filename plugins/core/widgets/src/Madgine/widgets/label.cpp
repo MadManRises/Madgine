@@ -49,7 +49,7 @@ namespace Widgets {
         return mFont.name();
     }
 
-    void Label::setFontName(const std::string_view &name)
+    void Label::setFontName(std::string_view name)
     {
         mFont.load(name);
     }

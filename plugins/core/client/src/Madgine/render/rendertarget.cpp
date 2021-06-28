@@ -4,6 +4,11 @@
 #include "rendertarget.h"
 #include "renderpass.h"
 
+#include "Meta/keyvalue/metatable_impl.h"
+
+METATABLE_BEGIN(Engine::Render::RenderTarget)
+METATABLE_END(Engine::Render::RenderTarget)
+
 namespace Engine {
 namespace Render {
 

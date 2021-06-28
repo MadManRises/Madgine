@@ -12,8 +12,8 @@ namespace Render {
     struct MADGINE_OPENGL_EXPORT OpenGLTextureLoader : Resources::VirtualResourceLoaderImpl<OpenGLTextureLoader, OpenGLTexture, TextureLoader> {
         OpenGLTextureLoader();
 
-        bool loadImpl(OpenGLTexture &tex, ResourceType *res);
-        void unloadImpl(OpenGLTexture &tex, ResourceType *res);
+        bool loadImpl(OpenGLTexture &tex, ResourceDataInfo &info);
+        void unloadImpl(OpenGLTexture &tex, ResourceDataInfo &info);
         bool create(Texture &texture, DataFormat format) override;
 
 		virtual void setData(Texture &tex, Vector2i size, const ByteBuffer &data) override;

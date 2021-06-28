@@ -374,7 +374,7 @@ namespace Im3D {
             cursorX += g.mAdvance / 64.0f * scale;
         }
 
-        Mesh(IM3D_TRIANGLES, Render::RenderPassFlags_NoLighting | Render::RenderPassFlags_DistanceField, vertices.get(), 4 * textLen, param, indices.get(), 6 * textLen, *font.mTexture);
+        Mesh(IM3D_TRIANGLES, Render::RenderPassFlags_NoLighting | Render::RenderPassFlags_DistanceField, vertices.get(), 4 * textLen, param, indices.get(), 6 * textLen, font.mTexture);
 
         if (GetIO().mReleaseFont)
             GetIO().mReleaseFont(font);

@@ -40,11 +40,11 @@ namespace Render {
     {
     }
 
-    bool SkeletonLoader::loadImpl(SkeletonDescriptor &skeleton, ResourceType *res)
+    bool SkeletonLoader::loadImpl(SkeletonDescriptor &skeleton, ResourceDataInfo &info)
     {
         Assimp::Importer importer;
 
-        std::vector<unsigned char> buffer = res->readAsBlob();
+        std::vector<unsigned char> buffer = info.resource()->readAsBlob();
 
         const aiScene *scene = importer.ReadFileFromMemory(buffer.data(), buffer.size(), 0);
 
@@ -54,7 +54,7 @@ namespace Render {
         }
 
         if (scene->mNumMeshes == 0) {
-            LOG_ERROR("No mesh in file '" << res->path().str() << "'");
+            LOG_ERROR("No mesh in file '" << info.resource()->path().str() << "'");
             return false;
         }
 
@@ -139,7 +139,7 @@ namespace Render {
         return true;
     }
 
-    void SkeletonLoader::unloadImpl(SkeletonDescriptor &data, ResourceType *res)
+    void SkeletonLoader::unloadImpl(SkeletonDescriptor &data, ResourceDataInfo &info)
     {
         data.mBones.clear();
     }

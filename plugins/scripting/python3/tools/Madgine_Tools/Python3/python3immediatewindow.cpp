@@ -12,6 +12,7 @@
 
 #include "Madgine/app/application.h"
 #include "Python3/python3env.h"
+#include "Python3/util/python3lock.h"
 
 METATABLE_BEGIN_BASE(Engine::Tools::Python3ImmediateWindow, Engine::Tools::ToolBase)
 METATABLE_END(Engine::Tools::Python3ImmediateWindow)
@@ -72,9 +73,10 @@ namespace Tools {
 
             if (exec) {
                 mCommandLog << ">>> " << mCommandBuffer << "\n";
-                mEnv->lock(mCommandLog.rdbuf());
-                mEnv->execute(mCommandBuffer);
-                mEnv->unlock();
+                {
+                    Scripting::Python3::Python3Lock lock { mCommandLog.rdbuf() };
+                    mEnv->execute(mCommandBuffer);
+                }
                 mCommandBuffer.clear();
                 ImGui::SetKeyboardFocusHere(-1);
             }

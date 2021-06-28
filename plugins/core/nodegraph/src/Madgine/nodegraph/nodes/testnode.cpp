@@ -3,8 +3,8 @@
 #include "testnode.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
-#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 #include "Meta/serialize/serializetable_impl.h"
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 #include "../nodeinterpreter.h"
 
@@ -19,7 +19,6 @@ METATABLE_END(Engine::NodeGraph::TestNode)
 SERIALIZETABLE_INHERIT_BEGIN(Engine::NodeGraph::TestNode, Engine::NodeGraph::NodeBase)
 SERIALIZETABLE_END(Engine::NodeGraph::TestNode)
 
-
 namespace Engine {
 namespace NodeGraph {
 
@@ -27,6 +26,11 @@ namespace NodeGraph {
         : Node(graph)
     {
         setup();
+    }
+
+    TestNode::TestNode(const TestNode &other, NodeGraph &graph)
+        : Node(other, graph)
+    {
     }
 
     size_t TestNode::flowInCount() const
@@ -59,7 +63,7 @@ namespace NodeGraph {
         return "data_in";
     }
 
-    ExtendedValueTypeDesc TestNode::dataInType(uint32_t index) const
+    ExtendedValueTypeDesc TestNode::dataInType(uint32_t index, bool bidir) const
     {
         return { ValueTypeIndex { index == 0 ? ValueTypeEnum::IntValue : ValueTypeEnum::FloatValue } };
     }
@@ -74,7 +78,7 @@ namespace NodeGraph {
         return "data_out";
     }
 
-    ExtendedValueTypeDesc TestNode::dataOutType(uint32_t index) const
+    ExtendedValueTypeDesc TestNode::dataOutType(uint32_t index, bool bidir) const
     {
         return { ValueTypeIndex { ValueTypeEnum::FloatValue } };
     }

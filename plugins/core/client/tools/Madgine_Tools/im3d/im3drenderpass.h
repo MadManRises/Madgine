@@ -4,10 +4,7 @@
 
 #include "programloader.h"
 
-#include "Madgine/render/shadinglanguage/sl.h"
 
-#define SL_SHADER im3d
-#include INCLUDE_SL_SHADER
 
 namespace Engine {
 namespace Render {
@@ -25,10 +22,6 @@ namespace Render {
         Camera *mCamera;
 
         int mPriority;
-
-        Im3DPerApplication mPerApplication;
-        Im3DPerFrame mPerFrame;
-        Im3DPerObject mPerObject;
     };
 
 }

@@ -83,6 +83,10 @@ namespace StringUtil {
         return std::move(s);
     }
 
+    inline std::string toLower(std::string_view s) {
+        return toLower(std::string { s });
+    }
+
     inline std::string toUpper(std::string &&s)
     {
         std::transform(s.begin(), s.end(), s.begin(), ::toupper);
@@ -156,6 +160,14 @@ constexpr bool streq(const char *lhs, const char *rhs)
         if (lhs[i] != rhs[i])
             return false;
     } while (lhs[i]);
+    return true;
+}
+
+constexpr bool strcpy_s(char *dest, size_t size, const char *source)
+{
+    for (size_t i = 0; i < size; ++i) {
+        dest[i] = source[i];
+    }
     return true;
 }
 

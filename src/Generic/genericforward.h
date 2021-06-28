@@ -22,13 +22,12 @@ struct OffsetPtrTag;
 template <typename T, size_t>
 struct TaggedPlaceholder;
 
-template <typename T>
-struct ControlBlock;
-
-
 struct Any;
 
-struct ByteBuffer;
+template <typename>
+struct ByteBufferImpl;
+using ByteBuffer = ByteBufferImpl<const void>;
+using WritableByteBuffer = ByteBufferImpl<void>;
 
 struct CoWString;
 template <typename T>

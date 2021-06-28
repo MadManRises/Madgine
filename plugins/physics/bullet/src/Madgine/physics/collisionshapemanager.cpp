@@ -254,7 +254,7 @@ namespace Physics {
     CollisionShapeManager::InstanceHandle::InstanceHandle(typename CollisionShapeManager::HandleType shape)
         : mInstance(shape->get()->create())
     {
-        mInstance->mShape = shape;
+        mInstance->mShape = std::move(shape);
     }
 
     CollisionShapeManager::InstanceHandle::InstanceHandle(typename CollisionShapeManager::ResourceType *res)
@@ -289,7 +289,7 @@ namespace Physics {
         return *this;
     }
 
-    void CollisionShapeManager::InstanceHandle::load(const std::string_view &name, CollisionShapeManager *loader)
+    void CollisionShapeManager::InstanceHandle::load(std::string_view name, CollisionShapeManager *loader)
     {
         *this = CollisionShapeManager::load(name, loader);
     }
@@ -351,38 +351,38 @@ namespace Physics {
         : ResourceLoader({ ".fbx", ".dae" })
     {
         getOrCreateManual(
-            "Cube", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceType *res) {
+            "Cube", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceDataInfo &info) {
                 data = std::make_unique<BoxShape>();
                 return true;
             },
             {}, this);
 
         getOrCreateManual(
-            "Plane", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceType *res) {
+            "Plane", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceDataInfo &info) {
                 data = std::make_unique<PlaneShape>();
                 return true;
             },
             {}, this);
 
         getOrCreateManual(
-            "Capsule", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceType *res) {
+            "Capsule", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceDataInfo &info) {
                 data = std::make_unique<CapsuleShape>();
                 return true;
             },
             {}, this);
 
         getOrCreateManual(
-            "Compound", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceType *res) {
+            "Compound", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceDataInfo &info) {
                 data = std::make_unique<CompoundShape>();
                 return true;
             },
             {}, this);
     }
 
-    bool CollisionShapeManager::loadImpl(std::unique_ptr<CollisionShape> &shape, ResourceType *res)
+    bool CollisionShapeManager::loadImpl(std::unique_ptr<CollisionShape> &shape, ResourceDataInfo &info)
     {
         Render::MeshLoader::HandleType mesh;
-        mesh.load(res->name());
+        mesh.load(info.resource()->name());
         if (!mesh)
             return false;
 
@@ -390,7 +390,7 @@ namespace Physics {
         return true;
     }
 
-    void CollisionShapeManager::unloadImpl(std::unique_ptr<CollisionShape> &shape, ResourceType *res)
+    void CollisionShapeManager::unloadImpl(std::unique_ptr<CollisionShape> &shape, ResourceDataInfo &info)
     {
     }
 

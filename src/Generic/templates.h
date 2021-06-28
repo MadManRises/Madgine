@@ -18,6 +18,10 @@ struct first {
     typedef V type;
 };
 
+template <typename... Args>
+using first_t = typename first<Args...>::type;
+
+
 template <template <typename> typename Cond>
 struct negate {
     template <typename T>
@@ -54,7 +58,7 @@ struct overloaded : Ts... {
     using Ts::operator()...;
 };
 template <typename... Ts>
-overloaded(Ts...)->overloaded<Ts...>;
+overloaded(Ts...) -> overloaded<Ts...>;
 
 template <typename T, size_t S>
 constexpr size_t array_size(T (&)[S])
@@ -91,11 +95,12 @@ template <template <typename> typename F, typename T, bool b>
 using apply_if_t = typename apply_if<F, T, b>::type;
 
 template <typename, template <typename...> typename>
-struct is_instance : public std::false_type {
+struct is_instance : std::false_type {
 };
 
 template <typename... T, template <typename...> typename U>
-struct is_instance<U<T...>, U> : public std::true_type {
+struct is_instance<U<T...>, U> : std::true_type {
+    using argument_types = type_pack<T...>;
 };
 
 template <typename T, template <typename...> typename U>
@@ -108,11 +113,10 @@ template <typename T>
 constexpr const bool is_tuple_v = is_tuple<T>::value;
 
 template <typename T>
-using is_string_like = std::bool_constant<std::is_convertible_v<T&, const std::string &> && std::is_constructible_v<T, const std::string &>>;
+using is_string_like = std::bool_constant<std::is_convertible_v<T &, const std::string &> && std::is_constructible_v<T, const std::string &>>;
 
 template <typename T>
 constexpr const bool is_string_like_v = is_string_like<T>::value;
-
 
 template <size_t add, typename Sequence>
 struct index_range_add;

@@ -26,9 +26,9 @@ namespace Audio {
     {
     }
 
-    bool AudioBufferLoader::loadImpl(AudioBuffer &data, ResourceType *res)
+    bool AudioBufferLoader::loadImpl(AudioBuffer &data, ResourceDataInfo &info)
     {
-        InStream stream = DecodeOggFile(data.mInfo, Filesystem::openFileRead(res->path(), true));
+        InStream stream = DecodeOggFile(data.mInfo, Filesystem::openFileRead(info.resource()->path(), true));
 
         size_t bufferSize = (data.mInfo.mBitsPerSample * data.mInfo.mSampleCount * data.mInfo.mChannels) / 8;
 
@@ -36,14 +36,14 @@ namespace Audio {
 
         size_t actualSize = stream.readRaw(buffer.get(), bufferSize);
         if (actualSize != bufferSize)
-            LOG_WARNING("Mismatch loading audio-file: " << res->path() << " Diff: " << bufferSize - actualSize);
+            LOG_WARNING("Mismatch loading audio-file: " << info.resource()->path() << " Diff: " << bufferSize - actualSize);
 
         data.mBuffer = { std::move(buffer), actualSize };
 
         return true;
     }
 
-    void AudioBufferLoader::unloadImpl(AudioBuffer &data, ResourceType *res)
+    void AudioBufferLoader::unloadImpl(AudioBuffer &data, ResourceDataInfo &info)
     {
     }
 

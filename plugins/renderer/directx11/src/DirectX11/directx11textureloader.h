@@ -12,8 +12,8 @@ namespace Render {
     struct MADGINE_DIRECTX11_EXPORT DirectX11TextureLoader : Resources::VirtualResourceLoaderImpl<DirectX11TextureLoader, DirectX11Texture, TextureLoader> {
         DirectX11TextureLoader();
 
-        bool loadImpl(DirectX11Texture &tex, ResourceType *res);
-        void unloadImpl(DirectX11Texture &tex, ResourceType *res);
+        bool loadImpl(DirectX11Texture &tex, ResourceDataInfo &info);
+        void unloadImpl(DirectX11Texture &tex, ResourceDataInfo &info);
         bool create(Texture &texture, DataFormat format/*, D3D11_BIND_FLAG bind*/) override;
 
 		virtual void setData(Texture &tex, Vector2i size, const ByteBuffer &data) override;

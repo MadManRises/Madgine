@@ -42,6 +42,11 @@ struct Vector3i {
         z += other.z;
         return *this;
     }
+    
+    constexpr bool operator==(const Vector3i &other) const
+    {
+        return x == other.x && y == other.y && z == other.z;
+    }
 
     int operator[](const size_t i) const
     {
@@ -55,6 +60,16 @@ struct Vector3i {
         assert(i < 3);
 
         return *(&x + i);
+    }
+
+    int *ptr()
+    {
+        return &x;
+    }
+
+    const int *ptr() const
+    {
+        return &x;
     }
 
     /** Swizzle-like narrowing operations

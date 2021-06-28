@@ -12,7 +12,7 @@ namespace Scene {
             Mesh(const ObjectPtr &init);
 
             std::string_view getName() const;
-            void setName(const std::string_view &name);
+            void setName(std::string_view name);
 
             Render::GPUMeshData *data() const;
 

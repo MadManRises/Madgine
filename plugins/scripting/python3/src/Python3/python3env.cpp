@@ -15,6 +15,7 @@
 #include "util/pyvirtualrange.h"
 #include "util/pyvirtualiterator.h"
 #include "util/math/pyvector3.h"
+#include "util/math/pymatrix3.h"
 #include "util/math/pyquaternion.h"
 
 #include "python3fileloader.h"
@@ -92,6 +93,8 @@ namespace Scripting {
                 return NULL;
             if (PyType_Ready(&PyVector3Type) < 0)
                 return NULL;
+            if (PyType_Ready(&PyMatrix3Type) < 0)
+                return NULL;
             if (PyType_Ready(&PyQuaternionType) < 0)
                 return NULL;
 
@@ -102,6 +105,12 @@ namespace Scripting {
             Py_INCREF(&PyVector3Type);
             if (PyModule_AddObject(m, "Vector3", (PyObject *)&PyVector3Type) < 0) {
                 Py_DECREF(&PyVector3Type);
+                Py_DECREF(m);
+                return NULL;
+            }
+            Py_INCREF(&PyMatrix3Type);
+            if (PyModule_AddObject(m, "Matrix3", (PyObject *)&PyMatrix3Type) < 0) {
+                Py_DECREF(&PyMatrix3Type);
                 Py_DECREF(m);
                 return NULL;
             }
@@ -117,11 +126,18 @@ namespace Scripting {
 
         static std::atomic<size_t> sInstances = 0;
 
-        static PyThreadState *sMainThread = nullptr;
         static Python3StreamRedirect sStream { std::cout.rdbuf() };
 
         Python3Environment::Python3Environment(App::Application &app)
             : VirtualScope(app)
+        {            
+        }
+
+        Python3Environment::~Python3Environment()
+        {
+        }
+
+        bool Python3Environment::init()
         {
             if (sInstances++ == 0) {
 
@@ -129,38 +145,37 @@ namespace Scripting {
 
                 /* Add a built-in module, before Py_Initialize */
                 if (PyImport_AppendInittab("Environment", PyInit_Environment) == -1) {
-                    throw "Error: could not extend in-built modules table";
+                    LOG("Error: could not extend built-in modules table");
+                    return false;
                 }
 
                 /* Pass argv[0] to the Python interpreter */
                 Py_SetProgramName(program);
 
                 Py_InitializeEx(0);
-                
-                PyRun_SimpleString("import Environment");                
+
+                PyRun_SimpleString("import Environment");
                 sStream.redirect("stdout");
                 sStream.redirect("stderr");
 
-                unlock();
+                Python3FileLoader::getSingleton().setup();
 
-                Python3FileLoader::load("dump");
+                PyEval_SaveThread();
+
+                /*Python3FileLoader::load("dump");
                 Python3FileLoader::load("signature");
                 Python3FileLoader::load("testnode");
 
                 lock(std::cout.rdbuf());
                 PyRun_SimpleString("from dump import dump");
-                unlock();
+                unlock();*/
             }
+            return true;
         }
 
-        Python3Environment::~Python3Environment()
+        void Python3Environment::finalize()
         {
             if (--sInstances == 0) {
-
-                for (std::pair<const std::string, Python3FileLoader::ResourceType> &p : Python3FileLoader::getSingleton()) {
-                    p.second.unloadData();
-                }
-
                 lock(std::cout.rdbuf());
 
                 sStream.reset("stdout");
@@ -171,19 +186,26 @@ namespace Scripting {
             }
         }
 
-        void Python3Environment::execute(const std::string_view &command)
+        void Python3Environment::execute(std::string_view command)
         {
             PyRun_SimpleString(command.data());
         }
 
-        void Python3Environment::lock(std::streambuf *buf) {
-            PyEval_RestoreThread(sMainThread);
-            sStream.setBuf(buf);
+        PyGILState_STATE Python3Environment::lock(std::streambuf *buf) {
+            //assert(PyGILState_Check() == 0);
+            PyGILState_STATE handle = PyGILState_Ensure();
+            assert(PyGILState_Check() == 1);     
+            if (buf)
+                sStream.setBuf(buf);
+            return handle;
         }
 
-        std::streambuf *Python3Environment::unlock() {
+        std::streambuf *Python3Environment::unlock(PyGILState_STATE handle)
+        {            
             std::streambuf *result = sStream.buf();
-            sMainThread = PyEval_SaveThread();
+            assert(PyGILState_Check() == 1);
+            PyGILState_Release(handle);
+            //assert(PyGILState_Check() == 0);
             return result;
         }
 

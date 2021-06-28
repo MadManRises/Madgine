@@ -41,6 +41,15 @@ namespace Scripting {
             setup();
         }
 
+        Python3FunctionNode::Python3FunctionNode(const Python3FunctionNode &other, NodeGraph::NodeGraph &graph)
+            : Node(other, graph)
+            , mFile(other.mFile)
+            , mArguments(other.mArguments)
+            , mReturnType(other.mReturnType)
+            , mName(other.mName)
+        {
+        }
+
         std::string_view Python3FunctionNode::name() const
         {
             return mName;
@@ -76,7 +85,7 @@ namespace Scripting {
             return "out";
         }
 
-        ExtendedValueTypeDesc Python3FunctionNode::dataOutType(uint32_t index) const
+        ExtendedValueTypeDesc Python3FunctionNode::dataOutType(uint32_t index, bool bidir) const
         {
             return mReturnType;
         }
@@ -91,7 +100,7 @@ namespace Scripting {
             return mArguments[index].first;
         }
 
-        ExtendedValueTypeDesc Python3FunctionNode::dataInType(uint32_t index) const
+        ExtendedValueTypeDesc Python3FunctionNode::dataInType(uint32_t index, bool bidir) const
         {
             return mArguments[index].second;
         }
@@ -107,7 +116,7 @@ namespace Scripting {
                     interpreter.read(v, i);
                     PyTuple_SET_ITEM(static_cast<PyObject *>(args), i, toPyObject(v));
                 }
-                fromPyObject(retVal, mFile->call("__call__", args));
+                fromPyObject(retVal, mFile->call("__call__", args, {}));
             }
 
             interpreter.write(0, retVal);
@@ -130,7 +139,7 @@ namespace Scripting {
             return mFile.name();
         }
 
-        void Python3FunctionNode::setName(const std::string_view &name)
+        void Python3FunctionNode::setName(std::string_view name)
         {
             mFile.load(name);
             updatePins();
@@ -140,7 +149,7 @@ namespace Scripting {
         {
             mArguments.clear();
 
-            Python3FileLoader::HandleType handle = Python3FileLoader::load("signature");
+            Python3FileLoader::HandleType signature = Python3FileLoader::load("signature");
 
             mName = std::string { mFile.name() } + " [Python3]";
 
@@ -148,7 +157,7 @@ namespace Scripting {
                 Python3Lock lock { std::cout.rdbuf() };
                 PyObjectPtr fn = mFile->get("__call__");
                 if (fn) {
-                    PyObjectPtr spec = handle->call("get", "(O)", (PyObject *)fn);
+                    PyObjectPtr spec = signature->call("get", "(O)", (PyObject *)fn);
 
                     PyObject *key = NULL, *value = NULL;
                     Py_ssize_t pos = 0;

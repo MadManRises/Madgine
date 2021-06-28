@@ -1,6 +1,8 @@
 #include "../python3lib.h"
 
 #include "pyobjectptr.h"
+#include "pydictptr.h"
+
 
 namespace Engine {
 namespace Scripting {
@@ -9,6 +11,12 @@ namespace Scripting {
         PyObjectPtr::PyObjectPtr(PyObject *object)
             : mObject(object)
         {
+        }
+
+        PyObjectPtr::PyObjectPtr(const PyObjectPtr &other)
+            : mObject(other.mObject)
+        {
+            Py_INCREF(mObject);
         }
 
         PyObjectPtr::PyObjectPtr(PyObjectPtr &&other)
@@ -21,23 +29,40 @@ namespace Scripting {
             reset();
         }
 
-        PyObjectPtr PyObjectPtr::get(const std::string_view &name) const
+        PyObjectPtr PyObjectPtr::get(std::string_view name) const
         {
             return PyObject_GetAttrString(mObject, name.data());
         }
 
-        PyObjectPtr PyObjectPtr::call(const std::string_view &name, const char *format, ...) const
-        {
+        PyObjectPtr PyObjectPtr::call(std::string_view name, const char *format, ...) const
+        {            
             va_list vl;
             va_start(vl, format);
-            PyObjectPtr result = call(name, Py_VaBuildValue(format, vl));
+            PyObjectPtr result = call(name, Py_VaBuildValue(format, vl), {});
             va_end(vl);
             return result;
         }
 
-        PyObjectPtr PyObjectPtr::call(const std::string_view &name, const PyObjectPtr &args) const
+        PyObjectPtr PyObjectPtr::call(std::string_view name, const PyDictPtr &kwargs, const char *format, ...) const
         {
-            return PyObject_CallObject(get(name), args);
+            va_list vl;
+            va_start(vl, format);
+            PyObjectPtr result = call(name, Py_VaBuildValue(format, vl), kwargs);
+            va_end(vl);
+            return result;
+        }
+
+        PyObjectPtr PyObjectPtr::call(std::string_view name, const PyObjectPtr &args, const PyObjectPtr &kwargs) const
+        {
+            PyObjectPtr function = get(name);
+            if (!function)
+                return nullptr;
+            return PyObject_Call(function, args, kwargs);
+        }
+
+        PyObjectFieldAccessor PyObjectPtr::operator[](const PyObjectPtr &name) const
+        {
+            return { *this, name };
         }
 
         void PyObjectPtr::reset()
@@ -60,6 +85,18 @@ namespace Scripting {
         PyObjectPtr::operator PyObject *() const
         {
             return mObject;
+        }
+
+        PyObjectPtr PyObjectPtr::None()
+        {
+            Py_RETURN_NONE;
+        }
+
+        PyObjectFieldAccessor &PyObjectFieldAccessor::operator=(const PyObjectPtr &value)
+        {
+            auto result = PyObject_SetItem(mObject, mKey, value);
+            assert(result == 0);
+            return *this;
         }
 
     }

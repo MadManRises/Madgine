@@ -24,7 +24,7 @@ SERIALIZETABLE_END(Engine::Widgets::Image)
 namespace Engine {
 namespace Widgets {
 
-    void Image::setImageByName(const std::string_view &name)
+    void Image::setImageByName(std::string_view name)
     {
         setImage(Resources::ImageLoader::getSingleton().get(name));
     }

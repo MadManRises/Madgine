@@ -99,14 +99,14 @@ namespace Threading {
 
     void WorkGroup::checkThreadStates()
     {
+
         auto pivot = std::remove_if(mSubThreads.begin(), mSubThreads.end(),
             [](Future<int> &f) {
-                return f.is_ready();
+                bool result = f.is_ready();
+                if (result)
+                    f.get();
+                return result;
             });
-
-        for (auto it = pivot; it != mSubThreads.end(); ++it) {
-            it->get();
-        }
 
         mSubThreads.erase(pivot, mSubThreads.end());
     }

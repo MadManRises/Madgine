@@ -47,7 +47,7 @@ namespace Scene {
             return mMesh.name();
         }
 
-        void Mesh::setName(const std::string_view &name)
+        void Mesh::setName(std::string_view name)
         {
             mMesh.load(name);
         }
@@ -69,7 +69,7 @@ namespace Scene {
 
         void Mesh::set(Render::GPUMeshLoader::HandleType handle)
         {
-            mMesh = handle;
+            mMesh = std::move(handle);
         }
 
         Render::GPUMeshLoader::ResourceType *Mesh::get() const

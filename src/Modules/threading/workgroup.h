@@ -78,7 +78,8 @@ namespace Threading {
         {
             ThreadGuard guard(*this);
             try {
-                return TupleUnpacker::invokeDefaultResult(0, std::forward<F>(main), std::forward<Args>(args)...);
+                int result = TupleUnpacker::invokeDefaultResult(0, std::forward<F>(main), std::forward<Args>(args)...);
+                return result;
             } catch (std::exception &e) {
                 LOG_ERROR("Uncaught Exception in Workgroup-Thread!");
                 LOG_EXCEPTION(e);

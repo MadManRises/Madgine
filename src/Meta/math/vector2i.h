@@ -60,6 +60,16 @@ struct Vector2i {
 
         return *(&x + i);
     }
+        
+    int *ptr()
+    {
+        return &x;
+    }
+
+    const int *ptr() const
+    {
+        return &x;
+    }
 
     friend std::ostream &operator<<(std::ostream &o, const Vector2i &v)
     {

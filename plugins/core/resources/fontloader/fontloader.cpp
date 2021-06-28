@@ -100,16 +100,16 @@ namespace Render {
     {
     }
 
-    bool FontLoader::loadImpl(Font &font, ResourceType *res)
+    bool FontLoader::loadImpl(Font &font, ResourceDataInfo &info)
     {
-        font.mTexture.create(res->name(), FORMAT_FLOAT8);
+        font.mTexture.create(info.resource()->name(), FORMAT_FLOAT8);
         font.mTexture.setMinMode(MIN_NEAREST);
-        font.mTextureHandle = &font.mTexture->mTextureHandle;
+        //font.mTextureHandle = &font.mTexture->mTextureHandle;
 
-        if (res->path().extension() == ".msdf") {
+        if (info.resource()->path().extension() == ".msdf") {
 
             Filesystem::FileManager cache("msdf_cache");
-            Serialize::SerializeInStream in = cache.openRead(res->path().parentPath() / (std::string { res->name() } + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
+            Serialize::SerializeInStream in = cache.openRead(info.resource()->path().parentPath() / (std::string { info.resource()->name() } + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
             assert(in);
             in >> font.mGlyphs;
             in >> font.mTextureSize;
@@ -117,8 +117,8 @@ namespace Render {
             in >> b;
             font.mTexture.setData(font.mTextureSize, b);
 
-        } else if (res->path().extension() == ".ttf") {
-            LOG("Creating Cache for " << res->path());
+        } else if (info.resource()->path().extension() == ".ttf") {
+            LOG("Creating Cache for " << info.resource()->path());
 
             FT_Library ft;
             if (FT_Init_FreeType(&ft)) {
@@ -126,7 +126,7 @@ namespace Render {
                 return false;
             }
 
-            std::vector<unsigned char> fontBuffer = res->readAsBlob();
+            std::vector<unsigned char> fontBuffer = info.resource()->readAsBlob();
 
             FT_Face face;
             if (FT_New_Memory_Face(ft, fontBuffer.data(), fontBuffer.size(), 0, &face)) {
@@ -244,7 +244,7 @@ namespace Render {
             font.mTexture.setData(font.mTextureSize, { texBuffer.get(), 4 * byteSize });
 
             Filesystem::FileManager cache("msdf_cache");
-            Serialize::SerializeOutStream out = cache.openWrite(res->path().parentPath() / (std::string { res->name() } + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
+            Serialize::SerializeOutStream out = cache.openWrite(info.resource()->path().parentPath() / (std::string { info.resource()->name() } + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
             if (out) {
                 out << font.mGlyphs;
                 out << font.mTextureSize;
@@ -258,8 +258,9 @@ namespace Render {
         return true;
     }
 
-    void FontLoader::unloadImpl(Font &font, ResourceType *res)
+    void FontLoader::unloadImpl(Font &font, ResourceDataInfo &info)
     {
+        font.mTexture.reset();
     }
 
 }

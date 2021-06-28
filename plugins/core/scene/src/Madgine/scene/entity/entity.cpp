@@ -110,12 +110,12 @@ namespace Scene {
             return { { *it }, &mSceneManager };
         }
 
-        EntityComponentPtr<EntityComponentBase> Entity::getComponent(const std::string_view &name)
+        EntityComponentPtr<EntityComponentBase> Entity::getComponent(std::string_view name)
         {
             return getComponent(sComponentsByName()[name]);
         }
 
-        EntityComponentPtr<const EntityComponentBase> Entity::getComponent(const std::string_view &name) const
+        EntityComponentPtr<const EntityComponentBase> Entity::getComponent(std::string_view name) const
         {
             return getComponent(sComponentsByName()[name]);
         }
@@ -125,12 +125,12 @@ namespace Scene {
             return mComponents.contains(i);
         }
 
-        bool Entity::hasComponent(const std::string_view &name)
+        bool Entity::hasComponent(std::string_view name)
         {
             return hasComponent(sComponentsByName()[name]);
         }
 
-        EntityComponentPtr<EntityComponentBase> Entity::addComponent(const std::string_view &name, const ObjectPtr &table)
+        EntityComponentPtr<EntityComponentBase> Entity::addComponent(std::string_view name, const ObjectPtr &table)
         {
             return addComponent(sComponentsByName().at(name), table);
         }
@@ -146,7 +146,7 @@ namespace Scene {
             }
         }
 
-        void Entity::removeComponent(const std::string_view &name)
+        void Entity::removeComponent(std::string_view name)
         {
             removeComponent(sComponentsByName().at(name));
         }

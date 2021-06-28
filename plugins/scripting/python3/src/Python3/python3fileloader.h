@@ -4,6 +4,8 @@
 
 #include "util/pymoduleptr.h"
 
+#include "Meta/keyvalue/objectptr.h"
+
 namespace Engine {
 namespace Scripting {
     namespace Python3 {
@@ -18,13 +20,20 @@ namespace Scripting {
                     : Base::HandleType(handle)
                 {
                 }
-
             };
 
             Python3FileLoader();
 
-            bool loadImpl(PyModulePtr &module, ResourceType *res);
-            void unloadImpl(PyModulePtr &module, ResourceType *res);
+            void setup();
+
+            bool loadImpl(PyModulePtr &module, ResourceDataInfo &info, Filesystem::FileEventType event);
+            void unloadImpl(PyModulePtr &module, ResourceDataInfo &info);
+
+            void find_spec(ValueType &retVal, std::string_view name, std::optional<std::string_view> import_path, ObjectPtr target_module);
+
+            void create_module(ValueType &retVal, ObjectPtr spec);
+            void exec_module(ValueType &retVal, ObjectPtr module);
+
         };
 
     }

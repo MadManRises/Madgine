@@ -79,7 +79,8 @@ namespace Plugins {
                     mModule = nullptr;
                 }
             } else {
-                errorMsg = "Unkown";
+                Dl::DlAPIResult result = Dl::getError("openDll");
+                errorMsg = result.toString();
             }
         } catch (const std::exception &e) {
             errorMsg = e.what();

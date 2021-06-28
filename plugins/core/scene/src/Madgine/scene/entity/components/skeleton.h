@@ -12,7 +12,7 @@ namespace Scene {
             Skeleton(const ObjectPtr &init);
 
             std::string_view getName() const;
-            void setName(const std::string_view &name);
+            void setName(std::string_view name);
 
             Render::SkeletonDescriptor *data() const;
 

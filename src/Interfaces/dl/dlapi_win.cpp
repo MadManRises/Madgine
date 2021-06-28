@@ -11,6 +11,18 @@
 namespace Engine {
 namespace Dl {
 
+    static DWORD sLastError;
+
+    DlAPIResult toResult(DWORD error, const char *op)
+    {
+        switch (error) {
+        default:
+            fprintf(stderr, "Unknown Windows Dl-Error-Code from %s: %lu\n", op, error);
+            fflush(stderr);
+            return DlAPIResult::UNKNOWN_ERROR;
+        }
+    }
+
     void *openDll(const std::string &name)
     {
         static struct Guard {
@@ -31,6 +43,7 @@ namespace Dl {
             handle = GetModuleHandle(nullptr);
         else
             handle = LoadLibrary(name.c_str());
+        sLastError = GetLastError();
         SymRefreshModuleList(GetCurrentProcess());
 
         return handle;
@@ -39,6 +52,7 @@ namespace Dl {
     void closeDll(void *handle)
     {
         auto result = FreeLibrary((HINSTANCE)handle);
+        sLastError = GetLastError();
         assert(result != 0);
     }
 
@@ -53,6 +67,10 @@ namespace Dl {
         auto result = GetModuleFileName((HMODULE)dllHandle, buffer, sizeof(buffer));
         assert(result);
         return buffer;
+    }
+
+    DlAPIResult getError(const char *op) {
+        return toResult(sLastError, op);
     }
 }
 }

@@ -20,10 +20,10 @@ METATABLE_END(Engine::Render::TextureLoader::ResourceType)
         {
         }
 
-        void TextureLoader::HandleType::create(const std::string_view &name, DataFormat format, TextureLoader *loader)
+        void TextureLoader::HandleType::create(std::string_view name, DataFormat format, TextureLoader *loader)
         {
             *this = TextureLoader::loadManual(
-                name, {}, [=](TextureLoader *loader, Texture &texture, const TextureLoader::ResourceType *res) { return loader->create(texture, format); }, {},
+                name, {}, [=](TextureLoader *loader, Texture &texture, const TextureLoader::ResourceDataInfo &info) { return loader->create(texture, format); }, {},
                 loader);
         }
 
@@ -31,28 +31,28 @@ METATABLE_END(Engine::Render::TextureLoader::ResourceType)
         {
             if (!loader)
                 loader = &TextureLoader::getSingleton();
-            loader->setData(getData(*this, loader), size, data);
+            loader->setData(*getDataPtr(*this, loader), size, data);
         }
 
         void TextureLoader::HandleType::setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data, TextureLoader *loader)
         {
             if (!loader)
                 loader = &TextureLoader::getSingleton();
-            loader->setSubData(getData(*this, loader), offset, size, data);
+            loader->setSubData(*getDataPtr(*this, loader), offset, size, data);
         }
 
         void TextureLoader::HandleType::setWrapMode(WrapMode mode, TextureLoader *loader)
         {
             if (!loader)
                 loader = &TextureLoader::getSingleton();
-            loader->setWrapMode(getData(*this, loader), mode);
+            loader->setWrapMode(*getDataPtr(*this, loader), mode);
         }
 
         void TextureLoader::HandleType::setMinMode(MinMode mode, TextureLoader *loader)
         {
             if (!loader)
                 loader = &TextureLoader::getSingleton();
-            loader->setMinMode(getData(*this, loader), mode);
+            loader->setMinMode(*getDataPtr(*this, loader), mode);
         }
 
     }

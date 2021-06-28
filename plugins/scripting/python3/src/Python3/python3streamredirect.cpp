@@ -26,7 +26,7 @@ namespace Scripting {
             }
         }
 
-        void Python3StreamRedirect::redirect(const std::string_view &name)
+        void Python3StreamRedirect::redirect(std::string_view name)
         {
             if (!mOldStreams[name]) {
                 mOldStreams[name] = PySys_GetObject(name.data()); // borrowed
@@ -35,7 +35,7 @@ namespace Scripting {
             PySys_SetObject(name.data(), Scripting::Python3::toPyObject(TypedScopePtr { this }));
         }
 
-        void Python3StreamRedirect::reset(const std::string_view &name)
+        void Python3StreamRedirect::reset(std::string_view name)
         {
             auto it = mOldStreams.find(name);
             if (it != mOldStreams.end()) {
@@ -45,7 +45,7 @@ namespace Scripting {
             }
         }
 
-        int Python3StreamRedirect::write(const std::string_view &text)
+        int Python3StreamRedirect::write(std::string_view text)
         {
             return mBuf->sputn(text.data(), text.size());
         }

@@ -11,7 +11,7 @@ namespace Engine {
 namespace Scripting {
     namespace Python3 {
  
-        PyModulePtr::PyModulePtr(const std::string_view &name)
+        PyModulePtr::PyModulePtr(std::string_view name)
         {
             PyObject *modules = PyImport_GetModuleDict();
             mObject = PyDict_GetItemString(modules, name.data());
@@ -21,6 +21,13 @@ namespace Scripting {
                 mObject = PyImport_ImportModule(name.data());
             }
 
+        }
+
+        PyModulePtr PyModulePtr::create(std::string_view name)
+        {
+            PyModulePtr module;
+            module.mObject = PyModule_NewObject(PyUnicode_FromString(name.data()));
+            return module;
         }
 
     }

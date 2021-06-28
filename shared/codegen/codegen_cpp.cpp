@@ -2,6 +2,8 @@
 
 #include "codegen_cpp.h"
 
+#include "statement.h"
+
 namespace CodeGen {
 
 CppFile::CppFile()
@@ -9,7 +11,7 @@ CppFile::CppFile()
 {
 }
 
-void CppFile::include(size_t level, const std::string_view &file)
+void CppFile::include(size_t level, std::string_view file)
 {
     if (mIncludes.size() <= level)
         mIncludes.resize(level + 1);
@@ -17,7 +19,7 @@ void CppFile::include(size_t level, const std::string_view &file)
     mIncludes[level][mConditionalsBitMask].insert(std::string { file });
 }
 
-void CppFile::beginNamespace(const std::string_view &ns)
+void CppFile::beginNamespace(std::string_view ns)
 {
     mNamespaceStack.push(&std::get<Namespace>(mNamespaceStack.top()->mElements.emplace_back(Namespace { std::string { ns }, mConditionalsBitMask })));
 }
@@ -33,25 +35,30 @@ CppFile::CustomCodeBuilder::~CustomCodeBuilder()
     mFile->addCustomCodeBlock(mStream.str());
 }
 
-CppFile::CustomCodeBuilder &CppFile::CustomCodeBuilder::operator<<(const std::string_view &code)
+CppFile::CustomCodeBuilder &CppFile::CustomCodeBuilder::operator<<(std::string_view code)
 {
     mStream << code;
     return *this;
 }
 
-CppFile::CustomCodeBuilder CppFile::operator<<(const std::string_view &code)
+CppFile::CustomCodeBuilder CppFile::operator<<(std::string_view code)
 {
     CustomCodeBuilder builder { this };
     builder.mStream << code;
     return builder;
 }
 
-void CppFile::addCustomCodeBlock(const std::string_view &code)
+void CppFile::addCustomCodeBlock(std::string_view code)
 {
     mNamespaceStack.top()->mElements.emplace_back(CustomCodeBlock {
-        mConditionalsBitMask,
         std::string { code },
+        mConditionalsBitMask
     });
+}
+
+void CppFile::statement(Statement statement)
+{
+    throw 0;
 }
 
 void CppFile::generate(std::ostream &stream)
@@ -75,35 +82,75 @@ void CppFile::generate(std::ostream &stream)
 
     stream << "\n";
 
-    mGlobalNamespace.generate(stream, *this);
+    generate(stream, mGlobalNamespace);
 }
 
-void CppFile::CustomCodeBlock::generate(std::ostream &stream, CppFile &file)
+void CppFile::generate(std::ostream &stream, CustomCodeBlock &block)
 {
-    stream << file.generateIncludeGuard(mConditionals);
+    stream << generateIncludeGuard(block.mConditionals);
 
-    stream << mCode;
+    stream << block.mCode;
 
-    if (mConditionals != Engine::BitArray<64> {})
+    if (block.mConditionals != Engine::BitArray<64> {})
         stream << "#endif\n";
 }
 
-void CppFile::Namespace::generate(std::ostream &stream, CppFile &file)
+void CppFile::generate(std::ostream &stream, Namespace &ns)
 {
-    stream << file.generateIncludeGuard(mConditionals);
+    stream << generateIncludeGuard(ns.mConditionals);
 
-    if (!mName.empty())
-        stream << "namespace " << mName << "{\n";
+    if (!ns.mName.empty())
+        stream << "namespace " << ns.mName << "{\n";
 
-    for (std::variant<Namespace, CustomCodeBlock> &v : mElements) {
-        std::visit([&](auto &block) { block.generate(stream, file); }, v);
+    for (Statement &s : ns.mElements) {
+        std::visit([&](auto &block) { generate(stream, block); }, s);
     }
 
-    if (!mName.empty())
+    if (!ns.mName.empty())
         stream << "}\n";
 
-    if (mConditionals != Engine::BitArray<64> {})
+    if (ns.mConditionals != Engine::BitArray<64> {})
         stream << "#endif\n";
+}
+
+void CppFile::generate(std::ostream &stream, VariableRead &read)
+{
+    throw 0;
+}
+
+void CppFile::generate(std::ostream &stream, VariableDefinition &def)
+{
+    throw 0;
+}
+
+void CppFile::generate(std::ostream &stream, MemberAccess &access)
+{
+    throw 0;
+}
+
+void CppFile::generate(std::ostream &stream, Return &ret)
+{
+    throw 0;
+}
+
+void CppFile::generate(std::ostream &stream, Assignment &assign)
+{
+    throw 0;
+}
+
+void CppFile::generate(std::ostream &stream, ArithOperation &op)
+{
+    throw 0;
+}
+
+void CppFile::generate(std::ostream &stream, Constructor &con)
+{
+    throw 0;
+}
+
+void CppFile::generate(std::ostream &stream, Constant &c)
+{
+    throw 0;
 }
 
 std::string CppFile::generateIncludeGuard(const Engine::BitArray<64> &conditionals)

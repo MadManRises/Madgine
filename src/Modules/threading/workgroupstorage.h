@@ -10,6 +10,7 @@ namespace Threading {
         struct container_type {
             container_type() = default;
             container_type(const container_type &) = delete;
+            container_type(container_type &&) = default;
 
             T *operator->()
             {

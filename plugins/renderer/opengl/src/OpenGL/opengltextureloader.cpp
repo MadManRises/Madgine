@@ -24,12 +24,12 @@ namespace Render {
     {
     }
 
-    bool OpenGLTextureLoader::loadImpl(OpenGLTexture &tex, ResourceType *res)
+    bool OpenGLTextureLoader::loadImpl(OpenGLTexture &tex, ResourceDataInfo &info)
     {
         throw 0;
     }
 
-    void OpenGLTextureLoader::unloadImpl(OpenGLTexture &tex, ResourceType *res)
+    void OpenGLTextureLoader::unloadImpl(OpenGLTexture &tex, ResourceDataInfo &info)
     {
         tex.reset();
     }

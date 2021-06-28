@@ -32,14 +32,14 @@ namespace Serialize {
         other.mSlaveMappings.clear();
     }
 
-    SerializeManager::~SerializeManager() {}
+    SerializeManager::~SerializeManager() { }
 
     const SyncableUnitMap &SerializeManager::slavesMap() const
     {
         return mSlaveMappings;
     }
 
-	const SyncableUnitMap &SerializeManager::mastersMap() const
+    const SyncableUnitMap &SerializeManager::mastersMap() const
     {
         return sMasterMappings;
     }
@@ -133,7 +133,7 @@ namespace Serialize {
         return unit == nullptr
             ? NULL_UNIT_ID
             : (!mgr || mgr->isMaster(&out.data())) ? unit->masterId()
-                                                     : unit->slaveId();
+                                                   : unit->slaveId();
     }
 
     SyncableUnitBase *SerializeManager::convertPtr(SerializeInStream &in,
@@ -141,18 +141,22 @@ namespace Serialize {
     {
         if (unit == NULL_UNIT_ID)
             return nullptr;
-        try {
-            if (mSlaveStreamData && (&in.data() == mSlaveStreamData)) {
-                return mSlaveMappings.at(unit);
-            } else {
-                return getByMasterId(unit);
-            }
-        } catch (const std::out_of_range &) {
+        SyncableUnitBase *ptr = nullptr;
+
+        if (mSlaveStreamData && (&in.data() == mSlaveStreamData)) {
+            auto it = sMasterMappings.find(unit);
+            if (it != sMasterMappings.end())
+                ptr = it->second;
+        } else {
+            ptr = getByMasterId(unit);
+        }
+        if (!ptr) {
             std::stringstream ss;
             ss << "Unknown Unit-Id (" << unit
                << ") used! Possible binary mismatch!";
             throw SerializeException(ss.str());
         }
+        return ptr;
     }
 
     SerializeStreamData *SerializeManager::getSlaveStreamData()
@@ -172,7 +176,10 @@ namespace Serialize {
     SyncableUnitBase *SerializeManager::getByMasterId(UnitId unit)
     {
         std::lock_guard guard(sMasterMappingMutex);
-        return sMasterMappings.at(unit);
+        auto it = sMasterMappings.find(unit);
+        if (it == sMasterMappings.end())
+            return nullptr;
+        return it->second;
     }
 
     const std::string &SerializeManager::name() const

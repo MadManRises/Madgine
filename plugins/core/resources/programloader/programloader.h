@@ -18,18 +18,21 @@ namespace Render {
 
             using Base::HandleType::HandleType;
             HandleType(Base::HandleType handle)
-                : Base::HandleType(handle)
+                : Base::HandleType(std::move(handle))
             {
             }
 
             void create(const std::string &name, ProgramLoader *loader = nullptr);
+            void create(const std::string &name, CodeGen::ShaderFile &&file, ProgramLoader *loader = nullptr);
+            void createUnnamed(CodeGen::ShaderFile &&file, ProgramLoader *loader = nullptr);
 
-            template <typename T>
+            template <typename T, typename = std::enable_if_t<!is_instance_v<T, ByteBufferImpl>>>
             void setParameters(const T &param, size_t index, ProgramLoader *loader = nullptr)
             {
                 setParameters({ &param, sizeof(T) }, index, loader);
             }
             void setParameters(const ByteBuffer &data, size_t index, ProgramLoader *loader = nullptr);
+            WritableByteBuffer mapParameters(size_t index, ProgramLoader *loader = nullptr);
 
 			void setDynamicParameters(const ByteBuffer &data, size_t index, ProgramLoader *loader = nullptr);
         };
@@ -37,8 +40,10 @@ namespace Render {
         ProgramLoader();
 
         virtual bool create(Program &program, const std::string &name) = 0;
+        virtual bool create(Program &program, const std::string &name, const CodeGen::ShaderFile &file) = 0;
 
         virtual void setParameters(Program &program, const ByteBuffer &data, size_t index) = 0;
+        virtual WritableByteBuffer mapParameters(Program &program, size_t index) = 0;
 
 		virtual void setDynamicParameters(Program &program, const ByteBuffer &data, size_t index) = 0;
     };

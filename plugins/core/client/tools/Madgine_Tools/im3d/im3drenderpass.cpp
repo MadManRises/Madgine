@@ -11,6 +11,11 @@
 
 #include "textureloader.h"
 
+#include "Madgine/render/shadinglanguage/sl.h"
+
+#define SL_SHADER im3d
+#include INCLUDE_SL_SHADER
+
 namespace Engine {
 namespace Render {
 
@@ -20,12 +25,9 @@ namespace Render {
     {
         mProgram.create("scene");
         
-        mPerObject.hasLight = false;
-        mPerObject.hasDistanceField = false;
-        mPerObject.hasSkeleton = false;
-
-        mPerObject.m = Matrix4::IDENTITY;
-        mPerObject.anti_m = Matrix4::IDENTITY;
+        mProgram.setParameters({ nullptr, sizeof(Im3DPerApplication) },0);
+        mProgram.setParameters({ nullptr, sizeof(Im3DPerFrame) }, 1);
+        mProgram.setParameters({ nullptr, sizeof(Im3DPerObject) }, 2);
     }
 
     void Im3DRenderPass::render(RenderTarget *target)
@@ -38,23 +40,33 @@ namespace Render {
 
         float aspectRatio = float(size.x) / size.y;
 
-        mPerApplication.p = mCamera->getProjectionMatrix(aspectRatio);
+        auto perApplication = mProgram.mapParameters(0).cast<Im3DPerApplication>();
 
-        mProgram.setParameters(mPerApplication, 0);
+        perApplication->p = mCamera->getProjectionMatrix(aspectRatio);
 
-        mPerFrame.v = mCamera->getViewMatrix();
+        auto perFrame = mProgram.mapParameters(1).cast<Im3DPerFrame>();
 
-        mProgram.setParameters(mPerFrame, 1);
+        perFrame->v = mCamera->getViewMatrix();        
 
         /*for (const std::pair<Im3DNativeMesh, std::vector<Matrix4>> &p : context->mNativeMeshes)
             target->renderInstancedMesh(RenderPassFlags_NoLighting, p.first, p.second);*/
 
         for (std::pair<const Im3DTextureId, Im3D::Im3DContext::RenderData> &p : context->mRenderData) {
 
-            mPerObject.hasTexture = p.first != 0;
-            mPerObject.hasDistanceField = bool(p.second.mFlags & RenderPassFlags_DistanceField);
-            mProgram.setParameters(mPerObject, 2);
             target->bindTexture(p.first);
+
+            auto perObject = mProgram.mapParameters(2).cast<Im3DPerObject>();
+
+            perObject->hasLight = false;
+            perObject->hasDistanceField = false;
+            perObject->hasSkeleton = false;
+
+            perObject->m = Matrix4::IDENTITY;
+            perObject->anti_m = Matrix4::IDENTITY;
+
+            perObject->hasTexture = p.first != 0;
+            perObject->hasDistanceField = bool(p.second.mFlags & RenderPassFlags_DistanceField);
+                        
 
             for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
                 target->renderVertices(mProgram, i + 1, p.second.mVertices[i], p.second.mIndices[i]);

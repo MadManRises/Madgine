@@ -12,8 +12,24 @@ namespace Render {
     struct DirectX11PixelShaderLoader : Resources::ResourceLoader<DirectX11PixelShaderLoader, DirectX11PixelShader, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
         DirectX11PixelShaderLoader();
 
-        bool loadImpl(DirectX11PixelShader &shader, ResourceType *res);
-        void unloadImpl(DirectX11PixelShader &shader, ResourceType *res);
+        struct HandleType : Base::HandleType {
+
+            using Base::HandleType::HandleType;
+            HandleType(Base::HandleType handle)
+                : Base::HandleType(std::move(handle))
+            {
+            }
+
+            void create(const std::string &name, const CodeGen::ShaderFile &file, DirectX11PixelShaderLoader *loader = nullptr);
+        };
+
+
+        bool loadImpl(DirectX11PixelShader &shader, ResourceDataInfo &info);
+        void unloadImpl(DirectX11PixelShader &shader, ResourceDataInfo &info);
+
+        bool create(DirectX11PixelShader &shader, ResourceType *res, const CodeGen::ShaderFile &file);
+
+        bool loadFromSource(DirectX11PixelShader &shader, std::string_view name, std::string_view source);
     };
 
 }

@@ -59,8 +59,8 @@ namespace Scene {
 
             EntityComponentPtr<EntityComponentBase> getComponent(uint32_t i);
             EntityComponentPtr<const EntityComponentBase> getComponent(uint32_t i) const;
-            EntityComponentPtr<EntityComponentBase> getComponent(const std::string_view &name);
-            EntityComponentPtr<const EntityComponentBase> getComponent(const std::string_view &name) const;
+            EntityComponentPtr<EntityComponentBase> getComponent(std::string_view name);
+            EntityComponentPtr<const EntityComponentBase> getComponent(std::string_view name) const;
 
             struct MADGINE_SCENE_EXPORT Helper {
                 Entity *mEntity;
@@ -78,11 +78,11 @@ namespace Scene {
             }
 
             bool hasComponent(size_t i);
-            bool hasComponent(const std::string_view &name);
+            bool hasComponent(std::string_view name);
 
-            EntityComponentPtr<EntityComponentBase> addComponent(const std::string_view &name, const ObjectPtr &table = {});
+            EntityComponentPtr<EntityComponentBase> addComponent(std::string_view name, const ObjectPtr &table = {});
             EntityComponentPtr<EntityComponentBase> addComponent(size_t i, const ObjectPtr &table = {});
-            void removeComponent(const std::string_view &name);
+            void removeComponent(std::string_view name);
             void removeComponent(size_t i);
             void clearComponents();
 

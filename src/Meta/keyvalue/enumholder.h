@@ -20,7 +20,7 @@ struct META_EXPORT EnumHolder {
 
     bool operator==(const EnumHolder &other) const;
     
-    const std::string_view &toString() const;
+    std::string_view toString() const;
     const EnumMetaTable *table() const;
 
     int32_t value() const;

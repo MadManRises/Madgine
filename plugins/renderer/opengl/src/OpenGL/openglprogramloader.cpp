@@ -25,12 +25,12 @@ namespace Render {
     {
     }
 
-    bool OpenGLProgramLoader::loadImpl(OpenGLProgram &program, ResourceType *res)
+    bool OpenGLProgramLoader::loadImpl(OpenGLProgram &program, ResourceDataInfo &info)
     {
         throw 0;
     }
 
-    void OpenGLProgramLoader::unloadImpl(OpenGLProgram &program, ResourceType *res)
+    void OpenGLProgramLoader::unloadImpl(OpenGLProgram &program, ResourceDataInfo &info)
     {
         program.reset();
     }
@@ -64,9 +64,19 @@ namespace Render {
         return true;
     }
 
+    bool OpenGLProgramLoader::create(Program &program, const std::string &name, const CodeGen::ShaderFile &file)
+    {
+        throw 0;
+    }
+
     void OpenGLProgramLoader::setParameters(Program &program, const ByteBuffer &data, size_t index)
     {
         static_cast<OpenGLProgram &>(program).setParameters(data, index);
+    }
+
+    WritableByteBuffer OpenGLProgramLoader::mapParameters(Program &program, size_t index)
+    {
+        throw 0;
     }
 
     void OpenGLProgramLoader::setDynamicParameters(Program &program, const ByteBuffer &data, size_t index)

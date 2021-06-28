@@ -26,12 +26,12 @@ namespace Render {
     {
     }
 
-    bool DirectX11TextureLoader::loadImpl(DirectX11Texture &tex, ResourceType *res)
+    bool DirectX11TextureLoader::loadImpl(DirectX11Texture &tex, ResourceDataInfo &info)
     {
         throw 0;
     }
 
-    void DirectX11TextureLoader::unloadImpl(DirectX11Texture &tex, ResourceType *res)
+    void DirectX11TextureLoader::unloadImpl(DirectX11Texture &tex, ResourceDataInfo &info)
     {
         tex.reset();
     }

@@ -10,7 +10,7 @@ namespace Engine {
 
 namespace Scene {
     namespace Entity {
-        EntityComponentBase::EntityComponentBase(const ObjectPtr &initTable)
+        EntityComponentBase::EntityComponentBase(const std::optional<ObjectPtr> &initTable)
         {
         }
 

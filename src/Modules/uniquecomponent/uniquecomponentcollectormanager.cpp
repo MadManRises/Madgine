@@ -32,7 +32,7 @@ void UniqueComponentCollectorManager::onPluginLoad(const Plugins::Plugin *p)
     const Plugins::BinaryInfo *info = p->info();
 
     CompoundAtomicOperation op;
-    for (auto &[name, reg] : registryRegistry()) {
+    for (UniqueComponentRegistryBase *reg : registryRegistry()) {
         reg->onPluginLoad(info, op);
     }
 }
@@ -42,7 +42,7 @@ Future<void> UniqueComponentCollectorManager::aboutToUnloadPlugin(const Plugins:
     const Plugins::BinaryInfo *info = p->info();
 
     CompoundAtomicOperation op;
-    for (auto &[name, reg] : registryRegistry()) {
+    for (UniqueComponentRegistryBase *reg : registryRegistry()) {
         reg->onPluginUnload(info, op);
     }
     return {};

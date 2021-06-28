@@ -27,7 +27,7 @@ namespace Tools {
 
         mProgram.create("grid");
 
-        mMesh = Render::GPUMeshLoader::loadManual("grid", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &data, Render::GPUMeshLoader::ResourceType *res) {
+        mMesh = Render::GPUMeshLoader::loadManual("grid", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &data, Render::GPUMeshLoader::ResourceDataInfo &info) {
             std::vector<Compound<Render::VertexPos_4D>> vertices {
                 { { 0, 0, 0, 1 } },
                 { { 1, 0, 0, 0 } },
@@ -42,6 +42,8 @@ namespace Tools {
 
             return loader->generate(data, { 3, std::move(vertices), std::move(indices) });
         });
+
+        mProgram.setParameters(mParameters, 1);
     }
 
     void GridPass::render(Render::RenderTarget *target)
@@ -51,7 +53,7 @@ namespace Tools {
 
         mParameters.vp = mCamera->getViewProjectionMatrix(aspectRatio);
 
-        mProgram.setParameters(mParameters, 1);
+        std::memcpy(mProgram.mapParameters(1).mData, &mParameters, sizeof(mParameters));
 
         target->renderMesh(mMesh, mProgram);
     }

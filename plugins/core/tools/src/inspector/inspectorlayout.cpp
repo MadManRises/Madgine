@@ -7,7 +7,7 @@
 namespace Engine {
 	namespace Tools {		
 
-		InspectorLayout::InspectorLayout(LayoutLoader::HandleType &&document) :
+		InspectorLayout::InspectorLayout(LayoutLoader::HandleType document) :
 			mDocument(std::move(document))
 		{			
 		}

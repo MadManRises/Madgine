@@ -444,7 +444,12 @@ namespace Serialize {
         static StreamResult read(SerializeInStream &in, std::tuple<Ty...> &t, const char *name, std::index_sequence<Is...>, Args &&... args)
         {
             STREAM_PROPAGATE_ERROR(in.format().beginContainer(in, name, false));
-            STREAM_PROPAGATE_ERROR((Serialize::read<Ty>(in, std::get<Is>(t), nullptr, args...), ...));
+            STREAM_PROPAGATE_ERROR(TupleUnpacker::accumulate(
+                t, [&](auto &e, StreamResult r) {
+                    STREAM_PROPAGATE_ERROR(std::move(r));
+                    return Serialize::read(in, e, nullptr, args...);
+                },
+                StreamResult {}));
             return in.format().endContainer(in, name);
         }
 
@@ -476,7 +481,12 @@ namespace Serialize {
         static StreamResult read(SerializeInStream &in, std::tuple<Ty &...> t, const char *name, std::index_sequence<Is...>, Args &&... args)
         {
             STREAM_PROPAGATE_ERROR(in.format().beginContainer(in, name, false));
-            STREAM_PROPAGATE_ERROR((Serialize::read<Ty>(in, std::get<Is>(t), nullptr, args...), ...));
+            STREAM_PROPAGATE_ERROR(TupleUnpacker::accumulate(
+                t, [&](auto &e, StreamResult r) {
+                    STREAM_PROPAGATE_ERROR(std::move(r));
+                    return Serialize::read(in, e, nullptr, args...);
+                },
+                StreamResult {}));
             return in.format().endContainer(in, name);
         }
 

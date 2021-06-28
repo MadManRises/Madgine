@@ -204,12 +204,12 @@ namespace Scene {
             if (!behavior.empty())
                 LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
         }
-        Future<typename refcounted_deque<Entity::Entity>::iterator> f;
+        Future<Pib<typename RefcountedContainer<std::deque<Entity::Entity>>::iterator>> f;
         if (init) {
             f = TupleUnpacker::invokeExpand(&decltype(mEntities)::emplace<SceneManager &, bool, std::string, ObjectPtr>, &mEntities, mEntities.end(), tuple_cat(createEntityData(name, false), std::make_tuple(table))).init(init);
         } else
             f = TupleUnpacker::invokeExpand(&decltype(mEntities)::emplace<SceneManager &, bool, std::string, ObjectPtr>, &mEntities, mEntities.end(), tuple_cat(createEntityData(name, false), std::make_tuple(table)));
-        return { f.then([](const typename refcounted_deque<Entity::Entity>::iterator &it) { return Entity::EntityPtr { &*it }; }) };
+        return { f.then([](const typename RefcountedContainer<std::deque<Entity::Entity>>::iterator &it) { return Entity::EntityPtr { &*it }; }) };
     }
 
     Entity::EntityPtr SceneManager::createLocalEntity(const std::string &behavior, const std::string &name)
@@ -227,7 +227,7 @@ namespace Scene {
         return &*mLocalEntities.emplace(mLocalEntities.end(), std::get<0>(data), std::get<1>(data), std::get<2>(data), table);
     }
 
-    Threading::SignalStub<const refcounted_deque<Entity::Entity>::iterator &, int> &SceneManager::entitiesSignal()
+    Threading::SignalStub<const RefcountedContainer<std::deque<Entity::Entity>>::iterator &, int> &SceneManager::entitiesSignal()
     {
         return mEntities.observer().signal();
     }

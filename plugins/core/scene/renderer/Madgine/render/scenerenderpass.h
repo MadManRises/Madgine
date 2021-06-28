@@ -4,11 +4,6 @@
 
 #include "programloader.h"
 
-#include "Madgine/render/shadinglanguage/sl.h"
-
-#define SL_SHADER scene
-#include INCLUDE_SL_SHADER
-
 namespace Engine {
 namespace Render {
 
@@ -27,10 +22,6 @@ namespace Render {
         Camera *mCamera;
 
         int mPriority;
-
-        ScenePerApplication mPerApplication;
-        ScenePerFrame mPerFrame;
-        ScenePerObject mPerObject;
     };
 
 }

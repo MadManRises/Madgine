@@ -2,13 +2,16 @@
 
 namespace Engine {
 
+    using Constructor = OwnedScopePtr(*)();
+
 struct META_EXPORT MetaTable {
     const MetaTable **mSelf;
     const char *mTypeName;
     const MetaTable **mBase;    
     const std::pair<const char *, Accessor> *mMember;
+    const Constructor *mConstructors;
 
-    ScopeIterator find(const std::string_view &key, TypedScopePtr scope) const;
+    ScopeIterator find(std::string_view key, TypedScopePtr scope) const;
 
     void call(TypedScopePtr scope, ValueType &retVal, const ArgumentList &args) const;
 

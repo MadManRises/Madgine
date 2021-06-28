@@ -364,7 +364,7 @@ namespace Tools {
             select(node.mEntity);
         }
 
-        ImGui::DraggableValueTypeSource(name, this, node.mEntity);
+        ImGui::DraggableValueTypeSource(name, node.mEntity);
 
         Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> transform = node.mEntity->getComponent<Engine::Scene::Entity::Transform>();
         if (transform) {
@@ -430,7 +430,7 @@ namespace Tools {
             //TODO
             //ImGui::DraggableValueTypeSource(name.c_str(), this, ValueType { Scene::Entity::EntityComponentPtr<Scene::Entity::EntityComponentBase> { component } });
             if (open) {
-                mInspector->draw(component.getTyped());
+                mInspector->drawMembers(component.getTyped());
                 ImGui::TreePop();
             }
         }
@@ -515,7 +515,7 @@ namespace Tools {
 
     void SceneEditor::renderCamera(Render::Camera *camera)
     {
-        mInspector->draw(camera);
+        mInspector->drawMembers(camera);
     }
 
     void SceneEditor::renderPopups()

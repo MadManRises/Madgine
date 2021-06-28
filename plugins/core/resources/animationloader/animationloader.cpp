@@ -58,11 +58,11 @@ METATABLE_END(Engine::Render::QuaternionKeyFrame)
         {
         }
 
-        bool AnimationLoader::loadImpl(AnimationList &animations, ResourceType *res)
+        bool AnimationLoader::loadImpl(AnimationList &animations, ResourceDataInfo &info)
         {
             Assimp::Importer importer;
 
-            std::vector<unsigned char> buffer = res->readAsBlob();
+            std::vector<unsigned char> buffer = info.resource()->readAsBlob();
 
             const aiScene *scene = importer.ReadFileFromMemory(buffer.data(), buffer.size(), 0);
 
@@ -116,7 +116,7 @@ METATABLE_END(Engine::Render::QuaternionKeyFrame)
             return true;
         }
 
-        void AnimationLoader::unloadImpl(AnimationList &data, ResourceType *res)
+        void AnimationLoader::unloadImpl(AnimationList &data, ResourceDataInfo &info)
         {
         }
 

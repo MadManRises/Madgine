@@ -22,7 +22,7 @@ struct UniqueComponentCollector;
 
 
 
-struct ComponentRegistryBase;
+struct UniqueComponentRegistryBase;
 
 
 namespace Debug {

@@ -137,7 +137,7 @@ namespace Tools {
                                 }
 
                                 if (ImGui::TreeNode("UniqueComponents")) {
-                                    for (ComponentRegistryBase *reg : kvValues(registryRegistry())) {
+                                    for (UniqueComponentRegistryBase *reg : registryRegistry()) {
                                         for (CollectorInfoBase *info : *reg) {
                                             if (info->mBinary == binInfo && ImGui::TreeNode(info->mBaseInfo->mTypeName.data(), "%.*s", static_cast<int>(info->mBaseInfo->mTypeName.size()), info->mBaseInfo->mTypeName.data())) {
                                                 for (const std::vector<const TypeInfo *> &components : info->mElementInfos) {

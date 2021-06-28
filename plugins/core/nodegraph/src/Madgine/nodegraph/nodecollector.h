@@ -14,9 +14,9 @@ DECLARE_UNIQUE_COMPONENT(Engine::NodeGraph, Node, NodeBase, NodeGraph &);
 namespace Engine {
 namespace NodeGraph {
 
-    template <typename T>
-    struct Node : Serialize::VirtualData<T, VirtualScope<T, NamedComponent<T, NodeComponent<T>>>> {
-        using Serialize::VirtualData<T, VirtualScope<T, NamedComponent<T, NodeComponent<T>>>>::VirtualData;
+    template <typename T, typename Base = NodeBase>
+    struct Node : Serialize::VirtualData<T, VirtualScope<T, NamedComponent<T, NodeComponent<T, Base>>>> {
+        using Serialize::VirtualData<T, VirtualScope<T, NamedComponent<T, NodeComponent<T, Base>>>>::VirtualData;
 
         virtual std::string_view className() const override final
         {
@@ -25,6 +25,9 @@ namespace NodeGraph {
         virtual std::string_view name() const override
         {
             return className();
+        }
+        virtual std::unique_ptr<NodeBase> clone(NodeGraph& graph) const override {
+            return std::make_unique<T>(*static_cast<const T *>(this), graph);
         }
     };
 

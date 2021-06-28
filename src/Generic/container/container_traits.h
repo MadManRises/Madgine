@@ -1,7 +1,7 @@
 #pragma once
 
-#include "underlying_container.h"
 #include "../indextype.h"
+#include "underlying_container.h"
 
 DERIVE_FUNCTION(isReference)
 
@@ -11,6 +11,12 @@ template <typename It>
 struct Pib {
 
     Pib() = default;
+
+    Pib(It it, bool b)
+        : first(std::move(it))
+        , second(b)
+    {
+    }
 
     template <typename It2>
     Pib(std::pair<It2, bool> &&pib)
@@ -139,7 +145,7 @@ struct container_traits<std::vector<T>, void> {
     typedef typename container::iterator iterator;
     typedef typename container::const_iterator const_iterator;
     typedef typename container::reverse_iterator reverse_iterator;
-    typedef typename container::const_reverse_iterator const_reverse_iterator;    
+    typedef typename container::const_reverse_iterator const_reverse_iterator;
 
     typedef IndexType<size_t> handle;
     typedef IndexType<size_t> const_handle;
@@ -456,6 +462,98 @@ struct container_traits<std::array<T, Size>, void> {
         if (it == c.end())
             return {};
         return std::distance(c.begin(), it);
+    }
+
+    static iterator toIterator(container &c, const position_handle &handle)
+    {
+        return c.begin() + handle;
+    }
+
+    static const_iterator toIterator(const container &c, const const_position_handle &handle)
+    {
+        return c.begin() + handle;
+    }
+
+    static position_handle next(container &c, const position_handle &handle)
+    {
+        return handle + 1;
+    }
+
+    static position_handle prev(container &c, const position_handle &handle)
+    {
+        return handle - 1;
+    }
+};
+
+template <typename T>
+struct container_traits<std::deque<T>, void> {
+    static constexpr const bool sorted = false;
+    static constexpr const bool has_dependent_handle = true;
+    static constexpr const bool remove_invalidates_handles = true;
+    static constexpr const bool is_fixed_size = false;
+
+    typedef std::deque<T> container;
+    typedef typename container::iterator iterator;
+    typedef typename container::const_iterator const_iterator;
+    typedef typename container::reverse_iterator reverse_iterator;
+    typedef typename container::const_reverse_iterator const_reverse_iterator;
+
+    typedef IndexType<size_t> handle;
+    typedef IndexType<size_t> const_handle;
+    typedef IndexType<size_t> position_handle;
+    typedef IndexType<size_t> const_position_handle;
+    typedef typename container::value_type value_type;
+
+    typedef iterator emplace_return;
+
+    template <typename U>
+    using rebind_t = std::deque<U>;
+
+    template <typename... _Ty>
+    static emplace_return emplace(container &c, const const_iterator &where, _Ty &&... args)
+    {
+        return c.emplace(where, std::forward<_Ty>(args)...);
+    }
+
+    static bool was_emplace_successful(const emplace_return &)
+    {
+        return true;
+    }
+
+    static position_handle toPositionHandle(container &c, const iterator &it)
+    {
+        return std::distance(c.begin(), it);
+    }
+
+    static handle toHandle(container &c, const position_handle &handle)
+    {
+        return handle;
+    }
+
+    static handle toHandle(container &c, const iterator &it)
+    {
+        if (it == c.end())
+            return {};
+        return std::distance(c.begin(), it);
+    }
+
+    static void revalidateHandleAfterInsert(position_handle &handle, const container &c, const const_iterator &it)
+    {
+        size_t item = std::distance(c.begin(), it);
+        if (item <= handle)
+            ++handle;
+    }
+
+    static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const const_iterator &it, bool wasIn, size_t count = 1)
+    {
+        size_t pivot = std::distance(c.begin(), it);
+        if (wasIn) {
+            handle = pivot;
+        } else {
+            assert(handle < pivot || handle >= pivot + count);
+            if (handle > pivot)
+                handle -= count;
+        }
     }
 
     static iterator toIterator(container &c, const position_handle &handle)

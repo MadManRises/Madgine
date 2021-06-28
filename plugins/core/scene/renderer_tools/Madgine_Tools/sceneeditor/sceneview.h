@@ -14,6 +14,8 @@
 #include "Madgine/scene/entity/entitycomponentptr.h"
 #include "Madgine/scene/entity/components/transform.h"
 
+#include "imgui/imguiaddons.h"
+
 namespace Engine {
 namespace Tools {
 
@@ -33,15 +35,15 @@ namespace Tools {
 
         SceneEditor *mEditor;
 
-        bool mMouseDown[3] = { false, false, false };
-        bool mDragging[3] = { false, false, false };
-		bool mMouseClicked[3] = { false, false, false };
+        ImGui::InteractiveViewState mState;
         int mDraggedAxis;
         Ray mDragStartRay;
         Engine::Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> mDragTransform;
         Matrix4 mDragStoredMatrix;
         Vector3 mDragStoredPosition;
         Vector3 mDragRelMousePosition;
+
+        bool mAxisDragging = false;
 
 		Render::SceneRenderPass mSceneRenderer;
         GridPass mGridRenderer;

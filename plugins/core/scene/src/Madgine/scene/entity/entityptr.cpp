@@ -19,6 +19,21 @@ namespace Engine {
 namespace Scene {
     namespace Entity {
 
+        struct EntityPtr::ControlBlockDummy {
+
+            SceneManager::ControlBlock *operator->() const
+            {
+                return mBlock;
+            }
+
+             operator SceneManager::ControlBlock *() const
+            {
+                return mBlock;
+            }
+
+            SceneManager::ControlBlock *mBlock;
+        };
+
         static constexpr uintptr_t mask = 3 ^ static_cast<uintptr_t>(Serialize::UnitIdTag::SYNCABLE);
 
         EntityPtr::EntityPtr(const EntityPtr &other)
@@ -34,7 +49,7 @@ namespace Scene {
         }
 
         EntityPtr::EntityPtr(Entity *entity)
-            : mEntity(reinterpret_cast<uintptr_t>(ControlBlock<Entity>::fromPtr(entity)))
+            : mEntity(reinterpret_cast<uintptr_t>(SceneManager::ControlBlock::fromPtr(entity)))
         {
             if (mEntity) {
                 assert(!getBlock()->dead());
@@ -134,7 +149,7 @@ namespace Scene {
         }
 
         void EntityPtr::applySerializableMap(Serialize::SerializeInStream &in, bool success)
-        {            
+        {
             if (mEntity & static_cast<uintptr_t>(Serialize::UnitIdTag::SYNCABLE)) {
                 Entity *ptr = reinterpret_cast<Entity *>(mEntity);
                 Serialize::UnitHelper<Entity *>::applyMap(in, ptr, success);
@@ -147,9 +162,9 @@ namespace Scene {
             return mEntity & mask;
         }
 
-        ControlBlock<Entity> *EntityPtr::getBlock() const
+        typename EntityPtr::ControlBlockDummy EntityPtr::getBlock() const
         {
-            return reinterpret_cast<ControlBlock<Entity> *>(mEntity & ~mask);
+            return { reinterpret_cast<SceneManager::ControlBlock *>(mEntity & ~mask) };
         }
     }
 }

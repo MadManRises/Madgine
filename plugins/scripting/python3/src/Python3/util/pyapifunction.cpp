@@ -23,10 +23,10 @@ namespace Scripting {
                 fromPyObject(arguments.emplace_back(), PyTuple_GetItem(args, i));
             }
             
-            std::streambuf *buf = Python3Environment::unlock();
             ValueType retVal;
+            Py_BEGIN_ALLOW_THREADS;
             self->mFunction(retVal, arguments);
-            Python3Environment::lock(buf);
+            Py_END_ALLOW_THREADS;
 
             return toPyObject(retVal);
         }

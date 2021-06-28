@@ -14,12 +14,15 @@ namespace Scripting {
             Python3Environment(App::Application &app);
             ~Python3Environment();
 
-            void execute(const std::string_view &command);
+            virtual bool init() override;
+            virtual void finalize() override;
 
-            static void lock(std::streambuf *buf);
-            static std::streambuf *unlock();
+            void execute(std::string_view command);
 
-            size_t totalRefCount();
+            static PyGILState_STATE lock(std::streambuf *buf);
+            static std::streambuf *unlock(PyGILState_STATE state);
+
+            static size_t totalRefCount();
         };
 
     }

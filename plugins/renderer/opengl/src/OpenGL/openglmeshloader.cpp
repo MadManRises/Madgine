@@ -32,7 +32,7 @@ namespace Render {
 
     void OpenGLMeshLoader::generateImpl(OpenGLMeshData &data, const MeshData &mesh)
     {
-        data.mVAO = create;
+        data.mVAO = Render::create;
         data.mVAO.bind();
 
         data.mVertices = GL_ARRAY_BUFFER;

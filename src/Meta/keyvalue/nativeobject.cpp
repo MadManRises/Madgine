@@ -12,7 +12,7 @@ struct NativeObjectInstance : ObjectInstance {
     {
     }
 
-    virtual bool getValue(ValueType &retVal, const std::string_view &name) const override
+    virtual bool getValue(ValueType &retVal, std::string_view name) const override
     {
         auto it = mData.find(name);
         if (it == mData.end())
@@ -21,7 +21,7 @@ struct NativeObjectInstance : ObjectInstance {
         return true;
     }
 
-    virtual void setValue(const std::string_view &name, const ValueType &value) override
+    virtual void setValue(std::string_view name, const ValueType &value) override
     {
         mData[std::string{name}] = value;
     }

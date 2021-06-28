@@ -14,30 +14,81 @@
 
 #include "Meta/keyvalue/virtualscope.h"
 
+#include "Interfaces/filesystem/filewatcher.h"
 
 namespace Engine {
 namespace Resources {
 
     MADGINE_RESOURCES_EXPORT ResourceLoaderBase &getLoaderByIndex(size_t i);
+    MADGINE_RESOURCES_EXPORT void waitForIOThread();
+
+    template <typename Interface>
+    struct ResourceDataInfo {
+        ResourceDataInfo(typename Interface::ResourceType *res)
+            : mResource(res)
+        {
+        }
+
+        ResourceDataInfo(ResourceDataInfo &&other) noexcept
+            : mResource(other.mResource)
+            , mRefCount(other.mRefCount.exchange(0))
+        {
+        }
+
+        ResourceDataInfo &operator=(ResourceDataInfo &&other) noexcept
+        {
+            mResource = other.mResource;
+            mRefCount = other.mRefCount.exchange(0);
+            return *this;
+        }
+
+        typename Interface::ResourceType *resource() const
+        {
+            return mResource;
+        }
+
+        void incRef()
+        {
+            ++mRefCount;
+        }
+
+        bool decRef()
+        {
+            uint32_t oldCount = mRefCount--;
+            assert(oldCount > 0);
+            return oldCount > 1;
+        }
+
+    private:
+        typename Interface::ResourceType *mResource;
+        std::atomic<uint32_t> mRefCount = 0;
+    };
+
+    template <typename Loader>
+    struct ResourceData {
+
+        ResourceData(typename Loader::ResourceType *res)
+            : mInfo(res)
+        {
+        }
+
+        typename Loader::ResourceDataInfo mInfo;
+        typename Loader::Data mData;
+    };
 
     template <typename Loader>
     struct ResourceType : Loader::Interface::ResourceType {
 
         ResourceType(const std::string &name, const Filesystem::Path &path, typename Loader::Ctor ctor = {}, typename Loader::Dtor dtor = {})
             : Loader::Interface::ResourceType(name, path)
-            , mCtor(ctor ? std::move(ctor) : [](Loader *loader, typename Loader::Data &data, ResourceType *res) { return loader->loadImpl(data, res); })
-            , mDtor(dtor ? std::move(dtor) : [](Loader *loader, typename Loader::Data &data, ResourceType *res) { loader->unloadImpl(data, res); })
+            , mCtor(ctor ? std::move(ctor) : [](Loader *loader, typename Loader::Data &data, typename Loader::ResourceDataInfo &info, Filesystem::FileEventType event) { return TupleUnpacker::invoke(&Loader::loadImpl, loader, data, info, event); })
+            , mDtor(dtor ? std::move(dtor) : [](Loader *loader, typename Loader::Data &data, typename Loader::ResourceDataInfo &info) { loader->unloadImpl(data, info); })
         {
         }
 
         typename Loader::HandleType loadData()
         {
             return Loader::load(this);
-        }
-
-        void unloadData()
-        {
-            Loader::unload(this);
         }
 
         typename Loader::Data *dataPtr()
@@ -60,17 +111,15 @@ namespace Resources {
 
         struct ResourceType;
 
-        struct InfoBlock {
-            ResourceType *mResource;
-        };
+        using ResourceDataInfo = ResourceDataInfo<T>;
 
-        using DataContainer = typename replace<Container>::template type<std::pair<InfoBlock, Data>>;
+        using DataContainer = typename replace<Container>::template type<ResourceData<T>>;
 
         using HandleType = Handle<T, typename container_traits<DataContainer>::handle>;
         using OriginalHandleType = HandleType;
 
-        using Ctor = std::function<bool(T *, Data &, ResourceType *)>;
-        using Dtor = std::function<void(T *, Data &, ResourceType *)>;
+        using Ctor = std::function<bool(T *, Data &, ResourceDataInfo &, Filesystem::FileEventType event)>;
+        using Dtor = std::function<void(T *, Data &, ResourceDataInfo &)>;
 
         struct ResourceType : ResourceLoaderBase::ResourceType {
 
@@ -81,15 +130,34 @@ namespace Resources {
                 return T::load(this);
             }
 
-            void unloadData()
-            {
-                T::unload(this);
-            }
-
             using traits = container_traits<DataContainer>;
 
             typename Storage::template container_type<typename container_traits<DataContainer>::handle> mData;
         };
+
+        template <typename C>
+        static Ctor toCtor(C &&ctor)
+        {
+            if constexpr (std::is_same_v<std::remove_reference_t<C>, Ctor>) {
+                return std::forward<C>(ctor);
+            } else {
+                return [ctor { std::forward<C>(ctor) }](T *loader, Data &data, ResourceDataInfo &info, Filesystem::FileEventType event) mutable {
+                    return TupleUnpacker::invoke(ctor, loader, data, info, event);
+                };
+            }
+        }
+
+        template <typename D>
+        static Dtor toDtor(D &&dtor)
+        {
+            if constexpr (std::is_same_v<std::remove_reference_t<D>, Dtor>) {
+                return std::forward<D>(dtor);
+            } else {
+                return [dtor { std::forward<D>(dtor) }](T *loader, Data &data, ResourceDataInfo &info) mutable {
+                    return TupleUnpacker::invoke(dtor, loader, data, info);
+                };
+            }
+        }
 
         using Base::Base;
 
@@ -106,14 +174,17 @@ namespace Resources {
         using Base = _Base;
         using Data = _Data;
 
+        using ResourceDataInfo = typename Interface::ResourceDataInfo;
         using ResourceType = ResourceType<T>;
 
-        using DataContainer = typename replace<typename Base::Container>::template type<std::pair<ResourceType *, Data>>;
+        using DataContainer = typename replace<typename Base::Container>::template type<ResourceData<T>>;
+
+        static_assert(!container_traits<DataContainer>::remove_invalidates_handles);
 
         using HandleType = Handle<T, typename container_traits<DataContainer>::handle>;
 
-        using Ctor = std::function<bool(T *, Data &, ResourceType *)>;
-        using Dtor = std::function<void(T *, Data &, ResourceType *)>;
+        using Ctor = std::function<bool(T *, Data &, ResourceDataInfo &, Filesystem::FileEventType event)>;
+        using Dtor = std::function<void(T *, Data &, ResourceDataInfo &)>;
 
         using Base::Base;
 
@@ -122,7 +193,7 @@ namespace Resources {
             return static_cast<T &>(getLoaderByIndex(component_index<T>()));
         }
 
-        static HandleType load(const std::string_view &name, bool persistent = false, T *loader = nullptr)
+        static HandleType load(std::string_view name, T *loader = nullptr)
         {
             if (name.empty())
                 return {};
@@ -133,13 +204,15 @@ namespace Resources {
                 LOG_ERROR("No resource '" << name << "' available!");
                 return {};
             }
-            return load(res, persistent, loader);
+            return load(res, Filesystem::FileEventType::FILE_CREATED, loader);
         }
 
-        static ResourceType *get(const std::string_view &name, T *loader = nullptr)
+        static ResourceType *get(std::string_view name, T *loader = nullptr)
         {
             if (!loader)
                 loader = &getSingleton();
+
+            waitForIOThread();
 
             auto it = loader->mResources.find(name);
             if (it != loader->mResources.end())
@@ -148,85 +221,117 @@ namespace Resources {
                 return nullptr;
         }
 
-        static ResourceType *get(const HandleType &handle, T *loader = nullptr)
+        static ResourceDataInfo *get(const HandleType &handle, T *loader = nullptr)
         {
             if (!handle)
                 return nullptr;
             if constexpr (container_traits<DataContainer>::has_dependent_handle) {
                 if (!loader)
                     loader = &getSingleton();
-                return (*loader->mData)[handle.mData].first;
+                return &(*loader->mData)[handle.mData].mInfo;
             } else {
-                return handle.mData->first;
+                return &handle.mData->mInfo;
             }
         }
 
-        static ResourceType *getOrCreateManual(const std::string_view &name, const Filesystem::Path &path = {}, Ctor ctor = {}, Dtor dtor = {}, T *loader = nullptr)
+        template <typename C = Ctor, typename D = Dtor>
+        static ResourceType *getOrCreateManual(std::string_view name, const Filesystem::Path &path = {}, C &&ctor = {}, D &&dtor = {}, T *loader = nullptr)
         {
             if (!loader)
                 loader = &getSingleton();
-            return &loader->mResources.try_emplace(std::string { name }, std::string { name }, path, ctor, dtor).first->second;
+            if (name == ResourceBase::sUnnamed) {
+                return new ResourceType(ResourceBase::sUnnamed, path, Interface::toCtor(std::forward<C>(ctor)),
+                    Interface::toDtor(std::forward<D>(dtor)));
+            } else {
+                return &loader->mResources.try_emplace(
+                                              std::string { name }, std::string { name }, path, Interface::toCtor(std::forward<C>(ctor)),
+                                              Interface::toDtor(std::forward<D>(dtor)))
+                            .first->second;
+            }
         }
 
-        static HandleType load(ResourceType *resource, bool persistent = false, T *loader = nullptr)
+        static HandleType create(ResourceType *resource, Filesystem::FileEventType event = Filesystem::FileEventType::FILE_CREATED, T *loader = nullptr)
         {
             HandleType handle { (typename container_traits<DataContainer>::handle) * resource->mData };
-            if (!handle) {
-                if (!loader)
-                    loader = &getSingleton();
-                typename container_traits<DataContainer>::iterator it = container_traits<DataContainer>::emplace(*loader->mData, loader->mData->end(), std::piecewise_construct, std::make_tuple(resource), std::make_tuple());
-                *resource->mHolder = container_traits<DataContainer>::toPositionHandle(*loader->mData, it);
-                handle = container_traits<DataContainer>::toHandle(*loader->mData, *resource->mHolder);
-                *resource->mData = (decltype(*resource->mData))handle.mData;
-                resource->mCtor(loader, getData(handle, loader), resource);
+            assert(event == Filesystem::FileEventType::FILE_CREATED || handle);
+            if (!handle || event != Filesystem::FileEventType::FILE_CREATED) {
+                if (event == Filesystem::FileEventType::FILE_CREATED || !loader->mSettings.mInplaceReload) {
+                    if (!loader)
+                        loader = &getSingleton();
+                    typename container_traits<DataContainer>::iterator it = container_traits<DataContainer>::emplace(*loader->mData, loader->mData->end(), resource);
+                    *resource->mHolder = container_traits<DataContainer>::toPositionHandle(*loader->mData, it);
+                    handle = container_traits<DataContainer>::toHandle(*loader->mData, *resource->mHolder);
+                    *resource->mData = (decltype(*resource->mData))handle.mData;
+                }
             }
             return handle;
         }
 
-        static void unload(ResourceType *resource, T *loader = nullptr)
+        static HandleType load(ResourceType *resource, Filesystem::FileEventType event = Filesystem::FileEventType::FILE_CREATED, T *loader = nullptr)
         {
             HandleType handle { (typename container_traits<DataContainer>::handle) * resource->mData };
-            if (handle) {
+
+            if (!handle || event != Filesystem::FileEventType::FILE_CREATED) {
                 if (!loader)
                     loader = &getSingleton();
-                resource->mDtor(loader, getData(handle, loader), resource);
+                handle = create(resource, event, loader);
+                resource->mCtor(loader, *getDataPtr(handle, loader), *get(handle, loader), event);
+            }
+
+            return handle;
+        }
+
+        static void unload(const HandleType &handle, T *loader = nullptr)
+        {            
+            assert(handle);
+            if (!handle.info()->decRef()) {
+                if (!loader)
+                    loader = &getSingleton();
+                ResourceType *resource = handle.resource();
+                resource->mDtor(loader, *getDataPtr(handle, loader), *get(handle, loader));
+
+                typename container_traits<DataContainer>::iterator it = container_traits<DataContainer>::toIterator(*loader->mData, *resource->mHolder);
+                loader->mData->erase(it);
+
+                //TODO: Check for multi-storage data for unnamed resources
+                if (resource->name() == ResourceBase::sUnnamed)
+                    delete resource;
             }
         }
 
-        static HandleType loadManual(const std::string_view &name, const Filesystem::Path &path = {}, Ctor ctor = {}, Dtor dtor = {}, T *loader = nullptr)
+        template <typename C = Ctor, typename D = Dtor>
+        static HandleType loadManual(std::string_view name, const Filesystem::Path &path = {}, C &&ctor = {}, D &&dtor = {}, T *loader = nullptr)
         {
             if (!loader)
                 loader = &getSingleton();
-            return load(getOrCreateManual(name, path, ctor, dtor, loader), true, loader);
+            return load(getOrCreateManual(
+                            name, path, std::forward<C>(ctor), std::forward<D>(dtor),
+                            loader),
+                Filesystem::FileEventType::FILE_CREATED, loader);
         }
 
-        static Data &getData(const HandleType &handle, T *loader = nullptr)
-        {
-            if constexpr (container_traits<DataContainer>::has_dependent_handle) {
-                if (!loader)
-                    loader = &getSingleton();
-                return (*loader->mData)[handle.mData].second;
-            } else {
-                return handle.mData->second;
-            }
-        }
-
-        static Data *getDataPtr(ResourceType *resource, T *loader = nullptr)
+        /*static Data *getDataPtr(ResourceType *resource, T *loader = nullptr)
         {
             HandleType handle { (typename container_traits<DataContainer>::handle) * resource->mData };
             return getDataPtr(handle, loader);
-        }
+        }*/
 
         static Data *getDataPtr(const HandleType &handle, T *loader = nullptr)
         {
             if (!handle)
                 return nullptr;
-            return &getData(handle, loader);
+            if constexpr (container_traits<DataContainer>::has_dependent_handle) {
+                if (!loader)
+                    loader = &getSingleton();
+                return &(*loader->mData)[handle.mData].mData;
+            } else {
+                return &handle.mData->mData;
+            }
         }
 
         //bool load(Data &data, ResourceType *res) = 0;
         //void unload(Data &data) = 0;
-        std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path, const std::string_view &name = {}) override
+        std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path, std::string_view name = {}) override
         {
             std::string actualName { name.empty() ? path.stem() : name };
             auto pib = mResources.try_emplace(actualName, actualName, path);
@@ -235,6 +340,15 @@ namespace Resources {
                 this->resourceAdded(&pib.first->second);
 
             return std::make_pair(&pib.first->second, pib.second);
+        }
+
+        void updateResourceData(ResourceBase *resource) override
+        {
+            if (static_cast<T *>(this)->mSettings.mAutoReload) {
+                ResourceType *res = static_cast<ResourceType *>(resource);
+                if (*res->mData)
+                    load(res, Filesystem::FileEventType::FILE_MODIFIED);
+            }
         }
 
         typename std::map<std::string, ResourceType>::iterator begin()
@@ -264,6 +378,7 @@ namespace Resources {
         }
 
         std::map<std::string, ResourceType, std::less<>> mResources;
+        std::vector<ResourceType> mUnnamedResources;
 
         typename Base::Storage::template container_type<DataContainer> mData;
     };
@@ -281,59 +396,57 @@ namespace Resources {
 
         using ResourceLoaderVirtualBase<T, ResourceLoaderInterface<T, _Data, _Container, _Storage>>::ResourceLoaderVirtualBase;
 
-        static typename Base::HandleType load(const std::string_view &name, bool persistent = false, T *loader = nullptr)
+        static typename Base::HandleType load(std::string_view name, T *loader = nullptr)
         {
             if (!loader)
                 loader = &Base::getSingleton();
-            return loader->loadVImpl(name, persistent);
+            return loader->loadVImpl(name);
         }
 
-        static typename Base::HandleType load(typename Base::ResourceType *resource, bool persistent = false, T *loader = nullptr)
+        static typename Base::HandleType load(typename Base::ResourceType *resource, T *loader = nullptr)
         {
             if (!loader)
                 loader = &Base::getSingleton();
-            return loader->loadVImpl(resource, persistent);
+            return loader->loadVImpl(resource);
         }
 
-        static void unload(typename Base::ResourceType *resource, T *loader = nullptr)
+        static void unload(const typename Base::HandleType &handle, T *loader = nullptr)
         {
             if (!loader)
                 loader = &Base::getSingleton();
-            return loader->unloadVImpl(resource);
+            return loader->unloadVImpl(handle);
         }
 
-        static typename Base::HandleType loadManual(const std::string_view &name, const Filesystem::Path &path = {}, typename Base::Ctor ctor = {}, typename Base::Dtor dtor = {}, T *loader = nullptr)
+        template <typename C = typename Base::Ctor, typename D = typename Base::Dtor>
+        static typename Base::HandleType loadManual(std::string_view name, const Filesystem::Path &path = {}, C &&ctor = {}, D &&dtor = {}, T *loader = nullptr)
         {
             if (!loader)
                 loader = &Base::getSingleton();
-            return loader->loadManualVImpl(name, path, std::move(ctor), std::move(dtor));
+            return loader->loadManualVImpl(
+                name, path, Base::toCtor(std::forward<C>(ctor)),
+                Base::toDtor(std::forward<D>(dtor)));
         }
 
-        static typename Base::Data &getData(const typename Base::HandleType &handle, T *loader = nullptr)
-        {
-            if constexpr (container_traits<typename Base::DataContainer>::has_dependent_handle) {
-                if (!loader)
-                    loader = &Base::getSingleton();
-                return loader->getDataVImpl(handle);
-            } else {
-                return handle.mData->second;
-            }
-        }
-
-        static typename Base::Data *getDataPtr(typename Base::ResourceType *resource, T *loader = nullptr)
+        /*static typename Base::Data *getDataPtr(typename Base::ResourceType *resource, T *loader = nullptr)
         {
             typename Base::HandleType handle { (typename container_traits<typename Base::DataContainer>::handle) * resource->mData };
             return getDataPtr(handle, loader);
-        }
+        }*/
 
         static typename Base::Data *getDataPtr(const typename Base::HandleType &handle, T *loader = nullptr)
         {
             if (!handle)
                 return nullptr;
-            return &getData(handle, loader);
+            if constexpr (container_traits<typename Base::DataContainer>::has_dependent_handle) {
+                if (!loader)
+                    loader = &Base::getSingleton();
+                return loader->getDataPtrVImpl(handle);
+            } else {
+                return &handle.mData->mData;
+            }
         }
 
-        static typename Base::ResourceType *get(const typename Base::HandleType &handle, T *loader = nullptr)
+        static typename Base::ResourceDataInfo *get(const typename Base::HandleType &handle, T *loader = nullptr)
         {
             if (!handle)
                 return nullptr;
@@ -342,7 +455,7 @@ namespace Resources {
                     loader = &Base::getSingleton();
                 return loader->getVImpl(handle);
             } else {
-                return handle.mData->first.mResource;
+                return &handle.mData->mInfo;
             }
         }
 
@@ -353,12 +466,12 @@ namespace Resources {
             return result;
         }
 
-        virtual typename Base::HandleType loadManualVImpl(const std::string_view &name, const Filesystem::Path &path = {}, typename Base::Ctor ctor = {}, typename Base::Dtor dtor = {}) = 0;
-        virtual typename Base::HandleType loadVImpl(const std::string_view &name, bool persistent = false) = 0;
-        virtual typename Base::HandleType loadVImpl(typename Base::ResourceType *resource, bool persistent = false) = 0;
-        virtual void unloadVImpl(typename Base::ResourceType *resource) = 0;
-        virtual typename Base::Data &getDataVImpl(const typename Base::HandleType &handle) = 0;
-        virtual typename Base::ResourceType *getVImpl(const typename Base::HandleType &handle) = 0;
+        virtual typename Base::HandleType loadManualVImpl(std::string_view name, const Filesystem::Path &path = {}, typename Base::Ctor ctor = {}, typename Base::Dtor dtor = {}) = 0;
+        virtual typename Base::HandleType loadVImpl(std::string_view name) = 0;
+        virtual typename Base::HandleType loadVImpl(typename Base::ResourceType *resource) = 0;
+        virtual void unloadVImpl(const typename Base::HandleType &handle) = 0;
+        virtual typename Base::Data *getDataPtrVImpl(const typename Base::HandleType &handle) = 0;
+        virtual typename Base::ResourceDataInfo *getVImpl(const typename Base::HandleType &handle) = 0;
     };
 
     template <typename T, typename _Data, typename _Base>
@@ -371,27 +484,27 @@ namespace Resources {
 
         using Self::Self;
 
-        virtual typename Base::OriginalHandleType loadManualVImpl(const std::string_view &name, const Filesystem::Path &path = {}, typename Base::Ctor ctor = {}, typename Base::Dtor dtor = {}) override
+        virtual typename Base::OriginalHandleType loadManualVImpl(std::string_view name, const Filesystem::Path &path = {}, typename Base::Ctor ctor = {}, typename Base::Dtor dtor = {}) override
         {
-            return Self::loadManual(name, path, ctor, dtor, static_cast<T *>(this));
+            return Self::loadManual(name, path, std::move(ctor), std::move(dtor), static_cast<T *>(this));
         }
-        virtual typename Base::OriginalHandleType loadVImpl(const std::string_view &name, bool persistent = false) override
+        virtual typename Base::OriginalHandleType loadVImpl(std::string_view name) override
         {
-            return Self::load(name, persistent, static_cast<T *>(this));
+            return Self::load(name, static_cast<T *>(this));
         }
-        virtual typename Base::OriginalHandleType loadVImpl(typename Base::ResourceType *resource, bool persistent = false) override
+        virtual typename Base::OriginalHandleType loadVImpl(typename Base::ResourceType *resource) override
         {
-            return Self::load(static_cast<typename Self::ResourceType *>(resource), persistent, static_cast<T *>(this));
+            return Self::load(static_cast<typename Self::ResourceType *>(resource), Filesystem::FileEventType::FILE_CREATED, static_cast<T *>(this));
         }
-        virtual void unloadVImpl(typename Base::ResourceType *resource) override
+        virtual void unloadVImpl(const typename Base::OriginalHandleType &handle) override
         {
-            Self::unload(static_cast<typename Self::ResourceType *>(resource), static_cast<T *>(this));
+            Self::unload(handle, static_cast<T *>(this));
         }
-        virtual typename Base::Data &getDataVImpl(const typename Base::OriginalHandleType &handle) override
+        virtual typename Base::Data *getDataPtrVImpl(const typename Base::OriginalHandleType &handle) override
         {
-            return Self::getData(handle, static_cast<T *>(this));
+            return Self::getDataPtr(handle, static_cast<T *>(this));
         }
-        virtual typename Base::ResourceType *getVImpl(const typename Base::OriginalHandleType &handle) override
+        virtual typename Base::ResourceDataInfo *getVImpl(const typename Base::OriginalHandleType &handle) override
         {
             return Self::get(handle, static_cast<T *>(this));
         }

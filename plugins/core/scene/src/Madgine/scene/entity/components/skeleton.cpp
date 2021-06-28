@@ -34,7 +34,7 @@ namespace Scene {
             return mSkeleton.name();
         }
 
-        void Skeleton::setName(const std::string_view &name)
+        void Skeleton::setName(std::string_view name)
         {
             mSkeleton.load(name);
             resetMatrices();
@@ -42,7 +42,7 @@ namespace Scene {
 
         void Skeleton::set(Render::SkeletonLoader::HandleType handle)
         {
-            mSkeleton = handle;
+            mSkeleton = std::move(handle);
             resetMatrices();
         }
 

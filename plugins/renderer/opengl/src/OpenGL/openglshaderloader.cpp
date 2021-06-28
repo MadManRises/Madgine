@@ -30,9 +30,9 @@ namespace Render {
     {
     }
 
-    bool OpenGLShaderLoader::loadImpl(OpenGLShader &shader, ResourceType *res)
+    bool OpenGLShaderLoader::loadImpl(OpenGLShader &shader, ResourceDataInfo &info)
     {
-        std::string_view filename = res->path().stem();
+        std::string_view filename = info.resource()->path().stem();
 
         ShaderType type;
         if (StringUtil::endsWith(filename, "_VS")) {
@@ -42,7 +42,7 @@ namespace Render {
         } else
             std::terminate();
 
-        std::string source = res->readAsText();
+        std::string source = info.resource()->readAsText();
 
         const char *cSource = source.c_str();
 
@@ -68,7 +68,7 @@ namespace Render {
         return true;
     }
 
-    void OpenGLShaderLoader::unloadImpl(OpenGLShader &shader, ResourceType *res)
+    void OpenGLShaderLoader::unloadImpl(OpenGLShader &shader, ResourceDataInfo &info)
     {
         shader.reset();
     }

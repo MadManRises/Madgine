@@ -17,16 +17,16 @@ namespace Scripting {
         {
             size_t argCount = PyTuple_Size(args);
             ArgumentList arguments;
-            arguments.reserve(argCount);
+            arguments.resize(argCount);
 
             for (size_t i = 0; i < argCount; ++i) {
-                fromPyObject(arguments.emplace_back(), PyTuple_GetItem(args, i));
+                fromPyObject(arguments[i], PyTuple_GetItem(args, i));
             }
             
-            std::streambuf *buf = Python3Environment::unlock();
             ValueType retVal;
+            Py_BEGIN_ALLOW_THREADS
             self->mFunction(retVal, arguments);
-            Python3Environment::lock(buf);
+            Py_END_ALLOW_THREADS
 
             return toPyObject(retVal);
         }

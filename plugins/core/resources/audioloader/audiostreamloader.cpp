@@ -21,12 +21,12 @@ namespace Audio {
     {
     }
 
-    bool AudioStreamLoader::loadImpl(AudioStream &data, ResourceType *res)
+    bool AudioStreamLoader::loadImpl(AudioStream &data, ResourceDataInfo &info)
     {
         return true;
     }
 
-    void AudioStreamLoader::unloadImpl(AudioStream &data, ResourceType *res)
+    void AudioStreamLoader::unloadImpl(AudioStream &data, ResourceDataInfo &info)
     {
     }
 

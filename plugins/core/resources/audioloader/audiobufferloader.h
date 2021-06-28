@@ -17,8 +17,8 @@ namespace Audio {
 
         AudioBufferLoader();
 
-        bool loadImpl(AudioBuffer &data, ResourceType *res);
-        void unloadImpl(AudioBuffer &data, ResourceType *res);
+        bool loadImpl(AudioBuffer &data, ResourceDataInfo &info);
+        void unloadImpl(AudioBuffer &data, ResourceDataInfo &info);
     };
 
 }

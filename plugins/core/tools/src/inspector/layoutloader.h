@@ -26,8 +26,8 @@ namespace Tools {
     struct LayoutLoader : Resources::ResourceLoader<LayoutLoader, XMLDocument> {
         LayoutLoader();
 
-        bool loadImpl(Data &data, ResourceType *res);
-        void unloadImpl(Data &data, ResourceType *res);
+        bool loadImpl(Data &data, ResourceDataInfo &info);
+        void unloadImpl(Data &data, ResourceDataInfo &info);
     };
 
 }

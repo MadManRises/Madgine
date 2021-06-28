@@ -5,13 +5,16 @@ namespace Engine {
 
 struct META_EXPORT ObjectPtr {
 
-    ObjectPtr();
+    ObjectPtr() = default;
+    ObjectPtr(std::monostate);
     ObjectPtr(const std::shared_ptr<ObjectInstance> &instance);
 
-    void setValue(const std::string_view &name, const ValueType &value);
-    bool getValue(ValueType &retVal, const std::string_view &name) const;
+    void setValue(std::string_view name, const ValueType &value);
+    bool getValue(ValueType &retVal, std::string_view name) const;
 
     void reset();
+    ObjectInstance *get();
+    const ObjectInstance *get() const;
 
     explicit operator bool() const;
 

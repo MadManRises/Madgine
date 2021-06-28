@@ -71,13 +71,13 @@ METATABLE_END(Engine::Resources::ImageLoader::ResourceType)
         {
         }
 
-        bool ImageLoader::loadImpl(ImageData &data, ResourceType *res)
+        bool ImageLoader::loadImpl(ImageData &data, ResourceDataInfo &info)
         {
-            data = { res->readAsBlob() };
+            data = { info.resource()->readAsBlob() };
             return true;
         }
 
-        void ImageLoader::unloadImpl(ImageData &data, ResourceType *res)
+        void ImageLoader::unloadImpl(ImageData &data, ResourceDataInfo &info)
         {
             data.clear();
         }

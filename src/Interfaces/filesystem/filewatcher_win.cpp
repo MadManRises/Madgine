@@ -6,6 +6,8 @@
 
 #    include "filewatcher.h"
 
+#    include "Generic/coroutines/generator.h"
+
 #    define NOMINMAX
 #    include <Windows.h>
 
@@ -14,15 +16,114 @@ namespace Filesystem {
 
     static std::mutex sFilewatcherMutex;
 
+    struct SCOPED_HANDLE {
+        SCOPED_HANDLE(HANDLE handle)
+            : mHandle(handle)
+        {
+        }
+
+        ~SCOPED_HANDLE()
+        {
+            CloseHandle(mHandle);
+        }
+
+        operator HANDLE() const
+        {
+            return mHandle;
+        }
+
+        HANDLE mHandle;
+    };
+
+    PFILE_NOTIFY_INFORMATION bump(PFILE_NOTIFY_INFORMATION p)
+    {
+        return p->NextEntryOffset == 0 ? nullptr : reinterpret_cast<PFILE_NOTIFY_INFORMATION>(reinterpret_cast<char *>(p) + p->NextEntryOffset);
+    }
+
+    Generator<std::vector<FileEvent>> fileWatch(const Path &path)
+    {
+
+        std::vector<FileEvent> result;
+
+        SCOPED_HANDLE dir = CreateFile(path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED, NULL);
+        SCOPED_HANDLE event = CreateEvent(NULL, true, false, path.c_str());
+        assert(event);
+
+        OVERLAPPED overlapped;
+        overlapped.hEvent = event;
+
+        FILE_NOTIFY_INFORMATION info[50];
+
+        while (true) {
+
+            ResetEvent(event);
+
+            bool b = ReadDirectoryChangesW(dir, info, sizeof(info), true, FILE_NOTIFY_CHANGE_LAST_WRITE | FILE_NOTIFY_CHANGE_FILE_NAME, NULL, &overlapped, NULL);
+            if (!b) {
+                LOG_ERROR("Error: " << GetLastError());
+                std::terminate();
+            }
+            DWORD bytes;
+            while (!GetOverlappedResult(dir, &overlapped, &bytes, false)) {
+                auto error = GetLastError();
+                switch (error) {
+                case ERROR_IO_INCOMPLETE:
+                    co_yield result;
+                    break;
+                default:
+                    LOG_ERROR("Error: " << error);
+                    std::terminate();
+                }
+            }
+            assert(bytes);
+            PFILE_NOTIFY_INFORMATION pInfo = info;
+            while (pInfo) {
+                FileEvent &event = result.emplace_back();
+
+                std::wstring ws(pInfo->FileName, pInfo->FileNameLength / 2);
+                event.mPath = path / std::string { ws.begin(), ws.end() };
+
+                switch (pInfo->Action) {
+                case FILE_ACTION_ADDED:
+                    event.mType = FileEventType::FILE_CREATED;
+                    break;
+                case FILE_ACTION_REMOVED:
+                    event.mType = FileEventType::FILE_DELETED;
+                    break;
+                case FILE_ACTION_MODIFIED:
+                    event.mType = FileEventType::FILE_MODIFIED;
+                    break;
+                case FILE_ACTION_RENAMED_OLD_NAME:
+                    event.mType = FileEventType::FILE_RENAMED;
+                    event.mOldPath = event.mPath;
+                    pInfo = bump(pInfo);
+                    if (!pInfo)
+                        std::terminate();
+                    if (pInfo->Action != FILE_ACTION_RENAMED_NEW_NAME)
+                        std::terminate();
+                    ws = { pInfo->FileName, pInfo->FileNameLength / 2 };
+                    event.mPath = path / std::string { ws.begin(), ws.end() };
+                    break;
+                case FILE_ACTION_RENAMED_NEW_NAME:
+                    throw 0;
+                default:
+                    std::terminate();
+                }
+
+                pInfo = bump(pInfo);
+            }
+            co_yield result;
+            result.clear();
+        }
+    }
+
     FileWatcher::FileWatcher()
     {
     }
 
     FileWatcher::~FileWatcher()
     {
-        for (const std::pair<const Path, uintptr_t> &handle : mWatches) {
-            CloseHandle((HANDLE)handle.second);
-        }
+        clear();
     }
 
     void FileWatcher::addWatch(const Path &path)
@@ -30,10 +131,7 @@ namespace Filesystem {
         assert(isDir(path));
         auto pib = mWatches.try_emplace(path, 0);
         if (pib.second) {
-            HANDLE dir = CreateFile(path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
-            if (!dir)
-                throw 0;
-            pib.first->second = (uintptr_t)dir;
+            pib.first->second = reinterpret_cast<uintptr_t>(fileWatch(pib.first->first).release());
         }
     }
 
@@ -41,14 +139,17 @@ namespace Filesystem {
     {
         auto it = mWatches.find(path);
         if (it != mWatches.end()) {
-            CloseHandle((HANDLE)it->second);
+            Generator<std::vector<FileEvent>>::fromAddress(reinterpret_cast<void *>(it->second)).reset();
             mWatches.erase(it);
         }
     }
 
-    PFILE_NOTIFY_INFORMATION bump(PFILE_NOTIFY_INFORMATION p)
+    void FileWatcher::clear()
     {
-        return p->NextEntryOffset == 0 ? nullptr : reinterpret_cast<PFILE_NOTIFY_INFORMATION>(reinterpret_cast<char *>(p) + p->NextEntryOffset);
+        for (const std::pair<const Path, uintptr_t> &handle : mWatches) {
+            Generator<std::vector<FileEvent>>::fromAddress(reinterpret_cast<void *>(handle.second)).reset();
+        }
+        mWatches.clear();
     }
 
     std::vector<FileEvent> FileWatcher::fetchChanges()
@@ -63,50 +164,11 @@ namespace Filesystem {
 
         std::vector<FileEvent> result;
         for (const std::pair<const Path, uintptr_t> &watch : mWatches) {
-            FILE_NOTIFY_INFORMATION info[10];
-            DWORD bytes;
-            bool b = ReadDirectoryChangesW((HANDLE)watch.second, info, sizeof(info), true, FILE_NOTIFY_CHANGE_LAST_WRITE, &bytes, NULL, NULL);
-            if (!b) {
-                LOG_ERROR("Error: " << GetLastError());
-                std::terminate();
-            }
-            if (bytes) {
-                PFILE_NOTIFY_INFORMATION pInfo = info;
-                while (pInfo) {
-                    FileEvent &event = result.emplace_back();
-
-                    std::wstring ws(pInfo->FileName, pInfo->FileNameLength / 2);
-                    event.mPath = watch.first / std::string { ws.begin(), ws.end() };
-
-                    switch (pInfo->Action) {
-                    case FILE_ACTION_ADDED:
-                        event.mType = FileEventType::FILE_CREATED;
-                        break;
-                    case FILE_ACTION_REMOVED:
-                        event.mType = FileEventType::FILE_DELETED;
-                        break;
-                    case FILE_ACTION_MODIFIED:
-                        event.mType = FileEventType::FILE_MODIFIED;
-                        break;
-                    case FILE_ACTION_RENAMED_OLD_NAME:
-                        event.mOldPath = event.mPath;
-                        pInfo = bump(pInfo);
-                        if (!pInfo)
-                            std::terminate();
-                        if (pInfo->Action != FILE_ACTION_RENAMED_NEW_NAME)
-                            std::terminate();
-                        ws = { pInfo->FileName, pInfo->FileNameLength / 2 };
-                        event.mPath = watch.first / std::string { ws.begin(), ws.end() };
-                        break;
-                    case FILE_ACTION_RENAMED_NEW_NAME:
-                        throw 0;
-                    default:
-                        std::terminate();
-                    }
-
-                    pInfo = bump(pInfo);
-                }
-            }
+            Generator<std::vector<FileEvent>> gen = Generator<std::vector<FileEvent>>::fromAddress(reinterpret_cast<void *>(watch.second));
+            bool going = gen.next();
+            const std::vector<FileEvent> &events = gen.get();
+            std::copy(events.begin(), events.end(), std::back_inserter(result));
+            gen.release();
         }
         return result;
     }
