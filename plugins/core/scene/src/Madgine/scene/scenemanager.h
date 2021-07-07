@@ -9,8 +9,8 @@
 
 #include "Madgine/app/globalapibase.h"
 #include "Madgine/app/globalapicollector.h"
-#include "madgineobject/madgineobjectobserver.h"
 #include "Meta/serialize/container/noparent.h"
+#include "madgineobject/madgineobjectobserver.h"
 
 #include "Modules/threading/datamutex.h"
 
@@ -31,6 +31,8 @@
 
 #include "Generic/container/concatIt.h"
 
+#include "Meta/math/vector3.h"
+
 namespace Engine {
 namespace Scene {
     struct MADGINE_SCENE_EXPORT SceneManager : Serialize::TopLevelUnit<SceneManager>,
@@ -44,7 +46,7 @@ namespace Scene {
         void update();
 
         Future<Entity::EntityPtr> createEntity(const std::string &behavior = "", const std::string &name = "",
-            const std::function<void(Entity::Entity&)> &init = {});
+            const std::function<void(Entity::Entity &)> &init = {});
         Entity::EntityPtr createLocalEntity(const std::string &behavior = "", const std::string &name = "");
         Entity::EntityPtr findEntity(const std::string &name);
         void remove(Entity::Entity *e);
@@ -98,6 +100,11 @@ namespace Scene {
         virtual bool init() final;
         virtual void finalize() final;
 
+    public:
+        OFFSET_CONTAINER(mSceneComponents, SceneComponentContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, MadgineObjectObserver, std::true_type>>);
+
+        ////////////////////////////////////////////// ECS
+
     private:
         std::string generateUniqueName();
 
@@ -106,23 +113,12 @@ namespace Scene {
         std::tuple<SceneManager &, bool, std::string> createEntityData(const std::string &name, bool local);
         std::tuple<std::string> storeEntityCreationData(const Entity::Entity &entity) const;
 
-    public:
-        OFFSET_CONTAINER(mSceneComponents, SceneComponentContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, MadgineObjectObserver, std::true_type>>);
-
     private:
         Entity::EntityComponentListContainer<std::vector<Placeholder<0>>> mEntityComponentLists;
 
         using EntityContainer = RefcountedContainer<std::deque<Entity::Entity>>;
-        SYNCABLE_CONTAINER(mEntities, RefcountedContainer<std::deque<Entity::Entity>>, Threading::SignalFunctor<const EntityContainer::iterator &, int>);
+        SYNCABLE_CONTAINER(mEntities, EntityContainer, Threading::SignalFunctor<const EntityContainer::iterator &, int>);
         EntityContainer mLocalEntities;
-
-        Threading::DataMutex mMutex;
-
-        std::chrono::steady_clock::time_point mLastFrame;
-
-        size_t mItemCount = 0;
-
-        std::atomic<size_t> mPauseStack = 0;
 
         struct EntityHelper {
             Entity::EntityPtr operator()(Entity::Entity &ref)
@@ -135,9 +131,22 @@ namespace Scene {
         using ControlBlock = typename EntityContainer::ControlBlock;
 
         decltype(auto) entities()
-        {            
+        {
             return transformIt<EntityHelper>(concatIt(mEntities, mLocalEntities));
         }
+
+        ////////////////////////////////////////// ECS End
+
+    private:
+        Threading::DataMutex mMutex;
+
+        std::chrono::steady_clock::time_point mLastFrame;
+
+        std::atomic<size_t> mPauseStack = 0;
+
+    public:
+        Vector3 mAmbientLightColor = { 1.0f, 1.0f, 1.0f };
+        NormalizedVector3 mAmbientLightDirection = { -0.0f, -1.0f, 1.5f };
     };
 
 }

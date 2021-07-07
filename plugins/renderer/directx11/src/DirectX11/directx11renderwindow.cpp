@@ -159,6 +159,11 @@ namespace Render {
         return nullptr;
     }
 
+    TextureHandle DirectX11RenderWindow::depthTexture() const
+    {
+        return 0;
+    }
+
     Vector2i DirectX11RenderWindow::size() const
     {
         InterfacesVector size = mWindow->renderSize();

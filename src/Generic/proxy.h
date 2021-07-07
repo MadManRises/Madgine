@@ -25,6 +25,12 @@ struct Proxy {
         return *this;
     }
 
+    Proxy<T, simplifyPointer> &operator=(T &&t)
+    {
+        mData = std::forward<T>(t);
+        return *this;
+    }
+
 private:
     T mData;
 };

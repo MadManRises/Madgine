@@ -1,0 +1,78 @@
+cbuffer PerApplication : register(b0)
+{
+    matrix p;
+}
+
+cbuffer PerFrame : register(b1)
+{   
+    matrix v;   
+}
+
+cbuffer PerObject : register(b2)
+{
+    matrix m;
+
+	bool hasTexture;
+	bool hasDistanceField;	
+}
+
+struct AppData {
+#ifdef HAS_POSITION0
+    float3 aPos : POSITION0;
+#endif
+#ifdef HAS_POSITION1
+    float2 aPos2 : POSITION1;
+#endif
+#ifdef HAS_COLOR0
+    float4 aColor : COLOR;
+#endif
+#ifdef HAS_NORMAL0
+    float3 aNormal : NORMAL;
+#endif
+#ifdef HAS_TEXCOORD0
+    float2 aUV : TEXCOORD;
+#endif
+};
+
+struct VertexShaderOutput {
+    float4 position : SV_POSITION;
+    float4 color : COLOR;
+    float4 worldPos : POSITION;
+    float3 normal : NORMAL;
+    float2 uv : TEXCOORD0;
+};
+
+VertexShaderOutput main(AppData IN)
+{
+    VertexShaderOutput OUT;
+
+#ifdef HAS_POSITION1
+    float2 aPos2 = IN.aPos2;
+#else
+    float2 aPos2 = float2(0,0);
+#endif
+
+	OUT.worldPos = mul(m, float4(IN.aPos, 1.0));
+    
+    OUT.position = mul(p, mul(v, OUT.worldPos) + float4(aPos2, 0.0, 0.0));
+    OUT.position.z += OUT.position.w;
+    OUT.position.z /= 2;
+    
+#ifdef HAS_COLOR0
+    OUT.color = IN.aColor;
+#else
+    OUT.color = float4(1,1,1,1);
+#endif
+#ifdef HAS_NORMAL0
+	OUT.normal = float4(IN.aNormal, 0);
+#else
+    OUT.normal = float3(0,0,0);
+#endif
+#ifdef HAS_TEXCOORD0
+	OUT.uv = IN.aUV;
+#else
+    OUT.uv = float2(0,0);
+#endif
+
+    return OUT;
+}

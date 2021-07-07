@@ -66,8 +66,6 @@ namespace Widgets {
         int mUIAtlasSize = 0;
         std::map<Resources::ImageLoader::ResourceType *, Atlas2::Entry> mUIAtlasEntries;
 
-        WidgetsPerObject mParameters;
-
         void expandUIAtlas()
         {
             if (mUIAtlasSize == 0) {
@@ -113,6 +111,8 @@ namespace Widgets {
     {
         mData->mProgram.create("ui");
 
+        mData->mProgram.setParameters({ nullptr, sizeof(WidgetsPerObject) }, 2);
+
         mData->mMesh = Render::GPUMeshLoader::loadManual("widgetMesh", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &mesh, Render::GPUMeshLoader::ResourceDataInfo &info) {
             return loader->generate(mesh, { 3, std::vector<Vertex> {} });
         });
@@ -132,8 +132,13 @@ namespace Widgets {
 
         mTopLevelWidgets.clear();
 
-        /*mDefaultTexture.reset();
-        mUIAtlasTexture.reset();*/
+        mData->mDefaultTexture.reset();
+        
+        mData->mUIAtlasTexture.reset();
+
+        mData->mMesh.reset();
+
+        mData->mProgram.reset();
     }
 
     WidgetBase *WidgetManager::createTopLevelWidget(const std::string &name)
@@ -627,13 +632,15 @@ namespace Widgets {
         for (std::pair<const Render::TextureDescriptor, std::vector<Vertex>> &p : vertices) {
             if (!p.second.empty()) {
 
-                mData->mParameters.hasDistanceField = bool(p.first.mFlags & Render::TextureFlag_IsDistanceField);
-                mData->mProgram.setParameters(mData->mParameters, 2);
+                {
+                    auto parameters = mData->mProgram.mapParameters(2).cast<WidgetsPerObject>();
+                    parameters->hasDistanceField = bool(p.first.mFlags & Render::TextureFlag_IsDistanceField);
+                }
 
                 if (p.first.mTextureHandle)
-                    target->bindTexture(p.first.mTextureHandle);
+                    target->bindTexture({ p.first.mTextureHandle });
                 else
-                    target->bindTexture(mData->mUIAtlasTexture->mTextureHandle);
+                    target->bindTexture({ mData->mUIAtlasTexture->mTextureHandle });
 
                 mData->mMesh.update({ 3, std::move(p.second) });
 

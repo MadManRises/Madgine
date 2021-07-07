@@ -23,7 +23,7 @@ namespace Render {
         : mCamera(camera)
         , mPriority(priority)
     {
-        mProgram.create("scene");
+        mProgram.create("im3d");
         
         mProgram.setParameters({ nullptr, sizeof(Im3DPerApplication) },0);
         mProgram.setParameters({ nullptr, sizeof(Im3DPerFrame) }, 1);
@@ -53,16 +53,13 @@ namespace Render {
 
         for (std::pair<const Im3DTextureId, Im3D::Im3DContext::RenderData> &p : context->mRenderData) {
 
-            target->bindTexture(p.first);
+            target->bindTexture({ p.first });
 
             auto perObject = mProgram.mapParameters(2).cast<Im3DPerObject>();
 
-            perObject->hasLight = false;
-            perObject->hasDistanceField = false;
-            perObject->hasSkeleton = false;
+            perObject->hasDistanceField = false;            
 
-            perObject->m = Matrix4::IDENTITY;
-            perObject->anti_m = Matrix4::IDENTITY;
+            perObject->m = Matrix4::IDENTITY;            
 
             perObject->hasTexture = p.first != 0;
             perObject->hasDistanceField = bool(p.second.mFlags & RenderPassFlags_DistanceField);

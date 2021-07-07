@@ -42,7 +42,6 @@ namespace Render {
             return result + "\n";
         }
 
-
         void generateType(std::ostream &stream, const CodeGen::Type &type)
         {
             std::visit(overloaded {
@@ -207,14 +206,57 @@ namespace Render {
                 throw 0;
         }
 
+        const char *guessDefault(std::string_view name)
+        {
+            if (name.find("pos2") != std::string_view::npos)
+                return "float2(0,0)";
+            else if (name.find("pos") != std::string_view::npos)
+                return "float3(0,0,0)";
+            else if (name.find("col") != std::string_view::npos)
+                return "float4(1,1,1,1)";
+            else if (StringUtil::toLower(name).find("uv") != std::string::npos)
+                return "float2(0,0)";
+            else if (StringUtil::toLower(name).find("normal") != std::string::npos)
+                return "float3(0,0)";
+            else if (StringUtil::toLower(name).find("bone") != std::string::npos)
+                return "int4(0,0,0,0)";
+            else if (StringUtil::toLower(name).find("weights") != std::string::npos)
+                return "float4(0,0,0,0)";
+            else
+                throw 0;
+        }
+
         void generate(std::ostream &stream, const CodeGen::ShaderFile &file, uint32_t index)
         {
             for (const std::pair<const std::string, CodeGen::Struct> &structInfo : file.mStructs) {
-                bool isBuffer = !structInfo.second.mAnnotations.empty() && StringUtil::startsWith(structInfo.second.mAnnotations.front(), "buffer");
 
-                stream << (isBuffer ? "cbuffer" : "struct") << " " << structInfo.second.mName << "{\n";
+                if (structInfo.first == "VertexData") {
+                    if (index == 0) {
+                        stream << "struct VertexDataIn {\n";
+                        for (const CodeGen::Variable &arg : structInfo.second.mVariables) {
+                            stream << generateIncludeGuard(arg.mConditionals, file.mConditionalTokenList);
+                            stream << "\t";
+                            generateType(stream, arg.mType);
+                            stream << " " << arg.mName << " : " << guessSemantic(arg.mName, false) << ";\n";
+                            if (arg.mConditionals != Engine::BitArray<64> {})
+                                stream << "#endif\n";
+                        }
+                        stream << "};\n";
+                    } else {
+                        continue;
+                    }
+                }
+
+                bool isBuffer = !structInfo.second.mAnnotations.empty() && StringUtil::startsWith(structInfo.second.mAnnotations.front(), "buffer");
+                if (isBuffer) {
+                    std::string_view number = std::string_view { structInfo.second.mAnnotations.front() }.substr(strlen("buffer"));
+                    uint32_t bufferIndex = std::atoi(number.data());
+                    stream << "cbuffer " << structInfo.second.mName << " : register(b" << bufferIndex << ")";
+                } else
+                    stream << "struct " << structInfo.second.mName;
+                stream << "{\n";
+
                 for (const CodeGen::Variable &arg : structInfo.second.mVariables) {
-                    stream << generateIncludeGuard(arg.mConditionals, file.mConditionalTokenList);
                     stream << "\t";
                     for (const std::string &annotation : arg.mAnnotations) {
 
@@ -222,19 +264,18 @@ namespace Render {
                     }
                     generateType(stream, arg.mType);
                     stream << " " << arg.mName;
-                    if (!structInfo.second.mAnnotations.empty() && structInfo.second.mAnnotations.front() == "semantic")
-                        stream << " : " << guessSemantic(arg.mName, structInfo.second.mName == "RasterizerData");
+                    if (structInfo.second.mName == "RasterizerData" && !structInfo.second.mAnnotations.empty() && structInfo.second.mAnnotations.front() == "semantic")
+                        stream << " : " << guessSemantic(arg.mName, true);
                     stream << ";\n";
-                    if (arg.mConditionals != Engine::BitArray<64> {})
-                        stream << "#endif\n";
                 }
                 stream << "};\n\n";
             }
 
             const std::vector<CodeGen::Function> &functions = *std::next(file.mInstances.begin(), index);
             for (const CodeGen::Function &function : functions) {
+                std::string_view name = function.mName == "main" ? "mainImpl" : std::string_view { function.mName };
                 generateType(stream, function.mReturnType);
-                stream << " " << function.mName << "(";
+                stream << " " << name << "(";
                 bool first = true;
                 for (const CodeGen::Variable &arg : function.mArguments) {
                     generateType(stream, arg.mType);
@@ -246,9 +287,6 @@ namespace Render {
                 }
                 stream << ")";
 
-                if (function.mName == "main" && index == 1) {
-                    stream << " : SV_TARGET";
-                }
                 stream << "{\n";
 
                 for (const CodeGen::Statement &statement : function.mStatements) {
@@ -259,6 +297,27 @@ namespace Render {
 
                 stream << "}\n\n";
             }
+
+            if (index == 0) {
+                stream << "RasterizerData main(VertexDataIn dataIn){\n";
+                stream << "\tVertexData IN;\n";
+                for (const CodeGen::Variable &inVar : file.mStructs.at("VertexData").mVariables) {
+                    stream << generateIncludeGuard(inVar.mConditionals, file.mConditionalTokenList);
+                    stream << "\tIN." << inVar.mName << " = dataIn." << inVar.mName << ";\n";
+                    if (inVar.mConditionals != Engine::BitArray<64> {}) {
+                        stream << "#else\n";
+                        stream << "\tIN." << inVar.mName << " = " << guessDefault(inVar.mName) << ";\n";
+                        stream << "#endif\n";
+                    }
+                }
+                stream << "\treturn mainImpl(IN);\n";
+                stream << "}\n\n";
+            } else {
+                stream << "float4 main(RasterizerData IN) : SV_TARGET {\n";
+                stream << "\treturn mainImpl(IN);\n";
+                stream << "}\n\n";
+            }
+
         }
 
     }

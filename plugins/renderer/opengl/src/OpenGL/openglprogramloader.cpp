@@ -6,6 +6,8 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
+#include "codegen/codegen_shader.h"
+
 VIRTUALUNIQUECOMPONENT(Engine::Render::OpenGLProgramLoader);
 
 METATABLE_BEGIN_BASE(Engine::Render::OpenGLProgramLoader, Engine::Render::ProgramLoader)
@@ -40,15 +42,15 @@ namespace Render {
         OpenGLProgram &program = static_cast<OpenGLProgram &>(_program);
 
         OpenGLShaderLoader::HandleType vertexShader;
-        vertexShader.load(name + "_VS");
+        vertexShader.load(name, VertexShader);
         if (!vertexShader) {
-            LOG_ERROR("Failed to load VS '" << name << "_VS'!");
+            LOG_ERROR("Failed to load VS '" << name << "'!");
         }
         
         OpenGLShaderLoader::HandleType pixelShader;
-        pixelShader.load(name + "_PS");
+        pixelShader.load(name, PixelShader);
         if (!pixelShader) {
-            LOG_ERROR("Failed to load VS '" << name << "_PS'!");
+            LOG_ERROR("Failed to load PS '" << name << "'!");
         }
         
         if (!vertexShader || !pixelShader) {
@@ -64,9 +66,21 @@ namespace Render {
         return true;
     }
 
-    bool OpenGLProgramLoader::create(Program &program, const std::string &name, const CodeGen::ShaderFile &file)
+    bool OpenGLProgramLoader::create(Program &_program, const std::string &name, const CodeGen::ShaderFile &file)
     {
-        throw 0;
+        assert(file.mInstances.size() == 2);
+
+        OpenGLProgram &program = static_cast<OpenGLProgram &>(_program);
+
+        OpenGLShaderLoader::HandleType vertexShader;
+        vertexShader.create(name, file, VertexShader);
+        OpenGLShaderLoader::HandleType pixelShader;
+        pixelShader.create(name, file, PixelShader);
+
+        if (!program.link(std::move(vertexShader), std::move(pixelShader)))
+            std::terminate();
+
+        return true;
     }
 
     void OpenGLProgramLoader::setParameters(Program &program, const ByteBuffer &data, size_t index)
@@ -76,7 +90,7 @@ namespace Render {
 
     WritableByteBuffer OpenGLProgramLoader::mapParameters(Program &program, size_t index)
     {
-        throw 0;
+        return static_cast<OpenGLProgram &>(program).mapParameters(index);
     }
 
     void OpenGLProgramLoader::setDynamicParameters(Program &program, const ByteBuffer &data, size_t index)

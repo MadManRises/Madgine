@@ -162,6 +162,10 @@ public:
         return *this;
     }
 
+    bool equalsWithEpsilon(const Vector3& other, float epsilon = floatZeroThreshold) {
+        return isEqual(x, other.x, epsilon) && isEqual(y, other.y, epsilon) && isEqual(z, other.z, epsilon);
+    }
+
     bool operator==(const Vector3 &rkVector) const
     {
         return x == rkVector.x && y == rkVector.y && z == rkVector.z;
@@ -798,6 +802,13 @@ public:
 };
 
 struct NormalizedVector3 : Vector3 {
+
+    constexpr NormalizedVector3(float x, float y, float z)
+        : Vector3(x, y, z)
+    {
+        normalize();
+    }
+
     constexpr NormalizedVector3(const Vector3 &v)
         : Vector3(v)
     {

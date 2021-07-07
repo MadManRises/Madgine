@@ -8,7 +8,7 @@ namespace Render {
 
     struct MADGINE_OPENGL_EXPORT OpenGLRenderTexture : OpenGLRenderTarget {
 
-        OpenGLRenderTexture(OpenGLRenderContext *context, const Vector2i &size);
+        OpenGLRenderTexture(OpenGLRenderContext *context, const Vector2i &size, const RenderTextureConfig &config);
         ~OpenGLRenderTexture();
 
         bool resize(const Vector2i &size) override;
@@ -19,9 +19,12 @@ namespace Render {
 
         virtual const OpenGLTexture *texture() const override;
 
+        virtual TextureHandle depthTexture() const override;
+
     private:
         GLuint mFramebuffer;
-        GLuint mDepthRenderbuffer;
+        GLuint mDepthRenderbuffer = 0;
+        GLuint mDepthTexture = 0;
 
         OpenGLTexture mTexture;
 

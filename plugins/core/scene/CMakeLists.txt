@@ -30,11 +30,13 @@ Project(SceneRenderer)
 set(sources "")
 FolderSources(sources "" renderer)
 	FolderSources(sources renderer Madgine scenerendererforward.h scenerendererlib.h)
-		FolderSources(sources Madgine render scenerenderpass.cpp scenerenderpass.h)
+		FolderSources(sources Madgine render scenerenderpass.cpp scenerenderpass.h shadowrenderpass.cpp shadowrenderpass.h)
 
 add_plugin(SceneRenderer Madgine Core ${sources} SOURCE_ROOT renderer PRECOMPILED_HEADER renderer/Madgine/scenerendererlib.h)
 
 target_link_plugins(SceneRenderer Scene Client ProgramLoader)
+
+target_link_libraries(SceneRenderer PRIVATE Im3D)
 
 set(sources "")
 FolderSources(sources "" renderer_tools)

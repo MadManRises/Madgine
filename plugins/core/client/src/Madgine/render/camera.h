@@ -2,6 +2,7 @@
 
 #include "Meta/math/quaternion.h"
 #include "Meta/math/vector3.h"
+#include "Meta/math/frustum.h"
 
 namespace Engine {
 namespace Render {
@@ -14,18 +15,21 @@ namespace Render {
         Matrix4 getViewProjectionMatrix(float aspectRatio);
         Matrix4 getViewMatrix();
         Matrix4 getProjectionMatrix(float aspectRatio);
+        Frustum getFrustum(float aspectRatio);
 
         Ray mousePointToRay(const Vector2 &mousePos, const Vector2 &viewportSize);
         Ray toRay() const;
 
         std::string mName;
 
-        Vector3 mPosition;
+        Vector3 mPosition = Vector3::ZERO;
         Quaternion mOrientation;
 
-        float mF;
-        float mN;
-        float mFOV;
+        float mF = 200.0f;
+        float mN = 0.1f;
+        float mFOV = 90.0f;
+
+        bool mOrthographic = false;
     };
 
 }

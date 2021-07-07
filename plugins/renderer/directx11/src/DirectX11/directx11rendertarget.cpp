@@ -29,7 +29,7 @@ namespace Render {
     {
     }
 
-    void DirectX11RenderTarget::setup(ID3D11RenderTargetView *targetView, const Vector2i &size)
+    void DirectX11RenderTarget::setup(ID3D11RenderTargetView *targetView, const Vector2i &size, const RenderTextureConfig &config)
     {
         if (mTargetView) {
             mTargetView->Release();
@@ -44,8 +44,10 @@ namespace Render {
 
         depthStencilBufferDesc.ArraySize = 1;
         depthStencilBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+        if (config.mCreateDepthBufferView)
+            depthStencilBufferDesc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
         depthStencilBufferDesc.CPUAccessFlags = 0; // No CPU access required.
-        depthStencilBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+        depthStencilBufferDesc.Format = DXGI_FORMAT_R32_TYPELESS;
         depthStencilBufferDesc.Width = size.x;
         depthStencilBufferDesc.Height = size.y;
         depthStencilBufferDesc.MipLevels = 1;
@@ -66,7 +68,13 @@ namespace Render {
             mDepthStencilView = nullptr;
         }
 
-        hr = sDevice->CreateDepthStencilView(mDepthStencilBuffer, nullptr, &mDepthStencilView);
+        D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
+        ZeroMemory(&dsvDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
+        dsvDesc.Flags = 0;
+        dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+        dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+
+        hr = sDevice->CreateDepthStencilView(mDepthStencilBuffer, &dsvDesc, &mDepthStencilView);
         DX11_CHECK(hr);
 
         if (!mDepthStencilState) {
@@ -122,10 +130,46 @@ namespace Render {
             hr = sDevice->CreateBlendState(&omDesc, &mBlendState);
             DX11_CHECK(hr);
         }
+
+        if (!mSamplers[0]) {
+
+            D3D11_SAMPLER_DESC samplerDesc;
+
+            samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+            samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+            samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+            samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+            samplerDesc.MipLODBias = 0.0f;
+            samplerDesc.MaxAnisotropy = 1;
+            samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+            samplerDesc.BorderColor[0] = 0;
+            samplerDesc.BorderColor[1] = 0;
+            samplerDesc.BorderColor[2] = 0;
+            samplerDesc.BorderColor[3] = 0;
+            samplerDesc.MinLOD = 0;
+            samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+            
+            hr = sDevice->CreateSamplerState(&samplerDesc, mSamplers + 0);
+            DX11_CHECK(hr);
+
+            samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+            samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+            samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+
+            hr = sDevice->CreateSamplerState(&samplerDesc, mSamplers + 1);
+            DX11_CHECK(hr);            
+        }
     }
 
     void DirectX11RenderTarget::shutdown()
     {
+        for (size_t i = 0; i < 2; ++i) {
+            if (mSamplers[i]) {
+                mSamplers[i]->Release();
+                mSamplers[i] = nullptr;
+            }
+        }
+
         if (mBlendState) {
             mBlendState->Release();
             mBlendState = nullptr;
@@ -162,7 +206,7 @@ namespace Render {
 
         const Vector2i &screenSize = size();
 
-        sDeviceContext->RSSetState(mRasterizerState);
+        sDeviceContext->RSSetState(mRasterizerState);        
 
         D3D11_VIEWPORT viewport;
         viewport.Width = static_cast<float>(screenSize.x);
@@ -176,11 +220,13 @@ namespace Render {
         constexpr FLOAT color[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
 
         sDeviceContext->ClearRenderTargetView(mTargetView, color);
-        sDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+        sDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
         sDeviceContext->OMSetRenderTargets(1, &mTargetView, mDepthStencilView);
         sDeviceContext->OMSetDepthStencilState(mDepthStencilState, 1);
         sDeviceContext->OMSetBlendState(mBlendState, 0, 0xffffffff);
+
+        sDeviceContext->PSSetSamplers(0, 2, mSamplers);
 
         RenderTarget::beginFrame();
     }
@@ -254,9 +300,10 @@ namespace Render {
         sDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
     }
 
-    void DirectX11RenderTarget::bindTexture(TextureHandle tex)
+    void DirectX11RenderTarget::bindTexture(const std::vector<TextureHandle> &tex)
     {
-        sDeviceContext->PSSetShaderResources(0, 1, reinterpret_cast<ID3D11ShaderResourceView *const *>(&tex));
+        sDeviceContext->PSSetShaderResources(0, tex.size(), reinterpret_cast<ID3D11ShaderResourceView *const *>(tex.data()));
     }
+
 }
 }

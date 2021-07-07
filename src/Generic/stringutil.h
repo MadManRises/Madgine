@@ -171,4 +171,15 @@ constexpr bool strcpy_s(char *dest, size_t size, const char *source)
     return true;
 }
 
+constexpr std::strong_ordering strcmp(const char* first, const char* second) {
+    while (*first || *second) {
+        std::strong_ordering comp = *first <=> *second;
+        if (comp != 0)
+            return comp;
+        ++first;
+        ++second;
+    }
+    return std::strong_ordering::equal;
+}
+
 }

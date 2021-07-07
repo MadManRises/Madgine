@@ -423,9 +423,14 @@ namespace Render {
         return nullptr;
     }
 
+    TextureHandle OpenGLRenderWindow::depthTexture() const
+    {
+        return 0;
+    }
+
     Vector2i OpenGLRenderWindow::size() const
     {
-        InterfacesVector size;
+        InterfacesVector size = mOsWindow->renderSize();
         return { size.x, size.y };
     }
 

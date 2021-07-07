@@ -17,4 +17,12 @@ TEST(Math, Quaternion)
     };
 
     ASSERT_TRUE(q1.toMatrix().equalsWithEpsilon(rot1));
+
+    NormalizedVector3 dir { 1, 1, 1 };
+
+    Quaternion dirQ = Quaternion::FromDirection(dir);
+
+     
+
+    ASSERT_TRUE((dirQ.toMatrix() * Vector3 { Vector3::UNIT_Z }).equalsWithEpsilon(dir));
 }

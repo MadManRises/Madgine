@@ -34,7 +34,6 @@ namespace Threading {
         std::atomic<State> mState = State::INIT;
 
         mutable std::mutex mMutex;
-        std::condition_variable mCv, mCv_main;
         std::map<TaskQueue *, std::vector<TaskHandle>> mTaskLists;
         std::vector<TaskHandle> mTasks;
 

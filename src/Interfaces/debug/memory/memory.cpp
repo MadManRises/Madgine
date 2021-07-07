@@ -283,6 +283,7 @@ namespace Debug {
 
             pib.first->second->mSize += s;
             pib.first->second->mGeneration = std::min(pib.first->second->mGeneration, size_t(1));
+            pib.first->second->mBlockSize = s;
 
             auto pib2 = mAllocations.try_emplace(id, pib.first->second);
             assert(pib2.second);

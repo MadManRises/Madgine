@@ -2,10 +2,12 @@
 
 parameters ScenePerApplication {
 	float4x4(p);
+	float4x4(lightProjectionMatrix);
 };
 
 parameters ScenePerFrame {
 	float4x4(v);
+	float4x4(lightViewMatrix);
 
 	float3(lightColor);
 	float3(lightDir);

@@ -34,7 +34,7 @@ namespace Tools {
         }
         BlockData mData;
         std::list<BlockData> mLeafs;
-        std::unordered_map<void *, std::unique_ptr<MemoryBlock>> mChildren;
+        std::unordered_map<void *, MemoryBlock> mChildren;
         Item *mSources = nullptr;
     };
 
@@ -44,6 +44,7 @@ namespace Tools {
             METHODNAME_SORTING,
             ADDRESS_SORTING,
             FILE_SORTING,
+            BLOCK_SIZE_SORTING,
             SIZE_SORTING
         };
 
@@ -54,8 +55,8 @@ namespace Tools {
         std::string_view key() const override;
 
     private:
-        void traceDraw(const std::pmr::vector<Engine::Debug::TraceBack> &data, size_t size, int depth);
-        bool traceLevel(const Engine::Debug::TraceBack &traceback, size_t size, bool leaf);
+        void traceDraw(const std::pmr::vector<Engine::Debug::TraceBack> &data, size_t size, size_t blockSize, int depth);
+        bool traceLevel(const Engine::Debug::TraceBack &traceback, size_t size, size_t blockSize, bool leaf);
         void drawBlock(const BlockData &block, size_t depth);
 
         bool drawHeader(const char *title, SortMode mode, float size = 0);

@@ -15,5 +15,7 @@
 
 #include "scenerendererforward.h"
 
+#include <numeric>
+
 
 /// @endcond

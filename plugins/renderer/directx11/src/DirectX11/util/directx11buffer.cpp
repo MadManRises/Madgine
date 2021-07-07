@@ -110,7 +110,7 @@ namespace Render {
 
         std::unique_ptr<void, UnmapDeleter> dataBuffer { subres.pData, { mBuffer } };
 
-        return { dataBuffer, mSize };
+        return { std::move(dataBuffer), mSize };
     }
 
     ID3D11Buffer *DirectX11Buffer::handle()

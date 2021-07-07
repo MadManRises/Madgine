@@ -146,6 +146,8 @@ struct META_EXPORT Matrix4 {
         return *this;
     }
 
+    bool equalsWithEpsilon(const Matrix4 &rkMatrix, float epsilon = floatZeroThreshold) const;
+
     /** Tests 2 matrices for equality.
      */
     bool operator==(const Matrix4 &rkMatrix) const;

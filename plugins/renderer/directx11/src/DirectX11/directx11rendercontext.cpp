@@ -39,9 +39,9 @@
         {
         }
 
-        std::unique_ptr<RenderTarget> DirectX11RenderContext::createRenderTexture(const Vector2i &size)
+        std::unique_ptr<RenderTarget> DirectX11RenderContext::createRenderTexture(const Vector2i &size, const RenderTextureConfig &config)
         {
-            return std::make_unique<DirectX11RenderTexture>(this, size);
+            return std::make_unique<DirectX11RenderTexture>(this, size, config);
         }
 
         std::unique_ptr<RenderTarget> DirectX11RenderContext::createRenderWindow(Window::OSWindow *w)

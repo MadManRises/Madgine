@@ -18,7 +18,6 @@ namespace Render {
 		OpenGLTexture &operator=(OpenGLTexture &&);
 
 		void reset();
-
         void bind() const;
 
         void setData(Vector2i size, const ByteBuffer &data);

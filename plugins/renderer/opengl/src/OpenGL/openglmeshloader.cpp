@@ -48,7 +48,7 @@ namespace Render {
 
             if (tex) {
                 data.mTexture = { GL_UNSIGNED_BYTE };
-                data.mTexture.setFilter(GL_NEAREST);
+                //data.mTexture.setFilter(GL_NEAREST);
                 data.mTexture.setData({ tex->mWidth, tex->mHeight }, { tex->mBuffer, static_cast<size_t>(tex->mWidth * tex->mHeight) });
                 data.mTextureHandle = data.mTexture.handle();
             } else {

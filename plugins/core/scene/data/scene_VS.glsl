@@ -3,11 +3,13 @@
 layout (std140, binding = 0) uniform PerApplication
 {
 	mat4 p;	
+	mat4 lightProjection;
 };
 
 layout (std140, binding = 1) uniform PerFrame
 {
 	mat4 v;
+	mat4 lightView;
 
 	vec3 lightColor;
 	vec3 lightDir;
@@ -42,6 +44,7 @@ out vec4 color;
 out vec4 worldPos;
 out vec3 normal;
 out vec2 uv;
+out vec4 lightViewPosition;
 
 
 void main()
@@ -59,4 +62,5 @@ void main()
     color = aColor;
 	normal = mat3(anti_m) * aNormal;
 	uv = vec2(aUV.x, 1.0 - aUV.y);
+	lightViewPosition = lightProjection * (lightView * worldPos + vec4(aPos2, 0.0, 0.0));
 }

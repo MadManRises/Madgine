@@ -43,17 +43,18 @@ namespace Tools {
             return loader->generate(data, { 3, std::move(vertices), std::move(indices) });
         });
 
-        mProgram.setParameters(mParameters, 1);
+        mProgram.setParameters({ nullptr, sizeof(GridPerFrame) }, 1);
     }
 
     void GridPass::render(Render::RenderTarget *target)
     {
         Vector2i size = target->size();
         float aspectRatio = float(size.x) / size.y;
+        {
+            auto parameters = mProgram.mapParameters(1).cast<GridPerFrame>();
 
-        mParameters.vp = mCamera->getViewProjectionMatrix(aspectRatio);
-
-        std::memcpy(mProgram.mapParameters(1).mData, &mParameters, sizeof(mParameters));
+            parameters->vp = mCamera->getViewProjectionMatrix(aspectRatio);
+        }
 
         target->renderMesh(mMesh, mProgram);
     }

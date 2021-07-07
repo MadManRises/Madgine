@@ -3,11 +3,13 @@
 layout (std140, binding = 0) uniform PerApplication
 {
 	mat4 p;	
+	mat4 lightProjection;
 };
 
 layout (std140, binding = 1) uniform PerFrame
 {
 	mat4 v;
+	mat4 lightView;
 
 	vec3 lightColor;
 	vec3 lightDir;
@@ -25,12 +27,14 @@ layout (std140, binding = 2) uniform PerObject
 };
 
 layout(binding = 0) uniform sampler2D tex;
+layout(binding = 1) uniform sampler2D shadowDepthMap;
 
 
 in vec4 color;
 in vec4 worldPos;
 in vec3 normal;
 in vec2 uv;
+in vec4 lightViewPosition;
 
 
 
@@ -60,13 +64,26 @@ void main()
 	}
 
 	if (hasLight){
+		float bias = 0.001;
+		vec2 lightTexCoord;
+		lightTexCoord.x = lightViewPosition.x / lightViewPosition.w / 2.0 + 0.5;
+		lightTexCoord.y = lightViewPosition.y / lightViewPosition.w / 2.0 + 0.5;
+
+		float shadowDepth = texture2D(shadowDepthMap, lightTexCoord).r;
+		float lightDepth = lightViewPosition.z / lightViewPosition.w / 2.0 + 0.5;
+		lightDepth = lightDepth - bias;
+
 		float ambientStrength = 0.4;
 		vec3 ambient = ambientStrength * lightColor;
 
-		float diffuseStrength = 0.7;
-		vec3 norm = normalize(normal);
-		float diff = max(dot(norm, -lightDir), 0.0);
-		vec3 diffuse = diffuseStrength * diff * lightColor;
+		vec3 diffuse = vec3(0,0,0);
+
+		if (lightDepth < shadowDepth){
+			float diffuseStrength = 0.7;
+			vec3 norm = normalize(normal);
+			float diff = max(dot(norm, -lightDir), 0.0);
+			diffuse = diffuseStrength * diff * lightColor;
+		}
 
 		colorAcc = vec4(ambient + diffuse,1.0) * colorAcc;
 	}

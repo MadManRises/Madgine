@@ -42,7 +42,6 @@ namespace Render {
 
     private:
         ID3D11Resource *mResource = nullptr;
-        ID3D11SamplerState *mSampler = nullptr;
         TextureType mType;
         Vector2i mSize = { 0, 0 };
         DataFormat mFormat;

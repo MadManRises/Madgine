@@ -60,6 +60,17 @@ void Matrix4::FromAxes(const Vector4 &xAxis, const Vector4 &yAxis, const Vector4
     SetColumn(4, wAxis);
 }
 
+bool Matrix4::equalsWithEpsilon(const Matrix4 &rkMatrix, float epsilon) const
+{
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            if (!isEqual(rkMatrix.m[i][j], m[i][j], epsilon))
+                return false;
+        }
+    }
+    return true;
+}
+
 //-----------------------------------------------------------------------
 bool Matrix4::operator==(const Matrix4 &rkMatrix) const
 {
@@ -159,7 +170,7 @@ Matrix4 Matrix4::Transpose() const
     Matrix4 kTranspose;
     for (size_t iRow = 0; iRow < 4; iRow++) {
         for (size_t iCol = 0; iCol < 4; iCol++)
-            kTranspose[iCol][iRow] = m[iRow][iCol];
+            kTranspose.m[iCol][iRow] = m[iRow][iCol];
     }
     return kTranspose;
 }

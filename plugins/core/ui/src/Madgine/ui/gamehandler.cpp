@@ -153,5 +153,10 @@ namespace UI {
     void GameHandlerBase::fixedUpdate(std::chrono::microseconds timeStep)
     {
     }
+
+    bool GameHandlerBase::dragging() const {
+        return mDragging;
+    }
+
 }
 } // namespace UI

@@ -26,7 +26,12 @@ namespace Render {
 
     void OpenGLRenderTarget::beginFrame()
     {
-        const Vector2i &screenSize = size();
+        Vector2i screenSize = size();
+
+        if (screenSize.x <= 0)
+            screenSize.x = 1;
+        if (screenSize.y <= 0)
+            screenSize.y = 1;
 
         glViewport(0, 0, static_cast<GLsizei>(screenSize.x), static_cast<GLsizei>(screenSize.y));
         GL_CHECK();
@@ -105,10 +110,13 @@ namespace Render {
         GL_CHECK();
     }
 
-    void OpenGLRenderTarget::bindTexture(TextureHandle tex)
+    void OpenGLRenderTarget::bindTexture(const std::vector<TextureHandle> &tex)
     {
-        glBindTexture(GL_TEXTURE_2D, tex);
-        GL_CHECK();
+        for (size_t i = 0; i < tex.size(); ++i) {
+            glActiveTexture(GL_TEXTURE0 + i);
+            glBindTexture(GL_TEXTURE_2D, tex[i]);
+            GL_CHECK();
+        }
     }
 
 }

@@ -21,9 +21,11 @@ namespace Render {
     struct RendererBase;
     struct RenderContext;
     struct RenderTarget;
+    struct RenderTextureConfig;
     struct RenderPass;
     struct Camera;
     struct TextureDescriptor;
+    
 }
 
 }

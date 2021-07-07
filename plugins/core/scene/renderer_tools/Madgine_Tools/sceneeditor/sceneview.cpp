@@ -94,6 +94,11 @@ namespace Tools {
 
     SceneView::~SceneView()
     {
+        mRenderTarget->removeRenderPass(&mIm3DRenderer);
+
+        mRenderTarget->removeRenderPass(&mGridRenderer);
+
+        mRenderTarget->removeRenderPass(&mSceneRenderer);
     }
 
     void SceneView::render()

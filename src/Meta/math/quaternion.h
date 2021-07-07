@@ -54,6 +54,16 @@ struct Quaternion {
         };
     }
 
+    static Quaternion FromDirection(const NormalizedVector3 &dir, const NormalizedVector3 &up = { Vector3::UNIT_Y })
+    {
+        NormalizedVector3 side = up.crossProduct(dir);
+        NormalizedVector3 actualUp = dir.crossProduct(side);
+
+        Matrix3 m;
+        m.FromAxes(side, actualUp, dir);
+        return FromMatrix(m);
+    }
+
     static Quaternion FromMatrix(const Matrix3 &m)
     {
         float w = sqrtf(1.0 + m[0][0] + m[1][1] + m[2][2]) / 2.0f;

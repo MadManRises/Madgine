@@ -28,6 +28,8 @@ METATABLE_BEGIN(Engine::Scene::SceneManager)
 //SYNCABLEUNIT_MEMBERS()
 READONLY_PROPERTY(entities, entities)
 MEMBER(mSceneComponents)
+MEMBER(mAmbientLightColor)
+MEMBER(mAmbientLightDirection)
 METATABLE_END(Engine::Scene::SceneManager)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::SceneManager)
@@ -128,7 +130,8 @@ namespace Scene {
 
     std::string SceneManager::generateUniqueName()
     {
-        return "Madgine_AutoGen_Name_"s + std::to_string(++mItemCount);
+        static size_t itemCount = 0;
+        return "Madgine_AutoGen_Name_"s + std::to_string(++itemCount);
     }
 
     void SceneManager::remove(Entity::Entity *e)

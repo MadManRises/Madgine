@@ -6,6 +6,8 @@
 
 #include "openglssbobuffer.h"
 
+#include "../openglshaderloader.h"
+
 namespace Engine {
 namespace Render {
 
@@ -17,13 +19,15 @@ namespace Render {
 
         OpenGLProgram &operator=(OpenGLProgram &&other);
 
-        bool link(OpenGLShader *vertexShader, OpenGLShader *pixelShader);
+        bool link(typename OpenGLShaderLoader::HandleType vertexShader, typename OpenGLShaderLoader::HandleType pixelShader);
 
         void reset();
 
         void bind();
 
         void setParameters(const ByteBuffer &data, size_t index);
+        WritableByteBuffer mapParameters(size_t index);
+
         void setDynamicParameters(const ByteBuffer &data, size_t index);
 
         struct UniformBufferDescriptor {
@@ -35,6 +39,8 @@ namespace Render {
         void verify();
 
     private:
+        OpenGLShaderLoader::HandleType mVertexShader;
+        OpenGLShaderLoader::HandleType mPixelShader;
         GLuint mHandle = 0;
         std::vector<OpenGLBuffer> mUniformBuffers;
 #if !OPENGL_ES

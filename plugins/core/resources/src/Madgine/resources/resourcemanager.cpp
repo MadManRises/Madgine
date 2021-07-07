@@ -81,6 +81,7 @@ namespace Resources {
 
         bool last = mInitialized.test_and_set();
         assert(!last);
+        mInitialized.notify_all();
 
         return true;
     }

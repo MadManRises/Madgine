@@ -71,6 +71,15 @@ namespace UI {
         return GameHandlerBase::init();
     }
 
+    void GameManager::finalize() {
+
+        if (mGameWindow) {
+            mGameWindow->getRenderTarget()->removeRenderPass(&mSceneRenderer);
+        }
+
+        GameHandlerBase::finalize();
+    }
+
     void GameManager::setWidget(Engine::Widgets::WidgetBase *w)
     {
         GameHandlerBase::setWidget(w);

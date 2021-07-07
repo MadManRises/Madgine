@@ -12,7 +12,9 @@ namespace Render {
         virtual void beginFrame() override;
         virtual void endFrame() override;
 
-		Texture *texture() const override;
+		virtual Texture *texture() const override;
+
+        virtual TextureHandle depthTexture() const override;
 
 		virtual bool resize(const Vector2i &size) override;
 		virtual Vector2i size() const override;

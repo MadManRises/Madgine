@@ -121,7 +121,7 @@ namespace Window {
             out << mOsWindow->data();
         }
 
-        for (const std::unique_ptr<MainWindowComponentBase> &comp : components()) {
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
             comp->callFinalize();
         }
 

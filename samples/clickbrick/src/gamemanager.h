@@ -16,6 +16,7 @@ namespace UI {
         GameManager(Engine::UI::UIManager &ui);
 
         virtual bool init() override;
+        virtual void finalize() override;
 
         virtual std::string_view key() const override;
 

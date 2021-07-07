@@ -41,19 +41,5 @@ METATABLE_END(Engine::Render::TextureLoader::ResourceType)
             loader->setSubData(*getDataPtr(*this, loader), offset, size, data);
         }
 
-        void TextureLoader::HandleType::setWrapMode(WrapMode mode, TextureLoader *loader)
-        {
-            if (!loader)
-                loader = &TextureLoader::getSingleton();
-            loader->setWrapMode(*getDataPtr(*this, loader), mode);
-        }
-
-        void TextureLoader::HandleType::setMinMode(MinMode mode, TextureLoader *loader)
-        {
-            if (!loader)
-                loader = &TextureLoader::getSingleton();
-            loader->setMinMode(*getDataPtr(*this, loader), mode);
-        }
-
     }
 }

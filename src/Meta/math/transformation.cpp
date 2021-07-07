@@ -4,6 +4,7 @@
 
 #include "matrix4.h"
 #include "quaternion.h"
+#include "frustum.h"
 
 namespace Engine {
 
@@ -30,6 +31,34 @@ Matrix4 TranslationMatrix(const Vector3 &v)
 Matrix3 ScalingMatrix(const Vector3 &v)
 {
     return { v.x, 0, 0, 0, v.y, 0, 0, 0, v.z };
+}
+
+Matrix4 ProjectionMatrix(const Frustum &frustum)
+{
+    float r = frustum.mRight;
+    float t = frustum.mTop;
+    float near = frustum.mNear;
+    float far = frustum.mFar;
+
+    Matrix4 p;
+
+    if (frustum.mOrthographic) {
+        p = {
+            1 / r, 0, 0, 0,
+            0, 1 / t, 0, 0,
+            0, 0, 2 / (far - near), -(far + near) / (far - near),
+            0, 0, 0, 1
+        };
+    } else {
+        p = {
+            near / r, 0, 0, 0,
+            0, near / t, 0, 0,
+            0, 0, (far + near) / (far - near), -2 * far * near / (far - near),
+            0, 0, 1, 0
+        };
+    }
+
+    return p;
 }
 
 Matrix3 ExtractRotationMatrix(const Matrix3& m) {

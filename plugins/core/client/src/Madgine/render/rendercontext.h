@@ -4,6 +4,8 @@
 
 #include "Modules/threading/task.h"
 
+#include "rendertextureconfig.h"
+
 namespace Engine {
 namespace Render {
 
@@ -12,7 +14,7 @@ namespace Render {
         virtual ~RenderContext();
 
         virtual std::unique_ptr<RenderTarget> createRenderWindow(Window::OSWindow *w) = 0;
-        virtual std::unique_ptr<RenderTarget> createRenderTexture(const Vector2i &size = { 1, 1 }) = 0;
+        virtual std::unique_ptr<RenderTarget> createRenderTexture(const Vector2i &size = { 1, 1 }, const RenderTextureConfig &config = {}) = 0;
 
         void addRenderTarget(RenderTarget *target);
         void removeRenderTarget(RenderTarget *target);

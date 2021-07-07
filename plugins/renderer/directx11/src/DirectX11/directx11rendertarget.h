@@ -8,6 +8,8 @@
 
 #include "render/renderpassflags.h"
 
+#include "Madgine/render/rendertextureconfig.h"
+
 namespace Engine {
 namespace Render {
 
@@ -16,7 +18,7 @@ namespace Render {
         DirectX11RenderTarget(DirectX11RenderContext *context);
         ~DirectX11RenderTarget();
 
-        void setup(ID3D11RenderTargetView *targetView, const Vector2i &size);
+        void setup(ID3D11RenderTargetView *targetView, const Vector2i &size, const RenderTextureConfig &config = {});
         void shutdown();
 
         virtual void beginFrame() override;
@@ -27,16 +29,18 @@ namespace Render {
         virtual void renderMesh(GPUMeshData *mesh, Program *program) override;
         virtual void clearDepthBuffer() override;
 
-        virtual void bindTexture(TextureHandle tex) override;
+        virtual void bindTexture(const std::vector<TextureHandle> &tex) override;
 
         //void setupProgram(RenderPassFlags flags = RenderPassFlags_None, unsigned int textureId = 0) override;
 
         ID3D11RenderTargetView *mTargetView = nullptr;
-        ID3D11Texture2D *mDepthStencilBuffer = nullptr;
+        ID3D11Texture2D *mDepthStencilBuffer = nullptr;        
         ID3D11DepthStencilView *mDepthStencilView = nullptr;
         ID3D11DepthStencilState *mDepthStencilState = nullptr;
         ID3D11RasterizerState *mRasterizerState = nullptr;
         ID3D11BlendState *mBlendState = nullptr;
+
+        ID3D11SamplerState *mSamplers[2] = { nullptr, nullptr };
         
     };
 

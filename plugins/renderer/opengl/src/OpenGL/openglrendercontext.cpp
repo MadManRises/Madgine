@@ -27,9 +27,9 @@
         {
         }
 
-        std::unique_ptr<RenderTarget> OpenGLRenderContext::createRenderTexture(const Vector2i &size)
+        std::unique_ptr<RenderTarget> OpenGLRenderContext::createRenderTexture(const Vector2i &size, const RenderTextureConfig &config)
         {
-            return std::make_unique<OpenGLRenderTexture>(this, size);
+            return std::make_unique<OpenGLRenderTexture>(this, size, config);
         }
 
         OpenGLRenderContext &OpenGLRenderContext::getSingleton()

@@ -51,25 +51,25 @@ TEST(Math, Matrix3)
         1, 1, 1
     };
 
-    ASSERT_EQ(identity * identity, identity);
-    ASSERT_EQ(identity * rot1, rot1);
-    ASSERT_EQ(rot1 * identity, rot1);
-    ASSERT_EQ(rot1 * rot1, rot2);
-    ASSERT_EQ(rot1 * rot2, identity);
+    EXPECT_EQ(identity * identity, identity);
+    EXPECT_EQ(identity * rot1, rot1);
+    EXPECT_EQ(rot1 * identity, rot1);
+    EXPECT_EQ(rot1 * rot1, rot2);
+    EXPECT_EQ(rot1 * rot2, identity);
 
-    ASSERT_EQ(ones * ones, 3 * ones);
+    EXPECT_EQ(ones * ones, 3 * ones);
 
-    ASSERT_EQ(flip1.Inverse(), flip1);
-    ASSERT_EQ(flip2.Inverse(), flip2);
-    ASSERT_EQ(flip3.Inverse(), flip3);
+    EXPECT_EQ(flip1.Inverse(), flip1);
+    EXPECT_EQ(flip2.Inverse(), flip2);
+    EXPECT_EQ(flip3.Inverse(), flip3);
 
-    ASSERT_EQ(rot1.Inverse(), rot2);
-    ASSERT_EQ(rot2.Inverse(), rot1);
+    EXPECT_EQ(rot1.Inverse(), rot2);
+    EXPECT_EQ(rot2.Inverse(), rot1);
 
-    ASSERT_EQ(ones.Determinant(), 0);
+    EXPECT_EQ(ones.Determinant(), 0);
 
-    ASSERT_EQ(rot1[0][1], 1);
-    ASSERT_EQ(rot1[1][0], 0);
+    EXPECT_EQ(rot1[0][1], 1);
+    EXPECT_EQ(rot1[1][0], 0);
 }
 
 TEST(Math, Matrix4)
@@ -125,26 +125,78 @@ TEST(Math, Matrix4)
         1, 1, 1, 1
     };
 
-    ASSERT_EQ(identity * identity, identity);
-    ASSERT_EQ(identity * rot1, rot1);
-    ASSERT_EQ(rot1 * identity, rot1);
-    ASSERT_EQ(rot1 * rot1, rot2);
-    ASSERT_EQ(rot1 * rot2, identity);
+    EXPECT_EQ(identity * identity, identity);
+    EXPECT_EQ(identity * rot1, rot1);
+    EXPECT_EQ(rot1 * identity, rot1);
+    EXPECT_EQ(rot1 * rot1, rot2);
+    EXPECT_EQ(rot1 * rot2, identity);
 
-    ASSERT_EQ(ones * ones, 4 * ones);
+    EXPECT_EQ(ones * ones, 4 * ones);
 
-    ASSERT_EQ(flip1.Inverse(), flip1);
-    ASSERT_EQ(flip2.Inverse(), flip2);
-    ASSERT_EQ(flip3.Inverse(), flip3);
+    EXPECT_EQ(flip1.Inverse(), flip1);
+    EXPECT_EQ(flip2.Inverse(), flip2);
+    EXPECT_EQ(flip3.Inverse(), flip3);
 
-    ASSERT_EQ(rot1.Inverse(), rot2);
-    ASSERT_EQ(rot2.Inverse(), rot1);
+    EXPECT_EQ(rot1.Inverse(), rot2);
+    EXPECT_EQ(rot2.Inverse(), rot1);
 
-    ASSERT_EQ(rot1[0][1], 1);
-    ASSERT_EQ(rot1[1][0], 0);
+    EXPECT_EQ(rot1[0][1], 1);
+    EXPECT_EQ(rot1[1][0], 0);
 
     Matrix3 tmp = { 1, 2, 3,
                     4, 5, 6,
                     7, 8, 9 };
-    ASSERT_EQ(tmp, Matrix4 { tmp }.ToMat3());
+    EXPECT_EQ(tmp, Matrix4 { tmp }.ToMat3());
+
+    Matrix4 transposeX {
+        1, 0, 0, 1,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    };
+
+    Matrix4 invTransposeX {
+        1, 0, 0, -1,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    };
+
+    EXPECT_EQ(transposeX.Inverse(), invTransposeX);
+
+    Matrix4 transposeY {
+        1, 0, 0, 0,
+        0, 1, 0, 1,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    };
+
+    Matrix4 invTransposeY {
+        1, 0, 0, 0,
+        0, 1, 0, -1,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    };
+
+    EXPECT_EQ(transposeY.Inverse(), invTransposeY);
+
+    Matrix4 transposeZ {
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 1,
+        0, 0, 0, 1
+    };
+
+    Matrix4 invTransposeZ {
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, -1,
+        0, 0, 0, 1
+    };
+
+    EXPECT_EQ(transposeZ.Inverse(), invTransposeZ);
+
+    EXPECT_EQ((rot1 * transposeX).Inverse(), invTransposeX * rot2);
+    EXPECT_EQ((rot1 * transposeY).Inverse(), invTransposeY * rot2);
+    EXPECT_EQ((rot1 * transposeZ).Inverse(), invTransposeZ * rot2);
 }

@@ -40,7 +40,7 @@ namespace Render {
         return *this;
     }
 
-    bool OpenGLProgram::link(OpenGLShader *vertexShader, OpenGLShader *pixelShader)
+    bool OpenGLProgram::link(typename OpenGLShaderLoader::HandleType vertexShader, typename OpenGLShaderLoader::HandleType pixelShader)
     {
         reset();
 
@@ -61,6 +61,9 @@ namespace Render {
             LOG_ERROR("ERROR::SHADER::PROGRAM::LINKING_FAILED");
             LOG_ERROR(infoLog);
         }
+
+        mVertexShader = std::move(vertexShader);
+        mPixelShader = std::move(pixelShader);
 
 #if OPENGL_ES
         GLuint perApplicationIndex = glGetUniformBlockIndex(mHandle, "PerApplication");
@@ -148,6 +151,11 @@ namespace Render {
         }
 
         mUniformBuffers[index].setData(data);
+    }
+
+    WritableByteBuffer OpenGLProgram::mapParameters(size_t index)
+    {
+        return mUniformBuffers[index].mapData();
     }
 
     void OpenGLProgram::setDynamicParameters(const ByteBuffer &data, size_t index)

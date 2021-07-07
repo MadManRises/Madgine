@@ -22,10 +22,12 @@ namespace Threading {
                 queue->update(TaskMask::BARRIER, nullptr, 0, 1);
             }
             ++mThreadAccumulator;
+            //LOG(std::this_thread::get_id() << " arrived");
             if (isMain) {
-                if (mThreadAccumulator < mThreadCount) {
-                    std::unique_lock lock { mMutex };
-                    mCv_main.wait(lock, [this]() { return mThreadAccumulator == mThreadCount; });
+                size_t threadAcc = mThreadAccumulator;
+                while (threadAcc < mThreadCount) {
+                    mThreadAccumulator.wait(threadAcc);
+                    threadAcc = mThreadAccumulator;
                 }
                 bool done = true;
                 for (TaskQueue *q : WorkGroup::self().taskQueues()) {
@@ -35,20 +37,19 @@ namespace Threading {
                 }
                 mThreadAccumulator = 0;
                 if (done) {
+                    mState = State::RUN;
                     std::unique_lock lock { mMutex };
                     for (std::pair<TaskQueue *const, std::vector<TaskHandle>> &tasks : mTaskLists) {
                         for (TaskHandle &task : tasks.second)
                             tasks.first->queue(std::move(task), TaskMask::BARRIER);
                     }
                     mTaskLists.clear();
-                    mState = State::RUN;
+                    //LOG(std::this_thread::get_id() << " -> RUN");
+                    mState.notify_all();
                 }
-                mCv.notify_all();
             } else {
-                std::unique_lock lock { mMutex };
-                mCv_main.notify_one();
-                if (mState == State::INIT)
-                    mCv.wait(lock);
+                mThreadAccumulator.notify_one();
+                mState.wait(State::INIT);
             }
         }
 
@@ -76,11 +77,13 @@ namespace Threading {
                 }
             } while (running);
 
+            //LOG(std::this_thread::get_id() << " ran");
             ++mThreadAccumulator;
             if (isMain) {
-                if (mThreadAccumulator < mThreadCount) {
-                    std::unique_lock lock { mMutex };
-                    mCv_main.wait(lock, [this]() { return mThreadAccumulator == mThreadCount; });
+                size_t threadAcc = mThreadAccumulator;
+                while (threadAcc < mThreadCount) {
+                    mThreadAccumulator.wait(threadAcc);
+                    threadAcc = mThreadAccumulator;
                 }
                 bool done = true;
                 for (TaskQueue *q : WorkGroup::self().taskQueues()) {
@@ -90,26 +93,27 @@ namespace Threading {
                 }
                 mThreadAccumulator = 0;
                 if (done) {
-                    std::unique_lock lock { mMutex };
+                    //LOG(std::this_thread::get_id() << " -> DONE");
                     mState = State::DONE;
+                    mState.notify_all();
                 }
-                mCv.notify_all();
             } else {
-                mCv_main.notify_one();
-                std::unique_lock lock { mMutex };
-                if (mState == State::RUN)
-                    mCv.wait(lock);
+                mThreadAccumulator.notify_one();
+                mState.wait(State::RUN);
             }
         }
 
+        //LOG(std::this_thread::get_id() << " out");
         ++mThreadAccumulator;
         if (isMain) {
-            if (mThreadAccumulator < mThreadCount) {
-                std::unique_lock lock { mMutex };
-                mCv_main.wait(lock, [this]() { return mThreadAccumulator == mThreadCount; });
+            size_t threadAcc = mThreadAccumulator;
+            while (threadAcc < mThreadCount) {
+                mThreadAccumulator.wait(threadAcc);
+                threadAcc = mThreadAccumulator;                
             }
+            //LOG(std::this_thread::get_id() << " -> EXIT");
         } else {
-            mCv_main.notify_one();
+            mThreadAccumulator.notify_one();
         }
     }
 

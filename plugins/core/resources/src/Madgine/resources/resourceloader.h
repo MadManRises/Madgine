@@ -23,19 +23,19 @@ namespace Resources {
     MADGINE_RESOURCES_EXPORT void waitForIOThread();
 
     template <typename Interface>
-    struct ResourceDataInfo {
-        ResourceDataInfo(typename Interface::ResourceType *res)
+    struct ResourceDataInfoBase {
+        ResourceDataInfoBase(typename Interface::ResourceType *res)
             : mResource(res)
         {
         }
 
-        ResourceDataInfo(ResourceDataInfo &&other) noexcept
+        ResourceDataInfoBase(ResourceDataInfoBase &&other) noexcept
             : mResource(other.mResource)
             , mRefCount(other.mRefCount.exchange(0))
         {
         }
 
-        ResourceDataInfo &operator=(ResourceDataInfo &&other) noexcept
+        ResourceDataInfoBase &operator=(ResourceDataInfoBase &&other) noexcept
         {
             mResource = other.mResource;
             mRefCount = other.mRefCount.exchange(0);
@@ -62,6 +62,11 @@ namespace Resources {
     private:
         typename Interface::ResourceType *mResource;
         std::atomic<uint32_t> mRefCount = 0;
+    };
+
+    template <typename Interface>
+    struct ResourceDataInfo : ResourceDataInfoBase<Interface> {
+        using ResourceDataInfoBase<Interface>::ResourceDataInfoBase;
     };
 
     template <typename Loader>
@@ -282,7 +287,7 @@ namespace Resources {
         }
 
         static void unload(const HandleType &handle, T *loader = nullptr)
-        {            
+        {
             assert(handle);
             if (!handle.info()->decRef()) {
                 if (!loader)
@@ -292,6 +297,8 @@ namespace Resources {
 
                 typename container_traits<DataContainer>::iterator it = container_traits<DataContainer>::toIterator(*loader->mData, *resource->mHolder);
                 loader->mData->erase(it);
+                *resource->mData = {};
+                *resource->mHolder = {};
 
                 //TODO: Check for multi-storage data for unnamed resources
                 if (resource->name() == ResourceBase::sUnnamed)

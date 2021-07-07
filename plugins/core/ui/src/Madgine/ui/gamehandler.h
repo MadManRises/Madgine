@@ -55,6 +55,8 @@ namespace UI {
 
         const InterfacesVector &dragStart() const;
 
+        bool dragging() const;
+
     private:
 
 

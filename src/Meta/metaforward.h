@@ -200,6 +200,8 @@ struct Vector2;
 struct Vector3;
 struct Vector4;
 
+struct NormalizedVector3;
+
 struct Vector2i;
 struct Vector3i;
 struct Vector4i;
@@ -211,7 +213,7 @@ struct Matrix4;
 
 struct Quaternion;
 
-
+struct Frustum;
 struct Ray;
 struct Sphere;
 struct Plane;

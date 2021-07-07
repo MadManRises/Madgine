@@ -54,24 +54,5 @@ namespace Render {
         static_cast<DirectX11Texture &>(tex).setSubData(offset, size, data);
     }
 
-    void DirectX11TextureLoader::setWrapMode(Texture &tex, WrapMode mode)
-    {
-        /*GLint glMode;
-        switch (mode) {
-        case WRAP_CLAMP_TO_EDGE:
-            glMode = GL_CLAMP_TO_EDGE;
-            break;
-        default:
-            std::terminate();
-        }
-
-        static_cast<DirectX11Texture &>(tex).setWrapMode(glMode);*/
-    }
-
-    void DirectX11TextureLoader::setMinMode(Texture &tex, MinMode mode)
-    {
-		//TODO
-    }
-
 }
 }

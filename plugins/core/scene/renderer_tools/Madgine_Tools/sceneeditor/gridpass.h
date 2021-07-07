@@ -27,8 +27,6 @@ namespace Tools {
         Render::GPUMeshLoader::HandleType mMesh;
         Render::ProgramLoader::HandleType mProgram;
 
-        GridPerFrame mParameters;
-
         Render::Camera *mCamera;
 
         int mPriority;

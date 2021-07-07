@@ -19,18 +19,19 @@ namespace Render {
     }
 
     OpenGLBuffer::OpenGLBuffer(GLenum target, const ByteBuffer &data)
-        : mTarget(target)
+        : mTarget(target), mSize(data.mSize)
     {
         glGenBuffers(1, &mHandle);
         GL_CHECK();
 
-        if (data.mData)
+        if (data.mSize)
             setData(data);
     }
 
     OpenGLBuffer::OpenGLBuffer(OpenGLBuffer &&other)
         : mHandle(std::exchange(other.mHandle, 0))
         , mTarget(std::exchange(other.mTarget, 0))
+        , mSize(std::exchange(other.mSize, 0))
     {
     }
 
@@ -43,6 +44,7 @@ namespace Render {
     {
         std::swap(mHandle, other.mHandle);
         std::swap(mTarget, other.mTarget);
+        std::swap(mSize, other.mSize);
         return *this;
     }
 
@@ -77,9 +79,33 @@ namespace Render {
     void OpenGLBuffer::setData(const ByteBuffer &data)
     {
         bind();
-        glBufferData(mTarget, data.mSize, data.mData, GL_STATIC_DRAW);
+        glBufferData(mTarget, data.mSize, data.mData, GL_DYNAMIC_DRAW);
         GL_CHECK();
         GL_LOG("Buffer-Data: " << size);
+        mSize = data.mSize;
+    }
+
+    WritableByteBuffer OpenGLBuffer::mapData()
+    {
+        struct UnmapDeleter {
+            OpenGLBuffer *mSelf;
+
+            void operator()(void *p)
+            {
+                mSelf->bind();
+                auto result = glUnmapBuffer(mSelf->mTarget);
+                assert(result);
+                GL_CHECK();
+            }
+        };
+        bind();
+        void *data = glMapBufferRange(mTarget, 0, mSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
+        GL_CHECK();
+        assert(data);
+
+        std::unique_ptr<void, UnmapDeleter> dataBuffer { data, { this } };
+
+        return { std::move(dataBuffer), mSize };
     }
 
     void OpenGLBuffer::setSubData(unsigned int offset, const ByteBuffer &data)

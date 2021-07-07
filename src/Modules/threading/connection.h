@@ -2,27 +2,28 @@
 
 #include "connectionstore.h"
 #include "taskqueue.h"
+#include "Generic/linkednode.h"
 
 namespace Engine {
 namespace Threading {
 
     struct MODULES_EXPORT ConnectionBase {
         virtual ~ConnectionBase() = default;
-        ConnectionBase(std::shared_ptr<ConnectionBase> *prev);
+        ConnectionBase() = default;
         ConnectionBase(const ConnectionBase &other) = delete;
         void disconnect();
+
+        DoublyLinkedNode<std::shared_ptr<ConnectionBase>> mNode;
 
     protected:
         template <typename Con, typename... Args>
         std::weak_ptr<Con> cloneImpl(Args &&... args)
         {
-            std::shared_ptr<Con> ptr = ConnectionStore::create<Con>(&mNext, std::forward<Args>(args)...);
-            mNext = ptr;
+            std::shared_ptr<Con> ptr = ConnectionStore::create<Con>(std::forward<Args>(args)...);
+            mNode.link(ptr);
             return ptr;
-        }
-
-        std::shared_ptr<ConnectionBase> mNext;
-        std::shared_ptr<ConnectionBase> *mPrev;
+        }       
+        
     };
 
     template <typename... _Ty>
@@ -35,15 +36,13 @@ namespace Threading {
 
     template <typename T, typename... _Ty>
     struct ConnectionInstance : Connection<_Ty...> {
-        ConnectionInstance(std::shared_ptr<ConnectionBase> *prev, T &&impl)
-            : Connection<_Ty...>(prev)
-            , mImpl(std::forward<T>(impl))
+        ConnectionInstance(T &&impl)
+            : mImpl(std::forward<T>(impl))
         {
         }
 
-        ConnectionInstance(std::shared_ptr<ConnectionBase> *prev, const ConnectionInstance &other)
-            : Connection<_Ty...>(prev)
-            , mImpl(other.mImpl)
+        ConnectionInstance(const ConnectionInstance &other)
+            : mImpl(other.mImpl)
         {
         }
 
@@ -58,15 +57,13 @@ namespace Threading {
 
     template <typename T, typename... _Ty>
     struct ConnectionInstance<T *, _Ty...> : Connection<_Ty...> {    
-        ConnectionInstance(std::shared_ptr<ConnectionBase> *prev, T *impl)
-            : Connection<_Ty...>(prev)
-            , mImpl(impl)
+        ConnectionInstance(T *impl)
+            : mImpl(impl)
         {
         }
 
-        ConnectionInstance(std::shared_ptr<ConnectionBase> *prev, const ConnectionInstance &other)
-            : Connection<_Ty...>(prev)
-            , mImpl(other.mImpl)
+        ConnectionInstance(const ConnectionInstance &other)
+            : mImpl(other.mImpl)
         {
         }
 
@@ -81,13 +78,13 @@ namespace Threading {
 
     template <typename T, typename... _Ty>
     struct DirectConnection : ConnectionInstance<T, _Ty...> {
-        DirectConnection(std::shared_ptr<ConnectionBase> *prev, T &&impl)
-            : ConnectionInstance<T, _Ty...>(prev, std::forward<T>(impl))
+        DirectConnection(T &&impl)
+            : ConnectionInstance<T, _Ty...>(std::forward<T>(impl))
         {
         }
 
-        DirectConnection(std::shared_ptr<ConnectionBase> *prev, const DirectConnection<T, _Ty...> &other)
-            : ConnectionInstance<T, _Ty...>(prev, other)
+        DirectConnection(const DirectConnection<T, _Ty...> &other)
+            : ConnectionInstance<T, _Ty...>(other)
         {
         }
 
@@ -104,15 +101,15 @@ namespace Threading {
 
     template <typename T, typename... _Ty>
     struct QueuedConnection : ConnectionInstance<T, _Ty...> {    
-        QueuedConnection(std::shared_ptr<ConnectionBase> *prev, T &&impl,
+        QueuedConnection(T &&impl,
             TaskQueue &queue)
-            : ConnectionInstance<T, _Ty...>(prev, std::forward<T>(impl))
+            : ConnectionInstance<T, _Ty...>(std::forward<T>(impl))
             , mQueue(queue)
         {
         }
 
-        QueuedConnection(std::shared_ptr<ConnectionBase> *prev, const QueuedConnection<T, _Ty...> &other)
-            : ConnectionInstance<T, _Ty...>(prev, other)
+        QueuedConnection(const QueuedConnection<T, _Ty...> &other)
+            : ConnectionInstance<T, _Ty...>(other)
             , mQueue(other.mQueue)
         {
         }

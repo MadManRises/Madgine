@@ -20,6 +20,9 @@ namespace Render {
 
     RenderTarget::~RenderTarget()
     {
+        for (RenderPass* pass : mRenderPasses) {
+            pass->shutdown();
+        }
         mContext->removeRenderTarget(this);
     }
 
@@ -37,10 +40,12 @@ namespace Render {
             std::upper_bound(mRenderPasses.begin(), mRenderPasses.end(), pass,
                 [](RenderPass *first, RenderPass *second) { return first->priority() < second->priority(); }),
             pass);
+        pass->setup(mContext);
     }
 
     void RenderTarget::removeRenderPass(RenderPass *pass)
     {
+        pass->shutdown();
         mRenderPasses.erase(std::find(mRenderPasses.begin(), mRenderPasses.end(), pass));
     }
 

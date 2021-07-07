@@ -9,7 +9,7 @@ namespace Render {
 
     DirectX11Texture::DirectX11Texture(TextureType type, DataFormat format, UINT bind, size_t width, size_t height, const ByteBuffer &data)
         : mType(type)
-        , mSize{ static_cast<int>(width), static_cast<int>(height) }
+        , mSize { static_cast<int>(width), static_cast<int>(height) }
         , mFormat(format)
         , mBind(bind)
     {
@@ -71,25 +71,7 @@ namespace Render {
         HRESULT hr = sDevice->CreateShaderResourceView(mResource, &shaderResourceViewDesc, reinterpret_cast<ID3D11ShaderResourceView **>(&mTextureHandle));
         DX11_CHECK(hr);
 
-        D3D11_SAMPLER_DESC samplerDesc;
-
-        samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-        samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-        samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-        samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-        samplerDesc.MipLODBias = 0.0f;
-        samplerDesc.MaxAnisotropy = 1;
-        samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-        samplerDesc.BorderColor[0] = 0;
-        samplerDesc.BorderColor[1] = 0;
-        samplerDesc.BorderColor[2] = 0;
-        samplerDesc.BorderColor[3] = 0;
-        samplerDesc.MinLOD = 0;
-        samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-        // Create the texture sampler state.
-        hr = sDevice->CreateSamplerState(&samplerDesc, &mSampler);
-        DX11_CHECK(hr);
+        
     }
 
     DirectX11Texture::DirectX11Texture(TextureType type, DataFormat format, UINT bind)
@@ -120,14 +102,13 @@ namespace Render {
         std::swap(mType, other.mType);
         std::swap(mBind, other.mBind);
         std::swap(mFormat, other.mFormat);
-        std::swap(mSampler, other.mSampler);
         std::swap(mSize, other.mSize);
         return *this;
     }
 
     void DirectX11Texture::reset()
     {
-        if (mTextureHandle) {
+        if (mTextureHandle) {            
             switch (mType) {
             case Texture2D:
                 static_cast<ID3D11Texture2D *>(mResource)->Release();
@@ -143,8 +124,7 @@ namespace Render {
 
     void DirectX11Texture::bind() const
     {
-        sDeviceContext->PSSetShaderResources(0, 1, reinterpret_cast<ID3D11ShaderResourceView *const *>(&mTextureHandle));
-        sDeviceContext->PSSetSamplers(0, 1, &mSampler);
+        sDeviceContext->PSSetShaderResources(0, 1, reinterpret_cast<ID3D11ShaderResourceView *const *>(&mTextureHandle));        
     }
 
     void DirectX11Texture::setData(Vector2i size, const ByteBuffer &data)

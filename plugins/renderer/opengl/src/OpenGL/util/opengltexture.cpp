@@ -15,7 +15,7 @@ namespace Render {
         glGenTextures(1, &temp);
         mTextureHandle = temp;
         GL_CHECK();
-        setFilter(GL_NEAREST);
+        setFilter(GL_LINEAR);
         bind();
 #if !OPENGL_ES
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
@@ -139,6 +139,7 @@ namespace Render {
     {
         bind();
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
+        GL_CHECK();
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
         GL_CHECK();
     }

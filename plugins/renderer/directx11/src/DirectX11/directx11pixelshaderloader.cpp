@@ -10,8 +10,6 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
-#include "codegen/codegen_shader.h"
-
 #include "directx11shadercodegen.h"
 
 #include "Interfaces/filesystem/api.h"

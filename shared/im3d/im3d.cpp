@@ -1,5 +1,5 @@
-#include "Modules/moduleslib.h"
 #include "Meta/metalib.h"
+#include "Modules/moduleslib.h"
 
 #include "im3d.h"
 
@@ -407,7 +407,6 @@ namespace Im3D {
         };
         indices[1] = 1;
 
-
         Vector3 p = d.perpendicular();
         p.normalize();
         p -= d.normalizedCopy();
@@ -610,6 +609,22 @@ namespace Im3D {
         MeshParameters meshParam = param;
         meshParam.mTransform = meshParam.mTransform * TranslationMatrix(center);
         Mesh(IM3D_LINES, vertices.get(), vertexCount, meshParam, indices.get(), indexCounter);
+    }
+
+    MADGINE_IM3D_EXPORT void Frustum(const struct Frustum &frustum, const Parameters &param)
+    {
+        Render::Vertex vertices[8];
+        auto corners = frustum.getCorners();
+        for (size_t i = 0; i < 8; ++i) {
+            vertices[i].mPos = corners[i];
+            vertices[i].mColor = param.mColor;
+        }
+
+        static constexpr unsigned short indices[] = {
+            0, 1, 0, 3, 0, 4, 1, 2, 1, 5, 2, 3, 2, 6, 3, 7, 4, 5, 4, 7, 5, 6, 6, 7
+        };
+
+        Mesh(IM3D_LINES, vertices, 8, param, indices, 24);
     }
 
     bool BoundingSphere(const char *name, Im3DBoundingObjectFlags flags, size_t priority)

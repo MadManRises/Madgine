@@ -1,11 +1,13 @@
 cbuffer PerApplication : register(b0)
 {
     matrix p;
+	matrix lightProjection;
 }
 
 cbuffer PerFrame : register(b1)
 {   
     matrix v;   
+	matrix lightView;
 
     float3 lightColor;
 	float3 lightDir;
@@ -22,14 +24,18 @@ cbuffer PerObject : register(b2)
 }
 
 Texture2D tex : register(t0);
+Texture2D shadowDepthMap : register(t1);
+
 SamplerState texSampler : register(s0);
+SamplerState clampSampler : register(s1);
 
 struct PixelShaderInput {
     float4 position : SV_POSITION;
     float4 color : COLOR;
     float4 worldPos : POSITION;
     float3 normal : NORMAL;
-    float2 uv : TEXCOORD;
+    float2 uv : TEXCOORD0;
+	float4 lightViewPosition : TEXCOORD1;
 };
 
 float median(float r, float g, float b) {
@@ -48,7 +54,7 @@ float4 main(PixelShaderInput IN)
 			float sigDist = median(sample.r, sample.g, sample.b) - 0.5;
 			//sigDist *= dot(msdfUnit, float2(0.5));
 			sigDist *= 4.0;
-			float opacity = clamp(sigDist + 0.5, 0.0, 1.0);
+			float opacity = saturate(sigDist + 0.5);
 			colorAcc = lerp(float4(0,0,0,0), colorAcc, opacity);
 		}
 		else
@@ -58,13 +64,26 @@ float4 main(PixelShaderInput IN)
 	}
 	
 	if (hasLight){
+		float bias = 0.001f;
+		float2 lightTexCoord;
+		lightTexCoord.x = IN.lightViewPosition.x / IN.lightViewPosition.w / 2.0 + 0.5;
+		lightTexCoord.y = -IN.lightViewPosition.y / IN.lightViewPosition.w / 2.0 + 0.5;
+
+		float shadowDepth = shadowDepthMap.Sample(clampSampler, lightTexCoord).r;
+		float lightDepth = IN.lightViewPosition.z / IN.lightViewPosition.w;
+		lightDepth = lightDepth - bias;
+
 		float ambientStrength = 0.4;
 		float3 ambient = ambientStrength * lightColor;
 
-		float diffuseStrength = 0.7;
-		float3 norm = normalize(IN.normal);
-		float diff = max(dot(norm, -lightDir), 0.0);
-		float3 diffuse = diffuseStrength * diff * lightColor;
+		float3 diffuse = float3(0,0,0);
+
+		if (lightDepth < shadowDepth){
+			float diffuseStrength = 0.7;
+			float3 norm = normalize(IN.normal);
+			float diff = max(dot(norm, -lightDir), 0.0);
+			diffuse = diffuseStrength * diff * lightColor;
+		}
 
 		colorAcc = float4(ambient + diffuse,1.0) * colorAcc;
 	}

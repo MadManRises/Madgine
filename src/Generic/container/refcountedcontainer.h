@@ -14,12 +14,12 @@ struct RefcountedContainer {
 
     struct ControlBlock {
 
-        using It = typename internal_container_type::iterator;
+        using position_handle = typename internal_traits::position_handle;
 
         template <typename... Args>
         ControlBlock(Args &&... args)
         {
-            static_assert(sizeof(It) + sizeof(void *) <= sizeof(value_type));
+            static_assert(sizeof(position_handle) + sizeof(void *) <= sizeof(value_type));
             new (&mData) value_type(std::forward<Args>(args)...);
         }
 
@@ -42,27 +42,27 @@ struct RefcountedContainer {
         }
 
         template <typename... Args>
-        It emplace(Args &&... args)
+        position_handle emplace(Args &&... args)
         {
             assert(mDeadFlag && mRefCount == 0);
-            It next = it();
-            it().~It();
+            position_handle next = handle();
+            handle().~position_handle();
             mDeadFlag = false;
             new (&mData) value_type(std::forward<Args>(args)...);
             return next;
         }
 
-        void destroy(It *head, const It &selfIt)
+        void destroy(position_handle *head, const position_handle &selfIt)
         {
             assert(!mDeadFlag);
             mData.~value_type();
             mDeadFlag = true;
             mHead = head;
             if (mRefCount == 0) {
-                new (&it()) It(*head);
+                new (&handle()) position_handle(*head);
                 *head = selfIt;
             } else {
-                new (&it()) It(selfIt);
+                new (&handle()) position_handle(selfIt);
             }
         }
 
@@ -93,10 +93,10 @@ struct RefcountedContainer {
             return reinterpret_cast<ControlBlock *>(ptr);
         }
 
-        It &it()
+        position_handle &handle()
         {
             assert(mDeadFlag);
-            return *reinterpret_cast<It *>(&mHead + 1);
+            return *reinterpret_cast<position_handle *>(&mHead + 1);
         }
 
         void incRef()
@@ -108,7 +108,7 @@ struct RefcountedContainer {
         {
             --mRefCount;
             if (mRefCount == 0 && mDeadFlag) {
-                std::swap(*mHead, it());
+                std::swap(*mHead, handle());
             }
         }
 
@@ -120,8 +120,8 @@ struct RefcountedContainer {
     private:
         union {
             value_type mData;
-            It *mHead;
-            //It mIt;
+            position_handle *mHead;
+            //position_handle mHandle;
         };
         bool mDeadFlag : 1 = false;
         uint32_t mRefCount : 31 = 0;
@@ -324,7 +324,7 @@ struct RefcountedContainer {
     void clear()
     {
         for (auto it = blocks_begin(); it != blocks().end(); ++it) {
-            it->destroy(&mFreeListHead, it.it());
+            it->destroy(&mFreeListHead, internal_traits::toPositionHandle(mData, it.it()));
         }
         mSize = 0;
     }
@@ -332,15 +332,17 @@ struct RefcountedContainer {
     template <typename... Args>
     Pib<iterator> emplace(const const_iterator &where, Args &&... args)
     {
-        assert(where.it() == mData.end() || where.it() == mFreeListHead);
+        internal_traits::iterator freeListIterator = internal_traits::toIterator(mData, mFreeListHead);
+
+        assert(where.it() == mData.end() || where.it() == freeListIterator);
         ++mSize;
         typename internal_traits::emplace_return it;
-        if (mFreeListHead == mData.end()) {
+        if (freeListIterator == mData.end()) {
             it = internal_traits::emplace(mData, where.it(), std::forward<Args>(args)...);
-            mFreeListHead = std::next(it);
+            mFreeListHead = internal_traits::toPositionHandle(mData, std::next(it));
         } else {
-            it = mFreeListHead;
-            mFreeListHead = mFreeListHead->emplace(std::forward<Args>(args)...);
+            it = freeListIterator;
+            mFreeListHead = freeListIterator->emplace(std::forward<Args>(args)...);
         }
         return { { it, mData }, internal_traits::was_emplace_successful(it) };
     }
@@ -348,7 +350,7 @@ struct RefcountedContainer {
     iterator erase(const iterator &where)
     {
         --mSize;
-        where.get_block().destroy(&mFreeListHead, where.it());
+        where.get_block().destroy(&mFreeListHead, internal_traits::toPositionHandle(mData, where.it()));
 
         return { where.it(), mData };
     }
@@ -423,7 +425,7 @@ private:
     friend struct container_traits<RefcountedContainer<C>, void>;
 
     internal_container_type mData;
-    typename internal_container_type::iterator mFreeListHead = mData.end();
+    typename internal_traits::position_handle mFreeListHead = internal_traits::toPositionHandle(mData, mData.end());
     size_t mSize = 0;
 };
 

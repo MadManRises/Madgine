@@ -21,6 +21,8 @@ namespace Render {
 
         void reset();
         void setData(const ByteBuffer &data);
+        WritableByteBuffer mapData();
+
         void setSubData(unsigned int offset, const ByteBuffer &data);
 
         GLuint handle();
@@ -28,6 +30,7 @@ namespace Render {
     private:
         GLuint mHandle = 0;
         GLenum mTarget;
+        size_t mSize = 0;
     };
 
 }
