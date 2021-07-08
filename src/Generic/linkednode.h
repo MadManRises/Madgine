@@ -25,7 +25,7 @@ template <typename PtrT>
 struct DoublyLinkedStartNode : DoublyLinkedNodeBase<PtrT> {
 
     void reset() {
-        mNext = nullptr;
+        this->mNext = nullptr;
     }
 
 };
@@ -34,11 +34,11 @@ template <typename PtrT>
 struct DoublyLinkedNode : DoublyLinkedNodeBase<PtrT> {
 
     void unlink() {
-        if (mNext)
-            mNext->mNode.mPrev = mPrev;        
-        *mPrev = mNext;
+        if (this->mNext)
+            this->mNext->mNode.mPrev = mPrev;        
+        *mPrev = this->mNext;
         mPrev = nullptr;
-        mNext = nullptr;
+        this->mNext = nullptr;
     }
 
 private:
