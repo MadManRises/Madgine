@@ -32,7 +32,6 @@
 #include <unordered_map>
 #include <optional>
 #include <cstring>
-#include <compare>
 
 #if WINDOWS
 #    include <memory_resource>

@@ -19,7 +19,6 @@
 #include <cmath>
 #include <cstddef>
 #include <cstring>
-#include <compare>
 
 
 #include "metaforward.h"
