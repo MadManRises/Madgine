@@ -31,7 +31,7 @@ namespace Serialize {
     template <typename F>
     EmplaceRequestBuilder(F &&f) -> EmplaceRequestBuilder<Builder<F, EmplaceRequestBuilder, 4>>;
 
-    template <typename C, typename Observer = NoOpFunctor, typename controlled = std::false_type, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
+    template <typename C, typename Observer = NoOpFunctor, typename controlled = std::false_type, typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
     struct SyncableContainerImpl : SerializableContainerImpl<C, Observer, controlled, OffsetPtr>, Syncable<OffsetPtr> {
 
         using _traits = container_traits<C>;
@@ -282,10 +282,10 @@ namespace Serialize {
         }
     };
 
-    template <typename C, typename Observer = NoOpFunctor, typename controlled = std::false_type, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
+    template <typename C, typename Observer = NoOpFunctor, typename controlled = std::false_type, typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
     using SyncableContainer = container_api<SyncableContainerImpl<C, Observer, controlled, OffsetPtr>>;
 
-#define SYNCABLE_CONTAINER(Name, ...) OFFSET_CONTAINER(Name, ::Engine::Serialize::SyncableContainer<__VA_ARGS__>)
+#define SYNCABLE_CONTAINER(Name, ...) MEMBER_OFFSET_CONTAINER(Name, ::Engine::Serialize::SyncableContainer<__VA_ARGS__>)
 
 }
 

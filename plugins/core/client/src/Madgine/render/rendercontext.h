@@ -21,6 +21,9 @@ namespace Render {
 
         void render();
 
+        virtual void beginFrame();
+        virtual void endFrame();
+
         template <typename F>
         static bool execute(F &&f)
         {

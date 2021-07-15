@@ -175,11 +175,6 @@ namespace Render {
         GL_CHECK();*/
     }
 
-    TextureHandle DirectX11Texture::handle() const
-    {
-        return mTextureHandle;
-    }
-
     ID3D11Resource *DirectX11Texture::resource() const
     {
         return mResource;

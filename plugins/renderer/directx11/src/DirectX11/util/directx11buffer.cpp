@@ -11,34 +11,52 @@
 namespace Engine {
 namespace Render {
 
-    DirectX11Buffer::DirectX11Buffer(UINT bind, const ByteBuffer &data)
-        : mBind(bind)
-        , mSize(data.mSize)
+    DirectX11Buffer::DirectX11Buffer(UINT bind, size_t size)
+        : mSize(size)
+        , mBind(bind)
     {
-        if (data.mSize) {
-            D3D11_BUFFER_DESC vertexBufferDesc;
-            ZeroMemory(&vertexBufferDesc, sizeof(D3D11_BUFFER_DESC));
+        if (size > 0) {
+            D3D11_BUFFER_DESC bufferDesc;
+            ZeroMemory(&bufferDesc, sizeof(D3D11_BUFFER_DESC));
 
-            vertexBufferDesc.BindFlags = bind;
-            vertexBufferDesc.ByteWidth = data.mSize;
-            vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-            vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+            bufferDesc.BindFlags = bind;
+            bufferDesc.ByteWidth = size;
+            bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+            bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 
-            D3D11_SUBRESOURCE_DATA resourceData;
-            ZeroMemory(&resourceData, sizeof(D3D11_SUBRESOURCE_DATA));
-
-            resourceData.pSysMem = data.mData;
-
-            HRESULT hr = sDevice->CreateBuffer(&vertexBufferDesc, data.mData ? &resourceData : nullptr, &mBuffer);
+            HRESULT hr = sDevice->CreateBuffer(&bufferDesc, nullptr, &mBuffer);
             DX11_CHECK(hr);
         }
     }
 
-    DirectX11Buffer::DirectX11Buffer(DirectX11Buffer &&other)
-        : mBind(std::exchange(other.mBind, 0))
-        , mBuffer(std::exchange(other.mBuffer, nullptr))
-        , mSize(std::exchange(other.mSize, 0))
+    DirectX11Buffer::DirectX11Buffer(UINT bind, const ByteBuffer &data)
+        : mSize(data.mSize)
+        , mBind(bind)
+    {
+        assert(data.mData);
+        assert(data.mSize);
+        D3D11_BUFFER_DESC bufferDesc;
+        ZeroMemory(&bufferDesc, sizeof(D3D11_BUFFER_DESC));
 
+        bufferDesc.BindFlags = bind;
+        bufferDesc.ByteWidth = data.mSize;        
+        bufferDesc.CPUAccessFlags = 0;
+        bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+
+        D3D11_SUBRESOURCE_DATA subData;
+        ZeroMemory(&subData, sizeof(D3D11_SUBRESOURCE_DATA));
+        subData.pSysMem = data.mData;
+        subData.SysMemPitch = 0;
+        subData.SysMemSlicePitch = 0;
+
+        HRESULT hr = sDevice->CreateBuffer(&bufferDesc, &subData, &mBuffer);
+        DX11_CHECK(hr);
+    }
+
+    DirectX11Buffer::DirectX11Buffer(DirectX11Buffer &&other)
+        : mSize(std::exchange(other.mSize, 0))
+        , mBind(std::exchange(other.mBind, 0))
+        , mBuffer(std::exchange(other.mBuffer, nullptr))
     {
     }
 
@@ -87,8 +105,15 @@ namespace Render {
     {
         if (mSize != data.mSize)
             *this = { mBind, data };
-        else
-            sDeviceContext->UpdateSubresource(mBuffer, 0, nullptr, data.mData, 0, 0);
+        else if (data.mSize > 0)
+            sDeviceContext->UpdateSubresource(mBuffer, 0, nullptr, data.mData, data.mSize, 0);        
+    }
+
+    void DirectX11Buffer::resize(size_t size)
+    {
+        if (mSize != size) {
+            *this = { mBind, size };
+        }
     }
 
     WritableByteBuffer DirectX11Buffer::mapData()

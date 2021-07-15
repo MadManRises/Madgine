@@ -40,7 +40,7 @@ namespace Tools {
             Resources::ImageLoader::HandleType data = image->loadData();
 
             mImageTexture.setData({ data->mWidth, data->mHeight }, { data->mBuffer, static_cast<size_t>(data->mWidth * data->mHeight) });
-            ImGui::Image((void *)(uintptr_t)mImageTexture.handle(), { static_cast<float>(data->mWidth), static_cast<float>(data->mHeight) });
+            ImGui::Image((void *)(uintptr_t)mImageTexture.mTextureHandle, { static_cast<float>(data->mWidth), static_cast<float>(data->mHeight) });
         });
 
         return ToolBase::init();

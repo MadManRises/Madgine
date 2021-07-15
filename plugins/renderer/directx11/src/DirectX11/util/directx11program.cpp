@@ -84,15 +84,15 @@ namespace Render {
         }
     }
 
-    void DirectX11Program::setParameters(const ByteBuffer &data, size_t index)
+    void DirectX11Program::setParameters(size_t index, size_t size)
     {
         if (mConstantBuffers.size() <= index)
             mConstantBuffers.resize(index + 1);
 
         if (!mConstantBuffers[index]) {
-            mConstantBuffers[index] = { D3D11_BIND_CONSTANT_BUFFER, data };
+            mConstantBuffers[index] = { D3D11_BIND_CONSTANT_BUFFER, size };
         } else {
-            mConstantBuffers[index].setData(data);
+            mConstantBuffers[index].resize(size);
         }
     }
 
@@ -101,15 +101,20 @@ namespace Render {
         return mConstantBuffers[index].mapData();
     }
 
-	void DirectX11Program::setDynamicParameters(const ByteBuffer &data, size_t index)
+	void DirectX11Program::setDynamicParameters(size_t index, const ByteBuffer &data)
     {
         if (mDynamicBuffers.size() <= index)
                 mDynamicBuffers.resize(index + 1);
 
         if (!mDynamicBuffers[index]) {
-            mDynamicBuffers[index] = { D3D11_BIND_CONSTANT_BUFFER, data };
+            mDynamicBuffers[index] = { D3D11_BIND_CONSTANT_BUFFER, data.mSize };
         } else {
-            mDynamicBuffers[index].setData(data);
+            mDynamicBuffers[index].resize(data.mSize);
+        }
+
+        if (data.mSize > 0) {
+            auto target = mDynamicBuffers[index].mapData();
+            std::memcpy(target.mData, data.mData, data.mSize);
         }
     }
 }

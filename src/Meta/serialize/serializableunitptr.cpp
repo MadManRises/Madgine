@@ -76,7 +76,7 @@ namespace Serialize {
     {
     }
 
-    bool SerializableUnitConstPtr::isActive(size_t offset) const
+    bool SerializableUnitConstPtr::isActive(OffsetPtr offset) const
     {
         //TODO: Maybe save lookup -> enforce order of elements in memory
         return mType->getIndex(offset) < unit()->mActiveIndex;

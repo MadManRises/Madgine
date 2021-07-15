@@ -6,7 +6,7 @@ namespace Render {
     struct MADGINE_OPENGL_EXPORT OpenGLBuffer {
 
         OpenGLBuffer() = default;
-        OpenGLBuffer(GLenum target);
+        OpenGLBuffer(GLenum target, size_t size);
         OpenGLBuffer(GLenum target, const ByteBuffer &data);
         OpenGLBuffer(const OpenGLBuffer &) = delete;
         OpenGLBuffer(OpenGLBuffer &&);
@@ -21,6 +21,7 @@ namespace Render {
 
         void reset();
         void setData(const ByteBuffer &data);
+        void resize(size_t size);
         WritableByteBuffer mapData();
 
         void setSubData(unsigned int offset, const ByteBuffer &data);

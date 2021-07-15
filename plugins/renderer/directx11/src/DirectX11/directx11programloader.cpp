@@ -71,9 +71,9 @@ namespace Render {
         return true;
     }
 
-    void DirectX11ProgramLoader::setParameters(Program &program, const ByteBuffer &data, size_t index)
+    void DirectX11ProgramLoader::setParameters(Program &program, size_t index, size_t size)
     {
-        static_cast<DirectX11Program &>(program).setParameters(data, index);
+        static_cast<DirectX11Program &>(program).setParameters(index, size);
     }
 
     WritableByteBuffer Engine::Render::DirectX11ProgramLoader::mapParameters(Program &program, size_t index)
@@ -81,9 +81,9 @@ namespace Render {
         return static_cast<DirectX11Program&>(program).mapParameters(index);
     }
 
-	void DirectX11ProgramLoader::setDynamicParameters(Program &program, const ByteBuffer &data, size_t index)
+	void DirectX11ProgramLoader::setDynamicParameters(Program &program, size_t index, const ByteBuffer &data)
     {
-        static_cast<DirectX11Program &>(program).setDynamicParameters(data, index);
+        static_cast<DirectX11Program &>(program).setDynamicParameters(index, data);
     }
 
 }

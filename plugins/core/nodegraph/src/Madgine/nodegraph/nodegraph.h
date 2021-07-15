@@ -70,12 +70,12 @@ namespace NodeGraph {
 
         void onDataProviderRemove(const NodeBase *node, uint32_t index);
 
-        std::vector<FlowOutPinPrototype> mFlowOutPins;
         std::vector<FlowInPinPrototype> mFlowInPins;
-        std::vector<DataOutPinPrototype> mDataOutPins;
-        std::vector<DataInPinPrototype> mDataInPins;
-        std::vector<DataProviderPinPrototype> mDataProviderPins;
+        std::vector<FlowOutPinPrototype> mFlowOutPins;
         std::vector<DataReceiverPinPrototype> mDataReceiverPins;
+        std::vector<DataProviderPinPrototype> mDataProviderPins;
+        std::vector<DataInPinPrototype> mDataInPins;
+        std::vector<DataOutPinPrototype> mDataOutPins;        
 
     protected:
         static const char *nodeCreationNames(size_t index);

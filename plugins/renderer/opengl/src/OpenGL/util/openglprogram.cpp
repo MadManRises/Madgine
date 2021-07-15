@@ -141,16 +141,16 @@ namespace Render {
 #endif
     }
 
-    void OpenGLProgram::setParameters(const ByteBuffer &data, size_t index)
+    void OpenGLProgram::setParameters(size_t index, size_t size)
     {
         if (mUniformBuffers.size() <= index)
             mUniformBuffers.resize(index + 1);
 
         if (!mUniformBuffers[index]) {
-            mUniformBuffers[index] = GL_UNIFORM_BUFFER;
+            mUniformBuffers[index] = { GL_UNIFORM_BUFFER, size };
+        } else {
+            mUniformBuffers[index].resize(size);
         }
-
-        mUniformBuffers[index].setData(data);
     }
 
     WritableByteBuffer OpenGLProgram::mapParameters(size_t index)
@@ -158,18 +158,24 @@ namespace Render {
         return mUniformBuffers[index].mapData();
     }
 
-    void OpenGLProgram::setDynamicParameters(const ByteBuffer &data, size_t index)
+    void OpenGLProgram::setDynamicParameters(size_t index, const ByteBuffer &data)
     {
         if (mShaderStorageBuffers.size() <= index)
             mShaderStorageBuffers.resize(index + 1);
 
 #if !OPENGL_ES
         if (!mShaderStorageBuffers[index]) {
-            mShaderStorageBuffers[index] = GL_SHADER_STORAGE_BUFFER;
-        }
+            mShaderStorageBuffers[index] = { GL_SHADER_STORAGE_BUFFER, data.mSize };
+        } else 
 #endif
+        {
+            mShaderStorageBuffers[index].resize(data.mSize);
+        }
 
-        mShaderStorageBuffers[index].setData(data);
+        if (data.mSize > 0) { 
+            auto target = mShaderStorageBuffers[index].mapData();
+            std::memcpy(target.mData, data.mData, data.mSize);
+        }
     }
 
     std::vector<OpenGLProgram::UniformBufferDescriptor> OpenGLProgram::uniformBuffers()

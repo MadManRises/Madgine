@@ -121,11 +121,6 @@ namespace Render {
         GL_CHECK();*/
     }
 
-    GLuint OpenGLTexture::handle() const
-    {
-        return mTextureHandle;
-    }
-
     void OpenGLTexture::setWrapMode(GLint mode)
     {
         bind();

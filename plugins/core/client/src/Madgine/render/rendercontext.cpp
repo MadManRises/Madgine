@@ -46,8 +46,18 @@
 
         void RenderContext::render()
         {
+            beginFrame();
             for (RenderTarget *target : safeIterate(reverseIt(mRenderTargets)))
                 target->render();
+            endFrame();
+        }
+
+        void RenderContext::beginFrame()
+        {
+        }
+
+        void RenderContext::endFrame()
+        {
         }
 
         void RenderContext::checkThread()

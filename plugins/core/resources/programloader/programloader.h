@@ -26,15 +26,10 @@ namespace Render {
             void create(const std::string &name, CodeGen::ShaderFile &&file, ProgramLoader *loader = nullptr);
             void createUnnamed(CodeGen::ShaderFile &&file, ProgramLoader *loader = nullptr);
 
-            template <typename T, typename = std::enable_if_t<!is_instance_v<T, ByteBufferImpl>>>
-            void setParameters(const T &param, size_t index, ProgramLoader *loader = nullptr)
-            {
-                setParameters({ &param, sizeof(T) }, index, loader);
-            }
-            void setParameters(const ByteBuffer &data, size_t index, ProgramLoader *loader = nullptr);
+            void setParameters(size_t index, size_t size, ProgramLoader *loader = nullptr);
             WritableByteBuffer mapParameters(size_t index, ProgramLoader *loader = nullptr);
 
-			void setDynamicParameters(const ByteBuffer &data, size_t index, ProgramLoader *loader = nullptr);
+			void setDynamicParameters(size_t index, const ByteBuffer &data, ProgramLoader *loader = nullptr);
         };
 
         ProgramLoader();
@@ -42,10 +37,10 @@ namespace Render {
         virtual bool create(Program &program, const std::string &name) = 0;
         virtual bool create(Program &program, const std::string &name, const CodeGen::ShaderFile &file) = 0;
 
-        virtual void setParameters(Program &program, const ByteBuffer &data, size_t index) = 0;
+        virtual void setParameters(Program &program, size_t index, size_t size) = 0;
         virtual WritableByteBuffer mapParameters(Program &program, size_t index) = 0;
 
-		virtual void setDynamicParameters(Program &program, const ByteBuffer &data, size_t index) = 0;
+		virtual void setDynamicParameters(Program &program, size_t index, const ByteBuffer &data) = 0;
     };
 
 }

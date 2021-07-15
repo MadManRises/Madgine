@@ -28,6 +28,8 @@
 
 #include "imgui/valuetypepayload.h"
 
+#include "imgui/imgui_internal.h"
+
 UNIQUECOMPONENT(Engine::Tools::FunctionTool);
 
 namespace Engine {

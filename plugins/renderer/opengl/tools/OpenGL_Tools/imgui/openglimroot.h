@@ -14,6 +14,8 @@ namespace Tools {
         virtual void finalize() override;
 
         virtual void newFrame(float timeSinceLastFrame) override;
+
+        virtual void renderMainDrawList() override;
     };
 
 }

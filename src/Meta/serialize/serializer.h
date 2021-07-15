@@ -1,13 +1,14 @@
 #pragma once
 
 #include "Generic/callerhierarchy.h"
+#include "Generic/offsetptr.h"
 
 namespace Engine {
 namespace Serialize {
 
     struct Serializer {
         const char *mFieldName;
-        size_t (*mOffset)() = nullptr;
+        OffsetPtr (*mOffset)() = nullptr;
 
         void (*mWriteState)(const SerializableDataUnit *, SerializeOutStream &, const char *, CallerHierarchyBasePtr) = nullptr;
         StreamResult (*mReadState)(SerializableDataUnit *, SerializeInStream &, const char *, CallerHierarchyBasePtr) = nullptr;

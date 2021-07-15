@@ -163,11 +163,14 @@ namespace Render {
             interpret->mHandle.createUnnamed(std::move(gen.mFile));
 
             for (GPUBufferCodeGeneratorData *buffer : gen.mBuffers) {
-                interpret->mHandle.setParameters(buffer->mInterpretData->mBuffer, buffer->mIndex);
+                interpret->mHandle.setParameters(buffer->mIndex, buffer->mInterpretData->mBuffer.mSize);
 
                 buffer->mInterpretData->mMapper = [handle { interpret->mHandle }, index { buffer->mIndex }]() mutable {
                     return handle.mapParameters(index);
                 };
+
+                auto targetBuffer = buffer->mInterpretData->mMapper();
+                std::memcpy(targetBuffer.mData, buffer->mInterpretData->mBuffer.mData, buffer->mInterpretData->mBuffer.mSize);
             }
 
             //interpret->mHandle.create("test");

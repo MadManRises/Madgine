@@ -170,7 +170,7 @@ namespace Serialize {
         get(index).mWriteRequest(parent, out, data);
     }
 
-    uint8_t SerializeTable::getIndex(size_t offset) const
+    uint8_t SerializeTable::getIndex(OffsetPtr offset) const
     {
         uint8_t index = 0;
 

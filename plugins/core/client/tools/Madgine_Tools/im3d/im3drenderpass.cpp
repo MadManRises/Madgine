@@ -25,9 +25,9 @@ namespace Render {
     {
         mProgram.create("im3d");
         
-        mProgram.setParameters({ nullptr, sizeof(Im3DPerApplication) },0);
-        mProgram.setParameters({ nullptr, sizeof(Im3DPerFrame) }, 1);
-        mProgram.setParameters({ nullptr, sizeof(Im3DPerObject) }, 2);
+        mProgram.setParameters(0, sizeof(Im3DPerApplication));
+        mProgram.setParameters(1, sizeof(Im3DPerFrame));
+        mProgram.setParameters(2, sizeof(Im3DPerObject));
     }
 
     void Im3DRenderPass::render(RenderTarget *target)

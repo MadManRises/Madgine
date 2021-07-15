@@ -35,7 +35,7 @@ struct UnpackingMemberFunctor {
     }
 };
 
-template <auto f, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
+template <auto f, typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
 struct ParentFunctor {
     template <typename... Args>
     decltype(auto) operator()(Args &&... args)

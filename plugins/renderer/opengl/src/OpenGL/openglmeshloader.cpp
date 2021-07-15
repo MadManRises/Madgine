@@ -32,13 +32,40 @@ namespace Render {
 
     void OpenGLMeshLoader::generateImpl(OpenGLMeshData &data, const MeshData &mesh)
     {
+        data.mGroupSize = mesh.mGroupSize;
+
         data.mVAO = Render::create;
         data.mVAO.bind();
 
-        data.mVertices = GL_ARRAY_BUFFER;
+        bool dynamic = !mesh.mVertices.mData;
 
-        if (!mesh.mIndices.empty()) {
-            data.mIndices = GL_ELEMENT_ARRAY_BUFFER;
+        if (!dynamic) {
+            data.mVertices = {
+                GL_ARRAY_BUFFER,
+                mesh.mVertices
+            };
+        } else {
+            data.mVertices = {
+                GL_ARRAY_BUFFER,
+                mesh.mVertices.mSize
+            };
+        }
+
+        if (mesh.mIndices.empty()) {
+            data.mElementCount = mesh.mVertices.mSize / mesh.mVertexSize;
+        } else {
+            if (!dynamic) {
+                data.mIndices = {
+                    GL_ELEMENT_ARRAY_BUFFER,
+                    mesh.mIndices
+                };
+            } else {
+                data.mIndices = {
+                    GL_ELEMENT_ARRAY_BUFFER,
+                    mesh.mIndices.size() * sizeof(unsigned short)
+                };
+            }
+            data.mElementCount = mesh.mIndices.size();
         }
 
         if (!mesh.mTexturePath.empty()) {
@@ -50,13 +77,11 @@ namespace Render {
                 data.mTexture = { GL_UNSIGNED_BYTE };
                 //data.mTexture.setFilter(GL_NEAREST);
                 data.mTexture.setData({ tex->mWidth, tex->mHeight }, { tex->mBuffer, static_cast<size_t>(tex->mWidth * tex->mHeight) });
-                data.mTextureHandle = data.mTexture.handle();
+                data.mTextureHandle = data.mTexture.mTextureHandle;
             } else {
                 LOG_ERROR("Failed to find texture '" << imageName << "' for mesh!");
             }
         }
-
-        updateImpl(data, mesh);
 
         auto attributes = mesh.mAttributeList();
 
@@ -95,13 +120,15 @@ namespace Render {
     {
         data.mGroupSize = mesh.mGroupSize;
 
-        data.mVertices.setData(mesh.mVertices);
+        data.mVertices.resize(mesh.mVertices.mSize);
+        std::memcpy(data.mVertices.mapData().mData, mesh.mVertices.mData, mesh.mVertices.mSize);
 
-        if (!mesh.mIndices.empty()) {
-            data.mIndices.setData(mesh.mIndices);
-            data.mElementCount = mesh.mIndices.size();
-        } else {
+        if (mesh.mIndices.empty()) {
             data.mElementCount = mesh.mVertices.mSize / mesh.mVertexSize;
+        } else {
+            data.mIndices.resize(mesh.mIndices.size() * sizeof(unsigned short));
+            std::memcpy(data.mIndices.mapData().mData, mesh.mIndices.data(), mesh.mIndices.size() * sizeof(unsigned short));
+            data.mElementCount = mesh.mIndices.size();
         }
     }
 

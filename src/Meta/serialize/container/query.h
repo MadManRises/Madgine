@@ -2,7 +2,7 @@
 
 #include "../syncable.h"
 #include "Generic/future.h"
-#include "Generic/offsetptr.h"
+#include "Generic/memberoffsetptr.h"
 #include "Generic/onetimefunctor.h"
 
 namespace Engine {
@@ -44,10 +44,10 @@ namespace Serialize {
         };
     }
 
-    template <auto f, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
+    template <auto f, typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
     using Query = typename FunctionCapture<__query__impl__::QueryImpl, f, OffsetPtr>::type;
 
-#define QUERY(Name, f) OFFSET_CONTAINER(Name, ::Engine::Serialize::Query<&Self::f>)
+#define QUERY(Name, f) MEMBER_OFFSET_CONTAINER(Name, ::Engine::Serialize::Query<&Self::f>)
 
  
 }

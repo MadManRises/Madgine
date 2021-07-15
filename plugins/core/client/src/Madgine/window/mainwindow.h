@@ -25,7 +25,7 @@
 namespace Engine {
 namespace Window {
 
-    template <typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
+    template <typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
     struct MainWindowComponentObserver : MadgineObjectObserver {
         template <typename It>
         void operator()(const It &it, int event)
@@ -136,7 +136,7 @@ namespace Window {
     private:
         const WindowSettings &mSettings;
 
-        OFFSET_CONTAINER(mComponents, MainWindowComponentContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, MainWindowComponentComparator>, MainWindowComponentObserver<>, std::true_type>>);
+        MEMBER_OFFSET_CONTAINER(mComponents, MainWindowComponentContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, MainWindowComponentComparator>, MainWindowComponentObserver<>, std::true_type>>);
 
         std::vector<std::unique_ptr<ToolWindow>> mToolWindows;
 

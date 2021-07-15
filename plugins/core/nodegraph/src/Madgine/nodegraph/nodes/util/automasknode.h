@@ -13,19 +13,19 @@ namespace NodeGraph {
         virtual uint32_t flowInMask(uint32_t index, bool bidir = true) const override
         {
             uint32_t mask = NodeExecutionMask::ALL;
-            for (const FlowOutPinPrototype& pin : mFlowOutPins) {
+            for (const FlowOutPinPrototype &pin : this->mFlowOutPins) {
                 if (pin.mTarget) {
-                    mask &= mGraph.flowInMask(pin.mTarget, false);
+                    mask &= this->mGraph.flowInMask(pin.mTarget, false);
                 }
             }
-            for (const DataInPinPrototype &pin : mDataInPins) {
+            for (const DataInPinPrototype &pin : this->mDataInPins) {
                 if (pin.mSource) {
-                    mask &= mGraph.dataProviderMask(pin.mSource, false);
+                    mask &= this->mGraph.dataProviderMask(pin.mSource, false);
                 }
             }
-            for (const DataOutPinPrototype &pin : mDataOutPins) {
+            for (const DataOutPinPrototype &pin : this->mDataOutPins) {
                 if (pin.mTarget) {
-                    mask &= mGraph.dataReceiverMask(pin.mTarget, false);
+                    mask &= this->mGraph.dataReceiverMask(pin.mTarget, false);
                 }
             }
             if (bidir) {
@@ -37,19 +37,19 @@ namespace NodeGraph {
         virtual uint32_t flowOutMask(uint32_t index, bool bidir = true) const override
         {
             uint32_t mask = NodeExecutionMask::ALL;
-            for (const FlowInPinPrototype &pin : mFlowInPins) {
+            for (const FlowInPinPrototype &pin : this->mFlowInPins) {
                 for (Pin source : pin.mSources) {
-                    mask &= mGraph.flowOutMask(source, false);
+                    mask &= this->mGraph.flowOutMask(source, false);
                 }
             }
-            for (const DataReceiverPinPrototype &pin : mDataReceiverPins) {
+            for (const DataReceiverPinPrototype &pin : this->mDataReceiverPins) {
                 for (Pin source : pin.mSources) {
-                    mask &= mGraph.dataOutMask(source, false);
+                    mask &= this->mGraph.dataOutMask(source, false);
                 }
             }
-            for (const DataProviderPinPrototype &pin : mDataProviderPins) {
+            for (const DataProviderPinPrototype &pin : this->mDataProviderPins) {
                 for (Pin target : pin.mTargets) {
-                    mask &= mGraph.dataInMask(target, false);
+                    mask &= this->mGraph.dataInMask(target, false);
                 }
             }
             if (bidir) {

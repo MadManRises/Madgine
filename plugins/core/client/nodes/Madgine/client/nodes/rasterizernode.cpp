@@ -183,7 +183,7 @@ namespace Render {
         CodeGen::Struct *rasterizerData = file.getStruct("RasterizerData");
         rasterizerData->mAnnotations.push_back("semantic");
 
-        file.statement(CodeGen::VariableDefinition { "OUT", rasterizerData });
+        file.statement(CodeGen::VariableDefinition { { "OUT", rasterizerData } });
 
         for (uint32_t i = 0; i < dataInCount(); ++i) {
             rasterizerData->mVariables.push_back({ std::string { dataInName(i) }, dataInType(i) });

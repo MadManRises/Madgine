@@ -18,7 +18,7 @@ struct type_pack;
 
 struct CompoundAtomicOperation;
 
-struct OffsetPtrTag;
+struct MemberOffsetPtrTag;
 template <typename T, size_t>
 struct TaggedPlaceholder;
 

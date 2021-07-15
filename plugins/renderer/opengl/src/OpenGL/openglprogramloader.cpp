@@ -83,9 +83,9 @@ namespace Render {
         return true;
     }
 
-    void OpenGLProgramLoader::setParameters(Program &program, const ByteBuffer &data, size_t index)
+    void OpenGLProgramLoader::setParameters(Program &program, size_t index, size_t size)
     {
-        static_cast<OpenGLProgram &>(program).setParameters(data, index);
+        static_cast<OpenGLProgram &>(program).setParameters(index, size);
     }
 
     WritableByteBuffer OpenGLProgramLoader::mapParameters(Program &program, size_t index)
@@ -93,9 +93,9 @@ namespace Render {
         return static_cast<OpenGLProgram &>(program).mapParameters(index);
     }
 
-    void OpenGLProgramLoader::setDynamicParameters(Program &program, const ByteBuffer &data, size_t index)
+    void OpenGLProgramLoader::setDynamicParameters(Program &program, size_t index, const ByteBuffer &data)
     {
-        static_cast<OpenGLProgram &>(program).setDynamicParameters(data, index);
+        static_cast<OpenGLProgram &>(program).setDynamicParameters(index, data);
     }
 
 }

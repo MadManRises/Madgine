@@ -40,8 +40,8 @@ METATABLE_END(Engine::Tools::OpenGLImRoot)
 
             ImGui_ImplOpenGL3_Init();
             ImGui_ImplOpenGL3_CreateDeviceObjects();
-            if (!(ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable))
-                ImGui::GetIO().RenderDrawListsFn = ImGui_ImplOpenGL3_RenderDrawData;
+            /*if (!(ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable))
+                ImGui::GetIO().RenderDrawListsFn = ImGui_ImplOpenGL3_RenderDrawData;*/
 
             Im3D::GetIO().mFetchFont = [](const char *fontName) {
                 Render::FontLoader::HandleType font;
@@ -79,6 +79,11 @@ METATABLE_END(Engine::Tools::OpenGLImRoot)
             ImGui_ImplOpenGL3_NewFrame();
             ImGui::NewFrame();
             Im3D::NewFrame();
+        }
+
+        void OpenGLImRoot::renderMainDrawList()
+        {
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         }
 
     }

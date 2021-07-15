@@ -13,22 +13,17 @@
 
 #include "Interfaces/window/windowapi.h"
 
-#include "directx11meshloader.h"
-#include "directx11pixelshaderloader.h"
-#include "directx11programloader.h"
-#include "directx11rendercontext.h"
-#include "directx11textureloader.h"
-#include "directx11vertexshaderloader.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+
+#include "directx11rendercontext.h"
 
 namespace Engine {
 namespace Render {
 
-    DirectX11RenderWindow::DirectX11RenderWindow(DirectX11RenderContext *context, Window::OSWindow *w, DirectX11RenderWindow *reusedResources)
+    DirectX11RenderWindow::DirectX11RenderWindow(DirectX11RenderContext *context, Window::OSWindow *w)
         : DirectX11RenderTarget(context)
         , mWindow(w)
-        , mReusedContext(reusedResources)
     {
         HRESULT hr;
 
@@ -47,62 +42,27 @@ namespace Render {
         swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
         swapChainDesc.Windowed = TRUE;
 
-        if (!reusedResources) {
-            UINT createDeviceFlags = D3D11_CREATE_DEVICE_DEBUG;
+        IDXGIDevice *device;
+        hr = sDevice->QueryInterface(IID_PPV_ARGS(& device));
+        DX11_CHECK(hr);
 
-            // These are the feature levels that we will accept.
-            D3D_FEATURE_LEVEL featureLevels[] = {
-                D3D_FEATURE_LEVEL_11_1,
-                D3D_FEATURE_LEVEL_11_0,
-                D3D_FEATURE_LEVEL_10_1,
-                D3D_FEATURE_LEVEL_10_0,
-                D3D_FEATURE_LEVEL_9_3,
-                D3D_FEATURE_LEVEL_9_2,
-                D3D_FEATURE_LEVEL_9_1
-            };
+        IDXGIAdapter *adapter;
+        hr = device->GetParent(IID_PPV_ARGS(&adapter));
+        DX11_CHECK(hr);
 
-            // This will be the feature level that
-            // is used to create our device and swap chain.
-            D3D_FEATURE_LEVEL featureLevel;
+        IDXGIFactory *factory;
+        hr = adapter->GetParent(IID_PPV_ARGS(&factory));
+        DX11_CHECK(hr);
 
-            assert(sDeviceContext == nullptr);
-
-            hr = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE,
-                nullptr, createDeviceFlags, featureLevels, _countof(featureLevels),
-                D3D11_SDK_VERSION, &swapChainDesc, &mSwapChain, &sDevice, &featureLevel,
-                &sDeviceContext);
-
-            if (hr == E_INVALIDARG) {
-                hr = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE,
-                    nullptr, createDeviceFlags, &featureLevels[1], _countof(featureLevels) - 1,
-                    D3D11_SDK_VERSION, &swapChainDesc, &mSwapChain, &sDevice, &featureLevel,
-                    &sDeviceContext);
-            }
-
-            DX11_CHECK(hr);
-        } else {
-            IDXGIDevice *device;
-            hr = sDevice->QueryInterface(__uuidof(IDXGIDevice), (void **)&device);
-            DX11_CHECK(hr);
-
-            IDXGIAdapter *adapter;
-            hr = device->GetParent(__uuidof(IDXGIAdapter), (void **)&adapter);
-            DX11_CHECK(hr);
-
-            IDXGIFactory *factory;
-            hr = adapter->GetParent(__uuidof(IDXGIFactory), (void **)&factory);
-            DX11_CHECK(hr);
-
-            hr = factory->CreateSwapChain(sDevice, &swapChainDesc, &mSwapChain);
-            DX11_CHECK(hr);
-        }
+        hr = factory->CreateSwapChain(sDevice, &swapChainDesc, &mSwapChain);
+        DX11_CHECK(hr);
 
         // The Direct3D device and swap chain were successfully created.
         // Now we need to initialize the buffers of the swap chain.
         // Next initialize the back buffer of the swap chain and associate it to a
         // render target view.
         ID3D11Texture2D *backBuffer;
-        hr = mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID *)&backBuffer);
+        hr = mSwapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer));
         DX11_CHECK(hr);
 
         ID3D11RenderTargetView *targetView;
@@ -126,17 +86,6 @@ namespace Render {
         if (mSwapChain) {
             mSwapChain->Release();
             mSwapChain = nullptr;
-        }
-
-        if (!mReusedContext) {
-            if (sDeviceContext) {
-                sDeviceContext->Release();
-                sDeviceContext = nullptr;
-            }
-            if (sDevice) {
-                sDevice->Release();
-                sDevice = nullptr;
-            }
         }
     }
 

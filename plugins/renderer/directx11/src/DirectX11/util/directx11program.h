@@ -23,10 +23,11 @@ namespace Render {
 
         void bind(DirectX11VertexArray *format);
 
-        void setParameters(const ByteBuffer &data, size_t index);
+        void setParameters(size_t index, size_t size);
+
         WritableByteBuffer mapParameters(size_t index);
 
-        void setDynamicParameters(const ByteBuffer &data, size_t index);
+        void setDynamicParameters(size_t index, const ByteBuffer &data);
 
     private:
         DirectX11VertexShaderLoader::HandleType mVertexShader;

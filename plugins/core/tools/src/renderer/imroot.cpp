@@ -195,6 +195,8 @@ namespace Tools {
         else
             ImGui::EndFrame();
 
+        ImGui::UpdatePlatformWindows();
+
         return running;
     }
 

@@ -13,6 +13,8 @@
 #include "Madgine/resources/resourcemanager.h"
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
+#include "imgui/imgui_internal.h"
+
 METATABLE_BEGIN_BASE(Engine::Tools::ProjectManager, Engine::Tools::ToolBase)
 METATABLE_END(Engine::Tools::ProjectManager)
 

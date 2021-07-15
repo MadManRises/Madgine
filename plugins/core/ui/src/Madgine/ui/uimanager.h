@@ -64,8 +64,8 @@ namespace UI {
 
         GameHandlerBase &getGameHandler(size_t i, bool = true);
 
-        OFFSET_CONTAINER(mGuiHandlers, GuiHandlerContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, MadgineObjectObserver, std::true_type>>);
-        OFFSET_CONTAINER(mGameHandlers, GameHandlerContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, MadgineObjectObserver, std::true_type>>)
+        MEMBER_OFFSET_CONTAINER(mGuiHandlers, GuiHandlerContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, MadgineObjectObserver, std::true_type>>);
+        MEMBER_OFFSET_CONTAINER(mGameHandlers, GameHandlerContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, MadgineObjectObserver, std::true_type>>)
 
     protected:
         bool init() override;

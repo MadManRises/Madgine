@@ -24,10 +24,9 @@ namespace NodeGraph {
         virtual CodeGen::File &file() = 0;
 
     protected:
-        std::vector<std::unique_ptr<CodeGeneratorData>> mData;
-        const NodeBase *mCurrentNode = nullptr;
         const NodeGraph &mGraph;    
-        
+        std::vector<std::unique_ptr<CodeGeneratorData>> mData;
+        const NodeBase *mCurrentNode = nullptr;        
     };
 
 }

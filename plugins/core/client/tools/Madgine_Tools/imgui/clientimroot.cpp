@@ -57,7 +57,6 @@ namespace Tools {
         ClientImRoot *root = static_cast<ClientImRoot *>(io.UserData);
         root->addViewportMapping(window->getRenderer(), vp);
         window->getRenderer()->addRenderPass(root);
-        vp->RendererUserData = window->getRenderer();
     }
     static void DestroyImGuiToolWindow(ImGuiViewport *vp)
     {
@@ -71,7 +70,6 @@ namespace Tools {
             vp->PlatformHandleRaw = nullptr;
             topLevel->destroyToolWindow(toolWindow);
 
-            vp->RendererUserData = nullptr;
             static_cast<ClientImRoot *>(io.UserData)->removeViewportMapping(toolWindow->getRenderer());
         }
     }
@@ -180,7 +178,6 @@ namespace Tools {
 
             ImGuiViewport *main_viewport = ImGui::GetMainViewport();
             main_viewport->PlatformHandle = mWindow.osWindow();
-            main_viewport->RendererUserData = mWindow.getRenderWindow();
         }
 
         //Input
@@ -228,7 +225,6 @@ namespace Tools {
         if (Window::platformCapabilities.mSupportMultipleWindows) {
             ImGuiViewport *main_viewport = ImGui::GetMainViewport();
             main_viewport->PlatformHandle = nullptr;
-            main_viewport->RendererUserData = nullptr;
         }
 
         Im3D::DestroyContext();
@@ -244,13 +240,11 @@ namespace Tools {
             ImGuiViewport *main_viewport = ImGui::GetMainViewport();
             main_viewport->Flags |= ImGuiViewportFlags_NoRendererClear; //TODO: Is that necessary every Frame?
 
-            if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-                ImGui::UpdatePlatformWindows();
-
-                ImGui::GetPlatformIO().Renderer_RenderWindow(ImGui::GetMainViewport(), nullptr);
-            } else {
+            if (!(ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)) {
                 ImGui::Render();
             }
+
+            renderMainDrawList();
         } else {
             ImGui::GetPlatformIO().Renderer_RenderWindow(mViewportMappings.at(target), nullptr);
         }

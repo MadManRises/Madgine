@@ -111,7 +111,7 @@ namespace Widgets {
     {
         mData->mProgram.create("ui");
 
-        mData->mProgram.setParameters({ nullptr, sizeof(WidgetsPerObject) }, 2);
+        mData->mProgram.setParameters(2, sizeof(WidgetsPerObject));
 
         mData->mMesh = Render::GPUMeshLoader::loadManual("widgetMesh", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &mesh, Render::GPUMeshLoader::ResourceDataInfo &info) {
             return loader->generate(mesh, { 3, std::vector<Vertex> {} });

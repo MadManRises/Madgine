@@ -4,14 +4,14 @@
 #include "Generic/container/container_api.h"
 #include "Generic/container/containerevent.h"
 #include "Generic/functor.h"
-#include "Generic/offsetptr.h"
+#include "Generic/memberoffsetptr.h"
 #include "../serializable.h"
 #include "../unithelper.h"
 
 namespace Engine {
 namespace Serialize {
 
-    template <typename C, typename Observer = NoOpFunctor, typename controlled = std::false_type, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
+    template <typename C, typename Observer = NoOpFunctor, typename controlled = std::false_type, typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
     struct SerializableContainerImpl : Serializable<OffsetPtr>,
                                        C,
                                        Observer {
@@ -526,10 +526,10 @@ namespace Serialize {
         position_handle mActiveIterator;
     };
 
-    template <typename C, typename Observer = NoOpFunctor, typename controlled = std::false_type, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
+    template <typename C, typename Observer = NoOpFunctor, typename controlled = std::false_type, typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
     using SerializableContainer = container_api<SerializableContainerImpl<C, Observer, controlled, OffsetPtr>>;
 
-#define SERIALIZABLE_CONTAINER(Name, ...) OFFSET_CONTAINER(Name, ::Engine::Serialize::SerializableContainer<__VA_ARGS__>)
+#define SERIALIZABLE_CONTAINER(Name, ...) MEMBER_OFFSET_CONTAINER(Name, ::Engine::Serialize::SerializableContainer<__VA_ARGS__>)
 
 }
 

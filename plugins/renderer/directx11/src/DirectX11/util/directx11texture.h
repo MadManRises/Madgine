@@ -34,7 +34,6 @@ namespace Render {
 
         void resize(Vector2i size);
 
-        TextureHandle handle() const;
         ID3D11Resource *resource() const;
 
         /*void setWrapMode(GLint mode);

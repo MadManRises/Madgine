@@ -13,7 +13,8 @@ namespace Tools {
 		virtual bool init() override;
         virtual void finalize() override;
 
-        virtual void newFrame(float timeSinceLastFrame) override;        
+        virtual void newFrame(float timeSinceLastFrame) override;
+        virtual void renderMainDrawList() override; 
     };
 
 }

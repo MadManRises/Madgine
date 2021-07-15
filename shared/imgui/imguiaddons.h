@@ -80,9 +80,6 @@ IMGUI_API bool InputText(const char *label, Engine::CoWString *s, ImGuiInputText
 IMGUI_API void BeginValueType(Engine::ExtendedValueTypeDesc type, const char *name = "");
 IMGUI_API bool EndValueType(Engine::ValueType *v, Engine::ExtendedValueTypeDesc type);
 
-IMGUI_API void PushDisabled();
-IMGUI_API void PopDisabled();
-
 IMGUI_API void BeginTreeArrow(const void *label, ImGuiTreeNodeFlags flags = 0);
 IMGUI_API bool EndTreeArrow(bool *opened = nullptr);
 IMGUI_API void BeginSpanningTreeNode(const void *id, const char *label, ImGuiTreeNodeFlags flags = 0);

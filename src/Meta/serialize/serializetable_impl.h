@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Generic/offsetptr.h"
+#include "Generic/memberoffsetptr.h"
 #include "serializer.h"
 #include "serializetable.h"
 #include "streams/operations.h"
@@ -30,7 +30,7 @@ namespace Serialize {
         return {
             name,
             []() {
-                return size_t { 0 };
+                return OffsetPtr { };
             },
             [](const SerializableDataUnit *_unit, SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
@@ -92,7 +92,7 @@ namespace Serialize {
         return {
             name,
             []() {
-                return size_t { 0 };
+                return OffsetPtr { };
             },
             [](const SerializableDataUnit *_unit, SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
@@ -138,7 +138,7 @@ namespace Serialize {
         return {
             name,
             []() {
-                return OffsetPtr<Unit, T> { P }.template offset<SerializableDataUnit>();
+                return MemberOffsetPtr<Unit, T> { P }.template offset<SerializableDataUnit>();
             },
             [](const SerializableDataUnit *_unit, SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
@@ -203,7 +203,7 @@ namespace Serialize {
         return {
             name,
             []() {
-                return OffsetPtr<Unit, T> { P }.template offset<SerializableDataUnit>();
+                return MemberOffsetPtr<Unit, T> { P }.template offset<SerializableDataUnit>();
             },
             [](const SerializableDataUnit *_unit, SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
 

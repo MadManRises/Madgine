@@ -41,16 +41,16 @@ namespace Render {
     {
         mProgram.create("scene");
 
-        mProgram.setParameters({ nullptr, sizeof(ScenePerApplication) }, 0);
-        mProgram.setParameters({ nullptr, sizeof(ScenePerFrame) }, 1);
-        mProgram.setParameters({ nullptr, sizeof(ScenePerObject) }, 2);
+        mProgram.setParameters(0, sizeof(ScenePerApplication));
+        mProgram.setParameters(1, sizeof(ScenePerFrame));
+        mProgram.setParameters(2, sizeof(ScenePerObject));
 
         mShadowMap = context->createRenderTexture({ 2048, 2048 }, { .mCreateDepthBufferView = true });
 
         mShadowMap->addRenderPass(&mShadowPass);
     }
 
-    void SceneRenderPass::shutdown() 
+    void SceneRenderPass::shutdown()
     {
         mShadowMap.reset();
 
@@ -95,7 +95,7 @@ namespace Render {
                 GPUMeshData *meshData = mesh->data();
                 if (meshData) {
 
-                    target->bindTexture({ meshData->mTextureHandle, mShadowMap->depthTexture()});
+                    target->bindTexture({ meshData->mTextureHandle, mShadowMap->depthTexture() });
 
                     Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
 
@@ -118,9 +118,9 @@ namespace Render {
                     }
 
                     if (skeleton) {
-                        mProgram.setDynamicParameters(skeleton->matrices(), 0);
+                        mProgram.setDynamicParameters(0, skeleton->matrices());
                     } else {
-                        mProgram.setDynamicParameters({}, 0);
+                        mProgram.setDynamicParameters(0, {});
                     }
 
                     target->renderMesh(meshData, mProgram);

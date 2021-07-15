@@ -19,7 +19,6 @@
 #include "Meta/math/vector2i.h"
 #include "Meta/math/vector4.h"
 
-
 //---- Define assertion handler. Defaults to calling assert().
 //#define IM_ASSERT(_EXPR)  MyAssert(_EXPR)
 //#define IM_ASSERT(_EXPR)  ((void)(_EXPR))     // Disable asserts

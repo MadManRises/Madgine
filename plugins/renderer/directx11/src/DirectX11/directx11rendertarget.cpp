@@ -219,12 +219,12 @@ namespace Render {
 
         constexpr FLOAT color[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
 
-        sDeviceContext->ClearRenderTargetView(mTargetView, color);
-        sDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-
         sDeviceContext->OMSetRenderTargets(1, &mTargetView, mDepthStencilView);
         sDeviceContext->OMSetDepthStencilState(mDepthStencilState, 1);
         sDeviceContext->OMSetBlendState(mBlendState, 0, 0xffffffff);
+
+        sDeviceContext->ClearRenderTargetView(mTargetView, color);
+        sDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
         sDeviceContext->PSSetSamplers(0, 2, mSamplers);
 

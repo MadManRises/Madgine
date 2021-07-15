@@ -2,6 +2,7 @@
 
 #include "statetransmissionflags.h"
 #include "Generic/callerhierarchy.h"
+#include "Generic/offsetptr.h"
 
 namespace Engine {
 namespace Serialize {
@@ -44,7 +45,7 @@ namespace Serialize {
         void writeAction(const SerializableUnitBase *parent, uint8_t index, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *data) const;
         void writeRequest(const SerializableUnitBase *parent, uint8_t index, BufferedOutStream &out, const void *data) const;
 
-        uint8_t getIndex(size_t offset) const;
+        uint8_t getIndex(OffsetPtr offset) const;
         const Serializer &get(uint8_t index) const;
     };
 

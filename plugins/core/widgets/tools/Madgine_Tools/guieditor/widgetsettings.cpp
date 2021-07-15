@@ -10,6 +10,8 @@
 
 #include "inspector/inspector.h"
 
+#include "imgui/imgui_internal.h"
+
 namespace Engine {
 namespace Tools {
 

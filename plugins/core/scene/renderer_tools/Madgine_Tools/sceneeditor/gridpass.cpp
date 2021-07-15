@@ -43,7 +43,7 @@ namespace Tools {
             return loader->generate(data, { 3, std::move(vertices), std::move(indices) });
         });
 
-        mProgram.setParameters({ nullptr, sizeof(GridPerFrame) }, 1);
+        mProgram.setParameters(1, sizeof(GridPerFrame));
     }
 
     void GridPass::render(Render::RenderTarget *target)

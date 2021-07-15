@@ -25,10 +25,10 @@ namespace Render {
 
         void bind();
 
-        void setParameters(const ByteBuffer &data, size_t index);
+        void setParameters(size_t index, size_t size);
         WritableByteBuffer mapParameters(size_t index);
 
-        void setDynamicParameters(const ByteBuffer &data, size_t index);
+        void setDynamicParameters(size_t index, const ByteBuffer &data);
 
         struct UniformBufferDescriptor {
             std::string mName;

@@ -42,7 +42,7 @@ namespace Render {
 
         glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
         GL_CHECK();
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mTexture.handle(), 0);        
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mTexture.mTextureHandle, 0);        
         GL_CHECK();
 
         if (config.mCreateDepthBufferView) {

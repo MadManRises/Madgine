@@ -35,19 +35,35 @@ namespace Render {
         data.mVAO = { mesh.mAttributeList() };
         data.mVAO.bind();
 
-        data.mVertices = {
-            D3D11_BIND_VERTEX_BUFFER,
-            mesh.mVertices
-        };
+        bool dynamic = !mesh.mVertices.mData;
+
+        if (!dynamic) {
+            data.mVertices = {
+                D3D11_BIND_VERTEX_BUFFER,
+                mesh.mVertices
+            };
+        } else {
+            data.mVertices = {
+                D3D11_BIND_VERTEX_BUFFER,
+                mesh.mVertices.mSize
+            };
+        }
         data.mVertices.bindVertex(data.mVAO.mStride);
 
         if (mesh.mIndices.empty()) {
             data.mElementCount = mesh.mVertices.mSize / mesh.mVertexSize;
         } else {
-            data.mIndices = {
-                D3D11_BIND_INDEX_BUFFER,
-                mesh.mIndices
-            };
+            if (!dynamic) {
+                data.mIndices = {
+                    D3D11_BIND_INDEX_BUFFER,                    
+                    mesh.mIndices
+                };
+            } else {
+                data.mIndices = {
+                    D3D11_BIND_INDEX_BUFFER,                    
+                    mesh.mIndices.size() * sizeof(unsigned short)
+                };
+            }
             data.mIndices.bindIndex();
             data.mElementCount = mesh.mIndices.size();
         }
@@ -58,7 +74,7 @@ namespace Render {
             tex.load(imageName);
 
             data.mTexture = { Texture2D, FORMAT_FLOAT8, D3D11_BIND_SHADER_RESOURCE, static_cast<size_t>(tex->mWidth), static_cast<size_t>(tex->mHeight), { tex->mBuffer, static_cast<size_t>(tex->mWidth * tex->mHeight) } };
-            data.mTextureHandle = data.mTexture.handle();
+            data.mTextureHandle = data.mTexture.mTextureHandle;
         }
 
         data.mVAO.unbind();
@@ -92,18 +108,14 @@ namespace Render {
     {
         data.mGroupSize = mesh.mGroupSize;
 
-        data.mVertices = {
-            D3D11_BIND_VERTEX_BUFFER,
-            mesh.mVertices
-        };
+        data.mVertices.resize(mesh.mVertices.mSize);
+        std::memcpy(data.mVertices.mapData().mData, mesh.mVertices.mData, mesh.mVertices.mSize);
 
         if (mesh.mIndices.empty()) {
             data.mElementCount = mesh.mVertices.mSize / mesh.mVertexSize;
         } else {
-            data.mIndices = {
-                D3D11_BIND_INDEX_BUFFER,
-                mesh.mIndices
-            };
+            data.mIndices.resize(mesh.mIndices.size() * sizeof(unsigned short));
+            std::memcpy(data.mIndices.mapData().mData, mesh.mIndices.data(), mesh.mIndices.size() * sizeof(unsigned short));
             data.mElementCount = mesh.mIndices.size();
         }
     }

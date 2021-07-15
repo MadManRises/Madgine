@@ -25,8 +25,6 @@ namespace Render {
 
 		void resize(Vector2i size);
 
-        GLuint handle() const;
-
         void setWrapMode(GLint mode);
         void setFilter(GLint filter);
 

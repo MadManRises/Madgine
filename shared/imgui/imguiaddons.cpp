@@ -565,18 +565,6 @@ bool EndValueType(Engine::ValueType *v, Engine::ExtendedValueTypeDesc type)
     return changed;
 }
 
-void PushDisabled()
-{
-    ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-}
-
-void PopDisabled()
-{
-    ImGui::PopStyleVar();
-    ImGui::PopItemFlag();
-}
-
 void BeginTreeArrow(const void *label, ImGuiTreeNodeFlags flags)
 {
     ImGui::PushID(label);
@@ -953,7 +941,7 @@ bool DirectoryPicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *s
 {
     BeginFilesystemPicker(path, selection);
 
-    if (ImGui::BeginChild("CurrentFolder", { 0.0f, -ImGui::GetItemsLineHeightWithSpacing() })) {
+    if (ImGui::BeginChild("CurrentFolder", { 0.0f, -ImGui::GetFrameHeightWithSpacing() })) {
 
         for (Engine::Filesystem::FileQueryResult result : Engine::Filesystem::listDirs(*path)) {
 
@@ -982,7 +970,7 @@ bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *select
     bool selectedIsDir = false;
     bool clicked = false;
 
-    if (ImGui::BeginChild("CurrentFolder", { 0.0f, -2 * ImGui::GetItemsLineHeightWithSpacing() })) {
+    if (ImGui::BeginChild("CurrentFolder", { 0.0f, -2 * ImGui::GetFrameHeightWithSpacing() })) {
 
         for (Engine::Filesystem::FileQueryResult result : Engine::Filesystem::listFilesAndDirs(*path)) {
 

@@ -44,6 +44,8 @@
 
 #include "Meta/serialize/formatter/safebinaryformatter.h"
 
+#include "imgui/imgui_internal.h"
+
 
 UNIQUECOMPONENT(Engine::Tools::SceneEditor);
 

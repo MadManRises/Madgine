@@ -39,11 +39,11 @@ namespace Render {
             Resources::ResourceBase::sUnnamed, {}, [=, file { std::move(file) }](ProgramLoader *loader, Program &program, const ProgramLoader::ResourceDataInfo &info) mutable { return loader->create(program, Resources::ResourceBase::sUnnamed, file); }, {}, loader);
     }
 
-    void ProgramLoader::HandleType::setParameters(const ByteBuffer &data, size_t index, ProgramLoader *loader)
+    void ProgramLoader::HandleType::setParameters(size_t index, size_t size, ProgramLoader *loader)
     {
         if (!loader)
             loader = &ProgramLoader::getSingleton();
-        loader->setParameters(*getDataPtr(*this, loader), data, index);
+        loader->setParameters(*getDataPtr(*this, loader), index, size);
     }
 
     WritableByteBuffer ProgramLoader::HandleType::mapParameters(size_t index, ProgramLoader *loader)
@@ -53,11 +53,11 @@ namespace Render {
         return loader->mapParameters(*getDataPtr(*this, loader), index);
     }
 
-    void ProgramLoader::HandleType::setDynamicParameters(const ByteBuffer &data, size_t index, ProgramLoader *loader)
+    void ProgramLoader::HandleType::setDynamicParameters(size_t index, const ByteBuffer &data, ProgramLoader *loader)
     {
         if (!loader)
             loader = &ProgramLoader::getSingleton();
-        loader->setDynamicParameters(*getDataPtr(*this, loader), data, index);
+        loader->setDynamicParameters(*getDataPtr(*this, loader), index, data);
     }
 
 }

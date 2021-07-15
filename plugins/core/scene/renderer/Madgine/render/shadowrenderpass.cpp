@@ -40,13 +40,9 @@ namespace Render {
     {
         mProgram.create("scene");
 
-        mProgram.setParameters({ nullptr, sizeof(ScenePerApplication) }, 0);
-        mProgram.setParameters({ nullptr, sizeof(ScenePerFrame) }, 1);
-        mProgram.setParameters({ nullptr, sizeof(ScenePerObject) }, 2);
-
-        /*mShadowMap = context->createRenderTexture({ 512, 512 });
-
-        mShadowMap->addRenderPass(&mShadowPass);*/
+        mProgram.setParameters(0, sizeof(ScenePerApplication));
+        mProgram.setParameters(1, sizeof(ScenePerFrame));
+        mProgram.setParameters(2, sizeof(ScenePerObject));
     }
 
     void ShadowRenderPass::shutdown()
@@ -109,9 +105,9 @@ namespace Render {
                     }
 
                     if (skeleton) {
-                        mProgram.setDynamicParameters(skeleton->matrices(), 0);
+                        mProgram.setDynamicParameters(0, skeleton->matrices());
                     } else {
-                        mProgram.setDynamicParameters({}, 0);
+                        mProgram.setDynamicParameters(0, {});
                     }
 
                     target->renderMesh(meshData, mProgram);

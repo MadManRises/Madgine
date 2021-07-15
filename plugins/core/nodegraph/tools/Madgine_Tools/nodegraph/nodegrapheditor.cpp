@@ -743,7 +743,7 @@ namespace Tools {
 
                 bool alreadyClicked = false;
 
-                ImGui::BeginChild("GraphList", { 0.0f, -ImGui::GetItemsLineHeightWithSpacing() });
+                ImGui::BeginChild("GraphList", { 0.0f, -ImGui::GetFrameHeightWithSpacing() });
 
                 for (const std::pair<std::string_view, TypedScopePtr> &res : NodeGraph::NodeGraphLoader::getSingleton().resources()) {
 
