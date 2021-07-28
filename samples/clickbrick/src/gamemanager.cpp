@@ -35,6 +35,7 @@
 UNIQUECOMPONENT(ClickBrick::UI::GameManager)
 
 METATABLE_BEGIN_BASE(ClickBrick::UI::GameManager, Engine::UI::GameHandlerBase)
+MEMBER(mCamera)
 METATABLE_END(ClickBrick::UI::GameManager)
 
 SERIALIZETABLE_INHERIT_BEGIN(ClickBrick::UI::GameManager, Engine::UI::GameHandlerBase)

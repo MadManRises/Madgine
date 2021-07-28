@@ -20,11 +20,11 @@ namespace Render {
 
         void reset();
 
-        //void bind(DirectX12VertexArray *format);
+        ID3DBlob *getInstance(DirectX12VertexArray *format);
 
         Resources::ResourceBase *mResource = nullptr;
 
-        std::vector<std::pair<ID3DBlob *, std::vector<D3D12_INPUT_ELEMENT_DESC>>> mInstances;
+        std::vector<ID3DBlob *> mInstances;
     };
 
 }

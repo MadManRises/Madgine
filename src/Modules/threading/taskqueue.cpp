@@ -60,7 +60,10 @@ namespace Threading {
     {
         std::chrono::steady_clock::time_point nextAvailableTaskTime = std::chrono::steady_clock::time_point::max();
         while (std::optional<Threading::TaskTracker> f = fetch(taskMask, interruptFlag, nextAvailableTaskTime, idleCount, repeatedCount)) {
-            f->mTask();
+            TaskState state = f->mTask();
+            if (state == YIELD) {
+                queue(std::move(f->mTask), f->mMask);
+            }
         }
         return nextAvailableTaskTime;
     }
@@ -106,7 +109,7 @@ namespace Threading {
 
     void TaskQueue::queue_for(TaskHandle &&task, TaskMask mask, std::chrono::steady_clock::time_point time_point, const std::vector<Threading::DataMutex *> &dependencies)
     {
-        queueInternal({std::move(task), mask, time_point });
+        queueInternal({ std::move(task), mask, time_point });
     }
 
     void TaskQueue::addRepeatedTask(TaskHandle &&task, TaskMask mask, std::chrono::steady_clock::duration interval, void *owner)

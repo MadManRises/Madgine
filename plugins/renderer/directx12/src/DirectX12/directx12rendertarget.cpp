@@ -40,10 +40,10 @@ namespace Render {
 
         D3D12_HEAP_PROPERTIES depthHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 
-        D3D12_RESOURCE_DESC depthResourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_D32_FLOAT, size.x, size.y);
+        D3D12_RESOURCE_DESC depthResourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_R24G8_TYPELESS, size.x, size.y);
         depthResourceDesc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 
-        CD3DX12_CLEAR_VALUE depthOptimizedClearValue(DXGI_FORMAT_D32_FLOAT, 1.0f, 0);
+        CD3DX12_CLEAR_VALUE depthOptimizedClearValue(DXGI_FORMAT_D24_UNORM_S8_UINT, 1.0f, 0);
 
         HRESULT hr = sDevice->CreateCommittedResource(
             &depthHeapProperties,
@@ -55,7 +55,7 @@ namespace Render {
         DX12_CHECK(hr);
 
         D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc {};
-        dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+        dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
         dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
         dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
 
@@ -73,26 +73,11 @@ namespace Render {
         // Setup rasterizer state.
         ZeroMemory(&mRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
 
-        mRasterizerDesc.AntialiasedLineEnable = FALSE;
-        mRasterizerDesc.CullMode = /*D3D12_CULL_BACK*/ D3D12_CULL_MODE_NONE;
-        mRasterizerDesc.DepthBias = 0;
-        mRasterizerDesc.DepthBiasClamp = 0.0f;
-        mRasterizerDesc.DepthClipEnable = FALSE;
-        mRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
-        mRasterizerDesc.FrontCounterClockwise = FALSE;
-        mRasterizerDesc.MultisampleEnable = FALSE;
-        mRasterizerDesc.SlopeScaledDepthBias = 0.0f;
+       
 
         ZeroMemory(&mBlendState, sizeof(D3D12_BLEND_DESC));
 
-        mBlendState.RenderTarget[0].BlendEnable = true;
-        mBlendState.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
-        mBlendState.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-        mBlendState.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-        mBlendState.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-        mBlendState.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA;
-        mBlendState.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-        mBlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+        
 
         /*if (!mSamplers[0]) {
 
@@ -160,6 +145,14 @@ namespace Render {
         viewport.MaxDepth = 1.0f;
         DirectX12RenderContext::getSingleton().mCommandList.mList->RSSetViewports(1, &viewport);
 
+        D3D12_RECT scissorRect;
+        scissorRect.left = 0.0f;
+        scissorRect.top = 0.0f;
+        scissorRect.right = static_cast<float>(screenSize.x);
+        scissorRect.bottom = static_cast<float>(screenSize.y);
+
+        DirectX12RenderContext::getSingleton().mCommandList.mList->RSSetScissorRects(1, &scissorRect);
+
         //TransitionBarrier();
 
         constexpr FLOAT color[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
@@ -189,6 +182,14 @@ namespace Render {
         viewport.MinDepth = 0.0f;
         viewport.MaxDepth = 1.0f;
         DirectX12RenderContext::getSingleton().mCommandList.mList->RSSetViewports(1, &viewport);
+
+        D3D12_RECT scissorRect;
+        scissorRect.left = static_cast<float>(space.mTopLeft.x);
+        scissorRect.top = static_cast<float>(space.mTopLeft.y);
+        scissorRect.right = static_cast<float>(space.mTopLeft.x + space.mSize.x);
+        scissorRect.bottom = static_cast<float>(space.mTopLeft.y + space.mSize.y);
+
+        DirectX12RenderContext::getSingleton().mCommandList.mList->RSSetScissorRects(1, &scissorRect);
     }
 
     void DirectX12RenderTarget::renderMesh(GPUMeshData *m, Program *p)

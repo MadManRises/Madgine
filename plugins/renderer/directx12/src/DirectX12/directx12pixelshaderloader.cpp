@@ -107,10 +107,6 @@ namespace Render {
 
         shader = { pShaderBlob };
 
-        if (pShaderBlob) {
-            pShaderBlob->Release();
-            pShaderBlob = nullptr;
-        }
         if (pErrorBlob) {
             pErrorBlob->Release();
             pErrorBlob = nullptr;

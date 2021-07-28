@@ -125,6 +125,7 @@ namespace Render {
         OffsetPtr handle = DirectX12RenderContext::getSingleton().mDescriptorHeap.allocate();
         mTextureHandle = DirectX12RenderContext::getSingleton().mDescriptorHeap.gpuHandle(handle).ptr;
         sDevice->CreateShaderResourceView(mResource, &shaderResourceViewDesc, DirectX12RenderContext::getSingleton().mDescriptorHeap.cpuHandle(handle));      
+        DX12_CHECK();
     }
 
     DirectX12Texture::DirectX12Texture(TextureType type, DataFormat format)

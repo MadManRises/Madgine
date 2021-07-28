@@ -40,13 +40,17 @@ namespace Render {
 
         float aspectRatio = float(size.x) / size.y;
 
-        auto perApplication = mProgram.mapParameters(0).cast<Im3DPerApplication>();
+        {
+            auto perApplication = mProgram.mapParameters(0).cast<Im3DPerApplication>();
 
-        perApplication->p = mCamera->getProjectionMatrix(aspectRatio);
+            perApplication->p = mCamera->getProjectionMatrix(aspectRatio);
+        }
 
-        auto perFrame = mProgram.mapParameters(1).cast<Im3DPerFrame>();
+        {
+            auto perFrame = mProgram.mapParameters(1).cast<Im3DPerFrame>();
 
-        perFrame->v = mCamera->getViewMatrix();        
+            perFrame->v = mCamera->getViewMatrix();
+        }
 
         /*for (const std::pair<Im3DNativeMesh, std::vector<Matrix4>> &p : context->mNativeMeshes)
             target->renderInstancedMesh(RenderPassFlags_NoLighting, p.first, p.second);*/
@@ -55,15 +59,16 @@ namespace Render {
 
             target->bindTexture({ p.first });
 
-            auto perObject = mProgram.mapParameters(2).cast<Im3DPerObject>();
+            {
+                auto perObject = mProgram.mapParameters(2).cast<Im3DPerObject>();
 
-            perObject->hasDistanceField = false;            
+                perObject->hasDistanceField = false;
 
-            perObject->m = Matrix4::IDENTITY;            
+                perObject->m = Matrix4::IDENTITY;
 
-            perObject->hasTexture = p.first != 0;
-            perObject->hasDistanceField = bool(p.second.mFlags & RenderPassFlags_DistanceField);
-                        
+                perObject->hasTexture = p.first != 0;
+                perObject->hasDistanceField = bool(p.second.mFlags & RenderPassFlags_DistanceField);
+            }           
 
             for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
                 target->renderVertices(mProgram, i + 1, p.second.mVertices[i], p.second.mIndices[i]);

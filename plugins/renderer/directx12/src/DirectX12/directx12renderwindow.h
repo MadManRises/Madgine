@@ -37,6 +37,7 @@ namespace Render {
         IDXGISwapChain3 *mSwapChain;
 
         OffsetPtr mTargetViews[2];
+        ID3D12Resource *mBackBuffers[2];
     };
 
 }

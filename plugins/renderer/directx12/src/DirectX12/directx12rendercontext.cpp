@@ -177,19 +177,43 @@ namespace Render {
 
     void DirectX12RenderContext::createRootSignature()
     {
-        CD3DX12_ROOT_PARAMETER rootParameters[5];
+        CD3DX12_ROOT_PARAMETER rootParameters[4];
 
         rootParameters[0].InitAsConstantBufferView(0);
         rootParameters[1].InitAsConstantBufferView(1);
         rootParameters[2].InitAsConstantBufferView(2);
-        rootParameters[3].InitAsShaderResourceView(0);
-        rootParameters[4].InitAsShaderResourceView(1);
+
+        CD3DX12_DESCRIPTOR_RANGE range;
+        range.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 0);
+
+        rootParameters[3].InitAsDescriptorTable(1, &range);
 
         CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
         // Allow input layout and deny uneccessary access to certain pipeline stages.
         D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 
-        rootSignatureDesc.Init(5, rootParameters, 0, nullptr, rootSignatureFlags);
+        D3D12_STATIC_SAMPLER_DESC samplerDesc[2];
+        ZeroMemory(samplerDesc, sizeof(samplerDesc));
+
+        samplerDesc[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+        samplerDesc[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        samplerDesc[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        samplerDesc[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        samplerDesc[0].MipLODBias = 0.0f;
+        samplerDesc[0].MaxAnisotropy = 1;
+        samplerDesc[0].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+        samplerDesc[0].BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+        samplerDesc[0].MinLOD = 0;
+        samplerDesc[0].MaxLOD = D3D12_FLOAT32_MAX;
+
+        samplerDesc[1] = samplerDesc[0];
+
+        samplerDesc[1].AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+        samplerDesc[1].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+        samplerDesc[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+        samplerDesc[1].ShaderRegister = 1;
+
+        rootSignatureDesc.Init(4, rootParameters, 2, samplerDesc, rootSignatureFlags);
 
         ID3DBlob *signature = nullptr;
         ID3DBlob *error = nullptr;
@@ -208,7 +232,7 @@ namespace Render {
     void DirectX12RenderContext::ExecuteCommandList(DirectX12CommandList &list, std::function<void()> dtor)
     {
         HRESULT hr = list.mList->Close();
-        DX12_CHECK(hr);        
+        DX12_CHECK(hr);
 
         ID3D12CommandList *cmdList = list.mList;
         mCommandQueue->ExecuteCommandLists(1, &cmdList);

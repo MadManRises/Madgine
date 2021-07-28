@@ -34,9 +34,9 @@ namespace UI {
 
         void start();
 
-    private:
         Engine::Render::Camera mCamera;
 
+    private:
         Engine::UI::WidgetPtr<Engine::Widgets::SceneWindow> mGameWindow;
         Engine::UI::WidgetPtr<Engine::Widgets::Label> mScoreLabel;
         Engine::UI::WidgetPtr<Engine::Widgets::Label> mLifeLabel;
@@ -50,7 +50,7 @@ namespace UI {
         std::list<Engine::Scene::Entity::EntityPtr> mBricks;
 
         Engine::Scene::SceneManager &mSceneMgr;
-		Engine::Render::SceneRenderPass mSceneRenderer;
+        Engine::Render::SceneRenderPass mSceneRenderer;
     };
 
 }

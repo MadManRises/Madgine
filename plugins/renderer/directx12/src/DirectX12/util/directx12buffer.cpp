@@ -13,21 +13,22 @@
 namespace Engine {
 namespace Render {
 
-    DirectX12Buffer::DirectX12Buffer(size_t size)
+    DirectX12Buffer::DirectX12Buffer(size_t size, bool persistent)
         : mSize(size)
-    {       
+        , mPersistent(persistent)
+    {
         if (size > 0) {
             DirectX12ConstantBufferHeap &heap = DirectX12RenderContext::getSingleton().mConstantBufferHeap;
 
             size_t actualSize = alignTo(size, 256);
 
-            mOffset = heap.allocate(actualSize);
+            mOffset = persistent ? heap.allocatePersistent(actualSize) : heap.allocateTemp(actualSize);
 
             D3D12_CONSTANT_BUFFER_VIEW_DESC bufferDesc;
             ZeroMemory(&bufferDesc, sizeof(D3D12_CONSTANT_BUFFER_VIEW_DESC));
 
             bufferDesc.SizeInBytes = actualSize;
-            bufferDesc.BufferLocation = heap.address(mOffset);
+            bufferDesc.BufferLocation = persistent ? heap.addressPersistent(mOffset) : heap.addressTemp(mOffset);
 
             mHandle = heap.descriptorHeap()->allocate();
             sDevice->CreateConstantBufferView(&bufferDesc, heap.descriptorHeap()->cpuHandle(mHandle));
@@ -36,8 +37,13 @@ namespace Render {
         }
     }
 
+    DirectX12Buffer::DirectX12Buffer(size_t size)
+        : DirectX12Buffer(size, false)
+    {
+    }
+
     DirectX12Buffer::DirectX12Buffer(const ByteBuffer &data)
-        : DirectX12Buffer(data.mSize)
+        : DirectX12Buffer(data.mSize, true)
     {
         setData(data);
     }
@@ -46,6 +52,7 @@ namespace Render {
         : mSize(std::exchange(other.mSize, 0))
         , mHandle(std::exchange(other.mHandle, {}))
         , mOffset(std::exchange(other.mOffset, {}))
+        , mPersistent(std::exchange(other.mPersistent, false))
     {
     }
 
@@ -59,31 +66,51 @@ namespace Render {
         std::swap(mSize, other.mSize);
         std::swap(mHandle, other.mHandle);
         std::swap(mOffset, other.mOffset);
+        std::swap(mPersistent, other.mPersistent);
         return *this;
     }
 
     DirectX12Buffer::operator bool() const
     {
-        return true;
+        return static_cast<bool>(mHandle);
     }
 
     void DirectX12Buffer::bindVertex(UINT stride) const
     {
-        /*UINT offset = 0;
-        sDeviceContext->IASetVertexBuffers(0, 1, &mBuffer, &stride, &offset);*/
+        D3D12_VERTEX_BUFFER_VIEW view;
+        view.BufferLocation = mPersistent ? DirectX12RenderContext::getSingleton().mConstantBufferHeap.addressPersistent(mOffset) : DirectX12RenderContext::getSingleton().mConstantBufferHeap.addressTemp(mOffset);
+        view.SizeInBytes = mSize;
+        view.StrideInBytes = stride;
+        DirectX12RenderContext::getSingleton().mCommandList.mList->IASetVertexBuffers(0, 1, &view);
         DX12_LOG("Bind Vertex Buffer -> " << mBuffer);
         DirectX12VertexArray::onBindVBO(this);
     }
 
     void DirectX12Buffer::bindIndex() const
     {
-        //sDeviceContext->IASetIndexBuffer(mBuffer, DXGI_FORMAT_R16_UINT, 0);
+        D3D12_INDEX_BUFFER_VIEW view;
+        view.BufferLocation = mPersistent ? DirectX12RenderContext::getSingleton().mConstantBufferHeap.addressPersistent(mOffset) : DirectX12RenderContext::getSingleton().mConstantBufferHeap.addressTemp(mOffset);
+        view.SizeInBytes = mSize;
+        view.Format = DXGI_FORMAT_R16_UINT;
+        DirectX12RenderContext::getSingleton().mCommandList.mList->IASetIndexBuffer(&view);
         DX12_LOG("Bind Index Buffer -> " << mBuffer);
         DirectX12VertexArray::onBindEBO(this);
     }
 
     void DirectX12Buffer::reset()
     {
+        if (mHandle) {
+            DirectX12ConstantBufferHeap &heap = DirectX12RenderContext::getSingleton().mConstantBufferHeap;
+
+            heap.descriptorHeap()->deallocate(mHandle);
+            mHandle.reset();
+
+            size_t actualSize = alignTo(mSize, 256);
+
+            mPersistent ? heap.deallocatePersistent(mOffset, actualSize) : heap.deallocateTemp(mOffset, actualSize);
+            mOffset.reset();
+            mSize = 0;
+        }
     }
 
     void DirectX12Buffer::setData(const ByteBuffer &data)
@@ -92,26 +119,7 @@ namespace Render {
         if (mSize != data.mSize)
             *this = { data };
         else {
-            auto heapDesc = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-            auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(data.mSize);
-            ID3D12Resource *uploadHeap;
-            HRESULT hr = sDevice->CreateCommittedResource(
-                &heapDesc,
-                D3D12_HEAP_FLAG_NONE,
-                &resourceDesc,
-                D3D12_RESOURCE_STATE_GENERIC_READ,
-                nullptr,
-                IID_PPV_ARGS(&uploadHeap));
-            DX12_CHECK(hr);
-            
-            D3D12_SUBRESOURCE_DATA dataDesc;
-            ZeroMemory(&dataDesc, sizeof(D3D12_SUBRESOURCE_DATA));
-            dataDesc.pData = data.mData;
-            UpdateSubresources(DirectX12RenderContext::getSingleton().mTempCommandList.mList, heap.resource(), uploadHeap, mOffset.offset(), 0, 0, &dataDesc);            
-        
-            DirectX12RenderContext::getSingleton().ExecuteCommandList(DirectX12RenderContext::getSingleton().mTempCommandList);
-
-            uploadHeap->Release();
+            heap.setData(mOffset, data);
         }
     }
 
@@ -130,6 +138,12 @@ namespace Render {
     OffsetPtr DirectX12Buffer::handle()
     {
         return mHandle;
+    }
+
+    D3D12_GPU_VIRTUAL_ADDRESS DirectX12Buffer::gpuAddress() const
+    {
+        DirectX12ConstantBufferHeap &heap = DirectX12RenderContext::getSingleton().mConstantBufferHeap;
+        return mPersistent ? heap.addressPersistent(mOffset) : heap.addressTemp(mOffset);
     }
 
 }

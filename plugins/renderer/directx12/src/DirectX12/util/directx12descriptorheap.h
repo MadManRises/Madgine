@@ -24,6 +24,7 @@ namespace Render {
         D3D12_DESCRIPTOR_HEAP_TYPE mType;
         ID3D12DescriptorHeap *mHeap = nullptr;
         size_t mIndex = 0;
+        std::vector<size_t> mFreeList;
     };
 
 }

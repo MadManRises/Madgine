@@ -7,6 +7,10 @@ namespace Render {
 
     struct MADGINE_DIRECTX12_EXPORT DirectX12Buffer {
 
+    private:
+        DirectX12Buffer(size_t size, bool persistent);
+
+    public:
         DirectX12Buffer() = default;
         DirectX12Buffer(size_t size);
         DirectX12Buffer(const ByteBuffer &data);
@@ -29,10 +33,13 @@ namespace Render {
 
         OffsetPtr handle();
 
+        D3D12_GPU_VIRTUAL_ADDRESS gpuAddress() const;
+
     private:
-        size_t mSize = 0;              
+        size_t mSize = 0;
         OffsetPtr mOffset;
         OffsetPtr mHandle;
+        bool mPersistent;
     };
 
 }

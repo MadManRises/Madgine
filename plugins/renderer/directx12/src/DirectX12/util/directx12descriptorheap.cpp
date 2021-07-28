@@ -39,17 +39,23 @@ namespace Render {
     {
         UINT handleSize = sDevice->GetDescriptorHandleIncrementSize(mType);
 
-        assert(mIndex < 100);
-
-        size_t index = mIndex;
-
-        ++mIndex;
+        size_t index;
+        if (mFreeList.empty()) {
+            assert(mIndex < 100);
+            index = mIndex;
+            ++mIndex;
+        } else {
+            index = mFreeList.back();
+            mFreeList.pop_back();
+        }        
 
         return OffsetPtr{ index * handleSize };
     }
 
     void DirectX12DescriptorHeap::deallocate(OffsetPtr handle)
     {
+        UINT handleSize = sDevice->GetDescriptorHandleIncrementSize(mType);
+        mFreeList.push_back(handle.offset() / handleSize);
     }
 
     D3D12_CPU_DESCRIPTOR_HANDLE DirectX12DescriptorHeap::cpuHandle(OffsetPtr index)

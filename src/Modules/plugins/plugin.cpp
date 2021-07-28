@@ -140,7 +140,6 @@ namespace Plugins {
         std::vector<SharedFuture<bool>> dependentList;
         std::vector<Plugin *> dependents = mDependents;
         for (Plugin *dep : dependents) {
-            std::promise<bool> depPromise;
             dependentList.emplace_back(dep->mSection->unloadPlugin(barrier, dep));
         }
 

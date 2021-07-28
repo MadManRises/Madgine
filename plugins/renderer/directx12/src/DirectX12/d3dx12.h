@@ -3234,7 +3234,7 @@ inline bool operator==(const D3D12_CLEAR_VALUE &a, const D3D12_CLEAR_VALUE &b) n
         return (a.Color[0] == b.Color[0]) && (a.Color[1] == b.Color[1]) && (a.Color[2] == b.Color[2]) && (a.Color[3] == b.Color[3]);
     }
 }
-inline bool operator==(const D3D12_RENDER_PASS_BEGINNING_ACCESS_CLEAR_PARAMETERS &a, const D3D12_RENDER_PASS_BEGINNING_ACCESS_CLEAR_PARAMETERS &b) noexcept
+/* inline bool operator==(const D3D12_RENDER_PASS_BEGINNING_ACCESS_CLEAR_PARAMETERS &a, const D3D12_RENDER_PASS_BEGINNING_ACCESS_CLEAR_PARAMETERS &b) noexcept
 {
     return a.ClearValue == b.ClearValue;
 }
@@ -3294,7 +3294,9 @@ inline bool operator==(const D3D12_RENDER_PASS_DEPTH_STENCIL_DESC &a, const D3D1
         return false;
     return true;
 }
+*/
 
+#define D3DX12_NO_STATE_OBJECT_HELPERS
 #    ifndef D3DX12_NO_STATE_OBJECT_HELPERS
 
 //================================================================================================

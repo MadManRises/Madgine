@@ -33,6 +33,7 @@ namespace Render {
         DirectX12PixelShaderLoader::HandleType mPixelShader;
         std::vector<DirectX12Buffer> mConstantBuffers;
         std::vector<DirectX12Buffer> mDynamicBuffers;
+        std::map<DirectX12VertexArray *, ID3D12PipelineState *> mPipelineStates;
     };
 
 }

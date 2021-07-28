@@ -134,37 +134,33 @@ namespace Render {
     void ShadowRenderPass::updateFrustum()
     {
         Vector3 minBounds = std::numeric_limits<float>::max() * Vector3 { Vector3::UNIT_SCALE };
-        Vector3 maxBounds = std::numeric_limits<float>::min() * Vector3 { Vector3::UNIT_SCALE };
-
-        Frustum cameraFrustum = mCamera->getFrustum(1.0f);
-        auto corners = cameraFrustum.getCorners();
+        Vector3 maxBounds = std::numeric_limits<float>::lowest() * Vector3 { Vector3::UNIT_SCALE };
 
         Quaternion q = Quaternion::FromDirection(mScene.mAmbientLightDirection);
         Quaternion qInv = q.inverse();
 
-        for (Vector3 &v : corners) {
-            v = qInv * v;
-        }
+        Frustum cameraFrustum = mCamera->getFrustum(1.0f);
+        Frustum localFrustum = qInv * cameraFrustum;
+        auto corners = localFrustum.getCorners();
 
         minBounds = std::accumulate(corners.begin(), corners.end(), minBounds, static_cast<Vector3 (*)(const Vector3 &, const Vector3 &)>(&min));
         maxBounds = std::accumulate(corners.begin(), corners.end(), maxBounds, static_cast<Vector3 (*)(const Vector3 &, const Vector3 &)>(&max));
 
         Vector3 relPos = (maxBounds + minBounds) / 2.0f;
-        relPos.z = minBounds.z - 1.0f;        
+        relPos.z = minBounds.z - 1.0f;
 
         Vector2 size = maxBounds.xy() - minBounds.xy();
-        
+
         mLightFrustum = {
             q * relPos,
             q,
             size.y / 2.0f, size.x / 2.0f,
-            1.0f, maxBounds.z - minBounds.z,
+            1.0f, maxBounds.z - minBounds.z + 1.0f,
             true
         };
 
         Im3D::Frustum(cameraFrustum, Vector4 { 0.0f, 1.0f, 0.0f, 1.0f });
         Im3D::Frustum(mLightFrustum, Vector4 { 1.0f, 0.0f, 0.0f, 1.0f });
-
     }
 
 }

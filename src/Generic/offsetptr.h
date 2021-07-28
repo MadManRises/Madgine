@@ -15,6 +15,10 @@ struct OffsetPtr {
         return mOffset;
     }
 
+    constexpr void reset() {
+        mOffset = std::numeric_limits<uintptr_t>::max();
+    }
+
     constexpr std::strong_ordering operator<=>(const OffsetPtr &other) const = default;
     constexpr std::strong_ordering operator<=>(uintptr_t offset) const {
         return mOffset <=> offset;

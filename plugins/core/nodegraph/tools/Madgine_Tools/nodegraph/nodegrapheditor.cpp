@@ -792,7 +792,10 @@ namespace Tools {
     void NodeGraphEditor::load(std::string_view name)
     {
         mGraphHandle.load(name);
-        mGraph = *mGraphHandle;
+        if (mGraphHandle)
+            mGraph = *mGraphHandle;
+        else
+            mGraph = {};
         createEditor();
     }
 

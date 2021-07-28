@@ -303,7 +303,7 @@ constexpr ExtendedValueTypeDesc toValueTypeDesc()
             return { { ValueTypeEnum::KeyValueVirtualAssociativeRangeValue }, toValueTypeDesc<KeyType_t<typename T::iterator::value_type>>(), toValueTypeDesc<ValueType_t<typename T::iterator::value_type>>() };
     } else if constexpr (std::is_pointer_v<T>) {
         if constexpr (std::is_function_v<std::remove_pointer_t<T>> || std::is_same_v<std::remove_cv_t<std::remove_pointer_t<T>>, FunctionTable>)
-            return { { ValueTypeEnum::ApiFunctionValue }, &function<T> };
+            return { { ValueTypeEnum::ApiFunctionValue }, &function<T>() };
         else
             return { { ValueTypeEnum::ScopeValue }, &table<std::remove_pointer_t<T>> };
     } else {

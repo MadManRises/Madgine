@@ -22,7 +22,7 @@ struct META_EXPORT Frustum {
 inline Frustum operator*(const Quaternion &q, const Frustum &f)
 {
     return {
-        f.mPosition,
+        q * f.mPosition,
         q * f.mOrientation,
         f.mTop, f.mRight,
         f.mNear, f.mFar,
