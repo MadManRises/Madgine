@@ -332,7 +332,7 @@ struct RefcountedContainer {
     template <typename... Args>
     Pib<iterator> emplace(const const_iterator &where, Args &&... args)
     {
-        internal_traits::iterator freeListIterator = internal_traits::toIterator(mData, mFreeListHead);
+        typename internal_traits::iterator freeListIterator = internal_traits::toIterator(mData, mFreeListHead);
 
         assert(where.it() == mData.end() || where.it() == freeListIterator);
         ++mSize;

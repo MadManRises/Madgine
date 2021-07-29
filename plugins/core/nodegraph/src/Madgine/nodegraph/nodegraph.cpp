@@ -538,8 +538,8 @@ namespace NodeGraph {
         if (!target.mNode) {
             throw 0;
         } else {
-            auto result = std::erase(node(target.mNode)->mFlowInPins[target.mIndex].mSources, source);
-            assert(result == 1);
+            /* auto result = */ std::erase(node(target.mNode)->mFlowInPins[target.mIndex].mSources, source);
+            /*assert(result == 1);*/
             node(target.mNode)->onFlowInUpdate(target.mIndex, source, DISCONNECT);
         }
     }
@@ -560,8 +560,8 @@ namespace NodeGraph {
             std::erase(mDataProviderPins[source.mIndex].mTargets, target);
             checkDataProvider(source.mIndex);
         } else {
-            auto result = std::erase(node(source.mNode)->mDataProviderPins[source.mIndex].mTargets, target);
-            assert(result == 1);
+            /* auto result = */ std::erase(node(source.mNode)->mDataProviderPins[source.mIndex].mTargets, target);
+            /* assert(result == 1);*/
             node(source.mNode)->onDataProviderUpdate(source.mIndex, target, DISCONNECT);
         }
     }
@@ -581,8 +581,8 @@ namespace NodeGraph {
         if (!target.mNode) {
             throw 0;
         } else {
-            auto result = std::erase(node(target.mNode)->mDataReceiverPins[target.mIndex].mSources, source);
-            assert(result == 1);
+            /* auto result = */ std::erase(node(target.mNode)->mDataReceiverPins[target.mIndex].mSources, source);
+            /* assert(result == 1);*/
             node(target.mNode)->onDataReceiverUpdate(target.mIndex, source, DISCONNECT);
         }
     }
