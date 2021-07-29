@@ -3,12 +3,6 @@
 namespace Engine {
 	namespace Render {
 
-		enum ShaderType 
-		{
-			VertexShader,
-			PixelShader
-		};
-
 		struct OpenGLShader 
 		{
 			OpenGLShader() = default;

@@ -13,7 +13,10 @@ namespace Render {
 
 	struct OpenGLRenderContext;
 
-    enum ShaderType;
+    enum ShaderType {
+            VertexShader,
+            PixelShader
+        };
 
     constexpr struct create_t {
     } create;
