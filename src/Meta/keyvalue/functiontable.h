@@ -17,6 +17,8 @@ struct FunctionTable {
     mutable const FunctionTable **mPrev = nullptr;
 };
 
+DLL_IMPORT_VARIABLE2(const Engine::FunctionTable, function, auto F);
+
 META_EXPORT const FunctionTable *&sFunctionList();
 
 META_EXPORT void registerFunction(const FunctionTable &f);
@@ -33,5 +35,3 @@ struct FunctionTableRegistrator {
 };
 
 }
-
-DLL_IMPORT_VARIABLE2(const Engine::FunctionTable, function, auto F);
