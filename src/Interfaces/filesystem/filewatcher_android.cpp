@@ -25,6 +25,14 @@ namespace Filesystem {
 
     }
 
+    void FileWatcher::clear()
+    {
+        /*for (const std::pair<const Path, uintptr_t> &handle : mWatches) {
+            Generator<std::vector<FileEvent>>::fromAddress(reinterpret_cast<void *>(handle.second)).reset();
+        }
+        mWatches.clear();*/
+    }
+
     std::vector<FileEvent> FileWatcher::fetchChanges()
     {
         return {};
