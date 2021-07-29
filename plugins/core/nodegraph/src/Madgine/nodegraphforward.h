@@ -20,6 +20,10 @@ namespace NodeGraph {
     struct DataReceiverPinPrototype;
     struct DataProviderPinPrototype;
 
-    enum EdgeEvent;
+    enum EdgeEvent {
+        CONNECT,
+        DISCONNECT,
+        UPDATE
+    };
 }
 }

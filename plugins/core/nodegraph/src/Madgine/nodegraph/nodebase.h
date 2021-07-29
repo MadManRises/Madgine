@@ -13,12 +13,6 @@
 namespace Engine {
 namespace NodeGraph {
 
-    enum EdgeEvent {
-        CONNECT,
-        DISCONNECT,
-        UPDATE
-    };
-
     struct MADGINE_NODEGRAPH_EXPORT NodeBase : Serialize::VirtualSerializableDataBase<VirtualScopeBase<>, Serialize::SerializableDataUnit> {
 
         SERIALIZABLEUNIT(NodeBase);
