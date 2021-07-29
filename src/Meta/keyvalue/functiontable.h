@@ -12,12 +12,15 @@ struct FunctionTable {
     const FunctionArgument *mArguments;
     const ExtendedValueTypeDesc *mReturnType;
 
-
     mutable const FunctionTable *mNext = nullptr;
     mutable const FunctionTable **mPrev = nullptr;
 };
 
+}
+
 DLL_IMPORT_VARIABLE2(const Engine::FunctionTable, function, auto F);
+
+namespace Engine {
 
 META_EXPORT const FunctionTable *&sFunctionList();
 
@@ -26,10 +29,12 @@ META_EXPORT void unregisterFunction(const FunctionTable &f);
 
 template <auto F>
 struct FunctionTableRegistrator {
-    FunctionTableRegistrator() {
+    FunctionTableRegistrator()
+    {
         registerFunction(function<F>());
     }
-    ~FunctionTableRegistrator() {
+    ~FunctionTableRegistrator()
+    {
         unregisterFunction(function<F>());
     }
 };
