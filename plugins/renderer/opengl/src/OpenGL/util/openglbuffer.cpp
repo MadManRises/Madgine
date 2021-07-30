@@ -81,19 +81,25 @@ namespace Render {
     {
         bind();
         glBufferData(mTarget, data.mSize, data.mData, GL_STATIC_DRAW);
-        GL_CHECK();        
+        GL_CHECK();
         mSize = data.mSize;
     }
 
-    void OpenGLBuffer::resize(size_t size) {
+    void OpenGLBuffer::resize(size_t size)
+    {
         bind();
         glBufferData(mTarget, size, nullptr, GL_DYNAMIC_DRAW);
         GL_CHECK();
         mSize = size;
     }
 
-    WritableByteBuffer OpenGLBuffer::mapData()
+    WritableByteBuffer OpenGLBuffer::mapData(size_t offset, size_t size)
     {
+
+        if (size == 0)
+            size = mSize;
+
+#if !WEBGL
         struct UnmapDeleter {
             OpenGLBuffer *mSelf;
 
@@ -106,13 +112,47 @@ namespace Render {
             }
         };
         bind();
-        void *data = glMapBufferRange(mTarget, 0, mSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
+        void *data = glMapBufferRange(mTarget, offset, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
         GL_CHECK();
         assert(data);
 
         std::unique_ptr<void, UnmapDeleter> dataBuffer { data, { this } };
 
-        return { std::move(dataBuffer), mSize };
+        return { std::move(dataBuffer), size };
+#else
+        struct MapHelper {
+            std::unique_ptr<std::byte[]> mPtr;
+            OpenGLBuffer *mSelf;
+            size_t mOffset;
+            size_t mSize;
+
+            MapHelper(OpenGLBuffer *self, size_t offset, size_t size)
+                : mPtr(std::make_unique<std::byte[]>(size))
+                , mSelf(self)
+                , mOffset(offset)
+                , mSize(size)
+            {
+            }
+
+            MapHelper(MapHelper &&other)
+                : mPtr(std::move(other.mPtr))
+                , mSelf(other.mSelf)
+                , mOffset(other.mOffset)
+                , mSize(other.mSize)
+            {
+            }
+
+            ~MapHelper()
+            {
+                if (mPtr)
+                    mSelf->setSubData(mOffset, { mPtr.get(), mSize });
+            }
+        };
+
+        MapHelper dataBuffer { this, offset, size };
+
+        return { std::move(dataBuffer), size, dataBuffer.mPtr.get() };
+#endif
     }
 
     void OpenGLBuffer::setSubData(unsigned int offset, const ByteBuffer &data)

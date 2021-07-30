@@ -22,7 +22,7 @@ namespace Render {
         void reset();
         void setData(const ByteBuffer &data);
         void resize(size_t size);
-        WritableByteBuffer mapData();
+        WritableByteBuffer mapData(size_t offset = 0, size_t size = 0);
 
         void setSubData(unsigned int offset, const ByteBuffer &data);
 

@@ -45,25 +45,7 @@ namespace Render {
 
     WritableByteBuffer OpenGLSSBOBufferStorage::mapData(const Area &area)
     {
-        struct UnmapDeleter {
-            OpenGLBuffer *mSelf;
-
-            void operator()(void *p)
-            {
-                mSelf->bind();
-                auto result = glUnmapBuffer(GL_UNIFORM_BUFFER);
-                assert(result);
-                GL_CHECK();
-            }
-        };
-        mBuffer.bind();
-        void *data = glMapBufferRange(GL_UNIFORM_BUFFER, area.mIndex * 16, area.mSize * 16, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
-        GL_CHECK();
-        assert(data);
-
-        std::unique_ptr<void, UnmapDeleter> dataBuffer { data, { &mBuffer } };
-
-        return { std::move(dataBuffer), area.mSize * 16 };
+        return mBuffer.mapData(area.mIndex * 16, area.mSize * 16);
     }	    
 
     OpenGLSSBOBuffer::~OpenGLSSBOBuffer()

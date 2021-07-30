@@ -10,20 +10,26 @@
 
 #include "openglforward.h"
 
-#include "Madgine/clientlib.h"
 #include "meshloaderlib.h"
 #include "programloaderlib.h"
 #include "textureloaderlib.h"
+#include "Madgine/clientlib.h"
 
 #if !ANDROID && !EMSCRIPTEN && !IOS
 #    include "../glad/glad.h"
 #    define OPENGL_ES 0
 #elif IOS
-#   include <OpenGLES/ES3/gl.h>
-#   define OPENGL_ES 1
+#    include <OpenGLES/ES3/gl.h>
+#    define OPENGL_ES 1
 #else
 #    include <GLES3/gl32.h>
 #    define OPENGL_ES 1
+#endif
+
+#if EMSCRIPTEN
+#    define WEBGL 1
+#else
+#    define WEBGL 0
 #endif
 
 MADGINE_OPENGL_EXPORT void glDump();
@@ -48,8 +54,8 @@ inline void glCheck()
 
 #if WINDOWS
 
-#define NOMINMAX
-#include <Windows.h>
+#    define NOMINMAX
+#    include <Windows.h>
 
 #    undef NO_ERROR
 typedef HGLRC ContextHandle;
