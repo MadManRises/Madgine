@@ -24,7 +24,7 @@ namespace Render {
         Area allocate(size_t size);
         void deallocate(const Area &area);
 
-		void setData(const void *data, const Area &area);
+		WritableByteBuffer mapData(const Area &area);
 
     private:
         std::vector<Area> mFreeList;
@@ -40,7 +40,8 @@ namespace Render {
 
 		void reset();
 
-		void setData(const ByteBuffer &data);
+        void resize(size_t size);
+		WritableByteBuffer mapData();
 
 		size_t offset() const;
 

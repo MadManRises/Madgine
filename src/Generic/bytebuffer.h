@@ -76,8 +76,14 @@ struct ByteBufferImpl {
         };
     }
 
-    Data* operator->() const {
+    Data *operator->() const
+    {
         return mData;
+    }
+
+    reference_t<Data> operator[](size_t index)
+    {
+        return mData[index];
     }
 
 private:

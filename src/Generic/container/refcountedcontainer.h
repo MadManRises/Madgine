@@ -90,40 +90,39 @@ struct RefcountedContainer {
 
     static_assert(sizeof(position_handle) + sizeof(void *) <= sizeof(value_type));
 
-    private:
-        static position_handle &handle(ControlBlock &block)
-        {
-            assert(block.mDeadFlag);
-            return *reinterpret_cast<position_handle *>(&block.mHead + 1);
+private:
+    static position_handle &handle(ControlBlock &block)
+    {
+        assert(block.mDeadFlag);
+        return *reinterpret_cast<position_handle *>(&block.mHead + 1);
+    }
+
+    template <typename... Args>
+    static position_handle emplace(ControlBlock &block, Args &&...args)
+    {
+        assert(block.mDeadFlag && block.mRefCount == 0);
+        position_handle next = handle(block);
+        handle(block).~position_handle();
+        block.mDeadFlag = false;
+        new (&block.mData) value_type(std::forward<Args>(args)...);
+        return next;
+    }
+
+    static void destroy(ControlBlock &block, position_handle *head, const position_handle &selfIt)
+    {
+        assert(!block.mDeadFlag);
+        block.mData.~value_type();
+        block.mDeadFlag = true;
+        block.mHead = head;
+        if (block.mRefCount == 0) {
+            new (&handle(block)) position_handle(*head);
+            *head = selfIt;
+        } else {
+            new (&handle(block)) position_handle(selfIt);
         }
+    }
 
-        template <typename... Args>
-        static position_handle emplace(ControlBlock &block, Args &&...args)
-        {
-            assert(block.mDeadFlag && block.mRefCount == 0);
-            position_handle next = handle(block);
-            handle(block).~position_handle();
-            block.mDeadFlag = false;
-            new (&block.mData) value_type(std::forward<Args>(args)...);
-            return next;
-        }
-
-        static void destroy(ControlBlock &block, position_handle *head, const position_handle &selfIt)
-        {
-            assert(!block.mDeadFlag);
-            block.mData.~value_type();
-            block.mDeadFlag = true;
-            block.mHead = head;
-            if (block.mRefCount == 0) {
-                new (&handle(block)) position_handle(*head);
-                *head = selfIt;
-            } else {
-                new (&handle(block)) position_handle(selfIt);
-            }
-        }
-
-        public:
-
+public:
     template <typename It, typename Val, bool refcounted>
     struct IteratorImpl {
 
@@ -427,19 +426,19 @@ private:
 };
 
 template <typename C>
-    void RefcountedContainer<C>::ControlBlock::incRef()
+void RefcountedContainer<C>::ControlBlock::incRef()
 {
     ++mRefCount;
 }
 
-    template <typename C>
-    void RefcountedContainer<C>::ControlBlock::decRef()
-    {
-            --mRefCount;
-            if (mRefCount == 0 && mDeadFlag) {
-                std::swap(*static_cast<position_handle*>(mHead), handle(*this));
-            }
-        }
+template <typename C>
+void RefcountedContainer<C>::ControlBlock::decRef()
+{
+    --mRefCount;
+    if (mRefCount == 0 && mDeadFlag) {
+        std::swap(*static_cast<position_handle *>(mHead), handle(*this));
+    }
+}
 
 template <typename C>
 struct container_traits<RefcountedContainer<C>, void> : RefcountedContainer<C>::internal_traits {

@@ -129,4 +129,22 @@ struct index_range_add<add, std::index_sequence<Is...>> {
 template <size_t from, size_t to>
 using make_index_range = typename index_range_add<from, std::make_index_sequence<to - from>>::type;
 
+template <typename T>
+struct reference {
+    using type = T &;
+};
+
+template <>
+struct reference<void> {
+    using type = void;
+};
+
+template <>
+struct reference<const void> {
+    using type = void;
+};
+
+template <typename T>
+using reference_t = typename reference<T>::type;
+
 }

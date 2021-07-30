@@ -47,7 +47,7 @@ namespace Render {
         std::vector<OpenGLBuffer> mShaderStorageBuffers;
 #else
         std::vector<OpenGLSSBOBuffer> mShaderStorageBuffers;
-        OpenGLBuffer mShaderStorageOffsetBuffer = {GL_UNIFORM_BUFFER, 0};
+        OpenGLBuffer mShaderStorageOffsetBuffer = { GL_UNIFORM_BUFFER, 0 };
 #endif
     };
 
