@@ -37,6 +37,10 @@ namespace Render {
     {
         std::swap(mHandle, other.mHandle);
         std::swap(mUniformBuffers, other.mUniformBuffers);
+        std::swap(mShaderStorageBuffers, other.mShaderStorageBuffers);
+#if OPENGL_ES
+        std:swap(mShaderStorageOffsetBuffer);
+#endif
         return *this;
     }
 
@@ -126,16 +130,17 @@ namespace Render {
             GL_CHECK();
         }
 #else
-        std::vector<unsigned int> offsets;
         size_t size = mShaderStorageBuffers.size();
         if (size > 0)
             size = (((size - 1) / 4) + 1) * 4;
-        offsets.resize(size);
+        mShaderStorageOffsetBuffer.resize(size * sizeof(unsigned int));
+        {
+        auto offsets = mShaderStorageOffsetBuffer.map().cast<unsigned int>();
         size_t i = 0;
         for (const OpenGLSSBOBuffer &buffer : mShaderStorageBuffers) {
             offsets[i++] = buffer.offset();
         }
-        mShaderStorageOffsetBuffer.setData(offsets);
+        }
         glBindBufferBase(GL_UNIFORM_BUFFER, 4, mShaderStorageOffsetBuffer.handle());
         GL_CHECK();
 #endif
