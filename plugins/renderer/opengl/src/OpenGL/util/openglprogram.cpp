@@ -135,7 +135,7 @@ namespace Render {
             size = (((size - 1) / 4) + 1) * 4;
         mShaderStorageOffsetBuffer.resize(size * sizeof(unsigned int));
         {
-        auto offsets = mShaderStorageOffsetBuffer.mapData().cast<unsigned int>();
+        auto offsets = mShaderStorageOffsetBuffer.mapData().cast<unsigned int[]>();
         size_t i = 0;
         for (const OpenGLSSBOBuffer &buffer : mShaderStorageBuffers) {
             offsets[i++] = buffer.offset();

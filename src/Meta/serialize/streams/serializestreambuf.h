@@ -26,11 +26,9 @@ namespace Serialize {
 
         SerializableUnitList &serializableList();
         friend struct SerializableListHolder;
-        void startSerializableRead(SerializableListHolder *list);
 
         SerializableUnitMap &serializableMap();
         friend struct SerializableMapHolder;
-        void startSerializableWrite(SerializableMapHolder *map);
 
     private:
         SerializeManager *mManager = nullptr;

@@ -61,6 +61,7 @@ namespace Serialize {
     {
         UnitId ptr;
         STREAM_PROPAGATE_ERROR(readUnformatted(ptr));
+        assert(ptr <= (std::numeric_limits<UnitId>::max() >> 2));
         if (ptr)
             ptr = (ptr << 2) | static_cast<UnitId>(UnitIdTag::SYNCABLE);
         p = reinterpret_cast<SyncableUnitBase *>(ptr);
@@ -73,7 +74,7 @@ namespace Serialize {
         STREAM_PROPAGATE_ERROR(readUnformatted(ptr));
         assert(ptr <= (std::numeric_limits<uint32_t>::max() >> 2));
         if (ptr)
-            ptr = (ptr << 2) | static_cast<UnitId>(UnitIdTag::SERIALIZABLE);
+            ptr = (ptr << 2) | static_cast<uint32_t>(UnitIdTag::SERIALIZABLE);
         p = reinterpret_cast<SerializableDataUnit *>(ptr);
         return {};
     }
@@ -234,11 +235,6 @@ namespace Serialize {
         return data().serializableList();
     }
 
-    void SerializeInStream::startSerializableRead(SerializableListHolder *list)
-    {
-        data().startSerializableRead(list);
-    }
-
     SerializeOutStream::SerializeOutStream()
     {
     }
@@ -352,11 +348,6 @@ namespace Serialize {
     SerializableUnitMap &SerializeOutStream::serializableMap()
     {
         return data().serializableMap();
-    }
-
-    void SerializeOutStream::startSerializableWrite(SerializableMapHolder *map)
-    {
-        data().startSerializableWrite(map);
     }
 
 }

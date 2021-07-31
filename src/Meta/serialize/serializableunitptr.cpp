@@ -21,8 +21,7 @@ namespace Serialize {
 
     void SerializableDataConstPtr::writeState(SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags) const
     {
-        SerializableMapHolder holder;
-        out.startSerializableWrite(&holder);
+        SerializableMapHolder holder { out };
 
         if (out.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
             out.format().beginExtended(out, name, 1);
@@ -36,8 +35,7 @@ namespace Serialize {
 
     StreamResult SerializableDataPtr::readState(SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags) const
     {
-        SerializableListHolder holder;
-        in.startSerializableRead(&holder);
+        SerializableListHolder holder { in };
 
         if (!in.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
             in.format().beginExtended(in, name, 1);
@@ -84,8 +82,7 @@ namespace Serialize {
 
     StreamResult SerializableUnitPtr::readState(SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags) const
     {
-        SerializableListHolder holder;
-        in.startSerializableRead(&holder);
+        SerializableListHolder holder { in };
 
         if (!in.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
             STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, name, 1));

@@ -72,7 +72,7 @@ struct ByteBufferImpl {
         return {
             std::move(mKeep),
             mSize,
-            static_cast<T *>(mData)
+            static_cast<std::remove_extent_t<T> *>(mData)
         };
     }
 
@@ -81,17 +81,23 @@ struct ByteBufferImpl {
         return mData;
     }
 
-    reference_t<Data> operator[](size_t index)
-    {
-        return mData[index];
-    }
-
 private:
     Any mKeep;
 
 public:
     size_t mSize = 0;
     Data *mData = nullptr;
+};
+
+template <typename Data>
+struct ByteBufferImpl<Data[]> : ByteBufferImpl<Data> {
+
+    using ByteBufferImpl<Data>::ByteBufferImpl;
+
+    Data &operator[](size_t index)
+    {
+        return this->mData[index];
+    }
 };
 
 using ByteBuffer = ByteBufferImpl<const void>;

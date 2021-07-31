@@ -94,7 +94,6 @@ namespace Serialize {
         void setNextFormattedStringDelimiter(char c);
 
         SerializableUnitList &serializableList();
-        void startSerializableRead(SerializableListHolder *list);
 
     protected:
         SerializeInStream(std::basic_streambuf<char> *buffer, SerializeStreamData *data);
@@ -160,7 +159,6 @@ namespace Serialize {
         SerializeStreamData &data() const;
 
         SerializableUnitMap &serializableMap();
-        void startSerializableWrite(SerializableMapHolder *map);
 
     protected:
         std::unique_ptr<SerializeStreamData> mData;

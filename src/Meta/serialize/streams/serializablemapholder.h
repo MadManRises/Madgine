@@ -5,7 +5,7 @@ namespace Serialize {
 
     struct SerializableMapHolder {
 
-        SerializableMapHolder() = default;     
+        SerializableMapHolder(SerializeOutStream &out);     
         SerializableMapHolder(const SerializableMapHolder &) = delete;
         SerializableMapHolder(SerializableMapHolder &&) = delete;
         ~SerializableMapHolder();
@@ -16,7 +16,7 @@ namespace Serialize {
 
     struct SerializableListHolder {
 
-        SerializableListHolder() = default;
+        SerializableListHolder(SerializeInStream &in);
         SerializableListHolder(const SerializableListHolder &) = delete;
         SerializableListHolder(SerializableListHolder &&) = delete;
         ~SerializableListHolder();

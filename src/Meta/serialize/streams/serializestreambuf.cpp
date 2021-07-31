@@ -48,28 +48,10 @@ namespace Serialize {
         return *mSerializableList;
     }
 
-    void SerializeStreamData::startSerializableRead(SerializableListHolder *list)
-    {
-        assert(!list->mData);
-        if (!mSerializableList) {
-            list->mData = this;
-            mSerializableList = &list->mList;
-        }
-    }
-
     SerializableUnitMap &SerializeStreamData::serializableMap()
     {
         assert(mSerializableMap);
         return *mSerializableMap;
-    }
-
-    void SerializeStreamData::startSerializableWrite(SerializableMapHolder *map)
-    {
-        assert(!map->mData);
-        if (!mSerializableMap) {
-            map->mData = this;
-            mSerializableMap = &map->mMap;
-        }
     }
 
     bool SerializeStreamData::isMaster(StreamMode mode)
