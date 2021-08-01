@@ -52,7 +52,7 @@ void main()
 		}
 		else
 		{
-			colorAcc = colorAcc * texture2D(tex, uv);
+			colorAcc = colorAcc * texture(tex, uv);
 		}
 	}
 
