@@ -191,7 +191,7 @@ namespace Render {
         if (mesh) {
             if (interpretData->mMesh.resource() != mesh)
                 interpretData->mMesh = mesh;
-            target->bindTexture({ interpretData->mMesh->mTextureHandle });
+            target->bindTextures({ interpretData->mMesh->mTextureHandle });
             target->renderMesh(interpretData->mMesh, interpretData->mHandle);
         }
     }

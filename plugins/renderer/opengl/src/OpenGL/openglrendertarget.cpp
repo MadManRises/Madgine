@@ -110,7 +110,7 @@ namespace Render {
         GL_CHECK();
     }
 
-    void OpenGLRenderTarget::bindTexture(const std::vector<TextureHandle> &tex)
+    void OpenGLRenderTarget::bindTextures(const std::vector<TextureHandle> &tex)
     {
         for (size_t i = 0; i < tex.size(); ++i) {
             glActiveTexture(GL_TEXTURE0 + i);

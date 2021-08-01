@@ -95,7 +95,7 @@ namespace Render {
                 GPUMeshData *meshData = mesh->data();
                 if (meshData) {
 
-                    target->bindTexture({ meshData->mTextureHandle, mShadowMap->depthTexture() });
+                    target->bindTextures({ meshData->mTextureHandle, mShadowMap->depthTexture() });
 
                     Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
 

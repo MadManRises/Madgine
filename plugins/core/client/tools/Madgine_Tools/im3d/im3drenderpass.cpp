@@ -57,7 +57,7 @@ namespace Render {
 
         for (std::pair<const Im3DTextureId, Im3D::Im3DContext::RenderData> &p : context->mRenderData) {
 
-            target->bindTexture({ p.first });
+            target->bindTextures({ p.first });
 
             {
                 auto perObject = mProgram.mapParameters(2).cast<Im3DPerObject>();

@@ -2,6 +2,8 @@
 
 in vec4 worldPos;
 
+out vec4 fragColor;
+
 vec3 _smoothstep(float edge0, float edge1, vec3 x) {
 	vec3 t = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
     return t * t * (3.0 - 2.0 * t);
@@ -21,5 +23,5 @@ void main()
 	//col = mix(vec4(1.0,1.0,1.0,1.0), vec4(0.0,0.0,0.0,0.0), mult.x * mult.y * mult.z);
 	col = vec4(0.7, 0.7, 0.7, clamp(1.0 - mult.x * mult.z, 0.0, 1.0));
 
-    gl_FragColor = col;
+    fragColor = col;
 }

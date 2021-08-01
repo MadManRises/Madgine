@@ -99,6 +99,7 @@ namespace Render {
             glUniformBlockBinding(mHandle, SSBOOffsetsIndex, 4);
             GL_CHECK();
         }
+
 #endif
 
         return success;
@@ -131,18 +132,19 @@ namespace Render {
         }
 #else
         size_t size = mShaderStorageBuffers.size();
-        if (size > 0)
+        if (size > 0) {
             size = (((size - 1) / 4) + 1) * 4;
-        mShaderStorageOffsetBuffer.resize(size * sizeof(unsigned int));
-        {
-        auto offsets = mShaderStorageOffsetBuffer.mapData().cast<unsigned int[]>();
-        size_t i = 0;
-        for (const OpenGLSSBOBuffer &buffer : mShaderStorageBuffers) {
-            offsets[i++] = buffer.offset();
+            mShaderStorageOffsetBuffer.resize(size * sizeof(unsigned int));
+            {
+                auto offsets = mShaderStorageOffsetBuffer.mapData().cast<unsigned int[]>();
+                size_t i = 0;
+                for (const OpenGLSSBOBuffer &buffer : mShaderStorageBuffers) {
+                    offsets[i++] = buffer.offset();
+                }
+            }
+            glBindBufferBase(GL_UNIFORM_BUFFER, 4, mShaderStorageOffsetBuffer.handle());
+            GL_CHECK();
         }
-        }
-        glBindBufferBase(GL_UNIFORM_BUFFER, 4, mShaderStorageOffsetBuffer.handle());
-        GL_CHECK();
 #endif
     }
 
@@ -171,13 +173,13 @@ namespace Render {
 #if !OPENGL_ES
         if (!mShaderStorageBuffers[index]) {
             mShaderStorageBuffers[index] = { GL_SHADER_STORAGE_BUFFER, data.mSize };
-        } else 
+        } else
 #endif
         {
             mShaderStorageBuffers[index].resize(data.mSize);
         }
 
-        if (data.mSize > 0) { 
+        if (data.mSize > 0) {
             auto target = mShaderStorageBuffers[index].mapData();
             std::memcpy(target.mData, data.mData, data.mSize);
         }

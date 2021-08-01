@@ -11,6 +11,7 @@ layout(binding = 0) uniform sampler2D tex;
 in vec4 color;
 in vec2 uv;
 
+out vec4 fragColor;
 
 float median(float r, float g, float b) {
     return max(min(r, g), min(max(r, g), b));
@@ -31,5 +32,5 @@ void main()
 	} else {
 		texColor = texture2D(tex, uv);
 	}
-    gl_FragColor = color * texColor;
+    fragColor = color * texColor;
 }

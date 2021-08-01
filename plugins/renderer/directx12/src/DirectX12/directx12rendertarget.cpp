@@ -249,7 +249,7 @@ namespace Render {
         DirectX12RenderContext::getSingleton().mCommandList.mList->ClearDepthStencilView(DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.cpuHandle(mDepthStencilView), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
     }
 
-    void DirectX12RenderTarget::bindTexture(const std::vector<TextureHandle> &tex)
+    void DirectX12RenderTarget::bindTextures(const std::vector<TextureHandle> &tex)
     {        
         //DirectX12RenderContext::getSingleton().mCommandList->PSSetShaderResources(0, tex.size(), reinterpret_cast<ID3D12ShaderResourceView *const *>(tex.data()));
     }

@@ -300,7 +300,7 @@ namespace Render {
         sDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
     }
 
-    void DirectX11RenderTarget::bindTexture(const std::vector<TextureHandle> &tex)
+    void DirectX11RenderTarget::bindTextures(const std::vector<TextureHandle> &tex)
     {
         sDeviceContext->PSSetShaderResources(0, tex.size(), reinterpret_cast<ID3D11ShaderResourceView *const *>(tex.data()));
     }

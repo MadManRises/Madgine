@@ -36,6 +36,7 @@ in vec3 normal;
 in vec2 uv;
 in vec4 lightViewPosition;
 
+out vec4 fragColor;
 
 
 float median(float r, float g, float b) {
@@ -88,5 +89,5 @@ void main()
 		colorAcc = vec4(ambient + diffuse,1.0) * colorAcc;
 	}
 
-    gl_FragColor = colorAcc;
+    fragColor = colorAcc;
 }

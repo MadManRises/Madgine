@@ -638,9 +638,9 @@ namespace Widgets {
                 }
 
                 if (p.first.mTextureHandle)
-                    target->bindTexture({ p.first.mTextureHandle });
+                    target->bindTextures({ p.first.mTextureHandle });
                 else
-                    target->bindTexture({ mData->mUIAtlasTexture->mTextureHandle });
+                    target->bindTextures({ mData->mUIAtlasTexture->mTextureHandle });
 
                 mData->mMesh.update({ 3, std::move(p.second) });
 

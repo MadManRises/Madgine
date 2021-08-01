@@ -1,16 +1,18 @@
-#version 420 core
+#version 300 es
 
-layout (std140, binding = 0) uniform PerApplication
+precision highp float;
+
+uniform PerApplication
 {
 	mat4 p;	
 };
 
-layout (std140, binding = 1) uniform PerFrame
+uniform PerFrame
 {
 	mat4 v;
 };
 
-layout (std140, binding = 2) uniform PerObject
+uniform PerObject
 {
 	mat4 m;
 	
@@ -18,7 +20,7 @@ layout (std140, binding = 2) uniform PerObject
 	bool hasDistanceField;
 };
 
-layout(binding = 0) uniform sampler2D tex;
+uniform sampler2D tex;
 
 
 in vec4 color;
