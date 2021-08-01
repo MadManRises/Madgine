@@ -1,5 +1,7 @@
 #version 300 es
 
+precision highp float;
+
 uniform PerApplication
 {
 	mat4 p;	

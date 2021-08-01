@@ -43,7 +43,7 @@ void main()
 	if (hasTexture){
 		if (hasDistanceField){
 			vec2 msdfUnit = 4.0/vec2(512.0, 512.0);
-			vec4 sampled = texture2D(tex, uv);
+			vec4 sampled = texture(tex, uv);
 			float sigDist = median(sampled.r, sampled.g, sampled.b) - 0.5;
 			//sigDist *= dot(msdfUnit, vec2(0.5));
 			sigDist *= 4.0;
