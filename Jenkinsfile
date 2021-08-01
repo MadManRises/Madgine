@@ -96,7 +96,7 @@ def staticTask = {
 				docker.image(toolchain.dockerImage).inside {
 					sh """
 					cd ${name}
-					ctest
+					ctest --output-on-failure
 					"""
 				}
 			}     
@@ -154,7 +154,7 @@ def task = {
 					docker.image(toolchain.dockerImage).inside {
 						sh """
 						cd ${name}
-						ctest
+						ctest --output-on-failure
 						"""
 					}
 				}           
