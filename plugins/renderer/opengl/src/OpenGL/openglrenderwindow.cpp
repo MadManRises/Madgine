@@ -58,14 +58,14 @@ namespace Render {
         Util::MessageType lvl;
         switch (severity) {
         case GL_DEBUG_SEVERITY_HIGH:
-            lvl = Util::ERROR_TYPE;
+            lvl = Util::MessageType::ERROR_TYPE;
             break;
         case GL_DEBUG_SEVERITY_MEDIUM:
-            lvl = Util::WARNING_TYPE;
+            lvl = Util::MessageType::WARNING_TYPE;
             break;
         case GL_DEBUG_SEVERITY_LOW:
         case GL_DEBUG_SEVERITY_NOTIFICATION:
-            lvl = Util::LOG_TYPE;
+            lvl = Util::MessageType::LOG_TYPE;
             break;
         }
 

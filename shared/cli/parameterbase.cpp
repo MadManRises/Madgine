@@ -50,9 +50,8 @@ namespace CLI {
                         LOG_WARNING("Too many arguments provided for option '" << optionName << "'! Superfluous arguments will be discarded!");
                     }
                     if (!parse(*args)) {
-                        LOG_ERROR("Invalid parameters provided for option '" << optionName << "': " << StringUtil::join(*args, ", "));
-                        if (mHelp)
-                            LOG_ERROR("\t" << mHelp);
+                        LOG_ERROR("Invalid parameters provided for option '" << optionName << "': " << StringUtil::join(*args, ", "));                        
+                        LOG_ERROR("\t" << help());
                     }
                 }
             }

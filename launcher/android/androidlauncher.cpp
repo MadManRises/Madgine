@@ -14,6 +14,11 @@
 #include "Interfaces/filesystem/api.h"
 #include "../launcher.h"
 
+#include "cli/parameter.h"
+#include "Interfaces/util/standardlog.h"
+
+extern Engine::CLI::Parameter<Engine::Util::MessageType> logLevel;
+
 namespace Engine {
 
 namespace Window {
@@ -51,6 +56,8 @@ namespace Android {
         ANativeActivity *activity = mActivity;
 
         static Engine::Core::Root root;
+
+        Engine::Util::StandardLog::setLogLevel(/*logLevel*/Engine::Util::MessageType::DEBUG_TYPE);
 
 		launch(&mWindow);
 		

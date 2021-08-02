@@ -24,7 +24,11 @@
 #include "Modules/threading/taskguard.h"
 #include "Interfaces/filesystem/api.h"
 
+#include "Interfaces/util/standardlog.h"
+
 Engine::CLI::Parameter<bool> toolMode { { "--toolMode", "-t" }, false, "If set, no application will be started. Only the root will be initialized and then immediately shutdown again." };
+
+Engine::CLI::Parameter<Engine::Util::MessageType> logLevel { { "--logLevel", "-l" }, Engine::Util::MessageType::LOG_TYPE, "Specify log-level." };
 
 #if EMSCRIPTEN
 #    define FIX_LOCAL static
@@ -34,7 +38,6 @@ Engine::CLI::Parameter<bool> toolMode { { "--toolMode", "-t" }, false, "If set, 
 
 int launch(Engine::Window::MainWindow **topLevelPointer)
 {
-
     FIX_LOCAL Engine::App::AppSettings settings;
 
     settings.mAppName = "Madgine Client";
@@ -72,6 +75,7 @@ DLL_EXPORT_TAG int main(int argc, char **argv)
     Engine::Filesystem::setup();
     Engine::Threading::WorkGroup workGroup { "Launcher" };
     Engine::Core::Root root { argc, argv };
+    Engine::Util::StandardLog::setLogLevel(logLevel);
     if (!toolMode) {
         return launch();
     } else {
@@ -83,7 +87,7 @@ DLL_EXPORT_TAG int main(int argc, char **argv)
 void madgine_terminate_handler()
 {
     {
-        Engine::Util::LogDummy cout { Engine::Util::ERROR_TYPE };
+        Engine::Util::LogDummy cout { Engine::Util::MessageType::ERROR_TYPE };
         cout << "Terminate called! (Madgine-Handler)\n";
         cout << "Stack-Trace:\n";
         for (const Engine::Debug::TraceBack &trace : Engine::Debug::StackTrace<64>::getCurrent(1).calculateReadable())

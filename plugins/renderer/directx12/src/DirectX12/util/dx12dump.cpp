@@ -20,7 +20,7 @@ bool checkDevice(HRESULT& result) {
 void dx12Dump(HRESULT result)
 {
 
-    Engine::Util::LogDummy cout { Engine::Util::LOG_TYPE };
+    Engine::Util::LogDummy cout { Engine::Util::MessageType::LOG_TYPE };
 
     
     if (result == DXGI_ERROR_DEVICE_REMOVED) {

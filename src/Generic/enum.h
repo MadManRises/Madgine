@@ -21,6 +21,20 @@ struct EnumMetaTable {
         }
     }
 
+    constexpr bool fromString(std::string_view s, int32_t &v) const
+    {
+        const std::string_view *end = mValueNames + (mMax - mMin - 1);
+        auto it = std::find(mValueNames, end, s);
+        if (it != end) {
+            v = (it - mValueNames) + mMin + 1;
+            return true;
+        } else if (mBase) {
+            return mBase->fromString(s, v);
+        } else {
+            return false;
+        }
+    }
+
     std::ostream &print(std::ostream &stream, int32_t value, std::string_view actualType) const
     {
         if (isBase(value))
@@ -55,6 +69,13 @@ struct Enum : _Representation {
     std::string_view toString() const
     {
         return Representation::sTable.toString(mValue);
+    }
+
+    bool fromString(std::string_view s)
+    {
+        return Representation::sTable.fromString(s, reinterpret_cast<int32_t &>(mValue));
+        /*mValue = static_cast<EnumType>(v);
+        return true;*/
     }
 
     friend std::ostream &operator<<(std::ostream &stream, const Enum<Representation> &value)

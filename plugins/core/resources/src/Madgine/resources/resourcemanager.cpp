@@ -157,6 +157,8 @@ namespace Resources {
 
     void ResourceManager::updateResources(Filesystem::FileEventType event, const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> &loaderByExtension)
     {
+        LOG_DEBUG("Scanning for Resources in: " << path);
+
         for (Filesystem::Path p : Filesystem::listFilesRecursive(path)) {
             updateResource(event, p, priority, loaderByExtension);
         }
@@ -164,6 +166,8 @@ namespace Resources {
 
     void ResourceManager::updateResource(Filesystem::FileEventType event, const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> &loaderByExtension)
     {
+        LOG_DEBUG("Updating Resource: " << path << " (" << event << ")");
+
         std::string_view extension = path.extension();
 
         auto it = loaderByExtension.find(extension);

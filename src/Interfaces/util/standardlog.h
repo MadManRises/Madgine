@@ -9,6 +9,8 @@ namespace Util {
 
         static void sLog(const std::string &msg, MessageType lvl, const std::string &name = "Default");
 
+        static void setLogLevel(MessageType lvl);
+
         // Inherited via Log
         void log(const std::string &msg, MessageType lvl) override;
         std::string getName() override;

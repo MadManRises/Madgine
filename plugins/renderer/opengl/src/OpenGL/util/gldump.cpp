@@ -7,7 +7,7 @@ using namespace Engine::Render;
 void glDump()
 {
 
-    Engine::Util::LogDummy cout { Engine::Util::LOG_TYPE };
+    Engine::Util::LogDummy cout { Engine::Util::MessageType::LOG_TYPE };
 
     cout << "GL-State: ---------- \n";
 

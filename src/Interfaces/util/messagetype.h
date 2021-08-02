@@ -1,16 +1,16 @@
 #pragma once
 
-namespace Engine
-{
-	namespace Util
-	{
-		
-		enum MessageType
-		{
-			ERROR_TYPE,
-			WARNING_TYPE,
-			LOG_TYPE
-		};
+#include "Generic/enum.h"
 
-	}
+namespace Engine {
+namespace Util {
+
+    ENUM(MessageType,
+        DEBUG_TYPE,
+        LOG_TYPE,
+        WARNING_TYPE,
+        ERROR_TYPE
+    );
+
+}
 }

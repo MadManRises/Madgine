@@ -103,5 +103,63 @@ namespace CLI {
             return static_cast<const std::string &>(*this).c_str();
         }
     };
+
+    template <typename Rep>
+    struct ParameterImpl<Enum<Rep>> : ParameterBase {
+        ParameterImpl(std::vector<const char *> options, Enum<Rep> defaultValue, const char *help = nullptr)
+            : ParameterBase(1, 1, std::move(options), help)
+            , mValue(defaultValue)
+        {
+        }
+
+        bool parse(const std::vector<const char *> &args) override
+        {
+            return mValue.fromString(args[0]);
+        }
+
+        const char *typeName() override
+        {
+            return Enum<Rep>::sTypeName().data();
+        }
+
+        std::string help() override
+        {
+            std::stringstream ss;
+            ss << ParameterBase::help();
+            ss << " [";
+            bool first = true;
+            for (int i = Enum<Rep>::MIN + 1; i < Enum<Rep>::MAX; ++i) {
+                if (first)
+                    first = false;
+                else
+                    ss << ", ";
+                ss << Rep::sTable.toString(i);
+            }
+            ss << "].";
+            return ss.str();
+        }
+
+        const Enum<Rep> &operator*()
+        {
+            init();
+            return mValue;
+        }
+
+        const Enum<Rep> *operator->()
+        {
+            init();
+            return &mValue;
+        }
+
+        operator const Enum<Rep> &()
+        {
+            init();
+            return mValue;
+        }
+
+    private:
+        Enum<Rep> mValue;
+    };
+
 }
 }

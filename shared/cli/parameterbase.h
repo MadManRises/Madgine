@@ -12,7 +12,7 @@ namespace CLI {
         virtual const char *typeName() = 0;
 
         void init();
-        std::string help();
+        virtual std::string help();
         const std::vector<const char *> &options();
 
     private:

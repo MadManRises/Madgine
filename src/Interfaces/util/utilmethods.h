@@ -24,9 +24,10 @@ namespace Util {
         MessageType mLvl;
     };
 
-#define LOG(s) Engine::Util::LogDummy(Engine::Util::LOG_TYPE) << s
-#define LOG_WARNING(s) Engine::Util::LogDummy(Engine::Util::WARNING_TYPE) << s
-#define LOG_ERROR(s) Engine::Util::LogDummy(Engine::Util::ERROR_TYPE) << s
+#define LOG_DEBUG(s) Engine::Util::LogDummy { Engine::Util::MessageType::DEBUG_TYPE } << s
+#define LOG(s) Engine::Util::LogDummy { Engine::Util::MessageType::LOG_TYPE } << s
+#define LOG_WARNING(s) Engine::Util::LogDummy { Engine::Util::MessageType::WARNING_TYPE } << s
+#define LOG_ERROR(s) Engine::Util::LogDummy { Engine::Util::MessageType::ERROR_TYPE } << s
 #define LOG_EXCEPTION(e) LOG_ERROR(e.what())
 
 #define LOG_ONCE(s) std::call_once([]() -> std::once_flag & {static std::once_flag dummy; return dummy; }(), [&]() { LOG(s); })
