@@ -94,13 +94,12 @@ macro(collect_data target)
 
 		if (NOT BUILD_SHARED_LIBS OR ANDROID OR EMSCRIPTEN)
 			
-			file(GLOB_RECURSE files ${CMAKE_CURRENT_SOURCE_DIR}/data/*)
+			#file(GLOB_RECURSE files ${CMAKE_CURRENT_SOURCE_DIR}/data/*)
 
-			add_custom_command(
-				TARGET ${target} 
-				POST_BUILD 
+			add_custom_target(
+				${target}_copy_data 				
 				COMMAND ${CMAKE_COMMAND} -DSOURCE=${CMAKE_CURRENT_SOURCE_DIR}/data -DTARGET=${CMAKE_BINARY_DIR}/data -P ${workspace_file_dir}/util/flatcopy.cmake
-				DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/data ${files}
+				DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/data #${files}
 			)
 		endif()
 	endif()

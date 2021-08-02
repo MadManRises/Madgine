@@ -17,7 +17,7 @@ macro(add_tools targetProject)
 		set(TOOL_CONFIG_SOURCE_ROOT tools)
 	endif()
 
-	add_plugin(${targetProject}Tools ${base} Tools ${TOOL_CONFIG_UNPARSED_ARGUMENTS} SOURCE_ROOT ${TOOL_CONFIG_SOURCE_ROOT})
+	add_plugin(${targetProject}Tools ${base} Tools ${TOOL_CONFIG_UNPARSED_ARGUMENTS} SOURCE_ROOT ${TOOL_CONFIG_SOURCE_ROOT} NO_DATA_COPY)
 
 	target_link_plugins(${targetProject}Tools ${targetProject})
 

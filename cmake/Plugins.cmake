@@ -65,14 +65,23 @@ endif ()
 
 macro(add_plugin name base type)
 
-	add_workspace_library(${name} ${ARGN})
+	set(options NO_DATA_COPY)
+	set(oneValueArgs)
+	set(multiValueArgs)
+	cmake_parse_arguments(PLUGIN_CONFIG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})	
+
+	add_workspace_library(${name} ${PLUGIN_CONFIG_UNPARSED_ARGUMENTS})
 
 	set_target_properties(${name} PROPERTIES 
 		OUTPUT_NAME Plugin_${base}_${type}_${name}
 		PLUGIN_BASE ${base}
 		PLUGIN_TYPE ${type})
 
-	collect_data(${name})
+	if (NOT PLUGIN_CONFIG_NO_DATA_COPY)
+		collect_data(${name})
+	else()
+		generate_binary_info(${name})
+	endif()
 
 	set(installPlugin TRUE)
 
