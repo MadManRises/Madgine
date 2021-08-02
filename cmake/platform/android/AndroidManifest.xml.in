@@ -7,17 +7,17 @@
 
     <application
         android:allowBackup="false"
-        android:label="com.@PROJECT_NAME@.$<TARGET_NAME:@target@>"
+        android:label="com.@PROJECT_NAME@.$<TARGET_FILE_BASE_NAME:@target@>"
         android:hasCode="false"
         android:theme="@android:style/Theme.NoTitleBar">
 
         <!-- This name is resolved to com.example.myapp.MainActivity
              based upon the package attribute -->
         <activity android:name="android.app.NativeActivity"
-                  android:label="$<TARGET_NAME:@target@>"
+                  android:label="$<TARGET_FILE_BASE_NAME:@target@>"
                   android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
                 <meta-data android:name="android.app.lib_name"
-                        android:value="$<TARGET_NAME:@target@>" />
+                        android:value="$<TARGET_FILE_BASE_NAME:@target@>" />
                 <intent-filter>
                         <action android:name="android.intent.action.MAIN" />
                         <category android:name="android.intent.category.LAUNCHER" />
