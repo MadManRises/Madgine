@@ -113,7 +113,7 @@ namespace Render {
         if (mDepthTexture){
             glBindTexture(GL_TEXTURE_2D, mDepthTexture);
             GL_CHECK();
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
             GL_CHECK();
         }
 

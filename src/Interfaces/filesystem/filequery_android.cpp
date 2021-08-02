@@ -27,7 +27,7 @@ namespace Filesystem {
     static const char *assetDir(const Path &p)
     {
         assert(isAssetPath(p));
-        const char *dir = p.c_str() + sizeof(sAssetPrefix);
+        const char *dir = p.c_str() + sizeof(sAssetPrefix) - 1;
         if (isSeparator(*dir))
             ++dir;
         return dir;

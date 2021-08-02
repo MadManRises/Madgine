@@ -30,7 +30,7 @@ namespace Filesystem {
     static const char *assetDir(const Path &p)
     {
         assert(isAssetPath(p));
-        const char *dir = p.c_str() + sizeof(sAssetPrefix);
+        const char *dir = p.c_str() + sizeof(sAssetPrefix) - 1;
         if (isSeparator(*dir))
             ++dir;
         return dir;
@@ -129,6 +129,9 @@ namespace Filesystem {
         AAsset_Streambuf(const char *path)
             : mAsset(AAssetManager_open(sAssetManager, path, AASSET_MODE_RANDOM))
         {
+            char *begin = (char *)AAsset_getBuffer(mAsset);
+            char *end = begin + AAsset_getLength64(mAsset);
+            setg(begin, begin, end);
         }
 
         ~AAsset_Streambuf()
@@ -141,29 +144,27 @@ namespace Filesystem {
         {
             assert(mode & std::ios_base::in);
 
-            int whence;
             switch (dir) {
             case std::ios_base::beg:
-                whence = SEEK_SET;
+                if (eback() + off >= egptr())
+                    return pos_type(off_type(-1));
+                setg(eback(), eback() + off, egptr());
                 break;
             case std::ios_base::cur:
-                whence = SEEK_CUR;
-                off += gptr() - egptr();
-                if (off >= eback() - egptr() && off <= 0) {
-                    setg(eback(), egptr() + off, egptr());
-                    off_t cur = AAsset_seek(mAsset, 0, SEEK_CUR);
-                    return pos_type(off_type(cur + off));
-                }
+                if (gptr() + off < eback() || gptr() + off >= egptr())                     
+                    return pos_type(off_type(-1));
+                setg(eback(), gptr() + off, egptr());
                 break;
             case std::ios_base::end:
-                whence = SEEK_END;
+                if (egptr() + off < eback())
+                    return pos_type(off_type(-1));
+                setg(eback(), egptr() + off, egptr());
                 break;
             default:
                 std::terminate();
             }
 
-            off_t pos = AAsset_seek(mAsset, off, whence);
-            return pos_type(off_type(pos));
+            return pos_type(off_type(gptr() - eback()));
         }
 
         pos_type seekpos(pos_type pos,
@@ -171,17 +172,9 @@ namespace Filesystem {
         {
             assert(mode & std::ios_base::in);
 
-            off_t newPos = AAsset_seek(mAsset, pos, SEEK_SET);
+            setg(eback(), eback() + pos, egptr());
 
             return pos_type(off_type(pos));
-        }
-
-        std::streamsize xsgetn(char *buffer, std::streamsize count) override
-        {
-            std::streamsize readCount = AAsset_read(mAsset, buffer, count);
-            if (readCount < 0)
-                std::terminate();
-            return readCount;
         }
 
     private:
