@@ -72,7 +72,7 @@ void main()
 		lightTexCoord.x = lightViewPosition.x / lightViewPosition.w / 2.0 + 0.5;
 		lightTexCoord.y = lightViewPosition.y / lightViewPosition.w / 2.0 + 0.5;
 
-		float shadowDepth = texture2D(shadowDepthMap, lightTexCoord).r;
+		float shadowDepth = texture(shadowDepthMap, lightTexCoord).r;
 		float lightDepth = lightViewPosition.z / lightViewPosition.w / 2.0 + 0.5;
 		lightDepth = lightDepth - bias;
 
