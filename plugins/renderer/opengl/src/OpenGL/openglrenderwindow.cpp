@@ -36,7 +36,7 @@ namespace Window {
 #elif OSX
 #    include "osxopengl.h"
 #elif IOS
-#   include "iosopengl.h"
+#    include "iosopengl.h"
 #endif
 
 namespace Engine {
@@ -264,9 +264,9 @@ namespace Render {
         } else {
             context = OSXBridge::createContext(window);
         }
-        
+
 #elif IOS
-        
+
         ContextHandle context;
         if (reusedContext) {
             context = reusedContext;
@@ -283,6 +283,20 @@ namespace Render {
             if (wglSwapIntervalEXT)
                 wglSwapIntervalEXT(0);
 #endif
+
+            if (glGetString) {
+                const GLubyte *val;
+#define GL_LOG_PROPERTY(name)         \
+    val = glGetString(name);          \
+    if (val) {                        \
+        LOG_DEBUG(#name ": " << val); \
+    }
+
+                GL_LOG_PROPERTY(GL_VERSION);
+                GL_LOG_PROPERTY(GL_VENDOR);
+                GL_LOG_PROPERTY(GL_RENDERER);
+                GL_LOG_PROPERTY(GL_EXTENSIONS);
+            }
         }
 
         return context;

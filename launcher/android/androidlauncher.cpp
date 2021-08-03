@@ -57,7 +57,7 @@ namespace Android {
 
         static Engine::Core::Root root;
 
-        Engine::Util::StandardLog::setLogLevel(/*logLevel*/Engine::Util::MessageType::DEBUG_TYPE);
+        Engine::Util::StandardLog::setLogLevel(logLevel);
 
 		launch(&mWindow);
 		

@@ -44,13 +44,8 @@ inline void glCheck()
     }
 }
 
-#if !EMSCRIPTEN
-#    define GL_CHECK() glCheck()
-#else
-#    define GL_CHECK()
-#endif
-//#define GL_LOG(x) LOG("GL: " << x)
-#define GL_LOG(x)
+#define GL_CHECK() glCheck()
+#define GL_LOG(x) LOG_DEBUG("GL: " << x)
 
 #if WINDOWS
 

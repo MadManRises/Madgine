@@ -9,17 +9,27 @@
 #include "../launcher.h"
 #include "Madgine/app/application.h"
 #include <emscripten.h>
+#include "Interfaces/util/standardlog.h"
+#include "cli/parameter.h"
+#include "cli/cli.h"
+
+extern Engine::CLI::Parameter<Engine::Util::MessageType> logLevel;
+
+std::unique_ptr<Engine::CLI::CLICore> sTempCLI;
 
 void mainImpl()
 {
     emscripten_cancel_main_loop();
     static Engine::Threading::WorkGroup workGroup { "Launcher" };
-    static Engine::Core::Root root;
+    static Engine::Core::Root root { std::move(sTempCLI) };
+    Engine::Util::StandardLog::setLogLevel(logLevel);
     launch();
 }
 
 DLL_EXPORT_TAG int main(int argc, char **argv)
 {
+    sTempCLI = std::make_unique<Engine::CLI::CLICore>(argc, argv);
+
     void (*callback)() = &mainImpl;
     Engine::Filesystem::setup(&callback);
 

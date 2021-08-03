@@ -62,7 +62,7 @@ namespace Render {
 #endif
 
         if (GLenum check = glCheckFramebufferStatus(GL_FRAMEBUFFER); check != GL_FRAMEBUFFER_COMPLETE) {
-            LOG_ERROR("Incomplete Framebuffer Status: " << check);
+            LOG_ERROR("Incomplete Framebuffer Status: " << check << " (texture: " << config.mCreateDepthBufferView << ")");
             glDump();
             std::terminate();
         }
@@ -104,7 +104,7 @@ namespace Render {
             glBindRenderbuffer(GL_RENDERBUFFER, mDepthRenderbuffer);
             GL_CHECK();
 
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
             GL_CHECK();
 
             glBindRenderbuffer(GL_RENDERBUFFER, 0);
@@ -113,7 +113,7 @@ namespace Render {
         if (mDepthTexture){
             glBindTexture(GL_TEXTURE_2D, mDepthTexture);
             GL_CHECK();
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, nullptr);
             GL_CHECK();
         }
 

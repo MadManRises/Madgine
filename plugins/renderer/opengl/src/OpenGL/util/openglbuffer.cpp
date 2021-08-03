@@ -159,7 +159,7 @@ namespace Render {
     {
         bind();
         glBufferSubData(mTarget, offset, data.mSize, data.mData);
-        GL_LOG("Buffer-SubData: " << offset << ", " << size);
+        GL_LOG("Buffer-SubData: " << offset << ", " << data.mSize);
         GL_CHECK();
     }
 

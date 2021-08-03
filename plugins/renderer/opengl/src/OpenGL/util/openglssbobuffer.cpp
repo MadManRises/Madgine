@@ -2,11 +2,11 @@
 
 #if OPENGL_ES
 
+#    include "../openglrendercontext.h"
+#    include "Modules/uniquecomponent/uniquecomponentcollector.h"
 #    include "openglssbobuffer.h"
-#include "Modules/uniquecomponent/uniquecomponentcollector.h"
-#include "../openglrendercontext.h"
 
-#include "Generic/bytebuffer.h"
+#    include "Generic/bytebuffer.h"
 
 namespace Engine {
 namespace Render {
@@ -16,7 +16,7 @@ namespace Render {
     {
         mBuffer = { GL_UNIFORM_BUFFER, size * 16 };
         glBindBufferBase(GL_UNIFORM_BUFFER, bindingIndex, mBuffer.handle());
-		GL_CHECK();
+        GL_CHECK();
     }
 
     OpenGLSSBOBufferStorage::Area OpenGLSSBOBufferStorage::allocate(size_t size)
@@ -46,7 +46,7 @@ namespace Render {
     WritableByteBuffer OpenGLSSBOBufferStorage::mapData(const Area &area)
     {
         return mBuffer.mapData(area.mIndex * 16, area.mSize * 16);
-    }	    
+    }
 
     OpenGLSSBOBuffer::~OpenGLSSBOBuffer()
     {
@@ -58,10 +58,11 @@ namespace Render {
         if (mArea.mSize > 0) {
             OpenGLSSBOBufferStorage &storage = OpenGLRenderContext::getSingleton().mSSBOBuffer;
             storage.deallocate(mArea);
-		}
+        }
     }
 
-    void OpenGLSSBOBuffer::resize(size_t size) {
+    void OpenGLSSBOBuffer::resize(size_t size)
+    {
         if (size == 0)
             return;
         size = (size - 1) / 16 + 1;
@@ -75,8 +76,8 @@ namespace Render {
     WritableByteBuffer OpenGLSSBOBuffer::mapData()
     {
         OpenGLSSBOBufferStorage &storage = OpenGLRenderContext::getSingleton().mSSBOBuffer;
-        GL_LOG("SSBO-Data: " << size);
-        return storage.mapData(mArea);		
+        GL_LOG("SSBO-Data: " << mArea.mIndex << ", " << mArea.mSize);
+        return storage.mapData(mArea);
     }
 
     size_t OpenGLSSBOBuffer::offset() const
