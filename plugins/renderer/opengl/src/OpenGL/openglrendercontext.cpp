@@ -50,10 +50,6 @@
 
             std::unique_ptr<RenderTarget> window = std::make_unique<OpenGLRenderWindow>(this, w, sharedContext);
 
-			#if OPENGL_ES
-            mSSBOBuffer = { 3, 128 };
-			#endif
-
 			return window;
         }
 

@@ -83,18 +83,17 @@ namespace Client {
                     pass.mArguments.resize(argCount - 1);
                     for (size_t i = 1; i < argCount; ++i) {
                         ExtendedValueTypeDesc desc = pass.mHandle->dataProviderType({ 0, i });
-                        if (desc != Engine::toValueTypeDesc<Render::Camera *>()) {
-                            pass.mArguments[i - 1].setType(desc);
-                        }else{
-                            pass.mArguments[i - 1] = &mCamera;
-                        }
                         if (desc == toValueTypeDesc<Engine::Vector4>()) {
                             pass.mArguments[i - 1] = Engine::Vector4 { Engine::Vector4::ZERO };
+                        } else if (desc != Engine::toValueTypeDesc<Render::Camera *>()) {
+                            pass.mArguments[i - 1].setType(desc);
+                        } else {
+                            pass.mArguments[i - 1] = &mCamera;
                         }
                     }
                 }
                 size_t i = 0;
-                for (ValueType& v : pass.mArguments) {
+                for (ValueType &v : pass.mArguments) {
                     mInspector->drawValue(std::to_string(i++), v, true, false);
                 }
             }

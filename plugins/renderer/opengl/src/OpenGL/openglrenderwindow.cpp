@@ -42,6 +42,11 @@ namespace Window {
 namespace Engine {
 namespace Render {
 
+#if OPENGL_ES
+    THREADLOCAL(OpenGLSSBOBufferStorage *)
+    OpenGLRenderWindow::sCurrentSSBOBuffer = nullptr;
+#endif
+
 #if !ANDROID && !EMSCRIPTEN && !OSX && !IOS
     static void __stdcall glDebugOutput(GLenum source,
         GLenum type,
@@ -397,10 +402,17 @@ namespace Render {
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
         //glDepthRange(0.0, 1.0);
+
+#if OPENGL_ES
+        mSSBOBuffer = { 3, 128 };
+#endif
     }
 
     OpenGLRenderWindow::~OpenGLRenderWindow()
     {
+#if OPENGL_ES
+        mSSBOBuffer.reset();
+#endif
         shutdownWindow(mOsWindow, mContext, mReusedContext);
     }
 
@@ -409,6 +421,10 @@ namespace Render {
         PROFILE();
 
         Engine::Render::makeCurrent(mOsWindow, mContext);
+
+#if OPENGL_ES
+        sCurrentSSBOBuffer = &mSSBOBuffer;
+#endif
 
         OpenGLRenderTarget::beginFrame();
     }

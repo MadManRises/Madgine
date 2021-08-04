@@ -4,8 +4,6 @@
 #include "Madgine/render/rendercontext.h"
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
-#include "util/openglssbobuffer.h"
-
 namespace Engine {
 namespace Render {
 
@@ -17,10 +15,6 @@ namespace Render {
         virtual std::unique_ptr<RenderTarget> createRenderTexture(const Vector2i &size = { 1, 1 }, const RenderTextureConfig &config = {}) override;
 
 		static OpenGLRenderContext &getSingleton();
-
-#if OPENGL_ES    
-        OpenGLSSBOBufferStorage mSSBOBuffer;
-#endif
     };
 
 }

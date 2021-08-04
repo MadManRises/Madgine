@@ -26,6 +26,8 @@ namespace Render {
 
 		WritableByteBuffer mapData(const Area &area);
 
+        void reset();
+
     private:
         std::vector<Area> mFreeList;
         size_t mIndex = 0;
