@@ -40,6 +40,8 @@ namespace Client {
     {
     }
 
+    NodeRendererTester::~NodeRendererTester() = default;
+
     bool NodeRendererTester::init()
     {
         if (!Tools::ToolBase::init())
@@ -85,6 +87,9 @@ namespace Client {
                             pass.mArguments[i - 1].setType(desc);
                         }else{
                             pass.mArguments[i - 1] = &mCamera;
+                        }
+                        if (desc == toValueTypeDesc<Engine::Vector4>()) {
+                            pass.mArguments[i - 1] = Engine::Vector4 { Engine::Vector4::ZERO };
                         }
                     }
                 }

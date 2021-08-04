@@ -51,7 +51,7 @@ FolderSources(sources "" nodes_tools)
 		FolderSources(sources Madgine client)
 			FolderSources(sources client nodes noderenderertester.cpp noderenderertester.h)
 
-add_tools(ClientNodes ${sources} PRECOMPILED_HEADER nodes_tools/Madgine/clientnodestoolslib.h)
+add_tools(ClientNodes ${sources} PRECOMPILED_HEADER nodes_tools/Madgine/clientnodestoolslib.h SOURCE_ROOT nodes_tools)
 
 target_link_plugins(ClientNodesTools Tools ClientTools)
 

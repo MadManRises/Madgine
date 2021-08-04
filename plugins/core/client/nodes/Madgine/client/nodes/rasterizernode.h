@@ -41,7 +41,7 @@ namespace Render {
 
 
 
-        size_t mAdditionalPins = 0;
+        uint32_t mAdditionalPins = 0;
     };
 
 }

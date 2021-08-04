@@ -23,9 +23,6 @@ namespace Tools {
         bool renderFunctionSelect(BoundApiFunction &function, std::string &functionName, ArgumentList &args);
 
     protected:
-        void refreshMethodCache();
-
-        void parseMethods(TypedScopePtr scope);
 
         bool renderFunctionDetails(BoundApiFunction &function, ArgumentList &args);
 

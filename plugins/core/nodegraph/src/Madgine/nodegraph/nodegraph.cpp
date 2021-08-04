@@ -444,7 +444,7 @@ namespace NodeGraph {
 
     std::string_view NodeGraph::dataProviderName(Pin target)
     {
-        return target.mNode ? node(target.mNode)->dataProviderName(target.mIndex) : "input";
+        return target.mNode ? node(target.mNode)->dataProviderName(target.mIndex) : "graphInput";
     }
 
     std::string_view NodeGraph::dataInName(Pin source)

@@ -58,7 +58,7 @@ namespace Render {
 
         virtual CodeGen::Statement generateRead(NodeGraph::CodeGenerator &generator, uint32_t providerIndex, std::unique_ptr<NodeGraph::CodeGeneratorData> &data) const override;
 
-        size_t mAdditionalPins = 0;
+        uint32_t mAdditionalPins = 0;
     };
 
 }

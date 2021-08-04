@@ -27,7 +27,7 @@ namespace Filesystem {
         return StringUtil::startsWith(p.str(), sAssetPrefix);
     }
 
-    static const char *assetDir(const Path &p)
+    static const char *assetPath(const Path &p)
     {
         assert(isAssetPath(p));
         const char *dir = p.c_str() + sizeof(sAssetPrefix) - 1;
@@ -96,9 +96,14 @@ namespace Filesystem {
     bool exists(const Path &p)
     {
         if (isAssetPath(p)) {
-            AAssetDir *dir = AAssetManager_openDir(sAssetManager, assetDir(p));
+            AAssetDir *dir = AAssetManager_openDir(sAssetManager, assetPath(p));
             bool result = AAssetDir_getNextFileName(dir) != nullptr;
             AAssetDir_close(dir);
+            if (result)
+                return true;
+            AAsset *file = AAssetManager_open(sAssetManager, assetPath(p), AASSET_MODE_RANDOM);
+            result = AAsset_getLength(file) > 0;
+            AAsset_close(file);
             return result;
         } else {
             return access(p.c_str(), F_OK) != -1;
@@ -184,7 +189,7 @@ namespace Filesystem {
     InStream openFileRead(const Path &p, bool isBinary)
     {
         if (isAssetPath(p)) {
-            return { std::make_unique<AAsset_Streambuf>(assetDir(p)) };
+            return { std::make_unique<AAsset_Streambuf>(assetPath(p)) };
         } else {
             std::unique_ptr<std::filebuf> buffer = std::make_unique<std::filebuf>();
             if (buffer->open(p.c_str(), static_cast<std::ios_base::openmode>(std::ios_base::in | (isBinary ? std::ios_base::binary : 0))))

@@ -14,6 +14,8 @@ namespace Engine {
 
 struct MetaTableTag;
 struct MetaTableCtorTag;
+template <typename T>
+struct MetaMemberFunctionTag;
 
 template <size_t... Ids>
 using MetaTableLineStruct = LineStruct<MetaTableTag, Ids...>;
@@ -171,13 +173,13 @@ static constexpr std::array<std::pair<const char *, ::Engine::Accessor>, std::tu
         struct LineStruct<MetaTableCtorTag, __LINE__> : MetaTableCtorLineStruct<__LINE__ - 1> { \
             constexpr const Constructor *data() const                                           \
             {                                                                                   \
-                if constexpr (MetaTableCtorLineStruct<__LINE__ - 1>::base)                   \
+                if constexpr (MetaTableCtorLineStruct<__LINE__ - 1>::base)                      \
                     return &mData;                                                              \
                 else                                                                            \
-                    return MetaTableCtorLineStruct<__LINE__ - 1>::data();                    \
+                    return MetaTableCtorLineStruct<__LINE__ - 1>::data();                       \
             }                                                                                   \
             static constexpr const bool base = false;                                           \
-            Constructor mData = ctorHelper<__VA_ARGS__>(type_holder<Ty>);                                  \
+            Constructor mData = ctorHelper<__VA_ARGS__>(type_holder<Ty>);                       \
         };                                                                                      \
     }
 
@@ -187,15 +189,15 @@ static constexpr std::array<std::pair<const char *, ::Engine::Accessor>, std::tu
 #define METATABLE_END_EX(T, ...) \
     _METATABLE_END_IMPL(T, __LINE__, __VA_ARGS__)
 
-#define _METATABLE_END_IMPL(T, ...)                                                \
-    METATABLE_ENTRY(nullptr, SINGLE_ARG({ nullptr, nullptr }), __VA_ARGS__)        \
-    CONSTRUCTOR(void)                                                              \
-    namespace Meta_##T                                                             \
-    {                                                                              \
-        static constexpr ::Engine::MetaTableLineStruct<__VA_ARGS__> sMembers = {}; \
-        static constexpr ::Engine::MetaTableCtorLineStruct<__VA_ARGS__> sCtors = {};\
-    }                                                                              \
-    DLL_EXPORT_VARIABLE(constexpr, const ::Engine::MetaTable, , table, SINGLE_ARG({ &::table<T>, #T, ::Engine::MetaTableLineStruct<__VA_ARGS__>::baseClass, Meta_##T::sMembers.data(), Meta_##T::sCtors.data()}), T);
+#define _METATABLE_END_IMPL(T, ...)                                                  \
+    METATABLE_ENTRY(nullptr, SINGLE_ARG({ nullptr, nullptr }), __VA_ARGS__)          \
+    CONSTRUCTOR(void)                                                                \
+    namespace Meta_##T                                                               \
+    {                                                                                \
+        static constexpr ::Engine::MetaTableLineStruct<__VA_ARGS__> sMembers = {};   \
+        static constexpr ::Engine::MetaTableCtorLineStruct<__VA_ARGS__> sCtors = {}; \
+    }                                                                                \
+    DLL_EXPORT_VARIABLE(constexpr, const ::Engine::MetaTable, , table, SINGLE_ARG({ &::table<T>, #T, ::Engine::MetaTableLineStruct<__VA_ARGS__>::baseClass, Meta_##T::sMembers.data(), Meta_##T::sCtors.data() }), T);
 
 /*#define STRUCT_METATABLE(T)                                                                                              \
     namespace {                                                                                                          \
@@ -222,12 +224,12 @@ static constexpr std::array<std::pair<const char *, ::Engine::Accessor>, std::tu
 #define PROPERTY(Name, Getter, Setter) \
     METATABLE_ENTRY(#Name, SINGLE_ARG(::Engine::property<Ty, &Ty::Getter, &Ty::Setter>()), __LINE__)
 
-#define NAMED_FUNCTION(Name, /*F, */...)                                                                                                                       \
-    FUNCTIONTABLE_EX(::Engine::MetaTableLineStruct<__LINE__ - 1>::name + "::" + STRINGIFY(Name), ::Engine::MetaTableLineStruct<__LINE__ - 1>::Ty::__VA_ARGS__) \
+#define NAMED_FUNCTION(Name, /*F, */...)                                                                                                                                                                                                         \
+    FUNCTIONTABLE_EX(::Engine::MetaTableLineStruct<__LINE__ - 1>::name + "::" + STRINGIFY(Name), ::Engine::MetaMemberFunctionTag<::Engine::MetaTableLineStruct<__LINE__ - 1>::Ty>, ::Engine::MetaTableLineStruct<__LINE__ - 1>::Ty::__VA_ARGS__) \
     METATABLE_ENTRY(STRINGIFY(Name), SINGLE_ARG(::Engine::property<Ty, &::Engine::method<&Ty::FIRST(__VA_ARGS__)>, nullptr>()), __LINE__)
 
-#define NAMED_FUNCTION_EX1(Name, I, /*F, */...)                                                                                                                                           \
-    FUNCTIONTABLE_EX(::Engine::MetaTableLineStruct<__LINE__ - 1>::name + "::" + STRINGIFY(Name), ::Engine::MetaTableLineStruct<SINGLE_ARG(SINGLE_ARG(__LINE__, I - 1))>::Ty::__VA_ARGS__) \
+#define NAMED_FUNCTION_EX1(Name, I, /*F, */...)                                                                                                                                                                                                                             \
+    FUNCTIONTABLE_EX(::Engine::MetaTableLineStruct<__LINE__ - 1>::name + "::" + STRINGIFY(Name), ::Engine::MetaMemberFunctionTag<::Engine::MetaTableLineStruct<SINGLE_ARG(SINGLE_ARG(__LINE__, I - 1))>::Ty>, ::Engine::MetaTableLineStruct<SINGLE_ARG(SINGLE_ARG(__LINE__, I - 1))>::Ty::__VA_ARGS__) \
     METATABLE_ENTRY(STRINGIFY(Name), SINGLE_ARG(::Engine::property<Ty, &::Engine::method<&Ty::FIRST(__VA_ARGS__)>, nullptr>()), __LINE__, I)
 
 #define FUNCTION(/*F, */...) NAMED_FUNCTION(FIRST(__VA_ARGS__), __VA_ARGS__)

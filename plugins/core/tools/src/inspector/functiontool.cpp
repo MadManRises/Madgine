@@ -52,7 +52,6 @@ namespace Tools {
     bool FunctionTool::init()
     {
         mInspector = &mRoot.getTool<Inspector>();
-        refreshMethodCache();
         return true;
     }
 
@@ -77,7 +76,32 @@ namespace Tools {
 
     bool FunctionTool::renderFunctionSelect(BoundApiFunction &function, std::string &functionName, ArgumentList &args)
     {
-        bool changed = ImGui::MethodPicker(nullptr, mMethodCache, &function, &functionName);
+        bool changed = false;        
+
+        std::string filter;
+        
+        std::string name = functionName;
+
+        if (function.mScope)
+            name = function.scope().name() + ("." + functionName);
+        if (ImGui::BeginCombo("##functionSelect", name.c_str())) {            
+            ImGui::InputText("filter", &filter);
+            const FunctionTable *current = sFunctionList();
+            while (current) {                    
+                bool is_selected = (function.mFunction.mTable == current);                
+                if (ImGui::Selectable(current->mName.data(), is_selected)) {
+                    functionName = current->mName;
+                    function.mScope = nullptr;
+                    function.mFunction = current;
+                    changed = true;
+                }
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();                    
+                current = current->mNext;
+            }
+            ImGui::EndCombo();
+        }
+
         if (ImGui::BeginDragDropTarget()) {
             const ImGui::ValueTypePayload *payload;
             if (ImGui::AcceptDraggableValueType(function, &payload)) {
@@ -94,26 +118,6 @@ namespace Tools {
             }
         }
         return renderFunctionDetails(function, args);
-    }
-
-    void FunctionTool::refreshMethodCache()
-    {
-        mMethodCache.clear();
-        auto scan = [this](const std::map<std::string_view, TypedScopePtr> &items) {
-            for (const std::pair<const std::string_view, TypedScopePtr> &p : items) {
-                parseMethods(p.second);
-            }
-        };
-        scan(KeyValueRegistry::globals());
-        scan(KeyValueRegistry::workgroupLocals());
-    }
-
-    void FunctionTool::parseMethods(TypedScopePtr scope)
-    {
-        kvScan([this](const ApiFunction &m, std::string_view name, TypedScopePtr scope) {
-            mMethodCache.emplace_back(std::move(name), BoundApiFunction { m, scope });
-        },
-            scope);
     }
 
     bool FunctionTool::renderFunctionDetails(BoundApiFunction &function, ArgumentList &args)
@@ -177,9 +181,6 @@ namespace Tools {
                 mCurrentFunction(result, mCurrentArguments);
             }
 
-            if (ImGui::Button("Refresh Cache")) {
-                refreshMethodCache();
-            }
         }
         ImGui::End();
     }

@@ -20,6 +20,7 @@ namespace Client {
     struct MADGINE_CLIENT_NODES_TOOLS_EXPORT NodeRendererTester : Tools::Tool<NodeRendererTester> {
         NodeRendererTester(Tools::ImRoot &root);
         NodeRendererTester(const NodeRendererTester &) = delete;
+        ~NodeRendererTester();
 
         virtual bool init() override;
         virtual void finalize() override;

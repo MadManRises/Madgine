@@ -188,7 +188,12 @@ namespace Render {
 
         void generate(std::ostream &stream, const CodeGen::ShaderFile &file, ShaderType type)
         {
+#if OPENGL_ES
+            stream << "#version 300 es\n";
+            stream << "precision highp float;\n";
+#else
             stream << "#version 430 core\n";
+#endif
 
             for (const std::pair<const std::string, CodeGen::Struct> &structInfo : file.mStructs) {
 
@@ -209,7 +214,10 @@ namespace Render {
                 if (isBuffer) {
                     std::string_view number = std::string_view { structInfo.second.mAnnotations.front() }.substr(strlen("buffer"));
                     uint32_t bufferIndex = std::atoi(number.data());
-                    stream << "layout (std140, binding = " << bufferIndex << ") uniform";
+#if !OPENGL_ES
+                    stream << "layout (std140, binding = " << bufferIndex << ") ";
+#endif
+                    stream << "uniform ";
                 } else
                     stream << "struct";
                 stream << " " << structInfo.second.mName << "{\n";
@@ -222,7 +230,7 @@ namespace Render {
                     generateType(stream, arg.mType);
                     stream << " " << arg.mName << ";\n";
                 }
-                stream << "};\n\n";                
+                stream << "};\n\n";
             }
 
             const std::vector<CodeGen::Function> &functions = *std::next(file.mInstances.begin(), type == VertexShader ? 0 : 1);
@@ -253,6 +261,9 @@ namespace Render {
             }
 
             stream << (type == VertexShader ? "out" : "in") << " RasterizerData rasterizerData;\n";
+            if (type == PixelShader)
+                stream << "out vec4 fragColor;\n";
+            stream << "\n";
             stream << "void main(){\n";
             if (type == VertexShader) {
                 stream << "\tVertexData IN;\n";
@@ -262,10 +273,9 @@ namespace Render {
                 stream << "\trasterizerData = mainImpl(IN);\n"
                        << "\tgl_Position = rasterizerData.pos;\n";
             } else {
-                stream << "\tgl_FragColor = mainImpl(rasterizerData);\n";
+                stream << "\tfragColor = mainImpl(rasterizerData);\n";
             }
             stream << "}\n";
-
         }
 
     }

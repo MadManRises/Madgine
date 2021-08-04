@@ -213,6 +213,7 @@ namespace Tools {
 
     bool NodeGraphEditor::init()
     {
+        createEditor();
 
         return ToolBase::init();
     }
@@ -842,7 +843,8 @@ namespace Tools {
 
     size_t NodeGraphEditor::onLoad(char *data)
     {
-        assert(mGraphHandle);
+        if (!mGraphHandle)
+            return 0;
 
         Filesystem::Path path = layoutPath();
 
