@@ -19,11 +19,9 @@
 namespace Engine {
 namespace Widgets {
     struct MADGINE_WIDGETS_EXPORT WidgetBase : VirtualScope<WidgetBase, Serialize::VirtualUnit<WidgetBase, Serialize::VirtualSerializableUnitBase<VirtualScopeBase<>, Serialize::SerializableUnitBase>>> {
-        SERIALIZABLEUNIT(WidgetBase);
+        SERIALIZABLEUNIT(WidgetBase);        
 
-        WidgetBase(const std::string &name, WidgetBase *parent);
-
-        WidgetBase(const std::string &name, WidgetManager &manager);
+        WidgetBase(const std::string &name, WidgetManager &manager, WidgetBase *parent = nullptr);
 
         WidgetBase(const WidgetBase &) = delete;
 
@@ -57,16 +55,8 @@ namespace Widgets {
         const std::string &key() const;
 
         WidgetBase *createChild(const std::string &name, WidgetClass _class);
-        WidgetBase *createChildWidget(const std::string &name);
-        Bar *createChildBar(const std::string &name);
-        Button *createChildButton(const std::string &name);
-        Checkbox *createChildCheckbox(const std::string &name);
-        Combobox *createChildCombobox(const std::string &name);
-        Label *createChildLabel(const std::string &name);
-        SceneWindow *createChildSceneWindow(const std::string &name);
-        TabWidget *createChildTabWidget(const std::string &name);
-        Textbox *createChildTextbox(const std::string &name);
-        Image *createChildImage(const std::string &name);
+        template <typename WidgetType = WidgetBase>
+        WidgetType *createChild(const std::string &name);
 
         WidgetBase *getChildRecursive(const std::string &name);
         void setParent(WidgetBase *parent);
@@ -111,17 +101,6 @@ namespace Widgets {
         std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, WidgetClass _class);
         std::tuple<std::unique_ptr<WidgetBase>> createWidgetClassTuple(const std::string &name, WidgetClass _class);
         std::tuple<std::string, WidgetClass> storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const;
-
-        std::unique_ptr<WidgetBase> createWidget(const std::string &name);
-        std::unique_ptr<Bar> createBar(const std::string &name);
-        std::unique_ptr<Button> createButton(const std::string &name);
-        std::unique_ptr<Checkbox> createCheckbox(const std::string &name);
-        std::unique_ptr<Combobox> createCombobox(const std::string &name);
-        std::unique_ptr<Image> createImage(const std::string &name);
-        std::unique_ptr<Label> createLabel(const std::string &name);
-        std::unique_ptr<SceneWindow> createSceneWindow(const std::string &name);
-        std::unique_ptr<TabWidget> createTabWidget(const std::string &name);
-        std::unique_ptr<Textbox> createTextbox(const std::string &name);
 
         virtual void sizeChanged(const Vector3i &pixelSize);
 

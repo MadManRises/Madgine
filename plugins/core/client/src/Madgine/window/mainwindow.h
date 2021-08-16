@@ -83,11 +83,6 @@ namespace Window {
 
         OSWindow *osWindow() const;
 
-        auto &components()
-        {
-            return mComponents;
-        }
-
         Render::RenderContext *getRenderer();
         Render::RenderTarget *getRenderWindow();
 
@@ -97,6 +92,11 @@ namespace Window {
         virtual bool frameStarted(std::chrono::microseconds) override;
         virtual bool frameRenderingQueued(std::chrono::microseconds, Threading::ContextMask) override;
         virtual bool frameEnded(std::chrono::microseconds) override;
+
+                auto &components()
+        {
+            return mComponents;
+        }
 
         template <typename T>
         T &getWindowComponent(bool init = true)

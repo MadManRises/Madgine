@@ -17,21 +17,6 @@ namespace Window {
         MainWindowComponentBase(MainWindow &window, int priority);
         virtual ~MainWindowComponentBase() = default;
 
-        MainWindow &window() const;
-
-        const MainWindow *parent() const;
-
-        virtual bool init();
-        virtual void finalize();
-
-        virtual std::string_view key() const = 0;
-
-        virtual void onResize(const Rect2i &space);
-
-        Rect2i getScreenSpace() const;
-        const Rect2i &getClientSpace() const;
-        virtual Rect2i getChildClientSpace();
-
         template <typename T>
         T &getWindowComponent(bool init = true)
         {
@@ -39,6 +24,16 @@ namespace Window {
         }
 
         MainWindowComponentBase &getWindowComponent(size_t i, bool = true);
+
+        MainWindow &window() const;
+
+        virtual std::string_view key() const = 0;
+
+        Rect2i getScreenSpace() const;
+        const Rect2i &getClientSpace() const;
+        virtual Rect2i getChildClientSpace();
+
+        virtual void onResize(const Rect2i &space);
 
         virtual bool injectKeyPress(const Input::KeyEventArgs &arg) { return false; };
         virtual bool injectKeyRelease(const Input::KeyEventArgs &arg) { return false; }
@@ -50,6 +45,13 @@ namespace Window {
         const int mPriority;
 
     protected:
+        const MainWindow *parent() const;
+
+        virtual bool init();
+        virtual void finalize();
+
+        friend struct MadgineObject<MainWindowComponentBase>;
+
         MainWindow &mWindow;
         Rect2i mClientSpace;
     };

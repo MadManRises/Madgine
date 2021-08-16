@@ -84,7 +84,7 @@ namespace Tools {
             }
             ImGui::Separator();
             if (ImGui::Button("Create Layout")) {
-                mWidgetManager->createTopLevelWidget("Unnamed");
+                mWidgetManager->createTopLevel<>("Unnamed");
             }
             ImGui::EndMenu();
         }

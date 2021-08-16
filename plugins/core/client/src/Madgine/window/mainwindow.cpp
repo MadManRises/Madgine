@@ -2,35 +2,24 @@
 #include "serialize/filesystem/filesystemlib.h"
 
 #include "mainwindow.h"
-
-#include "Interfaces/window/windowapi.h"
-
-#include "../render/rendercontext.h"
-
-#include "Meta/keyvalue/metatable_impl.h"
-
-#include "Meta/serialize/serializetable_impl.h"
-
 #include "toolwindow.h"
-
-#include "Interfaces/util/exception.h"
+#include "mainwindowcomponent.h"
 
 #include "Generic/container/reverseIt.h"
 
-#include "../render/rendertarget.h"
-
-#include "mainwindowcomponent.h"
-
-#include "Meta/serialize/configs/controlled.h"
-
 #include "Interfaces/filesystem/api.h"
 #include "Interfaces/window/windowsettings.h"
+#include "Interfaces/window/windowapi.h"
 
+#include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
+#include "Meta/serialize/configs/controlled.h"
+#include "Meta/serialize/formatter/iniformatter.h"
 #include "serialize/filesystem/filemanager.h"
 
-#include "Meta/serialize/formatter/iniformatter.h"
+#include "../render/rendercontext.h"
+#include "../render/rendertarget.h"
 
-#include "Meta/serialize/serializableunitptr.h"
 
 METATABLE_BEGIN(Engine::Window::MainWindow)
 READONLY_PROPERTY(Components, components)

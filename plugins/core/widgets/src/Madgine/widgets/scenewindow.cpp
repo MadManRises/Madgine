@@ -28,14 +28,8 @@ SERIALIZETABLE_END(Engine::Widgets::SceneWindow)
 namespace Engine {
 namespace Widgets {
 
-    SceneWindow::SceneWindow(const std::string &name, WidgetBase *parent)
-        : Widget(name, parent)
-    {
-        mTarget = manager().window().getRenderer()->createRenderTexture();
-    }
-
-    SceneWindow::SceneWindow(const std::string &name, WidgetManager &manager)
-        : Widget(name, manager)
+    SceneWindow::SceneWindow(const std::string &name, WidgetManager &manager, WidgetBase *parent)
+        : Widget(name, manager, parent)
     {
         mTarget = manager.window().getRenderer()->createRenderTexture();
     }

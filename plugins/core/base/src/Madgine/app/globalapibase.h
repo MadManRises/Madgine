@@ -20,10 +20,11 @@ namespace App {
 
         GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
 
-        const App::Application *parent() const;
         App::Application &app();
 
     protected:
+        const App::Application *parent() const;
+
         virtual bool init();
         virtual void finalize();
 

@@ -2,7 +2,7 @@
 
 #include "Generic/copy_traits.h"
 #include "Generic/functor.h"
-#include "Generic/offsetptr.h"
+#include "Generic/memberoffsetptr.h"
 #include "../serializable.h"
 #include "../streams/bufferedstream.h"
 #include "../streams/operations.h"
@@ -24,9 +24,9 @@ namespace Serialize {
         };
     };
 
-#define SYNCED(Name, ...) OFFSET_CONTAINER(Name, ::Engine::Serialize::Synced<__VA_ARGS__>)
+#define SYNCED(Name, ...) MEMBER_OFFSET_CONTAINER(Name, ::Engine::Serialize::Synced<__VA_ARGS__>)
 
-    template <typename T, typename Observer = NoOpFunctor, typename OffsetPtr = TaggedPlaceholder<OffsetPtrTag, 0>>
+    template <typename T, typename Observer = NoOpFunctor, typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
     struct Synced : Syncable<OffsetPtr>, Serializable<OffsetPtr>, CopyTraits<T>, private Observer {
 
         friend struct Operations<Synced<T, Observer, OffsetPtr>>;

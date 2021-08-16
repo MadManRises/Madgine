@@ -49,16 +49,8 @@ namespace Widgets {
         void clear();
 
         void destroyTopLevel(WidgetBase *w);
-        WidgetBase *createTopLevelWidget(const std::string &name);
-        Bar *createTopLevelBar(const std::string &name);
-        Button *createTopLevelButton(const std::string &name);
-        Checkbox *createTopLevelCheckbox(const std::string &name);
-        Combobox *createTopLevelCombobox(const std::string &name);
-        Image *createTopLevelImage(const std::string &name);
-        Label *createTopLevelLabel(const std::string &name);
-        SceneWindow *createTopLevelSceneWindow(const std::string &name);
-        TabWidget *createTopLevelTabWidget(const std::string &name);
-        Textbox *createTopLevelTextbox(const std::string &name);
+        template <typename WidgetType = WidgetBase>
+        WidgetType *createTopLevel(const std::string &name);
 
         decltype(auto) widgets()
         {
@@ -87,21 +79,15 @@ namespace Widgets {
         bool propagateInput(WidgetBase *w, const Input::PointerEventArgs &arg, bool (WidgetBase::*f)(const Input::PointerEventArgs &));
 
         static const char *widgetCreationNames(size_t index);
-        std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, WidgetClass _class);
+        std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, WidgetClass _class, WidgetBase *parent = nullptr);
         std::tuple<std::unique_ptr<WidgetBase>> createWidgetClassTuple(const std::string &name, WidgetClass _class);
         std::tuple<std::string, WidgetClass> storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const;
 
-        std::unique_ptr<WidgetBase> createWidget(const std::string &name);
-        std::unique_ptr<Bar> createBar(const std::string &name);
-        std::unique_ptr<Button> createButton(const std::string &name);
-        std::unique_ptr<Checkbox> createCheckbox(const std::string &name);
-        std::unique_ptr<Combobox> createCombobox(const std::string &name);
-        std::unique_ptr<Image> createImage(const std::string &name);
-        std::unique_ptr<Label> createLabel(const std::string &name);
-        std::unique_ptr<SceneWindow> createSceneWindow(const std::string &name);
-        std::unique_ptr<TabWidget> createTabWidget(const std::string &name);
-        std::unique_ptr<Textbox> createTextbox(const std::string &name);
-
+        template <typename WidgetType = WidgetBase>
+        std::unique_ptr<WidgetType> create(const std::string &name, WidgetBase *parent = nullptr);
+        
+        friend struct WidgetBase;
+        
     private:
         std::map<std::string, WidgetBase *> mWidgets;
 

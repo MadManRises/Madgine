@@ -39,17 +39,9 @@ namespace Engine {
 
 namespace Widgets {
 
-    WidgetBase::WidgetBase(const std::string &name, WidgetBase *parent)
+    WidgetBase::WidgetBase(const std::string &name, WidgetManager &manager, WidgetBase *parent)
         : mName(name)
         , mParent(parent)
-        , mManager(parent->manager())
-    {
-        mManager.registerWidget(this);
-    }
-
-    WidgetBase::WidgetBase(const std::string &name, WidgetManager &manager)
-        : mName(name)
-        , mParent(nullptr)
         , mManager(manager)
     {
         mManager.registerWidget(this);
@@ -66,7 +58,7 @@ namespace Widgets {
         if (mParent)
             updateGeometry(manager().getScreenSpace(), mParent->getAbsoluteSize(), mParent->getAbsolutePosition());
         else
-            updateGeometry(manager().getScreenSpace(), Matrix3::IDENTITY);
+            updateGeometry(manager().getScreenSpace());
     }
 
     const Matrix3 &WidgetBase::getSize()
@@ -80,7 +72,7 @@ namespace Widgets {
         if (mParent)
             updateGeometry(manager().getScreenSpace(), mParent->getAbsoluteSize(), mParent->getAbsolutePosition());
         else
-            updateGeometry(manager().getScreenSpace(), Matrix3::IDENTITY);
+            updateGeometry(manager().getScreenSpace());
     }
 
     const Matrix3 &WidgetBase::getPos() const
@@ -154,115 +146,42 @@ namespace Widgets {
     WidgetBase *WidgetBase::createChild(const std::string &name, WidgetClass _class)
     {
         switch (_class) {
+        case WidgetClass::WIDGET_CLASS:
+            return createChild<WidgetBase>(name);
         case WidgetClass::BAR_CLASS:
-            return createChildBar(name);
+            return createChild<Bar>(name);
         case WidgetClass::CHECKBOX_CLASS:
-            return createChildCheckbox(name);
+            return createChild<Checkbox>(name);
         case WidgetClass::LABEL_CLASS:
-            return createChildLabel(name);
+            return createChild<Label>(name);
         case WidgetClass::TABWIDGET_CLASS:
-            return createChildTabWidget(name);
+            return createChild<TabWidget>(name);
         case WidgetClass::BUTTON_CLASS:
-            return createChildButton(name);
+            return createChild<Button>(name);
         case WidgetClass::COMBOBOX_CLASS:
-            return createChildCombobox(name);
+            return createChild<Combobox>(name);
         case WidgetClass::TEXTBOX_CLASS:
-            return createChildTextbox(name);
+            return createChild<Textbox>(name);
         case WidgetClass::SCENEWINDOW_CLASS:
-            return createChildSceneWindow(name);
+            return createChild<SceneWindow>(name);
         case WidgetClass::IMAGE_CLASS:
-            return createChildImage(name);
+            return createChild<Image>(name);
         default:
             std::terminate();
         }
     }
 
-    WidgetBase *WidgetBase::createChildWidget(const std::string &name)
+    template DLL_EXPORT WidgetBase *WidgetBase::createChild<WidgetBase>(const std::string &);
+    template DLL_EXPORT Button *WidgetBase::createChild<Button>(const std::string &);
+
+    template <typename WidgetType>
+    WidgetType *WidgetBase::createChild(const std::string &name)
     {
-        WidgetBase *w = mChildren.emplace_back(createWidget(name))->get();
+        std::unique_ptr<WidgetType> p = mManager.create<WidgetType>(name, this);
+        WidgetType *w = p.get();
+        mChildren.emplace_back(std::move(p));
         w->updateGeometry(mManager.getScreenSpace(), getAbsoluteSize());
         return w;
-    }
-
-    Bar *WidgetBase::createChildBar(const std::string &name)
-    {
-        std::unique_ptr<Bar> p = createBar(name);
-        Bar *b = p.get();
-        mChildren.emplace_back(std::move(p));
-        b->updateGeometry(mManager.getScreenSpace(), getAbsoluteSize());
-        return b;
-    }
-
-    Button *WidgetBase::createChildButton(const std::string &name)
-    {
-        std::unique_ptr<Button> p = createButton(name);
-        Button *b = p.get();
-        mChildren.emplace_back(std::move(p));
-        b->updateGeometry(mManager.getScreenSpace(), getAbsoluteSize());
-        return b;
-    }
-
-    Checkbox *WidgetBase::createChildCheckbox(const std::string &name)
-    {
-        std::unique_ptr<Checkbox> p = createCheckbox(name);
-        Checkbox *c = p.get();
-        mChildren.emplace_back(std::move(p));
-        c->updateGeometry(mManager.getScreenSpace(), getAbsoluteSize());
-        return c;
-    }
-
-    Combobox *WidgetBase::createChildCombobox(const std::string &name)
-    {
-        std::unique_ptr<Combobox> p = createCombobox(name);
-        Combobox *c = p.get();
-        mChildren.emplace_back(std::move(p));
-        c->updateGeometry(mManager.getScreenSpace(), getAbsoluteSize());
-        return c;
-    }
-
-    Label *WidgetBase::createChildLabel(const std::string &name)
-    {
-        std::unique_ptr<Label> p = createLabel(name);
-        Label *l = p.get();
-        mChildren.emplace_back(std::move(p));
-        l->updateGeometry(mManager.getScreenSpace(), getAbsoluteSize());
-        return l;
-    }
-
-    SceneWindow *WidgetBase::createChildSceneWindow(const std::string &name)
-    {
-        std::unique_ptr<SceneWindow> p = createSceneWindow(name);
-        SceneWindow *s = p.get();
-        mChildren.emplace_back(std::move(p));
-        s->updateGeometry(mManager.getScreenSpace(), getAbsoluteSize());
-        return s;
-    }
-
-    TabWidget *WidgetBase::createChildTabWidget(const std::string &name)
-    {
-        std::unique_ptr<TabWidget> p = createTabWidget(name);
-        TabWidget *t = p.get();
-        mChildren.emplace_back(std::move(p));
-        t->updateGeometry(mManager.getScreenSpace(), getAbsoluteSize());
-        return t;
-    }
-
-    Textbox *WidgetBase::createChildTextbox(const std::string &name)
-    {
-        std::unique_ptr<Textbox> p = createTextbox(name);
-        Textbox *t = p.get();
-        mChildren.emplace_back(std::move(p));
-        t->updateGeometry(mManager.getScreenSpace(), getAbsoluteSize());
-        return t;
-    }
-
-    Image *WidgetBase::createChildImage(const std::string &name)
-    {
-        std::unique_ptr<Image> p = createImage(name);
-        Image *i = p.get();
-        mChildren.emplace_back(std::move(p));
-        i->updateGeometry(mManager.getScreenSpace(), getAbsoluteSize());
-        return i;
     }
 
     size_t WidgetBase::depth()
@@ -423,30 +342,7 @@ namespace Widgets {
 
     std::unique_ptr<WidgetBase> WidgetBase::createWidgetClass(const std::string &name, WidgetClass _class)
     {
-        switch (_class) {
-        case WidgetClass::WIDGET_CLASS:
-            return createWidget(name);
-        case WidgetClass::BAR_CLASS:
-            return createBar(name);
-        case WidgetClass::CHECKBOX_CLASS:
-            return createCheckbox(name);
-        case WidgetClass::LABEL_CLASS:
-            return createLabel(name);
-        case WidgetClass::TABWIDGET_CLASS:
-            return createTabWidget(name);
-        case WidgetClass::BUTTON_CLASS:
-            return createButton(name);
-        case WidgetClass::COMBOBOX_CLASS:
-            return createCombobox(name);
-        case WidgetClass::TEXTBOX_CLASS:
-            return createTextbox(name);
-        case WidgetClass::SCENEWINDOW_CLASS:
-            return createSceneWindow(name);
-        case WidgetClass::IMAGE_CLASS:
-            return createImage(name);
-        default:
-            std::terminate();
-        }
+        return mManager.createWidgetClass(name, _class, this);
     }
     std::tuple<std::unique_ptr<WidgetBase>> WidgetBase::createWidgetClassTuple(const std::string &name, WidgetClass _class)
     {
@@ -456,47 +352,7 @@ namespace Widgets {
     }
     std::tuple<std::string, WidgetClass> WidgetBase::storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const
     {
-        return std::make_tuple(widget->getName(), widget->getClass());
-    }
-    std::unique_ptr<WidgetBase> WidgetBase::createWidget(const std::string &name)
-    {
-        return std::make_unique<WidgetBase>(name, this);
-    }
-    std::unique_ptr<Bar> WidgetBase::createBar(const std::string &name)
-    {
-        return std::make_unique<Bar>(name, this);
-    }
-    std::unique_ptr<Button> WidgetBase::createButton(const std::string &name)
-    {
-        return std::make_unique<Button>(name, this);
-    }
-    std::unique_ptr<Checkbox> WidgetBase::createCheckbox(const std::string &name)
-    {
-        return std::make_unique<Checkbox>(name, this);
-    }
-    std::unique_ptr<Combobox> WidgetBase::createCombobox(const std::string &name)
-    {
-        return std::make_unique<Combobox>(name, this);
-    }
-    std::unique_ptr<Image> WidgetBase::createImage(const std::string &name)
-    {
-        return std::make_unique<Image>(name, this);
-    }
-    std::unique_ptr<Label> WidgetBase::createLabel(const std::string &name)
-    {
-        return std::make_unique<Label>(name, this);
-    }
-    std::unique_ptr<SceneWindow> WidgetBase::createSceneWindow(const std::string &name)
-    {
-        return std::make_unique<SceneWindow>(name, this);
-    }
-    std::unique_ptr<TabWidget> WidgetBase::createTabWidget(const std::string &name)
-    {
-        return std::make_unique<TabWidget>(name, this);
-    }
-    std::unique_ptr<Textbox> WidgetBase::createTextbox(const std::string &name)
-    {
-        return std::make_unique<Textbox>(name, this);
+        return mManager.storeWidgetCreationData(widget);
     }
     void WidgetBase::sizeChanged(const Vector3i &pixelSize)
     {

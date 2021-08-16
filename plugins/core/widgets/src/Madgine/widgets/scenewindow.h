@@ -6,9 +6,8 @@
 
 namespace Engine {
 namespace Widgets {
-    struct MADGINE_WIDGETS_EXPORT SceneWindow : Widget<SceneWindow> {
-        SceneWindow(const std::string &name, WidgetBase *parent);
-        SceneWindow(const std::string &name, WidgetManager &manager);
+    struct MADGINE_WIDGETS_EXPORT SceneWindow : Widget<SceneWindow> {        
+        SceneWindow(const std::string &name, WidgetManager &manager, WidgetBase *parent = nullptr);
 
         virtual ~SceneWindow();
 
