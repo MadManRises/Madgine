@@ -142,6 +142,12 @@ namespace Widgets {
     }
 
     template <typename WidgetType>
+    std::unique_ptr<WidgetType> WidgetManager::create(const std::string &name, WidgetBase *parent)
+    {
+        return std::make_unique<WidgetType>(name, *this, parent);
+    }
+
+    template <typename WidgetType>
     WidgetType *WidgetManager::createTopLevel(const std::string &name)
     {
         std::unique_ptr<WidgetType> p = create<WidgetType>(name);
@@ -206,12 +212,6 @@ namespace Widgets {
     std::tuple<std::string, WidgetClass> WidgetManager::storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const
     {
         return std::make_tuple(widget->getName(), widget->getClass());
-    }
-
-    template <typename WidgetType>
-    std::unique_ptr<WidgetType> WidgetManager::create(const std::string &name, WidgetBase *parent)
-    {
-        return std::make_unique<WidgetType>(name, *this, parent);
     }
 
     bool WidgetManager::propagateInput(WidgetBase *w, const Input::PointerEventArgs &arg, bool (WidgetBase::*f)(const Input::PointerEventArgs &))

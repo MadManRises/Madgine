@@ -97,7 +97,6 @@ namespace Widgets {
         WidgetManager &manager();
 
     protected:
-        static const char *widgetCreationNames(size_t index);
         std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, WidgetClass _class);
         std::tuple<std::unique_ptr<WidgetBase>> createWidgetClassTuple(const std::string &name, WidgetClass _class);
         std::tuple<std::string, WidgetClass> storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const;

@@ -72,13 +72,15 @@ namespace Widgets {
 
         Render::Texture &uiTexture() const;
 
+        static const char *widgetCreationNames(size_t index);
+
     protected:
         WidgetBase *getHoveredWidget(const Vector2 &pos, WidgetBase *current);
         WidgetBase *getHoveredWidgetUp(const Vector2 &pos, WidgetBase *current);
         WidgetBase *getHoveredWidgetDown(const Vector2 &pos, WidgetBase *current);
         bool propagateInput(WidgetBase *w, const Input::PointerEventArgs &arg, bool (WidgetBase::*f)(const Input::PointerEventArgs &));
 
-        static const char *widgetCreationNames(size_t index);
+        
         std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, WidgetClass _class, WidgetBase *parent = nullptr);
         std::tuple<std::unique_ptr<WidgetBase>> createWidgetClassTuple(const std::string &name, WidgetClass _class);
         std::tuple<std::string, WidgetClass> storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const;

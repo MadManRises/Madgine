@@ -30,7 +30,7 @@ MEMBER(mVisible)
 METATABLE_END(Engine::Widgets::WidgetBase)
 
 SERIALIZETABLE_BEGIN(Engine::Widgets::WidgetBase)
-FIELD(mChildren, Serialize::ParentCreator<&Engine::Widgets::WidgetBase::widgetCreationNames, &Engine::Widgets::WidgetBase::createWidgetClassTuple, &Engine::Widgets::WidgetBase::storeWidgetCreationData>)
+FIELD(mChildren, Serialize::ParentCreator<&Engine::Widgets::WidgetManager::widgetCreationNames, &Engine::Widgets::WidgetBase::createWidgetClassTuple, &Engine::Widgets::WidgetBase::storeWidgetCreationData>)
 FIELD(mPos)
 FIELD(mSize)
 SERIALIZETABLE_END(Engine::Widgets::WidgetBase)
@@ -329,15 +329,6 @@ namespace Widgets {
     void WidgetBase::setUserData(void *userData)
     {
         mUserData = userData;
-    }
-
-    const char *WidgetBase::widgetCreationNames(size_t index)
-    {
-        static constexpr std::array<const char *, 2> names {
-            "name",
-            "type"
-        };
-        return names[index];
     }
 
     std::unique_ptr<WidgetBase> WidgetBase::createWidgetClass(const std::string &name, WidgetClass _class)
