@@ -68,11 +68,12 @@ namespace Plugins {
 
         Threading::Barrier barrier { Threading::Barrier::NO_FLAGS, 1 };
 
-        std::promise<bool> p1;
-        Future<bool> f1 { p1.get_future() };
+        Future<bool> f1;
 
         if (loadCache && (!noPluginCache || !loadPlugins->empty())) {
-            barrier.queue(nullptr, [this, &barrier, p { std::move(p1) }]() mutable {
+            std::promise<bool> p;
+            f1 = p.get_future();
+            barrier.queue(nullptr, [this, &barrier, p { std::move(p) }]() mutable {
                 Filesystem::Path pluginFile = !loadPlugins->empty() ? Filesystem::Path { *loadPlugins } : cacheFileName();
 
                 Ini::IniFile file;
@@ -85,7 +86,7 @@ namespace Plugins {
                 }
             });
         } else {
-            f1 = true;
+            f1 = make_ready_future(true);
         }
 
         Future<bool> f2;

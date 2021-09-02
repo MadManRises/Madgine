@@ -109,9 +109,9 @@ namespace Render {
         mSwapChain->Present(0, 0);
     }
 
-    Texture *DirectX12RenderWindow::texture() const
+    TextureHandle DirectX12RenderWindow::texture() const
     {
-        return nullptr;
+        return 0;
     }
 
     TextureHandle DirectX12RenderWindow::depthTexture() const

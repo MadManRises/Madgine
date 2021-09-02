@@ -134,9 +134,9 @@ namespace Render {
         GL_CHECK();
     }
 
-    const OpenGLTexture *OpenGLRenderTexture::texture() const
+    TextureHandle OpenGLRenderTexture::texture() const
     {
-        return &mTexture;
+        return mTexture.mTextureHandle;
     }
 
     TextureHandle OpenGLRenderTexture::depthTexture() const

@@ -18,6 +18,7 @@
 
 #include "directx11rendercontext.h"
 
+
 namespace Engine {
 namespace Render {
 
@@ -103,9 +104,9 @@ namespace Render {
         mSwapChain->Present(0, 0);
     }
 
-    Texture *DirectX11RenderWindow::texture() const
+    TextureHandle DirectX11RenderWindow::texture() const
     {
-        return nullptr;
+        return 0;
     }
 
     TextureHandle DirectX11RenderWindow::depthTexture() const

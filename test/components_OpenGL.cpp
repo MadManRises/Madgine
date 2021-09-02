@@ -1,16 +1,16 @@
 #include "Modules/moduleslib.h"
 #include "Modules/uniquecomponent/uniquecomponentregistry.h"
-#if defined(BUILD_ClickBrick)
-#include "clickbricklib.h"
+#if defined(BUILD_SkeletonLoader)
+#include "skeletonloaderlib.h"
+#endif
+#if defined(BUILD_ImageLoader)
+#include "imageloaderlib.h"
 #endif
 #if defined(BUILD_ClientNodes)
 #include "Madgine/clientnodeslib.h"
 #endif
 #if defined(BUILD_MeshLoader)
 #include "meshloaderlib.h"
-#endif
-#if defined(BUILD_ImageLoader)
-#include "imageloaderlib.h"
 #endif
 #if defined(BUILD_Client)
 #include "Madgine/clientlib.h"
@@ -21,26 +21,26 @@
 #if defined(BUILD_OpenGL)
 #include "OpenGL/opengllib.h"
 #endif
-#if defined(BUILD_Widgets)
-#include "Madgine/widgetslib.h"
-#endif
 #if defined(BUILD_Scene)
 #include "Madgine/scenelib.h"
 #endif
 #if defined(BUILD_NodeGraph)
 #include "Madgine/nodegraphlib.h"
 #endif
+#if defined(BUILD_Widgets)
+#include "Madgine/widgetslib.h"
+#endif
 #if defined(BUILD_FontLoader)
 #include "fontloaderlib.h"
-#endif
-#if defined(BUILD_SkeletonLoader)
-#include "skeletonloaderlib.h"
 #endif
 #if defined(BUILD_UI)
 #include "Madgine/uilib.h"
 #endif
 #if defined(BUILD_AnimationLoader)
 #include "animationloaderlib.h"
+#endif
+#if defined(BUILD_ClickBrick)
+#include "clickbricklib.h"
 #endif
 
 #if defined(BUILD_Client)
@@ -53,11 +53,14 @@
 #if defined(BUILD_Resources)
 #include "Madgine/resources/resourceloadercollector.h"
 #endif
-#if defined(BUILD_MeshLoader) && defined(BUILD_Resources)
-#include "meshloader.h"
+#if defined(BUILD_SkeletonLoader) && defined(BUILD_Resources)
+#include "skeletonloader.h"
 #endif
 #if defined(BUILD_ImageLoader) && defined(BUILD_Resources)
 #include "imageloader.h"
+#endif
+#if defined(BUILD_MeshLoader) && defined(BUILD_Resources)
+#include "meshloader.h"
 #endif
 #if defined(BUILD_TestShared)
 #include "uniquecomponent/uniquecomponentshared.h"
@@ -77,9 +80,6 @@
 #include "OpenGL/openglshaderloader.h"
 #include "OpenGL/opengltextureloader.h"
 #endif
-#if defined(BUILD_Widgets) && defined(BUILD_Client)
-#include "Madgine/widgets/widgetmanager.h"
-#endif
 #if defined(BUILD_Scene)
 #include "Madgine/scene/entity/components/animation.h"
 #include "Madgine/scene/entity/components/mesh.h"
@@ -87,9 +87,6 @@
 #include "Madgine/scene/entity/components/transform.h"
 #include "Madgine/scene/entity/entitycomponentcollector.h"
 #include "Madgine/scene/scenecomponentcollector.h"
-#endif
-#if defined(BUILD_Scene) && defined(BUILD_ClickBrick)
-#include "brick.h"
 #endif
 #if defined(BUILD_Scene) && defined(BUILD_Base)
 #include "Madgine/scene/scenemanager.h"
@@ -113,26 +110,29 @@
 #if defined(BUILD_NodeGraph) && defined(BUILD_Resources)
 #include "Madgine/nodegraph/nodegraphloader.h"
 #endif
+#if defined(BUILD_Widgets) && defined(BUILD_Client)
+#include "Madgine/widgets/widgetmanager.h"
+#endif
 #if defined(BUILD_FontLoader) && defined(BUILD_Resources)
 #include "fontloader.h"
 #endif
-#if defined(BUILD_SkeletonLoader) && defined(BUILD_Resources)
-#include "skeletonloader.h"
-#endif
 #if defined(BUILD_UI)
 #include "Madgine/ui/handlercollector.h"
-#endif
-#if defined(BUILD_UI) && defined(BUILD_ClickBrick)
-#include "gamehandler.h"
-#include "gamemanager.h"
-#include "gameoverhandler.h"
-#include "mainmenuhandler.h"
 #endif
 #if defined(BUILD_UI) && defined(BUILD_Client)
 #include "Madgine/ui/uimanager.h"
 #endif
 #if defined(BUILD_AnimationLoader) && defined(BUILD_Resources)
 #include "animationloader.h"
+#endif
+#if defined(BUILD_Scene) && defined(BUILD_ClickBrick)
+#include "brick.h"
+#endif
+#if defined(BUILD_UI) && defined(BUILD_ClickBrick)
+#include "gamehandler.h"
+#include "gamemanager.h"
+#include "gameoverhandler.h"
+#include "mainmenuhandler.h"
 #endif
 
 
@@ -177,6 +177,8 @@ std::vector<Engine::Resources::ResourceLoaderRegistry::F> Engine::Resources::Res
 
 	}; 
 }
+#endif
+#if defined(BUILD_Resources)
 
 #    define ACC 0
 
@@ -300,6 +302,8 @@ std::vector<Engine::App::GlobalAPIRegistry::F> Engine::App::GlobalAPIRegistry::s
 
 	}; 
 }
+#endif
+#if defined(BUILD_Base)
 
 #    define ACC 0
 
@@ -337,6 +341,8 @@ std::vector<Engine::Render::RenderContextRegistry::F> Engine::Render::RenderCont
 
 	}; 
 }
+#endif
+#if defined(BUILD_Client)
 
 #    define ACC 0
 
@@ -373,6 +379,8 @@ std::vector<Engine::Window::MainWindowComponentRegistry::F> Engine::Window::Main
 
 	}; 
 }
+#endif
+#if defined(BUILD_Client)
 
 #    define ACC 0
 
@@ -406,7 +414,7 @@ size_t component_index<Engine::UI::UIManager>() { return CollectorBaseIndex_Main
 #endif
 #if defined(BUILD_NodeGraph)
 template <>
-std::vector<Engine::NodeGraph::NodeRegistry::F> Engine::NodeGraph::NodeRegistry::sComponents()
+std::vector<Engine::NodeGraph::NodeBaseRegistry::F> Engine::NodeGraph::NodeBaseRegistry::sComponents()
 {
 	return {
 #endif
@@ -447,6 +455,8 @@ std::vector<Engine::NodeGraph::NodeRegistry::F> Engine::NodeGraph::NodeRegistry:
 
 	}; 
 }
+#endif
+#if defined(BUILD_NodeGraph)
 
 #    define ACC 0
 
@@ -514,6 +524,50 @@ size_t component_index<Engine::Render::RasterizerNode>() { return CollectorBaseI
 #    undef ACC
 
 #endif
+#if defined(BUILD_NodeGraph)
+template <>
+std::map<std::string_view, size_t> Engine::NodeGraph::NodeRegistry::sComponentsByName()
+{
+	return {
+#endif
+#if defined(BUILD_NodeGraph)
+		{"FunctionNode", CollectorBaseIndex_NodeBase_NodeGraph + 0},
+#endif
+#if defined(BUILD_NodeGraph)
+		{"PumpNode", CollectorBaseIndex_NodeBase_NodeGraph + 1},
+#endif
+#if defined(BUILD_NodeGraph)
+		{"TestNode", CollectorBaseIndex_NodeBase_NodeGraph + 2},
+#endif
+#if defined(BUILD_NodeGraph)
+		{"VariableNode", CollectorBaseIndex_NodeBase_NodeGraph + 3},
+#endif
+#if defined(BUILD_NodeGraph)
+		{"AdditionNode", CollectorBaseIndex_NodeBase_NodeGraph + 4},
+#endif
+#if defined(BUILD_NodeGraph)
+		{"MultiplicationNode", CollectorBaseIndex_NodeBase_NodeGraph + 5},
+#endif
+#if defined(BUILD_NodeGraph)
+		{"Vector3to4Node", CollectorBaseIndex_NodeBase_NodeGraph + 6},
+#endif
+#if defined(BUILD_NodeGraph) && defined(BUILD_ClientNodes)
+		{"GPUBufferNode", CollectorBaseIndex_NodeBase_ClientNodes + 0},
+#endif
+#if defined(BUILD_NodeGraph) && defined(BUILD_ClientNodes)
+		{"FrameBufferNode", CollectorBaseIndex_NodeBase_ClientNodes + 1},
+#endif
+#if defined(BUILD_NodeGraph) && defined(BUILD_ClientNodes)
+		{"MeshRendererNode", CollectorBaseIndex_NodeBase_ClientNodes + 2},
+#endif
+#if defined(BUILD_NodeGraph) && defined(BUILD_ClientNodes)
+		{"RasterizerNode", CollectorBaseIndex_NodeBase_ClientNodes + 3},
+#endif
+#if defined(BUILD_NodeGraph)
+
+	}; 
+}
+#endif
 #if defined(BUILD_UI)
 template <>
 std::vector<Engine::UI::GameHandlerRegistry::F> Engine::UI::GameHandlerRegistry::sComponents()
@@ -527,6 +581,8 @@ std::vector<Engine::UI::GameHandlerRegistry::F> Engine::UI::GameHandlerRegistry:
 
 	}; 
 }
+#endif
+#if defined(BUILD_UI)
 
 #    define ACC 0
 
@@ -566,6 +622,8 @@ std::vector<Engine::UI::GuiHandlerRegistry::F> Engine::UI::GuiHandlerRegistry::s
 
 	}; 
 }
+#endif
+#if defined(BUILD_UI)
 
 #    define ACC 0
 
@@ -604,6 +662,8 @@ std::vector<Engine::Scene::SceneComponentRegistry::F> Engine::Scene::SceneCompon
 
 	}; 
 }
+#endif
+#if defined(BUILD_Scene)
 
 #    define ACC 0
 
@@ -615,7 +675,7 @@ std::vector<Engine::Scene::SceneComponentRegistry::F> Engine::Scene::SceneCompon
 #endif
 #if defined(BUILD_Scene)
 template <>
-std::vector<Engine::Scene::Entity::EntityComponentRegistry::F> Engine::Scene::Entity::EntityComponentRegistry::sComponents()
+std::vector<Engine::Scene::Entity::EntityComponentBaseRegistry::F> Engine::Scene::Entity::EntityComponentBaseRegistry::sComponents()
 {
 	return {
 #endif
@@ -638,6 +698,8 @@ std::vector<Engine::Scene::Entity::EntityComponentRegistry::F> Engine::Scene::En
 
 	}; 
 }
+#endif
+#if defined(BUILD_Scene)
 
 #    define ACC 0
 
@@ -683,6 +745,32 @@ size_t component_index<ClickBrick::Scene::Brick>() { return CollectorBaseIndex_E
 #endif
 #if defined(BUILD_Scene)
 template <>
+std::map<std::string_view, size_t> Engine::Scene::Entity::EntityComponentRegistry::sComponentsByName()
+{
+	return {
+#endif
+#if defined(BUILD_Scene)
+		{"Animation", CollectorBaseIndex_EntityComponentBase_Scene + 0},
+#endif
+#if defined(BUILD_Scene)
+		{"Mesh", CollectorBaseIndex_EntityComponentBase_Scene + 1},
+#endif
+#if defined(BUILD_Scene)
+		{"Skeleton", CollectorBaseIndex_EntityComponentBase_Scene + 2},
+#endif
+#if defined(BUILD_Scene)
+		{"Transform", CollectorBaseIndex_EntityComponentBase_Scene + 3},
+#endif
+#if defined(BUILD_Scene) && defined(BUILD_ClickBrick)
+		{"Brick", CollectorBaseIndex_EntityComponentBase_ClickBrick + 0},
+#endif
+#if defined(BUILD_Scene)
+
+	}; 
+}
+#endif
+#if defined(BUILD_Scene)
+template <>
 std::vector<Engine::Scene::Entity::EntityComponentListRegistry::F> Engine::Scene::Entity::EntityComponentListRegistry::sComponents()
 {
 	return {
@@ -706,6 +794,8 @@ std::vector<Engine::Scene::Entity::EntityComponentListRegistry::F> Engine::Scene
 
 	}; 
 }
+#endif
+#if defined(BUILD_Scene)
 
 #    define ACC 0
 
@@ -765,6 +855,8 @@ std::vector<Test::TestRegistry::F> Test::TestRegistry::sComponents()
 
 	}; 
 }
+#endif
+#if defined(BUILD_TestShared)
 
 #    define ACC 0
 

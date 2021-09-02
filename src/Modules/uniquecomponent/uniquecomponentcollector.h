@@ -41,44 +41,18 @@ struct UniqueComponentCollector {
 private:
     typename Registry::CollectorInfo mInfo;
 
-    template <typename T>
-    static size_t registerComponent()
-    {
-
-        LOG("Registering Component: " << typeName<T>());
-        sInstance().mInfo.mComponents.emplace_back(&createComponent<T, Base, _Ty...>);
-        std::vector<const TypeInfo *> elementInfos;
-        elementInfos.push_back(&typeInfo<T>);
-        if constexpr (has_typename_VBase_v<T>) {
-            elementInfos.push_back(&typeInfo<typename T::VBase>);
-        }
-        sInstance().mInfo.mElementInfos.emplace_back(std::move(elementInfos));
-        return sInstance().mInfo.mComponents.size() - 1;
-    }
-
-    static void unregisterComponent(size_t i)
-    {
-        sInstance().mInfo.mComponents[i] = nullptr;
-        sInstance().mInfo.mElementInfos[i].clear();
-    }
-
-    static IndexType<size_t> &baseIndex()
-    {
-        return sInstance().mInfo.mBaseIndex;
-    }
-
 public:
     template <typename T>
     struct ComponentRegistrator : IndexHolder {
         ComponentRegistrator()
-            : mIndex(registerComponent<T>())
-            , mBaseIndex(baseIndex())
+            : mIndex(sInstance().mInfo.template registerComponent<T>())
+            , mBaseIndex(sInstance().mInfo.mBaseIndex)
         {
         }
 
         ~ComponentRegistrator()
         {
-            unregisterComponent(mIndex);
+            sInstance().mInfo.unregisterComponent(mIndex);
             mIndex.reset();
         }
 

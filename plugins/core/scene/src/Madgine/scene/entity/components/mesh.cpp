@@ -30,7 +30,7 @@ namespace Engine {
 namespace Scene {
     namespace Entity {
         Mesh::Mesh(const ObjectPtr &data)
-            : EntityComponent(data)
+            : NamedUniqueComponent(data)
         {
             Engine::ValueType v;
             if (data.getValue(v, "mesh") && v.is<std::string>()) {

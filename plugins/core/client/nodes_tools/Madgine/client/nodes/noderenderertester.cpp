@@ -64,7 +64,7 @@ namespace Client {
     void NodeRendererTester::render()
     {
         if (ImGui::Begin("NodeRendererTester")) {
-            ImGui::Image((void *)mTexture->texture()->mTextureHandle, { 512, 512 });
+            ImGui::Image((void *)mTexture->texture(), { 512, 512 });
             ImGui::InteractiveView(mState);
 
             Tools::InteractiveCamera(mState, mCamera);

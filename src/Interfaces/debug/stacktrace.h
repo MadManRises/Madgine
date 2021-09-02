@@ -46,6 +46,34 @@ namespace Debug {
             return true;
         }
 
+        struct iterator {
+            bool operator!=(const iterator& other) {
+                return mCurrent != other.mCurrent;
+            }
+
+            void operator++() {
+                assert(mCurrent < mEnd);
+                ++mCurrent;
+                if (mCurrent != mEnd && !*mCurrent)
+                    mCurrent = mEnd;
+            }
+
+            void* operator*() {
+                return *mCurrent;
+            }
+
+            void **mCurrent, **mEnd;
+        };
+
+        iterator begin() {
+            return { mTrace.data(), mTrace.data() + S };
+        }
+
+        iterator end()
+        {
+            return { mTrace.data() + S, mTrace.data() + S };
+        }
+
     private:
         friend struct std::hash<StackTrace<S>>;
 

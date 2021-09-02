@@ -124,7 +124,7 @@ namespace Tools {
 
             ImVec2 region = ImGui::GetContentRegionAvail();
             mRenderTarget->resize({ static_cast<int>(region.x), static_cast<int>(region.y) });
-            bool pressed = ImGui::ImageButton((void *)mRenderTarget->texture()->mTextureHandle, region, { 0, 0 }, { 1, 1 }, 0);
+            bool pressed = ImGui::ImageButton((void *)mRenderTarget->texture(), region, { 0, 0 }, { 1, 1 }, 0);
 			if (pressed && !mState.mDragging[0])
                 if (!Im3D::IsAnyObjectHovered())
                     mEditor->deselect();

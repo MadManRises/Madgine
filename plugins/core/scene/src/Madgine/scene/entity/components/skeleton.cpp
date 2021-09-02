@@ -17,7 +17,7 @@ namespace Engine {
 namespace Scene {
     namespace Entity {
         Skeleton::Skeleton(const ObjectPtr &data)
-            : EntityComponent(data)
+            : NamedUniqueComponent(data)
         {
             Engine::ValueType v;
             if (data.getValue(v, "skeleton") && v.is<std::string>()) {

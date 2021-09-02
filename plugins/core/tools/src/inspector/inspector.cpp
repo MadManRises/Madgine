@@ -31,6 +31,14 @@
 
 UNIQUECOMPONENT(Engine::Tools::Inspector);
 
+
+METATABLE_BEGIN_BASE(Engine::Tools::Inspector, Engine::Tools::ToolBase)
+METATABLE_END(Engine::Tools::Inspector)
+
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::Inspector, Engine::Tools::ToolBase)
+SERIALIZETABLE_END(Engine::Tools::Inspector)
+
+
 namespace Engine {
 namespace Tools {
 
@@ -484,9 +492,3 @@ namespace Tools {
 
 }
 }
-
-METATABLE_BEGIN_BASE(Engine::Tools::Inspector, Engine::Tools::ToolBase)
-METATABLE_END(Engine::Tools::Inspector)
-
-SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::Inspector, Engine::Tools::ToolBase)
-SERIALIZETABLE_END(Engine::Tools::Inspector)

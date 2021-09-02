@@ -21,7 +21,7 @@
 
 #include "nodecollector.h"
 
-#include "Modules/uniquecomponent/uniquecomponentregistry.h"
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 METATABLE_BEGIN(Engine::NodeGraph::NodeGraph)
 METATABLE_END(Engine::NodeGraph::NodeGraph)
@@ -614,7 +614,7 @@ namespace NodeGraph {
 
     std::unique_ptr<NodeBase> NodeGraph::createNode(std::string_view name)
     {
-        return NodeRegistry::getConstructor(sNodesByName().at(name))(*this);
+        return NodeRegistry::getConstructor(NodeRegistry::sComponentsByName().at(name))(*this);
     }
 
     std::tuple<std::unique_ptr<NodeBase>> NodeGraph::createNodeTuple(std::string_view name)

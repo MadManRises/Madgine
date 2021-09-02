@@ -618,7 +618,7 @@ namespace Tools {
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
             if (ImGui::BeginPopup("Create New Node")) {
 
-                for (const std::pair<const std::string_view, IndexRef> &nodeDesc : NodeGraph::sNodesByName()) {
+                for (const std::pair<const std::string_view, size_t> &nodeDesc : NodeGraph::NodeRegistry::sComponentsByName()) {
                     if (ImGui::MenuItem(nodeDesc.first.data())) {
                         NodeGraph::NodeBase *node = mGraph.addNode(NodeGraph::NodeRegistry::getConstructor(nodeDesc.second)(mGraph));
                         ed::SetNodePosition(ed::NodeId { node }, mPopupPosition);

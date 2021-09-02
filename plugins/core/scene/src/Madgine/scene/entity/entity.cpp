@@ -112,12 +112,12 @@ namespace Scene {
 
         EntityComponentPtr<EntityComponentBase> Entity::getComponent(std::string_view name)
         {
-            return getComponent(sComponentsByName()[name]);
+            return getComponent(EntityComponentRegistry::sComponentsByName().at(name));
         }
 
         EntityComponentPtr<const EntityComponentBase> Entity::getComponent(std::string_view name) const
         {
-            return getComponent(sComponentsByName()[name]);
+            return getComponent(EntityComponentRegistry::sComponentsByName().at(name));
         }
 
         bool Entity::hasComponent(size_t i)
@@ -127,12 +127,12 @@ namespace Scene {
 
         bool Entity::hasComponent(std::string_view name)
         {
-            return hasComponent(sComponentsByName()[name]);
+            return hasComponent(EntityComponentRegistry::sComponentsByName().at(name));
         }
 
         EntityComponentPtr<EntityComponentBase> Entity::addComponent(std::string_view name, const ObjectPtr &table)
         {
-            return addComponent(sComponentsByName().at(name), table);
+            return addComponent(EntityComponentRegistry::sComponentsByName().at(name), table);
         }
 
         EntityComponentPtr<EntityComponentBase> Entity::addComponent(size_t i, const ObjectPtr &table)
@@ -148,7 +148,7 @@ namespace Scene {
 
         void Entity::removeComponent(std::string_view name)
         {
-            removeComponent(sComponentsByName().at(name));
+            removeComponent(EntityComponentRegistry::sComponentsByName().at(name));
         }
 
         void Entity::removeComponent(size_t i)
@@ -178,13 +178,13 @@ namespace Scene {
 
         std::tuple<EntityComponentOwningHandle<EntityComponentBase>> Entity::createComponentTuple(const std::string &name)
         {
-            uint32_t i = sComponentsByName().at(name);
+            uint32_t i = EntityComponentRegistry::sComponentsByName().at(name);
             return std::make_tuple(mSceneManager.entityComponentList(i).emplace({}, this));
         }
 
         std::tuple<std::string_view> Entity::storeComponentCreationData(const EntityComponentOwningHandle<EntityComponentBase> &comp) const
         {
-            for (const auto &p : sComponentsByName()) {
+            for (const auto &p : EntityComponentRegistry::sComponentsByName()) {
                 if (p.second == comp.mHandle.mType)
                     return p.first;
             }

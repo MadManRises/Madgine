@@ -6,9 +6,10 @@
 
 namespace Engine {
 
-template <typename T, typename Base, typename _VBase>
+template <typename _T, typename Base, typename _VBase>
 struct VirtualUniqueComponentImpl : Base {
     using VBase = _VBase;
+    using T = _T;
     using Base::Base;
 
     struct Inner {
@@ -17,7 +18,7 @@ struct VirtualUniqueComponentImpl : Base {
             assert(!Base::_preg());
             Base::_preg() = &reg;
         }
-        ~Inner() 
+        ~Inner()
         {
             assert(Base::_preg() == &reg);
             Base::_preg() = nullptr;
@@ -32,10 +33,11 @@ DLL_IMPORT_VARIABLE2(typename T::Inner, _vreg, typename T, typename Base);
 
 #    define VIRTUALUNIQUECOMPONENT(Name) DLL_EXPORT_VARIABLE2(, Name::Inner, Engine::, _vreg, {}, Name, Name::VBase)
 
-template <typename T, typename _Collector, typename Base>
+template <typename _T, typename _Collector, typename Base>
 struct VirtualUniqueComponentBase : public Base {
 public:
     using Collector = _Collector;
+    using T = _T;
 
     using Base::Base;
 
@@ -56,11 +58,12 @@ protected:
 DLL_IMPORT_VARIABLE2(typename T::Collector::template ComponentRegistrator<T>, _reg, typename T);
 
 #    define UNIQUECOMPONENT(Name) DLL_EXPORT_VARIABLE2(, Name::Collector::ComponentRegistrator<Name>, Engine::, _reg, {}, Name)
-#    define UNIQUECOMPONENT2(Name, ext) DLL_EXPORT_VARIABLE3(, Name::Collector::ComponentRegistrator<Name>, Engine::, _reg, ext, {}, Name)
+#    define UNIQUECOMPONENT2(Name, ext) DLL_EXPORT_VARIABLE3(, Name::Collector::ComponentRegistrator<Name>, Name::Collector::ComponentRegistrator<Name>, Engine::, _reg, ext, {}, Name)
 
-template <typename T, typename _Collector, typename _Base>
+template <typename _T, typename _Collector, typename _Base>
 struct UniqueComponent : _Base {
     using Collector = _Collector;
+    using T = _T;
 
     using _Base::_Base;
 
@@ -81,19 +84,25 @@ size_t component_index()
 #else
 
 namespace Engine {
-template <typename T, typename Base, typename _VBase>
+template <typename _T, typename Base, typename _VBase>
 struct VirtualUniqueComponentImpl : Base {
     using Base::Base;
+
+    using T = _T;
 };
 
-template <typename T, typename Collector, typename Base>
+template <typename _T, typename Collector, typename Base>
 struct VirtualUniqueComponentBase : Base {
     using Base::Base;
+
+    using T = _T;
 };
 
-template <typename T, typename Collector, typename Base>
+template <typename _T, typename Collector, typename Base>
 struct UniqueComponent : Base {
     using Base::Base;
+
+    using T = _T;
 };
 
 template <typename T>
@@ -111,13 +120,13 @@ namespace Engine {
 
 DLL_IMPORT_VARIABLE2(const std::string_view, _componentName, typename T);
 
-template <typename T, typename Base>
-struct NamedComponent : Base {
+template <typename Base>
+struct NamedUniqueComponent : Base {
     using Base::Base;
 
     static std::string_view componentName()
     {
-        return _componentName<T>();
+        return _componentName<typename Base::T>();
     }
 };
 

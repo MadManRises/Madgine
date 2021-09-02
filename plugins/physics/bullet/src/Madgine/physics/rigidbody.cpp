@@ -96,7 +96,7 @@ namespace Physics {
     };
 
     RigidBody::RigidBody(const ObjectPtr &data)
-        : EntityComponent(data)
+        : NamedUniqueComponent(data)
         , mData(std::make_unique<Data>())
     {
     }

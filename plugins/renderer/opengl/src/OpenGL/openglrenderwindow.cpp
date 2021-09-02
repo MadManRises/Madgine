@@ -448,9 +448,9 @@ namespace Render {
 #endif
     }
 
-    Texture *OpenGLRenderWindow::texture() const
+    TextureHandle OpenGLRenderWindow::texture() const
     {
-        return nullptr;
+        return 0;
     }
 
     TextureHandle OpenGLRenderWindow::depthTexture() const

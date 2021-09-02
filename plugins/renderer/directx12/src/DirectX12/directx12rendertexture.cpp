@@ -92,9 +92,9 @@ namespace Render {
         DirectX12RenderTarget::endFrame();
     }
 
-    const DirectX12Texture *DirectX12RenderTexture::texture() const
+    TextureHandle DirectX12RenderTexture::texture() const
     {
-        return &mTexture;
+        return mTexture.mTextureHandle;
     }
 
     TextureHandle DirectX12RenderTexture::depthTexture() const

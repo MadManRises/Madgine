@@ -25,6 +25,7 @@ struct CollectorInfoBase {
     const Plugins::BinaryInfo *mBinary;
     std::vector<std::vector<const TypeInfo *>> mElementInfos;
     IndexType<size_t> mBaseIndex;
+    std::vector<std::string_view> mComponentNames;
 };
 
 struct ComponentRegistryListener {
@@ -47,9 +48,10 @@ MODULES_EXPORT void exportStaticComponentHeader(const Filesystem::Path &outFile,
 MODULES_EXPORT std::vector<UniqueComponentRegistryBase *> &registryRegistry();
 
 struct MODULES_EXPORT UniqueComponentRegistryBase {
-    UniqueComponentRegistryBase(const TypeInfo *ti, const Plugins::BinaryInfo *binary)
+    UniqueComponentRegistryBase(const TypeInfo *ti, const Plugins::BinaryInfo *binary, const TypeInfo *namedTi = nullptr)
         : mBinary(binary)
         , mTi(ti)
+        , mNamedTi(namedTi ? namedTi : ti)
     {
         LOG("Adding: " << ti->mTypeName);
         registryRegistry().push_back(this);
@@ -68,6 +70,11 @@ struct MODULES_EXPORT UniqueComponentRegistryBase {
         return mTi;
     }
 
+    const TypeInfo *named_type_info()
+    {
+        return mNamedTi;
+    }
+
     std::vector<CollectorInfoBase *>::iterator begin()
     {
         return mLoadedCollectors.begin();
@@ -80,11 +87,15 @@ struct MODULES_EXPORT UniqueComponentRegistryBase {
 
     const Plugins::BinaryInfo *mBinary;
 
+    std::map<std::string_view, size_t> mComponentsByName;
+    bool mIsNamed = false;
+
 protected:
     std::vector<CollectorInfoBase *> mLoadedCollectors;
 
 private:
     const TypeInfo *mTi;
+    const TypeInfo *mNamedTi;
 };
 
 DLL_IMPORT_VARIABLE2(Registry, uniqueComponentRegistry, typename Registry);
@@ -99,11 +110,33 @@ struct UniqueComponentRegistry : UniqueComponentRegistryBase {
     using Listener = ComponentRegistryListenerEntry<F>;
 
     struct CollectorInfo : CollectorInfoBase {
+
+        template <typename T>
+        size_t registerComponent()
+        {
+
+            LOG("Registering Component: " << typeName<T>());
+            mComponents.emplace_back(&createComponent<T, Base, _Ty...>);
+            std::vector<const TypeInfo *> elementInfos;
+            elementInfos.push_back(&typeInfo<T>);
+            if constexpr (has_typename_VBase_v<T>) {
+                elementInfos.push_back(&typeInfo<typename T::VBase>);
+            }
+            mElementInfos.emplace_back(std::move(elementInfos));
+            return mComponents.size() - 1;
+        }
+
+        void unregisterComponent(size_t i)
+        {
+            mComponents[i] = nullptr;
+            mElementInfos[i].clear();
+        }
+
         std::vector<F> mComponents;
     };
 
-    UniqueComponentRegistry()
-        : UniqueComponentRegistryBase(&typeInfo<UniqueComponentRegistry>, &Plugins::PLUGIN_LOCAL(binaryInfo))
+    UniqueComponentRegistry(const TypeInfo *namedTi = nullptr)
+        : UniqueComponentRegistryBase(&typeInfo<UniqueComponentRegistry>, &Plugins::PLUGIN_LOCAL(binaryInfo), namedTi)
     {
     }
 
@@ -122,11 +155,13 @@ struct UniqueComponentRegistry : UniqueComponentRegistryBase {
         return sInstance().mComponents[i];
     }
 
-    static void addListener(Listener listener) {
+    static void addListener(Listener listener)
+    {
         sInstance().mListeners.push_back(listener);
     }
 
-    static void removeListener(ComponentRegistryListener* listener) {
+    static void removeListener(ComponentRegistryListener *listener)
+    {
         sInstance().mListeners.erase(std::find_if(sInstance().mListeners.begin(), sInstance().mListeners.end(), [=](const Listener &l) { return l.mListener == listener; }));
     }
 
@@ -188,15 +223,66 @@ struct UniqueComponentRegistry : UniqueComponentRegistryBase {
         }
     }
 
-
-
-private:
+protected:
     static inline UniqueComponentRegistry *sSelf = &sInstance(); //Keep to ensure instantiation of registry, even with no component/collector in it
 
     std::vector<F> mComponents;
     std::vector<Listener> mListeners;
 
     std::vector<CollectorInfo *> mUnloadedCollectors;
+};
+
+template <typename _Base, typename... _Ty>
+struct NamedUniqueComponentRegistry : UniqueComponentRegistry<_Base, _Ty...> {
+
+    struct CollectorInfo : UniqueComponentRegistry<_Base, _Ty...>::CollectorInfo {
+        template <typename T>
+        size_t registerComponent()
+        {
+
+            mComponentNames.emplace_back(T::componentName());
+            return UniqueComponentRegistry<_Base, _Ty...>::CollectorInfo::template registerComponent<T>();
+        }
+
+        void unregisterComponent(size_t i)
+        {
+            UniqueComponentRegistry<_Base, _Ty...>::CollectorInfo::unregisterComponent(i);
+            mComponentNames[i] = {};
+        }
+    };
+
+    NamedUniqueComponentRegistry()
+        : UniqueComponentRegistry<_Base, _Ty...>(&typeInfo<NamedUniqueComponentRegistry>)
+    {
+        mIsNamed = true;
+    }
+
+    static NamedUniqueComponentRegistry &sInstance()
+    {
+        return static_cast<NamedUniqueComponentRegistry &>(uniqueComponentRegistry<UniqueComponentRegistry<_Base, _Ty...>>());
+    }
+
+    static const std::map<std::string_view, size_t> &sComponentsByName()
+    {
+        return sInstance().mComponentsByName;
+    }
+
+    void onPluginLoad(const Plugins::BinaryInfo *bin, CompoundAtomicOperation &op)
+    {
+        size_t counter = mComponentsByName.size();
+
+        for (typename UniqueComponentRegistry<_Base, _Ty...>::CollectorInfo *info : mUnloadedCollectors) {
+            if (info->mBinary == bin) {
+                const std::vector<std::string_view> &names = static_cast<CollectorInfo *>(info)->mComponentNames;
+                for (std::string_view name : names) {
+                    mComponentsByName[name] = counter;
+                    ++counter;
+                }
+            }
+        }
+
+        UniqueComponentRegistry::onPluginLoad(bin, op);
+    }
 };
 
 }
@@ -218,6 +304,12 @@ struct UniqueComponentRegistry {
     {
         return sComponents()[i];
     }
+};
+
+template <typename _Base, typename... _Ty>
+struct NamedUniqueComponentRegistry : UniqueComponentRegistry<_Base, _Ty...> {
+
+    static std::map<std::string_view, size_t> sComponentsByName();
 };
 
 }

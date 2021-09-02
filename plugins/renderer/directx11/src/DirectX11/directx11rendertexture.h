@@ -23,7 +23,7 @@ namespace Render {
         virtual void beginFrame() override;
         virtual void endFrame() override;
 
-        virtual const DirectX11Texture *texture() const override;        
+        virtual TextureHandle texture() const override;        
         virtual TextureHandle depthTexture() const override;
         
     private:        

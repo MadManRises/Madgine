@@ -77,7 +77,7 @@ namespace Scene {
 
         std::string_view EntityComponentPtrBase<EntityComponentBase>::name() const
         {
-            return std::find_if(sComponentsByName().begin(), sComponentsByName().end(), [&](const std::pair<const std::string_view, IndexRef> &p) { return p.second == mHandle.mType; })->first;                
+            return std::find_if(EntityComponentRegistry::sComponentsByName().begin(), EntityComponentRegistry::sComponentsByName().end(), [&](const std::pair<const std::string_view, size_t> &p) { return p.second == mHandle.mType; })->first;                
         }
 
         TypedScopePtr EntityComponentPtrBase<EntityComponentBase>::getTyped() const

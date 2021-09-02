@@ -47,7 +47,7 @@ namespace Widgets {
 
         Vector4 color { 1, 1, 1, 1 };
 
-        Render::TextureHandle tex = mTarget ? mTarget->texture()->mTextureHandle : 0;
+        Render::TextureHandle tex = mTarget ? mTarget->texture() : 0;
 
         Vector3 v = pos;
         v.z = static_cast<float>(depth());

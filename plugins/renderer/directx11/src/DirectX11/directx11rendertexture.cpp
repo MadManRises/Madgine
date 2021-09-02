@@ -87,9 +87,9 @@ namespace Render {
         DirectX11RenderTarget::endFrame();
     }
 
-    const DirectX11Texture *DirectX11RenderTexture::texture() const
+    TextureHandle DirectX11RenderTexture::texture() const
     {
-        return &mTexture;
+        return mTexture.mTextureHandle;
     }
 
     TextureHandle DirectX11RenderTexture::depthTexture() const

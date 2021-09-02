@@ -95,8 +95,8 @@
     template <__VA_ARGS__>                    \
     Type &Name();
 
-#define DLL_EXPORT_VARIABLE3(qualifier, Type, ns, Name, ext, Init, ...)      \
-    static qualifier Type CONCAT2(__##Name##ext##_helper_, __LINE__) = Init; \
+#define DLL_EXPORT_VARIABLE3(qualifier, Type, ActualType, ns, Name, ext, Init, ...)      \
+    static qualifier ActualType CONCAT2(__##Name##ext##_helper_, __LINE__) = Init; \
     template <>                                                              \
     DLL_EXPORT Type &ns Name<__VA_ARGS__>()                                  \
     {                                                                        \
@@ -104,17 +104,18 @@
     }                                                                        \
     template Type &ns Name<__VA_ARGS__>();
 
-#define DLL_EXPORT_VARIABLE2_ORDER(qualifier, Type, ns, Name, Init, ...) \
+#define DLL_EXPORT_VARIABLE3_ORDER(qualifier, Type, ActualType, ns, Name, ext, Init, ...) \
     template <>                                                          \
     DLL_EXPORT Type &ns Name<__VA_ARGS__>()                              \
     {                                                                    \
-        static qualifier Type dummy = Init;                              \
+        static qualifier ActualType dummy = Init;                              \
         return dummy;                                                    \
     }                                                                    \
     template Type &ns Name<__VA_ARGS__>();                               \
     static Type &CONCAT2(__##Name##ext##_helper_, __LINE__) = ns Name<__VA_ARGS__>();
 
-#define DLL_EXPORT_VARIABLE2(qualifier, Type, ns, Name, Init, ...) DLL_EXPORT_VARIABLE3(qualifier, Type, ns, Name, , SINGLE_ARG(Init), __VA_ARGS__)
+#define DLL_EXPORT_VARIABLE2(qualifier, Type, ns, Name, Init, ...) DLL_EXPORT_VARIABLE3(qualifier, Type, Type, ns, Name, , SINGLE_ARG(Init), __VA_ARGS__)
+#define DLL_EXPORT_VARIABLE2_ORDER(qualifier, Type, ns, Name, Init, ...) DLL_EXPORT_VARIABLE3_ORDER(qualifier, Type, Type, ns, Name, , SINGLE_ARG(Init), __VA_ARGS__)
 
 /*#define TEMPLATE_INSTANTIATION(type) template type
 #define TEMPLATE_INSTANTIATION_EXPORT(type) template type DLL_EXPORT

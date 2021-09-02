@@ -19,7 +19,7 @@ namespace Render {
         virtual void renderMesh(GPUMeshData *mesh, Program *program) = 0;
         virtual void clearDepthBuffer() = 0;		
 
-        virtual const Texture *texture() const = 0;
+        virtual TextureHandle texture() const = 0;
         virtual TextureHandle depthTexture() const = 0;
 
         virtual void bindTextures(const std::vector<TextureHandle> &tex) = 0;
