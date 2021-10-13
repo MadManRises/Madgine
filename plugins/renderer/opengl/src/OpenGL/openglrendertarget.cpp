@@ -4,8 +4,8 @@
 
 #include "openglrendertarget.h"
 
-#include "openglmeshdata.h"
 #include "meshloader.h"
+#include "openglmeshdata.h"
 #include "openglmeshloader.h"
 
 #include "Meta/math/rect2i.h"
@@ -15,8 +15,8 @@
 namespace Engine {
 namespace Render {
 
-    OpenGLRenderTarget::OpenGLRenderTarget(OpenGLRenderContext *context)
-        : RenderTarget(context)
+    OpenGLRenderTarget::OpenGLRenderTarget(OpenGLRenderContext *context, bool global, std::string name, size_t iterations)
+        : RenderTarget(context, global, name, iterations)
     {
     }
 
@@ -24,8 +24,10 @@ namespace Render {
     {
     }
 
-    void OpenGLRenderTarget::beginFrame()
+    void OpenGLRenderTarget::beginIteration(size_t iteration)
     {
+        RenderTarget::beginIteration(iteration);
+
         Vector2i screenSize = size();
 
         if (screenSize.x <= 0)
@@ -40,8 +42,16 @@ namespace Render {
         GL_CHECK();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         GL_CHECK();
+    }
 
-        RenderTarget::beginFrame();
+    void OpenGLRenderTarget::pushAnnotation(const char *tag)
+    {
+        glPushDebugGroupKHR(GL_DEBUG_SOURCE_APPLICATION, 0, -1, tag);
+    }
+
+    void OpenGLRenderTarget::popAnnotation()
+    {
+        glPopDebugGroupKHR();
     }
 
     void OpenGLRenderTarget::setRenderSpace(const Rect2i &space)
@@ -52,7 +62,7 @@ namespace Render {
         GL_CHECK();
     }
 
-    void OpenGLRenderTarget::renderMesh(GPUMeshData *m, Program *p)
+    void OpenGLRenderTarget::renderMesh(GPUMeshData *m, Program *p, const GPUMeshData::Material *material)
     {
         OpenGLMeshData *mesh = static_cast<OpenGLMeshData *>(m);
         OpenGLProgram *program = static_cast<OpenGLProgram *>(p);
@@ -60,10 +70,12 @@ namespace Render {
         if (!mesh->mVAO)
             return;
 
-        mesh->mVAO.bind();
-        program->bind();
+        program->bind(&mesh->mVAO);
 
-		program->verify();
+        program->verify();
+
+        if (material)
+            bindTextures({ { material->mDiffuseHandle, TextureType_2D } });
 
         constexpr GLenum modes[] {
             GL_POINTS,
@@ -79,7 +91,39 @@ namespace Render {
             glDrawArrays(mode, 0, mesh->mElementCount);
         GL_CHECK();
 
-        mesh->mVAO.unbind();
+        program->unbind(&mesh->mVAO);
+    }
+
+    void OpenGLRenderTarget::renderMeshInstanced(size_t count, GPUMeshData *m, Program *p, const GPUMeshData::Material *material)
+    {
+        OpenGLMeshData *mesh = static_cast<OpenGLMeshData *>(m);
+        OpenGLProgram *program = static_cast<OpenGLProgram *>(p);
+
+        if (!mesh->mVAO)
+            return;
+
+        program->bind(&mesh->mVAO);
+
+        program->verify();
+
+        if (material)
+            bindTextures({ { material->mDiffuseHandle, TextureType_2D } });
+
+        constexpr GLenum modes[] {
+            GL_POINTS,
+            GL_LINES,
+            GL_TRIANGLES
+        };
+
+        GLenum mode = modes[mesh->mGroupSize - 1];
+
+        if (mesh->mIndices) {
+            glDrawElementsInstanced(mode, mesh->mElementCount, GL_UNSIGNED_SHORT, 0, count);
+        } else
+            glDrawArraysInstanced(mode, 0, mesh->mElementCount, count);
+        GL_CHECK();
+
+        program->unbind(&mesh->mVAO);
     }
 
     void OpenGLRenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices)
@@ -92,15 +136,13 @@ namespace Render {
         }
     }
 
-    void OpenGLRenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, TextureHandle texture)
+    void OpenGLRenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, const GPUMeshData::Material *material)
     {
         if (!vertices.empty()) {
             OpenGLMeshData tempMesh;
             OpenGLMeshLoader::getSingleton().generate(tempMesh, { groupSize, std::move(vertices), std::move(indices) });
 
-            tempMesh.mTextureHandle = texture;
-
-            renderMesh(&tempMesh, program);
+            renderMesh(&tempMesh, program, material);
         }
     }
 
@@ -110,11 +152,25 @@ namespace Render {
         GL_CHECK();
     }
 
-    void OpenGLRenderTarget::bindTextures(const std::vector<TextureHandle> &tex)
+    void OpenGLRenderTarget::bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset)
     {
         for (size_t i = 0; i < tex.size(); ++i) {
-            glActiveTexture(GL_TEXTURE0 + i);
-            glBindTexture(GL_TEXTURE_2D, tex[i]);
+            glActiveTexture(GL_TEXTURE0 + offset + i);
+            GLenum type;
+            switch (tex[i].mType) {
+            case TextureType_2D:
+                type = GL_TEXTURE_2D;
+                break;
+            case TextureType_2DMultiSample:
+                type = GL_TEXTURE_2D_MULTISAMPLE;
+                break;
+            case TextureType_Cube:
+                type = GL_TEXTURE_CUBE_MAP;
+                break;
+            default:
+                throw 0;
+            }
+            glBindTexture(type, tex[i].mTextureHandle);
             GL_CHECK();
         }
     }

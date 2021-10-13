@@ -13,29 +13,21 @@ namespace Render {
         DirectX11VertexArray() = default;
         DirectX11VertexArray(const DirectX11VertexArray &) = delete;
         DirectX11VertexArray(DirectX11VertexArray &&);
-        DirectX11VertexArray(const std::array<AttributeDescriptor, 7> &attributes);
+        DirectX11VertexArray(const DirectX11Buffer &vertex, const DirectX11Buffer &index, std::array<AttributeDescriptor, 7> (*attributes)());
         ~DirectX11VertexArray();
 
         DirectX11VertexArray &operator=(DirectX11VertexArray &&other);
 
 		explicit operator bool() const;
 
-        static DirectX11VertexArray *getCurrent();
-
         void reset();
 
-        void bind(DirectX11Program *program = nullptr);
-        void unbind();
-
-        static void onBindVBO(const DirectX11Buffer *buffer);
-        static void onBindEBO(const DirectX11Buffer *buffer);
-
-        static std::pair<const DirectX11Buffer *, const DirectX11Buffer *> getCurrentBindings();
+        void bind();
 
         UINT mStride = 0;
         uint8_t mFormat = 0;
 
-        std::vector<AttributeDescriptor> mAttributes;
+        std::array<AttributeDescriptor, 7> (*mAttributes)();
 
     private:
         const DirectX11Buffer *mVBO = nullptr;

@@ -9,6 +9,7 @@
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
 #include "Generic/container/transformIt.h"
+#include "Generic/container/mutable_set.h"
 
 namespace Engine {
 namespace Scene {
@@ -85,6 +86,7 @@ namespace Scene {
             void removeComponent(std::string_view name);
             void removeComponent(size_t i);
             void clearComponents();
+            void relocateComponent(EntityComponentHandle<EntityComponentBase> newIndex);
 
             bool isLocal() const;
 
@@ -103,7 +105,7 @@ namespace Scene {
 
             bool mLocal;
 
-            SERIALIZABLE_CONTAINER(mComponents, std::set<EntityComponentOwningHandle<EntityComponentBase>, std::less<>>, ParentFunctor<&Entity::handleEntityEvent>);
+            SERIALIZABLE_CONTAINER(mComponents, mutable_set<EntityComponentOwningHandle<EntityComponentBase>, std::less<>>, ParentFunctor<&Entity::handleEntityEvent>);
 
             SceneManager &mSceneManager;
         };

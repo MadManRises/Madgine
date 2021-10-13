@@ -43,11 +43,13 @@ namespace Tools {
             return loader->generate(data, { 3, std::move(vertices), std::move(indices) });
         });
 
-        mProgram.setParameters(1, sizeof(GridPerFrame));
+        mProgram.setParametersSize(1, sizeof(GridPerFrame));
     }
 
-    void GridPass::render(Render::RenderTarget *target)
+    void GridPass::render(Render::RenderTarget *target, size_t iteration)
     {
+        target->pushAnnotation("Grid");
+
         Vector2i size = target->size();
         float aspectRatio = float(size.x) / size.y;
         {
@@ -57,6 +59,8 @@ namespace Tools {
         }
 
         target->renderMesh(mMesh, mProgram);
+
+        target->popAnnotation();
     }
 
     int GridPass::priority() const

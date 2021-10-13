@@ -15,6 +15,9 @@ namespace Scene {
             void setName(std::string_view name);
 
             Render::GPUMeshData *data() const;
+            Render::GPUMeshData::Material *material() const;
+            void setMaterial(Render::GPUMeshData::Material *material);
+            void setMaterialName(std::string_view name);
 
             AABB aabb() const;
 
@@ -28,6 +31,7 @@ namespace Scene {
 
         private:
             typename Render::GPUMeshLoader::HandleType mMesh;
+            Render::GPUMeshData::Material *mMaterial = nullptr;
             bool mIsVisible = true;
         };
 

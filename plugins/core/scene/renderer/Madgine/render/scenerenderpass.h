@@ -5,6 +5,7 @@
 #include "programloader.h"
 
 #include "shadowrenderpass.h"
+#include "pointshadowrenderpass.h"
 
 namespace Engine {
 namespace Render {
@@ -14,18 +15,24 @@ namespace Render {
         SceneRenderPass(SceneRenderPass &&) = default;
         ~SceneRenderPass();
 
-        virtual void setup(Render::RenderContext *context) override;
+        virtual void setup(RenderTarget *target) override;
         virtual void shutdown() override;
-        virtual void render(Render::RenderTarget *target) override;
+        virtual void render(Render::RenderTarget *target, size_t iteration) override;
+        virtual void preRender() override;
 
         virtual int priority() const override;
+
+        float mAmbientFactor = 0.4f;
+        float mDiffuseFactor = 0.7f;
 
     private:
         ProgramLoader::HandleType mProgram;
 
         std::unique_ptr<Render::RenderTarget> mShadowMap;
+        std::unique_ptr<Render::RenderTarget> mPointShadowMaps[2];
 
         ShadowRenderPass mShadowPass;
+        PointShadowRenderPass mPointShadowPasses[2];
 
         Scene::SceneManager &mScene;
 

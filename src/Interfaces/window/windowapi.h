@@ -58,6 +58,7 @@ namespace Window {
         virtual bool hasFocus() = 0;
 
         virtual void setTitle(const char *title) = 0;
+        virtual std::string title() const = 0;
 
         virtual void destroy() = 0;
 

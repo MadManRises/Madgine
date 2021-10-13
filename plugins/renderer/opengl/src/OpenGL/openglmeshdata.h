@@ -11,17 +11,17 @@ namespace Render {
 
     struct MADGINE_OPENGL_EXPORT OpenGLMeshData : GPUMeshData {
 
+
         void reset()
         {
-            mTexture.reset();
+            mMaterials.clear();
             mVertices.reset();
             mIndices.reset();
             mVAO.reset();
         }
 
-        OpenGLTexture mTexture;
-        OpenGLBuffer mVertices;
-        OpenGLBuffer mIndices;
+        OpenGLBuffer mVertices = GL_ARRAY_BUFFER;
+        OpenGLBuffer mIndices = GL_ELEMENT_ARRAY_BUFFER;
         size_t mGroupSize;
         size_t mElementCount;
         OpenGLVertexArray mVAO;

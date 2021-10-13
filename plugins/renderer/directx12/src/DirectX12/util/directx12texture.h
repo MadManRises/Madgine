@@ -8,18 +8,16 @@
 
 #include "Generic/bytebuffer.h"
 
+#include "render/texturedescriptor.h"
+
 namespace Engine {
 namespace Render {
 
-    enum TextureType {
-        Texture2D,
-        RenderTarget2D
-    };
 
     struct MADGINE_DIRECTX12_EXPORT DirectX12Texture : Texture {
 
-        DirectX12Texture(TextureType type, DataFormat format, size_t width, size_t height, const ByteBuffer &data = {});
-        DirectX12Texture(TextureType type = Texture2D, DataFormat format = FORMAT_FLOAT8);
+        DirectX12Texture(TextureType type, bool isRenderTarget, DataFormat format, size_t width, size_t height, const ByteBuffer &data = {});
+        DirectX12Texture(TextureType type = TextureType_2D, bool isRenderTarget = false, DataFormat format = FORMAT_RGBA8);
         DirectX12Texture(const DirectX12Texture &) = delete;
         DirectX12Texture(DirectX12Texture &&);
         ~DirectX12Texture();
@@ -37,14 +35,19 @@ namespace Render {
 
         ID3D12Resource *resource() const;
 
+        TextureDescriptor descriptor() const;
+
         /*void setWrapMode(GLint mode);
         void setFilter(GLint filter);*/
+
+        void setName(std::string_view name);
 
     private:
         ID3D12Resource *mResource = nullptr;
         TextureType mType;
         Vector2i mSize = { 0, 0 };
         DataFormat mFormat;        
+        bool mIsRenderTarget;
     };
 
 }

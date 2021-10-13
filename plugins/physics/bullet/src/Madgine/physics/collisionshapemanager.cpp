@@ -20,6 +20,7 @@
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btCompoundShape.h"
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btConvexHullShape.h"
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btStaticPlaneShape.h"
+#include "bullet3-2.89/src/BulletCollision/CollisionShapes/btSphereShape.h"
 
 UNIQUECOMPONENT(Engine::Physics::CollisionShapeManager);
 
@@ -172,6 +173,47 @@ namespace Physics {
         virtual CapsuleShapeInstance *create() override
         {
             return new CapsuleShapeInstance;
+        }
+    };
+
+    struct SphereShapeInstance : Serialize::VirtualUnit<SphereShapeInstance, VirtualScope<SphereShapeInstance, CollisionShapeInstance>> {
+        SphereShapeInstance()
+            : mShape(0.1f)
+        {
+        }
+
+        virtual btCollisionShape *get() override
+        {
+            return &mShape;
+        }
+
+        virtual bool isInstance() override
+        {
+            return true;
+        }
+
+        virtual SphereShapeInstance *clone() override
+        {
+            return new SphereShapeInstance(*this);
+        }
+
+        float radius() const {
+            return mShape.getRadius();
+        }
+
+        void setRadius(float r) {
+            mShape.setImplicitShapeDimensions({ r, 0, 0 });
+            mShape.setMargin(r);
+        }
+
+        btSphereShape mShape;
+    };
+
+    struct SphereShape : CollisionShape {
+
+        virtual SphereShapeInstance *create() override
+        {
+            return new SphereShapeInstance;
         }
     };
 
@@ -372,6 +414,13 @@ namespace Physics {
             {}, this);
 
         getOrCreateManual(
+            "Sphere", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceDataInfo &info) {
+                data = std::make_unique<SphereShape>();
+                return true;
+            },
+            {}, this);
+
+        getOrCreateManual(
             "Compound", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceDataInfo &info) {
                 data = std::make_unique<CompoundShape>();
                 return true;
@@ -422,6 +471,14 @@ METATABLE_END(Engine::Physics::CapsuleShapeInstance)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Physics::CapsuleShapeInstance, Engine::Physics::CollisionShapeInstance)
 SERIALIZETABLE_END(Engine::Physics::CapsuleShapeInstance)
+
+METATABLE_BEGIN_BASE(Engine::Physics::SphereShapeInstance, Engine::Physics::CollisionShapeInstance)
+PROPERTY(radius, radius, setRadius)
+METATABLE_END(Engine::Physics::SphereShapeInstance)
+
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Physics::SphereShapeInstance, Engine::Physics::CollisionShapeInstance)
+ENCAPSULATED_FIELD(radius, radius, setRadius)
+SERIALIZETABLE_END(Engine::Physics::SphereShapeInstance)
 
 METATABLE_BEGIN_BASE(Engine::Physics::CompoundShapeInstance, Engine::Physics::CollisionShapeInstance)
 PROPERTY(Shapes, shapes, setShapes)

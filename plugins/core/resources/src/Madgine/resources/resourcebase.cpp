@@ -8,26 +8,14 @@
 
 METATABLE_BEGIN(Engine::Resources::ResourceBase)
 READONLY_PROPERTY(Name, name)
-PROPERTY(Persistent, isPersistent, setPersistent)
 METATABLE_END(Engine::Resources::ResourceBase)
 
 namespace Engine {
 namespace Resources {
     ResourceBase::ResourceBase(const std::string &name, Filesystem::Path path)
-        : mIsPersistent(false)
-        , mName(name)
+        : mName(name)
         , mPath(std::move(path))
     {
-    }
-
-    void ResourceBase::setPersistent(bool b)
-    {
-        mIsPersistent = b;
-    }
-
-    bool ResourceBase::isPersistent() const
-    {
-        return mIsPersistent;
     }
 
     void ResourceBase::setPath(const Filesystem::Path &path)
@@ -35,7 +23,7 @@ namespace Resources {
         mPath = path;
     }
 
-    const Filesystem::Path &ResourceBase::path()
+    const Filesystem::Path &ResourceBase::path() const
     {
         return mPath;
     }
@@ -50,18 +38,18 @@ namespace Resources {
         return mName;
     }
 
-    InStream ResourceBase::readAsStream(bool isBinary)
+    InStream ResourceBase::readAsStream(bool isBinary) const
     {
         return Filesystem::openFileRead(mPath, isBinary);
     }
 
-    std::string ResourceBase::readAsText()
+    std::string ResourceBase::readAsText() const
     {
         InStream buffer = readAsStream();
         return std::string { buffer.iterator(), buffer.end() };
     }
 
-    std::vector<unsigned char> Engine::Resources::ResourceBase::readAsBlob()
+    std::vector<unsigned char> Engine::Resources::ResourceBase::readAsBlob() const
     {
         InStream buffer = readAsStream(true);
         return std::vector<unsigned char> { buffer.iterator(), buffer.end() };

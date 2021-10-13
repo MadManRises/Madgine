@@ -39,37 +39,37 @@ namespace Scene {
             return TransformMatrix(mPosition, mScale, mOrientation);
         }
 
-        Matrix4 Transform::worldMatrix(const EntityComponentList<Transform> &transforms) const
+        Matrix4 Transform::worldMatrix() const
         {
-            return parentMatrix(transforms) * matrix();
+            return parentMatrix() * matrix();
         }
 
-        Matrix4 Transform::parentMatrix(const EntityComponentList<Transform> &transforms) const
+        Matrix4 Transform::parentMatrix() const
         {
             if (mParent)
-                return transforms.get(mParent)->worldMatrix(transforms);
+                return mParent->worldMatrix();
             else
                 return Matrix4::IDENTITY;
         }
 
-        void Transform::setParent(const EntityComponentPtr<Transform> &parent)
+        void Transform::setParent(Transform *parent)
         {
             if (parent == this)
                 return;
-            EntityComponentPtr<Transform> ptr = parent;
+            Transform *ptr = parent;
             while (ptr) {
-                EntityComponentPtr<Transform> next { ptr->mParent, ptr.sceneMgr() };
+                Transform *next = ptr->mParent;
                 if (next == this) {
-                    ptr->setParent({});
-                    ptr = {};
+                    ptr->setParent(nullptr);
+                    ptr = nullptr;
                 } else {
-                    ptr = std::move(next);
+                    ptr = next;
                 }
             }
-            mParent = static_cast<EntityComponentHandle<Transform>>(parent);
+            mParent = parent;
         }
 
-        const EntityComponentHandle<Transform> &Transform::parent() const
+        Transform *Transform::parent() const
         {
             return mParent;
         }
@@ -105,16 +105,6 @@ namespace Scene {
         void Transform::rotate(const Quaternion &q)
         {
             mOrientation *= q;
-        }
-
-        Matrix4 EntityComponentPtr<Transform>::worldMatrix() const
-        {
-            return (*this)->worldMatrix(mSceneMgr->entityComponentList<Transform>());
-        }
-
-        Matrix4 EntityComponentPtr<Transform>::parentMatrix() const
-        {
-            return (*this)->parentMatrix(mSceneMgr->entityComponentList<Transform>());
         }
     }
 }

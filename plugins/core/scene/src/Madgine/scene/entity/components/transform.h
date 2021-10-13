@@ -20,6 +20,8 @@ namespace Scene {
 
             SERIALIZABLEUNIT(Transform);
 
+            using Config = PersistentComponentConfig;
+
             using EntityComponent<Transform>::EntityComponent;
 
             Transform(Transform &&) = default;
@@ -40,25 +42,17 @@ namespace Scene {
             //KeyValueMapList maps() override;
 
             Matrix4 matrix() const;
-            Matrix4 worldMatrix(const EntityComponentList<Transform> &transforms) const;
-            Matrix4 parentMatrix(const EntityComponentList<Transform> &transforms) const;
+            Matrix4 worldMatrix() const;
+            Matrix4 parentMatrix() const;
 
-            void setParent(const EntityComponentPtr<Transform> &parent);
-            const EntityComponentHandle<Transform> &parent() const;
+            void setParent(Transform *parent);
+            Transform *parent() const;
 
         private:
             Serialize::Serialized<Vector3> mPosition;
             Vector3 mScale = Vector3::UNIT_SCALE;
             Quaternion mOrientation;
-            EntityComponentHandle<Transform> mParent;
-        };
-
-        template <>
-        struct MADGINE_SCENE_EXPORT EntityComponentPtr<Transform> : EntityComponentPtrBase<Transform> {
-            using EntityComponentPtrBase<Transform>::EntityComponentPtrBase;
-
-            Matrix4 worldMatrix() const;
-            Matrix4 parentMatrix() const;
+            Transform *mParent = nullptr;
         };
 
         using TransformPtr = EntityComponentPtr<Transform>;

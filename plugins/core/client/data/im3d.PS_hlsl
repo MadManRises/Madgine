@@ -1,19 +1,18 @@
+#include "im3d.sl"
+
 cbuffer PerApplication : register(b0)
 {
-    matrix p;
+    Im3DPerApplication app;
 }
 
 cbuffer PerFrame : register(b1)
 {   
-    matrix v;   
+    Im3DPerFrame frame;
 }
 
 cbuffer PerObject : register(b2)
 {
-    matrix m;
-
-	bool hasTexture;
-	bool hasDistanceField;
+    Im3DPerObject object;
 }
 
 Texture2D tex : register(t0);
@@ -37,8 +36,8 @@ float4 main(PixelShaderInput IN)
 {
     float4 colorAcc = IN.color;
 
-	if (hasTexture){
-		if (hasDistanceField){
+	if (object.hasTexture){
+		if (object.hasDistanceField){
 			float2 msdfUnit = 4.0/float2(512.0, 512.0);
 			float4 sample = tex.Sample(texSampler, IN.uv);
 			float sigDist = median(sample.r, sample.g, sample.b) - 0.5;

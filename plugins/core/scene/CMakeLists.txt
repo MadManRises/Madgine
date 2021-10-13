@@ -7,7 +7,7 @@ FolderSources(sources "" src)
 	FolderSources(sources src Madgine sceneforward.h scenelib.h)
 		FolderSources(sources Madgine scene scenemanager.cpp scenemanager.h scenecomponentcollector.cpp scenecomponentcollector.h scenecomponentbase.cpp scenecomponentbase.h)
 			FolderSources(sources scene entity entitycomponentbase.cpp entitycomponentbase.h entitycomponentcollector.cpp entitycomponentcollector.h entitycomponentptr.cpp componentexception.h entityptr.cpp entityptr.h entity.cpp entity.h entitycomponent.h entitycomponentlistbase.cpp entitycomponentlist.cpp entitycomponenthandle.cpp entitycomponenthandle.h masks.h)
-				FolderSources(sources entity components animation.cpp animation.h mesh.cpp mesh.h skeleton.cpp skeleton.h transform.cpp transform.h)
+				FolderSources(sources entity components animation.cpp animation.h mesh.cpp mesh.h pointlight.cpp pointlight.h skeleton.cpp skeleton.h transform.cpp transform.h)
 
 add_plugin(Scene Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/scenelib.h)
 
@@ -30,7 +30,7 @@ Project(SceneRenderer)
 set(sources "")
 FolderSources(sources "" renderer)
 	FolderSources(sources renderer Madgine scenerendererforward.h scenerendererlib.h)
-		FolderSources(sources Madgine render scenerenderpass.cpp scenerenderpass.h shadowrenderpass.cpp shadowrenderpass.h)
+		FolderSources(sources Madgine render pointshadowrenderpass.cpp pointshadowrenderpass.h scenerenderpass.cpp scenerenderpass.h shadowrenderpass.cpp shadowrenderpass.h)
 
 add_plugin(SceneRenderer Madgine Core ${sources} SOURCE_ROOT renderer PRECOMPILED_HEADER renderer/Madgine/scenerendererlib.h)
 

@@ -62,10 +62,10 @@ namespace Widgets {
         return mClicked;
     }
 
-    std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> Button::vertices(const Vector3 &screenSize)
+    std::vector<std::pair<std::vector<Vertex>, TextureSettings>> Button::vertices(const Vector3 &screenSize)
     {
 
-        std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> returnSet;
+        std::vector<std::pair<std::vector<Vertex>, TextureSettings>> returnSet;
         std::vector<Vertex> result;
 
         Vector3 pos = (getAbsolutePosition() * screenSize) / screenSize;
@@ -90,7 +90,7 @@ namespace Widgets {
 
         if (mFont) {
             //mFont->setPersistent(true);
-            std::pair<std::vector<Vertex>, Render::TextureDescriptor> fontVertices = renderText(mText, pos + 0.5f * size, mFont, mFontSize, { 0.5f, 0.5f }, screenSize);
+            std::pair<std::vector<Vertex>, TextureSettings> fontVertices = renderText(mText, pos + 0.5f * size, mFont, mFontSize, { 0.5f, 0.5f }, screenSize);
             if (!fontVertices.first.empty())
                 returnSet.push_back(fontVertices);
         }

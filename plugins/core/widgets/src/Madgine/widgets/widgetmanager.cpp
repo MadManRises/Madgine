@@ -111,13 +111,13 @@ namespace Widgets {
     {
         mData->mProgram.create("ui");
 
-        mData->mProgram.setParameters(2, sizeof(WidgetsPerObject));
+        mData->mProgram.setParametersSize(2, sizeof(WidgetsPerObject));
 
         mData->mMesh = Render::GPUMeshLoader::loadManual("widgetMesh", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &mesh, Render::GPUMeshLoader::ResourceDataInfo &info) {
             return loader->generate(mesh, { 3, std::vector<Vertex> {} });
         });
 
-        mData->mUIAtlasTexture.create("widgetUIAtlas", Render::FORMAT_FLOAT8);
+        mData->mUIAtlasTexture.create("widgetUIAtlas", Render::TextureType_2D, Render::FORMAT_RGBA8);
 
         mData->mDefaultTexture.load("default_tex");
 
@@ -160,13 +160,15 @@ namespace Widgets {
 
     template DLL_EXPORT WidgetBase *WidgetManager::createTopLevel<WidgetBase>(const std::string &);
 
+    static constexpr std::array<const char *, 2> sWidgetCreationNames {
+        "name",
+        "type"
+    };
+
     const char *WidgetManager::widgetCreationNames(size_t index)
     {
-        static constexpr std::array<const char *, 2> names {
-            "name",
-            "type"
-        };
-        return names[index];
+        
+        return sWidgetCreationNames[index];
     }
 
     std::unique_ptr<WidgetBase> WidgetManager::createWidgetClass(const std::string &name, WidgetClass _class, WidgetBase *parent)
@@ -446,13 +448,15 @@ namespace Widgets {
         }
     }
 
-    void WidgetManager::render(Render::RenderTarget *target)
+    void WidgetManager::render(Render::RenderTarget *target, size_t iteration)
     {
+        target->pushAnnotation("WidgetManager");
+
         Rect2i screenSpace = mClientSpace;
 
         target->setRenderSpace(screenSpace);
 
-        std::map<Render::TextureDescriptor, std::vector<Vertex>> vertices;
+        std::map<TextureSettings, std::vector<Vertex>> vertices;
 
         std::queue<Widgets::WidgetBase *> q;
         for (Widgets::WidgetBase *w : widgets()) {
@@ -470,7 +474,7 @@ namespace Widgets {
                     q.push(c);
             }
 
-            std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> localVerticesList = w->vertices(Vector3 { Vector2 { screenSpace.mSize }, 1.0f });
+            std::vector<std::pair<std::vector<Vertex>, TextureSettings>> localVerticesList = w->vertices(Vector3 { Vector2 { screenSpace.mSize }, 1.0f });
 
             Resources::ImageLoader::ResourceType *resource = w->resource();
             auto it = mData->mUIAtlasEntries.find(resource);
@@ -480,8 +484,8 @@ namespace Widgets {
                 mData->mUIAtlasTexture.setSubData({ it->second.mArea.mTopLeft.x, it->second.mArea.mTopLeft.y }, it->second.mArea.mSize, { data->mBuffer, static_cast<size_t>(data->mWidth * data->mHeight) });
             }
 
-            for (std::pair<std::vector<Vertex>, Render::TextureDescriptor> &localVertices : localVerticesList) {
-                if (!localVertices.second.mTextureHandle) {
+            for (std::pair<std::vector<Vertex>, TextureSettings> &localVertices : localVerticesList) {
+                if (!localVertices.second.mTexture.mTextureHandle) {
                     std::transform(localVertices.first.begin(), localVertices.first.end(), std::back_inserter(vertices[localVertices.second]), [&](const Vertex &v) {
                         return Vertex {
                             v.mPos,
@@ -496,23 +500,45 @@ namespace Widgets {
             }
         }
 
-        for (std::pair<const Render::TextureDescriptor, std::vector<Vertex>> &p : vertices) {
+        for (std::pair<const TextureSettings, std::vector<Vertex>> &p : vertices) {
             if (!p.second.empty()) {
 
                 {
                     auto parameters = mData->mProgram.mapParameters(2).cast<WidgetsPerObject>();
-                    parameters->hasDistanceField = bool(p.first.mFlags & Render::TextureFlag_IsDistanceField);
+                    parameters->hasDistanceField = bool(p.first.mFlags & TextureFlag_IsDistanceField);
                 }
 
-                if (p.first.mTextureHandle)
-                    target->bindTextures({ p.first.mTextureHandle });
+                if (p.first.mTexture.mTextureHandle)
+                    target->bindTextures({ p.first.mTexture });
                 else
-                    target->bindTextures({ mData->mUIAtlasTexture->mTextureHandle });
+                    target->bindTextures({ { mData->mUIAtlasTexture->mTextureHandle, Render::TextureType_2D } });
 
                 mData->mMesh.update({ 3, std::move(p.second) });
 
                 target->renderMesh(mData->mMesh, mData->mProgram);
             }
+        }
+
+        target->popAnnotation();
+    }
+
+    void WidgetManager::preRender() {
+        std::queue<Widgets::WidgetBase *> q;
+        for (Widgets::WidgetBase *w : widgets()) {
+            if (w->mVisible) {
+                q.push(w);
+            }
+        }
+        while (!q.empty()) {
+            Widgets::WidgetBase *w = q.front();
+            q.pop();
+
+            for (Widgets::WidgetBase *c : w->children()) {
+                if (c->mVisible)
+                    q.push(c);
+            }
+
+            w->preRender();
         }
     }
 

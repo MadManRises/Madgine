@@ -316,7 +316,7 @@ namespace Widgets {
         return min.x <= point.x && min.y <= point.y && max.x >= point.x && max.y >= point.y;
     }
 
-    std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> WidgetBase::vertices(const Vector3 &screenSize)
+    std::vector<std::pair<std::vector<Vertex>, TextureSettings>> WidgetBase::vertices(const Vector3 &screenSize)
     {
         return {};
     }
@@ -354,7 +354,7 @@ namespace Widgets {
         return nullptr;
     }
 
-    std::pair<std::vector<Vertex>, Render::TextureDescriptor> WidgetBase::renderText(const std::string &text, Vector3 pos, Render::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize)
+    std::pair<std::vector<Vertex>, TextureSettings> WidgetBase::renderText(const std::string &text, Vector3 pos, Render::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize)
     {
         std::vector<Vertex> result;
 
@@ -425,7 +425,11 @@ namespace Widgets {
 
             cursorX += g.mAdvance / 64.0f * scaleX;
         }
-        return { result, { font->mTexture->mTextureHandle, Render::TextureFlag_IsDistanceField } };
+        return { result, { { font->mTexture->mTextureHandle, Render::TextureType_2D }, TextureFlag_IsDistanceField } };
+    }
+
+    void WidgetBase::preRender() {
+
     }
 
 }

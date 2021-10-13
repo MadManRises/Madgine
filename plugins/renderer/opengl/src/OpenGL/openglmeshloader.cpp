@@ -34,62 +34,22 @@ namespace Render {
     {
         data.mGroupSize = mesh.mGroupSize;
 
-        data.mVAO = Render::create;
-        data.mVAO.bind();
+        data.mVertices.setData(mesh.mVertices);
 
-        bool dynamic = !mesh.mVertices.mData;
-
-        if (!dynamic) {
-            data.mVertices = {
-                GL_ARRAY_BUFFER,
-                mesh.mVertices
-            };
-        } else {
-            data.mVertices = {
-                GL_ARRAY_BUFFER,
-                mesh.mVertices.mSize
-            };
-        }
+        data.mVertices.bind();
 
         if (mesh.mIndices.empty()) {
             data.mElementCount = mesh.mVertices.mSize / mesh.mVertexSize;
         } else {
-            if (!dynamic) {
-                data.mIndices = {
-                    GL_ELEMENT_ARRAY_BUFFER,
-                    mesh.mIndices
-                };
-            } else {
-                data.mIndices = {
-                    GL_ELEMENT_ARRAY_BUFFER,
-                    mesh.mIndices.size() * sizeof(unsigned short)
-                };
-            }
+            data.mIndices.setData(mesh.mIndices);
+
             data.mElementCount = mesh.mIndices.size();
+            data.mIndices.bind();
         }
 
-        if (!mesh.mTexturePath.empty()) {
-            std::string_view imageName = mesh.mTexturePath.stem();
-            Resources::ImageLoader::HandleType tex;
-            tex.load(imageName);
+        generateMaterials(data, mesh);
 
-            if (tex) {
-                data.mTexture = { GL_UNSIGNED_BYTE };
-                //data.mTexture.setFilter(GL_NEAREST);
-                data.mTexture.setData({ tex->mWidth, tex->mHeight }, { tex->mBuffer, static_cast<size_t>(tex->mWidth * tex->mHeight) });
-                data.mTextureHandle = data.mTexture.mTextureHandle;
-            } else {
-                LOG_ERROR("Failed to find texture '" << imageName << "' for mesh!");
-            }
-        }
-
-        auto attributes = mesh.mAttributeList();
-
-        for (int i = 0; i < attributes.size(); ++i) {
-            data.mVAO.setVertexAttribute(i, attributes[i]);
-        }
-
-        data.mVAO.unbind();
+        data.mVAO = { data.mVertices, data.mIndices, mesh.mAttributeList };
     }
 
     bool OpenGLMeshLoader::generate(GPUMeshData &_data, const MeshData &mesh)

@@ -13,7 +13,7 @@ namespace Render {
         RenderContext(Threading::TaskQueue *queue);
         virtual ~RenderContext();
 
-        virtual std::unique_ptr<RenderTarget> createRenderWindow(Window::OSWindow *w) = 0;
+        virtual std::unique_ptr<RenderTarget> createRenderWindow(Window::OSWindow *w, size_t samples = 1) = 0;
         virtual std::unique_ptr<RenderTarget> createRenderTexture(const Vector2i &size = { 1, 1 }, const RenderTextureConfig &config = {}) = 0;
 
         void addRenderTarget(RenderTarget *target);
@@ -38,6 +38,8 @@ namespace Render {
 
 		static RenderContext &getSingleton();
 
+        size_t frame() const;
+
     protected:
         void checkThread();
         static void queueRenderTask(Threading::TaskHandle &&task);
@@ -49,6 +51,8 @@ namespace Render {
 
         Threading::TaskQueue *mRenderQueue = nullptr;
         std::thread::id mRenderThread;
+
+        size_t mFrame = 1;
     };
 
 }

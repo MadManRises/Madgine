@@ -233,6 +233,14 @@ namespace Window {
             SetWindowTextA((HWND)mHandle, title);
         }
 
+        virtual std::string title() const override
+        {
+            std::string result;
+            result.resize(256);
+            result.resize(GetWindowTextA((HWND)mHandle, result.data(), 256));
+            return result;
+        }
+
         //Input
         virtual bool isKeyDown(Input::Key::Key key) override
         {

@@ -108,6 +108,7 @@ private:
         &sMetaTablePtr,
         "<Lambda>",
         nullptr,
+        nullptr,
         sMembers
     };
 };

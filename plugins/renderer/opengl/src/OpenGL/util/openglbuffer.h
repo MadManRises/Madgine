@@ -1,13 +1,13 @@
 #pragma once
 
+#include "Generic/bytebuffer.h"
+
 namespace Engine {
 namespace Render {
 
     struct MADGINE_OPENGL_EXPORT OpenGLBuffer {
 
-        OpenGLBuffer() = default;
-        OpenGLBuffer(GLenum target, size_t size);
-        OpenGLBuffer(GLenum target, const ByteBuffer &data);
+        OpenGLBuffer(GLenum target, const ByteBuffer &data = {});
         OpenGLBuffer(const OpenGLBuffer &) = delete;
         OpenGLBuffer(OpenGLBuffer &&);
         ~OpenGLBuffer();

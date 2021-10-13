@@ -28,8 +28,7 @@ namespace Resources {
         void resourceAdded(T *res)
         {
             if (mSettings.mAutoLoad) {
-                res->setPersistent(true);
-                res->loadData();
+                res->loadData().info()->setPersistent(true);
             }
         }
 

@@ -16,6 +16,8 @@ namespace Physics {
     struct MADGINE_BULLET_EXPORT RigidBody : Engine::Scene::Entity::EntityComponent<RigidBody> {
         SERIALIZABLEUNIT(RigidBody);
 
+        using Config = Scene::Entity::PersistentComponentConfig;
+
         RigidBody(const ObjectPtr &data = {});
         RigidBody(RigidBody &&other);
         ~RigidBody();
@@ -26,9 +28,10 @@ namespace Physics {
         void finalize(Scene::Entity::Entity *entity);
 
         btRigidBody *get();
+        const btRigidBody *get() const;
         void activate();
 
-        const Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> &transform();
+        Scene::Entity::Transform *transform();
 
         float mass() const;
         void setMass(float mass);
@@ -47,19 +50,22 @@ namespace Physics {
 
         void setVelocity(const Vector3 &v);
 
+        Scene::SceneManager *sceneMgr();
+
         void setShape(typename CollisionShapeManager::HandleType handle);
         void setShapeName(std::string_view name);
         CollisionShapeManager::ResourceType *getShape() const;
         CollisionShapeInstance *getShapeInstance() const;
 
+        void add();
+        void remove();
+
         friend struct PhysicsManager;
 
-    private:
+    protected:
         typename CollisionShapeManager::InstanceHandle mShapeHandle;
-        struct Data;
-        std::unique_ptr<Data> mData;
-
-        static Scene::SceneManager *sceneMgrFromData(Data *data);
+        Scene::Entity::Transform *mTransform = nullptr;
+        Scene::SceneManager *mSceneMgr;
     };
 
     using RigidBodyPtr = Scene::Entity::EntityComponentPtr<RigidBody>;
@@ -68,4 +74,3 @@ namespace Physics {
 }
 
 RegisterType(Engine::Physics::RigidBody);
-RegisterType(Engine::Scene::Entity::EntityComponentList<Engine::Physics::RigidBody>);

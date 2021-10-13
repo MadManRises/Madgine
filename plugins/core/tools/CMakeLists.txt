@@ -4,6 +4,7 @@ Project(Tools)
 
 set(sources "")
 FolderSources(sources "" src toolbase.cpp toolbase.h toolscollector.cpp toolscollector.h)
+	FolderSources(sources src inject controlflow.cpp injectortool.cpp)
 	FolderSources(sources src inspector functiontool.cpp functiontool.h inspector.cpp inspector.h inspectorlayout.cpp inspectorlayout.h layoutloader.cpp layoutloader.h)
 	FolderSources(sources src memory memoryviewer.cpp memoryviewer.h)
 	FolderSources(sources src metrics metrics.cpp metrics.h)

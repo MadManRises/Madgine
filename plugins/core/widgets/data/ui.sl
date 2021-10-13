@@ -1,5 +1,5 @@
 
 
-parameters WidgetsPerObject {
+struct WidgetsPerObject {
 	bool(hasDistanceField);
 };

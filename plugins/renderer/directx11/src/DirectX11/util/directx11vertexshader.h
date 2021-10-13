@@ -20,7 +20,7 @@ namespace Render {
 
         void reset();
 
-        void bind(DirectX11VertexArray *format);
+        void bind(DirectX11VertexArray *format, size_t instanceDataSize);
 
         Resources::ResourceBase *mResource = nullptr;
 

@@ -101,12 +101,12 @@ namespace Resources {
 
         typename Loader::ResourceDataInfo *info() const
         {
-            return Loader::get(*this);
+            return Loader::getInfo(*this);
         }
 
         typename Loader::ResourceType *resource() const
         {
-            typename Loader::ResourceDataInfo *info = Loader::get(*this);
+            typename Loader::ResourceDataInfo *info = Loader::getInfo(*this);
             if (!info)
                 return nullptr;
             return static_cast<typename Loader::ResourceType *>(info->resource());

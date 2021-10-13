@@ -20,7 +20,6 @@ namespace Scene {
         void entityComponentOwningHelperWrite(Serialize::SerializeOutStream &out, const EntityComponentHandle<EntityComponentBase> &index, const char *name, CallerHierarchyBasePtr hierarchy);
         Serialize::StreamResult entityComponentOwningHelperRead(Serialize::SerializeInStream &in, const EntityComponentHandle<EntityComponentBase> &index, const char *name, CallerHierarchyBasePtr hierarchy);
 
-
         template <>
         struct EntityComponentHandle<EntityComponentBase> {
             IndexType<uint32_t> mIndex;
@@ -56,6 +55,12 @@ namespace Scene {
             uint32_t type() const
             {
                 return mType;
+            }
+
+            void relocate(const EntityComponentHandle<EntityComponentBase> &index)
+            {
+                assert(mType == index.mType);
+                mIndex = index.mIndex;
             }
         };
 
@@ -93,6 +98,12 @@ namespace Scene {
             {
                 return mType;
             }
+
+            void relocate(const EntityComponentHandle<EntityComponentBase> &index)
+            {
+                assert(mType == index.mType);
+                mIndex = index.mIndex;
+            }
         };
 
         template <typename T>
@@ -105,7 +116,7 @@ namespace Scene {
                 : mIndex(other.mIndex)
             {
                 assert(!other || component_index<T>() == other.mType);
-            }            
+            }
 
             Serialize::StreamResult readState(Serialize::SerializeInStream &in, const char *name, SceneManager *mgr)
             {
@@ -144,6 +155,12 @@ namespace Scene {
             {
                 return { mIndex, type() };
             }
+
+            void relocate(const EntityComponentHandle<EntityComponentBase> &index)
+            {
+                assert(index.mType == type());
+                mIndex = index.mIndex;
+            }
         };
 
         template <typename T>
@@ -180,6 +197,11 @@ namespace Scene {
             bool operator<(uint32_t type) const
             {
                 return mHandle.type() < type;
+            }
+
+            void relocate(const EntityComponentHandle<EntityComponentBase> &index)
+            {
+                mHandle.relocate(index);
             }
         };
 

@@ -1,19 +1,18 @@
+#include "im3d.sl"
+
 cbuffer PerApplication : register(b0)
 {
-    matrix p;
+    Im3DPerApplication app;
 }
 
 cbuffer PerFrame : register(b1)
 {   
-    matrix v;   
+    Im3DPerFrame frame;
 }
 
 cbuffer PerObject : register(b2)
 {
-    matrix m;
-
-	bool hasTexture;
-	bool hasDistanceField;	
+    Im3DPerObject object;
 }
 
 struct AppData {
@@ -52,9 +51,9 @@ VertexShaderOutput main(AppData IN)
     float2 aPos2 = float2(0,0);
 #endif
 
-	OUT.worldPos = mul(m, float4(IN.aPos, 1.0));
+	OUT.worldPos = mul(object.m, float4(IN.aPos, 1.0));
     
-    OUT.position = mul(p, mul(v, OUT.worldPos) + float4(aPos2, 0.0, 0.0));
+    OUT.position = mul(app.p, mul(frame.v, OUT.worldPos) + float4(aPos2, 0.0, 0.0));
     OUT.position.z += OUT.position.w;
     OUT.position.z /= 2;
     

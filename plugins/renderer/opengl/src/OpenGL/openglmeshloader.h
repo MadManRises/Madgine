@@ -20,7 +20,7 @@ namespace Render {
         virtual void update(GPUMeshData &data, const MeshData &mesh) override;
         virtual void update(GPUMeshData &data, MeshData &&mesh) override;
 
-		virtual void reset(GPUMeshData &data) override;
+        virtual void reset(GPUMeshData &data) override;
     };
 }
 }

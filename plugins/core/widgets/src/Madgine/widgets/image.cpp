@@ -49,7 +49,7 @@ namespace Widgets {
         return mImage;
     }
 
-    std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> Image::vertices(const Vector3 &screenSize)
+    std::vector<std::pair<std::vector<Vertex>, TextureSettings>> Image::vertices(const Vector3 &screenSize)
     {
         std::vector<Vertex> result;
 

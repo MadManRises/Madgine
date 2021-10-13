@@ -16,6 +16,7 @@ struct META_EXPORT Frustum {
     std::array<Vector3, 8> getCorners() const;
     Matrix4 getViewMatrix() const;
     Matrix4 getProjectionMatrix() const;
+    Matrix4 getViewProjectionMatrix() const;
     Ray toRay(const Vector2 &uv) const;
 };
 

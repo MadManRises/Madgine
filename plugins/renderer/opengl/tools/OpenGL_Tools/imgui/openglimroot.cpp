@@ -46,6 +46,7 @@ METATABLE_END(Engine::Tools::OpenGLImRoot)
             Im3D::GetIO().mFetchFont = [](const char *fontName) {
                 Render::FontLoader::HandleType font;
 				font.load(fontName);
+                font.info()->setPersistent(true);
 
                 return Im3DFont {
                     (Im3DTextureId)font->mTexture->mTextureHandle,

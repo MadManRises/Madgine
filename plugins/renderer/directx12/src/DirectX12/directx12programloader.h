@@ -17,8 +17,11 @@ namespace Render {
         bool create(Program &program, const std::string &name) override;
         bool create(Program &program, const std::string &name, const CodeGen::ShaderFile &file) override;
 
-        virtual void setParameters(Program &program, size_t index, size_t size) override;
+        virtual void setParametersSize(Program &program, size_t index, size_t size) override;
         virtual WritableByteBuffer mapParameters(Program &program, size_t index) override;
+
+        virtual void setInstanceDataSize(Program &program, size_t size) override;
+        virtual void setInstanceData(Program &program, const ByteBuffer &data) override;
         
         virtual void setDynamicParameters(Program &program, size_t index, const ByteBuffer &data) override;
     };

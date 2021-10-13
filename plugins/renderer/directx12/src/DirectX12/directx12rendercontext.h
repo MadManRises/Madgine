@@ -27,11 +27,10 @@ namespace Render {
         DirectX12RenderContext(Threading::TaskQueue *queue);
         ~DirectX12RenderContext();
 
-        virtual std::unique_ptr<RenderTarget> createRenderWindow(Window::OSWindow *w) override;
+        virtual std::unique_ptr<RenderTarget> createRenderWindow(Window::OSWindow *w, size_t samples) override;
         virtual std::unique_ptr<RenderTarget> createRenderTexture(const Vector2i &size = { 1, 1 }, const RenderTextureConfig &config = {}) override;
 
         virtual void beginFrame() override;
-        virtual void endFrame() override;
 
         void waitForGPU();
         void waitForFence(uint64_t fenceValue);

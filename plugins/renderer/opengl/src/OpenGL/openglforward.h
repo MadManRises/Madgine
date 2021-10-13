@@ -6,6 +6,9 @@ namespace Render {
     struct OpenGLRenderWindow;
 
     struct OpenGLShader;
+    struct OpenGLBuffer;
+    struct OpenGLProgram;
+    struct OpenGLVertexArray;
 
     struct OpenGLMeshData;
 
@@ -15,7 +18,8 @@ namespace Render {
 
     enum ShaderType {
             VertexShader,
-            PixelShader
+            PixelShader,
+            GeometryShader
         };
 
     constexpr struct create_t {

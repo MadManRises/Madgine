@@ -13,15 +13,14 @@ namespace Render {
 
         void reset()
         {
-            mTexture.reset();
+            mMaterials.clear();
             mVertices.reset();
             mIndices.reset();
             mVAO.reset();
         }
 
-        DirectX11Texture mTexture;
-        DirectX11Buffer mVertices;
-        DirectX11Buffer mIndices;
+        DirectX11Buffer mVertices = D3D11_BIND_VERTEX_BUFFER;
+        DirectX11Buffer mIndices = D3D11_BIND_INDEX_BUFFER;
         size_t mGroupSize;
         size_t mElementCount;
         DirectX11VertexArray mVAO;

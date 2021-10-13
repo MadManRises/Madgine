@@ -2,9 +2,9 @@
 
 #include "directx11programloader.h"
 
-#include "directx11vertexshaderloader.h"
+#include "directx11geometryshaderloader.h"
 #include "directx11pixelshaderloader.h"
-
+#include "directx11vertexshaderloader.h"
 
 #include "util/directx11program.h"
 
@@ -19,8 +19,6 @@ METATABLE_END(Engine::Render::DirectX11ProgramLoader)
 
 METATABLE_BEGIN_BASE(Engine::Render::DirectX11ProgramLoader::ResourceType, Engine::Render::ProgramLoader::ResourceType)
 METATABLE_END(Engine::Render::DirectX11ProgramLoader::ResourceType)
-
-
 
 namespace Engine {
 namespace Render {
@@ -45,43 +43,57 @@ namespace Render {
 
         DirectX11VertexShaderLoader::HandleType vertexShader;
         vertexShader.load(name);
+        DirectX11GeometryShaderLoader::HandleType geometryShader;
+        geometryShader.load(name);
         DirectX11PixelShaderLoader::HandleType pixelShader;
         pixelShader.load(name);
 
-        if (!program.link(vertexShader, pixelShader))
+        if (!program.link(std::move(vertexShader), std::move(pixelShader), std::move(geometryShader)))
             std::terminate();
 
         return true;
     }
 
     bool DirectX11ProgramLoader::create(Program &_program, const std::string &name, const CodeGen::ShaderFile &file)
-    {   
+    {
         assert(file.mInstances.size() == 2);
 
         DirectX11Program &program = static_cast<DirectX11Program &>(_program);
 
         DirectX11VertexShaderLoader::HandleType vertexShader;
         vertexShader.create(name, file);
+        DirectX11GeometryShaderLoader::HandleType geometryShader;
+        geometryShader.create(name, file);
         DirectX11PixelShaderLoader::HandleType pixelShader;
         pixelShader.create(name, file);
 
-        if (!program.link(std::move(vertexShader), std::move(pixelShader)))
+        if (!program.link(std::move(vertexShader), std::move(pixelShader), std::move(geometryShader)))
             std::terminate();
 
         return true;
     }
 
-    void DirectX11ProgramLoader::setParameters(Program &program, size_t index, size_t size)
+    void DirectX11ProgramLoader::setParametersSize(Program &program, size_t index, size_t size)
     {
-        static_cast<DirectX11Program &>(program).setParameters(index, size);
+        static_cast<DirectX11Program &>(program).setParametersSize(index, size);
     }
 
     WritableByteBuffer Engine::Render::DirectX11ProgramLoader::mapParameters(Program &program, size_t index)
     {
-        return static_cast<DirectX11Program&>(program).mapParameters(index);
+        return static_cast<DirectX11Program &>(program).mapParameters(index);
     }
 
-	void DirectX11ProgramLoader::setDynamicParameters(Program &program, size_t index, const ByteBuffer &data)
+    void DirectX11ProgramLoader::setInstanceDataSize(Program &program, size_t size)
+    {
+        static_cast<DirectX11Program &>(program).setInstanceDataSize(size);
+    }
+
+    void DirectX11ProgramLoader::setInstanceData(Program &program, const ByteBuffer &data)
+    {
+        static_cast<DirectX11Program &>(program).setInstanceData(data);
+    }
+
+    void DirectX11ProgramLoader::setDynamicParameters(Program &program, size_t index, const ByteBuffer &data)
     {
         static_cast<DirectX11Program &>(program).setDynamicParameters(index, data);
     }

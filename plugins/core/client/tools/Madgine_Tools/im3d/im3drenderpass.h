@@ -12,7 +12,7 @@ namespace Render {
     struct MADGINE_CLIENT_TOOLS_EXPORT Im3DRenderPass : RenderPass {
         Im3DRenderPass(Camera *camera, int priority);
 
-        virtual void render(RenderTarget *target) override;
+        virtual void render(RenderTarget *target, size_t iteration) override;
 
         virtual int priority() const override;
 

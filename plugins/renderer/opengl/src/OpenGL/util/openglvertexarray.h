@@ -1,6 +1,7 @@
 #pragma once
 
 #include "render/attributedescriptor.h"
+#include "openglvertexarrayobject.h"
 
 namespace Engine {
 namespace Render {
@@ -11,45 +12,25 @@ namespace Render {
         OpenGLVertexArray() = default;
         OpenGLVertexArray(const OpenGLVertexArray &) = delete;
         OpenGLVertexArray(OpenGLVertexArray &&);
-        OpenGLVertexArray(create_t);
+        OpenGLVertexArray(OpenGLBuffer &vertex, OpenGLBuffer &index, std::array<AttributeDescriptor, 7> (*attributes)());
         ~OpenGLVertexArray();
 
         OpenGLVertexArray &operator=(OpenGLVertexArray &&other);
 
 		explicit operator bool() const;
 
-        static unsigned int getCurrent();
+        void reset();        
 
-        void reset();
+        void bind(OpenGLProgram *program, OpenGLBuffer &instanceDataBuffer, size_t instanceDataSize);
+        void unbind(OpenGLProgram *program);
+        
 
-        void bind();
-        void unbind();
-
-#if OPENGL_ES
-        static void onBindVBO(GLuint buffer);
-        static void onBindEBO(GLuint buffer);
-
-        static std::pair<unsigned int, unsigned int> getCurrentBindings();
-#else
-        GLuint handle();
-#endif
-
-        void setVertexAttribute(unsigned int index, AttributeDescriptor attribute);
-
+        uint8_t mFormat = 0;
     private:
-#if !OPENGL_ES
-        GLuint mHandle = 0;
-#else
-        GLuint mVBO = 0;
-        GLuint mEBO = 0;
-
-        struct VertexArrayAttribute {
-            bool mEnabled = false;
-            AttributeDescriptor mAttribute;
-        };
-
-        std::vector<VertexArrayAttribute> mAttributes;
-#endif
+        OpenGLBuffer *mVertexBuffer = nullptr;
+        OpenGLBuffer *mIndexBuffer = nullptr;
+        std::array<AttributeDescriptor, 7> (*mAttributes)();
+        std::map<OpenGLProgram *, OpenGLVertexArrayObject> mInstances;
     };
 
 }

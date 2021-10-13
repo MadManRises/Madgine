@@ -8,6 +8,8 @@
 
 #include "../openglshaderloader.h"
 
+#include "openglvertexarrayobject.h"
+
 namespace Engine {
 namespace Render {
 
@@ -19,14 +21,18 @@ namespace Render {
 
         OpenGLProgram &operator=(OpenGLProgram &&other);
 
-        bool link(typename OpenGLShaderLoader::HandleType vertexShader, typename OpenGLShaderLoader::HandleType pixelShader);
+        bool link(typename OpenGLShaderLoader::HandleType vertexShader, typename OpenGLShaderLoader::HandleType pixelShader, typename OpenGLShaderLoader::HandleType geometryShader = {});
 
         void reset();
 
-        void bind();
+        void bind(OpenGLVertexArray *format);
+        void unbind(OpenGLVertexArray *format);
 
-        void setParameters(size_t index, size_t size);
+        void setParametersSize(size_t index, size_t size);
         WritableByteBuffer mapParameters(size_t index);
+
+        void setInstanceDataSize(size_t size);
+        void setInstanceData(const ByteBuffer &data);
 
         void setDynamicParameters(size_t index, const ByteBuffer &data);
 
@@ -49,6 +55,8 @@ namespace Render {
         std::vector<OpenGLSSBOBuffer> mShaderStorageBuffers;
         OpenGLBuffer mShaderStorageOffsetBuffer = { GL_UNIFORM_BUFFER, 0 };
 #endif
+        size_t mInstanceDataSize = 0;
+        OpenGLBuffer mInstanceBuffer = GL_ARRAY_BUFFER;
     };
 
 }

@@ -20,7 +20,8 @@
 namespace Engine {
 namespace Render {
 
-    void TransitionBarrier(ID3D12Resource *res, D3D12_RESOURCE_STATES from, D3D12_RESOURCE_STATES to) {
+    void TransitionBarrier(ID3D12Resource *res, D3D12_RESOURCE_STATES from, D3D12_RESOURCE_STATES to)
+    {
         D3D12_RESOURCE_BARRIER barrierDesc;
         ZeroMemory(&barrierDesc, sizeof(D3D12_RESOURCE_BARRIER));
 
@@ -36,8 +37,8 @@ namespace Render {
     }
 
     DirectX12RenderWindow::DirectX12RenderWindow(DirectX12RenderContext *context, Window::OSWindow *w)
-        : DirectX12RenderTarget(context)
-        , mWindow(w)        
+        : DirectX12RenderTarget(context, true, w->title())
+        , mWindow(w)
     {
         //context->waitForGPU();
 
@@ -62,7 +63,7 @@ namespace Render {
         hr = context->mFactory->CreateSwapChain(context->mCommandQueue, &swapChainDesc, &swapChain);
         DX12_CHECK(hr);
 
-        hr = swapChain->QueryInterface(&mSwapChain);        
+        hr = swapChain->QueryInterface(&mSwapChain);
         DX12_CHECK(hr);
 
         mTargetViews[0] = context->mRenderTargetDescriptorHeap.allocate();
@@ -89,34 +90,39 @@ namespace Render {
         }
     }
 
-    void DirectX12RenderWindow::beginFrame()
+    void DirectX12RenderWindow::beginIteration(size_t iteration)
     {
         PROFILE();
 
-        mTargetView = mTargetViews[1 - mSwapChain->GetCurrentBackBufferIndex()];
+        mTargetView = mTargetViews[mSwapChain->GetCurrentBackBufferIndex()];
 
-        TransitionBarrier(mBackBuffers[1 - mSwapChain->GetCurrentBackBufferIndex()], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+        TransitionBarrier(mBackBuffers[mSwapChain->GetCurrentBackBufferIndex()], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-        DirectX12RenderTarget::beginFrame();
+        DirectX12RenderTarget::beginIteration(iteration);
     }
 
-    void DirectX12RenderWindow::endFrame()
+    void DirectX12RenderWindow::endIteration(size_t iteration)
     {
-        DirectX12RenderTarget::endFrame();
+        TransitionBarrier(mBackBuffers[mSwapChain->GetCurrentBackBufferIndex()], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
-        TransitionBarrier(mBackBuffers[1 - mSwapChain->GetCurrentBackBufferIndex()], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+        DirectX12RenderTarget::endIteration(iteration);        
 
         mSwapChain->Present(0, 0);
     }
 
-    TextureHandle DirectX12RenderWindow::texture() const
+    TextureDescriptor DirectX12RenderWindow::texture(size_t index, size_t iteration) const
+    {
+        return {};
+    }
+
+    size_t DirectX12RenderWindow::textureCount() const
     {
         return 0;
     }
 
-    TextureHandle DirectX12RenderWindow::depthTexture() const
+    TextureDescriptor DirectX12RenderWindow::depthTexture() const
     {
-        return 0;
+        return {};
     }
 
     Vector2i DirectX12RenderWindow::size() const
@@ -136,12 +142,12 @@ namespace Render {
             mBackBuffers[i]->SetName((L"Window - BackBuffer " + std::to_wstring(i)).c_str());
 
             sDevice->CreateRenderTargetView(mBackBuffers[i], nullptr, DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(mTargetViews[i]));
-            
+
             mBackBuffers[i]->Release();
         }
     }
 
-    bool DirectX12RenderWindow::resize(const Vector2i &size)
+    bool DirectX12RenderWindow::resizeImpl(const Vector2i &size)
     {
         HRESULT hr = mSwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
         DX12_CHECK(hr);

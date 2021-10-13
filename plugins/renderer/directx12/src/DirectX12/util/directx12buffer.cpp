@@ -13,39 +13,30 @@
 namespace Engine {
 namespace Render {
 
-    DirectX12Buffer::DirectX12Buffer(size_t size, bool persistent)
-        : mSize(size)
-        , mPersistent(persistent)
+    DirectX12Buffer::DirectX12Buffer(const ByteBuffer &data)
+        : mSize(data.mSize)
+        , mPersistent(data.mData)
     {
-        if (size > 0) {
+        if (mSize > 0) {
             DirectX12ConstantBufferHeap &heap = DirectX12RenderContext::getSingleton().mConstantBufferHeap;
 
-            size_t actualSize = alignTo(size, 256);
+            size_t actualSize = alignTo(data.mSize, 256);
 
-            mOffset = persistent ? heap.allocatePersistent(actualSize) : heap.allocateTemp(actualSize);
+            mOffset = mPersistent ? heap.allocatePersistent(actualSize) : heap.allocateTemp(actualSize);
 
             D3D12_CONSTANT_BUFFER_VIEW_DESC bufferDesc;
             ZeroMemory(&bufferDesc, sizeof(D3D12_CONSTANT_BUFFER_VIEW_DESC));
 
             bufferDesc.SizeInBytes = actualSize;
-            bufferDesc.BufferLocation = persistent ? heap.addressPersistent(mOffset) : heap.addressTemp(mOffset);
+            bufferDesc.BufferLocation = mPersistent ? heap.addressPersistent(mOffset) : heap.addressTemp(mOffset);
 
             mHandle = heap.descriptorHeap()->allocate();
             sDevice->CreateConstantBufferView(&bufferDesc, heap.descriptorHeap()->cpuHandle(mHandle));
 
             DX12_CHECK();
+
+            setData(data);
         }
-    }
-
-    DirectX12Buffer::DirectX12Buffer(size_t size)
-        : DirectX12Buffer(size, false)
-    {
-    }
-
-    DirectX12Buffer::DirectX12Buffer(const ByteBuffer &data)
-        : DirectX12Buffer(data.mSize, true)
-    {
-        setData(data);
     }
 
     DirectX12Buffer::DirectX12Buffer(DirectX12Buffer &&other)
@@ -83,7 +74,6 @@ namespace Render {
         view.StrideInBytes = stride;
         DirectX12RenderContext::getSingleton().mCommandList.mList->IASetVertexBuffers(0, 1, &view);
         DX12_LOG("Bind Vertex Buffer -> " << mBuffer);
-        DirectX12VertexArray::onBindVBO(this);
     }
 
     void DirectX12Buffer::bindIndex() const
@@ -94,7 +84,6 @@ namespace Render {
         view.Format = DXGI_FORMAT_R16_UINT;
         DirectX12RenderContext::getSingleton().mCommandList.mList->IASetIndexBuffer(&view);
         DX12_LOG("Bind Index Buffer -> " << mBuffer);
-        DirectX12VertexArray::onBindEBO(this);
     }
 
     void DirectX12Buffer::reset()
@@ -118,16 +107,13 @@ namespace Render {
         DirectX12ConstantBufferHeap &heap = DirectX12RenderContext::getSingleton().mConstantBufferHeap;
         if (mSize != data.mSize)
             *this = { data };
-        else {
+        else if (data.mData)
             heap.setData(mOffset, data);
-        }
     }
 
     void DirectX12Buffer::resize(size_t size)
     {
-        if (mSize != size) {
-            *this = { size };
-        }
+        setData({ nullptr, size });
     }
 
     WritableByteBuffer DirectX12Buffer::mapData()

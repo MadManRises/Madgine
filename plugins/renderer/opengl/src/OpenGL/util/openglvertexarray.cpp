@@ -1,5 +1,6 @@
 #include "../opengllib.h"
 
+#include "openglbuffer.h"
 #include "openglvertexarray.h"
 
 namespace Engine {
@@ -21,18 +22,19 @@ namespace Render {
         }
     }
 
-    OpenGLVertexArray::OpenGLVertexArray(create_t)
+    OpenGLVertexArray::OpenGLVertexArray(OpenGLBuffer &vertex, OpenGLBuffer &index, std::array<AttributeDescriptor, 7> (*attributes)())
+        : mAttributes(attributes)
+        , mVertexBuffer(&vertex)
+        , mIndexBuffer(&index)
     {
-#if !OPENGL_ES
-        glGenVertexArrays(1, &mHandle);
-        GL_CHECK();
-#endif
     }
 
     OpenGLVertexArray::OpenGLVertexArray(OpenGLVertexArray &&other)
         :
 #if !OPENGL_ES
-        mHandle(std::exchange(other.mHandle, 0))
+        mAttributes(std::exchange(other.mAttributes, nullptr))
+        , mVertexBuffer(std::exchange(other.mVertexBuffer, nullptr))
+        , mIndexBuffer(std::exchange(other.mIndexBuffer, nullptr))
 #else
         mVBO(std::exchange(other.mVBO, 0))
         , mEBO(std::exchange(other.mEBO, 0))
@@ -49,7 +51,9 @@ namespace Render {
     OpenGLVertexArray &OpenGLVertexArray::operator=(OpenGLVertexArray &&other)
     {
 #if !OPENGL_ES
-        std::swap(mHandle, other.mHandle);
+        std::swap(mAttributes, other.mAttributes);
+        std::swap(mVertexBuffer, other.mVertexBuffer);
+        std::swap(mIndexBuffer, other.mIndexBuffer);
 #else
         if (sCurrentBound == &other)
             sCurrentBound = this;
@@ -63,156 +67,29 @@ namespace Render {
     OpenGLVertexArray::operator bool() const
     {
 #if !OPENGL_ES
-        return mHandle != 0;
+        return mAttributes;
 #else
         return mVBO != 0;
 #endif
     }
 
-    unsigned int OpenGLVertexArray::getCurrent()
-    {
-#if !OPENGL_ES
-        GLint dummy;
-        glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &dummy);
-        return dummy;
-#else
-        return reinterpret_cast<uintptr_t>(sCurrentBound);
-#endif
-    }
-
     void OpenGLVertexArray::reset()
     {
-#if OPENGL_ES
-        if (sCurrentBound == this)
-            sCurrentBound = nullptr;
-        mAttributes.clear();
-        mVBO = 0;
-        mEBO = 0;
-#else
-        if (mHandle) {
-            glDeleteVertexArrays(1, &mHandle);
-            GL_CHECK();
-            mHandle = 0;
-        }
-#endif
+        mAttributes = nullptr;
     }
 
-    void OpenGLVertexArray::bind()
+    void OpenGLVertexArray::bind(OpenGLProgram *program, OpenGLBuffer &instanceDataBuffer, size_t instanceDataSize)
     {
-#if !OPENGL_ES
-        glBindVertexArray(mHandle);
-        GL_CHECK();
-#else
-        assert(sCurrentBound == nullptr);
-        sCurrentBound = this;
-
-        GL_LOG("Bind VAO -> " << mVBO << ", " << mEBO);
-
-        glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
-
-        for (size_t i = 0; i < mAttributes.size(); ++i) {
-            if (mAttributes[i].mEnabled) {
-                if (mAttributes[i].mAttribute.mType == ATTRIBUTE_FLOAT) {
-                    glVertexAttribPointer(i, mAttributes[i].mAttribute.mArraySize, glType(mAttributes[i].mAttribute.mType), GL_FALSE, mAttributes[i].mAttribute.mStride, reinterpret_cast<void *>(mAttributes[i].mAttribute.mOffset));
-                    GL_LOG("Use " << i << " as vec" << mAttributes[i].mAttribute.mArraySize);
-                } else {
-                    glVertexAttribIPointer(i, mAttributes[i].mAttribute.mArraySize, glType(mAttributes[i].mAttribute.mType), mAttributes[i].mAttribute.mStride, reinterpret_cast<void *>(mAttributes[i].mAttribute.mOffset));
-                    GL_LOG("Use " << i << " as ivec" << mAttributes[i].mAttribute.mArraySize);
-                }
-                glEnableVertexAttribArray(i);
-            } else {
-                glDisableVertexAttribArray(i);
-                GL_LOG("Dont use " << i);
-            }
-        }
-        static int maxAttribs = []() {
-            int dummy;
-            glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &dummy);
-            return dummy;
-        }();
-        for (size_t i = mAttributes.size(); i < maxAttribs; ++i) {
-            glDisableVertexAttribArray(i);
-            GL_LOG("Dont use " << i);
-        }
-
-#endif
+        OpenGLVertexArrayObject &instance = mInstances[program];
+        if (!instance)
+            instance = { *mVertexBuffer, *mIndexBuffer, mAttributes(), instanceDataBuffer, instanceDataSize };
+        instance.bind();
     }
 
-    void OpenGLVertexArray::unbind()
+     void OpenGLVertexArray::unbind(OpenGLProgram *program)
     {
-#if !OPENGL_ES
-        glBindVertexArray(0);
-        GL_CHECK();
-#else
-        assert(sCurrentBound == this);
-        sCurrentBound = nullptr;
-#endif
+         mInstances.at(program).unbind();
     }
 
-    void OpenGLVertexArray::setVertexAttribute(unsigned int index, AttributeDescriptor attribute)
-    {
-        if (attribute) {
-
-            if (attribute.mType == ATTRIBUTE_FLOAT) {
-                glVertexAttribPointer(index, attribute.mArraySize, glType(attribute.mType), GL_FALSE, attribute.mStride, reinterpret_cast<void *>(attribute.mOffset));
-            } else {
-                glVertexAttribIPointer(index, attribute.mArraySize, glType(attribute.mType), attribute.mStride, reinterpret_cast<void *>(attribute.mOffset));
-            }
-            glEnableVertexAttribArray(index);
-
-#if OPENGL_ES
-            assert(sCurrentBound == this);
-            if (mAttributes.size() <= index) {
-                if (mAttributes.size() < index)
-                    LOG_WARNING("Non consecutive Vertex Attribute!");
-                mAttributes.resize(index + 1);
-            }
-            mAttributes[index] = { true, attribute };
-#endif
-        } else {
-            glDisableVertexAttribArray(index);
-
-#if OPENGL_ES
-            assert(sCurrentBound == this);
-            if (mAttributes.size() <= index) {
-                if (mAttributes.size() < index)
-                    LOG_WARNING("Non consecutive Vertex Attribute!");
-                mAttributes.resize(index + 1);
-            }
-            mAttributes[index].mEnabled = false;
-#endif
-        }
-    }
-
-#if OPENGL_ES
-    void OpenGLVertexArray::onBindVBO(GLuint buffer)
-    {
-        if (sCurrentBound)
-            sCurrentBound->mVBO = buffer;
-    }
-
-    void OpenGLVertexArray::onBindEBO(GLuint buffer)
-    {
-        if (sCurrentBound)
-            sCurrentBound->mEBO = buffer;
-    }
-
-    std::pair<unsigned int, unsigned int> OpenGLVertexArray::getCurrentBindings()
-    {
-        if (sCurrentBound) {
-            return { sCurrentBound->mVBO, sCurrentBound->mEBO };
-        } else {
-            return { 0, 0 };
-        }
-    }
-
-#else
-
-    GLuint OpenGLVertexArray::handle()
-    {
-        return mHandle;
-    }
-#endif
 }
 }

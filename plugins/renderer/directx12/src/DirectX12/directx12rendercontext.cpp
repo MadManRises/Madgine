@@ -91,6 +91,7 @@ namespace Render {
 
         hr = sDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, mCommandList.mAllocator, nullptr, IID_PPV_ARGS(&mCommandList.mList));
         DX12_CHECK(hr);
+        mCommandList.mList->SetName(L"Main CommandList");
 
         mCommandList.mList->SetDescriptorHeaps(1, &heap);
 
@@ -134,12 +135,8 @@ namespace Render {
 
     void DirectX12RenderContext::beginFrame()
     {
-        mCommandList.mList->SetGraphicsRootSignature(mRootSignature);
-    }
-
-    void DirectX12RenderContext::endFrame()
-    {
-        ExecuteCommandList(mCommandList);
+        mLastCompletedFenceValue = std::max(mLastCompletedFenceValue, mFence->GetCompletedValue());
+        RenderContext::beginFrame();
     }
 
     void DirectX12RenderContext::waitForGPU()
@@ -264,6 +261,7 @@ namespace Render {
                 ID3D12CommandAllocator *alloc = allocator;
                 mAllocatorPool.erase(mAllocatorPool.begin());
                 HRESULT hr = alloc->Reset();
+                DX12_CHECK(hr);
                 return alloc;
             }
         }
@@ -274,7 +272,7 @@ namespace Render {
         return alloc;
     }
 
-    std::unique_ptr<RenderTarget> DirectX12RenderContext::createRenderWindow(Window::OSWindow *w)
+    std::unique_ptr<RenderTarget> DirectX12RenderContext::createRenderWindow(Window::OSWindow *w, size_t samples)
     {
         checkThread();
 

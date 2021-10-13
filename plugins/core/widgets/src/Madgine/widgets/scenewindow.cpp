@@ -31,14 +31,14 @@ namespace Widgets {
     SceneWindow::SceneWindow(const std::string &name, WidgetManager &manager, WidgetBase *parent)
         : Widget(name, manager, parent)
     {
-        mTarget = manager.window().getRenderer()->createRenderTexture();
+        mTarget = manager.window().getRenderer()->createRenderTexture({ 1, 1 }, { .mSamples = 1 });
     }
 
     SceneWindow::~SceneWindow()
     {
     }
 
-    std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> SceneWindow::vertices(const Vector3 &screenSize)
+    std::vector<std::pair<std::vector<Vertex>, TextureSettings>> SceneWindow::vertices(const Vector3 &screenSize)
     {
         std::vector<Vertex> result;
 
@@ -46,8 +46,6 @@ namespace Widgets {
         Vector3 size = (getAbsoluteSize() * screenSize) / screenSize;
 
         Vector4 color { 1, 1, 1, 1 };
-
-        Render::TextureHandle tex = mTarget ? mTarget->texture() : 0;
 
         Vector3 v = pos;
         v.z = static_cast<float>(depth());
@@ -61,7 +59,7 @@ namespace Widgets {
         result.push_back({ v, color, { 0, 1 } });
         v.y -= size.y;
         result.push_back({ v, color, { 0, 0 } });
-        return { { result, { tex } } };
+        return { { result, { mTarget->texture() } } };
     }
 
     Render::RenderTarget *SceneWindow::getRenderTarget()
@@ -77,6 +75,10 @@ namespace Widgets {
     WidgetClass SceneWindow::getClass() const
     {
         return WidgetClass::SCENEWINDOW_CLASS;
+    }
+
+    void SceneWindow::preRender() {
+        mTarget->render();
     }
 
 }

@@ -13,6 +13,8 @@
 
 #include "Madgine/render/shadinglanguage/sl.h"
 
+#include "render/texturedescriptor.h"
+
 #define SL_SHADER im3d
 #include INCLUDE_SL_SHADER
 
@@ -24,14 +26,16 @@ namespace Render {
         , mPriority(priority)
     {
         mProgram.create("im3d");
-        
-        mProgram.setParameters(0, sizeof(Im3DPerApplication));
-        mProgram.setParameters(1, sizeof(Im3DPerFrame));
-        mProgram.setParameters(2, sizeof(Im3DPerObject));
+
+        mProgram.setParametersSize(0, sizeof(Im3DPerApplication));
+        mProgram.setParametersSize(1, sizeof(Im3DPerFrame));
+        mProgram.setParametersSize(2, sizeof(Im3DPerObject));
     }
 
-    void Im3DRenderPass::render(RenderTarget *target)
+    void Im3DRenderPass::render(RenderTarget *target, size_t iteration)
     {
+        target->pushAnnotation("Im3D");
+
         Im3D::Im3DContext *context = Im3D::GetCurrentContext();
 
         target->clearDepthBuffer();
@@ -57,7 +61,7 @@ namespace Render {
 
         for (std::pair<const Im3DTextureId, Im3D::Im3DContext::RenderData> &p : context->mRenderData) {
 
-            target->bindTextures({ p.first });
+            target->bindTextures({ { p.first, Render::TextureType_2D } });
 
             {
                 auto perObject = mProgram.mapParameters(2).cast<Im3DPerObject>();
@@ -68,13 +72,17 @@ namespace Render {
 
                 perObject->hasTexture = p.first != 0;
                 perObject->hasDistanceField = bool(p.second.mFlags & RenderPassFlags_DistanceField);
-            }           
+            }
 
             for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
                 target->renderVertices(mProgram, i + 1, p.second.mVertices[i], p.second.mIndices[i]);
-                target->renderVertices(mProgram, i + 1, p.second.mVertices2[i], p.second.mIndices2[i], p.first);
+                GPUMeshData::Material mat;
+                mat.mDiffuseHandle = p.first;
+                target->renderVertices(mProgram, i + 1, p.second.mVertices2[i], p.second.mIndices2[i], &mat);
             }
         }
+
+        target->popAnnotation();
     }
 
     int Im3DRenderPass::priority() const

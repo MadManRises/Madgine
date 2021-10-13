@@ -32,52 +32,22 @@ namespace Render {
     {
         data.mGroupSize = mesh.mGroupSize;
 
-        data.mVAO = { mesh.mAttributeList() };
-        data.mVAO.bind();
+        data.mVertices.setData(mesh.mVertices);
 
-        bool dynamic = !mesh.mVertices.mData;
-
-        if (!dynamic) {
-            data.mVertices = {
-                D3D11_BIND_VERTEX_BUFFER,
-                mesh.mVertices
-            };
-        } else {
-            data.mVertices = {
-                D3D11_BIND_VERTEX_BUFFER,
-                mesh.mVertices.mSize
-            };
-        }
         data.mVertices.bindVertex(data.mVAO.mStride);
 
         if (mesh.mIndices.empty()) {
             data.mElementCount = mesh.mVertices.mSize / mesh.mVertexSize;
         } else {
-            if (!dynamic) {
-                data.mIndices = {
-                    D3D11_BIND_INDEX_BUFFER,                    
-                    mesh.mIndices
-                };
-            } else {
-                data.mIndices = {
-                    D3D11_BIND_INDEX_BUFFER,                    
-                    mesh.mIndices.size() * sizeof(unsigned short)
-                };
-            }
+            data.mIndices.setData(mesh.mIndices);
+
             data.mIndices.bindIndex();
             data.mElementCount = mesh.mIndices.size();
         }
 
-        if (!mesh.mTexturePath.empty()) {
-            std::string_view imageName = mesh.mTexturePath.stem();
-            Resources::ImageLoader::HandleType tex;
-            tex.load(imageName);
+        generateMaterials(data, mesh);
 
-            data.mTexture = { Texture2D, FORMAT_FLOAT8, D3D11_BIND_SHADER_RESOURCE, static_cast<size_t>(tex->mWidth), static_cast<size_t>(tex->mHeight), { tex->mBuffer, static_cast<size_t>(tex->mWidth * tex->mHeight) } };
-            data.mTextureHandle = data.mTexture.mTextureHandle;
-        }
-
-        data.mVAO.unbind();
+        data.mVAO = { data.mVertices, data.mIndices, mesh.mAttributeList };
     }
 
     bool DirectX11MeshLoader::generate(GPUMeshData &_data, const MeshData &mesh)
@@ -146,6 +116,5 @@ namespace Render {
     {
         static_cast<DirectX11MeshData &>(data).reset();
     }
-
 }
 }

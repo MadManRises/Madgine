@@ -18,8 +18,6 @@ METATABLE_BEGIN_BASE(Engine::Render::OpenGLProgramLoader::ResourceType, Engine::
 READONLY_PROPERTY(Data, dataPtr)
 METATABLE_END(Engine::Render::OpenGLProgramLoader::ResourceType)
 
-
-
 namespace Engine {
 namespace Render {
 
@@ -46,22 +44,17 @@ namespace Render {
         if (!vertexShader) {
             LOG_ERROR("Failed to load VS '" << name << "'!");
         }
-        
+
         OpenGLShaderLoader::HandleType pixelShader;
         pixelShader.load(name, PixelShader);
-        if (!pixelShader) {
-            LOG_ERROR("Failed to load PS '" << name << "'!");
-        }
-        
-        if (!vertexShader || !pixelShader) {
-            LOG_ERROR("Failed to load Program '" << name << "'!");
-            std::terminate();
-        }
 
-        if (!program.link(vertexShader, pixelShader)) {
+        OpenGLShaderLoader::HandleType geometryShader;
+        geometryShader.load(name, GeometryShader);
+
+        if (!program.link(vertexShader, pixelShader, geometryShader)) {
             LOG_ERROR("Failed to link Program '" << name << "'!");
             std::terminate();
-        }        
+        }
 
         return true;
     }
@@ -83,14 +76,24 @@ namespace Render {
         return true;
     }
 
-    void OpenGLProgramLoader::setParameters(Program &program, size_t index, size_t size)
+    void OpenGLProgramLoader::setParametersSize(Program &program, size_t index, size_t size)
     {
-        static_cast<OpenGLProgram &>(program).setParameters(index, size);
+        static_cast<OpenGLProgram &>(program).setParametersSize(index, size);
     }
 
     WritableByteBuffer OpenGLProgramLoader::mapParameters(Program &program, size_t index)
     {
         return static_cast<OpenGLProgram &>(program).mapParameters(index);
+    }
+
+    void OpenGLProgramLoader::setInstanceDataSize(Program &program, size_t size)
+    {
+        static_cast<OpenGLProgram &>(program).setInstanceDataSize(size);
+    }
+
+    void OpenGLProgramLoader::setInstanceData(Program &program, const ByteBuffer &data)
+    {
+        static_cast<OpenGLProgram &>(program).setInstanceData(data);
     }
 
     void OpenGLProgramLoader::setDynamicParameters(Program &program, size_t index, const ByteBuffer &data)

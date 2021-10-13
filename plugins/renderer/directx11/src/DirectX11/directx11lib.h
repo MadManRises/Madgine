@@ -18,6 +18,7 @@
 #define NOMINMAX
 
 #include <d3d11.h>
+#include <d3d11_1.h>
 #include <d3dcompiler.h>
 
 MADGINE_DIRECTX11_EXPORT void dx11Dump();
@@ -33,7 +34,8 @@ inline void dx11Check(HRESULT result)
 
 #define DX11_CHECK(result) dx11Check(result)
 
-//#define DX11_LOG(x) LOG("DX11: " << x)
-#define DX11_LOG(x)
+#define DX11_LOG(x) LOG_DEBUG("DX11: " << x)
+
+#include <span>
 
 /// @endcond

@@ -26,8 +26,11 @@ namespace Render {
             void create(const std::string &name, CodeGen::ShaderFile &&file, ProgramLoader *loader = nullptr);
             void createUnnamed(CodeGen::ShaderFile &&file, ProgramLoader *loader = nullptr);
 
-            void setParameters(size_t index, size_t size, ProgramLoader *loader = nullptr);
+            void setParametersSize(size_t index, size_t size, ProgramLoader *loader = nullptr);
             WritableByteBuffer mapParameters(size_t index, ProgramLoader *loader = nullptr);
+
+            void setInstanceDataSize(size_t size, ProgramLoader *loader = nullptr);
+            void setInstanceData(const ByteBuffer &data, ProgramLoader *loader = nullptr);
 
 			void setDynamicParameters(size_t index, const ByteBuffer &data, ProgramLoader *loader = nullptr);
         };
@@ -37,8 +40,11 @@ namespace Render {
         virtual bool create(Program &program, const std::string &name) = 0;
         virtual bool create(Program &program, const std::string &name, const CodeGen::ShaderFile &file) = 0;
 
-        virtual void setParameters(Program &program, size_t index, size_t size) = 0;
+        virtual void setParametersSize(Program &program, size_t index, size_t size) = 0;
         virtual WritableByteBuffer mapParameters(Program &program, size_t index) = 0;
+
+        virtual void setInstanceDataSize(Program &program, size_t size) = 0;        
+        virtual void setInstanceData(Program &program, const ByteBuffer &data) = 0;
 
 		virtual void setDynamicParameters(Program &program, size_t index, const ByteBuffer &data) = 0;
     };

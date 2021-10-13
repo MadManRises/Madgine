@@ -26,6 +26,7 @@ namespace Render {
             nullptr,
             IID_PPV_ARGS(&mPersistentHeap));
         DX12_CHECK(hr);
+        mPersistentHeap->SetName(L"Persistent Heap");
 
         hr = sDevice->CreateCommittedResource(
             &tempHeapProperties,
@@ -35,6 +36,7 @@ namespace Render {
             nullptr,
             IID_PPV_ARGS(&mTempHeap));
         DX12_CHECK(hr);
+        mTempHeap->SetName(L"Temp Heap");
     }
 
     DirectX12ConstantBufferHeap::~DirectX12ConstantBufferHeap()
@@ -152,7 +154,12 @@ namespace Render {
 
         uploadHeap->Unmap(0, nullptr);
 
+        auto transition = CD3DX12_RESOURCE_BARRIER::Transition(mPersistentHeap, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_COPY_DEST);
+        DirectX12RenderContext::getSingleton().mTempCommandList.mList->ResourceBarrier(1, &transition);
         DirectX12RenderContext::getSingleton().mTempCommandList.mList->CopyBufferRegion(mPersistentHeap, offset.offset(), uploadHeap, 0, data.mSize);
+        
+        auto transition2 = CD3DX12_RESOURCE_BARRIER::Transition(mPersistentHeap, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
+        DirectX12RenderContext::getSingleton().mTempCommandList.mList->ResourceBarrier(1, &transition2);
 
         DirectX12RenderContext::getSingleton().ExecuteCommandList(DirectX12RenderContext::getSingleton().mTempCommandList, [uploadHeap]() {
             uploadHeap->Release();

@@ -32,7 +32,7 @@ namespace Client {
 
         struct NodeRenderPass : Render::RenderPass {
 
-            virtual void render(Render::RenderTarget *target) override;
+            virtual void render(Render::RenderTarget *target, size_t iteration) override;
 
             virtual int priority() const override;
 

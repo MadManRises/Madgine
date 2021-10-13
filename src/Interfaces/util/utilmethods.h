@@ -2,6 +2,8 @@
 
 #include "messagetype.h"
 
+#define ENABLE_DEBUG_LOGGING 0
+
 namespace Engine {
 namespace Util {
 
@@ -24,7 +26,11 @@ namespace Util {
         MessageType mLvl;
     };
 
-#define LOG_DEBUG(s) Engine::Util::LogDummy { Engine::Util::MessageType::DEBUG_TYPE } << s
+#if ENABLE_DEBUG_LOGGING
+#    define LOG_DEBUG(s) Engine::Util::LogDummy { Engine::Util::MessageType::DEBUG_TYPE } << s
+#else
+#    define LOG_DEBUG(s)
+#endif
 #define LOG(s) Engine::Util::LogDummy { Engine::Util::MessageType::LOG_TYPE } << s
 #define LOG_WARNING(s) Engine::Util::LogDummy { Engine::Util::MessageType::WARNING_TYPE } << s
 #define LOG_ERROR(s) Engine::Util::LogDummy { Engine::Util::MessageType::ERROR_TYPE } << s

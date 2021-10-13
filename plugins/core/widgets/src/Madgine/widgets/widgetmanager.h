@@ -66,7 +66,8 @@ namespace Widgets {
         virtual bool injectAxisEvent(const Input::AxisEventArgs &arg) override;
 
         virtual void onResize(const Rect2i &space) override;
-        virtual void render(Render::RenderTarget *target) override;
+        virtual void render(Render::RenderTarget *target, size_t iteration) override;
+        virtual void preRender() override;
 
 		virtual int priority() const override;
 

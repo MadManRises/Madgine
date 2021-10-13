@@ -56,12 +56,17 @@ namespace Resources {
         {
             uint32_t oldCount = mRefCount--;
             assert(oldCount > 0);
-            return oldCount > 1;
+            return oldCount > 1 || mPersistent;
+        }
+
+        void setPersistent(bool b) {
+            mPersistent = b;
         }
 
     private:
         typename Interface::ResourceType *mResource;
         std::atomic<uint32_t> mRefCount = 0;
+        bool mPersistent = false;
     };
 
     template <typename Interface>
@@ -133,6 +138,11 @@ namespace Resources {
             HandleType loadData()
             {
                 return T::load(this);
+            }
+
+            Data *dataPtr()
+            {
+                return T::getDataPtr(loadData());
             }
 
             using traits = container_traits<DataContainer>;
@@ -226,7 +236,7 @@ namespace Resources {
                 return nullptr;
         }
 
-        static ResourceDataInfo *get(const HandleType &handle, T *loader = nullptr)
+        static ResourceDataInfo *getInfo(const HandleType &handle, T *loader = nullptr)
         {
             if (!handle)
                 return nullptr;
@@ -280,7 +290,7 @@ namespace Resources {
                 if (!loader)
                     loader = &getSingleton();
                 handle = create(resource, event, loader);
-                resource->mCtor(loader, *getDataPtr(handle, loader), *get(handle, loader), event);
+                resource->mCtor(loader, *getDataPtr(handle, loader), *getInfo(handle, loader), event);
             }
 
             return handle;
@@ -293,7 +303,7 @@ namespace Resources {
                 if (!loader)
                     loader = &getSingleton();
                 ResourceType *resource = handle.resource();
-                resource->mDtor(loader, *getDataPtr(handle, loader), *get(handle, loader));
+                resource->mDtor(loader, *getDataPtr(handle, loader), *getInfo(handle, loader));
 
                 typename container_traits<DataContainer>::iterator it = container_traits<DataContainer>::toIterator(*loader->mData, *resource->mHolder);
                 loader->mData->erase(it);
@@ -453,14 +463,14 @@ namespace Resources {
             }
         }
 
-        static typename Base::ResourceDataInfo *get(const typename Base::HandleType &handle, T *loader = nullptr)
+        static typename Base::ResourceDataInfo *getInfo(const typename Base::HandleType &handle, T *loader = nullptr)
         {
             if (!handle)
                 return nullptr;
             if constexpr (container_traits<typename Base::DataContainer>::has_dependent_handle) {
                 if (!loader)
                     loader = &Base::getSingleton();
-                return loader->getVImpl(handle);
+                return loader->getInfoVImpl(handle);
             } else {
                 return &handle.mData->mInfo;
             }
@@ -478,7 +488,7 @@ namespace Resources {
         virtual typename Base::HandleType loadVImpl(typename Base::ResourceType *resource) = 0;
         virtual void unloadVImpl(const typename Base::HandleType &handle) = 0;
         virtual typename Base::Data *getDataPtrVImpl(const typename Base::HandleType &handle) = 0;
-        virtual typename Base::ResourceDataInfo *getVImpl(const typename Base::HandleType &handle) = 0;
+        virtual typename Base::ResourceDataInfo *getInfoVImpl(const typename Base::HandleType &handle) = 0;
     };
 
     template <typename T, typename _Data, typename _Base>
@@ -511,9 +521,9 @@ namespace Resources {
         {
             return Self::getDataPtr(handle, static_cast<T *>(this));
         }
-        virtual typename Base::ResourceDataInfo *getVImpl(const typename Base::OriginalHandleType &handle) override
+        virtual typename Base::ResourceDataInfo *getInfoVImpl(const typename Base::OriginalHandleType &handle) override
         {
-            return Self::get(handle, static_cast<T *>(this));
+            return Self::getInfo(handle, static_cast<T *>(this));
         }
     };
 }

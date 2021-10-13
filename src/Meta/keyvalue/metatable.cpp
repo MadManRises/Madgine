@@ -36,7 +36,8 @@ bool MetaTable::isDerivedFrom(const MetaTable *baseType, size_t *offset) const
 {
     if (this == baseType)
         return true;
-    assert(!offset);
+    if (offset)
+        *offset += mBaseOffset();
     return mBase && (*mBase)->isDerivedFrom(baseType);
 }
 

@@ -11,6 +11,13 @@ namespace Render {
 
     struct MeshData {
 
+        struct Material {
+            std::string mName;
+            std::string mDiffuseName;
+            std::string mEmissiveName;
+            Vector4 mDiffuseColor = Vector4::UNIT_SCALE;
+        };
+
         template <typename VertexType>
         static AABB calculateAABB(const std::vector<VertexType> &vertices)
         {
@@ -56,16 +63,18 @@ namespace Render {
         MeshData() = default;
 
         template <typename VertexType>
-        MeshData(size_t groupSize, std::vector<VertexType> vertices, std::vector<unsigned short> indices = {}, Filesystem::Path texturePath = {})
+        MeshData(size_t groupSize, std::vector<VertexType> vertices, std::vector<unsigned short> indices = {}, std::vector<Material> materials = {})
             : mAttributeList(generateAttributeList<VertexType>)
             , mAABB(calculateAABB(vertices))
             , mGroupSize(groupSize)
             , mVertices(std::move(vertices))
             , mVertexSize(sizeof(VertexType))
             , mIndices(std::move(indices))
-            , mTexturePath(std::move(texturePath))
+            , mMaterials(std::move(materials))
         {
         }
+
+
 
         std::array<Render::AttributeDescriptor, 7> (*mAttributeList)();
         AABB mAABB;
@@ -73,7 +82,7 @@ namespace Render {
         ByteBuffer mVertices;
         size_t mVertexSize;
         std::vector<unsigned short> mIndices;
-        Filesystem::Path mTexturePath;
+        std::vector<Material> mMaterials;
     };
 
 }

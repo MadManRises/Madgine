@@ -20,8 +20,8 @@
 namespace Engine {
 namespace Render {
 
-    DirectX11RenderTarget::DirectX11RenderTarget(DirectX11RenderContext *context)
-        : RenderTarget(context)
+    DirectX11RenderTarget::DirectX11RenderTarget(DirectX11RenderContext *context, bool global, std::string name, size_t iterations)
+        : RenderTarget(context, global, name, iterations)
     {
     }
 
@@ -29,39 +29,14 @@ namespace Render {
     {
     }
 
-    void DirectX11RenderTarget::setup(ID3D11RenderTargetView *targetView, const Vector2i &size, const RenderTextureConfig &config)
+    void DirectX11RenderTarget::setup(std::vector<ID3D11RenderTargetView *> targetViews, const Vector2i &size, TextureType type, size_t samples)
     {
-        if (mTargetView) {
-            mTargetView->Release();
-            mTargetView = nullptr;
+        for (ID3D11RenderTargetView *view : mTargetViews) {
+            view->Release();
         }
+        mTargetViews = std::move(targetViews);        
 
-        mTargetView = targetView;
-
-        // Create the depth buffer for use with the depth/stencil view.
-        D3D11_TEXTURE2D_DESC depthStencilBufferDesc;
-        ZeroMemory(&depthStencilBufferDesc, sizeof(D3D11_TEXTURE2D_DESC));
-
-        depthStencilBufferDesc.ArraySize = 1;
-        depthStencilBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-        if (config.mCreateDepthBufferView)
-            depthStencilBufferDesc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
-        depthStencilBufferDesc.CPUAccessFlags = 0; // No CPU access required.
-        depthStencilBufferDesc.Format = DXGI_FORMAT_R32_TYPELESS;
-        depthStencilBufferDesc.Width = size.x;
-        depthStencilBufferDesc.Height = size.y;
-        depthStencilBufferDesc.MipLevels = 1;
-        depthStencilBufferDesc.SampleDesc.Count = 1;
-        depthStencilBufferDesc.SampleDesc.Quality = 0;
-        depthStencilBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-
-        if (mDepthStencilBuffer) {
-            mDepthStencilBuffer->Release();
-            mDepthStencilBuffer = nullptr;
-        }
-
-        HRESULT hr = sDevice->CreateTexture2D(&depthStencilBufferDesc, nullptr, &mDepthStencilBuffer);
-        DX11_CHECK(hr);
+        mDepthBuffer = { type, FORMAT_D32, D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE, static_cast<size_t>(size.x), static_cast<size_t>(size.y), samples };
 
         if (mDepthStencilView) {
             mDepthStencilView->Release();
@@ -72,9 +47,24 @@ namespace Render {
         ZeroMemory(&dsvDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
         dsvDesc.Flags = 0;
         dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
-        dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+        switch (type) {
+        case TextureType_2D:
+            dsvDesc.ViewDimension = samples ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D;
+            LOG_ONCE("Fix this!");
+            break;
+        case TextureType_2DMultiSample:
+            dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
+            break;
+        case TextureType_Cube:
+            dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+            dsvDesc.Texture2DArray.ArraySize = 6;
+            dsvDesc.Texture2DArray.FirstArraySlice = 0;
+            break;
+        default:
+            throw 0;
+        }
 
-        hr = sDevice->CreateDepthStencilView(mDepthStencilBuffer, &dsvDesc, &mDepthStencilView);
+        HRESULT hr = sDevice->CreateDepthStencilView(mDepthBuffer.resource(), &dsvDesc, &mDepthStencilView);
         DX11_CHECK(hr);
 
         if (!mDepthStencilState) {
@@ -148,7 +138,7 @@ namespace Render {
             samplerDesc.BorderColor[3] = 0;
             samplerDesc.MinLOD = 0;
             samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-            
+
             hr = sDevice->CreateSamplerState(&samplerDesc, mSamplers + 0);
             DX11_CHECK(hr);
 
@@ -157,7 +147,7 @@ namespace Render {
             samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 
             hr = sDevice->CreateSamplerState(&samplerDesc, mSamplers + 1);
-            DX11_CHECK(hr);            
+            DX11_CHECK(hr);
         }
     }
 
@@ -190,23 +180,19 @@ namespace Render {
             mDepthStencilView = nullptr;
         }
 
-        if (mDepthStencilBuffer) {
-            mDepthStencilBuffer->Release();
-            mDepthStencilBuffer = nullptr;
+        for (ID3D11RenderTargetView *view : mTargetViews) {
+            view->Release();
         }
-
-        if (mTargetView) {
-            mTargetView->Release();
-            mTargetView = nullptr;
-        }
+        mTargetViews.clear();
     }
 
-    void DirectX11RenderTarget::beginFrame()
+    void DirectX11RenderTarget::beginIteration(size_t iteration)
     {
+        RenderTarget::beginIteration(iteration);
 
         const Vector2i &screenSize = size();
 
-        sDeviceContext->RSSetState(mRasterizerState);        
+        sDeviceContext->RSSetState(mRasterizerState);
 
         D3D11_VIEWPORT viewport;
         viewport.Width = static_cast<float>(screenSize.x);
@@ -219,16 +205,40 @@ namespace Render {
 
         constexpr FLOAT color[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
 
-        sDeviceContext->OMSetRenderTargets(1, &mTargetView, mDepthStencilView);
+        int bufferCount = iterations() > 1 ? 2 : 1;
+        int offset = iterations() > 1 ? iteration % 2 : 0;
+        size_t size = mTargetViews.size() / bufferCount;
+        sDeviceContext->OMSetRenderTargets(size, mTargetViews.data() + size * offset, mDepthStencilView);
         sDeviceContext->OMSetDepthStencilState(mDepthStencilState, 1);
         sDeviceContext->OMSetBlendState(mBlendState, 0, 0xffffffff);
 
-        sDeviceContext->ClearRenderTargetView(mTargetView, color);
+        for (ID3D11RenderTargetView *view : std::span { mTargetViews.begin() + size * offset, size })
+            sDeviceContext->ClearRenderTargetView(view, color);
         sDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
         sDeviceContext->PSSetSamplers(0, 2, mSamplers);
 
-        RenderTarget::beginFrame();
+        LOG_DEBUG("Begin Iteration");
+    }
+
+    void DirectX11RenderTarget::endIteration(size_t iteration)
+    {
+        LOG_DEBUG("End Iteration");
+        sDeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+        ID3D11ShaderResourceView *nullSRV[5] = { nullptr, nullptr, nullptr, nullptr };
+        sDeviceContext->PSSetShaderResources(0, 5, nullSRV);
+
+        RenderTarget::endIteration(iteration);
+    }
+
+    void DirectX11RenderTarget::pushAnnotation(const char *tag)
+    {
+        sAnnotator->BeginEvent(StringUtil::toWString(tag).c_str());
+    }
+
+    void DirectX11RenderTarget::popAnnotation()
+    {
+        sAnnotator->EndEvent();
     }
 
     void DirectX11RenderTarget::setRenderSpace(const Rect2i &space)
@@ -243,7 +253,7 @@ namespace Render {
         sDeviceContext->RSSetViewports(1, &viewport);
     }
 
-    void DirectX11RenderTarget::renderMesh(GPUMeshData *m, Program *p)
+    void DirectX11RenderTarget::renderMesh(GPUMeshData *m, Program *p, const GPUMeshData::Material *material)
     {
         DirectX11MeshData *mesh = static_cast<DirectX11MeshData *>(m);
         DirectX11Program *program = static_cast<DirectX11Program *>(p);
@@ -251,7 +261,10 @@ namespace Render {
         if (!mesh->mVAO)
             return;
 
-        mesh->mVAO.bind(program);
+        program->bind(&mesh->mVAO);
+
+        if (material)
+            bindTextures({ { material->mDiffuseHandle, TextureType_2D }, { material->mEmissiveHandle, TextureType_2D } });
 
         constexpr D3D11_PRIMITIVE_TOPOLOGY modes[] {
             D3D11_PRIMITIVE_TOPOLOGY_POINTLIST,
@@ -267,8 +280,38 @@ namespace Render {
             sDeviceContext->DrawIndexed(mesh->mElementCount, 0, 0);
         } else {
             sDeviceContext->Draw(mesh->mElementCount, 0);
+        }      
+    }
+
+    void DirectX11RenderTarget::renderMeshInstanced(size_t count, GPUMeshData *m, Program *p, const GPUMeshData::Material *material)
+    {
+        DirectX11MeshData *mesh = static_cast<DirectX11MeshData *>(m);
+        DirectX11Program *program = static_cast<DirectX11Program *>(p);
+
+        if (!mesh->mVAO)
+            return;
+
+        mesh->mVAO.bind();
+        program->bind(&mesh->mVAO);
+
+        if (material)
+            bindTextures({ { material->mDiffuseHandle, TextureType_2D }, { material->mEmissiveHandle, TextureType_2D } });
+
+        constexpr D3D11_PRIMITIVE_TOPOLOGY modes[] {
+            D3D11_PRIMITIVE_TOPOLOGY_POINTLIST,
+            D3D11_PRIMITIVE_TOPOLOGY_LINELIST,
+            D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
+        };
+
+        assert(mesh->mGroupSize > 0 && mesh->mGroupSize <= 3);
+        D3D11_PRIMITIVE_TOPOLOGY mode = modes[mesh->mGroupSize - 1];
+        sDeviceContext->IASetPrimitiveTopology(mode);
+
+        if (mesh->mIndices) {
+            sDeviceContext->DrawIndexedInstanced(mesh->mElementCount, count, 0, 0, 0);
+        } else {
+            sDeviceContext->DrawInstanced(mesh->mElementCount, count, 0, 0);
         }
-        mesh->mVAO.unbind();
     }
 
     void DirectX11RenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices)
@@ -283,15 +326,13 @@ namespace Render {
         }
     }
 
-    void DirectX11RenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, TextureHandle texture)
+    void DirectX11RenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, const GPUMeshData::Material *material)
     {
         if (!vertices.empty()) {
             DirectX11MeshData tempMesh;
             DirectX11MeshLoader::getSingleton().generate(tempMesh, { groupSize, std::move(vertices), std::move(indices) });
 
-            tempMesh.mTextureHandle = texture;
-
-            renderMesh(&tempMesh, program);
+            renderMesh(&tempMesh, program, material);
         }
     }
 
@@ -300,9 +341,14 @@ namespace Render {
         sDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
     }
 
-    void DirectX11RenderTarget::bindTextures(const std::vector<TextureHandle> &tex)
+    void DirectX11RenderTarget::bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset)
     {
-        sDeviceContext->PSSetShaderResources(0, tex.size(), reinterpret_cast<ID3D11ShaderResourceView *const *>(tex.data()));
+        LOG_DEBUG("Texture Bind");
+        std::vector<ID3D11ShaderResourceView *> handles;
+        std::transform(tex.begin(), tex.end(), std::back_inserter(handles), [](const TextureDescriptor &desc) {
+            return reinterpret_cast<ID3D11ShaderResourceView*>(desc.mTextureHandle);
+        });
+        sDeviceContext->PSSetShaderResources(offset, tex.size(), handles.data());
     }
 
 }

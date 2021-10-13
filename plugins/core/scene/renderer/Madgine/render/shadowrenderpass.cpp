@@ -4,7 +4,6 @@
 
 #include "Madgine/scene/scenemanager.h"
 
-#include "Madgine/scene/entity/components/animation.h"
 #include "Madgine/scene/entity/components/mesh.h"
 #include "Madgine/scene/entity/components/skeleton.h"
 #include "Madgine/scene/entity/components/transform.h"
@@ -36,13 +35,15 @@ namespace Render {
     {
     }
 
-    void ShadowRenderPass::setup(Render::RenderContext *context)
+    void ShadowRenderPass::setup(RenderTarget *target)
     {
         mProgram.create("scene");
 
-        mProgram.setParameters(0, sizeof(ScenePerApplication));
-        mProgram.setParameters(1, sizeof(ScenePerFrame));
-        mProgram.setParameters(2, sizeof(ScenePerObject));
+        mProgram.setParametersSize(0, sizeof(ScenePerApplication));
+        mProgram.setParametersSize(1, sizeof(ScenePerFrame));
+        mProgram.setParametersSize(2, sizeof(ScenePerObject));
+
+        mProgram.setInstanceDataSize(sizeof(SceneInstanceData));
     }
 
     void ShadowRenderPass::shutdown()
@@ -50,8 +51,35 @@ namespace Render {
         mProgram.reset();
     }
 
-    void ShadowRenderPass::render(Render::RenderTarget *target)
+    void ShadowRenderPass::render(Render::RenderTarget *target, size_t iteration)
     {
+        //TODO Culling
+
+        Threading::DataLock lock { mScene.mutex(), Threading::AccessMode::READ };
+
+        mScene.updateRender();
+
+        std::map<std::tuple<GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> instances;
+
+        for (const auto &[mesh, e] : mScene.entityComponentList<Scene::Entity::Mesh>().data()) {
+            if (!mesh.isVisible())
+                continue;
+
+            GPUMeshData *meshData = mesh.data();
+            if (!meshData)
+                continue;
+
+            Scene::Entity::Transform *transform = e->getComponent<Scene::Entity::Transform>();
+            if (!transform)
+                continue;
+
+            Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
+
+            instances[std::tuple<GPUMeshData *, Scene::Entity::Skeleton *> { meshData, skeleton }].push_back(transform->worldMatrix());
+        }
+
+        target->pushAnnotation("Shadow");
+
         updateFrustum();
 
         {
@@ -65,55 +93,47 @@ namespace Render {
 
             perFrame->v = viewMatrix();
 
-            perFrame->lightColor = mScene.mAmbientLightColor;
-            perFrame->lightDir = mScene.mAmbientLightDirection;
+            perFrame->light.light.color = mScene.mAmbientLightColor;
+            perFrame->light.light.dir = mScene.mAmbientLightDirection;
         }
 
-        //TODO Culling
+        for (const std::pair<const std::tuple<GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> &instance : instances) {
+            GPUMeshData *meshData = std::get<0>(instance.first);
+            Scene::Entity::Skeleton *skeleton = std::get<1>(instance.first);
 
-        Threading::DataLock lock { mScene.mutex(), Threading::AccessMode::READ };
+            {
+                auto perObject = mProgram.mapParameters(2).cast<ScenePerObject>();
 
-        for (Engine::Scene::Entity::EntityPtr e : mScene.entities()) {
-            Scene::Entity::Animation *anim = e->getComponent<Scene::Entity::Animation>();
-            if (anim)
-                anim->applyTransform(e);
+                perObject->hasLight = false;
 
-            Scene::Entity::Mesh *mesh = e->getComponent<Scene::Entity::Mesh>();
-            Scene::Entity::Transform *transform = e->getComponent<Scene::Entity::Transform>();
-            if (mesh && mesh->isVisible() && transform) {
-                GPUMeshData *meshData = mesh->data();
-                if (meshData) {
+                perObject->hasDistanceField = false;
 
-                    Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
+                perObject->hasTexture = false;
 
-                    {
-                        auto perObject = mProgram.mapParameters(2).cast<ScenePerObject>();
-
-                        perObject->hasLight = false;
-
-                        perObject->hasDistanceField = false;
-
-                        perObject->hasTexture = false;
-
-                        Matrix4 modelMatrix = transform->worldMatrix(mScene.entityComponentList<Scene::Entity::Transform>());
-                        perObject->m = modelMatrix;
-                        perObject->anti_m = modelMatrix
-                                                .Inverse()
-                                                .Transpose();
-
-                        perObject->hasSkeleton = skeleton != nullptr;
-                    }
-
-                    if (skeleton) {
-                        mProgram.setDynamicParameters(0, skeleton->matrices());
-                    } else {
-                        mProgram.setDynamicParameters(0, {});
-                    }
-
-                    target->renderMesh(meshData, mProgram);
-                }
+                perObject->hasSkeleton = skeleton != nullptr;
             }
+
+            std::vector<SceneInstanceData> instanceData;
+
+            std::transform(instance.second.begin(), instance.second.end(), std::back_inserter(instanceData), [](const Matrix4 &m) {
+                return SceneInstanceData {
+                    m,
+                    m.Inverse().Transpose()
+                };
+            });
+
+            mProgram.setInstanceData(std::move(instanceData));
+
+            if (skeleton) {
+                mProgram.setDynamicParameters(0, skeleton->matrices());
+            } else {
+                mProgram.setDynamicParameters(0, {});
+            }
+
+            target->renderMeshInstanced(instance.second.size(), meshData, mProgram);
         }
+
+        target->popAnnotation();
     }
 
     int ShadowRenderPass::priority() const
@@ -129,6 +149,11 @@ namespace Render {
     Matrix4 ShadowRenderPass::viewMatrix() const
     {
         return mLightFrustum.getViewMatrix();
+    }
+
+    Matrix4 ShadowRenderPass::viewProjectionMatrix() const
+    {
+        return mLightFrustum.getViewProjectionMatrix();
     }
 
     void ShadowRenderPass::updateFrustum()

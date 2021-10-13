@@ -1,27 +1,20 @@
+#include "scene.sl"
+
+#include "light.hlsl"
+
 cbuffer PerApplication : register(b0)
 {
-    matrix p;
-    matrix lightProjection;
+    ScenePerApplication app;
 }
 
 cbuffer PerFrame : register(b1)
 {   
-    matrix v;   
-    matrix lightView;
-
-    float3 lightColor;
-	float3 lightDir;
+    ScenePerFrame frame;
 }
 
 cbuffer PerObject : register(b2)
 {
-    matrix m;
-    matrix anti_m;
-
-    bool hasLight;
-	bool hasTexture;
-	bool hasDistanceField;
-	bool hasSkeleton;
+    ScenePerObject object;
 }
 
 cbuffer Bones : register(b3)
@@ -51,6 +44,7 @@ struct AppData {
 #ifdef HAS_WEIGHTS0
 	float4 aWeights : WEIGHTS;
 #endif
+    SceneInstanceData aInstance : INSTANCEDATA;
 };
 
 struct VertexShaderOutput {
@@ -73,20 +67,20 @@ VertexShaderOutput main(AppData IN)
 #endif
 
 #ifdef HAS_BONEINDICES0
-    if (hasSkeleton) {
+    if (object.hasSkeleton) {
 	    matrix BoneTransform = bones[IN.aBoneIDs[0]] * IN.aWeights[0]
 	    + bones[IN.aBoneIDs[1]] * IN.aWeights[1]
 	    + bones[IN.aBoneIDs[2]] * IN.aWeights[2]
 	    + bones[IN.aBoneIDs[3]] * IN.aWeights[3];
-	    OUT.worldPos = mul(m, mul(BoneTransform, float4(IN.aPos, 1.0)));
+	    OUT.worldPos = mul(IN.aInstance.m, mul(BoneTransform, float4(IN.aPos, 1.0)));
     } else {
-        OUT.worldPos = mul(m, float4(IN.aPos, 1.0));
+        OUT.worldPos = mul(IN.aInstance.m, float4(IN.aPos, 1.0));
     }
 #else
-	OUT.worldPos = mul(m, float4(IN.aPos, 1.0));
+	OUT.worldPos = mul(IN.aInstance.m, float4(IN.aPos, 1.0));
 #endif
     
-    OUT.position = mul(p, mul(v, OUT.worldPos) + float4(aPos2, 0.0, 0.0));
+    OUT.position = mul(app.p, mul(frame.v, OUT.worldPos) + float4(aPos2, 0.0, 0.0));
     OUT.position.z += OUT.position.w;
     OUT.position.z /= 2;
     
@@ -96,7 +90,7 @@ VertexShaderOutput main(AppData IN)
     OUT.color = float4(1,1,1,1);
 #endif
 #ifdef HAS_NORMAL0
-	OUT.normal = mul(anti_m, float4(IN.aNormal, 0));
+	OUT.normal = mul((float3x3)IN.aInstance.anti_m, IN.aNormal);
 #else
     OUT.normal = float3(0,0,0);
 #endif
@@ -106,9 +100,7 @@ VertexShaderOutput main(AppData IN)
     OUT.uv = float2(0,0);
 #endif
 
-    OUT.lightViewPosition = mul(lightProjection, mul(lightView, OUT.worldPos) + float4(aPos2, 0.0, 0.0));
-    OUT.lightViewPosition.z += OUT.lightViewPosition.w;
-    OUT.lightViewPosition.z /= 2;
-    
+    OUT.lightViewPosition = projectShadow(frame.light.caster, OUT.worldPos);
+ 
     return OUT;
 }

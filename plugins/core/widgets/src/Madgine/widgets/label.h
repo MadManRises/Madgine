@@ -18,7 +18,7 @@ namespace Widgets {
         Render::FontLoader::ResourceType *getFont() const;
         void setFont(Render::FontLoader::ResourceType *font);
 
-        std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize) override;
+        std::vector<std::pair<std::vector<Vertex>, TextureSettings>> vertices(const Vector3 &screenSize) override;
 
         std::string mText;
         int mFontSize = 16;

@@ -84,7 +84,7 @@ namespace Scene {
             }
         }
 
-        void Animation::applyTransform(const EntityPtr &entity)
+        void Animation::updateRender(Entity *entity)
         {
             if (mAnimationList && mCurrentAnimation) {
                 Skeleton *skeleton = entity->getComponent<Skeleton>();

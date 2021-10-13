@@ -231,9 +231,11 @@ namespace Tools {
         ImGui::DestroyContext();
     }
 
-    void ClientImRoot::render(Render::RenderTarget *target)
+    void ClientImRoot::render(Render::RenderTarget *target, size_t iteration)
     {
         PROFILE();
+
+        target->pushAnnotation("ImGui");
 
         if (mWindow.getRenderWindow() == target) {
 
@@ -248,6 +250,8 @@ namespace Tools {
         } else {
             ImGui::GetPlatformIO().Renderer_RenderWindow(mViewportMappings.at(target), nullptr);
         }
+
+        target->popAnnotation();
     }
 
     void ClientImRoot::addViewportMapping(Render::RenderTarget *target, ImGuiViewport *vp)

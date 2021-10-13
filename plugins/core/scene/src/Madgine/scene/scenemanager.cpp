@@ -62,7 +62,7 @@ namespace Scene {
 
         mLastFrame = std::chrono::steady_clock::now();
 
-        mApp.taskQueue()->addRepeatedTask([this]() { update(); }, Threading::TaskMask::DEFAULT, std::chrono::microseconds { 30 /*0000*/ }, this);
+        mApp.taskQueue()->addRepeatedTask([this]() { update(); }, Threading::TaskMask::DEFAULT, std::chrono::microseconds { 33 }, this);
 
         return true;
     }
@@ -114,6 +114,13 @@ namespace Scene {
         for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
             //PROFILE(component->componentName());
             component->update(std::chrono::duration_cast<std::chrono::microseconds>(timeSinceLastFrame), mPauseStack > 0);
+        }
+    }
+
+    void SceneManager::updateRender()
+    {
+        for (const std::unique_ptr<Entity::EntityComponentListBase>& list : mEntityComponentLists) {
+            list->updateRender();
         }
     }
 

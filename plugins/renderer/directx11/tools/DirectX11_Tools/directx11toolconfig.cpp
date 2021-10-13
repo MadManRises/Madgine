@@ -26,16 +26,17 @@ namespace Tools {
 
     bool DirectX11ToolConfig::init()
     {
-        mImageTexture = { Render::Texture2D, Render::FORMAT_FLOAT8, D3D11_BIND_SHADER_RESOURCE, 100, 100 };
+        mImageTexture = { Render::TextureType_2D, Render::FORMAT_RGBA8, D3D11_BIND_SHADER_RESOURCE, 100, 100 };
 
         getTool<Inspector>().addPreviewDefinition<Render::FontLoader::ResourceType>([](Render::FontLoader::ResourceType *font) {
-            font->setPersistent(true);
-            ImGui::Image((void *)font->loadData()->mTexture->mTextureHandle, { 100, 100 });
+            Render::FontLoader::HandleType handle = font->loadData();
+            handle.info()->setPersistent(true);
+            ImGui::Image((void *)handle->mTexture->mTextureHandle, { 100, 100 });
         });
 
         getTool<Inspector>().addPreviewDefinition<Resources::ImageLoader::ResourceType>([this](Resources::ImageLoader::ResourceType *image) {
-            image->setPersistent(true);
             Resources::ImageLoader::HandleType data = image->loadData();
+            data.info()->setPersistent(true);
 
             mImageTexture.setData({ data->mWidth, data->mHeight }, { data->mBuffer, static_cast<size_t>(data->mWidth * data->mHeight) });
             ImGui::Image((void *)mImageTexture.mTextureHandle, { static_cast<float>(data->mWidth), static_cast<float>(data->mHeight) });

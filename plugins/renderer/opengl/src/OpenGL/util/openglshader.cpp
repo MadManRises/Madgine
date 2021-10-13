@@ -11,6 +11,8 @@ namespace Render {
             return GL_FRAGMENT_SHADER;
         case VertexShader:
             return GL_VERTEX_SHADER;
+        case GeometryShader:
+            return GL_GEOMETRY_SHADER;
         default:
             std::terminate();
         }

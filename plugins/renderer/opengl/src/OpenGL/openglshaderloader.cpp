@@ -12,6 +12,10 @@
 
 #include "Interfaces/filesystem/api.h"
 
+#include "Madgine/render/shadinglanguage/slloader.h"
+
+#include "codegen/resolveincludes.h"
+
 UNIQUECOMPONENT(Engine::Render::OpenGLShaderLoader);
 
 METATABLE_BEGIN(Engine::Render::OpenGLShaderLoader)
@@ -51,6 +55,9 @@ namespace Render {
         case ShaderType::VertexShader:
             name += "_VS";
             break;
+        case ShaderType::GeometryShader:
+            name += "_GS";
+            break;
         default:
             throw 0;
         }
@@ -71,13 +78,15 @@ namespace Render {
 
     bool OpenGLShaderLoader::loadImpl(OpenGLShader &shader, ResourceDataInfo &info)
     {
-        std::string_view filename = info.resource()->name();        
+        std::string_view filename = info.resource()->name();
 
-         ShaderType type;
+        ShaderType type;
         if (filename.ends_with("_VS"))
             type = ShaderType::VertexShader;
         else if (filename.ends_with("_PS"))
             type = ShaderType::PixelShader;
+        else if (filename.ends_with("_GS"))
+            type = ShaderType::GeometryShader;
         else
             throw 0;
 
@@ -112,16 +121,34 @@ namespace Render {
         return loadFromSource(shader, res->name(), ss.str(), type);
     }
 
-    bool OpenGLShaderLoader::loadFromSource(OpenGLShader &shader, std::string_view name, std::string_view source, ShaderType type)
+    bool OpenGLShaderLoader::loadFromSource(OpenGLShader &shader, std::string_view name, std::string source, ShaderType type)
     {
-       OpenGLShader tempShader { type };
+        OpenGLShader tempShader { type };
 
         GLuint handle = tempShader.mHandle;
 
-        const char *cSource = source.data();
+        std::set<std::string> files;
+
+        CodeGen::resolveIncludes(source, [this, &files](const Filesystem::Path &path, size_t line, std::string_view filename) {
+
+            Resources::ResourceBase *res;
+
+            if (path.extension() == ".sl") {
+                res = SlLoader::get(path.stem());
+            } else {
+                res = get(path.stem(), this);
+            }
+
+            return "#line 1 " + std::to_string(files.size()) + "\n" + res->readAsText() + "\n#line " + std::to_string(line + 1) + " " + std::to_string(files.size());
+        }, name, files);
+
+        
+        const char *cSource
+            = source.data();
 
         glShaderSource(handle, 1, &cSource, NULL);
-        glCompileShader(handle);
+        const GLchar *root = "/";
+        glCompileShaderIncludeARB(handle, 1, &root, nullptr);
         // check for shader compile errors
         GLint success;
         char infoLog[512];

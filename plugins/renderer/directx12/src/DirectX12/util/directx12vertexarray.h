@@ -13,27 +13,21 @@ namespace Render {
         DirectX12VertexArray() = default;
         DirectX12VertexArray(const DirectX12VertexArray &) = delete;
         DirectX12VertexArray(DirectX12VertexArray &&);
-        DirectX12VertexArray(const std::array<AttributeDescriptor, 7> &attributes);
+        DirectX12VertexArray(size_t groupSize, const DirectX12Buffer &vertex, const DirectX12Buffer &index, const std::array<AttributeDescriptor, 7> &attributes);
         ~DirectX12VertexArray();
 
         DirectX12VertexArray &operator=(DirectX12VertexArray &&other);
 
 		explicit operator bool() const;
 
-        static DirectX12VertexArray *getCurrent();
-
         void reset();
 
-        void bind(DirectX12Program *program = nullptr);
-        void unbind();
-
-        static void onBindVBO(const DirectX12Buffer *buffer);
-        static void onBindEBO(const DirectX12Buffer *buffer);
-
-        static std::pair<const DirectX12Buffer *, const DirectX12Buffer *> getCurrentBindings();
+        void bind(DirectX12Program *program, DirectX12VertexShader *vertexShader, DirectX12PixelShader *pixelShader);
 
         UINT mStride = 0;
         uint8_t mFormat = 0;
+
+        size_t mGroupSize = 0;
 
         std::vector<AttributeDescriptor> mAttributes;
 
@@ -41,7 +35,7 @@ namespace Render {
         const DirectX12Buffer *mVBO = nullptr;
         const DirectX12Buffer *mEBO = nullptr;
 
-        
+        std::map<DirectX12Program *, ID3D12PipelineState *> mInstances;        
     };
 
 }

@@ -6,14 +6,14 @@ Project(Bullet)
 set(sources "")
 FolderSources(sources "" src)
 	FolderSources(sources src Madgine)
-		FolderSources(sources Madgine physics collisionshapemanager.cpp collisionshapemanager.h physicsmanager.cpp physicsmanager.h rigidbody.cpp rigidbody.h)
+		FolderSources(sources Madgine physics collisionshapemanager.cpp collisionshapemanager.h physicsmanager.cpp physicsmanager.h rigidbody.cpp rigidbody.h softbodyskeleton.cpp softbodyskeleton.h)
 
 
 add_plugin(Bullet Madgine Physics ${sources} PRECOMPILED_HEADER src/Madgine/bulletlib.h)
 
 target_link_plugins(Bullet Scene)
 
-target_link_libraries(Bullet PRIVATE BulletDynamics BulletCollision LinearMath)
+target_link_libraries(Bullet PRIVATE BulletDynamics BulletCollision BulletSoftBody LinearMath)
 
 set(sources "")
 FolderSources(sources "" tools)

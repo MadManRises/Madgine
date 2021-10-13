@@ -15,9 +15,12 @@
 
 #include "Madgine/scene/scenemanager.h"
 
+#include "bullet3-2.89/src/BulletSoftBody/btSoftRigidDynamicsWorld.h"
+
 UNIQUECOMPONENT(Engine::Physics::PhysicsManager)
 
 METATABLE_BEGIN(Engine::Physics::PhysicsManager)
+PROPERTY(AirDensity, airDensity, setAirDensity)
 METATABLE_END(Engine::Physics::PhysicsManager)
 
 SERIALIZETABLE_BEGIN(Engine::Physics::PhysicsManager)
@@ -28,21 +31,26 @@ namespace Physics {
 
     bool PhysicsManager::sContactCallback(btManifoldPoint &cp, const btCollisionObjectWrapper *colObj0, int partId0, int index0, const btCollisionObjectWrapper *colObj1, int partId1, int index1)
     {
-        void *userData = colObj0->m_collisionObject->getUserPointer();
-        if (!userData)
-            userData = colObj1->m_collisionObject->getUserPointer();
-        if (!userData)
+        RigidBody *rigidBody0 = static_cast<RigidBody*>(colObj0->m_collisionObject->getUserPointer());
+        RigidBody *rigidBody1 = static_cast<RigidBody *>(colObj1->m_collisionObject->getUserPointer());
+        
+        Scene::SceneManager *sceneMgr = nullptr;
+        if (rigidBody0)
+            sceneMgr = rigidBody0->sceneMgr();
+        else if (rigidBody1)
+            sceneMgr = rigidBody1->sceneMgr();
+        else
             return false;
 
         ContactPoint p { cp, colObj0->m_collisionObject, colObj1->m_collisionObject };
-        return RigidBody::sceneMgrFromData(static_cast<typename RigidBody::Data *>(userData))->getComponent<PhysicsManager>().contactCallback(p);
+        return sceneMgr->getComponent<PhysicsManager>().contactCallback(p, rigidBody0, rigidBody1);
     }
 
-    bool PhysicsManager::contactCallback(ContactPoint &p)
+    bool PhysicsManager::contactCallback(ContactPoint &p, RigidBody *body0, RigidBody *body1)
     {
 
         for (PhysicsListener *listener : mListener)
-            listener->onContact(p);
+            listener->onContact(p, body0, body1);
         return true;
     }
 
@@ -51,7 +59,8 @@ namespace Physics {
         btCollisionDispatcher mDispatcher;
         btDbvtBroadphase mBroadphase;
         btSequentialImpulseConstraintSolver mSolver;
-        btDiscreteDynamicsWorld mWorld;
+        btSoftRigidDynamicsWorld mWorld;
+        btSoftBodyWorldInfo mWorldInfo;
 
         PhysicsData()
             : mDispatcher(&mCollisionConfiguration)
@@ -60,6 +69,10 @@ namespace Physics {
             mWorld.setGravity({ 0, -9.81f, 0 });
 
             mWorld.getSolverInfo().m_solverMode |= SOLVER_ENABLE_FRICTION_DIRECTION_CACHING | SOLVER_USE_2_FRICTION_DIRECTIONS;
+
+            mWorldInfo.m_dispatcher = &mDispatcher;
+            mWorldInfo.m_broadphase = &mBroadphase;
+            mWorldInfo.m_gravity.setValue(0, -9.81, 0);
         }
     };
 
@@ -72,9 +85,14 @@ namespace Physics {
     {
     }
 
-    btDiscreteDynamicsWorld &PhysicsManager::world()
+    btSoftRigidDynamicsWorld &PhysicsManager::world()
     {
         return mData->mWorld;
+    }
+
+    btSoftBodyWorldInfo &PhysicsManager::worldInfo()
+    {
+        return mData->mWorldInfo;
     }
 
     ContactPointList PhysicsManager::contactPoints()
@@ -116,6 +134,14 @@ namespace Physics {
         //else {
         //    mData->mWorld.synchronizeMotionStates();
         //}
+    }
+
+    float PhysicsManager::airDensity() const {
+        return mData->mWorldInfo.air_density;
+    }
+
+    void PhysicsManager::setAirDensity(float density) {
+        mData->mWorldInfo.air_density = density;
     }
 
     ContactPointIterator ContactPointList::begin()

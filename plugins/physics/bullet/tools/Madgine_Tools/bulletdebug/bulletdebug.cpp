@@ -18,6 +18,8 @@
 #include "Madgine/physics/rigidbody.h"
 #include "Madgine/scene/scenemanager.h"
 
+#include "bullet3-2.89/src/BulletSoftBody/btSoftRigidDynamicsWorld.h"
+
 namespace Engine {
 namespace Tools {
 

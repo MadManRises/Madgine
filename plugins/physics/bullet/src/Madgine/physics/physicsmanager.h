@@ -7,9 +7,13 @@
 
 #include "bullet3-2.89/src/btBulletDynamicsCommon.h"
 
+
 #include "Generic/proxy.h"
 
 #include "Meta/math/vector3.h"
+
+struct btSoftRigidDynamicsWorld;
+struct btSoftBodyWorldInfo;
 
 namespace Engine {
 namespace Physics {
@@ -54,12 +58,16 @@ namespace Physics {
         PhysicsManager(Scene::SceneManager &sceneMgr);
         ~PhysicsManager();
 
-        btDiscreteDynamicsWorld &world();
+        btSoftRigidDynamicsWorld &world();
+        btSoftBodyWorldInfo &worldInfo();
 
         ContactPointList contactPoints();
 
         void addListener(PhysicsListener *listener);
         void removeListener(PhysicsListener *listener);
+
+        float airDensity() const;
+        void setAirDensity(float density);
 
     protected:
         virtual bool init() override;
@@ -68,7 +76,7 @@ namespace Physics {
         virtual void update(std::chrono::microseconds, bool paused) override;
 
         static bool sContactCallback(btManifoldPoint &cp, const btCollisionObjectWrapper *colObj0, int partId0, int index0, const btCollisionObjectWrapper *colObj1, int partId1, int index1);
-        bool contactCallback(ContactPoint &p);
+        bool contactCallback(ContactPoint &p, RigidBody *body0, RigidBody *body1);
 
     private:
         std::unique_ptr<PhysicsData> mData;

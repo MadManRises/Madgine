@@ -1,33 +1,30 @@
 #version 420 core
 
+#include "sl_support.glsl"
+#include "scene.sl"
+
+#include "light.glsl"
+
+
 layout (std140, binding = 0) uniform PerApplication
 {
-	mat4 p;	
-	mat4 lightProjection;
+	ScenePerApplication app;
 };
 
 layout (std140, binding = 1) uniform PerFrame
 {
-	mat4 v;
-	mat4 lightView;
-
-	vec3 lightColor;
-	vec3 lightDir;
+	ScenePerFrame frame;
 };
 
 layout (std140, binding = 2) uniform PerObject
 {
-	mat4 m;
-	mat4 anti_m;
-
-	bool hasLight;
-	bool hasTexture;
-	bool hasDistanceField;
-	bool hasSkeleton;
+	ScenePerObject object;
 };
 
-layout(binding = 0) uniform sampler2D tex;
-layout(binding = 1) uniform sampler2D shadowDepthMap;
+layout(binding = 0) uniform sampler2D diffuseTex;
+layout(binding = 1) uniform sampler2D emissiveTex;
+layout(binding = 2) uniform sampler2DMS shadowDepthMap;
+layout(binding = 3) uniform samplerCube pointShadowDepthMaps[2];
 
 
 in vec4 color;
@@ -36,58 +33,68 @@ in vec3 normal;
 in vec2 uv;
 in vec4 lightViewPosition;
 
-out vec4 fragColor;
+layout(location = 0) out vec4 fragColor;
+layout(location = 1) out vec4 brightColor;
 
 
 float median(float r, float g, float b) {
     return max(min(r, g), min(max(r, g), b));
 }
 
+
 void main()
 {
 
-	vec4 colorAcc = color;
+	vec4 baseColor = color * object.diffuseColor;
 
-	if (hasTexture){
-		if (hasDistanceField){
+	if (object.hasTexture){
+		if (object.hasDistanceField){
 			vec2 msdfUnit = 4.0/vec2(512.0, 512.0);
-			vec4 sampled = texture2D(tex, uv);
+			vec4 sampled = texture2D(diffuseTex, uv);
 			float sigDist = median(sampled.r, sampled.g, sampled.b) - 0.5;
 			//sigDist *= dot(msdfUnit, vec2(0.5));
 			sigDist *= 4.0;
 			float opacity = clamp(sigDist + 0.5, 0.0, 1.0);
-			colorAcc = mix(vec4(0), colorAcc, opacity);
+			baseColor = mix(vec4(0), baseColor, opacity);
 		}
 		else
 		{
-			colorAcc = colorAcc * texture2D(tex, uv);
+			baseColor = baseColor * texture2D(diffuseTex, uv);
 		}
 	}
 
-	if (hasLight){
-		float bias = 0.001;
-		vec2 lightTexCoord;
-		lightTexCoord.x = lightViewPosition.x / lightViewPosition.w / 2.0 + 0.5;
-		lightTexCoord.y = lightViewPosition.y / lightViewPosition.w / 2.0 + 0.5;
+	fragColor = vec4(0.0);
 
-		float shadowDepth = texture2D(shadowDepthMap, lightTexCoord).r;
-		float lightDepth = lightViewPosition.z / lightViewPosition.w / 2.0 + 0.5;
-		lightDepth = lightDepth - bias;
-
-		float ambientStrength = 0.4;
-		vec3 ambient = ambientStrength * lightColor;
-
-		vec3 diffuse = vec3(0,0,0);
-
-		if (lightDepth < shadowDepth){
-			float diffuseStrength = 0.7;
-			vec3 norm = normalize(normal);
-			float diff = max(dot(norm, -lightDir), 0.0);
-			diffuse = diffuseStrength * diff * lightColor;
+	if (object.hasLight){
+		fragColor += castDirectionalShadowLight(
+			frame.light, 
+			lightViewPosition, 
+			normal,
+			shadowDepthMap, 
+			app.ambientFactor, 
+			app.diffuseFactor
+		) * baseColor;
+		for (int i = 0; i < frame.pointLightCount; ++i){
+			fragColor += castPointShadowLight(
+				frame.pointLights[i],
+				worldPos.xyz,
+				normal,
+				pointShadowDepthMaps[i],
+				app.ambientFactor,
+				app.diffuseFactor
+			) * baseColor;
 		}
-
-		colorAcc = vec4(ambient + diffuse,1.0) * colorAcc;
+	}else{
+		fragColor += baseColor;
 	}
 
-    fragColor = colorAcc;
+	fragColor.xyz += texture2D(emissiveTex, uv).xyz;
+
+	if (app.hasHDR){
+		float brightness = dot(fragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+		if(brightness > 1.0)
+			brightColor = vec4(fragColor.rgb, 1.0);
+		else
+			brightColor = vec4(0.0, 0.0, 0.0, 1.0);
+	}
 }

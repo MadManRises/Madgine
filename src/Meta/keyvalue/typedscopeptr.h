@@ -60,10 +60,11 @@ public:
     template <typename T>
     T *safe_cast() const
     {
-        if (!mType->isDerivedFrom<std::remove_const_t<T>>())
+        size_t offset = 0;
+        if (!mType->isDerivedFrom<std::remove_const_t<T>>(&offset))
             std::terminate();
 
-        return static_cast<T *>(mScope);
+        return static_cast<T *>(reinterpret_cast<void*>(reinterpret_cast<char*>(mScope) + offset));
     }
 
     explicit operator bool() const

@@ -4,33 +4,42 @@
 
 #include "texture.h"
 
+#include "render/texturedescriptor.h"
+
 namespace Engine {
 namespace Render {
 
     struct MADGINE_OPENGL_EXPORT OpenGLTexture : Texture {
 
-        OpenGLTexture(GLenum type);
+        OpenGLTexture(TextureType type, DataFormat format, size_t samples = 1);
         OpenGLTexture() = default;
         OpenGLTexture(const OpenGLTexture &) = delete;
         OpenGLTexture(OpenGLTexture &&);
         ~OpenGLTexture();
 
-		OpenGLTexture &operator=(OpenGLTexture &&);
+        OpenGLTexture &operator=(OpenGLTexture &&);
 
-		void reset();
+        void reset();
         void bind() const;
 
         void setData(Vector2i size, const ByteBuffer &data);
         void setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data);
 
-		void resize(Vector2i size);
+        TextureDescriptor descriptor() const;
+        GLenum target() const;
+
+        void resize(Vector2i size);
 
         void setWrapMode(GLint mode);
+
+        explicit operator bool() const;
         void setFilter(GLint filter);
 
     private:
-        GLenum mType;        
+        DataFormat mFormat;
+        TextureType mType;
         Vector2i mSize = { 0, 0 };
+        size_t mSamples = 1;
     };
 
 }

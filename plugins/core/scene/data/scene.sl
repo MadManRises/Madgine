@@ -1,26 +1,35 @@
+#include "lightdata.sl"
 
+struct ScenePerApplication {
+	float4x4 p;
 
-parameters ScenePerApplication {
-	float4x4(p);
-	float4x4(lightProjectionMatrix);
+	bool hasHDR;
+
+	float ambientFactor;
+	float diffuseFactor;
 };
 
-parameters ScenePerFrame {
-	float4x4(v);
-	float4x4(lightViewMatrix);
+struct ScenePerFrame {
+	int pointLightCount;
+	float4x4 v;
 
-	float3(lightColor);
-	float3(lightDir);
+	DirectionalShadowLight light;
+
+	PointLight pointLights[2];
 };
 
-parameters ScenePerObject {
+struct SceneInstanceData{
+	float4x4 m;
+	float4x4 anti_m;
+};
 
-	float4x4(m);
-	float4x4(anti_m);
+struct ScenePerObject {
 
-	bool(hasLight);
-	bool(hasTexture);
-	bool(hasDistanceField);
-	bool(hasSkeleton);
+	float4 diffuseColor;
+
+	bool hasLight;
+	bool hasTexture;
+	bool hasDistanceField;
+	bool hasSkeleton;
 
 };

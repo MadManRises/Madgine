@@ -4,7 +4,6 @@
 
 #include "Madgine/scene/scenemanager.h"
 
-#include "Madgine/scene/entity/components/animation.h"
 #include "Madgine/scene/entity/components/mesh.h"
 #include "Madgine/scene/entity/components/skeleton.h"
 #include "Madgine/scene/entity/components/transform.h"
@@ -21,14 +20,24 @@
 
 #include "Madgine/render/rendertarget.h"
 
+#include "Madgine/scene/entity/components/pointlight.h"
+
 #define SL_SHADER scene
 #include INCLUDE_SL_SHADER
+
+#include "Meta/keyvalue/metatable_impl.h"
+
+METATABLE_BEGIN(Engine::Render::SceneRenderPass)
+MEMBER(mAmbientFactor)
+MEMBER(mDiffuseFactor)
+METATABLE_END(Engine::Render::SceneRenderPass)
 
 namespace Engine {
 namespace Render {
 
     SceneRenderPass::SceneRenderPass(Scene::SceneManager &scene, Camera *camera, int priority)
-        : mShadowPass(scene, camera, priority + 1)
+        : mShadowPass(scene, camera, 50)
+        , mPointShadowPasses { { 0, scene, 50 }, { 1, scene, 50 } }
         , mScene(scene)
         , mCamera(camera)
         , mPriority(priority)
@@ -37,28 +46,65 @@ namespace Render {
 
     SceneRenderPass::~SceneRenderPass() = default;
 
-    void SceneRenderPass::setup(Render::RenderContext *context)
+    void SceneRenderPass::setup(RenderTarget *target)
     {
         mProgram.create("scene");
 
-        mProgram.setParameters(0, sizeof(ScenePerApplication));
-        mProgram.setParameters(1, sizeof(ScenePerFrame));
-        mProgram.setParameters(2, sizeof(ScenePerObject));
+        mProgram.setParametersSize(0, sizeof(ScenePerApplication));
+        mProgram.setParametersSize(1, sizeof(ScenePerFrame));
+        mProgram.setParametersSize(2, sizeof(ScenePerObject));
 
-        mShadowMap = context->createRenderTexture({ 2048, 2048 }, { .mCreateDepthBufferView = true });
+        mProgram.setInstanceDataSize(sizeof(SceneInstanceData));
+
+        mShadowMap = target->context()->createRenderTexture({ 2048, 2048 }, { .mCreateDepthBufferView = true, .mType = TextureType_2DMultiSample, .mSamples = 4, .mTextureCount = 0 });
+        mPointShadowMaps[0] = target->context()->createRenderTexture({ 2048, 2048 }, { .mType = TextureType_Cube, .mCreateDepthBufferView = true, .mTextureCount = 0 });
+        mPointShadowMaps[1] = target->context()->createRenderTexture({ 2048, 2048 }, { .mType = TextureType_Cube, .mCreateDepthBufferView = true, .mTextureCount = 0 });
 
         mShadowMap->addRenderPass(&mShadowPass);
+        mPointShadowMaps[0]->addRenderPass(&mPointShadowPasses[0]);
+        mPointShadowMaps[1]->addRenderPass(&mPointShadowPasses[1]);
     }
 
     void SceneRenderPass::shutdown()
     {
         mShadowMap.reset();
+        mPointShadowMaps[0].reset();
+        mPointShadowMaps[1].reset();
 
         mProgram.reset();
     }
 
-    void SceneRenderPass::render(Render::RenderTarget *target)
+    void SceneRenderPass::render(Render::RenderTarget *target, size_t iteration)
     {
+        //TODO Culling
+
+        Threading::DataLock lock { mScene.mutex(), Threading::AccessMode::READ };
+
+        mScene.updateRender();
+
+        std::map<std::tuple<GPUMeshData *, const GPUMeshData::Material *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> instances;
+
+        for (const auto &[mesh, e] : mScene.entityComponentList<Scene::Entity::Mesh>().data()) {
+            if (!mesh.isVisible())
+                continue;
+
+            GPUMeshData *meshData = mesh.data();
+            if (!meshData)
+                continue;
+
+            const GPUMeshData::Material *material = mesh.material();
+
+            Scene::Entity::Transform *transform = e->getComponent<Scene::Entity::Transform>();
+            if (!transform)
+                continue;
+
+            Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
+
+            instances[std::tuple<GPUMeshData *, const GPUMeshData::Material *, Scene::Entity::Skeleton *> { meshData, material, skeleton }].push_back(transform->worldMatrix());
+        }
+
+        target->pushAnnotation("Scene");
+
         Vector2i size = target->size();
 
         float aspectRatio = float(size.x) / size.y;
@@ -67,66 +113,89 @@ namespace Render {
             auto perApplication = mProgram.mapParameters(0).cast<ScenePerApplication>();
 
             perApplication->p = mCamera->getProjectionMatrix(aspectRatio);
-            perApplication->lightProjectionMatrix = mShadowPass.projectionMatrix();
+
+            perApplication->hasHDR = target->textureCount() > 1;
+
+            perApplication->ambientFactor = mAmbientFactor;
+            perApplication->diffuseFactor = mDiffuseFactor;
         }
 
         {
             auto perFrame = mProgram.mapParameters(1).cast<ScenePerFrame>();
 
             perFrame->v = mCamera->getViewMatrix();
-            perFrame->lightViewMatrix = mShadowPass.viewMatrix();
+            perFrame->light.caster.viewProjectionMatrix = mShadowPass.viewProjectionMatrix();
 
-            perFrame->lightColor = mScene.mAmbientLightColor;
-            perFrame->lightDir = mScene.mAmbientLightDirection;
-        }
+            perFrame->light.caster.shadowSamples = 4;
 
-        //TODO Culling
+            perFrame->light.light.color = mScene.mAmbientLightColor;
+            perFrame->light.light.dir = mScene.mAmbientLightDirection;
 
-        Threading::DataLock lock { mScene.mutex(), Threading::AccessMode::READ };
+            Scene::Entity::EntityComponentList<Scene::Entity::PointLight> &lights = mScene.entityComponentList<Scene::Entity::PointLight>();
+            perFrame->pointLightCount = lights.size();
+            if (perFrame->pointLightCount > 2) {
+                LOG_WARNING("Too many point lights in scene!");
+                perFrame->pointLightCount = 2;
+            }
 
-        for (Engine::Scene::Entity::EntityPtr e : mScene.entities()) {
-            Scene::Entity::Animation *anim = e->getComponent<Scene::Entity::Animation>();
-            if (anim)
-                anim->applyTransform(e);
-
-            Scene::Entity::Mesh *mesh = e->getComponent<Scene::Entity::Mesh>();
-            Scene::Entity::Transform *transform = e->getComponent<Scene::Entity::Transform>();
-            if (mesh && mesh->isVisible() && transform) {
-                GPUMeshData *meshData = mesh->data();
-                if (meshData) {
-
-                    target->bindTextures({ meshData->mTextureHandle, mShadowMap->depthTexture() });
-
-                    Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
-
-                    {
-                        auto perObject = mProgram.mapParameters(2).cast<ScenePerObject>();
-
-                        perObject->hasLight = true;
-
-                        perObject->hasDistanceField = false;
-
-                        perObject->hasTexture = meshData->mTextureHandle != 0;
-
-                        Matrix4 modelMatrix = transform->worldMatrix(mScene.entityComponentList<Scene::Entity::Transform>());
-                        perObject->m = modelMatrix;
-                        perObject->anti_m = modelMatrix
-                                                .Inverse()
-                                                .Transpose();
-
-                        perObject->hasSkeleton = skeleton != nullptr;
-                    }
-
-                    if (skeleton) {
-                        mProgram.setDynamicParameters(0, skeleton->matrices());
-                    } else {
-                        mProgram.setDynamicParameters(0, {});
-                    }
-
-                    target->renderMesh(meshData, mProgram);
-                }
+            for (size_t i = 0; i < perFrame->pointLightCount; ++i) {
+                float range = lights[i].mRange;
+                perFrame->pointLights[i].position = lights.getEntity(i)->getComponent<Scene::Entity::Transform>()->getPosition();
+                perFrame->pointLights[i].color = lights[i].mColor;
+                perFrame->pointLights[i].constant = 1.0f;
+                perFrame->pointLights[i].linearFactor = 4.5f / range;
+                perFrame->pointLights[i].quadratic = 75.0f / (range * range);
             }
         }
+
+        target->bindTextures({ mShadowMap->depthTexture(), mPointShadowMaps[0]->depthTexture(), mPointShadowMaps[1]->depthTexture() }, 2);
+
+        for (const std::pair<const std::tuple<GPUMeshData *, const GPUMeshData::Material *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> &instance : instances) {
+            GPUMeshData *meshData = std::get<0>(instance.first);
+            const GPUMeshData::Material *material = std::get<1>(instance.first);
+            Scene::Entity::Skeleton *skeleton = std::get<2>(instance.first);
+
+            {
+                auto perObject = mProgram.mapParameters(2).cast<ScenePerObject>();
+
+                perObject->hasLight = true;
+
+                perObject->hasDistanceField = false;
+
+                perObject->hasTexture = material && material->mDiffuseHandle != 0;
+
+                perObject->hasSkeleton = skeleton != nullptr;
+
+                perObject->diffuseColor = material ? material->mDiffuseColor : Vector4::UNIT_SCALE;
+            }
+
+            std::vector<SceneInstanceData> instanceData;
+
+            std::transform(instance.second.begin(), instance.second.end(), std::back_inserter(instanceData), [](const Matrix4 &m) {
+                return SceneInstanceData {
+                    m,
+                    m.Inverse().Transpose()
+                };
+            });
+
+            mProgram.setInstanceData(std::move(instanceData));
+
+            if (skeleton) {
+                mProgram.setDynamicParameters(0, skeleton->matrices());
+            } else {
+                mProgram.setDynamicParameters(0, {});
+            }
+
+            target->renderMeshInstanced(instance.second.size(), meshData, mProgram, material);
+        }
+        target->popAnnotation();
+    }
+
+    void SceneRenderPass::preRender()
+    {
+        mShadowMap->render();
+        mPointShadowMaps[0]->render();
+        mPointShadowMaps[1]->render();
     }
 
     int SceneRenderPass::priority() const

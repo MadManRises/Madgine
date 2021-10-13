@@ -129,4 +129,10 @@ struct index_range_add<add, std::index_sequence<Is...>> {
 template <size_t from, size_t to>
 using make_index_range = typename index_range_add<from, std::make_index_sequence<to - from>>::type;
 
+template <typename Base, typename Derived>
+constexpr size_t inheritance_offset() {
+    static_assert(std::is_base_of_v<Base, Derived>);
+    return reinterpret_cast<uintptr_t>(static_cast<Base *>(reinterpret_cast<Derived *>(0x1))) - 1;
+}
+
 }

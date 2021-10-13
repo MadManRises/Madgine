@@ -60,13 +60,14 @@ namespace Engine
 				return mTask.operator bool();
 			}
 
-			TaskHandle clone() const
+			/* TaskHandle clone() const
 			{
 				return *this;
-			}
+			}*/
 
 		protected:
-			TaskHandle(const TaskHandle &other) :
+                        /* TaskHandle(const TaskHandle &other)
+                            :
 				mTask(other.mTask->clone())
 			{
 
@@ -76,7 +77,7 @@ namespace Engine
 			{
 				mTask = other.mTask->clone();
 				return *this;
-			}
+			}*/
 
 		private:
 			std::unique_ptr<Task> mTask;

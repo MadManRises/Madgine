@@ -19,13 +19,15 @@ namespace Engine {
 namespace Render {
 
     DirectX12RenderTexture::DirectX12RenderTexture(DirectX12RenderContext *context, const Vector2i &size, const RenderTextureConfig &config)
-        : DirectX12RenderTarget(context)
-        , mTexture(RenderTarget2D, FORMAT_FLOAT8)
+        : DirectX12RenderTarget(context, false, config.mName)
+        , mTexture(TextureType_2D, true, FORMAT_RGBA8)
         , mSize { 0, 0 }
     {
         //context->waitForGPU();
 
         resize(size, config);
+
+        mTexture.setName(config.mName.empty() ? "RenderTexture" : config.mName);
     }
 
     DirectX12RenderTexture::~DirectX12RenderTexture()
@@ -53,7 +55,7 @@ namespace Render {
         OffsetPtr targetView = DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.allocate();
         sDevice->CreateRenderTargetView(mTexture.resource(), &renderTargetViewDesc, DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(targetView));
 
-        setup(targetView, size, config);
+        setup(targetView, size);
 
         if (mDepthBufferView || config.mCreateDepthBufferView) {
             if (mDepthBufferView) {
@@ -77,29 +79,34 @@ namespace Render {
         return true;
     }
 
-    bool DirectX12RenderTexture::resize(const Vector2i &size)
+    bool DirectX12RenderTexture::resizeImpl(const Vector2i &size)
     {
         return resize(size, {});
     }
 
-    void DirectX12RenderTexture::beginFrame()
+    void DirectX12RenderTexture::beginIteration(size_t iteration)
     {
-        DirectX12RenderTarget::beginFrame();
+        DirectX12RenderTarget::beginIteration(iteration);
     }
 
-    void DirectX12RenderTexture::endFrame()
+    void DirectX12RenderTexture::endIteration(size_t iteration)
     {
-        DirectX12RenderTarget::endFrame();
+        DirectX12RenderTarget::endIteration(iteration);
     }
 
-    TextureHandle DirectX12RenderTexture::texture() const
+    TextureDescriptor DirectX12RenderTexture::texture(size_t index, size_t iteration) const
     {
-        return mTexture.mTextureHandle;
+        return mTexture.descriptor();
     }
 
-    TextureHandle DirectX12RenderTexture::depthTexture() const
+    size_t DirectX12RenderTexture::textureCount() const
     {
-        return mDepthBufferView.offset();
+        return 1;
+    }
+
+    TextureDescriptor DirectX12RenderTexture::depthTexture() const
+    {
+        return { mDepthBufferView.offset(), TextureType_2D };
     }
 
     Vector2i DirectX12RenderTexture::size() const

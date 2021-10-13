@@ -163,7 +163,7 @@ namespace Render {
             interpret->mHandle.createUnnamed(std::move(gen.mFile));
 
             for (GPUBufferCodeGeneratorData *buffer : gen.mBuffers) {
-                interpret->mHandle.setParameters(buffer->mIndex, buffer->mInterpretData->mBuffer.mSize);
+                interpret->mHandle.setParametersSize(buffer->mIndex, buffer->mInterpretData->mBuffer.mSize);
 
                 buffer->mInterpretData->mMapper = [handle { interpret->mHandle }, index { buffer->mIndex }]() mutable {
                     return handle.mapParameters(index);
@@ -191,7 +191,7 @@ namespace Render {
         if (mesh) {
             if (interpretData->mMesh.resource() != mesh)
                 interpretData->mMesh = mesh;
-            target->bindTextures({ interpretData->mMesh->mTextureHandle });
+            //TODO: Material, target->bindTextures({ { interpretData->mMesh->mTextureHandle, TextureType_2D } });
             target->renderMesh(interpretData->mMesh, interpretData->mHandle);
         }
     }

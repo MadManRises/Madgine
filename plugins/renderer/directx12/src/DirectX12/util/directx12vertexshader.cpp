@@ -8,6 +8,10 @@
 
 #include "Madgine/resources/resourcebase.h"
 
+#include "codegen/resolveincludes.h"
+
+#include "Madgine/render/shadinglanguage/slloader.h"
+
 namespace Engine {
 namespace Render {
 
@@ -15,8 +19,6 @@ namespace Render {
     {
         return "vs_5_1";
     }
-
-    
 
     DirectX12VertexShader::DirectX12VertexShader(Resources::ResourceBase *resource)
         : mResource(resource)
@@ -67,6 +69,15 @@ namespace Render {
 
             std::string source = mResource->readAsText();
 
+            std::set<std::string> files;
+
+            CodeGen::resolveIncludes(
+                source, [](const Filesystem::Path &path, size_t line, std::string_view filename) {
+                    Resources::ResourceBase *res = SlLoader::get(path.stem());
+                    return "#line 1 \"" + path.filename().str() + "\"\n" + res->readAsText() + "\n#line " + std::to_string(line + 1) + " \"" + std::string { filename } + "\"";
+                },
+                filename, files);
+
             const char *cSource = source.c_str();
 
             ID3DBlob *pErrorBlob = nullptr;
@@ -75,8 +86,6 @@ namespace Render {
 #if _DEBUG
             flags |= D3DCOMPILE_DEBUG;
 #endif
-
-            
 
             std::list<std::string> shaderMacroBuffer;
             std::vector<D3D_SHADER_MACRO> shaderMacros;

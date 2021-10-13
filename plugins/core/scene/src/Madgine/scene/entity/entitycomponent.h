@@ -20,14 +20,17 @@ namespace Scene {
         using EntityComponent = EntityComponentComponent<T, Base>;
 
 #define ENTITYCOMPONENTVIRTUALBASE_IMPL(Name, FullType) \
-    COMPONENT_NAME(Name, FullType)            
+    COMPONENT_NAME(Name, FullType)
 
 #define ENTITYCOMPONENTVIRTUALIMPL_IMPL(Name) \
     VIRTUALUNIQUECOMPONENT(Name)
 
-#define ENTITYCOMPONENT_IMPL(Name, FullType)                                   \
-    NAMED_UNIQUECOMPONENT(Name, FullType)                                      \
+#define ENTITYCOMPONENT_IMPL_EX(Name, FrontendType, FullType) \
+    NAMED_UNIQUECOMPONENT_EX(Name, FrontendType, FullType)    \
     UNIQUECOMPONENT2(Engine::Scene::Entity::EntityComponentList<FullType>, _2)
+
+#define ENTITYCOMPONENT_IMPL(Name, FullType) \
+    ENTITYCOMPONENT_IMPL_EX(Name, FullType, FullType)
 
     }
 }

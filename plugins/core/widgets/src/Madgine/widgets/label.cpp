@@ -31,7 +31,7 @@ namespace Widgets {
         return WidgetClass::LABEL_CLASS;
     }
 
-    std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> Label::vertices(const Vector3 &screenSize)
+    std::vector<std::pair<std::vector<Vertex>, TextureSettings>> Label::vertices(const Vector3 &screenSize)
     {
         Vector3 pos = (getAbsolutePosition() * screenSize) / screenSize;
         pos.z = depth();

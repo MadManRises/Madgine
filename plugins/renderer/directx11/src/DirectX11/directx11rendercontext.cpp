@@ -6,88 +6,91 @@
 #include "directx11rendercontext.h"
 #include "directx11rendertexture.h"
 
+UNIQUECOMPONENT(Engine::Render::DirectX11RenderContext)
 
+METATABLE_BEGIN(Engine::Render::DirectX11RenderContext)
+METATABLE_END(Engine::Render::DirectX11RenderContext)
 
-    UNIQUECOMPONENT(Engine::Render::DirectX11RenderContext)
+namespace Engine {
+namespace Render {
 
-        METATABLE_BEGIN(Engine::Render::DirectX11RenderContext)
-            METATABLE_END(Engine::Render::DirectX11RenderContext)
+    THREADLOCAL(ID3D11Device *)
+    sDevice = nullptr;
+    THREADLOCAL(ID3D11DeviceContext *)
+    sDeviceContext = nullptr;
+    THREADLOCAL(ID3DUserDefinedAnnotation *)
+    sAnnotator = nullptr;
 
-                namespace Engine
-{
-    namespace Render {
+    ID3D11DeviceContext *GetDeviceContext()
+    {
+        return sDeviceContext;
+    }
 
-        THREADLOCAL(ID3D11Device *) sDevice = nullptr;
-        THREADLOCAL(ID3D11DeviceContext *) sDeviceContext = nullptr;
+    ID3D11Device *GetDevice()
+    {
+        return sDevice;
+    }
 
-        ID3D11DeviceContext *GetDeviceContext()
-        {
-            return sDeviceContext;
-        }
+    DirectX11RenderContext::DirectX11RenderContext(Threading::TaskQueue *queue)
+        : UniqueComponent(queue)
+    {
+        HRESULT hr;
 
-        ID3D11Device *GetDevice()
-        {
-            return sDevice;
-        }
+        UINT createDeviceFlags = D3D11_CREATE_DEVICE_DEBUG;
 
-        DirectX11RenderContext::DirectX11RenderContext(Threading::TaskQueue *queue)
-            : UniqueComponent(queue)
-        {
-            HRESULT hr;
+        // These are the feature levels that we will accept.
+        D3D_FEATURE_LEVEL featureLevels[] = {
+            D3D_FEATURE_LEVEL_11_1,
+            D3D_FEATURE_LEVEL_11_0,
+            D3D_FEATURE_LEVEL_10_1,
+            D3D_FEATURE_LEVEL_10_0,
+            D3D_FEATURE_LEVEL_9_3,
+            D3D_FEATURE_LEVEL_9_2,
+            D3D_FEATURE_LEVEL_9_1
+        };
 
-            UINT createDeviceFlags = D3D11_CREATE_DEVICE_DEBUG;
+        // This will be the feature level that
+        // is used to create our device and swap chain.
+        D3D_FEATURE_LEVEL featureLevel;
 
-            // These are the feature levels that we will accept.
-            D3D_FEATURE_LEVEL featureLevels[] = {
-                D3D_FEATURE_LEVEL_11_1,
-                D3D_FEATURE_LEVEL_11_0,
-                D3D_FEATURE_LEVEL_10_1,
-                D3D_FEATURE_LEVEL_10_0,
-                D3D_FEATURE_LEVEL_9_3,
-                D3D_FEATURE_LEVEL_9_2,
-                D3D_FEATURE_LEVEL_9_1
-            };
+        assert(sDeviceContext == nullptr);
 
-            // This will be the feature level that
-            // is used to create our device and swap chain.
-            D3D_FEATURE_LEVEL featureLevel;
+        hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE,
+            nullptr, createDeviceFlags, featureLevels, _countof(featureLevels),
+            D3D11_SDK_VERSION, &sDevice, &featureLevel,
+            &sDeviceContext);
 
-            assert(sDeviceContext == nullptr);
-
+        if (hr == E_INVALIDARG) {
             hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE,
-                nullptr, createDeviceFlags, featureLevels, _countof(featureLevels),
+                nullptr, createDeviceFlags, &featureLevels[1], _countof(featureLevels) - 1,
                 D3D11_SDK_VERSION, &sDevice, &featureLevel,
                 &sDeviceContext);
-
-            if (hr == E_INVALIDARG) {
-                hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE,
-                    nullptr, createDeviceFlags, &featureLevels[1], _countof(featureLevels) - 1,
-                    D3D11_SDK_VERSION, &sDevice, &featureLevel,
-                    &sDeviceContext);
-            }
-
-            DX11_CHECK(hr);
         }
 
-        DirectX11RenderContext::~DirectX11RenderContext()
-        {
-            if (sDevice) {
-                sDevice->Release();
-                sDevice = nullptr;
-            }
-        }
+        sDeviceContext->QueryInterface(IID_PPV_ARGS(&sAnnotator));
 
-        std::unique_ptr<RenderTarget> DirectX11RenderContext::createRenderTexture(const Vector2i &size, const RenderTextureConfig &config)
-        {
-            return std::make_unique<DirectX11RenderTexture>(this, size, config);
-        }
-
-        std::unique_ptr<RenderTarget> DirectX11RenderContext::createRenderWindow(Window::OSWindow *w)
-        {
-            checkThread();
-
-            return std::make_unique<DirectX11RenderWindow>(this, w);
-        }
-
+        DX11_CHECK(hr);
     }
+
+    DirectX11RenderContext::~DirectX11RenderContext()
+    {
+        if (sDevice) {
+            sDevice->Release();
+            sDevice = nullptr;
+        }
+    }
+
+    std::unique_ptr<RenderTarget> DirectX11RenderContext::createRenderTexture(const Vector2i &size, const RenderTextureConfig &config)
+    {
+        return std::make_unique<DirectX11RenderTexture>(this, size, config);
+    }
+
+    std::unique_ptr<RenderTarget> DirectX11RenderContext::createRenderWindow(Window::OSWindow *w, size_t samples)
+    {
+        checkThread();
+
+        return std::make_unique<DirectX11RenderWindow>(this, w);
+    }
+
+}
 }

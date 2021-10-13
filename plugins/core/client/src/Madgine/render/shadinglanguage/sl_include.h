@@ -1,25 +1,23 @@
 
 #include "Meta/math/matrix4.h"
 
-#define NAMED(Name, Type)                                 \
-    struct field_Name_##Name {                            \
-        static constexpr const char *sName = #Name; \
-    };                                                    \
-    Engine::Render::ShadingLanguage::Named<Type, field_Name_##Name> Name
+#define struct struct alignas(16)
 
-#define parameters struct alignas(16)
-
-#define float3(Name) NAMED(Name, Engine::Vector3)
-#define float4x4(Name) NAMED(Name, Engine::Matrix4)
-#define bool(Name) NAMED(Name, uint32_t)
+#define int2 alignas(8) Engine::Vector2i
+#define float3 alignas(16) Engine::Vector3
+#define float4 alignas(16) Engine::Vector4
+#define float4x4 alignas(16) Engine::Matrix4
+#define bool uint32_t
 
 #include STRINGIFY2(SL_SHADER.sl)
 
 #undef NAMED
 
-#undef parameters
+#undef struct
 
+#undef int2
 #undef float3
+#undef float4
 #undef float4x4
 #undef bool
 

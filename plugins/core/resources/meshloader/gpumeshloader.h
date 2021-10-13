@@ -33,6 +33,7 @@ namespace Render {
                     loader = &GPUMeshLoader::getSingleton();
                 loader->update(*getDataPtr(*this, loader), std::move(mesh));
             }
+
         };
 
         GPUMeshLoader();
@@ -42,6 +43,8 @@ namespace Render {
 
         virtual bool generate(GPUMeshData &data, const MeshData &mesh) = 0;
         virtual bool generate(GPUMeshData &data, MeshData &&mesh) = 0;
+
+        void generateMaterials(GPUMeshData &data, const MeshData &mesh);
 
         virtual void update(GPUMeshData &data, const MeshData &mesh) = 0;
         virtual void update(GPUMeshData &data, MeshData &&mesh) = 0;

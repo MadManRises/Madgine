@@ -20,8 +20,8 @@
 namespace Engine {
 namespace Render {
 
-    DirectX12RenderTarget::DirectX12RenderTarget(DirectX12RenderContext *context)
-        : RenderTarget(context)
+    DirectX12RenderTarget::DirectX12RenderTarget(DirectX12RenderContext *context, bool global, std::string name)
+        : RenderTarget(context, global, name)
     {
     }
 
@@ -29,7 +29,7 @@ namespace Render {
     {
     }
 
-    void DirectX12RenderTarget::setup(OffsetPtr targetView, const Vector2i &size, const RenderTextureConfig &config)
+    void DirectX12RenderTarget::setup(OffsetPtr targetView, const Vector2i &size)
     {
         /*if (mTargetView) {
             mTargetView->Release();
@@ -131,8 +131,9 @@ namespace Render {
         }*/
     }
 
-    void DirectX12RenderTarget::beginFrame()
+    void DirectX12RenderTarget::beginIteration(size_t iteration)
     {
+        context()->mCommandList.mList->SetGraphicsRootSignature(context()->mRootSignature);
 
         const Vector2i &screenSize = size();
 
@@ -169,7 +170,23 @@ namespace Render {
 
         //sDeviceContext->PSSetSamplers(0, 2, mSamplers);
 
-        RenderTarget::beginFrame();
+        RenderTarget::beginIteration(iteration);
+    }
+
+    void DirectX12RenderTarget::endIteration(size_t iteration)
+    {
+        RenderTarget::endIteration(iteration);
+        context()->ExecuteCommandList(context()->mCommandList);
+    }
+    
+    void DirectX12RenderTarget::pushAnnotation(const char *tag)
+    {
+        PIXBeginEvent(DirectX12RenderContext::getSingleton().mCommandList.mList, PIX_COLOR(255, 255, 255), tag);
+    }
+
+    void DirectX12RenderTarget::popAnnotation()
+    {
+        PIXEndEvent(DirectX12RenderContext::getSingleton().mCommandList.mList);
     }
 
     void DirectX12RenderTarget::setRenderSpace(const Rect2i &space)
@@ -192,7 +209,7 @@ namespace Render {
         DirectX12RenderContext::getSingleton().mCommandList.mList->RSSetScissorRects(1, &scissorRect);
     }
 
-    void DirectX12RenderTarget::renderMesh(GPUMeshData *m, Program *p)
+    void DirectX12RenderTarget::renderMesh(GPUMeshData *m, Program *p, const GPUMeshData::Material *material)
     {
         DirectX12MeshData *mesh = static_cast<DirectX12MeshData *>(m);
         DirectX12Program *program = static_cast<DirectX12Program *>(p);
@@ -200,24 +217,36 @@ namespace Render {
         if (!mesh->mVAO)
             return;
 
-        mesh->mVAO.bind(program);
+        program->bind(&mesh->mVAO);
 
-        constexpr D3D12_PRIMITIVE_TOPOLOGY modes[] {
-            D3D_PRIMITIVE_TOPOLOGY_POINTLIST,
-            D3D_PRIMITIVE_TOPOLOGY_LINELIST,
-            D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
-        };
-
-        assert(mesh->mGroupSize > 0 && mesh->mGroupSize <= 3);
-        D3D12_PRIMITIVE_TOPOLOGY mode = modes[mesh->mGroupSize - 1];
-        DirectX12RenderContext::getSingleton().mCommandList.mList->IASetPrimitiveTopology(mode);
+        if (material)
+            bindTextures({ { material->mDiffuseHandle, TextureType_2D } });
 
         if (mesh->mIndices) {
             DirectX12RenderContext::getSingleton().mCommandList.mList->DrawIndexedInstanced(mesh->mElementCount, 1, 0, 0, 0);
         } else {
             DirectX12RenderContext::getSingleton().mCommandList.mList->DrawInstanced(mesh->mElementCount, 1, 0, 0);
         }
-        mesh->mVAO.unbind();
+    }
+
+    void DirectX12RenderTarget::renderMeshInstanced(size_t count, GPUMeshData *m, Program *p, const GPUMeshData::Material *material)
+    {
+        DirectX12MeshData *mesh = static_cast<DirectX12MeshData *>(m);
+        DirectX12Program *program = static_cast<DirectX12Program *>(p);
+
+        if (!mesh->mVAO)
+            return;
+
+        program->bind(&mesh->mVAO);
+
+        if (material)
+            bindTextures({ { material->mDiffuseHandle, TextureType_2D } });
+
+        if (mesh->mIndices) {
+            DirectX12RenderContext::getSingleton().mCommandList.mList->DrawIndexedInstanced(mesh->mElementCount, count, 0, 0, 0);
+        } else {
+            DirectX12RenderContext::getSingleton().mCommandList.mList->DrawInstanced(mesh->mElementCount, count, 0, 0);
+        }
     }
 
     void DirectX12RenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices)
@@ -232,15 +261,13 @@ namespace Render {
         }
     }
 
-    void DirectX12RenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, TextureHandle texture)
+    void DirectX12RenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, const GPUMeshData::Material *material)
     {
         if (!vertices.empty()) {
             DirectX12MeshData tempMesh;
             DirectX12MeshLoader::getSingleton().generate(tempMesh, { groupSize, std::move(vertices), std::move(indices) });
 
-            tempMesh.mTextureHandle = texture;
-
-            renderMesh(&tempMesh, program);
+            renderMesh(&tempMesh, program, material);
         }
     }
 
@@ -249,9 +276,13 @@ namespace Render {
         DirectX12RenderContext::getSingleton().mCommandList.mList->ClearDepthStencilView(DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.cpuHandle(mDepthStencilView), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
     }
 
-    void DirectX12RenderTarget::bindTextures(const std::vector<TextureHandle> &tex)
+    void DirectX12RenderTarget::bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset)
     {        
         //DirectX12RenderContext::getSingleton().mCommandList->PSSetShaderResources(0, tex.size(), reinterpret_cast<ID3D12ShaderResourceView *const *>(tex.data()));
+    }
+
+    DirectX12RenderContext* DirectX12RenderTarget::context() {
+        return static_cast<DirectX12RenderContext *>(RenderTarget::context());
     }
 
 }

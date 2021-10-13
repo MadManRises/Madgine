@@ -10,20 +10,6 @@ namespace Render {
             return in;
         }
 
-        template <typename T, typename Name>
-        struct alignas(align_helper(sizeof(T))) Named {
-            T mValue;
-
-            operator T& () {
-                return mValue;
-            }
-
-            Named<T, Name>& operator=(const T& v) {
-                mValue = v;
-                return *this;
-            }
-        };
-
     }
 }
 }

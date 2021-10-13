@@ -4,10 +4,9 @@
 
 namespace Engine {
 
-template <typename... Ty>
-struct MultiVector {
+template <template <typename...> typename Container, typename... Ty>
+struct MultiContainer {
 
-    using first_t = type_pack_select_t<0, type_pack<Ty...>>;
     using value_type = std::tuple<Ty...>;
 
     struct pointer;
@@ -65,64 +64,135 @@ struct MultiVector {
 
     struct iterator {
 
-        using iterator_category = typename std::vector<first_t>::iterator::iterator_category;
-        using value_type = typename MultiVector<Ty...>::value_type;
+        using iterator_category = typename Container<std::tuple<Ty...>>::iterator::iterator_category;
+        using value_type = typename MultiContainer<Container,Ty...>::value_type;
         using difference_type = ptrdiff_t;
-        using pointer = typename MultiVector<Ty...>::pointer;
-        using reference = typename MultiVector<Ty...>::reference;
+        using pointer = typename MultiContainer<Container, Ty...>::pointer;
+        using reference = typename MultiContainer<Container,Ty...>::reference;
 
         iterator operator+(ptrdiff_t diff) const
         {
-            return { mIndex + diff };
+            return {
+                TupleUnpacker::forEach(mIt, [=](auto &it) {
+                    return it + diff;
+                })
+            };
         }
 
-        size_t mIndex;
+        iterator operator-(ptrdiff_t diff) const
+        {
+            return            
+                { 
+                TupleUnpacker::forEach(mIt, [](auto &it){
+                return it - diff;
+                }
+            };
+        }
+
+        ptrdiff_t operator-(const iterator& other) const {
+            return std::get<0>(mIt) - std::get<0>(other.mIt);
+        }
+
+        constexpr bool
+        operator!=(const iterator &other) const
+        {
+            return std::get<0>(mIt) != std::get<0>(other.mIt);
+        }
+
+        iterator &operator++()
+        {
+            TupleUnpacker::forEach(mIt, [](auto &it) { ++it; });
+            return *this;
+        }
+
+        iterator &operator--()
+        {
+            TupleUnpacker::forEach(mIt, [](auto &it) { --it; });
+            return *this;
+        }
+
+        std::tuple<Ty &...> operator*() const
+        {
+            return { TupleUnpacker::forEach(mIt, [](auto &it) { return std::ref(*it); }) };
+        }
+
+        template <size_t I>
+        decltype(auto) get() const
+        {
+            return std::get<I>(mIt);
+        }
+
+        template <size_t I>
+        decltype(auto) get()
+        {
+            return *std::get<I>(mIt);
+        }
+
+        std::tuple<typename Container<Ty>::iterator...> mIt;
     };
 
     reference at(size_t i)
     {
         return {
-            { std::get<std::vector<Ty>>(mData).at(i)... }
+            { std::get<Container<Ty>>(mData).at(i)... }
         };
     }
 
     const_reference at(size_t i) const
     {
         return {
-            { std::get<std::vector<Ty>>(mData).at(i)... }
+            { std::get<Container<Ty>>(mData).at(i)... }
         };
     }
 
     template <typename... Tuples>
-    reference emplace_back(std::piecewise_construct_t, Tuples &&... tuples)
+    reference emplace_back(std::piecewise_construct_t, Tuples &&...tuples)
     {
-        return { { TupleUnpacker::invokeFromTuple(LIFT(std::get<std::vector<Ty>>(mData).emplace_back, &), std::forward<Tuples>(tuples))... } };
+        return { { TupleUnpacker::invokeFromTuple(LIFT(std::get<Container<Ty>>(mData).emplace_back, &), std::forward<Tuples>(tuples))... } };
+    }
+
+    template <typename... Tuples>
+    iterator emplace(const iterator &where, std::piecewise_construct_t, Tuples &&...tuples)
+    {
+        return { { TupleUnpacker::invokeExpand(LIFT(std::get<Container<Ty>>(mData).emplace, &), std::get<typename Container<Ty>::iterator>(where.mIt), std::forward<Tuples>(tuples))... } };
     }
 
     iterator erase(const iterator &where)
     {
-        (std::get<std::vector<Ty>>(mData).erase(std::get<std::vector<Ty>>(mData).begin() + where.mIndex), ...);
         return {
-            where.mIndex
+            { std::get<Container<Ty>>(mData).erase(std::get<typename Container<Ty>::iterator>(where.mIt))... }
         };
     }
 
     iterator begin()
     {
-        return { 0 };
+        return {
+            TupleUnpacker::forEach(mData, [](auto &v) {
+                return v.begin();
+            })
+        };
+    }
+
+    iterator end()
+    {
+        return {
+            TupleUnpacker::forEach(mData, [](auto &v) {
+                return v.end();
+            })
+        };
     }
 
     pointer data()
     {
         return {
-            { std::get<std::vector<Ty>>(mData).data()... }
+            { std::get<Container<Ty>>(mData).data()... }
         };
     }
 
     reference front()
     {
         return {
-            { std::get<std::vector<Ty>>(mData).front()... }
+            { std::get<Container<Ty>>(mData).front()... }
         };
     }
 
@@ -139,18 +209,18 @@ struct MultiVector {
     reference operator[](size_t i)
     {
         return {
-            { std::get<std::vector<Ty>>(mData)[i]... }
+            { std::get<Container<Ty>>(mData)[i]... }
         };
     }
 
     void pop_back()
     {
-        (std::get<std::vector<Ty>>(mData).pop_back(), ...);
+        (std::get<Container<Ty>>(mData).pop_back(), ...);
     }
 
     void clear()
     {
-        (std::get<std::vector<Ty>>(mData).clear(), ...);
+        (std::get<Container<Ty>>(mData).clear(), ...);
     }
 
     template <size_t I>
@@ -160,11 +230,11 @@ struct MultiVector {
     }
 
 private:
-    std::tuple<std::vector<Ty>...> mData;
+    std::tuple<Container<Ty>...> mData;
 };
 
-template <typename C, typename... Ty>
-struct container_api_impl<C, MultiVector<Ty...>> : C {
+template <typename C, template <typename...> typename Container, typename... Ty>
+struct container_api_impl<C, MultiContainer<Container, Ty...>> : C {
 
     using C::C;
 
@@ -205,7 +275,7 @@ struct container_api_impl<C, MultiVector<Ty...>> : C {
     }
 
     template <typename... _Ty>
-    decltype(auto) emplace_back(_Ty &&... args)
+    decltype(auto) emplace_back(_Ty &&...args)
     {
         return C::emplace_back(std::forward<_Ty>(args)...);
     }
@@ -236,5 +306,4 @@ struct container_api_impl<C, MultiVector<Ty...>> : C {
         return C::template get<I>();
     }
 };
-
 }

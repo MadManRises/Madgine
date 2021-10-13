@@ -81,7 +81,7 @@ namespace Tools {
     {
         mCamera.mPosition = { 0, 0.5, -1 };
 
-        mRenderTarget = context->createRenderTexture({ 100, 100 });
+        mRenderTarget = context->createRenderTexture({ 1000, 1000 }, { .mSamples = 4, .mName = "SceneView" });
 
 		mRenderTarget->addRenderPass(&mSceneRenderer);
 
@@ -124,7 +124,8 @@ namespace Tools {
 
             ImVec2 region = ImGui::GetContentRegionAvail();
             mRenderTarget->resize({ static_cast<int>(region.x), static_cast<int>(region.y) });
-            bool pressed = ImGui::ImageButton((void *)mRenderTarget->texture(), region, { 0, 0 }, { 1, 1 }, 0);
+            mRenderTarget->render();
+            bool pressed = ImGui::ImageButton((void *)mRenderTarget->texture().mTextureHandle, region, { 0, 0 }, { 1, 1 }, 0);
 			if (pressed && !mState.mDragging[0])
                 if (!Im3D::IsAnyObjectHovered())
                     mEditor->deselect();
@@ -180,7 +181,7 @@ namespace Tools {
                     if (mDraggedAxis != 2)
                         distance.z = 0.0f;
 
-                    mDragTransform->setPosition(mDragStoredPosition + mDragTransform.parentMatrix().ToMat3().Inverse() * distance);
+                    mDragTransform->setPosition(mDragStoredPosition + mDragTransform->parentMatrix().ToMat3().Inverse() * distance);
                 }
             }
 
@@ -193,9 +194,9 @@ namespace Tools {
                     e->addComponent<Scene::Entity::Mesh>().get()->set(resource);
                     mEditor->select(e);
                 } else if (ImGui::IsDraggableValueTypeBeingAccepted(resource)) {
-                    resource->setPersistent(true);
-                    Render::GPUMeshLoader::HandleType handle = resource->loadData();
-                    Im3D::NativeMesh(handle->mTextureHandle, handle->mAABB, TranslationMatrix(pos));
+                    Render::GPUMeshLoader::HandleType handle = resource->loadData();                    
+                    handle.info()->setPersistent(true);
+                    Im3D::NativeMesh(handle->mMaterials.front().mDiffuseHandle, handle->mAABB, TranslationMatrix(pos));
                 }
                 ImGui::EndDragDropTarget();
             }

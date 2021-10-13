@@ -3,15 +3,18 @@
 namespace Engine {
 namespace Render {
 
-	struct RenderPass {
+    struct RenderPass {
         virtual ~RenderPass() = default;
 
-		virtual void setup(Render::RenderContext *context) {}
+        virtual void setup(RenderTarget *target) { }
         virtual void shutdown() { }
-        virtual void render(Render::RenderTarget *target) = 0;
+        virtual void render(RenderTarget *target, size_t iteration) = 0;
+        virtual void preRender() { }        
 
-		virtual int priority() const = 0;
-	};
+        virtual void onResize(const Vector2i &size) {};
+
+        virtual int priority() const = 0;
+    };
 
 }
 }

@@ -41,7 +41,7 @@ namespace Serialize {
         template <typename T>
         StreamResult readUnformatted(T *&p)
         {
-            static_assert(std::is_base_of_v<SerializableUnitBase, T>);
+            static_assert(std::is_base_of_v<SerializableDataUnit, T>);
 
             if constexpr (std::is_base_of_v<SyncableUnitBase, T>) {
                 SyncableUnitBase *unit;

@@ -187,6 +187,10 @@ namespace Scene {
                 return get();
             }
 
+            void relocate(const EntityComponentHandle<EntityComponentBase>& index) {
+                mHandle.relocate(index);
+            }
+
         protected:
             EntityComponentHandle<T> mHandle;
             SceneManager *mSceneMgr;

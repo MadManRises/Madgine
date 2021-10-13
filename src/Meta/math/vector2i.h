@@ -60,7 +60,7 @@ struct Vector2i {
 
         return *(&x + i);
     }
-        
+
     int *ptr()
     {
         return &x;
@@ -97,5 +97,12 @@ struct Vector2i {
         return in;
     }
 };
+
+constexpr Vector2i min(const Vector2i &first, const Vector2i &second)
+{
+    return {
+        std::min(first.x, second.x), std::min(first.y, second.y)
+    };
+}
 
 }

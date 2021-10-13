@@ -23,7 +23,7 @@ namespace Engine {
 namespace Render {
 
     DirectX11RenderWindow::DirectX11RenderWindow(DirectX11RenderContext *context, Window::OSWindow *w)
-        : DirectX11RenderTarget(context)
+        : DirectX11RenderTarget(context, true, w->title())
         , mWindow(w)
     {
         HRESULT hr;
@@ -77,7 +77,7 @@ namespace Render {
         }
 
         InterfacesVector size = w->renderSize();
-        setup(targetView, { size.x, size.y });
+        setup({ targetView }, { size.x, size.y }, TextureType_2D);
     }
 
     DirectX11RenderWindow::~DirectX11RenderWindow()
@@ -90,28 +90,33 @@ namespace Render {
         }
     }
 
-    void DirectX11RenderWindow::beginFrame()
+    void DirectX11RenderWindow::beginIteration(size_t iteration)
     {
         PROFILE();
 
-        DirectX11RenderTarget::beginFrame();
+        DirectX11RenderTarget::beginIteration(iteration);
     }
 
-    void DirectX11RenderWindow::endFrame()
+    void DirectX11RenderWindow::endIteration(size_t iteration)
     {
-        DirectX11RenderTarget::endFrame();
+        DirectX11RenderTarget::endIteration(iteration);
 
         mSwapChain->Present(0, 0);
     }
 
-    TextureHandle DirectX11RenderWindow::texture() const
+    TextureDescriptor DirectX11RenderWindow::texture(size_t index, size_t iteration) const
+    {
+        return {};
+    }
+        
+    size_t DirectX11RenderWindow::textureCount() const
     {
         return 0;
     }
 
-    TextureHandle DirectX11RenderWindow::depthTexture() const
+    TextureDescriptor DirectX11RenderWindow::depthTexture() const
     {
-        return 0;
+        return {};
     }
 
     Vector2i DirectX11RenderWindow::size() const
@@ -120,12 +125,12 @@ namespace Render {
         return { size.x, size.y };
     }
 
-    bool DirectX11RenderWindow::resize(const Vector2i &size)
+    bool DirectX11RenderWindow::resizeImpl(const Vector2i &size)
     {
-        if (mTargetView) {
-            mTargetView->Release();
-            mTargetView = nullptr;
+        for (ID3D11RenderTargetView *view : mTargetViews) {
+            view->Release();            
         }
+        mTargetViews.clear();
 
         HRESULT hr = mSwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
         DX11_CHECK(hr);
@@ -144,7 +149,7 @@ namespace Render {
             backBuffer = nullptr;
         }
 
-        setup(targetView, size);
+        setup({ targetView }, size, TextureType_2D);
 
         return true;
     }

@@ -12,14 +12,15 @@ namespace Render {
     struct MADGINE_SCENE_RENDERER_EXPORT ShadowRenderPass : RenderPass {
         ShadowRenderPass(Scene::SceneManager &scene, Render::Camera *camera, int priority);
 
-        virtual void setup(Render::RenderContext *context) override;
+        virtual void setup(RenderTarget *target) override;
         virtual void shutdown() override;
-        virtual void render(Render::RenderTarget *target) override;
+        virtual void render(RenderTarget *target, size_t iteration) override;
 
         virtual int priority() const override;
 
         Matrix4 projectionMatrix() const;
         Matrix4 viewMatrix() const;
+        Matrix4 viewProjectionMatrix() const;
 
         void updateFrustum();
 

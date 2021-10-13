@@ -34,7 +34,7 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
         }
 
         template <typename V>
-        bool loadVertices(MeshData &mesh, MeshLoader &loader, const aiScene *scene, const Filesystem::Path &texturePath)
+        bool loadVertices(MeshData &mesh, MeshLoader &loader, const aiScene *scene, std::vector<MeshData::Material> materials)
         {
             std::vector<V> vertices;
             std::vector<unsigned short> indices;
@@ -61,22 +61,6 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
                         unsigned short baseVertexIndex = vertices.size();
                         aiMesh *mesh = scene->mMeshes[node->mMeshes[meshIndex]];
 
-                        aiMaterial *mat = scene->mMaterials[mesh->mMaterialIndex];
-
-                        Vector4 diffuseColor = Vector4::UNIT_SCALE;
-                        Vector4 ambientColor = Vector4::UNIT_SCALE;
-
-                        if constexpr (std::is_same_v<V, Render::Vertex>) {
-                            aiColor3D aiDiffuseColor;
-                            if (AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_DIFFUSE, aiDiffuseColor)) {
-                                diffuseColor = { aiDiffuseColor.r, aiDiffuseColor.g, aiDiffuseColor.b, 1.0f };
-                            }
-                            aiColor3D aiAmbientColor;
-                            if (AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_AMBIENT, aiAmbientColor)) {
-                                ambientColor = { aiAmbientColor.r, aiAmbientColor.g, aiAmbientColor.b, 1.0f };
-                            }
-                        }
-
                         for (size_t vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex) {
                             V &vertex = vertices.emplace_back();
                             aiVector3D v = mesh->mVertices[vertexIndex];
@@ -87,7 +71,7 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
                             }
                             if constexpr (V::template holds<VertexColor>) {
                                 aiColor4D *c = mesh->mColors[0];
-                                vertex.mColor = c ? Vector4 { c->r, c->g, c->b, c->a } : diffuseColor;
+                                vertex.mColor = c ? Vector4 { c->r, c->g, c->b, c->a } : Vector4::UNIT_SCALE;
                             }
                             if constexpr (V::template holds<VertexUV>) {
                                 aiVector3D &uv = mesh->mTextureCoords[0][vertexIndex];
@@ -134,7 +118,7 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
                     }
                 });
 
-            mesh = {3, std::move(vertices), std::move(indices), texturePath};
+            mesh = {3, std::move(vertices), std::move(indices), std::move(materials)};
             return true;
         }
 
@@ -144,7 +128,7 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
 
             std::vector<unsigned char> buffer = info.resource()->readAsBlob();
 
-            const aiScene *scene = importer.ReadFileFromMemory(buffer.data(), buffer.size(), aiProcess_MakeLeftHanded);
+            const aiScene *scene = importer.ReadFileFromMemory(buffer.data(), buffer.size(), aiProcess_MakeLeftHanded | aiProcess_Triangulate);
 
             if (!scene) {
                 LOG_ERROR(importer.GetErrorString());
@@ -156,18 +140,37 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
                 return false;
             }
 
-            Filesystem::Path texturePath;
+            std::vector<MeshData::Material> materials;
             for (size_t materialIndex = 0; materialIndex < scene->mNumMaterials; ++materialIndex) {
                 aiMaterial *mat = scene->mMaterials[materialIndex];
+                if (mat->GetName() == aiString { "DefaultMaterial" })
+                    continue; //TODO: Find proper solution
+
+                MeshData::Material &targetMat = materials.emplace_back();
+                targetMat.mName = mat->GetName().C_Str();
+                aiColor3D aiDiffuseColor;
+                if (AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_DIFFUSE, aiDiffuseColor)) {
+                    targetMat.mDiffuseColor = { aiDiffuseColor.r, aiDiffuseColor.g, aiDiffuseColor.b, 1.0f };
+                }
                 size_t count = mat->GetTextureCount(aiTextureType_DIFFUSE);
                 for (size_t i = 0; i < count; ++i) {
-                    aiString tempTexturePath;
-                    if (mat->GetTexture(aiTextureType_DIFFUSE, 0, &tempTexturePath) != AI_SUCCESS)
-                        std::terminate();
-                    if (tempTexturePath.length > 0) {
-                        if (!texturePath.empty() && texturePath != tempTexturePath.C_Str())
-                            throw "Only one texture is allowed at the moment!";
-                        texturePath = tempTexturePath.C_Str();
+                    aiString diffuseTexturePath;
+                    if (mat->GetTexture(aiTextureType_DIFFUSE, i, &diffuseTexturePath) == AI_SUCCESS && diffuseTexturePath.length > 0) {
+                        std::string diffuseName { Filesystem::Path { diffuseTexturePath.C_Str() }.stem() };
+                        if (!targetMat.mDiffuseName.empty() && targetMat.mDiffuseName != diffuseName)
+                            throw "Only one diffuse texture is allowed at the moment!";
+                        targetMat.mDiffuseName = diffuseName;
+                    }
+                }
+
+                count = mat->GetTextureCount(aiTextureType_EMISSIVE);
+                for (size_t i = 0; i < count; ++i) {
+                    aiString emissiveTexturePath;
+                    if (mat->GetTexture(aiTextureType_EMISSIVE, i, &emissiveTexturePath) == AI_SUCCESS && emissiveTexturePath.length > 0){
+                        std::string emissiveName { Filesystem::Path { emissiveTexturePath.C_Str() }.stem() };
+                        if (!targetMat.mEmissiveName.empty() && targetMat.mEmissiveName != emissiveName)
+                            throw "Only one emissive texture is allowed at the moment!";
+                        targetMat.mEmissiveName = emissiveName;
                     }
                 }
             }
@@ -180,14 +183,14 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
             });
 
             if (!hasSkeleton) {
-                if (texturePath.empty()) {
-                    return loadVertices<Render::Vertex>(mesh, *this, scene, texturePath);
+                if (materials.empty()) {
+                    return loadVertices<Render::Vertex>(mesh, *this, scene, std::move(materials));
                 } else {
-                    return loadVertices<Render::Vertex3>(mesh, *this, scene, texturePath);
+                    return loadVertices<Render::Vertex3>(mesh, *this, scene, std::move(materials));
                 }
             } else {
-                if (texturePath.empty()) {
-                    return loadVertices<Render::Vertex4>(mesh, *this, scene, texturePath);
+                if (materials.empty()) {
+                    return loadVertices<Render::Vertex4>(mesh, *this, scene, std::move(materials));
                 } else {
                     std::terminate();
                 }
@@ -199,7 +202,7 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
             data.mAttributeList = nullptr;
             data.mGroupSize = 0;
             data.mIndices.clear();
-            data.mTexturePath.clear();
+            data.mMaterials.clear();
             data.mVertexSize = 0;
             data.mVertices.clear();            
         }

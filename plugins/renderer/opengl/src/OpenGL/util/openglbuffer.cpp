@@ -11,15 +11,6 @@
 namespace Engine {
 namespace Render {
 
-    OpenGLBuffer::OpenGLBuffer(GLenum target, size_t size)
-        : mTarget(target)
-    {
-        glGenBuffers(1, &mHandle);
-        GL_CHECK();
-
-        resize(size);
-    }
-
     OpenGLBuffer::OpenGLBuffer(GLenum target, const ByteBuffer &data)
         : mTarget(target)
     {
@@ -51,7 +42,7 @@ namespace Render {
 
     OpenGLBuffer::operator bool() const
     {
-        return mHandle != 0;
+        return mSize > 0;
     }
 
     void OpenGLBuffer::bind() const
@@ -80,17 +71,16 @@ namespace Render {
     void OpenGLBuffer::setData(const ByteBuffer &data)
     {
         bind();
-        glBufferData(mTarget, data.mSize, data.mData, GL_STATIC_DRAW);
+        glBufferData(mTarget, data.mSize, data.mData, data.mData ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
         GL_CHECK();
         mSize = data.mSize;
     }
 
     void OpenGLBuffer::resize(size_t size)
     {
-        bind();
-        glBufferData(mTarget, size, nullptr, GL_DYNAMIC_DRAW);
-        GL_CHECK();
-        mSize = size;
+        if (size != mSize) {
+            setData({ nullptr, size });
+        }
     }
 
     WritableByteBuffer OpenGLBuffer::mapData(size_t offset, size_t size)

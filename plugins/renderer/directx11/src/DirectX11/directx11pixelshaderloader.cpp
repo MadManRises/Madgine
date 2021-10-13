@@ -14,6 +14,10 @@
 
 #include "Interfaces/filesystem/api.h"
 
+#include "Madgine/render/shadinglanguage/slloader.h"
+
+#include "codegen/resolveincludes.h"
+
 UNIQUECOMPONENT(Engine::Render::DirectX11PixelShaderLoader);
 
 namespace Engine {
@@ -92,11 +96,18 @@ namespace Render {
         return loadFromSource(shader, res->name(), ss.str());
     }
 
-    bool DirectX11PixelShaderLoader::loadFromSource(DirectX11PixelShader &shader, std::string_view name, std::string_view source)
+    bool DirectX11PixelShaderLoader::loadFromSource(DirectX11PixelShader &shader, std::string_view name, std::string source)
     {
         std::string profile = "latest";
         if (profile == "latest")
             profile = GetLatestPixelProfile();
+
+        std::set<std::string> files;
+
+        CodeGen::resolveIncludes(source, [](const Filesystem::Path &path, size_t line, std::string_view filename) {
+            Resources::ResourceBase *res = SlLoader::get(path.stem());
+            return "#line 1 \"" + path.filename().str() + "\"\n" + res->readAsText() + "\n#line " + std::to_string(line + 1) + " \"" + std::string { filename } + "\"";           
+        }, name, files);
 
         const char *cSource = source.data();
 
@@ -112,7 +123,7 @@ namespace Render {
             flags, 0, &pShaderBlob, &pErrorBlob);
 
         if (FAILED(hr)) {
-            LOG_ERROR("Loading of Shader '" << name << "' failed:");
+            LOG_ERROR("Loading of PixelShader '" << name << "' failed:");
             if (pErrorBlob) {
                 LOG_ERROR((char *)pErrorBlob->GetBufferPointer());
 

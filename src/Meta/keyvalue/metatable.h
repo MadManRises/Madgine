@@ -7,7 +7,8 @@ namespace Engine {
 struct META_EXPORT MetaTable {
     const MetaTable **mSelf;
     const char *mTypeName;
-    const MetaTable **mBase;    
+    const MetaTable **mBase;  
+    size_t(* mBaseOffset)();
     const std::pair<const char *, Accessor> *mMember;
     const Constructor *mConstructors;
 

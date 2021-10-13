@@ -2,22 +2,21 @@
 
 precision highp float;
 
+#include "im3d.sl"
+
 uniform PerApplication
 {
-	mat4 p;	
+	Im3DPerApplication app;
 };
 
 uniform PerFrame
 {
-	mat4 v;
+	Im3DPerFrame frame;
 };
 
 uniform PerObject
 {
-	mat4 m;
-	
-	bool hasTexture;
-	bool hasDistanceField;
+	Im3DPerObject object;
 };
 
 uniform sampler2D tex;

@@ -31,7 +31,7 @@ namespace Tools {
         void finalize() override;
 
         virtual void newFrame(float timeSinceLastFrame) = 0;
-        virtual void render(Render::RenderTarget *target) override;
+        virtual void render(Render::RenderTarget *target, size_t iteration) override;
 
         virtual void renderMainDrawList() = 0;
 

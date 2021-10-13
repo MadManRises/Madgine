@@ -6,13 +6,10 @@
 
 #include "texture.h"
 
+#include "render/texturedescriptor.h"
+
 namespace Engine {
 namespace Render {
-
-    enum DataFormat {
-        FORMAT_FLOAT8,
-        FORMAT_FLOAT32
-    };
 
     enum WrapMode {
         WRAP_CLAMP_TO_EDGE		
@@ -36,7 +33,8 @@ namespace Render {
             {
             }
 
-			void create(std::string_view name, DataFormat format, TextureLoader *loader = nullptr);
+			void create(std::string_view name, TextureType type, DataFormat format, TextureLoader *loader = nullptr);
+            void loadFromImage(std::string_view name, TextureType type, DataFormat format, TextureLoader *loader = nullptr);
 
             void setData(Vector2i size, const ByteBuffer &data, TextureLoader *loader = nullptr);
             void setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data, TextureLoader *loader = nullptr);
@@ -44,7 +42,7 @@ namespace Render {
 
         TextureLoader();
 
-        virtual bool create(Texture &tex, DataFormat format) = 0;
+        virtual bool create(Texture &tex, TextureType type, DataFormat format) = 0;
 
         virtual void setData(Texture &tex, Vector2i size, const ByteBuffer &data) = 0;
         virtual void setSubData(Texture &tex, Vector2i offset, Vector2i size, const ByteBuffer &data) = 0;

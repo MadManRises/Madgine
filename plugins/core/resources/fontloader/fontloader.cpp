@@ -102,7 +102,7 @@ namespace Render {
 
     bool FontLoader::loadImpl(Font &font, ResourceDataInfo &info)
     {
-        font.mTexture.create(info.resource()->name(), FORMAT_FLOAT8);        
+        font.mTexture.create(info.resource()->name(), TextureType_2D, FORMAT_RGBA8);        
         //font.mTextureHandle = &font.mTexture->mTextureHandle;
 
         if (info.resource()->path().extension() == ".msdf") {

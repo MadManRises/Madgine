@@ -11,18 +11,17 @@ namespace Render {
 
     struct MADGINE_DIRECTX12_EXPORT DirectX12MeshData : GPUMeshData {
 
+
         void reset()
         {
-            mTexture.reset();
+            mMaterials.clear();
             mVertices.reset();
             mIndices.reset();
             mVAO.reset();
         }
 
-        DirectX12Texture mTexture;
         DirectX12Buffer mVertices;
         DirectX12Buffer mIndices;
-        size_t mGroupSize;
         size_t mElementCount;
         DirectX12VertexArray mVAO;
     };

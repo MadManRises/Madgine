@@ -9,6 +9,8 @@
 
 #include "Generic/bytebuffer.h"
 
+#include "openglvertexarray.h"
+
 METATABLE_BEGIN(Engine::Render::OpenGLProgram)
 READONLY_PROPERTY(UniformBuffers, uniformBuffers)
 METATABLE_END(Engine::Render::OpenGLProgram)
@@ -30,6 +32,7 @@ namespace Render {
     OpenGLProgram::OpenGLProgram(OpenGLProgram &&other)
         : mHandle(std::exchange(other.mHandle, 0))
         , mUniformBuffers(std::move(other.mUniformBuffers))
+        , mInstanceBuffer(std::move(other.mInstanceBuffer))
     {
     }
 
@@ -44,16 +47,19 @@ namespace Render {
         return *this;
     }
 
-    bool OpenGLProgram::link(typename OpenGLShaderLoader::HandleType vertexShader, typename OpenGLShaderLoader::HandleType pixelShader)
+    bool OpenGLProgram::link(typename OpenGLShaderLoader::HandleType vertexShader, typename OpenGLShaderLoader::HandleType pixelShader, typename OpenGLShaderLoader::HandleType geometryShader)
     {
         reset();
 
-        if (vertexShader->mType != VertexShader || pixelShader->mType != PixelShader)
+        if (vertexShader->mType != VertexShader || (pixelShader && pixelShader->mType != PixelShader) || (geometryShader && geometryShader->mType != GeometryShader))
             std::terminate();
 
         mHandle = glCreateProgram();
         glAttachShader(mHandle, vertexShader->mHandle);
-        glAttachShader(mHandle, pixelShader->mHandle);
+        if (pixelShader)
+            glAttachShader(mHandle, pixelShader->mHandle);
+        if (geometryShader)
+            glAttachShader(mHandle, geometryShader->mHandle);
 
         glLinkProgram(mHandle);
         // check for linking errors
@@ -115,8 +121,10 @@ namespace Render {
         }
     }
 
-    void OpenGLProgram::bind()
+    void OpenGLProgram::bind(OpenGLVertexArray *format)
     {
+        format->bind(this, mInstanceBuffer, mInstanceDataSize);
+
         assert(mHandle);
         glUseProgram(mHandle);
         GL_CHECK();
@@ -148,16 +156,19 @@ namespace Render {
 #endif
     }
 
-    void OpenGLProgram::setParameters(size_t index, size_t size)
-    {
-        if (mUniformBuffers.size() <= index)
-            mUniformBuffers.resize(index + 1);
+    void OpenGLProgram::unbind(OpenGLVertexArray* format) {
+        uint8_t index = format->mFormat;
+        format->unbind(this);
+    }
 
-        if (!mUniformBuffers[index]) {
-            mUniformBuffers[index] = { GL_UNIFORM_BUFFER, size };
-        } else {
-            mUniformBuffers[index].resize(size);
+    void OpenGLProgram::setParametersSize(size_t index, size_t size)
+    {
+        if (mUniformBuffers.size() <= index) {
+            mUniformBuffers.reserve(index + 1);
+            while (mUniformBuffers.size() <= index)
+                mUniformBuffers.emplace_back(GL_UNIFORM_BUFFER);
         }
+        mUniformBuffers[index].resize(size);
     }
 
     WritableByteBuffer OpenGLProgram::mapParameters(size_t index)
@@ -165,19 +176,31 @@ namespace Render {
         return mUniformBuffers[index].mapData();
     }
 
+    void OpenGLProgram::setInstanceDataSize(size_t size)
+    {
+        mInstanceDataSize = size;
+    }
+
+    void OpenGLProgram::setInstanceData(const ByteBuffer &data)
+    {
+        mInstanceBuffer.setData(data);
+    }
+
     void OpenGLProgram::setDynamicParameters(size_t index, const ByteBuffer &data)
     {
-        if (mShaderStorageBuffers.size() <= index)
-            mShaderStorageBuffers.resize(index + 1);
-
-#if !OPENGL_ES
-        if (!mShaderStorageBuffers[index]) {
-            mShaderStorageBuffers[index] = { GL_SHADER_STORAGE_BUFFER, data.mSize };
-        } else
+        if (mShaderStorageBuffers.size() <= index) {
+            mShaderStorageBuffers.reserve(index + 1);
+            while (mShaderStorageBuffers.size() <= index)
+                mShaderStorageBuffers.emplace_back(
+#if OPENGL_ES
+                    GL_UNIFORM_BUFFER
+#else
+                    GL_SHADER_STORAGE_BUFFER
 #endif
-        {
-            mShaderStorageBuffers[index].resize(data.mSize);
+                );
         }
+
+        mShaderStorageBuffers[index].resize(data.mSize);
 
         if (data.mSize > 0) {
             auto target = mShaderStorageBuffers[index].mapData();

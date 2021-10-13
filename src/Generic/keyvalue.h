@@ -45,7 +45,7 @@ struct KeyValue<T, std::void_t<std::invoke_result_t<decltype(&T::key), T *>>> {
 };
 
 template <typename T>
-struct KeyValue<T *> {
+struct KeyValue<T *, std::void_t<std::invoke_result_t<decltype(&T::key), T *>>> {
     static T *value(T *v)
     {
         return v;
@@ -58,7 +58,7 @@ struct KeyValue<T *> {
 };
 
 template <typename T>
-struct KeyValue<T *const> {
+struct KeyValue<T *const, std::void_t<std::invoke_result_t<decltype(&T::key), T *>>> {
     static T *value(T *v)
     {
         return v;

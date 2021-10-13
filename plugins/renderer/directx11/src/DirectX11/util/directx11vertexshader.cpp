@@ -8,6 +8,10 @@
 
 #include "Madgine/resources/resourcebase.h"
 
+#include "Madgine/render/shadinglanguage/slloader.h"
+
+#include "codegen/resolveincludes.h"
+
 namespace Engine {
 namespace Render {
 
@@ -102,7 +106,7 @@ namespace Render {
         }
     }
 
-    void DirectX11VertexShader::bind(DirectX11VertexArray *format)
+    void DirectX11VertexShader::bind(DirectX11VertexArray *format, size_t instanceDataSize)
     {
         uint8_t index = format->mFormat;
         if (mInstances.size() <= index)
@@ -117,6 +121,15 @@ namespace Render {
                 profile = GetLatestVertexProfile();
 
             std::string source = mResource->readAsText();
+
+            std::set<std::string> files;
+
+            CodeGen::resolveIncludes(
+                source, [](const Filesystem::Path &path, size_t line, std::string_view filename) {
+                    Resources::ResourceBase *res = SlLoader::get(path.stem());
+                    return "#line 1 \"" + path.filename().str() + "\"\n" + res->readAsText() + "\n#line " + std::to_string(line + 1) + " \"" + std::string { filename } + "\"";
+                },
+                filename, files);
 
             const char *cSource = source.c_str();
 
@@ -135,22 +148,37 @@ namespace Render {
 
             std::stringstream ss;
 
-            for (const AttributeDescriptor &att : format->mAttributes) {
-                vertexLayoutDesc.push_back({ att.mSemantic,
-                    static_cast<UINT>(att.mSemanticIndex), dxFormat(att), 0, static_cast<UINT>(att.mOffset), D3D11_INPUT_PER_VERTEX_DATA, 0 });
+            for (const AttributeDescriptor &att : format->mAttributes()) {
+                if (att) {
+                    vertexLayoutDesc.push_back({ att.mSemantic,
+                        static_cast<UINT>(att.mSemanticIndex), dxFormat(att), 0, static_cast<UINT>(att.mOffset), D3D11_INPUT_PER_VERTEX_DATA, 0 });
 
-                ss.str("");
-                ss << "HAS_" << att.mSemantic << att.mSemanticIndex;
-                shaderMacroBuffer.push_back(ss.str());
-                shaderMacros.push_back({ shaderMacroBuffer.back().c_str(), nullptr });
+                    ss.str("");
+                    ss << "HAS_" << att.mSemantic << att.mSemanticIndex;
+                    shaderMacroBuffer.push_back(ss.str());
+                    shaderMacros.push_back({ shaderMacroBuffer.back().c_str(), nullptr });
+                }
             }
             shaderMacros.push_back({ nullptr, nullptr });
+
+            if (instanceDataSize > 0) {
+                assert(instanceDataSize % 16 == 0);
+                for (size_t i = 0; i < instanceDataSize / 16; ++i) {
+                    vertexLayoutDesc.push_back({ "INSTANCEDATA",
+                        static_cast<UINT>(i),
+                        DXGI_FORMAT_R32G32B32A32_FLOAT,
+                        1,
+                        i == 0 ? 0 : D3D11_APPEND_ALIGNED_ELEMENT,
+                        D3D11_INPUT_PER_INSTANCE_DATA,
+                        1 });
+                }
+            }
 
             HRESULT hr = D3DCompile(cSource, source.size(), mResource->path().c_str(), shaderMacros.data(), D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", profile.c_str(),
                 flags, 0, &pShaderBlob, &pErrorBlob);
 
             if (FAILED(hr)) {
-                LOG_ERROR("Loading of Shader '" << filename << "' failed:");
+                LOG_ERROR("Loading of VertexShader '" << filename << "' failed:");
                 if (pErrorBlob) {
                     LOG_ERROR((char *)pErrorBlob->GetBufferPointer());
 

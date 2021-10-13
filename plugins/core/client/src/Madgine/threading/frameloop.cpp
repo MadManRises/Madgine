@@ -19,7 +19,7 @@ namespace Threading {
                 stop();
             mLastFrame = now;
         },
-            Threading::TaskMask::ALL, std::chrono::microseconds(1000000 / 60), this);
+            Threading::TaskMask::ALL,  std::chrono::microseconds(/*1*/000000 / 60), this);
     }
 
     FrameLoop::~FrameLoop()

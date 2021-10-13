@@ -28,16 +28,17 @@ namespace Tools {
 
     bool OpenGLToolConfig::init()
     {
-        mImageTexture = { GL_UNSIGNED_BYTE };
+        mImageTexture = { Render::TextureType_2D, Render::FORMAT_RGBA8 };
 
         getTool<Inspector>().addPreviewDefinition<Render::FontLoader::ResourceType>([](Render::FontLoader::ResourceType *font) {
-            font->setPersistent(true);
-            ImGui::Image((void *)(uintptr_t)font->loadData()->mTexture->mTextureHandle, { 100, 100 });
+            Render::FontLoader::HandleType handle = font->loadData();
+            handle.info()->setPersistent(true);
+            ImGui::Image((void *)(uintptr_t)handle->mTexture->mTextureHandle, { 100, 100 });
         });
 
         getTool<Inspector>().addPreviewDefinition<Resources::ImageLoader::ResourceType>([this](Resources::ImageLoader::ResourceType *image) {
-            image->setPersistent(true);
             Resources::ImageLoader::HandleType data = image->loadData();
+            data.info()->setPersistent(true);
 
             mImageTexture.setData({ data->mWidth, data->mHeight }, { data->mBuffer, static_cast<size_t>(data->mWidth * data->mHeight) });
             ImGui::Image((void *)(uintptr_t)mImageTexture.mTextureHandle, { static_cast<float>(data->mWidth), static_cast<float>(data->mHeight) });
@@ -50,7 +51,7 @@ namespace Tools {
     {
         mImageTexture.reset();
 
-		ToolBase::finalize();
+        ToolBase::finalize();
     }
 
     std::string_view OpenGLToolConfig::key() const
@@ -68,4 +69,3 @@ METATABLE_END(Engine::Tools::OpenGLToolConfig)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::OpenGLToolConfig, Engine::Tools::ToolBase)
 SERIALIZETABLE_END(Engine::Tools::OpenGLToolConfig)
-

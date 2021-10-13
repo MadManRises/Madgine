@@ -380,7 +380,7 @@ namespace Tools {
                 ImGui::EndDragDropTarget();
             }
 
-            Matrix4 transformM = transform->worldMatrix(mSceneMgr->entityComponentList<Engine::Scene::Entity::Transform>());
+            Matrix4 transformM = transform->worldMatrix();
             AABB bb = { { -0.2f, -0.2f, -0.2f }, { 0.2f, 0.2f, 0.2f } };
             if (node.mEntity->hasComponent<Scene::Entity::Mesh>() && node.mEntity->getComponent<Scene::Entity::Mesh>()->data())
                 bb = node.mEntity->getComponent<Scene::Entity::Mesh>()->aabb();
@@ -458,9 +458,9 @@ namespace Tools {
 
         if (Engine::Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> t = entity->getComponent<Scene::Entity::Transform>()) {
             constexpr Vector4 colors[] = {
-                { 0.5f, 0, 0, 0.5f },
-                { 0, 0.5f, 0, 0.5f },
-                { 0, 0, 0.5f, 0.5f }
+                { 0.5f, 0, 0, 0.7f },
+                { 0, 0.5f, 0, 0.7f },
+                { 0, 0, 0.5f, 0.7f }
             };
             constexpr Vector3 offsets[] = {
                 { 1, 0, 0 },
@@ -477,7 +477,7 @@ namespace Tools {
             mHoveredAxis = -1;
             mHoveredTransform = {};
 
-            Vector3 pos = (t->worldMatrix(mSceneMgr->entityComponentList<Scene::Entity::Transform>()) * Vector4::UNIT_W).xyz();
+            Vector3 pos = (t->worldMatrix() * Vector4::UNIT_W).xyz();
 
             for (size_t i = 0; i < 3; ++i) {
                 Im3D::Arrow3D(IM3D_TRIANGLES, 0.1f, pos, pos + offsets[i], colors[i]);
@@ -493,7 +493,7 @@ namespace Tools {
                         const Engine::Render::Bone &bone = skeleton->mBones[i];
 
                         Matrix4 m = s->matrices()[i] * bone.mOffsetMatrix.Inverse() * skeleton->mMatrix.Inverse();
-                        Matrix4 world = t->worldMatrix(mSceneMgr->entityComponentList<Scene::Entity::Transform>());
+                        Matrix4 world = t->worldMatrix();
 
                         if (mShowBoneNames)
                             Im3D::Text(bone.mName.c_str(), Im3D::TextParameters { world * m, 2.0f });
@@ -583,8 +583,8 @@ namespace Tools {
         Scene::Entity::EntityPtr parent;
 
         if (transform) {
-            const Scene::Entity::EntityComponentHandle<Scene::Entity::Transform> &parentTransform = transform->parent();
-            if (parentTransform.mIndex) {
+            Scene::Entity::Transform *parentTransform = transform->parent();
+            if (parentTransform) {
                 for (Scene::Entity::EntityPtr p : mSceneMgr->entities()) {
                     if (p->getComponent<Scene::Entity::Transform>() == parentTransform) {
                         parent = p;

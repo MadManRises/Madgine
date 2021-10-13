@@ -21,6 +21,8 @@ namespace Scene {
             virtual void erase(const EntityComponentHandle<EntityComponentBase> &index) = 0;
             virtual bool empty() = 0;
             virtual void clear() = 0;
+            virtual size_t size() const = 0;
+            virtual void updateRender() = 0;
 
             
             Serialize::StreamResult readState(const EntityComponentHandle<EntityComponentBase> &index, Serialize::SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy);

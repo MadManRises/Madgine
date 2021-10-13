@@ -45,32 +45,15 @@ public:
     template <typename T>
     struct ComponentRegistrator : IndexHolder {
         ComponentRegistrator()
-            : mIndex(sInstance().mInfo.template registerComponent<T>())
-            , mBaseIndex(sInstance().mInfo.mBaseIndex)
+            : IndexHolder{sInstance().mInfo.template registerComponent<T>()
+            , sInstance().mInfo.mBaseIndex}
         {
         }
 
         ~ComponentRegistrator()
         {
             sInstance().mInfo.unregisterComponent(mIndex);
-            mIndex.reset();
         }
-
-        size_t index() const override
-        {
-            assert(isValid());
-            return mIndex + mBaseIndex;
-        }
-
-        bool isValid() const override
-        {
-            return mIndex && mBaseIndex;
-        }
-
-    private:
-        IndexType<size_t> mIndex;
-        //Make it a member to prevent problems through weak symbols during link time
-        IndexType<size_t> &mBaseIndex;
     };
 };
 

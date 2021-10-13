@@ -23,8 +23,11 @@ namespace Render {
 
         void bind(DirectX12VertexArray *format);
 
-        void setParameters(size_t index, size_t size);
+        void setParametersSize(size_t index, size_t size);
         WritableByteBuffer mapParameters(size_t index);
+
+        void setInstanceDataSize(size_t size);
+        void setInstanceData(const ByteBuffer &data);
 
         void setDynamicParameters(size_t index, const ByteBuffer &data);
 
@@ -33,7 +36,8 @@ namespace Render {
         DirectX12PixelShaderLoader::HandleType mPixelShader;
         std::vector<DirectX12Buffer> mConstantBuffers;
         std::vector<DirectX12Buffer> mDynamicBuffers;
-        std::map<DirectX12VertexArray *, ID3D12PipelineState *> mPipelineStates;
+        size_t mInstanceDataSize = 0;
+        DirectX12Buffer mInstanceBuffer;
     };
 
 }

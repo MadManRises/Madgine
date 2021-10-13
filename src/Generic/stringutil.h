@@ -93,6 +93,12 @@ namespace StringUtil {
         return std::move(s);
     }
 
+    inline std::wstring toWString(std::string_view input) {
+        std::wstring s;
+        std::copy(input.begin(), input.end(), std::back_inserter(s));
+        return s;
+    }
+
     template <typename Cont>
     std::string join(Cont &&cont, const char *sep)
     {

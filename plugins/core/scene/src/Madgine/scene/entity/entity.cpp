@@ -165,6 +165,12 @@ namespace Scene {
                 removeComponent(mComponents.begin()->mHandle.mType);
         }
 
+        void Entity::relocateComponent(EntityComponentHandle<EntityComponentBase> newIndex)
+        {
+            auto it = mComponents.find(newIndex.mType);
+            it->mHandle.mIndex = newIndex.mIndex;
+        }
+
         void Entity::remove()
         {
             mSceneManager.remove(this);

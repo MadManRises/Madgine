@@ -7,29 +7,30 @@
 namespace Engine {
 namespace Render {
 
-    DirectX12Texture::DirectX12Texture(TextureType type, DataFormat format, size_t width, size_t height, const ByteBuffer &data)
+    DirectX12Texture::DirectX12Texture(TextureType type, bool isRenderTarget, DataFormat format, size_t width, size_t height, const ByteBuffer &data)
         : mType(type)
         , mSize { static_cast<int>(width), static_cast<int>(height) }
         , mFormat(format)
+        , mIsRenderTarget(isRenderTarget)
     {
         DXGI_FORMAT xFormat;
         D3D12_SRV_DIMENSION dimension;
         size_t byteCount;
         switch (format) {
-        case FORMAT_FLOAT8:
+        case FORMAT_RGBA8:
             xFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
             byteCount = 4;
             break;
-        case FORMAT_FLOAT32:
-            xFormat = DXGI_FORMAT_R32G32B32A32_FLOAT;
-            byteCount = 16;
+        case FORMAT_RGBA16F:
+            xFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
+            byteCount = 8;
             break;
         default:
             std::terminate();
         }
 
         switch (type) {
-        case Texture2D: {
+        case TextureType_2D: {
             D3D12_RESOURCE_DESC textureDesc;
             ZeroMemory(&textureDesc, sizeof(D3D12_RESOURCE_DESC));
 
@@ -40,7 +41,7 @@ namespace Render {
             textureDesc.MipLevels = 1;
             textureDesc.SampleDesc.Count = 1;
             textureDesc.SampleDesc.Quality = 0;
-            textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+            textureDesc.Flags = isRenderTarget ? D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET : D3D12_RESOURCE_FLAG_NONE;
             textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 
             auto heapDesc = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
@@ -48,11 +49,12 @@ namespace Render {
                 &heapDesc,
                 D3D12_HEAP_FLAG_NONE,
                 &textureDesc,
-                D3D12_RESOURCE_STATE_COPY_DEST,
+                data.mData ? D3D12_RESOURCE_STATE_COPY_DEST : isRenderTarget ? D3D12_RESOURCE_STATE_RENDER_TARGET : D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
                 nullptr,
                 IID_PPV_ARGS(&mResource));
             DX12_CHECK(hr);
             if (data.mData) {
+                assert(!isRenderTarget);
                 const UINT64 uploadBufferSize = GetRequiredIntermediateSize(mResource, 0, 1);
 
                 heapDesc = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
@@ -73,39 +75,11 @@ namespace Render {
                 subResourceDesc.SlicePitch = subResourceDesc.RowPitch * height;
 
                 UpdateSubresources(DirectX12RenderContext::getSingleton().mTempCommandList.mList, mResource, uploadHeap, 0, 0, 1, &subResourceDesc);
-                auto transition = CD3DX12_RESOURCE_BARRIER::Transition(mResource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+                auto transition = CD3DX12_RESOURCE_BARRIER::Transition(mResource, D3D12_RESOURCE_STATE_COPY_DEST, isRenderTarget ? D3D12_RESOURCE_STATE_RENDER_TARGET : D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
                 DirectX12RenderContext::getSingleton().mTempCommandList.mList->ResourceBarrier(1, &transition);
 
-                DirectX12RenderContext::getSingleton().ExecuteCommandList(DirectX12RenderContext::getSingleton().mTempCommandList, [uploadHeap]() { uploadHeap->Release(); });                
+                DirectX12RenderContext::getSingleton().ExecuteCommandList(DirectX12RenderContext::getSingleton().mTempCommandList, [uploadHeap]() { uploadHeap->Release(); });
             }
-            dimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-
-            break;
-        }        
-        case RenderTarget2D: {
-            D3D12_RESOURCE_DESC textureDesc;
-            ZeroMemory(&textureDesc, sizeof(D3D12_RESOURCE_DESC));
-
-            textureDesc.DepthOrArraySize = 1;
-            textureDesc.Format = xFormat;
-            textureDesc.Width = width;
-            textureDesc.Height = height;
-            textureDesc.MipLevels = 1;
-            textureDesc.SampleDesc.Count = 1;
-            textureDesc.SampleDesc.Quality = 0;
-            textureDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-            textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-
-            auto heapDesc = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-            HRESULT hr = sDevice->CreateCommittedResource(
-                &heapDesc,
-                D3D12_HEAP_FLAG_NONE,
-                &textureDesc,
-                D3D12_RESOURCE_STATE_RENDER_TARGET,
-                nullptr,
-                IID_PPV_ARGS(&mResource));
-            DX12_CHECK(hr);
-            assert(!data.mData);
             dimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 
             break;
@@ -124,13 +98,14 @@ namespace Render {
 
         OffsetPtr handle = DirectX12RenderContext::getSingleton().mDescriptorHeap.allocate();
         mTextureHandle = DirectX12RenderContext::getSingleton().mDescriptorHeap.gpuHandle(handle).ptr;
-        sDevice->CreateShaderResourceView(mResource, &shaderResourceViewDesc, DirectX12RenderContext::getSingleton().mDescriptorHeap.cpuHandle(handle));      
+        sDevice->CreateShaderResourceView(mResource, &shaderResourceViewDesc, DirectX12RenderContext::getSingleton().mDescriptorHeap.cpuHandle(handle));
         DX12_CHECK();
     }
 
-    DirectX12Texture::DirectX12Texture(TextureType type, DataFormat format)
+    DirectX12Texture::DirectX12Texture(TextureType type, bool isRenderTarget, DataFormat format)
         : mType(type)
         , mFormat(format)
+        , mIsRenderTarget(isRenderTarget)
     {
     }
 
@@ -139,6 +114,7 @@ namespace Render {
         , mType(other.mType)
         , mFormat(std::exchange(other.mFormat, {}))
         , mSize(other.mSize)
+        , mIsRenderTarget(std::exchange(other.mIsRenderTarget, false))
     {
         mTextureHandle = std::exchange(other.mTextureHandle, 0);
     }
@@ -154,7 +130,8 @@ namespace Render {
         std::swap(mTextureHandle, other.mTextureHandle);
         std::swap(mType, other.mType);
         std::swap(mFormat, other.mFormat);
-        std::swap(mSize, other.mSize);        
+        std::swap(mSize, other.mSize);
+        std::swap(mIsRenderTarget, other.mIsRenderTarget);
         return *this;
     }
 
@@ -176,7 +153,7 @@ namespace Render {
 
     void DirectX12Texture::setData(Vector2i size, const ByteBuffer &data)
     {
-        *this = DirectX12Texture { mType, mFormat, static_cast<size_t>(size.x), static_cast<size_t>(size.y), data };
+        *this = DirectX12Texture { mType, mIsRenderTarget, mFormat, static_cast<size_t>(size.x), static_cast<size_t>(size.y), data };
     }
 
     void DirectX12Texture::setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data)
@@ -256,6 +233,11 @@ namespace Render {
         return mResource;
     }
 
+    TextureDescriptor DirectX12Texture::descriptor() const
+    {
+        return { mTextureHandle, mType };
+    }
+
     /*void DirectX12Texture::setWrapMode(GLint mode)
     {
         bind();
@@ -272,5 +254,10 @@ namespace Render {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
         GL_CHECK();
     }*/
+
+    void DirectX12Texture::setName(std::string_view name)
+    {
+        mResource->SetName(StringUtil::toWString(name).c_str());
+    }
 }
 }

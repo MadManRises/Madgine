@@ -34,24 +34,16 @@ namespace Render {
         tex.reset();
     }
 
-    bool OpenGLTextureLoader::create(Texture &tex, DataFormat format)
+    bool OpenGLTextureLoader::create(Texture &tex, TextureType type, DataFormat format)
     {
-        GLenum type;
-        switch (format) {
-        case FORMAT_FLOAT8:
-            type = GL_UNSIGNED_BYTE;
-            break;
-        default:
-            std::terminate();
-        }
-
-        static_cast<OpenGLTexture &>(tex) = OpenGLTexture { type };
+        static_cast<OpenGLTexture &>(tex) = OpenGLTexture { type, format };
 
         return true;
     }
 
     void OpenGLTextureLoader::setData(Texture &tex, Vector2i size, const ByteBuffer &data)
     {
+        static_cast<OpenGLTexture &>(tex) = { TextureType_2D, DataFormat::FORMAT_RGBA8 };
         static_cast<OpenGLTexture &>(tex).setData(size, data);
     }
 

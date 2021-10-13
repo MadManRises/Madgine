@@ -12,7 +12,6 @@ namespace Render {
 
     public:
         DirectX12Buffer() = default;
-        DirectX12Buffer(size_t size);
         DirectX12Buffer(const ByteBuffer &data);
         DirectX12Buffer(const DirectX12Buffer &) = delete;
         DirectX12Buffer(DirectX12Buffer &&);

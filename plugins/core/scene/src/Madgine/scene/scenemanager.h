@@ -44,6 +44,7 @@ namespace Scene {
         ~SceneManager();
 
         void update();
+        void updateRender();
 
         Future<Entity::EntityPtr> createEntity(const std::string &behavior = "", const std::string &name = "",
             const std::function<void(Entity::Entity &)> &init = {});

@@ -39,11 +39,11 @@ namespace Render {
             Resources::ResourceBase::sUnnamed, {}, [=, file { std::move(file) }](ProgramLoader *loader, Program &program, const ProgramLoader::ResourceDataInfo &info) mutable { return loader->create(program, Resources::ResourceBase::sUnnamed, file); }, {}, loader);
     }
 
-    void ProgramLoader::HandleType::setParameters(size_t index, size_t size, ProgramLoader *loader)
+    void ProgramLoader::HandleType::setParametersSize(size_t index, size_t size, ProgramLoader *loader)
     {
         if (!loader)
             loader = &ProgramLoader::getSingleton();
-        loader->setParameters(*getDataPtr(*this, loader), index, size);
+        loader->setParametersSize(*getDataPtr(*this, loader), index, size);
     }
 
     WritableByteBuffer ProgramLoader::HandleType::mapParameters(size_t index, ProgramLoader *loader)
@@ -51,6 +51,20 @@ namespace Render {
         if (!loader)
             loader = &ProgramLoader::getSingleton();
         return loader->mapParameters(*getDataPtr(*this, loader), index);
+    }
+
+    void ProgramLoader::HandleType::setInstanceDataSize(size_t size, ProgramLoader *loader)
+    {
+        if (!loader)
+            loader = &ProgramLoader::getSingleton();
+        return loader->setInstanceDataSize(*getDataPtr(*this, loader), size);
+    }
+
+    void ProgramLoader::HandleType::setInstanceData(const ByteBuffer &data, ProgramLoader *loader)
+    {
+        if (!loader)
+            loader = &ProgramLoader::getSingleton();
+        return loader->setInstanceData(*getDataPtr(*this, loader), data);
     }
 
     void ProgramLoader::HandleType::setDynamicParameters(size_t index, const ByteBuffer &data, ProgramLoader *loader)

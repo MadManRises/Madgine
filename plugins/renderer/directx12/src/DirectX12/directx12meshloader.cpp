@@ -30,52 +30,22 @@ namespace Render {
 
     void Engine::Render::DirectX12MeshLoader::generateImpl(DirectX12MeshData &data, const MeshData &mesh)
     {
-        data.mGroupSize = mesh.mGroupSize;
+        data.mVertices.setData(mesh.mVertices);
 
-        data.mVAO = { mesh.mAttributeList() };
-        data.mVAO.bind();
-
-        DX12_CHECK();
-
-        bool dynamic = !mesh.mVertices.mData;
-
-        if (!dynamic) {
-            data.mVertices = {
-                mesh.mVertices
-            };
-        } else {
-            data.mVertices = {
-                mesh.mVertices.mSize
-            };
-        }
         data.mVertices.bindVertex(data.mVAO.mStride);
 
         if (mesh.mIndices.empty()) {
             data.mElementCount = mesh.mVertices.mSize / mesh.mVertexSize;
         } else {
-            if (!dynamic) {
-                data.mIndices = {
-                    mesh.mIndices
-                };
-            } else {
-                data.mIndices = {
-                    mesh.mIndices.size() * sizeof(unsigned short)
-                };
-            }
+            data.mIndices.setData(mesh.mIndices);
+
             data.mIndices.bindIndex();
             data.mElementCount = mesh.mIndices.size();
         }
 
-        if (!mesh.mTexturePath.empty()) {
-            std::string_view imageName = mesh.mTexturePath.stem();
-            Resources::ImageLoader::HandleType tex;
-            tex.load(imageName);
+        generateMaterials(data, mesh);
 
-            data.mTexture = { Texture2D, FORMAT_FLOAT8, static_cast<size_t>(tex->mWidth), static_cast<size_t>(tex->mHeight), { tex->mBuffer, static_cast<size_t>(tex->mWidth * tex->mHeight) } };
-            data.mTextureHandle = data.mTexture.mTextureHandle;
-        }
-
-        data.mVAO.unbind();
+        data.mVAO = { mesh.mGroupSize, data.mVertices, data.mIndices, mesh.mAttributeList() };
     }
 
     bool DirectX12MeshLoader::generate(GPUMeshData &_data, const MeshData &mesh)
@@ -104,7 +74,7 @@ namespace Render {
 
     void DirectX12MeshLoader::updateImpl(DirectX12MeshData &data, const MeshData &mesh)
     {
-        data.mGroupSize = mesh.mGroupSize;
+        data.mVAO.mGroupSize = mesh.mGroupSize;
 
         data.mVertices.resize(mesh.mVertices.mSize);
         std::memcpy(data.mVertices.mapData().mData, mesh.mVertices.mData, mesh.mVertices.mSize);

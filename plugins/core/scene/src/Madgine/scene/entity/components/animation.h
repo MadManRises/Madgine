@@ -25,7 +25,7 @@ namespace Scene {
             void setStep(float step);
             float currentStep() const;
 
-            void applyTransform(const EntityPtr &entity);
+            void updateRender(Entity *entity);
 
         private:
             void refreshCache();

@@ -1,29 +1,24 @@
 #version 430 core
 
+#include "sl_support.glsl"
+#include "scene.sl"
+
+#include "light.glsl"
+
+
 layout (std140, binding = 0) uniform PerApplication
 {
-	mat4 p;	
-	mat4 lightProjection;
+	ScenePerApplication app;
 };
 
 layout (std140, binding = 1) uniform PerFrame
 {
-	mat4 v;
-	mat4 lightView;
-
-	vec3 lightColor;
-	vec3 lightDir;
+	ScenePerFrame frame;
 };
 
 layout (std140, binding = 2) uniform PerObject
 {
-	mat4 m;
-	mat4 anti_m;
-
-	bool hasLight;
-	bool hasTexture;
-	bool hasDistanceField;
-	bool hasSkeleton;
+	ScenePerObject object;
 };
 
 layout (std430, binding = 0) buffer Skeleton
@@ -39,6 +34,7 @@ layout(location = 3) in vec3 aNormal;
 layout(location = 4) in vec2 aUV;
 layout(location = 5) in ivec4 aBoneIDs;
 layout(location = 6) in vec4 aWeights;
+layout(location = 7) in SceneInstanceData aInstance;
 
 out vec4 color;
 out vec4 worldPos;
@@ -47,20 +43,22 @@ out vec2 uv;
 out vec4 lightViewPosition;
 
 
+
+
 void main()
 {
-	if (hasSkeleton){
+	if (object.hasSkeleton){
 		mat4 BoneTransform = bones[aBoneIDs[0]] * aWeights[0]
 		+ bones[aBoneIDs[1]] * aWeights[1]
 		+ bones[aBoneIDs[2]] * aWeights[2]
 		+ bones[aBoneIDs[3]] * aWeights[3];
-		worldPos = m * BoneTransform * vec4(aPos, 1.0);
+		worldPos = aInstance.m * BoneTransform * vec4(aPos, 1.0);
 	}else{
-		worldPos = m * vec4(aPos, 1.0);
+		worldPos = aInstance.m * vec4(aPos, 1.0);
 	}
-    gl_Position = p * (v * worldPos + vec4(aPos2, 0.0, 0.0));	
+    gl_Position = app.p * (frame.v * worldPos + vec4(aPos2, 0.0, 0.0));	
     color = aColor;
-	normal = mat3(anti_m) * aNormal;
+	normal = mat3(aInstance.anti_m) * aNormal;
 	uv = vec2(aUV.x, 1.0 - aUV.y);
-	lightViewPosition = lightProjection * (lightView * worldPos + vec4(aPos2, 0.0, 0.0));
+	lightViewPosition = projectShadow(frame.light.caster, worldPos);
 }

@@ -11,7 +11,8 @@ namespace Widgets {
 
         virtual ~SceneWindow();
 
-        std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize) override;
+        virtual std::vector<std::pair<std::vector<Vertex>, TextureSettings>> vertices(const Vector3 &screenSize) override;
+        virtual void preRender() override;
 
         Render::RenderTarget *getRenderTarget();
 

@@ -7,4 +7,4 @@ FolderSources(sources "" "" texture.h textureloader.cpp textureloader.h texturel
 
 add_plugin(TextureLoader Madgine Utility ${sources} PRECOMPILED_HEADER textureloaderlib.h SOURCE_ROOT .)
 
-target_link_plugins(TextureLoader Resources)
+target_link_plugins(TextureLoader Resources ImageLoader)

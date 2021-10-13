@@ -3,8 +3,33 @@
 namespace Engine {
 
 struct IndexHolder {
-    virtual size_t index() const = 0;
-    virtual bool isValid() const = 0;
+
+    IndexHolder(size_t index, IndexType<size_t> &baseIndex)
+        : mIndex(index)
+        , mBaseIndex(baseIndex)
+    {
+    }
+
+    ~IndexHolder()
+    {
+        mIndex.reset();
+    }
+
+    size_t index() const
+    {
+        assert(isValid());
+        return mIndex + mBaseIndex;
+    }
+
+    bool isValid() const
+    {
+        return mIndex && mBaseIndex;
+    }
+
+protected:
+    IndexType<size_t> mIndex;
+    //Make it a member to prevent problems through weak symbols during link time
+    IndexType<size_t> &mBaseIndex;
 };
 
 }

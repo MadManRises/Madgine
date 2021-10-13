@@ -1,10 +1,14 @@
 #include "../clientlib.h"
 
 #include "rendercontext.h"
-#include "rendertarget.h"
 #include "renderpass.h"
+#include "rendertarget.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+
+#include "gpumeshloader.h"
+
+#include "meshdata.h"
 
 METATABLE_BEGIN(Engine::Render::RenderTarget)
 METATABLE_END(Engine::Render::RenderTarget)
@@ -12,26 +16,62 @@ METATABLE_END(Engine::Render::RenderTarget)
 namespace Engine {
 namespace Render {
 
-    RenderTarget::RenderTarget(RenderContext *context)
+    RenderTarget::RenderTarget(RenderContext *context, bool global, std::string name, size_t iterations)
         : mContext(context)
+        , mIterations(iterations)
+        , mGlobal(global)
+        , mName(std::move(name))
     {
-        mContext->addRenderTarget(this);
+        if (global)
+            mContext->addRenderTarget(this);
     }
 
     RenderTarget::~RenderTarget()
     {
-        for (RenderPass* pass : mRenderPasses) {
+        for (RenderPass *pass : mRenderPasses) {
             pass->shutdown();
         }
-        mContext->removeRenderTarget(this);
+        if (mGlobal)
+            mContext->removeRenderTarget(this);
     }
 
     void RenderTarget::render()
     {
+        if (mContext->frame() == mFrame)
+            return;
+        mFrame = mContext->frame();
+
         beginFrame();
+
         for (RenderPass *pass : mRenderPasses)
-            pass->render(this);
+            pass->preRender();
+        for (size_t iteration = 0; iteration < mIterations; ++iteration) {
+            beginIteration(iteration);
+            for (RenderPass *pass : mRenderPasses)
+                pass->render(this, iteration);
+            endIteration(iteration);
+        }
+
         endFrame();
+    }
+
+    void RenderTarget::renderQuad(Program *program)
+    {
+        renderMesh(GPUMeshLoader::loadManual("quad", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &data, Render::GPUMeshLoader::ResourceDataInfo &info) {
+            std::vector<Compound<Render::VertexPos_3D>> vertices {
+                { { -1, -1, 0 } },
+                { { 1, -1, 0 } },
+                { { -1, 1, 0 } },
+                { { 1, 1, 0 } }
+            };
+
+            std::vector<unsigned short> indices {
+                0, 1, 2, 1, 2, 3
+            };
+
+            return loader->generate(data, { 3, std::move(vertices), std::move(indices) });
+        }),
+            program);
     }
 
     void RenderTarget::addRenderPass(RenderPass *pass)
@@ -40,7 +80,7 @@ namespace Render {
             std::upper_bound(mRenderPasses.begin(), mRenderPasses.end(), pass,
                 [](RenderPass *first, RenderPass *second) { return first->priority() < second->priority(); }),
             pass);
-        pass->setup(mContext);
+        pass->setup(this);
     }
 
     void RenderTarget::removeRenderPass(RenderPass *pass)
@@ -56,10 +96,42 @@ namespace Render {
 
     void RenderTarget::beginFrame()
     {
+        if (!mName.empty())
+            pushAnnotation(mName.c_str());
     }
 
     void RenderTarget::endFrame()
     {
+        if (!mName.empty())
+            popAnnotation();
+    }
+
+    void RenderTarget::beginIteration(size_t iteration)
+    {
+    }
+
+    void RenderTarget::endIteration(size_t iteration)
+    {
+    }
+
+    size_t RenderTarget::iterations() const
+    {
+        return mIterations;
+    }
+
+    RenderContext *RenderTarget::context() const
+    {
+        return mContext;
+    }
+
+    bool RenderTarget::resize(const Vector2i &size)
+    {
+        bool resized = resizeImpl(size);
+        if (resized) {
+            for (RenderPass *pass : mRenderPasses)
+                pass->onResize(size);
+        }
+        return resized;
     }
 
 }

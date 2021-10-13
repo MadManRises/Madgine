@@ -18,6 +18,21 @@
 
 namespace Engine {
 namespace Widgets {
+    typedef int TextureFlags;
+    enum TextureFlags_ {
+        TextureFlag_IsDistanceField = 1 << 0
+    };
+
+    struct TextureSettings {
+        Render::TextureDescriptor mTexture;
+        TextureFlags mFlags = 0;
+
+        bool operator<(const TextureSettings &other) const
+        {
+            return mTexture.mTextureHandle < other.mTexture.mTextureHandle || (mTexture.mTextureHandle == other.mTexture.mTextureHandle && mFlags < other.mFlags);
+        }
+    };
+
     struct MADGINE_WIDGETS_EXPORT WidgetBase : VirtualScope<WidgetBase, Serialize::VirtualUnit<WidgetBase, Serialize::VirtualSerializableUnitBase<VirtualScopeBase<>, Serialize::SerializableUnitBase>>> {
         SERIALIZABLEUNIT(WidgetBase);        
 
@@ -83,7 +98,8 @@ namespace Widgets {
 
         bool containsPoint(const Vector2 &point, const Rect2i &screenSpace, float extend = 0.0f) const;
 
-        virtual std::vector<std::pair<std::vector<Vertex>, Render::TextureDescriptor>> vertices(const Vector3 &screenSize);
+        virtual std::vector<std::pair<std::vector<Vertex>, TextureSettings>> vertices(const Vector3 &screenSize);
+        virtual void preRender();
 
         void *userData();
         void setUserData(void *userData);
@@ -103,7 +119,7 @@ namespace Widgets {
 
         virtual void sizeChanged(const Vector3i &pixelSize);
 
-        std::pair<std::vector<Vertex>, Render::TextureDescriptor> renderText(const std::string &text, Vector3 pos, Render::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize);
+        std::pair<std::vector<Vertex>, TextureSettings> renderText(const std::string &text, Vector3 pos, Render::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize);
 
     protected:
         void destroyChild(WidgetBase *w);

@@ -17,14 +17,15 @@ namespace Render {
         ~DirectX12RenderTexture();
         
         bool resize(const Vector2i &size, const RenderTextureConfig &config);
-        bool resize(const Vector2i &size) override;
+        bool resizeImpl(const Vector2i &size) override;
         Vector2i size() const override;
         
-        virtual void beginFrame() override;
-        virtual void endFrame() override;
+        virtual void beginIteration(size_t iteration) override;
+        virtual void endIteration(size_t iteration) override;
 
-        virtual TextureHandle texture() const override;        
-        virtual TextureHandle depthTexture() const override;
+        virtual TextureDescriptor texture(size_t index, size_t iteration = std::numeric_limits<size_t>::max()) const override;        
+        virtual size_t textureCount() const override;
+        virtual TextureDescriptor depthTexture() const override;
         
     private:        
         OffsetPtr mDepthBufferView;

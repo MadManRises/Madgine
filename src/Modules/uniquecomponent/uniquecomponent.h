@@ -55,10 +55,10 @@ protected:
     }
 };
 
-DLL_IMPORT_VARIABLE2(typename T::Collector::template ComponentRegistrator<T>, _reg, typename T);
+DLL_IMPORT_VARIABLE2(Engine::IndexHolder, _reg, typename T);
 
-#    define UNIQUECOMPONENT(Name) DLL_EXPORT_VARIABLE2(, Name::Collector::ComponentRegistrator<Name>, Engine::, _reg, {}, Name)
-#    define UNIQUECOMPONENT2(Name, ext) DLL_EXPORT_VARIABLE3(, Name::Collector::ComponentRegistrator<Name>, Name::Collector::ComponentRegistrator<Name>, Engine::, _reg, ext, {}, Name)
+#    define UNIQUECOMPONENT_EX(Frontend, Full) DLL_EXPORT_VARIABLE3(, Engine::IndexHolder, Frontend::Collector::ComponentRegistrator<Full>, Engine::, _reg, , {}, Frontend)
+#    define UNIQUECOMPONENT2(Name, ext) DLL_EXPORT_VARIABLE3(, Engine::IndexHolder, Name::Collector::ComponentRegistrator<Name>, Engine::, _reg, ext, {}, Name)
 
 template <typename _T, typename _Collector, typename _Base>
 struct UniqueComponent : _Base {
@@ -110,7 +110,7 @@ size_t component_index();
 
 }
 
-#    define UNIQUECOMPONENT(Name)
+#    define UNIQUECOMPONENT_EX(Frontend, Full)
 #    define UNIQUECOMPONENT2(Name, ext)
 #    define VIRTUALUNIQUECOMPONENT(Name)
 
@@ -132,9 +132,15 @@ struct NamedUniqueComponent : Base {
 
 }
 
-#define COMPONENT_NAME(Name, FullType) \
-    DLL_EXPORT_VARIABLE2(constexpr, const std::string_view, Engine::, _componentName, #Name, FullType);
+#define UNIQUECOMPONENT(Name) \
+    UNIQUECOMPONENT_EX(Name, Name)
+
+#define COMPONENT_NAME(Name, FrontendType) \
+    DLL_EXPORT_VARIABLE2(constexpr, const std::string_view, Engine::, _componentName, #Name, FrontendType);
+
+#define NAMED_UNIQUECOMPONENT_EX(Name, FrontendType, FullType) \
+    COMPONENT_NAME(Name, FrontendType)                         \
+    UNIQUECOMPONENT_EX(FrontendType, FullType)
 
 #define NAMED_UNIQUECOMPONENT(Name, FullType) \
-    COMPONENT_NAME(Name, FullType)            \
-    UNIQUECOMPONENT(FullType)
+    NAMED_UNIQUECOMPONENT_EX(Name, FullType, FullType)

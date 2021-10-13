@@ -10,23 +10,18 @@ namespace Resources {
 
         ~ResourceBase() noexcept = default;
 
-        void setPersistent(bool b);
-
-        bool isPersistent() const;
-
         void setPath(const Filesystem::Path &path);
-        const Filesystem::Path &path();
+        const Filesystem::Path &path() const;
         std::string_view extension();
         std::string_view name();
 
-        InStream readAsStream(bool isBinary = false);
-        std::string readAsText();
-        std::vector<unsigned char> readAsBlob();
+        InStream readAsStream(bool isBinary = false) const;
+        std::string readAsText() const;
+        std::vector<unsigned char> readAsBlob() const;
 
         static constexpr const char sUnnamed[] = "__unnamed__";
 
-    private:
-        bool mIsPersistent;
+    private:        
 
         std::string mName;
         Filesystem::Path mPath;

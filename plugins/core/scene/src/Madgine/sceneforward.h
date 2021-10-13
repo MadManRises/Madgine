@@ -20,6 +20,8 @@ namespace Scene {
         struct EntityComponentList;
         template <typename T>
         struct EntityComponentOwningHandle;
+        template <typename T>
+        struct EntityComponentHandle;
     }
 
     struct LightManager;

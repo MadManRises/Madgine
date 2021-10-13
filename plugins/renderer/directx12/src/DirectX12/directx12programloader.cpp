@@ -2,9 +2,8 @@
 
 #include "directx12programloader.h"
 
-#include "directx12vertexshaderloader.h"
 #include "directx12pixelshaderloader.h"
-
+#include "directx12vertexshaderloader.h"
 
 #include "util/directx12program.h"
 
@@ -19,8 +18,6 @@ METATABLE_END(Engine::Render::DirectX12ProgramLoader)
 
 METATABLE_BEGIN_BASE(Engine::Render::DirectX12ProgramLoader::ResourceType, Engine::Render::ProgramLoader::ResourceType)
 METATABLE_END(Engine::Render::DirectX12ProgramLoader::ResourceType)
-
-
 
 namespace Engine {
 namespace Render {
@@ -59,7 +56,7 @@ namespace Render {
     }
 
     bool DirectX12ProgramLoader::create(Program &_program, const std::string &name, const CodeGen::ShaderFile &file)
-    {   
+    {
         assert(file.mInstances.size() == 2);
 
         DirectX12Program &program = static_cast<DirectX12Program &>(_program);
@@ -75,17 +72,27 @@ namespace Render {
         return true;
     }
 
-    void DirectX12ProgramLoader::setParameters(Program &program, size_t index, size_t size)
+    void DirectX12ProgramLoader::setParametersSize(Program &program, size_t index, size_t size)
     {
-        static_cast<DirectX12Program &>(program).setParameters(index, size);
+        static_cast<DirectX12Program &>(program).setParametersSize(index, size);
     }
 
-    WritableByteBuffer Engine::Render::DirectX12ProgramLoader::mapParameters(Program &program, size_t index)
+    WritableByteBuffer DirectX12ProgramLoader::mapParameters(Program &program, size_t index)
     {
-        return static_cast<DirectX12Program&>(program).mapParameters(index);
+        return static_cast<DirectX12Program &>(program).mapParameters(index);
     }
 
-	void DirectX12ProgramLoader::setDynamicParameters(Program &program, size_t index, const ByteBuffer &data)
+    void DirectX12ProgramLoader::setInstanceDataSize(Program &program, size_t size)
+    {
+        static_cast<DirectX12Program &>(program).setInstanceDataSize(size);
+    }
+
+    void DirectX12ProgramLoader::setInstanceData(Program &program, const ByteBuffer &data)
+    {
+        static_cast<DirectX12Program &>(program).setInstanceData(data);
+    }
+
+    void DirectX12ProgramLoader::setDynamicParameters(Program &program, size_t index, const ByteBuffer &data)
     {
         static_cast<DirectX12Program &>(program).setDynamicParameters(index, data);
     }

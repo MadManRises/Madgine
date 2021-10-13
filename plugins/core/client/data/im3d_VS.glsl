@@ -1,21 +1,21 @@
 #version 430 core
 
+#include "sl_support.glsl"
+#include "im3d.sl"
+
 layout (std140, binding = 0) uniform PerApplication
 {
-	mat4 p;		
+	Im3DPerApplication app;
 };
 
 layout (std140, binding = 1) uniform PerFrame
 {
-	mat4 v;
+	Im3DPerFrame frame;
 };
 
 layout (std140, binding = 2) uniform PerObject
 {
-	mat4 m;
-	
-	bool hasTexture;
-	bool hasDistanceField;
+	Im3DPerObject object;
 };
 
 
@@ -33,9 +33,9 @@ out vec2 uv;
 
 void main()
 {
-	worldPos = m * vec4(aPos, 1.0);
+	worldPos = object.m * vec4(aPos, 1.0);
 	
-    gl_Position = p * (v * worldPos + vec4(aPos2, 0.0, 0.0));	
+    gl_Position = app.p * (frame.v * worldPos + vec4(aPos2, 0.0, 0.0));	
     color = aColor;
 	normal = aNormal;
 	uv = vec2(aUV.x, 1.0 - aUV.y);	
