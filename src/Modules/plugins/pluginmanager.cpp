@@ -62,77 +62,56 @@ namespace Plugins {
         }
     }
 
-    void PluginManager::setup(bool loadCache, bool loadExe)
+    bool PluginManager::setup(bool loadCache, bool loadExe)
     {
         assert(Threading::WorkGroup::self().singleThreaded());
 
         Threading::Barrier barrier { Threading::Barrier::NO_FLAGS, 1 };
 
-        Future<bool> f1;
-
-        if (loadCache && (!noPluginCache || !loadPlugins->empty())) {
-            std::promise<bool> p;
-            f1 = p.get_future();
-            barrier.queue(nullptr, [this, &barrier, p { std::move(p) }]() mutable {
+        Threading::TaskFuture<bool> result = barrier.queue(nullptr, [](PluginManager *_this, Threading::Barrier &barrier, bool loadCache, bool loadExe) mutable -> Threading::Task<bool> {
+            if (loadCache && (!noPluginCache || !loadPlugins->empty())) {
                 Filesystem::Path pluginFile = !loadPlugins->empty() ? Filesystem::Path { *loadPlugins } : cacheFileName();
 
                 Ini::IniFile file;
                 if (file.loadFromDisk(pluginFile)) {
                     LOG("Loading Plugins from '" << pluginFile << "'");
-                    loadSelection(barrier, file, std::move(p));
+                    bool result = co_await _this->loadSelection(barrier, file);
                 } else {
                     if (!loadPlugins->empty())
                         LOG_ERROR("Failed to open plugin-file '" << pluginFile << "'!");
+                    co_return false;
                 }
-            });
-        } else {
-            f1 = make_ready_future(true);
-        }
+            }
 
-        Future<bool> f2;
-
-        if (loadExe) {
-            std::promise<bool> p2;
-            f2 = p2.get_future();
-            barrier.queue(nullptr, [this, &barrier, f { std::move(f1) }, p { std::move(p2) }]() mutable {
-                if (!f.is_ready())
-                    return Threading::YIELD;
+            if (loadExe) {
                 Plugin exe { "MadgineLauncher", nullptr, {}, "" };
-                exe.load(*this, barrier, std::move(p));
-                exe.clearDependencies(*this);
-                return Threading::RETURN;
-            });
-        } else {
-            f2 = std::move(f1);
-        }
+                bool result = co_await exe.load(*_this, barrier);
+                exe.clearDependencies(*_this);
+            }
 
-        if (!exportPlugins->empty()) {
-            barrier.queue(nullptr, [this, &barrier, f { std::move(f2) }]() mutable {
-                if (!f.is_ready())
-                    return Threading::YIELD;
-
-                auto helper = [this, &barrier](const Filesystem::Path &path, bool hasTools) {
+            if (!exportPlugins->empty()) {
+                auto helper = [_this, &barrier](const Filesystem::Path &path, bool hasTools) {
                     Ini::IniFile file;
                     LOG("Saving Plugins to '" << path << "'");
-                    saveSelection(barrier, file, hasTools);
+                    _this->saveSelection(barrier, file, hasTools);
                     file.saveToDisk(path);
 
                     Filesystem::Path exportPath = path.parentPath() / ("components_" + std::string { path.stem() } + ".cpp");
 
-                    mExportSignal.emit(exportPath, hasTools);
+                    _this->mExportSignal.emit(exportPath, hasTools);
                 };
 
                 Filesystem::Path p = *exportPlugins;
                 helper(p, false);
                 Filesystem::Path p_tools = p.parentPath() / (std::string { p.stem() } + "_tools" + std::string { p.extension() });
                 helper(p_tools, true);
-
-                return Threading::RETURN;
-            });
-        }
+            }
+            co_return true;
+        }, this, barrier, loadCache, loadExe);
 
         Threading::TaskQueue queue { "PluginManager" };
         barrier.enter(&queue, 0, true);
+        return result;
     }
 
     PluginManager::~PluginManager()
@@ -220,37 +199,27 @@ namespace Plugins {
         }
     }
 
-    void PluginManager::loadSelection(Threading::Barrier &barrier, const Ini::IniFile &file, std::promise<bool> &&p)
+    Threading::TaskFuture<bool> PluginManager::loadSelection(Threading::Barrier &barrier, Ini::IniFile file)
     {
-        assert(!mLoadingSelectionFile);
-        mLoadingSelectionFile = true;
+        return barrier.queue(nullptr, [](PluginManager *_this, Threading::Barrier &barrier, Ini::IniFile file) -> Threading::Task<bool> {
+            assert(!_this->mLoadingSelectionFile);
+            _this->mLoadingSelectionFile = true;
 
-        std::vector<Future<bool>> futures;
+            std::vector<Threading::TaskFuture<bool>> futures;
 
-        for (auto &[name, section] : file) {
-            futures.emplace_back((*this)[name].loadFromIni(barrier, section));
-        }
-        mLoadingSelectionFile = false;
+            for (auto &[name, section] : file) {
+                futures.emplace_back((*_this)[name].loadFromIni(barrier, section));
+            }
+            _this->mLoadingSelectionFile = false;
 
-        barrier.queue(nullptr, [this, &barrier, futures { std::move(futures) }, p { std::move(p) }]() mutable {
-            bool wait = false;
-            for (auto it = futures.begin(); it != futures.end();) {
-                if (!it->is_ready()) {
-                    wait = true;
-                    ++it;
-                } else if (!*it) {
-                    p.set_value(false);
-                    return Threading::RETURN;
-                } else {
-                    it = futures.erase(it);
+            for (Threading::TaskFuture<bool> &future : futures) {
+                if (!co_await future) {
+                    co_return false;
                 }
             }
-            if (wait)
-                return Threading::YIELD;
-            onUpdate(barrier);
-            p.set_value(true);
-            return Threading::RETURN;
-        });
+            _this->onUpdate(barrier);
+            co_return true;
+        }, this, barrier, std::move(file));
     }
 
     void PluginManager::onUpdate(Threading::Barrier &barrier)
@@ -282,23 +251,17 @@ namespace Plugins {
             shutdownListenerAboutToRemoveSection(listener, &section);
     }
 
-    Future<bool> PluginManager::loadFromFile(const Filesystem::Path &p)
+    Threading::TaskFuture<bool> PluginManager::loadFromFile(const Filesystem::Path &p)
     {
         LOG("Loading Plugins: " << p);
         if (!Filesystem::exists(p))
             return false;
-        std::promise<bool> promise;
-        Future<bool> result { promise.get_future() };
         Threading::Barrier &barrier = Threading::WorkGroup::barrier(Threading::Barrier::RUN_ONLY_ON_MAIN_THREAD);
-        barrier.queue(nullptr, [=, &barrier, promise { std::move(promise) }]() mutable {
-            Ini::IniFile file;
-            if (!file.loadFromDisk(p)) {
-                promise.set_value(false);
-                return;
-            }
-            loadSelection(barrier, file, std::move(promise));
-        });
-        return result;
+        Ini::IniFile file;
+        if (!file.loadFromDisk(p)) {
+            return false;
+        }
+        return loadSelection(barrier, file);
     }
 
     void PluginManager::saveToFile(const Filesystem::Path &p, bool withTools)

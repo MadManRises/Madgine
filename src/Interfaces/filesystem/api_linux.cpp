@@ -83,6 +83,7 @@ namespace Filesystem {
         wordexp(p.c_str(), &word, 0);
         assert(word.we_wordc == 1);
         p = word.we_wordv[0];
+        wordfree(&word);)
     }
 
     bool isAbsolute(const Path &p)

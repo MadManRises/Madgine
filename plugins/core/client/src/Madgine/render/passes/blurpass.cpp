@@ -21,9 +21,7 @@ namespace Render {
 
     void BlurPass::setup(RenderTarget *target)
     {
-        mProgram.create("blur");
-
-        mProgram.setParametersSize(0, sizeof(BlurData));
+        mProgram.create("blur", { sizeof(BlurData) });        
     }
 
     void BlurPass::shutdown()

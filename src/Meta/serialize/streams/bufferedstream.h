@@ -4,6 +4,8 @@
 
 #include "streamstate.h"
 
+#include "Generic/lambda.h"
+
 namespace Engine {
 namespace Serialize {
     struct META_EXPORT BufferedInStream : SerializeInStream {
@@ -54,7 +56,7 @@ namespace Serialize {
 
         SyncManager *manager() const;
 
-        TransactionId createRequest(ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback);
+        TransactionId createRequest(ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback);
 
     protected:
         BufferedOutStream(std::unique_ptr<buffered_streambuf> buffer, std::unique_ptr<BufferedStreamData> data);

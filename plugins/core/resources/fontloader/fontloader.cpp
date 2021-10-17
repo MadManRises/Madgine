@@ -100,10 +100,8 @@ namespace Render {
     {
     }
 
-    bool FontLoader::loadImpl(Font &font, ResourceDataInfo &info)
+    Threading::Task<bool> FontLoader::loadImpl(Font &font, ResourceDataInfo &info)
     {
-        font.mTexture.create(info.resource()->name(), TextureType_2D, FORMAT_RGBA8);        
-        //font.mTextureHandle = &font.mTexture->mTextureHandle;
 
         if (info.resource()->path().extension() == ".msdf") {
 
@@ -114,7 +112,7 @@ namespace Render {
             in >> font.mTextureSize;
             ByteBuffer b;
             in >> b;
-            font.mTexture.setData(font.mTextureSize, b);
+            font.mTexture.create(info.resource()->name(), TextureType_2D, FORMAT_RGBA8, font.mTextureSize, std::move(b));        
 
         } else if (info.resource()->path().extension() == ".ttf") {
             LOG("Creating Cache for " << info.resource()->path());
@@ -122,7 +120,7 @@ namespace Render {
             FT_Library ft;
             if (FT_Init_FreeType(&ft)) {
                 LOG_ERROR("FREETYPE: Could not init FreeType Library");
-                return false;
+                co_return false;
             }
 
             std::vector<unsigned char> fontBuffer = info.resource()->readAsBlob();
@@ -131,7 +129,7 @@ namespace Render {
             if (FT_New_Memory_Face(ft, fontBuffer.data(), fontBuffer.size(), 0, &face)) {
                 FT_Done_FreeType(ft);
                 LOG_ERROR("FREETYPE: Failed to load font");
-                return false;
+                co_return false;
             }
 
             FT_Set_Pixel_Sizes(face, 0, 64);
@@ -240,7 +238,7 @@ namespace Render {
             FT_Done_Face(face);
             FT_Done_FreeType(ft);
 
-            font.mTexture.setData(font.mTextureSize, { texBuffer.get(), 4 * byteSize });
+            font.mTexture.create(info.resource()->name(), TextureType_2D, FORMAT_RGBA8, font.mTextureSize, { std::move(texBuffer), 4 * byteSize });        
 
             Filesystem::FileManager cache("msdf_cache");
             Serialize::SerializeOutStream out = cache.openWrite(info.resource()->path().parentPath() / (std::string { info.resource()->name() } + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
@@ -254,7 +252,7 @@ namespace Render {
             std::terminate();
         }
 
-        return true;
+        co_return true;
     }
 
     void FontLoader::unloadImpl(Font &font, ResourceDataInfo &info)

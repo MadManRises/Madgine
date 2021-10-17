@@ -1,11 +1,13 @@
 #pragma once
 
+#include "Generic/lambda.h"
+
 namespace Engine {
 namespace Serialize {
 
     struct PendingRequest {
 
-        PendingRequest(TransactionId id, ParticipantId request, TransactionId requesterTransactionId, std::function<void(void *)> callback)
+        PendingRequest(TransactionId id, ParticipantId request, TransactionId requesterTransactionId, Lambda<void(void *)> callback)
             : mId(id)
             , mRequester(request)
             , mRequesterTransactionId(requesterTransactionId)
@@ -17,7 +19,7 @@ namespace Serialize {
             : mId(std::exchange(other.mId, 0))
             , mRequester(std::exchange(other.mRequester, 0))
             , mRequesterTransactionId(std::exchange(other.mRequesterTransactionId, 0))
-            , mCallback(std::exchange(other.mCallback, std::function<void(void *)> {}))
+            , mCallback(std::exchange(other.mCallback, Lambda<void(void *)> {}))
         {
         }
 
@@ -30,7 +32,7 @@ namespace Serialize {
         {
             if (mCallback) {
                 mCallback(data);
-                mCallback = std::function<void(void *)> {};
+                mCallback = Lambda<void(void *)> {};
             }
         }
 
@@ -39,7 +41,7 @@ namespace Serialize {
         TransactionId mRequesterTransactionId;
 
     private:
-        std::function<void(void *)> mCallback;
+        Lambda<void(void *)> mCallback;
     };
 
 }

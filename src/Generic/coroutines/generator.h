@@ -1,6 +1,9 @@
 #pragma once
 
 #include "coroutine.h"
+#include "handle.h"
+
+namespace Engine {
 
 template <typename T>
 struct Generator {
@@ -8,15 +11,14 @@ struct Generator {
     struct promise_type {
         Generator get_return_object()
         {
-            return Generator { std::experimental::coroutine_handle<promise_type>::from_promise(*this) };
+            return { CoroutineHandle<promise_type>::fromPromise(*this) };
         }
-        // called by compiler first time co_yield occurs
+
         std::experimental::suspend_never initial_suspend()
         {
             return {};
         }
 
-        // required for co_yield
         std::experimental::suspend_always yield_value(T &t)
         {
             mValue = &t;
@@ -38,29 +40,14 @@ struct Generator {
         T *mValue = nullptr;
     };
 
-    Generator(std::experimental::coroutine_handle<promise_type> handle)
-        : mHandle(handle)
+    Generator(CoroutineHandle<promise_type> handle)
+        : mHandle(std::move(handle))
     {
-    }
-
-    Generator(Generator<T> &&other)
-        : mHandle(std::exchange(other.mHandle, nullptr))
-    {
-    }
-
-    ~Generator()
-    {
-        reset();
-    }
-
-    Generator& operator=(Generator<T>&& other) {
-        std::swap(mHandle, other.mHandle);
-        return *this;
     }
 
     const T &get()
     {
-        return *mHandle.promise().mValue;
+        return *mHandle->mValue;
     }
 
     bool next()
@@ -74,23 +61,12 @@ struct Generator {
         return mHandle.done();
     }
 
-    void reset()
+    CoroutineHandle<promise_type> release()
     {
-        if (mHandle) {
-            mHandle.destroy();
-            mHandle = nullptr;
-        }
+        return std::move(mHandle);
     }
 
-    void *release()
-    {
-        return std::exchange(mHandle, nullptr).address();
-    }
-
-    static Generator<T> fromAddress(void *address)
-    {
-        return { std::experimental::coroutine_handle<promise_type>::from_address(address) };
-    }
-
-    std::experimental::coroutine_handle<promise_type> mHandle;
+    CoroutineHandle<promise_type> mHandle;
 };
+
+}

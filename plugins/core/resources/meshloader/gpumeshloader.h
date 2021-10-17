@@ -38,7 +38,7 @@ namespace Render {
 
         GPUMeshLoader();
 
-        bool loadImpl(GPUMeshData &data, ResourceDataInfo &info);
+        Threading::Task<bool> loadImpl(GPUMeshData &data, ResourceDataInfo &info);
         void unloadImpl(GPUMeshData &data, ResourceDataInfo &info);
 
         virtual bool generate(GPUMeshData &data, const MeshData &mesh) = 0;

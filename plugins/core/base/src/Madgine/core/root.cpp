@@ -13,8 +13,6 @@
 
 #include "Modules/plugins/pluginsection.h"
 
-#include "Modules/threading/taskguard.h"
-
 namespace Engine {
 namespace Core {
 

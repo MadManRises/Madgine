@@ -27,7 +27,7 @@ namespace Serialize {
 #define SYNCED(Name, ...) MEMBER_OFFSET_CONTAINER(Name, ::Engine::Serialize::Synced<__VA_ARGS__>)
 
     template <typename T, typename Observer = NoOpFunctor, typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
-    struct Synced : Syncable<OffsetPtr>, Serializable<OffsetPtr>, CopyTraits<T>, private Observer {
+    struct Synced : Syncable<OffsetPtr>, Serializable<OffsetPtr>, private Observer {
 
         friend struct Operations<Synced<T, Observer, OffsetPtr>>;
 

@@ -3,7 +3,6 @@
 #include "../syncable.h"
 #include "Generic/future.h"
 #include "Generic/memberoffsetptr.h"
-#include "Generic/onetimefunctor.h"
 
 namespace Engine {
 namespace Serialize {
@@ -41,13 +40,13 @@ namespace Serialize {
                     assert(targets.empty());
                     std::promise<R> p;
                     Future<R> fut { p.get_future() };
-                    this->writeRequest(&args, requester, requesterTransactionId, oneTimeFunctor([p { std::move(p) }](void *data) mutable {
+                    this->writeRequest(&args, requester, requesterTransactionId, [p { std::move(p) }](void *data) mutable {
                         if constexpr (std::is_same_v<R, void>) {
                             p.set_value();
                         } else {
                             p.set_value(*static_cast<R *>(data));
                         }
-                    }));
+                    });
                     return fut;
                 }
             }

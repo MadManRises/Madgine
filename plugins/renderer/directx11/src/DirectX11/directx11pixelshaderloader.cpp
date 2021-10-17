@@ -154,6 +154,10 @@ namespace Render {
         return true;
     }
 
+    Threading::TaskQueue* DirectX11PixelShaderLoader::loadingTaskQueue() const {
+        return DirectX11RenderContext::renderQueue();
+    }
+
 }
 }
 

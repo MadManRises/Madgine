@@ -12,7 +12,7 @@ namespace Render {
 	struct MADGINE_FONTLOADER_EXPORT FontLoader : Resources::ResourceLoader<FontLoader, Font, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
         FontLoader();
 
-		bool loadImpl(Font &font, ResourceDataInfo &info);
+		Threading::Task<bool> loadImpl(Font &font, ResourceDataInfo &info);
         void unloadImpl(Font &font, ResourceDataInfo &info);
     };
 

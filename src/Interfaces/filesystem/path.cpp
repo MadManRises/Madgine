@@ -169,7 +169,7 @@ namespace Filesystem {
 
         mPath.resize(cursor);
 
-        Filesystem::makeNormalized(mPath);
+        //Filesystem::makeNormalized(mPath);
     }
 
     Path Path::filename() const

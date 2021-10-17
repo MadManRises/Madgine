@@ -29,7 +29,7 @@ namespace Serialize {
         void popRequest(TransactionId id);
 
         //write
-        TransactionId createRequest(ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback);
+        TransactionId createRequest(ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback);
 
 
     private:

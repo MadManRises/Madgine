@@ -69,10 +69,8 @@ namespace Render {
         assert(mRenderThread == std::this_thread::get_id());
     }
 
-    void RenderContext::queueRenderTask(Threading::TaskHandle &&task)
-    {
-        assert(sContext);
-        sContext->mRenderQueue->queue(std::move(task), Threading::TaskMask::ALL);
+    Threading::TaskQueue* RenderContext::renderQueue() {
+        return sContext->mRenderQueue;
     }
 
     bool RenderContext::isRenderThread()

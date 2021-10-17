@@ -536,7 +536,7 @@ namespace Tools {
 
                     if (!pin.mPin.mNode) {
                         ed::RejectNewItem();
-                    } else {                        
+                    } else {
 
                         mDragPin = pin;
                         switch (pin.mType) {
@@ -597,7 +597,7 @@ namespace Tools {
 
                 ed::NodeId nodeId = 0;
                 while (ed::QueryDeletedNode(&nodeId)) {
-                    if (ed::AcceptDeletedItem()) {                        
+                    if (ed::AcceptDeletedItem()) {
                         mGraph.removeNode(nodeId.Get() / 6000);
                     }
                 }
@@ -792,12 +792,13 @@ namespace Tools {
 
     void NodeGraphEditor::load(std::string_view name)
     {
-        mGraphHandle.load(name);
-        if (mGraphHandle)
-            mGraph = *mGraphHandle;
-        else
-            mGraph = {};
-        createEditor();
+        mGraphHandle.load(name).then([this](bool b) {
+            if (b)
+                mGraph = *mGraphHandle;
+            else
+                mGraph = {};
+            createEditor();
+        });
     }
 
     void NodeGraphEditor::create(const Filesystem::Path &path)
@@ -928,12 +929,12 @@ namespace Tools {
                 throw 0;
             }
 
-            uintptr_t outputPinIdN = outputPinId.Get();            
+            uintptr_t outputPinIdN = outputPinId.Get();
 
             NodeGraph::PinDesc outputPin = NodeGraph::NodeBase::pinFromId(outputPinIdN);
 
             if ((outputPin.mType == NodeGraph::PinType::Flow && outputPin.mDir == NodeGraph::PinDir::In) || outputPin.mType == NodeGraph::PinType::DataInstance) {
-                std::swap(inputPin, outputPin);                
+                std::swap(inputPin, outputPin);
             }
 
             //make this a < check

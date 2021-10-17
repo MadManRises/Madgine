@@ -48,13 +48,7 @@ namespace Render {
 
     void SceneRenderPass::setup(RenderTarget *target)
     {
-        mProgram.create("scene");
-
-        mProgram.setParametersSize(0, sizeof(ScenePerApplication));
-        mProgram.setParametersSize(1, sizeof(ScenePerFrame));
-        mProgram.setParametersSize(2, sizeof(ScenePerObject));
-
-        mProgram.setInstanceDataSize(sizeof(SceneInstanceData));
+        mProgram.create("scene", { sizeof(ScenePerApplication), sizeof(ScenePerFrame), sizeof(ScenePerObject) }, sizeof(SceneInstanceData));        
 
         mShadowMap = target->context()->createRenderTexture({ 2048, 2048 }, { .mCreateDepthBufferView = true, .mType = TextureType_2DMultiSample, .mSamples = 4, .mTextureCount = 0 });
         mPointShadowMaps[0] = target->context()->createRenderTexture({ 2048, 2048 }, { .mType = TextureType_Cube, .mCreateDepthBufferView = true, .mTextureCount = 0 });
@@ -76,6 +70,8 @@ namespace Render {
 
     void SceneRenderPass::render(Render::RenderTarget *target, size_t iteration)
     {
+        if (!mProgram.available())
+            return;
         //TODO Culling
 
         Threading::DataLock lock { mScene.mutex(), Threading::AccessMode::READ };
@@ -162,7 +158,7 @@ namespace Render {
 
                 perObject->hasDistanceField = false;
 
-                perObject->hasTexture = material && material->mDiffuseHandle != 0;
+                perObject->hasTexture = material && material->mDiffuseTexture->mTextureHandle != 0;
 
                 perObject->hasSkeleton = skeleton != nullptr;
 

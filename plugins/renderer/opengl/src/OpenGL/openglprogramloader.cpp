@@ -35,7 +35,7 @@ namespace Render {
         program.reset();
     }
 
-    bool OpenGLProgramLoader::create(Program &_program, const std::string &name)
+    bool OpenGLProgramLoader::create(Program &_program, const std::string &name, const std::vector<size_t> &bufferSizes, size_t instanceDataSize)
     {
         OpenGLProgram &program = static_cast<OpenGLProgram &>(_program);
 
@@ -55,6 +55,13 @@ namespace Render {
             LOG_ERROR("Failed to link Program '" << name << "'!");
             std::terminate();
         }
+
+        for (size_t i = 0; i < bufferSizes.size(); ++i)
+            if (bufferSizes[i] > 0)
+                program.setParametersSize(i, bufferSizes[i]);
+
+        if (instanceDataSize > 0)
+            program.setInstanceDataSize(instanceDataSize);
 
         return true;
     }
@@ -76,19 +83,9 @@ namespace Render {
         return true;
     }
 
-    void OpenGLProgramLoader::setParametersSize(Program &program, size_t index, size_t size)
-    {
-        static_cast<OpenGLProgram &>(program).setParametersSize(index, size);
-    }
-
     WritableByteBuffer OpenGLProgramLoader::mapParameters(Program &program, size_t index)
     {
         return static_cast<OpenGLProgram &>(program).mapParameters(index);
-    }
-
-    void OpenGLProgramLoader::setInstanceDataSize(Program &program, size_t size)
-    {
-        static_cast<OpenGLProgram &>(program).setInstanceDataSize(size);
     }
 
     void OpenGLProgramLoader::setInstanceData(Program &program, const ByteBuffer &data)

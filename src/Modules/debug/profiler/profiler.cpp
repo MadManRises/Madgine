@@ -6,7 +6,7 @@
 
 #include "../../threading/threadlocal.h"
 
-#include "../../threading/taskguard.h"
+#include "Generic/guard.h"
 
 #include "profilerthread.h"
 
@@ -21,7 +21,7 @@ namespace Debug {
         THREADLOCAL(ProfilerThread) sThread;
         Threading::WorkgroupLocal<Profiler> sProfiler;
 #if ENABLE_THREADING
-        Threading::TaskGuard _reg { []() { Threading::WorkGroup::addStaticThreadInitializer([]() { sProfiler->registerThread(&sThread); sThread->updateName(); }); }, []() {} };
+        Guard _reg { []() { Threading::WorkGroup::addStaticThreadInitializer([]() { sProfiler->registerThread(&sThread); sThread->updateName(); }); }, []() {} };
 #endif
 
         Profiler::Profiler()

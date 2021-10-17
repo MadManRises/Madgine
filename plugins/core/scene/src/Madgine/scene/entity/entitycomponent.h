@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Modules/threading/taskguard.h"
 #include "entitycomponentbase.h"
 #include "entitycomponentcollector.h"
 

@@ -59,8 +59,10 @@ namespace Threading {
     struct ConnectionBase;
     template <typename T, typename... _Ty>
     struct ConnectionInstance;
-    struct TaskQueue;
+    struct TaskQueue;    
     struct TaskHandle;
+    template <typename T>
+    struct Task;
     struct Barrier;
 }
 

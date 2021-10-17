@@ -21,7 +21,7 @@
 #include "Madgine/resources/resourcemanager.h"
 
 #include "Interfaces/debug/stacktrace.h"
-#include "Modules/threading/taskguard.h"
+#include "Generic/guard.h"
 #include "Interfaces/filesystem/api.h"
 
 #include "Interfaces/util/standardlog.h"
@@ -96,4 +96,4 @@ void madgine_terminate_handler()
     abort();
 }
 
-static Engine::Threading::TaskGuard global { []() { std::set_terminate(&madgine_terminate_handler); } };
+static Engine::Guard global { []() { std::set_terminate(&madgine_terminate_handler); } };

@@ -69,7 +69,7 @@ namespace Scene {
         void Mesh::setName(std::string_view name)
         {
             mMesh.load(name);
-            mMaterial = mMesh && !mMesh->mMaterials.empty() ? &mMesh->mMaterials.front() : nullptr;
+            //mMaterial = mMesh && !mMesh->mMaterials.empty() ? &mMesh->mMaterials.front() : nullptr;
         }
 
         void Mesh::setVisible(bool vis)

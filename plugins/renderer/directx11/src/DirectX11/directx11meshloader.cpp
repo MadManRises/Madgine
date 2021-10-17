@@ -55,9 +55,7 @@ namespace Render {
         DirectX11MeshData &data = static_cast<DirectX11MeshData &>(_data);
         data.mAABB = mesh.mAABB;
 
-        DirectX11RenderContext::execute([=, &data, &mesh]() mutable {
-            generateImpl(data, mesh);
-        });
+        generateImpl(data, mesh);
 
         return true;
     }
@@ -67,9 +65,7 @@ namespace Render {
         DirectX11MeshData &data = static_cast<DirectX11MeshData &>(_data);
         data.mAABB = mesh.mAABB;
 
-        DirectX11RenderContext::execute([=, &data, mesh { std::move(mesh) }]() mutable {
-            generateImpl(data, mesh);
-        });
+        generateImpl(data, mesh);
 
         return true;
     }
@@ -96,9 +92,7 @@ namespace Render {
 
         data.mAABB = mesh.mAABB;
 
-        DirectX11RenderContext::execute([=, &data, &mesh]() mutable {
-            updateImpl(data, mesh);
-        });
+        updateImpl(data, mesh);
     }
 
     void DirectX11MeshLoader::update(GPUMeshData &_data, MeshData &&mesh)
@@ -107,14 +101,18 @@ namespace Render {
 
         data.mAABB = mesh.mAABB;
 
-        DirectX11RenderContext::execute([=, &data, mesh { std::move(mesh) }]() mutable {
-            updateImpl(data, mesh);
-        });
+        updateImpl(data, mesh);
     }
 
     void DirectX11MeshLoader::reset(GPUMeshData &data)
     {
         static_cast<DirectX11MeshData &>(data).reset();
     }
+
+    Threading::TaskQueue *DirectX11MeshLoader::loadingTaskQueue() const
+    {
+        return DirectX11RenderContext::renderQueue();
+    }
+
 }
 }

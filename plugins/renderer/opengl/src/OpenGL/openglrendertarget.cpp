@@ -75,7 +75,7 @@ namespace Render {
         program->verify();
 
         if (material)
-            bindTextures({ { material->mDiffuseHandle, TextureType_2D } });
+            bindTextures({ { material->mDiffuseTexture->mTextureHandle, TextureType_2D } });
 
         constexpr GLenum modes[] {
             GL_POINTS,
@@ -107,7 +107,7 @@ namespace Render {
         program->verify();
 
         if (material)
-            bindTextures({ { material->mDiffuseHandle, TextureType_2D } });
+            bindTextures({ { material->mDiffuseTexture->mTextureHandle, TextureType_2D } });
 
         constexpr GLenum modes[] {
             GL_POINTS,

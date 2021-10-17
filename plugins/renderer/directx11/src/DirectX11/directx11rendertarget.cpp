@@ -264,7 +264,7 @@ namespace Render {
         program->bind(&mesh->mVAO);
 
         if (material)
-            bindTextures({ { material->mDiffuseHandle, TextureType_2D }, { material->mEmissiveHandle, TextureType_2D } });
+            bindTextures({ { material->mDiffuseTexture->mTextureHandle, TextureType_2D }, { material->mEmissiveTexture->mTextureHandle, TextureType_2D } });
 
         constexpr D3D11_PRIMITIVE_TOPOLOGY modes[] {
             D3D11_PRIMITIVE_TOPOLOGY_POINTLIST,
@@ -295,7 +295,7 @@ namespace Render {
         program->bind(&mesh->mVAO);
 
         if (material)
-            bindTextures({ { material->mDiffuseHandle, TextureType_2D }, { material->mEmissiveHandle, TextureType_2D } });
+            bindTextures({ { material->mDiffuseTexture->mTextureHandle, TextureType_2D }, { material->mEmissiveTexture->mTextureHandle, TextureType_2D } });
 
         constexpr D3D11_PRIMITIVE_TOPOLOGY modes[] {
             D3D11_PRIMITIVE_TOPOLOGY_POINTLIST,

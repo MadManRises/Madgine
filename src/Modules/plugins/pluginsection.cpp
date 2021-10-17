@@ -59,13 +59,13 @@ namespace Plugins {
         return mExclusive;
     }
 
-    SharedFuture<bool> PluginSection::load(Threading::Barrier &barrier)
+    Threading::TaskFuture<bool> PluginSection::load(Threading::Barrier &barrier)
     {
         if (mAtleastOne) {
             if (mPlugins.empty())
                 throw exception("No plugin available in Section tagged as atleastOne: "s + mName);
             for (std::pair<const std::string, Plugin> &p : mPlugins) {
-                SharedFuture<bool> state = p.second.state(Plugin::LOADING);
+                Threading::TaskFuture<bool> state = p.second.state(Plugin::LOADING);
                 if (!state.is_ready() || state)
                     return state;
             }
@@ -75,63 +75,42 @@ namespace Plugins {
         return true;
     }
 
-    Future<bool> PluginSection::unload(Threading::Barrier &barrier)
+    Threading::TaskFuture<bool> PluginSection::unload(Threading::Barrier &barrier)
     {
-        std::vector<SharedFuture<bool>> dependentsList;
+        std::vector<Threading::TaskFuture<bool>> dependentsList;
 
         for (Plugin *p : mDependents) {
             dependentsList.emplace_back(p->section()->unloadPlugin(barrier, p));
         }
 
-        std::promise<bool> promise;
-        Future<bool> result = promise.get_future();
-
-        barrier.queue(nullptr, [this, &barrier, dependentsList { std::move(dependentsList) }, promise { std::move(promise) }]() mutable {
-            bool wait = false;
-            for (SharedFuture<bool> &f : dependentsList) {
-                if (!f.is_ready()) {
-                    wait = true;
-                } else if (f) {
-                    LOG_ERROR("Unload of dependent for plugin-section \"" << mName << "\" failed!");
-                    return Threading::RETURN;
-                }
-            }
-            if (wait) {
-                return Threading::YIELD;
-            } else {
-                std::vector<SharedFuture<bool>> results;
-                for (Plugin &p : kvValues(mPlugins)) {
-                    results.emplace_back(unloadPlugin(barrier, &p));
-                }
-                barrier.queue(nullptr, [this, results { std::move(results) }, promise { std::move(promise) }]() mutable {
-                    bool wait = false;
-                    for (SharedFuture<bool> &f : results) {
-                        if (!f.is_ready()) {
-                            wait = true;
-                        } else if (f) {
-                            LOG_ERROR("Unload of plugin in section \"" << mName << "\" failed!");
-                            promise.set_value(true);
-                            return Threading::RETURN;
-                        }
+        return barrier.queue(
+            nullptr, [](PluginSection *_this, Threading::Barrier &barrier, std::vector<Threading::TaskFuture<bool>> dependentsList) mutable -> Threading::Task<bool> {
+                for (Threading::TaskFuture<bool> &f : dependentsList) {
+                    if (co_await f) {
+                        LOG_ERROR("Unload of dependent for plugin-section \"" << _this->mName << "\" failed!");
+                        co_return true;
                     }
-                    if (wait) {
-                        return Threading::YIELD;
-                    } else {
-                        promise.set_value(false);
-                        return Threading::RETURN;
+                }
+                std::vector<Threading::TaskFuture<bool>> results;
+                for (Plugin &p : kvValues(_this->mPlugins)) {
+                    results.emplace_back(_this->unloadPlugin(barrier, &p));
+                }
+                for (Threading::TaskFuture<bool> &f : results) {
+                    if (co_await f) {
+                        LOG_ERROR("Unload of plugin in section \"" << _this->mName << "\" failed!");
+                        co_return true;
                     }
-                });
-                return Threading::RETURN;
-            }
-        });
-        return result;
+                }
+                co_return false;
+            },
+            this, barrier, std::move(dependentsList));
     }
 
     PluginSection::State PluginSection::isLoaded(const std::string &name)
     {
         auto it = mPlugins.find(name);
         if (it != mPlugins.end()) {
-            SharedFuture<bool> state = it->second.state();
+            Threading::TaskFuture<bool> state = it->second.state();
             if (!state.is_ready())
                 return UNDEFINED;
             return state ? LOADED : UNLOADED;
@@ -139,35 +118,45 @@ namespace Plugins {
         return UNLOADED;
     }
 
-    SharedFuture<bool> PluginSection::loadPlugin(const std::string &name, Threading::TaskHandle onSuccess)
+    Threading::TaskFuture<bool> PluginSection::loadPlugin(const std::string &name, std::function<void()> onSuccess)
     {
         Plugin *plugin = getPlugin(name);
         if (!plugin)
             return false;
-        std::promise<bool> p;
-        SharedFuture<bool> f { p.get_future().share() };
         Threading::Barrier &barrier = Threading::WorkGroup::barrier(Threading::Barrier::RUN_ONLY_ON_MAIN_THREAD);
-        barrier.queue(nullptr, [=, &barrier, p { std::move(p) }, onSuccess { std::move(onSuccess) }]() mutable {
-            loadPlugin(barrier, plugin, std::move(p), std::move(f), [this, &barrier, onSuccess { std::move(onSuccess) }]() {if (onSuccess)onSuccess(); mMgr.onUpdate(barrier); });            
-        });
-        return f;
+        return barrier.queue(
+            nullptr, [](Threading::Barrier &barrier, PluginSection *_this, Plugin *plugin, std::function<void()> onSuccess) mutable -> Threading::Task<bool> {
+                bool result = co_await _this->loadPlugin(barrier, plugin);
+                if (result) {
+                    if (onSuccess)
+                        onSuccess();
+                    _this->mMgr.onUpdate(barrier);
+                }
+                co_return result;
+            },
+            barrier, this, plugin, std::move(onSuccess));
     }
 
-    SharedFuture<bool> PluginSection::unloadPlugin(const std::string &name, Threading::TaskHandle onSuccess)
+    Threading::TaskFuture<bool> PluginSection::unloadPlugin(const std::string &name, std::function<void()> onSuccess)
     {
         Plugin *plugin = getPlugin(name);
         if (!plugin)
             return false;
-        std::promise<bool> p;
-        SharedFuture<bool> f { p.get_future().share() };
         Threading::Barrier &barrier = Threading::WorkGroup::barrier(Threading::Barrier::RUN_ONLY_ON_MAIN_THREAD);
-        barrier.queue(nullptr, [=, &barrier, p { std::move(p) }, onSuccess { std::move(onSuccess) }]() mutable {
-            unloadPlugin(barrier, plugin, std::move(p), std::move(f), [this, &barrier, onSuccess { std::move(onSuccess) }]() {if (onSuccess)onSuccess(); mMgr.onUpdate(barrier); });
-        });
-        return f;
+        return barrier.queue(
+            nullptr, [](Threading::Barrier &barrier, PluginSection *_this, Plugin *plugin, std::function<void()> onSuccess) mutable -> Threading::Task<bool> {
+                bool result = co_await _this->unloadPlugin(barrier, plugin);
+                if (!result) {
+                    if (onSuccess)
+                        onSuccess();
+                    _this->mMgr.onUpdate(barrier);
+                }
+                co_return result;
+            },
+            barrier, this, plugin, std::move(onSuccess));
     }
 
-    SharedFuture<bool> PluginSection::loadPluginByFilename(const std::string &name)
+    Threading::TaskFuture<bool> PluginSection::loadPluginByFilename(const std::string &name)
     {
         auto pib = mPlugins.try_emplace(name, name);
         assert(pib.second);
@@ -202,128 +191,91 @@ namespace Plugins {
         return &it->second;
     }
 
-    SharedFuture<bool> PluginSection::loadPlugin(Threading::Barrier &barrier, Plugin *p, std::optional<std::promise<bool>> &&promise, std::optional<SharedFuture<bool>> &&future, Threading::TaskHandle onSuccess)
+    Threading::TaskFuture<bool> PluginSection::loadPlugin(Threading::Barrier &barrier, Plugin *p)
     {
         assert(p->section() == this);
 
-        SharedFuture<bool> resultFuture = p->startOperation(Plugin::LOADING, promise, std::move(future));
-
-        if (promise) {
-            std::vector<Future<void>> listenerFeedbacks;
-            {
-                std::unique_lock lock(mMgr.mListenersMutex);
-                for (PluginListener *listener : mListeners)
-                    listenerFeedbacks.emplace_back(listener->aboutToLoadPlugin(p));
-            }
-
-            barrier.queue(nullptr, [this, p, &barrier, promise { std::move(*promise) }, listenerFeedbacks { std::move(listenerFeedbacks) }, resultFuture, onSuccess { std::move(onSuccess) }]() mutable {
-                for (Future<void> &f : listenerFeedbacks)
-                    if (!f.is_ready())
-                        return Threading::YIELD;
-
-                SharedFuture<bool> result = true;
-                Plugin *unloadExclusive
-                    = nullptr;
-                if (mExclusive) {
-                    for (Plugin &p2 : kvValues(mPlugins)) {
-                        if (&p2 != p && p2.isLoaded()) {
-                            assert(!unloadExclusive);
-                            unloadExclusive = &p2;
-                        }
-                    }
-                }
-
-                if (unloadExclusive) {
-                    result = unloadPlugin(barrier, unloadExclusive);
-                }
-                barrier.queue(nullptr, [this, unloadExclusive, p, &barrier, promise { std::move(promise) }, result { std::move(result) }, resultFuture { std::move(resultFuture) }, onSuccess { std::move(onSuccess) }]() mutable {
-                    if (!result.is_ready())
-                        return Threading::YIELD;
-                    if (unloadExclusive && result) {
-                        promise.set_value(false);
-                        return Threading::RETURN;
+        return p->startOperation(Plugin::LOADING, [=, &barrier]() {
+            return barrier.queue(
+                nullptr, [](PluginSection *_this, Threading::Barrier &barrier, Plugin *p) -> Threading::Task<bool> {
+                    std::vector<Threading::TaskFuture<void>> listenerFeedbacks;
+                    {
+                        std::unique_lock lock(_this->mMgr.mListenersMutex);
+                        for (PluginListener *listener : _this->mListeners)
+                            listenerFeedbacks.emplace_back(listener->aboutToLoadPlugin(p));
                     }
 
-                    std::promise<bool> pluginPromise;
-                    Future<bool> f { pluginPromise.get_future() };
-                    p->load(mMgr, barrier, std::move(pluginPromise));
-                    barrier.queue(nullptr, [this, p, &barrier, promise { std::move(promise) }, f { std::move(f) }, resultFuture { std::move(resultFuture) }, onSuccess { std::move(onSuccess) }]() mutable {
-                        if (!f.is_ready())
-                            return Threading::YIELD;
+                    for (Threading::TaskFuture<void> &f : listenerFeedbacks)
+                        co_await f;
 
-                        if (!f) {
-                            promise.set_value(false);
-                            return Threading::RETURN;
+                    Plugin *unloadExclusive
+                        = nullptr;
+                    if (_this->mExclusive) {
+                        for (Plugin &p2 : kvValues(_this->mPlugins)) {
+                            if (&p2 != p && p2.isLoaded()) {
+                                assert(!unloadExclusive);
+                                unloadExclusive = &p2;
+                            }
                         }
+                    }
 
-                        {
-                            std::unique_lock lock(mMgr.mListenersMutex);
-                            for (PluginListener *listener : mListeners)
-                                listener->onPluginLoad(p);
+                    if (unloadExclusive) {
+                        if (co_await _this->unloadPlugin(barrier, unloadExclusive)) {
+                            co_return false;
                         }
+                    }
 
-                        PluginSection &toolsSection = mMgr.section("Tools");
-                        if (Plugin *toolPlugin = toolsSection.getPlugin(p->name() + "Tools")) {
-                            toolsSection.loadPlugin(barrier, toolPlugin, std::move(promise), std::move(resultFuture), std::move(onSuccess));
-                        } else {
-                            promise.set_value(true);
-                            barrier.queue(nullptr, std::move(onSuccess));
-                        }
+                    if (!co_await p->load(_this->mMgr, barrier)) {
+                        co_return false;
+                    }
 
-                        return Threading::RETURN;
-                    });
-                    return Threading::RETURN;
-                });
-                return Threading::RETURN;
-            });
-        }
+                    {
+                        std::unique_lock lock(_this->mMgr.mListenersMutex);
+                        for (PluginListener *listener : _this->mListeners)
+                            listener->onPluginLoad(p);
+                    }
 
-        return resultFuture;
+                    PluginSection &toolsSection = _this->mMgr.section("Tools");
+                    if (Plugin *toolPlugin = toolsSection.getPlugin(p->name() + "Tools")) {
+                        co_return co_await toolsSection.loadPlugin(barrier, toolPlugin);
+                    } else {
+                        co_return true;
+                    }
+                },
+                this, barrier, p);
+        });
     }
 
-    SharedFuture<bool> PluginSection::unloadPlugin(Threading::Barrier &barrier, Plugin *p, std::optional<std::promise<bool>> &&promise, std::optional<SharedFuture<bool>> &&future, Threading::TaskHandle onSuccess)
+    Threading::TaskFuture<bool> PluginSection::unloadPlugin(Threading::Barrier &barrier, Plugin *p)
     {
         assert(p->section() == this);
 
-        SharedFuture<bool> result = p->startOperation(Plugin::UNLOADING, promise, std::move(future));
+        return p->startOperation(Plugin::UNLOADING, [=, &barrier]() {
+            return barrier.queue(
+                nullptr, [](PluginSection *_this, Threading::Barrier &barrier, Plugin *p) -> Threading::Task<bool> {
+                    //assert(!mAtleastOne);
+                    std::vector<Threading::TaskFuture<void>> listenerFeedbacks;
+                    {
+                        std::unique_lock lock(_this->mMgr.mListenersMutex);
+                        for (PluginListener *listener : _this->mListeners)
+                            listenerFeedbacks.emplace_back(listener->aboutToUnloadPlugin(p));
+                    }
 
-        if (promise) {
+                    for (Threading::TaskFuture<void> &f : listenerFeedbacks)
+                        co_await f;
 
-            //assert(!mAtleastOne);
-            std::vector<Future<void>> listenerFeedbacks;
-            {
-                std::unique_lock lock(mMgr.mListenersMutex);
-                for (PluginListener *listener : mListeners)
-                    listenerFeedbacks.emplace_back(listener->aboutToUnloadPlugin(p));
-            }
-
-            barrier.queue(nullptr, [this, p, &barrier, promise { std::move(*promise) }, listenerFeedbacks { std::move(listenerFeedbacks) }, onSuccess { std::move(onSuccess) }]() mutable {
-                for (Future<void> &f : listenerFeedbacks)
-                    if (!f.is_ready())
-                        return Threading::YIELD;
-                std::promise<bool> pluginPromise;
-                Future<bool> result { pluginPromise.get_future() };
-                p->unload(mMgr, barrier, std::move(pluginPromise));
-                barrier.queue(nullptr, [this, p, &barrier, promise { std::move(promise) }, result { std::move(result) }, onSuccess { std::move(onSuccess) }]() mutable {
-                    if (!result.is_ready())
-                        return Threading::YIELD;
-                    bool resultValue = result;
+                    bool resultValue = co_await p->unload(_this->mMgr, barrier);
                     if (resultValue) {
                         {
-                            std::unique_lock lock(mMgr.mListenersMutex);
-                            for (PluginListener *listener : mListeners)
+                            std::unique_lock lock(_this->mMgr.mListenersMutex);
+                            for (PluginListener *listener : _this->mListeners)
                                 listener->onPluginUnload(p);
                         }
-                        barrier.queue(nullptr, std::move(onSuccess));
                     }
-                    promise.set_value(resultValue);
-                    return Threading::RETURN;
-                });
-                return Threading::RETURN;
-            });
-        }
-
-        return result;
+                    co_return resultValue;
+                },
+                this, barrier, p);
+        });
     }
 
     std::map<std::string, Plugin>::const_iterator PluginSection::begin() const
@@ -346,44 +298,34 @@ namespace Plugins {
         return mPlugins.end();
     }
 
-    Future<bool> PluginSection::loadFromIni(Threading::Barrier &barrier, const Ini::IniSection &sec)
+    Threading::TaskFuture<bool> PluginSection::loadFromIni(Threading::Barrier &barrier, const Ini::IniSection &sec)
     {
-        std::vector<std::pair<SharedFuture<bool>, bool>> futures;
+        return barrier.queue(
+            nullptr, [](PluginSection *_this, Threading::Barrier &barrier, const Ini::IniSection &sec) -> Threading::Task<bool> {
+                std::vector<std::pair<Threading::TaskFuture<bool>, bool>> futures;
 
-        for (const std::pair<const std::string, std::string> &p : sec) {
-            Plugin *plugin = getPlugin(p.first);
-            if (!plugin) {
-                LOG("Could not find Plugin \"" << p.first << "\"!");
-                continue;
-            }
-            if (p.second.empty()) {
-                futures.emplace_back(unloadPlugin(barrier, plugin), false);
-            } else {
-                futures.emplace_back(loadPlugin(barrier, plugin), true);
-            }
-        }
-
-        std::promise<bool> p;
-        Future<bool> f { p.get_future() };
-
-        barrier.queue(nullptr, [futures { std::move(futures) }, promise { std::move(p) }]() mutable {
-            bool wait = false;
-            for (std::pair<SharedFuture<bool>, bool> &p : futures) {
-                if (!p.first.is_ready())
-                    wait = true;
-                else if (p.first != p.second) {
-                    LOG("Error!");
-                    promise.set_value(false);
-                    return Threading::RETURN;
+                for (const std::pair<const std::string, std::string> &p : sec) {
+                    Plugin *plugin = _this->getPlugin(p.first);
+                    if (!plugin) {
+                        LOG("Could not find Plugin \"" << p.first << "\"!");
+                        continue;
+                    }
+                    if (p.second.empty()) {
+                        futures.emplace_back(_this->unloadPlugin(barrier, plugin), false);
+                    } else {
+                        futures.emplace_back(_this->loadPlugin(barrier, plugin), true);
+                    }
                 }
-            }
-            if (wait)
-                return Threading::YIELD;
-            promise.set_value(true);
-            return Threading::RETURN;
-        });
 
-        return f;
+                for (std::pair<Threading::TaskFuture<bool>, bool> &p : futures) {
+                    if (co_await p.first != p.second) {
+                        LOG("Error!");
+                        co_return false;
+                    }
+                }
+                co_return true;
+            },
+            this, barrier, sec);
     }
 
     PluginManager &PluginSection::manager()
@@ -409,7 +351,6 @@ namespace Plugins {
     {
         return (first->priority() > second->priority()) || (first->priority() == second->priority() && first < second);
     }
-
 }
 }
 

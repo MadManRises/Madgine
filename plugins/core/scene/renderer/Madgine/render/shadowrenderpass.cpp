@@ -37,13 +37,7 @@ namespace Render {
 
     void ShadowRenderPass::setup(RenderTarget *target)
     {
-        mProgram.create("scene");
-
-        mProgram.setParametersSize(0, sizeof(ScenePerApplication));
-        mProgram.setParametersSize(1, sizeof(ScenePerFrame));
-        mProgram.setParametersSize(2, sizeof(ScenePerObject));
-
-        mProgram.setInstanceDataSize(sizeof(SceneInstanceData));
+        mProgram.create("scene", { sizeof(ScenePerApplication), sizeof(ScenePerFrame), sizeof(ScenePerObject) }, sizeof(SceneInstanceData));
     }
 
     void ShadowRenderPass::shutdown()
@@ -54,6 +48,8 @@ namespace Render {
     void ShadowRenderPass::render(Render::RenderTarget *target, size_t iteration)
     {
         //TODO Culling
+        if (!mProgram.available())
+            return;
 
         Threading::DataLock lock { mScene.mutex(), Threading::AccessMode::READ };
 

@@ -2,6 +2,8 @@
 
 #include "task.h"
 
+#include "Generic/lambda.h"
+
 namespace Engine {
 namespace Threading {
 
@@ -31,11 +33,25 @@ namespace Threading {
         TaskQueue(const std::string &name, bool wantsMainThread = false);
         virtual ~TaskQueue();
 
-        void queue(TaskHandle &&task, TaskMask mask, const std::vector<Threading::DataMutex *> &dependencies = {});
+        void queueHandle(TaskHandle &&task, TaskMask mask, const std::vector<Threading::DataMutex *> &dependencies = {});
         void queue_after(TaskHandle &&task, TaskMask mask, std::chrono::steady_clock::duration duration, const std::vector<Threading::DataMutex *> &dependencies = {});
         void queue_for(TaskHandle &&task, TaskMask mask, std::chrono::steady_clock::time_point time_point, const std::vector<Threading::DataMutex *> &dependencies = {});
 
-        void addRepeatedTask(TaskHandle &&task, TaskMask mask, std::chrono::steady_clock::duration interval = std::chrono::steady_clock::duration::zero(), void *owner = nullptr);
+        template <typename T>
+        TaskFuture<T> queueTask(Task<T> task, TaskMask mask)
+        {
+            auto [fut, handle] = std::move(task).release();
+            queueHandle(std::move(handle), mask);
+            return std::move(fut);
+        }
+
+        template <typename F>
+        auto queue(F &&f, TaskMask mask)
+        {
+            return queueTask(make_task(std::forward<F>(f)), mask);
+        }
+
+        void addRepeatedTask(std::function<void()> &&task, TaskMask mask, std::chrono::steady_clock::duration interval = std::chrono::steady_clock::duration::zero(), void *owner = nullptr);
         void removeRepeatedTasks(void *owner);
 
         virtual std::optional<TaskTracker> fetch(TaskMask taskMask, const std::atomic<bool> *interruptFlag, std::chrono::steady_clock::time_point &nextTask, int &idleCount, int &repeatedCount);
@@ -54,7 +70,7 @@ namespace Threading {
 
         bool wantsMainThread() const;
 
-        void addSetupSteps(std::function<bool()> &&init, Threading::TaskHandle &&finalize = {});
+        void addSetupSteps(Lambda<bool()> &&init, Lambda<void()> &&finalize = {});
 
     protected:
         struct ScheduledTask {
@@ -76,7 +92,7 @@ namespace Threading {
         std::atomic<size_t> mTaskCount = 0;
 
         struct RepeatedTask {
-            TaskHandle mTask;
+            std::function<void()> mTask;
             TaskMask mMask;
             void *mOwner = nullptr;
             std::chrono::steady_clock::duration mInterval = std::chrono::steady_clock::duration::zero();
@@ -85,8 +101,8 @@ namespace Threading {
 
         std::list<ScheduledTask> mQueue;
         std::vector<RepeatedTask> mRepeatedTasks;
-        std::list<std::pair<Threading::TaskHandle, Threading::TaskHandle>> mSetupSteps;
-        std::list<std::pair<Threading::TaskHandle, Threading::TaskHandle>>::iterator mSetupState;
+        std::list<std::pair<Lambda<void()>, Lambda<void()>>> mSetupSteps;
+        std::list<std::pair<Lambda<void()>, Lambda<void()>>>::iterator mSetupState;
 
         mutable std::mutex mMutex;
         std::condition_variable mCv;

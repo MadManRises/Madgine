@@ -37,7 +37,7 @@ void UniqueComponentCollectorManager::onPluginLoad(const Plugins::Plugin *p)
     }
 }
 
-Future<void> UniqueComponentCollectorManager::aboutToUnloadPlugin(const Plugins::Plugin *p)
+Threading::TaskFuture<void> UniqueComponentCollectorManager::aboutToUnloadPlugin(const Plugins::Plugin *p)
 {
     const Plugins::BinaryInfo *info = p->info();
 

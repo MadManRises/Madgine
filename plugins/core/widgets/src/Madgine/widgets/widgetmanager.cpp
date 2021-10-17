@@ -109,9 +109,7 @@ namespace Widgets {
 
     bool WidgetManager::init()
     {
-        mData->mProgram.create("ui");
-
-        mData->mProgram.setParametersSize(2, sizeof(WidgetsPerObject));
+        mData->mProgram.create("ui", { 0, 0, sizeof(WidgetsPerObject) });
 
         mData->mMesh = Render::GPUMeshLoader::loadManual("widgetMesh", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &mesh, Render::GPUMeshLoader::ResourceDataInfo &info) {
             return loader->generate(mesh, { 3, std::vector<Vertex> {} });
@@ -450,6 +448,9 @@ namespace Widgets {
 
     void WidgetManager::render(Render::RenderTarget *target, size_t iteration)
     {
+        if (!mData->mProgram.available())
+            return; 
+
         target->pushAnnotation("WidgetManager");
 
         Rect2i screenSpace = mClientSpace;

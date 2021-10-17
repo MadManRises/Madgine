@@ -20,11 +20,12 @@ namespace Render {
     {
     }
 
-    void ProgramLoader::HandleType::create(const std::string &name, ProgramLoader *loader)
+    Threading::TaskFuture<bool> ProgramLoader::HandleType::create(const std::string &name, const std::vector<size_t> &bufferSizes, size_t instanceDataSize, ProgramLoader *loader)
     {
         *this = ProgramLoader::loadManual(
-            Resources::ResourceBase::sUnnamed, {}, [=](ProgramLoader *loader, Program &program, const ProgramLoader::ResourceDataInfo &info) { return loader->create(program, name); }, {},
+            Resources::ResourceBase::sUnnamed, {}, [=](ProgramLoader *loader, Program &program, const ProgramLoader::ResourceDataInfo &info) { return loader->create(program, name, bufferSizes, instanceDataSize); }, {},
             loader);
+        return info()->loadingTask();
     }
 
     void ProgramLoader::HandleType::create(const std::string &name, CodeGen::ShaderFile &&file, ProgramLoader *loader)
@@ -39,25 +40,11 @@ namespace Render {
             Resources::ResourceBase::sUnnamed, {}, [=, file { std::move(file) }](ProgramLoader *loader, Program &program, const ProgramLoader::ResourceDataInfo &info) mutable { return loader->create(program, Resources::ResourceBase::sUnnamed, file); }, {}, loader);
     }
 
-    void ProgramLoader::HandleType::setParametersSize(size_t index, size_t size, ProgramLoader *loader)
-    {
-        if (!loader)
-            loader = &ProgramLoader::getSingleton();
-        loader->setParametersSize(*getDataPtr(*this, loader), index, size);
-    }
-
     WritableByteBuffer ProgramLoader::HandleType::mapParameters(size_t index, ProgramLoader *loader)
     {
         if (!loader)
             loader = &ProgramLoader::getSingleton();
         return loader->mapParameters(*getDataPtr(*this, loader), index);
-    }
-
-    void ProgramLoader::HandleType::setInstanceDataSize(size_t size, ProgramLoader *loader)
-    {
-        if (!loader)
-            loader = &ProgramLoader::getSingleton();
-        return loader->setInstanceDataSize(*getDataPtr(*this, loader), size);
     }
 
     void ProgramLoader::HandleType::setInstanceData(const ByteBuffer &data, ProgramLoader *loader)

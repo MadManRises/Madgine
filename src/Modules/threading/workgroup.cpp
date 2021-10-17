@@ -24,9 +24,9 @@ namespace Threading {
 
     static std::atomic<size_t> sWorkgroupInstanceCounter = 0;
 
-    static std::vector<Threading::TaskHandle> &sThreadInitializers()
+    static std::vector<std::function<void()>> &sThreadInitializers()
     {
-        static std::vector<Threading::TaskHandle> dummy;
+        static std::vector<std::function<void()>> dummy;
         return dummy;
     }
 
@@ -47,12 +47,12 @@ namespace Threading {
         WorkGroupStorage::init(true);
         WorkGroupStorage::init(false);
 
-        for (const Threading::TaskHandle &task : sThreadInitializers()) {
+        for (const std::function<void()> &task : sThreadInitializers()) {
             task();
         }
 
         //Is that useful at all?
-        for (const Threading::TaskHandle &task : mThreadInitializers) {
+        for (const std::function<void()> &task : mThreadInitializers) {
             task();
         }
     }
@@ -73,7 +73,7 @@ namespace Threading {
 #endif
     }
 
-    void WorkGroup::addThreadInitializer(Threading::TaskHandle &&task)
+    void WorkGroup::addThreadInitializer(std::function<void()> &&task)
     {
 #if ENABLE_THREADING
         assert(mSubThreads.empty());
@@ -81,7 +81,7 @@ namespace Threading {
         mThreadInitializers.emplace_back(std::move(task));
     }
 
-    void WorkGroup::addStaticThreadInitializer(Threading::TaskHandle &&task)
+    void WorkGroup::addStaticThreadInitializer(std::function<void()> &&task)
     {
         sThreadInitializers().emplace_back(std::move(task));
     }
@@ -120,11 +120,11 @@ namespace Threading {
         assert(!sSelf);
         sSelf = this;
 
-        for (const Threading::TaskHandle &task : sThreadInitializers()) {
+        for (const std::function<void()> &task : sThreadInitializers()) {
             task();
         }
 
-        for (const Threading::TaskHandle &task : mThreadInitializers) {
+        for (const std::function<void()> &task : mThreadInitializers) {
             task();
         }
     }

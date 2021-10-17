@@ -117,7 +117,7 @@ namespace Serialize {
         return 0;
     }
 
-    TransactionId BufferedStreamData::createRequest(ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback)
+    TransactionId BufferedStreamData::createRequest(ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback)
     {
         if (requesterTransactionId == 0 && !callback)
             return 0;

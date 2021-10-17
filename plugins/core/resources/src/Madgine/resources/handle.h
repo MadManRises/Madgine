@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Modules/threading/taskfuture.h"
+
 namespace Engine {
 namespace Resources {
 
@@ -99,6 +101,11 @@ namespace Resources {
             return Loader::getDataPtr(*this);
         }
 
+        bool available() const
+        {
+            return *this && info()->verify();
+        }
+
         typename Loader::ResourceDataInfo *info() const
         {
             return Loader::getInfo(*this);
@@ -106,10 +113,10 @@ namespace Resources {
 
         typename Loader::ResourceType *resource() const
         {
-            typename Loader::ResourceDataInfo *info = Loader::getInfo(*this);
-            if (!info)
+            typename Loader::ResourceDataInfo *i = info();
+            if (!i)
                 return nullptr;
-            return static_cast<typename Loader::ResourceType *>(info->resource());
+            return static_cast<typename Loader::ResourceType *>(i->resource());
         }
 
         std::string_view name() const
@@ -123,10 +130,14 @@ namespace Resources {
             return mData != Data {};
         }
 
-        void load(std::string_view name, Loader *loader = nullptr)
+        Threading::TaskFuture<bool> load(std::string_view name, Loader *loader = nullptr)
         {
             reset();
             *this = Loader::load(name, loader);
+            typename Loader::ResourceDataInfo *i = info();
+            if (!i)
+                return false;
+            return i->loadingTask();
         }
 
         void reset()

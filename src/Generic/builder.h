@@ -1,7 +1,6 @@
 #pragma once
 
 #include "type_pack.h"
-#include "onetimefunctor.h"
 
 namespace Engine {
 
@@ -16,7 +15,7 @@ struct BuilderImpl {
     {
     }
 
-    BuilderImpl(OneTimeFunctor<F> f, Tuple data)
+    BuilderImpl(F f, Tuple data)
         : mF(std::move(f))
         , mData(std::move(data))
     {
@@ -34,7 +33,9 @@ struct BuilderImpl {
 
     decltype(auto) execute()
     {
-        return TupleUnpacker::invokeFromTuple(std::move(mF), std::move(mData));
+        F f = std::move(*mF);
+        mF.reset();
+        return TupleUnpacker::invokeFromTuple(std::move(f), std::move(mData));
     }
 
     operator return_type()
@@ -77,7 +78,9 @@ private:
     template <size_t Dim, typename T, size_t... Is>
     Facade<BuilderImpl<F, type_pack_apply_to_nth_t<appender<T>::template type, Pack, Dim>, Facade>> append_impl(T &&t, std::index_sequence<Is...>)
     {
-        return { std::move(mF),
+        F f = std::move(*mF);
+        mF.reset();
+        return { std::move(f),
             std::forward_as_tuple(
                 [&]() {
                     if constexpr (Is == Dim)
@@ -88,7 +91,7 @@ private:
     }
 
 private:
-    OneTimeFunctor<F> mF;
+    std::optional<F> mF;
     Tuple mData;
 };
 

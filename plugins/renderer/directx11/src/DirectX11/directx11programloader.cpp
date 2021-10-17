@@ -12,6 +12,8 @@
 
 #include "codegen/codegen_shader.h"
 
+#include "directx11rendercontext.h"
+
 VIRTUALUNIQUECOMPONENT(Engine::Render::DirectX11ProgramLoader);
 
 METATABLE_BEGIN_BASE(Engine::Render::DirectX11ProgramLoader, Engine::Render::ProgramLoader)
@@ -37,7 +39,7 @@ namespace Render {
         program.reset();
     }
 
-    bool DirectX11ProgramLoader::create(Program &_program, const std::string &name)
+    bool DirectX11ProgramLoader::create(Program &_program, const std::string &name, const std::vector<size_t> &bufferSizes, size_t instanceDataSize)
     {
         DirectX11Program &program = static_cast<DirectX11Program &>(_program);
 
@@ -50,6 +52,13 @@ namespace Render {
 
         if (!program.link(std::move(vertexShader), std::move(pixelShader), std::move(geometryShader)))
             std::terminate();
+
+        for (size_t i = 0; i < bufferSizes.size(); ++i)
+            if (bufferSizes[i] > 0)
+                program.setParametersSize(i, bufferSizes[i]);
+
+        if (instanceDataSize > 0)
+            program.setInstanceDataSize(instanceDataSize);
 
         return true;
     }
@@ -73,19 +82,9 @@ namespace Render {
         return true;
     }
 
-    void DirectX11ProgramLoader::setParametersSize(Program &program, size_t index, size_t size)
-    {
-        static_cast<DirectX11Program &>(program).setParametersSize(index, size);
-    }
-
     WritableByteBuffer Engine::Render::DirectX11ProgramLoader::mapParameters(Program &program, size_t index)
     {
         return static_cast<DirectX11Program &>(program).mapParameters(index);
-    }
-
-    void DirectX11ProgramLoader::setInstanceDataSize(Program &program, size_t size)
-    {
-        static_cast<DirectX11Program &>(program).setInstanceDataSize(size);
     }
 
     void DirectX11ProgramLoader::setInstanceData(Program &program, const ByteBuffer &data)
@@ -96,6 +95,11 @@ namespace Render {
     void DirectX11ProgramLoader::setDynamicParameters(Program &program, size_t index, const ByteBuffer &data)
     {
         static_cast<DirectX11Program &>(program).setDynamicParameters(index, data);
+    }
+
+        Threading::TaskQueue *DirectX11ProgramLoader::loadingTaskQueue() const
+    {
+        return DirectX11RenderContext::renderQueue();
     }
 
 }

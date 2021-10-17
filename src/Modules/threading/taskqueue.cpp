@@ -36,6 +36,7 @@ namespace Threading {
         //TODO: priority Queue
         {
             std::lock_guard<std::mutex> lock(mMutex);
+            task.mTask.setQueue(this);
             mQueue.emplace_back(std::move(task));
         }
         mCv.notify_one();
@@ -60,10 +61,8 @@ namespace Threading {
     {
         std::chrono::steady_clock::time_point nextAvailableTaskTime = std::chrono::steady_clock::time_point::max();
         while (std::optional<Threading::TaskTracker> f = fetch(taskMask, interruptFlag, nextAvailableTaskTime, idleCount, repeatedCount)) {
-            TaskState state = f->mTask();
-            if (state == YIELD) {
-                queue(std::move(f->mTask), f->mMask);
-            }
+            f->mTask();
+            assert(!f->mTask);
         }
         return nextAvailableTaskTime;
     }
@@ -73,10 +72,10 @@ namespace Threading {
         std::unique_lock<std::mutex> lock(mMutex);
 
         if (until == std::chrono::steady_clock::time_point::max()) {
-            auto cond = [=, &interruptFlag]() { return interruptFlag || !mQueue.empty() || !mRunning || !mRepeatedTasks.empty(); };
+            auto cond = [=, &interruptFlag]() { return (interruptFlag && *interruptFlag) || !mQueue.empty() || !mRunning || !mRepeatedTasks.empty(); };
             mCv.wait(lock, cond);
         } else {
-            auto cond = [=, &interruptFlag]() { return interruptFlag || !mQueue.empty() || !mRunning; };
+            auto cond = [=, &interruptFlag]() { return (interruptFlag && *interruptFlag) || !mQueue.empty() || !mRunning; };
             mCv.wait_until(lock, until, cond);
         }
     }
@@ -97,7 +96,7 @@ namespace Threading {
         mCv.notify_all();
     }
 
-    void TaskQueue::queue(TaskHandle &&task, TaskMask mask, const std::vector<Threading::DataMutex *> &dependencies)
+    void TaskQueue::queueHandle(TaskHandle &&task, TaskMask mask, const std::vector<Threading::DataMutex *> &dependencies)
     {
         queueInternal({ std::move(task), mask });
     }
@@ -112,7 +111,7 @@ namespace Threading {
         queueInternal({ std::move(task), mask, time_point });
     }
 
-    void TaskQueue::addRepeatedTask(TaskHandle &&task, TaskMask mask, std::chrono::steady_clock::duration interval, void *owner)
+    void TaskQueue::addRepeatedTask(std::function<void()> &&task, TaskMask mask, std::chrono::steady_clock::duration interval, void *owner)
     {
         {
             std::lock_guard<std::mutex> lock(mMutex);
@@ -133,10 +132,10 @@ namespace Threading {
 
         if (mRunning && match(TaskMask::DEFAULT, taskMask)) {
             while (mSetupState != mSetupSteps.end()) {
-                std::optional<Threading::TaskHandle> init = std::move(mSetupState->first);
+                Lambda<void()> init = std::move(mSetupState->first);
                 ++mSetupState;
                 if (init) {
-                    return wrapTask(std::move(*init), TaskMask::DEFAULT);
+                    return wrapTask(make_task(std::move(init)), TaskMask::DEFAULT);
                 }
             }
         }
@@ -168,7 +167,7 @@ namespace Threading {
                     if (repeatedCount > 0)
                         --repeatedCount;
                     nextTask->mNextExecuted = std::chrono::steady_clock::now() + nextTask->mInterval;
-                    return wrapTask([=]() { nextTask->mTask(); }, nextTask->mMask);
+                    return wrapTask(make_task([=]() { nextTask->mTask(); }), nextTask->mMask);
                 }
             }
         }
@@ -190,9 +189,9 @@ namespace Threading {
 
             while (mSetupState != mSetupSteps.begin()) {
                 --mSetupState;
-                Threading::TaskHandle finalize = std::move(mSetupState->second);
+                Lambda<void()> finalize = std::move(mSetupState->second);
                 if (finalize) {
-                    return wrapTask(std::move(finalize), TaskMask::DEFAULT);
+                    return wrapTask(make_task(std::move(finalize)), TaskMask::DEFAULT);
                 }
             }
         }
@@ -220,7 +219,7 @@ namespace Threading {
         return mTaskCount == 0;
     }
 
-    void TaskQueue::addSetupSteps(std::function<bool()> &&init, TaskHandle &&finalize)
+    void TaskQueue::addSetupSteps(Lambda<bool()> &&init, Lambda<void()> &&finalize)
     {
         bool isItEnd = mSetupState == mSetupSteps.end();
         if (init && finalize) {

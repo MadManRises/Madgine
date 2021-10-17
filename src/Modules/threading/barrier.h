@@ -1,5 +1,7 @@
 #pragma once
 
+#include "task.h"
+
 namespace Engine {
 namespace Threading {
 
@@ -17,7 +19,13 @@ namespace Threading {
 
         void enter(TaskQueue *queue, size_t queueIndex, bool isMain);
 
-        void queue(TaskQueue *queue, TaskHandle task);
+        void queueHandle(TaskQueue *queue, TaskHandle task);
+        template <typename F, typename... Args>
+        auto queue(TaskQueue* queue, F &&f, Args&&... args) {
+            auto [fut, handle] = make_task(std::forward<F>(f), std::forward<Args>(args)...).release();
+            this->queueHandle(queue, std::move(handle));                
+            return std::move(fut);
+        }
 
         bool running();
         bool started();

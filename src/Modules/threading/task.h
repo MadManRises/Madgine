@@ -1,87 +1,124 @@
 #pragma once
 
-#include "Generic/copy_traits.h"
+#include "Generic/coroutines/handle.h"
+#include "taskfuture.h"
 
-namespace Engine
-{
-	namespace Threading
-	{
+namespace Engine {
+namespace Threading {
 
-		enum TaskState {
-			YIELD,
-			RETURN
-		};
+    enum TaskState {
+        RETURN,
+        SUSPENDED
+    };
 
-		struct Task {
-			virtual TaskState execute() = 0;
-			virtual std::unique_ptr<Task> clone() = 0;
-			virtual ~Task() = default;
-		};
+    template <typename F, typename... Args>
+    auto make_task(F f, Args &&...args)
+    {
+        static_assert(!std::is_reference_v<F>);
+        if constexpr (is_instance_v<std::invoke_result_t<F, Args...>, Task>) {
+            return f(std::forward<Args>(args)...);
+        } else {
+            return [](F f, Args... args) -> Task<std::invoke_result_t<F, Args...>> {
+                co_return std::move(f)(std::forward<Args>(args)...);
+            }(std::move(f), std::forward<Args>(args)...);
+        }
+    }
 
-		template <typename F>
-		struct TaskImpl : Task {
+    struct MODULES_EXPORT TaskHandle {
 
-			TaskImpl(F &&f) :
-				mF(std::forward<F>(f))
-			{
-			}
+        TaskHandle() = default;
+        TaskHandle(TaskHandle &&other) = default;
+        TaskHandle(const TaskHandle &) = delete;
+        TaskHandle(TaskHandle &) = delete;
 
-			TaskState execute() override
-			{
-				return TupleUnpacker::invokeDefaultResult(RETURN, mF);
-			}
+        TaskHandle &operator=(TaskHandle &&) = default;
 
-			std::unique_ptr<Task> clone() override
-			{
-				return std::make_unique<TaskImpl<F>>(tryCopy(mF));
-			}
+        TaskHandle(CoroutineHandle<TaskPromiseTypeBase> handle);
+        ~TaskHandle();
 
-		private:
-			F mF;
-		};
+        void reset();
+        CoroutineHandle<TaskPromiseTypeBase> release();
 
-		struct TaskHandle {
+        void setQueue(TaskQueue *queue, Barrier *barrier = nullptr);
 
-			TaskHandle() = default;
-			TaskHandle(TaskHandle &&) noexcept = default;
+        TaskState operator()();
 
-			template <typename F>
-			TaskHandle(F &&f) :
-				mTask(std::make_unique<TaskImpl<std::remove_reference_t<F>>>(std::forward<F>(f))) {}
+        explicit operator bool() const;
 
-			TaskHandle &operator=(TaskHandle &&) noexcept = default;
+    protected:
+        CoroutineHandle<TaskPromiseTypeBase> mHandle;
+    };
 
-			TaskState operator()() const {
-				return mTask->execute();
-			}
+    template <typename T>
+    struct Task : TaskHandle {
 
-			explicit operator bool() const
-			{
-				return mTask.operator bool();
-			}
+        static_assert(!is_instance_v<T, Task>);
 
-			/* TaskHandle clone() const
-			{
-				return *this;
-			}*/
+        struct promise_type : TaskPromiseTypeBase {
 
-		protected:
-                        /* TaskHandle(const TaskHandle &other)
-                            :
-				mTask(other.mTask->clone())
-			{
+            promise_type()
+                : TaskPromiseTypeBase(std::make_shared<TaskPromiseSharedState<T>>())
+            {
+            }
 
-			}
+            Task<T> get_return_object()
+            {
+                return { std::experimental::coroutine_handle<promise_type>::from_promise(*this) };
+            }
 
-			TaskHandle &operator=(const TaskHandle &other)
-			{
-				mTask = other.mTask->clone();
-				return *this;
-			}*/
+            std::experimental::suspend_never return_value(T value) noexcept
+            {
+                static_cast<TaskPromiseSharedState<T> *>(mState.get())->set_value(std::move(value));
+                return {};
+            }
+        };
 
-		private:
-			std::unique_ptr<Task> mTask;
-		};
+        Task(CoroutineHandle<promise_type> handle)
+            : TaskHandle(std::move(handle))
+        {
+        }
 
-	}
+        std::pair<TaskFuture<T>, CoroutineHandle<TaskPromiseTypeBase>> release() &&
+        {
+            return { std::static_pointer_cast<TaskPromiseSharedState<T>>(mHandle->mState), std::move(mHandle) };
+        }
+
+    };
+
+    template <>
+    struct Task<void> : TaskHandle {
+
+        struct promise_type : TaskPromiseTypeBase {
+
+            promise_type()
+                : TaskPromiseTypeBase(std::make_shared<TaskPromiseSharedState<void>>())
+            {
+            }
+
+            Task<void> get_return_object()
+            {
+                return {
+                    CoroutineHandle<promise_type>::fromPromise(*this)
+                };
+            }
+
+            std::experimental::suspend_never return_void()
+            {
+                static_cast<TaskPromiseSharedState<void> *>(mState.get())->set_value();
+                return {};
+            }
+        };
+
+        Task(CoroutineHandle<promise_type> handle)
+            : TaskHandle(std::move(handle))
+        {
+        }
+
+        std::pair<TaskFuture<void>, CoroutineHandle<TaskPromiseTypeBase>> release() &&
+        {
+            return { std::static_pointer_cast<TaskPromiseSharedState<void>>(mHandle->mState), std::move(mHandle) };
+        }
+    };
+
+}
 }

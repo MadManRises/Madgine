@@ -128,7 +128,7 @@ namespace Resources {
         //registerResourceLocation(binPath.parent_path() / "data" / plugin->());
     }
 
-    Future<void> ResourceManager::aboutToUnloadPlugin(const Plugins::Plugin *plugin)
+    Threading::TaskFuture<void> ResourceManager::aboutToUnloadPlugin(const Plugins::Plugin *plugin)
     {
         return {};
     }
@@ -137,7 +137,7 @@ namespace Resources {
     void ResourceManager::update()
     {
         std::vector<Filesystem::FileEvent> events = mFileWatcher.fetchChangesReduced();
-        
+
         std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> loaderByExtension = getLoaderByExtension();
 
         for (const Filesystem::FileEvent &event : events) {
@@ -148,6 +148,11 @@ namespace Resources {
     void ResourceManager::waitForInit()
     {
         mInitialized.wait(false);
+    }
+
+    Threading::TaskQueue *ResourceManager::taskQueue()
+    {
+        return &mIOQueue;
     }
 
     void ResourceManager::updateResources(Filesystem::FileEventType event, const Filesystem::Path &path, int priority)
@@ -174,7 +179,7 @@ namespace Resources {
         if (it != loaderByExtension.end()) {
             for (ResourceLoaderBase *loader : it->second) {
                 auto [resource, created] = loader->addResource(path);
-                
+
                 switch (event) {
                 case Filesystem::FileEventType::FILE_CREATED:
                     if (!created && path != resource->path()) {

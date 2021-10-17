@@ -18,6 +18,8 @@ namespace Render {
 
 		virtual void setData(Texture &tex, Vector2i size, const ByteBuffer &data) override;
         virtual void setSubData(Texture &tex, Vector2i offset, Vector2i size, const ByteBuffer &data) override;
+
+        virtual Threading::TaskQueue *loadingTaskQueue() const override;
 	};
 }
 }

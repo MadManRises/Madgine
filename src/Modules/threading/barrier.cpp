@@ -68,11 +68,8 @@ namespace Threading {
                         }
                     }
                     if (task) {
-                        TaskState state = task();
-                        if (state == YIELD) {
-                            std::lock_guard lock { mMutex };
-                            mTasks.emplace_back(std::move(task));
-                        }
+                        task();
+                        assert(!task);
                     }
                 }
             } while (running);
@@ -109,7 +106,7 @@ namespace Threading {
             size_t threadAcc = mThreadAccumulator;
             while (threadAcc < mThreadCount) {
                 mThreadAccumulator.wait(threadAcc);
-                threadAcc = mThreadAccumulator;                
+                threadAcc = mThreadAccumulator;
             }
             //LOG(std::this_thread::get_id() << " -> EXIT");
         } else {
@@ -117,17 +114,18 @@ namespace Threading {
         }
     }
 
-    void Barrier::queue(TaskQueue *queue, TaskHandle task)
+    void Barrier::queueHandle(TaskQueue *queue, TaskHandle task)
     {
         assert(mState != State::DONE);
         if (!queue) {
+            task.setQueue(queue, this);
             std::lock_guard lock { mMutex };
             mTasks.emplace_back(std::move(task));
         } else if (mState == State::INIT) {
             std::lock_guard lock { mMutex };
             mTaskLists[queue].emplace_back(std::move(task));
         } else {
-            queue->queue(std::move(task), TaskMask::BARRIER);
+            queue->queueHandle(std::move(task), TaskMask::BARRIER);
         }
     }
 

@@ -24,25 +24,14 @@ namespace Render {
         virtual void beginFrame();
         virtual void endFrame();
 
-        template <typename F>
-        static bool execute(F &&f)
-        {
-            if (isRenderThread()) {
-                std::forward<F>(f)();
-                return true;
-            } else {
-                queueRenderTask(std::forward<F>(f));
-                return false;
-            }
-        }
-
 		static RenderContext &getSingleton();
 
         size_t frame() const;
 
+        static Threading::TaskQueue *renderQueue();
+
     protected:
         void checkThread();
-        static void queueRenderTask(Threading::TaskHandle &&task);
 
         static bool isRenderThread();
 

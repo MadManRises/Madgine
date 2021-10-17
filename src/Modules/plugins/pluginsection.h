@@ -20,8 +20,8 @@ namespace Plugins {
         bool isAtleastOne() const;
         bool isExclusive() const;
 
-        SharedFuture<bool> load(Threading::Barrier &barrier);
-        Future<bool> unload(Threading::Barrier &barrier);
+        Threading::TaskFuture<bool> load(Threading::Barrier &barrier);
+        Threading::TaskFuture<bool> unload(Threading::Barrier &barrier);
 
         enum State {
             LOADED,
@@ -30,10 +30,10 @@ namespace Plugins {
         };
 
         State isLoaded(const std::string &name);
-        SharedFuture<bool> loadPlugin(const std::string &name, Threading::TaskHandle onSuccess = {});
-        SharedFuture<bool> unloadPlugin(const std::string &name, Threading::TaskHandle onSuccess = {});
+        Threading::TaskFuture<bool> loadPlugin(const std::string &name, std::function<void()> onSuccess = {});
+        Threading::TaskFuture<bool> unloadPlugin(const std::string &name, std::function<void()> onSuccess = {});
 
-        SharedFuture<bool> loadPluginByFilename(const std::string &name);
+        Threading::TaskFuture<bool> loadPluginByFilename(const std::string &name);
 
         void addListener(PluginListener *listener);
         void removeListener(PluginListener *listener);
@@ -50,15 +50,15 @@ namespace Plugins {
         std::map<std::string, Plugin>::iterator begin();
         std::map<std::string, Plugin>::iterator end();
 
-        Future<bool> loadFromIni(Threading::Barrier &barrier, const Ini::IniSection &sec);
+        Threading::TaskFuture<bool> loadFromIni(Threading::Barrier &barrier, const Ini::IniSection &sec);
 
         PluginManager &manager();
 
         Plugin *getPlugin(const std::string &name);
 
     private:
-        SharedFuture<bool> loadPlugin(Threading::Barrier &barrier, Plugin *p, std::optional<std::promise<bool>> &&promise = {}, std::optional<SharedFuture<bool>> &&future = {}, Threading::TaskHandle onSuccess = {});
-        SharedFuture<bool> unloadPlugin(Threading::Barrier &barrier, Plugin *p, std::optional<std::promise<bool>> &&promise = {}, std::optional<SharedFuture<bool>> &&future = {}, Threading::TaskHandle onSuccess = {});
+        Threading::TaskFuture<bool> loadPlugin(Threading::Barrier &barrier, Plugin *p);
+        Threading::TaskFuture<bool> unloadPlugin(Threading::Barrier &barrier, Plugin *p);
 
         friend struct Plugin;
 

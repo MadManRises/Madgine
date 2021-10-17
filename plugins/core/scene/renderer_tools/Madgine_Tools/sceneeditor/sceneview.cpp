@@ -196,7 +196,7 @@ namespace Tools {
                 } else if (ImGui::IsDraggableValueTypeBeingAccepted(resource)) {
                     Render::GPUMeshLoader::HandleType handle = resource->loadData();                    
                     handle.info()->setPersistent(true);
-                    Im3D::NativeMesh(handle->mMaterials.front().mDiffuseHandle, handle->mAABB, TranslationMatrix(pos));
+                    Im3D::NativeMesh(handle->mMaterials.front().mDiffuseTexture->mTextureHandle, handle->mAABB, TranslationMatrix(pos));
                 }
                 ImGui::EndDragDropTarget();
             }

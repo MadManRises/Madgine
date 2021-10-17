@@ -16,6 +16,8 @@
 
 #include "Interfaces/filesystem/filewatcher.h"
 
+#include "Generic/lambda.h"
+
 namespace Engine {
 namespace Resources {
 
@@ -59,14 +61,36 @@ namespace Resources {
             return oldCount > 1 || mPersistent;
         }
 
-        void setPersistent(bool b) {
+        void setPersistent(bool b)
+        {
             mPersistent = b;
+        }
+
+        void setLoadingTask(Threading::TaskFuture<bool> task) {
+            assert(!mLoadingTask.valid());
+            mLoadingTask = task;
+        }
+
+        void setUnloadingTask(Threading::TaskFuture<void> task)
+        {
+            assert(!mUnloadingTask.valid());
+            mUnloadingTask = task;
+        }
+
+        bool verify() {
+            return mLoadingTask.valid() && mLoadingTask.is_ready() && mLoadingTask && !mUnloadingTask.valid();
+        }
+
+        Threading::TaskFuture<bool> loadingTask() {
+            return mLoadingTask;
         }
 
     private:
         typename Interface::ResourceType *mResource;
         std::atomic<uint32_t> mRefCount = 0;
         bool mPersistent = false;
+        Threading::TaskFuture<bool> mLoadingTask;
+        Threading::TaskFuture<void> mUnloadingTask;
     };
 
     template <typename Interface>
@@ -82,6 +106,12 @@ namespace Resources {
         {
         }
 
+        typename Loader::Data* verified(bool verified) {
+            if (verified && !mInfo.verify())
+                return nullptr;
+            return &mData;
+        }
+
         typename Loader::ResourceDataInfo mInfo;
         typename Loader::Data mData;
     };
@@ -91,8 +121,8 @@ namespace Resources {
 
         ResourceType(const std::string &name, const Filesystem::Path &path, typename Loader::Ctor ctor = {}, typename Loader::Dtor dtor = {})
             : Loader::Interface::ResourceType(name, path)
-            , mCtor(ctor ? std::move(ctor) : [](Loader *loader, typename Loader::Data &data, typename Loader::ResourceDataInfo &info, Filesystem::FileEventType event) { return TupleUnpacker::invoke(&Loader::loadImpl, loader, data, info, event); })
-            , mDtor(dtor ? std::move(dtor) : [](Loader *loader, typename Loader::Data &data, typename Loader::ResourceDataInfo &info) { loader->unloadImpl(data, info); })
+            , mCtor(ctor ? std::move(ctor) : Loader::Interface::template toCtor<Loader>(&Loader::loadImpl))
+            , mDtor(dtor ? std::move(dtor) : Loader::Interface::template toDtor<Loader>(&Loader::unloadImpl))
         {
         }
 
@@ -128,8 +158,8 @@ namespace Resources {
         using HandleType = Handle<T, typename container_traits<DataContainer>::handle>;
         using OriginalHandleType = HandleType;
 
-        using Ctor = std::function<bool(T *, Data &, ResourceDataInfo &, Filesystem::FileEventType event)>;
-        using Dtor = std::function<void(T *, Data &, ResourceDataInfo &)>;
+        using Ctor = Lambda<Threading::Task<bool>(T *, Data &, ResourceDataInfo &, Filesystem::FileEventType event)>;
+        using Dtor = Lambda<Threading::Task<void>(T *, Data &, ResourceDataInfo &)>;
 
         struct ResourceType : ResourceLoaderBase::ResourceType {
 
@@ -150,28 +180,20 @@ namespace Resources {
             typename Storage::template container_type<typename container_traits<DataContainer>::handle> mData;
         };
 
-        template <typename C>
-        static Ctor toCtor(C &&ctor)
+        template <typename Loader = T, typename C = void>
+        static typename Loader::Ctor toCtor(C &&ctor)
         {
-            if constexpr (std::is_same_v<std::remove_reference_t<C>, Ctor>) {
-                return std::forward<C>(ctor);
-            } else {
-                return [ctor { std::forward<C>(ctor) }](T *loader, Data &data, ResourceDataInfo &info, Filesystem::FileEventType event) mutable {
-                    return TupleUnpacker::invoke(ctor, loader, data, info, event);
-                };
-            }
+            return  [ctor { std::forward<C>(ctor) }](T *loader, Data &data, ResourceDataInfo &info, Filesystem::FileEventType event) mutable {
+                return Threading::make_task(LIFT(TupleUnpacker::invoke), ctor, static_cast<Loader*>(loader), static_cast<typename Loader::Data&>(data), info, event);
+            };
         }
 
-        template <typename D>
-        static Dtor toDtor(D &&dtor)
+        template <typename Loader = T, typename D = void>
+        static typename Loader::Dtor toDtor(D &&dtor)
         {
-            if constexpr (std::is_same_v<std::remove_reference_t<D>, Dtor>) {
-                return std::forward<D>(dtor);
-            } else {
-                return [dtor { std::forward<D>(dtor) }](T *loader, Data &data, ResourceDataInfo &info) mutable {
-                    return TupleUnpacker::invoke(dtor, loader, data, info);
-                };
-            }
+            return [dtor { std::forward<D>(dtor) }](T *loader, Data &data, ResourceDataInfo &info) mutable {
+                return Threading::make_task(LIFT(TupleUnpacker::invoke), dtor, static_cast<Loader*>(loader), static_cast<typename Loader::Data&>(data), info);
+            };
         }
 
         using Base::Base;
@@ -198,8 +220,8 @@ namespace Resources {
 
         using HandleType = Handle<T, typename container_traits<DataContainer>::handle>;
 
-        using Ctor = std::function<bool(T *, Data &, ResourceDataInfo &, Filesystem::FileEventType event)>;
-        using Dtor = std::function<void(T *, Data &, ResourceDataInfo &)>;
+        using Ctor = Lambda<Threading::Task<bool>(T *, Data &, ResourceDataInfo &, Filesystem::FileEventType event)>;
+        using Dtor = Lambda<Threading::Task<void>(T *, Data &, ResourceDataInfo &)>;
 
         using Base::Base;
 
@@ -290,7 +312,9 @@ namespace Resources {
                 if (!loader)
                     loader = &getSingleton();
                 handle = create(resource, event, loader);
-                resource->mCtor(loader, *getDataPtr(handle, loader), *getInfo(handle, loader), event);
+
+                ResourceDataInfo &info = *getInfo(handle, loader);
+                info.setLoadingTask(loader->queueLoading(resource->mCtor(loader, *getDataPtr(handle, loader, false), info, event)));
             }
 
             return handle;
@@ -303,7 +327,9 @@ namespace Resources {
                 if (!loader)
                     loader = &getSingleton();
                 ResourceType *resource = handle.resource();
-                resource->mDtor(loader, *getDataPtr(handle, loader), *getInfo(handle, loader));
+
+                ResourceDataInfo &info = *getInfo(handle, loader);
+                info.setUnloadingTask(loader->queueUnloading(resource->mDtor(loader, *getDataPtr(handle, loader), info)));
 
                 typename container_traits<DataContainer>::iterator it = container_traits<DataContainer>::toIterator(*loader->mData, *resource->mHolder);
                 loader->mData->erase(it);
@@ -333,16 +359,16 @@ namespace Resources {
             return getDataPtr(handle, loader);
         }*/
 
-        static Data *getDataPtr(const HandleType &handle, T *loader = nullptr)
+        static Data *getDataPtr(const HandleType &handle, T *loader = nullptr, bool verified = true)
         {
             if (!handle)
                 return nullptr;
             if constexpr (container_traits<DataContainer>::has_dependent_handle) {
                 if (!loader)
                     loader = &getSingleton();
-                return &(*loader->mData)[handle.mData].mData;
+                return (*loader->mData)[handle.mData].verified(verified);
             } else {
-                return &handle.mData->mData;
+                return handle.mData->verified(verified);
             }
         }
 
@@ -450,16 +476,16 @@ namespace Resources {
             return getDataPtr(handle, loader);
         }*/
 
-        static typename Base::Data *getDataPtr(const typename Base::HandleType &handle, T *loader = nullptr)
+        static typename Base::Data *getDataPtr(const typename Base::HandleType &handle, T *loader = nullptr, bool verified = true)
         {
             if (!handle)
                 return nullptr;
             if constexpr (container_traits<typename Base::DataContainer>::has_dependent_handle) {
                 if (!loader)
                     loader = &Base::getSingleton();
-                return loader->getDataPtrVImpl(handle);
+                return loader->getDataPtrVImpl(handle, verified);
             } else {
-                return &handle.mData->mData;
+                return handle.mData->verified(verified);
             }
         }
 
@@ -487,7 +513,7 @@ namespace Resources {
         virtual typename Base::HandleType loadVImpl(std::string_view name) = 0;
         virtual typename Base::HandleType loadVImpl(typename Base::ResourceType *resource) = 0;
         virtual void unloadVImpl(const typename Base::HandleType &handle) = 0;
-        virtual typename Base::Data *getDataPtrVImpl(const typename Base::HandleType &handle) = 0;
+        virtual typename Base::Data *getDataPtrVImpl(const typename Base::HandleType &handle, bool verified) = 0;
         virtual typename Base::ResourceDataInfo *getInfoVImpl(const typename Base::HandleType &handle) = 0;
     };
 
@@ -517,9 +543,9 @@ namespace Resources {
         {
             Self::unload(handle, static_cast<T *>(this));
         }
-        virtual typename Base::Data *getDataPtrVImpl(const typename Base::OriginalHandleType &handle) override
+        virtual typename Base::Data *getDataPtrVImpl(const typename Base::OriginalHandleType &handle, bool verified) override
         {
-            return Self::getDataPtr(handle, static_cast<T *>(this));
+            return Self::getDataPtr(handle, static_cast<T *>(this), verified);
         }
         virtual typename Base::ResourceDataInfo *getInfoVImpl(const typename Base::OriginalHandleType &handle) override
         {

@@ -2,8 +2,6 @@
 
 #include "Modules/uniquecomponent/uniquecomponentdefine.h"
 
-#include "Modules/threading/taskguard.h"
-
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
 #include "Meta/serialize/virtualserializableunit.h"

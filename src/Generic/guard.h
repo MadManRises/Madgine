@@ -1,27 +1,24 @@
 #pragma once
 
-#include "task.h"
 
 namespace Engine {
-namespace Threading {
 
-    struct TaskGuard {
-        TaskGuard(TaskHandle &&init, TaskHandle &&finalize = {})
+    struct Guard {
+        Guard(std::function<void()> &&init, std::function<void()> &&finalize = {})
             : mFinalize(std::move(finalize))
         {
             if (init)
                 init();
         }
 
-        ~TaskGuard()
+        ~Guard()
         {
             if (mFinalize)
                 mFinalize();
         }
 
     private:
-        TaskHandle mFinalize;
+        std::function<void()> mFinalize;
     };
 
-}
 }

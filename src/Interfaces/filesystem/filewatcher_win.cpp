@@ -131,7 +131,7 @@ namespace Filesystem {
         assert(isDir(path));
         auto pib = mWatches.try_emplace(path, 0);
         if (pib.second) {
-            pib.first->second = reinterpret_cast<uintptr_t>(fileWatch(pib.first->first).release());
+            pib.first->second = reinterpret_cast<uintptr_t>(&fileWatch(pib.first->first).release().release().promise());
         }
     }
 
@@ -139,7 +139,8 @@ namespace Filesystem {
     {
         auto it = mWatches.find(path);
         if (it != mWatches.end()) {
-            Generator<std::vector<FileEvent>>::fromAddress(reinterpret_cast<void *>(it->second)).reset();
+            //cause destroy
+            Generator<std::vector<FileEvent>> { CoroutineHandle<Generator<std::vector<FileEvent>>::promise_type>::fromPromise(*reinterpret_cast<Generator<std::vector<FileEvent>>::promise_type *>(it->second)) };
             mWatches.erase(it);
         }
     }
@@ -147,7 +148,8 @@ namespace Filesystem {
     void FileWatcher::clear()
     {
         for (const std::pair<const Path, uintptr_t> &handle : mWatches) {
-            Generator<std::vector<FileEvent>>::fromAddress(reinterpret_cast<void *>(handle.second)).reset();
+            //cause destroy
+            Generator<std::vector<FileEvent>> generator { CoroutineHandle<Generator<std::vector<FileEvent>>::promise_type>::fromPromise(*reinterpret_cast<Generator<std::vector<FileEvent>>::promise_type *>(handle.second)) };
         }
         mWatches.clear();
     }
@@ -164,11 +166,11 @@ namespace Filesystem {
 
         std::vector<FileEvent> result;
         for (const std::pair<const Path, uintptr_t> &watch : mWatches) {
-            Generator<std::vector<FileEvent>> gen = Generator<std::vector<FileEvent>>::fromAddress(reinterpret_cast<void *>(watch.second));
+            Generator<std::vector<FileEvent>> gen { CoroutineHandle<Generator<std::vector<FileEvent>>::promise_type>::fromPromise(*reinterpret_cast<Generator<std::vector<FileEvent>>::promise_type *>(watch.second)) };
             bool going = gen.next();
             const std::vector<FileEvent> &events = gen.get();
             std::copy(events.begin(), events.end(), std::back_inserter(result));
-            gen.release();
+            gen.release().release();
         }
         return result;
     }

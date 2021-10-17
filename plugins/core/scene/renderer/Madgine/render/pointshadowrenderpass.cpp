@@ -38,13 +38,7 @@ namespace Render {
 
     void PointShadowRenderPass::setup(RenderTarget *target)
     {
-        mProgram.create("pointshadow");
-
-        mProgram.setParametersSize(0, sizeof(PointShadowPerApplication));
-        mProgram.setParametersSize(1, sizeof(PointShadowPerFrame));
-        mProgram.setParametersSize(2, sizeof(PointShadowPerObject));
-
-        mProgram.setInstanceDataSize(sizeof(PointShadowInstanceData));
+        mProgram.create("pointshadow", { sizeof(PointShadowPerApplication), sizeof(PointShadowPerFrame), sizeof(PointShadowPerObject) }, sizeof(PointShadowInstanceData));
     }
 
     void PointShadowRenderPass::shutdown()

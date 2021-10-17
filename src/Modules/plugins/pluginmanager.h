@@ -15,7 +15,7 @@ namespace Plugins {
         PluginManager();
         ~PluginManager();		
 
-        void setup(bool loadCache = true, bool loadExe = true);
+        bool setup(bool loadCache = true, bool loadExe = true);
 
         PluginSection &section(const std::string &name);
         PluginSection &operator[](const std::string &name);
@@ -31,7 +31,7 @@ namespace Plugins {
         void addListener(PluginListener *listener);
         void removeListener(PluginListener *listener);
 
-        Future<bool> loadFromFile(const Filesystem::Path &p);
+        Threading::TaskFuture<bool> loadFromFile(const Filesystem::Path &p);
         void saveToFile(const Filesystem::Path &p, bool withTools);
 
         std::mutex mListenersMutex;
@@ -46,7 +46,7 @@ namespace Plugins {
         void setupSection(const std::string &name, bool exclusive, bool atleastOne);
 
         void saveSelection(Threading::Barrier &barrier, Ini::IniFile &file, bool withTools);
-        void loadSelection(Threading::Barrier &barrier, const Ini::IniFile &file, std::promise<bool> &&p);
+        Threading::TaskFuture<bool> loadSelection(Threading::Barrier &barrier, Ini::IniFile file);
 
         void onUpdate(Threading::Barrier &barrier);
 

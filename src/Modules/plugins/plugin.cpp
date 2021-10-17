@@ -53,7 +53,7 @@ namespace Plugins {
         assert(mDependents.empty());
     }
 
-    void Plugin::load(PluginManager &manager, Threading::Barrier &barrier, std::promise<bool> &&promise)
+    Threading::TaskFuture<bool> Plugin::load(PluginManager &manager, Threading::Barrier &barrier)
     {
         LOG("Loading Plugin \"" << mName << "\"...");
 
@@ -89,16 +89,15 @@ namespace Plugins {
 
         if (!mModule) {
             LOG_ERROR("Load of plugin \"" << mName << "\" failed with error: " << errorMsg);
-            promise.set_value(false);
-            return;
+            return false;
         } else {
 
-            std::vector<SharedFuture<bool>> dependencyList;
+            std::vector<Threading::TaskFuture<bool>> dependencyList;
             {
                 std::lock_guard lock { mMutex };
                 for (Plugin *dep : mDependencies) {
                     if (mName == dep->mName + "Tools") {
-                        SharedFuture<bool> f = dep->state();
+                        Threading::TaskFuture<bool> f = dep->state();
                         if (f.is_ready() && !f)
                             dependencyList.emplace_back(dep->mSection->loadPlugin(barrier, dep));
                     } else {
@@ -110,62 +109,45 @@ namespace Plugins {
                 }
             }
 
-            barrier.queue(nullptr, [this, &manager, dependencyList { std::move(dependencyList) }, promise { std::move(promise) }, name { mName }]() mutable {
-                bool wait = false;
-                for (SharedFuture<bool> &f : dependencyList) {
-                    if (!f.is_ready()) {
-                        wait = true;
-                    } else if (!f) {
-                        LOG_ERROR("Load of dependency for plugin \"" << mName << "\" failed!");
-                        clearDependencies(manager);
-                        Dl::closeDll(mModule);
-                        mModule = nullptr;
-                        promise.set_value(false);
-                        return Threading::RETURN;
+            return barrier.queue(nullptr, [](Plugin *_this, PluginManager &manager, std::vector<Threading::TaskFuture<bool>> dependencyList) mutable -> Threading::Task<bool> {
+                for (Threading::TaskFuture<bool> &f : dependencyList) {
+                    if (!co_await f) {
+                        LOG_ERROR("Load of dependency for plugin \"" << _this->mName << "\" failed!");
+                        _this->clearDependencies(manager);
+                        Dl::closeDll(_this->mModule);
+                        _this->mModule = nullptr;
+                        co_return false;
                     }
                 }
-                if (wait) {
-                    return Threading::YIELD;
-                } else {
-                    LOG("Success (" << name << ")");
-                    promise.set_value(true);
-                    return Threading::RETURN;
-                }
-            });
+
+                LOG("Success (" << _this->mName << ")");
+                co_return true;
+            }, this, manager, std::move(dependencyList));
         }
     }
 
-    void Plugin::unload(PluginManager &manager, Threading::Barrier &barrier, std::promise<bool> &&promise)
+    Threading::TaskFuture<bool> Plugin::unload(PluginManager &manager, Threading::Barrier &barrier)
     {
-        std::vector<SharedFuture<bool>> dependentList;
+        std::vector<Threading::TaskFuture<bool>> dependentList;
         std::vector<Plugin *> dependents = mDependents;
         for (Plugin *dep : dependents) {
             dependentList.emplace_back(dep->mSection->unloadPlugin(barrier, dep));
         }
 
-        barrier.queue(nullptr, [this, &manager, dependentList { std::move(dependentList) }, promise { std::move(promise) }]() mutable {
-            bool wait = false;
-            for (SharedFuture<bool> &f : dependentList) {
-                if (!f.is_ready()) {
-                    wait = true;
-                } else if (f) {
-                    LOG_ERROR("Unload of dependent for plugin \"" << mName << "\" failed!");
-                    promise.set_value(true);
-                    return Threading::RETURN;
+        return barrier.queue(nullptr, [](Plugin *_this, PluginManager &manager, std::vector<Threading::TaskFuture<bool>> dependentList) -> Threading::Task<bool> {
+            for (Threading::TaskFuture<bool> &f : dependentList) {
+                if (co_await f) {
+                    LOG_ERROR("Unload of dependent for plugin \"" << _this->mName << "\" failed!");
+                    co_return true;
                 }
             }
-            if (wait) {
-                return Threading::YIELD;
-            } else {
-                clearDependencies(manager);
-                LOG("Unloading Plugin \"" << mName << "\"...");
-                Dl::closeDll(mModule);
+            _this->clearDependencies(manager);
+            LOG("Unloading Plugin \"" << _this->mName << "\"...");
+            Dl::closeDll(_this->mModule);
 
-                mModule = nullptr;
-                promise.set_value(false);
-                return Threading::RETURN;
-            }
-        });
+            _this->mModule = nullptr;
+            co_return false;
+        }, this, manager, std::move(dependentList));
     }
 
     const void *Plugin::getSymbol(const std::string &name) const
@@ -212,38 +194,27 @@ namespace Plugins {
         return mSection;
     }
 
-    SharedFuture<bool> Plugin::startOperation(Operation op, std::optional<std::promise<bool>> &promise, std::optional<SharedFuture<bool>> &&future)
+    Threading::TaskFuture<bool> Plugin::startOperation(Operation op, std::function<Threading::TaskFuture<bool>()> task)
     {
         std::lock_guard lock { mMutex };
         if (mState.is_ready()) {
-            if (mState == (op == LOADING)) {
-                if (promise) {
-                    promise->set_value(mState);
-                    promise.reset();
-                }
-            } else {
-                if (!promise)
-                    promise.emplace();
+            if (mState != (op == LOADING)) {
                 mOperation = op;
-                if (future)
-                    mState = std::move(*future);
-                else
-                    mState = promise->get_future().share();
+                mState = task();
             }
         } else {
-            assert(!promise);
             assert(mOperation == op);
         }
         return mState;
     }
 
-    SharedFuture<bool> Plugin::state()
+    Threading::TaskFuture<bool> Plugin::state()
     {
         std::lock_guard lock { mMutex };
         return mState;
     }
 
-    SharedFuture<bool> Plugin::state(Operation op)
+    Threading::TaskFuture<bool> Plugin::state(Operation op)
     {
         std::lock_guard lock { mMutex };
         assert(mState.is_ready() || mOperation == op);

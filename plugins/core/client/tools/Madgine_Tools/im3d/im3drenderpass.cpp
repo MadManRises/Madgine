@@ -25,15 +25,14 @@ namespace Render {
         : mCamera(camera)
         , mPriority(priority)
     {
-        mProgram.create("im3d");
-
-        mProgram.setParametersSize(0, sizeof(Im3DPerApplication));
-        mProgram.setParametersSize(1, sizeof(Im3DPerFrame));
-        mProgram.setParametersSize(2, sizeof(Im3DPerObject));
+        mProgram.create("im3d", { sizeof(Im3DPerApplication) , sizeof(Im3DPerFrame), sizeof(Im3DPerObject) });
     }
 
     void Im3DRenderPass::render(RenderTarget *target, size_t iteration)
     {
+        if (!mProgram.available())
+            return;
+
         target->pushAnnotation("Im3D");
 
         Im3D::Im3DContext *context = Im3D::GetCurrentContext();
@@ -76,9 +75,12 @@ namespace Render {
 
             for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
                 target->renderVertices(mProgram, i + 1, p.second.mVertices[i], p.second.mIndices[i]);
-                GPUMeshData::Material mat;
+                /* GPUMeshData::Material mat;
                 mat.mDiffuseHandle = p.first;
-                target->renderVertices(mProgram, i + 1, p.second.mVertices2[i], p.second.mIndices2[i], &mat);
+                target->renderVertices(mProgram, i + 1, p.second.mVertices2[i], p.second.mIndices2[i], &mat);*/
+                if (p.first)
+                    throw 0;
+                target->renderVertices(mProgram, i + 1, p.second.mVertices2[i], p.second.mIndices2[i], nullptr);                
             }
         }
 

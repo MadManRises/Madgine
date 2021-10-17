@@ -33,8 +33,8 @@ namespace Threading {
         void checkThreadStates();
 #endif
 
-        void addThreadInitializer(Threading::TaskHandle &&task);
-        static void addStaticThreadInitializer(Threading::TaskHandle &&task);
+        void addThreadInitializer(std::function<void()> &&task);
+        static void addStaticThreadInitializer(std::function<void()> &&task);
 
         const std::string &name() const;
 
@@ -110,7 +110,7 @@ namespace Threading {
 #if ENABLE_THREADING
         std::vector<Future<int>> mSubThreads;
 #endif
-        std::vector<TaskHandle> mThreadInitializers;
+        std::vector<std::function<void()>> mThreadInitializers;
 
         std::vector<TaskQueue *> mTaskQueues;
 

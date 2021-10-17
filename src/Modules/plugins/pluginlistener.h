@@ -2,14 +2,14 @@
 
 #if ENABLE_PLUGINS
 
-#    include "Generic/future.h"
+#    include "Modules/threading/taskfuture.h"
 
 namespace Engine {
 namespace Plugins {
 
     struct PluginListener {
-        virtual Future<void> aboutToUnloadPlugin(const Plugin *p) { return {}; }
-        virtual Future<void> aboutToLoadPlugin(const Plugin *p) { return {}; }
+        virtual Threading::TaskFuture<void> aboutToUnloadPlugin(const Plugin *p) { return {}; }
+        virtual Threading::TaskFuture<void> aboutToLoadPlugin(const Plugin *p) { return {}; }
         virtual void onPluginUnload(const Plugin *p) { }
         virtual void onPluginLoad(const Plugin *p) { }
 

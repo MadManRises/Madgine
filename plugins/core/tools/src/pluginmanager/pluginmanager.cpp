@@ -14,7 +14,7 @@
 #    include "Meta/keyvalue/metatable_impl.h"
 #    include "Meta/serialize/serializetable_impl.h"
 
-#    include "Modules/threading/taskguard.h"
+#    include "Generic/guard.h"
 
 #    include "Interfaces/filesystem/api.h"
 
@@ -32,11 +32,10 @@ UNIQUECOMPONENT(Engine::Tools::PluginManager);
 namespace Engine {
 namespace Tools {
 
-    static Threading::TaskGuard excludeFromExport {
+    static Guard excludeFromExport {
         []() {
             skipUniqueComponentOnExport(&typeInfo<PluginManager>);
-        },
-        {}
+        }
     };
 
     PluginManager::PluginManager(ImRoot &root)
@@ -85,7 +84,7 @@ namespace Tools {
                                 ImGui::PushDisabled();
                             }
                             bool loaded;
-                            SharedFuture<bool> state = plugin.state();
+                            Threading::TaskFuture<bool> state = plugin.state();
                             bool available = state.is_ready();
                             if (available)
                                 loaded = state.get();

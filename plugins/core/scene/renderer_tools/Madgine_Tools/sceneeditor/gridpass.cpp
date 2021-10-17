@@ -25,7 +25,7 @@ namespace Tools {
         , mPriority(priority)
     {
 
-        mProgram.create("grid");
+        mProgram.create("grid", { 0, sizeof(GridPerFrame) });
 
         mMesh = Render::GPUMeshLoader::loadManual("grid", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &data, Render::GPUMeshLoader::ResourceDataInfo &info) {
             std::vector<Compound<Render::VertexPos_4D>> vertices {
@@ -42,12 +42,13 @@ namespace Tools {
 
             return loader->generate(data, { 3, std::move(vertices), std::move(indices) });
         });
-
-        mProgram.setParametersSize(1, sizeof(GridPerFrame));
     }
 
     void GridPass::render(Render::RenderTarget *target, size_t iteration)
     {
+        if (!mProgram.available())
+            return;
+
         target->pushAnnotation("Grid");
 
         Vector2i size = target->size();

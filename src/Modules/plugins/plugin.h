@@ -6,6 +6,8 @@
 
 #include "Generic/future.h"
 
+#include "Modules/threading/task.h"
+
 namespace Engine {
 namespace Plugins {
     struct MODULES_EXPORT Plugin {
@@ -13,8 +15,8 @@ namespace Plugins {
         Plugin(std::string name, PluginSection *section, std::string project, Filesystem::Path path);
         ~Plugin();
 
-        void load(PluginManager &manager, Threading::Barrier &barrier, std::promise<bool> &&promise);
-        void unload(PluginManager &manager, Threading::Barrier &barrier, std::promise<bool> &&promise);
+        Threading::TaskFuture<bool> load(PluginManager &manager, Threading::Barrier &barrier);
+        Threading::TaskFuture<bool> unload(PluginManager &manager, Threading::Barrier &barrier);
 
         const void *getSymbol(const std::string &name) const;
 
@@ -35,10 +37,10 @@ namespace Plugins {
             UNLOADING
         };
 
-        SharedFuture<bool> startOperation(Operation op, std::optional<std::promise<bool>> &promise, std::optional<SharedFuture<bool>> &&future);
+        Threading::TaskFuture<bool> startOperation(Operation op, std::function<Threading::TaskFuture<bool>()> task);
 
-        SharedFuture<bool> state();
-        SharedFuture<bool> state(Operation op);
+        Threading::TaskFuture<bool> state();
+        Threading::TaskFuture<bool> state(Operation op);
         bool isLoaded();
 
         friend struct PluginManager;
@@ -61,7 +63,7 @@ namespace Plugins {
         std::string mName;
         Filesystem::Path mPath;
         
-        SharedFuture<bool> mState;
+        Threading::TaskFuture<bool> mState;
 
         std::vector<Plugin *> mDependencies;
         std::vector<Plugin *> mDependents;

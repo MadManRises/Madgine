@@ -166,7 +166,7 @@ namespace Serialize {
         return static_cast<SyncManager *>(SerializeOutStream::manager());
     }
 
-    TransactionId BufferedOutStream::createRequest(ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback)
+    TransactionId BufferedOutStream::createRequest(ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback)
     {
         return data().createRequest(requester, requesterTransactionId, std::move(callback));
     }

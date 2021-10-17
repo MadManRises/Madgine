@@ -31,9 +31,7 @@ namespace Render {
 
     void BloomPass::setup(RenderTarget *target)
     {
-        mProgram.create("bloom");
-
-        mProgram.setParametersSize(0, sizeof(BloomData));
+        mProgram.create("bloom", { sizeof(BloomData) });        
 
         mBlurTarget = target->context()->createRenderTexture(target->size(), { .mIterations = 10, .mFormat = FORMAT_RGBA16F });
 

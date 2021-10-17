@@ -21,13 +21,19 @@ namespace Render {
     {
     }
 
-    void TextureLoader::HandleType::create(std::string_view name, TextureType type, DataFormat format, TextureLoader *loader)
+    Threading::TaskFuture<bool> TextureLoader::HandleType::create(
+        std::string_view name, TextureType type, DataFormat format, Vector2i size, ByteBuffer data, TextureLoader * loader)
     {
         *this = TextureLoader::loadManual(
-            name, {}, [=](TextureLoader *loader, Texture &texture, const TextureLoader::ResourceDataInfo &info) {
-                return loader->create(texture, type, format);
+            name, {}, [=, data { std::move(data) }](TextureLoader *loader, Texture &texture, const TextureLoader::ResourceDataInfo &info) mutable {
+                if (!loader->create(texture, type, format))
+                    return false;
+                if (data.mSize > 0)
+                    loader->setData(texture, size, std::move(data));
+                return true;
             },
             {}, loader);
+        return info()->loadingTask();
     }
 
     void TextureLoader::HandleType::loadFromImage(std::string_view name, TextureType type, DataFormat format, TextureLoader *loader)

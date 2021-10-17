@@ -36,10 +36,8 @@ namespace Render {
         program.reset();
     }
 
-    bool DirectX12ProgramLoader::create(Program &_program, const std::string &name)
+    bool DirectX12ProgramLoader::create(Program &_program, const std::string &name, const std::vector<size_t> &bufferSizes, size_t instanceDataSize)
     {
-        DX12_CHECK();
-
         DirectX12Program &program = static_cast<DirectX12Program &>(_program);
 
         DirectX12VertexShaderLoader::HandleType vertexShader;
@@ -50,7 +48,13 @@ namespace Render {
         if (!program.link(vertexShader, pixelShader))
             std::terminate();
 
-        DX12_CHECK();
+        for (size_t i = 0; i < bufferSizes.size(); ++i)
+            if (bufferSizes[i] > 0)
+                program.setParametersSize(i, bufferSizes[i]);
+
+        if (instanceDataSize > 0)
+            program.setInstanceDataSize(instanceDataSize);
+
 
         return true;
     }
@@ -72,19 +76,9 @@ namespace Render {
         return true;
     }
 
-    void DirectX12ProgramLoader::setParametersSize(Program &program, size_t index, size_t size)
-    {
-        static_cast<DirectX12Program &>(program).setParametersSize(index, size);
-    }
-
     WritableByteBuffer DirectX12ProgramLoader::mapParameters(Program &program, size_t index)
     {
         return static_cast<DirectX12Program &>(program).mapParameters(index);
-    }
-
-    void DirectX12ProgramLoader::setInstanceDataSize(Program &program, size_t size)
-    {
-        static_cast<DirectX12Program &>(program).setInstanceDataSize(size);
     }
 
     void DirectX12ProgramLoader::setInstanceData(Program &program, const ByteBuffer &data)

@@ -220,7 +220,7 @@ namespace Render {
         program->bind(&mesh->mVAO);
 
         if (material)
-            bindTextures({ { material->mDiffuseHandle, TextureType_2D } });
+            bindTextures({ { material->mDiffuseTexture->mTextureHandle, TextureType_2D } });
 
         if (mesh->mIndices) {
             DirectX12RenderContext::getSingleton().mCommandList.mList->DrawIndexedInstanced(mesh->mElementCount, 1, 0, 0, 0);
@@ -240,7 +240,7 @@ namespace Render {
         program->bind(&mesh->mVAO);
 
         if (material)
-            bindTextures({ { material->mDiffuseHandle, TextureType_2D } });
+            bindTextures({ { material->mDiffuseTexture->mTextureHandle, TextureType_2D } });
 
         if (mesh->mIndices) {
             DirectX12RenderContext::getSingleton().mCommandList.mList->DrawIndexedInstanced(mesh->mElementCount, count, 0, 0, 0);

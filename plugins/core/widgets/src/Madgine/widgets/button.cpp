@@ -88,7 +88,7 @@ namespace Widgets {
 
         returnSet.push_back({ result, {} });
 
-        if (mFont) {
+        if (mFont.available() && mFont->mTexture.available()) {
             //mFont->setPersistent(true);
             std::pair<std::vector<Vertex>, TextureSettings> fontVertices = renderText(mText, pos + 0.5f * size, mFont, mFontSize, { 0.5f, 0.5f }, screenSize);
             if (!fontVertices.first.empty())

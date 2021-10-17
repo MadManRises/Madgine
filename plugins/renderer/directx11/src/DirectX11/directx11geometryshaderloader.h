@@ -30,6 +30,8 @@ namespace Render {
         bool create(DirectX11GeometryShader &shader, ResourceType *res, const CodeGen::ShaderFile &file);
 
         bool loadFromSource(DirectX11GeometryShader &shader, std::string_view name, std::string source);
+
+        virtual Threading::TaskQueue *loadingTaskQueue() const override;
     };
 
 }

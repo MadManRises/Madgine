@@ -13,7 +13,7 @@ namespace Engine {
 
 	protected:
 		void onPluginLoad(const Plugins::Plugin *p) override;
-            Future<void> aboutToUnloadPlugin(const Plugins::Plugin *p) override;
+            Threading::TaskFuture<void> aboutToUnloadPlugin(const Plugins::Plugin *p) override;
 
 	private:
 		Plugins::PluginManager &mMgr;

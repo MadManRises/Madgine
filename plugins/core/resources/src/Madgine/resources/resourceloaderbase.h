@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Meta/keyvalue/virtualscope.h"
+#include "Modules/threading/task.h"
 
 namespace Engine {
 namespace Resources {
@@ -38,6 +39,10 @@ namespace Resources {
 
         virtual std::vector<std::pair<std::string_view, TypedScopePtr>> resources() = 0;
         virtual std::vector<const MetaTable *> resourceTypes() const = 0;
+
+        virtual Threading::TaskQueue *loadingTaskQueue() const;
+        Threading::TaskFuture<bool> queueLoading(Threading::Task<bool> task);
+        Threading::TaskFuture<void> queueUnloading(Threading::Task<void> task);
 
     protected:
         std::vector<std::string> mExtensions;

@@ -147,15 +147,6 @@ namespace Plugins {
     struct BinaryInfo;
 }
 
-namespace Threading {
-    struct ConnectionBase;
-    template <typename T, typename... _Ty>
-    struct ConnectionInstance;
-    struct TaskQueue;
-    struct TaskHandle;
-    struct Barrier;
-}
-
 namespace Filesystem {
     struct Path;
     struct FileQuery;

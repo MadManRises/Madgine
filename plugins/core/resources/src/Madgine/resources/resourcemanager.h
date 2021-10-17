@@ -48,6 +48,8 @@ namespace Resources {
 
         void waitForInit();
 
+        Threading::TaskQueue *taskQueue();
+
 #if ENABLE_PLUGINS
         int priority() const override;
 #endif
@@ -55,7 +57,7 @@ namespace Resources {
 #if ENABLE_PLUGINS
     protected:
         void onPluginLoad(const Plugins::Plugin *plugin) override;
-        Future<void> aboutToUnloadPlugin(const Plugins::Plugin *plugin) override;
+        Threading::TaskFuture<void> aboutToUnloadPlugin(const Plugins::Plugin *plugin) override;
 #endif
 
     private:

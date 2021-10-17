@@ -40,9 +40,12 @@ METATABLE_END(Engine::Render::GPUMeshData::Material)
         {
         }
 
-        bool GPUMeshLoader::loadImpl(GPUMeshData &mesh, ResourceDataInfo &info)
+        Threading::Task<bool> GPUMeshLoader::loadImpl(GPUMeshData &mesh, ResourceDataInfo &info)
         {
-            return generate(mesh, *MeshLoader::load(info.resource()->name()));
+            MeshLoader::HandleType handle;
+            if (!co_await handle.load(info.resource()->name()))
+                co_return false;
+            co_return generate(mesh, *handle);
         }
 
         void GPUMeshLoader::unloadImpl(GPUMeshData &data, ResourceDataInfo &info)
@@ -58,12 +61,10 @@ METATABLE_END(Engine::Render::GPUMeshData::Material)
                 
                 if (!mat.mDiffuseName.empty()) {
                     gpuMat.mDiffuseTexture.loadFromImage(mat.mDiffuseName, TextureType_2D, FORMAT_RGBA8);
-                    gpuMat.mDiffuseHandle = gpuMat.mDiffuseTexture->mTextureHandle;
                 }
 
                 if (!mat.mEmissiveName.empty()) {
                     gpuMat.mEmissiveTexture.loadFromImage(mat.mEmissiveName, TextureType_2D, FORMAT_RGBA8);
-                    gpuMat.mEmissiveHandle = gpuMat.mEmissiveTexture->mTextureHandle;
                 }
             }
         }

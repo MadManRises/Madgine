@@ -6,7 +6,6 @@
 #include "Generic/container/containerevent.h"
 #include "Generic/functor.h"
 #include "Generic/future.h"
-#include "Generic/onetimefunctor.h"
 #include "requestbuilder.h"
 #include "serializablecontainer.h"
 
@@ -248,9 +247,9 @@ namespace Serialize {
         }
 
         template <typename T, typename Then, typename OnSuccess, typename OnFailure>
-        static std::function<void(void *)> generateCallback(std::promise<T> p, Then &&onResult, OnSuccess &&onSuccess, OnFailure &&onFailure)
+        static Lambda<void(void *)> generateCallback(std::promise<T> p, Then &&onResult, OnSuccess &&onSuccess, OnFailure &&onFailure)
         {
-            return oneTimeFunctor([p = std::move(p), onResult = std::forward<Then>(onResult), onSuccess = std::forward<OnSuccess>(onSuccess), onFailure = std::forward<OnFailure>(onFailure)](void *data) mutable {
+            return [p = std::move(p), onResult = std::forward<Then>(onResult), onSuccess = std::forward<OnSuccess>(onSuccess), onFailure = std::forward<OnFailure>(onFailure)](void *data) mutable {
                 if (data) {
                     T *t = static_cast<T *>(data);
                     executeCallbacks(*t, std::move(onSuccess), std::move(onResult));
@@ -259,7 +258,7 @@ namespace Serialize {
                     TupleUnpacker::forEach(std::move(onFailure), [&](auto &&f) { std::forward<decltype(f)>(f)(); });
                     TupleUnpacker::forEach(std::move(onResult), [&](auto &&f) { TupleUnpacker::invoke(std::forward<decltype(f)>(f), std::nullopt); });
                 }
-            });
+            };
         }
 
         template <typename Init, typename... _Ty>

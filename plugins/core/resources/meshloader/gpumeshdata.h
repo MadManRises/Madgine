@@ -11,8 +11,6 @@ namespace Render {
             std::string mName;
             TextureLoader::HandleType mDiffuseTexture;
             TextureLoader::HandleType mEmissiveTexture;
-            TextureHandle mDiffuseHandle = 0;
-            TextureHandle mEmissiveHandle = 0;
             Vector4 mDiffuseColor = Vector4::UNIT_SCALE;
         };
         std::vector<Material> mMaterials;

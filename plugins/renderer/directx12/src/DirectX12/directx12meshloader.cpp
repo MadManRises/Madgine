@@ -53,9 +53,7 @@ namespace Render {
         DirectX12MeshData &data = static_cast<DirectX12MeshData &>(_data);
         data.mAABB = mesh.mAABB;
 
-        DirectX12RenderContext::execute([=, &data, &mesh]() mutable {
-            generateImpl(data, mesh);
-        });
+        generateImpl(data, mesh);
 
         return true;
     }
@@ -65,9 +63,7 @@ namespace Render {
         DirectX12MeshData &data = static_cast<DirectX12MeshData &>(_data);
         data.mAABB = mesh.mAABB;
 
-        DirectX12RenderContext::execute([=, &data, mesh { std::move(mesh) }]() mutable {
-            generateImpl(data, mesh);
-        });
+        generateImpl(data, mesh);
 
         return true;
     }
@@ -94,9 +90,7 @@ namespace Render {
 
         data.mAABB = mesh.mAABB;
 
-        DirectX12RenderContext::execute([=, &data, &mesh]() mutable {
-            updateImpl(data, mesh);
-        });
+        updateImpl(data, mesh);
     }
 
     void DirectX12MeshLoader::update(GPUMeshData &_data, MeshData &&mesh)
@@ -105,9 +99,7 @@ namespace Render {
 
         data.mAABB = mesh.mAABB;
 
-        DirectX12RenderContext::execute([=, &data, mesh { std::move(mesh) }]() mutable {
-            updateImpl(data, mesh);
-        });
+        updateImpl(data, mesh);
     }
 
     void DirectX12MeshLoader::reset(GPUMeshData &data)

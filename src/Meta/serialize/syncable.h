@@ -2,6 +2,8 @@
 
 #include "streams/comparestreamid.h"
 
+#include "Generic/lambda.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -12,14 +14,14 @@ namespace Serialize {
         virtual void readAction(SerializeInStream &in) = 0;*/
 
     protected:
-        BufferedOutStream &getSlaveActionMessageTarget(const SyncableUnitBase *parent, uint8_t index, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const;
+        BufferedOutStream &getSlaveActionMessageTarget(const SyncableUnitBase *parent, uint8_t index, ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback) const;
         std::set<BufferedOutStream *, CompareStreamId> getMasterActionMessageTargets(const SyncableUnitBase *parent, uint8_t index, ParticipantId answerTarget, TransactionId answerId,
             const std::set<ParticipantId> &targets = {}) const;
         BufferedOutStream &getMasterRequestResponseTarget(const SyncableUnitBase *parent, uint8_t index, ParticipantId answerTarget, TransactionId answerId) const;
         ParticipantId participantId(const SerializableUnitBase *parent);
 
         void writeAction(const SyncableUnitBase *parent, uint8_t index, const void *data, ParticipantId answerTarget, TransactionId answerId, const std::set<ParticipantId> &targets = {}) const;
-        void writeRequest(const SyncableUnitBase *parent, uint8_t index, const void *data, ParticipantId requester, TransactionId requesterTransactionId, std::function<void(void *)> callback) const;
+        void writeRequest(const SyncableUnitBase *parent, uint8_t index, const void *data, ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback) const;
         void writeRequestResponse(const SyncableUnitBase *parent, uint8_t index, const void *data, ParticipantId answerTarget, TransactionId answerId) const;
 
         void beginRequestResponseMessage(const SyncableUnitBase *parent, uint8_t index, BufferedOutStream &stream, TransactionId id) const;
@@ -51,7 +53,7 @@ namespace Serialize {
             SyncableBase::writeAction(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableDataUnit>()), data, answerTarget, answerId, targets);
         }
 
-        void writeRequest(const void *data, ParticipantId requester = 0, TransactionId requesterTransactionId = 0, std::function<void(void *)> callback = {}) const
+        void writeRequest(const void *data, ParticipantId requester = 0, TransactionId requesterTransactionId = 0, Lambda<void(void *)> callback = {}) const
         {
             SyncableBase::writeRequest(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableDataUnit>()), data, requester, requesterTransactionId, std::move(callback));
         }
