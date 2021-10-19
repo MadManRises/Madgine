@@ -45,12 +45,12 @@ inline void dx12Check(HRESULT result = 0)
 
 constexpr D3D12_CPU_DESCRIPTOR_HANDLE operator+(D3D12_CPU_DESCRIPTOR_HANDLE handle, Engine::OffsetPtr offset)
 {
-    return { reinterpret_cast<uintptr_t>(reinterpret_cast<std::byte*>(handle.ptr) + offset) };
+    return { handle.ptr + offset.offset() };
 }
 
 constexpr D3D12_GPU_DESCRIPTOR_HANDLE operator+(D3D12_GPU_DESCRIPTOR_HANDLE handle, Engine::OffsetPtr offset)
 {
-    return { reinterpret_cast<uintptr_t>(reinterpret_cast<std::byte *>(handle.ptr) + offset) };
+    return { handle.ptr + offset.offset() };
 }
 
 constexpr Engine::OffsetPtr operator-(D3D12_CPU_DESCRIPTOR_HANDLE handle1, D3D12_CPU_DESCRIPTOR_HANDLE handle2)

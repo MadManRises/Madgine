@@ -1,12 +1,8 @@
 #pragma once
 
 #include "directx12rendertarget.h"
-#include "Meta/math/matrix4.h"
-#include "util/directx12program.h"
-#include "util/directx12buffer.h"
 #include "util/directx12texture.h"
 
-#include "render/renderpassflags.h"
 
 namespace Engine {
 namespace Render {

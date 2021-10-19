@@ -4,6 +4,8 @@
 
 #include "streams/comparestreamid.h"
 
+#include "Generic/callerhierarchy.h"
+
 namespace Engine {
 namespace Serialize {
 

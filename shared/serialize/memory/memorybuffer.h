@@ -1,13 +1,11 @@
 #pragma once
 
-#include "Meta/serialize/streams/serializestreambuf.h"
-
 #include "Generic/bytebuffer.h"
 
 namespace Engine {
 namespace Memory {
     struct MADGINE_MEMORY_SERIALIZE_EXPORT MemoryBuffer : std::basic_streambuf<char> {
-        MemoryBuffer(std::vector<char> &buffer);
+        MemoryBuffer(WritableByteBuffer buffer);
         MemoryBuffer(ByteBuffer buffer);
         MemoryBuffer(const MemoryBuffer &) = delete;
         MemoryBuffer(MemoryBuffer &&other) noexcept;
@@ -18,7 +16,7 @@ namespace Memory {
         int_type underflow() override;
 
     private:
-        std::vector<char> *mWriteBuffer = nullptr;
+        WritableByteBuffer mWriteBuffer;
         ByteBuffer mReadBuffer;
     };
 }

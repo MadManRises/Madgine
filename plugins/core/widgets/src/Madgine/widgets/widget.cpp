@@ -14,8 +14,6 @@
 #include "tabwidget.h"
 #include "textbox.h"
 
-#include "Meta/math/vector4.h"
-
 #include "vertex.h"
 
 #include "Meta/keyvalue/metatable_impl.h"

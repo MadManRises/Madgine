@@ -10,7 +10,7 @@
 
 #include "Meta/serialize/formatter.h"
 
-#include "Meta/serialize/streams/serializestreambuf.h"
+#include "Meta/serialize/streams/serializestreamdata.h"
 
 namespace Engine {
 namespace Filesystem {

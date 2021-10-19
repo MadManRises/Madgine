@@ -8,7 +8,6 @@
 
 #include "Meta/math/matrix3.h"
 
-#include "Meta/keyvalue/proxyscopebase.h"
 #include "Meta/keyvalue/typedscopeptr.h"
 
 #include "Meta/keyvalue/boundapifunction.h"

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Modules/uniquecomponent/uniquecomponent.h"
-
 #include "Generic/callerhierarchy.h"
 
 #include "Meta/serialize/streams/streamresult.h"
@@ -173,6 +171,8 @@ namespace Scene {
             }
             EntityComponentOwningHandle(const EntityComponentOwningHandle<T> &other) = delete;
             EntityComponentOwningHandle(EntityComponentOwningHandle<T> &&other) = default;
+
+            EntityComponentOwningHandle& operator=(const EntityComponentOwningHandle &) = delete;
 
             operator EntityComponentHandle<T>() const
             {

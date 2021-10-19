@@ -2,8 +2,6 @@
 
 #include "inifile.h"
 
-#include "Generic/stringutil.h"
-
 #include "inisection.h"
 
 namespace Engine {

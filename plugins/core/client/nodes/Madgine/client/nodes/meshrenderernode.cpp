@@ -6,14 +6,11 @@
 #include "Meta/serialize/serializetable_impl.h"
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-#include "Madgine/nodegraph/nodegraph.h"
 #include "Madgine/nodegraph/nodeinterpreter.h"
 
 #include "Meta/keyvalue/valuetype.h"
 
 #include "Madgine/render/rendertarget.h"
-
-#include "Meta/math/vector4i.h"
 
 #include "programloaderlib.h"
 #include "programloader.h"
@@ -24,6 +21,8 @@
 
 #include "meshloaderlib.h"
 #include "gpumeshloader.h"
+
+#include "render/material.h"
 
 NODE(MeshRendererNode, Engine::Render::MeshRendererNode)
 
@@ -192,8 +191,13 @@ namespace Render {
         if (mesh) {
             if (interpretData->mMesh.resource() != mesh)
                 interpretData->mMesh = mesh;
-            //TODO: Material, target->bindTextures({ { interpretData->mMesh->mTextureHandle, TextureType_2D } });
-            target->renderMesh(interpretData->mMesh, interpretData->mHandle);
+            Material mat {
+                0,
+                0,
+                { 1, 1, 1, 1 }
+            };
+            //TODO: Material;
+            target->renderMesh(interpretData->mMesh, interpretData->mHandle, &mat);
         }
     }
 

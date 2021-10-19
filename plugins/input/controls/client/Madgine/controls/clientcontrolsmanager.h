@@ -2,7 +2,7 @@
 
 #include "Madgine/window/mainwindowcomponent.h"
 #include "Madgine/window/mainwindowcomponentcollector.h"
-#include "Modules/uniquecomponent/uniquecomponentcollector.h"
+
 
 namespace Engine {
 namespace Controls {

@@ -3,8 +3,6 @@
 namespace Engine {
 namespace Threading {
 
-    struct DataLock;
-
 	enum class AccessMode {
         READ,
         WRITE

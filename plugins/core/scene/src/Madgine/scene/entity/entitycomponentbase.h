@@ -3,6 +3,8 @@
 #include "Meta/serialize/serializabledataunit.h"
 #include "Meta/keyvalue/objectptr.h"
 
+#include "Modules/uniquecomponent/uniquecomponent.h"
+
 namespace Engine {
 namespace Scene {
     namespace Entity {
@@ -20,7 +22,7 @@ namespace Scene {
         struct MADGINE_SCENE_EXPORT EntityComponentBase : Serialize::SerializableDataUnit{ 
 
             using Config = ContiguousComponentConfig;
-
+            
             EntityComponentBase(const std::optional<ObjectPtr> &initTable = {});
         };
     }

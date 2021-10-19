@@ -117,14 +117,14 @@ public:
         std::swap(w, other.w);
     }
 
-    float operator[](const size_t i) const
+    constexpr float operator[](const size_t i) const
     {
         assert(i < 4);
 
         return *(&x + i);
     }
 
-    float &operator[](const size_t i)
+    constexpr float &operator[](const size_t i)
     {
         assert(i < 4);
 

@@ -4,7 +4,7 @@
 
 #include "Meta/serialize/serializableunit.h"
 
-#include "Meta/serialize/streams/serializestreambuf.h"
+#include "Meta/serialize/streams/serializestreamdata.h"
 
 #include "Meta/serialize/container/noparent.h"
 

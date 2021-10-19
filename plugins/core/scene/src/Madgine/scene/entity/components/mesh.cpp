@@ -9,10 +9,6 @@
 
 #include "Meta/keyvalue/valuetype.h"
 
-#include "meshdata.h"
-
-#include "../entitycomponentptr.h"
-
 ENTITYCOMPONENT_IMPL(Mesh, Engine::Scene::Entity::Mesh);
 
 METATABLE_BEGIN(Engine::Scene::Entity::Mesh)

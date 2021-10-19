@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Generic/stringutil.h"
-
 namespace Engine {
 namespace Debug {
     struct TraceBack {

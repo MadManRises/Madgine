@@ -10,8 +10,6 @@
 
 #include "rendertarget.h"
 
-#include "Modules/threading/taskqueue.h"
-
 namespace Engine {
 namespace Render {
 

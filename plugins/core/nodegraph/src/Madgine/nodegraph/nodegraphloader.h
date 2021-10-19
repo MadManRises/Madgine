@@ -4,8 +4,6 @@
 
 #include "nodegraph.h"
 
-#include "Meta/serialize/container/noparent.h"
-
 namespace Engine {
 namespace NodeGraph {
 

@@ -5,15 +5,8 @@
 #include "Modules/debug/profiler/profile.h"
 
 #include "Meta/math/vector2i.h"
-#include "Meta/math/vector3.h"
-#include "Meta/math/vector3i.h"
-#include "Meta/math/vector4.h"
-
-#include "directx12rendertexture.h"
 
 #include "Interfaces/window/windowapi.h"
-
-#include "Meta/keyvalue/metatable_impl.h"
 
 #include "directx12rendercontext.h"
 

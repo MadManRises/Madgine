@@ -6,8 +6,6 @@
 
 #    include "../plugins/binaryinfo.h"
 
-#    include "Generic/stringutil.h"
-
 #    include "Interfaces/filesystem/api.h"
 
 #    include "codegen/codegen_cpp.h"

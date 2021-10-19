@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../filesystem/path.h"
 #include "../filesystem/filequery.h"
 
 namespace Engine {

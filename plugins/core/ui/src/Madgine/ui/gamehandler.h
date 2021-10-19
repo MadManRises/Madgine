@@ -5,8 +5,6 @@
 
 #include "Interfaces/input/inputevents.h"
 
-#include "Meta/math/vector2.h"
-
 #include "handlercollector.h"
 
 namespace Engine {

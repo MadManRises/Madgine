@@ -6,13 +6,8 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
-#include "imageloaderlib.h"
-#include "imagedata.h"
-#include "imageloader.h"
-
 #include "meshdata.h"
 
-#include "openglrendercontext.h"
 
 VIRTUALUNIQUECOMPONENT(Engine::Render::OpenGLMeshLoader);
 

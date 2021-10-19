@@ -117,14 +117,14 @@ struct META_EXPORT Matrix4 {
     }
 
     /// Member access, allows use of construct mat[r][c]
-    inline const Vector4 operator[](size_t iRow) const { return { m[0][iRow], m[1][iRow], m[2][iRow], m[3][iRow] }; }
+    inline constexpr const Vector4 operator[](size_t iRow) const { return { m[0][iRow], m[1][iRow], m[2][iRow], m[3][iRow] }; }
 
     struct AccessHelper {
-        float &operator[](size_t iCol) { return m[iCol][row]; }
+        constexpr float &operator[](size_t iCol) { return m[iCol][row]; }
         size_t row;
         float (&m)[4][4];
     };
-    inline AccessHelper operator[](size_t iRow) { return { iRow, m }; }
+    inline constexpr AccessHelper operator[](size_t iRow) { return { iRow, m }; }
 
     inline float* data() {
         return &m[0][0];

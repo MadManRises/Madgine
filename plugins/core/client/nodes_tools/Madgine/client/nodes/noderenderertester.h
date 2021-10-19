@@ -8,8 +8,6 @@
 
 #include "Madgine/render/renderpass.h"
 
-#include "Meta/keyvalue/valuetype.h"
-
 #include "Madgine/render/camera.h"
 
 #include "imgui/imguiaddons.h"

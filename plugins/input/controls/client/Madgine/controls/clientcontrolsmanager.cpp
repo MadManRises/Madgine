@@ -8,7 +8,7 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "Interfaces/input/inputevents.h"
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 UNIQUECOMPONENT(Engine::Controls::ClientControlsManager)
 

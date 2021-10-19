@@ -29,10 +29,16 @@ ValueTypeDesc ValueType_type(const ValueType &v)
     return v.type();
 }
 
+template <typename T, typename>
+META_EXPORT ValueType_Return<T> ValueType_as_impl(const ValueType &v)
+{
+    return v.as<std::decay_t<T>>();
+}
+
 #define VALUETYPE_SEP
 #define VALUETYPE_IMPL(Type)                                                                                                                    \
     template <>                                                                                                                                 \
-    META_EXPORT void to_ValueType_impl<std::decay_t<Type>>(ValueType & v, std::decay_t<Type> && t) { v = std::move(t); }                        \
+    META_EXPORT void to_ValueType_impl(ValueType &v, std::decay_t<Type> &&t) { v = std::move(t); }                                              \
                                                                                                                                                 \
     template <>                                                                                                                                 \
     META_EXPORT void to_ValueType_impl<std::decay_t<Type> &>(ValueType & v, std::decay_t<Type> & t) { v = t; }                                  \
@@ -49,8 +55,7 @@ ValueTypeDesc ValueType_type(const ValueType &v)
     template <>                                                                                                                                 \
     META_EXPORT void to_ValueTypeRef_impl<std::decay_t<Type> &>(ValueTypeRef & v, std::decay_t<Type> & t) { v = ValueTypeRef { t }; }           \
                                                                                                                                                 \
-    template <>                                                                                                                                 \
-    META_EXPORT ValueType_Return<std::decay_t<Type>> ValueType_as_impl<std::decay_t<Type>>(const ValueType &v) { return v.as<std::decay_t<Type>>(); }
+    template META_EXPORT ValueType_Return<std::decay_t<Type>> ValueType_as_impl<std::decay_t<Type>>(const ValueType &v);
 
 #define VALUETYPE_TYPE(Name, Storage, ...) FOR_EACH(VALUETYPE_IMPL, VALUETYPE_SEP, __VA_ARGS__)
 
@@ -68,5 +73,6 @@ META_EXPORT void to_ValueType_impl<ValueType &>(ValueType &v, ValueType &t)
 {
     v = t;
 }
+
 
 }

@@ -7,8 +7,6 @@
 
 #include "Meta/serialize/container/serialized.h"
 
-#include "../entitycomponenthandle.h"
-
 #include "../entitycomponentptr.h"
 
 namespace Engine {
@@ -22,6 +20,7 @@ namespace Scene {
 
             using Config = PersistentComponentConfig;
 
+            Transform() = default;
             using EntityComponent<Transform>::EntityComponent;
 
             Transform(Transform &&) = default;

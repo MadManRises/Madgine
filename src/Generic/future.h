@@ -93,7 +93,7 @@ struct shared_future {
     {
         return std::visit(overloaded {
                               [](const std::shared_future<T> &f) -> shared_future<T> { return f; },
-                              [](const DeferredPtr &d) -> shared_future<T> { return d } },
+                              [](const DeferredPtr &d) -> shared_future<T> { return d; } },
             mValue);
     }
 

@@ -5,13 +5,10 @@
 #include "Interfaces/debug/memory/memory.h"
 #include "Madgine/resources/resourcemanager.h"
 #include "Modules/plugins/pluginmanager.h"
-#include "Modules/threading/workgroup.h"
 #include "keyvalueregistry.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcollectormanager.h"
 #include "cli/cli.h"
-
-#include "Modules/plugins/pluginsection.h"
 
 namespace Engine {
 namespace Core {

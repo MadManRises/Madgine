@@ -1,12 +1,10 @@
 #include "../../metalib.h"
 
-#include "serializestreambuf.h"
+#include "serializestreamdata.h"
 
 #include "../serializemanager.h"
 
 #include "../formatter.h"
-
-#include "serializablemapholder.h"
 
 namespace Engine {
 namespace Serialize {

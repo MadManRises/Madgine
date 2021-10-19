@@ -4,8 +4,6 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
-#include "gamehandler.h"
-
 #include "Madgine/widgets/widget.h"
 
 #include "Madgine/widgets/label.h"

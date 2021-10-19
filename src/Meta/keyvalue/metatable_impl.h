@@ -41,7 +41,7 @@ constexpr Accessor property()
 
         setter = [](const TypedScopePtr &scope, const ValueType &v) {
             if constexpr (std::is_same_v<SetterScope, void>) {
-                using SetterScope = std::remove_pointer_t<std::tuple_element_t<0, typename setter_traits::argument_types>>;
+                using SetterScope = std::remove_pointer_t<type_pack_select_t<0, typename setter_traits::argument_types>>;
                 if constexpr (std::is_convertible_v<Scope &, SetterScope &>) {
                     TupleUnpacker::invoke(Setter, scope.safe_cast<Scope>(), ValueType_as<std::decay_t<T>>(v));
                 } else {
@@ -58,7 +58,7 @@ constexpr Accessor property()
         [](ValueType &retVal, const TypedScopePtr &scope) {
             T value = [=]() -> T {
                 if constexpr (std::is_same_v<GetterScope, void>) {
-                    using GetterScope = std::remove_pointer_t<std::tuple_element_t<0, typename getter_traits::argument_types>>;
+                    using GetterScope = std::remove_pointer_t<type_pack_select_t<0, typename getter_traits::argument_types>>;
                     if constexpr (std::is_convertible_v<Scope &, GetterScope &>) {
                         return TupleUnpacker::invoke(Getter, scope.safe_cast<Scope>());
                     } else {

@@ -6,7 +6,6 @@
 #include "Meta/serialize/serializableunitptr.h"
 #include "entitycomponentcollector.h"
 #include "entitycomponentlistbase.h"
-#include "entityptr.h"
 
 namespace Engine {
 namespace Scene {

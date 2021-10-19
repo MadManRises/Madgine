@@ -2,11 +2,7 @@
 
 #include "directx12vertexshaderloader.h"
 
-#include "Generic/stringutil.h"
-
 #include "util/directx12vertexshader.h"
-
-#include "directx12rendercontext.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
 

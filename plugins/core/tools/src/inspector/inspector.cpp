@@ -1,14 +1,10 @@
 #include "../toolslib.h"
-#include "Madgine/baselib.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
 #include "inspector.h"
 
-#include "../renderer/imroot.h"
 #include "imgui/imguiaddons.h"
-
-#include "Modules/plugins/plugin.h"
 
 #include "Madgine/resources/resourcemanager.h"
 
@@ -22,8 +18,6 @@
 #include "Meta/keyvalue/keyvaluepair.h"
 
 #include "functiontool.h"
-
-#include "Madgine/app/application.h"
 
 #include "inspectorlayout.h"
 

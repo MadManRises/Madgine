@@ -2,7 +2,6 @@
 
 #if ENABLE_PLUGINS
 
-#    include "../tinyxml/tinyxml2.h"
 #    include "../toolbase.h"
 #    include "../toolscollector.h"
 

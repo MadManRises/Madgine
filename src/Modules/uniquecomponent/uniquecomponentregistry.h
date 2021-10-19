@@ -240,21 +240,21 @@ struct NamedUniqueComponentRegistry : UniqueComponentRegistry<_Base, _Ty...> {
         size_t registerComponent()
         {
 
-            mComponentNames.emplace_back(T::componentName());
+            this->mComponentNames.emplace_back(T::componentName());
             return UniqueComponentRegistry<_Base, _Ty...>::CollectorInfo::template registerComponent<T>();
         }
 
         void unregisterComponent(size_t i)
         {
             UniqueComponentRegistry<_Base, _Ty...>::CollectorInfo::unregisterComponent(i);
-            mComponentNames[i] = {};
+            this->mComponentNames[i] = {};
         }
     };
 
     NamedUniqueComponentRegistry()
         : UniqueComponentRegistry<_Base, _Ty...>(&typeInfo<NamedUniqueComponentRegistry>)
     {
-        mIsNamed = true;
+        this->mIsNamed = true;
     }
 
     static NamedUniqueComponentRegistry &sInstance()
@@ -269,19 +269,19 @@ struct NamedUniqueComponentRegistry : UniqueComponentRegistry<_Base, _Ty...> {
 
     void onPluginLoad(const Plugins::BinaryInfo *bin, CompoundAtomicOperation &op)
     {
-        size_t counter = mComponentsByName.size();
+        size_t counter = this->mComponentsByName.size();
 
-        for (typename UniqueComponentRegistry<_Base, _Ty...>::CollectorInfo *info : mUnloadedCollectors) {
+        for (typename UniqueComponentRegistry<_Base, _Ty...>::CollectorInfo *info : this->mUnloadedCollectors) {
             if (info->mBinary == bin) {
                 const std::vector<std::string_view> &names = static_cast<CollectorInfo *>(info)->mComponentNames;
                 for (std::string_view name : names) {
-                    mComponentsByName[name] = counter;
+                    this->mComponentsByName[name] = counter;
                     ++counter;
                 }
             }
         }
 
-        UniqueComponentRegistry::onPluginLoad(bin, op);
+        UniqueComponentRegistry<_Base, _Ty...>::onPluginLoad(bin, op);
     }
 };
 

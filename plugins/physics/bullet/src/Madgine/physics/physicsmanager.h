@@ -3,10 +3,6 @@
 #include "Madgine/scene/scenecomponentbase.h"
 #include "Madgine/scene/scenecomponentcollector.h"
 
-#include "Modules/uniquecomponent/uniquecomponent.h"
-
-#include "bullet3-2.89/src/btBulletDynamicsCommon.h"
-
 
 #include "Generic/proxy.h"
 
@@ -14,6 +10,9 @@
 
 struct btSoftRigidDynamicsWorld;
 struct btSoftBodyWorldInfo;
+struct btManifoldPoint;
+struct btCollisionObject;
+struct btCollisionObjectWrapper;
 
 namespace Engine {
 namespace Physics {

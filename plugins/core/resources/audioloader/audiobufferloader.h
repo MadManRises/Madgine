@@ -2,8 +2,6 @@
 
 #include "Madgine/resources/resourceloader.h"
 
-#include "Modules/threading/workgroupstorage.h"
-
 #include "audiobuffer.h"
 
 namespace Engine {

@@ -12,6 +12,8 @@
 
 #include "streams/operations.h"
 
+#include "serializableids.h"
+
 namespace Engine {
 namespace Serialize {
 

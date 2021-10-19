@@ -6,7 +6,6 @@
 #include "Modules/threading/connectionstore.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
-#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 namespace Engine {
 namespace UI {

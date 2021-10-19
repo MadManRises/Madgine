@@ -8,8 +8,6 @@
 
 #include "vertex.h"
 
-#include "Madgine/render/camera.h"
-
 #include "Madgine/window/mainwindow.h"
 
 #include "Madgine/render/rendercontext.h"
@@ -17,7 +15,7 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "textureloader.h"
+#include "Madgine/render/rendertarget.h"
 
 METATABLE_BEGIN_BASE(Engine::Widgets::SceneWindow, Engine::Widgets::WidgetBase)
 METATABLE_END(Engine::Widgets::SceneWindow)

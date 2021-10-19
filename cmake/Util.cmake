@@ -73,6 +73,11 @@ endif ()
 if (MSVC)
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4217")
 	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /ignore:4217")
+
+	if (NOT CLANG)
+		add_compile_options(/Zc:preprocessor)
+	endif()
+
 endif ()
 
 

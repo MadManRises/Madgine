@@ -2,13 +2,6 @@
 
 #include "directx12rendertarget.h"
 
-#include "util/directx12buffer.h"
-#include "util/directx12program.h"
-#include "util/directx12texture.h"
-#include "util/directx12vertexarray.h"
-
-#include "Meta/math/atlas2.h"
-
 #include <dxgi.h>
 
 namespace Engine {

@@ -5,8 +5,6 @@
 
 #include "Modules/threading/threadlocal.h"
 
-#include "Modules/uniquecomponent/uniquecomponent.h"
-#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 #include "util/directx12constantbufferheap.h"
 #include "util/directx12descriptorheap.h"

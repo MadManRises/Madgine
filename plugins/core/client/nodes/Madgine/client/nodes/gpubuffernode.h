@@ -5,8 +5,6 @@
 
 #include "shadercodegenerator.h"
 
-#include "Modules/uniquecomponent/uniquecomponentcollector.h"
-
 #include "Generic/bytebuffer.h"
 #include "Madgine/nodegraph/nodeinterpreter.h"
 

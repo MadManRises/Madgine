@@ -2,6 +2,8 @@
 
 #include "networkmanager.h"
 
+#include "networkbuffer.h"
+
 #include "Meta/serialize/formatter/safebinaryformatter.h"
 
 

@@ -7,8 +7,6 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 
-#include "../assimptools.h"
-#include "Meta/math/transformation.h"
 
 UNIQUECOMPONENT(Engine::Render::AnimationLoader)
 

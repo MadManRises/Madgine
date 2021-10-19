@@ -98,12 +98,12 @@ namespace Threading {
             mState->notifyDestroyed();
         }
 
-        std::experimental::suspend_always initial_suspend() noexcept
+        std::suspend_always initial_suspend() noexcept
         {
             return {};
         }
 
-        std::experimental::suspend_always final_suspend() noexcept
+        std::suspend_always final_suspend() noexcept
         {
             mState->finalize();
             return {};

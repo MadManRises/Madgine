@@ -10,8 +10,6 @@
 
 #include "streams/operations.h"
 
-#include "serializemanager.h"
-
 #include "toplevelunit.h"
 
 #include "streams/serializablemapholder.h"

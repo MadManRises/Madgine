@@ -11,9 +11,6 @@
 
 #include "Meta/serialize/streams/operations.h"
 
-#include "Madgine/app/application.h"
-#include "Madgine/scene/scenemanager.h"
-#include "Modules/threading/datamutex.h"
 
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btBoxShape.h"
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btCapsuleShape.h"

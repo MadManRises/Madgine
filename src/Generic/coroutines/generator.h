@@ -14,25 +14,24 @@ struct Generator {
             return { CoroutineHandle<promise_type>::fromPromise(*this) };
         }
 
-        std::experimental::suspend_never initial_suspend()
+        std::suspend_never initial_suspend()
         {
             return {};
         }
 
-        std::experimental::suspend_always yield_value(T &t)
+        std::suspend_always yield_value(T &t)
         {
             mValue = &t;
             return {};
         }
 
-        std::experimental::suspend_never return_void()
+        void return_void()
         {
-            return {};
         }
 
         void unhandled_exception() { }
 
-        std::experimental::suspend_always final_suspend() noexcept
+        std::suspend_always final_suspend() noexcept
         {
             return {};
         }

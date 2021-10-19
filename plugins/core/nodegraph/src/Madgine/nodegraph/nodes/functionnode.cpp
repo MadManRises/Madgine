@@ -12,8 +12,6 @@
 
 #include "../codegenerator.h"
 
-#include "codegen/codegen.h"
-
 #include "Meta/keyvalue/functiontable.h"
 
 NODE(FunctionNode, Engine::NodeGraph::FunctionNode)

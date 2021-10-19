@@ -149,8 +149,6 @@ namespace Resources {
         using Container = _Container;
         using Storage = _Storage;
 
-        struct ResourceType;
-
         using ResourceDataInfo = ResourceDataInfo<T>;
 
         using DataContainer = typename replace<Container>::template type<ResourceData<T>>;

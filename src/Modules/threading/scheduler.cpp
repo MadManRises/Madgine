@@ -6,8 +6,6 @@
 
 #include "taskqueue.h"
 
-#include "barrier.h"
-
 #include "Interfaces/threading/threadapi.h"
 
 #if EMSCRIPTEN

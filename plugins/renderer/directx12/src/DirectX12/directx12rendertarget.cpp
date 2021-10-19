@@ -2,20 +2,17 @@
 
 #include "directx12rendertarget.h"
 
-#include "Meta/math/matrix4.h"
-#include "Meta/math/vector4.h"
+#include "meshdata.h"
 
-#include "meshloader.h"
-
-#include "directx12renderwindow.h"
-
-#include "Madgine/render/camera.h"
-
-#include "Madgine/render/renderpass.h"
 #include "directx12meshdata.h"
 #include "directx12meshloader.h"
+#include "util/directx12program.h"
 
 #include "directx12rendercontext.h"
+
+#include "Meta/math/rect2i.h"
+
+#include "render/material.h"
 
 namespace Engine {
 namespace Render {
@@ -209,7 +206,7 @@ namespace Render {
         DirectX12RenderContext::getSingleton().mCommandList.mList->RSSetScissorRects(1, &scissorRect);
     }
 
-    void DirectX12RenderTarget::renderMesh(GPUMeshData *m, Program *p, const GPUMeshData::Material *material)
+    void DirectX12RenderTarget::renderMesh(GPUMeshData *m, Program *p, const Material *material)
     {
         DirectX12MeshData *mesh = static_cast<DirectX12MeshData *>(m);
         DirectX12Program *program = static_cast<DirectX12Program *>(p);
@@ -220,7 +217,7 @@ namespace Render {
         program->bind(&mesh->mVAO);
 
         if (material)
-            bindTextures({ { material->mDiffuseTexture->mTextureHandle, TextureType_2D } });
+            bindTextures({ { material->mDiffuseTexture, TextureType_2D } });
 
         if (mesh->mIndices) {
             DirectX12RenderContext::getSingleton().mCommandList.mList->DrawIndexedInstanced(mesh->mElementCount, 1, 0, 0, 0);
@@ -229,7 +226,7 @@ namespace Render {
         }
     }
 
-    void DirectX12RenderTarget::renderMeshInstanced(size_t count, GPUMeshData *m, Program *p, const GPUMeshData::Material *material)
+    void DirectX12RenderTarget::renderMeshInstanced(size_t count, GPUMeshData *m, Program *p, const Material *material)
     {
         DirectX12MeshData *mesh = static_cast<DirectX12MeshData *>(m);
         DirectX12Program *program = static_cast<DirectX12Program *>(p);
@@ -240,7 +237,7 @@ namespace Render {
         program->bind(&mesh->mVAO);
 
         if (material)
-            bindTextures({ { material->mDiffuseTexture->mTextureHandle, TextureType_2D } });
+            bindTextures({ { material->mDiffuseTexture, TextureType_2D } });
 
         if (mesh->mIndices) {
             DirectX12RenderContext::getSingleton().mCommandList.mList->DrawIndexedInstanced(mesh->mElementCount, count, 0, 0, 0);
@@ -261,7 +258,7 @@ namespace Render {
         }
     }
 
-    void DirectX12RenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, const GPUMeshData::Material *material)
+    void DirectX12RenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, const Material *material)
     {
         if (!vertices.empty()) {
             DirectX12MeshData tempMesh;

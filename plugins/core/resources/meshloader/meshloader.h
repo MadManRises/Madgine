@@ -2,15 +2,6 @@
 
 #include "Madgine/resources/resourceloader.h"
 
-#include "render/attributedescriptor.h"
-#include "render/vertex.h"
-
-#include "Meta/math/boundingbox.h"
-
-#include "Modules/threading/workgroupstorage.h"
-
-#include "Generic/bytebuffer.h"
-
 #include "meshdata.h"
 
 namespace Engine {

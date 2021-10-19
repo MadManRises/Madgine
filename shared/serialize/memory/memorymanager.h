@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Meta/serialize/serializemanager.h"
-#include "memorybuffer.h"
+#include "Generic/bytebuffer.h"
 
 namespace Engine {
 namespace Memory {
@@ -16,7 +16,7 @@ namespace Memory {
         void operator=(const MemoryManager &) = delete;
 
         Serialize::SerializeInStream openRead(ByteBuffer buffer, std::unique_ptr<Serialize::Formatter> format);
-        Serialize::SerializeOutStream openWrite(std::vector<char> &buffer, std::unique_ptr<Serialize::Formatter> format);
+        Serialize::SerializeOutStream openWrite(WritableByteBuffer buffer, std::unique_ptr<Serialize::Formatter> format);
 
     };
 }

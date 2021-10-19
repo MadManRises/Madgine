@@ -10,7 +10,6 @@
 #include "workgroupstorage.h"
 
 #include "barrier.h"
-#include "task.h"
 #include "taskqueue.h"
 
 namespace Engine {

@@ -4,8 +4,6 @@
 
 #include "accessor.h"
 
-#include "valuetype.h"
-
 #include "scopefield.h"
 
 namespace Engine {

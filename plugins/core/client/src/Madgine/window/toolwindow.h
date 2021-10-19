@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Interfaces/window/windoweventlistener.h"
-#include "Modules/uniquecomponent/uniquecomponentselector.h"
 
 namespace Engine {
 namespace Window {

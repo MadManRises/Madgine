@@ -9,9 +9,6 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-#include "../entitycomponentptr.h"
-
-#include "../../scenemanager.h"
 
 
 ENTITYCOMPONENT_IMPL(Transform, Engine::Scene::Entity::Transform);

@@ -2,8 +2,6 @@
 
 #include "serializestream.h"
 
-#include "streamstate.h"
-
 #include "Generic/lambda.h"
 
 namespace Engine {

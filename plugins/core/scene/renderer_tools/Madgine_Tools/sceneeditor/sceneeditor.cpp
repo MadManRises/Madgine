@@ -13,7 +13,6 @@
 #include "Madgine/scene/entity/entitycomponentcollector.h"
 #include "Madgine/scene/scenemanager.h"
 
-#include "Madgine/scene/entity/components/animation.h"
 #include "Madgine/scene/entity/components/mesh.h"
 #include "Madgine/scene/entity/components/skeleton.h"
 #include "Madgine/scene/entity/components/transform.h"
@@ -21,8 +20,6 @@
 #include "inspector/inspector.h"
 
 #include "im3d/im3d.h"
-
-#include "Madgine/resources/resourcemanager.h"
 
 #include "Meta/math/boundingbox.h"
 

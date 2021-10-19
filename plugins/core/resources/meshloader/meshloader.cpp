@@ -12,8 +12,6 @@
 
 #include "../assimptools.h"
 
-#include "Meta/math/transformation.h"
-
 METATABLE_BEGIN(Engine::Render::MeshLoader)
 MEMBER(mResources)
 METATABLE_END(Engine::Render::MeshLoader)

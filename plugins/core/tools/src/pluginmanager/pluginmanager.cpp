@@ -7,8 +7,6 @@
 #    include "imgui/imgui.h"
 #    include "imgui/imgui_internal.h"
 
-#    include "imgui/imguiaddons.h"
-
 #    include "Modules/plugins/pluginmanager.h"
 
 #    include "Meta/keyvalue/metatable_impl.h"
@@ -22,8 +20,6 @@
 
 #    include "Modules/plugins/plugin.h"
 #    include "Modules/plugins/pluginsection.h"
-
-#    include "ini/inifile.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 

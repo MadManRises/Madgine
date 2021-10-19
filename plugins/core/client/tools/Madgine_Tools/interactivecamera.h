@@ -1,6 +1,8 @@
 #pragma once
 
-#include "imgui/imguiaddons.h"
+namespace ImGui {
+struct InteractiveViewState;
+}
 
 namespace Engine {
 namespace Tools {

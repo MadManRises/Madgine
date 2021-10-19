@@ -6,7 +6,12 @@
 
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "Modules/uniquecomponent/uniquecomponentcollector.h"
+METATABLE_BEGIN(Engine::Scene::SceneComponentBase)
+METATABLE_END(Engine::Scene::SceneComponentBase)
+
+SERIALIZETABLE_BEGIN(Engine::Scene::SceneComponentBase)
+SERIALIZETABLE_END(Engine::Scene::SceneComponentBase)
+
 
 namespace Engine {
 
@@ -65,9 +70,3 @@ namespace Scene {
 
 }
 }
-
-METATABLE_BEGIN(Engine::Scene::SceneComponentBase)
-METATABLE_END(Engine::Scene::SceneComponentBase)
-
-SERIALIZETABLE_BEGIN(Engine::Scene::SceneComponentBase)
-SERIALIZETABLE_END(Engine::Scene::SceneComponentBase)

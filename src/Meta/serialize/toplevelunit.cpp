@@ -5,6 +5,8 @@
 
 #include "serializableunitptr.h"
 
+#include "serializableids.h"
+
 namespace Engine {
 namespace Serialize {
     TopLevelUnitBase::TopLevelUnitBase(UnitId staticId)

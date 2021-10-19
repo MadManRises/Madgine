@@ -207,6 +207,11 @@ macro(add_workspace_library name)
 
 	endif()
 
+	if (IWYU)
+		set_property(TARGET ${name} PROPERTY CXX_INCLUDE_WHAT_YOU_USE
+		"${IWYU};-Xiwyu;--pch_in_code;-Xiwyu;--prefix_header_includes=remove;-Xiwyu;--max_line_length=200;--driver-mode=cl")
+	endif (IWYU)
+
 endmacro(add_workspace_library)
 
 macro(add_workspace_interface_library name)

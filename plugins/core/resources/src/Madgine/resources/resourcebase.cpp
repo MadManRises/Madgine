@@ -6,6 +6,8 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
+Engine::CallableTraits<decltype(&Engine::Resources::ResourceBase::name)>;
+
 METATABLE_BEGIN(Engine::Resources::ResourceBase)
 READONLY_PROPERTY(Name, name)
 METATABLE_END(Engine::Resources::ResourceBase)

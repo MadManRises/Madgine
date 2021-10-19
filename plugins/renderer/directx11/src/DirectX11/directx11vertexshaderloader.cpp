@@ -2,8 +2,6 @@
 
 #include "directx11vertexshaderloader.h"
 
-#include "Generic/stringutil.h"
-
 #include "util/directx11vertexshader.h"
 
 #include "directx11rendercontext.h"

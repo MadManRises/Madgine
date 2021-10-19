@@ -4,9 +4,7 @@
 
 #include "Madgine/scene/entity/entitycomponentptr.h"
 
-#include "Madgine/scene/entity/components/transform.h"
-
-#include "Madgine/scene/entity/components/skeleton.h"
+#include "Meta/math/vector3.h"
 
 class btSoftBody;
 

@@ -1,7 +1,5 @@
 #include "../directx12lib.h"
 
-#include "directx12vertexarray.h"
-
 #include "../directx12rendercontext.h"
 
 using namespace Engine::Render;

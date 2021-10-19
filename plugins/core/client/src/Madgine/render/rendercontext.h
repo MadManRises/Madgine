@@ -2,9 +2,9 @@
 
 #include "Meta/math/vector2i.h"
 
-#include "Modules/threading/task.h"
-
 #include "rendertextureconfig.h"
+
+#include "Modules/uniquecomponent/uniquecomponent.h"
 
 namespace Engine {
 namespace Render {

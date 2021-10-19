@@ -4,8 +4,6 @@
 
 #include "Madgine/window/mainwindow.h"
 
-#include "Madgine/widgets/widget.h"
-
 #include "Modules/debug/profiler/profile.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
@@ -15,6 +13,8 @@
 
 #include "guihandler.h"
 #include "gamehandler.h"
+
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 UNIQUECOMPONENT(Engine::UI::UIManager)
 

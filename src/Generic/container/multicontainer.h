@@ -65,10 +65,10 @@ struct MultiContainer {
     struct iterator {
 
         using iterator_category = typename Container<std::tuple<Ty...>>::iterator::iterator_category;
-        using value_type = typename MultiContainer<Container,Ty...>::value_type;
+        using value_type = typename MultiContainer<Container, Ty...>::value_type;
         using difference_type = ptrdiff_t;
         using pointer = typename MultiContainer<Container, Ty...>::pointer;
-        using reference = typename MultiContainer<Container,Ty...>::reference;
+        using reference = typename MultiContainer<Container, Ty...>::reference;
 
         iterator operator+(ptrdiff_t diff) const
         {
@@ -81,15 +81,16 @@ struct MultiContainer {
 
         iterator operator-(ptrdiff_t diff) const
         {
-            return            
-                { 
-                TupleUnpacker::forEach(mIt, [](auto &it){
-                return it - diff;
-                }
+            return
+            {
+                TupleUnpacker::forEach(mIt, [](auto &it) {
+                    return it - diff;
+                })
             };
         }
 
-        ptrdiff_t operator-(const iterator& other) const {
+        ptrdiff_t operator-(const iterator &other) const
+        {
             return std::get<0>(mIt) - std::get<0>(other.mIt);
         }
 

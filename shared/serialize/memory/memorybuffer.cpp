@@ -2,15 +2,11 @@
 
 #include "memorybuffer.h"
 
-#include "Meta/serialize/formatter.h"
-
 namespace Engine {
 namespace Memory {
-    MemoryBuffer::MemoryBuffer(std::vector<char> &buffer)
-        : mWriteBuffer(&buffer)
+    MemoryBuffer::MemoryBuffer(WritableByteBuffer buffer)
+        : mWriteBuffer(std::move(buffer))
     {
-        //TODO: remove this later
-        mWriteBuffer->clear();
     }
 
     MemoryBuffer::MemoryBuffer(ByteBuffer buffer)
@@ -24,7 +20,7 @@ namespace Memory {
 
     MemoryBuffer::MemoryBuffer(MemoryBuffer &&other) noexcept
         : std::basic_streambuf<char>(std::move(other))
-        , mWriteBuffer(std::exchange(other.mWriteBuffer, nullptr))
+        , mWriteBuffer(std::move(other.mWriteBuffer))
         , mReadBuffer(std::move(other.mReadBuffer))
     {
     }
@@ -35,15 +31,17 @@ namespace Memory {
 
     MemoryBuffer::int_type MemoryBuffer::overflow(int c)
     {
-        size_t oldSize = mWriteBuffer->size();
+        size_t oldSize = mWriteBuffer.mSize;
         size_t newSize = 3 * oldSize / 2;
         if (newSize <= oldSize) {
             newSize = 16;
             assert(newSize > oldSize);
         }
-        mWriteBuffer->resize(newSize);
-        char *data = mWriteBuffer->data();
+        std::vector<char> newBuffer(newSize);
+        std::memcpy(newBuffer.data(), mWriteBuffer.mData, oldSize);
+        char *data = newBuffer.data();
         data[oldSize] = c;
+        mWriteBuffer = std::move(newBuffer);
         setp(data + oldSize + 1, data + newSize);
         return c;
     }

@@ -9,7 +9,6 @@ class btCollisionShape;
 namespace Engine {
 namespace Physics {
 
-    struct CollisionShapeManager;
     struct CollisionShapeInstance;
 
     struct CollisionShape {

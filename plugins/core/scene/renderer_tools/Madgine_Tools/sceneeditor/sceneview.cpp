@@ -2,19 +2,13 @@
 
 #include "sceneview.h"
 
-#include "renderer/imroot.h"
 #include "imgui/imgui.h"
 
 #include "imgui/imguiaddons.h"
 
 #include "Madgine/render/rendercontext.h"
 
-#include "Modules/plugins/pluginmanager.h"
-
-
 #include "Meta/keyvalue/metatable_impl.h"
-
-
 
 #include "im3d/im3d.h"
 #include "im3d/im3d_internal.h"
@@ -27,17 +21,11 @@
 
 #include "Meta/math/geometry3.h"
 
-#include "Madgine/app/application.h"
-
 #include "Madgine/scene/scenemanager.h"
 
 #include "Madgine/scene/entity/entity.h"
 
-#include "inspector/inspector.h"
-
 #include "Madgine/scene/entity/components/mesh.h"
-
-#include "meshdata.h"
 
 #include "texture.h"
 

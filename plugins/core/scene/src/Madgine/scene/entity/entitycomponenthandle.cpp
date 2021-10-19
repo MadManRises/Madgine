@@ -1,8 +1,6 @@
 #include "../../scenelib.h"
 #include "entitycomponenthandle.h"
 
-#include "entitycomponenthandle.h"
-
 #include "Meta/serialize/streams/operations.h"
 
 #include "entity.h"
@@ -12,8 +10,6 @@
 #include "entitycomponentlistbase.h"
 
 #include "entitycomponentptr.h"
-
-#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 namespace Engine {
 namespace Scene {

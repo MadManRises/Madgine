@@ -2,8 +2,6 @@
 
 #include "unithelper.h"
 
-#include "serializable.h"
-
 #include "streams/serializestream.h"
 
 #include "serializemanager.h"

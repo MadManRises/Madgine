@@ -26,14 +26,15 @@
 
 #include "Madgine/window/mainwindow.h"
 
-#include "Interfaces/window/windowapi.h"
-
 #include "Meta/math/atlas2.h"
+
+#include "Interfaces/input/inputevents.h"
 
 #include "imageloader.h"
 #include "meshloader.h"
-#include "programloader.h"
 #include "textureloader.h"
+
+#include "Madgine/render/rendertarget.h"
 
 #include "Madgine/render/shadinglanguage/sl.h"
 
@@ -280,13 +281,20 @@ namespace Widgets {
     {
         LOG_WARNING_ONCE("Handle modal widgets for hover");
 
-        const auto &widgets = current ? current->children() : uniquePtrToPtr(static_cast<const std::vector<std::unique_ptr<WidgetBase>> &>(mTopLevelWidgets));
-
-        for (WidgetBase *w : widgets) {
-            if (w->mVisible && w->containsPoint(pos, { { 0, 0 }, mClientSpace.mSize })) {
-                return getHoveredWidgetDown(pos, w);
+        if (current) {
+            for (WidgetBase *w : current->children()) {
+                if (w->mVisible && w->containsPoint(pos, { { 0, 0 }, mClientSpace.mSize })) {
+                    return getHoveredWidgetDown(pos, w);
+                }
+            }
+        } else {
+            for (WidgetBase *w : uniquePtrToPtr(static_cast<const std::vector<std::unique_ptr<WidgetBase>> &>(mTopLevelWidgets))) {
+                if (w->mVisible && w->containsPoint(pos, { { 0, 0 }, mClientSpace.mSize })) {
+                    return getHoveredWidgetDown(pos, w);
+                }
             }
         }
+        
         return current;
     }
 

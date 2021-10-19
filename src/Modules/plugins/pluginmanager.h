@@ -2,8 +2,6 @@
 
 #if ENABLE_PLUGINS
 
-#include "Generic/future.h"
-
 #include "../threading/signal.h"
 
 namespace Engine {

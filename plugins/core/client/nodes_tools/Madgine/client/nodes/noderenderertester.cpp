@@ -16,8 +16,6 @@
 #include "Madgine/render/rendercontext.h"
 #include "Madgine/render/rendertarget.h"
 
-#include "texture.h"
-
 #include "inspector/inspector.h"
 
 #include "Meta/keyvalue/valuetype.h"
@@ -81,7 +79,7 @@ namespace Client {
                     size_t argCount = pass.mHandle->mDataProviderPins.size();
                     assert(argCount >= 1);
                     pass.mArguments.resize(argCount - 1);
-                    for (size_t i = 1; i < argCount; ++i) {
+                    for (uint32_t i = 1; i < argCount; ++i) {
                         ExtendedValueTypeDesc desc = pass.mHandle->dataProviderType({ 0, i });
                         if (desc == toValueTypeDesc<Engine::Vector4>()) {
                             pass.mArguments[i - 1] = Engine::Vector4 { Engine::Vector4::ZERO };

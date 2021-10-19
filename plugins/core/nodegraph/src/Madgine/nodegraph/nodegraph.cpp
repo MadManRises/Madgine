@@ -1,8 +1,6 @@
 #include "../nodegraphlib.h"
 #include "serialize/filesystem/filesystemlib.h"
 
-#include "Meta/keyvalueutil/valuetypeserialize.h"
-
 #include "nodegraph.h"
 
 #include "nodebase.h"
@@ -21,7 +19,7 @@
 
 #include "nodecollector.h"
 
-#include "Modules/uniquecomponent/uniquecomponentcollector.h"
+#include "Modules/uniquecomponent/uniquecomponentregistry.h"
 
 METATABLE_BEGIN(Engine::NodeGraph::NodeGraph)
 METATABLE_END(Engine::NodeGraph::NodeGraph)
@@ -154,7 +152,7 @@ namespace NodeGraph {
                         }
                     }
                 }
-                for (size_t i = 0; i < node->flowOutCount(); ++i) {
+                for (uint32_t i = 0; i < node->flowOutCount(); ++i) {
                     Pin pin = node->flowOutTarget(i);
                     if (pin) {
                         if (!pin.mNode) {

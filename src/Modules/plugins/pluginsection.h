@@ -2,8 +2,7 @@
 
 #if ENABLE_PLUGINS
 
-#    include "Generic/future.h"
-#include "../threading/task.h"
+#include "../threading/taskfuture.h"
 
 namespace Engine {
 namespace Plugins {

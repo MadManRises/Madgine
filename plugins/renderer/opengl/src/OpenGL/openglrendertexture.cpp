@@ -2,9 +2,9 @@
 
 #include "openglrendertexture.h"
 
-#include "Generic/bytebuffer.h"
-
 #include "Madgine/render/rendertextureconfig.h"
+
+#include "Generic/bytebuffer.h"
 
 namespace Engine {
 namespace Render {

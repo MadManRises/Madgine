@@ -4,8 +4,6 @@
 
 #include "../streams/serializestream.h"
 
-#include "../serializeexception.h"
-
 namespace Engine {
 namespace Serialize {
 

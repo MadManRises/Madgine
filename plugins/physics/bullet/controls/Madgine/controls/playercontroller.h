@@ -1,10 +1,6 @@
 #pragma once
 
 #include "Madgine/scene/scenecomponentcollector.h"
-
-#include "Modules/uniquecomponent/uniquecomponent.h"
-#include "Modules/uniquecomponent/uniquecomponentcollector.h"
-
 #include "Madgine/scene/scenecomponentbase.h"
 
 #include "Madgine/controls/axiseventlistener.h"

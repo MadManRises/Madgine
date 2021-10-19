@@ -129,10 +129,7 @@ namespace Serialize {
         template <typename... Args>
         static void writeAction(const C &c, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *_data, Args &&... args)
         {
-            const std::tuple<ContainerEvent, typename C::const_iterator> &data = *static_cast<const std::tuple<ContainerEvent, typename C::const_iterator> *>(_data);
-
-            ContainerEvent op = std::get<0>(data);
-            const typename C::const_iterator &it = std::get<1>(data);
+            const auto &[op, it] = *static_cast<const std::tuple<ContainerEvent, typename C::const_iterator> *>(_data);
 
             for (BufferedOutStream *out : outStreams) {
                 Serialize::write(*out, op, "op");
@@ -187,15 +184,14 @@ namespace Serialize {
             if (RequestPolicy::sCallByMasterOnly)
                 throw 0;
 
-            const std::tuple<ContainerEvent, typename C::const_iterator, typename C::value_type &> &data = *static_cast<const std::tuple<ContainerEvent, typename C::const_iterator, typename C::value_type &> *>(_data);
-            ContainerEvent op = std::get<0>(data);
+            const auto &[op, it, item] = *static_cast<const std::tuple<ContainerEvent, typename C::const_iterator, typename C::value_type &> *>(_data);
             out << op;
             switch (op) {
             case EMPLACE: {
                 if constexpr (!container_traits<C>::sorted) {
-                    writeIterator(out, c, std::get<1>(data));
+                    writeIterator(out, c, it);
                 }
-                TupleUnpacker::invoke(&Creator::writeItem, out, std::get<2>(data), std::forward<Args>(args)...);
+                TupleUnpacker::invoke(&Creator::writeItem, out, item, std::forward<Args>(args)...);
                 break;
             }
             default:

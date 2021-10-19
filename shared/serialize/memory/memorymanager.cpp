@@ -2,9 +2,10 @@
 
 #include "memorymanager.h"
 
-#include "Meta/serialize/formatter/safebinaryformatter.h"
+#include "memorybuffer.h"
 
 #include "Meta/serialize/streams/serializestream.h"
+#include "Meta/serialize/streams/serializestreamdata.h"
 
 #include "Meta/serialize/formatter.h"
 
@@ -32,9 +33,9 @@ namespace Memory {
         return stream;
     }
 
-    Serialize::SerializeOutStream MemoryManager::openWrite(std::vector<char> &buffer, std::unique_ptr<Serialize::Formatter> format)
+    Serialize::SerializeOutStream MemoryManager::openWrite(WritableByteBuffer buffer, std::unique_ptr<Serialize::Formatter> format)
     {
-        return { std::make_unique<MemoryBuffer>(buffer), std::make_unique<Serialize::SerializeStreamData>(std::move(format), *this, createStreamId()) };
+        return { std::make_unique<MemoryBuffer>(std::move(buffer)), std::make_unique<Serialize::SerializeStreamData>(std::move(format), *this, createStreamId()) };
     } 
 
 }

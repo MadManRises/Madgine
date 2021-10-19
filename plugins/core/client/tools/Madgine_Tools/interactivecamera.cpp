@@ -6,6 +6,8 @@
 
 #include "Madgine/render/camera.h"
 
+#include "imgui/imguiaddons.h"
+
 namespace Engine {
 namespace Tools {
 

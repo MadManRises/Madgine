@@ -6,6 +6,7 @@
 
 #include "axiseventlistener.h"
 
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 
 UNIQUECOMPONENT(Engine::Controls::ControlsManager)

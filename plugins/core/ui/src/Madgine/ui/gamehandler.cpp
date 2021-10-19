@@ -6,6 +6,7 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
+#include "Modules/uniquecomponent/uniquecomponentregistry.h"
 
 DEFINE_UNIQUE_COMPONENT(Engine::UI, GameHandler)
 

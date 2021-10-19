@@ -2,8 +2,6 @@
 
 #include "widget.h"
 
-#include "Madgine/render/rendertarget.h"
-
 namespace Engine {
 namespace Widgets {
     struct MADGINE_WIDGETS_EXPORT SceneWindow : Widget<SceneWindow> {        

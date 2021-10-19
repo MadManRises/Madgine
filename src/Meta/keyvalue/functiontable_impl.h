@@ -3,7 +3,6 @@
 #include "Generic/linestruct.h"
 #include "valuetype_forward.h"
 
-#include "Generic/stringutil.h"
 #include "functionargument.h"
 #include "functiontable.h"
 

@@ -2,10 +2,6 @@
 
 #include "imageloader.h"
 
-#include "Generic/streams.h"
-
-#include "Interfaces/filesystem/api.h"
-
 #include "Meta/keyvalue/metatable_impl.h"
 
 #include "imagedata.h"

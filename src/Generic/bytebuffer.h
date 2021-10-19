@@ -8,6 +8,9 @@ struct ByteBufferDataAccessor {
     template <typename T>
     auto operator()(const std::vector<T> &v) { return v.data(); }
 
+    template <typename T>
+    auto operator()(std::vector<T> &v) { return v.data(); }
+
     template <typename T, typename D>
     auto operator()(const std::unique_ptr<T, D> &p) { return p.get(); }
 };

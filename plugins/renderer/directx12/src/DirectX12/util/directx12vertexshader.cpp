@@ -2,8 +2,6 @@
 
 #include "directx12vertexshader.h"
 
-#include "../directx12rendercontext.h"
-
 #include "directx12vertexarray.h"
 
 #include "Madgine/resources/resourcebase.h"

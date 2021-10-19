@@ -8,8 +8,6 @@
 
 #include "shadercodegenerator.h"
 
-#include "Meta/math/vector4.h"
-
 #include "Madgine/nodegraph/nodegraph.h"
 
 NODE(RasterizerNode, Engine::Render::RasterizerNode)

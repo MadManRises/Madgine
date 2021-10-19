@@ -6,8 +6,6 @@
 
 #include "Meta/serialize/syncableunit.h"
 
-#include "Modules/uniquecomponent/uniquecomponent.h"
-
 #include "Generic/container/transformIt.h"
 #include "Generic/container/mutable_set.h"
 

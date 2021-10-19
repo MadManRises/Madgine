@@ -2,8 +2,6 @@
 
 #include "openglshaderloader.h"
 
-#include "Generic/stringutil.h"
-
 #include "util/openglshader.h"
 
 #include "Meta/keyvalue/metatable_impl.h"

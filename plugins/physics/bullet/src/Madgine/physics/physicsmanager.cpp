@@ -11,11 +11,10 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "im3d/im3d.h"
-
 #include "Madgine/scene/scenemanager.h"
 
 #include "bullet3-2.89/src/BulletSoftBody/btSoftRigidDynamicsWorld.h"
+#include "bullet3-2.89/src/btBulletDynamicsCommon.h"
 
 UNIQUECOMPONENT(Engine::Physics::PhysicsManager)
 

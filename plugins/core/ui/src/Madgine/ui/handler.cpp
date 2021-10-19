@@ -1,13 +1,10 @@
 #include "../uilib.h"
 #include "handler.h"
 #include "Madgine/widgets/widget.h"
-#include "Madgine/window/mainwindow.h"
 #include "uimanager.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
-
-#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 METATABLE_BEGIN(Engine::UI::Handler)
 PROPERTY(Widget, widget, setWidget)

@@ -2,8 +2,6 @@
 
 #include "typedscopeptr.h"
 
-#include "Generic/functor.h"
-
 #include "ownedscopeptr.h"
 
 #include "Generic/container/virtualrange.h"
@@ -86,6 +84,7 @@ bool ValueType_is(const ValueType &v)
 
 template <typename T, typename = std::enable_if_t<isValueTypePrimitive_v<T>>>
 META_EXPORT ValueType_Return<T> ValueType_as_impl(const ValueType &v);
+
 
 template <typename T>
 decltype(auto) ValueType_as(const ValueType &v)

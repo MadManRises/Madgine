@@ -11,7 +11,7 @@ FolderSources(sources "" "" metaforward.h metalib.h)
 	FolderSources(sources "" serialize formatter.cpp formatter.h syncable.cpp syncable.h serializable.h serializableids.h serializableunit.cpp serializableunit.h serializableunitptr.cpp serializableunitptr.h serializeexception.h serializemanager.cpp serializemanager.h syncmanager.cpp syncmanager.h syncableunit.cpp syncableunit.h toplevelunit.cpp toplevelunit.h serializetable.cpp serializetable.h unithelper.cpp unithelper.h)
 		FolderSources(sources serialize container action.h synced.h syncablecontainer.h serializablecontainer.h serialized.h)
 		FolderSources(sources serialize formatter iniformatter.cpp iniformatter.h jsonformatter.cpp jsonformatter.h safebinaryformatter.cpp safebinaryformatter.h unsafebinaryformatter.cpp unsafebinaryformatter.h xmlformatter.cpp xmlformatter.h)
-		FolderSources(sources serialize streams buffered_streambuf.cpp buffered_streambuf.h bufferedstream.cpp bufferedstream.h serializestream.cpp serializestream.h serializestreambuf.cpp serializestreambuf.h serializablemapholder.cpp serializablemapholder.h streamresult.cpp streamresult.h)
+		FolderSources(sources serialize streams buffered_streambuf.cpp buffered_streambuf.h bufferedstream.cpp bufferedstream.h serializestream.cpp serializestream.h serializestreamdata.cpp serializestreamdata.h serializablemapholder.cpp serializablemapholder.h streamresult.cpp streamresult.h)
 	
 
 add_workspace_library(Meta ${sources} SOURCE_ROOT .. PRECOMPILED_HEADER metalib.h)

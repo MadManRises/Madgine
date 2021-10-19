@@ -13,18 +13,18 @@ struct CoroutineHandle {
         : mHandle(std::exchange(other.mHandle, nullptr))
     {
     }
-    CoroutineHandle(std::experimental::coroutine_handle<T> handle)
+    CoroutineHandle(std::coroutine_handle<T> handle)
         : mHandle(handle)
     {
     }
     template <typename U, typename = std::enable_if_t<std::is_base_of_v<T, U>>>
-    CoroutineHandle(std::experimental::coroutine_handle<U> handle)
+    CoroutineHandle(std::coroutine_handle<U> handle)
         : CoroutineHandle(CoroutineHandle<U> { handle })
     {
     }
     template <typename U, typename = std::enable_if_t<std::is_base_of_v<T, U>>>
     CoroutineHandle(CoroutineHandle<U> &&handle)
-        : mHandle(std::experimental::coroutine_handle<T>::from_promise(handle.release().promise()))
+        : mHandle(std::coroutine_handle<T>::from_promise(handle.release().promise()))
     {
     }
     ~CoroutineHandle()
@@ -39,7 +39,7 @@ struct CoroutineHandle {
         return *this;
     }
 
-    std::experimental::coroutine_handle<T> release()
+    std::coroutine_handle<T> release()
     {
         return std::exchange(mHandle, nullptr);
     }
@@ -62,7 +62,7 @@ struct CoroutineHandle {
         return mHandle.done();
     }
 
-    std::experimental::coroutine_handle<T> get()
+    std::coroutine_handle<T> get()
     {
         return mHandle;
     }
@@ -84,11 +84,11 @@ struct CoroutineHandle {
 
     static CoroutineHandle fromPromise(T &address)
     {
-        return { std::experimental::coroutine_handle<T>::from_promise(address) };
+        return { std::coroutine_handle<T>::from_promise(address) };
     }
 
 private:
-    std::experimental::coroutine_handle<T> mHandle;
+    std::coroutine_handle<T> mHandle;
 };
 
 template <>
@@ -100,12 +100,12 @@ struct CoroutineHandle<void> {
         : mHandle(std::exchange(other.mHandle, nullptr))
     {
     }
-    CoroutineHandle(std::experimental::coroutine_handle<> handle)
+    CoroutineHandle(std::coroutine_handle<> handle)
         : mHandle(handle)
     {
     }
     template <typename U>
-    CoroutineHandle(std::experimental::coroutine_handle<U> handle)
+    CoroutineHandle(std::coroutine_handle<U> handle)
         : CoroutineHandle(CoroutineHandle<U> { handle })
     {
     }
@@ -126,7 +126,7 @@ struct CoroutineHandle<void> {
         return *this;
     }
 
-    std::experimental::coroutine_handle<> release()
+    std::coroutine_handle<> release()
     {
         return std::exchange(mHandle, nullptr);
     }
@@ -149,7 +149,7 @@ struct CoroutineHandle<void> {
         return mHandle.done();
     }
 
-    std::experimental::coroutine_handle<> get()
+    std::coroutine_handle<> get()
     {
         return mHandle;
     }
@@ -160,7 +160,7 @@ struct CoroutineHandle<void> {
     }
 
 private:
-    std::experimental::coroutine_handle<> mHandle;
+    std::coroutine_handle<> mHandle;
 };
 
 

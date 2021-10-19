@@ -1,7 +1,7 @@
 #include "../../metalib.h"
 
 #include "serializablemapholder.h"
-#include "serializestreambuf.h"
+#include "serializestreamdata.h"
 #include "serializestream.h"
 
 namespace Engine {

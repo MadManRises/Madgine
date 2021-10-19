@@ -16,5 +16,7 @@
 
 #include "clientforward.h"
 
+#include "render/renderforward.h"
+
 
 /// @endcond

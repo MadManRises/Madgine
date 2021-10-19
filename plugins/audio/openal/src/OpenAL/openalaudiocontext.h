@@ -2,9 +2,6 @@
 
 #include "Madgine/app/globalapibase.h"
 #include "Madgine/app/globalapicollector.h"
-#include "Modules/uniquecomponent/uniquecomponent.h"
-
-#include "Meta/keyvalue/virtualscope.h"
 
 struct ALCdevice;
 struct ALCcontext;

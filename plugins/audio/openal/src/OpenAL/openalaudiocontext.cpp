@@ -9,8 +9,6 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 
-#include "audiobufferloader.h"
-
 UNIQUECOMPONENT(Engine::Audio::OpenALAudioContext)
 
 METATABLE_BEGIN(Engine::Audio::OpenALAudioContext)

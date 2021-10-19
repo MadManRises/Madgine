@@ -4,8 +4,6 @@
 
 #include "entity.h"
 
-#include "componentexception.h"
-
 #include "../scenemanager.h"
 
 #include "entitycomponentcollector.h"
@@ -14,9 +12,7 @@
 
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "Modules/uniquecomponent/uniquecomponentcollector.h"
-
-#include "entitycomponentlist.h"
+#include "entitycomponentlistbase.h"
 
 METATABLE_BEGIN(Engine::Scene::Entity::Entity)
 NAMED_MEMBER(Name, mName)

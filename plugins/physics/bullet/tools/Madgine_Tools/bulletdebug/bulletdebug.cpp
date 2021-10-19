@@ -2,9 +2,7 @@
 
 #include "bulletdebug.h"
 
-#include "Madgine_Tools/imgui/clientimroot.h"
 #include "imgui/imgui.h"
-#include "imgui/imguiaddons.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
@@ -15,7 +13,6 @@
 
 #include "Madgine/app/application.h"
 #include "Madgine/physics/physicsmanager.h"
-#include "Madgine/physics/rigidbody.h"
 #include "Madgine/scene/scenemanager.h"
 
 #include "bullet3-2.89/src/BulletSoftBody/btSoftRigidDynamicsWorld.h"

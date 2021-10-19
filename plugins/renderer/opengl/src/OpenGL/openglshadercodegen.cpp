@@ -6,8 +6,6 @@
 
 #include "Meta/math/vector4.h"
 
-#include "util/openglshader.h"
-
 namespace Engine {
 namespace Render {
     namespace OpenGLShaderCodeGen {

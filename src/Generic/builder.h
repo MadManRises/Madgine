@@ -65,7 +65,7 @@ protected:
     auto append(T &&t) &&
     {
         static_assert(Dim < type_pack_size_v<Pack>);
-        return append_impl<Dim>(std::forward<T>(t), type_pack_indices_t<Pack> {});
+        return append_impl<Dim, T>(std::forward<T>(t), type_pack_indices_t<Pack> {});
     }
 
 private:

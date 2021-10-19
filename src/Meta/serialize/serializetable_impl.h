@@ -25,7 +25,7 @@ namespace Serialize {
         static_assert(std::is_same_v<Unit, typename setter_traits::class_type>);
 
         //TODO remove const in tuple types
-        static_assert(std::is_same_v<typename setter_traits::argument_types, std::tuple<T>>);
+        static_assert(std::is_same_v<typename setter_traits::argument_types, type_pack<T>>);
 
         return {
             name,
@@ -87,7 +87,7 @@ namespace Serialize {
         using setter_traits = CallableTraits<decltype(Setter)>;
         static_assert(std::is_same_v<Unit, std::decay_t<typename setter_traits::class_type>>);
 
-        static_assert(std::is_same_v<typename setter_traits::decay_argument_types, std::tuple<T>>);
+        static_assert(std::is_same_v<typename setter_traits::decay_argument_types, type_pack<T>>);
 
         return {
             name,

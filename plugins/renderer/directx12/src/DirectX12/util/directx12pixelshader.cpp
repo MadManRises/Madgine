@@ -2,8 +2,6 @@
 
 #include "directx12pixelshader.h"
 
-#include "../directx12rendercontext.h"
-
 namespace Engine {
 namespace Render {
 

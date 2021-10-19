@@ -4,8 +4,6 @@
 
 #include "../streams/serializestream.h"
 
-#include "Generic/stringutil.h"
-
 #include "../primitivetypes.h"
 
 namespace Engine {

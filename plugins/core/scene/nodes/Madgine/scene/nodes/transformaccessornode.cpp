@@ -6,8 +6,6 @@
 #include "Meta/serialize/serializetable_impl.h"
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-#include "Meta/keyvalueutil/valuetypeserialize.h"
-
 #include "Madgine/nodegraph/nodeinterpreter.h"
 
 #include "Madgine/scene/entity/components/transform.h"

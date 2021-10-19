@@ -6,14 +6,6 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
-#include "render/vertex.h"
-
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-
-#include "../assimptools.h"
-
-#include "Meta/math/transformation.h"
 
 METATABLE_BEGIN(Engine::Render::GPUMeshLoader)
 METATABLE_END(Engine::Render::GPUMeshLoader)

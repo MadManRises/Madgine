@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Meta/keyvalue/typedscopeptr.h"
-#include "Modules/threading/workgroupstorage.h"
 
 namespace Engine {
 

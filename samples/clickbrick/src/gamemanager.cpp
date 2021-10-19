@@ -31,6 +31,7 @@
 
 #include "Meta/serialize/serializetable_impl.h"
 
+#include "Madgine/render/rendertarget.h"
 
 UNIQUECOMPONENT(ClickBrick::UI::GameManager)
 

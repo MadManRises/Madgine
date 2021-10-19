@@ -10,8 +10,6 @@
 #include "Modules/debug/profiler/profilerthread.h"
 #include "Modules/debug/profiler/processstats.h"
 
-#include "../renderer/imroot.h"
-
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 

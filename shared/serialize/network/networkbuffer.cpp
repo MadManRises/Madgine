@@ -2,8 +2,6 @@
 
 #include "networkbuffer.h"
 
-#include "Meta/serialize/formatter.h"
-
 namespace Engine {
 namespace Network {
     NetworkBuffer::NetworkBuffer(Socket socket)

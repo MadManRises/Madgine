@@ -1,9 +1,7 @@
 #pragma once
 
-#include "render/renderforward.h"
 #include "render/vertex.h"
 #include "render/texturedescriptor.h"
-#include "gpumeshdata.h"
 
 namespace Engine {
 namespace Render {
@@ -17,10 +15,10 @@ namespace Render {
         void render();
         virtual void setRenderSpace(const Rect2i &space) = 0;
         virtual void renderVertices(Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices = {}) = 0;
-        virtual void renderVertices(Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices = {}, const GPUMeshData::Material *material = nullptr) = 0;
+        virtual void renderVertices(Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices = {}, const Material *material = nullptr) = 0;
         virtual void renderQuad(Program *program);
-        virtual void renderMesh(GPUMeshData *mesh, Program *program, const GPUMeshData::Material *material = nullptr) = 0;
-        virtual void renderMeshInstanced(size_t count, GPUMeshData *mesh, Program *program, const GPUMeshData::Material *material = nullptr) = 0;
+        virtual void renderMesh(GPUMeshData *mesh, Program *program, const Material *material = nullptr) = 0;
+        virtual void renderMeshInstanced(size_t count, GPUMeshData *mesh, Program *program, const Material *material = nullptr) = 0;
         virtual void clearDepthBuffer() = 0;
 
         virtual TextureDescriptor texture(size_t index = 0, size_t iteration = std::numeric_limits<size_t>::max()) const = 0;

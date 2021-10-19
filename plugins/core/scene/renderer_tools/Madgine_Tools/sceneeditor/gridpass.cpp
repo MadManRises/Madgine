@@ -14,7 +14,6 @@
 
 #include "gpumeshloader.h"
 
-#include "program.h"
 #include "programloader.h"
 
 namespace Engine {

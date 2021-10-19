@@ -9,8 +9,6 @@
 
 #include "Madgine/render/camera.h"
 
-#include "textureloader.h"
-
 #include "Madgine/render/shadinglanguage/sl.h"
 
 #include "render/texturedescriptor.h"

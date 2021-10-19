@@ -4,8 +4,6 @@
 
 #include "../directx12rendercontext.h"
 
-#include "directx12vertexarray.h"
-
 #include "Generic/bytebuffer.h"
 
 #include "Generic/align.h"

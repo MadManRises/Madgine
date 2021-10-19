@@ -1,10 +1,9 @@
 #include "../directx12lib.h"
 
-#include "directx12pixelshader.h"
-#include "directx12program.h"
-#include "directx12vertexshader.h"
 
-#include "Meta/math/matrix4.h"
+#include "directx12program.h"
+
+
 
 #include "../directx12rendercontext.h"
 

@@ -2,8 +2,6 @@
 
 #include "directx11geometryshaderloader.h"
 
-#include "Generic/stringutil.h"
-
 #include "util/directx11geometryshader.h"
 
 #include "directx11rendercontext.h"

@@ -2,8 +2,6 @@
 
 #include "directx11pixelshaderloader.h"
 
-#include "Generic/stringutil.h"
-
 #include "util/directx11pixelshader.h"
 
 #include "directx11rendercontext.h"

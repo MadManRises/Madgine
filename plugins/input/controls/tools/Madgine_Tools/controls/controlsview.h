@@ -1,7 +1,6 @@
 #pragma once
 
 #include "toolscollector.h"
-#include "Modules/uniquecomponent/uniquecomponent.h"
 #include "toolbase.h"
 
 #include "Madgine/controls/axiseventlistener.h"

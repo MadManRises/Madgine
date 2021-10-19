@@ -3,12 +3,13 @@
 #include "buffered_streambuf.h"
 #include "bufferedstream.h"
 
-#include "../serializableunit.h"
 #include "../syncmanager.h"
 
 #include "../messageheader.h"
 
 #include "../formatter.h"
+
+#include "../serializableids.h"
 
 namespace Engine {
 namespace Serialize {

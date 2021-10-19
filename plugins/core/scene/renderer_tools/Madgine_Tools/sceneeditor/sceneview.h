@@ -12,7 +12,6 @@
 #include "gridpass.h"
 
 #include "Madgine/scene/entity/entitycomponentptr.h"
-#include "Madgine/scene/entity/components/transform.h"
 
 #include "imgui/imguiaddons.h"
 

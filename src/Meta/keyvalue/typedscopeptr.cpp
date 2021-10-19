@@ -4,6 +4,8 @@
 #include "typedscopeptr.h"
 #include "scopefield.h"
 
+#include "virtualscope.h" //enforce export of VirtualScopeBase<void>
+
 namespace Engine {
 
 ScopeField TypedScopePtr::operator[](std::string_view key) const

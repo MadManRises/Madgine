@@ -4,8 +4,6 @@
 
 #include "Madgine/scene/entity/entitycomponentptr.h"
 
-#include "Madgine/scene/entity/components/transform.h"
-
 #include "collisionshapemanager.h"
 
 class btRigidBody;

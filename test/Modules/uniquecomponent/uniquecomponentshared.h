@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Modules/uniquecomponent/uniquecomponentdefine.h"
+#include "Modules/uniquecomponent/uniquecomponent.h"
 
 #if defined(TestShared_EXPORTS)
 #    define TEST_EXPORT DLL_EXPORT

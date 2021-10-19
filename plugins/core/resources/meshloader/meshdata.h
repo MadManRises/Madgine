@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Generic/bytebuffer.h"
-#include "Interfaces/filesystem/path.h"
 #include "Meta/math/boundingbox.h"
 #include "render/attributedescriptor.h"
 #include "render/vertex.h"

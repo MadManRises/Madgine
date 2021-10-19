@@ -3,8 +3,6 @@
 #include "Interfaces/window/windoweventlistener.h"
 #include "Modules/uniquecomponent/uniquecomponentselector.h"
 
-#include "Generic/container/transformIt.h"
-
 #include "madgineobject/madgineobjectobserver.h"
 #include "Meta/serialize/toplevelunit.h"
 

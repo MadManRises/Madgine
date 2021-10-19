@@ -3,7 +3,6 @@
 #include "skeletonloader.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
-#include "Meta/math/transformation.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>

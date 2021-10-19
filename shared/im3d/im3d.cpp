@@ -3,8 +3,6 @@
 
 #include "im3d.h"
 
-#include "Modules/threading/workgroup.h"
-
 #include "render/vertex.h"
 
 #include "im3d_internal.h"

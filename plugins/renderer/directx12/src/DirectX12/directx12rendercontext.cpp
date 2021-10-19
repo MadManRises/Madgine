@@ -6,6 +6,8 @@
 #include "directx12rendercontext.h"
 #include "directx12rendertexture.h"
 
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
+
 UNIQUECOMPONENT(Engine::Render::DirectX12RenderContext)
 
 METATABLE_BEGIN(Engine::Render::DirectX12RenderContext)

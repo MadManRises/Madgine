@@ -1,3 +1,5 @@
+#include "audioloaderlib.h"
+
 #include "oggdecodebuf.h"
 
 #include "audioinfo.h"

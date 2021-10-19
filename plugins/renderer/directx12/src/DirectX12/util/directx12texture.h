@@ -4,8 +4,6 @@
 
 #include "texture.h"
 
-#include "textureloader.h"
-
 #include "Generic/bytebuffer.h"
 
 #include "render/texturedescriptor.h"

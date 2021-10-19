@@ -15,7 +15,6 @@
 
 #include "Madgine/window/mainwindow.h"
 #include "Madgine/widgets/widget.h"
-#include "Madgine/widgets/widgetmanager.h"
 
 #include "Interfaces/window/windowapi.h"
 
@@ -24,8 +23,6 @@
 #include "Meta/serialize/streams/serializestream.h"
 
 #include "Meta/serialize/formatter/xmlformatter.h"
-
-#include "Meta/serialize/serializemanager.h"
 
 #include "serialize/filesystem/filesystemlib.h"
 #include "serialize/filesystem/filemanager.h"
@@ -36,9 +33,16 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-#include "Meta/serialize/streams/serializestreambuf.h"
+#include "Meta/serialize/streams/serializestreamdata.h"
 
 UNIQUECOMPONENT(Engine::Tools::GuiEditor);
+
+METATABLE_BEGIN_BASE(Engine::Tools::GuiEditor, Engine::Tools::ToolBase)
+METATABLE_END(Engine::Tools::GuiEditor)
+
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::GuiEditor, Engine::Tools::ToolBase)
+FIELD(mHierarchyVisible)
+SERIALIZETABLE_END(Engine::Tools::GuiEditor)
 
 namespace Engine {
 namespace Tools {
@@ -444,11 +448,4 @@ namespace Tools {
 
 }
 }
-
-METATABLE_BEGIN_BASE(Engine::Tools::GuiEditor, Engine::Tools::ToolBase)
-METATABLE_END(Engine::Tools::GuiEditor)
-
-SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::GuiEditor, Engine::Tools::ToolBase)
-FIELD(mHierarchyVisible)
-SERIALIZETABLE_END(Engine::Tools::GuiEditor)
 

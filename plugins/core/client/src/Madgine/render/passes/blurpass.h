@@ -2,8 +2,6 @@
 
 #include "../renderpass.h"
 
-#include "render/texturedescriptor.h"
-
 #include "programloader.h"
 
 namespace Engine {

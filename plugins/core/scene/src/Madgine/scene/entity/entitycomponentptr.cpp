@@ -6,8 +6,6 @@
 
 #include "../scenemanager.h"
 
-#include "Modules/uniquecomponent/uniquecomponentcollector.h"
-
 #include "entitycomponentlist.h"
 
 using EntityComponentBasePtr = Engine::Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::EntityComponentBase>;

@@ -17,12 +17,12 @@ struct VirtualScopeBase<void> {
 template <typename T, typename _Base = VirtualScopeBase<>>
 struct VirtualScope : _Base {
     using _Base::_Base;
-    virtual TypedScopePtr customScopePtr() override
+    virtual TypedScopePtr customScopePtr() override 
     {
         return { this, table<decayed_t<T>> };
     }
 };
 
-template struct MODULES_EXPORT VirtualScopeBase<>;
+template struct META_EXPORT VirtualScopeBase<void>;
 
 }

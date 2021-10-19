@@ -5,13 +5,9 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "Meta/math/boundingbox.h"
-
 #include "Meta/keyvalue/valuetype.h"
 
 #include "skeletondescriptor.h"
-
-#include "../entitycomponentptr.h"
 
 namespace Engine {
 namespace Scene {

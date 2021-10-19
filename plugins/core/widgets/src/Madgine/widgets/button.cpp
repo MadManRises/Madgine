@@ -6,8 +6,6 @@
 
 #include "vertex.h"
 
-#include <iostream>
-
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 

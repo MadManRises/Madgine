@@ -17,6 +17,8 @@
 
 #include "directx11rendercontext.h"
 
+#include "render/material.h"
+
 namespace Engine {
 namespace Render {
 
@@ -253,7 +255,7 @@ namespace Render {
         sDeviceContext->RSSetViewports(1, &viewport);
     }
 
-    void DirectX11RenderTarget::renderMesh(GPUMeshData *m, Program *p, const GPUMeshData::Material *material)
+    void DirectX11RenderTarget::renderMesh(GPUMeshData *m, Program *p, const Material *material)
     {
         DirectX11MeshData *mesh = static_cast<DirectX11MeshData *>(m);
         DirectX11Program *program = static_cast<DirectX11Program *>(p);
@@ -264,7 +266,7 @@ namespace Render {
         program->bind(&mesh->mVAO);
 
         if (material)
-            bindTextures({ { material->mDiffuseTexture->mTextureHandle, TextureType_2D }, { material->mEmissiveTexture->mTextureHandle, TextureType_2D } });
+            bindTextures({ { material->mDiffuseTexture, TextureType_2D }, { material->mEmissiveTexture, TextureType_2D } });
 
         constexpr D3D11_PRIMITIVE_TOPOLOGY modes[] {
             D3D11_PRIMITIVE_TOPOLOGY_POINTLIST,
@@ -283,7 +285,7 @@ namespace Render {
         }      
     }
 
-    void DirectX11RenderTarget::renderMeshInstanced(size_t count, GPUMeshData *m, Program *p, const GPUMeshData::Material *material)
+    void DirectX11RenderTarget::renderMeshInstanced(size_t count, GPUMeshData *m, Program *p, const Material *material)
     {
         DirectX11MeshData *mesh = static_cast<DirectX11MeshData *>(m);
         DirectX11Program *program = static_cast<DirectX11Program *>(p);
@@ -295,7 +297,7 @@ namespace Render {
         program->bind(&mesh->mVAO);
 
         if (material)
-            bindTextures({ { material->mDiffuseTexture->mTextureHandle, TextureType_2D }, { material->mEmissiveTexture->mTextureHandle, TextureType_2D } });
+            bindTextures({ { material->mDiffuseTexture, TextureType_2D }, { material->mEmissiveTexture, TextureType_2D } });
 
         constexpr D3D11_PRIMITIVE_TOPOLOGY modes[] {
             D3D11_PRIMITIVE_TOPOLOGY_POINTLIST,
@@ -326,7 +328,7 @@ namespace Render {
         }
     }
 
-    void DirectX11RenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, const GPUMeshData::Material *material)
+    void DirectX11RenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, const Material *material)
     {
         if (!vertices.empty()) {
             DirectX11MeshData tempMesh;

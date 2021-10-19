@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Meta/serialize/syncmanager.h"
-#include "networkbuffer.h"
+
+#include "Interfaces/socket/socketapi.h"
 
 namespace Engine {
 namespace Network {

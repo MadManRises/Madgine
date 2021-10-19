@@ -2,8 +2,6 @@
 
 #include "Madgine/ui/guihandler.h"
 
-#include "Madgine/ui/widgetptr.h"
-
 namespace ClickBrick {
 namespace UI {
 

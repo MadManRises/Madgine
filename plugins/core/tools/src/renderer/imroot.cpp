@@ -9,8 +9,6 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
 
-#include "Meta/keyvalue/metatable_impl.h"
-
 #include "Meta/serialize/streams/serializestream.h"
 
 #include "Meta/serialize/formatter/iniformatter.h"
@@ -19,7 +17,9 @@
 
 #include "Meta/serialize/streams/operations.h"
 
-#include "Meta/serialize/streams/serializestreambuf.h"
+#include "Meta/serialize/streams/serializestreamdata.h"
+
+#include "Generic/container/transformIt.h"
 
 /*
 METATABLE_BEGIN(Engine::Tools::ImRoot)

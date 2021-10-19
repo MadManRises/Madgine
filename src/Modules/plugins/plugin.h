@@ -4,8 +4,6 @@
 
 #include "Interfaces/filesystem/path.h"
 
-#include "Generic/future.h"
-
 #include "Modules/threading/task.h"
 
 namespace Engine {

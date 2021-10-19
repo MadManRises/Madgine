@@ -26,6 +26,7 @@
 
 #include "genericforward.h"
 
+#include "stringutil.h"
 #include "callable_traits.h"
 #include "classname.h"
 #include "derive.h"

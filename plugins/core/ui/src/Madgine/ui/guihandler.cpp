@@ -3,12 +3,13 @@
 
 #include "Madgine/widgets/widget.h"
 #include "Madgine/widgets/widgetmanager.h"
-#include "uimanager.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
 #include "Madgine/threading/contextmasks.h"
+
+#include "Modules/uniquecomponent/uniquecomponentregistry.h"
 
 DEFINE_UNIQUE_COMPONENT(Engine::UI, GuiHandler)
 

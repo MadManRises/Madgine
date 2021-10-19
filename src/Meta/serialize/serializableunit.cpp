@@ -1,16 +1,6 @@
 #include "../metalib.h"
 #include "serializableunit.h"
 
-#include "serializemanager.h"
-
-#include "toplevelunit.h"
-
-#include "streams/bufferedstream.h"
-
-#include "streams/operations.h"
-
-#include "formatter.h"
-
 namespace Engine {
 namespace Serialize {
 

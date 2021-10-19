@@ -63,13 +63,12 @@ namespace Threading {
 
             Task<T> get_return_object()
             {
-                return { std::experimental::coroutine_handle<promise_type>::from_promise(*this) };
+                return { std::coroutine_handle<promise_type>::from_promise(*this) };
             }
 
-            std::experimental::suspend_never return_value(T value) noexcept
+            void return_value(T value) noexcept
             {
-                static_cast<TaskPromiseSharedState<T> *>(mState.get())->set_value(std::move(value));
-                return {};
+                static_cast<TaskPromiseSharedState<T> *>(mState.get())->set_value(std::move(value));                
             }
         };
 
@@ -102,10 +101,9 @@ namespace Threading {
                 };
             }
 
-            std::experimental::suspend_never return_void()
+            void return_void()
             {
-                static_cast<TaskPromiseSharedState<void> *>(mState.get())->set_value();
-                return {};
+                static_cast<TaskPromiseSharedState<void> *>(mState.get())->set_value();                
             }
         };
 

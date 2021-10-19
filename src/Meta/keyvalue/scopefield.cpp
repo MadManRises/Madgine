@@ -1,7 +1,6 @@
 #include "../metalib.h"
 
 #include "scopefield.h"
-#include "typedscopeptr.h"
 
 #include "accessor.h"
 

@@ -4,13 +4,15 @@
 
 #include "openglrendertarget.h"
 
-#include "meshloader.h"
+#include "meshdata.h"
 #include "openglmeshdata.h"
 #include "openglmeshloader.h"
 
 #include "Meta/math/rect2i.h"
 
 #include "util/openglprogram.h"
+
+#include "render/material.h"
 
 namespace Engine {
 namespace Render {
@@ -62,7 +64,7 @@ namespace Render {
         GL_CHECK();
     }
 
-    void OpenGLRenderTarget::renderMesh(GPUMeshData *m, Program *p, const GPUMeshData::Material *material)
+    void OpenGLRenderTarget::renderMesh(GPUMeshData *m, Program *p, const Material *material)
     {
         OpenGLMeshData *mesh = static_cast<OpenGLMeshData *>(m);
         OpenGLProgram *program = static_cast<OpenGLProgram *>(p);
@@ -75,7 +77,7 @@ namespace Render {
         program->verify();
 
         if (material)
-            bindTextures({ { material->mDiffuseTexture->mTextureHandle, TextureType_2D } });
+            bindTextures({ { material->mDiffuseTexture, TextureType_2D } });
 
         constexpr GLenum modes[] {
             GL_POINTS,
@@ -94,7 +96,7 @@ namespace Render {
         program->unbind(&mesh->mVAO);
     }
 
-    void OpenGLRenderTarget::renderMeshInstanced(size_t count, GPUMeshData *m, Program *p, const GPUMeshData::Material *material)
+    void OpenGLRenderTarget::renderMeshInstanced(size_t count, GPUMeshData *m, Program *p, const Material *material)
     {
         OpenGLMeshData *mesh = static_cast<OpenGLMeshData *>(m);
         OpenGLProgram *program = static_cast<OpenGLProgram *>(p);
@@ -107,7 +109,7 @@ namespace Render {
         program->verify();
 
         if (material)
-            bindTextures({ { material->mDiffuseTexture->mTextureHandle, TextureType_2D } });
+            bindTextures({ { material->mDiffuseTexture, TextureType_2D } });
 
         constexpr GLenum modes[] {
             GL_POINTS,
@@ -136,7 +138,7 @@ namespace Render {
         }
     }
 
-    void OpenGLRenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, const GPUMeshData::Material *material)
+    void OpenGLRenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, const Material *material)
     {
         if (!vertices.empty()) {
             OpenGLMeshData tempMesh;

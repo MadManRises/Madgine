@@ -9,9 +9,6 @@
 #include "Madgine/scene/entity/components/transform.h"
 #include "Madgine/scene/entity/entity.h"
 
-#include "Madgine/render/rendertarget.h"
-#include "meshdata.h"
-
 #include "Madgine/render/camera.h"
 
 #include "Madgine/render/shadinglanguage/sl.h"
@@ -21,6 +18,8 @@
 #include "Madgine/render/rendertarget.h"
 
 #include "Madgine/scene/entity/components/pointlight.h"
+
+#include "render/material.h"
 
 #define SL_SHADER scene
 #include INCLUDE_SL_SHADER
@@ -48,11 +47,11 @@ namespace Render {
 
     void SceneRenderPass::setup(RenderTarget *target)
     {
-        mProgram.create("scene", { sizeof(ScenePerApplication), sizeof(ScenePerFrame), sizeof(ScenePerObject) }, sizeof(SceneInstanceData));        
+        mProgram.create("scene", { sizeof(ScenePerApplication), sizeof(ScenePerFrame), sizeof(ScenePerObject) }, sizeof(SceneInstanceData));
 
-        mShadowMap = target->context()->createRenderTexture({ 2048, 2048 }, { .mCreateDepthBufferView = true, .mType = TextureType_2DMultiSample, .mSamples = 4, .mTextureCount = 0 });
-        mPointShadowMaps[0] = target->context()->createRenderTexture({ 2048, 2048 }, { .mType = TextureType_Cube, .mCreateDepthBufferView = true, .mTextureCount = 0 });
-        mPointShadowMaps[1] = target->context()->createRenderTexture({ 2048, 2048 }, { .mType = TextureType_Cube, .mCreateDepthBufferView = true, .mTextureCount = 0 });
+        mShadowMap = target->context()->createRenderTexture({ 2048, 2048 }, { .mCreateDepthBufferView = true, .mSamples = 4, .mTextureCount = 0, .mType = TextureType_2DMultiSample });
+        mPointShadowMaps[0] = target->context()->createRenderTexture({ 2048, 2048 }, { .mCreateDepthBufferView = true, .mTextureCount = 0, .mType = TextureType_Cube });
+        mPointShadowMaps[1] = target->context()->createRenderTexture({ 2048, 2048 }, { .mCreateDepthBufferView = true, .mTextureCount = 0, .mType = TextureType_Cube });
 
         mShadowMap->addRenderPass(&mShadowPass);
         mPointShadowMaps[0]->addRenderPass(&mPointShadowPasses[0]);
@@ -182,7 +181,13 @@ namespace Render {
                 mProgram.setDynamicParameters(0, {});
             }
 
-            target->renderMeshInstanced(instance.second.size(), meshData, mProgram, material);
+            Material mat {
+                material->mDiffuseTexture->mTextureHandle,
+                material->mEmissiveTexture->mTextureHandle,
+                material->mDiffuseColor
+            };
+
+            target->renderMeshInstanced(instance.second.size(), meshData, mProgram, &mat);
         }
         target->popAnnotation();
     }

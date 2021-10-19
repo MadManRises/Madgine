@@ -41,6 +41,11 @@ struct type_pack_select<0, type_pack<Head, Tail...>> {
     typedef Head type;
 };
 
+template <>
+struct type_pack_select<0, type_pack<>> {
+    typedef void**** type;
+};
+
 template <size_t I, typename T>
 using type_pack_select_t = typename type_pack_select<I, T>::type;
 

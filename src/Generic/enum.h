@@ -1,7 +1,5 @@
 #pragma once
 
-#include "stringutil.h"
-
 namespace Engine {
 
 struct EnumMetaTable {

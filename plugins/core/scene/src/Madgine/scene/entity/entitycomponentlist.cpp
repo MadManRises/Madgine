@@ -2,9 +2,7 @@
 
 #include "entitycomponentlist.h"
 
-#include "../scenemanager.h"
-
-#include "Modules/uniquecomponent/uniquecomponentcollector.h"
+#include "entity.h"
 
 namespace Engine {
 namespace Scene {

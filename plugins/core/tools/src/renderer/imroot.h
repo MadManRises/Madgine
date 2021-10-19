@@ -2,19 +2,18 @@
 
 #include "../toolscollector.h"
 
-#include "madgineobject/madgineobject.h"
-
 #include "Generic/container/observablecontainer.h"
 
 #include "madgineobject/madgineobjectobserver.h"
-
-#include "Meta/keyvalue/typedscopeptr.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 
 struct ImGuiDockNode;
 
 namespace Engine {
+
+    struct MadgineObjectState;
+
 namespace Tools {
 
     struct MADGINE_TOOLS_EXPORT ImRoot {

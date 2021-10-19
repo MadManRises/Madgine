@@ -4,8 +4,6 @@
 
 #include "programloader.h"
 
-#include "Meta/math/frustum.h"
-
 
 namespace Engine {
 namespace Render {

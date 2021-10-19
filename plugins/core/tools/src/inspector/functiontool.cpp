@@ -14,17 +14,9 @@
 
 #include "inspector.h"
 
-#include "Meta/keyvalue/keyvaluevirtualrange.h"
-#include "Meta/keyvalue/scopefield.h"
-#include "Meta/keyvalue/scopeiterator.h"
-
-#include "Meta/keyvalue/keyvaluepair.h"
 #include "Meta/keyvalue/functionargument.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
-
-#include "Meta/keyvalue/keyvaluescan.h"
-#include "Madgine/core/keyvalueregistry.h"
 
 #include "imgui/valuetypepayload.h"
 

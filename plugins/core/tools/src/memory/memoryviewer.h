@@ -6,7 +6,6 @@
 #    include "../toolscollector.h"
 #    include "Interfaces/debug/memory/memory.h"
 #    include "Interfaces/debug/stacktrace.h"
-#    include "Modules/uniquecomponent/uniquecomponent.h"
 
 namespace Engine {
 namespace Tools {

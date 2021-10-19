@@ -5,8 +5,6 @@
 
 #include "Modules/threading/threadlocal.h"
 
-#include "Modules/uniquecomponent/uniquecomponentcollector.h"
-#include "Modules/uniquecomponent/uniquecomponent.h"
 
 namespace Engine {
 namespace Render {

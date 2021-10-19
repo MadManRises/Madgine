@@ -11,15 +11,12 @@
 #include "Madgine/scene/entity/entity.h"
 
 #include "Madgine/render/rendertarget.h"
-#include "meshdata.h"
 
 #include "Madgine/render/shadinglanguage/sl.h"
 
 #include "Meta/math/transformation.h"
 
-#include "Madgine/render/camera.h"
-
-#include "im3d/im3d.h"
+#include "Meta/math/frustum.h"
 
 //#include "Madgine/render/rendercontext.h"
 
