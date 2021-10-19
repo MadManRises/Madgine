@@ -34,13 +34,13 @@ struct IndexType {
         return mIndex == other.mIndex;
     }
 
-    template <typename U, typename = std::enable_if_t<std::is_convertible_v<U, T>>>
+    template <std::constructible_from<T> U>    
     bool operator==(const U &other) const
     {
         return mIndex == other;
     }
 
-    template <typename U, typename = std::enable_if_t<std::is_convertible_v<U, T>>>
+    template <std::constructible_from<T> U>
     bool operator!=(const U &other) const
     {
         return mIndex != other;

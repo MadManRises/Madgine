@@ -32,7 +32,7 @@ void to_KeyValuePair(KeyValuePair &p, T &&t)
 template <bool reference_to_ptr>
 struct Functor_to_KeyValuePair {
     template <typename... Args>
-    decltype(auto) operator()(Args &&... args)
+    decltype(auto) operator()(Args &&...args)
     {
         return to_KeyValuePair<reference_to_ptr>(std::forward<Args>(args)...);
     }
@@ -41,7 +41,7 @@ struct Functor_to_KeyValuePair {
 template <bool reference_to_ptr>
 struct Functor_to_ValueTypeRef {
     template <typename... Args>
-    decltype(auto) operator()(Args &&... args)
+    decltype(auto) operator()(Args &&...args)
     {
         return to_ValueTypeRef<reference_to_ptr>(std::forward<Args>(args)...);
     }
@@ -55,18 +55,18 @@ using ValueTypePrimitiveSubList = type_pack_select_t<type_pack_index_v<size_t, V
 template <typename T>
 using QualifiedValueTypePrimitiveSubList = type_pack_select_t<type_pack_index_v<size_t, ValueTypeList, T>, QualifiedValueTypeList>;
 
-template <typename T, typename = void>
+template <typename T>
 struct ValueType_ReturnHelper {
     typedef T &type;
 };
 
-template <typename T>
-struct ValueType_ReturnHelper<T, std::enable_if_t<isValueTypePrimitive_v<T>>> {
+template <ValueTypePrimitive T>
+struct ValueType_ReturnHelper<T> {
     typedef type_pack_select_t<type_pack_index_v<size_t, ValueTypePrimitiveSubList<T>, T>, QualifiedValueTypePrimitiveSubList<T>> type;
 };
 
 template <typename T>
-struct ValueType_ReturnHelper<T *, void> {
+struct ValueType_ReturnHelper<T *> {
     typedef T *type;
 };
 
@@ -82,9 +82,8 @@ bool ValueType_is(const ValueType &v)
     return toValueTypeDesc<T>().canAccept(ValueType_type(v));
 }
 
-template <typename T, typename = std::enable_if_t<isValueTypePrimitive_v<T>>>
+template <ValueTypePrimitive T>
 META_EXPORT ValueType_Return<T> ValueType_as_impl(const ValueType &v);
-
 
 template <typename T>
 decltype(auto) ValueType_as(const ValueType &v)
@@ -104,7 +103,7 @@ decltype(auto) ValueType_as(const ValueType &v)
             return ValueType_as_impl<KeyValueVirtualSequenceRange>(v).safe_cast<T>();
         else
             return ValueType_as_impl<KeyValueVirtualAssociativeRange>(v).safe_cast<T>();
-    } else if constexpr (is_instance_v<T, Enum> || is_instance_v<T, BaseEnum>) {
+    } else if constexpr (is_instance_v<T, EnumType> || is_instance_v<T, BaseEnum>) {
         return ValueType_as_impl<EnumHolder>(v).safe_cast<T>();
     } else {
         if constexpr (std::is_pointer_v<T>) {
@@ -136,7 +135,7 @@ decltype(auto) convert_ValueType(T &&t)
         } else {
             return static_cast<std::underlying_type_t<T>>(t);
         }
-    } else if constexpr (is_instance_v<T, Enum> || is_instance_v<T, BaseEnum>) {
+    } else if constexpr (is_instance_v<T, EnumType> || is_instance_v<T, BaseEnum>) {
         return EnumHolder { std::forward<T>(t) };
     } else {
         if constexpr (std::is_pointer_v<std::decay_t<T>>) {
@@ -152,11 +151,13 @@ decltype(auto) convert_ValueType(T &&t)
     //static_assert(dependent_bool<T, false>::value, "The provided type can not be converted to a ValueType");
 }
 
-template <typename T, typename = std::enable_if_t<isValueTypePrimitive_v<std::decay_t<T>> || std::is_same_v<ValueType, std::decay_t<T>>>>
-META_EXPORT void to_ValueType_impl(ValueType &v, T &&t);
+template <typename T>
+requires(ValueTypePrimitive<std::decay_t<T>> || std::same_as<ValueType, std::decay_t<T>>)
+    META_EXPORT void to_ValueType_impl(ValueType &v, T &&t);
 
-template <typename T, typename = std::enable_if_t<isValueTypePrimitive_v<std::decay_t<T>> || std::is_same_v<ValueType, std::decay_t<T>>>>
-META_EXPORT void to_ValueTypeRef_impl(ValueTypeRef &v, T &&t);
+template <typename T>
+requires(ValueTypePrimitive<std::decay_t<T>> || std::same_as<ValueType, std::decay_t<T>>)
+    META_EXPORT void to_ValueTypeRef_impl(ValueTypeRef &v, T &&t);
 
 template <bool reference_to_ptr, typename T>
 void to_ValueType(ValueType &v, T &&t)

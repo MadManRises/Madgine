@@ -63,7 +63,7 @@ namespace Threading {
 
             Task<T> get_return_object()
             {
-                return { std::coroutine_handle<promise_type>::from_promise(*this) };
+                return { CoroutineHandle<promise_type>::fromPromise(*this) };
             }
 
             void return_value(T value) noexcept

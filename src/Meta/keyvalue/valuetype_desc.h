@@ -17,6 +17,9 @@ using isValueTypePrimitive = type_pack_contains<ValueTypeList, T>;
 template <typename T>
 static constexpr bool isValueTypePrimitive_v = isValueTypePrimitive<T>::value;
 
+template <typename T>
+concept ValueTypePrimitive = isValueTypePrimitive_v<T>;
+
 enum class ValueTypeEnum : unsigned char {
 #define VALUETYPE_SEP ,
 #define VALUETYPE_TYPE(Name, Storage, ...) Name##Value

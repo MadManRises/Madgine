@@ -30,18 +30,21 @@ namespace Serialize {
         typedef T type;
     };
 
-    template <typename T>
-    struct PrimitiveReducer<T, std::enable_if_t<std::is_convertible_v<T, const SyncableUnitBase *>>> {
+    template <std::convertible_to<const SyncableUnitBase*> T>
+    struct PrimitiveReducer<T> {
         typedef SyncableUnitBase *type;
     };
 
     template <typename T>
-    struct PrimitiveReducer<T, std::enable_if_t<!std::is_convertible_v<T, const SyncableUnitBase *> && std::is_convertible_v<T, const SerializableDataUnit *>>> {
+    concept SerializableUnitPtrHelper = !std::convertible_to<T, const SyncableUnitBase *> && std::convertible_to<T, const SerializableDataUnit *>;
+
+    template <SerializableUnitPtrHelper T>
+    struct PrimitiveReducer<T> {
         typedef SerializableDataUnit *type;
     };
 
-    template <typename T>
-    struct PrimitiveReducer<T, std::enable_if_t<std::is_enum_v<T>>> {
+    template <Enum T>
+    struct PrimitiveReducer<T> {
         typedef std::underlying_type_t<T> type;
     };
 

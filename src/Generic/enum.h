@@ -47,19 +47,19 @@ struct EnumMetaTable {
 };
 
 template <typename _Representation>
-struct Enum : _Representation {
+struct EnumType : _Representation {
 
     using Representation = _Representation;
-    using EnumType = typename _Representation::EnumType;
+    using BaseType = typename _Representation::EnumType;
 
-    Enum() = default;
+    EnumType() = default;
 
-    Enum(EnumType value)
+    EnumType(BaseType value)
         : mValue(value)
     {
     }
 
-    operator EnumType() const
+    operator BaseType() const
     {
         return mValue;
     }
@@ -76,7 +76,7 @@ struct Enum : _Representation {
         return true;*/
     }
 
-    friend std::ostream &operator<<(std::ostream &stream, const Enum<Representation> &value)
+    friend std::ostream &operator<<(std::ostream &stream, const EnumType<Representation> &value)
     {
         return Representation::sTable.print(stream, value.mValue, sTypeName());
     }
@@ -87,16 +87,16 @@ struct Enum : _Representation {
     }
 
 protected:
-    EnumType mValue;
+    BaseType mValue;
 };
 
 template <typename _Representation, typename Base>
-struct BaseEnum : Enum<_Representation>, Base::Representation {
+struct BaseEnum : EnumType<_Representation>, Base::Representation {
 private:
-    using EnumBase = Enum<_Representation>;
+    using EnumBase = EnumType<_Representation>;
 
 public:
-    using EnumType = typename EnumBase::EnumType;
+    using BaseType = typename EnumBase::BaseType;
 
     struct Representation : Base::Representation, EnumBase::Representation {
     };
@@ -109,19 +109,22 @@ public:
 
     //TODO: using might be enough
 
-    template <typename T, typename = std::enable_if_t<std::is_constructible_v<Base, T>>>
+    template <typename T>
+    requires std::constructible_from<Base, T>
     BaseEnum(T v)
-        : EnumBase(static_cast<EnumType>(static_cast<typename Base::EnumType>(v)))
+        : EnumBase(static_cast<BaseType>(static_cast<typename Base::BaseType>(v)))
     {
     }
 
-    template <typename T, typename = std::enable_if_t<std::is_constructible_v<Base, T>>>
+    template <typename T>
+    requires std::constructible_from<Base, T>
     bool operator==(T other) const
     {
         return toBase() == Base { other };
     }
 
-    template <typename T, typename = std::enable_if_t<std::is_constructible_v<Base, T>>>
+    template <typename T>
+    requires std::constructible_from<Base, T>
     bool operator!=(T other) const
     {
         return toBase() != Base { other };
@@ -140,7 +143,7 @@ public:
 private:
     Base toBase() const
     {
-        return { static_cast<typename Base::EnumType>(this->mValue) };
+        return { static_cast<typename Base::BaseType>(this->mValue) };
     }
 };
 
@@ -170,4 +173,4 @@ private:
 
 #define ENUM(Name, ...)                           \
     ENUM_REGISTRY(Name, -1, nullptr, __VA_ARGS__) \
-    using Name = Engine::Enum<Name##Representation>;
+    using Name = Engine::EnumType<Name##Representation>;

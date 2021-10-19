@@ -71,13 +71,6 @@ namespace TupleUnpacker {
         }
     }
 
-    /*template <typename R, typename F, typename... Args>
-    std::enable_if_t<!std::is_convertible_v<std::invoke_result_t<F&&, Args&&...>, R>, R> invokeDefaultResult(R &&defaultValue, F &&f, Args &&... args)
-    {
-        TupleUnpacker::invoke(std::forward<F>(f), std::forward<Args>(args)...);
-        return std::forward<R>(defaultValue);
-    }*/
-
     template <typename T, size_t... S, typename Tuple>
     T constructUnpackTuple(Tuple &&args, std::index_sequence<S...>)
     {

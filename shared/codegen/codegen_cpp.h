@@ -28,8 +28,9 @@ struct MADGINE_CODEGEN_EXPORT CppFile : File {
         ~CustomCodeBuilder();
 
         CustomCodeBuilder &operator<<(std::string_view code);
-        template <typename T, typename = std::enable_if_t<!std::is_convertible_v<T, std::string_view>>>
-        CustomCodeBuilder &operator<<(const T &t)
+        template <typename T>
+            requires (!std::convertible_to<T, std::string_view>)
+        CustomCodeBuilder &operator<<(const T &t) 
         {
             return (*this) << std::to_string(t);
         }

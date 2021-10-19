@@ -40,13 +40,15 @@ struct Any {
 
     Any() = default;
 
-    template <typename T, typename = std::enable_if_t<!std::is_same_v<std::decay_t<T>, Any>>, typename... Args>
+    template <typename T, typename... Args>
+    requires(!std::same_as<std::decay_t<T>, Any>)
     Any(inplace_t<T>, Args &&... args)
         : mData(std::make_unique<AnyHolder<T, std::is_class_v<T>>>(std::forward<Args>(args)...))
     {
     }
 
-    template <typename T, typename = std::enable_if_t<!std::is_same_v<std::decay_t<T>, Any>>>
+    template <typename T>
+    requires(!std::same_as<std::decay_t<T>, Any>)
     Any(T &&data)
         : mData(std::make_unique<AnyHolder<T, std::is_class_v<T>>>(std::forward<T>(data)))
     {

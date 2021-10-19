@@ -105,8 +105,8 @@ namespace CLI {
     };
 
     template <typename Rep>
-    struct ParameterImpl<Enum<Rep>> : ParameterBase {
-        ParameterImpl(std::vector<const char *> options, Enum<Rep> defaultValue, const char *help = nullptr)
+    struct ParameterImpl<EnumType<Rep>> : ParameterBase {
+        ParameterImpl(std::vector<const char *> options, EnumType<Rep> defaultValue, const char *help = nullptr)
             : ParameterBase(1, 1, std::move(options), help)
             , mValue(defaultValue)
         {
@@ -119,7 +119,7 @@ namespace CLI {
 
         const char *typeName() override
         {
-            return Enum<Rep>::sTypeName().data();
+            return EnumType<Rep>::sTypeName().data();
         }
 
         std::string help() override
@@ -128,7 +128,7 @@ namespace CLI {
             ss << ParameterBase::help();
             ss << " [";
             bool first = true;
-            for (int i = Enum<Rep>::MIN + 1; i < Enum<Rep>::MAX; ++i) {
+            for (int i = EnumType<Rep>::MIN + 1; i < EnumType<Rep>::MAX; ++i) {
                 if (first)
                     first = false;
                 else
@@ -139,26 +139,26 @@ namespace CLI {
             return ss.str();
         }
 
-        const Enum<Rep> &operator*()
+        const EnumType<Rep> &operator*()
         {
             init();
             return mValue;
         }
 
-        const Enum<Rep> *operator->()
+        const EnumType<Rep> *operator->()
         {
             init();
             return &mValue;
         }
 
-        operator const Enum<Rep> &()
+        operator const EnumType<Rep> &()
         {
             init();
             return mValue;
         }
 
     private:
-        Enum<Rep> mValue;
+        EnumType<Rep> mValue;
     };
 
 }

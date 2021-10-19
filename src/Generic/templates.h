@@ -106,6 +106,9 @@ struct is_instance<U<T...>, U> : std::true_type {
 template <typename T, template <typename...> typename U>
 constexpr const bool is_instance_v = is_instance<T, U>::value;
 
+template <typename T, template <typename> typename U>
+concept instance_of = is_instance_v<T, U>;
+
 template <typename T>
 using is_tuple = is_instance<T, std::tuple>;
 
@@ -134,5 +137,8 @@ constexpr size_t inheritance_offset() {
     static_assert(std::is_base_of_v<Base, Derived>);
     return reinterpret_cast<uintptr_t>(static_cast<Base *>(reinterpret_cast<Derived *>(0x1))) - 1;
 }
+
+template <typename T>
+concept Enum = std::is_enum_v<T>;
 
 }

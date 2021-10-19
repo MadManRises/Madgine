@@ -24,26 +24,27 @@ struct ByteBufferImpl {
 
     ByteBufferImpl() = default;
 
-    template <typename T, typename SizeAccessor = ByteBufferSizeAccessor, typename DataAccessor = ByteBufferDataAccessor,
-        typename = std::enable_if_t<!std::is_pointer_v<std::remove_reference_t<T>> && !std::is_null_pointer_v<std::remove_reference_t<T>> && !std::is_convertible_v<SizeAccessor, size_t> && !std::is_convertible_v<DataAccessor, const void *>>>
-    ByteBufferImpl(T &&t, SizeAccessor &&sizeAccess = {}, DataAccessor &&dataAccess = {})
+    template <typename T, typename SizeAccessor = ByteBufferSizeAccessor, typename DataAccessor = ByteBufferDataAccessor>
+    requires(!std::is_pointer_v<std::remove_reference_t<T>> && !std::is_null_pointer_v<std::remove_reference_t<T>> && !std::is_convertible_v<SizeAccessor, size_t> && !std::is_convertible_v<DataAccessor, const void *>)
+        ByteBufferImpl(T &&t, SizeAccessor &&sizeAccess = {}, DataAccessor &&dataAccess = {})
         : mKeep(std::forward<T>(t))
         , mSize(TupleUnpacker::invoke(std::forward<SizeAccessor>(sizeAccess), mKeep.as<T>()))
         , mData(TupleUnpacker::invoke(std::forward<DataAccessor>(dataAccess), mKeep.as<T>()))
     {
     }
 
-    template <typename T, typename DataAccessor = ByteBufferDataAccessor,
-        typename = std::enable_if_t<!std::is_pointer_v<std::remove_reference_t<T>> && !std::is_null_pointer_v<std::remove_reference_t<T>> && !std::is_convertible_v<DataAccessor, const void *>>>
-    ByteBufferImpl(T &&t, size_t size, DataAccessor &&dataAccess = {})
+    template <typename T, typename DataAccessor = ByteBufferDataAccessor>
+    requires(!std::is_pointer_v<std::remove_reference_t<T>> && !std::is_null_pointer_v<std::remove_reference_t<T>> && !std::is_convertible_v<DataAccessor, const void *>)
+        ByteBufferImpl(T &&t, size_t size, DataAccessor &&dataAccess = {})
         : mKeep(std::forward<T>(t))
         , mSize(size)
         , mData(TupleUnpacker::invoke(std::forward<DataAccessor>(dataAccess), mKeep.as<T>()))
     {
     }
 
-    template <typename T, typename = std::enable_if_t<!std::is_pointer_v<std::remove_reference_t<T>> && !std::is_null_pointer_v<std::remove_reference_t<T>>>>
-    ByteBufferImpl(T &&t, size_t size, Data *data)
+    template <typename T>
+    requires(!std::is_pointer_v<std::remove_reference_t<T>> && !std::is_null_pointer_v<std::remove_reference_t<T>>)
+        ByteBufferImpl(T &&t, size_t size, Data *data)
         : mKeep(std::forward<T>(t))
         , mSize(size)
         , mData(data)

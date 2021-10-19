@@ -17,14 +17,14 @@ struct CoroutineHandle {
         : mHandle(handle)
     {
     }
-    template <typename U, typename = std::enable_if_t<std::is_base_of_v<T, U>>>
+    template <std::derived_from<T> U>
     CoroutineHandle(std::coroutine_handle<U> handle)
         : CoroutineHandle(CoroutineHandle<U> { handle })
     {
     }
-    template <typename U, typename = std::enable_if_t<std::is_base_of_v<T, U>>>
+    template <std::derived_from<T> U>
     CoroutineHandle(CoroutineHandle<U> &&handle)
-        : mHandle(std::coroutine_handle<T>::from_promise(handle.release().promise()))
+        : CoroutineHandle(fromPromise(handle.release().promise()))
     {
     }
     ~CoroutineHandle()

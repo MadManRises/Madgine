@@ -43,15 +43,17 @@ struct BuilderImpl {
         return execute();
     }
 
-    template <typename T, typename = std::enable_if_t<std::is_convertible_v<return_type, T>>>
-    operator T() {
+    template <typename T>
+    requires std::convertible_to<return_type, T>
+    operator T()
+    {
         return execute();
     }
 
     template <typename G>
     auto then(G &&g) &&
     {
-        auto modified_f = [f { std::move(mF) }, g { std::forward<G>(g) }](auto &&... args) mutable -> decltype(auto) {
+        auto modified_f = [f { std::move(mF) }, g { std::forward<G>(g) }](auto &&...args) mutable -> decltype(auto) {
             return Engine::then(std::move(f)(std::forward<decltype(args)>(args)...), std::move(g));
         };
         return Facade<BuilderImpl<decltype(modified_f), Pack, Facade>> {

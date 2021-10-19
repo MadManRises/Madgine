@@ -4,10 +4,10 @@
 #include "../math/matrix4.h"
 #include "../math/quaternion.h"
 #include "../math/vector2.h"
-#include "../math/vector3.h"
-#include "../math/vector4.h"
 #include "../math/vector2i.h"
+#include "../math/vector3.h"
 #include "../math/vector3i.h"
+#include "../math/vector4.h"
 #include "../math/vector4i.h"
 
 #include "boundapifunction.h"
@@ -45,13 +45,14 @@ struct META_EXPORT ValueType {
 
     ValueType(ValueType &&other) noexcept;
 
-    template <typename T, typename = std::enable_if_t<!std::is_same_v<std::decay_t<T>, ValueType>>>
-    explicit ValueType(T &&v)
+    template <typename T>
+    requires(!std::is_same_v<std::decay_t<T>, ValueType>) 
+        explicit ValueType(T &&v)
         : mUnion(std::in_place_index<static_cast<size_t>(static_cast<ValueTypeEnum>(toValueTypeIndex<std::decay_t<T>>()))>, std::forward<T>(v))
     {
     }
 
-    template <typename T, typename _ = std::enable_if_t<std::is_enum_v<T>>>
+    template <Enum T>
     explicit ValueType(T val)
         : ValueType(static_cast<std::underlying_type_t<T>>(val))
     {
@@ -70,7 +71,8 @@ struct META_EXPORT ValueType {
     void operator=(const ValueType &other);
     void operator=(ValueType &&other);
 
-    template <typename T, typename _ = std::enable_if_t<!std::is_same_v<std::decay_t<T>, ValueType>>>
+    template <typename T>
+    requires(!std::is_same_v<std::decay_t<T>, ValueType>) 
     void operator=(T &&t)
     {
         constexpr size_t index = static_cast<size_t>(static_cast<ValueTypeEnum>(toValueTypeIndex<std::decay_t<T>>()));
@@ -86,7 +88,7 @@ struct META_EXPORT ValueType {
 
     ValueType operator()(const ArgumentList &args) const;
     template <typename... Args>
-    ValueType operator()(Args &&... args)
+    ValueType operator()(Args &&...args)
     {
         return (*this)({ ValueType { std::forward<Args>(args)... } });
     }
@@ -218,7 +220,6 @@ ValueType_Return<T> ValueType::as() const
     }
     //static_assert(dependent_bool<T, false>::value, "Invalid target type for Valuetype cast provided!");
 }
-
 
 META_EXPORT std::ostream &operator<<(std::ostream &stream,
     const Engine::ValueType &v);

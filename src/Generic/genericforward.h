@@ -34,7 +34,7 @@ template <typename T>
 struct CoW;
 
 template <typename>
-struct Enum;
+struct EnumType;
 template <typename, typename>
 struct BaseEnum;
 struct EnumMetaTable;

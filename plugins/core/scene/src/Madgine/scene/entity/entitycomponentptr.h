@@ -111,8 +111,9 @@ namespace Scene {
                 assert(!other || component_index<T>() == other.type());
             }
 
-            template <typename U, typename = std::enable_if_t<std::is_convertible_v<T *, U *>>>
-            explicit EntityComponentPtrBase(const EntityComponentPtrBase<U> &other)
+            template <typename U>
+            requires std::convertible_to<T *, U *>
+                explicit EntityComponentPtrBase(const EntityComponentPtrBase<U> &other)
                 : mHandle { other.handle() }
                 , mSceneMgr(other.sceneMgr())
             {
@@ -187,7 +188,8 @@ namespace Scene {
                 return get();
             }
 
-            void relocate(const EntityComponentHandle<EntityComponentBase>& index) {
+            void relocate(const EntityComponentHandle<EntityComponentBase> &index)
+            {
                 mHandle.relocate(index);
             }
 

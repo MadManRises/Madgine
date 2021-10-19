@@ -474,7 +474,7 @@ private:
             return this->get();
         }
 
-        template <typename U, typename = std::enable_if_t<std::is_constructible_v<U, T>>>
+        template <std::constructible_from<T> U>
         operator FutureWrapper<U, future>()
         {
             return this->then([](T &&t) { return U { std::forward<T>(t) }; });

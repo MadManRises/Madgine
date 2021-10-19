@@ -29,7 +29,7 @@ ValueTypeDesc ValueType_type(const ValueType &v)
     return v.type();
 }
 
-template <typename T, typename>
+template <ValueTypePrimitive T>
 META_EXPORT ValueType_Return<T> ValueType_as_impl(const ValueType &v)
 {
     return v.as<std::decay_t<T>>();

@@ -26,7 +26,8 @@ namespace Serialize {
     public:
         constexpr SerializableDataConstPtr() = default;
 
-        template <typename T, typename = std::enable_if_t<!std::is_same_v<SerializableDataUnit, T> && std::is_base_of_v<SerializableDataUnit, T>>>
+        template <typename T>
+        requires (!std::same_as<SerializableDataUnit, T> && std::is_base_of_v<SerializableDataUnit, T>)
         SerializableDataConstPtr(const T *t)
             : SerializableDataConstPtr(t, has_function_customUnitPtr<T> {})
         {
@@ -94,7 +95,8 @@ namespace Serialize {
     public:
         constexpr SerializableDataPtr() = default;
 
-        template <typename T, typename = std::enable_if_t<!std::is_same_v<SerializableDataUnit, T> && std::is_base_of_v<SerializableDataUnit, T> && !std::is_const_v<T>>>
+        template <typename T>
+        requires (!std::same_as<SerializableDataUnit, T> && std::is_base_of_v<SerializableDataUnit, T> && !std::is_const_v<T>)
         SerializableDataPtr(T *t)
             : SerializableDataPtr(t, has_function_customUnitPtr<T> {})
         {
@@ -146,7 +148,8 @@ namespace Serialize {
     public:
         constexpr SerializableUnitConstPtr() = default;
 
-        template <typename T, typename = std::enable_if_t<!std::is_same_v<SerializableUnitBase, T> && std::is_base_of_v<SerializableUnitBase, T>>>
+        template <typename T>
+        requires (!std::same_as<SerializableUnitBase, T> && std::is_base_of_v<SerializableUnitBase, T>)
         SerializableUnitConstPtr(const T *t)
             : SerializableUnitConstPtr(t, has_function_customUnitPtr<T> {})
         {
@@ -208,7 +211,8 @@ namespace Serialize {
     public:
         constexpr SerializableUnitPtr() = default;
 
-        template <typename T, typename = std::enable_if_t<!std::is_same_v<SerializableUnitBase, T> && std::is_base_of_v<SerializableUnitBase, T> && !std::is_const_v<T>>>
+        template <typename T>
+        requires (!std::same_as<SerializableUnitBase, T> && std::is_base_of_v<SerializableUnitBase, T> && !std::is_const_v<T>)
         SerializableUnitPtr(T *t)
             : SerializableUnitPtr(t, has_function_customUnitPtr<T> {})
         {

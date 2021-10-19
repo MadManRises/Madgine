@@ -15,7 +15,7 @@ struct CallerHierarchy : CallerHierarchyBase {
     {
     }
 
-    template <typename U, typename = std::enable_if_t<std::is_convertible_v<U, T>>>
+    template <std::convertible_to<T> U>
     CallerHierarchy(const CallerHierarchy<U> &other)
         : CallerHierarchyBase { other }
         , mData(other.mData)
@@ -36,7 +36,8 @@ struct CallerHierarchyBasePtr {
     {
     }
 
-    template <typename U, typename = std::enable_if_t<!is_instance_v<U, CallerHierarchy>>>
+    template <typename U>
+    requires(!instance_of<U, CallerHierarchy>)
     operator const U &() const
     {
         const CallerHierarchyBase *ptr = mPtr;
@@ -74,7 +75,8 @@ struct CallerHierarchyPtr : CallerHierarchyBasePtr {
         return *static_cast<const CallerHierarchy<T> *>(mPtr);
     }
 
-    template <typename U, typename = std::enable_if_t<std::is_convertible_v<T, U>>>
+    template <typename U>
+    requires std::convertible_to<T, U>
     operator CallerHierarchy<U>() const
     {
         return *static_cast<const CallerHierarchy<T> *>(mPtr);
