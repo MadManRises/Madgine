@@ -140,7 +140,7 @@ struct EnumType : _Representation {
     }
 
     static Generator<BaseType> values() {
-        return Representation::sTable.values<BaseType>();
+        return Representation::sTable.template values<BaseType>();
     }
 
 protected:

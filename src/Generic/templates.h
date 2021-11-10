@@ -2,7 +2,7 @@
 
 namespace Engine {
 template <typename T>
-using id = T;
+using identity = T;
 
 template <typename V, typename...>
 struct last {
