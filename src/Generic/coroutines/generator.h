@@ -19,7 +19,7 @@ struct Generator {
             return {};
         }
 
-        std::suspend_always yield_value(T &t)
+        std::suspend_always yield_value(const T &t)
         {
             mValue = &t;
             return {};
@@ -36,12 +36,39 @@ struct Generator {
             return {};
         }
 
-        T *mValue = nullptr;
+        const T *mValue = nullptr;
     };
 
     Generator(CoroutineHandle<promise_type> handle)
         : mHandle(std::move(handle))
     {
+    }
+
+    struct iterator {
+        struct end_token {
+        };
+
+        constexpr bool operator==(const end_token&) const {
+            return mGen.done();
+        }
+
+        void operator++() {
+            mGen.next();
+        }
+
+        const T& operator*() const {
+            return mGen.get();
+        }
+
+        Generator<T> &mGen;
+    };
+
+    iterator begin() {
+        return { *this };
+    }
+
+    static constexpr typename iterator::end_token end() {
+        return {};
     }
 
     const T &get()

@@ -38,26 +38,6 @@ namespace Render {
     {
         reset();
 
-        /*mHandle = glCreateProgram();
-        glAttachShader(mHandle, vertexShader->mHandle);
-        glAttachShader(mHandle, pixelShader->mHandle);
-
-        for (size_t i = 0; i < attributeNames.size(); ++i) {
-            glBindAttribLocation(mHandle, i, attributeNames[i]);
-            GL_CHECK();
-        }
-
-        glLinkProgram(mHandle);
-        // check for linking errors
-        GLint success;
-        char infoLog[512];
-        glGetProgramiv(mHandle, GL_LINK_STATUS, &success);
-        if (!success) {
-            glGetProgramInfoLog(mHandle, 512, NULL, infoLog);
-            LOG_ERROR("ERROR::SHADER::PROGRAM::LINKING_FAILED");
-            LOG_ERROR(infoLog);
-        }*/
-
         mVertexShader = std::move(vertexShader);
         mPixelShader = std::move(pixelShader);
         mGeometryShader = std::move(geometryShader);
@@ -70,6 +50,8 @@ namespace Render {
         mVertexShader.reset();
         mPixelShader.reset();
         mGeometryShader.reset();
+
+        mConstantBuffers.clear();
     }
 
     void DirectX11Program::bind(DirectX11VertexArray *format)

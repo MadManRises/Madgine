@@ -3,15 +3,14 @@
 #include "Madgine/scene/scenecomponentbase.h"
 #include "Madgine/scene/scenecomponentcollector.h"
 
-
 #include "Generic/proxy.h"
 
 #include "Meta/math/vector3.h"
 
-struct btSoftRigidDynamicsWorld;
+class btSoftRigidDynamicsWorld;
 struct btSoftBodyWorldInfo;
-struct btManifoldPoint;
-struct btCollisionObject;
+class btManifoldPoint;
+class btCollisionObject;
 struct btCollisionObjectWrapper;
 
 namespace Engine {
@@ -22,8 +21,13 @@ namespace Physics {
 
     struct MADGINE_BULLET_EXPORT ContactPoint {
 
+        ContactPoint(btManifoldPoint &point, const btCollisionObject *obj0, const btCollisionObject *obj1);
+
         void setFriction(float motion, const Vector3 &dir, const Vector3 &dir2);
 
+        Vector3 normal1() const;
+
+    private:
         btManifoldPoint &mPoint;
         const btCollisionObject *mObj0, *mObj1;
     };
@@ -79,7 +83,7 @@ namespace Physics {
 
     private:
         std::unique_ptr<PhysicsData> mData;
-        
+
         std::vector<PhysicsListener *> mListener;
     };
 

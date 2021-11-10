@@ -10,8 +10,8 @@ namespace Threading {
     void TaskPromiseSharedStateBase::finalize()
     {
         std::lock_guard guard { mMutex };
-        for (CoroutineHandle<TaskPromiseTypeBase> &handle : mThenResumes)
-            handle->resume(std::move(handle));
+        for (TaskHandle &handle : mThenResumes)
+            handle.resumeInQueue();
         mThenResumes.clear();
     }
 
@@ -21,17 +21,16 @@ namespace Threading {
         mDestroyed = true;
     }
 
-    void TaskPromiseTypeBase::resume(CoroutineHandle<TaskPromiseTypeBase> handle)
+    void TaskPromiseTypeBase::resume(TaskHandle handle)
     {
-        if (mState->mBarrier)
-            mState->mBarrier->queueHandle(mState->mQueue, std::move(handle));
+        if (mBarrier)
+            mBarrier->queueHandle(mQueue, std::move(handle));
         else
-            mState->mQueue->queueHandle(std::move(handle), TaskMask::ALL);
+            mQueue->queueHandle(std::move(handle), TaskMask::ALL);
     }
 
-    void TaskPromiseTypeBase::setQueue(TaskQueue* queue, Barrier* barrier) {
-        mState->mQueue = queue;
-        mState->mBarrier = barrier;
+    TaskQueue* TaskPromiseTypeBase::queue() const {
+        return mQueue;
     }
 
 }

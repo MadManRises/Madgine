@@ -33,7 +33,7 @@ namespace Tools {
         virtual void newFrame(float timeSinceLastFrame) = 0;
         virtual void render(Render::RenderTarget *target, size_t iteration) override;
 
-        virtual void renderMainDrawList() = 0;
+        virtual void renderDrawList(ImGuiViewport *vp) = 0;
 
         void addViewportMapping(Render::RenderTarget *target, ImGuiViewport *vp);
         void removeViewportMapping(Render::RenderTarget *target);

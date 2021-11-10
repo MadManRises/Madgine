@@ -220,6 +220,7 @@ namespace Tools {
 
     void NodeGraphEditor::finalize()
     {
+        mGraphHandle.reset();
         if (mEditor) {
             ed::DestroyEditor(mEditor);
             mEditor = nullptr;

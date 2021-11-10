@@ -47,6 +47,7 @@ namespace Render {
     private:
         OpenGLShaderLoader::HandleType mVertexShader;
         OpenGLShaderLoader::HandleType mPixelShader;
+        OpenGLShaderLoader::HandleType mGeometryShader;
         GLuint mHandle = 0;
         std::vector<OpenGLBuffer> mUniformBuffers;
 #if !OPENGL_ES

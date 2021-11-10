@@ -118,7 +118,6 @@ namespace Threading {
     {
         assert(mState != State::DONE);
         if (!queue) {
-            task.setQueue(queue, this);
             std::lock_guard lock { mMutex };
             mTasks.emplace_back(std::move(task));
         } else if (mState == State::INIT) {

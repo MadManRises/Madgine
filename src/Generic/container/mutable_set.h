@@ -234,6 +234,8 @@ struct container_traits<mutable_set<T, Cmp>> : container_traits<std::set<T, Cmp>
     typedef Cmp cmp_type;
     typedef T value_type;
 
+    //static_assert(sizeof(position_handle) <= sizeof(void *));
+
     typedef Pib<iterator> emplace_return;
 
     template <typename... _Ty>

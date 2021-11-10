@@ -23,7 +23,7 @@ namespace Render {
             }
 
             Threading::TaskFuture<bool> create(const std::string &name, const std::vector<size_t> &bufferSizes = {}, size_t instanceDataSize = 0, ProgramLoader *loader = nullptr);
-            void create(const std::string &name, CodeGen::ShaderFile &&file, ProgramLoader *loader = nullptr);
+            void create(const std::string &name, CodeGen::ShaderFile file, ProgramLoader *loader = nullptr);
             void createUnnamed(CodeGen::ShaderFile &&file, ProgramLoader *loader = nullptr);
 
             WritableByteBuffer mapParameters(size_t index, ProgramLoader *loader = nullptr);

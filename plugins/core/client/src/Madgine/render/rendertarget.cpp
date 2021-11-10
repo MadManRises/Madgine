@@ -57,7 +57,7 @@ namespace Render {
 
     void RenderTarget::renderQuad(Program *program)
     {
-        renderMesh(GPUMeshLoader::loadManual("quad", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &data, Render::GPUMeshLoader::ResourceDataInfo &info) {
+        static GPUMeshLoader::HandleType quad = GPUMeshLoader::loadManual("quad", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &data, Render::GPUMeshLoader::ResourceDataInfo &info) {
             std::vector<Compound<Render::VertexPos_3D>> vertices {
                 { { -1, -1, 0 } },
                 { { 1, -1, 0 } },
@@ -70,8 +70,10 @@ namespace Render {
             };
 
             return loader->generate(data, { 3, std::move(vertices), std::move(indices) });
-        }),
-            program);
+        });
+
+        if (quad.available())
+            renderMesh(quad, program);
     }
 
     void RenderTarget::addRenderPass(RenderPass *pass)

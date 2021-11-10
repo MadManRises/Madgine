@@ -67,7 +67,7 @@ struct CoroutineHandle {
         return mHandle;
     }
 
-    T &promise()
+    T &promise() const
     {
         return mHandle.promise();
     }
@@ -75,6 +75,10 @@ struct CoroutineHandle {
     T *operator->()
     {
         return &promise();
+    }
+
+    T& operator*() const {
+        return promise();
     }
 
     explicit operator bool() const

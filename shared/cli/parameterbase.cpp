@@ -31,7 +31,7 @@ namespace CLI {
                     auto it = CLICore::getSingleton().mArguments.find(option);
                     if (it != CLICore::getSingleton().mArguments.end()) {
                         if (args)
-                            LOG_WARNING("Different versions of argument '" << option << "' provided! Which version is used is undefined!");
+                            LOG_WARNING("Different styles of argument '" << option << "' provided! Which style is used is undefined!");
 
                         args = &it->second;
                         optionName = option;
@@ -40,7 +40,7 @@ namespace CLI {
 
                 if (args) {
                     if (args->size() < mMinArgumentCount) {
-                        LOG_ERROR("Unsufficient amount of arguments provided for option '" << optionName << "'!");
+                        LOG_ERROR("Insufficient amount of arguments provided for option '" << optionName << "'!");
                         if (mHelp)
                             LOG_ERROR("\t" << mHelp);
                         return;

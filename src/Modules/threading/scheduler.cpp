@@ -60,7 +60,7 @@ namespace Threading {
             std::chrono::steady_clock::time_point nextAvailableTaskTime = main_queue->update(TaskMask::DEFAULT, &mWorkgroup.hasInterrupt());
             main_queue->waitForTasks(&mWorkgroup.hasInterrupt(), nextAvailableTaskTime);
             mWorkgroup.checkThreadStates();
-            if (!main_queue->running()) {
+            if (!main_queue->running() && main_queue->idle(TaskMask::DEFAULT)) {
                 for (Threading::TaskQueue *queue : mWorkgroup.taskQueues()) {
                     queue->stop();
                 }

@@ -57,9 +57,9 @@ struct TypeInfo {
         return std::string { mFullName, strlen(mFullName) - 2 - mTypeName.size() };
     }
 
-    bool operator<(const TypeInfo &other) const
+    std::strong_ordering operator<=>(const TypeInfo &other) const
     {
-        return strcmp(mFullName, other.mFullName) < 0;
+        return strcmp(mFullName, other.mFullName);
     }
 
     const char *mFullName;

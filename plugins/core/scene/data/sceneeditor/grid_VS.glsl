@@ -14,4 +14,5 @@ void main()
 {	
 	worldPos = aPos;
     gl_Position = vp * worldPos;
+	gl_Position.y *= -1;
 }

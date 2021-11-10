@@ -30,6 +30,8 @@ namespace Render {
         bool create(OpenGLShader &shader, ResourceType *res, const CodeGen::ShaderFile &file, ShaderType type);
 
         bool loadFromSource(OpenGLShader &shader, std::string_view name, std::string source, ShaderType type);
+
+        virtual Threading::TaskQueue *loadingTaskQueue() const override;
     };
 
 }

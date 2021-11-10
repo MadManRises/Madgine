@@ -5,9 +5,7 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
-
 #include "fontloader.h"
-
 
 METATABLE_BEGIN_BASE(Engine::Widgets::Label, Engine::Widgets::WidgetBase)
 MEMBER(mText)
@@ -21,14 +19,12 @@ FIELD(mText)
 ENCAPSULATED_FIELD(mFont, getFontName, setFontName)
 SERIALIZETABLE_END(Engine::Widgets::Label)
 
-
-
 namespace Engine {
 namespace Widgets {
 
     WidgetClass Label::getClass() const
     {
-        return WidgetClass::LABEL_CLASS;
+        return WidgetClass::LABEL;
     }
 
     std::vector<std::pair<std::vector<Vertex>, TextureSettings>> Label::vertices(const Vector3 &screenSize)
@@ -53,7 +49,7 @@ namespace Widgets {
     {
         mFont.load(name);
     }
-	
+
     Render::FontLoader::ResourceType *Label::getFont() const
     {
         return mFont.resource();

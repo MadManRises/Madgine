@@ -5,6 +5,8 @@
 namespace Engine {
 namespace Serialize {
 
+    struct EnumTag;
+
     using SerializePrimitives = type_pack<
         bool,
         uint8_t,
@@ -23,14 +25,15 @@ namespace Serialize {
         std::monostate,
         Vector3,
         Vector4,
-        Matrix3>;
+        Matrix3,
+        EnumTag>;
 
     template <typename T, typename = void>
     struct PrimitiveReducer {
         typedef T type;
     };
 
-    template <std::convertible_to<const SyncableUnitBase*> T>
+    template <std::convertible_to<const SyncableUnitBase *> T>
     struct PrimitiveReducer<T> {
         typedef SyncableUnitBase *type;
     };
@@ -48,6 +51,11 @@ namespace Serialize {
         typedef std::underlying_type_t<T> type;
     };
 
+    template <typename T>
+    struct PrimitiveReducer<EnumType<T>> {
+        typedef EnumTag type;
+    };
+
     template <typename T, typename = void>
     struct PrimitiveTypeIndex : type_pack_index<uint8_t, SerializePrimitives, typename PrimitiveReducer<T>::type> {
     };
@@ -63,7 +71,7 @@ namespace Serialize {
     const constexpr bool PrimitiveTypesContain_v = PrimitiveTypesContain<T>::value;
 
     template <typename T>
-    const constexpr bool isPrimitiveType_v = PrimitiveTypesContain_v<T> || std::is_convertible_v<T, const SerializableDataUnit *> || std::is_convertible_v<T, const SyncableUnitBase *> || std::is_enum_v<T>;
+    const constexpr bool isPrimitiveType_v = PrimitiveTypesContain_v<T> || std::is_convertible_v<T, const SerializableDataUnit *> || std::is_convertible_v<T, const SyncableUnitBase *> || std::is_enum_v<T> || is_instance_v<T, EnumType>;
 
 }
 }

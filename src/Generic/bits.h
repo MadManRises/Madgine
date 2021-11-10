@@ -170,15 +170,14 @@ struct BitArray {
         return !(*this == other);
     }
 
-    constexpr bool operator<(const BitArray &other) const
+    constexpr std::strong_ordering operator<=>(const BitArray &other) const
     {
         for (size_t i = 0; i < InternalArraySize; ++i) {
-            if (mData[i] < other.mData[i])
-                return true;
-            if (mData[i] > other.mData[i])
-                return false;
+            auto cmp = mData[i] <=> other.mData[i];
+            if (cmp != 0)
+                return cmp;
         }
-        return false;
+        return std::strong_ordering::equal;
     }
 
 private:

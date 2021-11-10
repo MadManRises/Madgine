@@ -21,6 +21,8 @@ namespace Render {
         virtual void update(GPUMeshData &data, MeshData &&mesh) override;
 
         virtual void reset(GPUMeshData &data) override;
+
+        virtual Threading::TaskQueue *loadingTaskQueue() const override;
     };
 }
 }

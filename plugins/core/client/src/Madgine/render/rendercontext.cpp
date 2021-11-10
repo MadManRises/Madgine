@@ -43,7 +43,7 @@ namespace Render {
     void RenderContext::render()
     {
         beginFrame();
-        for (RenderTarget *target : safeIterate(reverseIt(mRenderTargets)))
+        for (RenderTarget *target : /* safeIterate(*/ mRenderTargets /*)*/)
             target->render();
         endFrame();
     }

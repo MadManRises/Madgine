@@ -36,7 +36,8 @@ void main()
 	worldPos = object.m * vec4(aPos, 1.0);
 	
     gl_Position = app.p * (frame.v * worldPos + vec4(aPos2, 0.0, 0.0));	
+	gl_Position.y *= -1;
     color = aColor;
 	normal = aNormal;
-	uv = vec2(aUV.x, 1.0 - aUV.y);	
+	uv = vec2(aUV.x, aUV.y);	
 }

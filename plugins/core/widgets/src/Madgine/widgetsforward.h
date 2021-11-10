@@ -16,7 +16,7 @@ namespace Widgets {
     struct Label;
     struct Image;
 
-    enum class WidgetClass;
+    FORWARD_ENUM(WidgetClass);
 
 }
 

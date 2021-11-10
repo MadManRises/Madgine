@@ -189,14 +189,14 @@ namespace Scene {
                 entityComponentOwningHelperWrite(out, mHandle, name, hierarchy);
             }
 
-            bool operator<(const EntityComponentOwningHandle<T> &other) const
+            auto operator<=>(const EntityComponentOwningHandle<T> &other) const
             {
-                return mHandle.type() < other.mHandle.type();
+                return mHandle.type() <=> other.mHandle.type();
             }
 
-            bool operator<(uint32_t type) const
+            auto operator<=>(uint32_t type) const
             {
-                return mHandle.type() < type;
+                return mHandle.type() <=> type;
             }
 
             void relocate(const EntityComponentHandle<EntityComponentBase> &index)
@@ -204,12 +204,6 @@ namespace Scene {
                 mHandle.relocate(index);
             }
         };
-
-        template <typename T>
-        bool operator<(uint32_t first, const EntityComponentOwningHandle<T> &second)
-        {
-            return first < second.mHandle.type();
-        }
 
     }
 

@@ -51,70 +51,22 @@ namespace Render {
     {
         reset();
 
-        if (vertexShader->mType != VertexShader || (pixelShader && pixelShader->mType != PixelShader) || (geometryShader && geometryShader->mType != GeometryShader))
-            std::terminate();
-
-        mHandle = glCreateProgram();
-        glAttachShader(mHandle, vertexShader->mHandle);
-        if (pixelShader)
-            glAttachShader(mHandle, pixelShader->mHandle);
-        if (geometryShader)
-            glAttachShader(mHandle, geometryShader->mHandle);
-
-        glLinkProgram(mHandle);
-        // check for linking errors
-        GLint success;
-        char infoLog[512];
-        glGetProgramiv(mHandle, GL_LINK_STATUS, &success);
-        if (!success) {
-            glGetProgramInfoLog(mHandle, 512, NULL, infoLog);
-            LOG_ERROR("ERROR::SHADER::PROGRAM::LINKING_FAILED");
-            LOG_ERROR(infoLog);
-        }
-
         mVertexShader = std::move(vertexShader);
         mPixelShader = std::move(pixelShader);
+        mGeometryShader = std::move(geometryShader);
 
-#if OPENGL_ES
-        GLuint perApplicationIndex = glGetUniformBlockIndex(mHandle, "PerApplication");
-        if (perApplicationIndex != GL_INVALID_INDEX) {
-            glUniformBlockBinding(mHandle, perApplicationIndex, 0);
-            GL_CHECK();
-        }
-
-        GLuint perFrameIndex = glGetUniformBlockIndex(mHandle, "PerFrame");
-        if (perFrameIndex != GL_INVALID_INDEX) {
-            glUniformBlockBinding(mHandle, perFrameIndex, 1);
-            GL_CHECK();
-        }
-
-        GLuint perObjectIndex = glGetUniformBlockIndex(mHandle, "PerObject");
-        if (perObjectIndex != GL_INVALID_INDEX) {
-            glUniformBlockBinding(mHandle, perObjectIndex, 2);
-            GL_CHECK();
-        }
-
-        GLuint SSBOIndex = glGetUniformBlockIndex(mHandle, "SSBO");
-        if (SSBOIndex != GL_INVALID_INDEX) {
-            glUniformBlockBinding(mHandle, SSBOIndex, 3);
-            GL_CHECK();
-        }
-
-        GLuint SSBOOffsetsIndex = glGetUniformBlockIndex(mHandle, "SSBO_Info");
-        if (SSBOOffsetsIndex != GL_INVALID_INDEX) {
-            glUniformBlockBinding(mHandle, SSBOOffsetsIndex, 4);
-            GL_CHECK();
-        }
-
-#endif
-
-        return success;
+        return true;
     }
 
     void OpenGLProgram::reset()
     {
+        mVertexShader.reset();
+        mPixelShader.reset();
+        mGeometryShader.reset();
+
         mUniformBuffers.clear();
         mShaderStorageBuffers.clear();
+
         if (mHandle) {
             glDeleteProgram(mHandle);
             mHandle = 0;
@@ -125,7 +77,63 @@ namespace Render {
     {
         format->bind(this, mInstanceBuffer, mInstanceDataSize);
 
-        assert(mHandle);
+        if (!mHandle) {
+            if (mVertexShader->mType != VertexShader || (mPixelShader && mPixelShader->mType != PixelShader) || (mGeometryShader && mGeometryShader->mType != GeometryShader))
+                std::terminate();
+
+            mHandle = glCreateProgram();
+            glAttachShader(mHandle, mVertexShader->mHandle);
+            if (mPixelShader)
+                glAttachShader(mHandle, mPixelShader->mHandle);
+            if (mGeometryShader)
+                glAttachShader(mHandle, mGeometryShader->mHandle);
+
+            glLinkProgram(mHandle);
+            // check for linking errors
+            GLint success;
+            char infoLog[512];
+            glGetProgramiv(mHandle, GL_LINK_STATUS, &success);
+            if (!success) {
+                glGetProgramInfoLog(mHandle, 512, NULL, infoLog);
+                LOG_ERROR("ERROR::SHADER::PROGRAM::LINKING_FAILED");
+                LOG_ERROR(infoLog);
+                std::terminate();
+            }
+
+#if OPENGL_ES
+            GLuint perApplicationIndex = glGetUniformBlockIndex(mHandle, "PerApplication");
+            if (perApplicationIndex != GL_INVALID_INDEX) {
+                glUniformBlockBinding(mHandle, perApplicationIndex, 0);
+                GL_CHECK();
+            }
+
+            GLuint perFrameIndex = glGetUniformBlockIndex(mHandle, "PerFrame");
+            if (perFrameIndex != GL_INVALID_INDEX) {
+                glUniformBlockBinding(mHandle, perFrameIndex, 1);
+                GL_CHECK();
+            }
+
+            GLuint perObjectIndex = glGetUniformBlockIndex(mHandle, "PerObject");
+            if (perObjectIndex != GL_INVALID_INDEX) {
+                glUniformBlockBinding(mHandle, perObjectIndex, 2);
+                GL_CHECK();
+            }
+
+            GLuint SSBOIndex = glGetUniformBlockIndex(mHandle, "SSBO");
+            if (SSBOIndex != GL_INVALID_INDEX) {
+                glUniformBlockBinding(mHandle, SSBOIndex, 3);
+                GL_CHECK();
+            }
+
+            GLuint SSBOOffsetsIndex = glGetUniformBlockIndex(mHandle, "SSBO_Info");
+            if (SSBOOffsetsIndex != GL_INVALID_INDEX) {
+                glUniformBlockBinding(mHandle, SSBOOffsetsIndex, 4);
+                GL_CHECK();
+            }
+
+#endif
+
+        }
         glUseProgram(mHandle);
         GL_CHECK();
 

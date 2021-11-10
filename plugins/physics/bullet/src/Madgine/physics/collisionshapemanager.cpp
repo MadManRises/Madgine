@@ -11,13 +11,12 @@
 
 #include "Meta/serialize/streams/operations.h"
 
-
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btBoxShape.h"
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btCapsuleShape.h"
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btCompoundShape.h"
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btConvexHullShape.h"
-#include "bullet3-2.89/src/BulletCollision/CollisionShapes/btStaticPlaneShape.h"
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btSphereShape.h"
+#include "bullet3-2.89/src/BulletCollision/CollisionShapes/btStaticPlaneShape.h"
 
 UNIQUECOMPONENT(Engine::Physics::CollisionShapeManager);
 
@@ -39,14 +38,15 @@ namespace Physics {
 
     struct MeshShape : CollisionShape, Serialize::VirtualUnit<MeshShape, VirtualScope<MeshShape, CollisionShapeInstance>> {
 
-        MeshShape(const ByteBuffer &vertexData, size_t vertexSize)
-            : mShape(static_cast<const float *>(vertexData.mData), vertexData.mSize / vertexSize, vertexSize)
+        void setMesh(const ByteBuffer &vertexData, size_t vertexSize)
         {
+            mShape = btConvexHullShape(static_cast<const float *>(vertexData.mData), vertexData.mSize / vertexSize, vertexSize);
         }
 
-        virtual CollisionShapeInstance *create() override
+        virtual CollisionShapeInstancePtr create(typename CollisionShapeManager::HandleType shape) override
         {
-            return this;
+            mHandle = std::move(shape);
+            return CollisionShapeInstancePtr { this };
         }
 
         virtual btCollisionShape *get() override
@@ -54,9 +54,9 @@ namespace Physics {
             return &mShape;
         }
 
-        virtual MeshShape *clone() override
+        virtual CollisionShapeInstancePtr clone() override
         {
-            return this;
+            return CollisionShapeInstancePtr { this };
         }
 
         virtual bool isInstance() override
@@ -68,8 +68,9 @@ namespace Physics {
     };
 
     struct BoxShapeInstance : Serialize::VirtualUnit<BoxShapeInstance, VirtualScope<BoxShapeInstance, CollisionShapeInstance>> {
-        BoxShapeInstance()
-            : mShape({ 0.5f, 0.5f, 0.5f })
+        BoxShapeInstance(typename CollisionShapeManager::HandleType shape)
+            : VirtualUnit(std::move(shape))
+            , mShape({ 0.5f, 0.5f, 0.5f })
         {
         }
 
@@ -83,9 +84,9 @@ namespace Physics {
             return true;
         }
 
-        virtual BoxShapeInstance *clone() override
+        virtual CollisionShapeInstancePtr clone() override
         {
-            return new BoxShapeInstance(*this);
+            return CollisionShapeInstancePtr { new BoxShapeInstance(*this) };
         }
 
         Vector3 getHalfExtends() const
@@ -103,15 +104,16 @@ namespace Physics {
 
     struct BoxShape : CollisionShape {
 
-        virtual BoxShapeInstance *create() override
+        virtual CollisionShapeInstancePtr create(typename CollisionShapeManager::HandleType shape) override
         {
-            return new BoxShapeInstance;
+            return CollisionShapeInstancePtr { new BoxShapeInstance(std::move(shape)) };
         }
     };
 
     struct PlaneShapeInstance : Serialize::VirtualUnit<PlaneShapeInstance, VirtualScope<PlaneShapeInstance, CollisionShapeInstance>> {
-        PlaneShapeInstance()
-            : mShape({ 0, 1, 0 }, 0.0f)
+        PlaneShapeInstance(typename CollisionShapeManager::HandleType shape)
+            : VirtualUnit(std::move(shape))
+            , mShape({ 0, 1, 0 }, 0.0f)
         {
         }
 
@@ -125,9 +127,9 @@ namespace Physics {
             return true;
         }
 
-        virtual PlaneShapeInstance *clone() override
+        virtual std::unique_ptr<CollisionShapeInstance, CollisionShapeInstanceDeleter> clone() override
         {
-            return new PlaneShapeInstance(*this);
+            return std::unique_ptr<CollisionShapeInstance, CollisionShapeInstanceDeleter> { new PlaneShapeInstance(*this) };
         }
 
         btStaticPlaneShape mShape;
@@ -135,15 +137,16 @@ namespace Physics {
 
     struct PlaneShape : CollisionShape {
 
-        virtual PlaneShapeInstance *create() override
+        virtual CollisionShapeInstancePtr create(typename CollisionShapeManager::HandleType shape) override
         {
-            return new PlaneShapeInstance;
+            return CollisionShapeInstancePtr { new PlaneShapeInstance(std::move(shape)) };
         }
     };
 
     struct CapsuleShapeInstance : Serialize::VirtualUnit<CapsuleShapeInstance, VirtualScope<CapsuleShapeInstance, CollisionShapeInstance>> {
-        CapsuleShapeInstance()
-            : mShape(0.5f, 2.0f)
+        CapsuleShapeInstance(typename CollisionShapeManager::HandleType shape)
+            : VirtualUnit(std::move(shape))
+            , mShape(0.5f, 2.0f)
         {
         }
 
@@ -157,9 +160,9 @@ namespace Physics {
             return true;
         }
 
-        virtual CapsuleShapeInstance *clone() override
+        virtual std::unique_ptr<CollisionShapeInstance, CollisionShapeInstanceDeleter> clone() override
         {
-            return new CapsuleShapeInstance(*this);
+            return std::unique_ptr<CollisionShapeInstance, CollisionShapeInstanceDeleter> { new CapsuleShapeInstance(*this) };
         }
 
         btCapsuleShape mShape;
@@ -167,15 +170,16 @@ namespace Physics {
 
     struct CapsuleShape : CollisionShape {
 
-        virtual CapsuleShapeInstance *create() override
+        virtual CollisionShapeInstancePtr create(typename CollisionShapeManager::HandleType shape) override
         {
-            return new CapsuleShapeInstance;
+            return CollisionShapeInstancePtr { new CapsuleShapeInstance(std::move(shape)) };
         }
     };
 
     struct SphereShapeInstance : Serialize::VirtualUnit<SphereShapeInstance, VirtualScope<SphereShapeInstance, CollisionShapeInstance>> {
-        SphereShapeInstance()
-            : mShape(0.1f)
+        SphereShapeInstance(typename CollisionShapeManager::HandleType shape)
+            : VirtualUnit(std::move(shape))
+            , mShape(0.1f)
         {
         }
 
@@ -189,16 +193,18 @@ namespace Physics {
             return true;
         }
 
-        virtual SphereShapeInstance *clone() override
+        virtual std::unique_ptr<CollisionShapeInstance, CollisionShapeInstanceDeleter> clone() override
         {
-            return new SphereShapeInstance(*this);
+            return std::unique_ptr<CollisionShapeInstance, CollisionShapeInstanceDeleter> { new SphereShapeInstance(*this) };
         }
 
-        float radius() const {
+        float radius() const
+        {
             return mShape.getRadius();
         }
 
-        void setRadius(float r) {
+        void setRadius(float r)
+        {
             mShape.setImplicitShapeDimensions({ r, 0, 0 });
             mShape.setMargin(r);
         }
@@ -208,13 +214,15 @@ namespace Physics {
 
     struct SphereShape : CollisionShape {
 
-        virtual SphereShapeInstance *create() override
+        virtual CollisionShapeInstancePtr create(typename CollisionShapeManager::HandleType shape) override
         {
-            return new SphereShapeInstance;
+            return CollisionShapeInstancePtr { new SphereShapeInstance(std::move(shape)) };
         }
     };
 
     struct CompoundShapeInstance : Serialize::VirtualUnit<CompoundShapeInstance, VirtualScope<CompoundShapeInstance, CollisionShapeInstance>> {
+
+        using VirtualUnit::VirtualUnit;
 
         void addShape(CollisionShapeManager::ResourceType *res)
         {
@@ -273,10 +281,10 @@ namespace Physics {
             return true;
         }
 
-        virtual CompoundShapeInstance *clone() override
+        virtual std::unique_ptr<CollisionShapeInstance, CollisionShapeInstanceDeleter> clone() override
         {
             //TODO
-            return new CompoundShapeInstance(*this);
+            return std::unique_ptr<CollisionShapeInstance, CollisionShapeInstanceDeleter> { new CompoundShapeInstance(*this) };
         }
 
         std::vector<CollisionShapeManager::InstanceHandle> mChildren;
@@ -284,16 +292,15 @@ namespace Physics {
     };
 
     struct CompoundShape : CollisionShape {
-        virtual CompoundShapeInstance *create() override
+        virtual CollisionShapeInstancePtr create(typename CollisionShapeManager::HandleType shape) override
         {
-            return new CompoundShapeInstance;
+            return CollisionShapeInstancePtr { new CompoundShapeInstance(std::move(shape)) };
         }
     };
 
     CollisionShapeManager::InstanceHandle::InstanceHandle(typename CollisionShapeManager::HandleType shape)
-        : mInstance(shape->get()->create())
+        : mInstance(shape.getUnsafe()->get()->create(std::move(shape)))
     {
-        mInstance->mShape = std::move(shape);
     }
 
     CollisionShapeManager::InstanceHandle::InstanceHandle(typename CollisionShapeManager::ResourceType *res)
@@ -304,16 +311,6 @@ namespace Physics {
     CollisionShapeManager::InstanceHandle::InstanceHandle(const InstanceHandle &other)
         : mInstance(other.mInstance ? other.mInstance->clone() : nullptr)
     {
-    }
-
-    CollisionShapeManager::InstanceHandle::InstanceHandle(InstanceHandle &&other) noexcept
-        : mInstance(std::exchange(other.mInstance, nullptr))
-    {
-    }
-
-    CollisionShapeManager::InstanceHandle::~InstanceHandle()
-    {
-        reset();
     }
 
     CollisionShapeManager::InstanceHandle &CollisionShapeManager::InstanceHandle::operator=(const InstanceHandle &other)
@@ -335,24 +332,22 @@ namespace Physics {
 
     void CollisionShapeManager::InstanceHandle::reset()
     {
-        if (mInstance && mInstance->isInstance())
-            delete mInstance;
-        mInstance = nullptr;
+        mInstance.reset();
     }
 
     CollisionShapeManager::ResourceType *CollisionShapeManager::InstanceHandle::resource() const
     {
-        return mInstance ? mInstance->mShape.resource() : nullptr;
+        return mInstance ? mInstance->resource() : nullptr;
     }
 
     CollisionShapeInstance *CollisionShapeManager::InstanceHandle::operator->() const
     {
-        return mInstance;
+        return mInstance.get();
     }
 
     CollisionShapeManager::InstanceHandle::operator CollisionShapeInstance *() const
     {
-        return mInstance;
+        return mInstance.get();
     }
 
     Serialize::StreamResult CollisionShapeManager::InstanceHandle::readState(Serialize::SerializeInStream &in, const char *name)
@@ -374,8 +369,8 @@ namespace Physics {
 
     void CollisionShapeManager::InstanceHandle::writeState(Serialize::SerializeOutStream &out, const char *name) const
     {
-        bool hasShape = mInstance;
-        std::string_view resName = hasShape ? mInstance->mShape.resource()->name() : "";
+        bool hasShape = static_cast<bool>(mInstance);
+        std::string_view resName = hasShape ? mInstance->resource()->name() : "";
         out.format().beginExtended(out, name, 1);
         Serialize::write(out, resName, "name");
         if (!hasShape) {
@@ -386,57 +381,77 @@ namespace Physics {
         }
     }
 
+    CollisionShapeManager::ResourceType *CollisionShapeInstance::resource() const
+    {
+        return mHandle.resource();
+    }
+
     CollisionShapeManager::CollisionShapeManager()
         : ResourceLoader({ ".fbx", ".dae" })
     {
         getOrCreateManual(
             "Cube", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceDataInfo &info) {
                 data = std::make_unique<BoxShape>();
-                return true;
+                return Threading::make_ready_task(true);
             },
             {}, this);
 
         getOrCreateManual(
             "Plane", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceDataInfo &info) {
                 data = std::make_unique<PlaneShape>();
-                return true;
+                return Threading::make_ready_task(true);
             },
             {}, this);
 
         getOrCreateManual(
             "Capsule", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceDataInfo &info) {
                 data = std::make_unique<CapsuleShape>();
-                return true;
+                return Threading::make_ready_task(true);
             },
             {}, this);
 
         getOrCreateManual(
             "Sphere", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceDataInfo &info) {
                 data = std::make_unique<SphereShape>();
-                return true;
+                return Threading::make_ready_task(true);
             },
             {}, this);
 
         getOrCreateManual(
             "Compound", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceDataInfo &info) {
                 data = std::make_unique<CompoundShape>();
-                return true;
+                return Threading::make_ready_task(true);
             },
             {}, this);
     }
 
-    bool CollisionShapeManager::loadImpl(std::unique_ptr<CollisionShape> &shape, ResourceDataInfo &info)
+    Threading::ImmediateTask<bool> CollisionShapeManager::loadImpl(std::unique_ptr<CollisionShape> &shape, ResourceDataInfo &info)
     {
-        Render::MeshLoader::HandleType mesh;
-        mesh.load(info.resource()->name());
-        if (!mesh)
-            return false;
+        std::unique_ptr<MeshShape> meshShapePtr = std::make_unique<MeshShape>();
+        MeshShape *meshShape = meshShapePtr.get();
+        shape = std::move(meshShapePtr);
 
-        shape = std::make_unique<MeshShape>(mesh->mVertices, mesh->mVertexSize);
-        return true;
+        Render::MeshLoader::HandleType mesh;
+        if (!co_await mesh.load(info.resource()->name()))
+            co_return false;
+
+        meshShape->setMesh(mesh->mVertices, mesh->mVertexSize);
+        
+        co_return true;
     }
 
     void CollisionShapeManager::unloadImpl(std::unique_ptr<CollisionShape> &shape, ResourceDataInfo &info)
+    {
+    }
+
+    void CollisionShapeInstanceDeleter::operator()(CollisionShapeInstance *instance)
+    {
+        if (instance->isInstance())
+            delete instance;
+    }
+
+    CollisionShapeInstance::CollisionShapeInstance(typename CollisionShapeManager::HandleType shape)
+        : mHandle(std::move(shape))
     {
     }
 

@@ -35,7 +35,7 @@ namespace Render {
             {
             }
 
-			Threading::TaskFuture<bool> create(std::string_view name, TextureType type, DataFormat format, Vector2i size = { 0, 0 }, ByteBuffer data = {}, TextureLoader *loader = nullptr);
+			Threading::TaskFuture<bool> create(TextureType type, DataFormat format, Vector2i size = { 0, 0 }, ByteBuffer data = {}, TextureLoader *loader = nullptr);
             void loadFromImage(std::string_view name, TextureType type, DataFormat format, TextureLoader *loader = nullptr);
 
             void setData(Vector2i size, const ByteBuffer &data, TextureLoader *loader = nullptr);

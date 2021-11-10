@@ -15,7 +15,7 @@ namespace Tools {
 
         virtual void newFrame(float timeSinceLastFrame) override;
 
-        virtual void renderMainDrawList() override;
+        virtual void renderDrawList(ImGuiViewport *vp) override;
     };
 
 }

@@ -53,9 +53,9 @@ namespace Filesystem {
         return mPath != other.mPath;
     }
 
-    bool Path::operator<(const Path &other) const
+    std::strong_ordering Path::operator<=>(const Path &other) const
     {
-        return mPath < other.mPath;
+        return mPath <=> other.mPath;
     }
 
     Path Path::parentPath() const

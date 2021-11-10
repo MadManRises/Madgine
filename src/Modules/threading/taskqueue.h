@@ -37,11 +37,13 @@ namespace Threading {
         void queue_after(TaskHandle &&task, TaskMask mask, std::chrono::steady_clock::duration duration, const std::vector<Threading::DataMutex *> &dependencies = {});
         void queue_for(TaskHandle &&task, TaskMask mask, std::chrono::steady_clock::time_point time_point, const std::vector<Threading::DataMutex *> &dependencies = {});
 
-        template <typename T>
-        TaskFuture<T> queueTask(Task<T> task, TaskMask mask)
+        template <typename T, typename I>
+        TaskFuture<T> queueTask(Task<T, I> task, TaskMask mask)
         {
-            auto [fut, handle] = std::move(task).release();
-            queueHandle(std::move(handle), mask);
+            auto [fut, handle] = std::move(task).release(this);
+            if (handle)
+                queueHandle(std::move(handle), mask);
+
             return std::move(fut);
         }
 
@@ -70,7 +72,24 @@ namespace Threading {
 
         bool wantsMainThread() const;
 
-        void addSetupSteps(Lambda<bool()> &&init, Lambda<void()> &&finalize = {});
+        template <typename Init, typename Finalize>
+        void addSetupSteps(Init &&init, Finalize &&finalize)
+        {
+            auto [future, initHandle] = make_task(std::forward<Init>(init)).release(this);
+            auto [_, finalizeHandle] = make_task(LIFT(TupleUnpacker::invoke), std::forward<Finalize>(finalize), std::move(future)).release(this);            
+            addSetupStepTasks(std::move(initHandle), std::move(finalizeHandle));
+        }
+
+        template <typename Init>
+        void addSetupSteps(Init &&init)
+        {
+            auto [_, initHandle] = make_task(std::forward<Init>(init));
+            addSetupStepTasks(std::move(initHandle));
+        }
+
+        bool await_ready();
+        void await_suspend(TaskHandle handle);
+        void await_resume();
 
     protected:
         struct ScheduledTask {
@@ -84,6 +103,8 @@ namespace Threading {
         virtual std::optional<TaskTracker> fetch_on_idle();
 
         TaskTracker wrapTask(TaskHandle &&task, TaskMask mask);
+
+        void addSetupStepTasks(TaskHandle init, TaskHandle finalize = {});
 
     private:
         std::string mName;
@@ -100,9 +121,10 @@ namespace Threading {
         };
 
         std::list<ScheduledTask> mQueue;
+        std::stack<TaskHandle> mAwaiterStack;
         std::vector<RepeatedTask> mRepeatedTasks;
-        std::list<std::pair<Lambda<void()>, Lambda<void()>>> mSetupSteps;
-        std::list<std::pair<Lambda<void()>, Lambda<void()>>>::iterator mSetupState;
+        std::list<std::pair<TaskHandle, TaskHandle>> mSetupSteps;
+        std::list<std::pair<TaskHandle, TaskHandle>>::iterator mSetupState;
 
         mutable std::mutex mMutex;
         std::condition_variable mCv;

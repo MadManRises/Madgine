@@ -246,9 +246,9 @@ namespace Tools {
                 ImGui::Render();
             }
 
-            renderMainDrawList();
+            renderDrawList(main_viewport);
         } else {
-            ImGui::GetPlatformIO().Renderer_RenderWindow(mViewportMappings.at(target), nullptr);
+            renderDrawList(mViewportMappings.at(target));
         }
 
         target->popAnnotation();

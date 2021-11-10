@@ -1,33 +1,20 @@
 #pragma once
 
+#include "inheritable.h"
+
 namespace Engine {
 
 struct AnyHolderBase {
     virtual ~AnyHolderBase() = default;
 };
 
-template <typename T, bool isClass>
-struct AnyHolder : AnyHolderBase, T {
-    template <typename... Args>
-    AnyHolder(Args &&... args)
-        : T(std::forward<Args>(args)...)
-    {
-    }    
-};
-
 template <typename T>
-struct AnyHolder<T, false> : AnyHolderBase {
+struct AnyHolder : AnyHolderBase, Inheritable<T> {
     template <typename... Args>
-    AnyHolder(Args &&... args)
-        : data(std::forward<Args>(args)...)
+    AnyHolder(Args &&...args)
+        : Inheritable<T>(std::forward<Args>(args)...)
     {
     }
-
-    operator T& () {
-        return data;
-    }
-
-    T data;
 };
 
 struct Any {
@@ -43,14 +30,14 @@ struct Any {
     template <typename T, typename... Args>
     requires(!std::same_as<std::decay_t<T>, Any>)
     Any(inplace_t<T>, Args &&... args)
-        : mData(std::make_unique<AnyHolder<T, std::is_class_v<T>>>(std::forward<Args>(args)...))
+        : mData(std::make_unique<AnyHolder<T>>(std::forward<Args>(args)...))
     {
     }
 
     template <typename T>
     requires(!std::same_as<std::decay_t<T>, Any>)
     Any(T &&data)
-        : mData(std::make_unique<AnyHolder<T, std::is_class_v<T>>>(std::forward<T>(data)))
+        : mData(std::make_unique<AnyHolder<T>>(std::forward<T>(data)))
     {
     }
 
@@ -73,7 +60,7 @@ struct Any {
     template <typename T>
     T &as() const
     {
-        AnyHolder<T, std::is_class_v<T>> *holder = dynamic_cast<AnyHolder<T, std::is_class_v<T>> *>(mData.get());
+        AnyHolder<T> *holder = dynamic_cast<AnyHolder<T> *>(mData.get());
         if (!holder)
             std::terminate();
         return *holder;

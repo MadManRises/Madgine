@@ -9,10 +9,6 @@
 
 namespace Engine {
 namespace UI {
-    struct WindowDescriptor {
-        std::string mWidgetName;
-        std::function<bool(Widgets::WidgetBase *)> mInit;
-    };
 
     struct MADGINE_UI_EXPORT Handler : MadgineObject<Handler>, Serialize::VirtualSerializableUnitBase<VirtualScopeBase<>, Serialize::SerializableUnitBase> {
         SERIALIZABLEUNIT(Handler);
@@ -47,9 +43,7 @@ namespace UI {
             return static_cast<T &>(getGameHandler(component_index<T>(), init));
         }
 
-        GameHandlerBase &getGameHandler(size_t i, bool = true);
-
-        void registerWidget(const std::string &name, std::function<bool(Widgets::WidgetBase *)> init);
+        GameHandlerBase &getGameHandler(size_t i, bool = true);        
 
     protected:
         virtual bool init();
@@ -80,9 +74,6 @@ namespace UI {
         UIManager &mUI;
 
         Engine::Threading::ConnectionStore mConStore;
-
-    private:
-        std::list<WindowDescriptor> mWidgets;
     };
 }
 }

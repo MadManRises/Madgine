@@ -29,33 +29,34 @@ struct AreaView {
         size_t acc = 0;
         for (int i = Dim - 1; i >= 0; --i) {
             size_t axis = mAxisMapping[i];
-            assert(topLeft[axis] < mSizes[i]);
-            acc *= mFullSizes[i];
-            if (!mFlipped[i]) {
-                acc += topLeft[axis];
+            assert(topLeft[i] < mSizes[axis]);
+            acc *= mFullSizes[axis];
+            if (!mFlipped[axis]) {
+                acc += topLeft[i];
             } else {
-                acc += (mSizes[i] - topLeft[axis] - sizes[axis]);
+                acc += (mSizes[axis] - topLeft[i] - sizes[i]);
             }
         }
         return { mBuffer + acc, sizes, mFullSizes, mFlipped, mAxisMapping };
     }
 
-    /*decltype(auto) operator[](size_t i) const
+    decltype(auto) operator[](size_t i) const
     {
         size_t axis = mAxisMapping[Dim - 1];
-        assert(i < mSizes[Dim - 1]);
+        assert(i < mSizes[axis]);
         if (mFlipped[axis])
             i = mSizes[axis] - 1 - i;
-        if constexpr (Dim == 1) {
-            return mBuffer[i];
-        } else {
-            size_t fullSize = 1;
-            for (size_t j = 0; i < Dim - 1; ++i) {
-                fullSize *= mFullSizes[mAxisMapping[j]];
-            }
-            return AreaView<T, Dim - 1, Storage> { mBuffer + i * fullSize, mSizes, mFullSizes, mFlipped, mAxisMapping};
+        size_t fullSize = 1;
+        for (size_t j = 0; j < axis; ++j) {
+            fullSize *= mFullSizes[j];
         }
-    }*/
+        T *ptr = mBuffer + i * fullSize;
+        if constexpr (Dim == 1) {
+            return *ptr;
+        } else {            
+            return AreaView<T, Dim - 1, Storage> { ptr, mSizes, mFullSizes, mFlipped, mAxisMapping};
+        }
+    }
 
     T &at(const std::array<size_t, Storage> &indices)
     {
@@ -81,13 +82,13 @@ struct AreaView {
     {
         size_t acc = 0;
         for (int i = Dim - 1; i >= 0; --i) {
-            size_t axis = mAxisMapping[i];
-            assert(indices[axis] < mSizes[i]);
+            size_t reverseAxis = std::find(mAxisMapping.begin(), mAxisMapping.end(), i) - mAxisMapping.begin();            
+            assert(indices[reverseAxis] < mSizes[i]);
             acc *= mFullSizes[i];
             if (!mFlipped[i]) {
-                acc += indices[axis];
+                acc += indices[reverseAxis];
             } else {
-                acc += (mSizes[i] - 1 - indices[axis]);
+                acc += (mSizes[i] - 1 - indices[reverseAxis]);
             }
         }
         return acc;
@@ -229,7 +230,7 @@ struct AreaView {
     {
         std::array<size_t, Dim> endSizes;
         endSizes.fill(0);
-        endSizes[Dim - 1] = mSizes[Dim - 1];
+        endSizes[Dim - 1] = mSizes[mAxisMapping[Dim - 1]];
         return { this, endSizes };
     }
 

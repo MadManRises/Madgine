@@ -38,24 +38,24 @@ namespace Scene {
             return mMesh;
         }
 
-        Render::GPUMeshData::Material *Mesh::material() const
+        uint32_t Mesh::material() const
         {
             return mMaterial;
         }
 
-        void Mesh::setMaterial(Render::GPUMeshData::Material *material)
+        void Mesh::setMaterial(uint32_t material)
         {
             mMaterial = material;
         }
 
-        void Mesh::setMaterialName(std::string_view name)
+        /* void Mesh::setMaterialName(std::string_view name)
         {
             if (!mMesh)
                 return;
             auto it = std::find_if(mMesh->mMaterials.begin(), mMesh->mMaterials.end(), [&](const Render::GPUMeshData::Material &mat) { return mat.mName == name; });
             if (it != mMesh->mMaterials.end())
                 mMaterial = &*it;
-        }
+        }*/
 
         std::string_view Mesh::getName() const
         {
@@ -65,7 +65,7 @@ namespace Scene {
         void Mesh::setName(std::string_view name)
         {
             mMesh.load(name);
-            //mMaterial = mMesh && !mMesh->mMaterials.empty() ? &mMesh->mMaterials.front() : nullptr;
+            mMaterial = 0;
         }
 
         void Mesh::setVisible(bool vis)
@@ -86,7 +86,7 @@ namespace Scene {
         void Mesh::set(Render::GPUMeshLoader::HandleType handle)
         {
             mMesh = std::move(handle);
-            mMaterial = mMesh ? &mMesh->mMaterials.front() : nullptr;
+            mMaterial = 0;
         }
 
         Render::GPUMeshLoader::ResourceType *Mesh::get() const

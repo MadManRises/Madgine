@@ -6,6 +6,8 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
+#include "openglrendercontext.h"
+
 VIRTUALUNIQUECOMPONENT(Engine::Render::OpenGLTextureLoader);
 
 METATABLE_BEGIN(Engine::Render::OpenGLTextureLoader)
@@ -14,8 +16,6 @@ METATABLE_END(Engine::Render::OpenGLTextureLoader)
 
 METATABLE_BEGIN_BASE(Engine::Render::OpenGLTextureLoader::ResourceType, Engine::Render::TextureLoader::ResourceType)
 METATABLE_END(Engine::Render::OpenGLTextureLoader::ResourceType)
-
-
 
 namespace Engine {
 namespace Render {
@@ -50,6 +50,11 @@ namespace Render {
     void OpenGLTextureLoader::setSubData(Texture &tex, Vector2i offset, Vector2i size, const ByteBuffer &data)
     {
         static_cast<OpenGLTexture &>(tex).setSubData(offset, size, data);
+    }
+
+    Threading::TaskQueue *OpenGLTextureLoader::loadingTaskQueue() const
+    {
+        return OpenGLRenderContext::renderQueue();
     }
 
 }

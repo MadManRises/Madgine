@@ -22,10 +22,10 @@ namespace Render {
     }
 
     Threading::TaskFuture<bool> TextureLoader::HandleType::create(
-        std::string_view name, TextureType type, DataFormat format, Vector2i size, ByteBuffer data, TextureLoader * loader)
+        TextureType type, DataFormat format, Vector2i size, ByteBuffer data, TextureLoader * loader)
     {
-        *this = TextureLoader::loadManual(
-            name, {}, [=, data { std::move(data) }](TextureLoader *loader, Texture &texture, const TextureLoader::ResourceDataInfo &info) mutable {
+        *this = TextureLoader::loadUnnamed(
+            [=, data { std::move(data) }](TextureLoader *loader, Texture &texture, const TextureLoader::ResourceDataInfo &info) mutable {
                 if (!loader->create(texture, type, format))
                     return false;
                 if (data.mSize > 0)
@@ -39,14 +39,12 @@ namespace Render {
     void TextureLoader::HandleType::loadFromImage(std::string_view name, TextureType type, DataFormat format, TextureLoader *loader)
     {
         *this = TextureLoader::loadManual(
-            name, {}, [=](TextureLoader *loader, Texture &texture, const TextureLoader::ResourceDataInfo &info) {
+            name, {}, [=](TextureLoader *loader, Texture &texture, const TextureLoader::ResourceDataInfo &info) -> Threading::Task<bool> {
                 Resources::ImageLoader::HandleType image;
-                image.load(name);
-
-                if (!image)
-                    return false;
+                if (!co_await image.load(info.resource()->name()))
+                    co_return false;
                 loader->setData(texture, { image->mWidth, image->mHeight }, { image->mBuffer, static_cast<size_t>(image->mWidth * image->mHeight) });
-                return true;
+                co_return true;
             },
             {}, loader);
             

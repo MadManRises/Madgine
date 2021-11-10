@@ -32,11 +32,11 @@ struct MadgineObjectState {
     }
             
     template <typename U>
-    U &getChild(U &u, int &counter, bool init = true)
+    U &getChildOrder(U &u, int &counter, bool init = true)
     {
         if (init) {
             checkInitState();
-            u.callInit(counter);
+            u.callInitOrder(counter);
         }
         return static_cast<U &>(u.getSelf(init));
     }
@@ -103,7 +103,7 @@ struct MadgineObject : MadgineObjectState {
         }
         return isInitialized();
     }
-    bool callInit(int &count)
+    bool callInitOrder(int &count)
     {
         bool notInit = mState == ObjectState::UNINITIALIZED;
         bool result = callInit();
@@ -120,7 +120,7 @@ struct MadgineObject : MadgineObjectState {
         }
         assert(mState == ObjectState::UNINITIALIZED);
     }
-    void callFinalize(int order)
+    void callFinalizeOrder(int order)
     {
         if (mOrder == order)
             callFinalize();

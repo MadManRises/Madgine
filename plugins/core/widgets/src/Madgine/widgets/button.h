@@ -5,6 +5,7 @@
 #include "Modules/threading/signal.h"
 
 #include "fontloader.h"
+#include "imageloader.h"
 
 namespace Engine {
 namespace Widgets {
@@ -12,13 +13,13 @@ namespace Widgets {
         using Widget::Widget;
         virtual ~Button() = default;
 
-        void setImageByName(std::string_view name);
-        void setImage(Resources::ResourceType<Resources::ImageLoader> *image);
+        void setImageName(std::string_view name);
+        void setImage(Resources::ImageLoader::ResourceType *image);
 
-        std::string_view getImageName() const;
-        Resources::ResourceType<Resources::ImageLoader> *image() const;
+        std::string_view imageName() const;
+        Resources::ImageLoader::ResourceType *image() const;
 
-        Resources::ResourceType<Resources::ImageLoader> *resource() const override;
+        virtual Resources::ImageLoader::ResourceType *resource() const override;
 
         Threading::SignalStub<> &clickEvent();
 
@@ -26,11 +27,11 @@ namespace Widgets {
 
         virtual WidgetClass getClass() const override;
 
-        std::string_view getFontName() const;
+        std::string_view fontName() const;
         void setFontName(std::string_view name);
 
-        Render::FontLoader::ResourceType *getFont() const;
-        void setFont(Render::FontLoader::ResourceType *font);
+        Render::FontLoader::ResourceType *font() const;
+        void setFont(Render::FontLoader::HandleType font);
 
         std::string mText;
         float mFontSize = 16;
@@ -46,8 +47,7 @@ namespace Widgets {
 
     private:
         Render::FontLoader::HandleType mFont;
-        //TODO: Use HandleType
-        Resources::ResourceType<Resources::ImageLoader> *mImage = nullptr;
+        Resources::ImageLoader::ResourceType *mImage;
 
         Threading::Signal<> mClicked;
 

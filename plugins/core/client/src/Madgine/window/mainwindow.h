@@ -131,12 +131,14 @@ namespace Window {
         void onRepaint() override;
         void onResize(const InterfacesVector &size) override;
 
+        void storeWindowData();
+
     private:
         const WindowSettings &mSettings;
 
         MEMBER_OFFSET_CONTAINER(mComponents, MainWindowComponentContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, MainWindowComponentComparator>, MainWindowComponentObserver<>, std::true_type>>);
 
-        std::vector<std::unique_ptr<ToolWindow>> mToolWindows;
+        std::list<ToolWindow> mToolWindows;
 
         Threading::FrameLoop mLoop;
 

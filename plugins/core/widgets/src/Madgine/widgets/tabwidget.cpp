@@ -11,17 +11,15 @@ METATABLE_END(Engine::Widgets::TabWidget)
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::TabWidget, Engine::Widgets::WidgetBase)
 SERIALIZETABLE_END(Engine::Widgets::TabWidget)
 
-namespace Engine
-{
-namespace Widgets
-	{
-		void TabWidget::addTab(Widget * w)
-		{
-		}
+namespace Engine {
+namespace Widgets {
+    void TabWidget::addTab(Widget *w)
+    {
+    }
 
-		    WidgetClass TabWidget::getClass() const
-                {
-                    return WidgetClass::TABWIDGET_CLASS;
-                }
-	}
+    WidgetClass TabWidget::getClass() const
+    {
+        return WidgetClass::TABWIDGET;
+    }
+}
 }

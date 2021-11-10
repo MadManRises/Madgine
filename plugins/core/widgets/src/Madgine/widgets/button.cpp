@@ -16,21 +16,21 @@
 METATABLE_BEGIN_BASE(Engine::Widgets::Button, Engine::Widgets::WidgetBase)
 MEMBER(mText)
 MEMBER(mFontSize)
-PROPERTY(Font, getFont, setFont)
+PROPERTY(Font, font, setFont)
 PROPERTY(Image, image, setImage)
 METATABLE_END(Engine::Widgets::Button)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::Button, Engine::Widgets::WidgetBase)
 FIELD(mText)
 FIELD(mFontSize)
-ENCAPSULATED_FIELD(mFont, getFontName, setFontName)
-ENCAPSULATED_FIELD(Image, getImageName, setImageByName)
+ENCAPSULATED_FIELD(mFont, fontName, setFontName)
+ENCAPSULATED_FIELD(Image, imageName, setImageName)
 SERIALIZETABLE_END(Engine::Widgets::Button)
 
 namespace Engine {
 namespace Widgets {
 
-        void Button::setImageByName(std::string_view name)
+    void Button::setImageName(std::string_view name)
     {
         setImage(Resources::ImageLoader::getSingleton().get(name));
     }
@@ -40,7 +40,7 @@ namespace Widgets {
         mImage = image;
     }
 
-    std::string_view Button::getImageName() const
+    std::string_view Button::imageName() const
     {
         return mImage ? mImage->name() : "";
     }
@@ -129,10 +129,10 @@ namespace Widgets {
 
     WidgetClass Button::getClass() const
     {
-        return WidgetClass::BUTTON_CLASS;
+        return WidgetClass::BUTTON;
     }
 
-    std::string_view Button::getFontName() const
+    std::string_view Button::fontName() const
     {
         return mFont.name();
     }
@@ -142,14 +142,14 @@ namespace Widgets {
         mFont.load(name);
     }
 
-    Render::FontLoader::ResourceType *Button::getFont() const
+    Render::FontLoader::ResourceType *Button::font() const
     {
         return mFont.resource();
     }
 
-    void Button::setFont(Render::FontLoader::ResourceType *font)
+    void Button::setFont(Render::FontLoader::HandleType font)
     {
-        mFont = font;
+        mFont = std::move(font);
     }
 
 }

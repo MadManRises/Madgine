@@ -65,8 +65,6 @@ namespace Render {
 
     void OpenGLTexture::setData(Vector2i size, const ByteBuffer &data)
     {
-        const void *ptr = data.mData;
-        std::vector<unsigned char> flippedData;
         GLenum internalStorage;
         GLenum internalFormat;
         GLenum sizedFormat;
@@ -82,7 +80,7 @@ namespace Render {
             internalStorage = GL_FLOAT;
             internalFormat = GL_RGBA;
             sizedFormat = GL_RGBA16F;
-            assert(!ptr);
+            assert(!data.mData);
             break;
         case FORMAT_R32F:
             internalStorage = GL_FLOAT,
@@ -93,35 +91,28 @@ namespace Render {
             internalStorage = GL_UNSIGNED_INT;
             internalFormat = GL_DEPTH_COMPONENT;
             sizedFormat = GL_DEPTH_COMPONENT24;
-            assert(!ptr);
+            assert(!data.mData);
             break;
         case FORMAT_D32:
             internalStorage = GL_FLOAT;
             internalFormat = GL_DEPTH_COMPONENT;
             sizedFormat = GL_DEPTH_COMPONENT32F;
-            assert(!ptr);
+            assert(!data.mData);
             break;
         default:
             throw 0;
         }
-        if (ptr) {
-            flippedData.reserve(size.x * size.y * byteWidth);
-            AreaView<const unsigned char, 2> view { static_cast<const unsigned char *>(data.mData), { size.x * byteWidth, static_cast<size_t>(size.y) } };
-            view.flip(1);
-            std::copy(view.begin(), view.end(), std::back_inserter(flippedData));
-            ptr = flippedData.data();
-        }
         bind();
         switch (mType) {
         case TextureType_2D:
-            glTexImage2D(target(), 0, sizedFormat, size.x, size.y, 0, internalFormat, internalStorage, ptr);
+            glTexImage2D(target(), 0, sizedFormat, size.x, size.y, 0, internalFormat, internalStorage, data.mData);
             break;
         case TextureType_2DMultiSample:
             glTexImage2DMultisample(target(), mSamples, sizedFormat, size.x, size.y, true);
             break;
         case TextureType_Cube:
             for (int i = 0; i < 6; ++i)
-                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, sizedFormat, size.x, size.y, 0, internalFormat, internalStorage, ptr);
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, sizedFormat, size.x, size.y, 0, internalFormat, internalStorage, data.mData);
             break;
         }
         GL_CHECK();
@@ -130,7 +121,6 @@ namespace Render {
 
     void OpenGLTexture::setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data)
     {
-        std::vector<unsigned char> flippedData;
         GLenum internalStorage;
         GLenum internalFormat;
         GLenum sizedFormat;
@@ -160,12 +150,8 @@ namespace Render {
         default:
             throw 0;
         }
-        flippedData.reserve(size.x * size.y * byteWidth);
-        AreaView<const unsigned char, 2> view { static_cast<const unsigned char *>(data.mData), { size.x * byteWidth, static_cast<size_t>(size.y) } };
-        view.flip(1);
-        std::copy(view.begin(), view.end(), std::back_inserter(flippedData));
         bind();
-        glTexSubImage2D(target(), 0, offset.x, mSize.y - offset.y - size.y, size.x, size.y, internalFormat, internalStorage, flippedData.data());
+        glTexSubImage2D(target(), 0, offset.x, offset.y, size.x, size.y, internalFormat, internalStorage, data.mData);
         GL_CHECK();
     }
 

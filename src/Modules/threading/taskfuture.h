@@ -41,7 +41,7 @@ namespace Threading {
             return is_ready();
         }
 
-        void await_suspend(CoroutineHandle<TaskPromiseTypeBase> handle)
+        void await_suspend(TaskHandle handle)
         {
             mState->then_resume(std::move(handle));
         }
@@ -101,7 +101,7 @@ namespace Threading {
             return is_ready();
         }
 
-        void await_suspend(CoroutineHandle<TaskPromiseTypeBase> handle)
+        void await_suspend(TaskHandle handle)
         {
             mState->then_resume(std::move(handle));
         }

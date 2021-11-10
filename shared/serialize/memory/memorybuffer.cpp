@@ -4,12 +4,13 @@
 
 namespace Engine {
 namespace Memory {
-    MemoryBuffer::MemoryBuffer(WritableByteBuffer buffer)
+    MemoryWriteBuffer::MemoryWriteBuffer(WritableByteBuffer buffer)
         : mWriteBuffer(std::move(buffer))
     {
+        setp(static_cast<char*>(buffer.mData), static_cast<char*>(buffer.mData) + buffer.mSize);
     }
 
-    MemoryBuffer::MemoryBuffer(ByteBuffer buffer)
+    MemoryReadBuffer::MemoryReadBuffer(ByteBuffer buffer)
         : mReadBuffer(std::move(buffer))
     {
         setg(
@@ -18,18 +19,27 @@ namespace Memory {
             const_cast<char *>(static_cast<const char *>(mReadBuffer.mData) + mReadBuffer.mSize));
     }
 
-    MemoryBuffer::MemoryBuffer(MemoryBuffer &&other) noexcept
+    MemoryWriteBuffer::MemoryWriteBuffer(MemoryWriteBuffer &&other) noexcept
         : std::basic_streambuf<char>(std::move(other))
         , mWriteBuffer(std::move(other.mWriteBuffer))
+    {
+    }
+
+    MemoryReadBuffer::MemoryReadBuffer(MemoryReadBuffer &&other) noexcept
+        : std::basic_streambuf<char>(std::move(other))
         , mReadBuffer(std::move(other.mReadBuffer))
     {
     }
 
-    MemoryBuffer::~MemoryBuffer()
+    MemoryWriteBuffer::~MemoryWriteBuffer()
     {
     }
 
-    MemoryBuffer::int_type MemoryBuffer::overflow(int c)
+    MemoryReadBuffer::~MemoryReadBuffer()
+    {
+    }
+
+    MemoryWriteBuffer::int_type MemoryWriteBuffer::overflow(int c)
     {
         size_t oldSize = mWriteBuffer.mSize;
         size_t newSize = 3 * oldSize / 2;
@@ -46,7 +56,7 @@ namespace Memory {
         return c;
     }
 
-    MemoryBuffer::int_type MemoryBuffer::underflow()
+    MemoryReadBuffer::int_type MemoryReadBuffer::underflow()
     {
         return traits_type::eof();
     }

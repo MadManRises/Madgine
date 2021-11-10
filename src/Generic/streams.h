@@ -32,7 +32,13 @@ struct InStream {
     template <typename T>
     InStream &operator>>(T &t)
     {
-        mStream >> t;
+        if constexpr (std::is_enum_v<T>) {
+            std::underlying_type_t<T> val;
+            mStream >> val;
+            t = static_cast<T>(val);
+        } else {
+            mStream >> t;
+        }
         return *this;
     }
 
@@ -138,7 +144,11 @@ struct OutStream {
     template <typename T>
     OutStream &operator<<(const T &t)
     {
-        mStream << t;
+        if constexpr (std::is_enum_v<T>) {
+            mStream << static_cast<std::underlying_type_t<T>>(t);
+        } else {
+            mStream << t;
+        }
         return *this;
     }
 
@@ -180,5 +190,4 @@ protected:
 
     using InStream::buffer;
 };*/
-
 }

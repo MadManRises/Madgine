@@ -2,8 +2,6 @@
 
 #include "Madgine/ui/gamehandler.h"
 
-#include "Madgine/ui/widgetptr.h"
-
 #include "Madgine/render/camera.h"
 
 #include "Madgine/render/scenerenderpass.h"
@@ -37,9 +35,9 @@ namespace UI {
         Engine::Render::Camera mCamera;
 
     private:
-        Engine::UI::WidgetPtr<Engine::Widgets::SceneWindow> mGameWindow;
-        Engine::UI::WidgetPtr<Engine::Widgets::Label> mScoreLabel;
-        Engine::UI::WidgetPtr<Engine::Widgets::Label> mLifeLabel;
+        Engine::Widgets::SceneWindow* mGameWindow = nullptr;
+        Engine::Widgets::Label* mScoreLabel = nullptr;
+        Engine::Widgets::Label* mLifeLabel = nullptr;
 
         int mScore = 0;
         int mLife = 100000;

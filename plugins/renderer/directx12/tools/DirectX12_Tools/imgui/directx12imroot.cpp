@@ -83,9 +83,9 @@ namespace Tools {
         Im3D::NewFrame();
     }
 
-    void DirectX12ImRoot::renderMainDrawList()
+    void DirectX12ImRoot::renderDrawList(ImGuiViewport *vp)
     {
-        ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), Render::DirectX12RenderContext::getSingleton().mCommandList.mList);
+        ImGui_ImplDX12_RenderDrawData(vp->DrawData, Render::DirectX12RenderContext::getSingleton().mCommandList.mList);
     }
 
 }

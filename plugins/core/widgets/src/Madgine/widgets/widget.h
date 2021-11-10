@@ -27,10 +27,7 @@ namespace Widgets {
         Render::TextureDescriptor mTexture;
         TextureFlags mFlags = 0;
 
-        bool operator<(const TextureSettings &other) const
-        {
-            return mTexture.mTextureHandle < other.mTexture.mTextureHandle || (mTexture.mTextureHandle == other.mTexture.mTextureHandle && mFlags < other.mFlags);
-        }
+        auto operator<=>(const TextureSettings &other) const = default;
     };
 
     struct MADGINE_WIDGETS_EXPORT WidgetBase : VirtualScope<WidgetBase, Serialize::VirtualUnit<WidgetBase, Serialize::VirtualSerializableUnitBase<VirtualScopeBase<>, Serialize::SerializableUnitBase>>> {
@@ -74,6 +71,10 @@ namespace Widgets {
         WidgetType *createChild(const std::string &name);
 
         WidgetBase *getChildRecursive(const std::string &name);
+        template <typename T>
+        T* getChildRecursive(const std::string& name) {
+            return dynamic_cast<T *>(getChildRecursive(name));
+        }
         void setParent(WidgetBase *parent);
         WidgetBase *getParent() const;
 

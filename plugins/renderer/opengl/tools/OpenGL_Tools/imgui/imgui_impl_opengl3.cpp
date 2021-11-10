@@ -295,8 +295,8 @@ bool ImGui_ImplOpenGL3_Init(const char *glsl_version)
     }
 #endif
 
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        ImGui_ImplOpenGL3_InitPlatformInterface();
+    /* if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        ImGui_ImplOpenGL3_InitPlatformInterface();*/
 
     return true;
 }
@@ -583,17 +583,6 @@ bool ImGui_ImplOpenGL3_CreateFontsTexture()
     int bytes_per_pixel;
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height, &bytes_per_pixel); // Load as RGBA 32-bit (75% of the memory is wasted, but default font is so small) because it is more likely to be compatible with user's existing shaders. If your ImTextureId represent a higher-level concept than just a GL texture id, consider calling GetTexDataAsAlpha8() instead to save on GPU memory.
 
-    std::vector<unsigned char> flippedTexture(width * height * bytes_per_pixel);
-
-    unsigned char *src = pixels;
-    for (int y = 0; y < height; ++y) {
-        unsigned char *dst = flippedTexture.data() + (height - 1 - y) * width * bytes_per_pixel;
-        for (int x = 0; x < width * bytes_per_pixel; ++x) {
-            *(dst++) = *(src++);
-        }
-    }
-
-
     // Upload texture to graphics system
     GLint last_texture;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
@@ -604,7 +593,7 @@ bool ImGui_ImplOpenGL3_CreateFontsTexture()
 #ifdef GL_UNPACK_ROW_LENGTH
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 #endif
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, flippedTexture.data());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
     // Store our identifier
     io.Fonts->SetTexID((ImTextureID)(intptr_t)bd->FontTexture);
@@ -687,7 +676,7 @@ bool ImGui_ImplOpenGL3_CreateDeviceObjects()
                                            "varying vec4 Frag_Color;\n"
                                            "void main()\n"
                                            "{\n"
-                                           "    Frag_UV = vec2(UV.x, 1.0-UV.y);\n"
+                                           "    Frag_UV = vec2(UV.x, UV.y);\n"
                                            "    Frag_Color = Color;\n"
                                            "    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
                                            "}\n";
@@ -700,7 +689,7 @@ bool ImGui_ImplOpenGL3_CreateDeviceObjects()
                                            "out vec4 Frag_Color;\n"
                                            "void main()\n"
                                            "{\n"
-                                           "    Frag_UV = vec2(UV.x, 1.0-UV.y);\n"
+                                           "    Frag_UV = vec2(UV.x, UV.y);\n"
                                            "    Frag_Color = Color;\n"
                                            "    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
                                            "}\n";
@@ -714,7 +703,7 @@ bool ImGui_ImplOpenGL3_CreateDeviceObjects()
                                               "out vec4 Frag_Color;\n"
                                               "void main()\n"
                                               "{\n"
-                                              "    Frag_UV = vec2(UV.x, 1.0-UV.y);\n"
+                                              "    Frag_UV = vec2(UV.x, UV.y);\n"
                                               "    Frag_Color = Color;\n"
                                               "    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
                                               "}\n";
@@ -727,7 +716,7 @@ bool ImGui_ImplOpenGL3_CreateDeviceObjects()
                                                 "out vec4 Frag_Color;\n"
                                                 "void main()\n"
                                                 "{\n"
-                                                "    Frag_UV = vec2(UV.x, 1-UV.y);\n"
+                                                "    Frag_UV = vec2(UV.x, UV.y);\n"
                                                 "    Frag_Color = Color;\n"
                                                 "    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
                                                 "}\n";

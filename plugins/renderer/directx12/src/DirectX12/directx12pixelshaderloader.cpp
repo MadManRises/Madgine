@@ -32,7 +32,7 @@ namespace Render {
     void DirectX12PixelShaderLoader::HandleType::create(const std::string &name, const CodeGen::ShaderFile &file, DirectX12PixelShaderLoader *loader)
     {
         *this = DirectX12PixelShaderLoader::loadManual(
-            name, {}, [=, &file](DirectX12PixelShaderLoader *loader, DirectX12PixelShader &shader, const DirectX12PixelShaderLoader::ResourceDataInfo &info) mutable { return loader->create(shader, info.resource(), file); }, {}, loader);
+            name, {}, [=, &file](DirectX12PixelShaderLoader *loader, DirectX12PixelShader &shader, const DirectX12PixelShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, {}, loader);
     }
 
     bool DirectX12PixelShaderLoader::loadImpl(DirectX12PixelShader &shader, ResourceDataInfo &info)

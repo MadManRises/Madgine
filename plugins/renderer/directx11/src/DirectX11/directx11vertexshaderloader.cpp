@@ -25,7 +25,7 @@ namespace Render {
     void DirectX11VertexShaderLoader::HandleType::create(const std::string &name, const CodeGen::ShaderFile &file, DirectX11VertexShaderLoader *loader)
     {
         *this = DirectX11VertexShaderLoader::loadManual(
-            name, {}, [=, &file](DirectX11VertexShaderLoader *loader, DirectX11VertexShader &shader, const DirectX11VertexShaderLoader::ResourceDataInfo &info) mutable { return loader->create(shader, info.resource(), file); }, {}, loader);
+            name, {}, [=, &file](DirectX11VertexShaderLoader *loader, DirectX11VertexShader &shader, const DirectX11VertexShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, {}, loader);
     }
 
     bool DirectX11VertexShaderLoader::loadImpl(DirectX11VertexShader &shader, ResourceDataInfo &info)

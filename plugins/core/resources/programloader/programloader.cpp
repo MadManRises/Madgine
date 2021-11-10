@@ -22,22 +22,22 @@ namespace Render {
 
     Threading::TaskFuture<bool> ProgramLoader::HandleType::create(const std::string &name, const std::vector<size_t> &bufferSizes, size_t instanceDataSize, ProgramLoader *loader)
     {
-        *this = ProgramLoader::loadManual(
-            Resources::ResourceBase::sUnnamed, {}, [=](ProgramLoader *loader, Program &program, const ProgramLoader::ResourceDataInfo &info) { return loader->create(program, name, bufferSizes, instanceDataSize); }, {},
+        *this = ProgramLoader::loadUnnamed(
+            [=](ProgramLoader *loader, Program &program, const ProgramLoader::ResourceDataInfo &info) { return loader->create(program, name, bufferSizes, instanceDataSize); }, {},
             loader);
         return info()->loadingTask();
     }
 
-    void ProgramLoader::HandleType::create(const std::string &name, CodeGen::ShaderFile &&file, ProgramLoader *loader)
+    void ProgramLoader::HandleType::create(const std::string &name, CodeGen::ShaderFile file, ProgramLoader *loader)
     {
-        *this = ProgramLoader::loadManual(
-            name, {}, [=, file { std::move(file) }](ProgramLoader *loader, Program &program, const ProgramLoader::ResourceDataInfo &info) mutable { return loader->create(program, name, file); }, {}, loader);
+        *this = ProgramLoader::loadUnnamed(
+            [=, file { std::move(file) }](ProgramLoader *loader, Program &program, const ProgramLoader::ResourceDataInfo &info) mutable { return loader->create(program, name, file); }, {}, loader);
     }
 
     void ProgramLoader::HandleType::createUnnamed(CodeGen::ShaderFile &&file, ProgramLoader *loader)
     {
-        *this = ProgramLoader::loadManual(
-            Resources::ResourceBase::sUnnamed, {}, [=, file { std::move(file) }](ProgramLoader *loader, Program &program, const ProgramLoader::ResourceDataInfo &info) mutable { return loader->create(program, Resources::ResourceBase::sUnnamed, file); }, {}, loader);
+        *this = ProgramLoader::loadUnnamed(
+            [=, file { std::move(file) }](ProgramLoader *loader, Program &program, const ProgramLoader::ResourceDataInfo &info) mutable { return loader->create(program, Resources::ResourceBase::sUnnamed, file); }, {}, loader);
     }
 
     WritableByteBuffer ProgramLoader::HandleType::mapParameters(size_t index, ProgramLoader *loader)

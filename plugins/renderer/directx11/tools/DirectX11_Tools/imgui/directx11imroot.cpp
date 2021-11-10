@@ -42,6 +42,12 @@ namespace Tools {
         /*if (!(ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable))
                 ImGui::GetIO().RenderDrawListsFn = ImGui_ImplDX11_RenderDrawData;*/
 
+        /* ImGuiIO &io = ImGui::GetIO();
+        io.BackendRendererName = "DirectX 11";
+        io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset; // We can honor the ImDrawCmd::VtxOffset field, allowing for large meshes.
+        io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;*/ // We can create multi-viewports on the Renderer side (optional)
+
+
         Im3D::GetIO().mFetchFont = [](const char *fontName) {
             Render::FontLoader::HandleType font;
             font.load(fontName);
@@ -80,9 +86,9 @@ namespace Tools {
         Im3D::NewFrame();
     }
 
-    void DirectX11ImRoot::renderMainDrawList()
+    void DirectX11ImRoot::renderDrawList(ImGuiViewport *vp)
     {
-        ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+        ImGui_ImplDX11_RenderDrawData(vp->DrawData);
     }
 
 }

@@ -23,6 +23,7 @@ namespace Threading {
 
     TaskQueue::~TaskQueue()
     {
+        assert(mQueue.empty());
         WorkGroup::self().removeTaskQueue(this);
     }
 
@@ -33,10 +34,9 @@ namespace Threading {
 
     void TaskQueue::queueInternal(ScheduledTask &&task)
     {
-        //TODO: priority Queue
         {
+            //TODO: priority Queue
             std::lock_guard<std::mutex> lock(mMutex);
-            task.mTask.setQueue(this);
             mQueue.emplace_back(std::move(task));
         }
         mCv.notify_one();
@@ -132,10 +132,10 @@ namespace Threading {
 
         if (mRunning && match(TaskMask::DEFAULT, taskMask)) {
             while (mSetupState != mSetupSteps.end()) {
-                Lambda<void()> init = std::move(mSetupState->first);
+                TaskHandle init = std::move(mSetupState->first);
                 ++mSetupState;
                 if (init) {
-                    return wrapTask(make_task(std::move(init)), TaskMask::DEFAULT);
+                    return wrapTask(std::move(init), TaskMask::DEFAULT);
                 }
             }
         }
@@ -153,6 +153,14 @@ namespace Threading {
                     nextTaskTimepoint = std::min(it->mScheduledFor, nextTaskTimepoint);
                 }
             }
+            while (!mAwaiterStack.empty()) {
+                TaskHandle handle = std::move(mAwaiterStack.top());
+                mAwaiterStack.pop();
+                if (handle.queue() == this) {
+                    return wrapTask(std::move(handle), TaskMask::ALL);
+                }
+                handle.resumeInQueue();
+            }
             if (mRunning && repeatedCount != 0 && (!interruptFlag || !*interruptFlag)) {
                 RepeatedTask *nextTask = nullptr;
                 for (RepeatedTask &task : mRepeatedTasks) {
@@ -167,7 +175,7 @@ namespace Threading {
                     if (repeatedCount > 0)
                         --repeatedCount;
                     nextTask->mNextExecuted = std::chrono::steady_clock::now() + nextTask->mInterval;
-                    return wrapTask(make_task([=]() { nextTask->mTask(); }), nextTask->mMask);
+                    return wrapTask(make_task([=]() { nextTask->mTask(); }).release(this).second, nextTask->mMask);
                 }
             }
         }
@@ -189,9 +197,9 @@ namespace Threading {
 
             while (mSetupState != mSetupSteps.begin()) {
                 --mSetupState;
-                Lambda<void()> finalize = std::move(mSetupState->second);
+                TaskHandle finalize = std::move(mSetupState->second);
                 if (finalize) {
-                    return wrapTask(make_task(std::move(finalize)), TaskMask::DEFAULT);
+                    return wrapTask(std::move(finalize), TaskMask::DEFAULT);
                 }
             }
         }
@@ -219,31 +227,28 @@ namespace Threading {
         return mTaskCount == 0;
     }
 
-    void TaskQueue::addSetupSteps(Lambda<bool()> &&init, Lambda<void()> &&finalize)
+    void TaskQueue::addSetupStepTasks(TaskHandle init, TaskHandle finalize)
     {
         bool isItEnd = mSetupState == mSetupSteps.end();
-        if (init && finalize) {
-            std::promise<bool> p;
-            std::future<bool> f = p.get_future();
-            mSetupSteps.emplace_back(
-                [init { std::move(init) }, p { std::move(p) }]() mutable {
-                    try {
-                        p.set_value(init());
-                    } catch (std::exception &) {
-                        p.set_value(false);
-                        throw;
-                    }
-                },
-                [finalize { std::move(finalize) }, f { std::move(f) }]() mutable {
-                    if (f.get())
-                        finalize();
-                });
-        } else {
-            mSetupSteps.emplace_back(std::move(init), std::move(finalize));
-        }
+        mSetupSteps.emplace_back(std::move(init), std::move(finalize));
         if (isItEnd) {
             mSetupState = std::prev(mSetupState);
         }
+    }
+
+    bool TaskQueue::await_ready()
+    {
+        return idle(TaskMask::DEFAULT);
+    }
+
+    void TaskQueue::await_suspend(TaskHandle handle)
+    {
+        std::lock_guard<std::mutex> lock(mMutex);
+        mAwaiterStack.emplace(std::move(handle));
+    }
+
+    void TaskQueue::await_resume()
+    {
     }
 
     TaskTracker::TaskTracker(TaskHandle &&task, TaskMask mask, std::atomic<size_t> &tracker)

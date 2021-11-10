@@ -818,6 +818,8 @@ struct container_traits<GenerationContainer<C>, void> {
     typedef IndexType<size_t> const_position_handle;
     typedef typename container::value_type value_type;
 
+    static_assert(sizeof(position_handle) <= sizeof(void *));
+
     typedef iterator emplace_return;
 
     template <typename... _Ty>

@@ -21,16 +21,10 @@ namespace Serialize {
         template <typename T>
         StreamResult readUnformatted(T &t)
         {
-            if constexpr (std::is_enum_v<T>) {
-                int32_t buffer;
-                readUnformatted(buffer);
-                t = static_cast<T>(buffer);
-            } else {
-                if (isBinary())
-                    readRaw(t);
-                else
-                    InStream::operator>>(t);
-            }
+            if (isBinary())
+                readRaw(t);
+            else
+                InStream::operator>>(t);
             if (!*this)
                 return STREAM_PARSE_ERROR(*this, "Expected: <" << typeName<T>() << ">");
             return {};
@@ -44,7 +38,7 @@ namespace Serialize {
             if constexpr (std::is_base_of_v<SyncableUnitBase, T>) {
                 SyncableUnitBase *unit;
                 STREAM_PROPAGATE_ERROR(readUnformatted(unit));
-                p = reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(unit));                
+                p = reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(unit));
             } else {
                 SerializableDataUnit *unit;
                 STREAM_PROPAGATE_ERROR(readUnformatted(unit));
@@ -117,17 +111,12 @@ namespace Serialize {
         SerializeOutStream &operator<<(const char *s);
 
         template <typename T>
-        requires (!std::is_pointer_v<T>)
-        void writeUnformatted(const T &t)
+        requires(!std::is_pointer_v<T>) void writeUnformatted(const T &t)
         {
-            if constexpr (std::is_enum_v<T>) {
-                writeUnformatted(static_cast<int32_t>(t));
-            } else {
-                if (isBinary())
-                    writeRaw(t);
-                else
-                    OutStream::operator<<(t);
-            }
+            if (isBinary())
+                writeRaw(t);
+            else
+                OutStream::operator<<(t);
         }
 
         void writeUnformatted(const SyncableUnitBase *p);

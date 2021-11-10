@@ -188,6 +188,16 @@ namespace Physics {
         get()->setAngularFactor({ factor.x, factor.y, factor.z });
     }
 
+    Vector3 RigidBody::angularVelocity() const
+    {
+        return get()->getAngularVelocity().m_floats;
+    }
+
+    void RigidBody::setAngularVelocity(const Vector3 &v)
+    {
+        get()->setAngularVelocity({ v.x, v.y, v.z });
+    }
+
     void RigidBody::setVelocity(const Vector3 &v)
     {
         get()->setLinearVelocity({ v.x, v.y, v.z });
@@ -209,7 +219,7 @@ namespace Physics {
 
     CollisionShapeManager::ResourceType *RigidBody::getShape() const
     {
-        return mShapeHandle ? mShapeHandle->mShape.resource() : nullptr;
+        return mShapeHandle ? mShapeHandle.resource() : nullptr;
     }
 
     CollisionShapeInstance *RigidBody::getShapeInstance() const

@@ -8,6 +8,8 @@
 
 #include "meshdata.h"
 
+#include "openglrendercontext.h"
+
 
 VIRTUALUNIQUECOMPONENT(Engine::Render::OpenGLMeshLoader);
 
@@ -104,6 +106,11 @@ namespace Render {
     void OpenGLMeshLoader::reset(GPUMeshData &data)
     {
         static_cast<OpenGLMeshData &>(data).reset();
+    }
+
+        Threading::TaskQueue *OpenGLMeshLoader::loadingTaskQueue() const
+    {
+        return OpenGLRenderContext::renderQueue();
     }
 
 }

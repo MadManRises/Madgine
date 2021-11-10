@@ -76,8 +76,10 @@ void main()
 		worldPos = m * vec4(aPos, 1.0);
 	}
     gl_Position = p * (v * worldPos + vec4(aPos2, 0.0, 0.0));	
+	gl_Position.y *= -1;
+
     color = aColor;
 	normal = mat3(anti_m) * aNormal;
-	uv = vec2(aUV.x, 1.0 - aUV.y);
+	uv = vec2(aUV.x, aUV.y);
 	lightViewPosition = lightProjection * (lightView * worldPos + vec4(aPos2, 0.0, 0.0));
 }

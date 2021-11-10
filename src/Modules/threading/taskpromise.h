@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Generic/coroutines/handle.h"
+#include "taskhandle.h"
 
 namespace Engine {
 namespace Threading {
@@ -9,17 +9,14 @@ namespace Threading {
 
     struct TaskPromiseSharedStateBase {
         std::mutex mMutex;
-        std::vector<CoroutineHandle<TaskPromiseTypeBase>> mThenResumes;
+        std::vector<TaskHandle> mThenResumes;
         bool mDestroyed = false;
-
-        TaskQueue *mQueue = nullptr;
-        Barrier *mBarrier = nullptr;
 
         void finalize();
 
         void notifyDestroyed();
 
-        void then_resume(CoroutineHandle<TaskPromiseTypeBase> handle)
+        void then_resume(TaskHandle handle)
         {
             std::lock_guard guard { mMutex };
             mThenResumes.emplace_back(std::move(handle));
@@ -37,7 +34,8 @@ namespace Threading {
 
         std::optional<T> mValue;
 
-        bool valid() {
+        bool valid()
+        {
             std::lock_guard guard { mMutex };
             return static_cast<bool>(mValue) || !mDestroyed;
         }
@@ -67,7 +65,8 @@ namespace Threading {
     struct TaskPromiseSharedState<void> : TaskPromiseSharedStateBase {
         bool mHasValue = false;
 
-        bool valid() {
+        bool valid()
+        {
             std::lock_guard guard { mMutex };
             return mHasValue || !mDestroyed;
         }
@@ -103,7 +102,7 @@ namespace Threading {
             return {};
         }
 
-        std::suspend_always final_suspend() noexcept
+        std::suspend_never final_suspend() noexcept
         {
             mState->finalize();
             return {};
@@ -111,13 +110,41 @@ namespace Threading {
 
         void unhandled_exception() { }
 
-        void resume(CoroutineHandle<TaskPromiseTypeBase> handle);
+        void resume(TaskHandle handle);
 
-        void setQueue(TaskQueue *queue, Barrier *barrier = nullptr);
+        TaskQueue *queue() const;
 
-        
-
+    protected:
         std::shared_ptr<TaskPromiseSharedStateBase> mState;
+
+    public:
+        TaskQueue *mQueue = nullptr;
+        Barrier *mBarrier = nullptr;
+    };
+
+    template <typename T>
+    struct TaskPromise : TaskPromiseTypeBase {
+        TaskPromise()
+            : TaskPromiseTypeBase(std::make_shared<TaskPromiseSharedState<T>>())
+        {
+        }
+
+        void return_value(T value) noexcept
+        {
+            static_cast<TaskPromiseSharedState<T> *>(mState.get())->set_value(std::move(value));
+        }
+    };
+
+    template <>
+    struct TaskPromise<void> : TaskPromiseTypeBase {
+        TaskPromise()
+            : TaskPromiseTypeBase(std::make_shared<TaskPromiseSharedState<void>>())
+        {
+        }
+
+        void return_void() noexcept
+        {
+        }
     };
 
 }

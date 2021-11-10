@@ -18,7 +18,7 @@ namespace Widgets {
     }
     WidgetClass Bar::getClass() const
     {
-        return WidgetClass::BAR_CLASS;
+        return WidgetClass::BAR;
     }
 }
 }

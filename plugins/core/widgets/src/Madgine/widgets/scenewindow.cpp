@@ -72,10 +72,11 @@ namespace Widgets {
 
     WidgetClass SceneWindow::getClass() const
     {
-        return WidgetClass::SCENEWINDOW_CLASS;
+        return WidgetClass::SCENEWINDOW;
     }
 
-    void SceneWindow::preRender() {
+    void SceneWindow::preRender()
+    {
         mTarget->render();
     }
 

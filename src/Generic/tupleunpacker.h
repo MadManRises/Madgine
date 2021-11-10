@@ -248,7 +248,6 @@ namespace TupleUnpacker {
         }
     }
 
-    //TODO: Use only is_standard_layout as soon as UnitHelper is cleaned up
     template <typename T>
     struct is_tuplefyable : std::bool_constant<std::is_standard_layout_v<T> && std::is_trivially_copy_constructible_v<T> && !std::is_fundamental_v<T> && !std::is_pointer_v<T> && !std::is_enum_v<T>> {
         static constexpr size_t elementCount = detect_fields_count<std::remove_reference_t<T>>(std::make_index_sequence<sizeof(T)>());

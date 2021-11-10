@@ -71,20 +71,7 @@ namespace Resources {
             return *this = Loader::load(res);
         }
 
-        bool operator==(const Handle<Loader, Data> &other) const
-        {
-            return mData == other.mData;
-        }
-
-        bool operator!=(const Handle<Loader, Data> &other) const
-        {
-            return mData != other.mData;
-        }
-
-        bool operator<(const Handle<Loader, Data> &other) const
-        {
-            return mData < other.mData;
-        }
+        auto operator<=>(const Handle<Loader, Data> &) const = default;
 
         decltype(auto) operator*() const
         {
@@ -104,6 +91,10 @@ namespace Resources {
         bool available() const
         {
             return *this && info()->verify();
+        }
+
+        typename Loader::Data* getUnsafe() const {
+            return Loader::getDataPtr(*this, nullptr, false);
         }
 
         typename Loader::ResourceDataInfo *info() const
@@ -132,7 +123,6 @@ namespace Resources {
 
         Threading::TaskFuture<bool> load(std::string_view name, Loader *loader = nullptr)
         {
-            reset();
             *this = Loader::load(name, loader);
             typename Loader::ResourceDataInfo *i = info();
             if (!i)

@@ -6,6 +6,7 @@
 #include "Meta/serialize/serializableunitptr.h"
 #include "entitycomponentcollector.h"
 #include "entitycomponentlistbase.h"
+#include "Generic/container/freelistcontainer.h"
 
 namespace Engine {
 namespace Scene {
@@ -23,10 +24,35 @@ namespace Scene {
 
             using Config = typename T::Config;
 
-            static_assert(sizeof(T) >= sizeof(IndexType<uint32_t>));
+            struct EntityPtrDummy {
+                Entity *mPtr = nullptr;
+                EntityPtrDummy(Entity *ptr)
+                    : mPtr(ptr)
+                {
+                }
+                ~EntityPtrDummy() {
+                    mPtr = nullptr;
+                }
+                operator Entity* () const {
+                    return mPtr;
+                }
+
+            };
+
+            static_assert(sizeof(T) >= sizeof(uintptr_t));
             static_assert(Config::sContiguous != Config::sPersistent);
 
-            using Vector = std::conditional_t<Config::sPersistent, container_api<MultiContainer<std::deque, T, Entity *>>, container_api<MultiContainer<std::vector, T, Entity *>>>;
+            static bool isFree(std::tuple<T &, EntityPtrDummy &> data)
+            {
+                return !std::get<1>(data);
+            }
+
+            static uintptr_t *getLocation(std::tuple<T &, EntityPtrDummy &> data)
+            {
+                return &reinterpret_cast<uintptr_t &>(std::get<0>(data));
+            }
+
+            using Vector = std::conditional_t<Config::sPersistent, container_api<FreeListContainer<MultiContainer<std::deque, T, EntityPtrDummy>, EntityComponentList<T>>>, container_api<MultiContainer<std::vector, T, Entity *>>>;
 
             Vector *operator->()
             {
@@ -101,24 +127,16 @@ namespace Scene {
 
             EntityComponentOwningHandle<EntityComponentBase> emplace(const ObjectPtr &table, Entity *entity) override final
             {
-                if constexpr (Config::sPersistent) {
-                    if (mFreeListHead) {
-                        auto it = mData.begin() + mFreeListHead;
-                        IndexType<uint32_t> &node = reinterpret_cast<IndexType<uint32_t> &>(it.template get<0>());
-                        mFreeListHead = node;
-                        new (&it.template get<0>()) T(table);
-                        it.template get<1>() = entity;
-                        return { { static_cast<uint32_t>(it - mData.begin()), static_cast<uint32_t>(component_index<T>()) } };
-                    }
-                }
-                auto it = mData.emplace(mData.end(), std::piecewise_construct, std::forward_as_tuple(table), std::make_tuple(entity));
-                return { { static_cast<uint32_t>(it - mData.begin()), static_cast<uint32_t>(component_index<T>()) } };
+                typename Vector::iterator it = mData.emplace(mData.end(), std::piecewise_construct, std::forward_as_tuple(table), std::make_tuple(entity));
+                uint32_t index = container_traits<Vector>::toHandle(mData, it);
+                return { { index, static_cast<uint32_t>(component_index<T>()) } };
             }
 
             void erase(const EntityComponentHandle<EntityComponentBase> &index) override final
             {
-                auto it = mData.begin() + index.mIndex;
+                auto it = container_traits<Vector>::toIterator(mData, index.mIndex);
                 if constexpr (Config::sContiguous) {
+                    auto it = mData.begin() + index.mIndex;
                     auto last = --mData.end();
                     if (last != it) {
                         it.template get<0>() = std::move(last.template get<0>());
@@ -127,11 +145,7 @@ namespace Scene {
                     }
                     mData.erase(last);
                 } else {
-                    it.template get<1>() = nullptr;
-                    it.template get<0>().~T();
-                    IndexType<uint32_t> &node = reinterpret_cast<IndexType<uint32_t> &>(it.template get<0>());
-                    node = mFreeListHead;
-                    mFreeListHead = index.mIndex;
+                    mData.erase(it);
                 }
             }
 
@@ -185,7 +199,6 @@ namespace Scene {
             }
 
             Vector mData;
-            IndexType<uint32_t> mFreeListHead;
         };
 
     }

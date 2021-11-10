@@ -80,7 +80,8 @@ namespace Render {
         switch (type) {
         case TextureType_2D:
             shaderResourceViewDesc.ViewDimension = samples > 1 ? D3D11_SRV_DIMENSION_TEXTURE2DMS : D3D11_SRV_DIMENSION_TEXTURE2D;
-            LOG_ONCE("Fix this!");
+            if (samples > 1)
+                LOG_ONCE("Fix this!");
             break;
         case TextureType_2DMultiSample:
             shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;

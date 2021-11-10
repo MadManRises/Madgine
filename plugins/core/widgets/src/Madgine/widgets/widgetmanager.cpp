@@ -63,6 +63,7 @@ namespace Widgets {
 
         Resources::ImageLoader::HandleType mDefaultTexture;
         Render::TextureLoader::HandleType mUIAtlasTexture;
+        std::set<Resources::ImageLoader::HandleType> mImageLoadingTasks;
         Atlas2 mUIAtlas { { 2048, 2048 } };
         int mUIAtlasSize = 0;
         std::map<Resources::ImageLoader::ResourceType *, Atlas2::Entry> mUIAtlasEntries;
@@ -116,7 +117,7 @@ namespace Widgets {
             return loader->generate(mesh, { 3, std::vector<Vertex> {} });
         });
 
-        mData->mUIAtlasTexture.create("widgetUIAtlas", Render::TextureType_2D, Render::FORMAT_RGBA8);
+        mData->mUIAtlasTexture.create(Render::TextureType_2D, Render::FORMAT_RGBA8);
 
         mData->mDefaultTexture.load("default_tex");
 
@@ -174,25 +175,25 @@ namespace Widgets {
     {
         std::unique_ptr<WidgetBase> w = [=]() -> std::unique_ptr<WidgetBase> {
             switch (_class) {
-            case WidgetClass::WIDGET_CLASS:
+            case WidgetClass::WIDGET:
                 return create<WidgetBase>(name, parent);
-            case WidgetClass::BAR_CLASS:
+            case WidgetClass::BAR:
                 return create<Bar>(name, parent);
-            case WidgetClass::CHECKBOX_CLASS:
+            case WidgetClass::CHECKBOX:
                 return create<Checkbox>(name, parent);
-            case WidgetClass::LABEL_CLASS:
+            case WidgetClass::LABEL:
                 return create<Label>(name, parent);
-            case WidgetClass::TABWIDGET_CLASS:
+            case WidgetClass::TABWIDGET:
                 return create<TabWidget>(name, parent);
-            case WidgetClass::BUTTON_CLASS:
+            case WidgetClass::BUTTON:
                 return create<Button>(name, parent);
-            case WidgetClass::COMBOBOX_CLASS:
+            case WidgetClass::COMBOBOX:
                 return create<Combobox>(name, parent);
-            case WidgetClass::TEXTBOX_CLASS:
+            case WidgetClass::TEXTBOX:
                 return create<Textbox>(name, parent);
-            case WidgetClass::SCENEWINDOW_CLASS:
+            case WidgetClass::SCENEWINDOW:
                 return create<SceneWindow>(name, parent);
-            case WidgetClass::IMAGE_CLASS:
+            case WidgetClass::IMAGE:
                 return create<Image>(name, parent);
             default:
                 std::terminate();
@@ -489,8 +490,14 @@ namespace Widgets {
             auto it = mData->mUIAtlasEntries.find(resource);
             if (it == mData->mUIAtlasEntries.end()) {
                 Resources::ImageLoader::HandleType data = resource ? resource->loadData() : mData->mDefaultTexture;
-                it = mData->mUIAtlasEntries.try_emplace(resource, mData->mUIAtlas.insert({ data->mWidth, data->mHeight }, [this]() { mData->expandUIAtlas(); })).first;
-                mData->mUIAtlasTexture.setSubData({ it->second.mArea.mTopLeft.x, it->second.mArea.mTopLeft.y }, it->second.mArea.mSize, { data->mBuffer, static_cast<size_t>(data->mWidth * data->mHeight) });
+                if (!data.available()) {
+                    mData->mImageLoadingTasks.emplace(std::move(data));
+                    continue;
+                } else {
+                    it = mData->mUIAtlasEntries.try_emplace(resource, mData->mUIAtlas.insert({ data->mWidth, data->mHeight }, [this]() { mData->expandUIAtlas(); })).first;
+                    mData->mUIAtlasTexture.setSubData({ it->second.mArea.mTopLeft.x, it->second.mArea.mTopLeft.y }, it->second.mArea.mSize, { data->mBuffer, static_cast<size_t>(data->mWidth * data->mHeight) });
+                    mData->mImageLoadingTasks.erase(data);
+                }
             }
 
             for (std::pair<std::vector<Vertex>, TextureSettings> &localVertices : localVerticesList) {

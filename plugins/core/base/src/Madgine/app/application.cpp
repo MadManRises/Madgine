@@ -54,7 +54,7 @@ namespace App {
         markInitialized();
 
         for (const std::unique_ptr<GlobalAPIBase> &api : mGlobalAPIs) {
-            if (!api->callInit(mGlobalAPIInitCounter))
+            if (!api->callInitOrder(mGlobalAPIInitCounter))
                 return false;
         }
 
@@ -65,14 +65,14 @@ namespace App {
     {
         for (; mGlobalAPIInitCounter > 0; --mGlobalAPIInitCounter) {
             for (const std::unique_ptr<GlobalAPIBase> &api : mGlobalAPIs) {
-                api->callFinalize(mGlobalAPIInitCounter);
+                api->callFinalizeOrder(mGlobalAPIInitCounter);
             }
         }
     }
 
     GlobalAPIBase &Application::getGlobalAPIComponent(size_t i, bool init)
     {
-        return getChild(mGlobalAPIs.get(i), mGlobalAPIInitCounter, init);
+        return getChildOrder(mGlobalAPIs.get(i), mGlobalAPIInitCounter, init);
     }
 
     const AppSettings &Application::settings()

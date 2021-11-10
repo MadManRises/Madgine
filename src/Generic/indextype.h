@@ -15,6 +15,12 @@ struct IndexType {
     {
     }
 
+    template <std::convertible_to<T> U>
+    IndexType(IndexType<U> other)
+        : mIndex(other)
+    {
+    }
+
     IndexType &operator=(T t)
     {
         mIndex = t;

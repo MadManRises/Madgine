@@ -74,6 +74,12 @@ struct UniqueComponentSelector : Observer
         set(IndexType<size_t>::sInvalid);
     }
 
+    std::unique_ptr<Base> release() {
+        std::unique_ptr<Base> result = std::move(mValue);
+        reset();
+        return result;
+    }
+
 private:
     std::unique_ptr<Base> mValue;
     IndexType<size_t> mIndex;

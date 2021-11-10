@@ -109,16 +109,15 @@ struct CoWString {
         return strncmp(mString, other.mString, mSize) == 0;
     }
 
-    bool operator<(const CoWString &other) const
+    std::strong_ordering operator<=>(const CoWString &other) const
     {
+        if (!mString && !other.mString)
+            return std::strong_ordering::equal;
         if (!other.mString)
-            return false;
+            return std::strong_ordering::less;
         if (!mString)
-            return true;
-        if (mSize < other.mSize)
-            return strncmp(mString, other.mString, mSize) <= 0;
-        else
-            return strncmp(mString, other.mString, other.mSize) < 0;
+            return std::strong_ordering::greater;
+        return strcmp(mString, other.mString);
     }
 
     operator std::string_view() const &

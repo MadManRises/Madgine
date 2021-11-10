@@ -2,24 +2,23 @@
 #include "serialize/filesystem/filesystemlib.h"
 
 #include "mainwindow.h"
-#include "toolwindow.h"
 #include "mainwindowcomponent.h"
+#include "toolwindow.h"
 
 #include "Generic/container/reverseIt.h"
 
 #include "Interfaces/filesystem/api.h"
-#include "Interfaces/window/windowsettings.h"
 #include "Interfaces/window/windowapi.h"
+#include "Interfaces/window/windowsettings.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
-#include "Meta/serialize/serializetable_impl.h"
 #include "Meta/serialize/configs/controlled.h"
 #include "Meta/serialize/formatter/iniformatter.h"
+#include "Meta/serialize/serializetable_impl.h"
 #include "serialize/filesystem/filemanager.h"
 
 #include "../render/rendercontext.h"
 #include "../render/rendertarget.h"
-
 
 METATABLE_BEGIN(Engine::Window::MainWindow)
 READONLY_PROPERTY(Components, components)
@@ -49,14 +48,12 @@ namespace Window {
 
         mLoop.addSetupSteps(
             [this]() {
-                if (!callInit())
-                    return false;
-                sync();
-                return true;
+                return callInit();
             },
-            [this]() {
-                unsync();
-                callFinalize();
+            [this](bool result) {
+                if (result) {
+                    callFinalize();
+                }
             });
     }
 
@@ -99,16 +96,14 @@ namespace Window {
             assert(result);
         }
 
+        sync();
+
         return true;
     }
 
     void MainWindow::finalize()
     {
-        Filesystem::FileManager mgr { "MainWindow-Layout" };
-
-        if (Serialize::SerializeOutStream out = mgr.openWrite(Filesystem::appDataPath() / "mainwindow.ini", std::make_unique<Serialize::IniFormatter>())) {
-            out << mOsWindow->data();
-        }
+        unsync();
 
         for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
             comp->callFinalize();
@@ -119,19 +114,31 @@ namespace Window {
         mRenderWindow.reset();
         mRenderContext.reset();
 
-        mOsWindow->removeListener(this);
-        mOsWindow->destroy();
-        mOsWindow = nullptr;
+        if (mOsWindow) {
+            storeWindowData();
+            mOsWindow->removeListener(this);
+            mOsWindow->destroy();
+            mOsWindow = nullptr;
+        }
+    }
+
+    void MainWindow::storeWindowData()
+    {
+        Filesystem::FileManager mgr { "MainWindow-Layout" };
+
+        if (Serialize::SerializeOutStream out = mgr.openWrite(Filesystem::appDataPath() / "mainwindow.ini", std::make_unique<Serialize::IniFormatter>())) {
+            out << mOsWindow->data();
+        }
     }
 
     ToolWindow *MainWindow::createToolWindow(const WindowSettings &settings)
     {
-        return mToolWindows.emplace_back(std::make_unique<ToolWindow>(*this, settings)).get();
+        return &mToolWindows.emplace_back(*this, settings);
     }
 
     void MainWindow::destroyToolWindow(ToolWindow *w)
     {
-        auto it = std::find_if(mToolWindows.begin(), mToolWindows.end(), [=](const std::unique_ptr<ToolWindow> &ptr) { return ptr.get() == w; });
+        auto it = std::find_if(mToolWindows.begin(), mToolWindows.end(), [=](const ToolWindow &window) { return &window == w; });
         assert(it != mToolWindows.end());
         mToolWindows.erase(it);
     }
@@ -209,7 +216,10 @@ namespace Window {
 
     void MainWindow::onClose()
     {
-        callFinalize();
+        storeWindowData();
+        mOsWindow = nullptr;
+        //callFinalize();
+        mLoop.shutdown();
     }
 
     void MainWindow::onRepaint()
@@ -266,8 +276,8 @@ namespace Window {
         if (mRenderContext)
             (*mRenderContext)->render();
         mOsWindow->update();
-        for (std::unique_ptr<ToolWindow> &window : mToolWindows)
-            window->osWindow()->update();
+        for (ToolWindow &window : mToolWindows)
+            window.osWindow()->update();
         return mOsWindow;
     }
 

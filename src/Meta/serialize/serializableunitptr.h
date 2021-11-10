@@ -50,14 +50,7 @@ namespace Serialize {
             return mUnit == other.mUnit && mType == other.mType;
         }
 
-        bool operator<(const SerializableDataConstPtr &other) const
-        {
-            if (mUnit < other.mUnit)
-                return true;
-            if (mUnit > other.mUnit)
-                return false;
-            return mType < other.mType;
-        }
+        auto operator<=>(const SerializableDataConstPtr &other) const = default;
 
         /*template <typename T>
         T *safe_cast() const
@@ -164,14 +157,14 @@ namespace Serialize {
             return mUnit == other.mUnit && mType == other.mType;
         }
 
-        bool operator<(const SerializableUnitConstPtr &other) const
+        /* bool operator<(const SerializableUnitConstPtr &other) const
         {
             if (mUnit < other.mUnit)
                 return true;
             if (mUnit > other.mUnit)
                 return false;
             return mType < other.mType;
-        }
+        }*/
 
         /*template <typename T>
         T *safe_cast() const

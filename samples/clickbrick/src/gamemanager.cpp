@@ -47,9 +47,6 @@ namespace UI {
 
     GameManager::GameManager(Engine::UI::UIManager &ui)
         : Engine::UI::GameHandler<GameManager>(ui)
-        , mGameWindow(this, "GameView")
-        , mScoreLabel(this, "Score")
-        , mLifeLabel(this, "Life")
         , mSceneMgr(Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>(false))
         , mSceneRenderer(mSceneMgr, &mCamera, 50)
     {
@@ -87,7 +84,15 @@ namespace UI {
         GameHandlerBase::setWidget(w);
 
         if (widget()) {
-            mGameWindow->getRenderTarget()->addRenderPass(&mSceneRenderer);            
+            mGameWindow = widget()->getChildRecursive<Engine::Widgets::SceneWindow>("GameView");
+            mGameWindow->getRenderTarget()->addRenderPass(&mSceneRenderer);  
+
+            mScoreLabel = widget()->getChildRecursive<Engine::Widgets::Label>("Score");
+            mLifeLabel = widget()->getChildRecursive<Engine::Widgets::Label>("Life");
+        } else {
+            mGameWindow = nullptr;
+            mScoreLabel = nullptr;
+            mLifeLabel = nullptr;
         }
     }
 

@@ -2,8 +2,6 @@
 
 #include "Madgine/ui/guihandler.h"
 
-#include "Madgine/ui/widgetptr.h"
-
 namespace ClickBrick {
 namespace UI {
 
@@ -17,9 +15,6 @@ namespace UI {
         virtual void setWidget(Engine::Widgets::WidgetBase *w) override;
 
         void startGame();
-
-    private:
-        Engine::UI::WidgetPtr<Engine::Widgets::Button> mStartGameButton;
     };
 
 }

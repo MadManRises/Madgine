@@ -14,6 +14,8 @@
 
 #include "codegen/resolveincludes.h"
 
+#include "openglrendercontext.h"
+
 UNIQUECOMPONENT(Engine::Render::OpenGLShaderLoader);
 
 METATABLE_BEGIN(Engine::Render::OpenGLShaderLoader)
@@ -41,7 +43,7 @@ namespace Render {
         }
 
         *this = OpenGLShaderLoader::loadManual(
-            name, {}, [=, &file](OpenGLShaderLoader *loader, OpenGLShader &shader, OpenGLShaderLoader::ResourceDataInfo &info) mutable { return loader->create(shader, info.resource(), file, type); }, {}, loader);
+            name, {}, [=, &file](OpenGLShaderLoader *loader, OpenGLShader &shader, OpenGLShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file, type); }, {}, loader);
     }
 
     void OpenGLShaderLoader::HandleType::load(std::string name, ShaderType type, OpenGLShaderLoader *loader)
@@ -161,6 +163,11 @@ namespace Render {
         shader = std::move(tempShader);
 
         return true;
+    }
+
+            Threading::TaskQueue *OpenGLShaderLoader::loadingTaskQueue() const
+    {
+        return OpenGLRenderContext::renderQueue();
     }
 
 }

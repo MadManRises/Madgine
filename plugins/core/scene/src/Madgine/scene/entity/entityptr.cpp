@@ -121,11 +121,11 @@ namespace Scene {
             return get() == other;
         }
 
-        bool EntityPtr::operator<(const EntityPtr &other) const
+        std::strong_ordering EntityPtr::operator<=>(const EntityPtr &other) const
         {
             update();
             other.update();
-            return mEntity < other.mEntity;
+            return mEntity <=> other.mEntity;
         }
 
         bool EntityPtr::isDead() const

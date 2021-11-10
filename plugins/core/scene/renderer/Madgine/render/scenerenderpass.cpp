@@ -87,7 +87,7 @@ namespace Render {
             if (!meshData)
                 continue;
 
-            const GPUMeshData::Material *material = mesh.material();
+            const GPUMeshData::Material *material = mesh.material() < meshData->mMaterials.size() ? &meshData->mMaterials[mesh.material()] : nullptr;
 
             Scene::Entity::Transform *transform = e->getComponent<Scene::Entity::Transform>();
             if (!transform)
@@ -157,7 +157,7 @@ namespace Render {
 
                 perObject->hasDistanceField = false;
 
-                perObject->hasTexture = material && material->mDiffuseTexture->mTextureHandle != 0;
+                perObject->hasTexture = material && material->mDiffuseTexture.available() && material->mDiffuseTexture->mTextureHandle != 0;
 
                 perObject->hasSkeleton = skeleton != nullptr;
 
@@ -181,13 +181,17 @@ namespace Render {
                 mProgram.setDynamicParameters(0, {});
             }
 
-            Material mat {
-                material->mDiffuseTexture->mTextureHandle,
-                material->mEmissiveTexture->mTextureHandle,
-                material->mDiffuseColor
-            };
+            if (material) {
+                Material mat {
+                    material->mDiffuseTexture.available() ? material->mDiffuseTexture->mTextureHandle : 0,
+                    material->mEmissiveTexture.available() ? material->mEmissiveTexture->mTextureHandle : 0,
+                    material->mDiffuseColor
+                };
 
-            target->renderMeshInstanced(instance.second.size(), meshData, mProgram, &mat);
+                target->renderMeshInstanced(instance.second.size(), meshData, mProgram, &mat);
+            } else {
+                target->renderMeshInstanced(instance.second.size(), meshData, mProgram, nullptr);
+            }
         }
         target->popAnnotation();
     }

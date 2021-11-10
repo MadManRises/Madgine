@@ -2,8 +2,6 @@
 
 #include "Madgine/ui/guihandler.h"
 
-#include "Madgine/ui/widgetptr.h"
-
 namespace ClickBrick {
 namespace UI {
 
@@ -21,7 +19,7 @@ namespace UI {
         void setScore(int score);
 
     private:
-        Engine::UI::WidgetPtr<Engine::Widgets::Label> mScoreLabel;
+        Engine::Widgets::Label *mScoreLabel = nullptr;
     };
 
 }

@@ -78,6 +78,8 @@ struct container_traits<std::list<T>, void> {
     typedef const_iterator const_position_handle;
     typedef typename container::value_type value_type;
 
+    //static_assert(sizeof(position_handle) <= sizeof(void *));
+
     typedef iterator emplace_return;
 
     template <typename... _Ty>
@@ -152,6 +154,8 @@ struct container_traits<std::vector<T>, void> {
     typedef IndexType<size_t> position_handle;
     typedef IndexType<size_t> const_position_handle;
     typedef typename container::value_type value_type;
+
+    static_assert(sizeof(position_handle) <= sizeof(void *));
 
     typedef iterator emplace_return;
 
@@ -242,6 +246,8 @@ struct container_traits<std::set<T, Cmp>, void> {
     typedef Cmp cmp_type;
     typedef const typename container::value_type value_type;
 
+    //static_assert(sizeof(position_handle) <= sizeof(void *));
+
     typedef Pib<iterator> emplace_return;
 
     template <typename... _Ty>
@@ -317,6 +323,8 @@ struct container_traits<std::map<K, T, Cmp>, void> {
     typedef Cmp cmp_type;
     typedef typename container::value_type value_type;
 
+    //static_assert(sizeof(position_handle) <= sizeof(void *));
+
     typedef Pib<iterator> emplace_return;
 
     template <typename... _Ty>
@@ -386,33 +394,17 @@ struct container_traits<std::array<T, Size>, void> {
     typedef typename container::reverse_iterator reverse_iterator;
     typedef typename container::const_reverse_iterator const_reverse_iterator;
 
+    typedef IndexType<uint32_t> handle;
+    typedef IndexType<uint32_t> const_handle;
+    typedef IndexType<uint32_t> position_handle;
+    typedef IndexType<uint32_t> const_position_handle;
+    typedef typename container::value_type value_type;
+    
+    static_assert(sizeof(position_handle) <= sizeof(void *));
+
     struct emplace_return {
     };
 
-    struct handle_t {
-        handle_t(size_t index = std::numeric_limits<size_t>::max())
-            : mIndex(index)
-        {
-        }
-
-        operator size_t() const { return mIndex; }
-
-        void operator++() { ++mIndex; }
-        void operator--() { --mIndex; }
-        handle_t &operator-=(size_t s)
-        {
-            mIndex -= s;
-            return *this;
-        }
-
-        size_t mIndex;
-    };
-
-    typedef handle_t handle;
-    typedef handle_t const_handle;
-    typedef handle_t position_handle;
-    typedef handle_t const_position_handle;
-    typedef typename container::value_type value_type;
 
     template <typename C>
     struct api : C {
@@ -503,6 +495,8 @@ struct container_traits<std::deque<T>, void> {
     typedef IndexType<size_t> position_handle;
     typedef IndexType<size_t> const_position_handle;
     typedef typename container::value_type value_type;
+
+    static_assert(sizeof(position_handle) <= sizeof(void *));
 
     typedef iterator emplace_return;
 

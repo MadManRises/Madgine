@@ -17,8 +17,6 @@ SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::Image, Engine::Widgets::WidgetBase
 ENCAPSULATED_FIELD(Image, getImageName, setImageByName)
 SERIALIZETABLE_END(Engine::Widgets::Image)
 
-
-
 namespace Engine {
 namespace Widgets {
 
@@ -72,7 +70,7 @@ namespace Widgets {
     }
     WidgetClass Image::getClass() const
     {
-        return WidgetClass::IMAGE_CLASS;
+        return WidgetClass::IMAGE;
     }
 }
 }

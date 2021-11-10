@@ -1,46 +1,37 @@
 #pragma once
 
 #include "context.h"
+#include "Generic/inheritable.h"
 
 DERIVE_FUNCTION(notify);
 
 namespace Engine {
 namespace Inject {
 
-    template <typename T, typename... Injectors>
-    struct Variable;
-
-    template <typename T, bool isClass>
-    struct VariableBase : T {
-    };
-
     template <typename T>
-    struct VariableBase<T, false> {
+    struct VariableBase : Inheritable<T> {
         template <typename... Args>
         VariableBase(Args &&...args)
-            : mData(std::forward<Args>(args)...)
+            : Inheritable<T>(std::forward<Args>(args)...)
         {
         }
 
         template <typename... Args>
         VariableBase(noContext, Args &&...args)
-            : mData(std::forward<Args>(args)...)
+            : Inheritable<T>(std::forward<Args>(args)...)
         {
-        }
-
-        T mData;
-
-        operator T& () {
-            return mData;
         }
     };
 
+    template <typename T, typename... Injectors>
+    struct Variable;
+
     template <typename T>
-    struct Variable<T> : VariableBase<T, std::is_class_v<T>> {
-        using VariableBase<T, std::is_class_v<T>>::VariableBase;
+    struct Variable<T> : VariableBase<T> {
+        using VariableBase<T>::VariableBase;
 
-        void notify() {
-
+        void notify()
+        {
         }
     };
 
@@ -48,7 +39,7 @@ namespace Inject {
     struct Variable<T, Injector, Injectors...> : Variable<T, Injectors...> {
         template <typename... Args>
         Variable(Args &&...args)
-            : Variable<T, Injectors...>(noContext {} , std::forward<Args>(args)...)
+            : Variable<T, Injectors...>(noContext {}, std::forward<Args>(args)...)
         {
             notify();
         }
@@ -59,7 +50,8 @@ namespace Inject {
         {
         }
 
-        void notify() {
+        void notify()
+        {
             if constexpr (has_function_notify_v<typename Injector::Context>)
                 sContext()->notify();
             Variable<T, Injectors...>::notify();
@@ -70,8 +62,9 @@ namespace Inject {
             return get_context<Injector, Injectors...>(sGenericContext.lock());
         }
 
-        void operator++() {
-            ++static_cast<Variable<T, Injectors...>&>(*this);
+        void operator++()
+        {
+            ++static_cast<Variable<T, Injectors...> &>(*this);
             notify();
         }
 
@@ -80,7 +73,6 @@ namespace Inject {
             --static_cast<Variable<T, Injectors...> &>(*this);
             notify();
         }
-
     };
 
 }

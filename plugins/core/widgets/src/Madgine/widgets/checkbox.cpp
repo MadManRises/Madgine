@@ -22,7 +22,7 @@ namespace Widgets {
     }
     WidgetClass Checkbox::getClass() const
     {
-        return WidgetClass::CHECKBOX_CLASS;
+        return WidgetClass::CHECKBOX;
     }
 }
 }

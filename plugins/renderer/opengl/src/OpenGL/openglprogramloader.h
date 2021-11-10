@@ -22,6 +22,8 @@ namespace Render {
         virtual void setInstanceData(Program &program, const ByteBuffer &data) override;
 
 		virtual void setDynamicParameters(Program &program, size_t index, const ByteBuffer &data) override;
+
+         virtual Threading::TaskQueue *loadingTaskQueue() const override;
     };
 }
 }

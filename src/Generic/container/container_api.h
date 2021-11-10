@@ -128,6 +128,72 @@ struct container_api_impl<C, std::vector<Ty...>> : C {
 };
 
 template <typename C, typename... Ty>
+struct container_api_impl<C, std::deque<Ty...>> : C {
+
+    using C::C;
+
+    using C::operator=;
+
+    using value_type = typename C::value_type;
+
+    /*void resize(size_t size)
+            {
+                C::resize(size);
+            }*/
+
+    void remove(const value_type &item)
+    {
+        for (typename C::const_iterator it = this->begin(); it != this->end();) {
+            if (*it == item) {
+                it = erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
+    decltype(auto) push_back(const value_type &item)
+    {
+        return then(emplace_back(item), [](auto &&it) -> decltype(auto) {
+            return *it;
+        });
+    }
+
+    decltype(auto) push_back(value_type &&item)
+    {
+        return then(emplace_back(std::move(item)), [](auto &&it) -> decltype(auto) {
+            return *it;
+        });
+    }
+
+    template <typename... _Ty>
+    decltype(auto) emplace_back(_Ty &&...args)
+    {
+        return this->emplace(this->end(), std::forward<_Ty>(args)...);
+    }
+
+    value_type &at(size_t i)
+    {
+        return C::at(i);
+    }
+
+    const value_type &at(size_t i) const
+    {
+        return C::at(i);
+    }
+
+    value_type &operator[](size_t i)
+    {
+        return C::operator[](i);
+    }
+
+    const value_type &operator[](size_t i) const
+    {
+        return C::operator[](i);
+    }
+};
+
+template <typename C, typename... Ty>
 struct container_api_impl<C, std::set<Ty...>> : SortedContainerApi<C> {
     using C::operator=;
 };

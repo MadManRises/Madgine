@@ -82,9 +82,9 @@ METATABLE_END(Engine::Tools::OpenGLImRoot)
             Im3D::NewFrame();
         }
 
-        void OpenGLImRoot::renderMainDrawList()
+        void OpenGLImRoot::renderDrawList(ImGuiViewport *vp)
         {
-            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            ImGui_ImplOpenGL3_RenderDrawData(vp->DrawData);
         }
 
     }

@@ -8,6 +8,8 @@
 
 #include "codegen/codegen_shader.h"
 
+#include "openglrendercontext.h"
+
 VIRTUALUNIQUECOMPONENT(Engine::Render::OpenGLProgramLoader);
 
 METATABLE_BEGIN_BASE(Engine::Render::OpenGLProgramLoader, Engine::Render::ProgramLoader)
@@ -96,6 +98,11 @@ namespace Render {
     void OpenGLProgramLoader::setDynamicParameters(Program &program, size_t index, const ByteBuffer &data)
     {
         static_cast<OpenGLProgram &>(program).setDynamicParameters(index, data);
+    }
+
+    Threading::TaskQueue *OpenGLProgramLoader::loadingTaskQueue() const
+    {
+        return OpenGLRenderContext::renderQueue();
     }
 
 }

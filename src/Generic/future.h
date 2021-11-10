@@ -1,7 +1,5 @@
 #pragma once
 
-#include "wrapreference.h"
-
 #ifdef __has_include // Check if __has_include is present
 #    if __has_include(<experimental/future>) // Check for an experimental version
 #        include <experimental/future>

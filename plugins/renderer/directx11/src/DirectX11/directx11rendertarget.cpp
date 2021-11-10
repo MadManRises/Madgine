@@ -51,8 +51,9 @@ namespace Render {
         dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
         switch (type) {
         case TextureType_2D:
-            dsvDesc.ViewDimension = samples ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D;
-            LOG_ONCE("Fix this!");
+            dsvDesc.ViewDimension = samples > 1 ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D;
+            if (samples > 1)
+                LOG_ONCE("Fix this!");
             break;
         case TextureType_2DMultiSample:
             dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;

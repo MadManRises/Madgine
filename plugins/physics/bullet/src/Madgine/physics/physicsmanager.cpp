@@ -28,6 +28,17 @@ SERIALIZETABLE_END(Engine::Physics::PhysicsManager)
 namespace Engine {
 namespace Physics {
 
+    ContactPoint::ContactPoint(btManifoldPoint &point, const btCollisionObject *obj0, const btCollisionObject *obj1)
+        : mPoint(point)
+        , mObj0(obj0)
+        , mObj1(obj1)
+    {
+    }
+
+    Vector3 ContactPoint::normal1() const {
+        return mPoint.m_normalWorldOnB.m_floats;
+    }
+
     bool PhysicsManager::sContactCallback(btManifoldPoint &cp, const btCollisionObjectWrapper *colObj0, int partId0, int index0, const btCollisionObjectWrapper *colObj1, int partId1, int index1)
     {
         RigidBody *rigidBody0 = static_cast<RigidBody*>(colObj0->m_collisionObject->getUserPointer());

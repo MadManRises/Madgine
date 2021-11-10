@@ -97,7 +97,7 @@ namespace Render {
         static_cast<DirectX11Program &>(program).setDynamicParameters(index, data);
     }
 
-        Threading::TaskQueue *DirectX11ProgramLoader::loadingTaskQueue() const
+    Threading::TaskQueue *DirectX11ProgramLoader::loadingTaskQueue() const
     {
         return DirectX11RenderContext::renderQueue();
     }

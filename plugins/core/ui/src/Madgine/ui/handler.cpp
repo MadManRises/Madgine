@@ -71,9 +71,6 @@ namespace UI {
     void Handler::finalize()
     {
         mWidget = nullptr;
-        for (const WindowDescriptor &des : mWidgets) {
-            des.mInit(nullptr);
-        }
     }
 
     void Handler::setWidget(Widgets::WidgetBase *widget)
@@ -89,21 +86,6 @@ namespace UI {
                 mWidget->pointerDownEvent().connect(&Handler::injectPointerDown, this, &mConStore);
                 mWidget->pointerUpEvent().connect(&Handler::injectPointerUp, this, &mConStore);
                 mWidget->axisEvent().connect(&Handler::injectAxisEvent, this, &mConStore);
-
-                for (const WindowDescriptor &des : mWidgets) {
-                    Widgets::WidgetBase *child = widget->getChildRecursive(des.mWidgetName);
-
-                    if (!child) {
-                        LOG_ERROR("Window not found: \"" << des.mWidgetName << "\"");
-                    }
-                    if (!des.mInit(child))
-                        LOG_ERROR("ERROR");
-                }
-            } else {
-                for (const WindowDescriptor &des : mWidgets) {                    
-                    if (!des.mInit(nullptr))
-                        LOG_ERROR("ERROR");
-                }
             }
         }
     }
@@ -152,12 +134,6 @@ namespace UI {
 
     void Handler::onAxisEvent(const Input::AxisEventArgs& evt)
     {
-    }
-
-    void Handler::registerWidget(const std::string &name, std::function<bool(Widgets::WidgetBase *)> init)
-    {
-        assert(!mWidget);
-        mWidgets.push_back({ name, init });
     }
 
     void Handler::onMouseVisibilityChanged(bool b)

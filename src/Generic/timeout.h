@@ -40,7 +40,7 @@ namespace Engine
 
 		std::chrono::steady_clock::duration remainder()
 		{
-			assert(!isInfinite());
+			assert(!isInfinite() && !isZero());
 			return mEnd - std::chrono::steady_clock::now();
 		}
 

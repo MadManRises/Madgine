@@ -26,7 +26,7 @@ namespace Scene {
 
             bool operator==(const EntityPtr &other) const;
             bool operator==(Entity *other) const;
-            bool operator<(const EntityPtr &other) const;
+            std::strong_ordering operator<=>(const EntityPtr &other) const;
 
             bool isDead() const;
 

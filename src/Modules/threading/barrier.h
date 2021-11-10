@@ -22,8 +22,9 @@ namespace Threading {
         void queueHandle(TaskQueue *queue, TaskHandle task);
         template <typename F, typename... Args>
         auto queue(TaskQueue* queue, F &&f, Args&&... args) {
-            auto [fut, handle] = make_task(std::forward<F>(f), std::forward<Args>(args)...).release();
-            this->queueHandle(queue, std::move(handle));                
+            auto [fut, handle] = make_task(std::forward<F>(f), std::forward<Args>(args)...).release(queue, this);
+            if (handle)
+                queueHandle(queue, std::move(handle));                
             return std::move(fut);
         }
 

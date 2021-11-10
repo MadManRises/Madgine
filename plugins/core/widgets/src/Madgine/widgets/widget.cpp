@@ -114,7 +114,7 @@ namespace Widgets {
 
     WidgetClass WidgetBase::getClass() const
     {
-        return WidgetClass::WIDGET_CLASS;
+        return WidgetClass::WIDGET;
     }
 
     void WidgetBase::destroy()
@@ -144,25 +144,25 @@ namespace Widgets {
     WidgetBase *WidgetBase::createChild(const std::string &name, WidgetClass _class)
     {
         switch (_class) {
-        case WidgetClass::WIDGET_CLASS:
+        case WidgetClass::WIDGET:
             return createChild<WidgetBase>(name);
-        case WidgetClass::BAR_CLASS:
+        case WidgetClass::BAR:
             return createChild<Bar>(name);
-        case WidgetClass::CHECKBOX_CLASS:
+        case WidgetClass::CHECKBOX:
             return createChild<Checkbox>(name);
-        case WidgetClass::LABEL_CLASS:
+        case WidgetClass::LABEL:
             return createChild<Label>(name);
-        case WidgetClass::TABWIDGET_CLASS:
+        case WidgetClass::TABWIDGET:
             return createChild<TabWidget>(name);
-        case WidgetClass::BUTTON_CLASS:
+        case WidgetClass::BUTTON:
             return createChild<Button>(name);
-        case WidgetClass::COMBOBOX_CLASS:
+        case WidgetClass::COMBOBOX:
             return createChild<Combobox>(name);
-        case WidgetClass::TEXTBOX_CLASS:
+        case WidgetClass::TEXTBOX:
             return createChild<Textbox>(name);
-        case WidgetClass::SCENEWINDOW_CLASS:
+        case WidgetClass::SCENEWINDOW:
             return createChild<SceneWindow>(name);
-        case WidgetClass::IMAGE_CLASS:
+        case WidgetClass::IMAGE:
             return createChild<Image>(name);
         default:
             std::terminate();
@@ -426,8 +426,8 @@ namespace Widgets {
         return { result, { { font->mTexture->mTextureHandle, Render::TextureType_2D }, TextureFlag_IsDistanceField } };
     }
 
-    void WidgetBase::preRender() {
-
+    void WidgetBase::preRender()
+    {
     }
 
 }

@@ -39,11 +39,17 @@ struct LambdaImpl {
     {
     }
 
+    template <typename R2, typename T2, typename... Args2>
+    LambdaImpl(LambdaImpl<R2, T2, Args2...> &&f)
+        : mCallable(f ? std::make_unique<CallableImpl<LambdaImpl<R2, T2, Args2...>>>(std::move(f)) : nullptr)
+    {
+    }
+
     LambdaImpl(LambdaImpl &&) = default;
 
     LambdaImpl &operator=(LambdaImpl &&) = default;
 
-    R operator()(Args... args)
+    R operator()(Args... args) const
     {
         return mCallable->call(std::forward<Args>(args)...);
     }

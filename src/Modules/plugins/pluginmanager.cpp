@@ -120,7 +120,7 @@ namespace Plugins {
 
         Threading::Barrier barrier { Threading::Barrier::NO_FLAGS, 1 };
 
-        std::vector<Future<bool>> results;
+        std::vector<Threading::TaskFuture<bool>> results;
 
         for (PluginSection &sec : kvValues(mSections)) {
             results.emplace_back(sec.unload(barrier));
@@ -129,7 +129,7 @@ namespace Plugins {
         Threading::TaskQueue queue { "PluginManager" };
         barrier.enter(&queue, 0, true);
 
-        for (Future<bool> &result : results) {
+        for (Threading::TaskFuture<bool> &result : results) {
             if (!result.is_ready() || result)
                 throw 0;
         }

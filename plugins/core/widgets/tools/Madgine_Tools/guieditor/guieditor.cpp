@@ -428,9 +428,9 @@ namespace Tools {
             Widgets::WidgetBase *root = mWidgetManager->currentRoot();
             if (root) {
                 if (ImGui::BeginPopup("WidgetSelector")) {
-                    for (int c = 0; c < (int)Widgets::WidgetClass::CLASS_COUNT; ++c) {
-                        if (ImGui::Selectable(Widgets::widgetClassNames[c])) {
-                            root->createChild("unnamed", (Widgets::WidgetClass)c);
+                    for (Widgets::WidgetClass c : Widgets::WidgetClass::values()) {
+                        if (ImGui::Selectable(std::string { c.toString() }.c_str())) {
+                            root->createChild("unnamed", c);
                             ImGui::CloseCurrentPopup();
                         }
                     }

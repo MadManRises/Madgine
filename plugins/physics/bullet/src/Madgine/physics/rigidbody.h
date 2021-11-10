@@ -46,6 +46,9 @@ namespace Physics {
         Vector3 angularFactor() const;
         void setAngularFactor(const Vector3 &factor);
 
+        Vector3 angularVelocity() const;
+        void setAngularVelocity(const Vector3 &v);
+
         void setVelocity(const Vector3 &v);
 
         Scene::SceneManager *sceneMgr();

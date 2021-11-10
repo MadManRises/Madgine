@@ -50,5 +50,6 @@ void main()
 	}else{
 		worldPos = aInstance.m * vec4(aPos, 1.0);
 	}
-    gl_Position = worldPos + vec4(aPos2, 0.0, 0.0) - vec4(frame.position, 0.0f);	
+    gl_Position = worldPos + vec4(aPos2, 0.0, 0.0) - vec4(frame.position, 0.0f);
+	gl_Position.y *= -1;
 }

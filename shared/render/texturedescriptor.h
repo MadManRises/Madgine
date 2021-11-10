@@ -20,6 +20,8 @@ namespace Render {
     struct TextureDescriptor {
         TextureHandle mTextureHandle;
         TextureType mType;
+
+        auto operator<=>(const TextureDescriptor &) const = default;
     };
 
 }

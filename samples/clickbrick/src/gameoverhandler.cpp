@@ -25,7 +25,6 @@ namespace UI {
 
     GameOverHandler::GameOverHandler(Engine::UI::UIManager &ui)
         : Engine::UI::GuiHandler<GameOverHandler>(ui, Engine::UI::GuiHandlerBase::WindowType::MODAL_OVERLAY)
-        , mScoreLabel(this, "ScoreLabel")
     {
     }
 
@@ -39,6 +38,9 @@ namespace UI {
         Engine::UI::GuiHandlerBase::setWidget(w);
         if (widget()) {
             widget()->pointerUpEvent().connect(&GameOverHandler::restartGame, this, &mConStore);
+            mScoreLabel = widget()->getChildRecursive<Engine::Widgets::Label>("ScoreLabel");
+        } else {
+            mScoreLabel = nullptr;
         }
     }
 

@@ -6,16 +6,14 @@
 namespace Engine {
 namespace Threading {
 
-    enum TaskState {
-        RETURN,
-        SUSPENDED
-    };
-
     template <typename F, typename... Args>
     auto make_task(F f, Args &&...args)
     {
         static_assert(!std::is_reference_v<F>);
-        if constexpr (is_instance_v<std::invoke_result_t<F, Args...>, Task>) {
+
+        using R = std::invoke_result_t<F, Args...>;
+
+        if constexpr (is_instance_v<R, Task>) {
             return f(std::forward<Args>(args)...);
         } else {
             return [](F f, Args... args) -> Task<std::invoke_result_t<F, Args...>> {
@@ -24,99 +22,61 @@ namespace Threading {
         }
     }
 
-    struct MODULES_EXPORT TaskHandle {
-
-        TaskHandle() = default;
-        TaskHandle(TaskHandle &&other) = default;
-        TaskHandle(const TaskHandle &) = delete;
-        TaskHandle(TaskHandle &) = delete;
-
-        TaskHandle &operator=(TaskHandle &&) = default;
-
-        TaskHandle(CoroutineHandle<TaskPromiseTypeBase> handle);
-        ~TaskHandle();
-
-        void reset();
-        CoroutineHandle<TaskPromiseTypeBase> release();
-
-        void setQueue(TaskQueue *queue, Barrier *barrier = nullptr);
-
-        TaskState operator()();
-
-        explicit operator bool() const;
-
-    protected:
-        CoroutineHandle<TaskPromiseTypeBase> mHandle;
-    };
-
-    template <typename T>
-    struct Task : TaskHandle {
+    template <typename T, typename Immediate>
+    struct Task {
 
         static_assert(!is_instance_v<T, Task>);
 
-        struct promise_type : TaskPromiseTypeBase {
-
-            promise_type()
-                : TaskPromiseTypeBase(std::make_shared<TaskPromiseSharedState<T>>())
+        struct promise_type : TaskPromise<T> {
+            Task<T, Immediate> get_return_object()
             {
-            }
-
-            Task<T> get_return_object()
-            {
-                return { CoroutineHandle<promise_type>::fromPromise(*this) };
-            }
-
-            void return_value(T value) noexcept
-            {
-                static_cast<TaskPromiseSharedState<T> *>(mState.get())->set_value(std::move(value));                
+                return { std::static_pointer_cast<TaskPromiseSharedState<T>>(this->mState), CoroutineHandle<promise_type>::fromPromise(*this) };
             }
         };
 
-        Task(CoroutineHandle<promise_type> handle)
-            : TaskHandle(std::move(handle))
+        template <typename T2, typename I>
+        friend struct Task;
+
+        template <typename I>
+        Task(Task<T, I> &&other)
+            : mHandle(std::move(other.mHandle))
+            , mState(std::move(other.mState))
+            , mImmediate(other.mImmediate)
         {
         }
 
-        std::pair<TaskFuture<T>, CoroutineHandle<TaskPromiseTypeBase>> release() &&
+        Task(std::shared_ptr<TaskPromiseSharedState<T>> state, CoroutineHandle<promise_type> handle = {})
+            : mHandle(std::move(handle))
+            , mState(std::move(state))
         {
-            return { std::static_pointer_cast<TaskPromiseSharedState<T>>(mHandle->mState), std::move(mHandle) };
         }
 
+        std::pair<TaskFuture<T>, TaskHandle> release(TaskQueue *queue, Barrier *barrier = nullptr) &&
+        {
+            if (mHandle) {
+                mHandle->mQueue = queue;
+                mHandle->mBarrier = barrier;
+            }
+            TaskHandle handle { std::move(mHandle) };
+            if (mImmediate)
+                handle();
+            return { std::move(mState), std::move(handle) };
+        }
+
+    private:
+        CoroutineHandle<TaskPromiseTypeBase> mHandle;
+        std::shared_ptr<TaskPromiseSharedState<T>> mState;
+        bool mImmediate = Immediate {};
     };
 
-    template <>
-    struct Task<void> : TaskHandle {
+    template <typename T>
+    using ImmediateTask = Task<T, std::true_type>;
 
-        struct promise_type : TaskPromiseTypeBase {
-
-            promise_type()
-                : TaskPromiseTypeBase(std::make_shared<TaskPromiseSharedState<void>>())
-            {
-            }
-
-            Task<void> get_return_object()
-            {
-                return {
-                    CoroutineHandle<promise_type>::fromPromise(*this)
-                };
-            }
-
-            void return_void()
-            {
-                static_cast<TaskPromiseSharedState<void> *>(mState.get())->set_value();                
-            }
-        };
-
-        Task(CoroutineHandle<promise_type> handle)
-            : TaskHandle(std::move(handle))
-        {
-        }
-
-        std::pair<TaskFuture<void>, CoroutineHandle<TaskPromiseTypeBase>> release() &&
-        {
-            return { std::static_pointer_cast<TaskPromiseSharedState<void>>(mHandle->mState), std::move(mHandle) };
-        }
-    };
+    template <typename T>
+    Task<T> make_ready_task(T &&val)
+    {
+        return { std::make_shared<TaskPromiseSharedState<T>>(std::forward<T>(val)) };
+    }
 
 }
 }

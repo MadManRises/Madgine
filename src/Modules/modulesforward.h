@@ -61,9 +61,10 @@ namespace Threading {
     struct ConnectionInstance;
     struct TaskQueue;    
     struct TaskHandle;
-    template <typename T>
+    template <typename T, typename Immediate = std::false_type>
     struct Task;
     struct Barrier;
+    struct TaskPromiseTypeBase;
 }
 
 namespace Threading {
