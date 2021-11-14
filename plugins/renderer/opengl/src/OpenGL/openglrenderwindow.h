@@ -29,7 +29,7 @@ namespace Render {
 
 #if OPENGL_ES
         static THREADLOCAL(OpenGLSSBOBufferStorage *) sCurrentSSBOBuffer;
-        OpenGLSSBOBufferStorage mSSBOBuffer;
+        std::optional<OpenGLSSBOBufferStorage> mSSBOBuffer;
 
     public:
         static OpenGLSSBOBufferStorage &getSSBOStorage()

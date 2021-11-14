@@ -22,8 +22,8 @@
 #    include <OpenGLES/ES3/gl.h>
 #    define OPENGL_ES 1
 #else
-#    include <GLES3/gl32.h>
-#    define OPENGL_ES 1
+#    include <GLES3/gl31.h>
+#    define OPENGL_ES 31
 #endif
 
 #if EMSCRIPTEN

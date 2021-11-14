@@ -2,6 +2,9 @@
 
 precision highp float;
 
+#include "sl_support.glsl_es"
+#include "im3d.sl"
+
 uniform PerApplication
 {
 	Im3DPerApplication app;
@@ -32,10 +35,10 @@ out vec2 uv;
 
 void main()
 {
-	worldPos = m * vec4(aPos, 1.0);
+	worldPos = object.m * vec4(aPos, 1.0);
 	
-    gl_Position = p * (v * worldPos + vec4(aPos2, 0.0, 0.0));	
-	gl_Position.y *= -1;
+    gl_Position = app.p * (frame.v * worldPos + vec4(aPos2, 0.0, 0.0));	
+	gl_Position.y *= -1.0;
     color = aColor;
 	normal = aNormal;
 	uv = vec2(aUV.x, aUV.y);	

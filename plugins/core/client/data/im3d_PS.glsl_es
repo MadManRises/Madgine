@@ -2,6 +2,7 @@
 
 precision highp float;
 
+#include "sl_support.glsl_es"
 #include "im3d.sl"
 
 uniform PerApplication
@@ -39,8 +40,8 @@ void main()
 
 	vec4 colorAcc = color;
 
-	if (hasTexture){
-		if (hasDistanceField){
+	if (object.hasTexture){
+		if (object.hasDistanceField){
 			vec2 msdfUnit = 4.0/vec2(512.0, 512.0);
 			vec4 sampled = texture(tex, uv);
 			float sigDist = median(sampled.r, sampled.g, sampled.b) - 0.5;

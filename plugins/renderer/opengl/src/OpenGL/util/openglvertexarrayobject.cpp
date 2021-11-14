@@ -19,8 +19,12 @@ namespace Render {
     }
 
     OpenGLVertexArrayObject::OpenGLVertexArrayObject(OpenGLBuffer &vertex, OpenGLBuffer &index, const std::array<AttributeDescriptor, 7> &attributes, OpenGLBuffer &instanceDataBuffer, size_t instanceDataSize)
+#if OPENGL_ES && OPENGL_ES < 300
+        : mVBO(vertex.handle())
+        , mEBO(index.handle())
+#endif
     {
-#if !OPENGL_ES
+#if !OPENGL_ES || OPENGL_ES >= 300
         glGenVertexArrays(1, &mHandle);
         GL_CHECK();
         glBindVertexArray(mHandle);
@@ -33,7 +37,7 @@ namespace Render {
             setVertexAttribute(i, attributes[i]);
         }
 
-#if !OPENGL_ES
+#if !OPENGL_ES || OPENGL_ES >= 300
         if (instanceDataSize > 0) {
             assert(instanceDataSize % 16 == 0);
 
@@ -54,7 +58,7 @@ namespace Render {
 
     OpenGLVertexArrayObject::OpenGLVertexArrayObject(OpenGLVertexArrayObject &&other)
         :
-#if !OPENGL_ES
+#if !OPENGL_ES || OPENGL_ES >= 300
         mHandle(std::exchange(other.mHandle, 0))
 #else
         mVBO(std::exchange(other.mVBO, 0))
@@ -71,7 +75,7 @@ namespace Render {
 
     OpenGLVertexArrayObject &OpenGLVertexArrayObject::operator=(OpenGLVertexArrayObject &&other)
     {
-#if !OPENGL_ES
+#if !OPENGL_ES || OPENGL_ES >= 300
         std::swap(mHandle, other.mHandle);
 #else
         mAttributes = std::move(other.mAttributes);
@@ -83,7 +87,7 @@ namespace Render {
 
     OpenGLVertexArrayObject::operator bool() const
     {
-#if !OPENGL_ES
+#if !OPENGL_ES || OPENGL_ES >= 300
         return mHandle != 0;
 #else
         return mVBO != 0;
@@ -92,22 +96,22 @@ namespace Render {
 
     void OpenGLVertexArrayObject::reset()
     {
-#if OPENGL_ES
-        mAttributes.clear();
-        mVBO = 0;
-        mEBO = 0;
-#else
+#if !OPENGL_ES || OPENGL_ES >= 300
         if (mHandle) {
             glDeleteVertexArrays(1, &mHandle);
             GL_CHECK();
             mHandle = 0;
         }
+#else
+        mAttributes.clear();
+        mVBO = 0;
+        mEBO = 0;
 #endif
     }
 
     void OpenGLVertexArrayObject::bind()
     {
-#if !OPENGL_ES
+#if !OPENGL_ES || OPENGL_ES >= 300
         glBindVertexArray(mHandle);
         GL_CHECK();
 #else
@@ -146,7 +150,7 @@ namespace Render {
 
     void OpenGLVertexArrayObject::unbind()
     {
-#if !OPENGL_ES
+#if !OPENGL_ES || OPENGL_ES >= 300
         glBindVertexArray(0);
         GL_CHECK();
 #endif
@@ -187,7 +191,7 @@ namespace Render {
         GL_CHECK();
     }
 
-#if !OPENGL_ES
+#if !OPENGL_ES || OPENGL_ES >= 300
 
     GLuint OpenGLVertexArrayObject::handle()
     {

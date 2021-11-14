@@ -23,14 +23,14 @@ namespace Render {
         void bind();
         void unbind();
 
-#if !OPENGL_ES
+#if !OPENGL_ES || OPENGL_ES >= 300
         GLuint handle();
 #endif
 
         void setVertexAttribute(unsigned int index, AttributeDescriptor attribute);
 
     private:
-#if !OPENGL_ES
+#if !OPENGL_ES || OPENGL_ES >= 300
         GLuint mHandle = 0;
 #else
         GLuint mVBO = 0;

@@ -211,7 +211,7 @@ namespace Render {
 
     bool checkMultisamplingSupport()
     {
-#if OPENGL_ES
+#if ANDROID || EMSCRIPTEN
         const EGLint attribs[] = {
             EGL_SAMPLE_BUFFERS, 1,
             EGL_NONE
@@ -221,7 +221,7 @@ namespace Render {
 
         return eglChooseConfig(Window::sDisplay, attribs, nullptr, 0, &numConfigs);
 #else
-        return false;
+        return true;
 #endif
     }
 

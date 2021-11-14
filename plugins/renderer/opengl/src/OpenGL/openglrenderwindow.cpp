@@ -62,7 +62,7 @@ namespace Render {
         Engine::Render::makeCurrent(mOsWindow, mContext);
 
 #if OPENGL_ES
-        sCurrentSSBOBuffer = &mSSBOBuffer;
+        sCurrentSSBOBuffer = &*mSSBOBuffer;
 #endif
 
         OpenGLRenderTarget::beginIteration(iteration);

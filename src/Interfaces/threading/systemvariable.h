@@ -19,11 +19,7 @@ namespace Engine
 
 			void wait()
 			{
-				if (mValue == initial)
-				{
-					std::unique_lock lock(mMutex);
-					mCond.wait(lock, [this]() {return mValue != initial; });
-				}
+                mValue.wait(initial);
 			}
 
 			operator T() const
@@ -34,14 +30,11 @@ namespace Engine
 			SystemVariable<T, initial> &operator=(T t)
 			{
 				mValue = t;
-				mCond.notify_all();
 				return *this;
 			}
 
 		private:
 			std::atomic<T> mValue;
-			std::mutex mMutex;
-			std::condition_variable mCond;
 		};
 
 	}

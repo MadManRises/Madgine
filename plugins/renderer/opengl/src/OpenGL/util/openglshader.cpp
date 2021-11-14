@@ -5,14 +5,17 @@
 namespace Engine {
 namespace Render {
 
-    GLenum toGLType(ShaderType type) {
+    GLenum toGLType(ShaderType type)
+    {
         switch (type) {
         case PixelShader:
             return GL_FRAGMENT_SHADER;
         case VertexShader:
             return GL_VERTEX_SHADER;
+#if !OPENGL_ES || OPENGL_ES > 31
         case GeometryShader:
             return GL_GEOMETRY_SHADER;
+#endif
         default:
             std::terminate();
         }

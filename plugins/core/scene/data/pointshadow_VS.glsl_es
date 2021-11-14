@@ -3,23 +3,24 @@
 precision highp float;
 
 #include "sl_support.glsl_es"
-#include "scene.sl"
+#include "pointshadow.sl"
 
 #include "light.glsl_es"
 
+
 uniform PerApplication
 {
-	ScenePerApplication app;
+	PointShadowPerApplication app;
 };
 
 uniform PerFrame
 {
-	ScenePerFrame frame;
+	PointShadowPerFrame frame;
 };
 
 uniform PerObject
 {
-	ScenePerObject object;
+	PointShadowPerObject object;
 };
 
 uniform SSBO_Info 
@@ -42,7 +43,6 @@ mat4 getBone(int index){
 	);
 }
 
-
 layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec2 aPos2;
 layout(location = 2) in vec4 aColor;
@@ -50,17 +50,13 @@ layout(location = 3) in vec3 aNormal;
 layout(location = 4) in vec2 aUV;
 layout(location = 5) in ivec4 aBoneIDs;
 layout(location = 6) in vec4 aWeights;
-layout(location = 7) in SceneInstanceData aInstance;
+layout(location = 7) in PointShadowInstanceData aInstance;
 
-out vec4 color;
-out vec4 worldPos;
-out vec3 normal;
-out vec2 uv;
-out vec4 lightViewPosition;
 
 
 void main()
 {
+	vec4 worldPos;
 	if (object.hasSkeleton){
 		mat4 BoneTransform = getBone(aBoneIDs[0]) * aWeights[0]
 		+ getBone(aBoneIDs[1]) * aWeights[1]
@@ -70,11 +66,6 @@ void main()
 	}else{
 		worldPos = aInstance.m * vec4(aPos, 1.0);
 	}
-    gl_Position = app.p * (frame.v * worldPos + vec4(aPos2, 0.0, 0.0));	
+    gl_Position = worldPos + vec4(aPos2, 0.0, 0.0) - vec4(frame.position, 0.0f);
 	gl_Position.y *= -1.0;
-
-    color = aColor;
-	normal = mat3(aInstance.anti_m) * aNormal;
-	uv = vec2(aUV.x, aUV.y);
-	lightViewPosition = projectShadow(frame.light.caster, worldPos);
 }
