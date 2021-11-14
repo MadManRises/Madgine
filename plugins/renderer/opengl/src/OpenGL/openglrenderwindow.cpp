@@ -13,6 +13,14 @@
 
 #include "openglrendercontext.h"
 
+#if ANDROID || EMSCRIPTEN
+#    include <EGL/egl.h>
+namespace Engine {
+namespace Window {
+    extern EGLDisplay sDisplay;
+}
+}
+#endif
 
 namespace Engine {
 namespace Render {
@@ -21,7 +29,6 @@ namespace Render {
     THREADLOCAL(OpenGLSSBOBufferStorage *)
     OpenGLRenderWindow::sCurrentSSBOBuffer = nullptr;
 #endif
-
 
     OpenGLRenderWindow::OpenGLRenderWindow(OpenGLRenderContext *context, Window::OSWindow *w, size_t samples, OpenGLRenderWindow *reusedResources)
         : OpenGLRenderTarget(context, true, w->title())
@@ -33,7 +40,7 @@ namespace Render {
             reusedContext = reusedResources->mContext;
         }
 
-        mContext = createContext(w, samples, reusedContext);
+        mContext = createContext(w, context->supportsMultisampling() ? samples : 1, reusedContext);
 
 #if OPENGL_ES
         mSSBOBuffer = { 3, 128 };
@@ -81,10 +88,10 @@ namespace Render {
     }
 
     TextureDescriptor OpenGLRenderWindow::texture(size_t index, size_t iteration) const
-    {        
+    {
         return {};
     }
-        
+
     size_t OpenGLRenderWindow::textureCount() const
     {
         return 0;

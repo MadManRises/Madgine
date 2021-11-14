@@ -6,6 +6,7 @@ namespace Engine {
 
 template <typename T, T invalid = std::numeric_limits<T>::max()>
 struct IndexType {
+    static_assert(std::is_unsigned_v<T>);
 
     using value_type = T;
     static constexpr T sInvalid = invalid;
@@ -23,14 +24,30 @@ struct IndexType {
 
     IndexType &operator=(T t)
     {
+        assert(t != invalid);
         mIndex = t;
         return *this;
     }
 
-    void operator++() { ++mIndex; }
-    void operator--() { --mIndex; }
+    void operator++()
+    {
+        assert(mIndex != invalid);
+        ++mIndex;
+    }
+    void operator--()
+    {
+        assert(mIndex != invalid);
+        --mIndex;
+    }
+    IndexType &operator+=(T s)
+    {
+        assert(mIndex != invalid);
+        mIndex += s;
+        return *this;
+    }
     IndexType &operator-=(T s)
     {
+        assert(mIndex != invalid);
         mIndex -= s;
         return *this;
     }
@@ -57,13 +74,9 @@ struct IndexType {
         mIndex = invalid;
     }
 
-    operator T &()
-    {
-        return mIndex;
-    }
-
     operator T() const
     {
+        assert(mIndex != invalid);
         return mIndex;
     }
 
@@ -72,9 +85,21 @@ struct IndexType {
         return mIndex != invalid;
     }
 
-    explicit operator bool()
+    friend std::ostream& operator<<(std::ostream& out, const IndexType& val) {
+        int64_t rep = val ? static_cast<int64_t>(val) : -1;
+        return out << rep;
+    }
+
+    friend std::istream &operator>>(std::istream &in, IndexType &val)
     {
-        return mIndex != invalid;
+        int64_t rep;
+        if (in >> rep) {
+            if (rep == -1)
+                val.reset();
+            else
+                val = rep;
+        }
+        return in;
     }
 
 private:

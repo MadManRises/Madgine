@@ -22,15 +22,16 @@
 
 #include <assert.h>
 
-#include "compatibility.h"
+#include "derive.h"
+
+#include "compatibility/compatibility.h"
 
 #include "genericforward.h"
 
-#include "concepts.h"
 #include "stringutil.h"
 #include "callable_traits.h"
 #include "classname.h"
-#include "derive.h"
+
 #include "decay.h"
 #include "templates.h"
 #include "tupleunpacker.h"

@@ -22,7 +22,7 @@ namespace Filesystem {
 
         bool operator==(const Path &other) const;
         bool operator!=(const Path &other) const;
-        std::strong_ordering operator<=>(const Path &other) const;
+        std::strong_ordering operator<=>(const Path &other) const noexcept = default;
 
         Path parentPath() const;
         Path relative() const;

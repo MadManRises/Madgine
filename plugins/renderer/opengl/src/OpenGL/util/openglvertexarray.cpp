@@ -6,10 +6,6 @@
 namespace Engine {
 namespace Render {
 
-#if OPENGL_ES
-    static thread_local OpenGLVertexArray *sCurrentBound = nullptr;
-#endif
-
     static GLenum glType(AttributeType type)
     {
         switch (type) {
@@ -30,16 +26,9 @@ namespace Render {
     }
 
     OpenGLVertexArray::OpenGLVertexArray(OpenGLVertexArray &&other)
-        :
-#if !OPENGL_ES
-        mAttributes(std::exchange(other.mAttributes, nullptr))
+        : mAttributes(std::exchange(other.mAttributes, nullptr))
         , mVertexBuffer(std::exchange(other.mVertexBuffer, nullptr))
         , mIndexBuffer(std::exchange(other.mIndexBuffer, nullptr))
-#else
-        mVBO(std::exchange(other.mVBO, 0))
-        , mEBO(std::exchange(other.mEBO, 0))
-        , mAttributes(std::move(other.mAttributes))
-#endif
     {
     }
 
@@ -50,27 +39,15 @@ namespace Render {
 
     OpenGLVertexArray &OpenGLVertexArray::operator=(OpenGLVertexArray &&other)
     {
-#if !OPENGL_ES
         std::swap(mAttributes, other.mAttributes);
         std::swap(mVertexBuffer, other.mVertexBuffer);
         std::swap(mIndexBuffer, other.mIndexBuffer);
-#else
-        if (sCurrentBound == &other)
-            sCurrentBound = this;
-        mAttributes = std::move(other.mAttributes);
-        mVBO = std::exchange(other.mVBO, 0);
-        mEBO = std::exchange(other.mEBO, 0);
-#endif
         return *this;
     }
 
     OpenGLVertexArray::operator bool() const
     {
-#if !OPENGL_ES
         return mAttributes;
-#else
-        return mVBO != 0;
-#endif
     }
 
     void OpenGLVertexArray::reset()
@@ -86,9 +63,9 @@ namespace Render {
         instance.bind();
     }
 
-     void OpenGLVertexArray::unbind(OpenGLProgram *program)
+    void OpenGLVertexArray::unbind(OpenGLProgram *program)
     {
-         mInstances.at(program).unbind();
+        mInstances.at(program).unbind();
     }
 
 }

@@ -1,6 +1,7 @@
 #pragma once
 
-#if !__has_cpp_attribute(__cpp_lib_concepts)
+
+#if __cpp_lib_concepts < 201907L
 
 namespace std
 {

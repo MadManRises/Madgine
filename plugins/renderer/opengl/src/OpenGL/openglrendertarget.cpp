@@ -48,12 +48,20 @@ namespace Render {
 
     void OpenGLRenderTarget::pushAnnotation(const char *tag)
     {
+#if OPENGL_ES
+        //glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, tag);
+#else
         glPushDebugGroupKHR(GL_DEBUG_SOURCE_APPLICATION, 0, -1, tag);
+#endif
     }
 
     void OpenGLRenderTarget::popAnnotation()
     {
+#if OPENGL_ES
+        //glPopDebugGroup();
+#else
         glPopDebugGroupKHR();
+#endif
     }
 
     void OpenGLRenderTarget::setRenderSpace(const Rect2i &space)

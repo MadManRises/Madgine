@@ -53,11 +53,6 @@ namespace Filesystem {
         return mPath != other.mPath;
     }
 
-    std::strong_ordering Path::operator<=>(const Path &other) const
-    {
-        return mPath <=> other.mPath;
-    }
-
     Path Path::parentPath() const
     {
         auto sep = mPath.rfind('/');

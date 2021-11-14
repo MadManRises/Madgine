@@ -6,6 +6,9 @@
 #    endif
 #endif
 
+#include "concepts.h"
+#include "spaceship.h"
+
 #if __cpp_lib_constexpr_algorithms >= 201806L
 #    define CONSTEXPR_ALGORITHM constexpr
 #else

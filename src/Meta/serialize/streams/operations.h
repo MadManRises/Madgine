@@ -417,22 +417,6 @@ namespace Serialize {
         }
     };
 
-    template <typename T, T defaultValue, typename... Configs>
-    struct Operations<IndexType<T, defaultValue>, Configs...> {
-
-        template <typename... Args>
-        static StreamResult read(SerializeInStream &in, IndexType<T, defaultValue> &t, const char *name, Args &&... args)
-        {
-            return Operations<T, Configs...>::read(in, t, name, std::forward<Args>(args)...);
-        }
-
-        template <typename... Args>
-        static void write(SerializeOutStream &out, const IndexType<T, defaultValue> &t, const char *name, Args &&... args)
-        {
-            Operations<T, Configs...>::write(out, t, name, std::forward<Args>(args)...);
-        }
-    };
-
     template <typename... Ty, typename... Configs>
     struct Operations<std::tuple<Ty...>, Configs...> {
 

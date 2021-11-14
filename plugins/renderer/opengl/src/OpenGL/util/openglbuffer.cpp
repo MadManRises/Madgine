@@ -50,12 +50,6 @@ namespace Render {
         glBindBuffer(mTarget, mHandle);
         GL_LOG("Bind Buffer " << mTarget << " -> " << mHandle);
         GL_CHECK();
-#if OPENGL_ES
-        if (mTarget == GL_ELEMENT_ARRAY_BUFFER)
-            OpenGLVertexArray::onBindEBO(mHandle);
-        if (mTarget == GL_ARRAY_BUFFER)
-            OpenGLVertexArray::onBindVBO(mHandle);
-#endif
     }
 
     void OpenGLBuffer::reset()

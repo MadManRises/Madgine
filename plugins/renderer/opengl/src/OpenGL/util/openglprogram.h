@@ -54,7 +54,7 @@ namespace Render {
         std::vector<OpenGLBuffer> mShaderStorageBuffers;
 #else
         std::vector<OpenGLSSBOBuffer> mShaderStorageBuffers;
-        OpenGLBuffer mShaderStorageOffsetBuffer = { GL_UNIFORM_BUFFER, 0 };
+        OpenGLBuffer mShaderStorageOffsetBuffer = { GL_UNIFORM_BUFFER };
 #endif
         size_t mInstanceDataSize = 0;
         OpenGLBuffer mInstanceBuffer = GL_ARRAY_BUFFER;

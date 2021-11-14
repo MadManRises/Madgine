@@ -32,12 +32,12 @@ namespace Render {
         std::vector<Area> mFreeList;
         size_t mIndex = 0;
         size_t mSize;
-        OpenGLBuffer mBuffer;
+        OpenGLBuffer mBuffer = { GL_UNIFORM_BUFFER };
     };
 
     struct OpenGLSSBOBuffer {
 
-        OpenGLSSBOBuffer() = default;
+        OpenGLSSBOBuffer(GLenum target);
         ~OpenGLSSBOBuffer();
 
 		void reset();

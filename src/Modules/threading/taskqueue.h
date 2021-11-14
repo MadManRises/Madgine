@@ -83,7 +83,7 @@ namespace Threading {
         template <typename Init>
         void addSetupSteps(Init &&init)
         {
-            auto [_, initHandle] = make_task(std::forward<Init>(init));
+            auto [_, initHandle] = make_task(std::forward<Init>(init)).release(this);
             addSetupStepTasks(std::move(initHandle));
         }
 

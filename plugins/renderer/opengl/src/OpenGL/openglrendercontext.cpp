@@ -34,6 +34,41 @@ namespace Window {
     extern EGLDisplay sDisplay;
 }
 }
+
+#    define X(VAL)    \
+        {             \
+            VAL, #VAL \
+        }
+static constexpr struct {
+    EGLint attribute;
+    const char *name;
+} eglAttributeNames[] = {
+    X(EGL_BUFFER_SIZE),
+    X(EGL_RED_SIZE),
+    X(EGL_GREEN_SIZE),
+    X(EGL_BLUE_SIZE),
+    X(EGL_ALPHA_SIZE),
+    X(EGL_CONFIG_CAVEAT),
+    X(EGL_CONFIG_ID),
+    X(EGL_DEPTH_SIZE),
+    X(EGL_LEVEL),
+    X(EGL_MAX_PBUFFER_WIDTH),
+    X(EGL_MAX_PBUFFER_HEIGHT),
+    X(EGL_MAX_PBUFFER_PIXELS),
+    X(EGL_NATIVE_RENDERABLE),
+    X(EGL_NATIVE_VISUAL_ID),
+    X(EGL_NATIVE_VISUAL_TYPE),
+    //X(EGL_PRESERVED_RESOURCES),
+    X(EGL_SAMPLE_BUFFERS),
+    X(EGL_SAMPLES),
+    // X(EGL_STENCIL_BITS),
+    X(EGL_SURFACE_TYPE),
+    X(EGL_TRANSPARENT_TYPE),
+    // X(EGL_TRANSPARENT_RED),
+    // X(EGL_TRANSPARENT_GREEN),
+    // X(EGL_TRANSPARENT_BLUE)
+};
+#    undef X
 #elif OSX
 #    include "osxopengl.h"
 #elif IOS
@@ -166,11 +201,27 @@ namespace Render {
 #elif ANDROID || EMSCRIPTEN
         EGLSurface surface = (EGLSurface)window->mHandle;
         if (!eglMakeCurrent(Window::sDisplay, surface, surface, context)) {
-            LOG_ERROR("Error-Code: " << errno);
+            LOG_ERROR("Error-Code: " << eglGetError());
             std::terminate();
         }
 #elif OSX
         OSXBridge::makeCurrent(context);
+#endif
+    }
+
+    bool checkMultisamplingSupport()
+    {
+#if OPENGL_ES
+        const EGLint attribs[] = {
+            EGL_SAMPLE_BUFFERS, 1,
+            EGL_NONE
+        };
+
+        EGLint numConfigs;
+
+        return eglChooseConfig(Window::sDisplay, attribs, nullptr, 0, &numConfigs);
+#else
+        return false;
 #endif
     }
 
@@ -271,6 +322,8 @@ namespace Render {
                 EGL_RED_SIZE, 8,
                 EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
                 EGL_CONFORMANT, EGL_OPENGL_ES2_BIT,
+                /* EGL_SAMPLE_BUFFERS, 1,
+                EGL_SAMPLES, static_cast<EGLint>(samples),*/
                 EGL_NONE
             };
 
@@ -282,10 +335,38 @@ namespace Render {
             EGLConfig config;
             EGLint numConfigs;
 
-            if (!eglChooseConfig(Window::sDisplay, attribs, &config, 1, &numConfigs))
+            if (!eglChooseConfig(Window::sDisplay, attribs, &config, 1, &numConfigs)) {
+                LOG_ERROR("Could not find suitable EGL configuration");
+
+                bool result = eglGetConfigs(Window::sDisplay, NULL, 0, &numConfigs);
+                assert(result);
+
+                LOG("Number of EGL configuration: " << numConfigs);
+
+                std::unique_ptr<EGLConfig[]> configs = std::make_unique<EGLConfig[]>(numConfigs);
+
+                result = eglGetConfigs(Window::sDisplay, configs.get(), numConfigs, &numConfigs);
+                assert(result);
+
+                for (int i = 0; i < numConfigs; i++) {
+                    Util::LogDummy out { Engine::Util::MessageType::LOG_TYPE };
+                    out << "Configuration:\n";
+                    EGLConfig config = configs[i];
+                    for (int j = 0; j < sizeof(eglAttributeNames) / sizeof(eglAttributeNames[0]); j++) {
+                        EGLint value = -1;
+                        result = eglGetConfigAttrib(Window::sDisplay, config, eglAttributeNames[j].attribute, &value);
+                        if (result) {
+                            out << " " << eglAttributeNames[j].name << " = " << value << "\n";
+                        }
+                    }
+                }
                 std::terminate();
+            }
 
             context = eglCreateContext(Window::sDisplay, config, /*sharedContext*/ nullptr, contextAttribs);
+            if (!context) {
+                LOG_ERROR("eglCreateContext - ErrorCode: " << eglGetError());
+            }
         }
 
 #elif OSX
@@ -330,22 +411,42 @@ namespace Render {
             GL_CHECK();
 #endif
 
+            //Pos
             glVertexAttrib3f(0, 0, 0, 0);
+            GL_CHECK();
+            //Pos2
             glVertexAttrib2f(1, 0, 0);
+            GL_CHECK();
+            //Color
             glVertexAttrib4f(2, 1, 1, 1, 1);
+            GL_CHECK();
+            //UV
             glVertexAttrib2f(4, 0, 0);
+            GL_CHECK();
+            //BoneIndices
             glVertexAttribI4i(5, 0, 0, 0, 0);
+            GL_CHECK();
+            //Weights
             glVertexAttrib4f(6, 0, 0, 0, 0);
+            GL_CHECK();
 
             glEnable(GL_BLEND);
+            GL_CHECK();
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            GL_CHECK();
 
             glEnable(GL_DEPTH_TEST);
+            GL_CHECK();
             glDepthMask(GL_TRUE);
+            GL_CHECK();
             glDepthFunc(GL_LESS);
+            GL_CHECK();
             //glDepthRange(0.0, 1.0);
 
+#if !OPENGL_ES
             glEnable(GL_MULTISAMPLE);
+            GL_CHECK();
+#endif
 
             if (glGetString) {
                 const GLubyte *val;
@@ -422,7 +523,7 @@ namespace Render {
 #endif
 
     OpenGLRenderContext::OpenGLRenderContext(Threading::TaskQueue *queue)
-        : UniqueComponent(queue)
+        : UniqueComponent(queue, checkMultisamplingSupport())
     {
     }
 

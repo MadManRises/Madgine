@@ -118,7 +118,7 @@ struct MultiContainer {
         IteratorImpl operator-(ptrdiff_t diff) const
         {
             return {
-                TupleUnpacker::forEach(mIt, [](auto &it) {
+                TupleUnpacker::forEach(mIt, [=](auto &it) {
                     return it - diff;
                 })
             };

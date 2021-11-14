@@ -154,6 +154,11 @@ namespace Window {
         {
         }
 
+        virtual std::string title() const override
+        {
+            return "";
+        }
+
         virtual void destroy() override;
 
         //Input
@@ -258,6 +263,7 @@ namespace Window {
                 EGL_RED_SIZE, 8,
                 EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
                 EGL_CONFORMANT, EGL_OPENGL_ES2_BIT,
+                /* EGL_SAMPLE_BUFFERS, 1,*/
                 EGL_NONE
             };
 

@@ -56,6 +56,11 @@ namespace Serialize {
         typedef EnumTag type;
     };
 
+    template <typename T, T invalid>
+    struct PrimitiveReducer<IndexType<T, invalid>> {
+        typedef T type;
+    };
+
     template <typename T, typename = void>
     struct PrimitiveTypeIndex : type_pack_index<uint8_t, SerializePrimitives, typename PrimitiveReducer<T>::type> {
     };

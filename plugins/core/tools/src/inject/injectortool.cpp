@@ -60,7 +60,7 @@ namespace Tools {
                 std::stringstream ss;
                 for (size_t i : block.mTargets)
                     ss << " " << i;
-                ImGui::Text(("Targets:" + ss.str()).c_str());
+                ImGui::Text("%s", ("Targets:" + ss.str()).c_str());
                 ImGui::EndChild();                
             }
         }

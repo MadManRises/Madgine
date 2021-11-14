@@ -165,7 +165,7 @@ public:
 
         IteratorImpl operator+(difference_type diff) const
         {
-            return { mIt + diff, *mContainer };
+            return { mIt + diff };
         }
 
         IteratorImpl &operator+=(difference_type diff)

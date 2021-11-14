@@ -10,7 +10,7 @@ namespace Engine {
 namespace Render {
 
     struct MADGINE_CLIENT_EXPORT RenderContext {
-        RenderContext(Threading::TaskQueue *queue);
+        RenderContext(Threading::TaskQueue *queue, bool supportsMultisampling = true);
         virtual ~RenderContext();
 
         virtual std::unique_ptr<RenderTarget> createRenderWindow(Window::OSWindow *w, size_t samples = 1) = 0;
@@ -30,6 +30,8 @@ namespace Render {
 
         static Threading::TaskQueue *renderQueue();
 
+        bool supportsMultisampling() const;
+
     protected:
         void checkThread();
 
@@ -42,6 +44,8 @@ namespace Render {
         std::thread::id mRenderThread;
 
         size_t mFrame = 1;
+
+        bool mSupportsMultisampling;
     };
 
 }

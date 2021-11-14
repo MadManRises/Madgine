@@ -108,7 +108,11 @@ namespace Render {
             glTexImage2D(target(), 0, sizedFormat, size.x, size.y, 0, internalFormat, internalStorage, data.mData);
             break;
         case TextureType_2DMultiSample:
+#if OPENGL_ES
+            glTexStorage2DMultisample(target(), mSamples, sizedFormat, size.x, size.y, true);
+#else
             glTexImage2DMultisample(target(), mSamples, sizedFormat, size.x, size.y, true);
+#endif
             break;
         case TextureType_Cube:
             for (int i = 0; i < 6; ++i)

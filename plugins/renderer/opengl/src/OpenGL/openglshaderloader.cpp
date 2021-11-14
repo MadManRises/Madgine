@@ -147,8 +147,7 @@ namespace Render {
             = source.data();
 
         glShaderSource(handle, 1, &cSource, NULL);
-        const GLchar *root = "/";
-        glCompileShaderIncludeARB(handle, 1, &root, nullptr);
+        glCompileShader(handle);
         // check for shader compile errors
         GLint success;
         char infoLog[512];

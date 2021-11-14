@@ -33,7 +33,7 @@ struct InStream {
     InStream &operator>>(T &t)
     {
         if constexpr (std::is_enum_v<T>) {
-            std::underlying_type_t<T> val;
+            /* std::underlying_type_t<T> */int64_t val;
             mStream >> val;
             t = static_cast<T>(val);
         } else {

@@ -8,14 +8,13 @@
 
 #    include "Generic/bytebuffer.h"
 
-
 namespace Engine {
 namespace Render {
 
     OpenGLSSBOBufferStorage::OpenGLSSBOBufferStorage(int bindingIndex, size_t size)
         : mSize(size)
+        , mBuffer(GL_UNIFORM_BUFFER, { nullptr, size * 16 })
     {
-        mBuffer = { GL_UNIFORM_BUFFER, size * 16 };
         glBindBufferBase(GL_UNIFORM_BUFFER, bindingIndex, mBuffer.handle());
         GL_CHECK();
     }
@@ -53,6 +52,11 @@ namespace Render {
     {
         mFreeList.clear();
         mBuffer.reset();
+    }
+
+    OpenGLSSBOBuffer::OpenGLSSBOBuffer(GLenum target)
+    {
+        assert(target = GL_UNIFORM_BUFFER);
     }
 
     OpenGLSSBOBuffer::~OpenGLSSBOBuffer()
