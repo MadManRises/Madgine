@@ -7,10 +7,6 @@
 namespace Engine {
 namespace Plugins {
 
-    struct PluginListenerCmp {
-        bool operator()(PluginListener *first, PluginListener *second) const;
-    };
-
     struct MODULES_EXPORT PluginSection {
         PluginSection(PluginManager &mgr, const std::string &name, bool exclusive = false, bool atleastOne = false);
         PluginSection(const PluginSection &) = delete;
@@ -33,9 +29,6 @@ namespace Plugins {
         Threading::TaskFuture<bool> unloadPlugin(const std::string &name, std::function<void()> onSuccess = {});
 
         Threading::TaskFuture<bool> loadPluginByFilename(const std::string &name);
-
-        void addListener(PluginListener *listener);
-        void removeListener(PluginListener *listener);
 
         template <typename T>
         T *getUniqueSymbol(const std::string &name) const
@@ -62,7 +55,6 @@ namespace Plugins {
         friend struct Plugin;
 
         std::map<std::string, Plugin> mPlugins;
-        std::set<PluginListener *, PluginListenerCmp> mListeners;
 
         std::vector<Plugin *> mDependents;
 

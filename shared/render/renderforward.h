@@ -7,6 +7,11 @@ namespace Render {
     struct GPUMeshData;
     struct Texture;
     struct Material;
+    struct Glyph;
+    struct Font;
+
+    typedef int RenderPassFlags;
+    typedef uintptr_t TextureHandle;
 
 }
 }

@@ -20,18 +20,19 @@ namespace Core {
 
     Root::Root(std::unique_ptr<CLI::CLICore> cli)
         : mCLI(std::move(cli))
-#if ENABLE_PLUGINS
-        , mPluginManager(std::make_unique<Plugins::PluginManager>())
-        , mCollectorManager(std::make_unique<UniqueComponentCollectorManager>(*mPluginManager))
-#endif
-#if ENABLE_MEMTRACKING
-        , mMemTracker(std::make_unique<Debug::Memory::MemoryTracker>())
-#endif
-        , mResources(std::make_unique<Resources::ResourceManager>())
     {
+
 #if ENABLE_PLUGINS
+        mPluginManager = std::make_unique<Plugins::PluginManager>();
         mPluginManager->setup();
+        mCollectorManager = std::make_unique<UniqueComponentCollectorManager>(*mPluginManager);
 #endif
+
+#if ENABLE_MEMTRACKING
+        mMemTracker = std::make_unique<Debug::Memory::MemoryTracker>();
+#endif
+
+        mResources = std::make_unique<Resources::ResourceManager>();
 
         KeyValueRegistry::registerGlobal("ResourceManager", mResources.get());
     }

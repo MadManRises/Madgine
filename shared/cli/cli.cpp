@@ -33,7 +33,7 @@ namespace CLI {
                     LOG_WARNING("Argument '" << *it << "' provided twice! Last occurence will be used!");
                     pib.first->second.clear();
                 }
-                std::vector<const char *> &args = pib.first->second;
+                std::vector<std::string_view> &args = pib.first->second;
                 ++it;
                 while (it != end && **it != '-') {
                     args.emplace_back(*it);

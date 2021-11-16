@@ -26,21 +26,14 @@ namespace Plugins {
         std::map<std::string, PluginSection>::iterator begin();
         std::map<std::string, PluginSection>::iterator end();
 
-        void addListener(PluginListener *listener);
-        void removeListener(PluginListener *listener);
-
         Threading::TaskFuture<bool> loadFromFile(const Filesystem::Path &p);
         void saveToFile(const Filesystem::Path &p, bool withTools);
 
-        std::mutex mListenersMutex;
         std::mutex mDependenciesMutex;
 
         Threading::SignalStub<Filesystem::Path, bool> &exportSignal();
 
     protected:
-        void setupListenerOnSectionAdded(PluginListener *listener, PluginSection *section);
-        void shutdownListenerAboutToRemoveSection(PluginListener *listener, PluginSection *section);
-
         void setupSection(const std::string &name, bool exclusive, bool atleastOne);
 
         void saveSelection(Threading::Barrier &barrier, Ini::IniFile &file, bool withTools);
@@ -52,10 +45,6 @@ namespace Plugins {
 
     private:
         std::map<std::string, PluginSection> mSections;
-
-        std::vector<PluginListener *> mListeners;
-
-        static PluginManager *sSingleton;
 
         bool mLoadingSelectionFile = false;
 

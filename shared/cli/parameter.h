@@ -15,7 +15,7 @@ namespace CLI {
         {
         }
 
-        bool parse(const std::vector<const char *> &args) override;
+        bool parse(const std::vector<std::string_view> &args) override;
 
         const char *typeName() override
         {
@@ -45,7 +45,7 @@ namespace CLI {
     };
 
     template <>
-    inline bool ParameterImpl<bool>::parse(const std::vector<const char *> &args)
+    inline bool ParameterImpl<bool>::parse(const std::vector<std::string_view> &args)
     {
         if (args.empty())
             mValue = true;
@@ -62,11 +62,11 @@ namespace CLI {
     }
 
     template <>
-    inline bool ParameterImpl<int>::parse(const std::vector<const char *> &args)
+    inline bool ParameterImpl<int>::parse(const std::vector<std::string_view> &args)
     {
         errno = 0;
         char *end;
-        int value = strtol(args.front(), &end, 0);
+        int value = strtol(args.front().data(), &end, 0);
         if (errno == 0 && *end == '\0') {
             mValue = value;
             return true;
@@ -76,7 +76,7 @@ namespace CLI {
     }
 
     template <>
-    inline bool ParameterImpl<std::string>::parse(const std::vector<const char *> &args)
+    inline bool ParameterImpl<std::string>::parse(const std::vector<std::string_view> &args)
     {
         mValue = args.front();
         return true;
@@ -112,7 +112,7 @@ namespace CLI {
         {
         }
 
-        bool parse(const std::vector<const char *> &args) override
+        bool parse(const std::vector<std::string_view> &args) override
         {
             return mValue.fromString(args[0]);
         }

@@ -10,8 +10,6 @@
 
 #    include "Interfaces/util/exception.h"
 
-#    include "pluginlistener.h"
-
 #    include "Interfaces/dl/runtime.h"
 
 #    include "Generic/keyvalue.h"
@@ -163,26 +161,6 @@ namespace Plugins {
         return loadPlugin(name);
     }
 
-    void PluginSection::addListener(PluginListener *listener)
-    {
-        std::unique_lock lock(mMgr.mListenersMutex);
-        mListeners.emplace(listener);
-        for (std::pair<const std::string, Plugins::Plugin> &p : *this) {
-            if (p.second.state())
-                listener->onPluginLoad(&p.second);
-        }
-    }
-
-    void PluginSection::removeListener(PluginListener *listener)
-    {
-        std::unique_lock lock(mMgr.mListenersMutex);
-        for (std::pair<const std::string, Plugins::Plugin> &p : *this) {
-            if (p.second.state())
-                listener->aboutToUnloadPlugin(&p.second);
-        }
-        mListeners.erase(listener);
-    }
-
     Plugin *PluginSection::getPlugin(const std::string &name)
     {
         auto it = mPlugins.find(name);
@@ -198,15 +176,6 @@ namespace Plugins {
         return p->startOperation(Plugin::LOADING, [=, &barrier]() {
             return barrier.queue(
                 nullptr, [](PluginSection *_this, Threading::Barrier &barrier, Plugin *p) -> Threading::Task<bool> {
-                    std::vector<Threading::TaskFuture<void>> listenerFeedbacks;
-                    {
-                        std::unique_lock lock(_this->mMgr.mListenersMutex);
-                        for (PluginListener *listener : _this->mListeners)
-                            listenerFeedbacks.emplace_back(listener->aboutToLoadPlugin(p));
-                    }
-
-                    for (Threading::TaskFuture<void> &f : listenerFeedbacks)
-                        co_await f;
 
                     Plugin *unloadExclusive
                         = nullptr;
@@ -229,12 +198,6 @@ namespace Plugins {
                         co_return false;
                     }
 
-                    {
-                        std::unique_lock lock(_this->mMgr.mListenersMutex);
-                        for (PluginListener *listener : _this->mListeners)
-                            listener->onPluginLoad(p);
-                    }
-
                     PluginSection &toolsSection = _this->mMgr.section("Tools");
                     if (Plugin *toolPlugin = toolsSection.getPlugin(p->name() + "Tools")) {
                         co_return co_await toolsSection.loadPlugin(barrier, toolPlugin);
@@ -251,30 +214,7 @@ namespace Plugins {
         assert(p->section() == this);
 
         return p->startOperation(Plugin::UNLOADING, [=, &barrier]() {
-            return barrier.queue(
-                nullptr, [](PluginSection *_this, Threading::Barrier &barrier, Plugin *p) -> Threading::Task<bool> {
-                    //assert(!mAtleastOne);
-                    std::vector<Threading::TaskFuture<void>> listenerFeedbacks;
-                    {
-                        std::unique_lock lock(_this->mMgr.mListenersMutex);
-                        for (PluginListener *listener : _this->mListeners)
-                            listenerFeedbacks.emplace_back(listener->aboutToUnloadPlugin(p));
-                    }
-
-                    for (Threading::TaskFuture<void> &f : listenerFeedbacks)
-                        co_await f;
-
-                    bool resultValue = co_await p->unload(_this->mMgr, barrier);
-                    if (resultValue) {
-                        {
-                            std::unique_lock lock(_this->mMgr.mListenersMutex);
-                            for (PluginListener *listener : _this->mListeners)
-                                listener->onPluginUnload(p);
-                        }
-                    }
-                    co_return resultValue;
-                },
-                this, barrier, p);
+            return p->unload(mMgr, barrier);
         });
     }
 
@@ -347,10 +287,6 @@ namespace Plugins {
         return symbol;
     }
 
-    bool PluginListenerCmp::operator()(PluginListener *first, PluginListener *second) const
-    {
-        return (first->priority() > second->priority()) || (first->priority() == second->priority() && first < second);
-    }
 }
 }
 

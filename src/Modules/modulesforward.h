@@ -50,7 +50,6 @@ namespace Plugins {
     struct PluginManager;
     struct Plugin;
     struct PluginSection;
-    struct PluginListener;
 
     struct BinaryInfo;
 }

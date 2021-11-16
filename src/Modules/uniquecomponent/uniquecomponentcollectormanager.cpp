@@ -10,6 +10,8 @@
 
 #    include "../plugins/plugin.h"
 
+#include "../plugins/pluginsection.h"
+
 #include "Generic/container/compoundatomicoperation.h"
 
 namespace Engine {
@@ -17,35 +19,16 @@ namespace Engine {
 UniqueComponentCollectorManager::UniqueComponentCollectorManager(Plugins::PluginManager &pluginMgr)
     : mMgr(pluginMgr)
 {
-    mMgr.addListener(this);
     mMgr.exportSignal().connect(&exportStaticComponentHeader);
-}
-
-UniqueComponentCollectorManager::~UniqueComponentCollectorManager()
-{
-    mMgr.removeListener(this);
-}
-
-void UniqueComponentCollectorManager::onPluginLoad(const Plugins::Plugin *p)
-{
-
-    const Plugins::BinaryInfo *info = p->info();
 
     CompoundAtomicOperation op;
-    for (UniqueComponentRegistryBase *reg : registryRegistry()) {
-        reg->onPluginLoad(info, op);
+    for (const auto& [name, section] : pluginMgr) {
+        for (const auto& [name, plugin] : section) {
+            for (UniqueComponentRegistryBase* reg : registryRegistry()) {
+                reg->onPluginLoad(plugin.info(), op);
+            }
+        }
     }
-}
-
-Threading::TaskFuture<void> UniqueComponentCollectorManager::aboutToUnloadPlugin(const Plugins::Plugin *p)
-{
-    const Plugins::BinaryInfo *info = p->info();
-
-    CompoundAtomicOperation op;
-    for (UniqueComponentRegistryBase *reg : registryRegistry()) {
-        reg->onPluginUnload(info, op);
-    }
-    return {};
 }
 
 }

@@ -11,6 +11,7 @@
 #include "Meta/math/vector2i.h"
 #include "Meta/math/frustum.h"
 #include "render/vertex.h"
+#include "render/renderforward.h"
 
 #include "im3d_parameters.h"
 

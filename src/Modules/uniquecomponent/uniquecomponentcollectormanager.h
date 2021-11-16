@@ -2,18 +2,11 @@
 
 #if ENABLE_PLUGINS
 
-#include "../plugins/pluginlistener.h"
-
 namespace Engine {
 
-	struct MODULES_EXPORT UniqueComponentCollectorManager : Plugins::PluginListener{
+	struct MODULES_EXPORT UniqueComponentCollectorManager{
 
 		UniqueComponentCollectorManager(Plugins::PluginManager &pluginMgr);
-		virtual ~UniqueComponentCollectorManager();
-
-	protected:
-		void onPluginLoad(const Plugins::Plugin *p) override;
-            Threading::TaskFuture<void> aboutToUnloadPlugin(const Plugins::Plugin *p) override;
 
 	private:
 		Plugins::PluginManager &mMgr;

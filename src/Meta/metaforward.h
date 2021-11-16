@@ -50,10 +50,6 @@ using KeyValueVirtualAssociativeRange = VirtualRange<KeyValuePair, Functor_to_Ke
 using KeyValueVirtualSequenceIterator = VirtualIterator<ValueTypeRef>;
 using KeyValueVirtualSequenceRange = VirtualRange<ValueTypeRef, Functor_to_ValueTypeRef<true>>;
 
-template <typename T>
-struct MadgineObject;
-
-
 
 namespace Serialize {
     struct SerializeInStream;
@@ -132,59 +128,6 @@ namespace Serialize {
 
     template <typename T, typename... Configs, typename Hierarchy = std::monostate>
     void write(SerializeOutStream &out, const T &t, const char *name, const Hierarchy &hierarchy = {}, StateTransmissionFlags flags = 0);
-}
-
-namespace Network {
-    struct NetworkManager;
-}
-
-namespace Plugins {
-    struct PluginManager;
-    struct Plugin;
-    struct PluginSection;
-    struct PluginListener;
-
-    struct BinaryInfo;
-}
-
-namespace Filesystem {
-    struct Path;
-    struct FileQuery;
-    struct FileQueryState;
-
-    struct SharedLibraryQuery;
-    struct SharedLibraryQueryState;
-}
-
-namespace Threading {
-    struct WorkGroup;
-    struct WorkGroupHandle;
-    struct Scheduler;
-
-    struct FrameListener;
-    struct FrameLoop;
-
-    struct DataMutex;
-}
-
-namespace Render {
-    typedef uintptr_t TextureHandle;
-    typedef int RenderPassFlags;
-
-    struct Font;
-    struct Glyph;
-}
-
-namespace Resources {
-    struct ResourceManager;
-    template <typename Loader>
-    struct ResourceType;
-    template <typename T, typename Data, typename Container, typename Storage>
-    struct ResourceLoader;
-    template <typename T, typename _Data, typename Base>
-    struct ResourceLoaderImpl;
-    struct ResourceBase;
-    struct ResourceLoaderBase;
 }
 
 struct Vector2;

@@ -13,6 +13,8 @@
 
 #include "resourceloaderbase.h"
 
+#include "Modules/plugins/pluginsection.h"
+
 namespace Engine {
 namespace Resources {
 
@@ -38,9 +40,6 @@ namespace Resources {
 
     ResourceManager::~ResourceManager()
     {
-#if ENABLE_PLUGINS
-        Plugins::PluginManager::getSingleton().removeListener(this);
-#endif
     }
 
     void ResourceManager::registerResourceLocation(const Filesystem::Path &path, int priority)
@@ -62,7 +61,19 @@ namespace Resources {
     bool ResourceManager::init()
     {
 #if ENABLE_PLUGINS
-        Plugins::PluginManager::getSingleton().addListener(this);
+        for (auto &section : Plugins::PluginManager::getSingleton()) {
+            for (std::pair<const  std::string, Plugins::Plugin> &p : section.second) {
+                if (!p.second.isLoaded())
+                    continue;
+                const Plugins::BinaryInfo *info = p.second.info();
+                Filesystem::Path binPath = info->mBinaryDir;
+                bool isLocal = p.second.fullPath().parentPath() == binPath;
+                if (isLocal)
+                    registerResourceLocation(Filesystem::Path { info->mProjectRoot } / "data", 75);
+                //else
+                //registerResourceLocation(binPath.parent_path() / "data" / plugin->());
+            }
+        }
 #endif
 
         registerResourceLocation(Filesystem::executablePath().parentPath() / "data", 50);
@@ -91,10 +102,6 @@ namespace Resources {
         mFileWatcher.clear();
 
         mInitialized.clear();
-
-#if ENABLE_PLUGINS
-        Plugins::PluginManager::getSingleton().removeListener(this);
-#endif
     }
 
     Filesystem::Path ResourceManager::findResourceFile(const std::string &fileName)
@@ -107,32 +114,6 @@ namespace Resources {
         }
         return {};
     }
-
-#if ENABLE_PLUGINS
-    void ResourceManager::onPluginLoad(const Plugins::Plugin *plugin)
-    {
-        std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> loaderByExtension = getLoaderByExtension();
-
-        if (mInitialized.test()) {
-            for (const std::pair<const Filesystem::Path, int> &p : mResourcePaths) {
-                updateResources(Filesystem::FileEventType::FILE_CREATED, p.first, p.second, loaderByExtension);
-            }
-        }
-
-        const Plugins::BinaryInfo *info = plugin->info();
-        Filesystem::Path binPath = info->mBinaryDir;
-        bool isLocal = plugin->fullPath().parentPath() == binPath;
-        if (isLocal)
-            registerResourceLocation(Filesystem::Path { info->mProjectRoot } / "data", 75);
-        //else
-        //registerResourceLocation(binPath.parent_path() / "data" / plugin->());
-    }
-
-    Threading::TaskFuture<void> ResourceManager::aboutToUnloadPlugin(const Plugins::Plugin *plugin)
-    {
-        return {};
-    }
-#endif
 
     void ResourceManager::update()
     {
@@ -218,13 +199,6 @@ namespace Resources {
             return false;
         return first < second;
     }
-
-#if ENABLE_PLUGINS
-    int ResourceManager::priority() const
-    {
-        return 75;
-    }
-#endif
 
 }
 }

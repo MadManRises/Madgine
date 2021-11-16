@@ -14,7 +14,7 @@ namespace CLI {
         static const CLICore &getSingleton();
         static std::vector<ParameterBase *> &parameters();
 
-        std::map<std::string_view, std::vector<const char *>> mArguments;
+        std::map<std::string_view, std::vector<std::string_view>> mArguments;
     };
 }
 }

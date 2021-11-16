@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Modules/plugins/pluginlistener.h"
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 #include "Interfaces/filesystem/filewatcher.h"
 #include "resourceloadercollector.h"
@@ -9,9 +8,6 @@
 namespace Engine {
 namespace Resources {
     struct MADGINE_RESOURCES_EXPORT ResourceManager final
-#if ENABLE_PLUGINS
-        : Plugins::PluginListener
-#endif
     {
         static ResourceManager &getSingleton();
 
@@ -49,16 +45,6 @@ namespace Resources {
         void waitForInit();
 
         Threading::TaskQueue *taskQueue();
-
-#if ENABLE_PLUGINS
-        int priority() const override;
-#endif
-
-#if ENABLE_PLUGINS
-    protected:
-        void onPluginLoad(const Plugins::Plugin *plugin) override;
-        Threading::TaskFuture<void> aboutToUnloadPlugin(const Plugins::Plugin *plugin) override;
-#endif
 
     private:
         void updateResources(Filesystem::FileEventType event, const Filesystem::Path &path, int priority);

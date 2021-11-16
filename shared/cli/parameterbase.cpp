@@ -24,7 +24,7 @@ namespace CLI {
 
             if (CLICore::isInitialized()) {
 
-                const std::vector<const char *> *args = nullptr;
+                const std::vector<std::string_view> *args = nullptr;
                 const char *optionName = nullptr;
 
                 for (const char *option : mOptions) {

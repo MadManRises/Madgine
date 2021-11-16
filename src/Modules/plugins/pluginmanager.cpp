@@ -36,7 +36,7 @@ namespace Plugins {
         return Filesystem::appDataPath() / ("plugins.cfg");
     }
 
-    PluginManager *PluginManager::sSingleton = nullptr;
+    static PluginManager *sSingleton = nullptr;
 
     PluginManager &PluginManager::getSingleton()
     {
@@ -138,11 +138,6 @@ namespace Plugins {
     PluginSection &PluginManager::section(const std::string &name)
     {
         auto pib = mSections.try_emplace(name, *this, name);
-        if (pib.second) {
-            for (PluginListener *listener : mListeners) {
-                setupListenerOnSectionAdded(listener, &pib.first->second);
-            }
-        }
         return pib.first->second;
     }
 
@@ -231,26 +226,6 @@ namespace Plugins {
         }
     }
 
-    void PluginManager::addListener(PluginListener *listener)
-    {
-        {
-            std::unique_lock lock(mListenersMutex);
-            mListeners.push_back(listener);
-        }
-        for (PluginSection &section : kvValues(mSections))
-            setupListenerOnSectionAdded(listener, &section);
-    }
-
-    void PluginManager::removeListener(PluginListener *listener)
-    {
-        {
-            std::unique_lock lock(mListenersMutex);
-            mListeners.erase(std::remove(mListeners.begin(), mListeners.end(), listener), mListeners.end());
-        }
-        for (PluginSection &section : kvValues(mSections))
-            shutdownListenerAboutToRemoveSection(listener, &section);
-    }
-
     Threading::TaskFuture<bool> PluginManager::loadFromFile(const Filesystem::Path &p)
     {
         LOG("Loading Plugins: " << p);
@@ -275,23 +250,10 @@ namespace Plugins {
         });
     }
 
-    void PluginManager::setupListenerOnSectionAdded(PluginListener *listener, PluginSection *section)
-    {
-        section->addListener(listener);
-    }
-
-    void PluginManager::shutdownListenerAboutToRemoveSection(PluginListener *listener, PluginSection *section)
-    {
-        section->removeListener(listener);
-    }
-
     void PluginManager::setupSection(const std::string &name, bool exclusive, bool atleastOne)
     {
         auto pib = mSections.try_emplace(name, *this, name, exclusive, atleastOne);
         assert(pib.second);
-        for (PluginListener *listener : mListeners) {
-            setupListenerOnSectionAdded(listener, &pib.first->second);
-        }
     }
 
     Threading::SignalStub<Filesystem::Path, bool> &PluginManager::exportSignal()

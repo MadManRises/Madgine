@@ -2,8 +2,8 @@
 
 /// @cond
 
-#include "Modules/moduleslib.h"
 #include "Meta/metalib.h"
+#include "Modules/moduleslib.h"
 
 #if defined(Resources_EXPORTS)
 #    define MADGINE_RESOURCES_EXPORT DLL_EXPORT
@@ -11,5 +11,6 @@
 #    define MADGINE_RESOURCES_EXPORT DLL_IMPORT
 #endif
 
+#include "resourcesforward.h"
 
 /// @endcond
