@@ -11,6 +11,7 @@ namespace Plugins {
         static PluginManager &getSingleton();
 
         PluginManager();
+        PluginManager(const PluginManager &) = delete;
         ~PluginManager();		
 
         bool setup(bool loadCache = true, bool loadExe = true);
@@ -26,27 +27,23 @@ namespace Plugins {
         std::map<std::string, PluginSection>::iterator begin();
         std::map<std::string, PluginSection>::iterator end();
 
-        Threading::TaskFuture<bool> loadFromFile(const Filesystem::Path &p);
+        bool loadFromFile(const Filesystem::Path &p, bool withTools);
         void saveToFile(const Filesystem::Path &p, bool withTools);
-
-        std::mutex mDependenciesMutex;
 
         Threading::SignalStub<Filesystem::Path, bool> &exportSignal();
 
     protected:
         void setupSection(const std::string &name, bool exclusive, bool atleastOne);
 
-        void saveSelection(Threading::Barrier &barrier, Ini::IniFile &file, bool withTools);
-        Threading::TaskFuture<bool> loadSelection(Threading::Barrier &barrier, Ini::IniFile file);
+        void saveSelection(Ini::IniFile &file, bool withTools);
+        bool loadSelection(const Ini::IniFile &file, bool withTools);
 
-        void onUpdate(Threading::Barrier &barrier);
+        void onUpdate();
 
         friend struct PluginSection;
 
     private:
-        std::map<std::string, PluginSection> mSections;
-
-        bool mLoadingSelectionFile = false;
+        std::map<std::string, PluginSection> mSections;        
 
         Threading::Signal<Filesystem::Path, bool> mExportSignal;
     };

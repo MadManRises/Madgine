@@ -18,7 +18,6 @@ namespace Threading {
         template <typename F, typename... Args>
         void createThread(F &&main, Args &&... args)
         {
-            addThread();
             mSubThreads.emplace_back(
                 std::async(std::launch::async, &WorkGroup::threadMain<F, std::decay_t<Args>...>, this, std::forward<F>(main), std::forward<Args>(args)...));
         }
@@ -45,17 +44,10 @@ namespace Threading {
         void removeTaskQueue(TaskQueue *taskQueue);
         const std::vector<TaskQueue *> taskQueues() const;
 
-        static Barrier &barrier(int flags = 0);
-        void enterCurrentBarrier(TaskQueue *queue, size_t queueIndex, bool isMain);
-
-        const std::atomic<bool> &hasInterrupt();
-
     private:
 #if ENABLE_THREADING
         void initThread();
         void finalizeThread();
-
-        void addThread();
 
         struct ThreadGuard {
             ThreadGuard(WorkGroup &group)
@@ -113,11 +105,6 @@ namespace Threading {
         std::vector<std::function<void()>> mThreadInitializers;
 
         std::vector<TaskQueue *> mTaskQueues;
-
-        mutable std::mutex mMutex;
-        std::list<Barrier> mBarriers;
-
-        std::atomic<bool> mHasInterrupt;
     };
 }
 }

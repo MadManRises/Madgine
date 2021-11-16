@@ -11,8 +11,6 @@
 #    include "pluginmanager.h"
 #    include "pluginsection.h"
 
-#    include "../threading/barrier.h"
-
 namespace Engine {
 namespace Plugins {
 
@@ -26,7 +24,6 @@ namespace Plugins {
 #    elif UNIX
         , mPath("lib" + mName + ".so")
 #    endif
-        , mState(false)
     {
         assert(!mName.empty());
     }
@@ -37,117 +34,83 @@ namespace Plugins {
         , mSection(section)
         , mName(std::move(name))
         , mPath(std::move(path))
-        , mState(false)
     {
         assert(!mName.empty());
     }
 
     Plugin::~Plugin()
     {
-        if (mModule && mPath.empty()) {
-            Dl::closeDll(mModule);
-            mModule = nullptr;
-        }
         assert(!mModule);
         assert(mDependencies.empty());
         assert(mDependents.empty());
     }
 
-    Threading::TaskFuture<bool> Plugin::load(PluginManager &manager, Threading::Barrier &barrier)
+    void Plugin::ensureModule(PluginManager &manager)
     {
-        LOG("Loading Plugin \"" << mName << "\"...");
+        if (!mModule) {
+            std::string errorMsg;
+            try {
+                mModule = Dl::openDll(mPath.str());
+                if (mModule) {
+                    const BinaryInfo *bin = info();
+                    if (bin) {
+                        bin->mSelf = this;
 
-        std::string errorMsg;
+                        for (const char **dep = bin->mPluginDependencies; *dep; ++dep) {
+                            addDependency(manager, manager.getPlugin(*dep));
+                        }
 
-        try {
-            mModule = Dl::openDll(mPath.str());
-            if (mModule) {
-                const BinaryInfo *bin = info();
-                if (bin) {
-                    bin->mSelf = this;
-
-                    for (const char **dep = bin->mPluginDependencies; *dep; ++dep) {
-                        addDependency(manager, manager.getPlugin(*dep));
-                    }
-
-                    for (const char **dep = bin->mPluginGroupDependencies; *dep; ++dep) {
-                        addGroupDependency(manager, &manager.section(*dep));
+                        for (const char **dep = bin->mPluginGroupDependencies; *dep; ++dep) {
+                            addGroupDependency(manager, &manager.section(*dep));
+                        }
+                    } else {
+                        errorMsg = "Unable to locate BinaryInfo. Make sure you call generate_binary_info in your CMakeLists.txt for your binaries!";
+                        Dl::closeDll(mModule);
+                        mModule = nullptr;
                     }
                 } else {
-                    errorMsg = "Unable to locate BinaryInfo. Make sure you call generate_binary_info in your CMakeLists.txt for your executable!";
-                    Dl::closeDll(mModule);
-                    mModule = nullptr;
+                    Dl::DlAPIResult result = Dl::getError("openDll");
+                    errorMsg = result.toString();
                 }
-            } else {
-                Dl::DlAPIResult result = Dl::getError("openDll");
-                errorMsg = result.toString();
+            } catch (const std::exception &e) {
+                errorMsg = e.what();
+                mModule = nullptr;
             }
-        } catch (const std::exception &e) {
-            errorMsg = e.what();
-            mModule = nullptr;
-        }
-
-        if (!mModule) {
-            LOG_ERROR("Load of plugin \"" << mName << "\" failed with error: " << errorMsg);
-            return false;
-        } else {
-
-            std::vector<Threading::TaskFuture<bool>> dependencyList;
-            {
-                std::lock_guard lock { mMutex };
-                for (Plugin *dep : mDependencies) {
-                    if (mName == dep->mName + "Tools") {
-                        Threading::TaskFuture<bool> f = dep->state();
-                        if (f.is_ready() && !f)
-                            dependencyList.emplace_back(dep->mSection->loadPlugin(barrier, dep));
-                    } else {
-                        dependencyList.emplace_back(dep->mSection->loadPlugin(barrier, dep));
-                    }
-                }
-                for (PluginSection *sec : mGroupDependencies) {
-                    dependencyList.emplace_back(sec->load(barrier));
-                }
+            if (!mModule) {
+                LOG_ERROR(errorMsg);
+                throw 0;
             }
-
-            return barrier.queue(nullptr, [](Plugin *_this, PluginManager &manager, std::vector<Threading::TaskFuture<bool>> dependencyList) mutable -> Threading::Task<bool> {
-                for (Threading::TaskFuture<bool> &f : dependencyList) {
-                    if (!co_await f) {
-                        LOG_ERROR("Load of dependency for plugin \"" << _this->mName << "\" failed!");
-                        _this->clearDependencies(manager);
-                        Dl::closeDll(_this->mModule);
-                        _this->mModule = nullptr;
-                        co_return false;
-                    }
-                }
-
-                LOG("Success (" << _this->mName << ")");
-                co_return true;
-            }, this, manager, std::move(dependencyList));
         }
     }
 
-    Threading::TaskFuture<bool> Plugin::unload(PluginManager &manager, Threading::Barrier &barrier)
+    void Plugin::loadDependencies(PluginManager &manager)
     {
-        std::vector<Threading::TaskFuture<bool>> dependentList;
-        std::vector<Plugin *> dependents = mDependents;
-        for (Plugin *dep : dependents) {
-            dependentList.emplace_back(dep->mSection->unloadPlugin(barrier, dep));
-        }
-
-        return barrier.queue(nullptr, [](Plugin *_this, PluginManager &manager, std::vector<Threading::TaskFuture<bool>> dependentList) -> Threading::Task<bool> {
-            for (Threading::TaskFuture<bool> &f : dependentList) {
-                if (co_await f) {
-                    LOG_ERROR("Unload of dependent for plugin \"" << _this->mName << "\" failed!");
-                    co_return true;
+        assert(mIsLoaded);
+        ensureModule(manager);
+        for (Plugin *dep : mDependencies) {
+            if (!dep->isLoaded()) {
+                if (mName == dep->mName + "Tools") {
+                    dep->mSection->loadPlugin(dep, false);
+                } else {
+                    dep->mSection->loadPlugin(dep);
                 }
             }
-            _this->clearDependencies(manager);
-            LOG("Unloading Plugin \"" << _this->mName << "\"...");
-            Dl::closeDll(_this->mModule);
+        }
+        for (PluginSection *sec : mGroupDependencies) {
+            sec->load();
+        }
+    }
 
-            _this->mModule = nullptr;
-            co_return false;
-        }, this, manager, std::move(dependentList));
+    void Plugin::unloadDependents(PluginManager &manager)
+    {
+        assert(mIsLoaded);
+        ensureModule(manager);
+        for (Plugin *dep : mDependents) {
+            if (dep->mSection->unloadPlugin(dep)) {
+                LOG_ERROR("Unload of dependent for plugin \"" << mName << "\" failed!");
+                throw 0;
+            }
+        }
     }
 
     const void *Plugin::getSymbol(const std::string &name) const
@@ -170,6 +133,7 @@ namespace Plugins {
 
     const BinaryInfo *Plugin::info() const
     {
+        assert(mModule);
         return static_cast<const BinaryInfo *>(getSymbol("binaryInfo"));
     }
 
@@ -194,41 +158,21 @@ namespace Plugins {
         return mSection;
     }
 
-    Threading::TaskFuture<bool> Plugin::startOperation(Operation op, std::function<Threading::TaskFuture<bool>()> task)
+    bool Plugin::isLoaded() const
     {
-        std::lock_guard lock { mMutex };
-        if (mState.is_ready()) {
-            if (mState != (op == LOADING)) {
-                mOperation = op;
-                mState = task();
-            }
-        } else {
-            assert(mOperation == op);
+        return mIsLoaded;
+    }
+
+    void Plugin::setLoaded(bool loaded)
+    {
+        if (mIsLoaded != loaded) {
+            LOG("Plugin " << mName << "... " << (loaded ? "Loaded" : "Unloaded"));
+            mIsLoaded = loaded;
         }
-        return mState;
-    }
-
-    Threading::TaskFuture<bool> Plugin::state()
-    {
-        std::lock_guard lock { mMutex };
-        return mState;
-    }
-
-    Threading::TaskFuture<bool> Plugin::state(Operation op)
-    {
-        std::lock_guard lock { mMutex };
-        assert(mState.is_ready() || mOperation == op);
-        return mState;
-    }
-
-    bool Plugin::isLoaded()
-    {
-        return mState.is_ready() && mState;
     }
 
     void Plugin::addDependency(PluginManager &manager, Plugin *dependency)
     {
-        std::lock_guard lock { manager.mDependenciesMutex };
         checkCircularDependency(dependency);
         mDependencies.push_back(dependency);
         dependency->mDependents.push_back(this);
@@ -236,7 +180,6 @@ namespace Plugins {
 
     void Plugin::removeDependency(PluginManager &manager, Plugin *dependency)
     {
-        std::lock_guard lock { manager.mDependenciesMutex };
         auto it = std::find(mDependencies.begin(), mDependencies.end(), dependency);
         assert(it != mDependencies.end());
 
@@ -249,7 +192,6 @@ namespace Plugins {
 
     void Plugin::addGroupDependency(PluginManager &manager, PluginSection *dependency)
     {
-        std::lock_guard lock { manager.mDependenciesMutex };
         for (std::pair<const std::string, Plugin> &p : *dependency) {
             checkCircularDependency(&p.second);
         }
@@ -259,7 +201,6 @@ namespace Plugins {
 
     void Plugin::removeGroupDependency(PluginManager &manager, PluginSection *dependency)
     {
-        std::lock_guard lock { manager.mDependenciesMutex };
         auto it = std::find(mGroupDependencies.begin(), mGroupDependencies.end(), dependency);
         assert(it != mGroupDependencies.end());
 
@@ -272,7 +213,6 @@ namespace Plugins {
 
     void Plugin::clearDependencies(PluginManager &manager)
     {
-        std::lock_guard lock { manager.mDependenciesMutex };
         while (!mDependencies.empty()) {
             Plugin *dependency = mDependencies.back();
 
@@ -292,6 +232,10 @@ namespace Plugins {
             mGroupDependencies.pop_back();
             dependency->mDependents.erase(it);
         }
+
+        assert(mModule);
+        Dl::closeDll(mModule);
+        mModule = nullptr;
     }
 
     void Plugin::checkCircularDependency(Plugin *dependency)

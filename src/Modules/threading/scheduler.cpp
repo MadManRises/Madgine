@@ -54,21 +54,18 @@ namespace Threading {
         setCurrentThreadName(mWorkgroup.name() + "_" + main_queue->name() + " (Main)");
 
         do {
-            while (mWorkgroup.hasInterrupt()) {
-                mWorkgroup.enterCurrentBarrier(main_queue, 0, true);
-            }
-            std::chrono::steady_clock::time_point nextAvailableTaskTime = main_queue->update(TaskMask::DEFAULT, &mWorkgroup.hasInterrupt());
-            main_queue->waitForTasks(&mWorkgroup.hasInterrupt(), nextAvailableTaskTime);
+            std::chrono::steady_clock::time_point nextAvailableTaskTime = main_queue->update();
+            main_queue->waitForTasks(nextAvailableTaskTime);
             mWorkgroup.checkThreadStates();
-            if (!main_queue->running() && main_queue->idle(TaskMask::DEFAULT)) {
+            if (!main_queue->running() && main_queue->idle()) {
                 for (Threading::TaskQueue *queue : mWorkgroup.taskQueues()) {
                     queue->stop();
                 }
             }
-        } while (!main_queue->idle(TaskMask::DEFAULT) || !mWorkgroup.singleThreaded());
+        } while (!main_queue->idle() || !mWorkgroup.singleThreaded());
 
         for (Threading::TaskQueue *queue : mWorkgroup.taskQueues()) {
-            assert(queue->idle(TaskMask::DEFAULT));
+            assert(queue->idle());
         }
 
 #endif
@@ -79,12 +76,9 @@ namespace Threading {
     void Scheduler::schedulerLoop(Threading::TaskQueue *queue)
     {
         setCurrentThreadName(mWorkgroup.name() + "_" + queue->name());
-        while (queue->running() || !queue->idle(TaskMask::DEFAULT)) {
-            while (mWorkgroup.hasInterrupt()) {
-                mWorkgroup.enterCurrentBarrier(queue, 0, false);
-            }
-            std::chrono::steady_clock::time_point nextAvailableTaskTime = queue->update(TaskMask::DEFAULT, &mWorkgroup.hasInterrupt());
-            queue->waitForTasks(&mWorkgroup.hasInterrupt(), nextAvailableTaskTime);
+        while (queue->running() || !queue->idle()) {
+            std::chrono::steady_clock::time_point nextAvailableTaskTime = queue->update();
+            queue->waitForTasks(nextAvailableTaskTime);
         }        
     }
 #endif
@@ -92,7 +86,7 @@ namespace Threading {
     void Scheduler::singleLoop()
     {
         for (Threading::TaskQueue *queue : mWorkgroup.taskQueues()) {
-            queue->update(TaskMask::DEFAULT, &mWorkgroup.hasInterrupt(), 1, 1);
+            queue->update(1, 1);
         }
     }
 

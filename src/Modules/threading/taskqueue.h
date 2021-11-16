@@ -7,23 +7,13 @@
 namespace Engine {
 namespace Threading {
 
-    enum class TaskMask : uint8_t {
-        NONE = 0,
-        DEFAULT = 1 << 0,
-        BARRIER = 1 << 1,
-        ALL = (1 << 8) - 1
-    };
-
-    MODULES_EXPORT bool match(TaskMask v, TaskMask values, TaskMask mask = TaskMask::NONE);
-
     struct MODULES_EXPORT TaskTracker {
-        TaskTracker(TaskHandle &&task, TaskMask mask, std::atomic<size_t> &tracker);
+        TaskTracker(TaskHandle &&task, std::atomic<size_t> &tracker);
         TaskTracker(const TaskTracker &) = delete;
         TaskTracker(TaskTracker &&other);
         ~TaskTracker();
 
         TaskHandle mTask;
-        TaskMask mMask;
 
     private:
         std::atomic<size_t> *mTracker;
@@ -33,37 +23,37 @@ namespace Threading {
         TaskQueue(const std::string &name, bool wantsMainThread = false);
         virtual ~TaskQueue();
 
-        void queueHandle(TaskHandle &&task, TaskMask mask, const std::vector<Threading::DataMutex *> &dependencies = {});
-        void queue_after(TaskHandle &&task, TaskMask mask, std::chrono::steady_clock::duration duration, const std::vector<Threading::DataMutex *> &dependencies = {});
-        void queue_for(TaskHandle &&task, TaskMask mask, std::chrono::steady_clock::time_point time_point, const std::vector<Threading::DataMutex *> &dependencies = {});
+        void queueHandle(TaskHandle &&task, const std::vector<Threading::DataMutex *> &dependencies = {});
+        void queue_after(TaskHandle &&task, std::chrono::steady_clock::duration duration, const std::vector<Threading::DataMutex *> &dependencies = {});
+        void queue_for(TaskHandle &&task, std::chrono::steady_clock::time_point time_point, const std::vector<Threading::DataMutex *> &dependencies = {});
 
         template <typename T, typename I>
-        TaskFuture<T> queueTask(Task<T, I> task, TaskMask mask)
+        TaskFuture<T> queueTask(Task<T, I> task)
         {
-            auto [fut, handle] = std::move(task).release(this);
+            auto [fut, handle] = std::move(task).assign(this);
             if (handle)
-                queueHandle(std::move(handle), mask);
+                queueHandle(std::move(handle));
 
             return std::move(fut);
         }
 
         template <typename F>
-        auto queue(F &&f, TaskMask mask)
+        auto queue(F &&f)
         {
-            return queueTask(make_task(std::forward<F>(f)), mask);
+            return queueTask(make_task(std::forward<F>(f)));
         }
 
-        void addRepeatedTask(std::function<void()> &&task, TaskMask mask, std::chrono::steady_clock::duration interval = std::chrono::steady_clock::duration::zero(), void *owner = nullptr);
+        void addRepeatedTask(std::function<void()> &&task, std::chrono::steady_clock::duration interval = std::chrono::steady_clock::duration::zero(), void *owner = nullptr);
         void removeRepeatedTasks(void *owner);
 
-        virtual std::optional<TaskTracker> fetch(TaskMask taskMask, const std::atomic<bool> *interruptFlag, std::chrono::steady_clock::time_point &nextTask, int &idleCount, int &repeatedCount);
+        virtual std::optional<TaskTracker> fetch(std::chrono::steady_clock::time_point &nextTask, int &idleCount, int &repeatedCount);
 
-        virtual bool idle(TaskMask taskMask) const;
+        virtual bool idle() const;
 
         const std::string &name() const;
 
-        std::chrono::steady_clock::time_point update(TaskMask taskMask, const std::atomic<bool> *interruptFlag, int idleCount = -1, int repeatedCount = -1);
-        void waitForTasks(const std::atomic<bool> *interruptFlag, std::chrono::steady_clock::time_point until = std::chrono::steady_clock::time_point::max());
+        std::chrono::steady_clock::time_point update(int idleCount = -1, int repeatedCount = -1);
+        void waitForTasks(std::chrono::steady_clock::time_point until = std::chrono::steady_clock::time_point::max());
 
         void notify();
 
@@ -75,8 +65,8 @@ namespace Threading {
         template <typename Init, typename Finalize>
         void addSetupSteps(Init &&init, Finalize &&finalize)
         {
-            auto [future, initHandle] = make_task(std::forward<Init>(init)).release(this);
-            auto [_, finalizeHandle] = make_task(LIFT(TupleUnpacker::invoke), std::forward<Finalize>(finalize), std::move(future)).release(this);            
+            auto [future, initHandle] = make_task(std::forward<Init>(init)).assign(this);
+            auto [_, finalizeHandle] = make_task(LIFT(TupleUnpacker::invoke), std::forward<Finalize>(finalize), std::move(future)).assign(this);            
             addSetupStepTasks(std::move(initHandle), std::move(finalizeHandle));
         }
 
@@ -94,7 +84,6 @@ namespace Threading {
     protected:
         struct ScheduledTask {
             TaskHandle mTask;
-            TaskMask mMask;
             std::chrono::steady_clock::time_point mScheduledFor = std::chrono::steady_clock::time_point::min();
         };
 
@@ -102,7 +91,7 @@ namespace Threading {
 
         virtual std::optional<TaskTracker> fetch_on_idle();
 
-        TaskTracker wrapTask(TaskHandle &&task, TaskMask mask);
+        TaskTracker wrapTask(TaskHandle &&task);
 
         void addSetupStepTasks(TaskHandle init, TaskHandle finalize = {});
 
@@ -114,7 +103,6 @@ namespace Threading {
 
         struct RepeatedTask {
             std::function<void()> mTask;
-            TaskMask mMask;
             void *mOwner = nullptr;
             std::chrono::steady_clock::duration mInterval = std::chrono::steady_clock::duration::zero();
             std::chrono::steady_clock::time_point mNextExecuted = std::chrono::steady_clock::time_point::min();

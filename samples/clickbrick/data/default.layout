@@ -95,7 +95,5 @@
         </Item>
         <Item key="ClientImRoot" serId=16>
         </Item>
-        <Item key="ClientControlsManager" serId=17>
-        </Item>
     </mComponents>
 </Item>

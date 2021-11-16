@@ -2,7 +2,6 @@
 
 #include "taskpromise.h"
 #include "taskqueue.h"
-#include "barrier.h"
 
 namespace Engine {
 namespace Threading {
@@ -23,13 +22,11 @@ namespace Threading {
 
     void TaskPromiseTypeBase::resume(TaskHandle handle)
     {
-        if (mBarrier)
-            mBarrier->queueHandle(mQueue, std::move(handle));
-        else
-            mQueue->queueHandle(std::move(handle), TaskMask::ALL);
+        mQueue->queueHandle(std::move(handle));
     }
 
-    TaskQueue* TaskPromiseTypeBase::queue() const {
+    TaskQueue *TaskPromiseTypeBase::queue() const
+    {
         return mQueue;
     }
 

@@ -24,8 +24,10 @@ UniqueComponentCollectorManager::UniqueComponentCollectorManager(Plugins::Plugin
     CompoundAtomicOperation op;
     for (const auto& [name, section] : pluginMgr) {
         for (const auto& [name, plugin] : section) {
-            for (UniqueComponentRegistryBase* reg : registryRegistry()) {
-                reg->onPluginLoad(plugin.info(), op);
+            if (plugin.isLoaded()) {
+                for (UniqueComponentRegistryBase *reg : registryRegistry()) {
+                    reg->onPluginLoad(plugin.info(), op);
+                }
             }
         }
     }

@@ -51,11 +51,10 @@ namespace Threading {
         {
         }
 
-        std::pair<TaskFuture<T>, TaskHandle> release(TaskQueue *queue, Barrier *barrier = nullptr) &&
+        std::pair<TaskFuture<T>, TaskHandle> assign(TaskQueue *queue) &&
         {
             if (mHandle) {
                 mHandle->mQueue = queue;
-                mHandle->mBarrier = barrier;
             }
             TaskHandle handle { std::move(mHandle) };
             if (mImmediate)

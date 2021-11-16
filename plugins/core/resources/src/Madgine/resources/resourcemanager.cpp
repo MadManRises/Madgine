@@ -88,7 +88,7 @@ namespace Resources {
             updateResources(Filesystem::FileEventType::FILE_CREATED, p.first, p.second, loaderByExtension);
         }
 
-        mIOQueue.addRepeatedTask([this]() { update(); }, Engine::Threading::TaskMask::DEFAULT, std::chrono::seconds { 1 });
+        mIOQueue.addRepeatedTask([this]() { update(); }, std::chrono::seconds { 1 });
 
         bool last = mInitialized.test_and_set();
         assert(!last);

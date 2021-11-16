@@ -15,20 +15,16 @@ namespace Plugins {
         bool isAtleastOne() const;
         bool isExclusive() const;
 
-        Threading::TaskFuture<bool> load(Threading::Barrier &barrier);
-        Threading::TaskFuture<bool> unload(Threading::Barrier &barrier);
+        bool load();
+        bool unload();
 
-        enum State {
-            LOADED,
-            UNLOADED,
-            UNDEFINED
-        };
+        bool isLoaded(const std::string &name);
+        bool loadPlugin(const std::string &name);
+        bool unloadPlugin(const std::string &name);
 
-        State isLoaded(const std::string &name);
-        Threading::TaskFuture<bool> loadPlugin(const std::string &name, std::function<void()> onSuccess = {});
-        Threading::TaskFuture<bool> unloadPlugin(const std::string &name, std::function<void()> onSuccess = {});
+        bool loadPluginByFilename(const std::string &name);
 
-        Threading::TaskFuture<bool> loadPluginByFilename(const std::string &name);
+        void loadAllDependencies();
 
         template <typename T>
         T *getUniqueSymbol(const std::string &name) const
@@ -42,15 +38,13 @@ namespace Plugins {
         std::map<std::string, Plugin>::iterator begin();
         std::map<std::string, Plugin>::iterator end();
 
-        Threading::TaskFuture<bool> loadFromIni(Threading::Barrier &barrier, const Ini::IniSection &sec);
-
         PluginManager &manager();
 
         Plugin *getPlugin(const std::string &name);
 
     private:
-        Threading::TaskFuture<bool> loadPlugin(Threading::Barrier &barrier, Plugin *p);
-        Threading::TaskFuture<bool> unloadPlugin(Threading::Barrier &barrier, Plugin *p);
+        bool loadPlugin(Plugin *p, bool autoLoadTools = true);
+        bool unloadPlugin(Plugin *p);
 
         friend struct Plugin;
 

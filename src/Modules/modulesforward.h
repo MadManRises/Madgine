@@ -62,7 +62,6 @@ namespace Threading {
     struct TaskHandle;
     template <typename T, typename Immediate = std::false_type>
     struct Task;
-    struct Barrier;
     struct TaskPromiseTypeBase;
 }
 

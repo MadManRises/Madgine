@@ -9,7 +9,6 @@
 #include "workgroup.h"
 #include "workgroupstorage.h"
 
-#include "barrier.h"
 #include "taskqueue.h"
 
 namespace Engine {
@@ -138,14 +137,6 @@ namespace Threading {
         ThreadStorage::finalize(true);
     }
 
-    void WorkGroup::addThread()
-    {
-        std::lock_guard lock { mMutex };
-        for (Barrier &barrier : mBarriers) {
-            if (barrier.running())
-                barrier.addThread();
-        }
-    }
 #endif
 
     WorkGroup &WorkGroup::self()
@@ -175,49 +166,6 @@ namespace Threading {
     const std::vector<TaskQueue *> WorkGroup::taskQueues() const
     {
         return mTaskQueues;
-    }
-
-    Barrier &WorkGroup::barrier(int flags)
-    {
-        WorkGroup &group = self();
-        std::lock_guard lock { group.mMutex };
-        Barrier &barrier = group.mBarriers.emplace_back(flags,
-#if ENABLE_THREADING
-            group.mSubThreads.size() +
-#endif
-                1);
-        if (!group.mHasInterrupt) {
-            group.mHasInterrupt = true;
-            for (TaskQueue *queue : group.mTaskQueues)
-                queue->notify();
-        }
-        return barrier;
-    }
-
-    void WorkGroup::enterCurrentBarrier(TaskQueue *queue, size_t queueIndex, bool isMain)
-    {
-        std::list<Barrier>::iterator it;
-        {
-            std::lock_guard lock { mMutex };
-            if (mBarriers.empty())
-                return;
-            it = mBarriers.begin();
-            while (it->started()) {
-                ++it;
-                if (it == mBarriers.end())
-                    return;
-            }
-        }
-        it->enter(queue, queueIndex, isMain);
-        if (isMain) {
-            std::lock_guard lock { mMutex };
-            mHasInterrupt = mBarriers.erase(it) != mBarriers.end();
-        }
-    }
-
-    const std::atomic<bool> &WorkGroup::hasInterrupt()
-    {
-        return mHasInterrupt;
     }
 
 }

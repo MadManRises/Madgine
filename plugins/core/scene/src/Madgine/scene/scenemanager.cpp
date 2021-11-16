@@ -62,7 +62,7 @@ namespace Scene {
 
         mLastFrame = std::chrono::steady_clock::now();
 
-        mApp.taskQueue()->addRepeatedTask([this]() { update(); }, Threading::TaskMask::DEFAULT, std::chrono::microseconds { 33 }, this);
+        mApp.taskQueue()->addRepeatedTask([this]() { update(); }, std::chrono::microseconds { 33 }, this);
 
         return true;
     }

@@ -18,8 +18,6 @@
 
 #    include "../threading/workgroup.h"
 
-#    include "../threading/barrier.h"
-
 namespace Engine {
 namespace Plugins {
 
@@ -57,108 +55,65 @@ namespace Plugins {
         return mExclusive;
     }
 
-    Threading::TaskFuture<bool> PluginSection::load(Threading::Barrier &barrier)
+    bool PluginSection::load()
     {
         if (mAtleastOne) {
             if (mPlugins.empty())
                 throw exception("No plugin available in Section tagged as atleastOne: "s + mName);
-            for (std::pair<const std::string, Plugin> &p : mPlugins) {
-                Threading::TaskFuture<bool> state = p.second.state(Plugin::LOADING);
-                if (!state.is_ready() || state)
-                    return state;
+            for (Plugin &p : kvValues(mPlugins)) {
+                if (p.isLoaded())
+                    return true;
             }
-            /*if (!*/ return loadPlugin(barrier, &mPlugins.begin()->second); /*)
-                throw exception("Failed to load default Plugin for atleastOne Section: "s + mPlugins.begin()->first);*/
+            return loadPlugin(&mPlugins.begin()->second);
         }
         return true;
     }
 
-    Threading::TaskFuture<bool> PluginSection::unload(Threading::Barrier &barrier)
+    bool PluginSection::unload()
     {
-        std::vector<Threading::TaskFuture<bool>> dependentsList;
-
         for (Plugin *p : mDependents) {
-            dependentsList.emplace_back(p->section()->unloadPlugin(barrier, p));
+            if (!p->section()->unloadPlugin(p))
+                return true;
         }
 
-        return barrier.queue(
-            nullptr, [](PluginSection *_this, Threading::Barrier &barrier, std::vector<Threading::TaskFuture<bool>> dependentsList) mutable -> Threading::Task<bool> {
-                for (Threading::TaskFuture<bool> &f : dependentsList) {
-                    if (co_await f) {
-                        LOG_ERROR("Unload of dependent for plugin-section \"" << _this->mName << "\" failed!");
-                        co_return true;
-                    }
-                }
-                std::vector<Threading::TaskFuture<bool>> results;
-                for (Plugin &p : kvValues(_this->mPlugins)) {
-                    results.emplace_back(_this->unloadPlugin(barrier, &p));
-                }
-                for (Threading::TaskFuture<bool> &f : results) {
-                    if (co_await f) {
-                        LOG_ERROR("Unload of plugin in section \"" << _this->mName << "\" failed!");
-                        co_return true;
-                    }
-                }
-                co_return false;
-            },
-            this, barrier, std::move(dependentsList));
+        for (Plugin &p : kvValues(mPlugins)) {
+            if (unloadPlugin(&p))
+                return true;
+        }
+
+        return false;
     }
 
-    PluginSection::State PluginSection::isLoaded(const std::string &name)
+    bool PluginSection::isLoaded(const std::string &name)
     {
         auto it = mPlugins.find(name);
         if (it != mPlugins.end()) {
-            Threading::TaskFuture<bool> state = it->second.state();
-            if (!state.is_ready())
-                return UNDEFINED;
-            return state ? LOADED : UNLOADED;
+            return it->second.isLoaded();
         }
-        return UNLOADED;
+        return false;
     }
 
-    Threading::TaskFuture<bool> PluginSection::loadPlugin(const std::string &name, std::function<void()> onSuccess)
+    bool PluginSection::loadPlugin(const std::string &name)
     {
         Plugin *plugin = getPlugin(name);
         if (!plugin)
             return false;
-        Threading::Barrier &barrier = Threading::WorkGroup::barrier(Threading::Barrier::RUN_ONLY_ON_MAIN_THREAD);
-        return barrier.queue(
-            nullptr, [](Threading::Barrier &barrier, PluginSection *_this, Plugin *plugin, std::function<void()> onSuccess) mutable -> Threading::Task<bool> {
-                bool result = co_await _this->loadPlugin(barrier, plugin);
-                if (result) {
-                    if (onSuccess)
-                        onSuccess();
-                    _this->mMgr.onUpdate(barrier);
-                }
-                co_return result;
-            },
-            barrier, this, plugin, std::move(onSuccess));
+        return loadPlugin(plugin);
     }
 
-    Threading::TaskFuture<bool> PluginSection::unloadPlugin(const std::string &name, std::function<void()> onSuccess)
+    bool PluginSection::unloadPlugin(const std::string &name)
     {
         Plugin *plugin = getPlugin(name);
         if (!plugin)
             return false;
-        Threading::Barrier &barrier = Threading::WorkGroup::barrier(Threading::Barrier::RUN_ONLY_ON_MAIN_THREAD);
-        return barrier.queue(
-            nullptr, [](Threading::Barrier &barrier, PluginSection *_this, Plugin *plugin, std::function<void()> onSuccess) mutable -> Threading::Task<bool> {
-                bool result = co_await _this->unloadPlugin(barrier, plugin);
-                if (!result) {
-                    if (onSuccess)
-                        onSuccess();
-                    _this->mMgr.onUpdate(barrier);
-                }
-                co_return result;
-            },
-            barrier, this, plugin, std::move(onSuccess));
+        return unloadPlugin(plugin);
     }
 
-    Threading::TaskFuture<bool> PluginSection::loadPluginByFilename(const std::string &name)
+    bool PluginSection::loadPluginByFilename(const std::string &name)
     {
         auto pib = mPlugins.try_emplace(name, name);
         assert(pib.second);
-        return loadPlugin(name);
+        return loadPlugin(&pib.first->second);
     }
 
     Plugin *PluginSection::getPlugin(const std::string &name)
@@ -169,53 +124,48 @@ namespace Plugins {
         return &it->second;
     }
 
-    Threading::TaskFuture<bool> PluginSection::loadPlugin(Threading::Barrier &barrier, Plugin *p)
+    bool PluginSection::loadPlugin(Plugin *p, bool autoLoadTools)
     {
         assert(p->section() == this);
 
-        return p->startOperation(Plugin::LOADING, [=, &barrier]() {
-            return barrier.queue(
-                nullptr, [](PluginSection *_this, Threading::Barrier &barrier, Plugin *p) -> Threading::Task<bool> {
+        if (mExclusive) {
+            Plugin *unloadExclusive = nullptr;
 
-                    Plugin *unloadExclusive
-                        = nullptr;
-                    if (_this->mExclusive) {
-                        for (Plugin &p2 : kvValues(_this->mPlugins)) {
-                            if (&p2 != p && p2.isLoaded()) {
-                                assert(!unloadExclusive);
-                                unloadExclusive = &p2;
-                            }
-                        }
-                    }
+            for (Plugin &p2 : kvValues(mPlugins)) {
+                if (&p2 != p && p2.isLoaded()) {
+                    assert(!unloadExclusive);
+                    unloadExclusive = &p2;
+                }
+            }
 
-                    if (unloadExclusive) {
-                        if (co_await _this->unloadPlugin(barrier, unloadExclusive)) {
-                            co_return false;
-                        }
-                    }
+            if (unloadExclusive) {
+                if (unloadPlugin(unloadExclusive)) {
+                    return false;
+                }
+            }
+        }
 
-                    if (!co_await p->load(_this->mMgr, barrier)) {
-                        co_return false;
-                    }
+        p->setLoaded(true);
+        p->loadDependencies(mMgr);
 
-                    PluginSection &toolsSection = _this->mMgr.section("Tools");
-                    if (Plugin *toolPlugin = toolsSection.getPlugin(p->name() + "Tools")) {
-                        co_return co_await toolsSection.loadPlugin(barrier, toolPlugin);
-                    } else {
-                        co_return true;
-                    }
-                },
-                this, barrier, p);
-        });
+        PluginSection &toolsSection = mMgr.section("Tools");
+        Plugin *toolPlugin = toolsSection.getPlugin(p->name() + "Tools");
+        if (autoLoadTools && toolPlugin) {
+            return toolsSection.loadPlugin(toolPlugin);
+        } else {
+            mMgr.onUpdate();
+            return true;
+        }
     }
 
-    Threading::TaskFuture<bool> PluginSection::unloadPlugin(Threading::Barrier &barrier, Plugin *p)
+    bool PluginSection::unloadPlugin(Plugin *p)
     {
-        assert(p->section() == this);
+        assert(!mAtleastOne);
 
-        return p->startOperation(Plugin::UNLOADING, [=, &barrier]() {
-            return p->unload(mMgr, barrier);
-        });
+        p->unloadDependents(mMgr);
+        p->setLoaded(false);
+
+        return true;
     }
 
     std::map<std::string, Plugin>::const_iterator PluginSection::begin() const
@@ -238,34 +188,12 @@ namespace Plugins {
         return mPlugins.end();
     }
 
-    Threading::TaskFuture<bool> PluginSection::loadFromIni(Threading::Barrier &barrier, const Ini::IniSection &sec)
+    void PluginSection::loadAllDependencies()
     {
-        return barrier.queue(
-            nullptr, [](PluginSection *_this, Threading::Barrier &barrier, const Ini::IniSection &sec) -> Threading::Task<bool> {
-                std::vector<std::pair<Threading::TaskFuture<bool>, bool>> futures;
-
-                for (const std::pair<const std::string, std::string> &p : sec) {
-                    Plugin *plugin = _this->getPlugin(p.first);
-                    if (!plugin) {
-                        LOG("Could not find Plugin \"" << p.first << "\"!");
-                        continue;
-                    }
-                    if (p.second.empty()) {
-                        futures.emplace_back(_this->unloadPlugin(barrier, plugin), false);
-                    } else {
-                        futures.emplace_back(_this->loadPlugin(barrier, plugin), true);
-                    }
-                }
-
-                for (std::pair<Threading::TaskFuture<bool>, bool> &p : futures) {
-                    if (co_await p.first != p.second) {
-                        LOG("Error!");
-                        co_return false;
-                    }
-                }
-                co_return true;
-            },
-            this, barrier, sec);
+        for (Plugin& p : kvValues(mPlugins)) {
+            if (p.isLoaded())
+                p.loadDependencies(mMgr);
+        }
     }
 
     PluginManager &PluginSection::manager()

@@ -9,7 +9,7 @@ FolderSources(sources "" "" modulesforward.h moduleslib.h)
 if (MODULES_ENABLE_PLUGINS)
 	FolderSources(sources "" plugins pluginmanager.cpp pluginmanager.h pluginsection.cpp pluginsection.h plugin.cpp plugin.h)
 endif()
-	FolderSources(sources "" threading barrier.cpp barrier.h connection.cpp connection.h connectionstore.cpp connectionstore.h datamutex.cpp datamutex.h global.h globalstorage.h scheduler.cpp scheduler.h signal.h signalrouter.h signalstub.cpp signalstub.h task.h taskhandle.cpp taskhandle.h taskpromise.cpp taskpromise.h taskqueue.cpp taskqueue.h threadlocal.h threadstorage.cpp threadstorage.h workgroup.cpp workgroup.h workgrouphandle.h workgroupstorage.cpp workgroupstorage.h)
+	FolderSources(sources "" threading connection.cpp connection.h connectionstore.cpp connectionstore.h datamutex.cpp datamutex.h global.h globalstorage.h scheduler.cpp scheduler.h signal.h signalrouter.h signalstub.cpp signalstub.h task.h taskhandle.cpp taskhandle.h taskpromise.cpp taskpromise.h taskqueue.cpp taskqueue.h threadlocal.h threadstorage.cpp threadstorage.h workgroup.cpp workgroup.h workgrouphandle.h workgroupstorage.cpp workgroupstorage.h)
 	FolderSources(sources "" uniquecomponent indexholder.h uniquecomponent.h uniquecomponentcollector.h uniquecomponentcontainer.h uniquecomponentcollectormanager.cpp uniquecomponentcollectormanager.h uniquecomponentregistry.cpp uniquecomponentregistry.h)
 	
 

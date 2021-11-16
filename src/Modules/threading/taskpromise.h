@@ -119,7 +119,6 @@ namespace Threading {
 
     public:
         TaskQueue *mQueue = nullptr;
-        Barrier *mBarrier = nullptr;
     };
 
     template <typename T>

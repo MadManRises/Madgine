@@ -10,7 +10,7 @@
 namespace Engine {
 namespace Threading {
     FrameLoop::FrameLoop()
-        : TaskQueue("FrameLoop", true)        
+        : TaskQueue("FrameLoop", true)
         , mLastFrame(std::chrono::high_resolution_clock::now())
     {
         addRepeatedTask([this]() {
@@ -19,7 +19,7 @@ namespace Threading {
                 stop();
             mLastFrame = now;
         },
-            Threading::TaskMask::ALL,  std::chrono::microseconds(/*1*/000000 / 60), this);
+            std::chrono::microseconds(/*1*/ 000000 / 60), this);
     }
 
     FrameLoop::~FrameLoop()
@@ -116,7 +116,6 @@ namespace Threading {
         });*/
         return {};
     }
-    
 
 }
 }

@@ -21,7 +21,7 @@
 #    include "Modules/plugins/plugin.h"
 #    include "Modules/plugins/pluginsection.h"
 
-#include "Modules/uniquecomponent/uniquecomponentcollector.h"
+#    include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 UNIQUECOMPONENT(Engine::Tools::PluginManager);
 
@@ -79,13 +79,8 @@ namespace Tools {
                             if (plugin.isDependencyOf(PLUGIN_SELF)) {
                                 ImGui::PushDisabled();
                             }
-                            bool loaded;
-                            Threading::TaskFuture<bool> state = plugin.state();
-                            bool available = state.is_ready();
-                            if (available)
-                                loaded = state.get();
-                            else
-                                ImGui::PushItemFlag(ImGuiItemFlags_MixedValue, true);
+                            bool loaded = plugin.isLoaded();
+
                             bool clicked = false;
                             std::string displayName { pluginName + " (" + project + ")" };
                             if (section.isExclusive()) {
@@ -94,16 +89,16 @@ namespace Tools {
                                     loaded = true;
                             } else
                                 clicked = ImGui::Checkbox(displayName.c_str(), &loaded);
-                            if (available) {
-                                if (clicked) {
-                                    if (loaded)
-                                        section.loadPlugin(pluginName, [this]() { updateConfigFile(); });
-                                    else
-                                        section.unloadPlugin(pluginName, [this]() { updateConfigFile(); });
+                            if (clicked) {
+                                if (loaded) {
+                                    if (section.loadPlugin(pluginName))
+                                        updateConfigFile();
+                                } else {
+                                    if (!section.unloadPlugin(pluginName))
+                                        updateConfigFile();
                                 }
-                            } else {
-                                ImGui::PopItemFlag();
                             }
+
                             if (plugin.isDependencyOf(PLUGIN_SELF)) {
                                 ImGui::PopDisabled();
                             }
@@ -175,7 +170,7 @@ namespace Tools {
         if (!name.empty()) {
             Filesystem::Path p = path / (name + ".cfg");
             if (Filesystem::exists(p)) {
-                mManager.loadFromFile(p);
+                mManager.loadFromFile(p, true);
             }
         }
         updateConfigFile();
@@ -186,7 +181,7 @@ namespace Tools {
         ProjectManager &project = getTool<ProjectManager>();
         if (!project.config().empty()) {
             Filesystem::Path p = project.projectRoot() / (project.config() + "(tools).cfg");
-            mManager.saveToFile(p, true);            
+            mManager.saveToFile(p, true);
             Filesystem::Path p_notools = project.projectRoot() / (project.config() + ".cfg");
             mManager.saveToFile(p_notools, false);
         }

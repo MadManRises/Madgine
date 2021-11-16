@@ -13,9 +13,6 @@ namespace Plugins {
         Plugin(std::string name, PluginSection *section, std::string project, Filesystem::Path path);
         ~Plugin();
 
-        Threading::TaskFuture<bool> load(PluginManager &manager, Threading::Barrier &barrier);
-        Threading::TaskFuture<bool> unload(PluginManager &manager, Threading::Barrier &barrier);
-
         const void *getSymbol(const std::string &name) const;
 
         Filesystem::Path fullPath() const;
@@ -30,16 +27,12 @@ namespace Plugins {
 
         PluginSection *section() const;
 
-        enum Operation {
-            LOADING,
-            UNLOADING
-        };
 
-        Threading::TaskFuture<bool> startOperation(Operation op, std::function<Threading::TaskFuture<bool>()> task);
+        void setLoaded(bool loaded);
+        bool isLoaded() const;
 
-        Threading::TaskFuture<bool> state();
-        Threading::TaskFuture<bool> state(Operation op);
-        bool isLoaded();
+        void loadDependencies(PluginManager &manager);
+        void unloadDependents(PluginManager &manager);
 
         friend struct PluginManager;
 
@@ -53,23 +46,20 @@ namespace Plugins {
         void checkCircularDependency(Plugin *dependency);
         bool checkCircularDependency(Plugin *dependency, std::vector<std::string_view> &trace);
 
+        void ensureModule(PluginManager &manager);
+
     private:
-        void *mModule;
+        void *mModule = nullptr;
+        bool mIsLoaded = false;
 
         std::string mProject;
         PluginSection *mSection;
         std::string mName;
         Filesystem::Path mPath;
-        
-        Threading::TaskFuture<bool> mState;
 
         std::vector<Plugin *> mDependencies;
         std::vector<Plugin *> mDependents;
         std::vector<PluginSection *> mGroupDependencies;
-
-        Operation mOperation;
-
-        std::mutex mMutex;
     };
 }
 }
