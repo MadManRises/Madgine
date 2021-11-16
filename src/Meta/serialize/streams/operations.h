@@ -260,7 +260,7 @@ namespace Serialize {
                 return result;
             } else if constexpr (is_iterable_v<T>) {
                 return ContainerOperations<T, Configs...>::read(in, t, name, hierarchy);
-            } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
+            } else if constexpr (TupleUnpacker::Tuplefyable<T>) {
                 return Operations<decltype(TupleUnpacker::toTuple(std::declval<T &>())), Configs...>::read(in, TupleUnpacker::toTuple(t), name, hierarchy);
             } else {
                 static_assert(dependent_bool<T, false>::value, "Invalid Type");
@@ -289,7 +289,7 @@ namespace Serialize {
                 Serialize::write<std::string>(out, t, name, hierarchy);
             } else if constexpr (is_iterable_v<T>) {
                 ContainerOperations<std::remove_const_t<T>, Configs...>::write(out, t, name, hierarchy);
-            } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
+            } else if constexpr (TupleUnpacker::Tuplefyable<T>) {
                 Operations<decltype(TupleUnpacker::toTuple(std::declval<T &>())), Configs...>::write(out, TupleUnpacker::toTuple(t), name, hierarchy);
             } else {
                 static_assert(dependent_bool<T, false>::value, "Invalid Type");

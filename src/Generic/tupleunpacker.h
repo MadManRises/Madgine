@@ -6,12 +6,12 @@ namespace Engine {
 namespace TupleUnpacker {
 
 #define LIFT(fname, ...)                                       \
-    [__VA_ARGS__](auto &&... args) -> decltype(auto) {         \
+    [__VA_ARGS__](auto &&...args) -> decltype(auto) {          \
         return (fname)(std::forward<decltype(args)>(args)...); \
     }
 
 #define LIFT_MEMBER(fname, ...)                                                                      \
-    [__VA_ARGS__](auto &&_this, auto &&... args) -> decltype(auto) {                                 \
+    [__VA_ARGS__](auto &&_this, auto &&...args) -> decltype(auto) {                                  \
         return (std::forward<decltype(_this)>(_this)->fname)(std::forward<decltype(args)>(args)...); \
     }
 
@@ -48,19 +48,19 @@ namespace TupleUnpacker {
     }
 
     template <typename F, typename... Args>
-    decltype(auto) invoke(F &&f, Args &&... args)
+    decltype(auto) invoke(F &&f, Args &&...args)
     {
         return invokeFromTuple(std::forward<F>(f), std::forward_as_tuple(std::forward<Args>(args)...));
     }
 
     template <typename F, typename... Args>
-    decltype(auto) invokeExpand(F &&f, Args &&... args)
+    decltype(auto) invokeExpand(F &&f, Args &&...args)
     {
         return invokeFromTuple(std::forward<F>(f), expand<sizeof...(args) - 1>(std::forward_as_tuple(std::forward<Args>(args)...)));
     }
 
     template <typename R, typename F, typename... Args>
-    R invokeDefaultResult(R &&defaultValue, F &&f, Args &&... args)
+    R invokeDefaultResult(R &&defaultValue, F &&f, Args &&...args)
     {
         using result_t = decltype(TupleUnpacker::invoke(std::forward<F>(f), std::forward<Args>(args)...));
         if constexpr (std::is_convertible_v<result_t, R>) {
@@ -84,194 +84,108 @@ namespace TupleUnpacker {
     }
 
     template <typename T, typename... Args>
-    T construct(Args &&... args)
+    T construct(Args &&...args)
     {
         return constructFromTuple<T>(std::forward_as_tuple(std::forward<Args>(args)...));
     }
 
     template <typename T, typename... Args>
-    T constructExpand(Args &&... args)
+    T constructExpand(Args &&...args)
     {
         return constructFromTuple<T>(expand<sizeof...(args) - 1>(std::forward_as_tuple(std::forward<Args>(args)...)));
     }
 
-    struct ubiq_constructor {
-        template <typename T>
-        constexpr operator T() const noexcept;
-    };
-
-    template <typename T, size_t I0, size_t... Is>
-    constexpr dependent_t<size_t, decltype(T { ubiq_constructor {}, (Is, ubiq_constructor {})... })>
-        detect_fields_count(std::index_sequence<I0, Is...>)
-    {
-        return sizeof...(Is) + 1;
-    }
-
-    template <typename T, size_t... Is>
-    constexpr size_t detect_fields_count(std::index_sequence<Is...>)
-    {
-        if constexpr (sizeof...(Is) > 0)
-            return detect_fields_count<T>(std::make_index_sequence<sizeof...(Is) - 1>());
-        else
-            return 0;
-    }
-
     template <typename... _Ty>
-    constexpr std::tuple<_Ty...> returnAsTuple(_Ty &&... args) noexcept
+    constexpr std::tuple<_Ty &...> returnAsTuple(_Ty &...args) noexcept
     { // forward arguments in a tuple
-        return std::tuple<_Ty...> { std::forward<_Ty>(args)... };
+        return std::tuple<_Ty &...> { args... };
     }
 
     template <typename T>
-    auto toTupleImpl(T &&t, std::integral_constant<size_t, 1>)
+    auto num_bindings_impl() noexcept
     {
-        if constexpr (std::is_reference_v<T>) {
-            auto &[a] = std::forward<T>(t);
-
-            return returnAsTuple(a);
-        } else {
-            auto &&[a] = std::forward<T>(t);
-
-            return returnAsTuple(std::forward<decltype(a)>(a));
-        }
+        return overloaded {
+            [](auto &&u, int) -> decltype(({auto&& [a] = u; std::integral_constant<size_t, 1>{}; })) { return {}; },
+            [](auto &&u, int) -> decltype(({auto&& [a,b] = u; std::integral_constant<size_t, 2>{}; })) { return {}; },
+            [](auto &&u, int) -> decltype(({auto&& [a,b,c] = u; std::integral_constant<size_t, 3>{}; })) { return {}; },
+            [](auto &&u, int) -> decltype(({auto&& [a,b,c,d] = u; std::integral_constant<size_t, 4>{}; })) { return {}; },
+            [](auto &&u, int) -> decltype(({auto&& [a,b,c,d,e] = u; std::integral_constant<size_t, 5>{}; })) { return {}; },
+            [](auto &&u, int) -> decltype(({auto&& [a,b,c,d,e,f] = u; std::integral_constant<size_t, 6>{}; })) { return {}; },
+            [](auto &&u, int) -> decltype(({auto&& [a,b,c,d,e,f,g] = u; std::integral_constant<size_t, 7>{}; })) { return {}; },
+            [](auto &&u, int) -> decltype(({auto&& [a,b,c,d,e,f,g,h] = u; std::integral_constant<size_t, 8>{}; })) { return {}; },
+            [](auto &&u, int) -> decltype(({auto&& [a,b,c,d,e,f,g,h,i] = u; std::integral_constant<size_t, 9>{}; })) { return {}; },
+            [](auto &&u, unsigned) -> std::integral_constant<size_t, 0> {}
+        }(std::declval<T>(), int {});
     }
 
-    template <typename T>
-    auto toTupleImpl(T &&t, std::integral_constant<size_t, 2>)
+    template <typename T, size_t size>
+    concept TuplefyableHelper = decltype(num_bindings_impl<T>()) {} == size;
+
+    auto toTuple(TuplefyableHelper<1> auto &t)
     {
-        if constexpr (std::is_reference_v<T>) {
-            auto &[a, b] = std::forward<T>(t);
+        auto &[a] = t;
 
-            return returnAsTuple(a, b);
-        } else {
-            auto &&[a, b] = std::forward<T>(t);
-
-            return returnAsTuple(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b));
-        }
+        return returnAsTuple(a);
     }
 
-    template <typename T>
-    auto toTupleImpl(T &&t, std::integral_constant<size_t, 3>)
+    auto toTuple(TuplefyableHelper<2> auto &t)
     {
-        if constexpr (std::is_reference_v<T>) {
-            auto &[a, b, c] = std::forward<T>(t);
+        auto &[a, b] = t;
 
-            return returnAsTuple(a, b, c);
-        } else {
-            auto &&[a, b, c] = std::forward<T>(t);
-
-            return returnAsTuple(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b), std::forward<decltype(c)>(c));
-        }
+        return returnAsTuple(a, b);
     }
 
-    template <typename T>
-    auto toTupleImpl(T &&t, std::integral_constant<size_t, 4>)
+    auto toTuple(TuplefyableHelper<3> auto &t)
     {
-        if constexpr (std::is_reference_v<T>) {
-            auto &[a, b, c, d] = std::forward<T>(t);
+        auto &[a, b, c] = t;
 
-            return returnAsTuple(a, b, c, d);
-        } else {
-            auto &&[a, b, c, d] = std::forward<T>(t);
-
-            return returnAsTuple(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b), std::forward<decltype(c)>(c), std::forward<decltype(d)>(d));
-        }
+        return returnAsTuple(a, b, c);
     }
 
-    template <typename T>
-    auto toTupleImpl(T &&t, std::integral_constant<size_t, 5>)
+    auto toTuple(TuplefyableHelper<4> auto &t)
     {
-        if constexpr (std::is_reference_v<T>) {
-            auto &[a, b, c, d, e] = std::forward<T>(t);
+        auto &[a, b, c, d] = t;
 
-            return returnAsTuple(a, b, c, d, e);
-        } else {
-            auto &&[a, b, c, d, e] = std::forward<T>(t);
-
-            return returnAsTuple(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b), std::forward<decltype(c)>(c), std::forward<decltype(d)>(d), std::forward<decltype(e)>(e));
-        }
+        return returnAsTuple(a, b, c, d);
     }
 
-    template <typename T>
-    auto toTupleImpl(T &&t, std::integral_constant<size_t, 6>)
+    auto toTuple(TuplefyableHelper<5> auto &t)
     {
-        if constexpr (std::is_reference_v<T>) {
-            auto &[a, b, c, d, e, f] = std::forward<T>(t);
+        auto &[a, b, c, d, e] = t;
 
-            return returnAsTuple(a, b, c, d, e, f);
-        } else {
-            auto &&[a, b, c, d, e, f] = std::forward<T>(t);
-
-            return returnAsTuple(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b), std::forward<decltype(c)>(c), std::forward<decltype(d)>(d), std::forward<decltype(e)>(e), std::forward<decltype(f)>(f));
-        }
+        return returnAsTuple(a, b, c, d, e);
     }
 
-    template <typename T>
-    auto toTupleImpl(T &&t, std::integral_constant<size_t, 7>)
+    auto toTuple(TuplefyableHelper<6> auto &t)
     {
-        if constexpr (std::is_reference_v<T>) {
-            auto &[a, b, c, d, e, f, g] = std::forward<T>(t);
+        auto &[a, b, c, d, e, f] = t;
 
-            return returnAsTuple(a, b, c, d, e, f, g);
-        } else {
-            auto &&[a, b, c, d, e, f, g] = std::forward<T>(t);
-
-            return returnAsTuple(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b), std::forward<decltype(c)>(c), std::forward<decltype(d)>(d), std::forward<decltype(e)>(e), std::forward<decltype(f)>(f), std::forward<decltype(g)>(g));
-        }
+        return returnAsTuple(a, b, c, d, e, f);
     }
 
-    template <typename T>
-    auto toTupleImpl(T &&t, std::integral_constant<size_t, 8>)
+    auto toTuple(TuplefyableHelper<7> auto &t)
     {
-        if constexpr (std::is_reference_v<T>) {
-            auto &[a, b, c, d, e, f, g, h] = std::forward<T>(t);
+        auto &[a, b, c, d, e, f, g] = t;
 
-            return returnAsTuple(a, b, c, d, e, f, g, h);
-        } else {
-            auto &&[a, b, c, d, e, f, g, h] = std::forward<T>(t);
-
-            return returnAsTuple(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b), std::forward<decltype(c)>(c), std::forward<decltype(d)>(d), std::forward<decltype(e)>(e), std::forward<decltype(f)>(f), std::forward<decltype(g)>(g), std::forward<decltype(h)>(h));
-        }
+        return returnAsTuple(a, b, c, d, e, f, g);
     }
 
-    template <typename T>
-    auto toTupleImpl(T &&t, std::integral_constant<size_t, 9>)
+    auto toTuple(TuplefyableHelper<8> auto &t)
     {
-        if constexpr (std::is_reference_v<T>) {
-            auto &[a, b, c, d, e, f, g, h, i] = std::forward<T>(t);
+        auto &[a, b, c, d, e, f, g, h] = t;
 
-            return returnAsTuple(a, b, c, d, e, f, g, h, i);
-        } else {
-            auto &&[a, b, c, d, e, f, g, h, i] = std::forward<T>(t);
-
-            return returnAsTuple(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b), std::forward<decltype(c)>(c), std::forward<decltype(d)>(d), std::forward<decltype(e)>(e), std::forward<decltype(f)>(f), std::forward<decltype(g)>(g), std::forward<decltype(h)>(h), std::forward<decltype(i)>(i));
-        }
+        return returnAsTuple(a, b, c, d, e, f, g, h);
     }
 
-    template <typename T>
-    struct is_tuplefyable : std::bool_constant<std::is_standard_layout_v<T> && std::is_trivially_copy_constructible_v<T> && !std::is_fundamental_v<T> && !std::is_pointer_v<T> && !std::is_enum_v<T>> {
-        static constexpr size_t elementCount = detect_fields_count<std::remove_reference_t<T>>(std::make_index_sequence<sizeof(T)>());
-    };
-
-    template <typename T>
-    auto toTuple(T &&t)
+    auto toTuple(TuplefyableHelper<9> auto &t)
     {
-        return toTupleImpl(std::forward<T>(t), std::integral_constant<size_t, is_tuplefyable<std::remove_const_t<std::remove_reference_t<T>>>::elementCount> {});
+        auto &[a, b, c, d, e, f, g, h, i] = t;
+
+        return returnAsTuple(a, b, c, d, e, f, g, h, i);
     }
 
     template <typename T>
-    constexpr const bool is_tuplefyable_v = is_tuplefyable<std::remove_const_t<std::remove_reference_t<T>>>::value;
-
-#define MAKE_TUPLEFYABLE(Type, Count)                                       \
-    template <>                                                             \
-    struct ::Engine::TupleUnpacker::is_tuplefyable<Type> : std::true_type { \
-        static constexpr size_t elementCount = Count;                       \
-    };
-
-#define MAKE_NOT_TUPLEFYABLE(Type, ...)                                           \
-    template <__VA_ARGS__>                                                              \
-    struct ::Engine::TupleUnpacker::is_tuplefyable<Type> : std::false_type { \
-    };
+    concept Tuplefyable = decltype(num_bindings_impl<T>()) {} > 0;
 
     template <typename Tuple, typename F, size_t... Is>
     auto forEach(Tuple &&t, F &&f, std::index_sequence<Is...>)
@@ -324,7 +238,5 @@ namespace TupleUnpacker {
     {
         return select(std::forward<Tuple>(t), std::forward<F>(f), index, std::make_index_sequence<std::tuple_size<std::remove_reference_t<Tuple>>::value>());
     }
-
-};
-
+}
 }

@@ -106,6 +106,4 @@ private:
     T mIndex;
 };
 
-MAKE_NOT_TUPLEFYABLE(SINGLE_ARG(IndexType<T, invalid>), typename T, T invalid)
-
 }

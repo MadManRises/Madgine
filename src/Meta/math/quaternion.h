@@ -183,6 +183,4 @@ struct Quaternion {
 };
 
 META_EXPORT Quaternion slerp(Quaternion q1, Quaternion q2, float ratio);
-
-MAKE_TUPLEFYABLE(Quaternion, 2);
 }

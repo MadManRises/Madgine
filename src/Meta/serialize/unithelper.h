@@ -59,7 +59,7 @@ namespace Serialize {
                 for (auto &t : physical(item)) {
                     UnitHelper<std::remove_reference_t<decltype(t)>>::applyMap(in, t, success);
                 }
-            } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
+            } else if constexpr (TupleUnpacker::Tuplefyable<T>) {
                 TupleUnpacker::forEach(TupleUnpacker::toTuple(item), [&](auto &t) {
                     UnitHelper<std::remove_reference_t<decltype(t)>>::applyMap(in, t, success);
                 });
@@ -80,7 +80,7 @@ namespace Serialize {
                 for (auto &&t : physical(item)) {
                     UnitHelper<std::remove_reference_t<decltype(t)>>::setItemDataSynced(t, b);
                 }
-            } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
+            } else if constexpr (TupleUnpacker::Tuplefyable<T>) {
                 TupleUnpacker::forEach(TupleUnpacker::toTuple(item), [&](auto &t) {
                     UnitHelper<std::remove_reference_t<decltype(t)>>::setItemDataSynced(t, b);
                 });
@@ -101,7 +101,7 @@ namespace Serialize {
                 for (auto &t : physical(item)) {
                     UnitHelper<std::remove_reference_t<decltype(t)>>::setItemActive(t, active, existenceChanged);
                 }
-            } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
+            } else if constexpr (TupleUnpacker::Tuplefyable<T>) {
                 TupleUnpacker::forEach(TupleUnpacker::toTuple(item), [&](auto &t) {
                     UnitHelper<std::remove_reference_t<decltype(t)>>::setItemActive(t, active, existenceChanged);
                 });
@@ -126,7 +126,7 @@ namespace Serialize {
                 for (auto &t : physical(item)) {
                     UnitHelper<std::remove_reference_t<decltype(t)>>::setItemParent(t, parent);
                 }
-            } else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
+            } else if constexpr (TupleUnpacker::Tuplefyable<T>) {
                 TupleUnpacker::forEach(TupleUnpacker::toTuple(item), [&](auto &t) {
                     UnitHelper<std::remove_reference_t<decltype(t)>>::setItemParent(t, parent);
                 });
