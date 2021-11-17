@@ -26,8 +26,8 @@ namespace Filesystem {
 
     INTERFACES_EXPORT Path getCwd();
     INTERFACES_EXPORT void setCwd(const Path &p);
-    INTERFACES_EXPORT void createDirectory(const Path &p);
-    INTERFACES_EXPORT void createDirectories(const Path &p);
+    INTERFACES_EXPORT bool createDirectory(const Path &p);
+    INTERFACES_EXPORT bool createDirectories(const Path &p);
     INTERFACES_EXPORT bool copyFile(const Path &file, const Path &target);
     INTERFACES_EXPORT bool exists(const Path &p);
     INTERFACES_EXPORT bool remove(const Path &p);

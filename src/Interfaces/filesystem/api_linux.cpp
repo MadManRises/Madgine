@@ -57,10 +57,12 @@ namespace Filesystem {
         return (statbuffer.st_mode & S_IFMT) == S_IFDIR;
     }
 
-    void createDirectory(const Path &p)
+    bool createDirectory(const Path &p)
     {
-        auto result = mkdir(p.c_str(), 0700);
-        assert(result == 0);
+        std::string s = p.str();
+        makeNormalized(s);
+        auto result = mkdir(s.c_str(), 0700);
+        return result == 0;
     }
 
     bool exists(const Path &p)
@@ -83,7 +85,7 @@ namespace Filesystem {
         wordexp(p.c_str(), &word, 0);
         assert(word.we_wordc == 1);
         p = word.we_wordv[0];
-        wordfree(&word);)
+        wordfree(&word);
     }
 
     bool isAbsolute(const Path &p)

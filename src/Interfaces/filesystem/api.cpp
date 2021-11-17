@@ -4,25 +4,27 @@
 namespace Engine {
 namespace Filesystem {
 
-    void createDirectories(const Path &p)
+    bool createDirectories(const Path &p)
     {
-        if (!exists(p)) {
-            Path parent = p.parentPath();
-            if (!parent.empty())
-                createDirectories(parent);
-            createDirectory(p);
-        }
+        if (exists(p))
+            return true;
+
+        Path parent = p.parentPath();
+        if (!parent.empty())
+            if (!createDirectories(parent))
+                return false;
+        return createDirectory(p);
     }
 
     bool copyFile(const Path &p, const Path &target)
     {
         Path exactTarget = target;
         if (isDir(exactTarget))
-            exactTarget /= p.filename();        
+            exactTarget /= p.filename();
         OutStream out = openFileWrite(exactTarget, true);
         assert(out);
         InStream in = openFileRead(p);
-        assert(in);        
+        assert(in);
         out.pipe(in);
         return true;
     }

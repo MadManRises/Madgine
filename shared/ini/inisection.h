@@ -4,12 +4,12 @@ namespace Engine {
 namespace Ini {
 
     struct INI_EXPORT IniSection {
-        IniSection(std::istream *stream = nullptr);
+        IniSection();
 
         std::string &operator[](const std::string &key);
 
-        void save(std::ostream &stream) const;
-        void load(std::istream &stream);
+        void save(OutStream &stream) const;
+        void load(InStream &stream);
 
         std::map<std::string, std::string>::iterator begin();
         std::map<std::string, std::string>::iterator end();

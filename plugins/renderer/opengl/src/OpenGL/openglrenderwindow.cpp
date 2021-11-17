@@ -13,7 +13,15 @@
 
 #include "openglrendercontext.h"
 
-#if ANDROID || EMSCRIPTEN
+#if LINUX
+#include <GL/glx.h>
+#include <X11/Xlib.h>
+    namespace Engine {
+    namespace Window {
+        extern Display *sDisplay();
+    }
+    }
+#elif ANDROID || EMSCRIPTEN
 #    include <EGL/egl.h>
 namespace Engine {
 namespace Window {

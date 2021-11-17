@@ -104,6 +104,10 @@ struct InStream {
         return std::unique_ptr<std::streambuf>(mStream.rdbuf(nullptr));
     }
 
+    std::istream& istream() {
+        return mStream;
+    }
+
 protected:
     InStream(std::streambuf *buffer)
         : mStream(buffer)

@@ -2,13 +2,13 @@
 
 #include "inisection.h"
 
+#include "Generic/streams.h"
+
 namespace Engine {
 namespace Ini {
 
-    IniSection::IniSection(std::istream *stream)
+    IniSection::IniSection()
     {
-        if (stream)
-            load(*stream);
     }
 
     std::string &IniSection::operator[](const std::string &key)
@@ -16,28 +16,28 @@ namespace Ini {
         return mValues[key];
     }
 
-    void IniSection::save(std::ostream &stream) const
+    void IniSection::save(OutStream &stream) const
     {
         for (const std::pair<const std::string, std::string> &p : mValues) {
             stream << p.first << "=" << p.second << '\n';
         }
     }
 
-    void IniSection::load(std::istream &stream)
+    void IniSection::load(InStream &stream)
     {
         mValues.clear();
-        std::streampos save = stream.tellg();
+        std::streampos save = stream.tell();
         std::string line;
-        while (std::getline(stream, line)) {
+        while (std::getline(stream.istream(), line)) {
             if (line.at(0) == '[') {
-                stream.seekg(save);
+                stream.seek(save);
                 return;
             }
             size_t pos = line.find('=');
             if (pos == std::string::npos || line.rfind('=') != pos)
                 std::terminate();
             mValues[line.substr(0, pos)] = line.substr(pos + 1);
-            save = stream.tellg();
+            save = stream.tell();
         }
     }
 

@@ -189,6 +189,11 @@ namespace Window {
         {
         }
 
+        virtual std::string title() const override
+        {
+            return "";
+        }
+
         virtual void destroy() override
         {
             XDestroyWindow(sDisplay(), mHandle);

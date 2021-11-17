@@ -4,6 +4,8 @@
 
 #include "inisection.h"
 
+#include "Interfaces/filesystem/api.h"
+
 namespace Engine {
 namespace Ini {
     IniFile::IniFile()
@@ -26,7 +28,7 @@ namespace Ini {
 
     void IniFile::saveToDisk(const Filesystem::Path &path) const
     {
-        std::ofstream stream(path.str());
+        OutStream stream = Filesystem::openFileWrite(path);
         assert(stream);
         for (const std::pair<const std::string, IniSection> &p : mSections) {
             stream << "[" << p.first << "]\n";
@@ -36,18 +38,20 @@ namespace Ini {
 
     bool IniFile::loadFromDisk(const Filesystem::Path &path)
     {
-        std::ifstream stream(path.str());
+        InStream stream = Filesystem::openFileRead(path);
         if (!stream)
             return false;
         mSections.clear();
         std::string line;
-        while (std::getline(stream, line)) {
+        while (std::getline(stream.istream(), line)) {
             if (!StringUtil::startsWith(line, "[") || !StringUtil::endsWith(line, "]"))
                 std::terminate();
             std::string sectionName = line.substr(1, line.size() - 2);
-            auto pib = mSections.try_emplace(sectionName, &stream);
+            auto pib = mSections.try_emplace(sectionName);
             if (!pib.second) {
                 LOG_WARNING("Ini-File '" << path.c_str() << "' contains section '" << sectionName << "' twice. Second instance is ignored!");
+            } else {
+                pib.first->second.load(stream);
             }
         }
         return true;

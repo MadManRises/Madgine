@@ -68,10 +68,10 @@ namespace Filesystem {
         return result;
     }
 
-    void createDirectory(const Path &p)
+    bool createDirectory(const Path &p)
     {
         auto result = CreateDirectory(p.c_str(), NULL);
-        assert(result);
+        return result;
     }
 
     bool exists(const Path &p)
