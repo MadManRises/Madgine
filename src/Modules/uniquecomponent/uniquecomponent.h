@@ -50,7 +50,7 @@ protected:
     static IndexHolder *&_preg()
     {
         static IndexHolder *dummy = nullptr;
-        //LOG("Accessing registry for " << typeid(T).name() << " at: " << &dummy << "(= " << dummy << ")");
+        LOG_DEBUG("Accessing registry for " << typeid(T).name() << " at: " << &dummy << "(= " << dummy << ")");
         return dummy;
     }
 };

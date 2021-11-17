@@ -11,7 +11,7 @@
 
 namespace Engine {
 namespace Util {
-    MessageType sLogLevel = MessageType::LOG_TYPE;
+    MessageType sLogLevel = MessageType::DEBUG_TYPE;
 
     StandardLog::StandardLog(const std::string &name)
         : mName(name)

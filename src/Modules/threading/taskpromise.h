@@ -7,7 +7,7 @@ namespace Threading {
 
     struct TaskPromiseTypeBase;
 
-    struct TaskPromiseSharedStateBase {
+    struct MODULES_EXPORT TaskPromiseSharedStateBase {
         std::mutex mMutex;
         std::vector<TaskHandle> mThenResumes;
         bool mDestroyed = false;

@@ -12,6 +12,18 @@
 namespace Engine {
 namespace Dl {
 
+    static int sLastError;
+
+    DlAPIResult toResult(int error, const char *op)
+    {
+        switch (error) {
+        default:
+            fprintf(stderr, "Unknown Unix Dl-Error-Code from %s: %lu\n", op, error);
+            fflush(stderr);
+            return DlAPIResult::UNKNOWN_ERROR;
+        }
+    }
+
     void *openDll(const std::string &name)
     {
         void *handle;
@@ -20,8 +32,7 @@ namespace Dl {
             handle = dlopen(nullptr, RTLD_LAZY);
         else
             handle = dlopen(name.c_str(), RTLD_NOW);
-        if (!handle)
-            throw exception(dlerror());
+        sLastError = errno;
 
         return handle;
     }
@@ -43,6 +54,10 @@ namespace Dl {
         auto result = dladdr(getDllSymbol(dllHandle, symbolName.c_str()), &info);
         assert(result);
         return info.dli_fname;
+    }
+
+    DlAPIResult getError(const char *op) {
+        return toResult(sLastError, op);
     }
 }
 }

@@ -4,6 +4,7 @@
 #include "Interfaces/filesystem/filewatcher.h"
 #include "resourceloadercollector.h"
 #include "Modules/threading/taskqueue.h"
+#include "Generic/systemvariable.h"
 
 namespace Engine {
 namespace Resources {
@@ -63,7 +64,7 @@ namespace Resources {
 
         std::map<Filesystem::Path, int, SubDirCompare> mResourcePaths;
 
-        std::atomic_flag mInitialized;
+        Threading::SystemVariable<bool, false> mInitialized;
 
         Threading::TaskQueue mIOQueue;
     };

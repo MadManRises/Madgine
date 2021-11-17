@@ -4,6 +4,8 @@
 
 namespace Engine {
 
+    DERIVE_TYPENAME(VBase)
+
 template <typename T, typename Base, typename... _Ty>
 std::unique_ptr<Base> createComponent(_Ty... arg)
 {
