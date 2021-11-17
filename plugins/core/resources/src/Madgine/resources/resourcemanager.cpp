@@ -53,7 +53,7 @@ namespace Resources {
         /*else
 			std::terminate();*/
 
-        if (mInitialized.test()) {
+        if (mInitialized) {
             updateResources(Filesystem::FileEventType::FILE_CREATED, path, priority);
         }
     }
@@ -90,9 +90,7 @@ namespace Resources {
 
         mIOQueue.addRepeatedTask([this]() { update(); }, std::chrono::seconds { 1 });
 
-        bool last = mInitialized.test_and_set();
-        assert(!last);
-        mInitialized.notify_all();
+        mInitialized = true;
 
         return true;
     }
@@ -101,7 +99,7 @@ namespace Resources {
     {
         mFileWatcher.clear();
 
-        mInitialized.clear();
+        mInitialized = false;
     }
 
     Filesystem::Path ResourceManager::findResourceFile(const std::string &fileName)
@@ -128,7 +126,7 @@ namespace Resources {
 
     void ResourceManager::waitForInit()
     {
-        mInitialized.wait(false);
+        mInitialized.wait();
     }
 
     Threading::TaskQueue *ResourceManager::taskQueue()

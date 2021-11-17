@@ -8,8 +8,6 @@
 
 namespace Engine {
 
-DERIVE_TYPENAME(VBase)
-
 template <typename Registry, typename __Base, typename... _Ty>
 struct UniqueComponentCollector {
     typedef typename Registry::Base Base;

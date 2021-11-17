@@ -11,7 +11,7 @@ namespace Scene {
         struct MADGINE_SCENE_EXPORT PointLight : EntityComponent<PointLight> {
             PointLight(const ObjectPtr &init);
 
-            size_t mRange = 10;
+            uint32_t mRange = 10;
             Vector3 mColor = { 1.0f, 1.0f, 1.0f };
         };
 

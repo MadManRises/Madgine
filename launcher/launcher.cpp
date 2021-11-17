@@ -28,7 +28,7 @@
 
 Engine::CLI::Parameter<bool> toolMode { { "--toolMode", "-t" }, false, "If set, no application will be started. Only the root will be initialized and then immediately shutdown again." };
 
-Engine::CLI::Parameter<Engine::Util::MessageType> logLevel { { "--logLevel", "-l" }, Engine::Util::MessageType::LOG_TYPE, "Specify log-level." };
+Engine::CLI::Parameter<Engine::Util::MessageType> logLevel { { "--logLevel", "-l" }, Engine::Util::MessageType::DEBUG_TYPE, "Specify log-level." };
 
 #if EMSCRIPTEN
 #    define FIX_LOCAL static
