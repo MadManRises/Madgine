@@ -37,6 +37,8 @@ METATABLE_END(Engine::Tools::ClientImRoot)
 SERIALIZETABLE_BEGIN(Engine::Tools::ClientImRoot)
 SERIALIZETABLE_END(Engine::Tools::ClientImRoot)
 
+VIRTUALUNIQUECOMPONENTBASE(Engine::Tools::ClientImRoot)
+
 namespace Engine {
 namespace Tools {
 

@@ -22,6 +22,8 @@ METATABLE_BEGIN(Engine::Render::GPUMeshData::Material)
 READONLY_PROPERTY(Name, mName)
 METATABLE_END(Engine::Render::GPUMeshData::Material)
 
+VIRTUALUNIQUECOMPONENTBASE(Engine::Render::GPUMeshLoader)
+
 
     namespace Engine
 {

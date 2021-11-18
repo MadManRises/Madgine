@@ -15,13 +15,13 @@ struct VirtualUniqueComponentImpl : Base {
     struct Inner {
         Inner()
         {
-            assert(!Base::_preg());
-            Base::_preg() = &reg;
+            assert(!Base::preg());
+            Base::preg() = &reg;
         }
         ~Inner()
         {
-            assert(Base::_preg() == &reg);
-            Base::_preg() = nullptr;
+            assert(Base::preg() == &reg);
+            Base::preg() = nullptr;
         }
 
     private:
@@ -33,6 +33,8 @@ DLL_IMPORT_VARIABLE2(typename T::Inner, _vreg, typename T, typename Base);
 
 #    define VIRTUALUNIQUECOMPONENT(Name) DLL_EXPORT_VARIABLE2(, Name::Inner, Engine::, _vreg, {}, Name, Name::VBase)
 
+DLL_IMPORT_VARIABLE2(Engine::IndexHolder *, _preg, typename T);
+
 template <typename _T, typename _Collector, typename Base>
 struct VirtualUniqueComponentBase : public Base {
 public:
@@ -43,22 +45,23 @@ public:
 
     static size_t component_index()
     {
-        return _preg()->index();
+        return preg()->index();
     }
 
 protected:
-    static IndexHolder *&_preg()
-    {
-        static IndexHolder *dummy = nullptr;
-        LOG_DEBUG("Accessing registry for " << typeid(T).name() << " at: " << &dummy << "(= " << dummy << ")");
-        return dummy;
+    static IndexHolder*& preg() {
+        return _preg<T>();
     }
+
 };
 
 DLL_IMPORT_VARIABLE2(Engine::IndexHolder, _reg, typename T);
 
 #    define UNIQUECOMPONENT_EX(Frontend, Full) DLL_EXPORT_VARIABLE3(, Engine::IndexHolder, Frontend::Collector::ComponentRegistrator<Full>, Engine::, _reg, , {}, Frontend)
 #    define UNIQUECOMPONENT2(Name, ext) DLL_EXPORT_VARIABLE3(, Engine::IndexHolder, Name::Collector::ComponentRegistrator<Name>, Engine::, _reg, ext, {}, Name)
+
+#    define VIRTUALUNIQUECOMPONENTBASE(Name) DLL_EXPORT_VARIABLE2(, Engine::IndexHolder*, Engine::, _preg, nullptr, Name)
+        
 
 template <typename _T, typename _Collector, typename _Base>
 struct UniqueComponent : _Base {
@@ -113,6 +116,7 @@ size_t component_index();
 #    define UNIQUECOMPONENT_EX(Frontend, Full)
 #    define UNIQUECOMPONENT2(Name, ext)
 #    define VIRTUALUNIQUECOMPONENT(Name)
+#    define VIRTUALUNIQUECOMPONENTBASE(Name)
 
 #endif
 

@@ -13,6 +13,8 @@
 METATABLE_BEGIN_BASE(Engine::Render::TextureLoader::ResourceType, Engine::Resources::ResourceBase)
 METATABLE_END(Engine::Render::TextureLoader::ResourceType)
 
+VIRTUALUNIQUECOMPONENTBASE(Engine::Render::TextureLoader)
+
 namespace Engine {
 namespace Render {
 

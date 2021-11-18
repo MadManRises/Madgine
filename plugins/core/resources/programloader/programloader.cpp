@@ -12,6 +12,8 @@ METATABLE_END(Engine::Render::ProgramLoader)
 METATABLE_BEGIN_BASE(Engine::Render::ProgramLoader::ResourceType, Engine::Resources::ResourceBase)
 METATABLE_END(Engine::Render::ProgramLoader::ResourceType)
 
+VIRTUALUNIQUECOMPONENTBASE(Engine::Render::ProgramLoader)
+
 namespace Engine {
 namespace Render {
 
