@@ -11,6 +11,14 @@
 namespace Engine {
 namespace Render {
 
+#if OPENGL_ES
+#    define IF_CUBE_FRAMEBUFFER if constexpr (OPENGL_ES > 31)
+#    define IF_NOT_CUBE_FRAMEBUFFER if constexpr (OPENGL_ES < 32)
+#else
+#    define IF_CUBE_FRAMEBUFFER if (glFramebufferTexture)
+#    define IF_NOT_CUBE_FRAMEBUFFER if (!glFramebufferTexture)
+#endif
+
     GLenum toGLFormat(DataFormat format)
     {
         switch (format) {
@@ -27,21 +35,24 @@ namespace Render {
 
     void attachFramebufferTexture(GLenum attachment, OpenGLTexture &tex, TextureType type, size_t j)
     {
-#if OPENGL_ES > 31 || !OPENGL_ES
-        assert(j == 0);
-        glFramebufferTexture(GL_FRAMEBUFFER, attachment, tex.mTextureHandle, 0);
-        GL_CHECK();
-#else
-        GLenum target = tex.target();
-        if (type == TextureType_Cube) {
-            target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + j;
-        } else {
+        IF_CUBE_FRAMEBUFFER
+        {
             assert(j == 0);
+            glFramebufferTexture(GL_FRAMEBUFFER, attachment, tex.mTextureHandle, 0);
+            GL_CHECK();
         }
+        else
+        {
+            GLenum target = tex.target();
+            if (type == TextureType_Cube) {
+                target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + j;
+            } else {
+                assert(j == 0);
+            }
 
-        glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, target, tex.mTextureHandle, 0);
-        GL_CHECK();
-#endif
+            glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, target, tex.mTextureHandle, 0);
+            GL_CHECK();
+        }
     }
 
     OpenGLRenderTexture::OpenGLRenderTexture(OpenGLRenderContext *context, const Vector2i &size, const RenderTextureConfig &config)
@@ -57,12 +68,13 @@ namespace Render {
 
         size_t bufferCount = config.mIterations > 1 && mSamples == 1 ? 2 : 1;
         size_t framebufferCount = bufferCount;
-#if OPENGL_ES < 32 && OPENGL_ES
-        if (type == TextureType_Cube) {
-            assert(framebufferCount == 1);
-            framebufferCount = 6;
+        IF_NOT_CUBE_FRAMEBUFFER
+        {
+            if (type == TextureType_Cube) {
+                assert(framebufferCount == 1);
+                framebufferCount = 6;
+            }
         }
-#endif
 
         glGenFramebuffers(framebufferCount, mFramebuffers);
         GL_CHECK();
