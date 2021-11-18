@@ -281,5 +281,10 @@ namespace Render {
         return std::make_unique<DirectX12RenderWindow>(this, w);
     }
 
+    bool DirectX12RenderContext::supportsMultisampling() const
+    {
+        return true;
+    }
+
 }
 }

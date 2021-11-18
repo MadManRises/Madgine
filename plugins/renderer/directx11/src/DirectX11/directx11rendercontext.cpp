@@ -92,5 +92,10 @@ namespace Render {
         return std::make_unique<DirectX11RenderWindow>(this, w);
     }
 
+    bool DirectX11RenderContext::supportsMultisampling() const
+    {
+        return true;
+    }
+
 }
 }

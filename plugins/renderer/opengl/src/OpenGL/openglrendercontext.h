@@ -19,6 +19,8 @@ namespace Render {
         virtual std::unique_ptr<RenderTarget> createRenderTexture(const Vector2i &size = { 1, 1 }, const RenderTextureConfig &config = {}) override;
 
 		static OpenGLRenderContext &getSingleton();
+
+        virtual bool supportsMultisampling() const override;
     };
 
 }

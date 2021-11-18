@@ -15,10 +15,9 @@ namespace Render {
 
     Threading::WorkgroupLocal<RenderContext *> sContext = nullptr;
 
-    RenderContext::RenderContext(Threading::TaskQueue *queue, bool supportsMultisampling)
+    RenderContext::RenderContext(Threading::TaskQueue *queue)
         : mRenderQueue(queue)
-        , mRenderThread(std::this_thread::get_id())
-        , mSupportsMultisampling(supportsMultisampling)
+        , mRenderThread(std::this_thread::get_id())        
     {
         assert(!sContext);
         sContext = this;
@@ -81,11 +80,6 @@ namespace Render {
     RenderContext &RenderContext::getSingleton()
     {
         return *sContext;
-    }
-
-    bool RenderContext::supportsMultisampling() const
-    {
-        return mSupportsMultisampling;
     }
 
 }

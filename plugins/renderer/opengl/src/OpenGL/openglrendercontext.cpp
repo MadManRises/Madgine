@@ -209,22 +209,6 @@ namespace Render {
 #endif
     }
 
-    bool checkMultisamplingSupport()
-    {
-#if ANDROID || EMSCRIPTEN
-        const EGLint attribs[] = {
-            EGL_SAMPLE_BUFFERS, 1,
-            EGL_NONE
-        };
-
-        EGLint numConfigs;
-
-        return eglChooseConfig(Window::sDisplay, attribs, nullptr, 0, &numConfigs);
-#else
-        return true;
-#endif
-    }
-
     ContextHandle createContext(Window::OSWindow *window, size_t samples, ContextHandle reusedContext, bool setup)
     {
 
@@ -523,7 +507,7 @@ namespace Render {
 #endif
 
     OpenGLRenderContext::OpenGLRenderContext(Threading::TaskQueue *queue)
-        : UniqueComponent(queue, checkMultisamplingSupport())
+        : UniqueComponent(queue)
     {
     }
 
@@ -559,6 +543,21 @@ namespace Render {
         std::unique_ptr<RenderTarget> window = std::make_unique<OpenGLRenderWindow>(this, w, samples, sharedContext);
 
         return window;
+    }
+
+    bool OpenGLRenderContext::supportsMultisampling() const {
+#if ANDROID || EMSCRIPTEN
+        const EGLint attribs[] = {
+            EGL_SAMPLE_BUFFERS, 1,
+            EGL_NONE
+        };
+
+        EGLint numConfigs;
+
+        return eglChooseConfig(Window::sDisplay, attribs, nullptr, 0, &numConfigs);
+#else
+        return glTexImage2DMultisample;
+#endif
     }
 
 }
