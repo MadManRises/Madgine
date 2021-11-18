@@ -443,13 +443,6 @@ namespace Render {
             GL_CHECK();
             //glDepthRange(0.0, 1.0);
 
-#if !OPENGL_ES
-            if (checkMultisampling()) { 
-                glEnable(GL_MULTISAMPLE);
-                GL_CHECK();
-            }
-#endif
-
             if (glGetString) {
                 const GLubyte *val;
 #define GL_LOG_PROPERTY(name)         \

@@ -206,7 +206,10 @@ namespace Render {
             glBindRenderbuffer(GL_RENDERBUFFER, mDepthRenderbuffer);
             GL_CHECK();
 
-            glRenderbufferStorageMultisample(GL_RENDERBUFFER, mSamples, GL_DEPTH_COMPONENT24, width, height);
+            if (mSamples > 1)
+                glRenderbufferStorageMultisample(GL_RENDERBUFFER, mSamples, GL_DEPTH_COMPONENT24, width, height);
+            else
+                glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
             GL_CHECK();
 
             glBindRenderbuffer(GL_RENDERBUFFER, 0);
