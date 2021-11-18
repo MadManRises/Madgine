@@ -22,11 +22,7 @@ namespace Render {
         virtual TextureDescriptor depthTexture() const override;
 
     private:
-#if OPENGL_ES < 32 && OPENGL_ES
         GLuint mFramebuffers[6] = { 0 };
-#else
-        GLuint mFramebuffers[2] = { 0 };
-#endif
         GLuint mDepthRenderbuffer = 0;
 
         OpenGLTexture mDepthTexture;

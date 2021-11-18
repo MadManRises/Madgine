@@ -15,8 +15,8 @@ namespace Render {
 #    define IF_CUBE_FRAMEBUFFER if constexpr (OPENGL_ES > 31)
 #    define IF_NOT_CUBE_FRAMEBUFFER if constexpr (OPENGL_ES < 32)
 #else
-#    define IF_CUBE_FRAMEBUFFER if (glFramebufferTexture)
-#    define IF_NOT_CUBE_FRAMEBUFFER if (!glFramebufferTexture)
+#    define IF_CUBE_FRAMEBUFFER if ( false && glFramebufferTexture)
+#    define IF_NOT_CUBE_FRAMEBUFFER if (true  || !glFramebufferTexture)
 #endif
 
     GLenum toGLFormat(DataFormat format)
@@ -64,7 +64,11 @@ namespace Render {
         if (type == TextureType_2DMultiSample && !context->supportsMultisampling())
             type = TextureType_2D;
 
-        bool createDepthBufferView = config.mCreateDepthBufferView || type == TextureType_Cube;
+        bool createDepthBufferView = config.mCreateDepthBufferView;
+        IF_NOT_CUBE_FRAMEBUFFER
+        {
+            createDepthBufferView |= type == TextureType_Cube;
+        }
 
         size_t bufferCount = config.mIterations > 1 && mSamples == 1 ? 2 : 1;
         size_t framebufferCount = bufferCount;
