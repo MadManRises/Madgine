@@ -209,6 +209,22 @@ namespace Render {
 #endif
     }
 
+    static bool checkMultisampling()
+    {
+#if ANDROID || EMSCRIPTEN
+        const EGLint attribs[] = {
+            EGL_SAMPLE_BUFFERS, 1,
+            EGL_NONE
+        };
+
+        EGLint numConfigs;
+
+        return eglChooseConfig(Window::sDisplay, attribs, nullptr, 0, &numConfigs);
+#else
+        return glTexImage2DMultisample;
+#endif
+    }
+
     ContextHandle createContext(Window::OSWindow *window, size_t samples, ContextHandle reusedContext, bool setup)
     {
 
@@ -428,8 +444,10 @@ namespace Render {
             //glDepthRange(0.0, 1.0);
 
 #if !OPENGL_ES
-            glEnable(GL_MULTISAMPLE);
-            GL_CHECK();
+            if (checkMultisampling()) { 
+                glEnable(GL_MULTISAMPLE);
+                GL_CHECK();
+            }
 #endif
 
             if (glGetString) {
@@ -545,19 +563,9 @@ namespace Render {
         return window;
     }
 
-    bool OpenGLRenderContext::supportsMultisampling() const {
-#if ANDROID || EMSCRIPTEN
-        const EGLint attribs[] = {
-            EGL_SAMPLE_BUFFERS, 1,
-            EGL_NONE
-        };
-
-        EGLint numConfigs;
-
-        return eglChooseConfig(Window::sDisplay, attribs, nullptr, 0, &numConfigs);
-#else
-        return glTexImage2DMultisample;
-#endif
+    bool OpenGLRenderContext::supportsMultisampling() const
+    {
+        return checkMultisampling();
     }
 
 }

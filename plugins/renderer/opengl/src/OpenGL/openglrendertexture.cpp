@@ -144,7 +144,7 @@ namespace Render {
             GL_CHECK();
 
             if (GLenum check = glCheckFramebufferStatus(GL_FRAMEBUFFER); check != GL_FRAMEBUFFER_COMPLETE) {
-                LOG_ERROR("Incomplete Framebuffer Status: " << check << " (texture: " << config.mCreateDepthBufferView << ")");
+                LOG_ERROR("Incomplete Framebuffer Status: " << check << " (depth-texture: " << createDepthBufferView << ")");
                 glDump();
                 std::terminate();
             }
