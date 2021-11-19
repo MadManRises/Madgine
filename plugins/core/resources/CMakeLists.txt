@@ -11,8 +11,9 @@ add_plugin(Resources Madgine Core ${sources})
 target_link_libraries(Resources PUBLIC Modules Meta)
 
 
-
-add_subdirectory(audioloader)
+if (NOT IOS)
+	add_subdirectory(audioloader)
+endif()
 add_subdirectory(imageloader)
 add_subdirectory(programloader)
 add_subdirectory(textureloader)

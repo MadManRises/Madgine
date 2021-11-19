@@ -40,8 +40,10 @@ target_link_plugins(OpenGL MeshLoader ProgramLoader TextureLoader ImageLoader)
 
 if (OSX)
     target_sources(OpenGL PRIVATE src/OpenGL/osxopengl.mm)
+	set_source_files_properties(src/OpenGL/osxopengl.mm PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
 elseif(IOS)
     target_sources(OpenGL PRIVATE src/OpenGL/iosopengl.mm)
+	set_source_files_properties(src/OpenGL/iosopengl.mm PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
 endif ()
 
 set(sources "")

@@ -1,3 +1,4 @@
+#include "opengllib.h"
 
 #include "osxopengl.h"
 

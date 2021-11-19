@@ -10,6 +10,9 @@ endif(ANDROID)
 if (OSX)
     FolderSources(sources "" osx osx_main.mm)
 endif (OSX)
+if (IOS)
+	FolderSources(sources "" ios ios_main.mm)
+endif (IOS)
 
 add_workspace_application(MadgineLauncher ${sources})
 
@@ -29,7 +32,7 @@ elseif (ANDROID)
 elseif (OSX)
     target_link_libraries(MadgineLauncher PRIVATE "-framework Cocoa")
 elseif (IOS)
-    target_link_libraries(MadgineLauncher PRIVATE "-framework Foundation")
+    target_link_libraries(MadgineLauncher PRIVATE "-framework UIKit")
 endif()
 
 

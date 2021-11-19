@@ -59,10 +59,10 @@ Path appDataPath()
         return (statbuffer.st_mode & S_IFMT) == S_IFDIR;
     }
 
-    void createDirectory(const Path &p)
+    bool createDirectory(const Path &p)
     {
         auto result = mkdir(p.c_str(), 0700);
-        assert(result == 0);
+        return result == 0;
     }
 
     bool exists(const Path &p)

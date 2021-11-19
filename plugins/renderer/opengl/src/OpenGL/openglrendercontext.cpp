@@ -181,6 +181,8 @@ namespace Render {
         eglMakeCurrent(Window::sDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 #elif OSX
         OSXBridge::resetContext();
+#elif IOS
+        IOSBridge::resetContext();
 #endif
     }
 
@@ -206,11 +208,14 @@ namespace Render {
         }
 #elif OSX
         OSXBridge::makeCurrent(context);
+#elif IOS
+        IOSBridge::makeCurrent(context);
 #endif
     }
 
     static bool checkMultisampling()
     {
+#if MULTISAMPLING
 #if ANDROID || EMSCRIPTEN
         const EGLint attribs[] = {
             EGL_SAMPLE_BUFFERS, 1,
@@ -222,6 +227,9 @@ namespace Render {
         return eglChooseConfig(Window::sDisplay, attribs, nullptr, 0, &numConfigs);
 #else
         return glTexImage2DMultisample;
+#endif
+#else
+        return false;
 #endif
     }
 
@@ -454,7 +462,9 @@ namespace Render {
                 GL_LOG_PROPERTY(GL_VERSION);
                 GL_LOG_PROPERTY(GL_VENDOR);
                 GL_LOG_PROPERTY(GL_RENDERER);
+#if !OSX
                 GL_LOG_PROPERTY(GL_EXTENSIONS);
+#endif
             }
         }
 

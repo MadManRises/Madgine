@@ -11,14 +11,6 @@
 namespace Engine {
 namespace Render {
 
-#if OPENGL_ES
-#    define IF_CUBE_FRAMEBUFFER if constexpr (OPENGL_ES > 31)
-#    define IF_NOT_CUBE_FRAMEBUFFER if constexpr (OPENGL_ES < 32)
-#else
-#    define IF_CUBE_FRAMEBUFFER if ( false && glFramebufferTexture)
-#    define IF_NOT_CUBE_FRAMEBUFFER if (true  || !glFramebufferTexture)
-#endif
-
     GLenum toGLFormat(DataFormat format)
     {
         switch (format) {
@@ -35,13 +27,19 @@ namespace Render {
 
     void attachFramebufferTexture(GLenum attachment, OpenGLTexture &tex, TextureType type, size_t j)
     {
-        IF_CUBE_FRAMEBUFFER
-        {
+#if CUBE_FRAMEBUFFER
+#if !OPENGL_ES
+        if (glFramebufferTexture){
+#endif
             assert(j == 0);
             glFramebufferTexture(GL_FRAMEBUFFER, attachment, tex.mTextureHandle, 0);
             GL_CHECK();
+#if !OPENGL_ES
         }
         else
+#endif
+#endif
+#if OPENGL_ES < 32
         {
             GLenum target = tex.target();
             if (type == TextureType_Cube) {
@@ -53,6 +51,7 @@ namespace Render {
             glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, target, tex.mTextureHandle, 0);
             GL_CHECK();
         }
+#endif
     }
 
     OpenGLRenderTexture::OpenGLRenderTexture(OpenGLRenderContext *context, const Vector2i &size, const RenderTextureConfig &config)
@@ -65,20 +64,21 @@ namespace Render {
             type = TextureType_2D;
 
         bool createDepthBufferView = config.mCreateDepthBufferView;
-        IF_NOT_CUBE_FRAMEBUFFER
-        {
-            createDepthBufferView |= type == TextureType_Cube;
-        }
 
         size_t bufferCount = config.mIterations > 1 && mSamples == 1 ? 2 : 1;
         size_t framebufferCount = bufferCount;
-        IF_NOT_CUBE_FRAMEBUFFER
+#if OPENGL_ES < 32
+#if !OPENGL_ES
+        if (!glFramebufferTexture)
+#endif
         {
             if (type == TextureType_Cube) {
                 assert(framebufferCount == 1);
                 framebufferCount = 6;
+                createDepthBufferView = true;
             }
         }
+#endif
 
         glGenFramebuffers(framebufferCount, mFramebuffers);
         GL_CHECK();
@@ -112,6 +112,7 @@ namespace Render {
 
         for (size_t j = 0; j < framebufferCount; ++j) {
 
+#if MULTISAMPLING
             if (mSamples > 1) {
                 glBindFramebuffer(GL_FRAMEBUFFER, mMultisampledFramebuffer);
                 GL_CHECK();
@@ -125,7 +126,9 @@ namespace Render {
                     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D_MULTISAMPLE, mMultisampledTextures[i], 0);
                     GL_CHECK();
                 }
-            } else {
+            } else
+#endif
+            {
                 glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffers[j]);
                 GL_CHECK();
                 for (size_t i = 0; i < config.mTextureCount; ++i) {
@@ -148,8 +151,12 @@ namespace Render {
             GL_CHECK();
 
             if (GLenum check = glCheckFramebufferStatus(GL_FRAMEBUFFER); check != GL_FRAMEBUFFER_COMPLETE) {
+                if (check == 0){
+                    GL_CHECK();
+                }else{
                 LOG_ERROR("Incomplete Framebuffer Status: " << check << " (depth-texture: " << createDepthBufferView << ")");
                 glDump();
+                }
                 std::terminate();
             }
 
@@ -193,6 +200,7 @@ namespace Render {
         for (OpenGLTexture &tex : mTextures)
             tex.setData({ width, height }, {});
 
+#if MULTISAMPLING
         for (size_t i = 0; i < mMultisampledTextures.size(); ++i) {
             glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, mMultisampledTextures[i]);
             GL_CHECK();
@@ -205,6 +213,7 @@ namespace Render {
         }
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
         GL_CHECK();
+#endif
 
         if (mDepthRenderbuffer) {
             glBindRenderbuffer(GL_RENDERBUFFER, mDepthRenderbuffer);

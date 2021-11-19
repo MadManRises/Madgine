@@ -28,6 +28,10 @@ namespace Window {
     extern EGLDisplay sDisplay;
 }
 }
+#elif OSX
+#include "osxopengl.h"
+#elif IOS
+#    include "iosopengl.h"
 #endif
 
 namespace Engine {

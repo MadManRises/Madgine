@@ -125,6 +125,7 @@ function(install_to_workspace name)
 			EXPORT ${name}
 			RUNTIME DESTINATION bin COMPONENT ${name}
 			LIBRARY DESTINATION lib COMPONENT ${name}
+			BUNDLE DESTINATION App COMPONENT ${name}
 			INCLUDES DESTINATION ${name}/include
 			ARCHIVE DESTINATION ${name}/lib COMPONENT ${name}			
 		)
@@ -134,6 +135,7 @@ function(install_to_workspace name)
 			EXPORT ${name}
 			RUNTIME DESTINATION bin COMPONENT ${name}
 			LIBRARY DESTINATION lib COMPONENT ${name}
+			BUNDLE DESTINATION App COMPONENT ${name}
 		)
 	endif()
 

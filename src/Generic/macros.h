@@ -36,3 +36,8 @@
 
 #define DEBUG_MACRO2(...) static_assert(false, #__VA_ARGS__);
 #define DEBUG_MACRO(...) DEBUG_MACRO2(__VA_ARGS__)
+
+#define CONSTANT_CASE(name, stream) \
+    case name:                      \
+        stream << #name;            \
+        break;

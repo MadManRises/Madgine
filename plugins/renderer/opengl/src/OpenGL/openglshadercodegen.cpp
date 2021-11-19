@@ -190,7 +190,7 @@ namespace Render {
             stream << "#version 300 es\n";
             stream << "precision highp float;\n";
 #else
-            stream << "#version 430 core\n";
+            stream << "#version 410 core\n";
 #endif
 
             for (const std::pair<const std::string, CodeGen::Struct> &structInfo : file.mStructs) {

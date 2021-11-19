@@ -51,7 +51,8 @@ namespace Render {
 #if OPENGL_ES
         //glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, tag);
 #else
-        glPushDebugGroupKHR(GL_DEBUG_SOURCE_APPLICATION, 0, -1, tag);
+        if (glPushDebugGroupKHR)
+            glPushDebugGroupKHR(GL_DEBUG_SOURCE_APPLICATION, 0, -1, tag);
 #endif
     }
 
@@ -60,7 +61,8 @@ namespace Render {
 #if OPENGL_ES
         //glPopDebugGroup();
 #else
-        glPopDebugGroupKHR();
+        if (glPopDebugGroupKHR)
+            glPopDebugGroupKHR();
 #endif
     }
 
@@ -171,9 +173,11 @@ namespace Render {
             case TextureType_2D:
                 type = GL_TEXTURE_2D;
                 break;
+#if MULTISAMPLING
             case TextureType_2DMultiSample:
                 type = GL_TEXTURE_2D_MULTISAMPLE;
                 break;
+#endif
             case TextureType_Cube:
                 type = GL_TEXTURE_CUBE_MAP;
                 break;

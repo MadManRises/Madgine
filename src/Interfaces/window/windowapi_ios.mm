@@ -181,6 +181,10 @@ namespace Window {
         {
             return false;
         }
+
+        virtual std::string title() const override {
+            return "";
+        }
         
         using OSWindow::onClose;
         using OSWindow::onRepaint;

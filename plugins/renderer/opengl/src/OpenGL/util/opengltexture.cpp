@@ -21,9 +21,12 @@ namespace Render {
             setFilter(GL_LINEAR);
         bind();
 #if !OPENGL_ES
-        glTexParameteri(target(), GL_TEXTURE_BASE_LEVEL, 0);
-        glTexParameteri(target(), GL_TEXTURE_MAX_LEVEL, 0);
-        GL_CHECK();
+        if (mType != TextureType_2DMultiSample) {
+            glTexParameteri(target(), GL_TEXTURE_BASE_LEVEL, 0);
+            GL_CHECK();
+            glTexParameteri(target(), GL_TEXTURE_MAX_LEVEL, 0);
+            GL_CHECK();
+        }
 #endif
     }
 
@@ -109,9 +112,13 @@ namespace Render {
             break;
         case TextureType_2DMultiSample:
 #if OPENGL_ES
+#if OPENGL_ES >= 31
             glTexStorage2DMultisample(target(), mSamples, sizedFormat, size.x, size.y, true);
 #else
-            glTexImage2DMultisample(target(), mSamples, sizedFormat, size.x, size.y, true);
+                throw 0;
+#endif
+#else
+                glTexImage2DMultisample(target(), mSamples, sizedFormat, size.x, size.y, true);
 #endif
             break;
         case TextureType_Cube:
@@ -208,8 +215,10 @@ namespace Render {
         switch (mType) {
         case TextureType_2D:
             return GL_TEXTURE_2D;
+#if MULTISAMPLING
         case TextureType_2DMultiSample:
             return GL_TEXTURE_2D_MULTISAMPLE;
+#endif
         case TextureType_Cube:
             return GL_TEXTURE_CUBE_MAP;
         default:
