@@ -40,12 +40,16 @@ namespace Resources {
 
     Threading::TaskFuture<bool> ResourceLoaderBase::queueLoading(Threading::Task<bool> task)
     {
-        return loadingTaskQueue()->queueTask(std::move(task));
+        Threading::TaskFuture<bool> fut = task.get_future();
+        loadingTaskQueue()->queueTask(std::move(task));
+        return fut;
     }
 
     Threading::TaskFuture<void> ResourceLoaderBase::queueUnloading(Threading::Task<void> task)
     {
-        return loadingTaskQueue()->queueTask(std::move(task));
+        Threading::TaskFuture<void> fut = task.get_future();
+        loadingTaskQueue()->queueTask(std::move(task));
+        return fut;
     }
 
 }

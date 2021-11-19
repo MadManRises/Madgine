@@ -24,6 +24,8 @@
 
 #include "Meta/keyvalue/valuetype.h"
 
+#include "renderer/imroot.h"
+
 UNIQUECOMPONENT(Engine::Tools::NodeGraphEditor);
 
 METATABLE_BEGIN_BASE(Engine::Tools::NodeGraphEditor, Engine::Tools::ToolBase)
@@ -799,14 +801,20 @@ namespace Tools {
             else
                 mGraph = {};
             createEditor();
-        });
+        },
+            mRoot.taskQueue());
     }
 
     void NodeGraphEditor::create(const Filesystem::Path &path)
     {
-        mGraphHandle.create(path);
-        mGraph = *mGraphHandle;
-        createEditor();
+        mGraphHandle.create(path).then([this](bool b) {
+            if (b)
+                mGraph = *mGraphHandle;
+            else
+                mGraph = {};
+            createEditor();
+        },
+            mRoot.taskQueue());
     }
 
     std::string_view NodeGraphEditor::getCurrentName() const

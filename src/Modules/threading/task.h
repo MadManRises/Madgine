@@ -30,7 +30,7 @@ namespace Threading {
         struct promise_type : TaskPromise<T> {
             Task<T, Immediate> get_return_object()
             {
-                return { std::static_pointer_cast<TaskPromiseSharedState<T>>(this->mState), CoroutineHandle<promise_type>::fromPromise(*this) };
+                return { CoroutineHandle<promise_type>::fromPromise(*this) };
             }
         };
 
@@ -45,25 +45,36 @@ namespace Threading {
         {
         }
 
-        Task(std::shared_ptr<TaskPromiseSharedState<T>> state, CoroutineHandle<promise_type> handle = {})
-            : mHandle(std::move(handle))
-            , mState(std::move(state))
+        Task(std::shared_ptr<TaskPromiseSharedState<T>> state)
+            : mState(std::move(state))
         {
         }
 
-        std::pair<TaskFuture<T>, TaskHandle> assign(TaskQueue *queue) &&
+        Task(CoroutineHandle<promise_type> handle)
+            : mHandle(std::move(handle))
+        {
+        }
+
+        TaskFuture<T> get_future() {
+            if (!mState) {
+                mState = mHandle->get_state();
+            }
+            return mState;
+        }
+
+        TaskHandle assign(TaskQueue *queue) &&
         {
             if (mHandle) {
-                mHandle->mQueue = queue;
+                mHandle->setQueue(queue);
             }
             TaskHandle handle { std::move(mHandle) };
             if (mImmediate)
                 handle();
-            return { std::move(mState), std::move(handle) };
+            return { std::move(handle) };
         }
 
     private:
-        CoroutineHandle<TaskPromiseTypeBase> mHandle;
+        CoroutineHandle<TaskPromise<T>> mHandle;
         std::shared_ptr<TaskPromiseSharedState<T>> mState;
         bool mImmediate = Immediate {};
     };

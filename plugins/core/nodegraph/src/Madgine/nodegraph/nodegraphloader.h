@@ -18,7 +18,7 @@ namespace NodeGraph {
             {
             }
 
-            void create(const Filesystem::Path &path);
+            Threading::TaskFuture<bool> create(const Filesystem::Path &path);
         };
 
         NodeGraphLoader();

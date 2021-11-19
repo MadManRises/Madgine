@@ -1,6 +1,7 @@
 #pragma once
 
 #include "taskpromise.h"
+#include "taskhandle.h"
 
 namespace Engine {
 namespace Threading {
@@ -43,18 +44,17 @@ namespace Threading {
 
         void await_suspend(TaskHandle handle)
         {
-            mState->then_resume(std::move(handle));
+            mState->then(std::move(handle));
         }
 
         template <typename F>
-        auto then(F &&f)
+        auto then(F &&f, Threading::TaskQueue *queue)
         {
-            /* auto [fut, handle] = make_task(std::forward<F>(f), *this).release();
-            handle->setQueue(mState->mQueue, mState->mBarrier);
-            mState->then_resume(std::move(handle));
-            return std::move(fut);
-            */
-            LOG_ONCE("Todo!");
+            auto task = make_task(std::forward<F>(f), TaskFuture<T> { *this });
+            auto fut = task.get_future();
+            auto handle = std::move(task).assign(queue);
+            mState->then(std::move(handle));
+            return fut;
         }
 
         T &await_resume()
@@ -103,7 +103,7 @@ namespace Threading {
 
         void await_suspend(TaskHandle handle)
         {
-            mState->then_resume(std::move(handle));
+            mState->then(std::move(handle));
         }
 
         void await_resume()

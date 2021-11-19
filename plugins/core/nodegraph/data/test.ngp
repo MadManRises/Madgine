@@ -12,8 +12,8 @@
             <mDataInPins>
                 <Item>
                     <Element>
-                        <Element>0</Element>
-                        <Element>4294967295</Element>
+                        <Element>-1</Element>
+                        <Element>-1</Element>
                     </Element>
                 </Item>
                 <Item>
@@ -44,8 +44,8 @@
             <mDataInPins>
                 <Item>
                     <Element>
-                        <Element>0</Element>
-                        <Element>4294967295</Element>
+                        <Element>-1</Element>
+                        <Element>-1</Element>
                     </Element>
                 </Item>
                 <Item>
@@ -96,7 +96,7 @@
             <mFlowOutPins>
                 <Item>
                     <Element>
-                        <Element>0</Element>
+                        <Element>-1</Element>
                         <Element>0</Element>
                     </Element>
                 </Item>
@@ -118,8 +118,8 @@
             <mDataOutPins>
                 <Item>
                     <Element>
-                        <Element>0</Element>
-                        <Element>4294967295</Element>
+                        <Element>-1</Element>
+                        <Element>-1</Element>
                     </Element>
                 </Item>
             </mDataOutPins>

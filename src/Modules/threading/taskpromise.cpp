@@ -20,9 +20,21 @@ namespace Threading {
         mDestroyed = true;
     }
 
+    void TaskPromiseSharedStateBase::then(TaskHandle handle)
+    {
+        std::lock_guard guard { mMutex };
+        mThenResumes.emplace_back(std::move(handle));
+    }
+
     void TaskPromiseTypeBase::resume(TaskHandle handle)
     {
         mQueue->queueHandle(std::move(handle));
+    }
+
+    void TaskPromiseTypeBase::setQueue(TaskQueue* queue) {
+        assert(queue);
+        assert(!mQueue);
+        mQueue = queue;
     }
 
     TaskQueue *TaskPromiseTypeBase::queue() const

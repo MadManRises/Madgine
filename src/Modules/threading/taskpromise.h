@@ -1,7 +1,5 @@
 #pragma once
 
-#include "taskhandle.h"
-
 namespace Engine {
 namespace Threading {
 
@@ -16,11 +14,7 @@ namespace Threading {
 
         void notifyDestroyed();
 
-        void then_resume(TaskHandle handle)
-        {
-            std::lock_guard guard { mMutex };
-            mThenResumes.emplace_back(std::move(handle));
-        }
+        void then(TaskHandle handle);
     };
 
     template <typename T>
@@ -86,15 +80,13 @@ namespace Threading {
     };
 
     struct MODULES_EXPORT TaskPromiseTypeBase {
-        TaskPromiseTypeBase(std::shared_ptr<TaskPromiseSharedStateBase> state)
-            : mState(std::move(state))
-        {
-        }
+        TaskPromiseTypeBase() = default;
         TaskPromiseTypeBase(const TaskPromiseTypeBase &) = delete;
         TaskPromiseTypeBase &operator=(TaskPromiseTypeBase &&) = default;
         ~TaskPromiseTypeBase()
         {
-            mState->notifyDestroyed();
+            if (std::shared_ptr<TaskPromiseSharedStateBase> ptr = mState.lock())
+                ptr->notifyDestroyed();
         }
 
         std::suspend_always initial_suspend() noexcept
@@ -104,7 +96,8 @@ namespace Threading {
 
         std::suspend_never final_suspend() noexcept
         {
-            mState->finalize();
+            if (std::shared_ptr<TaskPromiseSharedStateBase> ptr = mState.lock())
+                ptr->finalize();
             return {};
         }
 
@@ -112,37 +105,49 @@ namespace Threading {
 
         void resume(TaskHandle handle);
 
+        void setQueue(TaskQueue *queue);
         TaskQueue *queue() const;
 
     protected:
-        std::shared_ptr<TaskPromiseSharedStateBase> mState;
+        std::weak_ptr<TaskPromiseSharedStateBase> mState;
 
-    public:
+    private:
         TaskQueue *mQueue = nullptr;
     };
 
     template <typename T>
     struct TaskPromise : TaskPromiseTypeBase {
-        TaskPromise()
-            : TaskPromiseTypeBase(std::make_shared<TaskPromiseSharedState<T>>())
-        {
-        }
 
         void return_value(T value) noexcept
         {
-            static_cast<TaskPromiseSharedState<T> *>(mState.get())->set_value(std::move(value));
+            if (std::shared_ptr<TaskPromiseSharedStateBase> ptr = mState.lock())
+                static_cast<TaskPromiseSharedState<T> *>(ptr.get())->set_value(std::move(value));
+        }
+
+        std::shared_ptr<TaskPromiseSharedState<T>> get_state()
+        {
+            assert(!mState.owner_before(std::weak_ptr<TaskPromiseSharedStateBase> {}) && !std::weak_ptr<TaskPromiseSharedStateBase> {}.owner_before(mState));
+            std::shared_ptr<TaskPromiseSharedState<T>> state = std::make_shared<TaskPromiseSharedState<T>>();
+            mState = state;
+            return state;
         }
     };
 
     template <>
     struct TaskPromise<void> : TaskPromiseTypeBase {
-        TaskPromise()
-            : TaskPromiseTypeBase(std::make_shared<TaskPromiseSharedState<void>>())
-        {
-        }
 
         void return_void() noexcept
         {
+            if (std::shared_ptr<TaskPromiseSharedStateBase> ptr = mState.lock())
+                static_cast<TaskPromiseSharedState<void> *>(ptr.get())->set_value();
+        }
+
+        std::shared_ptr<TaskPromiseSharedState<void>> get_state()
+        {
+            assert(!mState.owner_before(std::weak_ptr<TaskPromiseSharedStateBase> {}) && !std::weak_ptr<TaskPromiseSharedStateBase> {}.owner_before(mState));
+            std::shared_ptr<TaskPromiseSharedState<void>> state = std::make_shared<TaskPromiseSharedState<void>>();
+            mState = state;
+            return state;
         }
     };
 

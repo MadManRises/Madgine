@@ -28,19 +28,17 @@ namespace Threading {
         void queue_for(TaskHandle &&task, std::chrono::steady_clock::time_point time_point, const std::vector<Threading::DataMutex *> &dependencies = {});
 
         template <typename T, typename I>
-        TaskFuture<T> queueTask(Task<T, I> task)
+        void queueTask(Task<T, I> task)
         {
-            auto [fut, handle] = std::move(task).assign(this);
+            auto handle = std::move(task).assign(this);
             if (handle)
                 queueHandle(std::move(handle));
-
-            return std::move(fut);
         }
 
         template <typename F>
-        auto queue(F &&f)
+        void queue(F &&f)
         {
-            return queueTask(make_task(std::forward<F>(f)));
+            queueTask(make_task(std::forward<F>(f)));
         }
 
         void addRepeatedTask(std::function<void()> &&task, std::chrono::steady_clock::duration interval = std::chrono::steady_clock::duration::zero(), void *owner = nullptr);
@@ -65,15 +63,17 @@ namespace Threading {
         template <typename Init, typename Finalize>
         void addSetupSteps(Init &&init, Finalize &&finalize)
         {
-            auto [future, initHandle] = make_task(std::forward<Init>(init)).assign(this);
-            auto [_, finalizeHandle] = make_task(LIFT(TupleUnpacker::invoke), std::forward<Finalize>(finalize), std::move(future)).assign(this);            
+            auto initTask = make_task(std::forward<Init>(init));
+            auto future = initTask.get_future();
+            auto initHandle = std::move(initTask).assign(this);
+            auto finalizeHandle = make_task(LIFT(TupleUnpacker::invoke), std::forward<Finalize>(finalize), std::move(future)).assign(this);            
             addSetupStepTasks(std::move(initHandle), std::move(finalizeHandle));
         }
 
         template <typename Init>
         void addSetupSteps(Init &&init)
         {
-            auto [_, initHandle] = make_task(std::forward<Init>(init)).release(this);
+            auto initHandle = make_task(std::forward<Init>(init)).assign(this);
             addSetupStepTasks(std::move(initHandle));
         }
 

@@ -76,7 +76,6 @@ struct IndexType {
 
     operator T() const
     {
-        assert(mIndex != invalid);
         return mIndex;
     }
 

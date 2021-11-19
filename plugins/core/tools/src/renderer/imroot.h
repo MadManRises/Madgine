@@ -42,6 +42,8 @@ namespace Tools {
 
         void finishToolRead();
 
+        virtual Threading::TaskQueue *taskQueue() const = 0;
+
     protected:
         void checkInitState();
 

@@ -57,6 +57,8 @@ namespace Tools {
 
         Rect2i getChildClientSpace() override;        
 
+        virtual Threading::TaskQueue *taskQueue() const override;
+
     private:
         std::map<Render::RenderTarget *, ImGuiViewport *>
             mViewportMappings;

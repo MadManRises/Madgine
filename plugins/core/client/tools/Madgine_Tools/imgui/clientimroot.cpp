@@ -394,5 +394,10 @@ namespace Tools {
             mWindow.applyClientSpaceResize(this);
     }
 
+    Threading::TaskQueue *ClientImRoot::taskQueue() const
+    {
+        return &mWindow.frameLoop();
+    }
+
 }
 }

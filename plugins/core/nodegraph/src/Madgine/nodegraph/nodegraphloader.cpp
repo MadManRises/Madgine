@@ -22,9 +22,10 @@ METATABLE_END(Engine::NodeGraph::NodeGraphLoader::ResourceType)
 {
     namespace NodeGraph {
 
-        void NodeGraphLoader::HandleType::create(const Filesystem::Path &path)
+        Threading::TaskFuture<bool> NodeGraphLoader::HandleType::create(const Filesystem::Path &path)
         {
             *this = NodeGraphLoader::loadManual(path.stem(), path);
+            return info()->loadingTask();
         }
 
         NodeGraphLoader::NodeGraphLoader()

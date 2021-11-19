@@ -164,7 +164,7 @@ namespace Threading {
                     if (repeatedCount > 0)
                         --repeatedCount;
                     nextTask->mNextExecuted = std::chrono::steady_clock::now() + nextTask->mInterval;
-                    return wrapTask(make_task([=]() { nextTask->mTask(); }).assign(this).second);
+                    return wrapTask(make_task([=]() { nextTask->mTask(); }).assign(this));
                 }
             }
         }
