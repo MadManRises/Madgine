@@ -190,6 +190,9 @@ namespace Window {
             return "";
         }
         
+        WindowData OSWindow::data() {
+            return {};
+        }
 
 
     static std::unordered_map<UIWindow *, IOSWindow> sWindows;

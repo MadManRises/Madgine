@@ -68,11 +68,13 @@ if (NOT ANDROID AND NOT EMSCRIPTEN AND NOT IOS)
 	export_to_workspace(OpenAL)
 endif()
 
-add_subdirectory(libogg-1.3.4)
+if (NOT IOS)
+	add_subdirectory(libogg-1.3.4)
 
-add_library(Ogg::ogg ALIAS ogg)
+	add_library(Ogg::ogg ALIAS ogg)
 
-add_subdirectory(libvorbis-1.3.7)
+	add_subdirectory(libvorbis-1.3.7)
+endif()
 
 set(BUILD_SHARED_LIBS ${OLD_BUILD_SHARED_LIBS})
 set(BUILD_TESTING ${OLD_BUILD_TESTING})
