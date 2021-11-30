@@ -72,165 +72,168 @@ namespace Window {
             }
             return true;
         }*/
-
-        virtual InterfacesVector size() override
-        {
-            NSRect rect = [reinterpret_cast<NSWindow*>(mHandle) contentRectForFrameRect:[reinterpret_cast<NSWindow*>(mHandle) frame]];
-            return {static_cast<int>(rect.size.width), static_cast<int>(rect.size.height)};
-        }
-
-        virtual InterfacesVector renderSize() override
-        {
-            //TODO
-            return {static_cast<int>(size().x * platformCapabilities.mScalingFactor), static_cast<int>(size().y * platformCapabilities.mScalingFactor)};
-        }
-
-        virtual InterfacesVector pos() override
-        {
-            NSRect rect = [reinterpret_cast<NSWindow*>(mHandle) contentRectForFrameRect:[reinterpret_cast<NSWindow*>(mHandle) frame]];
-            return {static_cast<int>(rect.origin.x), static_cast<int>([[reinterpret_cast<NSWindow*>(mHandle) screen] frame].size.height - rect.origin.y - rect.size.height)};
-        }
-
-        virtual InterfacesVector renderPos() override
-        {
-            return {static_cast<int>(pos().x * platformCapabilities.mScalingFactor), static_cast<int>(pos().y * platformCapabilities.mScalingFactor)};
-        }
-
-        virtual void setSize(const InterfacesVector &size) override
-        {
-            NSRect rect{static_cast<double>(pos().x), static_cast<double>(pos().y), static_cast<double>(size.x), static_cast<double>(size.y)};
-            [reinterpret_cast<NSWindow*>(mHandle) setFrame: rect display: YES animate: NO];
-        }
-
-        virtual void setRenderSize(const InterfacesVector &size) override
-        {
-            setSize({static_cast<int>(size.x / platformCapabilities.mScalingFactor), static_cast<int>(size.y / platformCapabilities.mScalingFactor)});
-        }
-
-        virtual void setPos(const InterfacesVector &size) override
-        {
-        }
-
-        virtual void setRenderPos(const InterfacesVector &size) override
-        {
-        }
-
-        virtual void show() override
-        {
-            [reinterpret_cast<NSWindow*>(mHandle) makeKeyAndOrderFront:NSApp];
-        }
-
-        virtual bool isMinimized() override
-        {
-            return false;
-        }
-
-        virtual void focus() override
-        {
-        }
-
-        virtual bool hasFocus() override
-        {
-            return true;
-        }
-
-        virtual void setTitle(const char *title) override
-        {
-        }
-
-        virtual void destroy() override
-        {
-            [reinterpret_cast<NSWindow*>(mHandle) close];
-        }
         
-        virtual void captureInput() override
-        {
-            
-        }
-        
-        virtual void releaseInput() override
-        {
-            
-        }
-
-        virtual bool isMaximized() override
-        {
-            return false;
-        }
-        
-        virtual bool isFullscreen() override
-        {
-            return false;
-        }
-        
-        virtual void update() override
-        {
-            NSEvent* ev;
-            while (NULL != (ev = [NSApp nextEventMatchingMask: NSAnyEventMask untilDate: nil inMode: NSDefaultRunLoopMode dequeue: YES]))
-            {
-                switch([ev type]){
-                    case NSEventTypeMouseMoved:
-                    case NSEventTypeLeftMouseUp:
-                    case NSEventTypeLeftMouseDown:
-                    case NSEventTypeLeftMouseDragged:
-                    {
-                        const NSPoint screenLocation = [NSEvent mouseLocation];
-                        InterfacesVector screenPos {static_cast<int>(platformCapabilities.mScalingFactor * screenLocation.x), static_cast<int>(platformCapabilities.mScalingFactor * ([[reinterpret_cast<NSWindow*>(mHandle) screen] frame].size.height - screenLocation.y))};
-                        const NSPoint windowLocation = [reinterpret_cast<NSWindow*>(mHandle) convertPointFromScreen:screenLocation];
-                        InterfacesVector windowPos {static_cast<int>(platformCapabilities.mScalingFactor * windowLocation.x), renderSize().y - static_cast<int>(platformCapabilities.mScalingFactor * windowLocation.y)};
-                        
-                        switch([ev type]){
-                            case NSEventTypeMouseMoved:
-                            case NSEventTypeLeftMouseDragged:
-                                injectPointerMove(Input::PointerEventArgs{
-                                    windowPos,
-                                    screenPos,
-                                    windowPos - mLastKnownMousePos });
-                                mLastKnownMousePos = windowPos;
-                                break;
-                            case NSEventTypeLeftMouseDown:
-                                injectPointerPress(Input::PointerEventArgs{
-                                   windowPos, screenPos, Input::MouseButton::LEFT_BUTTON
-                                });
-                                break;
-                            case NSEventTypeLeftMouseUp:
-                                injectPointerRelease(Input::PointerEventArgs{
-                                    windowPos, screenPos, Input::MouseButton::LEFT_BUTTON
-                                });
-                                break;
-                            default:
-                                std::terminate();
-                        }
-                    }
-                        break;
-                    default:
-                        LOG_WARNING("Unhandled event: " << [ev type]);
-                }
-                
-                [NSApp sendEvent: ev];
-            }
-        }
-        
-        virtual bool isKeyDown(Input::Key::Key key) override
-        {
-            return false;
-        }
-        
-        virtual std::string title() const override
-        {
-            return "";
-        }
-        
-        using OSWindow::onClose;
-        using OSWindow::onRepaint;
         using OSWindow::onResize;
-
-    private:
+        
         InterfacesVector mLastKnownMousePos;
         Cocoa_WindowListener *mListener;
     };
 
-}}
+        InterfacesVector OSWindow::size()
+    {
+        NSRect rect = [reinterpret_cast<NSWindow*>(mHandle) contentRectForFrameRect:[reinterpret_cast<NSWindow*>(mHandle) frame]];
+        return {static_cast<int>(rect.size.width), static_cast<int>(rect.size.height)};
+    }
+
+        InterfacesVector OSWindow::renderSize()
+    {
+        //TODO
+        return {static_cast<int>(size().x * platformCapabilities.mScalingFactor), static_cast<int>(size().y * platformCapabilities.mScalingFactor)};
+    }
+
+        InterfacesVector OSWindow::pos()
+    {
+        NSRect rect = [reinterpret_cast<NSWindow*>(mHandle) contentRectForFrameRect:[reinterpret_cast<NSWindow*>(mHandle) frame]];
+        return {static_cast<int>(rect.origin.x), static_cast<int>([[reinterpret_cast<NSWindow*>(mHandle) screen] frame].size.height - rect.origin.y - rect.size.height)};
+    }
+
+        InterfacesVector OSWindow::renderPos()
+    {
+        return {static_cast<int>(pos().x * platformCapabilities.mScalingFactor), static_cast<int>(pos().y * platformCapabilities.mScalingFactor)};
+    }
+
+        void OSWindow::setSize(const InterfacesVector &size)
+    {
+        NSRect rect{static_cast<double>(pos().x), static_cast<double>(pos().y), static_cast<double>(size.x), static_cast<double>(size.y)};
+        [reinterpret_cast<NSWindow*>(mHandle) setFrame: rect display: YES animate: NO];
+    }
+
+        void OSWindow::setRenderSize(const InterfacesVector &size)
+    {
+        setSize({static_cast<int>(size.x / platformCapabilities.mScalingFactor), static_cast<int>(size.y / platformCapabilities.mScalingFactor)});
+    }
+
+        void OSWindow::setPos(const InterfacesVector &size)
+    {
+    }
+
+        void OSWindow::setRenderPos(const InterfacesVector &size)
+    {
+    }
+
+        void OSWindow::show()
+    {
+        [reinterpret_cast<NSWindow*>(mHandle) makeKeyAndOrderFront:NSApp];
+    }
+
+        bool OSWindow::isMinimized()
+    {
+        return false;
+    }
+
+        void OSWindow::focus()
+    {
+    }
+
+        bool OSWindow::hasFocus()
+    {
+        return true;
+    }
+
+        void OSWindow::setTitle(const char *title)
+    {
+    }
+
+        void OSWindow::destroy()
+    {
+        [reinterpret_cast<NSWindow*>(mHandle) close];
+    }
+    
+        void OSWindow::captureInput()
+    {
+        
+    }
+    
+        void OSWindow::releaseInput()
+    {
+        
+    }
+
+        bool OSWindow::isMaximized()
+    {
+        return false;
+    }
+    
+        bool OSWindow::isFullscreen()
+    {
+        return false;
+    }
+    
+        void OSWindow::update()
+    {
+        NSEvent* ev;
+        while (NULL != (ev = [NSApp nextEventMatchingMask: NSAnyEventMask untilDate: nil inMode: NSDefaultRunLoopMode dequeue: YES]))
+        {
+            switch([ev type]){
+                case NSEventTypeMouseMoved:
+                case NSEventTypeLeftMouseUp:
+                case NSEventTypeLeftMouseDown:
+                case NSEventTypeLeftMouseDragged:
+                {
+                    const NSPoint screenLocation = [NSEvent mouseLocation];
+                    InterfacesVector screenPos {static_cast<int>(platformCapabilities.mScalingFactor * screenLocation.x), static_cast<int>(platformCapabilities.mScalingFactor * ([[reinterpret_cast<NSWindow*>(mHandle) screen] frame].size.height - screenLocation.y))};
+                    const NSPoint windowLocation = [reinterpret_cast<NSWindow*>(mHandle) convertPointFromScreen:screenLocation];
+                    InterfacesVector windowPos {static_cast<int>(platformCapabilities.mScalingFactor * windowLocation.x), renderSize().y - static_cast<int>(platformCapabilities.mScalingFactor * windowLocation.y)};
+                    
+                    switch([ev type]){
+                        case NSEventTypeMouseMoved:
+                        case NSEventTypeLeftMouseDragged:
+                            injectPointerMove(Input::PointerEventArgs{
+                                windowPos,
+                                screenPos,
+                                windowPos - static_cast<OSXWindow*>(this)->mLastKnownMousePos });
+                            static_cast<OSXWindow*>(this)->mLastKnownMousePos = windowPos;
+                            break;
+                        case NSEventTypeLeftMouseDown:
+                            injectPointerPress(Input::PointerEventArgs{
+                                windowPos, screenPos, Input::MouseButton::LEFT_BUTTON
+                            });
+                            break;
+                        case NSEventTypeLeftMouseUp:
+                            injectPointerRelease(Input::PointerEventArgs{
+                                windowPos, screenPos, Input::MouseButton::LEFT_BUTTON
+                            });
+                            break;
+                        default:
+                            std::terminate();
+                    }
+                }
+                    break;
+                default:
+                    LOG_WARNING("Unhandled event: " << [ev type]);
+            }
+            
+            [NSApp sendEvent: ev];
+        }
+    }
+    
+        bool OSWindow::isKeyDown(Input::Key::Key key)
+    {
+        return false;
+    }
+    
+        std::string OSWindow::title() const
+    {
+        return "";
+    }
+
+    WindowData OSWindow::data()
+    {
+        return {};
+    }
+
+}
+}
 
 
 @implementation Cocoa_WindowListener

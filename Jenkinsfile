@@ -3,17 +3,32 @@
  def axisList = [
     [//toolchains
 		[
-			name : "clang-linux-20",
+			name : "clang-windows",
+			dockerImage : 'schuetzo/linux-test-env:latest',
+			args : ""
+		],
+		[
+			name : "clang-osx",
+			dockerImage : 'schuetzo/linux-test-env:latest',
+			args : "-DCMAKE_TOOLCHAIN_FILE=-DENABLE_ARC=False -DDEPLOYMENT_TARGET=11.0"
+		],
+		[
+			name : "clang-ios",
+			dockerImage : 'schuetzo/linux-test-env:latest',
+			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/ios.cmake -DPLATFORM=SIMULATOR64 -DENABLE_ARC=False -DDEPLOYMENT_TARGET=11.0"
+		],
+		[
+			name : "clang-linux",
 			dockerImage : 'schuetzo/linux-test-env:latest',
 			args : ""
 		],
 		[
 			name : "clang-android",
 			dockerImage : 'schuetzo/linux-test-env:latest',
-			args : "-DANDROID_ABI=x86_64 -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/android.cmake"
+			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/android.cmake -DANDROID_ABI=x86_64"
 		],
 		[
-			name : "emscripten",
+			name : "clang-emscripten",
 			dockerImage : 'schuetzo/linux-test-env:latest',
 			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/emscripten-wasm.cmake"
 		]
@@ -127,7 +142,7 @@ def task = {
     return {
         // This is where the important work happens for each combination
 	    stage ("${name}") {
-			if (toolchain.name != "emscripten") {
+			if (toolchain.name != "clang-emscripten") {
 				stage("cmake") {
 					sh """
 					if ${params.fullBuild}; then

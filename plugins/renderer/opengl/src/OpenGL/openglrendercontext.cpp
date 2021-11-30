@@ -226,9 +226,9 @@ namespace Render {
 #elif ANDROID || EMSCRIPTEN
         eglSwapBuffers(Window::sDisplay, (EGLSurface)window->mHandle);
 #elif OSX
-        OSXBridge::swapBuffers(mContext);
+        OSXBridge::swapBuffers(context);
 #elif IOS
-        IOSBridge::swapBuffers(mContext);
+        IOSBridge::swapBuffers(context);
 #else
 #    error "Unsupported Platform!"
 #endif
