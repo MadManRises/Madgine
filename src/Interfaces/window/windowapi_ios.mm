@@ -73,97 +73,101 @@ namespace Window {
             return true;
         }*/
 
-        virtual InterfacesVector size() override
+        InterfacesVector mLastKnownMousePos;
+        //Cocoa_WindowListener *mListener;
+    };
+
+         InterfacesVector OSWindow::size() 
         {
             CGRect rect = [reinterpret_cast<UIWindow*>(mHandle) frame];
             return {static_cast<int>(rect.size.width), static_cast<int>(rect.size.height)};
         }
 
-        virtual InterfacesVector renderSize() override
+         InterfacesVector OSWindow::renderSize() 
         {
             //TODO
             return {static_cast<int>(size().x * platformCapabilities.mScalingFactor), static_cast<int>(size().y * platformCapabilities.mScalingFactor)};
         }
 
-        virtual InterfacesVector pos() override
+         InterfacesVector OSWindow::pos() 
         {
             CGRect rect = [reinterpret_cast<UIWindow*>(mHandle) frame];
             return {static_cast<int>(rect.origin.x), static_cast<int>([[reinterpret_cast<UIWindow*>(mHandle) screen] bounds].size.height - rect.origin.y - rect.size.height)};
         }
 
-        virtual InterfacesVector renderPos() override
+         InterfacesVector OSWindow::renderPos() 
         {
             return {static_cast<int>(pos().x * platformCapabilities.mScalingFactor), static_cast<int>(pos().y * platformCapabilities.mScalingFactor)};
         }
 
-        virtual void setSize(const InterfacesVector &size) override
+         void OSWindow::setSize(const InterfacesVector &size) 
         {
             CGRect rect{static_cast<double>(pos().x), static_cast<double>(pos().y), static_cast<double>(size.x), static_cast<double>(size.y)};
             [reinterpret_cast<UIWindow*>(mHandle) setBounds:rect];
         }
 
-        virtual void setRenderSize(const InterfacesVector &size) override
+         void OSWindow::setRenderSize(const InterfacesVector &size) 
         {
             setSize({static_cast<int>(size.x / platformCapabilities.mScalingFactor), static_cast<int>(size.y / platformCapabilities.mScalingFactor)});
         }
 
-        virtual void setPos(const InterfacesVector &size) override
+         void OSWindow::setPos(const InterfacesVector &size) 
         {
         }
 
-        virtual void setRenderPos(const InterfacesVector &size) override
+         void OSWindow::setRenderPos(const InterfacesVector &size) 
         {
         }
 
-        virtual void show() override
+         void OSWindow::show() 
         {
             [reinterpret_cast<UIWindow*>(mHandle) makeKeyAndVisible];
         }
 
-        virtual bool isMinimized() override
+         bool OSWindow::isMinimized() 
         {
             return false;
         }
 
-        virtual void focus() override
+         void OSWindow::focus() 
         {
         }
 
-        virtual bool hasFocus() override
+         bool OSWindow::hasFocus() 
         {
             return true;
         }
 
-        virtual void setTitle(const char *title) override
+         void OSWindow::setTitle(const char *title) 
         {
         }
 
-        virtual void destroy() override
+         void OSWindow::destroy() 
         {
             [reinterpret_cast<UIWindow*>(mHandle) close];
         }
         
-        virtual void captureInput() override
+         void OSWindow::captureInput() 
         {
             
         }
         
-        virtual void releaseInput() override
+         void OSWindow::releaseInput() 
         {
             
         }
 
-        virtual bool isMaximized() override
+         bool OSWindow::isMaximized() 
         {
             return false;
         }
         
-        virtual bool isFullscreen() override
+         bool OSWindow::isFullscreen() 
         {
             return false;
         }
         
-        virtual void update() override
+         void OSWindow::update() 
         {
             const CFTimeInterval seconds = 0.000002;
 
@@ -177,23 +181,15 @@ namespace Window {
             } while(result == kCFRunLoopRunHandledSource);
         }
         
-        virtual bool isKeyDown(Input::Key::Key key) override
+         bool OSWindow::isKeyDown(Input::Key::Key key) 
         {
             return false;
         }
 
-        virtual std::string title() const override {
+         std::string OSWindow::title() const  {
             return "";
         }
         
-        using OSWindow::onClose;
-        using OSWindow::onRepaint;
-        using OSWindow::onResize;
-
-    private:
-        InterfacesVector mLastKnownMousePos;
-        //Cocoa_WindowListener *mListener;
-    };
 
 
     static std::unordered_map<UIWindow *, IOSWindow> sWindows;
