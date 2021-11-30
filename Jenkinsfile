@@ -10,7 +10,7 @@
 		[
 			name : "clang-osx",
 			dockerImage : 'schuetzo/linux-test-env:latest',
-			args : "-DCMAKE_TOOLCHAIN_FILE=-DENABLE_ARC=False -DDEPLOYMENT_TARGET=11.0"
+			args : "-DENABLE_ARC=False -DDEPLOYMENT_TARGET=11.0"
 		],
 		[
 			name : "clang-ios",
