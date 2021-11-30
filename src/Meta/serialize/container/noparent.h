@@ -13,7 +13,7 @@ namespace Serialize {
         NoParentUnit(Args &&... args)
             :  T(std::forward<Args>(args)...)
         {
-            if constexpr (std::is_base_of_v<TopLevelUnitBase, T>)
+            if constexpr (std::derived_from<T, TopLevelUnitBase>)
                 this->sync();
             else
                 UnitHelper<T>::setItemActive(*this, true, true);
@@ -21,7 +21,7 @@ namespace Serialize {
 
         ~NoParentUnit()
         {
-            if constexpr (std::is_base_of_v<TopLevelUnitBase, T>)
+            if constexpr (std::derived_from<T, TopLevelUnitBase>)
                 this->unsync();
             else
                 UnitHelper<T>::setItemActive(*this, false, true);

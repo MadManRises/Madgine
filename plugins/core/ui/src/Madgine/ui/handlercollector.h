@@ -14,10 +14,10 @@ namespace UI {
 
     struct GuiHandlerBase;
     template <typename T>
-    using GuiHandler = Serialize::VirtualUnit<T, VirtualScope<T, GuiHandlerComponent<T>>>;
+    using GuiHandler = Serialize::VirtualData<T, VirtualScope<T, GuiHandlerComponent<T>>>;
     struct GameHandlerBase;
     template <typename T>
-    using GameHandler = Serialize::VirtualUnit<T, VirtualScope<T, GameHandlerComponent<T>>>;
+    using GameHandler = Serialize::VirtualData<T, VirtualScope<T, GameHandlerComponent<T>>>;
 
 }
 }

@@ -105,6 +105,7 @@ namespace TupleUnpacker {
     auto num_bindings_impl() noexcept
     {
         return overloaded {
+            [](auto &&u, unsigned) -> std::integral_constant<size_t, 0> { return {}; },
             [](auto &&u, int) -> decltype(({auto&& [a] = u; std::integral_constant<size_t, 1>{}; })) { return {}; },
             [](auto &&u, int) -> decltype(({auto&& [a,b] = u; std::integral_constant<size_t, 2>{}; })) { return {}; },
             [](auto &&u, int) -> decltype(({auto&& [a,b,c] = u; std::integral_constant<size_t, 3>{}; })) { return {}; },
@@ -113,8 +114,7 @@ namespace TupleUnpacker {
             [](auto &&u, int) -> decltype(({auto&& [a,b,c,d,e,f] = u; std::integral_constant<size_t, 6>{}; })) { return {}; },
             [](auto &&u, int) -> decltype(({auto&& [a,b,c,d,e,f,g] = u; std::integral_constant<size_t, 7>{}; })) { return {}; },
             [](auto &&u, int) -> decltype(({auto&& [a,b,c,d,e,f,g,h] = u; std::integral_constant<size_t, 8>{}; })) { return {}; },
-            [](auto &&u, int) -> decltype(({auto&& [a,b,c,d,e,f,g,h,i] = u; std::integral_constant<size_t, 9>{}; })) { return {}; },
-            [](auto &&u, unsigned) -> std::integral_constant<size_t, 0> {}
+            [](auto &&u, int) -> decltype(({auto&& [a,b,c,d,e,f,g,h,i] = u; std::integral_constant<size_t, 9>{}; })) { return {}; }
         }(std::declval<T>(), int {});
     }
 

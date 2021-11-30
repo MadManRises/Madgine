@@ -73,7 +73,7 @@ namespace Render {
         }
     }
 
-    void OpenGLProgram::bind(OpenGLVertexArray *format)
+    void OpenGLProgram::bind(const OpenGLVertexArray *format) const 
     {
         format->bind(this, mInstanceBuffer, mInstanceDataSize);
 
@@ -164,7 +164,8 @@ namespace Render {
 #endif
     }
 
-    void OpenGLProgram::unbind(OpenGLVertexArray* format) {
+    void OpenGLProgram::unbind(const OpenGLVertexArray *format) const
+    {
         uint8_t index = format->mFormat;
         format->unbind(this);
     }
@@ -246,7 +247,7 @@ namespace Render {
         return result;
     }
 
-    void OpenGLProgram::verify()
+    void OpenGLProgram::verify() const 
     {
 #if !OPENGL_ES
         int maxLength;

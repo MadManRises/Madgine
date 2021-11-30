@@ -18,7 +18,7 @@ namespace Render {
         }
     }
 
-    OpenGLVertexArrayObject::OpenGLVertexArrayObject(OpenGLBuffer &vertex, OpenGLBuffer &index, const std::array<AttributeDescriptor, 7> &attributes, OpenGLBuffer &instanceDataBuffer, size_t instanceDataSize)
+    OpenGLVertexArrayObject::OpenGLVertexArrayObject(OpenGLBuffer &vertex, OpenGLBuffer &index, const std::array<AttributeDescriptor, 7> &attributes, const OpenGLBuffer &instanceDataBuffer, size_t instanceDataSize)
 #if OPENGL_ES && OPENGL_ES < 300
         : mVBO(vertex.handle())
         , mEBO(index.handle())
@@ -109,7 +109,7 @@ namespace Render {
 #endif
     }
 
-    void OpenGLVertexArrayObject::bind()
+    void OpenGLVertexArrayObject::bind() const 
     {
 #if !OPENGL_ES || OPENGL_ES >= 300
         glBindVertexArray(mHandle);

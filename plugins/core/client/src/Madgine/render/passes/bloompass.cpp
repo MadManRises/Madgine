@@ -66,7 +66,7 @@ namespace Render {
         mBlurTarget->render();
     }
 
-    void BloomPass::onResize(const Vector2i& size) 
+    void BloomPass::onTargetResize(const Vector2i& size) 
     {
         mBlurTarget->resize(size);
         mInput->resize(size);

@@ -10,7 +10,6 @@
 #include "Madgine/app/globalapibase.h"
 #include "Madgine/app/globalapicollector.h"
 #include "Meta/serialize/container/noparent.h"
-#include "madgineobject/madgineobjectobserver.h"
 
 #include "Modules/threading/datamutex.h"
 
@@ -32,6 +31,8 @@
 #include "Generic/container/concatIt.h"
 
 #include "Meta/math/vector3.h"
+
+#include "Generic/intervalclock.h"
 
 namespace Engine {
 namespace Scene {
@@ -62,20 +63,20 @@ namespace Scene {
         bool isPaused() const;
 
         template <typename T>
-        T &getComponent(bool init = true)
+        T &getComponent()
         {
-            return static_cast<T &>(getComponent(Engine::component_index<T>(), init));
+            return static_cast<T &>(getComponent(Engine::component_index<T>()));
         }
-        SceneComponentBase &getComponent(size_t i, bool = true);
+        SceneComponentBase &getComponent(size_t i);
         size_t getComponentCount();
 
         template <typename T>
-        T &getGlobalAPIComponent(bool init = true)
+        T &getGlobalAPIComponent()
         {
-            return static_cast<T &>(getGlobalAPIComponent(Engine::component_index<T>(), init));
+            return static_cast<T &>(getGlobalAPIComponent(Engine::component_index<T>()));
         }
 
-        App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
+        App::GlobalAPIBase &getGlobalAPIComponent(size_t i);
 
         Threading::DataMutex &mutex();
 
@@ -98,11 +99,11 @@ namespace Scene {
         }
 
     protected:
-        virtual bool init() final;
-        virtual void finalize() final;
+        virtual Threading::Task<bool> init() final;
+        virtual Threading::Task<void> finalize() final;
 
     public:
-        MEMBER_OFFSET_CONTAINER(mSceneComponents, SceneComponentContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, MadgineObjectObserver, std::true_type>>);
+        MEMBER_OFFSET_CONTAINER(mSceneComponents, SceneComponentContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, NoOpFunctor, std::true_type>>);
 
         ////////////////////////////////////////////// ECS
 
@@ -141,7 +142,7 @@ namespace Scene {
     private:
         Threading::DataMutex mMutex;
 
-        std::chrono::steady_clock::time_point mLastFrame;
+        IntervalClock<std::chrono::steady_clock> mFrameClock;
 
         std::atomic<size_t> mPauseStack = 0;
 

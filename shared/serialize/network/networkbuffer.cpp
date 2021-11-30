@@ -9,12 +9,6 @@ namespace Network {
     {
     }
 
-    /*NetworkBuffer::NetworkBuffer(NetworkBuffer &&other) noexcept
-        : buffered_streambuf(std::move(other))
-        , mSocket(std::exchange(other.mSocket, Invalid_Socket))
-    {
-    }*/
-
     NetworkBuffer::~NetworkBuffer()
     {
     }

@@ -42,7 +42,7 @@ namespace Render {
         void setFilter(GLint filter);*/
 
     private:
-        ID3D11Resource *mResource = nullptr;
+        ReleasePtr<ID3D11Resource> mResource;
         TextureType mType;
         Vector2i mSize = { 0, 0 };
         DataFormat mFormat;

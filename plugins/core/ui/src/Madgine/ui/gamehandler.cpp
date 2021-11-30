@@ -20,12 +20,11 @@ SERIALIZETABLE_END(Engine::UI::GameHandlerBase)
 namespace Engine {
 namespace UI {
 
-    GameHandlerBase::GameHandlerBase(UIManager &ui, Threading::ContextMask context)
+    GameHandlerBase::GameHandlerBase(UIManager &ui)
         : Handler(ui)
         , mCurrentMouseButton(Input::MouseButton::NO_BUTTON)
         , mDragging(false)
         , mSingleClick(false)
-        , mContext(context)
     {
     }
 
@@ -33,18 +32,6 @@ namespace UI {
     {
         mDragging = false;
         onPointerDragAbort();
-    }
-
-    void GameHandlerBase::update(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask mask)
-    {
-        if (mContext & mask)
-            update(timeSinceLastFrame);
-    }
-
-    void GameHandlerBase::fixedUpdate(std::chrono::microseconds timeStep, Threading::ContextMask mask)
-    {
-        if (mContext & mask)
-            fixedUpdate(timeStep);
     }
 
     void GameHandlerBase::onPointerMove(const Input::PointerEventArgs &me)

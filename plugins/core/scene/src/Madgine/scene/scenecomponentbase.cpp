@@ -30,12 +30,9 @@ namespace Scene {
     {
     }
 
-    SceneManager &SceneComponentBase::sceneMgr(bool init) const
+    SceneManager &SceneComponentBase::sceneMgr() const
     {
-        if (init) {
-            checkInitState();
-        }
-        return static_cast<SceneManager&>(mSceneMgr.getSelf(init));
+        return mSceneMgr;
     }
 
     std::string_view SceneComponentBase::key() const
@@ -43,25 +40,19 @@ namespace Scene {
         return serializeType()->mTypeName;
     }
 
-    SceneComponentBase &SceneComponentBase::getSceneComponent(size_t i, bool init)
+    SceneComponentBase &SceneComponentBase::getSceneComponent(size_t i)
     {
-        if (init) {
-            checkInitState();
-        }
-        return mSceneMgr.getComponent(i, init);
+        return mSceneMgr.getComponent(i);
     }
 
-    App::GlobalAPIBase &SceneComponentBase::getGlobalAPIComponent(size_t i, bool init)
+    App::GlobalAPIBase &SceneComponentBase::getGlobalAPIComponent(size_t i)
     {
-        if (init) {
-            checkInitState();
-        }
-        return mSceneMgr.getGlobalAPIComponent(i, init);
+        return mSceneMgr.getGlobalAPIComponent(i);
     }
 
-    const SceneManager *SceneComponentBase::parent() const
+    Threading::TaskQueue *SceneComponentBase::taskQueue() const
     {
-        return &mSceneMgr;
+        return mSceneMgr.taskQueue();
     }
 
     void SceneComponentBase::update(std::chrono::microseconds, bool paused)

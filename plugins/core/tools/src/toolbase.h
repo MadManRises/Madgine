@@ -14,7 +14,7 @@ namespace Tools {
     struct MADGINE_TOOLS_EXPORT ToolBase : Serialize::VirtualSerializableUnitBase<VirtualScopeBase<>, Serialize::SerializableUnitBase>, MadgineObject<ToolBase> {
         SERIALIZABLEUNIT(ToolBase);
 
-        ToolBase (ImRoot &root);
+        ToolBase(ImRoot &root);
         virtual ~ToolBase() = default;
 
         virtual void render();
@@ -26,25 +26,24 @@ namespace Tools {
         bool isVisible();
         void setVisible(bool v);
 
-        ToolBase &getToolComponent(size_t index, bool = true);
+        ToolBase &getToolComponent(size_t index);
         template <typename T>
         T &getTool()
         {
             return static_cast<T &>(getToolComponent(component_index<T>()));
         }
-		
-		//virtual App::Application &app(bool = true) override;
 
-        const ImRoot *parent() const;
+        ImRoot &root();
+
+        Threading::TaskQueue *taskQueue() const;
 
     protected:
-        
         virtual bool init();
         virtual void finalize();
         friend struct MadgineObject<ToolBase>;
 
-		bool mVisible = false;
-        
+        bool mVisible = false;
+
         ImRoot &mRoot;
     };
 

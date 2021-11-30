@@ -16,12 +16,12 @@ namespace App {
         ~Application();
 
         template <typename T>
-        T &getGlobalAPIComponent(bool init = true)
+        T &getGlobalAPIComponent()
         {
-            return static_cast<T &>(getGlobalAPIComponent(component_index<T>(), init));
-        }
+            return static_cast<T &>(getGlobalAPIComponent(component_index<T>()));
+        }     
 
-        GlobalAPIBase &getGlobalAPIComponent(size_t, bool = true);
+        GlobalAPIBase &getGlobalAPIComponent(size_t i);
 
         const AppSettings &settings();
 
@@ -30,14 +30,12 @@ namespace App {
         Threading::TaskQueue *taskQueue();
 
     protected:
-        bool init();
-        void finalize();
+        Threading::Task<bool> init();
+        Threading::Task<void> finalize();
         friend struct MadgineObject<Application>;
 
     private:
         const AppSettings &mSettings;
-
-        int mGlobalAPIInitCounter = 0;
 
         Threading::TaskQueue mTaskQueue;
 

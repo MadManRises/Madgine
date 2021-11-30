@@ -231,7 +231,8 @@ namespace Widgets {
     void WidgetBase::setParent(WidgetBase *parent)
     {
         auto it = std::find_if(mParent->mChildren.begin(), mParent->mChildren.end(), [this](std::unique_ptr<WidgetBase> &p) { return p.get() == this; });
-        parent->mChildren.emplace_back(mParent->mChildren.extract(it));
+        parent->mChildren.emplace_back(std::move(*it));
+        mParent->mChildren.erase(it);
         mParent = parent;
         updateGeometry(mManager.getScreenSpace(), parent->getAbsoluteSize());
     }
@@ -352,7 +353,7 @@ namespace Widgets {
         return nullptr;
     }
 
-    std::pair<std::vector<Vertex>, TextureSettings> WidgetBase::renderText(const std::string &text, Vector3 pos, Render::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize)
+    std::pair<std::vector<Vertex>, TextureSettings> WidgetBase::renderText(const std::string &text, Vector3 pos, const Render::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize)
     {
         std::vector<Vertex> result;
 
@@ -371,7 +372,7 @@ namespace Widgets {
         float maxY = 0.0f;
 
         for (size_t i = 0; i < textLen; ++i) {
-            Render::Glyph &g = font->mGlyphs[text[i]];
+            const Render::Glyph &g = font->mGlyphs[text[i]];
 
             fullWidth += g.mSize.x * scaleX;
             maxY = max(maxY, g.mBearingY * scaleY);
@@ -386,7 +387,7 @@ namespace Widgets {
         float cursorX = xLeft;
 
         for (size_t i = 0; i < textLen; ++i) {
-            Render::Glyph &g = font->mGlyphs[text[i]];
+            const Render::Glyph &g = font->mGlyphs[text[i]];
 
             float width = g.mSize.x * scaleX;
             float height = g.mSize.y * scaleY;

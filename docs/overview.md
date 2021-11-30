@@ -1,4 +1,11 @@
-# Overview
+\page Core Core Overview
+
+\subpage Generic
+\subpage Interfaces
+\subpage Meta
+\subpage Modules
+
+# Core Overview
 
 ## Folder hierarchy
 

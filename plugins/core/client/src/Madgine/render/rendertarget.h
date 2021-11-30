@@ -14,18 +14,18 @@ namespace Render {
 
         void render();
         virtual void setRenderSpace(const Rect2i &space) = 0;
-        virtual void renderVertices(Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices = {}) = 0;
-        virtual void renderVertices(Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices = {}, const Material *material = nullptr) = 0;
-        virtual void renderQuad(Program *program);
-        virtual void renderMesh(GPUMeshData *mesh, Program *program, const Material *material = nullptr) = 0;
-        virtual void renderMeshInstanced(size_t count, GPUMeshData *mesh, Program *program, const Material *material = nullptr) = 0;
+        virtual void renderVertices(const Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices = {}) = 0;
+        virtual void renderVertices(const Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices = {}, const Material *material = nullptr) = 0;
+        virtual void renderQuad(const Program *program);
+        virtual void renderMesh(const GPUMeshData *mesh, const Program *program, const Material *material = nullptr) = 0;
+        virtual void renderMeshInstanced(size_t count, const GPUMeshData *mesh, const Program *program, const Material *material = nullptr) = 0;
         virtual void clearDepthBuffer() = 0;
 
         virtual TextureDescriptor texture(size_t index = 0, size_t iteration = std::numeric_limits<size_t>::max()) const = 0;
         virtual size_t textureCount() const = 0;
         virtual TextureDescriptor depthTexture() const = 0;
 
-        virtual void bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset = 0) = 0;
+        virtual void bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset = 0) const = 0;
 
         virtual bool resizeImpl(const Vector2i &size) = 0;
         bool resize(const Vector2i &size);
@@ -36,8 +36,8 @@ namespace Render {
 
         const std::vector<RenderPass *> &renderPasses();
 
-        virtual void beginIteration(size_t iteration);
-        virtual void endIteration(size_t iteration);
+        virtual void beginIteration(size_t iteration) const;
+        virtual void endIteration(size_t iteration) const;
 
         virtual void beginFrame();
         virtual void endFrame();
@@ -58,9 +58,9 @@ namespace Render {
 
         size_t mFrame;
 
-        size_t mIterations;
-
         std::string mName;
+
+        size_t mIterations;        
     };
 
 }

@@ -9,6 +9,7 @@ namespace Serialize {
         OK,
         UNKNOWN_ERROR,
         PERMISSION_ERROR,
+        INTEGRITY_ERROR,
         PARSE_ERROR,
         CLOSED_BY_USER,
         SEND_FAILURE,

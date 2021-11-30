@@ -21,15 +21,8 @@ namespace UI {
 
         bool isRootWindow() const;
 
-        Threading::ContextMask context() const;
-
-    protected:
-        void setContext(Threading::ContextMask context);
-
     private:
         const WindowType mType;
-
-        Threading::ContextMask mContext;
     };
 }
 }

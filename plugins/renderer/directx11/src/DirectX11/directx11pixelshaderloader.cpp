@@ -102,15 +102,17 @@ namespace Render {
 
         std::set<std::string> files;
 
-        CodeGen::resolveIncludes(source, [](const Filesystem::Path &path, size_t line, std::string_view filename) {
-            Resources::ResourceBase *res = SlLoader::get(path.stem());
-            return "#line 1 \"" + path.filename().str() + "\"\n" + res->readAsText() + "\n#line " + std::to_string(line + 1) + " \"" + std::string { filename } + "\"";           
-        }, name, files);
+        CodeGen::resolveIncludes(
+            source, [](const Filesystem::Path &path, size_t line, std::string_view filename) {
+                Resources::ResourceBase *res = SlLoader::get(path.stem());
+                return "#line 1 \"" + path.filename().str() + "\"\n" + res->readAsText() + "\n#line " + std::to_string(line + 1) + " \"" + std::string { filename } + "\"";
+            },
+            name, files);
 
         const char *cSource = source.data();
 
-        ID3DBlob *pShaderBlob = nullptr;
-        ID3DBlob *pErrorBlob = nullptr;
+        ReleasePtr<ID3DBlob> pShaderBlob;
+        ReleasePtr<ID3DBlob> pErrorBlob;
 
         UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
 #if _DEBUG
@@ -124,35 +126,18 @@ namespace Render {
             LOG_ERROR("Loading of PixelShader '" << name << "' failed:");
             if (pErrorBlob) {
                 LOG_ERROR((char *)pErrorBlob->GetBufferPointer());
-
-                if (pShaderBlob) {
-                    pShaderBlob->Release();
-                    pShaderBlob = nullptr;
-                }
-                if (pErrorBlob) {
-                    pErrorBlob->Release();
-                    pErrorBlob = nullptr;
-                }
             }
 
             return false;
         }
 
-        shader = { pShaderBlob };
-
-        if (pShaderBlob) {
-            pShaderBlob->Release();
-            pShaderBlob = nullptr;
-        }
-        if (pErrorBlob) {
-            pErrorBlob->Release();
-            pErrorBlob = nullptr;
-        }
+        shader = { std::move(pShaderBlob) };
 
         return true;
     }
 
-    Threading::TaskQueue* DirectX11PixelShaderLoader::loadingTaskQueue() const {
+    Threading::TaskQueue *DirectX11PixelShaderLoader::loadingTaskQueue() const
+    {
         return DirectX11RenderContext::renderQueue();
     }
 

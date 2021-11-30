@@ -11,7 +11,7 @@ namespace Render {
         OpenGLVertexArrayObject() = default;
         OpenGLVertexArrayObject(const OpenGLVertexArrayObject &) = delete;
         OpenGLVertexArrayObject(OpenGLVertexArrayObject &&);
-        OpenGLVertexArrayObject(OpenGLBuffer &vertex, OpenGLBuffer &index, const std::array<AttributeDescriptor, 7> &attributes, OpenGLBuffer &instanceDataBuffer, size_t instanceDataSize);
+        OpenGLVertexArrayObject(OpenGLBuffer &vertex, OpenGLBuffer &index, const std::array<AttributeDescriptor, 7> &attributes, const OpenGLBuffer &instanceDataBuffer, size_t instanceDataSize);
         ~OpenGLVertexArrayObject();
 
         OpenGLVertexArrayObject &operator=(OpenGLVertexArrayObject &&other);
@@ -20,7 +20,7 @@ namespace Render {
 
         void reset();
 
-        void bind();
+        void bind() const;
         void unbind();
 
 #if !OPENGL_ES || OPENGL_ES >= 300

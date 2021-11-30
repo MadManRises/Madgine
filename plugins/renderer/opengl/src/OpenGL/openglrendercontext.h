@@ -10,6 +10,7 @@ namespace Render {
     ContextHandle createContext(Window::OSWindow *window, size_t samples, ContextHandle reusedContext, bool setup = true);
     void destroyContext(Window::OSWindow *window, ContextHandle context, bool reusedContext = false);
     void makeCurrent(Window::OSWindow *window, ContextHandle context);
+    void swapBuffers(Window::OSWindow *window, ContextHandle context);
 
     struct MADGINE_OPENGL_EXPORT OpenGLRenderContext : public RenderContextComponent<OpenGLRenderContext> {
         OpenGLRenderContext(Threading::TaskQueue *queue);
@@ -17,6 +18,8 @@ namespace Render {
 
         virtual std::unique_ptr<RenderTarget> createRenderWindow(Window::OSWindow *w, size_t samples) override;
         virtual std::unique_ptr<RenderTarget> createRenderTexture(const Vector2i &size = { 1, 1 }, const RenderTextureConfig &config = {}) override;
+
+        virtual void unloadAllResources() override;
 
 		static OpenGLRenderContext &getSingleton();
 

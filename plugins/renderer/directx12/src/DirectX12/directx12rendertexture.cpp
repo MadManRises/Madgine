@@ -73,12 +73,12 @@ namespace Render {
         return resize(size, {});
     }
 
-    void DirectX12RenderTexture::beginIteration(size_t iteration)
+    void DirectX12RenderTexture::beginIteration(size_t iteration) const
     {
         DirectX12RenderTarget::beginIteration(iteration);
     }
 
-    void DirectX12RenderTexture::endIteration(size_t iteration)
+    void DirectX12RenderTexture::endIteration(size_t iteration) const
     {
         DirectX12RenderTarget::endIteration(iteration);
     }

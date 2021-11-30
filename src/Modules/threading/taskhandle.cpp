@@ -2,6 +2,7 @@
 
 #include "taskhandle.h"
 #include "taskpromise.h"
+#include "taskqueue.h"
 
 namespace Engine {
 namespace Threading {
@@ -18,7 +19,7 @@ namespace Threading {
 
     TaskHandle &TaskHandle::operator=(TaskHandle &&other)
     {
-        mHandle = std::exchange(other.mHandle, {});
+        std::swap(mHandle, other.mHandle);
         return *this;
     }
 
@@ -35,7 +36,12 @@ namespace Threading {
 
     void TaskHandle::resumeInQueue()
     {
-        mHandle.promise().resume(std::move(*this));
+        queue()->queueHandle(std::move(*this));
+    }
+
+    std::coroutine_handle<TaskPromiseTypeBase> TaskHandle::release()
+    {
+        return std::exchange(mHandle, std::coroutine_handle<TaskPromiseTypeBase> {});
     }
 
     TaskQueue *TaskHandle::queue() const

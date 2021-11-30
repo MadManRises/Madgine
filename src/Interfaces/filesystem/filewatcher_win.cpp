@@ -167,7 +167,7 @@ namespace Filesystem {
         std::vector<FileEvent> result;
         for (const std::pair<const Path, uintptr_t> &watch : mWatches) {
             Generator<std::vector<FileEvent>> gen { CoroutineHandle<Generator<std::vector<FileEvent>>::promise_type>::fromPromise(*reinterpret_cast<Generator<std::vector<FileEvent>>::promise_type *>(watch.second)) };
-            bool going = gen.next();
+            gen.next();
             const std::vector<FileEvent> &events = gen.get();
             std::copy(events.begin(), events.end(), std::back_inserter(result));
             gen.release().release();

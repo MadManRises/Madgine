@@ -22,7 +22,7 @@ namespace Serialize {
     StreamResult SafeBinaryFormatter::beginPrimitive(SerializeInStream &in, const char *name, uint8_t typeId)
     {
         uint16_t type;
-        in.readRaw(type);
+        STREAM_PROPAGATE_ERROR(in.readRaw(type));
         type -= SERIALIZE_MAGIC_NUMBER;
         if (type != typeId)
             return STREAM_PARSE_ERROR(in, "Invalid type-id encountered!");

@@ -271,12 +271,12 @@ constexpr ValueTypeIndex toValueTypeIndex()
     static_assert(!std::is_same_v<T, ValueType>);
     if constexpr (isValueTypePrimitive_v<T>) {
         return static_cast<ValueTypeEnum>(type_pack_index_v<size_t, ValueTypeList, T>);
-    } else if constexpr (is_iterable_v<T>) {
+    } else if constexpr (Iterable<T>) {
         if constexpr (std::is_same_v<KeyType_t<typename T::iterator::value_type>, std::monostate>)
             return ValueTypeEnum::KeyValueVirtualSequenceRangeValue;
         else
             return ValueTypeEnum::KeyValueVirtualAssociativeRangeValue;
-    } else if constexpr (std::is_pointer_v<T>) {
+    } else if constexpr (Pointer<T>) {
         if constexpr (std::is_function_v<std::remove_pointer_t<T>>)
             return ValueTypeEnum::FunctionValue;
         else if constexpr (std::is_same_v<std::remove_cv_t<std::remove_pointer_t<T>>, FunctionTable>)
@@ -291,21 +291,21 @@ constexpr ValueTypeIndex toValueTypeIndex()
 template <typename T>
 constexpr ExtendedValueTypeDesc toValueTypeDesc()
 {
-    if constexpr (is_instance_v<T, std::optional>) {
+    if constexpr (InstanceOf<T, std::optional>) {
         return { { ExtendedValueTypeEnum::OptionalType }, toValueTypeDesc<type_pack_unpack_unique_t<typename is_instance<T, std::optional>::argument_types>>() };
     } else if constexpr (isValueTypePrimitive_v<T>) {
         return { toValueTypeIndex<T>() };
-    } else if constexpr (std::is_same_v<T, ValueType>) {
+    } else if constexpr (std::same_as<T, ValueType>) {
         return { ExtendedValueTypeEnum::GenericType };
-    } else if constexpr (std::is_same_v<T, TypedScopePtr>) {
+    } else if constexpr (std::same_as<T, TypedScopePtr>) {
         return { { ValueTypeEnum::ScopeValue }, static_cast<const MetaTable **>(nullptr) };
-    } else if constexpr (is_iterable_v<T>) {
-        if constexpr (std::is_same_v<KeyType_t<typename T::iterator::value_type>, std::monostate>)
+    } else if constexpr (Iterable<T>) {
+        if constexpr (std::same_as<KeyType_t<typename T::iterator::value_type>, std::monostate>)
             return { { ValueTypeEnum::KeyValueVirtualSequenceRangeValue }, toValueTypeDesc<typename T::iterator::value_type>() };
         else
             return { { ValueTypeEnum::KeyValueVirtualAssociativeRangeValue }, toValueTypeDesc<KeyType_t<typename T::iterator::value_type>>(), toValueTypeDesc<ValueType_t<typename T::iterator::value_type>>() };
-    } else if constexpr (std::is_pointer_v<T>) {
-        if constexpr (std::is_function_v<std::remove_pointer_t<T>> || std::is_same_v<std::remove_cv_t<std::remove_pointer_t<T>>, FunctionTable>)
+    } else if constexpr (Pointer<T>) {
+        if constexpr (Function<std::remove_pointer_t<T>> || std::same_as<std::remove_cv_t<std::remove_pointer_t<T>>, FunctionTable>)
             //return { { ValueTypeEnum::ApiFunctionValue }, nullptr };
             throw 0;
         else

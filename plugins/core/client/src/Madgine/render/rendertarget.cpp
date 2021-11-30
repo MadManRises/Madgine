@@ -18,9 +18,9 @@ namespace Render {
 
     RenderTarget::RenderTarget(RenderContext *context, bool global, std::string name, size_t iterations)
         : mContext(context)
-        , mIterations(iterations)
         , mGlobal(global)
         , mName(std::move(name))
+        , mIterations(iterations)
     {
         if (global)
             mContext->addRenderTarget(this);
@@ -55,7 +55,7 @@ namespace Render {
         endFrame();
     }
 
-    void RenderTarget::renderQuad(Program *program)
+    void RenderTarget::renderQuad(const Program *program)
     {
         static GPUMeshLoader::HandleType quad = GPUMeshLoader::loadManual("quad", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &data, Render::GPUMeshLoader::ResourceDataInfo &info) {
             std::vector<Compound<Render::VertexPos_3D>> vertices {
@@ -108,11 +108,11 @@ namespace Render {
             popAnnotation();
     }
 
-    void RenderTarget::beginIteration(size_t iteration)
+    void RenderTarget::beginIteration(size_t iteration) const
     {
     }
 
-    void RenderTarget::endIteration(size_t iteration)
+    void RenderTarget::endIteration(size_t iteration) const
     {
     }
 
@@ -131,7 +131,7 @@ namespace Render {
         bool resized = resizeImpl(size);
         if (resized) {
             for (RenderPass *pass : mRenderPasses)
-                pass->onResize(size);
+                pass->onTargetResize(size);
         }
         return resized;
     }

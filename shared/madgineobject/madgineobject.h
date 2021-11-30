@@ -1,168 +1,59 @@
 #pragma once
 
+#include "Modules/threading/task.h"
+
 namespace Engine {
-
-DERIVE_FUNCTION(parent);
-
-struct DependencyInitException {
-};
 
 struct MadgineObjectState {
 
-    bool isInitialized() const
-    {
-        return mState == ObjectState::INITIALIZED || mState == ObjectState::MARKED_INITIALIZED;
-    }
-
-    void checkInitState() const
-    {
-        if (mState == ObjectState::UNINITIALIZED)
-            throw DependencyInitException {};
-    }
-
-        
-    template <typename U>
-    U &getChild(U &u, bool init = true)
-    {
-        if (init) {
-            checkInitState();
-            u.callInit();
-        }
-        return static_cast<U &>(u.getSelf(init));
-    }
-            
-    template <typename U>
-    U &getChildOrder(U &u, int &counter, bool init = true)
-    {
-        if (init) {
-            checkInitState();
-            u.callInitOrder(counter);
-        }
-        return static_cast<U &>(u.getSelf(init));
-    }
-
 protected:
-    enum class ObjectState {
-        UNINITIALIZED,
-        INITIALIZING,
-        MARKED_INITIALIZED,
-        INITIALIZED
-    };
-
-    ObjectState getState() const
+    ~MadgineObjectState()
     {
-        return mState;
-    }
-
-    void checkDependency() const
-    {
-        switch (mState) {
-        case ObjectState::UNINITIALIZED:
-            throw DependencyInitException {};
-        case ObjectState::INITIALIZING:
-            LOG_WARNING("Possible circular dependency! Consider using markInitialized!");
-            break;
-        default:
-            break;
-        }
-    }
-    void markInitialized()
-    {
-        assert(mState == ObjectState::INITIALIZING);
-        mState = ObjectState::MARKED_INITIALIZED;
-    }
-
-
-    ObjectState mState = ObjectState::UNINITIALIZED;
-};
-
-template <typename T>
-struct MadgineObject : MadgineObjectState {
-    bool callInit()
-    {
-        if (mState == ObjectState::UNINITIALIZED) {
-            mState = ObjectState::INITIALIZING;
-            bool result;
-            mTypeInfo = &typeid(static_cast<T &>(*this));
-            try {
-                LOG("Initializing: " << mTypeInfo->name() << "...");
-                result = static_cast<T *>(this)->init();
-            } catch (const DependencyInitException &) {
-                result = false;
-            }
-            if (result)
-                mState = ObjectState::INITIALIZED;
-            else if (mState == ObjectState::INITIALIZING)
-                mState = ObjectState::UNINITIALIZED;
-            else if (mState == ObjectState::MARKED_INITIALIZED) {
-                mState = ObjectState::INITIALIZED;
-                callFinalize();
-            } else
-                std::terminate();
-            LOG((isInitialized() ? "Success" : "Failure"));
-        }
-        return isInitialized();
-    }
-    bool callInitOrder(int &count)
-    {
-        bool notInit = mState == ObjectState::UNINITIALIZED;
-        bool result = callInit();
-        if (notInit && mState == ObjectState::INITIALIZED)
-            mOrder = ++count;
-        return result;
-    }
-
-    void callFinalize()
-    {
-        if (mState == ObjectState::INITIALIZED) {
-            static_cast<T *>(this)->finalize();
-            mState = ObjectState::UNINITIALIZED;
-        }
-        assert(mState == ObjectState::UNINITIALIZED);
-    }
-    void callFinalizeOrder(int order)
-    {
-        if (mOrder == order)
-            callFinalize();
-    }
-
-    static constexpr bool hasParent()
-    {
-        return has_function_parent_v<T>;
-    }
-
-    auto getParent() const
-    {
-        if constexpr (hasParent())
-            return static_cast<const T *>(this)->parent();
-        else
-            return nullptr;
-    }
-
-    T &getSelf(bool init = true)
-    {
-        if (init) {
-            checkDependency();
-        }
-        return static_cast<T &>(*this);
-    }
-
-protected:
-    MadgineObject()
-        : mOrder(-1)
-    {
-    }
-
-    ~MadgineObject()
-    {
-        if (mState != ObjectState::UNINITIALIZED) {
+        if (mState && mState->valid()) {
             LOG_WARNING("Deleting still initialized Object: " << mTypeInfo->name());
         }
     }
 
-private:
-    int mOrder;
+    Threading::TaskFuture<bool> getState()
+    {
+        if (!mState)
+            mState = std::make_shared<Threading::TaskPromiseSharedState<bool>>();
+        return mState;
+    }
+
+protected:
+    std::shared_ptr<Threading::TaskPromiseSharedState<bool>> mState;
     const std::type_info *mTypeInfo = nullptr;
+};
+
+template <typename T>
+struct MadgineObject : MadgineObjectState {
+    Threading::Task<bool> callInit()
+    {
+        assert(!mState || (!mState->is_ready() && mState->valid()));
+        mTypeInfo = &typeid(static_cast<T &>(*this));
+        LOG("Initializing: " << mTypeInfo->name() << "...");
+        auto task = Threading::make_task(&T::init, static_cast<T *>(this));
+        if (!mState)
+            mState = std::make_shared<Threading::TaskPromiseSharedState<bool>>();
+        task.get_future(mState);
+
+        return task;
+    }
+
+    Threading::Task<void> callFinalize()
+    {
+        return [this]() -> Threading::Task<void> {
+            assert(mState && mState->is_ready() && mState->get());
+            mState.reset();
+
+            if constexpr (InstanceOf<decltype(static_cast<T *>(this)->finalize()), Threading::Task>) {
+                co_await static_cast<T *>(this)->finalize();
+            } else {
+                static_cast<T *>(this)->finalize();
+            }
+        }();
+    }
 };
 
 }

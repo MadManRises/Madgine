@@ -4,18 +4,22 @@
 
 namespace Engine {
 
-struct AnyHolderBase {
-    virtual ~AnyHolderBase() = default;
-};
+namespace __generic_impl__ {
 
-template <typename T>
-struct AnyHolder : AnyHolderBase, Inheritable<T> {
-    template <typename... Args>
-    AnyHolder(Args &&...args)
-        : Inheritable<T>(std::forward<Args>(args)...)
-    {
-    }
-};
+    struct AnyHolderBase {
+        virtual ~AnyHolderBase() = default;
+    };
+
+    template <typename T>
+    struct AnyHolder : AnyHolderBase, Inheritable<T> {
+        template <typename... Args>
+        AnyHolder(Args &&...args)
+            : Inheritable<T>(std::forward<Args>(args)...)
+        {
+        }
+    };
+
+}
 
 struct Any {
     template <typename T>
@@ -29,15 +33,15 @@ struct Any {
 
     template <typename T, typename... Args>
     requires(!std::same_as<std::decay_t<T>, Any>)
-    Any(inplace_t<T>, Args &&... args)
-        : mData(std::make_unique<AnyHolder<T>>(std::forward<Args>(args)...))
+        Any(inplace_t<T>, Args &&...args)
+        : mData(std::make_unique<__generic_impl__::AnyHolder<T>>(std::forward<Args>(args)...))
     {
     }
 
     template <typename T>
     requires(!std::same_as<std::decay_t<T>, Any>)
-    Any(T &&data)
-        : mData(std::make_unique<AnyHolder<T>>(std::forward<T>(data)))
+        Any(T &&data)
+        : mData(std::make_unique<__generic_impl__::AnyHolder<T>>(std::forward<T>(data)))
     {
     }
 
@@ -60,14 +64,13 @@ struct Any {
     template <typename T>
     T &as() const
     {
-        AnyHolder<T> *holder = dynamic_cast<AnyHolder<T> *>(mData.get());
+        __generic_impl__::AnyHolder<T> *holder = dynamic_cast<__generic_impl__::AnyHolder<T> *>(mData.get());
         if (!holder)
             std::terminate();
         return *holder;
     }
 
 private:
-    std::unique_ptr<AnyHolderBase> mData;
+    std::unique_ptr<__generic_impl__::AnyHolderBase> mData;
 };
-
 }

@@ -13,8 +13,8 @@ namespace Audio {
         OpenALAudioContext(App::Application &app);
         ~OpenALAudioContext();
 
-        virtual bool init() override;
-        virtual void finalize() override;
+        virtual Threading::Task<bool> init() override;
+        virtual Threading::Task<void> finalize() override;
 
     private:
         ALCdevice *mDevice = nullptr;

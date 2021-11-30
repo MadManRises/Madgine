@@ -2,41 +2,35 @@
 
 #include "../toolscollector.h"
 
-#include "Generic/container/observablecontainer.h"
-
-#include "madgineobject/madgineobjectobserver.h"
-
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 
 struct ImGuiDockNode;
 
 namespace Engine {
 
-    struct MadgineObjectState;
+struct MadgineObjectState;
 
 namespace Tools {
 
     struct MADGINE_TOOLS_EXPORT ImRoot {
-        ImRoot(MadgineObjectState *state);
+        ImRoot();
         ~ImRoot();
 
-        virtual bool init();
-        virtual void finalize();
+        virtual Threading::Task<bool> init();
+        virtual Threading::Task<void> finalize();
 
         const std::vector<std::unique_ptr<ToolBase>> &tools();
-        ToolBase &getToolComponent(size_t index, bool = true);
+        ToolBase &getToolComponent(size_t index);
         template <typename T>
         T &getTool()
         {
             return static_cast<T &>(getToolComponent(::Engine::component_index<T>()));
         }
 
-        bool frame();
+        void render();
 
         ImGuiDockNode *dockNode() const;
 
-        bool isInitialized() const;
-        
         std::stringstream mToolReadBuffer;
         ToolBase *mToolReadTool = nullptr;
 
@@ -44,13 +38,9 @@ namespace Tools {
 
         virtual Threading::TaskQueue *taskQueue() const = 0;
 
-    protected:
-        void checkInitState();
-
     private:
-        MadgineObjectState *mState;
 
-        ToolsContainer<ObservableContainer<std::vector<Placeholder<0>>, MadgineObjectObserver>> mCollector;
+        ToolsContainer<std::vector<Placeholder<0>>> mCollector;
 
         ImGuiDockNode *mDockNode = nullptr;
     };

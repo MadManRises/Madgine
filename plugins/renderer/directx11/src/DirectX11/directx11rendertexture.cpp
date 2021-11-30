@@ -20,9 +20,9 @@ namespace Render {
 
     DirectX11RenderTexture::DirectX11RenderTexture(DirectX11RenderContext *context, const Vector2i &size, const RenderTextureConfig &config)
         : DirectX11RenderTarget(context, false, config.mName, config.mIterations)
-        , mSize { 0, 0 }
         , mType(config.mType)
         , mSamples(config.mSamples)
+        , mSize { 0, 0 }
     {
         size_t bufferCount = config.mIterations > 1 && config.mSamples == 1 ? 2 : 1;
 
@@ -51,7 +51,7 @@ namespace Render {
 
         mSize = size;
 
-        std::vector<ID3D11RenderTargetView *> targetViews;
+        std::vector<ReleasePtr<ID3D11RenderTargetView>> targetViews;
 
         if (mSamples > 1) {
             for (DirectX11Texture &tex : mTextures)
@@ -91,7 +91,7 @@ namespace Render {
         return true;
     }
 
-    void DirectX11RenderTexture::beginIteration(size_t iteration)
+    void DirectX11RenderTexture::beginIteration(size_t iteration) const
     {
         DirectX11RenderTarget::beginIteration(iteration);
 
@@ -99,7 +99,7 @@ namespace Render {
             bindTextures({ mTextures[1 - (iteration % 2)].descriptor() });
     }
 
-    void DirectX11RenderTexture::endIteration(size_t iteration)
+    void DirectX11RenderTexture::endIteration(size_t iteration) const
     {
         DirectX11RenderTarget::endIteration(iteration);
 

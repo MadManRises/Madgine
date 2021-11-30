@@ -111,8 +111,8 @@ namespace Render {
 
         const char *cSource = source.data();
 
-        ID3DBlob *pShaderBlob = nullptr;
-        ID3DBlob *pErrorBlob = nullptr;
+        ReleasePtr<ID3DBlob> pShaderBlob;
+        ReleasePtr<ID3DBlob> pErrorBlob;
 
         UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
 #if _DEBUG
@@ -126,30 +126,12 @@ namespace Render {
             LOG_ERROR("Loading of GeometryShader '" << name << "' failed:");
             if (pErrorBlob) {
                 LOG_ERROR((char *)pErrorBlob->GetBufferPointer());
-
-                if (pShaderBlob) {
-                    pShaderBlob->Release();
-                    pShaderBlob = nullptr;
-                }
-                if (pErrorBlob) {
-                    pErrorBlob->Release();
-                    pErrorBlob = nullptr;
-                }
             }
 
             return false;
         }
 
-        shader = { pShaderBlob };
-
-        if (pShaderBlob) {
-            pShaderBlob->Release();
-            pShaderBlob = nullptr;
-        }
-        if (pErrorBlob) {
-            pErrorBlob->Release();
-            pErrorBlob = nullptr;
-        }
+        shader = { std::move(pShaderBlob) };
 
         return true;
     }

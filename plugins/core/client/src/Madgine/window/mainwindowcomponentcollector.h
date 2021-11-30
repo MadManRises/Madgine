@@ -13,10 +13,10 @@ namespace Engine {
 namespace Window {
 
     template <typename T>
-    using MainWindowComponent = Serialize::VirtualUnit<T, VirtualScope<T, MainWindowComponentComponent<T>>>;
+    using MainWindowComponent = Serialize::VirtualData<T, VirtualScope<T, MainWindowComponentComponent<T>>>;
 
 	template <typename T>
-    using MainWindowVirtualBase = Serialize::VirtualUnit<T, MainWindowComponentVirtualBase<T>>;
+    using MainWindowVirtualBase = Serialize::VirtualData<T, MainWindowComponentVirtualBase<T>>;
 
     template <typename T, typename Base>
     using MainWindowVirtualImpl = VirtualUniqueComponentImpl<T, Base>;

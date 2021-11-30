@@ -20,11 +20,11 @@ namespace Render {
 
         void reset();
 
-        void bind(DirectX11VertexArray *format, size_t instanceDataSize);
+        void bind(const DirectX11VertexArray *format, size_t instanceDataSize) const;
 
         Resources::ResourceBase *mResource = nullptr;
 
-        std::vector<std::pair<ID3D11VertexShader *, ID3D11InputLayout *>> mInstances;
+        mutable std::vector<std::pair<ReleasePtr<ID3D11VertexShader>, ReleasePtr<ID3D11InputLayout>>> mInstances;
     };
 
 }

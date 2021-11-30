@@ -7,8 +7,6 @@
 #include <dlfcn.h>
 #include <unistd.h>
 
-#include "../util/exception.h"
-
 namespace Engine {
 namespace Dl {
 

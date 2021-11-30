@@ -26,7 +26,7 @@ namespace Render {
     {
     }
 
-    void OpenGLRenderTarget::beginIteration(size_t iteration)
+    void OpenGLRenderTarget::beginIteration(size_t iteration) const
     {
         RenderTarget::beginIteration(iteration);
 
@@ -74,10 +74,10 @@ namespace Render {
         GL_CHECK();
     }
 
-    void OpenGLRenderTarget::renderMesh(GPUMeshData *m, Program *p, const Material *material)
+    void OpenGLRenderTarget::renderMesh(const GPUMeshData *m, const Program *p, const Material *material)
     {
-        OpenGLMeshData *mesh = static_cast<OpenGLMeshData *>(m);
-        OpenGLProgram *program = static_cast<OpenGLProgram *>(p);
+        const OpenGLMeshData *mesh = static_cast<const OpenGLMeshData *>(m);
+        const OpenGLProgram *program = static_cast<const OpenGLProgram *>(p);
 
         if (!mesh->mVAO)
             return;
@@ -106,10 +106,10 @@ namespace Render {
         program->unbind(&mesh->mVAO);
     }
 
-    void OpenGLRenderTarget::renderMeshInstanced(size_t count, GPUMeshData *m, Program *p, const Material *material)
+    void OpenGLRenderTarget::renderMeshInstanced(size_t count, const GPUMeshData *m, const Program *p, const Material *material)
     {
-        OpenGLMeshData *mesh = static_cast<OpenGLMeshData *>(m);
-        OpenGLProgram *program = static_cast<OpenGLProgram *>(p);
+        const OpenGLMeshData *mesh = static_cast<const OpenGLMeshData *>(m);
+        const OpenGLProgram *program = static_cast<const OpenGLProgram *>(p);
 
         if (!mesh->mVAO)
             return;
@@ -138,7 +138,7 @@ namespace Render {
         program->unbind(&mesh->mVAO);
     }
 
-    void OpenGLRenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices)
+    void OpenGLRenderTarget::renderVertices(const Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices)
     {
         if (!vertices.empty()) {
             OpenGLMeshData tempMesh;
@@ -148,7 +148,7 @@ namespace Render {
         }
     }
 
-    void OpenGLRenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, const Material *material)
+    void OpenGLRenderTarget::renderVertices(const Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, const Material *material)
     {
         if (!vertices.empty()) {
             OpenGLMeshData tempMesh;
@@ -164,7 +164,7 @@ namespace Render {
         GL_CHECK();
     }
 
-    void OpenGLRenderTarget::bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset)
+    void OpenGLRenderTarget::bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset) const
     {
         for (size_t i = 0; i < tex.size(); ++i) {
             glActiveTexture(GL_TEXTURE0 + offset + i);

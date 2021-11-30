@@ -32,10 +32,10 @@ namespace Tools {
     {
     }
 
-    bool DirectX11ImRoot::init()
+    Threading::Task<bool> DirectX11ImRoot::init()
     {
-        if (!ClientImRoot::init())
-            return false;
+        if (!co_await ClientImRoot::init())
+            co_return false;
 
         ImGui_ImplDX11_Init(Render::GetDevice(), Render::GetDeviceContext());
         //ImGui_ImplDirectX11_CreateDeviceObjects();
@@ -59,31 +59,21 @@ namespace Tools {
             };
         };
 
-        return true;
+        co_return true;
     }
 
-    void DirectX11ImRoot::finalize()
+    Threading::Task<void> DirectX11ImRoot::finalize()
     {
         ImGui_ImplDX11_Shutdown();
 
-        ClientImRoot::finalize();
+        co_await ClientImRoot::finalize();
+
+        co_return;
     }
 
-    void DirectX11ImRoot::newFrame(float timeSinceLastFrame)
+    void DirectX11ImRoot::newFrame()
     {
-        ImGuiIO &io = ImGui::GetIO();
-
-        io.DeltaTime = timeSinceLastFrame;
-
-        Vector2i size = mWindow.getScreenSpace().mSize;
-
-        io.BackendPlatformUserData = &mWindow;
-
-        io.DisplaySize = ImVec2(size.x / io.DisplayFramebufferScale.x, size.y / io.DisplayFramebufferScale.y);
-
         ImGui_ImplDX11_NewFrame();
-        ImGui::NewFrame();
-        Im3D::NewFrame();
     }
 
     void DirectX11ImRoot::renderDrawList(ImGuiViewport *vp)

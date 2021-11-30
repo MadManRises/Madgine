@@ -1,3 +1,8 @@
+\page Meta Meta
+
+\subpage Keyvalue
+\subpage Serialize
+
 # Meta Information
 
 The Madgine contains many features that need to know all properties of the type they are working on given only the base type (e.g. Script embedding, Serialization). There exist multiple techniques to implement that in C++:

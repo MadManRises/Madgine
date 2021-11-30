@@ -74,6 +74,14 @@ namespace Render {
 
     DirectX11RenderContext::~DirectX11RenderContext()
     {
+        if (sAnnotator) {
+            sAnnotator->Release();
+            sAnnotator = nullptr;
+        }
+        if (sDeviceContext) {
+            sDeviceContext->Release();
+            sDeviceContext = nullptr;
+        }
         if (sDevice) {
             sDevice->Release();
             sDevice = nullptr;

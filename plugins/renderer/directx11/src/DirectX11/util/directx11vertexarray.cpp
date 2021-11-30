@@ -10,9 +10,9 @@ namespace Engine {
 namespace Render {
 
     DirectX11VertexArray::DirectX11VertexArray(const DirectX11Buffer &vertex, const DirectX11Buffer &index, std::array<AttributeDescriptor, 7> (*attributes)())
-        : mVBO(&vertex)
+        : mAttributes(attributes)
+        , mVBO(&vertex)
         , mEBO(&index)
-        , mAttributes(attributes)
     {
         uint8_t acc = 1;
 
@@ -67,7 +67,7 @@ namespace Render {
         mFormat = 0;
     }
 
-    void DirectX11VertexArray::bind()
+    void DirectX11VertexArray::bind() const 
     {
         DX11_LOG("Bind VAO -> " << mVBO << ", " << mEBO);
 

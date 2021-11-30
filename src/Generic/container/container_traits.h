@@ -61,7 +61,7 @@ struct container_traits : container_traits<typename underlying_container<C>::typ
 };
 
 template <typename T>
-struct container_traits<std::list<T>, void> {
+struct container_traits<std::list<T>> {
     static constexpr const bool sorted = false;
     static constexpr const bool has_dependent_handle = false;
     static constexpr const bool remove_invalidates_handles = false;
@@ -137,7 +137,7 @@ struct container_traits<std::list<T>, void> {
 };
 
 template <typename T>
-struct container_traits<std::vector<T>, void> {
+struct container_traits<std::vector<T>> {
     static constexpr const bool sorted = false;
     static constexpr const bool has_dependent_handle = true;
     static constexpr const bool remove_invalidates_handles = true;
@@ -228,7 +228,7 @@ struct container_traits<std::vector<T>, void> {
 };
 
 template <typename T, typename Cmp>
-struct container_traits<std::set<T, Cmp>, void> {
+struct container_traits<std::set<T, Cmp>> {
     static constexpr const bool sorted = true;
     static constexpr const bool has_dependent_handle = false;
     static constexpr const bool remove_invalidates_handles = false;
@@ -305,7 +305,7 @@ struct container_traits<std::set<T, Cmp>, void> {
 };
 
 template <typename K, typename T, typename Cmp>
-struct container_traits<std::map<K, T, Cmp>, void> {
+struct container_traits<std::map<K, T, Cmp>> {
     static constexpr const bool sorted = true;
     static constexpr const bool has_dependent_handle = false;
     static constexpr const bool remove_invalidates_handles = false;
@@ -382,7 +382,7 @@ struct container_traits<std::map<K, T, Cmp>, void> {
 };
 
 template <typename T, size_t Size>
-struct container_traits<std::array<T, Size>, void> {
+struct container_traits<std::array<T, Size>> {
     static constexpr const bool sorted = false;
     static constexpr const bool has_dependent_handle = true;
     static constexpr const bool remove_invalidates_handles = false;
@@ -478,7 +478,7 @@ struct container_traits<std::array<T, Size>, void> {
 };
 
 template <typename T>
-struct container_traits<std::deque<T>, void> {
+struct container_traits<std::deque<T>> {
     static constexpr const bool sorted = false;
     static constexpr const bool has_dependent_handle = true;
     static constexpr const bool remove_invalidates_handles = true;

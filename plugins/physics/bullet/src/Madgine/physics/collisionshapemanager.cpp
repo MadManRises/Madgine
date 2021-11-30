@@ -38,6 +38,10 @@ namespace Physics {
 
     struct MeshShape : CollisionShape, Serialize::VirtualUnit<MeshShape, VirtualScope<MeshShape, CollisionShapeInstance>> {
 
+        ~MeshShape() {
+
+        }
+
         void setMesh(const ByteBuffer &vertexData, size_t vertexSize)
         {
             mShape = btConvexHullShape(static_cast<const float *>(vertexData.mData), vertexData.mSize / vertexSize, vertexSize);
@@ -386,6 +390,11 @@ namespace Physics {
         return mHandle.resource();
     }
 
+    bool CollisionShapeInstance::available() const
+    {
+        return mHandle.available();
+    }
+
     CollisionShapeManager::CollisionShapeManager()
         : ResourceLoader({ ".fbx", ".dae" })
     {
@@ -436,7 +445,7 @@ namespace Physics {
             co_return false;
 
         meshShape->setMesh(mesh->mVertices, mesh->mVertexSize);
-        
+
         co_return true;
     }
 
@@ -452,6 +461,10 @@ namespace Physics {
 
     CollisionShapeInstance::CollisionShapeInstance(typename CollisionShapeManager::HandleType shape)
         : mHandle(std::move(shape))
+    {
+    }
+
+    CollisionShapeInstance::~CollisionShapeInstance()
     {
     }
 

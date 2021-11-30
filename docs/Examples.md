@@ -1,2 +1,4 @@
+\page Examples Examples
+
 # Examples
 

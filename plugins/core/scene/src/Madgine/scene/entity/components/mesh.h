@@ -14,7 +14,7 @@ namespace Scene {
             std::string_view getName() const;
             void setName(std::string_view name);
 
-            Render::GPUMeshData *data() const;
+            const Render::GPUMeshData *data() const;
             uint32_t material() const;
             void setMaterial(uint32_t index);
             //void setMaterialName(std::string_view name);

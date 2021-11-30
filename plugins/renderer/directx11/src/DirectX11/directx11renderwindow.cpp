@@ -13,11 +13,9 @@
 
 #include "Interfaces/window/windowapi.h"
 
-
 #include "Meta/keyvalue/metatable_impl.h"
 
 #include "directx11rendercontext.h"
-
 
 namespace Engine {
 namespace Render {
@@ -43,8 +41,8 @@ namespace Render {
         swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
         swapChainDesc.Windowed = TRUE;
 
-        IDXGIDevice *device;
-        hr = sDevice->QueryInterface(IID_PPV_ARGS(& device));
+        ReleasePtr<IDXGIDevice> device;
+        hr = sDevice->QueryInterface(IID_PPV_ARGS(&device));
         DX11_CHECK(hr);
 
         IDXGIAdapter *adapter;
@@ -62,42 +60,35 @@ namespace Render {
         // Now we need to initialize the buffers of the swap chain.
         // Next initialize the back buffer of the swap chain and associate it to a
         // render target view.
-        ID3D11Texture2D *backBuffer;
+        ReleasePtr<ID3D11Texture2D> backBuffer;
         hr = mSwapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer));
         DX11_CHECK(hr);
 
-        ID3D11RenderTargetView *targetView;
+        ReleasePtr<ID3D11RenderTargetView> targetView;
 
         hr = sDevice->CreateRenderTargetView(backBuffer, nullptr, &targetView);
         DX11_CHECK(hr);
 
-        if (backBuffer) {
-            backBuffer->Release();
-            backBuffer = nullptr;
-        }
-
         InterfacesVector size = w->renderSize();
-        setup({ targetView }, { size.x, size.y }, TextureType_2D);
+
+        std::vector<ReleasePtr<ID3D11RenderTargetView>> views;
+        views.emplace_back(std::move(targetView));
+        setup(std::move(views), { size.x, size.y }, TextureType_2D);
     }
 
     DirectX11RenderWindow::~DirectX11RenderWindow()
     {
         shutdown();
-
-        if (mSwapChain) {
-            mSwapChain->Release();
-            mSwapChain = nullptr;
-        }
     }
 
-    void DirectX11RenderWindow::beginIteration(size_t iteration)
+    void DirectX11RenderWindow::beginIteration(size_t iteration) const
     {
         PROFILE();
 
         DirectX11RenderTarget::beginIteration(iteration);
     }
 
-    void DirectX11RenderWindow::endIteration(size_t iteration)
+    void DirectX11RenderWindow::endIteration(size_t iteration) const
     {
         DirectX11RenderTarget::endIteration(iteration);
 
@@ -108,7 +99,7 @@ namespace Render {
     {
         return {};
     }
-        
+
     size_t DirectX11RenderWindow::textureCount() const
     {
         return 0;
@@ -127,29 +118,23 @@ namespace Render {
 
     bool DirectX11RenderWindow::resizeImpl(const Vector2i &size)
     {
-        for (ID3D11RenderTargetView *view : mTargetViews) {
-            view->Release();            
-        }
         mTargetViews.clear();
 
         HRESULT hr = mSwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
         DX11_CHECK(hr);
 
-        ID3D11Texture2D *backBuffer;
+        ReleasePtr<ID3D11Texture2D> backBuffer;
         hr = mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID *)&backBuffer);
         DX11_CHECK(hr);
 
-        ID3D11RenderTargetView *targetView;
+        ReleasePtr<ID3D11RenderTargetView> targetView;
 
         hr = sDevice->CreateRenderTargetView(backBuffer, nullptr, &targetView);
         DX11_CHECK(hr);
 
-        if (backBuffer) {
-            backBuffer->Release();
-            backBuffer = nullptr;
-        }
-
-        setup({ targetView }, size, TextureType_2D);
+        std::vector<ReleasePtr<ID3D11RenderTargetView>> views;
+        views.emplace_back(std::move(targetView));
+        setup(std::move(views), size, TextureType_2D);
 
         return true;
     }

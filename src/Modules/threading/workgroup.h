@@ -74,7 +74,7 @@ namespace Threading {
                 return result;
             } catch (std::exception &e) {
                 LOG_ERROR("Uncaught Exception in Workgroup-Thread!");
-                LOG_EXCEPTION(e);
+                LOG_ERROR(e.what());
                 throw;
             }
         }
@@ -87,7 +87,7 @@ namespace Threading {
                 return std::forward<F>(main)(std::forward<Args>(args)...);
             } catch (std::exception &e) {
                 LOG_ERROR("Uncaught Exception in Workgroup-Task-Thread!");
-                LOG_EXCEPTION(e);
+                LOG_ERROR(e.what());
                 throw;
             }
         }

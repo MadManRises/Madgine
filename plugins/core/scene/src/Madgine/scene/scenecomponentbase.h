@@ -14,29 +14,30 @@ namespace Scene {
 
         SceneComponentBase(SceneManager &sceneMgr);
 
-        SceneManager &sceneMgr(bool = true) const;
+        void sceneMgr(SceneManager *&ptr) const;
+        SceneManager &sceneMgr() const;
 
         virtual void update(std::chrono::microseconds, bool paused);
 
         std::string_view key() const;
 
-        template <typename T>
-        T &getSceneComponent(bool init = true)
+template <typename T>
+        T &getSceneComponent()
         {
-            return static_cast<T &>(getSceneComponent(component_index<T>(), init));
+            return static_cast<T &>(getSceneComponent(component_index<T>()));
         }
 
-        SceneComponentBase &getSceneComponent(size_t i, bool = true);
+        SceneComponentBase &getSceneComponent(size_t i);
 
         template <typename T>
-        T &getGlobalAPIComponent(bool init = true)
+        T &getGlobalAPIComponent()
         {
-            return static_cast<T &>(getGlobalAPIComponent(component_index<T>(), init));
+            return static_cast<T &>(getGlobalAPIComponent(component_index<T>()));
         }
 
-        App::GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
+        App::GlobalAPIBase &getGlobalAPIComponent(size_t i);
 
-        const SceneManager *parent() const;
+        Threading::TaskQueue *taskQueue() const;
 
     protected:
         virtual bool init();

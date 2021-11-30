@@ -51,7 +51,7 @@ namespace Render {
         }
     }
 
-    ID3DBlob *DirectX12VertexShader::getInstance(DirectX12VertexArray *format)
+    ID3DBlob *DirectX12VertexShader::getInstance(const DirectX12VertexArray *format) const
     {
         uint8_t index = format->mFormat;
         if (mInstances.size() <= index)

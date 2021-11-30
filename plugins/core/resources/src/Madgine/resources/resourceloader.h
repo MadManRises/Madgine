@@ -69,12 +69,16 @@ namespace Resources {
         void setLoadingTask(Threading::TaskFuture<bool> task)
         {
             assert(!mLoadingTask.valid());
+            assert(!mUnloadingTask.valid() || mUnloadingTask.is_ready());
+            mUnloadingTask.reset();
             mLoadingTask = task;
         }
 
         void setUnloadingTask(Threading::TaskFuture<void> task)
         {
             assert(!mUnloadingTask.valid());
+            assert(mLoadingTask == true);
+            mLoadingTask.reset();
             mUnloadingTask = task;
         }
 
@@ -86,6 +90,11 @@ namespace Resources {
         Threading::TaskFuture<bool> loadingTask()
         {
             return mLoadingTask;
+        }
+
+        Threading::TaskFuture<void> unloadingTask()
+        {
+            return mUnloadingTask;
         }
 
     private:
@@ -170,6 +179,11 @@ namespace Resources {
             HandleType loadData()
             {
                 return T::load(this);
+            }
+
+            Threading::TaskFuture<void> forceUnload()
+            {
+                return T::unload(this);
             }
 
             Data *dataPtr()
@@ -369,24 +383,57 @@ namespace Resources {
             return handle;
         }
 
-        static void unload(const HandleType &handle, T *loader = nullptr)
+        static Threading::TaskFuture<void> unload(ResourceType *resource, T *loader = nullptr)
+        {
+            HandleType handle { (typename container_traits<DataContainer>::handle) * resource->mData };
+            return unload(handle, loader);
+        }
+
+        static Threading::TaskFuture<void> unload(const HandleType &handle, T *loader = nullptr)
+        {
+            if (!handle)
+                return {};
+            if (!loader)
+                loader = &getSingleton();
+
+            ResourceDataInfo &info = *getInfo(handle, loader);
+            Threading::TaskFuture<void> task = info.unloadingTask();
+
+            if (!task.valid()) {
+                ResourceType *resource = handle.resource();
+
+                task = loader->queueUnloading(resource->mDtor(loader, *getDataPtr(handle, loader), info));
+
+                info.setUnloadingTask(task);
+            }
+
+            return task;
+        }
+
+        static void resetHandle(const HandleType &handle, T *loader = nullptr)
         {
             assert(handle);
             if (!handle.info()->decRef()) {
                 if (!loader)
                     loader = &getSingleton();
+
+                Threading::TaskFuture<void> task = unload(handle, loader);
+
                 ResourceType *resource = handle.resource();
+                auto cleanup = [&data { *loader->mData }, handle { *resource->mHolder }]() {
+                    typename container_traits<DataContainer>::iterator it = container_traits<DataContainer>::toIterator(data, handle);
+                    data.erase(it);
+                };
+                if (task.is_ready()) {
+                    cleanup();
+                } else {
+                    task.then(std::move(cleanup),
+                        loader->loadingTaskQueue());
+                }
 
-                ResourceDataInfo &info = *getInfo(handle, loader);
-                info.setUnloadingTask(loader->queueUnloading(resource->mDtor(loader, *getDataPtr(handle, loader), info)));
-
-                typename container_traits<DataContainer>::iterator it = container_traits<DataContainer>::toIterator(*loader->mData, *resource->mHolder);
-                /* loader->mData->erase(it);*/
                 *resource->mData = {};
                 *resource->mHolder = {};
-                //TODO
 
-                //TODO: Check for multi-storage data for unnamed resources
                 //if (resource->name() == ResourceBase::sUnnamed)
                 //    delete resource;
             }
@@ -414,12 +461,6 @@ namespace Resources {
                 Filesystem::FileEventType::FILE_CREATED, loader);
         }
 
-        /*static Data *getDataPtr(ResourceType *resource, T *loader = nullptr)
-        {
-            HandleType handle { (typename container_traits<DataContainer>::handle) * resource->mData };
-            return getDataPtr(handle, loader);
-        }*/
-
         static Data *getDataPtr(const HandleType &handle, T *loader = nullptr, bool verified = true)
         {
             if (!handle)
@@ -433,8 +474,6 @@ namespace Resources {
             }
         }
 
-        //bool load(Data &data, ResourceType *res) = 0;
-        //void unload(Data &data) = 0;
         std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path, std::string_view name = {}) override
         {
             std::string actualName { name.empty() ? path.stem() : name };
@@ -514,11 +553,18 @@ namespace Resources {
             return loader->loadVImpl(resource);
         }
 
-        static void unload(const typename Base::HandleType &handle, T *loader = nullptr)
+        static Threading::TaskFuture<void> unload(typename Base::ResourceType *resource, T *loader = nullptr)
         {
             if (!loader)
                 loader = &Base::getSingleton();
-            return loader->unloadVImpl(handle);
+            return loader->unloadVImpl(resource);
+        }
+
+        static void resetHandle(const typename Base::HandleType &handle, T *loader = nullptr)
+        {
+            if (!loader)
+                loader = &Base::getSingleton();
+            return loader->resetHandleVImpl(handle);
         }
 
         template <typename C = typename Base::Ctor, typename D = typename Base::Dtor>
@@ -540,12 +586,6 @@ namespace Resources {
                 Base::toMutableCtor(std::forward<C>(ctor)),
                 Base::toMutableDtor(std::forward<D>(dtor)));
         }
-
-        /*static typename Base::Data *getDataPtr(typename Base::ResourceType *resource, T *loader = nullptr)
-        {
-            typename Base::HandleType handle { (typename container_traits<typename Base::DataContainer>::handle) * resource->mData };
-            return getDataPtr(handle, loader);
-        }*/
 
         static typename Base::Data *getDataPtr(const typename Base::HandleType &handle, T *loader = nullptr, bool verified = true)
         {
@@ -584,7 +624,8 @@ namespace Resources {
         virtual typename Base::HandleType loadUnnamedVImpl(typename Base::Ctor ctor = {}, typename Base::Dtor dtor = {}) = 0;
         virtual typename Base::HandleType loadVImpl(std::string_view name) = 0;
         virtual typename Base::HandleType loadVImpl(typename Base::ResourceType *resource) = 0;
-        virtual void unloadVImpl(const typename Base::HandleType &handle) = 0;
+        virtual Threading::TaskFuture<void> unloadVImpl(typename Base::ResourceType *resource) = 0;
+        virtual void resetHandleVImpl(const typename Base::HandleType &handle) = 0;
         virtual typename Base::Data *getDataPtrVImpl(const typename Base::HandleType &handle, bool verified) = 0;
         virtual typename Base::ResourceDataInfo *getInfoVImpl(const typename Base::HandleType &handle) = 0;
     };
@@ -615,9 +656,13 @@ namespace Resources {
         {
             return Self::load(static_cast<typename Self::ResourceType *>(resource), Filesystem::FileEventType::FILE_CREATED, static_cast<T *>(this));
         }
-        virtual void unloadVImpl(const typename Base::OriginalHandleType &handle) override
+        virtual Threading::TaskFuture<void> unloadVImpl(typename Base::ResourceType *resource) override
         {
-            Self::unload(handle, static_cast<T *>(this));
+            return Self::unload(static_cast<typename Self::ResourceType *>(resource), static_cast<T *>(this));
+        }
+        virtual void resetHandleVImpl(const typename Base::OriginalHandleType &handle) override
+        {
+            Self::resetHandle(handle, static_cast<T *>(this));
         }
         virtual typename Base::Data *getDataPtrVImpl(const typename Base::OriginalHandleType &handle, bool verified) override
         {

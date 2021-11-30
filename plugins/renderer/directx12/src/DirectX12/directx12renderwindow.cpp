@@ -83,7 +83,7 @@ namespace Render {
         }
     }
 
-    void DirectX12RenderWindow::beginIteration(size_t iteration)
+    void DirectX12RenderWindow::beginIteration(size_t iteration) const
     {
         PROFILE();
 
@@ -94,7 +94,7 @@ namespace Render {
         DirectX12RenderTarget::beginIteration(iteration);
     }
 
-    void DirectX12RenderWindow::endIteration(size_t iteration)
+    void DirectX12RenderWindow::endIteration(size_t iteration) const
     {
         TransitionBarrier(mBackBuffers[mSwapChain->GetCurrentBackBufferIndex()], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 

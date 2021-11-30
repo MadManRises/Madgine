@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Madgine/threading/contextmasks.h"
 #include "handler.h"
 
 #include "Interfaces/input/inputevents.h"
@@ -12,12 +11,12 @@ namespace UI {
     struct MADGINE_UI_EXPORT GameHandlerBase : Handler {
         static constexpr float sDefaultDragStartThreshold = 80.0f;
 
-        GameHandlerBase(UIManager &ui, Threading::ContextMask context = Threading::ContextMask::SceneContext);
+        GameHandlerBase(UIManager &ui);
 
         void abortDrag();
 
-        void update(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask mask);
-        void fixedUpdate(std::chrono::microseconds timeStep, Threading::ContextMask mask);
+        virtual void update(std::chrono::microseconds timeSinceLastFrame);
+        virtual void fixedUpdate(std::chrono::microseconds timeStep);
 
     protected:
         void onPointerMove(const Input::PointerEventArgs &me) override;
@@ -38,8 +37,6 @@ namespace UI {
 
         virtual void onPointerDragAbort();
 
-        virtual void update(std::chrono::microseconds timeSinceLastFrame);
-        virtual void fixedUpdate(std::chrono::microseconds timeStep);
 
         void clampToWindow(Input::PointerEventArgs &me);
 
@@ -70,8 +67,6 @@ namespace UI {
         bool mDragging, mSingleClick;
 
         InterfacesVector mDragStart;
-
-        Threading::ContextMask mContext;
     };
 
 } // namespace UI

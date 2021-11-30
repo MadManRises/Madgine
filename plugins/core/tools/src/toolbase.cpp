@@ -38,26 +38,20 @@ namespace Tools {
         mVisible = v;
     }
 
-    ToolBase &ToolBase::getToolComponent(size_t index, bool init)
+    ToolBase &ToolBase::getToolComponent(size_t index)
     {
-        if (init) {
-            checkInitState();
-        }
-        return mRoot.getToolComponent(index, init);
+        return mRoot.getToolComponent(index);
     }
 
-    const ImRoot *ToolBase::parent() const
+    ImRoot &ToolBase::root()
     {
-        return &mRoot;
+        return mRoot;
     }
-
-    /*App::Application &ToolBase::app(bool init)
+       
+    Threading::TaskQueue *ToolBase::taskQueue() const
     {
-        if (init) {
-            checkDependency();
-        }
-        return mRoot.app(init);
-    }*/
+        return mRoot.taskQueue();
+    }
 
     bool ToolBase::init()
     {
@@ -70,7 +64,6 @@ namespace Tools {
 }
 }
 
-
 METATABLE_BEGIN(Engine::Tools::ToolBase)
 PROPERTY(visible, isVisible, setVisible)
 METATABLE_END(Engine::Tools::ToolBase)
@@ -78,4 +71,3 @@ METATABLE_END(Engine::Tools::ToolBase)
 SERIALIZETABLE_BEGIN(Engine::Tools::ToolBase)
 FIELD(mVisible)
 SERIALIZETABLE_END(Engine::Tools::ToolBase)
-

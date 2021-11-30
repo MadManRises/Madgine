@@ -16,8 +16,8 @@ namespace Render {
         DirectX11RenderWindow(DirectX11RenderContext *context, Window::OSWindow *w);
         ~DirectX11RenderWindow();
 
-        virtual void beginIteration(size_t iteration) override;
-        virtual void endIteration(size_t iteration) override;
+        virtual void beginIteration(size_t iteration) const override;
+        virtual void endIteration(size_t iteration) const override;
 
 		virtual TextureDescriptor texture(size_t index, size_t iteration = std::numeric_limits<size_t>::max()) const override;
         virtual size_t textureCount() const override;
@@ -30,7 +30,7 @@ namespace Render {
 
 		Window::OSWindow *mWindow;        
 
-        IDXGISwapChain *mSwapChain;
+        ReleasePtr < IDXGISwapChain> mSwapChain;
     };
 
 }

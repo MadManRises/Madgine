@@ -93,11 +93,11 @@ namespace Serialize {
         return static_cast<BufferedStreamData &>(SerializeInStream::data());
     }
 
-    void BufferedInStream::readHeader(MessageHeader &header)
+    StreamResult BufferedInStream::readHeader(MessageHeader &header)
     {
         if (!isMessageAvailable())
             std::terminate();
-        readRaw(header);
+        return readRaw(header);
     }
 
     BufferedOutStream::BufferedOutStream(

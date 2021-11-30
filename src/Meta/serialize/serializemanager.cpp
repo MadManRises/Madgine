@@ -4,8 +4,6 @@
 
 #include "syncableunit.h"
 
-#include "serializeexception.h"
-
 #include "streams/serializestream.h"
 
 #include "serializableids.h"
@@ -136,11 +134,13 @@ namespace Serialize {
                                                    : unit->slaveId();
     }
 
-    SyncableUnitBase *SerializeManager::convertPtr(SerializeInStream &in,
-        UnitId unit)
+    StreamResult SerializeManager::convertPtr(SerializeInStream &in,
+        UnitId unit, SyncableUnitBase *&out)
     {
-        if (unit == NULL_UNIT_ID)
-            return nullptr;
+        if (unit == NULL_UNIT_ID) {
+            out = nullptr;
+            return {};
+        }
         SyncableUnitBase *ptr = nullptr;
 
         if (mSlaveStreamData && (&in.data() == mSlaveStreamData)) {
@@ -151,12 +151,10 @@ namespace Serialize {
             ptr = getByMasterId(unit);
         }
         if (!ptr) {
-            std::stringstream ss;
-            ss << "Unknown Unit-Id (" << unit
-               << ") used! Possible binary mismatch!";
-            throw SerializeException(ss.str());
+            return STREAM_INTEGRITY_ERROR(in, "Unknown Unit-Id (" << unit << ") used!");
         }
-        return ptr;
+        out = ptr;    
+        return {};
     }
 
     SerializeStreamData *SerializeManager::getSlaveStreamData()

@@ -30,6 +30,12 @@ namespace Render {
         sContext = nullptr;
     }
 
+    void RenderContext::unloadAllResources()
+    {
+
+    }
+    
+
     void RenderContext::addRenderTarget(RenderTarget *target)
     {
         mRenderTargets.push_back(target);
@@ -43,7 +49,7 @@ namespace Render {
     void RenderContext::render()
     {
         beginFrame();
-        for (RenderTarget *target : /* safeIterate(*/ mRenderTargets /*)*/)
+        for (RenderTarget *target : safeIterate(mRenderTargets))
             target->render();
         endFrame();
     }

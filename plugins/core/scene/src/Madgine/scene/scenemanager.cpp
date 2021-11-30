@@ -51,36 +51,32 @@ namespace Scene {
     {
     }
 
-    bool SceneManager::init()
+    Threading::Task<bool> SceneManager::init()
     {
-        markInitialized();
-
         for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
-            if (!component->callInit())
-                return false;
+            if (!co_await component->callInit())
+                co_return false;
         }
-
-        mLastFrame = std::chrono::steady_clock::now();
 
         mApp.taskQueue()->addRepeatedTask([this]() { update(); }, std::chrono::microseconds { 33 }, this);
 
-        return true;
+        co_return true;
     }
 
-    void SceneManager::finalize()
+    Threading::Task<void> SceneManager::finalize()
     {
         clear();
 
         mApp.taskQueue()->removeRepeatedTasks(this);
 
         for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
-            component->callFinalize();
+            co_await component->callFinalize();
         }
     }
 
-    SceneComponentBase &SceneManager::getComponent(size_t i, bool init)
+    SceneComponentBase &SceneManager::getComponent(size_t i)
     {
-        return getChild(mSceneComponents.get(i), init);
+        return mSceneComponents.get(i);
     }
 
     size_t SceneManager::getComponentCount()
@@ -88,12 +84,9 @@ namespace Scene {
         return mSceneComponents.size();
     }
 
-    App::GlobalAPIBase &SceneManager::getGlobalAPIComponent(size_t i, bool init)
+    App::GlobalAPIBase &SceneManager::getGlobalAPIComponent(size_t i)
     {
-        if (init) {
-            checkInitState();
-        }
-        return mApp.getGlobalAPIComponent(i, init);
+        return mApp.getGlobalAPIComponent(i);
     }
 
     Threading::DataMutex &SceneManager::mutex()
@@ -107,13 +100,11 @@ namespace Scene {
 
         Threading::DataLock lock(mMutex, Threading::AccessMode::WRITE);
 
-        std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
-        std::chrono::steady_clock::duration timeSinceLastFrame = now - mLastFrame;
-        mLastFrame = now;
+        std::chrono::microseconds timeSinceLastFrame = mFrameClock.tick<std::chrono::microseconds>();
 
         for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
             //PROFILE(component->componentName());
-            component->update(std::chrono::duration_cast<std::chrono::microseconds>(timeSinceLastFrame), mPauseStack > 0);
+            component->update(timeSinceLastFrame, mPauseStack > 0);
         }
     }
 

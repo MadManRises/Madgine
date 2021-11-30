@@ -1,12 +1,9 @@
 #pragma once
 
-#include "Madgine/threading/framelistener.h"
 #include "handlercollector.h"
 
-#include "Madgine/window/mainwindowcomponentcollector.h"
 #include "Madgine/window/mainwindowcomponent.h"
-
-#include "madgineobject/madgineobjectobserver.h"
+#include "Madgine/window/mainwindowcomponentcollector.h"
 
 #include "Meta/serialize/container/serializablecontainer.h"
 
@@ -16,11 +13,11 @@
 
 #include "Meta/math/vector2.h"
 
+#include "Generic/intervalclock.h"
 
 namespace Engine {
 namespace UI {
-    struct MADGINE_UI_EXPORT UIManager : Window::MainWindowComponent<UIManager>,
-                                         Threading::FrameListener {
+    struct MADGINE_UI_EXPORT UIManager : Window::MainWindowComponent<UIManager> {
         SERIALIZABLEUNIT(UIManager);
 
         UIManager(Window::MainWindow &window);
@@ -34,12 +31,10 @@ namespace UI {
         void showCursor();
         bool isCursorVisible() const;
 
-        bool frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context) override;
-        bool frameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context) override;
+        void update();
+        void fixedUpdate();
 
         //Scene::ContextMask currentContext();
-
-        Window::MainWindow &window(bool = true) const;
 
         std::set<GameHandlerBase *> getGameHandlers();
         std::set<GuiHandlerBase *> getGuiHandlers();
@@ -49,31 +44,33 @@ namespace UI {
         std::string_view key() const override;
 
         template <typename T>
-        T &getGuiHandler(bool init = true)
+        T &getGuiHandler()
         {
-            return static_cast<T &>(getGuiHandler(Engine::component_index<T>(), init));
+            return static_cast<T &>(getGuiHandler(Engine::component_index<T>()));
         }
 
-        GuiHandlerBase &getGuiHandler(size_t i, bool = true);
+        GuiHandlerBase &getGuiHandler(size_t i);
 
         template <typename T>
-        T &getGameHandler(bool init = true)
+        T &getGameHandler()
         {
-            return static_cast<T &>(getGameHandler(Engine::component_index<T>(), init));
+            return static_cast<T &>(getGameHandler(Engine::component_index<T>()));
         }
 
-        GameHandlerBase &getGameHandler(size_t i, bool = true);
+        GameHandlerBase &getGameHandler(size_t i);
 
-        MEMBER_OFFSET_CONTAINER(mGuiHandlers, GuiHandlerContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, MadgineObjectObserver, std::true_type>>);
-        MEMBER_OFFSET_CONTAINER(mGameHandlers, GameHandlerContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, MadgineObjectObserver, std::true_type>>)
+        GuiHandlerContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>> mGuiHandlers;
+        GameHandlerContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>> mGameHandlers;
 
     protected:
-        bool init() override;
-        void finalize() override;
+        Threading::Task<bool> init() override;
+        Threading::Task<void> finalize() override;
 
     private:
         Vector2 mKeptCursorPosition;
         bool mKeepingCursorPos = false;
+
+        IntervalClock<std::chrono::steady_clock> mFrameClock;
     };
 }
 }

@@ -800,7 +800,7 @@ struct underlying_container<GenerationContainer<C>> {
 };
 
 template <typename C>
-struct container_traits<GenerationContainer<C>, void> {
+struct container_traits<GenerationContainer<C>> {
     static constexpr const bool sorted = true;
     static constexpr const bool has_dependent_handle = true;
     static constexpr const bool remove_invalidates_handles = true;

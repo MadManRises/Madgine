@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../type_pack.h"
+#include "../referencetuple.h"
 
 namespace Engine {
 
@@ -12,61 +13,8 @@ struct MultiContainer {
     struct pointer;
     struct const_pointer;
 
-    struct reference {
-
-        reference(std::tuple<Ty &...> data)
-            : mData(data)
-        {
-        }
-
-        operator std::tuple<Ty &...>()
-        {
-            return mData;
-        }
-
-        template <size_t I>
-        decltype(auto) get()
-        {
-            return std::get<I>(mData);
-        }
-
-        template <typename T>
-        decltype(auto) get()
-        {
-            return std::get<T &>(mData);
-        }
-
-        pointer operator&() const
-        {
-            return {
-                { &std::get<Ty &>(mData)... }
-            };
-        }
-
-        friend void swap(const reference &first, const reference &second)
-        {
-            (std::swap(std::get<Ty &>(first.mData), std::get<Ty &>(second.mData)), ...);
-        }
-
-        std::tuple<Ty &...> mData;
-    };
-
-    struct const_reference {
-
-        template <size_t I>
-        decltype(auto) get()
-        {
-            return std::get<I>(mData);
-        }
-
-        template <typename T>
-        decltype(auto) get()
-        {
-            return std::get<const T &>(mData);
-        }
-
-        std::tuple<const Ty &...> mData;
-    };
+    using reference = ReferenceTuple<Ty...>;
+    using const_reference = ReferenceTuple<const Ty...>;
 
     struct pointer {
         ptrdiff_t operator-(const pointer &other) const
@@ -163,21 +111,21 @@ struct MultiContainer {
             return *this;
         }
 
-        std::tuple<Ty &...> operator*() const
+        reference operator*() const
         {
             return { TupleUnpacker::forEach(mIt, [](auto &it) { return std::ref(*it); }) };
         }
 
         template <size_t I>
-        decltype(auto) get() const
+        friend decltype(auto) get(const IteratorImpl &it)
         {
-            return std::get<I>(mIt);
+            return std::get<I>(it.mIt);
         }
 
         template <size_t I>
-        decltype(auto) get()
+        friend decltype(auto) get(IteratorImpl &it)
         {
-            return *std::get<I>(mIt);
+            return std::get<I>(it.mIt);
         }
 
         It mIt;
@@ -205,12 +153,12 @@ struct MultiContainer {
     template <typename... Tuples>
     void construct(reference item, std::piecewise_construct_t, Tuples &&...tuples)
     {
-        (TupleUnpacker::invokeFromTuple([&](auto... par){ new (&item.template get<Ty>()) Ty(std::forward<decltype(par)>(par)...); }, std::forward<Tuples>(tuples)),...);   
+        (TupleUnpacker::invokeFromTuple([&](auto... par){ new (&get<Ty>(item)) Ty(std::forward<decltype(par)>(par)...); }, std::forward<Tuples>(tuples)),...);   
     }
 
     void destruct(reference item)
     {
-        (item.template get<Ty>().~Ty(),...);
+        (get<Ty>(item).~Ty(),...);
     }
 
     template <typename... Tuples>
@@ -299,20 +247,15 @@ struct MultiContainer {
         };
     }
 
-    void pop_back()
-    {
-        (std::get<Container<Ty>>(mData).pop_back(), ...);
-    }
-
     void clear()
     {
         (std::get<Container<Ty>>(mData).clear(), ...);
     }
 
     template <size_t I>
-    decltype(auto) get()
+    friend decltype(auto) get(MultiContainer &data)
     {
-        return std::get<I>(mData);
+        return std::get<I>(data.mData);
     }
 
 private:
@@ -322,7 +265,7 @@ private:
 };
 
 template <template <typename...> typename Container, typename... Ty>
-struct container_traits<MultiContainer<Container, Ty...>, void> {
+struct container_traits<MultiContainer<Container, Ty...>> {
 
     typedef MultiContainer<Container, Ty...> container;
     typedef typename container::value_type value_type;
@@ -357,22 +300,22 @@ struct container_traits<MultiContainer<Container, Ty...>, void> {
 
     static position_handle toPositionHandle(container &c, const iterator &it)
     {
-        return helper_traits::toPositionHandle(c.template get<0>(), it.template get<0>());
+        return helper_traits::toPositionHandle(get<0>(c), get<0>(it));
     }
 
     static handle toHandle(container &c, const iterator &it)
     {
-        return helper_traits::toHandle(c.template get<0>(), it.template get<0>());
+        return helper_traits::toHandle(get<0>(c), get<0>(it));
     }
 
     static void revalidateHandleAfterInsert(position_handle &handle, const container &c, const const_iterator &it)
     {
-        helper_traits::revalidateHandleAfterInsert(handle, c.template get<0>(), it.template get<0>());
+        helper_traits::revalidateHandleAfterInsert(handle, get<0>(c), get<0>(it));
     }
 
     static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const const_iterator &it, bool wasIn, size_t count = 1)
     {
-        helper_traits::revalidateHandleAfterRemove(handle, c.template get<0>(), it.template get<0>());
+        helper_traits::revalidateHandleAfterRemove(handle, get<0>(c), get<0>(it));
     }
 
     static iterator toIterator(container &c, const position_handle &handle)
@@ -406,11 +349,6 @@ struct container_api_impl<C, MultiContainer<Container, Ty...>> : C {
     using value_type = typename C::value_type;
     using reference = typename C::reference;
     using const_reference = typename C::const_reference;
-
-    /*void resize(size_t size)
-            {
-                C::resize(size);
-            }*/
 
     void remove(const value_type &item)
     {
@@ -461,12 +399,6 @@ struct container_api_impl<C, MultiContainer<Container, Ty...>> : C {
     const_reference operator[](size_t i) const
     {
         return C::operator[](i);
-    }
-
-    template <size_t I>
-    decltype(auto) get()
-    {
-        return C::template get<I>();
     }
 };
 }

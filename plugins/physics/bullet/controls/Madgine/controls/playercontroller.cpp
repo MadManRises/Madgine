@@ -24,31 +24,36 @@ METATABLE_END(Engine::Controls::PlayerController)
 
 UNIQUECOMPONENT(Engine::Controls::PlayerController)
 
+namespace Engine {
+namespace Controls {
 
-    namespace Engine
-{
-    namespace Controls {
-
-        PlayerController::PlayerController(Scene::SceneManager &scene)
-            : VirtualScope(scene)
-        {
-        }
-
-        bool PlayerController::init()
-        {
-            sceneMgr().app().getGlobalAPIComponent<Controls::ControlsManager>().addAxisEventListener(this);
-
-            return VirtualScope::init();
-        }
-
-        bool PlayerController::onAxisEvent(const Input::AxisEventArgs &arg)
-        {
-            if (arg.mAxisType == Input::AxisEventArgs::LEFT) {
-                if (mTarget)
-                    mTarget->getComponent<Physics::RigidBody>()->setVelocity({ 3.0f * arg.mAxis1, 0.0f, -3.0f * arg.mAxis2 });
-            }
-            return false;
-        }
-
+    PlayerController::PlayerController(Scene::SceneManager &scene)
+        : VirtualScope(scene)
+    {
     }
+
+    bool PlayerController::init()
+    {
+        sceneMgr().app().getGlobalAPIComponent<Controls::ControlsManager>().addAxisEventListener(this);
+
+        return VirtualScope::init();
+    }
+
+    void PlayerController::finalize()
+    {
+        VirtualScope::finalize();
+
+        sceneMgr().app().getGlobalAPIComponent<Controls::ControlsManager>().removeAxisEventListener(this);        
+    }
+
+    bool PlayerController::onAxisEvent(const Input::AxisEventArgs &arg)
+    {
+        if (arg.mAxisType == Input::AxisEventArgs::LEFT) {
+            if (mTarget)
+                mTarget->getComponent<Physics::RigidBody>()->setVelocity({ 3.0f * arg.mAxis1, 0.0f, -3.0f * arg.mAxis2 });
+        }
+        return false;
+    }
+
+}
 }

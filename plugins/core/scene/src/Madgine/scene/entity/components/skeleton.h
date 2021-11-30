@@ -14,7 +14,7 @@ namespace Scene {
             std::string_view getName() const;
             void setName(std::string_view name);
 
-            Render::SkeletonDescriptor *data() const;
+            const Render::SkeletonDescriptor *data() const;
 
             void set(Render::SkeletonLoader::HandleType handle);
 

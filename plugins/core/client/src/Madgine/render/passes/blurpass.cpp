@@ -58,7 +58,7 @@ namespace Render {
         mInput->render();
     }
 
-    void BlurPass::onResize(const Vector2i &size)
+    void BlurPass::onTargetResize(const Vector2i &size)
     {
         mInput->resize(size);
     }

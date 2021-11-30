@@ -33,7 +33,7 @@ namespace Scene {
             Serialize::StreamResult readState(Serialize::SerializeInStream &in, const char *name = nullptr);
             void writeState(Serialize::SerializeOutStream &out, const char *name = nullptr) const;
 
-            void applySerializableMap(Serialize::SerializeInStream &in, bool success);
+            Serialize::StreamResult applySerializableMap(Serialize::SerializeInStream &in, bool success);
 
         private:
             bool holdsRef() const;

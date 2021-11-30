@@ -7,7 +7,7 @@
 namespace Engine {
 namespace Render {
 
-    DirectX11GeometryShader::DirectX11GeometryShader(ID3DBlob *pShaderBlob)
+    DirectX11GeometryShader::DirectX11GeometryShader(ReleasePtr<ID3DBlob> pShaderBlob)
     {
         sDevice->CreateGeometryShader(pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize(), nullptr, &mShader);
     }
@@ -30,13 +30,10 @@ namespace Render {
 
     void DirectX11GeometryShader::reset()
     {
-        if (mShader) {
-            mShader->Release();
-            mShader = nullptr;
-        }
+        mShader.reset();
     }
 
-    void DirectX11GeometryShader::bind()
+    void DirectX11GeometryShader::bind() const 
     {
         sDeviceContext->GSSetShader(mShader, nullptr, 0);
     }

@@ -9,6 +9,7 @@
 #include "metatable.h"
 #include "typedscopeptr.h"
 #include "valuetype_forward.h"
+#include "proxyscopebase.h"
 
 namespace Engine {
 
@@ -90,7 +91,7 @@ constexpr Accessor member()
     using DerivedScope = typename traits::class_type;
     using T = typename traits::return_type;
 
-    if constexpr (std::is_const_v<DerivedScope> || !std::is_assignable_v<T &, const T &> || (is_iterable_v<T> && !is_string_like_v<T>)) {
+    if constexpr (std::is_const_v<DerivedScope> || !std::is_assignable_v<T &, const T &> || (Iterable<T> && !String<T>)) {
         return property<Scope, P, nullptr>();
     } else {
         return property<Scope, P, &setField<P, DerivedScope, std::remove_reference_t<T>>>();

@@ -95,18 +95,16 @@ namespace Render {
 
     void DirectX11VertexShader::reset()
     {
-        for (std::pair<ID3D11VertexShader *, ID3D11InputLayout *> &p : mInstances) {
+        for (std::pair<ReleasePtr<ID3D11VertexShader>, ReleasePtr<ID3D11InputLayout>> &p : mInstances) {
             if (p.first) {
                 assert(p.second);
-                p.first->Release();
-                p.second->Release();
-                p = { nullptr,
-                    nullptr };
+                p.first.reset();
+                p.second.reset();
             }
         }
     }
 
-    void DirectX11VertexShader::bind(DirectX11VertexArray *format, size_t instanceDataSize)
+    void DirectX11VertexShader::bind(const DirectX11VertexArray *format, size_t instanceDataSize) const 
     {
         uint8_t index = format->mFormat;
         if (mInstances.size() <= index)
@@ -133,8 +131,8 @@ namespace Render {
 
             const char *cSource = source.c_str();
 
-            ID3DBlob *pShaderBlob = nullptr;
-            ID3DBlob *pErrorBlob = nullptr;
+            ReleasePtr<ID3DBlob> pShaderBlob;
+            ReleasePtr<ID3DBlob> pErrorBlob;
 
             UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
 #if _DEBUG
@@ -181,15 +179,6 @@ namespace Render {
                 LOG_ERROR("Loading of VertexShader '" << filename << "' failed:");
                 if (pErrorBlob) {
                     LOG_ERROR((char *)pErrorBlob->GetBufferPointer());
-
-                    if (pShaderBlob) {
-                        pShaderBlob->Release();
-                        pShaderBlob = nullptr;
-                    }
-                    if (pErrorBlob) {
-                        pErrorBlob->Release();
-                        pErrorBlob = nullptr;
-                    }
                 }
 
                 std::terminate();
@@ -200,15 +189,6 @@ namespace Render {
 
             hr = sDevice->CreateInputLayout(vertexLayoutDesc.data(), vertexLayoutDesc.size(), pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize(), &mInstances[index].second);
             DX11_CHECK(hr);
-
-            if (pShaderBlob) {
-                pShaderBlob->Release();
-                pShaderBlob = nullptr;
-            }
-            if (pErrorBlob) {
-                pErrorBlob->Release();
-                pErrorBlob = nullptr;
-            }
         }
 
         sDeviceContext->VSSetShader(mInstances[index].first, nullptr, 0);

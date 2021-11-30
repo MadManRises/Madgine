@@ -32,10 +32,10 @@ namespace Tools {
     {
     }
 
-    bool DirectX12ImRoot::init()
+    Threading::Task<bool> DirectX12ImRoot::init()
     {
-        if (!ClientImRoot::init())
-            return false;
+        if (!co_await ClientImRoot::init())
+            co_return false;
 
         OffsetPtr handle = Render::DirectX12RenderContext::getSingleton().mDescriptorHeap.allocate();
         ImGui_ImplDX12_Init(Render::GetDevice(), 1, DXGI_FORMAT_R8G8B8A8_UNORM, Render::DirectX12RenderContext::getSingleton().mDescriptorHeap.resource(), Render::DirectX12RenderContext::getSingleton().mDescriptorHeap.cpuHandle(handle), Render::DirectX12RenderContext::getSingleton().mDescriptorHeap.gpuHandle(handle));
@@ -56,31 +56,22 @@ namespace Tools {
             };
         };
 
-        return true;
+        co_return true;
     }
 
-    void DirectX12ImRoot::finalize()
+    Threading::Task<void> DirectX12ImRoot::finalize()
     {
         ImGui_ImplDX12_Shutdown();
 
-        ClientImRoot::finalize();
+        co_await ClientImRoot::finalize();
+
+        co_return;
     }
 
-    void DirectX12ImRoot::newFrame(float timeSinceLastFrame)
-    {
-        ImGuiIO &io = ImGui::GetIO();
-
-        io.DeltaTime = timeSinceLastFrame;
-
-        Vector2i size = mWindow.getScreenSpace().mSize;
-
-        io.BackendPlatformUserData = &mWindow;
-
-        io.DisplaySize = ImVec2(size.x / io.DisplayFramebufferScale.x, size.y / io.DisplayFramebufferScale.y);
+    void DirectX12ImRoot::newFrame()
+    {       
 
         ImGui_ImplDX12_NewFrame();
-        ImGui::NewFrame();
-        Im3D::NewFrame();
     }
 
     void DirectX12ImRoot::renderDrawList(ImGuiViewport *vp)

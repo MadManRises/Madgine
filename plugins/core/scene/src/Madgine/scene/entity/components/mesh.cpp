@@ -33,7 +33,7 @@ namespace Scene {
             }
         }
 
-        Render::GPUMeshData *Mesh::data() const
+        const Render::GPUMeshData *Mesh::data() const
         {
             return mMesh;
         }

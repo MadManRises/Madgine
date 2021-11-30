@@ -22,7 +22,7 @@ namespace Render {
 
         void reset();
 
-        void bind(DirectX12Program *program, DirectX12VertexShader *vertexShader, DirectX12PixelShader *pixelShader);
+        void bind(const DirectX12Program *program, const DirectX12VertexShader *vertexShader, const DirectX12PixelShader *pixelShader) const;
 
         UINT mStride = 0;
         uint8_t mFormat = 0;
@@ -35,7 +35,7 @@ namespace Render {
         const DirectX12Buffer *mVBO = nullptr;
         const DirectX12Buffer *mEBO = nullptr;
 
-        std::map<DirectX12Program *, ID3D12PipelineState *> mInstances;        
+        mutable std::map<const DirectX12Program *, ID3D12PipelineState *> mInstances;        
     };
 
 }

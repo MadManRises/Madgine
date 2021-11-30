@@ -13,7 +13,7 @@ namespace Controls {
 
         virtual std::string_view key() const override;
 
-        virtual bool init() override;
+        virtual Threading::Task<bool> init() override;
 
         virtual bool injectAxisEvent(const Input::AxisEventArgs &arg) override;
 

@@ -11,8 +11,8 @@ namespace Serialize {
     struct META_EXPORT SerializeStreamData {
     public:
         SerializeStreamData(std::unique_ptr<Formatter> format);
-        SerializeStreamData(SerializeStreamData &&) = delete;
         SerializeStreamData(std::unique_ptr<Formatter> format, SerializeManager &mgr, ParticipantId id);
+        SerializeStreamData(SerializeStreamData &&) = delete;        
         virtual ~SerializeStreamData();
 
         void setManager(SerializeManager *mgr);

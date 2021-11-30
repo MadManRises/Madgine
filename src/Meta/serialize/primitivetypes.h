@@ -76,7 +76,7 @@ namespace Serialize {
     const constexpr bool PrimitiveTypesContain_v = PrimitiveTypesContain<T>::value;
 
     template <typename T>
-    const constexpr bool isPrimitiveType_v = PrimitiveTypesContain_v<T> || std::is_convertible_v<T, const SerializableDataUnit *> || std::is_convertible_v<T, const SyncableUnitBase *> || std::is_enum_v<T> || is_instance_v<T, EnumType>;
+    concept PrimitiveType = PrimitiveTypesContain_v<T> || std::convertible_to<T, const SerializableDataUnit *> || std::convertible_to<T, const SyncableUnitBase *> || Enum<T> || InstanceOf<T, EnumType>;
 
 }
 }

@@ -25,7 +25,7 @@ struct UniqueComponentContainer : C
     {
         size_t count = Registry::sComponents().size();
         mSortedComponents.reserve(count);
-        if constexpr (is_instance_v<container, std::vector>) {
+        if constexpr (InstanceOf<container, std::vector>) {
             this->reserve(count);
         }
         for (auto f : Registry::sComponents()) {

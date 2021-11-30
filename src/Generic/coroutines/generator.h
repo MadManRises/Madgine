@@ -1,6 +1,5 @@
 #pragma once
 
-#include "coroutine.h"
 #include "handle.h"
 
 namespace Engine {

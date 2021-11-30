@@ -99,7 +99,7 @@ struct RefcountedContainer {
         };
         bool mDeadFlag : 1 = false;
         bool mFree : 1 = false;
-        uint32_t mRefCount : 31 = 0;
+        uint32_t mRefCount : 30 = 0;
 
         friend struct RefcountedContainer<C>;
     };
@@ -111,7 +111,7 @@ struct RefcountedContainer {
     using position_handle = typename internal_traits::position_handle;
 
 public:
-    template <typename It, typename Val>
+    template <typename It, typename Val, bool skipping>
     struct IteratorImpl {
 
         using iterator_category = typename It::iterator_category;
@@ -126,19 +126,21 @@ public:
         IteratorImpl(It it)
             : mIt(std::move(it))
         {
+            if constexpr (skipping)
+                update();
         }
 
-        template <typename It2, typename Val2>
+        template <typename It2, typename Val2, bool skipping2>
         friend struct IteratorImpl;
 
         template <typename It2, typename Val2>
-        IteratorImpl(const IteratorImpl<It2, Val2> &other)
+        IteratorImpl(const IteratorImpl<It2, Val2, skipping> &other)
             : mIt(other.mIt)
         {
         }
 
         template <typename It2, typename Val2>
-        IteratorImpl(const Pib<IteratorImpl<It2, Val2>> &other)
+        IteratorImpl(const Pib<IteratorImpl<It2, Val2, skipping>> &other)
             : IteratorImpl(other.first)
         {
         }
@@ -187,13 +189,31 @@ public:
         IteratorImpl &operator++()
         {
             ++mIt;
+            if constexpr (skipping)
+                update();
             return *this;
         }
 
         IteratorImpl &operator--()
         {
             --mIt;
+            if constexpr (skipping)
+                updateBack();
             return *this;
+        }
+
+        void update()
+        {
+            while (mIt.it() != mIt.container().end() && mIt->dead()) {
+                ++mIt;
+            }
+        }
+
+        void updateBack()
+        {
+            while (mIt->dead()) {
+                --mIt;
+            }
         }
 
         const It &it() const
@@ -205,10 +225,10 @@ public:
         It mIt;
     };
 
-    using iterator = IteratorImpl<typename internal_traits::iterator, value_type>;
-    using reverse_iterator = IteratorImpl<typename internal_traits::reverse_iterator, value_type>;
-    using const_iterator = IteratorImpl<typename internal_traits::const_iterator, const value_type>;
-    using const_reverse_iterator = IteratorImpl<typename internal_traits::const_reverse_iterator, const value_type>;
+    using iterator = IteratorImpl<typename internal_traits::iterator, value_type, true>;
+    using reverse_iterator = IteratorImpl<typename internal_traits::reverse_iterator, value_type, true>;
+    using const_iterator = IteratorImpl<typename internal_traits::const_iterator, const value_type, true>;
+    using const_reverse_iterator = IteratorImpl<typename internal_traits::const_reverse_iterator, const value_type, true>;
 
     iterator begin()
     {
@@ -230,10 +250,10 @@ public:
         return { mData.end() };
     }
 
-    using refcounted_iterator = IteratorImpl<typename internal_container_type::iterator, ControlBlock>;
-    using refcounted_reverse_iterator = IteratorImpl<typename internal_container_type::reverse_iterator, ControlBlock>;
-    using refcounted_const_iterator = IteratorImpl<typename internal_container_type::const_iterator, const ControlBlock>;
-    using refcounted_const_reverse_iterator = IteratorImpl<typename internal_container_type::const_reverse_iterator, const ControlBlock>;
+    using refcounted_iterator = IteratorImpl<typename internal_container_type::iterator, ControlBlock, false>;
+    using refcounted_reverse_iterator = IteratorImpl<typename internal_container_type::reverse_iterator, ControlBlock, false>;
+    using refcounted_const_iterator = IteratorImpl<typename internal_container_type::const_iterator, const ControlBlock, false>;
+    using refcounted_const_reverse_iterator = IteratorImpl<typename internal_container_type::const_reverse_iterator, const ControlBlock, false>;
 
     refcounted_iterator refcounted_begin()
     {
@@ -255,10 +275,10 @@ public:
         return { mData.end() };
     }
 
-    using blocks_iterator = IteratorImpl<typename internal_container_type::nodes_iterator, ControlBlock>;
-    using blocks_reverse_iterator = IteratorImpl<typename internal_container_type::nodes_reverse_iterator, ControlBlock>;
-    using blocks_const_iterator = IteratorImpl<typename internal_container_type::nodes_const_iterator, const ControlBlock>;
-    using blocks_const_reverse_iterator = IteratorImpl<typename internal_container_type::nodes_const_reverse_iterator, const ControlBlock>;
+    using blocks_iterator = IteratorImpl<typename internal_container_type::nodes_iterator, ControlBlock, false>;
+    using blocks_reverse_iterator = IteratorImpl<typename internal_container_type::nodes_reverse_iterator, ControlBlock, false>;
+    using blocks_const_iterator = IteratorImpl<typename internal_container_type::nodes_const_iterator, const ControlBlock, false>;
+    using blocks_const_reverse_iterator = IteratorImpl<typename internal_container_type::nodes_const_reverse_iterator, const ControlBlock, false>;
 
     blocks_iterator blocks_begin()
     {
@@ -338,7 +358,9 @@ public:
 
     void clear()
     {
-        mData.clear();
+        for (auto it = begin(); it != end();) {
+            it = erase(it);
+        }
     }
 
     iterator erase(const iterator &where)
@@ -349,6 +371,18 @@ public:
             where.get_block().destroy();
             where.get_block().mContainer = this;
             new (&where.get_block().mBuffer) position_handle(internal_traits::toPositionHandle(mData, where.it()));
+            return std::next(where);
+        }
+    }
+
+    refcounted_iterator erase_refcounted(const refcounted_iterator &where)
+    {
+        if (where->mRefCount == 0) {
+            return mData.erase(where.it());
+        } else {
+            where->destroy();
+            where->mContainer = this;
+            new (&where->mBuffer) position_handle(internal_traits::toPositionHandle(mData, where.it()));
             return std::next(where);
         }
     }
@@ -391,7 +425,7 @@ void RefcountedContainer<C>::ControlBlock::decRef()
 {
     --mRefCount;
     if (mRefCount == 0 && mDeadFlag)
-        mContainer->erase(container_traits<RefcountedContainer<C>>::toIterator(*mContainer, *reinterpret_cast<position_handle *>(&mBuffer)));
+        mContainer->erase_refcounted(internal_traits::toIterator(mContainer->mData, *reinterpret_cast<position_handle *>(&mBuffer)));
 }
 
 template <typename C>
@@ -400,7 +434,7 @@ struct underlying_container<RefcountedContainer<C>> {
 };
 
 template <typename C>
-struct container_traits<RefcountedContainer<C>, void> : RefcountedContainer<C>::internal_traits {
+struct container_traits<RefcountedContainer<C>> : RefcountedContainer<C>::internal_traits {
 
     typedef typename C::value_type value_type;
 

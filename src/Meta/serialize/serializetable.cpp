@@ -64,7 +64,7 @@ namespace Serialize {
 
         if (flags & StateTransmissionFlags_ApplyMap) {
             assert(in.manager());
-            applySerializableMap(unit, in, result.mState == StreamState::OK);
+            STREAM_PROPAGATE_ERROR(applySerializableMap(unit, in, result.mState == StreamState::OK));
         }
         return result;
     }
@@ -99,15 +99,16 @@ namespace Serialize {
         return get(index).mReadRequest(unit, inout, id);
     }
 
-    void SerializeTable::applySerializableMap(SerializableDataUnit *unit, SerializeInStream &in, bool success) const
+    StreamResult SerializeTable::applySerializableMap(SerializableDataUnit *unit, SerializeInStream &in, bool success) const
     {
         const SerializeTable *table = this;
         while (table) {
             for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                it->second.mApplySerializableMap(unit, in, success);
+                STREAM_PROPAGATE_ERROR(it->second.mApplySerializableMap(unit, in, success));
             }
             table = table->mBaseType ? &table->mBaseType() : nullptr;
         }
+        return {};
     }
 
     void SerializeTable::setDataSynced(SerializableUnitBase *unit, bool b) const

@@ -35,6 +35,8 @@
 
 #include "Madgine_Tools/interactivecamera.h"
 
+#include  "Madgine_Tools/imgui/clientimroot.h"
+
 
 namespace Engine {
 namespace Tools {
@@ -76,12 +78,16 @@ namespace Tools {
         mRenderTarget->addRenderPass(&mGridRenderer);
 		
 		mRenderTarget->addRenderPass(&mIm3DRenderer);		
+
+        static_cast<ClientImRoot &>(mEditor->root()).addRenderTarget(mRenderTarget.get());
     }
 
     SceneView::SceneView(SceneView &&) = default;
 
     SceneView::~SceneView()
     {
+        static_cast<ClientImRoot &>(mEditor->root()).removeRenderTarget(mRenderTarget.get());
+
         mRenderTarget->removeRenderPass(&mIm3DRenderer);
 
         mRenderTarget->removeRenderPass(&mGridRenderer);
@@ -112,7 +118,6 @@ namespace Tools {
 
             ImVec2 region = ImGui::GetContentRegionAvail();
             mRenderTarget->resize({ static_cast<int>(region.x), static_cast<int>(region.y) });
-            mRenderTarget->render();
             bool pressed = ImGui::ImageButton((void *)mRenderTarget->texture().mTextureHandle, region, { 0, 0 }, { 1, 1 }, 0);
 			if (pressed && !mState.mDragging[0])
                 if (!Im3D::IsAnyObjectHovered())

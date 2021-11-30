@@ -13,9 +13,9 @@ namespace App {
     {
     }
 
-    const App::Application *GlobalAPIBase::parent() const
+    Threading::TaskQueue *GlobalAPIBase::taskQueue() const
     {
-        return &mApp;
+        return mApp.taskQueue();
     }
 
     App::Application &GlobalAPIBase::app()
@@ -23,21 +23,19 @@ namespace App {
         return mApp;
     }
 
-    bool GlobalAPIBase::init()
+    Threading::Task<bool> GlobalAPIBase::init()
     {
-        return true;
+        co_return true;
     }
 
-    void GlobalAPIBase::finalize()
+    Threading::Task<void> GlobalAPIBase::finalize()
     {
+        co_return;
     }
 
-    GlobalAPIBase &GlobalAPIBase::getGlobalAPIComponent(size_t i, bool init)
+    GlobalAPIBase &GlobalAPIBase::getGlobalAPIComponent(size_t i)
     {
-        if (init) {
-            checkInitState();
-        }
-        return mApp.getGlobalAPIComponent(i, init);
+        return mApp.getGlobalAPIComponent(i);
     }
 
 }

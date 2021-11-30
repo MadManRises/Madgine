@@ -7,8 +7,6 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "Madgine/threading/contextmasks.h"
-
 #include "Modules/uniquecomponent/uniquecomponentregistry.h"
 
 DEFINE_UNIQUE_COMPONENT(Engine::UI, GuiHandler)
@@ -24,7 +22,6 @@ namespace UI {
     GuiHandlerBase::GuiHandlerBase(UIManager &ui, WindowType type)
         : Handler(ui)
         , mType(type)
-        , mContext(Threading::ContextMask::NoContext)
     {
     }
 
@@ -33,7 +30,8 @@ namespace UI {
         if (!mWidget)
             return;
 
-        if (getState() != ObjectState::INITIALIZED) {
+        auto state = getState();
+        if (!state.is_ready() || !state) {
             LOG_ERROR("Failed to open unitialized GuiHandler!");
             return;
         }
@@ -76,16 +74,6 @@ namespace UI {
     bool GuiHandlerBase::isRootWindow() const
     {
         return mType == WindowType::ROOT_WINDOW;
-    }
-
-    Threading::ContextMask GuiHandlerBase::context() const
-    {
-        return mContext;
-    }
-
-    void GuiHandlerBase::setContext(Threading::ContextMask context)
-    {
-        mContext = context;
     }
 
 } // namespace GuiHandler

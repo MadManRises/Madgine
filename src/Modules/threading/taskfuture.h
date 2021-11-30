@@ -1,10 +1,13 @@
 #pragma once
 
-#include "taskpromise.h"
 #include "taskhandle.h"
+#include "taskpromise.h"
 
 namespace Engine {
 namespace Threading {
+
+    template <typename F, typename... Args>
+    auto make_task(F f, Args &&...args);
 
     template <typename T>
     struct TaskFuture {
@@ -31,13 +34,18 @@ namespace Threading {
         {
             return mState && mState->valid();
         }
+        
+        void reset()
+        {
+            mState.reset();
+        }
 
-        bool is_ready()
+        bool is_ready() const
         {
             return mState->is_ready();
         }
 
-        bool await_ready()
+        bool await_ready() const
         {
             return is_ready();
         }
@@ -45,6 +53,11 @@ namespace Threading {
         void await_suspend(TaskHandle handle)
         {
             mState->then(std::move(handle));
+        }
+
+        const T &await_resume() const
+        {
+            return get();
         }
 
         template <typename F>
@@ -57,18 +70,13 @@ namespace Threading {
             return fut;
         }
 
-        T &await_resume()
-        {
-            return get();
-        }
-
-        T &get()
+        const T &get() const
         {
             assert(is_ready());
             return mState->get();
         }
 
-        operator T &()
+        operator const T &() const
         {
             return get();
         }
@@ -91,12 +99,17 @@ namespace Threading {
             return mState && mState->valid();
         }
 
-        bool is_ready()
+        void reset()
+        {
+            mState.reset();
+        }
+
+        bool is_ready() const
         {
             return !mState || mState->is_ready();
         }
 
-        bool await_ready()
+        bool await_ready() const
         {
             return is_ready();
         }
@@ -106,9 +119,19 @@ namespace Threading {
             mState->then(std::move(handle));
         }
 
-        void await_resume()
+        void await_resume() const
         {
             assert(is_ready());
+        }
+
+        template <typename F>
+        auto then(F &&f, Threading::TaskQueue *queue)
+        {
+            auto task = make_task(std::forward<F>(f));
+            auto fut = task.get_future();
+            auto handle = std::move(task).assign(queue);
+            mState->then(std::move(handle));
+            return fut;
         }
 
         std::shared_ptr<TaskPromiseSharedState<void>> mState;

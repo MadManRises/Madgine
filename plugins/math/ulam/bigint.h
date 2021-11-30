@@ -66,7 +66,7 @@ struct BigInt {
             }
             buffer = 1;
         }
-       assert(false);
+        throw 0;
     }
 
     BigInt operator-(const BigInt &v) const

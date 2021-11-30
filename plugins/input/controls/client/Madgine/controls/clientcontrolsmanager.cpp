@@ -22,7 +22,7 @@ namespace Engine {
 namespace Controls {
 
     ClientControlsManager::ClientControlsManager(Window::MainWindow &window)
-        : VirtualUnit(window, 100)
+        : VirtualData(window, 100)
         
     {
     }
@@ -32,10 +32,10 @@ namespace Controls {
         return "ClientControlsManager";
     }
 
-    bool Engine::Controls::ClientControlsManager::init()
+    Threading::Task<bool> Engine::Controls::ClientControlsManager::init()
     {
         mManager = &Engine::App::Application::getSingleton().getGlobalAPIComponent<ControlsManager>();
-        return VirtualUnit::init();
+        co_return true;
     }
 
     bool ClientControlsManager::injectAxisEvent(const Input::AxisEventArgs &arg)

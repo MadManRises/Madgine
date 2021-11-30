@@ -31,19 +31,13 @@ namespace Render {
     {
     }
 
-    void DirectX11RenderTarget::setup(std::vector<ID3D11RenderTargetView *> targetViews, const Vector2i &size, TextureType type, size_t samples)
+    void DirectX11RenderTarget::setup(std::vector<ReleasePtr<ID3D11RenderTargetView>> targetViews, const Vector2i &size, TextureType type, size_t samples)
     {
-        for (ID3D11RenderTargetView *view : mTargetViews) {
-            view->Release();
-        }
         mTargetViews = std::move(targetViews);        
 
         mDepthBuffer = { type, FORMAT_D32, D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE, static_cast<size_t>(size.x), static_cast<size_t>(size.y), samples };
 
-        if (mDepthStencilView) {
-            mDepthStencilView->Release();
-            mDepthStencilView = nullptr;
-        }
+        mDepthStencilView.reset();
 
         D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
         ZeroMemory(&dsvDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
@@ -142,14 +136,14 @@ namespace Render {
             samplerDesc.MinLOD = 0;
             samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-            hr = sDevice->CreateSamplerState(&samplerDesc, mSamplers + 0);
+            hr = sDevice->CreateSamplerState(&samplerDesc, &mSamplers[0]);
             DX11_CHECK(hr);
 
             samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
             samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
             samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 
-            hr = sDevice->CreateSamplerState(&samplerDesc, mSamplers + 1);
+            hr = sDevice->CreateSamplerState(&samplerDesc, &mSamplers[1]);
             DX11_CHECK(hr);
         }
     }
@@ -157,39 +151,18 @@ namespace Render {
     void DirectX11RenderTarget::shutdown()
     {
         for (size_t i = 0; i < 2; ++i) {
-            if (mSamplers[i]) {
-                mSamplers[i]->Release();
-                mSamplers[i] = nullptr;
-            }
+            mSamplers[i].reset();
         }
 
-        if (mBlendState) {
-            mBlendState->Release();
-            mBlendState = nullptr;
-        }
+        mBlendState.reset();
+        mRasterizerState.reset();
+        mDepthStencilState.reset();
+        mDepthStencilView.reset();
 
-        if (mRasterizerState) {
-            mRasterizerState->Release();
-            mRasterizerState = nullptr;
-        }
-
-        if (mDepthStencilState) {
-            mDepthStencilState->Release();
-            mDepthStencilState = nullptr;
-        }
-
-        if (mDepthStencilView) {
-            mDepthStencilView->Release();
-            mDepthStencilView = nullptr;
-        }
-
-        for (ID3D11RenderTargetView *view : mTargetViews) {
-            view->Release();
-        }
         mTargetViews.clear();
     }
 
-    void DirectX11RenderTarget::beginIteration(size_t iteration)
+    void DirectX11RenderTarget::beginIteration(size_t iteration) const
     {
         RenderTarget::beginIteration(iteration);
 
@@ -211,7 +184,7 @@ namespace Render {
         int bufferCount = iterations() > 1 ? 2 : 1;
         int offset = iterations() > 1 ? iteration % 2 : 0;
         size_t size = mTargetViews.size() / bufferCount;
-        sDeviceContext->OMSetRenderTargets(size, mTargetViews.data() + size * offset, mDepthStencilView);
+        sDeviceContext->OMSetRenderTargets(size, size > 0 ? &mTargetViews[size * offset] : nullptr, mDepthStencilView);
         sDeviceContext->OMSetDepthStencilState(mDepthStencilState, 1);
         sDeviceContext->OMSetBlendState(mBlendState, 0, 0xffffffff);
 
@@ -219,12 +192,12 @@ namespace Render {
             sDeviceContext->ClearRenderTargetView(view, color);
         sDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-        sDeviceContext->PSSetSamplers(0, 2, mSamplers);
+        sDeviceContext->PSSetSamplers(0, 2, &mSamplers[0]);
 
         LOG_DEBUG("Begin Iteration");
     }
 
-    void DirectX11RenderTarget::endIteration(size_t iteration)
+    void DirectX11RenderTarget::endIteration(size_t iteration) const
     {
         LOG_DEBUG("End Iteration");
         sDeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
@@ -256,10 +229,10 @@ namespace Render {
         sDeviceContext->RSSetViewports(1, &viewport);
     }
 
-    void DirectX11RenderTarget::renderMesh(GPUMeshData *m, Program *p, const Material *material)
+    void DirectX11RenderTarget::renderMesh(const GPUMeshData *m, const Program *p, const Material *material)
     {
-        DirectX11MeshData *mesh = static_cast<DirectX11MeshData *>(m);
-        DirectX11Program *program = static_cast<DirectX11Program *>(p);
+        const DirectX11MeshData *mesh = static_cast<const DirectX11MeshData *>(m);
+        const DirectX11Program *program = static_cast<const DirectX11Program *>(p);
 
         if (!mesh->mVAO)
             return;
@@ -286,10 +259,10 @@ namespace Render {
         }      
     }
 
-    void DirectX11RenderTarget::renderMeshInstanced(size_t count, GPUMeshData *m, Program *p, const Material *material)
+    void DirectX11RenderTarget::renderMeshInstanced(size_t count, const GPUMeshData *m, const Program *p, const Material *material)
     {
-        DirectX11MeshData *mesh = static_cast<DirectX11MeshData *>(m);
-        DirectX11Program *program = static_cast<DirectX11Program *>(p);
+        const DirectX11MeshData *mesh = static_cast<const DirectX11MeshData *>(m);
+        const DirectX11Program *program = static_cast<const DirectX11Program *>(p);
 
         if (!mesh->mVAO)
             return;
@@ -317,7 +290,7 @@ namespace Render {
         }
     }
 
-    void DirectX11RenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices)
+    void DirectX11RenderTarget::renderVertices(const Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices)
     {
         if (!vertices.empty()) {
             DirectX11MeshData tempMesh;
@@ -329,7 +302,7 @@ namespace Render {
         }
     }
 
-    void DirectX11RenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, const Material *material)
+    void DirectX11RenderTarget::renderVertices(const Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, const Material *material)
     {
         if (!vertices.empty()) {
             DirectX11MeshData tempMesh;
@@ -344,7 +317,7 @@ namespace Render {
         sDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
     }
 
-    void DirectX11RenderTarget::bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset)
+    void DirectX11RenderTarget::bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset) const
     {
         LOG_DEBUG("Texture Bind");
         std::vector<ID3D11ShaderResourceView *> handles;

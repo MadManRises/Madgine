@@ -20,7 +20,7 @@ namespace Scene {
                 setName(v.as<std::string>());
             }
         }
-        Render::SkeletonDescriptor *Skeleton::data() const
+        const Render::SkeletonDescriptor *Skeleton::data() const
         {
             return mSkeleton;
         }

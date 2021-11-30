@@ -126,6 +126,10 @@ struct FreeListContainer {
             return mIt;
         }
 
+        const C& container() const {
+            return *mContainer;
+        }
+
     private:
         It mIt;
         const C *mContainer = nullptr;
@@ -232,7 +236,7 @@ public:
 
     void clear()
     {
-        for (auto it = nodes_begin(); it != nodes_end(); ++it) {
+        for (auto it = begin(); it != end(); ++it) {
             destroy(*it, mFreeListHead);
             mFreeListHead = internal_traits::toPositionHandle(mContainer, it.it());
         }

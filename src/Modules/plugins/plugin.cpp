@@ -40,45 +40,38 @@ namespace Plugins {
 
     Plugin::~Plugin()
     {
-        assert(!mModule);
-        assert(mDependencies.empty());
-        assert(mDependents.empty());
+        //assert(!mModule);
+        //assert(mDependencies.empty());
+        //assert(mDependents.empty());
     }
 
     void Plugin::ensureModule(PluginManager &manager)
     {
         if (!mModule) {
             std::string errorMsg;
-            try {
-                mModule = Dl::openDll(mPath.str());
-                if (mModule) {
-                    const BinaryInfo *bin = info();
-                    if (bin) {
-                        bin->mSelf = this;
+            mModule = Dl::openDll(mPath.str());
+            if (mModule) {
+                const BinaryInfo *bin = info();
+                if (bin) {
+                    bin->mSelf = this;
 
-                        for (const char **dep = bin->mPluginDependencies; *dep; ++dep) {
-                            addDependency(manager, manager.getPlugin(*dep));
-                        }
+                    for (const char **dep = bin->mPluginDependencies; *dep; ++dep) {
+                        addDependency(manager, manager.getPlugin(*dep));
+                    }
 
-                        for (const char **dep = bin->mPluginGroupDependencies; *dep; ++dep) {
-                            addGroupDependency(manager, &manager.section(*dep));
-                        }
-                    } else {
-                        errorMsg = "Unable to locate BinaryInfo. Make sure you call generate_binary_info in your CMakeLists.txt for your binaries!";
-                        Dl::closeDll(mModule);
-                        mModule = nullptr;
+                    for (const char **dep = bin->mPluginGroupDependencies; *dep; ++dep) {
+                        addGroupDependency(manager, &manager.section(*dep));
                     }
                 } else {
-                    Dl::DlAPIResult result = Dl::getError("openDll");
-                    errorMsg = result.toString();
+                    LOG_ERROR("Unable to locate BinaryInfo. Make sure you call generate_binary_info in your CMakeLists.txt for your binaries!");
+                    Dl::closeDll(mModule);
+                    mModule = nullptr;
+                    std::terminate();                    
                 }
-            } catch (const std::exception &e) {
-                errorMsg = e.what();
-                mModule = nullptr;
-            }
-            if (!mModule) {
-                LOG_ERROR(errorMsg);
-                throw 0;
+            } else {
+                Dl::DlAPIResult result = Dl::getError("openDll");
+                LOG_ERROR(result.toString());
+                std::terminate();
             }
         }
     }

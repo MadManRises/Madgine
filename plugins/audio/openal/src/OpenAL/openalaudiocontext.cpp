@@ -73,7 +73,7 @@ namespace Audio {
     {
     }
 
-    bool OpenALAudioContext::init()
+    Threading::Task<bool> OpenALAudioContext::init()
     {
         mDevice = alcOpenDevice(nullptr);
         assert(mDevice);
@@ -117,10 +117,10 @@ namespace Audio {
 
         alCall(alSourcePlay, source);
         */
-        return true;
+        co_return true;
     }
 
-    void OpenALAudioContext::finalize()
+    Threading::Task<void> OpenALAudioContext::finalize()
     {
         alcMakeContextCurrent(nullptr);
         alcDestroyContext(mContext);
@@ -128,6 +128,8 @@ namespace Audio {
 
         alcCloseDevice(mDevice);
         mDevice = nullptr;
+
+        co_return;
     }
 
 }

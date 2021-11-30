@@ -21,7 +21,7 @@ namespace Render {
 
         void reset();
 
-        void bind(DirectX12VertexArray *format);
+        void bind(const DirectX12VertexArray *format) const;
 
         void setParametersSize(size_t index, size_t size);
         WritableByteBuffer mapParameters(size_t index);

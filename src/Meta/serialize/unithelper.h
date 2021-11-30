@@ -4,6 +4,8 @@
 
 #include "serializableunitptr.h"
 
+#include "streams/streamresult.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -12,32 +14,36 @@ namespace Serialize {
     DERIVE_FUNCTION(setActive, bool, bool);
     DERIVE_FUNCTION(setParent, SerializableUnitBase *);
 
-    META_EXPORT SyncableUnitBase *convertSyncablePtr(SerializeInStream &in, UnitId id);
-    META_EXPORT SerializableDataUnit *convertSerializablePtr(SerializeInStream &in, uint32_t id);
+    META_EXPORT StreamResult convertSyncablePtr(SerializeInStream &in, UnitId id, SyncableUnitBase *&out);
+    META_EXPORT StreamResult convertSerializablePtr(SerializeInStream &in, uint32_t id, SerializableDataUnit *&out);
 
     template <typename T>
     struct UnitHelper {
 
-        static void applyMap(SerializeInStream &in, T &item, bool success)
+        static StreamResult applyMap(SerializeInStream &in, T &item, bool success)
         {
-            if constexpr (std::is_pointer_v<T>) {
+            if constexpr (Pointer<T>) {
                 if (success) {
-                    static_assert(std::is_base_of_v<SerializableDataUnit, std::remove_pointer_t<T>>);
+                    static_assert(std::derived_from<std::remove_pointer_t<T>, SerializableDataUnit>);
                     uint32_t ptr = reinterpret_cast<uintptr_t>(item);
                     if (ptr & 0x3) {
                         switch (static_cast<UnitIdTag>(ptr & 0x3)) {
                         case UnitIdTag::SYNCABLE:
-                            if constexpr (std::is_base_of_v<SyncableUnitBase, std::remove_pointer_t<T>>) {
+                            if constexpr (std::derived_from<std::remove_pointer_t<T>, SyncableUnitBase>) {
                                 UnitId id = (ptr >> 2);
-                                item = static_cast<T>(convertSyncablePtr(in, id));
+                                SyncableUnitBase *unit;
+                                STREAM_PROPAGATE_ERROR(convertSyncablePtr(in, id, unit));
+                                item = static_cast<T>(unit);
                             } else {
                                 throw 0;
                             }
                             break;
                         case UnitIdTag::SERIALIZABLE:
-                            if constexpr (!std::is_base_of_v<SyncableUnitBase, std::remove_pointer_t<T>>) {
+                            if constexpr (!std::derived_from<std::remove_pointer_t<T>, SyncableUnitBase>) {
                                 uint32_t id = (ptr >> 2);
-                                item = static_cast<T>(convertSerializablePtr(in, id));
+                                SerializableDataUnit *unit;
+                                STREAM_PROPAGATE_ERROR(convertSerializablePtr(in, id, unit));
+                                item = static_cast<T>(unit);
                             } else {
                                 throw 0;
                             }
@@ -49,34 +55,40 @@ namespace Serialize {
                 } else {
                     item = nullptr;
                 }
+                return {};
             } else if constexpr (has_function_applySerializableMap_v<T>) {
-                item.applySerializableMap(in, success);
-            } else if constexpr (std::is_base_of_v<SerializableDataUnit, T>){
-                SerializableDataPtr { &item }.applySerializableMap(in, success);
-            } else if constexpr (is_instance_v<std::remove_const_t<T>, std::unique_ptr>) {
-                UnitHelper<typename T::element_type>::applyMap(in, *item, success);
-            } else if constexpr (is_iterable_v<T>) {
+                return item.applySerializableMap(in, success);
+            } else if constexpr (std::derived_from<T, SerializableDataUnit>) {
+                return SerializableDataPtr { &item }.applySerializableMap(in, success);
+            } else if constexpr (InstanceOf<std::remove_const_t<T>, std::unique_ptr>) {
+                return UnitHelper<typename T::element_type>::applyMap(in, *item, success);
+            } else if constexpr (Iterable<T>) {
                 for (auto &t : physical(item)) {
-                    UnitHelper<std::remove_reference_t<decltype(t)>>::applyMap(in, t, success);
+                    STREAM_PROPAGATE_ERROR(UnitHelper<std::remove_reference_t<decltype(t)>>::applyMap(in, t, success));
                 }
+                return {};
             } else if constexpr (TupleUnpacker::Tuplefyable<T>) {
-                TupleUnpacker::forEach(TupleUnpacker::toTuple(item), [&](auto &t) {
-                    UnitHelper<std::remove_reference_t<decltype(t)>>::applyMap(in, t, success);
-                });
+                return TupleUnpacker::accumulate(
+                    TupleUnpacker::toTuple(item), [&](auto &t, StreamResult r) {
+                        STREAM_PROPAGATE_ERROR(std::move(r));
+                        return UnitHelper<std::remove_reference_t<decltype(t)>>::applyMap(in, t, success);
+                    },
+                    StreamResult {});
             } else {
                 //static_assert(isPrimitiveType_v<T>, "Invalid Type");
+                return {};
             }
         }
 
-                static void setItemDataSynced(T &item, bool b)
+        static void setItemDataSynced(T &item, bool b)
         {
             if constexpr (has_function_setDataSynced_v<T>) {
                 item.setDataSynced(b);
-            } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>) {
+            } else if constexpr (std::derived_from<T, SerializableUnitBase>) {
                 SerializableUnitPtr { &item }.setDataSynced(b);
-            } else if constexpr (is_instance_v<std::remove_const_t<T>, std::unique_ptr>) {
+            } else if constexpr (InstanceOf<std::remove_const_t<T>, std::unique_ptr>) {
                 UnitHelper<typename T::element_type>::setItemDataSynced(*item, b);
-            } else if constexpr (is_iterable_v<T>) {
+            } else if constexpr (Iterable<T>) {
                 for (auto &&t : physical(item)) {
                     UnitHelper<std::remove_reference_t<decltype(t)>>::setItemDataSynced(t, b);
                 }
@@ -93,11 +105,11 @@ namespace Serialize {
         {
             if constexpr (has_function_setActive_v<T>) {
                 item.setActive(active, existenceChanged);
-            } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>) {
+            } else if constexpr (std::derived_from<T, SerializableUnitBase>) {
                 SerializableUnitPtr { &item }.setActive(active, existenceChanged);
-            } else if constexpr (is_instance_v<std::remove_const_t<T>, std::unique_ptr>) {                
+            } else if constexpr (InstanceOf<std::remove_const_t<T>, std::unique_ptr>) {
                 UnitHelper<typename T::element_type>::setItemActive(*item, active, existenceChanged);
-            } else if constexpr (is_iterable_v<T>) {
+            } else if constexpr (Iterable<T>) {
                 for (auto &t : physical(item)) {
                     UnitHelper<std::remove_reference_t<decltype(t)>>::setItemActive(t, active, existenceChanged);
                 }
@@ -118,11 +130,11 @@ namespace Serialize {
         {
             if constexpr (has_function_setParent_v<T>) {
                 item.setParent(parent);
-            } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>) {
+            } else if constexpr (std::derived_from<T, SerializableUnitBase>) {
                 SerializableUnitPtr { &item }.setParent(parent);
-            } else if constexpr (is_instance_v<std::remove_const_t<T>, std::unique_ptr>) {
+            } else if constexpr (InstanceOf<std::remove_const_t<T>, std::unique_ptr>) {
                 UnitHelper<typename T::element_type>::setItemParent(*item, parent);
-            } else if constexpr (is_iterable_v<T>) {
+            } else if constexpr (Iterable<T>) {
                 for (auto &t : physical(item)) {
                     UnitHelper<std::remove_reference_t<decltype(t)>>::setItemParent(t, parent);
                 }

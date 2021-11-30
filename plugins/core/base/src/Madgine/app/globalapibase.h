@@ -13,20 +13,20 @@ namespace App {
         virtual ~GlobalAPIBase() = default;
 
         template <typename T>
-        T &getGlobalAPIComponent(bool init = true)
+        T &getGlobalAPIComponent()
         {
-            return static_cast<T &>(getGlobalAPIComponent(component_index<T>(), init));
+            return static_cast<T &>(getGlobalAPIComponent(component_index<T>()));
         }
 
-        GlobalAPIBase &getGlobalAPIComponent(size_t i, bool = true);
+        GlobalAPIBase &getGlobalAPIComponent(size_t i);
 
         App::Application &app();
 
-    protected:
-        const App::Application *parent() const;
+        Threading::TaskQueue *taskQueue() const;
 
-        virtual bool init();
-        virtual void finalize();
+    protected:
+        virtual Threading::Task<bool> init();
+        virtual Threading::Task<void> finalize();
 
         friend struct MadgineObject<GlobalAPIBase>;
 

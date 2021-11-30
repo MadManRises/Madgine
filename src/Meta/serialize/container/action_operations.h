@@ -36,7 +36,7 @@ namespace Serialize {
                     return read(in, field, nullptr, args...);
                 },
                 StreamResult {}));
-            UnitHelper<decltype(data)>::applyMap(in, data, true);
+            STREAM_PROPAGATE_ERROR(UnitHelper<decltype(data)>::applyMap(in, data, true));
             if constexpr (std::is_same_v<R, void>) {
                 action.call(std::move(data), request ? request->mRequester : 0, request ? request->mRequesterTransactionId : 0);
                 if (request) {
@@ -73,7 +73,7 @@ namespace Serialize {
                         return read(in, field, nullptr, args...);
                     },
                     StreamResult {}));
-                UnitHelper<decltype(data)>::applyMap(in, data, true);
+                STREAM_PROPAGATE_ERROR(UnitHelper<decltype(data)>::applyMap(in, data, true));
                 if (TupleUnpacker::invokeExpand(Verifier::verify, OffsetPtr::parent(&action), id, data)) {
                     action.tryCall(data, in.id(), id);
                 } else {

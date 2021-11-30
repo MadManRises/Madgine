@@ -97,7 +97,7 @@ namespace Render {
         mFormat = 0;
     }
 
-    void DirectX12VertexArray::bind(DirectX12Program *program, DirectX12VertexShader *vertexShader, DirectX12PixelShader *pixelShader)
+    void DirectX12VertexArray::bind(const DirectX12Program *program, const DirectX12VertexShader *vertexShader, const DirectX12PixelShader *pixelShader) const 
     {
         constexpr D3D12_PRIMITIVE_TOPOLOGY modes[] {
             D3D_PRIMITIVE_TOPOLOGY_POINTLIST,

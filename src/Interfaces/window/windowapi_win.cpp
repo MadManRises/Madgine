@@ -28,15 +28,6 @@ namespace Window {
         {
         }
 
-        virtual void update() override
-        {
-            MSG msg;
-            while (PeekMessage(&msg, (HWND)mHandle, 0U, 0U, PM_REMOVE)) {
-                TranslateMessage(&msg);
-                DispatchMessage(&msg);
-            }
-        }
-
         bool handle(UINT msg, WPARAM wParam, LPARAM lParam, bool &ignore)
         {
             if (msg >= WM_MOUSEFIRST && msg <= WM_MOUSELAST) {
@@ -117,7 +108,7 @@ namespace Window {
                     if (wParam == SC_KEYMENU)
                         ignore = true;
                     break;
-                //default:
+                    //default:
                     //LOG_WARNING("Unhandled Event type: " << msg);
                 }
             }
@@ -125,157 +116,165 @@ namespace Window {
             return true;
         }
 
-        virtual InterfacesVector size() override
-        {
-            RECT rect;
-            auto result = GetWindowRect((HWND)mHandle, &rect);
-            assert(result);
-            return { rect.right - rect.left, rect.bottom - rect.top };
-        }
-
-        virtual InterfacesVector renderSize() override
-        {
-            RECT rect;
-            auto result = GetClientRect((HWND)mHandle, &rect);
-            assert(result);
-            return { rect.right - rect.left, rect.bottom - rect.top };
-        }
-
-        virtual void destroy() override
-        {
-            DestroyWindow((HWND)mHandle);
-        }
-
-        virtual InterfacesVector pos() override
-        {
-            RECT rect;
-            auto result = GetWindowRect((HWND)mHandle, &rect);
-            assert(result);
-            return { rect.left, rect.top };
-        }
-
-        virtual InterfacesVector renderPos() override
-        {
-            POINT p { 0, 0 };
-            auto result = ClientToScreen((HWND)mHandle, &p);
-            assert(result);
-            return { p.x, p.y };
-        }
-
-        virtual void setSize(const InterfacesVector &size) override
-        {
-            MoveWindow((HWND)mHandle, pos().x, pos().y, size.x, size.y, true);
-        }
-
-        virtual void setRenderSize(const InterfacesVector &size) override
-        {
-            RECT r;
-            auto result = GetClientRect((HWND)mHandle, &r);
-            assert(result);
-            RECT r2;
-            result = GetWindowRect((HWND)mHandle, &r2);
-            assert(result);
-            MoveWindow((HWND)mHandle, pos().x, pos().y, size.x + ((r2.right - r2.left) - (r.right - r.left)), size.y + ((r2.bottom - r2.top) - (r.bottom - r.top)), true);
-        }
-        virtual void setPos(const InterfacesVector &pos) override
-        {
-            MoveWindow((HWND)mHandle, pos.x, pos.y, size().x, size().y, true);
-        }
-        virtual void setRenderPos(const InterfacesVector &pos) override
-        {
-            RECT r;
-            auto result = GetWindowRect((HWND)mHandle, &r);
-            assert(result);
-            POINT p { 0, 0 };
-            result = ClientToScreen((HWND)mHandle, &p);
-            assert(result);
-            result = MoveWindow((HWND)mHandle, pos.x - (p.x - r.left), pos.y - (p.y - r.top), size().x, size().y, true);
-            assert(result);
-        }
-
-        virtual void show() override
-        {
-            ShowWindow((HWND)mHandle, SW_SHOW);
-        }
-
-        virtual bool isMinimized() override
-        {
-            WINDOWPLACEMENT placement;
-            auto result = GetWindowPlacement((HWND)mHandle, &placement);
-            assert(result);
-            return placement.showCmd == SW_MINIMIZE;
-        }
-
-        virtual bool isMaximized() override
-        {
-            WINDOWPLACEMENT placement;
-            auto result = GetWindowPlacement((HWND)mHandle, &placement);
-            assert(result);
-            return placement.showCmd == SW_MAXIMIZE;
-        }
-
-        virtual bool isFullscreen() override
-        {
-            return false;
-        }
-
-        virtual void focus() override
-        {
-            SetFocus((HWND)mHandle);
-        }
-        virtual bool hasFocus() override
-        {
-            return GetFocus() == (HWND)mHandle;
-        }
-
-        virtual void setTitle(const char *title) override
-        {
-            SetWindowTextA((HWND)mHandle, title);
-        }
-
-        virtual std::string title() const override
-        {
-            std::string result;
-            result.resize(256);
-            result.resize(GetWindowTextA((HWND)mHandle, result.data(), 256));
-            return result;
-        }
-
-        //Input
-        virtual bool isKeyDown(Input::Key::Key key) override
-        {
-            return mKeyDown[key];
-        }
-
-        virtual void captureInput() override
-        {
-            SetCapture((HWND)mHandle);
-        }
-
-        virtual void releaseInput() override
-        {
-            ReleaseCapture();
-        }
-
-        virtual WindowData data() override
-        {
-            WINDOWPLACEMENT wndpl;
-            wndpl.length = sizeof(WINDOWPLACEMENT);
-            GetWindowPlacement((HWND)mHandle, &wndpl);
-
-            return {
-                { wndpl.rcNormalPosition.left, wndpl.rcNormalPosition.top },
-                { wndpl.rcNormalPosition.right - wndpl.rcNormalPosition.left,
-                    wndpl.rcNormalPosition.bottom - wndpl.rcNormalPosition.top },
-                wndpl.showCmd == SW_MAXIMIZE,
-                isFullscreen()
-            };
-        }
-
-    private:
         BYTE mKeyDown[512];
         InterfacesVector mLastKnownMousePos;
     };
+
+    void OSWindow::update()
+    {
+        MSG msg;
+        while (PeekMessage(&msg, (HWND)mHandle, 0U, 0U, PM_REMOVE)) {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+    }
+
+    InterfacesVector OSWindow::size()
+    {
+        RECT rect;
+        auto result = GetWindowRect((HWND)mHandle, &rect);
+        assert(result);
+        return { rect.right - rect.left, rect.bottom - rect.top };
+    }
+
+    InterfacesVector OSWindow::renderSize()
+    {
+        RECT rect;
+        auto result = GetClientRect((HWND)mHandle, &rect);
+        assert(result);
+        return { rect.right - rect.left, rect.bottom - rect.top };
+    }
+
+    void OSWindow::destroy()
+    {
+        DestroyWindow((HWND)mHandle);
+    }
+
+    InterfacesVector OSWindow::pos()
+    {
+        RECT rect;
+        auto result = GetWindowRect((HWND)mHandle, &rect);
+        assert(result);
+        return { rect.left, rect.top };
+    }
+
+    InterfacesVector OSWindow::renderPos()
+    {
+        POINT p { 0, 0 };
+        auto result = ClientToScreen((HWND)mHandle, &p);
+        assert(result);
+        return { p.x, p.y };
+    }
+
+    void OSWindow::setSize(const InterfacesVector &size)
+    {
+        MoveWindow((HWND)mHandle, pos().x, pos().y, size.x, size.y, true);
+    }
+
+    void OSWindow::setRenderSize(const InterfacesVector &size)
+    {
+        RECT r;
+        auto result = GetClientRect((HWND)mHandle, &r);
+        assert(result);
+        RECT r2;
+        result = GetWindowRect((HWND)mHandle, &r2);
+        assert(result);
+        MoveWindow((HWND)mHandle, pos().x, pos().y, size.x + ((r2.right - r2.left) - (r.right - r.left)), size.y + ((r2.bottom - r2.top) - (r.bottom - r.top)), true);
+    }
+    void OSWindow::setPos(const InterfacesVector &pos)
+    {
+        MoveWindow((HWND)mHandle, pos.x, pos.y, size().x, size().y, true);
+    }
+    void OSWindow::setRenderPos(const InterfacesVector &pos)
+    {
+        RECT r;
+        auto result = GetWindowRect((HWND)mHandle, &r);
+        assert(result);
+        POINT p { 0, 0 };
+        result = ClientToScreen((HWND)mHandle, &p);
+        assert(result);
+        result = MoveWindow((HWND)mHandle, pos.x - (p.x - r.left), pos.y - (p.y - r.top), size().x, size().y, true);
+        assert(result);
+    }
+
+    void OSWindow::show()
+    {
+        ShowWindow((HWND)mHandle, SW_SHOW);
+    }
+
+    bool OSWindow::isMinimized()
+    {
+        WINDOWPLACEMENT placement;
+        auto result = GetWindowPlacement((HWND)mHandle, &placement);
+        assert(result);
+        return placement.showCmd == SW_MINIMIZE;
+    }
+
+    bool OSWindow::isMaximized()
+    {
+        WINDOWPLACEMENT placement;
+        auto result = GetWindowPlacement((HWND)mHandle, &placement);
+        assert(result);
+        return placement.showCmd == SW_MAXIMIZE;
+    }
+
+    bool OSWindow::isFullscreen()
+    {
+        return false;
+    }
+
+    void OSWindow::focus()
+    {
+        SetFocus((HWND)mHandle);
+    }
+    bool OSWindow::hasFocus()
+    {
+        return GetFocus() == (HWND)mHandle;
+    }
+
+    void OSWindow::setTitle(const char *title)
+    {
+        SetWindowTextA((HWND)mHandle, title);
+    }
+
+    std::string OSWindow::title() const
+    {
+        std::string result;
+        result.resize(256);
+        result.resize(GetWindowTextA((HWND)mHandle, result.data(), 256));
+        return result;
+    }
+
+    //Input
+    bool OSWindow::isKeyDown(Input::Key::Key key)
+    {
+        return static_cast<WindowsWindow *>(this)->mKeyDown[key];
+    }
+
+    void OSWindow::captureInput()
+    {
+        SetCapture((HWND)mHandle);
+    }
+
+    void OSWindow::releaseInput()
+    {
+        ReleaseCapture();
+    }
+
+    WindowData OSWindow::data()
+    {
+        WINDOWPLACEMENT wndpl;
+        wndpl.length = sizeof(WINDOWPLACEMENT);
+        GetWindowPlacement((HWND)mHandle, &wndpl);
+
+        return {
+            { wndpl.rcNormalPosition.left, wndpl.rcNormalPosition.top },
+            { wndpl.rcNormalPosition.right - wndpl.rcNormalPosition.left,
+                wndpl.rcNormalPosition.bottom - wndpl.rcNormalPosition.top },
+            wndpl.showCmd == SW_MAXIMIZE,
+            isFullscreen()
+        };
+    }
 
     static std::unordered_map<HWND, WindowsWindow> sWindows;
 
@@ -358,11 +357,6 @@ namespace Window {
         assert(pib.second);
 
         return &pib.first->second;
-    }
-
-    OSWindow *sFromNative(uintptr_t handle)
-    {
-        return handle ? &sWindows.at((HWND)handle) : nullptr;
     }
 
     static std::vector<MonitorInfo> sBuffer;

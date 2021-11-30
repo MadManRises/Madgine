@@ -1,7 +1,6 @@
 #include "../moduleslib.h"
 
 #include "taskpromise.h"
-#include "taskqueue.h"
 
 namespace Engine {
 namespace Threading {
@@ -9,8 +8,9 @@ namespace Threading {
     void TaskPromiseSharedStateBase::finalize()
     {
         std::lock_guard guard { mMutex };
-        for (TaskHandle &handle : mThenResumes)
+        for (TaskHandle &handle : mThenResumes) {
             handle.resumeInQueue();
+        }
         mThenResumes.clear();
     }
 
@@ -26,12 +26,8 @@ namespace Threading {
         mThenResumes.emplace_back(std::move(handle));
     }
 
-    void TaskPromiseTypeBase::resume(TaskHandle handle)
+    void TaskPromiseTypeBase::setQueue(TaskQueue *queue)
     {
-        mQueue->queueHandle(std::move(handle));
-    }
-
-    void TaskPromiseTypeBase::setQueue(TaskQueue* queue) {
         assert(queue);
         assert(!mQueue);
         mQueue = queue;

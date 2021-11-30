@@ -302,7 +302,7 @@ bool ValueTypeDrawer::draw(const Engine::KeyValueVirtualAssociativeRange &it)
     return false;
 }
 
-bool ValueTypeDrawer::draw(Engine::Function &m)
+bool ValueTypeDrawer::draw(Engine::KeyValueFunction &m)
 {
     if (strlen(mName)) {
         ImGui::Text("%s: ", mName);
@@ -312,7 +312,7 @@ bool ValueTypeDrawer::draw(Engine::Function &m)
     return false;
 }
 
-bool ValueTypeDrawer::draw(const Engine::Function &m)
+bool ValueTypeDrawer::draw(const Engine::KeyValueFunction &m)
 {
     if (strlen(mName)) {
         ImGui::Text("%s: ", mName);

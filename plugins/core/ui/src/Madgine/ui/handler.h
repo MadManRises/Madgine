@@ -2,15 +2,15 @@
 
 #include "Meta/keyvalue/virtualscope.h"
 #include "Meta/serialize/virtualserializableunit.h"
-#include "madgineobject/madgineobject.h"
 #include "Modules/threading/connectionstore.h"
+#include "madgineobject/madgineobject.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
 namespace Engine {
 namespace UI {
 
-    struct MADGINE_UI_EXPORT Handler : MadgineObject<Handler>, Serialize::VirtualSerializableUnitBase<VirtualScopeBase<>, Serialize::SerializableUnitBase> {
+    struct MADGINE_UI_EXPORT Handler : MadgineObject<Handler>, Serialize::VirtualSerializableDataBase<VirtualScopeBase<>, Serialize::SerializableDataUnit> {
         SERIALIZABLEUNIT(Handler);
 
         Handler(UIManager &ui);
@@ -25,25 +25,23 @@ namespace UI {
 
         virtual std::string_view key() const = 0;
 
-        //virtual App::Application &app(bool = true) override;
-        const UIManager *parent() const;
-        //UIManager &ui(bool = true);
-
         template <typename T>
-        T &getGuiHandler(bool init = true)
+        T &getGuiHandler()
         {
-            return static_cast<T &>(getGuiHandler(component_index<T>(), init));
+            return static_cast<T &>(getGuiHandler(component_index<T>()));
         }
 
-        GuiHandlerBase &getGuiHandler(size_t i, bool = true);
+        GuiHandlerBase &getGuiHandler(size_t i);
 
         template <typename T>
-        T &getGameHandler(bool init = true)
+        T &getGameHandler()
         {
-            return static_cast<T &>(getGameHandler(component_index<T>(), init));
+            return static_cast<T &>(getGameHandler(component_index<T>()));
         }
 
-        GameHandlerBase &getGameHandler(size_t i, bool = true);        
+        GameHandlerBase &getGameHandler(size_t i);
+
+        Threading::TaskQueue *taskQueue() const;
 
     protected:
         virtual bool init();

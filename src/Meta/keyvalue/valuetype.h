@@ -11,15 +11,13 @@
 #include "../math/vector4i.h"
 
 #include "boundapifunction.h"
-#include "function.h"
+#include "keyvaluefunction.h"
 
 #include "keyvaluevirtualrange.h"
 
 #include "objectptr.h"
 
 #include "typedscopeptr.h"
-
-#include "valuetypeexception.h"
 
 #include "ownedscopeptr.h"
 
@@ -212,7 +210,7 @@ ValueType_Return<T> ValueType::as() const
     } else if constexpr (std::is_enum_v<T>) {
         return static_cast<T>(std::get<std::underlying_type_t<T>>(mUnion));
     } else {
-        if constexpr (std::is_pointer_v<T>) {
+        if constexpr (Pointer<T>) {
             return std::get<TypedScopePtr>(mUnion).safe_cast<std::remove_pointer_t<T>>();
         } else {
             return std::get<OwnedScopePtr>(mUnion).safe_cast<T>();

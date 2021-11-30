@@ -1,7 +1,5 @@
 #pragma once
 
-#include "coroutine.h"
-
 namespace Engine {
 
 template <typename T = void>
@@ -77,7 +75,8 @@ struct CoroutineHandle {
         return &promise();
     }
 
-    T& operator*() const {
+    T &operator*() const
+    {
         return promise();
     }
 
@@ -89,6 +88,14 @@ struct CoroutineHandle {
     static CoroutineHandle fromPromise(T &address)
     {
         return { std::coroutine_handle<T>::from_promise(address) };
+    }
+
+    template <std::derived_from<T> U>
+    CoroutineHandle<U> cast()&&
+    {
+        CoroutineHandle<U> result = CoroutineHandle<U>::fromPromise(static_cast<U &>(mHandle.promise()));
+        mHandle = {};
+        return result;
     }
 
 private:
@@ -166,6 +173,4 @@ struct CoroutineHandle<void> {
 private:
     std::coroutine_handle<> mHandle;
 };
-
-
 }

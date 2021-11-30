@@ -11,8 +11,7 @@
     using prefix##Collector = Engine::UniqueComponentCollector<prefix##Registry, __VA_ARGS__>;                                                                                  \
     template <typename C>                                                                                                                                                       \
     using prefix##Container = Engine::UniqueComponentContainer<typename Engine::replace<C>::template type<std::unique_ptr<FIRST(__VA_ARGS__)>>, prefix##Registry, __VA_ARGS__>; \
-    template <typename Observer = Engine::NoOpFunctor>                                                                                                                          \
-    using prefix##Selector = Engine::UniqueComponentSelector<Observer, prefix##Registry, __VA_ARGS__>;                                                                          \
+    using prefix##Selector = Engine::UniqueComponentSelector<prefix##Registry, __VA_ARGS__>;                                                                          \
     template <typename T, typename Base = FIRST(__VA_ARGS__)>                                                                                                                   \
     using prefix##Component = component<Engine::UniqueComponent<T, prefix##Collector, Base>>;                                                                                   \
     template <typename T, typename Base = FIRST(__VA_ARGS__)>                                                                                                                   \

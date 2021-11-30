@@ -1,1 +1,3 @@
-# Workgroups & Threading
+\page Workgroup Workgroups & Threads
+
+# Workgroups & Threads

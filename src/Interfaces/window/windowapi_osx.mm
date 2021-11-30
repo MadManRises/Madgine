@@ -300,11 +300,6 @@ namespace Window{
         return &pib.first->second;
     }
 
-    OSWindow *sFromNative(uintptr_t handle)
-    {
-        return handle ? &sWindows.at((NSWindow*)handle) : nullptr;
-    }
-
     static std::vector<MonitorInfo> sBuffer;
 
     static void updateMonitors()

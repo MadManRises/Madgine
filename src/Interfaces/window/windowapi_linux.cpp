@@ -288,11 +288,6 @@ namespace Window {
         return &pib.first->second;
     }
 
-    OSWindow *sFromNative(uintptr_t handle)
-    {
-        return handle ? &sWindows.at((::Window)handle) : nullptr;
-    }
-
     static std::vector<MonitorInfo> sBuffer;
 
     static void updateMonitors()

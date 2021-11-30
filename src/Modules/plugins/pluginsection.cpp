@@ -8,8 +8,6 @@
 
 #    include "pluginmanager.h"
 
-#    include "Interfaces/util/exception.h"
-
 #    include "Interfaces/dl/runtime.h"
 
 #    include "Generic/keyvalue.h"
@@ -42,7 +40,7 @@ namespace Plugins {
 
     PluginSection::~PluginSection()
     {
-        assert(mDependents.empty());
+        //assert(mDependents.empty());
     }
 
     bool PluginSection::isAtleastOne() const
@@ -58,8 +56,10 @@ namespace Plugins {
     bool PluginSection::load()
     {
         if (mAtleastOne) {
-            if (mPlugins.empty())
-                throw exception("No plugin available in Section tagged as atleastOne: "s + mName);
+            if (mPlugins.empty()) {
+                LOG_ERROR("No plugin available in Section tagged as atleastOne: " << mName);
+                std::terminate();
+            }
             for (Plugin &p : kvValues(mPlugins)) {
                 if (p.isLoaded())
                     return true;

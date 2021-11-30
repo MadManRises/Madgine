@@ -9,7 +9,7 @@
 #    include <android/input.h>
 #    include <android/native_window.h>
 
-#    include "../threading/systemvariable.h"
+#    include "Generic/systemvariable.h"
 
 #    include "../input/inputevents.h"
 
@@ -23,7 +23,7 @@ namespace Window {
         3.0f
     };
 
-    DLL_EXPORT Threading::SystemVariable<ANativeWindow *> sNativeWindow = nullptr;
+    DLL_EXPORT SystemVariable<ANativeWindow *> sNativeWindow = nullptr;
 
     DLL_EXPORT EGLDisplay sDisplay = EGL_NO_DISPLAY;
 
@@ -55,116 +55,6 @@ namespace Window {
             if (!eglQuerySurface(sDisplay, surface, EGL_WIDTH, &width) || !eglQuerySurface(sDisplay, surface, EGL_HEIGHT, &height))
                 std::terminate();
             mSize = { width, height };
-        }
-
-        virtual void update() override
-        {
-            if (sQueue) {
-                AInputEvent *event = NULL;
-                while (AInputQueue_getEvent(sQueue, &event) >= 0) {
-                    if (AInputQueue_preDispatchEvent(sQueue, event)) {
-                        continue;
-                    }
-                    bool handled = false;
-                    switch (AInputEvent_getType(event)) {
-                    case AINPUT_EVENT_TYPE_KEY:
-                        //TODO
-                        std::terminate();
-                        break;
-                    case AINPUT_EVENT_TYPE_MOTION:
-                        handled = handleMotionEvent(event);
-                        break;
-                    default:
-                        LOG_ERROR("Unknown Event Type: " << AInputEvent_getType(event));
-                        break;
-                    }
-                    AInputQueue_finishEvent(sQueue, event, handled);
-                }
-            }
-        }
-
-        virtual InterfacesVector size() override
-        {
-            return mSize;
-        }
-
-        virtual InterfacesVector renderSize() override
-        {
-            //TODO
-            return size();
-        }
-
-        virtual InterfacesVector pos() override
-        {
-            return { 0, 0 };
-        }
-
-        virtual InterfacesVector renderPos() override
-        {
-            return { 0, 0 };
-        }
-
-        virtual void setSize(const InterfacesVector &size) override
-        {
-            mSize = size;
-        }
-
-        virtual void setRenderSize(const InterfacesVector &size) override
-        {
-            setSize(size);
-        }
-
-        virtual void setPos(const InterfacesVector &pos) override
-        {
-        }
-
-        virtual void setRenderPos(const InterfacesVector &pos) override
-        {
-        }
-
-        virtual void show() override
-        {
-        }
-
-        virtual bool isMinimized() override
-        {
-            return false;
-        }
-
-        virtual bool isMaximized() override
-        {
-            return false;
-        }
-
-        virtual bool isFullscreen() override
-        {
-            return true;
-        }
-
-        virtual void focus() override
-        {
-        }
-
-        virtual bool hasFocus() override
-        {
-            return true;
-        }
-
-        virtual void setTitle(const char *title) override
-        {
-        }
-
-        virtual std::string title() const override
-        {
-            return "";
-        }
-
-        virtual void destroy() override;
-
-        //Input
-        virtual bool isKeyDown(Input::Key::Key key) override
-        {
-            return false;
         }
 
         bool handleMotionEvent(const AInputEvent *event)
@@ -226,27 +116,140 @@ namespace Window {
             return handled;
         }
 
-        virtual void captureInput() override
-        {
-        }
-
-        virtual void releaseInput() override
-        {
-        }
-
-    private:
         InterfacesVector mSize;
 
         //Input
         InterfacesVector mLastKnownMousePos;
     };
 
-    static std::unordered_map<EGLSurface, AndroidWindow> sWindows;
+    static std::unordered_map<EGLSurface, AndroidWindow>
+        sWindows;
 
-    void AndroidWindow::destroy()
+    void OSWindow::update()
+    {
+        if (sQueue) {
+            AInputEvent *event = NULL;
+            while (AInputQueue_getEvent(sQueue, &event) >= 0) {
+                if (AInputQueue_preDispatchEvent(sQueue, event)) {
+                    continue;
+                }
+                bool handled = false;
+                switch (AInputEvent_getType(event)) {
+                case AINPUT_EVENT_TYPE_KEY:
+                    //TODO
+                    std::terminate();
+                    break;
+                case AINPUT_EVENT_TYPE_MOTION:
+                    handled = static_cast<AndroidWindow *>(this)->handleMotionEvent(event);
+                    break;
+                default:
+                    LOG_ERROR("Unknown Event Type: " << AInputEvent_getType(event));
+                    break;
+                }
+                AInputQueue_finishEvent(sQueue, event, handled);
+            }
+        }
+    }
+
+    InterfacesVector OSWindow::size()
+    {
+        return static_cast<AndroidWindow *>(this)->mSize;
+    }
+
+    InterfacesVector OSWindow::renderSize()
+    {
+        //TODO
+        return size();
+    }
+
+    InterfacesVector OSWindow::pos()
+    {
+        return { 0, 0 };
+    }
+
+    InterfacesVector OSWindow::renderPos()
+    {
+        return { 0, 0 };
+    }
+
+    void OSWindow::setSize(const InterfacesVector &size)
+    {
+        static_cast<AndroidWindow *>(this)->mSize = size;
+    }
+
+    void OSWindow::setRenderSize(const InterfacesVector &size)
+    {
+        setSize(size);
+    }
+
+    void OSWindow::setPos(const InterfacesVector &pos)
+    {
+    }
+
+    void OSWindow::setRenderPos(const InterfacesVector &pos)
+    {
+    }
+
+    void OSWindow::show()
+    {
+    }
+
+    bool OSWindow::isMinimized()
+    {
+        return false;
+    }
+
+    bool OSWindow::isMaximized()
+    {
+        return false;
+    }
+
+    bool OSWindow::isFullscreen()
+    {
+        return true;
+    }
+
+    void OSWindow::focus()
+    {
+    }
+
+    bool OSWindow::hasFocus()
+    {
+        return true;
+    }
+
+    void OSWindow::setTitle(const char *title)
+    {
+    }
+
+    std::string OSWindow::title() const
+    {
+        return "";
+    }
+
+    void OSWindow::destroy()
     {
         eglDestroySurface(sDisplay, (EGLSurface)mHandle);
         sWindows.erase((EGLSurface)mHandle);
+    }
+
+    WindowData OSWindow::data()
+    {
+        return {};
+    }
+
+    //Input
+    bool OSWindow::isKeyDown(Input::Key::Key key)
+    {
+        return false;
+    }
+
+    void OSWindow::captureInput()
+    {
+    }
+
+    void OSWindow::releaseInput()
+    {
     }
 
     OSWindow *sCreateWindow(const WindowSettings &settings)
@@ -291,11 +294,6 @@ namespace Window {
         assert(pib.second);
 
         return &pib.first->second;
-    }
-
-    OSWindow *sFromNative(uintptr_t handle)
-    {
-        return handle ? &sWindows.at((EGLSurface)handle) : nullptr;
     }
 
     std::vector<MonitorInfo> listMonitors()

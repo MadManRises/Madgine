@@ -126,8 +126,7 @@ namespace Tools {
     }
 
     ClientImRoot::ClientImRoot(Window::MainWindow &window)
-        : VirtualUnit(window, 80)
-        , ImRoot(this)
+        : VirtualData(window, 80)
         , mImGuiIniFilePath(Filesystem::appDataPath() / "imgui.ini")
     {
     }
@@ -136,7 +135,7 @@ namespace Tools {
     {
     }
 
-    bool ClientImRoot::init()
+    Threading::Task<bool> ClientImRoot::init()
     {
         ImGui::CreateContext();
         Im3D::CreateContext();
@@ -206,23 +205,19 @@ namespace Tools {
         io.KeyMap[ImGuiKey_Y] = Input::Key::Y;
         io.KeyMap[ImGuiKey_Z] = Input::Key::Z;
 
-        if (!ImRoot::init())
-            return false;
-
-        mWindow.addFrameListener(this);
+        if (!co_await ImRoot::init())
+            co_return false;
 
         mWindow.getRenderWindow()->addRenderPass(this);
 
-        return true;
+        co_return true;
     }
 
-    void ClientImRoot::finalize()
+    Threading::Task<void> ClientImRoot::finalize()
     {
         mWindow.getRenderWindow()->removeRenderPass(this);
 
-        mWindow.removeFrameListener(this);
-
-        ImRoot::finalize();
+        co_await ImRoot::finalize();
 
         if (Window::platformCapabilities.mSupportMultipleWindows) {
             ImGuiViewport *main_viewport = ImGui::GetMainViewport();
@@ -231,11 +226,48 @@ namespace Tools {
 
         Im3D::DestroyContext();
         ImGui::DestroyContext();
+
+        co_return;
+    }
+
+    void ClientImRoot::addRenderTarget(Render::RenderTarget *target)
+    {
+        mRenderTargets.push_back(target);
+    }
+
+    void ClientImRoot::removeRenderTarget(Render::RenderTarget *target)
+    {
+        mRenderTargets.erase(std::find(mRenderTargets.begin(), mRenderTargets.end(), target));
+    }
+
+    void ClientImRoot::preRender()
+    {
+        for (Render::RenderTarget *target : mRenderTargets)
+            target->render();
     }
 
     void ClientImRoot::render(Render::RenderTarget *target, size_t iteration)
     {
         PROFILE();
+
+        ImGuiIO &io = ImGui::GetIO();
+        io.KeyShift = mWindow.osWindow()->isKeyDown(Input::Key::Shift);
+        io.KeyCtrl = mWindow.osWindow()->isKeyDown(Input::Key::Control);
+        io.KeyAlt = mWindow.osWindow()->isKeyDown(Input::Key::Alt);
+
+        io.DeltaTime = (float)mFrameClock.tick<std::chrono::microseconds>().count() / 1000000.0f;
+
+        io.BackendPlatformUserData = &mWindow;
+
+        Vector2i size = mWindow.getScreenSpace().mSize;
+
+        io.DisplaySize = ImVec2(size.x / io.DisplayFramebufferScale.x, size.y / io.DisplayFramebufferScale.y);
+
+        newFrame();
+
+        ImRoot::render();
+
+        setCentralNode(dockNode());
 
         target->pushAnnotation("ImGui");
 
@@ -269,27 +301,6 @@ namespace Tools {
     int ClientImRoot::priority() const
     {
         return 100;
-    }
-
-    bool ClientImRoot::frameStarted(std::chrono::microseconds timeSinceLastFrame)
-    {
-        ImGuiIO &io = ImGui::GetIO();
-        io.KeyShift = mWindow.osWindow()->isKeyDown(Input::Key::Shift);
-        io.KeyCtrl = mWindow.osWindow()->isKeyDown(Input::Key::Control);
-        io.KeyAlt = mWindow.osWindow()->isKeyDown(Input::Key::Alt);
-
-        newFrame((float)timeSinceLastFrame.count() / 1000000.0f);
-
-        return true;
-    }
-
-    bool ClientImRoot::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context)
-    {
-        frame();
-
-        setCentralNode(dockNode());
-
-        return true;
     }
 
     std::string_view ClientImRoot::key() const
@@ -396,7 +407,7 @@ namespace Tools {
 
     Threading::TaskQueue *ClientImRoot::taskQueue() const
     {
-        return &mWindow.frameLoop();
+        return mWindow.taskQueue();
     }
 
 }

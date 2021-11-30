@@ -11,7 +11,7 @@ namespace Render {
         virtual void render(RenderTarget *target, size_t iteration) = 0;
         virtual void preRender() { }        
 
-        virtual void onResize(const Vector2i &size) {};
+        virtual void onTargetResize(const Vector2i &size) {};
 
         virtual int priority() const = 0;
     };

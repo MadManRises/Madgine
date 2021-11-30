@@ -84,10 +84,10 @@ namespace Filesystem {
         return buffer;
     }
 
-    void createDirectory(const Path &p)
+    bool createDirectory(const Path &p)
     {
         auto result = mkdir(p.c_str(), 0700);
-        assert(result == 0);
+        return result == 0;
     }
 
     bool exists(const Path &p)

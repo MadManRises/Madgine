@@ -9,7 +9,7 @@
 
 #    include <emscripten/html5.h>
 
-#    include "../threading/systemvariable.h"
+#    include "Generic/systemvariable.h"
 
 #    include "../input/inputevents.h"
 
@@ -51,7 +51,7 @@ namespace Window {
             EGLint height;
             if (!eglQuerySurface(sDisplay, surface, EGL_WIDTH, &width) || !eglQuerySurface(sDisplay, surface, EGL_HEIGHT, &height))
                 std::terminate();
-            mSize = { width, height };            
+            mSize = { width, height };
 
             //Input
             emscripten_set_mousemove_callback("#canvas", this, 0, EmscriptenWindow::handleMouseEvent);
@@ -61,90 +61,6 @@ namespace Window {
 
             emscripten_set_keydown_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, 0, EmscriptenWindow::handleKeyEvent);
             emscripten_set_keyup_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, 0, EmscriptenWindow::handleKeyEvent);
-        }
-
-        virtual void update() override
-        {
-        }
-
-        virtual InterfacesVector size() override
-        {
-            return mSize;
-        }
-
-        virtual InterfacesVector renderSize() override
-        {
-            //TODO
-            return size();
-        }
-
-        virtual InterfacesVector pos() override
-        {
-            return { 0, 0 };
-        }
-
-        virtual InterfacesVector renderPos() override
-        {
-            return { 0, 0 };
-        }
-
-        virtual void setSize(const InterfacesVector &size) override
-        {
-            mSize = size;
-            emscripten_set_canvas_element_size("#canvas", mSize.x, mSize.y);
-        }
-
-        virtual void setRenderSize(const InterfacesVector &size) override
-        {
-            setSize(size);
-        }
-
-        virtual void setPos(const InterfacesVector &pos) override
-        {
-        }
-
-        virtual void setRenderPos(const InterfacesVector &pos) override
-        {
-        }
-
-        virtual void show() override
-        {
-        }
-
-        virtual bool isMinimized() override
-        {
-            return false;
-        }
-
-        virtual bool isMaximized() override
-        {
-            return true;
-        }
-
-        virtual bool isFullscreen() override
-        {
-            return false;
-        }
-
-        virtual void focus() override
-        {
-        }
-
-        virtual bool hasFocus() override
-        {
-            return true;
-        }
-
-        virtual void setTitle(const char *title) override
-        {
-        }
-
-        virtual void destroy() override;
-
-        //Input
-        virtual bool isKeyDown(Input::Key::Key key) override
-        {
-            return mKeyDown[key];
         }
 
         static Input::MouseButton::MouseButton convertMouseButton(unsigned short id)
@@ -181,6 +97,7 @@ namespace Window {
 
             return EM_FALSE;
         }
+
         static EM_BOOL handleKeyEvent(int eventType, const EmscriptenKeyboardEvent *keyEvent, void *userData)
         {
             EmscriptenWindow *_this = static_cast<EmscriptenWindow *>(userData);
@@ -196,17 +113,8 @@ namespace Window {
 
             return EM_FALSE;
         }
-        
-        virtual void captureInput() override
-        {
-        }
 
-        virtual void releaseInput() override
-        {
-        }
-
-    private:
-        InterfacesVector mSize;   
+        InterfacesVector mSize;
         InterfacesVector mLastMousePosition;
 
         //Input
@@ -215,10 +123,100 @@ namespace Window {
 
     static std::unordered_map<EGLSurface, EmscriptenWindow> sWindows;
 
-    void EmscriptenWindow::destroy()
+    void OSWindow::update()
+    {
+    }
+
+    InterfacesVector OSWindow::size()
+    {
+        return static_cast<EmscriptenWindow*>(this)->mSize;
+    }
+
+    InterfacesVector OSWindow::renderSize()
+    {
+        //TODO
+        return size();
+    }
+
+    InterfacesVector OSWindow::pos()
+    {
+        return { 0, 0 };
+    }
+
+    InterfacesVector OSWindow::renderPos()
+    {
+        return { 0, 0 };
+    }
+
+    void OSWindow::setSize(const InterfacesVector &size)
+    {
+        static_cast<EmscriptenWindow *>(this)->mSize = size;
+        emscripten_set_canvas_element_size("#canvas", size.x, size.y);
+    }
+
+    void OSWindow::setRenderSize(const InterfacesVector &size)
+    {
+        setSize(size);
+    }
+
+    void OSWindow::setPos(const InterfacesVector &pos)
+    {
+    }
+
+    void OSWindow::setRenderPos(const InterfacesVector &pos)
+    {
+    }
+
+    void OSWindow::show()
+    {
+    }
+
+    bool OSWindow::isMinimized()
+    {
+        return false;
+    }
+
+    bool OSWindow::isMaximized()
+    {
+        return true;
+    }
+
+    bool OSWindow::isFullscreen()
+    {
+        return false;
+    }
+
+    void OSWindow::focus()
+    {
+    }
+
+    bool OSWindow::hasFocus()
+    {
+        return true;
+    }
+
+    void OSWindow::setTitle(const char *title)
+    {
+    }
+
+    void OSWindow::destroy()
     {
         eglDestroySurface(sDisplay, (EGLSurface)mHandle);
         sWindows.erase((EGLSurface)mHandle);
+    }
+
+    //Input
+    bool OSWindow::isKeyDown(Input::Key::Key key)
+    {
+        return static_cast<EmscriptenWindow *>(this)->mKeyDown[key];
+    }
+
+    void OSWindow::captureInput()
+    {
+    }
+
+    void OSWindow::releaseInput()
+    {
     }
 
     EM_BOOL eventCallback(int type, const EmscriptenUiEvent *event, void *userData)
@@ -282,11 +280,6 @@ namespace Window {
         window->setSize({ static_cast<int>(w), static_cast<int>(h) });
 
         return window;
-    }
-
-    OSWindow *sFromNative(uintptr_t handle)
-    {
-        return handle ? &sWindows.at((EGLSurface)handle) : nullptr;
     }
 
     std::vector<MonitorInfo> listMonitors()

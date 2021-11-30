@@ -97,7 +97,7 @@ namespace Serialize {
             switch (op) {
             case EMPLACE: {
                 if constexpr (!container_traits<C>::sorted) {
-                    readIterator(in, c, it);
+                    STREAM_PROPAGATE_ERROR(readIterator(in, c, it));
                 }
                 decltype(auto) op = insertOperation(c, it, answerTarget, answerId);
                 typename container_traits<C>::const_iterator cit = static_cast<const typename container_traits<C>::iterator &>(it);
@@ -105,7 +105,7 @@ namespace Serialize {
                 break;
             }
             case ERASE: {
-                readIterator(in, c, it);
+                STREAM_PROPAGATE_ERROR(readIterator(in, c, it));
                 it = removeOperation(c, it, answerTarget, answerId).erase(it);
                 break;
             }
@@ -241,7 +241,7 @@ namespace Serialize {
                 return t.readState(in, name, CallerHierarchyPtr { hierarchy });
             } else if constexpr (has_function_readState_v<T>) {
                 return t.readState(in, name);
-            } else if constexpr (isPrimitiveType_v<T>) {
+            } else if constexpr (PrimitiveType<T>) {
                 STREAM_PROPAGATE_ERROR(in.format().beginPrimitive(in, name, PrimitiveTypeIndex_v<T>));
                 STREAM_PROPAGATE_ERROR(in.readUnformatted(t));
                 return in.format().endPrimitive(in, name, PrimitiveTypeIndex_v<T>);
@@ -249,16 +249,16 @@ namespace Serialize {
             } else if constexpr (std::is_const_v<T>) {
                 //Don't do anything here
                 return {};
-            } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>) {
+            } else if constexpr (std::derived_from<T, SerializableUnitBase>) {
                 return SerializableUnitPtr { &t }.readState(in, name, CallerHierarchyPtr { hierarchy }, flags);
-            } else if constexpr (std::is_base_of_v<SerializableDataUnit, T>) {
+            } else if constexpr (std::derived_from<T, SerializableDataUnit>) {
                 return SerializableDataPtr { &t }.readState(in, name, CallerHierarchyPtr { hierarchy }, flags);
-            } else if constexpr (is_string_like_v<T>) {
+            } else if constexpr (String<T>) {
                 std::string s;
                 StreamResult result = Serialize::read<std::string>(in, s, name, hierarchy);
                 t = s;
                 return result;
-            } else if constexpr (is_iterable_v<T>) {
+            } else if constexpr (Iterable<T>) {
                 return ContainerOperations<T, Configs...>::read(in, t, name, hierarchy);
             } else if constexpr (TupleUnpacker::Tuplefyable<T>) {
                 return Operations<decltype(TupleUnpacker::toTuple(std::declval<T &>())), Configs...>::read(in, TupleUnpacker::toTuple(t), name, hierarchy);
@@ -274,20 +274,20 @@ namespace Serialize {
                 t.writeState(out, name, CallerHierarchyPtr { hierarchy });
             } else if constexpr (has_function_writeState_v<T>) {
                 t.writeState(out, name);
-            } else if constexpr (isPrimitiveType_v<T>) {
+            } else if constexpr (PrimitiveType<T>) {
                 out.format().beginPrimitive(out, name, PrimitiveTypeIndex_v<T>);
                 out.writeUnformatted(t);
                 out.format().endPrimitive(out, name, PrimitiveTypeIndex_v<T>);
                 //mLog.log(t);
             } else if constexpr (std::is_const_v<T>) {
                 //Don't do anything here
-            } else if constexpr (std::is_base_of_v<SerializableUnitBase, T>) {
+            } else if constexpr (std::derived_from<T, SerializableUnitBase>) {
                 SerializableUnitConstPtr { &t }.writeState(out, name, CallerHierarchyPtr { hierarchy }, flags);
-            } else if constexpr (std::is_base_of_v<SerializableDataUnit, T>) {
+            } else if constexpr (std::derived_from<T, SerializableDataUnit>) {
                 SerializableDataConstPtr { &t }.writeState(out, name, CallerHierarchyPtr { hierarchy }, flags);
-            } else if constexpr (is_string_like_v<T>) {
+            } else if constexpr (String<T>) {
                 Serialize::write<std::string>(out, t, name, hierarchy);
-            } else if constexpr (is_iterable_v<T>) {
+            } else if constexpr (Iterable<T>) {
                 ContainerOperations<std::remove_const_t<T>, Configs...>::write(out, t, name, hierarchy);
             } else if constexpr (TupleUnpacker::Tuplefyable<T>) {
                 Operations<decltype(TupleUnpacker::toTuple(std::declval<T &>())), Configs...>::write(out, TupleUnpacker::toTuple(t), name, hierarchy);
@@ -307,7 +307,7 @@ namespace Serialize {
         } else if constexpr (has_function_writeAction_v<T>) {
             t.writeAction(op, data, answerTarget, answerId);
         } else */
-            if constexpr (is_iterable_v<T>) {
+            if constexpr (Iterable<T>) {
                 ContainerOperations<T, Configs...>::writeAction(t, outStreams, data, std::forward<Args>(args)...);
             } /*else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
             write(out, TupleUnpacker::toTuple(t), name);
@@ -328,7 +328,7 @@ namespace Serialize {
         } else if constexpr (has_function_readAction_v<T>) {
              t.readAction(in, request);
         } else */
-            if constexpr (is_iterable_v<T>) {
+            if constexpr (Iterable<T>) {
                 return ContainerOperations<T, Configs...>::readAction(t, in, request, std::forward<Args>(args)...);
             } /*else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
             write(out, TupleUnpacker::toTuple(t), name);
@@ -349,7 +349,7 @@ namespace Serialize {
         } else  if constexpr (has_function_writeRequest_v<T>) {
             t.writeRequest(op, data, requester ,requesterTransactionId, callback);
         } else */
-            if constexpr (is_iterable_v<T>) {
+            if constexpr (Iterable<T>) {
                 ContainerOperations<T, Configs...>::writeRequest(t, out, data, std::forward<Args>(args)...);
             } /*else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
             write(out, TupleUnpacker::toTuple(t), name);
@@ -370,7 +370,7 @@ namespace Serialize {
         } else if constexpr (has_function_readRequest_v<T>) {
             t.readRequest(inout, id);
         } else */
-            if constexpr (is_iterable_v<T>) {
+            if constexpr (Iterable<T>) {
                 return ContainerOperations<T, Configs...>::readRequest(t, inout, id, std::forward<Args>(args)...);
             } /*else if constexpr (TupleUnpacker::is_tuplefyable_v<T>) {
             write(out, TupleUnpacker::toTuple(t), name);

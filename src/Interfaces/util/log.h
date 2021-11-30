@@ -1,7 +1,5 @@
 #pragma once
 
-#include "messagetype.h"
-
 namespace Engine {
 namespace Util {
 

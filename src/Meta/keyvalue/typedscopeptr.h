@@ -19,7 +19,7 @@ private:
         : mScope(t)
         , mType(table<decayed_t<T>>)
     {
-        static_assert(!is_instance_v<T, std::unique_ptr>);
+        static_assert(!InstanceOf<T, std::unique_ptr>);
     }
 
 public:

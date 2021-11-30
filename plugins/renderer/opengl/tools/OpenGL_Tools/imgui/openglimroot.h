@@ -10,10 +10,10 @@ namespace Tools {
         OpenGLImRoot(Window::MainWindow &window);
         ~OpenGLImRoot();
 
-        virtual bool init() override;
-        virtual void finalize() override;
+        virtual Threading::Task<bool> init() override;
+        virtual Threading::Task<void> finalize() override;
 
-        virtual void newFrame(float timeSinceLastFrame) override;
+        virtual void newFrame() override;
 
         virtual void renderDrawList(ImGuiViewport *vp) override;
     };

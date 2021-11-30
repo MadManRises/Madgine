@@ -67,9 +67,9 @@ namespace Render {
         subResourceDesc.SysMemPitch = width * byteCount;
         subResourceDesc.SysMemSlicePitch = 0;
 
-        ID3D11Texture2D *tex;
+        ReleasePtr<ID3D11Texture2D> tex;
         HRESULT hr = sDevice->CreateTexture2D(&textureDesc, data.mData ? &subResourceDesc : nullptr, &tex);
-        mResource = tex;
+        mResource = std::move(tex);
         DX11_CHECK(hr);
 
         D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
@@ -112,9 +112,9 @@ namespace Render {
     DirectX11Texture::DirectX11Texture(DirectX11Texture &&other)
         : mResource(std::exchange(other.mResource, nullptr))
         , mType(other.mType)
+        , mSize(std::move(other.mSize))
         , mFormat(std::exchange(other.mFormat, {}))
         , mBind(std::exchange(other.mBind, 0))
-        , mSize(std::move(other.mSize))
         , mSamples(std::exchange(other.mSamples, 1))
     {
         mTextureHandle = std::exchange(other.mTextureHandle, 0);
@@ -139,14 +139,11 @@ namespace Render {
 
     void DirectX11Texture::reset()
     {
-        if (mResource) {
-            mResource->Release();
-            mResource = nullptr;
-        }
+        mResource.reset();
         if (mTextureHandle) {
             DX11_LOG("Destroying SRV: " << reinterpret_cast<ID3D11ShaderResourceView *>(mTextureHandle));
             reinterpret_cast<ID3D11ShaderResourceView *>(mTextureHandle)->Release();
-            mTextureHandle = 0;            
+            mTextureHandle = 0;
         }
     }
 

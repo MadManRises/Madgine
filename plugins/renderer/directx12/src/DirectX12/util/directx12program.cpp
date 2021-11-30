@@ -70,7 +70,7 @@ namespace Render {
         mPixelShader.reset();
     }
 
-    void DirectX12Program::bind(DirectX12VertexArray *format)
+    void DirectX12Program::bind(const DirectX12VertexArray *format) const 
     {
         format->bind(this, mVertexShader, mPixelShader);
        

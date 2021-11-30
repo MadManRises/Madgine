@@ -1,5 +1,7 @@
 #pragma once
 
+#include "taskhandle.h"
+
 namespace Engine {
 namespace Threading {
 
@@ -8,6 +10,7 @@ namespace Threading {
     struct MODULES_EXPORT TaskPromiseSharedStateBase {
         std::mutex mMutex;
         std::vector<TaskHandle> mThenResumes;
+
         bool mDestroyed = false;
 
         void finalize();
@@ -77,6 +80,12 @@ namespace Threading {
             assert(!mHasValue);
             mHasValue = true;
         }
+
+        void get()
+        {
+            std::lock_guard guard { mMutex };
+            assert(mHasValue);
+        }
     };
 
     struct MODULES_EXPORT TaskPromiseTypeBase {
@@ -85,8 +94,8 @@ namespace Threading {
         TaskPromiseTypeBase &operator=(TaskPromiseTypeBase &&) = default;
         ~TaskPromiseTypeBase()
         {
-            if (std::shared_ptr<TaskPromiseSharedStateBase> ptr = mState.lock())
-                ptr->notifyDestroyed();
+            if (mState)
+                mState->notifyDestroyed();
         }
 
         std::suspend_always initial_suspend() noexcept
@@ -94,25 +103,48 @@ namespace Threading {
             return {};
         }
 
-        std::suspend_never final_suspend() noexcept
+        auto final_suspend() noexcept
         {
-            if (std::shared_ptr<TaskPromiseSharedStateBase> ptr = mState.lock())
-                ptr->finalize();
-            return {};
+            struct TaskHandleAwaiter {
+                bool await_ready() noexcept { return !mHandle; }
+                std::coroutine_handle<> await_suspend(std::coroutine_handle<> self) noexcept
+                {
+                    assert(mHandle);
+                    return mHandle.release();
+                }
+                void await_resume() noexcept { }
+
+                TaskHandle mHandle;
+            };
+            if (mState)
+                mState->finalize();
+            return TaskHandleAwaiter { std::move(mThenReturn) };
         }
 
         void unhandled_exception() { }
 
-        void resume(TaskHandle handle);
+        //void then(TaskHandle handle);
+        void then_return(TaskHandle handle)
+        {
+            assert(!mThenReturn);
+            mThenReturn = std::move(handle);
+        }
+
+        void set_state(std::shared_ptr<TaskPromiseSharedStateBase> state)
+        {
+            assert(!mState);
+            mState = std::move(state);
+        }
 
         void setQueue(TaskQueue *queue);
         TaskQueue *queue() const;
 
     protected:
-        std::weak_ptr<TaskPromiseSharedStateBase> mState;
+        std::shared_ptr<TaskPromiseSharedStateBase> mState;
 
     private:
         TaskQueue *mQueue = nullptr;
+        TaskHandle mThenReturn;
     };
 
     template <typename T>
@@ -120,13 +152,13 @@ namespace Threading {
 
         void return_value(T value) noexcept
         {
-            if (std::shared_ptr<TaskPromiseSharedStateBase> ptr = mState.lock())
-                static_cast<TaskPromiseSharedState<T> *>(ptr.get())->set_value(std::move(value));
+            if (mState)
+                static_cast<TaskPromiseSharedState<T> *>(mState.get())->set_value(std::move(value));
         }
 
         std::shared_ptr<TaskPromiseSharedState<T>> get_state()
         {
-            assert(!mState.owner_before(std::weak_ptr<TaskPromiseSharedStateBase> {}) && !std::weak_ptr<TaskPromiseSharedStateBase> {}.owner_before(mState));
+            assert(!mState);
             std::shared_ptr<TaskPromiseSharedState<T>> state = std::make_shared<TaskPromiseSharedState<T>>();
             mState = state;
             return state;
@@ -138,13 +170,13 @@ namespace Threading {
 
         void return_void() noexcept
         {
-            if (std::shared_ptr<TaskPromiseSharedStateBase> ptr = mState.lock())
-                static_cast<TaskPromiseSharedState<void> *>(ptr.get())->set_value();
+            if (mState)
+                static_cast<TaskPromiseSharedState<void> *>(mState.get())->set_value();
         }
 
         std::shared_ptr<TaskPromiseSharedState<void>> get_state()
         {
-            assert(!mState.owner_before(std::weak_ptr<TaskPromiseSharedStateBase> {}) && !std::weak_ptr<TaskPromiseSharedStateBase> {}.owner_before(mState));
+            assert(!mState);
             std::shared_ptr<TaskPromiseSharedState<void>> state = std::make_shared<TaskPromiseSharedState<void>>();
             mState = state;
             return state;

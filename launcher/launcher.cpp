@@ -51,13 +51,13 @@ int launch(Engine::Window::MainWindow **topLevelPointer)
         *topLevelPointer = &window;
 
 #if !ENABLE_PLUGINS
-    window.frameLoop()
-        .addSetupSteps([&]() {
+    window.taskQueue()
+        ->addSetupSteps([&]() {
             Engine::Filesystem::FileManager mgr { "Layout" };
             Engine::Serialize::SerializeInStream file = mgr.openRead(Engine::Resources::ResourceManager::getSingleton().findResourceFile("default.layout"), std::make_unique<Engine::Serialize::XMLFormatter>());
 
             if (file) {
-                window.readState(file, nullptr, {}, Engine::Serialize::StateTransmissionFlags_ApplyMap);
+                Engine::Serialize::SerializableDataPtr { &window }.readState(file, nullptr, {}, Engine::Serialize::StateTransmissionFlags_ApplyMap);
                 return true;
             } else {
                 return false;

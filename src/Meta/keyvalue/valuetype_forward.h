@@ -88,25 +88,25 @@ META_EXPORT ValueType_Return<T> ValueType_as_impl(const ValueType &v);
 template <typename T>
 decltype(auto) ValueType_as(const ValueType &v)
 {
-    if constexpr (is_instance_v<T, std::optional>) {
+    if constexpr (InstanceOf<T, std::optional>) {
         if (ValueType_isNull(v))
             return T {};
         else {
             return T { ValueType_as<type_pack_unpack_unique_t<typename is_instance<T, std::optional>::argument_types>>(v) };
         }
-    } else if constexpr (std::is_same_v<T, ValueType>) {
+    } else if constexpr (std::same_as<T, ValueType>) {
         return v;
     } else if constexpr (isValueTypePrimitive_v<T>) {
         return ValueType_as_impl<T>(v);
-    } else if constexpr (is_iterable_v<T>) {
+    } else if constexpr (Iterable<T>) {
         if constexpr (std::is_same_v<KeyType_t<typename T::iterator::value_type>, std::monostate>)
             return ValueType_as_impl<KeyValueVirtualSequenceRange>(v).safe_cast<T>();
         else
             return ValueType_as_impl<KeyValueVirtualAssociativeRange>(v).safe_cast<T>();
-    } else if constexpr (is_instance_v<T, EnumType> || is_instance_v<T, BaseEnum>) {
+    } else if constexpr (InstanceOf<T, EnumType> || InstanceOf<T, BaseEnum>) {
         return ValueType_as_impl<EnumHolder>(v).safe_cast<T>();
     } else {
-        if constexpr (std::is_pointer_v<T>) {
+        if constexpr (Pointer<T>) {
             return ValueType_as_impl<TypedScopePtr>(v).safe_cast<std::remove_pointer_t<T>>();
         } else {
             return ValueType_as_impl<OwnedScopePtr>(v).safe_cast<T>();
@@ -118,13 +118,13 @@ decltype(auto) ValueType_as(const ValueType &v)
 template <bool reference_to_ptr, typename T>
 decltype(auto) convert_ValueType(T &&t)
 {
-    if constexpr (is_instance_v<T, std::optional>) {
+    if constexpr (InstanceOf<T, std::optional>) {
         return std::forward<T>(t);
     } else if constexpr (isValueTypePrimitive_v<std::decay_t<T>> || std::is_same_v<ValueType, std::decay_t<T>>) {
         return std::forward<T>(t);
-    } else if constexpr (is_string_like_v<std::decay_t<T>>) {
+    } else if constexpr (String<std::decay_t<T>>) {
         return std::string { std::forward<T>(t) };
-    } else if constexpr (is_iterable_v<T>) {
+    } else if constexpr (Iterable<T>) {
         if constexpr (std::is_same_v<KeyType_t<typename std::remove_reference_t<T>::iterator::value_type>, std::monostate>)
             return KeyValueVirtualSequenceRange { std::forward<T>(t) };
         else
@@ -135,12 +135,12 @@ decltype(auto) convert_ValueType(T &&t)
         } else {
             return static_cast<std::underlying_type_t<T>>(t);
         }
-    } else if constexpr (is_instance_v<T, EnumType> || is_instance_v<T, BaseEnum>) {
+    } else if constexpr (InstanceOf<T, EnumType> || InstanceOf<T, BaseEnum>) {
         return EnumHolder { std::forward<T>(t) };
     } else {
-        if constexpr (std::is_pointer_v<std::decay_t<T>>) {
+        if constexpr (Pointer<std::decay_t<T>>) {
             return TypedScopePtr { t };
-        } else if constexpr (is_instance_v<std::decay_t<T>, std::unique_ptr>) {
+        } else if constexpr (InstanceOf<std::decay_t<T>, std::unique_ptr>) {
             return TypedScopePtr { t.get() };
         } else if constexpr (std::is_reference_v<T> && reference_to_ptr) {
             return TypedScopePtr { &t };

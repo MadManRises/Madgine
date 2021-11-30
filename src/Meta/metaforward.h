@@ -22,7 +22,7 @@ struct ApiFunction;
 struct BoundApiFunction;
 struct FunctionTable;
 struct FunctionArgument;
-struct Function;
+struct KeyValueFunction;
 struct EnumHolder;
 using ArgumentList = std::vector<ValueType>;
 

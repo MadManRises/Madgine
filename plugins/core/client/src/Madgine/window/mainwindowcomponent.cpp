@@ -28,18 +28,19 @@ namespace Window {
         return mWindow;
     }
 
-    const MainWindow *MainWindowComponentBase::parent() const
+    Threading::TaskQueue *MainWindowComponentBase::taskQueue() const
     {
-        return &mWindow;
+        return mWindow.taskQueue();
     }
 
-    bool MainWindowComponentBase::init()
+    Threading::Task<bool> MainWindowComponentBase::init()
     {
-        return true;
+        co_return true;
     }
 
-    void MainWindowComponentBase::finalize()
+    Threading::Task<void> MainWindowComponentBase::finalize()
     {
+        co_return;
     }
 
     void MainWindowComponentBase::onResize(const Rect2i &space)
@@ -57,12 +58,9 @@ namespace Window {
         return mClientSpace;
     }
 
-    MainWindowComponentBase &MainWindowComponentBase::getWindowComponent(size_t i, bool init)
+    MainWindowComponentBase &MainWindowComponentBase::getWindowComponent(size_t i)
     {
-        if (init) {
-            checkInitState();
-        }
-        return mWindow.getWindowComponent(i, init);
+        return mWindow.getWindowComponent(i);
     }
 
     Rect2i MainWindowComponentBase::getChildClientSpace()

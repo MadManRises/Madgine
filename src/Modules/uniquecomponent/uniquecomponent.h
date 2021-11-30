@@ -49,19 +49,18 @@ public:
     }
 
 protected:
-    static IndexHolder*& preg() {
+    static IndexHolder *&preg()
+    {
         return _preg<T>();
     }
-
 };
 
 DLL_IMPORT_VARIABLE2(Engine::IndexHolder, _reg, typename T);
 
-#    define UNIQUECOMPONENT_EX(Frontend, Full) DLL_EXPORT_VARIABLE3(, Engine::IndexHolder, Frontend::Collector::ComponentRegistrator<Full>, Engine::, _reg, , {}, Frontend)
-#    define UNIQUECOMPONENT2(Name, ext) DLL_EXPORT_VARIABLE3(, Engine::IndexHolder, Name::Collector::ComponentRegistrator<Name>, Engine::, _reg, ext, {}, Name)
+#    define UNIQUECOMPONENT(Type) DLL_EXPORT_VARIABLE3(, Engine::IndexHolder, Type::Collector::ComponentRegistrator<Type>, Engine::, _reg, , {}, Type)
+#    define UNIQUECOMPONENT2(Type, ext) DLL_EXPORT_VARIABLE3(, Engine::IndexHolder, Type::Collector::ComponentRegistrator<Type>, Engine::, _reg, ext, {}, Type)
 
-#    define VIRTUALUNIQUECOMPONENTBASE(Name) DLL_EXPORT_VARIABLE2(, Engine::IndexHolder*, Engine::, _preg, nullptr, Name)
-        
+#    define VIRTUALUNIQUECOMPONENTBASE(Name) DLL_EXPORT_VARIABLE2(, Engine::IndexHolder *, Engine::, _preg, nullptr, Name)
 
 template <typename _T, typename _Collector, typename _Base>
 struct UniqueComponent : _Base {
@@ -113,7 +112,7 @@ size_t component_index();
 
 }
 
-#    define UNIQUECOMPONENT_EX(Frontend, Full)
+#    define UNIQUECOMPONENT(Type)
 #    define UNIQUECOMPONENT2(Name, ext)
 #    define VIRTUALUNIQUECOMPONENT(Name)
 #    define VIRTUALUNIQUECOMPONENTBASE(Name)
@@ -136,15 +135,9 @@ struct NamedUniqueComponent : Base {
 
 }
 
-#define UNIQUECOMPONENT(Name) \
-    UNIQUECOMPONENT_EX(Name, Name)
-
 #define COMPONENT_NAME(Name, FrontendType) \
     DLL_EXPORT_VARIABLE2(constexpr, const std::string_view, Engine::, _componentName, #Name, FrontendType);
 
-#define NAMED_UNIQUECOMPONENT_EX(Name, FrontendType, FullType) \
-    COMPONENT_NAME(Name, FrontendType)                         \
-    UNIQUECOMPONENT_EX(FrontendType, FullType)
-
-#define NAMED_UNIQUECOMPONENT(Name, FullType) \
-    NAMED_UNIQUECOMPONENT_EX(Name, FullType, FullType)
+#define NAMED_UNIQUECOMPONENT(Name, Type) \
+    COMPONENT_NAME(Name, Type)            \
+    UNIQUECOMPONENT(Type)

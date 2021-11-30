@@ -13,17 +13,17 @@
 namespace Engine {
 namespace Window {
 
-    struct MADGINE_CLIENT_EXPORT MainWindowComponentBase : Serialize::VirtualSerializableUnitBase<VirtualScopeBase<>, Serialize::SerializableUnitBase>, MadgineObject<MainWindowComponentBase> {
+    struct MADGINE_CLIENT_EXPORT MainWindowComponentBase : Serialize::VirtualSerializableDataBase<VirtualScopeBase<>, Serialize::SerializableDataUnit>, MadgineObject<MainWindowComponentBase> {
         MainWindowComponentBase(MainWindow &window, int priority);
         virtual ~MainWindowComponentBase() = default;
 
         template <typename T>
-        T &getWindowComponent(bool init = true)
+        T &getWindowComponent()
         {
-            return static_cast<T &>(getWindowComponent(component_index<T>(), init));
+            return static_cast<T &>(getWindowComponent(component_index<T>()));
         }
 
-        MainWindowComponentBase &getWindowComponent(size_t i, bool = true);
+        MainWindowComponentBase &getWindowComponent(size_t i);
 
         MainWindow &window() const;
 
@@ -44,11 +44,11 @@ namespace Window {
 
         const int mPriority;
 
-    protected:
-        const MainWindow *parent() const;
+        Threading::TaskQueue *taskQueue() const;
 
-        virtual bool init();
-        virtual void finalize();
+    protected:
+        virtual Threading::Task<bool> init();
+        virtual Threading::Task<void> finalize();
 
         friend struct MadgineObject<MainWindowComponentBase>;
 

@@ -1,38 +1,9 @@
 #include "opengllib.h"
 #include "openglrenderwindow.h"
 
-#include "Modules/debug/profiler/profile.h"
-
 #include "Interfaces/window/windowapi.h"
-#include "Interfaces/window/windowsettings.h"
-
-#include "openglmeshloader.h"
-#include "openglprogramloader.h"
-#include "openglshaderloader.h"
-#include "opengltextureloader.h"
 
 #include "openglrendercontext.h"
-
-#if LINUX
-#include <GL/glx.h>
-#include <X11/Xlib.h>
-    namespace Engine {
-    namespace Window {
-        extern Display *sDisplay();
-    }
-    }
-#elif ANDROID || EMSCRIPTEN
-#    include <EGL/egl.h>
-namespace Engine {
-namespace Window {
-    extern EGLDisplay sDisplay;
-}
-}
-#elif OSX
-#include "osxopengl.h"
-#elif IOS
-#    include "iosopengl.h"
-#endif
 
 namespace Engine {
 namespace Render {
@@ -64,14 +35,13 @@ namespace Render {
 #if OPENGL_ES
         mSSBOBuffer.reset();
 #endif
+
         destroyContext(mOsWindow, mContext, mReusedContext);
     }
 
-    void OpenGLRenderWindow::beginIteration(size_t iteration)
+    void OpenGLRenderWindow::beginIteration(size_t iteration) const
     {
-        PROFILE();
-
-        Engine::Render::makeCurrent(mOsWindow, mContext);
+        makeCurrent(mOsWindow, mContext);
 
 #if OPENGL_ES
         sCurrentSSBOBuffer = &*mSSBOBuffer;
@@ -80,23 +50,11 @@ namespace Render {
         OpenGLRenderTarget::beginIteration(iteration);
     }
 
-    void OpenGLRenderWindow::endIteration(size_t iteration)
+    void OpenGLRenderWindow::endIteration(size_t iteration) const
     {
         OpenGLRenderTarget::endIteration(iteration);
 
-#if WINDOWS
-        SwapBuffers(GetDC((HWND)mOsWindow->mHandle));
-#elif LINUX
-        glXSwapBuffers(Window::sDisplay(), mOsWindow->mHandle);
-#elif ANDROID || EMSCRIPTEN
-        eglSwapBuffers(Window::sDisplay, (EGLSurface)mOsWindow->mHandle);
-#elif OSX
-        OSXBridge::swapBuffers(mContext);
-#elif IOS
-        IOSBridge::swapBuffers(mContext);
-#else
-#    error "Unsupported Platform!"
-#endif
+        swapBuffers(mOsWindow, mContext);
     }
 
     TextureDescriptor OpenGLRenderWindow::texture(size_t index, size_t iteration) const

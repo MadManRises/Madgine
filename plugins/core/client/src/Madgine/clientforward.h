@@ -11,11 +11,6 @@ namespace Window {
     struct MainWindowComponentComparator;
 }
 
-namespace Threading {
-    enum class ContextMask : unsigned int;
-}
-
-
 
 namespace Render {
     struct RendererBase;

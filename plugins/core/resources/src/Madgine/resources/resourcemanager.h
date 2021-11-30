@@ -64,7 +64,7 @@ namespace Resources {
 
         std::map<Filesystem::Path, int, SubDirCompare> mResourcePaths;
 
-        Threading::SystemVariable<bool, false> mInitialized;
+        SystemVariable<bool, false> mInitialized;
 
         Threading::TaskQueue mIOQueue;
     };

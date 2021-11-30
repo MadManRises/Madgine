@@ -33,10 +33,10 @@ METATABLE_END(Engine::Tools::OpenGLImRoot)
         {
         }
 
-        bool OpenGLImRoot::init()
+        Threading::Task<bool> OpenGLImRoot::init()
         {
-            if (!ClientImRoot::init())
-                return false;
+            if (!co_await ClientImRoot::init())
+                co_return false;
 
             ImGui_ImplOpenGL3_Init();
             ImGui_ImplOpenGL3_CreateDeviceObjects();
@@ -55,31 +55,21 @@ METATABLE_END(Engine::Tools::OpenGLImRoot)
                 };
             };
 
-			return true;
+			co_return true;
         }
 
-        void OpenGLImRoot::finalize()
+        Threading::Task<void> OpenGLImRoot::finalize()
         {           
 			ImGui_ImplOpenGL3_Shutdown();
 
-			ClientImRoot::finalize();
+			co_await ClientImRoot::finalize();
+
+            co_return;
         }
 
-        void OpenGLImRoot::newFrame(float timeSinceLastFrame)
+        void OpenGLImRoot::newFrame()
         {
-            ImGuiIO &io = ImGui::GetIO();
-
-            io.DeltaTime = timeSinceLastFrame;
-
-            Vector2i size = mWindow.getScreenSpace().mSize;
-
-            io.BackendPlatformUserData = &mWindow;
-
-            io.DisplaySize = ImVec2(size.x / io.DisplayFramebufferScale.x, size.y / io.DisplayFramebufferScale.y);
-
             ImGui_ImplOpenGL3_NewFrame();
-            ImGui::NewFrame();
-            Im3D::NewFrame();
         }
 
         void OpenGLImRoot::renderDrawList(ImGuiViewport *vp)

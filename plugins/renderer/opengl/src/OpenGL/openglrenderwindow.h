@@ -11,8 +11,8 @@ namespace Render {
         OpenGLRenderWindow(OpenGLRenderContext *context, Window::OSWindow *w, size_t samples = 1, OpenGLRenderWindow *sharedContext = nullptr);
         ~OpenGLRenderWindow();
 
-        virtual void beginIteration(size_t iteration) override;
-        virtual void endIteration(size_t iteration) override;
+        virtual void beginIteration(size_t iteration) const override;
+        virtual void endIteration(size_t iteration) const override;
 
         virtual TextureDescriptor texture(size_t index, size_t iteration = std::numeric_limits<size_t>::max()) const override;
         virtual size_t textureCount() const override;
@@ -29,7 +29,7 @@ namespace Render {
 
 #if OPENGL_ES
         static THREADLOCAL(OpenGLSSBOBufferStorage *) sCurrentSSBOBuffer;
-        std::optional<OpenGLSSBOBufferStorage> mSSBOBuffer;
+        mutable std::optional<OpenGLSSBOBufferStorage> mSSBOBuffer;
 
     public:
         static OpenGLSSBOBufferStorage &getSSBOStorage()

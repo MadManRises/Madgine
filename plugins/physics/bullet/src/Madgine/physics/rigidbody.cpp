@@ -14,10 +14,11 @@
 
 #include "Meta/math/transformation.h"
 
-#include "rigidbodyimpl.h"
+#include "rigidbody.h"
 
+#include "bullet3-2.89/src/BulletSoftBody/btSoftRigidDynamicsWorld.h"
 
-ENTITYCOMPONENT_IMPL_EX(RigidBody, Engine::Physics::RigidBody, Engine::Physics::RigidBodyImpl)
+ENTITYCOMPONENT_IMPL(RigidBody, Engine::Physics::RigidBody)
 
 METATABLE_BEGIN(Engine::Physics::RigidBody)
 PROPERTY(Mass, mass, setMass)
@@ -38,14 +39,53 @@ ENCAPSULATED_FIELD(LinearFactor, linearFactor, setLinearFactor)
 ENCAPSULATED_FIELD(AngularFactor, angularFactor, setAngularFactor)
 SERIALIZETABLE_END(Engine::Physics::RigidBody)
 
-METATABLE_BEGIN_BASE(Engine::Physics::RigidBodyImpl, Engine::Physics::RigidBody)
-METATABLE_END(Engine::Physics::RigidBodyImpl)
-
-SERIALIZETABLE_INHERIT_BEGIN(Engine::Physics::RigidBodyImpl, Engine::Physics::RigidBody)
-SERIALIZETABLE_END(Engine::Physics::RigidBodyImpl)
-
 namespace Engine {
 namespace Physics {
+
+    struct RigidBody::Data : btMotionState {
+        Data(RigidBody *component, Scene::Entity::Transform *transform)
+            : mRigidBody(btRigidBody::btRigidBodyConstructionInfo { 0.0f, this, nullptr, { 0.0f, 0.0f, 0.0f } })
+            , mTransform(transform)
+        {
+            mRigidBody.setUserPointer(component);
+        }
+
+        virtual void setWorldTransform(const btTransform &transform) override
+        {
+            if (mTransform) {
+                Matrix4 p = mTransform->parentMatrix();
+
+                Matrix4 m = p.Inverse() * TransformMatrix(Vector3 { transform.getOrigin() }, Vector3::UNIT_SCALE, Quaternion { transform.getRotation() });
+
+                Vector3 pos;
+                Vector3 scale;
+                Quaternion orientation;
+                std::tie(pos, scale, orientation) = DecomposeTransformMatrix(m);
+
+                mTransform->setPosition(pos);
+                mTransform->setOrientation(orientation);
+            }
+        }
+
+        virtual void getWorldTransform(btTransform &transform) const override
+        {
+            if (mTransform) {
+                Matrix4 m = mTransform->worldMatrix();
+
+                Vector3 pos;
+                Vector3 scale;
+                Quaternion orientation;
+                std::tie(pos, scale, orientation) = DecomposeTransformMatrix(m);
+                transform = btTransform { { orientation.v.x, orientation.v.y, orientation.v.z, orientation.w }, { pos.x, pos.y, pos.z } };
+            } else {
+                transform = btTransform { { 0.0f, 0.0f, 0.0f, 1.0f } };
+            }
+        }
+
+        Scene::Entity::Transform *mTransform = nullptr;
+
+        btRigidBody mRigidBody;
+    };
 
     RigidBody::RigidBody(const ObjectPtr &data)
         : NamedUniqueComponent(data)
@@ -53,29 +93,45 @@ namespace Physics {
     {
     }
 
-    RigidBody::RigidBody(RigidBody &&other) = default;
+    RigidBody::RigidBody(RigidBody &&other)
+        : NamedUniqueComponent(std::move(other))
+        , mShapeHandle(std::move(other.mShapeHandle))
+        , mSceneMgr(other.mSceneMgr)
+        , mData(std::move(other.mData))
+    {
+        if (mData)
+            get()->setUserPointer(this);
+    }
 
     RigidBody::~RigidBody() = default;
 
-    RigidBody &RigidBody::operator=(RigidBody &&) = default;
+    RigidBody &RigidBody::operator=(RigidBody &&other)
+    {
+        NamedUniqueComponent::operator=(std::move(other));
+        std::swap(mShapeHandle, other.mShapeHandle);
+        mSceneMgr = other.mSceneMgr;
+        std::swap(mData, other.mData);
+        if (mData)
+            get()->setUserPointer(this);
+        return *this;
+    }
 
     void RigidBody::init(Scene::Entity::Entity *entity)
     {
-        if (!mShapeHandle)
-            mShapeHandle.load("Cube");
+        //if (!mShapeHandle)
+        //    mShapeHandle.load("Cube");
 
-        mTransform = entity->addComponent<Scene::Entity::Transform>();
+        Scene::Entity::Transform *transform = entity->addComponent<Scene::Entity::Transform>();
+
+        mData = std::make_unique<Data>(this, transform);
         mSceneMgr = &entity->sceneMgr();
 
-        Matrix4 m = mTransform->worldMatrix();
+        Matrix4 m = transform->worldMatrix();
 
-        Vector3 pos;
-        Vector3 scale;
-        Quaternion orientation;
-        std::tie(pos, scale, orientation) = DecomposeTransformMatrix(m);
+        const auto &[pos, scale, orientation] = DecomposeTransformMatrix(m);
         get()->setWorldTransform(btTransform { { orientation.v.x, orientation.v.y, orientation.v.z, orientation.w }, { pos.x, pos.y, pos.z } });
 
-        if (mShapeHandle)
+        if (mShapeHandle && mShapeHandle->available())
             get()->setCollisionShape(mShapeHandle->get());
 
         add();
@@ -86,14 +142,26 @@ namespace Physics {
         remove();
     }
 
+    void RigidBody::update()
+    {
+        if (mShapeHandle && mShapeHandle->available() && !get()->getCollisionShape()) {
+            get()->setCollisionShape(mShapeHandle->get());
+            float mass = get()->getMass();
+            btVector3 inertia;
+            mShapeHandle->get()->calculateLocalInertia(mass, inertia);            
+            get()->setMassProps(mass, inertia);
+            add();
+        }
+    }
+
     btRigidBody *RigidBody::get()
     {
-        return &static_cast<RigidBodyImpl *>(this)->mRigidBody;
+        return &mData->mRigidBody;
     }
 
     const btRigidBody *RigidBody::get() const
     {
-        return &static_cast<const RigidBodyImpl *>(this)->mRigidBody;
+        return &mData->mRigidBody;
     }
 
     void RigidBody::activate()
@@ -103,7 +171,7 @@ namespace Physics {
 
     Scene::Entity::Transform *RigidBody::transform()
     {
-        return mTransform;
+        return mData->mTransform;
     }
 
     float RigidBody::mass() const
@@ -115,24 +183,13 @@ namespace Physics {
     {
         float oldMass = get()->getMass();
         if (mass != oldMass) {
-            if (mTransform)
-                remove();
+            remove();
             btVector3 inertia;
-            mShapeHandle->get()->calculateLocalInertia(mass, inertia);
-            get()->setMassProps(mass, inertia);
-            if (mTransform) {
-                add();
-                get()->activate(true);
-                if (oldMass == 0.0f) {
-                    Engine::Scene::Entity::Transform *component = mTransform;
-                    if (component) {
-                        const Vector3 &pos = component->getPosition();
-                        const Quaternion &orientation = component->getOrientation();
-                        get()->setWorldTransform(btTransform { { orientation.v.x, orientation.v.y, orientation.v.z, orientation.w }, { pos.x, pos.y, pos.z } });
-                    }
-                    get()->clearForces();
-                }
+            if (mShapeHandle && mShapeHandle->available()) {
+                mShapeHandle->get()->calculateLocalInertia(mass, inertia);
             }
+            get()->setMassProps(mass, inertia);
+            add();
         }
     }
 
@@ -152,7 +209,6 @@ namespace Physics {
             get()->forceActivationState(ISLAND_SLEEPING);
             if (get()->getMass() > 0) {
                 remove();
-                get()->activate(true);
                 add();
             }
         }
@@ -205,16 +261,28 @@ namespace Physics {
 
     void RigidBody::setShape(typename CollisionShapeManager::HandleType handle)
     {
-        mShapeHandle = std::move(handle);
+        remove();
 
-        get()->setCollisionShape(mShapeHandle->get());
+        mShapeHandle = std::move(handle);
+        if (mShapeHandle->available()) {
+            get()->setCollisionShape(mShapeHandle->get());
+        } else {
+            get()->setCollisionShape(nullptr);
+        }
+        add();
     }
 
     void RigidBody::setShapeName(std::string_view name)
     {
-        mShapeHandle.load(name);
+        remove();
 
-        get()->setCollisionShape(mShapeHandle->get());
+        mShapeHandle.load(name);
+        if (mShapeHandle->available()) {
+            get()->setCollisionShape(mShapeHandle->get());
+        } else {            
+            get()->setCollisionShape(nullptr);
+        }
+        add();
     }
 
     CollisionShapeManager::ResourceType *RigidBody::getShape() const
@@ -229,7 +297,11 @@ namespace Physics {
 
     void RigidBody::add()
     {
-        mSceneMgr->getComponent<PhysicsManager>().world().addRigidBody(get());
+        if (get()->getCollisionShape()) {
+            mSceneMgr->getComponent<PhysicsManager>().world().addRigidBody(get());
+            get()->activate(true);
+            get()->clearForces();
+        }
     }
 
     void RigidBody::remove()

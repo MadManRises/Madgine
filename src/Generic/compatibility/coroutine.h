@@ -20,7 +20,7 @@ namespace experimental {
             return me;
         }
         void operator()() { resume(); }
-        void *address() const { return ptr; }
+        void *address() const noexcept { return ptr; }
         void resume() const { __builtin_coro_resume(ptr); }
         void destroy() const { __builtin_coro_destroy(ptr); }
         bool done() const { return __builtin_coro_done(ptr); }

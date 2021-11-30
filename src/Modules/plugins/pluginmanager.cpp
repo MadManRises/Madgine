@@ -118,10 +118,10 @@ namespace Plugins {
     {
         assert(Threading::WorkGroup::self().singleThreaded());
 
-        for (PluginSection &sec : kvValues(mSections)) {
+        /* for (PluginSection &sec : kvValues(mSections)) {
             if (sec.unload())
                 throw 0;
-        }
+        }*/
     }
 
     PluginSection &PluginManager::section(const std::string &name)

@@ -40,7 +40,7 @@ VALUETYPE_TYPE(ApiFunction, ApiFunction, const ApiFunction &)
 VALUETYPE_SEP
 VALUETYPE_TYPE(BoundApiFunction, BoundApiFunction, const BoundApiFunction &)
 VALUETYPE_SEP
-VALUETYPE_TYPE(Function, Function, const Function &)
+VALUETYPE_TYPE(Function, KeyValueFunction, const KeyValueFunction &)
 VALUETYPE_SEP
 VALUETYPE_TYPE(Object, ObjectPtr, const ObjectPtr &)
 VALUETYPE_SEP

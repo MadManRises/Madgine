@@ -1,12 +1,12 @@
 #pragma once
 
 #include "Generic/container/container_api.h"
-#include "Generic/container/multicontainer.h"
+#include "Generic/container/freelistcontainer.h"
 #include "Meta/keyvalue/typedscopeptr.h"
 #include "Meta/serialize/serializableunitptr.h"
 #include "entitycomponentcollector.h"
 #include "entitycomponentlistbase.h"
-#include "Generic/container/freelistcontainer.h"
+#include "entitycomponentcontainer.h"
 
 namespace Engine {
 namespace Scene {
@@ -17,42 +17,11 @@ namespace Scene {
         DERIVE_FUNCTION(updateRender, Entity *);
         DERIVE_FUNCTION(relocateComponent, const EntityComponentHandle<EntityComponentBase> &, Entity *);
 
-        MADGINE_SCENE_EXPORT void relocateEntityComponent(Entity *entity, EntityComponentHandle<EntityComponentBase> index);
-
+        
         template <typename T>
         struct EntityComponentList : EntityComponentListComponent<EntityComponentList<T>> {
 
-            using Config = typename T::Config;
-
-            struct EntityPtrDummy {
-                Entity *mPtr = nullptr;
-                EntityPtrDummy(Entity *ptr)
-                    : mPtr(ptr)
-                {
-                }
-                ~EntityPtrDummy() {
-                    mPtr = nullptr;
-                }
-                operator Entity* () const {
-                    return mPtr;
-                }
-
-            };
-
-            static_assert(sizeof(T) >= sizeof(uintptr_t));
-            static_assert(Config::sContiguous != Config::sPersistent);
-
-            static bool isFree(std::tuple<T &, EntityPtrDummy &> data)
-            {
-                return !std::get<1>(data);
-            }
-
-            static uintptr_t *getLocation(std::tuple<T &, EntityPtrDummy &> data)
-            {
-                return &reinterpret_cast<uintptr_t &>(std::get<0>(data));
-            }
-
-            using Vector = std::conditional_t<Config::sPersistent, container_api<FreeListContainer<MultiContainer<std::deque, T, EntityPtrDummy>, EntityComponentList<T>>>, container_api<MultiContainer<std::vector, T, Entity *>>>;
+            using Vector = container_api<typename replace<typename T::Container>::template type<T>>;
 
             Vector *operator->()
             {
@@ -66,49 +35,49 @@ namespace Scene {
 
             T *get(const EntityComponentHandle<EntityComponentBase> &index) override final
             {
-                return &mData.at(index.mIndex).template get<0>();
+                return &get<0>(mData.at(index.mIndex));
             }
 
             const T *get(const EntityComponentHandle<EntityComponentBase> &index) const override final
             {
-                return &mData.at(index.mIndex).template get<0>();
+                return &get<0>(mData.at(index.mIndex));
             }
 
             TypedScopePtr getTyped(const EntityComponentHandle<EntityComponentBase> &index) override final
             {
-                return &mData.at(index.mIndex).template get<0>();
+                return &get<0>(mData.at(index.mIndex));
             }
 
             Serialize::SerializableDataPtr getSerialized(const EntityComponentHandle<EntityComponentBase> &index) override final
             {
-                return &mData.at(index.mIndex).template get<0>();
+                return &get<0>(mData.at(index.mIndex));
             }
 
             Serialize::SerializableDataConstPtr getSerialized(const EntityComponentHandle<EntityComponentBase> &index) const override final
             {
-                return &mData.at(index.mIndex).template get<0>();
+                return &get<0>(mData.at(index.mIndex));
             }
 
             void init(const EntityComponentHandle<EntityComponentBase> &index, Entity *entity) override final
             {
                 if constexpr (has_function_init_v<T>)
-                    mData.at(index.mIndex).template get<0>().init(entity);
+                    get<0>(mData.at(index.mIndex)).init(entity);
             }
 
             void finalize(const EntityComponentHandle<EntityComponentBase> &index, Entity *entity) override final
             {
                 if constexpr (has_function_finalize_v<T>)
-                    mData.at(index.mIndex).template get<0>().finalize(entity);
+                    get<0>(mData.at(index.mIndex)).finalize(entity);
             }
 
             T *get(const EntityComponentHandle<T> &index)
             {
-                return &mData.at(index.mIndex).template get<0>();
+                return &get<0>(mData.at(index.mIndex));
             }
 
             const T *get(const EntityComponentHandle<T> &index) const
             {
-                return &mData.at(index.mIndex).template get<0>();
+                return &get<0>(mData.at(index.mIndex));
             }
 
             Entity *getEntity(const EntityComponentHandle<EntityComponentBase> &index) const override final
@@ -122,7 +91,7 @@ namespace Scene {
 
             Entity *getEntity(uint32_t index) const
             {
-                return mData.at(index).template get<1>();
+                return get<1>(mData.at(index));
             }
 
             EntityComponentOwningHandle<EntityComponentBase> emplace(const ObjectPtr &table, Entity *entity) override final
@@ -135,18 +104,7 @@ namespace Scene {
             void erase(const EntityComponentHandle<EntityComponentBase> &index) override final
             {
                 auto it = container_traits<Vector>::toIterator(mData, index.mIndex);
-                if constexpr (Config::sContiguous) {
-                    auto it = mData.begin() + index.mIndex;
-                    auto last = --mData.end();
-                    if (last != it) {
-                        it.template get<0>() = std::move(last.template get<0>());
-                        it.template get<1>() = std::exchange(last.template get<1>(), nullptr);
-                        relocateEntityComponent(it.template get<1>(), index);
-                    }
-                    mData.erase(last);
-                } else {
-                    mData.erase(it);
-                }
+                mData.erase(it);
             }
 
             bool empty() override final
@@ -167,35 +125,35 @@ namespace Scene {
             void updateRender() override final
             {
                 if constexpr (has_function_updateRender_v<T>) {
-                    for (const std::tuple<T &, Entity *&> &t : mData) {
+                    for (const std::tuple<T &, NulledPtr<Entity> &> &t : mData) {
                         std::get<0>(t).updateRender(std::get<1>(t));
                     }
                 }
             }
 
-            typename std::vector<T>::iterator begin()
+            auto begin()
             {
-                return mData.template get<0>().begin();
+                return mData.begin();
             }
 
-            typename std::vector<T>::iterator end()
+            auto end()
             {
-                return mData.template get<0>().end();
+                return mData.end();
             }
 
-            Vector &data()
+            auto &data()
             {
                 return mData;
             }
 
             T &front()
             {
-                return mData.template get<0>().front();
+                return get<0>(mData).front();
             }
 
             T &operator[](size_t index)
             {
-                return mData.template get<0>()[index];
+                return get<0>(mData)[index];
             }
 
             Vector mData;

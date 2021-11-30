@@ -41,37 +41,41 @@ namespace Window {
         return value->mPriority;
     }
 
+    /**
+     * @brief Creates a MainWindow and sets up its TaskQueue
+     * @param settings settings for the creation of OSWindow
+     * 
+     * The settings are stored by reference. Instantiates all MainWindowComponents. 
+     * Initialization/Deinitialization-tasks of the MadgineObject are registered as
+     * setup steps in the TaskQueue. render() is registered as repeated task to the
+     * TaskQueue. 
+    */
     MainWindow::MainWindow(const WindowSettings &settings)
         : mSettings(settings)
+        , mTaskQueue("FrameLoop", true)
         , mComponents(*this)
     {
 
-        mLoop.addSetupSteps(
-            [this]() {
-                return callInit();
-            },
-            [this](bool result) {
-                if (result) {
-                    callFinalize();
-                }
-            });
+        mTaskQueue.addSetupSteps(
+            [this]() { return callInit(); },
+            [this]() { return callFinalize(); });
+
+        mTaskQueue.addRepeatedTask([this]() {
+            render();
+        },
+            std::chrono::microseconds(/*1*/ 000000 / 60), this);
     }
 
-    MainWindow::~MainWindow()
-    {
-    }
+    /**
+     * @brief default destructor 
+    */
+    MainWindow::~MainWindow() = default;
 
-    Rect2i MainWindow::getScreenSpace()
-    {
-        if (!mOsWindow)
-            return { { 0, 0 }, { 0, 0 } };
-        InterfacesVector pos = mOsWindow->renderPos(), size = mOsWindow->renderSize();
-        return {
-            { pos.x, pos.y }, { size.x, size.y }
-        };
-    }
-
-    bool MainWindow::init()
+    /**
+     * @brief 
+     * @return 
+    */
+    Threading::Task<bool> MainWindow::init()
     {
         WindowSettings settings = mSettings;
 
@@ -86,30 +90,32 @@ namespace Window {
         mOsWindow->addListener(this);
 
         assert(!mRenderContext);
-        mRenderContext.emplace(&mLoop);
+        mRenderContext.emplace(&mTaskQueue);
         mRenderWindow = (*mRenderContext)->createRenderWindow(mOsWindow);
 
-        addFrameListener(this);
-
         for (const std::unique_ptr<MainWindowComponentBase> &comp : components()) {
-            bool result = comp->callInit();
+            bool result = co_await comp->callInit();
             assert(result);
         }
 
-        sync();
+        applyClientSpaceResize();
 
-        return true;
+        co_return true;
     }
 
-    void MainWindow::finalize()
+    /**
+     * @brief 
+     * @return 
+    */
+    Threading::Task<void> MainWindow::finalize()
     {
-        unsync();
-
         for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
-            comp->callFinalize();
+            co_await comp->callFinalize();
         }
 
-        removeFrameListener(this);
+        (*mRenderContext)->unloadAllResources();
+
+        co_await mTaskQueue;
 
         mRenderWindow.reset();
         mRenderContext.reset();
@@ -120,22 +126,45 @@ namespace Window {
             mOsWindow->destroy();
             mOsWindow = nullptr;
         }
+
+        co_return;
     }
 
-    void MainWindow::storeWindowData()
+    /**
+     * @brief 
+    */
+    void MainWindow::render()
     {
-        Filesystem::FileManager mgr { "MainWindow-Layout" };
-
-        if (Serialize::SerializeOutStream out = mgr.openWrite(Filesystem::appDataPath() / "mainwindow.ini", std::make_unique<Serialize::IniFormatter>())) {
-            out << mOsWindow->data();
-        }
+        (*mRenderContext)->render();
+        mOsWindow->update();
+        for (ToolWindow &window : mToolWindows)
+            window.osWindow()->update();
     }
 
+    /**
+     * @brief 
+     * @param i 
+     * @return 
+    */
+    MainWindowComponentBase &MainWindow::getWindowComponent(size_t i)
+    {
+        return mComponents.get(i);
+    }
+
+    /**
+     * @brief 
+     * @param settings 
+     * @return 
+    */
     ToolWindow *MainWindow::createToolWindow(const WindowSettings &settings)
     {
         return &mToolWindows.emplace_back(*this, settings);
     }
 
+    /**
+     * @brief 
+     * @param w 
+    */
     void MainWindow::destroyToolWindow(ToolWindow *w)
     {
         auto it = std::find_if(mToolWindows.begin(), mToolWindows.end(), [=](const ToolWindow &window) { return &window == w; });
@@ -143,96 +172,68 @@ namespace Window {
         mToolWindows.erase(it);
     }
 
-    bool MainWindow::injectKeyPress(const Input::KeyEventArgs &arg)
-    {
-        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
-            if (comp->injectKeyPress(arg))
-                return true;
-        }
-        return false;
-    }
-
-    bool MainWindow::injectKeyRelease(const Input::KeyEventArgs &arg)
-    {
-        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
-            if (comp->injectKeyRelease(arg))
-                return true;
-        }
-        return false;
-    }
-
-    bool MainWindow::injectPointerPress(const Input::PointerEventArgs &arg)
-    {
-
-        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
-            if (comp->injectPointerPress(arg))
-                return true;
-        }
-
-        return false;
-    }
-
-    bool MainWindow::injectPointerRelease(const Input::PointerEventArgs &arg)
-    {
-
-        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
-            if (comp->injectPointerRelease(arg))
-                return true;
-        }
-
-        return false;
-    }
-
-    bool MainWindow::injectPointerMove(const Input::PointerEventArgs &arg)
-    {
-
-        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
-            if (comp->injectPointerMove(arg))
-                return true;
-        }
-
-        return false;
-    }
-
-    bool MainWindow::injectAxisEvent(const Input::AxisEventArgs &arg)
-    {
-        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
-            if (comp->injectAxisEvent(arg))
-                return true;
-        }
-
-        return false;
-    }
-
+    /**
+     * @brief Returns a pointer to the OSWindow 
+     * @return the OSWindow
+    */
     OSWindow *MainWindow::osWindow() const
     {
         return mOsWindow;
     }
 
+    /**
+     * @brief Returns a pointer to the RenderContext
+     * @return the RenderContext
+    */
     Render::RenderContext *MainWindow::getRenderer()
     {
         return *mRenderContext;
     }
 
-    void MainWindow::onClose()
+    /**
+     * @brief Returns the pointer to the RenderWindow
+     * @return the RenderWindow
+    */
+    Render::RenderTarget *MainWindow::getRenderWindow()
     {
-        storeWindowData();
-        mOsWindow = nullptr;
-        //callFinalize();
-        mLoop.shutdown();
+        return mRenderWindow.get();
     }
 
-    void MainWindow::onRepaint()
+    /**
+     * @brief Returns a pointer to the TaskQueue
+     * @return the TaskQueue
+    */
+    Threading::TaskQueue *MainWindow::taskQueue()
     {
-        //update();
+        return &mTaskQueue;
     }
 
-    void MainWindow::onResize(const InterfacesVector &size)
+    /**
+     * @brief 
+    */
+    void MainWindow::shutdown()
     {
-        mRenderWindow->resize({ size.x, size.y });
-        applyClientSpaceResize();
+        mTaskQueue.stop();
     }
 
+    /**
+     * @brief 
+     * @return 
+    */
+    Rect2i MainWindow::getScreenSpace()
+    {
+        if (!mOsWindow)
+            return { { 0, 0 }, { 0, 0 } };
+        InterfacesVector pos = mOsWindow->renderPos(), size = mOsWindow->renderSize();
+        return {
+            { pos.x, pos.y }, { size.x, size.y }
+        };
+    }
+
+    /**
+     * @brief 
+     * @param component 
+    */
     void MainWindow::applyClientSpaceResize(MainWindowComponentBase *component)
     {
         if (!mOsWindow)
@@ -259,61 +260,134 @@ namespace Window {
         }
     }
 
-    bool MainWindow::frameStarted(std::chrono::microseconds)
+    /**
+     * @brief 
+     * @param arg 
+     * @return 
+    */
+    bool MainWindow::injectKeyPress(const Input::KeyEventArgs &arg)
     {
-        return true;
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
+            if (comp->injectKeyPress(arg))
+                return true;
+        }
+        return false;
     }
 
-    bool MainWindow::frameRenderingQueued(std::chrono::microseconds, Threading::ContextMask)
+    /**
+     * @brief 
+     * @param arg 
+     * @return 
+    */
+    bool MainWindow::injectKeyRelease(const Input::KeyEventArgs &arg)
     {
-
-        return mOsWindow;
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
+            if (comp->injectKeyRelease(arg))
+                return true;
+        }
+        return false;
     }
 
-    bool MainWindow::frameEnded(std::chrono::microseconds)
+    /**
+     * @brief 
+     * @param arg 
+     * @return 
+    */
+    bool MainWindow::injectPointerPress(const Input::PointerEventArgs &arg)
     {
-        //TODO
-        if (mRenderContext)
-            (*mRenderContext)->render();
-        mOsWindow->update();
-        for (ToolWindow &window : mToolWindows)
-            window.osWindow()->update();
-        return mOsWindow;
+
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
+            if (comp->injectPointerPress(arg))
+                return true;
+        }
+
+        return false;
     }
 
-    MainWindowComponentBase &MainWindow::getWindowComponent(size_t i, bool init)
+    /**
+     * @brief 
+     * @param arg 
+     * @return 
+    */
+    bool MainWindow::injectPointerRelease(const Input::PointerEventArgs &arg)
     {
-        return getChild(mComponents.get(i), init);
+
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
+            if (comp->injectPointerRelease(arg))
+                return true;
+        }
+
+        return false;
     }
 
-    void MainWindow::addFrameListener(Threading::FrameListener *listener)
+    /**
+     * @brief 
+     * @param arg 
+     * @return 
+    */
+    bool MainWindow::injectPointerMove(const Input::PointerEventArgs &arg)
     {
-        mLoop.addFrameListener(listener);
+
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
+            if (comp->injectPointerMove(arg))
+                return true;
+        }
+
+        return false;
     }
 
-    void MainWindow::removeFrameListener(Threading::FrameListener *listener)
+    /**
+     * @brief 
+     * @param arg 
+     * @return 
+    */
+    bool MainWindow::injectAxisEvent(const Input::AxisEventArgs &arg)
     {
-        mLoop.removeFrameListener(listener);
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
+            if (comp->injectAxisEvent(arg))
+                return true;
+        }
+
+        return false;
     }
 
-    void MainWindow::singleFrame()
+    /**
+     * @brief 
+    */
+    void MainWindow::onClose()
     {
-        mLoop.singleFrame();
+        storeWindowData();
+        mOsWindow = nullptr;
+        mTaskQueue.stop();
     }
 
-    Threading::FrameLoop &MainWindow::frameLoop()
+    /**
+     * @brief 
+    */
+    void MainWindow::onRepaint()
     {
-        return mLoop;
     }
 
-    void MainWindow::shutdown()
+    /**
+     * @brief 
+     * @param size 
+    */
+    void MainWindow::onResize(const InterfacesVector &size)
     {
-        mLoop.shutdown();
+        mRenderWindow->resize({ size.x, size.y });
+        applyClientSpaceResize();
     }
 
-    Render::RenderTarget *MainWindow::getRenderWindow()
+    /**
+     * @brief 
+    */
+    void MainWindow::storeWindowData()
     {
-        return mRenderWindow.get();
+        Filesystem::FileManager mgr { "MainWindow-Layout" };
+
+        if (Serialize::SerializeOutStream out = mgr.openWrite(Filesystem::appDataPath() / "mainwindow.ini", std::make_unique<Serialize::IniFormatter>())) {
+            out << mOsWindow->data();
+        }
     }
 
 }

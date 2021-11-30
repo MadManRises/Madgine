@@ -49,5 +49,13 @@ struct replace<C<V, Ty...>> {
     using type = tagged<DefaultTag, Args...>;
 };
 
+template <template <template <typename...> typename, typename...> typename C, template<typename...> typename V, typename... Ty>
+struct replace<C<V, Ty...>> {
+    template <typename Tag, typename... Args>
+    using tagged = C<V, typename replace<Ty>::template tagged<Tag, Args...>...>;
+
+    template <typename... Args>
+    using type = tagged<DefaultTag, Args...>;
+};
 
 }

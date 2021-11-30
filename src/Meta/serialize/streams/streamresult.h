@@ -15,7 +15,7 @@ namespace Serialize {
         std::string mNotes;
     };
 
-    struct StreamResult {
+    struct [[nodiscard]] StreamResult {
         StreamState mState = StreamState::OK;
         std::unique_ptr<StreamError> mError;
     };
@@ -48,10 +48,11 @@ namespace Serialize {
 #define STREAM_ERROR(Stream, Type, ...) ::Engine::Serialize::StreamResultBuilder { Type, Stream, __FILE__, __LINE__ } << __VA_ARGS__;
 #define STREAM_PARSE_ERROR(Stream, ...) STREAM_ERROR(Stream, ::Engine::Serialize::StreamState::PARSE_ERROR, __VA_ARGS__);
 #define STREAM_PERMISSION_ERROR(Stream, ...) STREAM_ERROR(Stream, ::Engine::Serialize::StreamState::PERMISSION_ERROR, __VA_ARGS__);
+#define STREAM_INTEGRITY_ERROR(Stream, ...) STREAM_ERROR(Stream, ::Engine::Serialize::StreamState::INTEGRITY_ERROR, __VA_ARGS__);
 
 #define STREAM_PROPAGATE_ERROR(expr)                                                                              \
-    if (::Engine::Serialize::StreamResult result = (expr); result.mState != ::Engine::Serialize::StreamState::OK) \
-    return result
+    if (::Engine::Serialize::StreamResult _result = (expr); _result.mState != ::Engine::Serialize::StreamState::OK) \
+    return _result
 
 }
 }

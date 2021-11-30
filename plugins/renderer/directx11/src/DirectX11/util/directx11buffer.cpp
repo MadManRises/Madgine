@@ -75,10 +75,7 @@ namespace Render {
 
     void DirectX11Buffer::reset()
     {
-        if (mBuffer) {
-            mBuffer->Release();
-            mBuffer = nullptr;
-        }
+        mBuffer.reset();
     }
 
     void DirectX11Buffer::setData(const ByteBuffer &data)
@@ -116,7 +113,7 @@ namespace Render {
         return { std::move(dataBuffer), mSize };
     }
 
-    ID3D11Buffer *DirectX11Buffer::handle()
+    ID3D11Buffer *DirectX11Buffer::handle() const
     {
         return mBuffer;
     }

@@ -3,19 +3,15 @@
 
 #include "appsettings.h"
 
-#include "Interfaces/util/exception.h"
-
 #include "Meta/keyvalue/metatable_impl.h"
 
 #include "Modules/threading/workgroupstorage.h"
 
 #include "globalapibase.h"
 
-
 METATABLE_BEGIN(Engine::App::Application)
 MEMBER(mGlobalAPIs)
 METATABLE_END(Engine::App::Application)
-
 
 namespace Engine {
 
@@ -32,14 +28,8 @@ namespace App {
         sApp = this;
 
         mTaskQueue.addSetupSteps(
-            [this]() {
-                if (!callInit())
-                    throw exception("App Init Failed!");
-                return true;
-            },
-            [this]() {
-                callFinalize();
-            });
+            [this]() { return callInit(); },
+            [this]() { return callFinalize(); });
     }
 
     Application::~Application()
@@ -48,31 +38,26 @@ namespace App {
         sApp = nullptr;
     }
 
-    bool Application::init()
+    Threading::Task<bool> Application::init()
     {
-
-        markInitialized();
-
         for (const std::unique_ptr<GlobalAPIBase> &api : mGlobalAPIs) {
-            if (!api->callInitOrder(mGlobalAPIInitCounter))
-                return false;
+            if (!co_await api->callInit())
+                co_return false;
         }
 
-        return true;
+        co_return true;
     }
 
-    void Application::finalize()
+    Threading::Task<void> Application::finalize()
     {
-        for (; mGlobalAPIInitCounter > 0; --mGlobalAPIInitCounter) {
-            for (const std::unique_ptr<GlobalAPIBase> &api : mGlobalAPIs) {
-                api->callFinalizeOrder(mGlobalAPIInitCounter);
-            }
+        for (const std::unique_ptr<GlobalAPIBase> &api : mGlobalAPIs) {
+            co_await api->callFinalize();
         }
     }
 
-    GlobalAPIBase &Application::getGlobalAPIComponent(size_t i, bool init)
+    GlobalAPIBase &Application::getGlobalAPIComponent(size_t i)
     {
-        return getChildOrder(mGlobalAPIs.get(i), mGlobalAPIInitCounter, init);
+        return mGlobalAPIs.get(i);
     }
 
     const AppSettings &Application::settings()

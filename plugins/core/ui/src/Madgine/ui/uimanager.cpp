@@ -11,8 +11,8 @@
 
 #include "Meta/serialize/configs/controlled.h"
 
-#include "guihandler.h"
 #include "gamehandler.h"
+#include "guihandler.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
@@ -28,51 +28,48 @@ FIELD(mGuiHandlers, Serialize::ControlledConfig<KeyCompare<std::unique_ptr<Engin
 FIELD(mGameHandlers, Serialize::ControlledConfig<KeyCompare<std::unique_ptr<Engine::UI::GameHandlerBase>>>)
 SERIALIZETABLE_END(Engine::UI::UIManager)
 
-
-
 namespace Engine {
 
 namespace UI {
 
     UIManager::UIManager(Window::MainWindow &window)
-        : VirtualUnit(window, 50)
+        : VirtualData(window, 50)
         , mGuiHandlers(*this)
         , mGameHandlers(*this)
     {
+        window.taskQueue()->addRepeatedTask([this]() {
+            update();
+        });
+        window.taskQueue()->addRepeatedTask([this]() {
+            fixedUpdate();
+        },
+            std::chrono::microseconds { 15000 });
     }
 
     UIManager::~UIManager()
     {
     }
 
-    bool UIManager::init()
+    Threading::Task<bool> UIManager::init()
     {
-        mWindow.addFrameListener(this);
-
-        markInitialized();
 
         for (const std::unique_ptr<GuiHandlerBase> &handler : mGuiHandlers)
-            if (!handler->callInit())
-                return false;
+            co_await handler->callInit();
 
-        for (const std::unique_ptr<GameHandlerBase> &handler : mGameHandlers) {
-            if (!handler->callInit())
-                return false;
-        }
+        for (const std::unique_ptr<GameHandlerBase> &handler : mGameHandlers)
+            co_await handler->callInit();
 
-        return true;
+        co_return true;
     }
 
-    void UIManager::finalize()
+    Threading::Task<void> UIManager::finalize()
     {
         for (const std::unique_ptr<GameHandlerBase> &handler : mGameHandlers) {
-            handler->callFinalize();
+            co_await handler->callFinalize();
         }
 
         for (const std::unique_ptr<GuiHandlerBase> &handler : mGuiHandlers)
-            handler->callFinalize();
-
-        mWindow.removeFrameListener(this);
+            co_await handler->callFinalize();
     }
 
     void UIManager::clear()
@@ -146,36 +143,20 @@ namespace UI {
         return result;
     }
 
-    bool UIManager::frameRenderingQueued(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context)
+    void UIManager::update()
     {
-        PROFILE();
+        std::chrono::microseconds timeSinceLastFrame = mFrameClock.tick<std::chrono::microseconds>();
+
         for (const std::unique_ptr<GameHandlerBase> &h : mGameHandlers) {
-            h->update(timeSinceLastFrame, context);
+            h->update(timeSinceLastFrame);
         }
-        return true;
     }
 
-    bool UIManager::frameFixedUpdate(std::chrono::microseconds timeSinceLastFrame, Threading::ContextMask context)
+    void UIManager::fixedUpdate()
     {
         for (const std::unique_ptr<GameHandlerBase> &h : mGameHandlers) {
-            h->fixedUpdate(timeSinceLastFrame, context);
+            h->fixedUpdate(std::chrono::microseconds { 15000 });
         }
-        return true;
-    }
-
-    /*Scene::ContextMask UIManager::currentContext()
-    {
-        return mModalWindowList.empty()
-            ? (mCurrentRoot ? mCurrentRoot->context() : Scene::ContextMask::NoContext)
-            : mModalWindowList.top()->context();
-    }*/
-
-    Window::MainWindow &UIManager::window(bool init) const
-    {
-        if (init) {
-            checkInitState();
-        }
-        return mWindow;
     }
 
     std::string_view UIManager::key() const
@@ -183,14 +164,14 @@ namespace UI {
         return "UI";
     }
 
-    GameHandlerBase &UIManager::getGameHandler(size_t i, bool init)
+    GameHandlerBase &UIManager::getGameHandler(size_t i)
     {
-        return getChild(mGameHandlers.get(i), init);
+        return mGameHandlers.get(i);
     }
 
-    GuiHandlerBase &UIManager::getGuiHandler(size_t i, bool init)
+    GuiHandlerBase &UIManager::getGuiHandler(size_t i)
     {
-        return getChild(mGuiHandlers.get(i), init);
+        return mGuiHandlers.get(i);
     }
 
 }

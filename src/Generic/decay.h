@@ -2,19 +2,21 @@
 
 namespace Engine {
 
-template <typename T, typename = void>
-struct decayBase {
-	using type = void;
-};
+namespace __generic_impl__ {
+    template <typename T, typename = void>
+    struct decayBase {
+        using type = void;
+    };
 
-template <typename T>
-struct decayBase<T, std::void_t<typename T::decay_t>> {
-	using type = typename T::decay_t;
-};
+    template <typename T>
+    struct decayBase<T, std::void_t<typename T::decay_t>> {
+        using type = typename T::decay_t;
+    };
+}
 
 template <typename T>
 struct decay {
-    using type = typename decayBase<T>::type;
+    using type = typename __generic_impl__::decayBase<T>::type;
 };
 
 template <typename T>

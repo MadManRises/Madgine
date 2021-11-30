@@ -25,8 +25,8 @@ namespace Render {
 
         void reset();
 
-        void bind(OpenGLVertexArray *format);
-        void unbind(OpenGLVertexArray *format);
+        void bind(const OpenGLVertexArray *format) const;
+        void unbind(const OpenGLVertexArray *format) const;
 
         void setParametersSize(size_t index, size_t size);
         WritableByteBuffer mapParameters(size_t index);
@@ -42,19 +42,19 @@ namespace Render {
             uint32_t mSize;
         };
         std::vector<UniformBufferDescriptor> uniformBuffers();
-        void verify();
+        void verify() const;
 
     private:
         OpenGLShaderLoader::HandleType mVertexShader;
         OpenGLShaderLoader::HandleType mPixelShader;
         OpenGLShaderLoader::HandleType mGeometryShader;
-        GLuint mHandle = 0;
+        mutable GLuint mHandle = 0;
         std::vector<OpenGLBuffer> mUniformBuffers;
 #if !OPENGL_ES
         std::vector<OpenGLBuffer> mShaderStorageBuffers;
 #else
         std::vector<OpenGLSSBOBuffer> mShaderStorageBuffers;
-        OpenGLBuffer mShaderStorageOffsetBuffer = { GL_UNIFORM_BUFFER };
+        mutable OpenGLBuffer mShaderStorageOffsetBuffer = { GL_UNIFORM_BUFFER };
 #endif
         size_t mInstanceDataSize = 0;
         OpenGLBuffer mInstanceBuffer = GL_ARRAY_BUFFER;

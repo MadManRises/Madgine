@@ -9,6 +9,8 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
 
+#include "im3d/im3d.h"
+
 #include "Meta/serialize/streams/serializestream.h"
 
 #include "Meta/serialize/formatter/iniformatter.h"
@@ -73,9 +75,8 @@ namespace Tools {
         }
     }
 
-    ImRoot::ImRoot(MadgineObjectState *state)
-        : mState(state)
-        , mCollector(*this)
+    ImRoot::ImRoot()
+        : mCollector(*this)
     {
     }
 
@@ -83,7 +84,7 @@ namespace Tools {
     {
     }
 
-    bool ImRoot::init()
+    Threading::Task<bool> ImRoot::init()
     {
 
         ImGuiSettingsHandler ini_handler;
@@ -93,30 +94,34 @@ namespace Tools {
         ini_handler.ReadLineFn = ToolReadLine;
         ini_handler.WriteAllFn = ToolWriteAll;
         ini_handler.UserData = this;
-        GImGui->SettingsHandlers.push_back(ini_handler);
+        GImGui->SettingsHandlers.push_back(ini_handler);        
 
         for (const std::unique_ptr<ToolBase> &tool : mCollector) {
-            tool->callInit();
+            bool result = co_await tool->callInit();
+            assert(result);            
         }
 
-        return true;
+        co_return true;
     }
 
-    void ImRoot::finalize()
+    Threading::Task<void> ImRoot::finalize()
     {
 
         for (const std::unique_ptr<ToolBase> &tool : mCollector) {
-            tool->callFinalize();
+            co_await tool->callFinalize();
         }
     }
 
-    bool ImRoot::frame()
+    void ImRoot::render()
     {
         PROFILE_NAMED("ImGui - Rendering");
 
-        bool running = true;
+        ImGuiIO &io = ImGui::GetIO();
+        
+        ImGui::NewFrame();
+        Im3D::NewFrame();
 
-        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable) {
+        if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
 
             ImGuiID dockspace_id = ImGui::GetID("MadgineDockSpace");
 
@@ -160,7 +165,7 @@ namespace Tools {
 
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("Quit")) {
-                    running = false;
+                    throw 0;
                 }
                 ImGui::EndMenu();
             }
@@ -182,22 +187,20 @@ namespace Tools {
 
         finishToolRead();
 
-        for (ToolBase *tool : safeIterate(uniquePtrToPtr(mCollector))) {
+        for (ToolBase *tool : uniquePtrToPtr(mCollector)) {
             tool->update();
         }
 
-        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable) {
+        if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
             ImGui::End();
         }
 
-        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
             ImGui::Render();
         else
             ImGui::EndFrame();
 
-        ImGui::UpdatePlatformWindows();
-
-        return running;
+        ImGui::UpdatePlatformWindows();        
     }
 
     const std::vector<std::unique_ptr<ToolBase>> &ImRoot::tools()
@@ -205,24 +208,14 @@ namespace Tools {
         return mCollector;
     }
 
-    ToolBase &ImRoot::getToolComponent(size_t index, bool init)
+    ToolBase &ImRoot::getToolComponent(size_t index)
     {
-        return mState->getChild(mCollector.get(index), init);
+        return mCollector.get(index);
     }
 
     ImGuiDockNode *ImRoot::dockNode() const
     {
         return mDockNode;
-    }
-
-    bool ImRoot::isInitialized() const
-    {
-        return mState->isInitialized();
-    }
-
-    void ImRoot::checkInitState()
-    {
-        mState->checkInitState();
     }
 
     void ImRoot::finishToolRead()

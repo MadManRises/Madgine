@@ -8,7 +8,6 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-
 UNIQUECOMPONENT(Engine::Controls::ControlsManager)
 
 METATABLE_BEGIN_BASE(Engine::Controls::ControlsManager, Engine::App::GlobalAPIBase)
@@ -16,7 +15,7 @@ METATABLE_END(Engine::Controls::ControlsManager)
 
 namespace Engine {
 namespace Controls {
-    
+
     ControlsManager::ControlsManager(App::Application &app)
         : VirtualScope(app)
     {
@@ -29,12 +28,12 @@ namespace Controls {
 
     void ControlsManager::addListener(std::string_view action, ActionCallback callback, void *userData)
     {
-        mControlsMap.try_emplace(std::string { action }).first->second.mListeners.emplace_back(ActionListener {callback, userData});
+        mControlsMap.try_emplace(std::string { action }).first->second.mListeners.emplace_back(ActionListener { callback, userData });
     }
 
     void ControlsManager::trigger(const ActionDescriptor *action)
     {
-        for (const ActionListener& listener : action->mListeners) {
+        for (const ActionListener &listener : action->mListeners) {
             listener.mF(action, listener.mUserData);
         }
     }
@@ -42,6 +41,11 @@ namespace Controls {
     void ControlsManager::addAxisEventListener(AxisEventListener *listener)
     {
         mAxisEventListeners.push_back(listener);
+    }
+
+    void ControlsManager::removeAxisEventListener(AxisEventListener *listener)
+    {
+        mAxisEventListeners.erase(std::find(mAxisEventListeners.begin(), mAxisEventListeners.end(), listener));
     }
 
     bool ControlsManager::injectAxisEvent(const Input::AxisEventArgs &arg)

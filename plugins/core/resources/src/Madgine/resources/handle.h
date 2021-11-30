@@ -42,7 +42,7 @@ namespace Resources {
         template <typename Loader2, typename Data2>
         Handle(const Handle<Loader2, Data2> &other)
         {
-            if constexpr (std::is_base_of_v<Loader2, Loader> || std::is_base_of_v<Loader, Loader2>) {
+            if constexpr (std::derived_from<Loader2, Loader> || std::derived_from<Loader, Loader2>) {
                 mData = (Data)other.mData;
                 if (mData)
                     info()->incRef();
@@ -73,17 +73,17 @@ namespace Resources {
 
         auto operator<=>(const Handle<Loader, Data> &) const = default;
 
-        decltype(auto) operator*() const
+        const auto &operator*() const
         {
             return *Loader::getDataPtr(*this);
         }
 
-        auto operator->() const
+        const auto operator->() const
         {
             return Loader::getDataPtr(*this);
         }
 
-        operator typename Loader::Data *() const
+        operator const typename Loader::Data *() const
         {
             return Loader::getDataPtr(*this);
         }
@@ -93,7 +93,7 @@ namespace Resources {
             return *this && info()->verify();
         }
 
-        typename Loader::Data* getUnsafe() const {
+        const typename Loader::Data* getUnsafe() const {
             return Loader::getDataPtr(*this, nullptr, false);
         }
 
@@ -133,7 +133,7 @@ namespace Resources {
         void reset()
         {
             if (mData) {
-                Loader::unload(*this);
+                Loader::resetHandle(*this);
                 mData = Data {};
             }
         }

@@ -26,7 +26,7 @@ namespace Serialize {
         {
             R returnValue;
             STREAM_PROPAGATE_ERROR(read(in, returnValue, nullptr, args...));
-            UnitHelper<R>::applyMap(in, returnValue, true);
+            STREAM_PROPAGATE_ERROR(UnitHelper<R>::applyMap(in, returnValue, true));
             assert(request);
             query.writeRequestResponse(&returnValue, request->mRequester, request->mRequesterTransactionId);
             (*request)(&returnValue);
@@ -50,7 +50,7 @@ namespace Serialize {
                     return read(in, field, nullptr, args...);
                 },
                 StreamResult {}));
-            UnitHelper<decltype(data)>::applyMap(in, data, true);
+            STREAM_PROPAGATE_ERROR(UnitHelper<decltype(data)>::applyMap(in, data, true));
             query.tryCall(data, in.id(), id);
             return {};
         }

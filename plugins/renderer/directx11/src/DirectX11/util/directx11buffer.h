@@ -25,12 +25,12 @@ namespace Render {
         void resize(size_t size);
         WritableByteBuffer mapData();
 
-        ID3D11Buffer *handle();        
+        ID3D11Buffer *handle() const;        
 
     private:
         size_t mSize = 0;
         UINT mBind = 0;
-        ID3D11Buffer *mBuffer = nullptr;                
+        ReleasePtr<ID3D11Buffer> mBuffer;                
     };
 
 }

@@ -485,7 +485,7 @@ namespace Tools {
             }
 
             if (Scene::Entity::Skeleton *s = entity->getComponent<Scene::Entity::Skeleton>()) {
-                if (Render::SkeletonDescriptor *skeleton = s->data()) {
+                if (const Render::SkeletonDescriptor *skeleton = s->data()) {
                     for (size_t i = 0; i < skeleton->mBones.size(); ++i) {
                         const Engine::Render::Bone &bone = skeleton->mBones[i];
 

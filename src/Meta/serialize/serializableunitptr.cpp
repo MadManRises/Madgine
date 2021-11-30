@@ -36,7 +36,7 @@ namespace Serialize {
         SerializableListHolder holder { in };
 
         if (!in.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
-            in.format().beginExtended(in, name, 1);
+            STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, name, 1));
             SerializableUnitBase *idHelper;
             STREAM_PROPAGATE_ERROR(read(in, idHelper, "serId"));
             uint32_t id = reinterpret_cast<uintptr_t>(idHelper) >> 2;
@@ -126,9 +126,9 @@ namespace Serialize {
         mType->setParent(unit());
     }
 
-    void SerializableDataPtr::applySerializableMap(SerializeInStream &in, bool success) const
+    StreamResult SerializableDataPtr::applySerializableMap(SerializeInStream &in, bool success) const
     {
-        mType->applySerializableMap(unit(), in, success);
+        return mType->applySerializableMap(unit(), in, success);
     }
 
     void SerializableUnitPtr::setDataSynced(bool b) const

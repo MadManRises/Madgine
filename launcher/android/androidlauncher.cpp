@@ -9,7 +9,7 @@
 
 #include <android/native_activity.h>
 
-#include "Interfaces/threading/systemvariable.h"
+#include "Generic/systemvariable.h"
 
 #include "Interfaces/filesystem/api.h"
 #include "../launcher.h"
@@ -22,7 +22,7 @@ extern Engine::CLI::Parameter<Engine::Util::MessageType> logLevel;
 namespace Engine {
 
 namespace Window {
-    extern Threading::SystemVariable<ANativeWindow *> sNativeWindow;
+    extern SystemVariable<ANativeWindow *> sNativeWindow;
     extern AInputQueue *sQueue;
 }
 
@@ -36,7 +36,6 @@ namespace Android {
 
     AndroidLauncher::AndroidLauncher(ANativeActivity *activity)
         : mActivity(activity)
-        , mWindow(nullptr)
     {
         activity->instance = this;
 

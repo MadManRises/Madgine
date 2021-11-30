@@ -30,7 +30,7 @@ namespace Widgets {
         auto operator<=>(const TextureSettings &other) const = default;
     };
 
-    struct MADGINE_WIDGETS_EXPORT WidgetBase : VirtualScope<WidgetBase, Serialize::VirtualUnit<WidgetBase, Serialize::VirtualSerializableUnitBase<VirtualScopeBase<>, Serialize::SerializableUnitBase>>> {
+    struct MADGINE_WIDGETS_EXPORT WidgetBase : VirtualScope<WidgetBase, Serialize::VirtualData<WidgetBase, Serialize::VirtualSerializableDataBase<VirtualScopeBase<>, Serialize::SerializableDataUnit>>> {
         SERIALIZABLEUNIT(WidgetBase);        
 
         WidgetBase(const std::string &name, WidgetManager &manager, WidgetBase *parent = nullptr);
@@ -120,7 +120,7 @@ namespace Widgets {
 
         virtual void sizeChanged(const Vector3i &pixelSize);
 
-        std::pair<std::vector<Vertex>, TextureSettings> renderText(const std::string &text, Vector3 pos, Render::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize);
+        std::pair<std::vector<Vertex>, TextureSettings> renderText(const std::string &text, Vector3 pos, const Render::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize);
 
     protected:
         void destroyChild(WidgetBase *w);
@@ -134,7 +134,7 @@ namespace Widgets {
 
         WidgetManager &mManager;
 
-        SERIALIZABLE_CONTAINER(mChildren, std::vector<std::unique_ptr<WidgetBase>>, NoOpFunctor);
+        std::vector<std::unique_ptr<WidgetBase>> mChildren;
 
         Matrix3 mPos = Matrix3::ZERO;
         Matrix3 mSize = Matrix3::IDENTITY;
@@ -145,9 +145,9 @@ namespace Widgets {
     };
 
     template <typename T>
-    struct Widget : VirtualScope<T, Serialize::VirtualUnit<T, WidgetBase>> {
+    struct Widget : VirtualScope<T, Serialize::VirtualData<T, WidgetBase>> {
 
-        using VirtualScope<T, Serialize::VirtualUnit<T, WidgetBase>>::VirtualScope;
+        using VirtualScope<T, Serialize::VirtualData<T, WidgetBase>>::VirtualScope;
     };
 }
 }

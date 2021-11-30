@@ -52,13 +52,13 @@ namespace Render {
 
         mScene.updateRender();
 
-        std::map<std::tuple<GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> instances;
+        std::map<std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> instances;
 
         for (const auto &[mesh, e] : mScene.entityComponentList<Scene::Entity::Mesh>().data()) {
             if (!mesh.isVisible())
                 continue;
 
-            GPUMeshData *meshData = mesh.data();
+            const GPUMeshData *meshData = mesh.data();
             if (!meshData)
                 continue;
 
@@ -68,7 +68,7 @@ namespace Render {
 
             Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
 
-            instances[std::tuple<GPUMeshData *, Scene::Entity::Skeleton *> { meshData, skeleton }].push_back(transform->worldMatrix());
+            instances[std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *> { meshData, skeleton }].push_back(transform->worldMatrix());
         }
 
         target->pushAnnotation("Shadow");
@@ -90,8 +90,8 @@ namespace Render {
             perFrame->light.light.dir = mScene.mAmbientLightDirection;
         }
 
-        for (const std::pair<const std::tuple<GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> &instance : instances) {
-            GPUMeshData *meshData = std::get<0>(instance.first);
+        for (const std::pair<const std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> &instance : instances) {
+            const GPUMeshData *meshData = std::get<0>(instance.first);
             Scene::Entity::Skeleton *skeleton = std::get<1>(instance.first);
 
             {

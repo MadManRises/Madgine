@@ -33,45 +33,42 @@ namespace Window {
             mListeners.erase(std::remove(mListeners.begin(), mListeners.end(), listener), mListeners.end());
         }
 
-        virtual void update() = 0;
+        void update();
 
-        virtual InterfacesVector size() = 0;
+        InterfacesVector size();
 
-        virtual InterfacesVector renderSize() = 0;
+        InterfacesVector renderSize();
 
-        virtual InterfacesVector pos() = 0;
+        InterfacesVector pos();
 
-        virtual InterfacesVector renderPos() = 0;
+        InterfacesVector renderPos();
 
-        virtual void setSize(const InterfacesVector &size) = 0;
-        virtual void setRenderSize(const InterfacesVector &size) = 0;
+        void setSize(const InterfacesVector &size);
+        void setRenderSize(const InterfacesVector &size);
 
-        virtual void setPos(const InterfacesVector &pos) = 0;
-        virtual void setRenderPos(const InterfacesVector &pos) = 0;
+        void setPos(const InterfacesVector &pos);
+        void setRenderPos(const InterfacesVector &pos);
 
-        virtual void show() = 0;
-        virtual bool isMinimized() = 0;
-        virtual bool isMaximized() = 0;
-        virtual bool isFullscreen() = 0;
+        void show();
+        bool isMinimized();
+        bool isMaximized();
+        bool isFullscreen();
 
-        virtual void focus() = 0;
-        virtual bool hasFocus() = 0;
+        void focus();
+        bool hasFocus();
 
-        virtual void setTitle(const char *title) = 0;
-        virtual std::string title() const = 0;
+        void setTitle(const char *title);
+        std::string title() const;
 
-        virtual void destroy() = 0;
+        void destroy();
 
-        virtual WindowData data()
-        {
-            return {};
-        }
+        WindowData data();
 
         //Input
-        virtual bool isKeyDown(Input::Key::Key key) = 0;
+        bool isKeyDown(Input::Key::Key key);
 
-        virtual void captureInput() = 0;
-        virtual void releaseInput() = 0;
+        void captureInput();
+        void releaseInput();
 
         const uintptr_t mHandle;
 
@@ -150,7 +147,6 @@ namespace Window {
     };
 
     INTERFACES_EXPORT OSWindow *sCreateWindow(const WindowSettings &settings);
-    INTERFACES_EXPORT OSWindow *sFromNative(uintptr_t handle);
 
     struct MonitorInfo {
         int x, y;

@@ -7,16 +7,19 @@
 #include "serializemanager.h"
 
 namespace Engine {
-namespace Serialize {    
+namespace Serialize {
 
-	SyncableUnitBase *convertSyncablePtr(SerializeInStream &in, UnitId id)
+    StreamResult convertSyncablePtr(SerializeInStream &in, UnitId id, SyncableUnitBase *&out)
     {
-        return in.manager()->convertPtr(in, id);
+        return in.manager()->convertPtr(in, id, out);
     }
-    
-    SerializableDataUnit *convertSerializablePtr(SerializeInStream &in, uint32_t id)
+
+    StreamResult convertSerializablePtr(SerializeInStream &in, uint32_t id, SerializableDataUnit *&out)
     {
-        return in.serializableList().at(id);        
+        if (id > in.serializableList().size())
+            throw 0;
+        out = in.serializableList().at(id);
+        return {};
     }
 }
 }

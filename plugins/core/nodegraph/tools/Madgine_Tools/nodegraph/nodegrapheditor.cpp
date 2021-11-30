@@ -223,10 +223,7 @@ namespace Tools {
     void NodeGraphEditor::finalize()
     {
         mGraphHandle.reset();
-        if (mEditor) {
-            ed::DestroyEditor(mEditor);
-            mEditor = nullptr;
-        }
+        mEditor.reset();
 
         ToolBase::finalize();
     }
@@ -258,7 +255,7 @@ namespace Tools {
             ImGui::GetCurrentContext()->MouseViewport->Pos = { -10000, -10000 };
             ImGui::GetCurrentContext()->MouseViewport->Size = { 20000, 20000 };
 
-            ed::SetCurrentEditor(mEditor);
+            ed::SetCurrentEditor(mEditor.get());
 
             std::optional<ExtendedValueTypeDesc> hoveredPin;
 
@@ -845,8 +842,7 @@ namespace Tools {
         OutStream layout = Filesystem::openFileWrite(layoutPath());
         layout.writeRaw(view.data(), view.size());
 
-        *mGraphHandle = mGraph;
-        mGraphHandle->saveToFile();
+        mGraph.saveToFile();
 
         return true;
     }
@@ -876,10 +872,7 @@ namespace Tools {
 
     void NodeGraphEditor::createEditor()
     {
-        if (mEditor) {
-            ed::DestroyEditor(mEditor);
-            mEditor = nullptr;
-        }
+        mEditor.reset();
 
         ed::Config config;
 
@@ -893,7 +886,7 @@ namespace Tools {
             return static_cast<NodeGraphEditor *>(userPointer)->onLoad(data);
         };
 
-        mEditor = ed::CreateEditor(&config);
+        mEditor = { ed::CreateEditor(&config), &ed::DestroyEditor };
 
         mInitialLoad = true;
     }

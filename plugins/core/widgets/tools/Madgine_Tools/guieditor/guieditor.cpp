@@ -13,8 +13,8 @@
 #include "Meta/math/bounds.h"
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "Madgine/window/mainwindow.h"
 #include "Madgine/widgets/widget.h"
+#include "Madgine/window/mainwindow.h"
 
 #include "Interfaces/window/windowapi.h"
 
@@ -34,6 +34,8 @@
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 #include "Meta/serialize/streams/serializestreamdata.h"
+
+#include "Generic/coroutines/generator.h"
 
 UNIQUECOMPONENT(Engine::Tools::GuiEditor);
 
@@ -62,7 +64,7 @@ namespace Tools {
             loadLayout();
         });
 
-        mWindow->frameLoop().queue([this]() {
+        mWindow->taskQueue()->queue([this]() {
             loadLayout();
         });
 #endif
@@ -130,9 +132,9 @@ namespace Tools {
         buf->open(filePath.str(), std::ios::out);
         Serialize::SerializeOutStream out { std::move(buf), std::make_unique<Serialize::SerializeStreamData>(std::make_unique<Serialize::XMLFormatter>()) };
 
-        mWindow->writeState(out);
+        Serialize::SerializableDataPtr { mWindow }.writeState(out);
     }
-
+    
     void GuiEditor::loadLayout()
     {
         ProjectManager &project = getTool<ProjectManager>();
@@ -146,11 +148,13 @@ namespace Tools {
             Filesystem::FileManager file("Layout");
             Serialize::SerializeInStream in = file.openRead(filePath, std::make_unique<Serialize::XMLFormatter>());
             if (in) {
-                Serialize::StreamResult result = mWindow->readState(in, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap);
+                Serialize::StreamResult result = Serialize::SerializableDataPtr { mWindow }.readState(in, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap);
                 if (result.mState != Serialize::StreamState::OK) {
                     LOG_ERROR("Failed loading '" << filePath << "' with following Error: "
                                                  << "\n"
                                                  << *result.mError);
+                } else {
+                    mWidgetManager->openStartupWidget();
                 }
             }
         }
@@ -167,7 +171,7 @@ namespace Tools {
             Rect2i screenSpace = mWidgetManager->getClientSpace();
 
             InterfacesVector pos = mWidgetManager->window().osWindow()->renderPos();
-            Vector3i windowPos = Vector3i{
+            Vector3i windowPos = Vector3i {
                 pos.x, pos.y, 0
             };
 
@@ -448,4 +452,3 @@ namespace Tools {
 
 }
 }
-

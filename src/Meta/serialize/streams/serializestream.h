@@ -21,21 +21,22 @@ namespace Serialize {
         template <typename T>
         StreamResult readUnformatted(T &t)
         {
-            if (isBinary())
-                readRaw(t);
-            else
+            if (isBinary()) {
+                return readRaw(t);
+            } else {
+
                 InStream::operator>>(t);
-            if (!*this)
-                return STREAM_PARSE_ERROR(*this, "Expected: <" << typeName<T>() << ">");
-            return {};
+                if (!*this)
+                    return STREAM_PARSE_ERROR(*this, "Expected: <" << typeName<T>() << ">");
+                return {};
+            }
         }
 
         template <typename T>
-        StreamResult readUnformatted(T *&p)
+        requires std::convertible_to<T *, SerializableDataUnit *>
+        StreamResult readUnformatted(T *&p) 
         {
-            static_assert(std::is_base_of_v<SerializableDataUnit, T>);
-
-            if constexpr (std::is_base_of_v<SyncableUnitBase, T>) {
+            if constexpr (std::convertible_to<T *, SyncableUnitBase *>) {
                 SyncableUnitBase *unit;
                 STREAM_PROPAGATE_ERROR(readUnformatted(unit));
                 p = reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(unit));
@@ -111,7 +112,7 @@ namespace Serialize {
         SerializeOutStream &operator<<(const char *s);
 
         template <typename T>
-        requires(!std::is_pointer_v<T>) void writeUnformatted(const T &t)
+        requires(!Pointer<T>) void writeUnformatted(const T &t)
         {
             if (isBinary())
                 writeRaw(t);

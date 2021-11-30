@@ -13,19 +13,19 @@ namespace Threading {
 
         using R = std::invoke_result_t<F, Args...>;
 
-        if constexpr (is_instance_v<R, Task>) {
-            return f(std::forward<Args>(args)...);
+        if constexpr (InstanceOf<R, Task>) {
+            return std::invoke(std::move(f), std::forward<Args>(args)...);
         } else {
             return [](F f, Args... args) -> Task<std::invoke_result_t<F, Args...>> {
-                co_return std::move(f)(std::forward<Args>(args)...);
+                co_return std::invoke(std::move(f), std::forward<Args>(args)...);
             }(std::move(f), std::forward<Args>(args)...);
         }
     }
 
     template <typename T, typename Immediate>
-    struct Task {
+    struct [[nodiscard]] Task {
 
-        static_assert(!is_instance_v<T, Task>);
+        static_assert(!InstanceOf<T, Task>);
 
         struct promise_type : TaskPromise<T> {
             Task<T, Immediate> get_return_object()
@@ -55,14 +55,22 @@ namespace Threading {
         {
         }
 
-        TaskFuture<T> get_future() {
+        TaskFuture<T> get_future(const std::shared_ptr<TaskPromiseSharedState<T>> &state = {})
+        {
+            assert(!mState || !state);
+            if (state) {
+                assert(!state->is_ready() && state->valid());
+                mState = state;
+                if (mHandle)
+                    mHandle->set_state(state);
+            }
             if (!mState) {
                 mState = mHandle->get_state();
             }
             return mState;
         }
 
-        TaskHandle assign(TaskQueue *queue) &&
+        TaskHandle assign(TaskQueue *queue)
         {
             if (mHandle) {
                 mHandle->setQueue(queue);
@@ -70,7 +78,24 @@ namespace Threading {
             TaskHandle handle { std::move(mHandle) };
             if (mImmediate)
                 handle();
-            return { std::move(handle) };
+            return handle;
+        }
+
+        bool await_ready() noexcept { return !mHandle; }
+        std::coroutine_handle<> await_suspend(TaskHandle handle) noexcept
+        {
+            assert(mHandle);
+            if (!mState) {
+                mState = mHandle->get_state();
+            }
+            mHandle->setQueue(handle.queue());
+            mHandle->then_return(std::move(handle));
+            return mHandle.get();
+        }
+        T await_resume() noexcept
+        {
+            assert(!mHandle || mHandle.done());
+            return mState->get();
         }
 
     private:

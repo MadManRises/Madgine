@@ -8,71 +8,75 @@
 
 namespace Engine {
 
-template <typename RefT>
-struct VirtualRangeBase;
+namespace __generic_impl__ {
 
-template <typename RefT>
-struct VirtualIteratorBase {
-    virtual ~VirtualIteratorBase() = default;
-    virtual void increment() = 0;
-    virtual void get(RefT &ref) const = 0;
-    virtual std::unique_ptr<VirtualIteratorBase<RefT>> clone() const = 0;
-    virtual bool equals(const VirtualIteratorBase<RefT> &) const = 0;
+    template <typename RefT>
+    struct VirtualRangeBase;
 
-    const std::shared_ptr<VirtualRangeBase<RefT>> &container() const
-    {
-        return mContainer;
-    }
+    template <typename RefT>
+    struct VirtualIteratorBase {
+        virtual ~VirtualIteratorBase() = default;
+        virtual void increment() = 0;
+        virtual void get(RefT &ref) const = 0;
+        virtual std::unique_ptr<VirtualIteratorBase<RefT>> clone() const = 0;
+        virtual bool equals(const VirtualIteratorBase<RefT> &) const = 0;
 
-    VirtualIterator<RefT> end()
-    {
-        return mContainer->end(mContainer);
-    }
+        const std::shared_ptr<VirtualRangeBase<RefT>> &container() const
+        {
+            return mContainer;
+        }
 
-protected:
-    VirtualIteratorBase(const std::shared_ptr<VirtualRangeBase<RefT>> &container)
-        : mContainer(container)
-    {
-    }
+        VirtualIterator<RefT> end()
+        {
+            return mContainer->end(mContainer);
+        }
 
-    std::shared_ptr<VirtualRangeBase<RefT>> mContainer;
-};
+    protected:
+        VirtualIteratorBase(const std::shared_ptr<VirtualRangeBase<RefT>> &container)
+            : mContainer(container)
+        {
+        }
 
-template <typename RefT, typename It, typename Assign>
-struct VirtualIteratorImpl : VirtualIteratorBase<RefT> {
+        std::shared_ptr<VirtualRangeBase<RefT>> mContainer;
+    };
 
-    template <typename It2>
-    VirtualIteratorImpl(It2 &&it, const std::shared_ptr<VirtualRangeBase<RefT>> &container)
-        : VirtualIteratorBase<RefT>(container)
-        , mIt(std::forward<It2>(it))
-    {
-    }
+    template <typename RefT, typename It, typename Assign>
+    struct VirtualIteratorImpl : VirtualIteratorBase<RefT> {
 
-    virtual void increment() override
-    {
-        ++mIt;
-    }
+        template <typename It2>
+        VirtualIteratorImpl(It2 &&it, const std::shared_ptr<VirtualRangeBase<RefT>> &container)
+            : VirtualIteratorBase<RefT>(container)
+            , mIt(std::forward<It2>(it))
+        {
+        }
 
-    virtual void get(RefT &ref) const override
-    {
-        Assign {}(ref, *mIt);
-    }
+        virtual void increment() override
+        {
+            ++mIt;
+        }
 
-    virtual std::unique_ptr<VirtualIteratorBase<RefT>> clone() const override
-    {
-        return std::make_unique<VirtualIteratorImpl<RefT, It, Assign>>(mIt, this->mContainer);
-    }
+        virtual void get(RefT &ref) const override
+        {
+            Assign {}(ref, *mIt);
+        }
 
-    virtual bool equals(const VirtualIteratorBase<RefT> &other) const override
-    {
-        assert(this->mContainer == other.container());
-        const VirtualIteratorImpl<RefT, It, Assign> *otherP = static_cast<const VirtualIteratorImpl<RefT, It, Assign> *>(&other);
-        return mIt == otherP->mIt;
-    }
+        virtual std::unique_ptr<VirtualIteratorBase<RefT>> clone() const override
+        {
+            return std::make_unique<VirtualIteratorImpl<RefT, It, Assign>>(mIt, this->mContainer);
+        }
 
-private:
-    It mIt;
-};
+        virtual bool equals(const VirtualIteratorBase<RefT> &other) const override
+        {
+            assert(this->mContainer == other.container());
+            const VirtualIteratorImpl<RefT, It, Assign> *otherP = static_cast<const VirtualIteratorImpl<RefT, It, Assign> *>(&other);
+            return mIt == otherP->mIt;
+        }
+
+    private:
+        It mIt;
+    };
+
+}
 
 template <typename RefT>
 struct VirtualIterator {
@@ -84,8 +88,8 @@ struct VirtualIterator {
     using reference = RefT;
 
     template <typename It, typename Assign = DefaultAssign>
-    VirtualIterator(It &&it, const std::shared_ptr<VirtualRangeBase<RefT>> &container, type_holder_t<Assign> = {})
-        : mImpl(std::make_unique<VirtualIteratorImpl<RefT, std::remove_reference_t<It>, Assign>>(std::forward<It>(it), container))
+    VirtualIterator(It &&it, const std::shared_ptr<__generic_impl__::VirtualRangeBase<RefT>> &container, type_holder_t<Assign> = {})
+        : mImpl(std::make_unique<__generic_impl__::VirtualIteratorImpl<RefT, std::remove_reference_t<It>, Assign>>(std::forward<It>(it), container))
     {
     }
 
@@ -144,66 +148,69 @@ struct VirtualIterator {
     }
 
 private:
-    std::unique_ptr<VirtualIteratorBase<RefT>> mImpl;
+    std::unique_ptr<__generic_impl__::VirtualIteratorBase<RefT>> mImpl;
 };
 
-template <typename RefT>
-struct VirtualRangeBase {
-    virtual ~VirtualRangeBase() = default;
-    virtual VirtualIterator<RefT> begin(const std::shared_ptr<VirtualRangeBase<RefT>> &self) = 0;
-    virtual VirtualIterator<RefT> end(const std::shared_ptr<VirtualRangeBase<RefT>> &self) = 0;
-    virtual bool isReference() const = 0;
-};
+namespace __generic_impl__ {
 
-template <typename RefT, typename C>
-struct VirtualRangeSecondBase : VirtualRangeBase<RefT> {
-    virtual C &get() = 0;
-};
+    template <typename RefT>
+    struct VirtualRangeBase {
+        virtual ~VirtualRangeBase() = default;
+        virtual VirtualIterator<RefT> begin(const std::shared_ptr<VirtualRangeBase<RefT>> &self) = 0;
+        virtual VirtualIterator<RefT> end(const std::shared_ptr<VirtualRangeBase<RefT>> &self) = 0;
+        virtual bool isReference() const = 0;
+    };
 
-template <typename RefT, typename C, typename Assign>
-struct VirtualRangeImpl : VirtualRangeSecondBase<RefT, std::remove_reference_t<C>> {
+    template <typename RefT, typename C>
+    struct VirtualRangeSecondBase : VirtualRangeBase<RefT> {
+        virtual C &get() = 0;
+    };
 
-    VirtualRangeImpl(C &&c)
-        : mContainer(std::forward<C>(c))
-    {
-    }
+    template <typename RefT, typename C, typename Assign>
+    struct VirtualRangeImpl : VirtualRangeSecondBase<RefT, std::remove_reference_t<C>> {
 
-    virtual VirtualIterator<RefT> begin(const std::shared_ptr<VirtualRangeBase<RefT>> &self) override
-    {
-        return { mContainer.begin(), self, type_holder<Assign> };
-    }
+        VirtualRangeImpl(C &&c)
+            : mContainer(std::forward<C>(c))
+        {
+        }
 
-    virtual VirtualIterator<RefT> end(const std::shared_ptr<VirtualRangeBase<RefT>> &self) override
-    {
-        return { mContainer.end(), self, type_holder<Assign> };
-    }
+        virtual VirtualIterator<RefT> begin(const std::shared_ptr<VirtualRangeBase<RefT>> &self) override
+        {
+            return { mContainer.begin(), self, type_holder<Assign> };
+        }
 
-    virtual C &get() override
-    {
-        return mContainer;
-    }
+        virtual VirtualIterator<RefT> end(const std::shared_ptr<VirtualRangeBase<RefT>> &self) override
+        {
+            return { mContainer.end(), self, type_holder<Assign> };
+        }
 
-    virtual bool isReference() const override
-    {
-        if constexpr (std::is_reference_v<C>)
-            return true;
-        else if constexpr (has_function_isReference_v<C>)
-            return mContainer.isReference();
-        else
-            return false;
-    }
+        virtual C &get() override
+        {
+            return mContainer;
+        }
 
-private:
-    C mContainer;
-};
+        virtual bool isReference() const override
+        {
+            if constexpr (std::is_reference_v<C>)
+                return true;
+            else if constexpr (has_function_isReference_v<C>)
+                return mContainer.isReference();
+            else
+                return false;
+        }
+
+    private:
+        C mContainer;
+    };
+
+}
 
 template <typename RefT, typename AssignDefault>
 struct VirtualRange {
 
     template <typename C, typename Assign = AssignDefault>
-    requires(!std::is_same_v<std::decay_t<C>, VirtualRange<RefT, AssignDefault>>)
-    explicit VirtualRange(C &&c, type_holder_t<Assign> = {})
-        : mRange(std::make_shared<VirtualRangeImpl<RefT, C, Assign>>(std::forward<C>(c)))
+    requires(!std::is_same_v<std::decay_t<C>, VirtualRange<RefT, AssignDefault>>) explicit VirtualRange(C &&c, type_holder_t<Assign> = {})
+        : mRange(std::make_shared<__generic_impl__::VirtualRangeImpl<RefT, C, Assign>>(std::forward<C>(c)))
     {
     }
 
@@ -213,12 +220,13 @@ struct VirtualRange {
     template <typename Assign, typename C>
     void assign(C &&c)
     {
-        mRange = std::make_shared<VirtualRangeImpl<RefT, C, Assign>>(std::forward<C>(c));
+        mRange = std::make_shared<__generic_impl__::VirtualRangeImpl<RefT, C, Assign>>(std::forward<C>(c));
     }
 
     template <typename C>
     requires(!std::is_same_v<std::decay_t<C>, VirtualRange<RefT, AssignDefault>>)
-    VirtualRange &operator=(C &&c)
+        VirtualRange &
+        operator=(C &&c)
     {
         assign<AssignDefault>(std::forward<C>(c));
         return *this;
@@ -240,7 +248,7 @@ struct VirtualRange {
     template <typename C>
     HeapObject<C, std::shared_ptr<C>> safe_cast()
     {
-        VirtualRangeSecondBase<RefT, C> *typed = dynamic_cast<VirtualRangeSecondBase<RefT, C> *>(mRange.get());
+        __generic_impl__::VirtualRangeSecondBase<RefT, C> *typed = dynamic_cast<__generic_impl__::VirtualRangeSecondBase<RefT, C> *>(mRange.get());
         if (typed) {
             if (isReference()) {
                 return std::shared_ptr<C> { &typed->get(), [](C *) {} };
@@ -257,7 +265,7 @@ struct VirtualRange {
     template <typename C>
     HeapObject<const C, std::shared_ptr<const C>> safe_cast() const
     {
-        VirtualRangeSecondBase<RefT, C> *typed = dynamic_cast<VirtualRangeSecondBase<RefT, C> *>(mRange.get());
+        __generic_impl__::VirtualRangeSecondBase<RefT, C> *typed = dynamic_cast<__generic_impl__::VirtualRangeSecondBase<RefT, C> *>(mRange.get());
         if (typed) {
             if (isReference()) {
                 return std::shared_ptr<const C> { &typed->get(), [](C *) {} };
@@ -274,13 +282,13 @@ struct VirtualRange {
     template <typename C>
     C &unsafe_cast()
     {
-        return dynamic_cast<VirtualRangeSecondBase<RefT, C> *>(mRange.get())->get();
+        return dynamic_cast<__generic_impl__::VirtualRangeSecondBase<RefT, C> *>(mRange.get())->get();
     }
 
     template <typename C>
     const C &unsafe_cast() const
     {
-        return dynamic_cast<VirtualRangeSecondBase<RefT, C> *>(mRange.get())->get();
+        return dynamic_cast<__generic_impl__::VirtualRangeSecondBase<RefT, C> *>(mRange.get())->get();
     }
 
     bool isReference() const
@@ -296,6 +304,6 @@ struct VirtualRange {
     }
 
 private:
-    std::shared_ptr<VirtualRangeBase<RefT>> mRange;
+    std::shared_ptr<__generic_impl__::VirtualRangeBase<RefT>> mRange;
 };
 }

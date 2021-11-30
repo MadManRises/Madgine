@@ -7,7 +7,7 @@
 namespace Engine {
 namespace Render {
 
-    DirectX11PixelShader::DirectX11PixelShader(ID3DBlob *pShaderBlob)
+    DirectX11PixelShader::DirectX11PixelShader(ReleasePtr<ID3DBlob> pShaderBlob)
     {
         sDevice->CreatePixelShader(pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize(), nullptr, &mShader);
     }
@@ -30,13 +30,10 @@ namespace Render {
 
     void DirectX11PixelShader::reset()
     {
-        if (mShader) {
-            mShader->Release();
-            mShader = nullptr;
-        }
+        mShader.reset();
     }
 
-    void DirectX11PixelShader::bind()
+    void DirectX11PixelShader::bind() const 
     {
         sDeviceContext->PSSetShader(mShader, nullptr, 0);
     }

@@ -128,7 +128,7 @@ namespace Render {
         }*/
     }
 
-    void DirectX12RenderTarget::beginIteration(size_t iteration)
+    void DirectX12RenderTarget::beginIteration(size_t iteration) const
     {
         context()->mCommandList.mList->SetGraphicsRootSignature(context()->mRootSignature);
 
@@ -170,7 +170,7 @@ namespace Render {
         RenderTarget::beginIteration(iteration);
     }
 
-    void DirectX12RenderTarget::endIteration(size_t iteration)
+    void DirectX12RenderTarget::endIteration(size_t iteration) const
     {
         RenderTarget::endIteration(iteration);
         context()->ExecuteCommandList(context()->mCommandList);
@@ -206,10 +206,10 @@ namespace Render {
         DirectX12RenderContext::getSingleton().mCommandList.mList->RSSetScissorRects(1, &scissorRect);
     }
 
-    void DirectX12RenderTarget::renderMesh(GPUMeshData *m, Program *p, const Material *material)
+    void DirectX12RenderTarget::renderMesh(const GPUMeshData *m, const Program *p, const Material *material)
     {
-        DirectX12MeshData *mesh = static_cast<DirectX12MeshData *>(m);
-        DirectX12Program *program = static_cast<DirectX12Program *>(p);
+        const DirectX12MeshData *mesh = static_cast<const DirectX12MeshData *>(m);
+        const DirectX12Program *program = static_cast<const DirectX12Program *>(p);
 
         if (!mesh->mVAO)
             return;
@@ -226,10 +226,10 @@ namespace Render {
         }
     }
 
-    void DirectX12RenderTarget::renderMeshInstanced(size_t count, GPUMeshData *m, Program *p, const Material *material)
+    void DirectX12RenderTarget::renderMeshInstanced(size_t count, const GPUMeshData *m, const Program *p, const Material *material)
     {
-        DirectX12MeshData *mesh = static_cast<DirectX12MeshData *>(m);
-        DirectX12Program *program = static_cast<DirectX12Program *>(p);
+        const DirectX12MeshData *mesh = static_cast<const DirectX12MeshData *>(m);
+        const DirectX12Program *program = static_cast<const DirectX12Program *>(p);
 
         if (!mesh->mVAO)
             return;
@@ -246,7 +246,7 @@ namespace Render {
         }
     }
 
-    void DirectX12RenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices)
+    void DirectX12RenderTarget::renderVertices(const Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices)
     {
         if (!vertices.empty()) {
             DirectX12MeshData tempMesh;
@@ -258,7 +258,7 @@ namespace Render {
         }
     }
 
-    void DirectX12RenderTarget::renderVertices(Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, const Material *material)
+    void DirectX12RenderTarget::renderVertices(const Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, const Material *material)
     {
         if (!vertices.empty()) {
             DirectX12MeshData tempMesh;
@@ -273,12 +273,12 @@ namespace Render {
         DirectX12RenderContext::getSingleton().mCommandList.mList->ClearDepthStencilView(DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.cpuHandle(mDepthStencilView), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
     }
 
-    void DirectX12RenderTarget::bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset)
+    void DirectX12RenderTarget::bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset) const
     {        
         //DirectX12RenderContext::getSingleton().mCommandList->PSSetShaderResources(0, tex.size(), reinterpret_cast<ID3D12ShaderResourceView *const *>(tex.data()));
     }
 
-    DirectX12RenderContext* DirectX12RenderTarget::context() {
+    DirectX12RenderContext* DirectX12RenderTarget::context() const {
         return static_cast<DirectX12RenderContext *>(RenderTarget::context());
     }
 

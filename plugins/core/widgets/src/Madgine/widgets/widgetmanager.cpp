@@ -94,7 +94,7 @@ namespace Widgets {
     };
 
     WidgetManager::WidgetManager(Window::MainWindow &window)
-        : VirtualUnit(window, 20)
+        : VirtualData(window, 20)
         , mData(std::make_unique<WidgetManagerData>())
     {
     }
@@ -109,7 +109,7 @@ namespace Widgets {
         return "WidgetManager";
     }
 
-    bool WidgetManager::init()
+    Threading::Task<bool> WidgetManager::init()
     {
         mData->mProgram.create("ui", { 0, 0, sizeof(WidgetsPerObject) });
 
@@ -123,10 +123,10 @@ namespace Widgets {
 
         mWindow.getRenderWindow()->addRenderPass(this);
 
-        return true;
+        co_return true;
     }
 
-    void WidgetManager::finalize()
+    Threading::Task<void> WidgetManager::finalize()
     {
         mWindow.getRenderWindow()->removeRenderPass(this);
 
@@ -139,6 +139,8 @@ namespace Widgets {
         mData->mMesh.reset();
 
         mData->mProgram.reset();
+
+        co_return;
     }
 
     template <typename WidgetType>
@@ -558,15 +560,9 @@ namespace Widgets {
         }
     }
 
-    Render::Texture &WidgetManager::uiTexture() const
+    const Render::Texture &WidgetManager::uiTexture() const
     {
         return *mData->mUIAtlasTexture;
-    }
-
-    void WidgetManager::onActivate(bool active)
-    {
-        if (active)
-            openStartupWidget();
     }
 
     int WidgetManager::priority() const

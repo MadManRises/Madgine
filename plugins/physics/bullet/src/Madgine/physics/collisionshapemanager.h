@@ -51,7 +51,7 @@ namespace Physics {
         CollisionShapeManager();
 
         Threading::ImmediateTask<bool> loadImpl(std::unique_ptr<CollisionShape> &shape, ResourceDataInfo &info);
-        void unloadImpl(std::unique_ptr<CollisionShape> &shape, ResourceDataInfo &info);
+        void unloadImpl(std::unique_ptr<CollisionShape> &shape, ResourceDataInfo &info);        
     };
 
     struct CollisionShape {
@@ -60,13 +60,15 @@ namespace Physics {
     };
 
     struct CollisionShapeInstance : Serialize::VirtualSerializableUnitBase<VirtualScopeBase<>, Serialize::SerializableUnitBase> {
-        CollisionShapeInstance(typename CollisionShapeManager::HandleType shape = {});
-        virtual ~CollisionShapeInstance() = default;
+        CollisionShapeInstance(typename CollisionShapeManager::HandleType shape = {});        
+        virtual ~CollisionShapeInstance();
         virtual btCollisionShape *get() = 0;
         virtual bool isInstance() = 0;
         virtual CollisionShapeInstancePtr clone() = 0;
 
         CollisionShapeManager::ResourceType *resource() const;
+
+        bool available() const;
 
     protected:
         typename CollisionShapeManager::HandleType mHandle;

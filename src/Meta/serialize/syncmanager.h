@@ -25,7 +25,7 @@ namespace Serialize {
         SyncManager(SyncManager &&) noexcept;
         ~SyncManager();
 
-        void readMessage(BufferedInOutStream &);
+        StreamResult readMessage(BufferedInOutStream &);
 
         std::set<BufferedOutStream *, CompareStreamId> getMasterMessageTargets();
 
@@ -37,11 +37,11 @@ namespace Serialize {
         BufferedOutStream &getSlaveMessageTarget();
 
         bool isMessageAvailable();
-        void receiveMessages(int msgCount = -1, TimeOut timeout = {});
+        StreamResult receiveMessages(int msgCount = -1, TimeOut timeout = {});
         void sendMessages();
-        void sendAndReceiveMessages();
+        StreamResult sendAndReceiveMessages();
 
-        SyncableUnitBase *convertPtr(SerializeInStream &in, UnitId unit);
+        StreamResult convertPtr(SerializeInStream &in, UnitId unit, SyncableUnitBase *&out);
 
         std::vector<ParticipantId> getMasterParticipantIds();
         size_t clientCount() const;
@@ -51,7 +51,7 @@ namespace Serialize {
         StreamState getStreamError() const;
 
     protected:
-        bool receiveMessages(BufferedInOutStream &stream, int &msgCount, TimeOut timeout = {});
+        StreamResult receiveMessages(BufferedInOutStream &stream, int &msgCount, TimeOut timeout = {});
         bool sendAllMessages(BufferedInOutStream &stream, TimeOut timeout = {});
 
         BufferedInOutStream *getSlaveStream();

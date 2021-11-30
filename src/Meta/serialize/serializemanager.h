@@ -1,5 +1,7 @@
 #pragma once
 
+
+
 namespace Engine {
 namespace Serialize {
 
@@ -29,7 +31,7 @@ namespace Serialize {
         void addFilter(std::function<bool(const SerializableUnitBase *, ParticipantId)>);
 
         static UnitId convertPtr(const SerializeManager *mgr, SerializeOutStream &out, const SyncableUnitBase *unit);
-        SyncableUnitBase *convertPtr(SerializeInStream &in, UnitId unit);
+        StreamResult convertPtr(SerializeInStream &in, UnitId unit, SyncableUnitBase *&out);
 
         const std::string &name() const;
 

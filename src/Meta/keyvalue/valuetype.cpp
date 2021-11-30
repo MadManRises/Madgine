@@ -55,7 +55,7 @@ ValueType ValueType::operator()(const ArgumentList &args) const
             function(result, args);
             return result;
         },
-        [&](const Function &function) {
+        [&](const KeyValueFunction &function) {
             ValueType result;
             function(result, args);
             return result;
@@ -140,7 +140,7 @@ std::string ValueType::toShortString() const
         [](const BoundApiFunction &) {
             return "<bound-api-function>"s;
         },
-        [](const Function &) {
+        [](const KeyValueFunction &) {
             return "<function>"s;
         },
         [](const KeyValueVirtualSequenceRange &) {

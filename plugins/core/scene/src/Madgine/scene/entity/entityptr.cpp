@@ -146,13 +146,14 @@ namespace Scene {
             Serialize::write(out, get(), name);
         }
 
-        void EntityPtr::applySerializableMap(Serialize::SerializeInStream &in, bool success)
+        Serialize::StreamResult EntityPtr::applySerializableMap(Serialize::SerializeInStream &in, bool success)
         {
             if (mEntity & static_cast<uintptr_t>(Serialize::UnitIdTag::SYNCABLE)) {
                 Entity *ptr = reinterpret_cast<Entity *>(mEntity);
-                Serialize::UnitHelper<Entity *>::applyMap(in, ptr, success);
+                STREAM_PROPAGATE_ERROR(Serialize::UnitHelper<Entity *>::applyMap(in, ptr, success));
                 *this = ptr;
             }
+            return { };
         }
 
         bool EntityPtr::holdsRef() const

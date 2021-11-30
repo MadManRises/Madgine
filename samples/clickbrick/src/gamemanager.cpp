@@ -47,7 +47,7 @@ namespace UI {
 
     GameManager::GameManager(Engine::UI::UIManager &ui)
         : Engine::UI::GameHandler<GameManager>(ui)
-        , mSceneMgr(Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>(false))
+        , mSceneMgr(Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>())
         , mSceneRenderer(mSceneMgr, &mCamera, 50)
     {
     }

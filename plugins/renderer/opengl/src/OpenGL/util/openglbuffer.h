@@ -26,7 +26,7 @@ namespace Render {
 
         void setSubData(unsigned int offset, const ByteBuffer &data);
 
-        GLuint handle();
+        GLuint handle() const;
 
     private:
         GLuint mHandle = 0;

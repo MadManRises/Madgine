@@ -235,7 +235,7 @@ namespace Render {
         return true;
     }
 
-    void OpenGLRenderTexture::beginIteration(size_t iteration)
+    void OpenGLRenderTexture::beginIteration(size_t iteration) const
     {
         glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffers[iteration % 2]);
         GL_CHECK();
@@ -243,7 +243,7 @@ namespace Render {
         OpenGLRenderTarget::beginIteration(iteration);
     }
 
-    void OpenGLRenderTexture::endIteration(size_t iteration)
+    void OpenGLRenderTexture::endIteration(size_t iteration) const
     {
         OpenGLRenderTarget::endIteration(iteration);
 

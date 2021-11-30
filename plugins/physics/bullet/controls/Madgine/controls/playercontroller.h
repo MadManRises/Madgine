@@ -15,6 +15,7 @@ namespace Controls {
         PlayerController(Scene::SceneManager &scene);
 
         virtual bool init() override;
+        virtual void finalize() override;
 
         virtual bool onAxisEvent(const Input::AxisEventArgs &arg) override;
 

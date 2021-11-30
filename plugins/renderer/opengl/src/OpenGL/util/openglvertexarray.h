@@ -21,8 +21,8 @@ namespace Render {
 
         void reset();        
 
-        void bind(OpenGLProgram *program, OpenGLBuffer &instanceDataBuffer, size_t instanceDataSize);
-        void unbind(OpenGLProgram *program);
+        void bind(const OpenGLProgram *program, const OpenGLBuffer &instanceDataBuffer, size_t instanceDataSize) const;
+        void unbind(const OpenGLProgram *program) const;
         
 
         uint8_t mFormat = 0;
@@ -30,7 +30,7 @@ namespace Render {
         OpenGLBuffer *mVertexBuffer = nullptr;
         OpenGLBuffer *mIndexBuffer = nullptr;
         std::array<AttributeDescriptor, 7> (*mAttributes)();
-        std::map<OpenGLProgram *, OpenGLVertexArrayObject> mInstances;
+        mutable std::map<const OpenGLProgram *, OpenGLVertexArrayObject> mInstances;
     };
 
 }

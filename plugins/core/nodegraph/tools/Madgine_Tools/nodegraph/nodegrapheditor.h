@@ -49,7 +49,7 @@ namespace Tools {
         void verify();
 
     private:
-        ed::EditorContext *mEditor = nullptr;
+        std::unique_ptr<ed::EditorContext, void (*)(ed::EditorContext *)> mEditor = { nullptr, nullptr };
         bool mHierarchyVisible;
         bool mNodeDetailsVisible;
 
@@ -62,7 +62,7 @@ namespace Tools {
         };
         std::map<NodeGraph::NodeBase *, NodeMessages> mNodeMessages;
 
-        IndexType<uintptr_t> mSelectedNodeIndex;
+        IndexType<uint32_t> mSelectedNodeIndex;
 
         Filesystem::Path mDirBuffer, mSelectionBuffer;
         std::string mSelectionTargetBuffer;

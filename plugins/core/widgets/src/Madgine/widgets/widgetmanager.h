@@ -41,8 +41,8 @@ namespace Widgets {
 
         virtual std::string_view key() const override;
 
-        virtual bool init() override;
-        virtual void finalize() override;
+        virtual Threading::Task<bool> init() override;
+        virtual Threading::Task<void> finalize() override;
 
         WidgetBase *currentRoot();
 
@@ -71,7 +71,7 @@ namespace Widgets {
 
 		virtual int priority() const override;
 
-        Render::Texture &uiTexture() const;
+        const Render::Texture &uiTexture() const;
 
         static const char *widgetCreationNames(size_t index);
 
@@ -94,7 +94,7 @@ namespace Widgets {
     private:
         std::map<std::string, WidgetBase *> mWidgets;
 
-        SERIALIZABLE_CONTAINER(mTopLevelWidgets, std::vector<std::unique_ptr<WidgetBase>>, NoOpFunctor);
+        std::vector<std::unique_ptr<WidgetBase>> mTopLevelWidgets;
 
         WidgetBase *mHoveredWidget = nullptr;
 
@@ -103,7 +103,6 @@ namespace Widgets {
         std::vector<WidgetBase *> mModalWidgetList;
 
         void expandUIAtlas();
-        void onActivate(bool active);
 
         struct WidgetManagerData;
         std::unique_ptr<WidgetManagerData> mData;

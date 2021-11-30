@@ -3,10 +3,8 @@
 #include "Madgine/app/globalapibase.h"
 #include "Madgine/app/globalapicollector.h"
 
-
 namespace Engine {
 namespace Controls {
-
 
     typedef void ActionCallback(const ActionDescriptor *, void *);
 
@@ -30,18 +28,18 @@ namespace Controls {
         void addListener(std::string_view action, typename CallableTraits<decltype(f)>::class_type *item)
         {
             addListener(
-                action, 
-                [](ActionDescriptor *desc, void *self) { 
-                    TupleUnpacker::invoke(f, reinterpret_cast<typename CallableTraits<decltype(f)>::class_type *>(self), desc); 
-                }, 
-                item
-            );
+                action,
+                [](ActionDescriptor *desc, void *self) {
+                    TupleUnpacker::invoke(f, reinterpret_cast<typename CallableTraits<decltype(f)>::class_type *>(self), desc);
+                },
+                item);
         }
         void addListener(std::string_view action, ActionCallback callback, void *userData = nullptr);
 
         void trigger(const ActionDescriptor *action);
 
         void addAxisEventListener(AxisEventListener *listener);
+        void removeAxisEventListener(AxisEventListener *listener);
 
         bool injectAxisEvent(const Input::AxisEventArgs &arg);
 

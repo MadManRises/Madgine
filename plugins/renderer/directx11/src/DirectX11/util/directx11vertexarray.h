@@ -22,7 +22,7 @@ namespace Render {
 
         void reset();
 
-        void bind();
+        void bind() const;
 
         UINT mStride = 0;
         uint8_t mFormat = 0;

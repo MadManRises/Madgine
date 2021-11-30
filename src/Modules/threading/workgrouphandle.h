@@ -51,7 +51,7 @@ namespace Threading {
                 p.set_value(result);
             } catch (std::exception &e) {
                 LOG_ERROR("Uncaught Exception in Workgroup-MainThread!");
-                LOG_EXCEPTION(e);
+                LOG_ERROR(e.what());
                 throw;
             }
         }

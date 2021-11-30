@@ -15,7 +15,7 @@ namespace Serialize {
 
         bool isMessageAvailable();
 
-        void readHeader(MessageHeader &header);
+        StreamResult readHeader(MessageHeader &header);
 
         SyncManager *manager() const;
 

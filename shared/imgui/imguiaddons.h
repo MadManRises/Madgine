@@ -49,8 +49,8 @@ struct IMGUI_API ValueTypeDrawer {
     bool draw(const Engine::KeyValueVirtualSequenceRange &range);
     bool draw(Engine::KeyValueVirtualAssociativeRange &range);
     bool draw(const Engine::KeyValueVirtualAssociativeRange &range);
-    bool draw(Engine::Function &m);
-    bool draw(const Engine::Function &m);
+    bool draw(Engine::KeyValueFunction &m);
+    bool draw(const Engine::KeyValueFunction &m);
     bool draw(Engine::ApiFunction &m);
     bool draw(const Engine::ApiFunction &m);
     bool draw(Engine::BoundApiFunction &m);

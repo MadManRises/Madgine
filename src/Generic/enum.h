@@ -1,7 +1,5 @@
 #pragma once
 
-#include "coroutines/generator.h"
-
 namespace Engine {
 
 struct EnumMetaTable {

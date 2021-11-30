@@ -4,7 +4,7 @@
 
 namespace Engine {
 
-struct META_EXPORT Function {
+struct META_EXPORT KeyValueFunction {
     template <typename R, typename... Args, size_t... I>
     static void unpackHelper(void (*f)(), ValueType &retVal, const ArgumentList &args, std::index_sequence<I...>)
     {
@@ -23,13 +23,14 @@ struct META_EXPORT Function {
     }
 
     template <typename R, typename... Args>
-    Function(R (*f)(Args...))
+    KeyValueFunction(R (*f)(Args...))
         : mFunction(reinterpret_cast<void(*)()>(f))
         , mWrapper(&unpackApiMethod<R, Args...>)
     {
     }
 
-    bool operator==(const Function& other) const {
+    bool operator==(const KeyValueFunction &other) const
+    {
         return mFunction == other.mFunction;
     }
 

@@ -43,6 +43,15 @@ inline void dx12Check(HRESULT result = 0)
 
 #include "Generic/offsetptr.h"
 
+struct ReleaseDeleter {
+    template <typename T>
+    void operator()(T* ptr) {
+        ptr->Release();
+    }
+};
+template <typename T>
+using ReleasePtr = std::unique_ptr<T, ReleaseDeleter>;
+
 constexpr D3D12_CPU_DESCRIPTOR_HANDLE operator+(D3D12_CPU_DESCRIPTOR_HANDLE handle, Engine::OffsetPtr offset)
 {
     return { handle.ptr + offset.offset() };

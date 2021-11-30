@@ -5,7 +5,7 @@ namespace Render {
 
     struct DirectX11PixelShader {
         DirectX11PixelShader() = default;
-        DirectX11PixelShader(ID3DBlob *pShaderBlob);
+        DirectX11PixelShader(ReleasePtr<ID3DBlob> pShaderBlob);
         DirectX11PixelShader(const DirectX11PixelShader &) = delete;
         DirectX11PixelShader(DirectX11PixelShader &&);
         ~DirectX11PixelShader();
@@ -14,9 +14,9 @@ namespace Render {
 
         void reset();
 
-        void bind();
+        void bind() const;
 
-        ID3D11PixelShader *mShader = nullptr;        
+        ReleasePtr<ID3D11PixelShader> mShader;        
     };
 
 }

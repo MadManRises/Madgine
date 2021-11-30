@@ -1,4 +1,4 @@
-<Item syncId=259>
+<Item serId=259>
     <mComponents>
         <Item key="WidgetManager" serId=1>
             <mStartupWidget>2</mStartupWidget>

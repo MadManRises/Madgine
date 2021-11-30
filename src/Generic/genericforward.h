@@ -39,5 +39,10 @@ template <typename, typename>
 struct BaseEnum;
 struct EnumMetaTable;
 
+template <typename>
+struct Generator;
+template <typename>
+struct CoroutineHandle;
+
 
 }

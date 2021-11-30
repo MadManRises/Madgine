@@ -88,9 +88,9 @@ namespace Serialize {
             UnitHelper<T>::setItemActive(mData, active, existenceChanged);
         }
 
-        void applySerializableMap(SerializeInStream &in, bool success)
+        StreamResult applySerializableMap(SerializeInStream &in, bool success)
         {
-            UnitHelper<T>::applyMap(in, mData, success);
+            return UnitHelper<T>::applyMap(in, mData, success);
         }
 
         void setParent(SerializableUnitBase *parent)

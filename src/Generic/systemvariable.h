@@ -1,7 +1,6 @@
 #pragma once
 
 namespace Engine {
-namespace Threading {
 
     template <typename T, T initial = T {}>
     struct SystemVariable {
@@ -50,5 +49,4 @@ namespace Threading {
 #endif
     };
 
-}
 }

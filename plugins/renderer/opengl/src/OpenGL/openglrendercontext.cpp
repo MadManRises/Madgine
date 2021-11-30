@@ -12,6 +12,10 @@
 
 #include "openglshaderloader.h"
 
+#include "openglprogramloader.h"
+#include "opengltextureloader.h"
+#include "openglmeshloader.h"
+
 #if WINDOWS
 #    include "wglext.h"
 
@@ -213,10 +217,27 @@ namespace Render {
 #endif
     }
 
+    void swapBuffers(Window::OSWindow *window, ContextHandle context)
+    {
+#if WINDOWS
+        SwapBuffers(GetDC((HWND)window->mHandle));
+#elif LINUX
+        glXSwapBuffers(Window::sDisplay(), window->mHandle);
+#elif ANDROID || EMSCRIPTEN
+        eglSwapBuffers(Window::sDisplay, (EGLSurface)window->mHandle);
+#elif OSX
+        OSXBridge::swapBuffers(mContext);
+#elif IOS
+        IOSBridge::swapBuffers(mContext);
+#else
+#    error "Unsupported Platform!"
+#endif
+    }
+
     static bool checkMultisampling()
     {
 #if MULTISAMPLING
-#if ANDROID || EMSCRIPTEN
+#    if ANDROID || EMSCRIPTEN
         const EGLint attribs[] = {
             EGL_SAMPLE_BUFFERS, 1,
             EGL_NONE
@@ -225,9 +246,9 @@ namespace Render {
         EGLint numConfigs;
 
         return eglChooseConfig(Window::sDisplay, attribs, nullptr, 0, &numConfigs);
-#else
+#    else
         return glTexImage2DMultisample;
-#endif
+#    endif
 #else
         return false;
 #endif
@@ -499,11 +520,9 @@ namespace Render {
     namespace {
         void OpenGLInit()
         {
-            static std::mutex sMutex;
-            static bool init = false;
+            static std::once_flag once;
 
-            std::lock_guard guard(sMutex);
-            if (!init) {
+            std::call_once(once, []() {
                 Engine::Window::WindowSettings settings;
                 settings.mHidden = true;
                 Window::OSWindow *tmp = Window::sCreateWindow(settings);
@@ -521,8 +540,7 @@ namespace Render {
 
                 destroyContext(tmp, context);
                 tmp->destroy();
-                init = true;
-            }
+            });
         }
     }
 #endif
@@ -564,6 +582,23 @@ namespace Render {
         std::unique_ptr<RenderTarget> window = std::make_unique<OpenGLRenderWindow>(this, w, samples, sharedContext);
 
         return window;
+    }
+
+    void OpenGLRenderContext::unloadAllResources()
+    {
+        RenderContext::unloadAllResources();
+
+        for (std::pair<const std::string, OpenGLProgramLoader::ResourceType> &res : OpenGLProgramLoader::getSingleton()) {
+            res.second.forceUnload();
+        }
+
+        for (std::pair<const std::string, OpenGLTextureLoader::ResourceType> &res : OpenGLTextureLoader::getSingleton()) {
+            res.second.forceUnload();
+        }
+
+        for (std::pair<const std::string, OpenGLMeshLoader::ResourceType> &res : OpenGLMeshLoader::getSingleton()) {
+            res.second.forceUnload();
+        }
     }
 
     bool OpenGLRenderContext::supportsMultisampling() const

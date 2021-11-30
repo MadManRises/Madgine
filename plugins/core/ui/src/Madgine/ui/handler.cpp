@@ -21,47 +21,19 @@ namespace UI {
     {
     }
 
-    UI::GuiHandlerBase &Handler::getGuiHandler(size_t i, bool init)
+    GuiHandlerBase &Handler::getGuiHandler(size_t i)
     {
-        if (init) {
-            checkInitState();
-        }
-        return mUI.getGuiHandler(i, init);
+        return mUI.getGuiHandler(i);
     }
 
-    GameHandlerBase &Handler::getGameHandler(size_t i, bool init)
+    GameHandlerBase &Handler::getGameHandler(size_t i)
     {
-        if (init) {
-            checkInitState();
-        }
-        return mUI.getGameHandler(i, init);
+        return mUI.getGameHandler(i);
     }
 
     void Handler::sizeChanged()
     {
     }
-
-    /*App::Application& Handler::app(bool init)
-		{
-			if (init)
-			{
-				checkInitState();
-			}
-			return mUI.app(init);
-		}*/
-
-    const UIManager *Handler::parent() const
-    {
-        return &mUI;
-    }
-
-    /*UIManager &Handler::ui(bool init)
-    {
-        if (init) {
-            checkInitState();
-        }
-        return mUI.getSelf(init);
-    }*/
 
     bool Handler::init()
     {
@@ -143,6 +115,11 @@ namespace UI {
     Widgets::WidgetBase *Handler::widget() const
     {
         return mWidget;
+    }
+        
+    Threading::TaskQueue *Handler::taskQueue() const
+    {
+        return mUI.taskQueue();
     }
 
 }

@@ -2,7 +2,6 @@
 
 #include "task.h"
 
-#include "Generic/lambda.h"
 
 namespace Engine {
 namespace Threading {

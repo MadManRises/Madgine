@@ -35,15 +35,16 @@ namespace Physics {
     {
     }
 
-    Vector3 ContactPoint::normal1() const {
+    Vector3 ContactPoint::normal1() const
+    {
         return mPoint.m_normalWorldOnB.m_floats;
     }
 
     bool PhysicsManager::sContactCallback(btManifoldPoint &cp, const btCollisionObjectWrapper *colObj0, int partId0, int index0, const btCollisionObjectWrapper *colObj1, int partId1, int index1)
     {
-        RigidBody *rigidBody0 = static_cast<RigidBody*>(colObj0->m_collisionObject->getUserPointer());
+        RigidBody *rigidBody0 = static_cast<RigidBody *>(colObj0->m_collisionObject->getUserPointer());
         RigidBody *rigidBody1 = static_cast<RigidBody *>(colObj1->m_collisionObject->getUserPointer());
-        
+
         Scene::SceneManager *sceneMgr = nullptr;
         if (rigidBody0)
             sceneMgr = rigidBody0->sceneMgr();
@@ -144,13 +145,19 @@ namespace Physics {
         //else {
         //    mData->mWorld.synchronizeMotionStates();
         //}
+
+        for (const auto &[body, _] : sceneMgr().entityComponentList<RigidBody>()) {
+            body.update();
+        }
     }
 
-    float PhysicsManager::airDensity() const {
+    float PhysicsManager::airDensity() const
+    {
         return mData->mWorldInfo.air_density;
     }
 
-    void PhysicsManager::setAirDensity(float density) {
+    void PhysicsManager::setAirDensity(float density)
+    {
         mData->mWorldInfo.air_density = density;
     }
 

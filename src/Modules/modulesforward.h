@@ -9,7 +9,7 @@ template <typename T, typename _Collector, typename _Base>
 struct UniqueComponent;
 template <typename Base>
 struct NamedUniqueComponent;
-template <typename Observer, typename Registry, typename _Base, typename... _Ty>
+template <typename Registry, typename _Base, typename... _Ty>
 struct UniqueComponentSelector;
 template <typename C, typename Registry, typename __dont_remove_Base, typename... _Ty>
 struct UniqueComponentContainer;
@@ -69,9 +69,6 @@ namespace Threading {
     struct WorkGroup;
     struct WorkGroupHandle;
     struct Scheduler;
-
-    struct FrameListener;
-    struct FrameLoop;
 
     struct DataMutex;
 }

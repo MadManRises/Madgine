@@ -96,7 +96,7 @@ namespace Filesystem {
         auto result = GetLongPathNameA(p.c_str(), buffer, sizeof(buffer));
         if (result == 0) {
             auto error = GetLastError();
-            assert(false);
+            throw 0;
         }
         assert(result < sizeof(buffer));
         buffer[0] = toupper(buffer[0]);

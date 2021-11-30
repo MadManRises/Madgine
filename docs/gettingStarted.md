@@ -1,3 +1,5 @@
+\page Started Getting Started
+
 # Getting Started
 
 This article describes all the neccessary steps to compile your first application with the Madgine.

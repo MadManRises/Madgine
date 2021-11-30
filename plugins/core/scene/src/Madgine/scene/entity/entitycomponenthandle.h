@@ -110,6 +110,11 @@ namespace Scene {
 
             EntityComponentHandle() = default;
 
+            EntityComponentHandle(IndexType<uint32_t> index)
+                : mIndex(index)
+            {
+            }
+
             EntityComponentHandle(const EntityComponentHandle<std::conditional_t<std::is_const_v<T>, const EntityComponentBase, EntityComponentBase>> &other)
                 : mIndex(other.mIndex)
             {

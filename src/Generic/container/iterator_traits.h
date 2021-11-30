@@ -15,10 +15,6 @@ struct derive_iterator {
 };
 
 template <typename T>
-using is_iterable = std::bool_constant<has_function_begin_v<T> && has_function_end_v<T>>;
-
-template <typename T>
-constexpr const bool is_iterable_v = is_iterable<T>::value;
-
+concept Iterable = has_function_begin_v<T> && has_function_end_v<T>;
 
 }

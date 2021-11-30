@@ -20,7 +20,7 @@ FolderSources(sources "" "" interfacesforward.h interfaceslib.h)
 	FolderSources(sources "" input rawinput_win.cpp rawinput_win.h)
 	FolderSources(sources "" socket socketapi.h socketapi_unix.cpp socketapi_win.cpp)
 	FolderSources(sources "" threading threadapi.h threadapi_unix.cpp threadapi_win.cpp)
-	FolderSources(sources "" util exception.cpp exception.h log.cpp log.h standardlog.cpp standardlog.h utilmethods.cpp utilmethods.h)
+	FolderSources(sources "" util log.cpp log.h standardlog.cpp standardlog.h utilmethods.cpp utilmethods.h)
 	FolderSources(sources "" window windowapi.h windowapi_android.cpp windowapi_emscripten.cpp windowapi_linux.cpp windowapi_win.cpp windoweventlistener.h)
 
 add_workspace_library(Interfaces ${sources} SOURCE_ROOT .. PRECOMPILED_HEADER interfaceslib.h)

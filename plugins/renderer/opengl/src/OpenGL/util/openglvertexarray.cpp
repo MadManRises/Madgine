@@ -29,6 +29,7 @@ namespace Render {
         : mAttributes(std::exchange(other.mAttributes, nullptr))
         , mVertexBuffer(std::exchange(other.mVertexBuffer, nullptr))
         , mIndexBuffer(std::exchange(other.mIndexBuffer, nullptr))
+        , mInstances(std::move(other.mInstances))
     {
     }
 
@@ -53,9 +54,12 @@ namespace Render {
     void OpenGLVertexArray::reset()
     {
         mAttributes = nullptr;
+        mVertexBuffer = nullptr;
+        mIndexBuffer = nullptr;
+        mInstances.clear();
     }
 
-    void OpenGLVertexArray::bind(OpenGLProgram *program, OpenGLBuffer &instanceDataBuffer, size_t instanceDataSize)
+    void OpenGLVertexArray::bind(const OpenGLProgram *program, const OpenGLBuffer &instanceDataBuffer, size_t instanceDataSize) const 
     {
         OpenGLVertexArrayObject &instance = mInstances[program];
         if (!instance)
@@ -63,7 +67,7 @@ namespace Render {
         instance.bind();
     }
 
-    void OpenGLVertexArray::unbind(OpenGLProgram *program)
+    void OpenGLVertexArray::unbind(const OpenGLProgram *program) const 
     {
         mInstances.at(program).unbind();
     }

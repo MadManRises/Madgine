@@ -10,10 +10,10 @@
 
 #include "directx11forward.h"
 
-#include "Madgine/clientlib.h"
 #include "meshloaderlib.h"
 #include "programloaderlib.h"
 #include "textureloaderlib.h"
+#include "Madgine/clientlib.h"
 
 #define NOMINMAX
 
@@ -26,7 +26,8 @@ MADGINE_DIRECTX11_EXPORT void dx11Dump();
 inline void dx11Check(HRESULT result)
 {
     if (FAILED(result)) {
-        LOG("DX11-Error: " << "?");
+        LOG("DX11-Error: "
+            << "?");
         dx11Dump();
         std::terminate();
     }
@@ -37,5 +38,33 @@ inline void dx11Check(HRESULT result)
 #define DX11_LOG(x) LOG_DEBUG("DX11: " << x)
 
 #include <span>
+
+struct ReleaseDeleter {
+    template <typename T>
+    void operator()(T *ptr)
+    {
+        ptr->Release();
+    }
+};
+template <typename T>
+struct ReleasePtr : std::unique_ptr<T, ReleaseDeleter> {
+    using std::unique_ptr<T, ReleaseDeleter>::unique_ptr;
+
+    T **operator&()
+    {
+        assert(!*this);
+        return reinterpret_cast<T **>(this);
+    }
+
+    T *const *operator&() const
+    {
+        return reinterpret_cast<T *const *>(this);
+    }
+
+    operator T *() const
+    {
+        return get();
+    }
+};
 
 /// @endcond

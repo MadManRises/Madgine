@@ -147,7 +147,7 @@ namespace Render {
         GL_CHECK();
     }
 
-    GLuint OpenGLBuffer::handle()
+    GLuint OpenGLBuffer::handle() const
     {
         return mHandle;
     }

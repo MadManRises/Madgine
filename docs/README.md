@@ -1,3 +1,5 @@
+\mainpage Madgine
+
 # Madgine - Build your own game engine
 
 [![Build Status](http://www.madman-studios.com/jenkins/buildStatus/icon?job=Madgine%2Fmaster)](http://www.madman-studios.com/jenkins/job/Madgine/job/master/)
@@ -19,21 +21,6 @@ To be able to achieve that all parts of the engine are available for you to use 
 ## Documentation
 
 There is currently no documentation in code. Please refer to the explanations of general the concepts in this docs in combination to the implementation. There is also a [doxygen page][Doxygen], that lists all the interfaces and APIs. If you need further help or if the documents are outdated or lacking, please let me now either by raising an issue on [GitHub][] or by reaching out to me during a live coding stream on [Twitch][].
-
-## Table Of Contents
-
-* [Getting Started][]
-* [Overview][]
-    * [Generic][]
-    * [Meta][]
-    * [Interfaces][]
-    * [Modules][]
-        * [Plugins & Unique Components][]
-        * [Signals & Slots][]
-        * [KeyValue][]
-        * [Workgroups & Threading][]
-        * [Event handling][]
-
 
 ### License
 
@@ -62,4 +49,3 @@ The Madgine is licensed under the MIT License, see [LICENSE.md][] for more infor
 [Signals & Slots]: signalslot.md
 [KeyValue]:keyvalue.md
 [Workgroups & Threading]: workgroup.md
-[Event handling]: event.md

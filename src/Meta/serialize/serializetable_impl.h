@@ -1,11 +1,11 @@
 #pragma once
 
+#include "Generic/makeowning.h"
 #include "Generic/memberoffsetptr.h"
 #include "serializer.h"
 #include "serializetable.h"
 #include "streams/operations.h"
 #include "unithelper.h"
-#include "Generic/makeowning.h"
 
 namespace Engine {
 namespace Serialize {
@@ -30,16 +30,16 @@ namespace Serialize {
         return {
             name,
             []() {
-                return OffsetPtr { };
+                return OffsetPtr {};
             },
             [](const SerializableDataUnit *_unit, SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
-                    write(out, (unit->*Getter)(), name, CallerHierarchyPtr { hierarchy.append(unit) } );
+                write(out, (unit->*Getter)(), name, CallerHierarchyPtr { hierarchy.append(unit) });
             },
             [](SerializableDataUnit *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
                 (unit->*Setter)(nullptr);
-                return read(in, unit->*P, name, CallerHierarchyPtr { hierarchy.append(unit) } );
+                return read(in, unit->*P, name, CallerHierarchyPtr { hierarchy.append(unit) });
             },
             [](SerializableDataUnit *unit, SerializeInStream &in, PendingRequest *request) -> StreamResult {
                 throw "Unsupported";
@@ -47,9 +47,21 @@ namespace Serialize {
             [](SerializableDataUnit *unit, BufferedInOutStream &inout, TransactionId id) -> StreamResult {
                 throw "Unsupported";
             },
-            [](SerializableDataUnit *_unit, SerializeInStream &in, bool success) {
+            [](SerializableDataUnit *_unit, SerializeInStream &in, bool success) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
-                UnitHelper<T>::applyMap(in, unit->*P, success);
+                STREAM_PROPAGATE_ERROR(UnitHelper<T>::applyMap(in, unit->*P, success));
+                if constexpr (!std::derived_from<T, SerializableUnitBase>) {
+                    if (success) {
+                        T val = unit->*P;
+                        unit->*P = nullptr;
+                        (unit->*Setter)(val);
+                    } else {
+                        T val = unit->*P;
+                        (unit->*Setter)(nullptr);
+                        unit->*P = val;
+                    }
+                }
+                return {};
             },
             [](SerializableDataUnit *unit, bool b) {
             },
@@ -92,7 +104,7 @@ namespace Serialize {
         return {
             name,
             []() {
-                return OffsetPtr { };
+                return OffsetPtr {};
             },
             [](const SerializableDataUnit *_unit, SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
@@ -112,6 +124,7 @@ namespace Serialize {
                 throw "Unsupported";
             },
             [](SerializableDataUnit *_unit, SerializeInStream &in, bool success) {
+                return StreamResult {};
             },
             [](SerializableDataUnit *unit, bool b) {
             },
@@ -150,20 +163,20 @@ namespace Serialize {
             },
             [](SerializableDataUnit *_unit, SerializeInStream &in, PendingRequest *request) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
-                if constexpr (std::is_base_of_v<SyncableBase, T>)
+                if constexpr (std::derived_from<T, SyncableBase>)
                     return Operations<T, Configs...>::readAction(unit->*P, in, request, unit);
                 else
                     throw "Unsupported";
             },
             [](SerializableDataUnit *_unit, BufferedInOutStream &inout, TransactionId id) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
-                if constexpr (std::is_base_of_v<SyncableBase, T>)
+                if constexpr (std::derived_from<T, SyncableBase>)
                     return Operations<T, Configs...>::readRequest(unit->*P, inout, id, unit);
                 else
                     throw "Unsupported";
             },
             [](SerializableDataUnit *unit, SerializeInStream &in, bool success) {
-                UnitHelper<T>::applyMap(in, static_cast<Unit *>(unit)->*P, success);
+                return UnitHelper<T>::applyMap(in, static_cast<Unit *>(unit)->*P, success);
             },
             [](SerializableDataUnit *unit, bool b) {
                 UnitHelper<T>::setItemDataSynced(static_cast<Unit *>(unit)->*P, b);
@@ -172,19 +185,19 @@ namespace Serialize {
                 UnitHelper<T>::setItemActive(static_cast<Unit *>(unit)->*P, active, existenceChanged);
             },
             [](SerializableDataUnit *unit) {
-                if constexpr (std::is_base_of_v<SerializableUnitBase, T>)
+                if constexpr (std::derived_from<T, SerializableUnitBase>)
                     UnitHelper<T>::setItemParent(static_cast<Unit *>(unit)->*P, unit);
             },
             [](const SerializableDataUnit *_unit, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *data) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
-                if constexpr (std::is_base_of_v<SyncableBase, T>)
+                if constexpr (std::derived_from<T, SyncableBase>)
                     Operations<T, Configs...>::writeAction(unit->*P, outStreams, data, unit);
                 else
                     throw "Unsupported";
             },
             [](const SerializableDataUnit *_unit, BufferedOutStream &out, const void *data) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
-                if constexpr (std::is_base_of_v<SyncableBase, T>)
+                if constexpr (std::derived_from<T, SyncableBase>)
                     Operations<T, Configs...>::writeRequest(unit->*P, out, data, unit);
                 else
                     throw "Unsupported";
@@ -198,7 +211,7 @@ namespace Serialize {
         using traits = CallableTraits<decltype(P)>;
         using Unit = typename traits::class_type;
         using T = std::decay_t<typename traits::return_type>;
-        static_assert(std::is_base_of_v<SyncableBase, T>);
+        static_assert(std::derived_from<T, SyncableBase>);
 
         return {
             name,
@@ -220,6 +233,7 @@ namespace Serialize {
                 return Operations<T, Configs...>::readRequest(unit->*P, inout, id, unit);
             },
             [](SerializableDataUnit *unit, SerializeInStream &in, bool success) {
+                return StreamResult {};
             },
             [](SerializableDataUnit *unit, bool b) {
                 //UnitHelper<T>::setItemDataSynced(static_cast<Unit *>(unit)->*P, b);
@@ -266,7 +280,7 @@ namespace Serialize {
     ;                         \
     }                         \
     }                         \
-    DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::Serialize::SerializeTable, ::, serializeTable, SINGLE_ARG({ #T, ::Engine::type_holder<T>, ::Engine::Serialize::__SerializeInstance<T>::baseType, ::Engine::Serialize::__SerializeInstance<T>::fields, std::is_base_of_v<::Engine::Serialize::TopLevelUnitBase, T> }), T);
+    DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::Serialize::SerializeTable, ::, serializeTable, SINGLE_ARG({ #T, ::Engine::type_holder<T>, ::Engine::Serialize::__SerializeInstance<T>::baseType, ::Engine::Serialize::__SerializeInstance<T>::fields, std::derived_from<T, ::Engine::Serialize::TopLevelUnitBase> }), T);
 
 #define FIELD(...) \
     { STRINGIFY2(FIRST(__VA_ARGS__)), ::Engine::Serialize::field<Ty, &Ty::__VA_ARGS__>(STRINGIFY2(FIRST(__VA_ARGS__))) },
