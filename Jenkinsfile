@@ -142,7 +142,7 @@ def task = {
     return {
         // This is where the important work happens for each combination
 	    stage ("${name}") {
-			if (toolchain.name != "clang-emscripten") {
+			if (toolchain.name != "clang-emscripten" && toolchain.name != "clang-ios" && toolchain.name != "clang-android") {
 				stage("cmake") {
 					sh """
 					if ${params.fullBuild}; then
