@@ -182,6 +182,17 @@ namespace Widgets {
         return w;
     }
 
+    template WidgetBase *WidgetBase::createChild<WidgetBase>(const std::string &);
+    template Bar *WidgetBase::createChild<Bar>(const std::string &);
+    template Checkbox *WidgetBase::createChild<Checkbox>(const std::string &);
+    template Label *WidgetBase::createChild<Label>(const std::string &);
+    template TabWidget *WidgetBase::createChild<TabWidget>(const std::string &);
+    template Button *WidgetBase::createChild<Button>(const std::string &);
+    template Combobox *WidgetBase::createChild<Combobox>(const std::string &);
+    template Textbox *WidgetBase::createChild<Textbox>(const std::string &);
+    template SceneWindow *WidgetBase::createChild<SceneWindow>(const std::string &);
+    template Image *WidgetBase::createChild<Image>(const std::string &);
+
     size_t WidgetBase::depth()
     {
         return mParent ? mParent->depth() + 1 : 0;

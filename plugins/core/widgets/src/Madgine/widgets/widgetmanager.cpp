@@ -149,6 +149,17 @@ namespace Widgets {
         return std::make_unique<WidgetType>(name, *this, parent);
     }
 
+    template std::unique_ptr<WidgetBase> WidgetManager::create<WidgetBase>(const std::string &, WidgetBase *);
+    template std::unique_ptr<Bar> WidgetManager::create<Bar>(const std::string &, WidgetBase *);
+    template std::unique_ptr<Checkbox> WidgetManager::create<Checkbox>(const std::string &, WidgetBase *);
+    template std::unique_ptr<Label> WidgetManager::create<Label>(const std::string &, WidgetBase *);
+    template std::unique_ptr<TabWidget> WidgetManager::create<TabWidget>(const std::string &, WidgetBase *);
+    template std::unique_ptr<Button> WidgetManager::create<Button>(const std::string &, WidgetBase *);
+    template std::unique_ptr<Combobox> WidgetManager::create<Combobox>(const std::string &, WidgetBase *);
+    template std::unique_ptr<Textbox> WidgetManager::create<Textbox>(const std::string &, WidgetBase *);
+    template std::unique_ptr<SceneWindow> WidgetManager::create<SceneWindow>(const std::string &, WidgetBase *);
+    template std::unique_ptr<Image> WidgetManager::create<Image>(const std::string &, WidgetBase *);
+
     template <typename WidgetType>
     WidgetType *WidgetManager::createTopLevel(const std::string &name)
     {
@@ -169,7 +180,7 @@ namespace Widgets {
 
     const char *WidgetManager::widgetCreationNames(size_t index)
     {
-        
+
         return sWidgetCreationNames[index];
     }
 
@@ -297,7 +308,7 @@ namespace Widgets {
                 }
             }
         }
-        
+
         return current;
     }
 
@@ -460,7 +471,7 @@ namespace Widgets {
     void WidgetManager::render(Render::RenderTarget *target, size_t iteration)
     {
         if (!mData->mProgram.available())
-            return; 
+            return;
 
         target->pushAnnotation("WidgetManager");
 
@@ -540,7 +551,8 @@ namespace Widgets {
         target->popAnnotation();
     }
 
-    void WidgetManager::preRender() {
+    void WidgetManager::preRender()
+    {
         std::queue<Widgets::WidgetBase *> q;
         for (Widgets::WidgetBase *w : widgets()) {
             if (w->mVisible) {

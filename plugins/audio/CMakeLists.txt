@@ -1,3 +1,3 @@
 if (NOT ANDROID AND NOT IOS)
-add_subdirectory(openal)
+	add_subdirectory(openal)
 endif ()
