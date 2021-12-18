@@ -6,6 +6,10 @@
 #include "directx11rendercontext.h"
 #include "directx11rendertexture.h"
 
+#include "directx11programloader.h"
+#include "directx11textureloader.h"
+#include "directx11meshloader.h"
+
 UNIQUECOMPONENT(Engine::Render::DirectX11RenderContext)
 
 METATABLE_BEGIN(Engine::Render::DirectX11RenderContext)
@@ -98,6 +102,23 @@ namespace Render {
         checkThread();
 
         return std::make_unique<DirectX11RenderWindow>(this, w);
+    }
+
+    void DirectX11RenderContext::unloadAllResources()
+    {
+        RenderContext::unloadAllResources();
+
+        for (std::pair<const std::string, DirectX11ProgramLoader::ResourceType> &res : DirectX11ProgramLoader::getSingleton()) {
+            res.second.forceUnload();
+        }
+
+        for (std::pair<const std::string, DirectX11TextureLoader::ResourceType> &res : DirectX11TextureLoader::getSingleton()) {
+            res.second.forceUnload();
+        }
+
+        for (std::pair<const std::string, DirectX11MeshLoader::ResourceType> &res : DirectX11MeshLoader::getSingleton()) {
+            res.second.forceUnload();
+        }
     }
 
     bool DirectX11RenderContext::supportsMultisampling() const

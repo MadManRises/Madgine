@@ -11,8 +11,14 @@
 namespace Engine {
 namespace App {
 
+    /**
+     * @brief The Application manages all GlobalAPIComponents
+     * 
+     * The Application creates all registered GlobalAPIComponents.
+     * It also creates a TaskQueue for game logic tasks.
+    */
     struct MADGINE_BASE_EXPORT Application : MadgineObject<Application> {
-        Application(const AppSettings &settings);
+        Application();
         ~Application();
 
         template <typename T>
@@ -21,13 +27,11 @@ namespace App {
             return static_cast<T &>(getGlobalAPIComponent(component_index<T>()));
         }     
 
-        GlobalAPIBase &getGlobalAPIComponent(size_t i);
-
-        const AppSettings &settings();
-
-        static Application &getSingleton();
+        GlobalAPIBase &getGlobalAPIComponent(size_t i);        
 
         Threading::TaskQueue *taskQueue();
+
+        static Application &getSingleton();
 
     protected:
         Threading::Task<bool> init();
@@ -35,8 +39,6 @@ namespace App {
         friend struct MadgineObject<Application>;
 
     private:
-        const AppSettings &mSettings;
-
         Threading::TaskQueue mTaskQueue;
 
     public:

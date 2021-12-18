@@ -63,7 +63,7 @@ namespace Physics {
         CollisionShapeInstance(typename CollisionShapeManager::HandleType shape = {});        
         virtual ~CollisionShapeInstance();
         virtual btCollisionShape *get() = 0;
-        virtual bool isInstance() = 0;
+        virtual void destroy() = 0;
         virtual CollisionShapeInstancePtr clone() = 0;
 
         CollisionShapeManager::ResourceType *resource() const;

@@ -16,7 +16,7 @@ namespace Serialize {
         ~SerializeInStream();
 
         template <typename T>
-        SerializeInStream &operator>>(T &t);
+        SerializeInStream &operator>>(T &t) = delete;
 
         template <typename T>
         StreamResult readUnformatted(T &t)

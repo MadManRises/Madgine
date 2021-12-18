@@ -265,7 +265,7 @@ namespace Serialize {
 
     void SerializeOutStream::writeUnformatted(const SyncableUnitBase *p)
     {
-        writeUnformatted(SerializeManager::convertPtr(manager(), *this, p));
+        writeUnformatted(SerializeManager::convertPtr(*this, p));
     }
 
     void SerializeOutStream::writeUnformatted(const SerializableDataUnit *p)

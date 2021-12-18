@@ -1,5 +1,8 @@
 #pragma once
 
+/**
+ * @brief Main namespace for the Madgine
+*/
 namespace Engine {
 
 template <typename C, typename Base>
@@ -43,6 +46,8 @@ template <typename>
 struct Generator;
 template <typename>
 struct CoroutineHandle;
+
+struct OffsetPtr;
 
 
 }

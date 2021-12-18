@@ -6,6 +6,8 @@
 
 #include "scopefield.h"
 
+#include "metatable.h"
+
 namespace Engine {
 
 ScopeIterator::ScopeIterator(TypedScopePtr scope, const std::pair<const char *, Accessor> *pointer)

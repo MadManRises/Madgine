@@ -6,7 +6,7 @@
 
 #include "Generic/callerhierarchy.h"
 
-#include "serializetable.h"
+#include "serializetable_forward.h"
 
 namespace Engine {
 namespace Serialize {

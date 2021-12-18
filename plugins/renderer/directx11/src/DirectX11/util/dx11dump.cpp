@@ -7,7 +7,7 @@ using namespace Engine::Render;
 void dx11Dump()
 {
 
-    Engine::Util::LogDummy cout { Engine::Util::MessageType::LOG_TYPE };
+    Engine::Util::LogDummy cout { Engine::Util::MessageType::INFO_TYPE };
 
     cout << "DX11-State: ---------- \n";
 

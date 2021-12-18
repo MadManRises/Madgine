@@ -4,8 +4,6 @@
 
 #include "nodebase.h"
 
-#include "Meta/serialize/container/serializablecontainer.h"
-
 namespace Engine {
 namespace NodeGraph {
 

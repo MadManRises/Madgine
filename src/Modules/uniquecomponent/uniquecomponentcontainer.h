@@ -4,10 +4,6 @@
 
 #include "uniquecomponent.h"
 
-#if ENABLE_PLUGINS
-#    include "Generic/container/compoundatomicoperation.h"
-#endif
-
 namespace Engine {
 
 template <typename C, typename Registry, typename __dont_remove_Base, typename... _Ty>

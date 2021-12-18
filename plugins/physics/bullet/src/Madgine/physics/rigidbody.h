@@ -53,7 +53,7 @@ namespace Physics {
 
         void setVelocity(const Vector3 &v);
 
-        Scene::SceneManager *sceneMgr();
+        PhysicsManager *mgr();
 
         void setShape(typename CollisionShapeManager::HandleType handle);
         void setShapeName(std::string_view name);
@@ -67,7 +67,7 @@ namespace Physics {
 
     protected:
         typename CollisionShapeManager::InstanceHandle mShapeHandle;
-        Scene::SceneManager *mSceneMgr;
+        PhysicsManager *mMgr = nullptr;
         struct Data;
         std::unique_ptr<Data> mData;
     };

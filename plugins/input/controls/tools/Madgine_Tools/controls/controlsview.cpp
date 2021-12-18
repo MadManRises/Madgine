@@ -41,7 +41,7 @@ UNIQUECOMPONENT(Engine::Tools::ControlsView)
 
         bool ControlsView::init()
         {
-            Engine::App::Application::getSingleton().getGlobalAPIComponent<Controls::ControlsManager>().addAxisEventListener(this);
+            Engine::App::Application::getSingleton().getGlobalAPIComponent<Input::ControlsManager>().addAxisEventListener(this);
 
             return VirtualUnit::init();
         }

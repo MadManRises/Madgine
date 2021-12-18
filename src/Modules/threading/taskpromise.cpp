@@ -2,6 +2,11 @@
 
 #include "taskpromise.h"
 
+#if ENABLE_TASK_TRACKING
+#    include "taskqueue.h"
+#include "Interfaces/debug/stacktrace.h"
+#endif
+
 namespace Engine {
 namespace Threading {
 
@@ -31,6 +36,10 @@ namespace Threading {
         assert(queue);
         assert(!mQueue);
         mQueue = queue;
+
+#if ENABLE_TASK_TRACKING
+        queue->mTracker.onAssign(std::coroutine_handle<TaskPromiseTypeBase>::from_promise(*this).address(), Debug::StackTrace<2>::getCurrent(2));
+#endif
     }
 
     TaskQueue *TaskPromiseTypeBase::queue() const

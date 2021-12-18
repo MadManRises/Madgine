@@ -19,6 +19,7 @@ namespace Tools {
 
         virtual void render();
         virtual void renderMenu();
+        virtual void renderStatus();
         virtual void update();
 
         virtual std::string_view key() const = 0;

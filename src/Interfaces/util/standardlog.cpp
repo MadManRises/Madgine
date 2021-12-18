@@ -12,13 +12,19 @@
 namespace Engine {
 namespace Util {
     MessageType sLogLevel = MessageType::DEBUG_TYPE;
+    extern Log *sLog;
+
+    static StandardLog sGlobalLog {""};
 
     StandardLog::StandardLog(const std::string &name)
         : mName(name)
     {
+        if (!Util::sLog) {
+            Util::sLog = this;
+        }
     }
 
-    void StandardLog::sLog(const std::string &msg, MessageType lvl, const std::string &name)
+    void StandardLog::sLog(std::string_view msg, MessageType lvl, const std::string &name)
     {
         if (lvl < sLogLevel)
             return;
@@ -60,8 +66,8 @@ namespace Util {
         case MessageType::DEBUG_TYPE:
             type = "Debug    :";
             break;
-        case MessageType::LOG_TYPE:
-            type = "Log      :";
+        case MessageType::INFO_TYPE:
+            type = "Info     :";
             break;
         case MessageType::WARNING_TYPE:
             type = "Warning  :";
@@ -82,7 +88,7 @@ namespace Util {
         sLogLevel = lvl;
     }
 
-    void StandardLog::log(const std::string &msg, MessageType lvl)
+    void StandardLog::log(std::string_view msg, MessageType lvl)
     {
         sLog(msg, lvl, mName);
         Log::log(msg, lvl);
@@ -91,6 +97,10 @@ namespace Util {
     std::string StandardLog::getName()
     {
         return mName;
+    }
+
+    StandardLog& StandardLog::getSingleton() {
+        return sGlobalLog;
     }
 }
 }

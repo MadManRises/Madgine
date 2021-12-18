@@ -9,7 +9,7 @@ namespace Engine {
 namespace Serialize {
 
    template <auto f, typename OffsetPtr, typename R, typename T, typename... _Ty, typename... Configs>
-    struct Operations<__query__impl__::QueryImpl<f, OffsetPtr, R, T, _Ty...>, Configs...> {
+    struct Operations<__serialize_impl__::QueryImpl<f, OffsetPtr, R, T, _Ty...>, Configs...> {
 
         template <typename... Args>
         static void writeAction(const Query<f, OffsetPtr> &query, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *data, Args &&... args)

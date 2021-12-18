@@ -2,24 +2,24 @@
 
 #if ENABLE_THREADING
 
-#include "serverbase.h"
+#    include "serverbase.h"
 
-#include "Meta/keyvalue/metatable_impl.h"
+#    include "Meta/keyvalue/metatable_impl.h"
 
 namespace Engine {
 namespace Server {
     ServerBase::ServerBase(const std::string &name)
-        : TaskQueue(name + "-Server")
+        : mTaskQueue(name + "-Server")
         , mLog(name + "-Log")
     {
         Util::setLog(&mLog);
         mLog.startConsole();
-        addRepeatedTask([this]() { consoleCheck(); }, std::chrono::milliseconds(20));
+        mTaskQueue.addRepeatedTask([this]() { consoleCheck(); }, std::chrono::milliseconds(20));
     }
 
     ServerBase::~ServerBase()
     {
-        removeRepeatedTasks(this);
+        mTaskQueue.removeRepeatedTasks(this);
         mLog.stopConsole();
         mInstances.clear();
         Util::setLog(nullptr);
@@ -32,7 +32,7 @@ namespace Server {
 
     void ServerBase::shutdown()
     {
-        stop();
+        mTaskQueue.stop();
     }
 
     void ServerBase::performCommand(const std::string &cmd)
@@ -56,7 +56,5 @@ namespace Server {
 
 METATABLE_BEGIN(Engine::Server::ServerBase)
 METATABLE_END(Engine::Server::ServerBase)
-
-
 
 #endif

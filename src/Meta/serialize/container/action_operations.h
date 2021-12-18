@@ -12,7 +12,7 @@ namespace Engine {
 namespace Serialize {
 
     template <auto f, typename OffsetPtr, typename R, typename T, typename... _Ty, typename... Configs>
-    struct Operations<__action__impl__::ActionImpl<f, OffsetPtr, R, T, _Ty...>, Configs...> {
+    struct Operations<__serialize_impl__::ActionImpl<f, OffsetPtr, R, T, _Ty...>, Configs...> {
 
         using RequestPolicy = ConfigSelectorDefault<RequestPolicyCategory, RequestPolicy::all_requests, Configs...>;
         using Verifier = ConfigSelectorDefault<VerifierCategory, DefaultVerifier, Configs...>;
@@ -76,13 +76,13 @@ namespace Serialize {
                 STREAM_PROPAGATE_ERROR(UnitHelper<decltype(data)>::applyMap(in, data, true));
                 if (TupleUnpacker::invokeExpand(Verifier::verify, OffsetPtr::parent(&action), id, data)) {
                     action.tryCall(data, in.id(), id);
+                    return {};
                 } else {
                     return STREAM_PERMISSION_ERROR(in, "Request for action not verified");
                 }
             } else {
                 return STREAM_PERMISSION_ERROR(in, "Request for action not allowed");
             }
-            return {};
         }
     };
 

@@ -26,7 +26,7 @@ namespace Engine
 			stopConsole();
 		}
 
-		void ServerLog::log(const std::string& msg, Util::MessageType lvl)
+		void ServerLog::log(std::string_view msg, Util::MessageType lvl)
 		{
 			std::cout << "\r";
 			StandardLog::log(msg, lvl);

@@ -5,7 +5,6 @@ namespace Engine
 
 	namespace App
 	{
-		struct AppSettings;
 		struct Application;			
 		struct GlobalAPIBase;
 	}

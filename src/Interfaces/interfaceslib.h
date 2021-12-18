@@ -1,10 +1,12 @@
 #pragma once
 
+/// @cond
+
 #include "Generic/genericlib.h"
 
 #include "interfacesconfig.h"
 
-/// @cond
+
 
 #if defined(Interfaces_EXPORTS)
 #    define INTERFACES_EXPORT DLL_EXPORT

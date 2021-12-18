@@ -109,7 +109,7 @@ namespace Render {
             lvl = Util::MessageType::WARNING_TYPE;
             break;
         case GL_DEBUG_SEVERITY_LOW:
-            lvl = Util::MessageType::LOG_TYPE;
+            lvl = Util::MessageType::INFO_TYPE;
             break;
         case GL_DEBUG_SEVERITY_NOTIFICATION:
             lvl = Util::MessageType::DEBUG_TYPE;

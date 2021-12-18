@@ -4,6 +4,8 @@
 
 #include "proxyscopebase.h"
 
+#include "metatable.h"
+
 namespace Engine {
 
 OwnedScopePtr::OwnedScopePtr(std::shared_ptr<ProxyScopeBase> ptr)

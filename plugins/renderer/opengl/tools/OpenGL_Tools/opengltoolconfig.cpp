@@ -33,7 +33,8 @@ namespace Tools {
         getTool<Inspector>().addPreviewDefinition<Render::FontLoader::ResourceType>([](Render::FontLoader::ResourceType *font) {
             Render::FontLoader::HandleType handle = font->loadData();
             handle.info()->setPersistent(true);
-            ImGui::Image((void *)(uintptr_t)handle->mTexture->mTextureHandle, { 100, 100 });
+            if (handle.available())
+                ImGui::Image((void *)(uintptr_t)handle->mTexture->mTextureHandle, { 100, 100 });
         });
 
         getTool<Inspector>().addPreviewDefinition<Resources::ImageLoader::ResourceType>([this](Resources::ImageLoader::ResourceType *image) {

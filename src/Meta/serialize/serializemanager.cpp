@@ -24,7 +24,6 @@ namespace Serialize {
     SerializeManager::SerializeManager(SerializeManager &&other) noexcept
         : mSlaveMappings(std::move(other.mSlaveMappings))
         , mSlaveStreamData(std::exchange(other.mSlaveStreamData, nullptr))
-        , mFilters(std::move(other.mFilters))
         , mName(std::move(other.mName))
     {
         other.mSlaveMappings.clear();
@@ -98,9 +97,9 @@ namespace Serialize {
         }
     }
 
-    bool SerializeManager::isMaster(SerializeStreamData *stream) const
+    bool SerializeManager::isMaster(SerializeStreamData &stream) const
     {
-        return !mSlaveStreamData || mSlaveStreamData != stream;
+        return mSlaveStreamData != &stream;
     }
 
     bool SerializeManager::isMaster() const
@@ -108,30 +107,13 @@ namespace Serialize {
         return !mSlaveStreamData;
     }
 
-    bool SerializeManager::filter(const SerializableUnitBase *unit,
-        ParticipantId id)
-    {
-        for (auto &f : mFilters) {
-            if (!f(unit, id)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    void SerializeManager::addFilter(
-        std::function<bool(const SerializableUnitBase *, ParticipantId)> f)
-    {
-        mFilters.push_back(f);
-    }
-
-    UnitId SerializeManager::convertPtr(const SerializeManager *mgr, SerializeOutStream &out,
+    UnitId SerializeManager::convertPtr(SerializeOutStream &out,
         const SyncableUnitBase *unit)
     {
         return unit == nullptr
             ? NULL_UNIT_ID
-            : (!mgr || mgr->isMaster(&out.data())) ? unit->masterId()
-                                                   : unit->slaveId();
+            : out.isMaster() ? unit->masterId()
+                             : unit->slaveId();
     }
 
     StreamResult SerializeManager::convertPtr(SerializeInStream &in,
@@ -143,17 +125,17 @@ namespace Serialize {
         }
         SyncableUnitBase *ptr = nullptr;
 
-        if (mSlaveStreamData && (&in.data() == mSlaveStreamData)) {
+        if (in.isMaster()) {
+            ptr = in.manager()->getByMasterId(unit);
+        } else {
             auto it = sMasterMappings.find(unit);
             if (it != sMasterMappings.end())
                 ptr = it->second;
-        } else {
-            ptr = getByMasterId(unit);
         }
         if (!ptr) {
             return STREAM_INTEGRITY_ERROR(in, "Unknown Unit-Id (" << unit << ") used!");
         }
-        out = ptr;    
+        out = ptr;
         return {};
     }
 

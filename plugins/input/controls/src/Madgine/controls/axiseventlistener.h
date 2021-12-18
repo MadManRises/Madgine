@@ -1,10 +1,10 @@
 #pragma once
 
 namespace Engine {
-namespace Controls {
+namespace Input {
 
 	struct AxisEventListener {
-        virtual bool onAxisEvent(const Input::AxisEventArgs &arg) = 0;
+        virtual bool onAxisEvent(const AxisEventArgs &arg) = 0;
 	};
 
 }

@@ -12,6 +12,8 @@
 
 #include "serializableids.h"
 
+#include "serializetable.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -55,7 +57,7 @@ namespace Serialize {
             switch (header.mCmd) {
             case INITIAL_STATE_DONE:
                 mReceivingMasterState = false;
-                stream >> id;
+                STREAM_PROPAGATE_ERROR(read(stream, id, "id"));
                 stream.setId(id);
                 break;
             default:
@@ -374,7 +376,7 @@ namespace Serialize {
                 }                
             }
         } catch (const std::out_of_range &) {
-            return STREAM_INTEGRITY_ERROR(in, "Unknown Unit-Id (" << unit << ") used!");
+            return STREAM_INTEGRITY_ERROR(in, "Unknown Syncable Unit-Id (" << unit << ") used!");
         }
         return {};
     }

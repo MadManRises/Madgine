@@ -3,12 +3,6 @@
 namespace Engine {
 namespace Render {
 
-    enum ShaderType {
-        NoShader,
-        VertexShader,
-        PixelShader
-    };
-
     struct DirectX12VertexShader {
         DirectX12VertexShader() = default;
         DirectX12VertexShader(Resources::ResourceBase *resource);

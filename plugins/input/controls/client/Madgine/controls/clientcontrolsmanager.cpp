@@ -10,16 +10,16 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-UNIQUECOMPONENT(Engine::Controls::ClientControlsManager)
+UNIQUECOMPONENT(Engine::Input::ClientControlsManager)
 
-METATABLE_BEGIN_BASE(Engine::Controls::ClientControlsManager, Engine::Window::MainWindowComponentBase)
-METATABLE_END(Engine::Controls::ClientControlsManager)
+METATABLE_BEGIN_BASE(Engine::Input::ClientControlsManager, Engine::Window::MainWindowComponentBase)
+METATABLE_END(Engine::Input::ClientControlsManager)
 
-SERIALIZETABLE_INHERIT_BEGIN(Engine::Controls::ClientControlsManager, Engine::Window::MainWindowComponentBase)
-SERIALIZETABLE_END(Engine::Controls::ClientControlsManager)
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Input::ClientControlsManager, Engine::Window::MainWindowComponentBase)
+SERIALIZETABLE_END(Engine::Input::ClientControlsManager)
 
 namespace Engine {
-namespace Controls {
+namespace Input {
 
     ClientControlsManager::ClientControlsManager(Window::MainWindow &window)
         : VirtualData(window, 100)
@@ -32,13 +32,13 @@ namespace Controls {
         return "ClientControlsManager";
     }
 
-    Threading::Task<bool> Engine::Controls::ClientControlsManager::init()
+    Threading::Task<bool> ClientControlsManager::init()
     {
         mManager = &Engine::App::Application::getSingleton().getGlobalAPIComponent<ControlsManager>();
         co_return true;
     }
 
-    bool ClientControlsManager::injectAxisEvent(const Input::AxisEventArgs &arg)
+    bool ClientControlsManager::injectAxisEvent(const AxisEventArgs &arg)
     {
         return mManager->injectAxisEvent(arg);
     }

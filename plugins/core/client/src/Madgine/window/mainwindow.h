@@ -8,7 +8,6 @@
 
 #include "madgineobject/madgineobject.h"
 
-#include "Meta/serialize/container/serializablecontainer.h"
 #include "Meta/serialize/serializabledataunit.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"

@@ -12,7 +12,7 @@ namespace Serialize {
         static constexpr bool sCallByMasterOnly = callByMasterOnly;
     };
 
-    struct RequestPolicy {
+    namespace RequestPolicy {
         using all_requests = RequestPolicyType<false>;
         using no_requests = RequestPolicyType<true>;
     };

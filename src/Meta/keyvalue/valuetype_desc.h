@@ -2,12 +2,11 @@
 
 #include "valuetype_types.h"
 
-#include "functiontable.h"
-#include "metatable.h"
-
 #include "Generic/bits.h"
 
 #include "Generic/keyvalue.h"
+
+#include "table_forward.h"
 
 namespace Engine {
 

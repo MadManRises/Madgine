@@ -7,8 +7,6 @@
 
 #include "Generic/container/transformIt.h"
 
-#include "Meta/serialize/container/serializablecontainer.h"
-
 #include "Meta/serialize/virtualserializableunit.h"
 
 #include "Meta/keyvalue/virtualscope.h"

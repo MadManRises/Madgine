@@ -156,7 +156,7 @@ namespace Serialize {
         static StreamResult readAction(C &c, SerializeInStream &in, PendingRequest *request, Args &&... args)
         {
             ContainerEvent op;
-            in >> op;
+            STREAM_PROPAGATE_ERROR(Serialize::read(in, op, "operation"));
 
             bool accepted = (op & ~MASK) != ABORTED;
 
@@ -206,7 +206,7 @@ namespace Serialize {
             bool accepted = !RequestPolicy::sCallByMasterOnly;
 
             ContainerEvent op;
-            inout >> op;
+            STREAM_PROPAGATE_ERROR(Serialize::read(inout, op, "operation"));
 
             if (!accepted) {
                 if (id) {
@@ -525,7 +525,7 @@ namespace Serialize {
         Operations<T, Configs...>::write(out, t, name, hierarchy, flags);
     }
 
-    template <typename T>
+    /* template <typename T>
     inline SerializeInStream &SerializeInStream::operator>>(T &t)
     {
         StreamResult result = read(*this, t, nullptr);
@@ -534,7 +534,7 @@ namespace Serialize {
             throw result;
         }
         return *this;
-    }
+    }*/
 
     template <typename T>
     inline SerializeOutStream &SerializeOutStream::operator<<(const T &t)

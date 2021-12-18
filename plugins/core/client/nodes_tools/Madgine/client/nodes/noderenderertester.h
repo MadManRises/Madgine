@@ -13,7 +13,7 @@
 #include "imgui/imguiaddons.h"
 
 namespace Engine {
-namespace Client {
+namespace Tools {
 
     struct MADGINE_CLIENT_NODES_TOOLS_EXPORT NodeRendererTester : Tools::Tool<NodeRendererTester> {
         NodeRendererTester(Tools::ImRoot &root);
@@ -55,4 +55,4 @@ namespace Client {
 }
 }
 
-RegisterType(Engine::Client::NodeRendererTester);
+RegisterType(Engine::Tools::NodeRendererTester);

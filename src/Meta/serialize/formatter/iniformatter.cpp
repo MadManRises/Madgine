@@ -14,6 +14,16 @@ namespace Serialize {
     {
     }
 
+    void IniFormatter::setupStream(std::istream &in)
+    {
+        in >> std::boolalpha;
+    }
+
+    void IniFormatter::setupStream(std::ostream &out)
+    {
+        out << std::boolalpha;
+    }
+
     void IniFormatter::beginPrimitive(SerializeOutStream &out, const char *name, uint8_t typeId)
     {
         out.writeUnformatted(std::string(name));

@@ -8,7 +8,7 @@
 namespace Engine {
 namespace Tools {
 
-	struct MADGINE_CONTROLS_TOOLS_EXPORT ControlsView : Tool<ControlsView>, Controls::AxisEventListener{
+	struct MADGINE_CONTROLS_TOOLS_EXPORT ControlsView : Tool<ControlsView>, Input::AxisEventListener{
     
 		ControlsView(ImRoot &root);
 

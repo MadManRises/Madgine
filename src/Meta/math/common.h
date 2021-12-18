@@ -19,19 +19,17 @@ constexpr bool isEqual(float a, float b, float epsilon = floatZeroThreshold)
     return isZero(a - b, epsilon);
 }
 
-namespace Detail {
-    constexpr float sqrtNewtonRaphson(float x, float curr, float prev)
-    {
-        return curr == prev
-            ? curr
-            : sqrtNewtonRaphson(x, 0.5f * (curr + x / curr), curr);
-    }
+constexpr float sqrtNewtonRaphson(float x, float curr, float prev)
+{
+    return curr == prev
+        ? curr
+        : sqrtNewtonRaphson(x, 0.5f * (curr + x / curr), curr);
 }
 
 constexpr float sqrtf(float x)
 {
     return x >= 0 && x < std::numeric_limits<float>::infinity()
-        ? Detail::sqrtNewtonRaphson(x, x, 0)
+        ? sqrtNewtonRaphson(x, x, 0)
         : std::numeric_limits<float>::quiet_NaN();
 }
 

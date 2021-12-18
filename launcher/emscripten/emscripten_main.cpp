@@ -1,17 +1,14 @@
-#include "Madgine/clientlib.h"
 #include "Madgine/baselib.h"
+#include "Madgine/clientlib.h"
 
-#if EMSCRIPTEN
-
-#    include "Interfaces/filesystem/api.h"
-#    include "Madgine/core/root.h"
-#    include "Modules/threading/workgroup.h"
 #include "../launcher.h"
-#include "Madgine/app/application.h"
-#include <emscripten.h>
+#include "Interfaces/filesystem/api.h"
 #include "Interfaces/util/standardlog.h"
-#include "cli/parameter.h"
+#include "Madgine/core/root.h"
+#include "Modules/threading/workgroup.h"
 #include "cli/cli.h"
+#include "cli/parameter.h"
+#include <emscripten.h>
 
 extern Engine::CLI::Parameter<Engine::Util::MessageType> logLevel;
 
@@ -36,5 +33,3 @@ DLL_EXPORT_TAG int main(int argc, char **argv)
     emscripten_set_main_loop_arg([](void *) {}, nullptr, 0, false);
     return 0;
 }
-
-#endif

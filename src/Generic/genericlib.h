@@ -1,8 +1,8 @@
 #pragma once
 
-#include "commonlib.h"
-
 /// @cond
+
+#include "commonlib.h"
 
 #include <algorithm>
 #include <deque>

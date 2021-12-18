@@ -11,13 +11,13 @@ namespace Serialize {
 
     StreamResult convertSyncablePtr(SerializeInStream &in, UnitId id, SyncableUnitBase *&out)
     {
-        return in.manager()->convertPtr(in, id, out);
+        return SerializeManager::convertPtr(in, id, out);
     }
 
     StreamResult convertSerializablePtr(SerializeInStream &in, uint32_t id, SerializableDataUnit *&out)
     {
         if (id > in.serializableList().size())
-            throw 0;
+            return STREAM_INTEGRITY_ERROR(in, "Unknown Serializable Unit-Id (" << id << ") used!");
         out = in.serializableList().at(id);
         return {};
     }

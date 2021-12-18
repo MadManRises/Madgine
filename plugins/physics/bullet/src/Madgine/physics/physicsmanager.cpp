@@ -45,16 +45,16 @@ namespace Physics {
         RigidBody *rigidBody0 = static_cast<RigidBody *>(colObj0->m_collisionObject->getUserPointer());
         RigidBody *rigidBody1 = static_cast<RigidBody *>(colObj1->m_collisionObject->getUserPointer());
 
-        Scene::SceneManager *sceneMgr = nullptr;
+        PhysicsManager *mgr = nullptr;
         if (rigidBody0)
-            sceneMgr = rigidBody0->sceneMgr();
+            mgr = rigidBody0->mgr();
         else if (rigidBody1)
-            sceneMgr = rigidBody1->sceneMgr();
+            mgr = rigidBody1->mgr();
         else
             return false;
 
         ContactPoint p { cp, colObj0->m_collisionObject, colObj1->m_collisionObject };
-        return sceneMgr->getComponent<PhysicsManager>().contactCallback(p, rigidBody0, rigidBody1);
+        return mgr->contactCallback(p, rigidBody0, rigidBody1);
     }
 
     bool PhysicsManager::contactCallback(ContactPoint &p, RigidBody *body0, RigidBody *body1)

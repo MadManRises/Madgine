@@ -5,8 +5,6 @@
 #include "Madgine/window/mainwindowcomponent.h"
 #include "Madgine/window/mainwindowcomponentcollector.h"
 
-#include "Meta/serialize/container/serializablecontainer.h"
-
 #include "Generic/keyvalue.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"

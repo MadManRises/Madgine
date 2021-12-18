@@ -27,6 +27,8 @@ namespace Threading {
 
         TaskQueue *queue() const;
 
+        void *address() const;
+
         explicit operator bool() const;
 
     private:

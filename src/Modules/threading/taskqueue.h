@@ -2,6 +2,9 @@
 
 #include "task.h"
 
+#if ENABLE_TASK_TRACKING
+#include "../debug/tasktracking/tasktracker.h"
+#endif
 
 namespace Engine {
 namespace Threading {
@@ -65,7 +68,7 @@ namespace Threading {
             auto initTask = make_task(std::forward<Init>(init));
             auto future = initTask.get_future();
             auto initHandle = std::move(initTask).assign(this);
-            auto finalizeHandle = make_task(LIFT(TupleUnpacker::invoke), std::forward<Finalize>(finalize), std::move(future)).assign(this);            
+            auto finalizeHandle = make_task(LIFT(TupleUnpacker::invoke), std::forward<Finalize>(finalize), std::move(future)).assign(this);
             addSetupStepTasks(std::move(initHandle), std::move(finalizeHandle));
         }
 
@@ -79,6 +82,10 @@ namespace Threading {
         bool await_ready();
         void await_suspend(TaskHandle handle);
         void await_resume();
+
+#if ENABLE_TASK_TRACKING
+        Debug::Threading::TaskTracker mTracker;
+#endif
 
     protected:
         struct ScheduledTask {

@@ -78,6 +78,7 @@ namespace Serialize {
     struct SerializableDataConstPtr;
 
 	struct Serializer;
+    struct SerializeTableCallbacks;
 
     struct Formatter;
 

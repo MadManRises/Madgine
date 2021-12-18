@@ -23,8 +23,8 @@
 
 The framework is strongly plugin-oriented. It contains a set of core libraries that provide the necessary generic functionality needed in a working Madgine-Application:
 - [Generic][]: header-only library. Mostly template code, including container traits
-- [Meta][]: reflection and serialization/synchronization library
 - [Interfaces][]: hardware/platform abstractions
+- [Meta][]: reflection and serialization/synchronization library
 - [Modules][]: threading and plugin functionality
 
 

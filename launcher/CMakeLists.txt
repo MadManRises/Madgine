@@ -1,6 +1,6 @@
 
 set(sources "")
-FolderSources(sources "" "" launcher.cpp)
+FolderSources(sources "" "" launcher.cpp main.cpp terminate_handler.cpp)
 if (EMSCRIPTEN)
 	FolderSources(sources "" emscripten emscripten_main.cpp)
 endif(EMSCRIPTEN)

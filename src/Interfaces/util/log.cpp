@@ -6,10 +6,11 @@
 namespace Engine {
 	namespace Util {
 
-		void Log::log(const std::string& msg, MessageType lvl) {
+		void Log::log(std::string_view msg, MessageType lvl)
+            {
 			for (LogListener* listener : mListeners)
 			{
-				listener->messageLogged(msg, lvl, Debug::StackTrace<32>::getCurrent(3), getName());
+				listener->messageLogged(msg, lvl, Debug::StackTrace<32>::getCurrent(3), this);
 			}
 		}
 

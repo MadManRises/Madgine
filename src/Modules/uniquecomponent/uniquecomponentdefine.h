@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Generic/functor.h"
 #include "Generic/replace.h"
 
 //base is included in __VA_ARGS__ to circumvent the problem with empty __VA_ARGS__ and ,

@@ -14,6 +14,16 @@ namespace Serialize {
     {
     }
 
+    void XMLFormatter::setupStream(std::istream &in)
+    {
+        in >> std::boolalpha;
+    }
+
+    void XMLFormatter::setupStream(std::ostream &out)
+    {
+        out << std::boolalpha;
+    }
+
     void XMLFormatter::beginExtended(SerializeOutStream &out, const char *name, size_t count)
     {
         if (!mCurrentExtended) {

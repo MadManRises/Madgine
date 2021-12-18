@@ -4,7 +4,6 @@
 #include "vector2.h"
 
 namespace Engine {
-namespace Math {
     Bounds::Bounds(float left, float bottom, float right, float top)
         : mLeft(left)
         , mBottom(bottom)
@@ -83,5 +82,4 @@ namespace Math {
     {
         return width() <= 0 || height() <= 0;
     }
-} // namespace Math
-} // namespace Core
+}

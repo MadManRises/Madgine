@@ -8,7 +8,7 @@ namespace Engine
 	namespace Util
 	{
 
-		static Log* sLog = nullptr;
+		Log* sLog = nullptr;
 		
 
 		void setLog(Log* log)
@@ -16,10 +16,10 @@ namespace Engine
 			sLog = log;
 		}
 
-		void log(const std::string& msg, MessageType level)
+		void log(std::string_view msg, MessageType level)
 		{
 			if (sLog)
-				sLog->log(msg.c_str(), level);
+				sLog->log(msg, level);
 			else
 				StandardLog::sLog(msg, level);
 		}

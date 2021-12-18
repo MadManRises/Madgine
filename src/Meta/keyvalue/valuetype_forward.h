@@ -1,7 +1,5 @@
 #pragma once
 
-#include "typedscopeptr.h"
-
 #include "ownedscopeptr.h"
 
 #include "Generic/container/virtualrange.h"

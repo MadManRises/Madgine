@@ -14,6 +14,9 @@
 
 #include "streams/serializablemapholder.h"
 
+#include "statetransmissionflags.h"
+#include "serializetable.h"
+
 namespace Engine {
 namespace Serialize {
 

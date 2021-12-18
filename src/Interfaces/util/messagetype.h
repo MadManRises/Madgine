@@ -7,7 +7,7 @@ namespace Util {
 
     ENUM(MessageType,
         DEBUG_TYPE,
-        LOG_TYPE,
+        INFO_TYPE,
         WARNING_TYPE,
         ERROR_TYPE
     );

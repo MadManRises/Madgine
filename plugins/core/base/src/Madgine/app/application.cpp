@@ -1,8 +1,6 @@
 #include "../baselib.h"
 #include "application.h"
 
-#include "appsettings.h"
-
 #include "Meta/keyvalue/metatable_impl.h"
 
 #include "Modules/threading/workgroupstorage.h"
@@ -19,9 +17,14 @@ namespace App {
 
     static Threading::WorkgroupLocal<Application *> sApp;
 
-    Application::Application(const AppSettings &settings)
-        : mSettings(settings)
-        , mTaskQueue("Application")
+    /**
+     * @brief Creates an Application and sets up its TaskQueue
+     * 
+     * Instantiates all WindowAPIComponents. Initialization/Deinitialization-tasks
+     * of the MadgineObject are registered as setup steps in the TaskQueue.
+    */
+    Application::Application()
+        : mTaskQueue("Application")
         , mGlobalAPIs(*this)
     {
         assert(!sApp);
@@ -32,12 +35,19 @@ namespace App {
             [this]() { return callFinalize(); });
     }
 
+    /**
+     * @brief 
+    */
     Application::~Application()
     {
         assert(sApp == this);
         sApp = nullptr;
     }
 
+    /**
+     * @brief 
+     * @return 
+    */
     Threading::Task<bool> Application::init()
     {
         for (const std::unique_ptr<GlobalAPIBase> &api : mGlobalAPIs) {
@@ -48,6 +58,10 @@ namespace App {
         co_return true;
     }
 
+    /**
+     * @brief 
+     * @return 
+    */
     Threading::Task<void> Application::finalize()
     {
         for (const std::unique_ptr<GlobalAPIBase> &api : mGlobalAPIs) {
@@ -55,21 +69,29 @@ namespace App {
         }
     }
 
+    /**
+     * @brief 
+     * @param i 
+     * @return 
+    */
     GlobalAPIBase &Application::getGlobalAPIComponent(size_t i)
     {
         return mGlobalAPIs.get(i);
     }
 
-    const AppSettings &Application::settings()
-    {
-        return mSettings;
-    }
-
+    /**
+     * @brief 
+     * @return 
+    */
     Application &Application::getSingleton()
     {
         return *sApp;
     }
 
+    /**
+     * @brief 
+     * @return 
+    */
     Threading::TaskQueue *Application::taskQueue()
     {
         return &mTaskQueue;

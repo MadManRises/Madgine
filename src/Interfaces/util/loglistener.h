@@ -7,7 +7,7 @@ namespace Util {
 
     struct LogListener {
         virtual ~LogListener() = default;
-        virtual void messageLogged(const std::string &message, Engine::Util::MessageType lml, const Engine::Debug::StackTrace<32> &stackTrace, const std::string &logName) = 0;
+        virtual void messageLogged(std::string_view message, MessageType lml, const Debug::StackTrace<32> &stackTrace, Log *log) = 0;
     };
 
 }

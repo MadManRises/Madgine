@@ -22,19 +22,19 @@
 
 #include "Madgine_Tools/interactivecamera.h"
 
-UNIQUECOMPONENT(Engine::Client::NodeRendererTester);
+UNIQUECOMPONENT(Engine::Tools::NodeRendererTester);
 
-METATABLE_BEGIN_BASE(Engine::Client::NodeRendererTester, Engine::Tools::ToolBase)
-METATABLE_END(Engine::Client::NodeRendererTester)
+METATABLE_BEGIN_BASE(Engine::Tools::NodeRendererTester, Engine::Tools::ToolBase)
+METATABLE_END(Engine::Tools::NodeRendererTester)
 
-SERIALIZETABLE_INHERIT_BEGIN(Engine::Client::NodeRendererTester, Engine::Tools::ToolBase)
-SERIALIZETABLE_END(Engine::Client::NodeRendererTester)
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::NodeRendererTester, Engine::Tools::ToolBase)
+SERIALIZETABLE_END(Engine::Tools::NodeRendererTester)
 
 namespace Engine {
-namespace Client {
+namespace Tools {
 
     NodeRendererTester::NodeRendererTester(Tools::ImRoot &root)
-        : Tools::Tool<NodeRendererTester>(root)
+        : Tool<NodeRendererTester>(root)
     {
     }
 
@@ -42,12 +42,12 @@ namespace Client {
 
     bool NodeRendererTester::init()
     {
-        if (!Tools::ToolBase::init())
+        if (!ToolBase::init())
             return false;
 
-        mTexture = static_cast<const Tools::ClientImRoot &>(mRoot).window().getRenderer()->createRenderTexture({ 512, 512 });
+        mTexture = static_cast<const ClientImRoot &>(mRoot).window().getRenderer()->createRenderTexture({ 512, 512 });
 
-        mInspector = &getTool<Tools::Inspector>();
+        mInspector = &getTool<Inspector>();
 
         return true;
     }
@@ -56,7 +56,7 @@ namespace Client {
     {
         mTexture.reset();
 
-        Tools::ToolBase::finalize();
+        ToolBase::finalize();
     }
 
     void NodeRendererTester::render()

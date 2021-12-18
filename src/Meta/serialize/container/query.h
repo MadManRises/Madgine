@@ -6,7 +6,7 @@
 
 namespace Engine {
 namespace Serialize {
-    namespace __query__impl__ {
+    namespace __serialize_impl__ {
 
         template <auto f, typename OffsetPtr, typename R, typename T, typename... _Ty>
         struct QueryImpl : Syncable<OffsetPtr> {
@@ -44,7 +44,7 @@ namespace Serialize {
     }
 
     template <auto f, typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
-    using Query = typename FunctionCapture<__query__impl__::QueryImpl, f, OffsetPtr>::type;
+    using Query = typename FunctionCapture<__serialize_impl__::QueryImpl, f, OffsetPtr>::type;
 
 #define QUERY(Name, f) MEMBER_OFFSET_CONTAINER(Name, ::Engine::Serialize::Query<&Self::f>)
 

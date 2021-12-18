@@ -1,7 +1,8 @@
 #pragma once
 
-#include "serializetable.h"
+#include "serializetable_forward.h"
 #include "Generic/callerhierarchy.h"
+#include "Generic/offsetptr.h"
 
 namespace Engine {
 namespace Serialize {

@@ -22,6 +22,10 @@ namespace Tools {
     {
     }
 
+    void ToolBase::renderStatus()
+    {
+    }
+
     void ToolBase::update()
     {
         if (mVisible)

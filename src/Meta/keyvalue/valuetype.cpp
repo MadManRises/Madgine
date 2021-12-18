@@ -1,6 +1,8 @@
 #include "../metalib.h"
 #include "valuetype.h"
 
+#include "metatable.h"
+
 namespace Engine {
 
 ValueType::ValueType()

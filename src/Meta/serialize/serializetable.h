@@ -3,11 +3,10 @@
 #include "statetransmissionflags.h"
 #include "Generic/callerhierarchy.h"
 #include "Generic/offsetptr.h"
+#include "serializetable_forward.h"
 
 namespace Engine {
 namespace Serialize {
-
-    DERIVE_FUNCTION(onActivate);    
 
     struct SerializeTableCallbacks {
         template <typename T>
@@ -52,4 +51,4 @@ namespace Serialize {
 }
 }
 
-DLL_IMPORT_VARIABLE2(const Engine::Serialize::SerializeTable, serializeTable, typename T);
+

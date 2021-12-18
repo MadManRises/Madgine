@@ -258,14 +258,15 @@ namespace Serialize {
 }
 }
 
-#define SERIALIZETABLE_BEGIN_IMPL(T, Base)                                                        \
-    namespace Engine {                                                                            \
-        namespace Serialize {                                                                     \
-            template <>                                                                           \
-            struct __SerializeInstance<T> {                                                       \
-                using Ty = T;                                                                     \
-                static constexpr const ::Engine::Serialize::SerializeTable &(*baseType)() = Base; \
-                static constexpr const std::pair<const char *, ::Engine::Serialize::Serializer> fields[] = {
+#define SERIALIZETABLE_BEGIN_IMPL(T, Base)                                                            \
+    namespace Engine {                                                                                \
+        namespace Serialize {                                                                         \
+            namespace __serialize_impl__ {                                                            \
+                template <>                                                                           \
+                struct SerializeInstance<T> {                                                       \
+                    using Ty = T;                                                                     \
+                    static constexpr const ::Engine::Serialize::SerializeTable &(*baseType)() = Base; \
+                    static constexpr const std::pair<const char *, ::Engine::Serialize::Serializer> fields[] = {
 
 #define SERIALIZETABLE_INHERIT_BEGIN(T, Base) SERIALIZETABLE_BEGIN_IMPL(T, &serializeTable<Base>)
 #define SERIALIZETABLE_BEGIN(T) SERIALIZETABLE_BEGIN_IMPL(T, nullptr)
@@ -280,7 +281,8 @@ namespace Serialize {
     ;                         \
     }                         \
     }                         \
-    DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::Serialize::SerializeTable, ::, serializeTable, SINGLE_ARG({ #T, ::Engine::type_holder<T>, ::Engine::Serialize::__SerializeInstance<T>::baseType, ::Engine::Serialize::__SerializeInstance<T>::fields, std::derived_from<T, ::Engine::Serialize::TopLevelUnitBase> }), T);
+    }                         \
+    DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::Serialize::SerializeTable, ::, serializeTable, SINGLE_ARG({ #T, ::Engine::type_holder<T>, ::Engine::Serialize::__serialize_impl__::SerializeInstance<T>::baseType, ::Engine::Serialize::__serialize_impl__::SerializeInstance<T>::fields, std::derived_from<T, ::Engine::Serialize::TopLevelUnitBase> }), T);
 
 #define FIELD(...) \
     { STRINGIFY2(FIRST(__VA_ARGS__)), ::Engine::Serialize::field<Ty, &Ty::__VA_ARGS__>(STRINGIFY2(FIRST(__VA_ARGS__))) },

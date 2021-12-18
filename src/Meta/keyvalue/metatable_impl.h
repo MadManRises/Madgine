@@ -1,15 +1,12 @@
 #pragma once
 
-#include "Generic/container/virtualrange.h"
 #include "Generic/fixed_string.h"
 #include "Generic/linestruct.h"
 #include "accessor.h"
 #include "boundapifunction.h"
 #include "functiontable_impl.h"
 #include "metatable.h"
-#include "typedscopeptr.h"
 #include "valuetype_forward.h"
-#include "proxyscopebase.h"
 
 namespace Engine {
 

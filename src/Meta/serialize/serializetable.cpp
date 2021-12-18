@@ -88,14 +88,14 @@ namespace Serialize {
     StreamResult SerializeTable::readAction(SerializableUnitBase *unit, SerializeInStream &in, PendingRequest *request) const
     {
         uint8_t index;
-        in >> index;
+        STREAM_PROPAGATE_ERROR(read(in, index, "index"));
         return get(index).mReadAction(unit, in, request);
     }
 
     StreamResult SerializeTable::readRequest(SerializableUnitBase *unit, BufferedInOutStream &inout, TransactionId id) const
     {
         uint8_t index;
-        inout >> index;
+        STREAM_PROPAGATE_ERROR(read(inout, index, "index"));
         return get(index).mReadRequest(unit, inout, id);
     }
 

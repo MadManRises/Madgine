@@ -5,7 +5,7 @@
 
 
 namespace Engine {
-namespace Controls {
+namespace Input {
 
     struct MADGINE_CLIENTCONTROLS_EXPORT ClientControlsManager : Window::MainWindowComponent<ClientControlsManager> {
 
@@ -15,7 +15,7 @@ namespace Controls {
 
         virtual Threading::Task<bool> init() override;
 
-        virtual bool injectAxisEvent(const Input::AxisEventArgs &arg) override;
+        virtual bool injectAxisEvent(const AxisEventArgs &arg) override;
 
     private:
         ControlsManager *mManager;
@@ -24,4 +24,4 @@ namespace Controls {
 }
 }
 
-RegisterType(Engine::Controls::ClientControlsManager)
+RegisterType(Engine::Input::ClientControlsManager)

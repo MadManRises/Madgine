@@ -12,7 +12,6 @@
 #include "Meta/serialize/streams/operations.h"
 #include "serialize/filesystem/filemanager.h"
 
-
 #include "Generic/areaview.h"
 #include "Generic/bytebuffer.h"
 
@@ -108,12 +107,18 @@ namespace Render {
             Filesystem::FileManager cache("msdf_cache");
             Serialize::SerializeInStream in = cache.openRead(info.resource()->path().parentPath() / (std::string { info.resource()->name() } + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
             assert(in);
-            in >> font.mGlyphs;
-            in >> font.mTextureSize;
             ByteBuffer b;
-            in >> b;
-            font.mTexture.create(TextureType_2D, FORMAT_RGBA8, font.mTextureSize, std::move(b));        
-
+            Serialize::StreamResult result = [&]() {
+                STREAM_PROPAGATE_ERROR(read(in, font.mGlyphs, nullptr));
+                STREAM_PROPAGATE_ERROR(read(in, font.mTextureSize, nullptr));
+                return read(in, b, nullptr);
+            }();
+            if (result.mState != Serialize::StreamState::OK) {
+                LOG_ERROR("Failed to load \"" << info.resource()->path() << "\": \n"
+                                              << *result.mError);
+                co_return false;
+            }
+            font.mTexture.create(TextureType_2D, FORMAT_RGBA8, font.mTextureSize, std::move(b));
         } else if (info.resource()->path().extension() == ".ttf") {
             LOG("Creating Cache for " << info.resource()->path());
 
@@ -238,7 +243,7 @@ namespace Render {
             FT_Done_Face(face);
             FT_Done_FreeType(ft);
 
-            font.mTexture.create(TextureType_2D, FORMAT_RGBA8, font.mTextureSize, { std::move(texBuffer), 4 * byteSize });        
+            font.mTexture.create(TextureType_2D, FORMAT_RGBA8, font.mTextureSize, { texBuffer.get(), 4 * byteSize });
 
             Filesystem::FileManager cache("msdf_cache");
             Serialize::SerializeOutStream out = cache.openWrite(info.resource()->path().parentPath() / (std::string { info.resource()->name() } + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());

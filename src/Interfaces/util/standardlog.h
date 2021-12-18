@@ -7,13 +7,15 @@ namespace Util {
     struct INTERFACES_EXPORT StandardLog : Log {
         StandardLog(const std::string &name);
 
-        static void sLog(const std::string &msg, MessageType lvl, const std::string &name = "Default");
+        static void sLog(std::string_view msg, MessageType lvl, const std::string &name = "Default");
 
         static void setLogLevel(MessageType lvl);
 
         // Inherited via Log
-        void log(const std::string &msg, MessageType lvl) override;
+        void log(std::string_view msg, MessageType lvl) override;
         std::string getName() override;
+
+        static StandardLog &getSingleton();
 
     private:
         std::string mName;

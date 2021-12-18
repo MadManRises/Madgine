@@ -6,7 +6,7 @@
 
 namespace Engine {
 namespace Serialize {
-    namespace __action__impl__ {
+    namespace __serialize_impl__ {
 
         template <auto f, typename OffsetPtr, typename R, typename T, typename... _Ty>
         struct ActionImpl : Syncable<OffsetPtr> {
@@ -54,7 +54,7 @@ namespace Serialize {
     }
 
     template <auto f, typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
-    using Action = typename FunctionCapture<__action__impl__::ActionImpl, f, OffsetPtr>::type;
+    using Action = typename FunctionCapture<__serialize_impl__::ActionImpl, f, OffsetPtr>::type;
 
 #define ACTION(Name, f) MEMBER_OFFSET_CONTAINER(Name, ::Engine::Serialize::Action<&Self::f>)
 

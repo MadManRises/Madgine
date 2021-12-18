@@ -14,18 +14,18 @@
 
 #include "Madgine/physics/rigidbody.h"
 
-SERIALIZETABLE_INHERIT_BEGIN(Engine::Controls::PlayerController, Engine::Scene::SceneComponentBase)
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Input::PlayerController, Engine::Scene::SceneComponentBase)
 FIELD(mTarget)
-SERIALIZETABLE_END(Engine::Controls::PlayerController)
+SERIALIZETABLE_END(Engine::Input::PlayerController)
 
-METATABLE_BEGIN_BASE(Engine::Controls::PlayerController, Engine::Scene::SceneComponentBase)
+METATABLE_BEGIN_BASE(Engine::Input::PlayerController, Engine::Scene::SceneComponentBase)
 MEMBER(mTarget)
-METATABLE_END(Engine::Controls::PlayerController)
+METATABLE_END(Engine::Input::PlayerController)
 
-UNIQUECOMPONENT(Engine::Controls::PlayerController)
+UNIQUECOMPONENT(Engine::Input::PlayerController)
 
 namespace Engine {
-namespace Controls {
+namespace Input {
 
     PlayerController::PlayerController(Scene::SceneManager &scene)
         : VirtualScope(scene)
@@ -34,7 +34,7 @@ namespace Controls {
 
     bool PlayerController::init()
     {
-        sceneMgr().app().getGlobalAPIComponent<Controls::ControlsManager>().addAxisEventListener(this);
+        sceneMgr().app().getGlobalAPIComponent<ControlsManager>().addAxisEventListener(this);
 
         return VirtualScope::init();
     }
@@ -43,12 +43,12 @@ namespace Controls {
     {
         VirtualScope::finalize();
 
-        sceneMgr().app().getGlobalAPIComponent<Controls::ControlsManager>().removeAxisEventListener(this);        
+        sceneMgr().app().getGlobalAPIComponent<ControlsManager>().removeAxisEventListener(this);        
     }
 
-    bool PlayerController::onAxisEvent(const Input::AxisEventArgs &arg)
+    bool PlayerController::onAxisEvent(const AxisEventArgs &arg)
     {
-        if (arg.mAxisType == Input::AxisEventArgs::LEFT) {
+        if (arg.mAxisType == AxisEventArgs::LEFT) {
             if (mTarget)
                 mTarget->getComponent<Physics::RigidBody>()->setVelocity({ 3.0f * arg.mAxis1, 0.0f, -3.0f * arg.mAxis2 });
         }

@@ -32,7 +32,7 @@ struct StaticCallableMaker<CallableType<F, R, T, _Ty...>> {
 template <typename T>
 using makeStaticCallable = typename StaticCallableMaker<T>::type;
 
-namespace __generic__impl__ {
+namespace __generic_impl__ {
     template <typename R, typename T, typename... _Ty>
     CallableType<R (T::*)(_Ty...), R, T, _Ty...> callableTypeDeducer(R (T::*f)(_Ty...));
 
@@ -52,7 +52,7 @@ namespace __generic__impl__ {
 }
 
 template <typename F>
-using CallableTraits = decltype(__generic__impl__::callableTypeDeducer(std::declval<F>()));
+using CallableTraits = decltype(__generic_impl__::callableTypeDeducer(std::declval<F>()));
 
 template <typename F, typename = void>
 struct callable_is_variadic : std::true_type {

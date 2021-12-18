@@ -5,11 +5,14 @@ namespace Filesystem {
 
     struct INTERFACES_EXPORT Path {
 
+        Path() = default;
+        Path(std::string_view s);  
         Path(const std::string &s);
-        Path(const char *s = "");
+        Path(const char *s);
 
-		Path &operator=(const std::string &s);
-        Path &operator=(const char *s);
+		Path &operator=(std::string_view s);        
+        Path &operator=(const std::string &s);        
+        Path &operator=(const char *s);        
 
         Path &operator/=(const Path &p);
 

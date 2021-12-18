@@ -8,7 +8,7 @@ namespace Engine {
 namespace Util {
 
     INTERFACES_EXPORT void setLog(Log *log = nullptr);
-    INTERFACES_EXPORT void log(const std::string &msg, MessageType lvl);
+    INTERFACES_EXPORT void log(std::string_view msg, MessageType lvl);
 
     struct INTERFACES_EXPORT LogDummy {
         LogDummy(MessageType lvl);
@@ -31,7 +31,7 @@ namespace Util {
 #else
 #    define LOG_DEBUG(s)
 #endif
-#define LOG(s) Engine::Util::LogDummy { Engine::Util::MessageType::LOG_TYPE } << s
+#define LOG(s) Engine::Util::LogDummy { Engine::Util::MessageType::INFO_TYPE } << s
 #define LOG_WARNING(s) Engine::Util::LogDummy { Engine::Util::MessageType::WARNING_TYPE } << s
 #define LOG_ERROR(s) Engine::Util::LogDummy { Engine::Util::MessageType::ERROR_TYPE } << s
 

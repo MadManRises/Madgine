@@ -685,10 +685,6 @@ bool DragMatrix3(const char *label, Engine::Matrix3 *m, float *v_speeds, bool *e
     ImGuiContext &g = *GImGui;
     bool value_changed = false;
 
-    const char *end = FindRenderedTextEnd(label);
-    TextEx(label, end);
-    SameLine();
-
     BeginGroup();
     PushID(label);
 
@@ -696,6 +692,9 @@ bool DragMatrix3(const char *label, Engine::Matrix3 *m, float *v_speeds, bool *e
         PushMultiItemsWidths(3, std::min(300.0f, CalcItemWidth()));
         for (int j = 0; j < 3; ++j) {
             PushID(3 * i + j);
+            if (j > 0) {
+                SameLine(0, g.Style.ItemInnerSpacing.x);
+            }
             if (enabled && !enabled[3 * i + j])
                 PushDisabled();
             value_changed |= DragFloat("", &(*m)[i][j], v_speeds[3 * i + j]);
@@ -703,9 +702,12 @@ bool DragMatrix3(const char *label, Engine::Matrix3 *m, float *v_speeds, bool *e
                 PopDisabled();
             PopItemWidth();
             PopID();
-            if (j < 2) {
-                SameLine(0, g.Style.ItemInnerSpacing.x);
-            }
+            
+        }
+        if (i == 0) {
+            SameLine(0, g.Style.ItemInnerSpacing.x);
+            const char *end = FindRenderedTextEnd(label);
+            TextEx(label, end);
         }
     }
     PopID();

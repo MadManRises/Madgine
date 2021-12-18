@@ -1,7 +1,6 @@
 #pragma once
 
 namespace Engine {
-namespace Math {
     struct META_EXPORT Bounds {
         Bounds(float left = 0.f, float bottom = 0.f, float right = 0.f, float top = 0.f);
 
@@ -29,5 +28,4 @@ namespace Math {
     private:
         float mLeft, mBottom, mRight, mTop;
     };
-} // namespace Math
-} // namespace Core
+}

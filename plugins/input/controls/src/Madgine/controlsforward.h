@@ -3,7 +3,7 @@
 
 
 namespace Engine {
-namespace Controls {
+namespace Input {
 
     struct ActionDescriptor;
     struct ControlsManager;

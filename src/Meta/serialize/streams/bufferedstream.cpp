@@ -136,7 +136,7 @@ namespace Serialize {
     {
         MessageHeader header;
         header.mType = type;
-        header.mObject = SerializeManager::convertPtr(manager(), *this, unit);
+        header.mObject = SerializeManager::convertPtr(*this, unit);
         header.mTransaction = id;
         buffer().beginMessage();
         writeRaw(header);

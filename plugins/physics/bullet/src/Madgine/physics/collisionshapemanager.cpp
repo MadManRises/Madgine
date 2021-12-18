@@ -38,8 +38,8 @@ namespace Physics {
 
     struct MeshShape : CollisionShape, Serialize::VirtualUnit<MeshShape, VirtualScope<MeshShape, CollisionShapeInstance>> {
 
-        ~MeshShape() {
-
+        ~MeshShape()
+        {
         }
 
         void setMesh(const ByteBuffer &vertexData, size_t vertexSize)
@@ -49,6 +49,7 @@ namespace Physics {
 
         virtual CollisionShapeInstancePtr create(typename CollisionShapeManager::HandleType shape) override
         {
+            ++mRefCount;
             mHandle = std::move(shape);
             return CollisionShapeInstancePtr { this };
         }
@@ -63,11 +64,15 @@ namespace Physics {
             return CollisionShapeInstancePtr { this };
         }
 
-        virtual bool isInstance() override
+        virtual void destroy() override
         {
-            return false;
+            assert(mRefCount > 0);
+            if (--mRefCount == 0) {
+                mHandle.reset();
+            }
         }
 
+        std::atomic<uint32_t> mRefCount = 0;
         btConvexHullShape mShape;
     };
 
@@ -83,9 +88,9 @@ namespace Physics {
             return &mShape;
         }
 
-        virtual bool isInstance() override
+        virtual void destroy() override
         {
-            return true;
+            delete this;
         }
 
         virtual CollisionShapeInstancePtr clone() override
@@ -126,9 +131,9 @@ namespace Physics {
             return &mShape;
         }
 
-        virtual bool isInstance() override
+        virtual void destroy() override
         {
-            return true;
+            delete this;
         }
 
         virtual std::unique_ptr<CollisionShapeInstance, CollisionShapeInstanceDeleter> clone() override
@@ -159,9 +164,9 @@ namespace Physics {
             return &mShape;
         }
 
-        virtual bool isInstance() override
+        virtual void destroy() override
         {
-            return true;
+            delete this;
         }
 
         virtual std::unique_ptr<CollisionShapeInstance, CollisionShapeInstanceDeleter> clone() override
@@ -192,9 +197,9 @@ namespace Physics {
             return &mShape;
         }
 
-        virtual bool isInstance() override
+        virtual void destroy() override
         {
-            return true;
+            delete this;
         }
 
         virtual std::unique_ptr<CollisionShapeInstance, CollisionShapeInstanceDeleter> clone() override
@@ -280,9 +285,9 @@ namespace Physics {
             return &mShape;
         }
 
-        virtual bool isInstance() override
+        virtual void destroy() override
         {
-            return true;
+            delete this;
         }
 
         virtual std::unique_ptr<CollisionShapeInstance, CollisionShapeInstanceDeleter> clone() override
@@ -455,8 +460,7 @@ namespace Physics {
 
     void CollisionShapeInstanceDeleter::operator()(CollisionShapeInstance *instance)
     {
-        if (instance->isInstance())
-            delete instance;
+        instance->destroy();
     }
 
     CollisionShapeInstance::CollisionShapeInstance(typename CollisionShapeManager::HandleType shape)

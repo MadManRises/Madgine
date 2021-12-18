@@ -55,7 +55,7 @@ namespace Serialize {
     bool SerializeStreamData::isMaster(StreamMode mode)
     {
         if (mManager)
-            return mManager->isMaster(this);
+            return mManager->isMaster(*this);
         return mode == StreamMode::WRITE;
     }
 

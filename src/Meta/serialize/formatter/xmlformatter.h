@@ -9,6 +9,9 @@ namespace Serialize {
 
         XMLFormatter();
 
+        virtual void setupStream(std::istream &) override;
+        virtual void setupStream(std::ostream &) override; 
+
         virtual void beginExtended(SerializeOutStream &, const char *name, size_t count) override;
 
         virtual void beginCompound(SerializeOutStream &, const char *name) override;

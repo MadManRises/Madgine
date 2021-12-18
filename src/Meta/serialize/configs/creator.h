@@ -113,7 +113,7 @@ namespace Serialize {
         }
     };
 
-    namespace __creationhelper__impl__ {
+    namespace __serialize_impl__ {
 
         struct DefaultClear {
             template <typename T, typename Op>
@@ -271,9 +271,9 @@ namespace Serialize {
     }
 
     template <auto names, auto reader, auto writer, auto clear = nullptr>
-    using ParentCreator = typename FunctionCapture<__creationhelper__impl__::_ParentCreator, reader, typename FunctionCapture<__creationhelper__impl__::_ParentCreatorWriter, writer, Functor<names>>::type, std::conditional_t<std::is_same_v<decltype(clear), std::nullptr_t>, __creationhelper__impl__::DefaultClear, UnpackingMemberFunctor<clear>>>::type;
+    using ParentCreator = typename FunctionCapture<__serialize_impl__::_ParentCreator, reader, typename FunctionCapture<__serialize_impl__::_ParentCreatorWriter, writer, Functor<names>>::type, std::conditional_t<std::is_same_v<decltype(clear), std::nullptr_t>, __serialize_impl__::DefaultClear, UnpackingMemberFunctor<clear>>>::type;
 
     template <auto names, auto reader, auto writer, auto clear = nullptr>
-    using CustomCreator = typename FunctionCapture<__creationhelper__impl__::_CustomCreator, reader, typename FunctionCapture<__creationhelper__impl__::_CustomCreatorWriter, writer, Functor<names>>::type, std::conditional_t<std::is_same_v<decltype(clear), std::nullptr_t>, __creationhelper__impl__::DefaultClear, Functor<clear>>>::type;
+    using CustomCreator = typename FunctionCapture<__serialize_impl__::_CustomCreator, reader, typename FunctionCapture<__serialize_impl__::_CustomCreatorWriter, writer, Functor<names>>::type, std::conditional_t<std::is_same_v<decltype(clear), std::nullptr_t>, __serialize_impl__::DefaultClear, Functor<clear>>>::type;
 }
 }

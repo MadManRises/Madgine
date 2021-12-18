@@ -2,6 +2,10 @@
 
 #include "taskhandle.h"
 
+#if MODULES_ENABLE_TASK_TRACKING
+#    include "../debug/tasktracking/tasktracker.h"
+#endif
+
 namespace Engine {
 namespace Threading {
 

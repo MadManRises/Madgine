@@ -23,6 +23,8 @@
 
 #include "Generic/container/transformIt.h"
 
+#include "Meta/serialize/statetransmissionflags.h"
+
 /*
 METATABLE_BEGIN(Engine::Tools::ImRoot)
 READONLY_PROPERTY(Tools, tools)
@@ -94,11 +96,11 @@ namespace Tools {
         ini_handler.ReadLineFn = ToolReadLine;
         ini_handler.WriteAllFn = ToolWriteAll;
         ini_handler.UserData = this;
-        GImGui->SettingsHandlers.push_back(ini_handler);        
+        GImGui->SettingsHandlers.push_back(ini_handler);
 
         for (const std::unique_ptr<ToolBase> &tool : mCollector) {
             bool result = co_await tool->callInit();
-            assert(result);            
+            assert(result);
         }
 
         co_return true;
@@ -117,7 +119,9 @@ namespace Tools {
         PROFILE_NAMED("ImGui - Rendering");
 
         ImGuiIO &io = ImGui::GetIO();
-        
+
+        ImGuiViewport *viewport = ImGui::GetMainViewport();
+
         ImGui::NewFrame();
         Im3D::NewFrame();
 
@@ -131,9 +135,10 @@ namespace Tools {
             // because it would be confusing to have two docking targets within each others.
             ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
 
-            ImGuiViewport *viewport = ImGui::GetMainViewport();
             ImGui::SetNextWindowPos(viewport->Pos);
-            ImGui::SetNextWindowSize(viewport->Size);
+            ImVec2 size = viewport->Size;
+            size.y -= ImGui::GetFrameHeight();// remove status bar height
+            ImGui::SetNextWindowSize(size); 
             ImGui::SetNextWindowViewport(viewport->ID);
 
             ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
@@ -185,6 +190,16 @@ namespace Tools {
             ImGui::EndMainMenuBar();
         }
 
+        if (ImGui::BeginViewportSideBar("##MainStatusBar", viewport, ImGuiDir_Down, ImGui::GetFrameHeight(), ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar)) {
+            if (ImGui::BeginMenuBar()) {
+                for (ToolBase *tool : safeIterate(uniquePtrToPtr(mCollector))) {
+                    tool->renderStatus();
+                }
+                ImGui::EndMenuBar();
+            }
+            ImGui::End();
+        }
+
         finishToolRead();
 
         for (ToolBase *tool : uniquePtrToPtr(mCollector)) {
@@ -200,7 +215,7 @@ namespace Tools {
         else
             ImGui::EndFrame();
 
-        ImGui::UpdatePlatformWindows();        
+        ImGui::UpdatePlatformWindows();
     }
 
     const std::vector<std::unique_ptr<ToolBase>> &ImRoot::tools()

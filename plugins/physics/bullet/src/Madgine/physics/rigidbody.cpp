@@ -96,7 +96,7 @@ namespace Physics {
     RigidBody::RigidBody(RigidBody &&other)
         : NamedUniqueComponent(std::move(other))
         , mShapeHandle(std::move(other.mShapeHandle))
-        , mSceneMgr(other.mSceneMgr)
+        , mMgr(other.mMgr)
         , mData(std::move(other.mData))
     {
         if (mData)
@@ -109,7 +109,7 @@ namespace Physics {
     {
         NamedUniqueComponent::operator=(std::move(other));
         std::swap(mShapeHandle, other.mShapeHandle);
-        mSceneMgr = other.mSceneMgr;
+        mMgr = other.mMgr;
         std::swap(mData, other.mData);
         if (mData)
             get()->setUserPointer(this);
@@ -124,7 +124,7 @@ namespace Physics {
         Scene::Entity::Transform *transform = entity->addComponent<Scene::Entity::Transform>();
 
         mData = std::make_unique<Data>(this, transform);
-        mSceneMgr = &entity->sceneMgr();
+        mMgr = &entity->sceneMgr().getComponent<PhysicsManager>();
 
         Matrix4 m = transform->worldMatrix();
 
@@ -148,7 +148,7 @@ namespace Physics {
             get()->setCollisionShape(mShapeHandle->get());
             float mass = get()->getMass();
             btVector3 inertia;
-            mShapeHandle->get()->calculateLocalInertia(mass, inertia);            
+            mShapeHandle->get()->calculateLocalInertia(mass, inertia);
             get()->setMassProps(mass, inertia);
             add();
         }
@@ -279,7 +279,7 @@ namespace Physics {
         mShapeHandle.load(name);
         if (mShapeHandle->available()) {
             get()->setCollisionShape(mShapeHandle->get());
-        } else {            
+        } else {
             get()->setCollisionShape(nullptr);
         }
         add();
@@ -298,7 +298,7 @@ namespace Physics {
     void RigidBody::add()
     {
         if (get()->getCollisionShape()) {
-            mSceneMgr->getComponent<PhysicsManager>().world().addRigidBody(get());
+            mMgr->world().addRigidBody(get());
             get()->activate(true);
             get()->clearForces();
         }
@@ -306,12 +306,12 @@ namespace Physics {
 
     void RigidBody::remove()
     {
-        mSceneMgr->getComponent<PhysicsManager>().world().removeRigidBody(get());
+        mMgr->world().removeRigidBody(get());
     }
 
-    Scene::SceneManager *RigidBody::sceneMgr()
+    PhysicsManager *RigidBody::mgr()
     {
-        return mSceneMgr;
+        return mMgr;
     }
 
 }

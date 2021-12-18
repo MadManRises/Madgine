@@ -26,40 +26,19 @@ namespace Physics {
         btSoftBody *get();
         void activate();
 
-        const Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> &transform();
+        Scene::Entity::Transform *transform();
 
+        void add();
+        void remove();
 
         void attach(RigidBody *rigidbody, size_t index, const Engine::Vector3 &offset = Engine::Vector3::ZERO);
-        /* float mass() const;
-        void setMass(float mass);
 
-        bool kinematic() const;
-        void setKinematic(bool kinematic);
-
-        float friction() const;
-        void setFriction(float friction);
-
-        Vector3 linearFactor() const;
-        void setLinearFactor(const Vector3 &factor);
-
-        Vector3 angularFactor() const;
-        void setAngularFactor(const Vector3 &factor);
-
-        void setVelocity(const Vector3 &v);
-
-        void setShape(typename CollisionShapeManager::HandleType handle);
-        void setShapeName(std::string_view name);
-        CollisionShapeManager::ResourceType *getShape() const;
-        CollisionShapeInstance *getShapeInstance() const;
-        */
         friend struct PhysicsManager;
 
     private:
-        //typename CollisionShapeManager::InstanceHandle mShapeHandle;
         struct Data;
         std::unique_ptr<Data> mData;
-
-        //static Scene::SceneManager *sceneMgrFromData(Data *data);
+        PhysicsManager *mMgr = nullptr;
     };
 
     using SoftBodySkeletonPtr = Scene::Entity::EntityComponentPtr<SoftBodySkeleton>;

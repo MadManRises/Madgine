@@ -28,6 +28,8 @@
 
 #include "toolbase.h"
 
+#include "Madgine/resources/resourcemanager.h"
+
 //UNIQUECOMPONENT(Engine::Tools::ClientImRoot);
 
 METATABLE_BEGIN(Engine::Tools::ClientImRoot)
@@ -205,6 +207,15 @@ namespace Tools {
         io.KeyMap[ImGuiKey_Y] = Input::Key::Y;
         io.KeyMap[ImGuiKey_Z] = Input::Key::Z;
 
+        static const ImWchar icons_ranges[] = { 0xe800, 0xe8ff, 0 };
+
+        ImFontConfig config;
+        config.MergeMode = true;
+
+        io.Fonts->AddFontDefault();
+        io.Fonts->AddFontFromFileTTF(Engine::Resources::ResourceManager::getSingleton().findResourceFile("imgui_icons.ttf").c_str(), 13, &config, icons_ranges);
+        io.Fonts->Build();
+
         if (!co_await ImRoot::init())
             co_return false;
 
@@ -250,28 +261,28 @@ namespace Tools {
     {
         PROFILE();
 
-        ImGuiIO &io = ImGui::GetIO();
-        io.KeyShift = mWindow.osWindow()->isKeyDown(Input::Key::Shift);
-        io.KeyCtrl = mWindow.osWindow()->isKeyDown(Input::Key::Control);
-        io.KeyAlt = mWindow.osWindow()->isKeyDown(Input::Key::Alt);
-
-        io.DeltaTime = (float)mFrameClock.tick<std::chrono::microseconds>().count() / 1000000.0f;
-
-        io.BackendPlatformUserData = &mWindow;
-
-        Vector2i size = mWindow.getScreenSpace().mSize;
-
-        io.DisplaySize = ImVec2(size.x / io.DisplayFramebufferScale.x, size.y / io.DisplayFramebufferScale.y);
-
-        newFrame();
-
-        ImRoot::render();
-
-        setCentralNode(dockNode());
-
         target->pushAnnotation("ImGui");
 
         if (mWindow.getRenderWindow() == target) {
+
+            ImGuiIO &io = ImGui::GetIO();
+            io.KeyShift = mWindow.osWindow()->isKeyDown(Input::Key::Shift);
+            io.KeyCtrl = mWindow.osWindow()->isKeyDown(Input::Key::Control);
+            io.KeyAlt = mWindow.osWindow()->isKeyDown(Input::Key::Alt);
+
+            io.DeltaTime = (float)mFrameClock.tick<std::chrono::microseconds>().count() / 1000000.0f;
+
+            io.BackendPlatformUserData = &mWindow;
+
+            Vector2i size = mWindow.getScreenSpace().mSize;
+
+            io.DisplaySize = ImVec2(size.x / io.DisplayFramebufferScale.x, size.y / io.DisplayFramebufferScale.y);
+
+            newFrame();
+
+            ImRoot::render();
+
+            setCentralNode(dockNode());
 
             ImGuiViewport *main_viewport = ImGui::GetMainViewport();
             main_viewport->Flags |= ImGuiViewportFlags_NoRendererClear; //TODO: Is that necessary every Frame?

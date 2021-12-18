@@ -4,6 +4,10 @@
 #include "taskpromise.h"
 #include "taskqueue.h"
 
+#if MODULES_ENABLE_TASK_TRACKING
+#    include "../debug/tasktracking/tasktracker.h"
+#endif
+
 namespace Engine {
 namespace Threading {
 
@@ -30,7 +34,14 @@ namespace Threading {
 
     void TaskHandle::operator()()
     {
+#if MODULES_ENABLE_TASK_TRACKING
+        Debug::Threading::onResume(*this);
+        TaskQueue *q = queue();
+#endif
         mHandle.resume();
+#if MODULES_ENABLE_TASK_TRACKING
+        Debug::Threading::onSuspend(q);
+#endif
         mHandle = {};
     }
 
@@ -47,6 +58,11 @@ namespace Threading {
     TaskQueue *TaskHandle::queue() const
     {
         return mHandle.promise().queue();
+    }
+
+    void *TaskHandle::address() const
+    {
+        return mHandle.address();
     }
 
     TaskHandle::operator bool() const

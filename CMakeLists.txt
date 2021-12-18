@@ -63,6 +63,7 @@ if (MADGINE_AS_SDK)
 		add_subdirectory(${LAUNCHER_LOCATION} launcher)
 	endfunction()
 else()
+	add_subdirectory(docs)
 	set(MADGINE_BINARY_NAME "MadgineLauncher")
 	add_subdirectory(launcher)
 endif()
@@ -78,7 +79,3 @@ export_to_workspace(Madgine)
 cpack_add_component(Madgine REQUIRED)
 
 cpack_add_component_group(Renderer EXPANDED)
-
-configure_file(docs/Doxyfile.in Doxyfile.in)
-file(GENERATE OUTPUT Doxyfile INPUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.in)
-

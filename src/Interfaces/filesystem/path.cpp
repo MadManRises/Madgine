@@ -5,30 +5,37 @@
 namespace Engine {
 namespace Filesystem {
 
-    Path::Path(const std::string &s)
+    Path::Path(std::string_view s)
         : mPath(s)
     {
         normalize();
     }
 
-    Path::Path(const char *s)
-        : mPath(s)
+    Path::Path(const std::string &s)
+        : Path(std::string_view { s })
     {
+    }
+
+    Path::Path(const char *s)
+        : Path(std::string_view { s })
+    {
+    }
+
+    Path &Path::operator=(std::string_view s)
+    {
+        mPath = s;
         normalize();
+        return *this;
     }
 
     Path &Path::operator=(const std::string &s)
     {
-        mPath = s;
-        normalize();
-        return *this;
+        return operator=(std::string_view { s });
     }
 
     Path &Path::operator=(const char *s)
     {
-        mPath = s;
-        normalize();
-        return *this;
+        return operator=(std::string_view { s });
     }
 
     Path &Path::operator/=(const Path &other)

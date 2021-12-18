@@ -260,11 +260,8 @@ struct type_pack_unpack_unique<type_pack<Unique>, Default> {
 
 template <typename Default>
 struct type_pack_unpack_unique<type_pack<>, Default> {
+    static_assert(!std::same_as<Default, void>, "empty type_pack passed to type_pack_unpack_unique without default");
     using type = Default;
-};
-
-template <>
-struct type_pack_unpack_unique<type_pack<>, void> {
 };
 
 template <typename Pack, typename Default = void>

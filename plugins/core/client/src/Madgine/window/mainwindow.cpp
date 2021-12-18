@@ -82,7 +82,11 @@ namespace Window {
         Filesystem::FileManager mgr { "MainWindow-Layout" };
 
         if (Serialize::SerializeInStream in = mgr.openRead(Filesystem::appDataPath() / "mainwindow.ini", std::make_unique<Serialize::IniFormatter>())) {
-            in >> settings.mData;
+            Serialize::StreamResult result = read(in, settings.mData, nullptr);
+            if (result.mState != Serialize::StreamState::OK) {
+                LOG_ERROR("Error loading MainWindow-Layout: \n"
+                    << *result.mError);
+            }
         }
 
         mOsWindow = sCreateWindow(settings);

@@ -9,6 +9,9 @@ namespace Serialize {
 
         IniFormatter();
 
+        virtual void setupStream(std::istream &) override;
+        virtual void setupStream(std::ostream &) override;
+
         virtual void beginPrimitive(SerializeOutStream &, const char *name, uint8_t typeId) override;
         virtual void endPrimitive(SerializeOutStream &, const char *name, uint8_t typeId) override;
 

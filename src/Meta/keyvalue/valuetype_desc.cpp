@@ -2,6 +2,8 @@
 
 #include "valuetype_desc.h"
 
+#include "metatable.h"
+
 namespace Engine {
 
 std::string_view ValueTypeIndex::toString() const

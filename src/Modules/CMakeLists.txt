@@ -1,11 +1,16 @@
 Project(Modules VERSION 1.0.0)
 
 
+option(MODULES_ENABLE_TASK_TRACKING "" OFF)
+
 set(sources)
 
 FolderSources(sources "" "" modulesforward.h moduleslib.h)
 	FolderSources(sources "" debug)
 		FolderSources(sources debug profiler processstats.cpp processstats.h profile.h profiler.cpp profiler.h profilerthread.cpp profilerthread.h staticprocess.cpp staticprocess.h)
+if (MODULES_ENABLE_TASK_TRACKING)
+		FolderSources(sources debug tasktracking tasktracker.cpp tasktracker.h)
+endif()
 if (MODULES_ENABLE_PLUGINS)
 	FolderSources(sources "" plugins pluginmanager.cpp pluginmanager.h pluginsection.cpp pluginsection.h plugin.cpp plugin.h)
 endif()

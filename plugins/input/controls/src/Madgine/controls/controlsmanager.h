@@ -4,7 +4,7 @@
 #include "Madgine/app/globalapicollector.h"
 
 namespace Engine {
-namespace Controls {
+namespace Input {
 
     typedef void ActionCallback(const ActionDescriptor *, void *);
 
@@ -51,4 +51,4 @@ namespace Controls {
 }
 }
 
-RegisterType(Engine::Controls::ControlsManager)
+RegisterType(Engine::Input::ControlsManager)

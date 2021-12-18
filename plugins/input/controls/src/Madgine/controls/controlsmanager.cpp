@@ -8,13 +8,13 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-UNIQUECOMPONENT(Engine::Controls::ControlsManager)
+UNIQUECOMPONENT(Engine::Input::ControlsManager)
 
-METATABLE_BEGIN_BASE(Engine::Controls::ControlsManager, Engine::App::GlobalAPIBase)
-METATABLE_END(Engine::Controls::ControlsManager)
+METATABLE_BEGIN_BASE(Engine::Input::ControlsManager, Engine::App::GlobalAPIBase)
+METATABLE_END(Engine::Input::ControlsManager)
 
 namespace Engine {
-namespace Controls {
+namespace Input {
 
     ControlsManager::ControlsManager(App::Application &app)
         : VirtualScope(app)
@@ -48,7 +48,7 @@ namespace Controls {
         mAxisEventListeners.erase(std::find(mAxisEventListeners.begin(), mAxisEventListeners.end(), listener));
     }
 
-    bool ControlsManager::injectAxisEvent(const Input::AxisEventArgs &arg)
+    bool ControlsManager::injectAxisEvent(const AxisEventArgs &arg)
     {
         for (AxisEventListener *listener : mAxisEventListeners)
             if (listener->onAxisEvent(arg))
