@@ -40,23 +40,23 @@ namespace Tools {
 
     NodeRendererTester::~NodeRendererTester() = default;
 
-    bool NodeRendererTester::init()
+    Threading::Task<bool> NodeRendererTester::init()
     {
-        if (!ToolBase::init())
-            return false;
+        if (!co_await ToolBase::init())
+            co_return false;
 
         mTexture = static_cast<const ClientImRoot &>(mRoot).window().getRenderer()->createRenderTexture({ 512, 512 });
 
         mInspector = &getTool<Inspector>();
 
-        return true;
+        co_return true;
     }
 
-    void NodeRendererTester::finalize()
+    Threading::Task<void> NodeRendererTester::finalize()
     {
         mTexture.reset();
 
-        ToolBase::finalize();
+        co_await ToolBase::finalize();
     }
 
     void NodeRendererTester::render()

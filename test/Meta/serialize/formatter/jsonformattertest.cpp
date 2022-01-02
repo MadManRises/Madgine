@@ -12,7 +12,7 @@ using namespace std::chrono_literals;
 TEST(Serialize_Formatter, JSON)
 {
     FormatterBaseTest<JSONFormatter>(R"(
-"Item" : {
+"unit1" : {
     "__extended" : {
         "syncId" : 10
     },
@@ -125,7 +125,7 @@ TEST(Serialize_Formatter, JSON_InvalidParse)
 
     StreamResult result = read(in, unit, nullptr);
     ASSERT_EQ(result.mState, StreamState::PARSE_ERROR);
-    ASSERT_EQ(result.mError->mMsg, "ERROR: (8, 17): Expected: <int>");
+    ASSERT_EQ(result.mError->mMsg, "ERROR: (8, 16): Expected: <int>");
 }
 
 TEST(Serialize_Formatter, JSON_ExtendedOrder)
@@ -188,7 +188,7 @@ TEST(Serialize_Formatter, JSON_ExtendedOrder)
     SerializeInStream in { std::move(file), std::make_unique<SerializeStreamData>(std::make_unique<JSONFormatter>()) };
 
     StreamResult result = read(in, unit, nullptr);
-    ASSERT_EQ(result.mState, StreamState::OK) << *result.mError;
+    ASSERT_EQ(result.mState, StreamState::OK) << result;
     ASSERT_EQ(unit.complexList1.front().i, 2);
     ASSERT_EQ(unit.complexList1.front().f, 6.0f);
     ASSERT_EQ(unit.complexList1.front().s, "set");

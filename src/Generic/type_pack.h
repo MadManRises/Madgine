@@ -11,7 +11,7 @@ struct type_pack_indices;
 
 template <typename... T>
 struct type_pack_indices<type_pack<T...>> {
-    using type = std::make_index_sequence<sizeof...(T)>;
+    using type = std::index_sequence_for<T...>;
 };
 
 template <typename Pack>

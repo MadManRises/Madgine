@@ -321,7 +321,7 @@ namespace Render {
     {
         LOG_DEBUG("Texture Bind");
         std::vector<ID3D11ShaderResourceView *> handles;
-        std::transform(tex.begin(), tex.end(), std::back_inserter(handles), [](const TextureDescriptor &desc) {
+        std::ranges::transform(tex, std::back_inserter(handles), [](const TextureDescriptor &desc) {
             return reinterpret_cast<ID3D11ShaderResourceView*>(desc.mTextureHandle);
         });
         sDeviceContext->PSSetShaderResources(offset, tex.size(), handles.data());

@@ -69,8 +69,8 @@ namespace Im3D {
                 p.second.mVertexBase[i] = 0;
                 for (auto it = p.second.mPersistentMeshes[i].begin(); it != p.second.mPersistentMeshes[i].end();) {
                     if (std::chrono::steady_clock::now() <= std::get<0>(*it)) {
-                        std::transform(std::get<2>(*it).begin(), std::get<2>(*it).end(), std::back_inserter(p.second.mIndices[i]), [&](unsigned short j) { return j + p.second.mVertices[i].size(); });
-                        std::copy(std::get<1>(*it).begin(), std::get<1>(*it).end(), std::back_inserter(p.second.mVertices[i]));
+                        std::ranges::transform(std::get<2>(*it), std::back_inserter(p.second.mIndices[i]), [&](unsigned short j) { return j + p.second.mVertices[i].size(); });
+                        std::ranges::copy(std::get<1>(*it), std::back_inserter(p.second.mVertices[i]));
                         ++it;
                     } else {
                         it = p.second.mPersistentMeshes[i].erase(it);

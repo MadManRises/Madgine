@@ -25,19 +25,21 @@ namespace Tools {
     {
     }
 
-    bool BulletDebug::init()
+    Threading::Task<bool> BulletDebug::init()
     {
         mManager = &App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>().getComponent<Physics::PhysicsManager>();
 
+        co_await mManager->state();
+
         mManager->world().setDebugDrawer(this);
 
-        return ToolBase::init();
+        co_return co_await ToolBase::init();
     }
 
-    void BulletDebug::finalize()
+    Threading::Task<void> BulletDebug::finalize()
     {
 
-        ToolBase::finalize();
+        co_await ToolBase::finalize();
     }
 
     void BulletDebug::render()

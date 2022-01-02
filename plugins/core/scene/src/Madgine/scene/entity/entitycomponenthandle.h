@@ -170,6 +170,7 @@ namespace Scene {
         struct EntityComponentOwningHandle {
             EntityComponentHandle<T> mHandle;
 
+            EntityComponentOwningHandle() = default;
             EntityComponentOwningHandle(EntityComponentHandle<T> handle)
                 : mHandle(std::move(handle))
             {
@@ -178,6 +179,7 @@ namespace Scene {
             EntityComponentOwningHandle(EntityComponentOwningHandle<T> &&other) = default;
 
             EntityComponentOwningHandle& operator=(const EntityComponentOwningHandle &) = delete;
+            EntityComponentOwningHandle& operator=(EntityComponentOwningHandle<T> &&) = default;
 
             operator EntityComponentHandle<T>() const
             {

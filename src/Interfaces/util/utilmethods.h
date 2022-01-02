@@ -8,10 +8,10 @@ namespace Engine {
 namespace Util {
 
     INTERFACES_EXPORT void setLog(Log *log = nullptr);
-    INTERFACES_EXPORT void log(std::string_view msg, MessageType lvl);
+    INTERFACES_EXPORT void log(std::string_view msg, MessageType lvl, const char *file = nullptr);
 
     struct INTERFACES_EXPORT LogDummy {
-        LogDummy(MessageType lvl);
+        LogDummy(MessageType lvl, const char *file = nullptr);
         ~LogDummy();
 
         template <typename T>
@@ -24,6 +24,7 @@ namespace Util {
     private:
         std::stringstream mStream;
         MessageType mLvl;
+        const char *mFile;
     };
 
 #if ENABLE_DEBUG_LOGGING
@@ -31,9 +32,9 @@ namespace Util {
 #else
 #    define LOG_DEBUG(s)
 #endif
-#define LOG(s) Engine::Util::LogDummy { Engine::Util::MessageType::INFO_TYPE } << s
-#define LOG_WARNING(s) Engine::Util::LogDummy { Engine::Util::MessageType::WARNING_TYPE } << s
-#define LOG_ERROR(s) Engine::Util::LogDummy { Engine::Util::MessageType::ERROR_TYPE } << s
+#define LOG(s) Engine::Util::LogDummy { Engine::Util::MessageType::INFO_TYPE, __FILE__ } << s
+#define LOG_WARNING(s) Engine::Util::LogDummy { Engine::Util::MessageType::WARNING_TYPE, __FILE__ } << s
+#define LOG_ERROR(s) Engine::Util::LogDummy { Engine::Util::MessageType::ERROR_TYPE, __FILE__ } << s
 
 #define ONCE(f) std::call_once([]() -> std::once_flag & {static std::once_flag dummy; return dummy; }(), [&]() { f; })
 

@@ -22,8 +22,8 @@ namespace Window {
     };
 
     struct WindowsWindow final : OSWindow {
-        WindowsWindow(HWND hwnd)
-            : OSWindow((uintptr_t)hwnd)
+        WindowsWindow(HWND hwnd, WindowEventListener *listener)
+            : OSWindow((uintptr_t)hwnd, listener)
             , mKeyDown {}
         {
         }
@@ -303,7 +303,7 @@ namespace Window {
         return wcex.lpszClassName;
     }
 
-    OSWindow *sCreateWindow(const WindowSettings &settings)
+    OSWindow *sCreateWindow(const WindowSettings &settings, WindowEventListener *listener)
     {
         HWND handle = (HWND)settings.mHandle;
         if (!handle) {
@@ -353,7 +353,7 @@ namespace Window {
 
         Input::setupRawInput(handle);
 
-        auto pib = sWindows.try_emplace(handle, handle);
+        auto pib = sWindows.try_emplace(handle, handle, listener);
         assert(pib.second);
 
         return &pib.first->second;

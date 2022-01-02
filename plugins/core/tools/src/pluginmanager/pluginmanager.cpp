@@ -150,14 +150,14 @@ namespace Tools {
         ImGui::End();
     }
 
-    bool PluginManager::init()
+    Threading::Task<bool> PluginManager::init()
     {
         ProjectManager &project = getTool<ProjectManager>();
 
         project.mProjectChanged.connect(&PluginManager::updateConfigFile, this);
         setCurrentConfig(project.projectRoot(), project.config());
 
-        return ToolBase::init();
+        co_return co_await ToolBase::init();
     }
 
     std::string_view PluginManager::key() const

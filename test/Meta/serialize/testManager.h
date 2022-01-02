@@ -96,21 +96,24 @@ struct TestBuf : std::basic_streambuf<char> {
     Buffer &mBuffer;
 };
 
-struct TestManager : Engine::Serialize::SyncManager {
+struct TestManager : SyncManager {
     TestManager(const char *id)
         : SyncManager("Test-Manager_"s + id)
     {
     }
 
-    BufferedInOutStream &setBuffer(Buffer &buffer, bool slave, bool shareState = true, std::unique_ptr<Engine::Serialize::Formatter> format = std::make_unique<Engine::Serialize::SafeBinaryFormatter>())
+    SyncManagerResult setBuffer(Buffer &buffer, bool slave, bool shareState = true, std::unique_ptr<Engine::Serialize::Formatter> format = std::make_unique<Engine::Serialize::SafeBinaryFormatter>())
     {
         std::unique_ptr<BufferedTestBuf> buf = std::make_unique<BufferedTestBuf>(buffer, !slave);
         if (slave) {
-            setSlaveStream(Engine::Serialize::BufferedInOutStream { std::move(buf), std::move(format), *this, 0 }, shareState, std::chrono::milliseconds { 1000 });
-            return *getSlaveStream();
+            return setSlaveStream(BufferedInOutStream { std::move(buf), std::move(format), *this, 0 }, shareState, std::chrono::milliseconds { 1000 });
         } else {
-            addMasterStream(Engine::Serialize::BufferedInOutStream { std::move(buf), std::move(format), *this, 1 }, shareState);
-            return getMasterStream(1);
+            return addMasterStream(Engine::Serialize::BufferedInOutStream { std::move(buf), std::move(format), *this, 1 }, shareState);
         }
     }
+
+    using SyncManager::getMasterStream;
+    using SyncManager::getSlaveStream;
 };
+
+#define HANDLE_MGR_RESULT(mgr, ...) ASSERT_EQ(__VA_ARGS__, SyncManagerResult::SUCCESS) << mgr.fetchStreamError()

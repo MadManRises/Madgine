@@ -8,7 +8,6 @@ namespace Threading {
 
     TaskQueue::TaskQueue(const std::string &name, bool wantsMainThread)
         : mName(name)
-        , mSetupState(mSetupSteps.begin())
         , mWantsMainThread(wantsMainThread)
     {
         WorkGroup::self().addTaskQueue(this);
@@ -25,7 +24,7 @@ namespace Threading {
         return mWantsMainThread;
     }
 
-    void TaskQueue::queueInternal(ScheduledTask &&task)
+    void TaskQueue::queueInternal(ScheduledTask task)
     {
         {
             //TODO: priority Queue
@@ -35,12 +34,7 @@ namespace Threading {
         mCv.notify_one();
     }
 
-    std::optional<TaskTracker> TaskQueue::fetch_on_idle()
-    {
-        return {};
-    }
-
-    TaskTracker TaskQueue::wrapTask(TaskHandle &&task)
+    TaskTracker TaskQueue::wrapTask(TaskHandle task)
     {
         return TaskTracker { std::move(task), mTaskCount };
     }
@@ -50,10 +44,10 @@ namespace Threading {
         return mName;
     }
 
-    std::chrono::steady_clock::time_point TaskQueue::update(int idleCount, int repeatedCount)
+    std::chrono::steady_clock::time_point TaskQueue::update(int repeatedCount)
     {
         std::chrono::steady_clock::time_point nextAvailableTaskTime = std::chrono::steady_clock::time_point::max();
-        while (std::optional<Threading::TaskTracker> f = fetch(nextAvailableTaskTime, idleCount, repeatedCount)) {
+        while (std::optional<Threading::TaskTracker> f = fetch(nextAvailableTaskTime, repeatedCount)) {
             f->mTask();
             assert(!f->mTask);
         }
@@ -65,10 +59,10 @@ namespace Threading {
         std::unique_lock<std::mutex> lock(mMutex);
 
         if (until == std::chrono::steady_clock::time_point::max()) {
-            auto cond = [=]() { return !mQueue.empty() || !mRunning || !mRepeatedTasks.empty(); };
+            auto cond = [this]() { return !mQueue.empty() || !mRunning || !mRepeatedTasks.empty(); };
             mCv.wait(lock, cond);
         } else {
-            auto cond = [=]() { return !mQueue.empty() || !mRunning; };
+            auto cond = [this]() { return !mQueue.empty() || !mRunning; };
             mCv.wait_until(lock, until, cond);
         }
     }
@@ -89,22 +83,22 @@ namespace Threading {
         mCv.notify_all();
     }
 
-    void TaskQueue::queueHandle(TaskHandle &&task, const std::vector<Threading::DataMutex *> &dependencies)
+    void TaskQueue::queueHandle(TaskHandle task, const std::vector<Threading::DataMutex *> &dependencies)
     {
         queueInternal({ std::move(task) });
     }
 
-    void TaskQueue::queue_after(TaskHandle &&task, std::chrono::steady_clock::duration duration, const std::vector<Threading::DataMutex *> &dependencies)
+    void TaskQueue::queue_after(TaskHandle task, std::chrono::steady_clock::duration duration, const std::vector<Threading::DataMutex *> &dependencies)
     {
         queue_for(std::move(task), std::chrono::steady_clock::now() + duration);
     }
 
-    void TaskQueue::queue_for(TaskHandle &&task, std::chrono::steady_clock::time_point time_point, const std::vector<Threading::DataMutex *> &dependencies)
+    void TaskQueue::queue_for(TaskHandle task, std::chrono::steady_clock::time_point time_point, const std::vector<Threading::DataMutex *> &dependencies)
     {
         queueInternal({ std::move(task), time_point });
     }
 
-    void TaskQueue::addRepeatedTask(std::function<void()> &&task, std::chrono::steady_clock::duration interval, void *owner)
+    void TaskQueue::addRepeatedTask(std::function<void()> task, std::chrono::steady_clock::duration interval, void *owner)
     {
         {
             std::lock_guard<std::mutex> lock(mMutex);
@@ -116,10 +110,10 @@ namespace Threading {
     void TaskQueue::removeRepeatedTasks(void *owner)
     {
         std::lock_guard<std::mutex> lock(mMutex);
-        mRepeatedTasks.erase(std::remove_if(mRepeatedTasks.begin(), mRepeatedTasks.end(), [owner](const RepeatedTask &task) { return task.mOwner == owner; }), mRepeatedTasks.end());
+        std::erase_if(mRepeatedTasks, [owner](const RepeatedTask &task) { return task.mOwner == owner; });
     }
 
-    std::optional<TaskTracker> TaskQueue::fetch(std::chrono::steady_clock::time_point &nextTask, int &idleCount, int &repeatedCount)
+    std::optional<TaskTracker> TaskQueue::fetch(std::chrono::steady_clock::time_point &nextTask, int &repeatedCount)
     {
         std::chrono::steady_clock::time_point nextTaskTimepoint = nextTask;
 
@@ -165,19 +159,6 @@ namespace Threading {
                         --repeatedCount;
                     nextTask->mNextExecuted = std::chrono::steady_clock::now() + nextTask->mInterval;
                     return wrapTask(make_task([=]() { nextTask->mTask(); }).assign(this));
-                }
-            }
-        }
-
-        if (mRunning && idleCount != 0) {
-            size_t zero = 0;
-            if (mTaskCount.compare_exchange_strong(zero, 1)) {
-                std::optional<TaskTracker> task = fetch_on_idle();
-                --mTaskCount;
-                if (task) {
-                    if (idleCount > 0)
-                        --idleCount;
-                    return task;
                 }
             }
         }

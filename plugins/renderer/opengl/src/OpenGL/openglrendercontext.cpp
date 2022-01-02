@@ -525,7 +525,7 @@ namespace Render {
             std::call_once(once, []() {
                 Engine::Window::WindowSettings settings;
                 settings.mHidden = true;
-                Window::OSWindow *tmp = Window::sCreateWindow(settings);
+                Window::OSWindow *tmp = Window::sCreateWindow(settings, nullptr);
                 ContextHandle context = createContext(tmp, 1, nullptr, false);
 
 #    if WINDOWS

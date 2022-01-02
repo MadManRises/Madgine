@@ -1,4 +1,5 @@
 #include "../scenerenderertoolslib.h"
+#include "serialize/filesystem/filesystemlib.h"
 
 #include "sceneeditor.h"
 
@@ -32,17 +33,14 @@
 #include "serialize/memory/memorylib.h"
 #include "serialize/memory/memorymanager.h"
 
-
 #include "Meta/serialize/formatter/xmlformatter.h"
 
-#include "serialize/filesystem/filesystemlib.h"
 #include "serialize/filesystem/filemanager.h"
 
 
 #include "Meta/serialize/formatter/safebinaryformatter.h"
 
 #include "imgui/imgui_internal.h"
-
 
 UNIQUECOMPONENT(Engine::Tools::SceneEditor);
 
@@ -66,7 +64,7 @@ namespace Tools {
     {
     }
 
-    bool SceneEditor::init()
+    Threading::Task<bool> SceneEditor::init()
     {
         mSceneMgr = &App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>();
         mInspector = &mRoot.getTool<Inspector>();
@@ -75,14 +73,14 @@ namespace Tools {
         mSceneMgr->pause();
         mMode = STOP;
 
-        return ToolBase::init();
+        co_return co_await ToolBase::init();
     }
 
-    void SceneEditor::finalize()
+    Threading::Task<void> SceneEditor::finalize()
     {
         mSceneViews.clear();
 
-        ToolBase::finalize();
+        co_await ToolBase::finalize();
     }
 
     void SceneEditor::render()

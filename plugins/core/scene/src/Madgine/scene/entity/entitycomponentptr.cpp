@@ -75,7 +75,7 @@ namespace Scene {
 
         std::string_view EntityComponentPtrBase<EntityComponentBase>::name() const
         {
-            return std::find_if(EntityComponentRegistry::sComponentsByName().begin(), EntityComponentRegistry::sComponentsByName().end(), [&](const std::pair<const std::string_view, size_t> &p) { return p.second == mHandle.mType; })->first;                
+            return std::ranges::find(EntityComponentRegistry::sComponentsByName(), mHandle.mType, projectionPairSecond)->first;
         }
 
         TypedScopePtr EntityComponentPtrBase<EntityComponentBase>::getTyped() const
@@ -102,13 +102,13 @@ namespace Scene {
         }
 
         EntityComponentPtrBase<const EntityComponentBase>::EntityComponentPtrBase(const EntityComponentPtrBase<EntityComponentBase> &other)
-            : mHandle { other.handle() }            
+            : mHandle { other.handle() }
             , mSceneMgr(other.sceneMgr())
         {
         }
 
         EntityComponentPtrBase<const EntityComponentBase>::EntityComponentPtrBase(EntityComponentHandle<const EntityComponentBase> data, SceneManager *sceneMgr)
-            : mHandle(data)            
+            : mHandle(data)
             , mSceneMgr(sceneMgr)
         {
         }

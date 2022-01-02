@@ -242,7 +242,7 @@ namespace Tools {
 
             Serialize::StreamResult result = Serialize::read(in, *mToolReadTool, nullptr, {}, Serialize::StateTransmissionFlags_SkipId);
             if (result.mState != Serialize::StreamState::OK) {
-                LOG_ERROR(*result.mError);
+                LOG_ERROR(result);
             }
 
             mToolReadTool = nullptr;

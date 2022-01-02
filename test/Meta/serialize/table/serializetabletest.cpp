@@ -20,9 +20,8 @@ SERIALIZETABLE_END(S)
 
 struct TestStruct : SerializableUnitBase {
 
-	int i;
+    int i;
     S s;
-	
 };
 
 SERIALIZETABLE_BEGIN(TestStruct)
@@ -38,8 +37,10 @@ TEST(Serialize_Table, Test1)
 
 
     Buffer buffer;
-    BufferedInOutStream &stream1 = mgr1.setBuffer(buffer, false, false);
-    BufferedInOutStream &stream2 = mgr2.setBuffer(buffer, true, false);
+    HANDLE_MGR_RESULT(mgr1, mgr1.setBuffer(buffer, false, false));
+    BufferedInOutStream &stream1 = mgr1.getMasterStream(1);
+    HANDLE_MGR_RESULT(mgr2, mgr2.setBuffer(buffer, true, false));
+    BufferedInOutStream &stream2 = *mgr2.getSlaveStream();
 
     TestStruct t1;
     t1.i = 1;
@@ -49,10 +50,10 @@ TEST(Serialize_Table, Test1)
     stream1.endMessage();
     stream1.sendMessages();
 
-	TestStruct t2;
+    TestStruct t2;
 
-	stream2.isMessageAvailable();
-	serializeTable<TestStruct>().readState(&t2, stream2);
+    stream2.isMessageAvailable();
+    serializeTable<TestStruct>().readState(&t2, stream2);
 
-	ASSERT_EQ(t1.i, t2.i);
+    ASSERT_EQ(t1.i, t2.i);
 }

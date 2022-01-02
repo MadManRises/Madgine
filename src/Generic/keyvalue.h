@@ -141,6 +141,8 @@ decltype(auto) kvKey(T &&v)
     return KeyValue<std::remove_reference_t<T>>::key(std::forward<T>(v));
 }
 
+constexpr auto projectionKey = LIFT(kvKey);
+
 template <typename T>
 decltype(auto) kvValues(T &v)
 {
@@ -157,7 +159,7 @@ template <typename T, typename K>
 struct Finder {
     static auto find(T &c, const K &key)
     {
-        return std::find_if(c.begin(), c.end(), [&](const typename T::value_type &v) { return kvKey(v) == key; });
+        return std::ranges::find(c, key, projectionKey);
     }
 };
 

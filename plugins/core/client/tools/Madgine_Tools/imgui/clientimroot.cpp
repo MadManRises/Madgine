@@ -174,8 +174,8 @@ namespace Tools {
             platform_io.Monitors.clear();
             for (Window::MonitorInfo info : Window::listMonitors()) {
                 ImGuiPlatformMonitor monitor;
-                monitor.MainPos = monitor.WorkPos = ImVec2 { static_cast<float>(info.x), static_cast<float>(info.y) };
-                monitor.MainSize = monitor.WorkSize = ImVec2 { static_cast<float>(info.width), static_cast<float>(info.height) };
+                monitor.MainPos = monitor.WorkPos = ImVec2 { static_cast<float>(info.mPosition.x), static_cast<float>(info.mPosition.y) };
+                monitor.MainSize = monitor.WorkSize = ImVec2 { static_cast<float>(info.mSize.x), static_cast<float>(info.mSize.y) };
                 platform_io.Monitors.push_back(monitor);
             }
 
@@ -248,7 +248,7 @@ namespace Tools {
 
     void ClientImRoot::removeRenderTarget(Render::RenderTarget *target)
     {
-        mRenderTargets.erase(std::find(mRenderTargets.begin(), mRenderTargets.end(), target));
+        std::erase(mRenderTargets, target);
     }
 
     void ClientImRoot::preRender()

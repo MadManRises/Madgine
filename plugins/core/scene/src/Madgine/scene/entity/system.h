@@ -17,7 +17,7 @@ namespace Scene {
 
             virtual void removeComponent(C *c)
             {
-                mComponents.erase(std::remove(mComponents.begin(), mComponents.end(), c), mComponents.end());
+                std::erase(mComponents, c);
             }
 
             const std::vector<C *> &components()

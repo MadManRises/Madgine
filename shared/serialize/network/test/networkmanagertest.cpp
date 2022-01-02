@@ -24,7 +24,7 @@ TEST(NetworkManager, Connect)
     });
     Engine::Network::NetworkManager client("testNetworkClient");
 
-    EXPECT_EQ(client.connect("127.0.0.1", 1234, 2000ms), Engine::Network::NetworkManagerResult::SUCCESS) << "Stream-Error: " << server.getStreamError();    
+    EXPECT_EQ(client.connect("127.0.0.1", 1234, 2000ms), Engine::Network::NetworkManagerResult::SUCCESS) << "Stream-Error: " << server.fetchStreamError();    
 
     done = true;
 

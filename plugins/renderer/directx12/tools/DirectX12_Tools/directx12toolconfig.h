@@ -1,7 +1,7 @@
 #pragma once
 
-#include "toolscollector.h"
 #include "toolbase.h"
+#include "toolscollector.h"
 
 #include "DirectX12/util/directx12texture.h"
 
@@ -15,8 +15,8 @@ namespace Tools {
         DirectX12ToolConfig(ImRoot &root);
         DirectX12ToolConfig(const SceneEditor &) = delete;
 
-        virtual bool init() override;
-        virtual void finalize() override;
+        virtual Threading::Task<bool> init() override;
+        virtual Threading::Task<void> finalize() override;
 
         std::string_view key() const override;
 

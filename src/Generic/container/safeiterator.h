@@ -15,12 +15,12 @@ struct SafeIterator {
     }
 
     template <typename It>
-    struct iteratorImpl {
+    struct IteratorImpl {
         It mIt, mEnd;
         const std::vector<value_type> &mV;
         T &mRef;
 
-        iteratorImpl(It it, It end, const std::vector<value_type> &v, T &ref)
+        IteratorImpl(It it, It end, const std::vector<value_type> &v, T &ref)
             : mIt(std::move(it))
             , mEnd(std::move(end))
             , mV(v)
@@ -31,7 +31,7 @@ struct SafeIterator {
 
         void validate()
         {
-            while (mIt != mEnd && std::find(mRef.begin(), mRef.end(), *mIt) == mRef.end())
+            while (mIt != mEnd && std::ranges::find(mRef, *mIt) == mRef.end())
                 ++mIt;
         }
 
@@ -40,22 +40,29 @@ struct SafeIterator {
             return *mIt;
         }
 
-        bool operator!=(const iteratorImpl &other) const
+        bool operator!=(const IteratorImpl &other) const
         {
             return mIt != other.mIt;
         }
 
-        void operator++()
+        IteratorImpl &operator++()
         {
             ++mIt;
             validate();
+            return *this;
+        }
+
+        IteratorImpl operator++(int) {
+            IteratorImpl copy = *this;
+            ++*this;
+            return copy;
         }
     };
 
-    using iterator = iteratorImpl<typename traits::const_iterator>;
-    using const_iterator = iteratorImpl<typename traits::const_iterator>;
-    using reverse_iterator = iteratorImpl<typename traits::reverse_iterator>;
-    using const_reverse_iterator = iteratorImpl<typename traits::const_reverse_iterator>;
+    using iterator = IteratorImpl<typename traits::const_iterator>;
+    using const_iterator = IteratorImpl<typename traits::const_iterator>;
+    using reverse_iterator = IteratorImpl<typename traits::reverse_iterator>;
+    using const_reverse_iterator = IteratorImpl<typename traits::const_reverse_iterator>;
 
     iterator begin()
     {

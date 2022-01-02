@@ -1,9 +1,5 @@
 #pragma once
 
-#include "serializestreamdata.h"
-
-#include "pendingrequest.h"
-
 namespace Engine {
 namespace Serialize {
 
@@ -11,34 +7,11 @@ namespace Serialize {
         uint64_t mMsgSize;
     };
 
-    struct META_EXPORT BufferedStreamData : SerializeStreamData {
-    public:
-        BufferedStreamData(std::unique_ptr<Formatter> format, SyncManager &mgr, ParticipantId id = 0);
-        BufferedStreamData(const BufferedStreamData &) = delete;
-        BufferedStreamData(BufferedStreamData &&) noexcept = delete;
-
-        virtual ~BufferedStreamData() = default;
-
-        SyncManager *manager();
-
-        //read
-        PendingRequest *fetchRequest(TransactionId id);
-        void popRequest(TransactionId id);
-
-        //write
-        TransactionId createRequest(ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback);
-
-
-    private:
-        TransactionId mRunningTransactionId = 0;
-        std::queue<PendingRequest> mPendingRequests;
-    };
-
     struct META_EXPORT buffered_streambuf : std::basic_streambuf<char> {
     public:
         buffered_streambuf(std::unique_ptr<std::basic_streambuf<char>> buffer);
         buffered_streambuf(const buffered_streambuf &) = delete;
-        buffered_streambuf(buffered_streambuf &&) noexcept;
+        buffered_streambuf(buffered_streambuf &&) = delete;
 
         virtual ~buffered_streambuf();
 

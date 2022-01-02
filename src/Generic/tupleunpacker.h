@@ -10,9 +10,20 @@ namespace TupleUnpacker {
         return (fname)(std::forward<decltype(args)>(args)...); \
     }
 
-#define LIFT_MEMBER(fname, ...)                                                                      \
-    [__VA_ARGS__](auto &&_this, auto &&...args) -> decltype(auto) {                                  \
-        return (std::forward<decltype(_this)>(_this)->fname)(std::forward<decltype(args)>(args)...); \
+    template <typename Tuple>
+    Tuple &&shiftTupleReference(Tuple &&tuple)
+    {
+        return std::forward<Tuple>(tuple);
+    }
+
+    template <typename... T, size_t... Is>
+    std::tuple<T &...> shiftTupleReference(std::tuple<T...>& tuple, std::index_sequence<Is...>) {
+        return { std::get<Is>(tuple)... };
+    }
+
+    template <typename... T>
+    std::tuple<T &...> shiftTupleReference(std::tuple<T...>& tuple) {
+        return shiftTupleReference(tuple, std::index_sequence_for<T...> {});
     }
 
     template <size_t I, typename Tuple, size_t... S, size_t... T>
@@ -20,7 +31,7 @@ namespace TupleUnpacker {
     {
         return std::tuple_cat(
             std::forward_as_tuple(std::get<S>(std::forward<Tuple>(tuple))...),
-            std::get<I>(std::forward<Tuple>(tuple)),
+            shiftTupleReference(std::get<I>(std::forward<Tuple>(tuple))),
             std::forward_as_tuple(std::get<I + 1 + T>(std::forward<Tuple>(tuple))...));
     }
 
@@ -32,6 +43,26 @@ namespace TupleUnpacker {
             std::forward<Tuple>(tuple),
             std::make_index_sequence<I>(),
             std::make_index_sequence<S - 1 - I>());
+    }
+
+    template <typename Tuple, size_t... Is>
+    decltype(auto) flatten(Tuple &&tuple, std::index_sequence<Is...>);
+
+    template <typename NonTuple>
+    decltype(auto) flatten(NonTuple &&t)
+    {
+        return std::forward_as_tuple(std::forward<NonTuple>(t));
+    }
+
+    template <Tuple Tuple>
+    decltype(auto) flatten(Tuple &&tuple)
+    {
+        return flatten(std::forward<Tuple>(tuple), std::make_index_sequence<std::tuple_size_v<Tuple>>());
+    }
+
+    template <typename Tuple, size_t... Is>
+    decltype(auto) flatten(Tuple&& tuple, std::index_sequence<Is...>) {
+        return std::tuple_cat(flatten(std::get<Is>(std::forward<Tuple>(tuple)))...);
     }
 
     template <typename F, size_t... S, typename Tuple>
@@ -57,6 +88,12 @@ namespace TupleUnpacker {
     decltype(auto) invokeExpand(F &&f, Args &&...args)
     {
         return invokeFromTuple(std::forward<F>(f), expand<sizeof...(args) - 1>(std::forward_as_tuple(std::forward<Args>(args)...)));
+    }
+
+    template <typename F, typename... Args>
+    decltype(auto) invokeFlatten(F &&f, Args &&...args)
+    {
+        return invokeFromTuple(std::forward<F>(f), flatten(std::forward_as_tuple(std::forward<Args>(args)...)));
     }
 
     template <typename R, typename F, typename... Args>
@@ -95,12 +132,6 @@ namespace TupleUnpacker {
         return constructFromTuple<T>(expand<sizeof...(args) - 1>(std::forward_as_tuple(std::forward<Args>(args)...)));
     }
 
-    template <typename... _Ty>
-    constexpr std::tuple<_Ty &...> returnAsTuple(_Ty &...args) noexcept
-    { // forward arguments in a tuple
-        return std::tuple<_Ty &...> { args... };
-    }
-
     template <typename T>
     auto num_bindings_impl() noexcept
     {
@@ -125,63 +156,63 @@ namespace TupleUnpacker {
     {
         auto &[a] = t;
 
-        return returnAsTuple(a);
+        return std::tie(a);
     }
 
     auto toTuple(TuplefyableHelper<2> auto &t)
     {
         auto &[a, b] = t;
 
-        return returnAsTuple(a, b);
+        return std::tie(a, b);
     }
 
     auto toTuple(TuplefyableHelper<3> auto &t)
     {
         auto &[a, b, c] = t;
 
-        return returnAsTuple(a, b, c);
+        return std::tie(a, b, c);
     }
 
     auto toTuple(TuplefyableHelper<4> auto &t)
     {
         auto &[a, b, c, d] = t;
 
-        return returnAsTuple(a, b, c, d);
+        return std::tie(a, b, c, d);
     }
 
     auto toTuple(TuplefyableHelper<5> auto &t)
     {
         auto &[a, b, c, d, e] = t;
 
-        return returnAsTuple(a, b, c, d, e);
+        return std::tie(a, b, c, d, e);
     }
 
     auto toTuple(TuplefyableHelper<6> auto &t)
     {
         auto &[a, b, c, d, e, f] = t;
 
-        return returnAsTuple(a, b, c, d, e, f);
+        return std::tie(a, b, c, d, e, f);
     }
 
     auto toTuple(TuplefyableHelper<7> auto &t)
     {
         auto &[a, b, c, d, e, f, g] = t;
 
-        return returnAsTuple(a, b, c, d, e, f, g);
+        return std::tie(a, b, c, d, e, f, g);
     }
 
     auto toTuple(TuplefyableHelper<8> auto &t)
     {
         auto &[a, b, c, d, e, f, g, h] = t;
 
-        return returnAsTuple(a, b, c, d, e, f, g, h);
+        return std::tie(a, b, c, d, e, f, g, h);
     }
 
     auto toTuple(TuplefyableHelper<9> auto &t)
     {
         auto &[a, b, c, d, e, f, g, h, i] = t;
 
-        return returnAsTuple(a, b, c, d, e, f, g, h, i);
+        return std::tie(a, b, c, d, e, f, g, h, i);
     }
 
     template <typename T>
@@ -202,18 +233,13 @@ namespace TupleUnpacker {
         return forEach(std::forward<Tuple>(t), std::forward<F>(f), std::make_index_sequence<std::tuple_size<std::remove_reference_t<Tuple>>::value>());
     }
 
-    template <typename Tuple, typename F, typename T, size_t... Is>
-    T accumulate(Tuple &&tuple, F &&f, T &&t, std::index_sequence<Is...>)
-    {
-        DefaultAssign assign;
-        (assign(t, f(std::get<Is>(std::forward<Tuple>(tuple)), std::forward<T>(t))), ...);
-        return std::forward<T>(t);
-    }
-
     template <typename Tuple, typename F, typename T>
     T accumulate(Tuple &&tuple, F &&f, T &&t)
     {
-        return accumulate(std::forward<Tuple>(tuple), std::forward<F>(f), std::forward<T>(t), std::make_index_sequence<std::tuple_size<std::remove_reference_t<Tuple>>::value>());
+        forEach(std::forward<Tuple>(tuple), [&](auto &&e) {
+            t = f(std::forward<decltype(e)>(e), std::forward<T>(t));
+        });
+        return std::forward<T>(t);
     }
 
     template <typename Tuple, typename F, size_t... Is>

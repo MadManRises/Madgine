@@ -28,6 +28,15 @@ namespace Debug {
             return resolveSymbols(mTrace.data(), itemCount);
         }
 
+        template <size_t U>
+        StackTrace<U> subset(size_t offset = 0) const {
+            static_assert(U <= S);
+            assert(U + offset <= S);
+            StackTrace<U> result;
+            std::copy(mTrace.begin() + offset, mTrace.begin() + offset + U, result.begin());
+            return result;
+        }
+
         static StackTrace<S> getCurrent(size_t skip)
         {
             StackTrace<S> result;
@@ -58,7 +67,7 @@ namespace Debug {
                     mCurrent = mEnd;
             }
 
-            void* operator*() {
+            void* &operator*() {
                 return *mCurrent;
             }
 

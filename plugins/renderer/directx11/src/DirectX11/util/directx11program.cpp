@@ -69,14 +69,14 @@ namespace Render {
 
         ID3D11Buffer *buffers[20];
         assert(mConstantBuffers.size() <= 20);
-        std::transform(mConstantBuffers.begin(), mConstantBuffers.end(), buffers, [](const DirectX11Buffer &buf) { return buf.handle(); });
+        std::ranges::transform(mConstantBuffers, buffers, [](const DirectX11Buffer &buf) { return buf.handle(); });
 
         sDeviceContext->VSSetConstantBuffers(0, mConstantBuffers.size(), buffers);
         sDeviceContext->PSSetConstantBuffers(0, mConstantBuffers.size(), buffers);
         sDeviceContext->GSSetConstantBuffers(0, mConstantBuffers.size(), buffers);
 
         assert(mDynamicBuffers.size() <= 20);
-        std::transform(mDynamicBuffers.begin(), mDynamicBuffers.end(), buffers, [](const DirectX11Buffer &buf) { return buf.handle(); });
+        std::ranges::transform(mDynamicBuffers, buffers, [](const DirectX11Buffer &buf) { return buf.handle(); });
 
         sDeviceContext->VSSetConstantBuffers(3, mDynamicBuffers.size(), buffers);
         sDeviceContext->PSSetConstantBuffers(3, mDynamicBuffers.size(), buffers);

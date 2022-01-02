@@ -2,7 +2,6 @@
 
 namespace Engine {
 
-
 template <typename T, typename Cmp>
 struct mutable_set : std::set<T, Cmp> {
 
@@ -10,8 +9,7 @@ struct mutable_set : std::set<T, Cmp> {
 
     using _traits = container_traits<Base>;
 
-    
-template <typename It>
+    template <typename It>
     struct const_iterator_prototype;
 
     template <typename It>
@@ -67,11 +65,17 @@ template <typename It>
             return mIterator == other.mIterator;
         }
 
-        iterator_prototype<It> &
-        operator++()
+        iterator_prototype<It> &operator++()
         {
             ++mIterator;
             return *this;
+        }
+
+        iterator_prototype<It> operator++(int)
+        {
+            iterator_prototype<It> copy = *this;
+            ++*this;
+            return copy;
         }
 
         iterator_prototype<It> &operator--()
@@ -239,7 +243,7 @@ struct container_traits<mutable_set<T, Cmp>> : container_traits<std::set<T, Cmp>
     typedef Pib<iterator> emplace_return;
 
     template <typename... _Ty>
-    static emplace_return emplace(container &c, const const_iterator &where, _Ty &&... args)
+    static emplace_return emplace(container &c, const const_iterator &where, _Ty &&...args)
     {
         return c.emplace(std::forward<_Ty>(args)...);
     }

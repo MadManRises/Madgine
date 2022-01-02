@@ -14,7 +14,7 @@ namespace Threading {
     {
         std::wstring wstring;
         wstring.reserve(name.size());
-        std::copy(name.begin(), name.end(), std::back_inserter(wstring));
+        std::ranges::copy(name, std::back_inserter(wstring));
         SetThreadDescription(
             GetCurrentThread(),
             wstring.c_str());

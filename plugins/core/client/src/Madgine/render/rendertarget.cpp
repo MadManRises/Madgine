@@ -88,7 +88,7 @@ namespace Render {
     void RenderTarget::removeRenderPass(RenderPass *pass)
     {
         pass->shutdown();
-        mRenderPasses.erase(std::find(mRenderPasses.begin(), mRenderPasses.end(), pass));
+        std::erase(mRenderPasses, pass);
     }
 
     const std::vector<RenderPass *> &RenderTarget::renderPasses()

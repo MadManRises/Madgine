@@ -23,7 +23,7 @@ namespace Serialize {
         if (targets.empty()) {
             for (BufferedOutStream *out : result) {
                 out->beginMessage(parent, ACTION, out->id() == answerTarget ? answerId : 0);
-                *out << index;
+                write(*out, index, "index");
             }
         } else {
             auto it1 = result.begin();
@@ -36,7 +36,7 @@ namespace Serialize {
                 }
                 if (*it2 == out->id()) {
                     out->beginMessage(parent, ACTION, out->id() == answerTarget ? answerId : 0);
-                    *out << index;
+                    write(*out, index, "index");
                     ++it2;
                     ++it1;
                 } else {
@@ -85,7 +85,7 @@ namespace Serialize {
     {        
         BufferedOutStream &out = parent->getSlaveMessageTarget();
         out.beginMessage(parent, REQUEST, out.createRequest(requester, requesterTransactionId, std::move(callback)));
-        out << index;
+        write(out, index, "index");
         return out;
     }
 
@@ -111,7 +111,7 @@ namespace Serialize {
     void SyncableBase::beginRequestResponseMessage(const SyncableUnitBase *parent, uint8_t index, BufferedOutStream &stream, TransactionId id) const
     {
         stream.beginMessage(parent, ACTION, id);
-        stream << index;
+        write(stream, index, "index");
     }
 
     bool SyncableBase::isMaster(const SyncableUnitBase *parent) const

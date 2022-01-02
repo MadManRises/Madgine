@@ -14,6 +14,8 @@
 
 #include "Generic/coroutines/generator.h"
 
+#include "Interfaces/filesystem/path.h"
+
 UNIQUECOMPONENT(Engine::Tools::LogViewer);
 
 METATABLE_BEGIN_BASE(Engine::Tools::LogViewer, Engine::Tools::ToolBase)
@@ -62,14 +64,20 @@ namespace Tools {
 
             if (ImGui::BeginChild("Messages")) {
 
-                ImGui::Columns(2);
-                ImGui::SetColumnWidth(0, 24);
+                ImGui::Columns(3);
+                if (!mOnce) {
+                    ImGui::SetColumnWidth(0, 24);
+                    mOnce = true;
+                }
 
                 for (const LogEntry &entry : mEntries) {
                     if (mMsgFilters[entry.mType]) {
                         ImGui::Text("%s", icons[entry.mType]);
                         ImGui::NextColumn();
                         ImGui::Selectable(entry.mMsg.c_str(), false, ImGuiSelectableFlags_SpanAllColumns);
+                        ImGui::NextColumn();
+                        if (entry.mFile)
+                            ImGui::Text("%s", entry.mFile);
                         ImGui::NextColumn();
                         ImGui::Separator();
                     }
@@ -90,12 +98,12 @@ namespace Tools {
         }
     }
 
-    void LogViewer::messageLogged(std::string_view message, Util::MessageType lml, const Debug::StackTrace<32> &stackTrace, Util::Log *log)
+    void LogViewer::messageLogged(std::string_view message, Util::MessageType lml, const char *file, Util::Log *log)
     {
         ++mMsgCounts[lml];
         if (lml != Util::MessageType::DEBUG_TYPE) {
             std::lock_guard guard { mMutex };
-            mEntries.push_back({ std::string { message }, lml });
+            mEntries.push_back({ std::string { message }, lml, file });
         }
     }
 

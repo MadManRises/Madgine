@@ -169,7 +169,7 @@ namespace Filesystem {
             Generator<std::vector<FileEvent>> gen { CoroutineHandle<Generator<std::vector<FileEvent>>::promise_type>::fromPromise(*reinterpret_cast<Generator<std::vector<FileEvent>>::promise_type *>(watch.second)) };
             gen.next();
             const std::vector<FileEvent> &events = gen.get();
-            std::copy(events.begin(), events.end(), std::back_inserter(result));
+            std::ranges::copy(events, std::back_inserter(result));
             gen.release().release();
         }
         return result;

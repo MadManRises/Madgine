@@ -11,6 +11,8 @@
 
 #include "../serializableids.h"
 
+#include "syncstreamdata.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -38,7 +40,7 @@ namespace Serialize {
         return first.id() < second.id();
     }
 
-    BufferedInStream::BufferedInStream(std::unique_ptr<std::basic_streambuf<char>> buffer, std::unique_ptr<BufferedStreamData> data)
+    BufferedInStream::BufferedInStream(std::unique_ptr<std::basic_streambuf<char>> buffer, std::unique_ptr<SyncStreamData> data)
         : BufferedInStream(std::make_unique<buffered_streambuf>(std::move(buffer)), std::move(data))
     {
     }
@@ -48,12 +50,12 @@ namespace Serialize {
     {
     }
 
-    BufferedInStream::BufferedInStream(BufferedInStream &&other, SerializeManager *mgr)
+    BufferedInStream::BufferedInStream(BufferedInStream &&other, SyncManager *mgr)
         : SerializeInStream(std::move(other), mgr)
     {
     }
 
-    BufferedInStream::BufferedInStream(std::unique_ptr<buffered_streambuf> buffer, std::unique_ptr<BufferedStreamData> data)
+    BufferedInStream::BufferedInStream(std::unique_ptr<buffered_streambuf> buffer, std::unique_ptr<SyncStreamData> data)
         : SerializeInStream(std::move(buffer), std::move(data))
     {
     }
@@ -73,6 +75,11 @@ namespace Serialize {
         return avail > 0;
     }
 
+    SyncManager *BufferedInStream::manager() const
+    {
+        return data().manager();
+    }
+
     PendingRequest *BufferedInStream::fetchRequest(TransactionId id)
     {
         return data().fetchRequest(id);
@@ -83,14 +90,14 @@ namespace Serialize {
         data().popRequest(id);
     }
 
-    BufferedInStream::BufferedInStream(buffered_streambuf *buffer, BufferedStreamData *data)
+    BufferedInStream::BufferedInStream(buffered_streambuf *buffer, SyncStreamData *data)
         : SerializeInStream(buffer, data)
     {
     }
 
-    BufferedStreamData &BufferedInStream::data() const
+    SyncStreamData &BufferedInStream::data() const
     {
-        return static_cast<BufferedStreamData &>(SerializeInStream::data());
+        return static_cast<SyncStreamData &>(SerializeInStream::data());
     }
 
     StreamResult BufferedInStream::readHeader(MessageHeader &header)
@@ -101,7 +108,7 @@ namespace Serialize {
     }
 
     BufferedOutStream::BufferedOutStream(
-        std::unique_ptr<std::basic_streambuf<char>> buffer, std::unique_ptr<BufferedStreamData> data)
+        std::unique_ptr<std::basic_streambuf<char>> buffer, std::unique_ptr<SyncStreamData> data)
         : BufferedOutStream(std::make_unique<buffered_streambuf>(std::move(buffer)), std::move(data))
     {
     }
@@ -111,13 +118,13 @@ namespace Serialize {
     {
     }
 
-    BufferedOutStream::BufferedOutStream(BufferedOutStream &&other, SerializeManager *mgr)
+    BufferedOutStream::BufferedOutStream(BufferedOutStream &&other, SyncManager *mgr)
         : SerializeOutStream(std::move(other), mgr)
     {
     }
 
     BufferedOutStream::BufferedOutStream(
-        std::unique_ptr<buffered_streambuf> buffer, std::unique_ptr<BufferedStreamData> data)
+        std::unique_ptr<buffered_streambuf> buffer, std::unique_ptr<SyncStreamData> data)
         : SerializeOutStream(std::move(buffer), std::move(data))
     {
     }
@@ -172,26 +179,26 @@ namespace Serialize {
         return data().createRequest(requester, requesterTransactionId, std::move(callback));
     }
 
-    BufferedStreamData &BufferedOutStream::data() const
+    SyncStreamData &BufferedOutStream::data() const
     {
-        return static_cast<BufferedStreamData &>(SerializeOutStream::data());
+        return static_cast<SyncStreamData &>(SerializeOutStream::data());
     }
 
     BufferedInOutStream::BufferedInOutStream(
-        std::unique_ptr<std::basic_streambuf<char>> buffer, std::unique_ptr<BufferedStreamData> data)
+        std::unique_ptr<std::basic_streambuf<char>> buffer, std::unique_ptr<SyncStreamData> data)
         : BufferedInOutStream(std::make_unique<buffered_streambuf>(std::move(buffer)), std::move(data))
     {
     }
 
     BufferedInOutStream::BufferedInOutStream(
-        std::unique_ptr<buffered_streambuf> buffer, std::unique_ptr<BufferedStreamData> data)
+        std::unique_ptr<buffered_streambuf> buffer, std::unique_ptr<SyncStreamData> data)
         : BufferedInStream(buffer.get(), data.get())
         , BufferedOutStream(std::move(buffer), std::move(data))
     {
     }
 
     BufferedInOutStream::BufferedInOutStream(std::unique_ptr<std::basic_streambuf<char>> buffer, std::unique_ptr<Formatter> format, SyncManager &mgr, ParticipantId id)
-        : BufferedInOutStream(std::make_unique<buffered_streambuf>(std::move(buffer)), std::make_unique<BufferedStreamData>(std::move(format), mgr, id))
+        : BufferedInOutStream(std::make_unique<buffered_streambuf>(std::move(buffer)), std::make_unique<SyncStreamData>(std::move(format), mgr, id))
     {
     }
 
@@ -202,7 +209,7 @@ namespace Serialize {
     }
 
     BufferedInOutStream::BufferedInOutStream(BufferedInOutStream &&other,
-        SerializeManager *mgr)
+        SyncManager *mgr)
         : BufferedInStream(std::move(other), mgr)
         , BufferedOutStream(std::move(other), mgr)
     {

@@ -10,6 +10,13 @@
 namespace Engine {
 namespace Threading {
 
+    void TaskPromiseSharedStateBase::attach()
+    {
+        std::lock_guard guard { mMutex };
+        assert(!mAttached);
+        mAttached = true;
+    }
+
     void TaskPromiseSharedStateBase::finalize()
     {
         std::lock_guard guard { mMutex };

@@ -113,8 +113,8 @@ namespace Widgets {
 
     protected:
         std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, WidgetClass _class);
-        std::tuple<std::unique_ptr<WidgetBase>> createWidgetClassTuple(const std::string &name, WidgetClass _class);
-        std::tuple<std::string, WidgetClass> storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const;
+        Serialize::StreamResult readWidget(Serialize::SerializeInStream &in, std::unique_ptr<WidgetBase> &widget);
+        void writeWidget(Serialize::SerializeOutStream &out, const std::unique_ptr<WidgetBase> &widget) const;
 
         virtual void sizeChanged(const Vector3i &pixelSize);
 

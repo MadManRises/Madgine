@@ -25,7 +25,7 @@ METATABLE_BEGIN(Engine::NodeGraph::NodeGraph)
 METATABLE_END(Engine::NodeGraph::NodeGraph)
 
 SERIALIZETABLE_BEGIN(Engine::NodeGraph::NodeGraph)
-FIELD(mNodes, Serialize::ParentCreator<&Engine::NodeGraph::NodeGraph::nodeCreationNames, &Engine::NodeGraph::NodeGraph::createNodeTuple, &Engine::NodeGraph::NodeGraph::storeNodeCreationData>)
+FIELD(mNodes, Serialize::ParentCreator<&Engine::NodeGraph::NodeGraph::readNode, &Engine::NodeGraph::NodeGraph::writeNode>)
 FIELD(mFlowOutPins)
 FIELD(mDataInPins)
 FIELD(mDataOutPins)
@@ -47,7 +47,7 @@ namespace NodeGraph {
         , mPath(other.mPath)
     {
         mNodes.reserve(other.mNodes.size());
-        std::transform(other.mNodes.begin(), other.mNodes.end(), std::back_inserter(mNodes), [&](const std::unique_ptr<NodeBase> &node) { return node->clone(*this); });
+        std::ranges::transform(other.mNodes, std::back_inserter(mNodes), [&](const std::unique_ptr<NodeBase> &node) { return node->clone(*this); });
     }
 
     NodeGraph::NodeGraph(NodeGraph &&other) = default;
@@ -67,7 +67,7 @@ namespace NodeGraph {
 
         mNodes.clear();
         mNodes.reserve(other.mNodes.size());
-        std::transform(other.mNodes.begin(), other.mNodes.end(), std::back_inserter(mNodes), [&](const std::unique_ptr<NodeBase> &node) { return node->clone(*this); });
+        std::ranges::transform(other.mNodes, std::back_inserter(mNodes), [&](const std::unique_ptr<NodeBase> &node) { return node->clone(*this); });
 
         ++mGeneration;
 
@@ -301,7 +301,7 @@ namespace NodeGraph {
     {
         if (!node)
             return 0;
-        return std::find_if(mNodes.begin(), mNodes.end(), [=](const std::unique_ptr<NodeBase> &ptr) { return ptr.get() == node; }) - mNodes.begin() + 1;
+        return std::ranges::find(mNodes, node, projectionToRawPtr) - mNodes.begin() + 1;
     }
 
     Pin NodeGraph::flowOutTarget(Pin source)
@@ -604,25 +604,30 @@ namespace NodeGraph {
         }
     }
 
-    const char *NodeGraph::nodeCreationNames(size_t index)
-    {
-        assert(index == 0);
-        return "type";
-    }
-
     std::unique_ptr<NodeBase> NodeGraph::createNode(std::string_view name)
     {
         return NodeRegistry::getConstructor(NodeRegistry::sComponentsByName().at(name))(*this);
     }
 
-    std::tuple<std::unique_ptr<NodeBase>> NodeGraph::createNodeTuple(std::string_view name)
+    Serialize::StreamResult NodeGraph::readNode(Serialize::SerializeInStream &in, std::unique_ptr<NodeBase> &node)
     {
-        return { createNode(name) };
+        STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, "Node", 1));
+
+        std::string name;
+        STREAM_PROPAGATE_ERROR(read(in, name, "type"));
+
+        if (!NodeRegistry::sComponentsByName().contains(name))
+            return STREAM_INTEGRITY_ERROR(in, "No Node \"" << name << "\" available.\n"
+                                                                << "Make sure to check the loaded plugins.");
+        node = createNode(name);
+        return {};
     }
 
-    std::tuple<std::string_view> NodeGraph::storeNodeCreationData(const std::unique_ptr<NodeBase> &node) const
+    void NodeGraph::writeNode(Serialize::SerializeOutStream &out, const std::unique_ptr<NodeBase> &node) const
     {
-        return std::make_tuple(node->className());
+        out.format().beginExtended(out, "Node", 1);
+
+        write(out, node->className(), "type");
     }
 }
 }

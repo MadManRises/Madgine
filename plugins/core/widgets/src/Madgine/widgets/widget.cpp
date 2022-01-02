@@ -28,7 +28,7 @@ MEMBER(mVisible)
 METATABLE_END(Engine::Widgets::WidgetBase)
 
 SERIALIZETABLE_BEGIN(Engine::Widgets::WidgetBase)
-FIELD(mChildren, Serialize::ParentCreator<&Engine::Widgets::WidgetManager::widgetCreationNames, &Engine::Widgets::WidgetBase::createWidgetClassTuple, &Engine::Widgets::WidgetBase::storeWidgetCreationData>)
+FIELD(mChildren, Serialize::ParentCreator<&Engine::Widgets::WidgetBase::readWidget, &Engine::Widgets::WidgetBase::writeWidget>)
 FIELD(mPos)
 FIELD(mSize)
 SERIALIZETABLE_END(Engine::Widgets::WidgetBase)
@@ -205,7 +205,7 @@ namespace Widgets {
 
     void WidgetBase::destroyChild(WidgetBase *w)
     {
-        auto it = std::find_if(mChildren.begin(), mChildren.end(), [=](const std::unique_ptr<WidgetBase> &ptr) { return ptr.get() == w; });
+        auto it = std::ranges::find(mChildren, w, projectionToRawPtr);
         assert(it != mChildren.end());
         mChildren.erase(it);
     }
@@ -241,7 +241,7 @@ namespace Widgets {
 
     void WidgetBase::setParent(WidgetBase *parent)
     {
-        auto it = std::find_if(mParent->mChildren.begin(), mParent->mChildren.end(), [this](std::unique_ptr<WidgetBase> &p) { return p.get() == this; });
+        auto it = std::ranges::find(mParent->mChildren, parent, projectionToRawPtr);
         parent->mChildren.emplace_back(std::move(*it));
         mParent->mChildren.erase(it);
         mParent = parent;
@@ -345,15 +345,20 @@ namespace Widgets {
     {
         return mManager.createWidgetClass(name, _class, this);
     }
-    std::tuple<std::unique_ptr<WidgetBase>> WidgetBase::createWidgetClassTuple(const std::string &name, WidgetClass _class)
+    Serialize::StreamResult WidgetBase::readWidget(Serialize::SerializeInStream &in, std::unique_ptr<WidgetBase> &widget)
     {
-        return {
-            createWidgetClass(name, _class)
-        };
+        STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, "Widget", 2));
+        std::string name;
+        WidgetClass _class;
+        STREAM_PROPAGATE_ERROR(read(in, name, "name"));
+        STREAM_PROPAGATE_ERROR(read(in, _class, "type"));
+
+        widget = createWidgetClass(name, _class);
+        return {};
     }
-    std::tuple<std::string, WidgetClass> WidgetBase::storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const
+    void WidgetBase::writeWidget(Serialize::SerializeOutStream &out, const std::unique_ptr<WidgetBase> &widget) const
     {
-        return mManager.storeWidgetCreationData(widget);
+        mManager.writeWidget(out, widget);
     }
     void WidgetBase::sizeChanged(const Vector3i &pixelSize)
     {

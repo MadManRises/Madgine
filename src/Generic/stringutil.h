@@ -20,7 +20,7 @@ namespace StringUtil {
 
     CONSTEXPR_ALGORITHM std::string_view trim(std::string_view s)
     {
-        auto begin = std::find_if_not(s.begin(), s.end(), isspace);
+        auto begin = std::ranges::find_if_not(s, isspace);
         auto end = std::find_if_not(s.rbegin(), s.rend(), isspace);
         return { &*begin, static_cast<size_t>(end.base() - begin) };
     }
@@ -79,7 +79,7 @@ namespace StringUtil {
 
     inline std::string toLower(std::string &&s)
     {
-        std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+        std::ranges::transform(s, s.begin(), ::tolower);
         return std::move(s);
     }
 
@@ -89,13 +89,13 @@ namespace StringUtil {
 
     inline std::string toUpper(std::string &&s)
     {
-        std::transform(s.begin(), s.end(), s.begin(), ::toupper);
+        std::ranges::transform(s, s.begin(), ::toupper);
         return std::move(s);
     }
 
     inline std::wstring toWString(std::string_view input) {
         std::wstring s;
-        std::copy(input.begin(), input.end(), std::back_inserter(s));
+        std::ranges::copy(input, std::back_inserter(s));
         return s;
     }
 

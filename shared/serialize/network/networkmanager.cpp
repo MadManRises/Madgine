@@ -126,7 +126,7 @@ namespace Network {
 
     bool NetworkManager::isServer() const
     {
-        return bool(mServerSocket);
+        return static_cast<bool>(mServerSocket);
     }
 
     NetworkManagerResult NetworkManager::moveMasterStream(

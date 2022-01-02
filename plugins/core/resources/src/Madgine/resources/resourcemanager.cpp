@@ -32,10 +32,9 @@ namespace Resources {
         assert(!sSingleton);
         sSingleton = this;
 
-        mIOQueue.addSetupSteps([this]() { return init(); },
-            [this]() {
-                finalize();
-            });
+        mIOQueue.addSetupSteps(
+            [this]() { return callInit(); },
+            [this]() { return callFinalize(); });
     }
 
     ResourceManager::~ResourceManager()
@@ -62,7 +61,7 @@ namespace Resources {
     {
 #if ENABLE_PLUGINS
         for (auto &section : Plugins::PluginManager::getSingleton()) {
-            for (std::pair<const  std::string, Plugins::Plugin> &p : section.second) {
+            for (std::pair<const std::string, Plugins::Plugin> &p : section.second) {
                 if (!p.second.isLoaded())
                     continue;
                 const Plugins::BinaryInfo *info = p.second.info();

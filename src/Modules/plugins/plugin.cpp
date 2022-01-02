@@ -70,7 +70,8 @@ namespace Plugins {
                 }
             } else {
                 Dl::DlAPIResult result = Dl::getError("openDll");
-                LOG_ERROR(result.toString());
+                LOG_ERROR(result.toString() << " loading dynamic library '" << mPath
+                                            << "'");
                 std::terminate();
             }
         }
@@ -173,10 +174,10 @@ namespace Plugins {
 
     void Plugin::removeDependency(PluginManager &manager, Plugin *dependency)
     {
-        auto it = std::find(mDependencies.begin(), mDependencies.end(), dependency);
+        auto it = std::ranges::find(mDependencies, dependency);
         assert(it != mDependencies.end());
 
-        auto it2 = std::find(dependency->mDependents.begin(), dependency->mDependents.end(), this);
+        auto it2 = std::ranges::find(dependency->mDependents, this);
         assert(it2 != dependency->mDependents.end());
 
         mDependencies.erase(it);
@@ -194,10 +195,10 @@ namespace Plugins {
 
     void Plugin::removeGroupDependency(PluginManager &manager, PluginSection *dependency)
     {
-        auto it = std::find(mGroupDependencies.begin(), mGroupDependencies.end(), dependency);
+        auto it = std::ranges::find(mGroupDependencies, dependency);
         assert(it != mGroupDependencies.end());
 
-        auto it2 = std::find(dependency->mDependents.begin(), dependency->mDependents.end(), this);
+        auto it2 = std::ranges::find(dependency->mDependents, this);
         assert(it2 != dependency->mDependents.end());
 
         mGroupDependencies.erase(it);
@@ -209,7 +210,7 @@ namespace Plugins {
         while (!mDependencies.empty()) {
             Plugin *dependency = mDependencies.back();
 
-            auto it = std::find(dependency->mDependents.begin(), dependency->mDependents.end(), this);
+            auto it = std::ranges::find(dependency->mDependents, this);
             assert(it != dependency->mDependents.end());
 
             mDependencies.pop_back();
@@ -219,7 +220,7 @@ namespace Plugins {
         while (!mGroupDependencies.empty()) {
             PluginSection *dependency = mGroupDependencies.back();
 
-            auto it = std::find(dependency->mDependents.begin(), dependency->mDependents.end(), this);
+            auto it = std::ranges::find(dependency->mDependents, this);
             assert(it != dependency->mDependents.end());
 
             mGroupDependencies.pop_back();

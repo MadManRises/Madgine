@@ -18,7 +18,8 @@ namespace Serialize {
 
         static const constexpr bool controlled = true;
 
-        static void writeItem(SerializeOutStream &out, const typename comparator_traits<Cmp>::item_type &t)
+        template <typename C>
+        static void writeItem(SerializeOutStream &out, const typename container_traits<C>::value_type &t)
         {
             out.format().beginExtended(out, "Item", 1);
             write(out, comparator_traits<Cmp>::to_cmp_type(t), "key");
@@ -34,9 +35,7 @@ namespace Serialize {
             STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, "Item", 1));
             MakeOwning_t<typename comparator_traits<Cmp>::type> key;
             STREAM_PROPAGATE_ERROR(read(in, key, "key"));
-            it = std::find_if(physical(op).begin(), physical(op).end(), [&](const auto &t) {
-                return comparator_traits<Cmp>::to_cmp_type(t) == key;
-            });
+            it = std::ranges::find(physical(op), key, &comparator_traits<Cmp>::to_cmp_type);
             if (it == physical(op).end())
                 return STREAM_ERROR(in, StreamState::UNKNOWN_ERROR, "Missing item of name '" << key << "' in controlled container");
 

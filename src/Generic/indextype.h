@@ -2,15 +2,21 @@
 
 namespace Engine {
 
-template <typename T, T invalid = std::numeric_limits<T>::max()>
+template <Unsigned T, T invalid = std::numeric_limits<T>::max()>
 struct IndexType {
-    static_assert(std::is_unsigned_v<T>);
 
     using value_type = T;
     static constexpr T sInvalid = invalid;
 
     IndexType(T index = invalid)
         : mIndex(index)
+    {
+    }
+
+    IndexType(const IndexType &) = default;
+
+    IndexType(IndexType &&other)
+        : mIndex(std::exchange(other.mIndex, invalid))
     {
     }
 
@@ -24,6 +30,13 @@ struct IndexType {
     {
         assert(t != invalid);
         mIndex = t;
+        return *this;
+    }
+
+    IndexType &operator=(const IndexType &) = default;
+
+    IndexType& operator=(IndexType&& other) {
+        mIndex = std::exchange(other.mIndex, invalid);
         return *this;
     }
 
@@ -55,7 +68,7 @@ struct IndexType {
         return mIndex == other.mIndex;
     }
 
-    template <std::constructible_from<T> U>    
+    template <std::constructible_from<T> U>
     bool operator==(const U &other) const
     {
         return mIndex == other;
@@ -82,7 +95,8 @@ struct IndexType {
         return mIndex != invalid;
     }
 
-    friend std::ostream& operator<<(std::ostream& out, const IndexType& val) {
+    friend std::ostream &operator<<(std::ostream &out, const IndexType &val)
+    {
         int64_t rep = val ? static_cast<int64_t>(val) : -1;
         return out << rep;
     }
@@ -103,4 +117,15 @@ private:
     T mIndex;
 };
 
+}
+
+namespace std {
+template <typename T, typename U, template <typename> class TQual, template <typename> class UQual>
+struct basic_common_reference<Engine::IndexType<T>, U, TQual, UQual> {
+    using type = std::common_reference_t<T, U>;
+};
+template <typename T, typename U, template <typename> class TQual, template <typename> class UQual>
+struct basic_common_reference<T, Engine::IndexType<U>, TQual, UQual> {
+    using type = std::common_reference_t<T, U>;
+};
 }

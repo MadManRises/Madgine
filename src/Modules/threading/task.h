@@ -6,21 +6,6 @@
 namespace Engine {
 namespace Threading {
 
-    template <typename F, typename... Args>
-    auto make_task(F f, Args &&...args)
-    {
-        static_assert(!std::is_reference_v<F>);
-
-        using R = std::invoke_result_t<F, Args...>;
-
-        if constexpr (InstanceOf<R, Task>) {
-            return std::invoke(std::move(f), std::forward<Args>(args)...);
-        } else {
-            return [](F f, Args... args) -> Task<std::invoke_result_t<F, Args...>> {
-                co_return std::invoke(std::move(f), std::forward<Args>(args)...);
-            }(std::move(f), std::forward<Args>(args)...);
-        }
-    }
 
     template <typename T, typename Immediate>
     struct [[nodiscard]] Task {
@@ -55,19 +40,19 @@ namespace Threading {
         {
         }
 
-        TaskFuture<T> get_future(const std::shared_ptr<TaskPromiseSharedState<T>> &state = {})
+        TaskFuture<T> get_future()
         {
-            assert(!mState || !state);
-            if (state) {
-                assert(!state->is_ready() && state->valid());
-                mState = state;
-                if (mHandle)
-                    mHandle->set_state(state);
-            }
             if (!mState) {
                 mState = mHandle->get_state();
             }
             return mState;
+        }
+
+        void set_future(TaskFuture<T> fut)
+        {
+            assert(!mState && fut.valid());
+            mState = fut.release();
+            mHandle->set_state(mState);
         }
 
         TaskHandle assign(TaskQueue *queue)
@@ -111,6 +96,23 @@ namespace Threading {
     Task<T> make_ready_task(T &&val)
     {
         return { std::make_shared<TaskPromiseSharedState<T>>(std::forward<T>(val)) };
+    }
+
+    
+    template <typename F, typename... Args>
+    auto make_task(F f, Args &&...args)
+    {
+        static_assert(!std::is_reference_v<F>);
+
+        using R = std::invoke_result_t<F, Args...>;
+
+        if constexpr (InstanceOf<R, Task>) {
+            return std::invoke(std::move(f), std::forward<Args>(args)...);
+        } else {
+            return [](F f, Args... args) -> Task<R> {
+                co_return std::invoke(std::move(f), std::forward<Args>(args)...);
+            }(std::move(f), std::forward<Args>(args)...);
+        }
     }
 
 }

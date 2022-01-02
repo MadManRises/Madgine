@@ -52,8 +52,12 @@ namespace Serialize {
         StreamResult readUnformatted(SerializableDataUnit *&p);
 
         StreamResult readUnformatted(std::string &s);
-        StreamResult readUnformatted(std::string_view &s) = delete;
-        StreamResult readUnformatted(CoWString &s);
+        StreamResult readUnformatted(String auto& s) {
+            std::string string;
+            STREAM_PROPAGATE_ERROR(readUnformatted(string));
+            s = std::move(string);
+            return {};
+        }
 
         StreamResult readUnformatted(ByteBuffer &b);
 
@@ -107,12 +111,10 @@ namespace Serialize {
         ParticipantId id() const;
 
         template <typename T>
-        SerializeOutStream &operator<<(const T &t);
-
-        SerializeOutStream &operator<<(const char *s);
+        SerializeOutStream &operator<<(const T &t) = delete;
 
         template <typename T>
-        requires(!Pointer<T>) void writeUnformatted(const T &t)
+        requires(!Pointer<T> && !StringViewable<T>) void writeUnformatted(const T &t)
         {
             if (isBinary())
                 writeRaw(t);
@@ -123,9 +125,10 @@ namespace Serialize {
         void writeUnformatted(const SyncableUnitBase *p);
         void writeUnformatted(const SerializableDataUnit *p);
 
-        void writeUnformatted(const std::string &s);
         void writeUnformatted(const std::string_view &s);
-        void writeUnformatted(const CoWString &s);
+        void writeUnformatted(const StringViewable auto& s) {
+            writeUnformatted(std::string_view { s });
+        }
 
         void writeUnformatted(const ByteBuffer &b);
 

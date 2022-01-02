@@ -1,7 +1,5 @@
 #include "../../metalib.h"
 #include "buffered_streambuf.h"
-#include "../formatter.h"
-#include "../syncmanager.h"
 
 namespace Engine {
 namespace Serialize {
@@ -10,19 +8,6 @@ namespace Serialize {
         : mBytesToRead(sizeof(BufferedMessageHeader))
         , mBuffer(std::move(buffer))
     {
-    }
-
-    buffered_streambuf::buffered_streambuf(buffered_streambuf &&other) noexcept
-        : std::basic_streambuf<char>(std::move(other))
-        , mBytesToRead(other.mBytesToRead)
-        , mReceiveMessageHeader(other.mReceiveMessageHeader)
-        , mRecBuffer(std::forward<std::vector<char>>(other.mRecBuffer))
-        , mSendBuffer(std::forward<std::vector<char>>(other.mSendBuffer))
-        , mBufferedSendMsgs(std::forward<std::list<BufferedSendMessage>>(other.mBufferedSendMsgs))
-    {
-        setg(mRecBuffer.data(), mRecBuffer.data() + (other.gptr() - other.eback()), mRecBuffer.data() + mRecBuffer.size());
-        setp(mSendBuffer.data(), mSendBuffer.data() + mSendBuffer.size());
-        pbump(static_cast<int>(other.pptr() - other.pbase()));
     }
 
     buffered_streambuf::~buffered_streambuf()
@@ -80,20 +65,7 @@ namespace Serialize {
         }
     }
 
-    PendingRequest *BufferedStreamData::fetchRequest(TransactionId id)
-    {
-        if (id == 0)
-            return nullptr;
-        assert(mPendingRequests.front().mId == id);
-        return &mPendingRequests.front();
-    }
-
-    void BufferedStreamData::popRequest(TransactionId id)
-    {
-        assert(id != 0);
-        assert(mPendingRequests.front().mId == id);
-        mPendingRequests.pop();
-    }
+    
 
     buffered_streambuf::int_type buffered_streambuf::overflow(int c)
     {
@@ -117,20 +89,12 @@ namespace Serialize {
         return 0;
     }
 
-    TransactionId BufferedStreamData::createRequest(ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback)
-    {
-        if (requesterTransactionId == 0 && !callback)
-            return 0;
-
-        assert(callback || requester != 0);
-        TransactionId id = ++mRunningTransactionId;
-        mPendingRequests.push({ id, requester, requesterTransactionId, std::move(callback) });
-        return id;
-    }
+    
 
     void buffered_streambuf::beginMessage()
     {
         assert(pptr() == pbase());
+        assert(pptr() == nullptr);
     }
 
     void buffered_streambuf::endMessage()
@@ -193,6 +157,7 @@ namespace Serialize {
                 readCount += num;
                 mBytesToRead -= num;
                 if (mBytesToRead == 0) {
+                    assert(mReceiveMessageHeader.mMsgSize > 0);
                     mBytesToRead = mReceiveMessageHeader.mMsgSize;
                     mRecBuffer.resize(mBytesToRead);
                 }
@@ -221,15 +186,7 @@ namespace Serialize {
         return readCount;
     }
 
-    BufferedStreamData::BufferedStreamData(std::unique_ptr<Formatter> format, SyncManager &mgr, ParticipantId id)
-        : SerializeStreamData(std::move(format), mgr, id)
-    {
-    }
-
-    SyncManager *BufferedStreamData::manager()
-    {
-        return static_cast<SyncManager *>(SerializeStreamData::manager());
-    }
+   
 
 }
 }

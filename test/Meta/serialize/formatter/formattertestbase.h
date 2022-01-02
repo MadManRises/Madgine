@@ -34,7 +34,7 @@ void FormatterBaseTest(std::string_view expected = "")
 
     SerializeOutStream out { std::move(pBuffer), std::make_unique<SerializeStreamData>(std::make_unique<Formatter>()) };
 
-    out << unit1;
+    write(out, unit1, "unit1");
 
     std::string file = buffer->str();
 

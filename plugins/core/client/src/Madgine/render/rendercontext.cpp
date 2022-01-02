@@ -43,7 +43,7 @@ namespace Render {
 
     void RenderContext::removeRenderTarget(RenderTarget *target)
     {
-        mRenderTargets.erase(std::find(mRenderTargets.begin(), mRenderTargets.end(), target));
+        std::erase(mRenderTargets, target);
     }
 
     void RenderContext::render()

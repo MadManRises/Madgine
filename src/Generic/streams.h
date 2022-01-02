@@ -66,6 +66,10 @@ struct InStream {
     {
         return mStream.tellg();
     }
+    std::streamsize gcount()
+    {
+        return mStream.gcount();
+    }
     bool seek(pos_type p)
     {
         return static_cast<bool>(mStream.seekg(p));

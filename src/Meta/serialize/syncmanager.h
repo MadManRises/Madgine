@@ -48,7 +48,7 @@ namespace Serialize {
 
 		static ParticipantId getParticipantId(SyncManager *manager);
 
-        StreamState getStreamError() const;
+        StreamResult fetchStreamError();
 
     protected:
         StreamResult receiveMessages(BufferedInOutStream &stream, int &msgCount, TimeOut timeout = {});
@@ -68,7 +68,7 @@ namespace Serialize {
 
         void sendState(BufferedInOutStream &stream, SyncableUnitBase *unit);
 
-        SyncManagerResult recordStreamError(StreamState error);
+        SyncManagerResult recordStreamError(StreamResult error);
 
     private:
 
@@ -81,7 +81,7 @@ namespace Serialize {
 
         bool mSlaveStreamInvalid;
 
-        StreamState mStreamError = StreamState::OK;
+        StreamResult mStreamError;
     };
 }
 }

@@ -24,18 +24,22 @@ constexpr const char *list1ArgNames(size_t index)
     return names[index];
 }
 
-std::tuple<int, float, std::string, bool> writeList1(const ComplexDataType &data)
+void writeList1(Engine::Serialize::SerializeOutStream &out, const ComplexDataType &data)
 {
-    return {
-        data.i,
-        data.f,
-        data.s,
-        data.b
-    };
+    out.format().beginExtended(out, "Item", 4);
+    write(out, data.i, "first");
+    write(out, data.f, "second");
+    write(out, data.s, "third");
+    write(out, data.b, "fourth");
 }
-std::tuple<int, float, std::string, bool> readList1(int i, float f, std::string s, bool b)
+Engine::Serialize::StreamResult readList1(Engine::Serialize::SerializeInStream &in, int &i, float &f, std::string &s, bool &b)
 {
-    return { i, f, s, b };
+    STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, "Item", 4));
+    STREAM_PROPAGATE_ERROR(read(in, i, "first"));
+    STREAM_PROPAGATE_ERROR(read(in, f, "second"));
+    STREAM_PROPAGATE_ERROR(read(in, s, "third"));
+    STREAM_PROPAGATE_ERROR(read(in, b, "fourth"));
+    return {};
 }
 
 SERIALIZETABLE_BEGIN(TestUnit)
@@ -46,9 +50,9 @@ FIELD(list1)
 FIELD(list2)
 FIELD(set1)
 FIELD(set2)
-FIELD(map1, KeyValueCreator<DefaultCreator<const std::pair<int, float>>, DefaultCreator<int>>)
+FIELD(map1, KeyValueCreator<DefaultCreator, DefaultCreator>)
 
-FIELD(complexList1, CustomCreator<&list1ArgNames, &readList1, &writeList1>)
+FIELD(complexList1, CustomCreator<&readList1, &writeList1>)
 FIELD(complexList2)
 FIELD(complexList3)
 

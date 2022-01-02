@@ -4,6 +4,8 @@
 
 #include "Modules/threading/workgroupstorage.h"
 
+#include "Generic/container/transformIt.h"
+
 namespace Engine {
 
 std::map<std::string_view, TypedScopePtr> sGlobalRegistry;
@@ -23,13 +25,13 @@ void KeyValueRegistry::registerWorkGroupLocal(const char *name, TypedScopePtr pt
 
 void KeyValueRegistry::unregisterGlobal(TypedScopePtr ptr)
 {
-    auto it = std::find_if(sGlobalRegistry.begin(), sGlobalRegistry.end(), [=](auto &p) { return p.second == ptr; });
+    auto it = std::ranges::find(sGlobalRegistry, ptr, projectionPairSecond);
     sGlobalRegistry.erase(it);
 }
 
 void KeyValueRegistry::unregisterWorkGroupLocal(TypedScopePtr ptr)
 {
-    auto it = std::find_if(sWorkGroupLocalRegistry->begin(), sWorkGroupLocalRegistry->end(), [=](auto &p) { return p.second == ptr; });
+    auto it = std::ranges::find(*sWorkGroupLocalRegistry, ptr, projectionPairSecond);
     sWorkGroupLocalRegistry->erase(it);
 }
 

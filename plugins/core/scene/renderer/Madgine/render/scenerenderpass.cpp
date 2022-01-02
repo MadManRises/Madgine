@@ -166,7 +166,7 @@ namespace Render {
 
             std::vector<SceneInstanceData> instanceData;
 
-            std::transform(instance.second.begin(), instance.second.end(), std::back_inserter(instanceData), [](const Matrix4 &m) {
+            std::ranges::transform(instance.second, std::back_inserter(instanceData), [](const Matrix4 &m) {
                 return SceneInstanceData {
                     m,
                     m.Inverse().Transpose()

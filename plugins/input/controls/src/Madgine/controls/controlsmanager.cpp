@@ -45,7 +45,7 @@ namespace Input {
 
     void ControlsManager::removeAxisEventListener(AxisEventListener *listener)
     {
-        mAxisEventListeners.erase(std::find(mAxisEventListeners.begin(), mAxisEventListeners.end(), listener));
+        std::erase(mAxisEventListeners, listener);
     }
 
     bool ControlsManager::injectAxisEvent(const AxisEventArgs &arg)

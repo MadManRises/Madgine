@@ -88,7 +88,7 @@ constexpr Accessor member()
     using DerivedScope = typename traits::class_type;
     using T = typename traits::return_type;
 
-    if constexpr (std::is_const_v<DerivedScope> || !std::is_assignable_v<T &, const T &> || (Iterable<T> && !String<T>)) {
+    if constexpr (std::is_const_v<DerivedScope> || !std::is_assignable_v<T &, const T &> || (std::ranges::range<T> && !String<T>)) {
         return property<Scope, P, nullptr>();
     } else {
         return property<Scope, P, &setField<P, DerivedScope, std::remove_reference_t<T>>>();

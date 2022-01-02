@@ -6,7 +6,7 @@
 
 #include "messageheader.h"
 
-#include "streams/buffered_streambuf.h"
+#include "streams/syncstreamdata.h"
 
 #include "streams/operations.h"
 
@@ -102,8 +102,8 @@ namespace Serialize {
 
     void SyncManager::clearTopLevelItems()
     {
-        while (!slavesMap().empty()) {
-            slavesMap().begin()->second->clearSlaveId(this);
+        while (!mSlaveMappings.empty()) {
+            mSlaveMappings.begin()->second->clearSlaveId(this);
         }
         for (TopLevelUnitBase *unit : mTopLevelUnits) {
             unit->removeManager(this);
@@ -132,8 +132,8 @@ namespace Serialize {
 
     void SyncManager::removeTopLevelItem(TopLevelUnitBase *unit)
     {
-        auto it2 = slavesMap().begin();
-        while (it2 != slavesMap().end()) {
+        auto it2 = mSlaveMappings.begin();
+        while (it2 != mSlaveMappings.end()) {
             if (it2->second->mTopLevel == unit) {
                 it2++->second->clearSlaveId(this);
             } else {
@@ -205,7 +205,7 @@ namespace Serialize {
                 while (mReceivingMasterState) {
                     int msgCount = -1;
                     if (StreamResult result = receiveMessages(*mSlaveStream, msgCount); result.mState != StreamState::OK) {
-                        state = recordStreamError(result.mState);
+                        state = recordStreamError(std::move(result));
                         mReceivingMasterState = false;
                     }
                     if (mReceivingMasterState && timeout.expired()) {
@@ -214,8 +214,8 @@ namespace Serialize {
                     }
                 }
                 if (state != SyncManagerResult::SUCCESS) {
-                    while (!slavesMap().empty()) {
-                        slavesMap().begin()->second->clearSlaveId(this);
+                    while (!mSlaveMappings.empty()) {
+                        mSlaveMappings.begin()->second->clearSlaveId(this);
                     }
                 }
             }
@@ -236,10 +236,10 @@ namespace Serialize {
     void SyncManager::removeSlaveStream()
     {
         if (mSlaveStream) {
-            while (!slavesMap().empty()) {
-                size_t s = slavesMap().size();
-                slavesMap().begin()->second->clearSlaveId(this);
-                assert(s > slavesMap().size());
+            while (!mSlaveMappings.empty()) {
+                size_t s = mSlaveMappings.size();
+                mSlaveMappings.begin()->second->clearSlaveId(this);
+                assert(s > mSlaveMappings.size());
             }
             for (TopLevelUnitBase *topLevel : mTopLevelUnits) {
                 topLevel->updateManagerType(this, true);
@@ -260,7 +260,7 @@ namespace Serialize {
         }
 
         if (!stream)
-            return recordStreamError(StreamState::UNKNOWN_ERROR);
+            return SyncManagerResult::UNKNOWN_ERROR;
 
         mMasterStreams.emplace(std::move(stream));
         return SyncManagerResult::SUCCESS;
@@ -296,9 +296,9 @@ namespace Serialize {
         }
     }
 
-    StreamState SyncManager::getStreamError() const
+    StreamResult SyncManager::fetchStreamError()
     {
-        return mStreamError;
+        return std::move(mStreamError);
     }
 
     StreamResult SyncManager::receiveMessages(int msgCount, TimeOut timeout)
@@ -354,22 +354,19 @@ namespace Serialize {
         }
         try {
             if (mSlaveStream && (&in == &*mSlaveStream)) {
-                out = slavesMap().at(unit);
+                out = mSlaveMappings.at(unit);
             } else {
                 if (unit < RESERVED_ID_COUNT) {
                     assert(unit >= BEGIN_STATIC_ID_SPACE);
-                    auto it = std::find_if(
-                        mTopLevelUnits.begin(), mTopLevelUnits.end(),
-                        [unit](TopLevelUnitBase *topLevel) {
-                            return topLevel->masterId() == unit;
-                        });
+                    auto it = std::ranges::find(
+                        mTopLevelUnits, unit, &TopLevelUnitBase::masterId);
                     if (it == mTopLevelUnits.end()) {
                         return STREAM_INTEGRITY_ERROR(in, "Illegal TopLevel-Id (" << unit << ") used!");
                     }
                     out = *it;
                 } else {
                     SyncableUnitBase *u = getByMasterId(unit);
-                    if (std::find(mTopLevelUnits.begin(), mTopLevelUnits.end(), u->mTopLevel) == mTopLevelUnits.end()) {
+                    if (std::ranges::find(mTopLevelUnits, u->mTopLevel) == mTopLevelUnits.end()) {
                         return STREAM_INTEGRITY_ERROR(in, "Unit (" << unit << ") with unregistered TopLevel-Unit used!");
                     }
                     out = u;
@@ -446,9 +443,9 @@ namespace Serialize {
         stream.endMessage();
     }
 
-    SyncManagerResult SyncManager::recordStreamError(StreamState error)
+    SyncManagerResult SyncManager::recordStreamError(StreamResult error)
     {
-        mStreamError = error;
+        mStreamError = std::move(error);
         return SyncManagerResult::STREAM_ERROR;
     }
 

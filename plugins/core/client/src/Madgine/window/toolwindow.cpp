@@ -18,17 +18,13 @@ namespace Window {
     ToolWindow::ToolWindow(MainWindow &parent, const WindowSettings &settings)
         : mParent(parent)
     {
-        mOsWindow = sCreateWindow(settings);
-
-        mOsWindow->addListener(this);
+        mOsWindow = sCreateWindow(settings, this);
 
         mRenderWindow = parent.getRenderer()->createRenderWindow(mOsWindow);
     }
 
     ToolWindow::~ToolWindow()
     {
-        mOsWindow->removeListener(this);
-
         mOsWindow->destroy();
     }
 

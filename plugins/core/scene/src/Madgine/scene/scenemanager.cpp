@@ -33,7 +33,7 @@ MEMBER(mAmbientLightDirection)
 METATABLE_END(Engine::Scene::SceneManager)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::SceneManager)
-FIELD(mEntities, Serialize::ParentCreator<&Engine::Scene::SceneManager::entityCreationNames, &Engine::Scene::SceneManager::createNonLocalEntityData, &Engine::Scene::SceneManager::storeEntityCreationData>, Serialize::RequestPolicy::no_requests)
+FIELD(mEntities, Serialize::ParentCreator<&Engine::Scene::SceneManager::readNonLocalEntity, &Engine::Scene::SceneManager::writeEntity>, Serialize::RequestPolicy::no_requests)
 FIELD(mSceneComponents, Serialize::ControlledConfig<KeyCompare<std::unique_ptr<Engine::Scene::SceneComponentBase>>>)
 SERIALIZETABLE_END(Engine::Scene::SceneManager)
 
@@ -84,11 +84,6 @@ namespace Scene {
         return mSceneComponents.size();
     }
 
-    App::GlobalAPIBase &SceneManager::getGlobalAPIComponent(size_t i)
-    {
-        return mApp.getGlobalAPIComponent(i);
-    }
-
     Threading::DataMutex &SceneManager::mutex()
     {
         return mMutex;
@@ -110,16 +105,14 @@ namespace Scene {
 
     void SceneManager::updateRender()
     {
-        for (const std::unique_ptr<Entity::EntityComponentListBase>& list : mEntityComponentLists) {
+        for (const std::unique_ptr<Entity::EntityComponentListBase> &list : mEntityComponentLists) {
             list->updateRender();
         }
     }
 
     Entity::EntityPtr SceneManager::findEntity(const std::string &name)
     {
-        auto it = std::find_if(mEntities.begin(), mEntities.end(), [&](const Entity::Entity &e) {
-            return e.key() == name;
-        });
+        auto it = std::ranges::find(mEntities, name, projectionKey);
         if (it == mEntities.end()) {
             std::terminate();
         }
@@ -134,12 +127,11 @@ namespace Scene {
 
     void SceneManager::remove(Entity::Entity *e)
     {
-
         if (e->isLocal()) {
-            auto it = std::find_if(mLocalEntities.begin(), mLocalEntities.end(), [=](Entity::Entity &ent) { return &ent == e; });
+            auto it = std::ranges::find(mLocalEntities, e, projectionAddressOf);
             mLocalEntities.erase(it);
         } else {
-            auto it = std::find_if(mEntities.begin(), mEntities.end(), [=](Entity::Entity &ent) { return &ent == e; });
+            auto it = std::ranges::find(mEntities, e, projectionAddressOf);
             mEntities.erase(it);
         }
     }
@@ -170,15 +162,12 @@ namespace Scene {
         return &mLocalEntities.emplace_back(std::move(e), true);
     }
 
-    const char *SceneManager::entityCreationNames(size_t index)
+    Serialize::StreamResult SceneManager::readNonLocalEntity(Serialize::SerializeInStream &in, OutRef<SceneManager> &mgr, bool &isLocal, std::string &name)
     {
-        assert(index == 0);
-        return "name";
-    }
-
-    std::tuple<SceneManager &, bool, std::string> SceneManager::createNonLocalEntityData(const std::string &name)
-    {
-        return createEntityData(name, false);
+        STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, "Entity", 1));
+        mgr = *this;
+        isLocal = false;
+        return read(in, name, "name");
     }
 
     std::tuple<SceneManager &, bool, std::string> SceneManager::createEntityData(const std::string &name, bool local)
@@ -188,9 +177,10 @@ namespace Scene {
         return make_tuple(std::ref(*this), local, actualName);
     }
 
-    std::tuple<std::string> SceneManager::storeEntityCreationData(const Entity::Entity &entity) const
+    void SceneManager::writeEntity(Serialize::SerializeOutStream &out, const Entity::Entity &entity) const
     {
-        return std::make_tuple(entity.name());
+        out.format().beginExtended(out, "Entity", 1);
+        write(out, entity.name(), "name");
     }
 
     Future<Entity::EntityPtr> SceneManager::createEntity(const std::string &behavior, const std::string &name,
@@ -206,10 +196,10 @@ namespace Scene {
                 LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
         }
         Future<Pib<typename RefcountedContainer<std::deque<Entity::Entity>>::iterator>> f;
-        if (init) {
-            f = TupleUnpacker::invokeExpand(&decltype(mEntities)::emplace<SceneManager &, bool, std::string, ObjectPtr>, &mEntities, mEntities.end(), tuple_cat(createEntityData(name, false), std::make_tuple(table))).init(init);
-        } else
-            f = TupleUnpacker::invokeExpand(&decltype(mEntities)::emplace<SceneManager &, bool, std::string, ObjectPtr>, &mEntities, mEntities.end(), tuple_cat(createEntityData(name, false), std::make_tuple(table)));
+        if (init)
+            f = TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace, this), mEntities.end(), createEntityData(name, false), table).init(init);
+        else
+            f = TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace, this), mEntities.end(), createEntityData(name, false), table);
         return { f.then([](const typename RefcountedContainer<std::deque<Entity::Entity>>::iterator &it) { return Entity::EntityPtr { &*it }; }) };
     }
 
@@ -224,8 +214,7 @@ namespace Scene {
             if (!behavior.empty())
                 LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
         }
-        const std::tuple<SceneManager &, bool, std::string> &data = createEntityData(name, true);
-        return &*mLocalEntities.emplace(mLocalEntities.end(), std::get<0>(data), std::get<1>(data), std::get<2>(data), table);
+        return &*TupleUnpacker::invokeFlatten(LIFT(mLocalEntities.emplace, this), mLocalEntities.end(), createEntityData(name, true), table);
     }
 
     Threading::SignalStub<const RefcountedContainer<std::deque<Entity::Entity>>::iterator &, int> &SceneManager::entitiesSignal()

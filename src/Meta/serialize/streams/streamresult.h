@@ -18,6 +18,8 @@ namespace Serialize {
     struct [[nodiscard]] StreamResult {
         StreamState mState = StreamState::OK;
         std::unique_ptr<StreamError> mError;
+
+        META_EXPORT friend std::ostream &operator<<(std::ostream &out, const StreamResult &result);
     };
 
     struct META_EXPORT StreamResultBuilder {
@@ -38,10 +40,10 @@ namespace Serialize {
         operator StreamResult();
 
         template <typename T>
-        StreamResultBuilder &operator<<(T &&t)
+        StreamResultBuilder &&operator<<(T &&t) &&
         {
             mMsg << std::forward<T>(t);
-            return *this;
+            return std::move(*this);
         }
     };
 

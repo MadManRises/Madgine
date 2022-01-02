@@ -44,7 +44,7 @@ namespace Threading {
     template <size_t S>
     bool try_lockData(std::array<DataMutex *, S> data, AccessMode mode)
     {
-        std::sort(data.begin(), data.end());
+        std::ranges::sort(data);
         return try_lockData_sorted(data.begin(), data.end(), mode);
     }
     bool try_lockData_sorted(DataMutex *const *begin, DataMutex *const *end, AccessMode mode);

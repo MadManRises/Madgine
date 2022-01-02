@@ -67,7 +67,7 @@ namespace Render {
 
             std::string source = mResource->readAsText();
 
-            std::set<std::string> files;
+            std::map<std::string, size_t> files;
 
             CodeGen::resolveIncludes(
                 source, [](const Filesystem::Path &path, size_t line, std::string_view filename) {

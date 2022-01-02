@@ -19,7 +19,7 @@ struct META_EXPORT KeyValueFunction {
     template <typename R, typename... Args>
     static void unpackApiMethod(void (*f)(), ValueType &retVal, const ArgumentList &args)
     {
-        unpackHelper<R, Args...>(f, retVal, args, std::make_index_sequence<sizeof...(Args)>());
+        unpackHelper<R, Args...>(f, retVal, args, std::index_sequence_for<Args...>());
     }
 
     template <typename R, typename... Args>

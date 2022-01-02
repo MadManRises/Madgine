@@ -37,25 +37,31 @@ namespace Render {
         program.reset();
     }
 
-    bool OpenGLProgramLoader::create(Program &_program, const std::string &name, const std::vector<size_t> &bufferSizes, size_t instanceDataSize)
+    Threading::Task<bool> OpenGLProgramLoader::create(Program &_program, const std::string &name, const std::vector<size_t> &bufferSizes, size_t instanceDataSize)
     {
         OpenGLProgram &program = static_cast<OpenGLProgram &>(_program);
 
         OpenGLShaderLoader::HandleType vertexShader;
-        vertexShader.load(name, VertexShader);
-        if (!vertexShader) {
+        if (!co_await vertexShader.load(name, VertexShader)) { 
             LOG_ERROR("Failed to load VS '" << name << "'!");
+            co_return false;
         }
 
         OpenGLShaderLoader::HandleType pixelShader;
-        pixelShader.load(name, PixelShader);
+        if (!co_await pixelShader.load(name, PixelShader) && pixelShader) {
+            LOG_ERROR("Failed to load PS '" << name << "'!");
+            co_return false;
+        }
 
         OpenGLShaderLoader::HandleType geometryShader;
-        geometryShader.load(name, GeometryShader);
+        if (!co_await geometryShader.load(name, GeometryShader) && geometryShader) {
+            LOG_ERROR("Failed to load GS '" << name << "'!");
+            co_return false;
+        }
 
         if (!program.link(vertexShader, pixelShader, geometryShader)) {
             LOG_ERROR("Failed to link Program '" << name << "'!");
-            std::terminate();
+            co_return false;
         }
 
         for (size_t i = 0; i < bufferSizes.size(); ++i)
@@ -65,7 +71,7 @@ namespace Render {
         if (instanceDataSize > 0)
             program.setInstanceDataSize(instanceDataSize);
 
-        return true;
+        co_return true;
     }
 
     bool OpenGLProgramLoader::create(Program &_program, const std::string &name, const CodeGen::ShaderFile &file)

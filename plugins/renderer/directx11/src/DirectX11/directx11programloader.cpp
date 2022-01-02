@@ -39,19 +39,22 @@ namespace Render {
         program.reset();
     }
 
-    bool DirectX11ProgramLoader::create(Program &_program, const std::string &name, const std::vector<size_t> &bufferSizes, size_t instanceDataSize)
+    Threading::Task<bool> DirectX11ProgramLoader::create(Program &_program, const std::string &name, const std::vector<size_t> &bufferSizes, size_t instanceDataSize)
     {
         DirectX11Program &program = static_cast<DirectX11Program &>(_program);
 
         DirectX11VertexShaderLoader::HandleType vertexShader;
-        vertexShader.load(name);
+        if (!co_await vertexShader.load(name))
+            co_return false;
         DirectX11GeometryShaderLoader::HandleType geometryShader;
-        geometryShader.load(name);
+        if (!co_await geometryShader.load(name) && geometryShader)
+            co_return false;
         DirectX11PixelShaderLoader::HandleType pixelShader;
-        pixelShader.load(name);
+        if (!co_await pixelShader.load(name) && pixelShader)
+            co_return false;
 
         if (!program.link(std::move(vertexShader), std::move(pixelShader), std::move(geometryShader)))
-            std::terminate();
+            co_return false;
 
         for (size_t i = 0; i < bufferSizes.size(); ++i)
             if (bufferSizes[i] > 0)
@@ -60,7 +63,7 @@ namespace Render {
         if (instanceDataSize > 0)
             program.setInstanceDataSize(instanceDataSize);
 
-        return true;
+        co_return true;
     }
 
     bool DirectX11ProgramLoader::create(Program &_program, const std::string &name, const CodeGen::ShaderFile &file)

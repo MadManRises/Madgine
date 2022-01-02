@@ -43,8 +43,8 @@ namespace Window {
     }
 
     struct LinuxWindow final : OSWindow {
-        LinuxWindow(::Window hwnd, const InterfacesVector &size)
-            : OSWindow(hwnd)
+        LinuxWindow(::Window hwnd, WindowEventListener *listener, const InterfacesVector &size)
+            : OSWindow(hwnd, listener)
             , mSize(size)            
         {
         }
@@ -240,7 +240,7 @@ namespace Window {
         }
     }
 
-    OSWindow *sCreateWindow(const WindowSettings &settings)
+    OSWindow *sCreateWindow(const WindowSettings &settings, WindowEventListener *listener)
     {
         assert(sDisplay());
 
@@ -282,7 +282,7 @@ namespace Window {
             XWindowEvent(sDisplay(), handle, StructureNotifyMask, &event);
         } while (event.type != MapNotify);
 
-        auto pib = sWindows.try_emplace(handle, handle, settings.mData.mSize);
+        auto pib = sWindows.try_emplace(handle, handle, listener, settings.mData.mSize);
         assert(pib.second);
 
         return &pib.first->second;

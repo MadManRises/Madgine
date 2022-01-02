@@ -270,7 +270,7 @@ constexpr ValueTypeIndex toValueTypeIndex()
     static_assert(!std::is_same_v<T, ValueType>);
     if constexpr (isValueTypePrimitive_v<T>) {
         return static_cast<ValueTypeEnum>(type_pack_index_v<size_t, ValueTypeList, T>);
-    } else if constexpr (Iterable<T>) {
+    } else if constexpr (std::ranges::range<T>) {
         if constexpr (std::is_same_v<KeyType_t<typename T::iterator::value_type>, std::monostate>)
             return ValueTypeEnum::KeyValueVirtualSequenceRangeValue;
         else
@@ -298,7 +298,7 @@ constexpr ExtendedValueTypeDesc toValueTypeDesc()
         return { ExtendedValueTypeEnum::GenericType };
     } else if constexpr (std::same_as<T, TypedScopePtr>) {
         return { { ValueTypeEnum::ScopeValue }, static_cast<const MetaTable **>(nullptr) };
-    } else if constexpr (Iterable<T>) {
+    } else if constexpr (std::ranges::range<T>) {
         if constexpr (std::same_as<KeyType_t<typename T::iterator::value_type>, std::monostate>)
             return { { ValueTypeEnum::KeyValueVirtualSequenceRangeValue }, toValueTypeDesc<typename T::iterator::value_type>() };
         else

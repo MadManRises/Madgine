@@ -1,28 +1,27 @@
 #pragma once
 
-#include "toolscollector.h"
 #include "toolbase.h"
+#include "toolscollector.h"
 
 #include "Madgine/controls/axiseventlistener.h"
 
 namespace Engine {
 namespace Tools {
 
-	struct MADGINE_CONTROLS_TOOLS_EXPORT ControlsView : Tool<ControlsView>, Input::AxisEventListener{
-    
-		ControlsView(ImRoot &root);
+    struct MADGINE_CONTROLS_TOOLS_EXPORT ControlsView : Tool<ControlsView>, Input::AxisEventListener {
 
-		virtual std::string_view key() const override;
+        ControlsView(ImRoot &root);
 
-		virtual bool init() override;
+        virtual std::string_view key() const override;
 
-		virtual void render() override;
+        virtual Threading::Task<bool> init() override;
 
-		virtual bool onAxisEvent(const Input::AxisEventArgs &arg) override;
+        virtual void render() override;
 
-		float mLeftStickX, mLeftStickY;
+        virtual bool onAxisEvent(const Input::AxisEventArgs &arg) override;
 
-	};
+        float mLeftStickX, mLeftStickY;
+    };
 
 }
 }

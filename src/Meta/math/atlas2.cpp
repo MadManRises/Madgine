@@ -131,11 +131,11 @@ std::vector<Atlas2::Entry> Atlas2::insert(const std::vector<Vector2i> &sizes, co
 
     int index = 0;
 
-    std::transform(sizes.begin(), sizes.end(), std::back_inserter(items), [&](const Vector2i &v) {
+    std::ranges::transform(sizes, std::back_inserter(items), [&](const Vector2i &v) {
         return std::make_pair(v, index++);
     });
 
-    std::sort(items.begin(), items.end(), [](const std::pair<Vector2i, int> &first, const std::pair<Vector2i, int> &second) {
+    std::ranges::sort(items, [](const std::pair<Vector2i, int> &first, const std::pair<Vector2i, int> &second) {
         if (first.first.x * first.first.y > second.first.x * second.first.y)
             return true;
         if (first.first.x * first.first.y < second.first.x * second.first.y)

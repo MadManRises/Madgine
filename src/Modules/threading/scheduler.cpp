@@ -86,7 +86,7 @@ namespace Threading {
     void Scheduler::singleLoop()
     {
         for (Threading::TaskQueue *queue : mWorkgroup.taskQueues()) {
-            queue->update(1, 1);
+            queue->update(1);
         }
     }
 

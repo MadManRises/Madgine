@@ -1,6 +1,6 @@
 <Graph serId=1>
     <mNodes>
-        <Item type="TestNode" serId=2>
+        <Node type="TestNode" serId=2>
             <mFlowOutPins>
                 <Item>
                     <Element>
@@ -31,8 +31,8 @@
                     </Element>
                 </Item>
             </mDataOutPins>
-        </Item>
-        <Item type="TestNode" serId=3>
+        </Node>
+        <Node type="TestNode" serId=3>
             <mFlowOutPins>
                 <Item>
                     <Element>
@@ -63,8 +63,8 @@
                     </Element>
                 </Item>
             </mDataOutPins>
-        </Item>
-        <Item type="VariableNode" serId=4>
+        </Node>
+        <Node type="VariableNode" serId=4>
             <mDefaultValue type=5>0</mDefaultValue>
             <mFlowOutPins>
             </mFlowOutPins>
@@ -72,8 +72,8 @@
             </mDataInPins>
             <mDataOutPins>
             </mDataOutPins>
-        </Item>
-        <Item type="VariableNode" serId=5>
+        </Node>
+        <Node type="VariableNode" serId=5>
             <mDefaultValue type=5>1</mDefaultValue>
             <mFlowOutPins>
             </mFlowOutPins>
@@ -81,8 +81,8 @@
             </mDataInPins>
             <mDataOutPins>
             </mDataOutPins>
-        </Item>
-        <Item type="VariableNode" serId=6>
+        </Node>
+        <Node type="VariableNode" serId=6>
             <mDefaultValue type=5>0</mDefaultValue>
             <mFlowOutPins>
             </mFlowOutPins>
@@ -90,8 +90,8 @@
             </mDataInPins>
             <mDataOutPins>
             </mDataOutPins>
-        </Item>
-        <Item type="Python3FunctionNode" serId=7>
+        </Node>
+        <Node type="Python3FunctionNode" serId=7>
             <File>testnode</File>
             <mFlowOutPins>
                 <Item>
@@ -123,8 +123,8 @@
                     </Element>
                 </Item>
             </mDataOutPins>
-        </Item>
-        <Item type="VariableNode" serId=8>
+        </Node>
+        <Node type="VariableNode" serId=8>
             <mDefaultValue type=1>a</mDefaultValue>
             <mFlowOutPins>
             </mFlowOutPins>
@@ -132,8 +132,8 @@
             </mDataInPins>
             <mDataOutPins>
             </mDataOutPins>
-        </Item>
-        <Item type="VariableNode" serId=9>
+        </Node>
+        <Node type="VariableNode" serId=9>
             <mDefaultValue type=1>b</mDefaultValue>
             <mFlowOutPins>
             </mFlowOutPins>
@@ -141,7 +141,7 @@
             </mDataInPins>
             <mDataOutPins>
             </mDataOutPins>
-        </Item>
+        </Node>
     </mNodes>
     <mFlowInPins>
         <Item>

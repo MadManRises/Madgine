@@ -26,7 +26,7 @@ namespace Tools {
     {
     }
 
-    bool OpenGLToolConfig::init()
+    Threading::Task<bool> OpenGLToolConfig::init()
     {
         mImageTexture = { Render::TextureType_2D, Render::FORMAT_RGBA8 };
 
@@ -45,14 +45,14 @@ namespace Tools {
             ImGui::Image((void *)(uintptr_t)mImageTexture.mTextureHandle, { static_cast<float>(data->mWidth), static_cast<float>(data->mHeight) });
         });
 
-        return ToolBase::init();
+        co_return co_await ToolBase::init();
     }
 
-    void OpenGLToolConfig::finalize()
+    Threading::Task<void> OpenGLToolConfig::finalize()
     {
         mImageTexture.reset();
 
-        ToolBase::finalize();
+        co_await ToolBase::finalize();
     }
 
     std::string_view OpenGLToolConfig::key() const

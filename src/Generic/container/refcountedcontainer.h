@@ -194,6 +194,13 @@ public:
             return *this;
         }
 
+        IteratorImpl operator++(int)
+        {
+            IteratorImpl copy = *this;
+            ++*this;
+            return copy;
+        }
+
         IteratorImpl &operator--()
         {
             --mIt;

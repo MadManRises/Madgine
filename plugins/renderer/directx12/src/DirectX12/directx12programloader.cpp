@@ -36,17 +36,19 @@ namespace Render {
         program.reset();
     }
 
-    bool DirectX12ProgramLoader::create(Program &_program, const std::string &name, const std::vector<size_t> &bufferSizes, size_t instanceDataSize)
+    Threading::Task<bool> DirectX12ProgramLoader::create(Program &_program, const std::string &name, const std::vector<size_t> &bufferSizes, size_t instanceDataSize)
     {
         DirectX12Program &program = static_cast<DirectX12Program &>(_program);
 
         DirectX12VertexShaderLoader::HandleType vertexShader;
-        vertexShader.load(name);
+        if (!co_await vertexShader.load(name))
+            co_return false;
         DirectX12PixelShaderLoader::HandleType pixelShader;
-        pixelShader.load(name);
+        if (!co_await pixelShader.load(name))
+            co_return false;
 
         if (!program.link(vertexShader, pixelShader))
-            std::terminate();
+            co_return false;
 
         for (size_t i = 0; i < bufferSizes.size(); ++i)
             if (bufferSizes[i] > 0)
@@ -56,7 +58,7 @@ namespace Render {
             program.setInstanceDataSize(instanceDataSize);
 
 
-        return true;
+        co_return true;
     }
 
     bool DirectX12ProgramLoader::create(Program &_program, const std::string &name, const CodeGen::ShaderFile &file)

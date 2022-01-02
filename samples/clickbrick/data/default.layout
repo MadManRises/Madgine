@@ -3,9 +3,9 @@
         <Item key="WidgetManager" serId=1>
             <mStartupWidget>2</mStartupWidget>
             <mTopLevelWidgets>
-                <Item name="MainMenu" type=WidgetClass::WIDGET serId=2>
+                <Widget name="MainMenu" type=WidgetClass::WIDGET serId=2>
                     <mChildren>
-                        <Item name="StartGameButton" type=WidgetClass::BUTTON serId=3>
+                        <Widget name="StartGameButton" type=WidgetClass::BUTTON serId=3>
                             <mText>StartGame</mText>
                             <mFontSize>5</mFontSize>
                             <mFont>OpenSans-Regular</mFont>
@@ -14,16 +14,16 @@
                             </mChildren>
                             <mPos>[0.25, 0, 0, 0, 0.2, 0, 0, 0, 0]</mPos>
                             <mSize>[0.5, 0, 0, 0, 0.1, 0, 0, 0, 1]</mSize>
-                        </Item>
+                        </Widget>
                     </mChildren>
                     <mPos>[0, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
                     <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
-                </Item>
-                <Item name="Ingame" type=WidgetClass::WIDGET serId=4>
+                </Widget>
+                <Widget name="Ingame" type=WidgetClass::WIDGET serId=4>
                     <mChildren>
-                        <Item name="GameView" type=WidgetClass::SCENEWINDOW serId=5>
+                        <Widget name="GameView" type=WidgetClass::SCENEWINDOW serId=5>
                             <mChildren>
-                                <Item name="Score" type=WidgetClass::LABEL serId=6>
+                                <Widget name="Score" type=WidgetClass::LABEL serId=6>
                                     <mFontSize>3</mFontSize>
                                     <mText>Score:123</mText>
                                     <mFont>OpenSans-Bold</mFont>
@@ -31,8 +31,8 @@
                                     </mChildren>
                                     <mPos>[0.8, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
                                     <mSize>[0.2, 0, 0, 0, 0, 40, 0, 0, 1]</mSize>
-                                </Item>
-                                <Item name="Life" type=WidgetClass::LABEL serId=7>
+                                </Widget>
+                                <Widget name="Life" type=WidgetClass::LABEL serId=7>
                                     <mFontSize>3</mFontSize>
                                     <mText>Life: 99999</mText>
                                     <mFont>OpenSans-Bold</mFont>
@@ -40,18 +40,18 @@
                                     </mChildren>
                                     <mPos>[0, 0, 5, 0, 0, 0, 0, 0, 0]</mPos>
                                     <mSize>[0.2, 0, 0, 0, 0, 40, 0, 0, 1]</mSize>
-                                </Item>
+                                </Widget>
                             </mChildren>
                             <mPos>[0, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
                             <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
-                        </Item>
+                        </Widget>
                     </mChildren>
                     <mPos>[0, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
                     <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
-                </Item>
-                <Item name="GameOver" type=WidgetClass::WIDGET serId=8>
+                </Widget>
+                <Widget name="GameOver" type=WidgetClass::WIDGET serId=8>
                     <mChildren>
-                        <Item name="GameOverLabel" type=WidgetClass::LABEL serId=9>
+                        <Widget name="GameOverLabel" type=WidgetClass::LABEL serId=9>
                             <mFontSize>9</mFontSize>
                             <mText>Game Over</mText>
                             <mFont>OpenSans-Bold</mFont>
@@ -59,8 +59,8 @@
                             </mChildren>
                             <mPos>[0.2, 0, 0, 0, 0.4, 0, 0, 0, 0]</mPos>
                             <mSize>[0.7, 0, 0, 0, 0.11, 0, 0, 0, 1]</mSize>
-                        </Item>
-                        <Item name="ScoreLabel" type=WidgetClass::LABEL serId=10>
+                        </Widget>
+                        <Widget name="ScoreLabel" type=WidgetClass::LABEL serId=10>
                             <mFontSize>4</mFontSize>
                             <mText>Your Score: </mText>
                             <mFont>OpenSans-Regular</mFont>
@@ -68,11 +68,11 @@
                             </mChildren>
                             <mPos>[0.3, 0, 0, 0, 0.55, 0, 0, 0, 0]</mPos>
                             <mSize>[0.4, 0, 0, 0, 0.05, 0, 0, 0, 1]</mSize>
-                        </Item>
+                        </Widget>
                     </mChildren>
                     <mPos>[0, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
                     <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
-                </Item>
+                </Widget>
             </mTopLevelWidgets>
         </Item>
         <Item key="UI" serId=11>

@@ -55,7 +55,7 @@ namespace Filesystem {
             }
         }
 
-        events.erase(std::remove_if(events.begin(), events.end(), [](const Filesystem::FileEvent &event) { return event.mType == Filesystem::FileEventType::MIN; }), events.end());
+        std::erase_if(events, [](const Filesystem::FileEvent &event) { return event.mType == Filesystem::FileEventType::MIN; });
 
         return events;
     }

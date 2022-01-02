@@ -18,19 +18,10 @@ namespace Window {
 
     struct INTERFACES_EXPORT OSWindow {
 
-        OSWindow(uintptr_t handle)
+        OSWindow(uintptr_t handle, WindowEventListener *listener)
             : mHandle(handle)
+            , mListener(listener)
         {
-        }
-
-        void addListener(WindowEventListener *listener)
-        {
-            mListeners.push_back(listener);
-        }
-
-        void removeListener(WindowEventListener *listener)
-        {
-            mListeners.erase(std::remove(mListeners.begin(), mListeners.end(), listener), mListeners.end());
         }
 
         void update();
@@ -75,21 +66,17 @@ namespace Window {
     protected:
         void onResize(const InterfacesVector &size)
         {
-            for (WindowEventListener *listener : mListeners)
-                listener->onResize(size);
+                mListener->onResize(size);
         }
 
         void onClose()
         {
-            std::vector<WindowEventListener *> listeners = mListeners;
-            for (WindowEventListener *listener : listeners)
-                listener->onClose();
+                mListener->onClose();
         }
 
         void onRepaint()
         {
-            for (WindowEventListener *listener : mListeners)
-                listener->onRepaint();
+                mListener->onRepaint();
         }
 
         //Input
@@ -97,60 +84,42 @@ namespace Window {
         {
             if (arg.scancode == Input::Key::Shift)
                 return false;
-            for (WindowEventListener *listener : mListeners)
-                if (listener->injectKeyPress(arg))
-                    return true;
-            return false;
+            return mListener->injectKeyPress(arg);
         }
         bool injectKeyRelease(const Input::KeyEventArgs &arg)
         {
             if (arg.scancode == Input::Key::Shift)
                 return false;
-            for (WindowEventListener *listener : mListeners)
-                if (listener->injectKeyRelease(arg))
-                    return true;
-            return false;
+            return mListener->injectKeyRelease(arg);
         }
         bool injectPointerPress(const Input::PointerEventArgs &arg)
         {
             captureInput();
-            for (WindowEventListener *listener : mListeners)
-                if (listener->injectPointerPress(arg))
-                    return true;
-            return false;
+            return mListener->injectPointerPress(arg);
         }
         bool injectPointerRelease(const Input::PointerEventArgs &arg)
         {
             releaseInput();
-            for (WindowEventListener *listener : mListeners)
-                if (listener->injectPointerRelease(arg))
-                    return true;
-            return false;
+            return mListener->injectPointerRelease(arg);
         }
         bool injectPointerMove(const Input::PointerEventArgs &arg)
         {
-            for (WindowEventListener *listener : mListeners)
-                if (listener->injectPointerMove(arg))
-                    return true;
-            return false;
+            return mListener->injectPointerMove(arg);
         }
         bool injectAxisEvent(const Input::AxisEventArgs &arg)
         {
-            for (WindowEventListener *listener : mListeners)
-                if (listener->injectAxisEvent(arg))
-                    return true;
-            return false;
+            return mListener->injectAxisEvent(arg);
         }
 
     private:
-        std::vector<WindowEventListener *> mListeners;
+        WindowEventListener * mListener;
     };
 
-    INTERFACES_EXPORT OSWindow *sCreateWindow(const WindowSettings &settings);
+    INTERFACES_EXPORT OSWindow *sCreateWindow(const WindowSettings &settings, WindowEventListener *listener);
 
     struct MonitorInfo {
-        int x, y;
-        int width, height;
+        InterfacesVector mPosition;
+        InterfacesVector mSize;
     };
 
     INTERFACES_EXPORT std::vector<MonitorInfo> listMonitors();

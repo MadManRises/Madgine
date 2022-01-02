@@ -16,14 +16,13 @@ namespace Tools {
         BulletDebug(ImRoot &root);
         BulletDebug(const BulletDebug &) = delete;
 
-        virtual bool init() override;
-        virtual void finalize() override;
+        virtual Threading::Task<bool> init() override;
+        virtual Threading::Task<void> finalize() override;
 
         virtual void render() override;
         virtual void renderMenu() override;
 
         std::string_view key() const override;
-
 
         virtual void drawLine(const btVector3 &from, const btVector3 &to, const btVector3 &fromColor, const btVector3 &toColor) override;
 

@@ -62,7 +62,7 @@ namespace Serialize {
                 return SerializableDataPtr { &item }.applySerializableMap(in, success);
             } else if constexpr (InstanceOf<std::remove_const_t<T>, std::unique_ptr>) {
                 return UnitHelper<typename T::element_type>::applyMap(in, *item, success);
-            } else if constexpr (Iterable<T>) {
+            } else if constexpr (std::ranges::range<T>) {
                 for (auto &t : physical(item)) {
                     STREAM_PROPAGATE_ERROR(UnitHelper<std::remove_reference_t<decltype(t)>>::applyMap(in, t, success));
                 }
@@ -88,7 +88,7 @@ namespace Serialize {
                 SerializableUnitPtr { &item }.setDataSynced(b);
             } else if constexpr (InstanceOf<std::remove_const_t<T>, std::unique_ptr>) {
                 UnitHelper<typename T::element_type>::setItemDataSynced(*item, b);
-            } else if constexpr (Iterable<T>) {
+            } else if constexpr (std::ranges::range<T>) {
                 for (auto &&t : physical(item)) {
                     UnitHelper<std::remove_reference_t<decltype(t)>>::setItemDataSynced(t, b);
                 }
@@ -109,7 +109,7 @@ namespace Serialize {
                 SerializableUnitPtr { &item }.setActive(active, existenceChanged);
             } else if constexpr (InstanceOf<std::remove_const_t<T>, std::unique_ptr>) {
                 UnitHelper<typename T::element_type>::setItemActive(*item, active, existenceChanged);
-            } else if constexpr (Iterable<T>) {
+            } else if constexpr (std::ranges::range<T>) {
                 for (auto &t : physical(item)) {
                     UnitHelper<std::remove_reference_t<decltype(t)>>::setItemActive(t, active, existenceChanged);
                 }
@@ -134,7 +134,7 @@ namespace Serialize {
                 SerializableUnitPtr { &item }.setParent(parent);
             } else if constexpr (InstanceOf<std::remove_const_t<T>, std::unique_ptr>) {
                 UnitHelper<typename T::element_type>::setItemParent(*item, parent);
-            } else if constexpr (Iterable<T>) {
+            } else if constexpr (std::ranges::range<T>) {
                 for (auto &t : physical(item)) {
                     UnitHelper<std::remove_reference_t<decltype(t)>>::setItemParent(t, parent);
                 }

@@ -78,7 +78,7 @@ namespace Render {
         format->bind(this, mInstanceBuffer, mInstanceDataSize);
 
         if (!mHandle) {
-            if (mVertexShader->mType != VertexShader || (mPixelShader && mPixelShader->mType != PixelShader) || (mGeometryShader && mGeometryShader->mType != GeometryShader))
+            if (!mVertexShader || mVertexShader->mType != VertexShader || (mPixelShader && mPixelShader->mType != PixelShader) || (mGeometryShader && mGeometryShader->mType != GeometryShader))
                 std::terminate();
 
             mHandle = glCreateProgram();
@@ -166,7 +166,6 @@ namespace Render {
 
     void OpenGLProgram::unbind(const OpenGLVertexArray *format) const
     {
-        uint8_t index = format->mFormat;
         format->unbind(this);
     }
 

@@ -57,13 +57,14 @@ namespace Tools {
         return mRoot.taskQueue();
     }
 
-    bool ToolBase::init()
+    Threading::Task<bool> ToolBase::init()
     {
-        return true;
+        co_return true;
     }
 
-    void ToolBase::finalize()
+    Threading::Task<void> ToolBase::finalize()
     {
+        co_return;
     }
 }
 }

@@ -40,9 +40,9 @@ TEST(Serialize_Container, SyncedUnit)
     ASSERT_TRUE(mgr2.addTopLevelItem(&unit2));
 
     Buffer buffer;
-    mgr1.setBuffer(buffer, false);
+    HANDLE_MGR_RESULT(mgr1, mgr1.setBuffer(buffer, false));
     mgr1.sendMessages();
-    mgr2.setBuffer(buffer, true);
+    HANDLE_MGR_RESULT(mgr2, mgr2.setBuffer(buffer, true));
 
     ASSERT_EQ(unit1.list1, unit2.list1);
     ASSERT_EQ(unit1.list2, unit2.list2);
@@ -109,7 +109,7 @@ TEST(Serialize_Container, Array)
         std::make_unique<TestBuf>(buffer, false), std::make_unique<SerializeStreamData>(std::make_unique<SafeBinaryFormatter>())
     };
 
-    stream1 << array;
+    write(stream1, array, "array");
 
     std::array<uint32_t, 128> array2;
     read(stream2, array2, nullptr);

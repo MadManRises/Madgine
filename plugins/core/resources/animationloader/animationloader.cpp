@@ -139,7 +139,7 @@ METATABLE_END(Engine::Render::QuaternionKeyFrame)
                         }
                     }
                     if (!consecutive) {
-                        auto it = std::find_if(mBoneNames.begin(), mBoneNames.end(), [&](const std::string &boneName) { return StringUtil::startsWith(handle->mBones[i].mName, boneName); });
+                        auto it = std::ranges::find_if(mBoneNames, [&](const std::string &boneName) { return StringUtil::startsWith(handle->mBones[i].mName, boneName); });
                         int mapping;
                         if (it == mBoneNames.end()) {
                             mapping = -1;

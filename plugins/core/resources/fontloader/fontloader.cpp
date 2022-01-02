@@ -115,7 +115,7 @@ namespace Render {
             }();
             if (result.mState != Serialize::StreamState::OK) {
                 LOG_ERROR("Failed to load \"" << info.resource()->path() << "\": \n"
-                                              << *result.mError);
+                                              << result);
                 co_return false;
             }
             font.mTexture.create(TextureType_2D, FORMAT_RGBA8, font.mTextureSize, std::move(b));
@@ -229,7 +229,7 @@ namespace Render {
                 if (entries[c].mFlipped)
                     targetView.swapAxis(0, 1);
 
-                std::transform(bufferView.begin(), bufferView.end(), targetView.begin(),
+                std::ranges::transform(bufferView, targetView.begin(),
                     [](const Vector3 &v) {
                         return std::array<unsigned char, 4> {
                             static_cast<unsigned char>(clamp(v.x, 0.0f, 1.0f) * 255),
@@ -248,9 +248,9 @@ namespace Render {
             Filesystem::FileManager cache("msdf_cache");
             Serialize::SerializeOutStream out = cache.openWrite(info.resource()->path().parentPath() / (std::string { info.resource()->name() } + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
             if (out) {
-                out << font.mGlyphs;
-                out << font.mTextureSize;
-                out << ByteBuffer { texBuffer.get(), 4 * byteSize };
+                write(out, font.mGlyphs, "glyphs");
+                write(out, font.mTextureSize, "size");
+                write(out, ByteBuffer { texBuffer.get(), 4 * byteSize }, "texture");
             }
 
         } else {

@@ -44,17 +44,6 @@ constexpr size_t array_size(T (&)[S])
     return S;
 }
 
-namespace __generic_impl__ {
-    template <template <typename...> typename, typename, typename...>
-    struct can_apply : std::false_type {
-    };
-    template <template <typename...> typename Z, typename... Ts>
-    struct can_apply<Z, std::void_t<Z<Ts...>>, Ts...> : std::true_type {
-    };
-}
-template <template <typename...> typename Z, typename... Ts>
-using can_apply = __generic_impl__::can_apply<Z, void, Ts...>;
-
 template <template <typename> typename F, typename T, bool b>
 struct apply_if {
     using type = T;
@@ -101,7 +90,10 @@ template <typename T>
 concept Tuple = InstanceOf<T, std::tuple>;
 
 template <typename T>
-concept String = std::is_convertible_v<T &, const std::string &> && std::is_constructible_v<T, const std::string &>;
+concept String = std::is_constructible_v<std::string, const T &> && std::is_constructible_v<T, const std::string &>;
+
+template <typename T>
+concept StringViewable = std::is_constructible_v<std::string_view, const T &>;
 
 template <typename T>
 concept Enum = std::is_enum_v<T>;
@@ -111,5 +103,35 @@ concept Pointer = std::is_pointer_v<T> || std::is_null_pointer_v<T>;
 
 template <typename T>
 concept Function = std::is_function_v<T>;
+
+template <typename T>
+concept Unsigned = std::is_unsigned_v<T>;
+
+template <typename T, typename... Ty>
+concept OneOf = (std::same_as<T, Ty> || ...);
+
+template <typename T>
+struct OutRef {
+
+    OutRef() = default;
+
+    OutRef(T &t)
+        : mPtr(&t)
+    {
+    }
+
+    OutRef &operator=(T &t)
+    {
+        mPtr = &t;
+        return *this;
+    }
+
+    operator T &()
+    {
+        return *mPtr;
+    }
+
+    T *mPtr = nullptr;
+};
 
 }

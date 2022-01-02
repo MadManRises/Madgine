@@ -6,23 +6,31 @@ namespace Engine {
 
 struct MadgineObjectState {
 
+    Threading::TaskFuture<bool> state()
+    {
+        return mState.ensure();
+    }
+
+    bool isInitialized()
+    {
+        Threading::TaskFuture<bool> state = mState.load();
+        return state.valid() && state.is_ready() && state;
+    }
+
 protected:
     ~MadgineObjectState()
     {
-        if (mState && mState->valid()) {
-            LOG_WARNING("Deleting still initialized Object: " << mTypeInfo->name());
+        Threading::TaskFuture<bool> state = mState.load();
+        if (state.valid()) {
+            if (!state.attached())
+                LOG_WARNING("Unattached TaskFuture in " << mTypeInfo->name() << ". Some coroutine is probably waiting for initialization which will never happen.");
+            else
+                LOG_WARNING("Deleting still initialized Object: " << mTypeInfo->name());
         }
     }
 
-    Threading::TaskFuture<bool> getState()
-    {
-        if (!mState)
-            mState = std::make_shared<Threading::TaskPromiseSharedState<bool>>();
-        return mState;
-    }
-
 protected:
-    std::shared_ptr<Threading::TaskPromiseSharedState<bool>> mState;
+    Threading::AtomicTaskFuture<bool> mState;
     const std::type_info *mTypeInfo = nullptr;
 };
 
@@ -30,29 +38,24 @@ template <typename T>
 struct MadgineObject : MadgineObjectState {
     Threading::Task<bool> callInit()
     {
-        assert(!mState || (!mState->is_ready() && mState->valid()));
+        assert(!mState.load().attached());
         mTypeInfo = &typeid(static_cast<T &>(*this));
         LOG("Initializing: " << mTypeInfo->name() << "...");
         auto task = Threading::make_task(&T::init, static_cast<T *>(this));
-        if (!mState)
-            mState = std::make_shared<Threading::TaskPromiseSharedState<bool>>();
-        task.get_future(mState);
+        task.set_future(state());
 
         return task;
     }
 
     Threading::Task<void> callFinalize()
     {
-        return [this]() -> Threading::Task<void> {
-            assert(mState && mState->is_ready() && mState->get());
-            mState.reset();
-
-            if constexpr (InstanceOf<decltype(static_cast<T *>(this)->finalize()), Threading::Task>) {
-                co_await static_cast<T *>(this)->finalize();
-            } else {
-                static_cast<T *>(this)->finalize();
-            }
-        }();
+        assert(mState.load());
+        mState.reset();
+        if constexpr (InstanceOf<decltype(static_cast<T *>(this)->finalize()), Threading::Task>) {
+            co_await static_cast<T *>(this)->finalize();
+        } else {
+            static_cast<T *>(this)->finalize();
+        }
     }
 };
 

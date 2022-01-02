@@ -9,14 +9,14 @@
 namespace Engine {
 namespace Threading {
 
-    struct TaskPromiseTypeBase;
-
     struct MODULES_EXPORT TaskPromiseSharedStateBase {
         std::mutex mMutex;
         std::vector<TaskHandle> mThenResumes;
 
+        bool mAttached = false;
         bool mDestroyed = false;
 
+        void attach();
         void finalize();
 
         void notifyDestroyed();
@@ -134,12 +134,6 @@ namespace Threading {
             mThenReturn = std::move(handle);
         }
 
-        void set_state(std::shared_ptr<TaskPromiseSharedStateBase> state)
-        {
-            assert(!mState);
-            mState = std::move(state);
-        }
-
         void setQueue(TaskQueue *queue);
         TaskQueue *queue() const;
 
@@ -164,8 +158,16 @@ namespace Threading {
         {
             assert(!mState);
             std::shared_ptr<TaskPromiseSharedState<T>> state = std::make_shared<TaskPromiseSharedState<T>>();
+            state->attach();
             mState = state;
             return state;
+        }
+
+        void set_state(std::shared_ptr<TaskPromiseSharedState<T>> state)
+        {
+            assert(!mState && state);
+            state->attach();
+            mState = std::move(state);
         }
     };
 
@@ -182,8 +184,16 @@ namespace Threading {
         {
             assert(!mState);
             std::shared_ptr<TaskPromiseSharedState<void>> state = std::make_shared<TaskPromiseSharedState<void>>();
+            state->attach();
             mState = state;
             return state;
+        }
+
+        void set_state(std::shared_ptr<TaskPromiseSharedState<void>> state)
+        {
+            assert(!mState && state);
+            state->attach();
+            mState = std::move(state);
         }
     };
 

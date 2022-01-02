@@ -30,14 +30,24 @@ namespace Threading {
         TaskFuture &operator=(const TaskFuture &) = default;
         TaskFuture &operator=(TaskFuture &&) = default;
 
-        bool valid()
+        bool valid() const
         {
-            return mState && mState->valid();
+            return static_cast<bool>(mState);
         }
-        
+
+        bool attached()
+        {
+            return mState && mState->mAttached;
+        }
+
         void reset()
         {
             mState.reset();
+        }
+
+        std::shared_ptr<TaskPromiseSharedState<T>> release()
+        {
+            return std::move(mState);
         }
 
         bool is_ready() const
@@ -81,6 +91,7 @@ namespace Threading {
             return get();
         }
 
+    private:
         std::shared_ptr<TaskPromiseSharedState<T>> mState;
     };
 
@@ -96,12 +107,22 @@ namespace Threading {
 
         bool valid()
         {
-            return mState && mState->valid();
+            return static_cast<bool>(mState);
+        }
+
+        bool attached()
+        {
+            return mState && mState->mAttached;
         }
 
         void reset()
         {
             mState.reset();
+        }
+
+        std::shared_ptr<TaskPromiseSharedState<void>> release()
+        {
+            return std::move(mState);
         }
 
         bool is_ready() const
@@ -134,7 +155,36 @@ namespace Threading {
             return fut;
         }
 
+    private:
         std::shared_ptr<TaskPromiseSharedState<void>> mState;
+    };
+
+    template <typename T>
+    struct AtomicTaskFuture {
+
+        TaskFuture<T> ensure()
+        {
+            std::shared_ptr<TaskPromiseSharedState<T>> check = mState.load();
+            if (!check) {
+                std::shared_ptr<TaskPromiseSharedState<T>> state = std::make_shared<TaskPromiseSharedState<T>>();
+                if (mState.compare_exchange_strong(check, state))
+                    return state;
+            }
+            return check;
+        }
+
+        TaskFuture<T> load() const
+        {
+            return mState.load();
+        }
+
+        void reset()
+        {
+            mState.store({});
+        }
+
+    private:
+        std::atomic<std::shared_ptr<TaskPromiseSharedState<T>>> mState;
     };
 
 }

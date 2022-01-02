@@ -34,12 +34,15 @@ layout(location = 3) in vec3 aNormal;
 layout(location = 4) in vec2 aUV;
 layout(location = 5) in ivec4 aBoneIDs;
 layout(location = 6) in vec4 aWeights;
-layout(location = 7) in PointShadowInstanceData aInstance;
+layout(location = 7) in mat4 aInstance_m;
 
 
 
 void main()
 {
+	PointShadowInstanceData aInstance;
+	aInstance.m = aInstance_m;
+
 	vec4 worldPos;
 	if (object.hasSkeleton){
 		mat4 BoneTransform = bones[aBoneIDs[0]] * aWeights[0]

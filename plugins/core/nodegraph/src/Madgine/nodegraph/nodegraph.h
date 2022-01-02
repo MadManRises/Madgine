@@ -76,10 +76,9 @@ namespace NodeGraph {
         std::vector<DataOutPinPrototype> mDataOutPins;        
 
     protected:
-        static const char *nodeCreationNames(size_t index);
         std::unique_ptr<NodeBase> createNode(std::string_view name);
-        std::tuple<std::unique_ptr<NodeBase>> createNodeTuple(std::string_view name);
-        std::tuple<std::string_view> storeNodeCreationData(const std::unique_ptr<NodeBase> &node) const;
+        Serialize::StreamResult readNode(Serialize::SerializeInStream &in, std::unique_ptr<NodeBase> &node);
+        void writeNode(Serialize::SerializeOutStream &out, const std::unique_ptr<NodeBase> &node) const;
 
     private:
         Filesystem::Path mPath;

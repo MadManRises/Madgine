@@ -2,7 +2,7 @@
 
 namespace CodeGen {
 
-    inline void resolveIncludes(std::string &source, std::function<std::string(const Engine::Filesystem::Path &, size_t, std::string_view)> lookup, const std::string_view currentFileName, std::set<std::string> &files)
+    inline void resolveIncludes(std::string &source, std::function<std::string(const Engine::Filesystem::Path &, size_t, std::string_view)> lookup, const std::string_view currentFileName, std::map<std::string, size_t> &files)
     {       
 
         size_t end = 0;
@@ -19,7 +19,7 @@ namespace CodeGen {
             Engine::Filesystem::Path path { filename };
             ++end;
             std::string code;
-            if (files.insert(filename).second) {
+            if (files.try_emplace(filename, files.size()).second) {
                 code = lookup(path, line, currentFileName);
                 resolveIncludes(code, lookup, filename, files);
             }

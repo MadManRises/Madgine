@@ -31,11 +31,6 @@ namespace Serialize {
 
     SerializeManager::~SerializeManager() { }
 
-    const SyncableUnitMap &SerializeManager::slavesMap() const
-    {
-        return mSlaveMappings;
-    }
-
     const SyncableUnitMap &SerializeManager::mastersMap() const
     {
         return sMasterMappings;

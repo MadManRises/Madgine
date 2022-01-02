@@ -2,10 +2,8 @@
 
 namespace Engine {
 
-template <typename R, typename T, typename... Args>
+template <typename R, std::same_as<void> T, typename... Args>
 struct LambdaImpl {
-
-    static_assert(std::is_same_v<T, void>);
 
     struct Callable {
         virtual ~Callable() = default;

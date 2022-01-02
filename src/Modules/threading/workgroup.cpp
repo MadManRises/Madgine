@@ -97,21 +97,17 @@ namespace Threading {
 
     void WorkGroup::checkThreadStates()
     {
-
-        auto pivot = std::remove_if(mSubThreads.begin(), mSubThreads.end(),
+        std::erase_if(mSubThreads,
             [](Future<int> &f) {
                 bool result = f.is_ready();
                 if (result)
                     f.get();
                 return result;
             });
-
-        mSubThreads.erase(pivot, mSubThreads.end());
     }
 
     void WorkGroup::initThread()
     {
-
         ThreadStorage::init(true);
         ThreadStorage::init(false);
 
@@ -129,7 +125,6 @@ namespace Threading {
 
     void WorkGroup::finalizeThread()
     {
-
         assert(sSelf == this);
         sSelf = nullptr;
 
@@ -160,7 +155,7 @@ namespace Threading {
 
     void WorkGroup::removeTaskQueue(TaskQueue *taskQueue)
     {
-        mTaskQueues.erase(std::find(mTaskQueues.begin(), mTaskQueues.end(), taskQueue));
+        std::erase(mTaskQueues, taskQueue);
     }
 
     const std::vector<TaskQueue *> WorkGroup::taskQueues() const

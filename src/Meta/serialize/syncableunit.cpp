@@ -67,7 +67,7 @@ namespace Serialize {
             out.format().beginExtended(out, name, 1);
             write(out, mMasterId, "syncId");
         }
-        SerializableUnitConstPtr { this, mType }.writeState(out, name, hierarchy, flags | StateTransmissionFlags_SkipId);
+        customUnitPtr().writeState(out, name, hierarchy, flags | StateTransmissionFlags_SkipId);
     }
 
     StreamResult SyncableUnitBase::readState(SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags)
@@ -79,22 +79,22 @@ namespace Serialize {
 
             if (in.manager() && in.manager()->getSlaveStreamData() == &in.data()) {
                 setSlaveId(id, in.manager());
-                if (serializeType()->mIsTopLevelUnit) {
+                if (mType->mIsTopLevelUnit) {
                     static_cast<TopLevelUnitBase *>(this)->setStaticSlaveId(id);
                 }
             }
         }
-        return SerializableUnitPtr { this, mType }.readState(in, name, hierarchy, flags | StateTransmissionFlags_SkipId);
+        return customUnitPtr().readState(in, name, hierarchy, flags | StateTransmissionFlags_SkipId);
     }
 
     StreamResult SyncableUnitBase::readAction(BufferedInOutStream &in, PendingRequest *request)
     {
-        return serializeType()->readAction(this, in, request);
+        return mType->readAction(this, in, request);
     }
 
     StreamResult SyncableUnitBase::readRequest(BufferedInOutStream &in, TransactionId id)
     {
-        return serializeType()->readRequest(this, in, id);
+        return mType->readRequest(this, in, id);
     }
 
     std::set<BufferedOutStream *, CompareStreamId> SyncableUnitBase::getMasterMessageTargets() const

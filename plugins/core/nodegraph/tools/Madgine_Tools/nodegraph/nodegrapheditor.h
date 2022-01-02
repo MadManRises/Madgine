@@ -1,7 +1,7 @@
 #pragma once
 
-#include "toolscollector.h"
 #include "toolbase.h"
+#include "toolscollector.h"
 
 #include "Madgine/nodegraph/nodegraphloader.h"
 #include "Madgine/nodegraph/pins.h"
@@ -22,8 +22,8 @@ namespace Tools {
         NodeGraphEditor(ImRoot &root);
         NodeGraphEditor(const NodeGraphEditor &) = delete;
 
-        virtual bool init() override;
-        virtual void finalize() override;
+        virtual Threading::Task<bool> init() override;
+        virtual Threading::Task<void> finalize() override;
 
         virtual void render() override;
         virtual void renderMenu() override;
@@ -34,7 +34,6 @@ namespace Tools {
         void load(std::string_view name);
         void create(const Filesystem::Path &path);
         std::string_view getCurrentName() const;
-
 
     protected:
         bool onSave(std::string_view view, ed::SaveReasonFlags reason);

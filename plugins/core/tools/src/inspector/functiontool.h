@@ -13,7 +13,7 @@ namespace Tools {
 
         std::string_view key() const override;
 
-        virtual bool init() override;
+        virtual Threading::Task<bool> init() override;
 
         virtual void render() override;
 
@@ -23,7 +23,6 @@ namespace Tools {
         bool renderFunctionSelect(BoundApiFunction &function, std::string &functionName, ArgumentList &args);
 
     protected:
-
         bool renderFunctionDetails(BoundApiFunction &function, ArgumentList &args);
 
     private:

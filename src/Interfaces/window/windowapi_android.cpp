@@ -47,8 +47,8 @@ namespace Window {
     } sDisplayGuard;
 
     struct AndroidWindow final : OSWindow {
-        AndroidWindow(EGLSurface surface)
-            : OSWindow((uintptr_t)surface)
+        AndroidWindow(EGLSurface surface, WindowEventListener *listener)
+            : OSWindow((uintptr_t)surface, listener)
         {
             EGLint width;
             EGLint height;
@@ -252,7 +252,7 @@ namespace Window {
     {
     }
 
-    OSWindow *sCreateWindow(const WindowSettings &settings)
+    OSWindow *sCreateWindow(const WindowSettings &settings, WindowEventListener *listener)
     {
         assert(sDisplay);
 
@@ -290,7 +290,7 @@ namespace Window {
                 return nullptr;
         }
 
-        auto pib = sWindows.try_emplace(handle, handle);
+        auto pib = sWindows.try_emplace(handle, handle, listener);
         assert(pib.second);
 
         return &pib.first->second;

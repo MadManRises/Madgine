@@ -26,10 +26,10 @@ namespace Engine
 			stopConsole();
 		}
 
-		void ServerLog::log(std::string_view msg, Util::MessageType lvl)
+		void ServerLog::log(std::string_view msg, Util::MessageType lvl, const char *file)
 		{
 			std::cout << "\r";
-			StandardLog::log(msg, lvl);
+			StandardLog::log(msg, lvl, file);
 			std::cout << "prompt> " << mCurrentCmd;
 			std::cout.flush();
 		}

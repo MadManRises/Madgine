@@ -28,9 +28,9 @@ TEST(Serialize_Action, Action)
     ASSERT_TRUE(mgr2.addTopLevelItem(&unit2));
 
     Buffer buffer;
-    mgr1.setBuffer(buffer, false);
+    HANDLE_MGR_RESULT(mgr1, mgr1.setBuffer(buffer, false));
     mgr1.sendMessages();
-    mgr2.setBuffer(buffer, true);
+    HANDLE_MGR_RESULT(mgr2, mgr2.setBuffer(buffer, true));
 
     ASSERT_EQ(unit1.mCallCount, 0);
     ASSERT_EQ(unit2.mCallCount, 0);
@@ -90,14 +90,14 @@ TEST(Serialize_Action, Action_Hierarchical)
     ASSERT_TRUE(mgr3.addTopLevelItem(&unit3));
 
     Buffer buffer;
-    mgr1.setBuffer(buffer, false);
+    HANDLE_MGR_RESULT(mgr1, mgr1.setBuffer(buffer, false));
     mgr1.sendMessages();
-    mgr2.setBuffer(buffer, true);
+    HANDLE_MGR_RESULT(mgr2, mgr2.setBuffer(buffer, true));
 
     Buffer buffer2;
-    mgr2.setBuffer(buffer2, false);
+    HANDLE_MGR_RESULT(mgr2, mgr2.setBuffer(buffer2, false));
     mgr2.sendMessages();
-    mgr3.setBuffer(buffer2, true);
+    HANDLE_MGR_RESULT(mgr3, mgr3.setBuffer(buffer2, true));
 
     ASSERT_EQ(unit1.mCallCount, 0);
     ASSERT_EQ(unit2.mCallCount, 0);

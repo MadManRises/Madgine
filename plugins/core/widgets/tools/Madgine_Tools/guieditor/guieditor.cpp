@@ -54,7 +54,7 @@ namespace Tools {
     {
     }
 
-    bool GuiEditor::init()
+    Threading::Task < bool> GuiEditor::init()
     {
         mWindow = &static_cast<const ClientImRoot &>(mRoot).window();
         mWidgetManager = &mWindow->getWindowComponent<Widgets::WidgetManager>();
@@ -152,7 +152,7 @@ namespace Tools {
                 if (result.mState != Serialize::StreamState::OK) {
                     LOG_ERROR("Failed loading '" << filePath << "' with following Error: "
                                                  << "\n"
-                                                 << *result.mError);
+                                                 << result);
                 } else {
                     mWidgetManager->openStartupWidget();
                 }

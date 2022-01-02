@@ -26,7 +26,7 @@ namespace Serialize {
         ParticipantId participantId() const;
 
         void setStaticSlaveId(UnitId staticId);
-        void initSlaveId(SerializeManager *mgr);
+        void initSlaveId(SyncManager *mgr);
 
         std::set<BufferedOutStream *, CompareStreamId> getMasterMessageTargets() const;
 

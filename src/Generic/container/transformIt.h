@@ -14,34 +14,44 @@ struct TransformItContainer {
         using pointer = void;
         using reference = value_type;
 
+        TransformIterator() = default;
+
         TransformIterator(It &&it, Converter &conv)
             : mIt(std::forward<It>(it))
-            , mConverter(conv)
+            , mConverter(&conv)
         {
         }
 
         TransformIterator(const TransformIterator<It> &other) = default;
         TransformIterator(TransformIterator<It> &&other) = default;
         TransformIterator& operator=(const TransformIterator<It>& other) {
-            assert(&mConverter == &other.mConverter);
+            assert(!mConverter || mConverter == other.mConverter);
             mIt = other.mIt;
             return *this;
         }
         TransformIterator &operator=(TransformIterator<It> &&other)
         {
-            assert(&mConverter == &other.mConverter);
+            assert(!mConverter || mConverter == other.mConverter);
             mIt = std::move(other.mIt);
             return *this;
         }
 
-        void operator++()
+        TransformIterator &operator++()
         {
             ++mIt;
+            return *this;
+        }
+
+        TransformIterator operator++(int)
+        {
+            TransformIterator copy = *this;
+            ++*this;
+            return copy;
         }
 
         decltype(auto) operator*() const
         {
-            return mConverter(*mIt);
+            return (*mConverter)(*mIt);
         }
 
         bool operator!=(const TransformIterator<It> &other) const
@@ -61,12 +71,12 @@ struct TransformItContainer {
 
         TransformIterator<It> operator+(difference_type diff) const
         {
-            return { mIt + diff, mConverter };
+            return { mIt + diff, *mConverter };
         }
 
     private:
         It mIt;
-        Converter &mConverter;
+        Converter *mConverter = nullptr;
     };
 
     using iterator = TransformIterator<typename iterator_traits::iterator>;
@@ -183,5 +193,30 @@ decltype(auto) uniquePtrToPtr(T &&t)
 {
     return transformIt<UniquePtrToPtrConverter>(std::forward<T>(t));
 }
+
+template <typename T>
+decltype(auto) pairSecond(T &&t)
+{
+    return std::forward<T>(t).second;
+}
+
+constexpr auto projectionPairSecond = LIFT(pairSecond);
+
+template <typename T>
+decltype(auto) addressOf(T& t)
+{
+    return &t;
+}
+
+constexpr auto projectionAddressOf = LIFT(addressOf);
+
+template <typename T>
+decltype(auto) toRawPtr(const T &t)
+{
+    return t.get();
+}
+
+constexpr auto projectionToRawPtr = LIFT(toRawPtr);
+
 
 }

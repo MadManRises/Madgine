@@ -32,8 +32,8 @@ namespace Window {
 
 
     struct IOSWindow : OSWindow {
-        IOSWindow(UIWindow *handle)
-            : OSWindow((uintptr_t)handle)
+        IOSWindow(UIWindow *handle, WindowEventListener *listener)
+            : OSWindow((uintptr_t)handle, listener)
             //, mListener([[Cocoa_WindowListener alloc] init])
         {
             //[mListener listen:this];
@@ -197,7 +197,7 @@ namespace Window {
 
     static std::unordered_map<UIWindow *, IOSWindow> sWindows;
 
-    OSWindow *sCreateWindow(const WindowSettings &settings)
+    OSWindow *sCreateWindow(const WindowSettings &settings, WindowEventListener *listener)
     {
         CGRect rect = CGRectMake(0, 0, settings.mData.mSize.x, settings.mData.mSize.y);
         if (settings.mData.mPosition.x != -1 || settings.mData.mPosition.y != -1) {
@@ -213,7 +213,7 @@ namespace Window {
         //[handle cascadeTopLeftFromPoint:NSMakePoint(20,20)];
         [handle makeKeyAndVisible];
         
-        auto pib = sWindows.try_emplace(handle, handle);
+        auto pib = sWindows.try_emplace(handle, handle, listener);
         assert(pib.second);
         
         return &pib.first->second;

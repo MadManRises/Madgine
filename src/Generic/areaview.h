@@ -53,8 +53,8 @@ struct AreaView {
         T *ptr = mBuffer + i * fullSize;
         if constexpr (Dim == 1) {
             return *ptr;
-        } else {            
-            return AreaView<T, Dim - 1, Storage> { ptr, mSizes, mFullSizes, mFlipped, mAxisMapping};
+        } else {
+            return AreaView<T, Dim - 1, Storage> { ptr, mSizes, mFullSizes, mFlipped, mAxisMapping };
         }
     }
 
@@ -82,7 +82,7 @@ struct AreaView {
     {
         size_t acc = 0;
         for (int i = Dim - 1; i >= 0; --i) {
-            size_t reverseAxis = std::find(mAxisMapping.begin(), mAxisMapping.end(), i) - mAxisMapping.begin();            
+            size_t reverseAxis = std::ranges::find(mAxisMapping, i) - mAxisMapping.begin();
             assert(indices[reverseAxis] < mSizes[i]);
             acc *= mFullSizes[i];
             if (!mFlipped[i]) {
@@ -102,6 +102,8 @@ struct AreaView {
         using pointer = void;
         using reference = T &;
 
+        iterator() = default;
+
         iterator(AreaView<T, Dim> *view)
             : mView(view)
         {
@@ -114,20 +116,33 @@ struct AreaView {
         {
         }
 
-        T &operator*()
+        T &operator*() const
         {
             return mView->at(mIndices);
         }
 
-        void operator++()
+        iterator &operator++()
         {
             ++mIndices[0];
             validate();
+            return *this;
         }
 
-        bool operator!=(const iterator &other)
+        iterator operator++(int)
         {
-            return mView != other.mView || mIndices != other.mIndices;
+            iterator copy = *this;
+            ++*this;
+            return copy;
+        }
+
+        bool operator==(const iterator &other) const
+        {
+            return mView == other.mView && mIndices == other.mIndices;
+        }
+
+        bool operator!=(const iterator &other) const
+        {
+            return !(*this == other);
         }
 
     private:
@@ -147,7 +162,7 @@ struct AreaView {
         }
 
     private:
-        AreaView<T, Dim, Storage> *mView;
+        AreaView<T, Dim, Storage> *mView = nullptr;
         std::array<size_t, Dim> mIndices;
     };
 

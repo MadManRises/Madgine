@@ -312,7 +312,13 @@ namespace Tools {
 
     void MemoryViewer::render()
     {
+        static float addressWidth = ImGui::CalcTextSize(" 0x00000000 ").x;
+        static float lineWidth = ImGui::CalcTextSize(" Line v ").x;
+        static float sizeWidth = ImGui::CalcTextSize(" 0000000 ").x;
 
+        float fixedWidth = (mShowAddress ? addressWidth : 0) + (mShowFile ? lineWidth : 0) + 2 * sizeWidth;
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2 { fixedWidth + 40, 0 });
         if (ImGui::Begin("Memory Viewer", &mVisible)) {
             ImGui::Value("Total Memory", static_cast<unsigned int>(mTracker.totalMemory()));
             ImGui::Value("Overhead Memory", static_cast<unsigned int>(mTracker.overhead()));
@@ -327,12 +333,8 @@ namespace Tools {
             }
 
             float width = ImGui::GetWindowWidth() - 20;
-            static float addressWidth = ImGui::CalcTextSize(" 0x00000000 ").x;
-            static float lineWidth = ImGui::CalcTextSize(" Line v ").x;
-            static float sizeWidth = ImGui::CalcTextSize(" 0000000 ").x;
 
             ImGui::BeginColumns("cols", 3 + mShowAddress + 2 * mShowFile, ImGuiColumnsFlags_NoPreserveWidths);
-            float fixedWidth = (mShowAddress ? addressWidth : 0) + (mShowFile ? lineWidth : 0) + 2 * sizeWidth;
 
             resort |= drawHeader("Method %s", METHODNAME_SORTING, mShowFile ? 0 : width - fixedWidth);
             if (mShowAddress)
@@ -443,6 +445,7 @@ namespace Tools {
             ImGui::EndColumns();
         }
         ImGui::End();
+        ImGui::PopStyleVar();
     }
 
     std::string_view MemoryViewer::key() const

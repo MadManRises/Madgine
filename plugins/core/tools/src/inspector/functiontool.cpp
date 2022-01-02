@@ -41,10 +41,10 @@ namespace Tools {
         return "FunctionTool";
     }
 
-    bool FunctionTool::init()
+    Threading::Task<bool> FunctionTool::init()
     {
         mInspector = &mRoot.getTool<Inspector>();
-        return true;
+        co_return co_await ToolBase::init();
     }
 
     void FunctionTool::setCurrentFunction(std::string_view name, const BoundApiFunction &method)
@@ -68,19 +68,19 @@ namespace Tools {
 
     bool FunctionTool::renderFunctionSelect(BoundApiFunction &function, std::string &functionName, ArgumentList &args)
     {
-        bool changed = false;        
+        bool changed = false;
 
         std::string filter;
-        
+
         std::string name = functionName;
 
         if (function.mScope)
             name = function.scope().name() + ("." + functionName);
-        if (ImGui::BeginCombo("##functionSelect", name.c_str())) {            
+        if (ImGui::BeginCombo("##functionSelect", name.c_str())) {
             ImGui::InputText("filter", &filter);
             const FunctionTable *current = sFunctionList();
-            while (current) {                    
-                bool is_selected = (function.mFunction.mTable == current);                
+            while (current) {
+                bool is_selected = (function.mFunction.mTable == current);
                 if (ImGui::Selectable(current->mName.data(), is_selected)) {
                     functionName = current->mName;
                     function.mScope = nullptr;
@@ -88,7 +88,7 @@ namespace Tools {
                     changed = true;
                 }
                 if (is_selected)
-                    ImGui::SetItemDefaultFocus();                    
+                    ImGui::SetItemDefaultFocus();
                 current = current->mNext;
             }
             ImGui::EndCombo();
@@ -143,7 +143,7 @@ namespace Tools {
                 }
 
                 ImGui::PopID();
-                if(ImGui::IsItemHovered())
+                if (ImGui::IsItemHovered())
                     ImGui::SetTooltip("%s", function.mFunction.mTable->mArguments[i].mType.toString().c_str());
             }
 
@@ -172,7 +172,6 @@ namespace Tools {
                 ValueType result;
                 mCurrentFunction(result, mCurrentArguments);
             }
-
         }
         ImGui::End();
     }

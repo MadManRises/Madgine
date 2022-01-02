@@ -14,6 +14,8 @@ struct ConcatItContainer {
         using pointer = void;
         using reference = typename first<It...>::type::reference;
 
+        ConcatIterator() = default;
+
         ConcatIterator(std::tuple<std::pair<It, It>...> it)
             : mIt(std::move(it))
         {

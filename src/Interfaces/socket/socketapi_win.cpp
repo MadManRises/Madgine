@@ -158,13 +158,13 @@ std::pair<Socket, SocketAPIResult> SocketAPI::connect(const std::string &url, in
     target.sin_port = htons(portNr); //Port to connect on
     InetPton(AF_INET, url.c_str(), &target.sin_addr.s_addr);
 
-    int s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); //Create socket
+    SOCKET s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); //Create socket
 
     if (s == INVALID_SOCKET) {
         return { Socket {}, getError("socket") };
     }
 
-    Socket sock { static_cast<unsigned long long>(s) };
+    Socket sock { s };
 
     //Try connecting...
 

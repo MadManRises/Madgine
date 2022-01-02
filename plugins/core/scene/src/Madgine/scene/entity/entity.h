@@ -97,9 +97,8 @@ namespace Scene {
             std::string mName;
 
         private:
-            static const char *componentCreationNames(size_t index);
-            std::tuple<EntityComponentOwningHandle<EntityComponentBase>> createComponentTuple(const std::string &name);
-            std::tuple<std::string_view> storeComponentCreationData(const EntityComponentOwningHandle<EntityComponentBase> &comp) const;
+            Serialize::StreamResult readComponent(Serialize::SerializeInStream &in, EntityComponentOwningHandle<EntityComponentBase> &handle);
+            void writeComponent(Serialize::SerializeOutStream &out, const EntityComponentOwningHandle<EntityComponentBase> &comp) const;
 
             bool mLocal;
 

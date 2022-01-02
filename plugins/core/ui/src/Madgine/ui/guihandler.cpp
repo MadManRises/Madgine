@@ -30,7 +30,7 @@ namespace UI {
         if (!mWidget)
             return;
 
-        auto state = getState();
+        auto state = this->state();
         if (!state.is_ready() || !state) {
             LOG_ERROR("Failed to open unitialized GuiHandler!");
             return;

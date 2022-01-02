@@ -71,8 +71,6 @@ namespace Widgets {
 
         const Render::Texture &uiTexture() const;
 
-        static const char *widgetCreationNames(size_t index);
-
     protected:
         WidgetBase *getHoveredWidget(const Vector2 &pos, WidgetBase *current);
         WidgetBase *getHoveredWidgetUp(const Vector2 &pos, WidgetBase *current);
@@ -81,8 +79,8 @@ namespace Widgets {
 
         
         std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, WidgetClass _class, WidgetBase *parent = nullptr);
-        std::tuple<std::unique_ptr<WidgetBase>> createWidgetClassTuple(const std::string &name, WidgetClass _class);
-        std::tuple<std::string, WidgetClass> storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const;
+        Serialize::StreamResult readWidget(Serialize::SerializeInStream &in, std::unique_ptr<WidgetBase> &widget);
+        void writeWidget(Serialize::SerializeOutStream &out, const std::unique_ptr<WidgetBase> &widget) const;
 
         template <typename WidgetType = WidgetBase>
         std::unique_ptr<WidgetType> create(const std::string &name, WidgetBase *parent = nullptr);

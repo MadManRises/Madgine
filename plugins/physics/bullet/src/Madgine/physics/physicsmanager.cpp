@@ -118,7 +118,7 @@ namespace Physics {
 
     void PhysicsManager::removeListener(PhysicsListener *listener)
     {
-        mListener.erase(std::find(mListener.begin(), mListener.end(), listener));
+        std::erase(mListener, listener);
     }
 
     bool PhysicsManager::init()

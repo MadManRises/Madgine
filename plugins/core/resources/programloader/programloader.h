@@ -35,7 +35,7 @@ namespace Render {
 
         ProgramLoader();
 
-        virtual bool create(Program &program, const std::string &name, const std::vector<size_t> &bufferSizes = {}, size_t instanceDataSize = 0) = 0;
+        virtual Threading::Task<bool> create(Program &program, const std::string &name, const std::vector<size_t> &bufferSizes = {}, size_t instanceDataSize = 0) = 0;
         virtual bool create(Program &program, const std::string &name, const CodeGen::ShaderFile &file) = 0;
 
         virtual WritableByteBuffer mapParameters(Program &program, size_t index) = 0;

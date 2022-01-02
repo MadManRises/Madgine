@@ -27,25 +27,25 @@ static constexpr std::array<FunctionArgument, sizeof...(Args) + 1> metafunctionA
 template <typename R, typename... Args>
 static constexpr std::array<FunctionArgument, sizeof...(Args)> metafunctionArgs(R (*f)(Args...), std::string_view args)
 {
-    return metafunctionArgsHelper<R, Args...>(args, std::make_index_sequence<sizeof...(Args)>());
+    return metafunctionArgsHelper<R, Args...>(args, std::index_sequence_for<Args...>());
 }
 
 template <typename R, typename T, typename... Args>
 static constexpr std::array<FunctionArgument, sizeof...(Args) + 1> metafunctionArgs(R (T::*f)(Args...), std::string_view args)
 {
-    return metafunctionArgsMemberHelper<R, T, Args...>(args, std::make_index_sequence<sizeof...(Args)>());
+    return metafunctionArgsMemberHelper<R, T, Args...>(args, std::index_sequence_for<Args...>());
 }
 
 template <typename R, typename T, typename... Args>
 static constexpr std::array<FunctionArgument, sizeof...(Args) + 1> metafunctionArgs(R (T::*f)(Args...) const, std::string_view args)
 {
-    return metafunctionArgsMemberHelper<R, T, Args...>(args, std::make_index_sequence<sizeof...(Args)>());
+    return metafunctionArgsMemberHelper<R, T, Args...>(args, std::index_sequence_for<Args...>());
 }
 
 template <typename T, typename... Args>
 static constexpr std::array<FunctionArgument, sizeof...(Args) + 1> metafunctionArgs(void (T::*f)(ValueType &, Args...), std::string_view args)
 {
-    return metafunctionArgsMemberHelper<ValueType, T, Args...>(args, std::make_index_sequence<sizeof...(Args)>());
+    return metafunctionArgsMemberHelper<ValueType, T, Args...>(args, index_sequence_for<Args...>());
 }
 
 template <auto F, typename R, typename T, typename... Args, size_t... I>
@@ -81,19 +81,19 @@ static void unpackReturnHelper(const FunctionTable *table, ValueType &retVal, co
 template <auto F, typename R, typename T, typename... Args>
 static void unpackMemberApiMethod(const FunctionTable *table, ValueType &retVal, const ArgumentList &args)
 {
-    unpackMemberHelper<F, R, T, Args...>(table, retVal, args, std::make_index_sequence<sizeof...(Args)>());
+    unpackMemberHelper<F, R, T, Args...>(table, retVal, args, std::index_sequence_for<Args...>());
 }
 
 template <auto F, typename R, typename... Args>
 static void unpackApiMethod(const FunctionTable *table, ValueType &retVal, const ArgumentList &args)
 {
-    unpackApiHelper<F, R, Args...>(table, retVal, args, std::make_index_sequence<sizeof...(Args)>());
+    unpackApiHelper<F, R, Args...>(table, retVal, args, std::index_sequence_for<Args...>());
 }
 
 template <auto F, typename T, typename... Args>
 static void unpackReturnMethod(const FunctionTable *table, ValueType &retVal, const ArgumentList &args)
 {
-    unpackReturnHelper<F, T, Args...>(table, retVal, args, std::make_index_sequence<sizeof...(Args)>());
+    unpackReturnHelper<F, T, Args...>(table, retVal, args, std::index_sequence_for<Args...>());
 }
 
 template <auto F, typename R, typename... Args>

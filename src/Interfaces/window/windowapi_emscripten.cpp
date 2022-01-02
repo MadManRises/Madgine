@@ -43,8 +43,8 @@ namespace Window {
     } sDisplayGuard;
 
     struct EmscriptenWindow final : OSWindow {
-        EmscriptenWindow(EGLSurface surface)
-            : OSWindow((uintptr_t)surface)
+        EmscriptenWindow(EGLSurface surface, WindowEventListener *listener)
+            : OSWindow((uintptr_t)surface, listener)
             , mKeyDown {}
         {
             EGLint width;
@@ -230,7 +230,7 @@ namespace Window {
         return true;
     }
 
-    OSWindow *sCreateWindow(const WindowSettings &settings)
+    OSWindow *sCreateWindow(const WindowSettings &settings, WindowEventListener *listener)
     {
         assert(sDisplay);
 
@@ -266,7 +266,7 @@ namespace Window {
                 return nullptr;
         }
 
-        auto pib = sWindows.try_emplace(handle, handle);
+        auto pib = sWindows.try_emplace(handle, handle, listener);
         assert(pib.second);
 
         EmscriptenWindow *window = &pib.first->second;

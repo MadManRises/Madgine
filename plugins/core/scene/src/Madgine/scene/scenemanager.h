@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 
 #include "Meta/serialize/toplevelunit.h"
 
@@ -70,14 +69,6 @@ namespace Scene {
         SceneComponentBase &getComponent(size_t i);
         size_t getComponentCount();
 
-        template <typename T>
-        T &getGlobalAPIComponent()
-        {
-            return static_cast<T &>(getGlobalAPIComponent(Engine::component_index<T>()));
-        }
-
-        App::GlobalAPIBase &getGlobalAPIComponent(size_t i);
-
         Threading::DataMutex &mutex();
 
         Threading::SignalStub<const RefcountedContainer<std::deque<Entity::Entity>>::iterator &, int> &entitiesSignal();
@@ -110,10 +101,9 @@ namespace Scene {
     private:
         std::string generateUniqueName();
 
-        static const char *entityCreationNames(size_t index);
-        std::tuple<SceneManager &, bool, std::string> createNonLocalEntityData(const std::string &name);
+        Serialize::StreamResult readNonLocalEntity(Serialize::SerializeInStream &in, OutRef<SceneManager> &mgr, bool &isLocal, std::string &name);
         std::tuple<SceneManager &, bool, std::string> createEntityData(const std::string &name, bool local);
-        std::tuple<std::string> storeEntityCreationData(const Entity::Entity &entity) const;
+        void writeEntity(Serialize::SerializeOutStream &out, const Entity::Entity &entity) const;
 
     private:
         Entity::EntityComponentListContainer<std::vector<Placeholder<0>>> mEntityComponentLists;

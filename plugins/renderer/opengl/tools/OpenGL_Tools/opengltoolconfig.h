@@ -1,7 +1,7 @@
 #pragma once
 
-#include "toolscollector.h"
 #include "toolbase.h"
+#include "toolscollector.h"
 
 #include "OpenGL/util/opengltexture.h"
 
@@ -15,8 +15,8 @@ namespace Tools {
         OpenGLToolConfig(ImRoot &root);
         OpenGLToolConfig(const SceneEditor &) = delete;
 
-        virtual bool init() override;
-        virtual void finalize() override;
+        virtual Threading::Task<bool> init() override;
+        virtual Threading::Task<void> finalize() override;
 
         std::string_view key() const override;
 

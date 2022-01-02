@@ -20,7 +20,7 @@ READONLY_PROPERTY(Components, components)
 METATABLE_END(Engine::Scene::Entity::Entity)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Entity)
-FIELD(mComponents, Serialize::ParentCreator<&Engine::Scene::Entity::Entity::componentCreationNames, &Engine::Scene::Entity::Entity::createComponentTuple, &Engine::Scene::Entity::Entity::storeComponentCreationData, &Engine::Scene::Entity::Entity::clearComponents>)
+FIELD(mComponents, Serialize::ParentCreator<&Engine::Scene::Entity::Entity::readComponent, &Engine::Scene::Entity::Entity::writeComponent, &Engine::Scene::Entity::Entity::clearComponents>)
 SERIALIZETABLE_END(Engine::Scene::Entity::Entity)
 
 namespace Engine {
@@ -172,23 +172,23 @@ namespace Scene {
             mSceneManager.remove(this);
         }
 
-        const char *Engine::Scene::Entity::Entity::componentCreationNames(size_t index)
+        Serialize::StreamResult Entity::readComponent(Serialize::SerializeInStream &in, EntityComponentOwningHandle<EntityComponentBase> &handle)
         {
-            assert(index == 0);
-            return "type";
-        }
-
-        std::tuple<EntityComponentOwningHandle<EntityComponentBase>> Entity::createComponentTuple(const std::string &name)
-        {
+            STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, "Component", 1));
+            std::string name;
+            STREAM_PROPAGATE_ERROR(read(in, name, "name"));
             uint32_t i = EntityComponentRegistry::sComponentsByName().at(name);
-            return std::make_tuple(mSceneManager.entityComponentList(i).emplace({}, this));
+            handle = mSceneManager.entityComponentList(i).emplace({}, this);
+            return {};
         }
 
-        std::tuple<std::string_view> Entity::storeComponentCreationData(const EntityComponentOwningHandle<EntityComponentBase> &comp) const
+        void Entity::writeComponent(Serialize::SerializeOutStream &out, const EntityComponentOwningHandle<EntityComponentBase> &comp) const
         {
             for (const auto &p : EntityComponentRegistry::sComponentsByName()) {
-                if (p.second == comp.mHandle.mType)
-                    return p.first;
+                if (p.second == comp.mHandle.mType) {
+                    write(out, p.first, "name");
+                    return;
+                }
             }
             throw 0;
         }

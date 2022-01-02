@@ -38,7 +38,7 @@ METATABLE_END(Engine::NodeGraph::NodeGraphLoader::ResourceType)
             Serialize::StreamResult result = graph.loadFromFile(info.resource()->path());
 
             if (result.mState != Serialize::StreamState::OK) {
-                LOG(*result.mError);
+                LOG_ERROR("Error loading Nodegraph (" << info.resource()->path() << "):\n" << result);
                 return false;
             }
 

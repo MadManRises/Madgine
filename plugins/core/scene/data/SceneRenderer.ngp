@@ -1,6 +1,6 @@
 <Graph serId=1>
     <mNodes>
-        <Item type="Vector3to4Node" serId=2>
+        <Node type="Vector3to4Node" serId=2>
             <mFillValue>1</mFillValue>
             <mFlowOutPins>
             </mFlowOutPins>
@@ -14,8 +14,8 @@
             </mDataInPins>
             <mDataOutPins>
             </mDataOutPins>
-        </Item>
-        <Item type="MeshRendererNode" serId=3>
+        </Node>
+        <Node type="MeshRendererNode" serId=3>
             <mFlowOutPins>
                 <Item>
                     <Element>
@@ -46,8 +46,8 @@
             </mDataInPins>
             <mDataOutPins>
             </mDataOutPins>
-        </Item>
-        <Item type="RasterizerNode" serId=4>
+        </Node>
+        <Node type="RasterizerNode" serId=4>
             <mAdditionalPins>1</mAdditionalPins>
             <mFlowOutPins>
                 <Item>
@@ -73,8 +73,8 @@
             </mDataInPins>
             <mDataOutPins>
             </mDataOutPins>
-        </Item>
-        <Item type="AdditionNode" serId=5>
+        </Node>
+        <Node type="AdditionNode" serId=5>
             <mFlowOutPins>
             </mFlowOutPins>
             <mDataInPins>
@@ -93,8 +93,8 @@
             </mDataInPins>
             <mDataOutPins>
             </mDataOutPins>
-        </Item>
-        <Item type="FrameBufferNode" serId=6>
+        </Node>
+        <Node type="FrameBufferNode" serId=6>
             <mFlowOutPins>
             </mFlowOutPins>
             <mDataInPins>
@@ -107,8 +107,8 @@
             </mDataInPins>
             <mDataOutPins>
             </mDataOutPins>
-        </Item>
-        <Item type="GPUBufferNode" serId=7>
+        </Node>
+        <Node type="GPUBufferNode" serId=7>
             <mAdditionalPins>2</mAdditionalPins>
             <mFlowOutPins>
                 <Item>
@@ -134,8 +134,8 @@
             </mDataInPins>
             <mDataOutPins>
             </mDataOutPins>
-        </Item>
-        <Item type="FunctionNode" serId=8>
+        </Node>
+        <Node type="FunctionNode" serId=8>
             <Function>Engine::Render::Camera::getViewProjectionMatrix</Function>
             <mFlowOutPins>
             </mFlowOutPins>
@@ -155,8 +155,8 @@
             </mDataInPins>
             <mDataOutPins>
             </mDataOutPins>
-        </Item>
-        <Item type="MultiplicationNode" serId=9>
+        </Node>
+        <Node type="MultiplicationNode" serId=9>
             <mFlowOutPins>
             </mFlowOutPins>
             <mDataInPins>
@@ -175,8 +175,8 @@
             </mDataInPins>
             <mDataOutPins>
             </mDataOutPins>
-        </Item>
-        <Item type="VariableNode" serId=10>
+        </Node>
+        <Node type="VariableNode" serId=10>
             <mDefaultValue type=5>1</mDefaultValue>
             <mFlowOutPins>
             </mFlowOutPins>
@@ -184,7 +184,7 @@
             </mDataInPins>
             <mDataOutPins>
             </mDataOutPins>
-        </Item>
+        </Node>
     </mNodes>
     <mFlowOutPins>
         <Item>

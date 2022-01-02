@@ -17,7 +17,7 @@ namespace Serialize {
         std::ios_base::iostate state = in.state();
         in.clear();
 
-        mPosition = in.tell();
+        mPosition = in.tell() - in.gcount();
 
         ss << "ERROR: (";
 
@@ -59,6 +59,14 @@ namespace Serialize {
     {
         return out << error.mMsg << "\n"
                    << error.mNotes;
+    }
+
+    std::ostream &operator<<(std::ostream &out, const StreamResult &result)
+    {
+        out << result.mState;
+        if (result.mState != StreamState::OK)
+            out << '\n' << *result.mError;
+        return out;
     }
 
     StreamResultBuilder::operator StreamResult()

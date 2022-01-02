@@ -20,8 +20,8 @@ namespace Tools {
         SceneEditor(ImRoot &root);
         SceneEditor(const SceneEditor &) = delete;
 
-        virtual bool init() override;
-        virtual void finalize() override;
+        virtual Threading::Task<bool> init() override;
+        virtual Threading::Task<void> finalize() override;
 
         virtual void render() override;
         virtual void renderMenu() override;
@@ -106,7 +106,6 @@ namespace Tools {
 
         int mHoveredAxis = -1;
         Engine::Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> mHoveredTransform;
-
 
         //Settings
         Vector4 mBoneForward = { 1, 0, 0, 0 };

@@ -46,7 +46,7 @@ namespace Render {
             name, {}, [=, &file](OpenGLShaderLoader *loader, OpenGLShader &shader, OpenGLShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file, type); }, {}, loader);
     }
 
-    void OpenGLShaderLoader::HandleType::load(std::string name, ShaderType type, OpenGLShaderLoader *loader)
+    Threading::TaskFuture<bool> OpenGLShaderLoader::HandleType::load(std::string name, ShaderType type, OpenGLShaderLoader *loader)
     {
         switch (type) {
         case ShaderType::PixelShader:
@@ -62,7 +62,7 @@ namespace Render {
             throw 0;
         }
 
-        *this = OpenGLShaderLoader::load(name, loader);
+        return Handle::load(name, loader);
     }
 
     OpenGLShaderLoader::OpenGLShaderLoader()
@@ -92,7 +92,7 @@ namespace Render {
 
         std::string source = info.resource()->readAsText();
 
-        return loadFromSource(shader, filename, source, type);
+        return loadFromSource(shader, filename, source, type, info.resource()->path());
     }
 
     void OpenGLShaderLoader::unloadImpl(OpenGLShader &shader, ResourceDataInfo &info)
@@ -118,31 +118,33 @@ namespace Render {
             f << ss.str();
         }
 
-        return loadFromSource(shader, res->name(), ss.str(), type);
+        return loadFromSource(shader, res->name(), ss.str(), type, res->path());
     }
 
-    bool OpenGLShaderLoader::loadFromSource(OpenGLShader &shader, std::string_view name, std::string source, ShaderType type)
+    bool OpenGLShaderLoader::loadFromSource(OpenGLShader &shader, std::string_view name, std::string source, ShaderType type, const Filesystem::Path &path)
     {
         OpenGLShader tempShader { type };
 
         GLuint handle = tempShader.mHandle;
 
-        std::set<std::string> files;
+        std::map<std::string, size_t> files {
+            { std::string { path.filename() }, 0 }
+        };
 
-        CodeGen::resolveIncludes(source, [this, &files](const Filesystem::Path &path, size_t line, std::string_view filename) {
+        CodeGen::resolveIncludes(
+            source, [this, &files](const Filesystem::Path &path, size_t line, std::string_view filename) {
+                Resources::ResourceBase *res;
 
-            Resources::ResourceBase *res;
+                if (path.extension() == ".sl") {
+                    res = SlLoader::get(path.stem());
+                } else {
+                    res = get(path.stem(), this);
+                }
 
-            if (path.extension() == ".sl") {
-                res = SlLoader::get(path.stem());
-            } else {
-                res = get(path.stem(), this);
-            }
+                return "#line 1 " + std::to_string(files.at(path)) + "\n" + res->readAsText() + "\n#line " + std::to_string(line + 1) + " " + std::to_string(files.at(std::string { filename }));
+            },
+            path.filename().str(), files);
 
-            return "#line 1 " + std::to_string(files.size()) + "\n" + res->readAsText() + "\n#line " + std::to_string(line + 1) + " " + std::to_string(files.size());
-        }, name, files);
-
-        
         const char *cSource
             = source.data();
 
@@ -154,8 +156,10 @@ namespace Render {
         glGetShaderiv(handle, GL_COMPILE_STATUS, &success);
         if (!success) {
             glGetShaderInfoLog(handle, 512, NULL, infoLog);
-            LOG_ERROR("Loading of " << (type == VertexShader ? "VS" : "PS") << " Shader '" << name << "' failed:");
-            LOG_ERROR(infoLog);
+            Engine::Util::LogDummy { Engine::Util::MessageType::ERROR_TYPE, path.c_str() }
+                << "Compilation of " << (type == VertexShader ? "VS" : "PS")
+                << " Shader '" << name << "' failed:\n"
+                << infoLog;
             return false;
         }
 
@@ -164,7 +168,7 @@ namespace Render {
         return true;
     }
 
-            Threading::TaskQueue *OpenGLShaderLoader::loadingTaskQueue() const
+    Threading::TaskQueue *OpenGLShaderLoader::loadingTaskQueue() const
     {
         return OpenGLRenderContext::renderQueue();
     }

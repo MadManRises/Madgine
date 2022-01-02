@@ -14,7 +14,6 @@ namespace Serialize {
         SerializeManager(SerializeManager &&) noexcept;
         ~SerializeManager();
 
-        const SyncableUnitMap &slavesMap() const;
         const SyncableUnitMap &mastersMap() const;
 
         void addSlaveMapping(UnitId id, SyncableUnitBase *item);
@@ -41,10 +40,9 @@ namespace Serialize {
 
 		SyncableUnitBase *getByMasterId(UnitId unit);
 
+        SyncableUnitMap mSlaveMappings;   
+
     private:
-
-        SyncableUnitMap mSlaveMappings;        
-
 		SerializeStreamData *mSlaveStreamData = nullptr;
 
         std::string mName;

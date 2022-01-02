@@ -48,7 +48,7 @@ struct MODULES_EXPORT UniqueComponentRegistryBase {
 
     ~UniqueComponentRegistryBase()
     {
-        registryRegistry().erase(std::find(registryRegistry().begin(), registryRegistry().end(), this));
+        std::erase(registryRegistry(), this);
     }
 
     virtual void onPluginLoad(const Plugins::BinaryInfo *, CompoundAtomicOperation &) = 0;
@@ -168,7 +168,7 @@ struct UniqueComponentRegistry : UniqueComponentRegistryBase {
     void removeCollector(CollectorInfoBase *info)
     {
         //assert(std::find(mLoadedCollectors.begin(), mLoadedCollectors.end(), info) == mLoadedCollectors.end());
-        mUnloadedCollectors.erase(std::remove(mUnloadedCollectors.begin(), mUnloadedCollectors.end(), info), mUnloadedCollectors.end());
+        std::erase(mUnloadedCollectors, info);
     }
 
     void onPluginUnload(const Plugins::BinaryInfo *bin, CompoundAtomicOperation &op)

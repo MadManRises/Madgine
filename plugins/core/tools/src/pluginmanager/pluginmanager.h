@@ -15,7 +15,7 @@ namespace Tools {
 
         virtual void render() override;
 
-        virtual bool init() override;
+        virtual Threading::Task<bool> init() override;
 
         std::string_view key() const override;
 

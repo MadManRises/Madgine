@@ -55,15 +55,9 @@ namespace Window {
         , mTaskQueue("FrameLoop", true)
         , mComponents(*this)
     {
-
         mTaskQueue.addSetupSteps(
             [this]() { return callInit(); },
             [this]() { return callFinalize(); });
-
-        mTaskQueue.addRepeatedTask([this]() {
-            render();
-        },
-            std::chrono::microseconds(/*1*/ 000000 / 60), this);
     }
 
     /**
@@ -81,17 +75,17 @@ namespace Window {
 
         Filesystem::FileManager mgr { "MainWindow-Layout" };
 
-        if (Serialize::SerializeInStream in = mgr.openRead(Filesystem::appDataPath() / "mainwindow.ini", std::make_unique<Serialize::IniFormatter>())) {
+        Filesystem::Path path = Filesystem::appDataPath() / "mainwindow.ini";
+
+        if (Serialize::SerializeInStream in = mgr.openRead(path, std::make_unique<Serialize::IniFormatter>())) {
             Serialize::StreamResult result = read(in, settings.mData, nullptr);
             if (result.mState != Serialize::StreamState::OK) {
-                LOG_ERROR("Error loading MainWindow-Layout: \n"
-                    << *result.mError);
+                LOG_ERROR("Error loading MainWindow-Layout from " << path << ": \n"
+                    << result);
             }
         }
 
-        mOsWindow = sCreateWindow(settings);
-
-        mOsWindow->addListener(this);
+        mOsWindow = sCreateWindow(settings, this);
 
         assert(!mRenderContext);
         mRenderContext.emplace(&mTaskQueue);
@@ -103,6 +97,11 @@ namespace Window {
         }
 
         applyClientSpaceResize();
+
+        mTaskQueue.addRepeatedTask([this]() {
+            render();
+        },
+            std::chrono::microseconds(/*1*/ 000000 / 60), this);
 
         co_return true;
     }
@@ -126,7 +125,6 @@ namespace Window {
 
         if (mOsWindow) {
             storeWindowData();
-            mOsWindow->removeListener(this);
             mOsWindow->destroy();
             mOsWindow = nullptr;
         }
@@ -171,7 +169,7 @@ namespace Window {
     */
     void MainWindow::destroyToolWindow(ToolWindow *w)
     {
-        auto it = std::find_if(mToolWindows.begin(), mToolWindows.end(), [=](const ToolWindow &window) { return &window == w; });
+        auto it = std::ranges::find(mToolWindows, w, projectionAddressOf);
         assert(it != mToolWindows.end());
         mToolWindows.erase(it);
     }
@@ -390,7 +388,7 @@ namespace Window {
         Filesystem::FileManager mgr { "MainWindow-Layout" };
 
         if (Serialize::SerializeOutStream out = mgr.openWrite(Filesystem::appDataPath() / "mainwindow.ini", std::make_unique<Serialize::IniFormatter>())) {
-            out << mOsWindow->data();
+            write(out, mOsWindow->data(), "data");
         }
     }
 

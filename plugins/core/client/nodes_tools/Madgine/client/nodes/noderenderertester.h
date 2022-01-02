@@ -20,8 +20,8 @@ namespace Tools {
         NodeRendererTester(const NodeRendererTester &) = delete;
         ~NodeRendererTester();
 
-        virtual bool init() override;
-        virtual void finalize() override;
+        virtual Threading::Task < bool> init() override;
+        virtual Threading::Task < void> finalize() override;
 
         virtual void render() override;
         virtual void renderMenu() override;

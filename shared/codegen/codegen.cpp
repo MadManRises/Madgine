@@ -6,7 +6,7 @@ namespace CodeGen {
 
 void File::beginCondition(std::string_view cond)
 {
-    auto it = std::find(mConditionalTokenList.begin(), mConditionalTokenList.end(), cond);
+    auto it = std::ranges::find(mConditionalTokenList, cond);
     if (it == mConditionalTokenList.end()) {
         mConditionalTokenList.emplace_back(cond);
         it = std::prev(mConditionalTokenList.end());
@@ -21,7 +21,7 @@ void File::beginCondition(std::string_view cond)
 
 void File::endCondition(std::string_view cond)
 {
-    auto it = std::find(mConditionalTokenList.begin(), mConditionalTokenList.end(), cond);
+    auto it = std::ranges::find(mConditionalTokenList, cond);
     assert(it != mConditionalTokenList.end());
     size_t index = std::distance(mConditionalTokenList.begin(), it);
     --mConditionalsStack[index];

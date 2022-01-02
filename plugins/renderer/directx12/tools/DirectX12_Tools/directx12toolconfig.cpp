@@ -24,7 +24,7 @@ namespace Tools {
     {
     }
 
-    bool DirectX12ToolConfig::init()
+    Threading::Task<bool> DirectX12ToolConfig::init()
     {
         mImageTexture = { Render::TextureType_2D, false, Render::FORMAT_RGBA8, 100, 100 };
 
@@ -42,14 +42,14 @@ namespace Tools {
             ImGui::Image((void *)mImageTexture.mTextureHandle, { static_cast<float>(data->mWidth), static_cast<float>(data->mHeight) });
         });
 
-        return ToolBase::init();
+        co_return co_await ToolBase::init();
     }
 
-    void DirectX12ToolConfig::finalize()
+    Threading::Task<void> DirectX12ToolConfig::finalize()
     {
         mImageTexture.reset();
 
-		ToolBase::finalize();
+        co_await ToolBase::finalize();
     }
 
     std::string_view DirectX12ToolConfig::key() const
@@ -67,5 +67,3 @@ METATABLE_END(Engine::Tools::DirectX12ToolConfig)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::DirectX12ToolConfig, Engine::Tools::ToolBase)
 SERIALIZETABLE_END(Engine::Tools::DirectX12ToolConfig)
-
-

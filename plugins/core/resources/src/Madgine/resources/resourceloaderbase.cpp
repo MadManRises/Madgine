@@ -25,7 +25,7 @@ namespace Resources {
 
     size_t ResourceLoaderBase::extensionIndex(std::string_view ext) const
     {
-        return std::find(mExtensions.begin(), mExtensions.end(), ext) - mExtensions.begin();
+        return std::ranges::find(mExtensions, ext) - mExtensions.begin();
     }
 
     std::vector<const MetaTable *> ResourceLoaderBase::resourceTypes() const

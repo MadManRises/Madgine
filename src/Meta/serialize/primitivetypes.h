@@ -20,7 +20,7 @@ namespace Serialize {
         float,
         SyncableUnitBase *,
         SerializableDataUnit *,
-        type_pack<std::string, std::string_view, CoWString>,
+        std::string,
         ByteBuffer,
         std::monostate,
         Vector3,
@@ -61,22 +61,15 @@ namespace Serialize {
         typedef T type;
     };
 
-    template <typename T, typename = void>
-    struct PrimitiveTypeIndex : type_pack_index<uint8_t, SerializePrimitives, typename PrimitiveReducer<T>::type> {
+    template <String S>
+    struct PrimitiveReducer<S> {
+        typedef std::string type;
     };
 
     template <typename T>
-    const constexpr size_t PrimitiveTypeIndex_v = PrimitiveTypeIndex<T>::value;
-
-    template <typename T, typename = void>
-    struct PrimitiveTypesContain : type_pack_contains<SerializePrimitives, typename PrimitiveReducer<T>::type> {
-    };
+    const constexpr size_t PrimitiveTypeIndex_v = type_pack_index_v<uint8_t, SerializePrimitives, typename PrimitiveReducer<T>::type>;
 
     template <typename T>
-    const constexpr bool PrimitiveTypesContain_v = PrimitiveTypesContain<T>::value;
-
-    template <typename T>
-    concept PrimitiveType = PrimitiveTypesContain_v<T> || std::convertible_to<T, const SerializableDataUnit *> || std::convertible_to<T, const SyncableUnitBase *> || Enum<T> || InstanceOf<T, EnumType>;
-
+    concept PrimitiveType = type_pack_contains_v<SerializePrimitives, typename PrimitiveReducer<T>::type>;
 }
 }

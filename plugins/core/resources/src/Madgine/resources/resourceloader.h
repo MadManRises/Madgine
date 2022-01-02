@@ -77,7 +77,7 @@ namespace Resources {
         void setUnloadingTask(Threading::TaskFuture<void> task)
         {
             assert(!mUnloadingTask.valid());
-            assert(mLoadingTask == true);
+            assert(mLoadingTask.is_ready());
             mLoadingTask.reset();
             mUnloadingTask = task;
         }
@@ -297,10 +297,8 @@ namespace Resources {
             if (!loader)
                 loader = &getSingleton();
             ResourceType *res = get(name, loader);
-            if (!res) {
-                LOG_ERROR("No resource '" << name << "' available!");
+            if (!res)
                 return {};
-            }
             return load(res, Filesystem::FileEventType::FILE_CREATED, loader);
         }
 
@@ -402,7 +400,7 @@ namespace Resources {
             if (!task.valid()) {
                 ResourceType *resource = handle.resource();
 
-                task = loader->queueUnloading(resource->mDtor(loader, *getDataPtr(handle, loader), info));
+                task = loader->queueUnloading(resource->mDtor(loader, *getDataPtr(handle, loader, false), info));
 
                 info.setUnloadingTask(task);
             }
@@ -507,7 +505,7 @@ namespace Resources {
         virtual std::vector<std::pair<std::string_view, TypedScopePtr>> resources() override
         {
             std::vector<std::pair<std::string_view, TypedScopePtr>> result;
-            std::transform(mResources.begin(), mResources.end(), std::back_inserter(result), [](std::pair<const std::string, ResourceType> &p) {
+            std::ranges::transform(mResources, std::back_inserter(result), [](std::pair<const std::string, ResourceType> &p) {
                 return std::make_pair(std::string_view { p.first }, &p.second);
             });
             return result;

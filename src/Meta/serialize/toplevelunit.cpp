@@ -66,7 +66,7 @@ namespace Serialize {
         mStaticSlaveId = staticId;
     }
 
-    void TopLevelUnitBase::initSlaveId(SerializeManager *mgr)
+    void TopLevelUnitBase::initSlaveId(SyncManager *mgr)
     {
         setSlaveId(mStaticSlaveId ? mStaticSlaveId : masterId(), mgr);
     }
@@ -114,7 +114,7 @@ namespace Serialize {
 
     void TopLevelUnitBase::removeManager(SyncManager *mgr)
     {
-        mManagers.erase(std::remove(mManagers.begin(), mManagers.end(), mgr));
+        std::erase(mManagers, mgr);
         if (!mgr->isMaster()) {
             assert(mSlaveManager == mgr);
             mSlaveManager = nullptr;

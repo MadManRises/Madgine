@@ -10,14 +10,11 @@ namespace Engine {
 
 struct GenerationContainerIndex {
 
-    static constexpr uint16_t INVALID_GENERATION = std::numeric_limits<uint16_t>::max();
-    static constexpr uint32_t INVALID_INDEX = std::numeric_limits<uint32_t>::max();
-
     GenerationContainerIndex() = default;
     GenerationContainerIndex(const GenerationContainerIndex &) = delete;
     GenerationContainerIndex(GenerationContainerIndex &&other)
-        : mIndex(std::exchange(other.mIndex, INVALID_INDEX))
-        , mGeneration(std::exchange(other.mGeneration, INVALID_GENERATION))
+        : mIndex(std::move(other.mIndex))
+        , mGeneration(std::move(other.mGeneration))
 #if ENABLE_MEMTRACKING
         , mDebugMarker(std::exchange(other.mDebugMarker, 0))
 #endif
@@ -94,7 +91,6 @@ struct GenerationContainerBase {
     GenerationContainerBase(uint16_t bufferSize = 64)
         : mHistory(bufferSize)
     {
-        assert(bufferSize < GenerationContainerIndex::INVALID_GENERATION);
     }
 
     GenerationContainerBase(const GenerationContainerBase &) = delete;

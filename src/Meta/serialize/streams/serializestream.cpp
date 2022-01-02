@@ -100,14 +100,6 @@ namespace Serialize {
         return {};
     }
 
-    StreamResult SerializeInStream::readUnformatted(CoWString &s)
-    {
-        std::string string;
-        STREAM_PROPAGATE_ERROR(readUnformatted(string));
-        s = std::move(string);
-        return {};
-    }
-
     StreamResult SerializeInStream::readUnformatted(ByteBuffer &b)
     {
         assert(format().mBinary);
@@ -309,11 +301,6 @@ namespace Serialize {
         return format().mBinary;
     }
 
-    void SerializeOutStream::writeUnformatted(const std::string &s)
-    {
-        writeUnformatted(std::string_view { s });
-    }
-
     void SerializeOutStream::writeUnformatted(const std::string_view &s)
     {
         if (format().mBinary) {
@@ -322,11 +309,6 @@ namespace Serialize {
         } else {
             OutStream::operator<<(s);
         }
-    }
-
-    void SerializeOutStream::writeUnformatted(const CoWString &s)
-    {
-        writeUnformatted(std::string_view { s });
     }
 
     void SerializeOutStream::writeUnformatted(const ByteBuffer &b)

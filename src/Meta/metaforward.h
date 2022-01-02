@@ -68,7 +68,7 @@ namespace Serialize {
     struct SerializeManager;
     struct SyncManager;
     struct SerializeStreamData;
-    struct BufferedStreamData;
+    struct SyncStreamData;
 
     struct StreamResult;
 

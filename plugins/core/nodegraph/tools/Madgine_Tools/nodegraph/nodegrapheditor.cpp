@@ -213,38 +213,38 @@ namespace Tools {
     {
     }
 
-    bool NodeGraphEditor::init()
+    Threading::Task<bool> NodeGraphEditor::init()
     {
         createEditor();
 
-        return ToolBase::init();
+        co_return co_await ToolBase::init();
     }
 
-    void NodeGraphEditor::finalize()
+    Threading::Task<void> NodeGraphEditor::finalize()
     {
         mGraphHandle.reset();
         mEditor.reset();
 
-        ToolBase::finalize();
+        co_await ToolBase::finalize();
     }
 
     void NodeGraphEditor::render()
     {
+        ImGui::PushID(this);
+
         std::string fileName;
-        if (mGraphHandle) {
+        if (mGraphHandle.available()) {
             fileName = mGraphHandle.resource()->path().filename().str();
-
-            std::string pivot = "###";
-
-            if (mIsDirty)
-                pivot = "*" + pivot;
-
-            fileName = fileName + pivot + fileName;
         } else {
             fileName = "Node graph";
         }
+        fileName += "###editor";
 
-        if (ImGui::Begin(fileName.c_str())) {
+        ImGuiWindowFlags flags = 0;
+        if (mIsDirty)
+            flags |= ImGuiWindowFlags_UnsavedDocument;
+
+        if (ImGui::Begin(fileName.c_str(), nullptr, flags)) {
 
             ImVec2 topLeftScreen = ImGui::GetCursorScreenPos();
 
@@ -679,6 +679,8 @@ namespace Tools {
             }
             ImGui::End();
         }
+
+        ImGui::PopID();
     }
 
     void NodeGraphEditor::renderMenu()
@@ -816,7 +818,7 @@ namespace Tools {
 
     std::string_view NodeGraphEditor::getCurrentName() const
     {
-        return mGraphHandle ? mGraphHandle->name() : "";
+        return mGraphHandle.available() ? mGraphHandle->name() : "";
     }
 
     bool NodeGraphEditor::onSave(std::string_view view, ed::SaveReasonFlags reason)

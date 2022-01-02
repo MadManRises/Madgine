@@ -34,7 +34,8 @@ layout(location = 3) in vec3 aNormal;
 layout(location = 4) in vec2 aUV;
 layout(location = 5) in ivec4 aBoneIDs;
 layout(location = 6) in vec4 aWeights;
-layout(location = 7) in SceneInstanceData aInstance;
+layout(location = 7) in mat4 aInstance_m;
+layout(location = 11) in mat4 aInstance_anti_m;
 
 out vec4 color;
 out vec4 worldPos;
@@ -47,6 +48,10 @@ out vec4 lightViewPosition;
 
 void main()
 {
+	SceneInstanceData aInstance;
+	aInstance.m = aInstance_m;
+	aInstance.anti_m = aInstance_anti_m;
+
 	if (object.hasSkeleton){
 		mat4 BoneTransform = bones[aBoneIDs[0]] * aWeights[0]
 		+ bones[aBoneIDs[1]] * aWeights[1]

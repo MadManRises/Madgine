@@ -39,7 +39,7 @@ void exportStaticComponentHeader(const Filesystem::Path &outFile, bool hasTools)
     std::set<const Plugins::BinaryInfo *> binaries;
 
     auto notInSkip = [&](const TypeInfo *v) {
-        return std::find_if(sSkip().begin(), sSkip().end(), [=](const TypeInfo *v2) {
+        return std::ranges::find_if(sSkip(), [=](const TypeInfo *v2) {
             return strcmp(v->mFullName, v2->mFullName) == 0;
         }) == sSkip().end();
     };

@@ -26,9 +26,9 @@ TEST(Serialize_Query, Query)
     ASSERT_TRUE(mgr2.addTopLevelItem(&unit2));
 
     Buffer buffer;
-    mgr1.setBuffer(buffer, false);
+    HANDLE_MGR_RESULT(mgr1, mgr1.setBuffer(buffer, false));
     mgr1.sendMessages();
-    mgr2.setBuffer(buffer, true);
+    HANDLE_MGR_RESULT(mgr2, mgr2.setBuffer(buffer, true));
 
     ASSERT_EQ(unit1.mCallCount, 0);
     ASSERT_EQ(unit2.mCallCount, 0);

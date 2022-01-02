@@ -50,7 +50,7 @@ METATABLE_END(Engine::Widgets::WidgetManager)
 
 SERIALIZETABLE_BEGIN(Engine::Widgets::WidgetManager)
 FIELD(mStartupWidget)
-FIELD(mTopLevelWidgets, Serialize::ParentCreator<&Engine::Widgets::WidgetManager::widgetCreationNames, &Engine::Widgets::WidgetManager::createWidgetClassTuple, &Engine::Widgets::WidgetManager::storeWidgetCreationData>)
+FIELD(mTopLevelWidgets, Serialize::ParentCreator<&Engine::Widgets::WidgetManager::readWidget, &Engine::Widgets::WidgetManager::writeWidget>)
 SERIALIZETABLE_END(Engine::Widgets::WidgetManager)
 
 namespace Engine {
@@ -173,17 +173,6 @@ namespace Widgets {
 
     template DLL_EXPORT WidgetBase *WidgetManager::createTopLevel<WidgetBase>(const std::string &);
 
-    static constexpr std::array<const char *, 2> sWidgetCreationNames {
-        "name",
-        "type"
-    };
-
-    const char *WidgetManager::widgetCreationNames(size_t index)
-    {
-
-        return sWidgetCreationNames[index];
-    }
-
     std::unique_ptr<WidgetBase> WidgetManager::createWidgetClass(const std::string &name, WidgetClass _class, WidgetBase *parent)
     {
         std::unique_ptr<WidgetBase> w = [=]() -> std::unique_ptr<WidgetBase> {
@@ -219,14 +208,23 @@ namespace Widgets {
         return w;
     }
 
-    std::tuple<std::unique_ptr<WidgetBase>> WidgetManager::createWidgetClassTuple(const std::string &name, WidgetClass _class)
+    Serialize::StreamResult WidgetManager::readWidget(Serialize::SerializeInStream &in, std::unique_ptr<WidgetBase> &widget)
     {
-        return { createWidgetClass(name, _class) };
+        STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, "Widget", 2));
+        std::string name;
+        WidgetClass _class;
+        STREAM_PROPAGATE_ERROR(read(in, name, "name"));
+        STREAM_PROPAGATE_ERROR(read(in, _class, "type"));
+
+        widget = createWidgetClass(name, _class);
+        return {};
     }
 
-    std::tuple<std::string, WidgetClass> WidgetManager::storeWidgetCreationData(const std::unique_ptr<WidgetBase> &widget) const
+    void WidgetManager::writeWidget(Serialize::SerializeOutStream &out, const std::unique_ptr<WidgetBase> &widget) const
     {
-        return std::make_tuple(widget->getName(), widget->getClass());
+        out.format().beginExtended(out, "Widget", 2);
+        write(out, widget->getName(), "name");
+        write(out, widget->getClass(), "type");
     }
 
     bool WidgetManager::propagateInput(WidgetBase *w, const Input::PointerEventArgs &arg, bool (WidgetBase::*f)(const Input::PointerEventArgs &))
@@ -319,7 +317,7 @@ namespace Widgets {
 
     bool WidgetManager::injectPointerMove(const Input::PointerEventArgs &arg)
     {
-        if (std::find_if(mWidgets.begin(), mWidgets.end(), [&](const std::pair<const std::string, WidgetBase *> &p) { return p.second == mHoveredWidget; }) == mWidgets.end())
+        if (std::ranges::find(mWidgets, mHoveredWidget, projectionPairSecond) == mWidgets.end())
             mHoveredWidget = nullptr;
 
         Input::PointerEventArgs widgetArg = arg;
@@ -346,7 +344,7 @@ namespace Widgets {
 
     bool WidgetManager::injectAxisEvent(const Input::AxisEventArgs &arg)
     {
-        if (std::find_if(mWidgets.begin(), mWidgets.end(), [&](const std::pair<const std::string, WidgetBase *> &p) { return p.second == mHoveredWidget; }) == mWidgets.end())
+        if (std::ranges::find(mWidgets, mHoveredWidget, projectionPairSecond) == mWidgets.end())
             mHoveredWidget = nullptr;
 
         if (mHoveredWidget)
@@ -362,7 +360,7 @@ namespace Widgets {
 
     void WidgetManager::destroyTopLevel(WidgetBase *w)
     {
-        auto it = std::find_if(mTopLevelWidgets.begin(), mTopLevelWidgets.end(), [=](const std::unique_ptr<WidgetBase> &ptr) { return ptr.get() == w; });
+        auto it = std::ranges::find(mTopLevelWidgets, w, projectionToRawPtr);
         assert(it != mTopLevelWidgets.end());
         mTopLevelWidgets.erase(it);
     }
@@ -515,7 +513,7 @@ namespace Widgets {
 
             for (std::pair<std::vector<Vertex>, TextureSettings> &localVertices : localVerticesList) {
                 if (!localVertices.second.mTexture.mTextureHandle) {
-                    std::transform(localVertices.first.begin(), localVertices.first.end(), std::back_inserter(vertices[localVertices.second]), [&](const Vertex &v) {
+                    std::ranges::transform(localVertices.first, std::back_inserter(vertices[localVertices.second]), [&](const Vertex &v) {
                         return Vertex {
                             v.mPos,
                             v.mColor,

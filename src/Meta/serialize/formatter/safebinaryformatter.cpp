@@ -25,7 +25,7 @@ namespace Serialize {
         STREAM_PROPAGATE_ERROR(in.readRaw(type));
         type -= SERIALIZE_MAGIC_NUMBER;
         if (type != typeId)
-            return STREAM_PARSE_ERROR(in, "Invalid type-id encountered!");
+            return STREAM_INTEGRITY_ERROR(in, "Invalid type-id encountered!");
         return {};
     }
 
@@ -39,7 +39,6 @@ namespace Serialize {
     {
         uint32_t size = 0;
         if (sized) {
-            STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, name, 1));
             STREAM_PROPAGATE_ERROR(in.readRaw(size));
         } 
         mContainerSizes.push(size);
