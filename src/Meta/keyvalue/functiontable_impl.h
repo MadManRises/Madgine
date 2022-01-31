@@ -45,7 +45,7 @@ static constexpr std::array<FunctionArgument, sizeof...(Args) + 1> metafunctionA
 template <typename T, typename... Args>
 static constexpr std::array<FunctionArgument, sizeof...(Args) + 1> metafunctionArgs(void (T::*f)(ValueType &, Args...), std::string_view args)
 {
-    return metafunctionArgsMemberHelper<ValueType, T, Args...>(args, index_sequence_for<Args...>());
+    return metafunctionArgsMemberHelper<ValueType, T, Args...>(args, std::index_sequence_for<Args...>());
 }
 
 template <auto F, typename R, typename T, typename... Args, size_t... I>

@@ -29,7 +29,7 @@ namespace Tools {
 
 
         bool drawMembers(TypedScopePtr scope, std::set<std::string> drawn = {}, const char *layoutName = nullptr);
-
+        
         InspectorLayout *getLayout(const std::string &name);
 
         std::string_view key() const override;

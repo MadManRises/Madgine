@@ -227,7 +227,7 @@ namespace Scripting {
             return nullptr;
         }
 
-        PyObject *toPyObject(const Function &f)
+        PyObject *toPyObject(const KeyValueFunction &f)
         {
             PyErr_SetString(PyExc_NotImplementedError, "Can't convert type <Function> yet");
             return nullptr;

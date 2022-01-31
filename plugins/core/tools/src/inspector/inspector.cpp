@@ -25,13 +25,11 @@
 
 UNIQUECOMPONENT(Engine::Tools::Inspector);
 
-
 METATABLE_BEGIN_BASE(Engine::Tools::Inspector, Engine::Tools::ToolBase)
 METATABLE_END(Engine::Tools::Inspector)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::Inspector, Engine::Tools::ToolBase)
 SERIALIZETABLE_END(Engine::Tools::Inspector)
-
 
 namespace Engine {
 namespace Tools {
@@ -69,7 +67,7 @@ namespace Tools {
             std::vector<std::pair<std::string_view, TypedScopePtr>> result;
             const FunctionTable *table = sFunctionList();
             while (table) {
-                result.emplace_back(table->mName, const_cast<FunctionTable*>(table));
+                result.emplace_back(table->mName, const_cast<FunctionTable *>(table));
                 table = table->mNext;
             }
             return result;
@@ -155,18 +153,16 @@ namespace Tools {
         if (generic)
             ImGui::BeginValueType({ ExtendedValueTypeEnum::GenericType }, id.data());
 
-        std::pair<bool, bool> modified = value.visit(overloaded { [&](TypedScopePtr& scope) {
-                                                                     return drawValue(id, scope, editable, element);                                                        
+        std::pair<bool, bool> modified = value.visit(overloaded { [&](TypedScopePtr &scope) {
+                                                                     return drawValue(id, scope, editable, element);
                                                                  },
             [&](OwnedScopePtr scope) {
                 return drawValue(id, scope, editable, element);
             },
             [&](KeyValueVirtualSequenceRange &range) {
-                
                 return std::make_pair(false, drawValue(id, range, editable, element));
             },
             [&](KeyValueVirtualAssociativeRange &range) {
-                
                 return std::make_pair(false, drawValue(id, range, editable, element));
             },
             [&](BoundApiFunction &function) {
@@ -176,7 +172,9 @@ namespace Tools {
             [&](auto &other) {
                 if (!editable)
                     ImGui::PushDisabled();
+                ImGui::Indent();
                 std::pair<bool, bool> result = std::make_pair(ImGui::ValueTypeDrawer { id.data(), false }.draw(other), false);
+                ImGui::Unindent();
                 if (!editable)
                     ImGui::PopDisabled();
                 return result;
@@ -196,12 +194,23 @@ namespace Tools {
         auto it = mObjectSuggestionsByType.find(scope.mType);
         bool hasSuggestions = editable && it != mObjectSuggestionsByType.end();
 
-        bool open;
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+
+        bool open = false;
+        if (scope)
+            open = ImGui::TreeNode(id.data());
+        else {
+            ImGui::Indent();
+            ImGui::Text(id);
+            ImGui::Unindent();
+        }
+
+        ImGui::TableNextColumn();
 
         if (hasSuggestions) {
-            ImGui::BeginTreeArrow(id.data());
-            ImGui::SameLine();
-            if (ImGui::BeginCombo((std::string { id } + "##suggestions").c_str(), scope.name().c_str())) {
+            ImGui::PushItemWidth(-1.0f);
+            if (ImGui::BeginCombo("##suggestions", scope.name().c_str())) {
                 for (std::pair<std::string_view, TypedScopePtr> p : it->second()) {
                     if (ImGui::Selectable(p.first.data())) {
                         scope = p.second;
@@ -210,9 +219,7 @@ namespace Tools {
                 }
                 ImGui::EndCombo();
             }
-            open = ImGui::EndTreeArrow();
-        } else {
-            open = ImGui::TreeNode(id.data());
+            ImGui::PopItemWidth();
         }
 
         ImGui::DraggableValueTypeSource(id, scope, ImGuiDragDropFlags_SourceAllowNullID);
@@ -240,16 +247,22 @@ namespace Tools {
     }
 
     std::pair<bool, bool> Inspector::drawValue(std::string_view id, OwnedScopePtr &scope, bool editable, tinyxml2::XMLElement *element)
-    {        
+    {
         TypedScopePtr ptr = scope.get();
         return drawValue(id, ptr, editable, element);
     }
 
     bool Inspector::drawValue(std::string_view id, KeyValueVirtualSequenceRange &range, bool editable, tinyxml2::XMLElement *element)
     {
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+
         bool changed = false;
         bool b = ImGui::TreeNodeEx(id.data());
         ImGui::DraggableValueTypeSource(id, range);
+
+        ImGui::TableNextColumn();
+
         if (b) {
             size_t i = 0;
             for (auto vValue : range) {
@@ -273,9 +286,15 @@ namespace Tools {
 
     bool Inspector::drawValue(std::string_view id, KeyValueVirtualAssociativeRange &range, bool editable, tinyxml2::XMLElement *element)
     {
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+
         bool changed = false;
         bool b = ImGui::TreeNodeEx(id.data());
         ImGui::DraggableValueTypeSource(id, range);
+
+        ImGui::TableNextColumn();
+
         if (b) {
             size_t i = 0;
             for (auto [vKey, vValue] : range) {
@@ -303,10 +322,7 @@ namespace Tools {
 
     bool Inspector::drawMembers(TypedScopePtr scope, std::set<std::string> drawn, const char *layoutName)
     {
-        if (!scope) {
-            ImGui::Text("<NULL>");
-            return false;
-        }
+        assert(scope);
 
         bool changed = false;
 

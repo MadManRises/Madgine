@@ -101,7 +101,7 @@ namespace Serialize {
         template <typename Op>
         static StreamResult readItem(SerializeInStream &in, Op &op, typename container_traits<Op>::emplace_return &it, const typename container_traits<Op>::const_iterator &where)
         {
-            ArgsTuple<container_traits<Op>::value_type> tuple;
+            ArgsTuple<typename container_traits<Op>::value_type> tuple;
             STREAM_PROPAGATE_ERROR(readCreationData<typename container_traits<Op>::value_type>(in, tuple));
             it = TupleUnpacker::invokeExpand(LIFT(container_traits<Op>::emplace), op, where, std::move(tuple));
             STREAM_PROPAGATE_ERROR(read(in, *it, "Item"));

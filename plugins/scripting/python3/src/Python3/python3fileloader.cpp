@@ -78,7 +78,9 @@ namespace Scripting {
             ValueType resourcePtr;
             fromPyObject(resourcePtr, PyObjectPtr { toPyObject(spec) }.get("loader_state"));
             ResourceType *res = resourcePtr.as<TypedScopePtr>().safe_cast<ResourceType>();
-            PyModulePtr &module = *create(res, Filesystem::FileEventType::FILE_CREATED, this);
+            HandleType handle = create(res, Filesystem::FileEventType::FILE_CREATED, this);
+            handle.info()->setPersistent(true);
+            PyModulePtr &module = *getDataPtr(handle, this, false);
             assert(!module);
             module = PyModulePtr::create(res->name());
             return fromPyObject(retVal, module);

@@ -87,6 +87,8 @@ struct VirtualIterator {
     using pointer = void;
     using reference = RefT;
 
+    VirtualIterator() = default;
+
     template <typename It, typename Assign = DefaultAssign>
     VirtualIterator(It &&it, const std::shared_ptr<__generic_impl__::VirtualRangeBase<RefT>> &container, type_holder_t<Assign> = {})
         : mImpl(std::make_unique<__generic_impl__::VirtualIteratorImpl<RefT, std::remove_reference_t<It>, Assign>>(std::forward<It>(it), container))
@@ -103,19 +105,29 @@ struct VirtualIterator {
     {
     }
 
-    void operator=(const VirtualIterator<RefT> &other)
+    VirtualIterator<RefT> &operator=(const VirtualIterator<RefT> &other)
     {
         mImpl = other.mImpl->clone();
+        return *this;
     }
 
-    void operator=(VirtualIterator<RefT> &&other)
+    VirtualIterator<RefT> &operator=(VirtualIterator<RefT> &&other)
     {
         mImpl = std::move(other.mImpl);
+        return *this;
     }
 
-    void operator++()
+    VirtualIterator<RefT> &operator++()
     {
         mImpl->increment();
+        return *this;
+    }
+
+    VirtualIterator<RefT> operator++(int)
+    {
+        VirtualIterator<RefT> temp = *this;
+        ++*this;
+        return temp;
     }
 
     RefT operator*() const

@@ -247,6 +247,9 @@ namespace Render {
     {
         OpenGLRenderTarget::endIteration(iteration);
 
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        GL_CHECK();
+
         if (mSamples > 1) {
             for (size_t i = 0; i < mTextures.size(); ++i) {
                 glBindFramebuffer(GL_READ_FRAMEBUFFER, mFramebuffers[0]);
@@ -260,11 +263,13 @@ namespace Render {
                 GL_CHECK();
                 glBlitFramebuffer(0, 0, mSize.x, mSize.y, 0, 0, mSize.x, mSize.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
                 GL_CHECK();
+                glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+                GL_CHECK();
+                glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+                GL_CHECK();
             }
         }
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        GL_CHECK();
     }
 
     TextureDescriptor OpenGLRenderTexture::texture(size_t index, size_t iteration) const

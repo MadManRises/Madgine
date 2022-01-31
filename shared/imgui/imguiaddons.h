@@ -1,6 +1,7 @@
 #pragma once
 
 #include "imconfig.h"
+#include "imgui.h"
 
 #include "Meta/keyvalue/valuetype_forward.h"
 
@@ -70,9 +71,8 @@ struct IMGUI_API ValueTypeDrawer {
     bool mMinified;
 };
 
-IMGUI_API void setPayloadStatus(const std::string &);
+IMGUI_API void setPayloadStatus(std::string_view s);
 
-IMGUI_API void Text(const std::string &s);
 IMGUI_API void Text(std::string_view s);
 IMGUI_API bool InputText(const char *label, std::string *s, ImGuiInputTextFlags flags = 0);
 IMGUI_API bool InputText(const char *label, Engine::CoWString *s, ImGuiInputTextFlags flags = 0);
@@ -89,6 +89,26 @@ IMGUI_API void Duration(std::chrono::nanoseconds dur);
 IMGUI_API void RightAlignDuration(std::chrono::nanoseconds dur);
 
 IMGUI_API void RightAlignText(const char *s, ...);
+
+template <typename F, typename... Args>
+bool Col(F &&f, const char *label, Args&&... args)
+{
+    int columns = TableGetColumnCount();
+    assert(columns == 0 || columns == 2);
+    if (columns == 0) {
+        return f(label, std::forward<Args>(args)...);
+    } else {
+        TableNextColumn();
+        Text("%s", label);
+        TableNextColumn();
+
+        ImGui::PushItemWidth(-1.0f);
+        bool result = f(("##"s + label).c_str(), std::forward<Args>(args)...);
+        ImGui::PopItemWidth();
+
+        return result;
+    }
+}
 
 IMGUI_API bool DragMatrix3(const char *label, Engine::Matrix3 *m, float v_speed, bool *enabled = nullptr);
 IMGUI_API bool DragMatrix3(const char *label, Engine::Matrix3 *m, float *v_speeds, bool *enabled = nullptr);
@@ -123,7 +143,7 @@ bool AcceptDraggableValueType(
             }
         }
 
-        if constexpr (!Engine::isValueTypePrimitive_v<T>) {
+        if constexpr (!Engine::ValueTypePrimitive<T>) {
             if (Engine::ValueType_is<T *>(*payload)) {
                 const T *t = Engine::ValueType_as<T *>(*payload);
                 if (validate(*t) && AcceptDraggableValueType(payloadPointer)) {
@@ -206,5 +226,8 @@ struct InteractiveViewState {
 };
 
 IMGUI_API bool InteractiveView(InteractiveViewState &state);
+
+IMGUI_API void BeginGroupPanel(const char *name, const ImVec2 &size = ImVec2(0.0f, 0.0f));
+IMGUI_API void EndGroupPanel();
 
 }

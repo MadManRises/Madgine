@@ -16,6 +16,8 @@
 
 #include "Interfaces/filesystem/path.h"
 
+#include "../imguiicons.h"
+
 UNIQUECOMPONENT(Engine::Tools::LogViewer);
 
 METATABLE_BEGIN_BASE(Engine::Tools::LogViewer, Engine::Tools::ToolBase)
@@ -28,7 +30,7 @@ SERIALIZETABLE_END(Engine::Tools::LogViewer)
 namespace Engine {
 namespace Tools {
 
-    static constexpr std::array<const char *, 4> icons { "", "\xee\xa0\x81", "\xee\xa0\x80", "\xee\xa0\x82" };
+    static constexpr std::array<const char *, 4> icons { "", IMGUI_ICON_INFO, IMGUI_ICON_WARNING, IMGUI_ICON_ERROR };
 
     LogViewer::LogViewer(ImRoot &root)
         : Tool<LogViewer>(root)

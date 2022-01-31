@@ -30,6 +30,8 @@
 
 #include "Madgine/resources/resourcemanager.h"
 
+#include "imgui/misc/freetype/imgui_freetype.h"
+
 //UNIQUECOMPONENT(Engine::Tools::ClientImRoot);
 
 METATABLE_BEGIN(Engine::Tools::ClientImRoot)
@@ -207,13 +209,14 @@ namespace Tools {
         io.KeyMap[ImGuiKey_Y] = Input::Key::Y;
         io.KeyMap[ImGuiKey_Z] = Input::Key::Z;
 
-        static const ImWchar icons_ranges[] = { 0xe800, 0xe8ff, 0 };
+        static const ImWchar icons_ranges[] = { 0xf100, 0xf1ff, 0 };
 
         ImFontConfig config;
         config.MergeMode = true;
+        config.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_LoadColor;
 
         io.Fonts->AddFontDefault();
-        io.Fonts->AddFontFromFileTTF(Engine::Resources::ResourceManager::getSingleton().findResourceFile("imgui_icons.ttf").c_str(), 13, &config, icons_ranges);
+        io.Fonts->AddFontFromFileTTF(Engine::Resources::ResourceManager::getSingleton().findResourceFile("icons.ttf").c_str(), 13, &config, icons_ranges);
         io.Fonts->Build();
 
         if (!co_await ImRoot::init())

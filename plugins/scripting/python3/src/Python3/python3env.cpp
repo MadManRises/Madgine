@@ -6,17 +6,17 @@
 
 #include "Madgine/core/keyvalueregistry.h"
 
-#include "util/pyobjectutil.h"
-#include "util/pytypedscopeptr.h"
-#include "util/pyownedscopeptr.h"
-#include "util/pyapifunction.h"
-#include "util/pyboundapifunction.h"
-#include "util/pyscopeiterator.h"
-#include "util/pyvirtualrange.h"
-#include "util/pyvirtualiterator.h"
-#include "util/math/pyvector3.h"
 #include "util/math/pymatrix3.h"
 #include "util/math/pyquaternion.h"
+#include "util/math/pyvector3.h"
+#include "util/pyapifunction.h"
+#include "util/pyboundapifunction.h"
+#include "util/pyobjectutil.h"
+#include "util/pyownedscopeptr.h"
+#include "util/pyscopeiterator.h"
+#include "util/pytypedscopeptr.h"
+#include "util/pyvirtualiterator.h"
+#include "util/pyvirtualrange.h"
 
 #include "python3fileloader.h"
 
@@ -30,7 +30,6 @@ METATABLE_END(Engine::Scripting::Python3::Python3Environment)
 namespace Engine {
 namespace Scripting {
     namespace Python3 {
-
 
         static PyObject *
         PyEnvironment_get(PyObject *self, PyObject *args)
@@ -130,14 +129,14 @@ namespace Scripting {
 
         Python3Environment::Python3Environment(App::Application &app)
             : VirtualScope(app)
-        {            
+        {
         }
 
         Python3Environment::~Python3Environment()
         {
         }
 
-        bool Python3Environment::init()
+        Threading::Task<bool> Python3Environment::init()
         {
             if (sInstances++ == 0) {
 
@@ -146,7 +145,7 @@ namespace Scripting {
                 /* Add a built-in module, before Py_Initialize */
                 if (PyImport_AppendInittab("Environment", PyInit_Environment) == -1) {
                     LOG("Error: could not extend built-in modules table");
-                    return false;
+                    co_return false;
                 }
 
                 /* Pass argv[0] to the Python interpreter */
@@ -170,10 +169,10 @@ namespace Scripting {
                 PyRun_SimpleString("from dump import dump");
                 unlock();*/
             }
-            return true;
+            co_return true;
         }
 
-        void Python3Environment::finalize()
+        Threading::Task<void> Python3Environment::finalize()
         {
             if (--sInstances == 0) {
                 lock(std::cout.rdbuf());
@@ -184,6 +183,7 @@ namespace Scripting {
                 auto result = Py_FinalizeEx();
                 assert(result == 0);
             }
+            co_return;
         }
 
         void Python3Environment::execute(std::string_view command)
@@ -191,17 +191,18 @@ namespace Scripting {
             PyRun_SimpleString(command.data());
         }
 
-        PyGILState_STATE Python3Environment::lock(std::streambuf *buf) {
+        PyGILState_STATE Python3Environment::lock(std::streambuf *buf)
+        {
             //assert(PyGILState_Check() == 0);
             PyGILState_STATE handle = PyGILState_Ensure();
-            assert(PyGILState_Check() == 1);     
+            assert(PyGILState_Check() == 1);
             if (buf)
                 sStream.setBuf(buf);
             return handle;
         }
 
         std::streambuf *Python3Environment::unlock(PyGILState_STATE handle)
-        {            
+        {
             std::streambuf *result = sStream.buf();
             assert(PyGILState_Check() == 1);
             PyGILState_Release(handle);

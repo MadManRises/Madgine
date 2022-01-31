@@ -14,6 +14,8 @@
 #include "serialize/filesystem/filemanager.h"
 #include "Meta/serialize/formatter/xmlformatter.h"
 
+#include "Meta/serialize/statetransmissionflags.h"
+
 #include "Madgine/resources/resourcemanager.h"
 
 
@@ -41,7 +43,7 @@ int launch(Engine::Window::MainWindow **topLevelPointer)
             Engine::Serialize::SerializeInStream file = mgr.openRead(Engine::Resources::ResourceManager::getSingleton().findResourceFile("default.layout"), std::make_unique<Engine::Serialize::XMLFormatter>());
 
             if (file) {
-                Engine::Serialize::SerializableDataPtr { &window }.readState(file, nullptr, {}, Engine::Serialize::StateTransmissionFlags_ApplyMap);
+                Engine::Serialize::read(file, window, nullptr, {}, Engine::Serialize::StateTransmissionFlags_ApplyMap);
                 return true;
             } else {
                 return false;

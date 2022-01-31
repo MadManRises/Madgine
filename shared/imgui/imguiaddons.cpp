@@ -3,7 +3,7 @@
 
 #include "imguiaddons.h"
 
-#include "../imgui/imgui.h"
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "../imgui/imgui_internal.h"
 
 #include "Meta/math/matrix3.h"
@@ -31,67 +31,80 @@ ImGuiContext *&getImGuiContext()
 
 namespace ImGui {
 
-ValueTypePayload sPayload;
+    static ImVector<ImRect> sGroupPanelLabelStack;
+
+static ValueTypePayload sPayload;
+
+void LabeledText(const char *label, const char *text, ...)
+{
+    int columns = GetColumnsCount();
+    assert(columns == 1 || columns == 2);
+    va_list args;
+    va_start(args, text);
+            
+    if (columns == 1) {
+        if (strlen(label)) {
+            ImGui::LabelTextV(label, text, args);
+        } else {
+            ImGui::TextV(text, args);
+        }
+    } else {
+        if (strlen(label))
+            ImGui::Text("%s", label);
+        ImGui::NextColumn();
+        ImGui::TextV(text, args);
+        ImGui::NextColumn();
+    }
+    va_end(args);
+}
 
 bool ValueTypeDrawer::draw(Engine::TypedScopePtr &scope)
 {
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("<scope>");
+    LabeledText(mName, "<scope>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(const Engine::TypedScopePtr &scope)
 {
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("<scope>");
+    LabeledText(mName, "<scope>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(bool &b)
 {
-    return ImGui::Checkbox(mName, &b);
+    return Col(LIFT(Checkbox), mName, &b);
 }
 
 bool ValueTypeDrawer::draw(const bool &b)
 {
     PushDisabled();
-    ImGui::Checkbox(mName, const_cast<bool *>(&b));
+    Col(LIFT(Checkbox), mName, const_cast<bool *>(&b));
     PopDisabled();
     return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::CoWString &s)
 {
-    return InputText(mName, &s);
+    return Col(LIFT(InputText), mName, &s, 0);
 }
 
 bool ValueTypeDrawer::draw(const Engine::CoWString &s)
 {
-    if (mName) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("\"%.*s\"", static_cast<int>(s.size()), s.data());
+    LabeledText(mName, "\"%.*s\"", static_cast<int>(s.size()), s.data());
     return false;
 }
 
 bool ValueTypeDrawer::draw(int &i)
 {
     PushItemWidth(100);
-    return DragInt(mName, &i);
+    return Col(LIFT(DragInt), mName, &i);
 }
 
 bool ValueTypeDrawer::draw(const int &i)
 {
     PushDisabled();
     PushItemWidth(100);
-    DragInt(mName, const_cast<int *>(&i));
+    Col(LIFT(DragInt), mName, const_cast<int *>(&i));
     PopDisabled();
     return false;
 }
@@ -99,14 +112,14 @@ bool ValueTypeDrawer::draw(const int &i)
 bool ValueTypeDrawer::draw(uint64_t &i)
 {
     PushItemWidth(100);
-    return ImGui::DragScalar(mName, ImGuiDataType_U64, &i, 1.0f);
+    return Col(LIFT(DragScalar), mName, ImGuiDataType_U64, &i, 1.0f);
 }
 
 bool ValueTypeDrawer::draw(const uint64_t &i)
 {
     PushDisabled();
     PushItemWidth(100);
-    ImGui::DragScalar(mName, ImGuiDataType_U64, const_cast<uint64_t *>(&i), 1.0f);
+    Col(LIFT(DragScalar), mName, ImGuiDataType_U64, const_cast<uint64_t *>(&i), 1.0f);
     PopDisabled();
     return false;
 }
@@ -114,27 +127,27 @@ bool ValueTypeDrawer::draw(const uint64_t &i)
 bool ValueTypeDrawer::draw(float &f)
 {
     PushItemWidth(100);
-    return ImGui::DragFloat(mName, &f, 0.15f);
+    return Col(LIFT(DragFloat), mName, &f, 0.15f);
 }
 
 bool ValueTypeDrawer::draw(const float &f)
 {
     PushDisabled();
     PushItemWidth(100);
-    ImGui::DragFloat(mName, const_cast<float *>(&f), 0.15f);
+    Col(LIFT(DragFloat), mName, const_cast<float *>(&f), 0.15f);
     PopDisabled();
     return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::Matrix3 &m)
 {
-    return ImGui::DragMatrix3(mName, &m, 0.15f);
+    return Col(LIFT(DragMatrix3), mName, &m, 0.15f);
 }
 
 bool ValueTypeDrawer::draw(const Engine::Matrix3 &m)
 {
     PushDisabled();
-    ImGui::DragMatrix3(mName, const_cast<Engine::Matrix3 *>(&m), 0.15f);
+    Col(LIFT(DragMatrix3), mName, const_cast<Engine::Matrix3 *>(&m), 0.15f);
     PopDisabled();
     return false;
 }
@@ -151,13 +164,13 @@ bool ValueTypeDrawer::draw(const Engine::Matrix3 *m)
 
 bool ValueTypeDrawer::draw(Engine::Matrix4 &m)
 {
-    return ImGui::DragMatrix4(mName, &m, 0.15f);
+    return Col(LIFT(DragMatrix4), mName, &m, 0.15f);
 }
 
 bool ValueTypeDrawer::draw(const Engine::Matrix4 &m)
 {
     PushDisabled();
-    ImGui::DragMatrix4(mName, const_cast<Engine::Matrix4 *>(&m), 0.15f);
+    Col(LIFT(DragMatrix4), mName, const_cast<Engine::Matrix4 *>(&m), 0.15f);
     PopDisabled();
     return false;
 }
@@ -175,14 +188,14 @@ bool ValueTypeDrawer::draw(const Engine::Matrix4 *m)
 bool ValueTypeDrawer::draw(Engine::Vector2 &v)
 {
     PushItemWidth(100);
-    return ImGui::DragFloat2(mName, v.ptr(), 0.15f);
+    return Col(LIFT(DragFloat2), mName, v.ptr(), 0.15f);
 }
 
 bool ValueTypeDrawer::draw(const Engine::Vector2 &v)
 {
     PushDisabled();
     PushItemWidth(100);
-    ImGui::DragFloat2(mName, const_cast<float *>(v.ptr()), 0.15f);
+    Col(LIFT(DragFloat2), mName, const_cast<float *>(v.ptr()), 0.15f);
     PopDisabled();
     return false;
 }
@@ -190,14 +203,14 @@ bool ValueTypeDrawer::draw(const Engine::Vector2 &v)
 bool ValueTypeDrawer::draw(Engine::Vector3 &v)
 {
     PushItemWidth(100);
-    return ImGui::DragFloat3(mName, v.ptr(), 0.15f);
+    return Col(LIFT(DragFloat3), mName, v.ptr(), 0.15f);
 }
 
 bool ValueTypeDrawer::draw(const Engine::Vector3 &v)
 {
     PushDisabled();
     PushItemWidth(100);
-    ImGui::DragFloat3(mName, const_cast<float *>(v.ptr()), 0.15f);
+    Col(LIFT(DragFloat3), mName, const_cast<float *>(v.ptr()), 0.15f);
     PopDisabled();
     return false;
 }
@@ -205,14 +218,14 @@ bool ValueTypeDrawer::draw(const Engine::Vector3 &v)
 bool ValueTypeDrawer::draw(Engine::Vector4 &v)
 {
     PushItemWidth(100);
-    return ImGui::DragFloat4(mName, v.ptr(), 0.15f);
+    return Col(LIFT(DragFloat4), mName, v.ptr(), 0.15f);
 }
 
 bool ValueTypeDrawer::draw(const Engine::Vector4 &v)
 {
     PushDisabled();
     PushItemWidth(100);
-    ImGui::DragFloat4(mName, const_cast<float *>(v.ptr()), 0.15f);
+    Col(LIFT(DragFloat4), mName, const_cast<float *>(v.ptr()), 0.15f);
     PopDisabled();
     return false;
 }
@@ -220,14 +233,14 @@ bool ValueTypeDrawer::draw(const Engine::Vector4 &v)
 bool ValueTypeDrawer::draw(Engine::Vector2i &v)
 {
     PushItemWidth(100);
-    return ImGui::DragInt2(mName, v.ptr());
+    return Col(LIFT(DragInt2), mName, v.ptr());
 }
 
 bool ValueTypeDrawer::draw(const Engine::Vector2i &v)
 {
     PushDisabled();
     PushItemWidth(100);
-    ImGui::DragInt2(mName, const_cast<int *>(v.ptr()));
+    Col(LIFT(DragInt2), mName, const_cast<int *>(v.ptr()));
     PopDisabled();
     return false;
 }
@@ -235,14 +248,14 @@ bool ValueTypeDrawer::draw(const Engine::Vector2i &v)
 bool ValueTypeDrawer::draw(Engine::Vector3i &v)
 {
     PushItemWidth(100);
-    return ImGui::DragInt3(mName, v.ptr());
+    return Col(LIFT(DragInt3), mName, v.ptr());
 }
 
 bool ValueTypeDrawer::draw(const Engine::Vector3i &v)
 {
     PushDisabled();
     PushItemWidth(100);
-    ImGui::DragInt3(mName, const_cast<int *>(v.ptr()));
+    Col(LIFT(DragInt3), mName, const_cast<int *>(v.ptr()));
     PopDisabled();
     return false;
 }
@@ -250,135 +263,87 @@ bool ValueTypeDrawer::draw(const Engine::Vector3i &v)
 bool ValueTypeDrawer::draw(Engine::Vector4i &v)
 {
     PushItemWidth(100);
-    return ImGui::DragInt4(mName, v.ptr());
+    return Col(LIFT(DragInt4), mName, v.ptr());
 }
 
 bool ValueTypeDrawer::draw(const Engine::Vector4i &v)
 {
     PushDisabled();
     PushItemWidth(100);
-    ImGui::DragInt4(mName, const_cast<int *>(v.ptr()));
+    Col(LIFT(DragInt4), mName, const_cast<int *>(v.ptr()));
     PopDisabled();
     return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::KeyValueVirtualSequenceRange &it)
 {
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("<range>");
+    LabeledText(mName, "<range>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(const Engine::KeyValueVirtualSequenceRange &it)
 {
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("<range>");
+    LabeledText(mName, "<range>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::KeyValueVirtualAssociativeRange &it)
 {
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("<map>");
+    LabeledText(mName, "<map>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(const Engine::KeyValueVirtualAssociativeRange &it)
 {
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("<map>");
+    LabeledText(mName, "<map>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::KeyValueFunction &m)
 {
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("<function>");
+    LabeledText(mName, "<function>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(const Engine::KeyValueFunction &m)
 {
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("<function>");
+    LabeledText(mName, "<function>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::ApiFunction &m)
 {
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("<api-function>");
+    LabeledText(mName, "<api-function>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(const Engine::ApiFunction &m)
 {
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("<api-function>");
+    LabeledText(mName, "<api-function>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::BoundApiFunction &m)
 {
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("<bound api-function>");
+    LabeledText(mName, "<bound api-function>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(const Engine::BoundApiFunction &m)
 {
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("<bound api-function>");
+    LabeledText(mName, "<bound api-function>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(std::monostate &)
 {
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("<null>");
+    LabeledText(mName, "<null>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(const std::monostate &)
 {
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("<null>");
+    LabeledText(mName, "<null>");
     return false;
 }
 
@@ -401,46 +366,32 @@ bool ValueTypeDrawer::draw(const Engine::Quaternion &q)
 
 bool ValueTypeDrawer::draw(Engine::ObjectPtr &o)
 {
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("<object>");
+    LabeledText(mName, "<object>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(const Engine::ObjectPtr &o)
 {
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("<object>");
+    LabeledText(mName, "<object>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::Filesystem::Path &p)
 {
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("%s", p.c_str());
+    LabeledText(mName, p.c_str());
     return false;
 }
 
 bool ValueTypeDrawer::draw(const Engine::Filesystem::Path &p)
 {
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
-    ImGui::Text("%s", p.c_str());
+    LabeledText(mName, p.c_str());
     return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::EnumHolder &e)
 {
+    int columns = GetColumnsCount();
+    assert(columns == 2 || columns == 0);
     bool changed = false;
     std::string name { e.toString() };
     if (ImGui::BeginCombo(mName, name.c_str())) {
@@ -461,24 +412,15 @@ bool ValueTypeDrawer::draw(Engine::EnumHolder &e)
 
 bool ValueTypeDrawer::draw(const Engine::EnumHolder &e)
 {
-    if (strlen(mName)) {
-        ImGui::Text("%s: ", mName);
-        ImGui::SameLine();
-    }
     std::string_view name = e.toString();
-    ImGui::Text("\"%.*s\"", static_cast<int>(name.size()), name.data());
+    LabeledText(mName, "\"%.*s\"", static_cast<int>(name.size()), name.data());
     return false;
 }
 
-void setPayloadStatus(const std::string &msg)
+void setPayloadStatus(std::string_view msg)
 {
     if (ImGui::GetIO().KeyShift)
         sPayload.mStatusMessage = msg;
-}
-
-void Text(const std::string &s)
-{
-    Text("%s", s.c_str());
 }
 
 void Text(std::string_view s)
@@ -702,7 +644,6 @@ bool DragMatrix3(const char *label, Engine::Matrix3 *m, float *v_speeds, bool *e
                 PopDisabled();
             PopItemWidth();
             PopID();
-            
         }
         if (i == 0) {
             SameLine(0, g.Style.ItemInnerSpacing.x);
@@ -1032,7 +973,6 @@ bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *select
     return EndFilesystemPicker(validPath && (selectedIsFile || (openWrite && !selectedIsDir)), accepted, openWrite, openWrite && selectedIsFile && !confirmed, clicked);
 }
 
-
 bool InteractiveView(InteractiveViewState &state)
 {
     state.mActive = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
@@ -1066,6 +1006,134 @@ bool InteractiveView(InteractiveViewState &state)
     }
 
     return state.mActive;
+}
+
+void ImGui::BeginGroupPanel(const char *name, const ImVec2 &size)
+{
+    ImGui::BeginGroup();
+
+    auto cursorPos = ImGui::GetCursorScreenPos();
+    auto itemSpacing = ImGui::GetStyle().ItemSpacing;
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
+
+    auto frameHeight = ImGui::GetFrameHeight();
+    ImGui::BeginGroup();
+
+    ImVec2 effectiveSize = size;
+    if (size.x < 0.0f)
+        effectiveSize.x = ImGui::GetContentRegionAvailWidth();
+    else
+        effectiveSize.x = size.x;
+    ImGui::Dummy(ImVec2(effectiveSize.x, 0.0f));
+
+    ImGui::Dummy(ImVec2(frameHeight * 0.5f, 0.0f));
+    ImGui::SameLine(0.0f, 0.0f);
+    ImGui::BeginGroup();
+    ImGui::Dummy(ImVec2(frameHeight * 0.5f, 0.0f));
+    ImGui::SameLine(0.0f, 0.0f);
+    ImGui::TextUnformatted(name);
+    auto labelMin = ImGui::GetItemRectMin();
+    auto labelMax = ImGui::GetItemRectMax();
+    ImGui::SameLine(0.0f, 0.0f);
+    ImGui::Dummy(ImVec2(0.0, frameHeight + itemSpacing.y));
+    ImGui::BeginGroup();
+
+    //ImGui::GetWindowDrawList()->AddRect(labelMin, labelMax, IM_COL32(255, 0, 255, 255));
+
+    ImGui::PopStyleVar(2);
+
+#if IMGUI_VERSION_NUM >= 17301
+    ImGui::GetCurrentWindow()->ContentRegionRect.Max.x -= frameHeight * 0.5f;
+    ImGui::GetCurrentWindow()->WorkRect.Max.x -= frameHeight * 0.5f;
+    ImGui::GetCurrentWindow()->InnerRect.Max.x -= frameHeight * 0.5f;
+#else
+    ImGui::GetCurrentWindow()->ContentsRegionRect.Max.x -= frameHeight * 0.5f;
+#endif
+    ImGui::GetCurrentWindow()->Size.x -= frameHeight;
+
+    auto itemWidth = ImGui::CalcItemWidth();
+    ImGui::PushItemWidth(ImMax(0.0f, itemWidth - frameHeight));
+
+    sGroupPanelLabelStack.push_back(ImRect(labelMin, labelMax));
+}
+
+void ImGui::EndGroupPanel()
+{
+    ImGui::PopItemWidth();
+
+    auto itemSpacing = ImGui::GetStyle().ItemSpacing;
+
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
+
+    auto frameHeight = ImGui::GetFrameHeight();
+
+    ImGui::EndGroup();
+
+    //ImGui::GetWindowDrawList()->AddRectFilled(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), IM_COL32(0, 255, 0, 64), 4.0f);
+
+    ImGui::EndGroup();
+
+    ImGui::SameLine(0.0f, 0.0f);
+    ImGui::Dummy(ImVec2(frameHeight * 0.5f, 0.0f));
+    ImGui::Dummy(ImVec2(0.0, frameHeight - frameHeight * 0.5f - itemSpacing.y));
+
+    ImGui::EndGroup();
+
+    auto itemMin = ImGui::GetItemRectMin();
+    auto itemMax = ImGui::GetItemRectMax();
+    //ImGui::GetWindowDrawList()->AddRectFilled(itemMin, itemMax, IM_COL32(255, 0, 0, 64), 4.0f);
+
+    auto labelRect = sGroupPanelLabelStack.back();
+    sGroupPanelLabelStack.pop_back();
+
+    ImVec2 halfFrame = ImVec2(frameHeight * 0.25f, frameHeight) * 0.5f;
+    ImRect frameRect = ImRect(itemMin + halfFrame, itemMax - ImVec2(halfFrame.x, 0.0f));
+    labelRect.Min.x -= itemSpacing.x;
+    labelRect.Max.x += itemSpacing.x;
+    for (int i = 0; i < 4; ++i) {
+        switch (i) {
+        // left half-plane
+        case 0:
+            ImGui::PushClipRect(ImVec2(-FLT_MAX, -FLT_MAX), ImVec2(labelRect.Min.x, FLT_MAX), true);
+            break;
+        // right half-plane
+        case 1:
+            ImGui::PushClipRect(ImVec2(labelRect.Max.x, -FLT_MAX), ImVec2(FLT_MAX, FLT_MAX), true);
+            break;
+        // top
+        case 2:
+            ImGui::PushClipRect(ImVec2(labelRect.Min.x, -FLT_MAX), ImVec2(labelRect.Max.x, labelRect.Min.y), true);
+            break;
+        // bottom
+        case 3:
+            ImGui::PushClipRect(ImVec2(labelRect.Min.x, labelRect.Max.y), ImVec2(labelRect.Max.x, FLT_MAX), true);
+            break;
+        }
+
+        ImGui::GetWindowDrawList()->AddRect(
+            frameRect.Min, frameRect.Max,
+            ImColor(ImGui::GetStyleColorVec4(ImGuiCol_Border)),
+            halfFrame.x);
+
+        ImGui::PopClipRect();
+    }
+
+    ImGui::PopStyleVar(2);
+
+#if IMGUI_VERSION_NUM >= 17301
+    ImGui::GetCurrentWindow()->ContentRegionRect.Max.x += frameHeight * 0.5f;
+    ImGui::GetCurrentWindow()->WorkRect.Max.x += frameHeight * 0.5f;
+    ImGui::GetCurrentWindow()->InnerRect.Max.x += frameHeight * 0.5f;
+#else
+    ImGui::GetCurrentWindow()->ContentsRegionRect.Max.x += frameHeight * 0.5f;
+#endif
+    ImGui::GetCurrentWindow()->Size.x += frameHeight;
+
+    ImGui::Dummy(ImVec2(0.0f, 0.0f));
+
+    ImGui::EndGroup();
 }
 
 }

@@ -44,8 +44,7 @@ struct META_EXPORT ValueType {
     ValueType(ValueType &&other) noexcept;
 
     template <typename T>
-    requires(!std::is_same_v<std::decay_t<T>, ValueType>) 
-        explicit ValueType(T &&v)
+    requires(!std::same_as<std::decay_t<T>, ValueType>) explicit ValueType(T &&v)
         : mUnion(std::in_place_index<static_cast<size_t>(static_cast<ValueTypeEnum>(toValueTypeIndex<std::decay_t<T>>()))>, std::forward<T>(v))
     {
     }
@@ -58,7 +57,7 @@ struct META_EXPORT ValueType {
 
     template <typename T>
     explicit ValueType(T *val)
-        : ValueType(TypedScopePtr(val))
+        : ValueType(TypedScopePtr { val })
     {
     }
 
@@ -70,8 +69,7 @@ struct META_EXPORT ValueType {
     void operator=(ValueType &&other);
 
     template <typename T>
-    requires(!std::is_same_v<std::decay_t<T>, ValueType>) 
-    void operator=(T &&t)
+    requires(!std::is_same_v<std::decay_t<T>, ValueType>) void operator=(T &&t)
     {
         constexpr size_t index = static_cast<size_t>(static_cast<ValueTypeEnum>(toValueTypeIndex<std::decay_t<T>>()));
         if (mUnion.index() == index)
@@ -197,7 +195,7 @@ template <typename T>
 ValueType_Return<T> ValueType::as() const
 {
 
-    if constexpr (isValueTypePrimitive_v<T>) {
+    if constexpr (ValueTypePrimitive<T>) {
         return visit([](const auto &v) -> ValueType_Return<T> {
             if constexpr (std::is_convertible_v<decltype(v), ValueType_Return<T>>)
                 return v;
@@ -205,9 +203,9 @@ ValueType_Return<T> ValueType::as() const
                 throw 0;
         });
         //return std::get<static_cast<size_t>(toValueTypeIndex<T>().mIndex)>(mUnion);
-    } else if constexpr (std::is_same_v<T, ValueType>) {
+    } else if constexpr (std::same_as<T, ValueType>) {
         return *this;
-    } else if constexpr (std::is_enum_v<T>) {
+    } else if constexpr (Enum<T>) {
         return static_cast<T>(std::get<std::underlying_type_t<T>>(mUnion));
     } else {
         if constexpr (Pointer<T>) {

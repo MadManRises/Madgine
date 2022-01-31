@@ -22,7 +22,7 @@ VALUETYPE_TYPE(Quaternion, Quaternion, const Quaternion &)
 VALUETYPE_SEP
 VALUETYPE_TYPE(Vector4, Vector4, const Vector4 &)
 VALUETYPE_SEP
-VALUETYPE_TYPE(Vector3, Vector3, const Vector3 &, const NormalizedVector3 &)
+VALUETYPE_TYPE(Vector3, Vector3, const Vector3 &, NormalizedVector3)
 VALUETYPE_SEP
 VALUETYPE_TYPE(Vector2, Vector2, const Vector2 &)
 VALUETYPE_SEP

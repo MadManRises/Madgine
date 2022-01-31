@@ -11,13 +11,7 @@
 namespace Engine {
 
 template <typename T>
-using isValueTypePrimitive = type_pack_contains<ValueTypeList, T>;
-
-template <typename T>
-static constexpr bool isValueTypePrimitive_v = isValueTypePrimitive<T>::value;
-
-template <typename T>
-concept ValueTypePrimitive = isValueTypePrimitive_v<T>;
+concept ValueTypePrimitive = type_pack_contains_v<ValueTypeList, T>;
 
 enum class ValueTypeEnum : unsigned char {
 #define VALUETYPE_SEP ,
@@ -267,18 +261,18 @@ struct META_EXPORT ExtendedValueTypeDesc {
 template <typename T>
 constexpr ValueTypeIndex toValueTypeIndex()
 {
-    static_assert(!std::is_same_v<T, ValueType>);
-    if constexpr (isValueTypePrimitive_v<T>) {
+    static_assert(!std::same_as<T, ValueType>);
+    if constexpr (ValueTypePrimitive<T>) {
         return static_cast<ValueTypeEnum>(type_pack_index_v<size_t, ValueTypeList, T>);
     } else if constexpr (std::ranges::range<T>) {
-        if constexpr (std::is_same_v<KeyType_t<typename T::iterator::value_type>, std::monostate>)
+        if constexpr (std::same_as<KeyType_t<typename T::iterator::value_type>, std::monostate>)
             return ValueTypeEnum::KeyValueVirtualSequenceRangeValue;
         else
             return ValueTypeEnum::KeyValueVirtualAssociativeRangeValue;
     } else if constexpr (Pointer<T>) {
         if constexpr (std::is_function_v<std::remove_pointer_t<T>>)
             return ValueTypeEnum::FunctionValue;
-        else if constexpr (std::is_same_v<std::remove_cv_t<std::remove_pointer_t<T>>, FunctionTable>)
+        else if constexpr (std::same_as<std::remove_cv_t<std::remove_pointer_t<T>>, FunctionTable>)
             return ValueTypeEnum::ApiFunctionValue;
         else
             return ValueTypeEnum::ScopeValue;
@@ -292,7 +286,7 @@ constexpr ExtendedValueTypeDesc toValueTypeDesc()
 {
     if constexpr (InstanceOf<T, std::optional>) {
         return { { ExtendedValueTypeEnum::OptionalType }, toValueTypeDesc<type_pack_unpack_unique_t<typename is_instance<T, std::optional>::argument_types>>() };
-    } else if constexpr (isValueTypePrimitive_v<T>) {
+    } else if constexpr (ValueTypePrimitive<T>) {
         return { toValueTypeIndex<T>() };
     } else if constexpr (std::same_as<T, ValueType>) {
         return { ExtendedValueTypeEnum::GenericType };

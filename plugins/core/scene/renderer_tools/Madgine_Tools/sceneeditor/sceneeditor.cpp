@@ -37,7 +37,6 @@
 
 #include "serialize/filesystem/filemanager.h"
 
-
 #include "Meta/serialize/formatter/safebinaryformatter.h"
 
 #include "imgui/imgui_internal.h"
@@ -407,29 +406,35 @@ namespace Tools {
 
     void SceneEditor::renderEntity(Scene::Entity::EntityPtr &entity)
     {
-        bool found = false;
-        for (const Scene::Entity::EntityPtr &e : mSceneMgr->entities()) {
-            if (e == entity) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            entity = {};
+        if (entity.isDead())
             return;
-        }
 
-        ImGui::InputText("Name", &entity->mName);
+        //ImGui::Indent();
+        ImGui::Col(LIFT(ImGui::InputText), "Name", &entity->mName);
+        //ImGui::Unindent();
 
         for (const Scene::Entity::EntityComponentPtr<Scene::Entity::EntityComponentBase> &component : entity->components()) {
             std::string name = std::string { component.name() };
-            bool open = ImGui::TreeNode(name.c_str());
+            ImGui::BeginGroupPanel(name.c_str());
+            ImGui::BeginTable("columns", 2, ImGuiTableFlags_Resizable);
+
+
+
+            //bool open = ImGui::TreeNode(name.c_str());
+            //ImGui::NextColumn();
+            //ImGui::NextColumn();
             //TODO
             //ImGui::DraggableValueTypeSource(name.c_str(), this, ValueType { Scene::Entity::EntityComponentPtr<Scene::Entity::EntityComponentBase> { component } });
-            if (open) {
-                mInspector->drawMembers(component.getTyped());
-                ImGui::TreePop();
-            }
+            //if (open) {
+            mInspector->drawMembers(component.getTyped());
+            //    ImGui::TreePop();
+            //}
+
+            ImGui::EndTable();
+
+            ImGui::ItemSize({ ImGui::GetItemRectSize().x, 0 });
+
+            ImGui::EndGroupPanel();
         }
 
         if (ImGui::Button("+ Add Component")) {

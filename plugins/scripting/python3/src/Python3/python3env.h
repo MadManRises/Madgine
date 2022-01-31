@@ -14,8 +14,8 @@ namespace Scripting {
             Python3Environment(App::Application &app);
             ~Python3Environment();
 
-            virtual bool init() override;
-            virtual void finalize() override;
+            virtual Threading::Task<bool> init() override;
+            virtual Threading::Task<void> finalize() override;
 
             void execute(std::string_view command);
 

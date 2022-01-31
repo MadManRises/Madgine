@@ -43,7 +43,7 @@ namespace Scripting {
         {
             ValueType val;
             fromPyObject(val, key);
-            auto it = std::ranges::find_if(self->mRange, [&](const KeyValuePair &p) { return p.mKey == val; });
+            auto it = std::ranges::find(self->mRange, val, &KeyValuePair::mKey);
             if (it == self->mRange.end()) {
                 PyErr_Format(PyExc_KeyError, "No key %R in %R!", key, self);
                 return NULL;

@@ -13,6 +13,8 @@
 
 #pragma once
 
+#define IMGUI_ENABLE_FREETYPE
+
 #include "Meta/metalib.h"
 
 #include "Meta/math/vector2.h"

@@ -59,7 +59,7 @@ namespace Scripting {
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const CoW<Matrix3> &m);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const CoW<Matrix4> &m);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const EnumHolder &e);
-        MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const Function &f);
+        MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const KeyValueFunction &f);
 
         MADGINE_PYTHON3_EXPORT void fromPyObject(ValueType &retVal, PyObject *obj);
 

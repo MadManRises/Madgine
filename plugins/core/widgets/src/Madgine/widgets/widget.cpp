@@ -23,6 +23,7 @@
 
 METATABLE_BEGIN(Engine::Widgets::WidgetBase)
 READONLY_PROPERTY(Widgets, children)
+READONLY_PROPERTY(Pos, getPos)
 READONLY_PROPERTY(Size, getSize)
 MEMBER(mVisible)
 METATABLE_END(Engine::Widgets::WidgetBase)

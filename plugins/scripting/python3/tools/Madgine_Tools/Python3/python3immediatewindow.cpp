@@ -35,19 +35,17 @@ namespace Tools {
         return "Python3ImmediateWindow";
     }
 
-    bool Python3ImmediateWindow::init()
+    Threading::Task<bool> Python3ImmediateWindow::init()
     {
 
-        mEnv = &Engine::App::Application::getSingleton().getGlobalAPIComponent<Scripting::Python3::Python3Environment>();        
+        mEnv = &Engine::App::Application::getSingleton().getGlobalAPIComponent<Scripting::Python3::Python3Environment>();
 
-        return ToolBase::init();
+        co_return co_await ToolBase::init();
     }
 
-    void Python3ImmediateWindow::finalize()
+    Threading::Task<void> Python3ImmediateWindow::finalize()
     {
-        ToolBase::finalize();
-
-        
+        co_await ToolBase::finalize();
     }
 
     void Python3ImmediateWindow::renderMenu()
