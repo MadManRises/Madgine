@@ -51,7 +51,7 @@ struct InStream {
         return std::istreambuf_iterator<char>();
     }
 
-    size_t readRaw(void *buffer, size_t size)
+    size_t read(void *buffer, size_t size)
     {
         mStream.read(static_cast<char *>(buffer), size);
         return mStream.gcount();
@@ -94,9 +94,9 @@ struct InStream {
         mStream.setstate(state);
     }
 
-    void skipWs()
+    void skipWs(bool overwrite = false)
     {
-        if (mStream.flags() & std::ios_base::skipws) {
+        if (overwrite || (mStream.flags() & std::ios_base::skipws)) {
             mStream >> std::ws;
         }
     }
@@ -160,9 +160,15 @@ struct OutStream {
         return *this;
     }
 
-    void writeRaw(const void *data, size_t count)
+    void write(const void *data, size_t count)
     {
         mStream.write(static_cast<const char *>(data), count);
+    }
+
+    template <typename T>
+    void write(const T &t)
+    {
+        write(&t, sizeof(T));
     }
 
     explicit operator bool() const

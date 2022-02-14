@@ -162,9 +162,9 @@ namespace Scene {
         return &mLocalEntities.emplace_back(std::move(e), true);
     }
 
-    Serialize::StreamResult SceneManager::readNonLocalEntity(Serialize::SerializeInStream &in, OutRef<SceneManager> &mgr, bool &isLocal, std::string &name)
+    Serialize::StreamResult SceneManager::readNonLocalEntity(Serialize::FormattedSerializeStream &in, OutRef<SceneManager> &mgr, bool &isLocal, std::string &name)
     {
-        STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, "Entity", 1));
+        STREAM_PROPAGATE_ERROR(in.beginExtendedRead("Entity", 1));
         mgr = *this;
         isLocal = false;
         return read(in, name, "name");
@@ -177,9 +177,9 @@ namespace Scene {
         return make_tuple(std::ref(*this), local, actualName);
     }
 
-    void SceneManager::writeEntity(Serialize::SerializeOutStream &out, const Entity::Entity &entity) const
+    void SceneManager::writeEntity(Serialize::FormattedSerializeStream &out, const Entity::Entity &entity) const
     {
-        out.format().beginExtended(out, "Entity", 1);
+        out.beginExtendedWrite("Entity", 1);
         write(out, entity.name(), "name");
     }
 

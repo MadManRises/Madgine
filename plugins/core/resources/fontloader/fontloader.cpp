@@ -105,7 +105,7 @@ namespace Render {
         if (info.resource()->path().extension() == ".msdf") {
 
             Filesystem::FileManager cache("msdf_cache");
-            Serialize::SerializeInStream in = cache.openRead(info.resource()->path().parentPath() / (std::string { info.resource()->name() } + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
+            Serialize::FormattedSerializeStream in = cache.openRead(info.resource()->path().parentPath() / (std::string { info.resource()->name() } + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
             assert(in);
             ByteBuffer b;
             Serialize::StreamResult result = [&]() {
@@ -218,7 +218,8 @@ namespace Render {
                 font.mGlyphs[c].mUV = entries[c].mArea.mTopLeft;
                 font.mGlyphs[c].mFlipped = entries[c].mFlipped;
                 font.mGlyphs[c].mAdvance = face->glyph->advance.x;
-                font.mGlyphs[c].mBearingY = face->glyph->bitmap_top - 1;
+                font.mGlyphs[c].mBearing.x = face->glyph->bitmap_left - 1;
+                font.mGlyphs[c].mBearing.y = face->glyph->bitmap_top - 1;
 
                 Vector2i size = sizes[c];
                 if (entries[c].mFlipped)
@@ -246,7 +247,7 @@ namespace Render {
             font.mTexture.create(TextureType_2D, FORMAT_RGBA8, font.mTextureSize, { texBuffer.get(), 4 * byteSize });
 
             Filesystem::FileManager cache("msdf_cache");
-            Serialize::SerializeOutStream out = cache.openWrite(info.resource()->path().parentPath() / (std::string { info.resource()->name() } + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
+            Serialize::FormattedSerializeStream out = cache.openWrite(info.resource()->path().parentPath() / (std::string { info.resource()->name() } + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
             if (out) {
                 write(out, font.mGlyphs, "glyphs");
                 write(out, font.mTextureSize, "size");

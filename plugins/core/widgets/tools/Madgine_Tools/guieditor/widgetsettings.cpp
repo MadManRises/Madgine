@@ -33,13 +33,10 @@ namespace Tools {
     }
 
     void WidgetSettings::render()
-    {        
-		std::string name = mWidget->getName();
-        if (ImGui::InputText("Name", &name))
-            mWidget->setName(name);
+    {
 
         Matrix3 pos = mWidget->getPos();
-        Matrix3 size = mWidget->getSize();		
+        Matrix3 size = mWidget->getSize();
 
         bool enabled[9] = {
             true, true, true,
@@ -59,14 +56,17 @@ namespace Tools {
             1.0f,
         };
 
-        if (ImGui::DragMatrix3("Pos", &pos, speeds, enabled))
+        ImGui::TableNextRow();        
+        if (ImGui::Col(LIFT(ImGui::DragMatrix3), "Pos", &pos, speeds, enabled))
             mWidget->setPos(pos);
-        if (ImGui::DragMatrix3("Size", &size, 0.15f, enabled)) {
+        ImGui::TableNextRow();        
+        if (ImGui::Col(LIFT(ImGui::DragMatrix3), "Size", &size, 0.15f, enabled)) {
             mWidget->setSize(size);
             enforceAspectRatio();
         }
 
-        if (ImGui::Checkbox("AspectRatio", &mEnforceAspectRatio))
+        ImGui::TableNextRow();
+        if (ImGui::Col(LIFT(ImGui::Checkbox), "AspectRatio", &mEnforceAspectRatio))
             enforceAspectRatio();
         ImGui::SameLine();
 
@@ -77,9 +77,7 @@ namespace Tools {
         if (!mEnforceAspectRatio)
             ImGui::PopDisabled();
 
-		ImGui::Separator();
-
-		mInspector.drawMembers(mWidget, { "Pos", "Size" });
+        mInspector.drawMembers(mWidget, { "Pos", "Size", "Children" });
     }
 
     void WidgetSettings::saveGeometry()

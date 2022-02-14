@@ -3,6 +3,7 @@
 #include "windoweventlistener.h"
 
 #include "../input/inputevents.h"
+#include "../input/cursoricons.h"
 
 #include "windowsettings.h"
 
@@ -60,6 +61,8 @@ namespace Window {
 
         void captureInput();
         void releaseInput();
+
+        void setCursorIcon(Input::CursorIcon icon);
 
         const uintptr_t mHandle;
 

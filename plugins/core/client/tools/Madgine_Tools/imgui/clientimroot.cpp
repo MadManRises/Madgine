@@ -214,6 +214,8 @@ namespace Tools {
         ImFontConfig config;
         config.MergeMode = true;
         config.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_LoadColor;
+        //config.GlyphMinAdvanceX = 13.0f;
+        config.GlyphOffset = { 0.0f, 3.0f };
 
         io.Fonts->AddFontDefault();
         io.Fonts->AddFontFromFileTTF(Engine::Resources::ResourceManager::getSingleton().findResourceFile("icons.ttf").c_str(), 13, &config, icons_ranges);
@@ -260,6 +262,26 @@ namespace Tools {
             target->render();
     }
 
+    static Input::CursorIcon convertCursorIcon(ImGuiMouseCursor cursor)
+    {
+#define HELPER(x)              \
+    case ImGuiMouseCursor_##x: \
+        return Input::CursorIcon::x;
+        switch (cursor) {
+            HELPER(Arrow)
+            HELPER(TextInput)
+            HELPER(ResizeAll)
+            HELPER(ResizeNS)
+            HELPER(ResizeEW)
+            HELPER(ResizeNESW)
+            HELPER(ResizeNWSE)
+            HELPER(Hand)
+            HELPER(NotAllowed)
+        default:
+            throw 0;
+        }
+    }
+
     void ClientImRoot::render(Render::RenderTarget *target, size_t iteration)
     {
         PROFILE();
@@ -280,6 +302,8 @@ namespace Tools {
             Vector2i size = mWindow.getScreenSpace().mSize;
 
             io.DisplaySize = ImVec2(size.x / io.DisplayFramebufferScale.x, size.y / io.DisplayFramebufferScale.y);
+
+            mWindow.osWindow()->setCursorIcon(convertCursorIcon(ImGui::GetMouseCursor()));
 
             newFrame();
 

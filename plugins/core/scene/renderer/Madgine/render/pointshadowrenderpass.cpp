@@ -55,6 +55,12 @@ namespace Render {
 
         mScene.updateRender();
 
+        Scene::Entity::Entity *entity = lights.getEntity(mIndex);
+        Scene::Entity::Transform *transform = entity->getComponent<Scene::Entity::Transform>();
+        if (!transform)
+            return;
+
+
         std::map<std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> instances;
 
         for (const auto &[mesh, e] : mScene.entityComponentList<Scene::Entity::Mesh>().data()) {
@@ -92,7 +98,7 @@ namespace Render {
         {
             auto perFrame = mProgram.mapParameters(1).cast<PointShadowPerFrame>();
 
-            perFrame->position = lights.getEntity(mIndex)->getComponent<Scene::Entity::Transform>()->getPosition();
+            perFrame->position = transform->getPosition();
         }
 
         for (std::pair<const std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> &instance : instances) {

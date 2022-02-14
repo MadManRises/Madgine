@@ -29,6 +29,8 @@ namespace Filesystem {
                             it2->mPath = it2->mOldPath;
                             abort = true;
                             break;
+                        default:
+                            break;
                         }
                     }
                     if (abort)
@@ -46,11 +48,15 @@ namespace Filesystem {
                             it2->mPath = it->mOldPath;
                             it->mType = Filesystem::FileEventType::FILE_MODIFIED;
                             break;
+                        default:
+                            break;
                         }
                     }
                     if (abort)
                         break;
                 }
+                break;
+            default:
                 break;
             }
         }

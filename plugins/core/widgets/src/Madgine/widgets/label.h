@@ -23,6 +23,8 @@ namespace Widgets {
         std::string mText;
         int mFontSize = 16;
 
+        Vector2 mPivot = { 0.5f, 0.5f };
+
     private:
         Render::FontLoader::HandleType mFont;
     };

@@ -108,6 +108,9 @@ namespace Window {
                     if (wParam == SC_KEYMENU)
                         ignore = true;
                     break;
+                case WM_SETCURSOR:
+                    ignore = true;
+                    break;
                     //default:
                     //LOG_WARNING("Unhandled Event type: " << msg);
                 }
@@ -259,6 +262,34 @@ namespace Window {
     void OSWindow::releaseInput()
     {
         ReleaseCapture();
+    }
+
+    void OSWindow::setCursorIcon(Input::CursorIcon icon)
+    {
+        SetCursor(LoadCursor(NULL, [](Input::CursorIcon icon) {
+            switch (icon) {
+            case Input::CursorIcon::Arrow:
+                return IDC_ARROW;
+            case Input::CursorIcon::TextInput:
+                return IDC_IBEAM;
+            case Input::CursorIcon::ResizeAll:
+                return IDC_SIZEALL;
+            case Input::CursorIcon::ResizeNS:
+                return IDC_SIZENS;
+            case Input::CursorIcon::ResizeEW:
+                return IDC_SIZEWE;
+            case Input::CursorIcon::ResizeNESW:
+                return IDC_SIZENESW;
+            case Input::CursorIcon::ResizeNWSE:
+                return IDC_SIZENWSE;
+            case Input::CursorIcon::Hand:
+                return IDC_HAND;
+            case Input::CursorIcon::NotAllowed:
+                return IDC_NO;
+            default:
+                throw 0;
+            }
+        }(icon)));
     }
 
     WindowData OSWindow::data()

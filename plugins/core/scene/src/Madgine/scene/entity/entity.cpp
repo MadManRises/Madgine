@@ -172,9 +172,9 @@ namespace Scene {
             mSceneManager.remove(this);
         }
 
-        Serialize::StreamResult Entity::readComponent(Serialize::SerializeInStream &in, EntityComponentOwningHandle<EntityComponentBase> &handle)
+        Serialize::StreamResult Entity::readComponent(Serialize::FormattedSerializeStream &in, EntityComponentOwningHandle<EntityComponentBase> &handle)
         {
-            STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, "Component", 1));
+            STREAM_PROPAGATE_ERROR(in.beginExtendedRead("Component", 1));
             std::string name;
             STREAM_PROPAGATE_ERROR(read(in, name, "name"));
             uint32_t i = EntityComponentRegistry::sComponentsByName().at(name);
@@ -182,7 +182,7 @@ namespace Scene {
             return {};
         }
 
-        void Entity::writeComponent(Serialize::SerializeOutStream &out, const EntityComponentOwningHandle<EntityComponentBase> &comp) const
+        void Entity::writeComponent(Serialize::FormattedSerializeStream &out, const EntityComponentOwningHandle<EntityComponentBase> &comp) const
         {
             for (const auto &p : EntityComponentRegistry::sComponentsByName()) {
                 if (p.second == comp.mHandle.mType) {

@@ -17,7 +17,7 @@ add_plugin(Python3 Madgine Scripting ${sources} PRECOMPILED_HEADER src/Python3/p
 
 target_link_plugins(Python3 Base)
 
-target_link_libraries(Python3 PUBLIC Meta Python3::Python)
+target_link_libraries(Python3 PUBLIC Python3::Python)
 
 
 set(sources "")

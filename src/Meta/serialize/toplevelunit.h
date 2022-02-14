@@ -13,7 +13,7 @@ namespace Serialize {
         void sync();
         void unsync();
 
-        BufferedOutStream &getSlaveMessageTarget() const;
+        FormattedBufferedStream &getSlaveMessageTarget() const;
 
         const std::vector<SyncManager *> &getManagers() const;
         SyncManager *getSlaveManager() const;
@@ -28,7 +28,7 @@ namespace Serialize {
         void setStaticSlaveId(UnitId staticId);
         void initSlaveId(SyncManager *mgr);
 
-        std::set<BufferedOutStream *, CompareStreamId> getMasterMessageTargets() const;
+        std::set<FormattedBufferedStream *, CompareStreamId> getMasterMessageTargets() const;
 
     private:
         std::vector<SyncManager *> mManagers;

@@ -58,4 +58,6 @@ FIELD(complexList3)
 
 FIELD(pod)
 
+FIELD(bytes)
+
 SERIALIZETABLE_END(TestUnit)

@@ -64,27 +64,32 @@ namespace Tools {
             auto end = mEntries.end();
             auto begin = mEntries.size() <= 100 ? mEntries.begin() : std::prev(end, 100);
 
-            if (ImGui::BeginChild("Messages")) {
+            if (ImGui::BeginTable("Messages", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY)) {
 
-                ImGui::Columns(3);
-                if (!mOnce) {
+                ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed);
+                ImGui::TableSetupColumn("Message", ImGuiTableColumnFlags_WidthStretch);
+                ImGui::TableSetupColumn("Source", ImGuiTableColumnFlags_WidthStretch);
+                ImGui::TableSetupScrollFreeze(0, 1);
+                ImGui::TableHeadersRow();
+
+                /* if (!mOnce) {
                     ImGui::SetColumnWidth(0, 24);
                     mOnce = true;
-                }
+                }*/
 
-                for (const LogEntry &entry : mEntries) {
+                for (const LogEntry &entry : mEntries) {                    
                     if (mMsgFilters[entry.mType]) {
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
                         ImGui::Text("%s", icons[entry.mType]);
-                        ImGui::NextColumn();
+                        ImGui::TableNextColumn();
                         ImGui::Selectable(entry.mMsg.c_str(), false, ImGuiSelectableFlags_SpanAllColumns);
-                        ImGui::NextColumn();
+                        ImGui::TableNextColumn();
                         if (entry.mFile)
                             ImGui::Text("%s", entry.mFile);
-                        ImGui::NextColumn();
-                        ImGui::Separator();
                     }
                 }
-                ImGui::EndChild();
+                ImGui::EndTable();
             }
         }
         ImGui::End();

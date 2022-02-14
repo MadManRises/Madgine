@@ -32,35 +32,24 @@ namespace Serialize {
             []() {
                 return OffsetPtr {};
             },
-            [](const SerializableDataUnit *_unit, SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
+            [](const SerializableDataUnit *_unit, FormattedSerializeStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 write(out, (unit->*Getter)(), name, CallerHierarchyPtr { hierarchy.append(unit) });
             },
-            [](SerializableDataUnit *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) -> StreamResult {
+            [](SerializableDataUnit *_unit, FormattedSerializeStream &in, const char *name, CallerHierarchyBasePtr hierarchy) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
                 (unit->*Setter)(nullptr);
                 return read(in, unit->*P, name, CallerHierarchyPtr { hierarchy.append(unit) });
             },
-            [](SerializableDataUnit *unit, SerializeInStream &in, PendingRequest *request) -> StreamResult {
+            [](SerializableDataUnit *unit, FormattedSerializeStream &in, PendingRequest *request) -> StreamResult {
                 throw "Unsupported";
             },
-            [](SerializableDataUnit *unit, BufferedInOutStream &inout, TransactionId id) -> StreamResult {
+            [](SerializableDataUnit *unit, FormattedBufferedStream &inout, TransactionId id) -> StreamResult {
                 throw "Unsupported";
             },
-            [](SerializableDataUnit *_unit, SerializeInStream &in, bool success) -> StreamResult {
+            [](SerializableDataUnit *_unit, FormattedSerializeStream &in, bool success) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
                 STREAM_PROPAGATE_ERROR(UnitHelper<T>::applyMap(in, unit->*P, success));
-                if constexpr (!std::derived_from<T, SerializableUnitBase>) {
-                    if (success) {
-                        T val = unit->*P;
-                        unit->*P = nullptr;
-                        (unit->*Setter)(val);
-                    } else {
-                        T val = unit->*P;
-                        (unit->*Setter)(nullptr);
-                        unit->*P = val;
-                    }
-                }
                 return {};
             },
             [](SerializableDataUnit *unit, bool b) {
@@ -79,10 +68,10 @@ namespace Serialize {
             },
             [](SerializableDataUnit *unit) {
             },
-            [](const SerializableDataUnit *unit, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *data) {
+            [](const SerializableDataUnit *unit, const std::set<FormattedBufferedStream *, CompareStreamId> &outStreams, const void *data) {
                 throw "Unsupported";
             },
-            [](const SerializableDataUnit *_unit, BufferedOutStream &out, const void *data) {
+            [](const SerializableDataUnit *_unit, FormattedBufferedStream &out, const void *data) {
                 throw "Unsupported";
             }
         };
@@ -106,24 +95,24 @@ namespace Serialize {
             []() {
                 return OffsetPtr {};
             },
-            [](const SerializableDataUnit *_unit, SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
+            [](const SerializableDataUnit *_unit, FormattedSerializeStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 write(out, (unit->*Getter)(), name, hierarchy.append(unit));
             },
-            [](SerializableDataUnit *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) -> StreamResult {
+            [](SerializableDataUnit *_unit, FormattedSerializeStream &in, const char *name, CallerHierarchyBasePtr hierarchy) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
                 MakeOwning_t<T> dummy;
                 STREAM_PROPAGATE_ERROR(read(in, dummy, name, CallerHierarchyPtr { hierarchy.append(unit) }));
                 (unit->*Setter)(std::move(dummy));
                 return {};
             },
-            [](SerializableDataUnit *unit, SerializeInStream &in, PendingRequest *request) -> StreamResult {
+            [](SerializableDataUnit *unit, FormattedSerializeStream &in, PendingRequest *request) -> StreamResult {
                 throw "Unsupported";
             },
-            [](SerializableDataUnit *unit, BufferedInOutStream &inout, TransactionId id) -> StreamResult {
+            [](SerializableDataUnit *unit, FormattedBufferedStream &inout, TransactionId id) -> StreamResult {
                 throw "Unsupported";
             },
-            [](SerializableDataUnit *_unit, SerializeInStream &in, bool success) {
+            [](SerializableDataUnit *_unit, FormattedSerializeStream &in, bool success) {
                 return StreamResult {};
             },
             [](SerializableDataUnit *unit, bool b) {
@@ -132,10 +121,10 @@ namespace Serialize {
             },
             [](SerializableDataUnit *unit) {
             },
-            [](const SerializableDataUnit *unit, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *data) {
+            [](const SerializableDataUnit *unit, const std::set<FormattedBufferedStream *, CompareStreamId> &outStreams, const void *data) {
                 throw "Unsupported";
             },
-            [](const SerializableDataUnit *_unit, BufferedOutStream &out, const void *data) {
+            [](const SerializableDataUnit *_unit, FormattedBufferedStream &out, const void *data) {
                 throw "Unsupported";
             }
         };
@@ -153,29 +142,29 @@ namespace Serialize {
             []() {
                 return MemberOffsetPtr<Unit, T> { P }.template offset<SerializableDataUnit>();
             },
-            [](const SerializableDataUnit *_unit, SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
+            [](const SerializableDataUnit *_unit, FormattedSerializeStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 write<T, Configs...>(out, unit->*P, name, CallerHierarchyPtr { hierarchy.append(unit) });
             },
-            [](SerializableDataUnit *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) -> StreamResult {
+            [](SerializableDataUnit *_unit, FormattedSerializeStream &in, const char *name, CallerHierarchyBasePtr hierarchy) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
                 return read<T, Configs...>(in, unit->*P, name, CallerHierarchyPtr { hierarchy.append(unit) });
             },
-            [](SerializableDataUnit *_unit, SerializeInStream &in, PendingRequest *request) -> StreamResult {
+            [](SerializableDataUnit *_unit, FormattedSerializeStream &in, PendingRequest *request) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
                 if constexpr (std::derived_from<T, SyncableBase>)
                     return Operations<T, Configs...>::readAction(unit->*P, in, request, unit);
                 else
                     throw "Unsupported";
             },
-            [](SerializableDataUnit *_unit, BufferedInOutStream &inout, TransactionId id) -> StreamResult {
+            [](SerializableDataUnit *_unit, FormattedBufferedStream &inout, TransactionId id) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
                 if constexpr (std::derived_from<T, SyncableBase>)
                     return Operations<T, Configs...>::readRequest(unit->*P, inout, id, unit);
                 else
                     throw "Unsupported";
             },
-            [](SerializableDataUnit *unit, SerializeInStream &in, bool success) {
+            [](SerializableDataUnit *unit, FormattedSerializeStream &in, bool success) {
                 return UnitHelper<T>::applyMap(in, static_cast<Unit *>(unit)->*P, success);
             },
             [](SerializableDataUnit *unit, bool b) {
@@ -188,14 +177,14 @@ namespace Serialize {
                 if constexpr (std::derived_from<T, SerializableUnitBase>)
                     UnitHelper<T>::setItemParent(static_cast<Unit *>(unit)->*P, unit);
             },
-            [](const SerializableDataUnit *_unit, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *data) {
+            [](const SerializableDataUnit *_unit, const std::set<FormattedBufferedStream *, CompareStreamId> &outStreams, const void *data) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 if constexpr (std::derived_from<T, SyncableBase>)
                     Operations<T, Configs...>::writeAction(unit->*P, outStreams, data, unit);
                 else
                     throw "Unsupported";
             },
-            [](const SerializableDataUnit *_unit, BufferedOutStream &out, const void *data) {
+            [](const SerializableDataUnit *_unit, FormattedBufferedStream &out, const void *data) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 if constexpr (std::derived_from<T, SyncableBase>)
                     Operations<T, Configs...>::writeRequest(unit->*P, out, data, unit);
@@ -218,21 +207,21 @@ namespace Serialize {
             []() {
                 return MemberOffsetPtr<Unit, T> { P }.template offset<SerializableDataUnit>();
             },
-            [](const SerializableDataUnit *_unit, SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
+            [](const SerializableDataUnit *_unit, FormattedSerializeStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
 
             },
-            [](SerializableDataUnit *_unit, SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy) -> StreamResult {
+            [](SerializableDataUnit *_unit, FormattedSerializeStream &in, const char *name, CallerHierarchyBasePtr hierarchy) -> StreamResult {
                 return {};
             },
-            [](SerializableDataUnit *_unit, SerializeInStream &in, PendingRequest *request) -> StreamResult {
+            [](SerializableDataUnit *_unit, FormattedSerializeStream &in, PendingRequest *request) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
                 return Operations<T, Configs...>::readAction(unit->*P, in, request, unit);
             },
-            [](SerializableDataUnit *_unit, BufferedInOutStream &inout, TransactionId id) -> StreamResult {
+            [](SerializableDataUnit *_unit, FormattedBufferedStream &inout, TransactionId id) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
                 return Operations<T, Configs...>::readRequest(unit->*P, inout, id, unit);
             },
-            [](SerializableDataUnit *unit, SerializeInStream &in, bool success) {
+            [](SerializableDataUnit *unit, FormattedSerializeStream &in, bool success) {
                 return StreamResult {};
             },
             [](SerializableDataUnit *unit, bool b) {
@@ -244,11 +233,11 @@ namespace Serialize {
             [](SerializableDataUnit *unit) {
                 //UnitHelper<T>::setItemParent(static_cast<Unit *>(unit)->*P, unit);
             },
-            [](const SerializableDataUnit *_unit, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *data) {
+            [](const SerializableDataUnit *_unit, const std::set<FormattedBufferedStream *, CompareStreamId> &outStreams, const void *data) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 Operations<T, Configs...>::writeAction(unit->*P, outStreams, data, unit);
             },
-            [](const SerializableDataUnit *_unit, BufferedOutStream &out, const void *data) {
+            [](const SerializableDataUnit *_unit, FormattedBufferedStream &out, const void *data) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 Operations<T, Configs...>::writeRequest(unit->*P, out, data, unit);
             }

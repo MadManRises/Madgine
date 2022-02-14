@@ -15,88 +15,101 @@ namespace Serialize {
         SerializeInStream(SerializeInStream &&other, SerializeManager *mgr);
         ~SerializeInStream();
 
-        template <typename T>
-        SerializeInStream &operator>>(T &t) = delete;
+        StreamResult readN(std::string &buffer, size_t n);
+        StreamResult peekN(std::string &buffer, size_t n);
+        StreamResult readUntil(std::string &buffer, const char *delim);
+        StreamResult peekUntil(std::string &buffer, const char *delim);
 
+        StreamResult read(void *buffer, size_t size);
         template <typename T>
-        StreamResult readUnformatted(T &t)
+        StreamResult read(T &t)
         {
-            if (isBinary()) {
-                return readRaw(t);
-            } else {
+            return read(&t, sizeof(T));
+        }
+        template <typename T>
+        StreamResult operator>>(T &t)
+        {
+            InStream::operator>>(t);
+            if (!*this)
+                return STREAM_PARSE_ERROR(*this, true, "Unexpected EOF");
+            return {};
+        }
 
-                InStream::operator>>(t);
-                if (!*this)
-                    return STREAM_PARSE_ERROR(*this, "Expected: <" << typeName<T>() << ">");
-                return {};
+        SerializeStreamData &data() const;
+        SerializeManager *manager() const;
+        void setId(ParticipantId id);
+        ParticipantId id() const;
+        bool isMaster();
+        SerializableUnitList &serializableList();
+
+        template <typename T>
+        requires std::convertible_to<T *, SerializableDataUnit *>
+            StreamResult read(T *&p)
+        {
+            if constexpr (std::convertible_to<T *, SyncableUnitBase *>) {
+                SyncableUnitBase *unit;
+                STREAM_PROPAGATE_ERROR(read(unit));
+                p = reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(unit));
+            } else {
+                SerializableDataUnit *unit;
+                STREAM_PROPAGATE_ERROR(read(unit));
+                p = reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(unit));
             }
+            return {};
         }
 
         template <typename T>
         requires std::convertible_to<T *, SerializableDataUnit *>
-        StreamResult readUnformatted(T *&p) 
+            StreamResult operator>>(T *&p)
         {
             if constexpr (std::convertible_to<T *, SyncableUnitBase *>) {
                 SyncableUnitBase *unit;
-                STREAM_PROPAGATE_ERROR(readUnformatted(unit));
+                STREAM_PROPAGATE_ERROR(operator>>(unit));
                 p = reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(unit));
             } else {
                 SerializableDataUnit *unit;
-                STREAM_PROPAGATE_ERROR(readUnformatted(unit));
+                STREAM_PROPAGATE_ERROR(operator>>(unit));
                 p = reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(unit));
             }
             return {};
         }
 
-        StreamResult readUnformatted(SyncableUnitBase *&p);
-        StreamResult readUnformatted(SerializableDataUnit *&p);
+        StreamResult read(SyncableUnitBase *&p);
+        StreamResult read(SerializableDataUnit *&p);
 
-        StreamResult readUnformatted(std::string &s);
-        StreamResult readUnformatted(String auto& s) {
+        StreamResult operator>>(SyncableUnitBase *&p);
+        StreamResult operator>>(SerializableDataUnit *&p);
+
+        StreamResult read(std::string &s);
+        StreamResult read(String auto &s)
+        {
             std::string string;
-            STREAM_PROPAGATE_ERROR(readUnformatted(string));
+            STREAM_PROPAGATE_ERROR(read(string));
             s = std::move(string);
             return {};
         }
 
-        StreamResult readUnformatted(ByteBuffer &b);
-
-        StreamResult readUnformatted(std::monostate &);
-
-        std::string readN(size_t n);
-        std::string peekN(size_t n);
-        std::string readUntil(const char *set);
-        std::string peekUntil(const char *set);
-
-        StreamResult readRaw(void *buffer, size_t size);
-        template <typename T>
-        StreamResult readRaw(T &t)
+        StreamResult operator>>(std::string &s);
+        StreamResult operator>>(String auto &s)
         {
-            return readRaw(&t, sizeof(T));
+            std::string string;
+            STREAM_PROPAGATE_ERROR(read(string));
+            s = std::move(string);
+            return {};
         }
 
-        SerializeManager *manager() const;
+        StreamResult read(ByteBuffer &b);
 
-        void setId(ParticipantId id);
+        StreamResult operator>>(ByteBuffer &b);
 
-        ParticipantId id() const;
+        StreamResult read(std::monostate &);
 
-        Formatter &format() const;
-        bool isBinary() const;
-
-        bool isMaster();
-
-        SerializeStreamData &data() const;
-
-        void setNextFormattedStringDelimiter(char c);
-
-        SerializableUnitList &serializableList();
+        StreamResult operator>>(std::monostate &);
 
     protected:
         SerializeInStream(std::basic_streambuf<char> *buffer, SerializeStreamData *data);
 
     protected:
-        char mNextFormattedStringDelimiter = 0;
         SerializeStreamData *mData;
     };
 
@@ -108,53 +121,53 @@ namespace Serialize {
         SerializeOutStream(SerializeOutStream &&other, SerializeManager *mgr);
         ~SerializeOutStream();
 
-        ParticipantId id() const;
-
-        template <typename T>
-        SerializeOutStream &operator<<(const T &t) = delete;
-
-        template <typename T>
-        requires(!Pointer<T> && !StringViewable<T>) void writeUnformatted(const T &t)
-        {
-            if (isBinary())
-                writeRaw(t);
-            else
-                OutStream::operator<<(t);
-        }
-
-        void writeUnformatted(const SyncableUnitBase *p);
-        void writeUnformatted(const SerializableDataUnit *p);
-
-        void writeUnformatted(const std::string_view &s);
-        void writeUnformatted(const StringViewable auto& s) {
-            writeUnformatted(std::string_view { s });
-        }
-
-        void writeUnformatted(const ByteBuffer &b);
-
-        void writeUnformatted(const std::monostate &);
-
-        void writeRaw(const void *buffer, size_t size);
-        template <typename T>
-        void writeRaw(const T &t)
-        {
-            writeRaw(&t, sizeof(T));
-        }
-
-        SerializeManager *manager() const;
-
-        Formatter &format() const;
-        bool isBinary() const;
-
-        bool isMaster();
-
         SerializeStreamData &data() const;
-
+        SerializeManager *manager() const;
+        ParticipantId id() const;
+        bool isMaster();
         SerializableUnitMap &serializableMap();
+
+        template <typename T>
+        requires(!Pointer<T> && !StringViewable<T>) void write(const T &t)
+        {
+            OutStream::write(t);
+        }
+
+        template <typename T>
+        requires(!Pointer<T> && !StringViewable<T>) SerializeOutStream &operator<<(const T &t)
+        {
+            OutStream::operator<<(t);
+            return *this;
+        }
+
+        void write(const SyncableUnitBase *p);
+        void write(const SerializableDataUnit *p);
+
+        SerializeOutStream &operator<<(const SyncableUnitBase *);
+        SerializeOutStream &operator<<(const SerializableDataUnit *);
+
+        void write(const std::string_view &s);
+        void write(const StringViewable auto &s)
+        {
+            write(std::string_view { s });
+        }
+
+        SerializeOutStream &operator<<(const std::string_view &);
+        SerializeOutStream &operator<<(const StringViewable auto &s)
+        {
+            return operator<<(std::string_view { s });
+        }
+
+        void write(const ByteBuffer &b);
+
+        SerializeOutStream &operator<<(const ByteBuffer &);
+
+        void write(const std::monostate &);
+
+        SerializeOutStream &operator<<(const std::monostate &);
 
     protected:
         std::unique_ptr<SerializeStreamData> mData;
     };
-
 }
 }

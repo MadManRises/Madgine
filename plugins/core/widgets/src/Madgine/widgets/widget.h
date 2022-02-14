@@ -29,7 +29,7 @@ namespace Widgets {
     };
 
     struct MADGINE_WIDGETS_EXPORT WidgetBase : VirtualScope<WidgetBase, Serialize::VirtualData<WidgetBase, Serialize::VirtualSerializableDataBase<VirtualScopeBase<>, Serialize::SerializableDataUnit>>> {
-        SERIALIZABLEUNIT(WidgetBase);        
+        SERIALIZABLEUNIT(WidgetBase);
 
         WidgetBase(const std::string &name, WidgetManager &manager, WidgetBase *parent = nullptr);
 
@@ -70,7 +70,8 @@ namespace Widgets {
 
         WidgetBase *getChildRecursive(const std::string &name);
         template <typename T>
-        T* getChildRecursive(const std::string& name) {
+        T *getChildRecursive(const std::string &name)
+        {
             return dynamic_cast<T *>(getChildRecursive(name));
         }
         void setParent(WidgetBase *parent);
@@ -108,17 +109,19 @@ namespace Widgets {
         size_t depth();
 
         bool mVisible = true;
+        std::string mName;
 
         WidgetManager &manager();
 
     protected:
         std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, WidgetClass _class);
-        Serialize::StreamResult readWidget(Serialize::SerializeInStream &in, std::unique_ptr<WidgetBase> &widget);
-        void writeWidget(Serialize::SerializeOutStream &out, const std::unique_ptr<WidgetBase> &widget) const;
+        Serialize::StreamResult readWidget(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget);
+        void writeWidget(Serialize::FormattedSerializeStream &out, const std::unique_ptr<WidgetBase> &widget) const;
 
         virtual void sizeChanged(const Vector3i &pixelSize);
 
-        std::pair<std::vector<Vertex>, TextureSettings> renderText(const std::string &text, Vector3 pos, const Render::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize);
+        std::pair<std::vector<Vertex>, TextureSettings> renderText(const std::string &text, Vector3 pos, Vector2 size, const Render::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize);
+        
 
     protected:
         void destroyChild(WidgetBase *w);
@@ -127,7 +130,6 @@ namespace Widgets {
         Threading::Signal<const Input::AxisEventArgs &> mAxisEventSignal;
 
     private:
-        std::string mName;
         WidgetBase *mParent;
 
         WidgetManager &mManager;

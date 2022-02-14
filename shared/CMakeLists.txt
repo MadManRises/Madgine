@@ -32,6 +32,8 @@ add_subdirectory(serialize)
 
 add_subdirectory(cli)
 
+add_subdirectory(base64)
+
 add_subdirectory(ini)
 
 add_subdirectory(stb)

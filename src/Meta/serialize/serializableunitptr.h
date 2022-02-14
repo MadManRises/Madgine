@@ -66,7 +66,7 @@ namespace Serialize {
             return mUnit != nullptr;
         }
 
-        void writeState(SerializeOutStream &out, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0) const;
+        void writeState(FormattedSerializeStream &out, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0) const;
 
         const SerializableDataUnit *mUnit = nullptr;
         const SerializeTable *mType = nullptr;
@@ -118,9 +118,11 @@ namespace Serialize {
             return mUnit != nullptr;
         }
 
-        StreamResult readState(SerializeInStream &in, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0) const;
+        StreamResult readState(FormattedSerializeStream &in, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0) const;
 
-        StreamResult applySerializableMap(SerializeInStream &in, bool success) const;
+        StreamResult applySerializableMap(FormattedSerializeStream &in, bool success) const;
+
+        void setActive(bool active, bool existenceChanged) const;
 
         SerializableDataUnit *unit() const;
     };
@@ -182,8 +184,8 @@ namespace Serialize {
 
         bool isActive(OffsetPtr offset) const;
 
-        void writeAction(uint8_t index, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *data) const;
-        void writeRequest(uint8_t index, BufferedOutStream &out, const void *data) const;
+        void writeAction(uint8_t index, const std::set<FormattedBufferedStream *, CompareStreamId> &outStreams, const void *data) const;
+        void writeRequest(uint8_t index, FormattedBufferedStream &out, const void *data) const;
 
         const SerializableUnitBase *unit() const;
     };
@@ -232,10 +234,10 @@ namespace Serialize {
             return mUnit != nullptr;
         }
 
-        StreamResult readState(SerializeInStream &in, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0) const;
+        StreamResult readState(FormattedSerializeStream &in, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0) const;
 
-        StreamResult readAction(BufferedInOutStream &in, PendingRequest *request) const;
-        StreamResult readRequest(BufferedInOutStream &in, TransactionId id) const;
+        StreamResult readAction(FormattedSerializeStream &in, PendingRequest *request) const;
+        StreamResult readRequest(FormattedBufferedStream &in, TransactionId id) const;
 
         void setDataSynced(bool b) const;
         void setActive(bool active, bool existenceChanged) const;

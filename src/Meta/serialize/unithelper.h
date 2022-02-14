@@ -9,18 +9,18 @@
 namespace Engine {
 namespace Serialize {
 
-    DERIVE_FUNCTION(applySerializableMap, SerializeInStream &, bool);
+    DERIVE_FUNCTION(applySerializableMap, FormattedSerializeStream &, bool);
     DERIVE_FUNCTION(setDataSynced, bool);
     DERIVE_FUNCTION(setActive, bool, bool);
     DERIVE_FUNCTION(setParent, SerializableUnitBase *);
 
-    META_EXPORT StreamResult convertSyncablePtr(SerializeInStream &in, UnitId id, SyncableUnitBase *&out);
-    META_EXPORT StreamResult convertSerializablePtr(SerializeInStream &in, uint32_t id, SerializableDataUnit *&out);
+    META_EXPORT StreamResult convertSyncablePtr(FormattedSerializeStream &in, UnitId id, SyncableUnitBase *&out);
+    META_EXPORT StreamResult convertSerializablePtr(FormattedSerializeStream &in, uint32_t id, SerializableDataUnit *&out);
 
     template <typename T>
     struct UnitHelper {
 
-        static StreamResult applyMap(SerializeInStream &in, T &item, bool success)
+        static StreamResult applyMap(FormattedSerializeStream &in, T &item, bool success)
         {
             if constexpr (Pointer<T>) {
                 if (success) {
@@ -107,6 +107,8 @@ namespace Serialize {
                 item.setActive(active, existenceChanged);
             } else if constexpr (std::derived_from<T, SerializableUnitBase>) {
                 SerializableUnitPtr { &item }.setActive(active, existenceChanged);
+            } else if constexpr (std::derived_from<T, SerializableDataUnit>) {
+                SerializableDataPtr { &item }.setActive(active, existenceChanged);
             } else if constexpr (InstanceOf<std::remove_const_t<T>, std::unique_ptr>) {
                 UnitHelper<typename T::element_type>::setItemActive(*item, active, existenceChanged);
             } else if constexpr (std::ranges::range<T>) {

@@ -134,12 +134,15 @@ namespace Render {
             }
 
             for (size_t i = 0; i < perFrame->pointLightCount; ++i) {
-                float range = lights[i].mRange;
-                perFrame->pointLights[i].position = lights.getEntity(i)->getComponent<Scene::Entity::Transform>()->getPosition();
-                perFrame->pointLights[i].color = lights[i].mColor;
-                perFrame->pointLights[i].constant = 1.0f;
-                perFrame->pointLights[i].linearFactor = 4.5f / range;
-                perFrame->pointLights[i].quadratic = 75.0f / (range * range);
+                Scene::Entity::Transform *t = lights.getEntity(i)->getComponent<Scene::Entity::Transform>();
+                if (t) {
+                    float range = lights[i].mRange;
+                    perFrame->pointLights[i].position = t->getPosition();
+                    perFrame->pointLights[i].color = lights[i].mColor;
+                    perFrame->pointLights[i].constant = 1.0f;
+                    perFrame->pointLights[i].linearFactor = 4.5f / range;
+                    perFrame->pointLights[i].quadratic = 75.0f / (range * range);
+                }
             }
         }
 

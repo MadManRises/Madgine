@@ -10,8 +10,8 @@ namespace Serialize {
 
     struct META_EXPORT SerializeStreamData {
     public:
-        SerializeStreamData(std::unique_ptr<Formatter> format);
-        SerializeStreamData(std::unique_ptr<Formatter> format, SerializeManager &mgr, ParticipantId id);
+        SerializeStreamData();
+        SerializeStreamData(SerializeManager &mgr, ParticipantId id);
         SerializeStreamData(SerializeStreamData &&) = delete;        
         virtual ~SerializeStreamData();
 
@@ -22,8 +22,6 @@ namespace Serialize {
         ParticipantId id() const;
         void setId(ParticipantId id);
 
-        Formatter &format() const;
-
         SerializableUnitList &serializableList();
         friend struct SerializableListHolder;
 
@@ -33,7 +31,6 @@ namespace Serialize {
     private:
         SerializeManager *mManager = nullptr;
         ParticipantId mId = 0;
-        std::unique_ptr<Formatter> mFormatter;
 
         union {
             SerializableUnitMap *mSerializableMap = nullptr;

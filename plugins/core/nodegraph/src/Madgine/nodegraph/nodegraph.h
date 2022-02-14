@@ -77,8 +77,8 @@ namespace NodeGraph {
 
     protected:
         std::unique_ptr<NodeBase> createNode(std::string_view name);
-        Serialize::StreamResult readNode(Serialize::SerializeInStream &in, std::unique_ptr<NodeBase> &node);
-        void writeNode(Serialize::SerializeOutStream &out, const std::unique_ptr<NodeBase> &node) const;
+        Serialize::StreamResult readNode(Serialize::FormattedSerializeStream &in, std::unique_ptr<NodeBase> &node);
+        void writeNode(Serialize::FormattedSerializeStream &out, const std::unique_ptr<NodeBase> &node) const;
 
     private:
         Filesystem::Path mPath;

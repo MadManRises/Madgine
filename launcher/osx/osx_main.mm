@@ -18,16 +18,11 @@
 
 #include "Interfaces/util/standardlog.h"
 
+#include "../main.h"
+
 #if __has_feature(objc_arc)
 #error "ARC is on!"
 #endif
-
-extern Engine::CLI::Parameter<bool> toolMode;
-
-extern Engine::CLI::Parameter<Engine::Util::MessageType> logLevel;
-
-extern int launch(Engine::Window::MainWindow **topLevelPointer = nullptr);
-
 
 
 @interface MyNSApplication : NSApplication
@@ -53,12 +48,5 @@ int main(int argc, char * argv[])  {
         running = true;
         [NSApp activateIgnoringOtherApps:YES];
     
-    Engine::Threading::WorkGroup workGroup("Launcher");
-    Engine::Core::Root root { argc, argv };
-    Engine::Util::StandardLog::setLogLevel(logLevel);
-    if (!toolMode) {
-        return launch();
-    } else {
-        return root.errorCode();
-    }
+    return desktopMain(argc, argv);
 }

@@ -36,6 +36,8 @@ namespace Widgets {
         std::string mText;
         float mFontSize = 16;
 
+        Vector2 mPivot = { 0.5f, 0.5f };
+
     protected:
         bool injectPointerEnter(const Input::PointerEventArgs &arg) override;
         bool injectPointerLeave(const Input::PointerEventArgs &arg) override;

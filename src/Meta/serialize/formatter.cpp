@@ -2,44 +2,74 @@
 
 #include "formatter.h"
 
+#include "streams/serializestream.h"
 #include "streams/streamresult.h"
+
+#include "Generic/bytebuffer.h"
+
+#include "base64/base64.h"
+
+#include "serializemanager.h"
 
 namespace Engine {
 namespace Serialize {
 
-    StreamResult Formatter::beginExtended(Serialize::SerializeInStream &, const char *name, size_t count)
+    StreamResult Formatter::beginExtendedRead(const char *name, size_t count)
     {
-        return StreamResult();
+        return {};
     }
 
-	StreamResult Formatter::beginCompound(SerializeInStream &, const char *name)
+    StreamResult Formatter::beginCompoundRead(const char *name)
     {
-        return StreamResult();
+        return {};
     }
 
-    StreamResult Formatter::endCompound(SerializeInStream &, const char *name)
+    StreamResult Formatter::endCompoundRead(const char *name)
     {
-        return StreamResult();
+        return {};
     }
 
-	StreamResult Formatter::beginPrimitive(SerializeInStream &, const char *name, uint8_t typeId)
+    StreamResult Formatter::beginPrimitiveRead(const char *name, uint8_t typeId)
     {
-        return StreamResult();
+        return {};
     }
 
-    StreamResult Formatter::endPrimitive(SerializeInStream &, const char *name, uint8_t typeId)
+    StreamResult Formatter::endPrimitiveRead(const char *name, uint8_t typeId)
     {
-        return StreamResult();
+        return {};
     }
 
-    StreamResult Formatter::beginContainer(SerializeInStream &, const char *name, bool sized)
+    StreamResult Formatter::beginContainerRead(const char *name, bool sized)
     {
-        return StreamResult();
+        return {};
     }
 
-    StreamResult Formatter::endContainer(SerializeInStream &, const char *name)
+    StreamResult Formatter::endContainerRead(const char *name)
     {
-        return StreamResult();
+        return {};
+    }
+
+    StreamResult Formatter::read(std::string &s)
+    {
+        if (mBinary) {
+            mIn.read(s);
+        } else if (mNextStringDelimiter) {
+            STREAM_PROPAGATE_ERROR(mIn.readUntil(s, mNextStringDelimiter));
+            s.resize(s.size() - 1);
+            mNextStringDelimiter = nullptr;
+        } else {
+            mIn >> s;
+        }
+        return {};
+    }
+
+    StreamResult Formatter::expect(std::string_view expected)
+    {
+        std::string actual;
+        STREAM_PROPAGATE_ERROR(mIn.readN(actual, expected.size()));
+        if (actual != expected)
+            return STREAM_PARSE_ERROR(mIn, mBinary, "Expected '" << expected << "', Got '" << actual << "'");
+        return {};
     }
 
 }

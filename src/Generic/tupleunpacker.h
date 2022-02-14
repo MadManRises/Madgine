@@ -245,10 +245,6 @@ namespace TupleUnpacker {
     template <typename Tuple, typename F, size_t... Is>
     decltype(auto) select(Tuple &&t, F &&f, size_t index, std::index_sequence<Is...>)
     {
-        /*if constexpr (((!std::is_same_v<std::invoke_result_t<F, decltype(std::get<Is>(std::forward<Tuple>(t)))>, void>)&&...))
-            return std::tuple<std::invoke_result_t<F, decltype(std::get<Is>(std::forward<Tuple>(t)))>...> { f(std::get<Is>(std::forward<Tuple>(t)))... };
-        else
-            (f(std::get<Is>(std::forward<Tuple>(t))), ...);*/
         using R = std::invoke_result_t<F, decltype(std::get<0>(std::forward<Tuple>(t)))>;
         using Fs = R (*)(Tuple &&, F &&);
         constexpr Fs fs[] = {

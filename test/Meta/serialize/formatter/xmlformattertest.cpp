@@ -60,6 +60,7 @@ TEST(Serialize_Formatter, XML)
         <Element>1</Element>
         <Element>2</Element>
     </pod>
+    <bytes>SGVsbG8gV29ybGQh</bytes>
 </unit1>
 )");
 }
@@ -176,14 +177,14 @@ TEST(Serialize_Formatter, XML_ExtendedOrder)
         <Element>1</Element>
         <Element>2</Element>
     </pod>
+    <bytes>SGVsbG8gV29ybGQh</bytes>
 </unit1>)");
 
     NoParentUnit<TestUnit> unit;
 
     SerializeInStream in { std::move(file), std::make_unique<SerializeStreamData>(std::make_unique<XMLFormatter>()) };
 
-    StreamResult result = read(in, unit, nullptr);
-    ASSERT_EQ(result.mState, StreamState::OK) << result;
+    HANDLE_STREAM_RESULT(read(in, unit, nullptr));    
     ASSERT_EQ(unit.complexList1.front().i, 2);
     ASSERT_EQ(unit.complexList1.front().f, 6.0f);
     ASSERT_EQ(unit.complexList1.front().s, "set");

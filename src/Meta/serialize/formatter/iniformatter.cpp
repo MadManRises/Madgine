@@ -17,6 +17,7 @@ namespace Serialize {
     void IniFormatter::setupStream(std::istream &in)
     {
         in >> std::boolalpha;
+        in >> std::noskipws;
     }
 
     void IniFormatter::setupStream(std::ostream &out)
@@ -24,74 +25,70 @@ namespace Serialize {
         out << std::boolalpha;
     }
 
-    void IniFormatter::beginPrimitive(SerializeOutStream &out, const char *name, uint8_t typeId)
+    void IniFormatter::beginPrimitiveWrite(const char *name, uint8_t typeId)
     {
-        out.writeUnformatted(std::string(name));
-        out.writeUnformatted("=");
+        mOut << name << "=";
     }
 
-    StreamResult IniFormatter::beginPrimitive(SerializeInStream &in, const char *name, uint8_t typeId)
+    StreamResult IniFormatter::beginPrimitiveRead(const char *name, uint8_t typeId)
     {
-
-        std::string prefix = in.readUntil("=");
+        mIn.skipWs(true);
+        std::string prefix;
+        STREAM_PROPAGATE_ERROR(mIn.readUntil(prefix, "="));
         if (name && StringUtil::substr(prefix, 0, -1) != name)
-            return STREAM_PARSE_ERROR(in, "Expected '" << name << "'");
+            return STREAM_PARSE_ERROR(mIn, mBinary, "Expected '" << name << "', Got '" << StringUtil::substr(prefix, 0, -1) << "'");
 
         if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>)
-            in.setNextFormattedStringDelimiter('\n');
+            mNextStringDelimiter = "\n";
 
         return {};
     }
 
-    void IniFormatter::endPrimitive(SerializeOutStream &out, const char *name, uint8_t typeId)
+    void IniFormatter::endPrimitiveWrite(const char *name, uint8_t typeId)
     {
-        out.writeUnformatted("\n");
+        mOut << "\n";
     }
 
-    StreamResult IniFormatter::endPrimitive(SerializeInStream &in, const char *name, uint8_t typeId)
+    StreamResult IniFormatter::endPrimitiveRead(const char *name, uint8_t typeId)
     {
         return {};
     }
 
-    std::string IniFormatter::lookupFieldName(SerializeInStream &in)
+    StreamResult IniFormatter::lookupFieldName(std::string &name)
     {
-        std::string name = in.peekUntil("=");
+        STREAM_PROPAGATE_ERROR(mIn.peekUntil(name, "="));
         if (!name.empty())
             name = StringUtil::substr(name, 0, -1);
-        return name;
+        return {};
     }
 
-    void IniFormatter::beginContainer(SerializeOutStream &out, const char *name, uint32_t size)
+    void IniFormatter::beginContainerWrite(const char *name, uint32_t size)
     {
         if (size != std::numeric_limits<uint32_t>::max()) {
-            out.writeUnformatted("size=");
-            out.writeUnformatted(size);
-            out.writeUnformatted("\n");
+            mOut << "size=" << size << "\n";
         }
     }
 
-    StreamResult IniFormatter::beginContainer(SerializeInStream &in, const char *name, bool sized)
+    StreamResult IniFormatter::beginContainerRead(const char *name, bool sized)
     {
         uint32_t size = 0;
         if (sized) {
-            STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, name, 1));
-            constexpr std::string_view prefix = "size=";
-            if (in.readN(prefix.size()) != prefix)
-                return STREAM_PARSE_ERROR(in, "Expected container size");
-            STREAM_PROPAGATE_ERROR(in.readUnformatted(size));
+            mIn.skipWs(true);
+            FORMATTER_EXPECT("size=");
+            STREAM_PROPAGATE_ERROR(read(size));
         }
         mContainerSizes.push(size);
         return {};
     }
 
-    StreamResult IniFormatter::endContainer(SerializeInStream &, const char *name)
+    StreamResult IniFormatter::endContainerRead(const char *name)
     {
         assert(mContainerSizes.top() == 0);
         mContainerSizes.pop();
         return {};
     }
 
-    bool IniFormatter::hasContainerItem(SerializeInStream &)
+    bool IniFormatter::hasContainerItem()
     {
         if (mContainerSizes.top() > 0) {
             --mContainerSizes.top();

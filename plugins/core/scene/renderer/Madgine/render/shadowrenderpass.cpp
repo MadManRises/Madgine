@@ -15,8 +15,6 @@
 
 #include "Madgine/render/camera.h"
 
-#include "im3d/im3d.h"
-
 //#include "Madgine/render/rendercontext.h"
 
 #define SL_SHADER scene
@@ -176,9 +174,6 @@ namespace Render {
             1.0f, maxBounds.z - minBounds.z + 1.0f,
             true
         };
-
-        Im3D::Frustum(cameraFrustum, Vector4 { 0.0f, 1.0f, 0.0f, 1.0f });
-        Im3D::Frustum(mLightFrustum, Vector4 { 1.0f, 0.0f, 0.0f, 1.0f });
     }
 
 }

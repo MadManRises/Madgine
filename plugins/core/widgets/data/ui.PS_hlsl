@@ -27,6 +27,9 @@ float4 main(PixelShaderInput IN)
 		sigDist *= 4.0;
 		float opacity = clamp(sigDist + 0.5, 0.0, 1.0);
 		texColor = lerp(float4(0,0,0,0), float4(1,1,1,1), opacity);
+		if (opacity == 0.0){
+			discard;
+		}
 	} else {
 		texColor = tex.Sample(texSampler, IN.uv);		
 	}

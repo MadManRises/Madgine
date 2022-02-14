@@ -52,6 +52,10 @@ namespace Tools {
         co_await ToolBase::finalize();
     }
 
+    void DirectX12ToolConfig::renderMenu()
+    {
+    }
+
     std::string_view DirectX12ToolConfig::key() const
     {
         return "DirectX12ToolConfig";

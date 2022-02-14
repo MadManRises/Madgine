@@ -6,6 +6,8 @@
 #include "Meta/serialize/container/query.h"
 #include "Meta/serialize/container/syncablecontainer.h"
 
+#include "Generic/bytebuffer.h"
+
 using namespace Engine::Serialize;
 
 struct PODDataType {
@@ -72,4 +74,6 @@ struct TestUnit : TopLevelUnit<TestUnit> {
     SERIALIZABLE_CONTAINER(complexList3, std::list<ComplexDataType>);
 
     PODDataType pod;
+
+    Engine::ByteBuffer bytes;
 };

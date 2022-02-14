@@ -89,7 +89,7 @@ namespace NodeGraph {
         mPath = path;
         if (Filesystem::exists(mPath)) {
             Filesystem::FileManager mgr("Graph-Serializer");
-            Serialize::SerializeInStream in = mgr.openRead(mPath, std::make_unique<Serialize::XMLFormatter>());
+            Serialize::FormattedSerializeStream in = mgr.openRead(mPath, std::make_unique<Serialize::XMLFormatter>());
             STREAM_PROPAGATE_ERROR(Serialize::read(in, *this, "Graph", {}, Serialize::StateTransmissionFlags_ApplyMap));
 
             for (NodeBase *node : uniquePtrToPtr(mNodes))
@@ -198,7 +198,7 @@ namespace NodeGraph {
     void NodeGraph::saveToFile()
     {
         Filesystem::FileManager mgr("Graph-Serializer");
-        Serialize::SerializeOutStream out = mgr.openWrite(mPath, std::make_unique<Serialize::XMLFormatter>());
+        Serialize::FormattedSerializeStream out = mgr.openWrite(mPath, std::make_unique<Serialize::XMLFormatter>());
         Serialize::SerializableDataPtr { this }.writeState(out, "Graph");
     }
 
@@ -609,23 +609,23 @@ namespace NodeGraph {
         return NodeRegistry::getConstructor(NodeRegistry::sComponentsByName().at(name))(*this);
     }
 
-    Serialize::StreamResult NodeGraph::readNode(Serialize::SerializeInStream &in, std::unique_ptr<NodeBase> &node)
+    Serialize::StreamResult NodeGraph::readNode(Serialize::FormattedSerializeStream &in, std::unique_ptr<NodeBase> &node)
     {
-        STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, "Node", 1));
+        STREAM_PROPAGATE_ERROR(in.beginExtendedRead("Node", 1));
 
         std::string name;
         STREAM_PROPAGATE_ERROR(read(in, name, "type"));
 
         if (!NodeRegistry::sComponentsByName().contains(name))
-            return STREAM_INTEGRITY_ERROR(in, "No Node \"" << name << "\" available.\n"
+            return STREAM_INTEGRITY_ERROR(in.in(), in.isBinary(), "No Node \"" << name << "\" available.\n"
                                                                 << "Make sure to check the loaded plugins.");
         node = createNode(name);
         return {};
     }
 
-    void NodeGraph::writeNode(Serialize::SerializeOutStream &out, const std::unique_ptr<NodeBase> &node) const
+    void NodeGraph::writeNode(Serialize::FormattedSerializeStream &out, const std::unique_ptr<NodeBase> &node) const
     {
-        out.format().beginExtended(out, "Node", 1);
+        out.beginExtendedWrite("Node", 1);
 
         write(out, node->className(), "type");
     }

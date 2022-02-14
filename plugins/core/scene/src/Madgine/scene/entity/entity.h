@@ -97,8 +97,8 @@ namespace Scene {
             std::string mName;
 
         private:
-            Serialize::StreamResult readComponent(Serialize::SerializeInStream &in, EntityComponentOwningHandle<EntityComponentBase> &handle);
-            void writeComponent(Serialize::SerializeOutStream &out, const EntityComponentOwningHandle<EntityComponentBase> &comp) const;
+            Serialize::StreamResult readComponent(Serialize::FormattedSerializeStream &in, EntityComponentOwningHandle<EntityComponentBase> &handle);
+            void writeComponent(Serialize::FormattedSerializeStream &out, const EntityComponentOwningHandle<EntityComponentBase> &comp) const;
 
             bool mLocal;
 

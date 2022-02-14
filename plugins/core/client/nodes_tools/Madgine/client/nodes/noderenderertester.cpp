@@ -101,6 +101,7 @@ namespace Tools {
 
     void NodeRendererTester::renderMenu()
     {
+        ToolBase::renderMenu();
         if (mVisible) {
             if (ImGui::BeginMenu("NodeRendererTester")) {
                 ImGui::EndMenu();

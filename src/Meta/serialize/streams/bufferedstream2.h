@@ -43,16 +43,6 @@ namespace Serialize {
 
         BufferedOutStream &sendMessages();
 
-        template <typename... _Ty>
-        void writeCommand(Command cmd, const _Ty &... args)
-        {
-            beginMessage(cmd);
-
-            (write(*this, args, "args"), ...);
-
-            endMessage();
-        }
-
         SyncManager *manager() const;
 
         TransactionId createRequest(ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback);

@@ -57,9 +57,6 @@ namespace Serialize {
     struct SerializableDataUnit;
     struct SerializableUnitBase;
     struct SyncableUnitBase;
-    struct BufferedInOutStream;
-    struct BufferedInStream;
-    struct BufferedOutStream;
     struct TopLevelUnitBase;
     struct SyncableBase;
     struct SerializableBase;
@@ -69,6 +66,8 @@ namespace Serialize {
     struct SyncManager;
     struct SerializeStreamData;
     struct SyncStreamData;
+    struct FormattedSerializeStream;
+    struct FormattedBufferedStream;
 
     struct StreamResult;
 
@@ -124,11 +123,11 @@ namespace Serialize {
     template <typename, typename... Configs>
     struct Operations;
 
-        template <typename T, typename... Configs, typename Hierarchy = std::monostate>
-    StreamResult read(SerializeInStream &in, T &t, const char *name, const Hierarchy &hierarchy = {}, StateTransmissionFlags flags = 0);
+    template <typename T, typename... Configs, typename Hierarchy = std::monostate>
+    StreamResult read(FormattedSerializeStream &in, T &t, const char *name, const Hierarchy &hierarchy = {}, StateTransmissionFlags flags = 0);
 
     template <typename T, typename... Configs, typename Hierarchy = std::monostate>
-    void write(SerializeOutStream &out, const T &t, const char *name, const Hierarchy &hierarchy = {}, StateTransmissionFlags flags = 0);
+    void write(FormattedSerializeStream &out, const T &t, const char *name, const Hierarchy &hierarchy = {}, StateTransmissionFlags flags = 0);
 }
 
 struct Vector2;

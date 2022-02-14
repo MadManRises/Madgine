@@ -101,9 +101,9 @@ namespace Scene {
     private:
         std::string generateUniqueName();
 
-        Serialize::StreamResult readNonLocalEntity(Serialize::SerializeInStream &in, OutRef<SceneManager> &mgr, bool &isLocal, std::string &name);
+        Serialize::StreamResult readNonLocalEntity(Serialize::FormattedSerializeStream &in, OutRef<SceneManager> &mgr, bool &isLocal, std::string &name);
         std::tuple<SceneManager &, bool, std::string> createEntityData(const std::string &name, bool local);
-        void writeEntity(Serialize::SerializeOutStream &out, const Entity::Entity &entity) const;
+        void writeEntity(Serialize::FormattedSerializeStream &out, const Entity::Entity &entity) const;
 
     private:
         Entity::EntityComponentListContainer<std::vector<Placeholder<0>>> mEntityComponentLists;

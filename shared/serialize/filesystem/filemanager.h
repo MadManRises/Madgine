@@ -13,8 +13,8 @@ namespace Filesystem {
 
         void operator=(const FileManager &) = delete;
 
-        Serialize::SerializeInStream openRead(const Path &path, std::unique_ptr<Serialize::Formatter> format);
-        Serialize::SerializeOutStream openWrite(const Path &path, std::unique_ptr<Serialize::Formatter> format);
+        Serialize::FormattedSerializeStream openRead(const Path &path, std::unique_ptr<Serialize::Formatter> format);
+        Serialize::FormattedSerializeStream openWrite(const Path &path, std::unique_ptr<Serialize::Formatter> format);
     };
 }
 }

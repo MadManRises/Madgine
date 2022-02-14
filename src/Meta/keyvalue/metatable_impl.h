@@ -86,12 +86,12 @@ constexpr Accessor member()
 {
     using traits = CallableTraits<decltype(P)>;
     using DerivedScope = typename traits::class_type;
-    using T = typename traits::return_type;
+    using T = std::remove_reference_t<typename traits::return_type>;
 
     if constexpr (std::is_const_v<DerivedScope> || !std::is_assignable_v<T &, const T &> || (std::ranges::range<T> && !String<T>)) {
         return property<Scope, P, nullptr>();
     } else {
-        return property<Scope, P, &setField<P, DerivedScope, std::remove_reference_t<T>>>();
+        return property<Scope, P, &setField<P, DerivedScope, T>>();
     }
 }
 
@@ -137,7 +137,7 @@ static constexpr std::array<std::pair<const char *, ::Engine::Accessor>, std::tu
         struct LineStruct<MetaTableTag, __VA_ARGS__> {                       \
             using Ty = T;                                                    \
             static constexpr const MetaTable **baseClass = BasePtr;          \
-            static constexpr size_t(*baseOffset)() = BaseOffset;                 \
+            static constexpr size_t (*baseOffset)() = BaseOffset;            \
             static constexpr const bool base = true;                         \
             constexpr const std::pair<const char *, Accessor> *data() const; \
             static constexpr const fixed_string name = #T;                   \

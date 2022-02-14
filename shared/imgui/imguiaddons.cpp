@@ -21,6 +21,8 @@
 
 #include "Modules/threading/workgroupstorage.h"
 
+#include "Generic/coroutines/generator.h"
+
 Engine::Threading::WorkgroupLocal<ImGuiContext *>
     sContext;
 
@@ -31,7 +33,7 @@ ImGuiContext *&getImGuiContext()
 
 namespace ImGui {
 
-    static ImVector<ImRect> sGroupPanelLabelStack;
+static ImVector<ImRect> sGroupPanelLabelStack;
 
 static ValueTypePayload sPayload;
 
@@ -41,7 +43,7 @@ void LabeledText(const char *label, const char *text, ...)
     assert(columns == 1 || columns == 2);
     va_list args;
     va_start(args, text);
-            
+
     if (columns == 1) {
         if (strlen(label)) {
             ImGui::LabelTextV(label, text, args);
@@ -395,7 +397,7 @@ bool ValueTypeDrawer::draw(Engine::EnumHolder &e)
     bool changed = false;
     std::string name { e.toString() };
     if (ImGui::BeginCombo(mName, name.c_str())) {
-        for (int32_t i = e.table()->mMin + 1; i < e.table()->mMax; ++i) {
+        for (int32_t i : e.table()->values<int32_t>()) {
             bool isSelected = e.value() == i;
             std::string valueName { e.table()->toString(i) };
             if (ImGui::Selectable(valueName.c_str(), isSelected)) {
@@ -568,6 +570,48 @@ void BeginSpanningTreeNode(const void *id, const char *label, ImGuiTreeNodeFlags
 
 bool EndSpanningTreeNode()
 {
+    return EndTreeArrow();
+}
+
+bool EditableTreeNode(const void *id, std::string *s, ImGuiTreeNodeFlags flags)
+{
+    ImGuiContext &g = *GImGui;
+    ImGuiWindow *window = g.CurrentWindow;
+
+    BeginTreeArrow(id, flags);
+    ImGui::SameLine(0.0f, 0.0f);
+
+    ImVec2 pos_before = window->DC.CursorPos;
+
+    PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(g.Style.ItemSpacing.x, g.Style.FramePadding.y * 2.0f));
+    bool b = Selectable("##Selectable", flags & ImGuiTreeNodeFlags_Selected, ImGuiSelectableFlags_AllowDoubleClick | ImGuiSelectableFlags_AllowItemOverlap);
+    PopStyleVar();
+
+    ImGuiID inputId = window->GetID("##Input");
+    bool temp_input_is_active = TempInputIsActive(inputId);
+    bool temp_input_start = b && IsMouseDoubleClicked(0);
+
+    if (temp_input_start)
+        SetActiveID(inputId, window);
+
+    char buf[255];
+#if WINDOWS
+    strncpy_s(buf, sizeof(buf), s->data(), s->size());
+#else
+    strncpy(buf, s->data(), s->size());
+#endif
+
+    if (temp_input_is_active || temp_input_start) {
+        ImVec2 pos_after = window->DC.CursorPos;
+        window->DC.CursorPos = pos_before;
+
+        if (TempInputText(window->DC.LastItemRect, inputId, "##Input", buf, sizeof(buf), ImGuiInputTextFlags_None))
+            *s = std::string { buf };
+        window->DC.CursorPos = pos_after;
+    } else {
+        window->DrawList->AddText(pos_before, GetColorU32(ImGuiCol_Text), buf);
+    }
+
     return EndTreeArrow();
 }
 
@@ -800,11 +844,6 @@ bool AcceptDraggableValueType(const ValueTypePayload **payloadPointer)
         return true;
     }
     return false;
-}
-
-void RejectDraggableValueType()
-{
-    ImGui::SetTooltip("Reject");
 }
 
 bool IsDraggableValueTypeBeingAccepted(const ValueTypePayload **payloadPointer)
@@ -1134,6 +1173,42 @@ void ImGui::EndGroupPanel()
     ImGui::Dummy(ImVec2(0.0f, 0.0f));
 
     ImGui::EndGroup();
+}
+
+bool BeginPopupCompoundContextItem(const char *str_id)
+{
+    ImGuiWindow *window = GImGui->CurrentWindow;
+    if (!str_id)
+        str_id = "compound_context";
+    ImGuiID id = ImHashStr(str_id, 0, ImHashData(&window, sizeof(window)));
+
+    ImRect rect { GetItemRectMin(), GetItemRectMax() };
+
+    bool open = BeginPopupEx(id, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings);
+
+    if (open) {
+        ImVec2 pos = GetMousePosOnOpeningCurrentPopup();
+        if (rect.Contains(pos)) {
+            ImGui::Separator();
+        }else{
+            open = false;
+            EndPopup();
+        }
+    }
+
+    return open;
+}
+
+bool BeginPopupCompoundContextWindow(const char *str_id, ImGuiPopupFlags popup_flags)
+{
+    ImGuiWindow *window = GImGui->CurrentWindow;
+    if (!str_id)
+        str_id = "compound_context";
+    ImGuiID id = ImHashStr(str_id, 0, ImHashData(&window, sizeof(window)));
+    int mouse_button = (popup_flags & ImGuiPopupFlags_MouseButtonMask_);
+    if (IsMouseReleased(mouse_button) && IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup))
+        OpenPopupEx(id, popup_flags);
+    return BeginPopupEx(id, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings);
 }
 
 }

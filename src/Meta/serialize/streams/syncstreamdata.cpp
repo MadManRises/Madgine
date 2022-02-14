@@ -34,8 +34,8 @@ namespace Serialize {
         return id;
     }
 
-    SyncStreamData::SyncStreamData(std::unique_ptr<Formatter> format, SyncManager &mgr, ParticipantId id)
-        : SerializeStreamData(std::move(format), mgr, id)
+    SyncStreamData::SyncStreamData(SyncManager &mgr, ParticipantId id)
+        : SerializeStreamData(mgr, id)
     {
     }
 

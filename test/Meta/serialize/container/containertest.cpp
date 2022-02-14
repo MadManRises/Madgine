@@ -112,7 +112,7 @@ TEST(Serialize_Container, Array)
     write(stream1, array, "array");
 
     std::array<uint32_t, 128> array2;
-    read(stream2, array2, nullptr);
+    HANDLE_STREAM_RESULT(read(stream2, array2, nullptr));
 
     ASSERT_EQ(array, array2);
 }

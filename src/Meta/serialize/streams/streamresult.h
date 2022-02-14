@@ -6,7 +6,7 @@ namespace Engine {
 namespace Serialize {
 
     struct META_EXPORT StreamError {
-        StreamError(SerializeInStream &in, const std::string &msg, const char *file, size_t sourceLine);
+        StreamError(SerializeInStream &in, bool binary, const std::string &msg, const char *file, size_t sourceLine);
 
         META_EXPORT friend std::ostream &operator<<(std::ostream &out, const StreamError &error);
 
@@ -25,11 +25,12 @@ namespace Serialize {
     struct META_EXPORT StreamResultBuilder {
         StreamState mType;
         SerializeInStream &mStream;
+        bool mBinary;
         const char *mFile;
         size_t mLine;
         std::stringstream mMsg;
 
-        StreamResultBuilder(StreamState type, SerializeInStream &stream, const char *file, size_t line)
+        StreamResultBuilder(StreamState type, SerializeInStream &stream, bool binary, const char *file, size_t line)
             : mType(type)
             , mStream(stream)
             , mFile(file)
@@ -47,10 +48,10 @@ namespace Serialize {
         }
     };
 
-#define STREAM_ERROR(Stream, Type, ...) ::Engine::Serialize::StreamResultBuilder { Type, Stream, __FILE__, __LINE__ } << __VA_ARGS__;
-#define STREAM_PARSE_ERROR(Stream, ...) STREAM_ERROR(Stream, ::Engine::Serialize::StreamState::PARSE_ERROR, __VA_ARGS__);
-#define STREAM_PERMISSION_ERROR(Stream, ...) STREAM_ERROR(Stream, ::Engine::Serialize::StreamState::PERMISSION_ERROR, __VA_ARGS__);
-#define STREAM_INTEGRITY_ERROR(Stream, ...) STREAM_ERROR(Stream, ::Engine::Serialize::StreamState::INTEGRITY_ERROR, __VA_ARGS__);
+#define STREAM_ERROR(Stream, Binary, Type, ...) ::Engine::Serialize::StreamResultBuilder { Type, Stream, Binary, __FILE__, __LINE__ } << __VA_ARGS__;
+#define STREAM_PARSE_ERROR(Stream, Binary, ...) STREAM_ERROR(Stream, Binary, ::Engine::Serialize::StreamState::PARSE_ERROR, __VA_ARGS__);
+#define STREAM_PERMISSION_ERROR(Stream, Binary, ...) STREAM_ERROR(Stream, Binary, ::Engine::Serialize::StreamState::PERMISSION_ERROR, __VA_ARGS__);
+#define STREAM_INTEGRITY_ERROR(Stream, Binary, ...) STREAM_ERROR(Stream, Binary, ::Engine::Serialize::StreamState::INTEGRITY_ERROR, __VA_ARGS__);
 
 #define STREAM_PROPAGATE_ERROR(expr)                                                                              \
     if (::Engine::Serialize::StreamResult _result = (expr); _result.mState != ::Engine::Serialize::StreamState::OK) \

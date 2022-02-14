@@ -6,13 +6,12 @@
 
 #include "Meta/serialize/formatter/safebinaryformatter.h"
 
-
 namespace Engine {
 namespace Network {
     static int sManagerCount = 0;
 
     NetworkManager::NetworkManager(const std::string &name)
-        : SyncManager(name)        
+        : SyncManager(name)
     {
         if (sManagerCount == 0) {
             if (SocketAPI::init() != SocketAPIResult::SUCCESS)
@@ -22,7 +21,7 @@ namespace Network {
     }
 
     NetworkManager::NetworkManager(NetworkManager &&other) noexcept
-        : SyncManager(std::forward<NetworkManager>(other))        
+        : SyncManager(std::forward<NetworkManager>(other))
         , mServerSocket(std::move(other.mServerSocket))
     {
         ++sManagerCount;
@@ -70,7 +69,7 @@ namespace Network {
             return result;
         }
 
-        NetworkManagerResult result = setSlaveStream(Serialize::BufferedInOutStream { std::make_unique<NetworkBuffer>(std::move(socket)), std::make_unique<Serialize::SafeBinaryFormatter>(), *this }, true, timeout);
+        NetworkManagerResult result = setSlaveStream(Serialize::FormattedBufferedStream { std::make_unique<Serialize::SafeBinaryFormatter>(), std::make_unique<NetworkBuffer>(std::move(socket)), *this }, true, timeout);
 
         return result;
     }
@@ -94,7 +93,7 @@ namespace Network {
             std::tie(sock, error) = mServerSocket.accept(timeout);
             while (error != SocketAPIResult::TIMEOUT && (limit == -1 || count < limit)) {
                 if (sock) {
-                    if (addMasterStream(Serialize::BufferedInOutStream { std::make_unique<NetworkBuffer>(std::move(sock)), std::make_unique<Serialize::SafeBinaryFormatter>(), *this, createStreamId() }) == Serialize::SyncManagerResult::SUCCESS) {
+                    if (addMasterStream(Serialize::FormattedBufferedStream { std::make_unique<Serialize::SafeBinaryFormatter>(), std::make_unique<NetworkBuffer>(std::move(sock)), *this, createStreamId() }) == Serialize::SyncManagerResult::SUCCESS) {
                         ++count;
                     }
                 }
@@ -115,7 +114,7 @@ namespace Network {
         if (!sock)
             return recordSocketError(error);
 
-        Serialize::BufferedInOutStream stream { std::make_unique<NetworkBuffer>(std::move(sock)), std::make_unique<Serialize::SafeBinaryFormatter>(), *this, createStreamId() };
+        Serialize::FormattedBufferedStream stream { std::make_unique<Serialize::SafeBinaryFormatter>(), std::make_unique<NetworkBuffer>(std::move(sock)), *this, createStreamId() };
         return addMasterStream(std::move(stream));
     }
 

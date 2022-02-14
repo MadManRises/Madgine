@@ -18,14 +18,7 @@
 
 #include "Interfaces/window/windowapi.h"
 
-#include "project/projectmanager.h"
-
 #include "Meta/serialize/streams/serializestream.h"
-
-#include "Meta/serialize/formatter/xmlformatter.h"
-
-#include "serialize/filesystem/filesystemlib.h"
-#include "serialize/filesystem/filemanager.h"
 
 #include "Madgine/widgets/widgetclass.h"
 
@@ -33,9 +26,9 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-#include "Meta/serialize/streams/serializestreamdata.h"
-
 #include "Generic/coroutines/generator.h"
+
+#include "imguiicons.h"
 
 UNIQUECOMPONENT(Engine::Tools::GuiEditor);
 
@@ -43,7 +36,6 @@ METATABLE_BEGIN_BASE(Engine::Tools::GuiEditor, Engine::Tools::ToolBase)
 METATABLE_END(Engine::Tools::GuiEditor)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::GuiEditor, Engine::Tools::ToolBase)
-FIELD(mHierarchyVisible)
 SERIALIZETABLE_END(Engine::Tools::GuiEditor)
 
 namespace Engine {
@@ -54,59 +46,34 @@ namespace Tools {
     {
     }
 
-    Threading::Task < bool> GuiEditor::init()
+    Threading::Task<bool> GuiEditor::init()
     {
-        mWindow = &static_cast<const ClientImRoot &>(mRoot).window();
-        mWidgetManager = &mWindow->getWindowComponent<Widgets::WidgetManager>();
+        mWidgetManager = &static_cast<const ClientImRoot &>(mRoot).window().getWindowComponent<Widgets::WidgetManager>();
 
-#if ENABLE_PLUGINS
-        getTool<ProjectManager>().mProjectChanged.connect([this]() {
-            loadLayout();
-        });
-
-        mWindow->taskQueue()->queue([this]() {
-            loadLayout();
-        });
-#endif
-
-        return ToolBase::init();
+        co_return co_await ToolBase::init();
     }
 
     void GuiEditor::render()
     {
         Widgets::WidgetBase *hoveredWidget = nullptr;
-        if (mHierarchyVisible)
-            renderHierarchy(&hoveredWidget);
+        renderHierarchy(&hoveredWidget);
         renderSelection(hoveredWidget);
     }
 
     void GuiEditor::renderMenu()
     {
-        if (ImGui::BeginMenu("Layouts")) {
-            for (Widgets::WidgetBase *w : mWidgetManager->widgets()) {
-                if (ImGui::MenuItem(w->key().c_str(), nullptr, w->mVisible)) {
-                    mWidgetManager->swapCurrentRoot(w);
-                }
-            }
-            ImGui::Separator();
-            if (ImGui::Button("Create Layout")) {
-                mWidgetManager->createTopLevel<>("Unnamed");
-            }
-            ImGui::EndMenu();
-        }
-
+        ToolBase::renderMenu();
         if (mVisible) {
 
             if (ImGui::BeginMenu("GuiEditor")) {
 
-                ImGui::MenuItem("Hierarchy", nullptr, &mHierarchyVisible);
-
-                if (ImGui::MenuItem("Save Layout")) {
-                    saveLayout();
+                for (Widgets::WidgetBase *w : mWidgetManager->widgets()) {
+                    if (ImGui::MenuItem(w->key().c_str(), nullptr, w->mVisible)) {
+                        mWidgetManager->swapCurrentRoot(w);
+                    }
                 }
-
-                if (ImGui::MenuItem("Load Layout")) {
-                    loadLayout();
+                if (ImGui::Button("Create Layout")) {
+                    mWidgetManager->createTopLevel<>("Unnamed");
                 }
 
                 ImGui::EndMenu();
@@ -122,42 +89,6 @@ namespace Tools {
     std::string_view GuiEditor::key() const
     {
         return "GuiEditor";
-    }
-
-    void GuiEditor::saveLayout()
-    {
-        Filesystem::Path filePath = getTool<ProjectManager>().projectRoot() / "data" / "default.layout";
-
-        auto buf = std::make_unique<std::filebuf>();
-        buf->open(filePath.str(), std::ios::out);
-        Serialize::SerializeOutStream out { std::move(buf), std::make_unique<Serialize::SerializeStreamData>(std::make_unique<Serialize::XMLFormatter>()) };
-
-        Serialize::SerializableDataPtr { mWindow }.writeState(out);
-    }
-    
-    void GuiEditor::loadLayout()
-    {
-        ProjectManager &project = getTool<ProjectManager>();
-        const Filesystem::Path &root = project.projectRoot();
-        const std::string &config = project.config();
-
-        if (!config.empty()) {
-
-            Filesystem::Path filePath = root / "data" / (config + ".layout");
-
-            Filesystem::FileManager file("Layout");
-            Serialize::SerializeInStream in = file.openRead(filePath, std::make_unique<Serialize::XMLFormatter>());
-            if (in) {
-                Serialize::StreamResult result = Serialize::SerializableDataPtr { mWindow }.readState(in, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap);
-                if (result.mState != Serialize::StreamState::OK) {
-                    LOG_ERROR("Failed loading '" << filePath << "' with following Error: "
-                                                 << "\n"
-                                                 << result);
-                } else {
-                    mWidgetManager->openStartupWidget();
-                }
-            }
-        }
     }
 
     void GuiEditor::renderSelection(Widgets::WidgetBase *hoveredWidget)
@@ -204,7 +135,10 @@ namespace Tools {
 
                     bool rightBorder = false, leftBorder = false, topBorder = false, bottomBorder = false;
 
-                    if (!mDragging && selectedWidget->containsPoint(mouse, screenSpace, borderSize)) {
+                    bool hoveredWithBorder = selectedWidget->containsPoint(mouse, screenSpace, borderSize);
+
+                    if (!mDragging && hoveredWithBorder) {
+
                         leftBorder = abs(mouse.x - bounds.left()) < borderSize;
                         rightBorder = abs(mouse.x - bounds.right()) < borderSize;
                         topBorder = abs(mouse.y - bounds.top()) < borderSize;
@@ -222,27 +156,39 @@ namespace Tools {
                         }
 
                         acceptHover &= (!rightBorder && !leftBorder && !topBorder && !bottomBorder);
+
+                        if (io.MouseClicked[0]) {
+                            mMouseDown = true;
+                            mDraggingLeft = leftBorder;
+                            mDraggingRight = rightBorder;
+                            mDraggingTop = topBorder;
+                            mDraggingBottom = bottomBorder;
+                        }
                     }
 
-                    constexpr float thickness = 4.0f;
-
-                    //TODO
-                    if (leftBorder || mDraggingLeft)
-                        background->AddLine(bounds.topLeft() / io.DisplayFramebufferScale, bounds.bottomLeft() / io.DisplayFramebufferScale, resizeColor, thickness);
-                    if (rightBorder || mDraggingRight)
-                        background->AddLine(bounds.topRight() / io.DisplayFramebufferScale, bounds.bottomRight() / io.DisplayFramebufferScale, resizeColor, thickness);
-                    if (topBorder || mDraggingTop)
-                        background->AddLine(bounds.topLeft() / io.DisplayFramebufferScale, bounds.topRight() / io.DisplayFramebufferScale, resizeColor, thickness);
-                    if (bottomBorder || mDraggingBottom)
-                        background->AddLine(bounds.bottomLeft() / io.DisplayFramebufferScale, bounds.bottomRight() / io.DisplayFramebufferScale, resizeColor, thickness);
-
-                    if (io.MouseClicked[0] && selectedWidget->containsPoint(mouse, screenSpace, borderSize)) {
-                        mMouseDown = true;
-                        mDraggingLeft = leftBorder;
-                        mDraggingRight = rightBorder;
-                        mDraggingTop = topBorder;
-                        mDraggingBottom = bottomBorder;
+                    bool left = leftBorder || mDraggingLeft;
+                    bool right = rightBorder || mDraggingRight;
+                    bool top = topBorder || mDraggingTop;
+                    bool bottom = bottomBorder || mDraggingBottom;
+                    if (left || right) {
+                        if (top || bottom) {
+                            if (top == left) {
+                                ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNWSE);
+                            } else {
+                                ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNESW);
+                            }
+                        } else {
+                            ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+                        }
+                    } else {
+                        if (top || bottom) {
+                            ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
+                        } else {
+                            if (hoveredWithBorder && selectedWidget == mWidgetManager->hoveredWidget())
+                                ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
+                        }
                     }
+
 
                     if (mMouseDown && dragDistance.length() >= io.MouseDragThreshold && !mDragging) {
                         mSelected->saveGeometry();
@@ -262,7 +208,7 @@ namespace Tools {
                         hoveredSettings = &mSettings.emplace_back(hoveredWidget, getTool<Inspector>());
                     }
 
-                    if (!mDragging) {
+                    if (!mDragging && hoveredSettings != mSelected) {
                         Vector3 size = hoveredWidget->getAbsoluteSize() * Vector3 { Vector2 { screenSpace.mSize }, 1.0f };
                         Vector3 pos = hoveredWidget->getAbsolutePosition() * Vector3 { Vector2 { screenSpace.mSize }, 1.0f } + Vector3 { Vector2 { screenSpace.mTopLeft }, 0.0f };
 
@@ -371,8 +317,10 @@ namespace Tools {
             }
 
             if (mSelected) {
-                ImGui::Text("Selected");
-                mSelected->render();
+                if (ImGui::BeginTable("columns", 2, ImGuiTableFlags_Resizable)) {
+                    mSelected->render();
+                    ImGui::EndTable();
+                }
             }
             /*if (hoveredSettings && !mDragging && hoveredSettings != mSelected) {
                 ImGui::Text("Hovered");
@@ -392,57 +340,84 @@ namespace Tools {
         if (mSelected && mSelected->widget() == w)
             flags |= ImGuiTreeNodeFlags_Selected;
 
-        bool open = ImGui::TreeNodeEx(w->getName().c_str(), flags);
+        bool open = ImGui::EditableTreeNode(w, &w->mName, flags);
 
-        ImGui::DraggableValueTypeSource(w->getName(), w);
-        if (ImGui::BeginDragDropTarget()) {
-            Widgets::WidgetBase *newChild = nullptr;
-            if (ImGui::AcceptDraggableValueType(newChild)) {
-                newChild->setParent(w);
+        bool aborted = false;
+
+        if (ImGui::BeginPopupCompoundContextItem()) {
+            if (ImGui::BeginMenu(IMGUI_ICON_PLUS " Child Widget")) {
+                for (Widgets::WidgetClass c : Widgets::WidgetClass::values()) {
+                    if (ImGui::MenuItem(std::string { c.toString() }.c_str())) {
+                        w->createChild("unnamed", c);
+                    }
+                }
+                ImGui::EndMenu();
             }
-            ImGui::EndDragDropTarget();
-            if (newChild) {
-                if (open)
-                    ImGui::TreePop();
-                return false;
+            if (ImGui::MenuItem(IMGUI_ICON_X " Delete Widget", "del")) {
+                w->destroy();
+                aborted = true;
+            }
+            ImGui::EndPopup();
+        }
+
+        if (!aborted) {
+            if (hoveredWidget && !*hoveredWidget) {
+                if (ImGui::IsItemHovered()) {
+                    *hoveredWidget = w;
+                }
+            }
+
+            ImGui::DraggableValueTypeSource(w->getName(), w);
+            if (ImGui::BeginDragDropTarget()) {
+                Widgets::WidgetBase *newChild = nullptr;
+                if (ImGui::AcceptDraggableValueType(newChild)) {
+                    newChild->setParent(w);
+                    aborted = true;
+                }
+                ImGui::EndDragDropTarget();
             }
         }
 
         if (open) {
-            for (Widgets::WidgetBase *child : w->children()) {
-                if (!drawWidget(child, hoveredWidget)) {
-                    break;
+            if (!aborted) {
+                for (Widgets::WidgetBase *child : w->children()) {
+                    if (!drawWidget(child, hoveredWidget)) {
+                        break;
+                    }
                 }
             }
 
             ImGui::TreePop();
         }
 
-        if (hoveredWidget && !*hoveredWidget) {
-            if (ImGui::IsItemHovered()) {
-                *hoveredWidget = w;
-            }
-        }
-        return true;
+        return !aborted;
     }
 
     void GuiEditor::renderHierarchy(Widgets::WidgetBase **hoveredWidget)
     {
-        if (ImGui::Begin("GuiEditor - Hierarchy", &mHierarchyVisible)) {
+        if (ImGui::Begin("GuiEditor - Hierarchy", &mVisible)) {
             Widgets::WidgetBase *root = mWidgetManager->currentRoot();
             if (root) {
-                if (ImGui::BeginPopup("WidgetSelector")) {
-                    for (Widgets::WidgetClass c : Widgets::WidgetClass::values()) {
-                        if (ImGui::Selectable(std::string { c.toString() }.c_str())) {
-                            root->createChild("unnamed", c);
-                            ImGui::CloseCurrentPopup();
+                if (ImGui::BeginPopupCompoundContextWindow()) {
+                    if (ImGui::BeginMenu(IMGUI_ICON_PLUS " New Widget")) {
+                        for (Widgets::WidgetClass c : Widgets::WidgetClass::values()) {
+                            if (ImGui::MenuItem(std::string { c.toString() }.c_str())) {
+                                root->createChild("unnamed", c);
+                            }
                         }
+                        ImGui::EndMenu();
                     }
                     ImGui::EndPopup();
                 }
-                if (ImGui::Button("+ New Widget"))
-                    ImGui::OpenPopup("WidgetSelector");
+
                 drawWidget(root, hoveredWidget);
+
+                if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(0)) {
+                    if (hoveredWidget && *hoveredWidget)
+                        mSelected = static_cast<WidgetSettings *>((*hoveredWidget)->userData());
+                    else
+                        mSelected = nullptr;
+                }
             } else {
                 ImGui::Text("Please select a root window under 'Layout' in the menu bar.");
             }

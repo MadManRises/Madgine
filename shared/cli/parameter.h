@@ -102,6 +102,11 @@ namespace CLI {
         {
             return static_cast<const std::string &>(*this).c_str();
         }
+
+        operator std::string_view()
+        {
+            return static_cast<const std::string &>(*this);
+        }
     };
 
     template <typename Rep>

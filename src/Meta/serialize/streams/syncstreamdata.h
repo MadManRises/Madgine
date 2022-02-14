@@ -10,7 +10,7 @@ namespace Serialize {
 
     struct META_EXPORT SyncStreamData : SerializeStreamData {
     public:
-        SyncStreamData(std::unique_ptr<Formatter> format, SyncManager &mgr, ParticipantId id = 0);
+        SyncStreamData(SyncManager &mgr, ParticipantId id = 0);
         SyncStreamData(const SyncStreamData &) = delete;
         SyncStreamData(SyncStreamData &&) noexcept = delete;
 

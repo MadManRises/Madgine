@@ -9,7 +9,7 @@
 namespace Engine {
 namespace Serialize {
 
-    StreamError::StreamError(SerializeInStream &in, const std::string &msg, const char *file, size_t sourceLine)
+    StreamError::StreamError(SerializeInStream &in, bool binary, const std::string &msg, const char *file, size_t sourceLine)
     {
         std::stringstream ss;
         std::stringstream notes;
@@ -21,7 +21,7 @@ namespace Serialize {
 
         ss << "ERROR: (";
 
-        if (!in.isBinary()) {
+        if (!binary) {
             in.seek(0);
             pos_type lastNewLine = 0;
             mLineNumber = 1;
@@ -73,7 +73,7 @@ namespace Serialize {
     {
         return {
             mType,
-            mType == StreamState::OK ? std::unique_ptr<StreamError> {} : std::make_unique<StreamError>(mStream, mMsg.str(), mFile, mLine)
+            mType == StreamState::OK ? std::unique_ptr<StreamError> {} : std::make_unique<StreamError>(mStream, mBinary, mMsg.str(), mFile, mLine)
         };
     }
 

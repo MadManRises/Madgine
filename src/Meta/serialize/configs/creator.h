@@ -19,10 +19,10 @@ namespace Serialize {
         static const constexpr bool controlled = false;
 
         template <typename P>
-        using ArgsTuple = std::tuple<std::piecewise_construct_t, typename KeyCreator::template ArgsTuple<P::first_type>, typename ValueCreator::template ArgsTuple<P::second_type>>;
+        using ArgsTuple = std::tuple<std::piecewise_construct_t, typename KeyCreator::template ArgsTuple<typename P::first_type>, typename ValueCreator::template ArgsTuple<typename P::second_type>>;
 
         template <typename C>
-        static void writeItem(SerializeOutStream &out, const typename container_traits<C>::value_type &t)
+        static void writeItem(FormattedSerializeStream &out, const typename container_traits<C>::value_type &t)
         {
             out.format().beginCompound(out, "Item");
             writeCreationData<typename container_traits<C>::value_type>(out, t);
@@ -32,7 +32,7 @@ namespace Serialize {
         }
 
         template <typename Op>
-        static StreamResult readItem(SerializeInStream &in, Op &op, typename container_traits<Op>::emplace_return &it, const typename container_traits<Op>::const_iterator &where)
+        static StreamResult readItem(FormattedSerializeStream &in, Op &op, typename container_traits<Op>::emplace_return &it, const typename container_traits<Op>::const_iterator &where)
         {
             STREAM_PROPAGATE_ERROR(in.format().beginCompound(in, nullptr));
             ArgsTuple<typename container_traits<Op>::value_type> tuple;
@@ -45,14 +45,14 @@ namespace Serialize {
         }
 
         template <typename P>
-        static void writeCreationData(SerializeOutStream &out, const P &t)
+        static void writeCreationData(FormattedSerializeStream &out, const P &t)
         {
             KeyCreator::template writeCreationData<typename P::first_type>(out, t.first, "Key");
             ValueCreator::template writeCreationData<typename P::second_type>(out, t.second, "Value");
         }
 
         template <typename P>
-        static StreamResult readCreationData(SerializeInStream &in, ArgsTuple<P> &tuple)
+        static StreamResult readCreationData(FormattedSerializeStream &in, ArgsTuple<P> &tuple)
         {
             STREAM_PROPAGATE_ERROR(KeyCreator::template readCreationData<typename P::first_type>(in, std::get<1>(tuple)));
             return ValueCreator::template readCreationData<typename P::second_type>(in, std::get<2>(tuple));
@@ -74,7 +74,7 @@ namespace Serialize {
         static const constexpr bool controlled = false;
 
         template <typename T>
-        static StreamResult readCreationData(SerializeInStream &in, ArgsTuple<T> &result)
+        static StreamResult readCreationData(FormattedSerializeStream &in, ArgsTuple<T> &result)
         {
             if constexpr (std::is_const_v<T>) {
                 return read<std::remove_const_t<T>>(in, std::get<0>(result), nullptr);
@@ -84,7 +84,7 @@ namespace Serialize {
         }
 
         template <typename T>
-        static void writeCreationData(SerializeOutStream &out, const T &t, const char *name = "Item")
+        static void writeCreationData(FormattedSerializeStream &out, const T &t, const char *name = "Item")
         {
             if constexpr (std::is_const_v<T>) {
                 write<std::remove_const_t<T>>(out, t, name);
@@ -92,14 +92,14 @@ namespace Serialize {
         }
 
         template <typename C>
-        static void writeItem(SerializeOutStream &out, const typename container_traits<C>::value_type &t)
+        static void writeItem(FormattedSerializeStream &out, const typename container_traits<C>::value_type &t)
         {
             writeCreationData<typename container_traits<C>::value_type>(out, t);
             write<typename container_traits<C>::value_type>(out, t, "Item");
         }
 
         template <typename Op>
-        static StreamResult readItem(SerializeInStream &in, Op &op, typename container_traits<Op>::emplace_return &it, const typename container_traits<Op>::const_iterator &where)
+        static StreamResult readItem(FormattedSerializeStream &in, Op &op, typename container_traits<Op>::emplace_return &it, const typename container_traits<Op>::const_iterator &where)
         {
             ArgsTuple<typename container_traits<Op>::value_type> tuple;
             STREAM_PROPAGATE_ERROR(readCreationData<typename container_traits<Op>::value_type>(in, tuple));
@@ -140,7 +140,7 @@ namespace Serialize {
 
             using ArgsTuple = std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...>;
 
-            static StreamResult readCreationData(SerializeInStream &in, ArgsTuple &result)
+            static StreamResult readCreationData(FormattedSerializeStream &in, ArgsTuple &result)
             {
                 if constexpr (std::same_as<R, void>) {
                     TupleUnpacker::invokeExpand(reader, in, result);
@@ -151,7 +151,7 @@ namespace Serialize {
             }
 
             template <typename Op>
-            static StreamResult readItem(SerializeInStream &in, Op &op, typename container_traits<Op>::emplace_return &it, const typename container_traits<Op>::const_iterator &where, const CallerHierarchyBasePtr &hierarchy)
+            static StreamResult readItem(FormattedSerializeStream &in, Op &op, typename container_traits<Op>::emplace_return &it, const typename container_traits<Op>::const_iterator &where, const CallerHierarchyBasePtr &hierarchy)
             {
                 ArgsTuple tuple;
                 STREAM_PROPAGATE_ERROR(readCreationData(in, tuple));
@@ -169,13 +169,13 @@ namespace Serialize {
             }
 
             template <typename Arg>
-            static void writeCreationData(SerializeOutStream &out, const Arg &arg, const CallerHierarchyBasePtr &hierarchy)
+            static void writeCreationData(FormattedSerializeStream &out, const Arg &arg, const CallerHierarchyBasePtr &hierarchy)
             {
                 WriteFunctor {}(out, arg);
             }
 
             template <typename C>
-            static void writeItem(SerializeOutStream &out, const typename container_traits<C>::value_type &arg, const CallerHierarchyBasePtr &hierarchy)
+            static void writeItem(FormattedSerializeStream &out, const typename container_traits<C>::value_type &arg, const CallerHierarchyBasePtr &hierarchy)
             {
                 writeCreationData<typename container_traits<C>::value_type>(out, arg, hierarchy);
                 write<typename container_traits<C>::value_type>(out, arg, "Item", hierarchy);
@@ -197,7 +197,7 @@ namespace Serialize {
 
             using ArgsTuple = std::tuple<MakeOwning_t<std::remove_const_t<std::remove_reference_t<_Ty>>>...>;
 
-            static StreamResult readCreationData(SerializeInStream &in, ArgsTuple &result, const CallerHierarchy<T *> &parent)
+            static StreamResult readCreationData(FormattedSerializeStream &in, ArgsTuple &result, const CallerHierarchy<T *> &parent)
             {
                 assert(parent.mData);
                 if constexpr (std::same_as<R, void>) {
@@ -209,7 +209,7 @@ namespace Serialize {
             }
 
             template <typename Op>
-            static StreamResult readItem(SerializeInStream &in, Op &op, typename container_traits<Op>::emplace_return &it, const typename container_traits<Op>::const_iterator &where, const CallerHierarchy<T *> &parent)
+            static StreamResult readItem(FormattedSerializeStream &in, Op &op, typename container_traits<Op>::emplace_return &it, const typename container_traits<Op>::const_iterator &where, const CallerHierarchy<T *> &parent)
             {
                 ArgsTuple tuple;
                 STREAM_PROPAGATE_ERROR(readCreationData(in, tuple, parent));
@@ -226,14 +226,14 @@ namespace Serialize {
             }
 
             template <typename Arg>
-            static void writeCreationData(SerializeOutStream &out, const Arg &arg, const CallerHierarchy<const T *> &parent)
+            static void writeCreationData(FormattedSerializeStream &out, const Arg &arg, const CallerHierarchy<const T *> &parent)
             {
                 assert(parent.mData);
                 WriteFunctor {}(parent.mData, out, arg);
             }
 
             template <typename C>
-            static void writeItem(SerializeOutStream &out, const typename container_traits<C>::value_type &arg, const CallerHierarchy<const T *> &parent)
+            static void writeItem(FormattedSerializeStream &out, const typename container_traits<C>::value_type &arg, const CallerHierarchy<const T *> &parent)
             {
                 writeCreationData<typename container_traits<C>::value_type>(out, arg, parent);
                 write<typename container_traits<C>::value_type>(out, arg, "Item", CallerHierarchyPtr { parent });

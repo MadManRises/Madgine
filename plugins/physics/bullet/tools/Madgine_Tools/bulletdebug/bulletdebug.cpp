@@ -67,6 +67,7 @@ namespace Tools {
 
     void BulletDebug::renderMenu()
     {
+        ToolBase::renderMenu();
         if (mVisible) {
 
             if (ImGui::BeginMenu("BulletDebug")) {

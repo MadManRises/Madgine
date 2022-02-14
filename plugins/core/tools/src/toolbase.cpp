@@ -7,6 +7,8 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
+#include "imgui/imgui.h"
+
 namespace Engine {
 namespace Tools {
     ToolBase::ToolBase(ImRoot &root)
@@ -20,6 +22,10 @@ namespace Tools {
 
     void ToolBase::renderMenu()
     {
+        if (ImGui::BeginMenu("Views")) {
+            ImGui::MenuItem(key().data(), "", &mVisible);
+            ImGui::EndMenu();
+        }
     }
 
     void ToolBase::renderStatus()

@@ -24,7 +24,7 @@ namespace Tools {
         SceneView(SceneView &&);
         ~SceneView();
 
-        void render();
+        bool render();
 
         Render::Camera &camera();
 
@@ -47,6 +47,8 @@ namespace Tools {
 		Render::SceneRenderPass mSceneRenderer;
         GridPass mGridRenderer;
         Render::Im3DRenderPass mIm3DRenderer;
+
+        int mIndex;
     };
 
 }

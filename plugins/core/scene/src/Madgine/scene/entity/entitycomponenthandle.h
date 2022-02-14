@@ -12,23 +12,23 @@ namespace Scene {
         template <typename T>
         struct EntityComponentHandle;
 
-        void entityComponentHelperWrite(Serialize::SerializeOutStream &out, const EntityComponentHandle<EntityComponentBase> &index, const char *name, const SceneManager *mgr);
-        Serialize::StreamResult entityComponentHelperRead(Serialize::SerializeInStream &in, EntityComponentHandle<EntityComponentBase> &index, const char *name, SceneManager *mgr);
+        void entityComponentHelperWrite(Serialize::FormattedSerializeStream &out, const EntityComponentHandle<EntityComponentBase> &index, const char *name, const SceneManager *mgr);
+        Serialize::StreamResult entityComponentHelperRead(Serialize::FormattedSerializeStream &in, EntityComponentHandle<EntityComponentBase> &index, const char *name, SceneManager *mgr);
 
-        void entityComponentOwningHelperWrite(Serialize::SerializeOutStream &out, const EntityComponentHandle<EntityComponentBase> &index, const char *name, CallerHierarchyBasePtr hierarchy);
-        Serialize::StreamResult entityComponentOwningHelperRead(Serialize::SerializeInStream &in, const EntityComponentHandle<EntityComponentBase> &index, const char *name, CallerHierarchyBasePtr hierarchy);
+        void entityComponentOwningHelperWrite(Serialize::FormattedSerializeStream &out, const EntityComponentHandle<EntityComponentBase> &index, const char *name, CallerHierarchyBasePtr hierarchy);
+        Serialize::StreamResult entityComponentOwningHelperRead(Serialize::FormattedSerializeStream &in, const EntityComponentHandle<EntityComponentBase> &index, const char *name, CallerHierarchyBasePtr hierarchy);
 
         template <>
         struct EntityComponentHandle<EntityComponentBase> {
             IndexType<uint32_t> mIndex;
             IndexType<uint32_t> mType;
 
-            Serialize::StreamResult readState(Serialize::SerializeInStream &in, const char *name, SceneManager *mgr)
+            Serialize::StreamResult readState(Serialize::FormattedSerializeStream &in, const char *name, SceneManager *mgr)
             {
                 return entityComponentHelperRead(in, *this, name, mgr);
             }
 
-            void writeState(Serialize::SerializeOutStream &out, const char *name, SceneManager *mgr) const
+            void writeState(Serialize::FormattedSerializeStream &out, const char *name, SceneManager *mgr) const
             {
                 entityComponentHelperWrite(out, *this, name, mgr);
             }
@@ -121,7 +121,7 @@ namespace Scene {
                 assert(!other || component_index<T>() == other.mType);
             }
 
-            Serialize::StreamResult readState(Serialize::SerializeInStream &in, const char *name, SceneManager *mgr)
+            Serialize::StreamResult readState(Serialize::FormattedSerializeStream &in, const char *name, SceneManager *mgr)
             {
                 EntityComponentHandle<EntityComponentBase> handle { IndexType<uint32_t>::sInvalid, type() };
                 STREAM_PROPAGATE_ERROR(entityComponentHelperRead(in, handle, name, mgr));
@@ -129,7 +129,7 @@ namespace Scene {
                 return {};
             }
 
-            void writeState(Serialize::SerializeOutStream &out, const char *name, const SceneManager *mgr) const
+            void writeState(Serialize::FormattedSerializeStream &out, const char *name, const SceneManager *mgr) const
             {
                 entityComponentHelperWrite(out, *this, name, mgr);
             }
@@ -186,12 +186,12 @@ namespace Scene {
                 return mHandle;
             }
 
-            Serialize::StreamResult readState(Serialize::SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy)
+            Serialize::StreamResult readState(Serialize::FormattedSerializeStream &in, const char *name, CallerHierarchyBasePtr hierarchy)
             {
                 return entityComponentOwningHelperRead(in, mHandle, name, hierarchy);
             }
 
-            void writeState(Serialize::SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) const
+            void writeState(Serialize::FormattedSerializeStream &out, const char *name, CallerHierarchyBasePtr hierarchy) const
             {
                 entityComponentOwningHelperWrite(out, mHandle, name, hierarchy);
             }

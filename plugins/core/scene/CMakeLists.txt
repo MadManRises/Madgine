@@ -36,8 +36,6 @@ add_plugin(SceneRenderer Madgine Core ${sources} SOURCE_ROOT renderer PRECOMPILE
 
 target_link_plugins(SceneRenderer Scene Client ProgramLoader)
 
-target_link_libraries(SceneRenderer PRIVATE Im3D)
-
 set(sources "")
 FolderSources(sources "" renderer_tools)
 	FolderSources(sources renderer_tools Madgine_Tools)

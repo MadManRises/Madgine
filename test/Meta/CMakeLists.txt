@@ -9,6 +9,7 @@ FolderSources(sources "" "" Meta_gtest_main.cc)
 	FolderSources(sources "" serialize testunit.cpp)
 		FolderSources(sources serialize container actiontest.cpp containertest.cpp querytest.cpp)
 		FolderSources(sources serialize formatter iniformattertest.cpp jsonformattertest.cpp safebinaryformattertest.cpp unsafebinaryformattertest.cpp xmlformattertest.cpp)
+		FolderSources(sources serialize primitives bytebuffertest.cpp)
 		FolderSources(sources serialize table serializetabletest.cpp)	
 
 add_gtest(Meta_Test ${sources})

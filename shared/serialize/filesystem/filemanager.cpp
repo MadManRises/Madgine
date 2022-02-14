@@ -12,6 +12,8 @@
 
 #include "Meta/serialize/streams/serializestreamdata.h"
 
+#include "Meta/serialize/streams/formattedserializestream.h"
+
 namespace Engine {
 namespace Filesystem {
 
@@ -20,13 +22,13 @@ namespace Filesystem {
     {
     }
 
-    Serialize::SerializeInStream FileManager::openRead(const Path &path, std::unique_ptr<Serialize::Formatter> format)
+    Serialize::FormattedSerializeStream FileManager::openRead(const Path &path, std::unique_ptr<Serialize::Formatter> format)
     {
         assert(!getSlaveStreamData());
 
         InStream stream = openFileRead(path, format->mBinary);
         if (stream) {
-            Serialize::SerializeInStream in { stream.release(), std::make_unique<Serialize::SerializeStreamData>(std::move(format), *this, createStreamId()) };
+            Serialize::FormattedSerializeStream in { stream.release(), std::make_unique<Serialize::SerializeStreamData>(std::move(format), *this, createStreamId()) };
             setSlaveStreamData(&in.data());
 
             return in;
@@ -35,11 +37,11 @@ namespace Filesystem {
         }
     }
 
-    Serialize::SerializeOutStream FileManager::openWrite(const Path &path, std::unique_ptr<Serialize::Formatter> format)
+    Serialize::FormattedSerializeStream FileManager::openWrite(const Path &path, std::unique_ptr<Serialize::Formatter> format)
     {
         OutStream stream = openFileWrite(path, format->mBinary);
         if (stream) {
-            return Serialize::SerializeOutStream { stream.release(), std::make_unique<Serialize::SerializeStreamData>(std::move(format), *this, createStreamId()) };           
+            return Serialize::FormattedSerializeStream { stream.release(), std::make_unique<Serialize::SerializeStreamData>(std::move(format), *this, createStreamId()) };           
         } else {
             return {};
         }        

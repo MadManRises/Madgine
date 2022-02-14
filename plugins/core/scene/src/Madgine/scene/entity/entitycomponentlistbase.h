@@ -25,9 +25,9 @@ namespace Scene {
             virtual void updateRender() = 0;
 
             
-            Serialize::StreamResult readState(const EntityComponentHandle<EntityComponentBase> &index, Serialize::SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy);
+            Serialize::StreamResult readState(const EntityComponentHandle<EntityComponentBase> &index, Serialize::FormattedSerializeStream &in, const char *name, CallerHierarchyBasePtr hierarchy);
 
-            void writeState(const EntityComponentHandle<EntityComponentBase> &index, Serialize::SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy) const;
+            void writeState(const EntityComponentHandle<EntityComponentBase> &index, Serialize::FormattedSerializeStream &out, const char *name, CallerHierarchyBasePtr hierarchy) const;
 
         };
 

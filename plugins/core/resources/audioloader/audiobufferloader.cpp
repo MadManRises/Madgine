@@ -34,7 +34,7 @@ namespace Audio {
 
         std::unique_ptr<char[]> buffer = std::make_unique<char[]>(bufferSize);
 
-        size_t actualSize = stream.readRaw(buffer.get(), bufferSize);
+        size_t actualSize = stream.read(buffer.get(), bufferSize);
         if (actualSize != bufferSize)
             LOG_WARNING("Mismatch loading audio-file: " << info.resource()->path() << " Diff: " << bufferSize - actualSize);
 

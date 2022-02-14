@@ -2,8 +2,6 @@
 
 #if ENABLE_PLUGINS
 
-#include "../threading/signal.h"
-
 namespace Engine {
 namespace Plugins {
 
@@ -14,7 +12,9 @@ namespace Plugins {
         PluginManager(const PluginManager &) = delete;
         ~PluginManager();		
 
-        bool setup(bool loadCache = true, bool loadExe = true);
+        PluginManager &operator=(const PluginManager &) = delete;
+
+        bool setup(bool loadCache, bool loadExe, std::string_view configFile);
 
         PluginSection &section(const std::string &name);
         PluginSection &operator[](const std::string &name);
@@ -30,13 +30,11 @@ namespace Plugins {
         bool loadFromFile(const Filesystem::Path &p, bool withTools);
         void saveToFile(const Filesystem::Path &p, bool withTools);
 
-        Threading::SignalStub<Filesystem::Path, bool> &exportSignal();
+        void saveSelection(Ini::IniFile &file, bool withTools);
+        bool loadSelection(const Ini::IniFile &file, bool withTools);
 
     protected:
         void setupSection(const std::string &name, bool exclusive, bool atleastOne);
-
-        void saveSelection(Ini::IniFile &file, bool withTools);
-        bool loadSelection(const Ini::IniFile &file, bool withTools);
 
         void onUpdate();
 
@@ -45,7 +43,7 @@ namespace Plugins {
     private:
         std::map<std::string, PluginSection> mSections;        
 
-        Threading::Signal<Filesystem::Path, bool> mExportSignal;
+        bool mUseCache = false;
     };
 
 }

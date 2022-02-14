@@ -24,12 +24,12 @@ namespace Serialize {
         out << std::boolalpha;
     }
 
-    void XMLFormatter::beginExtended(SerializeOutStream &out, const char *name, size_t count)
+    void XMLFormatter::beginExtendedWrite(const char *name, size_t count)
     {
         if (!mCurrentExtended) {
             if (!name)
                 name = "Item";
-            out.writeUnformatted(indent() + "<" + std::string(name));
+            mOut << indent() << "<" << name;
             mCurrentExtended = true;
         }
         assert(mCurrentExtendedCount == 0);
@@ -37,19 +37,21 @@ namespace Serialize {
         mCurrentExtendedCount = count;
     }
 
-    StreamResult XMLFormatter::beginExtended(SerializeInStream &in, const char *name, size_t count)
+    StreamResult XMLFormatter::beginExtendedRead(const char *name, size_t count)
     {
         if (!mCurrentExtended) {
             if (name) {
-                std::string prefix = in.readN(strlen(name) + 1);
+                std::string prefix;
+                STREAM_PROPAGATE_ERROR(mIn.readN(prefix, strlen(name) + 1));
                 if (prefix != "<" + std::string(name))
-                    return STREAM_PARSE_ERROR(in, "Expected extended opening tag '<" << name << "'");
+                    return STREAM_PARSE_ERROR(mIn, mBinary, "Expected extended opening tag '<" << name << "'");
             } else {
-                std::string prefix = in.readUntil(" ");
+                std::string prefix;
+                STREAM_PROPAGATE_ERROR(mIn.readUntil(prefix, " >"));
                 if (!StringUtil::startsWith(prefix, "<"))
-                    return STREAM_PARSE_ERROR(in, "Expected extended opening tag, found: " << prefix);
+                    return STREAM_PARSE_ERROR(mIn, mBinary, "Expected extended opening tag, found: " << prefix);
                 if (prefix.size() <= 1)
-                    return STREAM_PARSE_ERROR(in, "Expected extended opening tag");
+                    return STREAM_PARSE_ERROR(mIn, mBinary, "Expected extended opening tag");
             }
             mCurrentExtended = true;
         }
@@ -59,182 +61,182 @@ namespace Serialize {
         return {};
     }
 
-    void XMLFormatter::beginCompound(SerializeOutStream &out, const char *name)
+    void XMLFormatter::beginCompoundWrite(const char *name)
     {
         if (!mCurrentExtended) {
             if (!name)
                 name = "Item";
-            out.writeUnformatted(indent() + "<" + std::string(name));
+            mOut << indent() << "<" << name;
         } else {
             assert(mCurrentExtendedCount == 0);
         }
-        out.writeUnformatted(">\n");
+        mOut << ">\n";
         mCurrentExtended = false;
         ++mLevel;
     }
 
-    StreamResult XMLFormatter::beginCompound(SerializeInStream &in, const char *name)
+    StreamResult XMLFormatter::beginCompoundRead(const char *name)
     {
         if (!mCurrentExtended) {
-            std::string prefix = in.readUntil(">");
+            std::string prefix;
+            STREAM_PROPAGATE_ERROR(mIn.readUntil(prefix, ">"));
             if (name && prefix != "<" + std::string(name) + ">")
-                return STREAM_PARSE_ERROR(in, "Expected opening tag <" << name << ">, found: " << prefix);
-            in.seek(in.tell() - off_type { 1 });
+                return STREAM_PARSE_ERROR(mIn, mBinary, "Expected opening tag <" << name << ">, found: " << prefix);
+            mIn.seek(mIn.tell() - off_type { 1 });
         } else {
             assert(mCurrentExtendedCount == 0);
-            STREAM_PROPAGATE_ERROR(prefetchAttributes(in));
-            std::string next = in.peekN(1);
-            if (next != ">")
-                return STREAM_PARSE_ERROR(in, "Expected '>'");            
+            STREAM_PROPAGATE_ERROR(prefetchAttributes());
         }
-        std::string prefix = in.readN(1);
-        if (prefix != ">")
-            return STREAM_PARSE_ERROR(in, "Expected closed tag '>'");
+        FORMATTER_EXPECT(">");
         mCurrentExtended = false;
         return {};
     }
-    void XMLFormatter::endCompound(SerializeOutStream &out, const char *name)
+    void XMLFormatter::endCompoundWrite(const char *name)
     {
         --mLevel;
         if (!name)
             name = "Item";
-        out.writeUnformatted(indent() + "</" + std::string(name) + ">\n");
+        mOut << indent() << "</" << name << ">\n";
     }
 
-    StreamResult XMLFormatter::endCompound(SerializeInStream &in, const char *name)
+    StreamResult XMLFormatter::endCompoundRead(const char *name)
     {
-        std::string prefix = in.readUntil(">");
+        std::string prefix;
+        STREAM_PROPAGATE_ERROR(mIn.readUntil(prefix, ">"));
         if (name && prefix != "</" + std::string(name) + ">")
-            return STREAM_PARSE_ERROR(in, "Expected closing tag '</" << name << ">', found: " << prefix);
+            return STREAM_PARSE_ERROR(mIn, mBinary, "Expected closing tag '</" << name << ">', found: " << prefix);
         if (!StringUtil::startsWith(prefix, "</"))
-            return STREAM_PARSE_ERROR(in, "Expected closing tag");
+            return STREAM_PARSE_ERROR(mIn, mBinary, "Expected closing tag");
         return {};
     }
 
-    void XMLFormatter::beginPrimitive(SerializeOutStream &out, const char *name, uint8_t typeId)
+    void XMLFormatter::beginPrimitiveWrite(const char *name, uint8_t typeId)
     {
         if (!name)
             name = "Element";
         if (mCurrentExtendedCount > 0) {
             assert(mCurrentExtended);
             --mCurrentExtendedCount;
-            out.writeUnformatted(" " + std::string(name) + "=");
-            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>)
-                out.writeUnformatted("\"");
+            mOut << " " << name << "=";
+            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<ByteBuffer>)
+                mOut << "\"";
         } else {
             if (!mCurrentExtended) {
-                out.writeUnformatted(indent() + "<" + std::string(name));
+                mOut << indent() << "<" << name;
             } else {
                 mCurrentExtended = false;
             }
-            out.writeUnformatted(">");
+            mOut << ">";
         }
     }
 
-    StreamResult XMLFormatter::beginPrimitive(SerializeInStream &in, const char *name, uint8_t typeId)
+    StreamResult XMLFormatter::beginPrimitiveRead(const char *name, uint8_t typeId)
     {
         if (mCurrentExtendedCount > 0) {
             assert(mCurrentExtended);
             --mCurrentExtendedCount;
             auto it = mPrefetchedAttributes.find(name);
             if (it != mPrefetchedAttributes.end()) {
-                mExtendedLookupPos = in.tell();
-                in.seek(it->second);
+                mExtendedLookupPos = mIn.tell();
+                mIn.seek(it->second);
                 mPrefetchedAttributes.erase(it);
             } else {
-                STREAM_PROPAGATE_ERROR(prefetchAttributes(in, name));
+                STREAM_PROPAGATE_ERROR(prefetchAttributes(name));
             }
-            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>) {
-                if (in.readN(1) != "\"")
-                    return STREAM_PARSE_ERROR(in, "Expected '\"'");
-                in.setNextFormattedStringDelimiter('"');
+            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<ByteBuffer>) {
+                FORMATTER_EXPECT("\"");
+                mNextStringDelimiter = "\"";
             }
         } else {
             if (!mCurrentExtended) {
-                std::string prefix = in.peekUntil(">");
+                std::string prefix;
+                STREAM_PROPAGATE_ERROR(mIn.peekUntil(prefix, ">"));
                 if (prefix.size() <= 1)
-                    return STREAM_PARSE_ERROR(in, "Syntax error");
+                    return STREAM_PARSE_ERROR(mIn, mBinary, "Syntax error");
                 if (name && prefix != "<" + std::string(name) + ">")
-                    return STREAM_PARSE_ERROR(in, "Expected: '" << name << "'");
-                in.readN(prefix.size() - 1);
+                    return STREAM_PARSE_ERROR(mIn, mBinary, "Expected: '" << name << "'");
+                STREAM_PROPAGATE_ERROR(mIn.readN(prefix, prefix.size() - 1));
             } else {
                 mCurrentExtended = false;
             }
-            std::string prefix = in.readN(1);
-            if (prefix != ">")
-                return STREAM_PARSE_ERROR(in, "Expected '>'");
+            FORMATTER_EXPECT(">");
 
-            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>)
-                in.setNextFormattedStringDelimiter('<');
+            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<ByteBuffer>)
+                mNextStringDelimiter = "<";
         }
         return {};
     }
 
-    void XMLFormatter::endPrimitive(SerializeOutStream &out, const char *name, uint8_t typeId)
+    void XMLFormatter::endPrimitiveWrite(const char *name, uint8_t typeId)
     {
         if (!name)
             name = "Element";
         if (mCurrentExtended) {
-            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>)
-                out.writeUnformatted("\"");
+            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<ByteBuffer>)
+                mOut << "\"";
         } else
-            out.writeUnformatted("</" + std::string(name) + ">\n");
+            mOut << "</" << name << ">\n";
     }
 
-    StreamResult XMLFormatter::endPrimitive(SerializeInStream &in, const char *name, uint8_t typeId)
+    StreamResult XMLFormatter::endPrimitiveRead(const char *name, uint8_t typeId)
     {
         if (mCurrentExtended) {
             if (mExtendedLookupPos != -1) {
-                in.seek(mExtendedLookupPos);
+                mIn.seek(mExtendedLookupPos);
                 mExtendedLookupPos = -1;
             }
         } else {
-            const char *cPrefix = ((typeId == Serialize::PrimitiveTypeIndex_v<std::string>) ? "/" : "</");
-            std::string prefix = in.readUntil(">");
+            const char *cPrefix = ((typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<ByteBuffer>) ? "/" : "</");
+            std::string prefix;
+            STREAM_PROPAGATE_ERROR(mIn.readUntil(prefix, ">"));
             if (prefix.size() <= 1)
-                return STREAM_PARSE_ERROR(in, "Syntax error");
+                return STREAM_PARSE_ERROR(mIn, mBinary, "Syntax error");
             if (name && prefix != cPrefix + std::string(name) + ">")
-                return STREAM_PARSE_ERROR(in, "Expected: '" << name << "'");
+                return STREAM_PARSE_ERROR(mIn, mBinary, "Expected: '" << name << "'");
         }
         return {};
     }
 
-    std::string XMLFormatter::lookupFieldName(SerializeInStream &in)
+    StreamResult XMLFormatter::lookupFieldName(std::string &name)
     {
-        std::string name = in.peekUntil("> ");
-        if (!name.empty()) {
-            if (name[0] != '<')
+        name.clear();
+        std::string dummy;
+        STREAM_PROPAGATE_ERROR(mIn.peekUntil(dummy, "> "));
+        if (!dummy.empty()) {
+            if (dummy[0] != '<')
                 throw 0;
-            if (name[1] == '/')
+            if (dummy[1] == '/')
                 return {};
-            return std::string { StringUtil::substr(name, 1, -1) };
-        }
-        return name;
+            name = StringUtil::substr(dummy, 1, -1);
+        } 
+        return {};
     }
 
-    void XMLFormatter::beginContainer(SerializeOutStream &out, const char *name, uint32_t size)
+    void XMLFormatter::beginContainerWrite(const char *name, uint32_t size)
     {
-        beginCompound(out, name);
+        beginCompoundWrite(name);
     }
 
-    void XMLFormatter::endContainer(SerializeOutStream &out, const char *name)
+    void XMLFormatter::endContainerWrite(const char *name)
     {
-        endCompound(out, name);
+        endCompoundWrite(name);
     }
 
-    StreamResult XMLFormatter::beginContainer(SerializeInStream &in, const char *name, bool sized)
+    StreamResult XMLFormatter::beginContainerRead(const char *name, bool sized)
     {
-        return beginCompound(in, name);
+        return beginCompoundRead(name);
     }
 
-    StreamResult XMLFormatter::endContainer(SerializeInStream &in, const char *name)
+    StreamResult XMLFormatter::endContainerRead(const char *name)
     {
-        return endCompound(in, name);
+        return endCompoundRead(name);
     }
 
-    bool XMLFormatter::hasContainerItem(SerializeInStream &in)
+    bool XMLFormatter::hasContainerItem()
     {
-        std::string prefix = in.peekN(2);
+        std::string prefix;
+        if (mIn.peekN(prefix, 2).mState != StreamState::OK)
+            return false;
         if (prefix[0] != '<')
             throw 0;
         return prefix[1] != '/';
@@ -245,31 +247,33 @@ namespace Serialize {
         return std::string(4 * mLevel, ' ');
     }
 
-    StreamResult XMLFormatter::prefetchAttributes(SerializeInStream &in, const char *name)
+    StreamResult XMLFormatter::prefetchAttributes(const char *name)
     {
-        std::string prefix = in.peekN(1);
+        std::string prefix;
+        STREAM_PROPAGATE_ERROR(mIn.peekN(prefix, 1));
         while (prefix != ">") {
-            prefix = in.readUntil("=");
+            STREAM_PROPAGATE_ERROR(mIn.readUntil(prefix, "="));
             if (name && prefix == name + "="s)
                 return {};
-            mPrefetchedAttributes.try_emplace(std::string { StringUtil::substr(prefix, 0, -1) }, in.tell());
-            STREAM_PROPAGATE_ERROR(skipValue(in));
-            prefix = in.peekN(1);
-        }        
+            mPrefetchedAttributes.try_emplace(std::string { StringUtil::substr(prefix, 0, -1) }, mIn.tell());
+            STREAM_PROPAGATE_ERROR(skipValue());
+            STREAM_PROPAGATE_ERROR(mIn.peekN(prefix, 1));
+        }
         if (name)
-            return STREAM_PARSE_ERROR(in, "Missing attribute '" << name << "'");
+            return STREAM_PARSE_ERROR(mIn, mBinary, "Missing attribute '" << name << "'");
         return {};
     }
 
-    StreamResult XMLFormatter::skipValue(SerializeInStream &in)
+    StreamResult XMLFormatter::skipValue()
     {
-        std::string next = in.peekN(1);
+        std::string next;
+        STREAM_PROPAGATE_ERROR(mIn.peekN(next, 1));
         if (next == "\"") {
-            in.readN(1);
-            in.readUntil("\"");
+            STREAM_PROPAGATE_ERROR(mIn.readN(next, 1));
+            STREAM_PROPAGATE_ERROR(mIn.readUntil(next, "\""));
         } else {
             float dummy; //TODO Is this catching all cases?
-            STREAM_PROPAGATE_ERROR(in.readUnformatted(dummy));
+            STREAM_PROPAGATE_ERROR(mIn >> dummy);
         }
         return {};
     }

@@ -35,8 +35,7 @@
 
 #include "Madgine_Tools/interactivecamera.h"
 
-#include  "Madgine_Tools/imgui/clientimroot.h"
-
+#include "Madgine_Tools/imgui/clientimroot.h"
 
 namespace Engine {
 namespace Tools {
@@ -68,16 +67,17 @@ namespace Tools {
         , mSceneRenderer(editor->sceneMgr(), &mCamera, 25)
         , mGridRenderer(&mCamera, 50)
         , mIm3DRenderer(&mCamera, 75)
+        , mIndex(editor->createViewIndex())
     {
         mCamera.mPosition = { 0, 0.5, -1 };
 
         mRenderTarget = context->createRenderTexture({ 1000, 1000 }, { .mSamples = 4, .mName = "SceneView" });
 
-		mRenderTarget->addRenderPass(&mSceneRenderer);
+        mRenderTarget->addRenderPass(&mSceneRenderer);
 
         mRenderTarget->addRenderPass(&mGridRenderer);
-		
-		mRenderTarget->addRenderPass(&mIm3DRenderer);		
+
+        mRenderTarget->addRenderPass(&mIm3DRenderer);
 
         static_cast<ClientImRoot &>(mEditor->root()).addRenderTarget(mRenderTarget.get());
     }
@@ -95,11 +95,12 @@ namespace Tools {
         mRenderTarget->removeRenderPass(&mSceneRenderer);
     }
 
-    void SceneView::render()
+    bool SceneView::render()
     {
-        ImGui::PushID(this);
+        bool open = true;
+
         ImGui::SetNextWindowSizeConstraints({ 100, 100 }, { 1000000, 1000000 });
-        if (ImGui::Begin("SceneView")) {
+        if (ImGui::Begin(("SceneView##SceneView" + std::to_string(mIndex)).c_str(), &open)) {
 
             constexpr Vector3 axes[3] = {
                 { 1, 0, 0 },
@@ -110,23 +111,23 @@ namespace Tools {
             ImGuiIO &io = ImGui::GetIO();
             Im3DIO &io3D = Im3D::GetIO();
 
-            const Ray &ray = Im3D::GetCurrentContext()->mMouseRay;            
+            const Ray &ray = Im3D::GetCurrentContext()->mMouseRay;
 
             if (mEditor->render3DCursor())
                 Im3D::Arrow3D(IM3D_LINES, 0.3f, ray.mPoint + 10.0f * ray.mDir, ray.mPoint + 20.0f * ray.mDir);
 
-
             ImVec2 region = ImGui::GetContentRegionAvail();
-            mRenderTarget->resize({ static_cast<int>(region.x), static_cast<int>(region.y) });
+            Vector2i iRegion { static_cast<int>(region.x), static_cast<int>(region.y) };
+            if (iRegion.x > 0 && iRegion.y > 0)
+                mRenderTarget->resize(iRegion);
             bool pressed = ImGui::ImageButton((void *)mRenderTarget->texture().mTextureHandle, region, { 0, 0 }, { 1, 1 }, 0);
-			if (pressed && !mState.mDragging[0])
+            if (pressed && !mState.mDragging[0])
                 if (!Im3D::IsAnyObjectHovered())
                     mEditor->deselect();
 
-            
             if (ImGui::InteractiveView(mState)) {
 
-                if (io.MouseClicked[0]){
+                if (io.MouseClicked[0]) {
                     if (mEditor->hoveredAxis() >= 0) {
                         mDraggedAxis = mEditor->hoveredAxis();
                         mDragStartRay = ray;
@@ -153,10 +154,10 @@ namespace Tools {
                 Vector2 size = ImGui::GetItemRectSize();
 
                 io3D.mNextFrameMouseRay = mCamera.mousePointToRay(Vector2 { io.MousePos } - pos, size);
-            }      
+            }
 
             InteractiveCamera(mState, mCamera);
-                        
+
             if (mState.mDragging[0] && mAxisDragging) {
 
                 Vector3 axis = axes[mDraggedAxis];
@@ -187,7 +188,7 @@ namespace Tools {
                     e->addComponent<Scene::Entity::Mesh>().get()->set(resource);
                     mEditor->select(e);
                 } else if (ImGui::IsDraggableValueTypeBeingAccepted(resource)) {
-                    Render::GPUMeshLoader::HandleType handle = resource->loadData();                    
+                    Render::GPUMeshLoader::HandleType handle = resource->loadData();
                     handle.info()->setPersistent(true);
                     Im3D::NativeMesh(handle->mMaterials.front().mDiffuseTexture->mTextureHandle, handle->mAABB, TranslationMatrix(pos));
                 }
@@ -195,7 +196,8 @@ namespace Tools {
             }
         }
         ImGui::End();
-        ImGui::PopID();
+
+        return open;
     }
 
     Render::Camera &SceneView::camera()

@@ -14,45 +14,45 @@ namespace Serialize {
     {
     }
 
-    void SafeBinaryFormatter::beginPrimitive(SerializeOutStream &out, const char *name, uint8_t typeId)
+    void SafeBinaryFormatter::beginPrimitiveWrite(const char *name, uint8_t typeId)
     {
-        out.writeRaw<uint16_t>(SERIALIZE_MAGIC_NUMBER + typeId);
+        mOut.write<uint16_t>(SERIALIZE_MAGIC_NUMBER + typeId);
     }
 
-    StreamResult SafeBinaryFormatter::beginPrimitive(SerializeInStream &in, const char *name, uint8_t typeId)
+    StreamResult SafeBinaryFormatter::beginPrimitiveRead(const char *name, uint8_t typeId)
     {
         uint16_t type;
-        STREAM_PROPAGATE_ERROR(in.readRaw(type));
+        STREAM_PROPAGATE_ERROR(mIn.read(type));
         type -= SERIALIZE_MAGIC_NUMBER;
         if (type != typeId)
-            return STREAM_INTEGRITY_ERROR(in, "Invalid type-id encountered!");
+            return STREAM_INTEGRITY_ERROR(mIn, mBinary, "Invalid type-id encountered!");
         return {};
     }
 
-    void SafeBinaryFormatter::beginContainer(SerializeOutStream &out, const char *name, uint32_t size)
+    void SafeBinaryFormatter::beginContainerWrite(const char *name, uint32_t size)
     {
         if (size != std::numeric_limits<uint32_t>::max())
-            out.writeRaw(size);        
+            mOut.write(size);        
     }
 
-    StreamResult SafeBinaryFormatter::beginContainer(SerializeInStream &in, const char *name, bool sized)
+    StreamResult SafeBinaryFormatter::beginContainerRead(const char *name, bool sized)
     {
         uint32_t size = 0;
         if (sized) {
-            STREAM_PROPAGATE_ERROR(in.readRaw(size));
+            STREAM_PROPAGATE_ERROR(mIn.read(size));
         } 
         mContainerSizes.push(size);
         return {};
     }
 
-    StreamResult SafeBinaryFormatter::endContainer(SerializeInStream &, const char *name)
+    StreamResult SafeBinaryFormatter::endContainerRead(const char *name)
     {
         assert(mContainerSizes.top() == 0);
         mContainerSizes.pop();
         return {};
     }
 
-    bool SafeBinaryFormatter::hasContainerItem(SerializeInStream &)
+    bool SafeBinaryFormatter::hasContainerItem()
     {
         if (mContainerSizes.top() > 0) {
             --mContainerSizes.top();

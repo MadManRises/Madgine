@@ -97,7 +97,7 @@ namespace Scene {
         }
         void Transform::translate(const Vector3 &v)
         {
-            *mPosition += v;
+            mPosition += v;
         }
         void Transform::rotate(const Quaternion &q)
         {

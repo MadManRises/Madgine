@@ -77,7 +77,7 @@ namespace Render {
                 mat.mDiffuseHandle = p.first;
                 target->renderVertices(mProgram, i + 1, p.second.mVertices2[i], p.second.mIndices2[i], &mat);*/
                 if (p.first)
-                    throw 0;
+                    LOG_ONCE("TODO!");
                 target->renderVertices(mProgram, i + 1, p.second.mVertices2[i], p.second.mIndices2[i], nullptr);                
             }
         }

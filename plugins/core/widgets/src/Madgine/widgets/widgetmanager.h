@@ -79,13 +79,15 @@ namespace Widgets {
 
         
         std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, WidgetClass _class, WidgetBase *parent = nullptr);
-        Serialize::StreamResult readWidget(Serialize::SerializeInStream &in, std::unique_ptr<WidgetBase> &widget);
-        void writeWidget(Serialize::SerializeOutStream &out, const std::unique_ptr<WidgetBase> &widget) const;
+        Serialize::StreamResult readWidget(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget);
+        void writeWidget(Serialize::FormattedSerializeStream &out, const std::unique_ptr<WidgetBase> &widget) const;
 
         template <typename WidgetType = WidgetBase>
         std::unique_ptr<WidgetType> create(const std::string &name, WidgetBase *parent = nullptr);
-        
+
         friend struct WidgetBase;
+
+        void onActivate(bool active);
         
     private:
         std::map<std::string, WidgetBase *> mWidgets;

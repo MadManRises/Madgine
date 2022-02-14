@@ -40,14 +40,14 @@ namespace Serialize {
             mSlaveStream.emplace(std::move(*other.mSlaveStream), this);
             other.mSlaveStream.reset();
         }
-        for (BufferedInOutStream &stream : other.mMasterStreams) {
+        for (FormattedBufferedStream &stream : other.mMasterStreams) {
             mMasterStreams.emplace(std::move(stream), this);
         }
     }
 
     SyncManager::~SyncManager() { clearTopLevelItems(); }
 
-    StreamResult SyncManager::readMessage(BufferedInOutStream &stream)
+    StreamResult SyncManager::readMessage(FormattedBufferedStream &stream)
     {
         MessageHeader header;
         STREAM_PROPAGATE_ERROR(stream.readHeader(header));
@@ -61,7 +61,7 @@ namespace Serialize {
                 stream.setId(id);
                 break;
             default:
-                return STREAM_INTEGRITY_ERROR(stream, "Invalid command used in message header: " << header.mCmd);
+                return STREAM_INTEGRITY_ERROR(stream.in(), stream.isBinary(), "Invalid command used in message header: " << header.mCmd);
             }
         } else {
             SyncableUnitBase *object;
@@ -81,18 +81,18 @@ namespace Serialize {
                 STREAM_PROPAGATE_ERROR(object->readState(stream, nullptr, {}, StateTransmissionFlags_ApplyMap));
                 break;
             default:
-                return STREAM_INTEGRITY_ERROR(stream, "Invalid Message-Type: " << header.mType);
+                return STREAM_INTEGRITY_ERROR(stream.in(), stream.isBinary(), "Invalid Message-Type: " << header.mType);
             }
         }
         return {};
     }
 
-    std::set<BufferedOutStream *, CompareStreamId>
+    std::set<FormattedBufferedStream *, CompareStreamId>
     SyncManager::getMasterMessageTargets()
     {
-        std::set<BufferedOutStream *, CompareStreamId> result;
+        std::set<FormattedBufferedStream *, CompareStreamId> result;
 
-        for (BufferedInOutStream &stream : mMasterStreams) {
+        for (FormattedBufferedStream &stream : mMasterStreams) {
             //if (!stream.isClosed()) {
             result.insert(&stream);
             //}
@@ -123,7 +123,7 @@ namespace Serialize {
         }
 
         if (sendStateFlag && unit->mSynced) {
-            for (BufferedInOutStream &stream : mMasterStreams) {
+            for (FormattedBufferedStream &stream : mMasterStreams) {
                 this->sendState(stream, unit);
             }
         }
@@ -152,7 +152,7 @@ namespace Serialize {
         addTopLevelItem(newUnit, false);
     }
 
-    BufferedOutStream &SyncManager::getSlaveMessageTarget()
+    FormattedBufferedStream &SyncManager::getSlaveMessageTarget()
     {
         assert(mSlaveStream);
         return *mSlaveStream;
@@ -162,7 +162,7 @@ namespace Serialize {
     {
         if (mSlaveStream && mSlaveStream->isMessageAvailable())
             return true;
-        for (BufferedInOutStream &stream : mMasterStreams) {
+        for (FormattedBufferedStream &stream : mMasterStreams) {
             if (stream.isMessageAvailable())
                 return true;
         }
@@ -175,7 +175,7 @@ namespace Serialize {
         mMasterStreams.clear();
     }
 
-    SyncManagerResult SyncManager::setSlaveStream(BufferedInOutStream &&stream,
+    SyncManagerResult SyncManager::setSlaveStream(FormattedBufferedStream &&stream,
         bool receiveState,
         TimeOut timeout)
     {
@@ -249,7 +249,7 @@ namespace Serialize {
         }
     }
 
-    SyncManagerResult SyncManager::addMasterStream(BufferedInOutStream &&stream,
+    SyncManagerResult SyncManager::addMasterStream(FormattedBufferedStream &&stream,
         bool sendStateFlag)
     {
         if (sendStateFlag && stream) {
@@ -275,7 +275,7 @@ namespace Serialize {
                 std::move(*it), false);
             result != SyncManagerResult::SUCCESS)
             return result;
-        BufferedInOutStream &stream = *target->mMasterStreams.find(streamId);
+        FormattedBufferedStream &stream = *target->mMasterStreams.find(streamId);
         std::vector<TopLevelUnitBase *> newTopLevels;
         newTopLevels.reserve(16);
         set_difference(target->getTopLevelUnits().begin(),
@@ -345,7 +345,7 @@ namespace Serialize {
         return {};
     }
 
-    StreamResult SyncManager::convertPtr(SerializeInStream &in,
+    StreamResult SyncManager::convertPtr(FormattedSerializeStream &in,
         UnitId unit, SyncableUnitBase *&out)
     {
         if (unit == NULL_UNIT_ID) {
@@ -361,19 +361,19 @@ namespace Serialize {
                     auto it = std::ranges::find(
                         mTopLevelUnits, unit, &TopLevelUnitBase::masterId);
                     if (it == mTopLevelUnits.end()) {
-                        return STREAM_INTEGRITY_ERROR(in, "Illegal TopLevel-Id (" << unit << ") used!");
+                        return STREAM_INTEGRITY_ERROR(in.in(), true, "Illegal TopLevel-Id (" << unit << ") used!");
                     }
                     out = *it;
                 } else {
                     SyncableUnitBase *u = getByMasterId(unit);
                     if (std::ranges::find(mTopLevelUnits, u->mTopLevel) == mTopLevelUnits.end()) {
-                        return STREAM_INTEGRITY_ERROR(in, "Unit (" << unit << ") with unregistered TopLevel-Unit used!");
+                        return STREAM_INTEGRITY_ERROR(in.in(), true, "Unit (" << unit << ") with unregistered TopLevel-Unit used!");
                     }
                     out = u;
                 }                
             }
         } catch (const std::out_of_range &) {
-            return STREAM_INTEGRITY_ERROR(in, "Unknown Syncable Unit-Id (" << unit << ") used!");
+            return STREAM_INTEGRITY_ERROR(in.in(), true, "Unknown Syncable Unit-Id (" << unit << ") used!");
         }
         return {};
     }
@@ -382,13 +382,13 @@ namespace Serialize {
     {
         std::vector<ParticipantId> result;
         result.reserve(mMasterStreams.size());
-        for (const BufferedInOutStream &stream : mMasterStreams) {
+        for (const FormattedBufferedStream &stream : mMasterStreams) {
             result.push_back(stream.id());
         }
         return result;
     }
 
-    StreamResult SyncManager::receiveMessages(BufferedInOutStream &stream,
+    StreamResult SyncManager::receiveMessages(FormattedBufferedStream &stream,
         int &msgCount, TimeOut timeout)
     {
 
@@ -407,19 +407,19 @@ namespace Serialize {
         return {};
     }
 
-    bool SyncManager::sendAllMessages(BufferedInOutStream &stream,
+    bool SyncManager::sendAllMessages(FormattedBufferedStream &stream,
         TimeOut timeout)
     {
         //TODO: Use Timeout (possibly pass down)
         return bool(stream.sendMessages());
     }
 
-    BufferedInOutStream *SyncManager::getSlaveStream()
+    FormattedBufferedStream *SyncManager::getSlaveStream()
     {
         return mSlaveStream ? &*mSlaveStream : nullptr;
     }
 
-    BufferedInOutStream &SyncManager::getMasterStream(ParticipantId id)
+    FormattedBufferedStream &SyncManager::getMasterStream(ParticipantId id)
     {
         return *mMasterStreams.find(id);
     }
@@ -435,7 +435,7 @@ namespace Serialize {
         return mMasterStreams.size();
     }
 
-    void SyncManager::sendState(BufferedInOutStream &stream,
+    void SyncManager::sendState(FormattedBufferedStream &stream,
         SyncableUnitBase *unit)
     {
         stream.beginMessage(unit, STATE, 0);

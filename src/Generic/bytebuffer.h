@@ -79,6 +79,13 @@ struct ByteBufferImpl {
         return mData;
     }
 
+    bool operator==(const ByteBufferImpl &other) const
+    {
+        if (mSize != other.mSize)
+            return false;
+        return std::memcmp(mData, other.mData, mSize) == 0;
+    }
+
 private:
     Any mKeep;
 

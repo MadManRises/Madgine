@@ -208,9 +208,9 @@ namespace Widgets {
         return w;
     }
 
-    Serialize::StreamResult WidgetManager::readWidget(Serialize::SerializeInStream &in, std::unique_ptr<WidgetBase> &widget)
+    Serialize::StreamResult WidgetManager::readWidget(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget)
     {
-        STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, "Widget", 2));
+        STREAM_PROPAGATE_ERROR(in.beginExtendedRead("Widget", 2));
         std::string name;
         WidgetClass _class;
         STREAM_PROPAGATE_ERROR(read(in, name, "name"));
@@ -220,9 +220,9 @@ namespace Widgets {
         return {};
     }
 
-    void WidgetManager::writeWidget(Serialize::SerializeOutStream &out, const std::unique_ptr<WidgetBase> &widget) const
+    void WidgetManager::writeWidget(Serialize::FormattedSerializeStream &out, const std::unique_ptr<WidgetBase> &widget) const
     {
-        out.format().beginExtended(out, "Widget", 2);
+        out.beginExtendedWrite("Widget", 2);
         write(out, widget->getName(), "name");
         write(out, widget->getClass(), "type");
     }
@@ -578,6 +578,11 @@ namespace Widgets {
     int WidgetManager::priority() const
     {
         return mPriority;
+    }
+
+    void WidgetManager::onActivate(bool active) {
+        if (active)
+            openStartupWidget();
     }
 
 }

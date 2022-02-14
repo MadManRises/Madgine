@@ -1,5 +1,10 @@
 #pragma once
 
+#include "streams/streamresult.h"
+#include "primitivetypes.h"
+
+#include "streams/serializestream.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -12,41 +17,84 @@ namespace Serialize {
         }
         virtual ~Formatter() = default;
 
-		virtual void setupStream(std::istream &) {};
-        virtual void setupStream(std::ostream &) {}; 
+        virtual void setupStream(std::istream &) {};
+        virtual void setupStream(std::ostream &) {};
 
-        virtual void beginExtended(Serialize::SerializeOutStream &, const char *name, size_t count) {};
+        virtual void beginExtendedWrite(const char *name, size_t count) {};
 
-        virtual void beginCompound(Serialize::SerializeOutStream &, const char *name) {};
-        virtual void endCompound(Serialize::SerializeOutStream &, const char *name) {};
+        virtual void beginCompoundWrite(const char *name) {};
+        virtual void endCompoundWrite(const char *name) {};
 
-		virtual StreamResult beginExtended(Serialize::SerializeInStream &, const char *name, size_t count);
+        virtual StreamResult beginExtendedRead(const char *name, size_t count);
 
-        virtual StreamResult beginCompound(Serialize::SerializeInStream &, const char *name);
-        virtual StreamResult endCompound(Serialize::SerializeInStream &, const char *name);
+        virtual StreamResult beginCompoundRead(const char *name);
+        virtual StreamResult endCompoundRead(const char *name);
 
-        virtual void beginPrimitive(SerializeOutStream &, const char *name, uint8_t typeId) {}
-        virtual void endPrimitive(SerializeOutStream &, const char *name, uint8_t typeId) {}
+        virtual void beginPrimitiveWrite(const char *name, uint8_t typeId) { }
+        virtual void endPrimitiveWrite(const char *name, uint8_t typeId) { }
 
-        virtual StreamResult beginPrimitive(SerializeInStream &, const char *name, uint8_t typeId);
-        virtual StreamResult endPrimitive(SerializeInStream &, const char *name, uint8_t typeId);
+        virtual StreamResult beginPrimitiveRead(const char *name, uint8_t typeId);
+        virtual StreamResult endPrimitiveRead(const char *name, uint8_t typeId);
 
-        virtual void beginContainer(SerializeOutStream &, const char *name, uint32_t size = std::numeric_limits<uint32_t>::max()) { }
-        virtual void endContainer(SerializeOutStream &, const char *name) { }
+        virtual void beginContainerWrite(const char *name, uint32_t size = std::numeric_limits<uint32_t>::max()) { }
+        virtual void endContainerWrite(const char *name) { }
 
-        virtual StreamResult beginContainer(SerializeInStream &, const char *name, bool sized = true);
-        virtual StreamResult endContainer(SerializeInStream &, const char *name);
+        virtual StreamResult beginContainerRead(const char *name, bool sized = true);
+        virtual StreamResult endContainerRead(const char *name);
 
-        virtual bool hasContainerItem(SerializeInStream &) = 0;
+        virtual bool hasContainerItem() = 0;
 
-        virtual std::string lookupFieldName(SerializeInStream &)
+        virtual StreamResult lookupFieldName(std::string &name)
         {
+            return STREAM_INTEGRITY_ERROR(mIn, mBinary, "Name lookup is not implemented in Formatter!");
+        }
+
+        
+        template <typename T>
+        StreamResult read(T &t)
+        {
+            if (mBinary) {
+                return mIn.read(t);
+            } else {
+                return mIn >> t;
+            }
+        }
+
+        StreamResult read(std::string &s);
+
+        StreamResult read(String auto &s)
+        {
+            std::string string;
+            STREAM_PROPAGATE_ERROR(read(string));
+            s = std::move(string);
             return {};
         }
 
+        template <typename T>
+        void write(const T &t)
+        {
+            if (mBinary) {
+                mOut.write(t);
+            } else {
+                mOut << t;
+            }
+        }
+
+
+        StreamResult expect(std::string_view expected);
+
+
         const bool mBinary;
         const bool mSupportNameLookup;
+
+    protected:
+        const char *mNextStringDelimiter = nullptr;
+
+        SerializeInStream mIn;
+        SerializeOutStream mOut;
     };
+
+    #define FORMATTER_EXPECT(text) STREAM_PROPAGATE_ERROR(expect(text))
 
 }
 }

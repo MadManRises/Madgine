@@ -117,3 +117,8 @@ struct TestManager : SyncManager {
 };
 
 #define HANDLE_MGR_RESULT(mgr, ...) ASSERT_EQ(__VA_ARGS__, SyncManagerResult::SUCCESS) << mgr.fetchStreamError()
+#define HANDLE_STREAM_RESULT(...)                            \
+    {                                                        \
+        StreamResult result = __VA_ARGS__;                   \
+        ASSERT_EQ(result.mState, StreamState::OK) << result; \
+    }

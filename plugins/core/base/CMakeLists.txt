@@ -12,7 +12,7 @@ add_plugin(Base Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/baselib.h
 
 target_link_plugins(Base Resources)
 
-target_link_libraries(Base PUBLIC Modules)
+target_link_libraries(Base PUBLIC CLI CodeGen)
 
 target_link_libraries(Base PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 

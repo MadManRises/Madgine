@@ -1,6 +1,7 @@
 #pragma once
 
-#include "streams/bufferedstream.h"
+#include "streams/formattedbufferedstream.h"
+#include "streams/streamresult.h"
 
 #include "streams/comparestreamid.h"
 
@@ -25,23 +26,23 @@ namespace Serialize {
         SyncManager(SyncManager &&) noexcept;
         ~SyncManager();
 
-        StreamResult readMessage(BufferedInOutStream &);
+        StreamResult readMessage(FormattedBufferedStream &);
 
-        std::set<BufferedOutStream *, CompareStreamId> getMasterMessageTargets();
+        std::set<FormattedBufferedStream *, CompareStreamId> getMasterMessageTargets();
 
         void clearTopLevelItems();
         bool addTopLevelItem(TopLevelUnitBase *unit, bool sendStateFlag = true);
         void removeTopLevelItem(TopLevelUnitBase *unit);
         void moveTopLevelItem(TopLevelUnitBase *oldUnit, TopLevelUnitBase *newUnit);
 
-        BufferedOutStream &getSlaveMessageTarget();
+        FormattedBufferedStream &getSlaveMessageTarget();
 
         bool isMessageAvailable();
         StreamResult receiveMessages(int msgCount = -1, TimeOut timeout = {});
         void sendMessages();
         StreamResult sendAndReceiveMessages();
 
-        StreamResult convertPtr(SerializeInStream &in, UnitId unit, SyncableUnitBase *&out);
+        StreamResult convertPtr(FormattedSerializeStream &in, UnitId unit, SyncableUnitBase *&out);
 
         std::vector<ParticipantId> getMasterParticipantIds();
         size_t clientCount() const;
@@ -51,22 +52,22 @@ namespace Serialize {
         StreamResult fetchStreamError();
 
     protected:
-        StreamResult receiveMessages(BufferedInOutStream &stream, int &msgCount, TimeOut timeout = {});
-        bool sendAllMessages(BufferedInOutStream &stream, TimeOut timeout = {});
+        StreamResult receiveMessages(FormattedBufferedStream &stream, int &msgCount, TimeOut timeout = {});
+        bool sendAllMessages(FormattedBufferedStream &stream, TimeOut timeout = {});
 
-        BufferedInOutStream *getSlaveStream();
-        BufferedInOutStream &getMasterStream(ParticipantId id);
+        FormattedBufferedStream *getSlaveStream();
+        FormattedBufferedStream &getMasterStream(ParticipantId id);
 
         void removeAllStreams();
-        SyncManagerResult setSlaveStream(BufferedInOutStream &&stream, bool receiveState = true, TimeOut timeout = {});
+        SyncManagerResult setSlaveStream(FormattedBufferedStream &&stream, bool receiveState = true, TimeOut timeout = {});
         void removeSlaveStream();
-        SyncManagerResult addMasterStream(BufferedInOutStream &&stream, bool sendState = true);
+        SyncManagerResult addMasterStream(FormattedBufferedStream &&stream, bool sendState = true);
         SyncManagerResult moveMasterStream(ParticipantId streamId, SyncManager *target);
 
 
         const std::set<TopLevelUnitBase *> &getTopLevelUnits() const;
 
-        void sendState(BufferedInOutStream &stream, SyncableUnitBase *unit);
+        void sendState(FormattedBufferedStream &stream, SyncableUnitBase *unit);
 
         SyncManagerResult recordStreamError(StreamResult error);
 
@@ -74,8 +75,8 @@ namespace Serialize {
 
         bool mReceivingMasterState;
 
-        mutable_set<BufferedInOutStream, CompareStreamId> mMasterStreams;
-        std::optional<BufferedInOutStream> mSlaveStream;
+        mutable_set<FormattedBufferedStream, CompareStreamId> mMasterStreams;
+        std::optional<FormattedBufferedStream> mSlaveStream;
 
         std::set<TopLevelUnitBase *> mTopLevelUnits; //TODO: Sort by MasterId    
 

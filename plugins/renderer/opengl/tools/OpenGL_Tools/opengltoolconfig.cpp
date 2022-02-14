@@ -55,6 +55,10 @@ namespace Tools {
         co_await ToolBase::finalize();
     }
 
+    void OpenGLToolConfig::renderMenu() {
+
+    }
+
     std::string_view OpenGLToolConfig::key() const
     {
         return "OpenGLToolConfig";

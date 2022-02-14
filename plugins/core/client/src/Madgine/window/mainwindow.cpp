@@ -77,7 +77,7 @@ namespace Window {
 
         Filesystem::Path path = Filesystem::appDataPath() / "mainwindow.ini";
 
-        if (Serialize::SerializeInStream in = mgr.openRead(path, std::make_unique<Serialize::IniFormatter>())) {
+        if (Serialize::FormattedSerializeStream in = mgr.openRead(path, std::make_unique<Serialize::IniFormatter>())) {
             Serialize::StreamResult result = read(in, settings.mData, nullptr);
             if (result.mState != Serialize::StreamState::OK) {
                 LOG_ERROR("Error loading MainWindow-Layout from " << path << ": \n"
@@ -387,7 +387,7 @@ namespace Window {
     {
         Filesystem::FileManager mgr { "MainWindow-Layout" };
 
-        if (Serialize::SerializeOutStream out = mgr.openWrite(Filesystem::appDataPath() / "mainwindow.ini", std::make_unique<Serialize::IniFormatter>())) {
+        if (Serialize::FormattedSerializeStream out = mgr.openWrite(Filesystem::appDataPath() / "mainwindow.ini", std::make_unique<Serialize::IniFormatter>())) {
             write(out, mOsWindow->data(), "data");
         }
     }

@@ -4,10 +4,12 @@
 #include "serializestreamdata.h"
 #include "serializestream.h"
 
+#include "formattedserializestream.h"
+
 namespace Engine {
 namespace Serialize {
 
-    SerializableMapHolder::SerializableMapHolder(SerializeOutStream &out)
+    SerializableMapHolder::SerializableMapHolder(FormattedSerializeStream &out)
     {
         if (!out.data().mSerializableMap) {
             mData = &out.data();
@@ -23,7 +25,7 @@ namespace Serialize {
         }
     }
     
-    SerializableListHolder::SerializableListHolder(SerializeInStream &in)
+    SerializableListHolder::SerializableListHolder(FormattedSerializeStream &in)
     {
         if (!in.data().mSerializableList) {
             mData = &in.data();

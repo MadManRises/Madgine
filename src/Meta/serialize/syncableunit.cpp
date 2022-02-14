@@ -61,19 +61,19 @@ namespace Serialize {
         return *this;
     }
 
-    void SyncableUnitBase::writeState(SerializeOutStream &out, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags) const
+    void SyncableUnitBase::writeState(FormattedSerializeStream &out, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags) const
     {
         if (out.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
-            out.format().beginExtended(out, name, 1);
+            out.beginExtendedWrite(name, 1);
             write(out, mMasterId, "syncId");
         }
         customUnitPtr().writeState(out, name, hierarchy, flags | StateTransmissionFlags_SkipId);
     }
 
-    StreamResult SyncableUnitBase::readState(SerializeInStream &in, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags)
+    StreamResult SyncableUnitBase::readState(FormattedSerializeStream &in, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags)
     {
         if (!in.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
-            STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, name, 1));
+            STREAM_PROPAGATE_ERROR(in.beginExtendedRead(name, 1));
             UnitId id;
             STREAM_PROPAGATE_ERROR(read(in, id, "syncId"));
 
@@ -87,26 +87,26 @@ namespace Serialize {
         return customUnitPtr().readState(in, name, hierarchy, flags | StateTransmissionFlags_SkipId);
     }
 
-    StreamResult SyncableUnitBase::readAction(BufferedInOutStream &in, PendingRequest *request)
+    StreamResult SyncableUnitBase::readAction(FormattedBufferedStream &in, PendingRequest *request)
     {
         return mType->readAction(this, in, request);
     }
 
-    StreamResult SyncableUnitBase::readRequest(BufferedInOutStream &in, TransactionId id)
+    StreamResult SyncableUnitBase::readRequest(FormattedBufferedStream &in, TransactionId id)
     {
         return mType->readRequest(this, in, id);
     }
 
-    std::set<BufferedOutStream *, CompareStreamId> SyncableUnitBase::getMasterMessageTargets() const
+    std::set<FormattedBufferedStream *, CompareStreamId> SyncableUnitBase::getMasterMessageTargets() const
     {
-        std::set<BufferedOutStream *, CompareStreamId> result;
+        std::set<FormattedBufferedStream *, CompareStreamId> result;
         if (mSynced) {
             result = mTopLevel->getMasterMessageTargets();
         }
         return result;
     }
 
-    BufferedOutStream &SyncableUnitBase::getSlaveMessageTarget() const
+    FormattedBufferedStream &SyncableUnitBase::getSlaveMessageTarget() const
     {
         assert(mSynced);
         return mTopLevel->getSlaveMessageTarget();

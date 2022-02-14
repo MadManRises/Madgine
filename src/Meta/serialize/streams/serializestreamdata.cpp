@@ -9,15 +9,13 @@
 namespace Engine {
 namespace Serialize {
 
-    SerializeStreamData::SerializeStreamData(std::unique_ptr<Formatter> format)
-        : mFormatter(std::move(format))
+    SerializeStreamData::SerializeStreamData()
     {
     }
 
-    SerializeStreamData::SerializeStreamData(std::unique_ptr<Formatter> format, SerializeManager &mgr, ParticipantId id)
+    SerializeStreamData::SerializeStreamData(SerializeManager &mgr, ParticipantId id)
         : mManager(&mgr)
         , mId(id)
-        , mFormatter(std::move(format))
     {
     }
 
@@ -33,11 +31,6 @@ namespace Serialize {
     SerializeManager *SerializeStreamData::manager()
     {
         return mManager;
-    }
-
-    Formatter &SerializeStreamData::format() const
-    {
-        return *mFormatter;
     }
 
     SerializableUnitList &SerializeStreamData::serializableList()

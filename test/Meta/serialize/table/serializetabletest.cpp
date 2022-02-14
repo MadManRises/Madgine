@@ -53,7 +53,7 @@ TEST(Serialize_Table, Test1)
     TestStruct t2;
 
     stream2.isMessageAvailable();
-    serializeTable<TestStruct>().readState(&t2, stream2);
+    HANDLE_STREAM_RESULT(serializeTable<TestStruct>().readState(&t2, stream2));
 
     ASSERT_EQ(t1.i, t2.i);
 }

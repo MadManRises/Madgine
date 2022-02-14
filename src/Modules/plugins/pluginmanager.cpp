@@ -10,8 +10,6 @@
 
 #    include "Generic/keyvalue.h"
 
-#    include "cli/parameter.h"
-
 #    include "ini/inisection.h"
 
 #    include "pluginsection.h"
@@ -24,10 +22,6 @@
 
 namespace Engine {
 namespace Plugins {
-
-    CLI::Parameter<bool> noPluginCache { { "--no-plugin-cache", "-npc" }, false, "Disables the loading of the cached plugin selection at startup." };
-    CLI::Parameter<std::string> loadPlugins { { "--load-plugins", "-lp" }, "", "If set the pluginmanager will load the specified config file after loading the cached plugin-file." };
-    CLI::Parameter<std::string> exportPlugins { { "--export-plugins", "-ep" }, "", "If set the pluginmanager will save the current plugin selection after the boot to the specified config file and will export a corresponding uniquecomponent configuration source file." };
 
     static Filesystem::Path cacheFileName()
     {
@@ -60,12 +54,14 @@ namespace Plugins {
         }
     }
 
-    bool PluginManager::setup(bool loadCache, bool loadExe)
+    bool PluginManager::setup(bool loadCache, bool loadExe, std::string_view configFile)
     {
+        mUseCache = loadCache;
+
         assert(Threading::WorkGroup::self().singleThreaded());
 
-        if (loadCache && (!noPluginCache || !loadPlugins->empty())) {
-            Filesystem::Path pluginFile = !loadPlugins->empty() ? Filesystem::Path { *loadPlugins } : cacheFileName();
+        if (loadCache || !configFile.empty()) {
+            Filesystem::Path pluginFile = !configFile.empty() ? Filesystem::Path { configFile } : cacheFileName();
 
             Ini::IniFile file;
             if (file.loadFromDisk(pluginFile)) {
@@ -74,7 +70,7 @@ namespace Plugins {
                 if (!result)
                     return false;
             } else {
-                if (!loadPlugins->empty()) {
+                if (!configFile.empty()) {
                     LOG_ERROR("Failed to open plugin-file '" << pluginFile << "'!");
                     return false;
                 }
@@ -94,23 +90,6 @@ namespace Plugins {
 
         onUpdate();
 
-        if (!exportPlugins->empty()) {
-            auto helper = [this](const Filesystem::Path &path, bool hasTools) {
-                Ini::IniFile file;
-                LOG("Saving Plugins to '" << path << "'");
-                saveSelection(file, hasTools);
-                file.saveToDisk(path);
-
-                Filesystem::Path exportPath = path.parentPath() / ("components_" + std::string { path.stem() } + ".cpp");
-
-                mExportSignal.emit(exportPath, hasTools);
-            };
-
-            Filesystem::Path p = *exportPlugins;
-            helper(p, false);
-            Filesystem::Path p_tools = p.parentPath() / (std::string { p.stem() } + "_tools" + std::string { p.extension() });
-            helper(p_tools, true);
-        }
         return true;
     }
 
@@ -212,7 +191,7 @@ namespace Plugins {
 
     void PluginManager::onUpdate()
     {
-        if (!noPluginCache) {
+        if (mUseCache) {
             Ini::IniFile file;
             saveSelection(file, false);
             file.saveToDisk(cacheFileName());
@@ -245,10 +224,6 @@ namespace Plugins {
         assert(pib.second);
     }
 
-    Threading::SignalStub<Filesystem::Path, bool> &PluginManager::exportSignal()
-    {
-        return mExportSignal;
-    }
 }
 }
 

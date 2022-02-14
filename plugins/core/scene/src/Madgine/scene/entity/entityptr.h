@@ -30,10 +30,10 @@ namespace Scene {
 
             bool isDead() const;
 
-            Serialize::StreamResult readState(Serialize::SerializeInStream &in, const char *name = nullptr);
-            void writeState(Serialize::SerializeOutStream &out, const char *name = nullptr) const;
+            Serialize::StreamResult readState(Serialize::FormattedSerializeStream &in, const char *name = nullptr);
+            void writeState(Serialize::FormattedSerializeStream &out, const char *name = nullptr) const;
 
-            Serialize::StreamResult applySerializableMap(Serialize::SerializeInStream &in, bool success);
+            Serialize::StreamResult applySerializableMap(Serialize::FormattedSerializeStream &in, bool success);
 
         private:
             bool holdsRef() const;

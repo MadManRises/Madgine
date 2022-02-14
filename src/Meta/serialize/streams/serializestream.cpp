@@ -1,17 +1,19 @@
 #include "../../metalib.h"
 #include "serializestream.h"
 
-#include "../serializemanager.h"
-
 #include "serializestreamdata.h"
 
 //#include "../../keyvalue/valuetype.h"
 
-#include "Generic/bytebuffer.h"
-
 #include "../formatter.h"
 
 #include "Generic/cowstring.h"
+
+#include "Generic/bytebuffer.h"
+
+#include "base64/base64.h"
+
+#include "../serializemanager.h"
 
 namespace Engine {
 namespace Serialize {
@@ -25,14 +27,14 @@ namespace Serialize {
         , mData(data.release())
     {
         assert(mData);
-        format().setupStream(mStream);
+        //format().setupStream(mStream);
     }
 
     SerializeInStream::SerializeInStream(SerializeInStream &&other)
         : InStream(std::move(other))
         , mData(std::exchange(other.mData, nullptr))
     {
-        format().setupStream(mStream);
+        //format().setupStream(mStream);
     }
 
     SerializeInStream::SerializeInStream(SerializeInStream &&other, SerializeManager *mgr)
@@ -40,7 +42,7 @@ namespace Serialize {
         , mData(std::exchange(other.mData, nullptr))
     {
         data().setManager(mgr);
-        format().setupStream(mStream);
+        //format().setupStream(mStream);
     }
 
     SerializeInStream::~SerializeInStream()
@@ -52,127 +54,62 @@ namespace Serialize {
         }
     }
 
-    StreamResult SerializeInStream::readUnformatted(SyncableUnitBase *&p)
+    StreamResult SerializeInStream::read(void *buffer, size_t size)
     {
-        UnitId ptr;
-        STREAM_PROPAGATE_ERROR(readUnformatted(ptr));
-        assert(ptr <= (std::numeric_limits<UnitId>::max() >> 2));
-        if (ptr)
-            ptr = (ptr << 2) | static_cast<UnitId>(UnitIdTag::SYNCABLE);
-        p = reinterpret_cast<SyncableUnitBase *>(ptr);
-        return {};
-    }
-
-    StreamResult SerializeInStream::readUnformatted(SerializableDataUnit *&p)
-    {
-        uint32_t ptr;
-        STREAM_PROPAGATE_ERROR(readUnformatted(ptr));
-        assert(ptr <= (std::numeric_limits<uint32_t>::max() >> 2));
-        if (ptr)
-            ptr = (ptr << 2) | static_cast<uint32_t>(UnitIdTag::SERIALIZABLE);
-        p = reinterpret_cast<SerializableDataUnit *>(ptr);
-        return {};
-    }
-
-    void SerializeInStream::setNextFormattedStringDelimiter(char c)
-    {
-        assert(!(c && mNextFormattedStringDelimiter));
-        mNextFormattedStringDelimiter = c;
-    }
-
-    StreamResult SerializeInStream::readUnformatted(std::string &s)
-    {
-        if (format().mBinary) {
-            uint32_t size;
-            STREAM_PROPAGATE_ERROR(readRaw(size));
-            s.resize(size);
-            STREAM_PROPAGATE_ERROR(readRaw(&s[0], size));
-        } else {
-            if (mNextFormattedStringDelimiter) {
-                if (!std::getline(mStream, s, mNextFormattedStringDelimiter))
-                    std::terminate();
-                mNextFormattedStringDelimiter = 0;
-            } else {
-                if (!InStream::operator>>(s))
-                    return STREAM_PARSE_ERROR(*this, "Expected <string>");
-            }
-        }
-        return {};
-    }
-
-    StreamResult SerializeInStream::readUnformatted(ByteBuffer &b)
-    {
-        assert(format().mBinary);
-        uint32_t size;
-        STREAM_PROPAGATE_ERROR(readRaw(size));
-        std::unique_ptr<std::byte[]> buffer = std::make_unique<std::byte[]>(size);
-        STREAM_PROPAGATE_ERROR(readRaw(buffer.get(), size));
-        b = ByteBuffer { std::move(buffer), size };
-        return {};
-    }
-
-    StreamResult SerializeInStream::readUnformatted(std::monostate &)
-    {
-        return {};
-    }
-
-    StreamResult SerializeInStream::readRaw(void *buffer, size_t size)
-    {
-        InStream::readRaw(buffer, size);
+        InStream::read(buffer, size);
         if (!*this)
-            return STREAM_PARSE_ERROR(*this, "Unexpected EOF");
+            return STREAM_PARSE_ERROR(*this, true, "Unexpected EOF");
         return {};
     }
 
-    std::string SerializeInStream::readN(size_t n)
+    StreamResult SerializeInStream::readN(std::string &buffer, size_t n)
     {
+        //assert(!format().mBinary);
+
+        skipWs();
+
         if (n == 0)
             return {};
 
-        skipWs();
-
-        assert(!format().mBinary);
-        std::string buffer(n, '\0');
-        readRaw(&buffer[0], n);
-        return buffer;
+        buffer.resize(n, '\0');
+        return read(&buffer[0], n);
     }
 
-    std::string SerializeInStream::peekN(size_t n)
+    StreamResult SerializeInStream::readUntil(std::string &buffer, const char *delim)
     {
-        assert(!format().mBinary);
-
-        pos_type pos = tell();
-        std::string result = readN(n);
-        seek(pos);
-        return result;
-    }
-
-    std::string SerializeInStream::readUntil(const char *c)
-    {
-        assert(!format().mBinary);
+        //assert(!format().mBinary);
 
         skipWs();
 
-        char buffer[255];
+        buffer.resize(255);
         size_t i = 0;
         do {
-            if (InStream::readRaw(&buffer[i], 1) == 0)
-                break;
+            STREAM_PROPAGATE_ERROR(read(&buffer[i], 1));
             ++i;
-        } while (!strchr(c, buffer[i - 1]));
-        buffer[i] = '\0';
+        } while (!strchr(delim, buffer[i - 1]));
+        buffer.resize(i);
 
-        return buffer;
+        return {};
     }
 
-    std::string SerializeInStream::peekUntil(const char *c)
+    StreamResult SerializeInStream::peekN(std::string &buffer, size_t n)
     {
-        assert(!format().mBinary);
+        //assert(!format().mBinary);
 
         pos_type pos = tell();
-        std::string result = readUntil(c);
+        STREAM_PROPAGATE_ERROR(readN(buffer, n));
         seek(pos);
-        return result;
+        return {};
+    }
+
+    StreamResult SerializeInStream::peekUntil(std::string &buffer, const char *c)
+    {
+        //assert(!format().mBinary);
+
+        pos_type pos = tell();
+        STREAM_PROPAGATE_ERROR(readUntil(buffer, c));
+        seek(pos);
+        return {};
     }
 
     SerializeManager *SerializeInStream::manager() const
@@ -202,16 +139,6 @@ namespace Serialize {
         assert(mData);
     }
 
-    Formatter &SerializeInStream::format() const
-    {
-        return data().format();
-    }
-
-    bool SerializeInStream::isBinary() const
-    {
-        return format().mBinary;
-    }
-
     SerializeStreamData &SerializeInStream::data() const
     {
         return *mData;
@@ -222,6 +149,96 @@ namespace Serialize {
         return data().serializableList();
     }
 
+    StreamResult SerializeInStream::read(SyncableUnitBase *&p)
+    {
+        UnitId ptr;
+        STREAM_PROPAGATE_ERROR(read(ptr));
+        assert(ptr <= (std::numeric_limits<UnitId>::max() >> 2));
+        if (ptr)
+            ptr = (ptr << 2) | static_cast<UnitId>(UnitIdTag::SYNCABLE);
+        p = reinterpret_cast<SyncableUnitBase *>(ptr);
+        return {};
+    }
+
+    StreamResult SerializeInStream::read(SerializableDataUnit *&p)
+    {
+        uint32_t ptr;
+        STREAM_PROPAGATE_ERROR(read(ptr));
+        assert(ptr <= (std::numeric_limits<uint32_t>::max() >> 2));
+        if (ptr)
+            ptr = (ptr << 2) | static_cast<uint32_t>(UnitIdTag::SERIALIZABLE);
+        p = reinterpret_cast<SerializableDataUnit *>(ptr);
+        return {};
+    }
+
+    StreamResult SerializeInStream::operator>>(SyncableUnitBase *&p)
+    {
+        UnitId ptr;
+        STREAM_PROPAGATE_ERROR(operator>>(ptr));
+        assert(ptr <= (std::numeric_limits<UnitId>::max() >> 2));
+        if (ptr)
+            ptr = (ptr << 2) | static_cast<UnitId>(UnitIdTag::SYNCABLE);
+        p = reinterpret_cast<SyncableUnitBase *>(ptr);
+        return {};
+    }
+
+    StreamResult SerializeInStream::operator>>(SerializableDataUnit *&p)
+    {
+        uint32_t ptr;
+        STREAM_PROPAGATE_ERROR(operator>>(ptr));
+        assert(ptr <= (std::numeric_limits<uint32_t>::max() >> 2));
+        if (ptr)
+            ptr = (ptr << 2) | static_cast<uint32_t>(UnitIdTag::SERIALIZABLE);
+        p = reinterpret_cast<SerializableDataUnit *>(ptr);
+        return {};
+    }
+
+    StreamResult SerializeInStream::read(std::string &s)
+    {
+        uint32_t size;
+        STREAM_PROPAGATE_ERROR(read(size));
+        s.resize(size);
+        STREAM_PROPAGATE_ERROR(read(&s[0], size));
+        return {};
+    }
+
+    StreamResult SerializeInStream::operator>>(std::string &s)
+    {
+        InStream::operator>>(s);
+        if (!*this)
+            return STREAM_PARSE_ERROR(*this, false, "Expected <string>");
+        return {};
+    }
+
+    StreamResult SerializeInStream::read(ByteBuffer &b)
+    {
+        uint32_t size;
+        STREAM_PROPAGATE_ERROR(read(size));
+        std::unique_ptr<std::byte[]> buffer = std::make_unique<std::byte[]>(size);
+        STREAM_PROPAGATE_ERROR(read(buffer.get(), size));
+        b = ByteBuffer { std::move(buffer), size };
+        return {};
+    }
+
+    StreamResult SerializeInStream::operator>>(ByteBuffer &b)
+    {
+        std::string base64Encoded;
+        STREAM_PROPAGATE_ERROR(operator>>(base64Encoded));
+        if (!Base64::decode(b, base64Encoded))
+            return STREAM_PARSE_ERROR(*this, false, "Invalid Base64 String '" << base64Encoded << "'");
+        return {};
+    }
+
+    StreamResult SerializeInStream::read(std::monostate &)
+    {
+        return {};
+    }
+
+    StreamResult SerializeInStream::operator>>(std::monostate &)
+    {
+        return {};
+    }
+
     SerializeOutStream::SerializeOutStream()
     {
     }
@@ -230,14 +247,14 @@ namespace Serialize {
         : OutStream(std::move(buffer))
         , mData(std::move(data))
     {
-        format().setupStream(mStream);
+        //format().setupStream(mStream);
     }
 
     SerializeOutStream::SerializeOutStream(SerializeOutStream &&other)
         : OutStream(std::move(other))
         , mData(std::move(other.mData))
     {
-        format().setupStream(mStream);
+        //format().setupStream(mStream);
     }
 
     SerializeOutStream::SerializeOutStream(SerializeOutStream &&other, SerializeManager *mgr)
@@ -245,7 +262,7 @@ namespace Serialize {
         , mData(std::move(other.mData))
     {
         data().setManager(mgr);
-        format().setupStream(mStream);
+        //format().setupStream(mStream);
     }
 
     SerializeOutStream::~SerializeOutStream() = default;
@@ -253,27 +270,6 @@ namespace Serialize {
     ParticipantId SerializeOutStream::id() const
     {
         return data().id();
-    }
-
-    void SerializeOutStream::writeUnformatted(const SyncableUnitBase *p)
-    {
-        writeUnformatted(SerializeManager::convertPtr(*this, p));
-    }
-
-    void SerializeOutStream::writeUnformatted(const SerializableDataUnit *p)
-    {
-        uint32_t id = 0;
-        if (p) {
-            SerializableUnitMap &map = serializableMap();
-            auto it = map.try_emplace(p, map.size() + 1).first;
-            id = it->second;
-        }
-        writeUnformatted(id);
-    }
-
-    void SerializeOutStream::writeRaw(const void *buffer, size_t size)
-    {
-        OutStream::writeRaw(buffer, size);
     }
 
     SerializeManager *SerializeOutStream::manager() const
@@ -291,40 +287,74 @@ namespace Serialize {
         return *mData;
     }
 
-    Formatter &SerializeOutStream::format() const
-    {
-        return data().format();
-    }
-
-    bool SerializeOutStream::isBinary() const
-    {
-        return format().mBinary;
-    }
-
-    void SerializeOutStream::writeUnformatted(const std::string_view &s)
-    {
-        if (format().mBinary) {
-            writeRaw<uint32_t>(s.size());
-            writeRaw(s.data(), s.size());
-        } else {
-            OutStream::operator<<(s);
-        }
-    }
-
-    void SerializeOutStream::writeUnformatted(const ByteBuffer &b)
-    {
-        assert(format().mBinary);
-        writeRaw<uint32_t>(b.mSize);
-        writeRaw(b.mData, b.mSize);
-    }
-
-    void SerializeOutStream::writeUnformatted(const std::monostate &)
-    {
-    }
-
     SerializableUnitMap &SerializeOutStream::serializableMap()
     {
         return data().serializableMap();
+    }
+
+    void SerializeOutStream::write(const SyncableUnitBase *p)
+    {
+        OutStream::write(SerializeManager::convertPtr(*this, p));
+    }
+
+    void SerializeOutStream::write(const SerializableDataUnit *p)
+    {
+        uint32_t id = 0;
+        if (p) {
+            SerializableUnitMap &map = serializableMap();
+            auto it = map.try_emplace(p, map.size() + 1).first;
+            id = it->second;
+        }
+        OutStream::write(id);
+    }
+
+    SerializeOutStream &SerializeOutStream::operator<<(const SyncableUnitBase *p)
+    {
+        OutStream::operator<<(SerializeManager::convertPtr(*this, p));
+        return *this;
+    }
+    SerializeOutStream &SerializeOutStream::operator<<(const SerializableDataUnit *p)
+    {
+        uint32_t id = 0;
+        if (p) {
+            SerializableUnitMap &map = serializableMap();
+            auto it = map.try_emplace(p, map.size() + 1).first;
+            id = it->second;
+        }
+        OutStream::operator<<(id);
+    }
+
+    void SerializeOutStream::write(const std::string_view &s)
+    {
+        OutStream::write<uint32_t>(s.size());
+        OutStream::write(s.data(), s.size());
+    }
+
+    SerializeOutStream &SerializeOutStream::operator<<(const std::string_view &s)
+    {
+        OutStream::operator<<(s);
+        return *this;
+    }
+
+    void SerializeOutStream::write(const ByteBuffer &b)
+    {
+        OutStream::write<uint32_t>(b.mSize);
+        OutStream::write(b.mData, b.mSize);
+    }
+
+    SerializeOutStream &SerializeOutStream::operator<<(const ByteBuffer &b)
+    {
+        OutStream::operator<<(Base64::encode(b));
+        return *this;
+    }
+
+    void SerializeOutStream::write(const std::monostate &)
+    {
+    }
+
+    SerializeOutStream &SerializeOutStream::operator<<(const std::monostate &)
+    {
+        return *this;
     }
 
 }

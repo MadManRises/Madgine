@@ -38,11 +38,12 @@ set(sources "")
 FolderSources(sources "" tools)
 	FolderSources(sources tools Madgine_Tools interactivecamera.cpp interactivecamera.h)
 		FolderSources(sources Madgine_Tools im3d im3drenderpass.cpp im3drenderpass.h)
-		FolderSources(sources Madgine_Tools imgui clientimroot.cpp clientimroot.h)
+		FolderSources(sources Madgine_Tools imgui clientimroot.cpp clientimroot.h projectmanager.cpp projectmanager.h)
 
 add_tools(Client ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/clienttoolslib.h)
 
 target_link_plugins(ClientTools Tools ProgramLoader TextureLoader)
+target_link_libraries(ClientTools PUBLIC FilesystemSerialize)
 
 
 project(ClientNodesTools)

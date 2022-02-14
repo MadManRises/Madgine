@@ -9,6 +9,8 @@
 
 #include "Meta/serialize/formatter.h"
 
+#include "Meta/serialize/streams/formattedserializestream.h"
+
 namespace Engine {
 namespace Memory {
 
@@ -26,17 +28,17 @@ namespace Memory {
     {
     }
 
-    Serialize::SerializeInStream MemoryManager::openRead(ByteBuffer buffer, std::unique_ptr<Serialize::Formatter> format)
+    Serialize::FormattedSerializeStream MemoryManager::openRead(ByteBuffer buffer, std::unique_ptr<Serialize::Formatter> format)
     {
-        Serialize::SerializeInStream stream { std::make_unique<MemoryReadBuffer>(std::move(buffer)), std::make_unique<Serialize::SerializeStreamData>(std::move(format), *this, createStreamId()) };
+        Serialize::FormattedSerializeStream stream { std::move(format), std::make_unique<MemoryReadBuffer>(std::move(buffer)), std::make_unique<Serialize::SerializeStreamData>(*this, createStreamId()) };
         setSlaveStreamData(&stream.data());
         return stream;
     }
 
-    Serialize::SerializeOutStream MemoryManager::openWrite(WritableByteBuffer buffer, std::unique_ptr<Serialize::Formatter> format)
+    Serialize::FormattedSerializeStream MemoryManager::openWrite(WritableByteBuffer buffer, std::unique_ptr<Serialize::Formatter> format)
     {
-        return { std::make_unique<MemoryWriteBuffer>(std::move(buffer)), std::make_unique<Serialize::SerializeStreamData>(std::move(format), *this, createStreamId()) };
-    } 
+        return { std::move(format), std::make_unique<MemoryWriteBuffer>(std::move(buffer)), std::make_unique<Serialize::SerializeStreamData>(*this, createStreamId()) };
+    }
 
 }
 }

@@ -9,13 +9,13 @@
 namespace Engine {
 namespace Tools {
 
-    struct GuiEditor : public Tool<GuiEditor> {    
+    struct GuiEditor : public Tool<GuiEditor> {
 
         SERIALIZABLEUNIT(GuiEditor);
 
         GuiEditor(ImRoot &root);
 
-        virtual Threading::Task < bool> init() override;
+        virtual Threading::Task<bool> init() override;
 
         virtual void render() override;
         virtual void renderMenu() override;
@@ -23,21 +23,15 @@ namespace Tools {
 
         std::string_view key() const override;
 
-		void saveLayout();
-        void loadLayout();
-
     private:
         void renderSelection(Widgets::WidgetBase *hoveredWidget = nullptr);
         void renderHierarchy(Widgets::WidgetBase **hoveredWidget = nullptr);
         bool drawWidget(Widgets::WidgetBase *w, Widgets::WidgetBase **hoveredWidget = nullptr);
 
-    private:
-        Window::MainWindow *mWindow = nullptr;
+    private:        
         Widgets::WidgetManager *mWidgetManager = nullptr;
         WidgetSettings *mSelected = nullptr;
         std::list<WidgetSettings> mSettings;
-
-		bool mHierarchyVisible = false;
 
         bool mMouseDown = false;
         bool mDragging = false;

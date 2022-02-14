@@ -12,35 +12,35 @@ namespace Serialize {
         virtual void setupStream(std::istream &) override;
         virtual void setupStream(std::ostream &) override; 
 
-        virtual void beginExtended(SerializeOutStream &, const char *name, size_t count) override;
+        virtual void beginExtendedWrite(const char *name, size_t count) override;
 
-        virtual void beginCompound(SerializeOutStream &, const char *name) override;
-        virtual void endCompound(SerializeOutStream &, const char *name) override;
+        virtual void beginCompoundWrite(const char *name) override;
+        virtual void endCompoundWrite(const char *name) override;
 
-        virtual StreamResult beginExtended(SerializeInStream &, const char *name, size_t count) override;
+        virtual StreamResult beginExtendedRead(const char *name, size_t count) override;
 
-        virtual StreamResult beginCompound(SerializeInStream &, const char *name) override;
-        virtual StreamResult endCompound(SerializeInStream &, const char *name) override;
+        virtual StreamResult beginCompoundRead(const char *name) override;
+        virtual StreamResult endCompoundRead(const char *name) override;
 
-        virtual void beginPrimitive(SerializeOutStream &, const char *name, uint8_t typeId) override;
-        virtual void endPrimitive(SerializeOutStream &, const char *name, uint8_t typeId) override;
+        virtual void beginPrimitiveWrite(const char *name, uint8_t typeId) override;
+        virtual void endPrimitiveWrite(const char *name, uint8_t typeId) override;
 
-        virtual StreamResult beginPrimitive(SerializeInStream &, const char *name, uint8_t typeId) override;
-        virtual StreamResult endPrimitive(SerializeInStream &, const char *name, uint8_t typeId) override;
+        virtual StreamResult beginPrimitiveRead(const char *name, uint8_t typeId) override;
+        virtual StreamResult endPrimitiveRead(const char *name, uint8_t typeId) override;
 
-        virtual std::string lookupFieldName(SerializeInStream &) override;
+        virtual StreamResult lookupFieldName(std::string &name) override;
 
-        virtual void beginContainer(SerializeOutStream &, const char *name, uint32_t size) override;
-        virtual void endContainer(SerializeOutStream &, const char *name) override;
-        virtual StreamResult beginContainer(SerializeInStream &, const char *name, bool sized) override;
-        virtual StreamResult endContainer(SerializeInStream &, const char *name) override;
-        virtual bool hasContainerItem(SerializeInStream &) override;
+        virtual void beginContainerWrite(const char *name, uint32_t size) override;
+        virtual void endContainerWrite(const char *name) override;
+        virtual StreamResult beginContainerRead(const char *name, bool sized) override;
+        virtual StreamResult endContainerRead(const char *name) override;
+        virtual bool hasContainerItem() override;
 
         std::string indent();
 
     private:
-        StreamResult prefetchAttributes(SerializeInStream &in, const char *name = nullptr);
-        StreamResult skipValue(SerializeInStream &);
+        StreamResult prefetchAttributes(const char *name = nullptr);
+        StreamResult skipValue();
 
     private:
         size_t mLevel = 0;

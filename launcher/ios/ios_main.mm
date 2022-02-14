@@ -20,9 +20,7 @@
 #error "ARC is on!"
 #endif
 
-extern Engine::CLI::Parameter<bool> toolMode;
-
-extern int launch(Engine::Window::MainWindow **topLevelPointer = nullptr);
+#include "../launcher.h"
 
 
 
@@ -51,9 +49,5 @@ int main(int argc, char * argv[])  {
     
     Engine::Threading::WorkGroup workGroup("Launcher");
     Engine::Core::Root root { argc, argv };
-    if (!toolMode) {
-        return launch();
-    } else {
-        return root.errorCode();
-    }
+    return launch();
 }

@@ -60,7 +60,8 @@ TEST(Serialize_Formatter, JSON)
     ],
     "complexList3" : [
     ],
-    "pod" : [1,2]
+    "pod" : [1,2],
+    "bytes" : "SGVsbG8gV29ybGQh"
 })");
 }
 
@@ -116,7 +117,8 @@ TEST(Serialize_Formatter, JSON_InvalidParse)
     ],
     "complexList3" : [
     ],
-    "pod" : [1,2]
+    "pod" : [1,2],
+    "bytes" : "SGVsbG8gV29ybGQh"
 })");
 
     NoParentUnit<TestUnit> unit;
@@ -180,15 +182,15 @@ TEST(Serialize_Formatter, JSON_ExtendedOrder)
     ],
     "complexList3" : [
     ],
-    "pod" : [1,2]
+    "pod" : [1,2],
+    "bytes" : "SGVsbG8gV29ybGQh"
 })");
 
     NoParentUnit<TestUnit> unit;
 
     SerializeInStream in { std::move(file), std::make_unique<SerializeStreamData>(std::make_unique<JSONFormatter>()) };
 
-    StreamResult result = read(in, unit, nullptr);
-    ASSERT_EQ(result.mState, StreamState::OK) << result;
+    HANDLE_STREAM_RESULT(read(in, unit, nullptr));    
     ASSERT_EQ(unit.complexList1.front().i, 2);
     ASSERT_EQ(unit.complexList1.front().f, 6.0f);
     ASSERT_EQ(unit.complexList1.front().s, "set");

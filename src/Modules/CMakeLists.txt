@@ -23,7 +23,7 @@ add_workspace_library(Modules ${sources} SOURCE_ROOT .. PRECOMPILED_HEADER modul
 configure_file(modulesconfig.in.h modulesconfig.h)
 target_include_directories(Modules PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
-target_link_libraries(Modules PUBLIC Interfaces CodeGen CLI Ini)
+target_link_libraries(Modules PUBLIC Interfaces Ini)
 
 if (INTERFACES_ENABLE_THREADING)
 	find_package(Threads REQUIRED)

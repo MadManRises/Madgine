@@ -3,6 +3,9 @@
 namespace Engine {
 namespace Core {
 
+    MADGINE_BASE_EXPORT void skipUniqueComponentOnExport(const TypeInfo *t);
+    MADGINE_BASE_EXPORT void exportStaticComponentHeader(const Filesystem::Path &outFile, bool hasTools);
+
     struct MADGINE_BASE_EXPORT Root {
         Root(int argc = 0, char **argv = nullptr);
         Root(std::unique_ptr<CLI::CLICore> cli);

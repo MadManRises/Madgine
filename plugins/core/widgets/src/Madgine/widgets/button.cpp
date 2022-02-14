@@ -16,6 +16,7 @@
 METATABLE_BEGIN_BASE(Engine::Widgets::Button, Engine::Widgets::WidgetBase)
 MEMBER(mText)
 MEMBER(mFontSize)
+MEMBER(mPivot)
 PROPERTY(Font, font, setFont)
 PROPERTY(Image, image, setImage)
 METATABLE_END(Engine::Widgets::Button)
@@ -23,6 +24,7 @@ METATABLE_END(Engine::Widgets::Button)
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::Button, Engine::Widgets::WidgetBase)
 FIELD(mText)
 FIELD(mFontSize)
+FIELD(mPivot)
 ENCAPSULATED_FIELD(mFont, fontName, setFontName)
 ENCAPSULATED_FIELD(Image, imageName, setImageName)
 SERIALIZETABLE_END(Engine::Widgets::Button)
@@ -88,7 +90,7 @@ namespace Widgets {
 
         if (mFont.available() && mFont->mTexture.available()) {
             //mFont->setPersistent(true);
-            std::pair<std::vector<Vertex>, TextureSettings> fontVertices = renderText(mText, pos + 0.5f * size, mFont, mFontSize, { 0.5f, 0.5f }, screenSize);
+            std::pair<std::vector<Vertex>, TextureSettings> fontVertices = renderText(mText, pos, size.xy(), mFont, size.z * mFontSize, mPivot, screenSize);
             if (!fontVertices.first.empty())
                 returnSet.push_back(fontVertices);
         }

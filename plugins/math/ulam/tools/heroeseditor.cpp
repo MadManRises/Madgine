@@ -118,6 +118,7 @@ namespace Tools {
 
     void HeroesEditor::renderMenu()
     {
+        ToolBase::renderMenu();
         if (mVisible) {
             if (ImGui::BeginMenu("HeroesEditor")) {
 

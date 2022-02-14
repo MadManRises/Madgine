@@ -8,7 +8,7 @@ namespace Render {
 	struct Glyph {
         Vector2i mSize;
         Vector2i mUV;
-        int mBearingY;
+        Vector2i mBearing;
         int mAdvance;
         bool mFlipped;
     };

@@ -50,6 +50,7 @@ namespace Tools {
 
     void Python3ImmediateWindow::renderMenu()
     {
+        ToolBase::renderMenu();
     }
 
     void Python3ImmediateWindow::render()

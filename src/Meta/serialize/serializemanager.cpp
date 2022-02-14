@@ -128,7 +128,7 @@ namespace Serialize {
                 ptr = it->second;
         }
         if (!ptr) {
-            return STREAM_INTEGRITY_ERROR(in, "Unknown Unit-Id (" << unit << ") used!");
+            return STREAM_INTEGRITY_ERROR(in, true, "Unknown Unit-Id (" << unit << ") used!");
         }
         out = ptr;
         return {};

@@ -30,7 +30,7 @@ namespace Tools {
 
         const Filesystem::Path &currentSceneFile() const;
 
-        std::vector<SceneView> &views()
+        std::vector<std::unique_ptr<SceneView>> &views()
         {
             return mSceneViews;
         }
@@ -53,10 +53,11 @@ namespace Tools {
         void openScene(const Filesystem::Path &p);
         void saveScene(const Filesystem::Path &p);
 
+        int createViewIndex();
+
     private:
         void renderSelection();
         void renderHierarchy();
-        void renderSettings();
         void renderToolbar();
         void renderEntity(Scene::Entity::EntityPtr &entity);
         void renderCamera(Render::Camera *camera);
@@ -67,17 +68,13 @@ namespace Tools {
     private:
         Window::MainWindow &mWindow;
 
-        std::vector<SceneView> mSceneViews;
+        std::vector<std::unique_ptr<SceneView>> mSceneViews;
 
         Inspector *mInspector;
         Scene::SceneManager *mSceneMgr;
 
         Scene::Entity::EntityPtr mSelectedEntity;
         Render::Camera *mSelectedCamera = nullptr;
-
-        bool mHierarchyVisible = false;
-        bool mSettingsVisible = false;
-        bool mToolbarVisible = false;
 
         enum { PLAY,
             STOP,
@@ -112,6 +109,8 @@ namespace Tools {
         float mDefaultBoneLength = 1.0f;
         bool mShowBoneNames = true;
         bool mRender3DCursor = false;
+
+        int mRunningViewIndex = 0;
     };
 
 }

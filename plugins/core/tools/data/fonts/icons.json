@@ -1,5 +1,14 @@
 {
-    "error": 61697,
-    "info": 61698,
-    "warning": 61699
+    "axes": 61697,
+    "error": 61698,
+    "grid": 61699,
+    "info": 61700,
+    "pause": 61701,
+    "play": 61702,
+    "plus": 61703,
+    "pointlight": 61704,
+    "skeleton": 61705,
+    "stop": 61706,
+    "warning": 61707,
+    "x": 61708
 }

@@ -42,23 +42,26 @@ namespace Tools {
 
     bool MemoryViewer::traceLevel(const Engine::Debug::TraceBack &traceback, size_t size, size_t blockSize, bool leaf)
     {
-        ImGui::BeginSpanningTreeNode(&traceback, traceback.mFunction, leaf ? ImGuiTreeNodeFlags_Leaf : ImGuiTreeNodeFlags_None);
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
 
-        ImGui::NextColumn();
+        ImGui::BeginSpanningTreeNode(&traceback, traceback.mFunction, leaf ? ImGuiTreeNodeFlags_Leaf : ImGuiTreeNodeFlags_None);
+        
         if (mShowAddress) {
+            ImGui::TableNextColumn();
             ImGui::Text("%#010x", traceback.mAddress);
-            ImGui::NextColumn();
+            
         }
         if (mShowFile) {
+            ImGui::TableNextColumn();
             ImGui::Text("%s", traceback.mFile);
-            ImGui::NextColumn();
+            ImGui::TableNextColumn();
             ImGui::Text("%d", traceback.mLineNr);
-            ImGui::NextColumn();
         }
+        ImGui::TableNextColumn();
         ImGui::Text("%u", blockSize);
-        ImGui::NextColumn();
+        ImGui::TableNextColumn();
         ImGui::Text("%zu", size);
-        ImGui::NextColumn();
 
         return ImGui::EndSpanningTreeNode();
     }
@@ -334,115 +337,118 @@ namespace Tools {
 
             float width = ImGui::GetWindowWidth() - 20;
 
-            ImGui::BeginColumns("cols", 3 + mShowAddress + 2 * mShowFile, ImGuiColumnsFlags_NoPreserveWidths);
+            if (ImGui::BeginTable("cols", 3 + mShowAddress + 2 * mShowFile, ImGuiTableFlags_ScrollY/* | ImGuiColumnsFlags_NoPreserveWidths */)) {
 
-            resort |= drawHeader("Method %s", METHODNAME_SORTING, mShowFile ? 0 : width - fixedWidth);
-            if (mShowAddress)
-                resort |= drawHeader("Address %s", ADDRESS_SORTING, addressWidth);
-            if (mShowFile) {
-                resort |= drawHeader("File %s", FILE_SORTING, width - fixedWidth - ImGui::GetColumnWidth(0));
-                resort |= drawHeader("Line %s", FILE_SORTING, lineWidth);
-            }
-            resort |= drawHeader("BSize %s", BLOCK_SIZE_SORTING, sizeWidth);
-            resort |= drawHeader("Size %s", SIZE_SORTING, sizeWidth);
-            ImGui::Separator();
+                ImGui::TableSetupColumn("Method", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthStretch, 0.0f, METHODNAME_SORTING);
+                if (mShowAddress)
+                    ImGui::TableSetupColumn("Address", ImGuiTableColumnFlags_WidthFixed, 0.0f, ADDRESS_SORTING);
+                if (mShowFile) {
+                    ImGui::TableSetupColumn("File", ImGuiTableColumnFlags_WidthFixed, 0.0f, FILE_SORTING);
+                    ImGui::TableSetupColumn("Line", ImGuiTableColumnFlags_WidthFixed, 0.0f, FILE_SORTING);
+                }
+                ImGui::TableSetupColumn("BSize", ImGuiTableColumnFlags_WidthFixed, 0.0f, BLOCK_SIZE_SORTING);
+                ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthFixed, 0.0f, SIZE_SORTING);
 
-            std::strong_ordering (*inOrder)(const Item &, const Item &);
-            switch (mSortMode) {
-            case METHODNAME_SORTING:
-                inOrder = methodNameSorting;
-                break;
-            case BLOCK_SIZE_SORTING:
-                inOrder = blockSizeSorting;
-                break;
-            case SIZE_SORTING:
-                inOrder = sizeSorting;
-                break;
-            case FILE_SORTING:
-                inOrder = fileSorting;
-                break;
-            case ADDRESS_SORTING:
-                inOrder = addressSorting;
-                break;
-            default:
-                inOrder = noSorting;
-            }
+                ImGui::TableSetupScrollFreeze(0, 1);
+                ImGui::TableHeadersRow();
 
-            Item *front = mTracker.linkedFront();
-            Item *sortedFront = nullptr;
-            Item *unsortedFront = nullptr;
+                std::strong_ordering (*inOrder)(const Item &, const Item &);
+                switch (mSortMode) {
+                case METHODNAME_SORTING:
+                    inOrder = methodNameSorting;
+                    break;
+                case BLOCK_SIZE_SORTING:
+                    inOrder = blockSizeSorting;
+                    break;
+                case SIZE_SORTING:
+                    inOrder = sizeSorting;
+                    break;
+                case FILE_SORTING:
+                    inOrder = fileSorting;
+                    break;
+                case ADDRESS_SORTING:
+                    inOrder = addressSorting;
+                    break;
+                default:
+                    inOrder = noSorting;
+                }
 
-            if (mSortMode == NO_SORTING && !mCollapsing) {
-                sortedFront = uncollapse(mRootBlock, front);
-                mRootBlock.mChildren.clear();
-                mRootBlock.mLeafs.clear();
-                mRootBlock.mSources = nullptr;
-                mRootBlock.mData = BlockData {};
-            } else if (resort) {
-                if (!mCollapsing) {
-                    unsortedFront = uncollapse(mRootBlock, front);
+                Item *front = mTracker.linkedFront();
+                Item *sortedFront = nullptr;
+                Item *unsortedFront = nullptr;
+
+                if (mSortMode == NO_SORTING && !mCollapsing) {
+                    sortedFront = uncollapse(mRootBlock, front);
                     mRootBlock.mChildren.clear();
                     mRootBlock.mLeafs.clear();
                     mRootBlock.mSources = nullptr;
                     mRootBlock.mData = BlockData {};
-                } else {
-                    unsortedFront = front;
-                }
-            } else {
-                sortedFront = front;
-                Item **ptr = &sortedFront;
-                Item **target = &unsortedFront;
-                for (Item *it = *ptr; it; it = *ptr) {
-                    ++it->second.mGeneration;
-                    if (it->second.mGeneration <= (mSortMode == SIZE_SORTING ? 2 : 1)) {
-                        *ptr = it->second.mNext;
-                        *target = it;
-                        target = &it->second.mNext;
-                        *target = nullptr;
+                } else if (resort) {
+                    if (!mCollapsing) {
+                        unsortedFront = uncollapse(mRootBlock, front);
+                        mRootBlock.mChildren.clear();
+                        mRootBlock.mLeafs.clear();
+                        mRootBlock.mSources = nullptr;
+                        mRootBlock.mData = BlockData {};
                     } else {
-                        ptr = &it->second.mNext;
+                        unsortedFront = front;
+                    }
+                } else {
+                    sortedFront = front;
+                    Item **ptr = &sortedFront;
+                    Item **target = &unsortedFront;
+                    for (Item *it = *ptr; it; it = *ptr) {
+                        ++it->second.mGeneration;
+                        if (it->second.mGeneration <= (mSortMode == SIZE_SORTING ? 2 : 1)) {
+                            *ptr = it->second.mNext;
+                            *target = it;
+                            target = &it->second.mNext;
+                            *target = nullptr;
+                        } else {
+                            ptr = &it->second.mNext;
+                        }
                     }
                 }
-            }
 
-            //Sort Unsorted List & Merge
-            if (mCollapsing) {
-                /*if (resort) {
+                //Sort Unsorted List & Merge
+                if (mCollapsing) {
+                    /*if (resort) {
 						mRootBlock.mChildren.clear();
 						mRootBlock.mData = BlockData{};
 						mRootBlock.mLeafs.clear();
 					}*/
-                /*sort(methodNameSorting, false, unsortedFront);
+                    /*sort(methodNameSorting, false, unsortedFront);
 					merge(methodNameSorting, false, sortedFront, unsortedFront);*/
-                mRootBlock.mSources = unsortedFront;
-                collapseSort(inOrder, mSortDescending ? std::strong_ordering::less : std::strong_ordering::greater, 0, mRootBlock);
-                //mCollapsing = false;
-            } else {
-                sort(inOrder, mSortDescending ? std::strong_ordering::less : std::strong_ordering::greater, unsortedFront);
-                merge(inOrder, mSortDescending ? std::strong_ordering::less : std::strong_ordering::greater, sortedFront, unsortedFront);
-            }
-
-            //Fix Links
-            if (front != sortedFront) {
-                Item *originalFront = front;
-                if (!mTracker.linkedFront().compare_exchange_strong(front, sortedFront)) {
-                    while (front->second.mNext != originalFront)
-                        front = front->second.mNext;
-                    front->second.mNext = sortedFront;
+                    mRootBlock.mSources = unsortedFront;
+                    collapseSort(inOrder, mSortDescending ? std::strong_ordering::less : std::strong_ordering::greater, 0, mRootBlock);
+                    //mCollapsing = false;
+                } else {
+                    sort(inOrder, mSortDescending ? std::strong_ordering::less : std::strong_ordering::greater, unsortedFront);
+                    merge(inOrder, mSortDescending ? std::strong_ordering::less : std::strong_ordering::greater, sortedFront, unsortedFront);
                 }
-            }
 
-            if (mCollapsing) {
-                drawBlock(mRootBlock.mData, 0);
-            } else {
-                for (const std::pair<const Debug::FullStackTrace, Debug::Memory::TracedAllocationData> *it = sortedFront; it; it = it->second.mNext) {
-                    const auto &trace = *it;
-                    if (!trace.first.empty() && (trace.second.mSize > 0 || trace.second.mGeneration < 64))
-                        traceDraw(trace.first, trace.second.mSize, trace.second.mBlockSize, 0);
+                //Fix Links
+                if (front != sortedFront) {
+                    Item *originalFront = front;
+                    if (!mTracker.linkedFront().compare_exchange_strong(front, sortedFront)) {
+                        while (front->second.mNext != originalFront)
+                            front = front->second.mNext;
+                        front->second.mNext = sortedFront;
+                    }
                 }
-            }
 
-            ImGui::EndColumns();
+                if (mCollapsing) {
+                    drawBlock(mRootBlock.mData, 0);
+                } else {
+                    for (const std::pair<const Debug::FullStackTrace, Debug::Memory::TracedAllocationData> *it = sortedFront; it; it = it->second.mNext) {
+                        const auto &trace = *it;
+                        if (!trace.first.empty() && (trace.second.mSize > 0 || trace.second.mGeneration < 64))
+                            traceDraw(trace.first, trace.second.mSize, trace.second.mBlockSize, 0);
+                    }
+                }
+
+                ImGui::EndTable();
+            }
         }
         ImGui::End();
         ImGui::PopStyleVar();

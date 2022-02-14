@@ -62,7 +62,7 @@ namespace Tools {
     {
         auto buf = std::make_unique<std::stringbuf>();
         std::stringbuf *outBuffer = buf.get();
-        Serialize::SerializeOutStream out { std::move(buf), std::make_unique<Serialize::SerializeStreamData>(std::make_unique<Serialize::IniFormatter>()) };
+        Serialize::FormattedSerializeStream out { std::make_unique<Serialize::IniFormatter>(), std::move(buf), std::make_unique<Serialize::SerializeStreamData>() };
 
         ImRoot *root = static_cast<ImRoot *>(handler->UserData);
         for (ToolBase *tool : uniquePtrToPtr(root->tools())) {
@@ -168,25 +168,14 @@ namespace Tools {
 
             //mManager->setMenuHeight(ImGui::GetWindowSize().y);
 
-            if (ImGui::BeginMenu("File")) {
-                if (ImGui::MenuItem("Quit")) {
-                    throw 0;
-                }
+            if (ImGui::BeginMenu("Project")) {
                 ImGui::EndMenu();
             }
 
-            if (ImGui::BeginMenu("Tools")) {
-                for (const std::unique_ptr<ToolBase> &tool : mCollector) {
-                    bool visible = tool->isVisible();
-                    std::string name = std::string { tool->key() };
-                    if (ImGui::MenuItem(name.c_str(), "", &visible))
-                        tool->setVisible(visible);
-                }
-                ImGui::EndMenu();
-            }
             for (ToolBase *tool : safeIterate(uniquePtrToPtr(mCollector))) {
                 tool->renderMenu();
             }
+
             ImGui::EndMainMenuBar();
         }
 
@@ -238,7 +227,7 @@ namespace Tools {
         if (mToolReadTool) {
 
             auto buf = std::make_unique<std::stringbuf>(mToolReadBuffer.str());
-            Serialize::SerializeInStream in { std::move(buf), std::make_unique<Serialize::SerializeStreamData>(std::make_unique<Serialize::IniFormatter>()) };
+            Serialize::FormattedSerializeStream in { std::make_unique<Serialize::IniFormatter>(), std::move(buf), std::make_unique<Serialize::SerializeStreamData>() };
 
             Serialize::StreamResult result = Serialize::read(in, *mToolReadTool, nullptr, {}, Serialize::StateTransmissionFlags_SkipId);
             if (result.mState != Serialize::StreamState::OK) {

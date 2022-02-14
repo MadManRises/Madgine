@@ -22,7 +22,7 @@
 #include "font.h"
 
 METATABLE_BEGIN(Engine::Widgets::WidgetBase)
-READONLY_PROPERTY(Widgets, children)
+READONLY_PROPERTY(Children, children)
 READONLY_PROPERTY(Pos, getPos)
 READONLY_PROPERTY(Size, getSize)
 MEMBER(mVisible)
@@ -168,10 +168,7 @@ namespace Widgets {
         default:
             std::terminate();
         }
-    }
-
-    template DLL_EXPORT WidgetBase *WidgetBase::createChild<WidgetBase>(const std::string &);
-    template DLL_EXPORT Button *WidgetBase::createChild<Button>(const std::string &);
+    }    
 
     template <typename WidgetType>
     WidgetType *WidgetBase::createChild(const std::string &name)
@@ -184,6 +181,7 @@ namespace Widgets {
     }
 
     template WidgetBase *WidgetBase::createChild<WidgetBase>(const std::string &);
+    template Button *WidgetBase::createChild<Button>(const std::string &);
     template Bar *WidgetBase::createChild<Bar>(const std::string &);
     template Checkbox *WidgetBase::createChild<Checkbox>(const std::string &);
     template Label *WidgetBase::createChild<Label>(const std::string &);
@@ -211,11 +209,6 @@ namespace Widgets {
         mChildren.erase(it);
     }
 
-    /*KeyValueMapList Widget::maps()
-		{
-			return Scope::maps().merge(mChildren, MAP_RO(AbsolutePos, getAbsolutePosition), MAP_RO(AbsoluteSize, getAbsoluteSize), MAP(Visible, isVisible, setVisible), MAP(Size, getSize, setSize), MAP(Position, getPos, setPos));
-		}*/
-
     void WidgetBase::show()
     {
         mVisible = true;
@@ -242,7 +235,7 @@ namespace Widgets {
 
     void WidgetBase::setParent(WidgetBase *parent)
     {
-        auto it = std::ranges::find(mParent->mChildren, parent, projectionToRawPtr);
+        auto it = std::ranges::find(mParent->mChildren, this, projectionToRawPtr);
         parent->mChildren.emplace_back(std::move(*it));
         mParent->mChildren.erase(it);
         mParent = parent;
@@ -346,9 +339,9 @@ namespace Widgets {
     {
         return mManager.createWidgetClass(name, _class, this);
     }
-    Serialize::StreamResult WidgetBase::readWidget(Serialize::SerializeInStream &in, std::unique_ptr<WidgetBase> &widget)
+    Serialize::StreamResult WidgetBase::readWidget(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget)
     {
-        STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, "Widget", 2));
+        STREAM_PROPAGATE_ERROR(in.beginExtendedRead("Widget", 2));
         std::string name;
         WidgetClass _class;
         STREAM_PROPAGATE_ERROR(read(in, name, "name"));
@@ -357,7 +350,7 @@ namespace Widgets {
         widget = createWidgetClass(name, _class);
         return {};
     }
-    void WidgetBase::writeWidget(Serialize::SerializeOutStream &out, const std::unique_ptr<WidgetBase> &widget) const
+    void WidgetBase::writeWidget(Serialize::FormattedSerializeStream &out, const std::unique_ptr<WidgetBase> &widget) const
     {
         mManager.writeWidget(out, widget);
     }
@@ -370,7 +363,7 @@ namespace Widgets {
         return nullptr;
     }
 
-    std::pair<std::vector<Vertex>, TextureSettings> WidgetBase::renderText(const std::string &text, Vector3 pos, const Render::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize)
+    std::pair<std::vector<Vertex>, TextureSettings> WidgetBase::renderText(const std::string &text, Vector3 pos, Vector2 size, const Render::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize)
     {
         std::vector<Vertex> result;
 
@@ -380,28 +373,24 @@ namespace Widgets {
             return {};
 
         float scaleX = fontSize / 5.0f / screenSize.x;
-        float scaleY = fontSize / 5.0f / screenSize.y;
+        float scaleY = fontSize / 5.0f / screenSize.y;        
 
-        const float padding = 1.0f * scaleX;
-
-        float fullWidth = padding * (textLen - 1);
+        float fullWidth = 0.0f;
         float minY = 0.0f;
         float maxY = 0.0f;
 
         for (size_t i = 0; i < textLen; ++i) {
             const Render::Glyph &g = font->mGlyphs[text[i]];
 
-            fullWidth += g.mSize.x * scaleX;
-            maxY = max(maxY, g.mBearingY * scaleY);
-            minY = min(minY, (g.mBearingY - g.mSize.y) * scaleY);
+            fullWidth += g.mAdvance / 64.0f * scaleX;
+            maxY = max(maxY, g.mBearing.y * scaleY);
+            minY = min(minY, (g.mBearing.y - g.mSize.y) * scaleY);
         }
 
         float fullHeight = maxY - minY;
 
-        float xLeft = -fullWidth * pivot.x;
-        float yTop = -fullHeight * pivot.y;
-
-        float cursorX = xLeft;
+        float cursorX = (size.x - fullWidth) * pivot.x;
+        float originY = (size.y - fullHeight) * pivot.y + maxY;
 
         for (size_t i = 0; i < textLen; ++i) {
             const Render::Glyph &g = font->mGlyphs[text[i]];
@@ -409,9 +398,9 @@ namespace Widgets {
             float width = g.mSize.x * scaleX;
             float height = g.mSize.y * scaleY;
 
-            float vPosX1 = cursorX;
-            float vPosX2 = cursorX + width;
-            float vPosY1 = yTop + fullHeight - g.mBearingY * scaleY;
+            float vPosX1 = cursorX + g.mBearing.x * scaleX;
+            float vPosX2 = vPosX1 + width;
+            float vPosY1 = originY - g.mBearing.y * scaleY;
             float vPosY2 = vPosY1 + height;
 
             Vector3 v11 = { vPosX1, vPosY1, pos.z + 0.5f }, v12 = { vPosX2, vPosY1, pos.z + 0.5f }, v21 = { vPosX1, vPosY2, pos.z + 0.5f }, v22 = { vPosX2, vPosY2, pos.z + 0.5f };

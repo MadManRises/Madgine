@@ -133,7 +133,7 @@ namespace Scene {
             return !holdsRef() || getBlock()->dead();
         }
 
-        Serialize::StreamResult EntityPtr::readState(Serialize::SerializeInStream &in, const char *name)
+        Serialize::StreamResult EntityPtr::readState(Serialize::FormattedSerializeStream &in, const char *name)
         {
             Entity *ptr;
             STREAM_PROPAGATE_ERROR(Serialize::read(in, ptr, name));
@@ -141,12 +141,12 @@ namespace Scene {
             return {};
         }
 
-        void EntityPtr::writeState(Serialize::SerializeOutStream &out, const char *name) const
+        void EntityPtr::writeState(Serialize::FormattedSerializeStream &out, const char *name) const
         {
             Serialize::write(out, get(), name);
         }
 
-        Serialize::StreamResult EntityPtr::applySerializableMap(Serialize::SerializeInStream &in, bool success)
+        Serialize::StreamResult EntityPtr::applySerializableMap(Serialize::FormattedSerializeStream &in, bool success)
         {
             if (mEntity & static_cast<uintptr_t>(Serialize::UnitIdTag::SYNCABLE)) {
                 Entity *ptr = reinterpret_cast<Entity *>(mEntity);

@@ -277,31 +277,27 @@ namespace Im3D {
         if (textLen == 0)
             return;
 
-        float scale = param.mFontSize / 5000.0f;
+        float scale = param.mFontSize / 5000.0f;        
 
-        const float padding = 1.0f * scale;
-
-        float fullWidth = padding * (textLen - 1);
+        float fullWidth = 0.0f;
         float minY = 0.0f;
         float maxY = 0.0f;
 
         for (size_t i = 0; i < textLen; ++i) {
             Render::Glyph &g = font.mGlyphs[static_cast<uint8_t>(text[i])];
 
-            fullWidth += g.mSize.x * scale;
-            maxY = max(maxY, g.mBearingY * scale);
-            minY = min(minY, (g.mBearingY - g.mSize.y) * scale);
+            fullWidth += g.mAdvance / 64.0f * scale;
+            maxY = max(maxY, g.mBearing.y * scale);
+            minY = min(minY, (g.mBearing.y - g.mSize.y) * scale);
         }
 
         float fullHeight = maxY - minY;
 
-        float xLeft = -fullWidth * param.mPivot.x;
-        float yTop = fullHeight * param.mPivot.y;
+        float cursorX = -fullWidth * param.mPivot.x;
+        float originY = fullHeight * param.mPivot.y - maxY;
 
         std::unique_ptr<Render::Vertex2[]> vertices = std::make_unique<Render::Vertex2[]>(4 * textLen);
         std::unique_ptr<unsigned short[]> indices = std::make_unique<unsigned short[]>(6 * textLen);
-
-        float cursorX = xLeft;
 
         for (size_t i = 0; i < textLen; ++i) {
             Render::Glyph &g = font.mGlyphs[static_cast<uint8_t>(text[i])];
@@ -309,9 +305,9 @@ namespace Im3D {
             float width = g.mSize.x * scale;
             float height = g.mSize.y * scale;
 
-            float vPosX1 = cursorX;
-            float vPosX2 = cursorX + width;
-            float vPosY1 = yTop - fullHeight + g.mBearingY * scale;
+            float vPosX1 = cursorX + g.mBearing.x * scale;
+            float vPosX2 = vPosX1 + width;
+            float vPosY1 = originY + g.mBearing.y * scale;
             float vPosY2 = vPosY1 - height;
 
             Vector3 v11 = { 0, 0, 0 }, v12 = { 0, 0, 0 }, v21 = { 0, 0, 0 }, v22 = { 0, 0, 0 };

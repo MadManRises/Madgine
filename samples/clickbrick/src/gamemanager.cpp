@@ -209,7 +209,7 @@ namespace UI {
     void GameManager::modScore(int diff)
     {
         mScore += diff;
-        mScoreLabel->mText = "Score:" + std::to_string(mScore);
+        mScoreLabel->mText = "Score: " + std::to_string(mScore);
     }
 
     void GameManager::modLife(int diff)
@@ -229,7 +229,7 @@ namespace UI {
         mAcc = std::chrono::microseconds { 0 };
 
         mScore = 0;
-        mScoreLabel->mText = "Score:" + std::to_string(mScore);
+        mScoreLabel->mText = "Score: " + std::to_string(mScore);
         mLife = 3;
         mLifeLabel->mText = "Life: " + std::to_string(mLife);
 

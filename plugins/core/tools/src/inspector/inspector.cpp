@@ -83,6 +83,8 @@ namespace Tools {
         if (ImGui::Begin("Inspector", &mVisible)) {
             auto drawList = [this](const std::map<std::string_view, TypedScopePtr> &items) {
                 for (const std::pair<const std::string_view, TypedScopePtr> &p : items) {
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
                     if (ImGui::TreeNode(p.first.data())) {
                         drawMembers(p.second, {}, p.first.data());
                         ImGui::TreePop();
@@ -90,8 +92,11 @@ namespace Tools {
                 }
             };
 
-            drawList(KeyValueRegistry::globals());
-            drawList(KeyValueRegistry::workgroupLocals());
+            if (ImGui::BeginTable("table", 2, ImGuiTableFlags_Resizable)) {
+                drawList(KeyValueRegistry::globals());
+                drawList(KeyValueRegistry::workgroupLocals());
+                ImGui::EndTable();
+            }
         }
         ImGui::End();
     }
@@ -102,6 +107,7 @@ namespace Tools {
 
         for (ScopeIterator it = scope.begin(); it != scope.end(); ++it) {
             if (drawn.count(it->key()) == 0) {
+                ImGui::TableNextRow();
                 changed |= drawMember(scope, it);
                 drawn.insert(it->key());
             }
@@ -254,7 +260,6 @@ namespace Tools {
 
     bool Inspector::drawValue(std::string_view id, KeyValueVirtualSequenceRange &range, bool editable, tinyxml2::XMLElement *element)
     {
-        ImGui::TableNextRow();
         ImGui::TableNextColumn();
 
         bool changed = false;
@@ -266,6 +271,7 @@ namespace Tools {
         if (b) {
             size_t i = 0;
             for (auto vValue : range) {
+                ImGui::TableNextRow();
                 ValueType value = vValue;
                 std::string key = std::to_string(i);
                 if (value.is<TypedScopePtr>()) {
@@ -286,7 +292,6 @@ namespace Tools {
 
     bool Inspector::drawValue(std::string_view id, KeyValueVirtualAssociativeRange &range, bool editable, tinyxml2::XMLElement *element)
     {
-        ImGui::TableNextRow();
         ImGui::TableNextColumn();
 
         bool changed = false;
@@ -298,6 +303,7 @@ namespace Tools {
         if (b) {
             size_t i = 0;
             for (auto [vKey, vValue] : range) {
+                ImGui::TableNextRow();
                 ValueType value = vValue;
                 std::string key = vKey.toShortString() + "##" + std::to_string(i);
                 std::pair<bool, bool> result = drawValue(key, value, /*editable && */ vValue.isEditable(), false, element);
@@ -358,6 +364,7 @@ namespace Tools {
     {
         bool changed = false;
         for (tinyxml2::XMLElement *el = layout->rootElement()->FirstChildElement(); el; el = el->NextSiblingElement()) {
+            ImGui::TableNextRow();
             changed |= drawElement(scope, drawn, el);
         }
         return changed;
@@ -418,6 +425,7 @@ namespace Tools {
                     continue;
 
                 if (draw) {
+                    ImGui::TableNextRow();
                     tinyxml2::XMLElement *rule = nullptr;
                     for (tinyxml2::XMLElement *child = element->FirstChildElement("Rule"); child; child = child->NextSiblingElement("Rule")) {
                         const char *name = child->Attribute("name");
@@ -463,6 +471,7 @@ namespace Tools {
             ++count;
         ImGui::PushMultiItemsWidths(count, 100.0f); //TODO
         for (tinyxml2::XMLElement *child = element->FirstChildElement(); child; child = child->NextSiblingElement()) {
+            ImGui::TableNextRow();
             drawElement(scope, drawn, child);
             if (--count > 0)
                 ImGui::SameLine();

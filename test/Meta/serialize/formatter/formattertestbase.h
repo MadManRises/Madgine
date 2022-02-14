@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../testunit.h"
+#include "../testManager.h"
 
 #include "Meta/serialize/streams/serializestream.h"
 
@@ -28,6 +29,9 @@ void FormatterBaseTest(std::string_view expected = "")
     unit1.complexList1.emplace_back(2, 6.0f, "set");
     unit1.complexList1.emplace_back();
 
+    const char *s = "Hello World!";
+    unit1.bytes = { s, strlen(s) };
+
     std::unique_ptr<std::stringbuf> pBuffer = std::make_unique<std::stringbuf>();
 
     std::stringbuf *buffer = pBuffer.get();
@@ -47,8 +51,7 @@ void FormatterBaseTest(std::string_view expected = "")
 
     SerializeInStream in { out.release(), std::make_unique<SerializeStreamData>(std::make_unique<Formatter>()) };
 
-    StreamResult result = read(in, unit2, nullptr);
-    ASSERT_EQ(result.mState, StreamState::OK);
+    HANDLE_STREAM_RESULT(read(in, unit2, nullptr));
 
     ASSERT_EQ(unit1, unit2);
 }

@@ -19,7 +19,7 @@ namespace Tools {
 
         std::string_view key() const override;
 
-        void setCurrentConfig(const Filesystem::Path &path, const std::string &name);
+        //void setCurrentConfig(const Filesystem::Path &path, const std::string &name);
 
     protected:
         void updateConfigFile();

@@ -27,11 +27,11 @@ namespace Serialize {
         SyncableUnitBase &operator=(SyncableUnitBase &&other);
 
     public:
-        void writeState(SerializeOutStream &out, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0) const;
-        StreamResult readState(SerializeInStream &in, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0);
+        void writeState(FormattedSerializeStream &out, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0) const;
+        StreamResult readState(FormattedSerializeStream &in, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0);
 
-        StreamResult readAction(BufferedInOutStream &in, PendingRequest *request);
-        StreamResult readRequest(BufferedInOutStream &in, TransactionId id);
+        StreamResult readAction(FormattedBufferedStream &in, PendingRequest *request);
+        StreamResult readRequest(FormattedBufferedStream &in, TransactionId id);
 
         UnitId slaveId() const;
         UnitId masterId() const;
@@ -46,8 +46,8 @@ namespace Serialize {
         UnitId moveMasterId(UnitId newId = 0);
 
     private:
-        std::set<BufferedOutStream *, CompareStreamId> getMasterMessageTargets() const;
-        BufferedOutStream &getSlaveMessageTarget() const;
+        std::set<FormattedBufferedStream *, CompareStreamId> getMasterMessageTargets() const;
+        FormattedBufferedStream &getSlaveMessageTarget() const;
 
         void clearSlaveId(SerializeManager *mgr);
 

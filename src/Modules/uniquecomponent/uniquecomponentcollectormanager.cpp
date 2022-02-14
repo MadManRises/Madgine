@@ -19,8 +19,6 @@ namespace Engine {
 UniqueComponentCollectorManager::UniqueComponentCollectorManager(Plugins::PluginManager &pluginMgr)
     : mMgr(pluginMgr)
 {
-    mMgr.exportSignal().connect(&exportStaticComponentHeader);
-
     CompoundAtomicOperation op;
     for (const auto& [name, section] : pluginMgr) {
         for (const auto& [name, plugin] : section) {

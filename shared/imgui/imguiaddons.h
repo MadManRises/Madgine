@@ -84,6 +84,7 @@ IMGUI_API void BeginTreeArrow(const void *label, ImGuiTreeNodeFlags flags = 0);
 IMGUI_API bool EndTreeArrow(bool *opened = nullptr);
 IMGUI_API void BeginSpanningTreeNode(const void *id, const char *label, ImGuiTreeNodeFlags flags = 0);
 IMGUI_API bool EndSpanningTreeNode();
+IMGUI_API bool EditableTreeNode(const void *id, std::string *s, ImGuiTreeNodeFlags flags = 0);
 
 IMGUI_API void Duration(std::chrono::nanoseconds dur);
 IMGUI_API void RightAlignDuration(std::chrono::nanoseconds dur);
@@ -229,5 +230,8 @@ IMGUI_API bool InteractiveView(InteractiveViewState &state);
 
 IMGUI_API void BeginGroupPanel(const char *name, const ImVec2 &size = ImVec2(0.0f, 0.0f));
 IMGUI_API void EndGroupPanel();
+
+IMGUI_API bool BeginPopupCompoundContextItem(const char *str_id = nullptr);
+IMGUI_API bool BeginPopupCompoundContextWindow(const char *str_id = nullptr, ImGuiPopupFlags popup_flags = 1);
 
 }

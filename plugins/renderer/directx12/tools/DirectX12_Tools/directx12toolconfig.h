@@ -18,6 +18,8 @@ namespace Tools {
         virtual Threading::Task<bool> init() override;
         virtual Threading::Task<void> finalize() override;
 
+        virtual void renderMenu() override;
+
         std::string_view key() const override;
 
     private:
