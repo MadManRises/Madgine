@@ -52,8 +52,7 @@ using KeyValueVirtualSequenceRange = VirtualRange<ValueTypeRef, Functor_to_Value
 
 
 namespace Serialize {
-    struct SerializeInStream;
-    struct SerializeOutStream;
+    struct SerializeStream;
     struct SerializableDataUnit;
     struct SerializableUnitBase;
     struct SyncableUnitBase;
@@ -95,6 +94,12 @@ namespace Serialize {
         SYNCABLE = 1,
         SERIALIZABLE = 2
     };
+
+    enum class StreamMode {
+        READ,
+        WRITE
+    };
+
 
     struct buffered_streambuf;
 

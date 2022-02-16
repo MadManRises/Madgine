@@ -14,6 +14,17 @@
 namespace Engine {
 namespace Serialize {
 
+    SerializeStream &Formatter::stream()
+    {
+        return mStream;
+    }
+
+    void Formatter::setupStream(SerializeStream stream) {
+        assert(!mStream);
+        mStream = std::move(stream);
+        setupStream(mStream.stream());
+    }
+
     StreamResult Formatter::beginExtendedRead(const char *name, size_t count)
     {
         return {};
@@ -49,16 +60,26 @@ namespace Serialize {
         return {};
     }
 
+    StreamResult Formatter::beginHeaderRead()
+    {
+        return {};
+    }
+
+    StreamResult Formatter::endHeaderRead()
+    {
+        return {};
+    }
+
     StreamResult Formatter::read(std::string &s)
     {
         if (mBinary) {
-            mIn.read(s);
+            mStream.read(s);
         } else if (mNextStringDelimiter) {
-            STREAM_PROPAGATE_ERROR(mIn.readUntil(s, mNextStringDelimiter));
+            STREAM_PROPAGATE_ERROR(mStream.readUntil(s, mNextStringDelimiter));
             s.resize(s.size() - 1);
             mNextStringDelimiter = nullptr;
         } else {
-            mIn >> s;
+            mStream >> s;
         }
         return {};
     }
@@ -66,9 +87,9 @@ namespace Serialize {
     StreamResult Formatter::expect(std::string_view expected)
     {
         std::string actual;
-        STREAM_PROPAGATE_ERROR(mIn.readN(actual, expected.size()));
+        STREAM_PROPAGATE_ERROR(mStream.readN(actual, expected.size()));
         if (actual != expected)
-            return STREAM_PARSE_ERROR(mIn, mBinary, "Expected '" << expected << "', Got '" << actual << "'");
+            return STREAM_PARSE_ERROR(mStream, mBinary, "Expected '" << expected << "', Got '" << actual << "'");
         return {};
     }
 

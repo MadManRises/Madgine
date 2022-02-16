@@ -146,7 +146,7 @@ namespace Filesystem {
         return (p1.str().size() == p2.str().size()) && std::equal(p1.str().begin(), p1.str().end(), p2.str().begin(), &compareChar);
     }
 
-    InStream openFileRead(const Path &p, bool isBinary)
+    Stream openFileRead(const Path &p, bool isBinary)
     {
         std::unique_ptr<std::filebuf> buffer = std::make_unique<std::filebuf>();
         if (buffer->open(p.c_str(), static_cast<std::ios_base::openmode>(std::ios_base::in | (isBinary ? std::ios_base::binary : 0))))
@@ -155,7 +155,7 @@ namespace Filesystem {
             return {};
     }
 
-    OutStream openFileWrite(const Path &p, bool isBinary)
+    Stream openFileWrite(const Path &p, bool isBinary)
     {
         std::unique_ptr<std::filebuf> buffer = std::make_unique<std::filebuf>();
         if (buffer->open(p.c_str(), static_cast<std::ios_base::openmode>(std::ios_base::out | (isBinary ? std::ios_base::binary : 0))))

@@ -63,7 +63,7 @@ namespace Serialize {
 
     void SyncableUnitBase::writeState(FormattedSerializeStream &out, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags) const
     {
-        if (out.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
+        if (out.isMaster(StreamMode::WRITE) && !(flags & StateTransmissionFlags_SkipId)) {
             out.beginExtendedWrite(name, 1);
             write(out, mMasterId, "syncId");
         }
@@ -72,7 +72,7 @@ namespace Serialize {
 
     StreamResult SyncableUnitBase::readState(FormattedSerializeStream &in, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags)
     {
-        if (!in.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
+        if (!in.isMaster(StreamMode::READ) && !(flags & StateTransmissionFlags_SkipId)) {
             STREAM_PROPAGATE_ERROR(in.beginExtendedRead(name, 1));
             UnitId id;
             STREAM_PROPAGATE_ERROR(read(in, id, "syncId"));
@@ -97,9 +97,9 @@ namespace Serialize {
         return mType->readRequest(this, in, id);
     }
 
-    std::set<FormattedBufferedStream *, CompareStreamId> SyncableUnitBase::getMasterMessageTargets() const
+    std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> SyncableUnitBase::getMasterMessageTargets() const
     {
-        std::set<FormattedBufferedStream *, CompareStreamId> result;
+        std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> result;
         if (mSynced) {
             result = mTopLevel->getMasterMessageTargets();
         }

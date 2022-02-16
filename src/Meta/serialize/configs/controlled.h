@@ -19,25 +19,25 @@ namespace Serialize {
         static const constexpr bool controlled = true;
 
         template <typename C>
-        static void writeItem(SerializeOutStream &out, const typename container_traits<C>::value_type &t)
+        static void writeItem(FormattedSerializeStream &out, const typename container_traits<C>::value_type &t)
         {
-            out.format().beginExtended(out, "Item", 1);
+            out.beginExtendedWrite("Item", 1);
             write(out, comparator_traits<Cmp>::to_cmp_type(t), "key");
             write(out, t, "Item");
         }
 
         template <typename Op>
-        static StreamResult readItem(SerializeInStream &in, Op &op, typename container_traits<Op>::iterator &it)
+        static StreamResult readItem(FormattedSerializeStream &in, Op &op, typename container_traits<Op>::iterator &it)
         {
             /*if (it != physical(op).end())
                 return STREAM_ERROR(in, StreamState::UNKNOWN_ERROR, "Reading currently only supported at end()");*/
 
-            STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, "Item", 1));
+            STREAM_PROPAGATE_ERROR(in.beginExtendedRead("Item", 1));
             MakeOwning_t<typename comparator_traits<Cmp>::type> key;
             STREAM_PROPAGATE_ERROR(read(in, key, "key"));
             it = std::ranges::find(physical(op), key, &comparator_traits<Cmp>::to_cmp_type);
             if (it == physical(op).end())
-                return STREAM_ERROR(in, StreamState::UNKNOWN_ERROR, "Missing item of name '" << key << "' in controlled container");
+                return STREAM_ERROR(in.stream(), in.isBinary(), StreamState::UNKNOWN_ERROR, "Missing item of name '" << key << "' in controlled container");
 
             return read(in, *it, "Item");
         }

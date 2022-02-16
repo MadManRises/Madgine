@@ -26,9 +26,14 @@ namespace Filesystem {
     {
         assert(!getSlaveStreamData());
 
-        InStream stream = openFileRead(path, format->mBinary);
+        Stream stream = openFileRead(path, format->mBinary);
         if (stream) {
-            Serialize::FormattedSerializeStream in { stream.release(), std::make_unique<Serialize::SerializeStreamData>(std::move(format), *this, createStreamId()) };
+            Serialize::FormattedSerializeStream in {
+                std::move(format),
+                Serialize::SerializeStream {
+                    stream.release(),
+                    createStreamData() }
+            };
             setSlaveStreamData(&in.data());
 
             return in;
@@ -39,12 +44,12 @@ namespace Filesystem {
 
     Serialize::FormattedSerializeStream FileManager::openWrite(const Path &path, std::unique_ptr<Serialize::Formatter> format)
     {
-        OutStream stream = openFileWrite(path, format->mBinary);
+        Stream stream = openFileWrite(path, format->mBinary);
         if (stream) {
-            return Serialize::FormattedSerializeStream { stream.release(), std::make_unique<Serialize::SerializeStreamData>(std::move(format), *this, createStreamId()) };           
+            return Serialize::FormattedSerializeStream { std::move(format), Serialize::SerializeStream { stream.release(), createStreamData() } };
         } else {
             return {};
-        }        
+        }
     }
 
 }

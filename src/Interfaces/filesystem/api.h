@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Generic/streams.h"
+#include "Generic/stream.h"
 #include "filequery.h"
 
 namespace Engine {
@@ -36,8 +36,8 @@ namespace Filesystem {
     INTERFACES_EXPORT bool isSeparator(char c);
     INTERFACES_EXPORT bool isEqual(const Path &p1, const Path &p2);
 
-    INTERFACES_EXPORT InStream openFileRead(const Path &p, bool isBinary = false);
-    INTERFACES_EXPORT OutStream openFileWrite(const Path &p, bool isBinary = false);
+    INTERFACES_EXPORT Stream openFileRead(const Path &p, bool isBinary = false);
+    INTERFACES_EXPORT Stream openFileWrite(const Path &p, bool isBinary = false);
     /*INTERFACES_EXPORT InStream openAppDataFileRead(const Path &p, bool isBinary = false);
     INTERFACES_EXPORT OutStream openAppDataFileWrite(const Path &p, bool isBinary = false);*/
     INTERFACES_EXPORT FileInfo fileInfo(const Path &p);

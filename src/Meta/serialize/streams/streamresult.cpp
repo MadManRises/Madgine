@@ -9,7 +9,7 @@
 namespace Engine {
 namespace Serialize {
 
-    StreamError::StreamError(SerializeInStream &in, bool binary, const std::string &msg, const char *file, size_t sourceLine)
+    StreamError::StreamError(SerializeStream &in, bool binary, const std::string &msg, const char *file, size_t sourceLine)
     {
         std::stringstream ss;
         std::stringstream notes;
@@ -40,7 +40,7 @@ namespace Serialize {
 
             if (in) {
                 std::string area;
-                in.InStream::operator>>(area);
+                in.Stream::operator>>(area);
                 notes << "Note: next to '" << area << "'\n";
             }
         }

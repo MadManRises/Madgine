@@ -46,7 +46,7 @@ namespace Serialize {
         UnitId moveMasterId(UnitId newId = 0);
 
     private:
-        std::set<FormattedBufferedStream *, CompareStreamId> getMasterMessageTargets() const;
+        std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterMessageTargets() const;
         FormattedBufferedStream &getSlaveMessageTarget() const;
 
         void clearSlaveId(SerializeManager *mgr);

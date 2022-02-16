@@ -14,14 +14,10 @@ namespace Serialize {
     {
     }
 
-    void XMLFormatter::setupStream(std::istream &in)
+    void XMLFormatter::setupStream(std::iostream &inout)
     {
-        in >> std::boolalpha;
-    }
-
-    void XMLFormatter::setupStream(std::ostream &out)
-    {
-        out << std::boolalpha;
+        inout >> std::boolalpha;
+        inout << std::boolalpha;
     }
 
     void XMLFormatter::beginExtendedWrite(const char *name, size_t count)
@@ -29,7 +25,7 @@ namespace Serialize {
         if (!mCurrentExtended) {
             if (!name)
                 name = "Item";
-            mOut << indent() << "<" << name;
+            mStream << indent() << "<" << name;
             mCurrentExtended = true;
         }
         assert(mCurrentExtendedCount == 0);
@@ -42,16 +38,16 @@ namespace Serialize {
         if (!mCurrentExtended) {
             if (name) {
                 std::string prefix;
-                STREAM_PROPAGATE_ERROR(mIn.readN(prefix, strlen(name) + 1));
+                STREAM_PROPAGATE_ERROR(mStream.readN(prefix, strlen(name) + 1));
                 if (prefix != "<" + std::string(name))
-                    return STREAM_PARSE_ERROR(mIn, mBinary, "Expected extended opening tag '<" << name << "'");
+                    return STREAM_PARSE_ERROR(mStream, mBinary, "Expected extended opening tag '<" << name << "'");
             } else {
                 std::string prefix;
-                STREAM_PROPAGATE_ERROR(mIn.readUntil(prefix, " >"));
+                STREAM_PROPAGATE_ERROR(mStream.readUntil(prefix, " >"));
                 if (!StringUtil::startsWith(prefix, "<"))
-                    return STREAM_PARSE_ERROR(mIn, mBinary, "Expected extended opening tag, found: " << prefix);
+                    return STREAM_PARSE_ERROR(mStream, mBinary, "Expected extended opening tag, found: " << prefix);
                 if (prefix.size() <= 1)
-                    return STREAM_PARSE_ERROR(mIn, mBinary, "Expected extended opening tag");
+                    return STREAM_PARSE_ERROR(mStream, mBinary, "Expected extended opening tag");
             }
             mCurrentExtended = true;
         }
@@ -66,11 +62,11 @@ namespace Serialize {
         if (!mCurrentExtended) {
             if (!name)
                 name = "Item";
-            mOut << indent() << "<" << name;
+            mStream << indent() << "<" << name;
         } else {
             assert(mCurrentExtendedCount == 0);
         }
-        mOut << ">\n";
+        mStream << ">\n";
         mCurrentExtended = false;
         ++mLevel;
     }
@@ -79,10 +75,10 @@ namespace Serialize {
     {
         if (!mCurrentExtended) {
             std::string prefix;
-            STREAM_PROPAGATE_ERROR(mIn.readUntil(prefix, ">"));
+            STREAM_PROPAGATE_ERROR(mStream.readUntil(prefix, ">"));
             if (name && prefix != "<" + std::string(name) + ">")
-                return STREAM_PARSE_ERROR(mIn, mBinary, "Expected opening tag <" << name << ">, found: " << prefix);
-            mIn.seek(mIn.tell() - off_type { 1 });
+                return STREAM_PARSE_ERROR(mStream, mBinary, "Expected opening tag <" << name << ">, found: " << prefix);
+            mStream.seek(mStream.tell() - off_type { 1 });
         } else {
             assert(mCurrentExtendedCount == 0);
             STREAM_PROPAGATE_ERROR(prefetchAttributes());
@@ -96,17 +92,17 @@ namespace Serialize {
         --mLevel;
         if (!name)
             name = "Item";
-        mOut << indent() << "</" << name << ">\n";
+        mStream << indent() << "</" << name << ">\n";
     }
 
     StreamResult XMLFormatter::endCompoundRead(const char *name)
     {
         std::string prefix;
-        STREAM_PROPAGATE_ERROR(mIn.readUntil(prefix, ">"));
+        STREAM_PROPAGATE_ERROR(mStream.readUntil(prefix, ">"));
         if (name && prefix != "</" + std::string(name) + ">")
-            return STREAM_PARSE_ERROR(mIn, mBinary, "Expected closing tag '</" << name << ">', found: " << prefix);
+            return STREAM_PARSE_ERROR(mStream, mBinary, "Expected closing tag '</" << name << ">', found: " << prefix);
         if (!StringUtil::startsWith(prefix, "</"))
-            return STREAM_PARSE_ERROR(mIn, mBinary, "Expected closing tag");
+            return STREAM_PARSE_ERROR(mStream, mBinary, "Expected closing tag");
         return {};
     }
 
@@ -117,16 +113,16 @@ namespace Serialize {
         if (mCurrentExtendedCount > 0) {
             assert(mCurrentExtended);
             --mCurrentExtendedCount;
-            mOut << " " << name << "=";
+            mStream << " " << name << "=";
             if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<ByteBuffer>)
-                mOut << "\"";
+                mStream << "\"";
         } else {
             if (!mCurrentExtended) {
-                mOut << indent() << "<" << name;
+                mStream << indent() << "<" << name;
             } else {
                 mCurrentExtended = false;
             }
-            mOut << ">";
+            mStream << ">";
         }
     }
 
@@ -137,8 +133,8 @@ namespace Serialize {
             --mCurrentExtendedCount;
             auto it = mPrefetchedAttributes.find(name);
             if (it != mPrefetchedAttributes.end()) {
-                mExtendedLookupPos = mIn.tell();
-                mIn.seek(it->second);
+                mExtendedLookupPos = mStream.tell();
+                mStream.seek(it->second);
                 mPrefetchedAttributes.erase(it);
             } else {
                 STREAM_PROPAGATE_ERROR(prefetchAttributes(name));
@@ -150,12 +146,12 @@ namespace Serialize {
         } else {
             if (!mCurrentExtended) {
                 std::string prefix;
-                STREAM_PROPAGATE_ERROR(mIn.peekUntil(prefix, ">"));
+                STREAM_PROPAGATE_ERROR(mStream.peekUntil(prefix, ">"));
                 if (prefix.size() <= 1)
-                    return STREAM_PARSE_ERROR(mIn, mBinary, "Syntax error");
+                    return STREAM_PARSE_ERROR(mStream, mBinary, "Syntax error");
                 if (name && prefix != "<" + std::string(name) + ">")
-                    return STREAM_PARSE_ERROR(mIn, mBinary, "Expected: '" << name << "'");
-                STREAM_PROPAGATE_ERROR(mIn.readN(prefix, prefix.size() - 1));
+                    return STREAM_PARSE_ERROR(mStream, mBinary, "Expected: '" << name << "'");
+                STREAM_PROPAGATE_ERROR(mStream.readN(prefix, prefix.size() - 1));
             } else {
                 mCurrentExtended = false;
             }
@@ -173,26 +169,26 @@ namespace Serialize {
             name = "Element";
         if (mCurrentExtended) {
             if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<ByteBuffer>)
-                mOut << "\"";
+                mStream << "\"";
         } else
-            mOut << "</" << name << ">\n";
+            mStream << "</" << name << ">\n";
     }
 
     StreamResult XMLFormatter::endPrimitiveRead(const char *name, uint8_t typeId)
     {
         if (mCurrentExtended) {
             if (mExtendedLookupPos != -1) {
-                mIn.seek(mExtendedLookupPos);
+                mStream.seek(mExtendedLookupPos);
                 mExtendedLookupPos = -1;
             }
         } else {
             const char *cPrefix = ((typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<ByteBuffer>) ? "/" : "</");
             std::string prefix;
-            STREAM_PROPAGATE_ERROR(mIn.readUntil(prefix, ">"));
+            STREAM_PROPAGATE_ERROR(mStream.readUntil(prefix, ">"));
             if (prefix.size() <= 1)
-                return STREAM_PARSE_ERROR(mIn, mBinary, "Syntax error");
+                return STREAM_PARSE_ERROR(mStream, mBinary, "Syntax error");
             if (name && prefix != cPrefix + std::string(name) + ">")
-                return STREAM_PARSE_ERROR(mIn, mBinary, "Expected: '" << name << "'");
+                return STREAM_PARSE_ERROR(mStream, mBinary, "Expected: '" << name << "'");
         }
         return {};
     }
@@ -201,7 +197,7 @@ namespace Serialize {
     {
         name.clear();
         std::string dummy;
-        STREAM_PROPAGATE_ERROR(mIn.peekUntil(dummy, "> "));
+        STREAM_PROPAGATE_ERROR(mStream.peekUntil(dummy, "> "));
         if (!dummy.empty()) {
             if (dummy[0] != '<')
                 throw 0;
@@ -235,7 +231,7 @@ namespace Serialize {
     bool XMLFormatter::hasContainerItem()
     {
         std::string prefix;
-        if (mIn.peekN(prefix, 2).mState != StreamState::OK)
+        if (mStream.peekN(prefix, 2).mState != StreamState::OK)
             return false;
         if (prefix[0] != '<')
             throw 0;
@@ -250,30 +246,30 @@ namespace Serialize {
     StreamResult XMLFormatter::prefetchAttributes(const char *name)
     {
         std::string prefix;
-        STREAM_PROPAGATE_ERROR(mIn.peekN(prefix, 1));
+        STREAM_PROPAGATE_ERROR(mStream.peekN(prefix, 1));
         while (prefix != ">") {
-            STREAM_PROPAGATE_ERROR(mIn.readUntil(prefix, "="));
+            STREAM_PROPAGATE_ERROR(mStream.readUntil(prefix, "="));
             if (name && prefix == name + "="s)
                 return {};
-            mPrefetchedAttributes.try_emplace(std::string { StringUtil::substr(prefix, 0, -1) }, mIn.tell());
+            mPrefetchedAttributes.try_emplace(std::string { StringUtil::substr(prefix, 0, -1) }, mStream.tell());
             STREAM_PROPAGATE_ERROR(skipValue());
-            STREAM_PROPAGATE_ERROR(mIn.peekN(prefix, 1));
+            STREAM_PROPAGATE_ERROR(mStream.peekN(prefix, 1));
         }
         if (name)
-            return STREAM_PARSE_ERROR(mIn, mBinary, "Missing attribute '" << name << "'");
+            return STREAM_PARSE_ERROR(mStream, mBinary, "Missing attribute '" << name << "'");
         return {};
     }
 
     StreamResult XMLFormatter::skipValue()
     {
         std::string next;
-        STREAM_PROPAGATE_ERROR(mIn.peekN(next, 1));
+        STREAM_PROPAGATE_ERROR(mStream.peekN(next, 1));
         if (next == "\"") {
-            STREAM_PROPAGATE_ERROR(mIn.readN(next, 1));
-            STREAM_PROPAGATE_ERROR(mIn.readUntil(next, "\""));
+            STREAM_PROPAGATE_ERROR(mStream.readN(next, 1));
+            STREAM_PROPAGATE_ERROR(mStream.readUntil(next, "\""));
         } else {
             float dummy; //TODO Is this catching all cases?
-            STREAM_PROPAGATE_ERROR(mIn >> dummy);
+            STREAM_PROPAGATE_ERROR(mStream >> dummy);
         }
         return {};
     }

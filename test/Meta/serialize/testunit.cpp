@@ -24,17 +24,17 @@ constexpr const char *list1ArgNames(size_t index)
     return names[index];
 }
 
-void writeList1(Engine::Serialize::SerializeOutStream &out, const ComplexDataType &data)
+void writeList1(Engine::Serialize::FormattedSerializeStream &out, const ComplexDataType &data)
 {
-    out.format().beginExtended(out, "Item", 4);
+    out.beginExtendedWrite("Item", 4);
     write(out, data.i, "first");
     write(out, data.f, "second");
     write(out, data.s, "third");
     write(out, data.b, "fourth");
 }
-Engine::Serialize::StreamResult readList1(Engine::Serialize::SerializeInStream &in, int &i, float &f, std::string &s, bool &b)
+Engine::Serialize::StreamResult readList1(Engine::Serialize::FormattedSerializeStream &in, int &i, float &f, std::string &s, bool &b)
 {
-    STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, "Item", 4));
+    STREAM_PROPAGATE_ERROR(in.beginExtendedRead("Item", 4));
     STREAM_PROPAGATE_ERROR(read(in, i, "first"));
     STREAM_PROPAGATE_ERROR(read(in, f, "second"));
     STREAM_PROPAGATE_ERROR(read(in, s, "third"));

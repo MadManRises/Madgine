@@ -52,7 +52,7 @@ namespace Serialize {
                         table = table->mBaseType ? &table->mBaseType() : nullptr;
                     }
                     if (!found)
-                        return STREAM_PARSE_ERROR(in.in(), in.isBinary(), "Could not find field '" << name << "'");
+                        return STREAM_PARSE_ERROR(in.stream(), in.isBinary(), "Could not find field '" << name << "'");
                     STREAM_PROPAGATE_ERROR(in.lookupFieldName(name));
                 }
             } else {
@@ -95,10 +95,11 @@ namespace Serialize {
         return result;
     }
 
-    StreamResult SerializeTable::readAction(SerializableUnitBase *unit, FormattedSerializeStream &in, PendingRequest *request) const
+    StreamResult SerializeTable::readAction(SerializableUnitBase *unit, FormattedBufferedStream &in, PendingRequest *request) const
     {
         uint8_t index;
         STREAM_PROPAGATE_ERROR(read(in, index, "index"));
+        STREAM_PROPAGATE_ERROR(in.endHeaderRead());
         return get(index).mReadAction(unit, in, request);
     }
 
@@ -106,6 +107,7 @@ namespace Serialize {
     {
         uint8_t index;
         STREAM_PROPAGATE_ERROR(read(inout, index, "index"));
+        STREAM_PROPAGATE_ERROR(inout.endHeaderRead());
         return get(index).mReadRequest(unit, inout, id);
     }
 
@@ -187,7 +189,7 @@ namespace Serialize {
         }
     }
 
-    void SerializeTable::writeAction(const SerializableUnitBase *parent, uint8_t index, const std::set<FormattedBufferedStream *, CompareStreamId> &outStreams, const void *data) const
+    void SerializeTable::writeAction(const SerializableUnitBase *parent, uint8_t index, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, const void *data) const
     {
         get(index).mWriteAction(parent, outStreams, data);
     }

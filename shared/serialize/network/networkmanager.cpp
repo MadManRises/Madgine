@@ -6,6 +6,10 @@
 
 #include "Meta/serialize/formatter/safebinaryformatter.h"
 
+#include "Meta/serialize/streams/formattedbufferedstream.h"
+
+#include "Meta/serialize/streams/syncstreamdata.h"
+
 namespace Engine {
 namespace Network {
     static int sManagerCount = 0;
@@ -69,7 +73,7 @@ namespace Network {
             return result;
         }
 
-        NetworkManagerResult result = setSlaveStream(Serialize::FormattedBufferedStream { std::make_unique<Serialize::SafeBinaryFormatter>(), std::make_unique<NetworkBuffer>(std::move(socket)), *this }, true, timeout);
+        NetworkManagerResult result = setSlaveStream(Serialize::FormattedBufferedStream { std::make_unique<Serialize::SafeBinaryFormatter>(), std::make_unique<NetworkBuffer>(std::move(socket)), createStreamData() }, true, timeout);
 
         return result;
     }
@@ -93,7 +97,7 @@ namespace Network {
             std::tie(sock, error) = mServerSocket.accept(timeout);
             while (error != SocketAPIResult::TIMEOUT && (limit == -1 || count < limit)) {
                 if (sock) {
-                    if (addMasterStream(Serialize::FormattedBufferedStream { std::make_unique<Serialize::SafeBinaryFormatter>(), std::make_unique<NetworkBuffer>(std::move(sock)), *this, createStreamId() }) == Serialize::SyncManagerResult::SUCCESS) {
+                    if (addMasterStream(Serialize::FormattedBufferedStream { std::make_unique<Serialize::SafeBinaryFormatter>(), std::make_unique<NetworkBuffer>(std::move(sock)), createStreamData() }) == Serialize::SyncManagerResult::SUCCESS) {
                         ++count;
                     }
                 }
@@ -114,7 +118,7 @@ namespace Network {
         if (!sock)
             return recordSocketError(error);
 
-        Serialize::FormattedBufferedStream stream { std::make_unique<Serialize::SafeBinaryFormatter>(), std::make_unique<NetworkBuffer>(std::move(sock)), *this, createStreamId() };
+        Serialize::FormattedBufferedStream stream { std::make_unique<Serialize::SafeBinaryFormatter>(), std::make_unique<NetworkBuffer>(std::move(sock)), createStreamData() };
         return addMasterStream(std::move(stream));
     }
 

@@ -16,9 +16,9 @@ namespace Serialize {
     protected:
         FormattedBufferedStream &getSlaveActionMessageTarget(const SyncableUnitBase *parent, OffsetPtr offset, ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback) const;
         FormattedBufferedStream &getSlaveActionMessageTarget(const SyncableUnitBase *parent, uint8_t index, ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback) const;
-        std::set<FormattedBufferedStream *, CompareStreamId> getMasterActionMessageTargets(const SyncableUnitBase *parent, OffsetPtr offset, ParticipantId answerTarget, TransactionId answerId,
+        std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterActionMessageTargets(const SyncableUnitBase *parent, OffsetPtr offset, ParticipantId answerTarget, TransactionId answerId,
             const std::set<ParticipantId> &targets = {}) const;
-        std::set<FormattedBufferedStream *, CompareStreamId> getMasterActionMessageTargets(const SyncableUnitBase *parent, uint8_t index, ParticipantId answerTarget, TransactionId answerId,
+        std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterActionMessageTargets(const SyncableUnitBase *parent, uint8_t index, ParticipantId answerTarget, TransactionId answerId,
             const std::set<ParticipantId> &targets = {}) const;
         FormattedBufferedStream &getMasterRequestResponseTarget(const SyncableUnitBase *parent, OffsetPtr offset, ParticipantId answerTarget, TransactionId answerId) const;
         FormattedBufferedStream &getMasterRequestResponseTarget(const SyncableUnitBase *parent, uint8_t index, ParticipantId answerTarget, TransactionId answerId) const;
@@ -37,7 +37,7 @@ namespace Serialize {
     template <typename OffsetPtr>
     struct Syncable : SyncableBase {
 
-        std::set<FormattedBufferedStream *, CompareStreamId> getMasterActionMessageTargets(ParticipantId answerTarget = 0, TransactionId answerId = 0,
+        std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterActionMessageTargets(ParticipantId answerTarget = 0, TransactionId answerId = 0,
             const std::set<ParticipantId> &targets = {}) const
         {
             return SyncableBase::getMasterActionMessageTargets(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableDataUnit>()), answerTarget, answerId, targets);

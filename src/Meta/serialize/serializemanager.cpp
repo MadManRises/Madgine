@@ -8,6 +8,8 @@
 
 #include "serializableids.h"
 
+#include "streams/serializestreamdata.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -102,16 +104,16 @@ namespace Serialize {
         return !mSlaveStreamData;
     }
 
-    UnitId SerializeManager::convertPtr(SerializeOutStream &out,
+    UnitId SerializeManager::convertPtr(SerializeStream &out,
         const SyncableUnitBase *unit)
     {
         return unit == nullptr
             ? NULL_UNIT_ID
-            : out.isMaster() ? unit->masterId()
+            : out.isMaster(StreamMode::WRITE) ? unit->masterId()
                              : unit->slaveId();
     }
 
-    StreamResult SerializeManager::convertPtr(SerializeInStream &in,
+    StreamResult SerializeManager::convertPtr(SerializeStream &in,
         UnitId unit, SyncableUnitBase *&out)
     {
         if (unit == NULL_UNIT_ID) {
@@ -120,7 +122,7 @@ namespace Serialize {
         }
         SyncableUnitBase *ptr = nullptr;
 
-        if (in.isMaster()) {
+        if (in.isMaster(StreamMode::READ)) {
             ptr = in.manager()->getByMasterId(unit);
         } else {
             auto it = sMasterMappings.find(unit);
@@ -144,6 +146,10 @@ namespace Serialize {
         if (mSlaveStreamData && data)
             std::terminate();
         mSlaveStreamData = data;
+    }
+
+    std::unique_ptr<SerializeStreamData> SerializeManager::createStreamData() {
+        return std::make_unique<SerializeStreamData>(*this, createStreamId());
     }
 
     ParticipantId SerializeManager::createStreamId() { return ++sRunningStreamId; }

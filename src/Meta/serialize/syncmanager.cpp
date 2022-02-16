@@ -4,8 +4,6 @@
 
 #include "toplevelunit.h"
 
-#include "messageheader.h"
-
 #include "streams/syncstreamdata.h"
 
 #include "streams/operations.h"
@@ -49,52 +47,61 @@ namespace Serialize {
 
     StreamResult SyncManager::readMessage(FormattedBufferedStream &stream)
     {
-        MessageHeader header;
-        STREAM_PROPAGATE_ERROR(stream.readHeader(header));
+        STREAM_PROPAGATE_ERROR(stream.beginHeaderRead());
+        UnitId objectId;
+        STREAM_PROPAGATE_ERROR(read(stream, objectId, "Object"));
 
-        if (header.mObject == SERIALIZE_MANAGER) {
+        if (objectId == SERIALIZE_MANAGER) {
             ParticipantId id;
-            switch (header.mCmd) {
+            Command cmd;
+            STREAM_PROPAGATE_ERROR(read(stream, cmd, "Command"));
+            STREAM_PROPAGATE_ERROR(stream.endHeaderRead());
+            switch (cmd) {
             case INITIAL_STATE_DONE:
                 mReceivingMasterState = false;
-                STREAM_PROPAGATE_ERROR(read(stream, id, "id"));
+                STREAM_PROPAGATE_ERROR(read(stream, id, "Id"));
                 stream.setId(id);
                 break;
             default:
-                return STREAM_INTEGRITY_ERROR(stream.in(), stream.isBinary(), "Invalid command used in message header: " << header.mCmd);
+                return STREAM_INTEGRITY_ERROR(stream.stream(), stream.isBinary(), "Invalid command used in message header: " << cmd);
             }
         } else {
             SyncableUnitBase *object;
-            STREAM_PROPAGATE_ERROR(convertPtr(stream, header.mObject, object));
-            switch (header.mType) {
+            STREAM_PROPAGATE_ERROR(convertPtr(stream, objectId, object));
+            MessageType type;
+            STREAM_PROPAGATE_ERROR(read(stream, type, "MessageType"));
+            TransactionId transactionId;
+            STREAM_PROPAGATE_ERROR(read(stream, transactionId, "TransactionId"));
+            switch (type) {
             case ACTION: {
-                PendingRequest *request = stream.fetchRequest(header.mTransaction);
+                PendingRequest *request = stream.fetchRequest(transactionId);
                 STREAM_PROPAGATE_ERROR(object->readAction(stream, request));
                 if (request)
-                    stream.popRequest(header.mTransaction);
+                    stream.popRequest(transactionId);
                 break;
             }
             case REQUEST:
-                STREAM_PROPAGATE_ERROR(object->readRequest(stream, header.mTransaction));
+                STREAM_PROPAGATE_ERROR(object->readRequest(stream, transactionId));
                 break;
             case STATE:
+                stream.endHeaderRead();
                 STREAM_PROPAGATE_ERROR(object->readState(stream, nullptr, {}, StateTransmissionFlags_ApplyMap));
                 break;
             default:
-                return STREAM_INTEGRITY_ERROR(stream.in(), stream.isBinary(), "Invalid Message-Type: " << header.mType);
+                return STREAM_INTEGRITY_ERROR(stream.stream(), stream.isBinary(), "Invalid Message-Type: " << type);
             }
         }
         return {};
     }
 
-    std::set<FormattedBufferedStream *, CompareStreamId>
+    std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId>
     SyncManager::getMasterMessageTargets()
     {
-        std::set<FormattedBufferedStream *, CompareStreamId> result;
+        std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> result;
 
         for (FormattedBufferedStream &stream : mMasterStreams) {
             //if (!stream.isClosed()) {
-            result.insert(&stream);
+            result.insert(stream);
             //}
         }
         return result;
@@ -256,7 +263,13 @@ namespace Serialize {
             for (TopLevelUnitBase *unit : mTopLevelUnits) {
                 sendState(stream, unit);
             }
-            stream.writeCommand(INITIAL_STATE_DONE, stream.id());
+            stream.beginMessage();
+            stream.beginHeaderWrite();
+            write<UnitId>(stream, SERIALIZE_MANAGER, "Object");
+            write(stream, INITIAL_STATE_DONE, "Command");
+            stream.endHeaderWrite();
+            write(stream, stream.id(), "Id");
+            stream.endMessage();
         }
 
         if (!stream)
@@ -361,19 +374,19 @@ namespace Serialize {
                     auto it = std::ranges::find(
                         mTopLevelUnits, unit, &TopLevelUnitBase::masterId);
                     if (it == mTopLevelUnits.end()) {
-                        return STREAM_INTEGRITY_ERROR(in.in(), true, "Illegal TopLevel-Id (" << unit << ") used!");
+                        return STREAM_INTEGRITY_ERROR(in.stream(), true, "Illegal TopLevel-Id (" << unit << ") used!");
                     }
                     out = *it;
                 } else {
                     SyncableUnitBase *u = getByMasterId(unit);
                     if (std::ranges::find(mTopLevelUnits, u->mTopLevel) == mTopLevelUnits.end()) {
-                        return STREAM_INTEGRITY_ERROR(in.in(), true, "Unit (" << unit << ") with unregistered TopLevel-Unit used!");
+                        return STREAM_INTEGRITY_ERROR(in.stream(), true, "Unit (" << unit << ") with unregistered TopLevel-Unit used!");
                     }
                     out = u;
                 }                
             }
         } catch (const std::out_of_range &) {
-            return STREAM_INTEGRITY_ERROR(in.in(), true, "Unknown Syncable Unit-Id (" << unit << ") used!");
+            return STREAM_INTEGRITY_ERROR(in.stream(), true, "Unknown Syncable Unit-Id (" << unit << ") used!");
         }
         return {};
     }
@@ -438,7 +451,12 @@ namespace Serialize {
     void SyncManager::sendState(FormattedBufferedStream &stream,
         SyncableUnitBase *unit)
     {
-        stream.beginMessage(unit, STATE, 0);
+        stream.beginMessage();
+        stream.beginHeaderWrite();
+        write(stream, unit, "Object");
+        write(stream, STATE, "MessageType");
+        write<TransactionId>(stream, 0, "TransactionId");
+        stream.endHeaderWrite();
         unit->writeState(stream);
         stream.endMessage();
     }
@@ -447,6 +465,11 @@ namespace Serialize {
     {
         mStreamError = std::move(error);
         return SyncManagerResult::STREAM_ERROR;
+    }
+
+    std::unique_ptr<SyncStreamData> SyncManager::createStreamData()
+    {
+        return std::make_unique<SyncStreamData>(*this, createStreamId());
     }
 
 } // namespace Serialize

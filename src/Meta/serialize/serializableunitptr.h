@@ -184,7 +184,7 @@ namespace Serialize {
 
         bool isActive(OffsetPtr offset) const;
 
-        void writeAction(uint8_t index, const std::set<FormattedBufferedStream *, CompareStreamId> &outStreams, const void *data) const;
+        void writeAction(uint8_t index, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, const void *data) const;
         void writeRequest(uint8_t index, FormattedBufferedStream &out, const void *data) const;
 
         const SerializableUnitBase *unit() const;
@@ -236,7 +236,7 @@ namespace Serialize {
 
         StreamResult readState(FormattedSerializeStream &in, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0) const;
 
-        StreamResult readAction(FormattedSerializeStream &in, PendingRequest *request) const;
+        StreamResult readAction(FormattedBufferedStream &in, PendingRequest *request) const;
         StreamResult readRequest(FormattedBufferedStream &in, TransactionId id) const;
 
         void setDataSynced(bool b) const;

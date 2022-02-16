@@ -2,6 +2,8 @@
 
 #include "Meta/serialize/syncmanager.h"
 
+#include "Meta/serialize/streams/syncstreamdata.h"
+
 #include "Meta/serialize/formatter/safebinaryformatter.h"
 
 using namespace Engine::Serialize;
@@ -106,9 +108,9 @@ struct TestManager : SyncManager {
     {
         std::unique_ptr<BufferedTestBuf> buf = std::make_unique<BufferedTestBuf>(buffer, !slave);
         if (slave) {
-            return setSlaveStream(BufferedInOutStream { std::move(buf), std::move(format), *this, 0 }, shareState, std::chrono::milliseconds { 1000 });
+            return setSlaveStream(FormattedBufferedStream { std::move(format), std::move(buf), std::make_unique<SyncStreamData>(*this, 0) }, shareState, std::chrono::milliseconds { 1000 });
         } else {
-            return addMasterStream(Engine::Serialize::BufferedInOutStream { std::move(buf), std::move(format), *this, 1 }, shareState);
+            return addMasterStream(FormattedBufferedStream { std::move(format), std::move(buf), std::make_unique<SyncStreamData>(*this, 1) }, shareState);
         }
     }
 

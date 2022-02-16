@@ -15,7 +15,7 @@ namespace Resources {
         std::string_view extension();
         std::string_view name();
 
-        InStream readAsStream(bool isBinary = false) const;
+        Stream readAsStream(bool isBinary = false) const;
         std::string readAsText() const;
         std::vector<unsigned char> readAsBlob() const;
 

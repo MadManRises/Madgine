@@ -842,7 +842,7 @@ namespace Tools {
         if (!mGraphHandle)
             throw 0;
 
-        OutStream layout = Filesystem::openFileWrite(layoutPath());
+        Stream layout = Filesystem::openFileWrite(layoutPath());
         layout.write(view.data(), view.size());
 
         mGraph.saveToFile();
@@ -859,7 +859,7 @@ namespace Tools {
 
         size_t size = Filesystem::fileInfo(path).mSize;
         if (data) {
-            InStream layout = Filesystem::openFileRead(path);
+            Stream layout = Filesystem::openFileRead(path);
             layout.read(data, size);
         }
         return size;

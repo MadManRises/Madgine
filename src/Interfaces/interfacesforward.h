@@ -15,9 +15,6 @@ struct InterfacesVector {
     }
 };
 
-struct InStream;
-struct OutStream;
-
 namespace Debug {
 
     struct TraceBack;

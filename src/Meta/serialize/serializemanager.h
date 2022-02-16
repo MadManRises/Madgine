@@ -26,8 +26,8 @@ namespace Serialize {
         bool isMaster(SerializeStreamData &stream) const;
         bool isMaster() const;
 
-        static UnitId convertPtr(SerializeOutStream &out, const SyncableUnitBase *unit);
-        static StreamResult convertPtr(SerializeInStream &in, UnitId unit, SyncableUnitBase *&out);
+        static UnitId convertPtr(SerializeStream &stream, const SyncableUnitBase *unit);
+        static StreamResult convertPtr(SerializeStream &stream, UnitId unit, SyncableUnitBase *&out);
 
         const std::string &name() const;
 
@@ -36,6 +36,7 @@ namespace Serialize {
     protected:
         void setSlaveStreamData(SerializeStreamData *data);
 
+        std::unique_ptr<SerializeStreamData> createStreamData();
         static ParticipantId createStreamId();
 
 		SyncableUnitBase *getByMasterId(UnitId unit);

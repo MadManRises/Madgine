@@ -33,7 +33,7 @@ namespace Serialize {
         StreamResult readState(SerializableDataUnit *unit, FormattedSerializeStream &in, StateTransmissionFlags flags = 0, CallerHierarchyBasePtr hierarchy = {}) const;
         StreamResult readState(SerializableUnitBase *unit, FormattedSerializeStream &in, StateTransmissionFlags flags = 0, CallerHierarchyBasePtr hierarchy = {}) const;
 
-        StreamResult readAction(SerializableUnitBase *unit, FormattedSerializeStream &in, PendingRequest *request) const;
+        StreamResult readAction(SerializableUnitBase *unit, FormattedBufferedStream &in, PendingRequest *request) const;
         StreamResult readRequest(SerializableUnitBase *unit, FormattedBufferedStream &in, TransactionId id) const;
 
         StreamResult applySerializableMap(SerializableDataUnit *unit, FormattedSerializeStream &in, bool success) const;
@@ -42,7 +42,7 @@ namespace Serialize {
         void setActive(SerializableUnitBase *unit, bool active, bool existenceChanged) const;
         void setParent(SerializableUnitBase *unit) const;
 
-        void writeAction(const SerializableUnitBase *parent, uint8_t index, const std::set<FormattedBufferedStream *, CompareStreamId> &outStreams, const void *data) const;
+        void writeAction(const SerializableUnitBase *parent, uint8_t index, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, const void *data) const;
         void writeRequest(const SerializableUnitBase *parent, uint8_t index, FormattedBufferedStream &out, const void *data) const;
 
         uint8_t getIndex(OffsetPtr offset) const;

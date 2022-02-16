@@ -26,7 +26,7 @@ namespace Serialize {
     {
         SerializableMapHolder holder { out };
 
-        if (out.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
+        if (out.isMaster(StreamMode::WRITE) && !(flags & StateTransmissionFlags_SkipId)) {
             out.beginExtendedWrite(name, 1);
             write(out, mUnit, "serId");
         }
@@ -40,7 +40,7 @@ namespace Serialize {
     {
         SerializableListHolder holder { in };
 
-        if (!in.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
+        if (!in.isMaster(StreamMode::READ) && !(flags & StateTransmissionFlags_SkipId)) {
             STREAM_PROPAGATE_ERROR(in.beginExtendedRead(name, 1));
             SerializableUnitBase *idHelper;
             STREAM_PROPAGATE_ERROR(read(in, idHelper, "serId"));
@@ -93,7 +93,7 @@ namespace Serialize {
     {
         SerializableListHolder holder { in };
 
-        if (!in.isMaster() && !(flags & StateTransmissionFlags_SkipId)) {
+        if (!in.isMaster(StreamMode::READ) && !(flags & StateTransmissionFlags_SkipId)) {
             STREAM_PROPAGATE_ERROR(in.beginExtendedRead(name, 1));
             SerializableUnitBase *idHelper;
             STREAM_PROPAGATE_ERROR(read(in, idHelper, "serId"));
@@ -110,12 +110,12 @@ namespace Serialize {
         return in.endCompoundRead(name);
     }
 
-    void SerializableUnitConstPtr::writeAction(uint8_t index, const std::set<FormattedBufferedStream *, CompareStreamId> &outStreams, const void *data) const
+    void SerializableUnitConstPtr::writeAction(uint8_t index, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, const void *data) const
     {
         mType->writeAction(unit(), index, outStreams, data);
     }
 
-    StreamResult SerializableUnitPtr::readAction(FormattedSerializeStream &in, PendingRequest *request) const
+    StreamResult SerializableUnitPtr::readAction(FormattedBufferedStream &in, PendingRequest *request) const
     {
         return mType->readAction(unit(), in, request);
     }

@@ -62,7 +62,7 @@ namespace Tools {
     {
         auto buf = std::make_unique<std::stringbuf>();
         std::stringbuf *outBuffer = buf.get();
-        Serialize::FormattedSerializeStream out { std::make_unique<Serialize::IniFormatter>(), std::move(buf), std::make_unique<Serialize::SerializeStreamData>() };
+        Serialize::FormattedSerializeStream out { std::make_unique<Serialize::IniFormatter>(), { std::move(buf) } };
 
         ImRoot *root = static_cast<ImRoot *>(handler->UserData);
         for (ToolBase *tool : uniquePtrToPtr(root->tools())) {
@@ -227,7 +227,7 @@ namespace Tools {
         if (mToolReadTool) {
 
             auto buf = std::make_unique<std::stringbuf>(mToolReadBuffer.str());
-            Serialize::FormattedSerializeStream in { std::make_unique<Serialize::IniFormatter>(), std::move(buf), std::make_unique<Serialize::SerializeStreamData>() };
+            Serialize::FormattedSerializeStream in { std::make_unique<Serialize::IniFormatter>(), { std::move(buf) } };
 
             Serialize::StreamResult result = Serialize::read(in, *mToolReadTool, nullptr, {}, Serialize::StateTransmissionFlags_SkipId);
             if (result.mState != Serialize::StreamState::OK) {

@@ -617,7 +617,7 @@ namespace NodeGraph {
         STREAM_PROPAGATE_ERROR(read(in, name, "type"));
 
         if (!NodeRegistry::sComponentsByName().contains(name))
-            return STREAM_INTEGRITY_ERROR(in.in(), in.isBinary(), "No Node \"" << name << "\" available.\n"
+            return STREAM_INTEGRITY_ERROR(in.stream(), in.isBinary(), "No Node \"" << name << "\" available.\n"
                                                                 << "Make sure to check the loaded plugins.");
         node = createNode(name);
         return {};

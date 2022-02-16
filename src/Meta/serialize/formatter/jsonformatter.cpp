@@ -15,34 +15,31 @@ namespace Serialize {
         mParseLevel.emplace(false);
     }
 
-    void JSONFormatter::setupStream(std::istream &in)
+    void JSONFormatter::setupStream(std::iostream &inout)
     {
-        in >> std::boolalpha;
-    }
-
-    void JSONFormatter::setupStream(std::ostream &out)
-    {
-        out << std::boolalpha;
+        inout >> std::boolalpha;
+        inout << std::boolalpha;
     }
 
     void JSONFormatter::beginExtendedWrite(const char *name, size_t count)
     {
         if (!mCurrentExtended) {
             if (mAfterItem) {
-                mOut << ",";
+                mStream << ",";
                 mAfterItem = false;
             }
-            mOut << "\n" << indent();
+            mStream << "\n"
+                    << indent();
             if (!mParseLevel.top().mIsContainer) {
                 if (!name)
                     name = "Item";
-                mOut << "\"" << name << "\" : ";
+                mStream << "\"" << name << "\" : ";
             }
             mParseLevel.emplace(false);
-            mOut << "{\n";
+            mStream << "{\n";
             mCurrentExtended = true;
             ++mLevel;
-            mOut << indent() << "\"__extended\" : {";
+            mStream << indent() << "\"__extended\" : {";
             ++mLevel;
         }
         assert(mCurrentExtendedCount == 0);
@@ -56,8 +53,8 @@ namespace Serialize {
             if (!mParseLevel.top().mIsContainer) {
                 auto it = mParseLevel.top().mPrefetchedFields.find(name);
                 if (it != mParseLevel.top().mPrefetchedFields.end()) {
-                    mParseLevel.top().mLookupPos = mIn.tell();
-                    mIn.seek(it->second);
+                    mParseLevel.top().mLookupPos = mStream.tell();
+                    mStream.seek(it->second);
                     mParseLevel.top().mPrefetchedFields.erase(it);
                 } else {
                     if (mAfterItem) {
@@ -88,22 +85,24 @@ namespace Serialize {
     {
         if (!mCurrentExtended) {
             if (mAfterItem) {
-                mOut << ",";
+                mStream << ",";
                 mAfterItem = false;
             }
-            mOut << "\n" << indent();
+            mStream << "\n"
+                    << indent();
             if (!mParseLevel.top().mIsContainer) {
                 if (!name)
                     name = "Item";
-                mOut << "\"" << name << "\" : ";
+                mStream << "\"" << name << "\" : ";
             }
             mParseLevel.emplace(false);
-            mOut << "{";
+            mStream << "{";
             ++mLevel;
         } else {
             assert(mCurrentExtendedCount == 0);
             --mLevel;
-            mOut << "\n" << indent() << "}";
+            mStream << "\n"
+                    << indent() << "}";
             mAfterItem = true;
         }
         mCurrentExtended = false;
@@ -115,8 +114,8 @@ namespace Serialize {
             if (!mParseLevel.top().mIsContainer) {
                 auto it = mParseLevel.top().mPrefetchedFields.find(name);
                 if (it != mParseLevel.top().mPrefetchedFields.end()) {
-                    mParseLevel.top().mLookupPos = mIn.tell();
-                    mIn.seek(it->second);
+                    mParseLevel.top().mLookupPos = mStream.tell();
+                    mStream.seek(it->second);
                     mParseLevel.top().mPrefetchedFields.erase(it);
                 } else {
                     if (mAfterItem) {
@@ -149,7 +148,8 @@ namespace Serialize {
             mAfterItem = false;
         }
         --mLevel;
-        mOut << "\n" << indent() << "}";
+        mStream << "\n"
+                << indent() << "}";
         assert(!mParseLevel.top().mIsContainer);
         mParseLevel.pop();
         mAfterItem = true;
@@ -165,7 +165,7 @@ namespace Serialize {
         assert(!mParseLevel.top().mIsContainer);
         mParseLevel.pop();
         if (mParseLevel.top().mLookupPos != -1) {
-            mIn.seek(mParseLevel.top().mLookupPos);
+            mStream.seek(mParseLevel.top().mLookupPos);
             mParseLevel.top().mLookupPos = -1;
         }
         mAfterItem = true;
@@ -176,7 +176,7 @@ namespace Serialize {
     void JSONFormatter::beginPrimitiveWrite(const char *name, uint8_t typeId)
     {
         if (mAfterItem) {
-            mOut << ",";
+            mStream << ",";
             mAfterItem = false;
         }
         if (mCurrentExtendedCount > 0) {
@@ -186,10 +186,11 @@ namespace Serialize {
         if (!mParseLevel.top().mIsContainer) {
             if (!name)
                 name = "Element";
-            mOut << "\n" << indent() << "\"" << name << "\" : ";
+            mStream << "\n"
+                    << indent() << "\"" << name << "\" : ";
         }
         if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<ByteBuffer>)
-            mOut << "\"";
+            mStream << "\"";
     }
 
     StreamResult JSONFormatter::beginPrimitiveRead(const char *name, uint8_t typeId)
@@ -201,8 +202,8 @@ namespace Serialize {
         if (!mParseLevel.top().mIsContainer) {
             auto it = mParseLevel.top().mPrefetchedFields.find(name);
             if (it != mParseLevel.top().mPrefetchedFields.end()) {
-                mParseLevel.top().mLookupPos = mIn.tell();
-                mIn.seek(it->second);
+                mParseLevel.top().mLookupPos = mStream.tell();
+                mStream.seek(it->second);
                 mParseLevel.top().mPrefetchedFields.erase(it);
             } else {
                 if (mAfterItem) {
@@ -227,7 +228,7 @@ namespace Serialize {
     void JSONFormatter::endPrimitiveWrite(const char *name, uint8_t typeId)
     {
         if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<ByteBuffer>)
-            mOut << "\"";
+            mStream << "\"";
         mAfterItem = true;
         mLastPrimitive = true;
     }
@@ -235,7 +236,7 @@ namespace Serialize {
     StreamResult JSONFormatter::endPrimitiveRead(const char *name, uint8_t typeId)
     {
         if (mParseLevel.top().mLookupPos != -1) {
-            mIn.seek(mParseLevel.top().mLookupPos);
+            mStream.seek(mParseLevel.top().mLookupPos);
             mParseLevel.top().mLookupPos = -1;
         }
         mAfterItem = true;
@@ -245,48 +246,48 @@ namespace Serialize {
     StreamResult JSONFormatter::readFieldName(const char *name)
     {
         std::string prefix;
-        STREAM_PROPAGATE_ERROR(mIn.readUntil(prefix, ":"));
+        STREAM_PROPAGATE_ERROR(mStream.readUntil(prefix, ":"));
         std::string_view trimmed = StringUtil::trim(StringUtil::substr(prefix, 0, -1));
         while (name && StringUtil::substr(trimmed, 1, -1) != name) {
-            mParseLevel.top().mPrefetchedFields.try_emplace(std::string { StringUtil::substr(trimmed, 1, -1) }, mIn.tell());
+            mParseLevel.top().mPrefetchedFields.try_emplace(std::string { StringUtil::substr(trimmed, 1, -1) }, mStream.tell());
             STREAM_PROPAGATE_ERROR(skipObject());
             FORMATTER_EXPECT(",");
-            STREAM_PROPAGATE_ERROR(mIn.readUntil(prefix, ":"));
+            STREAM_PROPAGATE_ERROR(mStream.readUntil(prefix, ":"));
             trimmed = { prefix.c_str(), prefix.size() - 1 };
             trimmed = StringUtil::trim(trimmed);
         }
         if (!StringUtil::startsWith(trimmed, "\"") || !StringUtil::endsWith(trimmed, "\""))
-            return STREAM_PARSE_ERROR(mIn, mBinary, "Expected key in '\"\"'");
+            return STREAM_PARSE_ERROR(mStream, mBinary, "Expected key in '\"\"'");
         if (trimmed.size() <= 1)
-            return STREAM_PARSE_ERROR(mIn, mBinary, "Expected key");
+            return STREAM_PARSE_ERROR(mStream, mBinary, "Expected key");
         return {};
     }
 
     StreamResult JSONFormatter::lookupFieldName(std::string &name)
     {
         name.clear();
-        pos_type pos = mIn.tell();
+        pos_type pos = mStream.tell();
         std::string controlChar;
-        STREAM_PROPAGATE_ERROR(mIn.readN(controlChar, 1));
+        STREAM_PROPAGATE_ERROR(mStream.readN(controlChar, 1));
         if (controlChar == "}") {
-            mIn.seek(pos);
+            mStream.seek(pos);
             return {};
         }
         if (mAfterItem) {
             if (controlChar != ",")
                 throw 0;
         } else {
-            mIn.seek(pos);
+            mStream.seek(pos);
         }
         std::string prefix;
-        STREAM_PROPAGATE_ERROR(mIn.readUntil(prefix, ":"));
+        STREAM_PROPAGATE_ERROR(mStream.readUntil(prefix, ":"));
         std::string_view trimmed { prefix.c_str(), prefix.size() - 1 };
         trimmed = StringUtil::trim(trimmed);
         if (!StringUtil::startsWith(trimmed, "\"") || !StringUtil::endsWith(trimmed, "\""))
             throw 0;
         if (trimmed.size() <= 1)
             throw 0;
-        mIn.seek(pos);
+        mStream.seek(pos);
         name = StringUtil::substr(trimmed, 1, -1);
         return {};
     }
@@ -294,12 +295,12 @@ namespace Serialize {
     void JSONFormatter::beginContainerWrite(const char *name, uint32_t size)
     {
         if (mAfterItem) {
-            mOut << ",\n";
+            mStream << ",\n";
             mAfterItem = false;
         }
         if (!name)
             name = "Item";
-        mOut << indent() << "\"" << name << "\" : [";
+        mStream << indent() << "\"" << name << "\" : [";
         ++mLevel;
         mParseLevel.emplace(true);
     }
@@ -312,9 +313,9 @@ namespace Serialize {
         }
         STREAM_PROPAGATE_ERROR(readFieldName(name));
         std::string bracket;
-        STREAM_PROPAGATE_ERROR(sized ? mIn.peekN(bracket, 1) : mIn.readN(bracket, 1));
+        STREAM_PROPAGATE_ERROR(sized ? mStream.peekN(bracket, 1) : mStream.readN(bracket, 1));
         if (bracket != "[")
-            return STREAM_PARSE_ERROR(mIn, mBinary, "Expected '['");
+            return STREAM_PARSE_ERROR(mStream, mBinary, "Expected '['");
         mParseLevel.emplace(true);
         return {};
     }
@@ -328,8 +329,9 @@ namespace Serialize {
         }
         --mLevel;
         if (!mLastPrimitive)
-            mOut << "\n" << indent();
-        mOut << "]";
+            mStream << "\n"
+                    << indent();
+        mStream << "]";
         mAfterItem = true;
     }
 
@@ -348,12 +350,12 @@ namespace Serialize {
     bool JSONFormatter::hasContainerItem()
     {
         std::string prefix;
-        if (mIn.peekN(prefix, 1).mState != StreamState::OK)
+        if (mStream.peekN(prefix, 1).mState != StreamState::OK)
             return false;
         if (prefix[0] == '[') {
-            if (mIn.readN(prefix, 1).mState != StreamState::OK)
+            if (mStream.readN(prefix, 1).mState != StreamState::OK)
                 return false;
-            if (mIn.peekN(prefix, 1).mState != StreamState::OK)
+            if (mStream.peekN(prefix, 1).mState != StreamState::OK)
                 return false;
             return prefix != "]";
         }
@@ -372,29 +374,29 @@ namespace Serialize {
     StreamResult JSONFormatter::skipObject()
     {
         std::string next;
-        STREAM_PROPAGATE_ERROR(mIn.readN(next, 1));
+        STREAM_PROPAGATE_ERROR(mStream.readN(next, 1));
         switch (next[0]) {
         case '[': {
             do {
                 STREAM_PROPAGATE_ERROR(skipObject());
-                STREAM_PROPAGATE_ERROR(mIn.readN(next, 1));
+                STREAM_PROPAGATE_ERROR(mStream.readN(next, 1));
             } while (next == ",");
             if (next != "]")
-                return STREAM_PARSE_ERROR(mIn, mBinary, "Expected ']', Found '" << next << "'.");
+                return STREAM_PARSE_ERROR(mStream, mBinary, "Expected ']', Found '" << next << "'.");
         } break;
         case '{': {
             do {
                 STREAM_PROPAGATE_ERROR(readFieldName(nullptr));
                 STREAM_PROPAGATE_ERROR(skipObject());
-                STREAM_PROPAGATE_ERROR(mIn.readN(next, 1));
+                STREAM_PROPAGATE_ERROR(mStream.readN(next, 1));
             } while (next == ",");
             if (next != "}")
-                return STREAM_PARSE_ERROR(mIn, mBinary, "Expected '}', Found '" << next << "'.");
+                return STREAM_PARSE_ERROR(mStream, mBinary, "Expected '}', Found '" << next << "'.");
         } break;
         default: {
             std::string value;
-            STREAM_PROPAGATE_ERROR(mIn.readUntil(value, "}],"));
-            mIn.seek(mIn.tell() - off_type { 1 });
+            STREAM_PROPAGATE_ERROR(mStream.readUntil(value, "}],"));
+            mStream.seek(mStream.tell() - off_type { 1 });
         }
         }
         return {};

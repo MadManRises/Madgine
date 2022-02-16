@@ -28,7 +28,7 @@ namespace Ini {
 
     void IniFile::saveToDisk(const Filesystem::Path &path) const
     {
-        OutStream stream = Filesystem::openFileWrite(path);
+        Stream stream = Filesystem::openFileWrite(path);
         assert(stream);
         for (const std::pair<const std::string, IniSection> &p : mSections) {
             stream << "[" << p.first << "]\n";
@@ -38,12 +38,12 @@ namespace Ini {
 
     bool IniFile::loadFromDisk(const Filesystem::Path &path)
     {
-        InStream stream = Filesystem::openFileRead(path);
+        Stream stream = Filesystem::openFileRead(path);
         if (!stream)
             return false;
         mSections.clear();
         std::string line;
-        while (std::getline(stream.istream(), line)) {
+        while (std::getline(stream.stream(), line)) {
             if (!StringUtil::startsWith(line, "[") || !StringUtil::endsWith(line, "]"))
                 std::terminate();
             std::string sectionName = line.substr(1, line.size() - 2);

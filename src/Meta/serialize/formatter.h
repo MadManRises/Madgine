@@ -17,8 +17,10 @@ namespace Serialize {
         }
         virtual ~Formatter() = default;
 
-        virtual void setupStream(std::istream &) {};
-        virtual void setupStream(std::ostream &) {};
+        void setupStream(SerializeStream stream);
+        virtual void setupStream(std::iostream &) {};
+
+        SerializeStream &stream();
 
         virtual void beginExtendedWrite(const char *name, size_t count) {};
 
@@ -42,11 +44,17 @@ namespace Serialize {
         virtual StreamResult beginContainerRead(const char *name, bool sized = true);
         virtual StreamResult endContainerRead(const char *name);
 
+        virtual void beginHeaderWrite() {}
+        virtual void endHeaderWrite() { }
+
+        virtual StreamResult beginHeaderRead();
+        virtual StreamResult endHeaderRead();
+
         virtual bool hasContainerItem() = 0;
 
         virtual StreamResult lookupFieldName(std::string &name)
         {
-            return STREAM_INTEGRITY_ERROR(mIn, mBinary, "Name lookup is not implemented in Formatter!");
+            return STREAM_INTEGRITY_ERROR(mStream, mBinary, "Name lookup is not implemented in Formatter!");
         }
 
         
@@ -54,9 +62,9 @@ namespace Serialize {
         StreamResult read(T &t)
         {
             if (mBinary) {
-                return mIn.read(t);
+                return mStream.read(t);
             } else {
-                return mIn >> t;
+                return mStream >> t;
             }
         }
 
@@ -74,9 +82,9 @@ namespace Serialize {
         void write(const T &t)
         {
             if (mBinary) {
-                mOut.write(t);
+                mStream.write(t);
             } else {
-                mOut << t;
+                mStream << t;
             }
         }
 
@@ -90,8 +98,7 @@ namespace Serialize {
     protected:
         const char *mNextStringDelimiter = nullptr;
 
-        SerializeInStream mIn;
-        SerializeOutStream mOut;
+        SerializeStream mStream;
     };
 
     #define FORMATTER_EXPECT(text) STREAM_PROPAGATE_ERROR(expect(text))

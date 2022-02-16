@@ -8,8 +8,8 @@ namespace Ini {
 
         std::string &operator[](const std::string &key);
 
-        void save(OutStream &stream) const;
-        void load(InStream &stream);
+        void save(Stream &stream) const;
+        void load(Stream &stream);
 
         std::map<std::string, std::string>::iterator begin();
         std::map<std::string, std::string>::iterator end();

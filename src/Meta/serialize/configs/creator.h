@@ -24,24 +24,24 @@ namespace Serialize {
         template <typename C>
         static void writeItem(FormattedSerializeStream &out, const typename container_traits<C>::value_type &t)
         {
-            out.format().beginCompound(out, "Item");
+            out.beginCompoundWrite("Item");
             writeCreationData<typename container_traits<C>::value_type>(out, t);
             write<typename container_traits<C>::value_type::first_type>(out, t.first, "Key");
             write<typename container_traits<C>::value_type::second_type>(out, t.second, "Value");
-            out.format().endCompound(out, "Item");
+            out.endCompoundWrite("Item");
         }
 
         template <typename Op>
         static StreamResult readItem(FormattedSerializeStream &in, Op &op, typename container_traits<Op>::emplace_return &it, const typename container_traits<Op>::const_iterator &where)
         {
-            STREAM_PROPAGATE_ERROR(in.format().beginCompound(in, nullptr));
+            STREAM_PROPAGATE_ERROR(in.beginCompoundRead(nullptr));
             ArgsTuple<typename container_traits<Op>::value_type> tuple;
             STREAM_PROPAGATE_ERROR(readCreationData<typename container_traits<Op>::value_type>(in, tuple));
             it = TupleUnpacker::invokeExpand(LIFT(container_traits<Op>::emplace), op, where, std::move(tuple));
             assert(container_traits<Op>::was_emplace_successful(it));
             STREAM_PROPAGATE_ERROR(read<typename container_traits<Op>::value_type::first_type>(in, it.first->first, "Key"));
             STREAM_PROPAGATE_ERROR(read<typename container_traits<Op>::value_type::second_type>(in, it.first->second, "Value"));
-            return in.format().endCompound(in, nullptr);
+            return in.endCompoundRead(nullptr);
         }
 
         template <typename P>

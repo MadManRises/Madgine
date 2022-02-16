@@ -21,9 +21,9 @@ namespace Filesystem {
         Path exactTarget = target;
         if (isDir(exactTarget))
             exactTarget /= p.filename();
-        OutStream out = openFileWrite(exactTarget, true);
+        Stream out = openFileWrite(exactTarget, true);
         assert(out);
-        InStream in = openFileRead(p);
+        Stream in = openFileRead(p);
         assert(in);
         out.pipe(in);
         return true;

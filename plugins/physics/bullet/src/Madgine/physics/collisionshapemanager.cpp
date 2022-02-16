@@ -359,15 +359,15 @@ namespace Physics {
         return mInstance.get();
     }
 
-    Serialize::StreamResult CollisionShapeManager::InstanceHandle::readState(Serialize::SerializeInStream &in, const char *name)
+    Serialize::StreamResult CollisionShapeManager::InstanceHandle::readState(Serialize::FormattedSerializeStream &in, const char *name)
     {
         std::string resName;
-        STREAM_PROPAGATE_ERROR(in.format().beginExtended(in, name, 1));
+        STREAM_PROPAGATE_ERROR(in.beginExtendedRead(name, 1));
         STREAM_PROPAGATE_ERROR(Serialize::read(in, resName, "name"));
         if (resName.empty()) {
             reset();
-            STREAM_PROPAGATE_ERROR(in.format().beginCompound(in, name));
-            STREAM_PROPAGATE_ERROR(in.format().endCompound(in, name));
+            STREAM_PROPAGATE_ERROR(in.beginCompoundRead(name));
+            STREAM_PROPAGATE_ERROR(in.endCompoundRead(name));
         } else {
             load(resName);
             assert(mInstance);
@@ -376,15 +376,15 @@ namespace Physics {
         return {};
     }
 
-    void CollisionShapeManager::InstanceHandle::writeState(Serialize::SerializeOutStream &out, const char *name) const
+    void CollisionShapeManager::InstanceHandle::writeState(Serialize::FormattedSerializeStream &out, const char *name) const
     {
         bool hasShape = static_cast<bool>(mInstance);
         std::string_view resName = hasShape ? mInstance->resource()->name() : "";
-        out.format().beginExtended(out, name, 1);
+        out.beginExtendedWrite(name, 1);
         Serialize::write(out, resName, "name");
         if (!hasShape) {
-            out.format().beginCompound(out, name);
-            out.format().endCompound(out, name);
+            out.beginCompoundWrite(name);
+            out.endCompoundWrite(name);
         } else {
             Serialize::write(out, *mInstance, name);
         }

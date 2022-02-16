@@ -3,7 +3,7 @@
 namespace Engine {
 namespace Audio {
 
-	MADGINE_AUDIOLOADER_EXPORT InStream DecodeOggFile(AudioInfo &info, InStream &&file);
+	MADGINE_AUDIOLOADER_EXPORT Stream DecodeOggFile(AudioInfo &info, Stream &&file);
 
 }
 }

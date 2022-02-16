@@ -49,5 +49,6 @@ struct CoroutineHandle;
 
 struct OffsetPtr;
 
+struct Stream;
 
 }

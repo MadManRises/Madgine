@@ -71,13 +71,13 @@ namespace Serialize {
         setSlaveId(mStaticSlaveId ? mStaticSlaveId : masterId(), mgr);
     }
 
-    std::set<FormattedBufferedStream *, CompareStreamId> TopLevelUnitBase::getMasterMessageTargets() const
+    std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> TopLevelUnitBase::getMasterMessageTargets() const
     {
         //TODO: maybe return std::vector
-        std::set<FormattedBufferedStream *, CompareStreamId> result;
+        std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> result;
         for (SyncManager *mgr : mManagers) {
-            const std::set<FormattedBufferedStream *, CompareStreamId> &targets = mgr->getMasterMessageTargets();
-            std::set<FormattedBufferedStream *, CompareStreamId> temp;
+            const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &targets = mgr->getMasterMessageTargets();
+            std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> temp;
             set_union(result.begin(), result.end(), targets.begin(), targets.end(), inserter(temp, temp.begin()),
                 CompareStreamId {});
             temp.swap(result);

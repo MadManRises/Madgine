@@ -1,19 +1,30 @@
 #pragma once
 
-#include "Generic/streams.h"
+#include "Generic/stream.h"
 
 #include "streamresult.h"
 
 namespace Engine {
 namespace Serialize {
 
-    struct META_EXPORT SerializeInStream : InStream {
+    struct META_EXPORT SerializeStream : Stream {
     public:
-        SerializeInStream();
-        SerializeInStream(std::unique_ptr<std::basic_streambuf<char>> buffer, std::unique_ptr<SerializeStreamData> data);
-        SerializeInStream(SerializeInStream &&other);
-        SerializeInStream(SerializeInStream &&other, SerializeManager *mgr);
-        ~SerializeInStream();
+        SerializeStream();
+        SerializeStream(std::unique_ptr<std::basic_streambuf<char>> buffer, std::unique_ptr<SerializeStreamData> data = {});
+        SerializeStream(SerializeStream &&other);
+        SerializeStream(SerializeStream &&other, SerializeManager *mgr);
+        ~SerializeStream();
+
+        SerializeStream &operator=(SerializeStream &&other);
+        
+        SerializeStreamData &data() const;
+        SerializeManager *manager() const;
+        void setId(ParticipantId id);
+        ParticipantId id() const;
+        bool isMaster(StreamMode mode);
+        SerializableUnitList &serializableList();
+        SerializableUnitMap &serializableMap();
+
 
         StreamResult readN(std::string &buffer, size_t n);
         StreamResult peekN(std::string &buffer, size_t n);
@@ -29,18 +40,12 @@ namespace Serialize {
         template <typename T>
         StreamResult operator>>(T &t)
         {
-            InStream::operator>>(t);
+            Stream::operator>>(t);
             if (!*this)
                 return STREAM_PARSE_ERROR(*this, true, "Unexpected EOF");
             return {};
         }
 
-        SerializeStreamData &data() const;
-        SerializeManager *manager() const;
-        void setId(ParticipantId id);
-        ParticipantId id() const;
-        bool isMaster();
-        SerializableUnitList &serializableList();
 
         template <typename T>
         requires std::convertible_to<T *, SerializableDataUnit *>
@@ -106,45 +111,24 @@ namespace Serialize {
 
         StreamResult operator>>(std::monostate &);
 
-    protected:
-        SerializeInStream(std::basic_streambuf<char> *buffer, SerializeStreamData *data);
-
-    protected:
-        SerializeStreamData *mData;
-    };
-
-    struct META_EXPORT SerializeOutStream : OutStream {
-    public:
-        SerializeOutStream();
-        SerializeOutStream(std::unique_ptr<std::basic_streambuf<char>> buffer, std::unique_ptr<SerializeStreamData> data);
-        SerializeOutStream(SerializeOutStream &&other);
-        SerializeOutStream(SerializeOutStream &&other, SerializeManager *mgr);
-        ~SerializeOutStream();
-
-        SerializeStreamData &data() const;
-        SerializeManager *manager() const;
-        ParticipantId id() const;
-        bool isMaster();
-        SerializableUnitMap &serializableMap();
-
         template <typename T>
         requires(!Pointer<T> && !StringViewable<T>) void write(const T &t)
         {
-            OutStream::write(t);
+            Stream::write(t);
         }
 
         template <typename T>
-        requires(!Pointer<T> && !StringViewable<T>) SerializeOutStream &operator<<(const T &t)
+        requires(!Pointer<T> && !StringViewable<T>) SerializeStream &operator<<(const T &t)
         {
-            OutStream::operator<<(t);
+            Stream::operator<<(t);
             return *this;
         }
 
         void write(const SyncableUnitBase *p);
         void write(const SerializableDataUnit *p);
 
-        SerializeOutStream &operator<<(const SyncableUnitBase *);
-        SerializeOutStream &operator<<(const SerializableDataUnit *);
+        SerializeStream &operator<<(const SyncableUnitBase *);
+        SerializeStream &operator<<(const SerializableDataUnit *);
 
         void write(const std::string_view &s);
         void write(const StringViewable auto &s)
@@ -152,19 +136,19 @@ namespace Serialize {
             write(std::string_view { s });
         }
 
-        SerializeOutStream &operator<<(const std::string_view &);
-        SerializeOutStream &operator<<(const StringViewable auto &s)
+        SerializeStream &operator<<(const std::string_view &);
+        SerializeStream &operator<<(const StringViewable auto &s)
         {
             return operator<<(std::string_view { s });
         }
 
         void write(const ByteBuffer &b);
 
-        SerializeOutStream &operator<<(const ByteBuffer &);
+        SerializeStream &operator<<(const ByteBuffer &);
 
         void write(const std::monostate &);
 
-        SerializeOutStream &operator<<(const std::monostate &);
+        SerializeStream &operator<<(const std::monostate &);
 
     protected:
         std::unique_ptr<SerializeStreamData> mData;

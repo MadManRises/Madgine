@@ -4,12 +4,12 @@
 
 #include "oggdecodebuf.h"
 
-#include "Generic/streams.h"
+#include "Generic/stream.h"
 
 namespace Engine {
 namespace Audio {
 
-    InStream DecodeOggFile(AudioInfo &info, InStream &&file)
+    Stream DecodeOggFile(AudioInfo &info, Stream &&file)
     {
         return { std::make_unique<OggDecodeBuf>(info, file.release()) };
     }

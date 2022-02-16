@@ -38,20 +38,20 @@ namespace Resources {
         return mName;
     }
 
-    InStream ResourceBase::readAsStream(bool isBinary) const
+    Stream ResourceBase::readAsStream(bool isBinary) const
     {
         return Filesystem::openFileRead(mPath, isBinary);
     }
 
     std::string ResourceBase::readAsText() const
     {
-        InStream buffer = readAsStream();
+        Stream buffer = readAsStream();
         return std::string { buffer.iterator(), buffer.end() };
     }
 
     std::vector<unsigned char> Engine::Resources::ResourceBase::readAsBlob() const
     {
-        InStream buffer = readAsStream(true);
+        Stream buffer = readAsStream(true);
         return std::vector<unsigned char> { buffer.iterator(), buffer.end() };
     }
 

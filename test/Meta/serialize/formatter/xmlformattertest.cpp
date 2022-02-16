@@ -114,16 +114,15 @@ TEST(Serialize_Formatter, XML_InvalidParse)
     <complexList3>
     </complexList3>
 </unit1>")");
-    
-    NoParentUnit<TestUnit> unit;        
 
-    SerializeInStream in { std::move(file), std::make_unique<SerializeStreamData>(std::make_unique<XMLFormatter>()) };
+    NoParentUnit<TestUnit> unit;
 
-    StreamResult result = read(in, unit, nullptr);        
+    FormattedSerializeStream in { std::make_unique<XMLFormatter>(), SerializeStream { std::move(file), std::make_unique<SerializeStreamData>() } };
+
+    StreamResult result = read(in, unit, nullptr);
     ASSERT_EQ(result.mState, StreamState::PARSE_ERROR);
-    ASSERT_EQ(result.mError->mMsg, "ERROR: (4, 14): Expected: <int>"); 
+    ASSERT_EQ(result.mError->mMsg, "ERROR: (4, 14): Expected: <int>");
 }
-
 
 TEST(Serialize_Formatter, XML_ExtendedOrder)
 {
@@ -182,12 +181,11 @@ TEST(Serialize_Formatter, XML_ExtendedOrder)
 
     NoParentUnit<TestUnit> unit;
 
-    SerializeInStream in { std::move(file), std::make_unique<SerializeStreamData>(std::make_unique<XMLFormatter>()) };
+    FormattedSerializeStream in { std::make_unique<XMLFormatter>(), SerializeStream { std::move(file), std::make_unique<SerializeStreamData>() } };
 
-    HANDLE_STREAM_RESULT(read(in, unit, nullptr));    
+    HANDLE_STREAM_RESULT(read(in, unit, nullptr));
     ASSERT_EQ(unit.complexList1.front().i, 2);
     ASSERT_EQ(unit.complexList1.front().f, 6.0f);
     ASSERT_EQ(unit.complexList1.front().s, "set");
     ASSERT_EQ(unit.complexList1.front().b, true);
 }
-

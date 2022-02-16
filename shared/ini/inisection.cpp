@@ -2,7 +2,7 @@
 
 #include "inisection.h"
 
-#include "Generic/streams.h"
+#include "Generic/stream.h"
 
 namespace Engine {
 namespace Ini {
@@ -16,19 +16,19 @@ namespace Ini {
         return mValues[key];
     }
 
-    void IniSection::save(OutStream &stream) const
+    void IniSection::save(Stream &stream) const
     {
         for (const std::pair<const std::string, std::string> &p : mValues) {
             stream << p.first << "=" << p.second << '\n';
         }
     }
 
-    void IniSection::load(InStream &stream)
+    void IniSection::load(Stream &stream)
     {
         mValues.clear();
         std::streampos save = stream.tell();
         std::string line;
-        while (std::getline(stream.istream(), line)) {
+        while (std::getline(stream.stream(), line)) {
             if (line.at(0) == '[') {
                 stream.seek(save);
                 return;

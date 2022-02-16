@@ -16,7 +16,6 @@
 using namespace Engine::Serialize;
 using namespace std::chrono_literals;
 
-
 TEST(Serialize_Container, SyncedUnit)
 {
 
@@ -50,13 +49,13 @@ TEST(Serialize_Container, SyncedUnit)
 
     bool called = false;
     unit1.list2.emplace(unit1.list2.end(), 6).onSuccess([&](auto &&pib) {
-        called = true; 
+        called = true;
     });
     ASSERT_TRUE(called);
     ASSERT_EQ(unit1.list2.back(), 6);
 
     mgr1.sendMessages();
-    mgr2.receiveMessages(1, 0ms);    
+    mgr2.receiveMessages(1, 0ms);
 
     ASSERT_EQ(unit1.list2, unit2.list2);
 
@@ -88,9 +87,7 @@ TEST(Serialize_Container, SyncedUnit)
 
     ASSERT_EQ(unit2.list2.size(), 3);
     ASSERT_EQ(unit1.list2, unit2.list2);
-
 }
-
 
 TEST(Serialize_Container, Array)
 {
@@ -102,11 +99,11 @@ TEST(Serialize_Container, Array)
         array[i] = 2 * i;
 
     Buffer buffer;
-    SerializeOutStream stream1 {
-        std::make_unique<TestBuf>(buffer, true), std::make_unique<SerializeStreamData>(std::make_unique<SafeBinaryFormatter>())
+    FormattedSerializeStream stream1 {
+        std::make_unique<SafeBinaryFormatter>(), SerializeStream { std::make_unique<TestBuf>(buffer, true) }
     };
-    SerializeInStream stream2 {
-        std::make_unique<TestBuf>(buffer, false), std::make_unique<SerializeStreamData>(std::make_unique<SafeBinaryFormatter>())
+    FormattedSerializeStream stream2 {
+        std::make_unique<SafeBinaryFormatter>(), SerializeStream { std::make_unique<TestBuf>(buffer, false) }
     };
 
     write(stream1, array, "array");

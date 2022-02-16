@@ -11,15 +11,15 @@
 namespace Engine {
 namespace Serialize {
 
-    StreamResult convertSyncablePtr(SerializeInStream &in, UnitId id, SyncableUnitBase *&out)
+    StreamResult convertSyncablePtr(FormattedSerializeStream &in, UnitId id, SyncableUnitBase *&out)
     {
-        return SerializeManager::convertPtr(in, id, out);
+        return SerializeManager::convertPtr(in.stream(), id, out);
     }
 
-    StreamResult convertSerializablePtr(SerializeInStream &in, uint32_t id, SerializableDataUnit *&out)
+    StreamResult convertSerializablePtr(FormattedSerializeStream &in, uint32_t id, SerializableDataUnit *&out)
     {
         if (id > in.serializableList().size())
-            return STREAM_INTEGRITY_ERROR(in, true, "Unknown Serializable Unit-Id (" << id << ") used!");
+            return STREAM_INTEGRITY_ERROR(in.stream(), in.isBinary(), "Unknown Serializable Unit-Id (" << id << ") used!");
         out = in.serializableList().at(id);
         return {};
     }

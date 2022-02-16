@@ -41,8 +41,8 @@ namespace Physics {
 
             operator CollisionShapeInstance *() const;
 
-            Serialize::StreamResult readState(Serialize::SerializeInStream &in, const char *name = nullptr);
-            void writeState(Serialize::SerializeOutStream &out, const char *name = nullptr) const;
+            Serialize::StreamResult readState(Serialize::FormattedSerializeStream &in, const char *name = nullptr);
+            void writeState(Serialize::FormattedSerializeStream &out, const char *name = nullptr) const;
 
         private:
             CollisionShapeInstancePtr mInstance;

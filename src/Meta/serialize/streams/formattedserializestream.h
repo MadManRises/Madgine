@@ -5,7 +5,10 @@
 namespace Engine {
 namespace Serialize {
 
-    struct FormattedSerializeStream {
+    struct META_EXPORT FormattedSerializeStream {
+
+        FormattedSerializeStream() = default;
+        FormattedSerializeStream(std::unique_ptr<Formatter> format, SerializeStream stream);
 
         void beginExtendedWrite(const char *name, size_t count);
 
@@ -55,7 +58,7 @@ namespace Serialize {
 
         SerializeStreamData &data();
 
-        bool isMaster();
+        bool isMaster(StreamMode mode);
 
         bool isBinary();
 
@@ -66,8 +69,7 @@ namespace Serialize {
 
         SerializableUnitList &serializableList();
 
-        SerializeInStream &in();
-        SerializeOutStream &out();
+        [[deprecated]] SerializeStream &stream();
 
         std::unique_ptr<Formatter> mFormatter;
     };

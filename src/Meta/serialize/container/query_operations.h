@@ -1,28 +1,28 @@
 #pragma once
 
-#include "query.h"
+#include "../streams/formattedbufferedstream.h"
 #include "../streams/pendingrequest.h"
-#include "../streams/bufferedstream.h"
 #include "../unithelper.h"
+#include "query.h"
 
 namespace Engine {
 namespace Serialize {
 
-   template <auto f, typename OffsetPtr, typename R, typename T, typename... _Ty, typename... Configs>
+    template <auto f, typename OffsetPtr, typename R, typename T, typename... _Ty, typename... Configs>
     struct Operations<__serialize_impl__::QueryImpl<f, OffsetPtr, R, T, _Ty...>, Configs...> {
 
         template <typename... Args>
-        static void writeAction(const Query<f, OffsetPtr> &query, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *data, Args &&... args)
+        static void writeAction(const Query<f, OffsetPtr> &query, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, const void *data, Args &&...args)
         {
             assert(outStreams.size() == 1);
-            for (BufferedOutStream *out : outStreams) {
-                write(*out, *static_cast<const R *>(data), nullptr, args...);
-                out->endMessage();
+            for (FormattedBufferedStream &out : outStreams) {
+                write(out, *static_cast<const R *>(data), nullptr, args...);
+                out.endMessage();
             }
         }
 
         template <typename... Args>
-        static StreamResult readAction(Query<f, OffsetPtr> &query, SerializeInStream &in, PendingRequest *request, Args &&... args)
+        static StreamResult readAction(Query<f, OffsetPtr> &query, FormattedBufferedStream &in, PendingRequest *request, Args &&...args)
         {
             R returnValue;
             STREAM_PROPAGATE_ERROR(read(in, returnValue, nullptr, args...));
@@ -34,14 +34,14 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static void writeRequest(const Query<f, OffsetPtr> &query, BufferedOutStream &out, const void *data, Args &&... args)
+        static void writeRequest(const Query<f, OffsetPtr> &query, FormattedBufferedStream &out, const void *data, Args &&...args)
         {
             TupleUnpacker::forEach(*static_cast<const std::tuple<_Ty...> *>(data), [&](auto &field) { write(out, field, nullptr, args...); });
             out.endMessage();
         }
 
         template <typename... Args>
-        static StreamResult readRequest(Query<f, OffsetPtr> &query, BufferedInOutStream &in, TransactionId id, Args &&... args)
+        static StreamResult readRequest(Query<f, OffsetPtr> &query, FormattedBufferedStream &in, TransactionId id, Args &&...args)
         {
             std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> data;
             STREAM_PROPAGATE_ERROR(TupleUnpacker::accumulate(
@@ -55,7 +55,6 @@ namespace Serialize {
             return {};
         }
     };
-
 
 }
 }

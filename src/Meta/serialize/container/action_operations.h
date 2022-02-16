@@ -3,7 +3,7 @@
 #include "../configs/configselector.h"
 #include "../configs/requestpolicy.h"
 #include "../configs/verifier.h"
-#include "../streams/bufferedstream.h"
+#include "../streams/formattedbufferedstream.h"
 #include "../streams/pendingrequest.h"
 #include "../unithelper.h"
 #include "action.h"
@@ -18,16 +18,16 @@ namespace Serialize {
         using Verifier = ConfigSelectorDefault<VerifierCategory, DefaultVerifier, Configs...>;
 
         template <typename... Args>
-        static void writeAction(const Action<f, OffsetPtr> &action, const std::set<BufferedOutStream *, CompareStreamId> &outStreams, const void *data, Args &&...args)
+        static void writeAction(const Action<f, OffsetPtr> &action, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, const void *data, Args &&...args)
         {
-            for (BufferedOutStream *out : outStreams) {
-                TupleUnpacker::forEach(*static_cast<const std::tuple<_Ty...> *>(data), [&](auto &field) { write(*out, field, nullptr, args...); });
-                out->endMessage();
+            for (FormattedBufferedStream &out : outStreams) {
+                TupleUnpacker::forEach(*static_cast<const std::tuple<_Ty...> *>(data), [&](auto &field) { write(out, field, nullptr, args...); });
+                out.endMessage();
             }
         }
 
         template <typename... Args>
-        static StreamResult readAction(Action<f, OffsetPtr> &action, SerializeInStream &in, PendingRequest *request, Args &&...args)
+        static StreamResult readAction(Action<f, OffsetPtr> &action, FormattedBufferedStream &in, PendingRequest *request, Args &&...args)
         {
             std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> data;
             STREAM_PROPAGATE_ERROR(TupleUnpacker::accumulate(
@@ -52,7 +52,7 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static void writeRequest(const Action<f, OffsetPtr> &action, BufferedOutStream &out, const void *data, Args &&...args)
+        static void writeRequest(const Action<f, OffsetPtr> &action, FormattedBufferedStream &out, const void *data, Args &&...args)
         {
             if constexpr (!RequestPolicy::sCallByMasterOnly) {
                 TupleUnpacker::forEach(*static_cast<const std::tuple<_Ty...> *>(data), [&](auto &field) { write(out, field, nullptr, args...); });
@@ -63,7 +63,7 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static StreamResult readRequest(Action<f, OffsetPtr> &action, BufferedInOutStream &in, TransactionId id, Args &&...args)
+        static StreamResult readRequest(Action<f, OffsetPtr> &action, FormattedBufferedStream &in, TransactionId id, Args &&...args)
         {
             if constexpr (!RequestPolicy::sCallByMasterOnly) {
                 std::tuple<std::remove_const_t<std::remove_reference_t<_Ty>>...> data;
@@ -75,11 +75,11 @@ namespace Serialize {
                     StreamResult {}));
                 STREAM_PROPAGATE_ERROR(UnitHelper<decltype(data)>::applyMap(in, data, true));
                 if (!TupleUnpacker::invokeExpand(Verifier::verify, OffsetPtr::parent(&action), id, data))
-                    return STREAM_PERMISSION_ERROR(in, "Request for action not verified");
+                    return STREAM_PERMISSION_ERROR(in.stream(), in.isBinary(), "Request for action not verified");
                 action.tryCall(data, in.id(), id);
                 return {};
             } else {
-                return STREAM_PERMISSION_ERROR(in, "Request for action not allowed");
+                return STREAM_PERMISSION_ERROR(in.stream(), in.isBinary(), "Request for action not allowed");
             }
         }
     };

@@ -14,29 +14,25 @@ namespace Serialize {
     {
     }
 
-    void IniFormatter::setupStream(std::istream &in)
+    void IniFormatter::setupStream(std::iostream &inout)
     {
-        in >> std::boolalpha;
-        in >> std::noskipws;
-    }
-
-    void IniFormatter::setupStream(std::ostream &out)
-    {
-        out << std::boolalpha;
+        inout >> std::boolalpha;
+        inout >> std::noskipws;
+        inout << std::boolalpha;
     }
 
     void IniFormatter::beginPrimitiveWrite(const char *name, uint8_t typeId)
     {
-        mOut << name << "=";
+        mStream << name << "=";
     }
 
     StreamResult IniFormatter::beginPrimitiveRead(const char *name, uint8_t typeId)
     {
-        mIn.skipWs(true);
+        mStream.skipWs(true);
         std::string prefix;
-        STREAM_PROPAGATE_ERROR(mIn.readUntil(prefix, "="));
+        STREAM_PROPAGATE_ERROR(mStream.readUntil(prefix, "="));
         if (name && StringUtil::substr(prefix, 0, -1) != name)
-            return STREAM_PARSE_ERROR(mIn, mBinary, "Expected '" << name << "', Got '" << StringUtil::substr(prefix, 0, -1) << "'");
+            return STREAM_PARSE_ERROR(mStream, mBinary, "Expected '" << name << "', Got '" << StringUtil::substr(prefix, 0, -1) << "'");
 
         if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>)
             mNextStringDelimiter = "\n";
@@ -46,7 +42,7 @@ namespace Serialize {
 
     void IniFormatter::endPrimitiveWrite(const char *name, uint8_t typeId)
     {
-        mOut << "\n";
+        mStream << "\n";
     }
 
     StreamResult IniFormatter::endPrimitiveRead(const char *name, uint8_t typeId)
@@ -56,7 +52,7 @@ namespace Serialize {
 
     StreamResult IniFormatter::lookupFieldName(std::string &name)
     {
-        STREAM_PROPAGATE_ERROR(mIn.peekUntil(name, "="));
+        STREAM_PROPAGATE_ERROR(mStream.peekUntil(name, "="));
         if (!name.empty())
             name = StringUtil::substr(name, 0, -1);
         return {};
@@ -65,7 +61,7 @@ namespace Serialize {
     void IniFormatter::beginContainerWrite(const char *name, uint32_t size)
     {
         if (size != std::numeric_limits<uint32_t>::max()) {
-            mOut << "size=" << size << "\n";
+            mStream << "size=" << size << "\n";
         }
     }
 
@@ -73,7 +69,7 @@ namespace Serialize {
     {
         uint32_t size = 0;
         if (sized) {
-            mIn.skipWs(true);
+            mStream.skipWs(true);
             FORMATTER_EXPECT("size=");
             STREAM_PROPAGATE_ERROR(read(size));
         }

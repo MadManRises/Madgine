@@ -5,35 +5,35 @@ namespace Engine {
 typedef std::istream::pos_type pos_type;
 typedef std::istream::off_type off_type;
 
-struct InStream {
-    InStream()
+struct Stream {
+    Stream()
         : mStream(nullptr)
     {
     }
-    InStream(std::unique_ptr<std::streambuf> &&buffer)
+    Stream(std::unique_ptr<std::streambuf> buffer)
         : mStream(buffer.release())
-        , mOwning(true)
     {
     }
-    InStream(InStream &&other)
+    Stream(Stream &&other)
         : mStream(other.mStream.rdbuf(nullptr))
-        , mOwning(std::exchange(other.mOwning, false))
     {
     }
-    ~InStream()
+
+    ~Stream()
     {
-        if (mOwning) {
-            assert(mStream.rdbuf());
-            delete mStream.rdbuf();
-        }
-        mStream.rdbuf(nullptr);
+        delete mStream.rdbuf(nullptr);
+    }
+
+    Stream& operator=(Stream&& other) {
+        mStream.rdbuf(other.mStream.rdbuf(mStream.rdbuf()));
+        return *this;
     }
 
     template <typename T>
-    InStream &operator>>(T &t)
+    Stream &operator>>(T &t)
     {
         if constexpr (std::is_enum_v<T>) {
-            /* std::underlying_type_t<T> */int64_t val;
+            /* std::underlying_type_t<T> */ int64_t val;
             mStream >> val;
             t = static_cast<T>(val);
         } else {
@@ -55,11 +55,6 @@ struct InStream {
     {
         mStream.read(static_cast<char *>(buffer), size);
         return mStream.gcount();
-    }
-
-    explicit operator bool() const
-    {
-        return mStream.rdbuf() != nullptr && static_cast<bool>(mStream);
     }
 
     pos_type tell()
@@ -101,56 +96,8 @@ struct InStream {
         }
     }
 
-    std::unique_ptr<std::streambuf> release()
-    {
-        assert(mOwning);
-        mOwning = false;
-        return std::unique_ptr<std::streambuf>(mStream.rdbuf(nullptr));
-    }
-
-    std::istream& istream() {
-        return mStream;
-    }
-
-protected:
-    InStream(std::streambuf *buffer)
-        : mStream(buffer)
-    {
-    }
-
-    std::streambuf &buffer() const
-    {
-        return *mStream.rdbuf();
-    }
-
-    std::istream mStream;
-
-    friend struct OutStream;
-
-    bool mOwning = false;
-};
-
-struct OutStream {
-    OutStream()
-        : mStream(nullptr)
-    {
-    }
-    OutStream(std::unique_ptr<std::streambuf> &&buffer)
-        : mStream(buffer.release())
-    {
-    }
-    OutStream(OutStream &&other)
-        : mStream(other.mStream.rdbuf(nullptr))
-    {
-    }
-    ~OutStream()
-    {
-        if (mStream.rdbuf())
-            delete mStream.rdbuf(nullptr);
-    }
-
     template <typename T>
-    OutStream &operator<<(const T &t)
+    Stream &operator<<(const T &t)
     {
         if constexpr (std::is_enum_v<T>) {
             mStream << static_cast<std::underlying_type_t<T>>(t);
@@ -181,18 +128,22 @@ struct OutStream {
         return std::unique_ptr<std::streambuf>(mStream.rdbuf(nullptr));
     }
 
-    void pipe(InStream &in)
+    void pipe(Stream &in)
     {
         mStream << &in.buffer();
     }
 
-protected:
+    std::iostream& stream() {
+        return mStream;
+    }
+
     std::streambuf &buffer() const
     {
         return *mStream.rdbuf();
     }
 
-    std::ostream mStream;
+protected:
+    std::iostream mStream;
 };
 
 /*struct Stream : InStream, OutStream {

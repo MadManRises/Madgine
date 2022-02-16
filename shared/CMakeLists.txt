@@ -60,14 +60,14 @@ install_to_workspace(BulletLib TARGETS BulletDynamics BulletCollision LinearMath
 export_to_workspace(BulletLib)
 
 if (NOT ANDROID AND NOT EMSCRIPTEN AND NOT IOS)
-	set(ALSOFT_INSTALL OFF CACHE BOOL "" FORCE)
-	set (ALSOFT_EXAMPLES OFF CACHE BOOL "" FORCE)
-	set(LIBTYPE STATIC)
-	add_subdirectory(openal-soft)
+	#set(ALSOFT_INSTALL OFF CACHE BOOL "" FORCE)
+	#set (ALSOFT_EXAMPLES OFF CACHE BOOL "" FORCE)
+	#set(LIBTYPE STATIC)
+	#add_subdirectory(openal-soft)
 
-	install_to_workspace(OpenAL TARGETS OpenAL common EXPORT_LIB)
+	#install_to_workspace(OpenAL TARGETS OpenAL common EXPORT_LIB)
 
-	export_to_workspace(OpenAL)
+	#export_to_workspace(OpenAL)
 endif()
 
 if (NOT IOS)

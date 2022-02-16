@@ -15,7 +15,7 @@ namespace Serialize {
     void UnsafeBinaryFormatter::beginContainerWrite(const char *name, uint32_t size)
     {
         if (size != std::numeric_limits<uint32_t>::max())
-            mOut.write(size);
+            mStream.write(size);
     }
 
     StreamResult UnsafeBinaryFormatter::beginContainerRead(const char *name, bool sized)
@@ -23,7 +23,7 @@ namespace Serialize {
         uint32_t size = 0;
         if (sized) {
             STREAM_PROPAGATE_ERROR(beginExtendedRead(name, 1));
-            STREAM_PROPAGATE_ERROR(mIn.read(size));
+            STREAM_PROPAGATE_ERROR(mStream.read(size));
         }
         mContainerSizes.push(size);
         return {};

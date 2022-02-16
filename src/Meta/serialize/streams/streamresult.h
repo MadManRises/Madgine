@@ -6,7 +6,7 @@ namespace Engine {
 namespace Serialize {
 
     struct META_EXPORT StreamError {
-        StreamError(SerializeInStream &in, bool binary, const std::string &msg, const char *file, size_t sourceLine);
+        StreamError(SerializeStream &in, bool binary, const std::string &msg, const char *file, size_t sourceLine);
 
         META_EXPORT friend std::ostream &operator<<(std::ostream &out, const StreamError &error);
 
@@ -24,13 +24,13 @@ namespace Serialize {
 
     struct META_EXPORT StreamResultBuilder {
         StreamState mType;
-        SerializeInStream &mStream;
+        SerializeStream &mStream;
         bool mBinary;
         const char *mFile;
         size_t mLine;
         std::stringstream mMsg;
 
-        StreamResultBuilder(StreamState type, SerializeInStream &stream, bool binary, const char *file, size_t line)
+        StreamResultBuilder(StreamState type, SerializeStream &stream, bool binary, const char *file, size_t line)
             : mType(type)
             , mStream(stream)
             , mFile(file)

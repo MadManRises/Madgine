@@ -123,7 +123,7 @@ TEST(Serialize_Formatter, JSON_InvalidParse)
 
     NoParentUnit<TestUnit> unit;
 
-    SerializeInStream in { std::move(file), std::make_unique<SerializeStreamData>(std::make_unique<JSONFormatter>()) };
+    FormattedSerializeStream in { std::make_unique<JSONFormatter>(), SerializeStream { std::move(file), std::make_unique<SerializeStreamData>() } };
 
     StreamResult result = read(in, unit, nullptr);
     ASSERT_EQ(result.mState, StreamState::PARSE_ERROR);
@@ -188,9 +188,9 @@ TEST(Serialize_Formatter, JSON_ExtendedOrder)
 
     NoParentUnit<TestUnit> unit;
 
-    SerializeInStream in { std::move(file), std::make_unique<SerializeStreamData>(std::make_unique<JSONFormatter>()) };
+    FormattedSerializeStream in { std::make_unique<JSONFormatter>(), SerializeStream { std::move(file), std::make_unique<SerializeStreamData>() } };
 
-    HANDLE_STREAM_RESULT(read(in, unit, nullptr));    
+    HANDLE_STREAM_RESULT(read(in, unit, nullptr));
     ASSERT_EQ(unit.complexList1.front().i, 2);
     ASSERT_EQ(unit.complexList1.front().f, 6.0f);
     ASSERT_EQ(unit.complexList1.front().s, "set");

@@ -19,10 +19,10 @@ namespace Engine {
 namespace Serialize {
 
     DERIVE_TYPENAME(Config);
-    DERIVE_FUNCTION(writeState, SerializeOutStream &, const char *)
-    DERIVE_FUNCTION2(writeState2, writeState, SerializeOutStream &, const char *, CallerHierarchyBasePtr)
-    DERIVE_FUNCTION(readState, SerializeInStream &, const char *)
-    DERIVE_FUNCTION2(readState2, readState, SerializeInStream &, const char *, CallerHierarchyBasePtr)
+    DERIVE_FUNCTION(writeState, FormattedSerializeStream &, const char *)
+    DERIVE_FUNCTION2(writeState2, writeState, FormattedSerializeStream &, const char *, CallerHierarchyBasePtr)
+    DERIVE_FUNCTION(readState, FormattedSerializeStream &, const char *)
+    DERIVE_FUNCTION2(readState2, readState, FormattedSerializeStream &, const char *, CallerHierarchyBasePtr)
     /*DERIVE_FUNCTION(readAction, SerializeInStream &, PendingRequest*)
     DERIVE_FUNCTION(readRequest, BufferedInOutStream &, TransactionId)
     DERIVE_FUNCTION(writeAction, int, const void *, ParticipantId, TransactionId)
@@ -127,28 +127,28 @@ namespace Serialize {
 
         //TODO: Maybe move loop out of this function
         template <typename... Args>
-        static void writeAction(const C &c, const std::set<FormattedBufferedStream *, CompareStreamId> &outStreams, const void *_data, Args &&...args)
+        static void writeAction(const C &c, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, const void *_data, Args &&...args)
         {
             const auto &[op, it] = *static_cast<const std::tuple<ContainerEvent, typename C::const_iterator> *>(_data);
 
-            for (FormattedBufferedStream *out : outStreams) {
-                Serialize::write(*out, op, "op");
+            for (FormattedBufferedStream &out : outStreams) {
+                Serialize::write(out, op, "op");
                 switch (op) {
                 case EMPLACE: {
                     if constexpr (!container_traits<C>::sorted) {
-                        writeIterator(*out, c, it);
+                        writeIterator(out, c, it);
                     }
-                    TupleUnpacker::invoke(&Creator::template writeItem<C>, *out, *it, std::forward<Args>(args)...);
+                    TupleUnpacker::invoke(&Creator::template writeItem<C>, out, *it, std::forward<Args>(args)...);
                     break;
                 }
                 case ERASE: {
-                    writeIterator(*out, c, it);
+                    writeIterator(out, c, it);
                     break;
                 }
                 default:
                     throw 0;
                 }
-                out->endMessage();
+                out.endMessage();
             }
         }
 
@@ -221,7 +221,7 @@ namespace Serialize {
                 } else {
                     FormattedBufferedStream &out = c.getSlaveActionMessageTarget(inout.id(), id);
                     Serialize::write(out, op, "op");
-                    out.pipe(inout);
+                    out.stream().pipe(inout.stream());
                     out.endMessage();
                 }
             }
@@ -286,7 +286,7 @@ namespace Serialize {
         }
 
         template <typename... Args>
-        static void writeAction(const T &t, const std::set<FormattedBufferedStream *, CompareStreamId> &outStreams, const void *data, Args &&...args)
+        static void writeAction(const T &t, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, const void *data, Args &&...args)
         {
             /*if constexpr (PrimitiveTypesContain_v<T> || std::is_enum_v<T>) {
             out.format().beginPrimitive(out, name, PrimitiveTypeIndex_v<T>);
@@ -486,19 +486,19 @@ namespace Serialize {
         template <typename... Args>
         static StreamResult read(FormattedSerializeStream &in, std::pair<U, V> &t, const char *name, Args &&...args)
         {
-            STREAM_PROPAGATE_ERROR(in.format().beginCompound(in, name));
+            STREAM_PROPAGATE_ERROR(in.beginCompoundRead(name));
             STREAM_PROPAGATE_ERROR(Serialize::read<U>(in, t.first, nullptr, args...));
             STREAM_PROPAGATE_ERROR(Serialize::read<V>(in, t.second, nullptr, args...));
-            return in.format().endCompound(in, name);
+            return in.endCompoundRead(name);
         }
 
         template <typename... Args>
         static void write(FormattedSerializeStream &out, const std::pair<U, V> &t, const char *name, Args &&...args)
         {
-            out.format().beginCompound(out, name);
+            out.beginCompoundWrite(name);
             Serialize::write<U>(out, t.first, "First", args...);
             Serialize::write<V>(out, t.second, "Second", args...);
-            out.format().endCompound(out, name);
+            out.endCompoundWrite(name);
         }
     };
 

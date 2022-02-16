@@ -3,11 +3,6 @@
 namespace Engine {
 namespace Serialize {
 
-	enum class StreamMode {
-        READ,
-        WRITE
-    };
-
     struct META_EXPORT SerializeStreamData {
     public:
         SerializeStreamData();

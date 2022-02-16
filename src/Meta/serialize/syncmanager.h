@@ -28,7 +28,7 @@ namespace Serialize {
 
         StreamResult readMessage(FormattedBufferedStream &);
 
-        std::set<FormattedBufferedStream *, CompareStreamId> getMasterMessageTargets();
+        std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterMessageTargets();
 
         void clearTopLevelItems();
         bool addTopLevelItem(TopLevelUnitBase *unit, bool sendStateFlag = true);
@@ -70,6 +70,8 @@ namespace Serialize {
         void sendState(FormattedBufferedStream &stream, SyncableUnitBase *unit);
 
         SyncManagerResult recordStreamError(StreamResult error);
+
+        std::unique_ptr<SyncStreamData> createStreamData();
 
     private:
 
