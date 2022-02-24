@@ -1,11 +1,13 @@
-#include "../metalib.h"
+#include "../../metalib.h"
 
-#include "serializetable.h"
-#include "streams/formattedbufferedstream.h"
-#include "streams/operations.h"
 #include "syncable.h"
-#include "syncableunit.h"
-#include "toplevelunit.h"
+
+#include "Generic/offsetptr.h"
+
+#include "../hierarchy/serializetable.h"
+
+#include "../syncmanager.h"
+#include "../hierarchy/toplevelunit.h"
 
 namespace Engine {
 namespace Serialize {
@@ -23,12 +25,7 @@ namespace Serialize {
         if (targets.empty()) {
             for (FormattedBufferedStream &out : result) {
                 out.beginMessage();
-                out.beginHeaderWrite();
-                write(out, parent, "Object");
-                write(out, ACTION, "MessageType");
-                write(out, out.id() == answerTarget ? answerId : 0, "TransactionId");
-                write(out, index, "index");
-                out.endHeaderWrite();
+                SyncManager::writeHeader(out, parent, ACTION, out.id() == answerTarget ? answerId : 0, index);
             }
         } else {
             auto it1 = result.begin();
@@ -41,12 +38,7 @@ namespace Serialize {
                 }
                 if (*it2 == out.id()) {
                     out.beginMessage();
-                    out.beginHeaderWrite();
-                    write(out, parent, "Object");
-                    write(out, ACTION, "MessageType");
-                    write(out, out.id() == answerTarget ? answerId : 0, "TransactionId");
-                    write(out, index, "index");
-                    out.endHeaderWrite();
+                    SyncManager::writeHeader(out, parent, ACTION, out.id() == answerTarget ? answerId : 0, index);
                     ++it2;
                     ++it1;
                 } else {
@@ -86,28 +78,23 @@ namespace Serialize {
         parent->serializeType()->writeAction(parent, index, getMasterActionMessageTargets(parent, index, answerTarget, answerId, targets), data);
     }
 
-    FormattedBufferedStream &SyncableBase::getSlaveActionMessageTarget(const SyncableUnitBase *parent, OffsetPtr offset, ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback) const
+    FormattedBufferedStream &SyncableBase::getSlaveRequestMessageTarget(const SyncableUnitBase *parent, OffsetPtr offset, ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback) const
     {
-        return getSlaveActionMessageTarget(parent, parent->serializeType()->getIndex(offset), requester, requesterTransactionId, callback);
+        return getSlaveRequestMessageTarget(parent, parent->serializeType()->getIndex(offset), requester, requesterTransactionId, callback);
     }
 
-    FormattedBufferedStream &SyncableBase::getSlaveActionMessageTarget(const SyncableUnitBase *parent, uint8_t index, ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback) const
+    FormattedBufferedStream &SyncableBase::getSlaveRequestMessageTarget(const SyncableUnitBase *parent, uint8_t index, ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback) const
     {
         FormattedBufferedStream &out = parent->getSlaveMessageTarget();
         out.beginMessage();
-        out.beginHeaderWrite();
-        write(out, parent, "Object");
-        write(out, REQUEST, "MessageType");
-        write(out, out.createRequest(requester, requesterTransactionId, std::move(callback)), "TransactionId");
-        write(out, index, "index");
-        out.endHeaderWrite();
+        SyncManager::writeHeader(out, parent, REQUEST, out.createRequest(requester, requesterTransactionId, std::move(callback)), index);
         return out;
     }
 
     void SyncableBase::writeRequest(const SyncableUnitBase *parent, OffsetPtr offset, const void *data, ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback) const
     {
         uint8_t index = parent->serializeType()->getIndex(offset);
-        parent->serializeType()->writeRequest(parent, index, getSlaveActionMessageTarget(parent, index, requester, requesterTransactionId, std::move(callback)), data);
+        parent->serializeType()->writeRequest(parent, index, getSlaveRequestMessageTarget(parent, index, requester, requesterTransactionId, std::move(callback)), data);
     }
 
     void SyncableBase::writeRequestResponse(const SyncableUnitBase *parent, OffsetPtr offset, const void *data, ParticipantId answerTarget, TransactionId answerId) const
@@ -126,12 +113,7 @@ namespace Serialize {
     void SyncableBase::beginRequestResponseMessage(const SyncableUnitBase *parent, uint8_t index, FormattedBufferedStream &stream, TransactionId id) const
     {
         stream.beginMessage();
-        stream.beginHeaderWrite();
-        write(stream, parent, "Object");
-        write(stream, ACTION, "MessageType");
-        write(stream, id, "TransactionId");
-        write(stream, index, "index");
-        stream.endHeaderWrite();
+        SyncManager::writeHeader(stream, parent, ACTION, id, index);
     }
 
     bool SyncableBase::isMaster(const SyncableUnitBase *parent) const

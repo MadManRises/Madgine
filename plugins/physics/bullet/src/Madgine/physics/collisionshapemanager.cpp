@@ -9,7 +9,7 @@
 
 #include "Meta/math/quaternion.h"
 
-#include "Meta/serialize/streams/operations.h"
+#include "Meta/serialize/operations.h"
 
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btBoxShape.h"
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btCapsuleShape.h"

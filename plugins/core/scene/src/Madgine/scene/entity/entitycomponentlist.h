@@ -3,7 +3,7 @@
 #include "Generic/container/container_api.h"
 #include "Generic/container/freelistcontainer.h"
 #include "Meta/keyvalue/typedscopeptr.h"
-#include "Meta/serialize/serializableunitptr.h"
+#include "Meta/serialize/hierarchy/serializableunitptr.h"
 #include "entitycomponentcollector.h"
 #include "entitycomponentlistbase.h"
 #include "entitycomponentcontainer.h"

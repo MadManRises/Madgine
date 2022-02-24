@@ -121,7 +121,10 @@ std::pair<Socket, SocketAPIResult> Socket::accept(TimeOut timeout) const
     FD_ZERO(&readSet);
     FD_SET(mSocket, &readSet);
     timeval timeout_s;
+    timeval *timeout_p = &timeout_s;
     if (timeout.isInfinite()) {
+        timeout_p = nullptr;
+    }else if (timeout.isZero()) {
         timeout_s.tv_sec = 0;
         timeout_s.tv_usec = 0;
     } else {
@@ -129,7 +132,7 @@ std::pair<Socket, SocketAPIResult> Socket::accept(TimeOut timeout) const
         timeout_s.tv_sec = static_cast<long>(remainder.count()) / 1000;
         timeout_s.tv_usec = static_cast<long>(remainder.count()) % 1000 * 1000;
     }
-    if (int error = select(static_cast<int>(mSocket), &readSet, nullptr, nullptr, &timeout_s); error <= 0) {
+    if (int error = select(static_cast<int>(mSocket), &readSet, nullptr, nullptr, timeout_p); error <= 0) {
         if (error == 0)
             return { Socket {}, SocketAPIResult::TIMEOUT };
         else

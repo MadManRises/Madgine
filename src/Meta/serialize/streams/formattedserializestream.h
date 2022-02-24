@@ -1,6 +1,8 @@
 #pragma once
 
-#include "../formatter.h"
+#include "formatter.h"
+
+#include "../primitivetypes.h"
 
 namespace Engine {
 namespace Serialize {
@@ -20,12 +22,6 @@ namespace Serialize {
         StreamResult beginCompoundRead(const char *name);
         StreamResult endCompoundRead(const char *name);
 
-        void beginPrimitiveWrite(const char *name, uint8_t typeId);
-        void endPrimitiveWrite(const char *name, uint8_t typeId);
-
-        StreamResult beginPrimitiveRead(const char *name, uint8_t typeId);
-        StreamResult endPrimitiveRead(const char *name, uint8_t typeId);
-
         void beginContainerWrite(const char *name, uint32_t size = std::numeric_limits<uint32_t>::max());
         void endContainerWrite(const char *name);
 
@@ -41,22 +37,22 @@ namespace Serialize {
         template <PrimitiveType T>
         void writePrimitive(const T &t, const char *name)
         {
-            beginPrimitiveWrite(name, PrimitiveTypeIndex_v<T>);
+            mFormatter->beginPrimitiveWrite(name, PrimitiveTypeIndex_v<T>);
             mFormatter->write(t);
-            endPrimitiveWrite(name, PrimitiveTypeIndex_v<T>);
+            mFormatter->endPrimitiveWrite(name, PrimitiveTypeIndex_v<T>);
         }
 
         template <PrimitiveType T>
         StreamResult readPrimitive(T &t, const char *name)
         {
-            STREAM_PROPAGATE_ERROR(beginPrimitiveRead(name, PrimitiveTypeIndex_v<T>));
+            STREAM_PROPAGATE_ERROR(mFormatter->beginPrimitiveRead(name, PrimitiveTypeIndex_v<T>));
             STREAM_PROPAGATE_ERROR(mFormatter->read(t));
-            return endPrimitiveRead(name, PrimitiveTypeIndex_v<T>);
+            return mFormatter->endPrimitiveRead(name, PrimitiveTypeIndex_v<T>);
         }
 
         explicit operator bool() const;
 
-        SerializeStreamData &data();
+        SerializeStreamData *data();
 
         bool isMaster(StreamMode mode);
 

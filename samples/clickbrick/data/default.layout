@@ -29,7 +29,7 @@
                             <mChildren>
                                 <Widget name="Score" type=WidgetClass::LABEL serId=7>
                                     <mFontSize>3</mFontSize>
-                                    <mText>Score: 2</mText>
+                                    <mText>Score: 0</mText>
                                     <mPivot>
                                         <Element>1</Element>
                                         <Element>0</Element>
@@ -42,7 +42,7 @@
                                 </Item>
                                 <Widget name="Life" type=WidgetClass::LABEL serId=8>
                                     <mFontSize>3</mFontSize>
-                                    <mText>Life: 3</mText>
+                                    <mText>Life: -26</mText>
                                     <mPivot>
                                         <Element>0</Element>
                                         <Element>0</Element>
@@ -74,11 +74,11 @@
                             <mChildren>
                             </mChildren>
                             <mPos>[0.2, 0, 0, 0, 0.4, 0, 0, 0, 0]</mPos>
-                            <mSize>[0.7, 0, 0, 0, 0.11, 0, 0, 0, 1]</mSize>
+                            <mSize>[0.6, 0, 0, 0, 0.11, 0, 0, 0, 1]</mSize>
                         </Item>
                         <Widget name="ScoreLabel" type=WidgetClass::LABEL serId=11>
                             <mFontSize>4</mFontSize>
-                            <mText>Your Score: </mText>
+                            <mText>Your Score: 0</mText>
                             <mPivot>
                                 <Element>0.5</Element>
                                 <Element>0.5</Element>

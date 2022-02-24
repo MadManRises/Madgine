@@ -28,12 +28,12 @@ namespace Server {
 
         void consoleCheck();
 
+        Threading::TaskQueue mTaskQueue;
+
     private:
         ServerLog mLog;
 
         std::list<ServerInstance> mInstances;
-
-        Threading::TaskQueue mTaskQueue;
     };
 
 }

@@ -7,7 +7,7 @@
 
 #include "Generic/container/transformIt.h"
 
-#include "Meta/serialize/virtualserializableunit.h"
+#include "Meta/serialize/hierarchy/virtualserializableunit.h"
 
 #include "Meta/keyvalue/virtualscope.h"
 
@@ -42,11 +42,11 @@ namespace Widgets {
         void setPos(const Matrix3 &pos);
         const Matrix3 &getPos() const;
 
-        Matrix3 getAbsoluteSize() const;
-        Matrix3 getAbsolutePosition() const;
+        Matrix3 getEffectiveSize() const;
+        Matrix3 getEffectivePosition() const;
 
-        Vector3 getActualSize() const;
-        Vector3 getActualPosition() const;
+        Vector3 getAbsoluteSize() const;
+        Vector3 getAbsolutePosition() const;
 
         void updateGeometry(const Rect2i &screenSpace, const Matrix3 &parentSize = Matrix3::IDENTITY, const Matrix3 &parentPos = Matrix3::ZERO);
 
@@ -66,7 +66,7 @@ namespace Widgets {
 
         WidgetBase *createChild(const std::string &name, WidgetClass _class);
         template <typename WidgetType = WidgetBase>
-        WidgetType *createChild(const std::string &name);
+        MADGINE_WIDGETS_EXPORT WidgetType *createChild(const std::string &name);
 
         WidgetBase *getChildRecursive(const std::string &name);
         template <typename T>
@@ -139,7 +139,7 @@ namespace Widgets {
         Matrix3 mPos = Matrix3::ZERO;
         Matrix3 mSize = Matrix3::IDENTITY;
 
-        Matrix3 mAbsolutePos, mAbsoluteSize;
+        Matrix3 mEffectivePos, mEffectiveSize;
 
         void *mUserData = nullptr;
     };

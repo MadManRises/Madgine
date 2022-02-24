@@ -1,11 +1,14 @@
 #pragma once
 
-#include "Generic/makeowning.h"
+#include "hierarchy/serializer.h"
+
+#include "container/unithelper.h"
+
 #include "Generic/memberoffsetptr.h"
-#include "serializer.h"
-#include "serializetable.h"
-#include "streams/operations.h"
-#include "unithelper.h"
+
+#include "hierarchy/serializetable.h"
+
+#include "operations.h"
 
 namespace Engine {
 namespace Serialize {
@@ -252,7 +255,7 @@ namespace Serialize {
         namespace Serialize {                                                                         \
             namespace __serialize_impl__ {                                                            \
                 template <>                                                                           \
-                struct SerializeInstance<T> {                                                       \
+                struct SerializeInstance<T> {                                                         \
                     using Ty = T;                                                                     \
                     static constexpr const ::Engine::Serialize::SerializeTable &(*baseType)() = Base; \
                     static constexpr const std::pair<const char *, ::Engine::Serialize::Serializer> fields[] = {

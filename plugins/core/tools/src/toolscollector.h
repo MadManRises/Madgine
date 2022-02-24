@@ -2,7 +2,7 @@
 
 #include "Modules/uniquecomponent/uniquecomponentdefine.h"
 
-#include "Meta/serialize/virtualserializableunit.h"
+#include "Meta/serialize/hierarchy/virtualserializableunit.h"
 
 #include "Meta/keyvalue/virtualscope.h"
 

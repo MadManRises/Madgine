@@ -2,7 +2,6 @@
 
 #include "syncstreamdata.h"
 
-#include "../formatter.h"
 #include "../syncmanager.h"
 
 namespace Engine {

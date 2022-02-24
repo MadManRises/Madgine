@@ -1,23 +1,15 @@
-#include "../metalib.h"
+#include "../../metalib.h"
 
-#include "serializableunitptr.h"
+#include "../streams/serializablemapholder.h"
+#include "statetransmissionflags.h"
 
-#include "streams/serializestream.h"
+#include "serializetable.h"
 
-#include "formatter.h"
-
-#include "serializableunit.h"
-
-#include "streams/operations.h"
+#include "Generic/offsetptr.h"
 
 #include "toplevelunit.h"
 
-#include "streams/serializablemapholder.h"
-
-#include "serializetable.h"
-#include "statetransmissionflags.h"
-
-#include "streams/formattedserializestream.h"
+#include "../operations.h"
 
 namespace Engine {
 namespace Serialize {
@@ -26,7 +18,7 @@ namespace Serialize {
     {
         SerializableMapHolder holder { out };
 
-        if (out.isMaster(StreamMode::WRITE) && !(flags & StateTransmissionFlags_SkipId)) {
+        if (out.isMaster(StreamMode::WRITE) && out.data() && !(flags & StateTransmissionFlags_SkipId)) {
             out.beginExtendedWrite(name, 1);
             write(out, mUnit, "serId");
         }
@@ -40,7 +32,7 @@ namespace Serialize {
     {
         SerializableListHolder holder { in };
 
-        if (!in.isMaster(StreamMode::READ) && !(flags & StateTransmissionFlags_SkipId)) {
+        if (!in.isMaster(StreamMode::READ) && in.data() && !(flags & StateTransmissionFlags_SkipId)) {
             STREAM_PROPAGATE_ERROR(in.beginExtendedRead(name, 1));
             SerializableUnitBase *idHelper;
             STREAM_PROPAGATE_ERROR(read(in, idHelper, "serId"));
@@ -93,7 +85,7 @@ namespace Serialize {
     {
         SerializableListHolder holder { in };
 
-        if (!in.isMaster(StreamMode::READ) && !(flags & StateTransmissionFlags_SkipId)) {
+        if (!in.isMaster(StreamMode::READ) && in.data() && !(flags & StateTransmissionFlags_SkipId)) {
             STREAM_PROPAGATE_ERROR(in.beginExtendedRead(name, 1));
             SerializableUnitBase *idHelper;
             STREAM_PROPAGATE_ERROR(read(in, idHelper, "serId"));

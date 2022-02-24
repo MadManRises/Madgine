@@ -2,10 +2,8 @@
 
 #include "formattedbufferedstream.h"
 
-#include "buffered_streambuf.h"
-
 #include "syncstreamdata.h"
-
+#include "buffered_streambuf.h"
 #include "../syncmanager.h"
 
 namespace Engine {
@@ -19,7 +17,7 @@ namespace Serialize {
     FormattedBufferedStream::FormattedBufferedStream(FormattedBufferedStream &&other, SyncManager *mgr)
         : FormattedBufferedStream(std::move(other))
     {
-        mFormatter->stream().data().setManager(mgr);
+        mFormatter->stream().data()->setManager(mgr);
     }
 
     void FormattedBufferedStream::beginMessage()
@@ -55,17 +53,17 @@ namespace Serialize {
 
     TransactionId FormattedBufferedStream::createRequest(ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback)
     {
-        return static_cast<SyncStreamData &>(mFormatter->stream().data()).createRequest(requester, requesterTransactionId, std::move(callback));
+        return static_cast<SyncStreamData *>(mFormatter->stream().data())->createRequest(requester, requesterTransactionId, std::move(callback));
     }
 
     PendingRequest *FormattedBufferedStream::fetchRequest(TransactionId id)
     {
-        return static_cast<SyncStreamData &>(mFormatter->stream().data()).fetchRequest(id);
+        return static_cast<SyncStreamData *>(mFormatter->stream().data())->fetchRequest(id);
     }
 
     void FormattedBufferedStream::popRequest(TransactionId id)
     {
-        static_cast<SyncStreamData &>(mFormatter->stream().data()).popRequest(id);
+        static_cast<SyncStreamData *>(mFormatter->stream().data())->popRequest(id);
     }
 
     StreamResult FormattedBufferedStream::beginHeaderRead()

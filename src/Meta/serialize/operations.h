@@ -1,19 +1,19 @@
 #pragma once
 
-#include "../configs/configselector.h"
-#include "../configs/creator.h"
-#include "../configs/requestpolicy.h"
-#include "../container/physical.h"
-#include "../formatter.h"
-#include "../primitivetypes.h"
-#include "../serializableunitptr.h"
-#include "Generic/callerhierarchy.h"
-#include "Generic/container/atomiccontaineroperation.h"
 #include "Generic/container/containerevent.h"
-#include "Generic/indextype.h"
-#include "comparestreamid.h"
-#include "pendingrequest.h"
-#include "formattedbufferedstream.h"
+#include "configs/configselector.h"
+#include "configs/creator.h"
+#include "configs/requestpolicy.h"
+
+#include "hierarchy/serializableunitptr.h"
+
+#include "streams/formattedbufferedstream.h"
+
+#include "Generic/container/atomiccontaineroperation.h"
+
+#include "container/physical.h"
+
+#include "streams/pendingrequest.h"
 
 namespace Engine {
 namespace Serialize {
@@ -219,7 +219,7 @@ namespace Serialize {
                     typename container_traits<C>::emplace_return it;
                     STREAM_PROPAGATE_ERROR(performOperation(c, op, inout, it, inout.id(), id, std::forward<Args>(args)...));
                 } else {
-                    FormattedBufferedStream &out = c.getSlaveActionMessageTarget(inout.id(), id);
+                    FormattedBufferedStream &out = c.getSlaveRequestMessageTarget(inout.id(), id);
                     Serialize::write(out, op, "op");
                     out.stream().pipe(inout.stream());
                     out.endMessage();
@@ -502,14 +502,14 @@ namespace Serialize {
         }
     };
 
-    template <typename T, typename... Configs, typename Hierarchy>
-    StreamResult read(FormattedSerializeStream &in, T &t, const char *name, const Hierarchy &hierarchy, StateTransmissionFlags flags)
+    template <typename T, typename... Configs, typename Hierarchy = std::monostate>
+    StreamResult read(FormattedSerializeStream &in, T &t, const char *name, const Hierarchy &hierarchy = {}, StateTransmissionFlags flags = 0)
     {
         return Operations<T, Configs...>::read(in, t, name, hierarchy, flags);
     }
 
-    template <typename T, typename... Configs, typename Hierarchy>
-    void write(FormattedSerializeStream &out, const T &t, const char *name, const Hierarchy &hierarchy, StateTransmissionFlags flags)
+    template <typename T, typename... Configs, typename Hierarchy = std::monostate>
+    void write(FormattedSerializeStream &out, const T &t, const char *name, const Hierarchy &hierarchy = {}, StateTransmissionFlags flags = 0)
     {
         Operations<T, Configs...>::write(out, t, name, hierarchy, flags);
     }

@@ -1,15 +1,8 @@
-#include "../metalib.h"
+#include "../../metalib.h"
 
 #include "formatter.h"
 
-#include "streams/serializestream.h"
-#include "streams/streamresult.h"
-
-#include "Generic/bytebuffer.h"
-
 #include "base64/base64.h"
-
-#include "serializemanager.h"
 
 namespace Engine {
 namespace Serialize {
@@ -19,7 +12,8 @@ namespace Serialize {
         return mStream;
     }
 
-    void Formatter::setupStream(SerializeStream stream) {
+    void Formatter::setupStream(SerializeStream stream)
+    {
         assert(!mStream);
         mStream = std::move(stream);
         setupStream(mStream.stream());
@@ -82,6 +76,28 @@ namespace Serialize {
             mStream >> s;
         }
         return {};
+    }
+
+    StreamResult Formatter::read(ByteBuffer &b)
+    {
+        if (mBinary) {
+            return mStream.read(b);
+        } else {
+            std::string base64Encoded;
+            STREAM_PROPAGATE_ERROR(read(base64Encoded));
+            if (!Base64::decode(b, base64Encoded))
+                return STREAM_PARSE_ERROR(mStream, mBinary, "Invalid Base64 String '" << base64Encoded << "'");
+            return {};
+        }        
+    }
+
+    void Formatter::write(const ByteBuffer &b)
+    {
+        if (mBinary) {
+            mStream.write(b);
+        } else {
+            mStream << Base64::encode(b);
+        }
     }
 
     StreamResult Formatter::expect(std::string_view expected)

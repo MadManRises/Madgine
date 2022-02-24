@@ -18,6 +18,11 @@ namespace StringUtil {
         return s.size() >= suffix.size() ? (s.substr(s.size() - suffix.size(), suffix.size()) == suffix) : false;
     }
 
+    constexpr bool contains(std::string_view s, std::string_view content)
+    {
+        return startsWith(s, content); //TODO!!
+    }
+
     CONSTEXPR_ALGORITHM std::string_view trim(std::string_view s)
     {
         auto begin = std::ranges::find_if_not(s, isspace);

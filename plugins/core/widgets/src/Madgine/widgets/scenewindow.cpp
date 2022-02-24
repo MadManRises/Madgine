@@ -40,8 +40,8 @@ namespace Widgets {
     {
         std::vector<Vertex> result;
 
-        Vector3 pos = (getAbsolutePosition() * screenSize) / screenSize;
-        Vector3 size = (getAbsoluteSize() * screenSize) / screenSize;
+        Vector3 pos = (getEffectivePosition() * screenSize) / screenSize;
+        Vector3 size = (getEffectiveSize() * screenSize) / screenSize;
 
         Vector4 color { 1, 1, 1, 1 };
 

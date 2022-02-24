@@ -11,19 +11,17 @@
 
 #include "im3d/im3d.h"
 
-#include "Meta/serialize/streams/serializestream.h"
-
 #include "Meta/serialize/formatter/iniformatter.h"
 
 #include "Generic/container/safeiterator.h"
 
-#include "Meta/serialize/streams/operations.h"
+#include "Meta/serialize/operations.h"
 
 #include "Meta/serialize/streams/serializestreamdata.h"
 
 #include "Generic/container/transformIt.h"
 
-#include "Meta/serialize/statetransmissionflags.h"
+#include "Meta/serialize/hierarchy/statetransmissionflags.h"
 
 /*
 METATABLE_BEGIN(Engine::Tools::ImRoot)

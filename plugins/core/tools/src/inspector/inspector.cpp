@@ -8,8 +8,6 @@
 
 #include "Madgine/resources/resourcemanager.h"
 
-#include "../tinyxml/tinyxml2.h"
-
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
@@ -19,9 +17,11 @@
 
 #include "functiontool.h"
 
-#include "inspectorlayout.h"
-
 #include "Madgine/core/keyvalueregistry.h"
+
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
+
+#include "Madgine/resources/resourceloaderbase.h"
 
 UNIQUECOMPONENT(Engine::Tools::Inspector);
 
@@ -34,26 +34,9 @@ SERIALIZETABLE_END(Engine::Tools::Inspector)
 namespace Engine {
 namespace Tools {
 
-    std::map<std::string, bool (Inspector::*)(TypedScopePtr, std::set<std::string> &, tinyxml2::XMLElement *)> Inspector::sElements = {
-        { "Member", &Inspector::drawSingleElement },
-        { "MemberList", &Inspector::drawElementList },
-        { "Inherit", &Inspector::inheritLayout },
-        { "String", &Inspector::drawConstantString },
-        { "Association", nullptr },
-        { "SingleLine", &Inspector::drawSingleLine }
-    };
-
     Inspector::Inspector(ImRoot &root)
         : Tool<Inspector>(root)
     {
-
-        for (auto &[name, resource] : Resources::ResourceManager::getSingleton().get<LayoutLoader>()) {
-
-            InspectorLayout &layout = mLayouts.try_emplace(name, resource.loadData()).first->second;
-            for (const std::string &assoc : layout.associations()) {
-                mAssociations[assoc] = &layout;
-            }
-        }
 
         for (std::unique_ptr<Resources::ResourceLoaderBase> &loader : Resources::ResourceManager::getSingleton().mCollector) {
             for (const MetaTable *type : loader->resourceTypes()) {
@@ -86,7 +69,7 @@ namespace Tools {
                     ImGui::TableNextRow();
                     ImGui::TableNextColumn();
                     if (ImGui::TreeNode(p.first.data())) {
-                        drawMembers(p.second, {}, p.first.data());
+                        drawMembers(p.second, {});
                         ImGui::TreePop();
                     }
                 }
@@ -116,23 +99,6 @@ namespace Tools {
         return changed;
     }
 
-    static bool style(const char *styleAttr, tinyxml2::XMLElement *element)
-    {
-        const char *style = element->Attribute("style");
-        if (!style)
-            return false;
-
-        const size_t len = strlen(styleAttr);
-
-        while (const char *found = strstr(style, styleAttr)) {
-            if ((found == style || found[-1] == ' ') && (found[len] == '\0' || found[len] == ' ')) {
-                return true;
-            }
-            style = found + len;
-        }
-        return false;
-    }
-
     bool Inspector::drawMember(TypedScopePtr parent, const ScopeIterator &it, tinyxml2::XMLElement *element)
     {
         ValueType value;
@@ -141,8 +107,7 @@ namespace Tools {
             return drawMembers(value.as<TypedScopePtr>(), {});
         }
 
-        bool showName = !element || !style("noname", element);
-        std::string id = (showName ? std::string() : "##"s) + it->key();
+        std::string_view id = it->key();
         bool editable = it->isEditable();
         bool generic = it->isGeneric();
 
@@ -246,7 +211,7 @@ namespace Tools {
         }
 
         if (open) {
-            changed |= drawMembers(scope, {}, element ? element->Attribute("layout") : nullptr);
+            changed |= drawMembers(scope, {});
             ImGui::TreePop();
         }
         return std::make_pair(modified, changed);
@@ -326,167 +291,17 @@ namespace Tools {
         ImGui::DraggableValueTypeSource(id, function);
     }
 
-    bool Inspector::drawMembers(TypedScopePtr scope, std::set<std::string> drawn, const char *layoutName)
+    bool Inspector::drawMembers(TypedScopePtr scope, std::set<std::string> drawn)
     {
         assert(scope);
 
-        bool changed = false;
-
-        const MetaTable *type = scope.mType;
-        while (type) {
-            const char *typeName = type->mTypeName;
-            InspectorLayout *layout = nullptr;
-            auto it = mAssociations.find(typeName);
-            if (it != mAssociations.end()) {
-                layout = it->second;
-            } else {
-                if (layoutName)
-                    layout = getLayout(layoutName);
-            }
-            if (layout) {
-                changed |= draw(layout, scope, drawn);
-            }
-            if (type->mBase)
-                type = *type->mBase;
-            else
-                type = nullptr;
-        }
-        changed |= drawRemainingMembers(scope, drawn);
+        bool changed = drawRemainingMembers(scope, drawn);
 
         auto it2 = mPreviews.find(scope.mType);
         if (it2 != mPreviews.end()) {
             it2->second(scope);
         }
         return changed;
-    }
-
-    bool Inspector::draw(InspectorLayout *layout, TypedScopePtr scope, std::set<std::string> &drawn)
-    {
-        bool changed = false;
-        for (tinyxml2::XMLElement *el = layout->rootElement()->FirstChildElement(); el; el = el->NextSiblingElement()) {
-            ImGui::TableNextRow();
-            changed |= drawElement(scope, drawn, el);
-        }
-        return changed;
-    }
-
-    bool Inspector::drawElement(TypedScopePtr scope,
-        std::set<std::string> &drawn, tinyxml2::XMLElement *element)
-    {
-        auto it = sElements.find(element->Name());
-        if (it != sElements.end()) {
-            if (it->second)
-                return (this->*it->second)(scope, drawn, element);
-        } else {
-            ImGui::Text("Unsupported Tag-Type: %s", element->Name());
-        }
-        return false;
-    }
-
-    bool Inspector::drawSingleElement(TypedScopePtr scope,
-        std::set<std::string> &drawn, tinyxml2::XMLElement *element)
-    {
-        const char *name = element->Attribute("name");
-        ScopeIterator value = scope.find(name);
-        if (value != scope.end()) {
-            drawn.insert(name);
-            if (!style("hide", element)) {
-                return drawMember(scope, value, element);
-            }
-        } else {
-            if (!style("optional", element)) {
-                ImGui::Text("Required field not found: %s", name);
-            }
-        }
-        return false;
-    }
-
-    bool Inspector::drawElementList(TypedScopePtr scope,
-        std::set<std::string> &drawn, tinyxml2::XMLElement *element)
-    {
-        bool changed = false;
-
-        const char *name = element->Attribute("name");
-        bool draw = !name || ImGui::TreeNode(name);
-        for (ScopeIterator it = scope.begin(); it != scope.end(); ++it) {
-            if (drawn.find(it->key()) == drawn.end()) {
-                bool skip = false;
-                for (tinyxml2::XMLElement *condition = element->FirstChildElement("Condition"); condition; condition = condition->NextSiblingElement("Condition")) {
-                    const char *expectedType = condition->Attribute("type");
-                    ValueType typeV;
-                    it->value(typeV);
-                    std::string type = typeV.is<TypedScopePtr>() ? typeV.as<TypedScopePtr>().mType->mTypeName : "";
-                    if (expectedType && type != expectedType) {
-                        skip = true;
-                        break;
-                    }
-                }
-                if (skip)
-                    continue;
-
-                if (draw) {
-                    ImGui::TableNextRow();
-                    tinyxml2::XMLElement *rule = nullptr;
-                    for (tinyxml2::XMLElement *child = element->FirstChildElement("Rule"); child; child = child->NextSiblingElement("Rule")) {
-                        const char *name = child->Attribute("name");
-                        if (!name || it->key() == std::string(name)) {
-                            rule = child;
-                        }
-                    }
-                    changed |= drawMember(scope, it, rule);
-                }
-                drawn.insert(it->key());
-            }
-        }
-        if (draw && name)
-            ImGui::TreePop();
-
-        return changed;
-    }
-
-    bool Inspector::inheritLayout(TypedScopePtr scope,
-        std::set<std::string> &drawn, tinyxml2::XMLElement *element)
-    {
-        InspectorLayout *layout = getLayout(element->Attribute("name"));
-        if (layout) {
-            return draw(layout, scope, drawn);
-        } else {
-            ImGui::Text("Layout not found: %s", element->Attribute("name"));
-            return false;
-        }
-    }
-
-    bool Inspector::drawConstantString(TypedScopePtr scope,
-        std::set<std::string> &drawn, tinyxml2::XMLElement *element)
-    {
-        ImGui::Text("%s", element->GetText());
-        return false;
-    }
-
-    bool Inspector::drawSingleLine(TypedScopePtr scope,
-        std::set<std::string> &drawn, tinyxml2::XMLElement *element)
-    {
-        int count = 0;
-        for (tinyxml2::XMLElement *child = element->FirstChildElement(); child; child = child->NextSiblingElement())
-            ++count;
-        ImGui::PushMultiItemsWidths(count, 100.0f); //TODO
-        for (tinyxml2::XMLElement *child = element->FirstChildElement(); child; child = child->NextSiblingElement()) {
-            ImGui::TableNextRow();
-            drawElement(scope, drawn, child);
-            if (--count > 0)
-                ImGui::SameLine();
-            ImGui::PopItemWidth();
-        }
-        return false;
-    }
-
-    InspectorLayout *Inspector::getLayout(const std::string &name)
-    {
-        auto it = mLayouts.find(name);
-        if (it != mLayouts.end()) {
-            return &it->second;
-        }
-        return nullptr;
     }
 
     std::string_view Inspector::key() const

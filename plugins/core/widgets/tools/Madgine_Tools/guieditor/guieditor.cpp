@@ -119,8 +119,8 @@ namespace Tools {
             if (mSelected) {
                 Widgets::WidgetBase *selectedWidget = mSelected->widget();
 
-                Vector3 absoluteSize = selectedWidget->getAbsoluteSize() * Vector3 { Vector2 { screenSpace.mSize }, 1.0f };
-                Vector3 absolutePos = selectedWidget->getAbsolutePosition() * Vector3 { Vector2 { screenSpace.mSize }, 1.0f } + Vector3 { Vector2 { screenSpace.mTopLeft }, 0.0f };
+                Vector3 absoluteSize = selectedWidget->getEffectiveSize() * Vector3 { Vector2 { screenSpace.mSize }, 1.0f };
+                Vector3 absolutePos = selectedWidget->getEffectivePosition() * Vector3 { Vector2 { screenSpace.mSize }, 1.0f } + Vector3 { Vector2 { screenSpace.mTopLeft }, 0.0f };
 
                 Bounds bounds(absolutePos.x, absolutePos.y + absoluteSize.y, absolutePos.x + absoluteSize.x, absolutePos.y);
 
@@ -209,8 +209,8 @@ namespace Tools {
                     }
 
                     if (!mDragging && hoveredSettings != mSelected) {
-                        Vector3 size = hoveredWidget->getAbsoluteSize() * Vector3 { Vector2 { screenSpace.mSize }, 1.0f };
-                        Vector3 pos = hoveredWidget->getAbsolutePosition() * Vector3 { Vector2 { screenSpace.mSize }, 1.0f } + Vector3 { Vector2 { screenSpace.mTopLeft }, 0.0f };
+                        Vector3 size = hoveredWidget->getEffectiveSize() * Vector3 { Vector2 { screenSpace.mSize }, 1.0f };
+                        Vector3 pos = hoveredWidget->getEffectivePosition() * Vector3 { Vector2 { screenSpace.mSize }, 1.0f } + Vector3 { Vector2 { screenSpace.mTopLeft }, 0.0f };
 
                         Bounds bounds(pos.x, pos.y + size.y, pos.x + size.x, pos.y);
 
@@ -238,7 +238,7 @@ namespace Tools {
 
                     auto [pos, size] = mSelected->savedGeometry();
 
-                    Matrix3 parentSize = mSelected->widget()->getParent() ? mSelected->widget()->getParent()->getAbsoluteSize() : Matrix3::IDENTITY;
+                    Matrix3 parentSize = mSelected->widget()->getParent() ? mSelected->widget()->getParent()->getEffectiveSize() : Matrix3::IDENTITY;
 
                     Vector2 relDragDistance = dragDistance / (parentSize * Vector3 { Vector2 { screenSpace.mSize }, 1.0f }).xy();
 

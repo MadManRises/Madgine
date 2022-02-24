@@ -4,7 +4,6 @@
 
 #include "pendingrequest.h"
 
-
 namespace Engine {
 namespace Serialize {
 

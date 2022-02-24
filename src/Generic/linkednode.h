@@ -35,10 +35,9 @@ struct DoublyLinkedNode : DoublyLinkedNodeBase<PtrT> {
 
     void unlink() {
         if (this->mNext)
-            this->mNext->mNode.mPrev = mPrev;        
+            this->mNext->mNode.mPrev = mPrev;       
+        PtrT keepAlive = *mPrev;
         *mPrev = this->mNext;
-        mPrev = nullptr;
-        this->mNext = nullptr;
     }
 
 private:

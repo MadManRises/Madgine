@@ -4,7 +4,7 @@
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
-#include "Meta/serialize/virtualserializableunit.h"
+#include "Meta/serialize/hierarchy/virtualserializableunit.h"
 
 DECLARE_NAMED_UNIQUE_COMPONENT(Engine::NodeGraph, Node, NodeBase, NodeGraph &);
 

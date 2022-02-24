@@ -1,6 +1,7 @@
 #pragma once
 
 #include "connection.h"
+#include "connectionstore.h"
 
 namespace Engine {
 namespace Threading {

@@ -2,7 +2,7 @@
 
 #include "Meta/keyvalue/virtualscope.h"
 #include "madgineobject/madgineobject.h"
-#include "Meta/serialize/syncableunit.h"
+#include "Meta/serialize/hierarchy/syncableunit.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 

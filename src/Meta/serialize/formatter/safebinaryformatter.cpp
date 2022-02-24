@@ -2,8 +2,6 @@
 
 #include "safebinaryformatter.h"
 
-#include "../streams/serializestream.h"
-
 namespace Engine {
 namespace Serialize {
 

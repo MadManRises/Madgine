@@ -1,7 +1,0 @@
-<Layout name="SceneManager" depth="1">
-
-  <Association>Engine::Scene::SceneManager</Association>
-
-  <Inherit name="SerializableUnit"></Inherit>
-
-</Layout>

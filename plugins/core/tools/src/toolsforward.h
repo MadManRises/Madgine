@@ -5,7 +5,6 @@ namespace Tools {
     struct ToolBase;
     struct ImRoot;
     struct Inspector;
-    struct InspectorLayout;
 
     struct SceneEditor;
 }

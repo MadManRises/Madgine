@@ -1,8 +1,7 @@
 #pragma once
 
-#include "../syncable.h"
+#include "syncable.h"
 #include "Generic/future.h"
-#include "Generic/memberoffsetptr.h"
 
 namespace Engine {
 namespace Serialize {

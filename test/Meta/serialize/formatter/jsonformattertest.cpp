@@ -11,11 +11,7 @@ using namespace std::chrono_literals;
 
 TEST(Serialize_Formatter, JSON)
 {
-    FormatterBaseTest<JSONFormatter>(R"(
-"unit1" : {
-    "__extended" : {
-        "syncId" : 10
-    },
+    FormatterBaseTest<JSONFormatter>(R"("unit1" : {
     "list1" : [1,2,3],
     "list2" : [4,5],
     "set1" : [6,7,8,9],
@@ -42,8 +38,7 @@ TEST(Serialize_Formatter, JSON)
                 "first" : 2,
                 "second" : 6,
                 "third" : "set",
-                "fourth" : true,
-                "serId" : 1
+                "fourth" : true
             }
         },
         {
@@ -51,8 +46,7 @@ TEST(Serialize_Formatter, JSON)
                 "first" : 2,
                 "second" : 4,
                 "third" : "default",
-                "fourth" : true,
-                "serId" : 2
+                "fourth" : true
             }
         }
     ],
@@ -68,11 +62,7 @@ TEST(Serialize_Formatter, JSON)
 TEST(Serialize_Formatter, JSON_InvalidParse)
 {
     std::unique_ptr<std::stringbuf> file = std::make_unique<std::stringbuf>(
-        R"(
-"Item" : {
-    "__extended" : {
-        "syncId" : 10
-    },
+        R"("Item" : {
     "list1" : [1,2,3],
     "list2" : [4,5],
     "set1" : [6,,8,9],
@@ -99,8 +89,7 @@ TEST(Serialize_Formatter, JSON_InvalidParse)
                 "first" : 2,
                 "second" : 6,
                 "third" : "set",
-                "fourth" : true,
-                "serId" : 1
+                "fourth" : true
             }
         },
         {
@@ -108,8 +97,7 @@ TEST(Serialize_Formatter, JSON_InvalidParse)
                 "first" : 2,
                 "second" : 4,
                 "third" : "default",
-                "fourth" : true,
-                "serId" : 2
+                "fourth" : true
             }
         }
     ],
@@ -123,21 +111,17 @@ TEST(Serialize_Formatter, JSON_InvalidParse)
 
     NoParentUnit<TestUnit> unit;
 
-    FormattedSerializeStream in { std::make_unique<JSONFormatter>(), SerializeStream { std::move(file), std::make_unique<SerializeStreamData>() } };
+    FormattedSerializeStream in { std::make_unique<JSONFormatter>(), SerializeStream { std::move(file) } };
 
     StreamResult result = read(in, unit, nullptr);
     ASSERT_EQ(result.mState, StreamState::PARSE_ERROR);
-    ASSERT_EQ(result.mError->mMsg, "ERROR: (8, 16): Expected: <int>");
+    ASSERT_EQ(result.mError->mMsg, "ERROR: (4, 16): Expected: <int>");
 }
 
 TEST(Serialize_Formatter, JSON_ExtendedOrder)
 {
     std::unique_ptr<std::stringbuf> file = std::make_unique<std::stringbuf>(
-        R"(
-"Item" : {
-    "__extended" : {
-        "syncId" : 10
-    },
+        R"("Item" : {
     "list1" : [1,2,3],
     "list2" : [4,5],
     "set1" : [6,7,8,9],
@@ -162,19 +146,17 @@ TEST(Serialize_Formatter, JSON_ExtendedOrder)
         {
             "__extended" : {
                 "second" : 6,
-                "first" : 2,
                 "third" : "set",
-                "serId" : 1,
+                "first" : 2,
                 "fourth" : true
             }
         },
         {
             "__extended" : {
-                "first" : 2,
                 "second" : 4,
                 "third" : "default",
-                "serId" : 2,
-                "fourth" : true
+                "fourth" : true,
+                "first" : 2
             }
         }
     ],
@@ -188,7 +170,7 @@ TEST(Serialize_Formatter, JSON_ExtendedOrder)
 
     NoParentUnit<TestUnit> unit;
 
-    FormattedSerializeStream in { std::make_unique<JSONFormatter>(), SerializeStream { std::move(file), std::make_unique<SerializeStreamData>() } };
+    FormattedSerializeStream in { std::make_unique<JSONFormatter>(), SerializeStream { std::move(file) } };
 
     HANDLE_STREAM_RESULT(read(in, unit, nullptr));
     ASSERT_EQ(unit.complexList1.front().i, 2);

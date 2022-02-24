@@ -1,8 +1,6 @@
-#include "Meta/metalib.h"
+#include "../../metalib.h"
 
 #include "xmlformatter.h"
-
-#include "../streams/serializestream.h"
 
 #include "../primitivetypes.h"
 

@@ -9,7 +9,7 @@
 
 #include "Meta/serialize/streams/serializestreamdata.h"
 
-#include "Meta/serialize/streams/operations.h"
+#include "Meta/serialize/operations.h"
 
 template <typename Formatter>
 void FormatterBaseTest(std::string_view expected = "")
@@ -35,7 +35,7 @@ void FormatterBaseTest(std::string_view expected = "")
 
     std::stringbuf *buffer = pBuffer.get();
 
-    FormattedSerializeStream out { std::make_unique<Formatter>(), SerializeStream { std::move(pBuffer), std::make_unique<SerializeStreamData>() } };
+    FormattedSerializeStream out { std::make_unique<Formatter>(), SerializeStream { std::move(pBuffer) } };
 
     write(out, unit1, "unit1");
 
@@ -44,11 +44,11 @@ void FormatterBaseTest(std::string_view expected = "")
     std::cout << file << std::endl;
 
     if (!out.isBinary())
-        EXPECT_EQ(file, expected.data());
+        EXPECT_EQ(expected.data(), file);
 
     std::cout << "Buffer-Size: " << file.size() << std::endl;
 
-    FormattedSerializeStream in { std::make_unique<Formatter>(), SerializeStream { out.stream().release(), std::make_unique<SerializeStreamData>() } };
+    FormattedSerializeStream in { std::make_unique<Formatter>(), SerializeStream { out.stream().release() } };
 
     HANDLE_STREAM_RESULT(read(in, unit2, nullptr));
 

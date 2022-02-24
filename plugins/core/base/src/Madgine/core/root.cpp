@@ -34,7 +34,7 @@ namespace Core {
 
 #if ENABLE_PLUGINS
         mPluginManager = std::make_unique<Plugins::PluginManager>();
-        mPluginManager->setup(!noPluginCache, true, loadPlugins);
+        mPluginManager->setup(!noPluginCache, mCLI->mProgramPath.stem(), loadPlugins);
         mCollectorManager = std::make_unique<UniqueComponentCollectorManager>(*mPluginManager);
 
         if (!exportPlugins->empty()) {

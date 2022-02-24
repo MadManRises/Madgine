@@ -1,10 +1,6 @@
 #pragma once
 
-#include "../formatter.h"
-#include "../streams/serializestream.h"
-#include "Generic/comparator_traits.h"
-#include "Generic/makeowning.h"
-#include "../container/physical.h"
+#include "../operations.h"
 
 namespace Engine {
 namespace Serialize {

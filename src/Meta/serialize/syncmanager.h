@@ -1,17 +1,16 @@
 #pragma once
 
-#include "streams/formattedbufferedstream.h"
-#include "streams/streamresult.h"
-
-#include "streams/comparestreamid.h"
-
-#include "Generic/timeout.h"
-
 #include "serializemanager.h"
 
 #include "Generic/genericresult.h"
 
+#include "Generic/timeout.h"
+
 #include "Generic/container/mutable_set.h"
+
+#include "streams/comparestreamid.h"
+
+#include "streams/formattedbufferedstream.h"
 
 namespace Engine {
 namespace Serialize {
@@ -26,6 +25,8 @@ namespace Serialize {
         SyncManager(SyncManager &&) noexcept;
         ~SyncManager();
 
+
+        static void writeHeader(FormattedBufferedStream &stream, const SyncableUnitBase *unit, MessageType type, TransactionId id, uint8_t index);
         StreamResult readMessage(FormattedBufferedStream &);
 
         std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterMessageTargets();

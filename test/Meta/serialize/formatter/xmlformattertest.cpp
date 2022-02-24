@@ -11,7 +11,7 @@ using namespace std::chrono_literals;
 
 TEST(Serialize_Formatter, XML)
 {
-    FormatterBaseTest<XMLFormatter>(R"(<unit1 syncId=10>
+    FormatterBaseTest<XMLFormatter>(R"(<unit1>
     <list1>
         <Item>1</Item>
         <Item>2</Item>
@@ -47,9 +47,9 @@ TEST(Serialize_Formatter, XML)
         </Item>
     </map1>
     <complexList1>
-        <Item first=2 second=6 third="set" fourth=true serId=1>
+        <Item first=2 second=6 third="set" fourth=true>
         </Item>
-        <Item first=2 second=4 third="default" fourth=true serId=2>
+        <Item first=2 second=4 third="default" fourth=true>
         </Item>
     </complexList1>
     <complexList2>
@@ -68,7 +68,7 @@ TEST(Serialize_Formatter, XML)
 TEST(Serialize_Formatter, XML_InvalidParse)
 {
     std::unique_ptr<std::stringbuf> file = std::make_unique<std::stringbuf>(
-        R"(<unit1 syncId=10>
+        R"(<unit1>
     <list1>
         <Item>1</Item>
         <Item></Item> )" /* <--- Error here */ R"(
@@ -104,9 +104,9 @@ TEST(Serialize_Formatter, XML_InvalidParse)
         </Item>
     </map1>
     <complexList1>
-        <Item first=2 second=6 third="set" serId=1>
+        <Item first=2 second=6 third="set">
         </Item>
-        <Item first=2 second=4 third="default" serId=2>
+        <Item first=2 second=4 third="default">
         </Item>
     </complexList1>
     <complexList2>
@@ -117,7 +117,7 @@ TEST(Serialize_Formatter, XML_InvalidParse)
 
     NoParentUnit<TestUnit> unit;
 
-    FormattedSerializeStream in { std::make_unique<XMLFormatter>(), SerializeStream { std::move(file), std::make_unique<SerializeStreamData>() } };
+    FormattedSerializeStream in { std::make_unique<XMLFormatter>(), SerializeStream { std::move(file) } };
 
     StreamResult result = read(in, unit, nullptr);
     ASSERT_EQ(result.mState, StreamState::PARSE_ERROR);
@@ -127,7 +127,7 @@ TEST(Serialize_Formatter, XML_InvalidParse)
 TEST(Serialize_Formatter, XML_ExtendedOrder)
 {
     std::unique_ptr<std::stringbuf> file = std::make_unique<std::stringbuf>(
-        R"(<unit1 syncId=10>
+        R"(<unit1>
     <list1>
         <Item>1</Item>
         <Item>2</Item>
@@ -163,9 +163,9 @@ TEST(Serialize_Formatter, XML_ExtendedOrder)
         </Item>
     </map1>
     <complexList1>
-        <Item second=6 first=2 third="set" serId=1 fourth=true>
+        <Item second=6 first=2 third="set" fourth=true>
         </Item>
-        <Item first=2 second=4 third="default" serId=2 fourth=true>
+        <Item first=2 second=4 third="default" fourth=true>
         </Item>
     </complexList1>
     <complexList2>
@@ -181,7 +181,7 @@ TEST(Serialize_Formatter, XML_ExtendedOrder)
 
     NoParentUnit<TestUnit> unit;
 
-    FormattedSerializeStream in { std::make_unique<XMLFormatter>(), SerializeStream { std::move(file), std::make_unique<SerializeStreamData>() } };
+    FormattedSerializeStream in { std::make_unique<XMLFormatter>(), SerializeStream { std::move(file) } };
 
     HANDLE_STREAM_RESULT(read(in, unit, nullptr));
     ASSERT_EQ(unit.complexList1.front().i, 2);

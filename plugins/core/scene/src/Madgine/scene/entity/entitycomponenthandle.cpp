@@ -1,7 +1,7 @@
 #include "../../scenelib.h"
 #include "entitycomponenthandle.h"
 
-#include "Meta/serialize/streams/operations.h"
+#include "Meta/serialize/operations.h"
 
 #include "entity.h"
 

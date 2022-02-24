@@ -1,7 +1,7 @@
 #pragma once
 
-#include "connectionstore.h"
 #include "taskqueue.h"
+#include "Generic/linkednode.h"
 
 namespace Engine {
 namespace Threading {
@@ -18,7 +18,7 @@ namespace Threading {
         template <typename Con, typename... Args>
         std::weak_ptr<Con> cloneImpl(Args &&... args)
         {
-            std::shared_ptr<Con> ptr = ConnectionStore::create<Con>(std::forward<Args>(args)...);
+            std::shared_ptr<Con> ptr = std::make_shared<Con>(std::forward<Args>(args)...);
             mNode.link(ptr);
             return ptr;
         }       

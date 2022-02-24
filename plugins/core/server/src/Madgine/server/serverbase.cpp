@@ -12,7 +12,7 @@ namespace Server {
         : mTaskQueue(name + "-Server")
         , mLog(name + "-Log")
     {
-        Util::setLog(&mLog);
+        //Util::setLog(&mLog);
         mLog.startConsole();
         mTaskQueue.addRepeatedTask([this]() { consoleCheck(); }, std::chrono::milliseconds(20));
     }

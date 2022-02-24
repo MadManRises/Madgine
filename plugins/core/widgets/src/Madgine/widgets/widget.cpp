@@ -55,7 +55,7 @@ namespace Widgets {
     {
         mSize = size;
         if (mParent)
-            updateGeometry(manager().getScreenSpace(), mParent->getAbsoluteSize(), mParent->getAbsolutePosition());
+            updateGeometry(manager().getScreenSpace(), mParent->getEffectiveSize(), mParent->getEffectivePosition());
         else
             updateGeometry(manager().getScreenSpace());
     }
@@ -69,7 +69,7 @@ namespace Widgets {
     {
         mPos = pos;
         if (mParent)
-            updateGeometry(manager().getScreenSpace(), mParent->getAbsoluteSize(), mParent->getAbsolutePosition());
+            updateGeometry(manager().getScreenSpace(), mParent->getEffectiveSize(), mParent->getEffectivePosition());
         else
             updateGeometry(manager().getScreenSpace());
     }
@@ -79,37 +79,37 @@ namespace Widgets {
         return mPos;
     }
 
-    Matrix3 WidgetBase::getAbsoluteSize() const
+    Matrix3 WidgetBase::getEffectiveSize() const
     {
-        return mAbsoluteSize;
+        return mEffectiveSize;
     }
 
-    Matrix3 WidgetBase::getAbsolutePosition() const
+    Matrix3 WidgetBase::getEffectivePosition() const
     {
-        return mAbsolutePos;
+        return mEffectivePos;
     }
 
-    Vector3 WidgetBase::getActualSize() const
+    Vector3 WidgetBase::getAbsoluteSize() const
     {
         const Rect2i &screenSpace = mManager.getClientSpace();
-        return mAbsoluteSize * Vector3 { Vector2 { screenSpace.mSize }, 1.0f };
+        return mEffectiveSize * Vector3 { Vector2 { screenSpace.mSize }, 1.0f };
     }
 
-    Vector3 WidgetBase::getActualPosition() const
+    Vector3 WidgetBase::getAbsolutePosition() const
     {
         const Rect2i &screenSpace = mManager.getClientSpace();
-        return mAbsolutePos * Vector3 { Vector2 { screenSpace.mSize }, 1.0f } + Vector3 { Vector2 { screenSpace.mTopLeft }, 0.0f };
+        return mEffectivePos * Vector3 { Vector2 { screenSpace.mSize }, 1.0f } + Vector3 { Vector2 { screenSpace.mTopLeft }, 0.0f };
     }
 
     void WidgetBase::updateGeometry(const Rect2i &screenSpace, const Matrix3 &parentSize, const Matrix3 &parentPos)
     {
-        mAbsoluteSize = mSize * parentSize;
-        mAbsolutePos = mPos * parentSize + parentPos;
+        mEffectiveSize = mSize * parentSize;
+        mEffectivePos = mPos * parentSize + parentPos;
 
-        sizeChanged((mAbsoluteSize * Vector3 { Vector2 { screenSpace.mSize }, 1.0f }).floor());
+        sizeChanged((mEffectiveSize * Vector3 { Vector2 { screenSpace.mSize }, 1.0f }).floor());
 
         for (WidgetBase *child : uniquePtrToPtr(mChildren)) {
-            child->updateGeometry(screenSpace, getAbsoluteSize(), getAbsolutePosition());
+            child->updateGeometry(screenSpace, mEffectiveSize, mEffectivePos);
         }
     }
 
@@ -176,7 +176,7 @@ namespace Widgets {
         std::unique_ptr<WidgetType> p = mManager.create<WidgetType>(name, this);
         WidgetType *w = p.get();
         mChildren.emplace_back(std::move(p));
-        w->updateGeometry(mManager.getScreenSpace(), getAbsoluteSize());
+        w->updateGeometry(mManager.getScreenSpace(), mEffectiveSize, mEffectivePos);
         return w;
     }
 
@@ -239,7 +239,7 @@ namespace Widgets {
         parent->mChildren.emplace_back(std::move(*it));
         mParent->mChildren.erase(it);
         mParent = parent;
-        updateGeometry(mManager.getScreenSpace(), parent->getAbsoluteSize());
+        updateGeometry(mManager.getScreenSpace(), parent->mEffectiveSize, parent->mEffectivePos);
     }
 
     WidgetBase *WidgetBase::getParent() const
@@ -315,8 +315,8 @@ namespace Widgets {
 
     bool WidgetBase::containsPoint(const Vector2 &point, const Rect2i &screenSpace, float extend) const
     {
-        Vector3 min = mAbsolutePos * Vector3 { Vector2 { screenSpace.mSize }, 1.0f } + Vector3 { Vector2 { screenSpace.mTopLeft }, 0.0f } - extend;
-        Vector3 max = mAbsoluteSize * Vector3 { Vector2 { screenSpace.mSize }, 1.0f } + min + 2 * extend;
+        Vector3 min = mEffectivePos * Vector3 { Vector2 { screenSpace.mSize }, 1.0f } + Vector3 { Vector2 { screenSpace.mTopLeft }, 0.0f } - extend;
+        Vector3 max = mEffectiveSize * Vector3 { Vector2 { screenSpace.mSize }, 1.0f } + min + 2 * extend;
         return min.x <= point.x && min.y <= point.y && max.x >= point.x && max.y >= point.y;
     }
 

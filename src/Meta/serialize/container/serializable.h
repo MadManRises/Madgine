@@ -1,6 +1,6 @@
 #pragma once
 
-#include "serializableunitptr.h"
+#include "../hierarchy/serializableunitptr.h"
 
 namespace Engine {
 namespace Serialize {

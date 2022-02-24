@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Meta/serialize/formatter.h"
+#include "../streams/formatter.h"
 
 namespace Engine {
 namespace Serialize {

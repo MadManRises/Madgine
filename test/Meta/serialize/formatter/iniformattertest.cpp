@@ -11,8 +11,7 @@ using namespace std::chrono_literals;
 
 TEST(Serialize_Formatter, Ini)
 {
-    FormatterBaseTest<IniFormatter>(R"(syncId=10
-size=3
+    FormatterBaseTest<IniFormatter>(R"(size=3
 Item=1
 Item=2
 Item=3
@@ -38,12 +37,10 @@ first=2
 second=6
 third=set
 fourth=true
-serId=1
 first=2
 second=4
 third=default
 fourth=true
-serId=2
 size=0
 size=0
 Element=1

@@ -1,9 +1,6 @@
 #pragma once
 
-#include "streams/streamresult.h"
-#include "primitivetypes.h"
-
-#include "streams/serializestream.h"
+#include "serializestream.h"
 
 namespace Engine {
 namespace Serialize {
@@ -44,7 +41,7 @@ namespace Serialize {
         virtual StreamResult beginContainerRead(const char *name, bool sized = true);
         virtual StreamResult endContainerRead(const char *name);
 
-        virtual void beginHeaderWrite() {}
+        virtual void beginHeaderWrite() { }
         virtual void endHeaderWrite() { }
 
         virtual StreamResult beginHeaderRead();
@@ -57,7 +54,6 @@ namespace Serialize {
             return STREAM_INTEGRITY_ERROR(mStream, mBinary, "Name lookup is not implemented in Formatter!");
         }
 
-        
         template <typename T>
         StreamResult read(T &t)
         {
@@ -78,6 +74,8 @@ namespace Serialize {
             return {};
         }
 
+        StreamResult read(ByteBuffer &b);
+
         template <typename T>
         void write(const T &t)
         {
@@ -88,9 +86,9 @@ namespace Serialize {
             }
         }
 
+        void write(const ByteBuffer &b);
 
         StreamResult expect(std::string_view expected);
-
 
         const bool mBinary;
         const bool mSupportNameLookup;
@@ -101,7 +99,7 @@ namespace Serialize {
         SerializeStream mStream;
     };
 
-    #define FORMATTER_EXPECT(text) STREAM_PROPAGATE_ERROR(expect(text))
+#define FORMATTER_EXPECT(text) STREAM_PROPAGATE_ERROR(expect(text))
 
 }
 }

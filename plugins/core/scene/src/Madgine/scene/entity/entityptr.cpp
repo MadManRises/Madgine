@@ -7,7 +7,7 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
-#include "Meta/serialize/streams/operations.h"
+#include "Meta/serialize/operations.h"
 
 METATABLE_BEGIN(Engine::Scene::Entity::EntityPtr)
 PROXY(get)

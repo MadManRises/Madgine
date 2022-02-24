@@ -2,15 +2,15 @@
 
 #include "syncmanager.h"
 
-#include "toplevelunit.h"
+#include "hierarchy/toplevelunit.h"
+
+#include "hierarchy/serializableids.h"
+
+#include "hierarchy/statetransmissionflags.h"
 
 #include "streams/syncstreamdata.h"
 
-#include "streams/operations.h"
-
-#include "serializableids.h"
-
-#include "serializetable.h"
+#include "operations.h"
 
 namespace Engine {
 namespace Serialize {
@@ -44,6 +44,16 @@ namespace Serialize {
     }
 
     SyncManager::~SyncManager() { clearTopLevelItems(); }
+
+    void SyncManager::writeHeader(FormattedBufferedStream &stream, const SyncableUnitBase *unit, MessageType type, TransactionId id, uint8_t index)
+    {
+        stream.beginHeaderWrite();
+        write(stream, SerializeManager::convertPtr(stream.stream(), unit), "Object");
+        write(stream, type, "MessageType");
+        write(stream, id, "TransactionId");
+        write(stream, index, "index");
+        stream.endHeaderWrite();
+    }
 
     StreamResult SyncManager::readMessage(FormattedBufferedStream &stream)
     {
@@ -201,7 +211,7 @@ namespace Serialize {
         }
 
         mSlaveStream.emplace(std::move(stream));
-        setSlaveStreamData(&mSlaveStream->data());
+        setSlaveStreamData(mSlaveStream->data());
 
         if (receiveState) {
             if (state == SyncManagerResult::SUCCESS) {
@@ -453,7 +463,7 @@ namespace Serialize {
     {
         stream.beginMessage();
         stream.beginHeaderWrite();
-        write(stream, unit, "Object");
+        write(stream, SerializeManager::convertPtr(stream.stream(), unit), "Object");
         write(stream, STATE, "MessageType");
         write<TransactionId>(stream, 0, "TransactionId");
         stream.endHeaderWrite();

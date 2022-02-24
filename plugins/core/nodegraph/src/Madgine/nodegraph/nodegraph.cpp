@@ -21,6 +21,8 @@
 
 #include "Modules/uniquecomponent/uniquecomponentregistry.h"
 
+#include "Meta/serialize/hierarchy/statetransmissionflags.h"
+
 METATABLE_BEGIN(Engine::NodeGraph::NodeGraph)
 METATABLE_END(Engine::NodeGraph::NodeGraph)
 

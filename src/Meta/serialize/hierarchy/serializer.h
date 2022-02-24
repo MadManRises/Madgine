@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Generic/callerhierarchy.h"
-#include "Generic/offsetptr.h"
 
 namespace Engine {
 namespace Serialize {

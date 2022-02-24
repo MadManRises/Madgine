@@ -1,5 +1,0 @@
-<Layout name="SceneComponent" depth="1">  
-
-  <Inherit name="SerializableUnit"></Inherit>
-
-</Layout>

@@ -6,6 +6,10 @@
 
 #include "../keyvalue/valuetype.h"
 
+#include "../serialize/streams/formattedserializestream.h"
+
+#include "Meta/serialize/operations.h"
+
 namespace Engine {
 namespace Serialize {
 

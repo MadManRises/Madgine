@@ -1,12 +1,11 @@
 #pragma once
 
+#include "serializable.h"
+#include "unithelper.h"
 #include "Generic/container/atomiccontaineroperation.h"
-#include "Generic/container/container_api.h"
-#include "Generic/container/containerevent.h"
-#include "Generic/functor.h"
 #include "Generic/memberoffsetptr.h"
-#include "../serializable.h"
-#include "../unithelper.h"
+#include "Generic/container/container_api.h"
+#include "Generic/functor.h"
 
 namespace Engine {
 namespace Serialize {

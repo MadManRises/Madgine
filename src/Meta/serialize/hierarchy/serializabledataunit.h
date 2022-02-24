@@ -1,5 +1,7 @@
 #pragma once
 
+#include "serializetable_forward.h"
+
 namespace Engine {
 namespace Serialize {
 

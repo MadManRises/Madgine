@@ -1,6 +1,6 @@
 #pragma once
 
-#include "streams/comparestreamid.h"
+#include "../streams/comparestreamid.h"
 
 #include "Generic/lambda.h"
 
@@ -14,8 +14,8 @@ namespace Serialize {
         virtual void readAction(SerializeInStream &in) = 0;*/
 
     protected:
-        FormattedBufferedStream &getSlaveActionMessageTarget(const SyncableUnitBase *parent, OffsetPtr offset, ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback) const;
-        FormattedBufferedStream &getSlaveActionMessageTarget(const SyncableUnitBase *parent, uint8_t index, ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback) const;
+        FormattedBufferedStream &getSlaveRequestMessageTarget(const SyncableUnitBase *parent, OffsetPtr offset, ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback) const;
+        FormattedBufferedStream &getSlaveRequestMessageTarget(const SyncableUnitBase *parent, uint8_t index, ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback) const;
         std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterActionMessageTargets(const SyncableUnitBase *parent, OffsetPtr offset, ParticipantId answerTarget, TransactionId answerId,
             const std::set<ParticipantId> &targets = {}) const;
         std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterActionMessageTargets(const SyncableUnitBase *parent, uint8_t index, ParticipantId answerTarget, TransactionId answerId,
@@ -43,9 +43,9 @@ namespace Serialize {
             return SyncableBase::getMasterActionMessageTargets(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableDataUnit>()), answerTarget, answerId, targets);
         }
 
-        FormattedBufferedStream &getSlaveActionMessageTarget(ParticipantId requester = 0, TransactionId requesterTransactionId = 0, std::function<void(void *)> callback = {}) const
+        FormattedBufferedStream &getSlaveRequestMessageTarget(ParticipantId requester = 0, TransactionId requesterTransactionId = 0, std::function<void(void *)> callback = {}) const
         {
-            return SyncableBase::getSlaveActionMessageTarget(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableDataUnit>()), requester, requesterTransactionId, std::move(callback));
+            return SyncableBase::getSlaveRequestMessageTarget(parent(), parent()->serializeType()->getIndex(OffsetPtr::template offset<SerializableDataUnit>()), requester, requesterTransactionId, std::move(callback));
         }
 
         ParticipantId participantId()

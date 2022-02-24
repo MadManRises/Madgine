@@ -54,7 +54,7 @@ namespace Plugins {
         }
     }
 
-    bool PluginManager::setup(bool loadCache, bool loadExe, std::string_view configFile)
+    bool PluginManager::setup(bool loadCache, std::string_view programName, std::string_view configFile)
     {
         mUseCache = loadCache;
 
@@ -77,8 +77,8 @@ namespace Plugins {
             }
         }
 
-        if (loadExe) {
-            Plugin exe { "MadgineLauncher", nullptr, {}, "" };
+        if (!programName.empty()) {
+            Plugin exe { std::string{programName}, nullptr, {}, "" };
             exe.setLoaded(true);
             exe.loadDependencies(*this);
             exe.clearDependencies(*this);

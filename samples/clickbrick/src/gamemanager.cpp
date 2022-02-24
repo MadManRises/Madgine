@@ -181,7 +181,7 @@ namespace UI {
 
     void GameManager::onPointerClick(const Engine::Input::PointerEventArgs &evt)
     {
-        Engine::Ray ray = mCamera.mousePointToRay(Engine::Vector2 { static_cast<float>(evt.windowPosition.x), static_cast<float>(evt.windowPosition.y) }, mGameWindow->getActualSize().xy());
+        Engine::Ray ray = mCamera.mousePointToRay(Engine::Vector2 { static_cast<float>(evt.windowPosition.x), static_cast<float>(evt.windowPosition.y) }, mGameWindow->getAbsoluteSize().xy());
 
         Engine::Scene::Entity::EntityPtr hit;
         float distance = std::numeric_limits<float>::max();        

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Meta/serialize/toplevelunit.h"
+#include "Meta/serialize/hierarchy/toplevelunit.h"
 
 #include "scenecomponentcollector.h"
 

@@ -31,6 +31,9 @@ namespace Scene {
             if (data.getValue(v, "mesh") && v.is<std::string>()) {
                 setName(v.as<std::string>());
             }
+            if (data.getValue(v, "material") && v.is<int>()) {
+                setMaterial(v.as<int>());
+            }
         }
 
         const Render::GPUMeshData *Mesh::data() const

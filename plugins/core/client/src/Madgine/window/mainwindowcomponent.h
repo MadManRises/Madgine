@@ -4,7 +4,7 @@
 
 #include "Meta/keyvalue/virtualscope.h"
 
-#include "Meta/serialize/virtualserializableunit.h"
+#include "Meta/serialize/hierarchy/virtualserializableunit.h"
 
 #include "Meta/math/rect2i.h"
 

@@ -1,9 +1,8 @@
 #pragma once
 
-#include "statetransmissionflags.h"
-#include "Generic/callerhierarchy.h"
-#include "Generic/offsetptr.h"
 #include "serializetable_forward.h"
+
+#include "Generic/callerhierarchy.h"
 
 namespace Engine {
 namespace Serialize {

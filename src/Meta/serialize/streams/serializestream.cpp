@@ -3,15 +3,7 @@
 
 #include "serializestreamdata.h"
 
-//#include "../../keyvalue/valuetype.h"
-
-#include "../formatter.h"
-
-#include "Generic/cowstring.h"
-
 #include "Generic/bytebuffer.h"
-
-#include "base64/base64.h"
 
 #include "../serializemanager.h"
 
@@ -38,7 +30,7 @@ namespace Serialize {
         : Stream(std::move(other))
         , mData(std::move(other.mData))
     {
-        data().setManager(mgr);
+        mData->setManager(mgr);
     }
 
     SerializeStream::~SerializeStream() = default;
@@ -109,37 +101,39 @@ namespace Serialize {
 
     SerializeManager *SerializeStream::manager() const
     {
-        return data().manager();
+        return mData->manager();
     }
 
     void SerializeStream::setId(ParticipantId id)
     {
-        data().setId(id);
+        mData->setId(id);
     }
 
     ParticipantId SerializeStream::id() const
     {
-        return data().id();
+        return mData->id();
     }
 
     bool SerializeStream::isMaster(StreamMode mode)
     {
-        return data().isMaster(mode);
+        if (mData)
+            return mData->isMaster();
+        return mode == StreamMode::WRITE;
     }
 
-    SerializeStreamData &SerializeStream::data() const
+    SerializeStreamData *SerializeStream::data() const
     {
-        return *mData;
+        return mData.get();
     }
 
     SerializableUnitList &SerializeStream::serializableList()
     {
-        return data().serializableList();
+        return mData->serializableList();
     }
 
     SerializableUnitMap &SerializeStream::serializableMap()
     {
-        return data().serializableMap();
+        return mData->serializableMap();
     }
 
     StreamResult SerializeStream::read(SyncableUnitBase *&p)
@@ -213,15 +207,6 @@ namespace Serialize {
         return {};
     }
 
-    StreamResult SerializeStream::operator>>(ByteBuffer &b)
-    {
-        std::string base64Encoded;
-        STREAM_PROPAGATE_ERROR(operator>>(base64Encoded));
-        if (!Base64::decode(b, base64Encoded))
-            return STREAM_PARSE_ERROR(*this, false, "Invalid Base64 String '" << base64Encoded << "'");
-        return {};
-    }
-
     StreamResult SerializeStream::read(std::monostate &)
     {
         return {};
@@ -281,12 +266,6 @@ namespace Serialize {
     {
         Stream::write<uint32_t>(b.mSize);
         Stream::write(b.mData, b.mSize);
-    }
-
-    SerializeStream &SerializeStream::operator<<(const ByteBuffer &b)
-    {
-        Stream::operator<<(Base64::encode(b));
-        return *this;
     }
 
     void SerializeStream::write(const std::monostate &)

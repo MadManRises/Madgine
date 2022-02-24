@@ -4,10 +4,12 @@
 
 #include "Meta/serialize/container/serializablecontainer.h"
 
-#include "Meta/serialize/syncableunit.h"
+#include "Meta/serialize/hierarchy/syncableunit.h"
 
 #include "Generic/container/transformIt.h"
 #include "Generic/container/mutable_set.h"
+
+#include "Generic/functor.h"
 
 namespace Engine {
 namespace Scene {

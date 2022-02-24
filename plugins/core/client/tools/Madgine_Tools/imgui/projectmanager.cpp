@@ -25,6 +25,8 @@
 
 #include "Meta/serialize/streams/serializestreamdata.h"
 
+#include "Meta/serialize/hierarchy/statetransmissionflags.h"
+
 METATABLE_BEGIN_BASE(Engine::Tools::ProjectManager, Engine::Tools::ToolBase)
 METATABLE_END(Engine::Tools::ProjectManager)
 

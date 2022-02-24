@@ -7,7 +7,7 @@
 #include "Meta/serialize/streams/serializestream.h"
 #include "Meta/serialize/streams/serializestreamdata.h"
 
-#include "Meta/serialize/formatter.h"
+#include "Meta/serialize/streams/formatter.h"
 
 #include "Meta/serialize/streams/formattedserializestream.h"
 
@@ -31,7 +31,7 @@ namespace Memory {
     Serialize::FormattedSerializeStream MemoryManager::openRead(ByteBuffer buffer, std::unique_ptr<Serialize::Formatter> format)
     {
         Serialize::FormattedSerializeStream stream { std::move(format), Serialize::SerializeStream { std::make_unique<MemoryReadBuffer>(std::move(buffer)), createStreamData() } };
-        setSlaveStreamData(&stream.data());
+        setSlaveStreamData(stream.data());
         return stream;
     }
 

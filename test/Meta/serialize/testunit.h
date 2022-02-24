@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Meta/serialize/toplevelunit.h"
+#include "Meta/serialize/hierarchy/toplevelunit.h"
 
 #include "Meta/serialize/container/action.h"
 #include "Meta/serialize/container/query.h"

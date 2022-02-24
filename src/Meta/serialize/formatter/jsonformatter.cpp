@@ -1,8 +1,6 @@
-#include "Meta/metalib.h"
+#include "../../metalib.h"
 
 #include "jsonformatter.h"
-
-#include "../streams/serializestream.h"
 
 #include "../primitivetypes.h"
 
@@ -25,11 +23,12 @@ namespace Serialize {
     {
         if (!mCurrentExtended) {
             if (mAfterItem) {
-                mStream << ",";
+                mStream << ",\n";
                 mAfterItem = false;
+            } else if (mParseLevel.top().mIsContainer) {
+                mStream << "\n";
             }
-            mStream << "\n"
-                    << indent();
+            mStream << indent();
             if (!mParseLevel.top().mIsContainer) {
                 if (!name)
                     name = "Item";
@@ -39,7 +38,7 @@ namespace Serialize {
             mStream << "{\n";
             mCurrentExtended = true;
             ++mLevel;
-            mStream << indent() << "\"__extended\" : {";
+            mStream << indent() << "\"__extended\" : {\n";
             ++mLevel;
         }
         assert(mCurrentExtendedCount == 0);
@@ -85,18 +84,19 @@ namespace Serialize {
     {
         if (!mCurrentExtended) {
             if (mAfterItem) {
-                mStream << ",";
+                mStream << ",\n";
                 mAfterItem = false;
+            } else if (mParseLevel.top().mIsContainer) {
+                mStream << "\n";
             }
-            mStream << "\n"
-                    << indent();
+            mStream << indent();
             if (!mParseLevel.top().mIsContainer) {
                 if (!name)
                     name = "Item";
                 mStream << "\"" << name << "\" : ";
             }
             mParseLevel.emplace(false);
-            mStream << "{";
+            mStream << "{\n";
             ++mLevel;
         } else {
             assert(mCurrentExtendedCount == 0);
@@ -148,8 +148,7 @@ namespace Serialize {
             mAfterItem = false;
         }
         --mLevel;
-        mStream << "\n"
-                << indent() << "}";
+        mStream << "\n" << indent() << "}";
         assert(!mParseLevel.top().mIsContainer);
         mParseLevel.pop();
         mAfterItem = true;
@@ -177,6 +176,8 @@ namespace Serialize {
     {
         if (mAfterItem) {
             mStream << ",";
+            if (!mLastPrimitive || !mParseLevel.top().mIsContainer)
+                mStream << "\n";
             mAfterItem = false;
         }
         if (mCurrentExtendedCount > 0) {
@@ -186,8 +187,7 @@ namespace Serialize {
         if (!mParseLevel.top().mIsContainer) {
             if (!name)
                 name = "Element";
-            mStream << "\n"
-                    << indent() << "\"" << name << "\" : ";
+            mStream << indent() << "\"" << name << "\" : ";
         }
         if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<ByteBuffer>)
             mStream << "\"";

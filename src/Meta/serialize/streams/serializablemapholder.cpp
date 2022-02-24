@@ -1,19 +1,23 @@
 #include "../../metalib.h"
 
 #include "serializablemapholder.h"
-#include "serializestreamdata.h"
-#include "serializestream.h"
 
 #include "formattedserializestream.h"
+
+#include "serializestreamdata.h"
 
 namespace Engine {
 namespace Serialize {
 
     SerializableMapHolder::SerializableMapHolder(FormattedSerializeStream &out)
+        : mData(out.data())
     {
-        if (!out.data().mSerializableMap) {
-            mData = &out.data();
-            mData->mSerializableMap = &mMap;
+        if (mData){
+            if (!mData->mSerializableMap) {
+                mData->mSerializableMap = &mMap;
+            } else {
+                mData = nullptr;
+            }
         }
     }
 
@@ -24,12 +28,16 @@ namespace Serialize {
             mData->mSerializableMap = nullptr;
         }
     }
-    
+
     SerializableListHolder::SerializableListHolder(FormattedSerializeStream &in)
+        : mData(in.data())
     {
-        if (!in.data().mSerializableList) {
-            mData = &in.data();
-            mData->mSerializableList = &mList;
+        if (mData){
+            if (!mData->mSerializableList) {
+                mData->mSerializableList = &mList;
+            } else {
+                mData = nullptr;
+            }
         }
     }
 

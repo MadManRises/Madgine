@@ -3,16 +3,14 @@
 namespace Engine {
 namespace Serialize {
 
-    struct META_EXPORT SerializeStreamData {
-    public:
-        SerializeStreamData();
+    struct META_EXPORT SerializeStreamData {    
         SerializeStreamData(SerializeManager &mgr, ParticipantId id);
         SerializeStreamData(SerializeStreamData &&) = delete;        
         virtual ~SerializeStreamData();
 
         void setManager(SerializeManager *mgr);
         SerializeManager *manager();
-        bool isMaster(StreamMode mode);
+        bool isMaster();
 
         ParticipantId id() const;
         void setId(ParticipantId id);

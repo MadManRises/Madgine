@@ -68,8 +68,8 @@ namespace Widgets {
         std::vector<std::pair<std::vector<Vertex>, TextureSettings>> returnSet;
         std::vector<Vertex> result;
 
-        Vector3 pos = (getAbsolutePosition() * screenSize) / screenSize;
-        Vector3 size = (getAbsoluteSize() * screenSize) / screenSize;
+        Vector3 pos = (getEffectivePosition() * screenSize) / screenSize;
+        Vector3 size = (getEffectiveSize() * screenSize) / screenSize;
         pos.z = depth();
 
         Vector4 color = mHovered ? Vector4 { 1.0f, 0.1f, 0.1f, 1.0f } : Vector4 { 0.4f, 0.4f, 0.4f, 1.0f };

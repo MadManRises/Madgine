@@ -1,22 +1,16 @@
-#include "../metalib.h"
+#include "../../metalib.h"
 
 #include "syncableunit.h"
-
-#include "syncmanager.h"
-
-#include "streams/serializestream.h"
-
-#include "formatter.h"
-
-#include "streams/operations.h"
-
-#include "toplevelunit.h"
-
-#include "serializableunitptr.h"
 
 #include "statetransmissionflags.h"
 
 #include "serializetable.h"
+
+#include "toplevelunit.h"
+
+#include "../syncmanager.h"
+
+#include "../operations.h"
 
 namespace Engine {
 namespace Serialize {
@@ -63,7 +57,7 @@ namespace Serialize {
 
     void SyncableUnitBase::writeState(FormattedSerializeStream &out, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags) const
     {
-        if (out.isMaster(StreamMode::WRITE) && !(flags & StateTransmissionFlags_SkipId)) {
+        if (out.isMaster(StreamMode::WRITE) && out.data() && !(flags & StateTransmissionFlags_SkipId)) {
             out.beginExtendedWrite(name, 1);
             write(out, mMasterId, "syncId");
         }
@@ -72,12 +66,12 @@ namespace Serialize {
 
     StreamResult SyncableUnitBase::readState(FormattedSerializeStream &in, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags)
     {
-        if (!in.isMaster(StreamMode::READ) && !(flags & StateTransmissionFlags_SkipId)) {
+        if (!in.isMaster(StreamMode::READ) && in.data() && !(flags & StateTransmissionFlags_SkipId)) {
             STREAM_PROPAGATE_ERROR(in.beginExtendedRead(name, 1));
             UnitId id;
             STREAM_PROPAGATE_ERROR(read(in, id, "syncId"));
 
-            if (in.manager() && in.manager()->getSlaveStreamData() == &in.data()) {
+            if (in.manager() && in.manager()->getSlaveStreamData() == in.data()) {
                 setSlaveId(id, in.manager());
                 if (mType->mIsTopLevelUnit) {
                     static_cast<TopLevelUnitBase *>(this)->setStaticSlaveId(id);

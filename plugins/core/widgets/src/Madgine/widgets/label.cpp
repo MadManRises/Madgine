@@ -31,8 +31,8 @@ namespace Widgets {
 
     std::vector<std::pair<std::vector<Vertex>, TextureSettings>> Label::vertices(const Vector3 &screenSize)
     {
-        Vector3 pos = (getAbsolutePosition() * screenSize) / screenSize;
-        Vector3 size = (getAbsoluteSize() * screenSize) / screenSize;
+        Vector3 pos = (getEffectivePosition() * screenSize) / screenSize;
+        Vector3 size = (getEffectiveSize() * screenSize) / screenSize;
         pos.z = depth();
 
         if (mFont && mFont.available()) {

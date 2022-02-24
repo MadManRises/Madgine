@@ -16,15 +16,14 @@ namespace Serialize {
         ~SerializeStream();
 
         SerializeStream &operator=(SerializeStream &&other);
-        
-        SerializeStreamData &data() const;
+
+        SerializeStreamData *data() const;
         SerializeManager *manager() const;
         void setId(ParticipantId id);
         ParticipantId id() const;
         bool isMaster(StreamMode mode);
         SerializableUnitList &serializableList();
         SerializableUnitMap &serializableMap();
-
 
         StreamResult readN(std::string &buffer, size_t n);
         StreamResult peekN(std::string &buffer, size_t n);
@@ -42,10 +41,9 @@ namespace Serialize {
         {
             Stream::operator>>(t);
             if (!*this)
-                return STREAM_PARSE_ERROR(*this, true, "Unexpected EOF");
+                return STREAM_PARSE_ERROR(*this, false, "Expected: <" << typeid(T).name() << ">");
             return {};
         }
-
 
         template <typename T>
         requires std::convertible_to<T *, SerializableDataUnit *>
@@ -105,8 +103,6 @@ namespace Serialize {
 
         StreamResult read(ByteBuffer &b);
 
-        StreamResult operator>>(ByteBuffer &b);
-
         StreamResult read(std::monostate &);
 
         StreamResult operator>>(std::monostate &);
@@ -143,8 +139,6 @@ namespace Serialize {
         }
 
         void write(const ByteBuffer &b);
-
-        SerializeStream &operator<<(const ByteBuffer &);
 
         void write(const std::monostate &);
 

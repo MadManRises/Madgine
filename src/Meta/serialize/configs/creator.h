@@ -1,15 +1,13 @@
 #pragma once
 
-#include "../formatter.h"
-#include "../streams/serializestream.h"
 #include "Generic/callerhierarchy.h"
-#include "Generic/functor.h"
+
 #include "Generic/makeowning.h"
+
+#include "Generic/functor.h"
 
 namespace Engine {
 namespace Serialize {
-
-    struct CreatorCategory;
 
     template <typename KeyCreator, typename ValueCreator>
     struct KeyValueCreator {

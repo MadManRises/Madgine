@@ -72,8 +72,10 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
                                 vertex.mColor = c ? Vector4 { c->r, c->g, c->b, c->a } : Vector4::UNIT_SCALE;
                             }
                             if constexpr (V::template holds<VertexUV>) {
-                                aiVector3D &uv = mesh->mTextureCoords[0][vertexIndex];
-                                vertex.mUV = { uv.x, 1.0f - uv.y };
+                                if (mesh->mTextureCoords[0]) { 
+                                    aiVector3D &uv = mesh->mTextureCoords[0][vertexIndex];
+                                    vertex.mUV = { uv.x, 1.0f - uv.y };
+                                }
                             }
                         }
 

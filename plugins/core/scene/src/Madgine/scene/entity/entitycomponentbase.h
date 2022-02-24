@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Meta/serialize/serializabledataunit.h"
+#include "Meta/serialize/hierarchy/serializabledataunit.h"
 #include "Meta/keyvalue/objectptr.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"

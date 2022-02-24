@@ -9,7 +9,7 @@
 #include "Meta/math/vector2i.h"
 
 #include "Meta/serialize/formatter/safebinaryformatter.h"
-#include "Meta/serialize/streams/operations.h"
+#include "Meta/serialize/operations.h"
 #include "serialize/filesystem/filemanager.h"
 
 #include "Generic/areaview.h"

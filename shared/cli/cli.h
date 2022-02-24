@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Interfaces/filesystem/path.h"
+
 namespace Engine {
 
 namespace CLI {
@@ -15,6 +17,7 @@ namespace CLI {
         static std::vector<ParameterBase *> &parameters();
 
         std::map<std::string_view, std::vector<std::string_view>> mArguments;
+        Filesystem::Path mProgramPath;
     };
 }
 }

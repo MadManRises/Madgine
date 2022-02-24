@@ -2,7 +2,7 @@
 
 #include "Meta/metalib.h"
 
-#include "Meta/serialize/serializableunit.h"
+#include "Meta/serialize/hierarchy/serializableunit.h"
 
 #include "Meta/serialize/streams/serializestreamdata.h"
 
@@ -11,7 +11,7 @@
 #include "../testManager.h"
 #include "../testunit.h"
 
-#include "Meta/serialize/streams/operations.h"
+#include "Meta/serialize/operations.h"
 
 using namespace Engine::Serialize;
 using namespace std::chrono_literals;

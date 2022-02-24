@@ -1,12 +1,9 @@
-#include "../metalib.h"
+#include "../../metalib.h"
 
 #include "unithelper.h"
 
-#include "streams/serializestream.h"
-
-#include "serializemanager.h"
-
-#include "streams/formattedserializestream.h"
+#include "../serializemanager.h"
+#include "../streams/formattedserializestream.h"
 
 namespace Engine {
 namespace Serialize {

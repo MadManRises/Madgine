@@ -29,7 +29,7 @@ namespace Threading {
     }
 
     WorkGroup::WorkGroup(const std::string &name)
-        : mInstanceCounter(sWorkgroupInstanceCounter.fetch_add(1))
+        : mInstanceCounter(sWorkgroupInstanceCounter++)
         , mName(name.empty() ? "Workgroup_" + std::to_string(mInstanceCounter) : name)
     {
 #if ENABLE_THREADING

@@ -2,11 +2,11 @@
 
 #include "serializemanager.h"
 
-#include "syncableunit.h"
+#include "hierarchy/serializableids.h"
+
+#include "hierarchy/syncableunit.h"
 
 #include "streams/serializestream.h"
-
-#include "serializableids.h"
 
 #include "streams/serializestreamdata.h"
 
@@ -122,7 +122,7 @@ namespace Serialize {
         }
         SyncableUnitBase *ptr = nullptr;
 
-        if (in.isMaster(StreamMode::READ)) {
+        if (in.isMaster(StreamMode::READ)) { //TODO: Same branch????
             ptr = in.manager()->getByMasterId(unit);
         } else {
             auto it = sMasterMappings.find(unit);

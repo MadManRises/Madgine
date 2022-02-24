@@ -15,6 +15,9 @@ namespace CLI {
         assert(!sSingleton);
         sSingleton = this;
 
+        if (argc > 0)
+            mProgramPath = argv[0];
+
         if (argc > 1) {
             char **it = argv + 1;
             char **end = argv + argc;

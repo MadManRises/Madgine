@@ -1,8 +1,5 @@
 #pragma once
 
-#include "../serializable.h"
-#include "../unithelper.h"
-
 namespace Engine {
 namespace Serialize {
     //TODO: Implement OffsetPtr interface
@@ -68,12 +65,12 @@ namespace Serialize {
             mData -= std::forward<Ty>(v);
         }
 
-        StreamResult readState(SerializeInStream &in, const char *name = nullptr)
+        StreamResult readState(FormattedSerializeStream &in, const char *name = nullptr)
         {
             return read(in, mData, name);
         }
 
-        void writeState(SerializeOutStream &out, const char *name = nullptr) const
+        void writeState(FormattedSerializeStream &out, const char *name = nullptr) const
         {
             write(out, mData, name);
         }
@@ -88,7 +85,7 @@ namespace Serialize {
             UnitHelper<T>::setItemActive(mData, active, existenceChanged);
         }
 
-        StreamResult applySerializableMap(SerializeInStream &in, bool success)
+        StreamResult applySerializableMap(FormattedSerializeStream &in, bool success)
         {
             return UnitHelper<T>::applyMap(in, mData, success);
         }

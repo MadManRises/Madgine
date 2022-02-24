@@ -15,6 +15,8 @@
 #include "textureloaderlib.h"
 #include "Madgine/clientlib.h"
 
+#include "Modules/threading/workgroup.h"
+
 #define NOMINMAX
 
 #include <d3d11.h>
@@ -35,7 +37,7 @@ inline void dx11Check(HRESULT result)
 
 #define DX11_CHECK(result) dx11Check(result)
 
-#define DX11_LOG(x) LOG_DEBUG("DX11: " << x)
+#define DX11_LOG(x) LOG_DEBUG("DX11: " << x << " (" << Engine::Threading::WorkGroup::self().name() << ")")
 
 #include <span>
 

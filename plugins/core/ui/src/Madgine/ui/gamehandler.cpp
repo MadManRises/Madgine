@@ -113,7 +113,7 @@ namespace UI {
 
     void GameHandlerBase::clampToWindow(Input::PointerEventArgs &me)
     {
-        Engine::Vector3 size = mWidget->getActualSize();
+        Engine::Vector3 size = mWidget->getAbsoluteSize();
         if (me.windowPosition.x < 0.0f)
             me.windowPosition.x = 0.0f;
         if (me.windowPosition.x > size.x)

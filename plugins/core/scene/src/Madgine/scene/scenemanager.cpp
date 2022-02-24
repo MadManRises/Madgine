@@ -2,7 +2,7 @@
 
 #include "scenemanager.h"
 
-#include "Meta/serialize/serializableids.h"
+#include "Meta/serialize/hierarchy/serializableids.h"
 
 #include "scenecomponentbase.h"
 

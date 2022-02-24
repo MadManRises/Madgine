@@ -56,24 +56,6 @@ namespace Serialize {
         return mFormatter->endCompoundRead(name);
     }
 
-    void FormattedSerializeStream::beginPrimitiveWrite(const char *name, uint8_t typeId)
-    {
-        mFormatter->beginPrimitiveWrite(name, typeId);
-    }
-    void FormattedSerializeStream::endPrimitiveWrite(const char *name, uint8_t typeId)
-    {
-        mFormatter->endPrimitiveWrite(name, typeId);
-    }
-
-    StreamResult FormattedSerializeStream::beginPrimitiveRead(const char *name, uint8_t typeId)
-    {
-        return mFormatter->beginPrimitiveRead(name, typeId);
-    }
-    StreamResult FormattedSerializeStream::endPrimitiveRead(const char *name, uint8_t typeId)
-    {
-        return mFormatter->endPrimitiveRead(name, typeId);
-    }
-
     void FormattedSerializeStream::beginContainerWrite(const char *name, uint32_t size)
     {
         mFormatter->beginContainerWrite(name, size);
@@ -89,7 +71,7 @@ namespace Serialize {
     }
     StreamResult FormattedSerializeStream::endContainerRead(const char *name)
     {
-        return mFormatter->endCompoundRead(name);
+        return mFormatter->endContainerRead(name);
     }
 
     bool FormattedSerializeStream::hasContainerItem()
@@ -112,7 +94,7 @@ namespace Serialize {
         return static_cast<bool>(mFormatter);
     }
 
-    SerializeStreamData &FormattedSerializeStream::data()
+    SerializeStreamData *FormattedSerializeStream::data()
     {
         return mFormatter->stream().data();
     }

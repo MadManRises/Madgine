@@ -24,6 +24,8 @@
 
 #include "Meta/math/boundingbox.h"
 
+#include "Meta/serialize/hierarchy/statetransmissionflags.h"
+
 #include "Madgine/window/mainwindow.h"
 
 #include "Madgine/scene/entity/entity.h"

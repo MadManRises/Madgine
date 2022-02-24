@@ -8,7 +8,7 @@
 
 #include "Meta/serialize/streams/serializestream.h"
 
-#include "Meta/serialize/formatter.h"
+#include "Meta/serialize/streams/formatter.h"
 
 #include "Meta/serialize/streams/serializestreamdata.h"
 
@@ -34,7 +34,7 @@ namespace Filesystem {
                     stream.release(),
                     createStreamData() }
             };
-            setSlaveStreamData(&in.data());
+            setSlaveStreamData(in.data());
 
             return in;
         } else {

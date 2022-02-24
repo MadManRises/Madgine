@@ -4,14 +4,8 @@
 
 #include "../serializemanager.h"
 
-#include "../formatter.h"
-
 namespace Engine {
 namespace Serialize {
-
-    SerializeStreamData::SerializeStreamData()
-    {
-    }
 
     SerializeStreamData::SerializeStreamData(SerializeManager &mgr, ParticipantId id)
         : mManager(&mgr)
@@ -45,11 +39,9 @@ namespace Serialize {
         return *mSerializableMap;
     }
 
-    bool SerializeStreamData::isMaster(StreamMode mode)
+    bool SerializeStreamData::isMaster()
     {
-        if (mManager)
-            return mManager->isMaster(*this);
-        return mode == StreamMode::WRITE;
+        return mManager->isMaster(*this);
     }
 
     ParticipantId SerializeStreamData::id() const

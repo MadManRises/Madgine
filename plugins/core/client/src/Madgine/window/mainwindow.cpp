@@ -73,15 +73,17 @@ namespace Window {
     {
         WindowSettings settings = mSettings;
 
-        Filesystem::FileManager mgr { "MainWindow-Layout" };
+        if (settings.mRestoreGeometry) {
+            Filesystem::FileManager mgr { "MainWindow-Layout" };
 
-        Filesystem::Path path = Filesystem::appDataPath() / "mainwindow.ini";
+            Filesystem::Path path = Filesystem::appDataPath() / "mainwindow.ini";
 
-        if (Serialize::FormattedSerializeStream in = mgr.openRead(path, std::make_unique<Serialize::IniFormatter>())) {
-            Serialize::StreamResult result = read(in, settings.mData, nullptr);
-            if (result.mState != Serialize::StreamState::OK) {
-                LOG_ERROR("Error loading MainWindow-Layout from " << path << ": \n"
-                    << result);
+            if (Serialize::FormattedSerializeStream in = mgr.openRead(path, std::make_unique<Serialize::IniFormatter>())) {
+                Serialize::StreamResult result = read(in, settings.mData, nullptr);
+                if (result.mState != Serialize::StreamState::OK) {
+                    LOG_ERROR("Error loading MainWindow-Layout from " << path << ": \n"
+                                                                      << result);
+                }
             }
         }
 

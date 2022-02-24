@@ -2,7 +2,7 @@
 
 #include "Madgine/resources/resourceloader.h"
 
-#include "Meta/serialize/virtualserializableunit.h"
+#include "Meta/serialize/hierarchy/virtualserializableunit.h"
 
 class btCollisionShape;
 

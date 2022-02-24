@@ -1,10 +1,9 @@
 #pragma once
 
-#include "../toolscollector.h"
 #include "../toolbase.h"
+#include "../toolscollector.h"
 
 #include "Interfaces/util/loglistener.h"
-
 
 namespace Engine {
 namespace Tools {
@@ -22,17 +21,35 @@ namespace Tools {
 
         std::string_view key() const override;
 
-    private:
+    protected:
         struct LogEntry {
+            LogEntry(std::string msg, Util::MessageType type, const char *file, Threading::WorkGroup *workgroup)
+                : mMsg(msg)
+                , mType(type)
+                , mFile(file)
+                , mWorkGroup(workgroup)
+            {
+            }
+
             std::string mMsg;
             Util::MessageType mType;
             const char *mFile;
+            Threading::WorkGroup *mWorkGroup;
         };
+
+        bool filter(const LogEntry &entry);
+
+        void addFilteredMessage(size_t index);
+
+    private:
         std::deque<LogEntry> mEntries;
         std::array<size_t, Util::MessageType::COUNT> mMsgCounts;
-        std::array<bool, Util::MessageType::COUNT> mMsgFilters;
         std::mutex mMutex;
-        bool mOnce = false;
+
+        std::array<bool, Util::MessageType::COUNT> mMsgFilters;
+        std::string mMessageWordFilter;
+        size_t mFilteredMsgCount = 0;
+        std::vector<size_t> mLookup;
     };
 
 }

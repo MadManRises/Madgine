@@ -14,7 +14,7 @@
 #include "serialize/filesystem/filemanager.h"
 #include "Meta/serialize/formatter/xmlformatter.h"
 
-#include "Meta/serialize/statetransmissionflags.h"
+#include "Meta/serialize/hierarchy/statetransmissionflags.h"
 
 #include "Madgine/resources/resourcemanager.h"
 
