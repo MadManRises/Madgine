@@ -25,7 +25,7 @@ struct replace {
 template <typename Tag, size_t N>
 struct replace<TaggedPlaceholder<Tag, N>> {
     template <typename Tag2, typename... Args>
-    using tagged = std::conditional_t<std::is_same_v<Tag, Tag2>, type_pack_select_t<N, type_pack<Args...>>, TaggedPlaceholder<Tag, N>>;
+    using tagged = std::conditional_t<std::is_same_v<Tag, Tag2>, typename type_pack<Args...>::template select<N>, TaggedPlaceholder<Tag, N>>;
 
     template <typename... Args>
     using type = tagged<DefaultTag, Args...>;

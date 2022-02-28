@@ -45,17 +45,17 @@ constexpr size_t array_size(T (&)[S])
 }
 
 template <template <typename> typename F, typename T, bool b>
-struct apply_if {
+struct transform_if {
     using type = T;
 };
 
 template <template <typename> typename F, typename T>
-struct apply_if<F, T, true> {
+struct transform_if<F, T, true> {
     using type = F<T>;
 };
 
 template <template <typename> typename F, typename T, bool b>
-using apply_if_t = typename apply_if<F, T, b>::type;
+using transform_if_t = typename transform_if<F, T, b>::type;
 
 template <typename, template <typename...> typename>
 struct is_instance : std::false_type {

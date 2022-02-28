@@ -6,7 +6,7 @@ namespace Engine {
 
 using ValueTypeList = type_pack<
 #define VALUETYPE_SEP ,
-#define VALUETYPE_TYPE(Name, Storage, ...) type_pack_apply_t<std::decay_t, type_pack<__VA_ARGS__>>
+#define VALUETYPE_TYPE(Name, Storage, ...) type_pack<__VA_ARGS__>::transform<std::decay_t>
 #include "valuetypedefinclude.h"
     >;
 

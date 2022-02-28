@@ -39,7 +39,7 @@ constexpr Accessor property()
 
         setter = [](const TypedScopePtr &scope, const ValueType &v) {
             if constexpr (std::is_same_v<SetterScope, void>) {
-                using SetterScope = std::remove_pointer_t<type_pack_select_t<0, typename setter_traits::argument_types>>;
+                using SetterScope = std::remove_pointer_t<typename setter_traits::argument_types::template select<0>>;
                 if constexpr (std::is_convertible_v<Scope &, SetterScope &>) {
                     TupleUnpacker::invoke(Setter, scope.safe_cast<Scope>(), ValueType_as<std::decay_t<T>>(v));
                 } else {
@@ -56,7 +56,7 @@ constexpr Accessor property()
         [](ValueType &retVal, const TypedScopePtr &scope) {
             T value = [=]() -> T {
                 if constexpr (std::is_same_v<GetterScope, void>) {
-                    using GetterScope = std::remove_pointer_t<type_pack_select_t<0, typename getter_traits::argument_types>>;
+                    using GetterScope = std::remove_pointer_t<typename getter_traits::argument_types::template select<0>>;
                     if constexpr (std::is_convertible_v<Scope &, GetterScope &>) {
                         return TupleUnpacker::invoke(Getter, scope.safe_cast<Scope>());
                     } else {
@@ -101,8 +101,8 @@ static constexpr BoundApiFunction method(TypedScopePtr scope)
     return { &function<F>(), scope };
 }
 
-template <typename... Args, typename T>
-static constexpr Constructor ctorHelper(type_holder_t<T>)
+template <typename T, typename... Args>
+static constexpr Constructor ctorHelper()
 {
     if constexpr (std::is_same_v<type_pack<Args...>, type_pack<void>>)
         return nullptr;
@@ -178,7 +178,7 @@ static constexpr std::array<std::pair<const char *, ::Engine::Accessor>, std::tu
                     return MetaTableCtorLineStruct<__LINE__ - 1>::data();                       \
             }                                                                                   \
             static constexpr const bool base = false;                                           \
-            Constructor mData = ctorHelper<__VA_ARGS__>(type_holder<Ty>);                       \
+            Constructor mData = ctorHelper<Ty, __VA_ARGS__>();                                  \
         };                                                                                      \
     }
 

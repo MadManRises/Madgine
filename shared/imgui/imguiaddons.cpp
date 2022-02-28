@@ -499,7 +499,7 @@ bool EndValueType(Engine::ValueType *v, Engine::ExtendedValueTypeDesc type)
         ImGui::SameLine(0, 0.0f);
         if (ImGui::BeginCombo("##combo", "", ImGuiComboFlags_NoPreview | ImGuiComboFlags_PopupAlignLeft)) {
             changed = true;
-            SelectValueTypeTypes(Engine::type_pack_filter_if_t<Engine::type_pack_apply_t<Engine::type_pack_first_t, Engine::ValueTypeList>, std::is_default_constructible> {}, v);
+            SelectValueTypeTypes(Engine::ValueTypeList::transform<Engine::type_pack_first>::filter<std::is_default_constructible> {}, v);
             ImGui::EndCombo();
         }
         EndGroup();

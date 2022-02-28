@@ -48,10 +48,10 @@ struct Functor_to_ValueTypeRef {
 META_EXPORT const ValueType &getArgument(const ArgumentList &args, size_t index);
 
 template <typename T>
-using ValueTypePrimitiveSubList = type_pack_select_t<type_pack_index_v<size_t, ValueTypeList, T>, ValueTypeList>;
+using ValueTypePrimitiveSubList = ValueTypeList::select<type_pack_index_v<size_t, ValueTypeList, T>>;
 
 template <typename T>
-using QualifiedValueTypePrimitiveSubList = type_pack_select_t<type_pack_index_v<size_t, ValueTypeList, T>, QualifiedValueTypeList>;
+using QualifiedValueTypePrimitiveSubList = QualifiedValueTypeList::select<type_pack_index_v<size_t, ValueTypeList, T>>;
 
 template <typename T>
 struct ValueType_ReturnHelper {
@@ -60,7 +60,7 @@ struct ValueType_ReturnHelper {
 
 template <ValueTypePrimitive T>
 struct ValueType_ReturnHelper<T> {
-    typedef type_pack_select_t<type_pack_index_v<size_t, ValueTypePrimitiveSubList<T>, T>, QualifiedValueTypePrimitiveSubList<T>> type;
+    typedef typename QualifiedValueTypePrimitiveSubList<T>::template select<type_pack_index_v<size_t, ValueTypePrimitiveSubList<T>, T>> type;
 };
 
 template <typename T>

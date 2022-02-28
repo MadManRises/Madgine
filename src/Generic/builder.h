@@ -8,7 +8,7 @@ namespace Engine {
 template <typename F, typename Pack, template <typename Builder> typename Facade>
 struct BuilderImpl {
 
-    using Tuple = type_pack_as_tuple_t<type_pack_apply_t<type_pack_as_tuple_t, Pack>>;
+    using Tuple = typename Pack::transform<type_pack_as_tuple>::as_tuple;
     using return_type = decltype(TupleUnpacker::invokeFromTuple(std::declval<F &&>(), std::declval<Tuple &&>()));
 
     BuilderImpl(F &&f)
@@ -67,19 +67,14 @@ protected:
     template <size_t Dim, typename T>
     auto append(T &&t) &&
     {
-        static_assert(Dim < type_pack_size_v<Pack>);
-        return append_impl<Dim, T>(std::forward<T>(t), type_pack_indices_t<Pack> {});
+        static_assert(Dim < Pack::size);
+        return append_impl<Dim, T>(std::forward<T>(t), typename Pack::indices {});
     }
 
 private:
-    template <typename T>
-    struct appender {
-        template <typename Pack2>
-        using type = type_pack_append_t<Pack2, T>;
-    };
-
+    
     template <size_t Dim, typename T, size_t... Is>
-    Facade<BuilderImpl<F, type_pack_apply_to_nth_t<appender<T>::template type, Pack, Dim>, Facade>> append_impl(T &&t, std::index_sequence<Is...>)
+    Facade<BuilderImpl<F, typename Pack::transform_nth<type_pack_appender<T>::template type, Dim>, Facade>> append_impl(T &&t, std::index_sequence<Is...>)
     {
         F f = std::move(*mF);
         mF.reset();

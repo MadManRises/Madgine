@@ -66,7 +66,7 @@ struct tuple_size<Engine::ReferenceTuple<Ty...>> : std::integral_constant<size_t
 
     template <size_t I, typename... Ty>
 struct tuple_element<I, Engine::ReferenceTuple<Ty...>> {
-    using type = Engine::type_pack_select_t<I, Engine::type_pack<Ty...>>&;
+    using type = typename Engine::type_pack<Ty...>::select<I>&;
 };
 
 }
