@@ -76,6 +76,8 @@ namespace Threading {
                 LOG_ERROR("Uncaught Exception in Workgroup-Thread!");
                 LOG_ERROR(e.what());
                 throw;
+            } catch (...) {
+                std::terminate();
             }
         }
 
@@ -89,7 +91,7 @@ namespace Threading {
                 LOG_ERROR("Uncaught Exception in Workgroup-Task-Thread!");
                 LOG_ERROR(e.what());
                 throw;
-            }
+            } 
         }
 #endif
 

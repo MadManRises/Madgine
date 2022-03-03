@@ -25,7 +25,7 @@ namespace Serialize {
         const char *mTypeName;
         SerializeTableCallbacks mCallbacks;
         const SerializeTable &(*mBaseType)();
-        const std::pair<const char *, Serializer> *mFields;
+        const Serializer *mFields;
         bool mIsTopLevelUnit;
 
         void writeState(const SerializableDataUnit *unit, FormattedSerializeStream &out, CallerHierarchyBasePtr hierarchy = {}) const;
@@ -35,8 +35,8 @@ namespace Serialize {
         StreamResult readAction(SerializableUnitBase *unit, FormattedBufferedStream &in, PendingRequest *request) const;
         StreamResult readRequest(SerializableUnitBase *unit, FormattedBufferedStream &in, TransactionId id) const;
 
-        StreamResult applySerializableMap(SerializableDataUnit *unit, FormattedSerializeStream &in, bool success) const;
-        void setDataSynced(SerializableUnitBase *unit, bool b) const;
+        StreamResult applyMap(SerializableDataUnit *unit, FormattedSerializeStream &in, bool success) const;
+        void setSynced(SerializableUnitBase *unit, bool b) const;
         void setActive(SerializableDataUnit *unit, bool active, bool existenceChanged) const;
         void setActive(SerializableUnitBase *unit, bool active, bool existenceChanged) const;
         void setParent(SerializableUnitBase *unit) const;

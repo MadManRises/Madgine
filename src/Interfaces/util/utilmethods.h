@@ -2,7 +2,7 @@
 
 #include "messagetype.h"
 
-#define ENABLE_DEBUG_LOGGING 1
+#define ENABLE_DEBUG_LOGGING 0
 
 namespace Engine {
 namespace Util {

@@ -41,8 +41,7 @@ namespace Physics {
 
             operator CollisionShapeInstance *() const;
 
-            Serialize::StreamResult readState(Serialize::FormattedSerializeStream &in, const char *name = nullptr);
-            void writeState(Serialize::FormattedSerializeStream &out, const char *name = nullptr) const;
+            friend struct Serialize::Operations<InstanceHandle>;
 
         private:
             CollisionShapeInstancePtr mInstance;
@@ -51,7 +50,7 @@ namespace Physics {
         CollisionShapeManager();
 
         Threading::ImmediateTask<bool> loadImpl(std::unique_ptr<CollisionShape> &shape, ResourceDataInfo &info);
-        void unloadImpl(std::unique_ptr<CollisionShape> &shape, ResourceDataInfo &info);        
+        void unloadImpl(std::unique_ptr<CollisionShape> &shape);
     };
 
     struct CollisionShape {
@@ -60,7 +59,7 @@ namespace Physics {
     };
 
     struct CollisionShapeInstance : Serialize::VirtualSerializableUnitBase<VirtualScopeBase<>, Serialize::SerializableUnitBase> {
-        CollisionShapeInstance(typename CollisionShapeManager::HandleType shape = {});        
+        CollisionShapeInstance(typename CollisionShapeManager::HandleType shape = {});
         virtual ~CollisionShapeInstance();
         virtual btCollisionShape *get() = 0;
         virtual void destroy() = 0;
@@ -74,6 +73,14 @@ namespace Physics {
         typename CollisionShapeManager::HandleType mHandle;
     };
 
+}
+namespace Serialize {
+
+    template <>
+    struct Operations<Physics::CollisionShapeManager::InstanceHandle> {
+        static StreamResult read(FormattedSerializeStream &in, Physics::CollisionShapeManager::InstanceHandle &handle, const char *name = nullptr);
+        static void write(FormattedSerializeStream &out, const Physics::CollisionShapeManager::InstanceHandle &handle, const char *name = nullptr);
+    };
 }
 }
 

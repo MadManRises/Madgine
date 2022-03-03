@@ -145,6 +145,9 @@ namespace Serialize {
         SerializeStream &operator<<(const std::monostate &);
 
     protected:
+        StreamResult checkState(const char *op);
+
+    protected:
         std::unique_ptr<SerializeStreamData> mData;
     };
 }

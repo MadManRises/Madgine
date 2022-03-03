@@ -63,16 +63,15 @@ namespace Scripting {
             PyVarObject_HEAD_INIT(NULL, 0)
                 .tp_name
             = "Environment.OwnedScopePtr",
-            .tp_doc = "Python implementation of OwnedScopePtr",
             .tp_basicsize = sizeof(PyOwnedScopePtr),
             .tp_itemsize = 0,
-            .tp_flags = Py_TPFLAGS_DEFAULT,
-            .tp_new = PyType_GenericNew,
-            //.tp_init = &PyInit<&PyOwnedScopePtr::mPtr>,
             .tp_dealloc = &PyDealloc<PyOwnedScopePtr, &PyOwnedScopePtr::mPtr>,
-            .tp_getattro = (getattrofunc)PyOwnedScopePtr_get,
-            .tp_iter = (getiterfunc)PyOwnedScopePtr_iter,
             .tp_str = (reprfunc)PyOwnedScopePtr_str,
+            .tp_getattro = (getattrofunc)PyOwnedScopePtr_get,
+            .tp_flags = Py_TPFLAGS_DEFAULT,
+            .tp_doc = "Python implementation of OwnedScopePtr",
+            .tp_iter = (getiterfunc)PyOwnedScopePtr_iter,
+            .tp_new = PyType_GenericNew,
         };
 
     }

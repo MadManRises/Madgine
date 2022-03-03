@@ -43,7 +43,7 @@ namespace Audio {
         return true;
     }
 
-    void AudioBufferLoader::unloadImpl(AudioBuffer &data, ResourceDataInfo &info)
+    void AudioBufferLoader::unloadImpl(AudioBuffer &data)
     {
     }
 

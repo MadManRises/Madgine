@@ -26,7 +26,7 @@ namespace Render {
         float mDiffuseFactor = 0.7f;
 
     private:
-        ProgramLoader::HandleType mProgram;
+        ProgramLoader::PtrType mProgram;
 
         std::unique_ptr<Render::RenderTarget> mShadowMap;
         std::unique_ptr<Render::RenderTarget> mPointShadowMaps[2];

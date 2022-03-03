@@ -13,7 +13,7 @@ namespace Render {
         OpenGLTextureLoader();
 
         bool loadImpl(OpenGLTexture &tex, ResourceDataInfo &info);
-        void unloadImpl(OpenGLTexture &tex, ResourceDataInfo &info);
+        void unloadImpl(OpenGLTexture &tex);
         bool create(Texture &texture, TextureType type, DataFormat format) override;
 
 		virtual void setData(Texture &tex, Vector2i size, const ByteBuffer &data) override;

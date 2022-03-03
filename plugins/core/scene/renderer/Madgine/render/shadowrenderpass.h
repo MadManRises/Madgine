@@ -25,7 +25,7 @@ namespace Render {
         void updateFrustum();
 
     private:
-        ProgramLoader::HandleType mProgram;
+        ProgramLoader::PtrType mProgram;
 
         Scene::SceneManager &mScene;        
 

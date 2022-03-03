@@ -13,7 +13,7 @@ namespace Render {
         SlLoader();
 
         bool loadImpl(SlFile &shader, ResourceDataInfo &info);
-        void unloadImpl(SlFile &shader, ResourceDataInfo &info);
+        void unloadImpl(SlFile &shader);
     };
 
 }

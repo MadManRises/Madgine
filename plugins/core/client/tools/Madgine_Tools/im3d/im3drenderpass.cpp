@@ -28,8 +28,8 @@ namespace Render {
 
     void Im3DRenderPass::render(RenderTarget *target, size_t iteration)
     {
-        if (!mProgram.available())
-            return;
+        /* if (!mProgram.available())
+            return;*/
 
         target->pushAnnotation("Im3D");
 

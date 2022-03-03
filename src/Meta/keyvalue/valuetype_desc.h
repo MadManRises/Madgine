@@ -11,7 +11,7 @@
 namespace Engine {
 
 template <typename T>
-concept ValueTypePrimitive = type_pack_contains_v<ValueTypeList, T>;
+concept ValueTypePrimitive = ValueTypeList::contains<T>;
 
 enum class ValueTypeEnum : unsigned char {
 #define VALUETYPE_SEP ,
@@ -263,7 +263,7 @@ constexpr ValueTypeIndex toValueTypeIndex()
 {
     static_assert(!std::same_as<T, ValueType>);
     if constexpr (ValueTypePrimitive<T>) {
-        return static_cast<ValueTypeEnum>(type_pack_index_v<size_t, ValueTypeList, T>);
+        return static_cast<ValueTypeEnum>(ValueTypeList::index<size_t, T>);
     } else if constexpr (std::ranges::range<T>) {
         if constexpr (std::same_as<KeyType_t<typename T::iterator::value_type>, std::monostate>)
             return ValueTypeEnum::KeyValueVirtualSequenceRangeValue;
@@ -285,7 +285,7 @@ template <typename T>
 constexpr ExtendedValueTypeDesc toValueTypeDesc()
 {
     if constexpr (InstanceOf<T, std::optional>) {
-        return { { ExtendedValueTypeEnum::OptionalType }, toValueTypeDesc<type_pack_unpack_unique_t<typename is_instance<T, std::optional>::argument_types>>() };
+        return { { ExtendedValueTypeEnum::OptionalType }, toValueTypeDesc<typename is_instance<T, std::optional>::argument_types::template unpack_unique<>>() };
     } else if constexpr (ValueTypePrimitive<T>) {
         return { toValueTypeIndex<T>() };
     } else if constexpr (std::same_as<T, ValueType>) {

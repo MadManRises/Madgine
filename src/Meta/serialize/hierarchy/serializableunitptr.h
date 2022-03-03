@@ -118,7 +118,7 @@ namespace Serialize {
 
         StreamResult readState(FormattedSerializeStream &in, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0) const;
 
-        StreamResult applySerializableMap(FormattedSerializeStream &in, bool success) const;
+        StreamResult applyMap(FormattedSerializeStream &in, bool success) const;
 
         void setActive(bool active, bool existenceChanged) const;
 
@@ -237,7 +237,7 @@ namespace Serialize {
         StreamResult readAction(FormattedBufferedStream &in, PendingRequest *request) const;
         StreamResult readRequest(FormattedBufferedStream &in, TransactionId id) const;
 
-        void setDataSynced(bool b) const;
+        void setSynced(bool b) const;
         void setActive(bool active, bool existenceChanged) const;
         void setParent(SerializableUnitBase *parent) const;
 

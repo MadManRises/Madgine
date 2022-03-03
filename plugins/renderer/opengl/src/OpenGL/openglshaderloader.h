@@ -25,7 +25,7 @@ namespace Render {
         };
 
         bool loadImpl(OpenGLShader &shader, ResourceDataInfo &info);
-        void unloadImpl(OpenGLShader &shader, ResourceDataInfo &info);
+        void unloadImpl(OpenGLShader &shader);
 
         bool create(OpenGLShader &shader, ResourceType *res, const CodeGen::ShaderFile &file, ShaderType type);
 

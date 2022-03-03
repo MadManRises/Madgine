@@ -22,45 +22,45 @@ namespace Render {
     {
     }
 
-    Threading::TaskFuture<bool> ProgramLoader::HandleType::create(const std::string &name, const std::vector<size_t> &bufferSizes, size_t instanceDataSize, ProgramLoader *loader)
+    Threading::TaskFuture<bool> ProgramLoader::PtrType::create(const std::string &name, const std::vector<size_t> &bufferSizes, size_t instanceDataSize, ProgramLoader *loader)
     {
-        *this = ProgramLoader::loadUnnamed(
-            [=](ProgramLoader *loader, Program &program, const ProgramLoader::ResourceDataInfo &info) { return loader->create(program, name, bufferSizes, instanceDataSize); }, {},
-            loader);
-        return info()->loadingTask();
+        return ProgramLoader::loadUnnamed(*this,
+            [=](ProgramLoader *loader, Program &program) mutable { return loader->create(program, std::move(name), std::move(bufferSizes), instanceDataSize); }, 
+            loader);        
     }
 
-    void ProgramLoader::HandleType::create(const std::string &name, CodeGen::ShaderFile file, ProgramLoader *loader)
+    void ProgramLoader::PtrType::create(const std::string &name, CodeGen::ShaderFile file, ProgramLoader *loader)
     {
-        *this = ProgramLoader::loadUnnamed(
-            [=, file { std::move(file) }](ProgramLoader *loader, Program &program, const ProgramLoader::ResourceDataInfo &info) mutable { return loader->create(program, name, file); }, {}, loader);
+        ProgramLoader::loadUnnamed(*this,
+            [=, file { std::move(file) }](ProgramLoader *loader, Program &program) mutable { return loader->create(program, std::move(name), file); }, loader);
     }
 
-    void ProgramLoader::HandleType::createUnnamed(CodeGen::ShaderFile &&file, ProgramLoader *loader)
+    void ProgramLoader::PtrType::createUnnamed(CodeGen::ShaderFile &&file, ProgramLoader *loader)
     {
-        *this = ProgramLoader::loadUnnamed(
-            [=, file { std::move(file) }](ProgramLoader *loader, Program &program, const ProgramLoader::ResourceDataInfo &info) mutable { return loader->create(program, Resources::ResourceBase::sUnnamed, file); }, {}, loader);
+        ProgramLoader::loadUnnamed(
+            *this,
+            [=, file { std::move(file) }](ProgramLoader *loader, Program &program) mutable { return loader->create(program, Resources::ResourceBase::sUnnamed, file); }, loader);
     }
 
-    WritableByteBuffer ProgramLoader::HandleType::mapParameters(size_t index, ProgramLoader *loader)
+    WritableByteBuffer ProgramLoader::PtrType::mapParameters(size_t index, ProgramLoader *loader)
     {
         if (!loader)
             loader = &ProgramLoader::getSingleton();
-        return loader->mapParameters(*getDataPtr(*this, loader), index);
+        return loader->mapParameters(**this, index);
     }
 
-    void ProgramLoader::HandleType::setInstanceData(const ByteBuffer &data, ProgramLoader *loader)
+    void ProgramLoader::PtrType::setInstanceData(const ByteBuffer &data, ProgramLoader *loader)
     {
         if (!loader)
             loader = &ProgramLoader::getSingleton();
-        return loader->setInstanceData(*getDataPtr(*this, loader), data);
+        return loader->setInstanceData(**this, data);
     }
 
-    void ProgramLoader::HandleType::setDynamicParameters(size_t index, const ByteBuffer &data, ProgramLoader *loader)
+    void ProgramLoader::PtrType::setDynamicParameters(size_t index, const ByteBuffer &data, ProgramLoader *loader)
     {
         if (!loader)
             loader = &ProgramLoader::getSingleton();
-        loader->setDynamicParameters(*getDataPtr(*this, loader), index, data);
+        loader->setDynamicParameters(**this, index, data);
     }
 
 }

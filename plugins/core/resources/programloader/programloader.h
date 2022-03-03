@@ -14,11 +14,11 @@ namespace Render {
 
         using Base = Resources::VirtualResourceLoaderBase<ProgramLoader, Program, std::list<Placeholder<0>>, Threading::WorkGroupStorage>;
 
-        struct MADGINE_PROGRAMLOADER_EXPORT HandleType : Base::HandleType {
+        struct MADGINE_PROGRAMLOADER_EXPORT PtrType : Base::PtrType {
 
-            using Base::HandleType::HandleType;
-            HandleType(Base::HandleType handle)
-                : Base::HandleType(std::move(handle))
+            using Base::PtrType::PtrType;
+            PtrType(Base::PtrType ptr)
+                : Base::PtrType(std::move(ptr))
             {
             }
 
@@ -35,7 +35,7 @@ namespace Render {
 
         ProgramLoader();
 
-        virtual Threading::Task<bool> create(Program &program, const std::string &name, const std::vector<size_t> &bufferSizes = {}, size_t instanceDataSize = 0) = 0;
+        virtual Threading::Task<bool> create(Program &program, std::string name, std::vector<size_t> bufferSizes = {}, size_t instanceDataSize = 0) = 0;
         virtual bool create(Program &program, const std::string &name, const CodeGen::ShaderFile &file) = 0;
 
         virtual WritableByteBuffer mapParameters(Program &program, size_t index) = 0;

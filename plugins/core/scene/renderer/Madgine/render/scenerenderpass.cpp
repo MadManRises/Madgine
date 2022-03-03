@@ -69,8 +69,8 @@ namespace Render {
 
     void SceneRenderPass::render(Render::RenderTarget *target, size_t iteration)
     {
-        if (!mProgram.available())
-            return;
+        /* if (!mProgram.available())
+            return;*/
         //TODO Culling
 
         Threading::DataLock lock { mScene.mutex(), Threading::AccessMode::READ };

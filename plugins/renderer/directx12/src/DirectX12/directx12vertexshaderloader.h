@@ -24,7 +24,7 @@ namespace Render {
         };
 
         bool loadImpl(DirectX12VertexShader &shader, ResourceDataInfo &info);
-        void unloadImpl(DirectX12VertexShader &shader, ResourceDataInfo &info);
+        void unloadImpl(DirectX12VertexShader &shader);
 
         bool create(DirectX12VertexShader &shader, ResourceType *res, const CodeGen::ShaderFile &file);
     };

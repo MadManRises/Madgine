@@ -13,6 +13,8 @@
 
 #include "Meta/serialize/operations.h"
 
+#include "Meta/serialize/container/container_operations.h"
+
 using namespace Engine::Serialize;
 using namespace std::chrono_literals;
 

@@ -58,7 +58,7 @@ namespace Render {
     void DirectX11GeometryShaderLoader::HandleType::create(const std::string &name, const CodeGen::ShaderFile &file, DirectX11GeometryShaderLoader *loader)
     {
         *this = DirectX11GeometryShaderLoader::loadManual(
-            name, {}, [=, &file](DirectX11GeometryShaderLoader *loader, DirectX11GeometryShader &shader, const DirectX11GeometryShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, {}, loader);
+            name, {}, [=, &file](DirectX11GeometryShaderLoader *loader, DirectX11GeometryShader &shader, const DirectX11GeometryShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, loader);
     }
 
     bool DirectX11GeometryShaderLoader::loadImpl(DirectX11GeometryShader &shader, ResourceDataInfo &info)
@@ -68,7 +68,7 @@ namespace Render {
         return loadFromSource(shader, info.resource()->path().stem(), source);
     }
 
-    void DirectX11GeometryShaderLoader::unloadImpl(DirectX11GeometryShader &shader, ResourceDataInfo &info)
+    void DirectX11GeometryShaderLoader::unloadImpl(DirectX11GeometryShader &shader)
     {
         shader.reset();
     }

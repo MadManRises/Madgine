@@ -10,6 +10,8 @@
 
 #include "operations.h"
 
+#include "container/container_operations.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -52,7 +54,7 @@ namespace Serialize {
             },
             [](SerializableDataUnit *_unit, FormattedSerializeStream &in, bool success) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
-                STREAM_PROPAGATE_ERROR(UnitHelper<T>::applyMap(in, unit->*P, success));
+                STREAM_PROPAGATE_ERROR(applyMap(in, unit->*P, success));
                 return {};
             },
             [](SerializableDataUnit *unit, bool b) {
@@ -156,41 +158,41 @@ namespace Serialize {
             [](SerializableDataUnit *_unit, FormattedBufferedStream &in, PendingRequest *request) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
                 if constexpr (std::derived_from<T, SyncableBase>)
-                    return Operations<T, Configs...>::readAction(unit->*P, in, request, unit);
+                    return readAction<T, Configs...>(unit->*P, in, request, CallerHierarchyPtr { CallerHierarchy { unit } });
                 else
                     throw "Unsupported";
             },
             [](SerializableDataUnit *_unit, FormattedBufferedStream &inout, TransactionId id) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
                 if constexpr (std::derived_from<T, SyncableBase>)
-                    return Operations<T, Configs...>::readRequest(unit->*P, inout, id, unit);
+                    return readRequest<T, Configs...>(unit->*P, inout, id, CallerHierarchyPtr { CallerHierarchy { unit } });
                 else
                     throw "Unsupported";
             },
             [](SerializableDataUnit *unit, FormattedSerializeStream &in, bool success) {
-                return UnitHelper<T>::applyMap(in, static_cast<Unit *>(unit)->*P, success);
+                return applyMap<T, Configs...>(in, static_cast<Unit *>(unit)->*P, success);
             },
             [](SerializableDataUnit *unit, bool b) {
-                UnitHelper<T>::setItemDataSynced(static_cast<Unit *>(unit)->*P, b);
+                setSynced<T, Configs...>(static_cast<Unit *>(unit)->*P, b);
             },
             [](SerializableDataUnit *unit, bool active, bool existenceChanged) {
-                UnitHelper<T>::setItemActive(static_cast<Unit *>(unit)->*P, active, existenceChanged);
+                setActive<T, Configs...>(static_cast<Unit *>(unit)->*P, active, existenceChanged);
             },
             [](SerializableDataUnit *unit) {
                 if constexpr (std::derived_from<T, SerializableUnitBase>)
-                    UnitHelper<T>::setItemParent(static_cast<Unit *>(unit)->*P, unit);
+                    setParent<T, Configs...>(static_cast<Unit *>(unit)->*P, unit);
             },
             [](const SerializableDataUnit *_unit, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, const void *data) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 if constexpr (std::derived_from<T, SyncableBase>)
-                    Operations<T, Configs...>::writeAction(unit->*P, outStreams, data, unit);
+                    writeAction<T, Configs...>(unit->*P, outStreams, data, CallerHierarchyPtr { CallerHierarchy { unit } });
                 else
                     throw "Unsupported";
             },
             [](const SerializableDataUnit *_unit, FormattedBufferedStream &out, const void *data) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
                 if constexpr (std::derived_from<T, SyncableBase>)
-                    Operations<T, Configs...>::writeRequest(unit->*P, out, data, unit);
+                    writeRequest<T, Configs...>(unit->*P, out, data, CallerHierarchyPtr { CallerHierarchy { unit } });
                 else
                     throw "Unsupported";
             }
@@ -218,11 +220,11 @@ namespace Serialize {
             },
             [](SerializableDataUnit *_unit, FormattedBufferedStream &in, PendingRequest *request) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
-                return Operations<T, Configs...>::readAction(unit->*P, in, request, unit);
+                return readAction<T, Configs...>(unit->*P, in, request, CallerHierarchyPtr { CallerHierarchy { unit } });
             },
             [](SerializableDataUnit *_unit, FormattedBufferedStream &inout, TransactionId id) -> StreamResult {
                 Unit *unit = static_cast<Unit *>(_unit);
-                return Operations<T, Configs...>::readRequest(unit->*P, inout, id, unit);
+                return readRequest<T, Configs...>(unit->*P, inout, id, CallerHierarchyPtr { CallerHierarchy { unit } });
             },
             [](SerializableDataUnit *unit, FormattedSerializeStream &in, bool success) {
                 return StreamResult {};
@@ -238,11 +240,11 @@ namespace Serialize {
             },
             [](const SerializableDataUnit *_unit, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, const void *data) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
-                Operations<T, Configs...>::writeAction(unit->*P, outStreams, data, unit);
+                writeAction<T, Configs...>(unit->*P, outStreams, data, CallerHierarchyPtr { CallerHierarchy { unit } });
             },
             [](const SerializableDataUnit *_unit, FormattedBufferedStream &out, const void *data) {
                 const Unit *unit = static_cast<const Unit *>(_unit);
-                Operations<T, Configs...>::writeRequest(unit->*P, out, data, unit);
+                writeRequest<T, Configs...>(unit->*P, out, data, CallerHierarchyPtr { CallerHierarchy { unit } });
             }
         };
     }
@@ -258,14 +260,14 @@ namespace Serialize {
                 struct SerializeInstance<T> {                                                         \
                     using Ty = T;                                                                     \
                     static constexpr const ::Engine::Serialize::SerializeTable &(*baseType)() = Base; \
-                    static constexpr const std::pair<const char *, ::Engine::Serialize::Serializer> fields[] = {
+                    static constexpr const ::Engine::Serialize::Serializer fields[] = {
 
 #define SERIALIZETABLE_INHERIT_BEGIN(T, Base) SERIALIZETABLE_BEGIN_IMPL(T, &serializeTable<Base>)
 #define SERIALIZETABLE_BEGIN(T) SERIALIZETABLE_BEGIN_IMPL(T, nullptr)
 
 #define SERIALIZETABLE_END(T) \
     {                         \
-        nullptr, { nullptr }  \
+        nullptr               \
     }                         \
     }                         \
     ;                         \
@@ -277,17 +279,13 @@ namespace Serialize {
     DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::Serialize::SerializeTable, ::, serializeTable, SINGLE_ARG({ #T, ::Engine::type_holder<T>, ::Engine::Serialize::__serialize_impl__::SerializeInstance<T>::baseType, ::Engine::Serialize::__serialize_impl__::SerializeInstance<T>::fields, std::derived_from<T, ::Engine::Serialize::TopLevelUnitBase> }), T);
 
 #define FIELD(...) \
-    { STRINGIFY2(FIRST(__VA_ARGS__)), ::Engine::Serialize::field<Ty, &Ty::__VA_ARGS__>(STRINGIFY2(FIRST(__VA_ARGS__))) },
+    ::Engine::Serialize::field<Ty, &Ty::__VA_ARGS__>(STRINGIFY2(FIRST(__VA_ARGS__))),
 
 #define SYNC(...) \
-    { STRINGIFY2(FIRST(__VA_ARGS__)), ::Engine::Serialize::sync<Ty, &Ty::__VA_ARGS__>(STRINGIFY2(FIRST(__VA_ARGS__))) },
+    ::Engine::Serialize::sync<Ty, &Ty::__VA_ARGS__>(STRINGIFY2(FIRST(__VA_ARGS__))),
 
-#define ENCAPSULATED_FIELD(Name, Getter, Setter)                                            \
-    {                                                                                       \
-        #Name, ::Engine::Serialize::encapsulated_field<Ty, &Ty::Getter, &Ty::Setter>(#Name) \
-    },
+#define ENCAPSULATED_FIELD(Name, Getter, Setter) \
+    ::Engine::Serialize::encapsulated_field<Ty, &Ty::Getter, &Ty::Setter>(#Name),
 
-#define ENCAPSULATED_POINTER(Name, Getter, Setter)                                                       \
-    {                                                                                                    \
-        #Name, ::Engine::Serialize::encapsulated_pointer<Ty, &Ty::Name, &Ty::Getter, &Ty::Setter>(#Name) \
-    },
+#define ENCAPSULATED_POINTER(Name, Getter, Setter) \
+    ::Engine::Serialize::encapsulated_pointer<Ty, &Ty::Name, &Ty::Getter, &Ty::Setter>(#Name),

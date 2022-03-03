@@ -4,8 +4,6 @@
 
 #include "networkbuffer.h"
 
-#include "Meta/serialize/formatter/safebinaryformatter.h"
-
 #include "Meta/serialize/streams/formattedbufferedstream.h"
 
 #include "Meta/serialize/streams/syncstreamdata.h"
@@ -57,7 +55,7 @@ namespace Network {
         return NetworkManagerResult::SUCCESS;
     }
 
-    NetworkManagerResult NetworkManager::connect(const std::string &url, int portNr, TimeOut timeout)
+    NetworkManagerResult NetworkManager::connect(const std::string &url, int portNr, std::unique_ptr<Serialize::Formatter> (*format)(), TimeOut timeout)
     {
         if (isConnected()) {
             return NetworkManagerResult::ALREADY_CONNECTED;
@@ -73,7 +71,7 @@ namespace Network {
             return result;
         }
 
-        NetworkManagerResult result = setSlaveStream(Serialize::FormattedBufferedStream { std::make_unique<Serialize::SafeBinaryFormatter>(), std::make_unique<NetworkBuffer>(std::move(socket)), createStreamData() }, true, timeout);
+        NetworkManagerResult result = setSlaveStream(Serialize::FormattedBufferedStream { format(), std::make_unique<NetworkBuffer>(std::move(socket)), createStreamData() }, true, timeout);
 
         return result;
     }
@@ -88,7 +86,7 @@ namespace Network {
         }
     }
 
-    int NetworkManager::acceptConnections(int limit, TimeOut timeout)
+    int NetworkManager::acceptConnections(std::unique_ptr<Serialize::Formatter> (*format)(), int limit, TimeOut timeout)
     {
         int count = 0;
         if (isServer()) {
@@ -97,7 +95,7 @@ namespace Network {
             std::tie(sock, error) = mServerSocket.accept(timeout);
             while (error != SocketAPIResult::TIMEOUT && (limit == -1 || count < limit)) {
                 if (sock) {
-                    if (addMasterStream(Serialize::FormattedBufferedStream { std::make_unique<Serialize::SafeBinaryFormatter>(), std::make_unique<NetworkBuffer>(std::move(sock)), createStreamData() }) == Serialize::SyncManagerResult::SUCCESS) {
+                    if (addMasterStream(Serialize::FormattedBufferedStream { format(), std::make_unique<NetworkBuffer>(std::move(sock)), createStreamData() }) == Serialize::SyncManagerResult::SUCCESS) {
                         ++count;
                     }
                 }
@@ -107,7 +105,7 @@ namespace Network {
         return count;
     }
 
-    NetworkManagerResult NetworkManager::acceptConnection(TimeOut timeout)
+    NetworkManagerResult NetworkManager::acceptConnection(std::unique_ptr<Serialize::Formatter> (*format)(), TimeOut timeout)
     {
         if (!isServer())
             return NetworkManagerResult::NO_SERVER;
@@ -118,13 +116,13 @@ namespace Network {
         if (!sock)
             return recordSocketError(error);
 
-        Serialize::FormattedBufferedStream stream { std::make_unique<Serialize::SafeBinaryFormatter>(), std::make_unique<NetworkBuffer>(std::move(sock)), createStreamData() };
+        Serialize::FormattedBufferedStream stream {format(), std::make_unique<NetworkBuffer>(std::move(sock)), createStreamData() };
         return addMasterStream(std::move(stream));
     }
 
     bool NetworkManager::isConnected() const
     {
-        return !isMaster();
+        return !isMaster() && !mSlaveStreamInvalid;
     }
 
     bool NetworkManager::isServer() const

@@ -125,7 +125,13 @@ namespace Threading {
             return TaskHandleAwaiter { std::move(mThenReturn) };
         }
 
-        void unhandled_exception() { }
+        void unhandled_exception() { 
+            if (mState) {
+
+            } else {
+                throw;
+            }
+        }
 
         //void then(TaskHandle handle);
         void then_return(TaskHandle handle)

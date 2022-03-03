@@ -138,7 +138,7 @@ namespace Render {
         return true;
     }
 
-    void SkeletonLoader::unloadImpl(SkeletonDescriptor &data, ResourceDataInfo &info)
+    void SkeletonLoader::unloadImpl(SkeletonDescriptor &data)
     {
         data.mBones.clear();
     }

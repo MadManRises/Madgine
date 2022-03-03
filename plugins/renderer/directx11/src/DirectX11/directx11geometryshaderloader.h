@@ -25,7 +25,7 @@ namespace Render {
 
 
         bool loadImpl(DirectX11GeometryShader &shader, ResourceDataInfo &info);
-        void unloadImpl(DirectX11GeometryShader &shader, ResourceDataInfo &info);
+        void unloadImpl(DirectX11GeometryShader &shader);
 
         bool create(DirectX11GeometryShader &shader, ResourceType *res, const CodeGen::ShaderFile &file);
 

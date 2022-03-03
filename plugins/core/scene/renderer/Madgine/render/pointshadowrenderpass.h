@@ -18,7 +18,7 @@ namespace Render {
         virtual int priority() const override;
 
     private:
-        ProgramLoader::HandleType mProgram;
+        ProgramLoader::PtrType mProgram;
 
         Scene::SceneManager &mScene;        
 

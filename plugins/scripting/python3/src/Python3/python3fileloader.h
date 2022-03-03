@@ -27,7 +27,7 @@ namespace Scripting {
             void setup();
 
             bool loadImpl(PyModulePtr &module, ResourceDataInfo &info, Filesystem::FileEventType event);
-            void unloadImpl(PyModulePtr &module, ResourceDataInfo &info);
+            void unloadImpl(PyModulePtr &module);
 
             void find_spec(ValueType &retVal, std::string_view name, std::optional<std::string_view> import_path, ObjectPtr target_module);
 

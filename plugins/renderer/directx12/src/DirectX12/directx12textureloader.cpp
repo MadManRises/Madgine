@@ -31,7 +31,7 @@ namespace Render {
         throw 0;
     }
 
-    void DirectX12TextureLoader::unloadImpl(DirectX12Texture &tex, ResourceDataInfo &info)
+    void DirectX12TextureLoader::unloadImpl(DirectX12Texture &tex)
     {
         tex.reset();
     }

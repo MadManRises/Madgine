@@ -29,7 +29,7 @@ namespace Render {
         throw 0;
     }
 
-    void OpenGLTextureLoader::unloadImpl(OpenGLTexture &tex, ResourceDataInfo &info)
+    void OpenGLTextureLoader::unloadImpl(OpenGLTexture &tex)
     {
         tex.reset();
     }

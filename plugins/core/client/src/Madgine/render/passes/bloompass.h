@@ -33,7 +33,7 @@ namespace Render {
         size_t mInputIndex;
         RenderTarget *mInput;
 
-        ProgramLoader::HandleType mProgram;
+        ProgramLoader::PtrType mProgram;
     };
 
 }

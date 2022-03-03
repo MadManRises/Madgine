@@ -43,8 +43,8 @@ namespace Render {
     void ShadowRenderPass::render(Render::RenderTarget *target, size_t iteration)
     {
         //TODO Culling
-        if (!mProgram.available())
-            return;
+        /* if (!mProgram.available())
+            return;*/
 
         Threading::DataLock lock { mScene.mutex(), Threading::AccessMode::READ };
 

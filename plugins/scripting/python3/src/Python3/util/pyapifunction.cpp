@@ -35,14 +35,13 @@ namespace Scripting {
             PyVarObject_HEAD_INIT(NULL, 0)
                 .tp_name
             = "Environment.ApiFunction",
-            .tp_doc = "Python implementation of ApiFunction",
             .tp_basicsize = sizeof(PyApiFunction),
             .tp_itemsize = 0,
-            .tp_flags = Py_TPFLAGS_DEFAULT,
-            .tp_new = PyType_GenericNew,
-            //.tp_init = &PyInit<&PyApiFunction::mFunction>,
             .tp_dealloc = &PyDealloc<PyApiFunction, &PyApiFunction::mFunction>,
             .tp_call = (ternaryfunc)PyApiFunction_call,
+            .tp_flags = Py_TPFLAGS_DEFAULT,
+            .tp_doc = "Python implementation of ApiFunction",
+            .tp_new = PyType_GenericNew,
         };
 
     }

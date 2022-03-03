@@ -88,12 +88,12 @@ namespace Threading {
         queueInternal({ std::move(task) });
     }
 
-    void TaskQueue::queue_after(TaskHandle task, std::chrono::steady_clock::duration duration, const std::vector<Threading::DataMutex *> &dependencies)
+    void TaskQueue::queueHandle_after(TaskHandle task, std::chrono::steady_clock::duration duration, const std::vector<Threading::DataMutex *> &dependencies)
     {
-        queue_for(std::move(task), std::chrono::steady_clock::now() + duration);
+        queueHandle_for(std::move(task), std::chrono::steady_clock::now() + duration);
     }
 
-    void TaskQueue::queue_for(TaskHandle task, std::chrono::steady_clock::time_point time_point, const std::vector<Threading::DataMutex *> &dependencies)
+    void TaskQueue::queueHandle_for(TaskHandle task, std::chrono::steady_clock::time_point time_point, const std::vector<Threading::DataMutex *> &dependencies)
     {
         queueInternal({ std::move(task), time_point });
     }

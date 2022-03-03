@@ -23,19 +23,31 @@ namespace Render {
     {
     }
 
-    Threading::TaskFuture<bool> TextureLoader::HandleType::create(
+    Threading::TaskFuture<bool> TextureLoader::PtrType::create(
         TextureType type, DataFormat format, Vector2i size, ByteBuffer data, TextureLoader * loader)
     {
-        *this = TextureLoader::loadUnnamed(
-            [=, data { std::move(data) }](TextureLoader *loader, Texture &texture, const TextureLoader::ResourceDataInfo &info) mutable {
+        return TextureLoader::loadUnnamed(*this,
+            [=, data { std::move(data) }](TextureLoader *loader, Texture &texture) mutable {
                 if (!loader->create(texture, type, format))
                     return false;
                 if (data.mSize > 0)
                     loader->setData(texture, size, std::move(data));
                 return true;
             },
-            {}, loader);
-        return info()->loadingTask();
+            loader);        
+    }
+
+    Threading::Task<bool> TextureLoader::PtrType::createTask(
+        TextureType type, DataFormat format, Vector2i size, ByteBuffer data)
+    {
+        return TextureLoader::loadUnnamedTask(*this,
+            [=, data { std::move(data) }](TextureLoader *loader, Texture &texture) mutable {
+                if (!loader->create(texture, type, format))
+                    return false;
+                if (data.mSize > 0)
+                    loader->setData(texture, size, std::move(data));
+                return true;
+            });
     }
 
     void TextureLoader::HandleType::loadFromImage(std::string_view name, TextureType type, DataFormat format, TextureLoader *loader)
@@ -48,22 +60,22 @@ namespace Render {
                 loader->setData(texture, { image->mWidth, image->mHeight }, { image->mBuffer, static_cast<size_t>(image->mWidth * image->mHeight) });
                 co_return true;
             },
-            {}, loader);
+             loader);
             
     }
 
-    void TextureLoader::HandleType::setData(Vector2i size, const ByteBuffer &data, TextureLoader *loader)
+    void TextureLoader::PtrType::setData(Vector2i size, const ByteBuffer &data, TextureLoader *loader)
     {
         if (!loader)
             loader = &TextureLoader::getSingleton();
-        loader->setData(*getDataPtr(*this, loader), size, data);
+        loader->setData(**this, size, data);
     }
 
-    void TextureLoader::HandleType::setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data, TextureLoader *loader)
+    void TextureLoader::PtrType::setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data, TextureLoader *loader)
     {
         if (!loader)
             loader = &TextureLoader::getSingleton();
-        loader->setSubData(*getDataPtr(*this, loader), offset, size, data);
+        loader->setSubData(**this, offset, size, data);
     }
 
 }

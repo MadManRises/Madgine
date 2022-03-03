@@ -24,6 +24,9 @@ struct mutable_set : std::set<T, Cmp> {
         {
         }
 
+        /* iterator_prototype(const iterator_prototype &) = default;
+        iterator_prototype(iterator_prototype &&) = default;*/
+
         iterator_prototype(It &&it)
             : mIterator(std::forward<It>(it))
         {
@@ -39,6 +42,9 @@ struct mutable_set : std::set<T, Cmp> {
             : mIterator(static_cast<const It2 &>(other))
         {
         }
+
+        /* iterator_prototype &operator=(const iterator_prototype &) = default;
+        iterator_prototype &operator=(iterator_prototype &&) = default;*/
 
         T &operator*() const
         {

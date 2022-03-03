@@ -45,7 +45,7 @@ METATABLE_END(Engine::NodeGraph::NodeGraphLoader::ResourceType)
             return true;
         }
 
-        void NodeGraphLoader::unloadImpl(NodeGraph &graph, ResourceDataInfo &info)
+        void NodeGraphLoader::unloadImpl(NodeGraph &graph)
         {
         }
 

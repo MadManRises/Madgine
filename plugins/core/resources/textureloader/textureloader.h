@@ -27,6 +27,21 @@ namespace Render {
 
         using Base = Resources::VirtualResourceLoaderBase<TextureLoader, Texture, std::list<Placeholder<0>>, Threading::WorkGroupStorage>;
 
+        struct MADGINE_TEXTURELOADER_EXPORT PtrType : Base::PtrType {
+
+            using Base::PtrType::PtrType;
+            PtrType(Base::PtrType ptr)
+                : Base::PtrType(std::move(ptr))
+            {
+            }
+
+            Threading::TaskFuture<bool> create(TextureType type, DataFormat format, Vector2i size = { 0, 0 }, ByteBuffer data = {}, TextureLoader *loader = nullptr);
+            Threading::Task<bool> createTask(TextureType type, DataFormat format, Vector2i size = { 0, 0 }, ByteBuffer data = {});
+
+            void setData(Vector2i size, const ByteBuffer &data, TextureLoader *loader = nullptr);
+            void setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data, TextureLoader *loader = nullptr);
+        };
+
         struct MADGINE_TEXTURELOADER_EXPORT HandleType : Base::HandleType {
 
             using Base::HandleType::HandleType;
@@ -35,11 +50,7 @@ namespace Render {
             {
             }
 
-			Threading::TaskFuture<bool> create(TextureType type, DataFormat format, Vector2i size = { 0, 0 }, ByteBuffer data = {}, TextureLoader *loader = nullptr);
             void loadFromImage(std::string_view name, TextureType type, DataFormat format, TextureLoader *loader = nullptr);
-
-            void setData(Vector2i size, const ByteBuffer &data, TextureLoader *loader = nullptr);
-            void setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data, TextureLoader *loader = nullptr);
         };
 
         TextureLoader();

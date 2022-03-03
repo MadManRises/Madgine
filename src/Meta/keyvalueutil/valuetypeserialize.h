@@ -7,19 +7,8 @@ namespace Serialize {
 
     template <>
     struct META_EXPORT Operations<ValueType> {
-        static StreamResult read(FormattedSerializeStream &in, ValueType &v, const char *name);
-        static void write(FormattedSerializeStream &out, const ValueType &v, const char *name);
-
-        template <typename... Args>
-        static StreamResult read(FormattedSerializeStream &in, ValueType &v, const char *name, Args &&...args)
-        {
-            return read(in, v, name);
-        }
-        template <typename... Args>
-        static void write(FormattedSerializeStream &out, const ValueType &v, const char *name, Args &&...args)
-        {
-            write(out, v, name);
-        }
+        static StreamResult read(FormattedSerializeStream &in, ValueType &v, const char *name, const CallerHierarchyBasePtr &hierarchy = {});
+        static void write(FormattedSerializeStream &out, const ValueType &v, const char *name, const CallerHierarchyBasePtr &hierarchy = {});
     };   
 
     

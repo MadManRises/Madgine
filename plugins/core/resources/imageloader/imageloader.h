@@ -12,7 +12,7 @@ namespace Resources {
         ImageLoader();
 
         bool loadImpl(ImageData &data, ResourceDataInfo &info);
-        void unloadImpl(ImageData &data, ResourceDataInfo &info);
+        void unloadImpl(ImageData &data);
     };
 
 }

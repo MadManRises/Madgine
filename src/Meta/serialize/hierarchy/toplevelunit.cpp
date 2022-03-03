@@ -44,14 +44,14 @@ namespace Serialize {
     void TopLevelUnitBase::sync()
     {
         SerializableUnitPtr self { this, serializeType() };
-        self.setDataSynced(true);
+        self.setSynced(true);
         self.setActive(true, true);
     }
 
     void TopLevelUnitBase::unsync()
     {
         SerializableUnitPtr self { this, serializeType() };
-        self.setDataSynced(false);
+        self.setSynced(false);
         self.setActive(false, true);
     }
 

@@ -22,14 +22,13 @@ namespace Scripting {
             PyVarObject_HEAD_INIT(NULL, 0)
                 .tp_name
             = "Environment.VirtualSequenceRange",
-            .tp_doc = "Python implementation of KeyValueVirtualSequenceRange",
             .tp_basicsize = sizeof(PyVirtualSequenceRange),
             .tp_itemsize = 0,
-            .tp_flags = Py_TPFLAGS_DEFAULT,
-            .tp_new = PyType_GenericNew,
-            //.tp_init = &PyInit<&PyVirtualSequenceRange::mRange>,
             .tp_dealloc = &PyDealloc<PyVirtualSequenceRange, &PyVirtualSequenceRange::mRange>,
+            .tp_flags = Py_TPFLAGS_DEFAULT,
+            .tp_doc = "Python implementation of KeyValueVirtualSequenceRange",
             .tp_iter = (getiterfunc)PyVirtualSequenceRange_iter,
+            .tp_new = PyType_GenericNew,
         };
 
         static PyObject *
@@ -59,15 +58,14 @@ namespace Scripting {
             PyVarObject_HEAD_INIT(NULL, 0)
                 .tp_name
             = "Environment.VirtualAssociativeRange",
-            .tp_doc = "Python implementation of KeyValueVirtualAssociativeRange",
             .tp_basicsize = sizeof(PyVirtualAssociativeRange),
             .tp_itemsize = 0,
-            .tp_flags = Py_TPFLAGS_DEFAULT,
-            .tp_new = PyType_GenericNew,
-            //.tp_init = &PyInit<&PyVirtualAssociativeRange::mRange>,
             .tp_dealloc = &PyDealloc<PyVirtualAssociativeRange, &PyVirtualAssociativeRange::mRange>,
-            .tp_iter = (getiterfunc)PyVirtualAssociativeRange_iter,
             .tp_as_mapping = &PyVirtualAssociativeRangeMapping,
+            .tp_flags = Py_TPFLAGS_DEFAULT,
+            .tp_doc = "Python implementation of KeyValueVirtualAssociativeRange",            
+            .tp_iter = (getiterfunc)PyVirtualAssociativeRange_iter,
+            .tp_new = PyType_GenericNew,
         };
 
     }

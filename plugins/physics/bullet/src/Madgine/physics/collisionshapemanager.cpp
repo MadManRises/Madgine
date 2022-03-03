@@ -359,37 +359,6 @@ namespace Physics {
         return mInstance.get();
     }
 
-    Serialize::StreamResult CollisionShapeManager::InstanceHandle::readState(Serialize::FormattedSerializeStream &in, const char *name)
-    {
-        std::string resName;
-        STREAM_PROPAGATE_ERROR(in.beginExtendedRead(name, 1));
-        STREAM_PROPAGATE_ERROR(Serialize::read(in, resName, "name"));
-        if (resName.empty()) {
-            reset();
-            STREAM_PROPAGATE_ERROR(in.beginCompoundRead(name));
-            STREAM_PROPAGATE_ERROR(in.endCompoundRead(name));
-        } else {
-            load(resName);
-            assert(mInstance);
-            STREAM_PROPAGATE_ERROR(Serialize::read(in, *mInstance, name));
-        }
-        return {};
-    }
-
-    void CollisionShapeManager::InstanceHandle::writeState(Serialize::FormattedSerializeStream &out, const char *name) const
-    {
-        bool hasShape = static_cast<bool>(mInstance);
-        std::string_view resName = hasShape ? mInstance->resource()->name() : "";
-        out.beginExtendedWrite(name, 1);
-        Serialize::write(out, resName, "name");
-        if (!hasShape) {
-            out.beginCompoundWrite(name);
-            out.endCompoundWrite(name);
-        } else {
-            Serialize::write(out, *mInstance, name);
-        }
-    }
-
     CollisionShapeManager::ResourceType *CollisionShapeInstance::resource() const
     {
         return mHandle.resource();
@@ -408,35 +377,35 @@ namespace Physics {
                 data = std::make_unique<BoxShape>();
                 return Threading::make_ready_task(true);
             },
-            {}, this);
+            this);
 
         getOrCreateManual(
             "Plane", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceDataInfo &info) {
                 data = std::make_unique<PlaneShape>();
                 return Threading::make_ready_task(true);
             },
-            {}, this);
+            this);
 
         getOrCreateManual(
             "Capsule", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceDataInfo &info) {
                 data = std::make_unique<CapsuleShape>();
                 return Threading::make_ready_task(true);
             },
-            {}, this);
+            this);
 
         getOrCreateManual(
             "Sphere", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceDataInfo &info) {
                 data = std::make_unique<SphereShape>();
                 return Threading::make_ready_task(true);
             },
-            {}, this);
+            this);
 
         getOrCreateManual(
             "Compound", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceDataInfo &info) {
                 data = std::make_unique<CompoundShape>();
                 return Threading::make_ready_task(true);
             },
-            {}, this);
+            this);
     }
 
     Threading::ImmediateTask<bool> CollisionShapeManager::loadImpl(std::unique_ptr<CollisionShape> &shape, ResourceDataInfo &info)
@@ -454,7 +423,7 @@ namespace Physics {
         co_return true;
     }
 
-    void CollisionShapeManager::unloadImpl(std::unique_ptr<CollisionShape> &shape, ResourceDataInfo &info)
+    void CollisionShapeManager::unloadImpl(std::unique_ptr<CollisionShape> &shape)
     {
     }
 
@@ -473,6 +442,42 @@ namespace Physics {
     }
 
 }
+
+namespace Serialize {
+
+    StreamResult Operations<Physics::CollisionShapeManager::InstanceHandle>::read(FormattedSerializeStream &in, Physics::CollisionShapeManager::InstanceHandle &handle, const char *name)
+    {
+        std::string resName;
+        STREAM_PROPAGATE_ERROR(in.beginExtendedRead(name, 1));
+        STREAM_PROPAGATE_ERROR(Serialize::read(in, resName, "name"));
+        if (resName.empty()) {
+            handle.reset();
+            STREAM_PROPAGATE_ERROR(in.beginCompoundRead(name));
+            STREAM_PROPAGATE_ERROR(in.endCompoundRead(name));
+        } else {
+            handle.load(resName);
+            assert(handle.mInstance);
+            STREAM_PROPAGATE_ERROR(Serialize::read(in, *handle.mInstance, name));
+        }
+        return {};
+    }
+
+    void Operations<Physics::CollisionShapeManager::InstanceHandle>::write(FormattedSerializeStream &out, const Physics::CollisionShapeManager::InstanceHandle &handle, const char *name)
+    {
+        bool hasShape = static_cast<bool>(handle.mInstance);
+        std::string_view resName = hasShape ? handle.mInstance->resource()->name() : "";
+        out.beginExtendedWrite(name, 1);
+        Serialize::write(out, resName, "name");
+        if (!hasShape) {
+            out.beginCompoundWrite(name);
+            out.endCompoundWrite(name);
+        } else {
+            Serialize::write(out, *handle.mInstance, name);
+        }
+    }
+
+}
+
 }
 
 METATABLE_BEGIN_BASE(Engine::Physics::MeshShape, Engine::Physics::CollisionShapeInstance)

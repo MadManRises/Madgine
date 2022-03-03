@@ -25,7 +25,7 @@ namespace Tools {
 
     private:
         Render::GPUMeshLoader::HandleType mMesh;
-        Render::ProgramLoader::HandleType mProgram;
+        Render::ProgramLoader::PtrType mProgram;
 
         Render::Camera *mCamera;
 

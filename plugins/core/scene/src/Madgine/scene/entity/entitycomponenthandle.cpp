@@ -17,7 +17,6 @@ namespace Scene {
 
         void entityComponentHelperWrite(Serialize::FormattedSerializeStream &out, const EntityComponentHandle<EntityComponentBase> &index, const char *name, const SceneManager *mgr)
         {
-            static_assert(Serialize::has_function_writeState2_v<EntityComponentOwningHandle<EntityComponentBase>>);
             write(out, mgr->entityComponentList(index.mType).getEntity(index), name);
         }
 

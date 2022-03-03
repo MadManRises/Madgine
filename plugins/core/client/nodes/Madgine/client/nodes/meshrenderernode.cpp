@@ -129,7 +129,7 @@ namespace Render {
     }
 
     struct MeshRendererNodeInterpret : NodeGraph::NodeInterpreterData {
-        Render::ProgramLoader::HandleType mHandle;
+        Render::ProgramLoader::PtrType mHandle;
         Render::GPUMeshLoader::HandleType mMesh;
     };
 
@@ -165,8 +165,8 @@ namespace Render {
                 throw 0; //??
                 //interpret->mHandle.setParametersSize(buffer->mIndex, buffer->mInterpretData->mBuffer.mSize);
 
-                buffer->mInterpretData->mMapper = [handle { interpret->mHandle }, index { buffer->mIndex }]() mutable {
-                    return handle.mapParameters(index);
+                buffer->mInterpretData->mMapper = [&ptr { interpret->mHandle }, index { buffer->mIndex }]() mutable {
+                    return ptr.mapParameters(index);
                 };
 
                 auto targetBuffer = buffer->mInterpretData->mMapper();

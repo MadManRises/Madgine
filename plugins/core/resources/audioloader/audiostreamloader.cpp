@@ -26,7 +26,7 @@ namespace Audio {
         return true;
     }
 
-    void AudioStreamLoader::unloadImpl(AudioStream &data, ResourceDataInfo &info)
+    void AudioStreamLoader::unloadImpl(AudioStream &data)
     {
     }
 

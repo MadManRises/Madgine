@@ -33,15 +33,14 @@ namespace Scripting {
             PyVarObject_HEAD_INIT(NULL, 0)
                 .tp_name
             = "Environment.VirtualSequenceIterator",
-            .tp_doc = "Python implementation of VirtualSequenceIterator",
             .tp_basicsize = sizeof(PyVirtualSequenceIterator),
             .tp_itemsize = 0,
-            .tp_flags = Py_TPFLAGS_DEFAULT,
-            .tp_new = PyType_GenericNew,
-            //.tp_init = &PyInit<&PyVirtualSequenceIterator::mIt>,
             .tp_dealloc = &PyDealloc<PyVirtualSequenceIterator, &PyVirtualSequenceIterator::mIt>,
+            .tp_flags = Py_TPFLAGS_DEFAULT,
+            .tp_doc = "Python implementation of VirtualSequenceIterator",
             .tp_iter = (getiterfunc)PyVirtualSequenceIterator_iter,
             .tp_iternext = (iternextfunc)PyVirtualSequenceIterator_next,
+            .tp_new = PyType_GenericNew,
         };
 
         static PyObject *
@@ -65,15 +64,14 @@ namespace Scripting {
             PyVarObject_HEAD_INIT(NULL, 0)
                 .tp_name
             = "Environment.VirtualAssociativeIterator",
-            .tp_doc = "Python implementation of VirtualAssociativeIterator",
             .tp_basicsize = sizeof(PyVirtualAssociativeIterator),
             .tp_itemsize = 0,
-            .tp_flags = Py_TPFLAGS_DEFAULT,
-            .tp_new = PyType_GenericNew,
-            //.tp_init = &PyInit<&PyVirtualAssociativeIterator::mIt>,
             .tp_dealloc = &PyDealloc<PyVirtualAssociativeIterator, &PyVirtualAssociativeIterator::mIt>,
+            .tp_flags = Py_TPFLAGS_DEFAULT,
+            .tp_doc = "Python implementation of VirtualAssociativeIterator",
             .tp_iter = (getiterfunc)PyVirtualAssociativeIterator_iter,
             .tp_iternext = (iternextfunc)PyVirtualAssociativeIterator_next,
+            .tp_new = PyType_GenericNew,
         };
 
     }

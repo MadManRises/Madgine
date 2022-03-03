@@ -2,9 +2,9 @@
 
 #include "formattedbufferedstream.h"
 
-#include "syncstreamdata.h"
-#include "buffered_streambuf.h"
 #include "../syncmanager.h"
+#include "buffered_streambuf.h"
+#include "syncstreamdata.h"
 
 namespace Engine {
 namespace Serialize {
@@ -20,29 +20,42 @@ namespace Serialize {
         mFormatter->stream().data()->setManager(mgr);
     }
 
-    void FormattedBufferedStream::beginMessage()
+    void FormattedBufferedStream::beginMessageWrite()
     {
-        static_cast<buffered_streambuf &>(mFormatter->stream().buffer()).beginMessage();
+        static_cast<buffered_streambuf &>(mFormatter->stream().buffer()).beginMessageWrite();
     }
 
-    void FormattedBufferedStream::endMessage()
+    void FormattedBufferedStream::endMessageWrite()
     {
-        static_cast<buffered_streambuf &>(mFormatter->stream().buffer()).endMessage();
+        static_cast<buffered_streambuf &>(mFormatter->stream().buffer()).endMessageWrite();
     }
 
-    bool FormattedBufferedStream::isMessageAvailable()
+    FormattedBufferedStream::MessageReadMarker FormattedBufferedStream::beginMessageRead()
     {
-        int avail = 0;
-
-        std::ios_base::iostate _State = std::ios_base::goodbit;
-        if (!*this) {
-            _State |= std::ios_base::failbit;
-        } else if ((avail = static_cast<buffered_streambuf &>(mFormatter->stream().buffer()).in_avail()) < 0) {
-            _State |= std::ios_base::eofbit;
+        if (mFormatter && static_cast<buffered_streambuf &>(mFormatter->stream().buffer()).beginMessageRead()) {
+            mFormatter->stream().clear();
+            return { mFormatter.get() };
+        } else {
+            return {};
         }
-        mFormatter->stream().stream().setstate(_State);
+    }
 
-        return avail > 0;
+    FormattedBufferedStream::MessageReadMarker::~MessageReadMarker()
+    {
+    }
+
+    void FormattedBufferedStream::MessageReadMarker::end()
+    {
+        assert(mFormatter);
+        mFormatter->stream().skipWs();
+        mFormatter->stream().clear();
+        static_cast<buffered_streambuf &>(mFormatter->stream().buffer()).endMessageRead();
+        mFormatter = nullptr;
+    }
+
+    FormattedBufferedStream::MessageReadMarker::operator bool() const
+    {
+        return mFormatter;
     }
 
     FormattedBufferedStream &FormattedBufferedStream::sendMessages()

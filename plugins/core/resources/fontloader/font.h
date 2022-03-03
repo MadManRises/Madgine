@@ -10,7 +10,7 @@ namespace Engine {
 namespace Render {
 
     struct Font {
-        TextureLoader::HandleType mTexture;
+        TextureLoader::PtrType mTexture;
         //TextureHandle *mTextureHandle;
         Vector2i mTextureSize;
 

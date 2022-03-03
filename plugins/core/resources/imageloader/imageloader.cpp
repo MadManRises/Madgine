@@ -46,7 +46,7 @@ namespace Resources {
         return true;
     }
 
-    void ImageLoader::unloadImpl(ImageData &data, ResourceDataInfo &info)
+    void ImageLoader::unloadImpl(ImageData &data)
     {
         data.clear();
     }

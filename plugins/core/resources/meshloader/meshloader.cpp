@@ -197,7 +197,7 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
             }
         }
 
-        void MeshLoader::unloadImpl(MeshData &data, ResourceDataInfo &info)
+        void MeshLoader::unloadImpl(MeshData &data)
         {
             data.mAttributeList = nullptr;
             data.mGroupSize = 0;

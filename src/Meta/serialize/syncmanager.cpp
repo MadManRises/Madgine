@@ -45,13 +45,12 @@ namespace Serialize {
 
     SyncManager::~SyncManager() { clearTopLevelItems(); }
 
-    void SyncManager::writeHeader(FormattedBufferedStream &stream, const SyncableUnitBase *unit, MessageType type, TransactionId id, uint8_t index)
+    void SyncManager::writeHeader(FormattedBufferedStream &stream, const SyncableUnitBase *unit, MessageType type, TransactionId id)
     {
         stream.beginHeaderWrite();
         write(stream, SerializeManager::convertPtr(stream.stream(), unit), "Object");
         write(stream, type, "MessageType");
         write(stream, id, "TransactionId");
-        write(stream, index, "index");
         stream.endHeaderWrite();
     }
 
@@ -82,6 +81,7 @@ namespace Serialize {
             STREAM_PROPAGATE_ERROR(read(stream, type, "MessageType"));
             TransactionId transactionId;
             STREAM_PROPAGATE_ERROR(read(stream, transactionId, "TransactionId"));
+            STREAM_PROPAGATE_ERROR(stream.endHeaderRead());
             switch (type) {
             case ACTION: {
                 PendingRequest *request = stream.fetchRequest(transactionId);
@@ -94,7 +94,6 @@ namespace Serialize {
                 STREAM_PROPAGATE_ERROR(object->readRequest(stream, transactionId));
                 break;
             case STATE:
-                stream.endHeaderRead();
                 STREAM_PROPAGATE_ERROR(object->readState(stream, nullptr, {}, StateTransmissionFlags_ApplyMap));
                 break;
             default:
@@ -175,7 +174,7 @@ namespace Serialize {
         return *mSlaveStream;
     }
 
-    bool SyncManager::isMessageAvailable()
+    /* bool SyncManager::isMessageAvailable()
     {
         if (mSlaveStream && mSlaveStream->isMessageAvailable())
             return true;
@@ -184,7 +183,7 @@ namespace Serialize {
                 return true;
         }
         return false;
-    }
+    }*/
 
     void SyncManager::removeAllStreams()
     {
@@ -210,6 +209,7 @@ namespace Serialize {
             }
         }
 
+        mSlaveStreamInvalid = true;
         mSlaveStream.emplace(std::move(stream));
         setSlaveStreamData(mSlaveStream->data());
 
@@ -245,6 +245,9 @@ namespace Serialize {
             }
             setSlaveStreamData(nullptr);
             mSlaveStream.reset();
+            mReceivingMasterState = false;
+        } else {
+            mSlaveStreamInvalid = false;
         }
 
         return state;
@@ -273,13 +276,13 @@ namespace Serialize {
             for (TopLevelUnitBase *unit : mTopLevelUnits) {
                 sendState(stream, unit);
             }
-            stream.beginMessage();
+            stream.beginMessageWrite();
             stream.beginHeaderWrite();
             write<UnitId>(stream, SERIALIZE_MANAGER, "Object");
             write(stream, INITIAL_STATE_DONE, "Command");
             stream.endHeaderWrite();
             write(stream, stream.id(), "Id");
-            stream.endMessage();
+            stream.endMessageWrite();
         }
 
         if (!stream)
@@ -338,6 +341,8 @@ namespace Serialize {
                 result.mState != StreamState::OK) {
                 it = mMasterStreams.erase(it);
                 return result;
+            } else if (!*it) {
+                it = mMasterStreams.erase(it);
             } else {
                 ++it;
             }
@@ -384,16 +389,18 @@ namespace Serialize {
                     auto it = std::ranges::find(
                         mTopLevelUnits, unit, &TopLevelUnitBase::masterId);
                     if (it == mTopLevelUnits.end()) {
-                        return STREAM_INTEGRITY_ERROR(in.stream(), true, "Illegal TopLevel-Id (" << unit << ") used!");
+                        return STREAM_INTEGRITY_ERROR(in.stream(), in.isBinary(), "Illegal TopLevel-Id (" << unit << ") used!");
                     }
                     out = *it;
                 } else {
                     SyncableUnitBase *u = getByMasterId(unit);
-                    if (std::ranges::find(mTopLevelUnits, u->mTopLevel) == mTopLevelUnits.end()) {
-                        return STREAM_INTEGRITY_ERROR(in.stream(), true, "Unit (" << unit << ") with unregistered TopLevel-Unit used!");
-                    }
+                    if (!u)
+                        return STREAM_INTEGRITY_ERROR(in.stream(), in.isBinary(), "Non-existing Unit-Id (" << unit << ") used!");
+                    if (std::ranges::find(mTopLevelUnits, u->mTopLevel) == mTopLevelUnits.end())
+                        return STREAM_INTEGRITY_ERROR(in.stream(), in.isBinary(), "Unit (" << unit << ") with unregistered TopLevel-Unit used!");
+
                     out = u;
-                }                
+                }
             }
         } catch (const std::out_of_range &) {
             return STREAM_INTEGRITY_ERROR(in.stream(), true, "Unknown Syncable Unit-Id (" << unit << ") used!");
@@ -414,17 +421,25 @@ namespace Serialize {
     StreamResult SyncManager::receiveMessages(FormattedBufferedStream &stream,
         int &msgCount, TimeOut timeout)
     {
-
-        while (stream && ((stream.isMessageAvailable() && msgCount == -1) || msgCount > 0)) {
-            while (stream.isMessageAvailable() && msgCount != 0) {
-                STREAM_PROPAGATE_ERROR(readMessage(stream));
-                if (msgCount > 0)
+        if (msgCount >= 0) {
+            while (stream && msgCount > 0) {
+                while (FormattedBufferedStream::MessageReadMarker msg = stream.beginMessageRead()) {
+                    STREAM_PROPAGATE_ERROR(readMessage(stream));
+                    msg.end();
                     --msgCount;
+                    if (!timeout.isZero() && timeout.expired())
+                        break;
+                }
+                if (timeout.expired())
+                    break;
+            }
+        } else {
+            while (FormattedBufferedStream::MessageReadMarker msg = stream.beginMessageRead()) {
+                STREAM_PROPAGATE_ERROR(readMessage(stream));
+                msg.end();
                 if (!timeout.isZero() && timeout.expired())
                     break;
             }
-            if (timeout.expired())
-                break;
         }
 
         return {};
@@ -461,14 +476,14 @@ namespace Serialize {
     void SyncManager::sendState(FormattedBufferedStream &stream,
         SyncableUnitBase *unit)
     {
-        stream.beginMessage();
+        stream.beginMessageWrite();
         stream.beginHeaderWrite();
         write(stream, SerializeManager::convertPtr(stream.stream(), unit), "Object");
         write(stream, STATE, "MessageType");
         write<TransactionId>(stream, 0, "TransactionId");
         stream.endHeaderWrite();
         unit->writeState(stream);
-        stream.endMessage();
+        stream.endMessageWrite();
     }
 
     SyncManagerResult SyncManager::recordStreamError(StreamResult error)

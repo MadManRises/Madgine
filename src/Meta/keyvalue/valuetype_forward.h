@@ -48,10 +48,10 @@ struct Functor_to_ValueTypeRef {
 META_EXPORT const ValueType &getArgument(const ArgumentList &args, size_t index);
 
 template <typename T>
-using ValueTypePrimitiveSubList = ValueTypeList::select<type_pack_index_v<size_t, ValueTypeList, T>>;
+using ValueTypePrimitiveSubList = ValueTypeList::select<ValueTypeList::index<size_t, T>>;
 
 template <typename T>
-using QualifiedValueTypePrimitiveSubList = QualifiedValueTypeList::select<type_pack_index_v<size_t, ValueTypeList, T>>;
+using QualifiedValueTypePrimitiveSubList = QualifiedValueTypeList::select<ValueTypeList::index<size_t, T>>;
 
 template <typename T>
 struct ValueType_ReturnHelper {
@@ -60,7 +60,7 @@ struct ValueType_ReturnHelper {
 
 template <ValueTypePrimitive T>
 struct ValueType_ReturnHelper<T> {
-    typedef typename QualifiedValueTypePrimitiveSubList<T>::template select<type_pack_index_v<size_t, ValueTypePrimitiveSubList<T>, T>> type;
+    typedef typename QualifiedValueTypePrimitiveSubList<T>::template select<ValueTypePrimitiveSubList<T>::template index<size_t, T>> type;
 };
 
 template <typename T>
@@ -90,7 +90,7 @@ decltype(auto) ValueType_as(const ValueType &v)
         if (ValueType_isNull(v))
             return T {};
         else {
-            return T { ValueType_as<type_pack_unpack_unique_t<typename is_instance<T, std::optional>::argument_types>>(v) };
+            return T { ValueType_as<typename is_instance<T, std::optional>::argument_types::template unpack_unique<>>(v) };
         }
     } else if constexpr (std::same_as<T, ValueType>) {
         return v;

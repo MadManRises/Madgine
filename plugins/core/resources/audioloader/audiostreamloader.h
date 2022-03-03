@@ -16,7 +16,7 @@ namespace Audio {
         AudioStreamLoader();
 
         bool loadImpl(AudioStream &data, ResourceDataInfo &info);
-        void unloadImpl(AudioStream &data, ResourceDataInfo &info);
+        void unloadImpl(AudioStream &data);
     };
 
 }

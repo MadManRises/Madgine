@@ -67,9 +67,9 @@ namespace Serialize {
     };
 
     template <typename T>
-    const constexpr size_t PrimitiveTypeIndex_v = type_pack_index_v<uint8_t, SerializePrimitives, typename PrimitiveReducer<T>::type>;
+    const constexpr size_t PrimitiveTypeIndex_v = SerializePrimitives::index<uint8_t, typename PrimitiveReducer<T>::type>;
 
     template <typename T>
-    concept PrimitiveType = type_pack_contains_v<SerializePrimitives, typename PrimitiveReducer<T>::type>;
+    concept PrimitiveType = SerializePrimitives::contains<typename PrimitiveReducer<T>::type>;
 }
 }

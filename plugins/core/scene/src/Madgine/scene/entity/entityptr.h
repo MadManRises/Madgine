@@ -30,20 +30,28 @@ namespace Scene {
 
             bool isDead() const;
 
-            Serialize::StreamResult readState(Serialize::FormattedSerializeStream &in, const char *name = nullptr);
-            void writeState(Serialize::FormattedSerializeStream &out, const char *name = nullptr) const;
-
-            Serialize::StreamResult applySerializableMap(Serialize::FormattedSerializeStream &in, bool success);
-
         private:
             bool holdsRef() const;
             struct ControlBlockDummy;
             ControlBlockDummy getBlock() const;
+
+            friend struct Serialize::Operations<EntityPtr>;
 
         private:
             mutable uintptr_t mEntity = 0;
         };
 
     }
+}
+namespace Serialize {
+
+    template <>
+    struct MADGINE_SCENE_EXPORT Operations<Scene::Entity::EntityPtr> {
+        static StreamResult read(FormattedSerializeStream &in, Scene::Entity::EntityPtr &ptr, const char *name = nullptr);
+        static void write(Serialize::FormattedSerializeStream &out, const Scene::Entity::EntityPtr &ptr, const char *name = nullptr);
+
+        static StreamResult applyMap(FormattedSerializeStream &in, Scene::Entity::EntityPtr &ptr, bool success);
+    };
+
 }
 }

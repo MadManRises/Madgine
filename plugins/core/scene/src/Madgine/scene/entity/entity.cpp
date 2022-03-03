@@ -184,6 +184,7 @@ namespace Scene {
 
         void Entity::writeComponent(Serialize::FormattedSerializeStream &out, const EntityComponentOwningHandle<EntityComponentBase> &comp) const
         {
+            out.beginExtendedWrite("Component", 1);
             for (const auto &p : EntityComponentRegistry::sComponentsByName()) {
                 if (p.second == comp.mHandle.mType) {
                     write(out, p.first, "name");

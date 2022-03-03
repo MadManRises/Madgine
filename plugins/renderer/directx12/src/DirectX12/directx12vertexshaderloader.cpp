@@ -23,7 +23,7 @@ namespace Render {
     void DirectX12VertexShaderLoader::HandleType::create(const std::string &name, const CodeGen::ShaderFile &file, DirectX12VertexShaderLoader *loader)
     {
         *this = DirectX12VertexShaderLoader::loadManual(
-            name, {}, [=, &file](DirectX12VertexShaderLoader *loader, DirectX12VertexShader &shader, const DirectX12VertexShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, {}, loader);
+            name, {}, [=, &file](DirectX12VertexShaderLoader *loader, DirectX12VertexShader &shader, const DirectX12VertexShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, loader);
     }
 
     bool DirectX12VertexShaderLoader::loadImpl(DirectX12VertexShader &shader, ResourceDataInfo &info)
@@ -33,7 +33,7 @@ namespace Render {
         return true;
     }
 
-    void DirectX12VertexShaderLoader::unloadImpl(DirectX12VertexShader &shader, ResourceDataInfo &info)
+    void DirectX12VertexShaderLoader::unloadImpl(DirectX12VertexShader &shader)
     {
         shader.reset();
     }

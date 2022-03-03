@@ -105,6 +105,42 @@ namespace Resources {
         Threading::TaskFuture<void> mUnloadingTask;
     };
 
+    template <typename T, typename Data>
+    struct PtrType {
+
+        PtrType() = default;
+        template <typename Data2>
+        PtrType(std::unique_ptr<Data2> data)
+            : mData(std::move(data))
+        {
+        }
+        PtrType(PtrType &&) = default;
+
+        ~PtrType()
+        {
+            T::unload(std::move(mData));
+        }
+
+        PtrType &operator=(PtrType &&) = default;
+
+        operator Data *() const
+        {
+            return mData.get();
+        }
+
+        Data *operator->() const
+        {
+            return mData.get();
+        }
+
+        void reset()
+        {
+            mData.reset();
+        }
+
+        std::unique_ptr<Data> mData;
+    };
+
     template <typename Interface>
     struct ResourceDataInfo : ResourceDataInfoBase<Interface> {
         using ResourceDataInfoBase<Interface>::ResourceDataInfoBase;
@@ -132,10 +168,9 @@ namespace Resources {
     template <typename Loader>
     struct ResourceType : Loader::Interface::ResourceType {
 
-        ResourceType(const std::string &name, const Filesystem::Path &path, typename Loader::Ctor ctor = {}, typename Loader::Dtor dtor = {})
+        ResourceType(const std::string &name, const Filesystem::Path &path, typename Loader::Ctor ctor = {})
             : Loader::Interface::ResourceType(name, path)
             , mCtor(ctor ? std::move(ctor) : Loader::Interface::template toCtor<Loader>(&Loader::loadImpl))
-            , mDtor(dtor ? std::move(dtor) : Loader::Interface::template toDtor<Loader>(&Loader::unloadImpl))
         {
         }
 
@@ -150,7 +185,6 @@ namespace Resources {
         }
 
         typename Loader::Ctor mCtor;
-        typename Loader::Dtor mDtor;
 
         typename Loader::Storage::template container_type<typename container_traits<typename Loader::DataContainer>::position_handle> mHolder;
     };
@@ -167,10 +201,12 @@ namespace Resources {
         using DataContainer = typename replace<Container>::template type<ResourceData<T>>;
 
         using HandleType = Handle<T, typename container_traits<DataContainer>::handle>;
+        using PtrType = PtrType<T, Data>;
         using OriginalHandleType = HandleType;
+        using OriginalPtrType = PtrType;
 
         using Ctor = Lambda<Threading::Task<bool>(T *, Data &, ResourceDataInfo &, Filesystem::FileEventType event)>;
-        using Dtor = Lambda<Threading::Task<void>(T *, Data &, ResourceDataInfo &)>;
+        using UnnamedCtor = Lambda<Threading::Task<bool>(T *, Data &)>;
 
         struct ResourceType : ResourceLoaderBase::ResourceType {
 
@@ -211,51 +247,6 @@ namespace Resources {
             return std::move(ctor);
         }
 
-        template <typename Loader = T, typename D = void>
-        static typename Loader::Dtor toDtor(D &&dtor)
-        {
-            static_assert(!std::is_same_v<D, typename Loader::Dtor>);
-            return [dtor { std::forward<D>(dtor) }](T *loader, Data &data, ResourceDataInfo &info) {
-                return Threading::make_task(LIFT(TupleUnpacker::invoke), dtor, static_cast<Loader *>(loader), static_cast<typename Loader::Data &>(data), info);
-            };
-        }
-
-        template <typename Loader = T>
-        static typename Loader::Dtor toDtor(typename Loader::Dtor &&dtor)
-        {
-            return std::move(dtor);
-        }
-
-        template <typename Loader = T, typename C = void>
-        static typename Loader::Ctor toMutableCtor(C &&ctor)
-        {
-            static_assert(!std::is_same_v<C, typename Loader::Ctor>);
-            return [ctor { std::forward<C>(ctor) }](T *loader, Data &data, ResourceDataInfo &info, Filesystem::FileEventType event) mutable {
-                return Threading::make_task(LIFT(TupleUnpacker::invoke), ctor, static_cast<Loader *>(loader), static_cast<typename Loader::Data &>(data), info, event);
-            };
-        }
-
-        template <typename Loader = T>
-        static typename Loader::Ctor toMutableCtor(typename Loader::Ctor &&ctor)
-        {
-            return std::move(ctor);
-        }
-
-        template <typename Loader = T, typename D = void>
-        static typename Loader::Dtor toMutableDtor(D &&dtor)
-        {
-            static_assert(!std::is_same_v<D, typename Loader::Dtor>);
-            return [dtor { std::forward<D>(dtor) }](T *loader, Data &data, ResourceDataInfo &info) mutable {
-                return Threading::make_task(LIFT(TupleUnpacker::invoke), dtor, static_cast<Loader *>(loader), static_cast<typename Loader::Data &>(data), info);
-            };
-        }
-
-        template <typename Loader = T>
-        static typename Loader::Dtor toMutableDtor(typename Loader::Dtor &&dtor)
-        {
-            return std::move(dtor);
-        }
-
         using Base::Base;
 
         static T &getSingleton()
@@ -279,9 +270,9 @@ namespace Resources {
         static_assert(!container_traits<DataContainer>::remove_invalidates_handles);
 
         using HandleType = Handle<T, typename container_traits<DataContainer>::handle>;
+        //using PtrType = PtrType<T, Data>;
 
         using Ctor = Lambda<Threading::Task<bool>(T *, Data &, ResourceDataInfo &, Filesystem::FileEventType event)>;
-        using Dtor = Lambda<Threading::Task<void>(T *, Data &, ResourceDataInfo &)>;
 
         using Base::Base;
 
@@ -329,22 +320,14 @@ namespace Resources {
             }
         }
 
-        template <typename C = Ctor, typename D = Dtor>
-        static ResourceType *getOrCreateUnnamed(C &&ctor = {}, D &&dtor = {}, T *loader = nullptr)
-        {
-            return new ResourceType(ResourceBase::sUnnamed, {}, Interface::toMutableCtor(std::forward<C>(ctor)),
-                Interface::toMutableDtor(std::forward<D>(dtor)));
-        }
-
-        template <typename C = Ctor, typename D = Dtor>
-        static ResourceType *getOrCreateManual(std::string_view name, const Filesystem::Path &path = {}, C &&ctor = {}, D &&dtor = {}, T *loader = nullptr)
+        template <typename C = Ctor>
+        static ResourceType *getOrCreateManual(std::string_view name, const Filesystem::Path &path = {}, C &&ctor = {}, T *loader = nullptr)
         {
             if (!loader)
                 loader = &getSingleton();
             assert(name != ResourceBase::sUnnamed);
             return &loader->mResources.try_emplace(
-                                          std::string { name }, std::string { name }, path, Interface::toCtor(std::forward<C>(ctor)),
-                                          Interface::toDtor(std::forward<D>(dtor)))
+                                          std::string { name }, std::string { name }, path, Interface::toCtor(std::forward<C>(ctor)))
                         .first->second;
         }
 
@@ -400,12 +383,29 @@ namespace Resources {
             if (!task.valid()) {
                 ResourceType *resource = handle.resource();
 
-                task = loader->queueUnloading(resource->mDtor(loader, *getDataPtr(handle, loader, false), info));
+                task = loader->queueUnloading(Threading::make_task(&T::unloadImpl, loader, *getDataPtr(handle, loader, false)));
 
                 info.setUnloadingTask(task);
             }
 
             return task;
+        }
+
+        static void unload(std::unique_ptr<Data> ptr, T *loader = nullptr)
+        {
+            if (!ptr)
+                return;
+            if (!loader)
+                loader = &getSingleton();
+
+            Threading::TaskFuture<void> task = loader->queueUnloading(Threading::make_task(&T::unloadImpl, loader, *ptr));
+
+            auto cleanup = [ptr { std::move(ptr) }]() {};
+            if (task.is_ready()) {
+                cleanup();
+            } else {
+                task.then(std::move(cleanup), loader->loadingTaskQueue());
+            }
         }
 
         static void resetHandle(const HandleType &handle, T *loader = nullptr)
@@ -437,26 +437,36 @@ namespace Resources {
             }
         }
 
-        template <typename C = Ctor, typename D = Dtor>
-        static HandleType loadManual(std::string_view name, const Filesystem::Path &path = {}, C &&ctor = {}, D &&dtor = {}, T *loader = nullptr)
+        template <typename C = Ctor>
+        static HandleType loadManual(std::string_view name, const Filesystem::Path &path = {}, C &&ctor = {}, T *loader = nullptr)
         {
             if (!loader)
                 loader = &getSingleton();
             return load(getOrCreateManual(
-                            name, path, std::forward<C>(ctor), std::forward<D>(dtor),
+                            name, path, std::forward<C>(ctor),
                             loader),
                 Filesystem::FileEventType::FILE_CREATED, loader);
         }
 
-        template <typename C = Ctor, typename D = Dtor>
-        static HandleType loadUnnamed(C &&ctor = {}, D &&dtor = {}, T *loader = nullptr)
+        static typename Interface::PtrType createUnnamed()
+        {
+            return std::make_unique<Data>();
+        }
+
+        template <typename C>
+        static Threading::Task<bool> loadUnnamedTask(typename Interface::PtrType &ptr, C &&ctor)
+        {
+            PtrType ptr = createUnnamed();
+            return Threading::make_task(std::forward<C>(ctor), *ptr);
+        }
+
+        template <typename C>
+        static Threading::TaskFuture<bool> loadUnnamed(typename Interface::PtrType &ptr, C &&ctor, T *loader = nullptr)
         {
             if (!loader)
                 loader = &getSingleton();
-            return load(getOrCreateUnnamed(
-                            std::forward<C>(ctor), std::forward<D>(dtor),
-                            loader),
-                Filesystem::FileEventType::FILE_CREATED, loader);
+
+            return loader->queueLoading(loadUnnamedTask(ptr, std::forward<C>(ctor)));
         }
 
         static Data *getDataPtr(const HandleType &handle, T *loader = nullptr, bool verified = true)
@@ -558,6 +568,13 @@ namespace Resources {
             return loader->unloadVImpl(resource);
         }
 
+        static void unload(std::unique_ptr<_Data> ptr, T *loader = nullptr)
+        {
+            if (!loader)
+                loader = &Base::getSingleton();
+            return loader->unloadVImpl(std::move(ptr));
+        }
+
         static void resetHandle(const typename Base::HandleType &handle, T *loader = nullptr)
         {
             if (!loader)
@@ -565,24 +582,31 @@ namespace Resources {
             return loader->resetHandleVImpl(handle);
         }
 
-        template <typename C = typename Base::Ctor, typename D = typename Base::Dtor>
-        static typename Base::HandleType loadManual(std::string_view name, const Filesystem::Path &path = {}, C &&ctor = {}, D &&dtor = {}, T *loader = nullptr)
+        template <typename C = typename Base::Ctor>
+        static typename Base::HandleType loadManual(std::string_view name, const Filesystem::Path &path = {}, C &&ctor = {}, T *loader = nullptr)
         {
             if (!loader)
                 loader = &Base::getSingleton();
             return loader->loadManualVImpl(
-                name, path, Base::toCtor(std::forward<C>(ctor)),
-                Base::toDtor(std::forward<D>(dtor)));
+                name, path, Base::toCtor(std::forward<C>(ctor)));
         }
 
-        template <typename C = typename Base::Ctor, typename D = typename Base::Dtor>
-        static typename Base::HandleType loadUnnamed(C &&ctor = {}, D &&dtor = {}, T *loader = nullptr)
+        template <typename C>
+        static Threading::TaskFuture<bool> loadUnnamed(typename Base::PtrType &ptr, C &&ctor, T *loader = nullptr)
         {
             if (!loader)
                 loader = &Base::getSingleton();
-            return loader->loadUnnamedVImpl(
-                Base::toMutableCtor(std::forward<C>(ctor)),
-                Base::toMutableDtor(std::forward<D>(dtor)));
+
+            return loader->queueLoading(loadUnnamedTask(ptr, std::forward<C>(ctor), loader));
+        }
+
+        template <typename C = typename Base::Ctor>
+        static Threading::Task<bool> loadUnnamedTask(typename Base::PtrType &ptr, C &&ctor, T *loader = nullptr)
+        {
+            if (!loader)
+                loader = &Base::getSingleton();
+            ptr = loader->createUnnamedVImpl();
+            return Threading::make_task(std::forward<C>(ctor), (T*)loader, *ptr);
         }
 
         static typename Base::Data *getDataPtr(const typename Base::HandleType &handle, T *loader = nullptr, bool verified = true)
@@ -618,11 +642,12 @@ namespace Resources {
             return result;
         }
 
-        virtual typename Base::HandleType loadManualVImpl(std::string_view name, const Filesystem::Path &path = {}, typename Base::Ctor ctor = {}, typename Base::Dtor dtor = {}) = 0;
-        virtual typename Base::HandleType loadUnnamedVImpl(typename Base::Ctor ctor = {}, typename Base::Dtor dtor = {}) = 0;
+        virtual typename Base::HandleType loadManualVImpl(std::string_view name, const Filesystem::Path &path = {}, typename Base::Ctor ctor = {}) = 0;
+        virtual typename Base::PtrType createUnnamedVImpl() = 0;
         virtual typename Base::HandleType loadVImpl(std::string_view name) = 0;
         virtual typename Base::HandleType loadVImpl(typename Base::ResourceType *resource) = 0;
         virtual Threading::TaskFuture<void> unloadVImpl(typename Base::ResourceType *resource) = 0;
+        virtual void unloadVImpl(std::unique_ptr<_Data> ptr) = 0;
         virtual void resetHandleVImpl(const typename Base::HandleType &handle) = 0;
         virtual typename Base::Data *getDataPtrVImpl(const typename Base::HandleType &handle, bool verified) = 0;
         virtual typename Base::ResourceDataInfo *getInfoVImpl(const typename Base::HandleType &handle) = 0;
@@ -638,13 +663,13 @@ namespace Resources {
 
         using Self::Self;
 
-        virtual typename Base::OriginalHandleType loadManualVImpl(std::string_view name, const Filesystem::Path &path = {}, typename Base::Ctor ctor = {}, typename Base::Dtor dtor = {}) override
+        virtual typename Base::OriginalHandleType loadManualVImpl(std::string_view name, const Filesystem::Path &path = {}, typename Base::Ctor ctor = {}) override
         {
-            return Self::loadManual(name, path, std::move(ctor), std::move(dtor), static_cast<T *>(this));
+            return Self::loadManual(name, path, std::move(ctor), static_cast<T *>(this));
         }
-        virtual typename Base::OriginalHandleType loadUnnamedVImpl(typename Base::Ctor ctor = {}, typename Base::Dtor dtor = {}) override
+        virtual typename Base::OriginalPtrType createUnnamedVImpl() override
         {
-            return Self::loadUnnamed(std::move(ctor), std::move(dtor), static_cast<T *>(this));
+            return Self::createUnnamed();
         }
         virtual typename Base::OriginalHandleType loadVImpl(std::string_view name) override
         {
@@ -657,6 +682,10 @@ namespace Resources {
         virtual Threading::TaskFuture<void> unloadVImpl(typename Base::ResourceType *resource) override
         {
             return Self::unload(static_cast<typename Self::ResourceType *>(resource), static_cast<T *>(this));
+        }
+        virtual void unloadVImpl(std::unique_ptr<typename Base::Data> data) override
+        {
+            return Self::unload(std::unique_ptr<Data> { static_cast<Data*>(data.release()) });
         }
         virtual void resetHandleVImpl(const typename Base::OriginalHandleType &handle) override
         {

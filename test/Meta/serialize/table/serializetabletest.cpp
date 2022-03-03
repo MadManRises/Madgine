@@ -46,14 +46,17 @@ TEST(Serialize_Table, Test1)
     t1.i = 1;
     t1.s.j = 2;
 
+    stream1.beginMessageWrite();
     serializeTable<TestStruct>().writeState(&t1, stream1);
-    stream1.endMessage();
+    stream1.endMessageWrite();
     stream1.sendMessages();
 
     TestStruct t2;
 
-    stream2.isMessageAvailable();
+    auto msg = stream2.beginMessageRead();
+    ASSERT_TRUE(msg);
     HANDLE_STREAM_RESULT(serializeTable<TestStruct>().readState(&t2, stream2));
+    msg.end();
 
     ASSERT_EQ(t1.i, t2.i);
 }

@@ -215,8 +215,8 @@ namespace Serialize {
             ~_ResetOperation()
             {
                 if (this->mContainer.isSynced()) {
-                    ContainerEvent op = RESET;
-                    container().writeAction(&op, mAnswerTarget, mAnswerId);
+                    std::tuple<ContainerEvent, const_iterator> data { RESET, container().end() };
+                    container().writeAction(&data, mAnswerTarget, mAnswerId);
                 }
             }
 

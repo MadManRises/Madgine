@@ -32,12 +32,12 @@ namespace Render {
         throw 0;
     }
 
-    void OpenGLProgramLoader::unloadImpl(OpenGLProgram &program, ResourceDataInfo &info)
+    void OpenGLProgramLoader::unloadImpl(OpenGLProgram &program)
     {
         program.reset();
     }
 
-    Threading::Task<bool> OpenGLProgramLoader::create(Program &_program, const std::string &name, const std::vector<size_t> &bufferSizes, size_t instanceDataSize)
+    Threading::Task<bool> OpenGLProgramLoader::create(Program &_program, std::string name, std::vector<size_t> bufferSizes, size_t instanceDataSize)
     {
         OpenGLProgram &program = static_cast<OpenGLProgram &>(_program);
 

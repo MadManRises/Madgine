@@ -25,7 +25,7 @@ namespace Render {
 
 
         bool loadImpl(DirectX12PixelShader &shader, ResourceDataInfo &info);
-        void unloadImpl(DirectX12PixelShader &shader, ResourceDataInfo &info);
+        void unloadImpl(DirectX12PixelShader &shader);
 
         bool create(DirectX12PixelShader &shader, ResourceType *res, const CodeGen::ShaderFile &file);
 

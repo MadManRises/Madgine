@@ -23,7 +23,7 @@ namespace Render {
         AnimationLoader();
 
         bool loadImpl(AnimationList &data, ResourceDataInfo &info);
-        void unloadImpl(AnimationList &data, ResourceDataInfo &info);
+        void unloadImpl(AnimationList &data);
 
     };
 

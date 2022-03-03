@@ -90,34 +90,6 @@ namespace Serialize {
             return mData;
         }
 
-        void setDataSynced(bool b)
-        {
-            UnitHelper<T>::setItemDataSynced(mData, b);
-        }
-
-        void setActive(bool active, bool existenceChanged)
-        {
-            if (!active) {
-                if (mData != T {})
-                    Observer::operator()(T {}, mData);
-            }
-            UnitHelper<T>::setItemActive(mData, active, existenceChanged);
-            if (active) {
-                if (mData != T {})
-                    Observer::operator()(mData, T {});
-            }
-        }
-
-        StreamResult applySerializableMap(FormattedSerializeStream &in, bool success)
-        {
-            return UnitHelper<T>::applyMap(in, mData, success);
-        }
-
-        void setParent(SerializableUnitBase *parent)
-        {
-            UnitHelper<T>::setItemParent(mData, parent);
-        }
-
     protected:
         void notify(const T &old, ParticipantId answerTarget = 0, TransactionId answerId = 0)
         {

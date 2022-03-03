@@ -172,7 +172,7 @@ namespace Tools {
             if (renderHovered && mHoveredId) {
                 ImGui::BeginTooltip();
                 for (Debug::TraceBack& tb : hoveredTraceback.calculateReadable()) {
-                    ImGui::Text(tb.mFunction);
+                    ImGui::Text("%s", tb.mFunction);
                 }
                 ImGui::EndTooltip();
             }

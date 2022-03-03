@@ -10,7 +10,7 @@ struct last {
 };
 
 template <typename U, typename V, typename... T>
-struct last<U, V, T...> : public last<V, T...> {
+struct last<U, V, T...> : last<V, T...> {
 };
 
 template <typename V, typename...>

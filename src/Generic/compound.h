@@ -16,7 +16,7 @@ struct Compound : Ty... {
     }
 
     template <typename T>
-    static const constexpr bool holds = type_pack_contains_v<type_pack<Ty...>, T>;
+    static const constexpr bool holds = type_pack<Ty...>::template contains<T>;
 };
 
 }

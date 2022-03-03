@@ -35,14 +35,13 @@ namespace Scripting {
             PyVarObject_HEAD_INIT(NULL, 0)
                 .tp_name
             = "Environment.BoundApiFunction",
-            .tp_doc = "Python implementation of BoundApiFunction",
             .tp_basicsize = sizeof(PyBoundApiFunction),
             .tp_itemsize = 0,
-            .tp_flags = Py_TPFLAGS_DEFAULT,
-            .tp_new = PyType_GenericNew,
-            //.tp_init = &PyInit<&PyBoundApiFunction::mFunction>,
             .tp_dealloc = &PyDealloc<PyBoundApiFunction, &PyBoundApiFunction::mFunction>,
             .tp_call = (ternaryfunc)PyBoundApiFunction_call,
+            .tp_flags = Py_TPFLAGS_DEFAULT,
+            .tp_doc = "Python implementation of BoundApiFunction",
+            .tp_new = PyType_GenericNew,            
         };
 
     }

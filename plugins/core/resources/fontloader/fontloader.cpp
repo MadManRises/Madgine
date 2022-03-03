@@ -17,6 +17,8 @@
 
 #include "Meta/math/vector3.h"
 
+#include "Meta/serialize/container/container_operations.h"
+
 #undef INFINITE
 #include "msdfgen.h"
 
@@ -118,7 +120,8 @@ namespace Render {
                                               << result);
                 co_return false;
             }
-            font.mTexture.create(TextureType_2D, FORMAT_RGBA8, font.mTextureSize, std::move(b));
+            if (!co_await font.mTexture.createTask(TextureType_2D, FORMAT_RGBA8, font.mTextureSize, std::move(b)))
+                co_return false;
         } else if (info.resource()->path().extension() == ".ttf") {
             LOG("Creating Cache for " << info.resource()->path());
 
@@ -244,7 +247,8 @@ namespace Render {
             FT_Done_Face(face);
             FT_Done_FreeType(ft);
 
-            font.mTexture.create(TextureType_2D, FORMAT_RGBA8, font.mTextureSize, { texBuffer.get(), 4 * byteSize });
+            if (!co_await font.mTexture.createTask(TextureType_2D, FORMAT_RGBA8, font.mTextureSize, { texBuffer.get(), 4 * byteSize }))
+                co_return false;
 
             Filesystem::FileManager cache("msdf_cache");
             Serialize::FormattedSerializeStream out = cache.openWrite(info.resource()->path().parentPath() / (std::string { info.resource()->name() } + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
@@ -261,9 +265,14 @@ namespace Render {
         co_return true;
     }
 
-    void FontLoader::unloadImpl(Font &font, ResourceDataInfo &info)
+    void FontLoader::unloadImpl(Font &font)
     {
         font.mTexture.reset();
+    }
+
+    Threading::TaskQueue *FontLoader::loadingTaskQueue() const
+    {
+        return TextureLoader::getSingleton().loadingTaskQueue();
     }
 
 }

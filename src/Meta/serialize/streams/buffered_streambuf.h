@@ -14,10 +14,12 @@ namespace Serialize {
         buffered_streambuf(buffered_streambuf &&) = delete;
 
         virtual ~buffered_streambuf();
+        
+        void beginMessageWrite();
+        void endMessageWrite();
 
-        //write
-        void beginMessage();
-        void endMessage();
+        bool beginMessageRead();
+        void endMessageRead();
 
     protected:
 

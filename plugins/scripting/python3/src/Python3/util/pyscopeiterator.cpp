@@ -33,15 +33,14 @@ namespace Scripting {
             PyVarObject_HEAD_INIT(NULL, 0)
                 .tp_name
             = "Environment.ScopeIterator",
-            .tp_doc = "Python implementation of ScopeIterator",
             .tp_basicsize = sizeof(PyScopeIterator),
             .tp_itemsize = 0,
-            .tp_flags = Py_TPFLAGS_DEFAULT,
-            .tp_new = PyType_GenericNew,
-            //.tp_init = &PyInit<&PyScopeIterator::mIt>,
             .tp_dealloc = &PyDealloc<PyScopeIterator, &PyScopeIterator::mIt>,
+            .tp_flags = Py_TPFLAGS_DEFAULT,
+            .tp_doc = "Python implementation of ScopeIterator",
             .tp_iter = (getiterfunc)PyScopeIterator_iter,
             .tp_iternext = (iternextfunc)PyScopeIterator_next,
+            .tp_new = PyType_GenericNew,
         };
 
     }

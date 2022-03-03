@@ -38,11 +38,13 @@ namespace Threading {
         Debug::Threading::onResume(*this);
         TaskQueue *q = queue();
 #endif
-        mHandle.resume();
+        //Reset mHandle to allow exception handling
+        std::coroutine_handle<TaskPromiseTypeBase> handle = mHandle;
+        mHandle = {};
+        handle.resume();
 #if MODULES_ENABLE_TASK_TRACKING
         Debug::Threading::onSuspend(q);
-#endif
-        mHandle = {};
+#endif        
     }
 
     void TaskHandle::resumeInQueue()

@@ -67,15 +67,15 @@ namespace Serialize {
     StreamResult Formatter::read(std::string &s)
     {
         if (mBinary) {
-            mStream.read(s);
+            return mStream.read(s);
         } else if (mNextStringDelimiter) {
             STREAM_PROPAGATE_ERROR(mStream.readUntil(s, mNextStringDelimiter));
             s.resize(s.size() - 1);
             mNextStringDelimiter = nullptr;
+            return {};
         } else {
-            mStream >> s;
-        }
-        return {};
+            return mStream >> s;
+        }        
     }
 
     StreamResult Formatter::read(ByteBuffer &b)

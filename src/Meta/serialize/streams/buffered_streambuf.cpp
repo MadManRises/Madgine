@@ -91,13 +91,13 @@ namespace Serialize {
 
     
 
-    void buffered_streambuf::beginMessage()
+    void buffered_streambuf::beginMessageWrite()
     {
         assert(pptr() == pbase());
         assert(pptr() == nullptr);
     }
 
-    void buffered_streambuf::endMessage()
+    void buffered_streambuf::endMessageWrite()
     {
         BufferedSendMessage &msg = mBufferedSendMsgs.emplace_back();
         BufferedMessageHeader *header = reinterpret_cast<BufferedMessageHeader*>(mSendBuffer.data());
@@ -106,6 +106,19 @@ namespace Serialize {
         mSendBuffer.shrink_to_fit();
         mSendBuffer.swap(msg.mData);
         setp(nullptr, nullptr);
+    }
+
+    bool buffered_streambuf::beginMessageRead()
+    {
+        receiveMessages();
+        return egptr() != eback();
+    }
+
+    void buffered_streambuf::endMessageRead()
+    {
+        const char *current = gptr();
+        const char *end = egptr();        
+        assert(current == end);
     }
 
     std::streamsize buffered_streambuf::sendMessages()
@@ -136,8 +149,9 @@ namespace Serialize {
         int readCount = 0;
         if (!mRecBuffer.empty() && mBytesToRead == 0) {
             if (gptr() != egptr()) {
-                throw 0; //LOG_WARNING("Message not fully read! (" << manager()->name() << ")");
+                printf("Message not fully read!");
             }
+            setg(nullptr, nullptr, nullptr);
             mRecBuffer.clear();
             mBytesToRead = sizeof mReceiveMessageHeader;
         }
@@ -146,7 +160,7 @@ namespace Serialize {
             std::streamsize avail = mBuffer->in_avail();
             if (avail < 0) {
                 return avail;
-            } else {
+            } else if (avail > 0) {
                 if (avail > mBytesToRead) {
                     avail = mBytesToRead;
                 }
@@ -168,7 +182,7 @@ namespace Serialize {
             std::streamsize avail = mBuffer->in_avail();
             if (avail < 0) {
                 return avail;
-            } else {
+            } else if (avail > 0) {
                 if (avail > mBytesToRead) {
                     avail = mBytesToRead;
                 }

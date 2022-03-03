@@ -14,7 +14,7 @@ namespace Serialize {
             if constexpr (std::derived_from<T, TopLevelUnitBase>)
                 this->sync();
             else
-                UnitHelper<T>::setItemActive(*this, true, true);
+                setActive(*this, true, true);
         }
 
         ~NoParentUnit()
@@ -22,7 +22,7 @@ namespace Serialize {
             if constexpr (std::derived_from<T, TopLevelUnitBase>)
                 this->unsync();
             else
-                UnitHelper<T>::setItemActive(*this, false, true);
+                setActive(*this, false, true);
         }
     };
 }

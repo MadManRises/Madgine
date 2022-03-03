@@ -58,7 +58,7 @@ namespace Render {
     void DirectX11PixelShaderLoader::HandleType::create(const std::string &name, const CodeGen::ShaderFile &file, DirectX11PixelShaderLoader *loader)
     {
         *this = DirectX11PixelShaderLoader::loadManual(
-            name, {}, [=, &file](DirectX11PixelShaderLoader *loader, DirectX11PixelShader &shader, const DirectX11PixelShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, {}, loader);
+            name, {}, [=, &file](DirectX11PixelShaderLoader *loader, DirectX11PixelShader &shader, const DirectX11PixelShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, loader);
     }
 
     bool DirectX11PixelShaderLoader::loadImpl(DirectX11PixelShader &shader, ResourceDataInfo &info)
@@ -68,7 +68,7 @@ namespace Render {
         return loadFromSource(shader, info.resource()->path().stem(), source);
     }
 
-    void DirectX11PixelShaderLoader::unloadImpl(DirectX11PixelShader &shader, ResourceDataInfo &info)
+    void DirectX11PixelShaderLoader::unloadImpl(DirectX11PixelShader &shader)
     {
         shader.reset();
     }

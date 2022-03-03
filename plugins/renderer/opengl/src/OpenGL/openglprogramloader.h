@@ -13,8 +13,8 @@ namespace Render {
         OpenGLProgramLoader();
 
         bool loadImpl(OpenGLProgram &program, ResourceDataInfo &info);
-        void unloadImpl(OpenGLProgram &program, ResourceDataInfo &info);
-        Threading::Task<bool> create(Program &program, const std::string &name, const std::vector<size_t> &bufferSizes = {}, size_t instanceDataSize = 0) override;
+        void unloadImpl(OpenGLProgram &program);
+        Threading::Task<bool> create(Program &program, std::string name, std::vector<size_t> bufferSizes = {}, size_t instanceDataSize = 0) override;
         bool create(Program &program, const std::string &name, const CodeGen::ShaderFile &file) override;
 
         virtual WritableByteBuffer mapParameters(Program &program, size_t index) override;

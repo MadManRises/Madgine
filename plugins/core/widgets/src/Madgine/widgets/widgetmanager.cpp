@@ -58,11 +58,11 @@ namespace Widgets {
 
     struct WidgetManager::WidgetManagerData {
 
-        Render::ProgramLoader::HandleType mProgram;
+        Render::ProgramLoader::PtrType mProgram;
         Render::GPUMeshLoader::HandleType mMesh;
 
         Resources::ImageLoader::HandleType mDefaultTexture;
-        Render::TextureLoader::HandleType mUIAtlasTexture;
+        Render::TextureLoader::PtrType mUIAtlasTexture;
         std::set<Resources::ImageLoader::HandleType> mImageLoadingTasks;
         Atlas2 mUIAtlas { { 2048, 2048 } };
         int mUIAtlasSize = 0;
@@ -468,8 +468,8 @@ namespace Widgets {
 
     void WidgetManager::render(Render::RenderTarget *target, size_t iteration)
     {
-        if (!mData->mProgram.available())
-            return;
+        /* if (!mData->mProgram.available())
+            return;*/
 
         target->pushAnnotation("WidgetManager");
 

@@ -26,8 +26,8 @@ namespace Threading {
         ~TaskQueue();
 
         void queueHandle(TaskHandle task, const std::vector<Threading::DataMutex *> &dependencies = {});
-        void queue_after(TaskHandle task, std::chrono::steady_clock::duration duration, const std::vector<Threading::DataMutex *> &dependencies = {});
-        void queue_for(TaskHandle task, std::chrono::steady_clock::time_point time_point, const std::vector<Threading::DataMutex *> &dependencies = {});
+        void queueHandle_after(TaskHandle task, std::chrono::steady_clock::duration duration, const std::vector<Threading::DataMutex *> &dependencies = {});
+        void queueHandle_for(TaskHandle task, std::chrono::steady_clock::time_point time_point, const std::vector<Threading::DataMutex *> &dependencies = {});
 
         template <typename T, typename I>
         void queueTask(Task<T, I> task)
@@ -36,11 +36,35 @@ namespace Threading {
             if (handle)
                 queueHandle(std::move(handle));
         }
+        template <typename T, typename I>
+        void queueTask_after(Task<T, I> task, std::chrono::steady_clock::duration duration)
+        {
+            auto handle = std::move(task).assign(this);
+            if (handle)
+                queueHandle_after(std::move(handle), duration);
+        }
+        template <typename T, typename I>
+        void queueTask_for(Task<T, I> task, std::chrono::steady_clock::time_point time_point)
+        {
+            auto handle = std::move(task).assign(this);
+            if (handle)
+                queueHandle_for(std::move(handle), time_point);
+        }
 
         template <typename F>
         void queue(F &&f)
         {
             queueTask(make_task(std::forward<F>(f)));
+        }
+        template <typename F>
+        void queue_after(F &&f, std::chrono::steady_clock::duration duration)
+        {
+            queueTask_after(make_task(std::forward<F>(f)), duration);
+        }
+        template <typename F>
+        void queue_for(F &&f, std::chrono::steady_clock::time_point time_point)
+        {
+            queueTask_for(make_task(std::forward<F>(f)), time_point);
         }
 
         void addRepeatedTask(std::function<void()> task, std::chrono::steady_clock::duration interval = std::chrono::steady_clock::duration::zero(), void *owner = nullptr);

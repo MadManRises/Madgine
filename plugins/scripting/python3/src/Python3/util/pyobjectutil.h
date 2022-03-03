@@ -4,17 +4,6 @@ namespace Engine {
 namespace Scripting {
     namespace Python3 {
 
-        /*template <typename T, typename V>
-        void PyInit(V(T::* p), PyObject* self) {
-            new (&((T *)(self)->*p)) V();
-        }
-
-        template <auto p>
-        int PyInit(PyObject* self, PyObject* args, PyObject* kwds) {
-            PyInit(p, self);
-            return 0;
-        }*/
-
         template <typename T, typename V>
         void PyDealloc(V(T::*p), PyObject *self)
         {

@@ -129,16 +129,16 @@ namespace Serialize {
         mType->setParent(unit());
     }
 
-    StreamResult SerializableDataPtr::applySerializableMap(FormattedSerializeStream &in, bool success) const
+    StreamResult SerializableDataPtr::applyMap(FormattedSerializeStream &in, bool success) const
     {
-        return mType->applySerializableMap(unit(), in, success);
+        return mType->applyMap(unit(), in, success);
     }
 
-    void SerializableUnitPtr::setDataSynced(bool b) const
+    void SerializableUnitPtr::setSynced(bool b) const
     {
         assert(unit()->mSynced != b);
         unit()->mSynced = b;
-        mType->setDataSynced(unit(), b);
+        mType->setSynced(unit(), b);
     }
 
     void SerializableUnitPtr::setActive(bool active, bool existenceChanged) const

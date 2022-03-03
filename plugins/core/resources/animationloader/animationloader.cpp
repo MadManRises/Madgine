@@ -114,7 +114,7 @@ METATABLE_END(Engine::Render::QuaternionKeyFrame)
             return true;
         }
 
-        void AnimationLoader::unloadImpl(AnimationList &data, ResourceDataInfo &info)
+        void AnimationLoader::unloadImpl(AnimationList &data)
         {
         }
 

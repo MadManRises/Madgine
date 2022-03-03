@@ -45,8 +45,8 @@ namespace Tools {
 
     void GridPass::render(Render::RenderTarget *target, size_t iteration)
     {
-        if (!mProgram.available())
-            return;
+        /* if (!mProgram.available())
+            return;*/
 
         target->pushAnnotation("Grid");
 

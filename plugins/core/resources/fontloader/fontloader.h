@@ -13,7 +13,9 @@ namespace Render {
         FontLoader();
 
 		Threading::Task<bool> loadImpl(Font &font, ResourceDataInfo &info);
-        void unloadImpl(Font &font, ResourceDataInfo &info);
+        void unloadImpl(Font &font);
+
+		virtual Threading::TaskQueue *loadingTaskQueue() const override;
     };
 
 }

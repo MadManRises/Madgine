@@ -63,9 +63,6 @@ namespace Serialize {
         template <typename T>
         friend struct Serializable;
 
-        DERIVE_FRIEND(setDataSynced);
-        DERIVE_FRIEND(setActive);
-        DERIVE_FRIEND(setParent);
         DERIVE_FRIEND(customUnitPtr);
 
         SerializableUnitPtr customUnitPtr();

@@ -14,7 +14,7 @@ namespace Render {
         MeshLoader();
 
         bool loadImpl(MeshData &data, ResourceDataInfo &info);
-        void unloadImpl(MeshData &data, ResourceDataInfo &info);
+        void unloadImpl(MeshData &data);
 
         
         

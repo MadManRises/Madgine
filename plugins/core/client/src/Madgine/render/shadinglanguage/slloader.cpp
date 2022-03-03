@@ -28,7 +28,7 @@ namespace Render {
         throw 0;
     }
 
-    void SlLoader::unloadImpl(SlFile &file, ResourceDataInfo &info)
+    void SlLoader::unloadImpl(SlFile &file)
     {
         throw 0;
     }

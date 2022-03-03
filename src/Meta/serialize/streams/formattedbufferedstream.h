@@ -13,10 +13,30 @@ namespace Serialize {
         FormattedBufferedStream(FormattedBufferedStream &&other) = default;
         FormattedBufferedStream(FormattedBufferedStream &&other, SyncManager *mgr);
 
-        void beginMessage();
-        void endMessage();
+        FormattedBufferedStream &operator=(FormattedBufferedStream &&) = default;
+
+        void beginMessageWrite();
+        void endMessageWrite();
         
-        bool isMessageAvailable();
+        struct META_EXPORT MessageReadMarker {
+            MessageReadMarker(Formatter *formatter = nullptr)
+                : mFormatter(formatter)
+            {
+            }
+            MessageReadMarker(MessageReadMarker &&other)
+                : mFormatter(std::exchange(other.mFormatter, nullptr))
+            {
+            }
+            ~MessageReadMarker();
+
+            void end();
+
+            explicit operator bool() const;
+
+            Formatter *mFormatter = nullptr;
+        };
+
+        MessageReadMarker beginMessageRead();
 
         FormattedBufferedStream &sendMessages();
 

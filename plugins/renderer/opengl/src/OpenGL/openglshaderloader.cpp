@@ -43,7 +43,7 @@ namespace Render {
         }
 
         *this = OpenGLShaderLoader::loadManual(
-            name, {}, [=, &file](OpenGLShaderLoader *loader, OpenGLShader &shader, OpenGLShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file, type); }, {}, loader);
+            name, {}, [=, &file](OpenGLShaderLoader *loader, OpenGLShader &shader, OpenGLShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file, type); }, loader);
     }
 
     Threading::TaskFuture<bool> OpenGLShaderLoader::HandleType::load(std::string name, ShaderType type, OpenGLShaderLoader *loader)
@@ -95,7 +95,7 @@ namespace Render {
         return loadFromSource(shader, filename, source, type, info.resource()->path());
     }
 
-    void OpenGLShaderLoader::unloadImpl(OpenGLShader &shader, ResourceDataInfo &info)
+    void OpenGLShaderLoader::unloadImpl(OpenGLShader &shader)
     {
         shader.reset();
     }

@@ -56,7 +56,7 @@ namespace Scripting {
             return true;
         }
 
-        void Python3FileLoader::unloadImpl(PyModulePtr &module, ResourceDataInfo &info)
+        void Python3FileLoader::unloadImpl(PyModulePtr &module)
         {
             Python3Lock lock;
             module.reset();

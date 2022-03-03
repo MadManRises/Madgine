@@ -21,12 +21,12 @@ namespace Network {
         void operator=(const NetworkManager &) = delete;
 
         NetworkManagerResult startServer(int port);
-        NetworkManagerResult connect(const std::string &url, int portNr, TimeOut timeout = {});
+        NetworkManagerResult connect(const std::string &url, int portNr, std::unique_ptr<Serialize::Formatter> (*format)(), TimeOut timeout = {});
 
         void close();
 
-        NetworkManagerResult acceptConnection(TimeOut timeout = {});
-        int acceptConnections(int limit = -1, TimeOut timeout = 0ms);
+        NetworkManagerResult acceptConnection(std::unique_ptr<Serialize::Formatter> (*format)(), TimeOut timeout = {});
+        int acceptConnections(std::unique_ptr<Serialize::Formatter> (*format)(), int limit = -1, TimeOut timeout = 0ms);
 
         bool isConnected() const;
         bool isServer() const;

@@ -13,7 +13,7 @@
 namespace Engine {
 namespace Serialize {
 
-    StreamResult Operations<ValueType>::read(FormattedSerializeStream &in, ValueType &v, const char *name)
+    StreamResult Operations<ValueType>::read(FormattedSerializeStream &in, ValueType &v, const char *name, const CallerHierarchyBasePtr &hierarchy)
     {
         STREAM_PROPAGATE_ERROR(in.beginExtendedRead(name, 1));
         ValueTypeEnum type;
@@ -28,7 +28,7 @@ namespace Serialize {
         });
     }
 
-    void Operations<ValueType>::write(FormattedSerializeStream &out, const ValueType &v, const char *name)
+    void Operations<ValueType>::write(FormattedSerializeStream &out, const ValueType &v, const char *name, const CallerHierarchyBasePtr &hierarchy)    
     {
         out.beginExtendedWrite(name, 1);
         Serialize::write(out, v.index().mIndex, "type");

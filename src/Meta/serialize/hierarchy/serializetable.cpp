@@ -1,7 +1,7 @@
 #include "../../metalib.h"
 
-#include "serializetable.h"
 #include "serializer.h"
+#include "serializetable.h"
 
 #include "statetransmissionflags.h"
 
@@ -13,6 +13,8 @@
 
 #include "Generic/offsetptr.h"
 
+#include "../streams/comparestreamid.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -20,8 +22,8 @@ namespace Serialize {
     {
         const SerializeTable *table = this;
         while (table) {
-            for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                it->second.mWriteState(unit, out, it->second.mFieldName, hierarchy);
+            for (const Serializer *it = table->mFields; it->mFieldName; ++it) {
+                it->mWriteState(unit, out, it->mFieldName, hierarchy);
             }
             table = table->mBaseType ? &table->mBaseType() : nullptr;
         }
@@ -42,9 +44,9 @@ namespace Serialize {
                     bool found = false;
                     const SerializeTable *table = this;
                     while (table && !found) {
-                        for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                            if (name == it->second.mFieldName) {
-                                STREAM_PROPAGATE_ERROR(it->second.mReadState(unit, in, it->second.mFieldName, hierarchy));
+                        for (const Serializer *it = table->mFields; it->mFieldName; ++it) {
+                            if (name == it->mFieldName) {
+                                STREAM_PROPAGATE_ERROR(it->mReadState(unit, in, it->mFieldName, hierarchy));
                                 found = true;
                                 break;
                             }
@@ -58,8 +60,8 @@ namespace Serialize {
             } else {
                 const SerializeTable *table = this;
                 while (table) {
-                    for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                        STREAM_PROPAGATE_ERROR(it->second.mReadState(unit, in, it->second.mFieldName, hierarchy));
+                    for (const Serializer *it = table->mFields; it->mFieldName; ++it) {
+                        STREAM_PROPAGATE_ERROR(it->mReadState(unit, in, it->mFieldName, hierarchy));
                     }
                     table = table->mBaseType ? &table->mBaseType() : nullptr;
                 }
@@ -69,7 +71,7 @@ namespace Serialize {
 
         if (flags & StateTransmissionFlags_ApplyMap) {
             assert(in.manager());
-            STREAM_PROPAGATE_ERROR(applySerializableMap(unit, in, result.mState == StreamState::OK));
+            STREAM_PROPAGATE_ERROR(applyMap(unit, in, result.mState == StreamState::OK));
         }
 
         if (activation) {
@@ -99,36 +101,34 @@ namespace Serialize {
     {
         uint8_t index;
         STREAM_PROPAGATE_ERROR(read(in, index, "index"));
-        STREAM_PROPAGATE_ERROR(in.endHeaderRead());
         return get(index).mReadAction(unit, in, request);
     }
 
     StreamResult SerializeTable::readRequest(SerializableUnitBase *unit, FormattedBufferedStream &inout, TransactionId id) const
     {
         uint8_t index;
-        STREAM_PROPAGATE_ERROR(read(inout, index, "index"));
-        STREAM_PROPAGATE_ERROR(inout.endHeaderRead());
+        STREAM_PROPAGATE_ERROR(read(inout, index, "index"));        
         return get(index).mReadRequest(unit, inout, id);
     }
 
-    StreamResult SerializeTable::applySerializableMap(SerializableDataUnit *unit, FormattedSerializeStream &in, bool success) const
+    StreamResult SerializeTable::applyMap(SerializableDataUnit *unit, FormattedSerializeStream &in, bool success) const
     {
         const SerializeTable *table = this;
         while (table) {
-            for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                STREAM_PROPAGATE_ERROR(it->second.mApplySerializableMap(unit, in, success));
+            for (const Serializer *it = table->mFields; it->mFieldName; ++it) {
+                STREAM_PROPAGATE_ERROR(it->mApplySerializableMap(unit, in, success));
             }
             table = table->mBaseType ? &table->mBaseType() : nullptr;
         }
         return {};
     }
 
-    void SerializeTable::setDataSynced(SerializableUnitBase *unit, bool b) const
+    void SerializeTable::setSynced(SerializableUnitBase *unit, bool b) const
     {
         const SerializeTable *table = this;
         while (table) {
-            for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                it->second.mSetDataSynced(unit, b);
+            for (const Serializer *it = table->mFields; it->mFieldName; ++it) {
+                it->mSetDataSynced(unit, b);
             }
             table = table->mBaseType ? &table->mBaseType() : nullptr;
         }
@@ -142,8 +142,8 @@ namespace Serialize {
         //TODO: Start with base
         const SerializeTable *table = this;
         while (table) {
-            for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                it->second.mSetActive(unit, active, existenceChanged);
+            for (const Serializer *it = table->mFields; it->mFieldName; ++it) {
+                it->mSetActive(unit, active, existenceChanged);
             }
             table = table->mBaseType ? &table->mBaseType() : nullptr;
         }
@@ -161,14 +161,14 @@ namespace Serialize {
         //TODO: Start with base
         const SerializeTable *table = this;
         while (table) {
-            for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
+            for (const Serializer *it = table->mFields; it->mFieldName; ++it) {
                 if (active)
                     ++unit->mActiveIndex;
                 else {
                     assert(unit->mActiveIndex > 0);
                     --unit->mActiveIndex;
                 }
-                it->second.mSetActive(unit, active, existenceChanged);
+                it->mSetActive(unit, active, existenceChanged);
             }
             table = table->mBaseType ? &table->mBaseType() : nullptr;
         }
@@ -182,8 +182,8 @@ namespace Serialize {
     {
         const SerializeTable *table = this;
         while (table) {
-            for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                it->second.mSetParent(unit);
+            for (const Serializer *it = table->mFields; it->mFieldName; ++it) {
+                it->mSetParent(unit);
             }
             table = table->mBaseType ? &table->mBaseType() : nullptr;
         }
@@ -191,11 +191,15 @@ namespace Serialize {
 
     void SerializeTable::writeAction(const SerializableUnitBase *parent, uint8_t index, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, const void *data) const
     {
+        for (FormattedBufferedStream &out : outStreams) {
+            write(out, index, "index");
+        }
         get(index).mWriteAction(parent, outStreams, data);
     }
 
     void SerializeTable::writeRequest(const SerializableUnitBase *parent, uint8_t index, FormattedBufferedStream &out, const void *data) const
     {
+        write(out, index, "index");
         get(index).mWriteRequest(parent, out, data);
     }
 
@@ -212,8 +216,8 @@ namespace Serialize {
 
         while (!tables.empty()) {
             table = tables.top();
-            for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
-                if (it->second.mOffset() == offset) {
+            for (const Serializer *it = table->mFields; it->mFieldName; ++it) {
+                if (it->mOffset() == offset) {
                     return index;
                 }
                 ++index;
@@ -236,9 +240,9 @@ namespace Serialize {
 
         while (!tables.empty()) {
             table = tables.top();
-            for (const std::pair<const char *, Serializer> *it = table->mFields; it->first; ++it) {
+            for (const Serializer *it = table->mFields; it->mFieldName; ++it) {
                 if (index == 0) {
-                    return it->second;
+                    return *it;
                 }
                 --index;
             }

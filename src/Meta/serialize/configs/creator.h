@@ -195,52 +195,55 @@ namespace Serialize {
 
             using ArgsTuple = std::tuple<MakeOwning_t<std::remove_const_t<std::remove_reference_t<_Ty>>>...>;
 
-            static StreamResult readCreationData(FormattedSerializeStream &in, ArgsTuple &result, const CallerHierarchy<T *> &parent)
+            static StreamResult readCreationData(FormattedSerializeStream &in, ArgsTuple &result, const CallerHierarchyBasePtr &hierarchy)
             {
-                assert(parent.mData);
+                T *parent = hierarchy;
+                assert(parent);
                 if constexpr (std::same_as<R, void>) {
-                    TupleUnpacker::invokeExpand(reader, parent.mData, in, result);
+                    TupleUnpacker::invokeExpand(reader, parent, in, result);
                     return {};
                 } else {
-                    return TupleUnpacker::invokeExpand(reader, parent.mData, in, result);
+                    return TupleUnpacker::invokeExpand(reader, parent, in, result);
                 }
             }
 
             template <typename Op>
-            static StreamResult readItem(FormattedSerializeStream &in, Op &op, typename container_traits<Op>::emplace_return &it, const typename container_traits<Op>::const_iterator &where, const CallerHierarchy<T *> &parent)
+            static StreamResult readItem(FormattedSerializeStream &in, Op &op, typename container_traits<Op>::emplace_return &it, const typename container_traits<Op>::const_iterator &where, const CallerHierarchyBasePtr &hierarchy)
             {
                 ArgsTuple tuple;
-                STREAM_PROPAGATE_ERROR(readCreationData(in, tuple, parent));
+                STREAM_PROPAGATE_ERROR(readCreationData(in, tuple, hierarchy));
                 if constexpr (std::is_const_v<typename container_traits<Op>::value_type>) {
                     std::remove_const_t<typename container_traits<Op>::value_type> temp = TupleUnpacker::constructFromTuple<std::remove_const_t<typename container_traits<Op>::value_type>>(std::move(*tuple));
-                    STREAM_PROPAGATE_ERROR(read(in, temp, nullptr, CallerHierarchyPtr { parent }));
+                    STREAM_PROPAGATE_ERROR(read(in, temp, nullptr, hierarchy));
                     it = container_traits<Op>::emplace(op, where, std::move(temp));
                 } else {
                     it = TupleUnpacker::invokeFlatten(LIFT(container_traits<Op>::emplace), op, where, std::move(tuple));
-                    STREAM_PROPAGATE_ERROR(read(in, *it, nullptr, CallerHierarchyPtr { parent }));
+                    STREAM_PROPAGATE_ERROR(read(in, *it, nullptr, hierarchy));
                 }
                 assert(container_traits<Op>::was_emplace_successful(it));
                 return {};
             }
 
             template <typename Arg>
-            static void writeCreationData(FormattedSerializeStream &out, const Arg &arg, const CallerHierarchy<const T *> &parent)
+            static void writeCreationData(FormattedSerializeStream &out, const Arg &arg, const CallerHierarchyBasePtr &hierarchy)
             {
-                assert(parent.mData);
-                WriteFunctor {}(parent.mData, out, arg);
+                const T *parent = hierarchy;
+                assert(parent);
+                WriteFunctor {}(parent, out, arg);
             }
 
             template <typename C>
-            static void writeItem(FormattedSerializeStream &out, const typename container_traits<C>::value_type &arg, const CallerHierarchy<const T *> &parent)
+            static void writeItem(FormattedSerializeStream &out, const typename container_traits<C>::value_type &arg, const CallerHierarchyBasePtr &hierarchy)
             {
-                writeCreationData<typename container_traits<C>::value_type>(out, arg, parent);
-                write<typename container_traits<C>::value_type>(out, arg, "Item", CallerHierarchyPtr { parent });
+                writeCreationData<typename container_traits<C>::value_type>(out, arg, hierarchy);
+                write<typename container_traits<C>::value_type>(out, arg, "Item", hierarchy);
             }
 
             template <typename Op>
-            static void clear(Op &op, const CallerHierarchy<T *> &parent)
+            static void clear(Op &op, const CallerHierarchyBasePtr &hierarchy)
             {
-                ClearFunctor {}(parent.mData, op);
+                T *parent = hierarchy;
+                ClearFunctor {}(parent, op);
             }
         };
 

@@ -34,12 +34,12 @@ namespace Render {
         throw 0;
     }
 
-    void DirectX11ProgramLoader::unloadImpl(DirectX11Program &program, ResourceDataInfo &info)
+    void DirectX11ProgramLoader::unloadImpl(DirectX11Program &program)
     {
         program.reset();
     }
 
-    Threading::Task<bool> DirectX11ProgramLoader::create(Program &_program, const std::string &name, const std::vector<size_t> &bufferSizes, size_t instanceDataSize)
+    Threading::Task<bool> DirectX11ProgramLoader::create(Program &_program, std::string name, std::vector<size_t> bufferSizes, size_t instanceDataSize)
     {
         DirectX11Program &program = static_cast<DirectX11Program &>(_program);
 

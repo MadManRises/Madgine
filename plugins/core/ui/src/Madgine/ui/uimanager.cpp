@@ -16,6 +16,7 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
+
 UNIQUECOMPONENT(Engine::UI::UIManager)
 
 METATABLE_BEGIN(Engine::UI::UIManager)

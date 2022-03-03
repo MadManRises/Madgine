@@ -6,6 +6,7 @@
 #include "Generic/memberoffsetptr.h"
 #include "Generic/container/container_api.h"
 #include "Generic/functor.h"
+#include "Generic/container/containerevent.h"
 
 namespace Engine {
 namespace Serialize {
@@ -28,10 +29,6 @@ namespace Serialize {
         typedef typename _traits::position_handle position_handle;
 
         typedef typename _traits::value_type value_type;
-
-    protected:
-        typedef UnitHelper<C> ContainerUnitHelper;
-        typedef UnitHelper<value_type> ItemUnitHelper;
 
     public:
         SerializableContainerImpl()
@@ -60,7 +57,7 @@ namespace Serialize {
             : Base(std::move(other))
             , mActiveIterator(hasEndIterator ? _traits::toPositionHandle(*this, Base::end()) : std::move(other.mActiveIterator))
         {
-            ContainerUnitHelper::setItemParent(*this, OffsetPtr::parent(this));
+            setParent(*this, OffsetPtr::parent(this));
             other.Base::clear();
             other.mActiveIterator = _traits::toPositionHandle(other, other.Base::begin());
         }
@@ -76,7 +73,7 @@ namespace Serialize {
             bool hasEndIterator = other.mActiveIterator == _traits::toPositionHandle(other, other.Base::end());
             Base::operator=(std::move(other));
             mActiveIterator = hasEndIterator ? _traits::toPositionHandle(*this, Base::end()) : std::move(other.mActiveIterator);
-            ContainerUnitHelper::setItemParent(*this, OffsetPtr::parent(this));
+            setParent(*this, OffsetPtr::parent(this));
             other.Base::clear();
             other.mActiveIterator = _traits::toPositionHandle(other, other.Base::begin());
             return *this;
@@ -183,7 +180,7 @@ namespace Serialize {
                         Observer::operator()(it, AFTER | EMPLACE);
                     }
                     Observer::operator()(it, BEFORE | ACTIVATE_ITEM);
-                    ItemUnitHelper::setItemActive(*it, active, existenceChange || !controlled::value);
+                    Serialize::setActive(*it, active, existenceChange || !controlled::value);
                     Observer::operator()(it, AFTER | ACTIVATE_ITEM);
                 }
             } else {
@@ -191,7 +188,7 @@ namespace Serialize {
                     mActiveIterator = _traits::prev(*this, mActiveIterator);
                     iterator it = _traits::toIterator(*this, mActiveIterator);
                     Observer::operator()(it, BEFORE | DEACTIVATE_ITEM);
-                    ItemUnitHelper::setItemActive(*it, active, existenceChange || !controlled::value);
+                    Serialize::setActive(*it, active, existenceChange || !controlled::value);
                     Observer::operator()(it, AFTER | DEACTIVATE_ITEM);
                     if (existenceChange) {
                         Observer::operator()(it, BEFORE | ERASE);
@@ -264,13 +261,13 @@ namespace Serialize {
                 }
                 if (mInserted) {
                     if (this->mContainer.isSynced())
-                        ItemUnitHelper::setItemDataSynced(*mIt, true);
+                        setSynced(*mIt, true);
                 }
                 if (this->mContainer.isItemActive(mIt)) {
                     this->mContainer.Observer::operator()(mIt, (mInserted ? AFTER : ABORTED) | EMPLACE);
                     if (mInserted) {
                         this->mContainer.Observer::operator()(mIt, BEFORE | ACTIVATE_ITEM);
-                        ItemUnitHelper::setItemActive(*mIt, true, true);
+                        Serialize::setActive(*mIt, true, true);
                         this->mContainer.Observer::operator()(mIt, AFTER | ACTIVATE_ITEM);
                     }
                 }
@@ -322,13 +319,13 @@ namespace Serialize {
                     bool inserted = std::get<1>(handle);
                     if (inserted) {
                         if (this->mContainer.isSynced())
-                            ItemUnitHelper::setItemDataSynced(*it, true);
+                            Serialize::setSynced(*it, true);
                     }
                     if (this->mContainer.isItemActive(it)) {
                         this->mContainer.Observer::operator()(it, (inserted ? AFTER : ABORTED) | EMPLACE);
                         if (inserted) {
                             this->mContainer.Observer::operator()(it, BEFORE | ACTIVATE_ITEM);
-                            ItemUnitHelper::setItemActive(*it, true, true);
+                            Serialize::setActive(*it, true, true);
                             this->mContainer.Observer::operator()(it, AFTER | ACTIVATE_ITEM);
                         }
                     }
@@ -344,11 +341,11 @@ namespace Serialize {
                 : Operation(c)
             {
                 if (this->mContainer.isSynced()) {
-                    ItemUnitHelper::setItemDataSynced(*it, false);
+                    setSynced(*it, false);
                 }
                 if (this->mContainer.isItemActive(it)) {
                     this->mContainer.Observer::operator()(it, BEFORE | DEACTIVATE_ITEM);
-                    ItemUnitHelper::setItemActive(*it, false, true);
+                    Serialize::setActive(*it, false, true);
                     this->mContainer.Observer::operator()(it, AFTER | DEACTIVATE_ITEM);
                     this->mContainer.Observer::operator()(it, BEFORE | ERASE);
                     mWasActive = true;
@@ -383,12 +380,12 @@ namespace Serialize {
             {
                 if (this->mContainer.isSynced()) {
                     for (iterator it = from; it != to; ++it) {
-                        ItemUnitHelper::setItemDataSynced(*it, false);
+                        Serialize::setSynced(*it, false);
                     }
                 }
                 for (iterator it = from; it != to && this->mContainer.isItemActive(it); ++it) {
                     this->mContainer.Observer::operator()(it, BEFORE | DEACTIVATE_ITEM);
-                    ItemUnitHelper::setItemActive(*it, false, true);
+                    Serialize::setActive(*it, false, true);
                     this->mContainer.Observer::operator()(it, AFTER | DEACTIVATE_ITEM);
                     this->mContainer.Observer::operator()(it, BEFORE | ERASE);
                     ++mCount;
@@ -422,7 +419,7 @@ namespace Serialize {
                 : Operation(c)
             {
                 if (this->mContainer.isSynced()) {
-                    ContainerUnitHelper::setItemDataSynced(this->mContainer, false);
+                    setSynced(this->mContainer, false);
                 }
 
                 if (this->mContainer.isActive()) {
@@ -435,7 +432,7 @@ namespace Serialize {
             ~_ResetOperation()
             {
                 if (this->mContainer.isSynced()) {
-                    ContainerUnitHelper::setItemDataSynced(this->mContainer, true);
+                    setSynced(this->mContainer, true);
                 }
                 if (mWasActive) {
                     this->mContainer.setActive(true, !controlled::value);
@@ -486,7 +483,7 @@ namespace Serialize {
                 position_handle newHandle = _traits::toPositionHandle(*this, it);
                 if (_traits::next(*this, newHandle) == mActiveIterator && !this->isActive())
                     mActiveIterator = newHandle;
-                ItemUnitHelper::setItemParent(*it, OffsetPtr::parent(this));
+                setParent(*it, OffsetPtr::parent(this));
             }
             return it;
         }

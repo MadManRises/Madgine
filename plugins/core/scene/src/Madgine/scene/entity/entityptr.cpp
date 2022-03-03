@@ -24,7 +24,7 @@ namespace Scene {
                 return mBlock;
             }
 
-             operator SceneManager::ControlBlock *() const
+            operator SceneManager::ControlBlock *() const
             {
                 return mBlock;
             }
@@ -133,29 +133,6 @@ namespace Scene {
             return !holdsRef() || getBlock()->dead();
         }
 
-        Serialize::StreamResult EntityPtr::readState(Serialize::FormattedSerializeStream &in, const char *name)
-        {
-            Entity *ptr;
-            STREAM_PROPAGATE_ERROR(Serialize::read(in, ptr, name));
-            mEntity = reinterpret_cast<uintptr_t>(ptr);
-            return {};
-        }
-
-        void EntityPtr::writeState(Serialize::FormattedSerializeStream &out, const char *name) const
-        {
-            Serialize::write(out, get(), name);
-        }
-
-        Serialize::StreamResult EntityPtr::applySerializableMap(Serialize::FormattedSerializeStream &in, bool success)
-        {
-            if (mEntity & static_cast<uintptr_t>(Serialize::UnitIdTag::SYNCABLE)) {
-                Entity *ptr = reinterpret_cast<Entity *>(mEntity);
-                STREAM_PROPAGATE_ERROR(Serialize::UnitHelper<Entity *>::applyMap(in, ptr, success));
-                *this = ptr;
-            }
-            return { };
-        }
-
         bool EntityPtr::holdsRef() const
         {
             return mEntity & mask;
@@ -166,5 +143,31 @@ namespace Scene {
             return { reinterpret_cast<SceneManager::ControlBlock *>(mEntity & ~mask) };
         }
     }
+}
+namespace Serialize {
+
+    StreamResult Operations<Scene::Entity::EntityPtr>::read(Serialize::FormattedSerializeStream &in, Scene::Entity::EntityPtr &ptr, const char *name)
+    {
+        Scene::Entity::Entity *dummy;
+        STREAM_PROPAGATE_ERROR(Serialize::read(in, dummy, name));
+        ptr.mEntity = reinterpret_cast<uintptr_t>(dummy);
+        return {};
+    }
+
+    void Operations<Scene::Entity::EntityPtr>::write(FormattedSerializeStream &out, const Scene::Entity::EntityPtr &ptr, const char *name)
+    {
+        Serialize::write(out, ptr.get(), name);
+    }
+
+    StreamResult Operations<Scene::Entity::EntityPtr>::applyMap(Serialize::FormattedSerializeStream &in, Scene::Entity::EntityPtr &ptr, bool success)
+    {
+        if (ptr.mEntity & static_cast<uintptr_t>(UnitIdTag::SYNCABLE)) {
+            Scene::Entity::Entity *dummy = reinterpret_cast<Scene::Entity::Entity *>(ptr.mEntity);
+            STREAM_PROPAGATE_ERROR(Serialize::applyMap(in, dummy, success));
+            ptr = dummy;
+        }
+        return {};
+    }
+
 }
 }

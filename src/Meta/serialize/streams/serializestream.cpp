@@ -35,7 +35,8 @@ namespace Serialize {
 
     SerializeStream::~SerializeStream() = default;
 
-    SerializeStream& SerializeStream::operator=(SerializeStream&& other) {
+    SerializeStream &SerializeStream::operator=(SerializeStream &&other)
+    {
         Stream::operator=(std::move(other));
         std::swap(mData, other.mData);
         return *this;
@@ -44,9 +45,7 @@ namespace Serialize {
     StreamResult SerializeStream::read(void *buffer, size_t size)
     {
         Stream::read(buffer, size);
-        if (!*this)
-            return STREAM_PARSE_ERROR(*this, true, "Unexpected EOF");
-        return {};
+        return checkState("read");
     }
 
     StreamResult SerializeStream::readN(std::string &buffer, size_t n)
@@ -54,6 +53,7 @@ namespace Serialize {
         //assert(!format().mBinary);
 
         skipWs();
+        STREAM_PROPAGATE_ERROR(checkState("skipWs"));
 
         if (n == 0)
             return {};
@@ -67,6 +67,7 @@ namespace Serialize {
         //assert(!format().mBinary);
 
         skipWs();
+        STREAM_PROPAGATE_ERROR(checkState("skipWs"));
 
         buffer.resize(255);
         size_t i = 0;
@@ -275,6 +276,24 @@ namespace Serialize {
     SerializeStream &SerializeStream::operator<<(const std::monostate &)
     {
         return *this;
+    }
+
+    StreamResult SerializeStream::checkState(const char *op)
+    {
+        if (!*this) {
+            const char *msg;
+            if (state() & std::ios_base::badbit) {
+                msg = "Stream corrupt";
+            } else if (state() & std::ios_base::failbit) {
+                msg = "Operation failure";
+            } else if (state() & std::ios_base::eofbit) {
+                msg = "Unexpected EOF";
+            } else
+                throw 0;
+            return STREAM_PARSE_ERROR(*this, true, msg << " after " << op);
+        } else {
+            return {};
+        }
     }
 
 }

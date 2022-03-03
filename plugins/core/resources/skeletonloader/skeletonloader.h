@@ -23,7 +23,7 @@ namespace Render {
         SkeletonLoader();
 
         bool loadImpl(SkeletonDescriptor &data, ResourceDataInfo &info);
-        void unloadImpl(SkeletonDescriptor &data, ResourceDataInfo &info);
+        void unloadImpl(SkeletonDescriptor &data);
 
     };
 

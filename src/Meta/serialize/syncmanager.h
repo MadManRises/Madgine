@@ -26,7 +26,7 @@ namespace Serialize {
         ~SyncManager();
 
 
-        static void writeHeader(FormattedBufferedStream &stream, const SyncableUnitBase *unit, MessageType type, TransactionId id, uint8_t index);
+        static void writeHeader(FormattedBufferedStream &stream, const SyncableUnitBase *unit, MessageType type, TransactionId id);
         StreamResult readMessage(FormattedBufferedStream &);
 
         std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterMessageTargets();
@@ -38,7 +38,7 @@ namespace Serialize {
 
         FormattedBufferedStream &getSlaveMessageTarget();
 
-        bool isMessageAvailable();
+        //bool isMessageAvailable();
         StreamResult receiveMessages(int msgCount = -1, TimeOut timeout = {});
         void sendMessages();
         StreamResult sendAndReceiveMessages();
@@ -74,16 +74,16 @@ namespace Serialize {
 
         std::unique_ptr<SyncStreamData> createStreamData();
 
-    private:
+        bool mSlaveStreamInvalid = false;
 
-        bool mReceivingMasterState;
+    private:
 
         mutable_set<FormattedBufferedStream, CompareStreamId> mMasterStreams;
         std::optional<FormattedBufferedStream> mSlaveStream;
 
         std::set<TopLevelUnitBase *> mTopLevelUnits; //TODO: Sort by MasterId    
 
-        bool mSlaveStreamInvalid;
+        bool mReceivingMasterState = false;
 
         StreamResult mStreamError;
     };

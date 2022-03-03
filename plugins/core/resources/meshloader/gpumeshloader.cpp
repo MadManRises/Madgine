@@ -42,7 +42,7 @@ VIRTUALUNIQUECOMPONENTBASE(Engine::Render::GPUMeshLoader)
             co_return generate(mesh, *handle);
         }
 
-        void GPUMeshLoader::unloadImpl(GPUMeshData &data, ResourceDataInfo &info)
+        void GPUMeshLoader::unloadImpl(GPUMeshData &data)
         {
             reset(data);
         }
