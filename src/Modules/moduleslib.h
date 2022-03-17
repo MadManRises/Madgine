@@ -6,7 +6,6 @@
 
 /// @cond
 
-#include "codegen/codegenlib.h"
 #include "cli/clilib.h"
 #include "ini/inilib.h"
 
@@ -18,6 +17,8 @@
 
 #include <shared_mutex>
 #include <regex>
+#include <variant>
+#include <stack>
 
 
 #include "modulesforward.h"

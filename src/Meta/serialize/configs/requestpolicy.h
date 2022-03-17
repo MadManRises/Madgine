@@ -17,5 +17,8 @@ namespace Serialize {
         using no_requests = RequestPolicyType<true>;
     };
 
+    template <typename... Configs>
+    using RequestPolicySelector = ConfigSelectorDefault<RequestPolicyCategory, RequestPolicy::all_requests, Configs...>;
+
 }
 }

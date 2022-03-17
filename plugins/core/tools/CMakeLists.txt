@@ -8,6 +8,7 @@ FolderSources(sources "" src toolbase.cpp toolbase.h toolscollector.cpp toolscol
 	FolderSources(sources src inspector functiontool.cpp functiontool.h inspector.cpp inspector.h)
 	FolderSources(sources src logviewer logviewer.cpp logviewer.h)
 	FolderSources(sources src memory memoryviewer.cpp memoryviewer.h)
+	FolderSources(sources src messagelogger messagelogger.cpp messagelogger.h)
 	FolderSources(sources src metrics metrics.cpp metrics.h)
 	FolderSources(sources src pluginmanager pluginmanager.cpp pluginmanager.h)
 	FolderSources(sources src profiler profiler.cpp profiler.h)

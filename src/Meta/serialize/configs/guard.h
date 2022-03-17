@@ -3,22 +3,30 @@
 namespace Engine {
 namespace Serialize {
 
-struct GuardCategory;
+    struct GuardCategory;
 
-template <typename... Guards>
-struct Guard {
-    using Category = GuardCategory;
-    
-    static std::tuple<> begin()
-    {
-        return {};
-    }
+    template <typename... Guards>
+    struct Guard {
+        using Category = GuardCategory;
 
-    static void end(std::tuple<>)
-    {
-    
-    }
-};
+        static auto guard(const CallerHierarchyBasePtr &hierarchy)
+        {
+            return std::make_tuple(Guards::guard(hierarchy)...);
+        }
+    };
+
+    template <auto Guard>
+    struct CallableGuard {
+        using Category = GuardCategory;
+
+        static decltype(auto) guard(const CallerHierarchyBasePtr &hierarchy)
+        {
+            return TupleUnpacker::invoke(Guard, hierarchy);
+        }
+    };
+
+    template <typename... Configs>
+    using GuardSelector = ConfigGroupSelector<GuardCategory, Guard, Configs...>;
 
 }
 }

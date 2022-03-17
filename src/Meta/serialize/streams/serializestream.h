@@ -21,7 +21,7 @@ namespace Serialize {
         SerializeManager *manager() const;
         void setId(ParticipantId id);
         ParticipantId id() const;
-        bool isMaster(StreamMode mode);
+        bool isMaster(AccessMode mode);
         SerializableUnitList &serializableList();
         SerializableUnitMap &serializableMap();
 
@@ -41,7 +41,7 @@ namespace Serialize {
         {
             Stream::operator>>(t);
             if (!*this)
-                return STREAM_PARSE_ERROR(*this, false, "Expected: <" << typeid(T).name() << ">");
+                return STREAM_PARSE_ERROR(*this, false) << "Expected: <" << typeid(T).name() << ">";
             return {};
         }
 
@@ -92,11 +92,10 @@ namespace Serialize {
             return {};
         }
 
-        StreamResult operator>>(std::string &s);
-        StreamResult operator>>(String auto &s)
+        StreamResult operator>>(String auto &s) requires(!std::same_as<decltype(s), std::string &>)
         {
             std::string string;
-            STREAM_PROPAGATE_ERROR(read(string));
+            STREAM_PROPAGATE_ERROR(operator>>(string));
             s = std::move(string);
             return {};
         }

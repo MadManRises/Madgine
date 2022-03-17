@@ -29,17 +29,12 @@ namespace Serialize {
                 },
                 StreamResult {}));
             STREAM_PROPAGATE_ERROR(applyMap(in, data, true));
-            if constexpr (std::is_same_v<R, void>) {
-                action.call(std::move(data), request ? request->mRequester : 0, request ? request->mRequesterTransactionId : 0);
-                if (request) {
-                    (*request)(nullptr);
-                }
-            } else {
-                R result = action.call(std::move(data), request ? request->mRequester : 0, request ? request->mRequesterTransactionId : 0);
-                if (request) {
-                    (*request)(&result);
-                }
+
+            auto result = action.call(std::move(data), request ? request->mRequester : 0, request ? request->mRequesterTransactionId : 0);
+            if (request) {
+                (*request)(&result);
             }
+
             return {};
         }
 
@@ -65,11 +60,11 @@ namespace Serialize {
                     StreamResult {}));
                 STREAM_PROPAGATE_ERROR(applyMap(in, data, true));
                 if (!TupleUnpacker::invokeExpand(Verifier::verify, OffsetPtr::parent(&action), in.id(), data))
-                    return STREAM_PERMISSION_ERROR(in.stream(), in.isBinary(), "Request for action not verified");
+                    return STREAM_PERMISSION_ERROR(in) << "Request for action not verified";
                 action.tryCall(data, in.id(), id);
                 return {};
             } else {
-                return STREAM_PERMISSION_ERROR(in.stream(), in.isBinary(), "Request for action not allowed");
+                return STREAM_PERMISSION_ERROR(in) << "Request for action not allowed";
             }
         }
     };

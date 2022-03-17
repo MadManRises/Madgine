@@ -12,11 +12,11 @@ namespace Threading {
         WorkGroupHandle(const WorkGroupHandle &) = delete;
 
         template <typename F, typename... Args>
-        WorkGroupHandle(F &&main, Args &&... args)
+        WorkGroupHandle(std::string_view name, F &&main, Args &&... args)
         {
             std::promise<int> p;
             mResult = p.get_future();
-            mThread = std::thread(&WorkGroupHandle::threadMain<F, Args...>, std::move(p), std::forward<F>(main), std::forward<Args>(args)...);
+            mThread = std::thread(&WorkGroupHandle::threadMain<F, Args...>, std::string { name }, std::move(p), std::forward<F>(main), std::forward<Args>(args)...);
         }
 
         ~WorkGroupHandle()
@@ -43,9 +43,9 @@ namespace Threading {
 
     private:
         template <typename F, typename... Args>
-        static void threadMain(std::promise<int> p, F &&main, Args &&... args)
+        static void threadMain(std::string_view name, std::promise<int> p, std::remove_reference_t<F> main, std::remove_reference_t<Args>... args)
         {
-            WorkGroup group;
+            WorkGroup group { name };
             try {
                 int result = TupleUnpacker::invokeDefaultResult(0, std::forward<F>(main), std::forward<Args>(args)...);
                 p.set_value(result);

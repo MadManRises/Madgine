@@ -8,10 +8,10 @@ template <typename C>
 using ResetOperation_t = typename has_typename_ResetOperation<C>::template type<C &>;
 
 template <typename C, typename... Args>
-decltype(auto) resetOperation(C &c, Args&&... args)
+decltype(auto) resetOperation(C &c, bool controlled, Args&&... args)
 {
     if constexpr (has_typename_ResetOperation_v<C>)
-        return typename C::ResetOperation { c, std::forward<Args>(args)... };
+        return typename C::ResetOperation { c, controlled, std::forward<Args>(args)... };
     else
         return c;
 }

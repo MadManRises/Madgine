@@ -33,7 +33,7 @@ namespace Serialize {
             STREAM_PROPAGATE_ERROR(read(in, key, "key"));
             it = std::ranges::find(physical(op), key, &comparator_traits<Cmp>::to_cmp_type);
             if (it == physical(op).end())
-                return STREAM_ERROR(in.stream(), in.isBinary(), StreamState::UNKNOWN_ERROR, "Missing item of name '" << key << "' in controlled container");
+                return STREAM_UNKNOWN_ERROR(in) << "Missing item of name '" << key << "' in controlled container";
 
             return read(in, *it, "Item");
         }

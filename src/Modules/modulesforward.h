@@ -24,10 +24,7 @@ struct NamedUniqueComponentRegistry;
 template <typename Registry, typename __Base, typename... _Ty>
 struct UniqueComponentCollector;
 
-
-
 struct UniqueComponentRegistryBase;
-
 
 namespace Debug {
 
@@ -45,7 +42,6 @@ namespace Debug {
     }
 }
 
-
 namespace Plugins {
     struct PluginManager;
     struct Plugin;
@@ -58,14 +54,12 @@ namespace Threading {
     struct ConnectionBase;
     template <typename T, typename... _Ty>
     struct ConnectionInstance;
-    struct TaskQueue;    
+    struct TaskQueue;
     struct TaskHandle;
     template <typename T, typename Immediate = std::false_type>
     struct Task;
     struct TaskPromiseTypeBase;
-}
 
-namespace Threading {
     struct WorkGroup;
     struct WorkGroupHandle;
     struct Scheduler;

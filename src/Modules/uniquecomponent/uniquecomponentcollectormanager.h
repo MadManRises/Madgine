@@ -5,12 +5,7 @@
 namespace Engine {
 
 	struct MODULES_EXPORT UniqueComponentCollectorManager{
-
 		UniqueComponentCollectorManager(Plugins::PluginManager &pluginMgr);
-
-	private:
-		Plugins::PluginManager &mMgr;
-
 	};
 
 }

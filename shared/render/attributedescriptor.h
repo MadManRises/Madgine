@@ -20,16 +20,16 @@ namespace Render {
             , mSemantic(semantic)
             , mSemanticIndex(semanticIndex)
         {
-            if constexpr (std::is_same_v<M, Vector2>) {
+            if constexpr (std::same_as<M, Vector2>) {
                 mType = ATTRIBUTE_FLOAT;
                 mArraySize = 2;
-            } else if constexpr (std::is_same_v<M, Vector3>) {
+            } else if constexpr (std::same_as<M, Vector3>) {
                 mType = ATTRIBUTE_FLOAT;
                 mArraySize = 3;
-            } else if constexpr (std::is_same_v<M, Vector4> || std::is_same_v<M, float[4]>) {
+            } else if constexpr (std::same_as<M, Vector4> || std::is_same_v<M, float[4]>) {
                 mType = ATTRIBUTE_FLOAT;
                 mArraySize = 4;
-            } else if constexpr (std::is_same_v<M, int[4]>) {
+            } else if constexpr (std::same_as<M, int[4]>) {
                 mType = ATTRIBUTE_INT;
                 mArraySize = 4;
             } else {

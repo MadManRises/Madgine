@@ -93,7 +93,7 @@ namespace Tools {
 
     void SceneEditor::render()
     {
-        Engine::Threading::DataLock lock { mSceneMgr->mutex(), Engine::Threading::AccessMode::WRITE };
+        auto guard = mSceneMgr->lock(AccessMode::WRITE);
         renderHierarchy();
         renderToolbar();
         renderSelection();
@@ -209,7 +209,7 @@ namespace Tools {
         if (mMode == STOP) {
             Memory::MemoryManager mgr { "Tmp" };
             Serialize::FormattedSerializeStream out = mgr.openWrite(mStartBuffer, std::make_unique<Serialize::SafeBinaryFormatter>());
-            mSceneMgr->writeState(out);
+            Serialize::write(out, *mSceneMgr, "Scene");
         }
 
         mSceneMgr->unpause();
@@ -236,7 +236,7 @@ namespace Tools {
 
         Memory::MemoryManager mgr { "Tmp" };
         Serialize::FormattedSerializeStream in = mgr.openRead(mStartBuffer, std::make_unique<Serialize::SafeBinaryFormatter>());
-        mSceneMgr->readState(in, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap);
+        Serialize::read(in, *mSceneMgr, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap);
     }
 
     void SceneEditor::openScene(const Filesystem::Path &p)
@@ -246,22 +246,22 @@ namespace Tools {
 
         mCurrentSceneFile = p;
 
-        Engine::Threading::DataLock lock(mSceneMgr->mutex(), Engine::Threading::AccessMode::WRITE);
+        auto guard = mSceneMgr->lock(AccessMode::WRITE);
 
         Filesystem::FileManager mgr { "Scene" };
         Serialize::FormattedSerializeStream in = mgr.openRead(mCurrentSceneFile, std::make_unique<Serialize::XMLFormatter>());
-        mSceneMgr->readState(in, "Scene", {}, Serialize::StateTransmissionFlags_ApplyMap);
+        Serialize::read(in, *mSceneMgr, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap);
     }
 
     void SceneEditor::saveScene(const Filesystem::Path &p)
     {
         mCurrentSceneFile = p;
 
-        Engine::Threading::DataLock lock(mSceneMgr->mutex(), Engine::Threading::AccessMode::READ);
+       auto guard = mSceneMgr->lock(AccessMode::READ);
 
         Filesystem::FileManager mgr { "Scene" };
         Serialize::FormattedSerializeStream out = mgr.openWrite(mCurrentSceneFile, std::make_unique<Serialize::XMLFormatter>());
-        mSceneMgr->writeState(out, "Scene");
+        Serialize::write(out, *mSceneMgr, "Scene");
     }
 
     int SceneEditor::createViewIndex()

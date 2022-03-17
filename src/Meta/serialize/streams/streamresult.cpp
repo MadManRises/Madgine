@@ -2,7 +2,7 @@
 
 #include "streamresult.h"
 
-#include "serializestream.h"
+#include "formattedserializestream.h"
 
 namespace Engine {
 namespace Serialize {
@@ -65,6 +65,11 @@ namespace Serialize {
         if (result.mState != StreamState::OK)
             out << '\n' << *result.mError;
         return out;
+    }
+
+    StreamResultBuilder::StreamResultBuilder(StreamState type, FormattedSerializeStream &stream, const char *file, size_t line)
+        : StreamResultBuilder(type, stream.stream(), stream.isBinary(), file, line)
+    {
     }
 
     StreamResultBuilder::operator StreamResult()

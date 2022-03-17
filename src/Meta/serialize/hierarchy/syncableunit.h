@@ -25,6 +25,9 @@ namespace Serialize {
         void writeState(FormattedSerializeStream &out, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0) const;
         StreamResult readState(FormattedSerializeStream &in, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0);
 
+        StreamResult applyMap(FormattedSerializeStream &in, bool success);
+        void setActive(bool active, bool existenceChanged);
+
         StreamResult readAction(FormattedBufferedStream &in, PendingRequest *request);
         StreamResult readRequest(FormattedBufferedStream &in, TransactionId id);
 

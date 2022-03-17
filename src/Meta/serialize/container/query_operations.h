@@ -10,14 +10,14 @@ namespace Serialize {
         {
             assert(outStreams.size() == 1);
             for (FormattedBufferedStream &out : outStreams) {
-                write(out, *static_cast<const R *>(data), nullptr, hierarchy);
+                write(out, *static_cast<const patch_void_t<R> *>(data), nullptr, hierarchy);
                 out.endMessageWrite();
             }
         }
 
         static StreamResult readAction(Query<f, OffsetPtr> &query, FormattedBufferedStream &in, PendingRequest *request, const CallerHierarchyBasePtr &hierarchy = {})
         {
-            R returnValue;
+            patch_void_t<R> returnValue;
             STREAM_PROPAGATE_ERROR(read(in, returnValue, nullptr, hierarchy));
             STREAM_PROPAGATE_ERROR(applyMap(in, returnValue, true));
             assert(request);

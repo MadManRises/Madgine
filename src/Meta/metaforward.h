@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Generic/enum.h"
+
 namespace Engine {
 
 struct ValueType;
@@ -49,7 +51,7 @@ using KeyValueVirtualAssociativeIterator = VirtualIterator<KeyValuePair>;
 using KeyValueVirtualAssociativeRange = VirtualRange<KeyValuePair, Functor_to_KeyValuePair<true>>;
 using KeyValueVirtualSequenceIterator = VirtualIterator<ValueTypeRef>;
 using KeyValueVirtualSequenceRange = VirtualRange<ValueTypeRef, Functor_to_ValueTypeRef<true>>;
-
+    
 
 namespace Serialize {
     struct SerializeStream;
@@ -97,10 +99,7 @@ namespace Serialize {
         SERIALIZABLE = 2
     };
 
-    enum class StreamMode {
-        READ,
-        WRITE
-    };
+
 
 
     struct buffered_streambuf;
@@ -117,11 +116,11 @@ namespace Serialize {
     struct SerializableMapHolder;
     struct SerializableListHolder;
 
-    enum MessageType {
+    ENUM(MessageType,
         STATE,
         ACTION,
         REQUEST
-    };
+    );
 
     enum Command {
         INITIAL_STATE_DONE

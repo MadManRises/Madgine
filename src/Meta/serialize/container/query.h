@@ -16,9 +16,9 @@ namespace Serialize {
             }
 
         private:
-            R call(std::tuple<_Ty...> args, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+            patch_void_t<R> call(std::tuple<_Ty...> args, ParticipantId answerTarget = 0, TransactionId answerId = 0)
             {
-                R result = TupleUnpacker::invokeExpand(f, OffsetPtr::parent(this), args);
+                patch_void_t<R> result = invoke_patch_void(LIFT(TupleUnpacker::invokeExpand), f, OffsetPtr::parent(this), args);
 
                 this->writeRequestResponse(&result, answerTarget, answerId);
 
@@ -32,7 +32,13 @@ namespace Serialize {
                 } else {
                     std::promise<R> p;
                     Future<R> fut { p.get_future() };
-                    this->writeRequest(&args, requester, requesterTransactionId, [p { std::move(p) }](void *data) mutable { p.set_value(*static_cast<R *>(data)); });
+                    this->writeRequest(&args, requester, requesterTransactionId, [p { std::move(p) }](void *data) mutable {
+                        if constexpr (std::is_same_v<R, void>) {
+                            p.set_value();   
+                        } else {
+                            p.set_value(*static_cast<R *>(data));
+                        }
+                    });
                     return fut;
                 }
             }

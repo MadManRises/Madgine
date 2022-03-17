@@ -17,12 +17,14 @@ namespace TupleUnpacker {
     }
 
     template <typename... T, size_t... Is>
-    std::tuple<T &...> shiftTupleReference(std::tuple<T...>& tuple, std::index_sequence<Is...>) {
+    std::tuple<T &...> shiftTupleReference(std::tuple<T...> &tuple, std::index_sequence<Is...>)
+    {
         return { std::get<Is>(tuple)... };
     }
 
     template <typename... T>
-    std::tuple<T &...> shiftTupleReference(std::tuple<T...>& tuple) {
+    std::tuple<T &...> shiftTupleReference(std::tuple<T...> &tuple)
+    {
         return shiftTupleReference(tuple, std::index_sequence_for<T...> {});
     }
 
@@ -61,7 +63,8 @@ namespace TupleUnpacker {
     }
 
     template <typename Tuple, size_t... Is>
-    decltype(auto) flatten(Tuple&& tuple, std::index_sequence<Is...>) {
+    decltype(auto) flatten(Tuple &&tuple, std::index_sequence<Is...>)
+    {
         return std::tuple_cat(flatten(std::get<Is>(std::forward<Tuple>(tuple)))...);
     }
 
@@ -221,10 +224,7 @@ namespace TupleUnpacker {
     template <typename Tuple, typename F, size_t... Is>
     auto forEach(Tuple &&t, F &&f, std::index_sequence<Is...>)
     {
-        if constexpr (((!std::is_same_v<std::invoke_result_t<F, decltype(std::get<Is>(std::forward<Tuple>(t)))>, void>)&&...))
-            return std::tuple<std::invoke_result_t<F, decltype(std::get<Is>(std::forward<Tuple>(t)))>...> { f(std::get<Is>(std::forward<Tuple>(t)))... };
-        else
-            (f(std::get<Is>(std::forward<Tuple>(t))), ...);
+        return std::tuple { invoke_patch_void(std::forward<F>(f), std::get<Is>(std::forward<Tuple>(t)))... };
     }
 
     template <typename Tuple, typename F>

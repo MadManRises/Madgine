@@ -5,7 +5,6 @@
 
 namespace Engine {
 
-
 template <typename Functor>
 struct LambdaHolder : ProxyScopeBase, Functor {
 
@@ -24,17 +23,16 @@ struct LambdaHolder : ProxyScopeBase, Functor {
 
     virtual TypedScopePtr proxyScopePtr() override
     {
-        return { static_cast<Functor*>(this), &sMetaTable };
+        return { static_cast<Functor *>(this), &sMetaTable };
     }
 
 private:
-
     static const MetaTable *sMetaTablePtr;
 
     template <typename R, typename T, typename... Args>
     static CONSTEVAL std::array<FunctionArgument, sizeof...(Args) + 1> metafunctionArgsMemberHelper()
     {
-        return { { { { { ValueTypeEnum::ScopeValue }, & sMetaTablePtr }, "this" }, { toValueTypeDesc<std::remove_const_t<std::remove_reference_t<Args>>>(), {} }... } };
+        return { { { { { ValueTypeEnum::ScopeValue }, &sMetaTablePtr }, "this" }, { toValueTypeDesc<std::remove_const_t<std::remove_reference_t<Args>>>(), {} }... } };
     }
 
     template <typename R, typename T, typename... Args>
@@ -56,13 +54,8 @@ private:
     {
         TypedScopePtr scope = ValueType_as<TypedScopePtr>(getArgument(args, 0));
         assert(scope.mType == &sMetaTable);
-        T *t = static_cast<T*>(scope.mScope);
-        if constexpr (std::is_same_v<R, void>) {
-            (t->*F)(ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...);
-            to_ValueType<true>(retVal, std::monostate {});
-        } else {
-            to_ValueType<true>(retVal, (t->*F)(ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...));
-        }
+        T *t = static_cast<T *>(scope.mScope);
+        to_ValueType<true>(retVal, invoke_patch_void(F, t, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...));
     }
 
     template <auto F, typename R, typename T, typename... Args>
@@ -70,7 +63,6 @@ private:
     {
         unpackMemberHelper<F, R, T, Args...>(table, retVal, args, std::make_index_sequence<sizeof...(Args)>());
     }
-
 
     template <auto F, typename R, typename T, typename... Args>
     static CONSTEVAL typename FunctionTable::FPtr wrapHelper(R (T::*f)(Args...))
@@ -83,7 +75,6 @@ private:
     {
         return &unpackMemberApiMethod<F, R, T, Args...>;
     }
-
 
     static const constexpr FunctionTable sFunctionTable {
         wrapHelper<&Functor::operator()>(&Functor::operator()),
@@ -121,6 +112,5 @@ OwnedScopePtr lambda(F &&f)
 {
     return std::static_pointer_cast<ProxyScopeBase>(std::make_shared<LambdaHolder<F>>(std::forward<F>(f)));
 }
-
 
 }

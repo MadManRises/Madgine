@@ -90,7 +90,7 @@ template <typename T>
 concept Tuple = InstanceOf<T, std::tuple>;
 
 template <typename T>
-concept String = std::is_constructible_v<std::string, const T &> && std::is_constructible_v<T, const std::string &>;
+concept String = std::is_constructible_v<std::string, const T &> &&std::is_constructible_v<T, const std::string &>;
 
 template <typename T>
 concept StringViewable = std::is_constructible_v<std::string_view, const T &>;
@@ -133,5 +133,19 @@ struct OutRef {
 
     T *mPtr = nullptr;
 };
+
+template <typename F, typename... Args>
+auto invoke_patch_void(F &&f, Args &&...args)
+{
+    if constexpr (std::same_as<std::invoke_result_t<F, Args...>, void>) {
+        std::invoke(std::forward<F>(f), std::forward<Args>(args)...);
+        return std::monostate {};
+    } else {
+        return std::invoke(std::forward<F>(f), std::forward<Args>(args)...);
+    }
+}
+
+template <typename T>
+using patch_void_t = std::conditional_t<std::same_as<T, void>, std::monostate, T>;
 
 }

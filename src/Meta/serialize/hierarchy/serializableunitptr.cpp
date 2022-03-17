@@ -1,6 +1,6 @@
 #include "../../metalib.h"
 
-#include "../streams/serializablemapholder.h"
+
 #include "statetransmissionflags.h"
 
 #include "serializetable.h"
@@ -16,9 +16,7 @@ namespace Serialize {
 
     void SerializableDataConstPtr::writeState(FormattedSerializeStream &out, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags) const
     {
-        SerializableMapHolder holder { out };
-
-        if (out.isMaster(StreamMode::WRITE) && out.data() && !(flags & StateTransmissionFlags_SkipId)) {
+        if (out.isMaster(AccessMode::WRITE) && out.data() && !(flags & StateTransmissionFlags_SkipId)) {
             out.beginExtendedWrite(name, 1);
             write(out, mUnit, "serId");
         }
@@ -30,9 +28,7 @@ namespace Serialize {
 
     StreamResult SerializableDataPtr::readState(FormattedSerializeStream &in, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags) const
     {
-        SerializableListHolder holder { in };
-
-        if (!in.isMaster(StreamMode::READ) && in.data() && !(flags & StateTransmissionFlags_SkipId)) {
+        if (!in.isMaster(AccessMode::READ) && in.data() && !(flags & StateTransmissionFlags_SkipId)) {
             STREAM_PROPAGATE_ERROR(in.beginExtendedRead(name, 1));
             SerializableUnitBase *idHelper;
             STREAM_PROPAGATE_ERROR(read(in, idHelper, "serId"));
@@ -83,43 +79,7 @@ namespace Serialize {
 
     StreamResult SerializableUnitPtr::readState(FormattedSerializeStream &in, const char *name, CallerHierarchyBasePtr hierarchy, StateTransmissionFlags flags) const
     {
-        SerializableListHolder holder { in };
-
-        if (!in.isMaster(StreamMode::READ) && in.data() && !(flags & StateTransmissionFlags_SkipId)) {
-            STREAM_PROPAGATE_ERROR(in.beginExtendedRead(name, 1));
-            SerializableUnitBase *idHelper;
-            STREAM_PROPAGATE_ERROR(read(in, idHelper, "serId"));
-            uint32_t id = reinterpret_cast<uintptr_t>(idHelper) >> 2;
-            SerializableUnitList &list = in.serializableList();
-            if (list.size() <= id)
-                list.resize(id + 1);
-            assert(!list[id]);
-            list[id] = unit();
-        }
-
-        STREAM_PROPAGATE_ERROR(in.beginCompoundRead(name));
-        STREAM_PROPAGATE_ERROR(mType->readState(unit(), in, flags, hierarchy));
-        return in.endCompoundRead(name);
-    }
-
-    void SerializableUnitConstPtr::writeAction(uint8_t index, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, const void *data) const
-    {
-        mType->writeAction(unit(), index, outStreams, data);
-    }
-
-    StreamResult SerializableUnitPtr::readAction(FormattedBufferedStream &in, PendingRequest *request) const
-    {
-        return mType->readAction(unit(), in, request);
-    }
-
-    void SerializableUnitConstPtr::writeRequest(uint8_t index, FormattedBufferedStream &out, const void *data) const
-    {
-        mType->writeRequest(unit(), index, out, data);
-    }
-
-    StreamResult SerializableUnitPtr::readRequest(FormattedBufferedStream &in, TransactionId id) const
-    {
-        return mType->readRequest(unit(), in, id);
+        return SerializableDataPtr { unit(), mType }.readState(in, name, hierarchy, flags);
     }
 
     void SerializableUnitPtr::setParent(SerializableUnitBase *parent) const

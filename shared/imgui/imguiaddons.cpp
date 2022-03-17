@@ -393,7 +393,7 @@ bool ValueTypeDrawer::draw(const Engine::Filesystem::Path &p)
 bool ValueTypeDrawer::draw(Engine::EnumHolder &e)
 {
     int columns = GetColumnsCount();
-    assert(columns == 2 || columns == 0);
+    assert(columns == 1 || columns == 2);
     bool changed = false;
     std::string name { e.toString() };
     if (ImGui::BeginCombo(mName, name.c_str())) {
@@ -427,7 +427,7 @@ void setPayloadStatus(std::string_view msg)
 
 void Text(std::string_view s)
 {
-    Text("%.*s", static_cast<int>(s.size()), s.data());
+    TextUnformatted(s.data(), s.data() + s.size());
 }
 
 bool InputText(const char *label, std::string *s, ImGuiInputTextFlags flags)

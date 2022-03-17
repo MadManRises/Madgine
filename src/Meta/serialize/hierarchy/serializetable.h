@@ -30,10 +30,9 @@ namespace Serialize {
 
         void writeState(const SerializableDataUnit *unit, FormattedSerializeStream &out, CallerHierarchyBasePtr hierarchy = {}) const;
         StreamResult readState(SerializableDataUnit *unit, FormattedSerializeStream &in, StateTransmissionFlags flags = 0, CallerHierarchyBasePtr hierarchy = {}) const;
-        StreamResult readState(SerializableUnitBase *unit, FormattedSerializeStream &in, StateTransmissionFlags flags = 0, CallerHierarchyBasePtr hierarchy = {}) const;
 
-        StreamResult readAction(SerializableUnitBase *unit, FormattedBufferedStream &in, PendingRequest *request) const;
-        StreamResult readRequest(SerializableUnitBase *unit, FormattedBufferedStream &in, TransactionId id) const;
+        StreamResult readAction(SyncableUnitBase *unit, FormattedBufferedStream &in, PendingRequest *request) const;
+        StreamResult readRequest(SyncableUnitBase *unit, FormattedBufferedStream &in, TransactionId id) const;
 
         StreamResult applyMap(SerializableDataUnit *unit, FormattedSerializeStream &in, bool success) const;
         void setSynced(SerializableUnitBase *unit, bool b) const;
@@ -41,11 +40,11 @@ namespace Serialize {
         void setActive(SerializableUnitBase *unit, bool active, bool existenceChanged) const;
         void setParent(SerializableUnitBase *unit) const;
 
-        void writeAction(const SerializableUnitBase *parent, uint8_t index, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, const void *data) const;
-        void writeRequest(const SerializableUnitBase *parent, uint8_t index, FormattedBufferedStream &out, const void *data) const;
+        void writeAction(const SyncableUnitBase *parent, uint16_t index, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, const void *data) const;
+        void writeRequest(const SyncableUnitBase *parent, uint16_t index, FormattedBufferedStream &out, const void *data) const;
 
-        uint8_t getIndex(OffsetPtr offset) const;
-        const Serializer &get(uint8_t index) const;
+        uint16_t getIndex(OffsetPtr offset) const;
+        const Serializer &get(uint16_t index) const;
     };
 
 }

@@ -23,7 +23,7 @@ namespace Serialize {
         STREAM_PROPAGATE_ERROR(mStream.read(type));
         type -= SERIALIZE_MAGIC_NUMBER;
         if (type != typeId)
-            return STREAM_INTEGRITY_ERROR(mStream, mBinary, "Invalid type-id encountered!");
+            return STREAM_INTEGRITY_ERROR(mStream, mBinary) << "Invalid type-id encountered!";
         return {};
     }
 

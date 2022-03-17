@@ -619,17 +619,19 @@ namespace NodeGraph {
         STREAM_PROPAGATE_ERROR(read(in, name, "type"));
 
         if (!NodeRegistry::sComponentsByName().contains(name))
-            return STREAM_INTEGRITY_ERROR(in.stream(), in.isBinary(), "No Node \"" << name << "\" available.\n"
-                                                                << "Make sure to check the loaded plugins.");
+            return STREAM_INTEGRITY_ERROR(in) << "No Node \"" << name << "\" available.\n"
+                                                                << "Make sure to check the loaded plugins.";
         node = createNode(name);
         return {};
     }
 
-    void NodeGraph::writeNode(Serialize::FormattedSerializeStream &out, const std::unique_ptr<NodeBase> &node) const
+    const char *NodeGraph::writeNode(Serialize::FormattedSerializeStream &out, const std::unique_ptr<NodeBase> &node) const
     {
         out.beginExtendedWrite("Node", 1);
 
         write(out, node->className(), "type");
+
+        return "Node";
     }
 }
 }

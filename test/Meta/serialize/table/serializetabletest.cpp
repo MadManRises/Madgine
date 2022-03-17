@@ -53,10 +53,11 @@ TEST(Serialize_Table, Test1)
 
     TestStruct t2;
 
-    auto msg = stream2.beginMessageRead();
+    FormattedBufferedStream::MessageReadMarker msg;
+    HANDLE_STREAM_RESULT(stream2.beginMessageRead(msg));
     ASSERT_TRUE(msg);
     HANDLE_STREAM_RESULT(serializeTable<TestStruct>().readState(&t2, stream2));
-    msg.end();
+    HANDLE_STREAM_RESULT(msg.end());
 
     ASSERT_EQ(t1.i, t2.i);
 }

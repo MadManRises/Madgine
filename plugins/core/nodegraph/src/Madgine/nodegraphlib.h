@@ -1,5 +1,7 @@
 #pragma once
 
+#include "codegen/codegenlib.h"
+
 /// @cond
 
 #include "Modules/moduleslib.h"

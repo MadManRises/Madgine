@@ -1,0 +1,6 @@
+#pragma once
+
+#cmakedefine01 META_ENABLE_MESSAGE_LOGGING
+
+//serialize
+#define ENABLE_MESSAGE_LOGGING META_ENABLE_MESSAGE_LOGGING

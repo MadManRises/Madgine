@@ -1,6 +1,8 @@
 #include "../../metalib.h"
 #include "buffered_streambuf.h"
 
+#include "messagelogger.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -8,10 +10,16 @@ namespace Serialize {
         : mBytesToRead(sizeof(BufferedMessageHeader))
         , mBuffer(std::move(buffer))
     {
+#if ENABLE_MESSAGE_LOGGING
+        MessageLogger::registerStream(this);
+#endif
     }
 
     buffered_streambuf::~buffered_streambuf()
     {
+#if ENABLE_MESSAGE_LOGGING
+        MessageLogger::unregisterStream(this);
+#endif
     }
 
     buffered_streambuf::pos_type buffered_streambuf::seekoff(off_type off, std::ios_base::seekdir dir,
@@ -65,8 +73,6 @@ namespace Serialize {
         }
     }
 
-    
-
     buffered_streambuf::int_type buffered_streambuf::overflow(int c)
     {
         if (c != EOF) {
@@ -89,8 +95,6 @@ namespace Serialize {
         return 0;
     }
 
-    
-
     void buffered_streambuf::beginMessageWrite()
     {
         assert(pptr() == pbase());
@@ -99,12 +103,13 @@ namespace Serialize {
 
     void buffered_streambuf::endMessageWrite()
     {
-        BufferedSendMessage &msg = mBufferedSendMsgs.emplace_back();
-        BufferedMessageHeader *header = reinterpret_cast<BufferedMessageHeader*>(mSendBuffer.data());
+        assert(!mSendBuffer.empty());
+        BufferedMessageHeader *header = reinterpret_cast<BufferedMessageHeader *>(mSendBuffer.data());
         header->mMsgSize = pptr() - pbase() - sizeof(BufferedMessageHeader);
+        assert(header->mMsgSize > 0);
         mSendBuffer.resize(pptr() - pbase());
         mSendBuffer.shrink_to_fit();
-        mSendBuffer.swap(msg.mData);
+        mBufferedSendMsgs.emplace(BufferedSendMessage { std::move(mSendBuffer) });
         setp(nullptr, nullptr);
     }
 
@@ -117,17 +122,22 @@ namespace Serialize {
     void buffered_streambuf::endMessageRead()
     {
         const char *current = gptr();
-        const char *end = egptr();        
+        const char *end = egptr();
         assert(current == end);
     }
 
     std::streamsize buffered_streambuf::sendMessages()
     {
-        for (auto it = mBufferedSendMsgs.begin(); it != mBufferedSendMsgs.end(); it = mBufferedSendMsgs.erase(it)) {
-            int num = mBuffer->sputn(it->mData.data(), it->mData.size());
-            if (num != it->mData.size()) {
+        while (!mBufferedSendMsgs.empty()) {
+            BufferedSendMessage msg = std::move(mBufferedSendMsgs.front());
+            mBufferedSendMsgs.pop();
+            int num = mBuffer->sputn(msg.mData.data(), msg.mData.size());
+            if (num != msg.mData.size()) {
                 return -1;
             }
+#if ENABLE_MESSAGE_LOGGING
+            MessageLogger::log(this, std::move(msg));
+#endif
         }
         return 0;
     }
@@ -194,13 +204,15 @@ namespace Serialize {
                 mBytesToRead -= num;
                 if (mBytesToRead == 0) {
                     setg(mRecBuffer.data(), mRecBuffer.data(), mRecBuffer.data() + mReceiveMessageHeader.mMsgSize);
+#if ENABLE_MESSAGE_LOGGING
+                    MessageLogger::log(this, mReceiveMessageHeader, std::move(mRecBuffer));    
+                    mRecBuffer = { 1 };
+#endif
                 }
             }
         }
         return readCount;
     }
-
-   
 
 }
 }

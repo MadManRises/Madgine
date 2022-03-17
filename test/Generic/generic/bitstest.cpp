@@ -8,11 +8,11 @@
 
 TEST(Bits, Basic)
 {
-    constexpr bool b1 = std::is_same_v<Engine::MinimalHoldingUIntType_t<1>, bool>;
+    constexpr bool b1 = std::same_as<Engine::MinimalHoldingUIntType_t<1>, bool>;
     ASSERT_TRUE(b1);
-    constexpr bool b2 = std::is_same_v<Engine::MinimalHoldingUIntType_t<5>, uint8_t>;
+    constexpr bool b2 = std::same_as<Engine::MinimalHoldingUIntType_t<5>, uint8_t>;
     ASSERT_TRUE(b2);
-    constexpr bool b3 = std::is_same_v<Engine::MinimalHoldingUIntType_t<63>, uint64_t>;
+    constexpr bool b3 = std::same_as<Engine::MinimalHoldingUIntType_t<63>, uint64_t>;
     ASSERT_TRUE(b3);
 
     ASSERT_EQ(Engine::bitSize(43), 6);

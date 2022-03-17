@@ -8,12 +8,7 @@ struct META_EXPORT KeyValueFunction {
     template <typename R, typename... Args, size_t... I>
     static void unpackHelper(void (*f)(), ValueType &retVal, const ArgumentList &args, std::index_sequence<I...>)
     {
-        if constexpr (std::is_same_v<R, void>) {
-            reinterpret_cast<R (*)(Args...)>(f)(ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I))...);
-            to_ValueType<true>(retVal, std::monostate {});
-        } else {
-            to_ValueType<true>(retVal, reinterpret_cast<R (*)(Args...)>(f)(ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I))...));
-        }
+        to_ValueType<true>(retVal, invoke_patch_void(reinterpret_cast<R (*)(Args...)>(f), ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I))...));
     }
 
     template <typename R, typename... Args>
@@ -24,7 +19,7 @@ struct META_EXPORT KeyValueFunction {
 
     template <typename R, typename... Args>
     KeyValueFunction(R (*f)(Args...))
-        : mFunction(reinterpret_cast<void(*)()>(f))
+        : mFunction(reinterpret_cast<void (*)()>(f))
         , mWrapper(&unpackApiMethod<R, Args...>)
     {
     }

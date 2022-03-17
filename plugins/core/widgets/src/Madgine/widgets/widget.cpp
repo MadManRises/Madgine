@@ -350,9 +350,9 @@ namespace Widgets {
         widget = createWidgetClass(name, _class);
         return {};
     }
-    void WidgetBase::writeWidget(Serialize::FormattedSerializeStream &out, const std::unique_ptr<WidgetBase> &widget) const
+    const char *WidgetBase::writeWidget(Serialize::FormattedSerializeStream &out, const std::unique_ptr<WidgetBase> &widget) const
     {
-        mManager.writeWidget(out, widget);
+        return mManager.writeWidget(out, widget);
     }
     void WidgetBase::sizeChanged(const Vector3i &pixelSize)
     {

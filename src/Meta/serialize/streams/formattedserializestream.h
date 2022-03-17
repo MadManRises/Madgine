@@ -54,7 +54,7 @@ namespace Serialize {
 
         SerializeStreamData *data();
 
-        bool isMaster(StreamMode mode);
+        bool isMaster(AccessMode mode);
 
         bool isBinary();
 
@@ -65,7 +65,7 @@ namespace Serialize {
 
         SerializableUnitList &serializableList();
 
-        [[deprecated]] SerializeStream &stream();
+        SerializeStream &stream();
 
         std::unique_ptr<Formatter> mFormatter;
     };

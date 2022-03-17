@@ -3,11 +3,6 @@
 namespace Engine {
 namespace Threading {
 
-	enum class AccessMode {
-        READ,
-        WRITE
-    };
-
     struct MODULES_EXPORT DataMutex {
 		
         enum ConsiderResult {
@@ -16,6 +11,7 @@ namespace Threading {
             CONSIDERED
         };
 
+        bool isHeldWrite() const;
         bool isAvailable(AccessMode mode) const;
         ConsiderResult consider(AccessMode mode);
         void unconsider();

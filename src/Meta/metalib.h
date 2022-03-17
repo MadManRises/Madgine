@@ -2,6 +2,7 @@
 
 #include "Generic/genericlib.h"
 
+#include "metaconfig.h"
 
 /// @cond
 

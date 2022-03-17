@@ -10,7 +10,7 @@ namespace CLI {
     struct ParameterImpl : ParameterBase {
 
         ParameterImpl(std::vector<const char *> options, T defaultValue = {}, const char *help = nullptr)
-            : ParameterBase(std::is_same_v<T, bool> ? 0 : 1, 1, std::move(options), help)
+            : ParameterBase(std::same_as<T, bool> ? 0 : 1, 1, std::move(options), help)
             , mValue(std::move(defaultValue))
         {
         }
@@ -19,7 +19,7 @@ namespace CLI {
 
         const char *typeName() override
         {
-            return std::is_same_v<T, std::string> ? "string" : typeid(T).name();
+            return std::same_as<T, std::string> ? "string" : typeid(T).name();
         }
 
         const T &operator*()

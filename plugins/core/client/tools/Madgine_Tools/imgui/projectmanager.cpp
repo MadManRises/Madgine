@@ -219,7 +219,7 @@ namespace Tools {
         Filesystem::FileManager file("Layout");
         Serialize::FormattedSerializeStream out = file.openWrite(filePath, std::make_unique<Serialize::XMLFormatter>());
 
-        Serialize::SerializableDataPtr { mWindow }.writeState(out);
+        Serialize::write(out, *mWindow, "Layout");
     }
 
     void ProjectManager::load()
@@ -231,7 +231,7 @@ namespace Tools {
             Filesystem::FileManager file("Layout");
             Serialize::FormattedSerializeStream in = file.openRead(filePath, std::make_unique<Serialize::XMLFormatter>());
             if (in) {
-                Serialize::StreamResult result = Serialize::SerializableDataPtr { mWindow }.readState(in, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap | Serialize::StateTransmissionFlags_Activation);
+                Serialize::StreamResult result = Serialize::read(in, *mWindow, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap | Serialize::StateTransmissionFlags_Activation | Serialize::StateTransmissionFlags_SkipId);
                 if (result.mState != Serialize::StreamState::OK) {
                     LOG_ERROR("Failed loading '" << filePath << "' with following Error: "
                                                  << "\n"

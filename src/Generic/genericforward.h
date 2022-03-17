@@ -8,7 +8,6 @@ namespace Engine {
 template <typename C, typename Base>
 struct container_api_impl;
 
-
 template <typename C>
 struct GenerationContainer;
 
@@ -17,7 +16,6 @@ using GenerationVector = GenerationContainer<std::vector<T>>;
 
 template <typename...>
 struct type_pack;
-
 
 struct CompoundAtomicOperation;
 
@@ -50,5 +48,10 @@ struct CoroutineHandle;
 struct OffsetPtr;
 
 struct Stream;
+
+enum class AccessMode {
+    READ,
+    WRITE
+};
 
 }

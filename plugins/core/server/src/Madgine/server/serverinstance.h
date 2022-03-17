@@ -11,10 +11,10 @@ namespace Server {
         ServerInstance() = delete;
         ServerInstance(const ServerInstance &) = delete;
 
-        template <typename T>
-        ServerInstance(T &&initCallback)
-            : mName("thread_"s + std::to_string(++sInstanceCounter))
-            , mWorkGroup(&ServerInstance::go<T>, this, std::forward<T>(initCallback))
+        template <typename F, typename... Args>
+        ServerInstance(std::string_view name, F &&initCallback, Args &&... args)
+            : mName(name.empty() ? "thread_"s + std::to_string(++sInstanceCounter) : name)
+            , mWorkGroup(mName, &ServerInstance::go<F, Args...>, this, std::forward<F>(initCallback), std::forward<Args>(args)...)
         {
         }
 
@@ -23,15 +23,13 @@ namespace Server {
         //ValueType toValueType() const;
 
     protected:
-        template <typename T>
-        int go(T initCallback)
+        template <typename F, typename... Args>
+        int go(F&& initCallback, Args&&... args)
         {
-            return TupleUnpacker::invokeDefaultResult(0, std::move(initCallback), &mHandle);
+            return TupleUnpacker::invokeDefaultResult(0, std::forward<F>(initCallback), std::forward<Args>(args)...);
         }
 
     private:
-        void *mHandle = nullptr;
-
         std::string mName;
         static size_t sInstanceCounter;
 

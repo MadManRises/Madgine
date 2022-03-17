@@ -24,8 +24,8 @@ TEST(Serialize_Container, SyncedUnit)
     TestManager mgr1("container1");
     TestManager mgr2("container2");
 
-    NoParentUnit<TestUnit> unit1;
-    NoParentUnit<TestUnit> unit2;
+    NoParent<TestUnit> unit1;
+    NoParent<TestUnit> unit2;
 
     unit1.list1.emplace(unit1.list1.end(), 3);
     unit1.list1.emplace(unit1.list1.end(), 4);

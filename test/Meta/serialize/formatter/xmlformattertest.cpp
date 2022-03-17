@@ -115,7 +115,7 @@ TEST(Serialize_Formatter, XML_InvalidParse)
     </complexList3>
 </unit1>")");
 
-    NoParentUnit<TestUnit> unit;
+    NoParent<TestUnit> unit;
 
     FormattedSerializeStream in { std::make_unique<XMLFormatter>(), SerializeStream { std::move(file) } };
 
@@ -179,7 +179,7 @@ TEST(Serialize_Formatter, XML_ExtendedOrder)
     <bytes>SGVsbG8gV29ybGQh</bytes>
 </unit1>)");
 
-    NoParentUnit<TestUnit> unit;
+    NoParent<TestUnit> unit;
 
     FormattedSerializeStream in { std::make_unique<XMLFormatter>(), SerializeStream { std::move(file) } };
 

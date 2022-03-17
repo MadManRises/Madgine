@@ -16,7 +16,7 @@ namespace Serialize {
     StreamResult convertSerializablePtr(FormattedSerializeStream &in, uint32_t id, SerializableDataUnit *&out)
     {
         if (id > in.serializableList().size())
-            return STREAM_INTEGRITY_ERROR(in.stream(), in.isBinary(), "Unknown Serializable Unit-Id (" << id << ") used!");
+            return STREAM_INTEGRITY_ERROR(in) << "Unknown Serializable Unit-Id (" << id << ") used!";
         out = in.serializableList().at(id);
         return {};
     }

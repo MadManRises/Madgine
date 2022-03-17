@@ -109,7 +109,7 @@ TEST(Serialize_Formatter, JSON_InvalidParse)
     "bytes" : "SGVsbG8gV29ybGQh"
 })");
 
-    NoParentUnit<TestUnit> unit;
+    NoParent<TestUnit> unit;
 
     FormattedSerializeStream in { std::make_unique<JSONFormatter>(), SerializeStream { std::move(file) } };
 
@@ -168,7 +168,7 @@ TEST(Serialize_Formatter, JSON_ExtendedOrder)
     "bytes" : "SGVsbG8gV29ybGQh"
 })");
 
-    NoParentUnit<TestUnit> unit;
+    NoParent<TestUnit> unit;
 
     FormattedSerializeStream in { std::make_unique<JSONFormatter>(), SerializeStream { std::move(file) } };
 

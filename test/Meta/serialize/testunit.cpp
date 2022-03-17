@@ -24,13 +24,14 @@ constexpr const char *list1ArgNames(size_t index)
     return names[index];
 }
 
-void writeList1(Engine::Serialize::FormattedSerializeStream &out, const ComplexDataType &data)
+const char *writeList1(Engine::Serialize::FormattedSerializeStream &out, const ComplexDataType &data)
 {
     out.beginExtendedWrite("Item", 4);
     write(out, data.i, "first");
     write(out, data.f, "second");
     write(out, data.s, "third");
     write(out, data.b, "fourth");
+    return "Item";
 }
 Engine::Serialize::StreamResult readList1(Engine::Serialize::FormattedSerializeStream &in, int &i, float &f, std::string &s, bool &b)
 {

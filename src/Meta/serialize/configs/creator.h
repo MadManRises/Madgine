@@ -167,16 +167,16 @@ namespace Serialize {
             }
 
             template <typename Arg>
-            static void writeCreationData(FormattedSerializeStream &out, const Arg &arg, const CallerHierarchyBasePtr &hierarchy)
+            static const char *writeCreationData(FormattedSerializeStream &out, const Arg &arg, const CallerHierarchyBasePtr &hierarchy)
             {
-                WriteFunctor {}(out, arg);
+                return WriteFunctor {}(out, arg);
             }
 
             template <typename C>
             static void writeItem(FormattedSerializeStream &out, const typename container_traits<C>::value_type &arg, const CallerHierarchyBasePtr &hierarchy)
             {
-                writeCreationData<typename container_traits<C>::value_type>(out, arg, hierarchy);
-                write<typename container_traits<C>::value_type>(out, arg, "Item", hierarchy);
+                const char *name = writeCreationData<typename container_traits<C>::value_type>(out, arg, hierarchy);
+                write<typename container_traits<C>::value_type>(out, arg, name, hierarchy);
             }
 
             template <typename Op>
@@ -225,18 +225,18 @@ namespace Serialize {
             }
 
             template <typename Arg>
-            static void writeCreationData(FormattedSerializeStream &out, const Arg &arg, const CallerHierarchyBasePtr &hierarchy)
+            static const char *writeCreationData(FormattedSerializeStream &out, const Arg &arg, const CallerHierarchyBasePtr &hierarchy)
             {
                 const T *parent = hierarchy;
                 assert(parent);
-                WriteFunctor {}(parent, out, arg);
+                return WriteFunctor {}(parent, out, arg);
             }
 
             template <typename C>
             static void writeItem(FormattedSerializeStream &out, const typename container_traits<C>::value_type &arg, const CallerHierarchyBasePtr &hierarchy)
             {
-                writeCreationData<typename container_traits<C>::value_type>(out, arg, hierarchy);
-                write<typename container_traits<C>::value_type>(out, arg, "Item", hierarchy);
+                const char *name = writeCreationData<typename container_traits<C>::value_type>(out, arg, hierarchy);
+                write<typename container_traits<C>::value_type>(out, arg, name, hierarchy);
             }
 
             template <typename Op>
@@ -250,9 +250,12 @@ namespace Serialize {
     }
 
     template <auto reader, auto writer, auto clear = nullptr>
-    using ParentCreator = typename FunctionCapture<__serialize_impl__::_ParentCreator, reader, MemberFunctor<writer>, std::conditional_t<std::is_same_v<decltype(clear), std::nullptr_t>, __serialize_impl__::DefaultClear, UnpackingMemberFunctor<clear>>>::type;
+    using ParentCreator = typename FunctionCapture<__serialize_impl__::_ParentCreator, reader, MemberFunctor<writer>, std::conditional_t<std::same_as<decltype(clear), std::nullptr_t>, __serialize_impl__::DefaultClear, UnpackingMemberFunctor<clear>>>::type;
 
     template <auto reader, auto writer, auto clear = nullptr>
-    using CustomCreator = typename FunctionCapture<__serialize_impl__::_CustomCreator, reader, Functor<writer>, std::conditional_t<std::is_same_v<decltype(clear), std::nullptr_t>, __serialize_impl__::DefaultClear, Functor<clear>>>::type;
+    using CustomCreator = typename FunctionCapture<__serialize_impl__::_CustomCreator, reader, Functor<writer>, std::conditional_t<std::same_as<decltype(clear), std::nullptr_t>, __serialize_impl__::DefaultClear, Functor<clear>>>::type;
+
+    template <typename... Configs>
+    using CreatorSelector = ConfigSelectorDefault<CreatorCategory, DefaultCreator, Configs...>;
 }
 }

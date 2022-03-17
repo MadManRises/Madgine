@@ -52,23 +52,13 @@ template <auto F, typename R, typename T, typename... Args, size_t... I>
 static void unpackMemberHelper(const FunctionTable *table, ValueType &retVal, const ArgumentList &args, std::index_sequence<I...>)
 {
     T *t = ValueType_as<TypedScopePtr>(getArgument(args, 0)).safe_cast<T>();
-    if constexpr (std::is_same_v<R, void>) {
-        (t->*F)(ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...);
-        to_ValueType<true>(retVal, std::monostate {});
-    } else {
-        to_ValueType<true>(retVal, (t->*F)(ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...));
-    }
+    to_ValueType<true>(retVal, invoke_patch_void(F, t, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...));
 }
 
 template <auto F, typename R, typename... Args, size_t... I>
 static void unpackApiHelper(const FunctionTable *table, ValueType &retVal, const ArgumentList &args, std::index_sequence<I...>)
 {
-    if constexpr (std::is_same_v<R, void>) {
-        F(ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I))...);
-        to_ValueType<true>(retVal, std::monostate {});
-    } else {
-        to_ValueType<true>(retVal, F(ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I))...));
-    }
+    to_ValueType<true>(retVal, invoke_patch_void(F, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I))...));
 }
 
 template <auto F, typename T, typename... Args, size_t... I>
@@ -119,7 +109,6 @@ static constexpr typename FunctionTable::FPtr wrapHelper(void (T::*f)(ValueType 
 {
     return &unpackReturnMethod<F, T, Args...>;
 }
-
 }
 
 #define FUNCTIONTABLE_IMPL(F, NameInit, Name, Tag, ...)                                                                                                                                                                                                                                                                                                           \
@@ -128,7 +117,7 @@ static constexpr typename FunctionTable::FPtr wrapHelper(void (T::*f)(ValueType 
         struct LineStruct<Tag, __LINE__> {                                                                                                                                                                                                                                                                                                                        \
             static constexpr const auto args = metafunctionArgs(&F, #__VA_ARGS__);                                                                                                                                                                                                                                                                                \
             using return_type = typename ::Engine::CallableTraits<decltype(&F)>::return_type;                                                                                                                                                                                                                                                                     \
-            static constexpr const ExtendedValueTypeDesc returnType = toValueTypeDesc<std::conditional_t<std::is_same_v<return_type, void>, std::monostate, return_type>>();                                                                                                                                                                                      \
+            static constexpr const ExtendedValueTypeDesc returnType = toValueTypeDesc<patch_void_t<return_type>>();                                                                                                                                                                                      \
             NameInit                                                                                                                                                                                                                                                                                                                                              \
         };                                                                                                                                                                                                                                                                                                                                                        \
     }                                                                                                                                                                                                                                                                                                                                                             \

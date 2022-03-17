@@ -220,11 +220,13 @@ namespace Widgets {
         return {};
     }
 
-    void WidgetManager::writeWidget(Serialize::FormattedSerializeStream &out, const std::unique_ptr<WidgetBase> &widget) const
+    const char *WidgetManager::writeWidget(Serialize::FormattedSerializeStream &out, const std::unique_ptr<WidgetBase> &widget) const
     {
         out.beginExtendedWrite("Widget", 2);
         write(out, widget->getName(), "name");
         write(out, widget->getClass(), "type");
+
+        return "Widget";
     }
 
     bool WidgetManager::propagateInput(WidgetBase *w, const Input::PointerEventArgs &arg, bool (WidgetBase::*f)(const Input::PointerEventArgs &))

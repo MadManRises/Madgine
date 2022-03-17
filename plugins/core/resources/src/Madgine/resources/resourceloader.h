@@ -382,8 +382,8 @@ namespace Resources {
 
             if (!task.valid()) {
                 ResourceType *resource = handle.resource();
-
-                task = loader->queueUnloading(Threading::make_task(&T::unloadImpl, loader, *getDataPtr(handle, loader, false)));
+                
+                task = loader->queueUnloading(Threading::make_task(&T::unloadImpl, (T*)loader, *getDataPtr(handle, loader, false)));
 
                 info.setUnloadingTask(task);
             }

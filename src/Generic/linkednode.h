@@ -40,6 +40,10 @@ struct DoublyLinkedNode : DoublyLinkedNodeBase<PtrT> {
         *mPrev = this->mNext;
     }
 
+    PtrT self() const {
+        return *mPrev;
+    }
+
 private:
     PtrT *mPrev = nullptr;
 

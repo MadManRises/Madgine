@@ -29,13 +29,13 @@ namespace Serialize {
     template <typename F>
     EmplaceRequestBuilder(F &&f) -> EmplaceRequestBuilder<Builder<F, EmplaceRequestBuilder, 4>>;
 
-    template <typename C, typename Observer = NoOpFunctor, typename controlled = std::false_type, typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
-    struct SyncableContainerImpl : SerializableContainerImpl<C, Observer, controlled, OffsetPtr>, Syncable<OffsetPtr> {
+    template <typename C, typename Observer = NoOpFunctor, typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
+    struct SyncableContainerImpl : SerializableContainerImpl<C, Observer, OffsetPtr>, Syncable<OffsetPtr> {
 
         using _traits = container_traits<C>;
-        using container_t = SyncableContainerImpl<C, Observer, controlled, OffsetPtr>;
+        using container_t = SyncableContainerImpl<C, Observer, OffsetPtr>;
 
-        typedef SerializableContainerImpl<C, Observer, controlled, OffsetPtr> Base;
+        typedef SerializableContainerImpl<C, Observer, OffsetPtr> Base;
 
         typedef typename _traits::iterator iterator;
         typedef typename _traits::const_iterator const_iterator;
@@ -47,10 +47,10 @@ namespace Serialize {
 
         SyncableContainerImpl(SyncableContainerImpl &&other) = default;
 
-        SyncableContainerImpl<C, Observer, controlled, OffsetPtr> &operator=(const typename Base::Base &other)
+        SyncableContainerImpl<C, Observer, OffsetPtr> &operator=(const typename Base::Base &other)
         {
             if (this->isMaster()) {
-                ResetOperation { *this } = other;
+                ResetOperation { *this, false } = other;
             } else {
                 std::pair<ContainerEvent, typename Base::Base> temp { RESET, other };
 
@@ -59,7 +59,7 @@ namespace Serialize {
             return *this;
         }
 
-        SyncableContainerImpl<C, Observer, controlled, OffsetPtr> &operator=(SyncableContainerImpl<C, Observer, controlled, OffsetPtr> &&other)
+        SyncableContainerImpl<C, Observer, OffsetPtr> &operator=(SyncableContainerImpl<C, Observer, OffsetPtr> &&other)
         {
             Base::operator=(std::move(other));
             return *this;
@@ -68,7 +68,7 @@ namespace Serialize {
         void clear()
         {
             if (this->isMaster()) {
-                ResetOperation { *this }.clear();
+                ResetOperation { *this, false }.clear();
             } else {
                 ContainerEvent op = RESET;
                 this->writeRequest(&op);
@@ -206,8 +206,8 @@ namespace Serialize {
         };
 
         struct _ResetOperation : Base::ResetOperation {
-            _ResetOperation(container_t &c, ParticipantId answerTarget = 0, TransactionId answerId = 0)
-                : Base::ResetOperation(c)
+            _ResetOperation(container_t &c, bool controlled, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+                : Base::ResetOperation(c, controlled)
                 , mAnswerTarget(answerTarget)
                 , mAnswerId(answerId)
             {
@@ -280,21 +280,21 @@ namespace Serialize {
         }
     };
 
-    template <typename C, typename Observer = NoOpFunctor, typename controlled = std::false_type, typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
-    using SyncableContainer = container_api<SyncableContainerImpl<C, Observer, controlled, OffsetPtr>>;
+    template <typename C, typename Observer = NoOpFunctor, typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
+    using SyncableContainer = container_api<SyncableContainerImpl<C, Observer, OffsetPtr>>;
 
 #define SYNCABLE_CONTAINER(Name, ...) MEMBER_OFFSET_CONTAINER(Name, ::Engine::Serialize::SyncableContainer<__VA_ARGS__>)
 
 }
 
-template <typename C, typename Observer, typename controlled, typename _OffsetPtr>
-struct underlying_container<Serialize::SyncableContainerImpl<C, Observer, controlled, _OffsetPtr>> {
+template <typename C, typename Observer, typename _OffsetPtr>
+struct underlying_container<Serialize::SyncableContainerImpl<C, Observer, _OffsetPtr>> {
     typedef C type;
 };
 
-template <typename C, typename Observer, typename controlled, typename _OffsetPtr>
-struct container_traits<Serialize::SyncableContainerImpl<C, Observer, controlled, _OffsetPtr>> : container_traits<C> {
-    typedef Serialize::SyncableContainerImpl<C, Observer, controlled, _OffsetPtr> container;
+template <typename C, typename Observer, typename _OffsetPtr>
+struct container_traits<Serialize::SyncableContainerImpl<C, Observer, _OffsetPtr>> : container_traits<C> {
+    typedef Serialize::SyncableContainerImpl<C, Observer, _OffsetPtr> container;
 
     using _traits = container_traits<C>;
 

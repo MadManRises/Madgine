@@ -109,7 +109,7 @@ namespace Serialize {
     {
         return unit == nullptr
             ? NULL_UNIT_ID
-            : out.isMaster(StreamMode::WRITE) ? unit->masterId()
+            : out.isMaster(AccessMode::WRITE) ? unit->masterId()
                              : unit->slaveId();
     }
 
@@ -122,7 +122,7 @@ namespace Serialize {
         }
         SyncableUnitBase *ptr = nullptr;
 
-        if (in.isMaster(StreamMode::READ)) { //TODO: Same branch????
+        if (in.isMaster(AccessMode::READ)) { //TODO: Same branch????
             ptr = in.manager()->getByMasterId(unit);
         } else {
             auto it = sMasterMappings.find(unit);
@@ -130,7 +130,7 @@ namespace Serialize {
                 ptr = it->second;
         }
         if (!ptr) {
-            return STREAM_INTEGRITY_ERROR(in, true, "Unknown Unit-Id (" << unit << ") used!");
+            return STREAM_INTEGRITY_ERROR(in, true) << "Unknown Unit-Id (" << unit << ") used!";
         }
         out = ptr;
         return {};

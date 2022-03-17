@@ -38,6 +38,8 @@ struct Stream {
             t = static_cast<T>(val);
         } else {
             mStream >> t;
+            if constexpr (std::same_as<T, std::string>)
+                clear();
         }
         return *this;
     }
@@ -91,9 +93,13 @@ struct Stream {
 
     void skipWs(bool overwrite = false)
     {
-        if (overwrite || (mStream.flags() & std::ios_base::skipws)) {
+        if (overwrite || isSkipWs()) {
             mStream >> std::ws;
         }
+    }
+
+    bool isSkipWs() const {
+        return mStream.flags() & std::ios_base::skipws;
     }
 
     template <typename T>
@@ -140,6 +146,14 @@ struct Stream {
     std::streambuf &buffer() const
     {
         return *mStream.rdbuf();
+    }
+
+    std::locale getloc() const {
+        return mStream.getloc();
+    }
+
+    std::locale imbue(const std::locale &loc) {
+        return mStream.imbue(loc);
     }
 
 protected:

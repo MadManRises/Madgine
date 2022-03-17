@@ -1,7 +1,7 @@
 #pragma once
 
-#include "syncable.h"
 #include "Generic/future.h"
+#include "syncable.h"
 
 namespace Engine {
 namespace Serialize {
@@ -19,22 +19,17 @@ namespace Serialize {
             }
 
         private:
-            R call(std::tuple<_Ty...> args, ParticipantId answerTarget = 0, TransactionId answerId = 0, const std::set<ParticipantId> &targets = {})
+            patch_void_t<R> call(std::tuple<_Ty...> args, ParticipantId answerTarget = 0, TransactionId answerId = 0, const std::set<ParticipantId> &targets = {})
             {
                 this->writeAction(&args, answerTarget, answerId, targets);
 
-                return TupleUnpacker::invokeExpand(f, OffsetPtr::parent(this), args);
+                return invoke_patch_void(LIFT(TupleUnpacker::invokeExpand), f, OffsetPtr::parent(this), args);
             }
 
             Future<R> tryCall(std::tuple<_Ty...> args, ParticipantId requester = 0, TransactionId requesterTransactionId = 0, const std::set<ParticipantId> &targets = {})
             {
                 if (this->isMaster()) {
-                    if constexpr (std::is_same_v<R, void>) {
-                        call(args, requester, requesterTransactionId, targets);
-                        return make_ready_future();
-                    } else {
-                        return call(args, requester, requesterTransactionId, targets);
-                    }
+                    return call(args, requester, requesterTransactionId, targets);
                 } else {
                     assert(targets.empty());
                     std::promise<R> p;

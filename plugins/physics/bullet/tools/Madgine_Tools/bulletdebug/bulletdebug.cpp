@@ -75,7 +75,7 @@ namespace Tools {
                 ImGui::EndMenu();
             }
 
-            Engine::Threading::DataLock lock { mManager->sceneMgr().mutex(), Engine::Threading::AccessMode::READ };
+            auto guard = mManager->sceneMgr().lock(AccessMode::READ);
             mManager->world().debugDrawWorld();
         }
     }

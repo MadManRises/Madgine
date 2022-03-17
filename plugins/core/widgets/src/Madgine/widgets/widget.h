@@ -116,7 +116,7 @@ namespace Widgets {
     protected:
         std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, WidgetClass _class);
         Serialize::StreamResult readWidget(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget);
-        void writeWidget(Serialize::FormattedSerializeStream &out, const std::unique_ptr<WidgetBase> &widget) const;
+        const char *writeWidget(Serialize::FormattedSerializeStream &out, const std::unique_ptr<WidgetBase> &widget) const;
 
         virtual void sizeChanged(const Vector3i &pixelSize);
 

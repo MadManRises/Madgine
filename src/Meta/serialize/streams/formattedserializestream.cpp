@@ -99,7 +99,7 @@ namespace Serialize {
         return mFormatter->stream().data();
     }
 
-    bool FormattedSerializeStream::isMaster(StreamMode mode)
+    bool FormattedSerializeStream::isMaster(AccessMode mode)
     {
         return mFormatter->stream().isMaster(mode);
     }

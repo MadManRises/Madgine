@@ -91,6 +91,10 @@ namespace Window {
         bool injectPointerMove(const Input::PointerEventArgs &arg) override;
         bool injectAxisEvent(const Input::AxisEventArgs &arg) override;
 
+        //TESTING
+        static void sTestScreens(size_t n);
+
+
     protected:
         void onClose() override;
         void onRepaint() override;

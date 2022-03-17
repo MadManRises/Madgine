@@ -8,7 +8,7 @@ namespace Engine {
 namespace Threading {
 
     struct MODULES_EXPORT WorkGroup {
-        WorkGroup(const std::string &name = "");
+        WorkGroup(std::string_view name = {});
         WorkGroup(const WorkGroup &) = delete;
         ~WorkGroup();
 
@@ -30,6 +30,8 @@ namespace Threading {
 
         bool singleThreaded();
         void checkThreadStates();
+
+        bool contains(std::thread::id id) const;
 #endif
 
         void addThreadInitializer(std::function<void()> &&task);
@@ -70,6 +72,7 @@ namespace Threading {
         {
             ThreadGuard guard(*this);
             try {
+
                 int result = TupleUnpacker::invokeDefaultResult(0, std::forward<F>(main), std::forward<Args>(args)...);
                 return result;
             } catch (std::exception &e) {
@@ -102,6 +105,8 @@ namespace Threading {
         std::string mName;
 
 #if ENABLE_THREADING
+        std::vector<std::thread::id> mThreads;
+
         std::vector<Future<int>> mSubThreads;
 #endif
         std::vector<std::function<void()>> mThreadInitializers;

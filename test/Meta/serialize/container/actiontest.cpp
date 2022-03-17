@@ -21,8 +21,8 @@ TEST(Serialize_Action, Action)
     TestManager mgr1("container1");
     TestManager mgr2("container2");
 
-    NoParentUnit<TestUnit> unit1;
-    NoParentUnit<TestUnit> unit2;
+    NoParent<TestUnit> unit1;
+    NoParent<TestUnit> unit2;
 
     ASSERT_TRUE(mgr1.addTopLevelItem(&unit1));
     ASSERT_TRUE(mgr2.addTopLevelItem(&unit2));
@@ -81,9 +81,9 @@ TEST(Serialize_Action, Action_Hierarchical)
     TestManager mgr2("container2");
     TestManager mgr3("container3");
 
-    NoParentUnit<TestUnit> unit1;
-    NoParentUnit<TestUnit> unit2;
-    NoParentUnit<TestUnit> unit3;
+    NoParent<TestUnit> unit1;
+    NoParent<TestUnit> unit2;
+    NoParent<TestUnit> unit3;
 
     ASSERT_TRUE(mgr1.addTopLevelItem(&unit1));
     ASSERT_TRUE(mgr2.addTopLevelItem(&unit2));    

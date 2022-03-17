@@ -31,6 +31,9 @@ SERIALIZETABLE_END(Engine::Window::MainWindow)
 namespace Engine {
 namespace Window {
 
+    static std::queue<WindowData> sTestPositions;
+    static std::mutex sTestPositionMutex;
+
     bool MainWindowComponentComparator::operator()(const std::unique_ptr<MainWindowComponentBase> &first, const std::unique_ptr<MainWindowComponentBase> &second) const
     {
         return first->mPriority < second->mPriority;
@@ -73,7 +76,11 @@ namespace Window {
     {
         WindowSettings settings = mSettings;
 
-        if (settings.mRestoreGeometry) {
+        if (!sTestPositions.empty()) {
+            std::unique_lock lock { sTestPositionMutex };
+            settings.mData = sTestPositions.front();
+            sTestPositions.pop();
+        } else if (settings.mRestoreGeometry) {
             Filesystem::FileManager mgr { "MainWindow-Layout" };
 
             Filesystem::Path path = Filesystem::appDataPath() / "mainwindow.ini";
@@ -391,6 +398,26 @@ namespace Window {
 
         if (Serialize::FormattedSerializeStream out = mgr.openWrite(Filesystem::appDataPath() / "mainwindow.ini", std::make_unique<Serialize::IniFormatter>())) {
             write(out, mOsWindow->data(), "data");
+        }
+    }
+
+    void MainWindow::sTestScreens(size_t n)
+    {
+        int rows = ceil(sqrt(n + 0.25f) - 0.5f);
+        int cols = (n - 1) / rows + 1;
+
+        InterfacesVector monitorSize = listMonitors().front().mSize;
+
+        InterfacesVector size = { monitorSize.x / cols, monitorSize.y / rows };
+
+        std::unique_lock lock { sTestPositionMutex };
+
+        for (int row = 0; row < rows; ++row) {
+            for (int col = 0; col < cols; ++col) {
+                if (row * cols + col == n)
+                    break;
+                sTestPositions.emplace(WindowData { { col * size.x, row * size.y }, size });
+            }
         }
     }
 

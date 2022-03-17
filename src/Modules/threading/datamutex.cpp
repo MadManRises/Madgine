@@ -4,13 +4,19 @@
 
 namespace Engine {
 namespace Threading {
+
+    bool DataMutex::isHeldWrite() const
+    {
+        return mCurrentHolder == std::this_thread::get_id();
+    }
+
     bool DataMutex::isAvailable(AccessMode mode) const
     {
         std::thread::id holder = mCurrentHolder;
         if (mode == AccessMode::READ) {
             return holder == std::thread::id {} || holder == std::this_thread::get_id();
         } else {
-            return (holder == std::thread::id {} && mReaderCount == 0) || holder == std::this_thread::get_id();
+            return (holder == std::thread::id {} && mReaderCount == 0) || isHeldWrite();
         }
     }
 
@@ -33,7 +39,7 @@ namespace Threading {
 
     bool DataMutex::lock(AccessMode mode)
     {
-        while (consider(mode) != CONSIDERED)
+        while (consider(mode) != CONSIDERED) //TODO: rewrite to us wait
             ;
         bool result = true;
         if (mode == AccessMode::READ) {
@@ -41,7 +47,7 @@ namespace Threading {
                 ++mReaderCount;
             } else {
                 assert(mCurrentHolder == std::this_thread::get_id());
-                result = false; 
+                result = false;
             }
         } else {
             std::thread::id expected = {};

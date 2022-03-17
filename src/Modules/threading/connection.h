@@ -101,7 +101,7 @@ namespace Threading {
     template <typename T, typename... _Ty>
     struct QueuedConnection : ConnectionInstance<T, _Ty...> {    
         QueuedConnection(T &&impl,
-            TaskQueue &queue)
+            TaskQueue *queue)
             : ConnectionInstance<T, _Ty...>(std::forward<T>(impl))
             , mQueue(queue)
         {
@@ -120,9 +120,9 @@ namespace Threading {
 
         void operator()(_Ty... args) const override final
         {
-            std::weak_ptr<ConnectionInstance<T, _Ty...>> ptr = std::static_pointer_cast<ConnectionInstance<T, _Ty...>>(*this->mPrev);
+            std::weak_ptr<ConnectionInstance<T, _Ty...>> ptr = std::static_pointer_cast<ConnectionInstance<T, _Ty...>>(this->mNode.self());
             std::tuple<_Ty...> t = std::make_tuple(args...);
-            mQueue.queue([=]() {
+            mQueue->queue([=]() {
                 if (std::shared_ptr<ConnectionInstance<T, _Ty...>> innerPtr = ptr.lock()) {
                     TupleUnpacker::invokeExpand([&](_Ty... args) { innerPtr->ConnectionInstance<T, _Ty...>::operator()(args...); }, t);
                 }
@@ -130,7 +130,7 @@ namespace Threading {
         }
 
     private:
-        TaskQueue &mQueue;
+        TaskQueue *mQueue;
     };
 }
 }

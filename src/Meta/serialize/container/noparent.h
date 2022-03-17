@@ -4,25 +4,25 @@ namespace Engine {
 namespace Serialize {
 
     template <typename T>
-    struct NoParentUnit : T {
+    struct NoParent : T {
         using decay_t = T;
 
         template <typename... Args>
-        NoParentUnit(Args &&...args)
+        NoParent(Args &&...args)
             : T(std::forward<Args>(args)...)
         {
             if constexpr (std::derived_from<T, TopLevelUnitBase>)
                 this->sync();
             else
-                setActive(*this, true, true);
+                setActive(*static_cast<T *>(this), true, true);
         }
 
-        ~NoParentUnit()
+        ~NoParent()
         {
             if constexpr (std::derived_from<T, TopLevelUnitBase>)
                 this->unsync();
             else
-                setActive(*this, false, true);
+                setActive(*static_cast<T *>(this), false, true);
         }
     };
 }

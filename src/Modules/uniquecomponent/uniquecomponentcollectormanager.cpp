@@ -17,7 +17,6 @@
 namespace Engine {
 
 UniqueComponentCollectorManager::UniqueComponentCollectorManager(Plugins::PluginManager &pluginMgr)
-    : mMgr(pluginMgr)
 {
     CompoundAtomicOperation op;
     for (const auto& [name, section] : pluginMgr) {

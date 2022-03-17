@@ -7,6 +7,9 @@
 namespace Engine {
 namespace Serialize {
 
+    static std::array<std::ctype<char>::mask, 256> sTable = generateMask(~ctype::space, { { '\n', ctype::space, ~0 } });    
+    static std::locale sLocale { std::locale {}, new ctype { sTable.data() } };
+
     IniFormatter::IniFormatter()
         : Formatter(false)
     {
@@ -17,6 +20,8 @@ namespace Serialize {
         inout >> std::boolalpha;
         inout >> std::noskipws;
         inout << std::boolalpha;
+
+        inout.imbue(sLocale);
     }
 
     void IniFormatter::beginPrimitiveWrite(const char *name, uint8_t typeId)
@@ -30,11 +35,7 @@ namespace Serialize {
         std::string prefix;
         STREAM_PROPAGATE_ERROR(mStream.readUntil(prefix, "="));
         if (name && StringUtil::substr(prefix, 0, -1) != name)
-            return STREAM_PARSE_ERROR(mStream, mBinary, "Expected '" << name << "', Got '" << StringUtil::substr(prefix, 0, -1) << "'");
-
-        if (typeId == Serialize::PrimitiveTypeIndex_v<std::string>)
-            mNextStringDelimiter = "\n";
-
+            return STREAM_PARSE_ERROR(mStream, mBinary) << "Expected '" << name << "', Got '" << StringUtil::substr(prefix, 0, -1) << "'";
         return {};
     }
 

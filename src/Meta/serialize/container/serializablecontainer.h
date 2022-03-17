@@ -1,17 +1,17 @@
 #pragma once
 
+#include "Generic/container/atomiccontaineroperation.h"
+#include "Generic/container/container_api.h"
+#include "Generic/container/containerevent.h"
+#include "Generic/functor.h"
+#include "Generic/memberoffsetptr.h"
 #include "serializable.h"
 #include "unithelper.h"
-#include "Generic/container/atomiccontaineroperation.h"
-#include "Generic/memberoffsetptr.h"
-#include "Generic/container/container_api.h"
-#include "Generic/functor.h"
-#include "Generic/container/containerevent.h"
 
 namespace Engine {
 namespace Serialize {
 
-    template <typename C, typename Observer = NoOpFunctor, typename controlled = std::false_type, typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
+    template <typename C, typename Observer = NoOpFunctor, typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
     struct SerializableContainerImpl : Serializable<OffsetPtr>,
                                        C,
                                        Observer {
@@ -19,7 +19,7 @@ namespace Serialize {
         using _traits = container_traits<C>;
 
     public:
-        using container = SerializableContainerImpl<C, Observer, controlled, OffsetPtr>;
+        using container = SerializableContainerImpl<C, Observer, OffsetPtr>;
 
         typedef typename _traits::container Base;
         typedef typename _traits::iterator iterator;
@@ -62,13 +62,13 @@ namespace Serialize {
             other.mActiveIterator = _traits::toPositionHandle(other, other.Base::begin());
         }
 
-        SerializableContainerImpl<C, Observer, controlled, OffsetPtr> &operator=(const Base &other)
+        SerializableContainerImpl<C, Observer, OffsetPtr> &operator=(const Base &other)
         {
-            ResetOperation { *this } = other;
+            ResetOperation { *this, false } = other;
             return *this;
         }
 
-        SerializableContainerImpl<C, Observer, controlled, OffsetPtr> &operator=(SerializableContainerImpl &&other)
+        SerializableContainerImpl<C, Observer, OffsetPtr> &operator=(SerializableContainerImpl &&other)
         {
             bool hasEndIterator = other.mActiveIterator == _traits::toPositionHandle(other, other.Base::end());
             Base::operator=(std::move(other));
@@ -131,17 +131,17 @@ namespace Serialize {
 
         void clear()
         {
-            ResetOperation { *this }.clear();
+            ResetOperation { *this, false }.clear();
         }
 
         template <typename... _Ty>
-        typename _traits::emplace_return emplace(const iterator &where, _Ty &&... args)
+        typename _traits::emplace_return emplace(const iterator &where, _Ty &&...args)
         {
             return InsertOperation { *this, where }.emplace(where, std::forward<_Ty>(args)...);
         }
 
         template <typename T, typename... _Ty>
-        typename _traits::emplace_return emplace_init(T &&init, const iterator &where, _Ty &&... args)
+        typename _traits::emplace_return emplace_init(T &&init, const iterator &where, _Ty &&...args)
         {
             InsertOperation op { *this, where };
             typename _traits::emplace_return it = op.emplace(where, std::forward<_Ty>(args)...);
@@ -169,7 +169,7 @@ namespace Serialize {
             return temp;
         }
 
-        void setActive(bool active, bool existenceChange)
+        void setActive(bool active, bool existenceChange, bool controlled)
         {
             if (active) {
                 while (mActiveIterator != _traits::toPositionHandle(*this, Base::end())) {
@@ -180,7 +180,7 @@ namespace Serialize {
                         Observer::operator()(it, AFTER | EMPLACE);
                     }
                     Observer::operator()(it, BEFORE | ACTIVATE_ITEM);
-                    Serialize::setActive(*it, active, existenceChange || !controlled::value);
+                    Serialize::setActive(*it, active, existenceChange || !controlled);
                     Observer::operator()(it, AFTER | ACTIVATE_ITEM);
                 }
             } else {
@@ -188,7 +188,7 @@ namespace Serialize {
                     mActiveIterator = _traits::prev(*this, mActiveIterator);
                     iterator it = _traits::toIterator(*this, mActiveIterator);
                     Observer::operator()(it, BEFORE | DEACTIVATE_ITEM);
-                    Serialize::setActive(*it, active, existenceChange || !controlled::value);
+                    Serialize::setActive(*it, active, existenceChange || !controlled);
                     Observer::operator()(it, AFTER | DEACTIVATE_ITEM);
                     if (existenceChange) {
                         Observer::operator()(it, BEFORE | ERASE);
@@ -218,7 +218,7 @@ namespace Serialize {
             }
 
             template <typename... Ty>
-            auto emplace(const const_iterator &it, Ty &&... args)
+            auto emplace(const const_iterator &it, Ty &&...args)
             {
                 return this->mContainer.emplace_intern(it, std::forward<Ty>(args)...);
             }
@@ -241,7 +241,7 @@ namespace Serialize {
             }
 
             template <typename... Ty>
-            auto emplace(const const_iterator &it, Ty &&... args)
+            auto emplace(const const_iterator &it, Ty &&...args)
             {
                 assert(!mCalled);
                 mCalled = true;
@@ -286,7 +286,7 @@ namespace Serialize {
             }
 
             template <typename... Ty>
-            auto emplace(const const_iterator &it, Ty &&... args)
+            auto emplace(const const_iterator &it, Ty &&...args)
             {
                 if constexpr (!_traits::sorted) {
                     if (this->mContainer.isItemActive(it)) {
@@ -415,8 +415,9 @@ namespace Serialize {
         };
 
         struct _ResetOperation : Operation {
-            _ResetOperation(container &c)
+            _ResetOperation(container &c, bool controlled)
                 : Operation(c)
+                , mControlled(controlled)
             {
                 if (this->mContainer.isSynced()) {
                     setSynced(this->mContainer, false);
@@ -425,7 +426,7 @@ namespace Serialize {
                 if (this->mContainer.isActive()) {
                     assert(this->mContainer.mActiveIterator == _traits::toPositionHandle(this->mContainer, this->mContainer.Base::end()));
                     this->mContainer.Observer::operator()(this->mContainer.end(), BEFORE | RESET);
-                    this->mContainer.setActive(false, !controlled::value);
+                    this->mContainer.setActive(false, !mControlled, mControlled);
                     mWasActive = true;
                 }
             }
@@ -435,7 +436,7 @@ namespace Serialize {
                     setSynced(this->mContainer, true);
                 }
                 if (mWasActive) {
-                    this->mContainer.setActive(true, !controlled::value);
+                    this->mContainer.setActive(true, !mControlled, mControlled);
                     this->mContainer.Observer::operator()(this->mContainer.end(), AFTER | RESET);
                 }
             }
@@ -453,6 +454,7 @@ namespace Serialize {
 
         private:
             bool mWasActive = false;
+            bool mControlled;
         };
 
         using InsertOperation = AtomicContainerOperation<_InsertOperation>;
@@ -475,7 +477,7 @@ namespace Serialize {
         }
 
         template <typename... _Ty>
-        typename _traits::emplace_return emplace_intern(const const_iterator &where, _Ty &&... args)
+        typename _traits::emplace_return emplace_intern(const const_iterator &where, _Ty &&...args)
         {
             typename _traits::emplace_return it = _traits::emplace(*this, where, std::forward<_Ty>(args)...);
             if (_traits::was_emplace_successful(it)) {
@@ -522,26 +524,26 @@ namespace Serialize {
         position_handle mActiveIterator;
     };
 
-    template <typename C, typename Observer = NoOpFunctor, typename controlled = std::false_type, typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
-    using SerializableContainer = container_api<SerializableContainerImpl<C, Observer, controlled, OffsetPtr>>;
+    template <typename C, typename Observer = NoOpFunctor, typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
+    using SerializableContainer = container_api<SerializableContainerImpl<C, Observer, OffsetPtr>>;
 
 #define SERIALIZABLE_CONTAINER(Name, ...) MEMBER_OFFSET_CONTAINER(Name, ::Engine::Serialize::SerializableContainer<__VA_ARGS__>)
 
 }
 
-template <typename C, typename Observer, typename controlled, typename _OffsetPtr>
-struct underlying_container<Serialize::SerializableContainerImpl<C, Observer, controlled, _OffsetPtr>, void> {
+template <typename C, typename Observer, typename _OffsetPtr>
+struct underlying_container<Serialize::SerializableContainerImpl<C, Observer, _OffsetPtr>, void> {
     typedef C type;
 };
 
-template <typename C, typename Observer, typename controlled, typename _OffsetPtr>
-struct container_traits<Serialize::SerializableContainerImpl<C, Observer, controlled, _OffsetPtr>, void> : container_traits<C> {
-    typedef Serialize::SerializableContainerImpl<C, Observer, controlled, _OffsetPtr> container;
+template <typename C, typename Observer, typename _OffsetPtr>
+struct container_traits<Serialize::SerializableContainerImpl<C, Observer, _OffsetPtr>, void> : container_traits<C> {
+    typedef Serialize::SerializableContainerImpl<C, Observer, _OffsetPtr> container;
 
     using _traits = container_traits<C>;
 
     template <typename... Args>
-    static typename _traits::emplace_return emplace(container &c, const typename _traits::iterator &where, Args &&... args)
+    static typename _traits::emplace_return emplace(container &c, const typename _traits::iterator &where, Args &&...args)
     {
         return c.emplace(where, std::forward<Args>(args)...);
     }

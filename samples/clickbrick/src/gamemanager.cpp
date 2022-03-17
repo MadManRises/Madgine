@@ -115,7 +115,7 @@ namespace UI {
 
     void GameManager::updateBricks(std::chrono::microseconds timeSinceLastFrame)
     {
-        Engine::Threading::DataLock lock { mSceneMgr.mutex(), Engine::Threading::AccessMode::WRITE };
+        auto guard = mSceneMgr.lock(Engine::AccessMode::WRITE);
 
         float ratio = (timeSinceLastFrame.count() / 1000000.0f);
 
@@ -150,7 +150,7 @@ namespace UI {
 
     void ClickBrick::UI::GameManager::spawnBrick()
     {
-        Engine::Threading::DataLock lock { Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>().mutex(), Engine::Threading::AccessMode::WRITE };
+        auto guard = Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>().lock(Engine::AccessMode::WRITE);
 
         Engine::Scene::Entity::EntityPtr brick = Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>().createEntity();
 
@@ -198,7 +198,7 @@ namespace UI {
         }
 
         if (hit) {
-            Engine::Threading::DataLock lock { Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>().mutex(), Engine::Threading::AccessMode::WRITE };
+            auto guard = Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>().lock(Engine::AccessMode::WRITE);
 
             mBricks.remove(hit);
             hit->remove();
@@ -233,7 +233,7 @@ namespace UI {
         mLife = 3;
         mLifeLabel->mText = "Life: " + std::to_string(mLife);
 
-        Engine::Threading::DataLock lock { mSceneMgr.mutex(), Engine::Threading::AccessMode::WRITE };
+        auto guard = mSceneMgr.lock(Engine::AccessMode::WRITE);
 
         for (const Engine::Scene::Entity::EntityPtr &brick : mBricks) {
             brick->remove();

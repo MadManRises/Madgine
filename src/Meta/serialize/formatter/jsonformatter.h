@@ -35,6 +35,11 @@ namespace Serialize {
         virtual StreamResult endContainerRead(const char *name) override;
         virtual bool hasContainerItem() override;
 
+        virtual void beginMessageWrite() override;
+        virtual void endMessageWrite() override;
+        virtual StreamResult beginMessageRead() override;
+        virtual StreamResult endMessageRead() override;
+
         std::string indent();
 
     private:
@@ -48,7 +53,7 @@ namespace Serialize {
         size_t mLevel = 0;
         bool mCurrentExtended = false;
         size_t mCurrentExtendedCount = 0;
-        bool mAfterItem = false;
+        bool mAfterItemRead = false, mAfterItemWrite = false;
         bool mLastPrimitive;
 
         struct ParseLevel {

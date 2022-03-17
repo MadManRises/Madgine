@@ -20,10 +20,7 @@ struct LambdaImpl {
 
         virtual R call(Args... args) override
         {
-            if constexpr (std::is_same_v<R, void>)
-                mF(std::forward<Args>(args)...);
-            else
-                return mF(std::forward<Args>(args)...);
+            return mF(std::forward<Args>(args)...);
         }
 
         F mF;

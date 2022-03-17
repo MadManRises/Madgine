@@ -7,6 +7,10 @@ namespace Serialize {
         uint64_t mMsgSize;
     };
 
+    struct BufferedSendMessage {
+        std::vector<char> mData;
+    };
+
     struct META_EXPORT buffered_streambuf : std::basic_streambuf<char> {
     public:
         buffered_streambuf(std::unique_ptr<std::basic_streambuf<char>> buffer);
@@ -14,7 +18,7 @@ namespace Serialize {
         buffered_streambuf(buffered_streambuf &&) = delete;
 
         virtual ~buffered_streambuf();
-        
+
         void beginMessageWrite();
         void endMessageWrite();
 
@@ -22,7 +26,6 @@ namespace Serialize {
         void endMessageRead();
 
     protected:
-
         pos_type seekoff(off_type off, std::ios_base::seekdir dir,
             std::ios_base::openmode mode = std::ios_base::in) override;
         pos_type seekpos(pos_type pos,
@@ -38,8 +41,7 @@ namespace Serialize {
         std::streamsize receiveMessages();
         std::streamsize sendMessages();
 
-    private:        
-
+    private:
         //read
         uint64_t mBytesToRead;
         BufferedMessageHeader mReceiveMessageHeader;
@@ -48,11 +50,12 @@ namespace Serialize {
         //write
         std::vector<char> mSendBuffer;
 
-        struct BufferedSendMessage {
-            std::vector<char> mData;
+        struct BufferedMessage {
+            BufferedMessageHeader mHeader;
+            char mData[0];
         };
 
-        std::list<BufferedSendMessage> mBufferedSendMsgs;
+        std::queue<BufferedSendMessage> mBufferedSendMsgs;
 
         std::unique_ptr<std::basic_streambuf<char>> mBuffer;
     };

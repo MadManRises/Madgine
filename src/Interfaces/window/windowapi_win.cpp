@@ -392,8 +392,14 @@ namespace Window {
 
     static std::vector<MonitorInfo> sBuffer;
 
-    static BOOL __stdcall MonitorEnumerator(HMONITOR, HDC, LPRECT rect, LPARAM)
+    static BOOL __stdcall MonitorEnumerator(HMONITOR monitor, HDC, LPRECT, LPARAM)
     {
+        MONITORINFO info;
+        info.cbSize = sizeof(info);
+        auto result = GetMonitorInfo(monitor, &info);
+        assert(result);
+
+        LPRECT rect = &info.rcWork;
         sBuffer.push_back({ rect->left, rect->top, rect->right - rect->left, rect->bottom - rect->top });
         return BOOL(true);
     }

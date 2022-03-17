@@ -69,7 +69,7 @@ struct META_EXPORT ValueType {
     void operator=(ValueType &&other);
 
     template <typename T>
-    requires(!std::is_same_v<std::decay_t<T>, ValueType>) void operator=(T &&t)
+    requires(!std::same_as<std::decay_t<T>, ValueType>) void operator=(T &&t)
     {
         constexpr size_t index = static_cast<size_t>(static_cast<ValueTypeEnum>(toValueTypeIndex<std::decay_t<T>>()));
         if (mUnion.index() == index)

@@ -221,7 +221,7 @@ template <typename RefT, typename AssignDefault>
 struct VirtualRange {
 
     template <typename C, typename Assign = AssignDefault>
-    requires(!std::is_same_v<std::decay_t<C>, VirtualRange<RefT, AssignDefault>>) explicit VirtualRange(C &&c, type_holder_t<Assign> = {})
+    requires(!std::same_as<std::decay_t<C>, VirtualRange<RefT, AssignDefault>>) explicit VirtualRange(C &&c, type_holder_t<Assign> = {})
         : mRange(std::make_shared<__generic_impl__::VirtualRangeImpl<RefT, C, Assign>>(std::forward<C>(c)))
     {
     }
@@ -236,7 +236,7 @@ struct VirtualRange {
     }
 
     template <typename C>
-    requires(!std::is_same_v<std::decay_t<C>, VirtualRange<RefT, AssignDefault>>)
+    requires(!std::same_as<std::decay_t<C>, VirtualRange<RefT, AssignDefault>>)
         VirtualRange &
         operator=(C &&c)
     {

@@ -19,6 +19,7 @@ METATABLE_END(Engine::Scene::Entity::Mesh)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Mesh)
 ENCAPSULATED_FIELD(Mesh, getName, setName)
+ENCAPSULATED_FIELD(Material, material, setMaterial)
 SERIALIZETABLE_END(Engine::Scene::Entity::Mesh)
 
 namespace Engine {

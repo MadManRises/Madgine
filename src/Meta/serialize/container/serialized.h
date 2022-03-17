@@ -2,7 +2,7 @@
 
 namespace Engine {
 namespace Serialize {
-    //TODO: Implement OffsetPtr interface
+    //TODO: Implement OffsetPtr interface + operations
     template <typename T>
     struct Serialized : SerializableBase {
         template <typename... _Ty>

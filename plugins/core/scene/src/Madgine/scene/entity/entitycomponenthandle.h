@@ -23,16 +23,6 @@ namespace Scene {
             IndexType<uint32_t> mIndex;
             IndexType<uint32_t> mType;
 
-            Serialize::StreamResult readState(Serialize::FormattedSerializeStream &in, const char *name, SceneManager *mgr)
-            {
-                return entityComponentHelperRead(in, *this, name, mgr);
-            }
-
-            void writeState(Serialize::FormattedSerializeStream &out, const char *name, SceneManager *mgr) const
-            {
-                entityComponentHelperWrite(out, *this, name, mgr);
-            }
-
             bool operator!=(const EntityComponentHandle<EntityComponentBase> &other) const
             {
                 assert(mType == other.mType);
@@ -178,22 +168,12 @@ namespace Scene {
             EntityComponentOwningHandle(const EntityComponentOwningHandle<T> &other) = delete;
             EntityComponentOwningHandle(EntityComponentOwningHandle<T> &&other) = default;
 
-            EntityComponentOwningHandle& operator=(const EntityComponentOwningHandle &) = delete;
-            EntityComponentOwningHandle& operator=(EntityComponentOwningHandle<T> &&) = default;
+            EntityComponentOwningHandle &operator=(const EntityComponentOwningHandle &) = delete;
+            EntityComponentOwningHandle &operator=(EntityComponentOwningHandle<T> &&) = default;
 
             operator EntityComponentHandle<T>() const
             {
                 return mHandle;
-            }
-
-            Serialize::StreamResult readState(Serialize::FormattedSerializeStream &in, const char *name, CallerHierarchyBasePtr hierarchy)
-            {
-                return entityComponentOwningHelperRead(in, mHandle, name, hierarchy);
-            }
-
-            void writeState(Serialize::FormattedSerializeStream &out, const char *name, CallerHierarchyBasePtr hierarchy) const
-            {
-                entityComponentOwningHelperWrite(out, mHandle, name, hierarchy);
             }
 
             auto operator<=>(const EntityComponentOwningHandle<T> &other) const
@@ -215,4 +195,37 @@ namespace Scene {
     }
 
 }
+
+namespace Serialize {
+
+    template <typename T, typename... Configs>
+    struct Operations<Scene::Entity::EntityComponentOwningHandle<T>, Configs...> {
+
+        static StreamResult read(Serialize::FormattedSerializeStream &in, Scene::Entity::EntityComponentOwningHandle<T> &handle, const char *name, CallerHierarchyBasePtr hierarchy)
+        {
+            return entityComponentOwningHelperRead(in, handle.mHandle, name, hierarchy);
+        }
+
+        static void write(Serialize::FormattedSerializeStream &out, const Scene::Entity::EntityComponentOwningHandle<T> &handle, const char *name, CallerHierarchyBasePtr hierarchy)
+        {
+            entityComponentOwningHelperWrite(out, handle.mHandle, name, hierarchy);
+        }
+    };
+
+    template <typename T, typename... Configs>
+    struct Operations<Scene::Entity::EntityComponentHandle<T>, Configs...> {
+
+        static StreamResult read(Serialize::FormattedSerializeStream &in, Scene::Entity::EntityComponentOwningHandle<T> &handle, const char *name, Scene::SceneManager *mgr)
+        {
+            return entityComponentHelperRead(in, *this, name, mgr);
+        }
+
+        static void write(Serialize::FormattedSerializeStream &out, const Scene::Entity::EntityComponentOwningHandle<T> &handle, const char *name, Scene::SceneManager *mgr)
+        {
+            entityComponentHelperWrite(out, *this, name, mgr);
+        }
+    };
+
+}
+
 }

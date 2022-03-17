@@ -48,7 +48,7 @@ struct TypeInfo {
         : mFullName(fullName)
         , mTypeName(fix(mFullName))
         , mHeaderPath(headerPath)
-        , mDecayType(std::is_same_v<decay_t<T>, void> ? nullptr : &typeInfo<decay_t<T>>)
+        , mDecayType(std::same_as<decay_t<T>, void> ? nullptr : &typeInfo<decay_t<T>>)
     {
     }
 

@@ -3,13 +3,13 @@
 namespace Engine {
 namespace Serialize {
 
-    template <std::ranges::range C, typename... Configs>
-    requires(!StringViewable<C>) struct Operations<C, Configs...> {
+    template <typename C, typename... Configs>
+    struct ContainerOperations {
 
         using T = typename C::value_type;
 
-        using Creator = ConfigSelectorDefault<CreatorCategory, DefaultCreator, Configs...>;
-        using RequestPolicy = ConfigSelectorDefault<RequestPolicyCategory, RequestPolicy::all_requests, Configs...>;
+        using Creator = CreatorSelector<Configs...>;
+        using RequestPolicy = RequestPolicySelector<Configs...>;
 
         template <typename Op>
         static StreamResult readOp(FormattedSerializeStream &in, Op &op, const char *name, const CallerHierarchyBasePtr &hierarchy = {})
@@ -34,7 +34,7 @@ namespace Serialize {
 
         static StreamResult read(FormattedSerializeStream &in, C &container, const char *name, const CallerHierarchyBasePtr &hierarchy = {})
         {
-            decltype(auto) op = resetOperation(container);
+            decltype(auto) op = resetOperation(container, Creator::controlled);
             return readOp(in, op, name, hierarchy);
         }
 
@@ -65,13 +65,15 @@ namespace Serialize {
             }
         }
 
-        static void setActive(C& c, bool active, bool existenceChanged) {
+        static void setActive(C &c, bool active, bool existenceChanged)
+        {
             for (auto &t : physical(c)) {
                 Serialize::setActive(t, active, existenceChanged);
             }
         }
 
-        static void setParent(C& c, SerializableUnitBase* parent) {
+        static void setParent(C &c, SerializableUnitBase *parent)
+        {
             for (auto &t : physical(c)) {
                 Serialize::setParent(t, parent);
             }
@@ -105,7 +107,7 @@ namespace Serialize {
             case ERASE:
                 STREAM_PROPAGATE_ERROR(readIterator(in, c, it));
                 it = removeOperation(c, it, answerTarget, answerId).erase(it);
-                return {};            
+                return {};
                 /*case REMOVE_RANGE: {
                 iterator from = this->read_iterator(in);
                 iterator to = this->read_iterator(in);
@@ -113,7 +115,7 @@ namespace Serialize {
                 break;
             }*/
             case RESET:
-                return read(in, c, "content", hierarchy);                
+                return read(in, c, "content", hierarchy);
             default:
                 throw 0;
             }
@@ -217,6 +219,37 @@ namespace Serialize {
                 }
             }
             return {};
+        }
+    };
+
+    template <std::ranges::range C, typename... Configs>
+    requires(!StringViewable<C>) struct Operations<C, Configs...> : ContainerOperations<C, Configs...> {
+    };
+
+    template <typename C, typename Base, typename... Configs>
+    struct Operations<container_api_impl<C, Base>, Configs...> : Operations<C, Configs...> {};
+
+    template <typename C, typename Observer, typename OffsetPtr>
+    struct SerializableContainerImpl;
+
+    template <typename C, typename Observer, typename OffsetPtr, typename... Configs>
+    struct Operations<SerializableContainerImpl<C, Observer, OffsetPtr>, Configs...> : ContainerOperations<SerializableContainerImpl<C, Observer, OffsetPtr>, Configs...> {
+
+        static void setActive(SerializableContainerImpl<C, Observer, OffsetPtr> &c, bool active, bool existenceChange)
+        {
+            c.setActive(active, existenceChange, ContainerOperations<SerializableContainerImpl<C, Observer, OffsetPtr>, Configs...>::Creator::controlled);
+        }
+    };
+
+    template <typename C, typename Observer, typename OffsetPtr>
+    struct SyncableContainerImpl;
+
+    template <typename C, typename Observer, typename OffsetPtr, typename... Configs>
+    struct Operations<SyncableContainerImpl<C, Observer, OffsetPtr>, Configs...> : ContainerOperations<SyncableContainerImpl<C, Observer, OffsetPtr>, Configs...> {
+
+        static void setActive(SyncableContainerImpl<C, Observer, OffsetPtr> &c, bool active, bool existenceChange)
+        {
+            c.setActive(active, existenceChange, ContainerOperations<SyncableContainerImpl<C, Observer, OffsetPtr>, Configs...>::Creator::controlled);
         }
     };
 

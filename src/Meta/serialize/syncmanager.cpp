@@ -17,16 +17,16 @@ namespace Serialize {
 
     SyncManager::SyncManager(const std::string &name)
         : SerializeManager(name)
-        , mReceivingMasterState(false)
         , mSlaveStreamInvalid(false)
+        , mReceivingMasterState(false)        
     {
     }
 
     SyncManager::SyncManager(SyncManager &&other) noexcept
         : SerializeManager(std::move(other))
-        , mReceivingMasterState(other.mReceivingMasterState)
-        , mTopLevelUnits(std::move(other.mTopLevelUnits))
         , mSlaveStreamInvalid(other.mSlaveStreamInvalid)
+        , mTopLevelUnits(std::move(other.mTopLevelUnits))
+        , mReceivingMasterState(other.mReceivingMasterState)
     {
         for (TopLevelUnitBase *unit : mTopLevelUnits) {
             unit->removeManager(&other);
@@ -72,7 +72,7 @@ namespace Serialize {
                 stream.setId(id);
                 break;
             default:
-                return STREAM_INTEGRITY_ERROR(stream.stream(), stream.isBinary(), "Invalid command used in message header: " << cmd);
+                return STREAM_INTEGRITY_ERROR(stream) << "Invalid command used in message header: " << cmd;
             }
         } else {
             SyncableUnitBase *object;
@@ -83,21 +83,21 @@ namespace Serialize {
             STREAM_PROPAGATE_ERROR(read(stream, transactionId, "TransactionId"));
             STREAM_PROPAGATE_ERROR(stream.endHeaderRead());
             switch (type) {
-            case ACTION: {
+            case MessageType::ACTION: {
                 PendingRequest *request = stream.fetchRequest(transactionId);
                 STREAM_PROPAGATE_ERROR(object->readAction(stream, request));
                 if (request)
                     stream.popRequest(transactionId);
                 break;
             }
-            case REQUEST:
+            case MessageType::REQUEST:
                 STREAM_PROPAGATE_ERROR(object->readRequest(stream, transactionId));
                 break;
-            case STATE:
-                STREAM_PROPAGATE_ERROR(object->readState(stream, nullptr, {}, StateTransmissionFlags_ApplyMap));
+            case MessageType::STATE:
+                STREAM_PROPAGATE_ERROR(read(stream, *object, "State", {}, StateTransmissionFlags_ApplyMap | StateTransmissionFlags_Activation));
                 break;
             default:
-                return STREAM_INTEGRITY_ERROR(stream.stream(), stream.isBinary(), "Invalid Message-Type: " << type);
+                return STREAM_INTEGRITY_ERROR(stream) << "Invalid Message-Type: " << type;
             }
         }
         return {};
@@ -389,21 +389,21 @@ namespace Serialize {
                     auto it = std::ranges::find(
                         mTopLevelUnits, unit, &TopLevelUnitBase::masterId);
                     if (it == mTopLevelUnits.end()) {
-                        return STREAM_INTEGRITY_ERROR(in.stream(), in.isBinary(), "Illegal TopLevel-Id (" << unit << ") used!");
+                        return STREAM_INTEGRITY_ERROR(in) << "Illegal TopLevel-Id (" << unit << ") used!";
                     }
                     out = *it;
                 } else {
                     SyncableUnitBase *u = getByMasterId(unit);
                     if (!u)
-                        return STREAM_INTEGRITY_ERROR(in.stream(), in.isBinary(), "Non-existing Unit-Id (" << unit << ") used!");
+                        return STREAM_INTEGRITY_ERROR(in) << "Non-existing Unit-Id (" << unit << ") used!";
                     if (std::ranges::find(mTopLevelUnits, u->mTopLevel) == mTopLevelUnits.end())
-                        return STREAM_INTEGRITY_ERROR(in.stream(), in.isBinary(), "Unit (" << unit << ") with unregistered TopLevel-Unit used!");
+                        return STREAM_INTEGRITY_ERROR(in) << "Unit (" << unit << ") with unregistered TopLevel-Unit used!";
 
                     out = u;
                 }
             }
         } catch (const std::out_of_range &) {
-            return STREAM_INTEGRITY_ERROR(in.stream(), true, "Unknown Syncable Unit-Id (" << unit << ") used!");
+            return STREAM_INTEGRITY_ERROR(in.stream(), true) << "Unknown Syncable Unit-Id (" << unit << ") used!";
         }
         return {};
     }
@@ -421,24 +421,29 @@ namespace Serialize {
     StreamResult SyncManager::receiveMessages(FormattedBufferedStream &stream,
         int &msgCount, TimeOut timeout)
     {
+        FormattedBufferedStream::MessageReadMarker msg;
         if (msgCount >= 0) {
             while (stream && msgCount > 0) {
-                while (FormattedBufferedStream::MessageReadMarker msg = stream.beginMessageRead()) {
+                STREAM_PROPAGATE_ERROR(stream.beginMessageRead(msg));
+                while (msg){
                     STREAM_PROPAGATE_ERROR(readMessage(stream));
-                    msg.end();
+                    STREAM_PROPAGATE_ERROR(msg.end());
                     --msgCount;
                     if (!timeout.isZero() && timeout.expired())
                         break;
+                    STREAM_PROPAGATE_ERROR(stream.beginMessageRead(msg));
                 }
                 if (timeout.expired())
                     break;
             }
         } else {
-            while (FormattedBufferedStream::MessageReadMarker msg = stream.beginMessageRead()) {
+            STREAM_PROPAGATE_ERROR(stream.beginMessageRead(msg));
+            while (msg) {
                 STREAM_PROPAGATE_ERROR(readMessage(stream));
-                msg.end();
+                STREAM_PROPAGATE_ERROR(msg.end());
                 if (!timeout.isZero() && timeout.expired())
                     break;
+                STREAM_PROPAGATE_ERROR(stream.beginMessageRead(msg));
             }
         }
 
@@ -479,10 +484,10 @@ namespace Serialize {
         stream.beginMessageWrite();
         stream.beginHeaderWrite();
         write(stream, SerializeManager::convertPtr(stream.stream(), unit), "Object");
-        write(stream, STATE, "MessageType");
+        write<MessageType>(stream, MessageType::STATE, "MessageType");
         write<TransactionId>(stream, 0, "TransactionId");
         stream.endHeaderWrite();
-        unit->writeState(stream);
+        write(stream, *unit, "State");
         stream.endMessageWrite();
     }
 

@@ -4,6 +4,7 @@
 #include "configs/configselector.h"
 #include "configs/creator.h"
 #include "configs/requestpolicy.h"
+#include "configs/guard.h"
 
 #include "hierarchy/serializableunitptr.h"
 
@@ -15,13 +16,15 @@
 
 #include "streams/pendingrequest.h"
 
+#include "hierarchy/statetransmissionflags.h"
+
+#include "streams/serializablemapholder.h"
+
 namespace Engine {
 namespace Serialize {
 
-    
     META_EXPORT StreamResult convertSyncablePtr(FormattedSerializeStream &in, UnitId id, SyncableUnitBase *&out);
     META_EXPORT StreamResult convertSerializablePtr(FormattedSerializeStream &in, uint32_t id, SerializableDataUnit *&out);
-
 
     template <typename T, typename... Configs>
     struct Operations {
@@ -33,10 +36,8 @@ namespace Serialize {
             } else if constexpr (std::is_const_v<T>) {
                 //Don't do anything here
                 return {};
-            } else if constexpr (std::derived_from<T, SyncableUnitBase>){
+            } else if constexpr (std::derived_from<T, SyncableUnitBase>) {
                 return t.readState(in, name, hierarchy, flags);
-            } else if constexpr (std::derived_from<T, SerializableUnitBase>) {
-                return SerializableUnitPtr { &t }.readState(in, name,  hierarchy, flags);
             } else if constexpr (std::derived_from<T, SerializableDataUnit>) {
                 return SerializableDataPtr { &t }.readState(in, name, hierarchy, flags);
             } else if constexpr (TupleUnpacker::Tuplefyable<T>) {
@@ -55,8 +56,6 @@ namespace Serialize {
                 //Don't do anything here
             } else if constexpr (std::derived_from<T, SyncableUnitBase>) {
                 t.writeState(out, name, hierarchy, flags);
-            } else if constexpr (std::derived_from<T, SerializableUnitBase>) {
-                SerializableUnitConstPtr { &t }.writeState(out, name, CallerHierarchyPtr { hierarchy }, flags);
             } else if constexpr (std::derived_from<T, SerializableDataUnit>) {
                 SerializableDataConstPtr { &t }.writeState(out, name, CallerHierarchyPtr { hierarchy }, flags);
             } else if constexpr (TupleUnpacker::Tuplefyable<T>) {
@@ -102,6 +101,8 @@ namespace Serialize {
                     item = nullptr;
                 }
                 return {};
+            } else if constexpr (std::derived_from<T, SyncableUnitBase>) {
+                return item.applyMap(in, success);
             } else if constexpr (std::derived_from<T, SerializableDataUnit>) {
                 return SerializableDataPtr { &item }.applyMap(in, success);
             } else if constexpr (TupleUnpacker::Tuplefyable<T>) {
@@ -130,7 +131,9 @@ namespace Serialize {
 
         static void setActive(T &item, bool active, bool existenceChanged)
         {
-            if constexpr (std::derived_from<T, SerializableUnitBase>) {
+            if constexpr (std::derived_from<T, SyncableUnitBase>) {
+                item.setActive(active, existenceChanged);
+            } else if constexpr (std::derived_from<T, SerializableUnitBase>) {
                 SerializableUnitPtr { &item }.setActive(active, existenceChanged);
             } else if constexpr (std::derived_from<T, SerializableDataUnit>) {
                 SerializableDataPtr { &item }.setActive(active, existenceChanged);
@@ -194,43 +197,7 @@ namespace Serialize {
     template <typename... Ty, typename... Configs>
     struct Operations<std::tuple<Ty...>, Configs...> {
 
-        template <size_t... Is>
-        static StreamResult read(FormattedSerializeStream &in, std::tuple<Ty...> &t, const char *name, std::index_sequence<Is...>, const CallerHierarchyBasePtr &hierarchy = {})
-        {
-            STREAM_PROPAGATE_ERROR(in.format().beginContainer(in, name, false));
-            STREAM_PROPAGATE_ERROR(TupleUnpacker::accumulate(
-                t, [&](auto &e, StreamResult r) {
-                    STREAM_PROPAGATE_ERROR(std::move(r));
-                    return Serialize::read(in, e, nullptr, hierarchy);
-                },
-                StreamResult {}));
-            return in.format().endContainer(in, name);
-        }
-
         static StreamResult read(FormattedSerializeStream &in, std::tuple<Ty...> &t, const char *name, const CallerHierarchyBasePtr &hierarchy = {})
-        {
-            return read(in, t, name, std::make_index_sequence<sizeof...(Ty)> {}, hierarchy);
-        }
-
-        template <size_t... Is>
-        static void write(FormattedSerializeStream &out, const std::tuple<Ty...> &t, const char *name, std::index_sequence<Is...>, const CallerHierarchyBasePtr &hierarchy = {})
-        {
-            out.format().beginContainer(out, name);
-            (Serialize::write<Ty>(out, std::get<Is>(t), "Element", hierarchy), ...);
-            out.format().endContainer(out, name);
-        }
-
-        static void write(FormattedSerializeStream &out, const std::tuple<Ty...> &t, const char *name, const CallerHierarchyBasePtr &hierarchy = {})
-        {
-            write(out, t, name, std::make_index_sequence<sizeof...(Ty)> {}, hierarchy);
-        }
-    };
-
-    template <typename... Ty, typename... Configs>
-    struct Operations<std::tuple<Ty &...>, Configs...> {
-
-        template <size_t... Is>
-        static StreamResult read(FormattedSerializeStream &in, std::tuple<Ty &...> t, const char *name, std::index_sequence<Is...>, const CallerHierarchyBasePtr &hierarchy = {})
         {
             STREAM_PROPAGATE_ERROR(in.beginContainerRead(name, false));
             STREAM_PROPAGATE_ERROR(TupleUnpacker::accumulate(
@@ -242,22 +209,38 @@ namespace Serialize {
             return in.endContainerRead(name);
         }
 
-        static StreamResult read(FormattedSerializeStream &in, std::tuple<Ty &...> t, const char *name, const CallerHierarchyBasePtr &hierarchy = {})
-        {
-            return read(in, t, name, std::make_index_sequence<sizeof...(Ty)> {}, hierarchy);
-        }
-
-        template <size_t... Is>
-        static void write(FormattedSerializeStream &out, const std::tuple<const Ty &...> t, const char *name, std::index_sequence<Is...>, const CallerHierarchyBasePtr &hierarchy = {})
+        static void write(FormattedSerializeStream &out, const std::tuple<Ty...> &t, const char *name, const CallerHierarchyBasePtr &hierarchy = {})
         {
             out.beginContainerWrite(name);
-            (Serialize::write<Ty>(out, std::get<Is>(t), "Element", hierarchy), ...);
+            TupleUnpacker::forEach(t, [&](const auto &e) {
+                Serialize::write(out, e, "Element", hierarchy);
+            });
             out.endContainerWrite(name);
+        }
+    };
+
+    template <typename... Ty, typename... Configs>
+    struct Operations<std::tuple<Ty &...>, Configs...> {
+
+        static StreamResult read(FormattedSerializeStream &in, std::tuple<Ty &...> t, const char *name, const CallerHierarchyBasePtr &hierarchy = {})
+        {
+            STREAM_PROPAGATE_ERROR(in.beginContainerRead(name, false));
+            STREAM_PROPAGATE_ERROR(TupleUnpacker::accumulate(
+                t, [&](auto &e, StreamResult r) {
+                    STREAM_PROPAGATE_ERROR(std::move(r));
+                    return Serialize::read(in, e, nullptr, hierarchy);
+                },
+                StreamResult {}));
+            return in.endContainerRead(name);
         }
 
         static void write(FormattedSerializeStream &out, const std::tuple<const Ty &...> t, const char *name, const CallerHierarchyBasePtr &hierarchy = {})
         {
-            write(out, t, name, std::make_index_sequence<sizeof...(Ty)> {}, hierarchy);
+            out.beginContainerWrite(name);
+            TupleUnpacker::forEach(t, [&](const auto &e) {
+                Serialize::write(out, e, "Element", hierarchy);
+            });
+            out.endContainerWrite(name);
         }
     };
 
@@ -284,12 +267,29 @@ namespace Serialize {
     template <typename T, typename... Configs>
     StreamResult read(FormattedSerializeStream &in, T &t, const char *name, const CallerHierarchyBasePtr &hierarchy = {}, StateTransmissionFlags flags = 0)
     {
-        return TupleUnpacker::invoke(Operations<T, Configs...>::read, in, t, name, hierarchy, flags);
+        SerializableListHolder holder { in };
+
+        if (flags & StateTransmissionFlags_Activation)
+            setActive(t, false, false);
+
+        StreamResult result = TupleUnpacker::invoke(Operations<T, Configs...>::read, in, t, name, hierarchy, flags);
+
+        if (flags & StateTransmissionFlags_ApplyMap) {
+            assert(in.manager());
+            STREAM_PROPAGATE_ERROR(applyMap(in, t, result.mState == StreamState::OK));
+        }
+
+        if (flags & StateTransmissionFlags_Activation)
+            setActive(t, true, false);
+
+        return result;
     }
 
     template <typename T, typename... Configs>
     void write(FormattedSerializeStream &out, const T &t, const char *name, const CallerHierarchyBasePtr &hierarchy = {}, StateTransmissionFlags flags = 0)
     {
+        SerializableMapHolder holder { out };
+
         TupleUnpacker::invoke(Operations<T, Configs...>::write, out, t, name, hierarchy, flags);
     }
 
@@ -324,12 +324,14 @@ namespace Serialize {
     template <typename T, typename... Configs>
     void setParent(T &t, SerializableUnitBase *parent)
     {
-        if constexpr (requires { &Operations<T>::setParent; })
+        if constexpr (requires { &Operations<T, Configs...>::setParent; })
             Operations<T, Configs...>::setParent(t, parent);
     }
 
     template <typename T, typename... Configs>
-    StreamResult readAction(T& t, FormattedBufferedStream& in, PendingRequest* request, const CallerHierarchyBasePtr& hierarchy = {}) {
+    StreamResult readAction(T &t, FormattedBufferedStream &in, PendingRequest *request, const CallerHierarchyBasePtr &hierarchy = {})
+    {
+        auto guard = GuardSelector<Configs...>::guard(hierarchy);
         return Operations<T, Configs...>::readAction(t, in, request, hierarchy);
     }
 

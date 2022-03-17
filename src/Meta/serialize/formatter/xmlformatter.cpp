@@ -7,6 +7,11 @@
 namespace Engine {
 namespace Serialize {
 
+    static std::array<std::ctype<char>::mask, 256> sTableQuote = generateMask(~ctype::space, { { '"', ctype::space, ~0 } });    
+    static std::locale sLocaleQuote { std::locale {}, new ctype {sTableQuote.data()} };
+    static std::array<std::ctype<char>::mask, 256> sTableBracket = generateMask(~ctype::space, { { '<', ctype::space, ~0 } });
+    static std::locale sLocaleBracket { std::locale {}, new ctype {sTableBracket.data()} };
+
     XMLFormatter::XMLFormatter()
         : Formatter(false, true)
     {
@@ -38,14 +43,14 @@ namespace Serialize {
                 std::string prefix;
                 STREAM_PROPAGATE_ERROR(mStream.readN(prefix, strlen(name) + 1));
                 if (prefix != "<" + std::string(name))
-                    return STREAM_PARSE_ERROR(mStream, mBinary, "Expected extended opening tag '<" << name << "'");
+                    return STREAM_PARSE_ERROR(mStream, mBinary) << "Expected extended opening tag '<" << name << "'";
             } else {
                 std::string prefix;
                 STREAM_PROPAGATE_ERROR(mStream.readUntil(prefix, " >"));
                 if (!StringUtil::startsWith(prefix, "<"))
-                    return STREAM_PARSE_ERROR(mStream, mBinary, "Expected extended opening tag, found: " << prefix);
+                    return STREAM_PARSE_ERROR(mStream, mBinary) << "Expected extended opening tag, found: " << prefix;
                 if (prefix.size() <= 1)
-                    return STREAM_PARSE_ERROR(mStream, mBinary, "Expected extended opening tag");
+                    return STREAM_PARSE_ERROR(mStream, mBinary) << "Expected extended opening tag";
             }
             mCurrentExtended = true;
         }
@@ -75,7 +80,7 @@ namespace Serialize {
             std::string prefix;
             STREAM_PROPAGATE_ERROR(mStream.readUntil(prefix, ">"));
             if (name && prefix != "<" + std::string(name) + ">")
-                return STREAM_PARSE_ERROR(mStream, mBinary, "Expected opening tag <" << name << ">, found: " << prefix);
+                return STREAM_PARSE_ERROR(mStream, mBinary) << "Expected opening tag <" << name << ">, found: " << prefix;
             mStream.seek(mStream.tell() - off_type { 1 });
         } else {
             assert(mCurrentExtendedCount == 0);
@@ -98,9 +103,9 @@ namespace Serialize {
         std::string prefix;
         STREAM_PROPAGATE_ERROR(mStream.readUntil(prefix, ">"));
         if (name && prefix != "</" + std::string(name) + ">")
-            return STREAM_PARSE_ERROR(mStream, mBinary, "Expected closing tag '</" << name << ">', found: " << prefix);
+            return STREAM_PARSE_ERROR(mStream, mBinary) << "Expected closing tag '</" << name << ">', found: " << prefix;
         if (!StringUtil::startsWith(prefix, "</"))
-            return STREAM_PARSE_ERROR(mStream, mBinary, "Expected closing tag");
+            return STREAM_PARSE_ERROR(mStream, mBinary) << "Expected closing tag";
         return {};
     }
 
@@ -139,24 +144,25 @@ namespace Serialize {
             }
             if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<ByteBuffer>) {
                 FORMATTER_EXPECT("\"");
-                mNextStringDelimiter = "\"";
+                pushLocale(sLocaleQuote, false);
             }
         } else {
             if (!mCurrentExtended) {
                 std::string prefix;
                 STREAM_PROPAGATE_ERROR(mStream.peekUntil(prefix, ">"));
                 if (prefix.size() <= 1)
-                    return STREAM_PARSE_ERROR(mStream, mBinary, "Syntax error");
+                    return STREAM_PARSE_ERROR(mStream, mBinary) << "Syntax error";
                 if (name && prefix != "<" + std::string(name) + ">")
-                    return STREAM_PARSE_ERROR(mStream, mBinary, "Expected: '" << name << "'");
+                    return STREAM_PARSE_ERROR(mStream, mBinary) << "Expected: '" << name << "'";
                 STREAM_PROPAGATE_ERROR(mStream.readN(prefix, prefix.size() - 1));
             } else {
                 mCurrentExtended = false;
             }
             FORMATTER_EXPECT(">");
 
-            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<ByteBuffer>)
-                mNextStringDelimiter = "<";
+            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<ByteBuffer> || typeId == Serialize::PrimitiveTypeIndex_v<EnumTag>) {
+                pushLocale(sLocaleBracket, false);                
+            }
         }
         return {};
     }
@@ -179,14 +185,21 @@ namespace Serialize {
                 mStream.seek(mExtendedLookupPos);
                 mExtendedLookupPos = -1;
             }
+            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<ByteBuffer>) {                
+                popLocale();
+                FORMATTER_EXPECT("\"");
+            }
         } else {
-            const char *cPrefix = ((typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<ByteBuffer>) ? "/" : "</");
+            const char *cPrefix = "</";
+            if (typeId == Serialize::PrimitiveTypeIndex_v<std::string> || typeId == Serialize::PrimitiveTypeIndex_v<ByteBuffer> || typeId == Serialize::PrimitiveTypeIndex_v<EnumTag>) {
+                popLocale();
+            }
             std::string prefix;
             STREAM_PROPAGATE_ERROR(mStream.readUntil(prefix, ">"));
             if (prefix.size() <= 1)
-                return STREAM_PARSE_ERROR(mStream, mBinary, "Syntax error");
+                return STREAM_PARSE_ERROR(mStream, mBinary) << "Syntax error";
             if (name && prefix != cPrefix + std::string(name) + ">")
-                return STREAM_PARSE_ERROR(mStream, mBinary, "Expected: '" << name << "'");
+                return STREAM_PARSE_ERROR(mStream, mBinary) << "Expected: '" << name << "'";
         }
         return {};
     }
@@ -202,7 +215,7 @@ namespace Serialize {
             if (dummy[1] == '/')
                 return {};
             name = StringUtil::substr(dummy, 1, -1);
-        } 
+        }
         return {};
     }
 
@@ -254,7 +267,7 @@ namespace Serialize {
             STREAM_PROPAGATE_ERROR(mStream.peekN(prefix, 1));
         }
         if (name)
-            return STREAM_PARSE_ERROR(mStream, mBinary, "Missing attribute '" << name << "'");
+            return STREAM_PARSE_ERROR(mStream, mBinary) << "Missing attribute '" << name << "'";
         return {};
     }
 

@@ -38,6 +38,8 @@ namespace Serialize {
         {
         }
 
+        StreamResultBuilder(StreamState type, FormattedSerializeStream &stream, const char *file, size_t line);
+
         operator StreamResult();
 
         template <typename T>
@@ -48,12 +50,14 @@ namespace Serialize {
         }
     };
 
-#define STREAM_ERROR(Stream, Binary, Type, ...) ::Engine::Serialize::StreamResultBuilder { Type, Stream, Binary, __FILE__, __LINE__ } << __VA_ARGS__;
-#define STREAM_PARSE_ERROR(Stream, Binary, ...) STREAM_ERROR(Stream, Binary, ::Engine::Serialize::StreamState::PARSE_ERROR, __VA_ARGS__);
-#define STREAM_PERMISSION_ERROR(Stream, Binary, ...) STREAM_ERROR(Stream, Binary, ::Engine::Serialize::StreamState::PERMISSION_ERROR, __VA_ARGS__);
-#define STREAM_INTEGRITY_ERROR(Stream, Binary, ...) STREAM_ERROR(Stream, Binary, ::Engine::Serialize::StreamState::INTEGRITY_ERROR, __VA_ARGS__);
+#define STREAM_ERROR(Type, ...) \
+    ::Engine::Serialize::StreamResultBuilder { Type, __VA_ARGS__, __FILE__, __LINE__ }
+#define STREAM_PARSE_ERROR(...) STREAM_ERROR(::Engine::Serialize::StreamState::PARSE_ERROR, __VA_ARGS__)
+#define STREAM_PERMISSION_ERROR(...) STREAM_ERROR(::Engine::Serialize::StreamState::PERMISSION_ERROR, __VA_ARGS__)
+#define STREAM_INTEGRITY_ERROR(...) STREAM_ERROR(::Engine::Serialize::StreamState::INTEGRITY_ERROR, __VA_ARGS__)
+#define STREAM_UNKNOWN_ERROR(...) STREAM_ERROR(::Engine::Serialize::StreamState::UNKNOWN_ERROR, __VA_ARGS__)
 
-#define STREAM_PROPAGATE_ERROR(expr)                                                                              \
+#define STREAM_PROPAGATE_ERROR(expr)                                                                                \
     if (::Engine::Serialize::StreamResult _result = (expr); _result.mState != ::Engine::Serialize::StreamState::OK) \
     return _result
 

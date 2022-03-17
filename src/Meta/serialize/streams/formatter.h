@@ -5,6 +5,10 @@
 namespace Engine {
 namespace Serialize {
 
+    using ctype = std::ctype<char>;
+
+    std::array<ctype::mask, 256> generateMask(ctype::mask mask, std::initializer_list<std::tuple<char, ctype::mask, ctype::mask>> specialCharacters = {});
+
     struct META_EXPORT Formatter {
 
         Formatter(bool isBinary, bool supportNameLookup = false)
@@ -47,11 +51,17 @@ namespace Serialize {
         virtual StreamResult beginHeaderRead();
         virtual StreamResult endHeaderRead();
 
+        virtual void beginMessageWrite() { }
+        virtual void endMessageWrite() { }
+
+        virtual StreamResult beginMessageRead();
+        virtual StreamResult endMessageRead();
+
         virtual bool hasContainerItem() = 0;
 
         virtual StreamResult lookupFieldName(std::string &name)
         {
-            return STREAM_INTEGRITY_ERROR(mStream, mBinary, "Name lookup is not implemented in Formatter!");
+            return STREAM_INTEGRITY_ERROR(mStream, mBinary) << "Name lookup is not implemented in Formatter!";
         }
 
         template <typename T>
@@ -64,9 +74,8 @@ namespace Serialize {
             }
         }
 
-        StreamResult read(std::string &s);
-
-        StreamResult read(String auto &s)
+        StreamResult read(String auto &s) 
+            requires(!std::same_as<decltype(s), std::string&>)
         {
             std::string string;
             STREAM_PROPAGATE_ERROR(read(string));
@@ -86,15 +95,19 @@ namespace Serialize {
             }
         }
 
-        void write(const ByteBuffer &b);
-
-        StreamResult expect(std::string_view expected);
+        void write(const ByteBuffer &b);        
 
         const bool mBinary;
         const bool mSupportNameLookup;
 
     protected:
-        const char *mNextStringDelimiter = nullptr;
+        StreamResult expect(std::string_view expected);
+
+        void pushLocale(const std::locale &locale, bool skipWs);
+        void popLocale();
+
+
+        std::stack<std::pair<std::locale, bool>> mLocaleStack;
 
         SerializeStream mStream;
     };

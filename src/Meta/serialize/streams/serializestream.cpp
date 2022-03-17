@@ -115,11 +115,11 @@ namespace Serialize {
         return mData->id();
     }
 
-    bool SerializeStream::isMaster(StreamMode mode)
+    bool SerializeStream::isMaster(AccessMode mode)
     {
         if (mData)
             return mData->isMaster();
-        return mode == StreamMode::WRITE;
+        return mode == AccessMode::WRITE;
     }
 
     SerializeStreamData *SerializeStream::data() const
@@ -187,14 +187,6 @@ namespace Serialize {
         STREAM_PROPAGATE_ERROR(read(size));
         s.resize(size);
         STREAM_PROPAGATE_ERROR(read(&s[0], size));
-        return {};
-    }
-
-    StreamResult SerializeStream::operator>>(std::string &s)
-    {
-        Stream::operator>>(s);
-        if (!*this)
-            return STREAM_PARSE_ERROR(*this, false, "Expected <string>");
         return {};
     }
 
@@ -290,7 +282,7 @@ namespace Serialize {
                 msg = "Unexpected EOF";
             } else
                 throw 0;
-            return STREAM_PARSE_ERROR(*this, true, msg << " after " << op);
+            return STREAM_PARSE_ERROR(*this, true) << msg << " after " << op;
         } else {
             return {};
         }

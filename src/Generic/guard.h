@@ -1,24 +1,25 @@
 #pragma once
 
+#include "lambda.h"
 
 namespace Engine {
 
-    struct Guard {
-        Guard(std::function<void()> &&init, std::function<void()> &&finalize = {})
-            : mFinalize(std::move(finalize))
-        {
-            if (init)
-                init();
-        }
+struct Guard {
+    Guard(Lambda<void()> &&init, Lambda<void()> &&finalize = {})
+        : mFinalize(std::move(finalize))
+    {
+        if (init)
+            init();
+    }
 
-        ~Guard()
-        {
-            if (mFinalize)
-                mFinalize();
-        }
+    ~Guard()
+    {
+        if (mFinalize)
+            mFinalize();
+    }
 
-    private:
-        std::function<void()> mFinalize;
-    };
+private:
+    Lambda<void()> mFinalize;
+};
 
 }

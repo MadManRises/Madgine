@@ -36,7 +36,7 @@
 namespace Engine {
 namespace Scene {
     struct MADGINE_SCENE_EXPORT SceneManager : Serialize::TopLevelUnit<SceneManager>,
-                                               App::GlobalAPI<Serialize::NoParentUnit<SceneManager>> {
+                                               App::GlobalAPI<Serialize::NoParent<SceneManager>> {
         SERIALIZABLEUNIT(SceneManager);
 
         SceneManager(App::Application &app);
@@ -68,8 +68,8 @@ namespace Scene {
         }
         SceneComponentBase &getComponent(size_t i);
         size_t getComponentCount();
-
-        Threading::DataMutex &mutex();
+        
+        Threading::DataLock lock(AccessMode mode);
 
         Threading::SignalStub<const RefcountedContainer<std::deque<Entity::Entity>>::iterator &, int> &entitiesSignal();
 
@@ -94,7 +94,7 @@ namespace Scene {
         virtual Threading::Task<void> finalize() final;
 
     public:
-        MEMBER_OFFSET_CONTAINER(mSceneComponents, SceneComponentContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, NoOpFunctor, std::true_type>>);
+        MEMBER_OFFSET_CONTAINER(mSceneComponents, SceneComponentContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, NoOpFunctor>>);
 
         ////////////////////////////////////////////// ECS
 
@@ -103,14 +103,14 @@ namespace Scene {
 
         Serialize::StreamResult readNonLocalEntity(Serialize::FormattedSerializeStream &in, OutRef<SceneManager> &mgr, bool &isLocal, std::string &name);
         std::tuple<SceneManager &, bool, std::string> createEntityData(const std::string &name, bool local);
-        void writeEntity(Serialize::FormattedSerializeStream &out, const Entity::Entity &entity) const;
+        const char *writeEntity(Serialize::FormattedSerializeStream &out, const Entity::Entity &entity) const;
 
     private:
         Entity::EntityComponentListContainer<std::vector<Placeholder<0>>> mEntityComponentLists;
 
         using EntityContainer = RefcountedContainer<std::deque<Entity::Entity>>;
         SYNCABLE_CONTAINER(mEntities, EntityContainer, Threading::SignalFunctor<const EntityContainer::iterator &, int>);
-        EntityContainer mLocalEntities;
+        RefcountedContainer<std::deque<Serialize::NoParent<Entity::Entity>>> mLocalEntities;
 
         struct EntityHelper {
             Entity::EntityPtr operator()(Entity::Entity &ref)
@@ -145,4 +145,4 @@ namespace Scene {
 }
 
 RegisterType(Engine::Scene::SceneManager);
-RegisterType(Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>);
+RegisterType(Engine::Serialize::NoParent<Engine::Scene::SceneManager>);

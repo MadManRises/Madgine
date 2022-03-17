@@ -28,11 +28,13 @@ namespace Threading {
         return dummy;
     }
 
-    WorkGroup::WorkGroup(const std::string &name)
+    WorkGroup::WorkGroup(std::string_view name)
         : mInstanceCounter(sWorkgroupInstanceCounter++)
         , mName(name.empty() ? "Workgroup_" + std::to_string(mInstanceCounter) : name)
     {
 #if ENABLE_THREADING
+        mThreads.push_back(std::this_thread::get_id());
+
         ThreadStorage::init(true);
         ThreadStorage::init(false);
 
@@ -106,8 +108,15 @@ namespace Threading {
             });
     }
 
+    bool WorkGroup::contains(std::thread::id id) const
+    {
+        return std::ranges::find(mThreads, id) != mThreads.end();
+    }
+
     void WorkGroup::initThread()
     {
+        mThreads.push_back(std::this_thread::get_id());
+
         ThreadStorage::init(true);
         ThreadStorage::init(false);
 

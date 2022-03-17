@@ -4,6 +4,8 @@
 
 #include "Generic/lambda.h"
 
+#include "Generic/nulledptr.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -23,20 +25,19 @@ namespace Serialize {
                 : mFormatter(formatter)
             {
             }
-            MessageReadMarker(MessageReadMarker &&other)
-                : mFormatter(std::exchange(other.mFormatter, nullptr))
-            {
-            }
+            MessageReadMarker(MessageReadMarker &&other) = default;
             ~MessageReadMarker();
 
-            void end();
+            MessageReadMarker &operator=(MessageReadMarker &&other);
+
+            StreamResult end();
 
             explicit operator bool() const;
 
-            Formatter *mFormatter = nullptr;
+            NulledPtr<Formatter> mFormatter;            
         };
 
-        MessageReadMarker beginMessageRead();
+        StreamResult beginMessageRead(MessageReadMarker &msg);
 
         FormattedBufferedStream &sendMessages();
 

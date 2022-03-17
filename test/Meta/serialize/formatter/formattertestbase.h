@@ -14,8 +14,8 @@
 template <typename Formatter>
 void FormatterBaseTest(std::string_view expected = "")
 {
-    NoParentUnit<TestUnit> unit1;
-    NoParentUnit<TestUnit> unit2;
+    NoParent<TestUnit> unit1;
+    NoParent<TestUnit> unit2;
 
     unit1.list1 = { 1, 2, 3 };
     unit1.list2 = { 4, 5 };
@@ -35,22 +35,20 @@ void FormatterBaseTest(std::string_view expected = "")
 
     std::stringbuf *buffer = pBuffer.get();
 
-    FormattedSerializeStream out { std::make_unique<Formatter>(), SerializeStream { std::move(pBuffer) } };
+    FormattedSerializeStream stream { std::make_unique<Formatter>(), SerializeStream { std::move(pBuffer) } };
 
-    write(out, unit1, "unit1");
+    write(stream, unit1, "unit1");
 
     std::string file = buffer->str();
 
     std::cout << file << std::endl;
 
-    if (!out.isBinary())
+    if (!stream.isBinary())
         EXPECT_EQ(expected.data(), file);
 
     std::cout << "Buffer-Size: " << file.size() << std::endl;
 
-    FormattedSerializeStream in { std::make_unique<Formatter>(), SerializeStream { out.stream().release() } };
-
-    HANDLE_STREAM_RESULT(read(in, unit2, nullptr));
+    HANDLE_STREAM_RESULT(read(stream, unit2, nullptr));
 
     ASSERT_EQ(unit1, unit2);
 }

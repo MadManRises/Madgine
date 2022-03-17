@@ -11,7 +11,7 @@ struct CallableType {
     typedef type_pack<_Ty...> argument_types;    
     typedef type_pack<std::decay_t<_Ty>...> decay_argument_types;
 
-    static constexpr const bool is_member_function = !std::is_same_v<T, void>;
+    static constexpr const bool is_member_function = !std::same_as<T, void>;
 
     static constexpr size_t argument_count = sizeof...(_Ty) + (is_member_function ? 1 : 0);
 

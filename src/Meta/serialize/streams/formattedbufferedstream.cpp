@@ -23,18 +23,22 @@ namespace Serialize {
     void FormattedBufferedStream::beginMessageWrite()
     {
         static_cast<buffered_streambuf &>(mFormatter->stream().buffer()).beginMessageWrite();
+        mFormatter->beginMessageWrite();
     }
 
     void FormattedBufferedStream::endMessageWrite()
     {
+        mFormatter->endMessageWrite();
         static_cast<buffered_streambuf &>(mFormatter->stream().buffer()).endMessageWrite();
     }
 
-    FormattedBufferedStream::MessageReadMarker FormattedBufferedStream::beginMessageRead()
+    StreamResult FormattedBufferedStream::beginMessageRead(MessageReadMarker &msg)
     {
         if (mFormatter && static_cast<buffered_streambuf &>(mFormatter->stream().buffer()).beginMessageRead()) {
             mFormatter->stream().clear();
-            return { mFormatter.get() };
+            STREAM_PROPAGATE_ERROR(mFormatter->beginMessageRead());
+            msg = { mFormatter.get() };
+            return {};
         } else {
             return {};
         }
@@ -44,13 +48,22 @@ namespace Serialize {
     {
     }
 
-    void FormattedBufferedStream::MessageReadMarker::end()
+    FormattedBufferedStream::MessageReadMarker &FormattedBufferedStream::MessageReadMarker::operator=(MessageReadMarker &&other)
+    {
+        assert(!mFormatter);
+        mFormatter = std::move(other.mFormatter);
+        return *this;
+    }
+
+    StreamResult FormattedBufferedStream::MessageReadMarker::end()
     {
         assert(mFormatter);
+        STREAM_PROPAGATE_ERROR(mFormatter->endMessageRead());
         mFormatter->stream().skipWs();
         mFormatter->stream().clear();
         static_cast<buffered_streambuf &>(mFormatter->stream().buffer()).endMessageRead();
         mFormatter = nullptr;
+        return {};
     }
 
     FormattedBufferedStream::MessageReadMarker::operator bool() const
@@ -60,7 +73,8 @@ namespace Serialize {
 
     FormattedBufferedStream &FormattedBufferedStream::sendMessages()
     {
-        mFormatter->stream().stream().flush();
+        if (mFormatter)
+            mFormatter->stream().stream().flush();
         return *this;
     }
 

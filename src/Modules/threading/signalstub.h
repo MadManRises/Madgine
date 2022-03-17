@@ -29,7 +29,13 @@ namespace Threading {
 
         template <typename T, typename R, typename... Args>
         std::weak_ptr<ConnectionBase> connect(R(T::* f)(Args...), T* t, ConnectionStore* store = nullptr) {
-            return connect([t, f](Args... args) { return (t->*f)(std::forward<Args>(args)...); });
+            return connect([t, f](Args... args) { return (t->*f)(std::forward<Args>(args)...); }, store);
+        }
+
+        template <typename T, typename R, typename... Args>
+        std::weak_ptr<ConnectionBase> connect(R (T::*f)(Args...), T *t, TaskQueue *queue, ConnectionStore *store = nullptr)
+        {
+            return connect([t, f](Args... args) { return (t->*f)(std::forward<Args>(args)...); }, queue, {}, store);
         }
 
         template <typename T>

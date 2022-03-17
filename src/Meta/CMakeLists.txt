@@ -1,5 +1,6 @@
 Project(Meta VERSION 1.0.0)
 
+option(META_ENABLE_MESSAGE_LOGGING "Enables Logging functionality for sync messages")
 
 set(sources)
 
@@ -12,10 +13,13 @@ FolderSources(sources "" "" metaforward.h metalib.h)
 		FolderSources(sources serialize container action.h serializable.h synced.h syncablecontainer.h serializablecontainer.h serialized.h syncable.cpp syncable.h)
 		FolderSources(sources serialize formatter iniformatter.cpp iniformatter.h jsonformatter.cpp jsonformatter.h safebinaryformatter.cpp safebinaryformatter.h unsafebinaryformatter.cpp unsafebinaryformatter.h xmlformatter.cpp xmlformatter.h)
 		FolderSources(sources serialize hierarchy serializableids.h serializableunit.cpp serializableunit.h serializableunitptr.cpp serializableunitptr.h syncableunit.cpp syncableunit.h toplevelunit.cpp toplevelunit.h serializetable.cpp serializetable.h)
-		FolderSources(sources serialize streams buffered_streambuf.cpp buffered_streambuf.h formattedbufferedstream.cpp formattedbufferedstream.h formattedserializestream.cpp formattedserializestream.h formatter.cpp formatter.h serializestream.cpp serializestream.h serializestreamdata.cpp serializestreamdata.h serializablemapholder.cpp serializablemapholder.h streamresult.cpp streamresult.h syncstreamdata.cpp syncstreamdata.h)
+		FolderSources(sources serialize streams buffered_streambuf.cpp buffered_streambuf.h formattedbufferedstream.cpp formattedbufferedstream.h formattedserializestream.cpp formattedserializestream.h formatter.cpp formatter.h messagelogger.cpp messagelogger.h serializestream.cpp serializestream.h serializestreamdata.cpp serializestreamdata.h serializablemapholder.cpp serializablemapholder.h streamresult.cpp streamresult.h syncstreamdata.cpp syncstreamdata.h)
 	
 
 add_workspace_library(Meta ${sources} SOURCE_ROOT .. PRECOMPILED_HEADER metalib.h)
+
+configure_file(metaconfig.in.h metaconfig.h)
+target_include_directories(Meta PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
 target_link_libraries(Meta PUBLIC Generic Base64)
 

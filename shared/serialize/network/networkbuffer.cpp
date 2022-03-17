@@ -29,7 +29,7 @@ namespace Network {
     {
         int result = mSocket.send(buf, len);
         if (result == -1) {
-            switch (SocketAPI::getError("recv")) {
+            switch (SocketAPI::getError("send")) {
             default:
                 return 0;
             }

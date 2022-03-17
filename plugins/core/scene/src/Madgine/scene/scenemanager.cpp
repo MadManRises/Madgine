@@ -21,7 +21,9 @@
 
 #include "Meta/serialize/configs/controlled.h"
 
-UNIQUECOMPONENT(Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>);
+#include "Meta/serialize/configs/guard.h"
+
+UNIQUECOMPONENT(Engine::Serialize::NoParent<Engine::Scene::SceneManager>);
 
 METATABLE_BEGIN(Engine::Scene::SceneManager)
 //TODO
@@ -32,8 +34,16 @@ MEMBER(mAmbientLightColor)
 MEMBER(mAmbientLightDirection)
 METATABLE_END(Engine::Scene::SceneManager)
 
+static Engine::Threading::DataLock static_lock(Engine::Scene::SceneManager *mgr)
+{
+    return mgr->lock(Engine::AccessMode::WRITE);
+}
+
 SERIALIZETABLE_BEGIN(Engine::Scene::SceneManager)
-FIELD(mEntities, Serialize::ParentCreator<&Engine::Scene::SceneManager::readNonLocalEntity, &Engine::Scene::SceneManager::writeEntity>, Serialize::RequestPolicy::no_requests)
+FIELD(mEntities,
+    Serialize::ParentCreator<&Engine::Scene::SceneManager::readNonLocalEntity, &Engine::Scene::SceneManager::writeEntity>,
+    Serialize::RequestPolicy::no_requests,
+    Serialize::CallableGuard<&static_lock>)
 FIELD(mSceneComponents, Serialize::ControlledConfig<KeyCompare<std::unique_ptr<Engine::Scene::SceneComponentBase>>>)
 SERIALIZETABLE_END(Engine::Scene::SceneManager)
 
@@ -84,16 +94,16 @@ namespace Scene {
         return mSceneComponents.size();
     }
 
-    Threading::DataMutex &SceneManager::mutex()
+    Threading::DataLock SceneManager::lock(AccessMode mode)
     {
-        return mMutex;
+        return Threading::DataLock { mMutex, mode };
     }
 
     void SceneManager::update()
     {
         PROFILE();
 
-        Threading::DataLock lock(mMutex, Threading::AccessMode::WRITE);
+        auto guard = lock(AccessMode::WRITE);
 
         std::chrono::microseconds timeSinceLastFrame = mFrameClock.tick<std::chrono::microseconds>();
 
@@ -177,15 +187,18 @@ namespace Scene {
         return make_tuple(std::ref(*this), local, actualName);
     }
 
-    void SceneManager::writeEntity(Serialize::FormattedSerializeStream &out, const Entity::Entity &entity) const
+    const char *SceneManager::writeEntity(Serialize::FormattedSerializeStream &out, const Entity::Entity &entity) const
     {
         out.beginExtendedWrite("Entity", 1);
         write(out, entity.name(), "name");
+        return "Entity";
     }
 
     Future<Entity::EntityPtr> SceneManager::createEntity(const std::string &behavior, const std::string &name,
         const std::function<void(Entity::Entity &)> &init)
     {
+        assert(mMutex.isHeldWrite());
+
         //ValueType behaviorTable /* = app().table()[behavior]*/;
         ObjectPtr table;
         /*if (behaviorTable.is<ObjectPtr>()) {
@@ -205,6 +218,8 @@ namespace Scene {
 
     Entity::EntityPtr SceneManager::createLocalEntity(const std::string &behavior, const std::string &name)
     {
+        assert(mMutex.isHeldWrite());
+
         //ValueType behaviorTable /* = app().table()[behavior]*/;
         ObjectPtr table;
         /*if (behaviorTable.is<ObjectPtr>()) {

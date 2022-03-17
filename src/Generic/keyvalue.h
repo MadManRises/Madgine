@@ -204,11 +204,11 @@ struct KeyCompare {
     template <typename T1, typename T2>
     constexpr bool operator()(const T1 &_Left, const T2 &_Right) const
     {
-        if constexpr (std::is_same_v<T1, KeyType_t<_Ty>> && std::is_same_v<T2, KeyType_t<_Ty>>)
+        if constexpr (std::same_as<T1, KeyType_t<_Ty>> && std::same_as<T2, KeyType_t<_Ty>>)
             return _Left < _Right;
-        else if constexpr (std::is_same_v<T1, KeyType_t<_Ty>>)
+        else if constexpr (std::same_as<T1, KeyType_t<_Ty>>)
             return _Left < kvKey(_Right);
-        else if constexpr (std::is_same_v<T2, KeyType_t<_Ty>>)
+        else if constexpr (std::same_as<T2, KeyType_t<_Ty>>)
             return kvKey(_Left) < _Right;
         else
             return kvKey(_Left) < kvKey(_Right);

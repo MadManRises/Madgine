@@ -9,10 +9,20 @@ struct NulledPtr {
         : mPtr(ptr)
     {
     }
+    NulledPtr(NulledPtr &&other)
+        : mPtr(std::exchange(other.mPtr, nullptr))
+    {
+    }
     ~NulledPtr()
     {
         mPtr = nullptr;
     }
+
+    NulledPtr& operator=(NulledPtr&& other) {
+        mPtr = std::exchange(other.mPtr, nullptr);
+        return *this;
+    }
+
     operator T *() const
     {
         return mPtr;

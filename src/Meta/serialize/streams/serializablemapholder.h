@@ -3,7 +3,7 @@
 namespace Engine {
 namespace Serialize {
 
-    struct SerializableMapHolder {
+    struct META_EXPORT SerializableMapHolder {
 
         SerializableMapHolder(FormattedSerializeStream &out);     
         SerializableMapHolder(const SerializableMapHolder &) = delete;
@@ -14,7 +14,7 @@ namespace Serialize {
         SerializeStreamData *mData = nullptr;
     };
 
-    struct SerializableListHolder {
+    struct META_EXPORT SerializableListHolder {
 
         SerializableListHolder(FormattedSerializeStream &in);
         SerializableListHolder(const SerializableListHolder &) = delete;

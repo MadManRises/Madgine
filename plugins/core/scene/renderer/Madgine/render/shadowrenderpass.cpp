@@ -46,7 +46,7 @@ namespace Render {
         /* if (!mProgram.available())
             return;*/
 
-        Threading::DataLock lock { mScene.mutex(), Threading::AccessMode::READ };
+        auto guard = mScene.lock(AccessMode::READ);
 
         mScene.updateRender();
 
