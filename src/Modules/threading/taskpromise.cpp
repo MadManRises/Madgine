@@ -3,8 +3,8 @@
 #include "taskpromise.h"
 
 #if ENABLE_TASK_TRACKING
+#    include "Interfaces/debug/stacktrace.h"
 #    include "taskqueue.h"
-#include "Interfaces/debug/stacktrace.h"
 #endif
 
 namespace Engine {
@@ -43,15 +43,18 @@ namespace Threading {
         assert(queue);
         assert(!mQueue);
         mQueue = queue;
-
-#if ENABLE_TASK_TRACKING
-        queue->mTracker.onAssign(std::coroutine_handle<TaskPromiseTypeBase>::from_promise(*this).address(), Debug::StackTrace<2>::getCurrent(2));
-#endif
     }
 
     TaskQueue *TaskPromiseTypeBase::queue() const
     {
         return mQueue;
+    }
+
+    void TaskHandleInitialSuspend::await_resume() noexcept
+    {
+#if ENABLE_TASK_TRACKING
+        Debug::Threading::onAssign(std::coroutine_handle<TaskPromiseTypeBase>::from_promise(*mPromise), mPromise->queue(), Debug::StackTrace<1>::getCurrent(1));
+#endif
     }
 
 }

@@ -57,26 +57,25 @@ namespace UI {
         return "GameManager";
     }
 
-    bool GameManager::init()
+    Engine::Threading::Task<bool> GameManager::init()
     {
-
         mCamera.mPosition = { 0, 0, -10 };
         mCamera.mOrientation = {};
 
         if (mGameWindow) {
-            mGameWindow->getRenderTarget()->addRenderPass(&mSceneRenderer);            
+            mGameWindow->getRenderTarget()->addRenderPass(&mSceneRenderer);
         }
 
-        return GameHandlerBase::init();
+        co_return co_await GameHandlerBase::init();
     }
 
-    void GameManager::finalize() {
-
+    Engine::Threading::Task<void> GameManager::finalize()
+    {
         if (mGameWindow) {
             mGameWindow->getRenderTarget()->removeRenderPass(&mSceneRenderer);
         }
 
-        GameHandlerBase::finalize();
+        co_await GameHandlerBase::finalize();
     }
 
     void GameManager::setWidget(Engine::Widgets::WidgetBase *w)
@@ -85,7 +84,7 @@ namespace UI {
 
         if (widget()) {
             mGameWindow = widget()->getChildRecursive<Engine::Widgets::SceneWindow>("GameView");
-            mGameWindow->getRenderTarget()->addRenderPass(&mSceneRenderer);  
+            mGameWindow->getRenderTarget()->addRenderPass(&mSceneRenderer);
 
             mScoreLabel = widget()->getChildRecursive<Engine::Widgets::Label>("Score");
             mLifeLabel = widget()->getChildRecursive<Engine::Widgets::Label>("Life");
@@ -184,7 +183,7 @@ namespace UI {
         Engine::Ray ray = mCamera.mousePointToRay(Engine::Vector2 { static_cast<float>(evt.windowPosition.x), static_cast<float>(evt.windowPosition.y) }, mGameWindow->getAbsoluteSize().xy());
 
         Engine::Scene::Entity::EntityPtr hit;
-        float distance = std::numeric_limits<float>::max();        
+        float distance = std::numeric_limits<float>::max();
 
         for (const Engine::Scene::Entity::EntityPtr &e : mBricks) {
             const Engine::AABB &aabb = e->getComponent<Engine::Scene::Entity::Mesh>()->aabb();

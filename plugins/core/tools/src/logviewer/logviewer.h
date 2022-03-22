@@ -23,18 +23,16 @@ namespace Tools {
 
     protected:
         struct LogEntry {
-            LogEntry(std::string msg, Util::MessageType type, const char *file, Threading::WorkGroup *workgroup)
+            LogEntry(std::string msg, Util::MessageType type, const char *file)
                 : mMsg(msg)
                 , mType(type)
                 , mFile(file)
-                , mWorkGroup(workgroup)
             {
             }
 
             std::string mMsg;
             Util::MessageType mType;
             const char *mFile;
-            Threading::WorkGroup *mWorkGroup;
         };
 
         bool filter(const LogEntry &entry);
@@ -42,6 +40,7 @@ namespace Tools {
         void addFilteredMessage(size_t index);
 
     private:
+        Threading::WorkGroup *mWorkgroup;
         std::deque<LogEntry> mEntries;
         std::array<size_t, Util::MessageType::COUNT> mMsgCounts;
         std::mutex mMutex;

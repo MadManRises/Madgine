@@ -1,5 +1,7 @@
 #include "../toolslib.h"
 
+#if ENABLE_MESSAGE_LOGGING
+
 #include "messagelogger.h"
 
 #include "imgui/imgui.h"
@@ -77,3 +79,5 @@ namespace Tools {
 
 }
 }
+
+#endif

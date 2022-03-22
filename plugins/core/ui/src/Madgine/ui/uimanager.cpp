@@ -38,13 +38,7 @@ namespace UI {
         , mGuiHandlers(*this)
         , mGameHandlers(*this)
     {
-        window.taskQueue()->addRepeatedTask([this]() {
-            update();
-        });
-        window.taskQueue()->addRepeatedTask([this]() {
-            fixedUpdate();
-        },
-            std::chrono::microseconds { 15000 });
+        
     }
 
     UIManager::~UIManager()
@@ -59,6 +53,14 @@ namespace UI {
 
         for (const std::unique_ptr<GameHandlerBase> &handler : mGameHandlers)
             co_await handler->callInit();
+
+        mWindow.taskQueue()->addRepeatedTask([this]() {
+            update();
+        });
+        mWindow.taskQueue()->addRepeatedTask([this]() {
+            fixedUpdate();
+        },
+            std::chrono::microseconds { 15000 });
 
         co_return true;
     }

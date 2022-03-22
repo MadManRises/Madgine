@@ -13,8 +13,8 @@ namespace UI {
 
         GameManager(Engine::UI::UIManager &ui);
 
-        virtual bool init() override;
-        virtual void finalize() override;
+        virtual Engine::Threading::Task<bool> init() override;
+        virtual Engine::Threading::Task<void> finalize() override;
 
         virtual std::string_view key() const override;
 
@@ -35,9 +35,9 @@ namespace UI {
         Engine::Render::Camera mCamera;
 
     private:
-        Engine::Widgets::SceneWindow* mGameWindow = nullptr;
-        Engine::Widgets::Label* mScoreLabel = nullptr;
-        Engine::Widgets::Label* mLifeLabel = nullptr;
+        Engine::Widgets::SceneWindow *mGameWindow = nullptr;
+        Engine::Widgets::Label *mScoreLabel = nullptr;
+        Engine::Widgets::Label *mLifeLabel = nullptr;
 
         int mScore = 0;
         int mLife = 100000;

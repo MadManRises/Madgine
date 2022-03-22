@@ -12,7 +12,6 @@ METATABLE_END(Engine::Scene::SceneComponentBase)
 SERIALIZETABLE_BEGIN(Engine::Scene::SceneComponentBase)
 SERIALIZETABLE_END(Engine::Scene::SceneComponentBase)
 
-
 namespace Engine {
 
 namespace Scene {
@@ -21,13 +20,14 @@ namespace Scene {
     {
     }
 
-    bool SceneComponentBase::init()
+    Threading::Task<bool> SceneComponentBase::init()
     {
-        return true;
+        co_return true;
     }
 
-    void SceneComponentBase::finalize()
+    Threading::Task<void> SceneComponentBase::finalize()
     {
+        co_return;
     }
 
     SceneManager &SceneComponentBase::sceneMgr() const

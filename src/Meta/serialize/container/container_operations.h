@@ -222,12 +222,24 @@ namespace Serialize {
         }
     };
 
+    template <typename C>
+    concept SerializeRange = !StringViewable<C>;
+
     template <std::ranges::range C, typename... Configs>
-    requires(!StringViewable<C>) struct Operations<C, Configs...> : ContainerOperations<C, Configs...> {
+    requires SerializeRange<C>
+    struct Operations<C, Configs...> : ContainerOperations<C, Configs...> {
     };
 
-    template <typename C, typename Base, typename... Configs>
-    struct Operations<container_api_impl<C, Base>, Configs...> : Operations<C, Configs...> {};
+    template <typename C>
+    concept SerializeWrappedRange = SerializeRange<C> && requires
+    {
+        typename underlying_container<C>::type;
+    };
+
+    template <std::ranges::range C, typename... Configs>
+    requires SerializeWrappedRange<C>
+    struct Operations<C, Configs...> : Operations<typename underlying_container<C>::type, Configs...> {
+    };
 
     template <typename C, typename Observer, typename OffsetPtr>
     struct SerializableContainerImpl;

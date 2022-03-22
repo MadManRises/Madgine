@@ -32,18 +32,18 @@ namespace Input {
     {
     }
 
-    bool PlayerController::init()
+    Threading::Task<bool> PlayerController::init()
     {
         sceneMgr().app().getGlobalAPIComponent<ControlsManager>().addAxisEventListener(this);
 
-        return VirtualScope::init();
+        co_return co_await VirtualScope::init();
     }
 
-    void PlayerController::finalize()
+    Threading::Task<void> PlayerController::finalize()
     {
-        VirtualScope::finalize();
+        co_await VirtualScope::finalize();
 
-        sceneMgr().app().getGlobalAPIComponent<ControlsManager>().removeAxisEventListener(this);        
+        sceneMgr().app().getGlobalAPIComponent<ControlsManager>().removeAxisEventListener(this);
     }
 
     bool PlayerController::onAxisEvent(const AxisEventArgs &arg)

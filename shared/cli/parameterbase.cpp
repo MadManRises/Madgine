@@ -59,7 +59,7 @@ namespace CLI {
 
     std::string ParameterBase::help()
     {
-        std::stringstream ss;
+        std::ostringstream ss;
         ss << StringUtil::join(mOptions, ", ") << ": \t";
         if (mHelp)
             ss << mHelp;

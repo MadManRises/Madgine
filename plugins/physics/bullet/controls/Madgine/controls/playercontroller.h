@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Madgine/scene/scenecomponentcollector.h"
 #include "Madgine/scene/scenecomponentbase.h"
+#include "Madgine/scene/scenecomponentcollector.h"
 
 #include "Madgine/controls/axiseventlistener.h"
 
@@ -14,8 +14,8 @@ namespace Input {
 
         PlayerController(Scene::SceneManager &scene);
 
-        virtual bool init() override;
-        virtual void finalize() override;
+        virtual Threading::Task<bool> init() override;
+        virtual Threading::Task<void> finalize() override;
 
         virtual bool onAxisEvent(const AxisEventArgs &arg) override;
 

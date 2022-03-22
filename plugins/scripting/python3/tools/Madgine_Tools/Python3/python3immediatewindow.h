@@ -20,7 +20,7 @@ namespace Tools {
 
     private:
         std::string mCommandBuffer;
-        std::stringstream mCommandLog;
+        std::ostringstream mCommandLog;
 
         Scripting::Python3::Python3Environment *mEnv = nullptr;
     };

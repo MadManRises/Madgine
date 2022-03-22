@@ -1011,7 +1011,7 @@ namespace Tools {
 
             for (uint32_t i = 0; i < node->dataInCount(); ++i) {
                 if (!node->dataInSource(i) && node->dataInDefault(i).is<std::monostate>()) {
-                    std::stringstream ss;
+                    std::ostringstream ss;
                     ss << "No Input provided for pin '" << node->dataInName(i) << "'!";
                     messages.mErrorMessages.push_back(ss.str());
                 }

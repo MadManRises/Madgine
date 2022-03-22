@@ -9,8 +9,8 @@ namespace Serialize {
 
     StreamError::StreamError(SerializeStream &in, bool binary, const std::string &msg, const char *file, size_t sourceLine)
     {
-        std::stringstream ss;
-        std::stringstream notes;
+        std::ostringstream ss;
+        std::ostringstream notes;
 
         std::ios_base::iostate state = in.state();
         in.clear();

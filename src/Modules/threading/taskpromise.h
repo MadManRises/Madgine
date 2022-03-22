@@ -92,6 +92,37 @@ namespace Threading {
         }
     };
 
+    struct TaskHandleFinalSuspend {
+        bool await_ready() noexcept { return !mHandle; }
+        std::coroutine_handle<> await_suspend(std::coroutine_handle<> self) noexcept
+        {
+            assert(mHandle);
+#if MODULES_ENABLE_TASK_TRACKING
+            Debug::Threading::onReturn(self, mHandle.queue());
+#endif
+            return mHandle.release();
+        }
+        void await_resume() noexcept { }
+
+        TaskHandle mHandle;
+    };
+
+    struct MODULES_EXPORT TaskHandleInitialSuspend {
+        bool await_ready() noexcept { return false; }
+        template <typename T>
+        void await_suspend(std::coroutine_handle<T> self) noexcept
+        {
+#if ENABLE_TASK_TRACKING
+            mPromise = &self.promise();
+#endif
+        }
+        void await_resume() noexcept;
+
+#if ENABLE_TASK_TRACKING
+        TaskPromiseTypeBase *mPromise;
+#endif
+    };
+
     struct MODULES_EXPORT TaskPromiseTypeBase {
         TaskPromiseTypeBase() = default;
         TaskPromiseTypeBase(const TaskPromiseTypeBase &) = delete;
@@ -102,30 +133,20 @@ namespace Threading {
                 mState->notifyDestroyed();
         }
 
-        std::suspend_always initial_suspend() noexcept
+        TaskHandleInitialSuspend initial_suspend() noexcept
         {
             return {};
         }
 
-        auto final_suspend() noexcept
+        TaskHandleFinalSuspend final_suspend() noexcept
         {
-            struct TaskHandleAwaiter {
-                bool await_ready() noexcept { return !mHandle; }
-                std::coroutine_handle<> await_suspend(std::coroutine_handle<> self) noexcept
-                {
-                    assert(mHandle);
-                    return mHandle.release();
-                }
-                void await_resume() noexcept { }
-
-                TaskHandle mHandle;
-            };
             if (mState)
                 mState->finalize();
-            return TaskHandleAwaiter { std::move(mThenReturn) };
+            return { std::move(mThenReturn) };
         }
 
-        void unhandled_exception() { 
+        void unhandled_exception()
+        {
             if (mState) {
 
             } else {

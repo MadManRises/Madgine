@@ -7,18 +7,18 @@ namespace Debug {
 
     namespace Threading {
 
-        MODULES_EXPORT void onAssign(std::coroutine_handle<Engine::Threading::TaskPromiseTypeBase> handle, StackTrace<2> stacktrace);
+        MODULES_EXPORT void onAssign(const std::coroutine_handle<> &handle, Engine::Threading::TaskQueue *queue, StackTrace<1> stacktrace);
         MODULES_EXPORT void onDestroy(Engine::Threading::TaskPromiseTypeBase &promise);        
 
         MODULES_EXPORT void onResume(const Engine::Threading::TaskHandle &handle);
         MODULES_EXPORT void onSuspend(Engine::Threading::TaskQueue *queue);
 
-        MODULES_EXPORT void onEnter(const Engine::Threading::TaskHandle &handle);
-        MODULES_EXPORT void onReturn(const Engine::Threading::TaskHandle &handle);
+        MODULES_EXPORT void onEnter(const std::coroutine_handle<> &handle, Engine::Threading::TaskQueue *queue);
+        MODULES_EXPORT void onReturn(const std::coroutine_handle<> &handle, Engine::Threading::TaskQueue *queue);
 
         struct MODULES_EXPORT TaskTracker {
 
-            void onAssign(void *ident, StackTrace<2> stacktrace);
+            void onAssign(void *ident, StackTrace<1> stacktrace);
             void onEnter(void *ident);
             void onReturn(void *ident);
             void onResume(void *ident);
@@ -37,11 +37,11 @@ namespace Debug {
                 std::chrono::high_resolution_clock::time_point mTimePoint = std::chrono::high_resolution_clock::now();
                 union {
                     std::thread::id mThread;
-                    StackTrace<2> mStackTrace;
+                    StackTrace<1> mStackTrace;
                 };
                 void *mIdentifier = nullptr;
 
-                Event(Type type, void *ident, StackTrace<2> stacktrace)
+                Event(Type type, void *ident, StackTrace<1> stacktrace)
                     : mType(type)
                     , mIdentifier(ident)
                     , mStackTrace(stacktrace)

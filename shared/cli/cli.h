@@ -10,7 +10,7 @@ namespace CLI {
         CLICore(int argc, char **argv);
         ~CLICore();
 
-        std::string help();
+        void help();
 
 		static bool isInitialized();
         static const CLICore &getSingleton();

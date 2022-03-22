@@ -36,7 +36,7 @@ struct MADGINE_CODEGEN_EXPORT CppFile : File {
         }
 
         CppFile *mFile;
-        std::stringstream mStream;
+        std::ostringstream mStream;
     };
 
     CustomCodeBuilder operator<<(std::string_view code);

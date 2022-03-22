@@ -37,6 +37,7 @@ namespace Tools {
 
     LogViewer::LogViewer(ImRoot &root)
         : Tool<LogViewer>(root)
+        , mWorkgroup(&Threading::WorkGroup::self())
     {
         for (Util::MessageType type : Util::MessageType::values()) {
             mMsgCounts[type] = 0;
@@ -82,12 +83,11 @@ namespace Tools {
             auto end = mEntries.end();
             auto begin = mEntries.size() <= 100 ? mEntries.begin() : std::prev(end, 100);
 
-            if (ImGui::BeginTable("Messages", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Hideable)) {
+            if (ImGui::BeginTable("Messages", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Hideable)) {
 
                 ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide);
                 ImGui::TableSetupColumn("Message", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide);
                 ImGui::TableSetupColumn("Source", ImGuiTableColumnFlags_WidthStretch);
-                ImGui::TableSetupColumn("Workgroup", ImGuiTableColumnFlags_WidthStretch);
                 ImGui::TableSetupScrollFreeze(0, 1);
                 ImGui::TableHeadersRow();
 
@@ -112,9 +112,6 @@ namespace Tools {
                                 ImGui::TableNextColumn();
                                 if (entry.mFile)
                                     ImGui::Text("%s", entry.mFile);
-                                ImGui::TableNextColumn();
-                                if (entry.mWorkGroup)
-                                    ImGui::Text(entry.mWorkGroup->name());
                                 --count;
                             }
                         }
@@ -136,9 +133,11 @@ namespace Tools {
 
     void LogViewer::messageLogged(std::string_view message, Util::MessageType lml, const char *file, Util::Log *log)
     {
+        if (mWorkgroup != &Threading::WorkGroup::self())
+            return;
         ++mMsgCounts[lml];
         std::lock_guard guard { mMutex };
-        if (filter(mEntries.emplace_back(std::string { message }, lml, file, &Threading::WorkGroup::self())))
+        if (filter(mEntries.emplace_back(std::string { message }, lml, file)))
             addFilteredMessage(mEntries.size() - 1);
     }
 

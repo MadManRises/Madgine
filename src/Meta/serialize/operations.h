@@ -296,7 +296,7 @@ namespace Serialize {
     template <typename T, typename... Configs>
     StreamResult applyMap(FormattedSerializeStream &in, T &t, bool success)
     {
-        if constexpr (requires { &Operations<T>::applyMap; })
+        if constexpr (requires { &Operations<T, Configs...>::applyMap; })
             return Operations<T, Configs...>::applyMap(in, t, success);
         else
             return {};
@@ -305,14 +305,14 @@ namespace Serialize {
     template <typename T, typename... Configs>
     void setSynced(T &t, bool b)
     {
-        if constexpr (requires { &Operations<T>::setSynced; })
+        if constexpr (requires { &Operations<T, Configs...>::setSynced; })
             Operations<T, Configs...>::setSynced(t, b);
     }
 
     template <typename T, typename... Configs>
     void setActive(T &t, bool active, bool existenceChanged)
     {
-        if constexpr (requires { &Operations<T>::setActive; })
+        if constexpr (requires { &Operations<T, Configs...>::setActive; })
             Operations<T, Configs...>::setActive(t, active, existenceChanged);
     }
 

@@ -57,7 +57,7 @@ namespace Tools {
                 ImGui::BeginChild(ImGui::GetID(&block));
                 ImGui::Text("Block");
                 ImGui::Text("Range: %p - %p", block.mAddresses.front(), block.mAddresses.back());
-                std::stringstream ss;
+                std::ostringstream ss;
                 for (size_t i : block.mTargets)
                     ss << " " << i;
                 ImGui::Text("%s", ("Targets:" + ss.str()).c_str());

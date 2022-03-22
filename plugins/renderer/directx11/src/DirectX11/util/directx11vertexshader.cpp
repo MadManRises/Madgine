@@ -144,7 +144,7 @@ namespace Render {
             std::list<std::string> shaderMacroBuffer;
             std::vector<D3D_SHADER_MACRO> shaderMacros;
 
-            std::stringstream ss;
+            std::ostringstream ss;
 
             for (const AttributeDescriptor &att : format->mAttributes()) {
                 if (att) {

@@ -110,7 +110,7 @@ namespace Render {
             res->setPath(dir / (std::string { res->name() } + (type == VertexShader ? "_VS" : "_PS") + ".glsl"));
         }
 
-        std::stringstream ss;
+        std::ostringstream ss;
         OpenGLShaderCodeGen::generate(ss, file, type);
 
         {

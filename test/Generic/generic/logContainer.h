@@ -2,7 +2,7 @@
 
 template <typename T>
 void logContainer(const T &c) {
-    std::stringstream ss;
+    Engine::Util::LogDummy ss { Engine::Util::MessageType::INFO_TYPE };
     bool first = true;
     for (const auto &i : c) {
         if (first) {
@@ -12,5 +12,4 @@ void logContainer(const T &c) {
         }
         ss << i;
     }
-    LOG(ss.str());
 }

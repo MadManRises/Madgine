@@ -22,7 +22,7 @@ namespace Util {
         }
 
     private:
-        std::stringstream mStream;
+        std::ostringstream mStream;
         MessageType mLvl;
         const char *mFile;
     };

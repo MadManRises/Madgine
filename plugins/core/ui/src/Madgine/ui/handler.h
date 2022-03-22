@@ -44,8 +44,8 @@ namespace UI {
         Threading::TaskQueue *taskQueue() const;
 
     protected:
-        virtual bool init();
-        virtual void finalize();
+        virtual Threading::Task<bool> init();
+        virtual Threading::Task<void> finalize();
 
         friend struct MadgineObject<Handler>;
 

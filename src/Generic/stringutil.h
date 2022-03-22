@@ -107,7 +107,7 @@ namespace StringUtil {
     template <typename Cont>
     std::string join(Cont &&cont, const char *sep)
     {
-        std::stringstream ss;
+        std::ostringstream ss;
         bool first = true;
         for (auto &&element : cont) {
             if (first)

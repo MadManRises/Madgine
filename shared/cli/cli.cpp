@@ -59,7 +59,7 @@ namespace CLI {
         }
 
         if (showHelp)
-            LOG(help());
+            help();
     }
 
     CLICore::~CLICore()
@@ -68,14 +68,13 @@ namespace CLI {
         sSingleton = nullptr;
     }
 
-    std::string CLICore::help()
+    void CLICore::help()
     {
-        std::stringstream ss;
-        ss << "Help:\n";
+        Util::LogDummy out { Util::MessageType::INFO_TYPE };
+        out << "Help:\n";
         for (ParameterBase *parameter : parameters()) {
-            ss << parameter->help() << "\n";
+            out << parameter->help() << "\n";
         }
-        return ss.str();
     }
 
     const CLICore &CLICore::getSingleton()

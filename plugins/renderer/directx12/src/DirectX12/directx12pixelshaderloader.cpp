@@ -57,7 +57,7 @@ namespace Render {
             res->setPath(dir / (std::string { res->name() } + ".PS_hlsl"));
         }
 
-        std::stringstream ss;
+        std::ostringstream ss;
         DirectX12ShaderCodeGen::generate(ss, file, 1);
 
         {

@@ -28,7 +28,7 @@ namespace Serialize {
         bool mBinary;
         const char *mFile;
         size_t mLine;
-        std::stringstream mMsg;
+        std::ostringstream mMsg;
 
         StreamResultBuilder(StreamState type, SerializeStream &stream, bool binary, const char *file, size_t line)
             : mType(type)

@@ -35,14 +35,15 @@ namespace UI {
     {
     }
 
-    bool Handler::init()
+    Threading::Task<bool> Handler::init()
     {
-        return true;
+        co_return true;
     }
 
-    void Handler::finalize()
+    Threading::Task<void> Handler::finalize()
     {
         mWidget = nullptr;
+        co_return;
     }
 
     void Handler::setWidget(Widgets::WidgetBase *widget)
@@ -104,7 +105,7 @@ namespace UI {
         return false;
     }
 
-    void Handler::onAxisEvent(const Input::AxisEventArgs& evt)
+    void Handler::onAxisEvent(const Input::AxisEventArgs &evt)
     {
     }
 
@@ -116,7 +117,7 @@ namespace UI {
     {
         return mWidget;
     }
-        
+
     Threading::TaskQueue *Handler::taskQueue() const
     {
         return mUI.taskQueue();

@@ -18,6 +18,15 @@ namespace Scripting {
             Py_TYPE(self)->tp_free(self);
         }
 
+        template <typename T, auto p>
+        static PyObject *
+        PyStr(PyObject *self)
+        {
+            std::ostringstream ss;
+            ss << (((T*)self)->*p);
+            return PyUnicode_FromString(ss.str().c_str());
+        }
+
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const ValueType &val);
 
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(std::monostate);

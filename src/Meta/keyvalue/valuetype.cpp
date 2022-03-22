@@ -96,37 +96,37 @@ std::string ValueType::toShortString() const
             return scope.name();
         },
         [](const Vector2 &v) {
-            std::stringstream ss;
+            std::ostringstream ss;
             ss << v;
             return ss.str();
         },
         [](const Vector3 &v) {
-            std::stringstream ss;
+            std::ostringstream ss;
             ss << v;
             return ss.str();
         },
         [](const Vector4 &v) {
-            std::stringstream ss;
+            std::ostringstream ss;
             ss << v;
             return ss.str();
         },
         [](const Vector2i &v) {
-            std::stringstream ss;
+            std::ostringstream ss;
             ss << v;
             return ss.str();
         },
         [](const Vector3i &v) {
-            std::stringstream ss;
+            std::ostringstream ss;
             ss << v;
             return ss.str();
         },
         [](const Vector4i &v) {
-            std::stringstream ss;
+            std::ostringstream ss;
             ss << v;
             return ss.str();
         },
         [](const Quaternion &q) {
-            std::stringstream ss;
+            std::ostringstream ss;
             ss << q;
             return ss.str();
         },

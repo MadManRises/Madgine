@@ -129,7 +129,7 @@ namespace CLI {
 
         std::string help() override
         {
-            std::stringstream ss;
+            std::ostringstream ss;
             ss << ParameterBase::help();
             ss << " [";
             bool first = true;

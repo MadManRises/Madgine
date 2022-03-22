@@ -56,11 +56,12 @@ namespace Tools {
             ImGuiIO &io = ImGui::GetIO();
 
             bool isHovered = false;
+            float mouseRatio;
 
             Threading::TaskQueue *hoveredTaskQueue = nullptr;
             void *hoveredId = nullptr;
             bool renderHovered = true;
-            Debug::StackTrace<2> hoveredTraceback;
+            Debug::StackTrace<1> hoveredTraceback;
 
             std::chrono::high_resolution_clock::time_point timeAreaBegin = mStart + std::chrono::duration_cast<std::chrono::high_resolution_clock::duration>(std::chrono::duration<float> { mScroll / 1000.0f });
             std::chrono::high_resolution_clock::time_point timeAreaEnd = timeAreaBegin + std::chrono::duration_cast<std::chrono::high_resolution_clock::duration>(std::chrono::duration<float> { 1.0f / mZoom });
@@ -83,69 +84,140 @@ namespace Tools {
                 ImGui::NextColumn();
 
                 Rect2 plotRect = beginPlot();
+                mouseRatio = (ImGui::GetMousePos().x - plotRect.mTopLeft.x) / plotRect.mSize.x;
+                ImVec2 keep = ImGui::GetCursorScreenPos();
 
                 isHovered |= ImGui::IsItemHovered(); // Hovered
+                bool foundTraceback = false;
 
                 std::lock_guard guard { queue->mTracker.mMutex };
                 auto begin = queue->mTracker.events().begin();
                 auto end = queue->mTracker.events().end();
                 auto cmp1 = [](const Debug::Threading::TaskTracker::Event &event, const std::chrono::high_resolution_clock::time_point &t) { return event.mTimePoint < t; };
-                auto it = std::lower_bound(begin, end, timeAreaBegin, cmp1);
+                auto start = std::lower_bound(begin, end, timeAreaBegin, cmp1);
                 auto cmp2 = [](const std::chrono::high_resolution_clock::time_point &t, const Debug::Threading::TaskTracker::Event &event) { return t < event.mTimePoint; };
-                int i = std::distance(begin, it) % 4;
-                end = std::upper_bound(it, end, timeAreaEnd, cmp2);
+                end = std::upper_bound(start, end, timeAreaEnd, cmp2);
 
-                while (it != end) {
+                bool found = false;
+
+                for (auto it = start; it != end; ++it) {
+                    if (it->mType != Debug::Threading::TaskTracker::Event::ASSIGN) {
+                        found = it->mType == Debug::Threading::TaskTracker::Event::RESUME;
+                        break;
+                    }
+                }
+
+                auto it = start;
+                if (!found) {
+                    while (it != begin && it->mType != Debug::Threading::TaskTracker::Event::RESUME)
+                        --it;
+                }
+
+                struct Plot {
+                    float x;
+                    float x_end;
+                    void *id;
+                    size_t depth;
+                };
+                int i = 0;
+                auto plot = [&](Plot &p) {
+                    p.x_end = std::max(p.x_end, p.x + 1.0f);
+
+                    ImU32 color = colors[(i++ + p.depth) % 4];
+                    if (mHoveredTaskQueue == queue && mHoveredId == p.id)
+                        color += IM_COL32(50, 50, 50, 0);
+                    draw_list->AddRectFilled({ plotRect.mTopLeft.x + p.x, plotRect.mTopLeft.y }, { plotRect.mTopLeft.x + p.x_end, plotRect.bottom() - 5.0f * p.depth }, color);
+                    ImGui::SetCursorScreenPos({ plotRect.mTopLeft.x + p.x, plotRect.mTopLeft.y });
+                    ImGui::InvisibleButton("id", { p.x_end - p.x, plotRect.mSize.y - 5.0f * p.depth }, ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
+
+                    if (ImGui::IsItemHovered()) {
+                        hoveredTaskQueue = queue;
+                        hoveredId = p.id;
+                    }
+                };
+
+                Plot p {
+                    0.0f,
+                    plotRect.mSize.x,
+                    nullptr,
+                    0
+                };
+                bool suspended = true;
+                std::stack<Plot> plots;
+                std::stack<std::pair<float, void *>> xs;
+
+                for (; it != end; ++it) {
                     const Debug::Threading::TaskTracker::Event &ev = *it;
                     switch (ev.mType) {
-                    case Debug::Threading::TaskTracker::Event::RESUME: {
-                    
-                        float x = getEventCoordinate(ev.mTimePoint, plotRect.mSize.x);
-                        float x_end = plotRect.mSize.x;
-                        auto it2 = std::next(it);
-                        bool loop = true;
-                        while (it2 != end && loop) {
-                            const Debug::Threading::TaskTracker::Event &ev2 = *it2;
-                            switch (ev2.mType) {
-                            case Debug::Threading::TaskTracker::Event::SUSPEND:
-                                x_end = getEventCoordinate(ev2.mTimePoint, plotRect.mSize.x);
-                                loop = false;
-                                break;
-                            case Debug::Threading::TaskTracker::Event::RESUME:
-                                throw 0;
-                                break;
-                            }
-                            ++it2;
-                        }
-                        x_end = std::max(x_end, x + 1.0f);
-                        ImU32 color = colors[i];
-                        if (mHoveredTaskQueue == queue && mHoveredId == ev.mIdentifier)
-                            color += IM_COL32(50, 50, 50, 0);
-                        draw_list->AddRectFilled({ plotRect.mTopLeft.x + x, plotRect.mTopLeft.y }, { plotRect.mTopLeft.x + x_end, plotRect.bottom() }, color);
-                        ImGui::SetCursorScreenPos({ plotRect.mTopLeft.x + x, plotRect.mTopLeft.y });
-                        ImGui::InvisibleButton("id", { x_end - x, plotRect.mSize.y }, ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
-
-                        if (ImGui::IsItemHovered()) {
-                            hoveredTaskQueue = queue;
-                            hoveredId = ev.mIdentifier;
-                        }
-
-                        i = (i + 1) % 4;
-                        break;
-                        }
                     case Debug::Threading::TaskTracker::Event::ASSIGN:
                         if (mHoveredTaskQueue == queue && mHoveredId == ev.mIdentifier) {
+                            foundTraceback = true;
                             hoveredTraceback = ev.mStackTrace;
                         }
                         break;
+                    case Debug::Threading::TaskTracker::Event::RESUME:
+                        p.x = getEventCoordinate(ev.mTimePoint, plotRect.mSize.x);
+                        p.id = ev.mIdentifier;
+                        assert(suspended);
+                        suspended = false;
+                        break;
+                    case Debug::Threading::TaskTracker::Event::SUSPEND:
+                        assert(xs.empty());
+                        p.x_end = getEventCoordinate(ev.mTimePoint, plotRect.mSize.x);
+                        plots.push(p);
+                        p.x = 0.0f;
+                        p.x_end = plotRect.mSize.x;
+                        p.id = nullptr;
+                        assert(!suspended);
+                        suspended = true;
+                        break;
+                    case Debug::Threading::TaskTracker::Event::ENTER:
+                        suspended = false;
+                        xs.push({ getEventCoordinate(ev.mTimePoint, plotRect.mSize.x), ev.mIdentifier });
+                        break;
+                    case Debug::Threading::TaskTracker::Event::RETURN:
+                        float x = 0.0f;
+                        if (!xs.empty()) {
+                            assert(xs.top().second == ev.mIdentifier);
+                            x = xs.top().first;
+                            xs.pop();
+                        }
+                        plots.push({ x, getEventCoordinate(ev.mTimePoint, plotRect.mSize.x), ev.mIdentifier, xs.size() + 1 });
+                        break;
                     }
-                    ++it;
+                }
+                assert(!suspended || xs.empty());
+
+                while (!xs.empty()) {
+                    plots.push({ xs.top().first, plotRect.mSize.x, xs.top().second, xs.size() });
+                    xs.pop();
                 }
 
+                if (!suspended)
+                    plot(p);
+                while (!plots.empty()) {
+                    plot(plots.top());
+                    plots.pop();
+                }
+
+                ImGui::SetCursorScreenPos(keep);
+
                 ImGui::NextColumn();
+
+                if (!foundTraceback && mHoveredTaskQueue == queue) {
+                    it = start;
+                    while (it != begin) {
+                        --it;
+                        if (it->mType == Debug::Threading::TaskTracker::Event::ASSIGN && it->mIdentifier == mHoveredId) {
+                            hoveredTraceback = it->mStackTrace;
+                            break;
+                        }
+                    }
+                }
             }
 
             //ImGui::Text("Scroll");
+            ImGui::Text("%f", mouseRatio);
 
             ImGui::NextColumn();
 
@@ -157,9 +229,13 @@ namespace Tools {
             ImGui::EndColumns();
 
             ImGui::Text("%f < %f < %f", 0.0f, mScroll, fullPlotSize);
+            ImGui::DragFloat("debug", &mScroll);
 
             if (isHovered) {
-                mZoom *= powf(1.1f, io.MouseWheel);
+                float factor = powf(1.1f, io.MouseWheel);
+                mZoom *= factor;
+                float mouseOffset = std::chrono::duration_cast<std::chrono::duration<float>>(timeAreaEnd - timeAreaBegin).count() * mouseRatio;
+                mScroll += 1000.0f * mouseOffset * (1.0f - 1.0f / factor);
             }
 
             if (mHoveredTaskQueue != hoveredTaskQueue || mHoveredId != hoveredId) {
@@ -171,7 +247,7 @@ namespace Tools {
 
             if (renderHovered && mHoveredId) {
                 ImGui::BeginTooltip();
-                for (Debug::TraceBack& tb : hoveredTraceback.calculateReadable()) {
+                for (Debug::TraceBack &tb : hoveredTraceback.calculateReadable()) {
                     ImGui::Text("%s", tb.mFunction);
                 }
                 ImGui::EndTooltip();
@@ -212,6 +288,8 @@ namespace Tools {
     float TaskTracker::getEventCoordinate(std::chrono::high_resolution_clock::time_point t, float pixelWidth)
     {
         float timePoint = std::chrono::duration_cast<std::chrono::duration<float>>(t - mStart).count() - mScroll / 1000.0f;
+        if (timePoint < 0.0f)
+            timePoint = 0.0f;
         return (timePoint * mZoom) * pixelWidth;
     }
 }

@@ -75,6 +75,9 @@ namespace Threading {
             }
             mHandle->setQueue(handle.queue());
             mHandle->then_return(std::move(handle));
+#if MODULES_ENABLE_TASK_TRACKING
+            Debug::Threading::onEnter(mHandle.get(), mHandle->queue());
+#endif
             return mHandle.get();
         }
         T await_resume() noexcept

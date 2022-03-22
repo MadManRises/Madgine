@@ -1,5 +1,7 @@
 #pragma once
 
+#if ENABLE_MESSAGE_LOGGING
+
 #include "../toolbase.h"
 #include "../toolscollector.h"
 
@@ -29,3 +31,5 @@ namespace Tools {
 }
 
 RegisterType(Engine::Tools::MessageLogger);
+
+#endif

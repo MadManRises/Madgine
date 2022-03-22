@@ -22,7 +22,7 @@ float Distance(const Ray &ray, const Vector3 &point, float *rayClosestParameter)
 UpTo<float, 2> Intersect(const Ray &ray, const Sphere &sphere)
 {
     Vector3 oc = ray.mPoint - sphere.mCenter;
-    float a = ray.mDir.dotProduct(ray.mDir);
+    float a = 1.0f/* ray.mDir.dotProduct(ray.mDir) */;
     float b = 2.0f * oc.dotProduct(ray.mDir);
     float c = oc.dotProduct(oc) - sphere.mRadius * sphere.mRadius;
     float discriminant = b * b - 4 * a * c;

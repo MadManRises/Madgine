@@ -73,8 +73,8 @@ namespace Physics {
         void setAirDensity(float density);
 
     protected:
-        virtual bool init() override;
-        virtual void finalize() override;
+        virtual Threading::Task<bool> init() override;
+        virtual Threading::Task<void> finalize() override;
 
         virtual void update(std::chrono::microseconds, bool paused) override;
 

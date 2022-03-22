@@ -83,7 +83,7 @@ namespace Render {
             res->setPath(dir / (std::string { res->name() } + ".GS_hlsl"));
         }
 
-        std::stringstream ss;
+        std::ostringstream ss;
         DirectX11ShaderCodeGen::generate(ss, file, 1);
 
         {

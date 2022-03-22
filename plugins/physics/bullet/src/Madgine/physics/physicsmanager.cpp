@@ -121,20 +121,20 @@ namespace Physics {
         std::erase(mListener, listener);
     }
 
-    bool PhysicsManager::init()
+    Threading::Task<bool> PhysicsManager::init()
     {
         mData = std::make_unique<PhysicsData>();
 
         gContactAddedCallback = &PhysicsManager::sContactCallback;
 
-        return VirtualScope::init();
+        co_return co_await VirtualScope::init();
     }
 
-    void PhysicsManager::finalize()
+    Threading::Task<void> PhysicsManager::finalize()
     {
         mData.reset();
 
-        VirtualScope::finalize();
+        co_await VirtualScope::finalize();
     }
 
     void PhysicsManager::update(std::chrono::microseconds timeSinceLastFrame, bool paused)
