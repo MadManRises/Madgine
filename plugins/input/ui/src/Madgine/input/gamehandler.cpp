@@ -8,21 +8,21 @@
 
 #include "Modules/uniquecomponent/uniquecomponentregistry.h"
 
-DEFINE_UNIQUE_COMPONENT(Engine::UI, GameHandler)
+DEFINE_UNIQUE_COMPONENT(Engine::Input, GameHandler)
 
-METATABLE_BEGIN_BASE(Engine::UI::GameHandlerBase, Engine::UI::Handler)
-METATABLE_END(Engine::UI::GameHandlerBase)
+METATABLE_BEGIN_BASE(Engine::Input::GameHandlerBase, Engine::Input::Handler)
+METATABLE_END(Engine::Input::GameHandlerBase)
 
-SERIALIZETABLE_INHERIT_BEGIN(Engine::UI::GameHandlerBase, Engine::UI::Handler)
-SERIALIZETABLE_END(Engine::UI::GameHandlerBase)
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Input::GameHandlerBase, Engine::Input::Handler)
+SERIALIZETABLE_END(Engine::Input::GameHandlerBase)
 
 
 namespace Engine {
-namespace UI {
+namespace Input {
 
     GameHandlerBase::GameHandlerBase(UIManager &ui)
         : Handler(ui)
-        , mCurrentMouseButton(Input::MouseButton::NO_BUTTON)
+        , mCurrentMouseButton(MouseButton::NO_BUTTON)
         , mDragging(false)
         , mSingleClick(false)
     {
@@ -34,11 +34,11 @@ namespace UI {
         onPointerDragAbort();
     }
 
-    void GameHandlerBase::onPointerMove(const Input::PointerEventArgs &me)
+    void GameHandlerBase::onPointerMove(const PointerEventArgs &me)
     {
-        Input::PointerEventArgs args = me;
+        PointerEventArgs args = me;
         clampToWindow(args);
-        if (mCurrentMouseButton != Input::MouseButton::NO_BUTTON) {
+        if (mCurrentMouseButton != MouseButton::NO_BUTTON) {
             args.button = mCurrentMouseButton;
             if (!mDragging && mSingleClick && fabs(args.windowPosition.x - mDragStart.x) + fabs(args.windowPosition.y - mDragStart.y) > mPointerDragModes[mCurrentMouseButton].mThreshold)
         {
@@ -59,18 +59,18 @@ namespace UI {
         }
     }
 
-    void GameHandlerBase::onPointerDown(const Input::PointerEventArgs &me)
+    void GameHandlerBase::onPointerDown(const PointerEventArgs &me)
     {
-        if (mCurrentMouseButton == Input::MouseButton::NO_BUTTON) {
+        if (mCurrentMouseButton == MouseButton::NO_BUTTON) {
             mCurrentMouseButton = me.button;
             mSingleClick = true;
             mDragStart = me.windowPosition;
         }
     }
 
-    void GameHandlerBase::onPointerUp(const Input::PointerEventArgs &me)
+    void GameHandlerBase::onPointerUp(const PointerEventArgs &me)
     {
-        Input::PointerEventArgs args = me;
+        PointerEventArgs args = me;
         clampToWindow(args);
         if (args.button == mCurrentMouseButton) {
             if (mDragging) {
@@ -83,27 +83,27 @@ namespace UI {
                 mSingleClick = false;
                 onPointerClick(args);
             }
-            mCurrentMouseButton = Input::MouseButton::NO_BUTTON;
+            mCurrentMouseButton = MouseButton::NO_BUTTON;
         }
     }
 
-    void GameHandlerBase::onPointerHover(const Input::PointerEventArgs &evt)
+    void GameHandlerBase::onPointerHover(const PointerEventArgs &evt)
     {
     }
 
-    void GameHandlerBase::onPointerClick(const Input::PointerEventArgs &evt)
+    void GameHandlerBase::onPointerClick(const PointerEventArgs &evt)
     {
     }
 
-    void GameHandlerBase::onPointerDragBegin(const Input::PointerEventArgs &evt)
+    void GameHandlerBase::onPointerDragBegin(const PointerEventArgs &evt)
     {
     }
 
-    void GameHandlerBase::onPointerDrag(const Input::PointerEventArgs &evt)
+    void GameHandlerBase::onPointerDrag(const PointerEventArgs &evt)
     {
     }
 
-    void GameHandlerBase::onPointerDragEnd(const Input::PointerEventArgs &evt)
+    void GameHandlerBase::onPointerDragEnd(const PointerEventArgs &evt)
     {
     }
 
@@ -111,7 +111,7 @@ namespace UI {
     {
     }
 
-    void GameHandlerBase::clampToWindow(Input::PointerEventArgs &me)
+    void GameHandlerBase::clampToWindow(PointerEventArgs &me)
     {
         Engine::Vector3 size = mWidget->getAbsoluteSize();
         if (me.windowPosition.x < 0.0f)
@@ -124,7 +124,7 @@ namespace UI {
             me.windowPosition.y = size.y;
     }
 
-    void GameHandlerBase::setPointerDragMode(Input::MouseButton::MouseButton button, MouseDragMode mode, float threshold)
+    void GameHandlerBase::setPointerDragMode(MouseButton::MouseButton button, MouseDragMode mode, float threshold)
     {
         mPointerDragModes[button] = { mode, threshold };
     }

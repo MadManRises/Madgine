@@ -7,26 +7,24 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-UNIQUECOMPONENT(ClickBrick::UI::GameHandler)
+UNIQUECOMPONENT(ClickBrick::GameHandler)
 
-METATABLE_BEGIN_BASE(ClickBrick::UI::GameHandler, Engine::UI::GuiHandlerBase)
-METATABLE_END(ClickBrick::UI::GameHandler)
+METATABLE_BEGIN_BASE(ClickBrick::GameHandler, Engine::Input::GuiHandlerBase)
+METATABLE_END(ClickBrick::GameHandler)
 
-SERIALIZETABLE_INHERIT_BEGIN(ClickBrick::UI::GameHandler, Engine::UI::GuiHandlerBase)
-SERIALIZETABLE_END(ClickBrick::UI::GameHandler)
+SERIALIZETABLE_INHERIT_BEGIN(ClickBrick::GameHandler, Engine::Input::GuiHandlerBase)
+SERIALIZETABLE_END(ClickBrick::GameHandler)
 
 namespace ClickBrick {
-namespace UI {
 
-    GameHandler::GameHandler(Engine::UI::UIManager &ui)
-        : Engine::UI::GuiHandler<GameHandler>(ui, Engine::UI::GuiHandlerBase::WindowType::ROOT_WINDOW)
-    {
-    }
-
-    std::string_view GameHandler::key() const
-    {
-        return "GameHandler";
-    }
-
+GameHandler::GameHandler(Engine::Input::UIManager &ui)
+    : Engine::Input::GuiHandler<GameHandler>(ui, Engine::Input::GuiHandlerBase::WindowType::ROOT_WINDOW)
+{
 }
+
+std::string_view GameHandler::key() const
+{
+    return "GameHandler";
+}
+
 }

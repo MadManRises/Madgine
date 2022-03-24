@@ -12,40 +12,38 @@
 
 #include "Meta/serialize/serializetable_impl.h"
 
-UNIQUECOMPONENT(ClickBrick::UI::MainMenuHandler)
+UNIQUECOMPONENT(ClickBrick::MainMenuHandler)
 
-METATABLE_BEGIN_BASE(ClickBrick::UI::MainMenuHandler, Engine::UI::GuiHandlerBase)
-METATABLE_END(ClickBrick::UI::MainMenuHandler)
+METATABLE_BEGIN_BASE(ClickBrick::MainMenuHandler, Engine::Input::GuiHandlerBase)
+METATABLE_END(ClickBrick::MainMenuHandler)
 
-SERIALIZETABLE_INHERIT_BEGIN(ClickBrick::UI::MainMenuHandler, Engine::UI::GuiHandlerBase)
-SERIALIZETABLE_END(ClickBrick::UI::MainMenuHandler)
+SERIALIZETABLE_INHERIT_BEGIN(ClickBrick::MainMenuHandler, Engine::Input::GuiHandlerBase)
+SERIALIZETABLE_END(ClickBrick::MainMenuHandler)
 
 namespace ClickBrick {
-namespace UI {
 
-    MainMenuHandler::MainMenuHandler(Engine::UI::UIManager &ui)
-        : Engine::UI::GuiHandler<MainMenuHandler>(ui, Engine::UI::GuiHandlerBase::WindowType::ROOT_WINDOW)
-    {
-    }
-
-    std::string_view MainMenuHandler::key() const
-    {
-        return "MainMenuHandler";
-    }
-
-    void ClickBrick::UI::MainMenuHandler::setWidget(Engine::Widgets::WidgetBase *w)
-    {
-        Engine::UI::GuiHandlerBase::setWidget(w);
-        if (widget()) {
-            widget()->getChildRecursive<Engine::Widgets::Button>("StartGameButton")->clickEvent().connect(&MainMenuHandler::startGame, this, &mConStore);
-        }
-    }
-
-    void ClickBrick::UI::MainMenuHandler::startGame()
-    {
-        getGameHandler<GameManager>().start();
-        getGuiHandler<GameHandler>().open();
-    }
-
+MainMenuHandler::MainMenuHandler(Engine::Input::UIManager &ui)
+    : Engine::Input::GuiHandler<MainMenuHandler>(ui, Engine::Input::GuiHandlerBase::WindowType::ROOT_WINDOW)
+{
 }
+
+std::string_view MainMenuHandler::key() const
+{
+    return "MainMenuHandler";
+}
+
+void MainMenuHandler::setWidget(Engine::Widgets::WidgetBase *w)
+{
+    Engine::Input::GuiHandlerBase::setWidget(w);
+    if (widget()) {
+        widget()->getChildRecursive<Engine::Widgets::Button>("StartGameButton")->clickEvent().connect(&MainMenuHandler::startGame, this, &mConStore);
+    }
+}
+
+void MainMenuHandler::startGame()
+{
+    getGameHandler<GameManager>().start();
+    getGuiHandler<GameHandler>().open();
+}
+
 }

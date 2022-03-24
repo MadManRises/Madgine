@@ -17,21 +17,21 @@
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 
-UNIQUECOMPONENT(Engine::UI::UIManager)
+UNIQUECOMPONENT(Engine::Input::UIManager)
 
-METATABLE_BEGIN(Engine::UI::UIManager)
+METATABLE_BEGIN(Engine::Input::UIManager)
 MEMBER(mGuiHandlers)
 MEMBER(mGameHandlers)
-METATABLE_END(Engine::UI::UIManager)
+METATABLE_END(Engine::Input::UIManager)
 
-SERIALIZETABLE_BEGIN(Engine::UI::UIManager)
-FIELD(mGuiHandlers, Serialize::ControlledConfig<KeyCompare<std::unique_ptr<Engine::UI::GuiHandlerBase>>>)
-FIELD(mGameHandlers, Serialize::ControlledConfig<KeyCompare<std::unique_ptr<Engine::UI::GameHandlerBase>>>)
-SERIALIZETABLE_END(Engine::UI::UIManager)
+SERIALIZETABLE_BEGIN(Engine::Input::UIManager)
+FIELD(mGuiHandlers, Serialize::ControlledConfig<KeyCompare<std::unique_ptr<Engine::Input::GuiHandlerBase>>>)
+FIELD(mGameHandlers, Serialize::ControlledConfig<KeyCompare<std::unique_ptr<Engine::Input::GameHandlerBase>>>)
+SERIALIZETABLE_END(Engine::Input::UIManager)
 
 namespace Engine {
 
-namespace UI {
+namespace Input {
 
     UIManager::UIManager(Window::MainWindow &window)
         : VirtualData(window, 50)

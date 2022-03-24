@@ -148,4 +148,10 @@ auto invoke_patch_void(F &&f, Args &&...args)
 template <typename T>
 using patch_void_t = std::conditional_t<std::same_as<T, void>, std::monostate, T>;
 
+template <auto a>
+struct auto_holder;
+
+template <auto f, auto g>
+concept f_same_as = std::same_as<auto_holder<f>, auto_holder<g>>;
+
 }

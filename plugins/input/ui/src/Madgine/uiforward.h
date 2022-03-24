@@ -2,7 +2,7 @@
 
 namespace Engine {
 
-namespace UI {
+namespace Input {
     struct Handler;
     struct GameHandlerBase;
     struct GuiHandlerBase;

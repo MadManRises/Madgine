@@ -14,7 +14,7 @@
 #include "Generic/intervalclock.h"
 
 namespace Engine {
-namespace UI {
+namespace Input {
     struct MADGINE_UI_EXPORT UIManager : Window::MainWindowComponent<UIManager> {
         SERIALIZABLEUNIT(UIManager);
 
@@ -73,4 +73,4 @@ namespace UI {
 }
 }
 
-RegisterType(Engine::UI::UIManager);
+RegisterType(Engine::Input::UIManager);

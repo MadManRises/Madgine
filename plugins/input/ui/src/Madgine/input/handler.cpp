@@ -6,16 +6,16 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
-METATABLE_BEGIN(Engine::UI::Handler)
+METATABLE_BEGIN(Engine::Input::Handler)
 PROPERTY(Widget, widget, setWidget)
-METATABLE_END(Engine::UI::Handler)
+METATABLE_END(Engine::Input::Handler)
 
-SERIALIZETABLE_BEGIN(Engine::UI::Handler)
+SERIALIZETABLE_BEGIN(Engine::Input::Handler)
 ENCAPSULATED_POINTER(mWidget, widget, setWidget)
-SERIALIZETABLE_END(Engine::UI::Handler)
+SERIALIZETABLE_END(Engine::Input::Handler)
 
 namespace Engine {
-namespace UI {
+namespace Input {
     Handler::Handler(UIManager &ui)
         : mUI(ui)
     {
@@ -63,49 +63,49 @@ namespace UI {
         }
     }
 
-    void Handler::injectPointerMove(const Input::PointerEventArgs &evt)
+    void Handler::injectPointerMove(const PointerEventArgs &evt)
     {
         onPointerMove(evt);
     }
 
-    void Handler::injectPointerDown(const Input::PointerEventArgs &evt)
+    void Handler::injectPointerDown(const PointerEventArgs &evt)
     {
         onPointerDown(evt);
     }
 
-    void Handler::injectPointerUp(const Input::PointerEventArgs &evt)
+    void Handler::injectPointerUp(const PointerEventArgs &evt)
     {
         onPointerUp(evt);
     }
 
-    bool Handler::injectKeyPress(const Input::KeyEventArgs &evt)
+    bool Handler::injectKeyPress(const KeyEventArgs &evt)
     {
         return onKeyPress(evt);
     }
 
-    void Handler::injectAxisEvent(const Input::AxisEventArgs &evt)
+    void Handler::injectAxisEvent(const AxisEventArgs &evt)
     {
         onAxisEvent(evt);
     }
 
-    void Handler::onPointerMove(const Input::PointerEventArgs &me)
+    void Handler::onPointerMove(const PointerEventArgs &me)
     {
     }
 
-    void Handler::onPointerDown(const Input::PointerEventArgs &me)
+    void Handler::onPointerDown(const PointerEventArgs &me)
     {
     }
 
-    void Handler::onPointerUp(const Input::PointerEventArgs &me)
+    void Handler::onPointerUp(const PointerEventArgs &me)
     {
     }
 
-    bool Handler::onKeyPress(const Input::KeyEventArgs &evt)
+    bool Handler::onKeyPress(const KeyEventArgs &evt)
     {
         return false;
     }
 
-    void Handler::onAxisEvent(const Input::AxisEventArgs &evt)
+    void Handler::onAxisEvent(const AxisEventArgs &evt)
     {
     }
 

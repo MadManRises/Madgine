@@ -132,12 +132,15 @@ static constexpr std::array<std::pair<const char *, ::Engine::Accessor>, std::tu
 #define METATABLE_BEGIN_BASE(T, Base) _METATABLE_BEGIN_IMPL(T, &table<Base>, SINGLE_ARG(&Engine::inheritance_offset<Base, T>), __LINE__)
 
 #define _METATABLE_BEGIN_IMPL(T, BasePtr, BaseOffset, ...)                   \
+    namespace Meta_##T                                                       \
+    {                                                                        \
+        static constexpr const ::Engine::MetaTable **baseClass = BasePtr;              \
+        static constexpr size_t (*baseOffset)() = BaseOffset;                \
+    }                                                                        \
     namespace Engine {                                                       \
         template <>                                                          \
         struct LineStruct<MetaTableTag, __VA_ARGS__> {                       \
             using Ty = T;                                                    \
-            static constexpr const MetaTable **baseClass = BasePtr;          \
-            static constexpr size_t (*baseOffset)() = BaseOffset;            \
             static constexpr const bool base = true;                         \
             constexpr const std::pair<const char *, Accessor> *data() const; \
             static constexpr const fixed_string name = #T;                   \
@@ -196,7 +199,7 @@ static constexpr std::array<std::pair<const char *, ::Engine::Accessor>, std::tu
         static constexpr ::Engine::MetaTableLineStruct<__VA_ARGS__> sMembers = {};   \
         static constexpr ::Engine::MetaTableCtorLineStruct<__VA_ARGS__> sCtors = {}; \
     }                                                                                \
-    DLL_EXPORT_VARIABLE(constexpr, const ::Engine::MetaTable, , table, SINGLE_ARG({ &::table<T>, #T, ::Engine::MetaTableLineStruct<__VA_ARGS__>::baseClass, ::Engine::MetaTableLineStruct<__VA_ARGS__>::baseOffset, Meta_##T::sMembers.data(), Meta_##T::sCtors.data() }), T);
+    DLL_EXPORT_VARIABLE(constexpr, const ::Engine::MetaTable, , table, SINGLE_ARG({ &::table<T>, #T, ::Meta_##T::baseClass, ::Meta_##T::baseOffset, Meta_##T::sMembers.data(), Meta_##T::sCtors.data() }), T);
 
 /*#define STRUCT_METATABLE(T)                                                                                              \
     namespace {                                                                                                          \

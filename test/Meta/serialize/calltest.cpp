@@ -2,25 +2,27 @@
 
 #include "Meta/metalib.h"
 
+
 #include "Meta/serialize/hierarchy/serializableunit.h"
 
 #include "Meta/serialize/container/noparent.h"
 
-#include "../testManager.h"
-#include "../testunit.h"
+
+#include "testManager.h"
+#include "testunit.h"
 
 using namespace Engine::Serialize;
 using namespace std::chrono_literals;
 
 
-TEST(Serialize_Query, Query)
+TEST(Serialize_Call, Call)
 {
 
     TestManager mgr1("container1");
     TestManager mgr2("container2");
 
-    NoParent<TestUnit> unit1 { 1 };
-    NoParent<TestUnit> unit2 { 2 };
+    NoParent<TestUnit> unit1;
+    NoParent<TestUnit> unit2;
 
     ASSERT_TRUE(mgr1.addTopLevelItem(&unit1));
     ASSERT_TRUE(mgr2.addTopLevelItem(&unit2));
@@ -33,78 +35,78 @@ TEST(Serialize_Query, Query)
     ASSERT_EQ(unit1.mCallCount, 0);
     ASSERT_EQ(unit2.mCallCount, 0);
 
-    Engine::Future<int> f1 = unit1.query(10);
+    Engine::Future<int> f1 = unit1.call(1);
 
     ASSERT_TRUE(f1.is_ready());
-    ASSERT_EQ(f1.get(), 11);
+    ASSERT_EQ(f1.get(), 2);
 
     ASSERT_EQ(unit1.mCallCount, 1);
     ASSERT_EQ(unit2.mCallCount, 0);
 
     mgr1.sendMessages();
-    mgr2.receiveMessages(1, 0ms);
+    mgr2.receiveMessages(1, 1000ms);
 
     ASSERT_EQ(unit1.mCallCount, 1);
-    ASSERT_EQ(unit2.mCallCount, 0);
+    ASSERT_EQ(unit2.mCallCount, 1);
 
-    Engine::Future<int> f2 = unit2.query(20);
+    Engine::Future<int> f2 = unit2.call(2);
 
     ASSERT_FALSE(f2.is_ready());
 
     ASSERT_EQ(unit1.mCallCount, 1);
-    ASSERT_EQ(unit2.mCallCount, 0);
+    ASSERT_EQ(unit2.mCallCount, 1);
 
     mgr2.sendMessages();
-    mgr1.receiveMessages(1, 0ms);
+    mgr1.receiveMessages(1, 1000ms);
 
     ASSERT_FALSE(f2.is_ready());
 
     ASSERT_EQ(unit1.mCallCount, 2);
-    ASSERT_EQ(unit2.mCallCount, 0);
+    ASSERT_EQ(unit2.mCallCount, 1);
 
     mgr1.sendMessages();
-    mgr2.receiveMessages(1, 0ms);
+    mgr2.receiveMessages(1, 1000ms);
 
     ASSERT_TRUE(f2.is_ready());
-    ASSERT_EQ(f2.get(), 21);
+    ASSERT_EQ(f2.get(), 3);
 
     ASSERT_EQ(unit1.mCallCount, 2);
-    ASSERT_EQ(unit2.mCallCount, 0);
+    ASSERT_EQ(unit2.mCallCount, 2);
 }
 
-TEST(Serialize_Query, Query_Hierarchical)
+TEST(Serialize_Call, Call_Hierarchical)
 {
 
     TestManager mgr1("container1");
-    TestManager mgr2("container2");    
+    TestManager mgr2("container2");
     TestManager mgr3("container3");
 
-    NoParent<TestUnit> unit1 { 1 };
-    NoParent<TestUnit> unit2 { 2 };
-    NoParent<TestUnit> unit3 { 3 };
+    NoParent<TestUnit> unit1;
+    NoParent<TestUnit> unit2;
+    NoParent<TestUnit> unit3;
 
     ASSERT_TRUE(mgr1.addTopLevelItem(&unit1));
-    ASSERT_TRUE(mgr2.addTopLevelItem(&unit2));
+    ASSERT_TRUE(mgr2.addTopLevelItem(&unit2));    
     ASSERT_TRUE(mgr3.addTopLevelItem(&unit3));
 
     Buffer buffer;
-    mgr1.setBuffer(buffer, false);
+    HANDLE_MGR_RESULT(mgr1, mgr1.setBuffer(buffer, false));
     mgr1.sendMessages();
-    mgr2.setBuffer(buffer, true);
+    HANDLE_MGR_RESULT(mgr2, mgr2.setBuffer(buffer, true));
 
     Buffer buffer2;
-    mgr2.setBuffer(buffer2, false);
+    HANDLE_MGR_RESULT(mgr2, mgr2.setBuffer(buffer2, false));
     mgr2.sendMessages();
-    mgr3.setBuffer(buffer2, true);
+    HANDLE_MGR_RESULT(mgr3, mgr3.setBuffer(buffer2, true));
 
     ASSERT_EQ(unit1.mCallCount, 0);
     ASSERT_EQ(unit2.mCallCount, 0);
     ASSERT_EQ(unit3.mCallCount, 0);
 
-    Engine::Future<int> f1 = unit1.query(10);
+    Engine::Future<int> f1 = unit1.call(1);
 
     ASSERT_TRUE(f1.is_ready());
-    ASSERT_EQ(f1.get(), 11);
+    ASSERT_EQ(f1.get(), 2);
 
     ASSERT_EQ(unit1.mCallCount, 1);
     ASSERT_EQ(unit2.mCallCount, 0);
@@ -114,23 +116,23 @@ TEST(Serialize_Query, Query_Hierarchical)
     mgr2.receiveMessages(1, 0ms);
 
     ASSERT_EQ(unit1.mCallCount, 1);
-    ASSERT_EQ(unit2.mCallCount, 0);
+    ASSERT_EQ(unit2.mCallCount, 1);
     ASSERT_EQ(unit3.mCallCount, 0);
 
     mgr2.sendMessages();
     mgr3.receiveMessages(1, 0ms);
 
     ASSERT_EQ(unit1.mCallCount, 1);
-    ASSERT_EQ(unit2.mCallCount, 0);
-    ASSERT_EQ(unit3.mCallCount, 0);
+    ASSERT_EQ(unit2.mCallCount, 1);
+    ASSERT_EQ(unit3.mCallCount, 1);
 
-    Engine::Future<int> f2 = unit3.query(20);
+    Engine::Future<int> f2 = unit3.call(2);
 
     ASSERT_FALSE(f2.is_ready());
 
     ASSERT_EQ(unit1.mCallCount, 1);
-    ASSERT_EQ(unit2.mCallCount, 0);
-    ASSERT_EQ(unit3.mCallCount, 0);
+    ASSERT_EQ(unit2.mCallCount, 1);
+    ASSERT_EQ(unit3.mCallCount, 1);
 
     mgr3.sendMessages();
     mgr2.receiveMessages(1, 0ms);
@@ -138,8 +140,8 @@ TEST(Serialize_Query, Query_Hierarchical)
     ASSERT_FALSE(f2.is_ready());
 
     ASSERT_EQ(unit1.mCallCount, 1);
-    ASSERT_EQ(unit2.mCallCount, 0);
-    ASSERT_EQ(unit3.mCallCount, 0);
+    ASSERT_EQ(unit2.mCallCount, 1);
+    ASSERT_EQ(unit3.mCallCount, 1);
 
     mgr2.sendMessages();
     mgr1.receiveMessages(1, 0ms);
@@ -147,8 +149,8 @@ TEST(Serialize_Query, Query_Hierarchical)
     ASSERT_FALSE(f2.is_ready());
 
     ASSERT_EQ(unit1.mCallCount, 2);
-    ASSERT_EQ(unit2.mCallCount, 0);
-    ASSERT_EQ(unit3.mCallCount, 0);
+    ASSERT_EQ(unit2.mCallCount, 1);
+    ASSERT_EQ(unit3.mCallCount, 1);
 
     mgr1.sendMessages();
     mgr2.receiveMessages(1, 0ms);
@@ -156,16 +158,16 @@ TEST(Serialize_Query, Query_Hierarchical)
     ASSERT_FALSE(f2.is_ready());
 
     ASSERT_EQ(unit1.mCallCount, 2);
-    ASSERT_EQ(unit2.mCallCount, 0);
-    ASSERT_EQ(unit3.mCallCount, 0);
+    ASSERT_EQ(unit2.mCallCount, 2);
+    ASSERT_EQ(unit3.mCallCount, 1);
 
     mgr2.sendMessages();
     mgr3.receiveMessages(1, 0ms);
-
+    
     ASSERT_TRUE(f2.is_ready());
-    ASSERT_EQ(f2.get(), 21);
+    ASSERT_EQ(f2.get(), 3);
 
     ASSERT_EQ(unit1.mCallCount, 2);
-    ASSERT_EQ(unit2.mCallCount, 0);
-    ASSERT_EQ(unit3.mCallCount, 0);
+    ASSERT_EQ(unit2.mCallCount, 2);
+    ASSERT_EQ(unit3.mCallCount, 2);
 }

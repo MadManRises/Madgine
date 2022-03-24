@@ -5,7 +5,7 @@
 #include "handlercollector.h"
 
 namespace Engine {
-namespace UI {
+namespace Input {
     struct MADGINE_UI_EXPORT GuiHandlerBase : Handler {    
         enum class WindowType {
             MODAL_OVERLAY,
@@ -27,5 +27,5 @@ namespace UI {
 }
 }
 
-RegisterType(Engine::UI::GuiHandlerBase);
+RegisterType(Engine::Input::GuiHandlerBase);
 

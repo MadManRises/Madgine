@@ -1,19 +1,17 @@
 #pragma once
 
-#include "Madgine/ui/guihandler.h"
+#include "Madgine/input/guihandler.h"
 
 namespace ClickBrick {
-namespace UI {
 
-    struct GameHandler : Engine::UI::GuiHandler<GameHandler> {
+    struct GameHandler : Engine::Input::GuiHandler<GameHandler> {
 
-        GameHandler(Engine::UI::UIManager &ui);        
+        GameHandler(Engine::Input::UIManager &ui);        
 
         virtual std::string_view key() const override;		    
 
     };
 
 }
-}
 
-RegisterType(ClickBrick::UI::GameHandler);
+RegisterType(ClickBrick::GameHandler);

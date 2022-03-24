@@ -12,19 +12,18 @@
 
 #include "Meta/serialize/serializetable_impl.h"
 
-UNIQUECOMPONENT(ClickBrick::UI::GameOverHandler)
+UNIQUECOMPONENT(ClickBrick::GameOverHandler)
 
-METATABLE_BEGIN_BASE(ClickBrick::UI::GameOverHandler, Engine::UI::GuiHandlerBase)
-METATABLE_END(ClickBrick::UI::GameOverHandler)
+METATABLE_BEGIN_BASE(ClickBrick::GameOverHandler, Engine::Input::GuiHandlerBase)
+METATABLE_END(ClickBrick::GameOverHandler)
 
-SERIALIZETABLE_INHERIT_BEGIN(ClickBrick::UI::GameOverHandler, Engine::UI::GuiHandlerBase)
-SERIALIZETABLE_END(ClickBrick::UI::GameOverHandler)
+SERIALIZETABLE_INHERIT_BEGIN(ClickBrick::GameOverHandler, Engine::Input::GuiHandlerBase)
+SERIALIZETABLE_END(ClickBrick::GameOverHandler)
 
 namespace ClickBrick {
-namespace UI {
 
-    GameOverHandler::GameOverHandler(Engine::UI::UIManager &ui)
-        : Engine::UI::GuiHandler<GameOverHandler>(ui, Engine::UI::GuiHandlerBase::WindowType::MODAL_OVERLAY)
+    GameOverHandler::GameOverHandler(Engine::Input::UIManager &ui)
+    : Engine::Input::GuiHandler<GameOverHandler>(ui, Engine::Input::GuiHandlerBase::WindowType::MODAL_OVERLAY)
     {
     }
 
@@ -35,7 +34,7 @@ namespace UI {
 
     void GameOverHandler::setWidget(Engine::Widgets::WidgetBase *w)
     {
-        Engine::UI::GuiHandlerBase::setWidget(w);
+        Engine::Input::GuiHandlerBase::setWidget(w);
         if (widget()) {
             widget()->pointerUpEvent().connect(&GameOverHandler::restartGame, this, &mConStore);
             mScoreLabel = widget()->getChildRecursive<Engine::Widgets::Label>("ScoreLabel");
@@ -50,10 +49,9 @@ namespace UI {
         close();
     }
 
-    void ClickBrick::UI::GameOverHandler::setScore(int score)
+    void GameOverHandler::setScore(int score)
     {
         mScoreLabel->mText = "Your Score: " + std::to_string(score);
     }
 
-}
 }

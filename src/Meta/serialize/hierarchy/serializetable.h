@@ -4,6 +4,8 @@
 
 #include "Generic/callerhierarchy.h"
 
+#include "Generic/lambda.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -26,6 +28,7 @@ namespace Serialize {
         SerializeTableCallbacks mCallbacks;
         const SerializeTable &(*mBaseType)();
         const Serializer *mFields;
+        const SyncFunction *mFunctions;
         bool mIsTopLevelUnit;
 
         void writeState(const SerializableDataUnit *unit, FormattedSerializeStream &out, CallerHierarchyBasePtr hierarchy = {}) const;
@@ -40,11 +43,18 @@ namespace Serialize {
         void setActive(SerializableUnitBase *unit, bool active, bool existenceChanged) const;
         void setParent(SerializableUnitBase *unit) const;
 
-        void writeAction(const SyncableUnitBase *parent, uint16_t index, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, const void *data) const;
-        void writeRequest(const SyncableUnitBase *parent, uint16_t index, FormattedBufferedStream &out, const void *data) const;
+        void writeAction(const SyncableUnitBase *unit, uint16_t index, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, const void *data) const;
+        void writeRequest(const SyncableUnitBase *unit, uint16_t index, FormattedBufferedStream &out, const void *data) const;
 
         uint16_t getIndex(OffsetPtr offset) const;
         const Serializer &get(uint16_t index) const;
+
+        const SyncFunction &getFunction(uint16_t index) const;
+
+        void writeFunctionArguments(const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, uint16_t index, FunctionType type, const void *args) const;
+        void writeFunctionResult(FormattedBufferedStream &out, uint16_t index, const void *args) const;
+        StreamResult readFunctionAction(SyncableUnitBase *unit, FormattedBufferedStream &in, PendingRequest *request) const;
+        StreamResult readFunctionRequest(SyncableUnitBase *unit, FormattedBufferedStream &in, TransactionId id) const;
     };
 
 }

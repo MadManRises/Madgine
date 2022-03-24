@@ -9,16 +9,16 @@
 
 #include "Modules/uniquecomponent/uniquecomponentregistry.h"
 
-DEFINE_UNIQUE_COMPONENT(Engine::UI, GuiHandler)
+DEFINE_UNIQUE_COMPONENT(Engine::Input, GuiHandler)
 
-METATABLE_BEGIN_BASE(Engine::UI::GuiHandlerBase, Engine::UI::Handler)
-METATABLE_END(Engine::UI::GuiHandlerBase)
+METATABLE_BEGIN_BASE(Engine::Input::GuiHandlerBase, Engine::Input::Handler)
+METATABLE_END(Engine::Input::GuiHandlerBase)
 
-SERIALIZETABLE_INHERIT_BEGIN(Engine::UI::GuiHandlerBase, Engine::UI::Handler)
-SERIALIZETABLE_END(Engine::UI::GuiHandlerBase)
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Input::GuiHandlerBase, Engine::Input::Handler)
+SERIALIZETABLE_END(Engine::Input::GuiHandlerBase)
 
 namespace Engine {
-namespace UI {
+namespace Input {
     GuiHandlerBase::GuiHandlerBase(UIManager &ui, WindowType type)
         : Handler(ui)
         , mType(type)

@@ -6,8 +6,8 @@
 
 #include "../hierarchy/serializetable.h"
 
-#include "../syncmanager.h"
 #include "../hierarchy/toplevelunit.h"
+#include "../syncmanager.h"
 
 namespace Engine {
 namespace Serialize {
@@ -47,13 +47,9 @@ namespace Serialize {
 
     FormattedBufferedStream &SyncableBase::getMasterRequestResponseTarget(const SyncableUnitBase *parent, ParticipantId answerTarget, TransactionId answerId) const
     {
-        for (FormattedBufferedStream &out : parent->getMasterMessageTargets()) {
-            if (out.id() == answerTarget) {
-                beginRequestResponseMessage(parent, out, answerId);
-                return out;
-            }
-        }
-        throw 0;
+        FormattedBufferedStream &out = parent->getMasterRequestResponseTarget(answerTarget);
+        beginRequestResponseMessage(parent, out, answerId);
+        return out;
     }
 
     ParticipantId SyncableBase::participantId(const SerializableUnitBase *parent)

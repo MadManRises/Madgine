@@ -18,7 +18,7 @@ namespace Serialize {
     SyncManager::SyncManager(const std::string &name)
         : SerializeManager(name)
         , mSlaveStreamInvalid(false)
-        , mReceivingMasterState(false)        
+        , mReceivingMasterState(false)
     {
     }
 
@@ -95,6 +95,16 @@ namespace Serialize {
                 break;
             case MessageType::STATE:
                 STREAM_PROPAGATE_ERROR(read(stream, *object, "State", {}, StateTransmissionFlags_ApplyMap | StateTransmissionFlags_Activation));
+                break;
+            case MessageType::FUNCTION_ACTION: {
+                PendingRequest *request = stream.fetchRequest(transactionId);
+                STREAM_PROPAGATE_ERROR(object->readFunctionAction(stream, request));
+                if (request)
+                    stream.popRequest(transactionId);
+                break;
+            }
+            case MessageType::FUNCTION_REQUEST:
+                STREAM_PROPAGATE_ERROR(object->readFunctionRequest(stream, transactionId));
                 break;
             default:
                 return STREAM_INTEGRITY_ERROR(stream) << "Invalid Message-Type: " << type;
@@ -425,7 +435,7 @@ namespace Serialize {
         if (msgCount >= 0) {
             while (stream && msgCount > 0) {
                 STREAM_PROPAGATE_ERROR(stream.beginMessageRead(msg));
-                while (msg){
+                while (msg) {
                     STREAM_PROPAGATE_ERROR(readMessage(stream));
                     STREAM_PROPAGATE_ERROR(msg.end());
                     --msgCount;

@@ -2,6 +2,7 @@
 
 #include "serializer.h"
 #include "serializetable.h"
+#include "syncfunction.h"
 
 #include "statetransmissionflags.h"
 
@@ -155,18 +156,18 @@ namespace Serialize {
         }
     }
 
-    void SerializeTable::writeAction(const SyncableUnitBase *parent, uint16_t index, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, const void *data) const
+    void SerializeTable::writeAction(const SyncableUnitBase *unit, uint16_t index, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, const void *data) const
     {
         for (FormattedBufferedStream &out : outStreams) {
             write(out, index, "index");
         }
-        get(index).mWriteAction(parent, outStreams, data);
+        get(index).mWriteAction(unit, outStreams, data);
     }
 
-    void SerializeTable::writeRequest(const SyncableUnitBase *parent, uint16_t index, FormattedBufferedStream &out, const void *data) const
+    void SerializeTable::writeRequest(const SyncableUnitBase *unit, uint16_t index, FormattedBufferedStream &out, const void *data) const
     {
         write(out, index, "index");
-        get(index).mWriteRequest(parent, out, data);
+        get(index).mWriteRequest(unit, out, data);
     }
 
     uint16_t SerializeTable::getIndex(OffsetPtr offset) const
@@ -217,6 +218,64 @@ namespace Serialize {
 
         //Corrupt package
         std::terminate();
+    }
+
+    const SyncFunction &SerializeTable::getFunction(uint16_t index) const
+    {
+        std::stack<const SerializeTable *> tables;
+        const SerializeTable *table = this;
+        while (table) {
+            tables.push(table);
+            table = table->mBaseType ? &table->mBaseType() : nullptr;
+        }
+
+        while (!tables.empty()) {
+            table = tables.top();
+            for (const SyncFunction *it = table->mFunctions; true; ++it) {
+                if (index == 0) {
+                    return *it;
+                }
+                --index;
+            }
+            tables.pop();
+        }
+
+        //Corrupt package
+        std::terminate();
+    }
+
+    void SerializeTable::writeFunctionArguments(const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, uint16_t index, FunctionType type, const void *args) const
+    {
+        for (FormattedBufferedStream &out : outStreams) {
+            write(out, index, "index");
+            write(out, type, "functionType");
+        }
+        getFunction(index).mWriteFunctionArguments(outStreams, args);
+    }
+
+    void SerializeTable::writeFunctionResult(FormattedBufferedStream &out, uint16_t index, const void *args) const
+    {
+        write(out, index, "index");
+        write(out, QUERY, "functionType");
+        getFunction(index).mWriteFunctionResult(out, args);
+    }
+
+    StreamResult SerializeTable::readFunctionAction(SyncableUnitBase *unit, FormattedBufferedStream &in, PendingRequest *request) const
+    {
+        uint16_t index;
+        STREAM_PROPAGATE_ERROR(read(in, index, "index"));
+        FunctionType type;
+        STREAM_PROPAGATE_ERROR(read(in, type, "functionType"));
+        return getFunction(index).mReadFunctionAction(unit, in, index, type, request);
+    }
+
+    StreamResult SerializeTable::readFunctionRequest(SyncableUnitBase *unit, FormattedBufferedStream &in, TransactionId id) const
+    {
+        uint16_t index;
+        STREAM_PROPAGATE_ERROR(read(in, index, "index"));
+        FunctionType type;
+        STREAM_PROPAGATE_ERROR(read(in, type, "functionType"));
+        return getFunction(index).mReadFunctionRequest(unit, in, index, type, id);
     }
 
 }

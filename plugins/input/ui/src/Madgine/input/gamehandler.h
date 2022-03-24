@@ -7,7 +7,7 @@
 #include "handlercollector.h"
 
 namespace Engine {
-namespace UI {
+namespace Input {
     struct MADGINE_UI_EXPORT GameHandlerBase : Handler {
         static constexpr float sDefaultDragStartThreshold = 80.0f;
 
@@ -19,26 +19,26 @@ namespace UI {
         virtual void fixedUpdate(std::chrono::microseconds timeStep);
 
     protected:
-        void onPointerMove(const Input::PointerEventArgs &me) override;
+        void onPointerMove(const PointerEventArgs &me) override;
 
-        void onPointerDown(const Input::PointerEventArgs &me) override;
+        void onPointerDown(const PointerEventArgs &me) override;
 
-        void onPointerUp(const Input::PointerEventArgs &me) override;
+        void onPointerUp(const PointerEventArgs &me) override;
 
-        virtual void onPointerHover(const Input::PointerEventArgs &evt);
+        virtual void onPointerHover(const PointerEventArgs &evt);
 
-        virtual void onPointerClick(const Input::PointerEventArgs &evt);
+        virtual void onPointerClick(const PointerEventArgs &evt);
 
-        virtual void onPointerDragBegin(const Input::PointerEventArgs &evt);
+        virtual void onPointerDragBegin(const PointerEventArgs &evt);
 
-        virtual void onPointerDrag(const Input::PointerEventArgs &evt);
+        virtual void onPointerDrag(const PointerEventArgs &evt);
 
-        virtual void onPointerDragEnd(const Input::PointerEventArgs &evt);
+        virtual void onPointerDragEnd(const PointerEventArgs &evt);
 
         virtual void onPointerDragAbort();
 
 
-        void clampToWindow(Input::PointerEventArgs &me);
+        void clampToWindow(PointerEventArgs &me);
 
         enum class MouseDragMode {
             DISABLED = 0,
@@ -46,7 +46,7 @@ namespace UI {
             ENABLED_HIDECURSOR
         };
 
-        void setPointerDragMode(Input::MouseButton::MouseButton button, MouseDragMode mode, float threshold = sDefaultDragStartThreshold);
+        void setPointerDragMode(MouseButton::MouseButton button, MouseDragMode mode, float threshold = sDefaultDragStartThreshold);
 
         const InterfacesVector &dragStart() const;
 
@@ -60,9 +60,9 @@ namespace UI {
             float mThreshold = sDefaultDragStartThreshold;
         };
 
-        std::array<MouseDragInfo, Input::MouseButton::BUTTON_COUNT> mPointerDragModes;
+        std::array<MouseDragInfo, MouseButton::BUTTON_COUNT> mPointerDragModes;
 
-        Input::MouseButton::MouseButton mCurrentMouseButton;
+        MouseButton::MouseButton mCurrentMouseButton;
 
         bool mDragging, mSingleClick;
 
@@ -73,4 +73,4 @@ namespace UI {
 
 }
 
-RegisterType(Engine::UI::GameHandlerBase);
+RegisterType(Engine::Input::GameHandlerBase);

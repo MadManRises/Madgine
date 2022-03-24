@@ -44,8 +44,6 @@ Engine::Serialize::StreamResult readList1(Engine::Serialize::FormattedSerializeS
 }
 
 SERIALIZETABLE_BEGIN(TestUnit)
-SYNC(action)
-SYNC(query)
 
 FIELD(list1)
 FIELD(list2)
@@ -61,4 +59,16 @@ FIELD(pod)
 
 FIELD(bytes)
 
+SYNCFUNCTION(fooImpl)
+
 SERIALIZETABLE_END(TestUnit)
+
+Engine::Future<int> TestUnit::call(int i)
+{
+    return TopLevelUnit<TestUnit>::call<&TestUnit::fooImpl>(i);
+}
+
+Engine::Future<int> TestUnit::query(int i)
+{
+    return TopLevelUnit<TestUnit>::query<&TestUnit::fooImpl>(i);
+}

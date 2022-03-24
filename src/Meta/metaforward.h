@@ -78,6 +78,7 @@ namespace Serialize {
     struct SerializableDataConstPtr;
 
 	struct Serializer;
+    struct SyncFunction;
     struct SerializeTableCallbacks;
 
     struct Formatter;
@@ -119,8 +120,15 @@ namespace Serialize {
     ENUM(MessageType,
         STATE,
         ACTION,
-        REQUEST
+        REQUEST,
+        FUNCTION_ACTION,
+        FUNCTION_REQUEST
     );
+
+    enum FunctionType {
+        QUERY,
+        CALL
+    };
 
     enum Command {
         INITIAL_STATE_DONE
@@ -129,6 +137,10 @@ namespace Serialize {
     template <typename, typename... Configs>
     struct Operations;
 
+    namespace __serialize_impl__ {
+        template <typename T>
+        struct SyncFunctionTable;
+    }
 }
 
 struct Vector2;

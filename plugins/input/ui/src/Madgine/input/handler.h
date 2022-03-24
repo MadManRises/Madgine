@@ -8,7 +8,7 @@
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
 namespace Engine {
-namespace UI {
+namespace Input {
 
     struct MADGINE_UI_EXPORT Handler : MadgineObject<Handler>, Serialize::VirtualSerializableDataBase<VirtualScopeBase<>, Serialize::SerializableDataUnit> {
         SERIALIZABLEUNIT(Handler);
@@ -49,22 +49,22 @@ namespace UI {
 
         friend struct MadgineObject<Handler>;
 
-        virtual void onPointerMove(const Input::PointerEventArgs &me);
+        virtual void onPointerMove(const PointerEventArgs &me);
 
-        virtual void onPointerDown(const Input::PointerEventArgs &me);
+        virtual void onPointerDown(const PointerEventArgs &me);
 
-        virtual void onPointerUp(const Input::PointerEventArgs &me);
+        virtual void onPointerUp(const PointerEventArgs &me);
 
-        virtual bool onKeyPress(const Input::KeyEventArgs &evt);
+        virtual bool onKeyPress(const KeyEventArgs &evt);
 
-        virtual void onAxisEvent(const Input::AxisEventArgs &evt);
+        virtual void onAxisEvent(const AxisEventArgs &evt);
 
     public:
-        void injectPointerMove(const Input::PointerEventArgs &evt);
-        void injectPointerDown(const Input::PointerEventArgs &evt);
-        void injectPointerUp(const Input::PointerEventArgs &evt);
-        bool injectKeyPress(const Input::KeyEventArgs &evt);
-        void injectAxisEvent(const Input::AxisEventArgs &evt);
+        void injectPointerMove(const PointerEventArgs &evt);
+        void injectPointerDown(const PointerEventArgs &evt);
+        void injectPointerUp(const PointerEventArgs &evt);
+        bool injectKeyPress(const KeyEventArgs &evt);
+        void injectAxisEvent(const AxisEventArgs &evt);
 
     protected:
         Widgets::WidgetBase *mWidget = nullptr;

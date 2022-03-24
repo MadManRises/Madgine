@@ -59,9 +59,8 @@ struct TestUnit : TopLevelUnit<TestUnit> {
     int mData;
     int mCallCount = 0;
 
-    QUERY(query, fooImpl);
-
-    ACTION(action, fooImpl);
+    Engine::Future<int> call(int i);
+    Engine::Future<int> query(int i);
 
     SERIALIZABLE_CONTAINER(list1, std::list<int>);
     SERIALIZABLE_CONTAINER(set1, std::set<int>);

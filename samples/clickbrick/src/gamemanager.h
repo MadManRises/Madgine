@@ -1,17 +1,16 @@
 #pragma once
 
-#include "Madgine/ui/gamehandler.h"
+#include "Madgine/input/gamehandler.h"
 
 #include "Madgine/render/camera.h"
 
 #include "Madgine/render/scenerenderpass.h"
 
 namespace ClickBrick {
-namespace UI {
 
-    struct GameManager : Engine::UI::GameHandler<GameManager> {
+    struct GameManager : Engine::Input::GameHandler<GameManager> {
 
-        GameManager(Engine::UI::UIManager &ui);
+        GameManager(Engine::Input::UIManager &ui);
 
         virtual Engine::Threading::Task<bool> init() override;
         virtual Engine::Threading::Task<void> finalize() override;
@@ -52,6 +51,5 @@ namespace UI {
     };
 
 }
-}
 
-RegisterType(ClickBrick::UI::GameManager);
+RegisterType(ClickBrick::GameManager);
