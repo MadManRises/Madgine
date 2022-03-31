@@ -174,6 +174,10 @@ def task = {
 					//	"""
 					//}
 				}           
+				stage("Deploy") {
+					archiveArtifacts artifacts: '*-RelWithDebInfo/bin/*', onlyIfSuccessful: true
+				}
+
 			} else {
 				stage("dummy") {
 					sh """
