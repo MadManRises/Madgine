@@ -122,7 +122,7 @@ def staticTask = {
 					cp ${name}/bin/MadgineLauncher_plugins_tools.* /var/www/html/latest/${env.BRANCH_NAME}
 					"""
 				}
-				archiveArtifacts artifacts: '*-RelWithDebInfo-*/bin/*', onlyIfSuccessful: true
+				archiveArtifacts artifacts: '*-RelWithDebInfo-*/bin/*, *-RelWithDebInfo-*/data/*', onlyIfSuccessful: true
 			}
 
         }
@@ -175,7 +175,7 @@ def task = {
 					//}
 				}           
 				stage("Deploy") {
-					archiveArtifacts artifacts: '*-RelWithDebInfo/bin/*', onlyIfSuccessful: true
+					archiveArtifacts artifacts: '*-RelWithDebInfo/bin/*, *-RelWithDebInfo-*/data/*', onlyIfSuccessful: true
 				}
 
 			} else {
