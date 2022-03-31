@@ -30,13 +30,11 @@ target_include_directories(Interfaces PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_B
 
 target_link_libraries(Interfaces PUBLIC Generic)
 
-if (INTERFACES_ENABLE_THREADING)
-	find_package(Threads REQUIRED)
-	target_link_libraries (Interfaces PRIVATE ${CMAKE_THREAD_LIBS_INIT})
-endif()
-
 if (WINDOWS)
 	target_link_libraries (Interfaces PRIVATE ws2_32 DbgHelp)	
+	if (MINGW)
+		target_link_libraries (Interfaces PRIVATE -Wl,-Bstatic -lpthread -Wl,-Bdynamic)
+	endif ()
 endif()
 
 if (ANDROID)
