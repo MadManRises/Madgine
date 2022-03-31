@@ -10,14 +10,15 @@
 namespace Engine {
 namespace Input {
 
-    struct MADGINE_UI_EXPORT Handler : MadgineObject<Handler>, Serialize::VirtualSerializableDataBase<VirtualScopeBase<>, Serialize::SerializableDataUnit> {
+    struct MADGINE_UI_EXPORT Handler : MadgineObject<Handler>, VirtualScopeBase<> {
         SERIALIZABLEUNIT(Handler);
 
-        Handler(UIManager &ui);
+        Handler(UIManager &ui, std::string_view widgetName);
         virtual ~Handler() = default;
 
         virtual void onMouseVisibilityChanged(bool b);
 
+        void onUpdate();
         Widgets::WidgetBase *widget() const;
         virtual void setWidget(Widgets::WidgetBase *w);
 
@@ -41,7 +42,8 @@ namespace Input {
 
         GameHandlerBase &getGameHandler(size_t i);
 
-        Threading::TaskQueue *taskQueue() const;
+        Threading::TaskQueue *viewTaskQueue() const;
+        Threading::TaskQueue *modelTaskQueue() const;
 
     protected:
         virtual Threading::Task<bool> init();
@@ -67,6 +69,7 @@ namespace Input {
         void injectAxisEvent(const AxisEventArgs &evt);
 
     protected:
+        std::string_view mWidgetName;
         Widgets::WidgetBase *mWidget = nullptr;
 
         UIManager &mUI;

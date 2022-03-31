@@ -55,7 +55,7 @@ private:
         TypedScopePtr scope = ValueType_as<TypedScopePtr>(getArgument(args, 0));
         assert(scope.mType == &sMetaTable);
         T *t = static_cast<T *>(scope.mScope);
-        to_ValueType<true>(retVal, invoke_patch_void(F, t, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...));
+        to_ValueType<true>(retVal, invoke_patch_void<std::monostate>(F, t, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...));
     }
 
     template <auto F, typename R, typename T, typename... Args>

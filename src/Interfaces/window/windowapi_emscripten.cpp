@@ -199,6 +199,11 @@ namespace Window {
     {
     }
 
+    std::string OSWindow::title() const
+    {
+        return "emscripten-window";
+    }
+
     void OSWindow::destroy()
     {
         eglDestroySurface(sDisplay, (EGLSurface)mHandle);
@@ -292,6 +297,16 @@ namespace Window {
         MonitorInfo info { 0, 0, static_cast<int>(w), static_cast<int>(h) };
 
         return { info };
+    }
+
+    void OSWindow::setCursorIcon(Input::CursorIcon icon)
+    {
+        //TODO
+    }
+
+    WindowData OSWindow::data()
+    {
+        return {};
     }
 
 }

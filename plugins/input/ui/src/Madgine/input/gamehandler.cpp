@@ -4,7 +4,6 @@
 #include "uimanager.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
-#include "Meta/serialize/serializetable_impl.h"
 
 #include "Modules/uniquecomponent/uniquecomponentregistry.h"
 
@@ -13,15 +12,12 @@ DEFINE_UNIQUE_COMPONENT(Engine::Input, GameHandler)
 METATABLE_BEGIN_BASE(Engine::Input::GameHandlerBase, Engine::Input::Handler)
 METATABLE_END(Engine::Input::GameHandlerBase)
 
-SERIALIZETABLE_INHERIT_BEGIN(Engine::Input::GameHandlerBase, Engine::Input::Handler)
-SERIALIZETABLE_END(Engine::Input::GameHandlerBase)
-
 
 namespace Engine {
 namespace Input {
 
-    GameHandlerBase::GameHandlerBase(UIManager &ui)
-        : Handler(ui)
+    GameHandlerBase::GameHandlerBase(UIManager &ui, std::string_view widgetName)
+        : Handler(ui, widgetName)
         , mCurrentMouseButton(MouseButton::NO_BUTTON)
         , mDragging(false)
         , mSingleClick(false)

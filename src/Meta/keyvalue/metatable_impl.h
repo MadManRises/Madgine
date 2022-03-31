@@ -101,19 +101,22 @@ static constexpr BoundApiFunction method(TypedScopePtr scope)
     return { &function<F>(), scope };
 }
 
-template <typename T, typename... Args>
-static constexpr Constructor ctorHelper()
-{
-    if constexpr (std::is_same_v<type_pack<Args...>, type_pack<void>>)
-        return nullptr;
-    else {
-        return []() {
-            return OwnedScopePtr {
-                std::make_shared<ScopeWrapper<T>>()
+template <typename T>
+struct ctorHelper {
+    template <typename... Args>
+    static constexpr Constructor ctor()
+    {
+        if constexpr (std::is_same_v<type_pack<Args...>, type_pack<void>>)
+            return nullptr;
+        else {
+            return []() {
+                return OwnedScopePtr {
+                    std::make_shared<ScopeWrapper<T>>()
+                };
             };
-        };
+        }
     }
-}
+};
 
 /*template <typename T, size_t... Is>
 static constexpr std::array<std::pair<const char *, ::Engine::Accessor>, std::tuple_size_v<T> + 1> structMembers(std::index_sequence<Is...>)
@@ -181,7 +184,7 @@ static constexpr std::array<std::pair<const char *, ::Engine::Accessor>, std::tu
                     return MetaTableCtorLineStruct<__LINE__ - 1>::data();                       \
             }                                                                                   \
             static constexpr const bool base = false;                                           \
-            Constructor mData = ctorHelper<Ty, __VA_ARGS__>();                                  \
+            Constructor mData = ctorHelper<Ty>::ctor<__VA_ARGS__>();                                  \
         };                                                                                      \
     }
 

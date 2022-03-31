@@ -95,24 +95,6 @@
                 </Item>
             </mTopLevelWidgets>
         </Item>
-        <Item key="UI" serId=12>
-            <mGuiHandlers>
-                <Item key="GameHandler" serId=13>
-                    <mWidget>5</mWidget>
-                </Item>
-                <Item key="GameOverHandler" serId=14>
-                    <mWidget>9</mWidget>
-                </Item>
-                <Item key="MainMenuHandler" serId=15>
-                    <mWidget>3</mWidget>
-                </Item>
-            </mGuiHandlers>
-            <mGameHandlers>
-                <Item key="GameManager" serId=16>
-                    <mWidget>6</mWidget>
-                </Item>
-            </mGameHandlers>
-        </Item>
         <Item key="ClientImRoot" serId=17>
         </Item>
     </mComponents>

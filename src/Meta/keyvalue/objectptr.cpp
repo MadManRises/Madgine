@@ -4,7 +4,7 @@
 
 namespace Engine {
 
-ObjectPtr::ObjectPtr(std::monostate)
+ObjectPtr::ObjectPtr(Void)
 {
 }
 

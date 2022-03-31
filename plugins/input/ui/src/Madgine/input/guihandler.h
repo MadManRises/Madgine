@@ -13,7 +13,7 @@ namespace Input {
             ROOT_WINDOW
         };
 
-        GuiHandlerBase(UIManager &ui, WindowType type);
+        GuiHandlerBase(UIManager &ui, WindowType type, std::string_view widgetName);
 
         virtual void open();
         virtual void close();

@@ -52,13 +52,13 @@ template <auto F, typename R, typename T, typename... Args, size_t... I>
 static void unpackMemberHelper(const FunctionTable *table, ValueType &retVal, const ArgumentList &args, std::index_sequence<I...>)
 {
     T *t = ValueType_as<TypedScopePtr>(getArgument(args, 0)).safe_cast<T>();
-    to_ValueType<true>(retVal, invoke_patch_void(F, t, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...));
+    to_ValueType<true>(retVal, invoke_patch_void<std::monostate>(F, t, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...));
 }
 
 template <auto F, typename R, typename... Args, size_t... I>
 static void unpackApiHelper(const FunctionTable *table, ValueType &retVal, const ArgumentList &args, std::index_sequence<I...>)
 {
-    to_ValueType<true>(retVal, invoke_patch_void(F, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I))...));
+    to_ValueType<true>(retVal, invoke_patch_void<std::monostate>(F, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I))...));
 }
 
 template <auto F, typename T, typename... Args, size_t... I>
@@ -117,7 +117,7 @@ static constexpr typename FunctionTable::FPtr wrapHelper(void (T::*f)(ValueType 
         struct LineStruct<Tag, __LINE__> {                                                                                                                                                                                                                                                                                                                        \
             static constexpr const auto args = metafunctionArgs(&F, #__VA_ARGS__);                                                                                                                                                                                                                                                                                \
             using return_type = typename ::Engine::CallableTraits<decltype(&F)>::return_type;                                                                                                                                                                                                                                                                     \
-            static constexpr const ExtendedValueTypeDesc returnType = toValueTypeDesc<patch_void_t<return_type>>();                                                                                                                                                                                      \
+            static constexpr const ExtendedValueTypeDesc returnType = toValueTypeDesc<patch_void_t<return_type, std::monostate>>();                                                                                                                                                                                      \
             NameInit                                                                                                                                                                                                                                                                                                                                              \
         };                                                                                                                                                                                                                                                                                                                                                        \
     }                                                                                                                                                                                                                                                                                                                                                             \

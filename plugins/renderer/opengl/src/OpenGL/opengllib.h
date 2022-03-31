@@ -21,6 +21,9 @@
 #elif IOS
 #    include <OpenGLES/ES3/gl.h>
 #    define OPENGL_ES 30
+#elif EMSCRIPTEN
+#    include <GLES3/gl3.h>
+#    define OPENGL_ES 30
 #else
 #    include <GLES3/gl31.h>
 #    define OPENGL_ES 31
@@ -49,7 +52,6 @@ inline void glCheck()
                 out << "UNKNOWN";
             }
             out << "(" << e << ")";
-
         }
         glDump();
         std::terminate();

@@ -29,9 +29,9 @@
 
 #include "Modules/threading/datamutex.h"
 
-#include "Meta/serialize/serializetable_impl.h"
-
 #include "Madgine/render/rendertarget.h"
+
+#include "Madgine/input/uimanager.h"
 
 UNIQUECOMPONENT(ClickBrick::GameManager)
 
@@ -39,14 +39,11 @@ METATABLE_BEGIN_BASE(ClickBrick::GameManager, Engine::Input::GameHandlerBase)
 MEMBER(mCamera)
 METATABLE_END(ClickBrick::GameManager)
 
-SERIALIZETABLE_INHERIT_BEGIN(ClickBrick::GameManager, Engine::Input::GameHandlerBase)
-SERIALIZETABLE_END(ClickBrick::GameManager)
-
 namespace ClickBrick {
 
 GameManager::GameManager(Engine::Input::UIManager &ui)
-    : Engine::Input::GameHandler<GameManager>(ui)
-    , mSceneMgr(Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>())
+    : Engine::Input::GameHandler<GameManager>(ui, "GameView")
+    , mSceneMgr(ui.app().getGlobalAPIComponent<Engine::Scene::SceneManager>())
     , mSceneRenderer(mSceneMgr, &mCamera, 50)
 {
 }
@@ -148,9 +145,9 @@ void GameManager::updateBricks(std::chrono::microseconds timeSinceLastFrame)
 
 void GameManager::spawnBrick()
 {
-    auto guard = Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>().lock(Engine::AccessMode::WRITE);
+    auto guard = mUI.app().getGlobalAPIComponent<Engine::Scene::SceneManager>().lock(Engine::AccessMode::WRITE);
 
-    Engine::Scene::Entity::EntityPtr brick = Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>().createEntity();
+    Engine::Scene::Entity::EntityPtr brick = mUI.app().getGlobalAPIComponent<Engine::Scene::SceneManager>().createEntity();
 
     Engine::Scene::Entity::Transform *t = brick->addComponent<Engine::Scene::Entity::Transform>().get();
     t->setScale({ 0.01f, 0.01f, 0.01f });
@@ -196,7 +193,7 @@ void GameManager::onPointerClick(const Engine::Input::PointerEventArgs &evt)
     }
 
     if (hit) {
-        auto guard = Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>().lock(Engine::AccessMode::WRITE);
+        auto guard = mUI.app().getGlobalAPIComponent<Engine::Scene::SceneManager>().lock(Engine::AccessMode::WRITE);
 
         mBricks.remove(hit);
         hit->remove();

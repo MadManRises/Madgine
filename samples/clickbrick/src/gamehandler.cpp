@@ -3,7 +3,6 @@
 #include "gamehandler.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
-#include "Meta/serialize/serializetable_impl.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
@@ -12,13 +11,10 @@ UNIQUECOMPONENT(ClickBrick::GameHandler)
 METATABLE_BEGIN_BASE(ClickBrick::GameHandler, Engine::Input::GuiHandlerBase)
 METATABLE_END(ClickBrick::GameHandler)
 
-SERIALIZETABLE_INHERIT_BEGIN(ClickBrick::GameHandler, Engine::Input::GuiHandlerBase)
-SERIALIZETABLE_END(ClickBrick::GameHandler)
-
 namespace ClickBrick {
 
 GameHandler::GameHandler(Engine::Input::UIManager &ui)
-    : Engine::Input::GuiHandler<GameHandler>(ui, Engine::Input::GuiHandlerBase::WindowType::ROOT_WINDOW)
+    : Engine::Input::GuiHandler<GameHandler>(ui, Engine::Input::GuiHandlerBase::WindowType::ROOT_WINDOW, "Ingame")
 {
 }
 

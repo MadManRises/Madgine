@@ -1,5 +1,7 @@
 #pragma once
 
+#include "table_forward.h"
+
 namespace Engine {
 
 using Constructor = OwnedScopePtr (*)();

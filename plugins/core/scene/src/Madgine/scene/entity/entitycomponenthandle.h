@@ -217,12 +217,12 @@ namespace Serialize {
 
         static StreamResult read(Serialize::FormattedSerializeStream &in, Scene::Entity::EntityComponentOwningHandle<T> &handle, const char *name, Scene::SceneManager *mgr)
         {
-            return entityComponentHelperRead(in, *this, name, mgr);
+            return entityComponentHelperRead(in, handle, name, mgr);
         }
 
         static void write(Serialize::FormattedSerializeStream &out, const Scene::Entity::EntityComponentOwningHandle<T> &handle, const char *name, Scene::SceneManager *mgr)
         {
-            entityComponentHelperWrite(out, *this, name, mgr);
+            entityComponentHelperWrite(out, handle, name, mgr);
         }
     };
 

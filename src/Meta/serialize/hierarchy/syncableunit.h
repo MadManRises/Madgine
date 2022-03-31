@@ -129,12 +129,12 @@ namespace Serialize {
         friend TableInitializer<T, _Base>;
 
         template <auto f, typename... Args>
-        Future<Callable<f>::traits::return_type> call(Args &&...args)
+        Future<typename Callable<f>::traits::return_type> call(Args &&...args)
         {
             using traits = typename Callable<f>::traits;
             using R = typename traits::return_type;
             typename traits::decay_argument_types::as_tuple argTuple { std::forward<Args>(args)... };
-            if (isMaster()) {
+            if (this->isMaster()) {
                 writeFunctionAction(this, functionIndex<f>, &argTuple);
                 return invoke_patch_void(LIFT(TupleUnpacker::invokeExpand), f, static_cast<T *>(this), argTuple);
             } else {
@@ -160,17 +160,17 @@ namespace Serialize {
             if (!targets.empty()) {
                 using traits = typename Callable<f>::traits;
                 typename traits::decay_argument_types::as_tuple argTuple { std::forward<Args>(args)... };
-                assert(isMaster());
+                assert(this->isMaster());
                 writeFunctionAction(this, functionIndex<f>, &argTuple, targets);
             }
         }
 
         template <auto f, typename... Args>
-        Future<Callable<f>::traits::return_type> query(Args &&...args)
+        Future<typename Callable<f>::traits::return_type> query(Args &&...args)
         {
             using traits = typename Callable<f>::traits;
             using R = typename traits::return_type;
-            if (isMaster()) {
+            if (this->isMaster()) {
                 return invoke_patch_void(f, static_cast<T *>(this), std::forward<Args>(args)...);
             } else {
                 std::promise<R> p;
@@ -195,7 +195,7 @@ namespace Serialize {
         {
             using traits = typename Callable<f>::traits;
             using R = typename traits::return_type;
-            if (isMaster()) {
+            if (this->isMaster()) {
                 (static_cast<T *>(this)->*f)(std::forward<Args>(args)...);
             } else {
                 typename traits::decay_argument_types::as_tuple argTuple { std::forward<Args>(args)... };

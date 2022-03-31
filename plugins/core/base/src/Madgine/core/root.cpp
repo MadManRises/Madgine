@@ -76,6 +76,7 @@ namespace Core {
         return mErrorCode;
     }
 
+#if ENABLE_PLUGINS
     std::string fixInclude(const char *pStr, const Plugins::BinaryInfo *binInfo)
     {
         Filesystem::Path p = pStr;
@@ -270,6 +271,7 @@ std::map<std::string_view, size_t> )"
 
         file.generate(stream);
     }
+#endif
 
 }
 }

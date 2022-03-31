@@ -388,7 +388,7 @@ namespace Widgets {
         return mHoveredWidget;
     }
 
-    WidgetBase *WidgetManager::getWidget(const std::string &name)
+    WidgetBase *WidgetManager::getWidget(std::string_view name)
     {
         auto it = mWidgets.find(name);
         if (it == mWidgets.end())
@@ -577,14 +577,21 @@ namespace Widgets {
         return *mData->mUIAtlasTexture;
     }
 
+    Threading::SignalStub<> &WidgetManager::updatedSignal()
+    {
+            return mUpdatedSignal;
+    }
+
     int WidgetManager::priority() const
     {
         return mPriority;
     }
 
     void WidgetManager::onActivate(bool active) {
-        if (active)
+        if (active) {
             openStartupWidget();
+            mUpdatedSignal.emit();
+        }
     }
 
 }

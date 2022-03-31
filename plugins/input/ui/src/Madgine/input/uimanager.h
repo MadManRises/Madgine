@@ -2,9 +2,6 @@
 
 #include "handlercollector.h"
 
-#include "Madgine/window/mainwindowcomponent.h"
-#include "Madgine/window/mainwindowcomponentcollector.h"
-
 #include "Generic/keyvalue.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
@@ -13,12 +10,13 @@
 
 #include "Generic/intervalclock.h"
 
+#include "madgineobject/madgineobject.h"
+
 namespace Engine {
 namespace Input {
-    struct MADGINE_UI_EXPORT UIManager : Window::MainWindowComponent<UIManager> {
-        SERIALIZABLEUNIT(UIManager);
+    struct MADGINE_UI_EXPORT UIManager : MadgineObject<UIManager> {
 
-        UIManager(Window::MainWindow &window);
+        UIManager(App::Application &app, Window::MainWindow &window);
         UIManager(const UIManager &) = delete;
 
         ~UIManager();
@@ -39,7 +37,7 @@ namespace Input {
 
         static const constexpr int sMaxInitOrder = 4;
 
-        std::string_view key() const override;
+        std::string_view key() const;
 
         template <typename T>
         T &getGuiHandler()
@@ -49,6 +47,10 @@ namespace Input {
 
         GuiHandlerBase &getGuiHandler(size_t i);
 
+        Threading::TaskQueue *viewTaskQueue() const;
+
+        Threading::TaskQueue *modelTaskQueue() const;
+
         template <typename T>
         T &getGameHandler()
         {
@@ -57,12 +59,21 @@ namespace Input {
 
         GameHandlerBase &getGameHandler(size_t i);
 
+        Threading::Task<bool> init();
+        Threading::Task<void> finalize();
+
+        App::Application &app() const;
+        Window::MainWindow &window() const;
+
+        void onUpdate();
+
+    private:
+        App::Application &mApp;
+        Window::MainWindow &mWindow;
+
+    public:
         GuiHandlerContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>> mGuiHandlers;
         GameHandlerContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>> mGameHandlers;
-
-    protected:
-        Threading::Task<bool> init() override;
-        Threading::Task<void> finalize() override;
 
     private:
         Vector2 mKeptCursorPosition;

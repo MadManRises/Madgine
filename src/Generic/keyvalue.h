@@ -18,13 +18,13 @@ struct KeyValue {
         return std::move(v);
     }
 
-    static std::monostate key(T &v)
+    static Void key(T &v)
     {
         static_assert(sizeof(std::remove_reference_t<T>) > 0, "Cannot determine key of incomplete type!");
         return {};
     }
 
-    static std::monostate key(T &&v)
+    static Void key(T &&v)
     {
         static_assert(sizeof(std::remove_reference_t<T>) > 0, "Cannot determine key of incomplete type!");
         return {};

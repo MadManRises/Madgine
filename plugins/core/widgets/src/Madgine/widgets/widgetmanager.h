@@ -8,7 +8,7 @@
 
 #include "Generic/container/transformIt.h"
 
-
+#include "Modules/threading/signal.h"
 
 namespace Engine {
 namespace Widgets {
@@ -31,7 +31,7 @@ namespace Widgets {
         bool isHovered(WidgetBase *w);
         WidgetBase *hoveredWidget();
 
-        WidgetBase *getWidget(const std::string &name);
+        WidgetBase *getWidget(std::string_view name);
 
         void registerWidget(WidgetBase *w);
         void updateWidget(WidgetBase *w, const std::string &newName);
@@ -71,6 +71,8 @@ namespace Widgets {
 
         const Render::Texture &uiTexture() const;
 
+        Threading::SignalStub<> &updatedSignal();
+
     protected:
         WidgetBase *getHoveredWidget(const Vector2 &pos, WidgetBase *current);
         WidgetBase *getHoveredWidgetUp(const Vector2 &pos, WidgetBase *current);
@@ -90,7 +92,7 @@ namespace Widgets {
         void onActivate(bool active);
         
     private:
-        std::map<std::string, WidgetBase *> mWidgets;
+        std::map<std::string, WidgetBase *, std::less<>> mWidgets;
 
         std::vector<std::unique_ptr<WidgetBase>> mTopLevelWidgets;
 
@@ -101,6 +103,8 @@ namespace Widgets {
         std::vector<WidgetBase *> mModalWidgetList;
 
         void expandUIAtlas();
+
+        Threading::Signal<> mUpdatedSignal;
 
         struct WidgetManagerData;
         std::unique_ptr<WidgetManagerData> mData;

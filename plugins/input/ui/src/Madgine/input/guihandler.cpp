@@ -5,7 +5,6 @@
 #include "Madgine/widgets/widgetmanager.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
-#include "Meta/serialize/serializetable_impl.h"
 
 #include "Modules/uniquecomponent/uniquecomponentregistry.h"
 
@@ -14,13 +13,10 @@ DEFINE_UNIQUE_COMPONENT(Engine::Input, GuiHandler)
 METATABLE_BEGIN_BASE(Engine::Input::GuiHandlerBase, Engine::Input::Handler)
 METATABLE_END(Engine::Input::GuiHandlerBase)
 
-SERIALIZETABLE_INHERIT_BEGIN(Engine::Input::GuiHandlerBase, Engine::Input::Handler)
-SERIALIZETABLE_END(Engine::Input::GuiHandlerBase)
-
 namespace Engine {
 namespace Input {
-    GuiHandlerBase::GuiHandlerBase(UIManager &ui, WindowType type)
-        : Handler(ui)
+    GuiHandlerBase::GuiHandlerBase(UIManager &ui, WindowType type, std::string_view widgetName)
+        : Handler(ui, widgetName)
         , mType(type)
     {
     }

@@ -1,1 +1,2 @@
 add_subdirectory(clickbrick)
+add_subdirectory(MMOLobby)

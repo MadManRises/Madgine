@@ -2,8 +2,6 @@
 
 #include "Modules/uniquecomponent/uniquecomponentdefine.h"
 
-#include "Meta/serialize/hierarchy/virtualserializableunit.h"
-
 #include "Meta/keyvalue/virtualscope.h"
 
 DECLARE_UNIQUE_COMPONENT(Engine::Input, GuiHandler, GuiHandlerBase, UIManager &);
@@ -14,10 +12,10 @@ namespace Input {
 
     struct GuiHandlerBase;
     template <typename T>
-    using GuiHandler = Serialize::VirtualData<T, VirtualScope<T, GuiHandlerComponent<T>>>;
+    using GuiHandler = VirtualScope<T, GuiHandlerComponent<T>>;
     struct GameHandlerBase;
     template <typename T>
-    using GameHandler = Serialize::VirtualData<T, VirtualScope<T, GameHandlerComponent<T>>>;
+    using GameHandler = VirtualScope<T, GameHandlerComponent<T>>;
 
 }
 }

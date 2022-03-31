@@ -10,20 +10,15 @@
 
 #include "gamemanager.h"
 
-#include "Meta/serialize/serializetable_impl.h"
-
 UNIQUECOMPONENT(ClickBrick::GameOverHandler)
 
 METATABLE_BEGIN_BASE(ClickBrick::GameOverHandler, Engine::Input::GuiHandlerBase)
 METATABLE_END(ClickBrick::GameOverHandler)
 
-SERIALIZETABLE_INHERIT_BEGIN(ClickBrick::GameOverHandler, Engine::Input::GuiHandlerBase)
-SERIALIZETABLE_END(ClickBrick::GameOverHandler)
-
 namespace ClickBrick {
 
     GameOverHandler::GameOverHandler(Engine::Input::UIManager &ui)
-    : Engine::Input::GuiHandler<GameOverHandler>(ui, Engine::Input::GuiHandlerBase::WindowType::MODAL_OVERLAY)
+    : Engine::Input::GuiHandler<GameOverHandler>(ui, Engine::Input::GuiHandlerBase::WindowType::MODAL_OVERLAY, "GameOver")
     {
     }
 

@@ -32,6 +32,7 @@ namespace App {
         Threading::TaskQueue *taskQueue();
 
         static Application &getSingleton();
+        static Application *getSingletonPtr();
 
     protected:
         Threading::Task<bool> init();

@@ -186,7 +186,6 @@ namespace Widgets {
     template Checkbox *WidgetBase::createChild<Checkbox>(const std::string &);
     template Label *WidgetBase::createChild<Label>(const std::string &);
     template TabWidget *WidgetBase::createChild<TabWidget>(const std::string &);
-    template Button *WidgetBase::createChild<Button>(const std::string &);
     template Combobox *WidgetBase::createChild<Combobox>(const std::string &);
     template Textbox *WidgetBase::createChild<Textbox>(const std::string &);
     template SceneWindow *WidgetBase::createChild<SceneWindow>(const std::string &);

@@ -9,6 +9,7 @@
 #endif
 
 #include "Madgine/widgetslib.h"
+#include "Madgine/baselib.h"
 
 #include "uiforward.h"
 

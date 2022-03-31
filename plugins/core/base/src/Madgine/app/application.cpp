@@ -92,6 +92,15 @@ namespace App {
      * @brief 
      * @return 
     */
+    Application *Application::getSingletonPtr()
+    {
+        return sApp;
+    }
+
+    /**
+     * @brief 
+     * @return 
+    */
     Threading::TaskQueue *Application::taskQueue()
     {
         return &mTaskQueue;

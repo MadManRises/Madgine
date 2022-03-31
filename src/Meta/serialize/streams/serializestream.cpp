@@ -200,12 +200,12 @@ namespace Serialize {
         return {};
     }
 
-    StreamResult SerializeStream::read(std::monostate &)
+    StreamResult SerializeStream::read(Void &)
     {
         return {};
     }
 
-    StreamResult SerializeStream::operator>>(std::monostate &)
+    StreamResult SerializeStream::operator>>(Void &)
     {
         return {};
     }
@@ -261,11 +261,11 @@ namespace Serialize {
         Stream::write(b.mData, b.mSize);
     }
 
-    void SerializeStream::write(const std::monostate &)
+    void SerializeStream::write(const Void &)
     {
     }
 
-    SerializeStream &SerializeStream::operator<<(const std::monostate &)
+    SerializeStream &SerializeStream::operator<<(const Void &)
     {
         return *this;
     }

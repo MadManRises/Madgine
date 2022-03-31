@@ -15,7 +15,7 @@ namespace Serialize {
         std::ios_base::iostate state = in.state();
         in.clear();
 
-        mPosition = in.tell() - in.gcount();
+        mPosition = static_cast<int>(in.tell()) - in.gcount();
 
         ss << "ERROR: (";
 

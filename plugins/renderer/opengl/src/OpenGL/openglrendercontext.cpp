@@ -378,7 +378,7 @@ namespace Render {
                 assert(result);
 
                 for (int i = 0; i < numConfigs; i++) {
-                    Util::LogDummy out { Engine::Util::MessageType::LOG_TYPE };
+                    Util::LogDummy out { Engine::Util::MessageType::INFO_TYPE };
                     out << "Configuration:\n";
                     EGLConfig config = configs[i];
                     for (int j = 0; j < sizeof(eglAttributeNames) / sizeof(eglAttributeNames[0]); j++) {

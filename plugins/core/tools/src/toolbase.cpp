@@ -38,7 +38,7 @@ namespace Tools {
             render();
     }
 
-    bool ToolBase::isVisible()
+    bool ToolBase::isVisible() const
     {
         return mVisible;
     }
@@ -46,6 +46,16 @@ namespace Tools {
     void ToolBase::setVisible(bool v)
     {
         mVisible = v;
+    }
+
+    bool ToolBase::isEnabled() const
+    {
+        return mEnabled;
+    }
+
+    void ToolBase::setEnabled(bool e)
+    {
+        mEnabled = e;
     }
 
     ToolBase &ToolBase::getToolComponent(size_t index)
@@ -57,7 +67,7 @@ namespace Tools {
     {
         return mRoot;
     }
-       
+
     Threading::TaskQueue *ToolBase::taskQueue() const
     {
         return mRoot.taskQueue();

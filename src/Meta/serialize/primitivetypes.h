@@ -22,7 +22,7 @@ namespace Serialize {
         SerializableDataUnit *,
         std::string,
         ByteBuffer,
-        std::monostate,
+        Void,
         Vector3,
         Vector4,
         Matrix3,

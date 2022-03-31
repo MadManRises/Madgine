@@ -97,8 +97,8 @@ namespace experimental {
 
 template <typename T = void>
 using coroutine_handle = experimental::coroutine_handle<T>;
-template <typename T, typename...>
-using coroutine_traits = experimental::coroutine_traits<T>;
+/* template <typename T, typename...>
+using coroutine_traits = experimental::coroutine_traits<T>;*/
 using suspend_always = experimental::suspend_always;
 using suspend_never = experimental::suspend_never;
 

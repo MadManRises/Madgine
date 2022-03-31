@@ -2,22 +2,20 @@
 #include "handler.h"
 #include "Madgine/widgets/widget.h"
 #include "uimanager.h"
+#include "Madgine/window/mainwindow.h"
+#include "Madgine/widgets/widgetmanager.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
-#include "Meta/serialize/serializetable_impl.h"
 
 METATABLE_BEGIN(Engine::Input::Handler)
 PROPERTY(Widget, widget, setWidget)
 METATABLE_END(Engine::Input::Handler)
 
-SERIALIZETABLE_BEGIN(Engine::Input::Handler)
-ENCAPSULATED_POINTER(mWidget, widget, setWidget)
-SERIALIZETABLE_END(Engine::Input::Handler)
-
 namespace Engine {
 namespace Input {
-    Handler::Handler(UIManager &ui)
-        : mUI(ui)
+    Handler::Handler(UIManager &ui, std::string_view widgetName)
+        : mWidgetName(widgetName)
+        , mUI(ui)
     {
     }
 
@@ -113,14 +111,19 @@ namespace Input {
     {
     }
 
+    void Handler::onUpdate()
+    {
+        setWidget(mUI.window().getWindowComponent<Widgets::WidgetManager>().getWidget(mWidgetName));
+    }
+
     Widgets::WidgetBase *Handler::widget() const
     {
         return mWidget;
     }
 
-    Threading::TaskQueue *Handler::taskQueue() const
+    Threading::TaskQueue *Handler::viewTaskQueue() const
     {
-        return mUI.taskQueue();
+        return mUI.viewTaskQueue();
     }
 
 }

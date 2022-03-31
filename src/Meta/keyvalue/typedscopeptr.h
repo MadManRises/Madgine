@@ -1,6 +1,6 @@
 #pragma once
 
-#include "table_forward.h"
+#include "metatable.h"
 
 namespace Engine {
 

@@ -487,7 +487,7 @@ template <template <typename> typename Fut>
 struct FutureWrapper<void, Fut> : Fut<void> {
     using Fut<void>::Fut;
 
-    FutureWrapper(std::monostate)
+    FutureWrapper(Void)
         : Fut<void>(FUTURE_NAMESPACE make_ready_future())
     {
     }

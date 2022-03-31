@@ -23,9 +23,12 @@ namespace Tools {
         virtual void update();
 
         virtual std::string_view key() const = 0;
-
-        bool isVisible();
+ 
+        bool isVisible() const;
         void setVisible(bool v);
+
+        bool isEnabled() const;
+        void setEnabled(bool e);
 
         ToolBase &getToolComponent(size_t index);
         template <typename T>
@@ -44,6 +47,8 @@ namespace Tools {
         friend struct MadgineObject<ToolBase>;
 
         bool mVisible = false;
+
+        bool mEnabled = true;
 
         ImRoot &mRoot;
     };

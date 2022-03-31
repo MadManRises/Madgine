@@ -26,6 +26,97 @@ namespace Serialize {
     META_EXPORT StreamResult convertSyncablePtr(FormattedSerializeStream &in, UnitId id, SyncableUnitBase *&out);
     META_EXPORT StreamResult convertSerializablePtr(FormattedSerializeStream &in, uint32_t id, SerializableDataUnit *&out);
 
+
+    template <typename T, typename... Configs>
+    StreamResult applyMap(FormattedSerializeStream &in, T &t, bool success)
+    {
+        if constexpr (requires { &Operations<T, Configs...>::applyMap; })
+            return Operations<T, Configs...>::applyMap(in, t, success);
+        else
+            return {};
+    }
+
+    template <typename T, typename... Configs>
+    void setSynced(T &t, bool b)
+    {
+        if constexpr (requires { &Operations<T, Configs...>::setSynced; })
+            Operations<T, Configs...>::setSynced(t, b);
+    }
+
+    template <typename T, typename... Configs>
+    void setActive(T &t, bool active, bool existenceChanged)
+    {
+        if constexpr (requires { &Operations<T, Configs...>::setActive; })
+            Operations<T, Configs...>::setActive(t, active, existenceChanged);
+    }
+
+    template <typename T>
+    void setParent(T &t, SerializableDataUnit *parent)
+    {
+    }
+
+    template <typename T, typename... Configs>
+    void setParent(T &t, SerializableUnitBase *parent)
+    {
+        if constexpr (requires { &Operations<T, Configs...>::setParent; })
+            Operations<T, Configs...>::setParent(t, parent);
+    }
+
+    template <typename T, typename... Configs>
+    StreamResult read(FormattedSerializeStream &in, T &t, const char *name, const CallerHierarchyBasePtr &hierarchy = {}, StateTransmissionFlags flags = 0)
+    {
+        SerializableListHolder holder { in };
+
+        if (flags & StateTransmissionFlags_Activation)
+            setActive(t, false, false);
+
+        StreamResult result = TupleUnpacker::invoke(Operations<T, Configs...>::read, in, t, name, hierarchy, flags);
+
+        if (flags & StateTransmissionFlags_ApplyMap) {
+            assert(in.manager());
+            STREAM_PROPAGATE_ERROR(applyMap(in, t, result.mState == StreamState::OK));
+        }
+
+        if (flags & StateTransmissionFlags_Activation)
+            setActive(t, true, false);
+
+        return result;
+    }
+
+    template <typename T, typename... Configs>
+    void write(FormattedSerializeStream &out, const T &t, const char *name, const CallerHierarchyBasePtr &hierarchy = {}, StateTransmissionFlags flags = 0)
+    {
+        SerializableMapHolder holder { out };
+
+        TupleUnpacker::invoke(Operations<T, Configs...>::write, out, t, name, hierarchy, flags);
+    }
+
+    template <typename T, typename... Configs>
+    StreamResult readAction(T &t, FormattedBufferedStream &in, PendingRequest *request, const CallerHierarchyBasePtr &hierarchy = {})
+    {
+        auto guard = GuardSelector<Configs...>::guard(hierarchy);
+        return Operations<T, Configs...>::readAction(t, in, request, hierarchy);
+    }
+
+    template <typename T, typename... Configs>
+    StreamResult readRequest(T &t, FormattedBufferedStream &inout, TransactionId id, const CallerHierarchyBasePtr &hierarchy = {})
+    {
+        return Operations<T, Configs...>::readRequest(t, inout, id, hierarchy);
+    }
+
+    template <typename T, typename... Configs>
+    void writeAction(const T &t, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, const void *data, const CallerHierarchyBasePtr &hierarchy = {})
+    {
+        Operations<T, Configs...>::writeAction(t, outStreams, data, hierarchy);
+    }
+
+    template <typename T, typename... Configs>
+    void writeRequest(const T &t, FormattedBufferedStream &out, const void *data, const CallerHierarchyBasePtr &hierarchy = {})
+    {
+        Operations<T, Configs...>::writeRequest(t, out, data, hierarchy);
+    }
+
+
     template <typename T, typename... Configs>
     struct Operations {
         static StreamResult read(FormattedSerializeStream &in, T &t, const char *name, const CallerHierarchyBasePtr &hierarchy = {}, StateTransmissionFlags flags = 0)
@@ -263,95 +354,6 @@ namespace Serialize {
             out.endCompoundWrite(name);
         }
     };
-
-    template <typename T, typename... Configs>
-    StreamResult read(FormattedSerializeStream &in, T &t, const char *name, const CallerHierarchyBasePtr &hierarchy = {}, StateTransmissionFlags flags = 0)
-    {
-        SerializableListHolder holder { in };
-
-        if (flags & StateTransmissionFlags_Activation)
-            setActive(t, false, false);
-
-        StreamResult result = TupleUnpacker::invoke(Operations<T, Configs...>::read, in, t, name, hierarchy, flags);
-
-        if (flags & StateTransmissionFlags_ApplyMap) {
-            assert(in.manager());
-            STREAM_PROPAGATE_ERROR(applyMap(in, t, result.mState == StreamState::OK));
-        }
-
-        if (flags & StateTransmissionFlags_Activation)
-            setActive(t, true, false);
-
-        return result;
-    }
-
-    template <typename T, typename... Configs>
-    void write(FormattedSerializeStream &out, const T &t, const char *name, const CallerHierarchyBasePtr &hierarchy = {}, StateTransmissionFlags flags = 0)
-    {
-        SerializableMapHolder holder { out };
-
-        TupleUnpacker::invoke(Operations<T, Configs...>::write, out, t, name, hierarchy, flags);
-    }
-
-    template <typename T, typename... Configs>
-    StreamResult applyMap(FormattedSerializeStream &in, T &t, bool success)
-    {
-        if constexpr (requires { &Operations<T, Configs...>::applyMap; })
-            return Operations<T, Configs...>::applyMap(in, t, success);
-        else
-            return {};
-    }
-
-    template <typename T, typename... Configs>
-    void setSynced(T &t, bool b)
-    {
-        if constexpr (requires { &Operations<T, Configs...>::setSynced; })
-            Operations<T, Configs...>::setSynced(t, b);
-    }
-
-    template <typename T, typename... Configs>
-    void setActive(T &t, bool active, bool existenceChanged)
-    {
-        if constexpr (requires { &Operations<T, Configs...>::setActive; })
-            Operations<T, Configs...>::setActive(t, active, existenceChanged);
-    }
-
-    template <typename T>
-    void setParent(T &t, SerializableDataUnit *parent)
-    {
-    }
-
-    template <typename T, typename... Configs>
-    void setParent(T &t, SerializableUnitBase *parent)
-    {
-        if constexpr (requires { &Operations<T, Configs...>::setParent; })
-            Operations<T, Configs...>::setParent(t, parent);
-    }
-
-    template <typename T, typename... Configs>
-    StreamResult readAction(T &t, FormattedBufferedStream &in, PendingRequest *request, const CallerHierarchyBasePtr &hierarchy = {})
-    {
-        auto guard = GuardSelector<Configs...>::guard(hierarchy);
-        return Operations<T, Configs...>::readAction(t, in, request, hierarchy);
-    }
-
-    template <typename T, typename... Configs>
-    StreamResult readRequest(T &t, FormattedBufferedStream &inout, TransactionId id, const CallerHierarchyBasePtr &hierarchy = {})
-    {
-        return Operations<T, Configs...>::readRequest(t, inout, id, hierarchy);
-    }
-
-    template <typename T, typename... Configs>
-    void writeAction(const T &t, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, const void *data, const CallerHierarchyBasePtr &hierarchy = {})
-    {
-        Operations<T, Configs...>::writeAction(t, outStreams, data, hierarchy);
-    }
-
-    template <typename T, typename... Configs>
-    void writeRequest(const T &t, FormattedBufferedStream &out, const void *data, const CallerHierarchyBasePtr &hierarchy = {})
-    {
-        Operations<T, Configs...>::writeRequest(t, out, data, hierarchy);
-    }
 
 }
 }

@@ -11,6 +11,11 @@
 namespace Engine {
 namespace Serialize {
 
+    template <typename T, typename... Configs>
+    void setActive(T &t, bool active, bool existenceChanged);
+    template <typename T, typename... Configs>
+    void setSynced(T &t, bool b);
+
     template <typename C, typename Observer = NoOpFunctor, typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
     struct SerializableContainerImpl : Serializable<OffsetPtr>,
                                        C,

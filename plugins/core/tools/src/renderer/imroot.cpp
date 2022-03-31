@@ -98,7 +98,7 @@ namespace Tools {
 
         for (const std::unique_ptr<ToolBase> &tool : mCollector) {
             bool result = co_await tool->callInit();
-            assert(result);
+            tool->setEnabled(result);
         }
 
         co_return true;
@@ -135,8 +135,8 @@ namespace Tools {
 
             ImGui::SetNextWindowPos(viewport->Pos);
             ImVec2 size = viewport->Size;
-            size.y -= ImGui::GetFrameHeight();// remove status bar height
-            ImGui::SetNextWindowSize(size); 
+            size.y -= ImGui::GetFrameHeight(); // remove status bar height
+            ImGui::SetNextWindowSize(size);
             ImGui::SetNextWindowViewport(viewport->ID);
 
             ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
@@ -170,8 +170,9 @@ namespace Tools {
                 ImGui::EndMenu();
             }
 
-            for (ToolBase *tool : safeIterate(uniquePtrToPtr(mCollector))) {
-                tool->renderMenu();
+            for (ToolBase *tool : uniquePtrToPtr(mCollector)) {
+                if (tool->isEnabled())
+                    tool->renderMenu();
             }
 
             ImGui::EndMainMenuBar();
@@ -179,8 +180,9 @@ namespace Tools {
 
         if (ImGui::BeginViewportSideBar("##MainStatusBar", viewport, ImGuiDir_Down, ImGui::GetFrameHeight(), ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar)) {
             if (ImGui::BeginMenuBar()) {
-                for (ToolBase *tool : safeIterate(uniquePtrToPtr(mCollector))) {
-                    tool->renderStatus();
+                for (ToolBase *tool : uniquePtrToPtr(mCollector)) {
+                    if (tool->isEnabled())
+                        tool->renderStatus();
                 }
                 ImGui::EndMenuBar();
             }
@@ -190,7 +192,8 @@ namespace Tools {
         finishToolRead();
 
         for (ToolBase *tool : uniquePtrToPtr(mCollector)) {
-            tool->update();
+            if (tool->isEnabled())
+                tool->update();
         }
 
         if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {

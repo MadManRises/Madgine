@@ -6,16 +6,9 @@ cmake_policy(SET CMP0022 NEW)
 
 
 include(CMakeDependentOption)
-include(ExternalProject)
-
-set (Workspace "" CACHE PATH "Path to the local Workspace")
    
 set(workspace_file_dir ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "")
 
-
-if (CMAKE_BUILD_TYPE STREQUAL "")
-	message (FATAL_ERROR "No Build Type Specified!")
-endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin CACHE INTERNAL "")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin CACHE INTERNAL "")
@@ -40,6 +33,7 @@ if (NOT WIN32)
 
 endif()
 
+
 get_property(support_shared GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS)
 
 if (NOT support_shared)
@@ -52,55 +46,6 @@ if (NOT BUILD_SHARED_LIBS)
 endif()
 
 add_definitions(-DBINARY_OUT_DIR="${CMAKE_BINARY_DIR}")
-
-if(MSVC)    
-	# Set compiler options.
-	set(variables
-		CMAKE_C_FLAGS
-		CMAKE_C_FLAGS_DEBUG
-		CMAKE_C_FLAGS_MINSIZEREL
-		CMAKE_C_FLAGS_RELEASE
-		CMAKE_C_FLAGS_RELWITHDEBINFO
-		CMAKE_CXX_FLAGS
-		CMAKE_CXX_FLAGS_DEBUG
-		CMAKE_CXX_FLAGS_MINSIZEREL
-		CMAKE_CXX_FLAGS_RELEASE
-		CMAKE_CXX_FLAGS_RELWITHDEBINFO
-	)
-	if(NOT BUILD_SHARED_LIBS)
-		message(STATUS
-		"MSVC -> forcing use of statically-linked runtime."
-		)
-		foreach(variable ${variables})
-			if(${variable} MATCHES "/MD")
-				string(REGEX REPLACE "/MD" "/MT" ${variable} "${${variable}}")
-			endif()
-		endforeach()
-	else()
-		message(STATUS
-		"MSVC -> forcing use of dynamically-linked runtime."
-		)
-		foreach(variable ${variables})
-			if(${variable} MATCHES "/MT")
-				string(REGEX REPLACE "/MT" "/MD" ${variable} "${${variable}}")
-			endif()
-		endforeach()
-	endif()
-endif()
-
-if (Workspace)
-	set (CMAKE_MODULE_PATH
-		"${CMAKE_MODULE_PATH}" "${Workspace}/cmake"
-	)
-
-	set (CMAKE_PREFIX_PATH
-		"${CMAKE_PREFIX_PATH}" "${Workspace}"
-	)
-
-	if (NOT INSTALL_EXTERN)
-		set(CMAKE_INSTALL_PREFIX ${Workspace})
-	endif()
-endif()
 
  
 function(install_header name)    

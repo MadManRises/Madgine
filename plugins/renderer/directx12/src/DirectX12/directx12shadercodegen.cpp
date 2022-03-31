@@ -66,7 +66,7 @@ namespace Render {
             stream << "float4(" << v.x << ", " << v.y << ", " << v.z << ")";
         }
 
-        void generate(std::ostream &stream, const std::monostate &v)
+        void generate(std::ostream &stream, const Void &v)
         {
             throw 0;
         }

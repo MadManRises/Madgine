@@ -9,6 +9,8 @@
 #include "concepts.h"
 #include "spaceship.h"
 #include "coroutine.h"
+#include "ranges.h"
+#include "atomic.h"
 
 #if __cpp_lib_constexpr_algorithms >= 201806L
 #    define CONSTEXPR_ALGORITHM constexpr

@@ -456,7 +456,7 @@ namespace Resources {
         template <typename C>
         static Threading::Task<bool> loadUnnamedTask(typename Interface::PtrType &ptr, C &&ctor)
         {
-            PtrType ptr = createUnnamed();
+            ptr = createUnnamed();
             return Threading::make_task(std::forward<C>(ctor), *ptr);
         }
 

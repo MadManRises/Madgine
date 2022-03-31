@@ -74,7 +74,10 @@ namespace Tools {
 
     Threading::Task<bool> SceneEditor::init()
     {
-        mSceneMgr = &App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>();
+        App::Application *app = App::Application::getSingletonPtr();
+        if (!app)
+            co_return false;
+        mSceneMgr = &app->getGlobalAPIComponent<Scene::SceneManager>();
         mInspector = &mRoot.getTool<Inspector>();
         mSceneViews.emplace_back(std::make_unique<SceneView>(this, mWindow.getRenderer()));
 

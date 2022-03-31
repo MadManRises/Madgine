@@ -11,7 +11,7 @@ namespace Input {
     struct MADGINE_UI_EXPORT GameHandlerBase : Handler {
         static constexpr float sDefaultDragStartThreshold = 80.0f;
 
-        GameHandlerBase(UIManager &ui);
+        GameHandlerBase(UIManager &ui, std::string_view widgetName);
 
         void abortDrag();
 

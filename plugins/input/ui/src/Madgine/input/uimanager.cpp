@@ -7,7 +7,6 @@
 #include "Modules/debug/profiler/profile.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
-#include "Meta/serialize/serializetable_impl.h"
 
 #include "Meta/serialize/configs/controlled.h"
 
@@ -16,29 +15,28 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
+#include "Madgine/app/application.h"
 
-UNIQUECOMPONENT(Engine::Input::UIManager)
+#include "Madgine/widgets/widgetmanager.h"
 
 METATABLE_BEGIN(Engine::Input::UIManager)
 MEMBER(mGuiHandlers)
 MEMBER(mGameHandlers)
 METATABLE_END(Engine::Input::UIManager)
 
-SERIALIZETABLE_BEGIN(Engine::Input::UIManager)
-FIELD(mGuiHandlers, Serialize::ControlledConfig<KeyCompare<std::unique_ptr<Engine::Input::GuiHandlerBase>>>)
-FIELD(mGameHandlers, Serialize::ControlledConfig<KeyCompare<std::unique_ptr<Engine::Input::GameHandlerBase>>>)
-SERIALIZETABLE_END(Engine::Input::UIManager)
-
 namespace Engine {
 
 namespace Input {
 
-    UIManager::UIManager(Window::MainWindow &window)
-        : VirtualData(window, 50)
+    UIManager::UIManager(App::Application &app, Window::MainWindow &window)
+        : mApp(app)
+        , mWindow(window)
         , mGuiHandlers(*this)
         , mGameHandlers(*this)
     {
-        
+        window.taskQueue()->addSetupSteps(
+            [this]() { return callInit(); },
+            [this]() { return callFinalize(); });
     }
 
     UIManager::~UIManager()
@@ -47,6 +45,8 @@ namespace Input {
 
     Threading::Task<bool> UIManager::init()
     {
+
+        mWindow.getWindowComponent<Widgets::WidgetManager>().updatedSignal().connect([this] { onUpdate(); });
 
         for (const std::unique_ptr<GuiHandlerBase> &handler : mGuiHandlers)
             co_await handler->callInit();
@@ -73,6 +73,25 @@ namespace Input {
 
         for (const std::unique_ptr<GuiHandlerBase> &handler : mGuiHandlers)
             co_await handler->callFinalize();
+    }
+
+    App::Application &UIManager::app() const
+    {
+        return mApp;
+    }
+
+    Window::MainWindow &UIManager::window() const
+    {
+        return mWindow;
+    }
+
+    void UIManager::onUpdate()
+    {
+        for (const std::unique_ptr<GuiHandlerBase> &handler : mGuiHandlers)
+            handler->onUpdate();
+
+        for (const std::unique_ptr<GameHandlerBase> &handler : mGameHandlers)
+            handler->onUpdate();
     }
 
     void UIManager::clear()
@@ -175,6 +194,16 @@ namespace Input {
     GuiHandlerBase &UIManager::getGuiHandler(size_t i)
     {
         return mGuiHandlers.get(i);
+    }
+
+    Threading::TaskQueue *UIManager::viewTaskQueue() const
+    {
+        return mWindow.taskQueue();
+    }
+
+    Threading::TaskQueue *UIManager::modelTaskQueue() const
+    {
+        return mApp.taskQueue();
     }
 
 }

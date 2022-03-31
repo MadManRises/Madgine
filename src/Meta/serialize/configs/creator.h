@@ -6,6 +6,8 @@
 
 #include "Generic/functor.h"
 
+#include "../streams/formattedserializestream.h"
+
 namespace Engine {
 namespace Serialize {
 

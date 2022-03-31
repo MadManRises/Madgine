@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../streams/comparestreamid.h"
+
 namespace Engine {
 namespace Serialize {
 

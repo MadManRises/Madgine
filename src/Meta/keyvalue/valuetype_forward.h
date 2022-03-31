@@ -97,7 +97,7 @@ decltype(auto) ValueType_as(const ValueType &v)
     } else if constexpr (ValueTypePrimitive<T>) {
         return ValueType_as_impl<T>(v);
     } else if constexpr (std::ranges::range<T>) {
-        if constexpr (std::same_as<KeyType_t<typename T::iterator::value_type>, std::monostate>)
+        if constexpr (std::same_as<KeyType_t<typename T::iterator::value_type>, Void>)
             return ValueType_as_impl<KeyValueVirtualSequenceRange>(v).safe_cast<T>();
         else
             return ValueType_as_impl<KeyValueVirtualAssociativeRange>(v).safe_cast<T>();
@@ -123,7 +123,7 @@ decltype(auto) convert_ValueType(T &&t)
     } else if constexpr (String<std::decay_t<T>>) {
         return std::string { std::forward<T>(t) };
     } else if constexpr (std::ranges::range<T>) {
-        if constexpr (std::same_as<KeyType_t<typename std::remove_reference_t<T>::iterator::value_type>, std::monostate>)
+        if constexpr (std::same_as<KeyType_t<typename std::remove_reference_t<T>::iterator::value_type>, Void>)
             return KeyValueVirtualSequenceRange { std::forward<T>(t) };
         else
             return KeyValueVirtualAssociativeRange { std::forward<T>(t) };

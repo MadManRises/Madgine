@@ -3,38 +3,38 @@
 #if defined(BUILD_NodeGraph)
 #include "Madgine/nodegraphlib.h"
 #endif
-#if defined(BUILD_MeshLoader)
-#include "meshloaderlib.h"
-#endif
 #if defined(BUILD_Client)
 #include "Madgine/clientlib.h"
+#endif
+#if defined(BUILD_MeshLoader)
+#include "meshloaderlib.h"
 #endif
 #if defined(BUILD_ClientNodes)
 #include "Madgine/clientnodeslib.h"
 #endif
-#if defined(BUILD_ImageLoader)
-#include "imageloaderlib.h"
-#endif
 #if defined(BUILD_Base)
 #include "Madgine/baselib.h"
+#endif
+#if defined(BUILD_ImageLoader)
+#include "imageloaderlib.h"
 #endif
 #if defined(BUILD_OpenGL)
 #include "OpenGL/opengllib.h"
 #endif
+#if defined(BUILD_AnimationLoader)
+#include "animationloaderlib.h"
+#endif
 #if defined(BUILD_FontLoader)
 #include "fontloaderlib.h"
+#endif
+#if defined(BUILD_SkeletonLoader)
+#include "skeletonloaderlib.h"
 #endif
 #if defined(BUILD_Scene)
 #include "Madgine/scenelib.h"
 #endif
 #if defined(BUILD_Widgets)
 #include "Madgine/widgetslib.h"
-#endif
-#if defined(BUILD_SkeletonLoader)
-#include "skeletonloaderlib.h"
-#endif
-#if defined(BUILD_AnimationLoader)
-#include "animationloaderlib.h"
 #endif
 #if defined(BUILD_UI)
 #include "Madgine/uilib.h"
@@ -72,11 +72,11 @@
 #if defined(BUILD_NodeGraph) && defined(BUILD_Resources)
 #include "Madgine/nodegraph/nodegraphloader.h"
 #endif
-#if defined(BUILD_MeshLoader) && defined(BUILD_Resources)
-#include "meshloader.h"
-#endif
 #if defined(BUILD_Client) && defined(BUILD_Resources)
 #include "Madgine/render/shadinglanguage/slloader.h"
+#endif
+#if defined(BUILD_MeshLoader) && defined(BUILD_Resources)
+#include "meshloader.h"
 #endif
 #if defined(BUILD_ImageLoader) && defined(BUILD_Resources)
 #include "imageloader.h"
@@ -99,8 +99,14 @@
 #include "OpenGL/openglshaderloader.h"
 #include "OpenGL/opengltextureloader.h"
 #endif
+#if defined(BUILD_AnimationLoader) && defined(BUILD_Resources)
+#include "animationloader.h"
+#endif
 #if defined(BUILD_FontLoader) && defined(BUILD_Resources)
 #include "fontloader.h"
+#endif
+#if defined(BUILD_SkeletonLoader) && defined(BUILD_Resources)
+#include "skeletonloader.h"
 #endif
 #if defined(BUILD_Scene)
 #include "Madgine/scene/entity/components/animation.h"
@@ -117,17 +123,11 @@
 #if defined(BUILD_Widgets) && defined(BUILD_Client)
 #include "Madgine/widgets/widgetmanager.h"
 #endif
-#if defined(BUILD_SkeletonLoader) && defined(BUILD_Resources)
-#include "skeletonloader.h"
-#endif
-#if defined(BUILD_AnimationLoader) && defined(BUILD_Resources)
-#include "animationloader.h"
-#endif
 #if defined(BUILD_UI)
-#include "Madgine/ui/handlercollector.h"
+#include "Madgine/input/handlercollector.h"
 #endif
 #if defined(BUILD_UI) && defined(BUILD_Client)
-#include "Madgine/ui/uimanager.h"
+#include "Madgine/input/uimanager.h"
 #endif
 #if defined(BUILD_Scene) && defined(BUILD_ClickBrick)
 #include "brick.h"
@@ -314,7 +314,7 @@ std::vector<Engine::App::GlobalAPIRegistry::F> Engine::App::GlobalAPIRegistry::s
 	return {
 #endif
 #if defined(BUILD_Scene) && defined(BUILD_Base)
-		createComponent<Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>>,
+		createComponent<Engine::Serialize::NoParent<Engine::Scene::SceneManager>>,
 #endif
 #if defined(BUILD_Base)
 
@@ -331,7 +331,7 @@ constexpr size_t CollectorBaseIndex_GlobalAPIBase_Scene = ACC;
 #endif
 #if defined(BUILD_Scene) && defined(BUILD_Base)
 template <>
-size_t component_index<Engine::Serialize::NoParentUnit<Engine::Scene::SceneManager>>() { return CollectorBaseIndex_GlobalAPIBase_Scene + 0; }
+size_t component_index<Engine::Serialize::NoParent<Engine::Scene::SceneManager>>() { return CollectorBaseIndex_GlobalAPIBase_Scene + 0; }
 #endif
 #if defined(BUILD_Scene) && defined(BUILD_Base)
 template <>
@@ -387,11 +387,11 @@ std::vector<Engine::Window::MainWindowComponentRegistry::F> Engine::Window::Main
 {
 	return {
 #endif
-#if defined(BUILD_UI) && defined(BUILD_Client)
-		createComponent<Engine::UI::UIManager>,
-#endif
 #if defined(BUILD_Widgets) && defined(BUILD_Client)
 		createComponent<Engine::Widgets::WidgetManager>,
+#endif
+#if defined(BUILD_UI) && defined(BUILD_Client)
+		createComponent<Engine::Input::UIManager>,
 #endif
 #if defined(BUILD_Client)
 
@@ -403,17 +403,6 @@ std::vector<Engine::Window::MainWindowComponentRegistry::F> Engine::Window::Main
 #    define ACC 0
 
 #endif
-#if defined(BUILD_UI) && defined(BUILD_Client)
-constexpr size_t CollectorBaseIndex_MainWindowComponentBase_UI = ACC;
-#endif
-#if defined(BUILD_UI) && defined(BUILD_Client)
-template <>
-size_t component_index<Engine::UI::UIManager>() { return CollectorBaseIndex_MainWindowComponentBase_UI + 0; }
-#endif
-#if defined(BUILD_UI) && defined(BUILD_Client)
-#        undef ACC
-#        define ACC CollectorBaseIndex_MainWindowComponentBase_UI + 1
-#endif
 #if defined(BUILD_Widgets) && defined(BUILD_Client)
 constexpr size_t CollectorBaseIndex_MainWindowComponentBase_Widgets = ACC;
 #endif
@@ -424,6 +413,17 @@ size_t component_index<Engine::Widgets::WidgetManager>() { return CollectorBaseI
 #if defined(BUILD_Widgets) && defined(BUILD_Client)
 #        undef ACC
 #        define ACC CollectorBaseIndex_MainWindowComponentBase_Widgets + 1
+#endif
+#if defined(BUILD_UI) && defined(BUILD_Client)
+constexpr size_t CollectorBaseIndex_MainWindowComponentBase_UI = ACC;
+#endif
+#if defined(BUILD_UI) && defined(BUILD_Client)
+template <>
+size_t component_index<Engine::Input::UIManager>() { return CollectorBaseIndex_MainWindowComponentBase_UI + 0; }
+#endif
+#if defined(BUILD_UI) && defined(BUILD_Client)
+#        undef ACC
+#        define ACC CollectorBaseIndex_MainWindowComponentBase_UI + 1
 #endif
 #if defined(BUILD_Client)
 
@@ -588,12 +588,12 @@ std::map<std::string_view, size_t> Engine::NodeGraph::NodeRegistry::sComponentsB
 #endif
 #if defined(BUILD_UI)
 template <>
-std::vector<Engine::UI::GameHandlerRegistry::F> Engine::UI::GameHandlerRegistry::sComponents()
+std::vector<Engine::Input::GameHandlerRegistry::F> Engine::Input::GameHandlerRegistry::sComponents()
 {
 	return {
 #endif
 #if defined(BUILD_UI) && defined(BUILD_ClickBrick)
-		createComponent<ClickBrick::UI::GameManager>,
+		createComponent<ClickBrick::GameManager>,
 #endif
 #if defined(BUILD_UI)
 
@@ -610,7 +610,7 @@ constexpr size_t CollectorBaseIndex_GameHandlerBase_ClickBrick = ACC;
 #endif
 #if defined(BUILD_UI) && defined(BUILD_ClickBrick)
 template <>
-size_t component_index<ClickBrick::UI::GameManager>() { return CollectorBaseIndex_GameHandlerBase_ClickBrick + 0; }
+size_t component_index<ClickBrick::GameManager>() { return CollectorBaseIndex_GameHandlerBase_ClickBrick + 0; }
 #endif
 #if defined(BUILD_UI) && defined(BUILD_ClickBrick)
 #        undef ACC
@@ -623,18 +623,18 @@ size_t component_index<ClickBrick::UI::GameManager>() { return CollectorBaseInde
 #endif
 #if defined(BUILD_UI)
 template <>
-std::vector<Engine::UI::GuiHandlerRegistry::F> Engine::UI::GuiHandlerRegistry::sComponents()
+std::vector<Engine::Input::GuiHandlerRegistry::F> Engine::Input::GuiHandlerRegistry::sComponents()
 {
 	return {
 #endif
 #if defined(BUILD_UI) && defined(BUILD_ClickBrick)
-		createComponent<ClickBrick::UI::MainMenuHandler>,
+		createComponent<ClickBrick::MainMenuHandler>,
 #endif
 #if defined(BUILD_UI) && defined(BUILD_ClickBrick)
-		createComponent<ClickBrick::UI::GameHandler>,
+		createComponent<ClickBrick::GameHandler>,
 #endif
 #if defined(BUILD_UI) && defined(BUILD_ClickBrick)
-		createComponent<ClickBrick::UI::GameOverHandler>,
+		createComponent<ClickBrick::GameOverHandler>,
 #endif
 #if defined(BUILD_UI)
 
@@ -651,15 +651,15 @@ constexpr size_t CollectorBaseIndex_GuiHandlerBase_ClickBrick = ACC;
 #endif
 #if defined(BUILD_UI) && defined(BUILD_ClickBrick)
 template <>
-size_t component_index<ClickBrick::UI::MainMenuHandler>() { return CollectorBaseIndex_GuiHandlerBase_ClickBrick + 0; }
+size_t component_index<ClickBrick::MainMenuHandler>() { return CollectorBaseIndex_GuiHandlerBase_ClickBrick + 0; }
 #endif
 #if defined(BUILD_UI) && defined(BUILD_ClickBrick)
 template <>
-size_t component_index<ClickBrick::UI::GameHandler>() { return CollectorBaseIndex_GuiHandlerBase_ClickBrick + 1; }
+size_t component_index<ClickBrick::GameHandler>() { return CollectorBaseIndex_GuiHandlerBase_ClickBrick + 1; }
 #endif
 #if defined(BUILD_UI) && defined(BUILD_ClickBrick)
 template <>
-size_t component_index<ClickBrick::UI::GameOverHandler>() { return CollectorBaseIndex_GuiHandlerBase_ClickBrick + 2; }
+size_t component_index<ClickBrick::GameOverHandler>() { return CollectorBaseIndex_GuiHandlerBase_ClickBrick + 2; }
 #endif
 #if defined(BUILD_UI) && defined(BUILD_ClickBrick)
 #        undef ACC

@@ -26,7 +26,7 @@ ValueType::~ValueType()
 
 void ValueType::clear()
 {
-    mUnion = std::monostate {};
+    mUnion = Void {};
 }
 
 void ValueType::operator=(const ValueType &other)
@@ -85,8 +85,8 @@ std::string ValueType::toShortString() const
         },
         [](const CoWString &s) {
             return "\"" + std::string { s } + "\"";
-        },
-        [](std::monostate) {
+                                  },
+                                  [](std::monostate) {
             return "NULL"s;
         },
         [](const TypedScopePtr &scope) {

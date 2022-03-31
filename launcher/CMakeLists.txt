@@ -23,7 +23,7 @@ elseif (NOT MODULES_ENABLE_PLUGINS)
 	set_target_properties(MadgineLauncher PROPERTIES OUTPUT_NAME MadgineLauncher_${PLUGIN_DEFINITION_NAME})
 endif()
 
-target_link_plugins(MadgineLauncher Base Client)
+target_link_plugins(MadgineLauncher Base Client UI)
 
 if (EMSCRIPTEN)
 	_target_link_libraries(MadgineLauncher PRIVATE "--shell-file ${CMAKE_CURRENT_SOURCE_DIR}/emscripten/template.html")

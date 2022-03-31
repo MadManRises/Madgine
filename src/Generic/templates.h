@@ -134,19 +134,22 @@ struct OutRef {
     T *mPtr = nullptr;
 };
 
-template <typename F, typename... Args>
+struct Void {
+};
+
+template <typename R = Void, typename F, typename... Args>
 auto invoke_patch_void(F &&f, Args &&...args)
 {
     if constexpr (std::same_as<std::invoke_result_t<F, Args...>, void>) {
         std::invoke(std::forward<F>(f), std::forward<Args>(args)...);
-        return std::monostate {};
+        return R {};
     } else {
         return std::invoke(std::forward<F>(f), std::forward<Args>(args)...);
     }
 }
 
-template <typename T>
-using patch_void_t = std::conditional_t<std::same_as<T, void>, std::monostate, T>;
+template <typename T, typename R = Void>
+using patch_void_t = std::conditional_t<std::same_as<T, void>, R, T>;
 
 template <auto a>
 struct auto_holder;
