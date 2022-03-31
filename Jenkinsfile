@@ -115,13 +115,14 @@ def staticTask = {
 					"""
 				}
 			}     
-			if (name == "emscripten-Debug-OpenGL") {
-				stage("Deploy") {
+			stage("Deploy") {
+				if (name == "emscripten-Debug-OpenGL") {
 					sh """
 					mkdir -p /var/www/html/latest/${env.BRANCH_NAME}
 					cp ${name}/bin/MadgineLauncher_plugins_tools.* /var/www/html/latest/${env.BRANCH_NAME}
 					"""
 				}
+				archiveArtifacts artifacts: '*-RelWithDebInfo/bin/*', onlyIfSuccessful: true
 			}
 
         }
@@ -176,7 +177,7 @@ def task = {
 			} else {
 				stage("dummy") {
 					sh """
-						echo "emscripten plugin build is not supported at the moment!"
+						echo "plugin build is not supported at the moment!"
 					"""
 				}
 			}
