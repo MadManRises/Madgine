@@ -3,7 +3,7 @@
  def axisList = [
     [//toolchains
 		[
-			name : "mingw-windows",
+			name : "clang-windows",
 			dockerImage : 'schuetzo/linux-test-env:latest',
 			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/mingw.cmake"
 		],

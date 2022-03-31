@@ -180,11 +180,13 @@ namespace Filesystem {
 
     FileInfo fileInfo(const Path &path)
     {
-        struct _stat64 stats;
-        _stat64(path.c_str(), &stats);
-        return {
-            static_cast<size_t>(stats.st_size)
-        };
+        WIN32_FILE_ATTRIBUTE_DATA fad;
+        if (!GetFileAttributesEx(path.c_str(), GetFileExInfoStandard, &fad))
+            return { 0 }; // error condition, could call GetLastError to find out more
+        LARGE_INTEGER size;
+        size.HighPart = fad.nFileSizeHigh;
+        size.LowPart = fad.nFileSizeLow;
+        return { static_cast<unsigned long long>(size.QuadPart) };
     }
 
 }
