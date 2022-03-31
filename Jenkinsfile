@@ -108,12 +108,12 @@ def staticTask = {
 				"""				
 			}
 			stage("Test") {
-				docker.image(toolchain.dockerImage).inside {
-					sh """
-					cd ${name}
-					ctest --output-on-failure
-					"""
-				}
+				//docker.image(toolchain.dockerImage).inside {
+				//	sh """
+				//	cd ${name}
+				//	ctest --output-on-failure
+				//	"""
+				//}
 			}     
 			stage("Deploy") {
 				if (name == "emscripten-Debug-OpenGL") {
