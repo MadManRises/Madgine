@@ -167,12 +167,12 @@ def task = {
 					"""				
 				}
 				stage("Test") {
-					docker.image(toolchain.dockerImage).inside {
-						sh """
-						cd ${name}
-						ctest --output-on-failure
-						"""
-					}
+					//docker.image(toolchain.dockerImage).inside {
+					//	sh """
+					//	cd ${name}
+					//	ctest --output-on-failure
+					//	"""
+					//}
 				}           
 			} else {
 				stage("dummy") {
