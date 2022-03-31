@@ -12,8 +12,13 @@
 #   define __unix__ 1
 #endif
 
+#if __MINGW32__ || __unix__
+#    define POSIX 1
+#else
+#    define POSIX 0
+#endif
+
 #if __unix__
-#    define UNIX 1
 #    if __EMSCRIPTEN__
 #        define EMSCRIPTEN 1
 #    else
@@ -49,7 +54,7 @@
 #    define LINUX 0
 #    define EMSCRIPTEN 0
 #    define OSX 0
-#   define IOS 0
+#    define IOS 0
 #endif
 
 #ifdef _WIN32

@@ -35,7 +35,7 @@
 #include <optional>
 #include <cstring>
 
-#if WINDOWS
+#if __cpp_lib_memory_resource >= 201603L
 #    include <memory_resource>
 #else
 #    include <experimental/memory_resource>

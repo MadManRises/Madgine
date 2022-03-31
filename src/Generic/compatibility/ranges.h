@@ -1,16 +1,18 @@
 #pragma once
 
-#if __cpp_lib_ranges < 101911
+#if __cpp_lib_ranges < 201911L
 
 namespace std {
 namespace ranges {
 
+#if !__MINGW32__
     template <class T>
     concept range = requires(T &t)
     {
         t.begin(); // equality-preserving for forward iterators
         t.end();
     };
+#endif
 
     template <typename C, typename F>
     constexpr auto find_if_not(C &&c, F &&f)
