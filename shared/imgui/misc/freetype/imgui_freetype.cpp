@@ -234,7 +234,7 @@ namespace
         IM_ASSERT(slot->format == FT_GLYPH_FORMAT_OUTLINE || slot->format == FT_GLYPH_FORMAT_BITMAP);
 
         // Apply convenience transform (this is not picking from real "Bold"/"Italic" fonts! Merely applying FreeType helper transform. Oblique == Slanting)
-        if (UserFlags & ImGuiFreeTypeBuilderFlags_Bold)
+        /* if (UserFlags & ImGuiFreeTypeBuilderFlags_Bold)
             FT_GlyphSlot_Embolden(slot);
         if (UserFlags & ImGuiFreeTypeBuilderFlags_Oblique)
         {
@@ -243,7 +243,7 @@ namespace
             //FT_Outline_Get_BBox(&slot->outline, &bbox);
             //slot->metrics.width = bbox.xMax - bbox.xMin;
             //slot->metrics.height = bbox.yMax - bbox.yMin;
-        }
+        }*/
 
         return &slot->metrics;
     }
