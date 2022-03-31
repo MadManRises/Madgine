@@ -65,7 +65,7 @@ struct ReleasePtr : std::unique_ptr<T, ReleaseDeleter> {
 
     operator T *() const
     {
-        return get();
+        return this->get();
     }
 };
 

@@ -19,7 +19,7 @@ FolderSources(sources "" "" interfacesforward.h interfaceslib.h)
 	FolderSources(sources "" filesystem api.cpp api.h api_android.cpp api_emscripten.cpp api_linux.cpp api_osx.cpp api_win.cpp filequery.cpp filequery_android.cpp filequery_emscripten.cpp filequery_linux.cpp filequery_osx.cpp filequery_ios.cpp filequery_win.cpp filequery.h filewatcher_win.cpp filewatcher_emscripten.cpp filewatcher_linux.cpp filewatcher_android.cpp filewatcher_osx.cpp filewatcher_ios.cpp filewatcher.cpp filewatcher.h path.cpp path.h)
 	FolderSources(sources "" input rawinput_win.cpp rawinput_win.h)
 	FolderSources(sources "" socket socketapi.h socketapi_unix.cpp socketapi_win.cpp)
-	FolderSources(sources "" threading threadapi.h threadapi_unix.cpp threadapi_win.cpp)
+	FolderSources(sources "" threading threadapi.h threadapi_posix.cpp threadapi_win.cpp)
 	FolderSources(sources "" util log.cpp log.h standardlog.cpp standardlog.h utilmethods.cpp utilmethods.h)
 	FolderSources(sources "" window windowapi.h windowapi_android.cpp windowapi_emscripten.cpp windowapi_linux.cpp windowapi_win.cpp windoweventlistener.h)
 
@@ -30,6 +30,11 @@ target_include_directories(Interfaces PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_B
 
 target_link_libraries(Interfaces PUBLIC Generic)
 
+if (INTERFACES_ENABLE_THREADING)
+	find_package(Threads REQUIRED)
+	target_link_libraries (Interfaces PRIVATE ${CMAKE_THREAD_LIBS_INIT})
+endif()
+
 if (WINDOWS)
 	target_link_libraries (Interfaces PRIVATE ws2_32 DbgHelp)	
 endif()
@@ -37,7 +42,6 @@ endif()
 if (ANDROID)
 	target_link_libraries(Interfaces PRIVATE android EGL log)	
 endif()
-
 
 if (UNIX)
 	if (EMSCRIPTEN)

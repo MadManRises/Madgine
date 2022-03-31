@@ -1,6 +1,6 @@
 #include "../interfaceslib.h"
 
-#if WINDOWS
+#if WINDOWS && !POSIX
 
 #    define NOMINMAX
 #    include <Windows.h>

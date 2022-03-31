@@ -24,34 +24,45 @@ endif()
 
 once()
 
+macro(cmake_log)
+	if (USE_CMAKE_LOG)
+		MESSAGE(STATUS "cmake diagnostics: " ${ARGN})
+	endif()
+endmacro(cmake_log)
+
 
 if (CMAKE_BUILD_TYPE STREQUAL "")
 	message (FATAL_ERROR "No Build Type Specified!")
 endif()
 
-
 if (WIN32)
 	set (WINDOWS 1)
+	cmake_log("Build Platform Windows")
 endif()
 
 if (CMAKE_ANDROID_ARCH_ABI)
 	set (ANDROID 1)
+	cmake_log("Build Platform Android")
 endif()
 
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
 	set (LINUX 1)
+	cmake_log("Build Platform Linux")
 endif()
 
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
 	set (OSX 1)
+	cmake_log("Build Platform OSX")
 endif() 
   
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	set(GCC 1)
+	cmake_log("Build Compiler Gcc")
 endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 	set(CLANG 1)
+	cmake_log("Build Compiler Clang")
 endif()
 
 set (CMAKE_CXX_VISIBILITY_PRESET hidden)
@@ -119,8 +130,4 @@ if (MSVC)
 endif()
 
 
-macro(cmake_log)
-	if (USE_CMAKE_LOG)
-		MESSAGE(STATUS "cmake diagnostics: " ${ARGN})
-	endif()
-endmacro(cmake_log)
+

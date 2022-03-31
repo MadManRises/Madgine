@@ -1,11 +1,12 @@
 #include "../interfaceslib.h"
 
-#if UNIX
+#if POSIX
 
 #    if LINUX || ANDROID
 #        include <sys/prctl.h>
 #    endif
 
+#include <pthread.h>
 #    include "threadapi.h"
 
 namespace Engine {
@@ -18,6 +19,8 @@ namespace Threading {
 #    elif EMSCRIPTEN
 #    elif OSX || IOS
         pthread_setname_np(name.c_str());
+#    elif WINDOWS
+        pthread_setname_np(pthread_self(), name.c_str());
 #    else
 #        error "Unsupported Platform!"
 #    endif
@@ -31,7 +34,7 @@ namespace Threading {
         return buffer;
 #    elif EMSCRIPTEN
         throw 0;
-#    elif OSX || IOS
+#    elif OSX || IOS || WINDOWS
         char buffer[512];
         pthread_getname_np(pthread_self(), buffer, 512);
         return buffer;

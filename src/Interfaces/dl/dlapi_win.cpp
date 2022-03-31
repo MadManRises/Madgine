@@ -1,6 +1,6 @@
 #include "../interfaceslib.h"
 
-#if WINDOWS
+#if WINDOWS || !POSIX
 
 #include "dlapi.h"
 
@@ -58,7 +58,7 @@ namespace Dl {
 
     const void *getDllSymbol(void *dllHandle, const std::string &symbolName)
     {
-        return GetProcAddress((HINSTANCE)dllHandle, symbolName.c_str());
+        return reinterpret_cast<const void*>(GetProcAddress((HINSTANCE)dllHandle, symbolName.c_str()));
     }
 
     Filesystem::Path getDllFullPath(void *dllHandle, const std::string &symbolName)
