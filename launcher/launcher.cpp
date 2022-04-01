@@ -1,7 +1,7 @@
 #include "Madgine/baselib.h"
 #include "Madgine/clientlib.h"
-#include "serialize/filesystem/filesystemlib.h"
 #include "Madgine/uilib.h"
+#include "serialize/filesystem/filesystemlib.h"
 
 #include "launcher.h"
 
@@ -36,8 +36,6 @@ int launch(Engine::Window::MainWindow **topLevelPointer)
     windowSettings.mTitle = "Maditor";
     FIX_LOCAL Engine::KeyValueWorkGroupLocal<Engine::Window::MainWindow> window { "MainWindow", windowSettings };
 
-    FIX_LOCAL Engine::KeyValueWorkGroupLocal<Engine::Input::UIManager> ui { "UI", app, window };
-
     if (topLevelPointer)
         *topLevelPointer = &window;
 
@@ -48,13 +46,20 @@ int launch(Engine::Window::MainWindow **topLevelPointer)
             Engine::Serialize::FormattedSerializeStream file = mgr.openRead(Engine::Resources::ResourceManager::getSingleton().findResourceFile("default.layout"), std::make_unique<Engine::Serialize::XMLFormatter>());
 
             if (file) {
-                Engine::Serialize::read(file, window, nullptr, {}, Engine::Serialize::StateTransmissionFlags_ApplyMap);
+                Engine::Serialize::StreamResult result = Engine::Serialize::read(file, window, nullptr, {}, Engine::Serialize::StateTransmissionFlags_ApplyMap);
+                if (result.mState != Engine::Serialize::StreamState::OK) {
+                    LOG_ERROR(result);
+                    return false;
+                }
                 return true;
             } else {
+                LOG_ERROR("Could not find default.layout!");
                 return false;
             }
         });
 #endif
+
+    FIX_LOCAL Engine::KeyValueWorkGroupLocal<Engine::Input::UIManager> ui { "UI", app, window };
 
     FIX_LOCAL Engine::Threading::Scheduler scheduler;
     return scheduler.go();
