@@ -32,10 +32,10 @@ TEST(Serialize_Query, Query)
     ASSERT_EQ(unit1.mCallCount, 0);
     ASSERT_EQ(unit2.mCallCount, 0);
 
-    Engine::Future<int> f1 = unit1.query(10);
+    Engine::Serialize::MessageFuture<int> f1 = unit1.query(10);
 
     ASSERT_TRUE(f1.is_ready());
-    ASSERT_EQ(f1.get(), 11);
+    ASSERT_MESSAGEFUTURE_EQ(f1, 11);
 
     ASSERT_EQ(unit1.mCallCount, 1);
     ASSERT_EQ(unit2.mCallCount, 0);
@@ -46,7 +46,7 @@ TEST(Serialize_Query, Query)
     ASSERT_EQ(unit1.mCallCount, 1);
     ASSERT_EQ(unit2.mCallCount, 0);
 
-    Engine::Future<int> f2 = unit2.query(20);
+    Engine::Serialize::MessageFuture<int> f2 = unit2.query(20);
 
     ASSERT_FALSE(f2.is_ready());
 
@@ -65,7 +65,7 @@ TEST(Serialize_Query, Query)
     mgr2.receiveMessages(1, 0ms);
 
     ASSERT_TRUE(f2.is_ready());
-    ASSERT_EQ(f2.get(), 21);
+    ASSERT_MESSAGEFUTURE_EQ(f2, 21);
 
     ASSERT_EQ(unit1.mCallCount, 2);
     ASSERT_EQ(unit2.mCallCount, 0);
@@ -100,10 +100,10 @@ TEST(Serialize_Query, Query_Hierarchical)
     ASSERT_EQ(unit2.mCallCount, 0);
     ASSERT_EQ(unit3.mCallCount, 0);
 
-    Engine::Future<int> f1 = unit1.query(10);
+    Engine::Serialize::MessageFuture<int> f1 = unit1.query(10);
 
     ASSERT_TRUE(f1.is_ready());
-    ASSERT_EQ(f1.get(), 11);
+    ASSERT_MESSAGEFUTURE_EQ(f1, 11);
 
     ASSERT_EQ(unit1.mCallCount, 1);
     ASSERT_EQ(unit2.mCallCount, 0);
@@ -123,7 +123,7 @@ TEST(Serialize_Query, Query_Hierarchical)
     ASSERT_EQ(unit2.mCallCount, 0);
     ASSERT_EQ(unit3.mCallCount, 0);
 
-    Engine::Future<int> f2 = unit3.query(20);
+    Engine::Serialize::MessageFuture<int> f2 = unit3.query(20);
 
     ASSERT_FALSE(f2.is_ready());
 
@@ -162,7 +162,7 @@ TEST(Serialize_Query, Query_Hierarchical)
     mgr3.receiveMessages(1, 0ms);
 
     ASSERT_TRUE(f2.is_ready());
-    ASSERT_EQ(f2.get(), 21);
+    ASSERT_MESSAGEFUTURE_EQ(f2, 21);
 
     ASSERT_EQ(unit1.mCallCount, 2);
     ASSERT_EQ(unit2.mCallCount, 0);

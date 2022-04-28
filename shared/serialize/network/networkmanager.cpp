@@ -8,6 +8,8 @@
 
 #include "Meta/serialize/streams/syncstreamdata.h"
 
+#include "Meta/serialize/streams/buffered_streambuf.h"
+
 namespace Engine {
 namespace Network {
     static int sManagerCount = 0;
@@ -71,7 +73,7 @@ namespace Network {
             return result;
         }
 
-        NetworkManagerResult result = setSlaveStream(Serialize::FormattedBufferedStream { format(), std::make_unique<NetworkBuffer>(std::move(socket)), createStreamData() }, true, timeout);
+        NetworkManagerResult result = setSlaveStream(Serialize::FormattedBufferedStream { format(), std::make_unique<Engine::Serialize::buffered_streambuf>(std::make_unique<NetworkBuffer>(std::move(socket))), createStreamData() }, true, timeout);
 
         return result;
     }
@@ -95,7 +97,7 @@ namespace Network {
             std::tie(sock, error) = mServerSocket.accept(timeout);
             while (error != SocketAPIResult::TIMEOUT && (limit == -1 || count < limit)) {
                 if (sock) {
-                    if (addMasterStream(Serialize::FormattedBufferedStream { format(), std::make_unique<NetworkBuffer>(std::move(sock)), createStreamData() }) == Serialize::SyncManagerResult::SUCCESS) {
+                    if (addMasterStream(Serialize::FormattedBufferedStream { format(), std::make_unique<Engine::Serialize::buffered_streambuf>(std::make_unique<NetworkBuffer>(std::move(sock))), createStreamData() }) == Serialize::SyncManagerResult::SUCCESS) {
                         ++count;
                     }
                 }
@@ -116,7 +118,7 @@ namespace Network {
         if (!sock)
             return recordSocketError(error);
 
-        Serialize::FormattedBufferedStream stream {format(), std::make_unique<NetworkBuffer>(std::move(sock)), createStreamData() };
+        Serialize::FormattedBufferedStream stream { format(), std::make_unique<Engine::Serialize::buffered_streambuf>(std::make_unique<NetworkBuffer>(std::move(sock))), createStreamData() };
         return addMasterStream(std::move(stream));
     }
 

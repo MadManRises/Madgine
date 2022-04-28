@@ -91,12 +91,12 @@ namespace Serialize {
         mType->setActive(this, active, existenceChanged);
     }
 
-    StreamResult SyncableUnitBase::readAction(FormattedBufferedStream &in, PendingRequest *request)
+    StreamResult SyncableUnitBase::readAction(FormattedBufferedStream &in, PendingRequest &request)
     {
         return mType->readAction(this, in, request);
     }
 
-    StreamResult SyncableUnitBase::readRequest(FormattedBufferedStream &in, TransactionId id)
+    StreamResult SyncableUnitBase::readRequest(FormattedBufferedStream &in, MessageId id)
     {
         return mType->readRequest(this, in, id);
     }
@@ -192,39 +192,39 @@ namespace Serialize {
         return mType;
     }
 
-    void writeFunctionAction(SyncableUnitBase *unit, uint16_t index, const void *args, const std::set<ParticipantId> &targets, ParticipantId answerTarget, TransactionId answerId)
+    void SyncableUnitBase::writeFunctionAction(uint16_t index, const void *args, const std::set<ParticipantId> &targets, ParticipantId answerTarget, MessageId answerId)
     {
-        std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> outStreams = unit->getMasterMessageTargets(targets);
+        std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> outStreams = getMasterMessageTargets(targets);
         for (FormattedBufferedStream &out : outStreams) {
             out.beginMessageWrite();
-            SyncManager::writeHeader(out, unit, MessageType::FUNCTION_ACTION, out.id() == answerTarget ? answerId : 0);
+            SyncManager::writeActionHeader(out, this, MessageType::FUNCTION_ACTION, out.id() == answerTarget ? answerId : 0);
         }
-        unit->mType->writeFunctionArguments(outStreams, index, CALL, args);
+        mType->writeFunctionArguments(outStreams, index, CALL, args);
     }
 
-    void writeFunctionResult(SyncableUnitBase *unit, uint16_t index, const void *result, ParticipantId answerTarget, TransactionId answerId)
+    void SyncableUnitBase::writeFunctionResult(uint16_t index, const void *result, ParticipantId answerTarget, MessageId answerId)
     {
         assert(answerTarget != 0 && answerId != 0);
-        FormattedBufferedStream &out = unit->getMasterRequestResponseTarget(answerTarget);
+        FormattedBufferedStream &out = getMasterRequestResponseTarget(answerTarget);
         out.beginMessageWrite();
-        SyncManager::writeHeader(out, unit, MessageType::FUNCTION_ACTION, answerId);
-        unit->mType->writeFunctionResult(out, index, result);
+        SyncManager::writeActionHeader(out, this, MessageType::FUNCTION_ACTION, answerId);
+        mType->writeFunctionResult(out, index, result);
     }
 
-    void writeFunctionRequest(SyncableUnitBase *unit, uint16_t index, FunctionType type, Lambda<void(void *)> callback, const void *args, ParticipantId requester, TransactionId requesterTransactionId)
+    void SyncableUnitBase::writeFunctionRequest(uint16_t index, FunctionType type, const void *args, ParticipantId requester, MessageId requesterTransactionId, GenericMessagePromise promise)
     {
-        FormattedBufferedStream &out = unit->getSlaveMessageTarget();
-        out.beginMessageWrite();
-        SyncManager::writeHeader(out, unit, MessageType::FUNCTION_REQUEST, out.createRequest(requester, requesterTransactionId, std::move(callback)));
-        unit->mType->writeFunctionArguments({ out }, index, type, args);
+        FormattedBufferedStream &out = getSlaveMessageTarget();
+        out.beginMessageWrite(requester, requesterTransactionId, std::move(promise));
+        SyncManager::writeHeader(out, this, MessageType::FUNCTION_REQUEST);
+        mType->writeFunctionArguments({ out }, index, type, args);
     }
 
-    StreamResult SyncableUnitBase::readFunctionAction(FormattedBufferedStream &in, PendingRequest *request)
+    StreamResult SyncableUnitBase::readFunctionAction(FormattedBufferedStream &in, PendingRequest &request)
     {
         return mType->readFunctionAction(this, in, request);
     }
 
-    StreamResult SyncableUnitBase::readFunctionRequest(FormattedBufferedStream &in, TransactionId id)
+    StreamResult SyncableUnitBase::readFunctionRequest(FormattedBufferedStream &in, MessageId id)
     {
         return mType->readFunctionRequest(this, in, id);
     }

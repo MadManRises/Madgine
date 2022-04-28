@@ -2,8 +2,6 @@
 
 #include "Meta/serialize/hierarchy/toplevelunit.h"
 
-#include "Meta/serialize/container/action.h"
-#include "Meta/serialize/container/query.h"
 #include "Meta/serialize/container/syncablecontainer.h"
 
 #include "Generic/bytebuffer.h"
@@ -59,8 +57,8 @@ struct TestUnit : TopLevelUnit<TestUnit> {
     int mData;
     int mCallCount = 0;
 
-    Engine::Future<int> call(int i);
-    Engine::Future<int> query(int i);
+    Engine::Serialize::MessageFuture<int> call(int i);
+    Engine::Serialize::MessageFuture<int> query(int i);
 
     SERIALIZABLE_CONTAINER(list1, std::list<int>);
     SERIALIZABLE_CONTAINER(set1, std::set<int>);

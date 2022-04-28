@@ -45,7 +45,15 @@ namespace Serialize {
 
     SyncManager::~SyncManager() { clearTopLevelItems(); }
 
-    void SyncManager::writeHeader(FormattedBufferedStream &stream, const SyncableUnitBase *unit, MessageType type, TransactionId id)
+    void SyncManager::writeHeader(FormattedBufferedStream &stream, const SyncableUnitBase *unit, MessageType type)
+    {
+        stream.beginHeaderWrite();
+        write(stream, SerializeManager::convertPtr(stream.stream(), unit), "Object");
+        write(stream, type, "MessageType");        
+        stream.endHeaderWrite();
+    }
+
+    void SyncManager::writeActionHeader(FormattedBufferedStream &stream, const SyncableUnitBase *unit, MessageType type, MessageId id)
     {
         stream.beginHeaderWrite();
         write(stream, SerializeManager::convertPtr(stream.stream(), unit), "Object");
@@ -54,7 +62,7 @@ namespace Serialize {
         stream.endHeaderWrite();
     }
 
-    StreamResult SyncManager::readMessage(FormattedBufferedStream &stream)
+    StreamResult SyncManager::readMessage(FormattedBufferedStream &stream, MessageId id)
     {
         STREAM_PROPAGATE_ERROR(stream.beginHeaderRead());
         UnitId objectId;
@@ -79,32 +87,29 @@ namespace Serialize {
             STREAM_PROPAGATE_ERROR(convertPtr(stream, objectId, object));
             MessageType type;
             STREAM_PROPAGATE_ERROR(read(stream, type, "MessageType"));
-            TransactionId transactionId;
-            STREAM_PROPAGATE_ERROR(read(stream, transactionId, "TransactionId"));
+            MessageId transactionId;
+            if (type == MessageType::ACTION || type == MessageType::FUNCTION_ACTION)
+                STREAM_PROPAGATE_ERROR(read(stream, transactionId, "TransactionId"));
             STREAM_PROPAGATE_ERROR(stream.endHeaderRead());
             switch (type) {
             case MessageType::ACTION: {
-                PendingRequest *request = stream.fetchRequest(transactionId);
+                PendingRequest request = stream.getRequest(transactionId);
                 STREAM_PROPAGATE_ERROR(object->readAction(stream, request));
-                if (request)
-                    stream.popRequest(transactionId);
                 break;
             }
             case MessageType::REQUEST:
-                STREAM_PROPAGATE_ERROR(object->readRequest(stream, transactionId));
+                STREAM_PROPAGATE_ERROR(object->readRequest(stream, id));
                 break;
             case MessageType::STATE:
                 STREAM_PROPAGATE_ERROR(read(stream, *object, "State", {}, StateTransmissionFlags_ApplyMap | StateTransmissionFlags_Activation));
                 break;
             case MessageType::FUNCTION_ACTION: {
-                PendingRequest *request = stream.fetchRequest(transactionId);
+                PendingRequest request = stream.getRequest(transactionId);
                 STREAM_PROPAGATE_ERROR(object->readFunctionAction(stream, request));
-                if (request)
-                    stream.popRequest(transactionId);
                 break;
             }
             case MessageType::FUNCTION_REQUEST:
-                STREAM_PROPAGATE_ERROR(object->readFunctionRequest(stream, transactionId));
+                STREAM_PROPAGATE_ERROR(object->readFunctionRequest(stream, id));
                 break;
             default:
                 return STREAM_INTEGRITY_ERROR(stream) << "Invalid Message-Type: " << type;
@@ -436,7 +441,7 @@ namespace Serialize {
             while (stream && msgCount > 0) {
                 STREAM_PROPAGATE_ERROR(stream.beginMessageRead(msg));
                 while (msg) {
-                    STREAM_PROPAGATE_ERROR(readMessage(stream));
+                    STREAM_PROPAGATE_ERROR(readMessage(stream, msg.mId));
                     STREAM_PROPAGATE_ERROR(msg.end());
                     --msgCount;
                     if (!timeout.isZero() && timeout.expired())
@@ -449,7 +454,7 @@ namespace Serialize {
         } else {
             STREAM_PROPAGATE_ERROR(stream.beginMessageRead(msg));
             while (msg) {
-                STREAM_PROPAGATE_ERROR(readMessage(stream));
+                STREAM_PROPAGATE_ERROR(readMessage(stream, msg.mId));
                 STREAM_PROPAGATE_ERROR(msg.end());
                 if (!timeout.isZero() && timeout.expired())
                     break;
@@ -495,7 +500,6 @@ namespace Serialize {
         stream.beginHeaderWrite();
         write(stream, SerializeManager::convertPtr(stream.stream(), unit), "Object");
         write<MessageType>(stream, MessageType::STATE, "MessageType");
-        write<TransactionId>(stream, 0, "TransactionId");
         stream.endHeaderWrite();
         write(stream, *unit, "State");
         stream.endMessageWrite();

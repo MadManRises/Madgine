@@ -7,6 +7,7 @@
 #include "statetransmissionflags.h"
 
 #include "serializableunit.h"
+#include "syncableunit.h"
 
 #include "../operations.h"
 
@@ -18,6 +19,21 @@
 
 namespace Engine {
 namespace Serialize {
+
+    void writeFunctionAction(SyncableUnitBase *unit, uint16_t index, const void *args, const std::set<ParticipantId> &targets, ParticipantId answerTarget, MessageId answerId)
+    {
+        unit->writeFunctionAction(index, args, targets, answerTarget, answerId);
+    }
+
+    void writeFunctionResult(SyncableUnitBase *unit, uint16_t index, const void *result, ParticipantId answerTarget, MessageId answerId)
+    {
+        unit->writeFunctionResult(index, result, answerTarget, answerId);
+    }
+
+    void writeFunctionRequest(SyncableUnitBase *unit, uint16_t index, FunctionType type, const void *args, ParticipantId requester, MessageId requesterTransactionId, GenericMessagePromise promise)
+    {
+        unit->writeFunctionRequest(index, type, args, requester, requesterTransactionId, std::move(promise));
+    }
 
     void SerializeTable::writeState(const SerializableDataUnit *unit, FormattedSerializeStream &out, CallerHierarchyBasePtr hierarchy) const
     {
@@ -64,14 +80,14 @@ namespace Serialize {
         return {};
     }
 
-    StreamResult SerializeTable::readAction(SyncableUnitBase *unit, FormattedBufferedStream &in, PendingRequest *request) const
+    StreamResult SerializeTable::readAction(SyncableUnitBase *unit, FormattedBufferedStream &in, PendingRequest &request) const
     {
         uint16_t index;
         STREAM_PROPAGATE_ERROR(read(in, index, "index"));
         return get(index).mReadAction(unit, in, request);
     }
 
-    StreamResult SerializeTable::readRequest(SyncableUnitBase *unit, FormattedBufferedStream &inout, TransactionId id) const
+    StreamResult SerializeTable::readRequest(SyncableUnitBase *unit, FormattedBufferedStream &inout, MessageId id) const
     {
         uint16_t index;
         STREAM_PROPAGATE_ERROR(read(inout, index, "index"));
@@ -260,7 +276,7 @@ namespace Serialize {
         getFunction(index).mWriteFunctionResult(out, args);
     }
 
-    StreamResult SerializeTable::readFunctionAction(SyncableUnitBase *unit, FormattedBufferedStream &in, PendingRequest *request) const
+    StreamResult SerializeTable::readFunctionAction(SyncableUnitBase *unit, FormattedBufferedStream &in, PendingRequest &request) const
     {
         uint16_t index;
         STREAM_PROPAGATE_ERROR(read(in, index, "index"));
@@ -269,7 +285,7 @@ namespace Serialize {
         return getFunction(index).mReadFunctionAction(unit, in, index, type, request);
     }
 
-    StreamResult SerializeTable::readFunctionRequest(SyncableUnitBase *unit, FormattedBufferedStream &in, TransactionId id) const
+    StreamResult SerializeTable::readFunctionRequest(SyncableUnitBase *unit, FormattedBufferedStream &in, MessageId id) const
     {
         uint16_t index;
         STREAM_PROPAGATE_ERROR(read(in, index, "index"));

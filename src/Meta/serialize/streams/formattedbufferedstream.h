@@ -6,23 +6,27 @@
 
 #include "Generic/nulledptr.h"
 
+#include "pendingrequest.h"
+
 namespace Engine {
 namespace Serialize {
 
     struct META_EXPORT FormattedBufferedStream : FormattedSerializeStream {
 
-        FormattedBufferedStream(std::unique_ptr<Formatter> format, std::unique_ptr<std::basic_streambuf<char>> buffer, std::unique_ptr<SyncStreamData> data);
+        FormattedBufferedStream(std::unique_ptr<Formatter> format, std::unique_ptr<message_streambuf> buffer, std::unique_ptr<SyncStreamData> data);
         FormattedBufferedStream(FormattedBufferedStream &&other) = default;
         FormattedBufferedStream(FormattedBufferedStream &&other, SyncManager *mgr);
 
         FormattedBufferedStream &operator=(FormattedBufferedStream &&) = default;
 
         void beginMessageWrite();
+        void beginMessageWrite(ParticipantId requester, MessageId requestId, GenericMessagePromise promise);
         void endMessageWrite();
-        
+
         struct META_EXPORT MessageReadMarker {
-            MessageReadMarker(Formatter *formatter = nullptr)
-                : mFormatter(formatter)
+            MessageReadMarker(MessageId id = 0, Formatter *formatter = nullptr)
+                : mId(id)
+                , mFormatter(formatter)
             {
             }
             MessageReadMarker(MessageReadMarker &&other) = default;
@@ -34,13 +38,15 @@ namespace Serialize {
 
             explicit operator bool() const;
 
-            NulledPtr<Formatter> mFormatter;            
+            MessageId mId;
+            Formatter *mFormatter;
         };
 
         StreamResult beginMessageRead(MessageReadMarker &msg);
 
-        FormattedBufferedStream &sendMessages();
+        PendingRequest getRequest(MessageId id);
 
+        FormattedBufferedStream &sendMessages();
 
         StreamResult beginHeaderRead();
         StreamResult endHeaderRead();
@@ -48,10 +54,6 @@ namespace Serialize {
         void beginHeaderWrite();
         void endHeaderWrite();
 
-        TransactionId createRequest(ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback);
-
-        PendingRequest *fetchRequest(TransactionId id);
-        void popRequest(TransactionId id);
     };
 
 }

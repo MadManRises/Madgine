@@ -13,7 +13,8 @@ namespace Serialize {
         PARSE_ERROR,
         CLOSED_BY_USER,
         SEND_FAILURE,
-        RECEIVE_FAILURE);
+        RECEIVE_FAILURE,
+        REJECTED);
 
 }
 }

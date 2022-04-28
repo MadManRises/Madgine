@@ -9,8 +9,8 @@
 namespace Engine {
 namespace Serialize {
 
-    FormattedBufferedStream::FormattedBufferedStream(std::unique_ptr<Formatter> format, std::unique_ptr<std::basic_streambuf<char>> buffer, std::unique_ptr<SyncStreamData> data)
-        : FormattedSerializeStream(std::move(format), { std::make_unique<buffered_streambuf>(std::move(buffer)), std::move(data) })
+    FormattedBufferedStream::FormattedBufferedStream(std::unique_ptr<Formatter> format, std::unique_ptr<message_streambuf> buffer, std::unique_ptr<SyncStreamData> data)
+        : FormattedSerializeStream(std::move(format), { std::move(buffer), std::move(data) })
     {
     }
 
@@ -26,6 +26,12 @@ namespace Serialize {
         mFormatter->beginMessageWrite();
     }
 
+    void FormattedBufferedStream::beginMessageWrite(ParticipantId requester, MessageId requestId, GenericMessagePromise promise)
+    {
+        static_cast<buffered_streambuf &>(mFormatter->stream().buffer()).beginMessageWrite(requester, requestId, std::move(promise));
+        mFormatter->beginMessageWrite();
+    }
+
     void FormattedBufferedStream::endMessageWrite()
     {
         mFormatter->endMessageWrite();
@@ -34,14 +40,15 @@ namespace Serialize {
 
     StreamResult FormattedBufferedStream::beginMessageRead(MessageReadMarker &msg)
     {
-        if (mFormatter && static_cast<buffered_streambuf &>(mFormatter->stream().buffer()).beginMessageRead()) {
-            mFormatter->stream().clear();
-            STREAM_PROPAGATE_ERROR(mFormatter->beginMessageRead());
-            msg = { mFormatter.get() };
-            return {};
-        } else {
-            return {};
+        if (mFormatter) {
+            MessageId id = static_cast<message_streambuf &>(mFormatter->stream().buffer()).beginMessageRead();
+            if (id != 0) {
+                mFormatter->stream().clear();
+                STREAM_PROPAGATE_ERROR(mFormatter->beginMessageRead());
+                msg = { id, mFormatter.get() };
+            }
         }
+        return {};
     }
 
     FormattedBufferedStream::MessageReadMarker::~MessageReadMarker()
@@ -50,25 +57,34 @@ namespace Serialize {
 
     FormattedBufferedStream::MessageReadMarker &FormattedBufferedStream::MessageReadMarker::operator=(MessageReadMarker &&other)
     {
-        assert(!mFormatter);
+        assert(!mId);
+        mId = std::exchange(other.mId, 0);
         mFormatter = std::move(other.mFormatter);
         return *this;
     }
 
     StreamResult FormattedBufferedStream::MessageReadMarker::end()
-    {
-        assert(mFormatter);
+    {        
+        assert(mId);
         STREAM_PROPAGATE_ERROR(mFormatter->endMessageRead());
         mFormatter->stream().skipWs();
         mFormatter->stream().clear();
-        static_cast<buffered_streambuf &>(mFormatter->stream().buffer()).endMessageRead();
+        if (static_cast<message_streambuf&>(mFormatter->stream().buffer()).endMessageRead() > 0) {
+            printf("Message not fully read!");
+        }
         mFormatter = nullptr;
+        mId = 0;
         return {};
     }
 
     FormattedBufferedStream::MessageReadMarker::operator bool() const
     {
-        return mFormatter;
+        return mId != 0;
+    }
+
+    PendingRequest FormattedBufferedStream::getRequest(MessageId id)
+    {
+        return static_cast<message_streambuf &>(mFormatter->stream().buffer()).getRequest(id);
     }
 
     FormattedBufferedStream &FormattedBufferedStream::sendMessages()
@@ -76,21 +92,6 @@ namespace Serialize {
         if (mFormatter)
             mFormatter->stream().stream().flush();
         return *this;
-    }
-
-    TransactionId FormattedBufferedStream::createRequest(ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback)
-    {
-        return static_cast<SyncStreamData *>(mFormatter->stream().data())->createRequest(requester, requesterTransactionId, std::move(callback));
-    }
-
-    PendingRequest *FormattedBufferedStream::fetchRequest(TransactionId id)
-    {
-        return static_cast<SyncStreamData *>(mFormatter->stream().data())->fetchRequest(id);
-    }
-
-    void FormattedBufferedStream::popRequest(TransactionId id)
-    {
-        static_cast<SyncStreamData *>(mFormatter->stream().data())->popRequest(id);
     }
 
     StreamResult FormattedBufferedStream::beginHeaderRead()

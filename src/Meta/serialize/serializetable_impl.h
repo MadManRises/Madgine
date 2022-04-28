@@ -18,9 +18,9 @@
 namespace Engine {
 namespace Serialize {
 
-    void writeFunctionAction(SyncableUnitBase *unit, uint16_t index, const void *args, const std::set<ParticipantId> &targets, ParticipantId answerTarget, TransactionId answerId);
-    void writeFunctionResult(SyncableUnitBase *unit, uint16_t index, const void *result, ParticipantId answerTarget, TransactionId answerId);
-    void writeFunctionRequest(SyncableUnitBase *unit, uint16_t index, FunctionType type, Lambda<void(void *)> callback, const void *args, ParticipantId requester, TransactionId requesterTransactionId);
+    void writeFunctionAction(SyncableUnitBase *unit, uint16_t index, const void *args, const std::set<ParticipantId> &targets, ParticipantId answerTarget, MessageId answerId);
+    void writeFunctionResult(SyncableUnitBase *unit, uint16_t index, const void *result, ParticipantId answerTarget, MessageId answerId);
+    void writeFunctionRequest(SyncableUnitBase *unit, uint16_t index, FunctionType type, const void *args, ParticipantId requester, MessageId requesterTransactionId, GenericMessagePromise promise = {});
 
     namespace __serialize_impl__ {
 
@@ -65,7 +65,7 @@ namespace Serialize {
                 [](SyncableUnitBase *unit, FormattedBufferedStream &in, PendingRequest *request) -> StreamResult {
                     throw "Unsupported";
                 },
-                [](SyncableUnitBase *unit, FormattedBufferedStream &inout, TransactionId id) -> StreamResult {
+                [](SyncableUnitBase *unit, FormattedBufferedStream &inout, MessageId id) -> StreamResult {
                     throw "Unsupported";
                 },
                 [](SerializableDataUnit *_unit, FormattedSerializeStream &in, bool success) -> StreamResult {
@@ -127,10 +127,10 @@ namespace Serialize {
                     (unit->*Setter)(std::move(dummy));
                     return {};
                 },
-                [](SyncableUnitBase *unit, FormattedBufferedStream &in, PendingRequest *request) -> StreamResult {
+                [](SyncableUnitBase *unit, FormattedBufferedStream &in, PendingRequest &request) -> StreamResult {
                     throw "Unsupported";
                 },
-                [](SyncableUnitBase *unit, FormattedBufferedStream &inout, TransactionId id) -> StreamResult {
+                [](SyncableUnitBase *unit, FormattedBufferedStream &inout, MessageId id) -> StreamResult {
                     throw "Unsupported";
                 },
                 [](SerializableDataUnit *_unit, FormattedSerializeStream &in, bool success) {
@@ -171,14 +171,14 @@ namespace Serialize {
                     Unit *unit = static_cast<Unit *>(_unit);
                     return read<T, Configs...>(in, unit->*P, name, CallerHierarchyPtr { hierarchy.append(unit) });
                 },
-                [](SyncableUnitBase *_unit, FormattedBufferedStream &in, PendingRequest *request) -> StreamResult {
+                [](SyncableUnitBase *_unit, FormattedBufferedStream &in, PendingRequest &request) -> StreamResult {
                     if constexpr (std::derived_from<T, SyncableBase>) {
                         Unit *unit = static_cast<Unit *>(_unit);
                         return readAction<T, Configs...>(unit->*P, in, request, CallerHierarchyPtr { CallerHierarchy { unit } });
                     } else
                         throw "Unsupported";
                 },
-                [](SyncableUnitBase *_unit, FormattedBufferedStream &inout, TransactionId id) -> StreamResult {
+                [](SyncableUnitBase *_unit, FormattedBufferedStream &inout, MessageId id) -> StreamResult {
                     if constexpr (std::derived_from<T, SyncableBase>) {
                         Unit *unit = static_cast<Unit *>(_unit);
                         return readRequest<T, Configs...>(unit->*P, inout, id, CallerHierarchyPtr { CallerHierarchy { unit } });
@@ -235,29 +235,27 @@ namespace Serialize {
                     write(out, *static_cast<const patch_void_t<R> *>(result), "Result");
                     out.endMessageWrite();
                 },
-                [](SyncableUnitBase *unit, FormattedBufferedStream &in, uint16_t index, FunctionType type, PendingRequest *request) {
+                [](SyncableUnitBase *unit, FormattedBufferedStream &in, uint16_t index, FunctionType type, PendingRequest &request) {
                     switch (type) {
                     case CALL: {
                         Tuple args;
                         STREAM_PROPAGATE_ERROR(read(in, args, "Args"));
-                        writeFunctionAction(unit, index, &args, {}, request ? request->mRequester : 0, request ? request->mRequesterTransactionId : 0);
+                        writeFunctionAction(unit, index, &args, {}, request.mRequester, request.mRequesterTransactionId);
                         patch_void_t<R> result = invoke_patch_void(LIFT(TupleUnpacker::invokeExpand), f, static_cast<T *>(unit), args);
-                        if (request)
-                            (*request)(&result);
+                        request.mPromise.setValue(result);
                     } break;
                     case QUERY: {
-                        assert(request);
                         patch_void_t<R> result;
                         STREAM_PROPAGATE_ERROR(read(in, result, "Result"));
-                        if (request->mRequesterTransactionId) {
-                            writeFunctionResult(unit, index, &result, request->mRequester, request->mRequesterTransactionId);
+                        if (request.mRequesterTransactionId) {
+                            writeFunctionResult(unit, index, &result, request.mRequester, request.mRequesterTransactionId);
                         }
-                        (*request)(&result);
+                        request.mPromise.setValue(result);
                     } break;
                     }
                     return StreamResult {};
                 },
-                [](SyncableUnitBase *unit, FormattedBufferedStream &in, uint16_t index, FunctionType type, TransactionId id) {
+                [](SyncableUnitBase *unit, FormattedBufferedStream &in, uint16_t index, FunctionType type, MessageId id) {
                     Tuple args;
                     STREAM_PROPAGATE_ERROR(read(in, args, "Args"));
                     ParticipantId answerId = in.id();
@@ -268,7 +266,8 @@ namespace Serialize {
                         if (type == QUERY && id != 0)
                             writeFunctionResult(unit, index, &result, answerId, id);
                     } else {
-                        writeFunctionRequest(unit, index, type, {}, &args, answerId, id);
+                        writeFunctionRequest(
+                            unit, index, type, &args, answerId, id);
                     }
                     return StreamResult {};
                 }
@@ -334,7 +333,7 @@ namespace Serialize {
             }                                                                                                                                       \
             static constexpr const bool base = false;                                                                                               \
             static constexpr const size_t count = Serialize::__serialize_impl__::FunctionLineStruct<__LINE__ - 1>::count + 1;                       \
-            Serialize::SyncFunction mData = Serialize::__serialize_impl__::syncFunction<&Ty::f>();                                                                                 \
+            Serialize::SyncFunction mData = Serialize::__serialize_impl__::syncFunction<&Ty::f>();                                                  \
             template <auto g>                                                                                                                       \
             static constexpr uint16_t getIndex()                                                                                                    \
             {                                                                                                                                       \

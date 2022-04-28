@@ -48,12 +48,9 @@ TEST(Serialize_Container, SyncedUnit)
     ASSERT_EQ(unit1.list1, unit2.list1);
     ASSERT_EQ(unit1.list2, unit2.list2);
     ASSERT_EQ(unit1.set1, unit2.set1);
-
-    bool called = false;
-    unit1.list2.emplace(unit1.list2.end(), 6).onSuccess([&](auto &&pib) {
-        called = true;
-    });
-    ASSERT_TRUE(called);
+    
+    auto calledFuture = unit1.list2.emplace(unit1.list2.end(), 6);
+    ASSERT_TRUE(calledFuture.is_ready());
     ASSERT_EQ(unit1.list2.back(), 6);
 
     mgr1.sendMessages();
@@ -61,8 +58,7 @@ TEST(Serialize_Container, SyncedUnit)
 
     ASSERT_EQ(unit1.list2, unit2.list2);
 
-    called = false;
-    unit2.list2.emplace(unit2.list2.end(), 7).onSuccess([&](auto &&pib) { called = true; });
+    calledFuture = unit2.list2.emplace(unit2.list2.end(), 7);
 
     ASSERT_EQ(unit1.list2, unit2.list2);
 
@@ -72,15 +68,14 @@ TEST(Serialize_Container, SyncedUnit)
     ASSERT_EQ(unit1.list2.back(), 7);
 
     mgr1.sendMessages();
-    ASSERT_FALSE(called);
+    ASSERT_FALSE(calledFuture.is_ready());
     mgr2.receiveMessages(1, 0ms);
-    ASSERT_TRUE(called);
+    ASSERT_TRUE(calledFuture.is_ready());
 
     ASSERT_EQ(unit1.list2, unit2.list2);
 
-    called = false;
-    unit1.list2.erase(std::next(unit1.list2.begin())).onSuccess([&](auto &&pib) { called = true; });
-    ASSERT_TRUE(called);
+    calledFuture = unit1.list2.erase(std::next(unit1.list2.begin()));
+    ASSERT_TRUE(calledFuture.is_ready());
 
     ASSERT_EQ(unit1.list2.size(), 3);
 

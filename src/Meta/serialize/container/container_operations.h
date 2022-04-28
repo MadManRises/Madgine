@@ -94,7 +94,7 @@ namespace Serialize {
             Serialize::write<int32_t>(out, std::distance(c.begin(), it), "it");
         }
 
-        static StreamResult performOperation(C &c, ContainerEvent op, FormattedSerializeStream &in, typename container_traits<C>::emplace_return &it, ParticipantId answerTarget, TransactionId answerId, const CallerHierarchyBasePtr &hierarchy = {})
+        static StreamResult performOperation(C &c, ContainerEvent op, FormattedSerializeStream &in, typename container_traits<C>::emplace_return &it, ParticipantId answerTarget, MessageId answerId, const CallerHierarchyBasePtr &hierarchy = {})
         {
             it = c.end();
             switch (op) {
@@ -150,7 +150,7 @@ namespace Serialize {
             }
         }
 
-        static StreamResult readAction(C &c, FormattedSerializeStream &in, PendingRequest *request, const CallerHierarchyBasePtr &hierarchy = {})
+        static StreamResult readAction(C &c, FormattedSerializeStream &in, PendingRequest &request, const CallerHierarchyBasePtr &hierarchy = {})
         {
             ContainerEvent op;
             STREAM_PROPAGATE_ERROR(Serialize::read(in, op, "operation"));
@@ -159,18 +159,15 @@ namespace Serialize {
 
             if (accepted) {
                 typename container_traits<C>::emplace_return it;
-                STREAM_PROPAGATE_ERROR(performOperation(c, op, in, it, request ? request->mRequester : 0, request ? request->mRequesterTransactionId : 0, hierarchy));
-                if (request) {
-                    (*request)(&it);
-                }
+                STREAM_PROPAGATE_ERROR(performOperation(c, op, in, it, request.mRequester, request.mRequesterTransactionId, hierarchy));                
+                request.mPromise.setValue(it);
             } else {
-                assert(request);
-                if (request->mRequesterTransactionId) {
-                    FormattedBufferedStream &out = c.getRequestResponseTarget(request->mRequester, request->mRequesterTransactionId);
+                if (request.mRequesterTransactionId) {
+                    FormattedBufferedStream &out = c.getRequestResponseTarget(request.mRequester, request.mRequesterTransactionId);
                     Serialize::write(out, op, "operation");
                     out.endMessageWrite();
                 }
-                (*request)(nullptr);
+                request.mPromise.setResult(MessageResult::REJECTED);
             }
             return {};
         }
@@ -196,7 +193,7 @@ namespace Serialize {
             out.endMessageWrite();
         }
 
-        static StreamResult readRequest(C &c, FormattedBufferedStream &inout, TransactionId id, const CallerHierarchyBasePtr &hierarchy = {})
+        static StreamResult readRequest(C &c, FormattedBufferedStream &inout, MessageId id, const CallerHierarchyBasePtr &hierarchy = {})
         {
             bool accepted = !RequestPolicy::sCallByMasterOnly;
 

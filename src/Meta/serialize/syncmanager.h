@@ -26,8 +26,9 @@ namespace Serialize {
         ~SyncManager();
 
 
-        static void writeHeader(FormattedBufferedStream &stream, const SyncableUnitBase *unit, MessageType type, TransactionId id);
-        StreamResult readMessage(FormattedBufferedStream &);
+        static void writeHeader(FormattedBufferedStream &stream, const SyncableUnitBase *unit, MessageType type);
+        static void writeActionHeader(FormattedBufferedStream &stream, const SyncableUnitBase *unit, MessageType type, MessageId id);
+        StreamResult readMessage(FormattedBufferedStream &stream, MessageId id);
 
         std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterMessageTargets();
 

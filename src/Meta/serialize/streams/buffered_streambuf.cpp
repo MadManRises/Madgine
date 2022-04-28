@@ -95,13 +95,15 @@ namespace Serialize {
         return 0;
     }
 
-    void buffered_streambuf::beginMessageWrite()
+    MessageId buffered_streambuf::beginMessageWriteImpl()
     {
-        assert(pptr() == pbase());
-        assert(pptr() == nullptr);
+        extend();
+        BufferedMessageHeader *header = reinterpret_cast<BufferedMessageHeader *>(mSendBuffer.data());
+        header->mMessageId = ++mRunningMessageId;
+        return header->mMessageId;
     }
 
-    void buffered_streambuf::endMessageWrite()
+    void buffered_streambuf::endMessageWriteImpl()
     {
         assert(!mSendBuffer.empty());
         BufferedMessageHeader *header = reinterpret_cast<BufferedMessageHeader *>(mSendBuffer.data());
@@ -110,20 +112,14 @@ namespace Serialize {
         mSendBuffer.resize(pptr() - pbase());
         mSendBuffer.shrink_to_fit();
         mBufferedSendMsgs.emplace(BufferedSendMessage { std::move(mSendBuffer) });
-        setp(nullptr, nullptr);
     }
 
-    bool buffered_streambuf::beginMessageRead()
+    MessageId buffered_streambuf::beginMessageReadImpl()
     {
         receiveMessages();
-        return egptr() != eback();
-    }
-
-    void buffered_streambuf::endMessageRead()
-    {
-        const char *current = gptr();
-        const char *end = egptr();
-        assert(current == end);
+        if (!egptr())
+            return 0;
+        return mReceiveMessageHeader.mMessageId;
     }
 
     std::streamsize buffered_streambuf::sendMessages()
@@ -142,26 +138,10 @@ namespace Serialize {
         return 0;
     }
 
-    buffered_streambuf::int_type buffered_streambuf::underflow()
-    {
-        return traits_type::eof();
-    }
-
-    std::streamsize buffered_streambuf::showmanyc()
-    {
-        if (receiveMessages() < 0)
-            return -1;
-        return egptr() - gptr();
-    }
-
     std::streamsize buffered_streambuf::receiveMessages()
     {
         int readCount = 0;
-        if (!mRecBuffer.empty() && mBytesToRead == 0) {
-            if (gptr() != egptr()) {
-                printf("Message not fully read!");
-            }
-            setg(nullptr, nullptr, nullptr);
+        if (!mRecBuffer.empty() && mBytesToRead == 0 && !egptr()) {
             mRecBuffer.clear();
             mBytesToRead = sizeof mReceiveMessageHeader;
         }
@@ -205,7 +185,7 @@ namespace Serialize {
                 if (mBytesToRead == 0) {
                     setg(mRecBuffer.data(), mRecBuffer.data(), mRecBuffer.data() + mReceiveMessageHeader.mMsgSize);
 #if ENABLE_MESSAGE_LOGGING
-                    MessageLogger::log(this, mReceiveMessageHeader, std::move(mRecBuffer));    
+                    MessageLogger::log(this, mReceiveMessageHeader, std::move(mRecBuffer));
                     mRecBuffer = { 1 };
 #endif
                 }

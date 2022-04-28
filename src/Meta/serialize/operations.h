@@ -92,14 +92,14 @@ namespace Serialize {
     }
 
     template <typename T, typename... Configs>
-    StreamResult readAction(T &t, FormattedBufferedStream &in, PendingRequest *request, const CallerHierarchyBasePtr &hierarchy = {})
+    StreamResult readAction(T &t, FormattedBufferedStream &in, PendingRequest &request, const CallerHierarchyBasePtr &hierarchy = {})
     {
         auto guard = GuardSelector<Configs...>::guard(hierarchy);
         return Operations<T, Configs...>::readAction(t, in, request, hierarchy);
     }
 
     template <typename T, typename... Configs>
-    StreamResult readRequest(T &t, FormattedBufferedStream &inout, TransactionId id, const CallerHierarchyBasePtr &hierarchy = {})
+    StreamResult readRequest(T &t, FormattedBufferedStream &inout, MessageId id, const CallerHierarchyBasePtr &hierarchy = {})
     {
         return Operations<T, Configs...>::readRequest(t, inout, id, hierarchy);
     }

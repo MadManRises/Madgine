@@ -92,7 +92,7 @@ namespace Serialize {
     typedef int StateTransmissionFlags;
 
     typedef uint32_t ParticipantId;
-    typedef uint32_t TransactionId;
+    typedef uint32_t MessageId;
     typedef uint32_t UnitId;
     enum class UnitIdTag {
         NONE = 0,
@@ -103,7 +103,7 @@ namespace Serialize {
 
 
 
-    struct buffered_streambuf;
+    struct message_streambuf;
 
     struct noparent_deleter;
 

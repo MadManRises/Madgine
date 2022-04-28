@@ -16,17 +16,6 @@ namespace Serialize {
         virtual ~SyncStreamData() = default;
 
         SyncManager *manager();
-
-        //read
-        PendingRequest *fetchRequest(TransactionId id);
-        void popRequest(TransactionId id);
-
-        //write
-        TransactionId createRequest(ParticipantId requester, TransactionId requesterTransactionId, Lambda<void(void *)> callback);
-
-    private:
-        TransactionId mRunningTransactionId = 0;
-        std::queue<PendingRequest> mPendingRequests;
     };
 
 }

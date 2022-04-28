@@ -34,8 +34,8 @@ namespace Serialize {
         void writeState(const SerializableDataUnit *unit, FormattedSerializeStream &out, CallerHierarchyBasePtr hierarchy = {}) const;
         StreamResult readState(SerializableDataUnit *unit, FormattedSerializeStream &in, StateTransmissionFlags flags = 0, CallerHierarchyBasePtr hierarchy = {}) const;
 
-        StreamResult readAction(SyncableUnitBase *unit, FormattedBufferedStream &in, PendingRequest *request) const;
-        StreamResult readRequest(SyncableUnitBase *unit, FormattedBufferedStream &in, TransactionId id) const;
+        StreamResult readAction(SyncableUnitBase *unit, FormattedBufferedStream &in, PendingRequest &request) const;
+        StreamResult readRequest(SyncableUnitBase *unit, FormattedBufferedStream &in, MessageId id) const;
 
         StreamResult applyMap(SerializableDataUnit *unit, FormattedSerializeStream &in, bool success) const;
         void setSynced(SerializableUnitBase *unit, bool b) const;
@@ -53,8 +53,8 @@ namespace Serialize {
 
         void writeFunctionArguments(const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, uint16_t index, FunctionType type, const void *args) const;
         void writeFunctionResult(FormattedBufferedStream &out, uint16_t index, const void *args) const;
-        StreamResult readFunctionAction(SyncableUnitBase *unit, FormattedBufferedStream &in, PendingRequest *request) const;
-        StreamResult readFunctionRequest(SyncableUnitBase *unit, FormattedBufferedStream &in, TransactionId id) const;
+        StreamResult readFunctionAction(SyncableUnitBase *unit, FormattedBufferedStream &in, PendingRequest &request) const;
+        StreamResult readFunctionRequest(SyncableUnitBase *unit, FormattedBufferedStream &in, MessageId id) const;
     };
 
 }

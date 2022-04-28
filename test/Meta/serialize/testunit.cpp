@@ -4,10 +4,6 @@
 
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "Meta/serialize/container/action_operations.h"
-
-#include "Meta/serialize/container/query_operations.h"
-
 #include "Meta/serialize/configs/creator.h"
 
 SERIALIZETABLE_BEGIN(ComplexDataType)
@@ -63,12 +59,12 @@ SYNCFUNCTION(fooImpl)
 
 SERIALIZETABLE_END(TestUnit)
 
-Engine::Future<int> TestUnit::call(int i)
+Engine::Serialize::MessageFuture<int> TestUnit::call(int i)
 {
     return TopLevelUnit<TestUnit>::call<&TestUnit::fooImpl>(i);
 }
 
-Engine::Future<int> TestUnit::query(int i)
+Engine::Serialize::MessageFuture<int> TestUnit::query(int i)
 {
     return TopLevelUnit<TestUnit>::query<&TestUnit::fooImpl>(i);
 }

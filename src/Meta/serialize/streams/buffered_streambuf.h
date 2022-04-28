@@ -1,17 +1,21 @@
 #pragma once
 
+#include "message_streambuf.h"
+
+
 namespace Engine {
 namespace Serialize {
 
     struct BufferedMessageHeader {
         uint64_t mMsgSize;
+        MessageId mMessageId;
     };
 
     struct BufferedSendMessage {
         std::vector<char> mData;
     };
 
-    struct META_EXPORT buffered_streambuf : std::basic_streambuf<char> {
+    struct META_EXPORT buffered_streambuf : message_streambuf {
     public:
         buffered_streambuf(std::unique_ptr<std::basic_streambuf<char>> buffer);
         buffered_streambuf(const buffered_streambuf &) = delete;
@@ -19,11 +23,10 @@ namespace Serialize {
 
         virtual ~buffered_streambuf();
 
-        void beginMessageWrite();
-        void endMessageWrite();
+        MessageId beginMessageWriteImpl() override;
+        void endMessageWriteImpl() override;
 
-        bool beginMessageRead();
-        void endMessageRead();
+        MessageId beginMessageReadImpl() override;
 
     protected:
         pos_type seekoff(off_type off, std::ios_base::seekdir dir,
@@ -32,9 +35,6 @@ namespace Serialize {
             std::ios_base::openmode mode = std::ios_base::in) override;
 
         int_type overflow(int c = EOF) override;
-        int_type underflow() override;
-
-        std::streamsize showmanyc() override;
 
         int sync() override;
         void extend();
@@ -58,6 +58,8 @@ namespace Serialize {
         std::queue<BufferedSendMessage> mBufferedSendMsgs;
 
         std::unique_ptr<std::basic_streambuf<char>> mBuffer;
+
+        MessageId mRunningMessageId = 0;
     };
 }
 }

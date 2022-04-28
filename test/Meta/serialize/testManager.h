@@ -6,6 +6,8 @@
 
 #include "Meta/serialize/formatter/safebinaryformatter.h"
 
+#include "Meta/serialize/streams/buffered_streambuf.h"
+
 using namespace Engine::Serialize;
 
 struct Buffer {
@@ -106,7 +108,7 @@ struct TestManager : SyncManager {
 
     SyncManagerResult setBuffer(Buffer &buffer, bool slave, bool shareState = true, std::unique_ptr<Engine::Serialize::Formatter> format = std::make_unique<Engine::Serialize::SafeBinaryFormatter>())
     {
-        std::unique_ptr<BufferedTestBuf> buf = std::make_unique<BufferedTestBuf>(buffer, !slave);
+        std::unique_ptr<buffered_streambuf> buf = std::make_unique<buffered_streambuf>(std::make_unique<BufferedTestBuf>(buffer, !slave));
         if (slave) {
             return setSlaveStream(FormattedBufferedStream { std::move(format), std::move(buf), std::make_unique<SyncStreamData>(*this, 0) }, shareState, std::chrono::milliseconds { 1000 });
         } else {
@@ -123,4 +125,10 @@ struct TestManager : SyncManager {
     {                                                        \
         StreamResult result = __VA_ARGS__;                   \
         ASSERT_EQ(result.mState, StreamState::OK) << result; \
+    }
+#define ASSERT_MESSAGEFUTURE_EQ(f, ...)             \
+    {                                               \
+        typename decltype(f)::type value;           \
+        ASSERT_EQ(f.get(value), MessageResult::OK); \
+        ASSERT_EQ(value, __VA_ARGS__);              \
     }

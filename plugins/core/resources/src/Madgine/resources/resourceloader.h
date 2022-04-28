@@ -380,9 +380,7 @@ namespace Resources {
             ResourceDataInfo &info = *getInfo(handle, loader);
             Threading::TaskFuture<void> task = info.unloadingTask();
 
-            if (!task.valid()) {
-                ResourceType *resource = handle.resource();
-                
+            if (!task.valid()) {                
                 task = loader->queueUnloading(Threading::make_task(&T::unloadImpl, (T*)loader, *getDataPtr(handle, loader, false)));
 
                 info.setUnloadingTask(task);

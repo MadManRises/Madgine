@@ -1,33 +1,13 @@
 #pragma once
 
-#include "requestbuilder.h"
-
+#include "Generic/future.h"
 #include "serializablecontainer.h"
 #include "syncable.h"
-#include "Generic/future.h"
 
 #include "Generic/container/containerevent.h"
 
 namespace Engine {
 namespace Serialize {
-
-    template <typename Builder>
-    struct EmplaceRequestBuilder;
-
-    template <typename Builder>
-    struct EmplaceRequestBuilder : RequestBuilder<Builder> {
-
-        using RequestBuilder<Builder>::RequestBuilder;
-
-        template <typename C>
-        auto init(C &&c) &&
-        {
-            return std::move(*this).template append<3>(std::forward<C>(c));
-        }
-    };
-
-    template <typename F>
-    EmplaceRequestBuilder(F &&f) -> EmplaceRequestBuilder<Builder<F, EmplaceRequestBuilder, 4>>;
 
     template <typename C, typename Observer = NoOpFunctor, typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
     struct SyncableContainerImpl : SerializableContainerImpl<C, Observer, OffsetPtr>, Syncable<OffsetPtr> {
@@ -76,77 +56,54 @@ namespace Serialize {
         }
 
         template <typename... _Ty>
-        auto emplace(const iterator &where, _Ty &&... args)
+        MessageFuture<typename _traits::emplace_return> emplace(const iterator &where, _Ty &&...args)
         {
-            return EmplaceRequestBuilder {
-                [=, args = std::tuple<_Ty...> { std::forward<_Ty>(args)... }](auto &&onResult, auto &&onSuccess, auto &&onFailure, auto &&init) mutable -> Future<typename _traits::emplace_return> {
-                    if (this->isMaster()) {
-                        typename _traits::emplace_return it = TupleUnpacker::invokeExpand(LIFT(emplace_impl, this), where, std::forward<decltype(init)>(init), std::move(args));
-                        executeCallbacks(it, std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onResult)>(onResult));
-                        return it;
-                    } else {
-                        std::promise<typename _traits::emplace_return> p;
-                        Future<typename _traits::emplace_return> future = p.get_future();
-
-                        value_type temp = TupleUnpacker::constructFromTuple<value_type>(std::move(args));
-                        TupleUnpacker::forEach(std::forward<decltype(init)>(init), [&](auto &&f) { TupleUnpacker::invoke(f, temp); });
-                        std::tuple<ContainerEvent, const_iterator, const value_type &> data { EMPLACE, where, temp };
-                        this->writeRequest(&data, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
-
-                        return future;
-                    }
-                }
-            };
+            if (this->isMaster()) {
+                return emplace_impl(where, std::forward<_Ty>(args)...);
+            } else {
+                value_type temp { std::forward<_Ty>(args)... };
+                std::tuple<ContainerEvent, const_iterator, const value_type &> data { EMPLACE, where, temp };
+                return this->template writeRequest<typename _traits::emplace_return>(&data);
+            }
         }
 
-        auto erase(const iterator &where)
+        template <typename Init, typename... _Ty>
+        MessageFuture<typename _traits::emplace_return> emplace_init(const iterator &where, Init &&init, _Ty &&...args)
         {
-            return RequestBuilder {
-                [=](auto &&onResult, auto &&onSuccess, auto &&onFailure) mutable -> Future<iterator> {
-                    if (this->isMaster()) {
-                        iterator it = erase_impl(where);
-                        executeCallbacks(it, std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onResult)>(onResult));
-                        return it;
-                    } else {
-                        std::promise<iterator> p;
-                        Future<iterator> future = p.get_future();
-
-                        std::tuple<ContainerEvent, const_iterator> data { ERASE, where };
-
-                        this->writeRequest(&data, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
-
-                        return future;
-                    }
-                }
-            };
+            if (this->isMaster()) {
+                return emplace_impl_init(where, std::forward<decltype(init)>(init), std::forward<_Ty>(args)...);
+            } else {
+                value_type temp { std::forward<_Ty>(args)... };
+                TupleUnpacker::invoke(std::forward<Init>(init), temp);
+                std::tuple<ContainerEvent, const_iterator, const value_type &> data { EMPLACE, where, temp };
+                return this->template writeRequest<typename _traits::emplace_return>(&data);
+            }
         }
 
-        auto erase(const iterator &from, const iterator &to)
+        MessageFuture<iterator> erase(const iterator &where)
+        {
+            if (this->isMaster()) {
+                return erase_impl(where);
+            } else {
+                std::tuple<ContainerEvent, const_iterator> data { ERASE, where };
+                return this->template writeRequest<iterator>(&data);                
+            }
+        }
+
+        MessageFuture<iterator> erase(const iterator &from, const iterator &to)
         {
             iterator it = this->end();
-            return RequestBuilder {
-                [=](auto &&onResult, auto &&onSuccess, auto &&onFailure) mutable -> Future<iterator> {
-                    if (this->isMaster()) {
-                        iterator it = erase_impl(from, to);
-                        executeCallbacks(it, std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onResult)>(onResult));
-                        return it;
-                    } else {
-                        std::promise<iterator> p;
-                        Future<iterator> future = p.get_future();
-
-                        std::tuple<ContainerEvent, const_iterator, const_iterator> data { ERASE_RANGE, from,
-                            to };
-
-                        this->writeRequest(&data, 0, 0, generateCallback(std::move(p), std::forward<decltype(onResult)>(onResult), std::forward<decltype(onSuccess)>(onSuccess), std::forward<decltype(onFailure)>(onFailure)));
-
-                        return future;
-                    }
-                }
-            };
+            if (this->isMaster()) {
+                return erase_impl(from, to);                
+            } else {
+                std::tuple<ContainerEvent, const_iterator, const_iterator> data { ERASE_RANGE, from,
+                    to };
+                return this->writeRequest<iterator>(&data);                
+            }
         }
 
         struct _InsertOperation : Base::InsertOperation {
-            _InsertOperation(container_t &c, const iterator &where, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+            _InsertOperation(container_t &c, const iterator &where, ParticipantId answerTarget = 0, MessageId answerId = 0)
                 : Base::InsertOperation(c, where)
                 , mAnswerTarget(answerTarget)
                 , mAnswerId(answerId)
@@ -170,11 +127,11 @@ namespace Serialize {
 
         private:
             ParticipantId mAnswerTarget;
-            TransactionId mAnswerId;
+            MessageId mAnswerId;
         };
 
         struct _RemoveOperation : Base::RemoveOperation {
-            _RemoveOperation(container_t &c, const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+            _RemoveOperation(container_t &c, const iterator &it, ParticipantId answerTarget = 0, MessageId answerId = 0)
                 : Base::RemoveOperation(c, it)
             {
                 if (this->mContainer.isSynced()) {
@@ -190,7 +147,7 @@ namespace Serialize {
         };
 
         struct _RemoveRangeOperation : Base::RemoveRangeOperation {
-            _RemoveRangeOperation(container_t &c, const iterator &from, const iterator &to, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+            _RemoveRangeOperation(container_t &c, const iterator &from, const iterator &to, ParticipantId answerTarget = 0, MessageId answerId = 0)
                 : Base::RemoveRangeOperation(c, from, to)
             {
                 if (this->mContainer.isSynced()) {
@@ -206,7 +163,7 @@ namespace Serialize {
         };
 
         struct _ResetOperation : Base::ResetOperation {
-            _ResetOperation(container_t &c, bool controlled, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+            _ResetOperation(container_t &c, bool controlled, ParticipantId answerTarget = 0, MessageId answerId = 0)
                 : Base::ResetOperation(c, controlled)
                 , mAnswerTarget(answerTarget)
                 , mAnswerId(answerId)
@@ -229,7 +186,7 @@ namespace Serialize {
 
         private:
             ParticipantId mAnswerTarget;
-            TransactionId mAnswerId;
+            MessageId mAnswerId;
         };
 
         using InsertOperation = AtomicContainerOperation<_InsertOperation>;
@@ -239,42 +196,29 @@ namespace Serialize {
         //TODO: MultiInsertOperation
 
     private:
-        template <typename T, typename... Callbacks>
-        static void executeCallbacks(const T &t, Callbacks &&... callbacks)
-        {
-            (TupleUnpacker::forEach(std::forward<Callbacks>(callbacks), [&](auto &&f) { TupleUnpacker::invoke(f, t); }), ...);
-        }
-
-        template <typename T, typename Then, typename OnSuccess, typename OnFailure>
-        static Lambda<void(void *)> generateCallback(std::promise<T> p, Then &&onResult, OnSuccess &&onSuccess, OnFailure &&onFailure)
-        {
-            return [p = std::move(p), onResult = std::forward<Then>(onResult), onSuccess = std::forward<OnSuccess>(onSuccess), onFailure = std::forward<OnFailure>(onFailure)](void *data) mutable {
-                if (data) {
-                    T *t = static_cast<T *>(data);
-                    executeCallbacks(*t, std::move(onSuccess), std::move(onResult));
-                    p.set_value(std::move(*t));
-                } else {
-                    TupleUnpacker::forEach(std::move(onFailure), [&](auto &&f) { std::forward<decltype(f)>(f)(); });
-                    TupleUnpacker::forEach(std::move(onResult), [&](auto &&f) { TupleUnpacker::invoke(std::forward<decltype(f)>(f), std::nullopt); });
-                }
-            };
-        }
-
         template <typename Init, typename... _Ty>
-        typename _traits::emplace_return emplace_impl(const iterator &where, Init &&init, _Ty &&... args)
+        typename _traits::emplace_return emplace_impl_init(const iterator &where, Init &&init, _Ty &&...args)
         {
             InsertOperation op { *this, where };
             typename _traits::emplace_return it = op.emplace(where, std::forward<_Ty>(args)...);
-            TupleUnpacker::forEach(std::forward<Init>(init), [&](auto &&f) { TupleUnpacker::invoke(f, *it); });
+            TupleUnpacker::invoke(std::forward<Init>(init), *it);
             return it;
         }
 
-        iterator erase_impl(const iterator &it, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+        template <typename... _Ty>
+        typename _traits::emplace_return emplace_impl(const iterator &where, _Ty &&...args)
+        {
+            InsertOperation op { *this, where };
+            typename _traits::emplace_return it = op.emplace(where, std::forward<_Ty>(args)...);
+            return it;
+        }
+
+        iterator erase_impl(const iterator &it, ParticipantId answerTarget = 0, MessageId answerId = 0)
         {
             return RemoveOperation { *this, it, answerTarget, answerId }.erase(it);
         }
 
-        iterator erase_impl(const iterator &from, const iterator &to, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+        iterator erase_impl(const iterator &from, const iterator &to, ParticipantId answerTarget = 0, MessageId answerId = 0)
         {
             return RemoveRangeOperation { *this, from, to, answerTarget, answerId }.erase(from, to);
         }
@@ -299,7 +243,7 @@ struct container_traits<Serialize::SyncableContainerImpl<C, Observer, _OffsetPtr
     using _traits = container_traits<C>;
 
     template <typename... Args>
-    static typename _traits::emplace_return emplace(container &c, const typename _traits::iterator &where, Args &&... args)
+    static typename _traits::emplace_return emplace(container &c, const typename _traits::iterator &where, Args &&...args)
     {
         return c.emplace(where, std::forward<Args>(args)...);
     }

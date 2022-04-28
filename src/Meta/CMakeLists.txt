@@ -10,10 +10,10 @@ FolderSources(sources "" "" metaforward.h metalib.h)
 	FolderSources(sources "" keyvalueutil valuetypeserialize.cpp valuetypeserialize.h)
 	FolderSources(sources "" math atlas2.cpp atlas2.h boundingbox.h bounds.cpp bounds.h frustum.cpp frustum.h geometry3.cpp geometry3.h matrix4.cpp matrix4.h matrix3.cpp matrix3.h plane.h quaternion.cpp quaternion.h ray.h transformation.cpp transformation.h vector4.h vector3.h vector2.h)
 	FolderSources(sources "" serialize operations.cpp operations.h serializemanager.cpp serializemanager.h syncmanager.cpp syncmanager.h)
-		FolderSources(sources serialize container action.h serializable.h synced.h syncablecontainer.h serializablecontainer.h serialized.h syncable.cpp syncable.h)
+		FolderSources(sources serialize container serializable.h synced.h syncablecontainer.h serializablecontainer.h serialized.h syncable.cpp syncable.h)
 		FolderSources(sources serialize formatter iniformatter.cpp iniformatter.h jsonformatter.cpp jsonformatter.h safebinaryformatter.cpp safebinaryformatter.h unsafebinaryformatter.cpp unsafebinaryformatter.h xmlformatter.cpp xmlformatter.h)
 		FolderSources(sources serialize hierarchy serializableids.h serializableunit.cpp serializableunit.h serializableunitptr.cpp serializableunitptr.h syncableunit.cpp syncableunit.h toplevelunit.cpp toplevelunit.h serializetable.cpp serializetable.h)
-		FolderSources(sources serialize streams buffered_streambuf.cpp buffered_streambuf.h formattedbufferedstream.cpp formattedbufferedstream.h formattedserializestream.cpp formattedserializestream.h formatter.cpp formatter.h messagelogger.cpp messagelogger.h serializestream.cpp serializestream.h serializestreamdata.cpp serializestreamdata.h serializablemapholder.cpp serializablemapholder.h streamresult.cpp streamresult.h syncstreamdata.cpp syncstreamdata.h)
+		FolderSources(sources serialize streams buffered_streambuf.cpp buffered_streambuf.h formattedbufferedstream.cpp formattedbufferedstream.h formattedserializestream.cpp formattedserializestream.h formatter.cpp formatter.h messagelogger.cpp messagelogger.h message_streambuf.cpp message_streambuf.h serializestream.cpp serializestream.h serializestreamdata.cpp serializestreamdata.h serializablemapholder.cpp serializablemapholder.h streamresult.cpp streamresult.h syncstreamdata.cpp syncstreamdata.h)
 	
 
 add_workspace_library(Meta ${sources} SOURCE_ROOT .. PRECOMPILED_HEADER metalib.h)
