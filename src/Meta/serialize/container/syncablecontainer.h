@@ -201,7 +201,9 @@ namespace Serialize {
         {
             InsertOperation op { *this, where };
             typename _traits::emplace_return it = op.emplace(where, std::forward<_Ty>(args)...);
-            TupleUnpacker::invoke(std::forward<Init>(init), *it);
+            if (_traits::was_emplace_successful(it)) {
+                init(*it);
+            }
             return it;
         }
 

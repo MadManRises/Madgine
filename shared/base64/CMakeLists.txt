@@ -1,4 +1,4 @@
-Project(CLI)
+Project(Base64)
 
 set(sources base64.cpp base64.h)
 	

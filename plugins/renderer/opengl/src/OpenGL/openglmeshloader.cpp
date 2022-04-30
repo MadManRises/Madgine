@@ -25,6 +25,7 @@ namespace Render {
 
     OpenGLMeshLoader::OpenGLMeshLoader()
     {
+        getOrCreateManual("Plane", {}, {}, this);
     }
 
     void OpenGLMeshLoader::generateImpl(OpenGLMeshData &data, const MeshData &mesh)

@@ -429,7 +429,7 @@ private:
             return mF(mFuture.get());
         }
 
-        operator future<std::invoke_result_t<F, T>>() &&
+        operator Fut<std::invoke_result_t<F, T>>() &&
         {
             return std::visit(overloaded {
                                   [this](T &&t) { return future<std::invoke_result_t<F, T>> { mF(std::forward<T>(t)) }; },

@@ -64,7 +64,7 @@ namespace Serialize {
         MessageFuture<T> writeRequest(const void *data, ParticipantId requester = 0, MessageId requesterTransactionId = 0) const
         {
             MessagePromise<T> p;
-            MessageFuture<T> f { p.get_future() };
+            MessageFuture<T> f { Future<MessageData<T>>{ p.get_future() } };
             SyncableBase::writeRequest(parent(), OffsetPtr::template offset<SerializableDataUnit>(), data, requester, requesterTransactionId, std::move(p));
             return f;
         }

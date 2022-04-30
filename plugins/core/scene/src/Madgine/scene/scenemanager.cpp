@@ -194,7 +194,7 @@ namespace Scene {
         return "Entity";
     }
 
-    Future<Entity::EntityPtr> SceneManager::createEntity(const std::string &behavior, const std::string &name,
+    Serialize::MessageFuture<Entity::EntityPtr> SceneManager::createEntity(const std::string &behavior, const std::string &name,
         const std::function<void(Entity::Entity &)> &init)
     {
         assert(mMutex.isHeldWrite());
@@ -208,9 +208,9 @@ namespace Scene {
             if (!behavior.empty())
                 LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
         }
-        Future<Pib<typename RefcountedContainer<std::deque<Entity::Entity>>::iterator>> f;
+        Serialize::MessageFuture<Pib<typename RefcountedContainer<std::deque<Entity::Entity>>::iterator>> f;
         if (init)
-            f = TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace, this), mEntities.end(), createEntityData(name, false), table).init(init);
+            f = TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_init, this), mEntities.end(), init, createEntityData(name, false), table);
         else
             f = TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace, this), mEntities.end(), createEntityData(name, false), table);
         return { f.then([](const typename RefcountedContainer<std::deque<Entity::Entity>>::iterator &it) { return Entity::EntityPtr { &*it }; }) };

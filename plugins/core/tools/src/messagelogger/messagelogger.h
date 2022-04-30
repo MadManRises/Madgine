@@ -24,7 +24,7 @@ namespace Tools {
     private:
         Serialize::MessageLogger &mLogger;
 
-        std::map<Serialize::buffered_streambuf *, bool> mVisibleStreams;
+        std::map<Serialize::message_streambuf *, bool> mVisibleStreams;
     };
 
 }

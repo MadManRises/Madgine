@@ -140,14 +140,32 @@ namespace Input {
         auto result = sGetData(HidP_Input, list.get(), &size, device.mPreparsedData, (PCHAR)data, bytesize);
         assert(result = HIDP_STATUS_SUCCESS);
 
+        bool newButtonMask[16] = { 0 };
+
         for (size_t i = 0; i < size; ++i) {
             USHORT index = list[i].DataIndex;
             bool *flag = device.mCaps[index].mChangedFlag;
-            if (flag) {
+            switch (device.mCaps[index].mType) {
+            case CapData::FLOAT:
                 *flag |= *device.mCaps[index].mValue != list[i].RawValue / 32768.0f - 1.0f;
                 *device.mCaps[index].mValue = list[i].RawValue / 32768.0f - 1.0f;
-            } else {
+                break;
+            case CapData::INT:
+                *flag |= *device.mCaps[index].mIntValue != list[i].RawValue;
+                *device.mCaps[index].mIntValue = list[i].RawValue;
+                break;
+            case CapData::BUTTON:
+                newButtonMask[index - 1] = list[i].On;
+                break;
+            }
+        }
 
+        for (size_t i = 0; i < 16; ++i) {
+            USHORT index = i + 1;
+            if (device.mButtonMask[i] != newButtonMask[i]) {
+                device.mKeyEvents.push({ KeyEventArgs { device.mCaps[index].mKey, 0 },
+                    newButtonMask[i] ? RawInputDevice::DOWN : RawInputDevice::UP });
+                device.mButtonMask[i] = newButtonMask[i];
             }
         }
     }
@@ -222,25 +240,43 @@ namespace Input {
     CapData RawInputDevice::resolveValueCap(USAGE usage)
     {
 
-        if (usage == HID_USAGE_GENERIC_X) {
-            return { &mControlSticks[0].mChanged, { &mControlSticks[0].mAxis1 } };
-        } else if (usage == HID_USAGE_GENERIC_Y) {
-            return { &mControlSticks[0].mChanged, { &mControlSticks[0].mAxis2 } };
-        } else if (usage == HID_USAGE_GENERIC_Z) {
-            return { &mZAxis.mChanged, { &mZAxis.mValue } };
-        } else {
+        switch (usage) {
+        case HID_USAGE_GENERIC_X:
+            return { CapData::FLOAT, &mControlSticks[0].mChanged, { &mControlSticks[0].mAxis1 } };
+        case HID_USAGE_GENERIC_Y:
+            return { CapData::FLOAT, &mControlSticks[0].mChanged, { &mControlSticks[0].mAxis2 } };
+        case HID_USAGE_GENERIC_RX:
+            return { CapData::FLOAT, &mControlSticks[1].mChanged, { &mControlSticks[1].mAxis1 } };
+        case HID_USAGE_GENERIC_RY:
+            return { CapData::FLOAT, &mControlSticks[1].mChanged, { &mControlSticks[1].mAxis2 } };
+        case HID_USAGE_GENERIC_Z:
+            return { CapData::FLOAT, &mZAxis.mChanged, { &mZAxis.mValue } };
+        case HID_USAGE_GENERIC_HATSWITCH: {
+            CapData result { CapData::INT, &mDPad.mChanged };
+            result.mIntValue = &mDPad.mValue;
+            return result;
+        }
+        default:
             LOG("unknown value usage: " << usage);
-            return { &mUnknownValueDummy.dummy1, { &mUnknownValueDummy.dummy2 } };
+            return { CapData::FLOAT, & mUnknownValueDummy.dummy1, { &mUnknownValueDummy.dummy2 } };
         }
     }
 
     CapData RawInputDevice::resolveButtonCap(USAGE usage)
     {
-        LOG("unknown button usage: " << usage);
-        return { &mUnknownValueDummy.dummy1, { &mUnknownValueDummy.dummy2 } };
+        CapData data = { CapData::BUTTON, nullptr };
+
+        if (usage > 16) {
+            LOG("unknown button usage: " << usage);
+            data.mKey = static_cast<Key::Key>(0);
+        } else if (usage > 8)
+            data.mKey = static_cast<Key::Key>(0x98 + usage - 9);
+        else
+            data.mKey = static_cast<Key::Key>(0x88 + usage - 1);
+        return data;
     }
 
-    bool RawInputDevice::fetchEvent(AxisEventArgs &arg)
+    bool RawInputDevice::fetchAxisEvent(AxisEventArgs &arg)
     {
         for (ControlStick &stick : mControlSticks) {
             if (stick.mChanged) {
@@ -259,7 +295,26 @@ namespace Input {
             return true;
         }
 
+        if (mDPad.mChanged) {
+            arg.mAxisType = AxisEventArgs::DPAD;
+            arg.mAxis1 = mDPad.mValue;
+            mDPad.mChanged = false;
+            return true;
+        }
+
         return false;
+    }
+
+    bool RawInputDevice::fetchKeyEvent(KeyEventArgs &arg, Dir &dir)
+    {
+        if (!mKeyEvents.empty()) {
+            arg = mKeyEvents.front().first;
+            dir = mKeyEvents.front().second;
+            mKeyEvents.pop();
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

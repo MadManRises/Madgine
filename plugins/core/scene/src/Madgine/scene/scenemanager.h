@@ -46,7 +46,7 @@ namespace Scene {
         void update();
         void updateRender();
 
-        Future<Entity::EntityPtr> createEntity(const std::string &behavior = "", const std::string &name = "",
+        Serialize::MessageFuture<Entity::EntityPtr> createEntity(const std::string &behavior = "", const std::string &name = "",
             const std::function<void(Entity::Entity &)> &init = {});
         Entity::EntityPtr createLocalEntity(const std::string &behavior = "", const std::string &name = "");
         Entity::EntityPtr findEntity(const std::string &name);

@@ -145,8 +145,8 @@ namespace Serialize {
             return InsertOperation { *this, where }.emplace(where, std::forward<_Ty>(args)...);
         }
 
-        template <typename T, typename... _Ty>
-        typename _traits::emplace_return emplace_init(T &&init, const iterator &where, _Ty &&...args)
+        template <typename Init, typename... _Ty>
+        typename _traits::emplace_return emplace_init(const iterator &where, Init &&init, _Ty &&...args)
         {
             InsertOperation op { *this, where };
             typename _traits::emplace_return it = op.emplace(where, std::forward<_Ty>(args)...);

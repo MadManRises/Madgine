@@ -5,7 +5,7 @@ namespace Serialize {
 
     template <typename T, typename Observer, typename OffsetPtr>
     struct Operations<Synced<T, Observer, OffsetPtr>> {        
-        static StreamResult readRequest(Synced<T, Observer, OffsetPtr> &synced, FormattedBufferedStream &inout, TransactionId id, const CallerHierarchyBasePtr &hierarchy = {})
+        static StreamResult readRequest(Synced<T, Observer, OffsetPtr> &synced, FormattedBufferedStream &inout, MessageId id, const CallerHierarchyBasePtr &hierarchy = {})
         {
             if (synced.isMaster()) {
                 typename Synced<T, Observer, OffsetPtr>::Operation op;
@@ -47,7 +47,7 @@ namespace Serialize {
             out.endMessageWrite();
         }
 
-        static StreamResult readAction(Synced<T, Observer, OffsetPtr> &synced, FormattedBufferedStream &in, PendingRequest *request, const CallerHierarchyBasePtr &hierarchy = {})
+        static StreamResult readAction(Synced<T, Observer, OffsetPtr> &synced, FormattedBufferedStream &in, PendingRequest &request, const CallerHierarchyBasePtr &hierarchy = {})
         {
             typename Synced<T, Observer, OffsetPtr>::Operation op;
             STREAM_PROPAGATE_ERROR(Serialize::read(in, op, nullptr));

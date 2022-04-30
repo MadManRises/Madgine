@@ -26,6 +26,7 @@ namespace Render {
 
     DirectX12MeshLoader::DirectX12MeshLoader()
     {
+        getOrCreateManual("Plane", {}, {}, this);
     }
 
     void Engine::Render::DirectX12MeshLoader::generateImpl(DirectX12MeshData &data, const MeshData &mesh)

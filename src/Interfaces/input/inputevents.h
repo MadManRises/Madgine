@@ -137,7 +137,22 @@ namespace Input {
             F21 = 0x84,
             F22 = 0x85,
             F23 = 0x86,
-            F24 = 0x87
+            F24 = 0x87,
+
+            //Gamepad in unassigned area
+            GP_A = 0x88,
+            GP_B = 0x89,
+            GP_X = 0x8A,
+            GP_Y = 0x8B,            
+
+            GP_LB = 0x8C,
+            GP_RB = 0x8D,
+
+            GP_B1 = 0x8E,
+            GP_B2 = 0x8F,
+
+            GP_LSB = 0x98,
+            GP_RSB = 0x99,
         };
     }
 
@@ -152,14 +167,8 @@ namespace Input {
     }
 
     struct KeyEventArgs {
-        Key::Key scancode;
+        Key::Key scancode = static_cast<Key::Key>(0);
         char text = 0;
-
-        KeyEventArgs(Key::Key key, char text)
-            : scancode(key)
-            , text(text)
-        {
-        }
     };
 
     struct PointerEventArgs {
@@ -189,7 +198,8 @@ namespace Input {
             LEFT,
             RIGHT,
             Z,
-            WHEEL = Z
+            WHEEL = Z,
+            DPAD
         };
 
         AxisEventArgs() = default;

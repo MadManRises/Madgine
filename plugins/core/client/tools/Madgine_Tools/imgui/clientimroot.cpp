@@ -412,8 +412,21 @@ namespace Tools {
     bool ClientImRoot::injectAxisEvent(const Engine::Input::AxisEventArgs &arg)
     {
         ImGuiIO &io = ImGui::GetIO();
-        if (arg.mAxisType == Input::AxisEventArgs::WHEEL)
+        switch (arg.mAxisType) {
+        case Input::AxisEventArgs::WHEEL:
             io.MouseWheel += arg.mAxis1;
+            break;
+        case Input::AxisEventArgs::LEFT:
+            mLeftControllerStick = { arg.mAxis1, arg.mAxis2 };
+            break;
+        case Input::AxisEventArgs::RIGHT:
+            mRightControllerStick = { arg.mAxis1, arg.mAxis2 };
+            break;
+        case Input::AxisEventArgs::DPAD:
+            mDPadState = arg.mAxis1;
+            break;
+        }
+
         return io.WantCaptureMouse;
     }
 

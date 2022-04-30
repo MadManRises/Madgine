@@ -29,6 +29,24 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
         MeshLoader::MeshLoader()
             : ResourceLoader({ ".fbx", ".dae" })
         {
+            getOrCreateManual(
+                "Plane", {}, [](Render::MeshLoader *loader, MeshData &data, Render::MeshLoader::ResourceDataInfo &info) -> Threading::Task<bool> {
+                    std::vector<Compound<Render::VertexPos_4D>> vertices {
+                        { { 0, 0, 0, 1 } },
+                        { { 1, 0, 0, 0 } },
+                        { { 0, 0, 1, 0 } },
+                        { { -1, 0, 0, 0 } },
+                        { { 0, 0, -1, 0 } }
+                    };
+
+                    std::vector<unsigned short> indices {
+                        0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 1
+                    };
+
+                    data = { 3, std::move(vertices), std::move(indices) };
+                    co_return true;
+                },
+                this);
         }
 
         template <typename V>

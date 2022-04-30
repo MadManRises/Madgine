@@ -33,7 +33,7 @@ ImGuiContext *&getImGuiContext()
 
 namespace ImGui {
 
-static ImVector<ImRect> sGroupPanelLabelStack;
+static Engine::Threading::WorkgroupLocal<ImVector<ImRect>> sGroupPanelLabelStack;
 
 static ValueTypePayload sPayload;
 
@@ -1093,7 +1093,7 @@ void ImGui::BeginGroupPanel(const char *name, const ImVec2 &size)
     auto itemWidth = ImGui::CalcItemWidth();
     ImGui::PushItemWidth(ImMax(0.0f, itemWidth - frameHeight));
 
-    sGroupPanelLabelStack.push_back(ImRect(labelMin, labelMax));
+    sGroupPanelLabelStack->push_back(ImRect(labelMin, labelMax));
 }
 
 void ImGui::EndGroupPanel()
@@ -1123,8 +1123,8 @@ void ImGui::EndGroupPanel()
     auto itemMax = ImGui::GetItemRectMax();
     //ImGui::GetWindowDrawList()->AddRectFilled(itemMin, itemMax, IM_COL32(255, 0, 0, 64), 4.0f);
 
-    auto labelRect = sGroupPanelLabelStack.back();
-    sGroupPanelLabelStack.pop_back();
+    auto labelRect = sGroupPanelLabelStack->back();
+    sGroupPanelLabelStack->pop_back();
 
     ImVec2 halfFrame = ImVec2(frameHeight * 0.25f, frameHeight) * 0.5f;
     ImRect frameRect = ImRect(itemMin + halfFrame, itemMax - ImVec2(halfFrame.x, 0.0f));

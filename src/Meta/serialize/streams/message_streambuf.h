@@ -7,6 +7,11 @@ namespace Serialize {
 
     struct META_EXPORT message_streambuf : std::basic_streambuf<char> {
 
+        message_streambuf() = default;
+        message_streambuf(const message_streambuf &) = delete;
+
+        message_streambuf &operator=(const message_streambuf &) = delete;
+
         void beginMessageWrite(ParticipantId requester = 0, MessageId requestId = 0, GenericMessagePromise promise = {});
         void endMessageWrite();
 

@@ -253,7 +253,7 @@ namespace Tools {
 
         Filesystem::FileManager mgr { "Scene" };
         Serialize::FormattedSerializeStream in = mgr.openRead(mCurrentSceneFile, std::make_unique<Serialize::XMLFormatter>());
-        Serialize::read(in, *mSceneMgr, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap);
+        Serialize::read(in, *mSceneMgr, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap | Serialize::StateTransmissionFlags_Activation);
     }
 
     void SceneEditor::saveScene(const Filesystem::Path &p)

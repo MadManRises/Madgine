@@ -327,7 +327,7 @@ namespace Resources {
                 loader = &getSingleton();
             assert(name != ResourceBase::sUnnamed);
             return &loader->mResources.try_emplace(
-                                          std::string { name }, std::string { name }, path, Interface::toCtor(std::forward<C>(ctor)))
+                                          std::string { name }, std::string { name }, path, Interface::template toCtor<T>(std::forward<C>(ctor)))
                         .first->second;
         }
 

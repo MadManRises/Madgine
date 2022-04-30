@@ -26,21 +26,7 @@ namespace Tools {
 
         mProgram.create("grid", { 0, sizeof(GridPerFrame) });
 
-        mMesh = Render::GPUMeshLoader::loadManual("grid", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &data, Render::GPUMeshLoader::ResourceDataInfo &info) {
-            std::vector<Compound<Render::VertexPos_4D>> vertices {
-                { { 0, 0, 0, 1 } },
-                { { 1, 0, 0, 0 } },
-                { { 0, 0, 1, 0 } },
-                { { -1, 0, 0, 0 } },
-                { { 0, 0, -1, 0 } }
-            };
-
-            std::vector<unsigned short> indices {
-                0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 1
-            };
-
-            return loader->generate(data, { 3, std::move(vertices), std::move(indices) });
-        });
+        mMesh.load("Plane");
     }
 
     void GridPass::render(Render::RenderTarget *target, size_t iteration)

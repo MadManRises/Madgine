@@ -27,8 +27,29 @@ namespace Serialize {
             return mResult;
         }
 
+        operator T()
+        {
+            return *mData;
+        }
+
         MessageResult mResult = MessageResult::OK;
         std::optional<T> mData;
+    };
+
+    template <>
+    struct MessageData<void> {
+        MessageData() = default;
+        MessageData(MessageResult result)
+            : mResult(result)
+        {
+        }
+
+        MessageResult get()
+        {
+            return mResult;
+        }
+
+        MessageResult mResult = MessageResult::OK;
     };
 
     template <typename T>
@@ -41,7 +62,9 @@ namespace Serialize {
         template <typename T>
         GenericMessagePromise(MessagePromise<T> promise)
             : mPromiseCallback([promise { std::move(promise) }](MessageResult result, const void *data) mutable {
-                if (data) {
+                if constexpr (std::same_as<T, void>) {
+                    promise.set_value({ result });
+                } else if (data) {
                     promise.set_value({ result, *static_cast<const T *>(data) });
                 } else {
                     promise.set_value({ result, std::nullopt });
@@ -75,6 +98,10 @@ namespace Serialize {
 
         using type = T;
 
+        MessageFuture() = default;
+
+        MessageFuture(MessageFuture &&) = default;
+
         MessageFuture(T t)
             : mFuture(std::move(t))
         {
@@ -85,9 +112,63 @@ namespace Serialize {
         {
         }
 
+        MessageFuture &operator=(MessageFuture &&) = default;
+
         MessageResult get(T &result)
         {
             return mFuture.get().get(result);
+        }
+
+        operator T()
+        {
+            return mFuture.get();
+        }
+
+        bool is_ready() const
+        {
+            return mFuture.is_ready();
+        }
+
+        template <typename F>
+        MessageFuture<std::invoke_result_t<F, T>> then(F &&f)
+        {
+            return Future<MessageData<std::invoke_result_t<F, T>>> { mFuture.then([f { std::forward<F>(f) }](MessageData<T> &&data) -> MessageData<std::invoke_result_t<F, T>> {
+                if (data.mData) {
+                    return { data.mResult, f(*data.mData) };
+                } else {
+                    return { data.mResult };
+                }
+            }) };
+        }
+
+    private:
+        Future<MessageData<T>> mFuture;
+    };
+
+    template <>
+    struct MessageFuture<void> {
+
+        using type = void;
+
+        MessageFuture() = default;
+
+        MessageFuture(MessageFuture &&) = default;
+
+        MessageFuture(Void v)
+            : mFuture(MessageData<void> {})
+        {
+        }
+
+        MessageFuture(Future<MessageData<void>> future)
+            : mFuture(std::move(future))
+        {
+        }
+
+        MessageFuture &operator=(MessageFuture &&) = default;
+
+        MessageResult get()
+        {
+            return mFuture.get().get();
         }
 
         bool is_ready() const
@@ -96,7 +177,7 @@ namespace Serialize {
         }
 
     private:
-        Future<MessageData<T>> mFuture;
+        Future<MessageData<void>> mFuture;
     };
 
     struct PendingRequest {

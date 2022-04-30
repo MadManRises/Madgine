@@ -78,7 +78,7 @@ namespace Plugins {
         }
 
         if (!programName.empty()) {
-            Plugin exe { std::string{programName}, nullptr, {}, "" };
+            Plugin exe {"MadgineLauncher", nullptr, {}, "" };
             exe.setLoaded(true);
             exe.loadDependencies(*this);
             exe.clearDependencies(*this);

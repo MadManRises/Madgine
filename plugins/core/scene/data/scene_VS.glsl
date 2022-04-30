@@ -27,7 +27,7 @@ layout (std430, binding = 0) buffer Skeleton
 };
 
 
-layout(location = 0) in vec3 aPos;
+layout(location = 0) in vec4 aPos;
 layout(location = 1) in vec2 aPos2;
 layout(location = 2) in vec4 aColor;
 layout(location = 3) in vec3 aNormal;
@@ -57,9 +57,9 @@ void main()
 		+ bones[aBoneIDs[1]] * aWeights[1]
 		+ bones[aBoneIDs[2]] * aWeights[2]
 		+ bones[aBoneIDs[3]] * aWeights[3];
-		worldPos = aInstance.m * BoneTransform * vec4(aPos, 1.0);
+		worldPos = aInstance.m * BoneTransform * aPos;
 	}else{
-		worldPos = aInstance.m * vec4(aPos, 1.0);
+		worldPos = aInstance.m * aPos;
 	}
     gl_Position = app.p * (frame.v * worldPos + vec4(aPos2, 0.0, 0.0));	
 	gl_Position.y *= -1;

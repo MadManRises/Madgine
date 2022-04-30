@@ -99,9 +99,21 @@ namespace Window {
                 }
                 case WM_INPUT: {
                     Input::RawInputDevice &device = Input::handleRawInput((HRAWINPUT)lParam);
-                    Input::AxisEventArgs arg;
-                    while (device.fetchEvent(arg))
-                        injectAxisEvent(arg);
+                    Input::AxisEventArgs axis;
+                    while (device.fetchAxisEvent(axis))
+                        injectAxisEvent(axis);
+                    Input::KeyEventArgs key;
+                    Input::RawInputDevice::Dir dir;
+                    while (device.fetchKeyEvent(key, dir)) {
+                        switch (dir) {
+                        case Input::RawInputDevice::UP:
+                            injectKeyRelease(key);
+                            break;
+                        case Input::RawInputDevice::DOWN:
+                            injectKeyPress(key);
+                            break;
+                        }
+                    }
                     break;
                 }
                 case WM_SYSCOMMAND:

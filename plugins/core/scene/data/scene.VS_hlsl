@@ -24,7 +24,7 @@ cbuffer Bones : register(b3)
 
 struct AppData {
 #ifdef HAS_POSITION0
-    float3 aPos : POSITION0;
+    float4 aPos : POSITION0;
 #endif
 #ifdef HAS_POSITION1
     float2 aPos2 : POSITION1;
@@ -72,12 +72,12 @@ VertexShaderOutput main(AppData IN)
 	    + bones[IN.aBoneIDs[1]] * IN.aWeights[1]
 	    + bones[IN.aBoneIDs[2]] * IN.aWeights[2]
 	    + bones[IN.aBoneIDs[3]] * IN.aWeights[3];
-	    OUT.worldPos = mul(IN.aInstance.m, mul(BoneTransform, float4(IN.aPos, 1.0)));
+	    OUT.worldPos = mul(IN.aInstance.m, mul(BoneTransform, IN.aPos));
     } else {
-        OUT.worldPos = mul(IN.aInstance.m, float4(IN.aPos, 1.0));
+        OUT.worldPos = mul(IN.aInstance.m, IN.aPos);
     }
 #else
-	OUT.worldPos = mul(IN.aInstance.m, float4(IN.aPos, 1.0));
+	OUT.worldPos = mul(IN.aInstance.m, IN.aPos);
 #endif
     
     OUT.position = mul(app.p, mul(frame.v, OUT.worldPos) + float4(aPos2, 0.0, 0.0));

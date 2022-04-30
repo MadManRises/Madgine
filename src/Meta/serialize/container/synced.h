@@ -91,7 +91,7 @@ namespace Serialize {
         }
 
     protected:
-        void notify(const T &old, ParticipantId answerTarget = 0, TransactionId answerId = 0)
+        void notify(const T &old, ParticipantId answerTarget = 0, MessageId answerId = 0)
         {
             if (this->isSynced()) {
                 std::pair<Operation, T> data { Operation::SET, mData };
