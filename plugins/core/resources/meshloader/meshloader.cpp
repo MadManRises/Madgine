@@ -69,6 +69,8 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
                 }
             }
 
+            bool warnOnce = true;
+
             assimpTraverseTree(
                 scene, [&](const aiNode *node, const Matrix4 &t) {
                     Matrix3 transform_anti = t.ToMat3().Inverse().Transpose();
@@ -109,7 +111,10 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
                                     while (freeIndex < 4 && mappings.mBoneWeights[freeIndex] != 0.0f)
                                         ++freeIndex;
                                     if (freeIndex == 4) {
-                                        LOG_WARNING("Vertex is assigned more than 4 Bones. That is not supported currently, animation might look wrong.");
+                                        if (warnOnce) {
+                                            warnOnce = false;
+                                            LOG_WARNING("Vertex is assigned more than 4 Bones. That is not supported currently, animation might look wrong.");
+                                        }
                                     } else {
                                         mappings.mBoneIndices[freeIndex] = actualIndex;
                                         mappings.mBoneWeights[freeIndex] = weight;
@@ -146,7 +151,7 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
 
             std::vector<unsigned char> buffer = info.resource()->readAsBlob();
 
-            const aiScene *scene = importer.ReadFileFromMemory(buffer.data(), buffer.size(), aiProcess_MakeLeftHanded | aiProcess_Triangulate);
+            const aiScene *scene = importer.ReadFileFromMemory(buffer.data(), buffer.size(), aiProcess_MakeLeftHanded | aiProcess_Triangulate | aiProcess_LimitBoneWeights);
 
             if (!scene) {
                 LOG_ERROR(importer.GetErrorString());
@@ -210,7 +215,7 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
                 if (materials.empty()) {
                     return loadVertices<Render::Vertex4>(mesh, *this, scene, std::move(materials));
                 } else {
-                    std::terminate();
+                    return loadVertices<Render::Vertex5>(mesh, *this, scene, std::move(materials));
                 }
             }
         }

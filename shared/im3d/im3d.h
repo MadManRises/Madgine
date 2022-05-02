@@ -36,10 +36,10 @@ enum Im3DBoundingObjectFlags_ {
 };
 
 struct Im3DFont {
-    Im3DTextureId mTexture;
+    Im3DTextureId mTexture = 0;
     Vector2i mTextureSize;
 
-    Render::Glyph *mGlyphs;
+    Render::Glyph *mGlyphs = nullptr;
 };
 
 struct Im3DIO {

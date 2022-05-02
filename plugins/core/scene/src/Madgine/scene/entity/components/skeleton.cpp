@@ -9,6 +9,8 @@
 
 #include "skeletondescriptor.h"
 
+#include "Madgine/resources/resourcemanager.h"
+
 namespace Engine {
 namespace Scene {
     namespace Entity {
@@ -22,7 +24,10 @@ namespace Scene {
         }
         const Render::SkeletonDescriptor *Skeleton::data() const
         {
-            return mSkeleton;
+            if (mLoaded)
+                return mSkeleton;
+            else
+                return nullptr;
         }
 
         std::string_view Skeleton::getName() const
@@ -32,14 +37,16 @@ namespace Scene {
 
         void Skeleton::setName(std::string_view name)
         {
+            mLoaded = false;
             mSkeleton.load(name);
-            resetMatrices();
+            mSkeleton.info()->loadingTask().then([this](bool) { resetMatrices(); mLoaded = true; }, Resources::ResourceManager::getSingleton().taskQueue());
         }
 
         void Skeleton::set(Render::SkeletonLoader::HandleType handle)
         {
+            mLoaded = false;
             mSkeleton = std::move(handle);
-            resetMatrices();
+            mSkeleton.info()->loadingTask().then([this](bool) { resetMatrices(); mLoaded=true; }, Resources::ResourceManager::getSingleton().taskQueue());
         }
 
         Render::SkeletonLoader::ResourceType *Skeleton::get() const
@@ -54,15 +61,15 @@ namespace Scene {
 
         void Skeleton::resetMatrices()
         {
-            if (!mSkeleton)
+            if (!mSkeleton.available())
                 mBoneMatrices.clear();
             else {
                 mBoneMatrices.resize(mSkeleton->mBones.size());
 
-				for (size_t i = 0; i < mBoneMatrices.size(); ++i) {
+                for (size_t i = 0; i < mBoneMatrices.size(); ++i) {
                     mBoneMatrices[i] = mSkeleton->mBones[i].mTTransform;
-				}
-			}
+                }
+            }
         }
 
         std::vector<Matrix4> &Skeleton::matrices()
@@ -83,5 +90,3 @@ METATABLE_END(Engine::Scene::Entity::Skeleton)
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Skeleton)
 ENCAPSULATED_FIELD(Skeleton, getName, setName)
 SERIALIZETABLE_END(Engine::Scene::Entity::Skeleton)
-
-

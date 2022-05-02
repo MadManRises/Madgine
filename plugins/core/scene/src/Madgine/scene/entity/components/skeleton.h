@@ -28,6 +28,8 @@ namespace Scene {
             typename Render::SkeletonLoader::HandleType mSkeleton;
 
 			std::vector<Matrix4> mBoneMatrices;
+
+            bool mLoaded = true;
         };
 
         using SkeletonPtr = EntityComponentPtr<Skeleton>;

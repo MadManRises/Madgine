@@ -61,6 +61,7 @@ namespace Tools {
 
         Vector2 mLeftControllerStick, mRightControllerStick;
         int mDPadState = 0;
+        float mZAxis = 0;
 
     private:
         std::map<Render::RenderTarget *, ImGuiViewport *>

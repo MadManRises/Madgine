@@ -270,11 +270,14 @@ namespace Im3D {
 
     void Text(const char *text, const TextParameters &param)
     {
-        Im3DFont font = GetIO().mFetchFont(param.mFontName);
-
         size_t textLen = strlen(text);
 
         if (textLen == 0)
+            return;
+
+        Im3DFont font = GetIO().mFetchFont(param.mFontName);
+
+        if (!font.mTexture)
             return;
 
         float scale = param.mFontSize / 5000.0f;        

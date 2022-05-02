@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Meta/math/vector4.h"
 #include "Generic/compound.h"
+#include "Meta/math/vector4.h"
 
 namespace Engine {
 namespace Render {
@@ -60,9 +60,15 @@ namespace Render {
         VertexNormal,
         VertexUV>;
 
-	using Vertex4 = Compound<
+    using Vertex4 = Compound<
         VertexPos_3D,
         VertexColor,
+        VertexNormal,
+        VertexBoneMappings>;
+
+    using Vertex5 = Compound<
+        VertexPos_3D,
+        VertexUV,
         VertexNormal,
         VertexBoneMappings>;
 

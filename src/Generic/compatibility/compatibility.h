@@ -6,6 +6,10 @@
 #    endif
 #endif
 
+#if !__cpp_lib_ranges
+#    define __cpp_lib_ranges 201911L
+#endif
+
 #include "concepts.h"
 #include "spaceship.h"
 #include "coroutine.h"

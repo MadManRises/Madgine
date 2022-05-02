@@ -295,6 +295,8 @@ namespace Tools {
             io.KeyCtrl = mWindow.osWindow()->isKeyDown(Input::Key::Control);
             io.KeyAlt = mWindow.osWindow()->isKeyDown(Input::Key::Alt);
 
+            io.MouseWheel += mZAxis * 0.3f;
+
             io.DeltaTime = (float)mFrameClock.tick<std::chrono::microseconds>().count() / 1000000.0f;
 
             io.BackendPlatformUserData = &mWindow;
@@ -415,6 +417,9 @@ namespace Tools {
         switch (arg.mAxisType) {
         case Input::AxisEventArgs::WHEEL:
             io.MouseWheel += arg.mAxis1;
+            break;
+        case Input::AxisEventArgs::Z:
+            mZAxis = arg.mAxis1;
             break;
         case Input::AxisEventArgs::LEFT:
             mLeftControllerStick = { arg.mAxis1, arg.mAxis2 };

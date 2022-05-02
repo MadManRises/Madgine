@@ -33,6 +33,8 @@ namespace Tools {
     {
         /* if (!mProgram.available())
             return;*/
+        if (!mMesh.available())
+            return;
 
         target->pushAnnotation("Grid");
 

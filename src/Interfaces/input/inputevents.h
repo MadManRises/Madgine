@@ -198,7 +198,7 @@ namespace Input {
             LEFT,
             RIGHT,
             Z,
-            WHEEL = Z,
+            WHEEL,
             DPAD
         };
 

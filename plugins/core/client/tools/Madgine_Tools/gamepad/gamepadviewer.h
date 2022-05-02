@@ -3,6 +3,8 @@
 #include "toolbase.h"
 #include "toolscollector.h"
 
+#include "textureloader.h"
+
 namespace Engine {
 namespace Tools {
 
@@ -10,9 +12,14 @@ namespace Tools {
 
         GamepadViewer(ImRoot &root);
 
-        virtual std::string_view key() const override;        
+        virtual Threading::Task<bool> init() override;
+
+        virtual std::string_view key() const override;
 
         virtual void render() override;
+
+    private:
+        Render::TextureLoader::HandleType mGamepadTexture;
     };
 
 }

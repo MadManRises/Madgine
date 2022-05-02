@@ -36,6 +36,16 @@ namespace Tools {
         return "GamepadViewer";
     }
 
+    Threading::Task<bool> GamepadViewer::init()
+    {
+        if (!co_await ToolBase::init())
+            co_return false;
+
+        mGamepadTexture.loadFromImage("Gamepad", Render::TextureType_2D, Render::FORMAT_RGBA8);
+
+        co_return true;
+    }
+
     void GamepadViewer::render()
     {
         if (ImGui::Begin("GamepadViewer", &mVisible)) {
@@ -48,38 +58,53 @@ namespace Tools {
 
             // prepare canvas
             const ImVec2 avail = ImGui::GetContentRegionAvail();
-            const float dimX = (avail.x - 20) / 2;
-            const float dimY = avail.y;
-            const float dim = max(20.0f, min(128.0f, min(dimX, dimY)));
-            ImVec2 Canvas(dim, dim);
+            constexpr const float ratio = 1350.0f / 759.0f;
+            const float dimX = avail.x;
+            const float dimY = avail.y * ratio;
+            const float dim = max(20.0f, min(dimX, dimY));
+            ImVec2 Canvas { dim, dim / ratio };
+
+            const float size = dim / 12.0f;
+            ImVec2 Circle { size, size };
+
+            ImVec2 cursor = window->DC.CursorPos;
+
+            if (mGamepadTexture.available())
+                ImGui::Image((void *)mGamepadTexture->mTextureHandle, Canvas);
+
+            size_t i = 0;
+            constexpr float offsets[2][2] = {
+                { 0.275f, 0.125f },
+                { 0.553f, 0.235f }
+            };
 
             for (Vector2 axis : { root.mLeftControllerStick, root.mRightControllerStick }) {
 
-                ImRect bb(window->DC.CursorPos, window->DC.CursorPos + Canvas);
+                ImVec2 topLeft = cursor + ImVec2 { offsets[i][0] * dim, offsets[i][1] * dim };
+                ++i;
+                ImRect bb(topLeft, topLeft + Circle);
                 ImGui::ItemSize(bb);
                 if (ImGui::ItemAdd(bb, 0)) {
 
-                    ImGui::RenderFrame(bb.Min, bb.Max, ImGui::GetColorU32(ImGuiCol_FrameBg, 1), true, Style.FrameRounding);
-
                     // background grid
-                    for (int i = 0; i <= Canvas.x; i += (Canvas.x / 4)) {
+                    for (float i = 0; i <= Circle.x; i += (Circle.x / 4)) {
                         DrawList->AddLine(
                             ImVec2(bb.Min.x + i, bb.Min.y),
                             ImVec2(bb.Min.x + i, bb.Max.y),
                             ImGui::GetColorU32(ImGuiCol_TextDisabled));
                     }
-                    for (int i = 0; i <= Canvas.y; i += (Canvas.y / 4)) {
+                    for (float i = 0; i <= Circle.y; i += (Circle.y / 4)) {
                         DrawList->AddLine(
                             ImVec2(bb.Min.x, bb.Min.y + i),
                             ImVec2(bb.Max.x, bb.Min.y + i),
                             ImGui::GetColorU32(ImGuiCol_TextDisabled));
                     }
 
-                    DrawList->AddCircle(bb.Min + Canvas / 2, 0.5f * dim, ImGui::GetColorU32(ImGuiCol_TextDisabled), 36);
+                    DrawList->AddCircle(bb.Min + Circle / 2, 0.5f * size, ImGui::GetColorU32(ImGuiCol_TextDisabled), 36);
 
                     ImVec2 v { 0.4f * axis.x + 0.5f, 0.4f * axis.y + 0.5f };
 
-                    ImVec2 pos = bb.Min + v * Canvas;
+                    ImVec2 pos = bb.Min + v * Circle;
 
                     DrawList->AddLine(pos - ImVec2(5.0f, 0), pos + ImVec2(5.0f, 0), ImGui::GetColorU32(ImGuiCol_ButtonHovered), 2.0f);
                     DrawList->AddLine(pos - ImVec2(0, 5.0f), pos + ImVec2(0, 5.0f), ImGui::GetColorU32(ImGuiCol_ButtonHovered), 2.0f);
@@ -88,23 +113,38 @@ namespace Tools {
                     ImGui::SetCursorScreenPos(ImVec2(bb.Max.x + 20, bb.Min.y)); // :P
                 }
             }
-            ImGui::Text("%d", root.mDPadState);
+
+            auto renderCircle = [&](ImVec2 offset, float radius) {
+                DrawList->AddCircleFilled(cursor + offset * dim, radius * dim, ImGui::GetColorU32(ImGuiCol_ButtonActive));
+            };
+
+            ImVec2 DPadOffset { 0.405f, 0.285f };
+            int x = 2;
+            int y = 2;
+            if (root.mDPadState > 0) {
+                x = root.mDPadState > 3 && root.mDPadState < 7 ? 7 - root.mDPadState : (root.mDPadState + 2) % 8 - 1;
+                y = root.mDPadState > 5 ? 9 - root.mDPadState : root.mDPadState - 1;
+            }
+            float x_off = sqrtf(fabs(x - 2) / 2) * sign(x - 2);
+            float y_off = sqrtf(fabs(y - 2) / 2) * sign(y - 2);
+            renderCircle(DPadOffset + ImVec2 { x_off, y_off } * 0.038f, 0.013f);
 
             ImGuiIO &io = ImGui::GetIO();
 
-#define BUTTON(name)                   \
-    if (io.KeysDown[Input::Key::name]) \
-    ImGui::Text(#name)
-            BUTTON(GP_A);
-            BUTTON(GP_B);
-            BUTTON(GP_X);
-            BUTTON(GP_Y);
-            BUTTON(GP_LB);
-            BUTTON(GP_RB);
-            BUTTON(GP_LSB);
-            BUTTON(GP_RSB);
-            BUTTON(GP_B1);
-            BUTTON(GP_B2);
+            auto button = [&](Input::Key::Key key, ImVec2 off, float radius) {
+                if (io.KeysDown[key])
+                    renderCircle(off, radius);
+            };
+            button(Input::Key::GP_A, { 0.68f, 0.215f }, 0.02f);
+            button(Input::Key::GP_B, { 0.73f, 0.165f }, 0.02f);
+            button(Input::Key::GP_X, { 0.63f, 0.165f }, 0.02f);
+            button(Input::Key::GP_Y, { 0.68f, 0.12f }, 0.02f);
+            button(Input::Key::GP_LB, { 0.3f, 0.06f }, 0.02f);
+            button(Input::Key::GP_RB, { 0.7f, 0.06f }, 0.02f);
+            button(Input::Key::GP_LSB, { 0.315f, 0.165f }, 0.02f);
+            button(Input::Key::GP_RSB, { 0.595f, 0.275f }, 0.02f);
+            button(Input::Key::GP_B1, { 0.45f, 0.166f }, 0.01f);
+            button(Input::Key::GP_B2, { 0.55f, 0.166f }, 0.01f);
         }
         ImGui::End();
     }

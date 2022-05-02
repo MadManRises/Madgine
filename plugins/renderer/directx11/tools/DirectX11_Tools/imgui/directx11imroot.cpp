@@ -51,12 +51,17 @@ namespace Tools {
         Im3D::GetIO().mFetchFont = [](const char *fontName) {
             Render::FontLoader::HandleType font;
             font.load(fontName);
+            font.info()->setPersistent(true);
 
-            return Im3DFont {
-                (Im3DTextureId)font->mTexture->mTextureHandle,
-                font->mTextureSize,
-                font->mGlyphs.data()
-            };
+            if (font.available()) {
+                return Im3DFont {
+                    (Im3DTextureId)font->mTexture->mTextureHandle,
+                    font->mTextureSize,
+                    font->mGlyphs.data()
+                };
+            } else {
+                return Im3DFont {};
+            }
         };
 
         co_return true;
