@@ -17,4 +17,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::ImGuiDemo);
+REGISTER_TYPE(Engine::Tools::ImGuiDemo)

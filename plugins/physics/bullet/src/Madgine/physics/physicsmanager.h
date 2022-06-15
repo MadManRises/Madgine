@@ -90,4 +90,4 @@ namespace Physics {
 }
 }
 
-RegisterType(Engine::Physics::PhysicsManager);
+REGISTER_TYPE(Engine::Physics::PhysicsManager)

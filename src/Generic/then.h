@@ -4,7 +4,7 @@
 
 namespace Engine {
 
-DERIVE_FUNCTION(then);
+DERIVE_FUNCTION(then)
 
 template <typename V, typename F>
 decltype(auto) then(V &&v, F &&f)

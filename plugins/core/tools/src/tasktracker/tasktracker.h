@@ -38,4 +38,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::TaskTracker);
+REGISTER_TYPE(Engine::Tools::TaskTracker)

@@ -7,7 +7,7 @@ namespace Resources {
     struct ResourceType;
     template <typename T, typename Data, typename Container, typename Storage>
     struct ResourceLoader;
-    template <typename T, typename _Data, typename Base>
+    template <typename T, typename Data, typename Base>
     struct ResourceLoaderImpl;
     struct ResourceBase;
     struct ResourceLoaderBase;

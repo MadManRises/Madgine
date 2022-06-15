@@ -9,35 +9,44 @@ namespace Engine {
 struct Quaternion {
 
     Quaternion()
-        : v(Vector3::ZERO)
+        : x(0.0f)
+        , y(0.0f)
+        , z(0.0f)
         , w(1.0f)
     {
     }
 
     Quaternion(float radian, const Vector3 &axis)
-        : v(axis)
-        , w(cosf(0.5f * radian))
+        : w(cosf(0.5f * radian))
     {
+        Vector3 v = axis;
         v.normalize();
         v *= sinf(0.5f * radian);
+        x = v.x;
+        y = v.y;
+        z = v.z;
     }
 
     Quaternion(float x, float y, float z, float w)
-        : v(x, y, z)
+        : x(x)
+        , y(y)
+        , z(z)
         , w(w)
     {
         normalize();
     }
 
     constexpr explicit Quaternion(float *const r)
-        : v(r)
+        : x(r[0])
+        , y(r[1])
+        , z(r[2])
         , w(r[3])
     {
     }
 
     static Quaternion FromRadian(const Vector3 &angles)
     {
-        return Quaternion(angles.z, Vector3::UNIT_Z) * Quaternion(angles.y, Vector3::UNIT_Y) * Quaternion(angles.x, Vector3::UNIT_X);
+        return Quaternion(angles.z, Vector3::UNIT_Z) * Quaternion(angles.x, Vector3::UNIT_X) * Quaternion(angles.y, Vector3::UNIT_Y);
     }
 
     static Quaternion FromDegrees(const Vector3 &angles)
@@ -45,13 +54,18 @@ struct Quaternion {
         return FromRadian(angles / 180.0f * PI);
     }
 
-    Vector3 toDegrees() const
+    Vector3 toRadian() const
     {
         return {
-            std::atan2(2 * (w * v.x + v.y * v.z), 1 - 2 * (v.x * v.x + v.y * v.y)) / PI * 180.0f,
-            std::asin(2 * (w * v.y - v.z * v.x)) / PI * 180.0f,
-            std::atan2(2 * (w * v.z + v.x * v.y), 1 - 2 * (v.y * v.y + v.z * v.z)) / PI * 180.0f
+            std::atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y)),
+            std::asin(2 * (w * y - z * x)),
+            std::atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z))
         };
+    }
+
+    Vector3 toDegrees() const
+    {
+        return toRadian() / PI * 180.0f;
     }
 
     static Quaternion FromDirection(const NormalizedVector3 &dir, const NormalizedVector3 &up = { Vector3::UNIT_Y })
@@ -73,8 +87,13 @@ struct Quaternion {
 
     void operator*=(const Quaternion &other)
     {
-        float newW = w * other.w - v.dotProduct(other.v);
-        v = w * other.v + other.w * v + v.crossProduct(other.v);
+        Vector3 v { x, y, z };
+        Vector3 otherV { other.x, other.y, other.z };
+        float newW = w * other.w - v.dotProduct(otherV);
+        v = w * otherV + other.w * v + v.crossProduct(otherV);
+        x = v.x;
+        y = v.y;
+        z = v.z;
         w = newW;
     }
 
@@ -88,7 +107,9 @@ struct Quaternion {
     void operator+=(const Quaternion &other)
     {
         w += other.w;
-        v += other.v;
+        x += other.x;
+        y += other.y;
+        z += other.z;
     }
 
     Quaternion operator+(const Quaternion &other)
@@ -101,7 +122,9 @@ struct Quaternion {
     void operator-=(const Quaternion &other)
     {
         w -= other.w;
-        v -= other.v;
+        x -= other.x;
+        y -= other.y;
+        z -= other.z;
     }
 
     Quaternion operator-(const Quaternion &other)
@@ -113,7 +136,9 @@ struct Quaternion {
 
     void operator*=(float c)
     {
-        v *= c;
+        x *= c;
+        y *= c;
+        z *= c;
         w *= c;
     }
 
@@ -126,12 +151,14 @@ struct Quaternion {
 
     float dotProduct(const Quaternion &other)
     {
-        return w * other.w + v.dotProduct(other.v);
+        return w * other.w + x * other.x + y * other.y + z * other.z;
     }
 
     void invert()
     {
-        v *= -1;
+        x *= -1;
+        y *= -1;
+        z *= -1;
     }
 
     Quaternion inverse() const
@@ -144,9 +171,9 @@ struct Quaternion {
     Matrix3 toMatrix() const
     {
         return Matrix3 {
-            1 - 2 * (v.y * v.y + v.z * v.z), 2 * (v.x * v.y - v.z * w), 2 * (v.x * v.z + v.y * w),
-            2 * (v.x * v.y + v.z * w), 1 - 2 * (v.x * v.x + v.z * v.z), 2 * (v.y * v.z - v.x * w),
-            2 * (v.x * v.z - v.y * w), 2 * (v.y * v.z + v.x * w), 1 - 2 * (v.x * v.x + v.y * v.y)
+            1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w),
+            2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w),
+            2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)
         };
     }
 
@@ -157,7 +184,7 @@ struct Quaternion {
 
     bool operator==(const Quaternion &other) const
     {
-        return w == other.w && v == other.v;
+        return w == other.w && x == other.x && y == other.y && z == other.z;
     }
 
     Quaternion operator-() const
@@ -167,17 +194,21 @@ struct Quaternion {
 
     void normalize()
     {
-        float invNorm = 1.0f / sqrtf(w * w + v.squaredLength());
-        v *= invNorm;
+        float invNorm = 1.0f / sqrtf(w * w + x * x + y * y + z * z);
+        x *= invNorm;
+        y *= invNorm;
+        z *= invNorm;
         w *= invNorm;
     }
 
-    Vector3 v;
+    float x;
+    float y;
+    float z;
     float w;
 
     friend std::ostream &operator<<(std::ostream &o, const Quaternion &q)
     {
-        o << "{" << q.v.x << ", " << q.v.y << ", " << q.v.z << ", " << q.w << "}";
+        o << "{" << q.x << ", " << q.y << ", " << q.z << ", " << q.w << "}";
         return o;
     }
 };

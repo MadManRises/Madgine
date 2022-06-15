@@ -53,4 +53,4 @@ namespace Resources {
 }
 }
 
-RegisterType(Engine::Resources::ResourceLoaderBase);
+REGISTER_TYPE(Engine::Resources::ResourceLoaderBase)

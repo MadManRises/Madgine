@@ -15,13 +15,13 @@ struct VirtualUniqueComponentImpl : Base {
     struct Inner {
         Inner()
         {
-            assert(!Base::preg());
-            Base::preg() = &reg;
+            if (!Base::preg())
+                Base::preg() = &reg;
         }
         ~Inner()
         {
-            assert(Base::preg() == &reg);
-            Base::preg() = nullptr;
+            if (Base::preg() == &reg)
+                Base::preg() = nullptr;
         }
 
     private:

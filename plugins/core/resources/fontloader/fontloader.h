@@ -21,4 +21,4 @@ namespace Render {
 }
 }
 
-RegisterType(Engine::Render::FontLoader);
+REGISTER_TYPE(Engine::Render::FontLoader)

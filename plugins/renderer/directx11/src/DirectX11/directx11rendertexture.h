@@ -2,8 +2,6 @@
 
 #include "directx11rendertarget.h"
 #include "Meta/math/matrix4.h"
-#include "util/directx11program.h"
-#include "util/directx11buffer.h"
 #include "util/directx11texture.h"
 
 #include "render/renderpassflags.h"

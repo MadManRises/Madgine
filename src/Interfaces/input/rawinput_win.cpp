@@ -4,6 +4,8 @@
 
 #    include "rawinput_win.h"
 
+#    if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+
 namespace Engine {
 namespace Input {
 
@@ -319,5 +321,7 @@ namespace Input {
 
 }
 }
+
+#endif
 
 #endif

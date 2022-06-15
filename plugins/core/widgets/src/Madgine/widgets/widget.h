@@ -152,4 +152,4 @@ namespace Widgets {
 }
 }
 
-RegisterType(Engine::Widgets::WidgetBase);
+REGISTER_TYPE(Engine::Widgets::WidgetBase)

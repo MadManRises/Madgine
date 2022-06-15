@@ -22,4 +22,4 @@ namespace Scene {
 }
 }
 
-RegisterType(Engine::Scene::Entity::EntityComponentBase);
+REGISTER_TYPE(Engine::Scene::Entity::EntityComponentBase)

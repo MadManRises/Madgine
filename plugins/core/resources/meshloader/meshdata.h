@@ -1,9 +1,10 @@
 #pragma once
 
 #include "Generic/bytebuffer.h"
+#include "Generic/offsetptr.h"
 #include "Meta/math/boundingbox.h"
-#include "render/attributedescriptor.h"
 #include "render/vertex.h"
+#include "render/vertexformat.h"
 
 namespace Engine {
 namespace Render {
@@ -32,38 +33,12 @@ namespace Render {
                 maxP };
         }
 
-        template <typename VertexType>
-        static std::array<AttributeDescriptor, 7> generateAttributeList()
-        {
-            std::array<Render::AttributeDescriptor, 7> attributeList;
-
-            if constexpr (VertexType::template holds<Render::VertexPos_4D> || VertexType::template holds<Render::VertexPos_3D>)
-                attributeList[0] = { &VertexType::mPos, "POSITION", 0, type_holder<VertexType> };
-
-            if constexpr (VertexType::template holds<Render::VertexPos2>)
-                attributeList[1] = { &VertexType::mPos2, "POSITION", 1, type_holder<VertexType> };
-
-            if constexpr (VertexType::template holds<Render::VertexColor>)
-                attributeList[2] = { &VertexType::mColor, "COLOR", 0, type_holder<VertexType> };
-
-            if constexpr (VertexType::template holds<Render::VertexNormal>)
-                attributeList[3] = { &VertexType::mNormal, "NORMAL", 0, type_holder<VertexType> };
-
-            if constexpr (VertexType::template holds<Render::VertexUV>)
-                attributeList[4] = { &VertexType::mUV, "TEXCOORD", 0, type_holder<VertexType> };
-
-            if constexpr (VertexType::template holds<Render::VertexBoneMappings>) {
-                attributeList[5] = { &VertexType::mBoneIndices, "BONEINDICES", 0, type_holder<VertexType> };
-                attributeList[6] = { &VertexType::mBoneWeights, "WEIGHTS", 0, type_holder<VertexType> };
-            }
-            return attributeList;
-        }
-
+        
         MeshData() = default;
 
         template <typename VertexType>
         MeshData(size_t groupSize, std::vector<VertexType> vertices, std::vector<unsigned short> indices = {}, std::vector<Material> materials = {})
-            : mAttributeList(generateAttributeList<VertexType>)
+            : mFormat(type_holder<VertexType>)
             , mAABB(calculateAABB(vertices))
             , mGroupSize(groupSize)
             , mVertices(std::move(vertices))
@@ -73,9 +48,7 @@ namespace Render {
         {
         }
 
-
-
-        std::array<Render::AttributeDescriptor, 7> (*mAttributeList)();
+        VertexFormat mFormat;
         AABB mAABB;
         size_t mGroupSize;
         ByteBuffer mVertices;

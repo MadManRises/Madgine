@@ -3,10 +3,10 @@
 #include "context.h"
 #include "Generic/inheritable.h"
 
-DERIVE_FUNCTION(notify);
-
 namespace Engine {
 namespace Inject {
+
+    DERIVE_FUNCTION(notify)
 
     template <typename T>
     struct VariableBase : Inheritable<T> {

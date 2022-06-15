@@ -135,6 +135,100 @@ namespace TupleUnpacker {
         return constructFromTuple<T>(expand<sizeof...(args) - 1>(std::forward_as_tuple(std::forward<Args>(args)...)));
     }
 
+#if !CLANG
+    namespace detail {
+        template <typename Struct, typename = void, typename... T>
+        struct is_direct_list_initializable_impl : std::false_type {
+        };
+
+        template <typename Struct, typename... T>
+        struct is_direct_list_initializable_impl<Struct, std::void_t<decltype(Struct { std::declval<T>()... })>, T...> : std::true_type {
+        };
+    }
+
+    template <typename Struct, typename... T>
+    using is_direct_list_initializable = detail::is_direct_list_initializable_impl<Struct, void, T...>;
+
+    template <typename Struct, typename... T>
+    constexpr bool is_direct_list_initializable_v = is_direct_list_initializable<Struct, T...>::value;
+
+    namespace detail {
+
+        struct any_helper {
+            template <typename T>
+            operator T &&();
+        };
+
+        template <typename T>
+        concept TuplefyableTest9 = is_direct_list_initializable_v<std::remove_reference_t<T>,
+            any_helper, any_helper, any_helper, any_helper, any_helper, any_helper, any_helper, any_helper, any_helper>;
+
+        template <typename T>
+        concept TuplefyableTest8 = is_direct_list_initializable_v<std::remove_reference_t<T>,
+            any_helper, any_helper, any_helper, any_helper, any_helper, any_helper, any_helper, any_helper> && !TuplefyableTest9<T>;
+
+        template <typename T>
+        concept TuplefyableTest7 = is_direct_list_initializable_v<std::remove_reference_t<T>,
+                                       any_helper, any_helper, any_helper, any_helper, any_helper, any_helper, any_helper> && !TuplefyableTest8<T> && !TuplefyableTest9<T>;
+
+        template <typename T>
+        concept TuplefyableTest6 = is_direct_list_initializable_v<std::remove_reference_t<T>,
+                                       any_helper, any_helper, any_helper, any_helper, any_helper, any_helper> && !TuplefyableTest7<T> && !TuplefyableTest8<T> && !TuplefyableTest9<T>;
+
+        template <typename T>
+        concept TuplefyableTest5 = is_direct_list_initializable_v<std::remove_reference_t<T>,
+                                       any_helper, any_helper, any_helper, any_helper, any_helper> && !TuplefyableTest6<T> && !TuplefyableTest7<T> && !TuplefyableTest8<T> && !TuplefyableTest9<T>;
+
+        template <typename T>
+        concept TuplefyableTest4 = is_direct_list_initializable_v<std::remove_reference_t<T>,
+                                       any_helper, any_helper, any_helper, any_helper> && !TuplefyableTest5<T> && !TuplefyableTest6<T> && !TuplefyableTest7<T> && !TuplefyableTest8<T> && !TuplefyableTest9<T>;
+
+        template <typename T>
+        concept TuplefyableTest3 = is_direct_list_initializable_v<std::remove_reference_t<T>,
+                                       any_helper, any_helper, any_helper> && !TuplefyableTest4<T> && !TuplefyableTest5<T> && !TuplefyableTest6<T> && !TuplefyableTest7<T> && !TuplefyableTest8<T> && !TuplefyableTest9<T>;
+
+        template <typename T>
+        concept TuplefyableTest2 = is_direct_list_initializable_v<std::remove_reference_t<T>,
+                                       any_helper, any_helper> && !TuplefyableTest3<T> && !TuplefyableTest4<T> && !TuplefyableTest5<T> && !TuplefyableTest6<T> && !TuplefyableTest7<T> && !TuplefyableTest8<T> && !TuplefyableTest9<T>;
+
+        template <typename T>
+        concept TuplefyableTest1 = is_direct_list_initializable_v<std::remove_reference_t<T>,
+                                       any_helper> && !TuplefyableTest2<T> && !TuplefyableTest3<T> && !TuplefyableTest4<T> && !TuplefyableTest5<T> && !TuplefyableTest6<T> && !TuplefyableTest7<T> && !TuplefyableTest8<T> && !TuplefyableTest9<T>;
+    }
+
+    template <typename T>
+    auto num_bindings_impl(T &t) noexcept
+    {
+        return overloaded {
+            [](auto &&u, unsigned) -> std::integral_constant<size_t, 0> { return {}; },
+            [](detail::TuplefyableTest1 auto &&u, int) -> std::integral_constant<size_t, 1> { return {}; },
+            [](detail::TuplefyableTest2 auto &&u, int) -> std::integral_constant<size_t, 2> { return {}; },
+            [](detail::TuplefyableTest3 auto &&u, int) -> std::integral_constant<size_t, 3> { return {}; },
+            [](detail::TuplefyableTest4 auto &&u, int) -> std::integral_constant<size_t, 4> { return {}; },
+            [](detail::TuplefyableTest5 auto &&u, int) -> std::integral_constant<size_t, 5> { return {}; },
+            [](detail::TuplefyableTest6 auto &&u, int) -> std::integral_constant<size_t, 6> { return {}; },
+            [](detail::TuplefyableTest7 auto &&u, int) -> std::integral_constant<size_t, 7> { return {}; },
+            [](detail::TuplefyableTest8 auto &&u, int) -> std::integral_constant<size_t, 8> { return {}; },
+            [](detail::TuplefyableTest9 auto &&u, int) -> std::integral_constant<size_t, 9> { return {}; }
+        }(t, int {});
+    }
+
+    template <typename T, size_t size>
+    concept TuplefyableHelper = requires(T &t)
+    {
+        {
+            num_bindings_impl<T>(t)
+            } -> std::same_as<std::integral_constant<size_t, size>>;
+    };
+
+    template <typename T>
+    concept Tuplefyable = std::invoke_result_t<decltype(num_bindings_impl<T>), T &>
+    {
+    }
+    > 0 && std::is_class_v<T> &&std::is_standard_layout_v<T>;
+
+#else
+
     template <typename T>
     auto num_bindings_impl() noexcept
     {
@@ -154,6 +248,17 @@ namespace TupleUnpacker {
 
     template <typename T, size_t size>
     concept TuplefyableHelper = decltype(num_bindings_impl<T>()) {} == size;
+
+    template <typename T>
+    concept Tuplefyable = decltype(num_bindings_impl<T>()) {} > 0;
+#endif
+
+    namespace detail {
+        struct Test2 {
+            int a, b;
+        };
+        static_assert(TuplefyableHelper<Test2, 2>);
+    }
 
     auto toTuple(TuplefyableHelper<1> auto &t)
     {
@@ -217,9 +322,6 @@ namespace TupleUnpacker {
 
         return std::tie(a, b, c, d, e, f, g, h, i);
     }
-
-    template <typename T>
-    concept Tuplefyable = decltype(num_bindings_impl<T>()) {} > 0;
 
     template <typename Tuple, typename F, size_t... Is>
     auto forEach(Tuple &&t, F &&f, std::index_sequence<Is...>)

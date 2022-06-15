@@ -1,9 +1,8 @@
-cmake_minimum_required (VERSION 2.6)
-
 Project(Tools)
 
 set(sources "")
 FolderSources(sources "" src toolbase.cpp toolbase.h toolscollector.cpp toolscollector.h)
+	FolderSources(sources src filesystem filesystem.cpp filesystem.h)
 	FolderSources(sources src inject controlflow.cpp injectortool.cpp)
 	FolderSources(sources src inspector functiontool.cpp functiontool.h inspector.cpp inspector.h)
 	FolderSources(sources src logviewer logviewer.cpp logviewer.h)

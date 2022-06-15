@@ -9,6 +9,6 @@
 #include "Madgine_Tools/clienttoolslib.h"
 #include "Madgine/scenerendererlib.h"
 
-#include "programloaderlib.h"
+#include "pipelineloaderlib.h"
 
 #include "scenerenderertoolsforward.h"

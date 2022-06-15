@@ -2,9 +2,9 @@
 
 #include "Madgine/render/renderpass.h"
 
-#include "programloader.h"
+#include "pipelineloader.h"
 
-
+#include "gpumeshloader.h"
 
 namespace Engine {
 namespace Render {
@@ -17,7 +17,9 @@ namespace Render {
         virtual int priority() const override;
 
     private:
-        ProgramLoader::PtrType mProgram;
+        PipelineLoader::Instance mPipeline;
+
+        GPUMeshLoader::PtrType mMeshes[/* IM3D_MESHTYPE_COUNT*/ 3][2];
 
         Camera *mCamera;
 

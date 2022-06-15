@@ -52,4 +52,4 @@ template <typename T>
 }
 }
 
-RegisterType(Engine::Scene::SceneComponentBase);
+REGISTER_TYPE(Engine::Scene::SceneComponentBase)

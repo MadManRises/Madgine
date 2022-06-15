@@ -11,7 +11,7 @@
 #include "openglforward.h"
 
 #include "meshloaderlib.h"
-#include "programloaderlib.h"
+#include "pipelineloaderlib.h"
 #include "textureloaderlib.h"
 #include "Madgine/clientlib.h"
 

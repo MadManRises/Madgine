@@ -56,4 +56,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::ToolBase);
+REGISTER_TYPE(Engine::Tools::ToolBase)

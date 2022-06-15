@@ -4,12 +4,10 @@
 
 #include "Modules/threading/workgroupstorage.h"
 
-#include "util/directx11geometryshader.h"
-
 namespace Engine {
 namespace Render {
 
-    struct DirectX11GeometryShaderLoader : Resources::ResourceLoader<DirectX11GeometryShaderLoader, DirectX11GeometryShader, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
+    struct DirectX11GeometryShaderLoader : Resources::ResourceLoader<DirectX11GeometryShaderLoader, ReleasePtr<ID3D11GeometryShader>, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
         DirectX11GeometryShaderLoader();
 
         struct HandleType : Base::HandleType {
@@ -24,12 +22,12 @@ namespace Render {
         };
 
 
-        bool loadImpl(DirectX11GeometryShader &shader, ResourceDataInfo &info);
-        void unloadImpl(DirectX11GeometryShader &shader);
+        bool loadImpl(ReleasePtr<ID3D11GeometryShader> &shader, ResourceDataInfo &info);
+        void unloadImpl(ReleasePtr<ID3D11GeometryShader> &shader);
 
-        bool create(DirectX11GeometryShader &shader, ResourceType *res, const CodeGen::ShaderFile &file);
+        bool create(ReleasePtr<ID3D11GeometryShader> &shader, ResourceType *res, const CodeGen::ShaderFile &file);
 
-        bool loadFromSource(DirectX11GeometryShader &shader, std::string_view name, std::string source);
+        bool loadFromSource(ReleasePtr<ID3D11GeometryShader> &shader, std::string_view name, std::string source);
 
         virtual Threading::TaskQueue *loadingTaskQueue() const override;
     };
@@ -37,4 +35,4 @@ namespace Render {
 }
 }
 
-RegisterType(Engine::Render::DirectX11GeometryShaderLoader);
+REGISTER_TYPE(Engine::Render::DirectX11GeometryShaderLoader)

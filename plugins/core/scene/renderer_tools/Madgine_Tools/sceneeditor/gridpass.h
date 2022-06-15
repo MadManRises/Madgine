@@ -5,7 +5,7 @@
 #include "OpenGL/util/openglbuffer.h"
 #include "OpenGL/util/openglvertexarray.h"*/
 #include "gpumeshloader.h"
-#include "programloader.h"
+#include "pipelineloader.h"
 
 #include "Madgine/render/shadinglanguage/sl.h"
 
@@ -25,7 +25,7 @@ namespace Tools {
 
     private:
         Render::GPUMeshLoader::HandleType mMesh;
-        Render::ProgramLoader::PtrType mProgram;
+        Render::PipelineLoader::Instance mPipeline;
 
         Render::Camera *mCamera;
 

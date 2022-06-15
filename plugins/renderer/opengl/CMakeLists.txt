@@ -1,7 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
-
 Project(OpenGL)
-
 
 
 if (NOT ANDROID AND NOT IOS AND NOT OSX)
@@ -28,15 +25,15 @@ FolderSources(sources "" src)
 if (NOT ANDROID AND NOT EMSCRIPTEN AND NOT IOS)
 	FolderSources(sources src glad glad.c glad.h)
 endif()
-FolderSources(sources src OpenGL openglforward.h opengllib.h openglmeshdata.h openglmeshloader.cpp openglmeshloader.h openglprogramloader.cpp openglprogramloader.h openglrendertexture.cpp openglrendertexture.h openglrenderwindow.cpp openglrenderwindow.h openglshaderloader.cpp openglshaderloader.h opengltextureloader.cpp opengltextureloader.h openglrendertarget.cpp openglrendertarget.h openglrendercontext.cpp openglrendercontext.h openglshadercodegen.cpp openglshadercodegen.h)
-	FolderSources(sources OpenGL util gldump.cpp openglbuffer.cpp openglbuffer.h openglshader.cpp openglshader.h openglssbobuffer.cpp openglssbobuffer.h opengltexture.cpp opengltexture.h openglvertexarray.cpp openglvertexarray.h openglvertexarrayobject.cpp openglvertexarrayobject.h openglprogram.cpp openglprogram.h)
+FolderSources(sources src OpenGL openglforward.h opengllib.h openglmeshdata.h openglmeshloader.cpp openglmeshloader.h openglpipelineloader.cpp openglpipelineloader.h openglrendertexture.cpp openglrendertexture.h openglrenderwindow.cpp openglrenderwindow.h openglshaderloader.cpp openglshaderloader.h opengltextureloader.cpp opengltextureloader.h openglrendertarget.cpp openglrendertarget.h openglrendercontext.cpp openglrendercontext.h openglshadercodegen.cpp openglshadercodegen.h)
+	FolderSources(sources OpenGL util gldump.cpp openglbuffer.cpp openglbuffer.h openglshader.cpp openglshader.h openglssbobuffer.cpp openglssbobuffer.h opengltexture.cpp opengltexture.h openglvertexarray.cpp openglvertexarray.h openglpipeline.cpp openglpipeline.h openglpipelineinstance.cpp openglpipelineinstance.h)
 
 add_plugin(OpenGL Madgine Renderer ${sources} PRECOMPILED_HEADER src/OpenGL/opengllib.h)
 
 target_link_libraries(OpenGL PRIVATE ${OPENGL_LIBRARIES} Client)
 target_include_directories(OpenGL PRIVATE ${OPENGL_INCLUDE_DIR})
 
-target_link_plugins(OpenGL MeshLoader ProgramLoader TextureLoader ImageLoader)
+target_link_plugins(OpenGL MeshLoader PipelineLoader TextureLoader ImageLoader)
 
 if (OSX)
     target_sources(OpenGL PRIVATE src/OpenGL/osxopengl.mm)

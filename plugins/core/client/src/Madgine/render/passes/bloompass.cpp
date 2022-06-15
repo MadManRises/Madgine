@@ -15,7 +15,6 @@ METATABLE_BEGIN(Engine::Render::BloomPass)
 MEMBER(mExposure)
 METATABLE_END(Engine::Render::BloomPass)
 
-
 namespace Engine {
 namespace Render {
 
@@ -31,7 +30,7 @@ namespace Render {
 
     void BloomPass::setup(RenderTarget *target)
     {
-        mProgram.create("bloom", { sizeof(BloomData) });        
+        mPipeline.createStatic({ .vs = "bloom", .ps = "bloom", .bufferSizes = { sizeof(BloomData) } });
 
         mBlurTarget = target->context()->createRenderTexture(target->size(), { .mIterations = 10, .mFormat = FORMAT_RGBA16F });
 
@@ -42,7 +41,7 @@ namespace Render {
     {
         mBlurTarget.reset();
 
-        mProgram.reset();
+        mPipeline.reset();
     }
 
     void BloomPass::render(RenderTarget *target, size_t iteration)
@@ -52,9 +51,9 @@ namespace Render {
 
         target->bindTextures({ mInput->texture(mInputIndex), mBlurTarget->texture(0) });
 
-        mProgram.mapParameters(0).cast<BloomData>()->exposure = mExposure;
+        mPipeline.mapParameters(0).cast<BloomData>()->exposure = mExposure;
 
-        target->renderQuad(mProgram);
+        target->renderQuad(mPipeline);
 
         if (iteration == target->iterations() - 1)
             target->popAnnotation();
@@ -66,7 +65,7 @@ namespace Render {
         mBlurTarget->render();
     }
 
-    void BloomPass::onTargetResize(const Vector2i& size) 
+    void BloomPass::onTargetResize(const Vector2i &size)
     {
         mBlurTarget->resize(size);
         mInput->resize(size);

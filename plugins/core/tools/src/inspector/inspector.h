@@ -61,4 +61,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::Inspector);
+REGISTER_TYPE(Engine::Tools::Inspector)

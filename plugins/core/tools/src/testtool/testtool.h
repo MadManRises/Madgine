@@ -30,4 +30,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::TestTool);
+REGISTER_TYPE(Engine::Tools::TestTool)

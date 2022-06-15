@@ -14,6 +14,7 @@
 #include "Madgine/render/renderpass.h"
 #include "directx11meshdata.h"
 #include "directx11meshloader.h"
+#include "util/directx11pipelineinstance.h"
 
 #include "directx11rendercontext.h"
 
@@ -229,15 +230,16 @@ namespace Render {
         sDeviceContext->RSSetViewports(1, &viewport);
     }
 
-    void DirectX11RenderTarget::renderMesh(const GPUMeshData *m, const Program *p, const Material *material)
+    void DirectX11RenderTarget::renderMesh(const GPUMeshData *m, const PipelineInstance *p, const Material *material)
     {
         const DirectX11MeshData *mesh = static_cast<const DirectX11MeshData *>(m);
-        const DirectX11Program *program = static_cast<const DirectX11Program *>(p);
+        const DirectX11PipelineInstance *pipeline = static_cast<const DirectX11PipelineInstance *>(p);
 
-        if (!mesh->mVAO)
-            return;
+        mesh->mVertices.bindVertex(mesh->mVertexSize);
+        
+        pipeline->bind(mesh->mFormat);
 
-        program->bind(&mesh->mVAO);
+        static_cast<DirectX11RenderContext *>(context())->bindFormat(mesh->mFormat, pipeline->mInstanceDataSize);
 
         if (material)
             bindTextures({ { material->mDiffuseTexture, TextureType_2D }, { material->mEmissiveTexture, TextureType_2D } });
@@ -253,22 +255,23 @@ namespace Render {
         sDeviceContext->IASetPrimitiveTopology(mode);
 
         if (mesh->mIndices) {
+            mesh->mIndices.bindIndex();
             sDeviceContext->DrawIndexed(mesh->mElementCount, 0, 0);
         } else {
             sDeviceContext->Draw(mesh->mElementCount, 0);
         }      
     }
 
-    void DirectX11RenderTarget::renderMeshInstanced(size_t count, const GPUMeshData *m, const Program *p, const Material *material)
+    void DirectX11RenderTarget::renderMeshInstanced(size_t count, const GPUMeshData *m, const PipelineInstance *p, const Material *material)
     {
         const DirectX11MeshData *mesh = static_cast<const DirectX11MeshData *>(m);
-        const DirectX11Program *program = static_cast<const DirectX11Program *>(p);
+        const DirectX11PipelineInstance *pipeline = static_cast<const DirectX11PipelineInstance *>(p);
 
-        if (!mesh->mVAO)
-            return;
+        mesh->mVertices.bindVertex(mesh->mVertexSize);
 
-        mesh->mVAO.bind();
-        program->bind(&mesh->mVAO);
+        pipeline->bind(mesh->mFormat);
+
+        static_cast<DirectX11RenderContext *>(context())->bindFormat(mesh->mFormat, pipeline->mInstanceDataSize);
 
         if (material)
             bindTextures({ { material->mDiffuseTexture, TextureType_2D }, { material->mEmissiveTexture, TextureType_2D } });
@@ -284,31 +287,10 @@ namespace Render {
         sDeviceContext->IASetPrimitiveTopology(mode);
 
         if (mesh->mIndices) {
+            mesh->mIndices.bindIndex();
             sDeviceContext->DrawIndexedInstanced(mesh->mElementCount, count, 0, 0, 0);
         } else {
             sDeviceContext->DrawInstanced(mesh->mElementCount, count, 0, 0);
-        }
-    }
-
-    void DirectX11RenderTarget::renderVertices(const Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices)
-    {
-        if (!vertices.empty()) {
-            DirectX11MeshData tempMesh;
-            DirectX11MeshLoader::getSingleton().generate(tempMesh, { groupSize, std::move(vertices), std::move(indices) });
-
-            //setupProgram(flags);
-
-            renderMesh(&tempMesh, program);
-        }
-    }
-
-    void DirectX11RenderTarget::renderVertices(const Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, const Material *material)
-    {
-        if (!vertices.empty()) {
-            DirectX11MeshData tempMesh;
-            DirectX11MeshLoader::getSingleton().generate(tempMesh, { groupSize, std::move(vertices), std::move(indices) });
-
-            renderMesh(&tempMesh, program, material);
         }
     }
 

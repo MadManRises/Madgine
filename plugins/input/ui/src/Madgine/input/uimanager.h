@@ -84,4 +84,4 @@ namespace Input {
 }
 }
 
-RegisterType(Engine::Input::UIManager);
+REGISTER_TYPE(Engine::Input::UIManager)

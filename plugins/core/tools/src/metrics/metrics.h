@@ -26,4 +26,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::Metrics);
+REGISTER_TYPE(Engine::Tools::Metrics)

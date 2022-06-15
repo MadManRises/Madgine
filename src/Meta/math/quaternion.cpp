@@ -8,7 +8,7 @@ Quaternion slerp(Quaternion q1, Quaternion q2, float ratio)
 {
 
     // Compute the cosine of the angle between the two vectors.
-    float dot = q1.v.dotProduct(q2.v) + q1.w * q2.w;
+    float dot = q1.dotProduct(q2);
 
     // If the dot product is negative, slerp won't take
     // the shorter path. Note that v1 and -v1 are equivalent when

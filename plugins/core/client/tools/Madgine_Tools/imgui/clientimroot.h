@@ -82,4 +82,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::ClientImRoot);
+REGISTER_TYPE(Engine::Tools::ClientImRoot)

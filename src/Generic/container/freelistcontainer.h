@@ -2,8 +2,8 @@
 
 namespace Engine {
 
-DERIVE_FUNCTION(construct);
-DERIVE_FUNCTION(destruct);
+DERIVE_FUNCTION(construct)
+DERIVE_FUNCTION(destruct)
 
 template <typename C, typename DataTraits = typename C::value_type>
 struct FreeListContainer {

@@ -38,7 +38,7 @@ namespace Tools {
             co_return false;
 
         OffsetPtr handle = Render::DirectX12RenderContext::getSingleton().mDescriptorHeap.allocate();
-        ImGui_ImplDX12_Init(Render::GetDevice(), 1, DXGI_FORMAT_R8G8B8A8_UNORM, Render::DirectX12RenderContext::getSingleton().mDescriptorHeap.resource(), Render::DirectX12RenderContext::getSingleton().mDescriptorHeap.cpuHandle(handle), Render::DirectX12RenderContext::getSingleton().mDescriptorHeap.gpuHandle(handle));
+        ImGui_ImplDX12_Init(Render::GetDevice(), 2, DXGI_FORMAT_R8G8B8A8_UNORM, Render::DirectX12RenderContext::getSingleton().mDescriptorHeap.resource(), Render::DirectX12RenderContext::getSingleton().mDescriptorHeap.cpuHandle(handle), Render::DirectX12RenderContext::getSingleton().mDescriptorHeap.gpuHandle(handle));
         //ImGui_ImplDirectX12_CreateDeviceObjects();
         /*if (!(ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable))
                 ImGui::GetIO().RenderDrawListsFn = [](ImDrawData *data) {

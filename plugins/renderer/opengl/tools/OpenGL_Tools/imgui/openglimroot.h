@@ -21,4 +21,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::OpenGLImRoot);
+REGISTER_TYPE(Engine::Tools::OpenGLImRoot)

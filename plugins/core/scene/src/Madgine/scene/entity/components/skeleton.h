@@ -38,5 +38,5 @@ namespace Scene {
 }
 }
 
-RegisterType(Engine::Scene::Entity::Skeleton);
-RegisterType(Engine::Scene::Entity::EntityComponentList<Engine::Scene::Entity::Skeleton>);
+REGISTER_TYPE(Engine::Scene::Entity::Skeleton)
+REGISTER_TYPE(Engine::Scene::Entity::EntityComponentList<Engine::Scene::Entity::Skeleton>)

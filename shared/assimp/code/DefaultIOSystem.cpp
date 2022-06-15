@@ -76,7 +76,7 @@ bool DefaultIOSystem::Exists( const char* pFile) const
 #ifdef _WIN32
     wchar_t fileName16[PATHLIMIT];
 
-    bool isUnicode = IsTextUnicode(pFile, static_cast<int>(strlen(pFile)), NULL) != 0;
+    /* bool isUnicode = IsTextUnicode(pFile, static_cast<int>(strlen(pFile)), NULL) != 0;
     if (isUnicode) {
 
         MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, pFile, -1, fileName16, PATHLIMIT);
@@ -84,7 +84,7 @@ bool DefaultIOSystem::Exists( const char* pFile) const
         if (0 != _wstat64(fileName16, &filestat)) {
             return false;
         }
-    } else {
+    } else*/ {
         FILE* file = ::fopen(pFile, "rb");
         if (!file)
             return false;
@@ -110,12 +110,12 @@ IOStream* DefaultIOSystem::Open( const char* strFile, const char* strMode)
     FILE* file;
 #ifdef _WIN32
     wchar_t fileName16[PATHLIMIT];
-    bool isUnicode = IsTextUnicode(strFile, static_cast<int>(strlen(strFile)), NULL) != 0;
+    /*bool isUnicode = IsTextUnicode(strFile, static_cast<int>(strlen(strFile)), NULL) != 0;
     if (isUnicode) {
         MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, strFile, -1, fileName16, PATHLIMIT);
         std::string mode8(strMode);
         file = ::_wfopen(fileName16, std::wstring(mode8.begin(), mode8.end()).c_str());
-    } else {
+    } else */{
         file = ::fopen(strFile, strMode);
     }
 #else
@@ -158,7 +158,7 @@ inline static void MakeAbsolutePath (const char* in, char* _out)
 {
     ai_assert(in && _out);
 #if defined( _MSC_VER ) || defined( __MINGW32__ )
-    bool isUnicode = IsTextUnicode(in, static_cast<int>(strlen(in)), NULL) != 0;
+    /*bool isUnicode = IsTextUnicode(in, static_cast<int>(strlen(in)), NULL) != 0;
     if (isUnicode) {
         wchar_t out16[PATHLIMIT];
         wchar_t in16[PATHLIMIT];
@@ -174,7 +174,7 @@ inline static void MakeAbsolutePath (const char* in, char* _out)
             strcpy(_out, in);
         }
 
-    } else {
+    } else */{
         char* ret = :: _fullpath(_out, in, PATHLIMIT);
         if (!ret) {
             // preserve the input path, maybe someone else is able to fix

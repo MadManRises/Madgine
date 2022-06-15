@@ -13,6 +13,8 @@
 
 #include "render/texturedescriptor.h"
 
+#include "meshdata.h"
+
 #define SL_SHADER im3d
 #include INCLUDE_SL_SHADER
 
@@ -23,7 +25,12 @@ namespace Render {
         : mCamera(camera)
         , mPriority(priority)
     {
-        mProgram.create("im3d", { sizeof(Im3DPerApplication) , sizeof(Im3DPerFrame), sizeof(Im3DPerObject) });
+        mPipeline.createDynamic({ .vs = "im3d", .ps = "im3d", .bufferSizes = { sizeof(Im3DPerApplication), sizeof(Im3DPerFrame), sizeof(Im3DPerObject) } });
+
+        for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
+            mMeshes[i][0].create({ i + 1, std::vector<Render::Vertex> {} });
+            mMeshes[i][1].create({ i + 1, std::vector<Render::Vertex2> {} });
+        }
     }
 
     void Im3DRenderPass::render(RenderTarget *target, size_t iteration)
@@ -42,13 +49,13 @@ namespace Render {
         float aspectRatio = float(size.x) / size.y;
 
         {
-            auto perApplication = mProgram.mapParameters(0).cast<Im3DPerApplication>();
+            auto perApplication = mPipeline.mapParameters(0).cast<Im3DPerApplication>();
 
             perApplication->p = mCamera->getProjectionMatrix(aspectRatio);
         }
 
         {
-            auto perFrame = mProgram.mapParameters(1).cast<Im3DPerFrame>();
+            auto perFrame = mPipeline.mapParameters(1).cast<Im3DPerFrame>();
 
             perFrame->v = mCamera->getViewMatrix();
         }
@@ -61,7 +68,7 @@ namespace Render {
             target->bindTextures({ { p.first, Render::TextureType_2D } });
 
             {
-                auto perObject = mProgram.mapParameters(2).cast<Im3DPerObject>();
+                auto perObject = mPipeline.mapParameters(2).cast<Im3DPerObject>();
 
                 perObject->hasDistanceField = false;
 
@@ -72,13 +79,19 @@ namespace Render {
             }
 
             for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
-                target->renderVertices(mProgram, i + 1, p.second.mVertices[i], p.second.mIndices[i]);
+                if (!p.second.mVertices[i].empty()) {
+                    mMeshes[i][0].update({ i + 1, p.second.mVertices[i], p.second.mIndices[i] });
+                    target->renderMesh(mMeshes[i][0], mPipeline);
+                }
                 /* GPUMeshData::Material mat;
                 mat.mDiffuseHandle = p.first;
                 target->renderVertices(mProgram, i + 1, p.second.mVertices2[i], p.second.mIndices2[i], &mat);*/
                 if (p.first)
                     LOG_ONCE("TODO!");
-                target->renderVertices(mProgram, i + 1, p.second.mVertices2[i], p.second.mIndices2[i], nullptr);                
+                if (!p.second.mVertices2[i].empty()) {
+                    mMeshes[i][1].update({ i + 1, p.second.mVertices2[i], p.second.mIndices2[i] });
+                    target->renderMesh(mMeshes[i][1], mPipeline, nullptr);
+                }
             }
         }
 
@@ -89,6 +102,5 @@ namespace Render {
     {
         return mPriority;
     }
-
 }
 }

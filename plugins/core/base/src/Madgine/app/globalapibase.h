@@ -35,4 +35,4 @@ namespace App {
 }
 }
 
-RegisterType(Engine::App::GlobalAPIBase);
+REGISTER_TYPE(Engine::App::GlobalAPIBase)

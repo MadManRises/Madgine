@@ -45,6 +45,6 @@ namespace Server {
 }
 }
 
-RegisterType(Engine::Server::ServerBase);
+REGISTER_TYPE(Engine::Server::ServerBase)
 
 #endif

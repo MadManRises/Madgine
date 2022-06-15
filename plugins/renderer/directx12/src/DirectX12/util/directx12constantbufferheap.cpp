@@ -9,16 +9,15 @@
 namespace Engine {
 namespace Render {
 
-    DirectX12ConstantBufferHeap::DirectX12ConstantBufferHeap(DirectX12DescriptorHeap *descriptorHeap, size_t size)
-        : mDescriptorHeap(descriptorHeap)
-        , mSize(size)
+    DirectX12ConstantBufferHeap::DirectX12ConstantBufferHeap(size_t size)
+        : mSize(size)
     {
         CD3DX12_HEAP_PROPERTIES persistentHeapProperties { D3D12_HEAP_TYPE_DEFAULT };
         CD3DX12_HEAP_PROPERTIES tempHeapProperties { D3D12_HEAP_TYPE_UPLOAD };
 
         CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(size);
 
-        HRESULT hr = sDevice->CreateCommittedResource(
+        HRESULT hr = GetDevice()->CreateCommittedResource(
             &persistentHeapProperties,
             D3D12_HEAP_FLAG_NONE,
             &bufferDesc,
@@ -28,7 +27,7 @@ namespace Render {
         DX12_CHECK(hr);
         mPersistentHeap->SetName(L"Persistent Heap");
 
-        hr = sDevice->CreateCommittedResource(
+        hr = GetDevice()->CreateCommittedResource(
             &tempHeapProperties,
             D3D12_HEAP_FLAG_NONE,
             &bufferDesc,
@@ -39,21 +38,8 @@ namespace Render {
         mTempHeap->SetName(L"Temp Heap");
     }
 
-    DirectX12ConstantBufferHeap::~DirectX12ConstantBufferHeap()
-    {
-        if (mTempHeap) {
-            mTempHeap->Release();
-            mTempHeap = nullptr;
-        }
-        if (mPersistentHeap) {
-            mPersistentHeap->Release();
-            mPersistentHeap = nullptr;
-        }
-    }
-
     DirectX12ConstantBufferHeap &DirectX12ConstantBufferHeap::operator=(DirectX12ConstantBufferHeap &&other)
     {
-        std::swap(mDescriptorHeap, other.mDescriptorHeap);
         std::swap(mTempHeap, other.mTempHeap);
         std::swap(mPersistentHeap, other.mPersistentHeap);
         std::swap(mSize, other.mSize);
@@ -62,55 +48,57 @@ namespace Render {
         return *this;
     }
 
-    OffsetPtr DirectX12ConstantBufferHeap::allocateTemp(size_t size)
+    D3D12_GPU_VIRTUAL_ADDRESS DirectX12ConstantBufferHeap::allocateTemp(size_t size)
     {
-        for (auto it = mFreeListTemp.begin(); it != mFreeListTemp.end(); ++it) {
+        /* for (auto it = mFreeListTemp.begin(); it != mFreeListTemp.end(); ++it) {
             if (it->second == size) {
                 OffsetPtr offset = it->first;
                 mFreeListTemp.erase(it);
                 return offset;
             } else if (it->second > size) {
                 it->second -= size;
-                return it->first;
+                return it->first + it->second;
             }
         }
-
-        assert(mOffsetTemp + size <= mSize);
+        */
+        if (mOffsetTemp + size > mSize) {
+            mOffsetTemp = OffsetPtr { 0 };
+        }
         OffsetPtr offset = mOffsetTemp;
         mOffsetTemp += size;
-        return offset;
+        return offset.offset() + mTempHeap->GetGPUVirtualAddress();
     }
 
-    void DirectX12ConstantBufferHeap::deallocateTemp(OffsetPtr ptr, size_t size)
+    void DirectX12ConstantBufferHeap::deallocateTemp(D3D12_GPU_VIRTUAL_ADDRESS ptr, size_t size)
     {
-        mFreeListTemp.push_back({ ptr, size });
+        //mFreeListTemp.push_back({ ptr, size });
     }
 
-    OffsetPtr DirectX12ConstantBufferHeap::allocatePersistent(size_t size)
+    D3D12_GPU_VIRTUAL_ADDRESS DirectX12ConstantBufferHeap::allocatePersistent(size_t size)
     {
         for (auto it = mFreeListPersistent.begin(); it != mFreeListPersistent.end(); ++it) {
             if (it->second == size) {
-                OffsetPtr offset = it->first;
+                D3D12_GPU_VIRTUAL_ADDRESS ptr = it->first;
                 mFreeListPersistent.erase(it);
-                return offset;
+                return ptr;
             } else if (it->second > size) {
                 it->second -= size;
-                return it->first;
+                return it->first + it->second;
             }
         }
 
         assert(mOffsetPersistent + size <= mSize);
         OffsetPtr offset = mOffsetPersistent;
         mOffsetPersistent += size;
-        return offset;
+        return offset.offset() + mPersistentHeap->GetGPUVirtualAddress();
     }
 
-    void DirectX12ConstantBufferHeap::deallocatePersistent(OffsetPtr ptr, size_t size)
+    void DirectX12ConstantBufferHeap::deallocatePersistent(D3D12_GPU_VIRTUAL_ADDRESS ptr, size_t size)
     {
         mFreeListPersistent.push_back({ ptr, size });
     }
 
-    WritableByteBuffer DirectX12ConstantBufferHeap::map(OffsetPtr offset, size_t size)
+    WritableByteBuffer DirectX12ConstantBufferHeap::map(D3D12_GPU_VIRTUAL_ADDRESS ptr, size_t size)
     {
         struct UnmapDeleter {
             ID3D12Resource *mBuffer;
@@ -122,22 +110,23 @@ namespace Render {
             }
         };
 
-        D3D12_RANGE range { offset.offset(), (offset + size).offset() };
+        D3D12_GPU_VIRTUAL_ADDRESS baseAddress = mTempHeap->GetGPUVirtualAddress();
+        D3D12_RANGE range { ptr - baseAddress, ptr - baseAddress + size };
         void *data;
         HRESULT hr = mTempHeap->Map(0, &range, &data);
         DX12_CHECK(hr);
 
-        std::unique_ptr<void, UnmapDeleter> dataBuffer { data, { mTempHeap, range } };
+        std::unique_ptr<void, UnmapDeleter> dataBuffer { static_cast<std::byte *>(data) + ptr - baseAddress, { mTempHeap, range } };
 
         return { std::move(dataBuffer), size };
     }
 
-    void DirectX12ConstantBufferHeap::setData(OffsetPtr offset, const ByteBuffer &data)
+    void DirectX12ConstantBufferHeap::setData(D3D12_GPU_VIRTUAL_ADDRESS ptr, const ByteBuffer &data)
     {
         auto heapDesc = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
         auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(data.mSize);
-        ID3D12Resource *uploadHeap;
-        HRESULT hr = sDevice->CreateCommittedResource(
+        ReleasePtr<ID3D12Resource> uploadHeap;
+        HRESULT hr = GetDevice()->CreateCommittedResource(
             &heapDesc,
             D3D12_HEAP_FLAG_NONE,
             &resourceDesc,
@@ -156,19 +145,14 @@ namespace Render {
 
         auto transition = CD3DX12_RESOURCE_BARRIER::Transition(mPersistentHeap, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_COPY_DEST);
         DirectX12RenderContext::getSingleton().mTempCommandList.mList->ResourceBarrier(1, &transition);
-        DirectX12RenderContext::getSingleton().mTempCommandList.mList->CopyBufferRegion(mPersistentHeap, offset.offset(), uploadHeap, 0, data.mSize);
-        
+        DirectX12RenderContext::getSingleton().mTempCommandList.mList->CopyBufferRegion(mPersistentHeap, ptr - mPersistentHeap->GetGPUVirtualAddress(), uploadHeap, 0, data.mSize);
+
         auto transition2 = CD3DX12_RESOURCE_BARRIER::Transition(mPersistentHeap, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
         DirectX12RenderContext::getSingleton().mTempCommandList.mList->ResourceBarrier(1, &transition2);
 
-        DirectX12RenderContext::getSingleton().ExecuteCommandList(DirectX12RenderContext::getSingleton().mTempCommandList, [uploadHeap]() {
-            uploadHeap->Release();
-        });
-    }
+        DirectX12RenderContext::getSingleton().ExecuteCommandList(DirectX12RenderContext::getSingleton().mTempCommandList, [uploadHeap { std::move(uploadHeap) }]() {
 
-    DirectX12DescriptorHeap *DirectX12ConstantBufferHeap::descriptorHeap() const
-    {
-        return mDescriptorHeap;
+        });
     }
 
     ID3D12Resource *DirectX12ConstantBufferHeap::resourceTemp() const
@@ -179,16 +163,6 @@ namespace Render {
     ID3D12Resource *DirectX12ConstantBufferHeap::resourcePersistent() const
     {
         return mPersistentHeap;
-    }
-
-    D3D12_GPU_VIRTUAL_ADDRESS DirectX12ConstantBufferHeap::addressTemp(OffsetPtr offset)
-    {
-        return reinterpret_cast<uintptr_t>(reinterpret_cast<std::byte *>(mTempHeap->GetGPUVirtualAddress()) + offset);
-    }
-
-    D3D12_GPU_VIRTUAL_ADDRESS DirectX12ConstantBufferHeap::addressPersistent(OffsetPtr offset)
-    {
-        return reinterpret_cast<uintptr_t>(reinterpret_cast<std::byte *>(mPersistentHeap->GetGPUVirtualAddress()) + offset);
     }
 
 }

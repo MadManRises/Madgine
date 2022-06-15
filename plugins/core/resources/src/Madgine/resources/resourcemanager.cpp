@@ -43,17 +43,18 @@ namespace Resources {
 
     void ResourceManager::registerResourceLocation(const Filesystem::Path &path, int priority)
     {
-        if (!exists(path))
+        Filesystem::Path absolutePath = path.absolute();
+
+        if (!exists(absolutePath))
             return;
 
-        auto [it, b] = mResourcePaths.try_emplace(path, priority);
-        if (b)
-            mFileWatcher.addWatch(path);
-        /*else
-			std::terminate();*/
+        auto [it, b] = mResourcePaths.try_emplace(absolutePath, priority);
+        if (b) {
+            mFileWatcher.addWatch(absolutePath);
 
-        if (mInitialized) {
-            updateResources(Filesystem::FileEventType::FILE_CREATED, path, priority);
+            if (mInitialized) {
+                updateResources(Filesystem::FileEventType::FILE_CREATED, path, priority);
+            }
         }
     }
 

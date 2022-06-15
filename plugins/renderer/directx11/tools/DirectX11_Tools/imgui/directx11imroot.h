@@ -20,4 +20,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::DirectX11ImRoot);
+REGISTER_TYPE(Engine::Tools::DirectX11ImRoot)

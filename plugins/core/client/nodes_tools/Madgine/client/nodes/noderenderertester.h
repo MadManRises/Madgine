@@ -55,4 +55,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::NodeRendererTester);
+REGISTER_TYPE(Engine::Tools::NodeRendererTester)

@@ -6,7 +6,6 @@
 
 #include "oggdecode.h"
 
-#include "Interfaces/filesystem/api.h"
 #include "Generic/stream.h"
 
 UNIQUECOMPONENT(Engine::Audio::AudioBufferLoader)
@@ -28,7 +27,7 @@ namespace Audio {
 
     bool AudioBufferLoader::loadImpl(AudioBuffer &data, ResourceDataInfo &info)
     {
-        Stream stream = DecodeOggFile(data.mInfo, Filesystem::openFileRead(info.resource()->path(), true));
+        Stream stream = DecodeOggFile(data.mInfo, info.resource()->readAsStream(true));
 
         size_t bufferSize = (data.mInfo.mBitsPerSample * data.mInfo.mSampleCount * data.mInfo.mChannels) / 8;
 

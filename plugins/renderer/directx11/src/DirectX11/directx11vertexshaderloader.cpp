@@ -2,8 +2,6 @@
 
 #include "directx11vertexshaderloader.h"
 
-#include "util/directx11vertexshader.h"
-
 #include "directx11rendercontext.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
@@ -22,26 +20,28 @@ namespace Render {
     {
     }
 
-    void DirectX11VertexShaderLoader::HandleType::create(const std::string &name, const CodeGen::ShaderFile &file, DirectX11VertexShaderLoader *loader)
+    /*void DirectX11VertexShaderLoader::HandleType::create(const std::string &name, const CodeGen::ShaderFile &file, DirectX11VertexShaderLoader *loader)
     {
         *this = DirectX11VertexShaderLoader::loadManual(
             name, {}, [=, &file](DirectX11VertexShaderLoader *loader, DirectX11VertexShader &shader, const DirectX11VertexShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, loader);
-    }
+    }*/
 
-    bool DirectX11VertexShaderLoader::loadImpl(DirectX11VertexShader &shader, ResourceDataInfo &info)
+    bool DirectX11VertexShaderLoader::loadImpl(DirectX11VertexShaderList &list, ResourceDataInfo &info)
     {
-        shader = { info.resource() };
+        list.mResource = info.resource();
 
         return true;
     }
 
-    void DirectX11VertexShaderLoader::unloadImpl(DirectX11VertexShader &shader)
+    void DirectX11VertexShaderLoader::unloadImpl(DirectX11VertexShaderList &list)
     {
-        shader.reset();
+        list.reset();
     }
 
-    bool DirectX11VertexShaderLoader::create(DirectX11VertexShader &shader, ResourceType *res, const CodeGen::ShaderFile &file)
+    bool DirectX11VertexShaderLoader::create(DirectX11VertexShaderList &shader, ResourceType *res, const CodeGen::ShaderFile &file)
     {
+        throw 0;
+        /*
         if (res->path().empty()) {
             Filesystem::Path dir = Filesystem::appDataPath() / "generated/shader/directx11";
 
@@ -57,9 +57,9 @@ namespace Render {
         
         shader = { res };
 
-        return true;
+        return true;*/
     }
-        
+
     Threading::TaskQueue *DirectX11VertexShaderLoader::loadingTaskQueue() const
     {
         return DirectX11RenderContext::renderQueue();

@@ -6,7 +6,6 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
-
 METATABLE_BEGIN(Engine::Render::GPUMeshLoader)
 METATABLE_END(Engine::Render::GPUMeshLoader)
 
@@ -24,44 +23,62 @@ METATABLE_END(Engine::Render::GPUMeshData::Material)
 
 VIRTUALUNIQUECOMPONENTBASE(Engine::Render::GPUMeshLoader)
 
+namespace Engine {
+namespace Render {
 
-    namespace Engine
-{
-    namespace Render {
+    GPUMeshLoader::GPUMeshLoader()
+        : VirtualResourceLoaderBase({ ".fbx", ".dae" })
+    {
+    }
 
-        GPUMeshLoader::GPUMeshLoader()
-            : VirtualResourceLoaderBase({ ".fbx", ".dae" })
-        {
-        }
+    Threading::Task<bool> GPUMeshLoader::loadImpl(GPUMeshData &mesh, ResourceDataInfo &info)
+    {
+        MeshLoader::HandleType handle;
+        if (!co_await handle.load(info.resource()->name()))
+            co_return false;
+        co_return generate(mesh, *handle);
+    }
 
-        Threading::Task<bool> GPUMeshLoader::loadImpl(GPUMeshData &mesh, ResourceDataInfo &info)
-        {
-            MeshLoader::HandleType handle;
-            if (!co_await handle.load(info.resource()->name()))
-                co_return false;
-            co_return generate(mesh, *handle);
-        }
+    void GPUMeshLoader::unloadImpl(GPUMeshData &data)
+    {
+        reset(data);
+    }
 
-        void GPUMeshLoader::unloadImpl(GPUMeshData &data)
-        {
-            reset(data);
-        }
+    bool GPUMeshLoader::generate(GPUMeshData &data, const MeshData &mesh)
+    {
+        data.mFormat = mesh.mFormat;
+        data.mVertexSize = mesh.mVertexSize;
+        data.mAABB = mesh.mAABB;
+        data.mGroupSize = mesh.mGroupSize;
 
-        void GPUMeshLoader::generateMaterials(GPUMeshData& data, const MeshData& mesh) {
-            for (const MeshData::Material &mat : mesh.mMaterials) {
-                GPUMeshData::Material &gpuMat = data.mMaterials.emplace_back();
-                gpuMat.mName = mat.mName;
-                gpuMat.mDiffuseColor = mat.mDiffuseColor;
-                
-                if (!mat.mDiffuseName.empty()) {
-                    gpuMat.mDiffuseTexture.loadFromImage(mat.mDiffuseName, TextureType_2D, FORMAT_RGBA8);
-                }
+        GPUMeshLoader::update(data, mesh);
 
-                if (!mat.mEmissiveName.empty()) {
-                    gpuMat.mEmissiveTexture.loadFromImage(mat.mEmissiveName, TextureType_2D, FORMAT_RGBA8);
-                }
+        data.mMaterials.clear();
+        for (const MeshData::Material &mat : mesh.mMaterials) {
+            GPUMeshData::Material &gpuMat = data.mMaterials.emplace_back();
+            gpuMat.mName = mat.mName;
+            gpuMat.mDiffuseColor = mat.mDiffuseColor;
+
+            if (!mat.mDiffuseName.empty()) {
+                gpuMat.mDiffuseTexture.loadFromImage(mat.mDiffuseName, TextureType_2D, FORMAT_RGBA8);
+            }
+
+            if (!mat.mEmissiveName.empty()) {
+                gpuMat.mEmissiveTexture.loadFromImage(mat.mEmissiveName, TextureType_2D, FORMAT_RGBA8);
             }
         }
 
+        return true;
     }
+
+    void GPUMeshLoader::update(GPUMeshData &data, const MeshData &mesh)
+    {
+        if (mesh.mIndices.empty()) {
+            data.mElementCount = mesh.mVertices.mSize / mesh.mVertexSize;
+        } else {
+            data.mElementCount = mesh.mIndices.size();
+        }
+    }
+
+}
 }

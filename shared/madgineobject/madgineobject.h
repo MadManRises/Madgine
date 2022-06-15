@@ -56,6 +56,7 @@ struct MadgineObject : MadgineObjectState {
         } else {
             static_cast<T *>(this)->finalize();
         }
+        co_return;
     }
 };
 

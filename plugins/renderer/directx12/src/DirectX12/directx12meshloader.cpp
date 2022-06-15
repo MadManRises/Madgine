@@ -29,78 +29,29 @@ namespace Render {
         getOrCreateManual("Plane", {}, {}, this);
     }
 
-    void Engine::Render::DirectX12MeshLoader::generateImpl(DirectX12MeshData &data, const MeshData &mesh)
-    {
-        data.mVertices.setData(mesh.mVertices);
-
-        data.mVertices.bindVertex(data.mVAO.mStride);
-
-        if (mesh.mIndices.empty()) {
-            data.mElementCount = mesh.mVertices.mSize / mesh.mVertexSize;
-        } else {
-            data.mIndices.setData(mesh.mIndices);
-
-            data.mIndices.bindIndex();
-            data.mElementCount = mesh.mIndices.size();
-        }
-
-        generateMaterials(data, mesh);
-
-        data.mVAO = { mesh.mGroupSize, data.mVertices, data.mIndices, mesh.mAttributeList() };
-    }
-
     bool DirectX12MeshLoader::generate(GPUMeshData &_data, const MeshData &mesh)
     {
         DirectX12MeshData &data = static_cast<DirectX12MeshData &>(_data);
-        data.mAABB = mesh.mAABB;
 
-        generateImpl(data, mesh);
+        data.mVertices.setData(mesh.mVertices);
 
-        return true;
-    }
+        if (!mesh.mIndices.empty())
+            data.mIndices.setData(mesh.mIndices);
 
-    bool DirectX12MeshLoader::generate(GPUMeshData &_data, MeshData &&mesh)
-    {
-        DirectX12MeshData &data = static_cast<DirectX12MeshData &>(_data);
-        data.mAABB = mesh.mAABB;
-
-        generateImpl(data, mesh);
-
-        return true;
-    }
-
-    void DirectX12MeshLoader::updateImpl(DirectX12MeshData &data, const MeshData &mesh)
-    {
-        data.mVAO.mGroupSize = mesh.mGroupSize;
-
-        data.mVertices.resize(mesh.mVertices.mSize);
-        std::memcpy(data.mVertices.mapData().mData, mesh.mVertices.mData, mesh.mVertices.mSize);
-
-        if (mesh.mIndices.empty()) {
-            data.mElementCount = mesh.mVertices.mSize / mesh.mVertexSize;
-        } else {
-            data.mIndices.resize(mesh.mIndices.size() * sizeof(unsigned short));
-            std::memcpy(data.mIndices.mapData().mData, mesh.mIndices.data(), mesh.mIndices.size() * sizeof(unsigned short));
-            data.mElementCount = mesh.mIndices.size();
-        }
+        return GPUMeshLoader::generate(_data, mesh);
     }
 
     void DirectX12MeshLoader::update(GPUMeshData &_data, const MeshData &mesh)
     {
         DirectX12MeshData &data = static_cast<DirectX12MeshData &>(_data);
 
-        data.mAABB = mesh.mAABB;
+        std::memcpy(data.mVertices.mapData(mesh.mVertices.mSize).mData, mesh.mVertices.mData, mesh.mVertices.mSize);
 
-        updateImpl(data, mesh);
-    }
+        if (!mesh.mIndices.empty()) {
+            std::memcpy(data.mIndices.mapData(mesh.mIndices.size() * sizeof(unsigned short)).mData, mesh.mIndices.data(), mesh.mIndices.size() * sizeof(unsigned short));
+        }
 
-    void DirectX12MeshLoader::update(GPUMeshData &_data, MeshData &&mesh)
-    {
-        DirectX12MeshData &data = static_cast<DirectX12MeshData &>(_data);
-
-        data.mAABB = mesh.mAABB;
-
-        updateImpl(data, mesh);
+        GPUMeshLoader::update(data, mesh);
     }
 
     void DirectX12MeshLoader::reset(GPUMeshData &data)

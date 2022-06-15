@@ -116,4 +116,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::SceneEditor);
+REGISTER_TYPE(Engine::Tools::SceneEditor)

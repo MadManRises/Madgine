@@ -5,20 +5,15 @@ namespace Engine {
 namespace Render {
     struct DirectX12RenderWindow;
 
-    struct DirectX12PixelShader;
-    struct DirectX12VertexShader;
-
-    struct DirectX12MeshData;
+    struct DirectX12PersistentMeshData;
+    struct DirectX12TempMeshData;
 
     struct DirectX12FontData;
 
-	struct DirectX12RenderContext;
+    struct DirectX12RenderContext;
 
-    struct DirectX12VertexArray;
-
-    struct DirectX12Buffer;
-
-    struct DirectX12Program;
+    struct DirectX12PersistentBuffer;
+    struct DirectX12TempBuffer;
 
     struct DirectX12ConstantBufferHeap;
 

@@ -77,5 +77,5 @@ namespace Physics {
 }
 }
 
-RegisterType(Engine::Physics::RigidBody);
-RegisterType(Engine::Scene::Entity::EntityComponentList<Engine::Physics::RigidBody>);
+REGISTER_TYPE(Engine::Physics::RigidBody)
+REGISTER_TYPE(Engine::Scene::Entity::EntityComponentList<Engine::Physics::RigidBody>)

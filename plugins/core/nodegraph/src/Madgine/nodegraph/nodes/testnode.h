@@ -33,4 +33,4 @@ namespace NodeGraph {
 }
 }
 
-RegisterType(Engine::NodeGraph::TestNode);
+REGISTER_TYPE(Engine::NodeGraph::TestNode)

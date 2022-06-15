@@ -28,12 +28,16 @@
 #include "Meta/serialize/hierarchy/statetransmissionflags.h"
 
 METATABLE_BEGIN_BASE(Engine::Tools::ProjectManager, Engine::Tools::ToolBase)
+#if ENABLE_PLUGINS
+PROPERTY(ProjectRoot, projectRootString, setProjectRoot)
+PROPERTY(Layout, layout, setLayout)
+#endif
 METATABLE_END(Engine::Tools::ProjectManager)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::ProjectManager, Engine::Tools::ToolBase)
 #if ENABLE_PLUGINS
 ENCAPSULATED_FIELD(ProjectRoot, projectRoot, setProjectRoot)
-ENCAPSULATED_FIELD(Config, config, setConfig)
+ENCAPSULATED_FIELD(Layout, layout, setLayout)
 #endif
 SERIALIZETABLE_END(Engine::Tools::ProjectManager)
 
@@ -80,19 +84,19 @@ namespace Tools {
             ImGui::EndPopup();
         }
 
-        static std::string configNameBuffer;
-        if (ImGui::BeginPopupModal("NewConfig")) {
+        static std::string layoutNameBuffer;
+        if (ImGui::BeginPopupModal("NewLayout")) {
 
-            ImGui::InputText("Name", &configNameBuffer);
-            if (configNameBuffer.empty()) {
+            ImGui::InputText("Name", &layoutNameBuffer);
+            if (layoutNameBuffer.empty()) {
                 ImGui::PushDisabled();
             }
             if (ImGui::Button("Ok")) {
-                setConfig(configNameBuffer);
+                setLayout(layoutNameBuffer);
 
                 ImGui::CloseCurrentPopup();
             }
-            if (configNameBuffer.empty()) {
+            if (layoutNameBuffer.empty()) {
                 ImGui::PopDisabled();
             }
             ImGui::SameLine();
@@ -102,7 +106,7 @@ namespace Tools {
         }
 
         bool openProjectDialog = false;
-        bool openConfigDialog = false;
+        bool openLayoutDialog = false;
 
         if (ImGui::BeginMenu("Project")) {
 
@@ -118,18 +122,18 @@ namespace Tools {
 
             if (mProjectRoot.empty())
                 ImGui::PushDisabled();
-            if (ImGui::MenuItem("New Config...")) {
-                openConfigDialog = true;
+            if (ImGui::MenuItem("New Layout...")) {
+                openLayoutDialog = true;
             }
-            if (ImGui::MenuItem("Save Config")) {
+            if (ImGui::MenuItem("Save Layout")) {
                 save();
             }
 
             ImGui::Separator();
 
-            for (const std::string &config : projectConfigs()) {
-                if (ImGui::MenuItem(config.c_str(), nullptr, mConfig == config)) {
-                    setConfig(config);
+            for (const std::string &layout : projectLayouts()) {
+                if (ImGui::MenuItem(layout.c_str(), nullptr, mLayout == layout)) {
+                    setLayout(layout);
                 }
             }
             if (mProjectRoot.empty())
@@ -151,9 +155,9 @@ namespace Tools {
             }
             ImGui::OpenPopup("OpenFolder");
         }
-        if (openConfigDialog) {
-            configNameBuffer.clear();
-            ImGui::OpenPopup("NewConfig");
+        if (openLayoutDialog) {
+            layoutNameBuffer.clear();
+            ImGui::OpenPopup("NewLayout");
         }
 #endif
     }
@@ -168,8 +172,8 @@ namespace Tools {
             }
 
             mProjectRoot = root;
-            const std::vector<std::string> &configs = projectConfigs();
-            mConfig = configs.empty() ? "" : configs.front();
+            const std::vector<std::string> &layouts = projectLayouts();
+            mLayout = layouts.empty() ? "" : layouts.front();
 
             load();
 
@@ -179,24 +183,24 @@ namespace Tools {
         }
     }
 
-    std::vector<std::string> ProjectManager::projectConfigs() const
+    std::vector<std::string> ProjectManager::projectLayouts() const
     {
         if (mProjectRoot.empty())
             return {};
         std::vector<std::string> result;
-        for (const Filesystem::Path &p : Filesystem::listFiles(mProjectRoot)) {
-            if (p.extension() == ".cfg" && p.str().find('(') == std::string::npos) {
+        for (const Filesystem::Path &p : Filesystem::listFiles(mProjectRoot / "data")) {
+            if (p.extension() == ".layout") {
                 result.push_back(std::string { p.stem() });
             }
         }
         return result;
     }
 
-    void ProjectManager::setConfig(const std::string &config)
+    void ProjectManager::setLayout(const std::string &layout)
     {
-        assert(!mProjectRoot.empty() || config.empty());
-        if (mConfig != config) {
-            mConfig = config;
+        assert(!mProjectRoot.empty() || layout.empty());
+        if (mLayout != layout) {
+            mLayout = layout;
             load();
         }
     }
@@ -207,26 +211,37 @@ namespace Tools {
         return mProjectRoot;
     }
 
-    const std::string &ProjectManager::config() const
+    const std::string &ProjectManager::projectRootString() const
     {
-        return mConfig;
+        return projectRoot().str();
+    }
+
+    const std::string &ProjectManager::layout() const
+    {
+        return mLayout;
     }
 
     void ProjectManager::save()
     {
-        Filesystem::Path filePath = mProjectRoot / "data" / (mConfig + ".layout");
+        Filesystem::Path folder = mProjectRoot / "data";
+        Filesystem::createDirectory(folder);
+        Filesystem::Path filePath = folder / (mLayout + ".layout");
 
         Filesystem::FileManager file("Layout");
         Serialize::FormattedSerializeStream out = file.openWrite(filePath, std::make_unique<Serialize::XMLFormatter>());
 
-        Serialize::write(out, *mWindow, "Layout");
+        if (out) {
+            Serialize::write(out, *mWindow, "Layout");
+        } else {
+            LOG_ERROR("Failed to open \"" << filePath << "\" for write!");
+        }
     }
 
     void ProjectManager::load()
     {
-        if (!mConfig.empty()) {
+        if (!mLayout.empty()) {
 
-            Filesystem::Path filePath = mProjectRoot / "data" / (mConfig + ".layout");
+            Filesystem::Path filePath = mProjectRoot / "data" / (mLayout + ".layout");
 
             Filesystem::FileManager file("Layout");
             Serialize::FormattedSerializeStream in = file.openRead(filePath, std::make_unique<Serialize::XMLFormatter>());

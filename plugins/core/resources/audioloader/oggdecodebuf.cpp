@@ -31,8 +31,22 @@ namespace Audio {
         callbacks.tell_func = delegate<&OggDecodeBuf::ogg_tell>;
 
         auto result = ov_open_callbacks(this, &mFile, nullptr, -1, callbacks);
-        if (result)
+        if (result) {
+            {
+                Util::LogDummy out { Util::MessageType::ERROR_TYPE };
+                out << "Vorbis Error: ";
+                switch (result) {
+                    CONSTANT_CASE(OV_EREAD, out)
+                    CONSTANT_CASE(OV_ENOTVORBIS, out)
+                    CONSTANT_CASE(OV_EVERSION, out)
+                    CONSTANT_CASE(OV_EBADHEADER, out)
+                    CONSTANT_CASE(OV_EFAULT, out)
+                default:
+                    out << "UNKNOWN_ERROR";
+                }
+            }
             std::terminate();
+        }
 
         vorbis_info *vorbisInfo = ov_info(&mFile, -1);
 
@@ -80,6 +94,7 @@ namespace Audio {
 
     int OggDecodeBuf::sync()
     {
+        mBase->pubsync();
         return 0;
     }
 

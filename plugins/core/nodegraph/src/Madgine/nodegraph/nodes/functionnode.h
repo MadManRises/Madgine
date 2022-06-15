@@ -35,4 +35,4 @@ namespace NodeGraph {
 }
 }
 
-RegisterType(Engine::NodeGraph::FunctionNode);
+REGISTER_TYPE(Engine::NodeGraph::FunctionNode)

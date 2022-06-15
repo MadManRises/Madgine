@@ -18,4 +18,4 @@ namespace ClickBrick {
 
 }
 
-RegisterType(ClickBrick::MainMenuHandler);
+REGISTER_TYPE(ClickBrick::MainMenuHandler)

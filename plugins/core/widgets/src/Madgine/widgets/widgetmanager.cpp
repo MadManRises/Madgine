@@ -6,7 +6,7 @@
 #include "Meta/serialize/serializetable_impl.h"
 
 #include "gpumeshloader.h"
-#include "programloader.h"
+#include "pipelineloader.h"
 
 #include "widget.h"
 
@@ -58,8 +58,8 @@ namespace Widgets {
 
     struct WidgetManager::WidgetManagerData {
 
-        Render::ProgramLoader::PtrType mProgram;
-        Render::GPUMeshLoader::HandleType mMesh;
+        Render::PipelineLoader::Instance mPipeline;
+        Render::GPUMeshLoader::PtrType mMesh;
 
         Resources::ImageLoader::HandleType mDefaultTexture;
         Render::TextureLoader::PtrType mUIAtlasTexture;
@@ -111,11 +111,9 @@ namespace Widgets {
 
     Threading::Task<bool> WidgetManager::init()
     {
-        mData->mProgram.create("ui", { 0, 0, sizeof(WidgetsPerObject) });
+        mData->mPipeline.createStatic({ .vs = "ui", .ps = "ui", .format = type_holder<Vertex>, .bufferSizes = { 0, 0, sizeof(WidgetsPerObject) } });
 
-        mData->mMesh = Render::GPUMeshLoader::loadManual("widgetMesh", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &mesh, Render::GPUMeshLoader::ResourceDataInfo &info) {
-            return loader->generate(mesh, { 3, std::vector<Vertex> {} });
-        });
+        mData->mMesh.create({ 3, std::vector<Vertex> {} });
 
         mData->mUIAtlasTexture.create(Render::TextureType_2D, Render::FORMAT_RGBA8);
 
@@ -138,7 +136,7 @@ namespace Widgets {
 
         mData->mMesh.reset();
 
-        mData->mProgram.reset();
+        mData->mPipeline.reset();
 
         co_return;
     }
@@ -533,7 +531,7 @@ namespace Widgets {
             if (!p.second.empty()) {
 
                 {
-                    auto parameters = mData->mProgram.mapParameters(2).cast<WidgetsPerObject>();
+                    auto parameters = mData->mPipeline.mapParameters(2).cast<WidgetsPerObject>();
                     parameters->hasDistanceField = bool(p.first.mFlags & TextureFlag_IsDistanceField);
                 }
 
@@ -544,7 +542,7 @@ namespace Widgets {
 
                 mData->mMesh.update({ 3, std::move(p.second) });
 
-                target->renderMesh(mData->mMesh, mData->mProgram);
+                target->renderMesh(mData->mMesh, mData->mPipeline);
             }
         }
 
@@ -579,7 +577,7 @@ namespace Widgets {
 
     Threading::SignalStub<> &WidgetManager::updatedSignal()
     {
-            return mUpdatedSignal;
+        return mUpdatedSignal;
     }
 
     int WidgetManager::priority() const
@@ -587,7 +585,8 @@ namespace Widgets {
         return mPriority;
     }
 
-    void WidgetManager::onActivate(bool active) {
+    void WidgetManager::onActivate(bool active)
+    {
         if (active) {
             openStartupWidget();
             mUpdatedSignal.emit();

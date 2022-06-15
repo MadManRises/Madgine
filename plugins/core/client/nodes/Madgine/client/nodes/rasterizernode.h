@@ -47,4 +47,4 @@ namespace Render {
 }
 }
 
-RegisterType(Engine::Render::RasterizerNode);
+REGISTER_TYPE(Engine::Render::RasterizerNode)

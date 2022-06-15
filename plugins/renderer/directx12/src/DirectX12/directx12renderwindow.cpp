@@ -13,22 +13,6 @@
 namespace Engine {
 namespace Render {
 
-    void TransitionBarrier(ID3D12Resource *res, D3D12_RESOURCE_STATES from, D3D12_RESOURCE_STATES to)
-    {
-        D3D12_RESOURCE_BARRIER barrierDesc;
-        ZeroMemory(&barrierDesc, sizeof(D3D12_RESOURCE_BARRIER));
-
-        barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        barrierDesc.Transition.pResource = res;
-        barrierDesc.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-        barrierDesc.Transition.StateBefore = from;
-        barrierDesc.Transition.StateAfter = to;
-        barrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-
-        DirectX12RenderContext::getSingleton().mCommandList.mList->ResourceBarrier(1, &barrierDesc);
-        DX12_CHECK();
-    }
-
     DirectX12RenderWindow::DirectX12RenderWindow(DirectX12RenderContext *context, Window::OSWindow *w)
         : DirectX12RenderTarget(context, true, w->title())
         , mWindow(w)
@@ -76,11 +60,6 @@ namespace Render {
     DirectX12RenderWindow::~DirectX12RenderWindow()
     {
         shutdown();
-
-        if (mSwapChain) {
-            mSwapChain->Release();
-            mSwapChain = nullptr;
-        }
     }
 
     void DirectX12RenderWindow::beginIteration(size_t iteration) const
@@ -89,16 +68,16 @@ namespace Render {
 
         mTargetView = mTargetViews[mSwapChain->GetCurrentBackBufferIndex()];
 
-        TransitionBarrier(mBackBuffers[mSwapChain->GetCurrentBackBufferIndex()], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+        Transition(mBackBuffers[mSwapChain->GetCurrentBackBufferIndex()], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
         DirectX12RenderTarget::beginIteration(iteration);
     }
 
     void DirectX12RenderWindow::endIteration(size_t iteration) const
     {
-        TransitionBarrier(mBackBuffers[mSwapChain->GetCurrentBackBufferIndex()], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+        Transition(mBackBuffers[mSwapChain->GetCurrentBackBufferIndex()], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
-        DirectX12RenderTarget::endIteration(iteration);        
+        DirectX12RenderTarget::endIteration(iteration);
 
         mSwapChain->Present(0, 0);
     }
@@ -127,16 +106,14 @@ namespace Render {
     void DirectX12RenderWindow::createRenderTargetViews()
     {
         for (size_t i = 0; i < 2; ++i) {
-            HRESULT hr = mSwapChain->GetBuffer(i, IID_PPV_ARGS(mBackBuffers + i));
+            HRESULT hr = mSwapChain->GetBuffer(i, IID_PPV_ARGS(&mBackBuffers[i]));
             DX12_CHECK(hr);
 
             assert(mBackBuffers[i]);
 
             mBackBuffers[i]->SetName((L"Window - BackBuffer " + std::to_wstring(i)).c_str());
 
-            sDevice->CreateRenderTargetView(mBackBuffers[i], nullptr, DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(mTargetViews[i]));
-
-            mBackBuffers[i]->Release();
+            GetDevice()->CreateRenderTargetView(mBackBuffers[i], nullptr, DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(mTargetViews[i]));
         }
     }
 

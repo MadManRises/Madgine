@@ -35,4 +35,4 @@ namespace NodeGraph {
 }
 }
 
-RegisterType(Engine::NodeGraph::VariableNode);
+REGISTER_TYPE(Engine::NodeGraph::VariableNode)

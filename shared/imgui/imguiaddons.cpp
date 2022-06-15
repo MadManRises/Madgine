@@ -887,9 +887,10 @@ void BeginFilesystemPicker(Engine::Filesystem::Path *path, Engine::Filesystem::P
 
     ImGui::SameLine();
 
-    if (ImGui::BeginCombo("Current", path->c_str())) {
+    std::string s = path->str();
 
-        ImGui::EndCombo();
+    if (ImGui::InputText("Current", &s)) {
+        *path = s;
     }
 }
 

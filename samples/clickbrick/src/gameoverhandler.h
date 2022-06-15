@@ -23,4 +23,4 @@ namespace ClickBrick {
 
 }
 
-RegisterType(ClickBrick::GameOverHandler);
+REGISTER_TYPE(ClickBrick::GameOverHandler)

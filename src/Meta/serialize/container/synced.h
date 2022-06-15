@@ -7,8 +7,8 @@
 namespace Engine {
 namespace Serialize {
 
-    DERIVE_FUNCTION2(PlusAssign, operator+=);
-    DERIVE_FUNCTION2(MinusAssign, operator-=);
+    DERIVE_FUNCTION2(PlusAssign, operator+=)
+    DERIVE_FUNCTION2(MinusAssign, operator-=)
 
 #define SYNCED(Name, ...) MEMBER_OFFSET_CONTAINER(Name, ::Engine::Serialize::Synced<__VA_ARGS__>)
 

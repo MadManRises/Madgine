@@ -56,5 +56,5 @@ namespace Scene {
 }
 }
 
-RegisterType(Engine::Scene::Entity::Transform);
-RegisterType(Engine::Scene::Entity::EntityComponentList<Engine::Scene::Entity::Transform>);
+REGISTER_TYPE(Engine::Scene::Entity::Transform)
+REGISTER_TYPE(Engine::Scene::Entity::EntityComponentList<Engine::Scene::Entity::Transform>)

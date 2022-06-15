@@ -11,7 +11,7 @@
 #include "Modules/moduleslib.h"
 #include "Meta/metalib.h"
 
-#include "programloaderlib.h"
+#include "pipelineloaderlib.h"
 #include "meshloaderlib.h"
 
 #include "clientforward.h"

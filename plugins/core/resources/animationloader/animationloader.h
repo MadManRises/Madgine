@@ -30,4 +30,4 @@ namespace Render {
 }
 }
 
-RegisterType(Engine::Render::AnimationLoader);
+REGISTER_TYPE(Engine::Render::AnimationLoader)

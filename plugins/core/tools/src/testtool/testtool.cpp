@@ -92,10 +92,10 @@ namespace Tools {
                 std::vector<Atlas2::Entry> entries = atlas.insert({ array, array + COUNT }, [&]() { atlas.addBin(origin); origin.x += 512; });
 
                 for (const Atlas2::Entry &entry : entries) {
-                    vertices.push_back({ { float(entry.mArea.mTopLeft.x), float(entry.mArea.mTopLeft.y), 0 }, { 1, 1, 1, 1 }, { 0, 0, 1 } });
-                    vertices.push_back({ { float(entry.mArea.mTopLeft.x + entry.mArea.mSize.x), float(entry.mArea.mTopLeft.y), 0 }, { 1, 1, 1, 1 }, { 0, 0, 1 } });
-                    vertices.push_back({ { float(entry.mArea.mTopLeft.x), float(entry.mArea.mTopLeft.y + entry.mArea.mSize.y), 0 }, { 1, 1, 1, 1 }, { 0, 0, 1 } });
-                    vertices.push_back({ { float(entry.mArea.mTopLeft.x + entry.mArea.mSize.x), float(entry.mArea.mTopLeft.y + entry.mArea.mSize.y), 0 }, { 1, 1, 1, 1 }, { 0, 0, 1 } });
+                    vertices.push_back({ { float(entry.mArea.mTopLeft.x), float(entry.mArea.mTopLeft.y), 0 }, { 0, 0, 1 }, { 1, 1, 1, 1 } });
+                    vertices.push_back({ { float(entry.mArea.mTopLeft.x + entry.mArea.mSize.x), float(entry.mArea.mTopLeft.y), 0 }, { 0, 0, 1 }, { 1, 1, 1, 1 } });
+                    vertices.push_back({ { float(entry.mArea.mTopLeft.x), float(entry.mArea.mTopLeft.y + entry.mArea.mSize.y), 0 }, { 0, 0, 1 }, { 1, 1, 1, 1 } });
+                    vertices.push_back({ { float(entry.mArea.mTopLeft.x + entry.mArea.mSize.x), float(entry.mArea.mTopLeft.y + entry.mArea.mSize.y), 0 }, { 0, 0, 1 }, { 1, 1, 1, 1 } });
                 }
 
                 for (Render::Vertex &v : vertices) {

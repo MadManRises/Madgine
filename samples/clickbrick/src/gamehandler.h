@@ -14,4 +14,4 @@ namespace ClickBrick {
 
 }
 
-RegisterType(ClickBrick::GameHandler);
+REGISTER_TYPE(ClickBrick::GameHandler)

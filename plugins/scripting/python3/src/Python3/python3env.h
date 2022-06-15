@@ -29,4 +29,4 @@ namespace Scripting {
 }
 }
 
-RegisterType(Engine::Scripting::Python3::Python3Environment)
+REGISTER_TYPE(Engine::Scripting::Python3::Python3Environment)

@@ -18,4 +18,4 @@ namespace Resources {
 }
 }
 
-RegisterType(Engine::Resources::ImageLoader);
+REGISTER_TYPE(Engine::Resources::ImageLoader)

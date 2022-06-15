@@ -44,7 +44,7 @@ namespace Engine
 			std::cout << "prompt> ";
 			std::cout.flush();
 
-#if WINDOWS
+#if WINDOWS && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_SYSTEM)
 			HANDLE input = GetStdHandle(STD_INPUT_HANDLE);
 			std::string cmd;
 
@@ -64,7 +64,7 @@ namespace Engine
 
 		void ServerLog::stopConsole()
 		{
-#if WINDOWS
+#if WINDOWS && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_SYSTEM)
 			HANDLE input = GetStdHandle(STD_INPUT_HANDLE);
 			SetConsoleMode(input, fdwOldMode);
 #endif
@@ -74,7 +74,7 @@ namespace Engine
 		{
 			std::vector<std::string> cmds;
 
-#if WINDOWS	
+#if WINDOWS && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_SYSTEM)
 
 			CHAR buffer[256];
 

@@ -68,7 +68,7 @@ struct TypeInfo {
     const TypeInfo *mDecayType;
 };
 
-#define RegisterType(T) template <> \
+#define REGISTER_TYPE(T) template <> \
                         inline constexpr const ::Engine::TypeInfo typeInfo<T> = { #T, __FILE__, ::Engine::type_holder<T> };
 
 }

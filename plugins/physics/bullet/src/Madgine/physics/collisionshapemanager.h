@@ -84,4 +84,4 @@ namespace Serialize {
 }
 }
 
-RegisterType(Engine::Physics::CollisionShapeManager);
+REGISTER_TYPE(Engine::Physics::CollisionShapeManager)

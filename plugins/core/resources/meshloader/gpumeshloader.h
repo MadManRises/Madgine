@@ -6,6 +6,8 @@
 
 #include "Modules/threading/workgroupstorage.h"
 
+#include "meshdata.h"
+
 namespace Engine {
 namespace Render {
 
@@ -13,27 +15,24 @@ namespace Render {
 
         using Base = VirtualResourceLoaderBase<GPUMeshLoader, GPUMeshData, std::list<Placeholder<0>>, Threading::WorkGroupStorage>;
 
-        struct HandleType : Base::HandleType {
-            using Base::HandleType::HandleType;
-            HandleType(Base::HandleType handle)
-                : Base::HandleType(std::move(handle))
+        struct PtrType : Base::PtrType {
+            using Base::PtrType::PtrType;
+            PtrType(Base::PtrType ptr)
+                : Base::PtrType(std::move(ptr))
             {
+            }
+
+            Threading::TaskFuture<bool> create(MeshData mesh)
+            {
+                return Base::PtrType::create([mesh { std::move(mesh) }](Render::GPUMeshLoader *loader, Render::GPUMeshData &data) mutable { return loader->generate(data, std::move(mesh)); });
             }
 
             void update(const MeshData &mesh, GPUMeshLoader *loader = nullptr)
             {
                 if (!loader)
                     loader = &GPUMeshLoader::getSingleton();
-                loader->update(*getDataPtr(*this, loader), mesh);
+                loader->update(**this, mesh);
             }
-
-            void update(MeshData &&mesh, GPUMeshLoader *loader = nullptr)
-            {
-                if (!loader)
-                    loader = &GPUMeshLoader::getSingleton();
-                loader->update(*getDataPtr(*this, loader), std::move(mesh));
-            }
-
         };
 
         GPUMeshLoader();
@@ -42,12 +41,8 @@ namespace Render {
         void unloadImpl(GPUMeshData &data);
 
         virtual bool generate(GPUMeshData &data, const MeshData &mesh) = 0;
-        virtual bool generate(GPUMeshData &data, MeshData &&mesh) = 0;
-
-        void generateMaterials(GPUMeshData &data, const MeshData &mesh);
 
         virtual void update(GPUMeshData &data, const MeshData &mesh) = 0;
-        virtual void update(GPUMeshData &data, MeshData &&mesh) = 0;
 
         virtual void reset(GPUMeshData &data) = 0;
     };
@@ -55,4 +50,4 @@ namespace Render {
 }
 }
 
-RegisterType(Engine::Render::GPUMeshLoader);
+REGISTER_TYPE(Engine::Render::GPUMeshLoader)

@@ -4,12 +4,12 @@
 
 #include "Modules/threading/workgroupstorage.h"
 
-#include "util/directx12vertexshader.h"
+#include "render/vertexformat.h"
 
 namespace Engine {
 namespace Render {
 
-    struct DirectX12VertexShaderLoader : Resources::ResourceLoader<DirectX12VertexShaderLoader, DirectX12VertexShader, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
+    struct DirectX12VertexShaderLoader : Resources::ResourceLoader<DirectX12VertexShaderLoader, ReleasePtr<IDxcBlob>, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
         DirectX12VertexShaderLoader();
 
         struct HandleType : Base::HandleType {
@@ -20,16 +20,27 @@ namespace Render {
             {
             }
 
+            Threading::TaskFuture<bool> load(std::string_view name, VertexFormat format);
+
             void create(const std::string &name, const CodeGen::ShaderFile &file, DirectX12VertexShaderLoader *loader = nullptr);
         };
 
-        bool loadImpl(DirectX12VertexShader &shader, ResourceDataInfo &info);
-        void unloadImpl(DirectX12VertexShader &shader);
 
-        bool create(DirectX12VertexShader &shader, ResourceType *res, const CodeGen::ShaderFile &file);
+        Threading::Task<bool> loadImpl(ReleasePtr<IDxcBlob> &shader, ResourceDataInfo &info);
+        void unloadImpl(ReleasePtr<IDxcBlob> &shader);
+
+        bool create(ReleasePtr<IDxcBlob> &shader, ResourceType *res, const CodeGen::ShaderFile &file);
+
+        bool loadFromSource(ReleasePtr<IDxcBlob> &shader, std::string_view name, std::string source, VertexFormat format);
+
+        virtual Threading::TaskQueue *loadingTaskQueue() const override;
+
+    private:
+        ReleasePtr<IDxcLibrary> mLibrary;
+        ReleasePtr<IDxcCompiler3> mCompiler;
     };
 
 }
 }
 
-RegisterType(Engine::Render::DirectX12VertexShaderLoader);
+REGISTER_TYPE(Engine::Render::DirectX12VertexShaderLoader)

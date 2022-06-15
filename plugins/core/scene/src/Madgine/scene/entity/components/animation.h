@@ -44,5 +44,5 @@ namespace Scene {
 }
 }
 
-RegisterType(Engine::Scene::Entity::Animation);
-RegisterType(Engine::Scene::Entity::EntityComponentList<Engine::Scene::Entity::Animation>);
+REGISTER_TYPE(Engine::Scene::Entity::Animation)
+REGISTER_TYPE(Engine::Scene::Entity::EntityComponentList<Engine::Scene::Entity::Animation>)

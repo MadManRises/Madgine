@@ -36,18 +36,41 @@ namespace Render {
         Vector2 mUV;
     };
 
-    struct VertexBoneMappings {
-        using ctor = std::pair<int[4], float[4]>;
+    struct VertexBoneIndices {
+        using ctor = int[4];
         int mBoneIndices[4];
+    };
+
+    struct VertexBoneWeights {
+        using ctor = float[4];
         float mBoneWeights[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
     };
 
-    //
+    using VertexElements = type_pack<
+        VertexPos_3D,
+        VertexPos_4D,
+        VertexPos2,
+        VertexNormal,
+        VertexColor,
+        VertexUV,
+        VertexBoneIndices,
+        VertexBoneWeights>;
+
+    static constexpr size_t sVertexElementSizes[] = {
+        sizeof(VertexPos_3D),
+        sizeof(VertexPos_4D),
+        sizeof(VertexPos2),
+        sizeof(VertexNormal),
+        sizeof(VertexColor),
+        sizeof(VertexUV),
+        sizeof(VertexBoneIndices),
+        sizeof(VertexBoneWeights)
+    };
 
     using Vertex = Compound<
         VertexPos_3D,
-        VertexColor,
-        VertexNormal>;
+        VertexNormal,
+        VertexColor>;
 
     using Vertex2 = Compound<
         VertexPos_3D,
@@ -62,15 +85,17 @@ namespace Render {
 
     using Vertex4 = Compound<
         VertexPos_3D,
-        VertexColor,
         VertexNormal,
-        VertexBoneMappings>;
+        VertexColor,
+        VertexBoneIndices,
+        VertexBoneWeights>;
 
     using Vertex5 = Compound<
         VertexPos_3D,
         VertexUV,
         VertexNormal,
-        VertexBoneMappings>;
+        VertexBoneIndices,
+        VertexBoneWeights>;
 
 }
 }

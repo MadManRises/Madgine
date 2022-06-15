@@ -8,6 +8,8 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
+#include "Modules/threading/workgroupstorage.h"
+
 UNIQUECOMPONENT(Engine::Render::DirectX12RenderContext)
 
 METATABLE_BEGIN(Engine::Render::DirectX12RenderContext)
@@ -16,11 +18,90 @@ METATABLE_END(Engine::Render::DirectX12RenderContext)
 namespace Engine {
 namespace Render {
 
-    static void GetHardwareAdapter(IDXGIFactory4 *pFactory, IDXGIAdapter1 **ppAdapter)
+    static void __stdcall dxDebugOutput(D3D12_MESSAGE_CATEGORY category,
+        D3D12_MESSAGE_SEVERITY severity,
+        D3D12_MESSAGE_ID id,
+        LPCSTR message,
+        void *context)
     {
-        *ppAdapter = nullptr;
+
+        Util::MessageType lvl;
+        switch (severity) {
+        case D3D12_MESSAGE_SEVERITY_ERROR:
+            lvl = Util::MessageType::ERROR_TYPE;
+            break;
+        case D3D12_MESSAGE_SEVERITY_WARNING:
+            lvl = Util::MessageType::WARNING_TYPE;
+            break;
+        case D3D12_MESSAGE_SEVERITY_INFO:
+            lvl = Util::MessageType::INFO_TYPE;
+            break;
+        case D3D12_MESSAGE_SEVERITY_MESSAGE:
+            lvl = Util::MessageType::DEBUG_TYPE;
+            break;
+        }
+
+        Util::LogDummy cout(lvl);
+        cout << "Debug message (" << id << "): " << message << "\n";
+
+        /* switch (source) {
+        case GL_DEBUG_SOURCE_API:
+            cout << "Source: API";
+            break;
+        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+            cout << "Source: Window System";
+            break;
+        case GL_DEBUG_SOURCE_SHADER_COMPILER:
+            cout << "Source: Shader Compiler";
+            break;
+        case GL_DEBUG_SOURCE_THIRD_PARTY:
+            cout << "Source: Third Party";
+            break;
+        case GL_DEBUG_SOURCE_APPLICATION:
+            cout << "Source: Application";
+            break;
+        case GL_DEBUG_SOURCE_OTHER:
+            cout << "Source: Other";
+            break;
+        }
+        cout << "\n";
+
+        switch (type) {
+        case GL_DEBUG_TYPE_ERROR:
+            cout << "Type: Error";
+            break;
+        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+            cout << "Type: Deprecated Behaviour";
+            break;
+        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+            cout << "Type: Undefined Behaviour";
+            break;
+        case GL_DEBUG_TYPE_PORTABILITY:
+            cout << "Type: Portability";
+            break;
+        case GL_DEBUG_TYPE_PERFORMANCE:
+            cout << "Type: Performance";
+            break;
+        case GL_DEBUG_TYPE_MARKER:
+            cout << "Type: Marker";
+            break;
+        case GL_DEBUG_TYPE_PUSH_GROUP:
+            cout << "Type: Push Group";
+            break;
+        case GL_DEBUG_TYPE_POP_GROUP:
+            cout << "Type: Pop Group";
+            break;
+        case GL_DEBUG_TYPE_OTHER:
+            cout << "Type: Other";
+            break;
+        }
+        cout << "\n";*/
+    }
+
+    static ReleasePtr<IDXGIAdapter1> GetHardwareAdapter(IDXGIFactory4 *pFactory)
+    {
         for (UINT adapterIndex = 0;; ++adapterIndex) {
-            IDXGIAdapter1 *pAdapter = nullptr;
+            ReleasePtr<IDXGIAdapter1> pAdapter;
             if (DXGI_ERROR_NOT_FOUND == pFactory->EnumAdapters1(adapterIndex, &pAdapter)) {
                 // No more adapters to enumerate.
                 break;
@@ -29,22 +110,19 @@ namespace Render {
             // Check to see if the adapter supports Direct3D 12, but don't create the
             // actual device yet.
             if (SUCCEEDED(D3D12CreateDevice(pAdapter, D3D_FEATURE_LEVEL_11_0, _uuidof(ID3D12Device), nullptr))) {
-                *ppAdapter = pAdapter;
-                return;
+                return pAdapter;
             }
-            pAdapter->Release();
         }
+        return {};
     }
 
-    THREADLOCAL(ID3D12Device *)
-    sDevice = nullptr;
+    Threading::WorkgroupLocal<ReleasePtr<ID3D12Device>> sDevice;
 
-    THREADLOCAL(DirectX12RenderContext *)
-    sSingleton = nullptr;
+    Threading::WorkgroupLocal<DirectX12RenderContext *> sSingleton = nullptr;
 
     ID3D12Device *GetDevice()
     {
-        return sDevice;
+        return *sDevice;
     }
 
     DirectX12RenderContext::DirectX12RenderContext(Threading::TaskQueue *queue)
@@ -57,41 +135,56 @@ namespace Render {
 
         HRESULT hr;
 
-        ID3D12Debug *debugController;
-        if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
-            debugController->EnableDebugLayer();
-            debugController->Release();
+        {
+            ReleasePtr<ID3D12Debug> debugController;
+            if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
+                debugController->EnableDebugLayer();
+            }
         }
 
-        assert(sDevice == nullptr);
+        assert(*sDevice == nullptr);
 
         hr = CreateDXGIFactory1(IID_PPV_ARGS(&mFactory));
         DX12_CHECK(hr);
 
-        IDXGIAdapter1 *hardwareAdapter;
-        GetHardwareAdapter(mFactory, &hardwareAdapter);
+        ReleasePtr<IDXGIAdapter1> hardwareAdapter = GetHardwareAdapter(mFactory);
 
-        hr = D3D12CreateDevice(hardwareAdapter, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&sDevice));
+        hr = D3D12CreateDevice(hardwareAdapter, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&*sDevice));
         DX12_CHECK(hr);
-        hardwareAdapter->Release();
+
+        {
+            ReleasePtr<ID3D12InfoQueue1> infoQueue;
+            hr = GetDevice()->QueryInterface(IID_PPV_ARGS(&infoQueue));
+            
+            if (SUCCEEDED(hr)) {
+
+                hr = infoQueue->RegisterMessageCallback(
+                    &dxDebugOutput,
+                    D3D12_MESSAGE_CALLBACK_FLAG_NONE,
+                    nullptr,
+                    nullptr);
+                DX12_CHECK(hr);
+            }
+            
+        }
 
         mDescriptorHeap = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
         mRenderTargetDescriptorHeap = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
         mDepthStencilDescriptorHeap = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-        mConstantBufferHeap = { &mDescriptorHeap, 64 * 1024 };
+        mConstantBufferHeap = { 64 * 1024 };
 
         D3D12_COMMAND_QUEUE_DESC queueDesc {};
         queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
         queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 
-        hr = sDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&mCommandQueue));
+        hr = GetDevice()->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&mCommandQueue));
         DX12_CHECK(hr);
 
         mCommandList.mAllocator = fetchCommandAllocator();
 
         ID3D12DescriptorHeap *heap = mDescriptorHeap.resource();
 
-        hr = sDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, mCommandList.mAllocator, nullptr, IID_PPV_ARGS(&mCommandList.mList));
+        hr = GetDevice()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, mCommandList.mAllocator, nullptr, IID_PPV_ARGS(&mCommandList.mList));
         DX12_CHECK(hr);
         mCommandList.mList->SetName(L"Main CommandList");
 
@@ -99,12 +192,12 @@ namespace Render {
 
         mTempCommandList.mAllocator = fetchCommandAllocator();
 
-        hr = sDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, mTempCommandList.mAllocator, nullptr, IID_PPV_ARGS(&mTempCommandList.mList));
+        hr = GetDevice()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, mTempCommandList.mAllocator, nullptr, IID_PPV_ARGS(&mTempCommandList.mList));
         DX12_CHECK(hr);
 
         mTempCommandList.mList->SetDescriptorHeaps(1, &heap);
 
-        hr = sDevice->CreateFence(mLastCompletedFenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mFence));
+        hr = GetDevice()->CreateFence(mLastCompletedFenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mFence));
         DX12_CHECK(hr);
 
         mNextFenceValue = mLastCompletedFenceValue + 1;
@@ -116,15 +209,7 @@ namespace Render {
 
     DirectX12RenderContext::~DirectX12RenderContext()
     {
-        if (sDevice) {
-            sDevice->Release();
-            sDevice = nullptr;
-        }
-
-        if (mFactory) {
-            mFactory->Release();
-            mFactory = nullptr;
-        }
+        (*sDevice).reset();
 
         assert(sSingleton == this);
         sSingleton = nullptr;
@@ -139,6 +224,14 @@ namespace Render {
     {
         mLastCompletedFenceValue = std::max(mLastCompletedFenceValue, mFence->GetCompletedValue());
         RenderContext::beginFrame();
+    }
+
+    void DirectX12RenderContext::endFrame()
+    {
+        RenderContext::endFrame();
+#if MADGINE_DIRECTX12_USE_SINGLE_COMMAND_LIST
+        ExecuteCommandList(mCommandList);
+#endif
     }
 
     void DirectX12RenderContext::waitForGPU()
@@ -176,16 +269,18 @@ namespace Render {
 
     void DirectX12RenderContext::createRootSignature()
     {
-        CD3DX12_ROOT_PARAMETER rootParameters[4];
+        CD3DX12_ROOT_PARAMETER rootParameters[8];
 
         rootParameters[0].InitAsConstantBufferView(0);
         rootParameters[1].InitAsConstantBufferView(1);
         rootParameters[2].InitAsConstantBufferView(2);
 
-        CD3DX12_DESCRIPTOR_RANGE range;
-        range.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 0);
+        CD3DX12_DESCRIPTOR_RANGE range[5];
 
-        rootParameters[3].InitAsDescriptorTable(1, &range);
+        for (size_t i = 0; i < 5; ++i) {
+            range[i].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, i);
+            rootParameters[3 + i].InitAsDescriptorTable(1, range + i);
+        }
 
         CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
         // Allow input layout and deny uneccessary access to certain pipeline stages.
@@ -212,23 +307,17 @@ namespace Render {
         samplerDesc[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
         samplerDesc[1].ShaderRegister = 1;
 
-        rootSignatureDesc.Init(4, rootParameters, 2, samplerDesc, rootSignatureFlags);
+        rootSignatureDesc.Init(8, rootParameters, 2, samplerDesc, rootSignatureFlags);
 
-        ID3DBlob *signature = nullptr;
-        ID3DBlob *error = nullptr;
+        ReleasePtr<ID3DBlob> signature;
+        ReleasePtr<ID3DBlob> error;
         HRESULT hr = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);
         DX12_CHECK(hr);
-        hr = sDevice->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&mRootSignature));
+        hr = GetDevice()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&mRootSignature));
         DX12_CHECK(hr);
-        if (signature) {
-            signature->Release();
-        }
-        if (error) {
-            error->Release();
-        }
     }
 
-    void DirectX12RenderContext::ExecuteCommandList(DirectX12CommandList &list, std::function<void()> dtor)
+    void DirectX12RenderContext::ExecuteCommandList(DirectX12CommandList &list, Lambda<void()> dtor)
     {
         HRESULT hr = list.mList->Close();
         DX12_CHECK(hr);
@@ -240,7 +329,7 @@ namespace Render {
         mCommandQueue->Signal(mFence, mNextFenceValue);
         ++mNextFenceValue;
 
-        list.mAllocator = fetchCommandAllocator(list.mAllocator, std::move(dtor));
+        list.mAllocator = fetchCommandAllocator(std::move(list.mAllocator), std::move(dtor));
 
         hr = list.mList->Reset(list.mAllocator, nullptr);
         DX12_CHECK(hr);
@@ -249,10 +338,10 @@ namespace Render {
         list.mList->SetDescriptorHeaps(1, &heap);
     }
 
-    ID3D12CommandAllocator *DirectX12RenderContext::fetchCommandAllocator(ID3D12CommandAllocator *discardAllocator, std::function<void()> dtor)
+    ReleasePtr<ID3D12CommandAllocator> DirectX12RenderContext::fetchCommandAllocator(ReleasePtr<ID3D12CommandAllocator> discardAllocator, Lambda<void()> dtor)
     {
         if (discardAllocator)
-            mAllocatorPool.emplace_back(mNextFenceValue, discardAllocator, std::move(dtor));
+            mAllocatorPool.emplace_back(mNextFenceValue, std::move(discardAllocator), std::move(dtor));
 
         if (!mAllocatorPool.empty()) {
             auto &[fenceValue, allocator, dtor] = mAllocatorPool.front();
@@ -260,7 +349,7 @@ namespace Render {
             if (fenceValue <= mLastCompletedFenceValue) {
                 if (dtor)
                     dtor();
-                ID3D12CommandAllocator *alloc = allocator;
+                ReleasePtr<ID3D12CommandAllocator> alloc = std::move(allocator);
                 mAllocatorPool.erase(mAllocatorPool.begin());
                 HRESULT hr = alloc->Reset();
                 DX12_CHECK(hr);
@@ -268,8 +357,8 @@ namespace Render {
             }
         }
 
-        ID3D12CommandAllocator *alloc;
-        HRESULT hr = sDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&alloc));
+        ReleasePtr<ID3D12CommandAllocator> alloc;
+        HRESULT hr = GetDevice()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&alloc));
         DX12_CHECK(hr);
         return alloc;
     }

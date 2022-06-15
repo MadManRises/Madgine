@@ -66,6 +66,11 @@ namespace Tools {
                     ImGui::PopDisabled();
                 }
                 */
+
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 40, 40, 255));
+            ImGui::Text("Changes are only applied on restart!");
+            ImGui::PopStyleColor();
+
             ImVec2 v = ImGui::GetContentRegionAvail();
             v.x *= 0.5f;
 

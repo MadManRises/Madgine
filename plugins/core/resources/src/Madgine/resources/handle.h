@@ -130,6 +130,26 @@ namespace Resources {
             return i->loadingTask();
         }
 
+        template <typename C = typename Loader::Ctor>
+        Threading::TaskFuture<bool> create(std::string_view name, const Filesystem::Path &path = {}, C &&c = {}, Loader *loader = nullptr)
+        {
+            *this = Loader::loadManual(name, path, std::forward<C>(c), loader);
+            typename Loader::ResourceDataInfo *i = info();
+            if (!i)
+                return false;
+            return i->loadingTask();
+        }
+
+        template <typename C = typename Loader::Ctor>
+        Threading::Task<bool> createTask(std::string_view name, const Filesystem::Path &path = {}, C &&c = {}, Loader *loader = nullptr)
+        {
+            *this = Loader::loadManual(name, path, std::forward<C>(c), loader);
+            typename Loader::ResourceDataInfo *i = info();
+            if (!i)
+                return false;
+            return i->loadingTask();
+        }
+
         void reset()
         {
             if (mData) {

@@ -54,4 +54,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::LogViewer);
+REGISTER_TYPE(Engine::Tools::LogViewer)

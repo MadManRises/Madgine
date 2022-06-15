@@ -46,5 +46,5 @@ namespace Physics {
 }
 }
 
-RegisterType(Engine::Physics::SoftBodySkeleton);
-RegisterType(Engine::Scene::Entity::EntityComponentList<Engine::Physics::SoftBodySkeleton>);
+REGISTER_TYPE(Engine::Physics::SoftBodySkeleton)
+REGISTER_TYPE(Engine::Scene::Entity::EntityComponentList<Engine::Physics::SoftBodySkeleton>)

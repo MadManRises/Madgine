@@ -78,5 +78,3 @@ struct UniqueComponentCollector {
 }
 
 #endif
-
-//#define RegisterCollector(collector) RegisterType(collector::Registry)

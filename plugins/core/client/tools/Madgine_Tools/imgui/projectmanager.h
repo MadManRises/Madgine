@@ -21,16 +21,17 @@ namespace Tools {
         virtual void renderMenu() override;
 
         const Filesystem::Path &projectRoot() const;
-        const std::string &config() const;
+        const std::string &projectRootString() const;
+        const std::string &layout() const;
 
         void save();
         void load();
 
 #if ENABLE_PLUGINS
         void setProjectRoot(const Filesystem::Path &root);
-        void setConfig(const std::string &config);
+        void setLayout(const std::string &layout);
 
-        std::vector<std::string> projectConfigs() const;
+        std::vector<std::string> projectLayouts() const;
 
     private:
         Filesystem::Path mCurrentSelectionPath;
@@ -40,10 +41,10 @@ namespace Tools {
     private:
         Window::MainWindow *mWindow = nullptr;
         Filesystem::Path mProjectRoot;
-        std::string mConfig;
+        std::string mLayout;
     };
 
 }
 }
 
-RegisterType(Engine::Tools::ProjectManager);
+REGISTER_TYPE(Engine::Tools::ProjectManager)

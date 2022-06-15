@@ -29,4 +29,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::DirectX12ToolConfig);
+REGISTER_TYPE(Engine::Tools::DirectX12ToolConfig)

@@ -24,4 +24,4 @@ namespace Render {
 }
 }
 
-RegisterType(Engine::Render::DirectX11TextureLoader);
+REGISTER_TYPE(Engine::Render::DirectX11TextureLoader)

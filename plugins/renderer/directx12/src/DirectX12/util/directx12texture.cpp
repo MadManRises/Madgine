@@ -4,6 +4,8 @@
 
 #include "../directx12rendercontext.h"
 
+#include "Generic/align.h"
+
 namespace Engine {
 namespace Render {
 
@@ -44,13 +46,20 @@ namespace Render {
             textureDesc.Flags = isRenderTarget ? D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET : D3D12_RESOURCE_FLAG_NONE;
             textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 
+            D3D12_CLEAR_VALUE clear {};
+            clear.Format = xFormat;
+            clear.Color[0] = 0.2f;
+            clear.Color[1] = 0.3f;
+            clear.Color[2] = 0.3f;
+            clear.Color[3] = 1.0f;
+
             auto heapDesc = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-            HRESULT hr = sDevice->CreateCommittedResource(
+            HRESULT hr = GetDevice()->CreateCommittedResource(
                 &heapDesc,
                 D3D12_HEAP_FLAG_NONE,
                 &textureDesc,
-                data.mData ? D3D12_RESOURCE_STATE_COPY_DEST : isRenderTarget ? D3D12_RESOURCE_STATE_RENDER_TARGET : D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-                nullptr,
+                data.mData ? D3D12_RESOURCE_STATE_COPY_DEST : D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+                isRenderTarget ? &clear : nullptr,
                 IID_PPV_ARGS(&mResource));
             DX12_CHECK(hr);
             if (data.mData) {
@@ -59,8 +68,8 @@ namespace Render {
 
                 heapDesc = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
                 auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
-                ID3D12Resource *uploadHeap;
-                hr = sDevice->CreateCommittedResource(
+                ReleasePtr<ID3D12Resource> uploadHeap;
+                hr = GetDevice()->CreateCommittedResource(
                     &heapDesc,
                     D3D12_HEAP_FLAG_NONE,
                     &resourceDesc,
@@ -75,10 +84,10 @@ namespace Render {
                 subResourceDesc.SlicePitch = subResourceDesc.RowPitch * height;
 
                 UpdateSubresources(DirectX12RenderContext::getSingleton().mTempCommandList.mList, mResource, uploadHeap, 0, 0, 1, &subResourceDesc);
-                auto transition = CD3DX12_RESOURCE_BARRIER::Transition(mResource, D3D12_RESOURCE_STATE_COPY_DEST, isRenderTarget ? D3D12_RESOURCE_STATE_RENDER_TARGET : D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+                auto transition = CD3DX12_RESOURCE_BARRIER::Transition(mResource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
                 DirectX12RenderContext::getSingleton().mTempCommandList.mList->ResourceBarrier(1, &transition);
 
-                DirectX12RenderContext::getSingleton().ExecuteCommandList(DirectX12RenderContext::getSingleton().mTempCommandList, [uploadHeap]() { uploadHeap->Release(); });
+                DirectX12RenderContext::getSingleton().ExecuteCommandList(DirectX12RenderContext::getSingleton().mTempCommandList, [uploadHeap { std::move(uploadHeap) }]() {});
             }
             dimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 
@@ -98,7 +107,7 @@ namespace Render {
 
         OffsetPtr handle = DirectX12RenderContext::getSingleton().mDescriptorHeap.allocate();
         mTextureHandle = DirectX12RenderContext::getSingleton().mDescriptorHeap.gpuHandle(handle).ptr;
-        sDevice->CreateShaderResourceView(mResource, &shaderResourceViewDesc, DirectX12RenderContext::getSingleton().mDescriptorHeap.cpuHandle(handle));
+        GetDevice()->CreateShaderResourceView(mResource, &shaderResourceViewDesc, DirectX12RenderContext::getSingleton().mDescriptorHeap.cpuHandle(handle));
         DX12_CHECK();
     }
 
@@ -138,8 +147,7 @@ namespace Render {
     void DirectX12Texture::reset()
     {
         if (mTextureHandle) {
-            mResource->Release();
-            mResource = nullptr;
+            mResource.reset();
             DirectX12RenderContext::getSingleton().mDescriptorHeap.deallocate(DirectX12RenderContext::getSingleton().mDescriptorHeap.fromGpuHandle({ mTextureHandle }));
             mTextureHandle = 0;
         }
@@ -158,22 +166,34 @@ namespace Render {
 
     void DirectX12Texture::setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data)
     {
-        /*size_t byteCount;
+        DXGI_FORMAT xFormat;
+        D3D12_SRV_DIMENSION dimension;
+        size_t byteCount;
         switch (mFormat) {
-        case FORMAT_FLOAT8:
+        case FORMAT_RGBA8:
+            xFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
             byteCount = 4;
             break;
-        case FORMAT_FLOAT32:
-            byteCount = 16;
+        case FORMAT_RGBA16F:
+            xFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
+            byteCount = 8;
             break;
         default:
             std::terminate();
         }
 
+        CD3DX12_RESOURCE_DESC resDesc = CD3DX12_RESOURCE_DESC::Tex2D(xFormat, size.x, size.y);
+
+        D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout;
+        UINT numRows;
+        UINT64 rowSize;
+        UINT64 totalSize;
+        GetDevice()->GetCopyableFootprints(&resDesc, 0, 1, 0, &layout, &numRows, &rowSize, &totalSize);
+
         auto heapDesc = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-        auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(data.mSize);
-        ID3D12Resource *uploadHeap;
-        HRESULT hr = sDevice->CreateCommittedResource(
+        auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(totalSize);
+        ReleasePtr<ID3D12Resource> uploadHeap;
+        HRESULT hr = GetDevice()->CreateCommittedResource(
             &heapDesc,
             D3D12_HEAP_FLAG_NONE,
             &resourceDesc,
@@ -187,27 +207,27 @@ namespace Render {
         subResourceDesc.RowPitch = size.x * byteCount;
         subResourceDesc.SlicePitch = subResourceDesc.RowPitch * size.y;
 
-        UpdateSubresources(DirectX12RenderContext::getSingleton().mTempCommandList.mList, mResource, uploadHeap, 0, 0, 1, &subResourceDesc);
-        auto transition = CD3DX12_RESOURCE_BARRIER::Transition(mResource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        BYTE *pData;
+        hr = uploadHeap->Map(0, nullptr, reinterpret_cast<void **>(&pData));
+        if (FAILED(hr)) {
+            throw 0;
+        }
+
+        D3D12_MEMCPY_DEST DestData = { pData + layout.Offset, layout.Footprint.RowPitch, SIZE_T(layout.Footprint.RowPitch) * SIZE_T(numRows) };
+        MemcpySubresource(&DestData, &subResourceDesc, rowSize, numRows, 1);
+        uploadHeap->Unmap(0, nullptr);
+
+        auto transition = CD3DX12_RESOURCE_BARRIER::Transition(mResource, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
         DirectX12RenderContext::getSingleton().mTempCommandList.mList->ResourceBarrier(1, &transition);
 
-        DirectX12RenderContext::getSingleton().ExecuteCommandList(DirectX12RenderContext::getSingleton().mTempCommandList, [uploadHeap]() { uploadHeap->Release(); }); 
-        */
+        CD3DX12_TEXTURE_COPY_LOCATION Dst(mResource, 0);
+        CD3DX12_TEXTURE_COPY_LOCATION Src(uploadHeap, layout);
+        DirectX12RenderContext::getSingleton().mTempCommandList.mList->CopyTextureRegion(&Dst, offset.x, offset.y, 0, &Src, nullptr);
 
-        /*D3D12_BOX box;
-        box.top = offset.y;
-        box.left = offset.x;
-        box.right = offset.x + size.x;
-        box.bottom = offset.y + size.y;
-        box.front = 0;
-        box.back = 1;
+        transition = CD3DX12_RESOURCE_BARRIER::Transition(mResource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        DirectX12RenderContext::getSingleton().mTempCommandList.mList->ResourceBarrier(1, &transition);
 
-        HRESULT hr = mResource->Map(0, nullptr, nullptr);
-        DX12_CHECK(hr);
-        hr = mResource->WriteToSubresource(0, &box, data.mData, size.x * byteCount, 0);
-        DX12_CHECK(hr);
-        mResource->Unmap(0, nullptr);*/
-        LOG_ONCE("Fix setSubData");
+        DirectX12RenderContext::getSingleton().ExecuteCommandList(DirectX12RenderContext::getSingleton().mTempCommandList, [uploadHeap { std::move(uploadHeap) }]() {});
     }
 
     void DirectX12Texture::resize(Vector2i size)

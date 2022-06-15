@@ -144,5 +144,5 @@ namespace Scene {
 }
 }
 
-RegisterType(Engine::Scene::SceneManager);
-RegisterType(Engine::Serialize::NoParent<Engine::Scene::SceneManager>);
+REGISTER_TYPE(Engine::Scene::SceneManager)
+REGISTER_TYPE(Engine::Serialize::NoParent<Engine::Scene::SceneManager>)

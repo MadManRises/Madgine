@@ -12,8 +12,8 @@
 namespace Engine{
 namespace Window{
 struct OSXWindow;
-}
-}
+/*}
+}*/
 
 @interface Cocoa_WindowListener : NSObject <NSWindowDelegate>{
     Engine::Window::OSXWindow *mWindow;
@@ -22,8 +22,8 @@ struct OSXWindow;
 - (void)listen:(Engine::Window::OSXWindow *)window;
 @end
 
-namespace Engine {
-namespace Window {
+/*namespace Engine {
+namespace Window {*/
 
     DLL_EXPORT const PlatformCapabilities platformCapabilities {
         true,
@@ -232,8 +232,8 @@ namespace Window {
         return {};
     }
 
-}
-}
+/*}
+}*/
 
 
 @implementation Cocoa_WindowListener
@@ -249,8 +249,8 @@ namespace Window {
 }
 @end
 
-namespace Engine{
-namespace Window{
+/*namespace Engine{
+namespace Window{*/
 
     static std::unordered_map<NSWindow *, OSXWindow> sWindows;
 

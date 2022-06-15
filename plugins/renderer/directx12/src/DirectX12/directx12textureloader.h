@@ -22,4 +22,4 @@ namespace Render {
 }
 }
 
-RegisterType(Engine::Render::DirectX12TextureLoader);
+REGISTER_TYPE(Engine::Render::DirectX12TextureLoader)

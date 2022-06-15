@@ -16,19 +16,19 @@ cbuffer PerObject : register(b2)
 }
 
 struct AppData {
-#ifdef HAS_POSITION0
+#ifdef HAS_POS_3D
     float3 aPos : POSITION0;
 #endif
-#ifdef HAS_POSITION1
+#ifdef HAS_POS2
     float2 aPos2 : POSITION1;
 #endif
-#ifdef HAS_COLOR0
-    float4 aColor : COLOR;
-#endif
-#ifdef HAS_NORMAL0
+#ifdef HAS_NORMAL
     float3 aNormal : NORMAL;
 #endif
-#ifdef HAS_TEXCOORD0
+#ifdef HAS_COLOR
+    float4 aColor : COLOR;
+#endif
+#ifdef HAS_UV
     float2 aUV : TEXCOORD;
 #endif
 };
@@ -45,7 +45,7 @@ VertexShaderOutput main(AppData IN)
 {
     VertexShaderOutput OUT;
 
-#ifdef HAS_POSITION1
+#ifdef HAS_POS2
     float2 aPos2 = IN.aPos2;
 #else
     float2 aPos2 = float2(0,0);
@@ -57,17 +57,17 @@ VertexShaderOutput main(AppData IN)
     OUT.position.z += OUT.position.w;
     OUT.position.z /= 2;
     
-#ifdef HAS_COLOR0
+#ifdef HAS_COLOR
     OUT.color = IN.aColor;
 #else
     OUT.color = float4(1,1,1,1);
 #endif
-#ifdef HAS_NORMAL0
+#ifdef HAS_NORMAL
 	OUT.normal = float4(IN.aNormal, 0);
 #else
     OUT.normal = float3(0,0,0);
 #endif
-#ifdef HAS_TEXCOORD0
+#ifdef HAS_UV
 	OUT.uv = IN.aUV;
 #else
     OUT.uv = float2(0,0);

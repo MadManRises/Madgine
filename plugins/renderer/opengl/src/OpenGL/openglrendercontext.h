@@ -1,8 +1,10 @@
 #pragma once
 
-#include "Madgine/render/rendercontextcollector.h"
 #include "Madgine/render/rendercontext.h"
+#include "Madgine/render/rendercontextcollector.h"
 #include "Modules/uniquecomponent/uniquecomponent.h"
+#include "util/openglvertexarray.h"
+#include "render/vertexformat.h"
 
 namespace Engine {
 namespace Render {
@@ -15,18 +17,27 @@ namespace Render {
     struct MADGINE_OPENGL_EXPORT OpenGLRenderContext : public RenderContextComponent<OpenGLRenderContext> {
         OpenGLRenderContext(Threading::TaskQueue *queue);
         ~OpenGLRenderContext();
+        OpenGLRenderContext(const OpenGLRenderContext &) = delete;
+
+        OpenGLRenderContext& operator=(const OpenGLRenderContext &) = delete;
 
         virtual std::unique_ptr<RenderTarget> createRenderWindow(Window::OSWindow *w, size_t samples) override;
         virtual std::unique_ptr<RenderTarget> createRenderTexture(const Vector2i &size = { 1, 1 }, const RenderTextureConfig &config = {}) override;
 
         virtual void unloadAllResources() override;
 
-		static OpenGLRenderContext &getSingleton();
+        static OpenGLRenderContext &getSingleton();
 
         virtual bool supportsMultisampling() const override;
+
+        void bindFormat(VertexFormat format);
+        void unbindFormat();
+
+    private:
+        std::map<VertexFormat, OpenGLVertexArray> mVAOs;
     };
 
 }
 }
 
-RegisterType(Engine::Render::OpenGLRenderContext);
+REGISTER_TYPE(Engine::Render::OpenGLRenderContext)

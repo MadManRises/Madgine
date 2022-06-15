@@ -27,4 +27,4 @@ namespace NodeGraph {
 
 }
 
-RegisterType(Engine::NodeGraph::MultiplicationNode)
+REGISTER_TYPE(Engine::NodeGraph::MultiplicationNode)

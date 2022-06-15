@@ -242,7 +242,7 @@ namespace Physics {
             mShape.addChildShape(btTransform { btQuaternion { 0, 0, 0 } }, instance->get());
         }
 
-        struct CompoundShapeElement : SerializableDataUnit {
+        struct CompoundShapeElement : Serialize::SerializableDataUnit {
             Vector3 mPos;
             Quaternion mOrientation;
             CollisionShapeManager::InstanceHandle mShape;
@@ -275,7 +275,7 @@ namespace Physics {
             for (CompoundShapeElement &element : shapes) {
                 auto &instance = mChildren.emplace_back(std::move(element.mShape));
                 mShape.addChildShape(btTransform {
-                                         btQuaternion { element.mOrientation.v.x, element.mOrientation.v.y, element.mOrientation.v.z, element.mOrientation.w }, btVector3 { element.mPos.x, element.mPos.y, element.mPos.z } },
+                                         btQuaternion { element.mOrientation.x, element.mOrientation.y, element.mOrientation.z, element.mOrientation.w }, btVector3 { element.mPos.x, element.mPos.y, element.mPos.z } },
                     instance->get());
             }
         }

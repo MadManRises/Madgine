@@ -46,23 +46,24 @@ namespace Render {
             name, {}, [=, &file](OpenGLShaderLoader *loader, OpenGLShader &shader, OpenGLShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file, type); }, loader);
     }
 
-    Threading::TaskFuture<bool> OpenGLShaderLoader::HandleType::load(std::string name, ShaderType type, OpenGLShaderLoader *loader)
+    Threading::TaskFuture<bool> OpenGLShaderLoader::HandleType::load(std::string_view name, ShaderType type, OpenGLShaderLoader *loader)
     {
+        std::string actualName { name };
         switch (type) {
         case ShaderType::PixelShader:
-            name += "_PS";
+            actualName += "_PS";
             break;
         case ShaderType::VertexShader:
-            name += "_VS";
+            actualName += "_VS";
             break;
         case ShaderType::GeometryShader:
-            name += "_GS";
+            actualName += "_GS";
             break;
         default:
             throw 0;
         }
 
-        return Handle::load(name, loader);
+        return Handle::load(actualName, loader);
     }
 
     OpenGLShaderLoader::OpenGLShaderLoader()

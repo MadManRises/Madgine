@@ -8,7 +8,7 @@
 
 Originally designed as a game engine framework the Madgine has evolved into a collection of libraries and utilities that can improve application development drastically. The combination of all provided libraries can be used to create an empty real-time application template with lots of tools and features already provided. It is written purely in C++ and uses the C++20-Standard. Its main focus is to provide minimal basic building blocks, which can be easily adjusted or even replaced. This leaves developers with the freedom to spend time on the parts of the application they want to invest in and not loosing time creating e.g. platform abstractions. 
 
-To be able to achieve that all parts of the engine are available for you to use in any kind of software and redistribution you fancy (see [LICENSE.md]). This also implies that I cannot sell copies of my software to support sustained development. If you are using this framework for your own business, please consider supporting the development of this project on [Patreon][] or reach out to me on my business e-mail: madmanrises at web dot de
+To be able to achieve that all parts of the engine are available for you to use in any kind of software and redistribution you fancy (see [LICENSE.md][]). This also implies that I cannot sell copies of my software to support sustained development. If you are using this framework for your own business, please consider supporting the development of this project on [Patreon][] or reach out to me on my business e-mail: madmanrises at web dot de
 
 ## Features
 

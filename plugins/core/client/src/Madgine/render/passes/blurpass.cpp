@@ -21,33 +21,33 @@ namespace Render {
 
     void BlurPass::setup(RenderTarget *target)
     {
-        mProgram.create("blur", { sizeof(BlurData) });        
+        mPipeline.createStatic({ .vs = "blur", .ps = "blur", .bufferSizes = { sizeof(BlurData) } });
     }
 
     void BlurPass::shutdown()
     {
-        mProgram.reset();
+        mPipeline.reset();
     }
 
     void BlurPass::render(RenderTarget *target, size_t iteration)
     {
         if (iteration == 0) {
-            target->pushAnnotation("Blur");            
+            target->pushAnnotation("Blur");
         }
 
         {
-            auto data = mProgram.mapParameters(0).cast<BlurData>();
+            auto data = mPipeline.mapParameters(0).cast<BlurData>();
             data->horizontal = iteration % 2;
             data->textureSize = target->size();
         }
 
-        if (iteration == 0) {         
+        if (iteration == 0) {
             target->bindTextures({ mInput->texture(mInputIndex) });
         } else {
             target->bindTextures({ target->texture(0, iteration) });
         }
 
-        target->renderQuad(mProgram);
+        target->renderQuad(mPipeline);
 
         if (iteration == target->iterations() - 1)
             target->popAnnotation();

@@ -31,4 +31,4 @@ namespace NodeGraph {
 }
 }
 
-RegisterType(Engine::NodeGraph::NodeGraphLoader);
+REGISTER_TYPE(Engine::NodeGraph::NodeGraphLoader)

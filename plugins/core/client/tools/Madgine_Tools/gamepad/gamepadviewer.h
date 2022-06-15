@@ -25,4 +25,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::GamepadViewer)
+REGISTER_TYPE(Engine::Tools::GamepadViewer)

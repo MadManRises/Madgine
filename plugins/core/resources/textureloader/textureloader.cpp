@@ -26,7 +26,7 @@ namespace Render {
     Threading::TaskFuture<bool> TextureLoader::PtrType::create(
         TextureType type, DataFormat format, Vector2i size, ByteBuffer data, TextureLoader * loader)
     {
-        return TextureLoader::loadUnnamed(*this,
+        return Base::PtrType::create(
             [=, data { std::move(data) }](TextureLoader *loader, Texture &texture) mutable {
                 if (!loader->create(texture, type, format))
                     return false;
@@ -40,7 +40,7 @@ namespace Render {
     Threading::Task<bool> TextureLoader::PtrType::createTask(
         TextureType type, DataFormat format, Vector2i size, ByteBuffer data)
     {
-        return TextureLoader::loadUnnamedTask(*this,
+        return Base::PtrType::createTask(
             [=, data { std::move(data) }](TextureLoader *loader, Texture &texture) mutable {
                 if (!loader->create(texture, type, format))
                     return false;

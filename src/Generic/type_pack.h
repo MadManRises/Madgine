@@ -47,17 +47,11 @@ struct type_pack<Head, Ty...> {
     struct helpers {
         template <size_t I>
         struct recurse : type_pack<Ty...>::helpers::template recurse<I - 1> {
-            using front = typename type_pack<Ty...>::helpers::template recurse<I - 1>::front::template prepend<Head>;
         };
 
         template <>
         struct recurse<0> {
-            using front = type_pack<>;
             using type = Head;
-            using tail = type_pack<Ty...>;
-
-            template <typename T>
-            using repeat = type_pack<>;
         };
 
         template <typename, typename T>
@@ -72,8 +66,9 @@ struct type_pack<Head, Ty...> {
             static constexpr IntType index = 0;
         };
 
-        template <typename Pack, typename T>
-        requires Pack::template contains<T> struct is_or_contains<Pack, T> : is_or_contains<T, T> {
+        template <typename... Ty2, typename T>
+        requires type_pack<Ty2...>::template contains<T> 
+        struct is_or_contains<type_pack<Ty2...>, T> : is_or_contains<T, T> {
         };
     };
 
@@ -84,8 +79,6 @@ struct type_pack<Head, Ty...> {
 
     template <template <typename> typename F>
     using transform = type_pack<F<Head>, F<Ty>...>;
-    template <template <typename> typename F, size_t n>
-    using transform_nth = typename helpers::template recurse<n>::front::template append<F<typename helpers::template recurse<n>::type>>::template concat<typename helpers::template recurse<n>::tail>;
 
     template <template <typename> typename Filter>
     using filter = typename type_pack<Ty...>::template filter<Filter>::template prepend_if<Filter<Head>::value, Head>;
@@ -127,6 +120,7 @@ struct type_pack<Head, Ty...> {
     template <typename Default = void>
     using unpack_unique = typename type_pack<Ty...>::template unique<Head>;
 };
+
 
 template <typename Pack>
 using type_pack_first = typename Pack::first;

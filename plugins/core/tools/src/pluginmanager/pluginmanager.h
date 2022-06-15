@@ -31,6 +31,6 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::PluginManager);
+REGISTER_TYPE(Engine::Tools::PluginManager)
 
 #endif

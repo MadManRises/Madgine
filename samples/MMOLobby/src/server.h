@@ -25,4 +25,4 @@ namespace MMOLobby {
 
 }
 
-RegisterType(MMOLobby::Server);
+REGISTER_TYPE(MMOLobby::Server)

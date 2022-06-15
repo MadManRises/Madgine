@@ -822,7 +822,7 @@ namespace Tools {
         return mGraphHandle.available() ? mGraphHandle->name() : "";
     }
 
-    bool NodeGraphEditor::onSave(std::string_view view, ed::SaveReasonFlags reason)
+    bool NodeGraphEditor::saveImpl(std::string_view view)
     {
         verify();
 
@@ -850,7 +850,7 @@ namespace Tools {
         return true;
     }
 
-    size_t NodeGraphEditor::onLoad(char *data)
+    size_t NodeGraphEditor::loadImpl(char *data)
     {
         if (!mGraphHandle)
             return 0;
@@ -882,11 +882,11 @@ namespace Tools {
         config.UserPointer = this;
 
         config.SaveSettings = [](const char *data, size_t size, ed::SaveReasonFlags reason, void *userPointer) {
-            return static_cast<NodeGraphEditor *>(userPointer)->onSave({ data, size }, reason);
+            return static_cast<NodeGraphEditor *>(userPointer)->saveImpl({ data, size });
         };
 
         config.LoadSettings = [](char *data, void *userPointer) {
-            return static_cast<NodeGraphEditor *>(userPointer)->onLoad(data);
+            return static_cast<NodeGraphEditor *>(userPointer)->loadImpl(data);
         };
 
         mEditor = { ed::CreateEditor(&config), &ed::DestroyEditor };

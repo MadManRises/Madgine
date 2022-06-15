@@ -40,4 +40,4 @@ namespace Scripting {
 }
 }
 
-RegisterType(Engine::Scripting::Python3::Python3FileLoader);
+REGISTER_TYPE(Engine::Scripting::Python3::Python3FileLoader)

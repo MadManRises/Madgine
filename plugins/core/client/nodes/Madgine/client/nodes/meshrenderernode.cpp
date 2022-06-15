@@ -12,8 +12,8 @@
 
 #include "Madgine/render/rendertarget.h"
 
-#include "programloaderlib.h"
-#include "programloader.h"
+#include "pipelineloaderlib.h"
+#include "pipelineloader.h"
 
 #include "shadercodegenerator.h"
 
@@ -38,7 +38,7 @@ namespace Render {
     struct Provider {
         std::string_view mName;
         ExtendedValueTypeDesc mType;
-        std::string_view mGuardName;        
+        std::string_view mGuardName;
     };
 
     static constexpr std::array<Provider, 7> sProviders {
@@ -129,7 +129,7 @@ namespace Render {
     }
 
     struct MeshRendererNodeInterpret : NodeGraph::NodeInterpreterData {
-        Render::ProgramLoader::PtrType mHandle;
+        Render::PipelineLoader::Instance mPipeline;
         Render::GPUMeshLoader::HandleType mMesh;
     };
 
@@ -159,8 +159,9 @@ namespace Render {
             gen.generate(dummy, this);
             gen.mFile.endFunction();
 
-            interpret->mHandle.createUnnamed(std::move(gen.mFile));
-
+            throw 0;
+            /* interpret->mHandle.createUnnamed(std::move(gen.mFile));
+            
             for (GPUBufferCodeGeneratorData *buffer : gen.mBuffers) {
                 throw 0; //??
                 //interpret->mHandle.setParametersSize(buffer->mIndex, buffer->mInterpretData->mBuffer.mSize);
@@ -175,7 +176,7 @@ namespace Render {
 
             //interpret->mHandle.create("test");
 
-            data = std::move(interpret);
+            data = std::move(interpret);*/
         }
 
         ValueType targetV;
@@ -197,7 +198,7 @@ namespace Render {
                 { 1, 1, 1, 1 }
             };
             //TODO: Material;
-            target->renderMesh(interpretData->mMesh, interpretData->mHandle, &mat);
+            target->renderMesh(interpretData->mMesh, interpretData->mPipeline, &mat);
         }
     }
 

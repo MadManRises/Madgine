@@ -59,4 +59,4 @@ namespace Window {
 }
 }
 
-RegisterType(Engine::Window::MainWindowComponentBase);
+REGISTER_TYPE(Engine::Window::MainWindowComponentBase)

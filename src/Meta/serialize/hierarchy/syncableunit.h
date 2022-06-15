@@ -94,7 +94,7 @@ namespace Serialize {
         template <typename T>
         friend struct Serializable;
 
-        DERIVE_FRIEND(customUnitPtr);
+        DERIVE_FRIEND(customUnitPtr)
 
         SerializableUnitPtr customUnitPtr();
         SerializableUnitConstPtr customUnitPtr() const;

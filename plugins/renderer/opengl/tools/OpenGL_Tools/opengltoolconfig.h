@@ -29,4 +29,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::OpenGLToolConfig);
+REGISTER_TYPE(Engine::Tools::OpenGLToolConfig)

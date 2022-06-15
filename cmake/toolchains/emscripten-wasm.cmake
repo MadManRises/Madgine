@@ -48,6 +48,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 # not implicit is beyond me.
 set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_FIND_ROOT_PATH})
 
+set(CMAKE_SHARED_LIBRARY_SUFFIX ".wasm")
 
 cmake_minimum_required(VERSION 3.7)
 set(CMAKE_CXX_FLAGS_INIT "-s USE_PTHREADS=0 -s ALLOW_MEMORY_GROWTH=1 -mtail-call")

@@ -31,4 +31,4 @@ namespace Widgets {
 }
 }
 
-RegisterType(Engine::Widgets::Label);
+REGISTER_TYPE(Engine::Widgets::Label)

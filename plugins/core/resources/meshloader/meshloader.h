@@ -23,4 +23,4 @@ namespace Render {
 }
 }
 
-RegisterType(Engine::Render::MeshLoader);
+REGISTER_TYPE(Engine::Render::MeshLoader)

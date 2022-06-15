@@ -4,8 +4,6 @@
 
 #    include "plugin.h"
 
-#    include "Interfaces/dl/dlapi.h"
-
 #    include "binaryinfo.h"
 
 #    include "pluginmanager.h"
@@ -64,8 +62,6 @@ namespace Plugins {
                     }
                 } else {
                     LOG_ERROR("Unable to locate BinaryInfo. Make sure you call generate_binary_info in your CMakeLists.txt for your binaries!");
-                    Dl::closeDll(mModule);
-                    mModule = nullptr;
                     std::terminate();                    
                 }
             } else {
@@ -228,8 +224,7 @@ namespace Plugins {
         }
 
         assert(mModule);
-        Dl::closeDll(mModule);
-        mModule = nullptr;
+        mModule.reset();
     }
 
     void Plugin::checkCircularDependency(Plugin *dependency)

@@ -27,4 +27,4 @@ namespace Widgets {
 }
 }
 
-RegisterType(Engine::Widgets::Image);
+REGISTER_TYPE(Engine::Widgets::Image)

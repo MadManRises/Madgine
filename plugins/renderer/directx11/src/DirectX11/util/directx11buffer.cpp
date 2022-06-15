@@ -4,8 +4,6 @@
 
 #include "../directx11rendercontext.h"
 
-#include "directx11vertexarray.h"
-
 #include "Generic/bytebuffer.h"
 
 namespace Engine {

@@ -16,13 +16,13 @@
     template <typename T, typename Base = FIRST(__VA_ARGS__)>                                                                                                                   \
     using prefix##VirtualBase = component<Engine::VirtualUniqueComponentBase<T, prefix##Collector, Base>>;                                                                      \
     }                                                                                                                                                                           \
-    RegisterType(ns::prefix##Registry);
+    REGISTER_TYPE(ns::prefix##Registry)
 
 #define DECLARE_UNIQUE_COMPONENT(ns, prefix, /*base, */...) DECLARE_UNIQUE_COMPONENT2(ns, prefix, Engine::UniqueComponentRegistry, std::type_identity_t, __VA_ARGS__)
 
 #define DECLARE_NAMED_UNIQUE_COMPONENT(ns, prefix, /*base, */...)                                                          \
     DECLARE_UNIQUE_COMPONENT2(ns, prefix, Engine::NamedUniqueComponentRegistry, Engine::NamedUniqueComponent, __VA_ARGS__) \
-    RegisterType(ns::prefix##BaseRegistry);
+    REGISTER_TYPE(ns::prefix##BaseRegistry)
 
 #if defined(STATIC_BUILD)
 #    define EXPORT_REGISTRY(Registry, BaseRegistry)

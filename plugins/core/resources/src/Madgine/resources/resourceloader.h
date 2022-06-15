@@ -118,10 +118,13 @@ namespace Resources {
 
         ~PtrType()
         {
-            T::unload(std::move(mData));
+            reset();
         }
 
-        PtrType &operator=(PtrType &&) = default;
+        PtrType& operator=(PtrType&& other) {
+            std::swap(mData, other.mData);
+            return *this;
+        }
 
         operator Data *() const
         {
@@ -133,8 +136,19 @@ namespace Resources {
             return mData.get();
         }
 
+        template <typename C>
+        Threading::TaskFuture<bool> create(C&& c, T *loader = nullptr) {
+            return T::loadUnnamed(*this, std::forward<C>(c), loader);
+        }
+
+        template <typename C>
+        Threading::Task<bool> createTask(C&& c, T* loader = nullptr) {
+            return T::loadUnnamedTask(*this, std::forward<C>(c), loader);
+        }
+
         void reset()
         {
+            T::unload(std::move(mData));
             mData.reset();
         }
 
@@ -158,7 +172,7 @@ namespace Resources {
         {
             if (verified && !mInfo.verify())
                 return nullptr;
-            return &mData;
+            return std::addressof(mData);
         }
 
         typename Loader::ResourceDataInfo mInfo;
@@ -445,6 +459,8 @@ namespace Resources {
                             loader),
                 Filesystem::FileEventType::FILE_CREATED, loader);
         }
+
+
 
         static typename Interface::PtrType createUnnamed()
         {

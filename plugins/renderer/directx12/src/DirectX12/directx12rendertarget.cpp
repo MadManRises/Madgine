@@ -6,7 +6,7 @@
 
 #include "directx12meshdata.h"
 #include "directx12meshloader.h"
-#include "util/directx12program.h"
+#include "util/directx12pipelineinstance.h"
 
 #include "directx12rendercontext.h"
 
@@ -28,12 +28,9 @@ namespace Render {
 
     void DirectX12RenderTarget::setup(OffsetPtr targetView, const Vector2i &size)
     {
-        /*if (mTargetView) {
-            mTargetView->Release();
-            mTargetView = nullptr;
-        }*/
-
         mTargetView = targetView;
+
+        mDepthStencilBuffer.reset();
 
         D3D12_HEAP_PROPERTIES depthHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 
@@ -42,7 +39,7 @@ namespace Render {
 
         CD3DX12_CLEAR_VALUE depthOptimizedClearValue(DXGI_FORMAT_D24_UNORM_S8_UINT, 1.0f, 0);
 
-        HRESULT hr = sDevice->CreateCommittedResource(
+        HRESULT hr = GetDevice()->CreateCommittedResource(
             &depthHeapProperties,
             D3D12_HEAP_FLAG_NONE,
             &depthResourceDesc,
@@ -52,85 +49,25 @@ namespace Render {
         DX12_CHECK(hr);
 
         D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc {};
+        dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
         dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
         dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-        dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
 
-        mDepthStencilView = DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.allocate();
-        sDevice->CreateDepthStencilView(mDepthStencilBuffer, &dsvDesc, DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.cpuHandle(mDepthStencilView));
-
-        // Setup depth/stencil state.
-        ZeroMemory(&mDepthStencilStateDesc, sizeof(D3D12_DEPTH_STENCIL_DESC));
-
-        mDepthStencilStateDesc.DepthEnable = TRUE;
-        mDepthStencilStateDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-        mDepthStencilStateDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
-        mDepthStencilStateDesc.StencilEnable = FALSE;
-
-        // Setup rasterizer state.
-        ZeroMemory(&mRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
-
-       
-
-        ZeroMemory(&mBlendState, sizeof(D3D12_BLEND_DESC));
-
-        
-
-        /*if (!mSamplers[0]) {
-
-            D3D12_SAMPLER_DESC samplerDesc;
-
-            samplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-            samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_WRAP;
-            samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_WRAP;
-            samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_WRAP;
-            samplerDesc.MipLODBias = 0.0f;
-            samplerDesc.MaxAnisotropy = 1;
-            samplerDesc.ComparisonFunc = D3D12_COMPARISON_ALWAYS;
-            samplerDesc.BorderColor[0] = 0;
-            samplerDesc.BorderColor[1] = 0;
-            samplerDesc.BorderColor[2] = 0;
-            samplerDesc.BorderColor[3] = 0;
-            samplerDesc.MinLOD = 0;
-            samplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
-
-            hr = sDevice->CreateSamplerState(&samplerDesc, mSamplers + 0);
-            DX12_CHECK(hr);
-
-            samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_CLAMP;
-            samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_CLAMP;
-            samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_CLAMP;
-
-            hr = sDevice->CreateSamplerState(&samplerDesc, mSamplers + 1);
-            DX12_CHECK(hr);
-        }*/
-
-        DX12_CHECK();
+        if (!mDepthStencilView)
+            mDepthStencilView = DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.allocate();
+        GetDevice()->CreateDepthStencilView(mDepthStencilBuffer, &dsvDesc, DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.cpuHandle(mDepthStencilView));
     }
 
     void DirectX12RenderTarget::shutdown()
     {
-        /*for (size_t i = 0; i < 2; ++i) {
-            if (mSamplers[i]) {
-                mSamplers[i]->Release();
-                mSamplers[i] = nullptr;
-            }
-        }*/
-
-        if (mDepthStencilBuffer) {
-            mDepthStencilBuffer->Release();
-            mDepthStencilBuffer = nullptr;
-        }
-
-        /*if (mTargetView) {
-            mTargetView->Release();
-            mTargetView = nullptr;
-        }*/
+        mDepthStencilBuffer.reset();
     }
 
     void DirectX12RenderTarget::beginIteration(size_t iteration) const
     {
-        context()->mCommandList.mList->SetGraphicsRootSignature(context()->mRootSignature);
+        ID3D12GraphicsCommandList *commandList = context()->mCommandList.mList;
+
+        commandList->SetGraphicsRootSignature(context()->mRootSignature);
 
         const Vector2i &screenSize = size();
 
@@ -141,7 +78,7 @@ namespace Render {
         viewport.TopLeftY = 0.0f;
         viewport.MinDepth = 0.0f;
         viewport.MaxDepth = 1.0f;
-        DirectX12RenderContext::getSingleton().mCommandList.mList->RSSetViewports(1, &viewport);
+        commandList->RSSetViewports(1, &viewport);
 
         D3D12_RECT scissorRect;
         scissorRect.left = 0.0f;
@@ -149,7 +86,7 @@ namespace Render {
         scissorRect.right = static_cast<float>(screenSize.x);
         scissorRect.bottom = static_cast<float>(screenSize.y);
 
-        DirectX12RenderContext::getSingleton().mCommandList.mList->RSSetScissorRects(1, &scissorRect);
+        commandList->RSSetScissorRects(1, &scissorRect);
 
         //TransitionBarrier();
 
@@ -158,10 +95,10 @@ namespace Render {
         D3D12_CPU_DESCRIPTOR_HANDLE targetView = DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(mTargetView);
         D3D12_CPU_DESCRIPTOR_HANDLE depthStencilView = DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.cpuHandle(mDepthStencilView);
 
-        DirectX12RenderContext::getSingleton().mCommandList.mList->ClearRenderTargetView(targetView, color, 0, nullptr);
-        DirectX12RenderContext::getSingleton().mCommandList.mList->ClearDepthStencilView(depthStencilView, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+        commandList->ClearRenderTargetView(targetView, color, 0, nullptr);
+        commandList->ClearDepthStencilView(depthStencilView, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-        DirectX12RenderContext::getSingleton().mCommandList.mList->OMSetRenderTargets(1, &targetView, false, &depthStencilView);
+        commandList->OMSetRenderTargets(1, &targetView, false, &depthStencilView);
         /*sDeviceContext->OMSetDepthStencilState(mDepthStencilState, 1);
         sDeviceContext->OMSetBlendState(mBlendState, 0, 0xffffffff);*/
 
@@ -173,21 +110,25 @@ namespace Render {
     void DirectX12RenderTarget::endIteration(size_t iteration) const
     {
         RenderTarget::endIteration(iteration);
+#if !MADGINE_DIRECTX12_USE_SINGLE_COMMAND_LIST
         context()->ExecuteCommandList(context()->mCommandList);
+#endif
     }
-    
+
     void DirectX12RenderTarget::pushAnnotation(const char *tag)
     {
-        PIXBeginEvent(DirectX12RenderContext::getSingleton().mCommandList.mList, PIX_COLOR(255, 255, 255), tag);
+        PIXBeginEvent(context()->mCommandList.mList, PIX_COLOR(255, 255, 255), tag);
     }
 
     void DirectX12RenderTarget::popAnnotation()
     {
-        PIXEndEvent(DirectX12RenderContext::getSingleton().mCommandList.mList);
+        PIXEndEvent(context()->mCommandList.mList);
     }
 
     void DirectX12RenderTarget::setRenderSpace(const Rect2i &space)
     {
+        ID3D12GraphicsCommandList *commandList = context()->mCommandList.mList;
+
         D3D12_VIEWPORT viewport;
         viewport.Width = static_cast<float>(space.mSize.x);
         viewport.Height = static_cast<float>(space.mSize.y);
@@ -195,7 +136,7 @@ namespace Render {
         viewport.TopLeftY = static_cast<float>(space.mTopLeft.y);
         viewport.MinDepth = 0.0f;
         viewport.MaxDepth = 1.0f;
-        DirectX12RenderContext::getSingleton().mCommandList.mList->RSSetViewports(1, &viewport);
+        commandList->RSSetViewports(1, &viewport);
 
         D3D12_RECT scissorRect;
         scissorRect.left = static_cast<float>(space.mTopLeft.x);
@@ -203,83 +144,115 @@ namespace Render {
         scissorRect.right = static_cast<float>(space.mTopLeft.x + space.mSize.x);
         scissorRect.bottom = static_cast<float>(space.mTopLeft.y + space.mSize.y);
 
-        DirectX12RenderContext::getSingleton().mCommandList.mList->RSSetScissorRects(1, &scissorRect);
+        commandList->RSSetScissorRects(1, &scissorRect);
     }
 
-    void DirectX12RenderTarget::renderMesh(const GPUMeshData *m, const Program *p, const Material *material)
+    void DirectX12RenderTarget::renderMesh(const GPUMeshData *m, const PipelineInstance *p, const Material *material)
     {
+        renderMeshInstanced(1, m, p, material);
+        /* ID3D12GraphicsCommandList *commandList = context()->mCommandList.mList;
+
         const DirectX12MeshData *mesh = static_cast<const DirectX12MeshData *>(m);
-        const DirectX12Program *program = static_cast<const DirectX12Program *>(p);
+        const DirectX12PipelineInstance *pipeline = static_cast<const DirectX12PipelineInstance *>(p);
 
-        if (!mesh->mVAO)
-            return;
+        mesh->mVertices.bindVertex(commandList, mesh->mVertexSize);
 
-        program->bind(&mesh->mVAO);
+        pipeline->bind(commandList, mesh->mFormat, mesh->mGroupSize);
 
         if (material)
             bindTextures({ { material->mDiffuseTexture, TextureType_2D } });
 
+        constexpr D3D12_PRIMITIVE_TOPOLOGY modes[] {
+            D3D_PRIMITIVE_TOPOLOGY_POINTLIST,
+            D3D_PRIMITIVE_TOPOLOGY_LINELIST,
+            D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
+        };
+
+        assert(mesh->mGroupSize > 0 && mesh->mGroupSize <= 3);
+        D3D12_PRIMITIVE_TOPOLOGY mode = modes[mesh->mGroupSize - 1];
+        commandList->IASetPrimitiveTopology(mode);
+
         if (mesh->mIndices) {
-            DirectX12RenderContext::getSingleton().mCommandList.mList->DrawIndexedInstanced(mesh->mElementCount, 1, 0, 0, 0);
+            mesh->mIndices.bindIndex(commandList);
+            commandList->DrawIndexedInstanced(mesh->mElementCount, 1, 0, 0, 0);
         } else {
-            DirectX12RenderContext::getSingleton().mCommandList.mList->DrawInstanced(mesh->mElementCount, 1, 0, 0);
-        }
+            commandList->DrawInstanced(mesh->mElementCount, 1, 0, 0);
+        }*/
     }
 
-    void DirectX12RenderTarget::renderMeshInstanced(size_t count, const GPUMeshData *m, const Program *p, const Material *material)
+    void DirectX12RenderTarget::renderMeshInstanced(size_t count, const GPUMeshData *m, const PipelineInstance *p, const Material *material)
     {
-        const DirectX12MeshData *mesh = static_cast<const DirectX12MeshData *>(m);
-        const DirectX12Program *program = static_cast<const DirectX12Program *>(p);
+        ID3D12GraphicsCommandList *commandList = context()->mCommandList.mList;
 
-        if (!mesh->mVAO)
+        const DirectX12PipelineInstance *pipeline = static_cast<const DirectX12PipelineInstance *>(p);
+        const DirectX12MeshData *mesh = static_cast<const DirectX12MeshData *>(m);
+
+        if (!pipeline->bind(commandList, m->mFormat, m->mGroupSize))
             return;
 
-        program->bind(&mesh->mVAO);
+        mesh->mVertices.bindVertex(commandList, mesh->mVertexSize);
 
         if (material)
             bindTextures({ { material->mDiffuseTexture, TextureType_2D } });
 
+        constexpr D3D12_PRIMITIVE_TOPOLOGY modes[] {
+            D3D_PRIMITIVE_TOPOLOGY_POINTLIST,
+            D3D_PRIMITIVE_TOPOLOGY_LINELIST,
+            D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
+        };
+
+        assert(m->mGroupSize > 0 && m->mGroupSize <= 3);
+        D3D12_PRIMITIVE_TOPOLOGY mode = modes[m->mGroupSize - 1];
+        commandList->IASetPrimitiveTopology(mode);
+
         if (mesh->mIndices) {
-            DirectX12RenderContext::getSingleton().mCommandList.mList->DrawIndexedInstanced(mesh->mElementCount, count, 0, 0, 0);
+            mesh->mIndices.bindIndex(commandList);
+            commandList->DrawIndexedInstanced(m->mElementCount, count, 0, 0, 0);
         } else {
-            DirectX12RenderContext::getSingleton().mCommandList.mList->DrawInstanced(mesh->mElementCount, count, 0, 0);
-        }
-    }
-
-    void DirectX12RenderTarget::renderVertices(const Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices)
-    {
-        if (!vertices.empty()) {
-            DirectX12MeshData tempMesh;
-            DirectX12MeshLoader::getSingleton().generate(tempMesh, { groupSize, std::move(vertices), std::move(indices) });
-
-            //setupProgram(flags);
-
-            renderMesh(&tempMesh, program);
-        }
-    }
-
-    void DirectX12RenderTarget::renderVertices(const Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, const Material *material)
-    {
-        if (!vertices.empty()) {
-            DirectX12MeshData tempMesh;
-            DirectX12MeshLoader::getSingleton().generate(tempMesh, { groupSize, std::move(vertices), std::move(indices) });
-
-            renderMesh(&tempMesh, program, material);
+            commandList->DrawInstanced(m->mElementCount, count, 0, 0);
         }
     }
 
     void DirectX12RenderTarget::clearDepthBuffer()
     {
-        DirectX12RenderContext::getSingleton().mCommandList.mList->ClearDepthStencilView(DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.cpuHandle(mDepthStencilView), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+        context()->mCommandList.mList->ClearDepthStencilView(DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.cpuHandle(mDepthStencilView), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
     }
 
     void DirectX12RenderTarget::bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset) const
-    {        
-        //DirectX12RenderContext::getSingleton().mCommandList->PSSetShaderResources(0, tex.size(), reinterpret_cast<ID3D12ShaderResourceView *const *>(tex.data()));
+    {
+        for (size_t i = 0; i < tex.size(); ++i) {
+            if (tex[i].mTextureHandle) {
+                D3D12_GPU_DESCRIPTOR_HANDLE handle;
+                handle.ptr = tex[i].mTextureHandle;
+                context()->mCommandList.mList->SetGraphicsRootDescriptorTable(3 + offset + i, handle);
+            }
+        }
     }
 
-    DirectX12RenderContext* DirectX12RenderTarget::context() const {
+    DirectX12RenderContext *DirectX12RenderTarget::context() const
+    {
         return static_cast<DirectX12RenderContext *>(RenderTarget::context());
+    }
+
+    void DirectX12RenderTarget::TransitionBarrier(ID3D12GraphicsCommandList *commandList, ID3D12Resource *res, D3D12_RESOURCE_STATES from, D3D12_RESOURCE_STATES to)
+    {
+        D3D12_RESOURCE_BARRIER barrierDesc;
+        ZeroMemory(&barrierDesc, sizeof(D3D12_RESOURCE_BARRIER));
+
+        barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        barrierDesc.Transition.pResource = res;
+        barrierDesc.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        barrierDesc.Transition.StateBefore = from;
+        barrierDesc.Transition.StateAfter = to;
+        barrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+
+        commandList->ResourceBarrier(1, &barrierDesc);
+        DX12_CHECK();
+    }
+
+    void DirectX12RenderTarget::Transition(ID3D12Resource *res, D3D12_RESOURCE_STATES from, D3D12_RESOURCE_STATES to) const
+    {
+        TransitionBarrier(context()->mCommandList.mList, res, from, to);
     }
 
 }

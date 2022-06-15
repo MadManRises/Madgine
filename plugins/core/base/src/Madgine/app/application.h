@@ -48,4 +48,4 @@ namespace App {
 }
 }
 
-RegisterType(Engine::App::Application);
+REGISTER_TYPE(Engine::App::Application)

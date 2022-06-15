@@ -41,7 +41,7 @@ namespace Render {
         void setName(std::string_view name);
 
     private:
-        ID3D12Resource *mResource = nullptr;
+        ReleasePtr<ID3D12Resource> mResource;
         TextureType mType;
         Vector2i mSize = { 0, 0 };
         DataFormat mFormat;        

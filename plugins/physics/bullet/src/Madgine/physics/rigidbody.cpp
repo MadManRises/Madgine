@@ -76,7 +76,7 @@ namespace Physics {
                 Vector3 scale;
                 Quaternion orientation;
                 std::tie(pos, scale, orientation) = DecomposeTransformMatrix(m);
-                transform = btTransform { { orientation.v.x, orientation.v.y, orientation.v.z, orientation.w }, { pos.x, pos.y, pos.z } };
+                transform = btTransform { { orientation.x, orientation.y, orientation.z, orientation.w }, { pos.x, pos.y, pos.z } };
             } else {
                 transform = btTransform { { 0.0f, 0.0f, 0.0f, 1.0f } };
             }
@@ -129,7 +129,7 @@ namespace Physics {
         Matrix4 m = transform->worldMatrix();
 
         const auto &[pos, scale, orientation] = DecomposeTransformMatrix(m);
-        get()->setWorldTransform(btTransform { { orientation.v.x, orientation.v.y, orientation.v.z, orientation.w }, { pos.x, pos.y, pos.z } });
+        get()->setWorldTransform(btTransform { { orientation.x, orientation.y, orientation.z, orientation.w }, { pos.x, pos.y, pos.z } });
 
         if (mShapeHandle && mShapeHandle->available())
             get()->setCollisionShape(mShapeHandle->get());

@@ -51,4 +51,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::BulletDebug);
+REGISTER_TYPE(Engine::Tools::BulletDebug)

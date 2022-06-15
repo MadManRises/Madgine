@@ -11,7 +11,7 @@
 
 #include "Madgine/scenelib.h"
 #include "Madgine/clientlib.h"
-#include "programloaderlib.h"
+#include "pipelineloaderlib.h"
 
 #include "scenerendererforward.h"
 

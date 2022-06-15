@@ -3,6 +3,8 @@
 #include "Madgine/app/globalapibase.h"
 #include "Madgine/app/globalapicollector.h"
 
+#include "Generic/functor.h"
+
 struct ALCdevice;
 struct ALCcontext;
 
@@ -17,11 +19,11 @@ namespace Audio {
         virtual Threading::Task<void> finalize() override;
 
     private:
-        ALCdevice *mDevice = nullptr;
-        ALCcontext *mContext = nullptr;
+        std::unique_ptr<ALCdevice, Functor<&alcCloseDevice>> mDevice;
+        std::unique_ptr<ALCcontext, Functor<&alcDestroyContext>> mContext;
     };
 
 }
 }
 
-RegisterType(Engine::Audio::OpenALAudioContext);
+REGISTER_TYPE(Engine::Audio::OpenALAudioContext)

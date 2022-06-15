@@ -47,54 +47,54 @@ METATABLE_BEGIN(Engine::Render::FontLoader)
 MEMBER(mResources)
 METATABLE_END(Engine::Render::FontLoader)
 
-namespace msdfgen {
-
-struct FtContext {
-    Point2 position;
-    Shape *shape;
-    Contour *contour;
-};
-
-static Point2 ftPoint2(const FT_Vector &vector)
-{
-    return Point2(vector.x / 64., vector.y / 64.);
-}
-
-static int ftMoveTo(const FT_Vector *to, void *user)
-{
-    FtContext *context = reinterpret_cast<FtContext *>(user);
-    context->contour = &context->shape->addContour();
-    context->position = ftPoint2(*to);
-    return 0;
-}
-
-static int ftLineTo(const FT_Vector *to, void *user)
-{
-    FtContext *context = reinterpret_cast<FtContext *>(user);
-    context->contour->addEdge(new LinearSegment(context->position, ftPoint2(*to)));
-    context->position = ftPoint2(*to);
-    return 0;
-}
-
-static int ftConicTo(const FT_Vector *control, const FT_Vector *to, void *user)
-{
-    FtContext *context = reinterpret_cast<FtContext *>(user);
-    context->contour->addEdge(new QuadraticSegment(context->position, ftPoint2(*control), ftPoint2(*to)));
-    context->position = ftPoint2(*to);
-    return 0;
-}
-
-static int ftCubicTo(const FT_Vector *control1, const FT_Vector *control2, const FT_Vector *to, void *user)
-{
-    FtContext *context = reinterpret_cast<FtContext *>(user);
-    context->contour->addEdge(new CubicSegment(context->position, ftPoint2(*control1), ftPoint2(*control2), ftPoint2(*to)));
-    context->position = ftPoint2(*to);
-    return 0;
-}
-}
-
 namespace Engine {
 namespace Render {
+
+    namespace msdfgen {
+
+        struct FtContext {
+            ::msdfgen::Point2 position;
+            ::msdfgen::Shape *shape;
+            ::msdfgen::Contour *contour;
+        };
+
+        static ::msdfgen::Point2 ftPoint2(const FT_Vector &vector)
+        {
+            return ::msdfgen::Point2(vector.x / 64., vector.y / 64.);
+        }
+
+        static int ftMoveTo(const FT_Vector *to, void *user)
+        {
+            FtContext *context = reinterpret_cast<FtContext *>(user);
+            context->contour = &context->shape->addContour();
+            context->position = ftPoint2(*to);
+            return 0;
+        }
+
+        static int ftLineTo(const FT_Vector *to, void *user)
+        {
+            FtContext *context = reinterpret_cast<FtContext *>(user);
+            context->contour->addEdge(new ::msdfgen::LinearSegment(context->position, ftPoint2(*to)));
+            context->position = ftPoint2(*to);
+            return 0;
+        }
+
+        static int ftConicTo(const FT_Vector *control, const FT_Vector *to, void *user)
+        {
+            FtContext *context = reinterpret_cast<FtContext *>(user);
+            context->contour->addEdge(new ::msdfgen::QuadraticSegment(context->position, ftPoint2(*control), ftPoint2(*to)));
+            context->position = ftPoint2(*to);
+            return 0;
+        }
+
+        static int ftCubicTo(const FT_Vector *control1, const FT_Vector *control2, const FT_Vector *to, void *user)
+        {
+            FtContext *context = reinterpret_cast<FtContext *>(user);
+            context->contour->addEdge(new ::msdfgen::CubicSegment(context->position, ftPoint2(*control1), ftPoint2(*control2), ftPoint2(*to)));
+            context->position = ftPoint2(*to);
+            return 0;
+        }
+    }
 
     FontLoader::FontLoader()
         : ResourceLoader({ ".msdf", ".ttf" })
@@ -197,10 +197,10 @@ namespace Render {
                 std::unique_ptr<Vector3[]> buffer = std::make_unique<Vector3[]>(sizes[c].x * sizes[c].y);
                 AreaView<Vector3, 2> bufferView { buffer.get(), { static_cast<size_t>(sizes[c].x), static_cast<size_t>(sizes[c].y) } };
 
-                msdfgen::BitmapRef<float, 3>
+                ::msdfgen::BitmapRef<float, 3>
                     bm { buffer[0].ptr(), sizes[c].x, sizes[c].y };
 
-                msdfgen::Shape shape;
+                ::msdfgen::Shape shape;
                 shape.inverseYAxis = true;
 
                 msdfgen::FtContext context = {};
@@ -214,8 +214,8 @@ namespace Render {
                 ftFunctions.delta = 0;
                 FT_Outline_Decompose(&face->glyph->outline, &ftFunctions, &context);
 
-                msdfgen::edgeColoringSimple(shape, 3);
-                msdfgen::generateMSDF(bm, shape, 4.0, { 1, 1 }, { static_cast<double>(-face->glyph->bitmap_left + 1), static_cast<double>(sizes[c].y - face->glyph->bitmap_top - 1) });
+                ::msdfgen::edgeColoringSimple(shape, 3);
+                ::msdfgen::generateMSDF(bm, shape, 4.0, { 1, 1 }, { static_cast<double>(-face->glyph->bitmap_left + 1), static_cast<double>(sizes[c].y - face->glyph->bitmap_top - 1) });
 
                 font.mGlyphs[c].mSize = sizes[c];
                 font.mGlyphs[c].mUV = entries[c].mArea.mTopLeft;

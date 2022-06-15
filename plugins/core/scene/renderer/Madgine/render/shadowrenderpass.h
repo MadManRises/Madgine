@@ -2,7 +2,7 @@
 
 #include "Madgine/render/renderpass.h"
 
-#include "programloader.h"
+#include "pipelineloader.h"
 
 #include "Meta/math/frustum.h"
 
@@ -25,7 +25,7 @@ namespace Render {
         void updateFrustum();
 
     private:
-        ProgramLoader::PtrType mProgram;
+        PipelineLoader::Instance mPipeline;
 
         Scene::SceneManager &mScene;        
 

@@ -108,4 +108,4 @@ namespace NodeGraph {
 }
 }
 
-RegisterType(Engine::NodeGraph::NodeBase);
+REGISTER_TYPE(Engine::NodeGraph::NodeBase)

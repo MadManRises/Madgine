@@ -30,6 +30,6 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::MessageLogger);
+REGISTER_TYPE(Engine::Tools::MessageLogger)
 
 #endif

@@ -25,11 +25,11 @@ target_include_directories(Modules PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINA
 
 target_link_libraries(Modules PUBLIC Interfaces Ini)
 
-if (INTERFACES_ENABLE_THREADING)
-	find_package(Threads REQUIRED)
+if (WINDOWS)
 	if (NOT BUILD_SHARED_LIBS AND MINGW)
-		target_link_libraries (Interfaces PRIVATE -Wl,-Bstatic,--whole-archive pthread -Wl,-Bdynamic,--no-whole-archive)
+		target_link_libraries (Modules PRIVATE -Wl,-Bstatic,--whole-archive pthread -Wl,-Bdynamic,--no-whole-archive)
 	else()
+		find_package(Threads)
 		target_link_libraries (Modules PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 	endif()
 endif()

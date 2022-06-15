@@ -2,6 +2,7 @@
 
 #include "Meta/math/boundingbox.h"
 #include "textureloader.h"
+#include "render/vertexformat.h"
 
 namespace Engine {
 namespace Render {
@@ -15,6 +16,10 @@ namespace Render {
         };
         std::vector<Material> mMaterials;
         AABB mAABB;
+        size_t mVertexSize;
+        VertexFormat mFormat;
+        size_t mGroupSize;
+        size_t mElementCount;
     };
 
 }

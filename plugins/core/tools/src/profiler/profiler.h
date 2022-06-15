@@ -20,4 +20,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::Profiler);
+REGISTER_TYPE(Engine::Tools::Profiler)

@@ -24,4 +24,4 @@ namespace Render {
 }
 }
 
-RegisterType(Engine::Render::OpenGLTextureLoader);
+REGISTER_TYPE(Engine::Render::OpenGLTextureLoader)

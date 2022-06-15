@@ -2,8 +2,6 @@
 
 #include "directx11geometryshaderloader.h"
 
-#include "util/directx11geometryshader.h"
-
 #include "directx11rendercontext.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
@@ -58,22 +56,22 @@ namespace Render {
     void DirectX11GeometryShaderLoader::HandleType::create(const std::string &name, const CodeGen::ShaderFile &file, DirectX11GeometryShaderLoader *loader)
     {
         *this = DirectX11GeometryShaderLoader::loadManual(
-            name, {}, [=, &file](DirectX11GeometryShaderLoader *loader, DirectX11GeometryShader &shader, const DirectX11GeometryShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, loader);
+            name, {}, [=, &file](DirectX11GeometryShaderLoader *loader, ReleasePtr<ID3D11GeometryShader> &shader, const DirectX11GeometryShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, loader);
     }
 
-    bool DirectX11GeometryShaderLoader::loadImpl(DirectX11GeometryShader &shader, ResourceDataInfo &info)
+    bool DirectX11GeometryShaderLoader::loadImpl(ReleasePtr<ID3D11GeometryShader> &shader, ResourceDataInfo &info)
     {
         std::string source = info.resource()->readAsText();
 
         return loadFromSource(shader, info.resource()->path().stem(), source);
     }
 
-    void DirectX11GeometryShaderLoader::unloadImpl(DirectX11GeometryShader &shader)
+    void DirectX11GeometryShaderLoader::unloadImpl(ReleasePtr<ID3D11GeometryShader> &shader)
     {
         shader.reset();
     }
 
-    bool DirectX11GeometryShaderLoader::create(DirectX11GeometryShader &shader, ResourceType *res, const CodeGen::ShaderFile &file)
+    bool DirectX11GeometryShaderLoader::create(ReleasePtr<ID3D11GeometryShader> &shader, ResourceType *res, const CodeGen::ShaderFile &file)
     {
         if (res->path().empty()) {
             Filesystem::Path dir = Filesystem::appDataPath() / "generated/shader/directx11";
@@ -94,7 +92,7 @@ namespace Render {
         return loadFromSource(shader, res->name(), ss.str());
     }
 
-    bool DirectX11GeometryShaderLoader::loadFromSource(DirectX11GeometryShader &shader, std::string_view name, std::string source)
+    bool DirectX11GeometryShaderLoader::loadFromSource(ReleasePtr<ID3D11GeometryShader> &shader, std::string_view name, std::string source)
     {
         std::string profile = "latest";
         if (profile == "latest")
@@ -131,7 +129,8 @@ namespace Render {
             return false;
         }
 
-        shader = { std::move(pShaderBlob) };
+        hr = sDevice->CreateGeometryShader(pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize(), nullptr, &shader);
+        DX11_CHECK(hr);
 
         return true;
     }

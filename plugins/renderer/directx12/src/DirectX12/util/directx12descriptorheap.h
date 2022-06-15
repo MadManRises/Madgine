@@ -13,8 +13,10 @@ namespace Render {
 
         OffsetPtr allocate();
         void deallocate(OffsetPtr handle);
+        void deallocate(D3D12_GPU_DESCRIPTOR_HANDLE handle);
 
         D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle(OffsetPtr index);
+        D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle(D3D12_GPU_DESCRIPTOR_HANDLE handle);
         D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle(OffsetPtr index);
         OffsetPtr fromGpuHandle(D3D12_GPU_DESCRIPTOR_HANDLE handle);
 

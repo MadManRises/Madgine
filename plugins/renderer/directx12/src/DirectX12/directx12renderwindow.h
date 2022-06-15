@@ -2,8 +2,6 @@
 
 #include "directx12rendertarget.h"
 
-#include <dxgi.h>
-
 namespace Engine {
 namespace Render {
 
@@ -28,13 +26,13 @@ namespace Render {
     private:
         Window::OSWindow *mWindow;
 
-        IDXGISwapChain3 *mSwapChain;
+        ReleasePtr<IDXGISwapChain3> mSwapChain;
 
         OffsetPtr mTargetViews[2];
-        ID3D12Resource *mBackBuffers[2];
+        ReleasePtr<ID3D12Resource> mBackBuffers[2];
     };
 
 }
 }
 
-RegisterType(Engine::Render::DirectX12RenderWindow);
+REGISTER_TYPE(Engine::Render::DirectX12RenderWindow)

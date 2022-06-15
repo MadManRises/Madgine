@@ -2,8 +2,8 @@
 
 namespace Engine {
 
-DERIVE_FUNCTION(begin);
-DERIVE_FUNCTION(rbegin);
+DERIVE_FUNCTION(begin)
+DERIVE_FUNCTION(rbegin)
 
 template <typename T>
 struct derive_iterator {

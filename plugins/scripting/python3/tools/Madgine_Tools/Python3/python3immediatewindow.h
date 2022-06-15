@@ -28,4 +28,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::Python3ImmediateWindow);
+REGISTER_TYPE(Engine::Tools::Python3ImmediateWindow)

@@ -22,4 +22,4 @@ namespace Audio {
 }
 }
 
-RegisterType(Engine::Audio::AudioBufferLoader);
+REGISTER_TYPE(Engine::Audio::AudioBufferLoader)

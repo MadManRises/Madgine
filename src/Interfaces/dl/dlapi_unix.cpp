@@ -22,7 +22,7 @@ namespace Dl {
         }
     }
 
-    void *openDll(const std::string &name)
+    DlHandle openDll(const std::string &name)
     {
         void *handle;
 
@@ -32,7 +32,7 @@ namespace Dl {
             handle = dlopen(name.c_str(), RTLD_NOW);
         sLastError = errno;
 
-        return handle;
+        return DlHandle { handle };
     }
 
     void closeDll(void *handle)
@@ -41,15 +41,15 @@ namespace Dl {
         assert(result == 0);
     }
 
-    const void *getDllSymbol(void *dllHandle, const std::string &symbolName)
+    const void *getDllSymbol(const DlHandle &dllHandle, const std::string &symbolName)
     {
-        return dlsym(dllHandle, symbolName.c_str());
+        return dlsym(dllHandle.get(), symbolName.c_str());
     }
 
-    Filesystem::Path getDllFullPath(void *dllHandle, const std::string &symbolName)
+    Filesystem::Path getDllFullPath(const DlHandle &dllHandle, const std::string &symbolName)
     {
         Dl_info info;
-        auto result = dladdr(getDllSymbol(dllHandle, symbolName.c_str()), &info);
+        auto result = dladdr(getDllSymbol(dllHandle.get(), symbolName.c_str()), &info);
         assert(result);
         return info.dli_fname;
     }

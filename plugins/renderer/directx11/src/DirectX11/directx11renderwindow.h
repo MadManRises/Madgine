@@ -2,10 +2,6 @@
 
 #include "directx11rendertarget.h"
 
-#include "util/directx11program.h"
-#include "util/directx11texture.h"
-#include "util/directx11vertexarray.h"
-#include "util/directx11buffer.h"
 
 #include "Meta/math/atlas2.h"
 
@@ -30,10 +26,10 @@ namespace Render {
 
 		Window::OSWindow *mWindow;        
 
-        ReleasePtr < IDXGISwapChain> mSwapChain;
+        ReleasePtr<IDXGISwapChain> mSwapChain;
     };
 
 }
 }
 
-RegisterType(Engine::Render::DirectX11RenderWindow);
+REGISTER_TYPE(Engine::Render::DirectX11RenderWindow)

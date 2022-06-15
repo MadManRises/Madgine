@@ -48,4 +48,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::ImRoot);
+REGISTER_TYPE(Engine::Tools::ImRoot)

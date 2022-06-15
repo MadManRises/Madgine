@@ -21,7 +21,7 @@ namespace Render {
             }
 
             void create(std::string name, const CodeGen::ShaderFile &file, ShaderType type, OpenGLShaderLoader *loader = nullptr);
-            Threading::TaskFuture<bool> load(std::string name, ShaderType type, OpenGLShaderLoader *loader = nullptr);
+            Threading::TaskFuture<bool> load(std::string_view name, ShaderType type, OpenGLShaderLoader *loader = nullptr);
         };
 
         bool loadImpl(OpenGLShader &shader, ResourceDataInfo &info);
@@ -37,4 +37,4 @@ namespace Render {
 }
 }
 
-RegisterType(Engine::Render::OpenGLShaderLoader);
+REGISTER_TYPE(Engine::Render::OpenGLShaderLoader)

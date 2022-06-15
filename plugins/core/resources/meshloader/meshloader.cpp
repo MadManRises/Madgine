@@ -99,16 +99,18 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
                             }
                         }
 
-                        if constexpr (V::template holds<VertexBoneMappings>) {
+                        if constexpr (V::template holds<VertexBoneIndices>) {
+                            static_assert(V::template holds<VertexBoneWeights>);
                             for (size_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
                                 aiBone *bone = mesh->mBones[boneIndex];
                                 size_t actualIndex = boneIndices.at(scene->mRootNode->FindNode(bone->mName));
                                 for (size_t weightIndex = 0; weightIndex < bone->mNumWeights; ++weightIndex) {
                                     size_t vertexIndex = baseVertexIndex + bone->mWeights[weightIndex].mVertexId;
                                     float weight = bone->mWeights[weightIndex].mWeight;
-                                    VertexBoneMappings &mappings = vertices[vertexIndex];
+                                    float (&weights)[4] = vertices[vertexIndex].mBoneWeights;
+                                    int (&indices)[4] = vertices[vertexIndex].mBoneIndices;
                                     size_t freeIndex = 0;
-                                    while (freeIndex < 4 && mappings.mBoneWeights[freeIndex] != 0.0f)
+                                    while (freeIndex < 4 && weights[freeIndex] != 0.0f)
                                         ++freeIndex;
                                     if (freeIndex == 4) {
                                         if (warnOnce) {
@@ -116,8 +118,8 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
                                             LOG_WARNING("Vertex is assigned more than 4 Bones. That is not supported currently, animation might look wrong.");
                                         }
                                     } else {
-                                        mappings.mBoneIndices[freeIndex] = actualIndex;
-                                        mappings.mBoneWeights[freeIndex] = weight;
+                                        indices[freeIndex] = actualIndex;
+                                        weights[freeIndex] = weight;
                                     }
                                 }
                             }
@@ -222,7 +224,6 @@ UNIQUECOMPONENT(Engine::Render::MeshLoader)
 
         void MeshLoader::unloadImpl(MeshData &data)
         {
-            data.mAttributeList = nullptr;
             data.mGroupSize = 0;
             data.mIndices.clear();
             data.mMaterials.clear();

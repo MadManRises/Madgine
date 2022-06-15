@@ -4,7 +4,9 @@
 
 #include "Interfaces/filesystem/path.h"
 
-#include "Modules/threading/task.h"
+#include "../threading/task.h"
+
+#include "Interfaces/dl/dlapi.h"
 
 namespace Engine {
 namespace Plugins {
@@ -49,7 +51,7 @@ namespace Plugins {
         void ensureModule(PluginManager &manager);
 
     private:
-        void *mModule = nullptr;
+        Dl::DlHandle mModule;
         bool mIsLoaded = false;
 
         std::string mProject;

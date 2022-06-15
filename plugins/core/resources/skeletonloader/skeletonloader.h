@@ -30,4 +30,4 @@ namespace Render {
 }
 }
 
-RegisterType(Engine::Render::SkeletonLoader);
+REGISTER_TYPE(Engine::Render::SkeletonLoader)

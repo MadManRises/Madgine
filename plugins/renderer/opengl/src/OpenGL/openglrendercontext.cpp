@@ -12,9 +12,9 @@
 
 #include "openglshaderloader.h"
 
-#include "openglprogramloader.h"
-#include "opengltextureloader.h"
 #include "openglmeshloader.h"
+#include "openglpipelineloader.h"
+#include "opengltextureloader.h"
 
 #if WINDOWS
 #    include "wglext.h"
@@ -447,7 +447,7 @@ namespace Render {
             glVertexAttrib2f(1, 0, 0);
             GL_CHECK();
             //Color
-            glVertexAttrib4f(2, 1, 1, 1, 1);
+            glVertexAttrib4f(3, 1, 1, 1, 1);
             GL_CHECK();
             //UV
             glVertexAttrib2f(4, 0, 0);
@@ -588,7 +588,7 @@ namespace Render {
     {
         RenderContext::unloadAllResources();
 
-        for (std::pair<const std::string, OpenGLProgramLoader::ResourceType> &res : OpenGLProgramLoader::getSingleton()) {
+        for (std::pair<const std::string, OpenGLPipelineLoader::ResourceType> &res : OpenGLPipelineLoader::getSingleton()) {
             res.second.forceUnload();
         }
 
@@ -604,6 +604,87 @@ namespace Render {
     bool OpenGLRenderContext::supportsMultisampling() const
     {
         return checkMultisampling();
+    }
+
+    static constexpr GLenum vTypes[] = {
+        GL_FLOAT,
+        GL_FLOAT,
+        GL_FLOAT,
+        GL_FLOAT,
+        GL_FLOAT,
+        GL_FLOAT,
+        GL_INT,
+        GL_FLOAT
+    };
+
+    void OpenGLRenderContext::bindFormat(VertexFormat format)
+    {
+        assert(!format.has(0) || !format.has(1));
+
+#if !OPENGL_ES || OPENGL_ES >= 310
+#    if !OPENGL_ES
+        if (glVertexAttribFormat) {
+#    endif
+            auto pib = mVAOs.try_emplace(format, create);
+            pib.first->second.bind();
+            if (!pib.second)
+                return;
+
+            GLuint offset = 0;
+            for (size_t i = 0; i < VertexElements::size; ++i) {
+                size_t attribIndex = i > 0 ? i - 1 : 0;
+                if (format.has(i)) {
+                    if (vTypes[i] == GL_FLOAT)
+                        glVertexAttribFormat(attribIndex, sVertexElementSizes[i] / 4, vTypes[i], GL_FALSE, offset);
+                    else
+                        glVertexAttribIFormat(attribIndex, sVertexElementSizes[i] / 4, vTypes[i], offset);
+                    GL_CHECK();
+                    glVertexAttribBinding(attribIndex, 0);
+                    GL_CHECK();
+                    glEnableVertexAttribArray(attribIndex);
+                    offset += sVertexElementSizes[i];
+                } else {
+                    //glDisableVertexAttribArray(attribIndex);
+                }
+            }
+
+            return;
+#    if !OPENGL_ES
+        }
+#    endif
+#endif
+
+        GLuint stride = 0;
+        for (size_t i = 0; i < VertexElements::size; ++i) {
+            if (format.has(i))
+                stride += sVertexElementSizes[i];
+        }
+
+        const std::byte *offset = 0;
+        for (size_t i = 0; i < VertexElements::size; ++i) {
+            size_t attribIndex = i > 0 ? i - 1 : 0;
+            if (format.has(i)) {
+                if (vTypes[i] == GL_FLOAT)
+                    glVertexAttribPointer(attribIndex, sVertexElementSizes[i] / 4, vTypes[i], GL_FALSE, stride, offset);
+                else
+                    glVertexAttribIPointer(attribIndex, sVertexElementSizes[i] / 4, vTypes[i], stride, offset);
+                GL_CHECK();
+                glEnableVertexAttribArray(attribIndex);
+                offset += sVertexElementSizes[i];
+            } else {
+                glDisableVertexAttribArray(attribIndex);
+            }
+        }
+        if (format.has(0) || format.has(1))
+            glEnableVertexAttribArray(0);
+    }
+
+    void OpenGLRenderContext::unbindFormat()
+    {
+#if !OPENGL_ES || OPENGL_ES >= 310
+        glBindVertexArray(0);
+        GL_CHECK();
+#endif
     }
 
 }

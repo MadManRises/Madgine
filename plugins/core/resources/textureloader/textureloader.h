@@ -64,4 +64,4 @@ namespace Render {
 }
 }
 
-RegisterType(Engine::Render::TextureLoader);
+REGISTER_TYPE(Engine::Render::TextureLoader)

@@ -4,7 +4,7 @@
 
 namespace Engine {
 
-DERIVE_FUNCTION(customScopePtr);
+DERIVE_FUNCTION(customScopePtr)
 
 struct META_EXPORT TypedScopePtr {
 private:

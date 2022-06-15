@@ -46,7 +46,7 @@ vec4 castDirectionalShadowLight(
 		diffuseStrength -= float(lightDepth > shadowDepth) / light.caster.shadowSamples;
 	}
 
-	return castDirectionalLight(light.light, normal, ambientFactor, diffuseFactor *  diffuseStrength);
+	return castDirectionalLight(light.light, normal, ambientFactor, diffuseFactor * diffuseStrength);
 }
 
 vec4 castPointLight(

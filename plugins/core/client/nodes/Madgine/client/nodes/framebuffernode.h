@@ -30,4 +30,4 @@ namespace Render {
 }
 }
 
-RegisterType(Engine::Render::FrameBufferNode);
+REGISTER_TYPE(Engine::Render::FrameBufferNode)

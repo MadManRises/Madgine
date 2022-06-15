@@ -16,7 +16,7 @@ decltype(auto) resetOperation(C &c, bool controlled, Args&&... args)
         return c;
 }
 
-DERIVE_TYPENAME(InsertOperation);
+DERIVE_TYPENAME(InsertOperation)
 
 template <typename C>
 using InsertOperation_t = typename has_typename_InsertOperation<C>::template type<C &>;
@@ -30,7 +30,7 @@ decltype(auto) insertOperation(C &c, Args &&... args)
         return c;
 }
 
-DERIVE_TYPENAME(MultiInsertOperation);
+DERIVE_TYPENAME(MultiInsertOperation)
 
 template <typename C>
 using MultiInsertOperation_t = typename has_typename_MultiInsertOperation<C>::template type<C &>;
@@ -44,7 +44,7 @@ decltype(auto) multiInsertOperation(C &c, Args &&... args)
         return c;
 }
 
-DERIVE_TYPENAME(RemoveOperation);
+DERIVE_TYPENAME(RemoveOperation)
 
 template <typename C>
 using RemoveOperation_t = typename has_typename_RemoveOperation<C>::template type<C &>;

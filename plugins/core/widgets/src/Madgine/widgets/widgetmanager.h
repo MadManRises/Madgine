@@ -114,4 +114,4 @@ namespace Widgets {
 }
 }
 
-RegisterType(Engine::Widgets::WidgetManager);
+REGISTER_TYPE(Engine::Widgets::WidgetManager)

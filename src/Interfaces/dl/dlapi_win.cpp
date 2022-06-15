@@ -16,6 +16,8 @@ namespace Dl {
     DlAPIResult toResult(DWORD error, const char *op)
     {
         switch (error) {
+        case ERROR_MOD_NOT_FOUND:
+            return DlAPIResult::DEPENDENCY_ERROR;
         default:
             fprintf(stderr, "Unknown Windows Dl-Error-Code from %s: %lu\n", op, error);
             fflush(stderr);
@@ -23,8 +25,9 @@ namespace Dl {
         }
     }
 
-    void *openDll(const std::string &name)
+    DlHandle openDll(const std::string &name)
     {
+#if WINAPI_FAMILY_PARTITION(NONGAMESPARTITIONS)
         static struct Guard {
             Guard()
             {
@@ -37,6 +40,7 @@ namespace Dl {
             UINT errorMode;
         } guard;
         SetErrorMode(SEM_FAILCRITICALERRORS);
+#endif
 
         void *handle;
         if (name.empty())
@@ -46,7 +50,7 @@ namespace Dl {
         sLastError = GetLastError();
         SymRefreshModuleList(GetCurrentProcess());
 
-        return handle;
+        return DlHandle{ handle };
     }
 
     void closeDll(void *handle)
@@ -56,15 +60,15 @@ namespace Dl {
         assert(result != 0);
     }
 
-    const void *getDllSymbol(void *dllHandle, const std::string &symbolName)
+    const void *getDllSymbol(const DlHandle &dllHandle, const std::string &symbolName)
     {
-        return reinterpret_cast<const void*>(GetProcAddress((HINSTANCE)dllHandle, symbolName.c_str()));
+        return reinterpret_cast<const void*>(GetProcAddress((HINSTANCE)dllHandle.get(), symbolName.c_str()));
     }
 
-    Filesystem::Path getDllFullPath(void *dllHandle, const std::string &symbolName)
+    Filesystem::Path getDllFullPath(const DlHandle &dllHandle, const std::string &symbolName)
     {
         char buffer[512];
-        auto result = GetModuleFileName((HMODULE)dllHandle, buffer, sizeof(buffer));
+        auto result = GetModuleFileName((HMODULE)dllHandle.get(), buffer, sizeof(buffer));
         assert(result);
         return buffer;
     }
