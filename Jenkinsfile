@@ -246,7 +246,7 @@ pipeline {
 
 	post {
         always {
-			recordIssues enabledForFailure: true, tools: [clang()]
+			recordIssues enabledForFailure: true, tools: []
 
 			sh """
 				doxygen clang-linux-Debug/Doxyfile
