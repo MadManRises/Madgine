@@ -18,10 +18,10 @@
 UNIQUECOMPONENT(Engine::Tools::FileBrowser);
 
 METATABLE_BEGIN_BASE(Engine::Tools::FileBrowser, Engine::Tools::ToolBase)
-METATABLE_END(Engine::Tools::Filesystem)
+METATABLE_END(Engine::Tools::FileBrowser)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::FileBrowser, Engine::Tools::ToolBase)
-SERIALIZETABLE_END(Engine::Tools::Filesystem)
+SERIALIZETABLE_END(Engine::Tools::FileBrowser)
 
 namespace Engine {
 namespace Tools {
