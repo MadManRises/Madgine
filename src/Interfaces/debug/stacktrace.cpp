@@ -5,8 +5,8 @@
 #include "stacktrace.h"
 
 #if WINDOWS
-#    include <DbgHelp.h>
 #    include <Windows.h>
+#    include <DbgHelp.h>
 #elif LINUX
 #    include <execinfo.h>
 #endif

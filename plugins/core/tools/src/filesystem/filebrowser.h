@@ -8,10 +8,10 @@
 namespace Engine {
 namespace Tools {
 
-    struct Filesystem : Tool<Filesystem> {
-        SERIALIZABLEUNIT(Filesystem);
+    struct FileBrowser : Tool<FileBrowser> {
+        SERIALIZABLEUNIT(FileBrowser);
 
-        Filesystem(ImRoot &root);
+        FileBrowser(ImRoot &root);
 
         virtual void render() override;
 
