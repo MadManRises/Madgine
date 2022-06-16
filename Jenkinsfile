@@ -164,15 +164,6 @@ def task = {
 					//	"""
 					//}
 				}           
-				stage("Deploy") {
-					sh """
-					mkdir -p /var/www/html/latest/${env.BRANCH_NAME}
-					cp emscripten-RelWithDebInfo-OpenGL/bin/MadgineLauncher_plugins_tools.* /var/www/html/latest/${env.BRANCH_NAME}
-					"""
-					
-					archiveArtifacts artifacts: '*-RelWithDebInfo*/bin/*, *-RelWithDebInfo*/data/*', onlyIfSuccessful: true
-				}
-
 			} else {
 				stage("dummy") {
 					sh """
@@ -262,8 +253,14 @@ pipeline {
 		success {
 			sh """
 			doxygen clang-linux-Debug/Doxyfile
+			
+			mkdir -p /var/www/html/latest/${env.BRANCH_NAME}
+			
 			cp -ur doc /var/www/html/latest/${env.BRANCH_NAME}
+			cp emscripten-RelWithDebInfo-OpenGL/bin/MadgineLauncher_plugins_tools.* /var/www/html/latest/${env.BRANCH_NAME}
 			"""
+		
+			archiveArtifacts artifacts: '*-RelWithDebInfo*/bin/*, *-RelWithDebInfo*/data/*'
 		}
     }
 }
