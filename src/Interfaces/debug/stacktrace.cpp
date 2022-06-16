@@ -5,8 +5,8 @@
 #include "stacktrace.h"
 
 #if WINDOWS
-#    include <Windows.h>
 #    include <DbgHelp.h>
+#    include <Windows.h>
 #elif LINUX
 #    include <execinfo.h>
 #endif
@@ -68,7 +68,8 @@ namespace Debug {
         FullStackTrace result(resource);
         result.reserve(size);
 
-#if WINDOWS && WINAPI_FAMILY_PARTITION(NONGAMESPARTITIONS)
+#if WINDOWS
+#    if WINAPI_FAMILY_PARTITION(NONGAMESPARTITIONS)
         constexpr size_t BUFFERSIZE = 1024;
         char infoBuffer[sizeof(SYMBOL_INFO) + BUFFERSIZE];
         PSYMBOL_INFO info = reinterpret_cast<PSYMBOL_INFO>(infoBuffer);
@@ -108,6 +109,9 @@ namespace Debug {
         };
         using AddressBuffer = std::pmr::unordered_map<void *, std::optional<BufferObject>>;
         static AddressBuffer addressBuffer { resource };
+#    else
+        size = 0;
+#    endif
 #elif ANDROID
         size = 0;
 #elif LINUX
@@ -117,8 +121,8 @@ namespace Debug {
 #endif
 
         for (int i = 0; i < size; ++i) {
-#if WINDOWS 
-#   if WINAPI_FAMILY_PARTITION(NONGAMESPARTITIONS)
+#if WINDOWS
+#    if WINAPI_FAMILY_PARTITION(NONGAMESPARTITIONS)
             auto pib = addressBuffer.try_emplace(data[i]);
             if (pib.second) {
                 if (SymFromAddr(process, reinterpret_cast<DWORD64>(data[i]), nullptr, info)) {
@@ -142,7 +146,7 @@ namespace Debug {
                     result.erase(--result.end());
                 result.emplace_back(data[i], pib.first->second->mFunction.c_str(), pib.first->second->mFile.c_str(), pib.first->second->mLineNr);
             }
-#   endif
+#    endif
 #elif ANDROID
 #elif LINUX
             if (symbols && symbols[i]) {
