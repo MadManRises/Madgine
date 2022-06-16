@@ -1,6 +1,7 @@
 #pragma once
 
 #include "vertex.h"
+#include "Generic/offsetptr.h"
 
 namespace Engine {
 namespace Render {
