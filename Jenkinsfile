@@ -231,7 +231,7 @@ pipeline {
         stage ("Multiconfiguration Parallel Tasks") {
 	        steps {
 			    script {
-					cmake_args = "-DUSE_CMAKE_LOG=1 "
+					cmake_args = "-DUSE_CMAKE_LOG=1 -DMODULES_ENABLE_TASK_TRACKING=ON"
 					if (params.timeTrace){
 						cmake_args = cmake_args + "-DCMAKE_CXX_FLAGS=-ftime-trace "
 					}
