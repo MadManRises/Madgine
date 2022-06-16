@@ -246,8 +246,6 @@ pipeline {
 
 	post {
         always {
-			junit '**/*.xml'
-		
 			recordIssues enabledForFailure: true, tools: [clang()]
 
 			sh """
@@ -257,6 +255,8 @@ pipeline {
 			
 				cp -ur doc /var/www/html/latest/${env.BRANCH_NAME}
 			"""
+
+			junit '**/*.xml'
 		}
 		success {
 			sh """
