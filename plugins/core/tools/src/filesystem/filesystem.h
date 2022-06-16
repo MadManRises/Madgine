@@ -1,11 +1,9 @@
 #pragma once
 
-#if ENABLE_PLUGINS
+#include "../toolbase.h"
+#include "../toolscollector.h"
 
-#    include "../toolbase.h"
-#    include "../toolscollector.h"
-
-#    include "Interfaces/filesystem/path.h"
+#include "Interfaces/filesystem/path.h"
 
 namespace Engine {
 namespace Tools {
@@ -28,5 +26,3 @@ namespace Tools {
 }
 
 REGISTER_TYPE(Engine::Tools::Filesystem)
-
-#endif

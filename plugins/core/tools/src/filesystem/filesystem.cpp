@@ -1,7 +1,5 @@
 #include "../toolslib.h"
 
-#if ENABLE_PLUGINS
-
 #    include "filesystem.h"
 
 #    include "imgui/imgui.h"
@@ -49,5 +47,3 @@ namespace Tools {
 
 }
 }
-
-#endif

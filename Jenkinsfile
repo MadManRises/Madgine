@@ -242,6 +242,13 @@ pipeline {
 			    }
 	        }
         }
+		stage ("Doxygen") {
+			steps {
+				sh """
+				doxygen clang-linux-Debug/Doxyfile
+				"""
+			}
+		}
     }
 
 	post {
@@ -252,7 +259,6 @@ pipeline {
 		}
 		success {
 			sh """
-			doxygen clang-linux-Debug/Doxyfile
 			
 			mkdir -p /var/www/html/latest/${env.BRANCH_NAME}
 			
