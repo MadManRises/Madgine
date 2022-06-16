@@ -3,8 +3,8 @@
 #if defined(BUILD_Base)
 #include "Madgine/baselib.h"
 #endif
-#if defined(BUILD_ImageLoader)
-#include "imageloaderlib.h"
+#if defined(BUILD_UI)
+#include "Madgine/uilib.h"
 #endif
 #if defined(BUILD_OpenGL)
 #include "OpenGL/opengllib.h"
@@ -15,11 +15,11 @@
 #if defined(BUILD_FontLoader)
 #include "fontloaderlib.h"
 #endif
-#if defined(BUILD_MeshLoader)
-#include "meshloaderlib.h"
-#endif
 #if defined(BUILD_Widgets)
 #include "Madgine/widgetslib.h"
+#endif
+#if defined(BUILD_MeshLoader)
+#include "meshloaderlib.h"
 #endif
 #if defined(BUILD_ClientNodes)
 #include "Madgine/clientnodeslib.h"
@@ -27,18 +27,18 @@
 #if defined(BUILD_Client)
 #include "Madgine/clientlib.h"
 #endif
-#if defined(BUILD_UI)
-#include "Madgine/uilib.h"
+#if defined(BUILD_ImageLoader)
+#include "imageloaderlib.h"
 #endif
 
 #if defined(BUILD_Base)
 #include "Madgine/app/globalapicollector.h"
 #endif
+#if defined(BUILD_UI)
+#include "Madgine/input/handlercollector.h"
+#endif
 #if defined(BUILD_Resources)
 #include "Madgine/resources/resourceloadercollector.h"
-#endif
-#if defined(BUILD_ImageLoader) && defined(BUILD_Resources)
-#include "imageloader.h"
 #endif
 #if defined(BUILD_TestShared)
 #include "uniquecomponent/uniquecomponentshared.h"
@@ -51,7 +51,7 @@
 #endif
 #if defined(BUILD_OpenGL) && defined(BUILD_Resources)
 #include "OpenGL/openglmeshloader.h"
-#include "OpenGL/openglprogramloader.h"
+#include "OpenGL/openglpipelineloader.h"
 #include "OpenGL/openglshaderloader.h"
 #include "OpenGL/opengltextureloader.h"
 #endif
@@ -93,8 +93,8 @@
 #if defined(BUILD_Widgets) && defined(BUILD_Client)
 #include "Madgine/widgets/widgetmanager.h"
 #endif
-#if defined(BUILD_UI)
-#include "Madgine/input/handlercollector.h"
+#if defined(BUILD_ImageLoader) && defined(BUILD_Resources)
+#include "imageloader.h"
 #endif
 
 
@@ -115,7 +115,7 @@ std::vector<Engine::Resources::ResourceLoaderRegistry::F> Engine::Resources::Res
 		createComponent<Engine::Render::OpenGLMeshLoader>,
 #endif
 #if defined(BUILD_OpenGL) && defined(BUILD_Resources)
-		createComponent<Engine::Render::OpenGLProgramLoader>,
+		createComponent<Engine::Render::OpenGLPipelineLoader>,
 #endif
 #if defined(BUILD_OpenGL) && defined(BUILD_Resources)
 		createComponent<Engine::Render::OpenGLShaderLoader>,
@@ -177,11 +177,11 @@ size_t component_index<Engine::Render::GPUMeshLoader>() { return CollectorBaseIn
 #endif
 #if defined(BUILD_OpenGL) && defined(BUILD_Resources)
 template <>
-size_t component_index<Engine::Render::OpenGLProgramLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
+size_t component_index<Engine::Render::OpenGLPipelineLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
 #endif
 #if defined(BUILD_OpenGL) && defined(BUILD_Resources)
 template <>
-size_t component_index<Engine::Render::ProgramLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
+size_t component_index<Engine::Render::PipelineLoader>() { return CollectorBaseIndex_ResourceLoaderBase_OpenGL + 1; }
 #endif
 #if defined(BUILD_OpenGL) && defined(BUILD_Resources)
 template <>

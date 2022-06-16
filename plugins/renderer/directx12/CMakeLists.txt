@@ -1,5 +1,11 @@
+find_package(WindowsSDK)
+
+if (NOT WINDOWSSDK_FOUND)
+	MESSAGE(STATUS "Could not locate Windows SDK! DirectX12 will be disabled")
+	return()
+endif()
+
 Project(DirectX12)
-	
 
 
 set(sources "")
@@ -8,8 +14,6 @@ FolderSources(sources src DirectX12 directx12forward.h directx12lib.h directx12g
 	FolderSources(sources DirectX12 util dx12dump.cpp directx12buffer.cpp directx12buffer.h directx12constantbufferheap.cpp directx12constantbufferheap.h directx12descriptorheap.cpp directx12descriptorheap.h directx12texture.cpp directx12texture.h directx12pipeline.cpp directx12pipeline.h directx12pipelineinstance.cpp directx12pipelineinstance.h)
 
 add_plugin(DirectX12 Madgine Renderer ${sources} PRECOMPILED_HEADER src/DirectX12/directx12lib.h)
-
-find_package(WindowsSDK REQUIRED)
 
 get_windowssdk_library_dirs(${WINDOWSSDK_PREFERRED_DIR} lib_dirs)
 
