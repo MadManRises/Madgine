@@ -1,6 +1,6 @@
 #pragma once
 
-#if __cpp_lib_ranges < 201911L
+#if __cpp_lib_ranges < 202110L
 
 namespace std {
 namespace ranges {
