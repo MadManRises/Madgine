@@ -30,7 +30,11 @@ namespace Render {
     Threading::TaskFuture<bool> DirectX12VertexShaderLoader::HandleType::load(std::string_view name, VertexFormat format)
     {
         char buffer[256];
-        sprintf_s(buffer, 256, "%s_%hu", name.data(), format);
+#if WINDOWS
+        sprintf_s(buffer, "%s_%hu", name.data(), format);
+#else
+        sprintf(buffer, "%s_%hu", name.data(), format);
+#endif
 
         *this = loadManual(buffer);
         ResourceDataInfo *i = info();
@@ -56,7 +60,7 @@ namespace Render {
     }
 
     DirectX12VertexShaderLoader::DirectX12VertexShaderLoader()
-        : ResourceLoader(std::vector<std::string>{})
+        : ResourceLoader(std::vector<std::string> {})
     {
         HRESULT hr = DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&mLibrary));
         //if(FAILED(hr)) Handle error...
@@ -78,7 +82,7 @@ namespace Render {
             auto pos = fullName.rfind('_');
             std::string_view name = fullName.substr(0, pos);
             VertexFormat format;
-            std::from_chars(fullName.data() + pos + 1, fullName.data() + fullName.size(), reinterpret_cast<uint16_t&>(format));
+            std::from_chars(fullName.data() + pos + 1, fullName.data() + fullName.size(), reinterpret_cast<uint16_t &>(format));
 
             DirectX12VertexShaderSourceLoader::HandleType source;
             if (!co_await source.load(name))
@@ -172,7 +176,6 @@ namespace Render {
             return false;
         }
         result->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shader), nullptr);
-
 
         return true;
     }

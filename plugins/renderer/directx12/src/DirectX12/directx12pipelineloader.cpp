@@ -43,7 +43,11 @@ namespace Render {
         HandleType pipeline;
 
         char buffer[256];
-        sprintf_s(buffer, 256, "%s|%s|%s", config.vs.data(), config.gs.data(), config.ps.data());
+#if WINDOWS
+        sprintf_s(buffer, "%s|%s|%s", config.vs.data(), config.gs.data(), config.ps.data());
+#else
+        sprintf(buffer, "%s|%s|%s", config.vs.data(), config.gs.data(), config.ps.data());
+#endif
 
         if (!co_await pipeline.create(buffer, {}, [&](DirectX12PipelineLoader *loader, DirectX12Pipeline &pipeline, ResourceDataInfo &info) -> Threading::Task<bool> {
                 DirectX12GeometryShaderLoader::HandleType geometryShader;

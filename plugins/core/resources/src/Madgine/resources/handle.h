@@ -147,7 +147,7 @@ namespace Resources {
             *this = Loader::loadManual(name, path, std::forward<C>(c), loader);
             typename Loader::ResourceDataInfo *i = info();
             if (!i)
-                return false;
+                return Threading::make_ready_task(false);
             return i->loadingTask();
         }
 

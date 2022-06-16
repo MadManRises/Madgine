@@ -43,7 +43,11 @@ namespace Render {
     {
 
         char buffer[256];
-        sprintf_s(buffer, 256, "%s|%s|%s", config.vs.data(), config.gs.data(), config.ps.data());
+#if WINDOWS
+        sprintf_s(buffer, "%s|%s|%s", config.vs.data(), config.gs.data(), config.ps.data());
+#else
+        sprintf(buffer, "%s|%s|%s", config.vs.data(), config.gs.data(), config.ps.data());
+#endif
 
         HandleType pipeline;
         if (!co_await pipeline.create(buffer, {}, [&](OpenGLPipelineLoader *loader, OpenGLPipeline &pipeline, ResourceDataInfo &info) -> Threading::Task<bool> {
