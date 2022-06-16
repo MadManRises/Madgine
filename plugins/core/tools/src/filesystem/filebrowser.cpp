@@ -1,6 +1,6 @@
 #include "../toolslib.h"
 
-#    include "filesystem.h"
+#    include "filebrowser.h"
 
 #    include "imgui/imgui.h"
 #    include "imgui/imgui_internal.h"
@@ -15,34 +15,34 @@
 
 #    include "Madgine/core/root.h"
 
-UNIQUECOMPONENT(Engine::Tools::Filesystem);
+UNIQUECOMPONENT(Engine::Tools::FileBrowser);
 
-METATABLE_BEGIN_BASE(Engine::Tools::Filesystem, Engine::Tools::ToolBase)
+METATABLE_BEGIN_BASE(Engine::Tools::FileBrowser, Engine::Tools::ToolBase)
 METATABLE_END(Engine::Tools::Filesystem)
 
-SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::Filesystem, Engine::Tools::ToolBase)
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::FileBrowser, Engine::Tools::ToolBase)
 SERIALIZETABLE_END(Engine::Tools::Filesystem)
 
 namespace Engine {
 namespace Tools {
 
-    Filesystem::Filesystem(ImRoot &root)
-        : Tool<Filesystem>(root)
+    FileBrowser::FileBrowser(ImRoot &root)
+        : Tool<FileBrowser>(root)
     {
     }
 
-    void Filesystem::render()
+    void FileBrowser::render()
     {
-        if (ImGui::Begin("Filesystem", &mVisible)) {
+        if (ImGui::Begin("File Browser", &mVisible)) {
             bool accepted;
             ImGui::FilePicker(&mCurrentPath, &mSelectedPath, accepted);
         }
         ImGui::End();
     }
 
-    std::string_view Filesystem::key() const
+    std::string_view FileBrowser::key() const
     {
-        return "Filesystem";
+        return "FileBrowser";
     }
 
 }
