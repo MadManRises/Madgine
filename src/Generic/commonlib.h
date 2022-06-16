@@ -19,6 +19,7 @@
 #endif
 
 #if __unix__
+#    define UNIX 1
 #    if __EMSCRIPTEN__
 #        define EMSCRIPTEN 1
 #    else
