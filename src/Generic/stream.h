@@ -160,13 +160,4 @@ protected:
     std::iostream mStream;
 };
 
-/*struct Stream : InStream, OutStream {
-    Stream(std::unique_ptr<std::streambuf> &&buffer)
-        : InStream(buffer.get())
-        , OutStream(std::move(buffer))
-    {
-    }
-
-    using InStream::buffer;
-};*/
 }

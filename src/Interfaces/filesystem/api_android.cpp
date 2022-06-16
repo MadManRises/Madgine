@@ -184,7 +184,7 @@ namespace Filesystem {
         AAsset *mAsset;
     };
 
-    InStream openFileRead(const Path &p, bool isBinary)
+    Stream openFileRead(const Path &p, bool isBinary)
     {
         if (isAssetPath(p)) {
             return { std::make_unique<AAsset_Streambuf>(assetPath(p)) };
@@ -197,7 +197,7 @@ namespace Filesystem {
         }
     }
 
-    OutStream openFileWrite(const Path &p, bool isBinary)
+    Stream openFileWrite(const Path &p, bool isBinary)
     {
         if (isAssetPath(p)) {
             return { };
