@@ -98,7 +98,7 @@ namespace Serialize {
             } else {
                 std::tuple<ContainerEvent, const_iterator, const_iterator> data { ERASE_RANGE, from,
                     to };
-                return this->writeRequest<iterator>(&data);                
+                return this->template writeRequest<iterator>(&data);                
             }
         }
 

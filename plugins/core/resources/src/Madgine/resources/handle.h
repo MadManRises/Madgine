@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Modules/threading/taskfuture.h"
+#include "Modules/threading/task.h"
 
 namespace Engine {
 namespace Resources {
