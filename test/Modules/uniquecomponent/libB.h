@@ -15,4 +15,4 @@ struct LIBB_EXPORT LibBComponent : Test::TestComponent<LibBComponent> {
     }
 };
 
-RegisterType(LibBComponent);
+REGISTER_TYPE(LibBComponent)

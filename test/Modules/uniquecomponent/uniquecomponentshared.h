@@ -18,4 +18,4 @@ struct TestBase {
 
 DECLARE_UNIQUE_COMPONENT(Test, Test, TestBase, TestDriver &)
 
-RegisterType(TestBase);
+REGISTER_TYPE(TestBase)
