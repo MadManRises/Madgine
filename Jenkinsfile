@@ -115,16 +115,6 @@ def staticTask = {
 				//	"""
 				//}
 			}     
-			stage("Deploy") {
-				if (name == "emscripten-Debug-OpenGL") {
-					sh """
-					mkdir -p /var/www/html/latest/${env.BRANCH_NAME}
-					cp ${name}/bin/MadgineLauncher_plugins_tools.* /var/www/html/latest/${env.BRANCH_NAME}
-					"""
-				}
-				archiveArtifacts artifacts: '*-RelWithDebInfo-*/bin/*, *-RelWithDebInfo-*/data/*', onlyIfSuccessful: true
-			}
-
         }
     }
 }
@@ -175,7 +165,12 @@ def task = {
 					//}
 				}           
 				stage("Deploy") {
-					archiveArtifacts artifacts: '*-RelWithDebInfo/bin/*, *-RelWithDebInfo-*/data/*', onlyIfSuccessful: true
+					sh """
+					mkdir -p /var/www/html/latest/${env.BRANCH_NAME}
+					cp emscripten-RelWithDebInfo-OpenGL/bin/MadgineLauncher_plugins_tools.* /var/www/html/latest/${env.BRANCH_NAME}
+					"""
+					
+					archiveArtifacts artifacts: '*-RelWithDebInfo*/bin/*, *-RelWithDebInfo*/data/*', onlyIfSuccessful: true
 				}
 
 			} else {
