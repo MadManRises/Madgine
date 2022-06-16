@@ -49,7 +49,7 @@ namespace Dl {
     Filesystem::Path getDllFullPath(const DlHandle &dllHandle, const std::string &symbolName)
     {
         Dl_info info;
-        auto result = dladdr(getDllSymbol(dllHandle.get(), symbolName.c_str()), &info);
+        auto result = dladdr(getDllSymbol(dllHandle, symbolName.c_str()), &info);
         assert(result);
         return info.dli_fname;
     }
