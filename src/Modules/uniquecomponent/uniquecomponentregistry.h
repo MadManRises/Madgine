@@ -73,7 +73,7 @@ struct MODULES_EXPORT UniqueComponentRegistryBase {
 
     const Plugins::BinaryInfo *mBinary;
 
-    std::map<std::string_view, size_t> mComponentsByName;
+    std::map<std::string_view, IndexType<uint32_t>> mComponentsByName;
     bool mIsNamed = false;
 
 protected:
@@ -227,7 +227,7 @@ struct NamedUniqueComponentRegistry : UniqueComponentRegistry<_Base, _Ty...> {
         return static_cast<NamedUniqueComponentRegistry &>(uniqueComponentRegistry<UniqueComponentRegistry<_Base, _Ty...>>());
     }
 
-    static const std::map<std::string_view, size_t> &sComponentsByName()
+    static const std::map<std::string_view, IndexType<uint32_t>> &sComponentsByName()
     {
         return sInstance().mComponentsByName;
     }
