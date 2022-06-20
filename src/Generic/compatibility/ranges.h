@@ -5,7 +5,7 @@
 namespace std {
 namespace ranges {
 
-#if __cpp_lib_ranges < 201911L || ANDROID
+#if (__cpp_lib_ranges < 201911L) || ANDROID || OSX || IOS
     template <class T>
     concept range = requires(T &t)
     {
