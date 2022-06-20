@@ -6,6 +6,9 @@
 
 #    include "Meta/keyvalue/metatable_impl.h"
 
+METATABLE_BEGIN(Engine::Server::ServerBase)
+METATABLE_END(Engine::Server::ServerBase)
+
 namespace Engine {
 namespace Server {
     ServerBase::ServerBase(const std::string &name)
@@ -53,8 +56,5 @@ namespace Server {
 
 }
 }
-
-METATABLE_BEGIN(Engine::Server::ServerBase)
-METATABLE_END(Engine::Server::ServerBase)
 
 #endif

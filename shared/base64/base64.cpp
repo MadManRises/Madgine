@@ -12,7 +12,8 @@ namespace Base64 {
     static constexpr const char base64Symbols[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     static constexpr std::array<uint8_t, 256> base64Lookup = []() {
         std::array<uint8_t, 256> result;
-        result.fill(255);
+        std::fill_n(result.begin(), 256, 255);
+        //result.fill(255); //TODO: Not constexpr in current NDK
         for (uint8_t i = 0; i < 64; ++i) {
             result[base64Symbols[i]] = i;
         }

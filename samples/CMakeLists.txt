@@ -1,2 +1,5 @@
 add_subdirectory(clickbrick)
-add_subdirectory(MMOLobby)
+
+if (MODULES_ENABLE_PLUGINS)
+    add_subdirectory(MMOLobby)
+endif()

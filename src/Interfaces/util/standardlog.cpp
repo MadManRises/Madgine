@@ -35,7 +35,7 @@ namespace Util {
         case MessageType::DEBUG_TYPE:
             prio = ANDROID_LOG_DEBUG;
             break;
-        case MessageType::LOG_TYPE:
+        case MessageType::INFO_TYPE:
             prio = ANDROID_LOG_INFO;
             break;
         case MessageType::WARNING_TYPE:
@@ -47,7 +47,7 @@ namespace Util {
         default:
             std::terminate();
         }
-        __android_log_print(prio, name.c_str(), "%s", msg.c_str());
+        __android_log_print(prio, name.c_str(), "%s", msg.data());
 #else
 
         time_t time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());

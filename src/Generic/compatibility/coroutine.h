@@ -1,6 +1,6 @@
 #pragma once
 
-#if CLANG
+#if __cpp_lib_coroutine < 201902L
 namespace std {
 namespace experimental {
 

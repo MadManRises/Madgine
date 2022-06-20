@@ -70,7 +70,7 @@ if (NOT ANDROID AND NOT EMSCRIPTEN AND NOT IOS)
 	export_to_workspace(OpenAL)
 endif()
 
-if (NOT IOS)
+if (NOT IOS AND NOT EMSCRIPTEN)
 	add_subdirectory(libogg-1.3.4)
 
 	add_library(Ogg::ogg ALIAS ogg)

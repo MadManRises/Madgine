@@ -327,11 +327,6 @@ namespace Window {
         return { info };
     }
 
-    void OSWindow::setCursorIcon(Input::CursorIcon icon)
-    {
-        //TODO
-    }
-
     WindowData OSWindow::data()
     {
         return {};
