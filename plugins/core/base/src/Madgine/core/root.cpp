@@ -181,7 +181,7 @@ std::vector<)"
                 for (const std::vector<const TypeInfo *> &typeInfos : collector->mElementInfos) {
                     const TypeInfo *typeInfo = typeInfos.front();
                     if (notInSkip(typeInfo))
-                        file << "		createComponent<"
+                        file << "		UniqueComponent::createComponent<"
                              << typeInfo->mFullName << ">,\n";
                 }
                 file.endCondition("BUILD_"s + collector->mBinary->mName);

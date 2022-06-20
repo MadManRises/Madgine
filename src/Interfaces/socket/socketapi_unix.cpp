@@ -117,7 +117,7 @@ SocketAPIResult Socket::open(int port)
 
     int s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (s < 0) {
-        return getError("socket");
+        return SocketAPI::getError("socket");
     }
 
     mSocket = s;
@@ -133,14 +133,14 @@ SocketAPIResult Socket::open(int port)
     }
 
     if (bind(s, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
-        SocketAPIResult result = getError("bind");
+        SocketAPIResult result = SocketAPI::getError("bind");
         close();
         return result;
     }
 
-    int result = listen(sock, SOMAXCONN);
+    int result = listen(s, SOMAXCONN);
     if (result != 0) {
-        SocketAPIResult result = getError("listen");
+        SocketAPIResult result = SocketAPI::getError("listen");
         close();
         return result;
     }
@@ -188,7 +188,7 @@ std::pair<Socket, SocketAPIResult> Socket::accept(TimeOut timeout) const
     }
 }
 
-SocketAPIResult SocketAPI::connect(std::string_view url, int portNr)
+SocketAPIResult Socket::connect(std::string_view url, int portNr)
 {
     if (*this)
         return SocketAPIResult::ALREADY_IN_USE;
@@ -200,12 +200,12 @@ SocketAPIResult SocketAPI::connect(std::string_view url, int portNr)
     target.sin_port = htons(portNr); //Port to connect on
 
     if (inet_pton(AF_INET, url.data(), &target.sin_addr) <= 0) {
-        return getError("inet_pton");
+        return SocketAPI::getError("inet_pton");
     }
 
     int s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); //Create socket
     if (s < 0) {
-        return getError("socket");
+        return SocketAPI::getError("socket");
     }
 
     mSocket = s;
@@ -218,7 +218,7 @@ SocketAPIResult SocketAPI::connect(std::string_view url, int portNr)
     //Try connecting...
 
     if (::connect(s, (struct sockaddr *)&target, sizeof(target)) < 0) {
-        SocketAPIResult error = getError("connect");
+        SocketAPIResult error = SocketAPI::getError("connect");
         close();
         return error;
     }
