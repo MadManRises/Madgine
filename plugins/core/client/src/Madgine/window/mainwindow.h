@@ -47,16 +47,27 @@ namespace Window {
     struct MADGINE_CLIENT_EXPORT MainWindow : WindowEventListener,
                                               Serialize::SerializableDataUnit,
                                               MadgineObject<MainWindow> {
-        SERIALIZABLEUNIT(MainWindow);
+        SERIALIZABLEUNIT(MainWindow)
 
         MainWindow(const WindowSettings &settings);
         ~MainWindow();
 
+        /**
+     * @name MadgineObject interface
+    */
+        ///@{
         Threading::Task<bool> init();
         Threading::Task<void> finalize();
+        ///@}
 
         void render();
 
+        void update();
+
+        /**
+     * @name Components
+    */
+        ///@{
         auto &components()
         {
             return mComponents;
@@ -65,10 +76,14 @@ namespace Window {
         template <typename T>
         T &getWindowComponent()
         {
-            return static_cast<T &>(getWindowComponent(component_index<T>()));
+            return static_cast<T &>(getWindowComponent(UniqueComponent::component_index<T>()));
         }
 
         MainWindowComponentBase &getWindowComponent(size_t i);
+
+        Rect2i getScreenSpace();
+        void applyClientSpaceResize(MainWindowComponentBase *component = nullptr);
+        ///@}
 
         ToolWindow *createToolWindow(const WindowSettings &settings);
         void destroyToolWindow(ToolWindow *w);
@@ -81,19 +96,20 @@ namespace Window {
         Threading::TaskQueue *taskQueue();
         void shutdown();
 
-        Rect2i getScreenSpace();
-        void applyClientSpaceResize(MainWindowComponentBase *component = nullptr);
-
+           /**
+     * @name Input propagation
+    */
+        ///@{
         bool injectKeyPress(const Input::KeyEventArgs &arg) override;
         bool injectKeyRelease(const Input::KeyEventArgs &arg) override;
         bool injectPointerPress(const Input::PointerEventArgs &arg) override;
         bool injectPointerRelease(const Input::PointerEventArgs &arg) override;
         bool injectPointerMove(const Input::PointerEventArgs &arg) override;
         bool injectAxisEvent(const Input::AxisEventArgs &arg) override;
+        ///@}
 
         //TESTING
         static void sTestScreens(size_t n);
-
 
     protected:
         void onClose() override;

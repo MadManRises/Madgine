@@ -24,7 +24,7 @@ namespace Tools {
         template <typename T>
         T &getTool()
         {
-            return static_cast<T &>(getToolComponent(::Engine::component_index<T>()));
+            return static_cast<T &>(getToolComponent(::Engine::UniqueComponent::component_index<T>()));
         }
 
         void render();

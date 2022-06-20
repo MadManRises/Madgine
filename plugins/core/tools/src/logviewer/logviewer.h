@@ -9,7 +9,7 @@ namespace Engine {
 namespace Tools {
 
     struct LogViewer : Tool<LogViewer>, Util::LogListener {
-        SERIALIZABLEUNIT(LogViewer);
+        SERIALIZABLEUNIT(LogViewer)
 
         LogViewer(ImRoot &root);
         ~LogViewer();

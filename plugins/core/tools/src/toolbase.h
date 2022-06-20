@@ -12,7 +12,7 @@ namespace Engine {
 namespace Tools {
 
     struct MADGINE_TOOLS_EXPORT ToolBase : Serialize::VirtualSerializableUnitBase<VirtualScopeBase<>, Serialize::SerializableUnitBase>, MadgineObject<ToolBase> {
-        SERIALIZABLEUNIT(ToolBase);
+        SERIALIZABLEUNIT(ToolBase)
 
         ToolBase(ImRoot &root);
         virtual ~ToolBase() = default;
@@ -34,7 +34,7 @@ namespace Tools {
         template <typename T>
         T &getTool()
         {
-            return static_cast<T &>(getToolComponent(component_index<T>()));
+            return static_cast<T &>(getToolComponent(UniqueComponent::component_index<T>()));
         }
 
         ImRoot &root();

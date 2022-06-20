@@ -15,7 +15,7 @@ namespace NodeGraph {
 
     struct MADGINE_NODEGRAPH_EXPORT NodeBase : Serialize::VirtualSerializableDataBase<VirtualScopeBase<>, Serialize::SerializableDataUnit> {
 
-        SERIALIZABLEUNIT(NodeBase);
+        SERIALIZABLEUNIT(NodeBase)
 
         NodeBase(NodeGraph &graph);
         NodeBase(const NodeBase &other, NodeGraph &graph);

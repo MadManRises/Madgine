@@ -26,7 +26,7 @@ namespace Engine {
 namespace Scene {
     namespace Entity {
         Mesh::Mesh(const ObjectPtr &data)
-            : NamedUniqueComponent(data)
+            : NamedComponent(data)
         {
             Engine::ValueType v;
             if (data.getValue(v, "mesh") && v.is<std::string>()) {

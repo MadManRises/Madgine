@@ -11,7 +11,7 @@ namespace Engine {
 namespace Input {
 
     struct MADGINE_UI_EXPORT Handler : MadgineObject<Handler>, VirtualScopeBase<> {
-        SERIALIZABLEUNIT(Handler);
+        SERIALIZABLEUNIT(Handler)
 
         Handler(UIManager &ui, std::string_view widgetName);
         virtual ~Handler() = default;
@@ -29,7 +29,7 @@ namespace Input {
         template <typename T>
         T &getGuiHandler()
         {
-            return static_cast<T &>(getGuiHandler(component_index<T>()));
+            return static_cast<T &>(getGuiHandler(UniqueComponent::component_index<T>()));
         }
 
         GuiHandlerBase &getGuiHandler(size_t i);
@@ -37,7 +37,7 @@ namespace Input {
         template <typename T>
         T &getGameHandler()
         {
-            return static_cast<T &>(getGameHandler(component_index<T>()));
+            return static_cast<T &>(getGameHandler(UniqueComponent::component_index<T>()));
         }
 
         GameHandlerBase &getGameHandler(size_t i);

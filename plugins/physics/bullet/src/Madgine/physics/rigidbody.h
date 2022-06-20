@@ -12,7 +12,7 @@ namespace Engine {
 namespace Physics {
 
     struct MADGINE_BULLET_EXPORT RigidBody : Scene::Entity::EntityComponent<RigidBody> {
-        SERIALIZABLEUNIT(RigidBody);
+        SERIALIZABLEUNIT(RigidBody)
 
         using Container = FreeListContainer<Scene::Entity::EntityComponentContainerImpl<std::vector>, Scene::Entity::EntityComponentFreeListConfig>;
 

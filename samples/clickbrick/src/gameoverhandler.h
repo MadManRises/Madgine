@@ -5,7 +5,7 @@
 namespace ClickBrick {
 
     struct GameOverHandler : Engine::Input::GuiHandler<GameOverHandler> {
-        SERIALIZABLEUNIT(GameOverHandler);
+        SERIALIZABLEUNIT(GameOverHandler)
 
         GameOverHandler(Engine::Input::UIManager &ui);
 

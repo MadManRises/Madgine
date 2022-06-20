@@ -8,7 +8,7 @@ namespace Engine {
 namespace Dl {
 
     ENUM_BASE(DlAPIResult, GenericResult,
-        DEPENDENCY_ERROR);
+        DEPENDENCY_ERROR)
 
     INTERFACES_EXPORT void closeDll(void *handle);
     using DlHandle = std::unique_ptr<void, Functor<&closeDll>>;

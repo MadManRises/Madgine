@@ -23,7 +23,7 @@ namespace Engine {
 namespace Scene {
     namespace Entity {
         PointLight::PointLight(const ObjectPtr &data)
-            : NamedUniqueComponent(data)
+            : NamedComponent(data)
         {
         }
     }

@@ -9,7 +9,7 @@ namespace Engine {
 namespace Tools {
 
     struct FileBrowser : Tool<FileBrowser> {
-        SERIALIZABLEUNIT(FileBrowser);
+        SERIALIZABLEUNIT(FileBrowser)
 
         FileBrowser(ImRoot &root);
 

@@ -88,13 +88,13 @@ namespace Physics {
     };
 
     RigidBody::RigidBody(const ObjectPtr &data)
-        : NamedUniqueComponent(data)
+        : NamedComponent(data)
 
     {
     }
 
     RigidBody::RigidBody(RigidBody &&other)
-        : NamedUniqueComponent(std::move(other))
+        : NamedComponent(std::move(other))
         , mShapeHandle(std::move(other.mShapeHandle))
         , mMgr(other.mMgr)
         , mData(std::move(other.mData))
@@ -107,7 +107,7 @@ namespace Physics {
 
     RigidBody &RigidBody::operator=(RigidBody &&other)
     {
-        NamedUniqueComponent::operator=(std::move(other));
+        NamedComponent::operator=(std::move(other));
         std::swap(mShapeHandle, other.mShapeHandle);
         mMgr = other.mMgr;
         std::swap(mData, other.mData);

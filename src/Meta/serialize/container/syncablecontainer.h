@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Generic/future.h"
 #include "serializablecontainer.h"
 #include "syncable.h"
 

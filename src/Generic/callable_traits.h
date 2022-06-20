@@ -8,7 +8,7 @@ struct CallableType {
     typedef F type;
     typedef R return_type;
     typedef T class_type;
-    typedef type_pack<_Ty...> argument_types;    
+    typedef type_pack<_Ty...> argument_types;
     typedef type_pack<std::decay_t<_Ty>...> decay_argument_types;
 
     static constexpr const bool is_member_function = !std::same_as<T, void>;
@@ -21,18 +21,19 @@ struct CallableType {
     };
 };
 
-template <typename T>
-struct StaticCallableMaker;
-
-template <typename F, typename R, typename T, typename... _Ty>
-struct StaticCallableMaker<CallableType<F, R, T, _Ty...>> {
-    typedef CallableType<T, R, void, _Ty...> type;
-};
-
-template <typename T>
-using makeStaticCallable = typename StaticCallableMaker<T>::type;
-
 namespace __generic_impl__ {
+
+    template <typename T>
+    struct StaticCallableMaker;
+
+    template <typename F, typename R, typename T, typename... _Ty>
+    struct StaticCallableMaker<CallableType<F, R, T, _Ty...>> {
+        typedef CallableType<T, R, void, _Ty...> type;
+    };
+
+    template <typename T>
+    using makeStaticCallable = typename StaticCallableMaker<T>::type;
+
     template <typename R, typename T, typename... _Ty>
     CallableType<R (T::*)(_Ty...), R, T, _Ty...> callableTypeDeducer(R (T::*f)(_Ty...));
 
@@ -54,21 +55,23 @@ namespace __generic_impl__ {
 template <typename F>
 using CallableTraits = decltype(__generic_impl__::callableTypeDeducer(std::declval<F>()));
 
-template <typename F, typename = void>
-struct callable_is_variadic : std::true_type {
-};
+namespace __generic_impl__ {
+    template <typename F, typename = void>
+    struct callable_is_variadic : std::true_type {
+    };
 
-template <typename F>
-struct callable_is_variadic<F, std::void_t<CallableTraits<F>>> : std::false_type {
-};
+    template <typename F>
+    struct callable_is_variadic<F, std::void_t<CallableTraits<F>>> : std::false_type {
+    };
 
-template <typename F>
-constexpr const bool callable_is_variadic_v = callable_is_variadic<F>::value;
+    template <typename F>
+    constexpr const bool callable_is_variadic_v = callable_is_variadic<F>::value;
+}
 
 template <typename F>
 constexpr size_t callable_argument_count(size_t expected)
 {
-    if constexpr (callable_is_variadic_v<F>) {
+    if constexpr (__generic_impl__::callable_is_variadic_v<F>) {
         return expected;
     } else {
         return CallableTraits<F>::argument_count;
@@ -87,13 +90,15 @@ constexpr size_t callable_argument_count()
     return CallableTraits<decltype(f)>::argument_count;
 }
 
-template <template <auto, typename, typename, typename...> typename C, auto f>
-struct Partial {
-    template <typename Arg1, typename Arg2, typename... Args>
-    struct apply {
-        using type = C<f, Arg1, Arg2, Args...>;
+namespace __generic_impl__ {
+    template <template <auto, typename, typename, typename...> typename C, auto f>
+    struct Partial {
+        template <typename Arg1, typename Arg2, typename... Args>
+        struct apply {
+            using type = C<f, Arg1, Arg2, Args...>;
+        };
     };
-};
+}
 
 template <auto f>
 struct Callable {
@@ -102,7 +107,7 @@ struct Callable {
 
     template <template <auto, typename, typename, typename...> typename C, typename... Args>
     struct instance {
-        using type = typename traits::template instance<Partial<C, f>::template apply, Args...>::type;
+        using type = typename traits::template instance<__generic_impl__::Partial<C, f>::template apply, Args...>::type;
     };
 };
 

@@ -9,7 +9,7 @@ namespace NodeGraph {
 
     struct MADGINE_NODEGRAPH_EXPORT NodeGraph : Serialize::SerializableDataUnit {
 
-        SERIALIZABLEUNIT(NodeGraph);
+        SERIALIZABLEUNIT(NodeGraph)
 
         NodeGraph();
         NodeGraph(const NodeGraph &other);

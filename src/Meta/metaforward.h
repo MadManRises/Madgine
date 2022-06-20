@@ -123,7 +123,7 @@ namespace Serialize {
         REQUEST,
         FUNCTION_ACTION,
         FUNCTION_REQUEST
-    );
+    )
 
     enum FunctionType {
         QUERY,

@@ -14,6 +14,6 @@ namespace Widgets {
         LAYOUT,
         LABEL,
         BAR,
-        IMAGE);
+        IMAGE)
 }
 }

@@ -43,7 +43,7 @@ FolderSources(sources "" tools)
 
 add_tools(Client ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/clienttoolslib.h)
 
-target_link_plugins(ClientTools Tools PipelineLoader TextureLoader)
+target_link_plugins(ClientTools Tools PipelineLoader TextureLoader FontLoader)
 target_link_libraries(ClientTools PUBLIC FilesystemSerialize)
 
 

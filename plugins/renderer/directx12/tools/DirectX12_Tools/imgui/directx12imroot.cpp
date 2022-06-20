@@ -9,9 +9,9 @@
 
 #include "im3d/im3d.h"
 
-#include "fontloader.h"
-
 #include "DirectX12/directx12rendercontext.h"
+
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 #include "Madgine/window/mainwindow.h"
 
@@ -44,17 +44,6 @@ namespace Tools {
                 ImGui::GetIO().RenderDrawListsFn = [](ImDrawData *data) {
                     ImGui_ImplDX12_RenderDrawData(data, Render::DirectX12RenderContext::getSingleton().mCommandList.mList);
                 };*/
-
-        Im3D::GetIO().mFetchFont = [](const char *fontName) {
-            Render::FontLoader::HandleType font;
-            font.load(fontName);
-
-            return Im3DFont {
-                (Im3DTextureId)font->mTexture->mTextureHandle,
-                font->mTextureSize,
-                font->mGlyphs.data()
-            };
-        };
 
         co_return true;
     }

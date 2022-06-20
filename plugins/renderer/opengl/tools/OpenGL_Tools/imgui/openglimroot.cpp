@@ -9,9 +9,9 @@
 
 #include "im3d/im3d.h"
 
-#include "Madgine/window/mainwindow.h"
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-#include "fontloader.h"
+#include "Madgine/window/mainwindow.h"
 
 VIRTUALUNIQUECOMPONENT(Engine::Tools::OpenGLImRoot)
 
@@ -42,18 +42,6 @@ METATABLE_END(Engine::Tools::OpenGLImRoot)
             ImGui_ImplOpenGL3_CreateDeviceObjects();
             /*if (!(ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable))
                 ImGui::GetIO().RenderDrawListsFn = ImGui_ImplOpenGL3_RenderDrawData;*/
-
-            Im3D::GetIO().mFetchFont = [](const char *fontName) {
-                Render::FontLoader::HandleType font;
-				font.load(fontName);
-                font.info()->setPersistent(true);
-
-                return Im3DFont {
-                    (Im3DTextureId)font->mTexture->mTextureHandle,
-                    font->mTextureSize,
-                    font->mGlyphs.data()
-                };
-            };
 
 			co_return true;
         }

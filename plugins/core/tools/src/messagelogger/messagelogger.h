@@ -12,7 +12,7 @@ namespace Serialize {
 namespace Tools {
 
     struct MessageLogger : Tool<MessageLogger> {
-        SERIALIZABLEUNIT(MessageLogger);
+        SERIALIZABLEUNIT(MessageLogger)
 
         MessageLogger(ImRoot &root);
         ~MessageLogger();

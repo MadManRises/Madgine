@@ -83,8 +83,11 @@ int SocketAPI::getOSError()
     return WSAGetLastError();
 }
 
-std::pair<Socket, SocketAPIResult> SocketAPI::socket(int port)
+SocketAPIResult Socket::open(int port)
 {
+    if (*this)
+        return SocketAPIResult::ALREADY_IN_USE;
+
     SOCKADDR_IN addr;
     memset(&addr, 0, sizeof addr);
     addr.sin_family = AF_INET;
@@ -95,24 +98,24 @@ std::pair<Socket, SocketAPIResult> SocketAPI::socket(int port)
     SOCKET s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     if (s == INVALID_SOCKET) {
-        return { Socket {}, getError("socket") };
+        return SocketAPI::getError("socket");
     }
 
-    Socket sock { s };
-
-    if (bind(sock, LPSOCKADDR(&addr), sizeof addr) == SOCKET_ERROR) {
-        SocketAPIResult result = getError("bind");
-        sock.close();
-        return { std::move(sock), result };
+    mSocket = s;
+    
+    if (bind(mSocket, LPSOCKADDR(&addr), sizeof addr) == SOCKET_ERROR) {
+        SocketAPIResult result = SocketAPI::getError("bind");
+        close();
+        return result;
     }
 
-    int result = listen(sock, SOMAXCONN);
+    int result = listen(s, SOMAXCONN);
     if (result == SOCKET_ERROR) {
-        SocketAPIResult result = getError("listen");
-        sock.close();
-        return { std::move(sock), result };
+        SocketAPIResult result = SocketAPI::getError("listen");
+        close();
+        return result;
     }
-    return { std::move(sock), SocketAPIResult::SUCCESS };
+    return SocketAPIResult::SUCCESS;
 }
 
 std::pair<Socket, SocketAPIResult> Socket::accept(TimeOut timeout) const
@@ -141,10 +144,11 @@ std::pair<Socket, SocketAPIResult> Socket::accept(TimeOut timeout) const
 
     SOCKET s = ::accept(mSocket, nullptr, nullptr);
     assert(s != INVALID_SOCKET);
-    Socket sock { s };
+    Socket sock;
+    sock.mSocket = s;
 
     u_long iMode = 1;
-    if (ioctlsocket(sock, FIONBIO, &iMode) == SOCKET_ERROR) {
+    if (ioctlsocket(s, FIONBIO, &iMode) == SOCKET_ERROR) {
         SocketAPIResult result = SocketAPI::getError("accept");
         sock.close();
         return { std::move(sock), result };
@@ -152,39 +156,42 @@ std::pair<Socket, SocketAPIResult> Socket::accept(TimeOut timeout) const
     return { std::move(sock), SocketAPIResult::SUCCESS };
 }
 
-std::pair<Socket, SocketAPIResult> SocketAPI::connect(const std::string &url, int portNr)
+SocketAPIResult Socket::connect(std::string_view url, int portNr)
 {
+    if (*this)
+        return SocketAPIResult::ALREADY_IN_USE;
+
     //Fill out the information needed to initialize a socket…
     SOCKADDR_IN target; //Socket address information
 
     target.sin_family = AF_INET; // address family Internet
     target.sin_port = htons(portNr); //Port to connect on
-    InetPton(AF_INET, url.c_str(), &target.sin_addr.s_addr);
+    InetPton(AF_INET, url.data(), &target.sin_addr.s_addr);
 
     SOCKET s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); //Create socket
 
     if (s == INVALID_SOCKET) {
-        return { Socket {}, getError("socket") };
+        return SocketAPI::getError("socket");
     }
 
-    Socket sock { s };
+    mSocket = s;
 
     //Try connecting...
 
-    if (::connect(sock, reinterpret_cast<SOCKADDR *>(&target), sizeof target) == SOCKET_ERROR) {
-        SocketAPIResult error = getError("connect");
-        sock.close();
-        return { std::move(sock), error };
+    if (::connect(s, reinterpret_cast<SOCKADDR *>(&target), sizeof target) == SOCKET_ERROR) {
+        SocketAPIResult error = SocketAPI::getError("connect");
+        close();
+        return error;
     }
 
     u_long iMode = 1;
-    if (ioctlsocket(sock, FIONBIO, &iMode)) {
-        SocketAPIResult error = getError("ioctlsocket");
-        sock.close();
-        return { std::move(sock), error };
+    if (ioctlsocket(s, FIONBIO, &iMode)) {
+        SocketAPIResult error = SocketAPI::getError("ioctlsocket");
+        close();
+        return error;
     }
 
-    return { std::move(sock), SocketAPIResult::SUCCESS };
+    return SocketAPIResult::SUCCESS;
 }
 }
 

@@ -45,9 +45,7 @@ namespace Network {
         if (isServer())
             return NetworkManagerResult::ALREADY_CONNECTED;
 
-        SocketAPIResult error;
-
-        std::tie(mServerSocket, error) = SocketAPI::socket(port);
+        SocketAPIResult error = mServerSocket.open(port);
 
         if (!isServer()) {
             NetworkManagerResult result = recordSocketError(error);
@@ -57,16 +55,14 @@ namespace Network {
         return NetworkManagerResult::SUCCESS;
     }
 
-    NetworkManagerResult NetworkManager::connect(const std::string &url, int portNr, std::unique_ptr<Serialize::Formatter> (*format)(), TimeOut timeout)
+    NetworkManagerResult NetworkManager::connect(std::string_view url, int portNr, std::unique_ptr<Serialize::Formatter> (*format)(), TimeOut timeout)
     {
         if (isConnected()) {
             return NetworkManagerResult::ALREADY_CONNECTED;
         }
 
-        SocketAPIResult error;
-
         Socket socket;
-        std::tie(socket, error) = SocketAPI::connect(url, portNr);
+        SocketAPIResult error = socket.connect(url, portNr);
 
         if (!socket) {
             NetworkManagerResult result = recordSocketError(error);

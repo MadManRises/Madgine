@@ -11,8 +11,6 @@ namespace Window {
 
         void close();
 
-        Vector3 getScreenSize();
-
         OSWindow *osWindow();
 
         Render::RenderTarget *getRenderer();

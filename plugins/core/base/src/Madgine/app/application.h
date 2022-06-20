@@ -24,10 +24,10 @@ namespace App {
         template <typename T>
         T &getGlobalAPIComponent()
         {
-            return static_cast<T &>(getGlobalAPIComponent(component_index<T>()));
-        }     
+            return static_cast<T &>(getGlobalAPIComponent(UniqueComponent::component_index<T>()));
+        }
 
-        GlobalAPIBase &getGlobalAPIComponent(size_t i);        
+        GlobalAPIBase &getGlobalAPIComponent(size_t i);
 
         Threading::TaskQueue *taskQueue();
 
@@ -35,9 +35,14 @@ namespace App {
         static Application *getSingletonPtr();
 
     protected:
+        /**
+     * @name MadgineObject interface
+    */
+        ///@{
         Threading::Task<bool> init();
         Threading::Task<void> finalize();
         friend struct MadgineObject<Application>;
+        ///@}
 
     private:
         Threading::TaskQueue mTaskQueue;

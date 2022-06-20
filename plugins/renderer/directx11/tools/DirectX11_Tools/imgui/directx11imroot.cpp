@@ -9,9 +9,9 @@
 
 #include "im3d/im3d.h"
 
-#include "fontloader.h"
-
 #include "DirectX11/directx11rendercontext.h"
+
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 #include "Madgine/window/mainwindow.h"
 
@@ -47,22 +47,6 @@ namespace Tools {
         io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset; // We can honor the ImDrawCmd::VtxOffset field, allowing for large meshes.
         io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;*/ // We can create multi-viewports on the Renderer side (optional)
 
-
-        Im3D::GetIO().mFetchFont = [](const char *fontName) {
-            Render::FontLoader::HandleType font;
-            font.load(fontName);
-            font.info()->setPersistent(true);
-
-            if (font.available()) {
-                return Im3DFont {
-                    (Im3DTextureId)font->mTexture->mTextureHandle,
-                    font->mTextureSize,
-                    font->mGlyphs.data()
-                };
-            } else {
-                return Im3DFont {};
-            }
-        };
 
         co_return true;
     }

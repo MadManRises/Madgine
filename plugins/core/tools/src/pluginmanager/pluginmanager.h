@@ -9,7 +9,7 @@ namespace Engine {
 namespace Tools {
 
     struct PluginManager : Tool<PluginManager> {
-        SERIALIZABLEUNIT(PluginManager);
+        SERIALIZABLEUNIT(PluginManager)
 
         PluginManager(ImRoot &root);
 

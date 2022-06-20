@@ -36,7 +36,7 @@ namespace Core {
 #if ENABLE_PLUGINS
         mPluginManager = std::make_unique<Plugins::PluginManager>();
         mPluginManager->setup(!noPluginCache, mCLI->mProgramPath.stem(), loadPlugins);
-        mCollectorManager = std::make_unique<UniqueComponentCollectorManager>(*mPluginManager);
+        mCollectorManager = std::make_unique<UniqueComponent::CollectorManager>(*mPluginManager);
 
         if (!exportPlugins->empty()) {
             auto helper = [this](const Filesystem::Path &path, bool hasTools) {
@@ -113,12 +113,12 @@ namespace Core {
             return !hasTools && StringUtil::endsWith(bin->mName, "Tools");
         };
 
-        for (UniqueComponentRegistryBase *reg : registryRegistry()) {
+        for (UniqueComponent::RegistryBase *reg : UniqueComponent::registryRegistry()) {
             if (skipBinary(reg->mBinary))
                 continue;
             binaries.insert(reg->mBinary);
 
-            for (CollectorInfoBase *collector : *reg) {
+            for (UniqueComponent::CollectorInfoBase *collector : *reg) {
                 if (!skipBinary(collector->mBinary))
                     binaries.insert(collector->mBinary);
             }
@@ -137,14 +137,14 @@ namespace Core {
             }
         }
 
-        for (UniqueComponentRegistryBase *reg : registryRegistry()) {
+        for (UniqueComponent::RegistryBase *reg : UniqueComponent::registryRegistry()) {
             const Plugins::BinaryInfo *bin = reg->mBinary;
             if (skipBinary(bin))
                 continue;
             file.beginCondition("BUILD_"s + bin->mName);
             file.include(1, fixInclude(reg->named_type_info()->mHeaderPath, bin));
 
-            for (CollectorInfoBase *collector : *reg) {
+            for (UniqueComponent::CollectorInfoBase *collector : *reg) {
                 if (skipBinary(collector->mBinary))
                     continue;
                 for (const std::vector<const TypeInfo *> &typeInfos : collector->mElementInfos) {
@@ -161,7 +161,7 @@ namespace Core {
 
         file.beginNamespace("Engine");
 
-        for (UniqueComponentRegistryBase *reg : registryRegistry()) {
+        for (UniqueComponent::RegistryBase *reg : UniqueComponent::registryRegistry()) {
             if (skipBinary(reg->mBinary))
                 continue;
             file.beginCondition("BUILD_"s + reg->mBinary->mName);
@@ -174,7 +174,7 @@ std::vector<)"
 	return {
 )";
 
-            for (CollectorInfoBase *collector : *reg) {
+            for (UniqueComponent::CollectorInfoBase *collector : *reg) {
                 if (skipBinary(collector->mBinary))
                     continue;
                 file.beginCondition("BUILD_"s + collector->mBinary->mName);
@@ -197,7 +197,7 @@ std::vector<)"
 
 )";
 
-            for (CollectorInfoBase *collector : *reg) {
+            for (UniqueComponent::CollectorInfoBase *collector : *reg) {
                 if (skipBinary(collector->mBinary))
                     continue;
                 file.beginCondition("BUILD_"s + collector->mBinary->mName);
@@ -240,7 +240,7 @@ std::map<std::string_view, size_t> )"
 	return {
 )";
 
-                for (CollectorInfoBase *collector : *reg) {
+                for (UniqueComponent::CollectorInfoBase *collector : *reg) {
                     if (skipBinary(collector->mBinary))
                         continue;
                     file.beginCondition("BUILD_"s + collector->mBinary->mName);

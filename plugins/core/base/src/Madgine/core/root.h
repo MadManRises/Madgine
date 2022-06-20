@@ -20,7 +20,7 @@ namespace Core {
 
 #if ENABLE_PLUGINS
         std::unique_ptr<Plugins::PluginManager> mPluginManager;
-        std::unique_ptr<UniqueComponentCollectorManager> mCollectorManager;
+        std::unique_ptr<UniqueComponent::CollectorManager> mCollectorManager;
 #endif
 
 #if ENABLE_MEMTRACKING

@@ -126,7 +126,7 @@ namespace Render {
     }
 
     DirectX12RenderContext::DirectX12RenderContext(Threading::TaskQueue *queue)
-        : UniqueComponent(queue)
+        : Component(queue)
     {
 
         assert(!sSingleton);

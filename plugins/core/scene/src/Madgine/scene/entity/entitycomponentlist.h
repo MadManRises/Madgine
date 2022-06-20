@@ -82,7 +82,7 @@ namespace Scene {
 
             Entity *getEntity(const EntityComponentHandle<EntityComponentBase> &index) const override final
             {
-                assert(index.mType == component_index<T>());
+                assert(index.mType == UniqueComponent::component_index<T>());
                 if (index)
                     return getEntity(index.mIndex);
                 else
@@ -98,7 +98,7 @@ namespace Scene {
             {
                 typename Vector::iterator it = mData.emplace(mData.end(), std::piecewise_construct, std::forward_as_tuple(table), std::make_tuple(entity));
                 uint32_t index = container_traits<Vector>::toHandle(mData, it);
-                return { { index, static_cast<uint32_t>(component_index<T>()) } };
+                return { { index, static_cast<uint32_t>(UniqueComponent::component_index<T>()) } };
             }
 
             void erase(const EntityComponentHandle<EntityComponentBase> &index) override final

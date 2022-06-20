@@ -13,11 +13,14 @@ namespace Serialize {
         template <typename T>
         constexpr SerializeTableCallbacks(type_holder_t<T>)
             : onActivate([](SerializableDataUnit *unit, bool active, bool existenceChanged) {
-                if constexpr (has_function_onActivate_upTo_v<T, 2>)
-                    TupleUnpacker::invoke(&T::onActivate, static_cast<T*>(unit), active, existenceChanged);
+                if constexpr (has_function_onActivate_v<T, bool, bool>)
+                    static_cast<T *>(unit)->onActivate(active, existenceChanged);
+                else if constexpr (has_function_onActivate_v<T, bool>)
+                    static_cast<T *>(unit)->onActivate(active);
+                else if constexpr (has_function_onActivate_v<T>)
+                    static_cast<T *>(unit)->onActivate();
             })
         {
-
         }
 
         void (*onActivate)(SerializableDataUnit *, bool, bool);
@@ -59,5 +62,3 @@ namespace Serialize {
 
 }
 }
-
-

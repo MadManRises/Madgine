@@ -265,7 +265,7 @@ namespace Resources {
 
         static T &getSingleton()
         {
-            return static_cast<T &>(getLoaderByIndex(component_index<T>()));
+            return static_cast<T &>(getLoaderByIndex(UniqueComponent::component_index<T>()));
         }
     };
 
@@ -292,7 +292,7 @@ namespace Resources {
 
         static T &getSingleton()
         {
-            return static_cast<T &>(getLoaderByIndex(component_index<T>()));
+            return static_cast<T &>(getLoaderByIndex(UniqueComponent::component_index<T>()));
         }
 
         static HandleType load(std::string_view name, T *loader = nullptr)
@@ -668,12 +668,12 @@ namespace Resources {
     };
 
     template <typename T, typename _Data, typename _Base>
-    struct VirtualResourceLoaderImpl : VirtualUniqueComponentImpl<T, VirtualScope<T, ResourceLoaderImpl<T, _Data, _Base>>, _Base> {
+    struct VirtualResourceLoaderImpl : UniqueComponent::VirtualComponentImpl<T, VirtualScope<T, ResourceLoaderImpl<T, _Data, _Base>>, _Base> {
 
         using Data = _Data;
         using Base = _Base;
 
-        using Self = VirtualUniqueComponentImpl<T, VirtualScope<T, ResourceLoaderImpl<T, Data, Base>>, _Base>;
+        using Self = UniqueComponent::VirtualComponentImpl<T, VirtualScope<T, ResourceLoaderImpl<T, Data, Base>>, _Base>;
 
         using Self::Self;
 

@@ -20,7 +20,7 @@ FolderSources(sources "" tools)
 
 add_tools(DirectX11 ${sources} PRECOMPILED_HEADER tools/DirectX11_Tools/directx11toolslib.h)
 
-target_link_plugins(DirectX11Tools ClientTools FontLoader)
+target_link_plugins(DirectX11Tools ClientTools)
 target_link_libraries(DirectX11Tools PRIVATE d3d11 dxgi d3dcompiler)
 
 if (BUILD_TESTING)

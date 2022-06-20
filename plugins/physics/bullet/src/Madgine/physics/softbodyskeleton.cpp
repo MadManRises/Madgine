@@ -60,7 +60,7 @@ namespace Physics {
     };
 
     SoftBodySkeleton::SoftBodySkeleton(const ObjectPtr &data)
-        : NamedUniqueComponent(data)
+        : NamedComponent(data)
     {
     }
 

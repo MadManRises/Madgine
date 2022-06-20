@@ -10,7 +10,7 @@ namespace Network {
     ENUM_BASE(NetworkManagerResult, Serialize::SyncManagerResult,
         ALREADY_CONNECTED,
         NO_SERVER,
-        SOCKET_ERROR);
+        SOCKET_ERROR)
 
     struct MADGINE_NETWORK_SERIALIZE_EXPORT NetworkManager : Serialize::SyncManager {
         NetworkManager(const std::string &name);
@@ -21,7 +21,7 @@ namespace Network {
         void operator=(const NetworkManager &) = delete;
 
         NetworkManagerResult startServer(int port);
-        NetworkManagerResult connect(const std::string &url, int portNr, std::unique_ptr<Serialize::Formatter> (*format)(), TimeOut timeout = {});
+        NetworkManagerResult connect(std::string_view url, int portNr, std::unique_ptr<Serialize::Formatter> (*format)(), TimeOut timeout = {});
 
         void close();
 

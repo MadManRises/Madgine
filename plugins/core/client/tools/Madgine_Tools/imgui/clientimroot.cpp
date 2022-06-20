@@ -28,14 +28,13 @@
 
 #include "toolbase.h"
 
+#include "fontloader.h"
+
 #include "Madgine/resources/resourcemanager.h"
 
 #include "imgui/misc/freetype/imgui_freetype.h"
 
-//UNIQUECOMPONENT(Engine::Tools::ClientImRoot);
-
-METATABLE_BEGIN(Engine::Tools::ClientImRoot)
-READONLY_PROPERTY(Tools, tools)
+METATABLE_BEGIN_BASE(Engine::Tools::ClientImRoot, Engine::Tools::ImRoot)
 METATABLE_END(Engine::Tools::ClientImRoot)
 
 SERIALIZETABLE_BEGIN(Engine::Tools::ClientImRoot)
@@ -220,6 +219,22 @@ namespace Tools {
         io.Fonts->AddFontDefault();
         io.Fonts->AddFontFromFileTTF(Engine::Resources::ResourceManager::getSingleton().findResourceFile("icons.ttf").c_str(), 13, &config, icons_ranges);
         io.Fonts->Build();
+
+        Im3D::GetIO().mFetchFont = [](const char *fontName) {
+            Render::FontLoader::HandleType font;
+            font.load(fontName);
+            font.info()->setPersistent(true);
+
+            if (font.available()) {
+                return Im3DFont {
+                    (Im3DTextureId)font->mTexture->mTextureHandle,
+                    font->mTextureSize,
+                    font->mGlyphs.data()
+                };
+            } else {
+                return Im3DFont {};
+            }
+        };
 
         if (!co_await ImRoot::init())
             co_return false;

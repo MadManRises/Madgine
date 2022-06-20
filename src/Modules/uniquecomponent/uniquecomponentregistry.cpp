@@ -9,14 +9,16 @@
 #    include "Interfaces/filesystem/api.h"
 
 namespace Engine {
+namespace UniqueComponent {
 
-MODULES_EXPORT std::vector<UniqueComponentRegistryBase *> &
-registryRegistry()
-{
-    static std::vector<UniqueComponentRegistryBase *> dummy;
-    return dummy;
+    MODULES_EXPORT std::vector<RegistryBase *> &
+    registryRegistry()
+    {
+        static std::vector<RegistryBase *> dummy;
+        return dummy;
+    }
+
 }
-
 } // namespace Engine
 
 #endif

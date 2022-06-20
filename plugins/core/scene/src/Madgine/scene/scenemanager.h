@@ -37,7 +37,9 @@ namespace Engine {
 namespace Scene {
     struct MADGINE_SCENE_EXPORT SceneManager : Serialize::TopLevelUnit<SceneManager>,
                                                App::GlobalAPI<Serialize::NoParent<SceneManager>> {
-        SERIALIZABLEUNIT(SceneManager);
+        SERIALIZABLEUNIT(SceneManager)
+
+        using EntityContainer = RefcountedContainer<std::deque<Entity::Entity>>;
 
         SceneManager(App::Application &app);
         SceneManager(const SceneManager &) = delete;
@@ -64,19 +66,19 @@ namespace Scene {
         template <typename T>
         T &getComponent()
         {
-            return static_cast<T &>(getComponent(Engine::component_index<T>()));
+            return static_cast<T &>(getComponent(UniqueComponent::component_index<T>()));
         }
         SceneComponentBase &getComponent(size_t i);
         size_t getComponentCount();
         
         Threading::DataLock lock(AccessMode mode);
 
-        Threading::SignalStub<const RefcountedContainer<std::deque<Entity::Entity>>::iterator &, int> &entitiesSignal();
+        Threading::SignalStub<const EntityContainer::iterator &, int> &entitiesSignal();
 
         template <typename T>
         Entity::EntityComponentList<T> &entityComponentList()
         {
-            return static_cast<Entity::EntityComponentList<T> &>(*mEntityComponentLists.at(Engine::component_index<T>()));
+            return static_cast<Entity::EntityComponentList<T> &>(*mEntityComponentLists.at(UniqueComponent::component_index<T>()));
         }
 
         Entity::EntityComponentListBase &entityComponentList(size_t index)
@@ -108,7 +110,6 @@ namespace Scene {
     private:
         Entity::EntityComponentListContainer<std::vector<Placeholder<0>>> mEntityComponentLists;
 
-        using EntityContainer = RefcountedContainer<std::deque<Entity::Entity>>;
         SYNCABLE_CONTAINER(mEntities, EntityContainer, Threading::SignalFunctor<const EntityContainer::iterator &, int>);
         RefcountedContainer<std::deque<Serialize::NoParent<Entity::Entity>>> mLocalEntities;
 

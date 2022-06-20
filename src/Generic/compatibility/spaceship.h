@@ -14,11 +14,11 @@ namespace __generic_impl__ {
         {
 
 #if __cpp_impl_three_way_comparison >= 201907L
-            if constexpr (has_operator_Spaceship_v<T, U>) {
+            if constexpr (has_operator_Spaceship<T, U>) {
                 return left <=> right;
             }
 #else
-            if constexpr (has_operator_Spaceship_v<T, U>) {
+            if constexpr (has_operator_Spaceship<T, U>) {
                 return Spaceship(left, right);
             }
 #endif

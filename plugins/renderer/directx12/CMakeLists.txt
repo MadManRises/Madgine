@@ -38,7 +38,7 @@ FolderSources(sources "" tools)
 
 add_tools(DirectX12 ${sources} PRECOMPILED_HEADER tools/DirectX12_Tools/directx12toolslib.h)
 
-target_link_plugins(DirectX12Tools ClientTools FontLoader)
+target_link_plugins(DirectX12Tools ClientTools)
 target_link_libraries(DirectX12Tools PRIVATE d3d12 dxgi dxcompiler)
 
 if (BUILD_TESTING)

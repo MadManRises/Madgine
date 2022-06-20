@@ -6,7 +6,7 @@
 
 namespace Engine {
 
-template <typename T, typename = void>
+template <typename T>
 struct KeyValue {
     static T &value(T &v)
     {
@@ -32,20 +32,26 @@ struct KeyValue {
 };
 
 template <typename T>
-struct KeyValue<T, std::void_t<std::invoke_result_t<decltype(&T::key), T *>>> {
+concept HasKey = requires(T &t)
+{
+    t.key();
+};
+
+template <HasKey T>
+struct KeyValue<T> {
     static T &value(T &v)
     {
         return v;
     }
 
-    static std::invoke_result_t<decltype(&T::key), T *> key(const T &v)
+    static decltype(auto) key(const T &v)
     {
         return v.key();
     }
 };
 
-template <typename T>
-struct KeyValue<T *, std::void_t<std::invoke_result_t<decltype(&T::key), T *>>> {
+template <HasKey T>
+struct KeyValue<T *> {
     static T *value(T *v)
     {
         return v;
@@ -57,8 +63,8 @@ struct KeyValue<T *, std::void_t<std::invoke_result_t<decltype(&T::key), T *>>> 
     }
 };
 
-template <typename T>
-struct KeyValue<T *const, std::void_t<std::invoke_result_t<decltype(&T::key), T *>>> {
+template <HasKey T>
+struct KeyValue<T *const> {
     static T *value(T *v)
     {
         return v;
@@ -156,7 +162,7 @@ decltype(auto) kvKeys(T &v)
 }
 
 template <typename T, typename K>
-struct Finder {
+struct KeyFinder {
     static auto find(T &c, const K &key)
     {
         return std::ranges::find(c, key, projectionKey);
@@ -164,7 +170,7 @@ struct Finder {
 };
 
 template <typename V, typename K, typename _K>
-struct Finder<std::map<K, V>, _K> {
+struct KeyFinder<std::map<K, V>, _K> {
     static auto find(std::map<K, V> &c, const _K &key)
     {
         return c.find(key);
@@ -172,7 +178,7 @@ struct Finder<std::map<K, V>, _K> {
 };
 
 template <typename V, typename K, typename _K>
-struct Finder<const std::map<K, V>, _K> {
+struct KeyFinder<const std::map<K, V>, _K> {
     static auto find(const std::map<K, V> &c, const _K &key)
     {
         return c.find(key);
@@ -182,7 +188,7 @@ struct Finder<const std::map<K, V>, _K> {
 template <typename T, typename K>
 decltype(auto) kvFind(T &c, const K &key)
 {
-    return Finder<T, K>::find(c, key);
+    return KeyFinder<T, K>::find(c, key);
 }
 
 template <typename T>

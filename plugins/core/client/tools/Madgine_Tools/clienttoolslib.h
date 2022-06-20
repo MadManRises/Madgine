@@ -10,5 +10,6 @@
 #include "Madgine/clientlib.h"
 #include "pipelineloaderlib.h"
 #include "textureloaderlib.h"
+#include "fontloaderlib.h"
 
 #include "clienttoolsforward.h"

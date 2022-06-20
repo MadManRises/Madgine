@@ -546,7 +546,7 @@ namespace Render {
 #endif
 
     OpenGLRenderContext::OpenGLRenderContext(Threading::TaskQueue *queue)
-        : UniqueComponent(queue)
+        : Component(queue)
     {
     }
 

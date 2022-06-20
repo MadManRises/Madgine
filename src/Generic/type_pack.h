@@ -2,16 +2,16 @@
 
 namespace Engine {
 
-template <typename Sequence, template <size_t...> typename Template>
+template <typename Sequence, template <size_t...> typename T>
 struct index_sequence_instantiate;
 
-template <size_t... Is, template <size_t...> typename Template>
-struct index_sequence_instantiate<std::index_sequence<Is...>, Template> {
-    using type = Template<Is...>;
+template <size_t... Is, template <size_t...> typename T>
+struct index_sequence_instantiate<std::index_sequence<Is...>, T> {
+    using type = T<Is...>;
 };
 
-template <typename Sequence, template <size_t...> typename Template>
-using index_sequence_instantiate_t = typename index_sequence_instantiate<Sequence, Template>::type;
+template <typename Sequence, template <size_t...> typename T>
+using index_sequence_instantiate_t = typename index_sequence_instantiate<Sequence, T>::type;
 
 template <typename...>
 struct type_pack;

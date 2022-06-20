@@ -11,7 +11,7 @@ namespace Tools {
 
     struct BulletDebug : Tool<BulletDebug>, btIDebugDraw {
 
-        SERIALIZABLEUNIT(BulletDebug);
+        SERIALIZABLEUNIT(BulletDebug)
 
         BulletDebug(ImRoot &root);
         BulletDebug(const BulletDebug &) = delete;

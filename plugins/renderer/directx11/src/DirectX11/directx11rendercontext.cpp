@@ -36,7 +36,7 @@ namespace Render {
     }
 
     DirectX11RenderContext::DirectX11RenderContext(Threading::TaskQueue *queue)
-        : UniqueComponent(queue)
+        : Component(queue)
     {
         HRESULT hr;
 

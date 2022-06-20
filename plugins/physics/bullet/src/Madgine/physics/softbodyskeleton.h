@@ -12,7 +12,7 @@ namespace Engine {
 namespace Physics {
 
     struct MADGINE_BULLET_EXPORT SoftBodySkeleton : Engine::Scene::Entity::EntityComponent<SoftBodySkeleton> {
-        SERIALIZABLEUNIT(SoftBodySkeleton);
+        SERIALIZABLEUNIT(SoftBodySkeleton)
 
         SoftBodySkeleton(const ObjectPtr &data = {});
         SoftBodySkeleton(SoftBodySkeleton &&other);
