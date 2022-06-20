@@ -249,18 +249,22 @@ pipeline {
 			recordIssues enabledForFailure: true, tools: [clang()]
 
 			sh """
-				doxygen clang-linux-Debug/Doxyfile
-				
-				mkdir -p /var/www/html/latest/${env.BRANCH_NAME}
+				cd clang-osx-Debug
+
+				make doxygen
+
+				cd ..
 			
-				cp -ur doc /var/www/html/latest/${env.BRANCH_NAME}
+				cp -r doc/* /opt/homebrew/var/www
 			"""
 
 			junit '**/*.xml'
 		}
 		success {
 			sh """
-				cp emscripten-RelWithDebInfo-OpenGL/bin/MadgineLauncher_plugins_tools.* /var/www/html/latest/${env.BRANCH_NAME}
+				mkdir -p /opt/homebrew/var/www/latest/${env.BRANCH_NAME}
+
+				cp emscripten-RelWithDebInfo-OpenGL/bin/MadgineLauncher_plugins_tools.* /opt/homebrew/var/www/latest/${env.BRANCH_NAME}
 			"""
 		
 			archiveArtifacts artifacts: '*-RelWithDebInfo*/bin/*, *-RelWithDebInfo*/data/*'
