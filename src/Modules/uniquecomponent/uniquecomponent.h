@@ -1,9 +1,10 @@
 #pragma once
 
+#    include "component_index.h"
+
 #if ENABLE_PLUGINS
 
 #    include "indexholder.h"
-#    include "component_index.h"
 
 namespace Engine {
 namespace UniqueComponent {
