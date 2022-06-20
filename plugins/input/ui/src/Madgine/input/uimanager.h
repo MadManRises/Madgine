@@ -6,6 +6,8 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 
+#include "Modules/uniquecomponent/component_index.h"
+
 #include "Meta/math/vector2.h"
 
 #include "Generic/intervalclock.h"
@@ -42,7 +44,7 @@ namespace Input {
         template <typename T>
         T &getGuiHandler()
         {
-            return static_cast<T &>(getGuiHandler(Engine::component_index<T>()));
+            return static_cast<T &>(getGuiHandler(UniqueComponent::component_index<T>()));
         }
 
         GuiHandlerBase &getGuiHandler(size_t i);
@@ -54,7 +56,7 @@ namespace Input {
         template <typename T>
         T &getGameHandler()
         {
-            return static_cast<T &>(getGameHandler(Engine::component_index<T>()));
+            return static_cast<T &>(getGameHandler(UniqueComponent::component_index<T>()));
         }
 
         GameHandlerBase &getGameHandler(size_t i);

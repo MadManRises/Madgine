@@ -4,6 +4,8 @@
 
 #include "Meta/serialize/streams/streamresult.h"
 
+#include "Modules/uniquecomponent/component_index.h"
+
 namespace Engine {
 namespace Scene {
 

@@ -160,6 +160,7 @@ namespace Core {
         }
 
         file.beginNamespace("Engine");
+        file.beginNamespace("UniqueComponent");
 
         for (UniqueComponent::RegistryBase *reg : UniqueComponent::registryRegistry()) {
             if (skipBinary(reg->mBinary))
@@ -181,7 +182,7 @@ std::vector<)"
                 for (const std::vector<const TypeInfo *> &typeInfos : collector->mElementInfos) {
                     const TypeInfo *typeInfo = typeInfos.front();
                     if (notInSkip(typeInfo))
-                        file << "		UniqueComponent::createComponent<"
+                        file << "		createComponent<"
                              << typeInfo->mFullName << ">,\n";
                 }
                 file.endCondition("BUILD_"s + collector->mBinary->mName);
@@ -264,6 +265,7 @@ std::map<std::string_view, size_t> )"
             file.endCondition("BUILD_"s + reg->mBinary->mName);
         }
 
+        file.endNamespace();
         file.endNamespace();
 
         std::ofstream stream(outFile.str());

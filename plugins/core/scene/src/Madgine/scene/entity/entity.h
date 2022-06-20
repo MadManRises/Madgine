@@ -9,6 +9,8 @@
 #include "Generic/container/transformIt.h"
 #include "Generic/container/mutable_set.h"
 
+#include "Modules/uniquecomponent/component_index.h"
+
 namespace Engine {
 namespace Scene {
     namespace Entity {

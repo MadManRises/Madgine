@@ -3,6 +3,7 @@
 #if ENABLE_PLUGINS
 
 #    include "indexholder.h"
+#    include "component_index.h"
 
 namespace Engine {
 namespace UniqueComponent {
@@ -76,12 +77,6 @@ namespace UniqueComponent {
         }
     };
 
-    template <typename T>
-    size_t component_index()
-    {
-        return T::component_index();
-    }
-
 }
 }
 
@@ -109,9 +104,6 @@ namespace UniqueComponent {
 
         using T = _T;
     };
-
-    template <typename T>
-    size_t component_index();
 
 }
 }
