@@ -72,7 +72,7 @@ def staticTask = {
 
 	def staticConfigFile = "../test/${staticConfig.name}_base.cfg"	
 
-	def archivePattern = configuration.artifacts.collect{name + "/" + it}.join(",")
+	def archivePattern = toolchain.artifacts.collect{name + "/" + it}.join(",")
 
     return {
         // This is where the important work happens for each combination
@@ -113,7 +113,6 @@ def staticTask = {
 				sh """
 				cd ${name}
 				make all
-				echo ${archivePattern}
 				"""				
 			}
 			stage("Test") {
