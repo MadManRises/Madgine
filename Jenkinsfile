@@ -113,6 +113,7 @@ def staticTask = {
 				sh """
 				cd ${name}
 				make all
+				echo ${archivePattern}
 				"""				
 			}
 			stage("Test") {
