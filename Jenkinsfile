@@ -5,32 +5,38 @@ def axisList = [
 		[
 			name : "clang-windows",
 			dockerImage : 'schuetzo/linux-test-env:latest',
-			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/mingw.cmake"
+			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/mingw.cmake",
+			artifacts : ['bin/*', 'data/*']
 		],
 		[
 			name : "clang-osx",
 			dockerImage : 'schuetzo/linux-test-env:latest',
-			args : "-DENABLE_ARC=False -DDEPLOYMENT_TARGET=11.0"
+			args : "-DENABLE_ARC=False -DDEPLOYMENT_TARGET=11.0",
+			artifacts : ['bin/*', 'data/*']
 		],
 		[
 			name : "clang-ios",
 			dockerImage : 'schuetzo/linux-test-env:latest',
-			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/ios.cmake -DPLATFORM=SIMULATOR64 -DENABLE_ARC=False -DDEPLOYMENT_TARGET=11.0"
+			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/ios.cmake -DPLATFORM=SIMULATOR64 -DENABLE_ARC=False -DDEPLOYMENT_TARGET=11.0",
+			artifacts : ['bin/*']
 		],
 		[
 			name : "clang-linux",
 			dockerImage : 'schuetzo/linux-test-env:latest',
-			args : ""
+			args : "",
+			artifacts : ['bin/*', 'data/*']
 		],
 		[
 			name : "clang-android",
 			dockerImage : 'schuetzo/linux-test-env:latest',
-			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/android.cmake -DANDROID_ABI=x86_64"
+			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/android.cmake -DANDROID_ABI=x86_64",
+			artifacts : ['bin/*']
 		],
 		[
 			name : "clang-emscripten",
 			dockerImage : 'schuetzo/linux-test-env:latest',
-			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/emscripten-wasm.cmake"
+			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/emscripten-wasm.cmake",
+			artifacts : ['bin/*']
 		]
 	],           
     [//configurations
@@ -114,7 +120,10 @@ def staticTask = {
 				//	ctest --output-on-failure
 				//	"""
 				//}
-			}     
+			}    
+			stage("Archive") {
+				archiveArtifacts artifacts: configuration.artifacts.collect{name + "/" + it}.join(",")
+			} 
         }
     }
 }
@@ -267,8 +276,6 @@ pipeline {
 
 				cp clang-emscripten-RelWithDebInfo-OpenGL/bin/MadgineLauncher_plugins_tools.* /opt/homebrew/var/www/latest/${env.BRANCH_NAME}
 			"""
-		
-			archiveArtifacts artifacts: '*-RelWithDebInfo-*/bin/*, *-RelWithDebInfo-*/data/*'
 		}
     }
 }
