@@ -268,7 +268,7 @@ pipeline {
 				cp clang-emscripten-RelWithDebInfo-OpenGL/bin/MadgineLauncher_plugins_tools.* /opt/homebrew/var/www/latest/${env.BRANCH_NAME}
 			"""
 		
-			archiveArtifacts artifacts: '*-RelWithDebInfo*/bin/*, *-RelWithDebInfo*/data/*'
+			archiveArtifacts artifacts: '*-RelWithDebInfo-*/bin/*, *-RelWithDebInfo-*/data/*'
 		}
     }
 }
