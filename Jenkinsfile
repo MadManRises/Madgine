@@ -265,7 +265,7 @@ pipeline {
 
 				cp -r doc/* /opt/homebrew/var/www
 
-				cp emscripten-RelWithDebInfo-OpenGL/bin/MadgineLauncher_plugins_tools.* /opt/homebrew/var/www/latest/${env.BRANCH_NAME}
+				cp clang-emscripten-RelWithDebInfo-OpenGL/bin/MadgineLauncher_plugins_tools.* /opt/homebrew/var/www/latest/${env.BRANCH_NAME}
 			"""
 		
 			archiveArtifacts artifacts: '*-RelWithDebInfo*/bin/*, *-RelWithDebInfo*/data/*'
