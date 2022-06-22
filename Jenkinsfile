@@ -72,6 +72,8 @@ def staticTask = {
 
 	def staticConfigFile = "../test/${staticConfig.name}_base.cfg"	
 
+	def archivePattern = configuration.artifacts.collect{name + "/" + it}.join(",")
+
     return {
         // This is where the important work happens for each combination
 	    stage ("${name}") {
@@ -122,7 +124,7 @@ def staticTask = {
 				//}
 			}    
 			stage("Archive") {
-				archiveArtifacts artifacts: configuration.artifacts.collect{name + "/" + it}.join(",")
+				archiveArtifacts artifacts: "${archivePattern}"
 			} 
         }
     }
