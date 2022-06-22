@@ -1,6 +1,6 @@
+properties([pipelineTriggers([githubPush()])])
 
-
- def axisList = [
+def axisList = [
     [//toolchains
 		[
 			name : "clang-windows",
