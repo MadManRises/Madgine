@@ -20,11 +20,13 @@ if (ANDROID)
 
 	if (CMAKE_HOST_WIN32)	
 		add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/gradle/gradlew
+			COMMAND gradle init
 			COMMAND gradle wrapper --gradle-version=7.3.3 --distribution-type=all
 			COMMAND gradle --stop
 			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/gradle)
 	else()
 		add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/gradle/gradlew
+			COMMAND gradle init
 			COMMAND gradle wrapper --gradle-version=7.3.3 --distribution-type=all			
 			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/gradle)
 	endif()
