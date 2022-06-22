@@ -29,7 +29,7 @@ android {
 
         applicationVariants.all { variant ->
             variant.outputs.all {
-                outputFileName = "../../../../apk/@target@.apk"
+                outputFileName = "../../../../../bin/@target@.apk"
             }
         }
     }
@@ -38,7 +38,7 @@ android {
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
-            jniLibs.srcDirs = ['@CMAKE_BINARY_DIR@/bin/', '@CMAKE_ANDROID_NDK@/sources/cxx-stl/llvm-libc++/libs/']
+            jniLibs.srcDirs = ['@CMAKE_CURRENT_BINARY_DIR@/bin/', '@CMAKE_ANDROID_NDK@/sources/cxx-stl/llvm-libc++/libs/']
 			assets.srcDirs = ['@CMAKE_BINARY_DIR@/data/']
         }
     }
