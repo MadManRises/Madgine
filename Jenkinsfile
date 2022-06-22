@@ -224,7 +224,7 @@ pipeline {
 			steps{
         		checkout scm
 				sh """
-				git submodule update --init --recursive
+					git submodule update --init --recursive
 				"""
 			}
 	    }
@@ -242,27 +242,28 @@ pipeline {
 			    }
 	        }
         }
+		stage ("Doxygen") {
+			steps {
+				sh """
+					cd clang-osx-Debug
+
+					make doxygen
+				"""
+			}
+		}
     }
 
 	post {
         always {
 			recordIssues enabledForFailure: true, tools: [clang()]
 
-			sh """
-				cd clang-osx-Debug
-
-				make doxygen
-
-				cd ..
-			
-				cp -r doc/* /opt/homebrew/var/www
-			"""
-
 			junit '**/*.xml'
 		}
 		success {
 			sh """
 				mkdir -p /opt/homebrew/var/www/latest/${env.BRANCH_NAME}
+
+				cp -r clang-osx-Debug/doc/* /opt/homebrew/var/www
 
 				cp emscripten-RelWithDebInfo-OpenGL/bin/MadgineLauncher_plugins_tools.* /opt/homebrew/var/www/latest/${env.BRANCH_NAME}
 			"""
