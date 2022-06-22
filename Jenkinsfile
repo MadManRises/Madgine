@@ -257,7 +257,7 @@ pipeline {
         always {
 			recordIssues enabledForFailure: true, tools: [clang()]
 
-			junit '**/*.xml'
+			//junit '**/*.xml'
 		}
 		success {
 			sh """
