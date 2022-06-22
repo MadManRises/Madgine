@@ -263,7 +263,7 @@ pipeline {
 			sh """
 				mkdir -p /opt/homebrew/var/www/latest/${env.BRANCH_NAME}
 
-				cp -r clang-osx-Debug/doc/* /opt/homebrew/var/www
+				cp -r doc/* /opt/homebrew/var/www
 
 				cp emscripten-RelWithDebInfo-OpenGL/bin/MadgineLauncher_plugins_tools.* /opt/homebrew/var/www/latest/${env.BRANCH_NAME}
 			"""
