@@ -47,7 +47,7 @@ namespace Android {
 
         Engine::Filesystem::setup(activity);
 
-        mThread = Threading::WorkGroupHandle(&AndroidLauncher::go, this);
+        mThread = Threading::WorkGroupHandle("Madgine", &AndroidLauncher::go, this);
     }
 
     void AndroidLauncher::go()

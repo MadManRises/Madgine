@@ -20,12 +20,12 @@ if (ANDROID)
 
 	if (CMAKE_HOST_WIN32)	
 		add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/gradle/gradlew
-			COMMAND gradle wrapper --gradle-version=4.10.2 --distribution-type=all
+			COMMAND gradle wrapper --gradle-version=7.3.3 --distribution-type=all
 			COMMAND gradle --stop
 			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/gradle)
 	else()
 		add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/gradle/gradlew
-			COMMAND gradle wrapper --gradle-version=4.10.2 --distribution-type=all			
+			COMMAND gradle wrapper --gradle-version=7.3.3 --distribution-type=all			
 			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/gradle)
 	endif()
 
@@ -40,6 +40,7 @@ if (ANDROID)
 		configure_file(${Android_List_dir}/android/build.gradle.in build.gradle @ONLY)
 		configure_file(${Android_List_dir}/android/local.properties.in local.properties @ONLY)
 		configure_file(${Android_List_dir}/android/AndroidManifest.xml.in AndroidManifest.xml.in @ONLY)
+		configure_file(${Android_List_dir}/android/settings.gradle.in settings.gradle @ONLY)
 		file(GENERATE OUTPUT AndroidManifest.xml INPUT ${CMAKE_CURRENT_BINARY_DIR}/AndroidManifest.xml.in)
 		#configure_file(${Android_List_dir}/android/launch.vs.json.in ${CMAKE_SOURCE_DIR}/.vs/launch.vs.json @ONLY)
 		#configure_file(${Android_List_dir}/android/debug_apk.bat.in debug_${target}_apk.bat @ONLY)
