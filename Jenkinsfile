@@ -123,9 +123,11 @@ def staticTask = {
 				//	"""
 				//}
 			}    
-			stage("Archive") {
-				archiveArtifacts artifacts: "${archivePattern}"
-			} 
+			if (configuration.name == "RelWithDebInfo"){
+				stage("Archive") {
+					archiveArtifacts artifacts: "${archivePattern}"
+				} 
+			}
         }
     }
 }
