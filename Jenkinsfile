@@ -18,7 +18,7 @@ def axisList = [
 			name : "clang-ios",
 			dockerImage : 'schuetzo/linux-test-env:latest',
 			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/ios.cmake -DPLATFORM=SIMULATOR64 -DENABLE_ARC=False -DDEPLOYMENT_TARGET=11.0",
-			artifacts : ['bin/*']
+			artifacts : ['bin/**']
 		],
 		[
 			name : "clang-linux",
