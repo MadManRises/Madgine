@@ -9,9 +9,9 @@
 METATABLE_BEGIN(Engine::Render::GPUMeshLoader)
 METATABLE_END(Engine::Render::GPUMeshLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::GPUMeshLoader::ResourceType, Engine::Resources::ResourceBase)
+METATABLE_BEGIN_BASE(Engine::Render::GPUMeshLoader::Resource, Engine::Resources::ResourceBase)
 READONLY_PROPERTY(Data, dataPtr)
-METATABLE_END(Engine::Render::GPUMeshLoader::ResourceType)
+METATABLE_END(Engine::Render::GPUMeshLoader::Resource)
 
 METATABLE_BEGIN(Engine::Render::GPUMeshData)
 MEMBER(mMaterials)
@@ -33,7 +33,7 @@ namespace Render {
 
     Threading::Task<bool> GPUMeshLoader::loadImpl(GPUMeshData &mesh, ResourceDataInfo &info)
     {
-        MeshLoader::HandleType handle;
+        MeshLoader::Handle handle;
         if (!co_await handle.load(info.resource()->name()))
             co_return false;
         co_return generate(mesh, *handle);

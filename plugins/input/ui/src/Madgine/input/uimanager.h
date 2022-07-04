@@ -18,7 +18,7 @@ namespace Engine {
 namespace Input {
     struct MADGINE_UI_EXPORT UIManager : MadgineObject<UIManager> {
 
-        UIManager(App::Application &app, Window::MainWindow &window);
+        UIManager(Base::Application &app, Window::MainWindow &window);
         UIManager(const UIManager &) = delete;
 
         ~UIManager();
@@ -64,13 +64,13 @@ namespace Input {
         Threading::Task<bool> init();
         Threading::Task<void> finalize();
 
-        App::Application &app() const;
+        Base::Application &app() const;
         Window::MainWindow &window() const;
 
         void onUpdate();
 
     private:
-        App::Application &mApp;
+        Base::Application &mApp;
         Window::MainWindow &mWindow;
 
     public:

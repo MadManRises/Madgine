@@ -9,26 +9,26 @@
 namespace Engine {
 namespace UniqueComponent {
 
-    template <typename _T, typename Base, typename _VBase>
-    struct VirtualComponentImpl : Base {
+    template <typename _T, typename _Base, typename _VBase>
+    struct VirtualComponentImpl : _Base {
         using VBase = _VBase;
         using T = _T;
-        using Base::Base;
+        using _Base::_Base;
 
         struct Inner {
             Inner()
             {
-                if (!Base::preg())
-                    Base::preg() = &reg;
+                if (!_Base::preg())
+                    _Base::preg() = &reg;
             }
             ~Inner()
             {
-                if (Base::preg() == &reg)
-                    Base::preg() = nullptr;
+                if (_Base::preg() == &reg)
+                    _Base::preg() = nullptr;
             }
 
         private:
-            typename Base::Collector::template ComponentRegistrator<T> reg;
+            typename _Base::Collector::template ComponentRegistrator<T> reg;
         };
     };
 
@@ -38,13 +38,13 @@ namespace UniqueComponent {
 
     DLL_IMPORT_VARIABLE2(Engine::UniqueComponent::IndexHolder *, _preg, typename T);
 
-    template <typename _T, typename _Collector, typename Base>
-    struct VirtualComponentBase : public Base {
+    template <typename _T, typename _Collector, typename _Base>
+    struct VirtualComponentBase : public _Base {
     public:
         using Collector = _Collector;
         using T = _T;
 
-        using Base::Base;
+        using _Base::_Base;
 
         static size_t component_index()
         {
@@ -85,23 +85,23 @@ namespace UniqueComponent {
 
 namespace Engine {
 namespace UniqueComponent {
-    template <typename _T, typename Base, typename _VBase>
-    struct VirtualComponentImpl : Base {
-        using Base::Base;
+    template <typename _T, typename _Base, typename _VBase>
+    struct VirtualComponentImpl : _Base {
+        using _Base::_Base;
 
         using T = _T;
     };
 
-    template <typename _T, typename Collector, typename Base>
-    struct VirtualComponentBase : Base {
-        using Base::Base;
+    template <typename _T, typename Collector, typename _Base>
+    struct VirtualComponentBase : _Base {
+        using _Base::_Base;
 
         using T = _T;
     };
 
-    template <typename _T, typename Collector, typename Base>
-    struct Component : Base {
-        using Base::Base;
+    template <typename _T, typename Collector, typename _Base>
+    struct Component : _Base {
+        using _Base::_Base;
 
         using T = _T;
     };
@@ -121,13 +121,13 @@ namespace UniqueComponent {
 
     DLL_IMPORT_VARIABLE2(const std::string_view, _componentName, typename T);
 
-    template <typename Base>
-    struct NamedComponent : Base {
-        using Base::Base;
+    template <typename _Base>
+    struct NamedComponent : _Base {
+        using _Base::_Base;
 
         static std::string_view componentName()
         {
-            return _componentName<typename Base::T>();
+            return _componentName<typename _Base::T>();
         }
     };
 

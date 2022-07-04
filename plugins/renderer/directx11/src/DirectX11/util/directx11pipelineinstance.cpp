@@ -11,7 +11,7 @@
 namespace Engine {
 namespace Render {
 
-    DirectX11PipelineInstance::DirectX11PipelineInstance(const PipelineConfiguration &config, typename DirectX11VertexShaderLoader::HandleType vertexShader, typename DirectX11PixelShaderLoader::HandleType pixelShader, typename DirectX11GeometryShaderLoader::HandleType geometryShader, bool dynamic)
+    DirectX11PipelineInstance::DirectX11PipelineInstance(const PipelineConfiguration &config, typename DirectX11VertexShaderLoader::Handle vertexShader, typename DirectX11PixelShaderLoader::Handle pixelShader, typename DirectX11GeometryShaderLoader::Handle geometryShader, bool dynamic)
         : PipelineInstance(config)
         , mVertexShaderHandle(std::move(vertexShader))
         , mPixelShaderHandle(std::move(pixelShader))

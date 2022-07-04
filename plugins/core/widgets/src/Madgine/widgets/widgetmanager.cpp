@@ -59,14 +59,14 @@ namespace Widgets {
     struct WidgetManager::WidgetManagerData {
 
         Render::PipelineLoader::Instance mPipeline;
-        Render::GPUMeshLoader::PtrType mMesh;
+        Render::GPUMeshLoader::Ptr mMesh;
 
-        Resources::ImageLoader::HandleType mDefaultTexture;
-        Render::TextureLoader::PtrType mUIAtlasTexture;
-        std::set<Resources::ImageLoader::HandleType> mImageLoadingTasks;
+        Resources::ImageLoader::Handle mDefaultTexture;
+        Render::TextureLoader::Ptr mUIAtlasTexture;
+        std::set<Resources::ImageLoader::Handle> mImageLoadingTasks;
         Atlas2 mUIAtlas { { 2048, 2048 } };
         int mUIAtlasSize = 0;
-        std::map<Resources::ImageLoader::ResourceType *, Atlas2::Entry> mUIAtlasEntries;
+        std::map<Resources::ImageLoader::Resource *, Atlas2::Entry> mUIAtlasEntries;
 
         void expandUIAtlas()
         {
@@ -497,10 +497,10 @@ namespace Widgets {
 
             std::vector<std::pair<std::vector<Vertex>, TextureSettings>> localVerticesList = w->vertices(Vector3 { Vector2 { screenSpace.mSize }, 1.0f });
 
-            Resources::ImageLoader::ResourceType *resource = w->resource();
+            Resources::ImageLoader::Resource *resource = w->resource();
             auto it = mData->mUIAtlasEntries.find(resource);
             if (it == mData->mUIAtlasEntries.end()) {
-                Resources::ImageLoader::HandleType data = resource ? resource->loadData() : mData->mDefaultTexture;
+                Resources::ImageLoader::Handle data = resource ? resource->loadData() : mData->mDefaultTexture;
                 if (!data.available()) {
                     mData->mImageLoadingTasks.emplace(std::move(data));
                     continue;

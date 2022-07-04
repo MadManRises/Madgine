@@ -1,7 +1,7 @@
 #pragma once
 
 namespace Engine {
-namespace Core {
+namespace Base {
 
     MADGINE_BASE_EXPORT void skipUniqueComponentOnExport(const TypeInfo *t);
     MADGINE_BASE_EXPORT void exportStaticComponentHeader(const Filesystem::Path &outFile, bool hasTools);

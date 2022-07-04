@@ -75,7 +75,7 @@ namespace Threading {
         {
             auto task = make_task(std::forward<F>(f), TaskFuture<T> { *this });
             auto fut = task.get_future();
-            auto handle = std::move(task).assign(queue);
+            auto handle = task.assign(queue);
             mState->then(std::move(handle));
             return fut;
         }
@@ -150,7 +150,7 @@ namespace Threading {
         {
             auto task = make_task(std::forward<F>(f));
             auto fut = task.get_future();
-            auto handle = std::move(task).assign(queue);
+            auto handle = task.assign(queue);
             mState->then(std::move(handle));
             return fut;
         }

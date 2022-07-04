@@ -48,7 +48,7 @@ namespace Tools {
         bool mHierarchyVisible;
         bool mNodeDetailsVisible;
 
-        NodeGraph::NodeGraphLoader::HandleType mGraphHandle;
+        NodeGraph::NodeGraphLoader::Handle mGraphHandle;
         NodeGraph::NodeGraph mGraph;
 
         struct NodeMessages {

@@ -7,13 +7,13 @@
 
 #include "globalapibase.h"
 
-METATABLE_BEGIN(Engine::App::Application)
+METATABLE_BEGIN(Engine::Base::Application)
 MEMBER(mGlobalAPIs)
-METATABLE_END(Engine::App::Application)
+METATABLE_END(Engine::Base::Application)
 
 namespace Engine {
 
-namespace App {
+namespace Base {
 
     static Threading::WorkgroupLocal<Application *> sApp;
 

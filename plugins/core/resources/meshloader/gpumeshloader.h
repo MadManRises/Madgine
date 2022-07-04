@@ -15,22 +15,20 @@ namespace Render {
 
         using Base = VirtualResourceLoaderBase<GPUMeshLoader, GPUMeshData, std::list<Placeholder<0>>, Threading::WorkGroupStorage>;
 
-        struct PtrType : Base::PtrType {
-            using Base::PtrType::PtrType;
-            PtrType(Base::PtrType ptr)
-                : Base::PtrType(std::move(ptr))
+        struct Ptr : Base::Ptr {
+            using Base::Ptr::Ptr;
+            Ptr(Base::Ptr ptr)
+                : Base::Ptr(std::move(ptr))
             {
             }
 
             Threading::TaskFuture<bool> create(MeshData mesh)
             {
-                return Base::PtrType::create([mesh { std::move(mesh) }](Render::GPUMeshLoader *loader, Render::GPUMeshData &data) mutable { return loader->generate(data, std::move(mesh)); });
+                return Base::Ptr::create([mesh { std::move(mesh) }](Render::GPUMeshLoader *loader, Render::GPUMeshData &data) mutable { return loader->generate(data, std::move(mesh)); });
             }
 
-            void update(const MeshData &mesh, GPUMeshLoader *loader = nullptr)
+            void update(const MeshData &mesh, GPUMeshLoader *loader = &GPUMeshLoader::getSingleton())
             {
-                if (!loader)
-                    loader = &GPUMeshLoader::getSingleton();
                 loader->update(**this, mesh);
             }
         };

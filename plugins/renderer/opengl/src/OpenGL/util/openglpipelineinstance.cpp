@@ -14,7 +14,7 @@
 namespace Engine {
 namespace Render {
 
-    OpenGLPipelineInstance::OpenGLPipelineInstance(const PipelineConfiguration &config, OpenGLPipelineLoader::HandleType pipeline)
+    OpenGLPipelineInstance::OpenGLPipelineInstance(const PipelineConfiguration &config, OpenGLPipelineLoader::Handle pipeline)
         : PipelineInstance(config)
         , mPipeline(std::move(pipeline))
     {

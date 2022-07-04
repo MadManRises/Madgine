@@ -18,8 +18,8 @@ VIRTUALUNIQUECOMPONENT(Engine::Render::DirectX12MeshLoader);
 METATABLE_BEGIN_BASE(Engine::Render::DirectX12MeshLoader, Engine::Render::GPUMeshLoader)
 METATABLE_END(Engine::Render::DirectX12MeshLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::DirectX12MeshLoader::ResourceType, Engine::Render::GPUMeshLoader::ResourceType)
-METATABLE_END(Engine::Render::DirectX12MeshLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::DirectX12MeshLoader::Resource, Engine::Render::GPUMeshLoader::Resource)
+METATABLE_END(Engine::Render::DirectX12MeshLoader::Resource)
 
 namespace Engine {
 namespace Render {

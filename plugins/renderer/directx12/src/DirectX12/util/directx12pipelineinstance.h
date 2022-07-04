@@ -11,7 +11,7 @@ namespace Render {
 
     struct MADGINE_DIRECTX12_EXPORT DirectX12PipelineInstance : PipelineInstance {
 
-        DirectX12PipelineInstance(const PipelineConfiguration &config, DirectX12PipelineLoader::HandleType pipeline);
+        DirectX12PipelineInstance(const PipelineConfiguration &config, DirectX12PipelineLoader::Handle pipeline);
 
         bool bind(ID3D12GraphicsCommandList *commandList, VertexFormat format, size_t groupSize) const;
 
@@ -29,7 +29,7 @@ namespace Render {
 
         DirectX12Buffer mInstanceBuffer;
 
-        DirectX12PipelineLoader::HandleType mPipelineHandle;
+        DirectX12PipelineLoader::Handle mPipelineHandle;
     };
 
 }

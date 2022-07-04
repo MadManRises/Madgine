@@ -221,7 +221,7 @@ namespace Tools {
         io.Fonts->Build();
 
         Im3D::GetIO().mFetchFont = [](const char *fontName) {
-            Render::FontLoader::HandleType font;
+            Render::FontLoader::Handle font;
             font.load(fontName);
             font.info()->setPersistent(true);
 

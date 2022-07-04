@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Madgine/resources/resourceloader.h"
+#include "Madgine/resources/virtualresourceloader.h"
 #include "Modules/threading/workgroupstorage.h"
 
 #include "Generic/bytebuffer.h"
@@ -25,8 +25,8 @@ namespace Render {
 
             Instance &operator=(std::unique_ptr<PipelineInstance> ptr);
 
-            Threading::TaskFuture<bool> createStatic(PipelineConfiguration config, PipelineLoader *loader = nullptr);
-            Threading::TaskFuture<bool> createDynamic(PipelineConfiguration config, PipelineLoader *loader = nullptr);
+            Threading::TaskFuture<bool> createStatic(PipelineConfiguration config, PipelineLoader *loader = &PipelineLoader::getSingleton());
+            Threading::TaskFuture<bool> createDynamic(PipelineConfiguration config, PipelineLoader *loader = &PipelineLoader::getSingleton());
 
             WritableByteBuffer mapParameters(size_t index);
 

@@ -19,7 +19,7 @@ namespace Tools {
         virtual void render() override;
 
     private:
-        Render::TextureLoader::HandleType mGamepadTexture;
+        Render::TextureLoader::Handle mGamepadTexture;
     };
 
 }

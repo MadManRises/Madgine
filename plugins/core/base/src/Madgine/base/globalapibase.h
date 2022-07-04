@@ -7,9 +7,9 @@
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
 namespace Engine {
-namespace App {
+namespace Base {
     struct MADGINE_BASE_EXPORT GlobalAPIBase : VirtualScopeBase<>, MadgineObject<GlobalAPIBase> {
-        GlobalAPIBase(App::Application &app);
+        GlobalAPIBase(Application &app);
         virtual ~GlobalAPIBase() = default;
 
         template <typename T>
@@ -20,7 +20,7 @@ namespace App {
 
         GlobalAPIBase &getGlobalAPIComponent(size_t i);
 
-        App::Application &app();
+        Application &app();
 
         Threading::TaskQueue *taskQueue() const;
 
@@ -30,9 +30,9 @@ namespace App {
 
         friend struct MadgineObject<GlobalAPIBase>;
 
-        App::Application &mApp;
+        Application &mApp;
     };
 }
 }
 
-REGISTER_TYPE(Engine::App::GlobalAPIBase)
+REGISTER_TYPE(Engine::Base::GlobalAPIBase)

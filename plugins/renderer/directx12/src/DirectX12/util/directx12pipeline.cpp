@@ -44,7 +44,7 @@ namespace Render {
         DXGI_FORMAT_R32G32B32A32_FLOAT
     };
 
-    bool DirectX12Pipeline::link(std::string_view vertexShader, typename DirectX12GeometryShaderLoader::HandleType geometryShader, typename DirectX12PixelShaderLoader::HandleType pixelShader)
+    bool DirectX12Pipeline::link(std::string_view vertexShader, typename DirectX12GeometryShaderLoader::Handle geometryShader, typename DirectX12PixelShaderLoader::Handle pixelShader)
     {
         reset();
 

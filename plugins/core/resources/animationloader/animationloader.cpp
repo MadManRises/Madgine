@@ -14,9 +14,9 @@ METATABLE_BEGIN(Engine::Render::AnimationLoader)
 MEMBER(mResources)
 METATABLE_END(Engine::Render::AnimationLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::AnimationLoader::ResourceType, Engine::Resources::ResourceBase)
+METATABLE_BEGIN_BASE(Engine::Render::AnimationLoader::Resource, Engine::Resources::ResourceBase)
 READONLY_PROPERTY(Data, dataPtr)
-METATABLE_END(Engine::Render::AnimationLoader::ResourceType)
+METATABLE_END(Engine::Render::AnimationLoader::Resource)
 
 METATABLE_BEGIN(Engine::Render::AnimationList)
 MEMBER(mAnimations)
@@ -118,7 +118,7 @@ METATABLE_END(Engine::Render::QuaternionKeyFrame)
         {
         }
 
-        int *AnimationList::generateBoneMappings(const SkeletonLoader::HandleType &handle)
+        int *AnimationList::generateBoneMappings(const SkeletonLoader::Handle &handle)
         {
             auto pib = mBoneMappings.try_emplace(handle);
             if (pib.second) {

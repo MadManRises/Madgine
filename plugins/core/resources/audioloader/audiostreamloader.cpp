@@ -10,8 +10,8 @@ METATABLE_BEGIN(Engine::Audio::AudioStreamLoader)
 MEMBER(mResources)
 METATABLE_END(Engine::Audio::AudioStreamLoader)
 
-METATABLE_BEGIN_BASE(Engine::Audio::AudioStreamLoader::ResourceType, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Audio::AudioStreamLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Audio::AudioStreamLoader::Resource, Engine::Resources::ResourceBase)
+METATABLE_END(Engine::Audio::AudioStreamLoader::Resource)
 
 namespace Engine {
 namespace Audio {

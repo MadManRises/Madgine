@@ -21,8 +21,8 @@ VIRTUALUNIQUECOMPONENT(Engine::Render::DirectX11PipelineLoader);
 METATABLE_BEGIN_BASE(Engine::Render::DirectX11PipelineLoader, Engine::Render::PipelineLoader)
 METATABLE_END(Engine::Render::DirectX11PipelineLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::DirectX11PipelineLoader::ResourceType, Engine::Render::PipelineLoader::ResourceType)
-METATABLE_END(Engine::Render::DirectX11PipelineLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::DirectX11PipelineLoader::Resource, Engine::Render::PipelineLoader::Resource)
+METATABLE_END(Engine::Render::DirectX11PipelineLoader::Resource)
 
 namespace Engine {
 namespace Render {
@@ -43,13 +43,13 @@ namespace Render {
 
     Threading::Task<bool> DirectX11PipelineLoader::create(Instance &instance, PipelineConfiguration config, bool dynamic)
     {
-        DirectX11VertexShaderLoader::HandleType vertexShader;
+        DirectX11VertexShaderLoader::Handle vertexShader;
         if (!co_await vertexShader.load(config.vs))
             co_return false;
-        DirectX11GeometryShaderLoader::HandleType geometryShader;
+        DirectX11GeometryShaderLoader::Handle geometryShader;
         if (!co_await geometryShader.load(config.gs) && geometryShader)
             co_return false;
-        DirectX11PixelShaderLoader::HandleType pixelShader;
+        DirectX11PixelShaderLoader::Handle pixelShader;
         if (!co_await pixelShader.load(config.ps) && pixelShader)
             co_return false;
 
@@ -64,11 +64,11 @@ namespace Render {
 
         DirectX11Program &program = static_cast<DirectX11Program &>(_program);
 
-        DirectX11VertexShaderLoader::HandleType vertexShader;
+        DirectX11VertexShaderLoader::Handle vertexShader;
         vertexShader.create(name, file);
-        DirectX11GeometryShaderLoader::HandleType geometryShader;
+        DirectX11GeometryShaderLoader::Handle geometryShader;
         geometryShader.create(name, file);
-        DirectX11PixelShaderLoader::HandleType pixelShader;
+        DirectX11PixelShaderLoader::Handle pixelShader;
         pixelShader.create(name, file);
 
         if (!program.link(std::move(vertexShader), std::move(pixelShader), std::move(geometryShader)))

@@ -34,7 +34,7 @@ namespace Render {
         //if(FAILED(hr)) Handle error
     }
 
-    /* void DirectX12PixelShaderLoader::HandleType::create(const std::string &name, const CodeGen::ShaderFile &file, DirectX12PixelShaderLoader *loader)
+    /* void DirectX12PixelShaderLoader::Handle::create(const std::string &name, const CodeGen::ShaderFile &file, DirectX12PixelShaderLoader *loader)
     {
         *this = DirectX12PixelShaderLoader::loadManual(
             name, {}, [=, &file](DirectX12PixelShaderLoader *loader, DirectX12PixelShader &shader, const DirectX12PixelShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, loader);
@@ -52,7 +52,7 @@ namespace Render {
         shader.reset();
     }
 
-    /* bool DirectX12PixelShaderLoader::create(DirectX12PixelShader &shader, ResourceType *res, const CodeGen::ShaderFile &file)
+    /* bool DirectX12PixelShaderLoader::create(DirectX12PixelShader &shader, Resource *res, const CodeGen::ShaderFile &file)
     {
         if (res->path().empty()) {
             Filesystem::Path dir = Filesystem::appDataPath() / "generated/shader/directx12";
@@ -136,5 +136,5 @@ namespace Render {
 METATABLE_BEGIN(Engine::Render::DirectX12PixelShaderLoader)
 METATABLE_END(Engine::Render::DirectX12PixelShaderLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::DirectX12PixelShaderLoader::ResourceType, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Render::DirectX12PixelShaderLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::DirectX12PixelShaderLoader::Resource, Engine::Resources::ResourceBase)
+METATABLE_END(Engine::Render::DirectX12PixelShaderLoader::Resource)

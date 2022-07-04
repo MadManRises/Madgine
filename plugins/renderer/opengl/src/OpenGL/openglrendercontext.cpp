@@ -588,15 +588,15 @@ namespace Render {
     {
         RenderContext::unloadAllResources();
 
-        for (std::pair<const std::string, OpenGLPipelineLoader::ResourceType> &res : OpenGLPipelineLoader::getSingleton()) {
+        for (std::pair<const std::string, OpenGLPipelineLoader::Resource> &res : OpenGLPipelineLoader::getSingleton()) {
             res.second.forceUnload();
         }
 
-        for (std::pair<const std::string, OpenGLTextureLoader::ResourceType> &res : OpenGLTextureLoader::getSingleton()) {
+        for (std::pair<const std::string, OpenGLTextureLoader::Resource> &res : OpenGLTextureLoader::getSingleton()) {
             res.second.forceUnload();
         }
 
-        for (std::pair<const std::string, OpenGLMeshLoader::ResourceType> &res : OpenGLMeshLoader::getSingleton()) {
+        for (std::pair<const std::string, OpenGLMeshLoader::Resource> &res : OpenGLMeshLoader::getSingleton()) {
             res.second.forceUnload();
         }
     }

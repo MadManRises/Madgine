@@ -21,13 +21,13 @@ UNIQUECOMPONENT(Engine::Render::DirectX12VertexShaderLoader);
 METATABLE_BEGIN(Engine::Render::DirectX12VertexShaderLoader)
 METATABLE_END(Engine::Render::DirectX12VertexShaderLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::DirectX12VertexShaderLoader::ResourceType, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Render::DirectX12VertexShaderLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::DirectX12VertexShaderLoader::Resource, Engine::Resources::ResourceBase)
+METATABLE_END(Engine::Render::DirectX12VertexShaderLoader::Resource)
 
 namespace Engine {
 namespace Render {
 
-    Threading::TaskFuture<bool> DirectX12VertexShaderLoader::HandleType::load(std::string_view name, VertexFormat format)
+    Threading::TaskFuture<bool> DirectX12VertexShaderLoader::Handle::load(std::string_view name, VertexFormat format)
     {
         char buffer[256];
 #if WINDOWS
@@ -36,11 +36,7 @@ namespace Render {
         sprintf(buffer, "%s_%hu", name.data(), format);
 #endif
 
-        *this = loadManual(buffer);
-        ResourceDataInfo *i = info();
-        if (!i)
-            return false;
-        return i->loadingTask();
+        return Base::Handle::create(buffer);
     }
 
     static constexpr const wchar_t *vMacros[] = {
@@ -69,7 +65,7 @@ namespace Render {
         //if(FAILED(hr)) Handle error
     }
 
-    /* void DirectX12PixelShaderLoader::HandleType::create(const std::string &name, const CodeGen::ShaderFile &file, DirectX12PixelShaderLoader *loader)
+    /* void DirectX12PixelShaderLoader::Handle::create(const std::string &name, const CodeGen::ShaderFile &file, DirectX12PixelShaderLoader *loader)
     {
         *this = DirectX12PixelShaderLoader::loadManual(
             name, {}, [=, &file](DirectX12PixelShaderLoader *loader, DirectX12PixelShader &shader, const DirectX12PixelShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, loader);
@@ -84,7 +80,7 @@ namespace Render {
             VertexFormat format;
             std::from_chars(fullName.data() + pos + 1, fullName.data() + fullName.size(), reinterpret_cast<uint16_t &>(format));
 
-            DirectX12VertexShaderSourceLoader::HandleType source;
+            DirectX12VertexShaderSourceLoader::Handle source;
             if (!co_await source.load(name))
                 co_return false;
 
@@ -99,7 +95,7 @@ namespace Render {
         shader.reset();
     }
 
-    /* bool DirectX12PixelShaderLoader::create(DirectX12PixelShader &shader, ResourceType *res, const CodeGen::ShaderFile &file)
+    /* bool DirectX12PixelShaderLoader::create(DirectX12PixelShader &shader, Resource *res, const CodeGen::ShaderFile &file)
     {
         if (res->path().empty()) {
             Filesystem::Path dir = Filesystem::appDataPath() / "generated/shader/directx12";

@@ -37,7 +37,7 @@ namespace Widgets {
         setImage(Resources::ImageLoader::getSingleton().get(name));
     }
 
-    void Button::setImage(Resources::ImageLoader::ResourceType *image)
+    void Button::setImage(Resources::ImageLoader::Resource *image)
     {
         mImage = image;
     }
@@ -47,12 +47,12 @@ namespace Widgets {
         return mImage ? mImage->name() : "";
     }
 
-    Resources::ImageLoader::ResourceType *Button::image() const
+    Resources::ImageLoader::Resource *Button::image() const
     {
         return mImage;
     }
 
-    Resources::ImageLoader::ResourceType *Button::resource() const
+    Resources::ImageLoader::Resource *Button::resource() const
     {
         return mImage;
     }
@@ -144,12 +144,12 @@ namespace Widgets {
         mFont.load(name);
     }
 
-    Render::FontLoader::ResourceType *Button::font() const
+    Render::FontLoader::Resource *Button::font() const
     {
         return mFont.resource();
     }
 
-    void Button::setFont(Render::FontLoader::HandleType font)
+    void Button::setFont(Render::FontLoader::Handle font)
     {
         mFont = std::move(font);
     }

@@ -9,7 +9,7 @@
 #include "Modules/threading/taskqueue.h"
 
 namespace Engine {
-namespace App {
+namespace Base {
 
     /**
      * @brief The Application manages all GlobalAPIComponents
@@ -53,4 +53,4 @@ namespace App {
 }
 }
 
-REGISTER_TYPE(Engine::App::Application)
+REGISTER_TYPE(Engine::Base::Application)

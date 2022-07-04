@@ -6,7 +6,7 @@
 
 #include "Modules/threading/workgroup.h"
 
-#include "Madgine/core/root.h"
+#include "Madgine/base/root.h"
 
 #include "Interfaces/util/standardlog.h"
 
@@ -24,7 +24,7 @@ int desktopMain(int argc, char **argv)
 {
     Engine::Filesystem::setup();
     Engine::Threading::WorkGroup workGroup { "Launcher" };
-    Engine::Core::Root root { argc, argv };
+    Engine::Base::Root root { argc, argv };
     Engine::Util::StandardLog::setLogLevel(logLevel);
 
     if (!toolMode) {

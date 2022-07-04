@@ -50,8 +50,8 @@ namespace UniqueComponent {
             std::erase(registryRegistry(), this);
         }
 
-        virtual void onPluginLoad(const Plugins::BinaryInfo *, CompoundAtomicOperation &) = 0;
-        virtual void onPluginUnload(const Plugins::BinaryInfo *, CompoundAtomicOperation &) = 0;
+        virtual void onPluginLoad(const Plugins::BinaryInfo *) = 0;
+        virtual void onPluginUnload(const Plugins::BinaryInfo *) = 0;
 
         const TypeInfo *type_info()
         {
@@ -146,7 +146,7 @@ namespace UniqueComponent {
             mUnloadedCollectors.push_back(info);
         }
 
-        void onPluginLoad(const Plugins::BinaryInfo *bin, CompoundAtomicOperation &op)
+        void onPluginLoad(const Plugins::BinaryInfo *bin)
         {
             for (auto it = mUnloadedCollectors.begin(); it != mUnloadedCollectors.end();) {
                 CollectorInfo *info = *it;
@@ -170,7 +170,7 @@ namespace UniqueComponent {
             std::erase(mUnloadedCollectors, info);
         }
 
-        void onPluginUnload(const Plugins::BinaryInfo *bin, CompoundAtomicOperation &op)
+        void onPluginUnload(const Plugins::BinaryInfo *bin)
         {
             for (auto it = mLoadedCollectors.begin(); it != mLoadedCollectors.end();) {
                 CollectorInfo *info = static_cast<CollectorInfo *>(*it);

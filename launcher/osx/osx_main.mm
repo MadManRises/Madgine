@@ -12,7 +12,7 @@
 
 #include "Modules/threading/workgroup.h"
 
-#include "Madgine/core/root.h"
+#include "Madgine/base/root.h"
 
 #include "cli/parameter.h"
 

@@ -125,12 +125,12 @@ namespace Render {
 
     ExtendedValueTypeDesc MeshRendererNode::dataInType(uint32_t index, bool bidir) const
     {
-        return index == 0 ? toValueTypeDesc<Render::RenderTarget *>() : toValueTypeDesc<Render::GPUMeshLoader::ResourceType *>();
+        return index == 0 ? toValueTypeDesc<Render::RenderTarget *>() : toValueTypeDesc<Render::GPUMeshLoader::Resource *>();
     }
 
     struct MeshRendererNodeInterpret : NodeGraph::NodeInterpreterData {
         Render::PipelineLoader::Instance mPipeline;
-        Render::GPUMeshLoader::HandleType mMesh;
+        Render::GPUMeshLoader::Handle mMesh;
     };
 
     void MeshRendererNode::interpret(NodeGraph::NodeInterpreter &interpreter, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const
@@ -187,7 +187,7 @@ namespace Render {
 
         ValueType meshV;
         interpreter.read(meshV, 1);
-        Render::GPUMeshLoader::ResourceType *mesh = ValueType_as<Render::GPUMeshLoader::ResourceType *>(meshV);
+        Render::GPUMeshLoader::Resource *mesh = ValueType_as<Render::GPUMeshLoader::Resource *>(meshV);
 
         if (mesh) {
             if (interpretData->mMesh.resource() != mesh)

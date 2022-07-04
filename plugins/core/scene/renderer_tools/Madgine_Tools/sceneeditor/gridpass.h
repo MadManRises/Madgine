@@ -24,7 +24,7 @@ namespace Tools {
         virtual int priority() const override;
 
     private:
-        Render::GPUMeshLoader::HandleType mMesh;
+        Render::GPUMeshLoader::Handle mMesh;
         Render::PipelineLoader::Instance mPipeline;
 
         Render::Camera *mCamera;

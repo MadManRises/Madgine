@@ -10,8 +10,8 @@
 
 #include "Generic/bytebuffer.h"
 
-METATABLE_BEGIN_BASE(Engine::Render::TextureLoader::ResourceType, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Render::TextureLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::TextureLoader::Resource, Engine::Resources::ResourceBase)
+METATABLE_END(Engine::Render::TextureLoader::Resource)
 
 VIRTUALUNIQUECOMPONENTBASE(Engine::Render::TextureLoader)
 
@@ -23,10 +23,10 @@ namespace Render {
     {
     }
 
-    Threading::TaskFuture<bool> TextureLoader::PtrType::create(
+    Threading::TaskFuture<bool> TextureLoader::Ptr::create(
         TextureType type, DataFormat format, Vector2i size, ByteBuffer data, TextureLoader * loader)
     {
-        return Base::PtrType::create(
+        return Base::Ptr::create(
             [=, data { std::move(data) }](TextureLoader *loader, Texture &texture) mutable {
                 if (!loader->create(texture, type, format))
                     return false;
@@ -37,10 +37,10 @@ namespace Render {
             loader);        
     }
 
-    Threading::Task<bool> TextureLoader::PtrType::createTask(
+    Threading::Task<bool> TextureLoader::Ptr::createTask(
         TextureType type, DataFormat format, Vector2i size, ByteBuffer data)
     {
-        return Base::PtrType::createTask(
+        return Base::Ptr::createTask(
             [=, data { std::move(data) }](TextureLoader *loader, Texture &texture) mutable {
                 if (!loader->create(texture, type, format))
                     return false;
@@ -50,11 +50,11 @@ namespace Render {
             });
     }
 
-    void TextureLoader::HandleType::loadFromImage(std::string_view name, TextureType type, DataFormat format, TextureLoader *loader)
+    Threading::TaskFuture<bool> TextureLoader::Handle::loadFromImage(std::string_view name, TextureType type, DataFormat format, TextureLoader *loader)
     {
-        *this = TextureLoader::loadManual(
+        return Base::Handle::create(
             name, {}, [=](TextureLoader *loader, Texture &texture, const TextureLoader::ResourceDataInfo &info) -> Threading::Task<bool> {
-                Resources::ImageLoader::HandleType image;
+                Resources::ImageLoader::Handle image;
                 if (!co_await image.load(info.resource()->name()))
                     co_return false;
                 loader->setData(texture, { image->mWidth, image->mHeight }, { image->mBuffer, static_cast<size_t>(image->mWidth * image->mHeight) });
@@ -64,17 +64,13 @@ namespace Render {
             
     }
 
-    void TextureLoader::PtrType::setData(Vector2i size, const ByteBuffer &data, TextureLoader *loader)
+    void TextureLoader::Ptr::setData(Vector2i size, const ByteBuffer &data, TextureLoader *loader)
     {
-        if (!loader)
-            loader = &TextureLoader::getSingleton();
         loader->setData(**this, size, data);
     }
 
-    void TextureLoader::PtrType::setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data, TextureLoader *loader)
+    void TextureLoader::Ptr::setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data, TextureLoader *loader)
     {
-        if (!loader)
-            loader = &TextureLoader::getSingleton();
         loader->setSubData(**this, offset, size, data);
     }
 

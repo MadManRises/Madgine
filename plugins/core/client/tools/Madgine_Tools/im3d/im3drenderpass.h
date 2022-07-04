@@ -19,7 +19,7 @@ namespace Render {
     private:
         PipelineLoader::Instance mPipeline;
 
-        GPUMeshLoader::PtrType mMeshes[/* IM3D_MESHTYPE_COUNT*/ 3][2];
+        GPUMeshLoader::Ptr mMeshes[/* IM3D_MESHTYPE_COUNT*/ 3][2];
 
         Camera *mCamera;
 

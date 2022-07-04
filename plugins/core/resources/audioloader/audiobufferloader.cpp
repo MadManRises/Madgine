@@ -14,8 +14,8 @@ METATABLE_BEGIN(Engine::Audio::AudioBufferLoader)
 MEMBER(mResources)
 METATABLE_END(Engine::Audio::AudioBufferLoader)
 
-METATABLE_BEGIN_BASE(Engine::Audio::AudioBufferLoader::ResourceType, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Audio::AudioBufferLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Audio::AudioBufferLoader::Resource, Engine::Resources::ResourceBase)
+METATABLE_END(Engine::Audio::AudioBufferLoader::Resource)
 
 namespace Engine {
 namespace Audio {

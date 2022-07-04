@@ -32,13 +32,13 @@ namespace Scripting {
 
             virtual void interpret(NodeGraph::NodeInterpreter &interpreter, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const override;
 
-            Python3FileLoader::ResourceType *getFile() const;
-            void setFile(Python3FileLoader::ResourceType *file);
+            Python3FileLoader::Resource *getFile() const;
+            void setFile(Python3FileLoader::Resource *file);
 
             std::string_view getName() const;
             void setName(std::string_view name);
 
-            Python3FileLoader::HandleType mFile;
+            Python3FileLoader::Handle mFile;
 
         protected:
             void updatePins();

@@ -6,8 +6,8 @@
 #include "launcher.h"
 
 #include "Interfaces/window/windowsettings.h"
-#include "Madgine/app/application.h"
-#include "Madgine/core/keyvalueregistry.h"
+#include "Madgine/base/application.h"
+#include "Madgine/base/keyvalueregistry.h"
 #include "Madgine/window/mainwindow.h"
 #include "Meta/serialize/operations.h"
 #include "Meta/serialize/streams/formattedserializestream.h"
@@ -30,7 +30,7 @@
 
 int launch(Engine::Window::MainWindow **topLevelPointer)
 {
-    FIX_LOCAL Engine::KeyValueWorkGroupLocal<Engine::App::Application> app { "Application" };
+    FIX_LOCAL Engine::KeyValueWorkGroupLocal<Engine::Base::Application> app { "Application" };
 
     FIX_LOCAL Engine::Window::WindowSettings windowSettings;
     windowSettings.mTitle = "Maditor";

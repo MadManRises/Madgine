@@ -13,7 +13,7 @@ namespace Render {
 
     struct MADGINE_OPENGL_EXPORT OpenGLPipelineInstance : PipelineInstance {
 
-        OpenGLPipelineInstance(const PipelineConfiguration &config, OpenGLPipelineLoader::HandleType pipeline);
+        OpenGLPipelineInstance(const PipelineConfiguration &config, OpenGLPipelineLoader::Handle pipeline);
 
         void bind() const;
 
@@ -36,7 +36,7 @@ namespace Render {
         
         OpenGLBuffer mInstanceBuffer = GL_ARRAY_BUFFER;
 
-        OpenGLPipelineLoader::HandleType mPipeline;
+        OpenGLPipelineLoader::Handle mPipeline;
     };
 
 }

@@ -11,10 +11,10 @@ namespace Render {
 
         using Base = ResourceLoader<SkeletonLoader, SkeletonDescriptor, std::list<Placeholder<0>>>;
 
-        struct HandleType : Base::HandleType {
-            using Base::HandleType::HandleType;
-            HandleType(Base::HandleType handle)
-                : Base::HandleType(std::move(handle))
+        struct Handle : Base::Handle {
+            using Base::Handle::Handle;
+            Handle(Base::Handle handle)
+                : Base::Handle(std::move(handle))
             {
             }
 

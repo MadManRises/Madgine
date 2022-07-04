@@ -24,18 +24,18 @@ namespace Physics {
         struct InstanceHandle {
 
             InstanceHandle() = default;
-            InstanceHandle(HandleType shape);
-            InstanceHandle(ResourceType *res);
+            InstanceHandle(Handle shape);
+            InstanceHandle(Resource *res);
             InstanceHandle(const InstanceHandle &);
             InstanceHandle(InstanceHandle &&other) noexcept = default;
 
             InstanceHandle &operator=(const InstanceHandle &other);
             InstanceHandle &operator=(InstanceHandle &&other);
 
-            void load(std::string_view name, CollisionShapeManager *loader = nullptr);
+            void load(std::string_view name, CollisionShapeManager *loader = &CollisionShapeManager::getSingleton());
             void reset();
 
-            ResourceType *resource() const;
+            Resource *resource() const;
 
             CollisionShapeInstance *operator->() const;
 
@@ -55,22 +55,22 @@ namespace Physics {
 
     struct CollisionShape {
         virtual ~CollisionShape() = default;
-        virtual CollisionShapeInstancePtr create(typename CollisionShapeManager::HandleType shape) = 0;
+        virtual CollisionShapeInstancePtr create(typename CollisionShapeManager::Handle shape) = 0;
     };
 
     struct CollisionShapeInstance : Serialize::VirtualSerializableUnitBase<VirtualScopeBase<>, Serialize::SerializableUnitBase> {
-        CollisionShapeInstance(typename CollisionShapeManager::HandleType shape = {});
+        CollisionShapeInstance(typename CollisionShapeManager::Handle shape = {});
         virtual ~CollisionShapeInstance();
         virtual btCollisionShape *get() = 0;
         virtual void destroy() = 0;
         virtual CollisionShapeInstancePtr clone() = 0;
 
-        CollisionShapeManager::ResourceType *resource() const;
+        CollisionShapeManager::Resource *resource() const;
 
         bool available() const;
 
     protected:
-        typename CollisionShapeManager::HandleType mHandle;
+        typename CollisionShapeManager::Handle mHandle;
     };
 
 }

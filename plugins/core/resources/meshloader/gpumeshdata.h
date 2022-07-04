@@ -10,8 +10,8 @@ namespace Render {
     struct GPUMeshData {
         struct Material {
             std::string mName;
-            TextureLoader::HandleType mDiffuseTexture;
-            TextureLoader::HandleType mEmissiveTexture;
+            TextureLoader::Handle mDiffuseTexture;
+            TextureLoader::Handle mEmissiveTexture;
             Vector4 mDiffuseColor = Vector4::UNIT_SCALE;
         };
         std::vector<Material> mMaterials;

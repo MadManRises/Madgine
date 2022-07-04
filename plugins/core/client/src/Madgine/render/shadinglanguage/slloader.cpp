@@ -9,8 +9,8 @@ UNIQUECOMPONENT(Engine::Render::SlLoader);
 METATABLE_BEGIN(Engine::Render::SlLoader)
 METATABLE_END(Engine::Render::SlLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::SlLoader::ResourceType, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Render::SlLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::SlLoader::Resource, Engine::Resources::ResourceBase)
+METATABLE_END(Engine::Render::SlLoader::Resource)
 
 namespace Engine {
 namespace Render {

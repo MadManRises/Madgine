@@ -18,8 +18,8 @@ VIRTUALUNIQUECOMPONENT(Engine::Render::DirectX12PipelineLoader);
 METATABLE_BEGIN_BASE(Engine::Render::DirectX12PipelineLoader, Engine::Render::PipelineLoader)
 METATABLE_END(Engine::Render::DirectX12PipelineLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::DirectX12PipelineLoader::ResourceType, Engine::Render::PipelineLoader::ResourceType)
-METATABLE_END(Engine::Render::DirectX12PipelineLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::DirectX12PipelineLoader::Resource, Engine::Render::PipelineLoader::Resource)
+METATABLE_END(Engine::Render::DirectX12PipelineLoader::Resource)
 
 namespace Engine {
 namespace Render {
@@ -40,7 +40,7 @@ namespace Render {
 
     Threading::Task<bool> DirectX12PipelineLoader::create(Instance &instance, PipelineConfiguration config, bool dynamic)
     {
-        HandleType pipeline;
+        Handle pipeline;
 
         char buffer[256];
 #if WINDOWS
@@ -50,9 +50,9 @@ namespace Render {
 #endif
 
         if (!co_await pipeline.create(buffer, {}, [&](DirectX12PipelineLoader *loader, DirectX12Pipeline &pipeline, ResourceDataInfo &info) -> Threading::Task<bool> {
-                DirectX12GeometryShaderLoader::HandleType geometryShader;
+                DirectX12GeometryShaderLoader::Handle geometryShader;
                 geometryShader.load(config.gs);
-                DirectX12PixelShaderLoader::HandleType pixelShader;
+                DirectX12PixelShaderLoader::Handle pixelShader;
                 pixelShader.load(config.ps);
                 co_return pipeline.link(config.vs, std::move(geometryShader), std::move(pixelShader));
             }))
@@ -69,9 +69,9 @@ namespace Render {
 
         DirectX12Program &program = static_cast<DirectX12Program &>(_program);
 
-        DirectX12VertexShaderLoader::HandleType vertexShader;
+        DirectX12VertexShaderLoader::Handle vertexShader;
         vertexShader.create(name, file);
-        DirectX12PixelShaderLoader::HandleType pixelShader;
+        DirectX12PixelShaderLoader::Handle pixelShader;
         pixelShader.create(name, file);
 
         if (!program.link(std::move(vertexShader), std::move(pixelShader)))

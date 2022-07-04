@@ -53,9 +53,9 @@ namespace Render {
     {
     }
 
-    void DirectX11PixelShaderLoader::HandleType::create(const std::string &name, const CodeGen::ShaderFile &file, DirectX11PixelShaderLoader *loader)
+    Threading::TaskFuture<bool> DirectX11PixelShaderLoader::Handle::create(const std::string &name, const CodeGen::ShaderFile &file, DirectX11PixelShaderLoader *loader)
     {
-        *this = DirectX11PixelShaderLoader::loadManual(
+        return Base::Handle::create(
             name, {}, [=, &file](DirectX11PixelShaderLoader *loader, ReleasePtr<ID3D11PixelShader> &shader, const DirectX11PixelShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, loader);
     }
 
@@ -71,7 +71,7 @@ namespace Render {
         shader.reset();
     }
 
-    bool DirectX11PixelShaderLoader::create(ReleasePtr<ID3D11PixelShader> &shader, ResourceType *res, const CodeGen::ShaderFile &file)
+    bool DirectX11PixelShaderLoader::create(ReleasePtr<ID3D11PixelShader> &shader, Resource *res, const CodeGen::ShaderFile &file)
     {
         if (res->path().empty()) {
             Filesystem::Path dir = Filesystem::appDataPath() / "generated/shader/directx11";
@@ -146,5 +146,5 @@ namespace Render {
 METATABLE_BEGIN(Engine::Render::DirectX11PixelShaderLoader)
 METATABLE_END(Engine::Render::DirectX11PixelShaderLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::DirectX11PixelShaderLoader::ResourceType, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Render::DirectX11PixelShaderLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::DirectX11PixelShaderLoader::Resource, Engine::Resources::ResourceBase)
+METATABLE_END(Engine::Render::DirectX11PixelShaderLoader::Resource)

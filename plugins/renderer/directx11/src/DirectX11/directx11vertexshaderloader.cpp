@@ -20,7 +20,7 @@ namespace Render {
     {
     }
 
-    /*void DirectX11VertexShaderLoader::HandleType::create(const std::string &name, const CodeGen::ShaderFile &file, DirectX11VertexShaderLoader *loader)
+    /*void DirectX11VertexShaderLoader::Handle::create(const std::string &name, const CodeGen::ShaderFile &file, DirectX11VertexShaderLoader *loader)
     {
         *this = DirectX11VertexShaderLoader::loadManual(
             name, {}, [=, &file](DirectX11VertexShaderLoader *loader, DirectX11VertexShader &shader, const DirectX11VertexShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, loader);
@@ -38,7 +38,7 @@ namespace Render {
         list.reset();
     }
 
-    bool DirectX11VertexShaderLoader::create(DirectX11VertexShaderList &shader, ResourceType *res, const CodeGen::ShaderFile &file)
+    bool DirectX11VertexShaderLoader::create(DirectX11VertexShaderList &shader, Resource *res, const CodeGen::ShaderFile &file)
     {
         throw 0;
         /*
@@ -72,5 +72,5 @@ METATABLE_BEGIN(Engine::Render::DirectX11VertexShaderLoader)
 MEMBER(mResources)
 METATABLE_END(Engine::Render::DirectX11VertexShaderLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::DirectX11VertexShaderLoader::ResourceType, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Render::DirectX11VertexShaderLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::DirectX11VertexShaderLoader::Resource, Engine::Resources::ResourceBase)
+METATABLE_END(Engine::Render::DirectX11VertexShaderLoader::Resource)

@@ -18,7 +18,7 @@
 #include "codegen/codegen_cpp.h"
 
 namespace Engine {
-namespace Core {
+namespace Base {
 
     CLI::Parameter<bool> noPluginCache { { "--no-plugin-cache", "-npc" }, false, "Disables the loading of the cached plugin selection at startup." };
     CLI::Parameter<std::string> loadPlugins { { "--load-plugins", "-lp" }, "", "If set the pluginmanager will load the specified config file after loading the cached plugin-file." };

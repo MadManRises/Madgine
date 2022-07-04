@@ -104,7 +104,7 @@ namespace Widgets {
         void *userData();
         void setUserData(void *userData);
 
-        virtual Resources::ResourceType<Resources::ImageLoader> *resource() const;
+        virtual Resources::Resource<Resources::ImageLoader> *resource() const;
 
         size_t depth();
 

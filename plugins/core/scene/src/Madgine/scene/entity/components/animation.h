@@ -13,9 +13,9 @@ namespace Scene {
             using EntityComponent<Animation>::EntityComponent;
             virtual ~Animation() = default;
 
-            void set(Render::AnimationLoader::HandleType handle);
+            void set(Render::AnimationLoader::Handle handle);
             void setName(const std::string &name);
-            Render::AnimationLoader::ResourceType *get() const;
+            Render::AnimationLoader::Resource *get() const;
 
             void setCurrentAnimationName(const std::string &name);
             void setCurrentAnimation(Render::AnimationDescriptor *desc);
@@ -31,8 +31,8 @@ namespace Scene {
             void refreshCache();
 
         private:
-            Render::AnimationLoader::HandleType mAnimationList;
-            Render::SkeletonLoader::HandleType mSkeletonCache;
+            Render::AnimationLoader::Handle mAnimationList;
+            Render::SkeletonLoader::Handle mSkeletonCache;
             int *mBoneIndexMapping = nullptr;
             Render::AnimationDescriptor *mCurrentAnimation = nullptr;
             float mCurrentStep = 0.0f;

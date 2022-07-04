@@ -259,7 +259,7 @@ namespace Physics {
         get()->setLinearVelocity({ v.x, v.y, v.z });
     }
 
-    void RigidBody::setShape(typename CollisionShapeManager::HandleType handle)
+    void RigidBody::setShape(typename CollisionShapeManager::Handle handle)
     {
         remove();
 
@@ -285,7 +285,7 @@ namespace Physics {
         add();
     }
 
-    CollisionShapeManager::ResourceType *RigidBody::getShape() const
+    CollisionShapeManager::Resource *RigidBody::getShape() const
     {
         return mShapeHandle ? mShapeHandle.resource() : nullptr;
     }

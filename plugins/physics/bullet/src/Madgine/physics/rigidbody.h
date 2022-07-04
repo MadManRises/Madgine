@@ -55,9 +55,9 @@ namespace Physics {
 
         PhysicsManager *mgr();
 
-        void setShape(typename CollisionShapeManager::HandleType handle);
+        void setShape(typename CollisionShapeManager::Handle handle);
         void setShapeName(std::string_view name);
-        CollisionShapeManager::ResourceType *getShape() const;
+        CollisionShapeManager::Resource *getShape() const;
         CollisionShapeInstance *getShapeInstance() const;
 
         void add();

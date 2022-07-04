@@ -75,7 +75,7 @@ namespace Tools {
             for (NodeRenderPass &pass : mPasses) {
                 TypedScopePtr ptr = pass.mHandle.resource();
                 if (mInspector->drawValue("pass", ptr, true).first) {
-                    pass.mHandle = ptr.safe_cast<NodeGraph::NodeGraphLoader::ResourceType>();
+                    pass.mHandle = ptr.safe_cast<NodeGraph::NodeGraphLoader::Resource>();
                     size_t argCount = pass.mHandle->mDataProviderPins.size();
                     assert(argCount >= 1);
                     pass.mArguments.resize(argCount - 1);

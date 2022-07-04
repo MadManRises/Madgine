@@ -3,15 +3,10 @@
 namespace Engine
 {
 
-	namespace App
+	namespace Base
 	{
 		struct Application;			
 		struct GlobalAPIBase;
 	}
-
-	namespace Core
-	{
-		struct Root;
-	}
-
+	
 }

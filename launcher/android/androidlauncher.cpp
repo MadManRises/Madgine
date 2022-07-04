@@ -3,7 +3,7 @@
 
 #include "androidlauncher.h"
 
-#include "Madgine/core/root.h"
+#include "Madgine/base/root.h"
 
 #include "Madgine/window/mainwindow.h"
 

@@ -32,21 +32,21 @@ namespace Threading {
         template <typename T, typename I>
         void queueTask(Task<T, I> task)
         {
-            auto handle = std::move(task).assign(this);
+            TaskHandle handle = task.assign(this);
             if (handle)
                 queueHandle(std::move(handle));
         }
         template <typename T, typename I>
         void queueTask_after(Task<T, I> task, std::chrono::steady_clock::duration duration)
         {
-            auto handle = std::move(task).assign(this);
+            TaskHandle handle = task.assign(this);
             if (handle)
                 queueHandle_after(std::move(handle), duration);
         }
         template <typename T, typename I>
         void queueTask_for(Task<T, I> task, std::chrono::steady_clock::time_point time_point)
         {
-            auto handle = std::move(task).assign(this);
+            TaskHandle handle = task.assign(this);
             if (handle)
                 queueHandle_for(std::move(handle), time_point);
         }

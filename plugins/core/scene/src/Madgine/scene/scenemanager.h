@@ -6,8 +6,8 @@
 
 #include "Meta/serialize/container/syncablecontainer.h"
 
-#include "Madgine/app/globalapibase.h"
-#include "Madgine/app/globalapicollector.h"
+#include "Madgine/base/globalapibase.h"
+#include "Madgine/base/globalapicollector.h"
 #include "Meta/serialize/container/noparent.h"
 
 #include "Modules/threading/datamutex.h"
@@ -36,12 +36,12 @@
 namespace Engine {
 namespace Scene {
     struct MADGINE_SCENE_EXPORT SceneManager : Serialize::TopLevelUnit<SceneManager>,
-                                               App::GlobalAPI<Serialize::NoParent<SceneManager>> {
+                                               Base::GlobalAPI<Serialize::NoParent<SceneManager>> {
         SERIALIZABLEUNIT(SceneManager)
 
         using EntityContainer = RefcountedContainer<std::deque<Entity::Entity>>;
 
-        SceneManager(App::Application &app);
+        SceneManager(Base::Application &app);
         SceneManager(const SceneManager &) = delete;
         ~SceneManager();
 

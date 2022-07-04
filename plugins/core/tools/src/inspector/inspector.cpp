@@ -17,7 +17,7 @@
 
 #include "functiontool.h"
 
-#include "Madgine/core/keyvalueregistry.h"
+#include "Madgine/base/keyvalueregistry.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 

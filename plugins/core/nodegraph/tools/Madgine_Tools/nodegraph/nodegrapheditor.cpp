@@ -807,7 +807,7 @@ namespace Tools {
 
     void NodeGraphEditor::create(const Filesystem::Path &path)
     {
-        mGraphHandle.create(path).then([this](bool b) {
+        mGraphHandle.create(path.stem(), path).then([this](bool b) {
             if (b)
                 mGraph = *mGraphHandle;
             else

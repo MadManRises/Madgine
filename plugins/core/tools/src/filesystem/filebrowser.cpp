@@ -13,7 +13,7 @@
 
 #    include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-#    include "Madgine/core/root.h"
+#    include "Madgine/base/root.h"
 
 UNIQUECOMPONENT(Engine::Tools::FileBrowser);
 

@@ -16,9 +16,9 @@ METATABLE_BEGIN(Engine::Render::SkeletonLoader)
 MEMBER(mResources)
 METATABLE_END(Engine::Render::SkeletonLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::SkeletonLoader::ResourceType, Engine::Resources::ResourceBase)
+METATABLE_BEGIN_BASE(Engine::Render::SkeletonLoader::Resource, Engine::Resources::ResourceBase)
 READONLY_PROPERTY(Data, dataPtr)
-METATABLE_END(Engine::Render::SkeletonLoader::ResourceType)
+METATABLE_END(Engine::Render::SkeletonLoader::Resource)
 
 METATABLE_BEGIN(Engine::Render::Bone)
 MEMBER(mName)

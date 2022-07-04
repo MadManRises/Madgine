@@ -16,7 +16,7 @@ METATABLE_END(Engine::Audio::OpenALAudioContext)
 namespace Engine {
 namespace Audio {
 
-    OpenALAudioContext::OpenALAudioContext(App::Application &app)
+    OpenALAudioContext::OpenALAudioContext(Base::Application &app)
         : VirtualScope(app)
     {
     }
@@ -34,7 +34,7 @@ namespace Audio {
         assert(mContext);
         alcMakeContextCurrent(mContext.get());
 
-        AudioBufferLoader::HandleType audioSample;
+        AudioBufferLoader::Handle audioSample;
 
         bool result = co_await audioSample.load("Example2");
         assert(result);

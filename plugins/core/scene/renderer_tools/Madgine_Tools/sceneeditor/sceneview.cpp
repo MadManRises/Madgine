@@ -181,14 +181,14 @@ namespace Tools {
 
             if (ImGui::BeginDragDropTarget()) {
                 Vector3 pos = ray.point(5.0f);
-                Render::GPUMeshLoader::ResourceType *resource;
+                Render::GPUMeshLoader::Resource *resource;
                 if (ImGui::AcceptDraggableValueType(resource)) {
                     Scene::Entity::EntityPtr e = mEditor->sceneMgr().createEntity();
                     e->addComponent<Scene::Entity::Transform>().get()->setPosition(pos);
                     e->addComponent<Scene::Entity::Mesh>().get()->set(resource);
                     mEditor->select(e);
                 } else if (ImGui::IsDraggableValueTypeBeingAccepted(resource)) {
-                    Render::GPUMeshLoader::HandleType handle = resource->loadData();
+                    Render::GPUMeshLoader::Handle handle = resource->loadData();
                     handle.info()->setPersistent(true);
                     Im3D::NativeMesh(handle->mMaterials.front().mDiffuseTexture->mTextureHandle, handle->mAABB, TranslationMatrix(pos));
                 }

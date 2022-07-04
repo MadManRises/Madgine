@@ -17,8 +17,8 @@ METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader, Engine::Render::GPUMeshLo
 MEMBER(mResources)
 METATABLE_END(Engine::Render::OpenGLMeshLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader::ResourceType, Engine::Render::GPUMeshLoader::ResourceType)
-METATABLE_END(Engine::Render::OpenGLMeshLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader::Resource, Engine::Render::GPUMeshLoader::Resource)
+METATABLE_END(Engine::Render::OpenGLMeshLoader::Resource)
 
 namespace Engine {
 namespace Render {

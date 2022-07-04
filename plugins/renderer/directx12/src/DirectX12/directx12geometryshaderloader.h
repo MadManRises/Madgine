@@ -10,11 +10,11 @@ namespace Render {
     struct DirectX12GeometryShaderLoader : Resources::ResourceLoader<DirectX12GeometryShaderLoader, ReleasePtr<IDxcBlob>, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
         DirectX12GeometryShaderLoader();
 
-        struct HandleType : Base::HandleType {
+        struct Handle : Base::Handle {
 
-            using Base::HandleType::HandleType;
-            HandleType(Base::HandleType handle)
-                : Base::HandleType(std::move(handle))
+            using Base::Handle::Handle;
+            Handle(Base::Handle handle)
+                : Base::Handle(std::move(handle))
             {
             }
 
@@ -24,7 +24,7 @@ namespace Render {
         bool loadImpl(ReleasePtr<IDxcBlob> &shader, ResourceDataInfo &info);
         void unloadImpl(ReleasePtr<IDxcBlob> &shader);
 
-        //bool create(ReleasePtr<ID3DBlob> &shader, ResourceType *res, const CodeGen::ShaderFile &file);
+        //bool create(ReleasePtr<ID3DBlob> &shader, Resource *res, const CodeGen::ShaderFile &file);
 
         bool loadFromSource(ReleasePtr<IDxcBlob> &shader, std::string_view name, std::string source);
 

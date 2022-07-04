@@ -53,9 +53,9 @@ namespace Render {
     {
     }
 
-    void DirectX11GeometryShaderLoader::HandleType::create(const std::string &name, const CodeGen::ShaderFile &file, DirectX11GeometryShaderLoader *loader)
+    Threading::TaskFuture<bool> DirectX11GeometryShaderLoader::Handle::create(const std::string &name, const CodeGen::ShaderFile &file, DirectX11GeometryShaderLoader *loader)
     {
-        *this = DirectX11GeometryShaderLoader::loadManual(
+        return Base::Handle::create(
             name, {}, [=, &file](DirectX11GeometryShaderLoader *loader, ReleasePtr<ID3D11GeometryShader> &shader, const DirectX11GeometryShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, loader);
     }
 
@@ -71,7 +71,7 @@ namespace Render {
         shader.reset();
     }
 
-    bool DirectX11GeometryShaderLoader::create(ReleasePtr<ID3D11GeometryShader> &shader, ResourceType *res, const CodeGen::ShaderFile &file)
+    bool DirectX11GeometryShaderLoader::create(ReleasePtr<ID3D11GeometryShader> &shader, Resource *res, const CodeGen::ShaderFile &file)
     {
         if (res->path().empty()) {
             Filesystem::Path dir = Filesystem::appDataPath() / "generated/shader/directx11";
@@ -146,5 +146,5 @@ namespace Render {
 METATABLE_BEGIN(Engine::Render::DirectX11GeometryShaderLoader)
 METATABLE_END(Engine::Render::DirectX11GeometryShaderLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::DirectX11GeometryShaderLoader::ResourceType, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Render::DirectX11GeometryShaderLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::DirectX11GeometryShaderLoader::Resource, Engine::Resources::ResourceBase)
+METATABLE_END(Engine::Render::DirectX11GeometryShaderLoader::Resource)

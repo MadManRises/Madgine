@@ -33,7 +33,7 @@ namespace Render {
         return *this;
     }
 
-    bool OpenGLPipeline::link(typename OpenGLShaderLoader::HandleType vertexShader, typename OpenGLShaderLoader::HandleType geometryShader, typename OpenGLShaderLoader::HandleType pixelShader)
+    bool OpenGLPipeline::link(typename OpenGLShaderLoader::Handle vertexShader, typename OpenGLShaderLoader::Handle geometryShader, typename OpenGLShaderLoader::Handle pixelShader)
     {
         reset();
 

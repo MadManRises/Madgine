@@ -7,8 +7,8 @@
 #include "Meta/keyvalue/metatable_impl.h"
 
 namespace Engine {
-namespace App {
-    GlobalAPIBase::GlobalAPIBase(App::Application &app)
+namespace Base {
+    GlobalAPIBase::GlobalAPIBase(Application &app)
         : mApp(app)
     {
     }
@@ -18,7 +18,7 @@ namespace App {
         return mApp.taskQueue();
     }
 
-    App::Application &GlobalAPIBase::app()
+    Application &GlobalAPIBase::app()
     {
         return mApp;
     }
@@ -41,5 +41,5 @@ namespace App {
 }
 }
 
-METATABLE_BEGIN(Engine::App::GlobalAPIBase)
-METATABLE_END(Engine::App::GlobalAPIBase)
+METATABLE_BEGIN(Engine::Base::GlobalAPIBase)
+METATABLE_END(Engine::Base::GlobalAPIBase)

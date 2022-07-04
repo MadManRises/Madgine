@@ -15,8 +15,8 @@ namespace Widgets {
         std::string_view getFontName() const;
         void setFontName(std::string_view name);
 
-        Render::FontLoader::ResourceType *getFont() const;
-        void setFont(Render::FontLoader::ResourceType *font);
+        Render::FontLoader::Resource *getFont() const;
+        void setFont(Render::FontLoader::Resource *font);
 
         std::vector<std::pair<std::vector<Vertex>, TextureSettings>> vertices(const Vector3 &screenSize) override;
 
@@ -26,7 +26,7 @@ namespace Widgets {
         Vector2 mPivot = { 0.5f, 0.5f };
 
     private:
-        Render::FontLoader::HandleType mFont;
+        Render::FontLoader::Handle mFont;
     };
 }
 }

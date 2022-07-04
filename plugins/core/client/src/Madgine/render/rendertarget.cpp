@@ -57,7 +57,7 @@ namespace Render {
 
     void RenderTarget::renderQuad(const PipelineInstance *pipeline)
     {
-        static GPUMeshLoader::HandleType quad = GPUMeshLoader::loadManual("quad", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &data, Render::GPUMeshLoader::ResourceDataInfo &info) {
+        static GPUMeshLoader::Handle quad = GPUMeshLoader::loadManual("quad", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &data, Render::GPUMeshLoader::ResourceDataInfo &info) {
             std::vector<Compound<Render::VertexPos_3D>> vertices {
                 { { -1, -1, 0 } },
                 { { 1, -1, 0 } },

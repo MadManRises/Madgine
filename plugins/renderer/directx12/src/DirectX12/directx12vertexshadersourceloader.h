@@ -10,11 +10,11 @@ namespace Render {
     struct DirectX12VertexShaderSourceLoader : Resources::ResourceLoader<DirectX12VertexShaderSourceLoader, std::string, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
         DirectX12VertexShaderSourceLoader();
 
-        struct HandleType : Base::HandleType {
+        struct Handle : Base::Handle {
 
-            using Base::HandleType::HandleType;
-            HandleType(Base::HandleType handle)
-                : Base::HandleType(std::move(handle))
+            using Base::Handle::Handle;
+            Handle(Base::Handle handle)
+                : Base::Handle(std::move(handle))
             {
             }
 
@@ -24,7 +24,7 @@ namespace Render {
         bool loadImpl(std::string &shader, ResourceDataInfo &info);
         void unloadImpl(std::string &shader);
 
-        //bool create(DirectX12VertexShader &shader, ResourceType *res, const CodeGen::ShaderFile &file);
+        //bool create(DirectX12VertexShader &shader, Resource *res, const CodeGen::ShaderFile &file);
 
         virtual Threading::TaskQueue *loadingTaskQueue() const override;
     };

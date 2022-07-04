@@ -108,15 +108,15 @@ namespace Render {
     {
         RenderContext::unloadAllResources();
 
-        for (std::pair<const std::string, DirectX11PipelineLoader::ResourceType> &res : DirectX11PipelineLoader::getSingleton()) {
+        for (std::pair<const std::string, DirectX11PipelineLoader::Resource> &res : DirectX11PipelineLoader::getSingleton()) {
             res.second.forceUnload();
         }
 
-        for (std::pair<const std::string, DirectX11TextureLoader::ResourceType> &res : DirectX11TextureLoader::getSingleton()) {
+        for (std::pair<const std::string, DirectX11TextureLoader::Resource> &res : DirectX11TextureLoader::getSingleton()) {
             res.second.forceUnload();
         }
 
-        for (std::pair<const std::string, DirectX11MeshLoader::ResourceType> &res : DirectX11MeshLoader::getSingleton()) {
+        for (std::pair<const std::string, DirectX11MeshLoader::Resource> &res : DirectX11MeshLoader::getSingleton()) {
             res.second.forceUnload();
         }
     }

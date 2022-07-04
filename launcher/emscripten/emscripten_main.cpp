@@ -4,7 +4,7 @@
 #include "../launcher.h"
 #include "Interfaces/filesystem/api.h"
 #include "Interfaces/util/standardlog.h"
-#include "Madgine/core/root.h"
+#include "Madgine/base/root.h"
 #include "Modules/threading/workgroup.h"
 #include "cli/cli.h"
 #include "cli/parameter.h"

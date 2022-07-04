@@ -20,7 +20,7 @@ namespace Resources {
         void registerResourceLocation(const Filesystem::Path &path, int priority);
 
         template <typename Loader>
-        typename Loader::ResourceType *getResource(const std::string &name)
+        typename Loader::Resource *getResource(const std::string &name)
         {
             return mCollector.get<Loader>().get(name);
         }

@@ -34,7 +34,7 @@ namespace Tools {
 
             virtual int priority() const override;
 
-            NodeGraph::NodeGraphLoader::HandleType mHandle;
+            NodeGraph::NodeGraphLoader::Handle mHandle;
 
             NodeGraph::NodeInterpreter mInterpreter;
 

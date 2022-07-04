@@ -13,7 +13,7 @@ namespace Render {
 
     struct MADGINE_DIRECTX11_EXPORT DirectX11PipelineInstance : PipelineInstance {
 
-        DirectX11PipelineInstance(const PipelineConfiguration &config, typename DirectX11VertexShaderLoader::HandleType vertexShader, typename DirectX11PixelShaderLoader::HandleType pixelShader, typename DirectX11GeometryShaderLoader::HandleType geometryShader, bool dynamic);
+        DirectX11PipelineInstance(const PipelineConfiguration &config, typename DirectX11VertexShaderLoader::Handle vertexShader, typename DirectX11PixelShaderLoader::Handle pixelShader, typename DirectX11GeometryShaderLoader::Handle geometryShader, bool dynamic);
 
         void bind(VertexFormat format) const;
 
@@ -36,9 +36,9 @@ namespace Render {
         
         DirectX11Buffer mInstanceBuffer = D3D11_BIND_VERTEX_BUFFER;
 
-        DirectX11VertexShaderLoader::HandleType mVertexShaderHandle;
-        DirectX11PixelShaderLoader::HandleType mPixelShaderHandle;
-        DirectX11GeometryShaderLoader::HandleType mGeometryShaderHandle;
+        DirectX11VertexShaderLoader::Handle mVertexShaderHandle;
+        DirectX11PixelShaderLoader::Handle mPixelShaderHandle;
+        DirectX11GeometryShaderLoader::Handle mGeometryShaderHandle;
         
         bool mIsDynamic;
     };

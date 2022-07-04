@@ -16,9 +16,9 @@ METATABLE_BEGIN(Engine::Render::MeshLoader)
 MEMBER(mResources)
 METATABLE_END(Engine::Render::MeshLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::MeshLoader::ResourceType, Engine::Resources::ResourceBase)
+METATABLE_BEGIN_BASE(Engine::Render::MeshLoader::Resource, Engine::Resources::ResourceBase)
 READONLY_PROPERTY(Data, dataPtr)
-METATABLE_END(Engine::Render::MeshLoader::ResourceType)
+METATABLE_END(Engine::Render::MeshLoader::Resource)
 
 UNIQUECOMPONENT(Engine::Render::MeshLoader)
 

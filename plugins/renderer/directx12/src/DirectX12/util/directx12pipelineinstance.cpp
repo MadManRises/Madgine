@@ -7,7 +7,7 @@
 namespace Engine {
 namespace Render {
 
-    DirectX12PipelineInstance::DirectX12PipelineInstance(const PipelineConfiguration &config, DirectX12PipelineLoader::HandleType pipeline)
+    DirectX12PipelineInstance::DirectX12PipelineInstance(const PipelineConfiguration &config, DirectX12PipelineLoader::Handle pipeline)
         : PipelineInstance(config)
         , mPipelineHandle(std::move(pipeline))
     {

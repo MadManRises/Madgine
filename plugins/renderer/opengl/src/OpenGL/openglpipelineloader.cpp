@@ -18,9 +18,9 @@ METATABLE_BEGIN_BASE(Engine::Render::OpenGLPipelineLoader, Engine::Render::Pipel
 MEMBER(mResources)
 METATABLE_END(Engine::Render::OpenGLPipelineLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::OpenGLPipelineLoader::ResourceType, Engine::Render::PipelineLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::OpenGLPipelineLoader::Resource, Engine::Render::PipelineLoader::Resource)
 READONLY_PROPERTY(Data, dataPtr)
-METATABLE_END(Engine::Render::OpenGLPipelineLoader::ResourceType)
+METATABLE_END(Engine::Render::OpenGLPipelineLoader::Resource)
 
 namespace Engine {
 namespace Render {
@@ -49,21 +49,21 @@ namespace Render {
         sprintf(buffer, "%s|%s|%s", config.vs.data(), config.gs.data(), config.ps.data());
 #endif
 
-        HandleType pipeline;
+        Handle pipeline;
         if (!co_await pipeline.create(buffer, {}, [&](OpenGLPipelineLoader *loader, OpenGLPipeline &pipeline, ResourceDataInfo &info) -> Threading::Task<bool> {
-                OpenGLShaderLoader::HandleType vertexShader;
+                OpenGLShaderLoader::Handle vertexShader;
                 if (!co_await vertexShader.load(config.vs, VertexShader)) {
                     LOG_ERROR("Failed to load VS '" << config.vs << "'!");
                     co_return false;
                 }
 
-                OpenGLShaderLoader::HandleType pixelShader;
+                OpenGLShaderLoader::Handle pixelShader;
                 if (!co_await pixelShader.load(config.ps, PixelShader) && pixelShader) {
                     LOG_ERROR("Failed to load PS '" << config.ps << "'!");
                     co_return false;
                 }
 
-                OpenGLShaderLoader::HandleType geometryShader;
+                OpenGLShaderLoader::Handle geometryShader;
                 if (!co_await geometryShader.load(config.gs, GeometryShader) && geometryShader) {
                     LOG_ERROR("Failed to load GS '" << config.gs << "'!");
                     co_return false;
@@ -90,9 +90,9 @@ namespace Render {
 
         OpenGLProgram &program = static_cast<OpenGLProgram &>(_program);
 
-        OpenGLShaderLoader::HandleType vertexShader;
+        OpenGLShaderLoader::Handle vertexShader;
         vertexShader.create(name, file, VertexShader);
-        OpenGLShaderLoader::HandleType pixelShader;
+        OpenGLShaderLoader::Handle pixelShader;
         pixelShader.create(name, file, PixelShader);
 
         if (!program.link(std::move(vertexShader), std::move(pixelShader)))

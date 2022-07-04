@@ -14,12 +14,12 @@ namespace Widgets {
         virtual ~Button() = default;
 
         void setImageName(std::string_view name);
-        void setImage(Resources::ImageLoader::ResourceType *image);
+        void setImage(Resources::ImageLoader::Resource *image);
 
         std::string_view imageName() const;
-        Resources::ImageLoader::ResourceType *image() const;
+        Resources::ImageLoader::Resource *image() const;
 
-        virtual Resources::ImageLoader::ResourceType *resource() const override;
+        virtual Resources::ImageLoader::Resource *resource() const override;
 
         Threading::SignalStub<> &clickEvent();
 
@@ -30,8 +30,8 @@ namespace Widgets {
         std::string_view fontName() const;
         void setFontName(std::string_view name);
 
-        Render::FontLoader::ResourceType *font() const;
-        void setFont(Render::FontLoader::HandleType font);
+        Render::FontLoader::Resource *font() const;
+        void setFont(Render::FontLoader::Handle font);
 
         std::string mText;
         float mFontSize = 16;
@@ -48,8 +48,8 @@ namespace Widgets {
         void emitClicked();
 
     private:
-        Render::FontLoader::HandleType mFont;
-        Resources::ImageLoader::ResourceType *mImage;
+        Render::FontLoader::Handle mFont;
+        Resources::ImageLoader::Resource *mImage;
 
         Threading::Signal<> mClicked;
 

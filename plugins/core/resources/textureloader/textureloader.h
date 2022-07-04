@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Madgine/resources/resourceloader.h"
+#include "Madgine/resources/virtualresourceloader.h"
 
 #include "Modules/threading/workgroupstorage.h"
 
@@ -27,30 +27,30 @@ namespace Render {
 
         using Base = Resources::VirtualResourceLoaderBase<TextureLoader, Texture, std::list<Placeholder<0>>, Threading::WorkGroupStorage>;
 
-        struct MADGINE_TEXTURELOADER_EXPORT PtrType : Base::PtrType {
+        struct MADGINE_TEXTURELOADER_EXPORT Ptr : Base::Ptr {
 
-            using Base::PtrType::PtrType;
-            PtrType(Base::PtrType ptr)
-                : Base::PtrType(std::move(ptr))
+            using Base::Ptr::Ptr;
+            Ptr(Base::Ptr ptr)
+                : Base::Ptr(std::move(ptr))
             {
             }
 
-            Threading::TaskFuture<bool> create(TextureType type, DataFormat format, Vector2i size = { 0, 0 }, ByteBuffer data = {}, TextureLoader *loader = nullptr);
+            Threading::TaskFuture<bool> create(TextureType type, DataFormat format, Vector2i size = { 0, 0 }, ByteBuffer data = {}, TextureLoader *loader = &TextureLoader::getSingleton());
             Threading::Task<bool> createTask(TextureType type, DataFormat format, Vector2i size = { 0, 0 }, ByteBuffer data = {});
 
-            void setData(Vector2i size, const ByteBuffer &data, TextureLoader *loader = nullptr);
-            void setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data, TextureLoader *loader = nullptr);
+            void setData(Vector2i size, const ByteBuffer &data, TextureLoader *loader = &TextureLoader::getSingleton());
+            void setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data, TextureLoader *loader = &TextureLoader::getSingleton());
         };
 
-        struct MADGINE_TEXTURELOADER_EXPORT HandleType : Base::HandleType {
+        struct MADGINE_TEXTURELOADER_EXPORT Handle : Base::Handle {
 
-            using Base::HandleType::HandleType;
-            HandleType(Base::HandleType handle)
-                : Base::HandleType(std::move(handle))
+            using Base::Handle::Handle;
+            Handle(Base::Handle handle)
+                : Base::Handle(std::move(handle))
             {
             }
 
-            void loadFromImage(std::string_view name, TextureType type, DataFormat format, TextureLoader *loader = nullptr);
+            Threading::TaskFuture<bool> loadFromImage(std::string_view name, TextureType type, DataFormat format, TextureLoader *loader = &TextureLoader::getSingleton());
         };
 
         TextureLoader();

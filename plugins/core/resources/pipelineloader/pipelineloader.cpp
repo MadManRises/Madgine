@@ -9,8 +9,8 @@
 METATABLE_BEGIN(Engine::Render::PipelineLoader)
 METATABLE_END(Engine::Render::PipelineLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::PipelineLoader::ResourceType, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Render::PipelineLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::PipelineLoader::Resource, Engine::Resources::ResourceBase)
+METATABLE_END(Engine::Render::PipelineLoader::Resource)
 
 VIRTUALUNIQUECOMPONENTBASE(Engine::Render::PipelineLoader)
 
@@ -35,15 +35,11 @@ namespace Render {
 
     Threading::TaskFuture<bool> PipelineLoader::Instance::createStatic(PipelineConfiguration config, PipelineLoader *loader)
     {
-        if (!loader)
-            loader = &getSingleton();
         return loader->queueLoading(loader->create(*this, std::move(config), false));
     }
 
     Threading::TaskFuture<bool> PipelineLoader::Instance::createDynamic(PipelineConfiguration config, PipelineLoader *loader)
     {
-        if (!loader)
-            loader = &getSingleton();
         return loader->queueLoading(loader->create(*this, std::move(config), true));
     }
 

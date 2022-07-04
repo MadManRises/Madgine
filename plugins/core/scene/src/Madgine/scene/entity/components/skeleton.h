@@ -16,16 +16,16 @@ namespace Scene {
 
             const Render::SkeletonDescriptor *data() const;
 
-            void set(Render::SkeletonLoader::HandleType handle);
+            void set(Render::SkeletonLoader::Handle handle);
 
-            Render::SkeletonLoader::ResourceType *get() const;
-            const Render::SkeletonLoader::HandleType &handle() const;
+            Render::SkeletonLoader::Resource *get() const;
+            const Render::SkeletonLoader::Handle &handle() const;
 
 			void resetMatrices();
             std::vector<Matrix4> &matrices();
 
         private:
-            typename Render::SkeletonLoader::HandleType mSkeleton;
+            typename Render::SkeletonLoader::Handle mSkeleton;
 
 			std::vector<Matrix4> mBoneMatrices;
 

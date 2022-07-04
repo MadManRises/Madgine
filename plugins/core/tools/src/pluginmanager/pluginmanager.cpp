@@ -21,7 +21,7 @@
 
 #    include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-#    include "Madgine/core/root.h"
+#    include "Madgine/base/root.h"
 
 UNIQUECOMPONENT(Engine::Tools::PluginManager);
 
@@ -30,7 +30,7 @@ namespace Tools {
 
     static Guard excludeFromExport {
         []() {
-            Core::skipUniqueComponentOnExport(&typeInfo<PluginManager>);
+            Base::skipUniqueComponentOnExport(&typeInfo<PluginManager>);
         }
     };
 
