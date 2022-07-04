@@ -1,13 +1,10 @@
 #include "Modules/moduleslib.h"
 #include "Modules/uniquecomponent/uniquecomponentregistry.h"
-#if defined(BUILD_ClientTools)
-#include "Madgine_Tools/clienttoolslib.h"
-#endif
 #if defined(BUILD_NodeGraph)
 #include "Madgine/nodegraphlib.h"
 #endif
-#if defined(BUILD_WidgetsTools)
-#include "Madgine_Tools/widgetstoolslib.h"
+#if defined(BUILD_ClientTools)
+#include "Madgine_Tools/clienttoolslib.h"
 #endif
 #if defined(BUILD_Tools)
 #include "toolslib.h"
@@ -23,6 +20,9 @@
 #endif
 #if defined(BUILD_OpenGLTools)
 #include "OpenGL_Tools/opengltoolslib.h"
+#endif
+#if defined(BUILD_WidgetsTools)
+#include "Madgine_Tools/widgetstoolslib.h"
 #endif
 #if defined(BUILD_UI)
 #include "Madgine/uilib.h"
@@ -91,9 +91,6 @@
 #include "Madgine_Tools/gamepad/gamepadviewer.h"
 #include "Madgine_Tools/imgui/projectmanager.h"
 #endif
-#if defined(BUILD_WidgetsTools) && defined(BUILD_Tools)
-#include "Madgine_Tools/guieditor/guieditor.h"
-#endif
 #if defined(BUILD_OpenGL) && defined(BUILD_Resources)
 #include "OpenGL/openglmeshloader.h"
 #include "OpenGL/openglpipelineloader.h"
@@ -109,11 +106,14 @@
 #if defined(BUILD_Tools) && defined(BUILD_OpenGLTools)
 #include "OpenGL_Tools/opengltoolconfig.h"
 #endif
+#if defined(BUILD_Tools) && defined(BUILD_WidgetsTools)
+#include "Madgine_Tools/guieditor/guieditor.h"
+#endif
 #if defined(BUILD_UI)
 #include "Madgine/input/handlercollector.h"
 #endif
 #if defined(BUILD_Base)
-#include "Madgine/app/globalapicollector.h"
+#include "Madgine/base/globalapicollector.h"
 #endif
 #if defined(BUILD_Client)
 #include "Madgine/render/rendercontextcollector.h"
@@ -378,7 +378,7 @@ size_t component_index<Engine::Tools::ClientImRoot>() { return CollectorBaseInde
 #endif
 #if defined(BUILD_Base)
 template <>
-std::vector<Engine::App::GlobalAPIRegistry::F> Engine::App::GlobalAPIRegistry::sComponents()
+std::vector<Engine::Base::GlobalAPIRegistry::F> Engine::Base::GlobalAPIRegistry::sComponents()
 {
 	return {
 #endif
@@ -646,7 +646,7 @@ std::vector<Engine::Tools::ToolsRegistry::F> Engine::Tools::ToolsRegistry::sComp
 #if defined(BUILD_Tools)
 		createComponent<Engine::Tools::TestTool>,
 #endif
-#if defined(BUILD_WidgetsTools) && defined(BUILD_Tools)
+#if defined(BUILD_Tools) && defined(BUILD_WidgetsTools)
 		createComponent<Engine::Tools::GuiEditor>,
 #endif
 #if defined(BUILD_Tools)
@@ -754,14 +754,14 @@ size_t component_index<Engine::Tools::TestTool>() { return CollectorBaseIndex_To
 #        undef ACC
 #        define ACC CollectorBaseIndex_ToolBase_Tools + 10
 #endif
-#if defined(BUILD_WidgetsTools) && defined(BUILD_Tools)
+#if defined(BUILD_Tools) && defined(BUILD_WidgetsTools)
 constexpr size_t CollectorBaseIndex_ToolBase_WidgetsTools = ACC;
 #endif
-#if defined(BUILD_WidgetsTools) && defined(BUILD_Tools)
+#if defined(BUILD_Tools) && defined(BUILD_WidgetsTools)
 template <>
 size_t component_index<Engine::Tools::GuiEditor>() { return CollectorBaseIndex_ToolBase_WidgetsTools + 0; }
 #endif
-#if defined(BUILD_WidgetsTools) && defined(BUILD_Tools)
+#if defined(BUILD_Tools) && defined(BUILD_WidgetsTools)
 #        undef ACC
 #        define ACC CollectorBaseIndex_ToolBase_WidgetsTools + 1
 #endif

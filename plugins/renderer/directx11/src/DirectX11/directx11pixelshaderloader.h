@@ -18,7 +18,7 @@ namespace Render {
             {
             }
 
-            void create(const std::string &name, const CodeGen::ShaderFile &file, DirectX11PixelShaderLoader *loader = &DirectX11PixelShaderLoader::getSingleton());
+            Threading::TaskFuture<bool> create(const std::string &name, const CodeGen::ShaderFile &file, DirectX11PixelShaderLoader *loader = &DirectX11PixelShaderLoader::getSingleton());
         };
 
         bool loadImpl(ReleasePtr<ID3D11PixelShader> &shader, ResourceDataInfo &info);

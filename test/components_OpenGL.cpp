@@ -66,7 +66,7 @@
 #include "Madgine/input/handlercollector.h"
 #endif
 #if defined(BUILD_Base)
-#include "Madgine/app/globalapicollector.h"
+#include "Madgine/base/globalapicollector.h"
 #endif
 #if defined(BUILD_Client)
 #include "Madgine/render/rendercontextcollector.h"
@@ -310,7 +310,7 @@ size_t component_index<Engine::Widgets::WidgetManager>() { return CollectorBaseI
 #endif
 #if defined(BUILD_Base)
 template <>
-std::vector<Engine::App::GlobalAPIRegistry::F> Engine::App::GlobalAPIRegistry::sComponents()
+std::vector<Engine::Base::GlobalAPIRegistry::F> Engine::Base::GlobalAPIRegistry::sComponents()
 {
 	return {
 #endif

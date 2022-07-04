@@ -18,7 +18,7 @@ void mainImpl()
 {
     emscripten_cancel_main_loop();
     static Engine::Threading::WorkGroup workGroup { "Launcher" };
-    static Engine::Core::Root root { std::move(sTempCLI) };
+    static Engine::Base::Root root { std::move(sTempCLI) };
     Engine::Util::StandardLog::setLogLevel(logLevel);
     launch();
 }

@@ -54,7 +54,7 @@ namespace Android {
     {
         ANativeActivity *activity = mActivity;
 
-        static Engine::Core::Root root;
+        static Engine::Base::Root root;
 
         Engine::Util::StandardLog::setLogLevel(logLevel);
 

@@ -18,7 +18,7 @@ namespace Render {
             {
             }
 
-            void create(const std::string &name, const CodeGen::ShaderFile &file, DirectX11GeometryShaderLoader *loader = &DirectX11GeometryShaderLoader::getSingleton());
+            Threading::TaskFuture<bool> create(const std::string &name, const CodeGen::ShaderFile &file, DirectX11GeometryShaderLoader *loader = &DirectX11GeometryShaderLoader::getSingleton());
         };
 
 

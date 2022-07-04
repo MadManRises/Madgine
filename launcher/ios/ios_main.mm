@@ -48,6 +48,6 @@ int main(int argc, char * argv[])  {
         [NSApp activateIgnoringOtherApps:YES];*/
     
     Engine::Threading::WorkGroup workGroup("Launcher");
-    Engine::Core::Root root { argc, argv };
+    Engine::Base::Root root { argc, argv };
     return launch();
 }
