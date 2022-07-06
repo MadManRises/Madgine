@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Modules/threading/task.h"
+#include "task.h"
 
 namespace Engine {
+    namespace Threading{
 
 struct MadgineObjectState {
 
@@ -60,4 +61,5 @@ struct MadgineObject : MadgineObjectState {
     }
 };
 
+    }
 }

@@ -6,7 +6,7 @@
 
 #include "mainwindowcomponentcollector.h"
 
-#include "madgineobject/madgineobject.h"
+#include "Modules/threading/madgineobject.h"
 
 #include "Meta/serialize/hierarchy/serializabledataunit.h"
 
@@ -46,7 +46,7 @@ namespace Window {
     */
     struct MADGINE_CLIENT_EXPORT MainWindow : WindowEventListener,
                                               Serialize::SerializableDataUnit,
-                                              MadgineObject<MainWindow> {
+                                              Threading::MadgineObject<MainWindow> {
         SERIALIZABLEUNIT(MainWindow)
 
         MainWindow(const WindowSettings &settings);

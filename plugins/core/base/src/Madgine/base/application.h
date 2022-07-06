@@ -1,6 +1,6 @@
 #pragma once
 
-#include "madgineobject/madgineobject.h"
+#include "Modules/threading/madgineobject.h"
 
 #include "globalapicollector.h"
 
@@ -17,7 +17,7 @@ namespace Base {
      * The Application creates all registered GlobalAPIComponents.
      * It also creates a TaskQueue for game logic tasks.
     */
-    struct MADGINE_BASE_EXPORT Application : MadgineObject<Application> {
+    struct MADGINE_BASE_EXPORT Application : Threading::MadgineObject<Application> {
         Application();
         ~Application();
 

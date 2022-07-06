@@ -60,9 +60,9 @@ namespace Threading {
             return is_ready();
         }
 
-        void await_suspend(TaskHandle handle)
+        std::coroutine_handle<> await_suspend(TaskHandle handle)
         {
-            mState->then(std::move(handle));
+            return mState->then(std::move(handle)).release();
         }
 
         const T &await_resume() const
@@ -135,9 +135,9 @@ namespace Threading {
             return is_ready();
         }
 
-        void await_suspend(TaskHandle handle)
+        std::coroutine_handle<> await_suspend(TaskHandle handle)
         {
-            mState->then(std::move(handle));
+            return mState->then(std::move(handle)).release();
         }
 
         void await_resume() const

@@ -114,7 +114,7 @@ struct type_pack<Head, Ty...> {
 
     template <typename T>
     struct unique {
-        static_assert(dependent_bool<T, false>::value, "type_pack containing 2 or more elements passed to type_pack_unpack_unique");
+        static_assert(dependent_bool<T, false>::value, "unpack_unique passed to type_pack containing 2 or more elements");
     };
 
     template <typename Default = void>

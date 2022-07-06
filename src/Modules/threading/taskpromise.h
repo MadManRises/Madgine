@@ -15,13 +15,14 @@ namespace Threading {
 
         bool mAttached = false;
         bool mDestroyed = false;
+        bool mDone = false;
 
         void attach();
         void finalize();
 
         void notifyDestroyed();
 
-        void then(TaskHandle handle);
+        TaskHandle then(TaskHandle handle);
     };
 
     template <typename T>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "madgineobject/madgineobject.h"
+#include "Modules/threading/madgineobject.h"
 
 #include "Meta/keyvalue/virtualscope.h"
 
@@ -8,7 +8,7 @@
 
 namespace Engine {
 namespace Base {
-    struct MADGINE_BASE_EXPORT GlobalAPIBase : VirtualScopeBase<>, MadgineObject<GlobalAPIBase> {
+    struct MADGINE_BASE_EXPORT GlobalAPIBase : VirtualScopeBase<>, Threading::MadgineObject<GlobalAPIBase> {
         GlobalAPIBase(Application &app);
         virtual ~GlobalAPIBase() = default;
 

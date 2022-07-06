@@ -2,7 +2,7 @@
 
 # Madgine - Build your own game engine
 
-[![Build Status](http://www.madman-studios.com/jenkins/buildStatus/icon?job=Madgine%2Fmaster)](http://www.madman-studios.com/jenkins/job/Madgine/job/master/)
+[![Build Status](http://madmanrises.hopto.org:8080/buildStatus/icon?job=Madgine%2Fmaster)](http://madmanrises.hopto.org:8080/job/Madgine/job/master/)
 
 ## Description
 

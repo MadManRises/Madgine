@@ -6,11 +6,11 @@
 #include "Modules/threading/taskqueue.h"
 #include "Generic/systemvariable.h"
 
-#include "madgineobject/madgineobject.h"
+#include "Modules/threading/madgineobject.h"
 
 namespace Engine {
 namespace Resources {
-    struct MADGINE_RESOURCES_EXPORT ResourceManager final : MadgineObject<ResourceManager>
+    struct MADGINE_RESOURCES_EXPORT ResourceManager final : Threading::MadgineObject<ResourceManager>
     {
         static ResourceManager &getSingleton();
 

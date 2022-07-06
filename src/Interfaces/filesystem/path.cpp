@@ -255,5 +255,10 @@ namespace Filesystem {
         return mPath;
     }
 
+    Path::operator std::string_view() const
+    {
+        return mPath;
+    }
+
 }
 }

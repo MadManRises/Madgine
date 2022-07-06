@@ -12,11 +12,11 @@
 
 #include "Generic/intervalclock.h"
 
-#include "madgineobject/madgineobject.h"
+#include "Modules/threading/madgineobject.h"
 
 namespace Engine {
 namespace Input {
-    struct MADGINE_UI_EXPORT UIManager : MadgineObject<UIManager> {
+    struct MADGINE_UI_EXPORT UIManager : Threading::MadgineObject<UIManager> {
 
         UIManager(Base::Application &app, Window::MainWindow &window);
         UIManager(const UIManager &) = delete;

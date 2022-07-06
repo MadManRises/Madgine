@@ -2,6 +2,8 @@
 
 \subpage Engine
 \subpage Tooling
+\subpage Scene
+
 
 # Plugins
 

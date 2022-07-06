@@ -161,36 +161,6 @@ decltype(auto) kvKeys(T &v)
     return transformIt<Functor<kvKey<decltype(*v.begin())>>>(v);
 }
 
-template <typename T, typename K>
-struct KeyFinder {
-    static auto find(T &c, const K &key)
-    {
-        return std::ranges::find(c, key, projectionKey);
-    }
-};
-
-template <typename V, typename K, typename _K>
-struct KeyFinder<std::map<K, V>, _K> {
-    static auto find(std::map<K, V> &c, const _K &key)
-    {
-        return c.find(key);
-    }
-};
-
-template <typename V, typename K, typename _K>
-struct KeyFinder<const std::map<K, V>, _K> {
-    static auto find(const std::map<K, V> &c, const _K &key)
-    {
-        return c.find(key);
-    }
-};
-
-template <typename T, typename K>
-decltype(auto) kvFind(T &c, const K &key)
-{
-    return KeyFinder<T, K>::find(c, key);
-}
-
 template <typename T>
 struct KeyType {
     typedef std::decay_t<decltype(kvKey(std::declval<T>()))> type;

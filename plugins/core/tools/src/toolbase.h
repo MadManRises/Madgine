@@ -1,6 +1,6 @@
 #pragma once
 
-#include "madgineobject/madgineobject.h"
+#include "Modules/Threading/madgineobject.h"
 
 #include "Meta/keyvalue/virtualscope.h"
 
@@ -11,7 +11,7 @@
 namespace Engine {
 namespace Tools {
 
-    struct MADGINE_TOOLS_EXPORT ToolBase : Serialize::VirtualSerializableUnitBase<VirtualScopeBase<>, Serialize::SerializableUnitBase>, MadgineObject<ToolBase> {
+    struct MADGINE_TOOLS_EXPORT ToolBase : Serialize::VirtualSerializableUnitBase<VirtualScopeBase<>, Serialize::SerializableUnitBase>, Threading::MadgineObject<ToolBase> {
         SERIALIZABLEUNIT(ToolBase)
 
         ToolBase(ImRoot &root);

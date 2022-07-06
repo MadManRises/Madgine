@@ -10,14 +10,24 @@ namespace Dl {
     ENUM_BASE(DlAPIResult, GenericResult,
         DEPENDENCY_ERROR)
 
-    INTERFACES_EXPORT void closeDll(void *handle);
-    using DlHandle = std::unique_ptr<void, Functor<&closeDll>>;
-    INTERFACES_EXPORT DlHandle openDll(const std::string &name);
+    struct INTERFACES_EXPORT DlHandle{
+        DlHandle() = default;
+        DlHandle(const DlHandle &) = delete;
+        ~DlHandle();
 
-    INTERFACES_EXPORT const void *getDllSymbol(const DlHandle &dllHandle, const std::string &symbolName);
-    INTERFACES_EXPORT Filesystem::Path getDllFullPath(const DlHandle &dllHandle, const std::string &symbolName);
-    INTERFACES_EXPORT DlAPIResult getError(const char *op);
+        DlHandle &operator=(const DlHandle &) = delete;
 
+        DlAPIResult open(std::string_view name);
+        DlAPIResult close();
+
+        explicit operator bool() const { return mHandle; }
+
+        const void *getSymbol(std::string_view name) const;
+        Filesystem::Path fullPath(std::string_view symbolName) const;
+
+    private:
+        void *mHandle = nullptr;
+    };
     
 }
 }

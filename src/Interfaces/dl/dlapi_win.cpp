@@ -11,8 +11,6 @@
 namespace Engine {
 namespace Dl {
 
-    static DWORD sLastError;
-
     DlAPIResult toResult(DWORD error, const char *op)
     {
         switch (error) {
@@ -25,7 +23,11 @@ namespace Dl {
         }
     }
 
-    DlHandle openDll(const std::string &name)
+    DlHandle::~DlHandle(){
+        close();
+    }
+
+    DlAPIResult DlHandle::open(std::string_view name)
     {
 #if WINAPI_FAMILY_PARTITION(NONGAMESPARTITIONS)
         static struct Guard {
@@ -41,41 +43,48 @@ namespace Dl {
         } guard;
         SetErrorMode(SEM_FAILCRITICALERRORS);
 #endif
-
-        void *handle;
+        
         if (name.empty())
-            handle = GetModuleHandle(nullptr);
+            mHandle = GetModuleHandle(nullptr);
         else
-            handle = LoadLibrary(name.c_str());
-        sLastError = GetLastError();
+            mHandle = LoadLibrary(name.data());
+
+        if (!mHandle){
+            DWORD error = GetLastError();
+            return toResult(error, "DlHandle::open");
+        }
+        
         SymRefreshModuleList(GetCurrentProcess());
 
-        return DlHandle{ handle };
+        return DlAPIResult::SUCCESS;
     }
 
-    void closeDll(void *handle)
+    DlAPIResult DlHandle::close()
     {
-        auto result = FreeLibrary((HINSTANCE)handle);
-        sLastError = GetLastError();
-        assert(result != 0);
+        if (mHandle){
+            auto result = FreeLibrary((HINSTANCE)mHandle);
+
+            if (result != 0)
+                return toResult(GetLastError(), "DlHandle::close");
+            
+            mHandle = nullptr;
+        }
+        return DlAPIResult::SUCCESS;
     }
 
-    const void *getDllSymbol(const DlHandle &dllHandle, const std::string &symbolName)
+    const void *DlHandle::getSymbol(std::string_view name) const
     {
-        return reinterpret_cast<const void*>(GetProcAddress((HINSTANCE)dllHandle.get(), symbolName.c_str()));
+        return reinterpret_cast<const void*>(GetProcAddress((HINSTANCE)mHandle, name.data()));
     }
 
-    Filesystem::Path getDllFullPath(const DlHandle &dllHandle, const std::string &symbolName)
+    Filesystem::Path DlHandle::fullPath(std::string_view symbolName) const
     {
         char buffer[512];
-        auto result = GetModuleFileName((HMODULE)dllHandle.get(), buffer, sizeof(buffer));
+        auto result = GetModuleFileName((HMODULE)mHandle, buffer, sizeof(buffer));
         assert(result);
         return buffer;
     }
 
-    DlAPIResult getError(const char *op) {
-        return toResult(sLastError, op);
-    }
 }
 }
 

@@ -24,6 +24,7 @@ namespace Threading {
             handle.resumeInQueue();
         }
         mThenResumes.clear();
+        mDone = true;
     }
 
     void TaskPromiseSharedStateBase::notifyDestroyed()
@@ -32,10 +33,12 @@ namespace Threading {
         mDestroyed = true;
     }
 
-    void TaskPromiseSharedStateBase::then(TaskHandle handle)
+    TaskHandle TaskPromiseSharedStateBase::then(TaskHandle handle)
     {
         std::lock_guard guard { mMutex };
-        mThenResumes.emplace_back(std::move(handle));
+        if (!mDone)
+            mThenResumes.emplace_back(std::move(handle));
+        return handle;
     }
 
     void TaskPromiseTypeBase::setQueue(TaskQueue *queue)

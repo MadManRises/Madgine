@@ -10,53 +10,61 @@
 namespace Engine {
 namespace Dl {
 
-    static int sLastError;
-
-    DlAPIResult toResult(int error, const char *op)
-    {
-        switch (error) {
-        default:
-            fprintf(stderr, "Unknown Unix Dl-Error-Code from %s: %lu\n", op, error);
+    static DlAPIResult toResult(const char *op)
+    {        
+        const char *error = dlerror();
+        if (error){
+            fprintf(stderr, "Unix Dl-Error from %s: %s\n", op, error);
             fflush(stderr);
-            return DlAPIResult::UNKNOWN_ERROR;
         }
+        return DlAPIResult::UNKNOWN_ERROR;
     }
 
-    DlHandle openDll(const std::string &name)
+    DlHandle::~DlHandle(){
+        close();
+    }
+
+    DlAPIResult DlHandle::open(std::string_view name)
     {
-        void *handle;
+        close();
 
         if (name.empty())
-            handle = dlopen(nullptr, RTLD_LAZY);
+            mHandle = dlopen(nullptr, RTLD_LAZY);
         else
-            handle = dlopen(name.c_str(), RTLD_NOW);
-        sLastError = errno;
+            mHandle = dlopen(name.data(), RTLD_NOW);
+        
+        if (!mHandle)
+            return toResult("DlHandle::open");
 
-        return DlHandle { handle };
+        return DlAPIResult::SUCCESS;
     }
 
-    void closeDll(void *handle)
+    DlAPIResult DlHandle::close()
     {
-        auto result = dlclose(handle);
-        assert(result == 0);
+        if (mHandle){
+            int result = dlclose(mHandle);
+            
+            if (result != 0)
+                return toResult("DlHandle::close");
+            
+            mHandle = nullptr;
+        }
+        return DlAPIResult::SUCCESS;
     }
 
-    const void *getDllSymbol(const DlHandle &dllHandle, const std::string &symbolName)
+    const void *DlHandle::getSymbol(std::string_view name) const
     {
-        return dlsym(dllHandle.get(), symbolName.c_str());
+        return dlsym(mHandle, name.data());
     }
 
-    Filesystem::Path getDllFullPath(const DlHandle &dllHandle, const std::string &symbolName)
+    Filesystem::Path DlHandle::fullPath(std::string_view symbolName) const
     {
         Dl_info info;
-        auto result = dladdr(getDllSymbol(dllHandle, symbolName.c_str()), &info);
+        auto result = dladdr(getSymbol(symbolName), &info);
         assert(result);
         return info.dli_fname;
     }
 
-    DlAPIResult getError(const char *op) {
-        return toResult(sLastError, op);
-    }
 }
 }
 

@@ -3,14 +3,14 @@
 #include "Meta/keyvalue/virtualscope.h"
 #include "Meta/serialize/hierarchy/virtualserializableunit.h"
 #include "Modules/threading/connectionstore.h"
-#include "madgineobject/madgineobject.h"
+#include "Modules/threading/madgineobject.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
 namespace Engine {
 namespace Input {
 
-    struct MADGINE_UI_EXPORT Handler : MadgineObject<Handler>, VirtualScopeBase<> {
+    struct MADGINE_UI_EXPORT Handler : VirtualScopeBase<>, Threading::MadgineObject<Handler> {
         SERIALIZABLEUNIT(Handler)
 
         Handler(UIManager &ui, std::string_view widgetName);
