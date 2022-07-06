@@ -621,7 +621,7 @@ namespace Render {
     {
         assert(!format.has(0) || !format.has(1));
 
-#if !OPENGL_ES || OPENGL_ES >= 31
+#if !OPENGL_ES || OPENGL_ES >= 310
 #    if !OPENGL_ES
         if (glVertexAttribFormat) {
 #    endif
@@ -681,7 +681,7 @@ namespace Render {
 
     void OpenGLRenderContext::unbindFormat()
     {
-#if !OPENGL_ES || OPENGL_ES >= 31
+#if !OPENGL_ES || OPENGL_ES >= 310
         glBindVertexArray(0);
         GL_CHECK();
 #endif
