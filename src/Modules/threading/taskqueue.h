@@ -79,8 +79,6 @@ namespace Threading {
         std::chrono::steady_clock::time_point update(int repeatedCount = -1);
         void waitForTasks(std::chrono::steady_clock::time_point until = std::chrono::steady_clock::time_point::max());
 
-        void notify();
-
         bool running() const;
         void stop();
 

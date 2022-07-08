@@ -67,11 +67,6 @@ namespace Threading {
         }
     }
 
-    void TaskQueue::notify()
-    {
-        mCv.notify_one();
-    }
-
     bool TaskQueue::running() const
     {
         return mRunning;
@@ -205,10 +200,12 @@ namespace Threading {
         return idle();
     }
 
-    void TaskQueue::await_suspend(TaskHandle handle)
+    std::coroutine_handle<> TaskQueue::await_suspend(TaskHandle handle)
     {
-        std::lock_guard<std::mutex> lock(mMutex);
-        mAwaiterStack.emplace(std::move(handle));
+        std::lock_guard<std::mutex> lock{mMutex};
+        if (!idle())
+            mAwaiterStack.emplace(std::move(handle));
+        return handle.release();
     }
 
     void TaskQueue::await_resume()

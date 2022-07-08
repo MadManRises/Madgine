@@ -2,7 +2,6 @@
 
 \subpage Pluginsystem
 \subpage Workgroup
-\subpage Tasks
 
 # Modules
 
