@@ -10,16 +10,23 @@ namespace Scene {
     namespace Entity {
 
         struct MADGINE_SCENE_EXPORT Animation : EntityComponent<Animation> {
+            SERIALIZABLEUNIT(Animation);
+
             using EntityComponent<Animation>::EntityComponent;
             virtual ~Animation() = default;
 
-            void set(Render::AnimationLoader::HandleType handle);
-            void setName(const std::string &name);
-            Render::AnimationLoader::ResourceType *get() const;
+            std::string_view getName() const;
+            void setName(std::string_view name);
 
-            void setCurrentAnimationName(const std::string &name);
-            void setCurrentAnimation(Render::AnimationDescriptor *desc);
-            Render::AnimationDescriptor *currentAnimation() const;
+            Render::AnimationLoader::ResourceType *get() const;
+            void set(Render::AnimationLoader::HandleType handle);
+
+            void setCurrentAnimationName(std::string_view name);
+            void setCurrentAnimationPtr(Render::AnimationDescriptor *desc);
+            Render::AnimationDescriptor *currentAnimationPtr() const;
+
+            IndexType<uint32_t> currentAnimation() const;
+            void setCurrentAnimation(IndexType<uint32_t> index);
 
             void step(float delta);
             void setStep(float step);
@@ -34,7 +41,7 @@ namespace Scene {
             Render::AnimationLoader::HandleType mAnimationList;
             Render::SkeletonLoader::HandleType mSkeletonCache;
             int *mBoneIndexMapping = nullptr;
-            Render::AnimationDescriptor *mCurrentAnimation = nullptr;
+            IndexType<uint32_t> mCurrentAnimation;
             float mCurrentStep = 0.0f;
         };
 

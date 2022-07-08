@@ -65,8 +65,8 @@ namespace Im3D {
     MADGINE_IM3D_EXPORT void PushID(const void *ptr);
     MADGINE_IM3D_EXPORT void PopID();
 
-    MADGINE_IM3D_EXPORT void Mesh(Im3DMeshType type, const Render::Vertex *vertices, size_t vertexCount, const MeshParameters &param = {}, const unsigned short *indices = nullptr, size_t indexCount = 0);
-    MADGINE_IM3D_EXPORT void Mesh(Im3DMeshType type, Render::RenderPassFlags flags, const Render::Vertex2 *vertices, size_t vertexCount, const MeshParameters &param = {}, const unsigned short *indices = nullptr, size_t indexCount = 0, Im3DTextureId texId = 0);
+    MADGINE_IM3D_EXPORT void Mesh(Im3DMeshType type, const Render::Vertex *vertices, size_t vertexCount, const MeshParameters &param = {}, const uint32_t *indices = nullptr, size_t indexCount = 0);
+    MADGINE_IM3D_EXPORT void Mesh(Im3DMeshType type, Render::RenderPassFlags flags, const Render::Vertex2 *vertices, size_t vertexCount, const MeshParameters &param = {}, const uint32_t *indices = nullptr, size_t indexCount = 0, Im3DTextureId texId = 0);
 
     MADGINE_IM3D_EXPORT void NativeMesh(Im3DNativeMesh mesh, const AABB &bb, const Matrix4 &transform = Matrix4::IDENTITY);
 

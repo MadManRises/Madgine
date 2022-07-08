@@ -89,9 +89,9 @@ namespace Serialize {
         mType->setParent(unit());
     }
 
-    StreamResult SerializableDataPtr::applyMap(FormattedSerializeStream &in, bool success) const
+    StreamResult SerializableDataPtr::applyMap(FormattedSerializeStream &in, bool success, CallerHierarchyBasePtr hierarchy) const
     {
-        return mType->applyMap(unit(), in, success);
+        return mType->applyMap(unit(), in, success, hierarchy);
     }
 
     void SerializableUnitPtr::setSynced(bool b) const

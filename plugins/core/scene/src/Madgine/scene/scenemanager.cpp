@@ -61,6 +61,11 @@ namespace Scene {
     {
     }
 
+    std::string_view SceneManager::key() const
+    {
+        return "SceneManager";
+    }
+
     Threading::Task<bool> SceneManager::init()
     {
         for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
@@ -124,7 +129,7 @@ namespace Scene {
     {
         auto it = std::ranges::find(mEntities, name, projectionKey);
         if (it == mEntities.end()) {
-            std::terminate();
+            return {};
         }
         return &*it;
     }

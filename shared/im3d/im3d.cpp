@@ -166,7 +166,7 @@ namespace Im3D {
         }
     }
 
-    void Mesh(Im3DMeshType type, const Render::Vertex *vertices, size_t vertexCount, const MeshParameters &param, const unsigned short *indices, size_t indexCount)
+    void Mesh(Im3DMeshType type, const Render::Vertex *vertices, size_t vertexCount, const MeshParameters &param, const uint32_t *indices, size_t indexCount)
     {
         Im3DContext &c = *sContext;
 
@@ -199,7 +199,7 @@ namespace Im3D {
 
         if (indices) {
             assert(indexCount % groupSize == 0);
-            std::transform(indices, indices + indexCount, std::back_inserter(c.mRenderData[0].mIndices[type]), [&](unsigned int i) { return i + vertexPivot; });
+            std::transform(indices, indices + indexCount, std::back_inserter(c.mRenderData[0].mIndices[type]), [&](uint32_t i) { return i + vertexPivot; });
         } else {
             assert(vertexCount % groupSize == 0);
             c.mRenderData[0].mIndices[type].resize(indexPivot + vertexCount);
@@ -214,7 +214,7 @@ namespace Im3D {
         assert(c.mRenderData[0].mIndices[type].size() % groupSize == 0);
     }
 
-    void Mesh(Im3DMeshType type, Render::RenderPassFlags flags, const Render::Vertex2 *vertices, size_t vertexCount, const MeshParameters &param, const unsigned short *indices, size_t indexCount, Im3DTextureId texId)
+    void Mesh(Im3DMeshType type, Render::RenderPassFlags flags, const Render::Vertex2 *vertices, size_t vertexCount, const MeshParameters &param, const uint32_t *indices, size_t indexCount, Im3DTextureId texId)
     {
         Im3DContext &c = *sContext;
 
@@ -244,7 +244,7 @@ namespace Im3D {
 
         if (indices) {
             assert(indexCount % groupSize == 0);
-            std::transform(indices, indices + indexCount, std::back_inserter(c.mRenderData[texId].mIndices2[type]), [&](unsigned int i) { return i + c.mRenderData[texId].mVertexBase2[type]; });
+            std::transform(indices, indices + indexCount, std::back_inserter(c.mRenderData[texId].mIndices2[type]), [&](uint32_t i) { return i + c.mRenderData[texId].mVertexBase2[type]; });
         } else {
             assert(vertexCount % groupSize == 0);
             size_t oldIndexCount = c.mRenderData[texId].mIndices2[type].size();
@@ -300,7 +300,7 @@ namespace Im3D {
         float originY = fullHeight * param.mPivot.y - maxY;
 
         std::unique_ptr<Render::Vertex2[]> vertices = std::make_unique<Render::Vertex2[]>(4 * textLen);
-        std::unique_ptr<unsigned short[]> indices = std::make_unique<unsigned short[]>(6 * textLen);
+        std::unique_ptr<uint32_t[]> indices = std::make_unique<uint32_t[]>(6 * textLen);
 
         for (size_t i = 0; i < textLen; ++i) {
             Render::Glyph &g = font.mGlyphs[static_cast<uint8_t>(text[i])];
@@ -391,7 +391,7 @@ namespace Im3D {
         constexpr int segments = 6;
 
         Render::Vertex vertices[2 + segments];
-        unsigned short indices[2 + 2 * segments];
+        uint32_t indices[2 + 2 * segments];
 
         Vector3 d = b - a;
 
@@ -440,7 +440,7 @@ namespace Im3D {
 
         switch (type) {
         case IM3D_TRIANGLES: {
-            constexpr unsigned short indices[] = {
+            constexpr uint32_t indices[] = {
                 0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 1, 1, 2, 5, 2, 3, 5, 3, 4, 5, 4, 1, 5
             };
 
@@ -448,7 +448,7 @@ namespace Im3D {
             break;
         }
         case IM3D_LINES: {
-            constexpr unsigned short indices[] = {
+            constexpr uint32_t indices[] = {
                 0, 1, 0, 2, 0, 3, 0, 4, 1, 5, 2, 5, 3, 5, 4, 5, 1, 2, 2, 3, 3, 4, 4, 1
             };
 
@@ -467,7 +467,7 @@ namespace Im3D {
         std::unique_ptr<Render::Vertex[]> vertices = std::make_unique<Render::Vertex[]>(vertexCount);
 
         size_t indexCount = 60 * (param.mDetail + 1) * (param.mDetail + 2);
-        std::unique_ptr<unsigned short[]> indices = std::make_unique<unsigned short[]>(indexCount);
+        std::unique_ptr<uint32_t[]> indices = std::make_unique<uint32_t[]>(indexCount);
 
         auto vertexIndex = [=](size_t face, size_t x, size_t y) {
             return 12 + face * faceVertexCount + ((5 * y + 2 * param.mDetail * y - y * y) / 2) - (y > 0 ? 2 : 1) + x;
@@ -539,7 +539,7 @@ namespace Im3D {
             { 1, 1, 1 }
         };
 
-        constexpr unsigned short cornerIndices[20][3] = {
+        constexpr uint32_t cornerIndices[20][3] = {
             { 0, 11, 5 },
             { 0, 5, 1 },
             { 0, 1, 7 },
@@ -617,7 +617,7 @@ namespace Im3D {
             vertices[i].mColor = param.mColor;
         }
 
-        static constexpr unsigned short indices[] = {
+        static constexpr uint32_t indices[] = {
             0, 1, 0, 3, 0, 4, 1, 2, 1, 5, 2, 3, 2, 6, 3, 7, 4, 5, 4, 7, 5, 6, 6, 7
         };
 
@@ -694,7 +694,7 @@ namespace Im3D {
                 { corners[6], { 1, 1, 1, 1 }, { 0, 0, 0 } },
                 { corners[7], { 1, 1, 1, 1 }, { 0, 0, 0 } },
             };
-            unsigned short indices[] = {
+            constexpr uint32_t indices[] = {
                 0, 1, 0, 2, 0, 4, 1, 3, 1, 5, 2, 3, 2, 6, 3, 7, 4, 5, 4, 6, 5, 7, 6, 7
             };
             Mesh(IM3D_LINES, vertices, 8, transform, indices, 24);

@@ -282,6 +282,12 @@ namespace Widgets {
         return true;
     }
 
+    bool WidgetBase::injectKeyPress(const Input::KeyEventArgs &arg)
+    {
+        mKeyPressSignal.emit(arg);
+        return true;
+    }
+
     Threading::SignalStub<const Input::PointerEventArgs &> &WidgetBase::pointerMoveEvent()
     {
         return mPointerMoveSignal;
@@ -310,6 +316,11 @@ namespace Widgets {
     Threading::SignalStub<const Input::AxisEventArgs &> &WidgetBase::axisEvent()
     {
         return mAxisEventSignal;
+    }
+
+    Threading::SignalStub<const Input::KeyEventArgs &> &WidgetBase::keyEvent()
+    {
+        return mKeyPressSignal;
     }
 
     bool WidgetBase::containsPoint(const Vector2 &point, const Rect2i &screenSpace, float extend) const

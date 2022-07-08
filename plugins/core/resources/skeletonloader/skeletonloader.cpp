@@ -106,6 +106,7 @@ namespace Render {
                     break;
                 } else {
                     boneData.mTTransform = assimpConvertMatrix(current->mTransformation) * boneData.mTTransform;
+                    boneData.mPreTransform = assimpConvertMatrix(current->mTransformation) * boneData.mPreTransform;
                 }
             }
         }

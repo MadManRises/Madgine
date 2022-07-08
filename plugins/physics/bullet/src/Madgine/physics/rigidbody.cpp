@@ -28,6 +28,9 @@ PROPERTY(LinearFactor, linearFactor, setLinearFactor)
 PROPERTY(AngularFactor, angularFactor, setAngularFactor)
 PROPERTY(Shape, getShape, setShape)
 READONLY_PROPERTY(ShapeData, getShapeInstance)
+PROPERTY(Ghost, ghost, setGhost)
+PROPERTY(CollisionGroup, collisionGroup, setCollisionGroup)
+PROPERTY(CollisionMask, collisionMask, setCollisionMask)
 METATABLE_END(Engine::Physics::RigidBody)
 
 SERIALIZETABLE_BEGIN(Engine::Physics::RigidBody)
@@ -37,17 +40,23 @@ ENCAPSULATED_FIELD(Mass, mass, setMass)
 ENCAPSULATED_FIELD(Friction, friction, setFriction)
 ENCAPSULATED_FIELD(LinearFactor, linearFactor, setLinearFactor)
 ENCAPSULATED_FIELD(AngularFactor, angularFactor, setAngularFactor)
+ENCAPSULATED_FIELD(Ghost, ghost, setGhost)
+ENCAPSULATED_FIELD(CollisionGroup, collisionGroup, setCollisionGroup)
+ENCAPSULATED_FIELD(CollisionMask, collisionMask, setCollisionMask)
 SERIALIZETABLE_END(Engine::Physics::RigidBody)
 
 namespace Engine {
 namespace Physics {
 
     struct RigidBody::Data : btMotionState {
-        Data(RigidBody *component, Scene::Entity::Transform *transform)
+        Data(RigidBody *component, Scene::Entity::Entity *entity = nullptr, Scene::Entity::Transform *transform = nullptr)
             : mRigidBody(btRigidBody::btRigidBodyConstructionInfo { 0.0f, this, nullptr, { 0.0f, 0.0f, 0.0f } })
+            , mEntity(entity)
             , mTransform(transform)
         {
             mRigidBody.setUserPointer(component);
+            mRigidBody.setUserIndex(65533);
+            mRigidBody.setUserIndex2(2);
         }
 
         virtual void setWorldTransform(const btTransform &transform) override
@@ -55,7 +64,9 @@ namespace Physics {
             if (mTransform) {
                 Matrix4 p = mTransform->parentMatrix();
 
-                Matrix4 m = p.Inverse() * TransformMatrix(Vector3 { transform.getOrigin() }, Vector3::UNIT_SCALE, Quaternion { transform.getRotation() });
+                btQuaternion q = transform.getRotation();
+
+                Matrix4 m = p.Inverse() * TransformMatrix(Vector3 { transform.getOrigin() }, Vector3::UNIT_SCALE, Quaternion { q.x(), q.y(), q.z(), q.w() });
 
                 Vector3 pos;
                 Vector3 scale;
@@ -82,6 +93,7 @@ namespace Physics {
             }
         }
 
+        Scene::Entity::Entity *mEntity = nullptr;
         Scene::Entity::Transform *mTransform = nullptr;
 
         btRigidBody mRigidBody;
@@ -89,8 +101,8 @@ namespace Physics {
 
     RigidBody::RigidBody(const ObjectPtr &data)
         : NamedUniqueComponent(data)
-
     {
+        mData = std::make_unique<Data>(this);
     }
 
     RigidBody::RigidBody(RigidBody &&other)
@@ -118,12 +130,11 @@ namespace Physics {
 
     void RigidBody::init(Scene::Entity::Entity *entity)
     {
-        //if (!mShapeHandle)
-        //    mShapeHandle.load("Cube");
-
         Scene::Entity::Transform *transform = entity->addComponent<Scene::Entity::Transform>();
 
-        mData = std::make_unique<Data>(this, transform);
+        mData->mEntity = entity;
+        mData->mTransform = transform;
+
         mMgr = &entity->sceneMgr().getComponent<PhysicsManager>();
 
         Matrix4 m = transform->worldMatrix();
@@ -167,6 +178,11 @@ namespace Physics {
     void RigidBody::activate()
     {
         get()->activate(true);
+    }
+
+    Scene::Entity::EntityPtr RigidBody::entity()
+    {
+        return mData->mEntity;
     }
 
     Scene::Entity::Transform *RigidBody::transform()
@@ -214,6 +230,20 @@ namespace Physics {
         }
     }
 
+    bool RigidBody::ghost() const
+    {
+        return get()->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE;
+    }
+
+    void RigidBody::setGhost(bool ghost)
+    {
+        if (ghost) {
+            get()->setCollisionFlags(get()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+        } else {
+            get()->setCollisionFlags(get()->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE);
+        }
+    }
+
     float RigidBody::friction() const
     {
         return get()->getFriction();
@@ -254,9 +284,45 @@ namespace Physics {
         get()->setAngularVelocity({ v.x, v.y, v.z });
     }
 
+    Vector3 RigidBody::velocity() const
+    {
+        return get()->getLinearVelocity().m_floats;
+    }
+
     void RigidBody::setVelocity(const Vector3 &v)
     {
         get()->setLinearVelocity({ v.x, v.y, v.z });
+    }
+
+    void RigidBody::setOrientation(const Quaternion &q)
+    {
+        btTransform t = get()->getWorldTransform();
+        t.setRotation({ q.v.x, q.v.y, q.v.z, q.w });
+        get()->setWorldTransform(t);
+    }
+
+    uint16_t RigidBody::collisionGroup() const
+    {
+        return get()->getUserIndex2();
+    }
+
+    void RigidBody::setCollisionGroup(uint16_t group)
+    {
+        if (get()->getBroadphaseProxy())
+            get()->getBroadphaseProxy()->m_collisionFilterGroup = group;
+        get()->setUserIndex2(group);
+    }
+
+    uint16_t RigidBody::collisionMask() const
+    {
+        return get()->getUserIndex();
+    }
+
+    void RigidBody::setCollisionMask(uint16_t mask)
+    {
+        if (get()->getBroadphaseProxy())
+            get()->getBroadphaseProxy()->m_collisionFilterMask = mask;
+        get()->setUserIndex(mask);
     }
 
     void RigidBody::setShape(typename CollisionShapeManager::HandleType handle)
@@ -297,8 +363,8 @@ namespace Physics {
 
     void RigidBody::add()
     {
-        if (get()->getCollisionShape()) {
-            mMgr->world().addRigidBody(get());
+        if (mMgr && get()->getCollisionShape()) {
+            mMgr->world().addRigidBody(get(), collisionGroup(), collisionMask());
             get()->activate(true);
             get()->clearForces();
         }
@@ -306,7 +372,8 @@ namespace Physics {
 
     void RigidBody::remove()
     {
-        mMgr->world().removeRigidBody(get());
+        if (mMgr)
+            mMgr->world().removeRigidBody(get());
     }
 
     PhysicsManager *RigidBody::mgr()

@@ -79,7 +79,7 @@ namespace Render {
         D3D12_INDEX_BUFFER_VIEW view;
         view.BufferLocation = mPersistent ? DirectX12RenderContext::getSingleton().mConstantBufferHeap.addressPersistent(mOffset) : DirectX12RenderContext::getSingleton().mConstantBufferHeap.addressTemp(mOffset);
         view.SizeInBytes = mSize;
-        view.Format = DXGI_FORMAT_R16_UINT;
+        view.Format = DXGI_FORMAT_R32_UINT;
         DirectX12RenderContext::getSingleton().mCommandList.mList->IASetIndexBuffer(&view);
         DX12_LOG("Bind Index Buffer -> " << mBuffer);
     }

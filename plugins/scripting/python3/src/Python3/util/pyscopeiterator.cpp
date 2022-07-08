@@ -24,7 +24,10 @@ namespace Scripting {
                 return NULL;
             ValueType v;
             self->mIt->value(v);
-            PyObject *result = Py_BuildValue("sN", self->mIt->key(), toPyObject(v));
+            PyObject *item = toPyObject(v);
+            if (!item)
+                return NULL;
+            PyObject *result = Py_BuildValue("sN", self->mIt->key(), item);
             ++self->mIt;
             return result;
         }

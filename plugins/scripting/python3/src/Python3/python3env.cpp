@@ -7,8 +7,10 @@
 #include "Madgine/core/keyvalueregistry.h"
 
 #include "util/math/pymatrix3.h"
+#include "util/math/pymatrix4.h"
 #include "util/math/pyquaternion.h"
 #include "util/math/pyvector3.h"
+#include "util/math/pyvector4.h"
 #include "util/pyapifunction.h"
 #include "util/pyboundapifunction.h"
 #include "util/pyobjectutil.h"
@@ -92,7 +94,11 @@ namespace Scripting {
                 return NULL;
             if (PyType_Ready(&PyVector3Type) < 0)
                 return NULL;
+            if (PyType_Ready(&PyVector4Type) < 0)
+                return NULL;
             if (PyType_Ready(&PyMatrix3Type) < 0)
+                return NULL;
+            if (PyType_Ready(&PyMatrix4Type) < 0)
                 return NULL;
             if (PyType_Ready(&PyQuaternionType) < 0)
                 return NULL;
@@ -134,6 +140,10 @@ namespace Scripting {
 
         Python3Environment::~Python3Environment()
         {
+        }
+
+        std::string_view Python3Environment::key() const {
+            return "Python3Environment";
         }
 
         Threading::Task<bool> Python3Environment::init()

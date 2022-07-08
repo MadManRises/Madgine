@@ -65,7 +65,7 @@ namespace Scripting {
             .tp_flags = Py_TPFLAGS_DEFAULT,
             .tp_doc = "Python implementation of KeyValueVirtualAssociativeRange",            
             .tp_iter = (getiterfunc)PyVirtualAssociativeRange_iter,
-            .tp_new = PyType_GenericNew,
+            .tp_new = PyType_GenericNew
         };
 
     }

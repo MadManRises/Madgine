@@ -129,7 +129,7 @@ namespace StringUtil {
                 ++pivot;
             size_t newPivot = string.find(token, pivot);
             if ((i == S - 1) != (newPivot == std::string_view::npos))
-                throw 0;
+                throw "Not enough elements for tokenize";
             if (newPivot == std::string_view::npos)
                 newPivot = string.size();
             size_t actualEnd = newPivot;

@@ -170,6 +170,7 @@ namespace __generic_impl__ {
         virtual ~VirtualRangeBase() = default;
         virtual VirtualIterator<RefT> begin(const std::shared_ptr<VirtualRangeBase<RefT>> &self) = 0;
         virtual VirtualIterator<RefT> end(const std::shared_ptr<VirtualRangeBase<RefT>> &self) = 0;
+        virtual size_t size() const = 0;
         virtual bool isReference() const = 0;
     };
 
@@ -194,6 +195,11 @@ namespace __generic_impl__ {
         virtual VirtualIterator<RefT> end(const std::shared_ptr<VirtualRangeBase<RefT>> &self) override
         {
             return { mContainer.end(), self, type_holder<Assign> };
+        }
+
+        virtual size_t size() const override
+        {
+            return mContainer.size();
         }
 
         virtual C &get() override
@@ -255,6 +261,11 @@ struct VirtualRange {
     VirtualIterator<RefT> end() const
     {
         return mRange->end(mRange);
+    }
+
+    size_t size() const
+    {
+        return mRange->size();
     }
 
     template <typename C>

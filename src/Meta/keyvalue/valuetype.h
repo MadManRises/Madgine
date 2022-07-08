@@ -139,6 +139,8 @@ struct META_EXPORT ValueType {
 
     void setType(ValueTypeDesc type);
 
+    void call(ValueType &retVal, const ArgumentList &args) const;
+
 private:
     Union mUnion;
 };
@@ -179,6 +181,8 @@ public:
     bool isEditable() const;
 
     ValueTypeRef &operator=(const ValueType &v);
+
+    void call(ValueType &retVal, const ArgumentList &args) const;
 
 private:
     ValueType mValue;

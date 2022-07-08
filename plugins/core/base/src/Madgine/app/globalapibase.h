@@ -12,6 +12,8 @@ namespace App {
         GlobalAPIBase(App::Application &app);
         virtual ~GlobalAPIBase() = default;
 
+        virtual std::string_view key() const = 0;
+
         template <typename T>
         T &getGlobalAPIComponent()
         {

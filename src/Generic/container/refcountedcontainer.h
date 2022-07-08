@@ -173,6 +173,8 @@ public:
         IteratorImpl &operator+=(difference_type diff)
         {
             mIt += diff;
+            if constexpr (skipping)
+                update();
             return *this;
         }
 

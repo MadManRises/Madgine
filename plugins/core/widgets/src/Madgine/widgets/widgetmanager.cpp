@@ -262,6 +262,26 @@ namespace Widgets {
         return false;
     }
 
+    bool WidgetManager::injectKeyPress(const Input::KeyEventArgs &arg)
+    {
+        for (WidgetBase *modalWidget : mModalWidgetList) {
+            while (modalWidget) {
+                if (modalWidget->injectKeyPress(arg))
+                    return true;
+                modalWidget = modalWidget->getParent();
+            }
+        }
+
+        WidgetBase *w = mHoveredWidget;
+        while (w) {
+            if (w->injectKeyPress(arg))
+                return true;
+            w = w->getParent();
+        }
+
+        return false;
+    }
+
     bool WidgetManager::injectPointerRelease(const Input::PointerEventArgs &arg)
     {
         Input::PointerEventArgs widgetArg = arg;
@@ -579,7 +599,7 @@ namespace Widgets {
 
     Threading::SignalStub<> &WidgetManager::updatedSignal()
     {
-            return mUpdatedSignal;
+        return mUpdatedSignal;
     }
 
     int WidgetManager::priority() const
@@ -587,7 +607,8 @@ namespace Widgets {
         return mPriority;
     }
 
-    void WidgetManager::onActivate(bool active) {
+    void WidgetManager::onActivate(bool active)
+    {
         if (active) {
             openStartupWidget();
             mUpdatedSignal.emit();

@@ -130,11 +130,15 @@ namespace Input {
         return mDragStart;
     }
 
-    void GameHandlerBase::update(std::chrono::microseconds timeSinceLastFrame)
+    void GameHandlerBase::updateRender(std::chrono::microseconds timeSinceLastFrame)
     {
     }
 
-    void GameHandlerBase::fixedUpdate(std::chrono::microseconds timeStep)
+    void GameHandlerBase::fixedUpdateRender(std::chrono::microseconds timeStep)
+    {
+    }
+
+    void GameHandlerBase::updateApp(std::chrono::microseconds timeSinceLastFrame)
     {
     }
 

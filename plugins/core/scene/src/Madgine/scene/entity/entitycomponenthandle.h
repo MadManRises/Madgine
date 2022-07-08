@@ -17,6 +17,7 @@ namespace Scene {
 
         void entityComponentOwningHelperWrite(Serialize::FormattedSerializeStream &out, const EntityComponentHandle<EntityComponentBase> &index, const char *name, CallerHierarchyBasePtr hierarchy);
         Serialize::StreamResult entityComponentOwningHelperRead(Serialize::FormattedSerializeStream &in, const EntityComponentHandle<EntityComponentBase> &index, const char *name, CallerHierarchyBasePtr hierarchy);
+        Serialize::StreamResult entityComponentOwningHelperApplyMap(Serialize::FormattedSerializeStream &in, EntityComponentHandle<EntityComponentBase> &index, bool success, CallerHierarchyBasePtr hierarchy);
 
         template <>
         struct EntityComponentHandle<EntityComponentBase> {
@@ -209,6 +210,10 @@ namespace Serialize {
         static void write(Serialize::FormattedSerializeStream &out, const Scene::Entity::EntityComponentOwningHandle<T> &handle, const char *name, CallerHierarchyBasePtr hierarchy)
         {
             entityComponentOwningHelperWrite(out, handle.mHandle, name, hierarchy);
+        }
+
+        static StreamResult applyMap(FormattedSerializeStream& in, Scene::Entity::EntityComponentOwningHandle<T>& handle, bool success, CallerHierarchyBasePtr hierarchy) {
+            return entityComponentOwningHelperApplyMap(in, handle.mHandle, success, hierarchy);
         }
     };
 

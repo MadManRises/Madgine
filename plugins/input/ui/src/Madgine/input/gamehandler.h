@@ -15,8 +15,9 @@ namespace Input {
 
         void abortDrag();
 
-        virtual void update(std::chrono::microseconds timeSinceLastFrame);
-        virtual void fixedUpdate(std::chrono::microseconds timeStep);
+        virtual void updateRender(std::chrono::microseconds timeSinceLastFrame);
+        virtual void fixedUpdateRender(std::chrono::microseconds timeStep);
+        virtual void updateApp(std::chrono::microseconds timeSinceLastFrame);
 
     protected:
         void onPointerMove(const PointerEventArgs &me) override;

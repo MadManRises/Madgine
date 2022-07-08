@@ -26,7 +26,7 @@ ValueType::~ValueType()
 
 void ValueType::clear()
 {
-    mUnion = Void {};
+    mUnion = std::monostate {};
 }
 
 void ValueType::operator=(const ValueType &other)
@@ -85,8 +85,8 @@ std::string ValueType::toShortString() const
         },
         [](const CoWString &s) {
             return "\"" + std::string { s } + "\"";
-                                  },
-                                  [](std::monostate) {
+        },
+        [](std::monostate) {
             return "NULL"s;
         },
         [](const TypedScopePtr &scope) {
@@ -235,6 +235,18 @@ void ValueType::setType(ValueTypeDesc type)
     }
 }
 
+void ValueType::call(ValueType &retVal, const ArgumentList &args) const
+{
+    std::visit(overloaded {
+                   [&](const ObjectPtr &o) {
+                       o.call(retVal, args);
+                   },
+                   [](const auto &) {
+                       throw 0;
+                   } },
+        mUnion);
+}
+
 ValueTypeRef::ValueTypeRef(ValueTypeRef &&other)
     : mValue(std::move(other.mValue))
     , mData(std::exchange(other.mData, nullptr))
@@ -279,6 +291,11 @@ ValueTypeRef &ValueTypeRef::operator=(ValueTypeRef &&other)
     mValue = std::move(other.mValue);
     mData = std::exchange(other.mData, nullptr);
     return *this;
+}
+
+void ValueTypeRef::call(ValueType &retVal, const ArgumentList &args) const
+{
+    return mValue.call(retVal, args);
 }
 
 DERIVE_OPERATOR(StreamOut, <<)

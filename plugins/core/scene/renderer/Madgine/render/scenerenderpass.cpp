@@ -21,6 +21,8 @@
 
 #include "render/material.h"
 
+#include "Madgine/scene/entity/components/material.h"
+
 #define SL_SHADER scene
 #include INCLUDE_SL_SHADER
 
@@ -87,11 +89,17 @@ namespace Render {
             if (!meshData)
                 continue;
 
-            const GPUMeshData::Material *material = mesh.material() < meshData->mMaterials.size() ? &meshData->mMaterials[mesh.material()] : nullptr;
-
             Scene::Entity::Transform *transform = e->getComponent<Scene::Entity::Transform>();
             if (!transform)
                 continue;
+
+            const GPUMeshData::Material *material = nullptr;
+            Scene::Entity::Material *materialComponent = e->getComponent<Scene::Entity::Material>();
+            if (materialComponent) {
+                material = materialComponent->get();
+            } else if (mesh.material() < meshData->mMaterials.size()) {
+                material = &meshData->mMaterials[mesh.material()];
+            }            
 
             Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
 

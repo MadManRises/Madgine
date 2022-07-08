@@ -84,6 +84,8 @@ namespace Tools {
         mSceneMgr->pause();
         mMode = STOP;
 
+        mStartBuffer.resize(65536);
+
         co_return co_await ToolBase::init();
     }
 
@@ -210,6 +212,7 @@ namespace Tools {
             return;
 
         if (mMode == STOP) {
+            auto lock = mSceneMgr->lock(AccessMode::READ);
             Memory::MemoryManager mgr { "Tmp" };
             Serialize::FormattedSerializeStream out = mgr.openWrite(mStartBuffer, std::make_unique<Serialize::SafeBinaryFormatter>());
             Serialize::write(out, *mSceneMgr, "Scene");
@@ -237,9 +240,13 @@ namespace Tools {
             mSceneMgr->pause();
         mMode = STOP;
 
+        auto lock = mSceneMgr->lock(AccessMode::WRITE);
         Memory::MemoryManager mgr { "Tmp" };
         Serialize::FormattedSerializeStream in = mgr.openRead(mStartBuffer, std::make_unique<Serialize::SafeBinaryFormatter>());
-        Serialize::read(in, *mSceneMgr, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap);
+        Serialize::StreamResult result = Serialize::read(in, *mSceneMgr, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap | Serialize::StateTransmissionFlags_Activation);
+        if (result.mState != Serialize::StreamState::OK) {
+            LOG_ERROR(*result.mError);
+        }
     }
 
     void SceneEditor::openScene(const Filesystem::Path &p)
@@ -311,7 +318,7 @@ namespace Tools {
 
             bool b = mMode == PLAY;
             pre(b);
-            if (ImGui::Button(mSceneMgr->isPaused() && b ? "Halted" : IMGUI_ICON_PLAY)) {
+            if (ImGui::Button(mMode == PAUSE ? "Resume" : IMGUI_ICON_PLAY)) {
                 play();
             }
             post(b);

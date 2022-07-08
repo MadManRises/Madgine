@@ -21,8 +21,13 @@ namespace Widgets {
 
         virtual WidgetClass getClass() const override;
 
+        uint16_t mLeftBorder = 0;
+        uint16_t mTopBorder = 0;
+        uint16_t mBottomBorder = 0;
+        uint16_t mRightBorder = 0;
+
     private:
-        Resources::ResourceType<Resources::ImageLoader> *mImage = nullptr;
+        Resources::ResourceType<Resources::ImageLoader> *mImage = nullptr;        
     };
 }
 }

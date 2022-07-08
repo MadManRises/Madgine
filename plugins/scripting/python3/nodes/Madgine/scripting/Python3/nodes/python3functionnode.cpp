@@ -116,7 +116,7 @@ namespace Scripting {
                     interpreter.read(v, i);
                     PyTuple_SET_ITEM(static_cast<PyObject *>(args), i, toPyObject(v));
                 }
-                fromPyObject(retVal, mFile->call("__call__", args, {}));
+                fromPyObject(retVal, mFile->get("__call__").call(args, PyObjectPtr{}));
             }
 
             interpreter.write(0, retVal);

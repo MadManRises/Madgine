@@ -28,10 +28,10 @@ namespace Serialize {
 
 
     template <typename T, typename... Configs>
-    StreamResult applyMap(FormattedSerializeStream &in, T &t, bool success)
+    StreamResult applyMap(FormattedSerializeStream &in, T &t, bool success, const CallerHierarchyBasePtr &hierarchy = {})
     {
         if constexpr (requires { &Operations<T, Configs...>::applyMap; })
-            return Operations<T, Configs...>::applyMap(in, t, success);
+            return TupleUnpacker::invoke(Operations<T, Configs...>::applyMap, in, t, success, hierarchy);
         else
             return {};
     }
@@ -156,7 +156,7 @@ namespace Serialize {
             }
         }
 
-        static StreamResult applyMap(FormattedSerializeStream &in, T &item, bool success)
+        static StreamResult applyMap(FormattedSerializeStream &in, T &item, bool success, CallerHierarchyBasePtr hierarchy = {})
         {
             if constexpr (Pointer<T>) {
                 if (success) {
@@ -193,14 +193,14 @@ namespace Serialize {
                 }
                 return {};
             } else if constexpr (std::derived_from<T, SyncableUnitBase>) {
-                return item.applyMap(in, success);
+                return item.applyMap(in, success, hierarchy);
             } else if constexpr (std::derived_from<T, SerializableDataUnit>) {
-                return SerializableDataPtr { &item }.applyMap(in, success);
+                return SerializableDataPtr { &item }.applyMap(in, success, hierarchy);
             } else if constexpr (TupleUnpacker::Tuplefyable<T>) {
                 return TupleUnpacker::accumulate(
                     TupleUnpacker::toTuple(item), [&](auto &t, StreamResult r) {
                         STREAM_PROPAGATE_ERROR(std::move(r));
-                        return Operations<std::remove_reference_t<decltype(t)>>::applyMap(in, t, success);
+                        return Operations<std::remove_reference_t<decltype(t)>>::applyMap(in, t, success, hierarchy);
                     },
                     StreamResult {});
             } else {

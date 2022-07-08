@@ -26,6 +26,7 @@ namespace Render {
 
     DirectX11MeshLoader::DirectX11MeshLoader()
     {
+        getOrCreateManual("Cube", {}, {}, this);
         getOrCreateManual("Plane", {}, {}, this);
     }
 
@@ -81,8 +82,8 @@ namespace Render {
         if (mesh.mIndices.empty()) {
             data.mElementCount = mesh.mVertices.mSize / mesh.mVertexSize;
         } else {
-            data.mIndices.resize(mesh.mIndices.size() * sizeof(unsigned short));
-            std::memcpy(data.mIndices.mapData().mData, mesh.mIndices.data(), mesh.mIndices.size() * sizeof(unsigned short));
+            data.mIndices.resize(mesh.mIndices.size() * sizeof(uint32_t));
+            std::memcpy(data.mIndices.mapData().mData, mesh.mIndices.data(), mesh.mIndices.size() * sizeof(uint32_t));
             data.mElementCount = mesh.mIndices.size();
         }
     }

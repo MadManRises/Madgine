@@ -73,7 +73,7 @@ METATABLE_END(Engine::Render::QuaternionKeyFrame)
             for (size_t animationIndex = 0; animationIndex < scene->mNumAnimations; ++animationIndex) {
                 aiAnimation *anim = scene->mAnimations[animationIndex];
 
-                AnimationDescriptor &animation = animations.mAnimations.try_emplace(anim->mName.C_Str()).first->second;
+                AnimationDescriptor &animation = animations.mAnimations.emplace_back();
 
                 animation.mName = anim->mName.C_Str();
 
@@ -86,7 +86,10 @@ METATABLE_END(Engine::Render::QuaternionKeyFrame)
                     AnimationBone &bone = animation.mBones.emplace_back();
 
                     if (animationIndex == 0) {
-                        animations.mBoneNames.emplace_back(node->mNodeName.C_Str());
+                        std::string_view name = node->mNodeName.C_Str();
+                        if (StringUtil::endsWith(name, "_$AssimpFbx$_Rotation"))
+                            name = name.substr(0, name.size() - strlen("_$AssimpFbx$_Rotation"));
+                        animations.mBoneNames.emplace_back(name);
                     } else {
                         if (animations.mBoneNames.size() <= boneIndex) {
                             LOG_ERROR("Different amount of bones between animations in one set!");
@@ -102,7 +105,7 @@ METATABLE_END(Engine::Render::QuaternionKeyFrame)
                     });
 
                     std::transform(node->mRotationKeys, node->mRotationKeys + node->mNumRotationKeys, std::back_inserter(bone.mOrientations), [&](const aiQuatKey &key) {
-                        return KeyFrame<Quaternion> { static_cast<float>(key.mTime), Quaternion { key.mValue.x, key.mValue.y, key.mValue.z, key.mValue.w } };
+                        return KeyFrame<Quaternion> { static_cast<float>(key.mTime), Quaternion { -key.mValue.x, -key.mValue.y, key.mValue.z, key.mValue.w } };
                     });
 
                     std::transform(node->mScalingKeys, node->mScalingKeys + node->mNumScalingKeys, std::back_inserter(bone.mScalings), [&](const aiVectorKey &key) {

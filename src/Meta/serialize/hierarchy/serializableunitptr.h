@@ -119,7 +119,7 @@ namespace Serialize {
 
         StreamResult readState(FormattedSerializeStream &in, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0) const;
 
-        StreamResult applyMap(FormattedSerializeStream &in, bool success) const;
+        StreamResult applyMap(FormattedSerializeStream &in, bool success, CallerHierarchyBasePtr hierarchy) const;
 
         void setActive(bool active, bool existenceChanged) const;
 

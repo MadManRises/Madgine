@@ -37,7 +37,7 @@ namespace Serialize {
         StreamResult readAction(SyncableUnitBase *unit, FormattedBufferedStream &in, PendingRequest &request) const;
         StreamResult readRequest(SyncableUnitBase *unit, FormattedBufferedStream &in, MessageId id) const;
 
-        StreamResult applyMap(SerializableDataUnit *unit, FormattedSerializeStream &in, bool success) const;
+        StreamResult applyMap(SerializableDataUnit *unit, FormattedSerializeStream &in, bool success, CallerHierarchyBasePtr hierarchy) const;
         void setSynced(SerializableUnitBase *unit, bool b) const;
         void setActive(SerializableDataUnit *unit, bool active, bool existenceChanged) const;
         void setActive(SerializableUnitBase *unit, bool active, bool existenceChanged) const;

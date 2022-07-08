@@ -75,7 +75,7 @@ namespace Tools {
             Im3D::Text("Test_1234 Hallo\n wie gehts", Matrix4 { Matrix4::IDENTITY });
 
             static std::vector<Render::Vertex> vertices;
-            static std::vector<unsigned short> indices;
+            static std::vector<uint32_t> indices;
             if (ImGui::Button("Update Atlas")) {
                 vertices.clear();
                 indices.clear();

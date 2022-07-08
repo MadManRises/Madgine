@@ -1,9 +1,9 @@
 #include "../uilib.h"
 #include "handler.h"
 #include "Madgine/widgets/widget.h"
-#include "uimanager.h"
-#include "Madgine/window/mainwindow.h"
 #include "Madgine/widgets/widgetmanager.h"
+#include "Madgine/window/mainwindow.h"
+#include "uimanager.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
 
@@ -57,6 +57,7 @@ namespace Input {
                 mWidget->pointerDownEvent().connect(&Handler::injectPointerDown, this, &mConStore);
                 mWidget->pointerUpEvent().connect(&Handler::injectPointerUp, this, &mConStore);
                 mWidget->axisEvent().connect(&Handler::injectAxisEvent, this, &mConStore);
+                mWidget->keyEvent().connect(&Handler::injectKeyPress, this, &mConStore);
             }
         }
     }

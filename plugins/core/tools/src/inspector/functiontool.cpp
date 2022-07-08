@@ -120,31 +120,30 @@ namespace Tools {
             ImGui::Text("(");
             //ImGui::SameLine();
 
-            for (size_t i = 0; i < function.argumentsCount(); ++i) {
+            if (ImGui::BeginTable("arguments", 2, ImGuiTableFlags_Resizable)) {
 
-                ImGui::Text(function.mFunction.mTable->mArguments[i].mName);
-                ImGui::SameLine();
-                ImGui::Text(":");
-                ImGui::SameLine();
+                for (size_t i = 0; i < function.argumentsCount(); ++i) {
 
-                ImGui::PushID(i);
-                ValueType v = i == 0 ? ValueType { function.scope() } : args[i - 1];
-                bool changed = mInspector->drawValue("", v, true, !function.mFunction.mTable->mArguments[i].mType.mType.isRegular()).first;
-                //ImGui::ValueType(&args[i], function.mMethod.mTable->mArguments[i].mType);
-                if (ImGui::BeginDragDropTarget()) {
-                    changed |= ImGui::AcceptDraggableValueType(v, function.mFunction.mTable->mArguments[i].mType);
-                    ImGui::EndDragDropTarget();
+                    //ImGui::PushID(i);
+                    ValueType v = i == 0 ? ValueType { function.scope() } : args[i - 1];
+                    bool changed = mInspector->drawValue(function.mFunction.mTable->mArguments[i].mName, v, true, !function.mFunction.mTable->mArguments[i].mType.mType.isRegular()).first;
+                    //ImGui::ValueType(&args[i], function.mMethod.mTable->mArguments[i].mType);
+                    if (ImGui::BeginDragDropTarget()) {
+                        changed |= ImGui::AcceptDraggableValueType(v, function.mFunction.mTable->mArguments[i].mType);
+                        ImGui::EndDragDropTarget();
+                    }
+                    if (changed) {
+                        if (i == 0)
+                            function.mScope = v.as<TypedScopePtr>().mScope;
+                        else
+                            args[i - 1] = v;
+                    }
+
+                    if (ImGui::IsItemHovered())
+                        ImGui::SetTooltip("%s", function.mFunction.mTable->mArguments[i].mType.toString().c_str());
                 }
-                if (changed) {
-                    if (i == 0)
-                        function.mScope = v.as<TypedScopePtr>().mScope;
-                    else
-                        args[i - 1] = v;
-                }
 
-                ImGui::PopID();
-                if (ImGui::IsItemHovered())
-                    ImGui::SetTooltip("%s", function.mFunction.mTable->mArguments[i].mType.toString().c_str());
+                ImGui::EndTable();
             }
 
             ImGui::Text(")");

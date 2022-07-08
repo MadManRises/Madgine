@@ -41,6 +41,12 @@ namespace Scene {
             return mgr->entityComponentList(index.mType).readState(index, in, name, hierarchy);
         }
 
+        Serialize::StreamResult entityComponentOwningHelperApplyMap(Serialize::FormattedSerializeStream &in, EntityComponentHandle<EntityComponentBase> &index, bool success, CallerHierarchyBasePtr hierarchy)
+        {
+            SceneManager *mgr = hierarchy;
+            return mgr->entityComponentList(index.mType).applyMap(index, in, success, hierarchy);
+        }
+
     }
 }
 }

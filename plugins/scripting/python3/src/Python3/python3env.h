@@ -14,6 +14,8 @@ namespace Scripting {
             Python3Environment(App::Application &app);
             ~Python3Environment();
 
+            std::string_view key() const override;
+
             virtual Threading::Task<bool> init() override;
             virtual Threading::Task<void> finalize() override;
 

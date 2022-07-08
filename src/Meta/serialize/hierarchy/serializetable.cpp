@@ -94,12 +94,12 @@ namespace Serialize {
         return get(index).mReadRequest(unit, inout, id);
     }
 
-    StreamResult SerializeTable::applyMap(SerializableDataUnit *unit, FormattedSerializeStream &in, bool success) const
+    StreamResult SerializeTable::applyMap(SerializableDataUnit *unit, FormattedSerializeStream &in, bool success, CallerHierarchyBasePtr hierarchy) const
     {
         const SerializeTable *table = this;
         while (table) {
             for (const Serializer *it = table->mFields; it->mFieldName; ++it) {
-                STREAM_PROPAGATE_ERROR(it->mApplySerializableMap(unit, in, success));
+                STREAM_PROPAGATE_ERROR(it->mApplySerializableMap(unit, in, success, hierarchy));
             }
             table = table->mBaseType ? &table->mBaseType() : nullptr;
         }

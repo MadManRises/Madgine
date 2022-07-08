@@ -19,7 +19,7 @@ namespace ClickBrick {
 
         virtual void setWidget(Engine::Widgets::WidgetBase *w) override;
 
-        virtual void update(std::chrono::microseconds timeSinceLastFrame) override;
+        virtual void updateRender(std::chrono::microseconds timeSinceLastFrame) override;
 
         void updateBricks(std::chrono::microseconds timeSinceLastFrame);
         void spawnBrick();

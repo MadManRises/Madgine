@@ -396,7 +396,7 @@ namespace Resources {
             if (!loader)
                 loader = &getSingleton();
 
-            Threading::TaskFuture<void> task = loader->queueUnloading(Threading::make_task(&T::unloadImpl, loader, *ptr));
+            Threading::TaskFuture<void> task = loader->queueUnloading(Threading::make_task(&T::unloadImpl, (T*)loader, *ptr));
 
             auto cleanup = [ptr { std::move(ptr) }]() {};
             if (task.is_ready()) {

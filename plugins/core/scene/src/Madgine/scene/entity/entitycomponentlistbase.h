@@ -29,6 +29,8 @@ namespace Scene {
 
             void writeState(const EntityComponentHandle<EntityComponentBase> &index, Serialize::FormattedSerializeStream &out, const char *name, CallerHierarchyBasePtr hierarchy) const;
 
+            Serialize::StreamResult applyMap(const EntityComponentHandle<EntityComponentBase> &index, Serialize::FormattedSerializeStream &in, bool success, CallerHierarchyBasePtr hierarchy);
+
         };
 
     }

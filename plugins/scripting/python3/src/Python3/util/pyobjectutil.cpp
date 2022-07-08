@@ -3,8 +3,10 @@
 #include "pyobjectutil.h"
 
 #include "math/pymatrix3.h"
+#include "math/pymatrix4.h"
 #include "math/pyquaternion.h"
 #include "math/pyvector3.h"
+#include "math/pyvector4.h"
 #include "pyapifunction.h"
 #include "pyboundapifunction.h"
 #include "pyownedscopeptr.h"
@@ -12,13 +14,18 @@
 #include "pytypedscopeptr.h"
 #include "pyvirtualiterator.h"
 #include "pyvirtualrange.h"
+#include "pydictptr.h"
+#include "pylistptr.h"
 
 #include "Meta/keyvalue/valuetype.h"
+#include "Meta/keyvalue/keyvaluepair.h"
 
 #include "Meta/keyvalue/objectinstance.h"
 #include "Meta/keyvalue/objectptr.h"
 
 #include "pyobjectptr.h"
+
+#include "python3lock.h"
 
 namespace Engine {
 namespace Scripting {
@@ -40,6 +47,13 @@ namespace Scripting {
             virtual void setValue(std::string_view name, const ValueType &value) override
             {
                 throw 0;
+            }
+
+            virtual void call(ValueType &retVal, const ArgumentList &args) override
+            {
+                Python3Lock lock;
+                
+                fromPyObject(retVal, mPtr.call(args));
             }
 
             PyObject *get() const
@@ -165,7 +179,8 @@ namespace Scripting {
 
         PyObject *toPyObject(const Vector4 &v)
         {
-            PyErr_SetString(PyExc_NotImplementedError, "Can't convert type <Vector4> yet");
+            PyObject *obj = PyObject_CallObject((PyObject *)&PyVector4Type, NULL);
+            new (&reinterpret_cast<PyVector4 *>(obj)->mVector) Vector4(v);
             return NULL;
         }
 
@@ -184,7 +199,9 @@ namespace Scripting {
 
         PyObject *toPyObject(const Vector4i &v)
         {
-            PyErr_SetString(PyExc_NotImplementedError, "Can't convert type <Vector4> yet");
+            /* PyObject *obj = PyObject_CallObject((PyObject *)&PyVector4Type, NULL);
+            new (&reinterpret_cast<PyVector4 *>(obj)->mVector) Vector4(v);*/
+            PyErr_SetString(PyExc_NotImplementedError, "Can't convert type <Vector4i> yet");
             return NULL;
         }
 
@@ -217,7 +234,8 @@ namespace Scripting {
 
         PyObject *toPyObject(const CoW<Matrix4> &m)
         {
-            PyErr_SetString(PyExc_NotImplementedError, "Can't convert type <Matrix4> yet");
+            PyObject *obj = PyObject_CallObject((PyObject *)&PyMatrix4Type, NULL);
+            new (&reinterpret_cast<PyMatrix4 *>(obj)->mMatrix) Matrix4(m);
             return nullptr;
         }
 
@@ -233,6 +251,25 @@ namespace Scripting {
             return nullptr;
         }
 
+        struct Functor_to_KeyValuePair {            
+            void operator()(KeyValuePair &p, const std::pair<PyObject*, PyObject*> &o)
+            {
+                fromPyObject(p.mKey, o.first);
+                ValueType v;
+                fromPyObject(v, o.second);
+                p.mValue = ValueTypeRef { v };
+            }
+        };
+
+        struct Functor_to_ValueRef {
+            void operator()(ValueTypeRef &r, PyObject *o)
+            {
+                ValueType v;
+                fromPyObject(v, o);
+                r = ValueTypeRef { v };
+            }
+        };
+
         void fromPyObject(ValueType &retVal, PyObject *obj)
         {
             if (!obj) {
@@ -245,12 +282,20 @@ namespace Scripting {
                 if (!PyArg_Parse(obj, "s", &s))
                     throw 0;
                 retVal = std::string { s };
+            } else if (PyBool_Check(obj)){
+                retVal = (obj == Py_True);
             } else if (PyLong_Check(obj)) {
                 int i;
                 if (!PyArg_Parse(obj, "i", &i))
                     throw 0;
                 retVal = i;
-            } else if (obj->ob_type == &PyTypedScopePtrType){
+            } else if (PyDict_Check(obj)) {
+                Py_INCREF(obj);
+                retVal = KeyValueVirtualAssociativeRange { PyDictPtr { obj }, Engine::type_holder<Functor_to_KeyValuePair> };
+            } else if (PyList_Check(obj)) {
+                Py_INCREF(obj);
+                retVal = KeyValueVirtualSequenceRange { PyListPtr { obj }, Engine::type_holder<Functor_to_ValueRef> };
+            } else if (obj->ob_type == &PyTypedScopePtrType) {
                 retVal = reinterpret_cast<PyTypedScopePtr *>(obj)->mPtr;
             } else {
                 Py_INCREF(obj);

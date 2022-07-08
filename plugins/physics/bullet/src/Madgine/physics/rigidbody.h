@@ -31,6 +31,7 @@ namespace Physics {
         const btRigidBody *get() const;
         void activate();
 
+        Scene::Entity::EntityPtr entity();
         Scene::Entity::Transform *transform();
 
         float mass() const;
@@ -38,6 +39,9 @@ namespace Physics {
 
         bool kinematic() const;
         void setKinematic(bool kinematic);
+
+        bool ghost() const;
+        void setGhost(bool ghost);
 
         float friction() const;
         void setFriction(float friction);
@@ -51,7 +55,16 @@ namespace Physics {
         Vector3 angularVelocity() const;
         void setAngularVelocity(const Vector3 &v);
 
+        Vector3 velocity() const;
         void setVelocity(const Vector3 &v);
+
+        void setOrientation(const Quaternion &q);
+
+        uint16_t collisionGroup() const;
+        void setCollisionGroup(uint16_t group);
+
+        uint16_t collisionMask() const;
+        void setCollisionMask(uint16_t group);
 
         PhysicsManager *mgr();
 

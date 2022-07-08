@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Meta/math/vector4.h"
+#include "texture.h"
 
 namespace Engine {
 namespace Render {

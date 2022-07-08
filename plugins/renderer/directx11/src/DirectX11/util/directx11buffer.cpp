@@ -69,7 +69,7 @@ namespace Render {
 
     void DirectX11Buffer::bindIndex() const
     {
-        sDeviceContext->IASetIndexBuffer(mBuffer, DXGI_FORMAT_R16_UINT, 0);
+        sDeviceContext->IASetIndexBuffer(mBuffer, DXGI_FORMAT_R32_UINT, 0);
         DX11_LOG("Bind Index Buffer -> " << mBuffer);
     }
 

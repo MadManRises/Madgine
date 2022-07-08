@@ -14,8 +14,8 @@ namespace Render {
 
         void render();
         virtual void setRenderSpace(const Rect2i &space) = 0;
-        virtual void renderVertices(const Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices = {}) = 0;
-        virtual void renderVertices(const Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices = {}, const Material *material = nullptr) = 0;
+        virtual void renderVertices(const Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<uint32_t> indices = {}) = 0;
+        virtual void renderVertices(const Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<uint32_t> indices = {}, const Material *material = nullptr) = 0;
         virtual void renderQuad(const Program *program);
         virtual void renderMesh(const GPUMeshData *mesh, const Program *program, const Material *material = nullptr) = 0;
         virtual void renderMeshInstanced(size_t count, const GPUMeshData *mesh, const Program *program, const Material *material = nullptr) = 0;

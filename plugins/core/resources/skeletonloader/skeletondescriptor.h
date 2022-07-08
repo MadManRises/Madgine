@@ -9,6 +9,7 @@ namespace Render {
         std::string mName;
         Matrix4 mOffsetMatrix;
         Matrix4 mTTransform;
+        Matrix4 mPreTransform = Matrix4::IDENTITY;
         IndexType<uint32_t> mParent;
         IndexType<uint32_t> mFirstChild;
     };

@@ -62,7 +62,7 @@ namespace Render {
         MeshData() = default;
 
         template <typename VertexType>
-        MeshData(size_t groupSize, std::vector<VertexType> vertices, std::vector<unsigned short> indices = {}, std::vector<Material> materials = {})
+        MeshData(size_t groupSize, std::vector<VertexType> vertices, std::vector<uint32_t> indices = {}, std::vector<Material> materials = {})
             : mAttributeList(generateAttributeList<VertexType>)
             , mAABB(calculateAABB(vertices))
             , mGroupSize(groupSize)
@@ -80,7 +80,7 @@ namespace Render {
         size_t mGroupSize;
         ByteBuffer mVertices;
         size_t mVertexSize;
-        std::vector<unsigned short> mIndices;
+        std::vector<uint32_t> mIndices;
         std::vector<Material> mMaterials;
     };
 

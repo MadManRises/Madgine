@@ -20,6 +20,9 @@ METATABLE_END(Engine::Render::GPUMeshData)
 
 METATABLE_BEGIN(Engine::Render::GPUMeshData::Material)
 READONLY_PROPERTY(Name, mName)
+/* MEMBER(mDiffuseTexture)
+MEMBER(mEmissiveTexture)*/
+MEMBER(mDiffuseColor)
 METATABLE_END(Engine::Render::GPUMeshData::Material)
 
 VIRTUALUNIQUECOMPONENTBASE(Engine::Render::GPUMeshLoader)

@@ -91,7 +91,7 @@ void GameManager::setWidget(Engine::Widgets::WidgetBase *w)
     }
 }
 
-void GameManager::update(std::chrono::microseconds timeSinceLastFrame)
+void GameManager::updateRender(std::chrono::microseconds timeSinceLastFrame)
 {
     if (mSceneMgr.isPaused())
         return;

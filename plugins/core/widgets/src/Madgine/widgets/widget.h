@@ -83,6 +83,7 @@ namespace Widgets {
         virtual bool injectPointerEnter(const Input::PointerEventArgs &arg);
         virtual bool injectPointerLeave(const Input::PointerEventArgs &arg);
         virtual bool injectAxisEvent(const Input::AxisEventArgs &arg);
+        virtual bool injectKeyPress(const Input::KeyEventArgs &arg);
 
         Threading::SignalStub<const Input::PointerEventArgs &> &pointerMoveEvent();
         Threading::SignalStub<const Input::PointerEventArgs &> &pointerDownEvent();
@@ -90,6 +91,7 @@ namespace Widgets {
         Threading::SignalStub<const Input::PointerEventArgs &> &pointerEnterEvent();
         Threading::SignalStub<const Input::PointerEventArgs &> &pointerLeaveEvent();
         Threading::SignalStub<const Input::AxisEventArgs &> &axisEvent();
+        Threading::SignalStub<const Input::KeyEventArgs &> &keyEvent();
 
         decltype(auto) children() const
         {
@@ -121,13 +123,13 @@ namespace Widgets {
         virtual void sizeChanged(const Vector3i &pixelSize);
 
         std::pair<std::vector<Vertex>, TextureSettings> renderText(const std::string &text, Vector3 pos, Vector2 size, const Render::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize);
-        
 
     protected:
         void destroyChild(WidgetBase *w);
 
         Threading::Signal<const Input::PointerEventArgs &> mPointerMoveSignal, mPointerDownSignal, mPointerUpSignal, mPointerEnterSignal, mPointerLeaveSignal;
         Threading::Signal<const Input::AxisEventArgs &> mAxisEventSignal;
+        Threading::Signal<const Input::KeyEventArgs &> mKeyPressSignal;
 
     private:
         WidgetBase *mParent;

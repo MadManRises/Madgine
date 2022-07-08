@@ -55,12 +55,16 @@ namespace Input {
             co_await handler->callInit();
 
         mWindow.taskQueue()->addRepeatedTask([this]() {
-            update();
+            updateRender();
         });
         mWindow.taskQueue()->addRepeatedTask([this]() {
-            fixedUpdate();
+            fixedUpdateRender();
         },
             std::chrono::microseconds { 15000 });
+
+        mApp.taskQueue()->addRepeatedTask([this]() {
+            updateApp();
+        });
 
         co_return true;
     }
@@ -165,19 +169,28 @@ namespace Input {
         return result;
     }
 
-    void UIManager::update()
+    void UIManager::updateRender()
     {
         std::chrono::microseconds timeSinceLastFrame = mFrameClock.tick<std::chrono::microseconds>();
 
         for (const std::unique_ptr<GameHandlerBase> &h : mGameHandlers) {
-            h->update(timeSinceLastFrame);
+            h->updateRender(timeSinceLastFrame);
         }
     }
 
-    void UIManager::fixedUpdate()
+    void UIManager::fixedUpdateRender()
     {
         for (const std::unique_ptr<GameHandlerBase> &h : mGameHandlers) {
-            h->fixedUpdate(std::chrono::microseconds { 15000 });
+            h->fixedUpdateRender(std::chrono::microseconds { 15000 });
+        }
+    }
+
+    void UIManager::updateApp()
+    {
+        std::chrono::microseconds timeSinceLastFrame = mAppClock.tick<std::chrono::microseconds>();
+
+        for (const std::unique_ptr<GameHandlerBase> &h : mGameHandlers) {
+            h->updateApp(timeSinceLastFrame);
         }
     }
 

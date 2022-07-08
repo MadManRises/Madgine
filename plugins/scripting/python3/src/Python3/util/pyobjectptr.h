@@ -16,9 +16,10 @@ namespace Scripting {
             ~PyObjectPtr();
 
             PyObjectPtr get(std::string_view name) const;
-            PyObjectPtr call(std::string_view name, const char *format, ...) const;
-            PyObjectPtr call(std::string_view name, const PyDictPtr &kwargs, const char *format, ...) const;
-            PyObjectPtr call(std::string_view name, const PyObjectPtr &args, const PyObjectPtr &kwargs) const;
+            PyObjectPtr call(const ArgumentList &args) const;
+            PyObjectPtr call(const char *format, ...) const;
+            PyObjectPtr call(const PyDictPtr &kwargs, const char *format, ...) const;
+            PyObjectPtr call(const PyObjectPtr &args, const PyObjectPtr &kwargs) const;
 
             PyObjectFieldAccessor operator[](const PyObjectPtr &name) const;
 

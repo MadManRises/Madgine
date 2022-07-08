@@ -15,7 +15,7 @@ namespace Serialize {
         StreamResult (*mReadAction)(SyncableUnitBase *, FormattedBufferedStream &, PendingRequest &) = nullptr;
         StreamResult (*mReadRequest)(SyncableUnitBase *, FormattedBufferedStream &, MessageId) = nullptr;
 
-        StreamResult (*mApplySerializableMap)(SerializableDataUnit *, FormattedSerializeStream &, bool) = nullptr;
+        StreamResult (*mApplySerializableMap)(SerializableDataUnit *, FormattedSerializeStream &, bool, CallerHierarchyBasePtr) = nullptr;
         void (*mSetDataSynced)(SerializableDataUnit *, bool) = nullptr;
         void (*mSetActive)(SerializableDataUnit *, bool, bool) = nullptr;
         void (*mSetParent)(SerializableDataUnit *) = nullptr;

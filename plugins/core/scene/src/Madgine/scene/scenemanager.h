@@ -43,6 +43,8 @@ namespace Scene {
         SceneManager(const SceneManager &) = delete;
         ~SceneManager();
 
+        virtual std::string_view key() const override;
+
         void update();
         void updateRender();
 

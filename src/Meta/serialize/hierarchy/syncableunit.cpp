@@ -81,9 +81,9 @@ namespace Serialize {
         return customUnitPtr().readState(in, name, hierarchy, flags | StateTransmissionFlags_SkipId);
     }
 
-    StreamResult SyncableUnitBase::applyMap(FormattedSerializeStream &in, bool success)
+    StreamResult SyncableUnitBase::applyMap(FormattedSerializeStream &in, bool success, CallerHierarchyBasePtr hierarchy)
     {
-        return mType->applyMap(this, in, success);
+        return mType->applyMap(this, in, success, hierarchy);
     }
 
     void SyncableUnitBase::setActive(bool active, bool existenceChanged)

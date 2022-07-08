@@ -14,6 +14,7 @@
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btBoxShape.h"
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btCapsuleShape.h"
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btCompoundShape.h"
+#include "bullet3-2.89/src/BulletCollision/CollisionShapes/btConeShape.h"
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btConvexHullShape.h"
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btSphereShape.h"
 #include "bullet3-2.89/src/BulletCollision/CollisionShapes/btStaticPlaneShape.h"
@@ -174,6 +175,27 @@ namespace Physics {
             return std::unique_ptr<CollisionShapeInstance, CollisionShapeInstanceDeleter> { new CapsuleShapeInstance(*this) };
         }
 
+        float radius() const
+        {
+            return mShape.getRadius();
+        }
+
+        float height() const
+        {
+            return 2.0f * mShape.getHalfHeight();
+        }
+
+        void setRadius(float radius)
+        {
+            mShape.setImplicitShapeDimensions({ radius, mShape.getHalfHeight(), radius });
+            mShape.setMargin(radius);
+        }
+
+        void setHeight(float height)
+        {
+            mShape.setImplicitShapeDimensions({ radius(), 0.5f * height, radius() });
+        }
+
         btCapsuleShape mShape;
     };
 
@@ -229,6 +251,69 @@ namespace Physics {
         }
     };
 
+    struct ConeShapeInstance : Serialize::VirtualUnit<ConeShapeInstance, VirtualScope<ConeShapeInstance, CollisionShapeInstance>> {
+        ConeShapeInstance(typename CollisionShapeManager::HandleType shape)
+            : VirtualUnit(std::move(shape))
+            , mShape(0.1f, 0.1f)
+        {
+        }
+
+        virtual btCollisionShape *get() override
+        {
+            return &mShape;
+        }
+
+        virtual void destroy() override
+        {
+            delete this;
+        }
+
+        virtual std::unique_ptr<CollisionShapeInstance, CollisionShapeInstanceDeleter> clone() override
+        {
+            return std::unique_ptr<CollisionShapeInstance, CollisionShapeInstanceDeleter> { new ConeShapeInstance(*this) };
+        }
+
+        float radius() const
+        {
+            return mShape.getRadius();
+        }
+
+        void setRadius(float r)
+        {
+            mShape.setRadius(r);
+        }
+
+        float height() const
+        {
+            return mShape.getHeight();
+        }
+
+        void setHeight(float h)
+        {
+            mShape.setHeight(h);
+        }
+
+        int upIndex() const
+        {
+            return mShape.getConeUpIndex();
+        }
+
+        void setUpIndex(int index)
+        {
+            mShape.setConeUpIndex(index);
+        }
+
+        btConeShape mShape;
+    };
+
+    struct ConeShape : CollisionShape {
+
+        virtual CollisionShapeInstancePtr create(typename CollisionShapeManager::HandleType shape) override
+        {
+            return CollisionShapeInstancePtr { new ConeShapeInstance(std::move(shape)) };
+        }
+    };
+
     struct CompoundShapeInstance : Serialize::VirtualUnit<CompoundShapeInstance, VirtualScope<CompoundShapeInstance, CollisionShapeInstance>> {
 
         using VirtualUnit::VirtualUnit;
@@ -247,7 +332,7 @@ namespace Physics {
             Quaternion mOrientation;
             CollisionShapeManager::InstanceHandle mShape;
 
-            CollisionShapeInstance *shapeInstance()
+            CollisionShapeInstance *shape()
             {
                 return mShape;
             }
@@ -401,6 +486,13 @@ namespace Physics {
             this);
 
         getOrCreateManual(
+            "Cone", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceDataInfo &info) {
+                data = std::make_unique<ConeShape>();
+                return Threading::make_ready_task(true);
+            },
+            this);
+
+        getOrCreateManual(
             "Compound", {}, [](CollisionShapeManager *mgr, std::unique_ptr<CollisionShape> &data, ResourceDataInfo &info) {
                 data = std::make_unique<CompoundShape>();
                 return Threading::make_ready_task(true);
@@ -475,7 +567,6 @@ namespace Serialize {
             Serialize::write(out, *handle.mInstance, name);
         }
     }
-
 }
 
 }
@@ -501,9 +592,13 @@ SERIALIZETABLE_INHERIT_BEGIN(Engine::Physics::PlaneShapeInstance, Engine::Physic
 SERIALIZETABLE_END(Engine::Physics::PlaneShapeInstance)
 
 METATABLE_BEGIN_BASE(Engine::Physics::CapsuleShapeInstance, Engine::Physics::CollisionShapeInstance)
+PROPERTY(radius, radius, setRadius)
+PROPERTY(height, height, setHeight)
 METATABLE_END(Engine::Physics::CapsuleShapeInstance)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Physics::CapsuleShapeInstance, Engine::Physics::CollisionShapeInstance)
+ENCAPSULATED_FIELD(radius, radius, setRadius)
+ENCAPSULATED_FIELD(height, height, setHeight)
 SERIALIZETABLE_END(Engine::Physics::CapsuleShapeInstance)
 
 METATABLE_BEGIN_BASE(Engine::Physics::SphereShapeInstance, Engine::Physics::CollisionShapeInstance)
@@ -513,6 +608,18 @@ METATABLE_END(Engine::Physics::SphereShapeInstance)
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Physics::SphereShapeInstance, Engine::Physics::CollisionShapeInstance)
 ENCAPSULATED_FIELD(radius, radius, setRadius)
 SERIALIZETABLE_END(Engine::Physics::SphereShapeInstance)
+
+METATABLE_BEGIN_BASE(Engine::Physics::ConeShapeInstance, Engine::Physics::CollisionShapeInstance)
+PROPERTY(radius, radius, setRadius)
+PROPERTY(height, height, setHeight)
+PROPERTY(upIndex, upIndex, setUpIndex)
+METATABLE_END(Engine::Physics::ConeShapeInstance)
+
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Physics::ConeShapeInstance, Engine::Physics::CollisionShapeInstance)
+ENCAPSULATED_FIELD(radius, radius, setRadius)
+ENCAPSULATED_FIELD(height, height, setHeight)
+ENCAPSULATED_FIELD(upIndex, upIndex, setUpIndex)
+SERIALIZETABLE_END(Engine::Physics::ConeShapeInstance)
 
 METATABLE_BEGIN_BASE(Engine::Physics::CompoundShapeInstance, Engine::Physics::CollisionShapeInstance)
 PROPERTY(Shapes, shapes, setShapes)
@@ -526,7 +633,7 @@ SERIALIZETABLE_END(Engine::Physics::CompoundShapeInstance)
 METATABLE_BEGIN(Engine::Physics::CompoundShapeInstance::CompoundShapeElement)
 MEMBER(mPos)
 MEMBER(mOrientation)
-READONLY_PROPERTY(Shape, shapeInstance)
+READONLY_PROPERTY(Shape, shape)
 METATABLE_END(Engine::Physics::CompoundShapeInstance::CompoundShapeElement)
 
 SERIALIZETABLE_BEGIN(Engine::Physics::CompoundShapeInstance::CompoundShapeElement)

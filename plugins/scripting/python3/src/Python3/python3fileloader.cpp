@@ -68,7 +68,7 @@ namespace Scripting {
             if (!res)
                 return;
             Python3Lock lock;
-            PyObjectPtr spec = PyModulePtr { "importlib.machinery" }.call("ModuleSpec", { { { "loader_state", toPyObject(TypedScopePtr { res }) } } }, "sO", res->name().data(), toPyObject(TypedScopePtr { this }));
+            PyObjectPtr spec = PyModulePtr { "importlib.machinery" }.get("ModuleSpec").call({ { { "loader_state", toPyObject(TypedScopePtr { res }) } } }, "sO", res->name().data(), toPyObject(TypedScopePtr { this }));
             return fromPyObject(retVal, spec);
         }
 
@@ -96,9 +96,9 @@ namespace Scripting {
 
             PyModulePtr importlib { "importlib.util" };
 
-            PyObjectPtr spec = importlib.call("spec_from_file_location", "ss", res->name().data(), res->path().c_str());
+            PyObjectPtr spec = importlib.get("spec_from_file_location").call("ss", res->name().data(), res->path().c_str());
 
-            return fromPyObject(retVal, spec.get("loader").call("exec_module", "(O)", (PyObject *)moduleObject));            
+            return fromPyObject(retVal, spec.get("loader").get("exec_module").call("(O)", (PyObject *)moduleObject));            
         }
     }
 }

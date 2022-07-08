@@ -3,6 +3,9 @@
 #include "pyobjectptr.h"
 #include "pydictptr.h"
 
+#include "pyobjectutil.h"
+
+#include "Meta/keyvalue/valuetype.h"
 
 namespace Engine {
 namespace Scripting {
@@ -34,30 +37,37 @@ namespace Scripting {
             return PyObject_GetAttrString(mObject, name.data());
         }
 
-        PyObjectPtr PyObjectPtr::call(std::string_view name, const char *format, ...) const
+        PyObjectPtr PyObjectPtr::call(const ArgumentList &args) const
+        {
+            PyObjectPtr tuple = PyTuple_New(args.size());
+            for (size_t i = 0; i < args.size(); ++i) {
+                PyTuple_SetItem(tuple, i, toPyObject(args[i]));
+            }
+
+            return call(tuple, PyObjectPtr {});
+        }
+
+        PyObjectPtr PyObjectPtr::call(const char *format, ...) const
         {            
             va_list vl;
             va_start(vl, format);
-            PyObjectPtr result = call(name, Py_VaBuildValue(format, vl), {});
+            PyObjectPtr result = call(Py_VaBuildValue(format, vl), PyObjectPtr{});
             va_end(vl);
             return result;
         }
 
-        PyObjectPtr PyObjectPtr::call(std::string_view name, const PyDictPtr &kwargs, const char *format, ...) const
+        PyObjectPtr PyObjectPtr::call(const PyDictPtr &kwargs, const char *format, ...) const
         {
             va_list vl;
             va_start(vl, format);
-            PyObjectPtr result = call(name, Py_VaBuildValue(format, vl), kwargs);
+            PyObjectPtr result = call(Py_VaBuildValue(format, vl), kwargs);
             va_end(vl);
             return result;
         }
 
-        PyObjectPtr PyObjectPtr::call(std::string_view name, const PyObjectPtr &args, const PyObjectPtr &kwargs) const
+        PyObjectPtr PyObjectPtr::call(const PyObjectPtr &args, const PyObjectPtr &kwargs) const
         {
-            PyObjectPtr function = get(name);
-            if (!function)
-                return nullptr;
-            return PyObject_Call(function, args, kwargs);
+            return PyObject_Call(mObject, args, kwargs);
         }
 
         PyObjectFieldAccessor PyObjectPtr::operator[](const PyObjectPtr &name) const

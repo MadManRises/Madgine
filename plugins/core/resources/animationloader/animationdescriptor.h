@@ -35,7 +35,7 @@ namespace Render {
 		AnimationList(const AnimationList &) = delete;
         AnimationList(AnimationList &&) = default;
 
-        std::map<std::string, AnimationDescriptor> mAnimations;
+        std::vector<AnimationDescriptor> mAnimations;
         std::vector<std::string> mBoneNames;
 
 		std::map<SkeletonLoader::HandleType, std::unique_ptr<int[]>> mBoneMappings;

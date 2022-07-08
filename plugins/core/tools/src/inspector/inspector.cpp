@@ -270,7 +270,7 @@ namespace Tools {
             for (auto [vKey, vValue] : range) {
                 ImGui::TableNextRow();
                 ValueType value = vValue;
-                std::string key = vKey.toShortString() + "##" + std::to_string(i);
+                std::string key = vKey.toShortString() /* + "##" + std::to_string(i)*/;
                 std::pair<bool, bool> result = drawValue(key, value, /*editable && */ vValue.isEditable(), false, element);
                 if (result.first)
                     vValue = value;
@@ -284,6 +284,8 @@ namespace Tools {
 
     void Inspector::drawValue(std::string_view id, BoundApiFunction &function, bool editable, tinyxml2::XMLElement *element)
     {
+        ImGui::TableNextColumn();
+        ImGui::TableNextColumn();
         std::string extended = "-> " + std::string { id };
         if (ImGui::Button(extended.c_str())) {
             getTool<FunctionTool>().setCurrentFunction(id, function);

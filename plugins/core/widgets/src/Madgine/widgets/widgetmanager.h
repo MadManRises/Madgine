@@ -62,6 +62,7 @@ namespace Widgets {
         virtual bool injectPointerRelease(const Input::PointerEventArgs &arg) override;
         virtual bool injectPointerMove(const Input::PointerEventArgs &arg) override;
         virtual bool injectAxisEvent(const Input::AxisEventArgs &arg) override;
+        virtual bool injectKeyPress(const Input::KeyEventArgs &arg) override;
 
         virtual void onResize(const Rect2i &space) override;
         virtual void render(Render::RenderTarget *target, size_t iteration) override;

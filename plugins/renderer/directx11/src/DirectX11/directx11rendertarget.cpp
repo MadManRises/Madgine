@@ -290,7 +290,7 @@ namespace Render {
         }
     }
 
-    void DirectX11RenderTarget::renderVertices(const Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices)
+    void DirectX11RenderTarget::renderVertices(const Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<uint32_t> indices)
     {
         if (!vertices.empty()) {
             DirectX11MeshData tempMesh;
@@ -302,7 +302,7 @@ namespace Render {
         }
     }
 
-    void DirectX11RenderTarget::renderVertices(const Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, const Material *material)
+    void DirectX11RenderTarget::renderVertices(const Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<uint32_t> indices, const Material *material)
     {
         if (!vertices.empty()) {
             DirectX11MeshData tempMesh;

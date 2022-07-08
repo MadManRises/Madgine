@@ -33,7 +33,7 @@ namespace Serialize {
         void writeState(FormattedSerializeStream &out, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0) const;
         StreamResult readState(FormattedSerializeStream &in, const char *name = nullptr, CallerHierarchyBasePtr hierarchy = {}, StateTransmissionFlags flags = 0);
 
-        StreamResult applyMap(FormattedSerializeStream &in, bool success);
+        StreamResult applyMap(FormattedSerializeStream &in, bool success, CallerHierarchyBasePtr hierarchy = {});
         void setActive(bool active, bool existenceChanged);
 
         StreamResult readAction(FormattedBufferedStream &in, PendingRequest &request);

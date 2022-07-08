@@ -4,7 +4,7 @@
 
 namespace Engine {
 
-ObjectPtr::ObjectPtr(Void)
+ObjectPtr::ObjectPtr(std::monostate)
 {
 }
 
@@ -43,6 +43,11 @@ bool ObjectPtr::getValue(ValueType &retVal, std::string_view name) const
     if (!mInstance)
         return false;
     return mInstance->getValue(retVal, name);
+}
+
+void ObjectPtr::call(ValueType &retVal, const ArgumentList &args) const
+{
+    mInstance->call(retVal, args);
 }
 
 bool ObjectPtr::operator==(const ObjectPtr &other) const

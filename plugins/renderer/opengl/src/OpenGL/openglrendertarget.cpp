@@ -98,7 +98,7 @@ namespace Render {
         GLenum mode = modes[mesh->mGroupSize - 1];
 
         if (mesh->mIndices) {
-            glDrawElements(mode, mesh->mElementCount, GL_UNSIGNED_SHORT, 0);
+            glDrawElements(mode, mesh->mElementCount, GL_UNSIGNED_INT, 0);
         } else
             glDrawArrays(mode, 0, mesh->mElementCount);
         GL_CHECK();
@@ -138,7 +138,7 @@ namespace Render {
         program->unbind(&mesh->mVAO);
     }
 
-    void OpenGLRenderTarget::renderVertices(const Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<unsigned short> indices)
+    void OpenGLRenderTarget::renderVertices(const Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<uint32_t> indices)
     {
         if (!vertices.empty()) {
             OpenGLMeshData tempMesh;
@@ -148,7 +148,7 @@ namespace Render {
         }
     }
 
-    void OpenGLRenderTarget::renderVertices(const Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<unsigned short> indices, const Material *material)
+    void OpenGLRenderTarget::renderVertices(const Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<uint32_t> indices, const Material *material)
     {
         if (!vertices.empty()) {
             OpenGLMeshData tempMesh;

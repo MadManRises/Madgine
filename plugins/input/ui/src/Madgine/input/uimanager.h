@@ -27,8 +27,9 @@ namespace Input {
         void showCursor();
         bool isCursorVisible() const;
 
-        void update();
-        void fixedUpdate();
+        void updateRender();
+        void fixedUpdateRender();
+        void updateApp();
 
         //Scene::ContextMask currentContext();
 
@@ -79,7 +80,7 @@ namespace Input {
         Vector2 mKeptCursorPosition;
         bool mKeepingCursorPos = false;
 
-        IntervalClock<std::chrono::steady_clock> mFrameClock;
+        IntervalClock<std::chrono::steady_clock> mFrameClock, mAppClock;
     };
 }
 }

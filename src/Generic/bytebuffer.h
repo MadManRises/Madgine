@@ -74,6 +74,16 @@ struct ByteBufferImpl {
         };
     }
 
+    Data *begin() const
+    {
+        return mData;
+    }
+
+    Data *end() const
+    {
+        return mData + mSize;
+    }
+
     Data *operator->() const
     {
         return mData;

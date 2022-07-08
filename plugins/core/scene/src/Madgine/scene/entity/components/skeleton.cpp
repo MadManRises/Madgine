@@ -11,9 +11,21 @@
 
 #include "Madgine/resources/resourcemanager.h"
 
+ENTITYCOMPONENT_IMPL(Skeleton, Engine::Scene::Entity::Skeleton);
+
+METATABLE_BEGIN(Engine::Scene::Entity::Skeleton)
+PROPERTY(Skeleton, get, set)
+READONLY_PROPERTY(Matrices, matrices)
+METATABLE_END(Engine::Scene::Entity::Skeleton)
+
+SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Skeleton)
+ENCAPSULATED_FIELD(Skeleton, getName, setName)
+SERIALIZETABLE_END(Engine::Scene::Entity::Skeleton)
+
 namespace Engine {
 namespace Scene {
     namespace Entity {
+
         Skeleton::Skeleton(const ObjectPtr &data)
             : NamedUniqueComponent(data)
         {
@@ -22,6 +34,7 @@ namespace Scene {
                 setName(v.as<std::string>());
             }
         }
+
         const Render::SkeletonDescriptor *Skeleton::data() const
         {
             if (mLoaded)
@@ -79,14 +92,3 @@ namespace Scene {
     }
 }
 }
-
-ENTITYCOMPONENT_IMPL(Skeleton, Engine::Scene::Entity::Skeleton);
-
-METATABLE_BEGIN(Engine::Scene::Entity::Skeleton)
-PROPERTY(Skeleton, get, set)
-READONLY_PROPERTY(Matrices, matrices)
-METATABLE_END(Engine::Scene::Entity::Skeleton)
-
-SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Skeleton)
-ENCAPSULATED_FIELD(Skeleton, getName, setName)
-SERIALIZETABLE_END(Engine::Scene::Entity::Skeleton)

@@ -52,10 +52,10 @@ namespace Serialize {
             out.endContainerWrite(name);
         }
 
-        static StreamResult applyMap(FormattedSerializeStream &in, C &c, bool success)
+        static StreamResult applyMap(FormattedSerializeStream &in, C &c, bool success, const CallerHierarchyBasePtr &hierarchy = {})
         {
             for (auto &t : physical(c)) {
-                STREAM_PROPAGATE_ERROR(Serialize::applyMap(in, t, success));
+                STREAM_PROPAGATE_ERROR(Serialize::applyMap(in, t, success, hierarchy));
             }
             return {};
         }

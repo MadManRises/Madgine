@@ -66,9 +66,37 @@ struct Quaternion {
 
     static Quaternion FromMatrix(const Matrix3 &m)
     {
-        float w = sqrtf(1.0 + m[0][0] + m[1][1] + m[2][2]) / 2.0f;
-        float w4 = 4.0f * w;
-        return { (m[2][1] - m[1][2]) / w4, (m[0][2] - m[2][0]) / w4, (m[1][0] - m[0][1]) / w4, w };
+        float qw, qx, qy, qz;
+        float tr = m[0][0] + m[1][1] + m[2][2];
+
+        if (tr > 0) {
+            float S = sqrt(tr + 1.0) * 2; // S=4*qw
+            qw = 0.25 * S;
+            qx = (m[2][1] - m[1][2]) / S;
+            qy = (m[0][2] - m[2][0]) / S;
+            qz = (m[1][0] - m[0][1]) / S;
+        } else if ((m[0][0] > m[1][1]) & (m[0][0] > m[2][2])) {
+            float S = sqrt(1.0 + m[0][0] - m[1][1] - m[2][2]) * 2; // S=4*qx
+            qw = (m[2][1] - m[1][2]) / S;
+            qx = 0.25 * S;
+            qy = (m[0][1] + m[1][0]) / S;
+            qz = (m[0][2] + m[2][0]) / S;
+        } else if (m[1][1] > m[2][2]) {
+            float S = sqrt(1.0 + m[1][1] - m[0][0] - m[2][2]) * 2; // S=4*qy
+            qw = (m[0][2] - m[2][0]) / S;
+            qx = (m[0][1] + m[1][0]) / S;
+            qy = 0.25 * S;
+            qz = (m[1][2] + m[2][1]) / S;
+        } else {
+            float S = sqrt(1.0 + m[2][2] - m[0][0] - m[1][1]) * 2; // S=4*qz
+            qw = (m[1][0] - m[0][1]) / S;
+            qx = (m[0][2] + m[2][0]) / S;
+            qy = (m[1][2] + m[2][1]) / S;
+            qz = 0.25 * S;
+        }
+
+        assert(!isnan(qx) && !isnan(qy) && !isnan(qz) && !isnan(qw));
+        return { qx, qy, qz, qw };
     }
 
     void operator*=(const Quaternion &other)

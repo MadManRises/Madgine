@@ -133,7 +133,7 @@ namespace Serialize {
                 [](SyncableUnitBase *unit, FormattedBufferedStream &inout, MessageId id) -> StreamResult {
                     throw "Unsupported";
                 },
-                [](SerializableDataUnit *_unit, FormattedSerializeStream &in, bool success) {
+                [](SerializableDataUnit *_unit, FormattedSerializeStream &in, bool success, CallerHierarchyBasePtr hierarchy) {
                     return StreamResult {};
                 },
                 [](SerializableDataUnit *unit, bool b) {
@@ -185,8 +185,9 @@ namespace Serialize {
                     } else
                         throw "Unsupported";
                 },
-                [](SerializableDataUnit *unit, FormattedSerializeStream &in, bool success) {
-                    return applyMap<T, Configs...>(in, static_cast<Unit *>(unit)->*P, success);
+                [](SerializableDataUnit *_unit, FormattedSerializeStream &in, bool success, CallerHierarchyBasePtr hierarchy) {
+                    Unit *unit = static_cast<Unit *>(_unit);
+                    return applyMap<T, Configs...>(in, unit->*P, success, CallerHierarchyPtr { hierarchy.append(unit) });
                 },
                 [](SerializableDataUnit *unit, bool b) {
                     setSynced<T, Configs...>(static_cast<Unit *>(unit)->*P, b);

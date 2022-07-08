@@ -74,4 +74,16 @@ META_EXPORT void to_ValueType_impl<ValueType &>(ValueType &v, ValueType &t)
     v = t;
 }
 
+template <>
+META_EXPORT void to_ValueTypeRef_impl<ValueType>(ValueTypeRef &v, ValueType &&t)
+{
+    v = ValueTypeRef { std::move(t) };
+}
+
+template <>
+META_EXPORT void to_ValueTypeRef_impl<ValueType &>(ValueTypeRef &v, ValueType &t)
+{
+    v = ValueTypeRef { t };
+}
+
 }
