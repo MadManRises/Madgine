@@ -101,7 +101,7 @@ namespace Threading {
         }
 
         bool await_ready();
-        void await_suspend(TaskHandle handle);
+        std::coroutine_handle<> await_suspend(TaskHandle handle);
         void await_resume();
 
 #if ENABLE_TASK_TRACKING
