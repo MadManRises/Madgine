@@ -672,8 +672,8 @@ namespace NodeGraph {
         if (!target.mNode) {
             std::erase(mDataReceiverPins[target.mIndex].mSources, source);
         } else {
-            auto result = std::erase(node(target.mNode)->mDataReceiverPins[target.mIndex].mSources, source);
-            assert(result == 1);
+            /*auto result = */std::erase(node(target.mNode)->mDataReceiverPins[target.mIndex].mSources, source);
+            /* assert(result == 1);*/
             node(target.mNode)->onDataReceiverUpdate(target.mIndex, source, DISCONNECT);
         }
 

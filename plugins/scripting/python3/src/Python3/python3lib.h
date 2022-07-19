@@ -11,9 +11,6 @@
 #    define MADGINE_PYTHON3_EXPORT DLL_IMPORT
 #endif
 
-#ifndef NDEBUG
-#	define Py_DEBUG
-#endif
 #define PY_SSIZE_T_CLEAN
 #include "Python.h"
 
