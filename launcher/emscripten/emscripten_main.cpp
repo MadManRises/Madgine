@@ -10,6 +10,8 @@
 #include "cli/parameter.h"
 #include <emscripten.h>
 
+#include "Madgine/base/keyvalueregistry.h"
+
 extern Engine::CLI::Parameter<Engine::Util::MessageType> logLevel;
 
 std::unique_ptr<Engine::CLI::CLICore> sTempCLI;

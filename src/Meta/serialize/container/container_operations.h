@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../streams/comparestreamid.h"
+#include "../primitivetypes.h"
 
 namespace Engine {
 namespace Serialize {
@@ -222,10 +223,9 @@ namespace Serialize {
     };
 
     template <typename C>
-    concept SerializeRange = !StringViewable<C>;
+    concept SerializeRange = std::ranges::range<C> && !PrimitiveType<C>;
 
-    template <std::ranges::range C, typename... Configs>
-    requires SerializeRange<C>
+    template <SerializeRange C, typename... Configs>    
     struct Operations<C, Configs...> : ContainerOperations<C, Configs...> {
     };
 
@@ -235,8 +235,7 @@ namespace Serialize {
         typename underlying_container<C>::type;
     };
 
-    template <std::ranges::range C, typename... Configs>
-    requires SerializeWrappedRange<C>
+    template <SerializeWrappedRange C, typename... Configs>
     struct Operations<C, Configs...> : Operations<typename underlying_container<C>::type, Configs...> {
     };
 
