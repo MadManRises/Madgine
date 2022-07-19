@@ -98,7 +98,7 @@ namespace Filesystem {
         return p1 == p2;
     }
 
-    InStream openFileRead(const Path &p, bool isBinary)
+    Stream openFileRead(const Path &p, bool isBinary)
     {
         std::unique_ptr<std::filebuf> buffer = std::make_unique<std::filebuf>();
         std::string s = p.str();
@@ -109,7 +109,7 @@ namespace Filesystem {
             return {};
     }
 
-    OutStream openFileWrite(const Path &p, bool isBinary)
+    Stream openFileWrite(const Path &p, bool isBinary)
     {
         std::unique_ptr<std::filebuf> buffer = std::make_unique<std::filebuf>();
         std::string s = p.str();

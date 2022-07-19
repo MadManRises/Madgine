@@ -33,7 +33,7 @@ namespace Render {
         size_t mInputIndex;
         RenderTarget *mInput;
 
-        ProgramLoader::PtrType mProgram;
+        PipelineLoader::Instance mPipeline;
     };
 
 }

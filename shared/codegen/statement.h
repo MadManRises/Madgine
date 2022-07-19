@@ -5,7 +5,21 @@
 
 namespace CodeGen {
 
-    
+struct MADGINE_CODEGEN_EXPORT StatementVector {
+    StatementVector();
+    StatementVector(std::initializer_list<Statement> statements);
+    StatementVector(const StatementVector &);
+    ~StatementVector();
+
+    StatementVector &operator=(const StatementVector &);
+
+    std::vector<Statement>::const_iterator begin() const;
+    std::vector<Statement>::const_iterator end() const;
+
+private:
+    std::vector<Statement> mVector;
+};
+
 struct Variable {
     std::string mName;
     Type mType;
@@ -64,7 +78,7 @@ struct MADGINE_CODEGEN_EXPORT MemberAccess {
 
 struct MADGINE_CODEGEN_EXPORT Constructor {
     Type mType;
-    std::vector<Statement> mArguments;
+    StatementVector mArguments;
 };
 
 struct MADGINE_CODEGEN_EXPORT Constant {
@@ -77,9 +91,8 @@ struct MADGINE_CODEGEN_EXPORT ArithOperation {
         ADD,
         MUL
     } mType;
-    std::vector<Statement> mOperands;
+    StatementVector mOperands;
 };
-
 
 struct MADGINE_CODEGEN_EXPORT Function {
     Function(std::string_view name, Type returnType, std::vector<Variable> arguments, std::vector<std::string> annotations);
@@ -100,7 +113,5 @@ struct Struct {
     std::vector<Variable> mVariables;
     std::vector<std::string> mAnnotations;
 };
-
-
 
 }

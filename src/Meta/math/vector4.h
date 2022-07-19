@@ -844,4 +844,4 @@ public:
 
 }
 
-RegisterType(Engine::Vector4)
+REGISTER_TYPE(Engine::Vector4)

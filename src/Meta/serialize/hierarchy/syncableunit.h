@@ -3,9 +3,6 @@
 #include "Generic/callerhierarchy.h"
 #include "serializableunit.h"
 
-#include "Generic/future.h"
-#include "Generic/lambda.h"
-
 #include "../streams/pendingrequest.h"
 
 namespace Engine {
@@ -94,7 +91,7 @@ namespace Serialize {
         template <typename T>
         friend struct Serializable;
 
-        DERIVE_FRIEND(customUnitPtr);
+        DERIVE_FRIEND(customUnitPtr)
 
         SerializableUnitPtr customUnitPtr();
         SerializableUnitConstPtr customUnitPtr() const;

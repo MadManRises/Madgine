@@ -6,7 +6,7 @@
 namespace Engine {
 namespace Serialize {
 
-    DERIVE_FUNCTION(customUnitPtr);
+    DERIVE_FUNCTION(customUnitPtr)
 
     struct META_EXPORT SerializableDataConstPtr {
     private:

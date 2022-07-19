@@ -6,7 +6,7 @@
 
 #include "Meta/keyvalue/virtualscope.h"
 
-DECLARE_UNIQUE_COMPONENT(Engine::Window, MainWindowComponent, MainWindowComponentBase, MainWindow &);
+DECLARE_UNIQUE_COMPONENT(Engine::Window, MainWindowComponent, MainWindowComponentBase, MainWindow &)
 
 
 namespace Engine {
@@ -19,7 +19,7 @@ namespace Window {
     using MainWindowVirtualBase = Serialize::VirtualData<T, MainWindowComponentVirtualBase<T>>;
 
     template <typename T, typename Base>
-    using MainWindowVirtualImpl = VirtualUniqueComponentImpl<T, Base>;
+    using MainWindowVirtualImpl = UniqueComponent::VirtualComponentImpl<T, Base>;
 
 }
 }

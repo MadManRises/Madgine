@@ -11,7 +11,7 @@ namespace Tools {
 
     struct GuiEditor : public Tool<GuiEditor> {
 
-        SERIALIZABLEUNIT(GuiEditor);
+        SERIALIZABLEUNIT(GuiEditor)
 
         GuiEditor(ImRoot &root);
 
@@ -41,4 +41,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::GuiEditor);
+REGISTER_TYPE(Engine::Tools::GuiEditor)

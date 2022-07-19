@@ -28,5 +28,5 @@ namespace Scene {
 }
 }
 
-RegisterType(ClickBrick::Scene::Brick);
-RegisterType(Engine::Scene::Entity::EntityComponentList<ClickBrick::Scene::Brick>);
+REGISTER_TYPE(ClickBrick::Scene::Brick)
+REGISTER_TYPE(Engine::Scene::Entity::EntityComponentList<ClickBrick::Scene::Brick>)

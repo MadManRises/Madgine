@@ -1,5 +1,4 @@
 
-
 #if defined(Base64_EXPORTS)
 #    define BASE64_EXPORT DLL_EXPORT
 #else

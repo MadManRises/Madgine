@@ -28,4 +28,4 @@ namespace NodeGraph {
 
 }
 
-RegisterType(Engine::NodeGraph::Vector3to4Node)
+REGISTER_TYPE(Engine::NodeGraph::Vector3to4Node)

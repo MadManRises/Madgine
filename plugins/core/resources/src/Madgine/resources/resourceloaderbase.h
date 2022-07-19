@@ -14,7 +14,7 @@ namespace Resources {
 
     struct MADGINE_RESOURCES_EXPORT ResourceLoaderBase : VirtualScopeBase<> {
 
-        using ResourceType = ResourceBase;
+        using Resource = ResourceBase;
 
         ResourceLoaderBase(std::vector<std::string> &&extensions, const ResourceLoaderSettings &settings = {});
         ResourceLoaderBase(const ResourceLoaderBase &) = delete;
@@ -53,4 +53,4 @@ namespace Resources {
 }
 }
 
-RegisterType(Engine::Resources::ResourceLoaderBase);
+REGISTER_TYPE(Engine::Resources::ResourceLoaderBase)

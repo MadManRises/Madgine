@@ -11,20 +11,22 @@
 #include "directx12forward.h"
 
 #include "meshloaderlib.h"
-#include "programloaderlib.h"
+#include "pipelineloaderlib.h"
 #include "textureloaderlib.h"
 #include "Madgine/clientlib.h"
 
 #define NOMINMAX
 
-#include "d3dx12.h"
 #include <d3d12.h>
-#include <d3dcompiler.h>
 #include <dxgi1_6.h>
 #include <pix.h>
+#include "d3dx12.h"
+#include <dxcapi.h>
 
 MADGINE_DIRECTX12_EXPORT void dx12Dump(HRESULT result);
 MADGINE_DIRECTX12_EXPORT bool checkDevice(HRESULT &result);
+
+#define MADGINE_DIRECTX12_USE_SINGLE_COMMAND_LIST 0
 
 inline void dx12Check(HRESULT result = 0)
 {
@@ -45,12 +47,31 @@ inline void dx12Check(HRESULT result = 0)
 
 struct ReleaseDeleter {
     template <typename T>
-    void operator()(T* ptr) {
+    void operator()(T *ptr)
+    {
         ptr->Release();
     }
 };
 template <typename T>
-using ReleasePtr = std::unique_ptr<T, ReleaseDeleter>;
+struct ReleasePtr : std::unique_ptr<T, ReleaseDeleter> {
+    using std::unique_ptr<T, ReleaseDeleter>::unique_ptr;
+
+    T **operator&()
+    {
+        assert(!*this);
+        return reinterpret_cast<T **>(this);
+    }
+
+    T *const *operator&() const
+    {
+        return reinterpret_cast<T *const *>(this);
+    }
+
+    operator T *() const
+    {
+        return this->get();
+    }
+};
 
 constexpr D3D12_CPU_DESCRIPTOR_HANDLE operator+(D3D12_CPU_DESCRIPTOR_HANDLE handle, Engine::OffsetPtr offset)
 {

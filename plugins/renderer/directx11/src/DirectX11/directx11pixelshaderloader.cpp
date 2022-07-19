@@ -2,8 +2,6 @@
 
 #include "directx11pixelshaderloader.h"
 
-#include "util/directx11pixelshader.h"
-
 #include "directx11rendercontext.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
@@ -55,25 +53,25 @@ namespace Render {
     {
     }
 
-    void DirectX11PixelShaderLoader::HandleType::create(const std::string &name, const CodeGen::ShaderFile &file, DirectX11PixelShaderLoader *loader)
+    Threading::TaskFuture<bool> DirectX11PixelShaderLoader::Handle::create(std::string_view name, const CodeGen::ShaderFile &file, DirectX11PixelShaderLoader *loader)
     {
-        *this = DirectX11PixelShaderLoader::loadManual(
-            name, {}, [=, &file](DirectX11PixelShaderLoader *loader, DirectX11PixelShader &shader, const DirectX11PixelShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, loader);
+        return Base::Handle::create(
+            name, {}, [=, &file](DirectX11PixelShaderLoader *loader, ReleasePtr<ID3D11PixelShader> &shader, const DirectX11PixelShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, loader);
     }
 
-    bool DirectX11PixelShaderLoader::loadImpl(DirectX11PixelShader &shader, ResourceDataInfo &info)
+    bool DirectX11PixelShaderLoader::loadImpl(ReleasePtr<ID3D11PixelShader> &shader, ResourceDataInfo &info)
     {
         std::string source = info.resource()->readAsText();
 
         return loadFromSource(shader, info.resource()->path().stem(), source);
     }
 
-    void DirectX11PixelShaderLoader::unloadImpl(DirectX11PixelShader &shader)
+    void DirectX11PixelShaderLoader::unloadImpl(ReleasePtr<ID3D11PixelShader> &shader)
     {
         shader.reset();
     }
 
-    bool DirectX11PixelShaderLoader::create(DirectX11PixelShader &shader, ResourceType *res, const CodeGen::ShaderFile &file)
+    bool DirectX11PixelShaderLoader::create(ReleasePtr<ID3D11PixelShader> &shader, Resource *res, const CodeGen::ShaderFile &file)
     {
         if (res->path().empty()) {
             Filesystem::Path dir = Filesystem::appDataPath() / "generated/shader/directx11";
@@ -94,7 +92,7 @@ namespace Render {
         return loadFromSource(shader, res->name(), ss.str());
     }
 
-    bool DirectX11PixelShaderLoader::loadFromSource(DirectX11PixelShader &shader, std::string_view name, std::string source)
+    bool DirectX11PixelShaderLoader::loadFromSource(ReleasePtr<ID3D11PixelShader> &shader, std::string_view name, std::string source)
     {
         std::string profile = "latest";
         if (profile == "latest")
@@ -131,7 +129,8 @@ namespace Render {
             return false;
         }
 
-        shader = { std::move(pShaderBlob) };
+        hr = sDevice->CreatePixelShader(pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize(), nullptr, &shader);
+        DX11_CHECK(hr);
 
         return true;
     }
@@ -147,5 +146,5 @@ namespace Render {
 METATABLE_BEGIN(Engine::Render::DirectX11PixelShaderLoader)
 METATABLE_END(Engine::Render::DirectX11PixelShaderLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::DirectX11PixelShaderLoader::ResourceType, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Render::DirectX11PixelShaderLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::DirectX11PixelShaderLoader::Resource, Engine::Resources::ResourceBase)
+METATABLE_END(Engine::Render::DirectX11PixelShaderLoader::Resource)

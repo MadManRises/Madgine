@@ -7,7 +7,7 @@ namespace Serialize {
 
     ENUM(MessageResult,
         OK,
-        REJECTED);
+        REJECTED)
 
 }
 }

@@ -1,22 +1,7 @@
-buildscript {
-    repositories {
-        jcenter()
-        google()
-    }
-
-    dependencies {
-        classpath "com.android.tools.build:gradle:3.2.1"
-    }
+plugins {
+    id 'com.android.application' version '7.2.1'
+    id 'com.android.library' version '7.2.1' apply false
 }
-
-allprojects {
-    repositories {
-        google()
-        jcenter()
-    }
-}
-
-apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion @ANDROID_PLATFORM_LEVEL@
@@ -44,7 +29,7 @@ android {
 
         applicationVariants.all { variant ->
             variant.outputs.all {
-                outputFileName = "../../../../apk/@target@.apk"
+                outputFileName = "../../../../../bin/@target@.apk"
             }
         }
     }
@@ -53,7 +38,7 @@ android {
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
-            jniLibs.srcDirs = ['@CMAKE_BINARY_DIR@/bin/', '@CMAKE_ANDROID_NDK@/sources/cxx-stl/llvm-libc++/libs/']
+            jniLibs.srcDirs = ['@CMAKE_CURRENT_BINARY_DIR@/bin/', '@CMAKE_ANDROID_NDK@/sources/cxx-stl/llvm-libc++/libs/']
 			assets.srcDirs = ['@CMAKE_BINARY_DIR@/data/']
         }
     }

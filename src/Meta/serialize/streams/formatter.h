@@ -74,17 +74,6 @@ namespace Serialize {
             }
         }
 
-        StreamResult read(String auto &s) 
-            requires(!std::same_as<decltype(s), std::string&>)
-        {
-            std::string string;
-            STREAM_PROPAGATE_ERROR(read(string));
-            s = std::move(string);
-            return {};
-        }
-
-        StreamResult read(ByteBuffer &b);
-
         template <typename T>
         void write(const T &t)
         {
@@ -94,8 +83,6 @@ namespace Serialize {
                 mStream << t;
             }
         }
-
-        void write(const ByteBuffer &b);        
 
         const bool mBinary;
         const bool mSupportNameLookup;

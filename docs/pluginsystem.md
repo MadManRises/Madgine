@@ -1,4 +1,4 @@
-\page Pluginsystem Plugins
+\page Pluginsystem Plugins & Unique Components
 
 # Plugins & Unique Components
 

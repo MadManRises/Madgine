@@ -149,12 +149,8 @@ namespace Render {
                 setup();
             }
         } else if (event == NodeGraph::DISCONNECT) {
-            mGraph.onDataProviderRemove(this, index);
-
-            mDataInPins.erase(mDataInPins.begin() + index);
-
-            assert(mDataProviderPins[index].mTargets.empty());
-            mDataProviderPins.erase(mDataProviderPins.begin() + index);
+            removeDataInPin(index);
+            removeDataProviderPin(index);    
 
             --mAdditionalPins;
         }

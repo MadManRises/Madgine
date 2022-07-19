@@ -1,6 +1,5 @@
 #include "../directx11lib.h"
 
-#include "directx11vertexarray.h"
 
 using namespace Engine::Render;
 

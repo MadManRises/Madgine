@@ -38,8 +38,6 @@ namespace Filesystem {
 
     INTERFACES_EXPORT Stream openFileRead(const Path &p, bool isBinary = false);
     INTERFACES_EXPORT Stream openFileWrite(const Path &p, bool isBinary = false);
-    /*INTERFACES_EXPORT InStream openAppDataFileRead(const Path &p, bool isBinary = false);
-    INTERFACES_EXPORT OutStream openAppDataFileWrite(const Path &p, bool isBinary = false);*/
     INTERFACES_EXPORT FileInfo fileInfo(const Path &p);
 }
 }

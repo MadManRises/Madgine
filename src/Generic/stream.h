@@ -106,7 +106,7 @@ struct Stream {
     Stream &operator<<(const T &t)
     {
         if constexpr (std::is_enum_v<T>) {
-            mStream << static_cast<std::underlying_type_t<T>>(t);
+            mStream << static_cast<int64_t /*std::underlying_type_t<T>*/>(t);
         } else {
             mStream << t;
         }
@@ -160,13 +160,4 @@ protected:
     std::iostream mStream;
 };
 
-/*struct Stream : InStream, OutStream {
-    Stream(std::unique_ptr<std::streambuf> &&buffer)
-        : InStream(buffer.get())
-        , OutStream(std::move(buffer))
-    {
-    }
-
-    using InStream::buffer;
-};*/
 }

@@ -31,6 +31,10 @@ template <typename T, bool b>
 struct dependent_bool : std::bool_constant<b> {
 };
 
+template <typename T, typename I, I i>
+struct dependent_constant : std::integral_constant<I, i> {
+};
+
 template <typename... Ts>
 struct overloaded : Ts... {
     using Ts::operator()...;
@@ -155,6 +159,6 @@ template <auto a>
 struct auto_holder;
 
 template <auto f, auto g>
-concept f_same_as = std::same_as<auto_holder<f>, auto_holder<g>>;
+concept FSameAs = std::same_as<auto_holder<f>, auto_holder<g>>;
 
 }

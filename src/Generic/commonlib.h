@@ -9,7 +9,7 @@
 #endif
 
 #if __APPLE__
-#   define __unix__ 1
+#    define __unix__ 1
 #endif
 
 #if __MINGW32__ || __unix__
@@ -19,6 +19,7 @@
 #endif
 
 #if __unix__
+#    define UNIX 1
 #    if __EMSCRIPTEN__
 #        define EMSCRIPTEN 1
 #    else
@@ -34,19 +35,19 @@
 #        endif
 #    endif
 #    if __APPLE__
-#       include <TargetConditionals.h>
-#       if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
-#           define IOS 1
-#           define OSX 0
-#       elif TARGET_OS_MAC
-#           define OSX 1
-#           define IOS 0
-#       else
-#           error "Unknown Apple platform"
-#       endif
+#        include <TargetConditionals.h>
+#        if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
+#            define IOS 1
+#            define OSX 0
+#        elif TARGET_OS_MAC
+#            define OSX 1
+#            define IOS 0
+#        else
+#            error "Unknown Apple platform"
+#        endif
 #    else
 #        define OSX 0
-#       define IOS 0
+#        define IOS 0
 #    endif
 #else
 #    define UNIX 0
@@ -100,23 +101,23 @@
     template <__VA_ARGS__>                    \
     Type &Name();
 
-#define DLL_EXPORT_VARIABLE3(qualifier, Type, ActualType, ns, Name, ext, Init, ...)      \
-    static qualifier ActualType CONCAT2(__##Name##ext##_helper_, __LINE__) = Init; \
-    template <>                                                              \
-    DLL_EXPORT Type &ns Name<__VA_ARGS__>()                                  \
-    {                                                                        \
-        return CONCAT2(__##Name##ext##_helper_, __LINE__);                   \
-    }                                                                        \
+#define DLL_EXPORT_VARIABLE3(qualifier, Type, ActualType, ns, Name, ext, Init, ...) \
+    static qualifier ActualType CONCAT2(__##Name##ext##_helper_, __LINE__) = Init;  \
+    template <>                                                                     \
+    DLL_EXPORT Type &ns Name<__VA_ARGS__>()                                         \
+    {                                                                               \
+        return CONCAT2(__##Name##ext##_helper_, __LINE__);                          \
+    }                                                                               \
     template Type &ns Name<__VA_ARGS__>();
 
 #define DLL_EXPORT_VARIABLE3_ORDER(qualifier, Type, ActualType, ns, Name, ext, Init, ...) \
-    template <>                                                          \
-    DLL_EXPORT Type &ns Name<__VA_ARGS__>()                              \
-    {                                                                    \
-        static qualifier ActualType dummy = Init;                              \
-        return dummy;                                                    \
-    }                                                                    \
-    template Type &ns Name<__VA_ARGS__>();                               \
+    template <>                                                                           \
+    DLL_EXPORT Type &ns Name<__VA_ARGS__>()                                               \
+    {                                                                                     \
+        static qualifier ActualType dummy = Init;                                         \
+        return dummy;                                                                     \
+    }                                                                                     \
+    template Type &ns Name<__VA_ARGS__>();                                                \
     static Type &CONCAT2(__##Name##ext##_helper_, __LINE__) = ns Name<__VA_ARGS__>();
 
 #define DLL_EXPORT_VARIABLE2(qualifier, Type, ns, Name, Init, ...) DLL_EXPORT_VARIABLE3(qualifier, Type, Type, ns, Name, , SINGLE_ARG(Init), __VA_ARGS__)
@@ -126,8 +127,6 @@
 #define TEMPLATE_INSTANTIATION_EXPORT(type) template type DLL_EXPORT
 #define TEMPLATE_INSTANTIATION_IMPORT(type) extern template type*/
 
-
-
 #if WINDOWS
 #    pragma warning(disable : 4251)
 #    pragma warning(disable : 4275)
@@ -136,4 +135,10 @@
 
 #ifdef _MSC_VER
 #    define _CRT_SECURE_NO_WARNINGS
+#endif
+
+#if __clang__
+#    define CLANG 1
+#else
+#    define CLANG 0
 #endif

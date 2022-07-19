@@ -109,6 +109,7 @@ namespace Window {
 
         mTaskQueue.addRepeatedTask([this]() {
             render();
+            update();
         },
             std::chrono::microseconds(/*1*/ 000000 / 60), this);
 
@@ -147,6 +148,10 @@ namespace Window {
     void MainWindow::render()
     {
         (*mRenderContext)->render();
+    }
+
+    void MainWindow::update()
+    {
         mOsWindow->update();
         for (ToolWindow &window : mToolWindows)
             window.osWindow()->update();
@@ -235,7 +240,8 @@ namespace Window {
     {
         if (!mOsWindow)
             return { { 0, 0 }, { 0, 0 } };
-        InterfacesVector pos = mOsWindow->renderPos(), size = mOsWindow->renderSize();
+        InterfacesVector pos = mOsWindow->renderPos();
+        InterfacesVector size = mOsWindow->renderSize();
         return {
             { pos.x, pos.y }, { size.x, size.y }
         };

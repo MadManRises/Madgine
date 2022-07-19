@@ -27,4 +27,4 @@ namespace NodeGraph {
 
 }
 
-RegisterType(Engine::NodeGraph::AdditionNode)
+REGISTER_TYPE(Engine::NodeGraph::AdditionNode)

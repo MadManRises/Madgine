@@ -10,7 +10,7 @@
 
 #include "Meta/math/rect2i.h"
 
-#include "util/openglprogram.h"
+#include "util/openglpipelineinstance.h"
 
 #include "render/material.h"
 
@@ -74,17 +74,23 @@ namespace Render {
         GL_CHECK();
     }
 
-    void OpenGLRenderTarget::renderMesh(const GPUMeshData *m, const Program *p, const Material *material)
+    void OpenGLRenderTarget::renderMesh(const GPUMeshData *m, const PipelineInstance *p, const Material *material)
     {
         const OpenGLMeshData *mesh = static_cast<const OpenGLMeshData *>(m);
-        const OpenGLProgram *program = static_cast<const OpenGLProgram *>(p);
+        const OpenGLPipelineInstance *pipeline = static_cast<const OpenGLPipelineInstance *>(p);
 
-        if (!mesh->mVAO)
-            return;
+        mesh->mVertices.bind();
+        static_cast<OpenGLRenderContext *>(context())->bindFormat(mesh->mFormat);
+#if !OPENGL_ES || OPENGL_ES >= 310
+#    if !OPENGL_ES
+        if (glBindVertexBuffer)
+#    endif
+            glBindVertexBuffer(0, mesh->mVertices.handle(), 0, mesh->mVertexSize);
+#endif
 
-        program->bind(&mesh->mVAO);
+        pipeline->bind();
 
-        program->verify();
+        pipeline->verify();
 
         if (material)
             bindTextures({ { material->mDiffuseTexture, TextureType_2D } });
@@ -98,25 +104,32 @@ namespace Render {
         GLenum mode = modes[mesh->mGroupSize - 1];
 
         if (mesh->mIndices) {
+            mesh->mIndices.bind();
             glDrawElements(mode, mesh->mElementCount, GL_UNSIGNED_INT, 0);
         } else
             glDrawArrays(mode, 0, mesh->mElementCount);
         GL_CHECK();
 
-        program->unbind(&mesh->mVAO);
+        static_cast<OpenGLRenderContext *>(context())->unbindFormat();
     }
 
-    void OpenGLRenderTarget::renderMeshInstanced(size_t count, const GPUMeshData *m, const Program *p, const Material *material)
+    void OpenGLRenderTarget::renderMeshInstanced(size_t count, const GPUMeshData *m, const PipelineInstance *p, const Material *material)
     {
         const OpenGLMeshData *mesh = static_cast<const OpenGLMeshData *>(m);
-        const OpenGLProgram *program = static_cast<const OpenGLProgram *>(p);
+        const OpenGLPipelineInstance *pipeline = static_cast<const OpenGLPipelineInstance *>(p);
 
-        if (!mesh->mVAO)
-            return;
+        mesh->mVertices.bind();
+        static_cast<OpenGLRenderContext *>(context())->bindFormat(mesh->mFormat);
+#if !OPENGL_ES || OPENGL_ES >= 310
+#    if !OPENGL_ES
+        if (glBindVertexBuffer)
+#    endif
+            glBindVertexBuffer(0, mesh->mVertices.handle(), 0, mesh->mVertexSize);
+#endif
 
-        program->bind(&mesh->mVAO);
+        pipeline->bind();
 
-        program->verify();
+        pipeline->verify();
 
         if (material)
             bindTextures({ { material->mDiffuseTexture, TextureType_2D } });
@@ -130,32 +143,13 @@ namespace Render {
         GLenum mode = modes[mesh->mGroupSize - 1];
 
         if (mesh->mIndices) {
+            mesh->mIndices.bind();
             glDrawElementsInstanced(mode, mesh->mElementCount, GL_UNSIGNED_SHORT, 0, count);
         } else
             glDrawArraysInstanced(mode, 0, mesh->mElementCount, count);
         GL_CHECK();
 
-        program->unbind(&mesh->mVAO);
-    }
-
-    void OpenGLRenderTarget::renderVertices(const Program *program, size_t groupSize, std::vector<Vertex> vertices, std::vector<uint32_t> indices)
-    {
-        if (!vertices.empty()) {
-            OpenGLMeshData tempMesh;
-            OpenGLMeshLoader::getSingleton().generate(tempMesh, { groupSize, std::move(vertices), std::move(indices) });
-
-            renderMesh(&tempMesh, program);
-        }
-    }
-
-    void OpenGLRenderTarget::renderVertices(const Program *program, size_t groupSize, std::vector<Vertex2> vertices, std::vector<uint32_t> indices, const Material *material)
-    {
-        if (!vertices.empty()) {
-            OpenGLMeshData tempMesh;
-            OpenGLMeshLoader::getSingleton().generate(tempMesh, { groupSize, std::move(vertices), std::move(indices) });
-
-            renderMesh(&tempMesh, program, material);
-        }
+        static_cast<OpenGLRenderContext *>(context())->unbindFormat();
     }
 
     void OpenGLRenderTarget::clearDepthBuffer()

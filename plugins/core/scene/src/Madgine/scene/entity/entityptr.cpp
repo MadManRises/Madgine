@@ -105,7 +105,7 @@ namespace Scene {
         Entity *EntityPtr::get() const
         {
             update();
-            return holdsRef() ? getBlock()->get() : nullptr;
+            return isDead() ? nullptr : getBlock()->get();
         }
 
         bool EntityPtr::operator==(const EntityPtr &other) const

@@ -11,6 +11,12 @@ struct OffsetPtr {
     {
     }
 
+    template <typename T, typename Base>
+    explicit OffsetPtr(type_holder_t<T>, type_holder_t<Base>)
+        : mOffset(reinterpret_cast<uintptr_t>(static_cast<Base *>(static_cast<T *>(reinterpret_cast<void *>(0x1)))) - 1)
+    {
+    }
+
     constexpr uintptr_t offset() const {
         return mOffset;
     }

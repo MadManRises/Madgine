@@ -11,16 +11,6 @@ namespace NodeGraph {
 
         using Base = Resources::ResourceLoader<NodeGraphLoader, NodeGraph, std::list<Placeholder<0>>>;
 
-        struct MADGINE_NODEGRAPH_EXPORT HandleType : Base::HandleType {
-            using Base::HandleType::HandleType;
-            HandleType(Base::HandleType handle)
-                : Base::HandleType(std::move(handle))
-            {
-            }
-
-            Threading::TaskFuture<bool> create(const Filesystem::Path &path);
-        };
-
         NodeGraphLoader();
 
         bool loadImpl(NodeGraph &graph, ResourceDataInfo &info);
@@ -31,4 +21,4 @@ namespace NodeGraph {
 }
 }
 
-RegisterType(Engine::NodeGraph::NodeGraphLoader);
+REGISTER_TYPE(Engine::NodeGraph::NodeGraphLoader)

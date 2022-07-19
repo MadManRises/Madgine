@@ -26,4 +26,4 @@ namespace Scene {
 }
 }
 
-RegisterType(Engine::Scene::TransformAccessorNode);
+REGISTER_TYPE(Engine::Scene::TransformAccessorNode)

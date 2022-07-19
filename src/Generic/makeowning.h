@@ -12,6 +12,14 @@ struct MakeOwning {
     using type = T;
 };
 
+template <typename T>
+struct MakeOwning<T&> : MakeOwning<T> {
+};
+
+template <typename T>
+struct MakeOwning<const T> : MakeOwning<T> {
+};
+
 template <>
 struct MakeOwning<const char *> {
     static std::string apply(const char *s)

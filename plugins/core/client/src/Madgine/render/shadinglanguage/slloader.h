@@ -19,4 +19,4 @@ namespace Render {
 }
 }
 
-RegisterType(Engine::Render::SlLoader);
+REGISTER_TYPE(Engine::Render::SlLoader)

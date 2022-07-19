@@ -24,10 +24,13 @@ namespace Tools {
         ValueType mV;
 
     private:
+        bool mRenderSphere = false;
         int mSphereDetail = 1;
+
+        std::string m3DText = "Test_1234 Hello World!";
     };
 
 }
 }
 
-RegisterType(Engine::Tools::TestTool);
+REGISTER_TYPE(Engine::Tools::TestTool)

@@ -8,12 +8,9 @@
 
 #include "../render/rendercontext.h"
 
-#include "Meta/keyvalue/metatable_impl.h"
-
 #include "../render/rendertarget.h"
 
 namespace Engine {
-
 namespace Window {
     ToolWindow::ToolWindow(MainWindow &parent, const WindowSettings &settings)
         : mParent(parent)
@@ -30,23 +27,7 @@ namespace Window {
 
     void ToolWindow::close()
     {
-        //mGui.closeMainWindow(this);
-    }
-
-    /*void MainWindow::showCursor()
-		{
-			setCursorVisibility(true);
-		}
-
-		void MainWindow::hideCursor()
-		{
-			setCursorVisibility(false);
-		}*/
-
-    Vector3 ToolWindow::getScreenSize()
-    {
-        InterfacesVector size = mOsWindow->renderSize();
-        return Vector3{ Vector2 { static_cast<float>(size.x), static_cast<float>(size.y) }, 1.0f };
+        //TODO
     }
 
     OSWindow *ToolWindow::osWindow()
@@ -101,6 +82,3 @@ namespace Window {
 
 }
 }
-
-METATABLE_BEGIN(Engine::Window::ToolWindow)
-METATABLE_END(Engine::Window::ToolWindow)

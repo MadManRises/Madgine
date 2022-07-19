@@ -6,7 +6,7 @@
 #include "Meta/serialize/serializetable_impl.h"
 
 #include "gpumeshloader.h"
-#include "programloader.h"
+#include "pipelineloader.h"
 
 #include "widget.h"
 
@@ -58,15 +58,15 @@ namespace Widgets {
 
     struct WidgetManager::WidgetManagerData {
 
-        Render::ProgramLoader::PtrType mProgram;
-        Render::GPUMeshLoader::HandleType mMesh;
+        Render::PipelineLoader::Instance mPipeline;
+        Render::GPUMeshLoader::Ptr mMesh;
 
-        Resources::ImageLoader::HandleType mDefaultTexture;
-        Render::TextureLoader::PtrType mUIAtlasTexture;
-        std::set<Resources::ImageLoader::HandleType> mImageLoadingTasks;
+        Resources::ImageLoader::Handle mDefaultTexture;
+        Render::TextureLoader::Ptr mUIAtlasTexture;
+        std::set<Resources::ImageLoader::Handle> mImageLoadingTasks;
         Atlas2 mUIAtlas { { 2048, 2048 } };
         int mUIAtlasSize = 0;
-        std::map<Resources::ImageLoader::ResourceType *, Atlas2::Entry> mUIAtlasEntries;
+        std::map<Resources::ImageLoader::Resource *, Atlas2::Entry> mUIAtlasEntries;
 
         void expandUIAtlas()
         {
@@ -111,11 +111,9 @@ namespace Widgets {
 
     Threading::Task<bool> WidgetManager::init()
     {
-        mData->mProgram.create("ui", { 0, 0, sizeof(WidgetsPerObject) });
+        mData->mPipeline.createStatic({ .vs = "ui", .ps = "ui", .format = type_holder<Vertex>, .bufferSizes = { 0, 0, sizeof(WidgetsPerObject) } });
 
-        mData->mMesh = Render::GPUMeshLoader::loadManual("widgetMesh", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &mesh, Render::GPUMeshLoader::ResourceDataInfo &info) {
-            return loader->generate(mesh, { 3, std::vector<Vertex> {} });
-        });
+        mData->mMesh.create({ 3, std::vector<Vertex> {} });
 
         mData->mUIAtlasTexture.create(Render::TextureType_2D, Render::FORMAT_RGBA8);
 
@@ -138,7 +136,7 @@ namespace Widgets {
 
         mData->mMesh.reset();
 
-        mData->mProgram.reset();
+        mData->mPipeline.reset();
 
         co_return;
     }
@@ -313,7 +311,7 @@ namespace Widgets {
 
     WidgetBase *WidgetManager::getHoveredWidgetDown(const Vector2 &pos, WidgetBase *current)
     {
-        LOG_WARNING_ONCE("Handle modal widgets for hover");
+        LOG_WARNING_ONCE("TODO: Handle modal widgets for hover (WidgetManager)");
 
         if (current) {
             for (WidgetBase *w : current->children()) {
@@ -519,10 +517,10 @@ namespace Widgets {
 
             std::vector<std::pair<std::vector<Vertex>, TextureSettings>> localVerticesList = w->vertices(Vector3 { Vector2 { screenSpace.mSize }, 1.0f });
 
-            Resources::ImageLoader::ResourceType *resource = w->resource();
+            Resources::ImageLoader::Resource *resource = w->resource();
             auto it = mData->mUIAtlasEntries.find(resource);
             if (it == mData->mUIAtlasEntries.end()) {
-                Resources::ImageLoader::HandleType data = resource ? resource->loadData() : mData->mDefaultTexture;
+                Resources::ImageLoader::Handle data = resource ? resource->loadData() : mData->mDefaultTexture;
                 if (!data.available()) {
                     mData->mImageLoadingTasks.emplace(std::move(data));
                     continue;
@@ -553,7 +551,7 @@ namespace Widgets {
             if (!p.second.empty()) {
 
                 {
-                    auto parameters = mData->mProgram.mapParameters(2).cast<WidgetsPerObject>();
+                    auto parameters = mData->mPipeline.mapParameters<WidgetsPerObject>(2);
                     parameters->hasDistanceField = bool(p.first.mFlags & TextureFlag_IsDistanceField);
                 }
 
@@ -564,7 +562,7 @@ namespace Widgets {
 
                 mData->mMesh.update({ 3, std::move(p.second) });
 
-                target->renderMesh(mData->mMesh, mData->mProgram);
+                target->renderMesh(mData->mMesh, mData->mPipeline);
             }
         }
 

@@ -26,6 +26,8 @@
 
 #include "renderer/imroot.h"
 
+#include "imguiicons.h"
+
 UNIQUECOMPONENT(Engine::Tools::NodeGraphEditor);
 
 METATABLE_BEGIN_BASE(Engine::Tools::NodeGraphEditor, Engine::Tools::ToolBase)
@@ -44,20 +46,21 @@ namespace Tools {
 
     void ShowLabel(std::string_view label, ImColor color = { 0.0f, 0.0f, 0.0f })
     {
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetTextLineHeight());
+        ImVec2 labelPos = ImGui::GetCursorPos() + ImGui::GetWindowPos();
+        labelPos.y -= ImGui::GetTextLineHeight();
         auto size = ImGui::CalcTextSize(label.data(), label.data() + label.size());
 
         auto padding = ImGui::GetStyle().FramePadding;
         auto spacing = ImGui::GetStyle().ItemSpacing;
 
-        ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2(spacing.x, -spacing.y));
+        labelPos += ImVec2(spacing.x, -spacing.y);
 
-        auto rectMin = ImGui::GetCursorScreenPos() - padding;
-        auto rectMax = ImGui::GetCursorScreenPos() + size + padding;
+        auto rectMin = labelPos - padding;
+        auto rectMax = labelPos + size + padding;
 
         auto drawList = ImGui::GetWindowDrawList();
         drawList->AddRectFilled(rectMin, rectMax, color, size.y * 0.15f);
-        ImGui::TextUnformatted(label.data(), label.data() + label.size());
+        drawList->AddText(labelPos, IM_COL32(255, 255, 255, 255), label.data(), label.data() + label.size());
     };
 
     ImColor DataColor(uint32_t mask)
@@ -100,7 +103,7 @@ namespace Tools {
         }
     }
 
-    void DataPinIcon(ExtendedValueTypeDesc type, uint32_t mask, bool connected = false)
+    void DataPinIcon(ExtendedValueTypeDesc type, uint32_t mask, bool connected)
     {
         ax::Widgets::Icon(ImVec2(sPinIconSize, sPinIconSize), ax::Widgets::IconType::Circle, connected, DataColor(mask), ImColor(32, 32, 32, 255));
         ImVec2 align { 0.5f, 0.5f };
@@ -108,7 +111,7 @@ namespace Tools {
         ed::PinPivotRect(pos, pos);
     }
 
-    void DataInstancePinIcon(ExtendedValueTypeDesc type, uint32_t mask, bool connected = false)
+    void DataInstancePinIcon(ExtendedValueTypeDesc type, uint32_t mask, bool connected)
     {
         ax::Widgets::Icon(ImVec2(sPinIconSize, sPinIconSize), ax::Widgets::IconType::Square, connected, DataColor(mask), ImColor(32, 32, 32, 255));
         ImVec2 align { 0.5f, 0.5f };
@@ -116,29 +119,31 @@ namespace Tools {
         ed::PinPivotRect(pos, pos);
     }
 
-    void FlowPinIcon(uint32_t mask)
+    void FlowPinIcon(uint32_t mask, bool connected)
     {
-        ax::Widgets::Icon(ImVec2(sPinIconSize, sPinIconSize), ax::Widgets::IconType::Flow, false, FlowColor(mask), ImColor(32, 32, 32, 255));
+        ax::Widgets::Icon(ImVec2(sPinIconSize, sPinIconSize), ax::Widgets::IconType::Flow, connected, FlowColor(mask), ImColor(32, 32, 32, 255));
         ImVec2 align { 0.5f, 0.5f };
         ImVec2 pos = ImGui::GetItemRectMin() + align * ImGui::GetItemRectSize();
         ed::PinPivotRect(pos, pos);
     }
 
-    void FlowOutPin(const char *name, uint32_t nodeId, uint32_t pinId, uint32_t mask)
+    void FlowOutPin(const char *name, uint32_t nodeId, uint32_t pinId, uint32_t mask, bool connected)
     {
+        float textSize = name ? ImGui::CalcTextSize(name).x : 0.0f;
+        ImGui::RightAlign(textSize + sPinIconSize + 8);
         ed::BeginPin(6000 * nodeId + NodeGraph::NodeBase::flowOutId(pinId), ed::PinKind::Output);
         if (name) {
             ImGui::Text("%s", name);
             ImGui::SameLine();
         }
-        FlowPinIcon(mask);
+        FlowPinIcon(mask, connected);
         ed::EndPin();
     }
 
-    void FlowInPin(const char *name, uint32_t nodeId, uint32_t pinId, uint32_t mask)
+    void FlowInPin(const char *name, uint32_t nodeId, uint32_t pinId, uint32_t mask, bool connected)
     {
         ed::BeginPin(6000 * nodeId + NodeGraph::NodeBase::flowInId(pinId), ed::PinKind::Input);
-        FlowPinIcon(mask);
+        FlowPinIcon(mask, connected);
         if (name) {
             ImGui::SameLine();
             ImGui::Text("%s", name);
@@ -146,23 +151,25 @@ namespace Tools {
         ed::EndPin();
     }
 
-    bool DataOutPin(const char *name, size_t nodeId, size_t pinId, ExtendedValueTypeDesc type, uint32_t mask, const NodeGraph::Pin &target)
+    bool DataOutPin(const char *name, size_t nodeId, size_t pinId, ExtendedValueTypeDesc type, uint32_t mask, bool connected)
     {
+        float textSize = name ? ImGui::CalcTextSize(name).x : 0.0f;
+        ImGui::RightAlign(textSize + sPinIconSize + 8);
         ed::BeginPin(6000 * nodeId + NodeGraph::NodeBase::dataOutId(pinId), ed::PinKind::Output);
         if (name) {
             ImGui::Text("%s", name);
             ImGui::SameLine();
         }
-        DataPinIcon(type, mask, bool(target));
+        DataPinIcon(type, mask, connected);
         ed::EndPin();
         return ImGui::IsItemHovered();
     }
 
-    bool DataInPin(const char *name, size_t nodeId, size_t pinId, ExtendedValueTypeDesc type, uint32_t mask, const NodeGraph::Pin &source)
+    bool DataInPin(const char *name, size_t nodeId, size_t pinId, ExtendedValueTypeDesc type, uint32_t mask, bool connected)
     {
         uintptr_t id = 6000 * nodeId + NodeGraph::NodeBase::dataInId(pinId);
         ed::BeginPin(id, ed::PinKind::Input);
-        DataPinIcon(type, mask, bool(source));
+        DataPinIcon(type, mask, connected);
         if (name) {
             ImGui::SameLine();
             ImGui::Text("%s", name);
@@ -171,23 +178,25 @@ namespace Tools {
         return ImGui::IsItemHovered();
     }
 
-    bool DataProviderPin(const char *name, size_t nodeId, size_t pinId, ExtendedValueTypeDesc type, uint32_t mask)
+    bool DataProviderPin(const char *name, size_t nodeId, size_t pinId, ExtendedValueTypeDesc type, uint32_t mask, bool connected)
     {
+        float textSize = name ? ImGui::CalcTextSize(name).x : 0.0f;
+        ImGui::RightAlign(textSize + sPinIconSize + 8);
         ed::BeginPin(6000 * nodeId + NodeGraph::NodeBase::dataProviderId(pinId), ed::PinKind::Output);
         if (name) {
             ImGui::Text("%s", name);
             ImGui::SameLine();
         }
-        DataInstancePinIcon(type, mask);
+        DataInstancePinIcon(type, mask, connected);
         ed::EndPin();
         return ImGui::IsItemHovered();
     }
 
-    bool DataReceiverPin(const char *name, size_t nodeId, size_t pinId, ExtendedValueTypeDesc type, uint32_t mask)
+    bool DataReceiverPin(const char *name, size_t nodeId, size_t pinId, ExtendedValueTypeDesc type, uint32_t mask, bool connected)
     {
         uintptr_t id = 6000 * nodeId + NodeGraph::NodeBase::dataReceiverId(pinId);
         ed::BeginPin(id, ed::PinKind::Input);
-        DataInstancePinIcon(type, mask);
+        DataInstancePinIcon(type, mask, connected);
         if (name) {
             ImGui::SameLine();
             ImGui::Text("%s", name);
@@ -270,17 +279,17 @@ namespace Tools {
             ImGui::Dummy({ sPinIconSize, 10 });
             uint32_t pinId = 0;
             for (NodeGraph::FlowOutPinPrototype &flowPin : mGraph.mFlowOutPins) {
-                FlowOutPin(nullptr, 0, pinId, mGraph.node(flowPin.mTarget.mNode)->flowInMask(flowPin.mTarget.mIndex));
+                FlowOutPin(nullptr, 0, pinId, mGraph.node(flowPin.mTarget.mNode)->flowInMask(flowPin.mTarget.mIndex), true);
                 ++pinId;
             }
             if (mDragPin && mDragPin->mDir == NodeGraph::PinDir::In && mDragPin->mType == NodeGraph::PinType::Flow) {
-                FlowOutPin(nullptr, 0, pinId, mDragMask);
+                FlowOutPin(nullptr, 0, pinId, mDragMask, false);
             }
             pinId = 0;
             for (NodeGraph::DataOutPinPrototype &dataPin : mGraph.mDataOutPins) {
                 NodeGraph::NodeBase *node = mGraph.node(dataPin.mTarget.mNode);
-                ExtendedValueTypeDesc type = node->dataOutType(dataPin.mTarget.mIndex);
-                if (DataOutPin(nullptr, 0, pinId, type, node->dataReceiverMask(dataPin.mTarget.mIndex), dataPin.mTarget))
+                ExtendedValueTypeDesc type = mGraph.dataOutType({ 0, pinId });
+                if (DataOutPin(nullptr, 0, pinId, type, node->dataReceiverMask(dataPin.mTarget.mIndex), static_cast<bool>(dataPin.mTarget)))
                     hoveredPin = type;
                 ++pinId;
             }
@@ -291,12 +300,12 @@ namespace Tools {
             for (NodeGraph::DataProviderPinPrototype &dataPin : mGraph.mDataProviderPins) {
                 NodeGraph::NodeBase *node = mGraph.node(dataPin.mTargets.front().mNode);
                 ExtendedValueTypeDesc type = mGraph.dataProviderType({ 0, pinId });
-                if (DataProviderPin(nullptr, 0, pinId, type, node->dataInMask(dataPin.mTargets.front().mIndex)))
+                if (DataProviderPin(nullptr, 0, pinId, type, node->dataInMask(dataPin.mTargets.front().mIndex), true))
                     hoveredPin = type;
                 ++pinId;
             }
             if (mDragPin && mDragPin->mDir == NodeGraph::PinDir::In && mDragPin->mType == NodeGraph::PinType::Data) {
-                DataProviderPin(nullptr, 0, pinId, *mDragType, mDragMask);
+                DataProviderPin(nullptr, 0, pinId, *mDragType, mDragMask, false);
             }
             ed::EndNode();
 
@@ -307,11 +316,11 @@ namespace Tools {
             pinId = 0;
             for (NodeGraph::FlowInPinPrototype &flowPin : mGraph.mFlowInPins) {
                 NodeGraph::NodeBase *node = mGraph.node(flowPin.mSources.front().mNode);
-                FlowInPin(nullptr, 0, pinId, node->flowInMask(flowPin.mSources.front().mIndex));
+                FlowInPin(nullptr, 0, pinId, node->flowInMask(flowPin.mSources.front().mIndex), true);
                 ++pinId;
             }
             if (mDragPin && mDragPin->mDir == NodeGraph::PinDir::Out && mDragPin->mType == NodeGraph::PinType::Flow) {
-                FlowInPin(nullptr, 0, pinId, mDragMask);
+                FlowInPin(nullptr, 0, pinId, mDragMask, false);
             }
             pinId = 0;
             for (NodeGraph::DataInPinPrototype &dataPin : mGraph.mDataInPins) {
@@ -319,7 +328,7 @@ namespace Tools {
                 NodeGraph::NodeBase *node = mGraph.node(dataPin.mSource.mNode);
                 ExtendedValueTypeDesc type = node->dataProviderType(dataPin.mSource.mIndex);
 
-                if (DataInPin(nullptr, 0, pinId, type, node->dataProviderMask(dataPin.mSource.mIndex), dataPin.mSource))
+                if (DataInPin(nullptr, 0, pinId, type, node->dataProviderMask(dataPin.mSource.mIndex), static_cast<bool>(dataPin.mSource)))
                     hoveredPin = type;
                 ++pinId;
             }
@@ -330,12 +339,12 @@ namespace Tools {
             for (NodeGraph::DataReceiverPinPrototype &dataPin : mGraph.mDataReceiverPins) {
                 NodeGraph::NodeBase *node = mGraph.node(dataPin.mSources.front().mNode);
                 ExtendedValueTypeDesc type = mGraph.dataOutType({ 0, pinId });
-                if (DataReceiverPin(nullptr, 0, pinId, type, node->dataOutMask(dataPin.mSources.front().mNode)))
+                if (DataReceiverPin(nullptr, 0, pinId, type, node->dataOutMask(dataPin.mSources.front().mNode), true))
                     hoveredPin = type;
                 ++pinId;
             }
             if (mDragPin && mDragPin->mDir == NodeGraph::PinDir::Out && mDragPin->mType == NodeGraph::PinType::Data) {
-                DataReceiverPin(nullptr, 0, pinId, *mDragType, mDragMask);
+                DataReceiverPin(nullptr, 0, pinId, *mDragType, mDragMask, false);
             }
             ed::EndNode();
             ed::PopStyleVar();
@@ -354,32 +363,32 @@ namespace Tools {
                             first = false;
                         else
                             ImGui::SameLine();
-                        ImGui::TextColored({ 1, 0, 0, 1 }, "%s", std::to_string(it->second.mErrorMessages.size()).c_str());
+                        ImGui::TextColored({ 1, 0, 0, 1 }, "%zu", it->second.mErrorMessages.size());
                     }
                     if (!it->second.mWarningMessages.empty()) {
                         if (first)
                             first = false;
                         else
                             ImGui::SameLine();
-                        ImGui::TextColored({ 1, 1, 0, 1 }, "%s", std::to_string(it->second.mWarningMessages.size()).c_str());
+                        ImGui::TextColored({ 1, 1, 0, 1 }, "%zu", it->second.mWarningMessages.size());
                     }
                 }
 
                 std::string id = std::to_string((uintptr_t)node);
                 ImGui::BeginColumns(id.c_str(), 2, ImGuiColumnsFlags_NoBorder | ImGuiColumnsFlags_GrowParentContentsSize);
 
-                ImGui::SetColumnWidth(0, 125.0f);
-                ImGui::SetColumnWidth(1, 125.0f);
+                ImGui::SetColumnWidth(0, 100.0f);
+                ImGui::SetColumnWidth(1, 100.0f);
 
                 uint32_t inFlowCount = node->flowInCount();
                 uint32_t outFlowCount = node->flowOutCount();
                 for (uint32_t flowIndex = 0; flowIndex < max(inFlowCount, outFlowCount); ++flowIndex) {
                     if (flowIndex < inFlowCount)
-                        FlowInPin(node->flowInName(flowIndex).data(), nodeId, flowIndex, node->flowInMask(flowIndex));
+                        FlowInPin(node->flowInName(flowIndex).data(), nodeId, flowIndex, node->flowInMask(flowIndex), !node->flowInSources(flowIndex).empty());
 
                     ImGui::NextColumn();
                     if (flowIndex < outFlowCount)
-                        FlowOutPin(node->flowOutName(flowIndex).data(), nodeId, flowIndex, node->flowOutMask(flowIndex));
+                        FlowOutPin(node->flowOutName(flowIndex).data(), nodeId, flowIndex, node->flowOutMask(flowIndex), static_cast<bool>(node->flowOutTarget(flowIndex)));
 
                     ImGui::NextColumn();
                 }
@@ -391,7 +400,7 @@ namespace Tools {
 
                         ExtendedValueTypeDesc type = node->dataInType(dataIndex);
 
-                        if (DataInPin(node->dataInName(dataIndex).data(), nodeId, dataIndex, type, node->dataInMask(dataIndex), source))
+                        if (DataInPin(node->dataInName(dataIndex).data(), nodeId, dataIndex, type, node->dataInMask(dataIndex), static_cast<bool>(source)))
                             hoveredPin = type;
                     }
 
@@ -402,7 +411,7 @@ namespace Tools {
 
                         ExtendedValueTypeDesc type = node->dataOutType(dataIndex);
 
-                        if (DataOutPin(node->dataOutName(dataIndex).data(), nodeId, dataIndex, type, node->dataOutMask(dataIndex), target))
+                        if (DataOutPin(node->dataOutName(dataIndex).data(), nodeId, dataIndex, type, node->dataOutMask(dataIndex), static_cast<bool>(target)))
                             hoveredPin = type;
                     }
 
@@ -430,7 +439,7 @@ namespace Tools {
                     if (dataInstanceIndex < dataReceiverCount) {
                         ExtendedValueTypeDesc type = node->dataReceiverType(dataInstanceIndex);
 
-                        if (DataReceiverPin(node->dataReceiverName(dataInstanceIndex).data(), nodeId, dataInstanceIndex, type, node->dataReceiverMask(dataInstanceIndex)))
+                        if (DataReceiverPin(node->dataReceiverName(dataInstanceIndex).data(), nodeId, dataInstanceIndex, type, node->dataReceiverMask(dataInstanceIndex), !node->dataReceiverSources(dataInstanceIndex).empty()))
                             hoveredPin = type;
                     }
 
@@ -439,7 +448,7 @@ namespace Tools {
                     if (dataInstanceIndex < dataProviderCount) {
                         ExtendedValueTypeDesc type = node->dataProviderType(dataInstanceIndex);
 
-                        if (DataProviderPin(node->dataProviderName(dataInstanceIndex).data(), nodeId, dataInstanceIndex, type, node->dataProviderMask(dataInstanceIndex)))
+                        if (DataProviderPin(node->dataProviderName(dataInstanceIndex).data(), nodeId, dataInstanceIndex, type, node->dataProviderMask(dataInstanceIndex), !node->dataProviderTargets(dataInstanceIndex).empty()))
                             hoveredPin = type;
                     }
 
@@ -449,7 +458,7 @@ namespace Tools {
                     if (node->dataReceiverVariadic() && mDragPin->mDir == NodeGraph::PinDir::Out) {
                         uint32_t index = node->dataReceiverCount();
 
-                        if (DataReceiverPin(node->dataReceiverName(index).data(), nodeId, index, *mDragType, node->dataReceiverMask(index)))
+                        if (DataReceiverPin(node->dataReceiverName(index).data(), nodeId, index, *mDragType, node->dataReceiverMask(index), false))
                             hoveredPin = *mDragType;
                     }
 
@@ -577,28 +586,42 @@ namespace Tools {
             ed::EndCreate();
 
             if (ed::BeginDelete()) {
-                ed::LinkId linkId = 0;
-                while (ed::QueryDeletedLink(&linkId)) {
-                    if (ed::AcceptDeletedItem()) {
-                        uintptr_t pinIdN = linkId.Get();
-                        NodeGraph::PinDesc pin = NodeGraph::NodeBase::pinFromId(pinIdN);
-
-                        if (pin.mType == NodeGraph::PinType::Flow) {
-                            mGraph.disconnectFlow(pin.mPin);
-                        } else {
-                            if (pin.mDir == NodeGraph::PinDir::In) {
-                                mGraph.disconnectDataIn(pin.mPin);
-                            } else {
-                                mGraph.disconnectDataOut(pin.mPin);
-                            }
-                        }
-                    }
-                }
+                std::vector<uint32_t> nodesToDelete;
 
                 ed::NodeId nodeId = 0;
                 while (ed::QueryDeletedNode(&nodeId)) {
                     if (ed::AcceptDeletedItem()) {
-                        mGraph.removeNode(nodeId.Get() / 6000);
+                        nodesToDelete.push_back(nodeId.Get() / 6000);
+                    }
+                }
+
+                for (auto it = nodesToDelete.begin(); it != nodesToDelete.end(); ++it) {
+                    ImVec2 pos = ed::GetNodePosition(6000 * mGraph.nodes().size());
+                    ed::SetNodePosition(6000 * *it, pos);
+                    mGraph.removeNode(*it);
+                    for (auto it2 = std::next(it); it2 != nodesToDelete.end(); ++it2) {
+                        if (*it2 > *it)
+                            --*it2;
+                    }
+                }
+
+                if (nodesToDelete.empty()) {
+                    ed::LinkId linkId = 0;
+                    while (ed::QueryDeletedLink(&linkId)) {
+                        if (ed::AcceptDeletedItem()) {
+                            uintptr_t pinIdN = linkId.Get();
+                            NodeGraph::PinDesc pin = NodeGraph::NodeBase::pinFromId(pinIdN);
+
+                            if (pin.mType == NodeGraph::PinType::Flow) {
+                                mGraph.disconnectFlow(pin.mPin);
+                            } else {
+                                if (pin.mDir == NodeGraph::PinDir::In) {
+                                    mGraph.disconnectDataIn(pin.mPin);
+                                } else {
+                                    mGraph.disconnectDataOut(pin.mPin);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -612,17 +635,19 @@ namespace Tools {
             else */
             if (ed::ShowBackgroundContextMenu()) {
                 mPopupPosition = popupPosition;
-                ImGui::OpenPopup("Create New Node");
+                ImGui::OpenPopup("NodeGraphPopup");
             }
 
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
-            if (ImGui::BeginPopup("Create New Node")) {
-
-                for (const std::pair<const std::string_view, size_t> &nodeDesc : NodeGraph::NodeRegistry::sComponentsByName()) {
-                    if (ImGui::MenuItem(nodeDesc.first.data())) {
-                        NodeGraph::NodeBase *node = mGraph.addNode(NodeGraph::NodeRegistry::getConstructor(nodeDesc.second)(mGraph));
-                        ed::SetNodePosition(ed::NodeId { node }, mPopupPosition);
+            if (ImGui::BeginPopup("NodeGraphPopup")) {
+                if (ImGui::BeginMenu(IMGUI_ICON_PLUS " Add Node")) {
+                    for (const std::pair<const std::string_view, size_t> &nodeDesc : NodeGraph::NodeRegistry::sComponentsByName()) {
+                        if (ImGui::MenuItem(nodeDesc.first.data())) {
+                            NodeGraph::NodeBase *node = mGraph.addNode(NodeGraph::NodeRegistry::getConstructor(nodeDesc.second)(mGraph));
+                            ed::SetNodePosition(ed::NodeId { node }, mPopupPosition);
+                        }
                     }
+                    ImGui::EndMenu();
                 }
 
                 ImGui::EndPopup();
@@ -674,7 +699,10 @@ namespace Tools {
         if (mNodeDetailsVisible) {
             if (ImGui::Begin("Node graph - Node Details")) {
                 if (mSelectedNodeIndex) {
-                    mIsDirty |= getTool<Inspector>().drawMembers(mGraph.nodes()[mSelectedNodeIndex].get());
+                    if (ImGui::BeginTable("columns", 2, ImGuiTableFlags_Resizable)) {
+                        mIsDirty |= getTool<Inspector>().drawMembers(mGraph.nodes()[mSelectedNodeIndex].get());
+                        ImGui::EndTable();
+                    }
                 }
             }
             ImGui::End();
@@ -705,8 +733,13 @@ namespace Tools {
 
                 if (ImGui::MenuItem("Debug", "", false)) {
                     NodeGraph::NodeInterpreter interpreter { &mGraph };
-                    IndexType<uint32_t> index = 0;
-                    interpreter.interpret(index, {});
+                    try {
+                        IndexType<uint32_t> index = 0;
+                        interpreter.interpret(index, {});
+                    } catch (const std::out_of_range &e)
+                    {
+                        LOG_ERROR("Uncaught out_of_range exception during NodeGraph debugging: " << e.what());
+                    }
                 }
 
                 ImGui::Separator();
@@ -807,7 +840,7 @@ namespace Tools {
 
     void NodeGraphEditor::create(const Filesystem::Path &path)
     {
-        mGraphHandle.create(path).then([this](bool b) {
+        mGraphHandle.create(path.stem(), path).then([this](bool b) {
             if (b)
                 mGraph = *mGraphHandle;
             else
@@ -822,7 +855,7 @@ namespace Tools {
         return mGraphHandle.available() ? mGraphHandle->name() : "";
     }
 
-    bool NodeGraphEditor::onSave(std::string_view view, ed::SaveReasonFlags reason)
+    bool NodeGraphEditor::saveImpl(std::string_view view)
     {
         verify();
 
@@ -850,7 +883,7 @@ namespace Tools {
         return true;
     }
 
-    size_t NodeGraphEditor::onLoad(char *data)
+    size_t NodeGraphEditor::loadImpl(char *data)
     {
         if (!mGraphHandle)
             return 0;
@@ -882,11 +915,11 @@ namespace Tools {
         config.UserPointer = this;
 
         config.SaveSettings = [](const char *data, size_t size, ed::SaveReasonFlags reason, void *userPointer) {
-            return static_cast<NodeGraphEditor *>(userPointer)->onSave({ data, size }, reason);
+            return static_cast<NodeGraphEditor *>(userPointer)->saveImpl({ data, size });
         };
 
         config.LoadSettings = [](char *data, void *userPointer) {
-            return static_cast<NodeGraphEditor *>(userPointer)->onLoad(data);
+            return static_cast<NodeGraphEditor *>(userPointer)->loadImpl(data);
         };
 
         mEditor = { ed::CreateEditor(&config), &ed::DestroyEditor };

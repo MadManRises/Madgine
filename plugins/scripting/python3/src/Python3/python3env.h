@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Madgine/app/globalapibase.h"
-#include "Madgine/app/globalapicollector.h"
+#include "Madgine/base/globalapibase.h"
+#include "Madgine/base/globalapicollector.h"
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 #include "python3streamredirect.h"
@@ -10,8 +10,8 @@ namespace Engine {
 namespace Scripting {
     namespace Python3 {
 
-        struct MADGINE_PYTHON3_EXPORT Python3Environment : App::GlobalAPI<Python3Environment> {
-            Python3Environment(App::Application &app);
+        struct MADGINE_PYTHON3_EXPORT Python3Environment : Base::GlobalAPI<Python3Environment> {
+            Python3Environment(Base::Application &app);
             ~Python3Environment();
 
             std::string_view key() const override;
@@ -31,4 +31,4 @@ namespace Scripting {
 }
 }
 
-RegisterType(Engine::Scripting::Python3::Python3Environment)
+REGISTER_TYPE(Engine::Scripting::Python3::Python3Environment)

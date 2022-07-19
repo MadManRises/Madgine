@@ -123,12 +123,12 @@ namespace Scripting {
             flowInOut = 0;
         }
 
-        Python3FileLoader::ResourceType *Python3FunctionNode::getFile() const
+        Python3FileLoader::Resource *Python3FunctionNode::getFile() const
         {
             return mFile.resource();
         }
 
-        void Python3FunctionNode::setFile(Python3FileLoader::ResourceType *file)
+        void Python3FunctionNode::setFile(Python3FileLoader::Resource *file)
         {
             mFile = file;
             updatePins();
@@ -149,7 +149,7 @@ namespace Scripting {
         {
             mArguments.clear();
 
-            Python3FileLoader::HandleType signature = Python3FileLoader::load("signature");
+            Python3FileLoader::Handle signature = Python3FileLoader::load("signature");
 
             mName = std::string { mFile.name() } + " [Python3]";
 

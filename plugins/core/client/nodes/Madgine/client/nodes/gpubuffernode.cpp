@@ -76,8 +76,8 @@ namespace Render {
         if (index == mAdditionalPins)
             return { ExtendedValueTypeEnum::GenericType };
         ExtendedValueTypeDesc desc { ExtendedValueTypeEnum::GenericType };
-            NodeGraph::Pin pin = mDataInPins[index].mSource;
-            desc = mGraph.dataProviderType(pin, false);        
+        NodeGraph::Pin pin = mDataInPins[index].mSource;
+        desc = mGraph.dataProviderType(pin, false);
         if (bidir && desc.mType == ExtendedValueTypeEnum::GenericType)
             return dataInType(index, false);
         return desc;
@@ -136,12 +136,8 @@ namespace Render {
                 setup();
             }
         } else if (event == NodeGraph::DISCONNECT) {
-            mGraph.onDataProviderRemove(this, index);
-
-            mDataInPins.erase(mDataInPins.begin() + index);
-
-            assert(mDataProviderPins[index].mTargets.empty());
-            mDataProviderPins.erase(mDataProviderPins.begin() + index);
+            removeDataInPin(index);
+            removeDataProviderPin(index);            
 
             --mAdditionalPins;
         }
@@ -166,16 +162,17 @@ namespace Render {
 
         void *ptr = bufferData->mBuffer.mData;
 
-        for (uint32_t i = 0; i < mAdditionalPins; ++i) {
-            ValueType v;
-            interpreter.read(v, i);
+        if (ptr) {
+            for (uint32_t i = 0; i < mAdditionalPins; ++i) {
+                ValueType v;
+                interpreter.read(v, i);
 
-            v.visit([&]<typename T>(const T &v) {
-                *static_cast<MakeOwning_t<T> *>(ptr) = v;
-                ptr = reinterpret_cast<char *>(ptr) + sizeof(MakeOwning_t<T>);
-            });
+                v.visit([&]<typename T>(const T &v) {
+                    *static_cast<MakeOwning_t<T> *>(ptr) = v;
+                    ptr = reinterpret_cast<char *>(ptr) + sizeof(MakeOwning_t<T>);
+                });
+            }
         }
-        
 
         if (bufferData->mMapper)
             bufferData->mBuffer.clear();

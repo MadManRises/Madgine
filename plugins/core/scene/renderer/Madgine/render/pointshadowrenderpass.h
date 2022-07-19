@@ -2,7 +2,7 @@
 
 #include "Madgine/render/renderpass.h"
 
-#include "programloader.h"
+#include "pipelineloader.h"
 
 
 namespace Engine {
@@ -18,7 +18,7 @@ namespace Render {
         virtual int priority() const override;
 
     private:
-        ProgramLoader::PtrType mProgram;
+        PipelineLoader::Instance mPipeline;
 
         Scene::SceneManager &mScene;        
 

@@ -47,6 +47,8 @@ namespace Tools {
 
         mTexture = static_cast<const ClientImRoot &>(mRoot).window().getRenderer()->createRenderTexture({ 512, 512 });
 
+        static_cast<ClientImRoot &>(mRoot).addRenderTarget(mTexture.get());
+
         mInspector = &getTool<Inspector>();
 
         co_return true;
@@ -54,6 +56,8 @@ namespace Tools {
 
     Threading::Task<void> NodeRendererTester::finalize()
     {
+        static_cast<ClientImRoot &>(mRoot).removeRenderTarget(mTexture.get());
+
         mTexture.reset();
 
         co_await ToolBase::finalize();
@@ -62,7 +66,9 @@ namespace Tools {
     void NodeRendererTester::render()
     {
         if (ImGui::Begin("NodeRendererTester")) {
-            ImGui::Image((void *)mTexture->texture().mTextureHandle, { 512, 512 });
+            //mTexture->render();
+
+            ImGui::ImageButton((void *)mTexture->texture().mTextureHandle, { 512, 512 }, { 0, 0 }, { 1, 1 }, 0);
             ImGui::InteractiveView(mState);
 
             Tools::InteractiveCamera(mState, mCamera);
@@ -72,28 +78,31 @@ namespace Tools {
             if (ImGui::Button("+")) {
                 mTexture->addRenderPass(&mPasses.emplace_back());
             }
-            for (NodeRenderPass &pass : mPasses) {
-                TypedScopePtr ptr = pass.mHandle.resource();
-                if (mInspector->drawValue("pass", ptr, true).first) {
-                    pass.mHandle = ptr.safe_cast<NodeGraph::NodeGraphLoader::ResourceType>();
-                    size_t argCount = pass.mHandle->mDataProviderPins.size();
-                    assert(argCount >= 1);
-                    pass.mArguments.resize(argCount - 1);
-                    for (uint32_t i = 1; i < argCount; ++i) {
-                        ExtendedValueTypeDesc desc = pass.mHandle->dataProviderType({ 0, i });
-                        if (desc == toValueTypeDesc<Engine::Vector4>()) {
-                            pass.mArguments[i - 1] = Engine::Vector4 { Engine::Vector4::ZERO };
-                        } else if (desc != Engine::toValueTypeDesc<Render::Camera *>()) {
-                            pass.mArguments[i - 1].setType(desc);
-                        } else {
-                            pass.mArguments[i - 1] = &mCamera;
+            if (ImGui::BeginTable("columns", 2, ImGuiTableFlags_Resizable)) {
+                for (NodeRenderPass &pass : mPasses) {
+                    TypedScopePtr ptr = pass.mHandle.resource();
+                    if (mInspector->drawValue("pass", ptr, true).first) {
+                        pass.mHandle = ptr.safe_cast<NodeGraph::NodeGraphLoader::Resource>();
+                        size_t argCount = pass.mHandle->mDataProviderPins.size();
+                        assert(argCount >= 1);
+                        pass.mArguments.resize(argCount - 1);
+                        for (uint32_t i = 1; i < argCount; ++i) {
+                            ExtendedValueTypeDesc desc = pass.mHandle->dataProviderType({ 0, i });
+                            if (desc == toValueTypeDesc<Engine::Vector4>()) {
+                                pass.mArguments[i - 1] = Engine::Vector4 { Engine::Vector4::ZERO };
+                            } else if (desc != Engine::toValueTypeDesc<Render::Camera *>()) {
+                                pass.mArguments[i - 1].setType(desc);
+                            } else {
+                                pass.mArguments[i - 1] = &mCamera;
+                            }
                         }
                     }
+                    size_t i = 0;
+                    for (ValueType &v : pass.mArguments) {
+                        mInspector->drawValue(std::to_string(i++), v, true, false);
+                    }
                 }
-                size_t i = 0;
-                for (ValueType &v : pass.mArguments) {
-                    mInspector->drawValue(std::to_string(i++), v, true, false);
-                }
+                ImGui::EndTable();
             }
         }
         ImGui::End();

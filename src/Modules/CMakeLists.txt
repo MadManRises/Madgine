@@ -1,7 +1,13 @@
 Project(Modules VERSION 1.0.0)
 
-
 option(MODULES_ENABLE_TASK_TRACKING "" OFF)
+
+CMAKE_DEPENDENT_OPTION(MODULES_ENABLE_THREADING "Enable multithreading utilities like thread local or workgroups" ON
+                       "NOT EMSCRIPTEN" OFF)
+
+CMAKE_DEPENDENT_OPTION(MODULES_USE_CUSTOM_THREADLOCAL "Replace the thread_local keyword with a custom implementation for thread-local variables." ON "MODULES_ENABLE_THREADING" OFF)
+option(MODULES_USE_PTHREAD_THREADLOCAL_STORE "Use pthread_[set/get]specific instead of thread_local to store all thread-local variables. Useful in combination with MODULES_USE_CUSTOM_THREADLOCAL on platforms that don't support thread_local.")
+
 
 set(sources)
 
@@ -25,11 +31,11 @@ target_include_directories(Modules PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINA
 
 target_link_libraries(Modules PUBLIC Interfaces Ini)
 
-if (INTERFACES_ENABLE_THREADING)
-	find_package(Threads REQUIRED)
+if (WINDOWS)
 	if (NOT BUILD_SHARED_LIBS AND MINGW)
-		target_link_libraries (Interfaces PRIVATE -Wl,-Bstatic,--whole-archive pthread -Wl,-Bdynamic,--no-whole-archive)
+		target_link_libraries (Modules PRIVATE -Wl,-Bstatic,--whole-archive pthread -Wl,-Bdynamic,--no-whole-archive)
 	else()
+		find_package(Threads)
 		target_link_libraries (Modules PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 	endif()
 endif()

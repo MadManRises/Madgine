@@ -12,11 +12,6 @@ struct META_EXPORT Atlas2 {
         bool mFlipped;
     };
 
-	struct Bin {
-        Vector2i mOrigin;
-        std::vector<Vector2i> mCorners; //Ordered top -> down ( x left -> right)
-    };
-
     Atlas2(const Vector2i &binSize)
         : mBinSize(binSize)
     {
@@ -28,10 +23,17 @@ struct META_EXPORT Atlas2 {
     std::vector<Entry> insert(const std::vector<Vector2i> &sizes, const std::function<void()> &expand, bool allowFlip = true);
 
 
-	const Vector2i mBinSize;
-
 private:
 
+    struct Bin {
+        Vector2i mOrigin;
+        std::vector<Vector2i> mCorners; //Ordered top -> down ( x left -> right)
+    };
+
+    std::tuple<float, int, bool> getScore(Bin &bin, const Vector2i &size, bool allowFlip);
+    static Atlas2::Entry insertIntoBin(Bin &bin, const Vector2i &_size, int cornerIndex, bool flipped);
+
+    const Vector2i mBinSize;
     std::vector<Bin> mBins;
 };
 

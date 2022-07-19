@@ -47,6 +47,12 @@ namespace Threading {
             return *this;
         }
 
+        Global<T, Storage> &operator=(T &&t)
+        {
+            data() = std::move(t);
+            return *this;
+        }
+
         Global<T, Storage> &operator=(const T &t)
         {
             data() = t;

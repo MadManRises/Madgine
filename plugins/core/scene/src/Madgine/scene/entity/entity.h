@@ -9,14 +9,14 @@
 #include "Generic/container/transformIt.h"
 #include "Generic/container/mutable_set.h"
 
-#include "Generic/functor.h"
+#include "Modules/uniquecomponent/component_index.h"
 
 namespace Engine {
 namespace Scene {
     namespace Entity {
 
         struct MADGINE_SCENE_EXPORT Entity : Serialize::SyncableUnit<Entity> {
-            SERIALIZABLEUNIT(Entity);
+            SERIALIZABLEUNIT(Entity)
 
             //Entity(const Entity &, bool local);
             Entity(Entity &&, bool local);
@@ -37,7 +37,7 @@ namespace Scene {
             template <typename T>
             EntityComponentPtr<T> addComponent(const ObjectPtr &table = {})
             {
-                return EntityComponentPtr<T> { addComponent(component_index<T>(), table) };
+                return EntityComponentPtr<T> { addComponent(UniqueComponent::component_index<T>(), table) };
             }
 
             template <typename T>
@@ -49,13 +49,13 @@ namespace Scene {
             template <typename T>
             EntityComponentPtr<T> getComponent()
             {
-                return static_cast<EntityComponentPtr<T>>(getComponent(component_index<T>()));
+                return static_cast<EntityComponentPtr<T>>(getComponent(UniqueComponent::component_index<T>()));
             }
 
             template <typename T>
             EntityComponentPtr<const T> getComponent() const
             {
-                return static_cast<EntityComponentPtr<const T>>(getComponent(component_index<T>()));
+                return static_cast<EntityComponentPtr<const T>>(getComponent(UniqueComponent::component_index<T>()));
             }
 
             EntityComponentPtr<EntityComponentBase> getComponent(uint32_t i);
@@ -75,7 +75,7 @@ namespace Scene {
             template <typename T>
             bool hasComponent()
             {
-                return hasComponent(component_index<T>());
+                return hasComponent(UniqueComponent::component_index<T>());
             }
 
             bool hasComponent(size_t i);

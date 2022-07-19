@@ -5,7 +5,7 @@ DLL_IMPORT_VARIABLE2(const Engine::Serialize::SerializeTable, serializeTable, ty
 namespace Engine {
 namespace Serialize {
 
-	DERIVE_FUNCTION(onActivate);
+	DERIVE_FUNCTION(onActivate)
 
 }
 }

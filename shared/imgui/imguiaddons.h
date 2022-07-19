@@ -90,6 +90,7 @@ IMGUI_API void Duration(std::chrono::nanoseconds dur);
 IMGUI_API void RightAlignDuration(std::chrono::nanoseconds dur);
 
 IMGUI_API void RightAlignText(const char *s, ...);
+IMGUI_API void RightAlign(float size);
 
 template <typename F, typename... Args>
 bool Col(F &&f, const char *label, Args&&... args)

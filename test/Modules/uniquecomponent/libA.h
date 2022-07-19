@@ -15,4 +15,4 @@ struct LIBA_EXPORT LibAComponent : Test::TestComponent<LibAComponent> {
     }
 };
 
-RegisterType(LibAComponent);
+REGISTER_TYPE(LibAComponent)

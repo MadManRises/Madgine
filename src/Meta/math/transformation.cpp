@@ -14,13 +14,12 @@ Matrix4 TransformMatrix(const Vector3 &translate, const Vector3 &scale, const Qu
 }
 
 std::tuple<Vector3, Vector3, Quaternion> DecomposeTransformMatrix(const Matrix4 &transform)
-{
-    std::tuple<Vector3, Vector3, Quaternion> result;
-    std::get<0>(result) = transform.GetColumn(3).xyz();
+{    
+    Vector3 translation = transform.GetColumn(3).xyz();
     Matrix3 m3 = transform.ToMat3();
-    std::get<1>(result) = { m3.GetColumn(0).length(), m3.GetColumn(1).length(), m3.GetColumn(2).length() };
-    std::get<2>(result) = Quaternion::FromMatrix(ScalingMatrix(std::get<1>(result)).Inverse() * m3);
-    return result;
+    Vector3 scale = { m3.GetColumn(0).length(), m3.GetColumn(1).length(), m3.GetColumn(2).length() };
+    Quaternion orientation = Quaternion::FromMatrix(ScalingMatrix(scale).Inverse() * m3);
+    return { translation, scale, orientation };
 }
 
 Matrix4 TranslationMatrix(const Vector3 &v)

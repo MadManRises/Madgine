@@ -9,6 +9,7 @@ include(CMakeDependentOption)
    
 set(workspace_file_dir ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "")
 
+set(WORKSPACE_HOOKS)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin CACHE INTERNAL "")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin CACHE INTERNAL "")
@@ -17,11 +18,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/bin CACHE 
 
 if (NOT WIN32)
 	set (outDir ${CMAKE_BINARY_DIR}/bin)
-	
-	if (CMAKE_ANDROID_ARCH_ABI)
-		set (outDir ${outDir}/${CMAKE_ANDROID_ARCH_ABI})
-		set (BUILD_TESTING FALSE CACHE BOOL "" FORCE)
-	endif()
 
 	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${outDir})
 	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${outDir})
@@ -42,6 +38,7 @@ if (NOT support_shared)
 endif()
 
 if (NOT BUILD_SHARED_LIBS)
+	MESSAGE(STATUS "Enabling STATIC_BUILD=1")
 	add_definitions(-DSTATIC_BUILD=1)
 endif()
 
@@ -159,6 +156,10 @@ macro(add_workspace_library name)
 		"${IWYU};-Xiwyu;--pch_in_code;-Xiwyu;--prefix_header_includes=remove;-Xiwyu;--max_line_length=200;--driver-mode=cl")
 	endif (IWYU)
 
+	foreach (hook ${WORKSPACE_HOOKS})
+		cmake_language(CALL ${hook} ${name})
+	endforeach()
+
 endmacro(add_workspace_library)
 
 macro(add_workspace_interface_library name)
@@ -209,11 +210,39 @@ function(install_interface_to_workspace name)
 endfunction(install_interface_to_workspace)
 
 
+function(get_all_targets var)
+    set(targets)
+    get_all_targets_recursive(targets ${CMAKE_SOURCE_DIR})
+    set(${var} ${targets} PARENT_SCOPE)
+endfunction()
+
+macro(get_all_targets_recursive targets dir)
+    get_property(subdirectories DIRECTORY "${dir}" PROPERTY SUBDIRECTORIES)
+    foreach(subdir ${subdirectories})
+        get_all_targets_recursive(${targets} ${subdir})
+    endforeach()
+
+    get_property(current_targets DIRECTORY ${dir} PROPERTY BUILDSYSTEM_TARGETS)
+    list(APPEND ${targets} ${current_targets})
+endmacro()
+
+macro (add_workspace_hook hook)
+	list(APPEND WORKSPACE_HOOKS ${hook})
+endmacro()
+
 #Iterate over all files in platform
 
-file(GLOB platforms "${CMAKE_CURRENT_LIST_DIR}/platform/*.cmake")
+set (globbing_expr "${CMAKE_CURRENT_LIST_DIR}/platform/*.cmake")
+
+if (MADGINE_EXTERNAL_FILE_HIERARCHY)
+	list(APPEND globbing_expr "${MADGINE_EXTERNAL_FILE_HIERARCHY}/cmake/platform/*.cmake")
+endif()
+
+file(GLOB platforms ${globbing_expr})
 
 foreach(platform ${platforms})
 	message(STATUS "Adding platform-code: ${platform}")
 	include (${platform})
 endforeach()
+
+

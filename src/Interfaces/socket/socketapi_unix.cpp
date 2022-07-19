@@ -103,8 +103,11 @@ SocketAPIResult postInitSock(unsigned long long s)
     return SocketAPIResult::SUCCESS;
 }
 
-std::pair<Socket, SocketAPIResult> SocketAPI::socket(int port)
+SocketAPIResult Socket::open(int port)
 {
+    if (*this)
+        return SocketAPIResult::ALREADY_IN_USE;
+
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
@@ -114,34 +117,34 @@ std::pair<Socket, SocketAPIResult> SocketAPI::socket(int port)
 
     int s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (s < 0) {
-        return { Socket {}, getError("socket") };
+        return SocketAPI::getError("socket");
     }
 
-    Socket sock { static_cast<unsigned long long>(s) };
+    mSocket = s;
 
-    if (SocketAPIResult result = preInitSock(sock); result != SocketAPIResult::SUCCESS) {
-        sock.close();
-        return { std::move(sock), result };
+    if (SocketAPIResult result = preInitSock(s); result != SocketAPIResult::SUCCESS) {
+        close();
+        return result;
     }
 
-    if (SocketAPIResult result = postInitSock(sock); result != SocketAPIResult::SUCCESS) {
-        sock.close();
-        return { std::move(sock), result };
+    if (SocketAPIResult result = postInitSock(s); result != SocketAPIResult::SUCCESS) {
+        close();
+        return result;
     }
 
-    if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
-        SocketAPIResult result = getError("bind");
-        sock.close();
-        return { std::move(sock), result };
+    if (bind(s, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
+        SocketAPIResult result = SocketAPI::getError("bind");
+        close();
+        return result;
     }
 
-    int result = listen(sock, SOMAXCONN);
+    int result = listen(s, SOMAXCONN);
     if (result != 0) {
-        SocketAPIResult result = getError("listen");
-        sock.close();
-        return { std::move(sock), result };
+        SocketAPIResult result = SocketAPI::getError("listen");
+        close();
+        return result;
     }
-    return { std::move(sock), SocketAPIResult::SUCCESS };
+    return SocketAPIResult::SUCCESS;
 }
 
 std::pair<Socket, SocketAPIResult> Socket::accept(TimeOut timeout) const
@@ -171,9 +174,11 @@ std::pair<Socket, SocketAPIResult> Socket::accept(TimeOut timeout) const
 #    else
         int socket = accept4(mSocket, NULL, NULL, O_NONBLOCK);
 #    endif
-        if (socket >= 0)
-            return { Socket { static_cast<unsigned long long>(socket) }, SocketAPIResult::SUCCESS };
-        else
+        if (socket >= 0) {
+            Socket s;
+            s.mSocket = socket;
+            return { std::move(s), SocketAPIResult::SUCCESS };
+        } else
             return { Socket {}, SocketAPI::getError("accept") };
     } else {
         if (retval == 0)
@@ -183,44 +188,47 @@ std::pair<Socket, SocketAPIResult> Socket::accept(TimeOut timeout) const
     }
 }
 
-std::pair<Socket, SocketAPIResult> SocketAPI::connect(const std::string &url, int portNr)
+SocketAPIResult Socket::connect(std::string_view url, int portNr)
 {
+    if (*this)
+        return SocketAPIResult::ALREADY_IN_USE;
+
     //Fill out the information needed to initialize a socket…
     struct sockaddr_in target; //Socket address information
 
     target.sin_family = AF_INET; // address family Internet
     target.sin_port = htons(portNr); //Port to connect on
 
-    if (inet_pton(AF_INET, url.c_str(), &target.sin_addr) <= 0) {
-        return { Socket {}, getError("inet_pton") };
+    if (inet_pton(AF_INET, url.data(), &target.sin_addr) <= 0) {
+        return SocketAPI::getError("inet_pton");
     }
 
     int s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); //Create socket
     if (s < 0) {
-        return { Socket {}, getError("socket") };
+        return SocketAPI::getError("socket");
     }
 
-    Socket sock { static_cast<unsigned long long>(s) };
+    mSocket = s;
 
-    if (SocketAPIResult result = preInitSock(sock); result != SocketAPIResult::SUCCESS) {
-        sock.close();
-        return { std::move(sock), result };
+    if (SocketAPIResult result = preInitSock(s); result != SocketAPIResult::SUCCESS) {
+        close();
+        return result;
     }
 
     //Try connecting...
 
-    if (::connect(sock, (struct sockaddr *)&target, sizeof(target)) < 0) {
-        SocketAPIResult error = getError("connect");
-        sock.close();
-        return { std::move(sock), error };
+    if (::connect(s, (struct sockaddr *)&target, sizeof(target)) < 0) {
+        SocketAPIResult error = SocketAPI::getError("connect");
+        close();
+        return error;
     }
 
-    if (SocketAPIResult result = postInitSock(sock); result != SocketAPIResult::SUCCESS) {
-        sock.close();
-        return { std::move(sock), result };
+    if (SocketAPIResult result = postInitSock(s); result != SocketAPIResult::SUCCESS) {
+        close();
+        return result;
     }
 
-    return { std::move(sock), SocketAPIResult::SUCCESS };
+    return SocketAPIResult::SUCCESS;
 }
 
 }

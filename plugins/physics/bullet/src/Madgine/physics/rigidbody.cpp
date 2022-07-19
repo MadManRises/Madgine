@@ -87,7 +87,7 @@ namespace Physics {
                 Vector3 scale;
                 Quaternion orientation;
                 std::tie(pos, scale, orientation) = DecomposeTransformMatrix(m);
-                transform = btTransform { { orientation.v.x, orientation.v.y, orientation.v.z, orientation.w }, { pos.x, pos.y, pos.z } };
+                transform = btTransform { { orientation.x, orientation.y, orientation.z, orientation.w }, { pos.x, pos.y, pos.z } };
             } else {
                 transform = btTransform { { 0.0f, 0.0f, 0.0f, 1.0f } };
             }
@@ -100,13 +100,14 @@ namespace Physics {
     };
 
     RigidBody::RigidBody(const ObjectPtr &data)
-        : NamedUniqueComponent(data)
+        : NamedComponent(data)
+
     {
         mData = std::make_unique<Data>(this);
     }
 
     RigidBody::RigidBody(RigidBody &&other)
-        : NamedUniqueComponent(std::move(other))
+        : NamedComponent(std::move(other))
         , mShapeHandle(std::move(other.mShapeHandle))
         , mMgr(other.mMgr)
         , mData(std::move(other.mData))
@@ -119,7 +120,7 @@ namespace Physics {
 
     RigidBody &RigidBody::operator=(RigidBody &&other)
     {
-        NamedUniqueComponent::operator=(std::move(other));
+        NamedComponent::operator=(std::move(other));
         std::swap(mShapeHandle, other.mShapeHandle);
         mMgr = other.mMgr;
         std::swap(mData, other.mData);
@@ -140,7 +141,7 @@ namespace Physics {
         Matrix4 m = transform->worldMatrix();
 
         const auto &[pos, scale, orientation] = DecomposeTransformMatrix(m);
-        get()->setWorldTransform(btTransform { { orientation.v.x, orientation.v.y, orientation.v.z, orientation.w }, { pos.x, pos.y, pos.z } });
+        get()->setWorldTransform(btTransform { { orientation.x, orientation.y, orientation.z, orientation.w }, { pos.x, pos.y, pos.z } });
 
         if (mShapeHandle && mShapeHandle->available())
             get()->setCollisionShape(mShapeHandle->get());
@@ -297,7 +298,7 @@ namespace Physics {
     void RigidBody::setOrientation(const Quaternion &q)
     {
         btTransform t = get()->getWorldTransform();
-        t.setRotation({ q.v.x, q.v.y, q.v.z, q.w });
+        t.setRotation({ q.x, q.y, q.z, q.w });
         get()->setWorldTransform(t);
     }
 
@@ -325,7 +326,7 @@ namespace Physics {
         get()->setUserIndex(mask);
     }
 
-    void RigidBody::setShape(typename CollisionShapeManager::HandleType handle)
+    void RigidBody::setShape(typename CollisionShapeManager::Handle handle)
     {
         remove();
 
@@ -351,7 +352,7 @@ namespace Physics {
         add();
     }
 
-    CollisionShapeManager::ResourceType *RigidBody::getShape() const
+    CollisionShapeManager::Resource *RigidBody::getShape() const
     {
         return mShapeHandle ? mShapeHandle.resource() : nullptr;
     }

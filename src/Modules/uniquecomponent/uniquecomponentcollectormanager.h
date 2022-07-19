@@ -3,11 +3,13 @@
 #if ENABLE_PLUGINS
 
 namespace Engine {
+namespace UniqueComponent {
 
-	struct MODULES_EXPORT UniqueComponentCollectorManager{
-		UniqueComponentCollectorManager(Plugins::PluginManager &pluginMgr);
-	};
+    struct MODULES_EXPORT CollectorManager {
+        CollectorManager(Plugins::PluginManager &pluginMgr);
+    };
 
+}
 }
 
 #endif

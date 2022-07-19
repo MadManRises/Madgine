@@ -10,14 +10,13 @@ add_plugin(Resources Madgine Core ${sources})
 
 target_link_libraries(Resources PUBLIC Modules Meta)
 
+set(sources "")
+FolderSources(sources "" tools)
+	FolderSources(sources tools Madgine_Tools resourcestoolconfig.cpp resourcestoolconfig.h resourcestoolsforward.h resourcestoolslib.h)
 
-if (NOT IOS)
-	add_subdirectory(audioloader)
-endif()
-add_subdirectory(imageloader)
-add_subdirectory(programloader)
-add_subdirectory(textureloader)
-add_subdirectory(meshloader)
-add_subdirectory(fontloader)
-add_subdirectory(skeletonloader)
-add_subdirectory(animationloader)
+
+add_tools(Resources ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/resourcestoolslib.h)
+
+target_link_plugins(Resources Tools)
+
+add_subdirectory(loaders)

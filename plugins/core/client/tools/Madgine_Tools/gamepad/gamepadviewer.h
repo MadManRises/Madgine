@@ -19,10 +19,10 @@ namespace Tools {
         virtual void render() override;
 
     private:
-        Render::TextureLoader::HandleType mGamepadTexture;
+        Render::TextureLoader::Handle mGamepadTexture;
     };
 
 }
 }
 
-RegisterType(Engine::Tools::GamepadViewer)
+REGISTER_TYPE(Engine::Tools::GamepadViewer)

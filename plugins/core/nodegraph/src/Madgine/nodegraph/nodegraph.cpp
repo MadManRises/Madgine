@@ -201,7 +201,7 @@ namespace NodeGraph {
     {
         Filesystem::FileManager mgr("Graph-Serializer");
         Serialize::FormattedSerializeStream out = mgr.openWrite(mPath, std::make_unique<Serialize::XMLFormatter>());
-        Serialize::SerializableDataPtr { this }.writeState(out, "Graph");
+        Serialize::write(out, *this, "Graph");
     }
 
     NodeBase *NodeGraph::addNode(std::unique_ptr<NodeBase> node)
@@ -218,63 +218,147 @@ namespace NodeGraph {
     void NodeGraph::removeNode(uint32_t index)
     {
         assert(index != 0);
+
+        NodeBase *node = mNodes[index - 1].get();
+
+        uint32_t pin = 0;
+        uint32_t size = node->mFlowInPins.size();
+        while (pin < size) {
+            const FlowInPinPrototype &flowIn = node->mFlowInPins[pin];
+            std::vector<Pin> sources = flowIn.mSources;
+            for (const Pin &source : sources) {
+                disconnectFlow(source);
+            }
+            uint32_t newSize = node->mFlowInPins.size();
+            if (size == newSize)
+                ++pin;
+            else
+                size = newSize;
+        }
+
+        pin = 0;
+        size = node->mFlowOutPins.size();
+        while (pin < size) {
+            const FlowOutPinPrototype &flowOut = node->mFlowOutPins[pin];
+            if (flowOut.mTarget) {
+                disconnectFlow({ index, pin });
+                uint32_t newSize = node->mFlowOutPins.size();
+                if (size == newSize)
+                    ++pin;
+                else
+                    size = newSize;
+            } else {
+                ++pin;
+            }
+        }
+
+        pin = 0;
+        size = node->mDataReceiverPins.size();
+        while (pin < size) {
+            const DataReceiverPinPrototype &receiver = node->mDataReceiverPins[pin];
+            std::vector<Pin> sources = receiver.mSources;
+            for (const Pin &source : sources) {
+                disconnectDataOut(source);
+            }
+            uint32_t newSize = node->mDataReceiverPins.size();
+            if (size == newSize)
+                ++pin;
+            else
+                size = newSize;
+        }
+
+        pin = 0;
+        size = node->mDataOutPins.size();
+        while (pin < size) {
+            const DataOutPinPrototype &dataOut = node->mDataOutPins[pin];
+            if (dataOut.mTarget) {
+                disconnectDataOut({ index, pin });
+                uint32_t newSize = node->mDataOutPins.size();
+                if (size == newSize)
+                    ++pin;
+                else
+                    size = newSize;
+            } else {
+                ++pin;
+            }
+        }
+
+        pin = 0;
+        size = node->mDataProviderPins.size();
+        while (pin < size) {
+            const DataProviderPinPrototype &provider = node->mDataProviderPins[pin];
+            std::vector<Pin> targets = provider.mTargets;
+            for (const Pin &target : targets) {
+                disconnectDataIn(target);
+            }
+            uint32_t newSize = node->mDataProviderPins.size();
+            if (size == newSize)
+                ++pin;
+            else
+                size = newSize;
+        }
+
+        pin = 0;
+        size = node->mDataInPins.size();
+        while (pin < size) {
+            const DataInPinPrototype &dataIn = node->mDataInPins[pin];
+            if (dataIn.mSource) {
+                disconnectDataIn({ index, pin });
+                uint32_t newSize = node->mDataInPins.size();
+                if (size == newSize)
+                    ++pin;
+                else
+                    size = newSize;
+            } else {
+                ++pin;
+            }
+        }
+
         uint32_t oldIndex = mNodes.size();
         std::swap(mNodes[index - 1], mNodes.back());
         mNodes.pop_back();
 
         for (const std::unique_ptr<NodeBase> &node : mNodes)
-            node->onNodeRemove(oldIndex, index);
+            node->onNodeReindex(oldIndex, index);
 
         for (FlowOutPinPrototype &pin : mFlowOutPins) {
-            if (pin.mTarget.mNode == index)
-                pin.mTarget = {};
-            else if (pin.mTarget.mNode == oldIndex)
+            assert(pin.mTarget.mNode != index);
+            if (pin.mTarget.mNode == oldIndex)
                 pin.mTarget.mNode = index;
         }
         for (DataInPinPrototype &pin : mDataInPins) {
-            if (pin.mSource.mNode == index)
-                pin.mSource = {};
-            else if (pin.mSource.mNode == oldIndex)
+            assert(pin.mSource.mNode != index);
+            if (pin.mSource.mNode == oldIndex)
                 pin.mSource.mNode = index;
         }
         for (DataOutPinPrototype &pin : mDataOutPins) {
-            if (pin.mTarget.mNode == index)
-                pin.mTarget = {};
-            else if (pin.mTarget.mNode == oldIndex)
+            assert(pin.mTarget.mNode != index);
+            if (pin.mTarget.mNode == oldIndex)
                 pin.mTarget.mNode = index;
         }
 
         for (FlowInPinPrototype &pin : mFlowInPins) {
             for (Pin &source : pin.mSources) {
-                if (source.mNode == index)
-                    source = {};
-                else if (source.mNode == oldIndex)
-                    source.mNode = index;
-            }
-        }
-        for (DataReceiverPinPrototype &pin : mDataReceiverPins) {
-            for (Pin &source : pin.mSources) {
-                if (source.mNode == index)
-                    source = {};
-                else if (source.mNode == oldIndex)
+                assert(source.mNode != index);
+                if (source.mNode == oldIndex)
                     source.mNode = index;
             }
         }
 
-        for (uint32_t i = 0; i < mDataProviderPins.size();) {
-            DataProviderPinPrototype &pin = mDataProviderPins[i];
-            for (auto it = pin.mTargets.begin(); it != pin.mTargets.end();) {
-                if (it->mNode == index) {
-                    it = pin.mTargets.erase(it);
-                } else if (it->mNode == oldIndex) {
-                    it->mNode = index;
-                    ++it;
-                } else {
-                    ++it;
-                }
+        for (DataReceiverPinPrototype &pin : mDataReceiverPins) {
+            for (Pin &source : pin.mSources) {
+                assert(source.mNode != index);
+                if (source.mNode == oldIndex)
+                    source.mNode = index;
             }
-            if (checkDataProvider(i))
-                ++i;
+        }
+
+        for (DataProviderPinPrototype &pin : mDataProviderPins) {
+            for (Pin &target : pin.mTargets) {
+                assert(target.mNode != index);
+                if (target.mNode == oldIndex)
+                    target.mNode = index;
+            }
         }
     }
 
@@ -420,8 +504,8 @@ namespace NodeGraph {
 
     uint32_t NodeGraph::dataOutMask(Pin target, bool bidir)
     {
-        if (target)
-            return node(target.mNode)->dataInMask(target.mIndex, bidir);
+        if (target.mNode)
+            return node(target.mNode)->dataOutMask(target.mIndex, bidir);
         if (!bidir || target.mIndex == mDataOutPins.size())
             return NodeExecutionMask::ALL;
         return node(mDataOutPins[target.mIndex].mTarget.mNode)->dataReceiverMask(mDataOutPins[target.mIndex].mTarget.mIndex, false);
@@ -532,16 +616,18 @@ namespace NodeGraph {
         } else {
             target = node(source.mNode)->mFlowOutPins[source.mIndex].mTarget;
             node(source.mNode)->mFlowOutPins[source.mIndex] = {};
-            node(source.mNode)->onFlowOutUpdate(source.mIndex, target, DISCONNECT);
         }
 
         if (!target.mNode) {
-            throw 0;
+            mFlowInPins.erase(mFlowInPins.begin() + target.mIndex);
         } else {
-            /* auto result = */ std::erase(node(target.mNode)->mFlowInPins[target.mIndex].mSources, source);
-            /*assert(result == 1);*/
+            auto result = std::erase(node(target.mNode)->mFlowInPins[target.mIndex].mSources, source);
+            assert(result == 1);
             node(target.mNode)->onFlowInUpdate(target.mIndex, source, DISCONNECT);
         }
+
+        if (source.mNode)
+            node(source.mNode)->onFlowOutUpdate(source.mIndex, target, DISCONNECT);
     }
 
     void NodeGraph::disconnectDataIn(Pin target)
@@ -550,51 +636,142 @@ namespace NodeGraph {
         if (!target.mNode) {
             source = mDataInPins[target.mIndex].mSource;
             mDataInPins.erase(mDataInPins.begin() + target.mIndex);
+
         } else {
             source = node(target.mNode)->mDataInPins[target.mIndex].mSource;
             node(target.mNode)->mDataInPins[target.mIndex] = {};
-            node(target.mNode)->onDataInUpdate(target.mIndex, source, DISCONNECT);
         }
 
         if (!source.mNode) {
             std::erase(mDataProviderPins[source.mIndex].mTargets, target);
-            checkDataProvider(source.mIndex);
+            if (mDataProviderPins[source.mIndex].mTargets.empty()) {
+                onDataProviderRemove(nullptr, source.mIndex);
+                mDataProviderPins.erase(mDataProviderPins.begin() + source.mIndex);                
+            }
         } else {
-            /* auto result = */ std::erase(node(source.mNode)->mDataProviderPins[source.mIndex].mTargets, target);
-            /* assert(result == 1);*/
+            auto result = std::erase(node(source.mNode)->mDataProviderPins[source.mIndex].mTargets, target);
+            assert(result == 1);
             node(source.mNode)->onDataProviderUpdate(source.mIndex, target, DISCONNECT);
         }
+
+        if (target.mNode)
+            node(target.mNode)->onDataInUpdate(target.mIndex, source, DISCONNECT);
     }
 
     void NodeGraph::disconnectDataOut(Pin source)
     {
         Pin target;
-        if (!source) {
+        if (!source.mNode) {
             target = mDataOutPins[source.mIndex].mTarget;
             mDataOutPins.erase(mDataOutPins.begin() + source.mIndex);
         } else {
             target = node(source.mNode)->mDataOutPins[source.mIndex].mTarget;
             node(source.mNode)->mDataOutPins[source.mIndex] = {};
-            node(source.mNode)->onDataOutUpdate(source.mIndex, target, DISCONNECT);
         }
 
         if (!target.mNode) {
-            throw 0;
+            std::erase(mDataReceiverPins[target.mIndex].mSources, source);
         } else {
-            /* auto result = */ std::erase(node(target.mNode)->mDataReceiverPins[target.mIndex].mSources, source);
-            /* assert(result == 1);*/
+            auto result = std::erase(node(target.mNode)->mDataReceiverPins[target.mIndex].mSources, source);
+            assert(result == 1);
             node(target.mNode)->onDataReceiverUpdate(target.mIndex, source, DISCONNECT);
+        }
+
+        if (source.mNode)
+            node(source.mNode)->onDataOutUpdate(source.mIndex, target, DISCONNECT);
+    }
+
+     void NodeGraph::onFlowOutRemove(const NodeBase *node, uint32_t index)
+    {
+        Pin pin { nodeIndex(node), index };
+        for (const std::unique_ptr<NodeBase> &ptr : mNodes) {
+            if (ptr.get() != node)
+                ptr->onFlowOutRemove(pin);
+        }
+
+        for (FlowInPinPrototype &inPin : mFlowInPins) {
+            for (Pin &source : inPin.mSources) {
+                if (source.mNode == pin.mNode) {
+                    if (source && source.mIndex > pin.mIndex) {
+                        --source.mIndex;
+                    }
+                }
+            }
         }
     }
 
-    bool NodeGraph::checkDataProvider(uint32_t index)
+    void NodeGraph::onFlowInRemove(const NodeBase *node, uint32_t index)
     {
-        if (mDataProviderPins[index].mTargets.empty()) {
-            onDataProviderRemove(nullptr, index);
-            mDataProviderPins.erase(mDataProviderPins.begin() + index);
-            return false;
+        Pin pin { nodeIndex(node), index };
+        for (const std::unique_ptr<NodeBase> &ptr : mNodes) {
+            if (ptr.get() != node)
+                ptr->onFlowInRemove(pin);
         }
-        return true;
+
+        for (FlowOutPinPrototype &outPin : mFlowOutPins) {
+            Pin &target = outPin.mTarget;
+            if (target.mNode == pin.mNode) {
+                if (target && target.mIndex > pin.mIndex) {
+                    --target.mIndex;
+                }
+            }
+        }
+    }
+
+    void NodeGraph::onDataInRemove(const NodeBase *node, uint32_t index)
+    {
+        Pin pin { nodeIndex(node), index };
+        for (const std::unique_ptr<NodeBase> &ptr : mNodes) {
+            if (ptr.get() != node)
+                ptr->onDataInRemove(pin);
+        }
+
+        for (DataProviderPinPrototype &provider : mDataProviderPins) {
+            for (Pin &target : provider.mTargets) {
+                if (target.mNode == pin.mNode) {
+                    if (target && target.mIndex > pin.mIndex) {
+                        --target.mIndex;
+                    }
+                }
+            }
+        }
+    }
+
+    void NodeGraph::onDataOutRemove(const NodeBase *node, uint32_t index)
+    {
+        Pin pin { nodeIndex(node), index };
+        for (const std::unique_ptr<NodeBase> &ptr : mNodes) {
+            if (ptr.get() != node)
+                ptr->onDataOutRemove(pin);
+        }
+
+        for (DataReceiverPinPrototype &receiver : mDataReceiverPins) {
+            for (Pin &source : receiver.mSources) {
+                if (source.mNode == pin.mNode) {
+                    if (source && source.mIndex > pin.mIndex) {
+                        --source.mIndex;
+                    }
+                }
+            }
+        }
+    }
+
+    void NodeGraph::onDataReceiverRemove(const NodeBase *node, uint32_t index)
+    {
+        Pin pin { nodeIndex(node), index };
+        for (const std::unique_ptr<NodeBase> &ptr : mNodes) {
+            if (ptr.get() != node)
+                ptr->onDataReceiverRemove(pin);
+        }
+
+        for (DataOutPinPrototype &outPin : mDataOutPins) {
+            Pin &target = outPin.mTarget;
+            if (target.mNode == pin.mNode) {
+                if (target && target.mIndex > pin.mIndex) {
+                    --target.mIndex;
+                }
+            }
+        }
     }
 
     void NodeGraph::onDataProviderRemove(const NodeBase *node, uint32_t index)
@@ -603,6 +780,15 @@ namespace NodeGraph {
         for (const std::unique_ptr<NodeBase> &ptr : mNodes) {
             if (ptr.get() != node)
                 ptr->onDataProviderRemove(pin);
+        }
+
+        for (DataInPinPrototype &inPin : mDataInPins) {
+            Pin &source = inPin.mSource;
+            if (source.mNode == pin.mNode) {
+                if (source && source.mIndex > pin.mIndex) {
+                    --source.mIndex;
+                }
+            }
         }
     }
 
@@ -620,7 +806,7 @@ namespace NodeGraph {
 
         if (!NodeRegistry::sComponentsByName().contains(name))
             return STREAM_INTEGRITY_ERROR(in) << "No Node \"" << name << "\" available.\n"
-                                                                << "Make sure to check the loaded plugins.";
+                                              << "Make sure to check the loaded plugins.";
         node = createNode(name);
         return {};
     }

@@ -224,6 +224,34 @@ namespace Window {
     {
     }
 
+    void OSWindow::setCursorIcon(Input::CursorIcon icon)
+    {
+        /*SetCursor(LoadCursor(NULL, [](Input::CursorIcon icon) {
+                switch (icon) {
+                case Input::CursorIcon::Arrow:
+                    return IDC_ARROW;
+                case Input::CursorIcon::TextInput:
+                    return IDC_IBEAM;
+                case Input::CursorIcon::ResizeAll:
+                    return IDC_SIZEALL;
+                case Input::CursorIcon::ResizeNS:
+                    return IDC_SIZENS;
+                case Input::CursorIcon::ResizeEW:
+                    return IDC_SIZEWE;
+                case Input::CursorIcon::ResizeNESW:
+                    return IDC_SIZENESW;
+                case Input::CursorIcon::ResizeNWSE:
+                    return IDC_SIZENWSE;
+                case Input::CursorIcon::Hand:
+                    return IDC_HAND;
+                case Input::CursorIcon::NotAllowed:
+                    return IDC_NO;
+                default:
+                    throw 0;
+                }
+            }(icon)));*/
+    }
+
     EM_BOOL eventCallback(int type, const EmscriptenUiEvent *event, void *userData)
     {
         double w;
@@ -297,11 +325,6 @@ namespace Window {
         MonitorInfo info { 0, 0, static_cast<int>(w), static_cast<int>(h) };
 
         return { info };
-    }
-
-    void OSWindow::setCursorIcon(Input::CursorIcon icon)
-    {
-        //TODO
     }
 
     WindowData OSWindow::data()

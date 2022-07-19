@@ -23,4 +23,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::InjectorTool);
+REGISTER_TYPE(Engine::Tools::InjectorTool)

@@ -53,4 +53,4 @@ namespace Render {
 }
 
 
-RegisterType(Engine::Render::RenderContext);
+REGISTER_TYPE(Engine::Render::RenderContext)

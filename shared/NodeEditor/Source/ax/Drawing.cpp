@@ -197,11 +197,11 @@ void ax::Drawing::DrawIcon(ImDrawList* drawList, const ImVec2& a, const ImVec2& 
         {
             const auto triangleTip = triangleStart + rect.w * (0.45f - 0.32f);
 
-            drawList->AddTriangleFilled(
+            /* drawList->AddTriangleFilled(
                 ImVec2(ceilf(triangleTip), rect.top() + rect.h * 0.5f),
                 ImVec2(triangleStart, rect.center_y() + 0.15f * rect.h),
                 ImVec2(triangleStart, rect.center_y() - 0.15f * rect.h),
-                color);
+                color);*/
         }
     }
 }

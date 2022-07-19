@@ -17,7 +17,7 @@ namespace Serialize {
 
     ENUM_BASE(SyncManagerResult, GenericResult,
         STREAM_ERROR,
-        TIMEOUT);
+        TIMEOUT)
 
     struct META_EXPORT SyncManager : SerializeManager {
         SyncManager(const std::string &name);

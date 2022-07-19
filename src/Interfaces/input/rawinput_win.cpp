@@ -4,6 +4,8 @@
 
 #    include "rawinput_win.h"
 
+#    if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+
 namespace Engine {
 namespace Input {
 
@@ -180,6 +182,10 @@ namespace Input {
         PRAWINPUT raw_input = (PRAWINPUT)data;
 
         auto it = sRawInputDevices.find(raw_input->header.hDevice);
+        if (it == sRawInputDevices.end()) {
+            listRawInputDevices();
+            it = sRawInputDevices.find(raw_input->header.hDevice);
+        }
         assert(it != sRawInputDevices.end());
         handleRawInputStatePacket(it->second, raw_input->data.hid.bRawData, raw_input->data.hid.dwSizeHid, raw_input->data.hid.dwCount);
         return it->second;
@@ -319,5 +325,7 @@ namespace Input {
 
 }
 }
+
+#endif
 
 #endif

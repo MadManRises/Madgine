@@ -29,7 +29,7 @@ namespace Widgets {
     };
 
     struct MADGINE_WIDGETS_EXPORT WidgetBase : VirtualScope<WidgetBase, Serialize::VirtualData<WidgetBase, Serialize::VirtualSerializableDataBase<VirtualScopeBase<>, Serialize::SerializableDataUnit>>> {
-        SERIALIZABLEUNIT(WidgetBase);
+        SERIALIZABLEUNIT(WidgetBase)
 
         WidgetBase(const std::string &name, WidgetManager &manager, WidgetBase *parent = nullptr);
 
@@ -106,7 +106,7 @@ namespace Widgets {
         void *userData();
         void setUserData(void *userData);
 
-        virtual Resources::ResourceType<Resources::ImageLoader> *resource() const;
+        virtual Resources::Resource<Resources::ImageLoader> *resource() const;
 
         size_t depth();
 
@@ -154,4 +154,4 @@ namespace Widgets {
 }
 }
 
-RegisterType(Engine::Widgets::WidgetBase);
+REGISTER_TYPE(Engine::Widgets::WidgetBase)

@@ -7,76 +7,77 @@
 #    include "indexholder.h"
 
 namespace Engine {
+namespace UniqueComponent {
 
-template <typename Registry, typename __Base, typename... _Ty>
-struct UniqueComponentCollector {
-    typedef typename Registry::Base Base;
-    typedef std::tuple<_Ty...> Ty;
-    typedef typename Registry::F F;
+    template <typename Registry, typename __Base, typename... _Ty>
+    struct Collector {
+        typedef typename Registry::Base Base;
+        typedef std::tuple<_Ty...> Ty;
+        typedef typename Registry::F F;
 
-    UniqueComponentCollector()
-    {
-        mInfo.mRegistryInfo = &typeInfo<Registry>;
-        mInfo.mBaseInfo = &typeInfo<Base>;
-        mInfo.mBinary = &Plugins::PLUGIN_LOCAL(binaryInfo);
-        Registry::sInstance().addCollector(&mInfo);
-    }
-    UniqueComponentCollector(const UniqueComponentCollector &) = delete;
-    ~UniqueComponentCollector()
-    {
-        Registry::sInstance().removeCollector(&mInfo);
-    }
-
-    void operator=(const UniqueComponentCollector &) = delete;
-
-    static UniqueComponentCollector &sInstance();
-
-    size_t size() const
-    {
-        return sInstance().mInfo.mComponents.size();
-    }
-
-private:
-    typename Registry::CollectorInfo mInfo;
-
-public:
-    template <typename T>
-    struct ComponentRegistrator : IndexHolder {
-        ComponentRegistrator()
-            : IndexHolder{sInstance().mInfo.template registerComponent<T>()
-            , sInstance().mInfo.mBaseIndex}
+        Collector()
         {
+            mInfo.mRegistryInfo = &typeInfo<Registry>;
+            mInfo.mBaseInfo = &typeInfo<Base>;
+            mInfo.mBinary = &Plugins::PLUGIN_LOCAL(binaryInfo);
+            Registry::sInstance().addCollector(&mInfo);
+        }
+        Collector(const Collector &) = delete;
+        ~Collector()
+        {
+            Registry::sInstance().removeCollector(&mInfo);
         }
 
-        ~ComponentRegistrator()
+        void operator=(const Collector &) = delete;
+
+        static Collector &sInstance();
+
+        size_t size() const
         {
-            sInstance().mInfo.unregisterComponent(mIndex);
+            return sInstance().mInfo.mComponents.size();
         }
+
+    private:
+        typename Registry::CollectorInfo mInfo;
+
+    public:
+        template <typename T>
+        struct ComponentRegistrator : IndexHolder {
+            ComponentRegistrator()
+                : IndexHolder { sInstance().mInfo.template registerComponent<T>(), sInstance().mInfo.mBaseIndex }
+            {
+            }
+
+            ~ComponentRegistrator()
+            {
+                sInstance().mInfo.unregisterComponent(mIndex);
+            }
+        };
     };
-};
 
-template <typename Registry, typename __Base, typename... _Ty>
-UniqueComponentCollector<Registry, __Base, _Ty...> &UniqueComponentCollector<Registry, __Base, _Ty...>::sInstance()
-{
-    static UniqueComponentCollector dummy;
-    return dummy;
+    template <typename Registry, typename __Base, typename... _Ty>
+    Collector<Registry, __Base, _Ty...> &Collector<Registry, __Base, _Ty...>::sInstance()
+    {
+        static Collector dummy;
+        return dummy;
+    }
+
 }
-
 }
 
 #else
 
 namespace Engine {
+namespace UniqueComponent {
 
-template <typename Registry, typename __Base, typename... _Ty>
-struct UniqueComponentCollector {
-    typedef typename Registry::Base Base;
-    typedef std::tuple<_Ty...> Ty;
-    typedef typename Registry::F F;
-};
+    template <typename Registry, typename __Base, typename... _Ty>
+    struct Collector {
+        typedef typename Registry::Base Base;
+        typedef std::tuple<_Ty...> Ty;
+        typedef typename Registry::F F;
+    };
 
+}
 }
 
 #endif
-
-//#define RegisterCollector(collector) RegisterType(collector::Registry)

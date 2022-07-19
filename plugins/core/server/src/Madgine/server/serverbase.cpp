@@ -6,13 +6,16 @@
 
 #    include "Meta/keyvalue/metatable_impl.h"
 
+METATABLE_BEGIN(Engine::Server::ServerBase)
+METATABLE_END(Engine::Server::ServerBase)
+
 namespace Engine {
 namespace Server {
     ServerBase::ServerBase(const std::string &name)
         : mTaskQueue(name + "-Server")
         , mLog(name + "-Log")
     {
-        //Util::setLog(&mLog);
+        Util::setLog(&mLog);
         mLog.startConsole();
         mTaskQueue.addRepeatedTask([this]() { consoleCheck(); }, std::chrono::milliseconds(20));
     }
@@ -53,8 +56,5 @@ namespace Server {
 
 }
 }
-
-METATABLE_BEGIN(Engine::Server::ServerBase)
-METATABLE_END(Engine::Server::ServerBase)
 
 #endif

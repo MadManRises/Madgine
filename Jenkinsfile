@@ -1,36 +1,42 @@
+properties([pipelineTriggers([githubPush()])])
 
-
- def axisList = [
+def axisList = [
     [//toolchains
 		[
 			name : "clang-windows",
 			dockerImage : 'schuetzo/linux-test-env:latest',
-			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/mingw.cmake"
+			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/mingw.cmake",
+			artifacts : ['bin/*', 'data/*']
 		],
 		[
 			name : "clang-osx",
 			dockerImage : 'schuetzo/linux-test-env:latest',
-			args : "-DENABLE_ARC=False -DDEPLOYMENT_TARGET=11.0"
+			args : "-DENABLE_ARC=False -DDEPLOYMENT_TARGET=11.0",
+			artifacts : ['bin/*', 'data/*']
 		],
 		[
 			name : "clang-ios",
 			dockerImage : 'schuetzo/linux-test-env:latest',
-			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/ios.cmake -DPLATFORM=SIMULATOR64 -DENABLE_ARC=False -DDEPLOYMENT_TARGET=11.0"
+			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/ios.cmake -DPLATFORM=SIMULATOR64 -DENABLE_ARC=False -DDEPLOYMENT_TARGET=11.0",
+			artifacts : ['bin/**']
 		],
 		[
 			name : "clang-linux",
 			dockerImage : 'schuetzo/linux-test-env:latest',
-			args : ""
+			args : "",
+			artifacts : ['bin/*', 'data/*']
 		],
 		[
 			name : "clang-android",
 			dockerImage : 'schuetzo/linux-test-env:latest',
-			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/android.cmake -DANDROID_ABI=x86_64"
+			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/android.cmake -DANDROID_ABI=x86_64",
+			artifacts : ['bin/*']
 		],
 		[
 			name : "clang-emscripten",
 			dockerImage : 'schuetzo/linux-test-env:latest',
-			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/emscripten-wasm.cmake"
+			args : "-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/emscripten-wasm.cmake",
+			artifacts : ['bin/*']
 		]
 	],           
     [//configurations
@@ -65,6 +71,8 @@ def staticTask = {
 	def parentName = toolchain.name + '-' + configuration.name  
 
 	def staticConfigFile = "../test/${staticConfig.name}_base.cfg"	
+
+	def archivePattern = toolchain.artifacts.collect{name + "/" + it}.join(",")
 
     return {
         // This is where the important work happens for each combination
@@ -114,17 +122,12 @@ def staticTask = {
 				//	ctest --output-on-failure
 				//	"""
 				//}
-			}     
-			stage("Deploy") {
-				if (name == "emscripten-Debug-OpenGL") {
-					sh """
-					mkdir -p /var/www/html/latest/${env.BRANCH_NAME}
-					cp ${name}/bin/MadgineLauncher_plugins_tools.* /var/www/html/latest/${env.BRANCH_NAME}
-					"""
-				}
-				archiveArtifacts artifacts: '*-RelWithDebInfo-*/bin/*, *-RelWithDebInfo-*/data/*', onlyIfSuccessful: true
+			}    
+			if (configuration.name == "RelWithDebInfo"){
+				stage("Archive") {
+					archiveArtifacts artifacts: "${archivePattern}"
+				} 
 			}
-
         }
     }
 }
@@ -174,10 +177,6 @@ def task = {
 					//	"""
 					//}
 				}           
-				stage("Deploy") {
-					archiveArtifacts artifacts: '*-RelWithDebInfo/bin/*, *-RelWithDebInfo-*/data/*', onlyIfSuccessful: true
-				}
-
 			} else {
 				stage("dummy") {
 					sh """
@@ -238,14 +237,14 @@ pipeline {
 			steps{
         		checkout scm
 				sh """
-				git submodule update --init --recursive
+					git submodule update --init --recursive
 				"""
 			}
 	    }
         stage ("Multiconfiguration Parallel Tasks") {
 	        steps {
 			    script {
-					cmake_args = "-DUSE_CMAKE_LOG=1 "
+					cmake_args = "-DUSE_CMAKE_LOG=1 -DMODULES_ENABLE_TASK_TRACKING=ON"
 					if (params.timeTrace){
 						cmake_args = cmake_args + "-DCMAKE_CXX_FLAGS=-ftime-trace "
 					}
@@ -256,18 +255,30 @@ pipeline {
 			    }
 	        }
         }
+		stage ("Doxygen") {
+			steps {
+				sh """
+					cd clang-osx-Debug
+
+					make doxygen
+				"""
+			}
+		}
     }
 
 	post {
         always {
-			junit '**/*.xml'
-		
 			recordIssues enabledForFailure: true, tools: [clang()]
+
+			//junit '**/*.xml'
 		}
 		success {
 			sh """
-			doxygen clang-linux-Debug/Doxyfile
-			cp -ur doc /var/www/html/latest/${env.BRANCH_NAME}
+				mkdir -p /opt/homebrew/var/www/latest/${env.BRANCH_NAME}
+
+				cp -r doc/* /opt/homebrew/var/www
+
+				cp clang-emscripten-RelWithDebInfo-OpenGL/bin/MadgineLauncher_plugins_tools.* /opt/homebrew/var/www/latest/${env.BRANCH_NAME}
 			"""
 		}
     }

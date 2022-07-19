@@ -8,6 +8,8 @@
 #    include <hidsdi.h>
 #    include <queue>
 
+#    if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+
 namespace Engine {
 namespace Input {
 
@@ -80,5 +82,7 @@ namespace Input {
 
 }
 }
+
+#endif
 
 #endif

@@ -3,7 +3,7 @@
 namespace Engine {
 namespace Render {
 
-    struct Program;
+    struct Pipeline;
     struct GPUMeshData;
     struct Texture;
     struct Material;

@@ -12,8 +12,8 @@
 
 #include "Madgine/render/rendertarget.h"
 
-#include "programloaderlib.h"
-#include "programloader.h"
+#include "pipelineloaderlib.h"
+#include "pipelineloader.h"
 
 #include "shadercodegenerator.h"
 
@@ -38,17 +38,18 @@ namespace Render {
     struct Provider {
         std::string_view mName;
         ExtendedValueTypeDesc mType;
-        std::string_view mGuardName;        
+        std::string_view mGuardName;
     };
 
     static constexpr std::array<Provider, 7> sProviders {
-        { { "pos", toValueTypeDesc<Vector3>(), "HAS_POSITION0" },
-            { "pos2", toValueTypeDesc<Vector2>(), "HAS_POSITION1" },
-            { "color", toValueTypeDesc<Vector4>(), "HAS_COLOR0" },
-            { "normal", toValueTypeDesc<Vector4>(), "HAS_NORMAL0" },
-            { "UV", toValueTypeDesc<Vector2>(), "HAS_TEXCOORD0" },
-            { "boneIDs", toValueTypeDesc<Vector4i>(), "HAS_BONEINDICES0" },
-            { "weights", toValueTypeDesc<Vector4>(), "HAS_WEIGHTS0" } }
+        { { "pos", toValueTypeDesc<Vector3>(), "HAS_POS_3D" },
+            //{ "pos", toValueTypeDesc<Vector4>(), "HAS_POS_4D" },
+            { "pos2", toValueTypeDesc<Vector2>(), "HAS_POS2" },
+            { "normal", toValueTypeDesc<Vector3>(), "HAS_NORMAL" },
+            { "color", toValueTypeDesc<Vector4>(), "HAS_COLOR" },
+            { "UV", toValueTypeDesc<Vector2>(), "HAS_UV" },
+            { "boneIDs", toValueTypeDesc<Vector4i>(), "HAS_BONE_INDICES" },
+            { "weights", toValueTypeDesc<Vector4>(), "HAS_BONE_WEIGHTS" } }
     };
 
     /*std::string_view Python3FunctionNode::name() const
@@ -125,12 +126,12 @@ namespace Render {
 
     ExtendedValueTypeDesc MeshRendererNode::dataInType(uint32_t index, bool bidir) const
     {
-        return index == 0 ? toValueTypeDesc<Render::RenderTarget *>() : toValueTypeDesc<Render::GPUMeshLoader::ResourceType *>();
+        return index == 0 ? toValueTypeDesc<Render::RenderTarget *>() : toValueTypeDesc<Render::GPUMeshLoader::Resource *>();
     }
 
     struct MeshRendererNodeInterpret : NodeGraph::NodeInterpreterData {
-        Render::ProgramLoader::PtrType mHandle;
-        Render::GPUMeshLoader::HandleType mMesh;
+        Render::PipelineLoader::Instance mPipeline;
+        Render::GPUMeshLoader::Handle mMesh;
     };
 
     void MeshRendererNode::interpret(NodeGraph::NodeInterpreter &interpreter, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const
@@ -159,21 +160,25 @@ namespace Render {
             gen.generate(dummy, this);
             gen.mFile.endFunction();
 
-            interpret->mHandle.createUnnamed(std::move(gen.mFile));
+            std::vector<size_t> bufferSizes;
 
             for (GPUBufferCodeGeneratorData *buffer : gen.mBuffers) {
-                throw 0; //??
-                //interpret->mHandle.setParametersSize(buffer->mIndex, buffer->mInterpretData->mBuffer.mSize);
-
-                buffer->mInterpretData->mMapper = [&ptr { interpret->mHandle }, index { buffer->mIndex }]() mutable {
-                    return ptr.mapParameters(index);
-                };
-
-                auto targetBuffer = buffer->mInterpretData->mMapper();
-                std::memcpy(targetBuffer.mData, buffer->mInterpretData->mBuffer.mData, buffer->mInterpretData->mBuffer.mSize);
+                bufferSizes.push_back(buffer->mInterpretData->mBuffer.mSize);
             }
 
-            //interpret->mHandle.create("test");
+            interpret->mPipeline.createGenerated({ .vs = "node", .ps = "node", .bufferSizes = std::move(bufferSizes) }, std::move(gen.mFile));
+
+            for (GPUBufferCodeGeneratorData *buffer : gen.mBuffers) {
+                buffer->mInterpretData->mMapper = [&pipeline { interpret->mPipeline }, index { buffer->mIndex }]() mutable {
+                    WritableByteBuffer buffer;
+                    if (pipeline)
+                        buffer = pipeline.mapParameters(index);
+                    return buffer;
+                };
+
+                //auto targetBuffer = buffer->mInterpretData->mMapper();
+                //std::memcpy(targetBuffer.mData, buffer->mInterpretData->mBuffer.mData, buffer->mInterpretData->mBuffer.mSize);
+            }
 
             data = std::move(interpret);
         }
@@ -186,18 +191,20 @@ namespace Render {
 
         ValueType meshV;
         interpreter.read(meshV, 1);
-        Render::GPUMeshLoader::ResourceType *mesh = ValueType_as<Render::GPUMeshLoader::ResourceType *>(meshV);
+        Render::GPUMeshLoader::Resource *mesh = ValueType_as<Render::GPUMeshLoader::Resource *>(meshV);
 
         if (mesh) {
             if (interpretData->mMesh.resource() != mesh)
                 interpretData->mMesh = mesh;
-            Material mat {
-                0,
-                0,
-                { 1, 1, 1, 1 }
-            };
-            //TODO: Material;
-            target->renderMesh(interpretData->mMesh, interpretData->mHandle, &mat);
+            if (interpretData->mMesh.available()) {
+                Material mat {
+                    0,
+                    0,
+                    { 1, 1, 1, 1 }
+                };
+                //TODO: Material;
+                target->renderMesh(interpretData->mMesh, interpretData->mPipeline, &mat);
+            }
         }
     }
 

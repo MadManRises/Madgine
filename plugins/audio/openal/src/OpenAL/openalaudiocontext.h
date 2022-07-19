@@ -1,7 +1,9 @@
 #pragma once
 
-#include "Madgine/app/globalapibase.h"
-#include "Madgine/app/globalapicollector.h"
+#include "Madgine/base/globalapibase.h"
+#include "Madgine/base/globalapicollector.h"
+
+#include "Generic/functor.h"
 
 struct ALCdevice;
 struct ALCcontext;
@@ -9,19 +11,21 @@ struct ALCcontext;
 namespace Engine {
 namespace Audio {
 
-    struct MADGINE_OPENAL_EXPORT OpenALAudioContext : public App::GlobalAPI<OpenALAudioContext> {
-        OpenALAudioContext(App::Application &app);
+    struct MADGINE_OPENAL_EXPORT OpenALAudioContext : public Base::GlobalAPI<OpenALAudioContext> {
+        OpenALAudioContext(Base::Application &app);
         ~OpenALAudioContext();
 
         virtual Threading::Task<bool> init() override;
         virtual Threading::Task<void> finalize() override;
 
+        virtual std::string_view key() const override;
+
     private:
-        ALCdevice *mDevice = nullptr;
-        ALCcontext *mContext = nullptr;
+        std::unique_ptr<ALCdevice, Functor<&alcCloseDevice>> mDevice;
+        std::unique_ptr<ALCcontext, Functor<&alcDestroyContext>> mContext;
     };
 
 }
 }
 
-RegisterType(Engine::Audio::OpenALAudioContext);
+REGISTER_TYPE(Engine::Audio::OpenALAudioContext)

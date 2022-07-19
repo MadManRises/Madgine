@@ -7,6 +7,8 @@
 
 #include "../serializemanager.h"
 
+#include "base64/base64.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -200,6 +202,15 @@ namespace Serialize {
         return {};
     }
 
+    StreamResult SerializeStream::operator>>(ByteBuffer &b)
+    {
+        std::string base64Encoded;
+        STREAM_PROPAGATE_ERROR(operator>>(base64Encoded));
+        if (!Base64::decode(b, base64Encoded))
+            return STREAM_PARSE_ERROR(*this, false) << "Invalid Base64 String '" << base64Encoded << "'";
+        return {};
+    }
+
     StreamResult SerializeStream::read(Void &)
     {
         return {};
@@ -259,6 +270,11 @@ namespace Serialize {
     {
         Stream::write<uint32_t>(b.mSize);
         Stream::write(b.mData, b.mSize);
+    }
+
+    SerializeStream &SerializeStream::operator<<(const ByteBuffer &b)
+    {
+        return operator<<(Base64::encode(b));        
     }
 
     void SerializeStream::write(const Void &)

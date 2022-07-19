@@ -7,7 +7,7 @@ namespace Render {
 
     struct OpenGLShader;
     struct OpenGLBuffer;
-    struct OpenGLProgram;
+    struct OpenGLPipelineInstance;
     struct OpenGLVertexArray;
 
     struct OpenGLMeshData;

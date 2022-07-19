@@ -12,7 +12,7 @@ namespace Engine {
 namespace Physics {
 
     struct MADGINE_BULLET_EXPORT RigidBody : Scene::Entity::EntityComponent<RigidBody> {
-        SERIALIZABLEUNIT(RigidBody);
+        SERIALIZABLEUNIT(RigidBody)
 
         using Container = FreeListContainer<Scene::Entity::EntityComponentContainerImpl<std::vector>, Scene::Entity::EntityComponentFreeListConfig>;
 
@@ -68,9 +68,9 @@ namespace Physics {
 
         PhysicsManager *mgr();
 
-        void setShape(typename CollisionShapeManager::HandleType handle);
+        void setShape(typename CollisionShapeManager::Handle handle);
         void setShapeName(std::string_view name);
-        CollisionShapeManager::ResourceType *getShape() const;
+        CollisionShapeManager::Resource *getShape() const;
         CollisionShapeInstance *getShapeInstance() const;
 
         void add();
@@ -90,5 +90,5 @@ namespace Physics {
 }
 }
 
-RegisterType(Engine::Physics::RigidBody);
-RegisterType(Engine::Scene::Entity::EntityComponentList<Engine::Physics::RigidBody>);
+REGISTER_TYPE(Engine::Physics::RigidBody)
+REGISTER_TYPE(Engine::Scene::Entity::EntityComponentList<Engine::Physics::RigidBody>)

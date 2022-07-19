@@ -5,7 +5,7 @@
 namespace ClickBrick {
 
     struct MainMenuHandler : Engine::Input::GuiHandler<MainMenuHandler> {
-        SERIALIZABLEUNIT(MainMenuHandler);
+        SERIALIZABLEUNIT(MainMenuHandler)
 
         MainMenuHandler(Engine::Input::UIManager &ui);
 
@@ -18,4 +18,4 @@ namespace ClickBrick {
 
 }
 
-RegisterType(ClickBrick::MainMenuHandler);
+REGISTER_TYPE(ClickBrick::MainMenuHandler)

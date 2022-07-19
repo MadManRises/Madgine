@@ -1,6 +1,6 @@
-add_subdirectory(resources)
 add_subdirectory(base)
 add_subdirectory(tools)
+add_subdirectory(resources)
 add_subdirectory(nodegraph)
 add_subdirectory(client)
 add_subdirectory(scene)

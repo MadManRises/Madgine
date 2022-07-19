@@ -66,7 +66,7 @@ namespace NodeGraph {
 
     ExtendedValueTypeDesc FunctionNode::dataProviderType(uint32_t index, bool bidir ) const
     {
-        return *mFunction->mReturnType;
+        return mFunction->mReturnType;
     }
 
     void FunctionNode::interpretRead(NodeInterpreter &interpreter, ValueType &retVal, uint32_t providerIndex, std::unique_ptr<NodeInterpreterData> &data) const

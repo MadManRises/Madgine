@@ -37,4 +37,4 @@ namespace Scene {
 }
 }
 
-RegisterType(Engine::Scene::Entity::EntityComponentListBase);
+REGISTER_TYPE(Engine::Scene::Entity::EntityComponentListBase)

@@ -34,4 +34,4 @@ namespace NodeGraph {
 }
 }
 
-RegisterType(Engine::NodeGraph::PumpNode);
+REGISTER_TYPE(Engine::NodeGraph::PumpNode)

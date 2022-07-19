@@ -1,3 +1,0 @@
-\page Tasks Tasks
-
-# Tasks

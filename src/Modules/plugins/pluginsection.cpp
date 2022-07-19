@@ -139,9 +139,8 @@ namespace Plugins {
             }
 
             if (unloadExclusive) {
-                if (unloadPlugin(unloadExclusive)) {
-                    return false;
-                }
+                unloadExclusive->unloadDependents(mMgr);
+                unloadExclusive->setLoaded(false);
             }
         }
 
@@ -165,7 +164,7 @@ namespace Plugins {
         p->unloadDependents(mMgr);
         p->setLoaded(false);
 
-        return true;
+        return false;
     }
 
     std::map<std::string, Plugin>::const_iterator PluginSection::begin() const

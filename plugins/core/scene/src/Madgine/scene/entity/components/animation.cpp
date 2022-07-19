@@ -31,7 +31,7 @@ namespace Engine {
 namespace Scene {
     namespace Entity {
 
-        void Animation::set(Render::AnimationLoader::HandleType handle)
+        void Animation::set(Render::AnimationLoader::Handle handle)
         {
             mAnimationList = std::move(handle);
             setCurrentAnimation({});
@@ -50,7 +50,7 @@ namespace Scene {
             refreshCache();
         }
 
-        Render::AnimationLoader::ResourceType *Animation::get() const
+        Render::AnimationLoader::Resource *Animation::get() const
         {
             return mAnimationList.resource();
         }

@@ -2,8 +2,6 @@
 
 #include "directx12pixelshaderloader.h"
 
-#include "util/directx12pixelshader.h"
-
 #include "Meta/keyvalue/metatable_impl.h"
 
 #include "directx12shadercodegen.h"
@@ -14,40 +12,47 @@
 
 #include "Madgine/render/shadinglanguage/slloader.h"
 
+#include "directx12rendercontext.h"
+
 UNIQUECOMPONENT(Engine::Render::DirectX12PixelShaderLoader);
 
 namespace Engine {
 namespace Render {
 
-    std::string GetLatestPixelProfile()
+    std::wstring GetLatestPixelProfile()
     {
-        return "ps_5_1";
+        return L"ps_6_0";
     }
 
     DirectX12PixelShaderLoader::DirectX12PixelShaderLoader()
         : ResourceLoader({ ".PS_hlsl" })
     {
+        HRESULT hr = DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&mLibrary));
+        //if(FAILED(hr)) Handle error...
+
+        hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&mCompiler));
+        //if(FAILED(hr)) Handle error
     }
 
-    void DirectX12PixelShaderLoader::HandleType::create(const std::string &name, const CodeGen::ShaderFile &file, DirectX12PixelShaderLoader *loader)
+    Threading::TaskFuture<bool> DirectX12PixelShaderLoader::Handle::create(std::string_view name, const CodeGen::ShaderFile &file, DirectX12PixelShaderLoader *loader)
     {
-        *this = DirectX12PixelShaderLoader::loadManual(
-            name, {}, [=, &file](DirectX12PixelShaderLoader *loader, DirectX12PixelShader &shader, const DirectX12PixelShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, loader);
+        return Base::Handle::create(
+            name, {}, [=, &file](DirectX12PixelShaderLoader *loader, ReleasePtr<IDxcBlob> &shader, const DirectX12PixelShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, loader);
     }
 
-    bool DirectX12PixelShaderLoader::loadImpl(DirectX12PixelShader &shader, ResourceDataInfo &info)
+    bool DirectX12PixelShaderLoader::loadImpl(ReleasePtr<IDxcBlob> &shader, ResourceDataInfo &info)
     {
         std::string source = info.resource()->readAsText();
 
         return loadFromSource(shader, info.resource()->path().stem(), source);
     }
 
-    void DirectX12PixelShaderLoader::unloadImpl(DirectX12PixelShader &shader)
+    void DirectX12PixelShaderLoader::unloadImpl(ReleasePtr<IDxcBlob> &shader)
     {
         shader.reset();
     }
 
-    bool DirectX12PixelShaderLoader::create(DirectX12PixelShader &shader, ResourceType *res, const CodeGen::ShaderFile &file)
+    bool DirectX12PixelShaderLoader::create(ReleasePtr<IDxcBlob> &shader, Resource *res, const CodeGen::ShaderFile &file)
     {
         if (res->path().empty()) {
             Filesystem::Path dir = Filesystem::appDataPath() / "generated/shader/directx12";
@@ -68,10 +73,10 @@ namespace Render {
         return loadFromSource(shader, res->name(), ss.str());
     }
 
-    bool DirectX12PixelShaderLoader::loadFromSource(DirectX12PixelShader &shader, std::string_view name, std::string source)
+    bool DirectX12PixelShaderLoader::loadFromSource(ReleasePtr<IDxcBlob> &shader, std::string_view name, std::string source)
     {
-        std::string profile = "latest";
-        if (profile == "latest")
+        std::wstring profile = L"latest";
+        if (profile == L"latest")
             profile = GetLatestPixelProfile();
 
         std::map<std::string, size_t> files;
@@ -83,52 +88,53 @@ namespace Render {
             },
             name, files);
 
-        const char *cSource = source.data();
+        DxcBuffer sourceBuffer;
+        sourceBuffer.Ptr = source.c_str();
+        sourceBuffer.Size = source.size();
+        sourceBuffer.Encoding = CP_UTF8;
 
-        ID3DBlob *pShaderBlob = nullptr;
-        ID3DBlob *pErrorBlob = nullptr;
+        std::vector<LPCWSTR> arguments;
+        arguments.push_back(L"-E");
+        arguments.push_back(L"main");
 
-        UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
-#if _DEBUG
-        flags |= D3DCOMPILE_DEBUG;
-#endif
+        arguments.push_back(L"-T");
+        arguments.push_back(profile.c_str());
 
-        HRESULT hr = D3DCompile(cSource, source.size(), name.data(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", profile.c_str(),
-            flags, 0, &pShaderBlob, &pErrorBlob);
-
+        ReleasePtr<IDxcResult> result;
+        HRESULT hr = mCompiler->Compile(
+            &sourceBuffer, // pSource
+            arguments.data(), // pSourceName
+            arguments.size(), // pEntryPoint
+            nullptr,
+            IID_PPV_ARGS(&result)); // ppResult
+        if (SUCCEEDED(hr))
+            result->GetStatus(&hr);
         if (FAILED(hr)) {
             LOG_ERROR("Loading of Shader '" << name << "' failed:");
-            if (pErrorBlob) {
-                LOG_ERROR((char *)pErrorBlob->GetBufferPointer());
 
-                if (pShaderBlob) {
-                    pShaderBlob->Release();
-                    pShaderBlob = nullptr;
-                }
-                if (pErrorBlob) {
-                    pErrorBlob->Release();
-                    pErrorBlob = nullptr;
+            if (result) {
+                ReleasePtr<IDxcBlobUtf8> pErrorBlob;
+                hr = result->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrorBlob), nullptr);
+                if (SUCCEEDED(hr) && pErrorBlob) {
+                    LOG_ERROR((char *)pErrorBlob->GetBufferPointer());
                 }
             }
-
             return false;
         }
-
-        shader = { pShaderBlob };
-
-        if (pErrorBlob) {
-            pErrorBlob->Release();
-            pErrorBlob = nullptr;
-        }
+        result->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shader), nullptr);
 
         return true;
     }
 
+    Threading::TaskQueue *DirectX12PixelShaderLoader::loadingTaskQueue() const
+    {
+        return DirectX12RenderContext::renderQueue();
+    }
 }
 }
 
 METATABLE_BEGIN(Engine::Render::DirectX12PixelShaderLoader)
 METATABLE_END(Engine::Render::DirectX12PixelShaderLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::DirectX12PixelShaderLoader::ResourceType, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Render::DirectX12PixelShaderLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::DirectX12PixelShaderLoader::Resource, Engine::Resources::ResourceBase)
+METATABLE_END(Engine::Render::DirectX12PixelShaderLoader::Resource)

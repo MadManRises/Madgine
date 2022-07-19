@@ -2,10 +2,10 @@
 
 #include "Madgine/render/renderpass.h"
 
-#include "programloader.h"
+#include "pipelineloader.h"
 
-#include "shadowrenderpass.h"
 #include "pointshadowrenderpass.h"
+#include "shadowrenderpass.h"
 
 namespace Engine {
 namespace Render {
@@ -26,7 +26,7 @@ namespace Render {
         float mDiffuseFactor = 0.7f;
 
     private:
-        ProgramLoader::PtrType mProgram;
+        PipelineLoader::Instance mPipeline;
 
         std::unique_ptr<Render::RenderTarget> mShadowMap;
         std::unique_ptr<Render::RenderTarget> mPointShadowMaps[2];

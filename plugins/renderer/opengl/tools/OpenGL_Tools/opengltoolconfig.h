@@ -10,7 +10,7 @@ namespace Tools {
 
     struct OpenGLToolConfig : public Tool<OpenGLToolConfig> {
 
-        SERIALIZABLEUNIT(OpenGLToolConfig);
+        SERIALIZABLEUNIT(OpenGLToolConfig)
 
         OpenGLToolConfig(ImRoot &root);
         OpenGLToolConfig(const SceneEditor &) = delete;
@@ -29,4 +29,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::OpenGLToolConfig);
+REGISTER_TYPE(Engine::Tools::OpenGLToolConfig)

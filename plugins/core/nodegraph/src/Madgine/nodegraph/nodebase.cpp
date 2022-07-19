@@ -45,6 +45,11 @@ namespace NodeGraph {
         return 1 + index;
     }
 
+    const std::vector<Pin> &NodeBase::flowInSources(uint32_t index) const
+    {
+        return mFlowInPins[index].mSources;
+    }
+
     Pin NodeBase::flowOutTarget(uint32_t index) const
     {
         return mFlowOutPins[index].mTarget;
@@ -83,9 +88,19 @@ namespace NodeGraph {
         return 3001 + index;
     }
 
+    const std::vector<Pin> &NodeBase::dataReceiverSources(uint32_t index) const
+    {
+        return mDataReceiverPins[index].mSources;
+    }
+
     uint32_t NodeBase::dataReceiverId(uint32_t index)
     {
         return 4001 + index;
+    }
+
+    const std::vector<Pin> &NodeBase::dataProviderTargets(uint32_t index) const
+    {
+        return mDataProviderPins[index].mTargets;
     }
 
     uint32_t NodeBase::dataProviderId(uint32_t index)
@@ -127,62 +142,171 @@ namespace NodeGraph {
     {
     }
 
-    void NodeBase::onDataProviderRemove(Pin pin)
+    void NodeBase::removeFlowOutPin(uint32_t index)
     {
-        for (uint32_t i = 0; i < dataInCount(); ++i) {
-            Pin &target = mDataInPins[i].mSource;
+        mGraph.onFlowOutRemove(this, index);
+        if (mFlowOutPins[index].mTarget)
+            mGraph.disconnectFlow({ mGraph.nodeIndex(this), index });
+        mFlowOutPins.erase(mFlowOutPins.begin() + index);
+    }
+
+    void NodeBase::removeFlowInPin(uint32_t index)
+    {
+        mGraph.onFlowInRemove(this, index);
+        while (!mFlowInPins[index].mSources.empty()) {
+            mGraph.disconnectFlow(mFlowInPins[index].mSources.front());
+        }
+        mFlowInPins.erase(mFlowInPins.begin() + index);
+    }
+
+    void NodeBase::removeDataInPin(uint32_t index)
+    {
+        mGraph.onDataInRemove(this, index);
+        if (mDataInPins[index].mSource)
+            mGraph.disconnectDataIn({ mGraph.nodeIndex(this), index });
+        mDataInPins.erase(mDataInPins.begin() + index);
+    }
+
+    void NodeBase::removeDataProviderPin(uint32_t index)
+    {
+        mGraph.onDataProviderRemove(this, index);
+        while (!mDataProviderPins[index].mTargets.empty()) {
+            mGraph.disconnectDataIn(mDataProviderPins[index].mTargets.front());
+        }
+        mDataProviderPins.erase(mDataProviderPins.begin() + index);
+    }
+
+    void NodeBase::removeDataOutPin(uint32_t index)
+    {
+        mGraph.onDataOutRemove(this, index);
+        if (mDataOutPins[index].mTarget)
+            mGraph.disconnectDataOut({ mGraph.nodeIndex(this), index });
+        mDataOutPins.erase(mDataOutPins.begin() + index);
+    }
+
+    void NodeBase::removeDataReceiverPin(uint32_t index)
+    {
+        mGraph.onDataReceiverRemove(this, index);
+        while (!mDataReceiverPins[index].mSources.empty()) {
+            mGraph.disconnectDataOut(mDataReceiverPins[index].mSources.front());
+        }
+        mDataReceiverPins.erase(mDataReceiverPins.begin() + index);
+    }
+
+    
+    void NodeBase::onFlowInRemove(Pin pin)
+    {
+        for (FlowInPinPrototype &inPin : mFlowInPins) {
+            for (Pin &source : inPin.mSources) {
+                if (source.mNode == pin.mNode) {
+                    if (source && source.mIndex > pin.mIndex) {
+                        --source.mIndex;
+                    }
+                }
+            }
+        }
+    }
+
+    void NodeBase::onFlowOutRemove(Pin pin)
+    {
+        for (FlowOutPinPrototype &outPin : mFlowOutPins) {
+            Pin &target = outPin.mTarget;
             if (target.mNode == pin.mNode) {
-                if (target.mIndex == pin.mIndex) {
-                    mGraph.disconnectDataIn({ mGraph.nodeIndex(this), i });
-                } else if (target && target.mIndex > pin.mIndex) {
+                if (target && target.mIndex > pin.mIndex) {
                     --target.mIndex;
                 }
             }
         }
     }
 
-    void NodeBase::onNodeRemove(uint32_t oldIndex, uint32_t newIndex)
+    
+    void NodeBase::onDataOutRemove(Pin pin)
     {
-        for (FlowOutPinPrototype& pin : mFlowOutPins) {
-            if (pin.mTarget.mNode == newIndex)
-                pin.mTarget = {};
-            else if (pin.mTarget.mNode == oldIndex)
+        for (DataReceiverPinPrototype &receiver : mDataReceiverPins) {
+            for (Pin &source : receiver.mSources) {
+                if (source.mNode == pin.mNode) {
+                    if (source && source.mIndex > pin.mIndex) {
+                        --source.mIndex;
+                    }
+                }
+            }
+        }
+    }
+
+    void NodeBase::onDataReceiverRemove(Pin pin)
+    {
+        for (DataOutPinPrototype &outPin : mDataOutPins) {
+            Pin &target = outPin.mTarget;
+            if (target.mNode == pin.mNode) {
+                if (target && target.mIndex > pin.mIndex) {
+                    --target.mIndex;
+                }
+            }
+        }
+    }
+
+
+    void NodeBase::onDataInRemove(Pin pin)
+    {
+        for (DataProviderPinPrototype &provider : mDataProviderPins) {
+            for (Pin &target : provider.mTargets) {
+                if (target.mNode == pin.mNode) {
+                    if (target && target.mIndex > pin.mIndex) {
+                        --target.mIndex;
+                    }
+                }
+            }
+        }
+    }
+
+    void NodeBase::onDataProviderRemove(Pin pin)
+    {
+        for (DataInPinPrototype &inPin : mDataInPins) {
+            Pin &source = inPin.mSource;
+            if (source.mNode == pin.mNode) {
+                if (source && source.mIndex > pin.mIndex) {
+                    --source.mIndex;
+                }
+            }
+        }
+    }
+
+    void NodeBase::onNodeReindex(uint32_t oldIndex, uint32_t newIndex)
+    {
+        for (FlowOutPinPrototype &pin : mFlowOutPins) {
+            assert(pin.mTarget.mNode != newIndex);
+            if (pin.mTarget.mNode == oldIndex)
                 pin.mTarget.mNode = newIndex;
         }
         for (DataInPinPrototype &pin : mDataInPins) {
-            if (pin.mSource.mNode == newIndex)
-                pin.mSource = {};
-            else if (pin.mSource.mNode == oldIndex)
+            assert(pin.mSource.mNode != newIndex);
+            if (pin.mSource.mNode == oldIndex)
                 pin.mSource.mNode = newIndex;
         }
         for (DataOutPinPrototype &pin : mDataOutPins) {
-            if (pin.mTarget.mNode == newIndex)
-                pin.mTarget = {};
-            else if (pin.mTarget.mNode == oldIndex)
+            assert(pin.mTarget.mNode != newIndex);
+            if (pin.mTarget.mNode == oldIndex)
                 pin.mTarget.mNode = newIndex;
         }
 
-        for (FlowInPinPrototype& pin : mFlowInPins) {
+        for (FlowInPinPrototype &pin : mFlowInPins) {
             for (Pin &source : pin.mSources) {
-                if (source.mNode == newIndex)
-                    source = {};
-                else if (source.mNode == oldIndex)
+                assert(source.mNode != newIndex);
+                if (source.mNode == oldIndex)
                     source.mNode = newIndex;
             }
         }
         for (DataReceiverPinPrototype &pin : mDataReceiverPins) {
             for (Pin &source : pin.mSources) {
-                if (source.mNode == newIndex)
-                    source = {};
-                else if (source.mNode == oldIndex)
+                assert(source.mNode != newIndex);
+                if (source.mNode == oldIndex)
                     source.mNode = newIndex;
             }
         }
         for (DataProviderPinPrototype &pin : mDataProviderPins) {
             for (Pin &target : pin.mTargets) {
-                if (target.mNode == newIndex)
-                    target = {};
-                else if (target.mNode == oldIndex)
+                assert(target.mNode != newIndex);
+                if (target.mNode == oldIndex)
                     target.mNode = newIndex;
             }
         }

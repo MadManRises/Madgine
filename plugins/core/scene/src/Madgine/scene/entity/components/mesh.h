@@ -21,16 +21,16 @@ namespace Scene {
 
             AABB aabb() const;
 
-            void set(Render::GPUMeshLoader::HandleType handle);            
+            void set(Render::GPUMeshLoader::Handle handle);            
 
-            Render::GPUMeshLoader::ResourceType *get() const;
-            const Render::GPUMeshLoader::HandleType &handle() const;
+            Render::GPUMeshLoader::Resource *get() const;
+            const Render::GPUMeshLoader::Handle &handle() const;
 
             void setVisible(bool vis);
             bool isVisible() const;
 
         private:
-            typename Render::GPUMeshLoader::HandleType mMesh;
+            typename Render::GPUMeshLoader::Handle mMesh;
             uint32_t mMaterial = 0;
             bool mIsVisible = true;
         };
@@ -41,5 +41,5 @@ namespace Scene {
 }
 }
 
-RegisterType(Engine::Scene::Entity::Mesh);
-RegisterType(Engine::Scene::Entity::EntityComponentList<Engine::Scene::Entity::Mesh>);
+REGISTER_TYPE(Engine::Scene::Entity::Mesh)
+REGISTER_TYPE(Engine::Scene::Entity::EntityComponentList<Engine::Scene::Entity::Mesh>)

@@ -15,10 +15,10 @@ namespace Tools {
 
         virtual void newFrame() override;
 
-        virtual void renderDrawList(ImGuiViewport *vp) override;
+        virtual void renderViewport(ImGuiViewport *vp) override;
     };
 
 }
 }
 
-RegisterType(Engine::Tools::OpenGLImRoot);
+REGISTER_TYPE(Engine::Tools::OpenGLImRoot)

@@ -108,7 +108,7 @@ namespace Scene {
                 : mHandle { other.handle() }
                 , mSceneMgr(other.sceneMgr())
             {
-                assert(!other || component_index<T>() == other.type());
+                assert(!other || UniqueComponent::component_index<T>() == other.type());
             }
 
             template <typename U>
@@ -175,7 +175,7 @@ namespace Scene {
 
             T *get() const
             {
-                return mHandle ? static_cast<T *>(resolveEntityComponentHandle(mSceneMgr, component_index<T>(), mHandle)) : nullptr;
+                return mHandle ? static_cast<T *>(resolveEntityComponentHandle(mSceneMgr, UniqueComponent::component_index<T>(), mHandle)) : nullptr;
             }
 
             T *operator->() const

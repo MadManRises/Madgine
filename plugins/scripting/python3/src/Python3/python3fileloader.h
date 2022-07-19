@@ -14,10 +14,10 @@ namespace Scripting {
 
             using Base = Resources::ResourceLoader<Python3FileLoader, PyModulePtr, std::list<Placeholder<0>>>;
 
-            struct MADGINE_PYTHON3_EXPORT HandleType : Base::HandleType {
-                using Base::HandleType::HandleType;
-                HandleType(Base::HandleType handle)
-                    : Base::HandleType(handle)
+            struct MADGINE_PYTHON3_EXPORT Handle : Base::Handle {
+                using Base::Handle::Handle;
+                Handle(Base::Handle handle)
+                    : Base::Handle(handle)
                 {
                 }
             };
@@ -40,4 +40,4 @@ namespace Scripting {
 }
 }
 
-RegisterType(Engine::Scripting::Python3::Python3FileLoader);
+REGISTER_TYPE(Engine::Scripting::Python3::Python3FileLoader)

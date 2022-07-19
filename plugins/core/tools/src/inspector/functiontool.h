@@ -38,4 +38,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::FunctionTool);
+REGISTER_TYPE(Engine::Tools::FunctionTool)

@@ -2,16 +2,16 @@
 
 namespace Engine {
 
-template <typename Sequence, template <size_t...> typename Template>
+template <typename Sequence, template <size_t...> typename T>
 struct index_sequence_instantiate;
 
-template <size_t... Is, template <size_t...> typename Template>
-struct index_sequence_instantiate<std::index_sequence<Is...>, Template> {
-    using type = Template<Is...>;
+template <size_t... Is, template <size_t...> typename T>
+struct index_sequence_instantiate<std::index_sequence<Is...>, T> {
+    using type = T<Is...>;
 };
 
-template <typename Sequence, template <size_t...> typename Template>
-using index_sequence_instantiate_t = typename index_sequence_instantiate<Sequence, Template>::type;
+template <typename Sequence, template <size_t...> typename T>
+using index_sequence_instantiate_t = typename index_sequence_instantiate<Sequence, T>::type;
 
 template <typename...>
 struct type_pack;
@@ -47,17 +47,11 @@ struct type_pack<Head, Ty...> {
     struct helpers {
         template <size_t I>
         struct recurse : type_pack<Ty...>::helpers::template recurse<I - 1> {
-            using front = typename type_pack<Ty...>::helpers::template recurse<I - 1>::front::template prepend<Head>;
         };
 
         template <>
         struct recurse<0> {
-            using front = type_pack<>;
             using type = Head;
-            using tail = type_pack<Ty...>;
-
-            template <typename T>
-            using repeat = type_pack<>;
         };
 
         template <typename, typename T>
@@ -72,8 +66,9 @@ struct type_pack<Head, Ty...> {
             static constexpr IntType index = 0;
         };
 
-        template <typename Pack, typename T>
-        requires Pack::template contains<T> struct is_or_contains<Pack, T> : is_or_contains<T, T> {
+        template <typename... Ty2, typename T>
+        requires type_pack<Ty2...>::template contains<T> 
+        struct is_or_contains<type_pack<Ty2...>, T> : is_or_contains<T, T> {
         };
     };
 
@@ -84,8 +79,6 @@ struct type_pack<Head, Ty...> {
 
     template <template <typename> typename F>
     using transform = type_pack<F<Head>, F<Ty>...>;
-    template <template <typename> typename F, size_t n>
-    using transform_nth = typename helpers::template recurse<n>::front::template append<F<typename helpers::template recurse<n>::type>>::template concat<typename helpers::template recurse<n>::tail>;
 
     template <template <typename> typename Filter>
     using filter = typename type_pack<Ty...>::template filter<Filter>::template prepend_if<Filter<Head>::value, Head>;
@@ -121,12 +114,13 @@ struct type_pack<Head, Ty...> {
 
     template <typename T>
     struct unique {
-        static_assert(dependent_bool<T, false>::value, "type_pack containing 2 or more elements passed to type_pack_unpack_unique");
+        static_assert(dependent_bool<T, false>::value, "unpack_unique passed to type_pack containing 2 or more elements");
     };
 
     template <typename Default = void>
     using unpack_unique = typename type_pack<Ty...>::template unique<Head>;
 };
+
 
 template <typename Pack>
 using type_pack_first = typename Pack::first;

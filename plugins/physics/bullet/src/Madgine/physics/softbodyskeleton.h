@@ -12,7 +12,7 @@ namespace Engine {
 namespace Physics {
 
     struct MADGINE_BULLET_EXPORT SoftBodySkeleton : Engine::Scene::Entity::EntityComponent<SoftBodySkeleton> {
-        SERIALIZABLEUNIT(SoftBodySkeleton);
+        SERIALIZABLEUNIT(SoftBodySkeleton)
 
         SoftBodySkeleton(const ObjectPtr &data = {});
         SoftBodySkeleton(SoftBodySkeleton &&other);
@@ -46,5 +46,5 @@ namespace Physics {
 }
 }
 
-RegisterType(Engine::Physics::SoftBodySkeleton);
-RegisterType(Engine::Scene::Entity::EntityComponentList<Engine::Physics::SoftBodySkeleton>);
+REGISTER_TYPE(Engine::Physics::SoftBodySkeleton)
+REGISTER_TYPE(Engine::Scene::Entity::EntityComponentList<Engine::Physics::SoftBodySkeleton>)

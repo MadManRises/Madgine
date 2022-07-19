@@ -14,8 +14,6 @@
 
 #include "gpumeshloader.h"
 
-#include "programloader.h"
-
 namespace Engine {
 namespace Tools {
 
@@ -24,9 +22,10 @@ namespace Tools {
         , mPriority(priority)
     {
 
-        mProgram.create("grid", { 0, sizeof(GridPerFrame) });
-
         mMesh.load("Plane");
+
+        mPipeline.createStatic({ .vs = "grid", .ps = "grid", .format = type_holder<Compound<Render::VertexPos_4D>>, .bufferSizes = { 0, sizeof(GridPerFrame) } });
+
     }
 
     void GridPass::render(Render::RenderTarget *target, size_t iteration)
@@ -41,12 +40,12 @@ namespace Tools {
         Vector2i size = target->size();
         float aspectRatio = float(size.x) / size.y;
         {
-            auto parameters = mProgram.mapParameters(1).cast<GridPerFrame>();
+            auto parameters = mPipeline.mapParameters<GridPerFrame>(1);
 
             parameters->vp = mCamera->getViewProjectionMatrix(aspectRatio);
         }
 
-        target->renderMesh(mMesh, mProgram);
+        target->renderMesh(mMesh, mPipeline);
 
         target->popAnnotation();
     }

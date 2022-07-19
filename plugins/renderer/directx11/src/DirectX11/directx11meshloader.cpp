@@ -18,8 +18,8 @@ VIRTUALUNIQUECOMPONENT(Engine::Render::DirectX11MeshLoader);
 METATABLE_BEGIN_BASE(Engine::Render::DirectX11MeshLoader, Engine::Render::GPUMeshLoader)
 METATABLE_END(Engine::Render::DirectX11MeshLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::DirectX11MeshLoader::ResourceType, Engine::Render::GPUMeshLoader::ResourceType)
-METATABLE_END(Engine::Render::DirectX11MeshLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::DirectX11MeshLoader::Resource, Engine::Render::GPUMeshLoader::Resource)
+METATABLE_END(Engine::Render::DirectX11MeshLoader::Resource)
 
 namespace Engine {
 namespace Render {
@@ -30,80 +30,31 @@ namespace Render {
         getOrCreateManual("Plane", {}, {}, this);
     }
 
-    void Engine::Render::DirectX11MeshLoader::generateImpl(DirectX11MeshData &data, const MeshData &mesh)
+    bool Engine::Render::DirectX11MeshLoader::generate(GPUMeshData &_data, const MeshData &mesh)
     {
-        data.mGroupSize = mesh.mGroupSize;
+        DirectX11MeshData &data = static_cast<DirectX11MeshData &>(_data);
 
         data.mVertices.setData(mesh.mVertices);
 
-        data.mVertices.bindVertex(data.mVAO.mStride);
-
-        if (mesh.mIndices.empty()) {
-            data.mElementCount = mesh.mVertices.mSize / mesh.mVertexSize;
-        } else {
+        if (!mesh.mIndices.empty())
             data.mIndices.setData(mesh.mIndices);
 
-            data.mIndices.bindIndex();
-            data.mElementCount = mesh.mIndices.size();
-        }
-
-        generateMaterials(data, mesh);
-
-        data.mVAO = { data.mVertices, data.mIndices, mesh.mAttributeList };
-    }
-
-    bool DirectX11MeshLoader::generate(GPUMeshData &_data, const MeshData &mesh)
-    {
-        DirectX11MeshData &data = static_cast<DirectX11MeshData &>(_data);
-        data.mAABB = mesh.mAABB;
-
-        generateImpl(data, mesh);
-
-        return true;
-    }
-
-    bool DirectX11MeshLoader::generate(GPUMeshData &_data, MeshData &&mesh)
-    {
-        DirectX11MeshData &data = static_cast<DirectX11MeshData &>(_data);
-        data.mAABB = mesh.mAABB;
-
-        generateImpl(data, mesh);
-
-        return true;
-    }
-
-    void DirectX11MeshLoader::updateImpl(DirectX11MeshData &data, const MeshData &mesh)
-    {
-        data.mGroupSize = mesh.mGroupSize;
-
-        data.mVertices.resize(mesh.mVertices.mSize);
-        std::memcpy(data.mVertices.mapData().mData, mesh.mVertices.mData, mesh.mVertices.mSize);
-
-        if (mesh.mIndices.empty()) {
-            data.mElementCount = mesh.mVertices.mSize / mesh.mVertexSize;
-        } else {
-            data.mIndices.resize(mesh.mIndices.size() * sizeof(uint32_t));
-            std::memcpy(data.mIndices.mapData().mData, mesh.mIndices.data(), mesh.mIndices.size() * sizeof(uint32_t));
-            data.mElementCount = mesh.mIndices.size();
-        }
+        return GPUMeshLoader::generate(data, mesh);
     }
 
     void DirectX11MeshLoader::update(GPUMeshData &_data, const MeshData &mesh)
     {
         DirectX11MeshData &data = static_cast<DirectX11MeshData &>(_data);
 
-        data.mAABB = mesh.mAABB;
+        data.mVertices.resize(mesh.mVertices.mSize);
+        std::memcpy(data.mVertices.mapData().mData, mesh.mVertices.mData, mesh.mVertices.mSize);
 
-        updateImpl(data, mesh);
-    }
+        if (!mesh.mIndices.empty()) {
+            data.mIndices.resize(mesh.mIndices.size() * sizeof(uint32_t));
+            std::memcpy(data.mIndices.mapData().mData, mesh.mIndices.data(), mesh.mIndices.size() * sizeof(uint32_t));
+        }
 
-    void DirectX11MeshLoader::update(GPUMeshData &_data, MeshData &&mesh)
-    {
-        DirectX11MeshData &data = static_cast<DirectX11MeshData &>(_data);
-
-        data.mAABB = mesh.mAABB;
-
-        updateImpl(data, mesh);
+        GPUMeshLoader::update(data, mesh);
     }
 
     void DirectX11MeshLoader::reset(GPUMeshData &data)

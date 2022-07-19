@@ -10,7 +10,7 @@ namespace Util {
         INFO_TYPE,
         WARNING_TYPE,
         ERROR_TYPE
-    );
+    )
 
 }
 }

@@ -5,9 +5,9 @@
 using namespace Engine::Render;
 
 bool checkDevice(HRESULT& result) {
-    if (!sDevice)
+    if (!GetDevice())
         return true;
-    HRESULT reason = sDevice->GetDeviceRemovedReason();
+    HRESULT reason = GetDevice()->GetDeviceRemovedReason();
     if (FAILED(reason)) {
         result = DXGI_ERROR_DEVICE_REMOVED;
         return false;
@@ -22,7 +22,7 @@ void dx12Dump(HRESULT result)
 
     
     if (result == DXGI_ERROR_DEVICE_REMOVED) {
-        HRESULT reason = sDevice->GetDeviceRemovedReason();
+        HRESULT reason = GetDevice()->GetDeviceRemovedReason();
         int i = 3;
     }
 

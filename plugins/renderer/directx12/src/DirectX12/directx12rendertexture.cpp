@@ -34,15 +34,14 @@ namespace Render {
         //mTexture.resize(size);
         mTexture.setData(size, {});
 
-        D3D12_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
-        ZeroMemory(&renderTargetViewDesc, sizeof(D3D12_RENDER_TARGET_VIEW_DESC));
+        D3D12_RENDER_TARGET_VIEW_DESC renderTargetViewDesc {};
 
         renderTargetViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         renderTargetViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
         renderTargetViewDesc.Texture2D.MipSlice = 0;
 
         OffsetPtr targetView = DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.allocate();
-        sDevice->CreateRenderTargetView(mTexture.resource(), &renderTargetViewDesc, DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(targetView));
+        GetDevice()->CreateRenderTargetView(mTexture.resource(), &renderTargetViewDesc, DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(targetView));
 
         setup(targetView, size);
 
@@ -60,7 +59,7 @@ namespace Render {
             depthViewDesc.Texture2D.MipLevels = 1; 
 
             mDepthBufferView = DirectX12RenderContext::getSingleton().mDescriptorHeap.allocate();
-            sDevice->CreateShaderResourceView(mDepthStencilBuffer, &depthViewDesc, DirectX12RenderContext::getSingleton().mDescriptorHeap.cpuHandle(mDepthBufferView));            
+            GetDevice()->CreateShaderResourceView(mDepthStencilBuffer, &depthViewDesc, DirectX12RenderContext::getSingleton().mDescriptorHeap.cpuHandle(mDepthBufferView));            
         }
 
         DX12_CHECK();
@@ -75,11 +74,15 @@ namespace Render {
 
     void DirectX12RenderTexture::beginIteration(size_t iteration) const
     {
+        Transition(mTexture.resource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
         DirectX12RenderTarget::beginIteration(iteration);
     }
 
     void DirectX12RenderTexture::endIteration(size_t iteration) const
     {
+        Transition(mTexture.resource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
         DirectX12RenderTarget::endIteration(iteration);
     }
 
@@ -95,7 +98,7 @@ namespace Render {
 
     TextureDescriptor DirectX12RenderTexture::depthTexture() const
     {
-        return { mDepthBufferView.offset(), TextureType_2D };
+        return { DirectX12RenderContext::getSingleton().mDescriptorHeap.gpuHandle(mDepthBufferView).ptr, TextureType_2D };
     }
 
     Vector2i DirectX12RenderTexture::size() const

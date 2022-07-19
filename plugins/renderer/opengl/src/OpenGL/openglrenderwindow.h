@@ -43,4 +43,4 @@ namespace Render {
 }
 }
 
-RegisterType(Engine::Render::OpenGLRenderWindow);
+REGISTER_TYPE(Engine::Render::OpenGLRenderWindow)

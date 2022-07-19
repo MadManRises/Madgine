@@ -33,7 +33,7 @@ namespace Widgets {
         setImage(Resources::ImageLoader::getSingleton().get(name));
     }
 
-    void Image::setImage(Resources::ImageLoader::ResourceType *image)
+    void Image::setImage(Resources::ImageLoader::Resource *image)
     {
         mImage = image;
     }
@@ -43,12 +43,12 @@ namespace Widgets {
         return mImage ? mImage->name() : "";
     }
 
-    Resources::ImageLoader::ResourceType *Image::image() const
+    Resources::ImageLoader::Resource *Image::image() const
     {
         return mImage;
     }
 
-    Resources::ImageLoader::ResourceType *Image::resource() const
+    Resources::ImageLoader::Resource *Image::resource() const
     {
         return mImage;
     }

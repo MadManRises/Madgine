@@ -74,4 +74,4 @@ namespace Input {
 
 }
 
-RegisterType(Engine::Input::GameHandlerBase);
+REGISTER_TYPE(Engine::Input::GameHandlerBase)

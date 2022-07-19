@@ -4,8 +4,6 @@
 
 #    include "plugin.h"
 
-#    include "Interfaces/dl/dlapi.h"
-
 #    include "binaryinfo.h"
 
 #    include "pluginmanager.h"
@@ -15,8 +13,7 @@ namespace Engine {
 namespace Plugins {
 
     Plugin::Plugin(std::string name, PluginSection *section, std::string project)
-        : mModule(nullptr)
-        , mProject(std::move(project))
+        : mProject(std::move(project))
         , mSection(section)
         , mName(std::move(name))
 #    if WINDOWS
@@ -29,8 +26,7 @@ namespace Plugins {
     }
 
     Plugin::Plugin(std::string name, PluginSection *section, std::string project, Filesystem::Path path)
-        : mModule(nullptr)
-        , mProject(std::move(project))
+        : mProject(std::move(project))
         , mSection(section)
         , mName(std::move(name))
         , mPath(std::move(path))
@@ -49,8 +45,8 @@ namespace Plugins {
     {
         if (!mModule) {
             std::string errorMsg;
-            mModule = Dl::openDll(mPath.str());
-            if (mModule) {
+            Dl::DlAPIResult result = mModule.open(mPath);
+            if (result == Dl::DlAPIResult::SUCCESS) {
                 const BinaryInfo *bin = info();
                 if (bin) {
                     bin->mSelf = this;
@@ -64,12 +60,9 @@ namespace Plugins {
                     }
                 } else {
                     LOG_ERROR("Unable to locate BinaryInfo. Make sure you call generate_binary_info in your CMakeLists.txt for your binaries!");
-                    Dl::closeDll(mModule);
-                    mModule = nullptr;
                     std::terminate();                    
                 }
             } else {
-                Dl::DlAPIResult result = Dl::getError("openDll");
                 LOG_ERROR(result.toString() << " loading dynamic library '" << mPath
                                             << "'");
                 std::terminate();
@@ -110,14 +103,14 @@ namespace Plugins {
     const void *Plugin::getSymbol(const std::string &name) const
     {
         std::string fullName = name + "_" + mName;
-        return Dl::getDllSymbol(mModule, fullName);
+        return mModule.getSymbol(fullName);
     }
 
     Filesystem::Path Plugin::fullPath() const
     {
 
         std::string fullName = "binaryInfo_" + mName;
-        return Dl::getDllFullPath(mModule, fullName);
+        return mModule.fullPath(fullName);
     }
 
     const std::string &Plugin::project() const
@@ -228,8 +221,7 @@ namespace Plugins {
         }
 
         assert(mModule);
-        Dl::closeDll(mModule);
-        mModule = nullptr;
+        mModule.close();
     }
 
     void Plugin::checkCircularDependency(Plugin *dependency)

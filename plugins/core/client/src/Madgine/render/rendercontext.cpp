@@ -10,6 +10,8 @@
 
 #include "rendertarget.h"
 
+#include "fontloader.h"
+
 namespace Engine {
 namespace Render {
 
@@ -32,7 +34,9 @@ namespace Render {
 
     void RenderContext::unloadAllResources()
     {
-
+        for (std::pair<const std::string, FontLoader::Resource> &res : FontLoader::getSingleton()) {
+            res.second.forceUnload();
+        }
     }
     
 

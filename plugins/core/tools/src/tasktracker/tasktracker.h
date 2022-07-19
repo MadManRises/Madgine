@@ -9,7 +9,7 @@ namespace Engine {
 namespace Tools {
 
     struct TaskTracker : Tool<TaskTracker> {
-        SERIALIZABLEUNIT(TaskTracker);
+        SERIALIZABLEUNIT(TaskTracker)
 
         TaskTracker(ImRoot &root);
         ~TaskTracker();
@@ -38,4 +38,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::TaskTracker);
+REGISTER_TYPE(Engine::Tools::TaskTracker)

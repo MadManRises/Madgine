@@ -280,7 +280,7 @@ namespace Im3D {
         if (!font.mTexture)
             return;
 
-        float scale = param.mFontSize / 5000.0f;        
+        float scale = param.mFontSize / 5000.0f;
 
         float fullWidth = 0.0f;
         float minY = 0.0f;
@@ -380,8 +380,8 @@ namespace Im3D {
     void Line(const Vector3 &a, const Vector3 &b, const LineParameters &param)
     {
         Render::Vertex vertices[] = {
-            { a, param.mColor, Vector3::ZERO },
-            { b, param.mColorB, Vector3::ZERO }
+            { a, Vector3::ZERO, param.mColorA },
+            { b, Vector3::ZERO, param.mColorB }
         };
         Mesh(IM3D_LINES, vertices, 2, param);
     }
@@ -396,11 +396,11 @@ namespace Im3D {
         Vector3 d = b - a;
 
         vertices[0] = {
-            a, param.mColor, -d
+            a, -d, param.mColor
         };
         indices[0] = 0;
         vertices[1] = {
-            b, param.mColor, d
+            b, d, param.mColor
         };
         indices[1] = 1;
 
@@ -411,7 +411,7 @@ namespace Im3D {
 
         for (int i = 0; i < segments; ++i) {
             Vector3 dir = Quaternion { i * 2 * PI / segments, d } * p;
-            vertices[2 + i] = { b + dir, param.mColor, dir };
+            vertices[2 + i] = { b + dir, dir, param.mColor };
             indices[2 + 2 * i] = 1;
             indices[2 + 2 * i + 1] = 2 + i;
         }
@@ -431,12 +431,12 @@ namespace Im3D {
         Vector3 d0 = radius * dist.normalizedCopy();
 
         const Render::Vertex vertices[]
-            = { { a, param.mColor, -dist },
-                  { a + d0 + d1, param.mColor, d1 },
-                  { a + d0 + d2, param.mColor, d2 },
-                  { a + d0 - d1, param.mColor, -d1 },
-                  { a + d0 - d2, param.mColor, -d2 },
-                  { b, param.mColor, dist } };
+            = { { a, -dist, param.mColor },
+                  { a + d0 + d1, d1, param.mColor },
+                  { a + d0 + d2, d2, param.mColor },
+                  { a + d0 - d1, -d1, param.mColor },
+                  { a + d0 - d2, -d2, param.mColor },
+                  { b, dist, param.mColor } };
 
         switch (type) {
         case IM3D_TRIANGLES: {
@@ -480,63 +480,63 @@ namespace Im3D {
 
         vertices[0] = {
             Vector3 { -radius, t, 0 },
-            param.mColor,
-            { 1, 1, 1 }
+            { 1, 1, 1 },
+            param.mColor
         };
         vertices[1] = {
             Vector3 { radius, t, 0 },
-            param.mColor,
-            { 1, 1, 1 }
+            { 1, 1, 1 },
+            param.mColor
         };
         vertices[2] = {
             Vector3 { -radius, -t, 0 },
-            param.mColor,
-            { 1, 1, 1 }
+            { 1, 1, 1 },
+            param.mColor
         };
         vertices[3] = {
             Vector3 { radius, -t, 0 },
-            param.mColor,
-            { 1, 1, 1 }
+            { 1, 1, 1 },
+            param.mColor
         };
         vertices[4] = {
             Vector3 { 0, -radius, t },
-            param.mColor,
-            { 1, 1, 1 }
+            { 1, 1, 1 },
+            param.mColor
         };
         vertices[5] = {
             Vector3 { 0, radius, t },
-            param.mColor,
-            { 1, 1, 1 }
+            { 1, 1, 1 },
+            param.mColor
         };
         vertices[6] = {
             Vector3 { 0, -radius, -t },
-            param.mColor,
-            { 1, 1, 1 }
+            { 1, 1, 1 },
+            param.mColor
         };
         vertices[7] = {
             Vector3 { 0, radius, -t },
-            param.mColor,
-            { 1, 1, 1 }
+            { 1, 1, 1 },
+            param.mColor
         };
         vertices[8] = {
             Vector3 { t, 0, -radius },
-            param.mColor,
-            { 1, 1, 1 }
+            { 1, 1, 1 },
+            param.mColor
         };
         vertices[9] = {
             Vector3 { t, 0, radius },
-            param.mColor,
-            { 1, 1, 1 }
+            { 1, 1, 1 },
+            param.mColor
         };
         vertices[10] = {
             Vector3 { -t, 0, -radius },
-            param.mColor,
-            { 1, 1, 1 }
+            { 1, 1, 1 },
+            param.mColor
         };
         vertices[11] = {
             Vector3 { -t, 0, radius },
-            param.mColor,
-            { 1, 1, 1 }
+            { 1, 1, 1 },
+            param.mColor
         };
 
         constexpr uint32_t cornerIndices[20][3] = {
@@ -577,8 +577,8 @@ namespace Im3D {
                         continue;
                     vertices[vertexCounter++] = {
                         slerp(left, right, x / float(param.mDetail + 1 - y)),
-                        param.mColor,
-                        { 1, 1, 1 }
+                        { 1, 1, 1 },
+                        param.mColor
                     };
                 }
             }
@@ -685,19 +685,19 @@ namespace Im3D {
         if ((flags & Im3DBoundingObjectFlags_ShowOutline) || (hovered && (flags & Im3DBoundingObjectFlags_ShowOnHover))) {
             std::array<Vector3, 8> corners = bb.corners();
             Render::Vertex vertices[] = {
-                { corners[0], { 1, 1, 1, 1 }, { 0, 0, 0 } },
-                { corners[1], { 1, 1, 1, 1 }, { 0, 0, 0 } },
-                { corners[2], { 1, 1, 1, 1 }, { 0, 0, 0 } },
-                { corners[3], { 1, 1, 1, 1 }, { 0, 0, 0 } },
-                { corners[4], { 1, 1, 1, 1 }, { 0, 0, 0 } },
-                { corners[5], { 1, 1, 1, 1 }, { 0, 0, 0 } },
-                { corners[6], { 1, 1, 1, 1 }, { 0, 0, 0 } },
-                { corners[7], { 1, 1, 1, 1 }, { 0, 0, 0 } },
+                { corners[0], { 0, 0, 0 }, { 1, 1, 1, 1 } },
+                { corners[1], { 0, 0, 0 }, { 1, 1, 1, 1 } },
+                { corners[2], { 0, 0, 0 }, { 1, 1, 1, 1 } },
+                { corners[3], { 0, 0, 0 }, { 1, 1, 1, 1 } },
+                { corners[4], { 0, 0, 0 }, { 1, 1, 1, 1 } },
+                { corners[5], { 0, 0, 0 }, { 1, 1, 1, 1 } },
+                { corners[6], { 0, 0, 0 }, { 1, 1, 1, 1 } },
+                { corners[7], { 0, 0, 0 }, { 1, 1, 1, 1 } },
             };
             constexpr uint32_t indices[] = {
                 0, 1, 0, 2, 0, 4, 1, 3, 1, 5, 2, 3, 2, 6, 3, 7, 4, 5, 4, 6, 5, 7, 6, 7
             };
-            Mesh(IM3D_LINES, vertices, 8, transform, indices, 24);
+            Mesh(IM3D_LINES, vertices, 8, { .mTransform = transform }, indices, 24);
         }
 
         return hovered;

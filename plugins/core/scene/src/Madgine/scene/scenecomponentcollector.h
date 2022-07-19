@@ -7,7 +7,7 @@
 
 #include "Meta/keyvalue/virtualscope.h"
 
-DECLARE_UNIQUE_COMPONENT(Engine::Scene, SceneComponent, SceneComponentBase, SceneManager &);
+DECLARE_UNIQUE_COMPONENT(Engine::Scene, SceneComponent, SceneComponentBase, SceneManager &)
 
 namespace Engine
 {
@@ -21,7 +21,7 @@ namespace Engine
 		using VirtualSceneComponentBase = Serialize::SyncableUnit<T, SceneComponentVirtualBase<T>>;
 
 		template <typename T, typename Base>
-		using VirtualSceneComponentImpl = VirtualScope<T, Serialize::SyncableUnit<T, VirtualUniqueComponentImpl<T, Base>>>;
+		using VirtualSceneComponentImpl = VirtualScope<T, Serialize::SyncableUnit<T, UniqueComponent::VirtualComponentImpl<T, Base>>>;
 
 #define VIRTUALSCENECOMPONENTBASE(T) template <> TEMPLATE_INSTANCE constexpr size_t &Engine::Scene::VirtualSceneComponentBase<T>::sIndex(){static size_t index = -1; return index;};
 

@@ -2,62 +2,49 @@
 
 namespace Engine {
 
-    DERIVE_TYPENAME(ResetOperation);
-
-template <typename C>
-using ResetOperation_t = typename has_typename_ResetOperation<C>::template type<C &>;
+DERIVE_TYPENAME(ResetOperation)
 
 template <typename C, typename... Args>
-decltype(auto) resetOperation(C &c, bool controlled, Args&&... args)
+decltype(auto) resetOperation(C &c, bool controlled, Args &&...args)
 {
-    if constexpr (has_typename_ResetOperation_v<C>)
+    if constexpr (has_typename_ResetOperation<C>)
         return typename C::ResetOperation { c, controlled, std::forward<Args>(args)... };
     else
         return c;
 }
 
-DERIVE_TYPENAME(InsertOperation);
-
-template <typename C>
-using InsertOperation_t = typename has_typename_InsertOperation<C>::template type<C &>;
+DERIVE_TYPENAME(InsertOperation)
 
 template <typename C, typename... Args>
-decltype(auto) insertOperation(C &c, Args &&... args)
+decltype(auto) insertOperation(C &c, Args &&...args)
 {
-    if constexpr (has_typename_InsertOperation_v<C>)
+    if constexpr (has_typename_InsertOperation<C>)
         return typename C::InsertOperation { c, std::forward<Args>(args)... };
     else
         return c;
 }
 
-DERIVE_TYPENAME(MultiInsertOperation);
-
-template <typename C>
-using MultiInsertOperation_t = typename has_typename_MultiInsertOperation<C>::template type<C &>;
+DERIVE_TYPENAME(MultiInsertOperation)
 
 template <typename C, typename... Args>
-decltype(auto) multiInsertOperation(C &c, Args &&... args)
+decltype(auto) multiInsertOperation(C &c, Args &&...args)
 {
-    if constexpr (has_typename_MultiInsertOperation_v<C>)
+    if constexpr (has_typename_MultiInsertOperation<C>)
         return typename C::MultiInsertOperation { c, std::forward<Args>(args)... };
     else
         return c;
 }
 
-DERIVE_TYPENAME(RemoveOperation);
-
-template <typename C>
-using RemoveOperation_t = typename has_typename_RemoveOperation<C>::template type<C &>;
+DERIVE_TYPENAME(RemoveOperation)
 
 template <typename C, typename... Args>
-decltype(auto) removeOperation(C &c, Args &&... args)
+decltype(auto) removeOperation(C &c, Args &&...args)
 {
-    if constexpr (has_typename_RemoveOperation_v<C>)
+    if constexpr (has_typename_RemoveOperation<C>)
         return typename C::RemoveOperation { c, std::forward<Args>(args)... };
     else
         return c;
 }
-
 
 template <typename C>
 struct AtomicContainerOperationBase {
@@ -100,7 +87,7 @@ struct container_traits<AtomicContainerOperation<Op>> : container_traits<typenam
     using _traits = container_traits<typename Op::container_type>;
 
     template <typename... Args>
-    static typename _traits::emplace_return emplace(container &c, const typename _traits::const_iterator &where, Args &&... args)
+    static typename _traits::emplace_return emplace(container &c, const typename _traits::const_iterator &where, Args &&...args)
     {
         return c.emplace(where, std::forward<Args>(args)...);
     }

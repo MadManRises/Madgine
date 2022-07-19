@@ -49,7 +49,7 @@ namespace Render {
 
     void SceneRenderPass::setup(RenderTarget *target)
     {
-        mProgram.create("scene", { sizeof(ScenePerApplication), sizeof(ScenePerFrame), sizeof(ScenePerObject) }, sizeof(SceneInstanceData));
+        mPipeline.createDynamic({ .vs = "scene", .ps = "scene", .bufferSizes = { sizeof(ScenePerApplication), sizeof(ScenePerFrame), sizeof(ScenePerObject) }, .instanceDataSize = sizeof(SceneInstanceData) });
 
         mShadowMap = target->context()->createRenderTexture({ 2048, 2048 }, { .mCreateDepthBufferView = true, .mSamples = 4, .mTextureCount = 0, .mType = TextureType_2DMultiSample });
         mPointShadowMaps[0] = target->context()->createRenderTexture({ 2048, 2048 }, { .mCreateDepthBufferView = true, .mTextureCount = 0, .mType = TextureType_Cube });
@@ -66,7 +66,7 @@ namespace Render {
         mPointShadowMaps[0].reset();
         mPointShadowMaps[1].reset();
 
-        mProgram.reset();
+        mPipeline.reset();
     }
 
     void SceneRenderPass::render(Render::RenderTarget *target, size_t iteration)
@@ -99,7 +99,7 @@ namespace Render {
                 material = materialComponent->get();
             } else if (mesh.material() < meshData->mMaterials.size()) {
                 material = &meshData->mMaterials[mesh.material()];
-            }            
+            }
 
             Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
 
@@ -113,7 +113,7 @@ namespace Render {
         float aspectRatio = float(size.x) / size.y;
 
         {
-            auto perApplication = mProgram.mapParameters(0).cast<ScenePerApplication>();
+            auto perApplication = mPipeline.mapParameters<ScenePerApplication>(0);
 
             perApplication->p = mCamera->getProjectionMatrix(aspectRatio);
 
@@ -124,7 +124,7 @@ namespace Render {
         }
 
         {
-            auto perFrame = mProgram.mapParameters(1).cast<ScenePerFrame>();
+            auto perFrame = mPipeline.mapParameters<ScenePerFrame>(1);
 
             perFrame->v = mCamera->getViewMatrix();
             perFrame->light.caster.viewProjectionMatrix = mShadowPass.viewProjectionMatrix();
@@ -162,7 +162,7 @@ namespace Render {
             Scene::Entity::Skeleton *skeleton = std::get<2>(instance.first);
 
             {
-                auto perObject = mProgram.mapParameters(2).cast<ScenePerObject>();
+                auto perObject = mPipeline.mapParameters<ScenePerObject>(2);
 
                 perObject->hasLight = true;
 
@@ -184,12 +184,12 @@ namespace Render {
                 };
             });
 
-            mProgram.setInstanceData(std::move(instanceData));
+            mPipeline.setInstanceData(std::move(instanceData));
 
             if (skeleton) {
-                mProgram.setDynamicParameters(0, skeleton->matrices());
+                mPipeline.setDynamicParameters(0, skeleton->matrices());
             } else {
-                mProgram.setDynamicParameters(0, {});
+                mPipeline.setDynamicParameters(0, {});
             }
 
             if (material) {
@@ -199,9 +199,9 @@ namespace Render {
                     material->mDiffuseColor
                 };
 
-                target->renderMeshInstanced(instance.second.size(), meshData, mProgram, &mat);
+                target->renderMeshInstanced(instance.second.size(), meshData, mPipeline, &mat);
             } else {
-                target->renderMeshInstanced(instance.second.size(), meshData, mProgram, nullptr);
+                target->renderMeshInstanced(instance.second.size(), meshData, mPipeline, nullptr);
             }
         }
         target->popAnnotation();

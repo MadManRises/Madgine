@@ -11,38 +11,16 @@
 namespace Engine {
 namespace Render {
 
-    DirectX12Buffer::DirectX12Buffer(const ByteBuffer &data)
-        : mSize(data.mSize)
-        , mPersistent(data.mData)
+    DirectX12Buffer::DirectX12Buffer(DirectX12Buffer &&other)
+        : mAddress(std::exchange(other.mAddress, 0))
+        , mSize(std::exchange(other.mSize, 0))
+        , mIsPersistent(std::exchange(other.mIsPersistent, false))
     {
-        if (mSize > 0) {
-            DirectX12ConstantBufferHeap &heap = DirectX12RenderContext::getSingleton().mConstantBufferHeap;
-
-            size_t actualSize = alignTo(data.mSize, 256);
-
-            mOffset = mPersistent ? heap.allocatePersistent(actualSize) : heap.allocateTemp(actualSize);
-
-            D3D12_CONSTANT_BUFFER_VIEW_DESC bufferDesc;
-            ZeroMemory(&bufferDesc, sizeof(D3D12_CONSTANT_BUFFER_VIEW_DESC));
-
-            bufferDesc.SizeInBytes = actualSize;
-            bufferDesc.BufferLocation = mPersistent ? heap.addressPersistent(mOffset) : heap.addressTemp(mOffset);
-
-            mHandle = heap.descriptorHeap()->allocate();
-            sDevice->CreateConstantBufferView(&bufferDesc, heap.descriptorHeap()->cpuHandle(mHandle));
-
-            DX12_CHECK();
-
-            setData(data);
-        }
     }
 
-    DirectX12Buffer::DirectX12Buffer(DirectX12Buffer &&other)
-        : mSize(std::exchange(other.mSize, 0))
-        , mHandle(std::exchange(other.mHandle, {}))
-        , mOffset(std::exchange(other.mOffset, {}))
-        , mPersistent(std::exchange(other.mPersistent, false))
+    DirectX12Buffer::DirectX12Buffer(const ByteBuffer &data)
     {
+        setData(data);
     }
 
     DirectX12Buffer::~DirectX12Buffer()
@@ -52,82 +30,88 @@ namespace Render {
 
     DirectX12Buffer &DirectX12Buffer::operator=(DirectX12Buffer &&other)
     {
+        std::swap(mAddress, other.mAddress);
         std::swap(mSize, other.mSize);
-        std::swap(mHandle, other.mHandle);
-        std::swap(mOffset, other.mOffset);
-        std::swap(mPersistent, other.mPersistent);
+        std::swap(mIsPersistent, other.mIsPersistent);
         return *this;
     }
 
     DirectX12Buffer::operator bool() const
     {
-        return static_cast<bool>(mHandle);
+        return mSize > 0;
     }
 
-    void DirectX12Buffer::bindVertex(UINT stride) const
+    void DirectX12Buffer::bindVertex(ID3D12GraphicsCommandList *commandList, UINT stride, size_t index) const
     {
         D3D12_VERTEX_BUFFER_VIEW view;
-        view.BufferLocation = mPersistent ? DirectX12RenderContext::getSingleton().mConstantBufferHeap.addressPersistent(mOffset) : DirectX12RenderContext::getSingleton().mConstantBufferHeap.addressTemp(mOffset);
+        view.BufferLocation = mAddress;
         view.SizeInBytes = mSize;
         view.StrideInBytes = stride;
-        DirectX12RenderContext::getSingleton().mCommandList.mList->IASetVertexBuffers(0, 1, &view);
+        commandList->IASetVertexBuffers(index, 1, &view);
         DX12_LOG("Bind Vertex Buffer -> " << mBuffer);
     }
 
-    void DirectX12Buffer::bindIndex() const
+    void DirectX12Buffer::bindIndex(ID3D12GraphicsCommandList *commandList) const
     {
         D3D12_INDEX_BUFFER_VIEW view;
-        view.BufferLocation = mPersistent ? DirectX12RenderContext::getSingleton().mConstantBufferHeap.addressPersistent(mOffset) : DirectX12RenderContext::getSingleton().mConstantBufferHeap.addressTemp(mOffset);
+        view.BufferLocation = mAddress;
         view.SizeInBytes = mSize;
         view.Format = DXGI_FORMAT_R32_UINT;
-        DirectX12RenderContext::getSingleton().mCommandList.mList->IASetIndexBuffer(&view);
+        commandList->IASetIndexBuffer(&view);
         DX12_LOG("Bind Index Buffer -> " << mBuffer);
     }
 
-    void DirectX12Buffer::reset()
+    void DirectX12Buffer::reset(size_t size)
     {
-        if (mHandle) {
+        if (mAddress && mIsPersistent) {
             DirectX12ConstantBufferHeap &heap = DirectX12RenderContext::getSingleton().mConstantBufferHeap;
 
-            heap.descriptorHeap()->deallocate(mHandle);
-            mHandle.reset();
-
-            size_t actualSize = alignTo(mSize, 256);
-
-            mPersistent ? heap.deallocatePersistent(mOffset, actualSize) : heap.deallocateTemp(mOffset, actualSize);
-            mOffset.reset();
-            mSize = 0;
+            heap.deallocatePersistent(mAddress, mSize);
         }
+
+        mIsPersistent = false;
+        mAddress = 0;
+        mSize = size;
     }
 
     void DirectX12Buffer::setData(const ByteBuffer &data)
     {
-        DirectX12ConstantBufferHeap &heap = DirectX12RenderContext::getSingleton().mConstantBufferHeap;
-        if (mSize != data.mSize)
-            *this = { data };
-        else if (data.mData)
-            heap.setData(mOffset, data);
+        size_t expectedSize = alignTo(data.mSize, 256);
+        if (data.mData) {
+            DirectX12ConstantBufferHeap &heap = DirectX12RenderContext::getSingleton().mConstantBufferHeap;
+
+            if (!mIsPersistent || mSize != expectedSize) {
+                reset(expectedSize);
+
+                mAddress = heap.allocatePersistent(expectedSize);
+            }
+
+            mIsPersistent = true;
+            heap.setData(mAddress, data);
+        } else {
+            reset(expectedSize);
+        }
     }
 
-    void DirectX12Buffer::resize(size_t size)
+    WritableByteBuffer DirectX12Buffer::mapData(size_t size)
     {
-        setData({ nullptr, size });
+        DirectX12ConstantBufferHeap &heap = DirectX12RenderContext::getSingleton().mConstantBufferHeap;
+
+        reset(alignTo(size, 256));
+
+        mAddress = heap.allocateTemp(mSize);
+
+        return heap.map(mAddress, mSize);
     }
 
     WritableByteBuffer DirectX12Buffer::mapData()
     {
-        return DirectX12RenderContext::getSingleton().mConstantBufferHeap.map(mOffset, mSize);
-    }
-
-    OffsetPtr DirectX12Buffer::handle()
-    {
-        return mHandle;
+        return mapData(mSize);
     }
 
     D3D12_GPU_VIRTUAL_ADDRESS DirectX12Buffer::gpuAddress() const
     {
-        DirectX12ConstantBufferHeap &heap = DirectX12RenderContext::getSingleton().mConstantBufferHeap;
-        return mPersistent ? heap.addressPersistent(mOffset) : heap.addressTemp(mOffset);
+        return mAddress;
     }
 
 }

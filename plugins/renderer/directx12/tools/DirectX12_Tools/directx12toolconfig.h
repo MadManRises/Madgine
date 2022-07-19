@@ -10,7 +10,7 @@ namespace Tools {
 
     struct DirectX12ToolConfig : public Tool<DirectX12ToolConfig> {
 
-        SERIALIZABLEUNIT(DirectX12ToolConfig);
+        SERIALIZABLEUNIT(DirectX12ToolConfig)
 
         DirectX12ToolConfig(ImRoot &root);
         DirectX12ToolConfig(const SceneEditor &) = delete;
@@ -29,4 +29,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::DirectX12ToolConfig);
+REGISTER_TYPE(Engine::Tools::DirectX12ToolConfig)

@@ -25,9 +25,9 @@ FUNCTION(create_module, spec)
 FUNCTION(exec_module, module)
 METATABLE_END(Engine::Scripting::Python3::Python3FileLoader)
 
-METATABLE_BEGIN_BASE(Engine::Scripting::Python3::Python3FileLoader::ResourceType, Engine::Resources::ResourceBase)
+METATABLE_BEGIN_BASE(Engine::Scripting::Python3::Python3FileLoader::Resource, Engine::Resources::ResourceBase)
 READONLY_PROPERTY(Data, dataPtr)
-METATABLE_END(Engine::Scripting::Python3::Python3FileLoader::ResourceType)
+METATABLE_END(Engine::Scripting::Python3::Python3FileLoader::Resource)
 
 namespace Engine {
 namespace Scripting {
@@ -64,7 +64,7 @@ namespace Scripting {
 
         void Python3FileLoader::find_spec(ValueType &retVal, std::string_view name, std::optional<std::string_view> import_path, ObjectPtr target_module)
         {
-            ResourceType *res = get(name, this);
+            Resource *res = get(name, this);
             if (!res)
                 return;
             Python3Lock lock;
@@ -77,8 +77,8 @@ namespace Scripting {
             Python3Lock lock;
             ValueType resourcePtr;
             fromPyObject(resourcePtr, PyObjectPtr { toPyObject(spec) }.get("loader_state"));
-            ResourceType *res = resourcePtr.as<TypedScopePtr>().safe_cast<ResourceType>();
-            HandleType handle = create(res, Filesystem::FileEventType::FILE_CREATED, this);
+            Resource *res = resourcePtr.as<TypedScopePtr>().safe_cast<Resource>();
+            Handle handle = create(res, Filesystem::FileEventType::FILE_CREATED, this);
             handle.info()->setPersistent(true);
             PyModulePtr &module = *getDataPtr(handle, this, false);
             assert(!module);
@@ -92,7 +92,7 @@ namespace Scripting {
             ValueType resourcePtr;
             PyObjectPtr moduleObject { toPyObject(module) };
             fromPyObject(resourcePtr, moduleObject.get("__spec__").get("loader_state"));
-            ResourceType *res = resourcePtr.as<TypedScopePtr>().safe_cast<ResourceType>();
+            Resource *res = resourcePtr.as<TypedScopePtr>().safe_cast<Resource>();
 
             PyModulePtr importlib { "importlib.util" };
 

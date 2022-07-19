@@ -2,29 +2,31 @@
 
 namespace Engine {
 
-struct IndexHolder;
+namespace UniqueComponent {
+    struct IndexHolder;
 
-struct UniqueComponentCollectorManager;
-template <typename T, typename _Collector, typename _Base>
-struct UniqueComponent;
-template <typename Base>
-struct NamedUniqueComponent;
-template <typename Registry, typename _Base, typename... _Ty>
-struct UniqueComponentSelector;
-template <typename C, typename Registry, typename __dont_remove_Base, typename... _Ty>
-struct UniqueComponentContainer;
-template <typename T, typename _Collector, typename Base>
-struct VirtualUniqueComponentBase;
-template <typename T, typename Base, typename _VBase = Base>
-struct VirtualUniqueComponentImpl;
-template <typename _Base, typename... _Ty>
-struct UniqueComponentRegistry;
-template <typename _Base, typename... _Ty>
-struct NamedUniqueComponentRegistry;
-template <typename Registry, typename __Base, typename... _Ty>
-struct UniqueComponentCollector;
+    struct CollectorManager;
+    template <typename T, typename _Collector, typename _Base>
+    struct Component;
+    template <typename Base>
+    struct NamedComponent;
+    template <typename Registry, typename _Base, typename... _Ty>
+    struct Selector;
+    template <typename C, typename Registry, typename __dont_remove_Base, typename... _Ty>
+    struct Container;
+    template <typename T, typename _Collector, typename Base>
+    struct VirtualComponentBase;
+    template <typename T, typename Base, typename _VBase = Base>
+    struct VirtualComponentImpl;
+    template <typename _Base, typename... _Ty>
+    struct Registry;
+    template <typename _Base, typename... _Ty>
+    struct NamedRegistry;
+    template <typename Registry, typename __Base, typename... _Ty>
+    struct Collector;
 
-struct UniqueComponentRegistryBase;
+    struct RegistryBase;
+}
 
 namespace Debug {
 

@@ -6,9 +6,9 @@
 #include "directx11rendercontext.h"
 #include "directx11rendertexture.h"
 
-#include "directx11programloader.h"
-#include "directx11textureloader.h"
 #include "directx11meshloader.h"
+#include "directx11pipelineloader.h"
+#include "directx11textureloader.h"
 
 UNIQUECOMPONENT(Engine::Render::DirectX11RenderContext)
 
@@ -36,7 +36,7 @@ namespace Render {
     }
 
     DirectX11RenderContext::DirectX11RenderContext(Threading::TaskQueue *queue)
-        : UniqueComponent(queue)
+        : Component(queue)
     {
         HRESULT hr;
 
@@ -108,15 +108,15 @@ namespace Render {
     {
         RenderContext::unloadAllResources();
 
-        for (std::pair<const std::string, DirectX11ProgramLoader::ResourceType> &res : DirectX11ProgramLoader::getSingleton()) {
+        for (std::pair<const std::string, DirectX11PipelineLoader::Resource> &res : DirectX11PipelineLoader::getSingleton()) {
             res.second.forceUnload();
         }
 
-        for (std::pair<const std::string, DirectX11TextureLoader::ResourceType> &res : DirectX11TextureLoader::getSingleton()) {
+        for (std::pair<const std::string, DirectX11TextureLoader::Resource> &res : DirectX11TextureLoader::getSingleton()) {
             res.second.forceUnload();
         }
 
-        for (std::pair<const std::string, DirectX11MeshLoader::ResourceType> &res : DirectX11MeshLoader::getSingleton()) {
+        for (std::pair<const std::string, DirectX11MeshLoader::Resource> &res : DirectX11MeshLoader::getSingleton()) {
             res.second.forceUnload();
         }
     }
@@ -124,6 +124,77 @@ namespace Render {
     bool DirectX11RenderContext::supportsMultisampling() const
     {
         return true;
+    }
+
+    static constexpr const char *vSemantics[] = {
+        "POSITION",
+        "POSITION",
+        "POSITION",
+        "NORMAL",
+        "COLOR",
+        "TEXCOORD",
+        "BONEINDICES",
+        "WEIGHTS"
+    };
+
+    static constexpr unsigned int vSemanticIndices[] = {
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+    };
+
+    static constexpr DXGI_FORMAT vFormats[] = {
+        DXGI_FORMAT_R32G32B32_FLOAT,
+        DXGI_FORMAT_R32G32B32A32_FLOAT,
+        DXGI_FORMAT_R32G32_FLOAT,
+        DXGI_FORMAT_R32G32B32_FLOAT,
+        DXGI_FORMAT_R32G32B32A32_FLOAT,
+        DXGI_FORMAT_R32G32_FLOAT,
+        DXGI_FORMAT_R32G32B32A32_SINT,
+        DXGI_FORMAT_R32G32B32A32_FLOAT
+    };
+
+    void DirectX11RenderContext::ensureFormat(VertexFormat format, size_t instanceDataSize, ID3DBlob *blob)
+    {
+        ReleasePtr<ID3D11InputLayout> &layout = mInputLayouts[format][instanceDataSize];
+
+        if (!layout) {
+            std::vector<D3D11_INPUT_ELEMENT_DESC> vertexLayoutDesc;
+
+            UINT offset = 0;
+            for (size_t i = 0; i < VertexElements::size; ++i) {
+                if (format.has(i)) {
+                    vertexLayoutDesc.push_back({ vSemantics[i],
+                        vSemanticIndices[i], vFormats[i], 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 });
+                    offset += sVertexElementSizes[i];
+                }
+            }
+
+            if (instanceDataSize > 0) {
+                assert(instanceDataSize % 16 == 0);
+                for (size_t i = 0; i < instanceDataSize / 16; ++i) {
+                    vertexLayoutDesc.push_back({ "INSTANCEDATA",
+                        static_cast<UINT>(i),
+                        DXGI_FORMAT_R32G32B32A32_FLOAT,
+                        1,
+                        i == 0 ? 0 : D3D11_APPEND_ALIGNED_ELEMENT,
+                        D3D11_INPUT_PER_INSTANCE_DATA,
+                        1 });
+                }
+            }
+            HRESULT hr = sDevice->CreateInputLayout(vertexLayoutDesc.data(), vertexLayoutDesc.size(), blob->GetBufferPointer(), blob->GetBufferSize(), &layout);
+            DX11_CHECK(hr);
+        }
+    }
+
+    void DirectX11RenderContext::bindFormat(VertexFormat format, size_t instanceDataSize)
+    {
+        sDeviceContext->IASetInputLayout(mInputLayouts[format].at(instanceDataSize));
     }
 
 }

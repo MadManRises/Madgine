@@ -8,6 +8,5 @@
 
 #include "Madgine_Tools/clienttoolslib.h"
 #include "OpenGL/opengllib.h"
-#include "fontloaderlib.h"
 
 #include "opengltoolsforward.h"

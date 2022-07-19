@@ -21,7 +21,7 @@ namespace Engine {
 namespace Scene {
     namespace Entity {
         Material::Material(const ObjectPtr &data)
-            : NamedUniqueComponent(data)
+            : NamedComponent(data)
         {
         }
 

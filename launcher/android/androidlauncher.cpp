@@ -3,7 +3,7 @@
 
 #include "androidlauncher.h"
 
-#include "Madgine/core/root.h"
+#include "Madgine/base/root.h"
 
 #include "Madgine/window/mainwindow.h"
 
@@ -47,16 +47,18 @@ namespace Android {
 
         Engine::Filesystem::setup(activity);
 
-        mThread = Threading::WorkGroupHandle(&AndroidLauncher::go, this);
+        mThread = Threading::WorkGroupHandle("Madgine", &AndroidLauncher::go, this);
     }
 
     void AndroidLauncher::go()
     {
         ANativeActivity *activity = mActivity;
 
-        static Engine::Core::Root root;
+        static Engine::Base::Root root;
 
         Engine::Util::StandardLog::setLogLevel(logLevel);
+
+        static Engine::KeyValueGlobal<Engine::Resources::ResourceManager> resourceManager { "ResourceManager" };
 
 		launch(&mWindow);
 		

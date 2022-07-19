@@ -27,7 +27,7 @@ namespace Scene {
     namespace Entity {
 
         Skeleton::Skeleton(const ObjectPtr &data)
-            : NamedUniqueComponent(data)
+            : NamedComponent(data)
         {
             Engine::ValueType v;
             if (data.getValue(v, "skeleton") && v.is<std::string>()) {
@@ -55,19 +55,19 @@ namespace Scene {
             mSkeleton.info()->loadingTask().then([this](bool) { resetMatrices(); mLoaded = true; }, Resources::ResourceManager::getSingleton().taskQueue());
         }
 
-        void Skeleton::set(Render::SkeletonLoader::HandleType handle)
+        void Skeleton::set(Render::SkeletonLoader::Handle handle)
         {
             mLoaded = false;
             mSkeleton = std::move(handle);
             mSkeleton.info()->loadingTask().then([this](bool) { resetMatrices(); mLoaded=true; }, Resources::ResourceManager::getSingleton().taskQueue());
         }
 
-        Render::SkeletonLoader::ResourceType *Skeleton::get() const
+        Render::SkeletonLoader::Resource *Skeleton::get() const
         {
             return mSkeleton.resource();
         }
 
-        const Render::SkeletonLoader::HandleType &Skeleton::handle() const
+        const Render::SkeletonLoader::Handle &Skeleton::handle() const
         {
             return mSkeleton;
         }

@@ -18,8 +18,8 @@ namespace Scene {
             std::string_view getName() const;
             void setName(std::string_view name);
 
-            Render::AnimationLoader::ResourceType *get() const;
-            void set(Render::AnimationLoader::HandleType handle);
+            Render::AnimationLoader::Resource *get() const;
+            void set(Render::AnimationLoader::Handle handle);
 
             void setCurrentAnimationName(std::string_view name);
             void setCurrentAnimationPtr(Render::AnimationDescriptor *desc);
@@ -38,8 +38,8 @@ namespace Scene {
             void refreshCache();
 
         private:
-            Render::AnimationLoader::HandleType mAnimationList;
-            Render::SkeletonLoader::HandleType mSkeletonCache;
+            Render::AnimationLoader::Handle mAnimationList;
+            Render::SkeletonLoader::Handle mSkeletonCache;
             int *mBoneIndexMapping = nullptr;
             IndexType<uint32_t> mCurrentAnimation;
             float mCurrentStep = 0.0f;
@@ -51,5 +51,5 @@ namespace Scene {
 }
 }
 
-RegisterType(Engine::Scene::Entity::Animation);
-RegisterType(Engine::Scene::Entity::EntityComponentList<Engine::Scene::Entity::Animation>);
+REGISTER_TYPE(Engine::Scene::Entity::Animation)
+REGISTER_TYPE(Engine::Scene::Entity::EntityComponentList<Engine::Scene::Entity::Animation>)

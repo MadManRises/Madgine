@@ -1,6 +1,6 @@
 #pragma once
 
-#include "madgineobject/madgineobject.h"
+#include "Modules/threading/madgineobject.h"
 
 #include "Meta/keyvalue/virtualscope.h"
 
@@ -11,8 +11,8 @@
 namespace Engine {
 namespace Tools {
 
-    struct MADGINE_TOOLS_EXPORT ToolBase : Serialize::VirtualSerializableUnitBase<VirtualScopeBase<>, Serialize::SerializableUnitBase>, MadgineObject<ToolBase> {
-        SERIALIZABLEUNIT(ToolBase);
+    struct MADGINE_TOOLS_EXPORT ToolBase : Serialize::VirtualSerializableUnitBase<VirtualScopeBase<>, Serialize::SerializableUnitBase>, Threading::MadgineObject<ToolBase> {
+        SERIALIZABLEUNIT(ToolBase)
 
         ToolBase(ImRoot &root);
         virtual ~ToolBase() = default;
@@ -30,11 +30,11 @@ namespace Tools {
         bool isEnabled() const;
         void setEnabled(bool e);
 
-        ToolBase &getToolComponent(size_t index);
+        ToolBase &getTool(size_t index);
         template <typename T>
         T &getTool()
         {
-            return static_cast<T &>(getToolComponent(component_index<T>()));
+            return static_cast<T &>(getTool(UniqueComponent::component_index<T>()));
         }
 
         ImRoot &root();
@@ -56,4 +56,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::ToolBase);
+REGISTER_TYPE(Engine::Tools::ToolBase)

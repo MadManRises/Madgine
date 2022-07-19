@@ -7,10 +7,10 @@
 namespace Engine {
 namespace Serialize {
 
-    template <typename Base = SerializableUnitBase, typename... Bases>
-    struct DLL_EXPORT VirtualSerializableUnitBase : Base, Bases... {
+    template <typename _Base = SerializableUnitBase, typename... _Bases>
+    struct DLL_EXPORT VirtualSerializableUnitBase : _Base, _Bases... {
 
-        using Base::Base;
+        using _Base::_Base;
 
         virtual SerializableUnitPtr customUnitPtr() = 0;
         virtual SerializableUnitConstPtr customUnitPtr() const = 0;
@@ -30,10 +30,10 @@ namespace Serialize {
         }
     };
 
-    template <typename Base = SerializableDataUnit, typename... Bases>
-    struct DLL_EXPORT VirtualSerializableDataBase : Base, Bases... {
+    template <typename _Base = SerializableDataUnit, typename... _Bases>
+    struct DLL_EXPORT VirtualSerializableDataBase : _Base, _Bases... {
 
-        using Base::Base;
+        using _Base::_Base;
 
         virtual SerializableDataPtr customUnitPtr() = 0;
         virtual SerializableDataConstPtr customUnitPtr() const = 0;

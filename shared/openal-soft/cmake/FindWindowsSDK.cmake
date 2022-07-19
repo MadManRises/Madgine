@@ -73,6 +73,7 @@ macro(_winsdk_announce)
 endmacro()
 
 set(_winsdk_win10vers
+	10.0.20348.0
 	10.0.19041.0 # Windows 10 Version 2004
 	10.0.18362.0 # Windows 10 Version 1903
 	10.0.17763.0 # Windows 10 Version 1809

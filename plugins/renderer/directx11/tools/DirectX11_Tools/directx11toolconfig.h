@@ -10,7 +10,7 @@ namespace Tools {
 
     struct DirectX11ToolConfig : public Tool<DirectX11ToolConfig> {
 
-        SERIALIZABLEUNIT(DirectX11ToolConfig);
+        SERIALIZABLEUNIT(DirectX11ToolConfig)
 
         DirectX11ToolConfig(ImRoot &root);
         DirectX11ToolConfig(const SceneEditor &) = delete;
@@ -29,4 +29,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::DirectX11ToolConfig);
+REGISTER_TYPE(Engine::Tools::DirectX11ToolConfig)

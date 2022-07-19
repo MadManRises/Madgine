@@ -23,11 +23,12 @@
 
 #include "Meta/serialize/hierarchy/statetransmissionflags.h"
 
-/*
+#include "Meta/keyvalue/metatable_impl.h"
+
+
 METATABLE_BEGIN(Engine::Tools::ImRoot)
 READONLY_PROPERTY(Tools, tools)
 METATABLE_END(Engine::Tools::ImRoot)
-*/
 
 namespace Engine {
 
@@ -213,7 +214,7 @@ namespace Tools {
         return mCollector;
     }
 
-    ToolBase &ImRoot::getToolComponent(size_t index)
+    ToolBase &ImRoot::getTool(size_t index)
     {
         return mCollector.get(index);
     }

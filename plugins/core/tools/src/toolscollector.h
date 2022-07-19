@@ -6,7 +6,7 @@
 
 #include "Meta/keyvalue/virtualscope.h"
 
-DECLARE_UNIQUE_COMPONENT(Engine::Tools, Tools, ToolBase, ImRoot &);
+DECLARE_UNIQUE_COMPONENT(Engine::Tools, Tools, ToolBase, ImRoot &)
 
 namespace Engine {
 namespace Tools {

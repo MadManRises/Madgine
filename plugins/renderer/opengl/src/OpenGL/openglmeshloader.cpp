@@ -17,8 +17,8 @@ METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader, Engine::Render::GPUMeshLo
 MEMBER(mResources)
 METATABLE_END(Engine::Render::OpenGLMeshLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader::ResourceType, Engine::Render::GPUMeshLoader::ResourceType)
-METATABLE_END(Engine::Render::OpenGLMeshLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader::Resource, Engine::Render::GPUMeshLoader::Resource)
+METATABLE_END(Engine::Render::OpenGLMeshLoader::Resource)
 
 namespace Engine {
 namespace Render {
@@ -29,80 +29,31 @@ namespace Render {
         getOrCreateManual("Plane", {}, {}, this);
     }
 
-    void OpenGLMeshLoader::generateImpl(OpenGLMeshData &data, const MeshData &mesh)
-    {
-        data.mGroupSize = mesh.mGroupSize;
-
-        data.mVertices.setData(mesh.mVertices);
-
-        data.mVertices.bind();
-
-        if (mesh.mIndices.empty()) {
-            data.mElementCount = mesh.mVertices.mSize / mesh.mVertexSize;
-        } else {
-            data.mIndices.setData(mesh.mIndices);
-
-            data.mElementCount = mesh.mIndices.size();
-            data.mIndices.bind();
-        }
-
-        generateMaterials(data, mesh);
-
-        data.mVAO = { data.mVertices, data.mIndices, mesh.mAttributeList };
-    }
-
     bool OpenGLMeshLoader::generate(GPUMeshData &_data, const MeshData &mesh)
     {
         OpenGLMeshData &data = static_cast<OpenGLMeshData &>(_data);
-        data.mAABB = mesh.mAABB;
 
-        generateImpl(data, mesh);
+        data.mVertices.setData(mesh.mVertices);
 
-        return true;
-    }
+        if (!mesh.mIndices.empty())
+            data.mIndices.setData(mesh.mIndices);
 
-    bool OpenGLMeshLoader::generate(GPUMeshData &_data, MeshData &&mesh)
-    {
-        OpenGLMeshData &data = static_cast<OpenGLMeshData &>(_data);
-        data.mAABB = mesh.mAABB;
-
-        generateImpl(data, mesh);
-
-        return true;
-    }
-
-    void OpenGLMeshLoader::updateImpl(OpenGLMeshData &data, const MeshData &mesh)
-    {
-        data.mGroupSize = mesh.mGroupSize;
-
-        data.mVertices.resize(mesh.mVertices.mSize);
-        std::memcpy(data.mVertices.mapData().mData, mesh.mVertices.mData, mesh.mVertices.mSize);
-
-        if (mesh.mIndices.empty()) {
-            data.mElementCount = mesh.mVertices.mSize / mesh.mVertexSize;
-        } else {
-            data.mIndices.resize(mesh.mIndices.size() * sizeof(uint32_t));
-            std::memcpy(data.mIndices.mapData().mData, mesh.mIndices.data(), mesh.mIndices.size() * sizeof(uint32_t));
-            data.mElementCount = mesh.mIndices.size();
-        }
+        return GPUMeshLoader::generate(data, mesh);
     }
 
     void OpenGLMeshLoader::update(GPUMeshData &_data, const MeshData &mesh)
     {
         OpenGLMeshData &data = static_cast<OpenGLMeshData &>(_data);
 
-        data.mAABB = mesh.mAABB;
+        data.mVertices.resize(mesh.mVertices.mSize);
+        std::memcpy(data.mVertices.mapData().mData, mesh.mVertices.mData, mesh.mVertices.mSize);
 
-        updateImpl(data, mesh);
-    }
+        if (!mesh.mIndices.empty()) {
+            data.mIndices.resize(mesh.mIndices.size() * sizeof(uint32_t));
+            std::memcpy(data.mIndices.mapData().mData, mesh.mIndices.data(), mesh.mIndices.size() * sizeof(uint32_t));
+        }
 
-    void OpenGLMeshLoader::update(GPUMeshData &_data, MeshData &&mesh)
-    {
-        OpenGLMeshData &data = static_cast<OpenGLMeshData &>(_data);
-
-        data.mAABB = mesh.mAABB;
-
-        updateImpl(data, mesh);
+        GPUMeshLoader::update(data, mesh);
     }
 
     void OpenGLMeshLoader::reset(GPUMeshData &data)

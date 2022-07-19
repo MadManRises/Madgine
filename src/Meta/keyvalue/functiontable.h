@@ -1,5 +1,7 @@
 #pragma once
 
+#include "valuetype_desc.h"
+
 namespace Engine {
 
 struct FunctionTable {
@@ -10,7 +12,7 @@ struct FunctionTable {
     size_t mArgumentsCount;
     bool mIsMemberFunction;
     const FunctionArgument *mArguments;
-    const ExtendedValueTypeDesc *mReturnType;
+    ExtendedValueTypeDesc mReturnType = toValueTypeDesc<std::monostate>();
 
     mutable const FunctionTable *mNext = nullptr;
     mutable const FunctionTable **mPrev = nullptr;

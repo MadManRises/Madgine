@@ -54,7 +54,7 @@ Struct::Struct(std::string_view name)
 
 Assignment::Assignment(std::string_view variableName, Statement statement)
     : mVariableName(variableName)
-    , mStatement(std::make_unique<Statement>(std::move(statement))) 
+    , mStatement(std::make_unique<Statement>(std::move(statement)))
 {
 }
 
@@ -69,6 +69,25 @@ Assignment &Assignment::operator=(const Assignment &other)
     mVariableName = other.mVariableName;
     *mStatement = *other.mStatement;
     return *this;
+}
+
+StatementVector::StatementVector() = default;
+StatementVector::StatementVector(std::initializer_list<Statement> statements)
+    : mVector(std::move(statements))
+{
+}
+StatementVector::StatementVector(const StatementVector &) = default;
+StatementVector::~StatementVector() = default;
+StatementVector &StatementVector::operator=(const StatementVector &) = default;
+
+std::vector<Statement>::const_iterator StatementVector::begin() const
+{
+    return mVector.begin();
+}
+
+std::vector<Statement>::const_iterator StatementVector::end() const
+{
+    return mVector.end();
 }
 
 }

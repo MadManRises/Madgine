@@ -5,7 +5,7 @@
 #include "OpenGL/util/openglbuffer.h"
 #include "OpenGL/util/openglvertexarray.h"*/
 #include "gpumeshloader.h"
-#include "programloader.h"
+#include "pipelineloader.h"
 
 #include "Madgine/render/shadinglanguage/sl.h"
 
@@ -24,8 +24,8 @@ namespace Tools {
         virtual int priority() const override;
 
     private:
-        Render::GPUMeshLoader::HandleType mMesh;
-        Render::ProgramLoader::PtrType mProgram;
+        Render::GPUMeshLoader::Handle mMesh;
+        Render::PipelineLoader::Instance mPipeline;
 
         Render::Camera *mCamera;
 

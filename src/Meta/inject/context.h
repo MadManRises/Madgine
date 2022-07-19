@@ -2,10 +2,10 @@
 
 #include "../../Generic/derive.h"
 
-DERIVE_FUNCTION(setup)
-
 namespace Engine {
 namespace Inject {
+
+    DERIVE_FUNCTION(setup)
 
     struct Context;
 

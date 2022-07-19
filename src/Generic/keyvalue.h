@@ -6,7 +6,7 @@
 
 namespace Engine {
 
-template <typename T, typename = void>
+template <typename T>
 struct KeyValue {
     static T &value(T &v)
     {
@@ -32,20 +32,26 @@ struct KeyValue {
 };
 
 template <typename T>
-struct KeyValue<T, std::void_t<std::invoke_result_t<decltype(&T::key), T *>>> {
+concept HasKey = requires(T &t)
+{
+    t.key();
+};
+
+template <HasKey T>
+struct KeyValue<T> {
     static T &value(T &v)
     {
         return v;
     }
 
-    static std::invoke_result_t<decltype(&T::key), T *> key(const T &v)
+    static decltype(auto) key(const T &v)
     {
         return v.key();
     }
 };
 
-template <typename T>
-struct KeyValue<T *, std::void_t<std::invoke_result_t<decltype(&T::key), T *>>> {
+template <HasKey T>
+struct KeyValue<T *> {
     static T *value(T *v)
     {
         return v;
@@ -57,8 +63,8 @@ struct KeyValue<T *, std::void_t<std::invoke_result_t<decltype(&T::key), T *>>> 
     }
 };
 
-template <typename T>
-struct KeyValue<T *const, std::void_t<std::invoke_result_t<decltype(&T::key), T *>>> {
+template <HasKey T>
+struct KeyValue<T *const> {
     static T *value(T *v)
     {
         return v;
@@ -153,36 +159,6 @@ template <typename T>
 decltype(auto) kvKeys(T &v)
 {
     return transformIt<Functor<kvKey<decltype(*v.begin())>>>(v);
-}
-
-template <typename T, typename K>
-struct Finder {
-    static auto find(T &c, const K &key)
-    {
-        return std::ranges::find(c, key, projectionKey);
-    }
-};
-
-template <typename V, typename K, typename _K>
-struct Finder<std::map<K, V>, _K> {
-    static auto find(std::map<K, V> &c, const _K &key)
-    {
-        return c.find(key);
-    }
-};
-
-template <typename V, typename K, typename _K>
-struct Finder<const std::map<K, V>, _K> {
-    static auto find(const std::map<K, V> &c, const _K &key)
-    {
-        return c.find(key);
-    }
-};
-
-template <typename T, typename K>
-decltype(auto) kvFind(T &c, const K &key)
-{
-    return Finder<T, K>::find(c, key);
 }
 
 template <typename T>

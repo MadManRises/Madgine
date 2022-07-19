@@ -4,6 +4,8 @@
 
 #include "Meta/serialize/streams/streamresult.h"
 
+#include "Modules/uniquecomponent/component_index.h"
+
 namespace Engine {
 namespace Scene {
 
@@ -109,7 +111,7 @@ namespace Scene {
             EntityComponentHandle(const EntityComponentHandle<std::conditional_t<std::is_const_v<T>, const EntityComponentBase, EntityComponentBase>> &other)
                 : mIndex(other.mIndex)
             {
-                assert(!other || component_index<T>() == other.mType);
+                assert(!other || UniqueComponent::component_index<T>() == other.mType);
             }
 
             Serialize::StreamResult readState(Serialize::FormattedSerializeStream &in, const char *name, SceneManager *mgr)
@@ -142,7 +144,7 @@ namespace Scene {
 
             uint32_t type() const
             {
-                return component_index<T>();
+                return UniqueComponent::component_index<T>();
             }
 
             operator EntityComponentHandle<EntityComponentBase>() const

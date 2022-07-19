@@ -12,24 +12,23 @@
 
 #include "../plugins/pluginsection.h"
 
-#include "Generic/container/compoundatomicoperation.h"
-
 namespace Engine {
+namespace UniqueComponent {
 
-UniqueComponentCollectorManager::UniqueComponentCollectorManager(Plugins::PluginManager &pluginMgr)
-{
-    CompoundAtomicOperation op;
-    for (const auto& [name, section] : pluginMgr) {
-        for (const auto& [name, plugin] : section) {
-            if (plugin.isLoaded()) {
-                for (UniqueComponentRegistryBase *reg : registryRegistry()) {
-                    reg->onPluginLoad(plugin.info(), op);
+    CollectorManager::CollectorManager(Plugins::PluginManager &pluginMgr)
+    {
+        for (const auto &[name, section] : pluginMgr) {
+            for (const auto &[name, plugin] : section) {
+                if (plugin.isLoaded()) {
+                    for (RegistryBase *reg : registryRegistry()) {
+                        reg->onPluginLoad(plugin.info());
+                    }
                 }
             }
         }
     }
-}
 
+}
 }
 
 #endif

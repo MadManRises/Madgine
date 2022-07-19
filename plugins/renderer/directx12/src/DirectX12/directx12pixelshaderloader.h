@@ -4,35 +4,39 @@
 
 #include "Modules/threading/workgroupstorage.h"
 
-#include "util/directx12pixelshader.h"
-
 namespace Engine {
 namespace Render {
 
-    struct DirectX12PixelShaderLoader : Resources::ResourceLoader<DirectX12PixelShaderLoader, DirectX12PixelShader, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
+    struct DirectX12PixelShaderLoader : Resources::ResourceLoader<DirectX12PixelShaderLoader, ReleasePtr<IDxcBlob>, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
         DirectX12PixelShaderLoader();
 
-        struct HandleType : Base::HandleType {
+        struct Handle : Base::Handle {
 
-            using Base::HandleType::HandleType;
-            HandleType(Base::HandleType handle)
-                : Base::HandleType(std::move(handle))
+            using Base::Handle::Handle;
+            Handle(Base::Handle handle)
+                : Base::Handle(std::move(handle))
             {
             }
 
-            void create(const std::string &name, const CodeGen::ShaderFile &file, DirectX12PixelShaderLoader *loader = nullptr);
+            Threading::TaskFuture<bool> create(std::string_view name, const CodeGen::ShaderFile &file, DirectX12PixelShaderLoader *loader = &DirectX12PixelShaderLoader::getSingleton());
         };
 
 
-        bool loadImpl(DirectX12PixelShader &shader, ResourceDataInfo &info);
-        void unloadImpl(DirectX12PixelShader &shader);
+        bool loadImpl(ReleasePtr<IDxcBlob> &shader, ResourceDataInfo &info);
+        void unloadImpl(ReleasePtr<IDxcBlob> &shader);
 
-        bool create(DirectX12PixelShader &shader, ResourceType *res, const CodeGen::ShaderFile &file);
+        bool create(ReleasePtr<IDxcBlob> &shader, Resource *res, const CodeGen::ShaderFile &file);
 
-        bool loadFromSource(DirectX12PixelShader &shader, std::string_view name, std::string source);
+        bool loadFromSource(ReleasePtr<IDxcBlob> &shader, std::string_view name, std::string source);
+
+        virtual Threading::TaskQueue *loadingTaskQueue() const override;
+
+    private:
+        ReleasePtr<IDxcLibrary> mLibrary;
+        ReleasePtr<IDxcCompiler3> mCompiler;
     };
 
 }
 }
 
-RegisterType(Engine::Render::DirectX12PixelShaderLoader);
+REGISTER_TYPE(Engine::Render::DirectX12PixelShaderLoader)

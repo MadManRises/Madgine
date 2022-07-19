@@ -20,7 +20,7 @@ namespace Render {
             { toValueTypeDesc<Matrix4>(), "float4x4" }
         };
 
-        std::string generateIncludeGuard(const Engine::BitArray<64> &conditionals, const std::vector<std::string> &conditionalTokenList)
+        std::string generateConditionalGuard(const Engine::BitArray<64> &conditionals, const std::vector<std::string> &conditionalTokenList)
         {
             if (conditionals == Engine::BitArray<64> {})
                 return "";
@@ -217,7 +217,7 @@ namespace Render {
             else if (StringUtil::toLower(name).find("uv") != std::string::npos)
                 return "float2(0,0)";
             else if (StringUtil::toLower(name).find("normal") != std::string::npos)
-                return "float3(0,0)";
+                return "float3(0,0,0)";
             else if (StringUtil::toLower(name).find("bone") != std::string::npos)
                 return "int4(0,0,0,0)";
             else if (StringUtil::toLower(name).find("weights") != std::string::npos)
@@ -234,7 +234,7 @@ namespace Render {
                     if (index == 0) {
                         stream << "struct VertexDataIn {\n";
                         for (const CodeGen::Variable &arg : structInfo.second.mVariables) {
-                            stream << generateIncludeGuard(arg.mConditionals, file.mConditionalTokenList);
+                            stream << generateConditionalGuard(arg.mConditionals, file.mConditionalTokenList);
                             stream << "\t";
                             generateType(stream, arg.mType);
                             stream << " " << arg.mName << " : " << guessSemantic(arg.mName, false) << ";\n";
@@ -302,7 +302,7 @@ namespace Render {
                 stream << "RasterizerData main(VertexDataIn dataIn){\n";
                 stream << "\tVertexData IN;\n";
                 for (const CodeGen::Variable &inVar : file.mStructs.at("VertexData").mVariables) {
-                    stream << generateIncludeGuard(inVar.mConditionals, file.mConditionalTokenList);
+                    stream << generateConditionalGuard(inVar.mConditionals, file.mConditionalTokenList);
                     stream << "\tIN." << inVar.mName << " = dataIn." << inVar.mName << ";\n";
                     if (inVar.mConditionals != Engine::BitArray<64> {}) {
                         stream << "#else\n";

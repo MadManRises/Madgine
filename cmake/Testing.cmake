@@ -12,6 +12,8 @@ if (BUILD_TESTING)
 
 	enable_testing()
 
+	set(BUILD_GMOCK OFF CACHE BOOL "Builds the googlemock subproject" FORCE)
+
 	add_subdirectory(test/googletest)
 
 	function(add_test_impl name)

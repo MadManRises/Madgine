@@ -33,7 +33,7 @@ namespace Tools {
         virtual void preRender() override;
         virtual void render(Render::RenderTarget *target, size_t iteration) override;
 
-        virtual void renderDrawList(ImGuiViewport *vp) = 0;
+        virtual void renderViewport(ImGuiViewport *vp) = 0;
 
         void addViewportMapping(Render::RenderTarget *target, ImGuiViewport *vp);
         void removeViewportMapping(Render::RenderTarget *target);
@@ -64,8 +64,7 @@ namespace Tools {
         float mZAxis = 0;
 
     private:
-        std::map<Render::RenderTarget *, ImGuiViewport *>
-            mViewportMappings;
+        std::map<Render::RenderTarget *, ImGuiViewport *> mViewportMappings;
 
         Vector2 mAreaPos = Vector2::ZERO;
         Vector2 mAreaSize = Vector2::ZERO;
@@ -75,11 +74,9 @@ namespace Tools {
         IntervalClock<std::chrono::steady_clock> mFrameClock;
 
         std::vector<Render::RenderTarget *> mRenderTargets;
-
-        
     };
 
 }
 }
 
-RegisterType(Engine::Tools::ClientImRoot);
+REGISTER_TYPE(Engine::Tools::ClientImRoot)

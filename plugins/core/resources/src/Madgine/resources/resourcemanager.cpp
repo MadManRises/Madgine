@@ -26,15 +26,17 @@ namespace Resources {
         return *sSingleton;
     }
 
-    ResourceManager::ResourceManager()
+    ResourceManager::ResourceManager(bool toolMode)
         : mIOQueue("IO")
     {
         assert(!sSingleton);
         sSingleton = this;
 
-        mIOQueue.addSetupSteps(
-            [this]() { return callInit(); },
-            [this]() { return callFinalize(); });
+        if (!toolMode) {
+            mIOQueue.addSetupSteps(
+                [this]() { return callInit(); },
+                [this]() { return callFinalize(); });
+        }
     }
 
     ResourceManager::~ResourceManager()
@@ -43,17 +45,18 @@ namespace Resources {
 
     void ResourceManager::registerResourceLocation(const Filesystem::Path &path, int priority)
     {
-        if (!exists(path))
+        Filesystem::Path absolutePath = path.absolute();
+
+        if (!exists(absolutePath))
             return;
 
-        auto [it, b] = mResourcePaths.try_emplace(path, priority);
-        if (b)
-            mFileWatcher.addWatch(path);
-        /*else
-			std::terminate();*/
+        auto [it, b] = mResourcePaths.try_emplace(absolutePath, priority);
+        if (b) {
+            mFileWatcher.addWatch(absolutePath);
 
-        if (mInitialized) {
-            updateResources(Filesystem::FileEventType::FILE_CREATED, path, priority);
+            if (mInitialized) {
+                updateResources(Filesystem::FileEventType::FILE_CREATED, path, priority);
+            }
         }
     }
 

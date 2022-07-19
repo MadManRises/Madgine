@@ -13,6 +13,8 @@
 #    include <Windows.h>
 #    include <windowsx.h>
 
+#    if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+
 namespace Engine {
 namespace Window {
 
@@ -447,8 +449,9 @@ namespace Window {
             updateMonitors();
         return sBuffer;
     }
+}
+}
 
-}
-}
+#endif
 
 #endif

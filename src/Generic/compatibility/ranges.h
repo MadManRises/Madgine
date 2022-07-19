@@ -1,11 +1,11 @@
 #pragma once
 
-#if __cpp_lib_ranges < 201911L
+#if __cpp_lib_ranges < 202110L
 
 namespace std {
 namespace ranges {
 
-#if !__MINGW32__
+#if (__cpp_lib_ranges < 201911L) || ANDROID || OSX || IOS
     template <class T>
     concept range = requires(T &t)
     {
@@ -13,6 +13,7 @@ namespace ranges {
         t.end();
     };
 #endif
+
 
     template <typename C, typename F>
     constexpr auto find_if_not(C &&c, F &&f)

@@ -17,8 +17,8 @@
 namespace Engine {
 namespace Filesystem {
 
-    void setup(void*) {
-
+    void setup(void *)
+    {
     }
 
     bool isDir(const Path &p)
@@ -46,6 +46,7 @@ namespace Filesystem {
         return std::string { Path(buffer).stem() };
     }
 
+#    if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
     Path appDataPath()
     {
         wchar_t *wBuffer;
@@ -67,6 +68,7 @@ namespace Filesystem {
 
         return result;
     }
+#    endif
 
     bool createDirectory(const Path &p)
     {
@@ -84,6 +86,7 @@ namespace Filesystem {
         return DeleteFile(p.c_str());
     }
 
+#    if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_SYSTEM)
     void makeNormalized(std::string &p)
     {
         if (p.find('\\') == std::string::npos && p.find('/') == std::string::npos)
@@ -102,6 +105,7 @@ namespace Filesystem {
         buffer[0] = toupper(buffer[0]);
         p = buffer;
     }
+#    endif
 
     bool isValidPath(const std::string &p)
     {

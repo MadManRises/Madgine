@@ -1,5 +1,3 @@
-cmake_minimum_required (VERSION 2.6)
-
 Project(Scene)
 
 set(sources "")
@@ -34,7 +32,7 @@ FolderSources(sources "" renderer)
 
 add_plugin(SceneRenderer Madgine Core ${sources} SOURCE_ROOT renderer PRECOMPILED_HEADER renderer/Madgine/scenerendererlib.h)
 
-target_link_plugins(SceneRenderer Scene Client ProgramLoader)
+target_link_plugins(SceneRenderer Scene Client PipelineLoader)
 
 set(sources "")
 FolderSources(sources "" renderer_tools)
@@ -43,6 +41,6 @@ FolderSources(sources "" renderer_tools)
 
 add_tools(SceneRenderer ${sources} PRECOMPILED_HEADER renderer_tools/Madgine_Tools/scenerenderertoolslib.h SOURCE_ROOT renderer_tools)
 
-target_link_plugins(SceneRendererTools ClientTools ProgramLoader)
+target_link_plugins(SceneRendererTools ClientTools PipelineLoader)
 
 target_link_libraries(SceneRendererTools PRIVATE MemorySerialize FilesystemSerialize)

@@ -34,7 +34,7 @@ namespace Scene {
             void operator()(const It &it, const It &begin)
             {
                 using T = std::remove_reference_t<decltype(*get<0>(it))>;
-                relocateEntityComponent(*get<1>(it), EntityComponentHandle<T> { std::distance(begin, it) });
+                relocateEntityComponent(*get<1>(it), EntityComponentHandle<T> { static_cast<uint32_t>(std::distance(begin, it)) });
             }
         };
 

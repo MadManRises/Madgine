@@ -5,10 +5,6 @@ namespace Render {
 
     struct MADGINE_DIRECTX12_EXPORT DirectX12Buffer {
 
-    private:
-        DirectX12Buffer(size_t size, bool persistent);
-
-    public:
         DirectX12Buffer() = default;
         DirectX12Buffer(const ByteBuffer &data);
         DirectX12Buffer(const DirectX12Buffer &) = delete;
@@ -20,23 +16,24 @@ namespace Render {
 
         explicit operator bool() const;
 
-        void bindVertex(UINT stride) const;
-        void bindIndex() const;
+        void bindVertex(ID3D12GraphicsCommandList *commandList, UINT stride, size_t index = 0) const;
+        void bindIndex(ID3D12GraphicsCommandList *commandList) const;
 
-        void reset();
+        void reset(size_t size = 0);
         void setData(const ByteBuffer &data);
-        void resize(size_t size);
+        
+
+        WritableByteBuffer mapData(size_t size);
         WritableByteBuffer mapData();
 
-        OffsetPtr handle();
+        //D3D12_GPU_DESCRIPTOR_HANDLE handle();
 
         D3D12_GPU_VIRTUAL_ADDRESS gpuAddress() const;
 
     private:
+        D3D12_GPU_VIRTUAL_ADDRESS mAddress = 0;
         size_t mSize = 0;
-        OffsetPtr mOffset;
-        OffsetPtr mHandle;
-        bool mPersistent;
+        bool mIsPersistent;
     };
 
 }

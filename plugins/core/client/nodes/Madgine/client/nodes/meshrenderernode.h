@@ -39,4 +39,4 @@ namespace Render {
 }
 }
 
-RegisterType(Engine::Render::MeshRendererNode);
+REGISTER_TYPE(Engine::Render::MeshRendererNode)

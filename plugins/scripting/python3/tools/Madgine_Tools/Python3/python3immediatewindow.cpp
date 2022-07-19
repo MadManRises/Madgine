@@ -10,7 +10,7 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-#include "Madgine/app/application.h"
+#include "Madgine/base/application.h"
 #include "Python3/python3env.h"
 #include "Python3/util/python3lock.h"
 
@@ -38,7 +38,7 @@ namespace Tools {
     Threading::Task<bool> Python3ImmediateWindow::init()
     {
 
-        mEnv = &Engine::App::Application::getSingleton().getGlobalAPIComponent<Scripting::Python3::Python3Environment>();
+        mEnv = &Engine::Base::Application::getSingleton().getGlobalAPIComponent<Scripting::Python3::Python3Environment>();
 
         co_return co_await ToolBase::init();
     }

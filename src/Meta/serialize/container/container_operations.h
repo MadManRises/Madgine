@@ -104,7 +104,7 @@ namespace Serialize {
                 }
                 decltype(auto) op = insertOperation(c, it, answerTarget, answerId);
                 typename container_traits<C>::const_iterator cit = static_cast<const typename container_traits<C>::iterator &>(it);
-                return TupleUnpacker::invoke(&Creator::template readItem<InsertOperation_t<C>>, in, op, it, cit, hierarchy);
+                return TupleUnpacker::invoke(&Creator::template readItem<decltype(op)>, in, op, it, cit, hierarchy);
             }
             case ERASE:
                 STREAM_PROPAGATE_ERROR(readIterator(in, c, it));

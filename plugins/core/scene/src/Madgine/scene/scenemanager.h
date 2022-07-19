@@ -6,8 +6,8 @@
 
 #include "Meta/serialize/container/syncablecontainer.h"
 
-#include "Madgine/app/globalapibase.h"
-#include "Madgine/app/globalapicollector.h"
+#include "Madgine/base/globalapibase.h"
+#include "Madgine/base/globalapicollector.h"
 #include "Meta/serialize/container/noparent.h"
 
 #include "Modules/threading/datamutex.h"
@@ -36,10 +36,12 @@
 namespace Engine {
 namespace Scene {
     struct MADGINE_SCENE_EXPORT SceneManager : Serialize::TopLevelUnit<SceneManager>,
-                                               App::GlobalAPI<Serialize::NoParent<SceneManager>> {
-        SERIALIZABLEUNIT(SceneManager);
+                                               Base::GlobalAPI<Serialize::NoParent<SceneManager>> {
+        SERIALIZABLEUNIT(SceneManager)
 
-        SceneManager(App::Application &app);
+        using EntityContainer = RefcountedContainer<std::deque<Entity::Entity>>;
+
+        SceneManager(Base::Application &app);
         SceneManager(const SceneManager &) = delete;
         ~SceneManager();
 
@@ -66,19 +68,19 @@ namespace Scene {
         template <typename T>
         T &getComponent()
         {
-            return static_cast<T &>(getComponent(Engine::component_index<T>()));
+            return static_cast<T &>(getComponent(UniqueComponent::component_index<T>()));
         }
         SceneComponentBase &getComponent(size_t i);
         size_t getComponentCount();
         
         Threading::DataLock lock(AccessMode mode);
 
-        Threading::SignalStub<const RefcountedContainer<std::deque<Entity::Entity>>::iterator &, int> &entitiesSignal();
+        Threading::SignalStub<const EntityContainer::iterator &, int> &entitiesSignal();
 
         template <typename T>
         Entity::EntityComponentList<T> &entityComponentList()
         {
-            return static_cast<Entity::EntityComponentList<T> &>(*mEntityComponentLists.at(Engine::component_index<T>()));
+            return static_cast<Entity::EntityComponentList<T> &>(*mEntityComponentLists.at(UniqueComponent::component_index<T>()));
         }
 
         Entity::EntityComponentListBase &entityComponentList(size_t index)
@@ -110,7 +112,6 @@ namespace Scene {
     private:
         Entity::EntityComponentListContainer<std::vector<Placeholder<0>>> mEntityComponentLists;
 
-        using EntityContainer = RefcountedContainer<std::deque<Entity::Entity>>;
         SYNCABLE_CONTAINER(mEntities, EntityContainer, Threading::SignalFunctor<const EntityContainer::iterator &, int>);
         RefcountedContainer<std::deque<Serialize::NoParent<Entity::Entity>>> mLocalEntities;
 
@@ -146,5 +147,5 @@ namespace Scene {
 }
 }
 
-RegisterType(Engine::Scene::SceneManager);
-RegisterType(Engine::Serialize::NoParent<Engine::Scene::SceneManager>);
+REGISTER_TYPE(Engine::Scene::SceneManager)
+REGISTER_TYPE(Engine::Serialize::NoParent<Engine::Scene::SceneManager>)

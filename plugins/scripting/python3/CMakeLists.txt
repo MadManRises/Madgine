@@ -3,6 +3,7 @@ project(Python3)
 find_package (Python3 COMPONENTS Development.Embed)
 
 if (NOT Python3_Development.Embed_FOUND)
+	MESSAGE(STATUS "Failed to find Python3 - Skipping plugin")
 	return()
 endif()
 
@@ -15,7 +16,7 @@ FolderSources(sources src Python3 python3env.cpp python3env.h python3fileloader.
 
 add_plugin(Python3 Madgine Scripting ${sources} PRECOMPILED_HEADER src/Python3/python3lib.h)
 
-target_link_plugins(Python3 Base)
+target_link_plugins(Python3 Base Resources)
 
 target_link_libraries(Python3 PUBLIC Python3::Python)
 

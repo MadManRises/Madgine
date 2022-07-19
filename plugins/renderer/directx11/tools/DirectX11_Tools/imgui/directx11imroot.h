@@ -14,10 +14,10 @@ namespace Tools {
         virtual Threading::Task<void> finalize() override;
 
         virtual void newFrame() override;
-        virtual void renderDrawList(ImGuiViewport *vp) override; 
+        virtual void renderViewport(ImGuiViewport *vp) override; 
     };
 
 }
 }
 
-RegisterType(Engine::Tools::DirectX11ImRoot);
+REGISTER_TYPE(Engine::Tools::DirectX11ImRoot)

@@ -14,8 +14,8 @@ METATABLE_BEGIN(Engine::Render::OpenGLTextureLoader)
 MEMBER(mResources)
 METATABLE_END(Engine::Render::OpenGLTextureLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::OpenGLTextureLoader::ResourceType, Engine::Render::TextureLoader::ResourceType)
-METATABLE_END(Engine::Render::OpenGLTextureLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::OpenGLTextureLoader::Resource, Engine::Render::TextureLoader::Resource)
+METATABLE_END(Engine::Render::OpenGLTextureLoader::Resource)
 
 namespace Engine {
 namespace Render {

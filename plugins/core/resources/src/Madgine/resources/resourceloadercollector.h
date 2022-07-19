@@ -5,4 +5,4 @@
 
 
 
-DECLARE_UNIQUE_COMPONENT(Engine::Resources, ResourceLoader, ResourceLoaderBase);
+DECLARE_UNIQUE_COMPONENT(Engine::Resources, ResourceLoader, ResourceLoaderBase)

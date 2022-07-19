@@ -2,8 +2,6 @@
 
 #include "../streams/comparestreamid.h"
 
-#include "Generic/lambda.h"
-
 #include "../streams/pendingrequest.h"
 
 namespace Engine {

@@ -2,8 +2,8 @@
 
 #include "windoweventlistener.h"
 
-#include "../input/inputevents.h"
 #include "../input/cursoricons.h"
+#include "../input/inputevents.h"
 
 #include "windowsettings.h"
 
@@ -69,17 +69,18 @@ namespace Window {
     protected:
         void onResize(const InterfacesVector &size)
         {
+            if (size.x > 0 && size.y > 0)
                 mListener->onResize(size);
         }
 
         void onClose()
         {
-                mListener->onClose();
+            mListener->onClose();
         }
 
         void onRepaint()
         {
-                mListener->onRepaint();
+            mListener->onRepaint();
         }
 
         //Input
@@ -115,7 +116,7 @@ namespace Window {
         }
 
     private:
-        WindowEventListener * mListener;
+        WindowEventListener *mListener;
     };
 
     INTERFACES_EXPORT OSWindow *sCreateWindow(const WindowSettings &settings, WindowEventListener *listener);

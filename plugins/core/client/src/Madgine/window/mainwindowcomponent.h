@@ -1,6 +1,6 @@
 #pragma once
 
-#include "madgineobject/madgineobject.h"
+#include "Modules/threading/madgineobject.h"
 
 #include "Meta/keyvalue/virtualscope.h"
 
@@ -13,7 +13,7 @@
 namespace Engine {
 namespace Window {
 
-    struct MADGINE_CLIENT_EXPORT MainWindowComponentBase : Serialize::VirtualSerializableDataBase<VirtualScopeBase<>, Serialize::SerializableDataUnit>, MadgineObject<MainWindowComponentBase> {
+    struct MADGINE_CLIENT_EXPORT MainWindowComponentBase : Serialize::VirtualSerializableDataBase<VirtualScopeBase<>, Serialize::SerializableDataUnit>, Threading::MadgineObject<MainWindowComponentBase> {
         MainWindowComponentBase(MainWindow &window, int priority);
         virtual ~MainWindowComponentBase() = default;
 
@@ -59,4 +59,4 @@ namespace Window {
 }
 }
 
-RegisterType(Engine::Window::MainWindowComponentBase);
+REGISTER_TYPE(Engine::Window::MainWindowComponentBase)

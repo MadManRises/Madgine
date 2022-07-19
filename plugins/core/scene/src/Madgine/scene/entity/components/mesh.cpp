@@ -26,7 +26,7 @@ namespace Engine {
 namespace Scene {
     namespace Entity {
         Mesh::Mesh(const ObjectPtr &data)
-            : NamedUniqueComponent(data)
+            : NamedComponent(data)
         {
             Engine::ValueType v;
             if (data.getValue(v, "mesh") && v.is<std::string>()) {
@@ -87,13 +87,13 @@ namespace Scene {
             return mMesh->mAABB;
         }
 
-        void Mesh::set(Render::GPUMeshLoader::HandleType handle)
+        void Mesh::set(Render::GPUMeshLoader::Handle handle)
         {
             mMesh = std::move(handle);
             mMaterial = 0;
         }
 
-        Render::GPUMeshLoader::ResourceType *Mesh::get() const
+        Render::GPUMeshLoader::Resource *Mesh::get() const
         {
             return mMesh.resource();
         }

@@ -13,7 +13,6 @@ namespace Im3D {
     struct Im3DObject {
         Im3DObject(Im3DID id);
 
-        std::string mName;
         Im3DID mID;
     };
 

@@ -6,7 +6,7 @@
 
 namespace Engine {
 
-static std::tuple<float, int, bool> getScore(Atlas2::Bin &bin, const Vector2i &binSize, const Vector2i &size, bool allowFlip)
+std::tuple<float, int, bool> Atlas2::getScore(Bin &bin, const Vector2i &size, bool allowFlip)
 {
     float score = 0;
     int cornerIndex;
@@ -15,12 +15,12 @@ static std::tuple<float, int, bool> getScore(Atlas2::Bin &bin, const Vector2i &b
     for (int index = 0; index < bin.mCorners.size(); ++index) {
         const Vector2i &pos = bin.mCorners[index];
 
-        int rightEnd = index > 0 ? bin.mCorners[index - 1].x : binSize.x;
-        int bottomEnd = (index < bin.mCorners.size() - 1) ? bin.mCorners[index + 1].y : binSize.y;
+        int rightEnd = index > 0 ? bin.mCorners[index - 1].x : mBinSize.x;
+        int bottomEnd = (index < bin.mCorners.size() - 1) ? bin.mCorners[index + 1].y : mBinSize.y;
 
         Vector2i cornerBounds { rightEnd - pos.x, bottomEnd - pos.y };
 
-        if (pos.x + size.x <= binSize.x && pos.y + size.y <= binSize.y) {
+        if (pos.x + size.x <= mBinSize.x && pos.y + size.y <= mBinSize.y) {
             float score_x = float(cornerBounds.x) / size.x;
             if (score_x > 1.0f)
                 score_x = 1.0f;
@@ -35,7 +35,7 @@ static std::tuple<float, int, bool> getScore(Atlas2::Bin &bin, const Vector2i &b
             }
         }
         if (allowFlip) {
-            if (pos.x + size.y <= binSize.x && pos.y + size.x <= binSize.y) {
+            if (pos.x + size.y <= mBinSize.x && pos.y + size.x <= mBinSize.y) {
                 float score_x = float(cornerBounds.x) / size.y;
                 if (score_x > 1.0f)
                     score_x = 1.0f;
@@ -54,13 +54,13 @@ static std::tuple<float, int, bool> getScore(Atlas2::Bin &bin, const Vector2i &b
     return { score, cornerIndex, flipped };
 }
 
-static Atlas2::Entry insertIntoBin(Atlas2::Bin &bin, const Vector2i &_size, int cornerIndex, bool flipped)
+Atlas2::Entry Atlas2::insertIntoBin(Bin &bin, const Vector2i &_size, int cornerIndex, bool flipped)
 {
     Vector2i size = _size;
     if (flipped)
         size = { size.y, size.x };
 
-    Atlas2::Entry entry;
+    Entry entry;
     entry.mArea.mTopLeft = bin.mCorners[cornerIndex] + bin.mOrigin;
     entry.mArea.mSize = size;
     entry.mFlipped = flipped;
@@ -101,7 +101,7 @@ Atlas2::Entry Atlas2::insert(const Vector2i &size, const std::function<void()> &
     bool flipped;
 
     for (Bin &bin : mBins) {
-        auto [newScore, newCornerIndex, newFlipped] = getScore(bin, mBinSize, size, allowFlip);
+        auto [newScore, newCornerIndex, newFlipped] = getScore(bin, size, allowFlip);
         if (newScore > score) {
             score = newScore;
             cornerIndex = newCornerIndex;

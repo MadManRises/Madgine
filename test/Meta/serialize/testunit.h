@@ -35,7 +35,7 @@ struct ComplexDataType : SerializableDataUnit {
 };
 
 struct TestUnit : TopLevelUnit<TestUnit> {
-    SERIALIZABLEUNIT(TestUnit);
+    SERIALIZABLEUNIT(TestUnit)
 
     TestUnit(int data = 1)
         : TopLevelUnit<TestUnit>(10)

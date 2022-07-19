@@ -15,7 +15,7 @@ namespace NodeGraph {
 
     struct MADGINE_NODEGRAPH_EXPORT NodeBase : Serialize::VirtualSerializableDataBase<VirtualScopeBase<>, Serialize::SerializableDataUnit> {
 
-        SERIALIZABLEUNIT(NodeBase);
+        SERIALIZABLEUNIT(NodeBase)
 
         NodeBase(NodeGraph &graph);
         NodeBase(const NodeBase &other, NodeGraph &graph);
@@ -27,6 +27,7 @@ namespace NodeGraph {
         virtual size_t flowInCount() const { return 0; }
         virtual std::string_view flowInName(uint32_t index) const { throw 0; }
         virtual uint32_t flowInMask(uint32_t index, bool bidir = true) const { return NodeExecutionMask::CPU; }
+        const std::vector<Pin> &flowInSources(uint32_t index) const;
         static uint32_t flowInId(uint32_t index);
 
         virtual size_t flowOutCount() const { return 0; }
@@ -57,6 +58,7 @@ namespace NodeGraph {
         virtual uint32_t dataReceiverMask(uint32_t index, bool bidir = true) const { return NodeExecutionMask::CPU; }
         virtual ExtendedValueTypeDesc dataReceiverType(uint32_t index, bool bidir = true) const { throw 0; }
         virtual bool dataReceiverVariadic() const { return false; }
+        const std::vector<Pin> &dataReceiverSources(uint32_t index) const;
         static uint32_t dataReceiverId(uint32_t index);
 
         virtual size_t dataProviderCount() const { return 0; }
@@ -64,6 +66,7 @@ namespace NodeGraph {
         virtual uint32_t dataProviderMask(uint32_t index, bool bidir = true) const { return NodeExecutionMask::CPU; }
         virtual ExtendedValueTypeDesc dataProviderType(uint32_t index, bool bidir = true) const { throw 0; }
         virtual bool dataProviderVariadic() const { return false; }
+        const std::vector<Pin> &dataProviderTargets(uint32_t index) const;
         static uint32_t dataProviderId(uint32_t index);
 
         static PinDesc pinFromId(uint32_t id);
@@ -76,8 +79,20 @@ namespace NodeGraph {
         virtual void onDataProviderUpdate(uint32_t index, Pin target, EdgeEvent event);
         virtual void onDataReceiverUpdate(uint32_t index, Pin source, EdgeEvent event);
 
+        void removeFlowInPin(uint32_t index);
+        void removeFlowOutPin(uint32_t index);
+        void removeDataInPin(uint32_t index);
+        void removeDataOutPin(uint32_t index);
+        void removeDataReceiverPin(uint32_t index);
+        void removeDataProviderPin(uint32_t index);
+
+        void onFlowInRemove(Pin pin);
+        void onFlowOutRemove(Pin pin);
+        void onDataInRemove(Pin pin);
+        void onDataOutRemove(Pin pin);
+        void onDataReceiverRemove(Pin pin);
         void onDataProviderRemove(Pin pin);
-        void onNodeRemove(uint32_t oldIndex, uint32_t newIndex);
+        void onNodeReindex(uint32_t oldIndex, uint32_t newIndex);
 
         virtual void interpret(NodeInterpreter &interpreter, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeInterpreterData> &data) const;
         virtual void interpretRead(NodeInterpreter &interpreter, ValueType &retVal, uint32_t providerIndex, std::unique_ptr<NodeInterpreterData> &data) const;
@@ -108,4 +123,4 @@ namespace NodeGraph {
 }
 }
 
-RegisterType(Engine::NodeGraph::NodeBase);
+REGISTER_TYPE(Engine::NodeGraph::NodeBase)

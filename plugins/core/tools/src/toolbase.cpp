@@ -58,9 +58,9 @@ namespace Tools {
         mEnabled = e;
     }
 
-    ToolBase &ToolBase::getToolComponent(size_t index)
+    ToolBase &ToolBase::getTool(size_t index)
     {
-        return mRoot.getToolComponent(index);
+        return mRoot.getTool(index);
     }
 
     ImRoot &ToolBase::root()

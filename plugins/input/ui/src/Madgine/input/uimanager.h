@@ -6,17 +6,19 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 
+#include "Modules/uniquecomponent/component_index.h"
+
 #include "Meta/math/vector2.h"
 
 #include "Generic/intervalclock.h"
 
-#include "madgineobject/madgineobject.h"
+#include "Modules/threading/madgineobject.h"
 
 namespace Engine {
 namespace Input {
-    struct MADGINE_UI_EXPORT UIManager : MadgineObject<UIManager> {
+    struct MADGINE_UI_EXPORT UIManager : Threading::MadgineObject<UIManager> {
 
-        UIManager(App::Application &app, Window::MainWindow &window);
+        UIManager(Base::Application &app, Window::MainWindow &window);
         UIManager(const UIManager &) = delete;
 
         ~UIManager();
@@ -43,7 +45,7 @@ namespace Input {
         template <typename T>
         T &getGuiHandler()
         {
-            return static_cast<T &>(getGuiHandler(Engine::component_index<T>()));
+            return static_cast<T &>(getGuiHandler(UniqueComponent::component_index<T>()));
         }
 
         GuiHandlerBase &getGuiHandler(size_t i);
@@ -55,7 +57,7 @@ namespace Input {
         template <typename T>
         T &getGameHandler()
         {
-            return static_cast<T &>(getGameHandler(Engine::component_index<T>()));
+            return static_cast<T &>(getGameHandler(UniqueComponent::component_index<T>()));
         }
 
         GameHandlerBase &getGameHandler(size_t i);
@@ -63,13 +65,13 @@ namespace Input {
         Threading::Task<bool> init();
         Threading::Task<void> finalize();
 
-        App::Application &app() const;
+        Base::Application &app() const;
         Window::MainWindow &window() const;
 
         void onUpdate();
 
     private:
-        App::Application &mApp;
+        Base::Application &mApp;
         Window::MainWindow &mWindow;
 
     public:
@@ -85,4 +87,4 @@ namespace Input {
 }
 }
 
-RegisterType(Engine::Input::UIManager);
+REGISTER_TYPE(Engine::Input::UIManager)

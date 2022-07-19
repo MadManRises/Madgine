@@ -18,9 +18,9 @@
 namespace Engine {
 namespace Serialize {
 
-    void writeFunctionAction(SyncableUnitBase *unit, uint16_t index, const void *args, const std::set<ParticipantId> &targets, ParticipantId answerTarget, MessageId answerId);
-    void writeFunctionResult(SyncableUnitBase *unit, uint16_t index, const void *result, ParticipantId answerTarget, MessageId answerId);
-    void writeFunctionRequest(SyncableUnitBase *unit, uint16_t index, FunctionType type, const void *args, ParticipantId requester, MessageId requesterTransactionId, GenericMessagePromise promise = {});
+    void META_EXPORT writeFunctionAction(SyncableUnitBase *unit, uint16_t index, const void *args, const std::set<ParticipantId> &targets, ParticipantId answerTarget, MessageId answerId);
+    void META_EXPORT writeFunctionResult(SyncableUnitBase *unit, uint16_t index, const void *result, ParticipantId answerTarget, MessageId answerId);
+    void META_EXPORT writeFunctionRequest(SyncableUnitBase *unit, uint16_t index, FunctionType type, const void *args, ParticipantId requester, MessageId requesterTransactionId, GenericMessagePromise promise = {});
 
     namespace __serialize_impl__ {
 
@@ -338,7 +338,7 @@ namespace Serialize {
             template <auto g>                                                                                                                       \
             static constexpr uint16_t getIndex()                                                                                                    \
             {                                                                                                                                       \
-                if constexpr (f_same_as<&Ty::f, g>)                                                                                                 \
+                if constexpr (FSameAs<&Ty::f, g>)                                                                                                   \
                     return count - 1;                                                                                                               \
                 else                                                                                                                                \
                     return Serialize::__serialize_impl__::FunctionLineStruct<__LINE__ - 1>::getIndex<g>();                                          \

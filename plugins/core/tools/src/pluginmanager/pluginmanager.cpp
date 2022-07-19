@@ -21,7 +21,7 @@
 
 #    include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-#    include "Madgine/core/root.h"
+#    include "Madgine/base/root.h"
 
 UNIQUECOMPONENT(Engine::Tools::PluginManager);
 
@@ -30,7 +30,7 @@ namespace Tools {
 
     static Guard excludeFromExport {
         []() {
-            Core::skipUniqueComponentOnExport(&typeInfo<PluginManager>);
+            Base::skipUniqueComponentOnExport(&typeInfo<PluginManager>);
         }
     };
 
@@ -66,6 +66,11 @@ namespace Tools {
                     ImGui::PopDisabled();
                 }
                 */
+
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 40, 40, 255));
+            ImGui::Text("Changes are only applied on restart!");
+            ImGui::PopStyleColor();
+
             ImVec2 v = ImGui::GetContentRegionAvail();
             v.x *= 0.5f;
 
@@ -127,8 +132,8 @@ namespace Tools {
                             }
 
                             if (ImGui::TreeNode("UniqueComponents")) {
-                                for (UniqueComponentRegistryBase *reg : registryRegistry()) {
-                                    for (CollectorInfoBase *info : *reg) {
+                                for (UniqueComponent::RegistryBase *reg : UniqueComponent::registryRegistry()) {
+                                    for (UniqueComponent::CollectorInfoBase *info : *reg) {
                                         if (info->mBinary == binInfo && ImGui::TreeNode(info->mBaseInfo->mTypeName.data(), "%.*s", static_cast<int>(info->mBaseInfo->mTypeName.size()), info->mBaseInfo->mTypeName.data())) {
                                             for (const std::vector<const TypeInfo *> &components : info->mElementInfos) {
                                                 ImGui::Text("%.*s", static_cast<int>(components.front()->mTypeName.size()), components.front()->mTypeName.data());

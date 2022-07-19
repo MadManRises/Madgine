@@ -14,7 +14,7 @@ namespace Scene {
 
         struct MADGINE_SCENE_EXPORT Transform : EntityComponent<Transform> {
 
-            SERIALIZABLEUNIT(Transform);
+            SERIALIZABLEUNIT(Transform)
 
             using Container = FreeListContainer<EntityComponentContainerImpl<std::deque>, EntityComponentFreeListConfig>;
 
@@ -56,5 +56,5 @@ namespace Scene {
 }
 }
 
-RegisterType(Engine::Scene::Entity::Transform);
-RegisterType(Engine::Scene::Entity::EntityComponentList<Engine::Scene::Entity::Transform>);
+REGISTER_TYPE(Engine::Scene::Entity::Transform)
+REGISTER_TYPE(Engine::Scene::Entity::EntityComponentList<Engine::Scene::Entity::Transform>)

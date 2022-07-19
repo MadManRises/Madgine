@@ -10,7 +10,7 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "Madgine/app/application.h"
+#include "Madgine/base/application.h"
 #include "Madgine/scene/entity/entitycomponentcollector.h"
 #include "Madgine/scene/scenemanager.h"
 
@@ -74,7 +74,7 @@ namespace Tools {
 
     Threading::Task<bool> SceneEditor::init()
     {
-        App::Application *app = App::Application::getSingletonPtr();
+        Base::Application *app = Base::Application::getSingletonPtr();
         if (!app)
             co_return false;
         mSceneMgr = &app->getGlobalAPIComponent<Scene::SceneManager>();
@@ -260,14 +260,17 @@ namespace Tools {
 
         Filesystem::FileManager mgr { "Scene" };
         Serialize::FormattedSerializeStream in = mgr.openRead(mCurrentSceneFile, std::make_unique<Serialize::XMLFormatter>());
-        Serialize::read(in, *mSceneMgr, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap | Serialize::StateTransmissionFlags_Activation);
+        Serialize::StreamResult result = Serialize::read(in, *mSceneMgr, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap | Serialize::StateTransmissionFlags_Activation);
+        if (result.mState != Serialize::StreamState::OK) {
+            LOG_ERROR(*result.mError);
+        }
     }
 
     void SceneEditor::saveScene(const Filesystem::Path &p)
     {
         mCurrentSceneFile = p;
 
-       auto guard = mSceneMgr->lock(AccessMode::READ);
+        auto guard = mSceneMgr->lock(AccessMode::READ);
 
         Filesystem::FileManager mgr { "Scene" };
         Serialize::FormattedSerializeStream out = mgr.openWrite(mCurrentSceneFile, std::make_unique<Serialize::XMLFormatter>());
@@ -495,7 +498,7 @@ namespace Tools {
             Vector3 pos = (t->worldMatrix() * Vector4::UNIT_W).xyz();
 
             for (size_t i = 0; i < 3; ++i) {
-                Im3D::Arrow3D(IM3D_TRIANGLES, 0.1f, pos, pos + offsets[i], colors[i]);
+                Im3D::Arrow3D(IM3D_TRIANGLES, 0.1f, pos, pos + offsets[i], { .mColor = colors[i] });
                 if (Im3D::BoundingBox(labels[i], 0, 2)) {
                     mHoveredAxis = i;
                     mHoveredTransform = t;
@@ -511,7 +514,7 @@ namespace Tools {
                         Matrix4 world = t->worldMatrix();
 
                         if (mShowBoneNames)
-                            Im3D::Text(bone.mName.c_str(), Im3D::TextParameters { world * m, 2.0f });
+                            Im3D::Text(bone.mName.c_str(), {.mTransform = world * m, .mFontSize = 2.0f });
 
                         Vector4 start = world * m * Vector4::UNIT_W;
                         Vector4 end;

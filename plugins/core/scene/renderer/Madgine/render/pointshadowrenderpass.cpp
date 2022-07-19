@@ -35,12 +35,12 @@ namespace Render {
 
     void PointShadowRenderPass::setup(RenderTarget *target)
     {
-        mProgram.create("pointshadow", { sizeof(PointShadowPerApplication), sizeof(PointShadowPerFrame), sizeof(PointShadowPerObject) }, sizeof(PointShadowInstanceData));
+        mPipeline.createDynamic({ .vs = "pointshadow", .ps = "pointshadow", .gs = "pointshadow", .bufferSizes = { sizeof(PointShadowPerApplication), sizeof(PointShadowPerFrame), sizeof(PointShadowPerObject) }, .instanceDataSize = sizeof(PointShadowInstanceData) });
     }
 
     void PointShadowRenderPass::shutdown()
     {
-        mProgram.reset();
+        mPipeline.reset();
     }
 
     void PointShadowRenderPass::render(Render::RenderTarget *target, size_t iteration)
@@ -60,7 +60,6 @@ namespace Render {
         if (!transform)
             return;
 
-
         std::map<std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> instances;
 
         for (const auto &[mesh, e] : mScene.entityComponentList<Scene::Entity::Mesh>().data()) {
@@ -76,14 +75,14 @@ namespace Render {
                 continue;
 
             Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
-            
+
             instances[std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *> { meshData, skeleton }].push_back(transform->worldMatrix());
         }
 
         target->pushAnnotation("PointShadow");
 
         {
-            auto perApplication = mProgram.mapParameters(0).cast<PointShadowPerApplication>();
+            auto perApplication = mPipeline.mapParameters<PointShadowPerApplication>(0);
 
             Frustum f {
                 Vector3::ZERO,
@@ -96,7 +95,7 @@ namespace Render {
         }
 
         {
-            auto perFrame = mProgram.mapParameters(1).cast<PointShadowPerFrame>();
+            auto perFrame = mPipeline.mapParameters<PointShadowPerFrame>(1);
 
             perFrame->position = transform->getPosition();
         }
@@ -106,21 +105,21 @@ namespace Render {
             Scene::Entity::Skeleton *skeleton = std::get<1>(instance.first);
 
             {
-                auto perObject = mProgram.mapParameters(2).cast<PointShadowPerObject>();
+                auto perObject = mPipeline.mapParameters<PointShadowPerObject>(2);
 
                 perObject->hasSkeleton = skeleton != nullptr;
             }
 
             size_t instanceCount = instance.second.size();
-            mProgram.setInstanceData(std::move(instance.second));
+            mPipeline.setInstanceData(std::move(instance.second));
 
             if (skeleton) {
-                mProgram.setDynamicParameters(0, skeleton->matrices());
+                mPipeline.setDynamicParameters(0, skeleton->matrices());
             } else {
-                mProgram.setDynamicParameters(0, {});
+                mPipeline.setDynamicParameters(0, {});
             }
 
-            target->renderMeshInstanced(instanceCount, meshData, mProgram);
+            target->renderMeshInstanced(instanceCount, meshData, mPipeline);
         }
 
         target->popAnnotation();

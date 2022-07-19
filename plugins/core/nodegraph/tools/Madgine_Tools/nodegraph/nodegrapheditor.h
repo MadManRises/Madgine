@@ -8,16 +8,12 @@
 
 namespace ed = ax::NodeEditor;
 
-namespace ax::NodeEditor {
-enum class SaveReasonFlags : uint32_t;
-}
-
 namespace Engine {
 namespace Tools {
 
     struct NodeGraphEditor : public Tool<NodeGraphEditor> {
 
-        SERIALIZABLEUNIT(NodeGraphEditor);
+        SERIALIZABLEUNIT(NodeGraphEditor)
 
         NodeGraphEditor(ImRoot &root);
         NodeGraphEditor(const NodeGraphEditor &) = delete;
@@ -36,8 +32,8 @@ namespace Tools {
         std::string_view getCurrentName() const;
 
     protected:
-        bool onSave(std::string_view view, ed::SaveReasonFlags reason);
-        size_t onLoad(char *data);
+        bool saveImpl(std::string_view view);
+        size_t loadImpl(char *data);
 
         Filesystem::Path layoutPath() const;
 
@@ -52,7 +48,7 @@ namespace Tools {
         bool mHierarchyVisible;
         bool mNodeDetailsVisible;
 
-        NodeGraph::NodeGraphLoader::HandleType mGraphHandle;
+        NodeGraph::NodeGraphLoader::Handle mGraphHandle;
         NodeGraph::NodeGraph mGraph;
 
         struct NodeMessages {
@@ -80,4 +76,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::NodeGraphEditor);
+REGISTER_TYPE(Engine::Tools::NodeGraphEditor)

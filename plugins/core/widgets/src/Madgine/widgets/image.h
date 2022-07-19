@@ -10,12 +10,12 @@ namespace Widgets {
         virtual ~Image() = default;
 
         void setImageByName(std::string_view name);
-        void setImage(Resources::ResourceType<Resources::ImageLoader> *image);
+        void setImage(Resources::Resource<Resources::ImageLoader> *image);
 
         std::string_view getImageName() const;
-        Resources::ResourceType<Resources::ImageLoader> *image() const;
+        Resources::Resource<Resources::ImageLoader> *image() const;
 
-        Resources::ResourceType<Resources::ImageLoader> *resource() const override;
+        Resources::Resource<Resources::ImageLoader> *resource() const override;
 
         std::vector<std::pair<std::vector<Vertex>, TextureSettings>> vertices(const Vector3 &screenSize) override;
 
@@ -27,9 +27,9 @@ namespace Widgets {
         uint16_t mRightBorder = 0;
 
     private:
-        Resources::ResourceType<Resources::ImageLoader> *mImage = nullptr;        
+        Resources::Resource<Resources::ImageLoader> *mImage = nullptr;
     };
 }
 }
 
-RegisterType(Engine::Widgets::Image);
+REGISTER_TYPE(Engine::Widgets::Image)

@@ -14,7 +14,7 @@ namespace Serialize {
     friend struct ::Engine::LineStruct;                         \
     friend struct ::Engine::Serialize::SerializeTableCallbacks; \
     DERIVE_FRIEND(onActivate, ::Engine::Serialize::)            \
-    using Self = _Self
+    using Self = _Self;
 
 }
 }

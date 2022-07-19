@@ -9,9 +9,9 @@
 
 #include "im3d/im3d.h"
 
-#include "fontloader.h"
-
 #include "DirectX12/directx12rendercontext.h"
+
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 #include "Madgine/window/mainwindow.h"
 
@@ -38,23 +38,12 @@ namespace Tools {
             co_return false;
 
         OffsetPtr handle = Render::DirectX12RenderContext::getSingleton().mDescriptorHeap.allocate();
-        ImGui_ImplDX12_Init(Render::GetDevice(), 1, DXGI_FORMAT_R8G8B8A8_UNORM, Render::DirectX12RenderContext::getSingleton().mDescriptorHeap.resource(), Render::DirectX12RenderContext::getSingleton().mDescriptorHeap.cpuHandle(handle), Render::DirectX12RenderContext::getSingleton().mDescriptorHeap.gpuHandle(handle));
+        ImGui_ImplDX12_Init(Render::GetDevice(), 2, DXGI_FORMAT_R8G8B8A8_UNORM, Render::DirectX12RenderContext::getSingleton().mDescriptorHeap.resource(), Render::DirectX12RenderContext::getSingleton().mDescriptorHeap.cpuHandle(handle), Render::DirectX12RenderContext::getSingleton().mDescriptorHeap.gpuHandle(handle));
         //ImGui_ImplDirectX12_CreateDeviceObjects();
         /*if (!(ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable))
                 ImGui::GetIO().RenderDrawListsFn = [](ImDrawData *data) {
                     ImGui_ImplDX12_RenderDrawData(data, Render::DirectX12RenderContext::getSingleton().mCommandList.mList);
                 };*/
-
-        Im3D::GetIO().mFetchFont = [](const char *fontName) {
-            Render::FontLoader::HandleType font;
-            font.load(fontName);
-
-            return Im3DFont {
-                (Im3DTextureId)font->mTexture->mTextureHandle,
-                font->mTextureSize,
-                font->mGlyphs.data()
-            };
-        };
 
         co_return true;
     }
@@ -74,7 +63,7 @@ namespace Tools {
         ImGui_ImplDX12_NewFrame();
     }
 
-    void DirectX12ImRoot::renderDrawList(ImGuiViewport *vp)
+    void DirectX12ImRoot::renderViewport(ImGuiViewport *vp)
     {
         ImGui_ImplDX12_RenderDrawData(vp->DrawData, Render::DirectX12RenderContext::getSingleton().mCommandList.mList);
     }

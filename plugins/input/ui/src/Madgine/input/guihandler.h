@@ -27,5 +27,5 @@ namespace Input {
 }
 }
 
-RegisterType(Engine::Input::GuiHandlerBase);
+REGISTER_TYPE(Engine::Input::GuiHandlerBase)
 

@@ -12,16 +12,21 @@ namespace Threading {
     struct MODULES_EXPORT TaskPromiseSharedStateBase {
         std::mutex mMutex;
         std::vector<TaskHandle> mThenResumes;
+        std::exception_ptr mException;
 
         bool mAttached = false;
         bool mDestroyed = false;
+        bool mDone = false;
 
         void attach();
         void finalize();
 
         void notifyDestroyed();
 
-        void then(TaskHandle handle);
+        bool then(TaskHandle handle);
+
+        void setException(std::exception_ptr exception);
+        void rethrowIfException();
     };
 
     template <typename T>
@@ -38,13 +43,13 @@ namespace Threading {
         bool valid()
         {
             std::lock_guard guard { mMutex };
-            return static_cast<bool>(mValue) || !mDestroyed;
+            return static_cast<bool>(mValue) || mException || !mDestroyed;
         }
 
         bool is_ready()
         {
             std::lock_guard guard { mMutex };
-            return static_cast<bool>(mValue);
+            return static_cast<bool>(mValue) || mException;
         }
 
         void set_value(T val)
@@ -57,6 +62,7 @@ namespace Threading {
         T &get()
         {
             std::lock_guard guard { mMutex };
+            rethrowIfException();
             assert(mValue);
             return *mValue;
         }
@@ -69,13 +75,13 @@ namespace Threading {
         bool valid()
         {
             std::lock_guard guard { mMutex };
-            return mHasValue || !mDestroyed;
+            return mHasValue || mException || !mDestroyed;
         }
 
         bool is_ready()
         {
             std::lock_guard guard { mMutex };
-            return mHasValue;
+            return mHasValue || mException;
         }
 
         void set_value()
@@ -88,6 +94,7 @@ namespace Threading {
         void get()
         {
             std::lock_guard guard { mMutex };
+            rethrowIfException();
             assert(mHasValue);
         }
     };
@@ -147,14 +154,12 @@ namespace Threading {
 
         void unhandled_exception()
         {
-            if (mState) {
-
-            } else {
+            if (mState)
+                mState->setException(std::current_exception());
+            else
                 throw;
-            }
         }
 
-        //void then(TaskHandle handle);
         void then_return(TaskHandle handle)
         {
             assert(!mThenReturn);

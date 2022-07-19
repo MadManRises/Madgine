@@ -2,8 +2,6 @@
 
 #include "formatter.h"
 
-#include "base64/base64.h"
-
 namespace Engine {
 namespace Serialize {
 
@@ -86,28 +84,6 @@ namespace Serialize {
     StreamResult Formatter::endMessageRead()
     {
         return {};
-    }
-
-    StreamResult Formatter::read(ByteBuffer &b)
-    {
-        if (mBinary) {
-            return mStream.read(b);
-        } else {
-            std::string base64Encoded;
-            STREAM_PROPAGATE_ERROR(read(base64Encoded));
-            if (!Base64::decode(b, base64Encoded))
-                return STREAM_PARSE_ERROR(mStream, mBinary) << "Invalid Base64 String '" << base64Encoded << "'";
-            return {};
-        }
-    }
-
-    void Formatter::write(const ByteBuffer &b)
-    {
-        if (mBinary) {
-            mStream.write(b);
-        } else {
-            mStream << Base64::encode(b);
-        }
     }
 
     StreamResult Formatter::expect(std::string_view expected)

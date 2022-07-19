@@ -12,7 +12,7 @@ add_plugin(Client Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/clientl
 
 plugin_group(Renderer EXCLUSIVE ATLEAST_ONE)
 
-target_link_plugins(Client ProgramLoader MeshLoader)
+target_link_plugins(Client PipelineLoader MeshLoader FontLoader)
 target_link_plugin_groups(Client Renderer)
 
 target_link_libraries(Client PUBLIC Modules Render Meta)
@@ -29,7 +29,7 @@ FolderSources(sources "" nodes)
 
 add_plugin(ClientNodes Madgine Core ${sources} PRECOMPILED_HEADER nodes/Madgine/clientnodeslib.h SOURCE_ROOT nodes)
 
-target_link_plugins(ClientNodes Client NodeGraph ProgramLoader MeshLoader)
+target_link_plugins(ClientNodes Client NodeGraph PipelineLoader MeshLoader)
 
 
 
@@ -43,7 +43,7 @@ FolderSources(sources "" tools)
 
 add_tools(Client ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/clienttoolslib.h)
 
-target_link_plugins(ClientTools Tools ProgramLoader TextureLoader)
+target_link_plugins(ClientTools Tools PipelineLoader TextureLoader FontLoader)
 target_link_libraries(ClientTools PUBLIC FilesystemSerialize)
 
 

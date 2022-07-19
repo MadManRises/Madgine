@@ -12,7 +12,10 @@
 
 #include "Modules/threading/workgroup.h"
 
-#include "Madgine/core/root.h"
+#include "Madgine/base/root.h"
+#include "Madgine/base/keyvalueregistry.h"
+
+#include "Madgine/resources/resourcemanager.h"
 
 #include "cli/parameter.h"
 
@@ -48,6 +51,7 @@ int main(int argc, char * argv[])  {
         [NSApp activateIgnoringOtherApps:YES];*/
     
     Engine::Threading::WorkGroup workGroup("Launcher");
-    Engine::Core::Root root { argc, argv };
+    Engine::Base::Root root { argc, argv };
+    Engine::KeyValueGlobal<Engine::Resources::ResourceManager> resourceManager { "ResourceManager" };
     return launch();
 }

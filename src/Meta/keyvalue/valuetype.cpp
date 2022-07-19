@@ -306,7 +306,7 @@ std::ostream &operator<<(std::ostream &stream,
     stream << "<" << v.getTypeString() << ">";
 
     v.visit([&](const auto &v) {
-        if constexpr (has_operator_StreamOut_v<decltype(v), std::ostream &> || has_operator_StreamOut_v<std::ostream &, decltype(v)>)
+        if constexpr (has_operator_StreamOut<decltype(v), std::ostream &> || has_operator_StreamOut<std::ostream &, decltype(v)>)
             stream << std::forward<decltype(v)>(v);
     });
 

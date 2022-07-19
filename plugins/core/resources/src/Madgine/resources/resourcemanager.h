@@ -6,21 +6,21 @@
 #include "Modules/threading/taskqueue.h"
 #include "Generic/systemvariable.h"
 
-#include "madgineobject/madgineobject.h"
+#include "Modules/threading/madgineobject.h"
 
 namespace Engine {
 namespace Resources {
-    struct MADGINE_RESOURCES_EXPORT ResourceManager final : MadgineObject<ResourceManager>
+    struct MADGINE_RESOURCES_EXPORT ResourceManager : Threading::MadgineObject<ResourceManager>
     {
         static ResourceManager &getSingleton();
 
-        ResourceManager();
+        ResourceManager(bool toolMode = false);
         ~ResourceManager();
 
         void registerResourceLocation(const Filesystem::Path &path, int priority);
 
         template <typename Loader>
-        typename Loader::ResourceType *getResource(const std::string &name)
+        typename Loader::Resource *getResource(const std::string &name)
         {
             return mCollector.get<Loader>().get(name);
         }

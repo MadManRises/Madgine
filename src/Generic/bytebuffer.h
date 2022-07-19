@@ -19,6 +19,10 @@ struct ByteBufferSizeAccessor {
     size_t operator()(const std::vector<T> &v) { return v.size() * sizeof(T); }
 };
 
+/**
+ * @brief 
+ * @tparam Data 
+*/
 template <typename Data>
 struct ByteBufferImpl {
 

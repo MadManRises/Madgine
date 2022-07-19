@@ -102,6 +102,8 @@ namespace Serialize {
 
         StreamResult read(ByteBuffer &b);
 
+        StreamResult operator>>(ByteBuffer &b);
+
         StreamResult read(Void &);
 
         StreamResult operator>>(Void &);
@@ -138,6 +140,8 @@ namespace Serialize {
         }
 
         void write(const ByteBuffer &b);
+
+        SerializeStream &operator<<(const ByteBuffer &b);
 
         void write(const Void &);
 

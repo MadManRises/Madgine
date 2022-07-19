@@ -11,7 +11,7 @@ namespace Filesystem {
         FILE_MODIFIED,
         FILE_CREATED,
         FILE_RENAMED,
-        FILE_DELETED);
+        FILE_DELETED)
 
     struct FileEvent {
         FileEventType mType;

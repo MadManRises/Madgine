@@ -32,12 +32,12 @@ namespace Render {
 
     void ShadowRenderPass::setup(RenderTarget *target)
     {
-        mProgram.create("scene", { sizeof(ScenePerApplication), sizeof(ScenePerFrame), sizeof(ScenePerObject) }, sizeof(SceneInstanceData));
+        mPipeline.createDynamic({ .vs = "scene", .bufferSizes = { sizeof(ScenePerApplication), sizeof(ScenePerFrame), sizeof(ScenePerObject) }, .instanceDataSize = sizeof(SceneInstanceData) });
     }
 
     void ShadowRenderPass::shutdown()
     {
-        mProgram.reset();
+        mPipeline.reset();
     }
 
     void ShadowRenderPass::render(Render::RenderTarget *target, size_t iteration)
@@ -74,13 +74,13 @@ namespace Render {
         updateFrustum();
 
         {
-            auto perApplication = mProgram.mapParameters(0).cast<ScenePerApplication>();
+            auto perApplication = mPipeline.mapParameters<ScenePerApplication>(0);
 
             perApplication->p = projectionMatrix();
         }
 
         {
-            auto perFrame = mProgram.mapParameters(1).cast<ScenePerFrame>();
+            auto perFrame = mPipeline.mapParameters<ScenePerFrame>(1);
 
             perFrame->v = viewMatrix();
 
@@ -93,7 +93,7 @@ namespace Render {
             Scene::Entity::Skeleton *skeleton = std::get<1>(instance.first);
 
             {
-                auto perObject = mProgram.mapParameters(2).cast<ScenePerObject>();
+                auto perObject = mPipeline.mapParameters<ScenePerObject>(2);
 
                 perObject->hasLight = false;
 
@@ -113,15 +113,15 @@ namespace Render {
                 };
             });
 
-            mProgram.setInstanceData(std::move(instanceData));
+            mPipeline.setInstanceData(std::move(instanceData));
 
             if (skeleton) {
-                mProgram.setDynamicParameters(0, skeleton->matrices());
+                mPipeline.setDynamicParameters(0, skeleton->matrices());
             } else {
-                mProgram.setDynamicParameters(0, {});
+                mPipeline.setDynamicParameters(0, {});
             }
 
-            target->renderMeshInstanced(instance.second.size(), meshData, mProgram);
+            target->renderMeshInstanced(instance.second.size(), meshData, mPipeline);
         }
 
         target->popAnnotation();

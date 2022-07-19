@@ -17,7 +17,7 @@
 
 #include "functiontool.h"
 
-#include "Madgine/core/keyvalueregistry.h"
+#include "Madgine/base/keyvalueregistry.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
@@ -37,15 +37,6 @@ namespace Tools {
     Inspector::Inspector(ImRoot &root)
         : Tool<Inspector>(root)
     {
-
-        for (std::unique_ptr<Resources::ResourceLoaderBase> &loader : Resources::ResourceManager::getSingleton().mCollector) {
-            for (const MetaTable *type : loader->resourceTypes()) {
-                addObjectSuggestion(type, [&]() {
-                    return loader->resources();
-                });
-            }
-        }
-
         addObjectSuggestion<FunctionTable>([]() {
             std::vector<std::pair<std::string_view, TypedScopePtr>> result;
             const FunctionTable *table = sFunctionList();
@@ -180,6 +171,7 @@ namespace Tools {
         ImGui::TableNextColumn();
 
         if (hasSuggestions) {
+            ImGui::PushID(id.data());
             ImGui::PushItemWidth(-1.0f);
             if (ImGui::BeginCombo("##suggestions", scope.name().c_str())) {
                 for (std::pair<std::string_view, TypedScopePtr> p : it->second()) {
@@ -191,6 +183,7 @@ namespace Tools {
                 ImGui::EndCombo();
             }
             ImGui::PopItemWidth();
+            ImGui::PopID();
         }
 
         ImGui::DraggableValueTypeSource(id, scope, ImGuiDragDropFlags_SourceAllowNullID);

@@ -118,7 +118,7 @@ private:
 };
 
 }
-
+/*
 namespace std {
 template <typename T, typename U, template <typename> class TQual, template <typename> class UQual>
 struct basic_common_reference<Engine::IndexType<T>, U, TQual, UQual> {
@@ -128,4 +128,4 @@ template <typename T, typename U, template <typename> class TQual, template <typ
 struct basic_common_reference<T, Engine::IndexType<U>, TQual, UQual> {
     using type = std::common_reference_t<T, U>;
 };
-}
+}*/

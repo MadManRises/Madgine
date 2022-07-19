@@ -195,7 +195,7 @@ namespace Serialize {
 
             static const constexpr bool controlled = false;
 
-            using ArgsTuple = std::tuple<MakeOwning_t<std::remove_const_t<std::remove_reference_t<_Ty>>>...>;
+            using ArgsTuple = std::tuple<MakeOwning_t<_Ty>...>;
 
             static StreamResult readCreationData(FormattedSerializeStream &in, ArgsTuple &result, const CallerHierarchyBasePtr &hierarchy)
             {

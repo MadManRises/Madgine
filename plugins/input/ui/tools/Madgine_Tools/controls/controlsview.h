@@ -26,4 +26,4 @@ namespace Tools {
 }
 }
 
-RegisterType(Engine::Tools::ControlsView)
+REGISTER_TYPE(Engine::Tools::ControlsView)

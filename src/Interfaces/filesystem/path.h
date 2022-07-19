@@ -48,6 +48,7 @@ namespace Filesystem {
         const char *c_str() const;
 
         operator const std::string &() const;
+        operator std::string_view() const;
 
     private:
         std::string mPath;

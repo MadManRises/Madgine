@@ -11,7 +11,7 @@ ENUM_BASE(SocketAPIResult, GenericResult,
     TIMEOUT,
     CONNECTION_REFUSED,
     ALREADY_IN_USE,
-    API_VERSION_MISMATCH);
+    API_VERSION_MISMATCH)
 
 struct INTERFACES_EXPORT Socket {
     Socket() = default;
@@ -26,6 +26,9 @@ struct INTERFACES_EXPORT Socket {
         if (*this)
             close();
     }
+
+    SocketAPIResult open(int port);
+    SocketAPIResult connect(std::string_view url, int portNr);
 
     void close();
 
@@ -48,33 +51,16 @@ struct INTERFACES_EXPORT Socket {
     }
 
 private:
-    explicit Socket(unsigned long long socket)
-        : mSocket(socket)
-    {
-    }
-
-    operator unsigned long long() const
-    {
-        return mSocket;
-    }
-
-
-    friend struct SocketAPI;
-
     static const constexpr unsigned long long Invalid_Socket = -1;
     unsigned long long mSocket = Invalid_Socket;
 };
 
-struct INTERFACES_EXPORT SocketAPI {
-    static SocketAPIResult init();
-    static void finalize();
+namespace SocketAPI {
+    INTERFACES_EXPORT SocketAPIResult init();
+    INTERFACES_EXPORT void finalize();
 
-    static std::pair<Socket, SocketAPIResult> socket(int port);
-    static std::pair<Socket, SocketAPIResult> connect(const std::string &url, int portNr);
-
-
-    static SocketAPIResult getError(const char *operation);
-    static int getOSError();
-};
+    INTERFACES_EXPORT SocketAPIResult getError(const char *operation);
+    INTERFACES_EXPORT int getOSError();
+}
 
 }

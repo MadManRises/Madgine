@@ -4,7 +4,7 @@
 #include "../launcher.h"
 #include "Interfaces/filesystem/api.h"
 #include "Interfaces/util/standardlog.h"
-#include "Madgine/core/root.h"
+#include "Madgine/base/root.h"
 #include "Modules/threading/workgroup.h"
 #include "cli/cli.h"
 #include "cli/parameter.h"
@@ -18,8 +18,9 @@ void mainImpl()
 {
     emscripten_cancel_main_loop();
     static Engine::Threading::WorkGroup workGroup { "Launcher" };
-    static Engine::Core::Root root { std::move(sTempCLI) };
+    static Engine::Base::Root root { std::move(sTempCLI) };
     Engine::Util::StandardLog::setLogLevel(logLevel);
+    static Engine::KeyValueGlobal<Engine::Resources::ResourceManager> resourceManager { "ResourceManager" };
     launch();
 }
 

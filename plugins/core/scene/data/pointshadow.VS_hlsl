@@ -25,25 +25,25 @@ cbuffer Bones : register(b3)
 
 
 struct AppData {
-#ifdef HAS_POSITION0
+#ifdef HAS_POS_3D
     float3 aPos : POSITION0;
 #endif
-#ifdef HAS_POSITION1
+#ifdef HAS_POS2
     float2 aPos2 : POSITION1;
 #endif
-#ifdef HAS_COLOR0
-    float4 aColor : COLOR;
-#endif
-#ifdef HAS_NORMAL0
+#ifdef HAS_NORMAL
     float3 aNormal : NORMAL;
 #endif
-#ifdef HAS_TEXCOORD0
+#ifdef HAS_COLOR
+    float4 aColor : COLOR;
+#endif
+#ifdef HAS_UV
     float2 aUV : TEXCOORD;
 #endif
-#ifdef HAS_BONEINDICES0
+#ifdef HAS_BONE_INDICES
 	int4 aBoneIDs : BONEINDICES;
 #endif
-#ifdef HAS_WEIGHTS0
+#ifdef HAS_BONE_WEIGHTS
 	float4 aWeights : WEIGHTS;
 #endif
     PointShadowInstanceData aInstance : INSTANCEDATA;
@@ -58,7 +58,7 @@ VertexShaderOutput main(AppData IN)
 {
 	VertexShaderOutput OUT;
 
-#ifdef HAS_POSITION1
+#ifdef HAS_POS2
     float2 aPos2 = IN.aPos2;
 #else
     float2 aPos2 = float2(0,0);
@@ -66,7 +66,7 @@ VertexShaderOutput main(AppData IN)
 	
 	float4 worldPos;
 
-#ifdef HAS_BONEINDICES0
+#ifdef HAS_BONE_INDICES
 	if (object.hasSkeleton){
 		float4x4 BoneTransform = bones[aBoneIDs[0]] * aWeights[0]
 		+ bones[aBoneIDs[1]] * aWeights[1]

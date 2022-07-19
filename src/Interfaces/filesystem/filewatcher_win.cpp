@@ -13,7 +13,7 @@
 
 namespace Engine {
 namespace Filesystem {
-
+#    if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_SYSTEM)
     static std::mutex sFilewatcherMutex;
 
     struct SCOPED_HANDLE {
@@ -116,6 +116,7 @@ namespace Filesystem {
             result.clear();
         }
     }
+#    endif
 
     FileWatcher::FileWatcher()
     {
@@ -128,43 +129,43 @@ namespace Filesystem {
 
     void FileWatcher::addWatch(const Path &path)
     {
+#    if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_SYSTEM)
         assert(isDir(path));
         auto pib = mWatches.try_emplace(path, 0);
         if (pib.second) {
             pib.first->second = reinterpret_cast<uintptr_t>(&fileWatch(pib.first->first).release().release().promise());
         }
+#    endif
     }
 
     void FileWatcher::removeWatch(const Path &path)
     {
+#    if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_SYSTEM)
         auto it = mWatches.find(path);
         if (it != mWatches.end()) {
             //cause destroy
             Generator<std::vector<FileEvent>> { CoroutineHandle<Generator<std::vector<FileEvent>>::promise_type>::fromPromise(*reinterpret_cast<Generator<std::vector<FileEvent>>::promise_type *>(it->second)) };
             mWatches.erase(it);
         }
+#    endif
     }
 
     void FileWatcher::clear()
     {
+#    if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_SYSTEM)
         for (const std::pair<const Path, uintptr_t> &handle : mWatches) {
             //cause destroy
             Generator<std::vector<FileEvent>> generator { CoroutineHandle<Generator<std::vector<FileEvent>>::promise_type>::fromPromise(*reinterpret_cast<Generator<std::vector<FileEvent>>::promise_type *>(handle.second)) };
         }
         mWatches.clear();
+#    endif
     }
 
     std::vector<FileEvent> FileWatcher::fetchChanges()
     {
-        /*std::optional<FileEvent> event;
-        std::scoped_lock lock { sFilewatcherMutex };
-        if (!mQueue.empty()) {
-            event = mQueue.front();
-            mQueue.pop();
-        }
-        return event;*/
-
         std::vector<FileEvent> result;
+
+#    if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_SYSTEM)
         for (const std::pair<const Path, uintptr_t> &watch : mWatches) {
             Generator<std::vector<FileEvent>> gen { CoroutineHandle<Generator<std::vector<FileEvent>>::promise_type>::fromPromise(*reinterpret_cast<Generator<std::vector<FileEvent>>::promise_type *>(watch.second)) };
             gen.next();
@@ -172,6 +173,8 @@ namespace Filesystem {
             std::ranges::copy(events, std::back_inserter(result));
             gen.release().release();
         }
+#    endif
+
         return result;
     }
 

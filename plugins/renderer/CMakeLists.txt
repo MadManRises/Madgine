@@ -1,9 +1,12 @@
 
-add_subdirectory(opengl)
-
+if (NOT NO_OPENGL_SUPPORT)
+	add_subdirectory(opengl)
+endif ()
 if (WINDOWS)
-	add_subdirectory(directx11)
-	if (NOT MINGW)
+	if (NOT NO_DIRECTX11_SUPPORT)
+		add_subdirectory(directx11)
+	endif ()
+	if (NOT NO_DIRECTX12_SUPPORT)
 		add_subdirectory(directx12)
 	endif()
 endif ()

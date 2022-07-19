@@ -62,4 +62,4 @@ namespace Render {
 }
 }
 
-RegisterType(Engine::Render::GPUBufferNode);
+REGISTER_TYPE(Engine::Render::GPUBufferNode)

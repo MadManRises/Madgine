@@ -16,7 +16,7 @@ namespace Widgets {
     struct MADGINE_WIDGETS_EXPORT WidgetManager : Window::MainWindowComponent<WidgetManager>,
                                                  Render::RenderPass {
 
-        SERIALIZABLEUNIT(WidgetManager);
+        SERIALIZABLEUNIT(WidgetManager)
 
         WidgetManager(Window::MainWindow &window);
         WidgetManager(const WidgetManager &) = delete;
@@ -115,4 +115,4 @@ namespace Widgets {
 }
 }
 
-RegisterType(Engine::Widgets::WidgetManager);
+REGISTER_TYPE(Engine::Widgets::WidgetManager)

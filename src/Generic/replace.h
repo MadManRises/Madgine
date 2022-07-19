@@ -22,10 +22,25 @@ struct replace {
     using type = T;
 };
 
+/// Necessary for MSVC
+template<size_t N, typename... Ty>
+struct select;
+
+template <size_t N, typename Head, typename... Tail>
+struct select<N, Head, Tail...> : select<N-1, Tail...> {
+
+};
+
+template <typename Head, typename... Tail>
+struct select<0, Head, Tail...> {
+    using type = Head;
+};
+///////// END MSVC
+
 template <typename Tag, size_t N>
 struct replace<TaggedPlaceholder<Tag, N>> {
     template <typename Tag2, typename... Args>
-    using tagged = std::conditional_t<std::same_as<Tag, Tag2>, typename type_pack<Args...>::template select<N>, TaggedPlaceholder<Tag, N>>;
+    using tagged = std::conditional_t<std::same_as<Tag, Tag2>, typename select<N, Args...>::type, TaggedPlaceholder<Tag, N>>;
 
     template <typename... Args>
     using type = tagged<DefaultTag, Args...>;

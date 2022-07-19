@@ -6,6 +6,6 @@ namespace Engine {
 
 ENUM(GenericResult,
     SUCCESS,
-    UNKNOWN_ERROR);
+    UNKNOWN_ERROR)
 
 }

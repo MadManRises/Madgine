@@ -12,22 +12,22 @@ namespace Render {
     struct OpenGLShaderLoader : Resources::ResourceLoader<OpenGLShaderLoader, OpenGLShader, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
         OpenGLShaderLoader();
 
-        struct HandleType : Base::HandleType {
+        struct Handle : Base::Handle {
 
-            using Base::HandleType::HandleType;
-            HandleType(Base::HandleType handle)
-                : Base::HandleType(std::move(handle))
+            using Base::Handle::Handle;
+            Handle(Base::Handle handle)
+                : Base::Handle(std::move(handle))
             {
             }
 
-            void create(std::string name, const CodeGen::ShaderFile &file, ShaderType type, OpenGLShaderLoader *loader = nullptr);
-            Threading::TaskFuture<bool> load(std::string name, ShaderType type, OpenGLShaderLoader *loader = nullptr);
+            Threading::TaskFuture<bool> create(std::string_view name, const CodeGen::ShaderFile &file, ShaderType type, OpenGLShaderLoader *loader = &OpenGLShaderLoader::getSingleton());
+            Threading::TaskFuture<bool> load(std::string_view name, ShaderType type, OpenGLShaderLoader *loader = &OpenGLShaderLoader::getSingleton());
         };
 
         bool loadImpl(OpenGLShader &shader, ResourceDataInfo &info);
         void unloadImpl(OpenGLShader &shader);
 
-        bool create(OpenGLShader &shader, ResourceType *res, const CodeGen::ShaderFile &file, ShaderType type);
+        bool create(OpenGLShader &shader, Resource *res, const CodeGen::ShaderFile &file, ShaderType type);
 
         bool loadFromSource(OpenGLShader &shader, std::string_view name, std::string source, ShaderType type, const Filesystem::Path &path = {});
 
@@ -37,4 +37,4 @@ namespace Render {
 }
 }
 
-RegisterType(Engine::Render::OpenGLShaderLoader);
+REGISTER_TYPE(Engine::Render::OpenGLShaderLoader)

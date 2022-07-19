@@ -3,7 +3,7 @@
 namespace Engine {
 namespace Serialize {
 
-    DERIVE_FUNCTION(physical);
+    DERIVE_FUNCTION(physical)
 
     template <typename T>
     decltype(auto) physical(T &t)

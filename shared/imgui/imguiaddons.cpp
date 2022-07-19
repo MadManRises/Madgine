@@ -641,8 +641,14 @@ void RightAlignDuration(std::chrono::nanoseconds dur)
     }
 }
 
+void RightAlign(float size) {
+    ImGuiWindow *window = GetCurrentWindow();
+    float avail = ImGui::GetWindowContentRegionWidth();
+    //window->DC.CursorPos.x = window->Pos.x - window->Scroll.x + (avail - size) + window->DC.GroupOffset.x + window->DC.ColumnsOffset.x;
+}
+
 void RightAlignText(const char *s, ...)
-{
+{    
     char buffer[1024];
     va_list args;
 
@@ -651,14 +657,9 @@ void RightAlignText(const char *s, ...)
     va_end(args);
     assert(len >= 0);
 
-    ImGuiContext &g = *ImGui::GetCurrentContext();
+    float w = CalcTextSize(buffer, buffer + len).x;
 
-    ImFont *font = g.Font;
-    const float font_size = g.FontSize;
-
-    float w = font->CalcTextSizeA(font_size, FLT_MAX, 0.0f, buffer, buffer + len, NULL).x;
-
-    ImGui::SameLine(ImGui::GetContentRegionAvailWidth() - w);
+    RightAlign(w);
     ImGui::Text("%s", buffer);
 }
 
@@ -887,9 +888,10 @@ void BeginFilesystemPicker(Engine::Filesystem::Path *path, Engine::Filesystem::P
 
     ImGui::SameLine();
 
-    if (ImGui::BeginCombo("Current", path->c_str())) {
+    std::string s = path->str();
 
-        ImGui::EndCombo();
+    if (ImGui::InputText("Current", &s)) {
+        *path = s;
     }
 }
 
@@ -1019,6 +1021,7 @@ bool InteractiveView(InteractiveViewState &state)
     ImGuiIO &io = ImGui::GetIO();
 
     if (state.mActive) {
+        ImGui::SetItemUsingMouseWheel();
         for (int i = 0; i < 3; ++i) {
             if (io.MouseClicked[i]) {
                 state.mMouseDown[i] = true;
@@ -1189,7 +1192,7 @@ bool BeginPopupCompoundContextItem(const char *str_id)
         ImVec2 pos = GetMousePosOnOpeningCurrentPopup();
         if (rect.Contains(pos)) {
             ImGui::Separator();
-        }else{
+        } else {
             open = false;
             EndPopup();
         }

@@ -14,8 +14,8 @@ METATABLE_BEGIN(Engine::Render::DirectX12TextureLoader)
 MEMBER(mResources)
 METATABLE_END(Engine::Render::DirectX12TextureLoader)
 
-METATABLE_BEGIN_BASE(Engine::Render::DirectX12TextureLoader::ResourceType, Engine::Render::TextureLoader::ResourceType)
-METATABLE_END(Engine::Render::DirectX12TextureLoader::ResourceType)
+METATABLE_BEGIN_BASE(Engine::Render::DirectX12TextureLoader::Resource, Engine::Render::TextureLoader::Resource)
+METATABLE_END(Engine::Render::DirectX12TextureLoader::Resource)
 
 
 

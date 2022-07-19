@@ -4,7 +4,7 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
-#include "Madgine/core/keyvalueregistry.h"
+#include "Madgine/base/keyvalueregistry.h"
 
 #include "util/math/pymatrix3.h"
 #include "util/math/pymatrix4.h"
@@ -133,7 +133,7 @@ namespace Scripting {
 
         static Python3StreamRedirect sStream { std::cout.rdbuf() };
 
-        Python3Environment::Python3Environment(App::Application &app)
+        Python3Environment::Python3Environment(Base::Application &app)
             : VirtualScope(app)
         {
         }
