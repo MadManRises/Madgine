@@ -76,7 +76,9 @@ namespace Base {
         Filesystem::Path p = pStr;
         if (p.isRelative())
             p = Filesystem::Path { BINARY_OUT_DIR } / p;
-        return p.relative(binInfo->mSourceRoot).str();
+        Filesystem::Path rel = p.relative(binInfo->mSourceRoot);
+        assert(!rel.empty());
+        return rel.str();
     };
 
     static std::vector<const TypeInfo *> &sSkip()

@@ -18,7 +18,7 @@ FolderSources(sources "" nodes)
 		FolderSources(sources Madgine scene)
 			FolderSources(sources scene nodes transformaccessornode.cpp transformaccessornode.h)
 
-add_plugin(SceneNodes Madgine Core ${sources} PRECOMPILED_HEADER nodes/Madgine/scenenodeslib.h)
+add_plugin(SceneNodes Madgine Core ${sources} PRECOMPILED_HEADER nodes/Madgine/scenenodeslib.h SOURCE_ROOT nodes)
 
 target_link_plugins(SceneNodes Scene NodeGraph)
 

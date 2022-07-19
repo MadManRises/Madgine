@@ -127,13 +127,10 @@ namespace Filesystem {
             if (isSeparator(mPath[i])) {
                 if (!hadSeparator) {
                     hadSeparator = true;
-                    if (lastElement == ".") {
-                        if (cursor > 0)
-                            --cursor;
-                    } else if (lastElement == ".." && canGoUp) {
+                    if (lastElement == ".." && canGoUp) {
                         --cursor;
                         cursor = mPath.rfind('/', cursor - 1) + 1;
-                    } else {
+                    } else if (lastElement != ".") {
                         mPath.replace(cursor, lastElement.size(), lastElement.c_str());
                         cursor += lastElement.size();
                         mPath.replace(cursor, 1, "/");
@@ -148,10 +145,8 @@ namespace Filesystem {
             }
         }
 
-        if (!lastElement.empty()) {
-            if (lastElement == "." && cursor > 0) {
-                --cursor;
-            } else if (lastElement == ".." && cursor > 0) {
+        if (!lastElement.empty()) {            
+            if (lastElement == ".." && cursor > 0) {
                 --cursor;
                 size_t pos = mPath.rfind('/', cursor - 1);
                 if (pos != std::string::npos) {
@@ -159,7 +154,7 @@ namespace Filesystem {
                 } else {
                     cursor = 0;
                 }
-            } else {
+            } else if (lastElement != "." || cursor == 0) {
                 mPath.replace(cursor, lastElement.size(), lastElement.c_str());
                 cursor += lastElement.size();
             }

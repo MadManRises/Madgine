@@ -44,28 +44,13 @@ namespace Tools {
     {
         if (ImGui::Begin("Plugin Manager", &mVisible)) {
 
-            /* ProjectManager &project = getTool<ProjectManager>();
-            const Filesystem::Path &projectRoot = project.projectRoot();
-            const std::string &config = project.config();
-
-            if (projectRoot.empty()) {
-                ImGui::Text("Please open a Project to modify the plugin selections.");
-            } else {
-
-                if (config.empty()) {
-                    ImGui::PushDisabled();
-                }
-                if (ImGui::Button("Export (with Tools)")) {
-                    exportStaticComponentHeader(projectRoot / ("components_"s + config + "(tools).cpp"), true);
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Export (without Tools)")) {
-                    exportStaticComponentHeader(projectRoot / ("components_"s + config + ".cpp"), false);
-                }
-                if (config.empty()) {
-                    ImGui::PopDisabled();
-                }
-                */
+            if (ImGui::Button("Export (with Tools)")) {
+                Base::exportStaticComponentHeader("components_default(tools).cpp", true);
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Export (without Tools)")) {
+                Base::exportStaticComponentHeader("components_default.cpp", false);
+            }
 
             ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 40, 40, 255));
             ImGui::Text("Changes are only applied on restart!");

@@ -17,6 +17,10 @@
 #include "cli/parameter.h"
 #include "Interfaces/util/standardlog.h"
 
+#include "Madgine/base/keyvalueregistry.h"
+
+#include "Madgine/resources/resourcemanager.h"
+
 extern Engine::CLI::Parameter<Engine::Util::MessageType> logLevel;
 
 namespace Engine {
