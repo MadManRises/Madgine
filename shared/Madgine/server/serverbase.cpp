@@ -1,4 +1,4 @@
-#include "../serverlib.h"
+#include "serverlib.h"
 
 #if ENABLE_THREADING
 

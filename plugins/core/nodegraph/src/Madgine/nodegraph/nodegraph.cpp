@@ -1,5 +1,5 @@
 #include "../nodegraphlib.h"
-#include "serialize/filesystem/filesystemlib.h"
+#include "Madgine/serialize/filesystem/filesystemlib.h"
 
 #include "nodegraph.h"
 
@@ -9,7 +9,7 @@
 
 #include "Interfaces/filesystem/api.h"
 
-#include "serialize/filesystem/filemanager.h"
+#include "Madgine/serialize/filesystem/filemanager.h"
 
 #include "Meta/serialize/streams/serializestream.h"
 

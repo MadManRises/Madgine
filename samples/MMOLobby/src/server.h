@@ -2,7 +2,7 @@
 
 #include "Madgine/server/serverbase.h"
 
-#include "serialize/network/networkmanager.h"
+#include "Madgine/serialize/network/networkmanager.h"
 
 namespace MMOLobby {	
 

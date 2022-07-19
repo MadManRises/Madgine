@@ -1,6 +1,6 @@
 #pragma once
 
-#include "render/vertexformat.h"
+#include "Madgine/render/vertexformat.h"
 
 
 namespace Engine {

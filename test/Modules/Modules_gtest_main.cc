@@ -29,7 +29,7 @@
 
 #include "Modules/moduleslib.h"
 #include "Interfaces/filesystem/api.h"
-#include "cli/cli.h"
+#include "Madgine/cli/cli.h"
 #include "gtest/gtest.h"
 #include <stdio.h>
 

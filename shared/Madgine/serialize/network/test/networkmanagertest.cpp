@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "serialize/network/networklib.h"
+#include "Madgine/serialize/network/networklib.h"
 
-#include "serialize/network/networkmanager.h"
+#include "Madgine/serialize/network/networkmanager.h"
 
 #include <future>
 

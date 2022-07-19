@@ -50,7 +50,7 @@ CppFile::CustomCodeBuilder CppFile::operator<<(std::string_view code)
 
 void CppFile::addCustomCodeBlock(std::string_view code)
 {
-    mNamespaceStack.top()->mElements.emplace_back(CustomCodeBlock {
+    statement(CustomCodeBlock {
         std::string { code },
         mConditionalsBitMask
     });
@@ -58,7 +58,7 @@ void CppFile::addCustomCodeBlock(std::string_view code)
 
 void CppFile::statement(Statement statement)
 {
-    throw 0;
+    mNamespaceStack.top()->mElements.emplace_back(std::move(statement));
 }
 
 void CppFile::generate(std::ostream &stream)

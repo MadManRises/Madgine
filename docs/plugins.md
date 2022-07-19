@@ -2,7 +2,11 @@
 
 \subpage Engine
 \subpage Tooling
+\subpage Resources
 \subpage Scene
+\subpage Widgets
+\subpage NodeGraph
+
 
 
 # Plugins

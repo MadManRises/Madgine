@@ -8,7 +8,7 @@
 
 #include "nodeexecutionmask.h"
 
-#include "codegen/statement.h"
+#include "Madgine/codegen/statement.h"
 
 namespace Engine {
 namespace NodeGraph {

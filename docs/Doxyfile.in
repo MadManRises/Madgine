@@ -869,6 +869,7 @@ INPUT                  = LICENSE.md \
                          src/ \
                          plugins/ \
                          launcher/launcher.h \
+                         shared/Madgine/ \
                          $<TARGET_PROPERTY:Interfaces,BINARY_DIR>/interfacesconfig.h \
                          $<TARGET_PROPERTY:Modules,BINARY_DIR>/modulesconfig.h
 

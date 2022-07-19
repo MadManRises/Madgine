@@ -1,6 +1,6 @@
 #pragma once
 
-#include "codegen/codegenlib.h"
+#include "Madgine/codegen/codegenlib.h"
 
 /// @cond
 

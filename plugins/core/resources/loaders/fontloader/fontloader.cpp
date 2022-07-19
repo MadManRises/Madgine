@@ -1,5 +1,5 @@
 #include "fontloaderlib.h"
-#include "serialize/filesystem/filesystemlib.h"
+#include "Madgine/serialize/filesystem/filesystemlib.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
 
@@ -10,7 +10,7 @@
 
 #include "Meta/serialize/formatter/safebinaryformatter.h"
 #include "Meta/serialize/operations.h"
-#include "serialize/filesystem/filemanager.h"
+#include "Madgine/serialize/filesystem/filemanager.h"
 
 #include "Generic/areaview.h"
 #include "Generic/bytebuffer.h"

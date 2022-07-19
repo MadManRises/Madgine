@@ -6,7 +6,7 @@
 
 #include "texture.h"
 
-#include "render/texturedescriptor.h"
+#include "Madgine/render/texturedescriptor.h"
 
 #include "Generic/bytebuffer.h"
 

@@ -1,5 +1,5 @@
 #include "../baselib.h"
-#include "codegen/codegenlib.h"
+#include "Madgine/codegen/codegenlib.h"
 
 #include "root.h"
 
@@ -8,13 +8,13 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollectormanager.h"
 #include "Modules/uniquecomponent/uniquecomponentregistry.h"
-#include "cli/cli.h"
+#include "Madgine/cli/cli.h"
 
-#include "cli/parameter.h"
+#include "Madgine/cli/parameter.h"
 
 #include "ini/inifile.h"
 
-#include "codegen/codegen_cpp.h"
+#include "Madgine/codegen/codegen_cpp.h"
 
 #include "Modules/plugins/binaryinfo.h"
 

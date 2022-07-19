@@ -3,7 +3,7 @@
 
 #include "im3d.h"
 
-#include "render/vertex.h"
+#include "Madgine/render/vertex.h"
 
 #include "im3d_internal.h"
 

@@ -12,7 +12,7 @@
 
 #include "../codegenerator.h"
 
-#include "codegen/codegen.h"
+#include "Madgine/codegen/codegen.h"
 
 NODE(VariableNode, Engine::NodeGraph::VariableNode)
 

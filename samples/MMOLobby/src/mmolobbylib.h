@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Madgine/serverlib.h"
-#include "serialize/network/networklib.h"
+#include "Madgine/server/serverlib.h"
+#include "Madgine/serialize/network/networklib.h"
 
 
 #if defined(MMOLobby_EXPORTS)

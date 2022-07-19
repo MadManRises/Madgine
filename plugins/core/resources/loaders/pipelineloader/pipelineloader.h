@@ -5,7 +5,7 @@
 
 #include "Generic/bytebuffer.h"
 
-#include "render/vertexformat.h"
+#include "Madgine/render/vertexformat.h"
 
 #include "pipeline.h"
 #include "pipelineinstance.h"

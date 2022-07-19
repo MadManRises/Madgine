@@ -3,7 +3,7 @@
 #include "Meta/math/boundingbox.h"
 #include "Meta/math/sphere.h"
 
-#include "render/renderpassflags.h"
+#include "Madgine/render/renderpassflags.h"
 
 namespace Engine {
 namespace Im3D {

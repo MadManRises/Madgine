@@ -6,7 +6,7 @@ Plugins are one of the core features that the whole framework is built around. T
 
 ## Plugins
 
-Plugins are implemented traditionally using shared libraries. They can be loaded and unloaded at rutime to extend the programm or disable certain features. The implementation contains a dependency tracker that is integrated with the CMake-System. Loading a plugin at runtime will automatically trigger a load of those dependency plugins that are linked to the main plugin in CMake. Furthermore it is possible to group plugins in sections and mark them with any combination of `exclusive` and/or `atleastOne`. Those invariants will then be respected if other plugins of the same section are tried to be loaded. Looking up symbols of plugins by name is also supported but discouraged in favor of Unique Components (see below).
+Plugins are implemented traditionally using shared libraries. Changes in the plugin selection require a restart of the engine. The implementation contains a dependency tracker that is integrated with the CMake-System. Loading a plugin will automatically trigger a load of all dependency plugins that are linked to said plugin in CMake. Furthermore it is possible to group plugins in sections and mark them with any combination of `exclusive` and/or `atleastOne`. Those invariants will then be respected if other plugins of the same section are tried to be loaded. Looking up symbols of plugins by name is also supported but discouraged in favor of Unique Components (see below).
 
 ### Plugin Definition Files
 
@@ -22,7 +22,7 @@ First of all a type of Unique Component has to be defined. This is done by defin
 
 ### How to use it
 
-The library comes with two kinds of accessors to use the registered types: Containers and Selectors. Containers will contain one instance of each registered type, while Selectors allow to pick one of them. Both of them will be updated automatically as soon a new plugin is loaded or unloaded.
+The library comes with two kinds of accessors to use the registered types: Containers and Selectors. Containers will contain one instance of each registered type, while Selectors allow to pick one of them.
 
 ### Disclaimer
 

@@ -23,15 +23,6 @@ set_target_properties(imgui_node_editor imgui_canvas PROPERTIES EXCLUDE_FROM_ALL
 add_subdirectory(im3d)
 set_target_properties(Im3D PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
-add_subdirectory(codegen)
-set_target_properties(CodeGen PROPERTIES EXCLUDE_FROM_ALL TRUE)
-
-add_subdirectory(render)
-
-add_subdirectory(serialize)
-
-add_subdirectory(cli)
-
 add_subdirectory(base64)
 
 add_subdirectory(ini)
@@ -39,6 +30,7 @@ add_subdirectory(ini)
 add_subdirectory(stb)
 set_target_properties(stb PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
+add_subdirectory(Madgine)
 
 ######################## Static Libs #################
 

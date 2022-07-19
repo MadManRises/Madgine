@@ -10,8 +10,8 @@
 #include "Meta/math/ray.h"
 #include "Meta/math/vector2i.h"
 #include "Meta/math/frustum.h"
-#include "render/vertex.h"
-#include "render/renderforward.h"
+#include "Madgine/render/vertex.h"
+#include "Madgine/render/renderforward.h"
 
 #include "im3d_parameters.h"
 

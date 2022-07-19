@@ -29,10 +29,10 @@
 
 #include "Meta/metalib.h"
 #include "Interfaces/interfaceslib.h"
-#include "cli/clilib.h"
+#include "Madgine/cli/clilib.h"
 
 #include "Interfaces/filesystem/api.h"
-#include "cli/cli.h"
+#include "Madgine/cli/cli.h"
 #include "gtest/gtest.h"
 #include <stdio.h>
 

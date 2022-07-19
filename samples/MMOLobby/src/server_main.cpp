@@ -1,5 +1,5 @@
 #include <Madgine/baselib.h>
-#include <Madgine/serverlib.h>
+#include <Madgine/server/serverlib.h>
 #include <Madgine/clientlib.h>
 #include "mmolobbylib.h"
 

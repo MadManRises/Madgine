@@ -4,7 +4,7 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
-#include "codegen/codegen_shader.h"
+#include "Madgine/codegen/codegen_shader.h"
 
 METATABLE_BEGIN(Engine::Render::PipelineLoader)
 METATABLE_END(Engine::Render::PipelineLoader)
@@ -43,7 +43,7 @@ namespace Render {
         return loader->queueLoading(loader->create(*this, std::move(config), true));
     }
 
-    Threading::TaskFuture<bool> Engine::Render::PipelineLoader::Instance::createGenerated(PipelineConfiguration config, CodeGen::ShaderFile file, PipelineLoader *loader)
+    Threading::TaskFuture<bool> PipelineLoader::Instance::createGenerated(PipelineConfiguration config, CodeGen::ShaderFile file, PipelineLoader *loader)
     {
         return loader->queueLoading(loader->create(*this, std::move(config), std::move(file)));
     }
