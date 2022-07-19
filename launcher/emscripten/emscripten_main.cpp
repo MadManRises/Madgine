@@ -12,6 +12,8 @@
 
 #include "Madgine/base/keyvalueregistry.h"
 
+#include "Madgine/resources/resourcemanager.h"
+
 extern Engine::CLI::Parameter<Engine::Util::MessageType> logLevel;
 
 std::unique_ptr<Engine::CLI::CLICore> sTempCLI;

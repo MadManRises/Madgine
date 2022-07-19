@@ -42,8 +42,8 @@ namespace ranges {
     template <typename C, typename I, typename P>
     constexpr auto find(C &&c, I &&i, P &&p)
     {
-        return std::find_if(std::forward<C>(c).begin(), std::forward<C>(c).end(), [&](auto &e) {
-            return std::invoke(p, e) == i;
+        return std::find_if(std::forward<C>(c).begin(), std::forward<C>(c).end(), [&](auto &&e) {
+            return std::invoke(p, std::forward<decltype(e)>(e)) == i;
         });
     }
 

@@ -621,8 +621,8 @@ namespace NodeGraph {
         if (!target.mNode) {
             mFlowInPins.erase(mFlowInPins.begin() + target.mIndex);
         } else {
-            auto result = std::erase(node(target.mNode)->mFlowInPins[target.mIndex].mSources, source);
-            assert(result == 1);
+            /*auto result = */std::erase(node(target.mNode)->mFlowInPins[target.mIndex].mSources, source);
+            /*assert(result == 1);*/
             node(target.mNode)->onFlowInUpdate(target.mIndex, source, DISCONNECT);
         }
 
@@ -649,8 +649,8 @@ namespace NodeGraph {
                 mDataProviderPins.erase(mDataProviderPins.begin() + source.mIndex);                
             }
         } else {
-            auto result = std::erase(node(source.mNode)->mDataProviderPins[source.mIndex].mTargets, target);
-            assert(result == 1);
+            /*auto result = */std::erase(node(source.mNode)->mDataProviderPins[source.mIndex].mTargets, target);
+            /* assert(result == 1);*/
             node(source.mNode)->onDataProviderUpdate(source.mIndex, target, DISCONNECT);
         }
 
