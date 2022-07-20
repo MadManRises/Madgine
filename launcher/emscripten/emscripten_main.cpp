@@ -6,8 +6,8 @@
 #include "Interfaces/util/standardlog.h"
 #include "Madgine/base/root.h"
 #include "Modules/threading/workgroup.h"
-#include "cli/cli.h"
-#include "cli/parameter.h"
+#include "Madgine/cli/cli.h"
+#include "Madgine/cli/parameter.h"
 #include <emscripten.h>
 
 #include "Madgine/base/keyvalueregistry.h"

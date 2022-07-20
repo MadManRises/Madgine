@@ -14,7 +14,7 @@
 #include "Interfaces/filesystem/api.h"
 #include "../launcher.h"
 
-#include "cli/parameter.h"
+#include "Madgine/cli/parameter.h"
 #include "Interfaces/util/standardlog.h"
 
 #include "Madgine/base/keyvalueregistry.h"

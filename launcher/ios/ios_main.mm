@@ -17,7 +17,7 @@
 
 #include "Madgine/resources/resourcemanager.h"
 
-#include "cli/parameter.h"
+#include "Madgine/cli/parameter.h"
 
 #if __has_feature(objc_arc)
 #error "ARC is on!"

@@ -14,7 +14,7 @@
 
 #include "Madgine/base/root.h"
 
-#include "cli/parameter.h"
+#include "Madgine/cli/parameter.h"
 
 #include "Interfaces/util/standardlog.h"
 
