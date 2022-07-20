@@ -1,49 +1,40 @@
 #include "../scenerenderertoolslib.h"
-#include "serialize/filesystem/filesystemlib.h"
 
 #include "sceneeditor.h"
 
+#include "Madgine/window/mainwindow.h"
 #include "Madgine_Tools/imgui/clientimroot.h"
+
+#include "im3d/im3d.h"
 #include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
 #include "imgui/imguiaddons.h"
+#include "Madgine_Tools/imguiicons.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
 #include "Madgine/base/application.h"
-#include "Madgine/scene/entity/entitycomponentcollector.h"
 #include "Madgine/scene/scenemanager.h"
+
+#include "Madgine/scene/entity/entity.h"
+#include "Madgine/scene/entity/entitycomponentcollector.h"
 
 #include "Madgine/scene/entity/components/mesh.h"
 #include "Madgine/scene/entity/components/skeleton.h"
 #include "Madgine/scene/entity/components/transform.h"
 
-#include "inspector/inspector.h"
-
-#include "im3d/im3d.h"
+#include "Madgine_Tools/inspector/inspector.h"
 
 #include "Meta/math/boundingbox.h"
 
+#include "Madgine/serialize/filesystem/filemanager.h"
+#include "Madgine/serialize/memory/memorymanager.h"
+#include "Meta/serialize/formatter/safebinaryformatter.h"
+#include "Meta/serialize/formatter/xmlformatter.h"
 #include "Meta/serialize/hierarchy/statetransmissionflags.h"
 
-#include "Madgine/window/mainwindow.h"
-
-#include "Madgine/scene/entity/entity.h"
-
 #include "Interfaces/input/inputevents.h"
-
-#include "serialize/memory/memorylib.h"
-#include "serialize/memory/memorymanager.h"
-
-#include "Meta/serialize/formatter/xmlformatter.h"
-
-#include "serialize/filesystem/filemanager.h"
-
-#include "Meta/serialize/formatter/safebinaryformatter.h"
-
-#include "imgui/imgui_internal.h"
-
-#include "imguiicons.h"
 
 UNIQUECOMPONENT(Engine::Tools::SceneEditor);
 
@@ -514,7 +505,7 @@ namespace Tools {
                         Matrix4 world = t->worldMatrix();
 
                         if (mShowBoneNames)
-                            Im3D::Text(bone.mName.c_str(), {.mTransform = world * m, .mFontSize = 2.0f });
+                            Im3D::Text(bone.mName.c_str(), { .mTransform = world * m, .mFontSize = 2.0f });
 
                         Vector4 start = world * m * Vector4::UNIT_W;
                         Vector4 end;

@@ -10,7 +10,7 @@
 
 #include "rendertarget.h"
 
-#include "fontloader.h"
+#include "Madgine/fontloader/fontloader.h"
 
 namespace Engine {
 namespace Render {

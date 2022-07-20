@@ -35,9 +35,9 @@
 #include <optional>
 #include <cstring>
 
-#if __cpp_lib_memory_resource >= 201603L
+//#if __cpp_lib_memory_resource >= 201603L
 #    include <memory_resource>
-#else
+/* #else
 #    include <experimental/memory_resource>
 namespace std {
 namespace experimental {
@@ -55,7 +55,7 @@ namespace experimental {
 }
 namespace pmr = experimental::pmr;
 }
-#endif
+#endif*/
 
 
 #include "interfacesforward.h"

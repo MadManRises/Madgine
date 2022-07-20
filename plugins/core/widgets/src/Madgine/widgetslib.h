@@ -2,17 +2,17 @@
 
 /// @cond
 
+#include "Madgine/clientlib.h"
+#include "Madgine/imageloaderlib.h"
+#include "Madgine/fontloaderlib.h"
+#include "Madgine/meshloaderlib.h"
+#include "Madgine/pipelineloaderlib.h"
+
 #if defined(Widgets_EXPORTS)
 #    define MADGINE_WIDGETS_EXPORT DLL_EXPORT
 #else
 #    define MADGINE_WIDGETS_EXPORT DLL_IMPORT
 #endif
-
-#include "Madgine/clientlib.h"
-#include "imageloaderlib.h"
-#include "fontloaderlib.h"
-#include "meshloaderlib.h"
-#include "pipelineloaderlib.h"
 
 #include "widgetsforward.h"
 

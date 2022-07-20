@@ -6,7 +6,7 @@
 
 #include "../shadinglanguage/sl.h"
 
-#include "render/texturedescriptor.h"
+#include "Madgine/render/texturedescriptor.h"
 
 #define SL_SHADER blur
 #include "../shadinglanguage/sl_include.h"

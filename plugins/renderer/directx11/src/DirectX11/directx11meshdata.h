@@ -3,7 +3,7 @@
 #include "util/directx11buffer.h"
 #include "util/directx11texture.h"
 
-#include "gpumeshdata.h"
+#include "Madgine/meshloader/gpumeshdata.h"
 
 namespace Engine {
 namespace Render {

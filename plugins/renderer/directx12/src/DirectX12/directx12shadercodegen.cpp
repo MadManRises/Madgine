@@ -2,7 +2,7 @@
 
 #include "directx12shadercodegen.h"
 
-#include "codegen/codegen_shader.h"
+#include "Madgine/codegen/codegen_shader.h"
 
 #include "Meta/math/vector4.h"
 

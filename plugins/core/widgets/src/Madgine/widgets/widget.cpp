@@ -19,7 +19,7 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "font.h"
+#include "Madgine/fontloader/font.h"
 
 METATABLE_BEGIN(Engine::Widgets::WidgetBase)
 READONLY_PROPERTY(Children, children)

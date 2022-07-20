@@ -2,22 +2,23 @@
 
 /// @cond
 
+#include "Meta/metalib.h"
+#include "Modules/moduleslib.h"
+
+#include "Madgine/fontloaderlib.h"
+#include "Madgine/meshloaderlib.h"
+#include "Madgine/pipelineloaderlib.h"
+
 #if defined(Client_EXPORTS)
 #    define MADGINE_CLIENT_EXPORT DLL_EXPORT
 #else
 #    define MADGINE_CLIENT_EXPORT DLL_IMPORT
 #endif
 
-#include "Modules/moduleslib.h"
-#include "Meta/metalib.h"
-
-#include "pipelineloaderlib.h"
-#include "meshloaderlib.h"
-#include "fontloaderlib.h"
 
 #include "clientforward.h"
 
-#include "render/renderforward.h"
+#include "Madgine/render/renderforward.h"
 
 
 /// @endcond

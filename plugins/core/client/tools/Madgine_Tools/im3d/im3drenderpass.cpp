@@ -11,9 +11,9 @@
 
 #include "Madgine/render/shadinglanguage/sl.h"
 
-#include "render/texturedescriptor.h"
+#include "Madgine/render/texturedescriptor.h"
 
-#include "meshdata.h"
+#include "Madgine/meshloader/meshdata.h"
 
 #define SL_SHADER im3d
 #include INCLUDE_SL_SHADER

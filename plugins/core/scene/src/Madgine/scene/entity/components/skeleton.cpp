@@ -7,7 +7,7 @@
 
 #include "Meta/keyvalue/valuetype.h"
 
-#include "skeletondescriptor.h"
+#include "Madgine/skeletonloader/skeletondescriptor.h"
 
 #include "Madgine/resources/resourcemanager.h"
 

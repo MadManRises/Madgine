@@ -8,7 +8,7 @@
 
 #include "imgui/imguiaddons.h"
 
-#include "inspector/inspector.h"
+#include "Madgine_Tools/inspector/inspector.h"
 
 #include "imgui/imgui_internal.h"
 

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "toolbase.h"
-#include "toolscollector.h"
+#include "Madgine_Tools/toolbase.h"
+#include "Madgine_Tools/toolscollector.h"
 
-#include "textureloader.h"
+#include "Madgine/textureloader/textureloader.h"
 
 namespace Engine {
 namespace Tools {

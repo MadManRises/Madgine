@@ -2,7 +2,7 @@
 #include "Madgine/clientlib.h"
 #include "Madgine/uilib.h"
 #include "Madgine/resourceslib.h"
-#include "serialize/filesystem/filesystemlib.h"
+#include "Madgine/serialize/filesystem/filesystemlib.h"
 
 #include "launcher.h"
 
@@ -15,7 +15,7 @@
 #include "Modules/threading/scheduler.h"
 
 #include "Meta/serialize/formatter/xmlformatter.h"
-#include "serialize/filesystem/filemanager.h"
+#include "Madgine/serialize/filesystem/filemanager.h"
 
 #include "Meta/serialize/hierarchy/statetransmissionflags.h"
 

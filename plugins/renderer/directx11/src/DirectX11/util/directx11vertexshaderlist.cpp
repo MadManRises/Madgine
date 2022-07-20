@@ -8,7 +8,7 @@
 
 #include "Madgine/render/shadinglanguage/slloader.h"
 
-#include "codegen/resolveincludes.h"
+#include "Madgine/codegen/resolveincludes.h"
 
 namespace Engine {
 namespace Render {

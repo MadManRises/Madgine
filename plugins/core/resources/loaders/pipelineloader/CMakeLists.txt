@@ -2,10 +2,11 @@
 Project(PipelineLoader)
 
 set(sources "")
-FolderSources(sources "" "" pipeline.h pipelineinstance.h pipelineloader.cpp pipelineloader.h pipelineloaderlib.h)
+FolderSources(sources "" Madgine pipelineloaderlib.h)
+	FolderSources(sources Madgine pipelineloader pipeline.h pipelineinstance.h pipelineloader.cpp pipelineloader.h)
 
 
-add_plugin(PipelineLoader Madgine Utility ${sources} PRECOMPILED_HEADER pipelineloaderlib.h SOURCE_ROOT .)
+add_plugin(PipelineLoader Madgine Utility ${sources} PRECOMPILED_HEADER Madgine/pipelineloaderlib.h SOURCE_ROOT .)
 
 target_link_plugins(PipelineLoader Resources)
 target_link_libraries(PipelineLoader PUBLIC CodeGen)

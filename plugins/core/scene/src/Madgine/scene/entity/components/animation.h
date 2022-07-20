@@ -2,8 +2,8 @@
 
 #include "../entitycomponent.h"
 
-#include "animationloader.h"
-#include "skeletonloader.h"
+#include "Madgine/animationloader/animationloader.h"
+#include "Madgine/skeletonloader/skeletonloader.h"
 
 namespace Engine {
 namespace Scene {

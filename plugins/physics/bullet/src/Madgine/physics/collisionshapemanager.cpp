@@ -5,7 +5,7 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "meshloader.h"
+#include "Madgine/meshloader/meshloader.h"
 
 #include "Meta/math/quaternion.h"
 

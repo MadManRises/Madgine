@@ -2,7 +2,7 @@
 
 #include "../entitycomponent.h"
 
-#include "gpumeshdata.h"
+#include "Madgine/meshloader/gpumeshdata.h"
 
 namespace Engine {
 namespace Scene {

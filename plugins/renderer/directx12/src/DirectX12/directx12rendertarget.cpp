@@ -2,7 +2,7 @@
 
 #include "directx12rendertarget.h"
 
-#include "meshdata.h"
+#include "Madgine/meshloader/meshdata.h"
 
 #include "directx12meshdata.h"
 #include "directx12meshloader.h"
@@ -12,7 +12,7 @@
 
 #include "Meta/math/rect2i.h"
 
-#include "render/material.h"
+#include "Madgine/render/material.h"
 
 namespace Engine {
 namespace Render {

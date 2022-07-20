@@ -2,7 +2,7 @@
 
 #include "../entitycomponent.h"
 
-#include "skeletonloader.h"
+#include "Madgine/skeletonloader/skeletonloader.h"
 
 namespace Engine {
 namespace Scene {

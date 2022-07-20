@@ -3,7 +3,7 @@
 #include "util/openglbuffer.h"
 #include "util/opengltexture.h"
 
-#include "gpumeshdata.h"
+#include "Madgine/meshloader/gpumeshdata.h"
 
 namespace Engine {
 namespace Render {

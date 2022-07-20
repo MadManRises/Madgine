@@ -2,7 +2,7 @@
 
 #include "Madgine/resources/resourceloader.h"
 
-#include "textureloader.h"
+#include "Madgine/textureloader/textureloader.h"
 
 #include "util/opengltexture.h"
 

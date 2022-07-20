@@ -4,15 +4,15 @@
 
 //#include "OpenGL/openglshaderloader.h"
 
-#include "meshloader.h"
+#include "Madgine/meshloader/meshloader.h"
 
 #include "Meta/math/matrix4.h"
 
 #include "Madgine/render/camera.h"
 #include "Madgine/render/rendertarget.h"
-#include "render/vertex.h"
+#include "Madgine/render/vertex.h"
 
-#include "gpumeshloader.h"
+#include "Madgine/meshloader/gpumeshloader.h"
 
 namespace Engine {
 namespace Tools {

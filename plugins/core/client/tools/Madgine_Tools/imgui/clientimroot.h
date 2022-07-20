@@ -3,7 +3,7 @@
 #include "Madgine/window/mainwindowcomponent.h"
 #include "Madgine/window/mainwindowcomponentcollector.h"
 
-#include "renderer/imroot.h"
+#include "Madgine_Tools/renderer/imroot.h"
 
 #include "Madgine/render/renderpass.h"
 

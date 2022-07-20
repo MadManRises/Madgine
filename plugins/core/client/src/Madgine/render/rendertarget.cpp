@@ -6,9 +6,9 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
-#include "gpumeshloader.h"
+#include "Madgine/meshloader/gpumeshloader.h"
 
-#include "meshdata.h"
+#include "Madgine/meshloader/meshdata.h"
 
 METATABLE_BEGIN(Engine::Render::RenderTarget)
 METATABLE_END(Engine::Render::RenderTarget)

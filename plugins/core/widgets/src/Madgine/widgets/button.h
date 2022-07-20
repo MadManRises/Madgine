@@ -4,8 +4,8 @@
 
 #include "Modules/threading/signal.h"
 
-#include "fontloader.h"
-#include "imageloader.h"
+#include "Madgine/fontloader/fontloader.h"
+#include "Madgine/imageloader/imageloader.h"
 
 namespace Engine {
 namespace Widgets {

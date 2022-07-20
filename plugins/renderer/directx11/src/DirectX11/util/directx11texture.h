@@ -2,13 +2,13 @@
 
 #include "Meta/math/vector2i.h"
 
-#include "texture.h"
+#include "Madgine/textureloader/texture.h"
 
-#include "textureloader.h"
+#include "Madgine/textureloader/textureloader.h"
 
 #include "Generic/bytebuffer.h"
 
-#include "render/texturedescriptor.h"
+#include "Madgine/render/texturedescriptor.h"
 
 namespace Engine {
 namespace Render {

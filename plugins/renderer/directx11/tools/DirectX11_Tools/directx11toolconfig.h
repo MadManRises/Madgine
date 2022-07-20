@@ -1,7 +1,7 @@
 #pragma once
 
-#include "toolbase.h"
-#include "toolscollector.h"
+#include "Madgine_Tools/toolbase.h"
+#include "Madgine_Tools/toolscollector.h"
 
 #include "DirectX11/util/directx11texture.h"
 

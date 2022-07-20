@@ -6,7 +6,7 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
-#include "meshdata.h"
+#include "Madgine/meshloader/meshdata.h"
 
 #include "openglrendercontext.h"
 

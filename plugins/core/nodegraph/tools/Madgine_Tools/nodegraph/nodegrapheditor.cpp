@@ -18,15 +18,15 @@
 
 #include "Madgine/nodegraph/nodebase.h"
 
-#include "inspector/inspector.h"
+#include "Madgine_Tools/inspector/inspector.h"
 
 #include "Madgine/nodegraph/nodeinterpreter.h"
 
 #include "Meta/keyvalue/valuetype.h"
 
-#include "renderer/imroot.h"
+#include "Madgine_Tools/renderer/imroot.h"
 
-#include "imguiicons.h"
+#include "Madgine_Tools/imguiicons.h"
 
 UNIQUECOMPONENT(Engine::Tools::NodeGraphEditor);
 

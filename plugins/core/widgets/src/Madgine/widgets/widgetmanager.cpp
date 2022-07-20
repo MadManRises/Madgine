@@ -5,8 +5,8 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "gpumeshloader.h"
-#include "pipelineloader.h"
+#include "Madgine/meshloader/gpumeshloader.h"
+#include "Madgine/pipelineloader/pipelineloader.h"
 
 #include "widget.h"
 
@@ -20,7 +20,7 @@
 #include "tabwidget.h"
 #include "textbox.h"
 
-#include "imagedata.h"
+#include "Madgine/imageloader/imagedata.h"
 
 #include "vertex.h"
 
@@ -30,9 +30,9 @@
 
 #include "Interfaces/input/inputevents.h"
 
-#include "imageloader.h"
-#include "meshloader.h"
-#include "textureloader.h"
+#include "Madgine/imageloader/imageloader.h"
+#include "Madgine/meshloader/meshloader.h"
+#include "Madgine/textureloader/textureloader.h"
 
 #include "Madgine/render/rendertarget.h"
 

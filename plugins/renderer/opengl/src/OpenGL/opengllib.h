@@ -2,6 +2,11 @@
 
 /// @cond
 
+#include "Madgine/meshloaderlib.h"
+#include "Madgine/pipelineloaderlib.h"
+#include "Madgine/textureloaderlib.h"
+#include "Madgine/clientlib.h"
+
 #if defined(OpenGL_EXPORTS)
 #    define MADGINE_OPENGL_EXPORT DLL_EXPORT
 #else
@@ -9,11 +14,6 @@
 #endif
 
 #include "openglforward.h"
-
-#include "meshloaderlib.h"
-#include "pipelineloaderlib.h"
-#include "textureloaderlib.h"
-#include "Madgine/clientlib.h"
 
 #if !ANDROID && !EMSCRIPTEN && !IOS
 #    include "../glad/glad.h"

@@ -6,7 +6,7 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
-#include "audiobufferloader.h"
+#include "Madgine/audioloader/audiobufferloader.h"
 
 UNIQUECOMPONENT(Engine::Audio::OpenALAudioContext)
 

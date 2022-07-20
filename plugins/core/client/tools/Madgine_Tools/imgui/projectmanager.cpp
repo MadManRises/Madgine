@@ -1,5 +1,5 @@
 #include "../clienttoolslib.h"
-#include "serialize/filesystem/filesystemlib.h"
+#include "Madgine/serialize/filesystem/filesystemlib.h"
 
 #include "projectmanager.h"
 
@@ -21,7 +21,7 @@
 
 #include "Meta/serialize/formatter/xmlformatter.h"
 
-#include "serialize/filesystem/filemanager.h"
+#include "Madgine/serialize/filesystem/filemanager.h"
 
 #include "Meta/serialize/streams/serializestreamdata.h"
 

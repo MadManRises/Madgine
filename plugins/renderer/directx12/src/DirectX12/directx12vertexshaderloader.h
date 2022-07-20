@@ -4,7 +4,7 @@
 
 #include "Modules/threading/workgroupstorage.h"
 
-#include "render/vertexformat.h"
+#include "Madgine/render/vertexformat.h"
 
 namespace Engine {
 namespace Render {

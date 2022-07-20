@@ -2,7 +2,7 @@
 
 #include "Madgine/render/renderpass.h"
 
-#include "pipelineloader.h"
+#include "Madgine/pipelineloader/pipelineloader.h"
 
 
 namespace Engine {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pipelineinstance.h"
+#include "Madgine/pipelineloader/pipelineinstance.h"
 
 #include "../directx11geometryshaderloader.h"
 #include "../directx11pipelineloader.h"

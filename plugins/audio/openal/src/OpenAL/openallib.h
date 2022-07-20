@@ -2,6 +2,9 @@
 
 /// @cond
 
+#include "Madgine/audioloaderlib.h"
+#include "Madgine/scenelib.h"
+
 #if defined(OpenALPlugin_EXPORTS)
 #    define MADGINE_OPENAL_EXPORT DLL_EXPORT
 #else
@@ -9,9 +12,6 @@
 #endif
 
 #include "openalforward.h"
-
-#include "audioloaderlib.h"
-#include "Madgine/scenelib.h"
 
 #include <AL/al.h>
 #include <AL/alc.h>

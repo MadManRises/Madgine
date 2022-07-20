@@ -7,7 +7,7 @@
 
 #include "imgui/imguiaddons.h"
 
-#include "inspector/inspector.h"
+#include "Madgine_Tools/inspector/inspector.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/math/bounds.h"
@@ -28,7 +28,7 @@
 
 #include "Generic/coroutines/generator.h"
 
-#include "imguiicons.h"
+#include "Madgine_Tools/imguiicons.h"
 
 UNIQUECOMPONENT(Engine::Tools::GuiEditor);
 

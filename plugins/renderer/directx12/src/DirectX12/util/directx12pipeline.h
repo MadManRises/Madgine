@@ -1,12 +1,12 @@
 #pragma once
 
-#include "pipeline.h"
+#include "Madgine/pipelineloader/pipeline.h"
 
 #include "../directx12geometryshaderloader.h"
 #include "../directx12pixelshaderloader.h"
 #include "../directx12vertexshaderloader.h"
 
-#include "render/vertexformat.h"
+#include "Madgine/render/vertexformat.h"
 
 namespace Engine {
 namespace Render {

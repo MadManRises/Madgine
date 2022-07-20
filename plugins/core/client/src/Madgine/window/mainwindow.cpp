@@ -1,5 +1,5 @@
 #include "../clientlib.h"
-#include "serialize/filesystem/filesystemlib.h"
+#include "Madgine/serialize/filesystem/filesystemlib.h"
 
 #include "mainwindow.h"
 #include "mainwindowcomponent.h"
@@ -15,7 +15,7 @@
 #include "Meta/serialize/configs/controlled.h"
 #include "Meta/serialize/formatter/iniformatter.h"
 #include "Meta/serialize/serializetable_impl.h"
-#include "serialize/filesystem/filemanager.h"
+#include "Madgine/serialize/filesystem/filemanager.h"
 
 #include "../render/rendercontext.h"
 #include "../render/rendertarget.h"

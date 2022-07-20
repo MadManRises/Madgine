@@ -7,7 +7,7 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "imageloader.h"
+#include "Madgine/imageloader/imageloader.h"
 
 METATABLE_BEGIN_BASE(Engine::Widgets::Image, Engine::Widgets::WidgetBase)
 PROPERTY(Image, image, setImage)

@@ -2,9 +2,10 @@
 Project(TextureLoader)
 
 set(sources "")
-FolderSources(sources "" "" texture.h textureloader.cpp textureloader.h textureloaderlib.h)
+FolderSources(sources "" Madgine textureloaderlib.h)
+	FolderSources(sources Madgine textureloader texture.h textureloader.cpp textureloader.h)
 
 
-add_plugin(TextureLoader Madgine Utility ${sources} PRECOMPILED_HEADER textureloaderlib.h SOURCE_ROOT .)
+add_plugin(TextureLoader Madgine Utility ${sources} PRECOMPILED_HEADER Madgine/textureloaderlib.h SOURCE_ROOT .)
 
 target_link_plugins(TextureLoader Resources ImageLoader)

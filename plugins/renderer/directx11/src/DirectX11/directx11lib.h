@@ -2,6 +2,11 @@
 
 /// @cond
 
+#include "Madgine/meshloaderlib.h"
+#include "Madgine/pipelineloaderlib.h"
+#include "Madgine/textureloaderlib.h"
+#include "Madgine/clientlib.h"
+
 #if defined(DirectX11_EXPORTS)
 #    define MADGINE_DIRECTX11_EXPORT DLL_EXPORT
 #else
@@ -9,13 +14,6 @@
 #endif
 
 #include "directx11forward.h"
-
-#include "meshloaderlib.h"
-#include "pipelineloaderlib.h"
-#include "textureloaderlib.h"
-#include "Madgine/clientlib.h"
-
-#include "Modules/threading/workgroup.h"
 
 #define NOMINMAX
 

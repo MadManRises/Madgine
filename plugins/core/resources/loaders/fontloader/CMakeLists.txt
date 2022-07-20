@@ -2,10 +2,11 @@
 Project(FontLoader)
 
 set(sources "")
-FolderSources(sources "" "" font.h fontloader.cpp fontloader.h fontloaderlib.h)
+FolderSources(sources "" Madgine fontloaderlib.h)
+	FolderSources(sources Madgine fontloader font.h fontloader.cpp fontloader.h)
 
 
-add_plugin(FontLoader Madgine Utility ${sources} PRECOMPILED_HEADER fontloaderlib.h SOURCE_ROOT .)
+add_plugin(FontLoader Madgine Utility ${sources} PRECOMPILED_HEADER Madgine/fontloaderlib.h SOURCE_ROOT .)
 
 target_link_plugins(FontLoader TextureLoader Resources)
 

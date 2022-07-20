@@ -19,7 +19,7 @@
 
 #include "Madgine/scene/entity/components/pointlight.h"
 
-#include "render/material.h"
+#include "Madgine/render/material.h"
 
 #include "Madgine/scene/entity/components/material.h"
 

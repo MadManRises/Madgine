@@ -5,7 +5,7 @@
 #include "Meta/math/matrix4.h"
 #include "Meta/math/vector4.h"
 
-#include "meshloader.h"
+#include "Madgine/meshloader/meshloader.h"
 
 #include "directx11renderwindow.h"
 
@@ -18,7 +18,7 @@
 
 #include "directx11rendercontext.h"
 
-#include "render/material.h"
+#include "Madgine/render/material.h"
 
 namespace Engine {
 namespace Render {

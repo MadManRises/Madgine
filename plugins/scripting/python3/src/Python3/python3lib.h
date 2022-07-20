@@ -1,6 +1,5 @@
 #pragma once
 
-/// @cond
 
 #include "Madgine/baselib.h"
 #include "Madgine/resourceslib.h"

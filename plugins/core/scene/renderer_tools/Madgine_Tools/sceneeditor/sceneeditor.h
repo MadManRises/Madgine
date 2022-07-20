@@ -1,8 +1,8 @@
 #pragma once
 
-#include "toolscollector.h"
+#include "Madgine_Tools/toolscollector.h"
 
-#include "toolbase.h"
+#include "Madgine_Tools/toolbase.h"
 
 #include "sceneview.h"
 

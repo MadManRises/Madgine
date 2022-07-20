@@ -1,6 +1,6 @@
 #pragma once
 
-#include "render/texturedescriptor.h"
+#include "Madgine/render/texturedescriptor.h"
 
 namespace Engine {
 namespace Render {

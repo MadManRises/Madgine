@@ -26,9 +26,9 @@
 
 #include "Interfaces/filesystem/api.h"
 
-#include "toolbase.h"
+#include "Madgine_Tools/toolbase.h"
 
-#include "fontloader.h"
+#include "Madgine/fontloader/fontloader.h"
 
 #include "Madgine/resources/resourcemanager.h"
 

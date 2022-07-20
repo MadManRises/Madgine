@@ -1,6 +1,6 @@
 #pragma once
 
-#include "render/vertex.h"
+#include "Madgine/render/vertex.h"
 
 namespace Engine {
 namespace Widgets {

@@ -2,10 +2,11 @@
 Project(SkeletonLoader)
 
 set(sources "")
-FolderSources(sources "" "" skeletondescriptor.h skeletonloader.cpp skeletonloader.h skeletonloaderlib.h)
+FolderSources(sources "" Madgine skeletonloaderlib.h)
+	FolderSources(sources Madgine skeletonloader skeletondescriptor.h skeletonloader.cpp skeletonloader.h)
 
 
-add_plugin(SkeletonLoader Madgine Utility ${sources} PRECOMPILED_HEADER skeletonloaderlib.h SOURCE_ROOT .)
+add_plugin(SkeletonLoader Madgine Utility ${sources} PRECOMPILED_HEADER Madgine/skeletonloaderlib.h SOURCE_ROOT .)
 
 target_link_libraries(SkeletonLoader PRIVATE assimp)
 

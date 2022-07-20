@@ -2,7 +2,7 @@
 
 #include "widget.h"
 
-#include "fontloader.h"
+#include "Madgine/fontloader/fontloader.h"
 
 namespace Engine {
 namespace Widgets {

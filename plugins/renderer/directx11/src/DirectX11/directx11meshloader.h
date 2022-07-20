@@ -2,7 +2,7 @@
 
 #include "Madgine/resources/resourceloader.h"
 
-#include "gpumeshloader.h"
+#include "Madgine/meshloader/gpumeshloader.h"
 
 #include "directx11meshdata.h"
 

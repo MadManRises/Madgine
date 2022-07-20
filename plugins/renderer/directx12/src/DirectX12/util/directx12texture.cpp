@@ -83,11 +83,13 @@ namespace Render {
                 subResourceDesc.RowPitch = width * byteCount;
                 subResourceDesc.SlicePitch = subResourceDesc.RowPitch * height;
 
-                UpdateSubresources(DirectX12RenderContext::getSingleton().mTempCommandList.mList, mResource, uploadHeap, 0, 0, 1, &subResourceDesc);
-                auto transition = CD3DX12_RESOURCE_BARRIER::Transition(mResource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-                DirectX12RenderContext::getSingleton().mTempCommandList.mList->ResourceBarrier(1, &transition);
+                DirectX12CommandList &list = DirectX12RenderContext::getSingleton().mTempCommandList;
 
-                DirectX12RenderContext::getSingleton().ExecuteCommandList(DirectX12RenderContext::getSingleton().mTempCommandList, [uploadHeap { std::move(uploadHeap) }]() {});
+                UpdateSubresources(list.mList, mResource, uploadHeap, 0, 0, 1, &subResourceDesc);
+                auto transition = CD3DX12_RESOURCE_BARRIER::Transition(mResource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+                list.mList->ResourceBarrier(1, &transition);
+
+                DirectX12RenderContext::getSingleton().ExecuteCommandList(list, [uploadHeap { std::move(uploadHeap) }]() {});
             }
             dimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 
@@ -217,17 +219,19 @@ namespace Render {
         MemcpySubresource(&DestData, &subResourceDesc, rowSize, numRows, 1);
         uploadHeap->Unmap(0, nullptr);
 
+        DirectX12CommandList &list = DirectX12RenderContext::getSingleton().mTempCommandList;
+
         auto transition = CD3DX12_RESOURCE_BARRIER::Transition(mResource, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
-        DirectX12RenderContext::getSingleton().mTempCommandList.mList->ResourceBarrier(1, &transition);
+        list.mList->ResourceBarrier(1, &transition);
 
         CD3DX12_TEXTURE_COPY_LOCATION Dst(mResource, 0);
         CD3DX12_TEXTURE_COPY_LOCATION Src(uploadHeap, layout);
-        DirectX12RenderContext::getSingleton().mTempCommandList.mList->CopyTextureRegion(&Dst, offset.x, offset.y, 0, &Src, nullptr);
+        list.mList->CopyTextureRegion(&Dst, offset.x, offset.y, 0, &Src, nullptr);
 
         transition = CD3DX12_RESOURCE_BARRIER::Transition(mResource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-        DirectX12RenderContext::getSingleton().mTempCommandList.mList->ResourceBarrier(1, &transition);
+        list.mList->ResourceBarrier(1, &transition);
 
-        DirectX12RenderContext::getSingleton().ExecuteCommandList(DirectX12RenderContext::getSingleton().mTempCommandList, [uploadHeap { std::move(uploadHeap) }]() {});
+        DirectX12RenderContext::getSingleton().ExecuteCommandList(list, [uploadHeap { std::move(uploadHeap) }]() {});
     }
 
     void DirectX12Texture::resize(Vector2i size)

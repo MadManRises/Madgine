@@ -4,7 +4,7 @@
 
 #include "openglrendertarget.h"
 
-#include "meshdata.h"
+#include "Madgine/meshloader/meshdata.h"
 #include "openglmeshdata.h"
 #include "openglmeshloader.h"
 
@@ -12,7 +12,7 @@
 
 #include "util/openglpipelineinstance.h"
 
-#include "render/material.h"
+#include "Madgine/render/material.h"
 
 namespace Engine {
 namespace Render {

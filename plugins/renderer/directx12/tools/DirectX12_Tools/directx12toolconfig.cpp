@@ -5,16 +5,16 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "inspector/inspector.h"
+#include "Madgine_Tools/inspector/inspector.h"
 
 #include "imgui/imgui.h"
 
-#include "imageloaderlib.h"
-#include "imageloader.h"
+#include "Madgine/imageloaderlib.h"
+#include "Madgine/imageloader/imageloader.h"
 
-#include "fontloader.h"
+#include "Madgine/fontloader/fontloader.h"
 
-#include "imagedata.h"
+#include "Madgine/imageloader/imagedata.h"
 
 namespace Engine {
 namespace Tools {

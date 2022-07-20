@@ -4,8 +4,8 @@
 /*#include "OpenGL/util/openglprogram.h"
 #include "OpenGL/util/openglbuffer.h"
 #include "OpenGL/util/openglvertexarray.h"*/
-#include "gpumeshloader.h"
-#include "pipelineloader.h"
+#include "Madgine/meshloader/gpumeshloader.h"
+#include "Madgine/pipelineloader/pipelineloader.h"
 
 #include "Madgine/render/shadinglanguage/sl.h"
 

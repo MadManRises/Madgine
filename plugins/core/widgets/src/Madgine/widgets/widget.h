@@ -11,7 +11,7 @@
 
 #include "Meta/keyvalue/virtualscope.h"
 
-#include "render/texturedescriptor.h"
+#include "Madgine/render/texturedescriptor.h"
 #include "vertex.h"
 
 namespace Engine {

@@ -2,9 +2,9 @@
 
 #include "Madgine/render/renderpass.h"
 
-#include "pipelineloader.h"
+#include "Madgine/pipelineloader/pipelineloader.h"
 
-#include "gpumeshloader.h"
+#include "Madgine/meshloader/gpumeshloader.h"
 
 namespace Engine {
 namespace Render {

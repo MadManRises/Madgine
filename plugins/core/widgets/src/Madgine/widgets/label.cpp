@@ -5,7 +5,7 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "fontloader.h"
+#include "Madgine/fontloader/fontloader.h"
 
 METATABLE_BEGIN_BASE(Engine::Widgets::Label, Engine::Widgets::WidgetBase)
 MEMBER(mText)

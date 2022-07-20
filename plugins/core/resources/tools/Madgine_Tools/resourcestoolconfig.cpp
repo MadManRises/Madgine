@@ -7,9 +7,9 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-#include "inspector/inspector.h"
+#include "Madgine_Tools/inspector/inspector.h"
 
-#include "renderer/imroot.h"
+#include "Madgine_Tools/renderer/imroot.h"
 
 #include "Madgine/resources/resourceloaderbase.h"
 #include "Madgine/resources/resourcemanager.h"

@@ -5,7 +5,7 @@
 
 #include "Modules/threading/threadlocal.h"
 
-#include "render/vertexformat.h"
+#include "Madgine/render/vertexformat.h"
 
 namespace Engine {
 namespace Render {

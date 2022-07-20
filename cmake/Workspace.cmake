@@ -172,7 +172,7 @@ macro(add_workspace_interface_library name)
 	add_library(${name} INTERFACE ${LIB_CONFIG_UNPARSED_ARGUMENTS})	
 
 	if (NOT LIB_CONFIG_SOURCE_ROOT)
-		MESSAGE(SEND_ERROR "Source directory must be always set for Interface Library '${name}'. Use SOURCE_ROOT to specify it.")
+		MESSAGE(SEND_ERROR "Source directory must always be set for Interface Library '${name}'. Use SOURCE_ROOT to specify it.")
 	endif()
 	
 	target_include_directories(${name} INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${LIB_CONFIG_SOURCE_ROOT}>)

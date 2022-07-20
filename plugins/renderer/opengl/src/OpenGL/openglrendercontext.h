@@ -4,7 +4,7 @@
 #include "Madgine/render/rendercontextcollector.h"
 #include "Modules/uniquecomponent/uniquecomponent.h"
 #include "util/openglvertexarray.h"
-#include "render/vertexformat.h"
+#include "Madgine/render/vertexformat.h"
 
 namespace Engine {
 namespace Render {

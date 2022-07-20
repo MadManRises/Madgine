@@ -2,7 +2,7 @@
 
 #include "Madgine/resources/resourceloader.h"
 
-#include "pipelineloader.h"
+#include "Madgine/pipelineloader/pipelineloader.h"
 
 #include "util/openglpipeline.h"
 

@@ -14,7 +14,7 @@
 - launcher: executable/entry-point setup for all supported platforms
 - plugins: set of plugins grouped by functionality
 - samples: small working examples of using the framework
-- shared: (external) libraries (note: not plugins)
+- shared: middleware & feature libraries (note: not plugins)
 - src: core libraries
 - test: tests for core libraries
 

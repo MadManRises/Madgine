@@ -12,17 +12,16 @@
 
 #include "Madgine/render/rendertarget.h"
 
-#include "pipelineloaderlib.h"
-#include "pipelineloader.h"
+
+#include "Madgine/pipelineloader/pipelineloader.h"
 
 #include "shadercodegenerator.h"
 
 #include "gpubuffernode.h"
 
-#include "meshloaderlib.h"
-#include "gpumeshloader.h"
+#include "Madgine/meshloader/gpumeshloader.h"
 
-#include "render/material.h"
+#include "Madgine/render/material.h"
 
 NODE(MeshRendererNode, Engine::Render::MeshRendererNode)
 

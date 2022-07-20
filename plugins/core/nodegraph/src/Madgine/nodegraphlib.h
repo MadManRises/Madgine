@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Madgine/codegen/codegenlib.h"
-
 /// @cond
+
+#include "Madgine/codegen/codegenlib.h"
 
 #include "Modules/moduleslib.h"
 #include "Madgine/resourceslib.h"

@@ -3,7 +3,7 @@
 
 #include "Interfaces/filesystem/api.h"
 
-#include "cli/parameter.h"
+#include "Madgine/cli/parameter.h"
 
 #include "Modules/threading/workgroup.h"
 

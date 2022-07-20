@@ -9,9 +9,9 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "fontloader.h"
+#include "Madgine/fontloader/fontloader.h"
 
-#include "imageloader.h"
+#include "Madgine/imageloader/imageloader.h"
 
 METATABLE_BEGIN_BASE(Engine::Widgets::Button, Engine::Widgets::WidgetBase)
 MEMBER(mText)

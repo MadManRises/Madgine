@@ -4,7 +4,7 @@
 #include "Meta/math/matrix4.h"
 #include "util/directx11texture.h"
 
-#include "render/renderpassflags.h"
+#include "Madgine/render/renderpassflags.h"
 
 namespace Engine {
 namespace Render {

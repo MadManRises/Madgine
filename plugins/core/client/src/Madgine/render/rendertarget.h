@@ -1,7 +1,7 @@
 #pragma once
 
-#include "render/vertex.h"
-#include "render/texturedescriptor.h"
+#include "Madgine/render/vertex.h"
+#include "Madgine/render/texturedescriptor.h"
 
 namespace Engine {
 namespace Render {

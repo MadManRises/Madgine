@@ -6,10 +6,10 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
-#include "imageloaderlib.h"
-#include "imagedata.h"
-#include "imageloader.h"
-#include "meshdata.h"
+#include "Madgine/imageloaderlib.h"
+#include "Madgine/imageloader/imagedata.h"
+#include "Madgine/imageloader/imageloader.h"
+#include "Madgine/meshloader/meshdata.h"
 
 #include "directx12rendercontext.h"
 

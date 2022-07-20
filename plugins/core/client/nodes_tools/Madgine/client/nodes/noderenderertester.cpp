@@ -16,7 +16,7 @@
 #include "Madgine/render/rendercontext.h"
 #include "Madgine/render/rendertarget.h"
 
-#include "inspector/inspector.h"
+#include "Madgine_Tools/inspector/inspector.h"
 
 #include "Meta/keyvalue/valuetype.h"
 

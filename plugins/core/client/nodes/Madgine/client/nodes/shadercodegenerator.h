@@ -2,7 +2,7 @@
 
 #include "Madgine/nodegraph/codegenerator.h"
 
-#include "codegen/codegen_shader.h"
+#include "Madgine/codegen/codegen_shader.h"
 
 namespace Engine {
 namespace Render {
