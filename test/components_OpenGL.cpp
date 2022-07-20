@@ -1,10 +1,10 @@
 #include "Modules/moduleslib.h"
 #include "Modules/uniquecomponent/uniquecomponentregistry.h"
-#if defined(BUILD_Client)
-#include "Madgine/clientlib.h"
+#if defined(BUILD_UI)
+#include "Madgine/uilib.h"
 #endif
-#if defined(BUILD_Base)
-#include "Madgine/baselib.h"
+#if defined(BUILD_ImageLoader)
+#include "Madgine/imageloaderlib.h"
 #endif
 #if defined(BUILD_OpenGL)
 #include "OpenGL/opengllib.h"
@@ -16,33 +16,29 @@
 #include "Madgine/widgetslib.h"
 #endif
 #if defined(BUILD_MeshLoader)
-#include "meshloaderlib.h"
+#include "Madgine/meshloaderlib.h"
+#endif
+#if defined(BUILD_Client)
+#include "Madgine/clientlib.h"
 #endif
 #if defined(BUILD_ClientNodes)
 #include "Madgine/clientnodeslib.h"
 #endif
 #if defined(BUILD_FontLoader)
-#include "fontloaderlib.h"
-#endif
-#if defined(BUILD_ImageLoader)
-#include "imageloaderlib.h"
-#endif
-#if defined(BUILD_UI)
-#include "Madgine/uilib.h"
-#endif
-
-#if defined(BUILD_Client)
-#include "Madgine/render/rendercontextcollector.h"
-#include "Madgine/window/mainwindowcomponentcollector.h"
+#include "Madgine/fontloaderlib.h"
 #endif
 #if defined(BUILD_Base)
-#include "Madgine/base/globalapicollector.h"
+#include "Madgine/baselib.h"
+#endif
+
+#if defined(BUILD_UI)
+#include "Madgine/input/handlercollector.h"
 #endif
 #if defined(BUILD_Resources)
 #include "Madgine/resources/resourceloadercollector.h"
 #endif
-#if defined(BUILD_Client) && defined(BUILD_Resources)
-#include "Madgine/render/shadinglanguage/slloader.h"
+#if defined(BUILD_ImageLoader) && defined(BUILD_Resources)
+#include "Madgine/imageloader/imageloader.h"
 #endif
 #if defined(BUILD_TestShared)
 #include "uniquecomponent/uniquecomponentshared.h"
@@ -52,9 +48,6 @@
 #endif
 #if defined(BUILD_TestShared) && defined(BUILD_LibB)
 #include "uniquecomponent/libB.h"
-#endif
-#if defined(BUILD_OpenGL) && defined(BUILD_Client)
-#include "OpenGL/openglrendercontext.h"
 #endif
 #if defined(BUILD_OpenGL) && defined(BUILD_Resources)
 #include "OpenGL/openglmeshloader.h"
@@ -75,11 +68,21 @@
 #if defined(BUILD_NodeGraph) && defined(BUILD_Resources)
 #include "Madgine/nodegraph/nodegraphloader.h"
 #endif
+#if defined(BUILD_MeshLoader) && defined(BUILD_Resources)
+#include "Madgine/meshloader/meshloader.h"
+#endif
+#if defined(BUILD_Client)
+#include "Madgine/render/rendercontextcollector.h"
+#include "Madgine/window/mainwindowcomponentcollector.h"
+#endif
+#if defined(BUILD_Client) && defined(BUILD_Resources)
+#include "Madgine/render/shadinglanguage/slloader.h"
+#endif
+#if defined(BUILD_OpenGL) && defined(BUILD_Client)
+#include "OpenGL/openglrendercontext.h"
+#endif
 #if defined(BUILD_Widgets) && defined(BUILD_Client)
 #include "Madgine/widgets/widgetmanager.h"
-#endif
-#if defined(BUILD_MeshLoader) && defined(BUILD_Resources)
-#include "meshloader.h"
 #endif
 #if defined(BUILD_NodeGraph) && defined(BUILD_ClientNodes)
 #include "Madgine/client/nodes/framebuffernode.h"
@@ -88,13 +91,10 @@
 #include "Madgine/client/nodes/rasterizernode.h"
 #endif
 #if defined(BUILD_FontLoader) && defined(BUILD_Resources)
-#include "fontloader.h"
+#include "Madgine/fontloader/fontloader.h"
 #endif
-#if defined(BUILD_ImageLoader) && defined(BUILD_Resources)
-#include "imageloader.h"
-#endif
-#if defined(BUILD_UI)
-#include "Madgine/input/handlercollector.h"
+#if defined(BUILD_Base)
+#include "Madgine/base/globalapicollector.h"
 #endif
 
 

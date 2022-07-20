@@ -1,43 +1,46 @@
 #include "Modules/moduleslib.h"
 #include "Modules/uniquecomponent/uniquecomponentregistry.h"
+#if defined(BUILD_ResourcesTools)
+#include "Madgine_Tools/resourcestoolslib.h"
+#endif
+#if defined(BUILD_MeshLoader)
+#include "Madgine/meshloaderlib.h"
+#endif
+#if defined(BUILD_Client)
+#include "Madgine/clientlib.h"
+#endif
+#if defined(BUILD_ClientNodes)
+#include "Madgine/clientnodeslib.h"
+#endif
+#if defined(BUILD_FontLoader)
+#include "Madgine/fontloaderlib.h"
+#endif
 #if defined(BUILD_Base)
 #include "Madgine/baselib.h"
 #endif
-#if defined(BUILD_FontLoader)
-#include "fontloaderlib.h"
-#endif
-#if defined(BUILD_OpenGLTools)
-#include "OpenGL_Tools/opengltoolslib.h"
-#endif
-#if defined(BUILD_ClientNodesTools)
-#include "Madgine/clientnodestoolslib.h"
+#if defined(BUILD_UI)
+#include "Madgine/uilib.h"
 #endif
 #if defined(BUILD_WidgetsTools)
 #include "Madgine_Tools/widgetstoolslib.h"
 #endif
 #if defined(BUILD_ImageLoader)
-#include "imageloaderlib.h"
-#endif
-#if defined(BUILD_UI)
-#include "Madgine/uilib.h"
-#endif
-#if defined(BUILD_ResourcesTools)
-#include "Madgine_Tools/resourcestoolslib.h"
-#endif
-#if defined(BUILD_Client)
-#include "Madgine/clientlib.h"
+#include "Madgine/imageloaderlib.h"
 #endif
 #if defined(BUILD_OpenGL)
 #include "OpenGL/opengllib.h"
 #endif
-#if defined(BUILD_Tools)
-#include "toolslib.h"
-#endif
 #if defined(BUILD_NodeGraph)
 #include "Madgine/nodegraphlib.h"
 #endif
+#if defined(BUILD_OpenGLTools)
+#include "OpenGL_Tools/opengltoolslib.h"
+#endif
 #if defined(BUILD_NodeGraphTools)
 #include "Madgine_Tools/nodegraphtoolslib.h"
+#endif
+#if defined(BUILD_Tools)
+#include "Madgine_Tools/toolslib.h"
 #endif
 #if defined(BUILD_Widgets)
 #include "Madgine/widgetslib.h"
@@ -45,16 +48,10 @@
 #if defined(BUILD_ClientTools)
 #include "Madgine_Tools/clienttoolslib.h"
 #endif
-#if defined(BUILD_MeshLoader)
-#include "meshloaderlib.h"
-#endif
-#if defined(BUILD_ClientNodes)
-#include "Madgine/clientnodeslib.h"
+#if defined(BUILD_ClientNodesTools)
+#include "Madgine/clientnodestoolslib.h"
 #endif
 
-#if defined(BUILD_Base)
-#include "Madgine/base/globalapicollector.h"
-#endif
 #if defined(BUILD_Resources)
 #include "Madgine/resources/resourceloadercollector.h"
 #endif
@@ -67,14 +64,8 @@
 #if defined(BUILD_TestShared) && defined(BUILD_LibB)
 #include "uniquecomponent/libB.h"
 #endif
-#if defined(BUILD_FontLoader) && defined(BUILD_Resources)
-#include "fontloader.h"
-#endif
-#if defined(BUILD_ImageLoader) && defined(BUILD_Resources)
-#include "imageloader.h"
-#endif
-#if defined(BUILD_UI)
-#include "Madgine/input/handlercollector.h"
+#if defined(BUILD_MeshLoader) && defined(BUILD_Resources)
+#include "Madgine/meshloader/meshloader.h"
 #endif
 #if defined(BUILD_Client)
 #include "Madgine/render/rendercontextcollector.h"
@@ -83,8 +74,17 @@
 #if defined(BUILD_Client) && defined(BUILD_Resources)
 #include "Madgine/render/shadinglanguage/slloader.h"
 #endif
-#if defined(BUILD_OpenGLTools) && defined(BUILD_Client)
-#include "OpenGL_Tools/imgui/openglimroot.h"
+#if defined(BUILD_FontLoader) && defined(BUILD_Resources)
+#include "Madgine/fontloader/fontloader.h"
+#endif
+#if defined(BUILD_Base)
+#include "Madgine/base/globalapicollector.h"
+#endif
+#if defined(BUILD_UI)
+#include "Madgine/input/handlercollector.h"
+#endif
+#if defined(BUILD_ImageLoader) && defined(BUILD_Resources)
+#include "Madgine/imageloader/imageloader.h"
 #endif
 #if defined(BUILD_OpenGL) && defined(BUILD_Resources)
 #include "OpenGL/openglmeshloader.h"
@@ -94,30 +94,6 @@
 #endif
 #if defined(BUILD_OpenGL) && defined(BUILD_Client)
 #include "OpenGL/openglrendercontext.h"
-#endif
-#if defined(BUILD_Tools)
-#include "filesystem/filebrowser.h"
-#include "inject/injectortool.h"
-#include "inspector/functiontool.h"
-#include "inspector/inspector.h"
-#include "logviewer/logviewer.h"
-#include "metrics/metrics.h"
-#include "profiler/profiler.h"
-#include "renderer/imguidemo.h"
-#include "testtool/testtool.h"
-#include "toolscollector.h"
-#endif
-#if defined(BUILD_Tools) && defined(BUILD_OpenGLTools)
-#include "OpenGL_Tools/opengltoolconfig.h"
-#endif
-#if defined(BUILD_Tools) && defined(BUILD_ClientNodesTools)
-#include "Madgine/client/nodes/noderenderertester.h"
-#endif
-#if defined(BUILD_Tools) && defined(BUILD_WidgetsTools)
-#include "Madgine_Tools/guieditor/guieditor.h"
-#endif
-#if defined(BUILD_Tools) && defined(BUILD_ResourcesTools)
-#include "Madgine_Tools/resourcestoolconfig.h"
 #endif
 #if defined(BUILD_NodeGraph)
 #include "Madgine/nodegraph/nodecollector.h"
@@ -132,7 +108,37 @@
 #if defined(BUILD_NodeGraph) && defined(BUILD_Resources)
 #include "Madgine/nodegraph/nodegraphloader.h"
 #endif
-#if defined(BUILD_Tools) && defined(BUILD_NodeGraphTools)
+#if defined(BUILD_NodeGraph) && defined(BUILD_ClientNodes)
+#include "Madgine/client/nodes/framebuffernode.h"
+#include "Madgine/client/nodes/gpubuffernode.h"
+#include "Madgine/client/nodes/meshrenderernode.h"
+#include "Madgine/client/nodes/rasterizernode.h"
+#endif
+#if defined(BUILD_OpenGLTools) && defined(BUILD_Client)
+#include "OpenGL_Tools/imgui/openglimroot.h"
+#endif
+#if defined(BUILD_Tools)
+#include "Madgine_Tools/filesystem/filebrowser.h"
+#include "Madgine_Tools/inject/injectortool.h"
+#include "Madgine_Tools/inspector/functiontool.h"
+#include "Madgine_Tools/inspector/inspector.h"
+#include "Madgine_Tools/logviewer/logviewer.h"
+#include "Madgine_Tools/metrics/metrics.h"
+#include "Madgine_Tools/profiler/profiler.h"
+#include "Madgine_Tools/renderer/imguidemo.h"
+#include "Madgine_Tools/testtool/testtool.h"
+#include "Madgine_Tools/toolscollector.h"
+#endif
+#if defined(BUILD_Tools) && defined(BUILD_ResourcesTools)
+#include "Madgine_Tools/resourcestoolconfig.h"
+#endif
+#if defined(BUILD_Tools) && defined(BUILD_WidgetsTools)
+#include "Madgine_Tools/guieditor/guieditor.h"
+#endif
+#if defined(BUILD_OpenGLTools) && defined(BUILD_Tools)
+#include "OpenGL_Tools/opengltoolconfig.h"
+#endif
+#if defined(BUILD_NodeGraphTools) && defined(BUILD_Tools)
 #include "Madgine_Tools/nodegraph/nodegrapheditor.h"
 #endif
 #if defined(BUILD_Widgets) && defined(BUILD_Client)
@@ -142,14 +148,8 @@
 #include "Madgine_Tools/gamepad/gamepadviewer.h"
 #include "Madgine_Tools/imgui/projectmanager.h"
 #endif
-#if defined(BUILD_MeshLoader) && defined(BUILD_Resources)
-#include "meshloader.h"
-#endif
-#if defined(BUILD_NodeGraph) && defined(BUILD_ClientNodes)
-#include "Madgine/client/nodes/framebuffernode.h"
-#include "Madgine/client/nodes/gpubuffernode.h"
-#include "Madgine/client/nodes/meshrenderernode.h"
-#include "Madgine/client/nodes/rasterizernode.h"
+#if defined(BUILD_Tools) && defined(BUILD_ClientNodesTools)
+#include "Madgine/client/nodes/noderenderertester.h"
 #endif
 
 
@@ -615,10 +615,10 @@ std::vector<Engine::Tools::ToolsRegistry::F> Engine::Tools::ToolsRegistry::sComp
 #if defined(BUILD_Tools) && defined(BUILD_ClientTools)
 		createComponent<Engine::Tools::ProjectManager>,
 #endif
-#if defined(BUILD_Tools) && defined(BUILD_NodeGraphTools)
+#if defined(BUILD_NodeGraphTools) && defined(BUILD_Tools)
 		createComponent<Engine::Tools::NodeGraphEditor>,
 #endif
-#if defined(BUILD_Tools) && defined(BUILD_OpenGLTools)
+#if defined(BUILD_OpenGLTools) && defined(BUILD_Tools)
 		createComponent<Engine::Tools::OpenGLToolConfig>,
 #endif
 #if defined(BUILD_Tools) && defined(BUILD_ResourcesTools)
@@ -690,25 +690,25 @@ size_t component_index<Engine::Tools::ProjectManager>() { return CollectorBaseIn
 #        undef ACC
 #        define ACC CollectorBaseIndex_ToolBase_ClientTools + 2
 #endif
-#if defined(BUILD_Tools) && defined(BUILD_NodeGraphTools)
+#if defined(BUILD_NodeGraphTools) && defined(BUILD_Tools)
 constexpr size_t CollectorBaseIndex_ToolBase_NodeGraphTools = ACC;
 #endif
-#if defined(BUILD_Tools) && defined(BUILD_NodeGraphTools)
+#if defined(BUILD_NodeGraphTools) && defined(BUILD_Tools)
 template <>
 size_t component_index<Engine::Tools::NodeGraphEditor>() { return CollectorBaseIndex_ToolBase_NodeGraphTools + 0; }
 #endif
-#if defined(BUILD_Tools) && defined(BUILD_NodeGraphTools)
+#if defined(BUILD_NodeGraphTools) && defined(BUILD_Tools)
 #        undef ACC
 #        define ACC CollectorBaseIndex_ToolBase_NodeGraphTools + 1
 #endif
-#if defined(BUILD_Tools) && defined(BUILD_OpenGLTools)
+#if defined(BUILD_OpenGLTools) && defined(BUILD_Tools)
 constexpr size_t CollectorBaseIndex_ToolBase_OpenGLTools = ACC;
 #endif
-#if defined(BUILD_Tools) && defined(BUILD_OpenGLTools)
+#if defined(BUILD_OpenGLTools) && defined(BUILD_Tools)
 template <>
 size_t component_index<Engine::Tools::OpenGLToolConfig>() { return CollectorBaseIndex_ToolBase_OpenGLTools + 0; }
 #endif
-#if defined(BUILD_Tools) && defined(BUILD_OpenGLTools)
+#if defined(BUILD_OpenGLTools) && defined(BUILD_Tools)
 #        undef ACC
 #        define ACC CollectorBaseIndex_ToolBase_OpenGLTools + 1
 #endif
