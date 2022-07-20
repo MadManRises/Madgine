@@ -2,7 +2,7 @@
 
 #include "Meta/math/vector2i.h"
 
-#include "Madgine/textureloader/texture.h"
+#include "Madgine/render/texture.h"
 
 #include "Generic/bytebuffer.h"
 

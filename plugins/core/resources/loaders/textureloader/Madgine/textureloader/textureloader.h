@@ -4,7 +4,7 @@
 
 #include "Modules/threading/workgroupstorage.h"
 
-#include "texture.h"
+#include "Madgine/render/texture.h"
 
 #include "Madgine/render/texturedescriptor.h"
 

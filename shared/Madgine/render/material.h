@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Meta/math/vector4.h"
-#include "Madgine/textureloader/texture.h"
+#include "texture.h"
 
 namespace Engine {
 namespace Render {

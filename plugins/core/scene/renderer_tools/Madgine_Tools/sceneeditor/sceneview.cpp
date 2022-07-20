@@ -27,7 +27,7 @@
 
 #include "Madgine/scene/entity/components/mesh.h"
 
-#include "Madgine/textureloader/texture.h"
+#include "Madgine/render/texture.h"
 
 #include "Meta/math/transformation.h"
 
