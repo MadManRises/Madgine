@@ -27,9 +27,6 @@ add_subdirectory(base64)
 
 add_subdirectory(ini)
 
-add_subdirectory(stb)
-set_target_properties(stb PROPERTIES EXCLUDE_FROM_ALL TRUE)
-
 add_subdirectory(Madgine)
 
 ######################## Static Libs #################

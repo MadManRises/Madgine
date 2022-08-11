@@ -17,12 +17,9 @@
 #include "image.h"
 #include "label.h"
 #include "scenewindow.h"
-#include "tabwidget.h"
 #include "textbox.h"
 
 #include "Madgine/imageloader/imagedata.h"
-
-#include "vertex.h"
 
 #include "Madgine/window/mainwindow.h"
 
@@ -55,6 +52,9 @@ SERIALIZETABLE_END(Engine::Widgets::WidgetManager)
 
 namespace Engine {
 namespace Widgets {
+
+    static float sDragDistanceThreshold = 2.0f;
+    static std::chrono::steady_clock::duration sDragTimeThreshold = 150ms;
 
     struct WidgetManager::WidgetManagerData {
 
@@ -142,26 +142,25 @@ namespace Widgets {
     }
 
     template <typename WidgetType>
-    std::unique_ptr<WidgetType> WidgetManager::create(const std::string &name, WidgetBase *parent)
+    std::unique_ptr<WidgetType> WidgetManager::create(WidgetBase *parent)
     {
-        return std::make_unique<WidgetType>(name, *this, parent);
+        return std::make_unique<WidgetType>(*this, parent);
     }
 
-    template std::unique_ptr<WidgetBase> WidgetManager::create<WidgetBase>(const std::string &, WidgetBase *);
-    template std::unique_ptr<Bar> WidgetManager::create<Bar>(const std::string &, WidgetBase *);
-    template std::unique_ptr<Checkbox> WidgetManager::create<Checkbox>(const std::string &, WidgetBase *);
-    template std::unique_ptr<Label> WidgetManager::create<Label>(const std::string &, WidgetBase *);
-    template std::unique_ptr<TabWidget> WidgetManager::create<TabWidget>(const std::string &, WidgetBase *);
-    template std::unique_ptr<Button> WidgetManager::create<Button>(const std::string &, WidgetBase *);
-    template std::unique_ptr<Combobox> WidgetManager::create<Combobox>(const std::string &, WidgetBase *);
-    template std::unique_ptr<Textbox> WidgetManager::create<Textbox>(const std::string &, WidgetBase *);
-    template std::unique_ptr<SceneWindow> WidgetManager::create<SceneWindow>(const std::string &, WidgetBase *);
-    template std::unique_ptr<Image> WidgetManager::create<Image>(const std::string &, WidgetBase *);
+    template std::unique_ptr<WidgetBase> WidgetManager::create<WidgetBase>(WidgetBase *);
+    template std::unique_ptr<Bar> WidgetManager::create<Bar>(WidgetBase *);
+    template std::unique_ptr<Checkbox> WidgetManager::create<Checkbox>(WidgetBase *);
+    template std::unique_ptr<Label> WidgetManager::create<Label>(WidgetBase *);
+    template std::unique_ptr<Button> WidgetManager::create<Button>(WidgetBase *);
+    template std::unique_ptr<Combobox> WidgetManager::create<Combobox>(WidgetBase *);
+    template std::unique_ptr<Textbox> WidgetManager::create<Textbox>(WidgetBase *);
+    template std::unique_ptr<SceneWindow> WidgetManager::create<SceneWindow>(WidgetBase *);
+    template std::unique_ptr<Image> WidgetManager::create<Image>(WidgetBase *);
 
     template <typename WidgetType>
-    WidgetType *WidgetManager::createTopLevel(const std::string &name)
+    WidgetType *WidgetManager::createTopLevel()
     {
-        std::unique_ptr<WidgetType> p = create<WidgetType>(name);
+        std::unique_ptr<WidgetType> p = create<WidgetType>();
         WidgetType *w = p.get();
         w->hide();
         w->updateGeometry(mClientSpace);
@@ -169,32 +168,30 @@ namespace Widgets {
         return w;
     }
 
-    template DLL_EXPORT WidgetBase *WidgetManager::createTopLevel<WidgetBase>(const std::string &);
+    template DLL_EXPORT WidgetBase *WidgetManager::createTopLevel<WidgetBase>();
 
-    std::unique_ptr<WidgetBase> WidgetManager::createWidgetClass(const std::string &name, WidgetClass _class, WidgetBase *parent)
+    std::unique_ptr<WidgetBase> WidgetManager::createWidgetByClass(WidgetClass _class, WidgetBase *parent)
     {
         std::unique_ptr<WidgetBase> w = [=]() -> std::unique_ptr<WidgetBase> {
             switch (_class) {
             case WidgetClass::WIDGET:
-                return create<WidgetBase>(name, parent);
+                return create<WidgetBase>(parent);
             case WidgetClass::BAR:
-                return create<Bar>(name, parent);
+                return create<Bar>(parent);
             case WidgetClass::CHECKBOX:
-                return create<Checkbox>(name, parent);
+                return create<Checkbox>(parent);
             case WidgetClass::LABEL:
-                return create<Label>(name, parent);
-            case WidgetClass::TABWIDGET:
-                return create<TabWidget>(name, parent);
+                return create<Label>(parent);
             case WidgetClass::BUTTON:
-                return create<Button>(name, parent);
+                return create<Button>(parent);
             case WidgetClass::COMBOBOX:
-                return create<Combobox>(name, parent);
+                return create<Combobox>(parent);
             case WidgetClass::TEXTBOX:
-                return create<Textbox>(name, parent);
+                return create<Textbox>(parent);
             case WidgetClass::SCENEWINDOW:
-                return create<SceneWindow>(name, parent);
+                return create<SceneWindow>(parent);
             case WidgetClass::IMAGE:
-                return create<Image>(name, parent);
+                return create<Image>(parent);
             default:
                 std::terminate();
             }
@@ -208,53 +205,70 @@ namespace Widgets {
 
     Serialize::StreamResult WidgetManager::readWidget(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget)
     {
-        STREAM_PROPAGATE_ERROR(in.beginExtendedRead("Widget", 2));
-        std::string name;
+        STREAM_PROPAGATE_ERROR(in.beginExtendedRead("Widget", 1));
         WidgetClass _class;
-        STREAM_PROPAGATE_ERROR(read(in, name, "name"));
         STREAM_PROPAGATE_ERROR(read(in, _class, "type"));
 
-        widget = createWidgetClass(name, _class);
+        widget = createWidgetByClass(_class);
         return {};
     }
 
     const char *WidgetManager::writeWidget(Serialize::FormattedSerializeStream &out, const std::unique_ptr<WidgetBase> &widget) const
     {
-        out.beginExtendedWrite("Widget", 2);
-        write(out, widget->getName(), "name");
+        out.beginExtendedWrite("Widget", 1);
         write(out, widget->getClass(), "type");
 
         return "Widget";
     }
 
-    bool WidgetManager::propagateInput(WidgetBase *w, const Input::PointerEventArgs &arg, bool (WidgetBase::*f)(const Input::PointerEventArgs &))
+    WidgetBase *WidgetManager::propagateInput(WidgetBase *w, const Input::PointerEventArgs &arg)
     {
         if (!w->mVisible)
-            return false;
+            return nullptr;
 
         if (!w->containsPoint(Vector2 { static_cast<float>(arg.windowPosition.x), static_cast<float>(arg.windowPosition.y) }, { { 0, 0 }, mClientSpace.mSize }))
-            return false;
+            return nullptr;
 
         for (WidgetBase *c : w->children()) {
-            if (propagateInput(c, arg, f))
-                return true;
+            if (WidgetBase *target = propagateInput(c, arg))
+                return target;
         }
-        return (w->*f)(arg);
+        return /*passthrough ? nullptr : */ w;
     }
 
     bool WidgetManager::injectPointerPress(const Input::PointerEventArgs &arg)
     {
+        assert(mDragStartEvent.button != arg.button);
+        if (mDragStartEvent.button != Input::MouseButton::NO_BUTTON)
+            return true;
+
         Input::PointerEventArgs widgetArg = arg;
         widgetArg.windowPosition = { widgetArg.windowPosition.x - mClientSpace.mTopLeft.x, widgetArg.windowPosition.y - mClientSpace.mTopLeft.y };
 
+        WidgetBase *target = nullptr;
+
         for (WidgetBase *modalWidget : mModalWidgetList) {
-            if (propagateInput(modalWidget, widgetArg, &WidgetBase::injectPointerPress))
-                return true;
+            target = propagateInput(modalWidget, widgetArg);
+            if (target)
+                break;
         }
 
-        for (WidgetBase *w : uniquePtrToPtr(mTopLevelWidgets)) {
-            if (propagateInput(w, widgetArg, &WidgetBase::injectPointerPress))
-                return true;
+        if (!target) {
+            for (WidgetBase *w : uniquePtrToPtr(mTopLevelWidgets)) {
+                target = propagateInput(w, widgetArg);
+                if (target)
+                    break;
+            }
+        }
+
+        if (target) {
+            mFocusedWidget = target;
+
+            mDragStartEvent = arg;
+
+            mDragStartTime = std::chrono::steady_clock::now();
+
+            return true;
         }
 
         return false;
@@ -270,7 +284,7 @@ namespace Widgets {
             }
         }
 
-        WidgetBase *w = mHoveredWidget;
+        WidgetBase *w = mFocusedWidget;
         while (w) {
             if (w->injectKeyPress(arg))
                 return true;
@@ -285,17 +299,21 @@ namespace Widgets {
         Input::PointerEventArgs widgetArg = arg;
         widgetArg.windowPosition = { widgetArg.windowPosition.x - mClientSpace.mTopLeft.x, widgetArg.windowPosition.y - mClientSpace.mTopLeft.y };
 
-        for (WidgetBase *modalWidget : mModalWidgetList) {
-            if (propagateInput(modalWidget, widgetArg, &WidgetBase::injectPointerRelease))
-                return true;
+        if (mDragStartEvent.button != arg.button)
+            return false;
+
+        assert(mFocusedWidget);
+
+        if (mDragging) {
+            mFocusedWidget->injectDragEnd(widgetArg);
+            mDragging = false;
+        } else {
+            mFocusedWidget->injectPointerClick(widgetArg);
         }
 
-        for (WidgetBase *w : uniquePtrToPtr(mTopLevelWidgets)) {
-            if (propagateInput(w, widgetArg, &WidgetBase::injectPointerRelease))
-                return true;
-        }
+        mDragStartEvent.button = Input::MouseButton::NO_BUTTON;
 
-        return false;
+        return true;
     }
 
     WidgetBase *WidgetManager::getHoveredWidgetUp(const Vector2 &pos, WidgetBase *current)
@@ -337,11 +355,29 @@ namespace Widgets {
 
     bool WidgetManager::injectPointerMove(const Input::PointerEventArgs &arg)
     {
-        if (std::ranges::find(mWidgets, mHoveredWidget, projectionPairSecond) == mWidgets.end())
+        if (std::ranges::find(mWidgets, mHoveredWidget) == mWidgets.end())
             mHoveredWidget = nullptr;
 
         Input::PointerEventArgs widgetArg = arg;
         widgetArg.windowPosition = { widgetArg.windowPosition.x - mClientSpace.mTopLeft.x, widgetArg.windowPosition.y - mClientSpace.mTopLeft.y };
+
+        if (mDragStartEvent.button != Input::MouseButton::NO_BUTTON) {
+
+            if (!mDragging) {
+                InterfacesVector dist = arg.screenPosition - mDragStartEvent.screenPosition;
+                if (std::abs(dist.x) + std::abs(dist.y) > sDragDistanceThreshold && std::chrono::steady_clock::now() - mDragStartTime > sDragTimeThreshold) {
+
+                    mFocusedWidget->injectDragBegin(mDragStartEvent);
+                    mDragging = true;
+                }
+            }
+
+            if (mDragging) {
+                mFocusedWidget->injectDragMove(widgetArg);
+            }
+
+            return false;
+        }
 
         WidgetBase *hoveredWidget = getHoveredWidget(Vector2 { static_cast<float>(widgetArg.windowPosition.x), static_cast<float>(widgetArg.windowPosition.y) }, mHoveredWidget);
 
@@ -364,7 +400,7 @@ namespace Widgets {
 
     bool WidgetManager::injectAxisEvent(const Input::AxisEventArgs &arg)
     {
-        if (std::ranges::find(mWidgets, mHoveredWidget, projectionPairSecond) == mWidgets.end())
+        if (std::ranges::find(mWidgets, mHoveredWidget) == mWidgets.end())
             mHoveredWidget = nullptr;
 
         if (mHoveredWidget)
@@ -406,38 +442,29 @@ namespace Widgets {
         return mHoveredWidget;
     }
 
+    WidgetBase *Engine::Widgets::WidgetManager::focusedWidget()
+    {
+        return mFocusedWidget;
+    }
+
     WidgetBase *WidgetManager::getWidget(std::string_view name)
     {
-        auto it = mWidgets.find(name);
+        auto it = std::ranges::find(mWidgets, name, &WidgetBase::mName);
         if (it == mWidgets.end())
             return nullptr;
-        return it->second;
+        return *it;
     }
 
     void WidgetManager::registerWidget(WidgetBase *w)
     {
-        if (!w->getName().empty()) {
-            mWidgets.try_emplace(w->getName(), w);
-        }
-    }
-
-    void WidgetManager::updateWidget(WidgetBase *w, const std::string &newName)
-    {
-        unregisterWidget(w);
-        if (!newName.empty()) {
-            mWidgets.try_emplace(newName, w);
-        }
+        auto pib = mWidgets.insert(w);
+        assert(pib.second);
     }
 
     void WidgetManager::unregisterWidget(WidgetBase *w)
     {
-        if (!w->getName().empty()) {
-            auto it = mWidgets.find(w->getName());
-            assert(it != mWidgets.end());
-            if (it->second == w) {
-                mWidgets.erase(it);
-            }
-        }
+        auto count = mWidgets.erase(w);
+        assert(count == 1);
     }
 
     void WidgetManager::swapCurrentRoot(WidgetBase *newRoot)
@@ -499,77 +526,38 @@ namespace Widgets {
 
         std::map<TextureSettings, std::vector<Vertex>> vertices;
 
-        std::queue<Widgets::WidgetBase *> q;
-        for (Widgets::WidgetBase *w : widgets()) {
-            if (w->mVisible) {
-                q.push(w);
-            }
-        }
-        while (!q.empty()) {
-
-            Widgets::WidgetBase *w = q.front();
-            q.pop();
-
-            for (Widgets::WidgetBase *c : w->children()) {
-                if (c->mVisible)
-                    q.push(c);
-            }
+        for (Widgets::WidgetBase *w : visibleWidgets()) {
 
             std::vector<std::pair<std::vector<Vertex>, TextureSettings>> localVerticesList = w->vertices(Vector3 { Vector2 { screenSpace.mSize }, 1.0f });
 
-            Resources::ImageLoader::Resource *resource = w->resource();
-            auto it = mData->mUIAtlasEntries.find(resource);
-            if (it == mData->mUIAtlasEntries.end()) {
-                Resources::ImageLoader::Handle data = resource ? resource->loadData() : mData->mDefaultTexture;
-                if (!data.available()) {
-                    mData->mImageLoadingTasks.emplace(std::move(data));
-                    continue;
-                } else {
-                    it = mData->mUIAtlasEntries.try_emplace(resource, mData->mUIAtlas.insert({ data->mWidth, data->mHeight }, [this]() { mData->expandUIAtlas(); })).first;
-                    mData->mUIAtlasTexture.setSubData({ it->second.mArea.mTopLeft.x, it->second.mArea.mTopLeft.y }, it->second.mArea.mSize, { data->mBuffer, static_cast<size_t>(data->mWidth * data->mHeight) });
-                    mData->mImageLoadingTasks.erase(data);
-                }
-            }
-
-            for (std::pair<std::vector<Vertex>, TextureSettings> &localVertices : localVerticesList) {
-                if (!localVertices.second.mTexture.mTextureHandle) {
-                    std::ranges::transform(localVertices.first, std::back_inserter(vertices[localVertices.second]), [&](const Vertex &v) {
-                        return Vertex {
-                            v.mPos,
-                            v.mColor,
-                            { (it->second.mArea.mSize.x / (2048.f * mData->mUIAtlasSize)) * v.mUV.x + it->second.mArea.mTopLeft.x / (2048.f * mData->mUIAtlasSize),
-                                (it->second.mArea.mSize.y / (2048.f * mData->mUIAtlasSize)) * v.mUV.y + it->second.mArea.mTopLeft.y / (2048.f * mData->mUIAtlasSize) }
-                        };
-                    });
-                } else {
-                    std::move(localVertices.first.begin(), localVertices.first.end(), std::back_inserter(vertices[localVertices.second]));
-                }
+            for (auto &[localVertices, tex] : localVerticesList) {
+                if (!localVertices.empty())
+                    std::ranges::move(localVertices, std::back_inserter(vertices[tex]));
             }
         }
 
-        for (std::pair<const TextureSettings, std::vector<Vertex>> &p : vertices) {
-            if (!p.second.empty()) {
+        for (auto &[tex, vertices] : vertices) {
+            assert(!vertices.empty());
 
-                {
-                    auto parameters = mData->mPipeline.mapParameters<WidgetsPerObject>(2);
-                    parameters->hasDistanceField = bool(p.first.mFlags & TextureFlag_IsDistanceField);
-                }
-
-                if (p.first.mTexture.mTextureHandle)
-                    target->bindTextures({ p.first.mTexture });
-                else
-                    target->bindTextures({ { mData->mUIAtlasTexture->mTextureHandle, Render::TextureType_2D } });
-
-                mData->mMesh.update({ 3, std::move(p.second) });
-
-                target->renderMesh(mData->mMesh, mData->mPipeline);
+            {
+                auto parameters = mData->mPipeline.mapParameters<WidgetsPerObject>(2);
+                parameters->hasDistanceField = bool(tex.mFlags & TextureFlag_IsDistanceField);
             }
+
+            if (tex.mTexture.mTextureHandle)
+                target->bindTextures({ tex.mTexture });
+            else
+                target->bindTextures({ { mData->mUIAtlasTexture->mTextureHandle, Render::TextureType_2D } });
+
+            mData->mMesh.update({ 3, std::move(vertices) });
+
+            target->renderMesh(mData->mMesh, mData->mPipeline);
         }
 
         target->popAnnotation();
     }
 
-    void WidgetManager::preRender()
+    Generator<WidgetBase *> WidgetManager::visibleWidgets()
     {
         std::queue<Widgets::WidgetBase *> q;
         for (Widgets::WidgetBase *w : widgets()) {
@@ -586,6 +574,13 @@ namespace Widgets {
                     q.push(c);
             }
 
+            co_yield w;
+        }
+    }
+
+    void WidgetManager::preRender()
+    {
+        for (WidgetBase *w : visibleWidgets()) {
             w->preRender();
         }
     }
@@ -611,6 +606,24 @@ namespace Widgets {
             openStartupWidget();
             mUpdatedSignal.emit();
         }
+    }
+
+    const Atlas2::Entry *WidgetManager::lookUpImage(Resources::ImageLoader::Resource *image)
+    {
+        auto it = mData->mUIAtlasEntries.find(image);
+        if (it == mData->mUIAtlasEntries.end()) {
+            Resources::ImageLoader::Handle data = image ? image->loadData() : mData->mDefaultTexture;
+            if (!data.available()) {
+                mData->mImageLoadingTasks.emplace(std::move(data));
+                return nullptr;
+            } else {
+                Atlas2::Entry entry = mData->mUIAtlas.insert(data->mSize, [this]() { mData->expandUIAtlas(); });
+                it = mData->mUIAtlasEntries.try_emplace(image, entry).first;
+                mData->mUIAtlasTexture.setSubData(entry.mArea.mTopLeft, entry.mArea.mSize, data->mBuffer);
+                mData->mImageLoadingTasks.erase(data);
+            }
+        }
+        return &it->second;
     }
 
 }

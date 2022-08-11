@@ -165,7 +165,7 @@ namespace Serialize {
                 },
                 [](const SerializableDataUnit *_unit, FormattedSerializeStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
                     const Unit *unit = static_cast<const Unit *>(_unit);
-                    write<T, Configs...>(out, unit->*P, name, CallerHierarchyPtr { hierarchy.append(unit) });
+                    write<T, Configs...>(out, std::invoke(P, unit), name, CallerHierarchyPtr { hierarchy.append(unit) });
                 },
                 [](SerializableDataUnit *_unit, FormattedSerializeStream &in, const char *name, CallerHierarchyBasePtr hierarchy) -> StreamResult {
                     Unit *unit = static_cast<Unit *>(_unit);

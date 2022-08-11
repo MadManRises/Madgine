@@ -31,7 +31,7 @@ namespace ClickBrick {
     {
         Engine::Input::GuiHandlerBase::setWidget(w);
         if (widget()) {
-            widget()->pointerUpEvent().connect(&GameOverHandler::restartGame, this, &mConStore);
+            widget()->pointerClickEvent().connect(&GameOverHandler::restartGame, this, &mConStore);
             mScoreLabel = widget()->getChildRecursive<Engine::Widgets::Label>("ScoreLabel");
         } else {
             mScoreLabel = nullptr;

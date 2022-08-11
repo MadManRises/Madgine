@@ -13,12 +13,15 @@ SERIALIZETABLE_END(Engine::Widgets::Bar)
 
 namespace Engine {
 namespace Widgets {
+
     void Bar::setRatio(float f)
     {
     }
+
     WidgetClass Bar::getClass() const
     {
         return WidgetClass::BAR;
     }
+
 }
 }

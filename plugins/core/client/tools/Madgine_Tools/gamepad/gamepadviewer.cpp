@@ -14,6 +14,7 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
+#include "imgui/imguiaddons.h"
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::GamepadViewer, Engine::Tools::ToolBase)
 SERIALIZETABLE_END(Engine::Tools::GamepadViewer)
@@ -48,7 +49,7 @@ namespace Tools {
 
     void GamepadViewer::render()
     {
-        if (ImGui::Begin("GamepadViewer", &mVisible)) {
+        if (ImGui::Begin("GamepadViewer", &mVisible)) {            
 
             const ImGuiStyle &Style = ImGui::GetStyle();
             ImDrawList *DrawList = ImGui::GetWindowDrawList();

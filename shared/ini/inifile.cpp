@@ -46,7 +46,7 @@ namespace Ini {
         while (std::getline(stream.stream(), line)) {
             if (!StringUtil::startsWith(line, "[") || !StringUtil::endsWith(line, "]"))
                 std::terminate();
-            std::string sectionName = line.substr(1, line.size() - 2);
+            std::string sectionName { StringUtil::substr(line, 1, -1) };
             auto pib = mSections.try_emplace(sectionName);
             if (!pib.second) {
                 LOG_WARNING("Ini-File '" << path.c_str() << "' contains section '" << sectionName << "' twice. Second instance is ignored!");

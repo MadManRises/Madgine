@@ -35,29 +35,29 @@ namespace ImGui {
 
 static Engine::Threading::WorkgroupLocal<ImVector<ImRect>> sGroupPanelLabelStack;
 
+static Engine::Threading::WorkgroupLocal<FilesystemPickerOptions> sFilesystemPickerOptions;
+
 static ValueTypePayload sPayload;
 
-void LabeledText(const char *label, const char *text, ...)
+void LabeledText(const char *label, std::string_view text)
 {
     int columns = GetColumnsCount();
     assert(columns == 1 || columns == 2);
-    va_list args;
-    va_start(args, text);
 
     if (columns == 1) {
         if (strlen(label)) {
-            ImGui::LabelTextV(label, text, args);
+            //ImGui::LabelTextV(label, text);
+            throw 0;
         } else {
-            ImGui::TextV(text, args);
+            ImGui::Text(text);
         }
     } else {
         if (strlen(label))
             ImGui::Text("%s", label);
         ImGui::NextColumn();
-        ImGui::TextV(text, args);
+        ImGui::Text(text);
         ImGui::NextColumn();
     }
-    va_end(args);
 }
 
 bool ValueTypeDrawer::draw(Engine::TypedScopePtr &scope)
@@ -79,9 +79,9 @@ bool ValueTypeDrawer::draw(bool &b)
 
 bool ValueTypeDrawer::draw(const bool &b)
 {
-    PushDisabled();
+    BeginDisabled();
     Col(LIFT(Checkbox), mName, const_cast<bool *>(&b));
-    PopDisabled();
+    EndDisabled();
     return false;
 }
 
@@ -92,7 +92,7 @@ bool ValueTypeDrawer::draw(Engine::CoWString &s)
 
 bool ValueTypeDrawer::draw(const Engine::CoWString &s)
 {
-    LabeledText(mName, "\"%.*s\"", static_cast<int>(s.size()), s.data());
+    LabeledText(mName, s);
     return false;
 }
 
@@ -104,10 +104,10 @@ bool ValueTypeDrawer::draw(int &i)
 
 bool ValueTypeDrawer::draw(const int &i)
 {
-    PushDisabled();
+    BeginDisabled();
     PushItemWidth(100);
     Col(LIFT(DragInt), mName, const_cast<int *>(&i));
-    PopDisabled();
+    EndDisabled();
     return false;
 }
 
@@ -119,10 +119,10 @@ bool ValueTypeDrawer::draw(uint64_t &i)
 
 bool ValueTypeDrawer::draw(const uint64_t &i)
 {
-    PushDisabled();
+    BeginDisabled();
     PushItemWidth(100);
     Col(LIFT(DragScalar), mName, ImGuiDataType_U64, const_cast<uint64_t *>(&i), 1.0f);
-    PopDisabled();
+    EndDisabled();
     return false;
 }
 
@@ -134,10 +134,10 @@ bool ValueTypeDrawer::draw(float &f)
 
 bool ValueTypeDrawer::draw(const float &f)
 {
-    PushDisabled();
+    BeginDisabled();
     PushItemWidth(100);
     Col(LIFT(DragFloat), mName, const_cast<float *>(&f), 0.15f);
-    PopDisabled();
+    EndDisabled();
     return false;
 }
 
@@ -148,9 +148,9 @@ bool ValueTypeDrawer::draw(Engine::Matrix3 &m)
 
 bool ValueTypeDrawer::draw(const Engine::Matrix3 &m)
 {
-    PushDisabled();
+    BeginDisabled();
     Col(LIFT(DragMatrix3), mName, const_cast<Engine::Matrix3 *>(&m), 0.15f);
-    PopDisabled();
+    EndDisabled();
     return false;
 }
 
@@ -171,9 +171,9 @@ bool ValueTypeDrawer::draw(Engine::Matrix4 &m)
 
 bool ValueTypeDrawer::draw(const Engine::Matrix4 &m)
 {
-    PushDisabled();
+    BeginDisabled();
     Col(LIFT(DragMatrix4), mName, const_cast<Engine::Matrix4 *>(&m), 0.15f);
-    PopDisabled();
+    EndDisabled();
     return false;
 }
 
@@ -195,10 +195,10 @@ bool ValueTypeDrawer::draw(Engine::Vector2 &v)
 
 bool ValueTypeDrawer::draw(const Engine::Vector2 &v)
 {
-    PushDisabled();
+    BeginDisabled();
     PushItemWidth(100);
     Col(LIFT(DragFloat2), mName, const_cast<float *>(v.ptr()), 0.15f);
-    PopDisabled();
+    EndDisabled();
     return false;
 }
 
@@ -210,10 +210,10 @@ bool ValueTypeDrawer::draw(Engine::Vector3 &v)
 
 bool ValueTypeDrawer::draw(const Engine::Vector3 &v)
 {
-    PushDisabled();
+    BeginDisabled();
     PushItemWidth(100);
     Col(LIFT(DragFloat3), mName, const_cast<float *>(v.ptr()), 0.15f);
-    PopDisabled();
+    EndDisabled();
     return false;
 }
 
@@ -225,10 +225,10 @@ bool ValueTypeDrawer::draw(Engine::Vector4 &v)
 
 bool ValueTypeDrawer::draw(const Engine::Vector4 &v)
 {
-    PushDisabled();
+    BeginDisabled();
     PushItemWidth(100);
     Col(LIFT(DragFloat4), mName, const_cast<float *>(v.ptr()), 0.15f);
-    PopDisabled();
+    EndDisabled();
     return false;
 }
 
@@ -240,10 +240,10 @@ bool ValueTypeDrawer::draw(Engine::Vector2i &v)
 
 bool ValueTypeDrawer::draw(const Engine::Vector2i &v)
 {
-    PushDisabled();
+    BeginDisabled();
     PushItemWidth(100);
     Col(LIFT(DragInt2), mName, const_cast<int *>(v.ptr()));
-    PopDisabled();
+    EndDisabled();
     return false;
 }
 
@@ -255,10 +255,10 @@ bool ValueTypeDrawer::draw(Engine::Vector3i &v)
 
 bool ValueTypeDrawer::draw(const Engine::Vector3i &v)
 {
-    PushDisabled();
+    BeginDisabled();
     PushItemWidth(100);
     Col(LIFT(DragInt3), mName, const_cast<int *>(v.ptr()));
-    PopDisabled();
+    EndDisabled();
     return false;
 }
 
@@ -270,10 +270,10 @@ bool ValueTypeDrawer::draw(Engine::Vector4i &v)
 
 bool ValueTypeDrawer::draw(const Engine::Vector4i &v)
 {
-    PushDisabled();
+    BeginDisabled();
     PushItemWidth(100);
     Col(LIFT(DragInt4), mName, const_cast<int *>(v.ptr()));
-    PopDisabled();
+    EndDisabled();
     return false;
 }
 
@@ -380,13 +380,13 @@ bool ValueTypeDrawer::draw(const Engine::ObjectPtr &o)
 
 bool ValueTypeDrawer::draw(Engine::Filesystem::Path &p)
 {
-    LabeledText(mName, p.c_str());
+    LabeledText(mName, p);
     return false;
 }
 
 bool ValueTypeDrawer::draw(const Engine::Filesystem::Path &p)
 {
-    LabeledText(mName, p.c_str());
+    LabeledText(mName, p);
     return false;
 }
 
@@ -414,8 +414,7 @@ bool ValueTypeDrawer::draw(Engine::EnumHolder &e)
 
 bool ValueTypeDrawer::draw(const Engine::EnumHolder &e)
 {
-    std::string_view name = e.toString();
-    LabeledText(mName, "\"%.*s\"", static_cast<int>(name.size()), name.data());
+    LabeledText(mName, e.toString());
     return false;
 }
 
@@ -430,39 +429,52 @@ void Text(std::string_view s)
     TextUnformatted(s.data(), s.data() + s.size());
 }
 
-bool InputText(const char *label, std::string *s, ImGuiInputTextFlags flags)
-{
-    char buf[255];
-#if WINDOWS
-    strcpy_s(buf, sizeof(buf), s->c_str());
-#else
-    strcpy(buf, s->c_str());
-#endif
+template <typename S>
+struct InputTextCallback_UserData {
+    S &mString;
+    ImGuiInputTextCallback mChainCallback = nullptr;
+    void *mChainCallbackUserData = nullptr;
+};
 
-    bool result = ImGui::InputText(label, buf, sizeof(buf), flags);
-    if (result || (flags & ImGuiInputTextFlags_EnterReturnsTrue)) {
-        *s = buf;
-        return result;
+template <typename S>
+static int InputTextCallback(ImGuiInputTextCallbackData *data)
+{
+    InputTextCallback_UserData<S> *user_data = (InputTextCallback_UserData<S> *)data->UserData;
+    if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
+        // Resize string callback
+        // If for some reason we refuse the new length (BufTextLen) and/or capacity (BufSize) we need to set them back to what we want.
+        S &str = user_data->mString;
+        IM_ASSERT(data->Buf == str.data());
+        str.resize(data->BufTextLen);
+        data->Buf = str.data();
+    } else if (user_data->mChainCallback) {
+        // Forward to user callback, if any
+        data->UserData = user_data->mChainCallbackUserData;
+        return user_data->mChainCallback(data);
     }
-    return false;
+    return 0;
 }
 
-bool InputText(const char *label, Engine::CoWString *s, ImGuiInputTextFlags flags)
+bool InputText(const char *label, std::string *s, ImGuiInputTextFlags flags, ImGuiInputTextCallback callback, void *user_data)
 {
-    char buf[255];
-#if WINDOWS
-    strncpy_s(buf, sizeof(buf), s->data(), s->size());
-#else
-    strncpy(buf, s->data(), s->size());
-#endif
+    InputTextCallback_UserData<std::string> cb {
+        *s,
+        callback,
+        user_data
+    };
 
-    bool result = ImGui::InputText(label, buf, sizeof(buf), flags);
+    return ImGui::InputText(label, s->data(), s->capacity() + 1, flags | ImGuiInputTextFlags_CallbackResize, &InputTextCallback<std::string>, &cb);
+}
 
-    if (result || (flags & ImGuiInputTextFlags_EnterReturnsTrue)) {
-        *s = std::string { buf };
-        return result;
-    }
-    return false;
+bool InputText(const char *label, Engine::CoWString *s, ImGuiInputTextFlags flags, ImGuiInputTextCallback callback, void *user_data)
+{
+    InputTextCallback_UserData<Engine::CoWString> cb {
+        *s,
+        callback,
+        user_data
+    };
+
+    return ImGui::InputText(label, s->data(), s->size() + 1, flags | ImGuiInputTextFlags_CallbackResize, &InputTextCallback<Engine::CoWString>, &cb);
 }
 
 template <typename T>
@@ -526,11 +538,13 @@ void BeginTreeArrow(const void *label, ImGuiTreeNodeFlags flags)
     ItemSize(ImVec2(label_size.x, frame_height), text_base_offset_y);
 
     if (!(flags & ImGuiTreeNodeFlags_Leaf)) {
-        ImGui::RenderArrow(ImVec2(style.FramePadding.x + frame_bb.Min.x, g.FontSize * 0.15f + text_base_offset_y + frame_bb.Min.y), *opened ? ImGuiDir_Down : ImGuiDir_Right, 0.70f);
-
         const ImRect interact_bb = ImRect(frame_bb.Min.x, frame_bb.Min.y, frame_bb.Min.x + style.ItemSpacing.x * 2, frame_bb.Max.y);
 
-        bool pressed = ImGui::ButtonBehavior(interact_bb, id, nullptr, nullptr);
+        bool hovered = false;
+
+        bool pressed = ImGui::ButtonBehavior(interact_bb, id, &hovered, nullptr, ImGuiButtonFlags_PressedOnClick);
+
+        ImGui::RenderArrow(window->DrawList, ImVec2(style.FramePadding.x + frame_bb.Min.x, g.FontSize * 0.15f + text_base_offset_y + frame_bb.Min.y), ImColor(255, 255, 255), *opened || hovered ? ImGuiDir_Down : ImGuiDir_Right, 0.70f);
 
         if (pressed)
             *opened = !*opened;
@@ -573,6 +587,30 @@ bool EndSpanningTreeNode()
     return EndTreeArrow();
 }
 
+bool TempInputText(const ImRect &bb, ImGuiID id, const char *label, std::string *s, ImGuiInputTextFlags flags)
+{
+    // On the first frame, g.TempInputTextId == 0, then on subsequent frames it becomes == id.
+    // We clear ActiveID on the first frame to allow the InputText() taking it back.
+    ImGuiContext &g = *GImGui;
+    const bool init = (g.TempInputId != id);
+    if (init)
+        ClearActiveID();
+
+    g.CurrentWindow->DC.CursorPos = bb.Min;
+
+    InputTextCallback_UserData<std::string> cb {
+        *s
+    };
+
+    bool value_changed = InputTextEx(label, NULL, s->data(), s->size() + 1, bb.GetSize(), flags | ImGuiInputTextFlags_MergedItem | ImGuiInputTextFlags_CallbackResize, &InputTextCallback<std::string>, &cb);
+    if (init) {
+        // First frame we started displaying the InputText widget, we expect it to take the active id.
+        IM_ASSERT(g.ActiveId == id);
+        g.TempInputId = g.ActiveId;
+    }
+    return value_changed;
+}
+
 bool EditableTreeNode(const void *id, std::string *s, ImGuiTreeNodeFlags flags)
 {
     ImGuiContext &g = *GImGui;
@@ -594,22 +632,16 @@ bool EditableTreeNode(const void *id, std::string *s, ImGuiTreeNodeFlags flags)
     if (temp_input_start)
         SetActiveID(inputId, window);
 
-    char buf[255];
-#if WINDOWS
-    strncpy_s(buf, sizeof(buf), s->data(), s->size());
-#else
-    strncpy(buf, s->data(), s->size());
-#endif
-
     if (temp_input_is_active || temp_input_start) {
         ImVec2 pos_after = window->DC.CursorPos;
         window->DC.CursorPos = pos_before;
 
-        if (TempInputText(window->DC.LastItemRect, inputId, "##Input", buf, sizeof(buf), ImGuiInputTextFlags_None))
-            *s = std::string { buf };
+        TempInputText(g.LastItemData.Rect, inputId, "##Input", s, ImGuiInputTextFlags_None);
+
+        ItemAdd(g.LastItemData.Rect, inputId);
         window->DC.CursorPos = pos_after;
     } else {
-        window->DrawList->AddText(pos_before, GetColorU32(ImGuiCol_Text), buf);
+        window->DrawList->AddText(pos_before, GetColorU32(ImGuiCol_Text), s->c_str());
     }
 
     return EndTreeArrow();
@@ -641,14 +673,15 @@ void RightAlignDuration(std::chrono::nanoseconds dur)
     }
 }
 
-void RightAlign(float size) {
+void RightAlign(float size)
+{
     ImGuiWindow *window = GetCurrentWindow();
     float avail = ImGui::GetWindowContentRegionWidth();
     //window->DC.CursorPos.x = window->Pos.x - window->Scroll.x + (avail - size) + window->DC.GroupOffset.x + window->DC.ColumnsOffset.x;
 }
 
 void RightAlignText(const char *s, ...)
-{    
+{
     char buffer[1024];
     va_list args;
 
@@ -683,10 +716,10 @@ bool DragMatrix3(const char *label, Engine::Matrix3 *m, float *v_speeds, bool *e
                 SameLine(0, g.Style.ItemInnerSpacing.x);
             }
             if (enabled && !enabled[3 * i + j])
-                PushDisabled();
+                BeginDisabled();
             value_changed |= DragFloat("", &(*m)[i][j], v_speeds[3 * i + j]);
             if (enabled && !enabled[3 * i + j])
-                PopDisabled();
+                EndDisabled();
             PopItemWidth();
             PopID();
         }
@@ -730,10 +763,10 @@ bool DragMatrix4(const char *label, Engine::Matrix4 *m, float *v_speeds, bool *e
         for (int j = 0; j < 4; ++j) {
             PushID(4 * i + j);
             if (enabled && !enabled[4 * i + j])
-                PushDisabled();
+                BeginDisabled();
             value_changed |= DragFloat("", &(*m)[i][j], v_speeds[4 * i + j]);
             if (enabled && !enabled[4 * i + j])
-                PopDisabled();
+                EndDisabled();
             PopItemWidth();
             PopID();
             if (j < 3) {
@@ -854,13 +887,13 @@ bool IsDraggableValueTypeBeingAccepted(const ValueTypePayload **payloadPointer)
         return false;
 
     ImGuiWindow *window = g.CurrentWindow;
-    if (!(window->DC.LastItemStatusFlags & ImGuiItemStatusFlags_HoveredRect))
+    if (!(g.LastItemData.StatusFlags & ImGuiItemStatusFlags_HoveredRect))
         return false;
     if (g.HoveredWindowUnderMovingWindow == NULL || window->RootWindow != g.HoveredWindowUnderMovingWindow->RootWindow)
         return false;
 
-    const ImRect &display_rect = (window->DC.LastItemStatusFlags & ImGuiItemStatusFlags_HasDisplayRect) ? window->DC.LastItemDisplayRect : window->DC.LastItemRect;
-    ImGuiID id = window->DC.LastItemId;
+    const ImRect &display_rect = (g.LastItemData.StatusFlags & ImGuiItemStatusFlags_HasDisplayRect) ? g.LastItemData.DisplayRect : g.LastItemData.Rect;
+    ImGuiID id = g.LastItemData.ID;
     if (id == 0)
         id = window->GetIDFromRectangle(display_rect);
     if (g.DragDropPayload.SourceId == id)
@@ -905,7 +938,7 @@ bool EndFilesystemPicker(bool valid, bool &accepted, bool openWrite = false, boo
     }
     ImGui::SameLine();
     if (!valid)
-        PushDisabled();
+        BeginDisabled();
     if (ImGui::Button(openWrite ? "Save" : "Open") || alreadyClicked) {
         if (!askForConfirmation) {
             accepted = true;
@@ -915,12 +948,12 @@ bool EndFilesystemPicker(bool valid, bool &accepted, bool openWrite = false, boo
         }
     }
     if (!valid)
-        PopDisabled();
+        EndDisabled();
 
     return closed;
 }
 
-bool DirectoryPicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *selection, bool &accepted)
+bool DirectoryPicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *selection, bool &accepted, const FilesystemPickerOptions *options)
 {
     BeginFilesystemPicker(path, selection);
 
@@ -945,7 +978,12 @@ bool DirectoryPicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *s
     return EndFilesystemPicker(true, accepted);
 }
 
-bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *selection, bool &accepted, bool openWrite)
+FilesystemPickerOptions *GetFilesystemPickerOptions()
+{
+    return &sFilesystemPickerOptions;
+}
+
+bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *selection, bool &accepted, bool openWrite, const FilesystemPickerOptions *options)
 {
     BeginFilesystemPicker(path, selection);
 
@@ -953,33 +991,59 @@ bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *select
     bool selectedIsDir = false;
     bool clicked = false;
 
-    if (ImGui::BeginChild("CurrentFolder", { 0.0f, -2 * ImGui::GetFrameHeightWithSpacing() })) {
+    if (ImGui::BeginTable("CurrentFolder", 1, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Hideable | ImGuiTableFlags_Resizable)) {
 
-        for (Engine::Filesystem::FileQueryResult result : Engine::Filesystem::listFilesAndDirs(*path)) {
+        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide);
+        //ImGui::TableSetupColumn("Total time");
+        //ImGui::TableSetupColumn("Rel. Time (parent)");
+        //ImGui::TableSetupColumn("Rel. Time (total)");
+        ImGui::TableSetupScrollFreeze(0, 1);
+        ImGui::TableHeadersRow();
 
-            bool selected = *selection == result.path();
+        struct File {
+            Engine::Filesystem::Path mPath;
+            bool mIsDir;
+        };
+        std::vector<File> files;
+
+        std::ranges::transform(Engine::Filesystem::listFilesAndDirs(*path), std::back_inserter(files), [](Engine::Filesystem::FileQueryResult result) { return File { result.path(), result.isDir() }; });
+
+        for (const File &file : files) {
+
+            ImGui::TableNextRow();
+
+            ImGui::TableNextColumn();
+
+            bool selected = *selection == file.mPath;
             if (selected) {
-                if (result.isDir())
+                if (file.mIsDir)
                     selectedIsDir = true;
                 else
                     selectedIsFile = true;
             }
 
-            if (ImGui::Selectable(result.path().filename().c_str(), selected)) {
-                *selection = result.path();
+            auto iconLookup = options && options->mIconLookup ? options->mIconLookup : sFilesystemPickerOptions->mIconLookup;
+
+            std::string name = file.mPath.filename();
+            if (iconLookup) {
+                name = iconLookup(file.mPath, file.mIsDir) + name;
+            }
+
+            if (ImGui::Selectable(name.c_str(), selected, ImGuiSelectableFlags_SpanAllColumns)) {
+                *selection = file.mPath;
             }
 
             if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
-                if (result.isDir()) {
-                    *path = result.path();
+                if (file.mIsDir) {
+                    *path = file.mPath;
                 } else {
-                    *selection = result.path();
+                    *selection = file.mPath;
                     clicked = true;
                 }
             }
         }
 
-        ImGui::EndChild();
+        ImGui::EndTable();
     }
 
     bool validPath = true;
@@ -1063,7 +1127,7 @@ void ImGui::BeginGroupPanel(const char *name, const ImVec2 &size)
 
     ImVec2 effectiveSize = size;
     if (size.x < 0.0f)
-        effectiveSize.x = ImGui::GetContentRegionAvailWidth();
+        effectiveSize.x = ImGui::GetContentRegionAvail().x;
     else
         effectiveSize.x = size.x;
     ImGui::Dummy(ImVec2(effectiveSize.x, 0.0f));
@@ -1211,6 +1275,85 @@ bool BeginPopupCompoundContextWindow(const char *str_id, ImGuiPopupFlags popup_f
     if (IsMouseReleased(mouse_button) && IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup))
         OpenPopupEx(id, popup_flags);
     return BeginPopupEx(id, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings);
+}
+
+bool IsNewWindow(const char *name)
+{
+    return FindWindowByName(name) == nullptr;
+}
+
+void SetWindowDockingDir(ImGuiID dockSpaceId, ImGuiDir dir, float ratio, bool outer, ImGuiCond cond)
+{
+    ImGuiWindow *window = GetCurrentWindow();
+
+    if (cond && (window->SetWindowDockAllowFlags & cond) == 0)
+        return;
+
+    window->SetWindowDockAllowFlags &= ~(ImGuiCond_Once | ImGuiCond_FirstUseEver | ImGuiCond_Appearing);
+
+    if (dir == ImGuiDir_Down || dir == ImGuiDir_Right)
+        ratio = 1.0f - ratio;
+
+    ImGuiDockNode *node;
+    ImGuiDockNode *centralNode = DockBuilderGetCentralNode(dockSpaceId);
+    bool dock = false;
+
+    ImGuiAxis axis = (dir == ImGuiDir_Left || dir == ImGuiDir_Right) ? ImGuiAxis_X : ImGuiAxis_Y;
+    int dirIndex = (dir == ImGuiDir_Left || dir == ImGuiDir_Up) ? 0 : 1;
+
+    if (outer) {
+        node = DockBuilderGetNode(dockSpaceId);
+        ImGuiDockNode *itNode = node;
+        while (itNode->IsSplitNode()) {
+            if (itNode->SplitAxis == axis) {
+                ImGuiDockNode *upNode = centralNode;
+                while (upNode && upNode->ParentNode != itNode->ChildNodes[0] && upNode->ParentNode != itNode->ChildNodes[1])
+                    upNode = upNode->ParentNode;
+                if (upNode) {
+                    int itDirIndex = upNode->ParentNode == itNode->ChildNodes[0] ? 1 : 0;
+                    if (itDirIndex == dirIndex) {
+                        if (!itNode->ChildNodes[dirIndex]->IsSplitNode()) {
+                            dir = ImGuiDir_None;
+                            node = itNode->ChildNodes[dirIndex];
+                            break;
+                        } else {
+                            break;
+                        }
+                    } else {
+                        itNode = itNode->ChildNodes[dirIndex];
+                    }
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+    } else {
+        node = centralNode;
+        ImGuiDockNode *itNode = node;
+        while (itNode->ParentNode) {
+            ImGuiDockNode *upNode = itNode->ParentNode;
+            if (upNode->SplitAxis == axis) {
+                int itDirIndex = itNode == upNode->ChildNodes[0] ? 1 : 0;
+                if (itDirIndex == dirIndex) {
+                    if (!upNode->ChildNodes[dirIndex]->IsSplitNode()) {
+                        dir = ImGuiDir_None;
+                        node = upNode->ChildNodes[dirIndex];
+                        break;
+                    } else {
+                        break;
+                    }
+                } else {
+                    itNode = upNode;
+                }
+            } else {
+                break;
+            }
+        }
+    }
+
+    DockContextQueueDock(GImGui, nullptr, node, window, dir, ratio, outer);
 }
 
 }

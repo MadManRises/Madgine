@@ -7,27 +7,21 @@ namespace Engine {
 DERIVE_FUNCTION(customScopePtr)
 
 struct META_EXPORT TypedScopePtr {
-private:
+
+    constexpr TypedScopePtr() = default;
+    
     template <typename T>
-    TypedScopePtr(T *t, std::true_type)
+    requires has_function_customScopePtr_v<T>
+    TypedScopePtr(T *t)
         : TypedScopePtr(t ? t->customScopePtr() : TypedScopePtr {nullptr, table<decayed_t<T>>})
     {
     }
 
     template <typename T>
-    TypedScopePtr(T *t, std::false_type)
+    requires (!has_function_customScopePtr_v<T>)
+    TypedScopePtr(T *t)
         : mScope(t)
         , mType(table<decayed_t<T>>)
-    {
-        static_assert(!InstanceOf<T, std::unique_ptr>);
-    }
-
-public:
-    constexpr TypedScopePtr() = default;
-
-    template <typename T>
-    TypedScopePtr(T *t)
-        : TypedScopePtr(t, has_function_customScopePtr<T> {})
     {
     }
 

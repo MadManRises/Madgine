@@ -32,12 +32,12 @@ struct Vector2i {
         return *this;
     }
 
-    constexpr Vector2i operator+(const Vector2i &other)
+    constexpr Vector2i operator+(const Vector2i &other) const
     {
         return { x + other.x, y + other.y };
     }
 
-    constexpr Vector2i operator-(const Vector2i &other)
+    constexpr Vector2i operator-(const Vector2i &other) const
     {
         return { x - other.x, y - other.y };
     }

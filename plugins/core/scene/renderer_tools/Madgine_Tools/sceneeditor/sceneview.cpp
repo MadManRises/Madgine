@@ -11,7 +11,6 @@
 #include "Meta/keyvalue/metatable_impl.h"
 
 #include "im3d/im3d.h"
-#include "im3d/im3d_internal.h"
 
 #include "sceneeditor.h"
 
@@ -99,6 +98,7 @@ namespace Tools {
     {
         bool open = true;
 
+        ImGui::SetNextWindowDockID(mEditor->root().dockSpaceId(), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowSizeConstraints({ 100, 100 }, { 1000000, 1000000 });
         if (ImGui::Begin(("SceneView##SceneView" + std::to_string(mIndex)).c_str(), &open)) {
 
@@ -111,10 +111,7 @@ namespace Tools {
             ImGuiIO &io = ImGui::GetIO();
             Im3DIO &io3D = Im3D::GetIO();
 
-            const Ray &ray = Im3D::GetCurrentContext()->mMouseRay;
-
-            if (mEditor->render3DCursor())
-                Im3D::Arrow3D(IM3D_LINES, 0.3f, ray.mPoint + 10.0f * ray.mDir, ray.mPoint + 20.0f * ray.mDir);
+            const Ray &ray = Im3D::GetMouseRay();
 
             ImVec2 region = ImGui::GetContentRegionAvail();
             Vector2i iRegion { static_cast<int>(region.x), static_cast<int>(region.y) };

@@ -74,8 +74,8 @@ struct IMGUI_API ValueTypeDrawer {
 IMGUI_API void setPayloadStatus(std::string_view s);
 
 IMGUI_API void Text(std::string_view s);
-IMGUI_API bool InputText(const char *label, std::string *s, ImGuiInputTextFlags flags = 0);
-IMGUI_API bool InputText(const char *label, Engine::CoWString *s, ImGuiInputTextFlags flags = 0);
+IMGUI_API bool InputText(const char *label, std::string *s, ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = nullptr, void *user_data = nullptr);
+IMGUI_API bool InputText(const char *label, Engine::CoWString *s, ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = nullptr, void *user_data = nullptr);
 
 IMGUI_API void BeginValueType(Engine::ExtendedValueTypeDesc type, const char *name = "");
 IMGUI_API bool EndValueType(Engine::ValueType *v, Engine::ExtendedValueTypeDesc type);
@@ -93,7 +93,7 @@ IMGUI_API void RightAlignText(const char *s, ...);
 IMGUI_API void RightAlign(float size);
 
 template <typename F, typename... Args>
-bool Col(F &&f, const char *label, Args&&... args)
+bool Col(F &&f, const char *label, Args &&...args)
 {
     int columns = TableGetColumnCount();
     assert(columns == 0 || columns == 2);
@@ -119,11 +119,12 @@ IMGUI_API bool DragMatrix4(const char *label, Engine::Matrix4 *m, float *v_speed
 
 IMGUI_API bool MethodPicker(const char *label, const std::vector<std::pair<std::string, Engine::BoundApiFunction>> &methods, Engine::BoundApiFunction *m, std::string *currentName, std::string *filter = nullptr, int expectedArgumentCount = -1);
 
-IMGUI_API void DraggableValueTypeSource(std::string_view name, void(*source)(Engine::ValueType &, void*), void *data, ImGuiDragDropFlags flags = 0);
+IMGUI_API void DraggableValueTypeSource(std::string_view name, void (*source)(Engine::ValueType &, void *), void *data, ImGuiDragDropFlags flags = 0);
 template <typename T>
-void DraggableValueTypeSource(std::string_view name, T&& data, ImGuiDragDropFlags flags = 0) {
+void DraggableValueTypeSource(std::string_view name, T &&data, ImGuiDragDropFlags flags = 0)
+{
     DraggableValueTypeSource(
-        name, [](Engine::ValueType &retVal, void *data) { Engine::to_ValueType<true>(retVal, static_cast<T &&>(*static_cast<std::remove_reference_t<T>*>(data))); }, &data, flags);
+        name, [](Engine::ValueType &retVal, void *data) { Engine::to_ValueType<true>(retVal, static_cast<T &&>(*static_cast<std::remove_reference_t<T> *>(data))); }, &data, flags);
 }
 
 IMGUI_API const Engine::ValueType *GetValuetypePayload();
@@ -215,10 +216,14 @@ bool IsDraggableValueTypeBeingAccepted(
     return false;
 }
 
-IMGUI_API bool DirectoryPicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *selection, bool &accepted);
-IMGUI_API bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *selection, bool &accepted, bool allowNewFile = false);
+struct FilesystemPickerOptions {
+    const char *(*mIconLookup)(const Engine::Filesystem::Path &path, bool isDir) = nullptr;
+};
 
+IMGUI_API FilesystemPickerOptions *GetFilesystemPickerOptions();
 
+IMGUI_API bool DirectoryPicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *selection, bool &accepted, const FilesystemPickerOptions *options = nullptr);
+IMGUI_API bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *selection, bool &accepted, bool allowNewFile = false, const FilesystemPickerOptions *options = nullptr);
 
 struct InteractiveViewState {
     bool mMouseDown[3] = { false, false, false };
@@ -234,5 +239,8 @@ IMGUI_API void EndGroupPanel();
 
 IMGUI_API bool BeginPopupCompoundContextItem(const char *str_id = nullptr);
 IMGUI_API bool BeginPopupCompoundContextWindow(const char *str_id = nullptr, ImGuiPopupFlags popup_flags = 1);
+
+IMGUI_API bool IsNewWindow(const char *name);
+IMGUI_API void SetWindowDockingDir(ImGuiID dockSpaceId, ImGuiDir dir, float ratio, bool outer, ImGuiCond cond = 0);
 
 }

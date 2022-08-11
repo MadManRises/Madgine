@@ -37,6 +37,7 @@ namespace Filesystem {
     struct Path;
     struct FileQuery;
     struct FileQueryState;
+    struct FileQueryResult;
 }
 
 namespace Dl {

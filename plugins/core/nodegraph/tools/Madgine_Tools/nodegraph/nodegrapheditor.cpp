@@ -803,13 +803,13 @@ namespace Tools {
                 }
                 ImGui::SameLine();
                 if (mSelectionTargetBuffer.empty())
-                    ImGui::PushDisabled();
+                    ImGui::BeginDisabled();
                 if (ImGui::Button("Open") || alreadyClicked) {
                     load(mSelectionTargetBuffer);
                     ImGui::CloseCurrentPopup();
                 }
                 if (mSelectionTargetBuffer.empty())
-                    ImGui::PopDisabled();
+                    ImGui::EndDisabled();
 
                 ImGui::EndPopup();
             }

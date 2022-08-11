@@ -1,8 +1,7 @@
 #pragma once
 
-#include "Madgine/window/mainwindowcomponentcollector.h"
 #include "Madgine/window/mainwindowcomponent.h"
-
+#include "Madgine/window/mainwindowcomponentcollector.h"
 
 #include "Madgine/render/renderpass.h"
 
@@ -10,11 +9,19 @@
 
 #include "Modules/threading/signal.h"
 
+#include "Generic/coroutines/generator.h"
+
+#include "Meta/math/atlas2.h"
+
+#include "Madgine/imageloader/imageloader.h"
+
+#include "Interfaces/input/inputevents.h"
+
 namespace Engine {
 namespace Widgets {
 
     struct MADGINE_WIDGETS_EXPORT WidgetManager : Window::MainWindowComponent<WidgetManager>,
-                                                 Render::RenderPass {
+                                                  Render::RenderPass {
 
         SERIALIZABLEUNIT(WidgetManager)
 
@@ -30,11 +37,11 @@ namespace Widgets {
 
         bool isHovered(WidgetBase *w);
         WidgetBase *hoveredWidget();
+        WidgetBase *focusedWidget();
 
         WidgetBase *getWidget(std::string_view name);
 
         void registerWidget(WidgetBase *w);
-        void updateWidget(WidgetBase *w, const std::string &newName);
         void unregisterWidget(WidgetBase *w);
 
         virtual std::string_view key() const override;
@@ -48,12 +55,14 @@ namespace Widgets {
 
         void destroyTopLevel(WidgetBase *w);
         template <typename WidgetType = WidgetBase>
-        WidgetType *createTopLevel(const std::string &name);
+        WidgetType *createTopLevel();
 
         decltype(auto) widgets()
         {
             return uniquePtrToPtr(mTopLevelWidgets);
         }
+
+        Generator<WidgetBase *> visibleWidgets();
 
         WidgetBase *mStartupWidget = nullptr;
         void openStartupWidget();
@@ -68,36 +77,38 @@ namespace Widgets {
         virtual void render(Render::RenderTarget *target, size_t iteration) override;
         virtual void preRender() override;
 
-		virtual int priority() const override;
+        virtual int priority() const override;
 
         const Render::Texture &uiTexture() const;
 
         Threading::SignalStub<> &updatedSignal();
 
+        const Atlas2::Entry *lookUpImage(Resources::ImageLoader::Resource *image);
+
     protected:
         WidgetBase *getHoveredWidget(const Vector2 &pos, WidgetBase *current);
         WidgetBase *getHoveredWidgetUp(const Vector2 &pos, WidgetBase *current);
         WidgetBase *getHoveredWidgetDown(const Vector2 &pos, WidgetBase *current);
-        bool propagateInput(WidgetBase *w, const Input::PointerEventArgs &arg, bool (WidgetBase::*f)(const Input::PointerEventArgs &));
+        WidgetBase *propagateInput(WidgetBase *w, const Input::PointerEventArgs &arg);
 
-        
-        std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, WidgetClass _class, WidgetBase *parent = nullptr);
+        std::unique_ptr<WidgetBase> createWidgetByClass(WidgetClass _class, WidgetBase *parent = nullptr);
         Serialize::StreamResult readWidget(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget);
         const char *writeWidget(Serialize::FormattedSerializeStream &out, const std::unique_ptr<WidgetBase> &widget) const;
 
         template <typename WidgetType = WidgetBase>
-        std::unique_ptr<WidgetType> create(const std::string &name, WidgetBase *parent = nullptr);
+        std::unique_ptr<WidgetType> create(WidgetBase *parent = nullptr);
 
         friend struct WidgetBase;
 
         void onActivate(bool active);
-        
+
     private:
-        std::map<std::string, WidgetBase *, std::less<>> mWidgets;
+        std::set<WidgetBase *> mWidgets;
 
         std::vector<std::unique_ptr<WidgetBase>> mTopLevelWidgets;
 
         WidgetBase *mHoveredWidget = nullptr;
+        WidgetBase *mFocusedWidget = nullptr;
 
         WidgetBase *mCurrentRoot = nullptr;
 
@@ -110,6 +121,10 @@ namespace Widgets {
         struct WidgetManagerData;
         std::unique_ptr<WidgetManagerData> mData;
 
+        //Dragging
+        Input::PointerEventArgs mDragStartEvent { { 0, 0 }, { 0, 0 }, Input::MouseButton::NO_BUTTON };
+        bool mDragging = false;
+        std::chrono::steady_clock::time_point mDragStartTime;
     };
 
 }

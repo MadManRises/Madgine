@@ -84,6 +84,8 @@ void GameManager::setWidget(Engine::Widgets::WidgetBase *w)
 
         mScoreLabel = widget()->getChildRecursive<Engine::Widgets::Label>("Score");
         mLifeLabel = widget()->getChildRecursive<Engine::Widgets::Label>("Life");
+
+
     } else {
         mGameWindow = nullptr;
         mScoreLabel = nullptr;

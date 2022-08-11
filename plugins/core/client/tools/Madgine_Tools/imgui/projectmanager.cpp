@@ -47,7 +47,7 @@ namespace Engine {
 namespace Tools {
 
     ProjectManager::ProjectManager(ImRoot &root)
-        : Tool<ProjectManager>(root)
+        : Tool<ProjectManager>(root, true)
     {
     }
 
@@ -67,6 +67,12 @@ namespace Tools {
     std::string_view ProjectManager::key() const
     {
         return "ProjectManager";
+    }
+
+    void ProjectManager::render()
+    {
+        /* ImGui::Begin("Game", nullptr, ImGuiWindowFlags_NoBackground);
+        ImGui::End();*/
     }
 
     void ProjectManager::renderMenu()
@@ -89,7 +95,7 @@ namespace Tools {
 
             ImGui::InputText("Name", &layoutNameBuffer);
             if (layoutNameBuffer.empty()) {
-                ImGui::PushDisabled();
+                ImGui::BeginDisabled();
             }
             if (ImGui::Button("Ok")) {
                 setLayout(layoutNameBuffer);
@@ -97,7 +103,7 @@ namespace Tools {
                 ImGui::CloseCurrentPopup();
             }
             if (layoutNameBuffer.empty()) {
-                ImGui::PopDisabled();
+                ImGui::EndDisabled();
             }
             ImGui::SameLine();
             if (ImGui::Button("Abort"))
@@ -121,7 +127,7 @@ namespace Tools {
             ImGui::Separator();
 
             if (mProjectRoot.empty())
-                ImGui::PushDisabled();
+                ImGui::BeginDisabled();
             if (ImGui::MenuItem("New Layout...")) {
                 openLayoutDialog = true;
             }
@@ -137,7 +143,7 @@ namespace Tools {
                 }
             }
             if (mProjectRoot.empty())
-                ImGui::PopDisabled();
+                ImGui::EndDisabled();
             ImGui::Separator();
             if (ImGui::MenuItem("Quit")) {
                 throw 0;

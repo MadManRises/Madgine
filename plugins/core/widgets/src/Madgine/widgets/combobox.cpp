@@ -13,22 +13,28 @@ SERIALIZETABLE_END(Engine::Widgets::Combobox)
 
 namespace Engine {
 namespace Widgets {
+
     void Combobox::addItem(const std::string &text)
     {
     }
+
     void Combobox::clear()
     {
     }
+
     void Combobox::setText(const std::string &s)
     {
     }
+
     std::string Combobox::getText()
     {
         return std::string();
     }
+
     WidgetClass Combobox::getClass() const
     {
         return WidgetClass::COMBOBOX;
     }
+
 }
 }

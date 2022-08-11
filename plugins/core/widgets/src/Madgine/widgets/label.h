@@ -2,7 +2,7 @@
 
 #include "widget.h"
 
-#include "Madgine/fontloader/fontloader.h"
+#include "util/textrenderdata.h"
 
 namespace Engine {
 namespace Widgets {
@@ -12,21 +12,10 @@ namespace Widgets {
 
         virtual WidgetClass getClass() const override;
 
-        std::string_view getFontName() const;
-        void setFontName(std::string_view name);
-
-        Render::FontLoader::Resource *getFont() const;
-        void setFont(Render::FontLoader::Resource *font);
-
         std::vector<std::pair<std::vector<Vertex>, TextureSettings>> vertices(const Vector3 &screenSize) override;
 
+        TextRenderData mTextRenderData;
         std::string mText;
-        int mFontSize = 16;
-
-        Vector2 mPivot = { 0.5f, 0.5f };
-
-    private:
-        Render::FontLoader::Handle mFont;
     };
 }
 }

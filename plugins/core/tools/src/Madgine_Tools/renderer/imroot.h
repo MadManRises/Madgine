@@ -4,8 +4,6 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 
-struct ImGuiDockNode;
-
 namespace Engine {
 
 struct MadgineObjectState;
@@ -29,7 +27,7 @@ namespace Tools {
 
         void render();
 
-        ImGuiDockNode *dockNode() const;
+        unsigned int dockSpaceId() const;
 
         std::stringstream mToolReadBuffer;
         ToolBase *mToolReadTool = nullptr;
@@ -38,11 +36,12 @@ namespace Tools {
 
         virtual Threading::TaskQueue *taskQueue() const = 0;
 
+
+    protected:
+        unsigned int mDockSpaceId;
+
     private:
-
         ToolsContainer<std::vector<Placeholder<0>>> mCollector;
-
-        ImGuiDockNode *mDockNode = nullptr;
     };
 
 }

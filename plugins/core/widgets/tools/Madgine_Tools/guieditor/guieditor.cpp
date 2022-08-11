@@ -53,6 +53,14 @@ namespace Tools {
         co_return co_await ToolBase::init();
     }
 
+    Threading::Task<void> GuiEditor::finalize()
+    {
+        mSettings.clear();
+
+        co_await ToolBase::finalize();
+        co_return;
+    }
+
     void GuiEditor::render()
     {
         Widgets::WidgetBase *hoveredWidget = nullptr;
@@ -73,7 +81,7 @@ namespace Tools {
                     }
                 }
                 if (ImGui::Button("Create Layout")) {
-                    mWidgetManager->createTopLevel<>("Unnamed");
+                    mWidgetManager->createTopLevel<>();
                 }
 
                 ImGui::EndMenu();
@@ -96,6 +104,7 @@ namespace Tools {
         constexpr float borderSize = 10.0f;
 
         if (ImGui::Begin("GuiEditor", &mVisible)) {
+            ImGui::SetWindowDockingDir(mRoot.dockSpaceId(), ImGuiDir_Right, 0.2f, false, ImGuiCond_FirstUseEver);
 
             ImDrawList *background = ImGui::GetBackgroundDrawList(ImGui::GetMainViewport());
 
@@ -112,7 +121,7 @@ namespace Tools {
             Vector2 dragDistance = mouse - io.MouseClickedPos[0];
 
             if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-                screenSpace += mWidgetManager->getScreenSpace().mTopLeft;
+                screenSpace.mTopLeft += mWidgetManager->getScreenSpace().mTopLeft;
 
             bool acceptHover = (hoveredWidget != nullptr || !io.WantCaptureMouse);
 
@@ -348,7 +357,7 @@ namespace Tools {
             if (ImGui::BeginMenu(IMGUI_ICON_PLUS " Child Widget")) {
                 for (Widgets::WidgetClass c : Widgets::WidgetClass::values()) {
                     if (ImGui::MenuItem(std::string { c.toString() }.c_str())) {
-                        w->createChild("unnamed", c);
+                        w->createChild(c);
                     }
                 }
                 ImGui::EndMenu();
@@ -367,7 +376,7 @@ namespace Tools {
                 }
             }
 
-            ImGui::DraggableValueTypeSource(w->getName(), w);
+            ImGui::DraggableValueTypeSource(w->mName, w);
             if (ImGui::BeginDragDropTarget()) {
                 Widgets::WidgetBase *newChild = nullptr;
                 if (ImGui::AcceptDraggableValueType(newChild)) {
@@ -396,13 +405,15 @@ namespace Tools {
     void GuiEditor::renderHierarchy(Widgets::WidgetBase **hoveredWidget)
     {
         if (ImGui::Begin("GuiEditor - Hierarchy", &mVisible)) {
+            ImGui::SetWindowDockingDir(mRoot.dockSpaceId(), ImGuiDir_Left, 0.2f, false, ImGuiCond_FirstUseEver);
+
             Widgets::WidgetBase *root = mWidgetManager->currentRoot();
             if (root) {
                 if (ImGui::BeginPopupCompoundContextWindow()) {
                     if (ImGui::BeginMenu(IMGUI_ICON_PLUS " New Widget")) {
                         for (Widgets::WidgetClass c : Widgets::WidgetClass::values()) {
                             if (ImGui::MenuItem(std::string { c.toString() }.c_str())) {
-                                root->createChild("unnamed", c);
+                                root->createChild(c);
                             }
                         }
                         ImGui::EndMenu();

@@ -27,7 +27,10 @@ namespace Tools {
         bool mRenderSphere = false;
         int mSphereDetail = 1;
 
+        bool mRenderText = false;
         std::string m3DText = "Test_1234 Hello World!";
+
+        bool mRenderArrow = false;
     };
 
 }

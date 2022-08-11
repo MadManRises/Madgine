@@ -12,12 +12,12 @@ struct CoWString {
     }
 
     CoWString(const std::string &&s)
-        : mSize(s.size())
+        : mOwningString(new char[s.size() + 1])
+        , mSize(s.size())
+        , mOwning(true)
     {
-        char *temp = new char[mSize];
-        strncpy(temp, s.c_str(), mSize);
-        mString = temp;
-        mOwning = true;
+        strncpy(mOwningString, s.c_str(), mSize);
+        mOwningString[mSize] = '\0';
     }
 
     CoWString(std::string &&s)
@@ -32,9 +32,12 @@ struct CoWString {
     }
 
     CoWString(const CoWString &other)
-        : mString(other.mString)
-        , mSize(other.mSize)
     {
+        if (other.mOwning) {
+            *this = std::string { other };
+        } else {
+            *this = std::string_view { other };
+        }
     }
 
     CoWString(CoWString &&other)
@@ -79,9 +82,9 @@ struct CoWString {
     {
         reset();
         mSize = s.size();
-        char *temp = new char[mSize];
-        strncpy(temp, s.c_str(), mSize);
-        mString = temp;
+        mOwningString = new char[mSize + 1];
+        strncpy(mOwningString, s.c_str(), mSize);
+        mOwningString[mSize] = '\0';
         mOwning = true;
         return *this;
     }
@@ -133,16 +136,37 @@ struct CoWString {
     void reset()
     {
         if (mOwning) {
-            delete[] mString;
+            delete[] mOwningString;
             mOwning = false;
         }
         mString = nullptr;
         mSize = 0;
     }
 
+    void resize(size_t size)
+    {
+        if (!mOwning || mSize < size) {
+            char *newString = new char[size + 1];
+            strncpy(newString, mString, std::min<size_t>(mSize, size));
+            if (mOwning)
+                delete[] mString;
+            mOwningString = newString;
+            mOwningString[size] = '\0';
+            mOwning = true;
+        }
+        mSize = size;
+    }
+
     constexpr const char *data() const
     {
         return mString;
+    }
+
+    constexpr char *data()
+    {
+        makeOwning();
+        assert(mOwning);
+        return mOwningString;
     }
 
     constexpr size_t size() const
@@ -164,7 +188,22 @@ struct CoWString {
     }
 
 private:
-    const char *mString = nullptr;
+    void makeOwning()
+    {
+        if (!mOwning) {
+            char *newString = new char[mSize + 1];
+            strncpy(newString, mString, mSize);
+            mOwningString = newString;
+            mOwningString[mSize] = '\0';
+            mOwning = true;
+        }
+    }
+
+private:
+    union {
+        const char *mString = nullptr;
+        char *mOwningString;
+    };
     unsigned int mSize = 0;
     bool mOwning = false;
 };

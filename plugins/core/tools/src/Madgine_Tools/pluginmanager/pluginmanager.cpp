@@ -23,6 +23,8 @@
 
 #    include "Madgine/base/root.h"
 
+#    include "imgui/imguiaddons.h"
+
 UNIQUECOMPONENT(Engine::Tools::PluginManager);
 
 namespace Engine {
@@ -42,6 +44,7 @@ namespace Tools {
 
     void PluginManager::render()
     {
+        ImGui::SetNextWindowSize({ 550, 400 }, ImGuiCond_FirstUseEver);
         if (ImGui::Begin("Plugin Manager", &mVisible)) {
 
             if (ImGui::Button("Export (with Tools)")) {
@@ -56,23 +59,20 @@ namespace Tools {
             ImGui::Text("Changes are only applied on restart!");
             ImGui::PopStyleColor();
 
-            ImVec2 v = ImGui::GetContentRegionAvail();
-            v.x *= 0.5f;
-
-            ImGui::BeginChild("Child1", v, false, ImGuiWindowFlags_HorizontalScrollbar);
-
             for (auto &[sectionName, section] : mManager) {
                 if (ImGui::TreeNode(sectionName.c_str())) {
                     for (auto &[pluginName, plugin] : section) {
                         const std::string &project = plugin.project();
 
-                        if (plugin.isDependencyOf(PLUGIN_SELF)) {
-                            ImGui::PushDisabled();
-                        }
                         bool loaded = plugin.isLoaded();
 
                         bool clicked = false;
                         std::string displayName { pluginName + " (" + project + ")" };
+                        ImGui::BeginTreeArrow(&plugin);
+                        ImGui::SameLine();
+                        if (plugin.isDependencyOf(PLUGIN_SELF)) {
+                            ImGui::BeginDisabled();
+                        }
                         if (section.isExclusive()) {
                             clicked = ImGui::RadioButton(displayName.c_str(), loaded);
                             if (clicked)
@@ -88,54 +88,43 @@ namespace Tools {
                                     updateConfigFile();
                             }
                         }
-
                         if (plugin.isDependencyOf(PLUGIN_SELF)) {
-                            ImGui::PopDisabled();
+                            ImGui::EndDisabled();
+                        }
+                        if (ImGui::EndTreeArrow()) {
+                            if (loaded) {
+                                const Plugins::BinaryInfo *binInfo = plugin.info();
+
+                                const char **dep = binInfo->mPluginDependencies;
+                                if (*dep && ImGui::TreeNode("Dependencies")) {
+                                    while (*dep) {
+                                        ImGui::Text("%s", *dep);
+                                        ++dep;
+                                    }
+                                    ImGui::TreePop();
+                                }
+
+                                if (ImGui::TreeNode("UniqueComponents")) {
+                                    for (UniqueComponent::RegistryBase *reg : UniqueComponent::registryRegistry()) {
+                                        for (UniqueComponent::CollectorInfoBase *info : *reg) {
+                                            if (info->mBinary == binInfo && ImGui::TreeNode(info->mBaseInfo->mTypeName.data(), "%.*s", static_cast<int>(info->mBaseInfo->mTypeName.size()), info->mBaseInfo->mTypeName.data())) {
+                                                for (const std::vector<const TypeInfo *> &components : info->mElementInfos) {
+                                                    ImGui::Text(components.front()->mTypeName);
+                                                }
+                                                ImGui::TreePop();
+                                            }
+                                        }
+                                    }
+                                    ImGui::TreePop();
+                                }
+                            }
+                            ImGui::TreePop();
                         }
                     }
                     ImGui::TreePop();
                 }
             }
-            ImGui::EndChild();
-            ImGui::SameLine();
 
-            ImGui::BeginChild("Child2", v, false, ImGuiWindowFlags_HorizontalScrollbar);
-
-            for (Plugins::PluginSection &section : kvValues(mManager)) {
-                for (auto &[pluginName, plugin] : section) {
-                    if (plugin.isLoaded()) {
-                        const Plugins::BinaryInfo *binInfo = static_cast<const Plugins::BinaryInfo *>(plugin.getSymbol("binaryInfo"));
-
-                        if (ImGui::TreeNode(pluginName.c_str())) {
-                            const char **dep = binInfo->mPluginDependencies;
-                            if (*dep && ImGui::TreeNode("Dependencies")) {
-                                while (*dep) {
-                                    ImGui::Text("%s", *dep);
-                                    ++dep;
-                                }
-                                ImGui::TreePop();
-                            }
-
-                            if (ImGui::TreeNode("UniqueComponents")) {
-                                for (UniqueComponent::RegistryBase *reg : UniqueComponent::registryRegistry()) {
-                                    for (UniqueComponent::CollectorInfoBase *info : *reg) {
-                                        if (info->mBinary == binInfo && ImGui::TreeNode(info->mBaseInfo->mTypeName.data(), "%.*s", static_cast<int>(info->mBaseInfo->mTypeName.size()), info->mBaseInfo->mTypeName.data())) {
-                                            for (const std::vector<const TypeInfo *> &components : info->mElementInfos) {
-                                                ImGui::Text("%.*s", static_cast<int>(components.front()->mTypeName.size()), components.front()->mTypeName.data());
-                                            }
-                                            ImGui::TreePop();
-                                        }
-                                    }
-                                }
-                                ImGui::TreePop();
-                            }
-                            ImGui::TreePop();
-                        }
-                    }
-                }
-            }
-            ImGui::EndChild(); /*
-            }*/
         }
         ImGui::End();
     }

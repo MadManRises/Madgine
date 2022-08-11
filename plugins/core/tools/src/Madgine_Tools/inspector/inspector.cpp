@@ -23,6 +23,8 @@
 
 #include "Madgine/resources/resourceloaderbase.h"
 
+#include "../renderer/imroot.h"
+
 UNIQUECOMPONENT(Engine::Tools::Inspector);
 
 METATABLE_BEGIN_BASE(Engine::Tools::Inspector, Engine::Tools::ToolBase)
@@ -55,6 +57,8 @@ namespace Tools {
     void Inspector::render()
     {
         if (ImGui::Begin("Inspector", &mVisible)) {
+            ImGui::SetWindowDockingDir(mRoot.dockSpaceId(), ImGuiDir_Left, 0.2f, false, ImGuiCond_FirstUseEver);
+
             auto drawList = [this](const std::map<std::string_view, TypedScopePtr> &items) {
                 for (const std::pair<const std::string_view, TypedScopePtr> &p : items) {
                     ImGui::TableNextRow();
@@ -133,12 +137,12 @@ namespace Tools {
             },
             [&](auto &other) {
                 if (!editable)
-                    ImGui::PushDisabled();
+                    ImGui::BeginDisabled();
                 ImGui::Indent();
                 std::pair<bool, bool> result = std::make_pair(ImGui::ValueTypeDrawer { id.data(), false }.draw(other), false);
                 ImGui::Unindent();
                 if (!editable)
-                    ImGui::PopDisabled();
+                    ImGui::EndDisabled();
                 return result;
             } });
 
@@ -194,12 +198,12 @@ namespace Tools {
                 modified = true;
             }
             /*OwnedScopePtr dummy;
-                                                                         if (ImGui::AcceptDraggableValueType(dummy, nullptr, [&](const OwnedScopePtr &ptr) {
-                                                                                 return ptr.type()->isDerivedFrom(scope.mType);
-                                                                             })) {
-                                                                             scope = dummy;
-                                                                             modified = true;
-                                                                         }*/
+            if (ImGui::AcceptDraggableValueType(dummy, nullptr, [&](const OwnedScopePtr &ptr) {
+                    return ptr.type()->isDerivedFrom(scope.mType);
+                })) {
+                scope = dummy;
+                modified = true;
+            }*/
             ImGui::EndDragDropTarget();
         }
 

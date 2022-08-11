@@ -41,8 +41,8 @@ namespace Tools {
             Resources::ImageLoader::Handle data = image->loadData();
             data.info()->setPersistent(true);
 
-            mImageTexture.setData({ data->mWidth, data->mHeight }, { data->mBuffer, static_cast<size_t>(data->mWidth * data->mHeight) });
-            ImGui::Image((void *)(uintptr_t)mImageTexture.mTextureHandle, { static_cast<float>(data->mWidth), static_cast<float>(data->mHeight) });
+            mImageTexture.setData(data->mSize, data->mBuffer);
+            ImGui::Image((void *)(uintptr_t)mImageTexture.mTextureHandle, data->mSize);
         });
 
         co_return co_await ToolBase::init();

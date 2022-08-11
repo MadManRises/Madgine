@@ -53,6 +53,11 @@ namespace Im3D {
         return sContext->mIO;
     }
 
+    const Ray &GetMouseRay()
+    {
+        return sContext->mMouseRay;
+    }
+
     Im3DObject::Im3DObject(Im3DID id)
         : mID(id)
     {

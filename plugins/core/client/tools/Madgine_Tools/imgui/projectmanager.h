@@ -18,6 +18,7 @@ namespace Tools {
         
         virtual std::string_view key() const override;
 
+        virtual void render() override;
         virtual void renderMenu() override;
 
         const Filesystem::Path &projectRoot() const;

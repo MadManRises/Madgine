@@ -60,6 +60,8 @@ namespace Im3D {
 
     MADGINE_IM3D_EXPORT Im3DIO &GetIO();
 
+    MADGINE_IM3D_EXPORT const Ray &GetMouseRay();
+
     MADGINE_IM3D_EXPORT void NewFrame();
 
     MADGINE_IM3D_EXPORT void PushID(const void *ptr);

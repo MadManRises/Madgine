@@ -24,21 +24,23 @@ namespace Tools {
     {
         std::chrono::nanoseconds totalTime = stats->totalTime();
 
+        ImGui::TableNextRow();
+
+        ImGui::TableNextColumn();
+
         ImGui::BeginSpanningTreeNode(stats, stats->function(), stats->children().empty() ? ImGuiTreeNodeFlags_Leaf : ImGuiTreeNodeFlags_None);
 
-        ImGui::NextColumn();
+        ImGui::TableNextColumn();
 
         ImGui::RightAlignDuration(totalTime);
 
-        ImGui::NextColumn();
+        ImGui::TableNextColumn();
 
         ImGui::RightAlignText("%.2f%%", 100.0f * totalTime.count() / parentTotalTime.count());
 
-        ImGui::NextColumn();
+        ImGui::TableNextColumn();
 
         ImGui::RightAlignText("%.2f%%", 100.0f * totalTime.count() / overallTime.count());
-
-        ImGui::NextColumn();
 
         if (ImGui::EndSpanningTreeNode()) {
             for (const std::pair<Debug::Profiler::ProcessStats *const, Debug::Profiler::ProcessStats::Data> &child : stats->children()) {
@@ -57,14 +59,24 @@ namespace Tools {
     void Profiler::render()
     {
         if (ImGui::Begin("Profiler", &mVisible)) {
+            
+             if (ImGui::BeginTable("cols", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Hideable | ImGuiTableFlags_Resizable)) {
 
-            ImGui::BeginColumns("cols", 4);
+                ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide);
+                ImGui::TableSetupColumn("Total time");
+                ImGui::TableSetupColumn("Rel. Time (parent)");
+                ImGui::TableSetupColumn("Rel. Time (total)");         
 
-            for (const Debug::Profiler::ProfilerThread *thread : mProfiler.getThreadStats()) {
-                drawStats(&thread->mStats, thread->mStats.totalTime(), thread->mStats.totalTime());
+                ImGui::TableSetupScrollFreeze(0, 1);
+
+                ImGui::TableHeadersRow();
+
+                for (const Debug::Profiler::ProfilerThread *thread : mProfiler.getThreadStats()) {
+                    drawStats(&thread->mStats, thread->mStats.totalTime(), thread->mStats.totalTime());
+                }
+
+                ImGui::EndTable();
             }
-
-            ImGui::EndColumns();
         }
         ImGui::End();
     }

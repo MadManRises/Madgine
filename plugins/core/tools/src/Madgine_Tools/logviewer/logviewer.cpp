@@ -20,6 +20,8 @@
 
 #include "../imguiicons.h"
 
+#include "../renderer/imroot.h"
+
 UNIQUECOMPONENT(Engine::Tools::LogViewer);
 
 METATABLE_BEGIN_BASE(Engine::Tools::LogViewer, Engine::Tools::ToolBase)
@@ -36,7 +38,7 @@ namespace Tools {
     static constexpr std::array<const char *, 4> sIcons { "D", IMGUI_ICON_INFO, IMGUI_ICON_WARNING, IMGUI_ICON_ERROR };
 
     LogViewer::LogViewer(ImRoot &root)
-        : Tool<LogViewer>(root)
+        : Tool<LogViewer>(root, true)
         , mWorkgroup(&Threading::WorkGroup::self())
     {
         for (Util::MessageType type : Util::MessageType::values()) {
@@ -54,6 +56,7 @@ namespace Tools {
     void LogViewer::render()
     {
         if (ImGui::Begin("LogViewer", &mVisible)) {
+            ImGui::SetWindowDockingDir(mRoot.dockSpaceId(), ImGuiDir_Down, 0.3f, true, ImGuiCond_FirstUseEver);
 
             int mTotalMsgCount = 0;
             bool filterChanged = false;
@@ -95,10 +98,9 @@ namespace Tools {
                 while (clipper.Step()) {
                     if (clipper.DisplayStart == clipper.DisplayEnd)
                         continue;
-                    auto it = mEntries.begin() + mLookup[clipper.DisplayStart / sLookupStep];
                     size_t skip = clipper.DisplayStart % sLookupStep;
                     size_t count = clipper.DisplayEnd - clipper.DisplayStart;
-                    while (count > 0 && it != mEntries.end()) {
+                    for (auto it = mEntries.begin() + mLookup[clipper.DisplayStart / sLookupStep]; it != mEntries.end() && count > 0; ++it) {
                         const LogEntry &entry = *it;
                         if (filter(entry)) {
                             if (skip > 0) {
@@ -114,8 +116,7 @@ namespace Tools {
                                     ImGui::Text("%s", entry.mFile);
                                 --count;
                             }
-                        }
-                        ++it;
+                        }                        
                     }
                 }
                 ImGui::EndTable();

@@ -11,7 +11,6 @@ namespace Widgets {
     struct SceneWindow;
     struct Checkbox;
     struct Combobox;
-    struct TabWidget;
     struct Textbox;
     struct Label;
     struct Image;

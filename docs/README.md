@@ -8,7 +8,7 @@
 
 The Madgine is a game engine consisting of libraries and utilities that can improve game development drastically. The combination of all provided libraries can be used to create an empty real-time application template with lots of tools and features already provided. It is written purely in C++ and uses the C++20-Standard, however at the moment does not contain the rich feature set that popular game engines provide. Its main focus is to provide minimal basic building blocks, which can be easily adjusted or even replaced. This leaves developers with the freedom to spend time on the parts of the game they want to invest in and not loosing time creating e.g. platform abstractions.
 
-To be able to achieve that all parts of the engine are available for you to use in any kind of software and redistribution you fancy (see [LICENSE.md](@ref License)). This also implies that I cannot sell copies of my software to support sustained development. If you are using this framework for your own business, please consider supporting the development of this project on [Patreon][] or reach out to me on my business e-mail: madmanrises at web dot de
+To be able to achieve that all parts of the engine are available for you to use in any kind of software and redistribution you fancy (see [LICENSE](@ref License)). This also implies that I cannot sell copies of my software to support sustained development. If you are using this framework for your own business, please consider supporting the development of this project on [Patreon][] or reach out to me on my business e-mail: madmanrises at web dot de
 
 ## Features
 
@@ -26,9 +26,8 @@ There is currently no documentation in code. Please refer to the explanations of
 
 The Madgine is licensed under the MIT License, see [LICENSE.md](@ref License) for more information.
 
-[Homepage]: http://www.madmanrises.com
 [CMake]: https://www.cmake.org
 [GitHub]: https://github.com/MadManRises/Madgine/issues
 [Twitch]: https://www.twitch.tv/madmanrises
 [Patreon]: https://www.patreon.com/madmanstudios
-[Doxygen]: http://www.madmanrises.com/latest/doc/
+[Doxygen]: http://madmanrises.hopto.org/

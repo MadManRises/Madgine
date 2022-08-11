@@ -10,6 +10,8 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
+#include "../renderer/imroot.h"
+
 UNIQUECOMPONENT(Engine::Tools::Metrics);
 
 namespace Engine {
@@ -37,7 +39,6 @@ namespace Tools {
 
     void Metrics::render()
     {
-
         if (ImGui::Begin("Metrics", &mVisible)) {
             ImGui::Text("Time/frame: ");
             ImGui::Duration(std::chrono::microseconds(static_cast<long long>(ImGui::GetIO().DeltaTime * 1000000.0f)));

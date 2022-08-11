@@ -112,6 +112,8 @@ namespace Render {
             Serialize::StreamResult result = [&]() {
                 STREAM_PROPAGATE_ERROR(read(in, font.mGlyphs, nullptr));
                 STREAM_PROPAGATE_ERROR(read(in, font.mTextureSize, nullptr));
+                STREAM_PROPAGATE_ERROR(read(in, font.mAscender, nullptr));
+                STREAM_PROPAGATE_ERROR(read(in, font.mDescender, nullptr));
                 return read(in, b, nullptr);
             }();
             if (result.mState != Serialize::StreamState::OK) {
@@ -140,6 +142,9 @@ namespace Render {
             }
 
             FT_Set_Pixel_Sizes(face, 0, 64);
+
+            font.mAscender = face->size->metrics.ascender;
+            font.mDescender = face->size->metrics.descender;
 
             std::vector<Vector2i> sizes;
             sizes.resize(128);
@@ -254,6 +259,8 @@ namespace Render {
             if (out) {
                 write(out, font.mGlyphs, "glyphs");
                 write(out, font.mTextureSize, "size");
+                write(out, font.mAscender, "ascender");
+                write(out, font.mDescender, "descender");
                 write(out, ByteBuffer { texBuffer.get(), 4 * byteSize }, "texture");
             }
 

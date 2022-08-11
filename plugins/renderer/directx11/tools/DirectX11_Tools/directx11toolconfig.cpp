@@ -39,8 +39,8 @@ namespace Tools {
             data.info()->setPersistent(true);
 
             if (data.available()) {
-                mImageTexture.setData({ data->mWidth, data->mHeight }, { data->mBuffer, static_cast<size_t>(data->mWidth * data->mHeight) });
-                ImGui::Image((void *)mImageTexture.mTextureHandle, { static_cast<float>(data->mWidth), static_cast<float>(data->mHeight) });
+                mImageTexture.setData(data->mSize, data->mBuffer);
+                ImGui::Image((void *)mImageTexture.mTextureHandle, data->mSize);
             }
         });
 

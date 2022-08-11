@@ -12,26 +12,16 @@
 #include "Meta/keyvalue/virtualscope.h"
 
 #include "Madgine/render/texturedescriptor.h"
-#include "vertex.h"
+#include "util/texturesettings.h"
+#include "util/vertex.h"
 
 namespace Engine {
 namespace Widgets {
-    typedef int TextureFlags;
-    enum TextureFlags_ {
-        TextureFlag_IsDistanceField = 1 << 0
-    };
-
-    struct TextureSettings {
-        Render::TextureDescriptor mTexture;
-        TextureFlags mFlags = 0;
-
-        auto operator<=>(const TextureSettings &other) const = default;
-    };
 
     struct MADGINE_WIDGETS_EXPORT WidgetBase : VirtualScope<WidgetBase, Serialize::VirtualData<WidgetBase, Serialize::VirtualSerializableDataBase<VirtualScopeBase<>, Serialize::SerializableDataUnit>>> {
         SERIALIZABLEUNIT(WidgetBase)
 
-        WidgetBase(const std::string &name, WidgetManager &manager, WidgetBase *parent = nullptr);
+        WidgetBase(WidgetManager &manager, WidgetBase *parent = nullptr);
 
         WidgetBase(const WidgetBase &) = delete;
 
@@ -59,37 +49,40 @@ namespace Widgets {
 
         virtual void setEnabled(bool b);
 
-        const std::string &getName() const;
-        void setName(const std::string &name);
+        bool isFocused() const;
 
         const std::string &key() const;
 
-        WidgetBase *createChild(const std::string &name, WidgetClass _class);
+        WidgetBase *createChild(WidgetClass _class);
         template <typename WidgetType = WidgetBase>
-        MADGINE_WIDGETS_EXPORT WidgetType *createChild(const std::string &name);
+        MADGINE_WIDGETS_EXPORT WidgetType *createChild();
 
-        WidgetBase *getChildRecursive(const std::string &name);
+        WidgetBase *getChildRecursive(std::string_view name);
         template <typename T>
-        T *getChildRecursive(const std::string &name)
+        T *getChildRecursive(std::string_view name)
         {
             return dynamic_cast<T *>(getChildRecursive(name));
         }
         void setParent(WidgetBase *parent);
         WidgetBase *getParent() const;
 
-        virtual bool injectPointerPress(const Input::PointerEventArgs &arg);
-        virtual bool injectPointerRelease(const Input::PointerEventArgs &arg);
+        virtual bool injectPointerClick(const Input::PointerEventArgs &arg);
         virtual bool injectPointerMove(const Input::PointerEventArgs &arg);
         virtual bool injectPointerEnter(const Input::PointerEventArgs &arg);
         virtual bool injectPointerLeave(const Input::PointerEventArgs &arg);
+        virtual bool injectDragBegin(const Input::PointerEventArgs &arg);
+        virtual bool injectDragMove(const Input::PointerEventArgs &arg);
+        virtual bool injectDragEnd(const Input::PointerEventArgs &arg);
         virtual bool injectAxisEvent(const Input::AxisEventArgs &arg);
         virtual bool injectKeyPress(const Input::KeyEventArgs &arg);
 
         Threading::SignalStub<const Input::PointerEventArgs &> &pointerMoveEvent();
-        Threading::SignalStub<const Input::PointerEventArgs &> &pointerDownEvent();
-        Threading::SignalStub<const Input::PointerEventArgs &> &pointerUpEvent();
+        Threading::SignalStub<const Input::PointerEventArgs &> &pointerClickEvent();
         Threading::SignalStub<const Input::PointerEventArgs &> &pointerEnterEvent();
         Threading::SignalStub<const Input::PointerEventArgs &> &pointerLeaveEvent();
+        Threading::SignalStub<const Input::PointerEventArgs &> &dragBeginEvent();
+        Threading::SignalStub<const Input::PointerEventArgs &> &dragMoveEvent();
+        Threading::SignalStub<const Input::PointerEventArgs &> &dragEndEvent();
         Threading::SignalStub<const Input::AxisEventArgs &> &axisEvent();
         Threading::SignalStub<const Input::KeyEventArgs &> &keyEvent();
 
@@ -106,28 +99,25 @@ namespace Widgets {
         void *userData();
         void setUserData(void *userData);
 
-        virtual Resources::Resource<Resources::ImageLoader> *resource() const;
-
         size_t depth();
 
         bool mVisible = true;
-        std::string mName;
+        std::string mName = "Unnamed";
 
         WidgetManager &manager();
 
     protected:
-        std::unique_ptr<WidgetBase> createWidgetClass(const std::string &name, WidgetClass _class);
+        std::unique_ptr<WidgetBase> createWidgetByClass(WidgetClass _class);
         Serialize::StreamResult readWidget(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget);
         const char *writeWidget(Serialize::FormattedSerializeStream &out, const std::unique_ptr<WidgetBase> &widget) const;
 
         virtual void sizeChanged(const Vector3i &pixelSize);
 
-        std::pair<std::vector<Vertex>, TextureSettings> renderText(const std::string &text, Vector3 pos, Vector2 size, const Render::Font *font, float fontSize, Vector2 pivot, const Vector3 &screenSize);
-
     protected:
         void destroyChild(WidgetBase *w);
 
-        Threading::Signal<const Input::PointerEventArgs &> mPointerMoveSignal, mPointerDownSignal, mPointerUpSignal, mPointerEnterSignal, mPointerLeaveSignal;
+        Threading::Signal<const Input::PointerEventArgs &> mPointerMoveSignal, mPointerClickSignal, mPointerEnterSignal, mPointerLeaveSignal;
+        Threading::Signal<const Input::PointerEventArgs &> mDragBeginSignal, mDragMoveSignal, mDragEndSignal;
         Threading::Signal<const Input::AxisEventArgs &> mAxisEventSignal;
         Threading::Signal<const Input::KeyEventArgs &> mKeyPressSignal;
 

@@ -15,6 +15,9 @@ namespace Render {
         Vector2i mTextureSize;
 
         std::array<Glyph, 128> mGlyphs;
+
+        int mAscender;
+        int mDescender;
     };
 
 }

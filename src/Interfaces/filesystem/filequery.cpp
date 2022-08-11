@@ -36,14 +36,15 @@ namespace Filesystem {
         : mQuery(query)
         , mBuffer(createQueryState())
     {
+        enterDir();
     }
 
-    FileQueryIterator::FileQueryIterator(FileQueryIterator &&other)
+    /* FileQueryIterator::FileQueryIterator(FileQueryIterator &&other)
         : mHandles(std::move(other.mHandles))
         , mQuery(other.mQuery)
         , mBuffer(std::move(other.mBuffer))
     {
-    }
+    }*/
 
     FileQueryIterator::~FileQueryIterator()
     {
@@ -54,18 +55,36 @@ namespace Filesystem {
         return { &mHandles.back(), mBuffer.get() };
     }
 
-    void FileQueryIterator::operator++()
+    FileQueryIterator &FileQueryIterator::operator++()
     {
         if (mHandles.back().advance(*mBuffer))
             verify();
         else
             leaveDir();
+        return *this;
+    }
+
+    void FileQueryIterator::operator++(int)
+    {
+        ++(*this);
     }
 
     bool FileQueryIterator::operator!=(const FileQueryIterator &other) const
     {
         assert(mQuery == other.mQuery);
         return mHandles != other.mHandles;
+    }
+
+    bool FileQueryIterator::operator==(const FileQuerySentinel &sen) const
+    {
+        assert(mQuery == sen.mQuery);
+        return mHandles.empty();
+    }
+
+    bool FileQueryIterator::operator!=(const FileQuerySentinel &sen) const
+    {
+        assert(mQuery == sen.mQuery);
+        return !mHandles.empty();
     }
 
     void FileQueryIterator::enterDir()
@@ -110,14 +129,12 @@ namespace Filesystem {
 
     FileQueryIterator FileQuery::begin() const
     {
-        FileQueryIterator it { this };
-        it.enterDir();
-        return it;
+        return { this };
     }
 
-    FileQueryIterator FileQuery::end() const
+    FileQuerySentinel FileQuery::end() const
     {
-        return FileQueryIterator { this };
+        return { this };
     }
 
     bool FileQueryResult::isDir() const

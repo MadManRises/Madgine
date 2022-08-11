@@ -34,6 +34,10 @@
 
 #include "imgui/misc/freetype/imgui_freetype.h"
 
+#include "imgui/imguiaddons.h"
+
+#include "Madgine_Tools/imguiicons.h"
+
 METATABLE_BEGIN_BASE(Engine::Tools::ClientImRoot, Engine::Tools::ImRoot)
 METATABLE_END(Engine::Tools::ClientImRoot)
 
@@ -236,6 +240,15 @@ namespace Tools {
             }
         };
 
+        ImGui::FilesystemPickerOptions *filepickerOptions = ImGui::GetFilesystemPickerOptions();
+
+        filepickerOptions->mIconLookup = [](const Filesystem::Path &path, bool isDir) {
+            if (isDir)
+                return IMGUI_ICON_FOLDER " ";
+            else
+                return IMGUI_ICON_FILE " ";
+        };
+
         if (!co_await ImRoot::init())
             co_return false;
 
@@ -330,7 +343,7 @@ namespace Tools {
 
             ImRoot::render();
 
-            setCentralNode(dockNode());
+            setCentralNode();
 
             ImGuiViewport *main_viewport = ImGui::GetMainViewport();
             main_viewport->Flags |= ImGuiViewportFlags_NoRendererClear; //TODO: Is that necessary every Frame?
@@ -454,19 +467,13 @@ namespace Tools {
         return io.WantCaptureMouse;
     }
 
-    void ClientImRoot::setMenuHeight(float h)
-    {
-        ImGuiIO &io = ImGui::GetIO();
-
-        if (mAreaPos.x == 0.0f)
-            mAreaPos.y = h * io.DisplayFramebufferScale.y;
-    }
-
-    void ClientImRoot::setCentralNode(ImGuiDockNode *node)
+    void ClientImRoot::setCentralNode()
     {
         ImGuiIO &io = ImGui::GetIO();
 
         Vector2 oldSize = mAreaSize;
+
+        ImGuiDockNode *node = ImGui::DockBuilderGetCentralNode(mDockSpaceId);
 
         if (node) {
             mAreaPos = Vector2 { node->Pos } * io.DisplayFramebufferScale;

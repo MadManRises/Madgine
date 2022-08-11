@@ -44,8 +44,6 @@ namespace Tools {
 
         Scene::SceneManager &sceneMgr();
 
-        bool render3DCursor() const;
-
         void play();
         void pause();
         void stop();
@@ -64,6 +62,8 @@ namespace Tools {
         void renderPopups();
 
         void handleInputs();
+
+        void im3DInteractions();
 
     private:
         Window::MainWindow &mWindow;

@@ -60,7 +60,7 @@ namespace Tools {
         if (ImGui::Col(LIFT(ImGui::DragMatrix3), "Pos", &pos, speeds, enabled))
             mWidget->setPos(pos);
         ImGui::TableNextRow();        
-        if (ImGui::Col(LIFT(ImGui::DragMatrix3), "Size", &size, 0.15f, enabled)) {
+        if (ImGui::Col(LIFT(ImGui::DragMatrix3), "Size", &size, speeds, enabled)) {
             mWidget->setSize(size);
             enforceAspectRatio();
         }
@@ -71,11 +71,11 @@ namespace Tools {
         ImGui::SameLine();
 
         if (!mEnforceAspectRatio)
-            ImGui::PushDisabled();
+            ImGui::BeginDisabled();
         if (ImGui::DragFloat("##aspectratio", &mAspectRatio, 0.05f))
             enforceAspectRatio();
         if (!mEnforceAspectRatio)
-            ImGui::PopDisabled();
+            ImGui::EndDisabled();
 
         mInspector.drawMembers(mWidget, { "Pos", "Size", "Children" });
     }

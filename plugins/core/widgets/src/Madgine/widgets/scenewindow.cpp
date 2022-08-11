@@ -6,8 +6,6 @@
 
 #include "Meta/math/vector4.h"
 
-#include "vertex.h"
-
 #include "Madgine/window/mainwindow.h"
 
 #include "Madgine/render/rendercontext.h"
@@ -16,6 +14,8 @@
 #include "Meta/serialize/serializetable_impl.h"
 
 #include "Madgine/render/rendertarget.h"
+
+#include "util/imagerenderdata.h"
 
 METATABLE_BEGIN_BASE(Engine::Widgets::SceneWindow, Engine::Widgets::WidgetBase)
 METATABLE_END(Engine::Widgets::SceneWindow)
@@ -26,8 +26,8 @@ SERIALIZETABLE_END(Engine::Widgets::SceneWindow)
 namespace Engine {
 namespace Widgets {
 
-    SceneWindow::SceneWindow(const std::string &name, WidgetManager &manager, WidgetBase *parent)
-        : Widget(name, manager, parent)
+    SceneWindow::SceneWindow(WidgetManager &manager, WidgetBase *parent)
+        : Widget(manager, parent)
     {
         mTarget = manager.window().getRenderer()->createRenderTexture({ 1, 1 }, { .mSamples = 1 });
     }
@@ -38,25 +38,14 @@ namespace Widgets {
 
     std::vector<std::pair<std::vector<Vertex>, TextureSettings>> SceneWindow::vertices(const Vector3 &screenSize)
     {
-        std::vector<Vertex> result;
-
         Vector3 pos = (getEffectivePosition() * screenSize) / screenSize;
         Vector3 size = (getEffectiveSize() * screenSize) / screenSize;
+        pos.z = depth();
 
-        Vector4 color { 1, 1, 1, 1 };
+        std::vector<Vertex> result;
 
-        Vector3 v = pos;
-        v.z = static_cast<float>(depth());
-        result.push_back({ v, color, { 0, 0 } });
-        v.x += size.x;
-        result.push_back({ v, color, { 1, 0 } });
-        v.y += size.y;
-        result.push_back({ v, color, { 1, 1 } });
-        result.push_back({ v, color, { 1, 1 } });
-        v.x -= size.x;
-        result.push_back({ v, color, { 0, 1 } });
-        v.y -= size.y;
-        result.push_back({ v, color, { 0, 0 } });
+        ImageRenderData::renderQuad(result, pos, size.xy());
+
         return { { result, { mTarget->texture() } } };
     }
 

@@ -46,9 +46,8 @@ namespace Tools {
         bool injectPointerRelease(const Input::PointerEventArgs &arg) override;
         bool injectPointerMove(const Input::PointerEventArgs &arg) override;
         bool injectAxisEvent(const Engine::Input::AxisEventArgs &arg) override;
-
-        void setMenuHeight(float h);
-        void setCentralNode(ImGuiDockNode *node);
+        
+        void setCentralNode();
 
         virtual std::string_view key() const override;
 

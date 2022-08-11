@@ -88,7 +88,7 @@ METATABLE_END(Engine::Render::QuaternionKeyFrame)
                     if (animationIndex == 0) {
                         std::string_view name = node->mNodeName.C_Str();
                         if (StringUtil::endsWith(name, "_$AssimpFbx$_Rotation"))
-                            name = name.substr(0, name.size() - strlen("_$AssimpFbx$_Rotation"));
+                            name.remove_suffix(strlen("_$AssimpFbx$_Rotation"));
                         animations.mBoneNames.emplace_back(name);
                     } else {
                         if (animations.mBoneNames.size() <= boneIndex) {

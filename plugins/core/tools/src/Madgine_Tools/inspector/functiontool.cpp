@@ -150,7 +150,7 @@ namespace Tools {
         }
 
         if (!function.mFunction)
-            ImGui::PushDisabled();
+            ImGui::BeginDisabled();
 
         bool call = false;
 
@@ -159,7 +159,7 @@ namespace Tools {
         }
 
         if (!function.mFunction)
-            ImGui::PopDisabled();
+            ImGui::EndDisabled();
 
         return call;
     }

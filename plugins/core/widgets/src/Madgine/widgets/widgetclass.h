@@ -7,11 +7,9 @@ namespace Widgets {
         WIDGET,
         SCENEWINDOW,
         COMBOBOX,
-        TABWIDGET,
         CHECKBOX,
         TEXTBOX,
         BUTTON,
-        LAYOUT,
         LABEL,
         BAR,
         IMAGE)

@@ -5,11 +5,11 @@
 #include "Madgine/window/mainwindow.h"
 #include "Madgine_Tools/imgui/clientimroot.h"
 
+#include "Madgine_Tools/imguiicons.h"
 #include "im3d/im3d.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
 #include "imgui/imguiaddons.h"
-#include "Madgine_Tools/imguiicons.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
@@ -90,10 +90,12 @@ namespace Tools {
     void SceneEditor::render()
     {
         auto guard = mSceneMgr->lock(AccessMode::WRITE);
+        updateEntityCache();
         renderHierarchy();
         renderToolbar();
         renderSelection();
         std::erase_if(mSceneViews, [](const std::unique_ptr<SceneView> &view) { return !view->render(); });
+        im3DInteractions();
         handleInputs();
     }
 
@@ -192,11 +194,6 @@ namespace Tools {
         return *mSceneMgr;
     }
 
-    bool SceneEditor::render3DCursor() const
-    {
-        return mRender3DCursor;
-    }
-
     void SceneEditor::play()
     {
         if (mMode == PLAY)
@@ -276,6 +273,8 @@ namespace Tools {
     void SceneEditor::renderSelection()
     {
         if (ImGui::Begin("SceneEditor", &mVisible)) {
+            ImGui::SetWindowDockingDir(mRoot.dockSpaceId(), ImGuiDir_Right, 0.2f, false, ImGuiCond_FirstUseEver);
+
             if (mSelectedEntity)
                 renderEntity(mSelectedEntity);
             if (mSelectedCamera)
@@ -287,6 +286,7 @@ namespace Tools {
     void SceneEditor::renderHierarchy()
     {
         if (ImGui::Begin("SceneEditor - Hierarchy", &mVisible)) {
+            ImGui::SetWindowDockingDir(mRoot.dockSpaceId(), ImGuiDir_Left, 0.2f, false, ImGuiCond_FirstUseEver);
 
             if (ImGui::BeginPopupCompoundContextWindow()) {
                 if (ImGui::MenuItem(IMGUI_ICON_PLUS " New Entity")) {
@@ -294,8 +294,6 @@ namespace Tools {
                 }
                 ImGui::EndPopup();
             }
-
-            updateEntityCache();
 
             for (EntityNode &entity : mEntityCache)
                 renderHierarchyEntity(entity);
@@ -305,10 +303,14 @@ namespace Tools {
 
     void SceneEditor::renderToolbar()
     {
+        ImGuiWindowClass window_class;
+        window_class.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
+        ImGui::SetNextWindowClass(&window_class);
         if (ImGui::Begin("SceneEditor - Toolbar", &mVisible, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar)) {
+            ImGui::SetWindowDockingDir(mRoot.dockSpaceId(), ImGuiDir_Up, 0.01f, true, ImGuiCond_FirstUseEver);
 
-            auto pre = [](bool b) { if (b) ImGui::PushDisabled(); };
-            auto post = [](bool b) { if (b) ImGui::PopDisabled(); };
+            auto pre = [](bool b) { if (b) ImGui::BeginDisabled(); };
+            auto post = [](bool b) { if (b) ImGui::EndDisabled(); };
 
             bool b = mMode == PLAY;
             pre(b);
@@ -362,49 +364,15 @@ namespace Tools {
         if (ImGui::BeginPopupCompoundContextItem()) {
             if (ImGui::MenuItem(IMGUI_ICON_X " Delete", "del")) {
                 node.mEntity->remove();
-                aborted = true;
             }
             ImGui::EndPopup();
         }
 
-        if (!aborted) {
-            ImGui::DraggableValueTypeSource(name, node.mEntity);
-
-            Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> transform = node.mEntity->getComponent<Engine::Scene::Entity::Transform>();
-            if (transform) {
-                if (ImGui::BeginDragDropTarget()) {
-                    Scene::Entity::EntityPtr *newChild;
-                    if (ImGui::AcceptDraggableValueType(newChild, nullptr, [](Scene::Entity::EntityPtr *child) { return (*child)->hasComponent<Scene::Entity::Transform>(); })) {
-                        Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::Transform> childTransform = (*newChild)->getComponent<Engine::Scene::Entity::Transform>();
-                        assert(childTransform);
-                        childTransform->setParent(transform);
-                    }
-                    ImGui::EndDragDropTarget();
-                }
-
-                Matrix4 transformM = transform->worldMatrix();
-                AABB bb = { { -0.2f, -0.2f, -0.2f }, { 0.2f, 0.2f, 0.2f } };
-                if (node.mEntity->hasComponent<Scene::Entity::Mesh>() && node.mEntity->getComponent<Scene::Entity::Mesh>()->data())
-                    bb = node.mEntity->getComponent<Scene::Entity::Mesh>()->aabb();
-
-                Im3DBoundingObjectFlags flags = Im3DBoundingObjectFlags_ShowOnHover;
-                if (hovered)
-                    flags |= Im3DBoundingObjectFlags_ShowOutline;
-
-                if (Im3D::BoundingBox(name.c_str(), bb, transformM, flags)) {
-                    if (ImGui::IsMouseClicked(0)) {
-                        select(node.mEntity);
-                    }
-                    hovered = true;
-                }
-            }
-        }
+        ImGui::DraggableValueTypeSource(name, node.mEntity);
 
         if (open) {
-            if (!aborted) {
-                for (EntityNode &node : node.mChildren)
-                    renderHierarchyEntity(node);
-            }
+            for (EntityNode &node : node.mChildren)
+                renderHierarchyEntity(node);
             ImGui::TreePop();
         }
     }
@@ -621,6 +589,48 @@ namespace Tools {
 
         container.push_back({ std::move(e) });
         mEntityMapping[e] = &container.back();
+    }
+
+    void SceneEditor::im3DInteractions()
+    {
+        for (EntityNode &node : mEntityCache) {
+            Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> transform = node.mEntity->getComponent<Engine::Scene::Entity::Transform>();
+            if (transform) {
+                bool selected = mSelectedEntity == node.mEntity;
+
+                if (ImGui::BeginDragDropTarget()) {
+                    Scene::Entity::EntityPtr *newChild;
+                    if (ImGui::AcceptDraggableValueType(newChild, nullptr, [](Scene::Entity::EntityPtr *child) { return (*child)->hasComponent<Scene::Entity::Transform>(); })) {
+                        Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::Transform> childTransform = (*newChild)->getComponent<Engine::Scene::Entity::Transform>();
+                        assert(childTransform);
+                        childTransform->setParent(transform);
+                    }
+                    ImGui::EndDragDropTarget();
+                }
+
+                Matrix4 transformM = transform->worldMatrix();
+                AABB bb = { { -0.2f, -0.2f, -0.2f }, { 0.2f, 0.2f, 0.2f } };
+                if (node.mEntity->hasComponent<Scene::Entity::Mesh>() && node.mEntity->getComponent<Scene::Entity::Mesh>()->data())
+                    bb = node.mEntity->getComponent<Scene::Entity::Mesh>()->aabb();
+
+                Im3DBoundingObjectFlags flags = Im3DBoundingObjectFlags_ShowOnHover;
+                if (selected)
+                    flags |= Im3DBoundingObjectFlags_ShowOutline;
+
+                if (Im3D::BoundingBox(node.mEntity->mName.c_str(), bb, transformM, flags)) {
+                    if (ImGui::IsMouseClicked(0)) {
+                        select(node.mEntity);
+                    }
+                }
+            }
+        }
+
+        
+        const Ray &ray = Im3D::GetMouseRay();
+
+        if (mRender3DCursor)
+            Im3D::Arrow3D(IM3D_LINES, 0.3f, ray.mPoint + 10.0f * ray.mDir, ray.mPoint + 20.0f * ray.mDir);
+
     }
 
 }

@@ -52,10 +52,11 @@ namespace Input {
         friend struct MadgineObject<Handler>;
 
         virtual void onPointerMove(const PointerEventArgs &me);
+        virtual void onPointerClick(const PointerEventArgs &me);
 
-        virtual void onPointerDown(const PointerEventArgs &me);
-
-        virtual void onPointerUp(const PointerEventArgs &me);
+        virtual void onDragBegin(const PointerEventArgs &me);
+        virtual void onDragMove(const PointerEventArgs &me);
+        virtual void onDragEnd(const PointerEventArgs &me);
 
         virtual bool onKeyPress(const KeyEventArgs &evt);
 
@@ -63,8 +64,10 @@ namespace Input {
 
     public:
         void injectPointerMove(const PointerEventArgs &evt);
-        void injectPointerDown(const PointerEventArgs &evt);
-        void injectPointerUp(const PointerEventArgs &evt);
+        void injectPointerClick(const PointerEventArgs &evt);
+        void injectDragBegin(const PointerEventArgs &evt);
+        void injectDragMove(const PointerEventArgs &evt);
+        void injectDragEnd(const PointerEventArgs &evt);
         bool injectKeyPress(const KeyEventArgs &evt);
         void injectAxisEvent(const AxisEventArgs &evt);
 

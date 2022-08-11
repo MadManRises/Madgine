@@ -16,6 +16,7 @@ namespace Tools {
         GuiEditor(ImRoot &root);
 
         virtual Threading::Task<bool> init() override;
+        virtual Threading::Task<void> finalize() override;
 
         virtual void render() override;
         virtual void renderMenu() override;

@@ -1,101 +1,122 @@
-<Item serId=1>
+<Layout serId=1>
     <mComponents>
         <Item key="WidgetManager" serId=2>
             <mStartupWidget>3</mStartupWidget>
             <mTopLevelWidgets>
-                <Widget name="MainMenu" type=WidgetClass::WIDGET serId=3>
+                <Widget type=WidgetClass::WIDGET serId=3>
                     <mChildren>
-                        <Widget name="StartGameButton" type=WidgetClass::BUTTON serId=4>
+                        <Widget type=WidgetClass::BUTTON serId=4>
                             <mText>StartGame</mText>
-                            <mFontSize>5</mFontSize>
-                            <mPivot>
-                                <Element>0.5</Element>
-                                <Element>0.5</Element>
-                            </mPivot>
-                            <mFont>OpenSans-Regular</mFont>
-                            <Image></Image>
+                            <mTextRenderData serId=5>
+                                <mFontSize>5</mFontSize>
+                                <mPivot>
+                                    <Element>0.5</Element>
+                                    <Element>0.5</Element>
+                                </mPivot>
+                                <mFont>OpenSans-Regular</mFont>
+                            </mTextRenderData>
+                            <mImageRenderData serId=6>
+                                <Image></Image>
+                            </mImageRenderData>
                             <mChildren>
                             </mChildren>
+                            <mName>StartGameButton</mName>
                             <mPos>[0.25, 0, 0, 0, 0.2, 0, 0, 0, 0]</mPos>
                             <mSize>[0.5, 0, 0, 0, 0.1, 0, 0, 0, 1]</mSize>
-                        </Item>
+                        </Widget>
                     </mChildren>
+                    <mName>MainMenu</mName>
                     <mPos>[0, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
                     <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
-                </Item>
-                <Widget name="Ingame" type=WidgetClass::WIDGET serId=5>
+                </Widget>
+                <Widget type=WidgetClass::WIDGET serId=7>
                     <mChildren>
-                        <Widget name="GameView" type=WidgetClass::SCENEWINDOW serId=6>
+                        <Widget type=WidgetClass::SCENEWINDOW serId=8>
                             <mChildren>
-                                <Widget name="Score" type=WidgetClass::LABEL serId=7>
-                                    <mFontSize>3</mFontSize>
+                                <Widget type=WidgetClass::LABEL serId=9>
                                     <mText>Score: 0</mText>
-                                    <mPivot>
-                                        <Element>1</Element>
-                                        <Element>0</Element>
-                                    </mPivot>
-                                    <mFont>OpenSans-Bold</mFont>
+                                    <mTextRenderData serId=10>
+                                        <mFontSize>3</mFontSize>
+                                        <mPivot>
+                                            <Element>1</Element>
+                                            <Element>0</Element>
+                                        </mPivot>
+                                        <mFont>OpenSans-Bold</mFont>
+                                    </mTextRenderData>
                                     <mChildren>
                                     </mChildren>
+                                    <mName>Score</mName>
                                     <mPos>[0.8, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
                                     <mSize>[0.2, 0, 0, 0, 0, 40, 0, 0, 1]</mSize>
-                                </Item>
-                                <Widget name="Life" type=WidgetClass::LABEL serId=8>
-                                    <mFontSize>3</mFontSize>
+                                </Widget>
+                                <Widget type=WidgetClass::LABEL serId=11>
                                     <mText>Life: -26</mText>
-                                    <mPivot>
-                                        <Element>0</Element>
-                                        <Element>0</Element>
-                                    </mPivot>
-                                    <mFont>OpenSans-Bold</mFont>
+                                    <mTextRenderData serId=12>
+                                        <mFontSize>3</mFontSize>
+                                        <mPivot>
+                                            <Element>0</Element>
+                                            <Element>0</Element>
+                                        </mPivot>
+                                        <mFont>OpenSans-Bold</mFont>
+                                    </mTextRenderData>
                                     <mChildren>
                                     </mChildren>
+                                    <mName>Life</mName>
                                     <mPos>[0, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
                                     <mSize>[0.2, 0, 0, 0, 0, 40, 0, 0, 1]</mSize>
-                                </Item>
+                                </Widget>
                             </mChildren>
+                            <mName>GameView</mName>
                             <mPos>[0, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
                             <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
-                        </Item>
+                        </Widget>
                     </mChildren>
+                    <mName>Ingame</mName>
                     <mPos>[0, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
                     <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
-                </Item>
-                <Widget name="GameOver" type=WidgetClass::WIDGET serId=9>
+                </Widget>
+                <Widget type=WidgetClass::WIDGET serId=13>
                     <mChildren>
-                        <Widget name="GameOverLabel" type=WidgetClass::LABEL serId=10>
-                            <mFontSize>9</mFontSize>
+                        <Widget type=WidgetClass::LABEL serId=14>
                             <mText>Game Over</mText>
-                            <mPivot>
-                                <Element>0.5</Element>
-                                <Element>0.5</Element>
-                            </mPivot>
-                            <mFont>OpenSans-Bold</mFont>
+                            <mTextRenderData serId=15>
+                                <mFontSize>9</mFontSize>
+                                <mPivot>
+                                    <Element>0.5</Element>
+                                    <Element>0.5</Element>
+                                </mPivot>
+                                <mFont>OpenSans-Bold</mFont>
+                            </mTextRenderData>
                             <mChildren>
                             </mChildren>
+                            <mName>GameOverLabel</mName>
                             <mPos>[0.2, 0, 0, 0, 0.4, 0, 0, 0, 0]</mPos>
                             <mSize>[0.6, 0, 0, 0, 0.11, 0, 0, 0, 1]</mSize>
-                        </Item>
-                        <Widget name="ScoreLabel" type=WidgetClass::LABEL serId=11>
-                            <mFontSize>4</mFontSize>
+                        </Widget>
+                        <Widget type=WidgetClass::LABEL serId=16>
                             <mText>Your Score: 0</mText>
-                            <mPivot>
-                                <Element>0.5</Element>
-                                <Element>0.5</Element>
-                            </mPivot>
-                            <mFont>OpenSans-Regular</mFont>
+                            <mTextRenderData serId=17>
+                                <mFontSize>4</mFontSize>
+                                <mPivot>
+                                    <Element>0.5</Element>
+                                    <Element>0.5</Element>
+                                </mPivot>
+                                <mFont>OpenSans-Regular</mFont>
+                            </mTextRenderData>
                             <mChildren>
                             </mChildren>
+                            <mName>ScoreLabel</mName>
                             <mPos>[0.3, 0, 0, 0, 0.55, 0, 0, 0, 0]</mPos>
                             <mSize>[0.4, 0, 0, 0, 0.05, 0, 0, 0, 1]</mSize>
-                        </Item>
+                        </Widget>
                     </mChildren>
+                    <mName>GameOver</mName>
                     <mPos>[0, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
                     <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
-                </Item>
+                </Widget>
             </mTopLevelWidgets>
         </Item>
-        <Item key="ClientImRoot" serId=17>
+        <Item key="ClientImRoot" serId=18>
         </Item>
     </mComponents>
-</Item>
+</Layout>

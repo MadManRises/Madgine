@@ -1,4 +1,4 @@
-/page License MIT License
+\page License MIT License
 
 Copyright (c) 2019 MadManRises
 

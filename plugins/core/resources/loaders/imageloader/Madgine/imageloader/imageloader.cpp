@@ -6,6 +6,7 @@
 
 #include "imagedata.h"
 
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 UNIQUECOMPONENT(Engine::Resources::ImageLoader)
@@ -20,21 +21,6 @@ METATABLE_END(Engine::Resources::ImageLoader::Resource)
 namespace Engine {
 namespace Resources {
 
-    ImageData::ImageData(const std::vector<unsigned char> &buffer)
-        : mBuffer(stbi_load_from_memory(buffer.data(), buffer.size(),
-                      &mWidth,
-                      &mHeight,
-                      &mChannels,
-                      STBI_rgb_alpha),
-            stbi_image_free)
-    {
-    }
-
-    void ImageData::clear()
-    {
-        mBuffer.reset();
-    }
-
     ImageLoader::ImageLoader()
         : ResourceLoader({ ".png", ".jpg" })
     {
@@ -42,13 +28,22 @@ namespace Resources {
 
     bool ImageLoader::loadImpl(ImageData &data, ResourceDataInfo &info)
     {
-        data = { info.resource()->readAsBlob() };
+        std::vector<unsigned char> buffer = info.resource()->readAsBlob();
+
+        stbi_uc *ptr = stbi_load_from_memory(buffer.data(), buffer.size(),
+            &data.mSize.x,
+            &data.mSize.y,
+            &data.mChannels,
+            STBI_rgb_alpha);
+
+        data.mBuffer = { std::unique_ptr<stbi_uc, Functor<&stbi_image_free>> { ptr }, static_cast<size_t>(data.mSize.x) * data.mSize.y * data.mChannels };
+
         return true;
     }
 
     void ImageLoader::unloadImpl(ImageData &data)
     {
-        data.clear();
+        data.mBuffer.clear();
     }
 
 }

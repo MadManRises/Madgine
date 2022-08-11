@@ -40,16 +40,30 @@ namespace Filesystem {
         operator Path() const;
         Path path() const;
     };
+        
+    struct INTERFACES_EXPORT FileQuerySentinel {
+
+        const FileQuery *mQuery;
+    };
 
     struct INTERFACES_EXPORT FileQueryIterator {
+
+        using difference_type = int;
+        using value_type = FileQueryResult;
+
         FileQueryIterator(const FileQuery *query);
-        FileQueryIterator(FileQueryIterator &&);
+        FileQueryIterator(FileQueryIterator &&) = default;
         ~FileQueryIterator();
 
+        FileQueryIterator &operator=(FileQueryIterator &&) = default;
+
         FileQueryResult operator*() const;
-        void operator++();
+        FileQueryIterator &operator++();
+        void operator++(int);
 
         bool operator!=(const FileQueryIterator &other) const;
+        bool operator==(const FileQuerySentinel &sen) const;
+        bool operator!=(const FileQuerySentinel &sen) const;
 
         void enterDir();
         void leaveDir();
@@ -65,17 +79,17 @@ namespace Filesystem {
         std::unique_ptr<FileQueryState, FileQueryStateDeleter> mBuffer;
     };
 
+
     struct INTERFACES_EXPORT FileQuery {
 
         FileQueryIterator begin() const;
-        FileQueryIterator end() const;
+        FileQuerySentinel end() const;
 
         Path mPath;
         bool mRecursive = false;
         bool mShowDirs = false;
         bool mShowFiles = true;
     };
-
 
 }
 }

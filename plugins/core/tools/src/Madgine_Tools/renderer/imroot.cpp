@@ -25,7 +25,6 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
-
 METATABLE_BEGIN(Engine::Tools::ImRoot)
 READONLY_PROPERTY(Tools, tools)
 METATABLE_END(Engine::Tools::ImRoot)
@@ -124,48 +123,7 @@ namespace Tools {
         ImGui::NewFrame();
         Im3D::NewFrame();
 
-        if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
-
-            ImGuiID dockspace_id = ImGui::GetID("MadgineDockSpace");
-
-            ImGuiDockNodeFlags dockspace_flags = /*ImGuiDockNodeFlags_NoDockingInCentralNode | */ ImGuiDockNodeFlags_PassthruCentralNode;
-
-            // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
-            // because it would be confusing to have two docking targets within each others.
-            ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-
-            ImGui::SetNextWindowPos(viewport->Pos);
-            ImVec2 size = viewport->Size;
-            size.y -= ImGui::GetFrameHeight(); // remove status bar height
-            ImGui::SetNextWindowSize(size);
-            ImGui::SetNextWindowViewport(viewport->ID);
-
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-            window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-            window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-            window_flags |= ImGuiWindowFlags_NoBackground;
-
-            // Important: note that we proceed even if Begin() returns false (aka window is collapsed).
-            // This is because we want to keep our DockSpace() active. If a DockSpace() is inactive,
-            // all active windows docked into it will lose their parent and become undocked.
-            // We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
-            // any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-            bool open = true;
-            ImGui::Begin("Madgine Root Window", &open, window_flags);
-            ImGui::PopStyleVar();
-
-            ImGui::PopStyleVar(2);
-
-            // DockSpace
-            ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
-            mDockNode = ImGui::DockBuilderGetNode(dockspace_id)->CentralNode;
-        }
-
         if (ImGui::BeginMainMenuBar()) {
-
-            //mManager->setMenuHeight(ImGui::GetWindowSize().y);
 
             if (ImGui::BeginMenu("Project")) {
                 ImGui::EndMenu();
@@ -191,6 +149,27 @@ namespace Tools {
         }
 
         finishToolRead();
+
+        ImGui::SetNextWindowPos(viewport->WorkPos);
+        ImGui::SetNextWindowSize(viewport->WorkSize);
+        ImGui::SetNextWindowViewport(viewport->ID);
+
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
+        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+        window_flags |= ImGuiWindowFlags_NoBackground;
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::Begin("Madgine Root Window", nullptr, window_flags);
+        ImGui::PopStyleVar(3);
+
+        // DockSpace
+        ImGuiID dockspace_id = ImGui::GetID("MadgineDockSpace");
+        ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
+        ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+        mDockSpaceId = dockspace_id;
 
         for (ToolBase *tool : uniquePtrToPtr(mCollector)) {
             if (tool->isEnabled())
@@ -219,9 +198,9 @@ namespace Tools {
         return mCollector.get(index);
     }
 
-    ImGuiDockNode *ImRoot::dockNode() const
+    unsigned int ImRoot::dockSpaceId() const
     {
-        return mDockNode;
+        return mDockSpaceId;
     }
 
     void ImRoot::finishToolRead()

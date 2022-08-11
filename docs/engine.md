@@ -19,6 +19,6 @@ digraph example {
 \enddot
 
 The responsibilities of the plugins are as follows:
-- **Base**: Contains the Application class which holds a list of GlobalAPIComponents, which are all implementations of globally accessible features of the engine. (e.g. SceneManager)
-- **Client**: Contains the rendering interface and the MainWindow, which also holds a list of MainWindowComponents, which are all implementations of additional input/render layers to the engine. (e.g. ImGui)
-- **UI**: It contains a few utilities to connect events from Base and Client with each other. It induces the direct dependency to the Widgets plugin. The UIManager holds two lists of different handler component types. A GuiHandler is mostly used on top-level-widgets to be able to show/hide the widget and access all its children. A GameHandler is usually used on SceneWindows and it contains additional code for game interaction, like dragging, frame updates, etc.
+- **[Base](@ref Base)**: Contains the Application class which holds a list of GlobalAPIComponents, which are all implementations of globally accessible features of the engine. (e.g. SceneManager)
+- **[Client](@ref Client)**: Contains the rendering interface and the MainWindow, which also holds a list of MainWindowComponents, which are all implementations of additional input/render layers to the engine. (e.g. ImGui)
+- **[UI](@ref UI)**: It contains a few utilities to connect events from Base and Client with each other. It induces the direct dependency to the Widgets plugin. The UIManager holds two lists of different handler component types. A GuiHandler is mostly used on top-level-widgets to be able to show/hide the widget and access all its children. A GameHandler is usually used on SceneWindows and it contains additional code for game interaction, like dragging, frame updates, etc.

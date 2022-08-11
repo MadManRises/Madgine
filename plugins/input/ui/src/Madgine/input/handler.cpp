@@ -54,8 +54,10 @@ namespace Input {
 
             if (mWidget) {
                 mWidget->pointerMoveEvent().connect(&Handler::injectPointerMove, this, &mConStore);
-                mWidget->pointerDownEvent().connect(&Handler::injectPointerDown, this, &mConStore);
-                mWidget->pointerUpEvent().connect(&Handler::injectPointerUp, this, &mConStore);
+                mWidget->pointerClickEvent().connect(&Handler::injectPointerClick, this, &mConStore);
+                mWidget->dragBeginEvent().connect(&Handler::injectDragBegin, this, &mConStore);
+                mWidget->dragMoveEvent().connect(&Handler::injectDragMove, this, &mConStore);
+                mWidget->dragEndEvent().connect(&Handler::injectDragEnd, this, &mConStore);
                 mWidget->axisEvent().connect(&Handler::injectAxisEvent, this, &mConStore);
                 mWidget->keyEvent().connect(&Handler::injectKeyPress, this, &mConStore);
             }
@@ -67,14 +69,24 @@ namespace Input {
         onPointerMove(evt);
     }
 
-    void Handler::injectPointerDown(const PointerEventArgs &evt)
+    void Handler::injectPointerClick(const PointerEventArgs &evt)
     {
-        onPointerDown(evt);
+        onPointerClick(evt);
     }
 
-    void Handler::injectPointerUp(const PointerEventArgs &evt)
+    void Handler::injectDragBegin(const PointerEventArgs &evt)
     {
-        onPointerUp(evt);
+        onDragBegin(evt);
+    }
+
+    void Handler::injectDragMove(const PointerEventArgs &evt)
+    {
+        onDragMove(evt);
+    }
+
+    void Handler::injectDragEnd(const PointerEventArgs &evt)
+    {
+        onDragEnd(evt);
     }
 
     bool Handler::injectKeyPress(const KeyEventArgs &evt)
@@ -91,11 +103,19 @@ namespace Input {
     {
     }
 
-    void Handler::onPointerDown(const PointerEventArgs &me)
+    void Handler::onPointerClick(const PointerEventArgs &me)
     {
     }
 
-    void Handler::onPointerUp(const PointerEventArgs &me)
+    void Handler::onDragBegin(const PointerEventArgs &me)
+    {
+    }
+
+    void Handler::onDragMove(const PointerEventArgs &me)
+    {
+    }
+
+    void Handler::onDragEnd(const PointerEventArgs &me)
     {
     }
 

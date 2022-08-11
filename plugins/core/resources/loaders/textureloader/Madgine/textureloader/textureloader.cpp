@@ -57,7 +57,7 @@ namespace Render {
                 Resources::ImageLoader::Handle image;
                 if (!co_await image.load(info.resource()->name()))
                     co_return false;
-                loader->setData(texture, { image->mWidth, image->mHeight }, { image->mBuffer, static_cast<size_t>(image->mWidth * image->mHeight) });
+                loader->setData(texture, image->mSize, image->mBuffer);
                 co_return true;
             },
              loader);
