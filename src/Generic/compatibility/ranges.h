@@ -5,15 +5,14 @@
 namespace std {
 namespace ranges {
 
-#if (__cpp_lib_ranges < 201911L) || ANDROID || OSX || IOS
+#    if (__cpp_lib_ranges < 201911L) || ANDROID || OSX || IOS
     template <class T>
     concept range = requires(T &t)
     {
         t.begin();
         t.end();
     };
-#endif
-
+#    endif
 
     template <typename C, typename F>
     constexpr auto find_if_not(C &&c, F &&f)
@@ -39,6 +38,12 @@ namespace ranges {
     constexpr auto copy(C &&c, O o)
     {
         return std::copy(std::forward<C>(c).begin(), std::forward<C>(c).end(), o);
+    }
+
+    template <typename C, typename O>
+    constexpr auto move(C &&c, O o)
+    {
+        return std::move(std::forward<C>(c).begin(), std::forward<C>(c).end(), o);
     }
 
     template <typename C, typename I, typename P>
