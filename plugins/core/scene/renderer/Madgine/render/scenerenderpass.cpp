@@ -113,7 +113,7 @@ namespace Render {
         float aspectRatio = float(size.x) / size.y;
 
         {
-            auto perApplication = mPipeline.mapParameters<ScenePerApplication>(0);
+            auto perApplication = mPipeline->mapParameters<ScenePerApplication>(0);
 
             perApplication->p = mCamera->getProjectionMatrix(aspectRatio);
 
@@ -124,7 +124,7 @@ namespace Render {
         }
 
         {
-            auto perFrame = mPipeline.mapParameters<ScenePerFrame>(1);
+            auto perFrame = mPipeline->mapParameters<ScenePerFrame>(1);
 
             perFrame->v = mCamera->getViewMatrix();
             perFrame->light.caster.viewProjectionMatrix = mShadowPass.viewProjectionMatrix();
@@ -154,7 +154,7 @@ namespace Render {
             }
         }
 
-        target->bindTextures({ mShadowMap->depthTexture(), mPointShadowMaps[0]->depthTexture(), mPointShadowMaps[1]->depthTexture() }, 2);
+        mPipeline->bindTextures({ mShadowMap->depthTexture(), mPointShadowMaps[0]->depthTexture(), mPointShadowMaps[1]->depthTexture() }, 2);
 
         for (const std::pair<const std::tuple<const GPUMeshData *, const GPUMeshData::Material *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> &instance : instances) {
             const GPUMeshData *meshData = std::get<0>(instance.first);
@@ -162,7 +162,7 @@ namespace Render {
             Scene::Entity::Skeleton *skeleton = std::get<2>(instance.first);
 
             {
-                auto perObject = mPipeline.mapParameters<ScenePerObject>(2);
+                auto perObject = mPipeline->mapParameters<ScenePerObject>(2);
 
                 perObject->hasLight = true;
 
@@ -184,12 +184,12 @@ namespace Render {
                 };
             });
 
-            mPipeline.setInstanceData(std::move(instanceData));
+            mPipeline->setInstanceData(std::move(instanceData));
 
             if (skeleton) {
-                mPipeline.setDynamicParameters(0, skeleton->matrices());
+                mPipeline->setDynamicParameters(0, skeleton->matrices());
             } else {
-                mPipeline.setDynamicParameters(0, {});
+                mPipeline->setDynamicParameters(0, {});
             }
 
             if (material) {
@@ -199,9 +199,9 @@ namespace Render {
                     material->mDiffuseColor
                 };
 
-                target->renderMeshInstanced(instance.second.size(), meshData, mPipeline, &mat);
+                mPipeline->renderMeshInstanced(instance.second.size(), meshData, &mat);
             } else {
-                target->renderMeshInstanced(instance.second.size(), meshData, mPipeline, nullptr);
+                mPipeline->renderMeshInstanced(instance.second.size(), meshData, nullptr);
             }
         }
         target->popAnnotation();

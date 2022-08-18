@@ -20,8 +20,7 @@
 namespace Engine {
 namespace Widgets {
 
-    struct MADGINE_WIDGETS_EXPORT WidgetManager : Window::MainWindowComponent<WidgetManager>,
-                                                  Render::RenderPass {
+    struct MADGINE_WIDGETS_EXPORT WidgetManager : Window::MainWindowComponent<WidgetManager> {
 
         SERIALIZABLEUNIT(WidgetManager)
 
@@ -84,6 +83,7 @@ namespace Widgets {
         Threading::SignalStub<> &updatedSignal();
 
         const Atlas2::Entry *lookUpImage(Resources::ImageLoader::Resource *image);
+        const Atlas2::Entry *lookUpImage(std::string_view name);
 
     protected:
         WidgetBase *getHoveredWidget(const Vector2 &pos, WidgetBase *current);

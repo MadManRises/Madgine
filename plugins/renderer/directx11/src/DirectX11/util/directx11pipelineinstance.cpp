@@ -8,6 +8,10 @@
 
 #include "Generic/bytebuffer.h"
 
+#include "../directx11meshdata.h"
+
+#include "Madgine/render/material.h"
+
 namespace Engine {
 namespace Render {
 
@@ -90,5 +94,82 @@ namespace Render {
             std::memcpy(target.mData, data.mData, data.mSize);
         }
     }
+
+    void DirectX11PipelineInstance::renderMesh(const GPUMeshData *m, const Material *material) const
+    {
+        const DirectX11MeshData *mesh = static_cast<const DirectX11MeshData *>(m);
+
+        mesh->mVertices.bindVertex(mesh->mVertexSize);
+
+        bind(mesh->mFormat);
+
+        DirectX11RenderContext::getSingleton().bindFormat(mesh->mFormat, mInstanceDataSize);
+
+        if (material)
+            bindTextures({ { material->mDiffuseTexture, TextureType_2D }, { material->mEmissiveTexture, TextureType_2D } });
+
+        constexpr D3D11_PRIMITIVE_TOPOLOGY modes[] {
+            D3D11_PRIMITIVE_TOPOLOGY_POINTLIST,
+            D3D11_PRIMITIVE_TOPOLOGY_LINELIST,
+            D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
+        };
+
+        assert(mesh->mGroupSize > 0 && mesh->mGroupSize <= 3);
+        D3D11_PRIMITIVE_TOPOLOGY mode = modes[mesh->mGroupSize - 1];
+        sDeviceContext->IASetPrimitiveTopology(mode);
+
+        if (mesh->mIndices) {
+            mesh->mIndices.bindIndex();
+            sDeviceContext->DrawIndexed(mesh->mElementCount, 0, 0);
+        } else {
+            sDeviceContext->Draw(mesh->mElementCount, 0);
+        }
+    }
+
+    void DirectX11PipelineInstance::renderMeshInstanced(size_t count, const GPUMeshData *m, const Material *material) const
+    {
+        const DirectX11MeshData *mesh = static_cast<const DirectX11MeshData *>(m);
+
+        mesh->mVertices.bindVertex(mesh->mVertexSize);
+
+        bind(mesh->mFormat);
+
+        DirectX11RenderContext::getSingleton().bindFormat(mesh->mFormat, mInstanceDataSize);
+
+        if (material)
+            bindTextures({ { material->mDiffuseTexture, TextureType_2D }, { material->mEmissiveTexture, TextureType_2D } });
+
+        constexpr D3D11_PRIMITIVE_TOPOLOGY modes[] {
+            D3D11_PRIMITIVE_TOPOLOGY_POINTLIST,
+            D3D11_PRIMITIVE_TOPOLOGY_LINELIST,
+            D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
+        };
+
+        assert(mesh->mGroupSize > 0 && mesh->mGroupSize <= 3);
+        D3D11_PRIMITIVE_TOPOLOGY mode = modes[mesh->mGroupSize - 1];
+        sDeviceContext->IASetPrimitiveTopology(mode);
+
+        if (mesh->mIndices) {
+            mesh->mIndices.bindIndex();
+            sDeviceContext->DrawIndexedInstanced(mesh->mElementCount, count, 0, 0, 0);
+        } else {
+            sDeviceContext->DrawInstanced(mesh->mElementCount, count, 0, 0);
+        }
+    }
+
+    void DirectX11PipelineInstance::bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset) const
+    {
+        bindTexturesImpl(tex, offset);
+    }
+
+    void DirectX11PipelineInstance::bindTexturesImpl(const std::vector<TextureDescriptor> &tex, size_t offset)
+    {
+        std::vector<ID3D11ShaderResourceView *> handles;
+        std::ranges::transform(tex, std::back_inserter(handles), [](const TextureDescriptor &desc) {
+            return reinterpret_cast<ID3D11ShaderResourceView *>(desc.mTextureHandle);
+        });
+        sDeviceContext->PSSetShaderResources(offset, tex.size(), handles.data());
+    }
+
 }
 }

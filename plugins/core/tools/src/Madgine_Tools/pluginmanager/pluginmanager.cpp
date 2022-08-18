@@ -60,7 +60,7 @@ namespace Tools {
             ImGui::PopStyleColor();
 
             for (auto &[sectionName, section] : mManager) {
-                if (ImGui::TreeNode(sectionName.c_str())) {
+                if (ImGui::CollapsingHeader(sectionName.c_str())) {
                     for (auto &[pluginName, plugin] : section) {
                         const std::string &project = plugin.project();
 
@@ -120,11 +120,9 @@ namespace Tools {
                             }
                             ImGui::TreePop();
                         }
-                    }
-                    ImGui::TreePop();
+                    }                    
                 }
             }
-
         }
         ImGui::End();
     }

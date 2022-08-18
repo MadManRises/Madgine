@@ -33,8 +33,10 @@ namespace Resources {
         stbi_uc *ptr = stbi_load_from_memory(buffer.data(), buffer.size(),
             &data.mSize.x,
             &data.mSize.y,
-            &data.mChannels,
+            nullptr,
             STBI_rgb_alpha);
+        
+        data.mChannels = 4;
 
         data.mBuffer = { std::unique_ptr<stbi_uc, Functor<&stbi_image_free>> { ptr }, static_cast<size_t>(data.mSize.x) * data.mSize.y * data.mChannels };
 

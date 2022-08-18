@@ -21,6 +21,11 @@ namespace Render {
 
         virtual void setDynamicParameters(size_t index, const ByteBuffer &data) override;
 
+        virtual void renderMesh(const GPUMeshData *mesh, const Material *material = nullptr) const override;
+        virtual void renderMeshInstanced(size_t count, const GPUMeshData *mesh, const Material *material = nullptr) const override;
+
+        virtual void bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset = 0) const override;        
+
     private:
         std::array<ReleasePtr<ID3D12PipelineState>, 3> *mPipelines;
 

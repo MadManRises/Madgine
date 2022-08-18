@@ -105,10 +105,17 @@ namespace Tools {
         if (changed) {
             args.clear();
             args.resize(function.argumentsCount(true));
+
             for (size_t i = 0; i < function.argumentsCount(true); ++i) {
-                args[i].setType(function.mFunction.mTable->mArguments[i + function.isMemberFunction()].mType);
+                ExtendedValueTypeDesc type = function.mFunction.mTable->mArguments[i + function.isMemberFunction()].mType;
+                if (type.mType.isRegular()) {
+                    args[i].setType(type);
+                } else {
+                    assert(type.mType == ExtendedValueTypeEnum::GenericType);
+                }
             }
         }
+
         return renderFunctionDetails(function, args);
     }
 
@@ -124,10 +131,11 @@ namespace Tools {
 
                 for (size_t i = 0; i < function.argumentsCount(); ++i) {
 
-                    //ImGui::PushID(i);
+                    ImGui::TableNextRow();
+
                     ValueType v = i == 0 ? ValueType { function.scope() } : args[i - 1];
                     bool changed = mInspector->drawValue(function.mFunction.mTable->mArguments[i].mName, v, true, !function.mFunction.mTable->mArguments[i].mType.mType.isRegular()).first;
-                    //ImGui::ValueType(&args[i], function.mMethod.mTable->mArguments[i].mType);
+
                     if (ImGui::BeginDragDropTarget()) {
                         changed |= ImGui::AcceptDraggableValueType(v, function.mFunction.mTable->mArguments[i].mType);
                         ImGui::EndDragDropTarget();
@@ -139,8 +147,17 @@ namespace Tools {
                             args[i - 1] = v;
                     }
 
-                    if (ImGui::IsItemHovered())
-                        ImGui::SetTooltip("%s", function.mFunction.mTable->mArguments[i].mType.toString().c_str());
+                    if (ImGui::IsItemHovered()) {
+                        ExtendedValueTypeDesc type = function.mFunction.mTable->mArguments[i].mType;
+                        if (type.mType != ExtendedValueTypeEnum::GenericType) {
+                            ImGui::SetTooltip("%s", type.toString().c_str());
+                        } else {
+                            assert(i > 0);
+                            ImGui::SetTooltip("%s (%s)", args[i - 1].type().toString().c_str(), type.toString().c_str());
+                        }
+
+                        
+                    }
                 }
 
                 ImGui::EndTable();
@@ -149,17 +166,11 @@ namespace Tools {
             ImGui::Text(")");
         }
 
-        if (!function.mFunction)
-            ImGui::BeginDisabled();
+        ImGui::BeginDisabled(!(function.mFunction && (!function.isMemberFunction() || function.mScope)));
 
-        bool call = false;
+        bool call = ImGui::Button("Call");
 
-        if (ImGui::Button("Call")) {
-            call = true;
-        }
-
-        if (!function.mFunction)
-            ImGui::EndDisabled();
+        ImGui::EndDisabled();
 
         return call;
     }

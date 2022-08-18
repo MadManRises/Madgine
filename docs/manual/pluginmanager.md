@@ -1,0 +1,1 @@
+\page PluginManagerManual Plugin Manager

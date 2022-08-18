@@ -239,6 +239,14 @@ namespace Tools {
 
     void NodeGraphEditor::render()
     {
+        renderEditor();
+        renderHierarchy();
+        renderSelection();
+    }
+
+    void NodeGraphEditor::renderEditor()
+    {
+
         ImGui::PushID(this);
 
         std::string fileName;
@@ -253,6 +261,7 @@ namespace Tools {
         if (mIsDirty)
             flags |= ImGuiWindowFlags_UnsavedDocument;
 
+        ImGui::SetNextWindowDockID(mRoot.dockSpaceId(), ImGuiCond_FirstUseEver);
         if (ImGui::Begin(fileName.c_str(), nullptr, flags)) {
 
             ImVec2 topLeftScreen = ImGui::GetCursorScreenPos();
@@ -690,14 +699,24 @@ namespace Tools {
         }
         ImGui::End();
 
+        ImGui::PopID();
+    }
+
+    void NodeGraphEditor::renderHierarchy()
+    {
         if (mHierarchyVisible) {
-            if (ImGui::Begin("Node graph - Hierarchy")) {
+            if (ImGui::Begin("Node graph - Hierarchy", &mHierarchyVisible)) {
+                ImGui::SetWindowDockingDir(mRoot.dockSpaceId(), ImGuiDir_Left, 0.2f, false, ImGuiCond_FirstUseEver);
             }
             ImGui::End();
         }
+    }
 
+    void NodeGraphEditor::renderSelection()
+    {
         if (mNodeDetailsVisible) {
-            if (ImGui::Begin("Node graph - Node Details")) {
+            if (ImGui::Begin("Node graph - Node Details", &mNodeDetailsVisible)) {
+                ImGui::SetWindowDockingDir(mRoot.dockSpaceId(), ImGuiDir_Right, 0.2f, false, ImGuiCond_FirstUseEver);
                 if (mSelectedNodeIndex) {
                     if (ImGui::BeginTable("columns", 2, ImGuiTableFlags_Resizable)) {
                         mIsDirty |= getTool<Inspector>().drawMembers(mGraph.nodes()[mSelectedNodeIndex].get());
@@ -707,8 +726,6 @@ namespace Tools {
             }
             ImGui::End();
         }
-
-        ImGui::PopID();
     }
 
     void NodeGraphEditor::renderMenu()
@@ -736,8 +753,7 @@ namespace Tools {
                     try {
                         IndexType<uint32_t> index = 0;
                         interpreter.interpret(index, {});
-                    } catch (const std::out_of_range &e)
-                    {
+                    } catch (const std::out_of_range &e) {
                         LOG_ERROR("Uncaught out_of_range exception during NodeGraph debugging: " << e.what());
                     }
                 }

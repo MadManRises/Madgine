@@ -115,17 +115,17 @@ namespace Render {
 
     size_t MeshRendererNode::dataInCount() const
     {
-        return 2;
+        return 1;
     }
 
     std::string_view MeshRendererNode::dataInName(uint32_t index) const
     {
-        return index == 0 ? "renderTarget" : "mesh";
+        return "mesh";
     }
 
     ExtendedValueTypeDesc MeshRendererNode::dataInType(uint32_t index, bool bidir) const
     {
-        return index == 0 ? toValueTypeDesc<Render::RenderTarget *>() : toValueTypeDesc<Render::GPUMeshLoader::Resource *>();
+        return toValueTypeDesc<Render::GPUMeshLoader::Resource *>();
     }
 
     struct MeshRendererNodeInterpret : NodeGraph::NodeInterpreterData {
@@ -171,7 +171,7 @@ namespace Render {
                 buffer->mInterpretData->mMapper = [&pipeline { interpret->mPipeline }, index { buffer->mIndex }]() mutable {
                     WritableByteBuffer buffer;
                     if (pipeline)
-                        buffer = pipeline.mapParameters(index);
+                        buffer = pipeline->mapParameters(index);
                     return buffer;
                 };
 
@@ -182,14 +182,10 @@ namespace Render {
             data = std::move(interpret);
         }
 
-        ValueType targetV;
-        interpreter.read(targetV, 0);
-        Render::RenderTarget *target = ValueType_as<Render::RenderTarget *>(targetV);
-
         MeshRendererNodeInterpret *interpretData = static_cast<MeshRendererNodeInterpret *>(data.get());
 
         ValueType meshV;
-        interpreter.read(meshV, 1);
+        interpreter.read(meshV, 0);
         Render::GPUMeshLoader::Resource *mesh = ValueType_as<Render::GPUMeshLoader::Resource *>(meshV);
 
         if (mesh) {
@@ -202,7 +198,7 @@ namespace Render {
                     { 1, 1, 1, 1 }
                 };
                 //TODO: Material;
-                target->renderMesh(interpretData->mMesh, interpretData->mPipeline, &mat);
+                interpretData->mPipeline->renderMesh(interpretData->mMesh, &mat);
             }
         }
     }

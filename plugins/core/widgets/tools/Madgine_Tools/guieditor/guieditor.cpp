@@ -379,7 +379,7 @@ namespace Tools {
             ImGui::DraggableValueTypeSource(w->mName, w);
             if (ImGui::BeginDragDropTarget()) {
                 Widgets::WidgetBase *newChild = nullptr;
-                if (ImGui::AcceptDraggableValueType(newChild)) {
+                if (ImGui::AcceptDraggableValueType(newChild, nullptr, [](const Widgets::WidgetBase *child) { return child->getParent(); })) {
                     newChild->setParent(w);
                     aborted = true;
                 }

@@ -5,14 +5,16 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
-METATABLE_BEGIN_BASE(Engine::Widgets::ScalableImageRenderData, Engine::Widgets::ImageRenderData)
+METATABLE_BEGIN_BASE(Engine::Widgets::ScalableImageRenderData, Engine::Widgets::RenderData)
+PROPERTY(Image, image, setImage)
 MEMBER(mLeftBorder)
 MEMBER(mTopBorder)
 MEMBER(mBottomBorder)
 MEMBER(mRightBorder)
 METATABLE_END(Engine::Widgets::ScalableImageRenderData)
 
-SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::ScalableImageRenderData, Engine::Widgets::ImageRenderData)
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::ScalableImageRenderData, Engine::Widgets::RenderData)
+ENCAPSULATED_FIELD(Image, imageName, setImageName)
 FIELD(mLeftBorder)
 FIELD(mTopBorder)
 FIELD(mBottomBorder)
@@ -22,13 +24,33 @@ SERIALIZETABLE_END(Engine::Widgets::ScalableImageRenderData)
 namespace Engine {
 namespace Widgets {
 
+    void ScalableImageRenderData::setImageName(std::string_view name)
+    {
+        setImage(Resources::ImageLoader::getSingleton().get(name));
+    }
+
+    void ScalableImageRenderData::setImage(Resources::ImageLoader::Resource *image)
+    {
+        mImage = image;
+    }
+
+    std::string_view ScalableImageRenderData::imageName() const
+    {
+        return mImage ? mImage->name() : "";
+    }
+
+    Resources::ImageLoader::Resource *ScalableImageRenderData::image() const
+    {
+        return mImage;
+    }
+
     std::vector<Vertex> ScalableImageRenderData::renderImage(Vector3 pos, Vector2 size, Vector2 screenSize, const Atlas2::Entry &entry, Vector4 color)
     {
         std::vector<Vertex> result;
         Vector3 posOuter = pos;
-        
-        Vector2 topLeftUV = Vector2 { entry.mArea.mTopLeft } / (2048.f /* * mData->mUIAtlasSize*/);
-        Vector2 uvSize = Vector2 { entry.mArea.mSize } / (2048.f /* * mData->mUIAtlasSize*/);
+
+        Vector2 topLeftUV = Vector2 { entry.mArea.mTopLeft + Vector2i { 1, 1 } } / (2048.f /* * mData->mUIAtlasSize*/);
+        Vector2 uvSize = Vector2 { entry.mArea.mSize - Vector2i { 2, 2 } } / (2048.f /* * mData->mUIAtlasSize*/);
         Vector2 bottomRightUV = topLeftUV + uvSize;
 
         Vector2 topLeftUVOuter = topLeftUV;

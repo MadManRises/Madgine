@@ -82,7 +82,7 @@ namespace Render {
         target->pushAnnotation("PointShadow");
 
         {
-            auto perApplication = mPipeline.mapParameters<PointShadowPerApplication>(0);
+            auto perApplication = mPipeline->mapParameters<PointShadowPerApplication>(0);
 
             Frustum f {
                 Vector3::ZERO,
@@ -95,7 +95,7 @@ namespace Render {
         }
 
         {
-            auto perFrame = mPipeline.mapParameters<PointShadowPerFrame>(1);
+            auto perFrame = mPipeline->mapParameters<PointShadowPerFrame>(1);
 
             perFrame->position = transform->getPosition();
         }
@@ -105,21 +105,21 @@ namespace Render {
             Scene::Entity::Skeleton *skeleton = std::get<1>(instance.first);
 
             {
-                auto perObject = mPipeline.mapParameters<PointShadowPerObject>(2);
+                auto perObject = mPipeline->mapParameters<PointShadowPerObject>(2);
 
                 perObject->hasSkeleton = skeleton != nullptr;
             }
 
             size_t instanceCount = instance.second.size();
-            mPipeline.setInstanceData(std::move(instance.second));
+            mPipeline->setInstanceData(std::move(instance.second));
 
             if (skeleton) {
-                mPipeline.setDynamicParameters(0, skeleton->matrices());
+                mPipeline->setDynamicParameters(0, skeleton->matrices());
             } else {
-                mPipeline.setDynamicParameters(0, {});
+                mPipeline->setDynamicParameters(0, {});
             }
 
-            target->renderMeshInstanced(instanceCount, meshData, mPipeline);
+            mPipeline->renderMeshInstanced(instanceCount, meshData);
         }
 
         target->popAnnotation();

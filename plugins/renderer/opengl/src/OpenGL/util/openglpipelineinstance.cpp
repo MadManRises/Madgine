@@ -11,6 +11,13 @@
 
 #include "openglvertexarray.h"
 
+#include "../openglmeshdata.h"
+
+#include "Madgine/render/material.h"
+
+#include "../openglrendertarget.h"
+#include "../openglrendercontext.h"
+
 namespace Engine {
 namespace Render {
 
@@ -106,6 +113,108 @@ namespace Render {
         if (data.mSize > 0) {
             auto target = mShaderStorageBuffers[index].mapData();
             std::memcpy(target.mData, data.mData, data.mSize);
+        }
+    }
+
+    
+    void OpenGLPipelineInstance::renderMesh(const GPUMeshData *m, const Material *material) const
+    {
+        const OpenGLMeshData *mesh = static_cast<const OpenGLMeshData *>(m);
+
+        mesh->mVertices.bind();
+        OpenGLRenderContext::getSingleton().bindFormat(mesh->mFormat);
+#if !OPENGL_ES || OPENGL_ES >= 310
+#    if !OPENGL_ES
+        if (glBindVertexBuffer)
+#    endif
+            glBindVertexBuffer(0, mesh->mVertices.handle(), 0, mesh->mVertexSize);
+#endif
+
+        bind();
+
+        verify();
+
+        if (material)
+            bindTextures({ { material->mDiffuseTexture, TextureType_2D } });
+
+        constexpr GLenum modes[] {
+            GL_POINTS,
+            GL_LINES,
+            GL_TRIANGLES
+        };
+
+        GLenum mode = modes[mesh->mGroupSize - 1];
+
+        if (mesh->mIndices) {
+            mesh->mIndices.bind();
+            glDrawElements(mode, mesh->mElementCount, GL_UNSIGNED_INT, 0);
+        } else
+            glDrawArrays(mode, 0, mesh->mElementCount);
+        GL_CHECK();
+
+        OpenGLRenderContext::getSingleton().unbindFormat();
+    }
+
+    void OpenGLPipelineInstance::renderMeshInstanced(size_t count, const GPUMeshData *m, const Material *material) const
+    {
+        const OpenGLMeshData *mesh = static_cast<const OpenGLMeshData *>(m);
+
+        mesh->mVertices.bind();
+        OpenGLRenderContext::getSingleton().bindFormat(mesh->mFormat);
+#if !OPENGL_ES || OPENGL_ES >= 310
+#    if !OPENGL_ES
+        if (glBindVertexBuffer)
+#    endif
+            glBindVertexBuffer(0, mesh->mVertices.handle(), 0, mesh->mVertexSize);
+#endif
+
+        bind();
+
+        verify();
+
+        if (material)
+            bindTextures({ { material->mDiffuseTexture, TextureType_2D } });
+
+        constexpr GLenum modes[] {
+            GL_POINTS,
+            GL_LINES,
+            GL_TRIANGLES
+        };
+
+        GLenum mode = modes[mesh->mGroupSize - 1];
+
+        if (mesh->mIndices) {
+            mesh->mIndices.bind();
+            glDrawElementsInstanced(mode, mesh->mElementCount, GL_UNSIGNED_SHORT, 0, count);
+        } else
+            glDrawArraysInstanced(mode, 0, mesh->mElementCount, count);
+        GL_CHECK();
+
+        OpenGLRenderContext::getSingleton().unbindFormat();
+    }
+
+    void OpenGLPipelineInstance::bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset) const
+    {
+        for (size_t i = 0; i < tex.size(); ++i) {
+            glActiveTexture(GL_TEXTURE0 + offset + i);
+            GLenum type;
+            switch (tex[i].mType) {
+            case TextureType_2D:
+                type = GL_TEXTURE_2D;
+                break;
+#if MULTISAMPLING
+            case TextureType_2DMultiSample:
+                type = GL_TEXTURE_2D_MULTISAMPLE;
+                break;
+#endif
+            case TextureType_Cube:
+                type = GL_TEXTURE_CUBE_MAP;
+                break;
+            default:
+                throw 0;
+            }
+            glBindTexture(type, tex[i].mTextureHandle);
+            GL_CHECK();
         }
     }
 

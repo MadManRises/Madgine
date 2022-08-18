@@ -23,6 +23,11 @@ namespace Render {
 
         virtual void setDynamicParameters(size_t index, const ByteBuffer &data) override;
 
+        virtual void renderMesh(const GPUMeshData *mesh, const Material *material = nullptr) const override;
+        virtual void renderMeshInstanced(size_t count, const GPUMeshData *mesh, const Material *material = nullptr) const override;
+
+        virtual void bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset = 0) const override;
+
         void verify() const;
 
         mutable GLuint mHandle = 0;
@@ -33,7 +38,7 @@ namespace Render {
         std::vector<OpenGLSSBOBuffer> mShaderStorageBuffers;
         mutable OpenGLBuffer mShaderStorageOffsetBuffer = { GL_UNIFORM_BUFFER };
 #endif
-        
+
         OpenGLBuffer mInstanceBuffer = GL_ARRAY_BUFFER;
 
         OpenGLPipelineLoader::Handle mPipeline;

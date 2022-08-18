@@ -147,86 +147,9 @@ namespace Render {
         commandList->RSSetScissorRects(1, &scissorRect);
     }
 
-    void DirectX12RenderTarget::renderMesh(const GPUMeshData *m, const PipelineInstance *p, const Material *material)
-    {
-        renderMeshInstanced(1, m, p, material);
-        /* ID3D12GraphicsCommandList *commandList = context()->mCommandList.mList;
-
-        const DirectX12MeshData *mesh = static_cast<const DirectX12MeshData *>(m);
-        const DirectX12PipelineInstance *pipeline = static_cast<const DirectX12PipelineInstance *>(p);
-
-        mesh->mVertices.bindVertex(commandList, mesh->mVertexSize);
-
-        pipeline->bind(commandList, mesh->mFormat, mesh->mGroupSize);
-
-        if (material)
-            bindTextures({ { material->mDiffuseTexture, TextureType_2D } });
-
-        constexpr D3D12_PRIMITIVE_TOPOLOGY modes[] {
-            D3D_PRIMITIVE_TOPOLOGY_POINTLIST,
-            D3D_PRIMITIVE_TOPOLOGY_LINELIST,
-            D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
-        };
-
-        assert(mesh->mGroupSize > 0 && mesh->mGroupSize <= 3);
-        D3D12_PRIMITIVE_TOPOLOGY mode = modes[mesh->mGroupSize - 1];
-        commandList->IASetPrimitiveTopology(mode);
-
-        if (mesh->mIndices) {
-            mesh->mIndices.bindIndex(commandList);
-            commandList->DrawIndexedInstanced(mesh->mElementCount, 1, 0, 0, 0);
-        } else {
-            commandList->DrawInstanced(mesh->mElementCount, 1, 0, 0);
-        }*/
-    }
-
-    void DirectX12RenderTarget::renderMeshInstanced(size_t count, const GPUMeshData *m, const PipelineInstance *p, const Material *material)
-    {
-        ID3D12GraphicsCommandList *commandList = context()->mCommandList.mList;
-
-        const DirectX12PipelineInstance *pipeline = static_cast<const DirectX12PipelineInstance *>(p);
-        const DirectX12MeshData *mesh = static_cast<const DirectX12MeshData *>(m);
-
-        if (!pipeline->bind(commandList, m->mFormat, m->mGroupSize))
-            return;
-
-        mesh->mVertices.bindVertex(commandList, mesh->mVertexSize);
-
-        if (material)
-            bindTextures({ { material->mDiffuseTexture, TextureType_2D } });
-
-        constexpr D3D12_PRIMITIVE_TOPOLOGY modes[] {
-            D3D_PRIMITIVE_TOPOLOGY_POINTLIST,
-            D3D_PRIMITIVE_TOPOLOGY_LINELIST,
-            D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
-        };
-
-        assert(m->mGroupSize > 0 && m->mGroupSize <= 3);
-        D3D12_PRIMITIVE_TOPOLOGY mode = modes[m->mGroupSize - 1];
-        commandList->IASetPrimitiveTopology(mode);
-
-        if (mesh->mIndices) {
-            mesh->mIndices.bindIndex(commandList);
-            commandList->DrawIndexedInstanced(m->mElementCount, count, 0, 0, 0);
-        } else {
-            commandList->DrawInstanced(m->mElementCount, count, 0, 0);
-        }
-    }
-
     void DirectX12RenderTarget::clearDepthBuffer()
     {
         context()->mCommandList.mList->ClearDepthStencilView(DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.cpuHandle(mDepthStencilView), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-    }
-
-    void DirectX12RenderTarget::bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset) const
-    {
-        for (size_t i = 0; i < tex.size(); ++i) {
-            if (tex[i].mTextureHandle) {
-                D3D12_GPU_DESCRIPTOR_HANDLE handle;
-                handle.ptr = tex[i].mTextureHandle;
-                context()->mCommandList.mList->SetGraphicsRootDescriptorTable(3 + offset + i, handle);
-            }
-        }
     }
 
     DirectX12RenderContext *DirectX12RenderTarget::context() const

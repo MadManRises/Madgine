@@ -30,19 +30,11 @@ namespace Render {
 
             Threading::TaskFuture<bool> createGenerated(PipelineConfiguration config, CodeGen::ShaderFile file, PipelineLoader *loader = &PipelineLoader::getSingleton());
             
-            WritableByteBuffer mapParameters(size_t index);
-            template <typename T>
-            auto mapParameters(size_t index) {
-                return mapParameters(index).cast<T>();
-            }
-
-            void setInstanceData(const ByteBuffer &data);
-
-            void setDynamicParameters(size_t index, const ByteBuffer &data);
 
             void reset();
 
             operator PipelineInstance *() const;
+            PipelineInstance *operator->() const;
 
         private:
             std::unique_ptr<PipelineInstance> mPtr;

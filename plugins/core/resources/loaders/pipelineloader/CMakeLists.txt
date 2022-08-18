@@ -8,5 +8,5 @@ FolderSources(sources "" Madgine pipelineloaderlib.h)
 
 add_plugin(PipelineLoader Madgine Utility ${sources} PRECOMPILED_HEADER Madgine/pipelineloaderlib.h SOURCE_ROOT .)
 
-target_link_plugins(PipelineLoader Resources)
+target_link_plugins(PipelineLoader Resources MeshLoader)
 target_link_libraries(PipelineLoader PUBLIC CodeGen)

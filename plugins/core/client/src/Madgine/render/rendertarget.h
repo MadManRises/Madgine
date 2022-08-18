@@ -13,17 +13,12 @@ namespace Render {
         virtual ~RenderTarget();
 
         void render();
-        virtual void setRenderSpace(const Rect2i &space) = 0;
-        virtual void renderQuad(const PipelineInstance *pipeline);
-        virtual void renderMesh(const GPUMeshData *mesh, const PipelineInstance *pipeline, const Material *material = nullptr) = 0;
-        virtual void renderMeshInstanced(size_t count, const GPUMeshData *mesh, const PipelineInstance *pipeline, const Material *material = nullptr) = 0;
+
         virtual void clearDepthBuffer() = 0;
 
         virtual TextureDescriptor texture(size_t index = 0, size_t iteration = std::numeric_limits<size_t>::max()) const = 0;
         virtual size_t textureCount() const = 0;
         virtual TextureDescriptor depthTexture() const = 0;
-
-        virtual void bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset = 0) const = 0;
 
         virtual bool resizeImpl(const Vector2i &size) = 0;
         bool resize(const Vector2i &size);
@@ -42,6 +37,8 @@ namespace Render {
 
         virtual void pushAnnotation(const char *tag) = 0;
         virtual void popAnnotation() = 0;
+
+        virtual void setRenderSpace(const Rect2i &space) = 0;
 
         RenderContext *context() const;
 

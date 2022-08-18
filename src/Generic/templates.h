@@ -94,7 +94,7 @@ template <typename T>
 concept Tuple = InstanceOf<T, std::tuple>;
 
 template <typename T>
-concept String = std::is_constructible_v<std::string, const T &> &&std::is_constructible_v<T, const std::string &>;
+concept String = std::is_constructible_v<std::string, const T &> && std::is_constructible_v<T, const std::string &>;
 
 template <typename T>
 concept StringViewable = std::is_constructible_v<std::string_view, const T &>;
@@ -113,6 +113,9 @@ concept Unsigned = std::is_unsigned_v<T>;
 
 template <typename T, typename... Ty>
 concept OneOf = (std::same_as<T, Ty> || ...);
+
+template <typename T, typename... Ty>
+concept NoneOf = !OneOf<T, Ty...>;
 
 template <typename T>
 struct OutRef {

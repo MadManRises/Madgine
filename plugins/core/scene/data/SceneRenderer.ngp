@@ -37,12 +37,6 @@
                         <Element>0</Element>
                     </Element>
                 </Item>
-                <Item>
-                    <Element>
-                        <Element>-1</Element>
-                        <Element>1</Element>
-                    </Element>
-                </Item>
             </mDataInPins>
             <mDataOutPins>
             </mDataOutPins>
@@ -128,7 +122,7 @@
                 <Item>
                     <Element>
                         <Element>-1</Element>
-                        <Element>2</Element>
+                        <Element>1</Element>
                     </Element>
                 </Item>
             </mDataInPins>
@@ -143,7 +137,7 @@
                 <Item>
                     <Element>
                         <Element>-1</Element>
-                        <Element>3</Element>
+                        <Element>2</Element>
                     </Element>
                 </Item>
                 <Item>

@@ -15,6 +15,8 @@
 
 #include "directx11rendercontext.h"
 
+#include "util/directx11pipelineinstance.h"
+
 namespace Engine {
 namespace Render {
 
@@ -96,7 +98,7 @@ namespace Render {
         DirectX11RenderTarget::beginIteration(iteration);
 
         if (iteration > 0)
-            bindTextures({ mTextures[1 - (iteration % 2)].descriptor() });
+            DirectX11PipelineInstance::bindTexturesImpl({ mTextures[1 - (iteration % 2)].descriptor() });
     }
 
     void DirectX11RenderTexture::endIteration(size_t iteration) const

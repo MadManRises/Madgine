@@ -58,12 +58,12 @@ struct AreaView {
         }
     }
 
-    T &at(const std::array<size_t, Storage> &indices)
+    T &at(const std::array<size_t, Dim> &indices)
     {
         return mBuffer[index(indices)];
     }
 
-    const T &at(const std::array<size_t, Storage> &indices) const
+    const T &at(const std::array<size_t, Dim> &indices) const
     {
         return mBuffer[index(indices)];
     }
@@ -78,17 +78,19 @@ struct AreaView {
         std::swap(mAxisMapping[a1], mAxisMapping[a2]);
     }
 
-    size_t index(const std::array<size_t, Storage> &indices) const
+    size_t index(const std::array<size_t, Dim> &indices) const
     {
         size_t acc = 0;
         for (int i = Dim - 1; i >= 0; --i) {
             size_t reverseAxis = std::ranges::find(mAxisMapping, i) - mAxisMapping.begin();
-            assert(indices[reverseAxis] < mSizes[i]);
             acc *= mFullSizes[i];
-            if (!mFlipped[i]) {
-                acc += indices[reverseAxis];
-            } else {
-                acc += (mSizes[i] - 1 - indices[reverseAxis]);
+            if (reverseAxis < Dim) {
+                assert(indices[reverseAxis] < mSizes[i]);
+                if (!mFlipped[i]) {
+                    acc += indices[reverseAxis];
+                } else {
+                    acc += (mSizes[i] - 1 - indices[reverseAxis]);
+                }
             }
         }
         return acc;
@@ -104,13 +106,13 @@ struct AreaView {
 
         iterator() = default;
 
-        iterator(AreaView<T, Dim> *view)
+        iterator(AreaView<T, Dim, Storage> *view)
             : mView(view)
         {
             mIndices.fill(0);
         }
 
-        iterator(AreaView<T, Dim> *view, const std::array<size_t, Dim> &indices)
+        iterator(AreaView<T, Dim, Storage> *view, const std::array<size_t, Dim> &indices)
             : mView(view)
             , mIndices(indices)
         {
@@ -148,15 +150,19 @@ struct AreaView {
     private:
         void validate()
         {
-            assert(mIndices[Dim - 1] < mView->mSizes[mView->mAxisMapping[Dim - 1]]);
-            for (size_t i = 0; i < Dim - 1; ++i) {
-                size_t axis = mView->mAxisMapping[i];
-                assert(mIndices[i] <= mView->mSizes[axis]);
-                if (mIndices[i] == mView->mSizes[axis]) {
-                    mIndices[i] = 0;
-                    ++mIndices[i + 1];
-                } else {
-                    break;
+            if constexpr (Dim == 1) {
+                assert(mIndices[0] <= mView->mSizes[mView->mAxisMapping[0]]);
+            } else {
+                assert(mIndices[Dim - 1] < mView->mSizes[mView->mAxisMapping[Dim - 1]]);
+                for (size_t i = 0; i < Dim - 1; ++i) {
+                    size_t axis = mView->mAxisMapping[i];
+                    assert(mIndices[i] <= mView->mSizes[axis]);
+                    if (mIndices[i] == mView->mSizes[axis]) {
+                        mIndices[i] = 0;
+                        ++mIndices[i + 1];
+                    } else {
+                        break;
+                    }
                 }
             }
         }

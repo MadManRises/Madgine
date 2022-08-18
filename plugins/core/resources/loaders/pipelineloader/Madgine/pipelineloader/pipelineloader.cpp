@@ -6,6 +6,9 @@
 
 #include "Madgine/codegen/codegen_shader.h"
 
+#include "Madgine/meshloaderlib.h"
+#include "Madgine/meshloader/gpumeshloader.h"
+
 METATABLE_BEGIN(Engine::Render::PipelineLoader)
 METATABLE_END(Engine::Render::PipelineLoader)
 
@@ -48,22 +51,7 @@ namespace Render {
         return loader->queueLoading(loader->create(*this, std::move(config), std::move(file)));
     }
 
-    WritableByteBuffer PipelineLoader::Instance::mapParameters(size_t index)
-    {
-        return mPtr->mapParameters(index);
-    }
-
-    void PipelineLoader::Instance::setInstanceData(const ByteBuffer &data)
-    {
-        mPtr->setInstanceData(data);
-    }
-
-    void PipelineLoader::Instance::setDynamicParameters(size_t index, const ByteBuffer &data)
-    {
-        mPtr->setDynamicParameters(index, data);
-    }
-
-    void PipelineLoader::Instance::reset()
+        void PipelineLoader::Instance::reset()
     {
         mPtr.reset();
     }
@@ -72,6 +60,33 @@ namespace Render {
     {
         return mPtr.get();
     }
+
+    PipelineInstance *PipelineLoader::Instance::operator->() const
+    {
+        return mPtr.get();
+    }
+    
+    void PipelineInstance::renderQuad() const
+    {
+        static GPUMeshLoader::Handle quad = GPUMeshLoader::loadManual("quad", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &data, Render::GPUMeshLoader::ResourceDataInfo &info) {
+            std::vector<Compound<Render::VertexPos_3D>> vertices {
+                { { -1, -1, 0 } },
+                { { 1, -1, 0 } },
+                { { -1, 1, 0 } },
+                { { 1, 1, 0 } }
+            };
+
+            std::vector<uint32_t> indices {
+                0, 1, 2, 1, 2, 3
+            };
+
+            return loader->generate(data, { 3, std::move(vertices), std::move(indices) });
+        });
+
+        if (quad.available())
+            renderMesh(quad);
+    }
+
 
 }
 }

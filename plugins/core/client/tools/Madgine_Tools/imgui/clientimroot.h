@@ -20,7 +20,6 @@ namespace Engine {
 namespace Tools {
 
     struct MADGINE_CLIENT_TOOLS_EXPORT ClientImRoot : Window::MainWindowVirtualBase<ClientImRoot>,
-                                                      Render::RenderPass,
                                                       ImRoot {
 
         ClientImRoot(Window::MainWindow &window);

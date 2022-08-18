@@ -8,6 +8,8 @@
 
 #include "mainwindow.h"
 
+#include "../render/rendertarget.h"
+
 METATABLE_BEGIN(Engine::Window::MainWindowComponentBase)
 METATABLE_END(Engine::Window::MainWindowComponentBase)
 
@@ -35,17 +37,26 @@ namespace Window {
 
     Threading::Task<bool> MainWindowComponentBase::init()
     {
+        mWindow.getRenderWindow()->addRenderPass(this);
+
         co_return true;
     }
 
     Threading::Task<void> MainWindowComponentBase::finalize()
     {
+        mWindow.getRenderWindow()->removeRenderPass(this);
+
         co_return;
     }
 
     void MainWindowComponentBase::onResize(const Rect2i &space)
     {
         mClientSpace = space;
+    }
+
+    void MainWindowComponentBase::render(Render::RenderTarget *target, size_t iteration)
+    {
+        target->setRenderSpace(mClientSpace);
     }
 
     Rect2i MainWindowComponentBase::getScreenSpace() const

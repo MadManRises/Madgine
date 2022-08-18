@@ -116,14 +116,12 @@ namespace Tools {
 
     std::pair<bool, bool> Inspector::drawValue(std::string_view id, ValueType &value, bool editable, bool generic, tinyxml2::XMLElement *element)
     {
-        if (generic)
-            ImGui::BeginValueType({ ExtendedValueTypeEnum::GenericType }, id.data());
-
-        std::pair<bool, bool> modified = value.visit(overloaded { [&](TypedScopePtr &scope) {
-                                                                     return drawValue(id, scope, editable, element);
-                                                                 },
+        std::pair<bool, bool> modified = value.visit(overloaded {
+            [&](TypedScopePtr &scope) {
+                return drawValue(id, scope, editable, generic ? &value : nullptr, element);
+            },
             [&](OwnedScopePtr scope) {
-                return drawValue(id, scope, editable, element);
+                return drawValue(id, scope, editable, generic ? &value : nullptr, element);
             },
             [&](KeyValueVirtualSequenceRange &range) {
                 return std::make_pair(false, drawValue(id, range, editable, element));
@@ -136,23 +134,52 @@ namespace Tools {
                 return std::make_pair(false, false);
             },
             [&](auto &other) {
-                if (!editable)
-                    ImGui::BeginDisabled();
+                int columns = ImGui::TableGetColumnCount();
+                assert(columns == 0 || columns == 2);
+
+                if (columns == 2)
+                    ImGui::TableNextColumn();
+
                 ImGui::Indent();
-                std::pair<bool, bool> result = std::make_pair(ImGui::ValueTypeDrawer { id.data(), false }.draw(other), false);
+                ImGui::Text(id);
                 ImGui::Unindent();
-                if (!editable)
-                    ImGui::EndDisabled();
+
+                if (columns == 0)
+                    ImGui::SameLine();
+                else {
+                    ImGui::TableNextColumn();
+                }
+
+                ImGui::PushID(id.data());
+
+                if (generic) {
+                    ImGui::BeginGroup();
+                    ImGui::PushItemWidth(-2.0f * ImGui::GetFrameHeight());
+                } else {
+                    ImGui::PushItemWidth(-1.0f);
+                }
+
+                ImGui::BeginDisabled(!editable);
+                std::pair<bool, bool> result = std::make_pair(ImGui::ValueTypeDrawer::draw(other), false);
+                ImGui::EndDisabled();
+
+                ImGui::PopItemWidth();
+
+                if (generic) {                    
+                    ImGui::SameLine(0);
+                    result.first |= ImGui::ValueTypeTypePicker(&value);
+                    ImGui::EndGroup();
+                }
+
+                ImGui::PopID();
+
                 return result;
             } });
-
-        if (generic)
-            modified.first |= ImGui::EndValueType(&value, { ExtendedValueTypeEnum::GenericType });
 
         return modified;
     }
 
-    std::pair<bool, bool> Inspector::drawValue(std::string_view id, TypedScopePtr &scope, bool editable, tinyxml2::XMLElement *element)
+    std::pair<bool, bool> Inspector::drawValue(std::string_view id, TypedScopePtr &scope, bool editable, ValueType *generic, tinyxml2::XMLElement *element)
     {
         bool modified = false;
         bool changed = false;
@@ -162,6 +189,8 @@ namespace Tools {
 
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
+
+        //ImGui::BeginGroup();
 
         bool open = false;
         if (scope)
@@ -176,7 +205,7 @@ namespace Tools {
 
         if (hasSuggestions) {
             ImGui::PushID(id.data());
-            ImGui::PushItemWidth(-1.0f);
+            ImGui::PushItemWidth(-1.0f + (-2.0f * ImGui::GetFrameHeight() * bool(generic)));
             if (ImGui::BeginCombo("##suggestions", scope.name().c_str())) {
                 for (std::pair<std::string_view, TypedScopePtr> p : it->second()) {
                     if (ImGui::Selectable(p.first.data())) {
@@ -188,7 +217,16 @@ namespace Tools {
             }
             ImGui::PopItemWidth();
             ImGui::PopID();
+
+            if (generic)
+                ImGui::SameLine();
         }
+
+        if (generic) {
+            modified |= ImGui::ValueTypeTypePicker(generic);
+        }
+
+        //ImGui::EndGroup();
 
         ImGui::DraggableValueTypeSource(id, scope, ImGuiDragDropFlags_SourceAllowNullID);
         if (editable && ImGui::BeginDragDropTarget()) {
@@ -214,10 +252,10 @@ namespace Tools {
         return std::make_pair(modified, changed);
     }
 
-    std::pair<bool, bool> Inspector::drawValue(std::string_view id, OwnedScopePtr &scope, bool editable, tinyxml2::XMLElement *element)
+    std::pair<bool, bool> Inspector::drawValue(std::string_view id, OwnedScopePtr &scope, bool editable, ValueType *generic, tinyxml2::XMLElement *element)
     {
         TypedScopePtr ptr = scope.get();
-        return drawValue(id, ptr, editable, element);
+        return drawValue(id, ptr, editable, generic, element);
     }
 
     bool Inspector::drawValue(std::string_view id, KeyValueVirtualSequenceRange &range, bool editable, tinyxml2::XMLElement *element)
@@ -248,7 +286,8 @@ namespace Tools {
                 ++i;
             }
             ImGui::TreePop();
-        }
+        }     
+
         return changed;
     }
 
@@ -322,6 +361,5 @@ namespace Tools {
     {
         mPreviews[type] = preview;
     }
-
 }
 }

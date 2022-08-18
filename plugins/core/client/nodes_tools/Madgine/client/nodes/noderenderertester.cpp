@@ -65,8 +65,7 @@ namespace Tools {
 
     void NodeRendererTester::render()
     {
-        if (ImGui::Begin("NodeRendererTester")) {
-            //mTexture->render();
+        if (ImGui::Begin("NodeRendererTester", &mVisible)) {
 
             ImGui::ImageButton((void *)mTexture->texture().mTextureHandle, { 512, 512 }, { 0, 0 }, { 1, 1 }, 0);
             ImGui::InteractiveView(mState);
@@ -84,16 +83,15 @@ namespace Tools {
                     if (mInspector->drawValue("pass", ptr, true).first) {
                         pass.mHandle = ptr.safe_cast<NodeGraph::NodeGraphLoader::Resource>();
                         size_t argCount = pass.mHandle->mDataProviderPins.size();
-                        assert(argCount >= 1);
-                        pass.mArguments.resize(argCount - 1);
-                        for (uint32_t i = 1; i < argCount; ++i) {
+                        pass.mArguments.resize(argCount);
+                        for (uint32_t i = 0; i < argCount; ++i) {
                             ExtendedValueTypeDesc desc = pass.mHandle->dataProviderType({ 0, i });
                             if (desc == toValueTypeDesc<Engine::Vector4>()) {
-                                pass.mArguments[i - 1] = Engine::Vector4 { Engine::Vector4::ZERO };
-                            } else if (desc != Engine::toValueTypeDesc<Render::Camera *>()) {
-                                pass.mArguments[i - 1].setType(desc);
+                                pass.mArguments[i] = Engine::Vector4 { Engine::Vector4::ZERO };
+                            } else if (desc == Engine::toValueTypeDesc<Render::Camera *>()) {
+                                pass.mArguments[i] = &mCamera;
                             } else {
-                                pass.mArguments[i - 1] = &mCamera;
+                                pass.mArguments[i].setType(desc);
                             }
                         }
                     }
@@ -128,21 +126,8 @@ namespace Tools {
         if (mHandle) {
             mInterpreter.setGraph(&*mHandle);
 
-            ArgumentList args { mArguments.size() + 1 };
-            args[0] = ValueType { target };
-
-            for (size_t i = 0; i < mArguments.size(); ++i) {
-                args[i + 1] = mArguments[i].visit(overloaded {
-                    [](const auto &v) {
-                        return ValueType { v };
-                    },
-                    [](const OwnedScopePtr &p) { return ValueType {
-                                                     p.get()
-                                                 }; } });
-            }
-
             IndexType<uint32_t> flow = 0;
-            mInterpreter.interpret(flow, std::move(args));
+            mInterpreter.interpret(flow, mArguments);
         }
     }
 

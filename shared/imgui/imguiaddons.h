@@ -14,61 +14,58 @@ typedef int ImGuiTreeNodeFlags;
 typedef int ImGuiInputTextFlags;
 
 struct IMGUI_API ValueTypeDrawer {
-    bool draw(Engine::TypedScopePtr &scope);
-    bool draw(const Engine::TypedScopePtr &scope);
-    bool draw(bool &b);
-    bool draw(const bool &b);
-    bool draw(Engine::CoWString &s);
-    bool draw(const Engine::CoWString &s);
-    bool draw(int &i);
-    bool draw(const int &i);
-    bool draw(uint64_t &i);
-    bool draw(const uint64_t &i);
-    bool draw(float &f);
-    bool draw(const float &f);
-    bool draw(Engine::Matrix3 &m);
-    bool draw(const Engine::Matrix3 &m);
-    bool draw(Engine::Matrix3 *m);
-    bool draw(const Engine::Matrix3 *m);
-    bool draw(Engine::Matrix4 &m);
-    bool draw(const Engine::Matrix4 &m);
-    bool draw(Engine::Matrix4 *m);
-    bool draw(const Engine::Matrix4 *m);
-    bool draw(Engine::Vector2 &v);
-    bool draw(const Engine::Vector2 &v);
-    bool draw(Engine::Vector3 &v);
-    bool draw(const Engine::Vector3 &v);
-    bool draw(Engine::Vector4 &v);
-    bool draw(const Engine::Vector4 &v);
-    bool draw(Engine::Vector2i &v);
-    bool draw(const Engine::Vector2i &v);
-    bool draw(Engine::Vector3i &v);
-    bool draw(const Engine::Vector3i &v);
-    bool draw(Engine::Vector4i &v);
-    bool draw(const Engine::Vector4i &v);
-    bool draw(Engine::KeyValueVirtualSequenceRange &range);
-    bool draw(const Engine::KeyValueVirtualSequenceRange &range);
-    bool draw(Engine::KeyValueVirtualAssociativeRange &range);
-    bool draw(const Engine::KeyValueVirtualAssociativeRange &range);
-    bool draw(Engine::KeyValueFunction &m);
-    bool draw(const Engine::KeyValueFunction &m);
-    bool draw(Engine::ApiFunction &m);
-    bool draw(const Engine::ApiFunction &m);
-    bool draw(Engine::BoundApiFunction &m);
-    bool draw(const Engine::BoundApiFunction &m);
-    bool draw(std::monostate &);
-    bool draw(const std::monostate &);
-    bool draw(Engine::Quaternion &q);
-    bool draw(const Engine::Quaternion &q);
-    bool draw(Engine::ObjectPtr &o);
-    bool draw(const Engine::ObjectPtr &o);
-    bool draw(Engine::Filesystem::Path &p);
-    bool draw(const Engine::Filesystem::Path &p);
-    bool draw(Engine::EnumHolder &e);
-    bool draw(const Engine::EnumHolder &e);
-
-    const char *mName;
-    bool mMinified;
+    static bool draw(Engine::TypedScopePtr &scope);
+    static bool draw(const Engine::TypedScopePtr &scope);
+    static bool draw(bool &b);
+    static bool draw(const bool &b);
+    static bool draw(Engine::CoWString &s);
+    static bool draw(const Engine::CoWString &s);
+    static bool draw(int &i);
+    static bool draw(const int &i);
+    static bool draw(uint64_t &i);
+    static bool draw(const uint64_t &i);
+    static bool draw(float &f);
+    static bool draw(const float &f);
+    static bool draw(Engine::Matrix3 &m);
+    static bool draw(const Engine::Matrix3 &m);
+    static bool draw(Engine::Matrix3 *m);
+    static bool draw(const Engine::Matrix3 *m);
+    static bool draw(Engine::Matrix4 &m);
+    static bool draw(const Engine::Matrix4 &m);
+    static bool draw(Engine::Matrix4 *m);
+    static bool draw(const Engine::Matrix4 *m);
+    static bool draw(Engine::Vector2 &v);
+    static bool draw(const Engine::Vector2 &v);
+    static bool draw(Engine::Vector3 &v);
+    static bool draw(const Engine::Vector3 &v);
+    static bool draw(Engine::Vector4 &v);
+    static bool draw(const Engine::Vector4 &v);
+    static bool draw(Engine::Vector2i &v);
+    static bool draw(const Engine::Vector2i &v);
+    static bool draw(Engine::Vector3i &v);
+    static bool draw(const Engine::Vector3i &v);
+    static bool draw(Engine::Vector4i &v);
+    static bool draw(const Engine::Vector4i &v);
+    static bool draw(Engine::KeyValueVirtualSequenceRange &range);
+    static bool draw(const Engine::KeyValueVirtualSequenceRange &range);
+    static bool draw(Engine::KeyValueVirtualAssociativeRange &range);
+    static bool draw(const Engine::KeyValueVirtualAssociativeRange &range);
+    static bool draw(Engine::KeyValueFunction &m);
+    static bool draw(const Engine::KeyValueFunction &m);
+    static bool draw(Engine::ApiFunction &m);
+    static bool draw(const Engine::ApiFunction &m);
+    static bool draw(Engine::BoundApiFunction &m);
+    static bool draw(const Engine::BoundApiFunction &m);
+    static bool draw(std::monostate &);
+    static bool draw(const std::monostate &);
+    static bool draw(Engine::Quaternion &q);
+    static bool draw(const Engine::Quaternion &q);
+    static bool draw(Engine::ObjectPtr &o);
+    static bool draw(const Engine::ObjectPtr &o);
+    static bool draw(Engine::Filesystem::Path &p);
+    static bool draw(const Engine::Filesystem::Path &p);
+    static bool draw(Engine::EnumHolder &e);
+    static bool draw(const Engine::EnumHolder &e);
 };
 
 IMGUI_API void setPayloadStatus(std::string_view s);
@@ -77,8 +74,7 @@ IMGUI_API void Text(std::string_view s);
 IMGUI_API bool InputText(const char *label, std::string *s, ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = nullptr, void *user_data = nullptr);
 IMGUI_API bool InputText(const char *label, Engine::CoWString *s, ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = nullptr, void *user_data = nullptr);
 
-IMGUI_API void BeginValueType(Engine::ExtendedValueTypeDesc type, const char *name = "");
-IMGUI_API bool EndValueType(Engine::ValueType *v, Engine::ExtendedValueTypeDesc type);
+IMGUI_API bool ValueTypeTypePicker(Engine::ValueType *v);
 
 IMGUI_API void BeginTreeArrow(const void *label, ImGuiTreeNodeFlags flags = 0);
 IMGUI_API bool EndTreeArrow(bool *opened = nullptr);
@@ -91,26 +87,6 @@ IMGUI_API void RightAlignDuration(std::chrono::nanoseconds dur);
 
 IMGUI_API void RightAlignText(const char *s, ...);
 IMGUI_API void RightAlign(float size);
-
-template <typename F, typename... Args>
-bool Col(F &&f, const char *label, Args &&...args)
-{
-    int columns = TableGetColumnCount();
-    assert(columns == 0 || columns == 2);
-    if (columns == 0) {
-        return f(label, std::forward<Args>(args)...);
-    } else {
-        TableNextColumn();
-        Text("%s", label);
-        TableNextColumn();
-
-        ImGui::PushItemWidth(-1.0f);
-        bool result = f(("##"s + label).c_str(), std::forward<Args>(args)...);
-        ImGui::PopItemWidth();
-
-        return result;
-    }
-}
 
 IMGUI_API bool DragMatrix3(const char *label, Engine::Matrix3 *m, float v_speed, bool *enabled = nullptr);
 IMGUI_API bool DragMatrix3(const char *label, Engine::Matrix3 *m, float *v_speeds, bool *enabled = nullptr);

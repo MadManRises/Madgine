@@ -56,17 +56,26 @@ namespace Tools {
             1.0f,
         };
 
-        ImGui::TableNextRow();        
-        if (ImGui::Col(LIFT(ImGui::DragMatrix3), "Pos", &pos, speeds, enabled))
+        ImGui::TableNextRow();  
+        ImGui::TableNextColumn();
+        ImGui::Text("Pos");
+        ImGui::TableNextColumn();
+        if (ImGui::DragMatrix3("##Pos", &pos, speeds, enabled))
             mWidget->setPos(pos);
-        ImGui::TableNextRow();        
-        if (ImGui::Col(LIFT(ImGui::DragMatrix3), "Size", &size, speeds, enabled)) {
+        ImGui::TableNextRow();   
+        ImGui::TableNextColumn();
+        ImGui::Text("Size");
+        ImGui::TableNextColumn();
+        if (ImGui::DragMatrix3("##Size", &size, speeds, enabled)) {
             mWidget->setSize(size);
             enforceAspectRatio();
         }
 
         ImGui::TableNextRow();
-        if (ImGui::Col(LIFT(ImGui::Checkbox), "AspectRatio", &mEnforceAspectRatio))
+        ImGui::TableNextColumn();
+        ImGui::Text("AspectRatio");
+        ImGui::TableNextColumn();
+        if (ImGui::Checkbox("##aspectrationEnabled", &mEnforceAspectRatio))
             enforceAspectRatio();
         ImGui::SameLine();
 

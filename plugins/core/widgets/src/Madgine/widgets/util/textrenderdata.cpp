@@ -5,13 +5,13 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
-METATABLE_BEGIN(Engine::Widgets::TextRenderData)
+METATABLE_BEGIN_BASE(Engine::Widgets::TextRenderData, Engine::Widgets::RenderData)
 MEMBER(mFontSize)
 MEMBER(mPivot)
 PROPERTY(Font, getFont, setFont)
 METATABLE_END(Engine::Widgets::TextRenderData)
 
-SERIALIZETABLE_BEGIN(Engine::Widgets::TextRenderData)
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::TextRenderData, Engine::Widgets::RenderData)
 FIELD(mFontSize)
 FIELD(mPivot)
 ENCAPSULATED_FIELD(mFont, getFontName, setFontName)
@@ -50,9 +50,9 @@ namespace Widgets {
         return renderText(text, pos, size.xy(), mFont, size.z * mFontSize, mPivot, screenSize, cursorIndex);
     }
 
-    std::vector<Vertex> TextRenderData::renderSelection(std::string_view text, Vector3 pos, Vector3 size, const Vector2 &screenSize, int selectionStart, int selectionEnd, Vector4 color)
+    std::vector<Vertex> TextRenderData::renderSelection(std::string_view text, Vector3 pos, Vector3 size, const Vector2 &screenSize, const Atlas2::Entry &entry, int selectionStart, int selectionEnd, Vector4 color)
     {
-        return renderSelection(text, pos, size.xy(), mFont, size.z * mFontSize, mPivot, screenSize, selectionStart, selectionEnd, color);
+        return renderSelection(text, pos, size.xy(), mFont, size.z * mFontSize, mPivot, screenSize, entry, selectionStart, selectionEnd, color);
     }
 
     float TextRenderData::calculateWidth(std::string_view text, float z)
@@ -85,46 +85,21 @@ namespace Widgets {
         float cursorX = (size.x - fullWidth) * pivot.x;
         float originY = (size.y - fullHeight) * pivot.y + maxY;
 
+        const Render::Glyph &ref = font->mGlyphs['D'];
+
+        float cursorHeight = ref.mSize.y * scaleY;
+
         for (size_t i = 0; i <= textLen; ++i) {
 
             if (i == cursorIndex) {
                 const Render::Glyph &cursor = font->mGlyphs['|'];
-                const Render::Glyph &ref = font->mGlyphs['D'];
+                
+                float width = 3.0f * scaleX;
 
-                float height = ref.mSize.y * scaleY;
+                float startX = cursorX - 1.5f * scaleX;
+                float startY = originY - ref.mBearing.y * scaleY;
 
-                float vPosX1 = cursorX - 1.5f * scaleX;
-                float vPosX2 = cursorX + 1.5f * scaleX;
-                float vPosY1 = originY - ref.mBearing.y * scaleY;
-                float vPosY2 = vPosY1 + height;
-
-                Vector3 v11 = { vPosX1, vPosY1, pos.z + 0.6f };
-                Vector3 v12 = { vPosX2, vPosY1, pos.z + 0.6f };
-                Vector3 v21 = { vPosX1, vPosY2, pos.z + 0.6f };
-                Vector3 v22 = { vPosX2, vPosY2, pos.z + 0.6f };
-
-                int uvWidth = cursor.mSize.x;
-                int uvHeight = cursor.mSize.y;
-
-                if (cursor.mFlipped)
-                    std::swap(uvWidth, uvHeight);
-
-                Vector2 uvTopLeft = { float(cursor.mUV.x) / font->mTextureSize.x, float(cursor.mUV.y) / font->mTextureSize.y };
-                Vector2 uvBottomRight = { float(cursor.mUV.x + uvWidth) / font->mTextureSize.x,
-                    float(cursor.mUV.y + uvHeight) / font->mTextureSize.y };
-
-                Vector2 uvTopRight = { uvBottomRight.x, uvTopLeft.y };
-                Vector2 uvBottomLeft = { uvTopLeft.x, uvBottomRight.y };
-
-                if (cursor.mFlipped)
-                    std::swap(uvTopRight, uvBottomLeft);
-
-                result.push_back({ v11 + pos, { 1, 1, 1, 1 }, uvTopLeft });
-                result.push_back({ v12 + pos, { 1, 1, 1, 1 }, uvTopRight });
-                result.push_back({ v21 + pos, { 1, 1, 1, 1 }, uvBottomLeft });
-                result.push_back({ v21 + pos, { 1, 1, 1, 1 }, uvBottomLeft });
-                result.push_back({ v12 + pos, { 1, 1, 1, 1 }, uvTopRight });
-                result.push_back({ v22 + pos, { 1, 1, 1, 1 }, uvBottomRight });
+                renderQuadUV(result, { pos.x + startX, pos.y + startY, pos.z + 0.6f }, { width, cursorHeight }, { 1, 1, 1, 1 }, { cursor.mUV, cursor.mSize }, font->mTextureSize, cursor.mFlipped);                
             }
 
             if (i == textLen)
@@ -135,45 +110,17 @@ namespace Widgets {
             float width = g.mSize.x * scaleX;
             float height = g.mSize.y * scaleY;
 
-            float vPosX1 = cursorX + g.mBearing.x * scaleX;
-            float vPosX2 = vPosX1 + width;
-            float vPosY1 = originY - g.mBearing.y * scaleY;
-            float vPosY2 = vPosY1 + height;
+            float startX = cursorX + g.mBearing.x * scaleX;
+            float startY = originY - g.mBearing.y * scaleY;
 
-            Vector3 v11 = { vPosX1, vPosY1, pos.z + 0.5f };
-            Vector3 v12 = { vPosX2, vPosY1, pos.z + 0.5f };
-            Vector3 v21 = { vPosX1, vPosY2, pos.z + 0.5f };
-            Vector3 v22 = { vPosX2, vPosY2, pos.z + 0.5f };
-
-            int uvWidth = g.mSize.x;
-            int uvHeight = g.mSize.y;
-
-            if (g.mFlipped)
-                std::swap(uvWidth, uvHeight);
-
-            Vector2 uvTopLeft = { float(g.mUV.x) / font->mTextureSize.x, float(g.mUV.y) / font->mTextureSize.y };
-            Vector2 uvBottomRight = { float(g.mUV.x + uvWidth) / font->mTextureSize.x,
-                float(g.mUV.y + uvHeight) / font->mTextureSize.y };
-
-            Vector2 uvTopRight = { uvBottomRight.x, uvTopLeft.y };
-            Vector2 uvBottomLeft = { uvTopLeft.x, uvBottomRight.y };
-
-            if (g.mFlipped)
-                std::swap(uvTopRight, uvBottomLeft);
-
-            result.push_back({ v11 + pos, { 1, 1, 1, 1 }, uvTopLeft });
-            result.push_back({ v12 + pos, { 1, 1, 1, 1 }, uvTopRight });
-            result.push_back({ v21 + pos, { 1, 1, 1, 1 }, uvBottomLeft });
-            result.push_back({ v21 + pos, { 1, 1, 1, 1 }, uvBottomLeft });
-            result.push_back({ v12 + pos, { 1, 1, 1, 1 }, uvTopRight });
-            result.push_back({ v22 + pos, { 1, 1, 1, 1 }, uvBottomRight });
+            renderQuadUV(result, { pos.x + startX, pos.y + startY, pos.z + 0.5f }, { width, height }, { 1, 1, 1, 1 }, { g.mUV, g.mSize }, font->mTextureSize, g.mFlipped);
 
             cursorX += g.mAdvance / 64.0f * scaleX;
         }
         return { result, { { font->mTexture->mTextureHandle, Render::TextureType_2D }, TextureFlag_IsDistanceField } };
     }
 
-    std::vector<Vertex> TextRenderData::renderSelection(std::string_view text, Vector3 pos, Vector2 size, const Render::Font *font, float fontSize, Vector2 pivot, const Vector2 &screenSize, int selectionStart, int selectionEnd, Vector4 color)
+    std::vector<Vertex> TextRenderData::renderSelection(std::string_view text, Vector3 pos, Vector2 size, const Render::Font *font, float fontSize, Vector2 pivot, const Vector2 &screenSize, const Atlas2::Entry &entry, int selectionStart, int selectionEnd, Vector4 color)
     {
         std::vector<Vertex> result;
 
@@ -212,26 +159,9 @@ namespace Widgets {
 
         float height = ref.mSize.y * scaleY;
 
-        float vPosY1 = originY - ref.mBearing.y * scaleY;
-        float vPosY2 = vPosY1 + height;
+        float startY = originY - ref.mBearing.y * scaleY;
 
-        Vector3 v11 = { startX, vPosY1, pos.z + 0.4f };
-        Vector3 v12 = { endX, vPosY1, pos.z + 0.4f };
-        Vector3 v21 = { startX, vPosY2, pos.z + 0.4f };
-        Vector3 v22 = { endX, vPosY2, pos.z + 0.4f };
-
-        Vector2 uvTopLeft = { 0.0f, 0.0f };
-        Vector2 uvBottomRight = { 1.0f, 1.0f };
-
-        Vector2 uvTopRight = { uvBottomRight.x, uvTopLeft.y };
-        Vector2 uvBottomLeft = { uvTopLeft.x, uvBottomRight.y };
-
-        result.push_back({ v11 + pos, color, uvTopLeft });
-        result.push_back({ v12 + pos, color, uvTopRight });
-        result.push_back({ v21 + pos, color, uvBottomLeft });
-        result.push_back({ v21 + pos, color, uvBottomLeft });
-        result.push_back({ v12 + pos, color, uvTopRight });
-        result.push_back({ v22 + pos, color, uvBottomRight });
+        renderQuadUV(result, { pos.x + startX, pos.y + startY, pos.z + 0.4f }, { endX - startX, height }, color, entry.mArea, { 2048, 2048 }, entry.mFlipped);
 
         return result;
     }
@@ -242,8 +172,8 @@ namespace Widgets {
 
         float result = 0.0f;
 
-        for (size_t i = 0; i < text.size(); ++i) {
-            const Render::Glyph &g = font->mGlyphs[text[i]];
+        for (char c : text) {
+            const Render::Glyph &g = font->mGlyphs[c];
 
             result += g.mAdvance / 64.0f * scale;
         }

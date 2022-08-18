@@ -36,18 +36,18 @@ namespace Render {
         }
 
         {
-            auto data = mPipeline.mapParameters<BlurData>(0);
+            auto data = mPipeline->mapParameters<BlurData>(0);
             data->horizontal = iteration % 2;
-            data->textureSize = target->size();
+            data->textureSize = mInput->size();
         }
 
         if (iteration == 0) {
-            target->bindTextures({ mInput->texture(mInputIndex) });
+            mPipeline->bindTextures({ mInput->texture(mInputIndex) });
         } else {
-            target->bindTextures({ target->texture(0, iteration) });
+            mPipeline->bindTextures({ target->texture(0, iteration) });
         }
 
-        target->renderQuad(mPipeline);
+        mPipeline->renderQuad();
 
         if (iteration == target->iterations() - 1)
             target->popAnnotation();
@@ -60,7 +60,7 @@ namespace Render {
 
     void BlurPass::onTargetResize(const Vector2i &size)
     {
-        mInput->resize(size);
+        mInput->resize(size);        
     }
 
     int BlurPass::priority() const

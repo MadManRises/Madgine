@@ -39,6 +39,7 @@ namespace Tools {
 
     void Metrics::render()
     {
+        ImGui::SetNextWindowSize({ 500, 125 }, ImGuiCond_FirstUseEver);
         if (ImGui::Begin("Metrics", &mVisible)) {
             ImGui::Text("Time/frame: ");
             ImGui::Duration(std::chrono::microseconds(static_cast<long long>(ImGui::GetIO().DeltaTime * 1000000.0f)));

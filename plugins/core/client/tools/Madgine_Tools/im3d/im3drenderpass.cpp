@@ -49,13 +49,13 @@ namespace Render {
         float aspectRatio = float(size.x) / size.y;
 
         {
-            auto perApplication = mPipeline.mapParameters<Im3DPerApplication>(0);
+            auto perApplication = mPipeline->mapParameters<Im3DPerApplication>(0);
 
             perApplication->p = mCamera->getProjectionMatrix(aspectRatio);
         }
 
         {
-            auto perFrame = mPipeline.mapParameters<Im3DPerFrame>(1);
+            auto perFrame = mPipeline->mapParameters<Im3DPerFrame>(1);
 
             perFrame->v = mCamera->getViewMatrix();
         }
@@ -65,10 +65,10 @@ namespace Render {
 
         for (std::pair<const Im3DTextureId, Im3D::Im3DContext::RenderData> &p : context->mRenderData) {
 
-            target->bindTextures({ { p.first, Render::TextureType_2D } });
+            mPipeline->bindTextures({ { p.first, Render::TextureType_2D } });
 
             {
-                auto perObject = mPipeline.mapParameters<Im3DPerObject>(2);
+                auto perObject = mPipeline->mapParameters<Im3DPerObject>(2);
 
                 perObject->hasDistanceField = false;
 
@@ -81,7 +81,7 @@ namespace Render {
             for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
                 if (!p.second.mVertices[i].empty()) {
                     mMeshes[i][0].update({ i + 1, p.second.mVertices[i], p.second.mIndices[i] });
-                    target->renderMesh(mMeshes[i][0], mPipeline);
+                    mPipeline->renderMesh(mMeshes[i][0]);
                 }
                 /* GPUMeshData::Material mat;
                 mat.mDiffuseHandle = p.first;
@@ -90,7 +90,7 @@ namespace Render {
                     LOG_ONCE("TODO!");
                 if (!p.second.mVertices2[i].empty()) {
                     mMeshes[i][1].update({ i + 1, p.second.mVertices2[i], p.second.mIndices2[i] });
-                    target->renderMesh(mMeshes[i][1], mPipeline, nullptr);
+                    mPipeline->renderMesh(mMeshes[i][1], nullptr);
                 }
             }
         }

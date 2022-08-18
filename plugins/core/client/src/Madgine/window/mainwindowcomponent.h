@@ -10,10 +10,12 @@
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
+#include "../render/renderpass.h"
+
 namespace Engine {
 namespace Window {
 
-    struct MADGINE_CLIENT_EXPORT MainWindowComponentBase : Serialize::VirtualSerializableDataBase<VirtualScopeBase<>, Serialize::SerializableDataUnit>, Threading::MadgineObject<MainWindowComponentBase> {
+    struct MADGINE_CLIENT_EXPORT MainWindowComponentBase : Serialize::VirtualSerializableDataBase<VirtualScopeBase<Render::RenderPass>, Serialize::SerializableDataUnit>, Threading::MadgineObject<MainWindowComponentBase> {
         MainWindowComponentBase(MainWindow &window, int priority);
         virtual ~MainWindowComponentBase() = default;
 
@@ -34,6 +36,8 @@ namespace Window {
         virtual Rect2i getChildClientSpace();
 
         virtual void onResize(const Rect2i &space);
+        
+        virtual void render(Render::RenderTarget *target, size_t iteration) override;
 
         virtual bool injectKeyPress(const Input::KeyEventArgs &arg) { return false; };
         virtual bool injectKeyRelease(const Input::KeyEventArgs &arg) { return false; }

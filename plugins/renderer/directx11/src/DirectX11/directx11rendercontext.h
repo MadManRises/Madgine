@@ -24,6 +24,8 @@ namespace Render {
 
         DirectX11RenderContext &operator=(const DirectX11RenderContext &) = delete;
 
+        static DirectX11RenderContext &getSingleton();
+
         virtual std::unique_ptr<RenderTarget> createRenderWindow(Window::OSWindow *w, size_t samples) override;
         virtual std::unique_ptr<RenderTarget> createRenderTexture(const Vector2i &size = { 1, 1 }, const RenderTextureConfig &config = {}) override;
 

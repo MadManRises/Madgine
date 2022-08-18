@@ -188,8 +188,10 @@ ValueTypeDesc ValueType::type() const
 {
     ValueTypeIndex i = index();
     switch (i) {
-    case ValueTypeEnum::ScopeValue:
-        return { i, as<TypedScopePtr>().mType->mSelf };
+    case ValueTypeEnum::ScopeValue: {
+        const MetaTable *table = as<TypedScopePtr>().mType;
+        return { i, table ? table->mSelf : nullptr };
+    }
     default:
         return { i };
     }

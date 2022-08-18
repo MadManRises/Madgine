@@ -35,6 +35,8 @@
 
 #include "Madgine/render/shadinglanguage/sl.h"
 
+#include "Generic/areaview.h"
+
 #define SL_SHADER ui
 #include INCLUDE_SL_SHADER
 
@@ -111,6 +113,9 @@ namespace Widgets {
 
     Threading::Task<bool> WidgetManager::init()
     {
+        if (!co_await MainWindowComponentBase::init())
+            co_return false;
+
         mData->mPipeline.createStatic({ .vs = "ui", .ps = "ui", .format = type_holder<Vertex>, .bufferSizes = { 0, 0, sizeof(WidgetsPerObject) } });
 
         mData->mMesh.create({ 3, std::vector<Vertex> {} });
@@ -126,8 +131,6 @@ namespace Widgets {
 
     Threading::Task<void> WidgetManager::finalize()
     {
-        mWindow.getRenderWindow()->removeRenderPass(this);
-
         mTopLevelWidgets.clear();
 
         mData->mDefaultTexture.reset();
@@ -137,6 +140,8 @@ namespace Widgets {
         mData->mMesh.reset();
 
         mData->mPipeline.reset();
+
+        co_await MainWindowComponentBase::finalize();
 
         co_return;
     }
@@ -515,20 +520,15 @@ namespace Widgets {
 
     void WidgetManager::render(Render::RenderTarget *target, size_t iteration)
     {
-        /* if (!mData->mProgram.available())
-            return;*/
-
         target->pushAnnotation("WidgetManager");
 
-        Rect2i screenSpace = mClientSpace;
-
-        target->setRenderSpace(screenSpace);
+        MainWindowComponentBase::render(target, iteration);
 
         std::map<TextureSettings, std::vector<Vertex>> vertices;
 
         for (Widgets::WidgetBase *w : visibleWidgets()) {
 
-            std::vector<std::pair<std::vector<Vertex>, TextureSettings>> localVerticesList = w->vertices(Vector3 { Vector2 { screenSpace.mSize }, 1.0f });
+            std::vector<std::pair<std::vector<Vertex>, TextureSettings>> localVerticesList = w->vertices(Vector3 { Vector2 { mClientSpace.mSize }, 1.0f });
 
             for (auto &[localVertices, tex] : localVerticesList) {
                 if (!localVertices.empty())
@@ -540,18 +540,18 @@ namespace Widgets {
             assert(!vertices.empty());
 
             {
-                auto parameters = mData->mPipeline.mapParameters<WidgetsPerObject>(2);
+                auto parameters = mData->mPipeline->mapParameters<WidgetsPerObject>(2);
                 parameters->hasDistanceField = bool(tex.mFlags & TextureFlag_IsDistanceField);
             }
 
             if (tex.mTexture.mTextureHandle)
-                target->bindTextures({ tex.mTexture });
+                mData->mPipeline->bindTextures({ tex.mTexture });
             else
-                target->bindTextures({ { mData->mUIAtlasTexture->mTextureHandle, Render::TextureType_2D } });
+                mData->mPipeline->bindTextures({ { mData->mUIAtlasTexture->mTextureHandle, Render::TextureType_2D } });
 
             mData->mMesh.update({ 3, std::move(vertices) });
 
-            target->renderMesh(mData->mMesh, mData->mPipeline);
+            mData->mPipeline->renderMesh(mData->mMesh);
         }
 
         target->popAnnotation();
@@ -617,13 +617,44 @@ namespace Widgets {
                 mData->mImageLoadingTasks.emplace(std::move(data));
                 return nullptr;
             } else {
-                Atlas2::Entry entry = mData->mUIAtlas.insert(data->mSize, [this]() { mData->expandUIAtlas(); });
+
+                size_t width = data->mSize.x;
+                size_t height = data->mSize.y;
+
+                assert(data->mChannels == 4);
+
+                const uint32_t *source = static_cast<const uint32_t *>(data->mBuffer.mData);
+
+                std::vector<uint32_t> targetBuffer;
+                targetBuffer.resize((width + 2) * (height + 2));
+
+                AreaView<uint32_t, 2> targetArea { targetBuffer.data(), { width + 2, height + 2 } };
+
+                AreaView<const uint32_t, 2> sourceArea { source, { width, height } };
+
+                std::ranges::copy(sourceArea, targetArea.subArea({ 1, 1 }, { width, height }).begin());
+                std::ranges::copy(sourceArea.subArea({ 0, 0 }, { 1, height }), targetArea.subArea({ 0, 1 }, { 1, height }).begin());
+                std::ranges::copy(sourceArea.subArea({ width - 1, 0 }, { 1, height }), targetArea.subArea({ width + 1, 1 }, { 1, height }).begin());
+                std::ranges::copy(sourceArea.subArea({ 0, 0 }, { width, 1 }), targetArea.subArea({ 1, 0 }, { width, 1 }).begin());
+                std::ranges::copy(sourceArea.subArea({ 0, height - 1 }, { width, 1 }), targetArea.subArea({ 1, height + 1 }, { width, 1 }).begin());
+
+                targetArea[0][0] = sourceArea[0][0];
+                targetArea[0][width + 1] = sourceArea[0][width - 1];
+                targetArea[height + 1][0] = sourceArea[height - 1][0];
+                targetArea[height + 1][width + 1] = sourceArea[height - 1][width - 1];
+
+                Atlas2::Entry entry = mData->mUIAtlas.insert(data->mSize + Vector2i { 2, 2 }, [this]() { mData->expandUIAtlas(); });
                 it = mData->mUIAtlasEntries.try_emplace(image, entry).first;
-                mData->mUIAtlasTexture.setSubData(entry.mArea.mTopLeft, entry.mArea.mSize, data->mBuffer);
+                mData->mUIAtlasTexture.setSubData(entry.mArea.mTopLeft, data->mSize + Vector2i { 2, 2 }, targetBuffer);
                 mData->mImageLoadingTasks.erase(data);
             }
         }
         return &it->second;
+    }
+
+    const Atlas2::Entry *WidgetManager::lookUpImage(std::string_view name)
+    {
+        return lookUpImage(Resources::ImageLoader::getSingleton().get(name));
     }
 
 }

@@ -4,14 +4,9 @@
 #include "renderpass.h"
 #include "rendertarget.h"
 
-#include "Meta/keyvalue/metatable_impl.h"
-
 #include "Madgine/meshloader/gpumeshloader.h"
 
 #include "Madgine/meshloader/meshdata.h"
-
-METATABLE_BEGIN(Engine::Render::RenderTarget)
-METATABLE_END(Engine::Render::RenderTarget)
 
 namespace Engine {
 namespace Render {
@@ -53,27 +48,6 @@ namespace Render {
         }
 
         endFrame();
-    }
-
-    void RenderTarget::renderQuad(const PipelineInstance *pipeline)
-    {
-        static GPUMeshLoader::Handle quad = GPUMeshLoader::loadManual("quad", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &data, Render::GPUMeshLoader::ResourceDataInfo &info) {
-            std::vector<Compound<Render::VertexPos_3D>> vertices {
-                { { -1, -1, 0 } },
-                { { 1, -1, 0 } },
-                { { -1, 1, 0 } },
-                { { 1, 1, 0 } }
-            };
-
-            std::vector<uint32_t> indices {
-                0, 1, 2, 1, 2, 3
-            };
-
-            return loader->generate(data, { 3, std::move(vertices), std::move(indices) });
-        });
-
-        if (quad.available())
-            renderMesh(quad, pipeline);
     }
 
     void RenderTarget::addRenderPass(RenderPass *pass)

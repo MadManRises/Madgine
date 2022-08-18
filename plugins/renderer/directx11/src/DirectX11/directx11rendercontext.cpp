@@ -25,6 +25,8 @@ namespace Render {
     THREADLOCAL(ID3DUserDefinedAnnotation *)
     sAnnotator = nullptr;
 
+    Threading::WorkgroupLocal<DirectX11RenderContext *> sSingleton = nullptr;
+
     ID3D11DeviceContext *GetDeviceContext()
     {
         return sDeviceContext;
@@ -38,6 +40,10 @@ namespace Render {
     DirectX11RenderContext::DirectX11RenderContext(Threading::TaskQueue *queue)
         : Component(queue)
     {
+        assert(!sSingleton);
+
+        sSingleton = this;
+
         HRESULT hr;
 
         UINT createDeviceFlags = D3D11_CREATE_DEVICE_DEBUG;
@@ -90,6 +96,14 @@ namespace Render {
             sDevice->Release();
             sDevice = nullptr;
         }
+
+        assert(sSingleton == this);
+        sSingleton = nullptr;
+    }
+
+    DirectX11RenderContext &DirectX11RenderContext::getSingleton()
+    {
+        return *sSingleton;
     }
 
     std::unique_ptr<RenderTarget> DirectX11RenderContext::createRenderTexture(const Vector2i &size, const RenderTextureConfig &config)

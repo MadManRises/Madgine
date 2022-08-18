@@ -228,83 +228,9 @@ namespace Render {
         sDeviceContext->RSSetViewports(1, &viewport);
     }
 
-    void DirectX11RenderTarget::renderMesh(const GPUMeshData *m, const PipelineInstance *p, const Material *material)
-    {
-        const DirectX11MeshData *mesh = static_cast<const DirectX11MeshData *>(m);
-        const DirectX11PipelineInstance *pipeline = static_cast<const DirectX11PipelineInstance *>(p);
-
-        mesh->mVertices.bindVertex(mesh->mVertexSize);
-        
-        pipeline->bind(mesh->mFormat);
-
-        static_cast<DirectX11RenderContext *>(context())->bindFormat(mesh->mFormat, pipeline->mInstanceDataSize);
-
-        if (material)
-            bindTextures({ { material->mDiffuseTexture, TextureType_2D }, { material->mEmissiveTexture, TextureType_2D } });
-
-        constexpr D3D11_PRIMITIVE_TOPOLOGY modes[] {
-            D3D11_PRIMITIVE_TOPOLOGY_POINTLIST,
-            D3D11_PRIMITIVE_TOPOLOGY_LINELIST,
-            D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
-        };
-
-        assert(mesh->mGroupSize > 0 && mesh->mGroupSize <= 3);
-        D3D11_PRIMITIVE_TOPOLOGY mode = modes[mesh->mGroupSize - 1];
-        sDeviceContext->IASetPrimitiveTopology(mode);
-
-        if (mesh->mIndices) {
-            mesh->mIndices.bindIndex();
-            sDeviceContext->DrawIndexed(mesh->mElementCount, 0, 0);
-        } else {
-            sDeviceContext->Draw(mesh->mElementCount, 0);
-        }      
-    }
-
-    void DirectX11RenderTarget::renderMeshInstanced(size_t count, const GPUMeshData *m, const PipelineInstance *p, const Material *material)
-    {
-        const DirectX11MeshData *mesh = static_cast<const DirectX11MeshData *>(m);
-        const DirectX11PipelineInstance *pipeline = static_cast<const DirectX11PipelineInstance *>(p);
-
-        mesh->mVertices.bindVertex(mesh->mVertexSize);
-
-        pipeline->bind(mesh->mFormat);
-
-        static_cast<DirectX11RenderContext *>(context())->bindFormat(mesh->mFormat, pipeline->mInstanceDataSize);
-
-        if (material)
-            bindTextures({ { material->mDiffuseTexture, TextureType_2D }, { material->mEmissiveTexture, TextureType_2D } });
-
-        constexpr D3D11_PRIMITIVE_TOPOLOGY modes[] {
-            D3D11_PRIMITIVE_TOPOLOGY_POINTLIST,
-            D3D11_PRIMITIVE_TOPOLOGY_LINELIST,
-            D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
-        };
-
-        assert(mesh->mGroupSize > 0 && mesh->mGroupSize <= 3);
-        D3D11_PRIMITIVE_TOPOLOGY mode = modes[mesh->mGroupSize - 1];
-        sDeviceContext->IASetPrimitiveTopology(mode);
-
-        if (mesh->mIndices) {
-            mesh->mIndices.bindIndex();
-            sDeviceContext->DrawIndexedInstanced(mesh->mElementCount, count, 0, 0, 0);
-        } else {
-            sDeviceContext->DrawInstanced(mesh->mElementCount, count, 0, 0);
-        }
-    }
-
     void DirectX11RenderTarget::clearDepthBuffer()
     {
         sDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-    }
-
-    void DirectX11RenderTarget::bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset) const
-    {
-        LOG_DEBUG("Texture Bind");
-        std::vector<ID3D11ShaderResourceView *> handles;
-        std::ranges::transform(tex, std::back_inserter(handles), [](const TextureDescriptor &desc) {
-            return reinterpret_cast<ID3D11ShaderResourceView*>(desc.mTextureHandle);
-        });
-        sDeviceContext->PSSetShaderResources(offset, tex.size(), handles.data());
     }
 
 }

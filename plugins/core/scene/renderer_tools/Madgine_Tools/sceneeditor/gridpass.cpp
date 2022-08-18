@@ -40,12 +40,12 @@ namespace Tools {
         Vector2i size = target->size();
         float aspectRatio = float(size.x) / size.y;
         {
-            auto parameters = mPipeline.mapParameters<GridPerFrame>(1);
+            auto parameters = mPipeline->mapParameters<GridPerFrame>(1);
 
             parameters->vp = mCamera->getViewProjectionMatrix(aspectRatio);
         }
 
-        target->renderMesh(mMesh, mPipeline);
+        mPipeline->renderMesh(mMesh);
 
         target->popAnnotation();
     }

@@ -36,6 +36,8 @@ namespace Tools {
     void FileBrowser::render()
     {
         if (ImGui::Begin("File Browser", &mVisible)) {
+            ImGui::SetWindowDockingDir(mRoot.dockSpaceId(), ImGuiDir_Right, 0.2f, false, ImGuiCond_FirstUseEver);
+
             bool accepted;
             ImGui::FilePicker(&mCurrentPath, &mSelectedPath, accepted);
         }

@@ -15,7 +15,7 @@
 
 #include "Madgine/render/rendertarget.h"
 
-#include "util/imagerenderdata.h"
+#include "util/renderdata.h"
 
 METATABLE_BEGIN_BASE(Engine::Widgets::SceneWindow, Engine::Widgets::WidgetBase)
 METATABLE_END(Engine::Widgets::SceneWindow)
@@ -44,7 +44,7 @@ namespace Widgets {
 
         std::vector<Vertex> result;
 
-        ImageRenderData::renderQuad(result, pos, size.xy());
+        RenderData::renderQuad(result, pos, size.xy());
 
         return { { result, { mTarget->texture() } } };
     }

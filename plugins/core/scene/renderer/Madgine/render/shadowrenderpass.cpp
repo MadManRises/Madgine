@@ -74,13 +74,13 @@ namespace Render {
         updateFrustum();
 
         {
-            auto perApplication = mPipeline.mapParameters<ScenePerApplication>(0);
+            auto perApplication = mPipeline->mapParameters<ScenePerApplication>(0);
 
             perApplication->p = projectionMatrix();
         }
 
         {
-            auto perFrame = mPipeline.mapParameters<ScenePerFrame>(1);
+            auto perFrame = mPipeline->mapParameters<ScenePerFrame>(1);
 
             perFrame->v = viewMatrix();
 
@@ -93,7 +93,7 @@ namespace Render {
             Scene::Entity::Skeleton *skeleton = std::get<1>(instance.first);
 
             {
-                auto perObject = mPipeline.mapParameters<ScenePerObject>(2);
+                auto perObject = mPipeline->mapParameters<ScenePerObject>(2);
 
                 perObject->hasLight = false;
 
@@ -113,15 +113,15 @@ namespace Render {
                 };
             });
 
-            mPipeline.setInstanceData(std::move(instanceData));
+            mPipeline->setInstanceData(std::move(instanceData));
 
             if (skeleton) {
-                mPipeline.setDynamicParameters(0, skeleton->matrices());
+                mPipeline->setDynamicParameters(0, skeleton->matrices());
             } else {
-                mPipeline.setDynamicParameters(0, {});
+                mPipeline->setDynamicParameters(0, {});
             }
 
-            target->renderMeshInstanced(instance.second.size(), meshData, mPipeline);
+            mPipeline->renderMeshInstanced(instance.second.size(), meshData);
         }
 
         target->popAnnotation();

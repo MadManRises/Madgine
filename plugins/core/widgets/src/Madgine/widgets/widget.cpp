@@ -153,7 +153,7 @@ namespace Widgets {
         default:
             std::terminate();
         }
-    }    
+    }
 
     template <typename WidgetType>
     WidgetType *WidgetBase::createChild()
@@ -223,11 +223,13 @@ namespace Widgets {
 
     void WidgetBase::setParent(WidgetBase *parent)
     {
-        auto it = std::ranges::find(mParent->mChildren, this, projectionToRawPtr);
-        parent->mChildren.emplace_back(std::move(*it));
-        mParent->mChildren.erase(it);
-        mParent = parent;
-        updateGeometry(mManager.getScreenSpace(), parent->mEffectiveSize, parent->mEffectivePos);
+        if (mParent != parent) {
+            auto it = std::ranges::find(mParent->mChildren, this, projectionToRawPtr);
+            parent->mChildren.emplace_back(std::move(*it));
+            mParent->mChildren.erase(it);
+            mParent = parent;
+            updateGeometry(mManager.getScreenSpace(), parent->mEffectiveSize, parent->mEffectivePos);
+        }
     }
 
     WidgetBase *WidgetBase::getParent() const

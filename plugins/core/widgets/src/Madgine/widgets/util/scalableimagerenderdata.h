@@ -1,11 +1,17 @@
 #pragma once
 
-#include "imagerenderdata.h"
+#include "renderdata.h"
 
 namespace Engine {
 namespace Widgets {
 
-    struct ScalableImageRenderData : ImageRenderData {
+    struct ScalableImageRenderData : RenderData {
+
+        void setImageName(std::string_view name);
+        void setImage(Resources::ImageLoader::Resource *image);
+
+        std::string_view imageName() const;
+        Resources::ImageLoader::Resource *image() const;
 
         std::vector<Vertex> renderImage(Vector3 pos, Vector2 size, Vector2 screenSize, const Atlas2::Entry &entry, Vector4 color = Vector4 { 1.0f, 1.0f, 1.0f, 1.0f });
 

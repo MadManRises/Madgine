@@ -144,6 +144,9 @@ namespace Tools {
 
     Threading::Task<bool> ClientImRoot::init()
     {
+        if (!co_await MainWindowComponentBase::init())
+            co_return false;
+
         ImGui::CreateContext();
         Im3D::CreateContext();
 
@@ -252,15 +255,11 @@ namespace Tools {
         if (!co_await ImRoot::init())
             co_return false;
 
-        mWindow.getRenderWindow()->addRenderPass(this);
-
         co_return true;
     }
 
     Threading::Task<void> ClientImRoot::finalize()
     {
-        mWindow.getRenderWindow()->removeRenderPass(this);
-
         ImGui::SaveIniSettingsToDisk(ImGui::GetIO().IniFilename);
 
         ImGui::GetIO().IniFilename = nullptr;
@@ -274,6 +273,8 @@ namespace Tools {
 
         Im3D::DestroyContext();
         ImGui::DestroyContext();
+
+        co_await MainWindowComponentBase::finalize();
 
         co_return;
     }
@@ -321,6 +322,8 @@ namespace Tools {
         target->pushAnnotation("ImGui");
 
         if (mWindow.getRenderWindow() == target) {
+
+            MainWindowComponentBase::render(target, iteration);
 
             ImGuiIO &io = ImGui::GetIO();
             io.KeyShift = mWindow.osWindow()->isKeyDown(Input::Key::Shift);

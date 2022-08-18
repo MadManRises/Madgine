@@ -38,7 +38,7 @@ bool MetaTable::isDerivedFrom(const MetaTable *baseType, size_t *offset) const
         return true;
     if (offset)
         *offset += mBaseOffset();
-    return mBase && (*mBase)->isDerivedFrom(baseType);
+    return mBase && (*mBase)->isDerivedFrom(baseType, offset);
 }
 
 std::string MetaTable::name(TypedScopePtr scope) const

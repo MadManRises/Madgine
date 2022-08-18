@@ -12,17 +12,12 @@ namespace Render {
 
         virtual void beginIteration(size_t iteration) const override;
 
+        virtual void clearDepthBuffer() override;
+
         virtual void pushAnnotation(const char *tag) override;
         virtual void popAnnotation() override;
 
         virtual void setRenderSpace(const Rect2i &space) override;
-        virtual void renderMesh(const GPUMeshData *mesh, const PipelineInstance *pipeline, const Material *material = nullptr) override;
-        virtual void renderMeshInstanced(size_t count, const GPUMeshData *mesh, const PipelineInstance *pipeline, const Material *material = nullptr) override;
-        virtual void clearDepthBuffer() override;
-
-        virtual void bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset = 0) const override;
-
-        //void setupProgram(RenderPassFlags flags = RenderPassFlags_None, unsigned int textureId = 0) override;
     };
 
 }

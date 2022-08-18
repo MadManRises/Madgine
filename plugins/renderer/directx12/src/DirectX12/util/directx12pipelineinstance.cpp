@@ -4,6 +4,10 @@
 
 #include "../directx12rendercontext.h"
 
+#include "../directx12meshdata.h"
+
+#include "Madgine/render/material.h"
+
 namespace Engine {
 namespace Render {
 
@@ -68,5 +72,83 @@ namespace Render {
             std::memcpy(target.mData, data.mData, data.mSize);
         }
     }
+
+    
+    void DirectX12PipelineInstance::renderMesh(const GPUMeshData *m, const Material *material) const
+    {
+        renderMeshInstanced(1, m, material);
+        /* ID3D12GraphicsCommandList *commandList = context()->mCommandList.mList;
+
+        const DirectX12MeshData *mesh = static_cast<const DirectX12MeshData *>(m);
+        const DirectX12PipelineInstance *pipeline = static_cast<const DirectX12PipelineInstance *>(p);
+
+        mesh->mVertices.bindVertex(commandList, mesh->mVertexSize);
+
+        pipeline->bind(commandList, mesh->mFormat, mesh->mGroupSize);
+
+        if (material)
+            bindTextures({ { material->mDiffuseTexture, TextureType_2D } });
+
+        constexpr D3D12_PRIMITIVE_TOPOLOGY modes[] {
+            D3D_PRIMITIVE_TOPOLOGY_POINTLIST,
+            D3D_PRIMITIVE_TOPOLOGY_LINELIST,
+            D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
+        };
+
+        assert(mesh->mGroupSize > 0 && mesh->mGroupSize <= 3);
+        D3D12_PRIMITIVE_TOPOLOGY mode = modes[mesh->mGroupSize - 1];
+        commandList->IASetPrimitiveTopology(mode);
+
+        if (mesh->mIndices) {
+            mesh->mIndices.bindIndex(commandList);
+            commandList->DrawIndexedInstanced(mesh->mElementCount, 1, 0, 0, 0);
+        } else {
+            commandList->DrawInstanced(mesh->mElementCount, 1, 0, 0);
+        }*/
+    }
+
+    void DirectX12PipelineInstance::renderMeshInstanced(size_t count, const GPUMeshData *m, const Material *material) const
+    {
+        ID3D12GraphicsCommandList *commandList = DirectX12RenderContext::getSingleton().mCommandList.mList;
+
+        const DirectX12MeshData *mesh = static_cast<const DirectX12MeshData *>(m);
+
+        if (!bind(commandList, m->mFormat, m->mGroupSize))
+            return;
+
+        mesh->mVertices.bindVertex(commandList, mesh->mVertexSize);
+
+        if (material)
+            bindTextures({ { material->mDiffuseTexture, TextureType_2D } });
+
+        constexpr D3D12_PRIMITIVE_TOPOLOGY modes[] {
+            D3D_PRIMITIVE_TOPOLOGY_POINTLIST,
+            D3D_PRIMITIVE_TOPOLOGY_LINELIST,
+            D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
+        };
+
+        assert(m->mGroupSize > 0 && m->mGroupSize <= 3);
+        D3D12_PRIMITIVE_TOPOLOGY mode = modes[m->mGroupSize - 1];
+        commandList->IASetPrimitiveTopology(mode);
+
+        if (mesh->mIndices) {
+            mesh->mIndices.bindIndex(commandList);
+            commandList->DrawIndexedInstanced(m->mElementCount, count, 0, 0, 0);
+        } else {
+            commandList->DrawInstanced(m->mElementCount, count, 0, 0);
+        }
+    }
+
+    void DirectX12PipelineInstance::bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset) const
+    {
+        for (size_t i = 0; i < tex.size(); ++i) {
+            if (tex[i].mTextureHandle) {
+                D3D12_GPU_DESCRIPTOR_HANDLE handle;
+                handle.ptr = tex[i].mTextureHandle;
+                DirectX12RenderContext::getSingleton().mCommandList.mList->SetGraphicsRootDescriptorTable(3 + offset + i, handle);
+            }
+        }
+    }
+
 }
 }

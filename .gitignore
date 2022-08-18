@@ -262,3 +262,5 @@ build/
 /CMakeGraphVizOptions.cmake
 
 **/.DS_Store
+
+.msdf

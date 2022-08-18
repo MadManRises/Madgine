@@ -143,7 +143,7 @@ namespace Input {
             GP_A = 0x88,
             GP_B = 0x89,
             GP_X = 0x8A,
-            GP_Y = 0x8B,            
+            GP_Y = 0x8B,
 
             GP_LB = 0x8C,
             GP_RB = 0x8D,
@@ -153,6 +153,12 @@ namespace Input {
 
             GP_LSB = 0x98,
             GP_RSB = 0x99,
+        };
+
+        enum Modifiers : uint8_t {
+            Mod_Shift = 1 << 0,
+            Mod_Ctrl = 1 << 1,
+            Mod_Alt = 1 << 2
         };
     }
 

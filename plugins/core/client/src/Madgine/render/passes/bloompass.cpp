@@ -49,11 +49,11 @@ namespace Render {
         if (iteration == 0)
             target->pushAnnotation("Bloom");
 
-        target->bindTextures({ mInput->texture(mInputIndex), mBlurTarget->texture(0) });
+        mPipeline->bindTextures({ mInput->texture(mInputIndex), mBlurTarget->texture(0) });
 
-        mPipeline.mapParameters<BloomData>(0)->exposure = mExposure;
+        mPipeline->mapParameters<BloomData>(0)->exposure = mExposure;
 
-        target->renderQuad(mPipeline);
+        mPipeline->renderQuad();
 
         if (iteration == target->iterations() - 1)
             target->popAnnotation();

@@ -43,6 +43,10 @@ namespace Tools {
 
         void verify();
 
+        void renderHierarchy();
+        void renderEditor();
+        void renderSelection();
+
     private:
         std::unique_ptr<ed::EditorContext, void (*)(ed::EditorContext *)> mEditor = { nullptr, nullptr };
         bool mHierarchyVisible;

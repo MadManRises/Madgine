@@ -1,9 +1,9 @@
 #pragma once
-#include "../toolscollector.h"
 #include "../toolbase.h"
+#include "../toolscollector.h"
 
-#include "Meta/keyvalue/typedscopeptr.h"
 #include "Meta/keyvalue/boundapifunction.h"
+#include "Meta/keyvalue/typedscopeptr.h"
 
 //#include "inspectorlayout.h"
 
@@ -21,12 +21,11 @@ namespace Tools {
         bool drawMember(TypedScopePtr parent, const ScopeIterator &it, tinyxml2::XMLElement *element = nullptr);
         //void drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, std::string id, std::string key, ValueType value, bool editable);
         std::pair<bool, bool> drawValue(std::string_view id, ValueType &value, bool editable, bool generic, tinyxml2::XMLElement *element = nullptr);
-        std::pair<bool, bool> drawValue(std::string_view id, TypedScopePtr &scope, bool editable, tinyxml2::XMLElement *element = nullptr);
-        std::pair<bool, bool> drawValue(std::string_view id, OwnedScopePtr &scope, bool editable, tinyxml2::XMLElement *element = nullptr);
+        std::pair<bool, bool> drawValue(std::string_view id, TypedScopePtr &scope, bool editable, ValueType *generic = nullptr, tinyxml2::XMLElement *element = nullptr);
+        std::pair<bool, bool> drawValue(std::string_view id, OwnedScopePtr &scope, bool editable, ValueType *generic = nullptr, tinyxml2::XMLElement *element = nullptr);
         bool drawValue(std::string_view id, KeyValueVirtualSequenceRange &range, bool editable, tinyxml2::XMLElement *element = nullptr);
         bool drawValue(std::string_view id, KeyValueVirtualAssociativeRange &range, bool editable, tinyxml2::XMLElement *element = nullptr);
         void drawValue(std::string_view id, BoundApiFunction &function, bool editable, tinyxml2::XMLElement *element = nullptr);
-
 
         bool drawMembers(TypedScopePtr scope, std::set<std::string> drawn = {});
 
@@ -46,7 +45,7 @@ namespace Tools {
         {
             addPreviewDefinition(table<T>, [=](TypedScopePtr p) { preview(p.safe_cast<T>()); });
         }
-	
+
     private:
         std::map<const MetaTable *, std::function<std::vector<std::pair<std::string_view, TypedScopePtr>>()>> mObjectSuggestionsByType;
         std::map<const MetaTable *, std::function<void(TypedScopePtr)>> mPreviews;

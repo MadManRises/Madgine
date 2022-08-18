@@ -39,74 +39,53 @@ static Engine::Threading::WorkgroupLocal<FilesystemPickerOptions> sFilesystemPic
 
 static ValueTypePayload sPayload;
 
-void LabeledText(const char *label, std::string_view text)
-{
-    int columns = GetColumnsCount();
-    assert(columns == 1 || columns == 2);
-
-    if (columns == 1) {
-        if (strlen(label)) {
-            //ImGui::LabelTextV(label, text);
-            throw 0;
-        } else {
-            ImGui::Text(text);
-        }
-    } else {
-        if (strlen(label))
-            ImGui::Text("%s", label);
-        ImGui::NextColumn();
-        ImGui::Text(text);
-        ImGui::NextColumn();
-    }
-}
-
 bool ValueTypeDrawer::draw(Engine::TypedScopePtr &scope)
 {
-    LabeledText(mName, "<scope>");
+    Text("<scope>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(const Engine::TypedScopePtr &scope)
 {
-    LabeledText(mName, "<scope>");
+    Text("<scope>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(bool &b)
 {
-    return Col(LIFT(Checkbox), mName, &b);
+    return Checkbox("##ValueTypeDrawer", &b);
 }
 
 bool ValueTypeDrawer::draw(const bool &b)
 {
     BeginDisabled();
-    Col(LIFT(Checkbox), mName, const_cast<bool *>(&b));
+    Checkbox("##ValueTypeDrawer", const_cast<bool *>(&b));
     EndDisabled();
     return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::CoWString &s)
 {
-    return Col(LIFT(InputText), mName, &s, 0);
+    return InputText("##ValueTypeDrawer", &s, 0);
 }
 
 bool ValueTypeDrawer::draw(const Engine::CoWString &s)
 {
-    LabeledText(mName, s);
+    Text(s);
     return false;
 }
 
 bool ValueTypeDrawer::draw(int &i)
 {
     PushItemWidth(100);
-    return Col(LIFT(DragInt), mName, &i);
+    return DragInt("##ValueTypeDrawer", &i);
 }
 
 bool ValueTypeDrawer::draw(const int &i)
 {
     BeginDisabled();
     PushItemWidth(100);
-    Col(LIFT(DragInt), mName, const_cast<int *>(&i));
+    DragInt("##ValueTypeDrawer", const_cast<int *>(&i));
     EndDisabled();
     return false;
 }
@@ -114,14 +93,14 @@ bool ValueTypeDrawer::draw(const int &i)
 bool ValueTypeDrawer::draw(uint64_t &i)
 {
     PushItemWidth(100);
-    return Col(LIFT(DragScalar), mName, ImGuiDataType_U64, &i, 1.0f);
+    return DragScalar("##ValueTypeDrawer", ImGuiDataType_U64, &i, 1.0f);
 }
 
 bool ValueTypeDrawer::draw(const uint64_t &i)
 {
     BeginDisabled();
     PushItemWidth(100);
-    Col(LIFT(DragScalar), mName, ImGuiDataType_U64, const_cast<uint64_t *>(&i), 1.0f);
+    DragScalar("##ValueTypeDrawer", ImGuiDataType_U64, const_cast<uint64_t *>(&i), 1.0f);
     EndDisabled();
     return false;
 }
@@ -129,27 +108,27 @@ bool ValueTypeDrawer::draw(const uint64_t &i)
 bool ValueTypeDrawer::draw(float &f)
 {
     PushItemWidth(100);
-    return Col(LIFT(DragFloat), mName, &f, 0.15f);
+    return DragFloat("##ValueTypeDrawer", &f, 0.15f);
 }
 
 bool ValueTypeDrawer::draw(const float &f)
 {
     BeginDisabled();
     PushItemWidth(100);
-    Col(LIFT(DragFloat), mName, const_cast<float *>(&f), 0.15f);
+    DragFloat("##ValueTypeDrawer", const_cast<float *>(&f), 0.15f);
     EndDisabled();
     return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::Matrix3 &m)
 {
-    return Col(LIFT(DragMatrix3), mName, &m, 0.15f);
+    return DragMatrix3("##ValueTypeDrawer", &m, 0.15f);
 }
 
 bool ValueTypeDrawer::draw(const Engine::Matrix3 &m)
 {
     BeginDisabled();
-    Col(LIFT(DragMatrix3), mName, const_cast<Engine::Matrix3 *>(&m), 0.15f);
+    DragMatrix3("##ValueTypeDrawer", const_cast<Engine::Matrix3 *>(&m), 0.15f);
     EndDisabled();
     return false;
 }
@@ -166,13 +145,13 @@ bool ValueTypeDrawer::draw(const Engine::Matrix3 *m)
 
 bool ValueTypeDrawer::draw(Engine::Matrix4 &m)
 {
-    return Col(LIFT(DragMatrix4), mName, &m, 0.15f);
+    return DragMatrix4("##ValueTypeDrawer", &m, 0.15f);
 }
 
 bool ValueTypeDrawer::draw(const Engine::Matrix4 &m)
 {
     BeginDisabled();
-    Col(LIFT(DragMatrix4), mName, const_cast<Engine::Matrix4 *>(&m), 0.15f);
+    DragMatrix4("##ValueTypeDrawer", const_cast<Engine::Matrix4 *>(&m), 0.15f);
     EndDisabled();
     return false;
 }
@@ -190,14 +169,14 @@ bool ValueTypeDrawer::draw(const Engine::Matrix4 *m)
 bool ValueTypeDrawer::draw(Engine::Vector2 &v)
 {
     PushItemWidth(100);
-    return Col(LIFT(DragFloat2), mName, v.ptr(), 0.15f);
+    return DragFloat2("##ValueTypeDrawer", v.ptr(), 0.15f);
 }
 
 bool ValueTypeDrawer::draw(const Engine::Vector2 &v)
 {
     BeginDisabled();
     PushItemWidth(100);
-    Col(LIFT(DragFloat2), mName, const_cast<float *>(v.ptr()), 0.15f);
+    DragFloat2("##ValueTypeDrawer", const_cast<float *>(v.ptr()), 0.15f);
     EndDisabled();
     return false;
 }
@@ -205,14 +184,14 @@ bool ValueTypeDrawer::draw(const Engine::Vector2 &v)
 bool ValueTypeDrawer::draw(Engine::Vector3 &v)
 {
     PushItemWidth(100);
-    return Col(LIFT(DragFloat3), mName, v.ptr(), 0.15f);
+    return DragFloat3("##ValueTypeDrawer", v.ptr(), 0.15f);
 }
 
 bool ValueTypeDrawer::draw(const Engine::Vector3 &v)
 {
     BeginDisabled();
     PushItemWidth(100);
-    Col(LIFT(DragFloat3), mName, const_cast<float *>(v.ptr()), 0.15f);
+    DragFloat3("##ValueTypeDrawer", const_cast<float *>(v.ptr()), 0.15f);
     EndDisabled();
     return false;
 }
@@ -220,14 +199,14 @@ bool ValueTypeDrawer::draw(const Engine::Vector3 &v)
 bool ValueTypeDrawer::draw(Engine::Vector4 &v)
 {
     PushItemWidth(100);
-    return Col(LIFT(DragFloat4), mName, v.ptr(), 0.15f);
+    return DragFloat4("##ValueTypeDrawer", v.ptr(), 0.15f);
 }
 
 bool ValueTypeDrawer::draw(const Engine::Vector4 &v)
 {
     BeginDisabled();
     PushItemWidth(100);
-    Col(LIFT(DragFloat4), mName, const_cast<float *>(v.ptr()), 0.15f);
+    DragFloat4("##ValueTypeDrawer", const_cast<float *>(v.ptr()), 0.15f);
     EndDisabled();
     return false;
 }
@@ -235,14 +214,14 @@ bool ValueTypeDrawer::draw(const Engine::Vector4 &v)
 bool ValueTypeDrawer::draw(Engine::Vector2i &v)
 {
     PushItemWidth(100);
-    return Col(LIFT(DragInt2), mName, v.ptr());
+    return DragInt2("##ValueTypeDrawer", v.ptr());
 }
 
 bool ValueTypeDrawer::draw(const Engine::Vector2i &v)
 {
     BeginDisabled();
     PushItemWidth(100);
-    Col(LIFT(DragInt2), mName, const_cast<int *>(v.ptr()));
+    DragInt2("##ValueTypeDrawer", const_cast<int *>(v.ptr()));
     EndDisabled();
     return false;
 }
@@ -250,14 +229,14 @@ bool ValueTypeDrawer::draw(const Engine::Vector2i &v)
 bool ValueTypeDrawer::draw(Engine::Vector3i &v)
 {
     PushItemWidth(100);
-    return Col(LIFT(DragInt3), mName, v.ptr());
+    return DragInt3("##ValueTypeDrawer", v.ptr());
 }
 
 bool ValueTypeDrawer::draw(const Engine::Vector3i &v)
 {
     BeginDisabled();
     PushItemWidth(100);
-    Col(LIFT(DragInt3), mName, const_cast<int *>(v.ptr()));
+    DragInt3("##ValueTypeDrawer", const_cast<int *>(v.ptr()));
     EndDisabled();
     return false;
 }
@@ -265,87 +244,87 @@ bool ValueTypeDrawer::draw(const Engine::Vector3i &v)
 bool ValueTypeDrawer::draw(Engine::Vector4i &v)
 {
     PushItemWidth(100);
-    return Col(LIFT(DragInt4), mName, v.ptr());
+    return DragInt4("##ValueTypeDrawer", v.ptr());
 }
 
 bool ValueTypeDrawer::draw(const Engine::Vector4i &v)
 {
     BeginDisabled();
     PushItemWidth(100);
-    Col(LIFT(DragInt4), mName, const_cast<int *>(v.ptr()));
+    DragInt4("##ValueTypeDrawer", const_cast<int *>(v.ptr()));
     EndDisabled();
     return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::KeyValueVirtualSequenceRange &it)
 {
-    LabeledText(mName, "<range>");
+    Text("<range>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(const Engine::KeyValueVirtualSequenceRange &it)
 {
-    LabeledText(mName, "<range>");
+    Text("<range>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::KeyValueVirtualAssociativeRange &it)
 {
-    LabeledText(mName, "<map>");
+    Text("<map>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(const Engine::KeyValueVirtualAssociativeRange &it)
 {
-    LabeledText(mName, "<map>");
+    Text("<map>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::KeyValueFunction &m)
 {
-    LabeledText(mName, "<function>");
+    Text("<function>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(const Engine::KeyValueFunction &m)
 {
-    LabeledText(mName, "<function>");
+    Text("<function>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::ApiFunction &m)
 {
-    LabeledText(mName, "<api-function>");
+    Text("<api-function>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(const Engine::ApiFunction &m)
 {
-    LabeledText(mName, "<api-function>");
+    Text("<api-function>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::BoundApiFunction &m)
 {
-    LabeledText(mName, "<bound api-function>");
+    Text("<bound api-function>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(const Engine::BoundApiFunction &m)
 {
-    LabeledText(mName, "<bound api-function>");
+    Text("<bound api-function>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(std::monostate &)
 {
-    LabeledText(mName, "<null>");
+    Text("<null>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(const std::monostate &)
 {
-    LabeledText(mName, "<null>");
+    Text("<null>");
     return false;
 }
 
@@ -368,35 +347,33 @@ bool ValueTypeDrawer::draw(const Engine::Quaternion &q)
 
 bool ValueTypeDrawer::draw(Engine::ObjectPtr &o)
 {
-    LabeledText(mName, "<object>");
+    Text("<object>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(const Engine::ObjectPtr &o)
 {
-    LabeledText(mName, "<object>");
+    Text("<object>");
     return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::Filesystem::Path &p)
 {
-    LabeledText(mName, p);
+    Text(p);
     return false;
 }
 
 bool ValueTypeDrawer::draw(const Engine::Filesystem::Path &p)
 {
-    LabeledText(mName, p);
+    Text(p);
     return false;
 }
 
 bool ValueTypeDrawer::draw(Engine::EnumHolder &e)
 {
-    int columns = GetColumnsCount();
-    assert(columns == 1 || columns == 2);
     bool changed = false;
     std::string name { e.toString() };
-    if (ImGui::BeginCombo(mName, name.c_str())) {
+    if (ImGui::BeginCombo("##ValueTypeDrawer", name.c_str())) {
         for (int32_t i : e.table()->values<int32_t>()) {
             bool isSelected = e.value() == i;
             std::string valueName { e.table()->toString(i) };
@@ -414,7 +391,7 @@ bool ValueTypeDrawer::draw(Engine::EnumHolder &e)
 
 bool ValueTypeDrawer::draw(const Engine::EnumHolder &e)
 {
-    LabeledText(mName, e.toString());
+    Text(e.toString());
     return false;
 }
 
@@ -492,30 +469,11 @@ bool SelectValueTypeTypes(Engine::type_pack<Ty...>, Engine::ValueType *v)
     return (SelectValueTypeType<Ty>(v) | ...);
 }
 
-void BeginValueType(Engine::ExtendedValueTypeDesc type, const char *name)
-{
-    if (type.mType == Engine::ExtendedValueTypeEnum::GenericType) {
-        const float width = CalcItemWidth() - GetFrameHeight();
-
-        ImGui::PushID(name);
-        BeginGroup();
-        ImGui::PushItemWidth(width);
-    }
-}
-
-bool EndValueType(Engine::ValueType *v, Engine::ExtendedValueTypeDesc type)
-{
+bool ValueTypeTypePicker(Engine::ValueType* v) {
     bool changed = false;
-    if (type.mType == Engine::ExtendedValueTypeEnum::GenericType) {
-        ImGui::PopItemWidth();
-        ImGui::SameLine(0, 0.0f);
-        if (ImGui::BeginCombo("##combo", "", ImGuiComboFlags_NoPreview | ImGuiComboFlags_PopupAlignLeft)) {
-            changed = true;
-            SelectValueTypeTypes(Engine::ValueTypeList::transform<Engine::type_pack_first>::filter<std::is_default_constructible> {}, v);
-            ImGui::EndCombo();
-        }
-        EndGroup();
-        ImGui::PopID();
+    if (ImGui::BeginCombo("##combo", "", ImGuiComboFlags_NoPreview | ImGuiComboFlags_PopupAlignLeft)) {       
+        changed |= SelectValueTypeTypes(Engine::ValueTypeList::transform<Engine::type_pack_first>::filter<std::is_default_constructible> {}, v);
+        ImGui::EndCombo();
     }
     return changed;
 }

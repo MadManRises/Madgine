@@ -37,7 +37,7 @@ std::string ValueTypeDesc::toString() const
 {
     switch (mType) {
     case ValueTypeEnum::ScopeValue:
-        return std::string { (*mSecondary.mMetaTable)->mTypeName } + "*";
+        return mSecondary.mMetaTable ? std::string { (*mSecondary.mMetaTable)->mTypeName } + "*" : "<no-type>";
     case ValueTypeEnum::OwnedScopeValue:
         return (*mSecondary.mMetaTable)->mTypeName;
     default:
