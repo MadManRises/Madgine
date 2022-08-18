@@ -18,8 +18,8 @@ namespace Tools {
         std::string_view key() const override;
 
     private:
-        Engine::Filesystem::Path mCurrentPath = ".";
-        Engine::Filesystem::Path mSelectedPath = ".";
+        Engine::Filesystem::Path mCurrentPath = Engine::Filesystem::Path { "." }.absolute();
+        Engine::Filesystem::Path mSelectedPath = Engine::Filesystem::Path { "." }.absolute();
     };
 
 }
