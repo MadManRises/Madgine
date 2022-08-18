@@ -162,6 +162,11 @@ namespace Window {
         return { rect.right - rect.left, rect.bottom - rect.top };
     }
 
+    void OSWindow::close()
+    {
+        PostMessage((HWND)mHandle, WM_CLOSE, 0, 0);
+    }
+
     void OSWindow::destroy()
     {
         DestroyWindow((HWND)mHandle);
@@ -198,10 +203,12 @@ namespace Window {
         assert(result);
         MoveWindow((HWND)mHandle, pos().x, pos().y, size.x + ((r2.right - r2.left) - (r.right - r.left)), size.y + ((r2.bottom - r2.top) - (r.bottom - r.top)), true);
     }
+
     void OSWindow::setPos(const InterfacesVector &pos)
     {
         MoveWindow((HWND)mHandle, pos.x, pos.y, size().x, size().y, true);
     }
+
     void OSWindow::setRenderPos(const InterfacesVector &pos)
     {
         RECT r;
@@ -244,6 +251,7 @@ namespace Window {
     {
         SetFocus((HWND)mHandle);
     }
+
     bool OSWindow::hasFocus()
     {
         return GetFocus() == (HWND)mHandle;
@@ -452,6 +460,6 @@ namespace Window {
 }
 }
 
-#endif
+#    endif
 
 #endif

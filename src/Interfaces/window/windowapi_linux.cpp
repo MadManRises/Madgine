@@ -194,6 +194,10 @@ namespace Window {
             return "";
         }
 
+        virtual void close() override
+        {
+        }
+
         virtual void destroy() override
         {
             XDestroyWindow(sDisplay(), mHandle);

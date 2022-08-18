@@ -8,7 +8,7 @@
                         <Widget type=WidgetClass::BUTTON serId=4>
                             <mText>StartGame</mText>
                             <mTextRenderData serId=5>
-                                <mFontSize>5</mFontSize>
+                                <mFontSize>64</mFontSize>
                                 <mPivot>
                                     <Element>0.5</Element>
                                     <Element>0.5</Element>
@@ -17,6 +17,10 @@
                             </mTextRenderData>
                             <mImageRenderData serId=6>
                                 <Image></Image>
+                                <mLeftBorder>0</mLeftBorder>
+                                <mTopBorder>0</mTopBorder>
+                                <mBottomBorder>0</mBottomBorder>
+                                <mRightBorder>0</mRightBorder>
                             </mImageRenderData>
                             <mChildren>
                             </mChildren>
@@ -36,7 +40,7 @@
                                 <Widget type=WidgetClass::LABEL serId=9>
                                     <mText>Score: 0</mText>
                                     <mTextRenderData serId=10>
-                                        <mFontSize>3</mFontSize>
+                                        <mFontSize>35</mFontSize>
                                         <mPivot>
                                             <Element>1</Element>
                                             <Element>0</Element>
@@ -52,7 +56,7 @@
                                 <Widget type=WidgetClass::LABEL serId=11>
                                     <mText>Life: -26</mText>
                                     <mTextRenderData serId=12>
-                                        <mFontSize>3</mFontSize>
+                                        <mFontSize>35</mFontSize>
                                         <mPivot>
                                             <Element>0</Element>
                                             <Element>0</Element>
@@ -80,7 +84,7 @@
                         <Widget type=WidgetClass::LABEL serId=14>
                             <mText>Game Over</mText>
                             <mTextRenderData serId=15>
-                                <mFontSize>9</mFontSize>
+                                <mFontSize>80</mFontSize>
                                 <mPivot>
                                     <Element>0.5</Element>
                                     <Element>0.5</Element>
@@ -96,7 +100,7 @@
                         <Widget type=WidgetClass::LABEL serId=16>
                             <mText>Your Score: 0</mText>
                             <mTextRenderData serId=17>
-                                <mFontSize>4</mFontSize>
+                                <mFontSize>35</mFontSize>
                                 <mPivot>
                                     <Element>0.5</Element>
                                     <Element>0.5</Element>

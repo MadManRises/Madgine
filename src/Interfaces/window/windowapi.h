@@ -52,6 +52,7 @@ namespace Window {
         void setTitle(const char *title);
         std::string title() const;
 
+        void close();
         void destroy();
 
         WindowData data();

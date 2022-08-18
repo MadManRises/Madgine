@@ -144,6 +144,11 @@ namespace Window {
     {
     }
 
+    void OSWindow::close()
+    {
+
+    }
+
         void OSWindow::destroy()
     {
         [reinterpret_cast<NSWindow*>(mHandle) close];

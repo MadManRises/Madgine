@@ -204,6 +204,10 @@ namespace Window {
         return "emscripten-window";
     }
 
+    void OSWindow::close()
+    {
+    }
+
     void OSWindow::destroy()
     {
         eglDestroySurface(sDisplay, (EGLSurface)mHandle);

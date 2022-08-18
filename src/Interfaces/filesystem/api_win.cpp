@@ -121,16 +121,18 @@ namespace Filesystem {
                 return false;
             c = p.data() + 2;
         }
-        for (; c < p.data() + p.size(); ++c)
-            if ((!std::isalnum(*c) && !isSeparator(*c) && !std::ispunct(*c) && *c != ' ')
-                || *c == '<'
-                || *c == '>'
-                || *c == ':'
-                || *c == '"'
-                || *c == '|'
-                || *c == '?'
-                || *c == '*')
+        for (; c < p.data() + p.size(); ++c) {
+            unsigned char uc = *c;
+            if ((!std::isalnum(uc) && !isSeparator(uc) && !std::ispunct(uc) && uc != ' ')
+                || uc == '<'
+                || uc == '>'
+                || uc == ':'
+                || uc == '"'
+                || uc == '|'
+                || uc == '?'
+                || uc == '*')
                 return false;
+        }
         return true;
     }
 

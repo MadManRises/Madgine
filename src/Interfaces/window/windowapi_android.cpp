@@ -227,6 +227,10 @@ namespace Window {
         return "";
     }
 
+    void OSWindow::close()
+    {
+    }
+
     void OSWindow::destroy()
     {
         eglDestroySurface(sDisplay, (EGLSurface)mHandle);

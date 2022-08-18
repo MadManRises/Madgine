@@ -27,6 +27,8 @@
 
 #include "Meta/serialize/hierarchy/statetransmissionflags.h"
 
+#include "Interfaces/window/windowapi.h"
+
 METATABLE_BEGIN_BASE(Engine::Tools::ProjectManager, Engine::Tools::ToolBase)
 #if ENABLE_PLUGINS
 PROPERTY(ProjectRoot, projectRootString, setProjectRoot)
@@ -146,7 +148,7 @@ namespace Tools {
                 ImGui::EndDisabled();
             ImGui::Separator();
             if (ImGui::MenuItem("Quit")) {
-                throw 0;
+                mWindow->osWindow()->close();
             }
             ImGui::EndMenu();
         }
