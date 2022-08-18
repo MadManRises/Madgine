@@ -26,7 +26,7 @@ namespace Tools {
 
     private:
         std::chrono::high_resolution_clock::time_point mStart = std::chrono::high_resolution_clock::now() - std::chrono::milliseconds { 10 }, mEnd = mStart;
-        float mScroll = 0.0f;
+        long long mScroll = 0;
         bool mLocked = false;
         float mZoom = 10.0f;
 

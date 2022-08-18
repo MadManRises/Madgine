@@ -50,7 +50,7 @@ namespace Tools {
             if (!mLocked)
                 mEnd = std::chrono::high_resolution_clock::now();
 
-            float fullPlotSize = std::chrono::duration_cast<std::chrono::duration<float>>(mEnd - mStart).count();
+            long long fullPlotSize = std::chrono::duration_cast<std::chrono::nanoseconds>(mEnd - mStart).count();
             ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
             ImGuiIO &io = ImGui::GetIO();
@@ -63,8 +63,8 @@ namespace Tools {
             bool renderHovered = true;
             Debug::StackTrace<1> hoveredTraceback;
 
-            std::chrono::high_resolution_clock::time_point timeAreaBegin = mStart + std::chrono::duration_cast<std::chrono::high_resolution_clock::duration>(std::chrono::duration<float> { mScroll / 1000.0f });
-            std::chrono::high_resolution_clock::time_point timeAreaEnd = timeAreaBegin + std::chrono::duration_cast<std::chrono::high_resolution_clock::duration>(std::chrono::duration<float> { 1.0f / mZoom });
+            std::chrono::high_resolution_clock::time_point timeAreaBegin = mStart + std::chrono::nanoseconds { mScroll };
+            std::chrono::high_resolution_clock::time_point timeAreaEnd = timeAreaBegin + std::chrono::nanoseconds{ static_cast<long long>(1000000000 / mZoom) };
 
             ImGui::Columns(2);
 
@@ -224,18 +224,18 @@ namespace Tools {
             ImVec2 canvas_p0 = ImGui::GetCursorScreenPos(); // ImDrawList API uses screen coordinates!
             ImVec2 scrollbar_sz = { canvas_p0.x + ImGui::GetContentRegionAvail().x, canvas_p0.y + 20.0f }; // Resize canvas to what's available
 
-            ImGui::ScrollbarEx({ canvas_p0, scrollbar_sz }, 1, ImGuiAxis_X, &mScroll, 1000.0f / mZoom, 1000.0f * fullPlotSize, ImDrawFlags_RoundCornersAll);
+            ImGui::ScrollbarEx({ canvas_p0, scrollbar_sz }, 1, ImGuiAxis_X, &mScroll, 1000000000 / mZoom, fullPlotSize, ImDrawFlags_RoundCornersAll);
 
             ImGui::EndColumns();
 
-            ImGui::Text("%f < %f < %f", 0.0f, mScroll, fullPlotSize);
-            ImGui::DragFloat("debug", &mScroll);
+            ImGui::Text("%lld < %lld < %lld", 0, mScroll, fullPlotSize);
+            ImGui::DragScalar("debug", ImGuiDataType_S64, &mScroll);
 
             if (isHovered) {
                 float factor = powf(1.1f, io.MouseWheel);
                 mZoom *= factor;
-                float mouseOffset = std::chrono::duration_cast<std::chrono::duration<float>>(timeAreaEnd - timeAreaBegin).count() * mouseRatio;
-                mScroll += 1000.0f * mouseOffset * (1.0f - 1.0f / factor);
+                long long mouseOffset = std::chrono::duration_cast<std::chrono::nanoseconds>(timeAreaEnd - timeAreaBegin).count() * mouseRatio;
+                mScroll += mouseOffset * (1.0f - 1.0f / factor);
             }
 
             if (mHoveredTaskQueue != hoveredTaskQueue || mHoveredId != hoveredId) {
@@ -287,10 +287,10 @@ namespace Tools {
 
     float TaskTracker::getEventCoordinate(std::chrono::high_resolution_clock::time_point t, float pixelWidth)
     {
-        float timePoint = std::chrono::duration_cast<std::chrono::duration<float>>(t - mStart).count() - mScroll / 1000.0f;
-        if (timePoint < 0.0f)
-            timePoint = 0.0f;
-        return (timePoint * mZoom) * pixelWidth;
+        long long timePoint = std::chrono::duration_cast<std::chrono::nanoseconds>(t - mStart).count() - mScroll;
+        if (timePoint < 0)
+            timePoint = 0;
+        return ((timePoint / 1000000000.0f) * mZoom) * pixelWidth;
     }
 }
 }
