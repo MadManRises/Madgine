@@ -74,8 +74,8 @@ namespace Widgets {
         if (textLen == 0 && cursorIndex == -1)
             return {};
 
-        float scaleX = fontSize / 5.0f / screenSize.x;
-        float scaleY = fontSize / 5.0f / screenSize.y;
+        float scaleX = fontSize / 64.0f / screenSize.x;
+        float scaleY = fontSize / 64.0f / screenSize.y;
 
         float minY = font->mDescender / 64.0f * scaleY;
         float maxY = font->mAscender / 64.0f * scaleY;
@@ -126,8 +126,8 @@ namespace Widgets {
 
         size_t textLen = text.size();
 
-        float scaleX = fontSize / 5.0f / screenSize.x;
-        float scaleY = fontSize / 5.0f / screenSize.y;
+        float scaleX = fontSize / 64.0f / screenSize.x;
+        float scaleY = fontSize / 64.0f / screenSize.y;
 
         float minY = font->mDescender / 64.0f * scaleY;
         float maxY = font->mAscender / 64.0f * scaleY;
@@ -168,7 +168,7 @@ namespace Widgets {
 
     float TextRenderData::calculateWidth(std::string_view text, const Render::Font *font, float fontSize)
     {
-        float scale = fontSize / 5.0f;
+        float scale = fontSize / 64.0f;
 
         float result = 0.0f;
 
@@ -183,11 +183,10 @@ namespace Widgets {
 
     Rect2 TextRenderData::calculateBoundingBox(std::string_view text, Vector3 pos, Vector2 size, const Render::Font *font, float fontSize, Vector2 pivot)
     {
-        float scaleX = fontSize / 5.0f;
-        float scaleY = fontSize / 5.0f;
+        float scale = fontSize / 64.0f;
 
-        float minY = font->mDescender / 64.0f * scaleY;
-        float maxY = font->mAscender / 64.0f * scaleY;
+        float minY = font->mDescender / 64.0f * scale;
+        float maxY = font->mAscender / 64.0f * scale;
         float fullHeight = maxY - minY;
         float fullWidth = calculateWidth(text, font, fontSize);
 
