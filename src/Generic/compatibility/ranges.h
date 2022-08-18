@@ -9,7 +9,7 @@ namespace ranges {
     template <class T>
     concept range = requires(T &t)
     {
-        t.begin(); // equality-preserving for forward iterators
+        t.begin();
         t.end();
     };
 #endif
@@ -30,7 +30,9 @@ namespace ranges {
     template <typename C, typename O, typename F>
     constexpr auto transform(C &&c, O o, F &&op)
     {
-        return std::transform(std::forward<C>(c).begin(), std::forward<C>(c).end(), o, std::forward<F>(op));
+        for (const auto &e : std::forward<C>(c))
+            *o++ = op(std::forward<decltype(e)>(e));
+        return o;
     }
 
     template <typename C, typename O>
