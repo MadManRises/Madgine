@@ -2,8 +2,6 @@
 
 #include "openglbuffer.h"
 
-#include "Generic/bytebuffer.h"
-
 #if OPENGL_ES
 #    include "openglvertexarray.h"
 #endif

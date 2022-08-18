@@ -3,8 +3,6 @@
 #include "Madgine/resources/virtualresourceloader.h"
 #include "Modules/threading/workgroupstorage.h"
 
-#include "Generic/bytebuffer.h"
-
 #include "Madgine/render/vertexformat.h"
 
 #include "pipeline.h"

@@ -8,8 +8,6 @@
 
 #include "Madgine/imageloader/imageloader.h"
 
-#include "Generic/bytebuffer.h"
-
 METATABLE_BEGIN_BASE(Engine::Render::TextureLoader::Resource, Engine::Resources::ResourceBase)
 METATABLE_END(Engine::Render::TextureLoader::Resource)
 

@@ -2,6 +2,8 @@
 
 #include "Madgine/render/vertexformat.h"
 
+#include "Generic/bytebuffer.h"
+
 namespace Engine {
 namespace Render {
 
