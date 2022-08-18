@@ -466,7 +466,7 @@ bool SelectValueTypeType(Engine::ValueType *v)
 template <typename... Ty>
 bool SelectValueTypeTypes(Engine::type_pack<Ty...>, Engine::ValueType *v)
 {
-    return (SelectValueTypeType<Ty>(v) | ...);
+    return (SelectValueTypeType<Ty>(v) || ...);
 }
 
 bool ValueTypeTypePicker(Engine::ValueType* v) {
