@@ -30,7 +30,7 @@ namespace ranges {
     template <typename C, typename O, typename F>
     constexpr auto transform(C &&c, O o, F &&op)
     {
-        for (const auto &e : std::forward<C>(c))
+        for (auto &&e : std::forward<C>(c))
             *o++ = op(std::forward<decltype(e)>(e));
         return o;
     }
