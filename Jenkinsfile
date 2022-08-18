@@ -274,11 +274,13 @@ pipeline {
 		}
 		success {
 			sh """
-				mkdir -p /opt/homebrew/var/www/latest/${env.BRANCH_NAME}
+				mkdir -p /opt/homebrew/var/www/${env.BRANCH_NAME}
 
-				cp -r doc/* /opt/homebrew/var/www
+				cp -r doc/* /opt/homebrew/var/www/${env.BRANCH_NAME}
 
-				cp clang-emscripten-RelWithDebInfo-OpenGL/bin/MadgineLauncher_plugins_tools.* /opt/homebrew/var/www/latest/${env.BRANCH_NAME}
+				mkdir -p /opt/homebrew/var/www/${env.BRANCH_NAME}/live
+
+				cp clang-emscripten-RelWithDebInfo-OpenGL/bin/MadgineLauncher_plugins_tools.* /opt/homebrew/var/www/${env.BRANCH_NAME}/live
 			"""
 		}
     }
