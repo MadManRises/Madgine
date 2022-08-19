@@ -10,8 +10,7 @@
 
 #include "Meta/serialize/configs/controlled.h"
 
-#include "gamehandler.h"
-#include "guihandler.h"
+#include "handler.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
@@ -20,8 +19,7 @@
 #include "Madgine/widgets/widgetmanager.h"
 
 METATABLE_BEGIN(Engine::Input::UIManager)
-MEMBER(mGuiHandlers)
-MEMBER(mGameHandlers)
+MEMBER(mHandlers)
 METATABLE_END(Engine::Input::UIManager)
 
 namespace Engine {
@@ -31,8 +29,7 @@ namespace Input {
     UIManager::UIManager(Base::Application &app, Window::MainWindow &window)
         : mApp(app)
         , mWindow(window)
-        , mGuiHandlers(*this)
-        , mGameHandlers(*this)
+        , mHandlers(*this)
     {
         window.taskQueue()->addSetupSteps(
             [this]() { return callInit(); },
@@ -48,10 +45,7 @@ namespace Input {
 
         mWindow.getWindowComponent<Widgets::WidgetManager>().updatedSignal().connect([this] { onUpdate(); });
 
-        for (const std::unique_ptr<GuiHandlerBase> &handler : mGuiHandlers)
-            co_await handler->callInit();
-
-        for (const std::unique_ptr<GameHandlerBase> &handler : mGameHandlers)
+        for (const std::unique_ptr<HandlerBase> &handler : mHandlers)
             co_await handler->callInit();
 
         mWindow.taskQueue()->addRepeatedTask([this]() {
@@ -71,11 +65,7 @@ namespace Input {
 
     Threading::Task<void> UIManager::finalize()
     {
-        for (const std::unique_ptr<GameHandlerBase> &handler : mGameHandlers) {
-            co_await handler->callFinalize();
-        }
-
-        for (const std::unique_ptr<GuiHandlerBase> &handler : mGuiHandlers)
+        for (const std::unique_ptr<HandlerBase> &handler : mHandlers)
             co_await handler->callFinalize();
     }
 
@@ -91,10 +81,7 @@ namespace Input {
 
     void UIManager::onUpdate()
     {
-        for (const std::unique_ptr<GuiHandlerBase> &handler : mGuiHandlers)
-            handler->onUpdate();
-
-        for (const std::unique_ptr<GameHandlerBase> &handler : mGameHandlers)
+        for (const std::unique_ptr<HandlerBase> &handler : mHandlers)
             handler->onUpdate();
     }
 
@@ -115,12 +102,9 @@ namespace Input {
 				mKeptCursorPosition = { (float)mouseState.X.abs, (float)mouseState.Y.abs };*/
         }
         //mGUI.hideCursor();
-        for (const std::unique_ptr<GameHandlerBase> &h : mGameHandlers) {
+
+        for (const std::unique_ptr<HandlerBase> &h : mHandlers)
             h->onMouseVisibilityChanged(false);
-        }
-        for (const std::unique_ptr<GuiHandlerBase> &h : mGuiHandlers) {
-            h->onMouseVisibilityChanged(false);
-        }
     }
 
     void UIManager::showCursor()
@@ -138,12 +122,8 @@ namespace Input {
         } else {
             //mGUI.showCursor();
         }
-        for (const std::unique_ptr<GameHandlerBase> &h : mGameHandlers) {
+        for (const std::unique_ptr<HandlerBase> &h : mHandlers)
             h->onMouseVisibilityChanged(true);
-        }
-        for (const std::unique_ptr<GuiHandlerBase> &h : mGuiHandlers) {
-            h->onMouseVisibilityChanged(true);
-        }
     }
 
     bool UIManager::isCursorVisible() const
@@ -151,19 +131,10 @@ namespace Input {
         return /* mGUI.isCursorVisible()*/ true;
     }
 
-    std::set<GameHandlerBase *> UIManager::getGameHandlers()
+    std::set<HandlerBase *> UIManager::getHandlers()
     {
-        std::set<GameHandlerBase *> result;
-        for (const std::unique_ptr<GameHandlerBase> &h : mGameHandlers) {
-            result.insert(h.get());
-        }
-        return result;
-    }
-
-    std::set<GuiHandlerBase *> UIManager::getGuiHandlers()
-    {
-        std::set<GuiHandlerBase *> result;
-        for (const std::unique_ptr<GuiHandlerBase> &h : mGuiHandlers) {
+        std::set<HandlerBase *> result;
+        for (const std::unique_ptr<HandlerBase> &h : mHandlers) {
             result.insert(h.get());
         }
         return result;
@@ -173,25 +144,22 @@ namespace Input {
     {
         std::chrono::microseconds timeSinceLastFrame = mFrameClock.tick<std::chrono::microseconds>();
 
-        for (const std::unique_ptr<GameHandlerBase> &h : mGameHandlers) {
+        for (const std::unique_ptr<HandlerBase> &h : mHandlers)
             h->updateRender(timeSinceLastFrame);
-        }
     }
 
     void UIManager::fixedUpdateRender()
     {
-        for (const std::unique_ptr<GameHandlerBase> &h : mGameHandlers) {
+        for (const std::unique_ptr<HandlerBase> &h : mHandlers)
             h->fixedUpdateRender(std::chrono::microseconds { 15000 });
-        }
     }
 
     void UIManager::updateApp()
     {
         std::chrono::microseconds timeSinceLastFrame = mAppClock.tick<std::chrono::microseconds>();
 
-        for (const std::unique_ptr<GameHandlerBase> &h : mGameHandlers) {
+        for (const std::unique_ptr<HandlerBase> &h : mHandlers)
             h->updateApp(timeSinceLastFrame);
-        }
     }
 
     std::string_view UIManager::key() const
@@ -199,14 +167,9 @@ namespace Input {
         return "UI";
     }
 
-    GameHandlerBase &UIManager::getGameHandler(size_t i)
+    HandlerBase &UIManager::getHandler(size_t i)
     {
-        return mGameHandlers.get(i);
-    }
-
-    GuiHandlerBase &UIManager::getGuiHandler(size_t i)
-    {
-        return mGuiHandlers.get(i);
+        return mHandlers.get(i);
     }
 
     Threading::TaskQueue *UIManager::viewTaskQueue() const

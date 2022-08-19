@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Madgine/input/guihandler.h"
+#include "Madgine/input/handler.h"
 
 namespace ClickBrick {
 
-    struct GameOverHandler : Engine::Input::GuiHandler<GameOverHandler> {
+    struct GameOverHandler : Engine::Input::Handler<GameOverHandler> {
         SERIALIZABLEUNIT(GameOverHandler)
 
         GameOverHandler(Engine::Input::UIManager &ui);

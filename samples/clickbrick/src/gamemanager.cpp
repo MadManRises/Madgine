@@ -35,14 +35,14 @@
 
 UNIQUECOMPONENT(ClickBrick::GameManager)
 
-METATABLE_BEGIN_BASE(ClickBrick::GameManager, Engine::Input::GameHandlerBase)
+METATABLE_BEGIN_BASE(ClickBrick::GameManager, Engine::Input::HandlerBase)
 MEMBER(mCamera)
 METATABLE_END(ClickBrick::GameManager)
 
 namespace ClickBrick {
 
 GameManager::GameManager(Engine::Input::UIManager &ui)
-    : Engine::Input::GameHandler<GameManager>(ui, "GameView")
+    : Engine::Input::Handler<GameManager>(ui, "GameView")
     , mSceneMgr(ui.app().getGlobalAPIComponent<Engine::Scene::SceneManager>())
     , mSceneRenderer(mSceneMgr, &mCamera, 50)
 {
@@ -62,7 +62,7 @@ Engine::Threading::Task<bool> GameManager::init()
         mGameWindow->getRenderTarget()->addRenderPass(&mSceneRenderer);
     }
 
-    co_return co_await GameHandlerBase::init();
+    co_return co_await HandlerBase::init();
 }
 
 Engine::Threading::Task<void> GameManager::finalize()
@@ -71,12 +71,12 @@ Engine::Threading::Task<void> GameManager::finalize()
         mGameWindow->getRenderTarget()->removeRenderPass(&mSceneRenderer);
     }
 
-    co_await GameHandlerBase::finalize();
+    co_await HandlerBase::finalize();
 }
 
 void GameManager::setWidget(Engine::Widgets::WidgetBase *w)
 {
-    GameHandlerBase::setWidget(w);
+    HandlerBase::setWidget(w);
 
     if (widget()) {
         mGameWindow = widget()->getChildRecursive<Engine::Widgets::SceneWindow>("GameView");
@@ -215,8 +215,8 @@ void GameManager::modLife(int diff)
     mLifeLabel->mText = "Life: " + std::to_string(mLife);
 
     if (mLife <= 0) {
-        getGuiHandler<GameOverHandler>().setScore(mScore);
-        getGuiHandler<GameOverHandler>().open();
+        getHandler<GameOverHandler>().setScore(mScore);
+        getHandler<GameOverHandler>().open();
     }
 }
 

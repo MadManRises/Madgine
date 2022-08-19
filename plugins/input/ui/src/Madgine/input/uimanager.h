@@ -35,32 +35,23 @@ namespace Input {
 
         //Scene::ContextMask currentContext();
 
-        std::set<GameHandlerBase *> getGameHandlers();
-        std::set<GuiHandlerBase *> getGuiHandlers();
+        std::set<HandlerBase *> getHandlers();        
 
         static const constexpr int sMaxInitOrder = 4;
 
         std::string_view key() const;
 
         template <typename T>
-        T &getGuiHandler()
+        T &getHandler()
         {
-            return static_cast<T &>(getGuiHandler(UniqueComponent::component_index<T>()));
+            return static_cast<T &>(getHandler(UniqueComponent::component_index<T>()));
         }
 
-        GuiHandlerBase &getGuiHandler(size_t i);
+        HandlerBase &getHandler(size_t i);
 
         Threading::TaskQueue *viewTaskQueue() const;
 
         Threading::TaskQueue *modelTaskQueue() const;
-
-        template <typename T>
-        T &getGameHandler()
-        {
-            return static_cast<T &>(getGameHandler(UniqueComponent::component_index<T>()));
-        }
-
-        GameHandlerBase &getGameHandler(size_t i);
 
         Threading::Task<bool> init();
         Threading::Task<void> finalize();
@@ -75,8 +66,7 @@ namespace Input {
         Window::MainWindow &mWindow;
 
     public:
-        GuiHandlerContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>> mGuiHandlers;
-        GameHandlerContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>> mGameHandlers;
+        HandlerContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>> mHandlers;        
 
     private:
         Vector2 mKeptCursorPosition;

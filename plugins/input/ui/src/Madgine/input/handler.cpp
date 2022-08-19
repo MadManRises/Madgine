@@ -7,44 +7,42 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
-METATABLE_BEGIN(Engine::Input::Handler)
+DEFINE_UNIQUE_COMPONENT(Engine::Input, Handler)
+
+METATABLE_BEGIN(Engine::Input::HandlerBase)
 PROPERTY(Widget, widget, setWidget)
-METATABLE_END(Engine::Input::Handler)
+METATABLE_END(Engine::Input::HandlerBase)
 
 namespace Engine {
 namespace Input {
-    Handler::Handler(UIManager &ui, std::string_view widgetName)
+    HandlerBase::HandlerBase(UIManager &ui, std::string_view widgetName, WidgetType type)
         : mWidgetName(widgetName)
         , mUI(ui)
+        , mType(type)
     {
     }
 
-    GuiHandlerBase &Handler::getGuiHandler(size_t i)
+    HandlerBase &HandlerBase::getHandler(size_t i)
     {
-        return mUI.getGuiHandler(i);
+        return mUI.getHandler(i);
     }
 
-    GameHandlerBase &Handler::getGameHandler(size_t i)
-    {
-        return mUI.getGameHandler(i);
-    }
-
-    void Handler::sizeChanged()
+    void HandlerBase::sizeChanged()
     {
     }
 
-    Threading::Task<bool> Handler::init()
+    Threading::Task<bool> HandlerBase::init()
     {
         co_return true;
     }
 
-    Threading::Task<void> Handler::finalize()
+    Threading::Task<void> HandlerBase::finalize()
     {
         mWidget = nullptr;
         co_return;
     }
 
-    void Handler::setWidget(Widgets::WidgetBase *widget)
+    void HandlerBase::setWidget(Widgets::WidgetBase *widget)
     {
         if (mWidget != widget) {
             if (mWidget) {
@@ -53,98 +51,165 @@ namespace Input {
             mWidget = widget;
 
             if (mWidget) {
-                mWidget->pointerMoveEvent().connect(&Handler::injectPointerMove, this, &mConStore);
-                mWidget->pointerClickEvent().connect(&Handler::injectPointerClick, this, &mConStore);
-                mWidget->dragBeginEvent().connect(&Handler::injectDragBegin, this, &mConStore);
-                mWidget->dragMoveEvent().connect(&Handler::injectDragMove, this, &mConStore);
-                mWidget->dragEndEvent().connect(&Handler::injectDragEnd, this, &mConStore);
-                mWidget->axisEvent().connect(&Handler::injectAxisEvent, this, &mConStore);
-                mWidget->keyEvent().connect(&Handler::injectKeyPress, this, &mConStore);
+                mWidget->pointerMoveEvent().connect(&HandlerBase::injectPointerMove, this, &mConStore);
+                mWidget->pointerClickEvent().connect(&HandlerBase::injectPointerClick, this, &mConStore);
+                mWidget->dragBeginEvent().connect(&HandlerBase::injectDragBegin, this, &mConStore);
+                mWidget->dragMoveEvent().connect(&HandlerBase::injectDragMove, this, &mConStore);
+                mWidget->dragEndEvent().connect(&HandlerBase::injectDragEnd, this, &mConStore);
+                mWidget->axisEvent().connect(&HandlerBase::injectAxisEvent, this, &mConStore);
+                mWidget->keyEvent().connect(&HandlerBase::injectKeyPress, this, &mConStore);
             }
         }
     }
 
-    void Handler::injectPointerMove(const PointerEventArgs &evt)
+    void HandlerBase::injectPointerMove(const PointerEventArgs &evt)
     {
         onPointerMove(evt);
     }
 
-    void Handler::injectPointerClick(const PointerEventArgs &evt)
+    void HandlerBase::injectPointerClick(const PointerEventArgs &evt)
     {
         onPointerClick(evt);
     }
 
-    void Handler::injectDragBegin(const PointerEventArgs &evt)
+    void HandlerBase::injectDragBegin(const PointerEventArgs &evt)
     {
         onDragBegin(evt);
     }
 
-    void Handler::injectDragMove(const PointerEventArgs &evt)
+    void HandlerBase::injectDragMove(const PointerEventArgs &evt)
     {
         onDragMove(evt);
     }
 
-    void Handler::injectDragEnd(const PointerEventArgs &evt)
+    void HandlerBase::injectDragEnd(const PointerEventArgs &evt)
     {
         onDragEnd(evt);
     }
 
-    bool Handler::injectKeyPress(const KeyEventArgs &evt)
+    bool HandlerBase::injectKeyPress(const KeyEventArgs &evt)
     {
         return onKeyPress(evt);
     }
 
-    void Handler::injectAxisEvent(const AxisEventArgs &evt)
+    void HandlerBase::injectAxisEvent(const AxisEventArgs &evt)
     {
         onAxisEvent(evt);
     }
 
-    void Handler::onPointerMove(const PointerEventArgs &me)
+    void HandlerBase::onPointerMove(const PointerEventArgs &me)
     {
     }
 
-    void Handler::onPointerClick(const PointerEventArgs &me)
+    void HandlerBase::onPointerClick(const PointerEventArgs &me)
     {
     }
 
-    void Handler::onDragBegin(const PointerEventArgs &me)
+    void HandlerBase::onDragBegin(const PointerEventArgs &me)
     {
     }
 
-    void Handler::onDragMove(const PointerEventArgs &me)
+    void HandlerBase::onDragMove(const PointerEventArgs &me)
     {
     }
 
-    void Handler::onDragEnd(const PointerEventArgs &me)
+    void HandlerBase::onDragEnd(const PointerEventArgs &me)
     {
     }
 
-    bool Handler::onKeyPress(const KeyEventArgs &evt)
+    bool HandlerBase::onKeyPress(const KeyEventArgs &evt)
     {
         return false;
     }
 
-    void Handler::onAxisEvent(const AxisEventArgs &evt)
+    void HandlerBase::onAxisEvent(const AxisEventArgs &evt)
     {
     }
 
-    void Handler::onMouseVisibilityChanged(bool b)
+    void HandlerBase::onMouseVisibilityChanged(bool b)
     {
     }
 
-    void Handler::onUpdate()
+    void HandlerBase::onUpdate()
     {
         setWidget(mUI.window().getWindowComponent<Widgets::WidgetManager>().getWidget(mWidgetName));
     }
 
-    Widgets::WidgetBase *Handler::widget() const
+    Widgets::WidgetBase *HandlerBase::widget() const
     {
         return mWidget;
     }
 
-    Threading::TaskQueue *Handler::viewTaskQueue() const
+    Threading::TaskQueue *HandlerBase::viewTaskQueue() const
     {
         return mUI.viewTaskQueue();
+    }
+
+    void HandlerBase::updateRender(std::chrono::microseconds timeSinceLastFrame)
+    {
+    }
+
+    void HandlerBase::fixedUpdateRender(std::chrono::microseconds timeStep)
+    {
+    }
+
+    void HandlerBase::updateApp(std::chrono::microseconds timeSinceLastFrame)
+    {
+    }
+
+    void HandlerBase::open()
+    {
+        assert(mType != WidgetType::DEFAULT_WIDGET);
+
+        if (!mWidget)
+            return;
+
+        auto state = this->state();
+        if (!state.is_ready() || !state) {
+            LOG_ERROR("Failed to open unitialized GuiHandler!");
+            return;
+        }
+
+        if (isOpen())
+            return;
+
+        switch (mType) {
+        case WidgetType::MODAL_OVERLAY:
+            mWidget->manager().openModalWidget(mWidget);
+            break;
+        case WidgetType::NONMODAL_OVERLAY:
+            mWidget->manager().openWidget(mWidget);
+            break;
+        case WidgetType::ROOT_WIDGET:
+            mWidget->manager().swapCurrentRoot(mWidget);
+            break;
+        }
+    }
+
+    void HandlerBase::close()
+    {
+        assert(mType != WidgetType::DEFAULT_WIDGET);
+
+        switch (mType) {
+        case WidgetType::MODAL_OVERLAY:
+            mWidget->manager().closeModalWidget(mWidget);
+            break;
+        case WidgetType::NONMODAL_OVERLAY:
+            mWidget->manager().closeWidget(mWidget);
+            break;
+        case WidgetType::ROOT_WIDGET:
+            std::terminate();
+        }
+    }
+
+    bool HandlerBase::isOpen() const
+    {
+        return mWidget->mVisible;
+    }
+
+    bool HandlerBase::isRootWindow() const
+    {
+        return mType == WidgetType::ROOT_WIDGET;
     }
 
 }

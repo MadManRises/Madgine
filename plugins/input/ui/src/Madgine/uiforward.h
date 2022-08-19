@@ -3,9 +3,7 @@
 namespace Engine {
 
 namespace Input {
-    struct Handler;
-    struct GameHandlerBase;
-    struct GuiHandlerBase;
+    struct HandlerBase;
     struct UIManager;
 }
 

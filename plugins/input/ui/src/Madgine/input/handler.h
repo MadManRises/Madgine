@@ -7,14 +7,25 @@
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
+#include "handlercollector.h"
+
+#include "Interfaces/input/inputevents.h"
+
 namespace Engine {
 namespace Input {
 
-    struct MADGINE_UI_EXPORT Handler : VirtualScopeBase<>, Threading::MadgineObject<Handler> {
-        SERIALIZABLEUNIT(Handler)
+    struct MADGINE_UI_EXPORT HandlerBase : VirtualScopeBase<>, Threading::MadgineObject<HandlerBase> {
+        SERIALIZABLEUNIT(HandlerBase)
 
-        Handler(UIManager &ui, std::string_view widgetName);
-        virtual ~Handler() = default;
+        enum class WidgetType {
+            DEFAULT_WIDGET,
+            MODAL_OVERLAY,
+            NONMODAL_OVERLAY,
+            ROOT_WIDGET
+        };
+
+        HandlerBase(UIManager &ui, std::string_view widgetName, WidgetType type = WidgetType::DEFAULT_WIDGET);
+        virtual ~HandlerBase() = default;
 
         virtual void onMouseVisibilityChanged(bool b);
 
@@ -27,29 +38,31 @@ namespace Input {
         virtual std::string_view key() const = 0;
 
         template <typename T>
-        T &getGuiHandler()
+        T &getHandler()
         {
-            return static_cast<T &>(getGuiHandler(UniqueComponent::component_index<T>()));
+            return static_cast<T &>(getHandler(UniqueComponent::component_index<T>()));
         }
 
-        GuiHandlerBase &getGuiHandler(size_t i);
-
-        template <typename T>
-        T &getGameHandler()
-        {
-            return static_cast<T &>(getGameHandler(UniqueComponent::component_index<T>()));
-        }
-
-        GameHandlerBase &getGameHandler(size_t i);
+        HandlerBase &getHandler(size_t i);
 
         Threading::TaskQueue *viewTaskQueue() const;
         Threading::TaskQueue *modelTaskQueue() const;
+
+        virtual void updateRender(std::chrono::microseconds timeSinceLastFrame);
+        virtual void fixedUpdateRender(std::chrono::microseconds timeStep);
+        virtual void updateApp(std::chrono::microseconds timeSinceLastFrame);
+
+        virtual void open();
+        virtual void close();
+        bool isOpen() const;
+
+        bool isRootWindow() const;
 
     protected:
         virtual Threading::Task<bool> init();
         virtual Threading::Task<void> finalize();
 
-        friend struct MadgineObject<Handler>;
+        friend struct MadgineObject<HandlerBase>;
 
         virtual void onPointerMove(const PointerEventArgs &me);
         virtual void onPointerClick(const PointerEventArgs &me);
@@ -78,6 +91,10 @@ namespace Input {
         UIManager &mUI;
 
         Engine::Threading::ConnectionStore mConStore;
+
+        const WidgetType mType;
     };
 }
 }
+
+REGISTER_TYPE(Engine::Input::HandlerBase)

@@ -12,13 +12,13 @@
 
 UNIQUECOMPONENT(ClickBrick::MainMenuHandler)
 
-METATABLE_BEGIN_BASE(ClickBrick::MainMenuHandler, Engine::Input::GuiHandlerBase)
+METATABLE_BEGIN_BASE(ClickBrick::MainMenuHandler, Engine::Input::HandlerBase)
 METATABLE_END(ClickBrick::MainMenuHandler)
 
 namespace ClickBrick {
 
 MainMenuHandler::MainMenuHandler(Engine::Input::UIManager &ui)
-    : Engine::Input::GuiHandler<MainMenuHandler>(ui, Engine::Input::GuiHandlerBase::WindowType::ROOT_WINDOW, "MainMenu")
+    : Engine::Input::Handler<MainMenuHandler>(ui, "MainMenu", Engine::Input::HandlerBase::WidgetType::ROOT_WIDGET)
 {
 }
 
@@ -29,7 +29,7 @@ std::string_view MainMenuHandler::key() const
 
 void MainMenuHandler::setWidget(Engine::Widgets::WidgetBase *w)
 {
-    Engine::Input::GuiHandlerBase::setWidget(w);
+    Engine::Input::HandlerBase::setWidget(w);
     if (widget()) {
         widget()->getChildRecursive<Engine::Widgets::Button>("StartGameButton")->clickEvent().connect(&MainMenuHandler::startGame, this, &mConStore);
     }
@@ -37,8 +37,8 @@ void MainMenuHandler::setWidget(Engine::Widgets::WidgetBase *w)
 
 void MainMenuHandler::startGame()
 {
-    getGameHandler<GameManager>().start();
-    getGuiHandler<GameHandler>().open();
+    getHandler<GameManager>().start();
+    getHandler<GameHandler>().open();
 }
 
 }
