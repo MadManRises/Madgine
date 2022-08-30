@@ -192,7 +192,7 @@ namespace Filesystem {
         LARGE_INTEGER size;
         size.HighPart = fad.nFileSizeHigh;
         size.LowPart = fad.nFileSizeLow;
-        return { static_cast<unsigned long long>(size.QuadPart) };
+        return { static_cast<size_t>(size.QuadPart) };
     }
 
 }
