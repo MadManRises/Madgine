@@ -1,4 +1,4 @@
-#include "Generic/genericlib.h"
+#include "../metalib.h"
 
 #include "base64.h"
 
@@ -20,7 +20,7 @@ namespace Base64 {
         return result;
     }();
 
-    BASE64_EXPORT std::string encode(const ByteBuffer &data)
+    std::string encode(const ByteBuffer &data)
     {
         std::string result;
         result.reserve((data.mSize + 2) / 3 * 4);
@@ -49,7 +49,7 @@ namespace Base64 {
         return result;
     }
 
-    BASE64_EXPORT bool decode(ByteBuffer &b, std::string_view string)
+    bool decode(ByteBuffer &b, std::string_view string)
     {
         if (string.size() % 4 != 0)
             return false;

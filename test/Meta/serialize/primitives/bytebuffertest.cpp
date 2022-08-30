@@ -2,7 +2,7 @@
 
 #include "Meta/metalib.h"
 
-#include "base64/base64.h"
+#include "Meta/base64/base64.h"
 
 #include "Generic/bytebuffer.h"
 

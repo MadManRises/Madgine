@@ -5,6 +5,7 @@ option(META_ENABLE_MESSAGE_LOGGING "Enables Logging functionality for sync messa
 set(sources)
 
 FolderSources(sources "" "" metaforward.h metalib.h)
+	FolderSources(sources "" base64 base64.cpp base64.h)
 	FolderSources(sources "" inject)
 	FolderSources(sources "" keyvalue accessor.h apifunction.cpp apifunction.h boundapifunction.cpp boundapifunction.h enumholder.cpp enumholder.h functiontable.cpp functiontable.h keyvaluefunction.cpp keyvaluevirtualrange.h metatable.cpp metatable.h nativeobject.cpp nativeobject.h objectptr.cpp objectptr.h ownedscopeptr.cpp ownedscopeptr.h scopefield.cpp scopefield.h scopeiterator.cpp scopeiterator.h typedscopeptr.cpp typedscopeptr.h valuetype.cpp valuetype.h valuetype_desc.cpp valuetype_desc.h valuetype_forward.cpp valuetype_forward.h valuetype_types.h)
 	FolderSources(sources "" keyvalueutil valuetypeserialize.cpp valuetypeserialize.h)
@@ -21,6 +22,6 @@ add_workspace_library(Meta ${sources} SOURCE_ROOT .. PRECOMPILED_HEADER metalib.
 configure_file(metaconfig.in.h metaconfig.h)
 target_include_directories(Meta PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
-target_link_libraries(Meta PUBLIC Generic Base64)
+target_link_libraries(Meta PUBLIC Generic)
 
 install_to_workspace(Madgine TARGETS Meta EXPORT_LIB)

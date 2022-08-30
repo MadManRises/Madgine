@@ -7,7 +7,7 @@
 
 #include "../serializemanager.h"
 
-#include "base64/base64.h"
+#include "Meta/base64/base64.h"
 
 namespace Engine {
 namespace Serialize {
