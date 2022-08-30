@@ -7,8 +7,8 @@
 
 #define STB_TEXTEDIT_CHARTYPE char
 #define STB_TEXTEDIT_POSTIONTYPE size_t
-#define STB_TEXTEDIT_UNDOSTATECOUNT 0
-#define STB_TEXTEDIT_UNDCHARCOUNT 0
+#define STB_TEXTEDIT_UNDOSTATECOUNT 1
+#define STB_TEXTEDIT_UNDCHARCOUNT 1
 #include "stb_textedit.h"
 
 namespace Engine {
