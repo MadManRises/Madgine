@@ -1,0 +1,247 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 22,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "displayName": "default",
+      "description": "Base build using Ninja generator",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "installDir": "${sourceDir}/out/install/${presetName}",
+      "hidden": true,
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_DEBUG_POSTFIX": "",
+        "CMAKE_MINSIZEREL_POSTFIX": "",
+        "CMAKE_RELWITHDEBINFO_POSTFIX": "",
+        "BUILD_SHARED_LIBS": {
+          "type": "BOOL",
+          "value": "True"
+        }
+      },
+      "architecture": {
+        "strategy": "external",
+        "value": "x64"
+      }
+    },
+    {
+      "name": "clang",
+      "inherits": "base",
+      "displayName": "-Clang-",
+      "description": "Base build using clang with MSVC",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang-cl",
+        "CMAKE_CXX_COMPILER": "clang-cl"
+      },
+      "hidden": true
+    },
+    {
+      "name": "emscripten",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_CXX_FLAGS": "-s WASM=1 -s USE_PTHREADS=0 -s -s ALLOW_MEMORY_GROWTH=1 -mtail-call",
+        "CMAKE_EXE_LINKER_FLAGS": "-s WASM=1 --emrun -s DEMANGLE_SUPPORT=1 -s USE_WEBGL2=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s ALLOW_MEMORY_GROWTH=1",
+        "CMAKE_SHARED_LINKER_FLAGS": "-s WASM=1 --emrun -s DEMANGLE_SUPPORT=1 -s USE_WEBGL2=1 -s SIDE_MODULE=1 -s EXPORT_ALL=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s ALLOW_MEMORY_GROWTH=1"
+      },
+      "toolchainFile": "cmake/toolchains/emscripten-wasm.cmake",
+      "hidden": true
+    },
+    {
+      "name": "android",
+      "inherits": "base",
+      "toolchainFile": "cmake/toolchains/android.cmake",
+      "hidden": true
+    },
+    {
+      "name": "android-armv7",
+      "inherits": "android",
+      "cacheVariables": { "ANDROID_ABI": "armeabi-v7a" },
+      "hidden": true
+    },
+    {
+      "name": "android-x64",
+      "inherits": "android",
+      "cacheVariables": { "ANDROID_ABI": "x86_64" },
+      "hidden": true
+    },
+    {
+      "name": "OpenGL",
+      "displayName": "-OpenGL",
+      "description": "Uses OpenGL config as plugin definition file",
+      "cacheVariables": {
+        "PLUGIN_DEFINITION_FILE": {
+          "type": "FILEPATH",
+          "value": "${sourceDir}/test/OpenGL.cfg"
+        },
+        "BUILD_SHARED_LIBS": {
+          "type": "BOOL",
+          "value": "False"
+        }
+      },
+      "hidden": true
+    },
+    {
+      "name": "OpenGL-Tools",
+      "inherits": "OpenGL",
+      "displayName": "-OpenGL (Tools)",
+      "description": "Uses OpenGL including Tools config as plugin definition file",
+      "cacheVariables": {
+        "PLUGIN_DEFINITION_FILE": {
+          "type": "FILEPATH",
+          "value": "${sourceDir}/test/OpenGL_tools.cfg"
+        }
+      },
+      "hidden": true
+    },
+    {
+      "name": "debug",
+      "displayName": "-Debug-",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      },
+      "hidden": true
+    },
+    {
+      "name": "release",
+      "displayName": "-Release-",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      },
+      "hidden": true
+    },
+    {
+      "name": "relwithdebinfo",
+      "displayName": "-RelWithDebInfo-",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      },
+      "hidden": true
+    },
+    {
+      "name": "Debug",
+      "inherits": [ "base", "debug" ]
+    },
+    {
+      "name": "Release",
+      "inherits": [ "base", "release" ]
+    },
+    {
+      "name": "RelWithDebInfo",
+      "inherits": [ "base", "relwithdebinfo" ]
+    },
+    {
+      "name": "Clang-Debug",
+      "inherits": [ "clang", "debug" ]
+    },
+    {
+      "name": "Clang-Debug-OpenGL",
+      "inherits": [ "clang", "debug", "OpenGL" ]
+    },
+    {
+      "name": "Clang-Debug-OpenGL (Tools)",
+      "inherits": [ "clang", "debug", "OpenGL-Tools" ]
+    },
+    {
+      "name": "Clang-Release",
+      "inherits": [ "clang", "release" ]
+    },
+    {
+      "name": "Clang-Release-OpenGL",
+      "inherits": [ "clang", "release", "OpenGL" ]
+    },
+    {
+      "name": "Clang-Release-OpenGL (Tools)",
+      "inherits": [ "clang", "release", "OpenGL-Tools" ]
+    },
+    {
+      "name": "Clang-RelWithDebInfo",
+      "inherits": [ "clang", "relwithdebinfo" ]
+    },
+    {
+      "name": "Clang-RelWithDebInfo-OpenGL",
+      "inherits": [ "clang", "relwithdebinfo", "OpenGL" ]
+    },
+    {
+      "name": "Clang-RelWithDebInfo-OpenGL (Tools)",
+      "inherits": [ "clang", "relwithdebinfo", "OpenGL-Tools" ]
+    },
+    {
+      "name": "Emscripten-Debug-OpenGL",
+      "inherits": [ "emscripten", "debug", "OpenGL" ]
+    },
+    {
+      "name": "Emscripten-Debug-OpenGL (Tools)",
+      "inherits": [ "emscripten", "debug", "OpenGL-Tools" ]
+    },
+    {
+      "name": "Emscripten-Release-OpenGL",
+      "inherits": [ "emscripten", "release", "OpenGL" ]
+    },
+    {
+      "name": "Emscripten-Release-OpenGL (Tools)",
+      "inherits": [ "emscripten", "release", "OpenGL-Tools" ]
+    },
+    {
+      "name": "Emscripten-RelWithDebInfo-OpenGL",
+      "inherits": [ "emscripten", "relwithdebinfo", "OpenGL" ]
+    },
+    {
+      "name": "Emscripten-RelWithDebInfo-OpenGL (Tools)",
+      "inherits": [ "emscripten", "relwithdebinfo", "OpenGL-Tools" ]
+    },
+    {
+      "name": "Android-x64-Debug-OpenGL",
+      "inherits": [ "android-x64", "debug", "OpenGL" ]
+    },
+    {
+      "name": "Android-x64-Debug-OpenGL (Tools)",
+      "inherits": [ "android-x64", "debug", "OpenGL-Tools" ]
+    },
+    {
+      "name": "Android-x64-Release-OpenGL",
+      "inherits": [ "android-x64", "release", "OpenGL" ]
+    },
+    {
+      "name": "Android-x64-Release-OpenGL (Tools)",
+      "inherits": [ "android-x64", "release", "OpenGL-Tools" ]
+    },
+    {
+      "name": "Android-x64-RelWithDebInfo-OpenGL",
+      "inherits": [ "android-x64", "relwithdebinfo", "OpenGL" ]
+    },
+    {
+      "name": "Android-x64-RelWithDebInfo-OpenGL (Tools)",
+      "inherits": [ "android-x64", "relwithdebinfo", "OpenGL-Tools" ]
+    },
+    {
+      "name": "Android-armv7-Debug-OpenGL",
+      "inherits": [ "android-armv7", "debug", "OpenGL" ]
+    },
+    {
+      "name": "Android-armv7-Debug-OpenGL (Tools)",
+      "inherits": [ "android-armv7", "debug", "OpenGL-Tools" ]
+    },
+    {
+      "name": "Android-armv7-Release-OpenGL",
+      "inherits": [ "android-armv7", "release", "OpenGL" ]
+    },
+    {
+      "name": "Android-armv7-Release-OpenGL (Tools)",
+      "inherits": [ "android-armv7", "release", "OpenGL-Tools" ]
+    },
+    {
+      "name": "Android-armv7-RelWithDebInfo-OpenGL",
+      "inherits": [ "android-armv7", "relwithdebinfo", "OpenGL" ]
+    },
+    {
+      "name": "Android-armv7-RelWithDebInfo-OpenGL (Tools)",
+      "inherits": [ "android-armv7", "relwithdebinfo", "OpenGL-Tools" ]
+    }
+  ],
+  "buildPresets": [],
+  "testPresets": []
+}
