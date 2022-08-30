@@ -1,0 +1,5 @@
+set (GRAPHVIZ_EXTERNAL_LIBS FALSE)
+set (GRAPHVIZ_STATIC_LIBS FALSE)
+set (GRAPHVIZ_MODULE_LIBS FALSE)
+set (GRAPHVIZ_EXECUTABLES FALSE)
+set (GRAPHVIZ_IGNORE_TARGETS assimp freetype lib_msdfgen stb zlib .*Tools .*Loader .*Serialize .*Nodes)
