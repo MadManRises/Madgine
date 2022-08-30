@@ -162,7 +162,7 @@ struct CoWString {
         return mString;
     }
 
-    constexpr char *data()
+    char *data()
     {
         makeOwning();
         assert(mOwning);
