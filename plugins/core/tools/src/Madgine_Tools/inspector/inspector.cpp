@@ -6,8 +6,6 @@
 
 #include "imgui/imguiaddons.h"
 
-#include "Madgine/resources/resourcemanager.h"
-
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
@@ -20,8 +18,6 @@
 #include "Madgine/base/keyvalueregistry.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
-
-#include "Madgine/resources/resourceloaderbase.h"
 
 #include "../renderer/imroot.h"
 
