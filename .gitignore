@@ -259,8 +259,11 @@ build/
 .vscode/
 
 /test/local
-/CMakeGraphVizOptions.cmake
 
 **/.DS_Store
 
 .msdf
+
+CMakeUserPresets.json
+
+*.dot*
