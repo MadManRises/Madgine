@@ -19,7 +19,7 @@ namespace Scripting {
         }
 
         PyTypeObject PyVirtualSequenceRangeType = {
-            PyVarObject_HEAD_INIT(NULL, 0)
+            .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
                 .tp_name
             = "Environment.VirtualSequenceRange",
             .tp_basicsize = sizeof(PyVirtualSequenceRange),
@@ -55,7 +55,7 @@ namespace Scripting {
         };
 
         PyTypeObject PyVirtualAssociativeRangeType = {
-            PyVarObject_HEAD_INIT(NULL, 0)
+            .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
                 .tp_name
             = "Environment.VirtualAssociativeRange",
             .tp_basicsize = sizeof(PyVirtualAssociativeRange),

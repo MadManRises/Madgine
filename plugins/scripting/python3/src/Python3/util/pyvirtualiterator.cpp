@@ -30,7 +30,7 @@ namespace Scripting {
         }
 
         PyTypeObject PyVirtualSequenceIteratorType = {
-            PyVarObject_HEAD_INIT(NULL, 0)
+            .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
                 .tp_name
             = "Environment.VirtualSequenceIterator",
             .tp_basicsize = sizeof(PyVirtualSequenceIterator),
@@ -61,7 +61,7 @@ namespace Scripting {
         }
 
         PyTypeObject PyVirtualAssociativeIteratorType = {
-            PyVarObject_HEAD_INIT(NULL, 0)
+            .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
                 .tp_name
             = "Environment.VirtualAssociativeIterator",
             .tp_basicsize = sizeof(PyVirtualAssociativeIterator),

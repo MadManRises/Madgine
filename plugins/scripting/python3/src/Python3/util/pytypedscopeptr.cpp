@@ -60,7 +60,7 @@ namespace Scripting {
         }
 
         PyTypeObject PyTypedScopePtrType = {
-            PyVarObject_HEAD_INIT(NULL, 0)
+            .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
                 .tp_name
             = "Environment.TypedScopePtr",
             .tp_basicsize = sizeof(PyTypedScopePtr),

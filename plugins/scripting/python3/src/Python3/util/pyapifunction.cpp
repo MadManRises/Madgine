@@ -22,7 +22,7 @@ namespace Scripting {
             for (size_t i = 0; i < argCount; ++i) {
                 fromPyObject(arguments.emplace_back(), PyTuple_GetItem(args, i));
             }
-            
+
             ValueType retVal;
             Py_BEGIN_ALLOW_THREADS;
             self->mFunction(retVal, arguments);
@@ -32,8 +32,8 @@ namespace Scripting {
         }
 
         PyTypeObject PyApiFunctionType = {
-            PyVarObject_HEAD_INIT(NULL, 0)
-                .tp_name
+            .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
+                           .tp_name
             = "Environment.ApiFunction",
             .tp_basicsize = sizeof(PyApiFunction),
             .tp_itemsize = 0,

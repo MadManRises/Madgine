@@ -107,7 +107,7 @@ namespace Tools {
 
     void BulletDebug::drawContactPoint(const btVector3 &PointOnB, const btVector3 &normalOnB, btScalar distance, int lifeTime, const btVector3 &color)
     {
-        Im3D::Sphere(Vector3 { PointOnB }, distance + 0.01f, { .mColor = { Vector3 { color }, 1 }, 0 });
+        Im3D::Sphere(Vector3 { PointOnB }, distance + 0.01f, { .mColor = { Vector3 { color }, 1 }, .mDetail = 0 });
     }
 
     void BulletDebug::reportErrorWarning(const char *warningString)

@@ -9,7 +9,7 @@ namespace Scripting {
     namespace Python3 {
 
         PyTypeObject PyMatrix3Type = {
-            PyVarObject_HEAD_INIT(NULL, 0)
+            .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
                 .tp_name
             = "Environment.Matrix3",
             .tp_basicsize = sizeof(PyMatrix3),
