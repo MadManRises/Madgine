@@ -49,8 +49,6 @@ namespace Android {
         activity->callbacks->onInputQueueCreated = delegate<&AndroidLauncher::onInputQueueCreated, AInputQueue *>;
         activity->callbacks->onInputQueueDestroyed = delegate<&AndroidLauncher::onInputQueueDestroyed, AInputQueue *>;
 
-        Engine::Filesystem::setup(activity);
-
         mThread = Threading::WorkGroupHandle("Madgine", &AndroidLauncher::go, this);
     }
 
@@ -58,9 +56,11 @@ namespace Android {
     {
         ANativeActivity *activity = mActivity;
 
-        static Engine::Base::Root root;
+        Engine::Filesystem::setup(activity);
 
         Engine::Util::StandardLog::setLogLevel(logLevel);
+
+        static Engine::Base::Root root;
 
         static Engine::KeyValueGlobal<Engine::Resources::ResourceManager> resourceManager { "ResourceManager" };
 

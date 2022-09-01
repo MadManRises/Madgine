@@ -28,9 +28,10 @@ int desktopMain(int argc, char **argv)
 {
     Engine::Filesystem::setup();
     Engine::Threading::WorkGroup workGroup { "Launcher" };
-    Engine::Base::Root root { argc, argv };
+
     Engine::Util::StandardLog::setLogLevel(logLevel);
 
+    Engine::Base::Root root { argc, argv };
     Engine::KeyValueGlobal<Engine::Resources::ResourceManager> resourceManager { "ResourceManager", toolMode };
 
     if (!toolMode) {
