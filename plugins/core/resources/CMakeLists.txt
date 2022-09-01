@@ -17,6 +17,6 @@ FolderSources(sources "" tools)
 
 add_tools(Resources ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/resourcestoolslib.h)
 
-target_link_plugins(Resources Tools)
+target_link_plugins(ResourcesTools Tools)
 
 add_subdirectory(loaders)

@@ -33,8 +33,6 @@ add_plugin(OpenGL Madgine Renderer ${sources} PRECOMPILED_HEADER src/OpenGL/open
 target_link_libraries(OpenGL PRIVATE ${OPENGL_LIBRARIES} Client)
 target_include_directories(OpenGL PRIVATE ${OPENGL_INCLUDE_DIR})
 
-target_link_plugins(OpenGL MeshLoader PipelineLoader TextureLoader ImageLoader)
-
 if (OSX)
     target_sources(OpenGL PRIVATE src/OpenGL/osxopengl.mm)
 	set_source_files_properties(src/OpenGL/osxopengl.mm PROPERTIES SKIP_PRECOMPILE_HEADERS ON)

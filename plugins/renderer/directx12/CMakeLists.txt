@@ -28,8 +28,6 @@ target_link_libraries(DirectX12 PRIVATE d3d12 dxgi dxguid Client dxcompiler)
 
 add_custom_command(TARGET DirectX12 POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${bin}/dxcompiler.dll ${bin}/dxil.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_link_plugins(DirectX12 MeshLoader PipelineLoader TextureLoader ImageLoader)
-
 set(sources "")
 FolderSources(sources "" tools)
 	FolderSources(sources tools DirectX12_Tools directx12toolconfig.cpp directx12toolconfig.h directx12toolsforward.h directx12toolslib.h)

@@ -5,7 +5,6 @@
 #include "Madgine/clientlib.h"
 #include "Madgine/nodegraphlib.h"
 
-#include "Madgine/pipelineloaderlib.h"
 #include "Madgine/meshloaderlib.h"
 
 #if defined(ClientNodes_EXPORTS)

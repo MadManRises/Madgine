@@ -4,10 +4,6 @@
 #include "renderpass.h"
 #include "rendertarget.h"
 
-#include "Madgine/meshloader/gpumeshloader.h"
-
-#include "Madgine/meshloader/meshdata.h"
-
 namespace Engine {
 namespace Render {
 

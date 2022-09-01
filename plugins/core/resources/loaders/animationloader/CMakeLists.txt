@@ -11,4 +11,4 @@ add_plugin(AnimationLoader Madgine Utility ${sources} PRECOMPILED_HEADER Madgine
 
 target_link_libraries(AnimationLoader PRIVATE assimp)
 
-target_link_plugins(AnimationLoader SkeletonLoader Resources)
+target_link_plugins(AnimationLoader SkeletonLoader)

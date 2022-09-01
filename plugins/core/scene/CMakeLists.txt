@@ -9,7 +9,7 @@ FolderSources(sources "" src)
 
 add_plugin(Scene Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/scenelib.h)
 
-target_link_plugins(Scene MeshLoader SkeletonLoader AnimationLoader Base)
+target_link_plugins(Scene MeshLoader AnimationLoader Base)
 
 project(SceneNodes)
 set(sources "")
@@ -32,7 +32,7 @@ FolderSources(sources "" renderer)
 
 add_plugin(SceneRenderer Madgine Core ${sources} SOURCE_ROOT renderer PRECOMPILED_HEADER renderer/Madgine/scenerendererlib.h)
 
-target_link_plugins(SceneRenderer Scene Client PipelineLoader)
+target_link_plugins(SceneRenderer Scene Client)
 
 set(sources "")
 FolderSources(sources "" renderer_tools)

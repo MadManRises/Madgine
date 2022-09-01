@@ -6,7 +6,6 @@
 #include "Modules/moduleslib.h"
 
 #include "Madgine/fontloaderlib.h"
-#include "Madgine/meshloaderlib.h"
 #include "Madgine/pipelineloaderlib.h"
 
 #if defined(Client_EXPORTS)

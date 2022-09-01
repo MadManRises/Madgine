@@ -10,7 +10,7 @@ FolderSources(sources "" src)
 
 add_plugin(Widgets Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/widgetslib.h)
 
-target_link_plugins(Widgets Client ImageLoader FontLoader MeshLoader PipelineLoader)
+target_link_plugins(Widgets Client)
 
 
 set(sources "")
