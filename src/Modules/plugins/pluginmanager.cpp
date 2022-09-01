@@ -165,18 +165,18 @@ namespace Plugins {
     bool PluginManager::loadSelection(const Ini::IniFile &file, bool withTools)
     {
 
-        for (auto &[name, section] : file) {
-            for (const std::pair<const std::string, std::string> &p : section) {
-                Plugin *plugin = getPlugin(p.first);
+        for (const auto &[sectionName, section] : file) {
+            for (const auto &[pluginName, state] : section) {
+                Plugin *plugin = getPlugin(pluginName);
                 if (!plugin) {
-                    LOG("Could not find Plugin \"" << p.first << "\"!");
+                    LOG("Could not find Plugin \"" << pluginName << "\"!");
                     continue;
                 }
-                plugin->setLoaded(!p.second.empty());
+                plugin->setLoaded(!state.empty());
                 if (withTools) {
-                    Plugin *toolsPlugin = getPlugin(p.first + "Tools");
+                    Plugin *toolsPlugin = getPlugin(pluginName + "Tools");
                     if (toolsPlugin) {
-                        toolsPlugin->setLoaded(!p.second.empty());
+                        toolsPlugin->setLoaded(!state.empty());
                     }
                 }
             }
