@@ -1,10 +1,10 @@
 #include "Modules/moduleslib.h"
 #include "Modules/uniquecomponent/uniquecomponentregistry.h"
+#if defined(BUILD_Base)
+#include "Madgine/baselib.h"
+#endif
 #if defined(BUILD_UI)
 #include "Madgine/uilib.h"
-#endif
-#if defined(BUILD_ImageLoader)
-#include "Madgine/imageloaderlib.h"
 #endif
 #if defined(BUILD_OpenGL)
 #include "OpenGL/opengllib.h"
@@ -12,11 +12,17 @@
 #if defined(BUILD_NodeGraph)
 #include "Madgine/nodegraphlib.h"
 #endif
+#if defined(BUILD_ImageLoader)
+#include "Madgine/imageloaderlib.h"
+#endif
 #if defined(BUILD_Widgets)
 #include "Madgine/widgetslib.h"
 #endif
 #if defined(BUILD_MeshLoader)
 #include "Madgine/meshloaderlib.h"
+#endif
+#if defined(BUILD_FontLoader)
+#include "Madgine/fontloaderlib.h"
 #endif
 #if defined(BUILD_Client)
 #include "Madgine/clientlib.h"
@@ -24,21 +30,15 @@
 #if defined(BUILD_ClientNodes)
 #include "Madgine/clientnodeslib.h"
 #endif
-#if defined(BUILD_FontLoader)
-#include "Madgine/fontloaderlib.h"
-#endif
-#if defined(BUILD_Base)
-#include "Madgine/baselib.h"
-#endif
 
+#if defined(BUILD_Base)
+#include "Madgine/base/globalapicollector.h"
+#endif
 #if defined(BUILD_UI)
 #include "Madgine/input/handlercollector.h"
 #endif
 #if defined(BUILD_Resources)
 #include "Madgine/resources/resourceloadercollector.h"
-#endif
-#if defined(BUILD_ImageLoader) && defined(BUILD_Resources)
-#include "Madgine/imageloader/imageloader.h"
 #endif
 #if defined(BUILD_TestShared)
 #include "uniquecomponent/uniquecomponentshared.h"
@@ -68,8 +68,14 @@
 #if defined(BUILD_NodeGraph) && defined(BUILD_Resources)
 #include "Madgine/nodegraph/nodegraphloader.h"
 #endif
+#if defined(BUILD_ImageLoader) && defined(BUILD_Resources)
+#include "Madgine/imageloader/imageloader.h"
+#endif
 #if defined(BUILD_MeshLoader) && defined(BUILD_Resources)
 #include "Madgine/meshloader/meshloader.h"
+#endif
+#if defined(BUILD_FontLoader) && defined(BUILD_Resources)
+#include "Madgine/fontloader/fontloader.h"
 #endif
 #if defined(BUILD_Client)
 #include "Madgine/render/rendercontextcollector.h"
@@ -89,12 +95,6 @@
 #include "Madgine/client/nodes/gpubuffernode.h"
 #include "Madgine/client/nodes/meshrenderernode.h"
 #include "Madgine/client/nodes/rasterizernode.h"
-#endif
-#if defined(BUILD_FontLoader) && defined(BUILD_Resources)
-#include "Madgine/fontloader/fontloader.h"
-#endif
-#if defined(BUILD_Base)
-#include "Madgine/base/globalapicollector.h"
 #endif
 
 
@@ -331,28 +331,7 @@ std::vector<Engine::Base::GlobalAPIRegistry::F> Engine::Base::GlobalAPIRegistry:
 #endif
 #if defined(BUILD_UI)
 template <>
-std::vector<Engine::Input::GameHandlerRegistry::F> Engine::Input::GameHandlerRegistry::sComponents()
-{
-	return {
-#endif
-#if defined(BUILD_UI)
-
-	}; 
-}
-#endif
-#if defined(BUILD_UI)
-
-#    define ACC 0
-
-#endif
-#if defined(BUILD_UI)
-
-#    undef ACC
-
-#endif
-#if defined(BUILD_UI)
-template <>
-std::vector<Engine::Input::GuiHandlerRegistry::F> Engine::Input::GuiHandlerRegistry::sComponents()
+std::vector<Engine::Input::HandlerRegistry::F> Engine::Input::HandlerRegistry::sComponents()
 {
 	return {
 #endif

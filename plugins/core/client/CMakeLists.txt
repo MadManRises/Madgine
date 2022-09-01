@@ -12,10 +12,10 @@ add_plugin(Client Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/clientl
 
 plugin_group(Renderer EXCLUSIVE ATLEAST_ONE)
 
-target_link_plugins(Client Meta Modules PipelineLoader FontLoader)
+target_link_plugins(Client PipelineLoader FontLoader)
 target_link_plugin_groups(Client Renderer)
 
-target_link_libraries(Client PUBLIC Render)
+target_link_libraries(Client PUBLIC Render Meta Modules)
 
 project(ClientNodes)
 set(sources "")
