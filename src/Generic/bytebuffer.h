@@ -47,7 +47,7 @@ struct ByteBufferImpl {
     }
 
     template <typename T>
-    requires(!std::is_pointer_v<std::remove_reference_t<T>> && !std::is_null_pointer_v<std::remove_reference_t<T>>)
+    requires(!Pointer<std::remove_reference_t<T>>)
         ByteBufferImpl(T &&t, size_t size, Data *data)
         : mKeep(std::forward<T>(t))
         , mSize(size)
@@ -55,7 +55,7 @@ struct ByteBufferImpl {
     {
     }
 
-    ByteBufferImpl(const void *data, size_t size)
+    ByteBufferImpl(Data *data, size_t size)
         : mSize(size)
         , mData(data)
     {
