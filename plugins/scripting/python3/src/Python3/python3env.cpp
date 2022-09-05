@@ -4,7 +4,7 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
-#include "Madgine/base/keyvalueregistry.h"
+#include "Madgine/root/keyvalueregistry.h"
 
 #include "util/math/pymatrix3.h"
 #include "util/math/pymatrix4.h"
@@ -129,71 +129,56 @@ namespace Scripting {
             return m;
         }
 
-        static std::atomic<size_t> sInstances = 0;
-
         static Python3StreamRedirect sStream { std::cout.rdbuf() };
 
-        Python3Environment::Python3Environment(Base::Application &app)
-            : VirtualScope(app)
+        Python3Environment::Python3Environment(Root::Root &root)
+            : RootComponent(root)
         {
-        }
+            wchar_t *program = Py_DecodeLocale("Madgine-Python3-Env", NULL);
 
-        Python3Environment::~Python3Environment()
-        {
-        }
+            /* Add a built-in module, before Py_Initialize */
+            if (PyImport_AppendInittab("Environment", PyInit_Environment) == -1) {
+                LOG("Error: could not extend built-in modules table");
+                mErrorCode = -1;
+                return;
+            }
 
-        std::string_view Python3Environment::key() const {
-            return "Python3Environment";
-        }
+            /* Pass argv[0] to the Python interpreter */
+            Py_SetProgramName(program);
 
-        Threading::Task<bool> Python3Environment::init()
-        {
-            if (sInstances++ == 0) {
+            Py_InitializeEx(0);
 
-                wchar_t *program = Py_DecodeLocale("Madgine-Python3-Env", NULL);
+            PyRun_SimpleString("import Environment");
+            sStream.redirect("stdout");
+            sStream.redirect("stderr");
 
-                /* Add a built-in module, before Py_Initialize */
-                if (PyImport_AppendInittab("Environment", PyInit_Environment) == -1) {
-                    LOG("Error: could not extend built-in modules table");
-                    co_return false;
-                }
+            Python3FileLoader::getSingleton().setup();
 
-                /* Pass argv[0] to the Python interpreter */
-                Py_SetProgramName(program);
+            PyEval_SaveThread();
 
-                Py_InitializeEx(0);
-
-                PyRun_SimpleString("import Environment");
-                sStream.redirect("stdout");
-                sStream.redirect("stderr");
-
-                Python3FileLoader::getSingleton().setup();
-
-                PyEval_SaveThread();
-
-                /*Python3FileLoader::load("dump");
+            /*Python3FileLoader::load("dump");
                 Python3FileLoader::load("signature");
                 Python3FileLoader::load("testnode");
 
                 lock(std::cout.rdbuf());
                 PyRun_SimpleString("from dump import dump");
                 unlock();*/
-            }
-            co_return true;
         }
 
-        Threading::Task<void> Python3Environment::finalize()
+        Python3Environment::~Python3Environment()
         {
-            if (--sInstances == 0) {
-                lock(std::cout.rdbuf());
+            lock(std::cout.rdbuf());
 
-                sStream.reset("stdout");
-                sStream.reset("stderr");
+            sStream.reset("stdout");
+            sStream.reset("stderr");
 
-                auto result = Py_FinalizeEx();
-                assert(result == 0);
-            }
-            co_return;
+            auto result = Py_FinalizeEx();
+            assert(result == 0);
+        }
+
+        std::string_view Python3Environment::key() const
+        {
+            return "Python3Environment";
         }
 
         void Python3Environment::execute(std::string_view command)

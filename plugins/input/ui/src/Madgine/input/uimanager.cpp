@@ -14,7 +14,7 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-#include "Madgine/base/application.h"
+#include "Madgine/app/application.h"
 
 #include "Madgine/widgets/widgetmanager.h"
 
@@ -26,7 +26,7 @@ namespace Engine {
 
 namespace Input {
 
-    UIManager::UIManager(Base::Application &app, Window::MainWindow &window)
+    UIManager::UIManager(App::Application &app, Window::MainWindow &window)
         : mApp(app)
         , mWindow(window)
         , mHandlers(*this)
@@ -69,7 +69,7 @@ namespace Input {
             co_await handler->callFinalize();
     }
 
-    Base::Application &UIManager::app() const
+    App::Application &UIManager::app() const
     {
         return mApp;
     }

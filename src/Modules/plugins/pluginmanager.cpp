@@ -10,11 +10,11 @@
 
 #    include "Generic/keyvalue.h"
 
-#    include "ini/inisection.h"
+#    include "../ini/inisection.h"
 
 #    include "pluginsection.h"
 
-#    include "ini/inifile.h"
+#    include "../ini/inifile.h"
 
 #    include "../threading/workgroup.h"
 
@@ -54,7 +54,7 @@ namespace Plugins {
         }
     }
 
-    bool PluginManager::setup(bool loadCache, std::string_view programName, std::string_view configFile)
+    int PluginManager::setup(bool loadCache, std::string_view programName, std::string_view configFile)
     {
         mUseCache = loadCache;
 
@@ -68,11 +68,11 @@ namespace Plugins {
                 LOG("Loading Plugins from '" << pluginFile << "'");
                 bool result = loadSelection(file, true);
                 if (!result)
-                    return false;
+                    return -1;
             } else {
                 if (!configFile.empty()) {
                     LOG_ERROR("Failed to open plugin-file '" << pluginFile << "'!");
-                    return false;
+                    return -1;
                 }
             }
         }
@@ -90,7 +90,7 @@ namespace Plugins {
 
         onUpdate();
 
-        return true;
+        return 0;
     }
 
     PluginManager::~PluginManager()

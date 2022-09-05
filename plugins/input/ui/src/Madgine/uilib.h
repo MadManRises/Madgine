@@ -3,7 +3,7 @@
 /// @cond
 
 #include "Madgine/widgetslib.h"
-#include "Madgine/baselib.h"
+#include "Madgine/applib.h"
 
 #if defined(UI_EXPORTS)
 #    define MADGINE_UI_EXPORT DLL_EXPORT

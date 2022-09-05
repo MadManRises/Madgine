@@ -11,7 +11,7 @@
 
 #include "im3d/im3d.h"
 
-#include "Madgine/base/application.h"
+#include "Madgine/app/application.h"
 #include "Madgine/physics/physicsmanager.h"
 #include "Madgine/scene/scenemanager.h"
 
@@ -27,7 +27,7 @@ namespace Tools {
 
     Threading::Task<bool> BulletDebug::init()
     {
-        mManager = &Base::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>().getComponent<Physics::PhysicsManager>();
+        mManager = &App::Application::getSingleton().getGlobalAPIComponent<Scene::SceneManager>().getComponent<Physics::PhysicsManager>();
 
         co_await mManager->state();
 

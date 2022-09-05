@@ -2,7 +2,7 @@
 
 /// @cond
 
-#include "Madgine/baselib.h"
+#include "Madgine/applib.h"
 #include "Madgine/meshloaderlib.h"
 #include "Madgine/skeletonloaderlib.h"
 #include "Madgine/animationloaderlib.h"

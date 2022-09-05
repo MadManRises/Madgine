@@ -16,14 +16,13 @@ set_target_properties(lib_msdfgen PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 add_subdirectory(imgui)
 set_target_properties(ImGui PROPERTIES EXCLUDE_FROM_ALL TRUE)
+target_include_directories(ImGui PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
 add_subdirectory(NodeEditor)
 set_target_properties(imgui_node_editor imgui_canvas PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 add_subdirectory(im3d)
 set_target_properties(Im3D PROPERTIES EXCLUDE_FROM_ALL TRUE)
-
-add_subdirectory(ini)
 
 add_subdirectory(Madgine)
 

@@ -22,6 +22,7 @@ endif()
 
 add_plugin(Tools Madgine Tools ${sources} PRECOMPILED_HEADER src/Madgine_Tools/toolslib.h)
 
-target_link_plugins(Tools Base)
+target_link_plugins(Tools Root)
+
 target_link_libraries(Tools PUBLIC ImGui Im3D )
 

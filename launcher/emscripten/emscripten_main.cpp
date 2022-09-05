@@ -1,20 +1,11 @@
-#include "Madgine/baselib.h"
-#include "Madgine/clientlib.h"
+#include "Madgine/rootlib.h"
 
 #include "../launcher.h"
 #include "Interfaces/filesystem/api.h"
-#include "Interfaces/util/standardlog.h"
-#include "Madgine/base/root.h"
+#include "Madgine/root/root.h"
 #include "Modules/threading/workgroup.h"
 #include "Madgine/cli/cli.h"
-#include "Madgine/cli/parameter.h"
 #include <emscripten.h>
-
-#include "Madgine/base/keyvalueregistry.h"
-
-#include "Madgine/resources/resourcemanager.h"
-
-extern Engine::CLI::Parameter<Engine::Util::MessageType> logLevel;
 
 std::unique_ptr<Engine::CLI::CLICore> sTempCLI;
 
@@ -23,10 +14,7 @@ void mainImpl()
     emscripten_cancel_main_loop();
     static Engine::Threading::WorkGroup workGroup { "Launcher" };
 
-    Engine::Util::StandardLog::setLogLevel(logLevel);
-
-    static Engine::Base::Root root { std::move(sTempCLI) };
-    static Engine::KeyValueGlobal<Engine::Resources::ResourceManager> resourceManager { "ResourceManager" };
+    static Engine::Root::Root root { std::move(sTempCLI) };
     launch();
 }
 

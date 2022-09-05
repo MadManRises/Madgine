@@ -8,7 +8,7 @@ FolderSources(sources "" src)
 
 add_plugin(Resources Madgine Core ${sources})
 
-target_link_libraries(Resources PUBLIC Modules Meta)
+target_link_plugins(Resources Root)
 
 set(sources "")
 FolderSources(sources "" tools)

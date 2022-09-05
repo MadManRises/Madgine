@@ -9,6 +9,6 @@ FolderSources(sources "" src)
 
 add_plugin(UI Madgine Input ${sources} PRECOMPILED_HEADER src/Madgine/uilib.h)
 
-target_link_plugins(UI Widgets Base)
+target_link_plugins(UI Widgets App)
 
 

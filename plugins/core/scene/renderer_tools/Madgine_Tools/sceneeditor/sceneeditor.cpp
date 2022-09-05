@@ -14,7 +14,7 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "Madgine/base/application.h"
+#include "Madgine/app/application.h"
 #include "Madgine/scene/scenemanager.h"
 
 #include "Madgine/scene/entity/entity.h"
@@ -65,7 +65,7 @@ namespace Tools {
 
     Threading::Task<bool> SceneEditor::init()
     {
-        Base::Application *app = Base::Application::getSingletonPtr();
+        App::Application *app = App::Application::getSingletonPtr();
         if (!app)
             co_return false;
         mSceneMgr = &app->getGlobalAPIComponent<Scene::SceneManager>();

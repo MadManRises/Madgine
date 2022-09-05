@@ -69,4 +69,9 @@ namespace Threading {
     struct DataMutex;
 }
 
+namespace Ini {
+    struct IniFile;
+    struct IniSection;
+}
+
 }

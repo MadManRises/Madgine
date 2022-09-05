@@ -16,7 +16,7 @@ METATABLE_END(Engine::Audio::OpenALAudioContext)
 namespace Engine {
 namespace Audio {
 
-    OpenALAudioContext::OpenALAudioContext(Base::Application &app)
+    OpenALAudioContext::OpenALAudioContext(App::Application &app)
         : VirtualScope(app)
     {
     }

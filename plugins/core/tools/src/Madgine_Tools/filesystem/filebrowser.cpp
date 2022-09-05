@@ -13,8 +13,6 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-#include "Madgine/base/root.h"
-
 #include "../renderer/imroot.h"
 
 UNIQUECOMPONENT(Engine::Tools::FileBrowser);

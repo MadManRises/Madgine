@@ -7,17 +7,12 @@
 
 #include <UIKit/UIKit.h>
 
-#include "Madgine/clientlib.h"
-#include "Madgine/baselib.h"
+#include "Madgine/rootlib.h"
 
 #include "Modules/threading/workgroup.h"
 
-#include "Madgine/base/root.h"
-#include "Madgine/base/keyvalueregistry.h"
+#include "Madgine/root/root.h"
 
-#include "Madgine/resources/resourcemanager.h"
-
-#include "Madgine/cli/parameter.h"
 
 #if __has_feature(objc_arc)
 #error "ARC is on!"
@@ -51,7 +46,6 @@ int main(int argc, char * argv[])  {
         [NSApp activateIgnoringOtherApps:YES];*/
     
     Engine::Threading::WorkGroup workGroup("Launcher");
-    Engine::Base::Root root { argc, argv };
-    Engine::KeyValueGlobal<Engine::Resources::ResourceManager> resourceManager { "ResourceManager" };
+    Engine::Root::Root root { argc, argv };
     return launch();
 }

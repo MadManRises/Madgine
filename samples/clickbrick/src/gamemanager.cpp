@@ -21,7 +21,7 @@
 
 #include "gameoverhandler.h"
 
-#include "Madgine/base/application.h"
+#include "Madgine/app/application.h"
 
 #include "Meta/math/ray.h"
 

@@ -17,6 +17,7 @@ FolderSources(sources "" "" modulesforward.h moduleslib.h)
 if (MODULES_ENABLE_TASK_TRACKING)
 		FolderSources(sources debug tasktracking tasktracker.cpp tasktracker.h)
 endif()
+	FolderSources(sources "" ini inifile.cpp inifile.h inisection.cpp inisection.h)
 if (MODULES_ENABLE_PLUGINS)
 	FolderSources(sources "" plugins pluginmanager.cpp pluginmanager.h pluginsection.cpp pluginsection.h plugin.cpp plugin.h)
 endif()
@@ -29,7 +30,7 @@ add_workspace_library(Modules ${sources} SOURCE_ROOT .. PRECOMPILED_HEADER modul
 configure_file(modulesconfig.in.h modulesconfig.h)
 target_include_directories(Modules PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
-target_link_libraries(Modules PUBLIC Interfaces Ini)
+target_link_libraries(Modules PUBLIC Interfaces)
 
 if (WINDOWS)
 	if (NOT BUILD_SHARED_LIBS AND MINGW)

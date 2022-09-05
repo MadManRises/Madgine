@@ -15,6 +15,12 @@
 
 #include "Modules/plugins/pluginsection.h"
 
+#include "Madgine/root/root.h"
+
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
+
+UNIQUECOMPONENT(Engine::Resources::ResourceManager)
+
 namespace Engine {
 namespace Resources {
 
@@ -26,13 +32,14 @@ namespace Resources {
         return *sSingleton;
     }
 
-    ResourceManager::ResourceManager(bool toolMode)
-        : mIOQueue("IO")
+    ResourceManager::ResourceManager(Root::Root &root)
+        : RootComponent(root)
+        , mIOQueue("IO")
     {
         assert(!sSingleton);
         sSingleton = this;
 
-        if (!toolMode) {
+        if (!root.toolMode()) {
             mIOQueue.addSetupSteps(
                 [this]() { return callInit(); },
                 [this]() { return callFinalize(); });
@@ -41,6 +48,11 @@ namespace Resources {
 
     ResourceManager::~ResourceManager()
     {
+    }
+
+    std::string_view ResourceManager::key() const
+    {
+        return "ResourceManager";
     }
 
     void ResourceManager::registerResourceLocation(const Filesystem::Path &path, int priority)

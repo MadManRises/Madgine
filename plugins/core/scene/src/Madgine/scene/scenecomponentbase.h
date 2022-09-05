@@ -35,7 +35,7 @@ template <typename T>
             return static_cast<T &>(getGlobalAPIComponent(component_index<T>()));
         }
 
-        Base::GlobalAPIBase &getGlobalAPIComponent(size_t i);
+        App::GlobalAPIBase &getGlobalAPIComponent(size_t i);
 
         Threading::TaskQueue *taskQueue() const;
 

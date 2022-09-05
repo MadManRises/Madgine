@@ -9,7 +9,7 @@ FolderSources(sources "" src)
 
 add_plugin(Scene Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/scenelib.h)
 
-target_link_plugins(Scene MeshLoader AnimationLoader Base)
+target_link_plugins(Scene MeshLoader AnimationLoader App)
 
 project(SceneNodes)
 set(sources "")

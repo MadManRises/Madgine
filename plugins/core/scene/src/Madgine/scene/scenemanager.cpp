@@ -6,7 +6,7 @@
 
 #include "scenecomponentbase.h"
 
-#include "Madgine/base/application.h"
+#include "Madgine/app/application.h"
 
 #include "Modules/debug/profiler/profile.h"
 
@@ -50,7 +50,7 @@ SERIALIZETABLE_END(Engine::Scene::SceneManager)
 namespace Engine {
 namespace Scene {
 
-    SceneManager::SceneManager(Base::Application &app)
+    SceneManager::SceneManager(App::Application &app)
         : SyncableUnit(Serialize::SCENE_MANAGER)
         , VirtualScope(app)
         , mSceneComponents(*this)

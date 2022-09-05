@@ -8,14 +8,19 @@
 
 #include "Modules/threading/madgineobject.h"
 
+#include "Madgine/root/rootcomponentcollector.h"
+#include "Madgine/root/rootcomponentbase.h"
+
 namespace Engine {
 namespace Resources {
-    struct MADGINE_RESOURCES_EXPORT ResourceManager : Threading::MadgineObject<ResourceManager>
+    struct MADGINE_RESOURCES_EXPORT ResourceManager : Root::RootComponent<ResourceManager>, Threading::MadgineObject<ResourceManager>
     {
         static ResourceManager &getSingleton();
 
-        ResourceManager(bool toolMode = false);
+        ResourceManager(Root::Root &root);
         ~ResourceManager();
+
+        virtual std::string_view key() const override;
 
         void registerResourceLocation(const Filesystem::Path &path, int priority);
 
@@ -73,3 +78,5 @@ namespace Resources {
 
 }
 }
+
+REGISTER_TYPE(Engine::Resources::ResourceManager)

@@ -21,7 +21,7 @@
 
 #    include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-#    include "Madgine/base/root.h"
+#    include "Madgine/root/root.h"
 
 #    include "imgui/imguiaddons.h"
 
@@ -32,7 +32,7 @@ namespace Tools {
 
     static Guard excludeFromExport {
         []() {
-            Base::skipUniqueComponentOnExport(&typeInfo<PluginManager>);
+            Root::skipUniqueComponentOnExport(&typeInfo<PluginManager>);
         }
     };
 
@@ -48,11 +48,11 @@ namespace Tools {
         if (ImGui::Begin("Plugin Manager", &mVisible)) {
 
             if (ImGui::Button("Export (with Tools)")) {
-                Base::exportStaticComponentHeader("components_default(tools).cpp", true);
+                Root::exportStaticComponentHeader("components_default(tools).cpp", true);
             }
             ImGui::SameLine();
             if (ImGui::Button("Export (without Tools)")) {
-                Base::exportStaticComponentHeader("components_default.cpp", false);
+                Root::exportStaticComponentHeader("components_default.cpp", false);
             }
 
             ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 40, 40, 255));

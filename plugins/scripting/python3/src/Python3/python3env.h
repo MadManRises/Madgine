@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Madgine/base/globalapibase.h"
-#include "Madgine/base/globalapicollector.h"
+#include "Madgine/root/rootcomponentbase.h"
+#include "Madgine/root/rootcomponentcollector.h"
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
+#include "Modules/uniquecomponent/uniquecomponent.h"
 
 #include "python3streamredirect.h"
 
@@ -10,15 +11,12 @@ namespace Engine {
 namespace Scripting {
     namespace Python3 {
 
-        struct MADGINE_PYTHON3_EXPORT Python3Environment : Base::GlobalAPI<Python3Environment> {
-            Python3Environment(Base::Application &app);
+        struct MADGINE_PYTHON3_EXPORT Python3Environment : Root::RootComponent<Python3Environment> {
+            Python3Environment(Root::Root &root);
             ~Python3Environment();
 
             std::string_view key() const override;
-
-            virtual Threading::Task<bool> init() override;
-            virtual Threading::Task<void> finalize() override;
-
+            
             void execute(std::string_view command);
 
             static PyGILState_STATE lock(std::streambuf *buf);

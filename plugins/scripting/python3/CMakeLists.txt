@@ -16,7 +16,7 @@ FolderSources(sources src Python3 python3env.cpp python3env.h python3fileloader.
 
 add_plugin(Python3 Madgine Scripting ${sources} PRECOMPILED_HEADER src/Python3/python3lib.h)
 
-target_link_plugins(Python3 Base Resources)
+target_link_plugins(Python3 Root Resources)
 
 target_link_libraries(Python3 PUBLIC Python3::Python)
 

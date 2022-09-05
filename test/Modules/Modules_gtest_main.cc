@@ -29,7 +29,6 @@
 
 #include "Modules/moduleslib.h"
 #include "Interfaces/filesystem/api.h"
-#include "Madgine/cli/cli.h"
 #include "gtest/gtest.h"
 #include <stdio.h>
 
@@ -40,13 +39,6 @@
 
 int main(int argc, char **argv)
 {
-
-    char *fakeArgs[2];
-    char arg2[] = "-npc";
-    fakeArgs[0] = argv[0];
-    fakeArgs[1] = arg2;
-    Engine::CLI::CLICore cli { 2, fakeArgs };
-
     printf("Running main() from %s\n", __FILE__);
     testing::InitGoogleTest(&argc, argv);
     auto result = RUN_ALL_TESTS();    

@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "Madgine/baselib.h"
+#include "Madgine/rootlib.h"
 #include "Madgine/resourceslib.h"
 
 #if defined(Python3_EXPORTS)

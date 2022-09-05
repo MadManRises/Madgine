@@ -1,9 +1,9 @@
 #include "Madgine/clientlib.h"
-#include "Madgine/baselib.h"
+#include "Madgine/rootlib.h"
 
 #include "androidlauncher.h"
 
-#include "Madgine/base/root.h"
+#include "Madgine/root/root.h"
 
 #include "Madgine/window/mainwindow.h"
 
@@ -13,15 +13,6 @@
 
 #include "Interfaces/filesystem/api.h"
 #include "../launcher.h"
-
-#include "Madgine/cli/parameter.h"
-#include "Interfaces/util/standardlog.h"
-
-#include "Madgine/base/keyvalueregistry.h"
-
-#include "Madgine/resources/resourcemanager.h"
-
-extern Engine::CLI::Parameter<Engine::Util::MessageType> logLevel;
 
 namespace Engine {
 
@@ -58,11 +49,7 @@ namespace Android {
 
         Engine::Filesystem::setup(activity);
 
-        Engine::Util::StandardLog::setLogLevel(logLevel);
-
-        static Engine::Base::Root root;
-
-        static Engine::KeyValueGlobal<Engine::Resources::ResourceManager> resourceManager { "ResourceManager" };
+        static Engine::Root::Root root;
 
 		launch(&mWindow);
 		

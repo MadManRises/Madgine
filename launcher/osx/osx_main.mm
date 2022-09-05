@@ -7,17 +7,6 @@
 
 #include <Cocoa/Cocoa.h>
 
-#include "Madgine/clientlib.h"
-#include "Madgine/baselib.h"
-
-#include "Modules/threading/workgroup.h"
-
-#include "Madgine/base/root.h"
-
-#include "Madgine/cli/parameter.h"
-
-#include "Interfaces/util/standardlog.h"
-
 #include "../main.h"
 
 #if __has_feature(objc_arc)

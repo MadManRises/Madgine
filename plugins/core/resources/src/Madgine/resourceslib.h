@@ -2,8 +2,7 @@
 
 /// @cond
 
-#include "Meta/metalib.h"
-#include "Modules/moduleslib.h"
+#include "Madgine/rootlib.h"
 
 #if defined(Resources_EXPORTS)
 #    define MADGINE_RESOURCES_EXPORT DLL_EXPORT

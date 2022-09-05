@@ -8,7 +8,6 @@ FolderSources(sources "" Madgine meshloaderlib.h)
 
 add_plugin(MeshLoader Madgine Utility ${sources} PRECOMPILED_HEADER Madgine/meshloaderlib.h SOURCE_ROOT .)
 
-target_link_libraries(MeshLoader PUBLIC Render)
 target_link_libraries(MeshLoader PRIVATE assimp)
 
 target_link_plugins(MeshLoader TextureLoader)

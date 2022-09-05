@@ -45,7 +45,7 @@ namespace Scene {
         return mSceneMgr.getComponent(i);
     }
 
-    Base::GlobalAPIBase &SceneComponentBase::getGlobalAPIComponent(size_t i)
+    App::GlobalAPIBase &SceneComponentBase::getGlobalAPIComponent(size_t i)
     {
         return mSceneMgr.getGlobalAPIComponent(i);
     }

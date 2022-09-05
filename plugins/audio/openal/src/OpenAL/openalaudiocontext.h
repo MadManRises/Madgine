@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Madgine/base/globalapibase.h"
-#include "Madgine/base/globalapicollector.h"
+#include "Madgine/app/globalapibase.h"
+#include "Madgine/app/globalapicollector.h"
 
 #include "Generic/functor.h"
 
@@ -11,8 +11,8 @@ struct ALCcontext;
 namespace Engine {
 namespace Audio {
 
-    struct MADGINE_OPENAL_EXPORT OpenALAudioContext : public Base::GlobalAPI<OpenALAudioContext> {
-        OpenALAudioContext(Base::Application &app);
+    struct MADGINE_OPENAL_EXPORT OpenALAudioContext : public App::GlobalAPI<OpenALAudioContext> {
+        OpenALAudioContext(App::Application &app);
         ~OpenALAudioContext();
 
         virtual Threading::Task<bool> init() override;

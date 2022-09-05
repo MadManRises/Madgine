@@ -37,7 +37,7 @@ FolderSources(sources "" "" Modules_gtest_main.cc)
 
 add_gtest(Modules_Test ${sources})
 
-target_link_libraries(Modules_Test PRIVATE Modules CLI)
+target_link_libraries(Modules_Test PRIVATE Modules)
 
 target_link_plugins(Modules_Test LibB)
 
