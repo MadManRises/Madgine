@@ -71,8 +71,8 @@ namespace Render {
 
     void SceneRenderPass::render(Render::RenderTarget *target, size_t iteration)
     {
-        /* if (!mProgram.available())
-            return;*/
+        if (!mPipeline.available())
+            return;
         //TODO Culling
 
         auto guard = mScene.lock(AccessMode::READ);
