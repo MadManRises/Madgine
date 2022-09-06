@@ -43,8 +43,8 @@ namespace Render {
     void ShadowRenderPass::render(Render::RenderTarget *target, size_t iteration)
     {
         //TODO Culling
-        /* if (!mProgram.available())
-            return;*/
+        if (!mPipeline.available())
+            return;
 
         auto guard = mScene.lock(AccessMode::READ);
 

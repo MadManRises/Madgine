@@ -31,6 +31,9 @@ namespace Render {
 
     void BlurPass::render(RenderTarget *target, size_t iteration)
     {
+        if (!mPipeline.available())
+            return;
+
         if (iteration == 0) {
             target->pushAnnotation("Blur");
         }

@@ -30,8 +30,8 @@ namespace Tools {
 
     void GridPass::render(Render::RenderTarget *target, size_t iteration)
     {
-        /* if (!mProgram.available())
-            return;*/
+        if (!mPipeline.available())
+            return;
         if (!mMesh.available())
             return;
 

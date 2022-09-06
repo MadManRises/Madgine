@@ -522,6 +522,9 @@ namespace Widgets {
 
     void WidgetManager::render(Render::RenderTarget *target, size_t iteration)
     {
+        if (!mData->mPipeline.available())
+            return;
+
         target->pushAnnotation("WidgetManager");
 
         MainWindowComponentBase::render(target, iteration);
