@@ -23,7 +23,7 @@ namespace Engine {
 namespace Render {
 
     DirectX12VertexShaderSourceLoader::DirectX12VertexShaderSourceLoader()
-        : ResourceLoader({ ".VS_hlsl" })
+        : ResourceLoader({ ".vs_hlsl" })
     {
     }
 

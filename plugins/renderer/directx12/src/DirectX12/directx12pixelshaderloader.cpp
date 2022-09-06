@@ -25,7 +25,7 @@ namespace Render {
     }
 
     DirectX12PixelShaderLoader::DirectX12PixelShaderLoader()
-        : ResourceLoader({ ".PS_hlsl" })
+        : ResourceLoader({ ".ps_hlsl" })
     {
         HRESULT hr = DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&mLibrary));
         //if(FAILED(hr)) Handle error...

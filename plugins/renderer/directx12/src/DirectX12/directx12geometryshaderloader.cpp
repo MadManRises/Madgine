@@ -25,7 +25,7 @@ namespace Render {
     }
 
     DirectX12GeometryShaderLoader::DirectX12GeometryShaderLoader()
-        : ResourceLoader({ ".GS_hlsl" })
+        : ResourceLoader({ ".gs_hlsl" })
     {
         HRESULT hr = DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&mLibrary));
         //if(FAILED(hr)) Handle error...

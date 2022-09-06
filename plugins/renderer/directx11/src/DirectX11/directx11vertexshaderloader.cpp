@@ -16,7 +16,7 @@ namespace Engine {
 namespace Render {
 
     DirectX11VertexShaderLoader::DirectX11VertexShaderLoader()
-        : ResourceLoader({ ".VS_hlsl" })
+        : ResourceLoader({ ".vs_hlsl" })
     {
     }
 

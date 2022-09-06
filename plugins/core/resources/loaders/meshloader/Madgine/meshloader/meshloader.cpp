@@ -26,7 +26,7 @@ namespace Engine {
 namespace Render {
 
     MeshLoader::MeshLoader()
-        : ResourceLoader({ ".fbx", ".dae" })
+        : ResourceLoader({ ".fbx", ".dae", ".stl" })
     {
 
         getOrCreateManual(

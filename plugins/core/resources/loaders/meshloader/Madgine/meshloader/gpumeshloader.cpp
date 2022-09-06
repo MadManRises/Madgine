@@ -30,7 +30,7 @@ namespace Engine {
 namespace Render {
 
     GPUMeshLoader::GPUMeshLoader()
-        : VirtualResourceLoaderBase({ ".fbx", ".dae" })
+        : VirtualResourceLoaderBase({ ".fbx", ".dae", ".stl" })
     {
     }
 
