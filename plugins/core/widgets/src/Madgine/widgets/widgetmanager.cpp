@@ -56,7 +56,7 @@ namespace Engine {
 namespace Widgets {
 
     static float sDragDistanceThreshold = 2.0f;
-    static std::chrono::steady_clock::duration sDragTimeThreshold = 150ms;
+    static std::chrono::steady_clock::duration sDragTimeThreshold = 5ms;
 
     struct WidgetManager::WidgetManagerData {
 
@@ -269,7 +269,7 @@ namespace Widgets {
         if (target) {
             mFocusedWidget = target;
 
-            mDragStartEvent = arg;
+            mDragStartEvent = widgetArg;
 
             mDragStartTime = std::chrono::steady_clock::now();
 
