@@ -267,3 +267,5 @@ build/
 CMakeUserPresets.json
 
 *.dot*
+
+out/

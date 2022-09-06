@@ -16,6 +16,8 @@ endif (IOS)
 
 add_workspace_application(MadgineLauncher ${sources})
 
+set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT MadgineLauncher)
+
 if (MADGINE_AS_SDK)
 	MESSAGE(${MADGINE_BINARY_NAME})
 	set_target_properties(MadgineLauncher PROPERTIES OUTPUT_NAME ${MADGINE_BINARY_NAME})

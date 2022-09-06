@@ -16,6 +16,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin CACHE INTERNAL 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin CACHE INTERNAL "")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/bin CACHE INTERNAL "")
 
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set(CMAKE_FOLDER "External")
+
 if (NOT WIN32)
 	set (outDir ${CMAKE_BINARY_DIR}/bin)
 
@@ -31,6 +34,8 @@ endif()
 
 
 get_property(support_shared GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS)
+
+option(BUILD_SHARED_LIBS "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" ON)
 
 if (NOT support_shared)
 	MESSAGE(STATUS "Forcing static libraries as shared libraries are not supported on that platform!")
@@ -107,11 +112,19 @@ function(export_to_workspace name)
 endfunction(export_to_workspace)
 
 #Customization-point for different platforms (e.g. Android)
-macro(add_workspace_application target)
+macro(add_workspace_application name)
 
-	add_executable(${target} ${ARGN})
+	add_executable(${name} ${ARGN})
+	set_target_properties(${name} PROPERTIES FOLDER "Application") 
 
 endmacro(add_workspace_application)
+
+macro(add_workspace_executable name)
+
+	add_executable(${name} ${ARGN})
+	set_target_properties(${name} PROPERTIES FOLDER "Executable") 
+
+endmacro(add_workspace_executable)
 
 macro(add_workspace_library name)
 
@@ -137,7 +150,9 @@ macro(add_workspace_library name)
 	target_include_directories(${name} INTERFACE $<BUILD_INTERFACE:${sourceDir}/${LIB_CONFIG_SOURCE_ROOT}>)
 
 	get_filename_component(abs_source_root ${LIB_CONFIG_SOURCE_ROOT} ABSOLUTE)
-	set_target_properties(${name} PROPERTIES SOURCE_ROOT ${abs_source_root})
+	set_target_properties(${name} PROPERTIES 
+									SOURCE_ROOT ${abs_source_root}
+									FOLDER "Library")
 
 	if (LIB_CONFIG_PRECOMPILED_HEADER)
 	
@@ -170,6 +185,9 @@ macro(add_workspace_interface_library name)
 	cmake_parse_arguments(LIB_CONFIG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})	
 	
 	add_library(${name} INTERFACE ${LIB_CONFIG_UNPARSED_ARGUMENTS})	
+
+	set_target_properties(${name} PROPERTIES 
+									FOLDER "Library")
 
 	if (NOT LIB_CONFIG_SOURCE_ROOT)
 		MESSAGE(SEND_ERROR "Source directory must always be set for Interface Library '${name}'. Use SOURCE_ROOT to specify it.")

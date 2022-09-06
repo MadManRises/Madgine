@@ -75,7 +75,8 @@ macro(add_plugin name base type)
 	set_target_properties(${name} PROPERTIES 
 		OUTPUT_NAME Plugin_${base}_${type}_${name}
 		PLUGIN_BASE ${base}
-		PLUGIN_TYPE ${type})
+		PLUGIN_TYPE ${type}
+		FOLDER "Plugins")
 
 	if (NOT PLUGIN_CONFIG_NO_DATA_COPY)
 		collect_data(${name})

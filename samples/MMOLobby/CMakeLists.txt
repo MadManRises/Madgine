@@ -10,7 +10,7 @@ add_plugin(MMOLobby MMOLobby Game ${sources} PRECOMPILED_HEADER src/mmolobbylib.
 
 target_link_libraries(MMOLobby PRIVATE NetworkSerialize Server)
 
-add_executable(MMOLobbyServer src/server_main.cpp)
+add_workspace_executable(MMOLobbyServer src/server_main.cpp)
 
 generate_binary_info(MMOLobbyServer)
 
