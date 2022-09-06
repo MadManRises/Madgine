@@ -166,7 +166,7 @@ namespace Resources {
     {
         LOG_DEBUG("Updating Resource: " << path << " (" << event << ")");
 
-        std::string_view extension = path.extension();
+        std::string extension = StringUtil::toLower(path.extension());
 
         auto it = loaderByExtension.find(extension);
         if (it != loaderByExtension.end()) {
