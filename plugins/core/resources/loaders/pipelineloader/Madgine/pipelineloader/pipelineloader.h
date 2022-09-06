@@ -31,11 +31,14 @@ namespace Render {
 
             void reset();
 
+            bool available() const;
+
             operator PipelineInstance *() const;
             PipelineInstance *operator->() const;
 
         private:
             std::unique_ptr<PipelineInstance> mPtr;
+            Threading::TaskFuture<bool> mState;
         };
 
         PipelineLoader();

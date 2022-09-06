@@ -2,6 +2,7 @@
 
 #include "Madgine/resourceslib.h"
 #include "Madgine/codegen/codegenlib.h"
+#include "Madgine/meshloaderlib.h"
 
 #if defined(PipelineLoader_EXPORTS)
 #    define MADGINE_PIPELINELOADER_EXPORT DLL_EXPORT

@@ -6,7 +6,6 @@
 
 #include "Madgine/codegen/codegen_shader.h"
 
-#include "Madgine/meshloaderlib.h"
 #include "Madgine/meshloader/gpumeshloader.h"
 
 METATABLE_BEGIN(Engine::Render::PipelineLoader)
@@ -38,22 +37,34 @@ namespace Render {
 
     Threading::TaskFuture<bool> PipelineLoader::Instance::createStatic(PipelineConfiguration config, PipelineLoader *loader)
     {
-        return loader->queueLoading(loader->create(*this, std::move(config), false));
+        assert(!mState.valid());
+        mState = loader->queueLoading(loader->create(*this, std::move(config), false));
+        return mState;
     }
 
     Threading::TaskFuture<bool> PipelineLoader::Instance::createDynamic(PipelineConfiguration config, PipelineLoader *loader)
     {
-        return loader->queueLoading(loader->create(*this, std::move(config), true));
+        assert(!mState.valid());
+        mState = loader->queueLoading(loader->create(*this, std::move(config), true));
+        return mState;
     }
 
     Threading::TaskFuture<bool> PipelineLoader::Instance::createGenerated(PipelineConfiguration config, CodeGen::ShaderFile file, PipelineLoader *loader)
     {
-        return loader->queueLoading(loader->create(*this, std::move(config), std::move(file)));
+        assert(!mState.valid());
+        mState = loader->queueLoading(loader->create(*this, std::move(config), std::move(file)));
+        return mState;
     }
 
-        void PipelineLoader::Instance::reset()
+    bool PipelineLoader::Instance::available() const
+    {
+        return mState.valid() && mState.is_ready() && mState;
+    }
+
+    void PipelineLoader::Instance::reset()
     {
         mPtr.reset();
+        mState.reset();
     }
 
     PipelineLoader::Instance::operator PipelineInstance *() const
@@ -65,7 +76,7 @@ namespace Render {
     {
         return mPtr.get();
     }
-    
+
     void PipelineInstance::renderQuad() const
     {
         static GPUMeshLoader::Handle quad = GPUMeshLoader::loadManual("quad", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &data, Render::GPUMeshLoader::ResourceDataInfo &info) {
@@ -86,7 +97,6 @@ namespace Render {
         if (quad.available())
             renderMesh(quad);
     }
-
 
 }
 }
