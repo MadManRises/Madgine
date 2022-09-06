@@ -87,6 +87,11 @@ namespace Input {
         onDragEnd(evt);
     }
 
+    void HandlerBase::injectDragAbort()
+    {
+        onDragAbort();
+    }
+
     bool HandlerBase::injectKeyPress(const KeyEventArgs &evt)
     {
         return onKeyPress(evt);
@@ -95,6 +100,12 @@ namespace Input {
     void HandlerBase::injectAxisEvent(const AxisEventArgs &evt)
     {
         onAxisEvent(evt);
+    }
+
+    void HandlerBase::abortDrag()
+    {
+        if (mWidget)
+            mWidget->abortDrag();
     }
 
     void HandlerBase::onPointerMove(const PointerEventArgs &me)
@@ -117,6 +128,10 @@ namespace Input {
     {
     }
 
+    void HandlerBase::onDragAbort()
+    {
+    }
+
     bool HandlerBase::onKeyPress(const KeyEventArgs &evt)
     {
         return false;
@@ -124,6 +139,11 @@ namespace Input {
 
     void HandlerBase::onAxisEvent(const AxisEventArgs &evt)
     {
+    }
+
+    bool HandlerBase::dragging() const
+    {
+        return mWidget ? mWidget->dragging() : false;
     }
 
     void HandlerBase::onMouseVisibilityChanged(bool b)

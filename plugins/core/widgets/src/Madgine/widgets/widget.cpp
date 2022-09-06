@@ -185,6 +185,16 @@ namespace Widgets {
         return mManager;
     }
 
+    bool WidgetBase::dragging() const
+    {
+        return mManager.dragging(this);
+    }
+
+    void WidgetBase::abortDrag()
+    {
+        mManager.abortDrag(this);
+    }
+
     void WidgetBase::destroyChild(WidgetBase *w)
     {
         auto it = std::ranges::find(mChildren, w, projectionToRawPtr);
@@ -279,6 +289,11 @@ namespace Widgets {
         return true;
     }
 
+    void WidgetBase::injectDragAbort()
+    {
+        mDragAbortSignal.emit();
+    }
+
     bool WidgetBase::injectAxisEvent(const Input::AxisEventArgs &arg)
     {
         mAxisEventSignal.emit(arg);
@@ -324,6 +339,11 @@ namespace Widgets {
     Threading::SignalStub<const Input::PointerEventArgs &> &WidgetBase::dragEndEvent()
     {
         return mDragEndSignal;
+    }
+
+    Threading::SignalStub<> &WidgetBase::dragAbortEvent()
+    {
+        return mDragAbortSignal;
     }
 
     Threading::SignalStub<const Input::AxisEventArgs &> &WidgetBase::axisEvent()

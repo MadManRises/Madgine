@@ -85,6 +85,9 @@ namespace Widgets {
         const Atlas2::Entry *lookUpImage(Resources::ImageLoader::Resource *image);
         const Atlas2::Entry *lookUpImage(std::string_view name);
 
+        bool dragging(const WidgetBase *widget);
+        void abortDrag(WidgetBase *widget);
+
     protected:
         WidgetBase *getHoveredWidget(const Vector2 &pos, WidgetBase *current);
         WidgetBase *getHoveredWidgetUp(const Vector2 &pos, WidgetBase *current);
@@ -124,6 +127,7 @@ namespace Widgets {
         //Dragging
         Input::PointerEventArgs mDragStartEvent { { 0, 0 }, { 0, 0 }, Input::MouseButton::NO_BUTTON };
         bool mDragging = false;
+        bool mDraggingAborted = false;
         std::chrono::steady_clock::time_point mDragStartTime;
     };
 

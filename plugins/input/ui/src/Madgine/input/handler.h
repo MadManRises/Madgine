@@ -70,10 +70,13 @@ namespace Input {
         virtual void onDragBegin(const PointerEventArgs &me);
         virtual void onDragMove(const PointerEventArgs &me);
         virtual void onDragEnd(const PointerEventArgs &me);
+        virtual void onDragAbort();
 
         virtual bool onKeyPress(const KeyEventArgs &evt);
 
         virtual void onAxisEvent(const AxisEventArgs &evt);
+
+        bool dragging() const;
 
     public:
         void injectPointerMove(const PointerEventArgs &evt);
@@ -81,8 +84,11 @@ namespace Input {
         void injectDragBegin(const PointerEventArgs &evt);
         void injectDragMove(const PointerEventArgs &evt);
         void injectDragEnd(const PointerEventArgs &evt);
+        void injectDragAbort();
         bool injectKeyPress(const KeyEventArgs &evt);
         void injectAxisEvent(const AxisEventArgs &evt);
+
+        void abortDrag();
 
     protected:
         std::string_view mWidgetName;

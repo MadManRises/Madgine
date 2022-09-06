@@ -310,7 +310,8 @@ namespace Widgets {
         assert(mFocusedWidget);
 
         if (mDragging) {
-            mFocusedWidget->injectDragEnd(widgetArg);
+            if (!mDraggingAborted)
+                mFocusedWidget->injectDragEnd(widgetArg);
             mDragging = false;
         } else {
             mFocusedWidget->injectPointerClick(widgetArg);
@@ -374,10 +375,11 @@ namespace Widgets {
 
                     mFocusedWidget->injectDragBegin(mDragStartEvent);
                     mDragging = true;
+                    mDraggingAborted = false;
                 }
             }
 
-            if (mDragging) {
+            if (mDragging && !mDraggingAborted) {
                 mFocusedWidget->injectDragMove(widgetArg);
             }
 
@@ -655,6 +657,19 @@ namespace Widgets {
     const Atlas2::Entry *WidgetManager::lookUpImage(std::string_view name)
     {
         return lookUpImage(Resources::ImageLoader::getSingleton().get(name));
+    }
+
+    bool WidgetManager::dragging(const WidgetBase *widget)
+    {
+        return mFocusedWidget == widget && mDragging && !mDraggingAborted;
+    }
+
+    void WidgetManager::abortDrag(WidgetBase *widget)
+    {
+        if (dragging(widget)) {
+            mFocusedWidget->injectDragAbort();
+            mDraggingAborted = true;
+        }
     }
 
 }

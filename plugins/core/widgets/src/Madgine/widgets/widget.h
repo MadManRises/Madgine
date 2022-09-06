@@ -73,6 +73,7 @@ namespace Widgets {
         virtual bool injectDragBegin(const Input::PointerEventArgs &arg);
         virtual bool injectDragMove(const Input::PointerEventArgs &arg);
         virtual bool injectDragEnd(const Input::PointerEventArgs &arg);
+        virtual void injectDragAbort();
         virtual bool injectAxisEvent(const Input::AxisEventArgs &arg);
         virtual bool injectKeyPress(const Input::KeyEventArgs &arg);
 
@@ -83,6 +84,7 @@ namespace Widgets {
         Threading::SignalStub<const Input::PointerEventArgs &> &dragBeginEvent();
         Threading::SignalStub<const Input::PointerEventArgs &> &dragMoveEvent();
         Threading::SignalStub<const Input::PointerEventArgs &> &dragEndEvent();
+        Threading::SignalStub<> &dragAbortEvent();
         Threading::SignalStub<const Input::AxisEventArgs &> &axisEvent();
         Threading::SignalStub<const Input::KeyEventArgs &> &keyEvent();
 
@@ -106,6 +108,9 @@ namespace Widgets {
 
         WidgetManager &manager();
 
+        bool dragging() const;
+        void abortDrag();
+
     protected:
         std::unique_ptr<WidgetBase> createWidgetByClass(WidgetClass _class);
         Serialize::StreamResult readWidget(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget);
@@ -118,6 +123,7 @@ namespace Widgets {
 
         Threading::Signal<const Input::PointerEventArgs &> mPointerMoveSignal, mPointerClickSignal, mPointerEnterSignal, mPointerLeaveSignal;
         Threading::Signal<const Input::PointerEventArgs &> mDragBeginSignal, mDragMoveSignal, mDragEndSignal;
+        Threading::Signal<> mDragAbortSignal;
         Threading::Signal<const Input::AxisEventArgs &> mAxisEventSignal;
         Threading::Signal<const Input::KeyEventArgs &> mKeyPressSignal;
 
