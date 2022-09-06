@@ -30,7 +30,7 @@ namespace Render {
 
     void BloomPass::setup(RenderTarget *target)
     {
-        mPipeline.createStatic({ .vs = "bloom", .ps = "bloom", .bufferSizes = { sizeof(BloomData) } });
+        mPipeline.createStatic({ .vs = "bloom", .ps = "bloom", .format = type_holder<Compound<Render::VertexPos_3D>>, .bufferSizes = { sizeof(BloomData) } });
 
         mBlurTarget = target->context()->createRenderTexture(target->size(), { .mIterations = 10, .mFormat = FORMAT_RGBA16F });
 

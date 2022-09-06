@@ -1,5 +1,5 @@
 struct AppData {
-#ifdef HAS_POSITION0
+#ifdef HAS_POS_3D
     float3 aPos : POSITION0;
 #endif
 };
