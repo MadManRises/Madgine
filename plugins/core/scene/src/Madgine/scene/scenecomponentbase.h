@@ -1,27 +1,26 @@
 #pragma once
 
 #include "Meta/keyvalue/virtualscope.h"
-#include "Modules/threading/madgineobject.h"
 #include "Meta/serialize/hierarchy/syncableunit.h"
+#include "Modules/threading/madgineobject.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
 namespace Engine {
 namespace Scene {
 
-    struct MADGINE_SCENE_EXPORT SceneComponentBase : VirtualScopeBase<>, Serialize::SyncableUnitBase, Threading::MadgineObject<SceneComponentBase> {    
+    struct MADGINE_SCENE_EXPORT SceneComponentBase : VirtualScopeBase<>, Serialize::SyncableUnitBase, Threading::MadgineObject<SceneComponentBase> {
         virtual ~SceneComponentBase() = default;
 
         SceneComponentBase(SceneManager &sceneMgr);
 
-        void sceneMgr(SceneManager *&ptr) const;
         SceneManager &sceneMgr() const;
 
         virtual void update(std::chrono::microseconds, bool paused);
 
         std::string_view key() const;
 
-template <typename T>
+        template <typename T>
         T &getSceneComponent()
         {
             return static_cast<T &>(getSceneComponent(component_index<T>()));
