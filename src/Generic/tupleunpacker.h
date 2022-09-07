@@ -232,18 +232,27 @@ namespace TupleUnpacker {
     template <typename T>
     auto num_bindings_impl() noexcept
     {
-        return decltype(overloaded {
-            [](auto &&u, unsigned) -> std::integral_constant<size_t, 0> { return {}; },
-            [](auto &&u, int) -> decltype(({auto&& [a] = u; std::integral_constant<size_t, 1>{}; })) { return {}; },
-            [](auto &&u, int) -> decltype(({auto&& [a,b] = u; std::integral_constant<size_t, 2>{}; })) { return {}; },
-            [](auto &&u, int) -> decltype(({auto&& [a,b,c] = u; std::integral_constant<size_t, 3>{}; })) { return {}; },
-            [](auto &&u, int) -> decltype(({auto&& [a,b,c,d] = u; std::integral_constant<size_t, 4>{}; })) { return {}; },
-            [](auto &&u, int) -> decltype(({auto&& [a,b,c,d,e] = u; std::integral_constant<size_t, 5>{}; })) { return {}; },
-            [](auto &&u, int) -> decltype(({auto&& [a,b,c,d,e,f] = u; std::integral_constant<size_t, 6>{}; })) { return {}; },
-            [](auto &&u, int) -> decltype(({auto&& [a,b,c,d,e,f,g] = u; std::integral_constant<size_t, 7>{}; })) { return {}; },
-            [](auto &&u, int) -> decltype(({auto&& [a,b,c,d,e,f,g,h] = u; std::integral_constant<size_t, 8>{}; })) { return {}; },
-            [](auto &&u, int) -> decltype(({auto&& [a,b,c,d,e,f,g,h,i] = u; std::integral_constant<size_t, 9>{}; })) { return {}; } 
-        } (std::declval<T>(), int {})) {};
+        return
+#    if _MSC_VER > 1929
+            decltype(
+#    endif
+                overloaded {
+                    [](auto &&u, unsigned) -> std::integral_constant<size_t, 0> { return {}; },
+                    [](auto &&u, int) -> decltype(({auto&& [a] = u; std::integral_constant<size_t, 1>{}; })) { return {}; },
+                    [](auto &&u, int) -> decltype(({auto&& [a,b] = u; std::integral_constant<size_t, 2>{}; })) { return {}; },
+                    [](auto &&u, int) -> decltype(({auto&& [a,b,c] = u; std::integral_constant<size_t, 3>{}; })) { return {}; },
+                    [](auto &&u, int) -> decltype(({auto&& [a,b,c,d] = u; std::integral_constant<size_t, 4>{}; })) { return {}; },
+                    [](auto &&u, int) -> decltype(({auto&& [a,b,c,d,e] = u; std::integral_constant<size_t, 5>{}; })) { return {}; },
+                    [](auto &&u, int) -> decltype(({auto&& [a,b,c,d,e,f] = u; std::integral_constant<size_t, 6>{}; })) { return {}; },
+                    [](auto &&u, int) -> decltype(({auto&& [a,b,c,d,e,f,g] = u; std::integral_constant<size_t, 7>{}; })) { return {}; },
+                    [](auto &&u, int) -> decltype(({auto&& [a,b,c,d,e,f,g,h] = u; std::integral_constant<size_t, 8>{}; })) { return {}; },
+                    [](auto &&u, int) -> decltype(({auto&& [a,b,c,d,e,f,g,h,i] = u; std::integral_constant<size_t, 9>{}; })) { return {}; } }(std::declval<T>(), int {})
+#    if _MSC_VER > 1929
+            )
+        {
+        }
+#    endif
+        ;
     }
 
     template <typename T, size_t size>
