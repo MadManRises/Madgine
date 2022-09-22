@@ -25,6 +25,8 @@ namespace Scripting {
 
             void reset();
 
+            void handleError();
+
             PyObjectPtr &operator=(PyObjectPtr &&other);
 
             explicit operator bool() const;

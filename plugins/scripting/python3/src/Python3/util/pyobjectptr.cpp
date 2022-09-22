@@ -81,6 +81,12 @@ namespace Scripting {
             mObject = nullptr;
         }
 
+        void PyObjectPtr::handleError()
+        {
+            if (!mObject)
+                PyErr_Print();
+        }
+
         PyObjectPtr &PyObjectPtr::operator=(PyObjectPtr &&other)
         {
             std::swap(mObject, other.mObject);
