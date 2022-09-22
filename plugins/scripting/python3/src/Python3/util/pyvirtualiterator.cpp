@@ -22,7 +22,7 @@ namespace Scripting {
         static PyObject *
         PyVirtualSequenceIterator_next(PyVirtualSequenceIterator *self)
         {
-            if (self->mIt == self->mIt.end())
+            if (self->mIt.ended())
                 return NULL;
             PyObject *result = toPyObject(*self->mIt);
             ++self->mIt;
@@ -31,7 +31,7 @@ namespace Scripting {
 
         PyTypeObject PyVirtualSequenceIteratorType = {
             .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
-                .tp_name
+                           .tp_name
             = "Environment.VirtualSequenceIterator",
             .tp_basicsize = sizeof(PyVirtualSequenceIterator),
             .tp_itemsize = 0,
@@ -53,7 +53,7 @@ namespace Scripting {
         static PyObject *
         PyVirtualAssociativeIterator_next(PyVirtualAssociativeIterator *self)
         {
-            if (self->mIt == self->mIt.end())
+            if (self->mIt.ended())
                 return NULL;
             PyObject *result = Py_BuildValue("NN", toPyObject(self->mIt->mKey), toPyObject(self->mIt->mValue));
             ++self->mIt;
@@ -62,7 +62,7 @@ namespace Scripting {
 
         PyTypeObject PyVirtualAssociativeIteratorType = {
             .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
-                .tp_name
+                           .tp_name
             = "Environment.VirtualAssociativeIterator",
             .tp_basicsize = sizeof(PyVirtualAssociativeIterator),
             .tp_itemsize = 0,
