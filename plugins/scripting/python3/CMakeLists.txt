@@ -20,6 +20,10 @@ target_link_plugins(Python3 Root Resources)
 
 target_link_libraries(Python3 PUBLIC Python3::Python)
 
+if (_Python3_LIBRARY_DEBUG)
+	target_compile_definitions(Python3 PUBLIC HAS_PYTHON3_DEBUG_LIB)
+endif (_Python3_LIBRARY_DEBUG)
+
 
 set(sources "")
 FolderSources(sources "" tools)
