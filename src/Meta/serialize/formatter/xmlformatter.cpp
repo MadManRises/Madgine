@@ -211,7 +211,7 @@ namespace Serialize {
         STREAM_PROPAGATE_ERROR(mStream.peekUntil(dummy, "> "));
         if (!dummy.empty()) {
             if (dummy[0] != '<')
-                throw 0;
+                return STREAM_PARSE_ERROR(mStream, mBinary) << "Expected: '<'";
             if (dummy[1] == '/')
                 return {};
             name = StringUtil::substr(dummy, 1, -1);
