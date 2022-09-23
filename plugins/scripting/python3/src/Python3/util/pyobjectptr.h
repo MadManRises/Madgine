@@ -31,6 +31,7 @@ namespace Scripting {
 
             explicit operator bool() const;
             operator PyObject *() const;
+            PyObject **operator&();
 
             static PyObjectPtr None();
 
