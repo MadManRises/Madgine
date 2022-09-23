@@ -17,22 +17,24 @@ namespace Tools {
         virtual void render() override;
         virtual void renderStatus() override;
 
-        virtual void messageLogged(std::string_view message, Util::MessageType lml, const char *file, Util::Log *log) override;
+        virtual void messageLogged(std::string_view message, Util::MessageType lml, const char *file, size_t line, Util::Log *log) override;
 
         std::string_view key() const override;
 
     protected:
         struct LogEntry {
-            LogEntry(std::string msg, Util::MessageType type, const char *file)
+            LogEntry(std::string msg, Util::MessageType type, const char *file, size_t line)
                 : mMsg(msg)
                 , mType(type)
                 , mFile(file)
+                , mLine(line)
             {
             }
 
             std::string mMsg;
             Util::MessageType mType;
             const char *mFile;
+            size_t mLine;
         };
 
         bool filter(const LogEntry &entry);

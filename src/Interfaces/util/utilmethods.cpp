@@ -13,23 +13,24 @@ namespace Util {
         sLog = log;
     }
 
-    void log(std::string_view msg, MessageType level, const char *file)
+    void log(std::string_view msg, MessageType level, const char *file, size_t line)
     {
         if (sLog)
-            sLog->log(msg, level, file);
+            sLog->log(msg, level, file, line);
         else
             StandardLog::sLog(msg, level);
     }
 
-    LogDummy::LogDummy(MessageType lvl, const char *file)
+    LogDummy::LogDummy(MessageType lvl, const char *file, size_t line)
         : mLvl(lvl)
         , mFile(file)
+        , mLine(line)
     {
     }
 
     LogDummy::~LogDummy()
     {
-        log(mStream.str(), mLvl, mFile);
+        log(mStream.str(), mLvl, mFile, mLine);
     }
 
 }

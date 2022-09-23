@@ -8,8 +8,7 @@ namespace Server {
         ServerLog(const std::string &name);
         ~ServerLog();
 
-        // Inherited via Log
-        void log(std::string_view msg, Util::MessageType lvl, const char *file) override;
+        void log(std::string_view msg, Util::MessageType lvl, const char *file, size_t line) override;
 
         bool startConsole();
         void stopConsole();

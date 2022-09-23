@@ -12,7 +12,7 @@ namespace Util {
         static void setLogLevel(MessageType lvl);
 
         // Inherited via Log
-        void log(std::string_view msg, MessageType lvl, const char *file) override;
+        void log(std::string_view msg, MessageType lvl, const char *file, size_t line) override;
         std::string getName() override;
 
         static StandardLog &getSingleton();

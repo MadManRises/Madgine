@@ -24,10 +24,10 @@ namespace Server {
         stopConsole();
     }
 
-    void ServerLog::log(std::string_view msg, Util::MessageType lvl, const char *file)
+    void ServerLog::log(std::string_view msg, Util::MessageType lvl, const char *file, size_t line)
     {
         std::cout << "\r";
-        StandardLog::log(msg, lvl, file);
+        StandardLog::log(msg, lvl, file, line);
         std::cout << "prompt> " << mCurrentCmd;
         std::cout.flush();
     }

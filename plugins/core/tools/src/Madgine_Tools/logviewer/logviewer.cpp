@@ -86,11 +86,12 @@ namespace Tools {
             auto end = mEntries.end();
             auto begin = mEntries.size() <= 100 ? mEntries.begin() : std::prev(end, 100);
 
-            if (ImGui::BeginTable("Messages", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Hideable)) {
+            if (ImGui::BeginTable("Messages", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Hideable | ImGuiTableFlags_SizingFixedFit)) {
 
                 ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide);
                 ImGui::TableSetupColumn("Message", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide);
-                ImGui::TableSetupColumn("Source", ImGuiTableColumnFlags_WidthStretch);
+                ImGui::TableSetupColumn("Source");
+                ImGui::TableSetupColumn("Line");
                 ImGui::TableSetupScrollFreeze(0, 1);
                 ImGui::TableHeadersRow();
 
@@ -114,6 +115,9 @@ namespace Tools {
                                 ImGui::TableNextColumn();
                                 if (entry.mFile)
                                     ImGui::Text("%s", entry.mFile);
+                                ImGui::TableNextColumn();
+                                if (entry.mFile)
+                                    ImGui::Text("%zu", entry.mLine);
                                 --count;
                             }
                         }                        
@@ -132,13 +136,13 @@ namespace Tools {
         }
     }
 
-    void LogViewer::messageLogged(std::string_view message, Util::MessageType lml, const char *file, Util::Log *log)
+    void LogViewer::messageLogged(std::string_view message, Util::MessageType lml, const char *file, size_t line, Util::Log *log)
     {
         if (mWorkgroup != &Threading::WorkGroup::self())
             return;
         ++mMsgCounts[lml];
         std::lock_guard guard { mMutex };
-        if (filter(mEntries.emplace_back(std::string { message }, lml, file)))
+        if (filter(mEntries.emplace_back(std::string { message }, lml, file, line)))
             addFilteredMessage(mEntries.size() - 1);
     }
 

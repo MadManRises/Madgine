@@ -6,11 +6,11 @@
 namespace Engine {
 	namespace Util {
 
-		void Log::log(std::string_view msg, MessageType lvl, const char *file)
+		void Log::log(std::string_view msg, MessageType lvl, const char *file, size_t line)
             {
 			for (LogListener* listener : mListeners)
 			{
-				listener->messageLogged(msg, lvl, file, this);
+				listener->messageLogged(msg, lvl, file, line, this);
 			}
 		}
 

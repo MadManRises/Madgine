@@ -88,10 +88,10 @@ namespace Util {
         sLogLevel = lvl;
     }
 
-    void StandardLog::log(std::string_view msg, MessageType lvl, const char *file)
+    void StandardLog::log(std::string_view msg, MessageType lvl, const char *file, size_t line)
     {
         sLog(msg, lvl, mName);
-        Log::log(msg, lvl, file);
+        Log::log(msg, lvl, file, line);
     }
 
     std::string StandardLog::getName()
