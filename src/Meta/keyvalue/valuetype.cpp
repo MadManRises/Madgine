@@ -125,6 +125,11 @@ std::string ValueType::toShortString() const
             ss << v;
             return ss.str();
         },
+        [](const Color3 &c) {
+            std::ostringstream ss;
+            ss << c;
+            return ss.str();
+        },
         [](const Quaternion &q) {
             std::ostringstream ss;
             ss << q;
@@ -314,5 +319,4 @@ std::ostream &operator<<(std::ostream &stream,
 
     return stream;
 }
-
 }

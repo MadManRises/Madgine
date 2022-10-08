@@ -153,6 +153,8 @@ struct Vector2i;
 struct Vector3i;
 struct Vector4i;
 
+struct Color3;
+
 struct Rect2i;
 
 struct Matrix3;

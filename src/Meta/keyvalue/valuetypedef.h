@@ -32,6 +32,8 @@ VALUETYPE_TYPE(Vector3i, Vector3i, const Vector3i &)
 VALUETYPE_SEP
 VALUETYPE_TYPE(Vector2i, Vector2i, const Vector2i &)
 VALUETYPE_SEP
+VALUETYPE_TYPE(Color3, Color3, const Color3 &)
+VALUETYPE_SEP
 VALUETYPE_TYPE(KeyValueVirtualAssociativeRange, KeyValueVirtualAssociativeRange, const KeyValueVirtualAssociativeRange &)
 VALUETYPE_SEP
 VALUETYPE_TYPE(KeyValueVirtualSequenceRange, KeyValueVirtualSequenceRange, const KeyValueVirtualSequenceRange &)

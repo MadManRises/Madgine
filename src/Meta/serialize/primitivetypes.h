@@ -26,7 +26,8 @@ namespace Serialize {
         Vector3,
         Vector4,
         Matrix3,
-        EnumTag>;
+        EnumTag,
+        Color3>;
 
     template <typename T, typename = void>
     struct PrimitiveReducer {

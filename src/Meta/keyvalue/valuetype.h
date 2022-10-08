@@ -9,6 +9,7 @@
 #include "../math/vector3i.h"
 #include "../math/vector4.h"
 #include "../math/vector4i.h"
+#include "../math/color3.h"
 
 #include "boundapifunction.h"
 #include "keyvaluefunction.h"
