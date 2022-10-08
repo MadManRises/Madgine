@@ -510,6 +510,8 @@ namespace Widgets {
     {
         if (mStartupWidget)
             swapCurrentRoot(mStartupWidget);
+        else if (mTopLevelWidgets.size() > 0)
+            swapCurrentRoot(mTopLevelWidgets.front().get());
     }
 
     void WidgetManager::onResize(const Rect2i &space)
