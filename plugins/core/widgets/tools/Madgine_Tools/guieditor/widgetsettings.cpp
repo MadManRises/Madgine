@@ -60,7 +60,7 @@ namespace Tools {
         ImGui::TableNextColumn();
         ImGui::Text("Pos");
         ImGui::TableNextColumn();
-        if (ImGui::DragMatrix3("##Pos", &pos, speeds, enabled))
+        if (ImGui::DragMatrix3("##Pos", &pos, speeds))
             mWidget->setPos(pos);
         ImGui::TableNextRow();   
         ImGui::TableNextColumn();
