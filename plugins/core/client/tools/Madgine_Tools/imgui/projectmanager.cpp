@@ -180,14 +180,16 @@ namespace Tools {
             }
 
             mProjectRoot = root;
+
+            
+            if (!mProjectRoot.empty()) {
+                Resources::ResourceManager::getSingleton().registerResourceLocation(mProjectRoot / "data", 80);
+            }
+
             const std::vector<std::string> &layouts = projectLayouts();
             mLayout = layouts.empty() ? "" : layouts.front();
 
             load();
-
-            if (!mProjectRoot.empty()) {
-                Resources::ResourceManager::getSingleton().registerResourceLocation(mProjectRoot / "data", 80);
-            }
         }
     }
 
