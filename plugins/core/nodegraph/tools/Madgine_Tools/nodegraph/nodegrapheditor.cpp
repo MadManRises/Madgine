@@ -650,7 +650,7 @@ namespace Tools {
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
             if (ImGui::BeginPopup("NodeGraphPopup")) {
                 if (ImGui::BeginMenu(IMGUI_ICON_PLUS " Add Node")) {
-                    for (const std::pair<const std::string_view, size_t> &nodeDesc : NodeGraph::NodeRegistry::sComponentsByName()) {
+                    for (const std::pair<const std::string_view, IndexType<uint32_t>> &nodeDesc : NodeGraph::NodeRegistry::sComponentsByName()) {
                         if (ImGui::MenuItem(nodeDesc.first.data())) {
                             NodeGraph::NodeBase *node = mGraph.addNode(NodeGraph::NodeRegistry::getConstructor(nodeDesc.second)(mGraph));
                             ed::SetNodePosition(ed::NodeId { node }, mPopupPosition);
