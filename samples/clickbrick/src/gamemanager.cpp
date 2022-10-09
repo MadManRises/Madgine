@@ -85,7 +85,6 @@ void GameManager::setWidget(Engine::Widgets::WidgetBase *w)
         mScoreLabel = widget()->getChildRecursive<Engine::Widgets::Label>("Score");
         mLifeLabel = widget()->getChildRecursive<Engine::Widgets::Label>("Life");
 
-
     } else {
         mGameWindow = nullptr;
         mScoreLabel = nullptr;
@@ -121,9 +120,9 @@ void GameManager::updateBricks(std::chrono::microseconds timeSinceLastFrame)
             return true;
         Scene::Brick *brick = e->getComponent<Scene::Brick>();
         Engine::Scene::Entity::Transform *t = e->getComponent<Engine::Scene::Entity::Transform>();
-        t->translate(brick->mSpeed * ratio * brick->mDir);
+        t->mPosition += brick->mSpeed * ratio * brick->mDir;
 
-        if (t->getPosition().length() > 10.5f) {
+        if (t->mPosition.length() > 10.5f) {
             e->remove();
             modLife(-1);
             return true;
@@ -139,7 +138,7 @@ void GameManager::updateBricks(std::chrono::microseconds timeSinceLastFrame)
             brick->mQ1 = { static_cast<float>(rand()), orientation };
         }
 
-        t->setOrientation(Engine::slerp(brick->mQ0, brick->mQ1, brick->mQAcc));
+        t->mOrientation = Engine::slerp(brick->mQ0, brick->mQ1, brick->mQAcc);
 
         return false;
     });
@@ -152,15 +151,15 @@ void GameManager::spawnBrick()
     Engine::Scene::Entity::EntityPtr brick = mUI.app().getGlobalAPIComponent<Engine::Scene::SceneManager>().createEntity();
 
     Engine::Scene::Entity::Transform *t = brick->addComponent<Engine::Scene::Entity::Transform>().get();
-    t->setScale({ 0.01f, 0.01f, 0.01f });
+    t->mScale = { 0.01f, 0.01f, 0.01f };
 
     Engine::Vector3 dir = { static_cast<float>(rand() - RAND_MAX / 2), static_cast<float>(rand() - RAND_MAX / 2), static_cast<float>(rand() - RAND_MAX / 2) };
     dir.normalize();
-    t->setPosition(dir * -10);
+    t->mPosition = dir * -10;
 
     Engine::Vector3 orientation = { static_cast<float>(rand() - RAND_MAX / 2), static_cast<float>(rand() - RAND_MAX / 2), static_cast<float>(rand() - RAND_MAX / 2) };
     Engine::Quaternion q { static_cast<float>(rand()), orientation };
-    t->setOrientation(q);
+    t->mOrientation = q;
 
     brick->addComponent<Engine::Scene::Entity::Mesh>().get()->setName("Brick");
 

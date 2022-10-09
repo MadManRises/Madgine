@@ -97,7 +97,7 @@ namespace Render {
         {
             auto perFrame = mPipeline->mapParameters<PointShadowPerFrame>(1);
 
-            perFrame->position = transform->getPosition();
+            perFrame->position = transform->mPosition;
         }
 
         for (std::pair<const std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> &instance : instances) {

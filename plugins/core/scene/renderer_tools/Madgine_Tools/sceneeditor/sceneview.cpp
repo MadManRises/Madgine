@@ -128,7 +128,7 @@ namespace Tools {
                     if (mEditor->hoveredAxis() >= 0) {
                         mDraggedAxis = mEditor->hoveredAxis();
                         mDragStartRay = ray;
-                        mDragStoredPosition = mEditor->hoveredTransform()->getPosition();
+                        mDragStoredPosition = mEditor->hoveredTransform()->mPosition;
 
                         Vector3 axis = axes[mDraggedAxis];
 
@@ -172,7 +172,7 @@ namespace Tools {
                     if (mDraggedAxis != 2)
                         distance.z = 0.0f;
 
-                    mDragTransform->setPosition(mDragStoredPosition + mDragTransform->parentMatrix().ToMat3().Inverse() * distance);
+                    mDragTransform->mPosition = mDragStoredPosition + mDragTransform->parentMatrix().ToMat3().Inverse() * distance;
                 }
             }
 
@@ -181,7 +181,7 @@ namespace Tools {
                 Render::GPUMeshLoader::Resource *resource;
                 if (ImGui::AcceptDraggableValueType(resource)) {
                     Scene::Entity::EntityPtr e = mEditor->sceneMgr().createEntity();
-                    e->addComponent<Scene::Entity::Transform>().get()->setPosition(pos);
+                    e->addComponent<Scene::Entity::Transform>().get()->mPosition = pos;
                     e->addComponent<Scene::Entity::Mesh>().get()->set(resource);
                     mEditor->select(e);
                 } else if (ImGui::IsDraggableValueTypeBeingAccepted(resource)) {

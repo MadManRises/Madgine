@@ -145,7 +145,7 @@ namespace Render {
                 Scene::Entity::Transform *t = lights.getEntity(i)->getComponent<Scene::Entity::Transform>();
                 if (t) {
                     float range = lights[i].mRange;
-                    perFrame->pointLights[i].position = t->getPosition();
+                    perFrame->pointLights[i].position = t->mPosition;
                     perFrame->pointLights[i].color = lights[i].mColor;
                     perFrame->pointLights[i].constant = 1.0f;
                     perFrame->pointLights[i].linearFactor = 4.5f / range;

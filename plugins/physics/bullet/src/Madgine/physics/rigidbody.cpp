@@ -68,13 +68,7 @@ namespace Physics {
 
                 Matrix4 m = p.Inverse() * TransformMatrix(Vector3 { transform.getOrigin() }, Vector3::UNIT_SCALE, Quaternion { q.x(), q.y(), q.z(), q.w() });
 
-                Vector3 pos;
-                Vector3 scale;
-                Quaternion orientation;
-                std::tie(pos, scale, orientation) = DecomposeTransformMatrix(m);
-
-                mTransform->setPosition(pos);
-                mTransform->setOrientation(orientation);
+                std::tie(mTransform->mPosition, mTransform->mScale, mTransform->mOrientation) = DecomposeTransformMatrix(m);
             }
         }
 

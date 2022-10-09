@@ -396,7 +396,7 @@ namespace Tools {
                         if (ImGui::MenuItem(componentDesc.first.data())) {
                             entity->addComponent(componentDesc.first);
                             if (componentDesc.first == "Transform") {
-                                entity->getComponent<Scene::Entity::Transform>()->setPosition({ 0, 0, 0 });
+                                entity->getComponent<Scene::Entity::Transform>()->mPosition = { 0, 0, 0 };
                             }
                         }
                     }
