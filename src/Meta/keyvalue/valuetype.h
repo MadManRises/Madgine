@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../math/color3.h"
 #include "../math/matrix3.h"
 #include "../math/matrix4.h"
 #include "../math/quaternion.h"
@@ -9,7 +10,6 @@
 #include "../math/vector3i.h"
 #include "../math/vector4.h"
 #include "../math/vector4i.h"
-#include "../math/color3.h"
 
 #include "boundapifunction.h"
 #include "keyvaluefunction.h"
@@ -29,6 +29,8 @@
 #include "valuetype_forward.h"
 
 namespace Engine {
+
+DERIVE_OPERATOR(Equal, ==);
 
 struct META_EXPORT ValueType {
 
@@ -79,15 +81,21 @@ struct META_EXPORT ValueType {
             mUnion.emplace<index>(std::forward<T>(t));
     }
 
-    bool operator==(const ValueType &other) const;
-
-    bool operator!=(const ValueType &other) const;
-
-    ValueType operator()(const ArgumentList &args) const;
-    template <typename... Args>
-    ValueType operator()(Args &&...args)
+    template <typename V>
+    bool operator==(const V &v) const
     {
-        return (*this)({ ValueType { std::forward<Args>(args)... } });
+        return visit([&]<typename U>(const U &u) {
+            if constexpr (has_operator_Equal<U, V>)
+                return u == v;
+            else
+                return false;
+        });
+    }
+
+    template <typename T>
+    bool operator!=(const T &other) const
+    {
+        return !(*this == other);
     }
 
     std::string toShortString() const;
@@ -141,6 +149,11 @@ struct META_EXPORT ValueType {
     void setType(ValueTypeDesc type);
 
     void call(ValueType &retVal, const ArgumentList &args) const;
+    template <typename... Args>
+    void call(ValueType &retVal, Args &&...args)
+    {
+        return call(retVal, { ValueType { std::forward<Args>(args)... } });
+    }
 
 private:
     Union mUnion;

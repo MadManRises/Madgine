@@ -39,44 +39,6 @@ void ValueType::operator=(ValueType &&other)
     mUnion = std::move(other.mUnion);
 }
 
-bool ValueType::operator==(const ValueType &other) const
-{
-    return mUnion == other.mUnion;
-}
-
-bool ValueType::operator!=(const ValueType &other) const
-{
-    return !(*this == other);
-}
-
-ValueType ValueType::operator()(const ArgumentList &args) const
-{
-    return visit(overloaded {
-        [&](const ApiFunction &function) {
-            ValueType result;
-            function(result, args);
-            return result;
-        },
-        [&](const KeyValueFunction &function) {
-            ValueType result;
-            function(result, args);
-            return result;
-        },
-        [&](const TypedScopePtr &scope) {
-            ValueType result;
-            scope.call(result, args);
-            return result;
-        },
-        [&](const OwnedScopePtr &scope) {
-            ValueType result;
-            scope.get().call(result, args);
-            return result;
-        },
-        [](const auto &) -> ValueType {
-            throw "calling operator is not supported";
-        } });
-}
-
 std::string ValueType::toShortString() const
 {
     return visit(overloaded {
@@ -244,12 +206,24 @@ void ValueType::setType(ValueTypeDesc type)
 
 void ValueType::call(ValueType &retVal, const ArgumentList &args) const
 {
-    std::visit(overloaded {
+    return std::visit(overloaded {
+                   [&](const ApiFunction &function) {
+                       return function(retVal, args);
+                   },
+                   [&](const KeyValueFunction &function) {
+                       return function(retVal, args);
+                   },
+                   [&](const TypedScopePtr &scope) {
+                       return scope.call(retVal, args);
+                   },
+                   [&](const OwnedScopePtr &scope) {
+                       return scope.get().call(retVal, args);
+                   },
                    [&](const ObjectPtr &o) {
-                       o.call(retVal, args);
+                       return o.call(retVal, args);
                    },
                    [](const auto &) {
-                       throw 0;
+                       throw "calling operator is not supported";
                    } },
         mUnion);
 }
