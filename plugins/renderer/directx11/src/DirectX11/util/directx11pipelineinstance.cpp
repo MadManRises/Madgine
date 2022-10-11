@@ -10,8 +10,6 @@
 
 #include "../directx11meshdata.h"
 
-#include "Madgine/render/material.h"
-
 namespace Engine {
 namespace Render {
 
@@ -95,7 +93,7 @@ namespace Render {
         }
     }
 
-    void DirectX11PipelineInstance::renderMesh(const GPUMeshData *m, const Material *material) const
+    void DirectX11PipelineInstance::renderMesh(const GPUMeshData *m) const
     {
         const DirectX11MeshData *mesh = static_cast<const DirectX11MeshData *>(m);
 
@@ -104,9 +102,6 @@ namespace Render {
         bind(mesh->mFormat);
 
         DirectX11RenderContext::getSingleton().bindFormat(mesh->mFormat, mInstanceDataSize);
-
-        if (material)
-            bindTextures({ { material->mDiffuseTexture, TextureType_2D }, { material->mEmissiveTexture, TextureType_2D } });
 
         constexpr D3D11_PRIMITIVE_TOPOLOGY modes[] {
             D3D11_PRIMITIVE_TOPOLOGY_POINTLIST,
@@ -126,7 +121,7 @@ namespace Render {
         }
     }
 
-    void DirectX11PipelineInstance::renderMeshInstanced(size_t count, const GPUMeshData *m, const Material *material) const
+    void DirectX11PipelineInstance::renderMeshInstanced(size_t count, const GPUMeshData *m) const
     {
         const DirectX11MeshData *mesh = static_cast<const DirectX11MeshData *>(m);
 
@@ -135,9 +130,6 @@ namespace Render {
         bind(mesh->mFormat);
 
         DirectX11RenderContext::getSingleton().bindFormat(mesh->mFormat, mInstanceDataSize);
-
-        if (material)
-            bindTextures({ { material->mDiffuseTexture, TextureType_2D }, { material->mEmissiveTexture, TextureType_2D } });
 
         constexpr D3D11_PRIMITIVE_TOPOLOGY modes[] {
             D3D11_PRIMITIVE_TOPOLOGY_POINTLIST,

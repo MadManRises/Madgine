@@ -13,8 +13,6 @@
 
 #include "../openglmeshdata.h"
 
-#include "Madgine/render/material.h"
-
 #include "../openglrendertarget.h"
 #include "../openglrendercontext.h"
 
@@ -117,7 +115,7 @@ namespace Render {
     }
 
     
-    void OpenGLPipelineInstance::renderMesh(const GPUMeshData *m, const Material *material) const
+    void OpenGLPipelineInstance::renderMesh(const GPUMeshData *m) const
     {
         const OpenGLMeshData *mesh = static_cast<const OpenGLMeshData *>(m);
 
@@ -133,9 +131,6 @@ namespace Render {
         bind();
 
         verify();
-
-        if (material)
-            bindTextures({ { material->mDiffuseTexture, TextureType_2D } });
 
         constexpr GLenum modes[] {
             GL_POINTS,
@@ -155,7 +150,7 @@ namespace Render {
         OpenGLRenderContext::getSingleton().unbindFormat();
     }
 
-    void OpenGLPipelineInstance::renderMeshInstanced(size_t count, const GPUMeshData *m, const Material *material) const
+    void OpenGLPipelineInstance::renderMeshInstanced(size_t count, const GPUMeshData *m) const
     {
         const OpenGLMeshData *mesh = static_cast<const OpenGLMeshData *>(m);
 
@@ -171,9 +166,6 @@ namespace Render {
         bind();
 
         verify();
-
-        if (material)
-            bindTextures({ { material->mDiffuseTexture, TextureType_2D } });
 
         constexpr GLenum modes[] {
             GL_POINTS,

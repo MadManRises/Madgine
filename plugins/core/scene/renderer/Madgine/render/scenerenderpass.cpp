@@ -19,8 +19,6 @@
 
 #include "Madgine/scene/entity/components/pointlight.h"
 
-#include "Madgine/render/material.h"
-
 #include "Madgine/scene/entity/components/material.h"
 
 #define SL_SHADER scene
@@ -192,17 +190,11 @@ namespace Render {
                 mPipeline->setDynamicParameters(0, {});
             }
 
-            if (material) {
-                Material mat {
-                    material->mDiffuseTexture.available() ? material->mDiffuseTexture->mTextureHandle : 0,
-                    material->mEmissiveTexture.available() ? material->mEmissiveTexture->mTextureHandle : 0,
-                    material->mDiffuseColor
-                };
+            mPipeline->bindTextures({
+                { material && material->mDiffuseTexture.available() ? material->mDiffuseTexture->mTextureHandle : 0, TextureType_2D },
+                { material && material->mEmissiveTexture.available() ? material->mEmissiveTexture->mTextureHandle : 0, TextureType_2D } });
 
-                mPipeline->renderMeshInstanced(instance.second.size(), meshData, &mat);
-            } else {
-                mPipeline->renderMeshInstanced(instance.second.size(), meshData, nullptr);
-            }
+            mPipeline->renderMeshInstanced(instance.second.size(), meshData);
         }
         target->popAnnotation();
     }

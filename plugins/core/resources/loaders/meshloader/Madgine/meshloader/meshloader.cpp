@@ -131,8 +131,12 @@ namespace Render {
                             vertex.mNormal = transform_anti * Vector3 { n.x, n.y, n.z };
                         }
                         if constexpr (V::template holds<VertexColor>) {
-                            aiColor4D *c = mesh->mColors[0];
-                            vertex.mColor = c ? Vector4 { c->r, c->g, c->b, c->a } : Vector4::UNIT_SCALE;
+                            if (mesh->mColors[0]) {
+                                aiColor4D &c = mesh->mColors[0][vertexIndex];
+                                vertex.mColor = Vector4 { &c.r };
+                            } else {
+                                vertex.mColor = Vector4::UNIT_SCALE;
+                            }
                         }
                         if constexpr (V::template holds<VertexUV>) {
                             if (mesh->mTextureCoords[0]) {

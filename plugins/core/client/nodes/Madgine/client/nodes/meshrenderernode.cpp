@@ -21,8 +21,6 @@
 
 #include "Madgine/meshloader/gpumeshloader.h"
 
-#include "Madgine/render/material.h"
-
 NODE(MeshRendererNode, Engine::Render::MeshRendererNode)
 
 METATABLE_BEGIN_BASE(Engine::Render::MeshRendererNode, Engine::NodeGraph::NodeBase)
@@ -192,13 +190,7 @@ namespace Render {
             if (interpretData->mMesh.resource() != mesh)
                 interpretData->mMesh = mesh;
             if (interpretData->mMesh.available()) {
-                Material mat {
-                    0,
-                    0,
-                    { 1, 1, 1, 1 }
-                };
-                //TODO: Material;
-                interpretData->mPipeline->renderMesh(interpretData->mMesh, &mat);
+                interpretData->mPipeline->renderMesh(interpretData->mMesh);
             }
         }
     }

@@ -6,8 +6,6 @@
 
 #include "../directx12meshdata.h"
 
-#include "Madgine/render/material.h"
-
 namespace Engine {
 namespace Render {
 
@@ -74,9 +72,9 @@ namespace Render {
     }
 
     
-    void DirectX12PipelineInstance::renderMesh(const GPUMeshData *m, const Material *material) const
+    void DirectX12PipelineInstance::renderMesh(const GPUMeshData *m) const
     {
-        renderMeshInstanced(1, m, material);
+        renderMeshInstanced(1, m);
         /* ID3D12GraphicsCommandList *commandList = context()->mCommandList.mList;
 
         const DirectX12MeshData *mesh = static_cast<const DirectX12MeshData *>(m);
@@ -107,7 +105,7 @@ namespace Render {
         }*/
     }
 
-    void DirectX12PipelineInstance::renderMeshInstanced(size_t count, const GPUMeshData *m, const Material *material) const
+    void DirectX12PipelineInstance::renderMeshInstanced(size_t count, const GPUMeshData *m) const
     {
         ID3D12GraphicsCommandList *commandList = DirectX12RenderContext::getSingleton().mCommandList.mList;
 
@@ -117,9 +115,6 @@ namespace Render {
             return;
 
         mesh->mVertices.bindVertex(commandList, mesh->mVertexSize);
-
-        if (material)
-            bindTextures({ { material->mDiffuseTexture, TextureType_2D } });
 
         constexpr D3D12_PRIMITIVE_TOPOLOGY modes[] {
             D3D_PRIMITIVE_TOPOLOGY_POINTLIST,

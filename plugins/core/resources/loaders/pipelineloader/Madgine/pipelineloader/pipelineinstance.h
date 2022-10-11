@@ -8,7 +8,6 @@ namespace Engine {
 namespace Render {
 
     struct GPUMeshData;
-    struct Material;
     struct TextureDescriptor;
     struct RenderTarget;
 
@@ -39,8 +38,8 @@ namespace Render {
 
         virtual void setDynamicParameters(size_t index, const ByteBuffer &data) = 0;
 
-        virtual void renderMesh(const GPUMeshData *mesh, const Material *material = nullptr) const = 0;
-        virtual void renderMeshInstanced(size_t count, const GPUMeshData *mesh, const Material *material = nullptr) const = 0;
+        virtual void renderMesh(const GPUMeshData *mesh) const = 0;
+        virtual void renderMeshInstanced(size_t count, const GPUMeshData *mesh) const = 0;
 
         void renderQuad() const;
 

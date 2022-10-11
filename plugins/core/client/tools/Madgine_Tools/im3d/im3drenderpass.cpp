@@ -78,19 +78,17 @@ namespace Render {
                 perObject->hasDistanceField = bool(p.second.mFlags & RenderPassFlags_DistanceField);
             }
 
+            mPipeline->bindTextures({ { p.first, TextureType_2D } });
+
             for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
                 if (!p.second.mVertices[i].empty()) {
                     mMeshes[i][0].update({ i + 1, p.second.mVertices[i], p.second.mIndices[i] });
                     mPipeline->renderMesh(mMeshes[i][0]);
                 }
-                /* GPUMeshData::Material mat;
-                mat.mDiffuseHandle = p.first;
-                target->renderVertices(mProgram, i + 1, p.second.mVertices2[i], p.second.mIndices2[i], &mat);*/
-                if (p.first)
-                    LOG_ONCE("TODO!");
+                
                 if (!p.second.mVertices2[i].empty()) {
                     mMeshes[i][1].update({ i + 1, p.second.mVertices2[i], p.second.mIndices2[i] });
-                    mPipeline->renderMesh(mMeshes[i][1], nullptr);
+                    mPipeline->renderMesh(mMeshes[i][1]);
                 }
             }
         }

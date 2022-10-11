@@ -18,8 +18,6 @@
 
 #include "directx11rendercontext.h"
 
-#include "Madgine/render/material.h"
-
 namespace Engine {
 namespace Render {
 

@@ -12,8 +12,6 @@
 
 #include "util/openglpipelineinstance.h"
 
-#include "Madgine/render/material.h"
-
 namespace Engine {
 namespace Render {
 
