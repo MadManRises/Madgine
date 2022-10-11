@@ -231,7 +231,7 @@ namespace Widgets {
         if (!w->mVisible)
             return nullptr;
 
-        if (!w->containsPoint(Vector2 { static_cast<float>(arg.windowPosition.x), static_cast<float>(arg.windowPosition.y) }, { { 0, 0 }, mClientSpace.mSize }))
+        if (!w->containsPoint(Vector2 { Vector2i { &arg.windowPosition.x } }, { { 0, 0 }, mClientSpace.mSize }))
             return nullptr;
 
         for (WidgetBase *c : w->children()) {
@@ -247,20 +247,17 @@ namespace Widgets {
         if (mDragStartEvent.button != Input::MouseButton::NO_BUTTON)
             return true;
 
-        Input::PointerEventArgs widgetArg = arg;
-        widgetArg.windowPosition = { widgetArg.windowPosition.x - mClientSpace.mTopLeft.x, widgetArg.windowPosition.y - mClientSpace.mTopLeft.y };
-
         WidgetBase *target = nullptr;
 
         for (WidgetBase *modalWidget : mModalWidgetList) {
-            target = propagateInput(modalWidget, widgetArg);
+            target = propagateInput(modalWidget, arg);
             if (target)
                 break;
         }
 
         if (!target) {
             for (WidgetBase *w : uniquePtrToPtr(mTopLevelWidgets)) {
-                target = propagateInput(w, widgetArg);
+                target = propagateInput(w, arg);
                 if (target)
                     break;
             }
@@ -269,7 +266,10 @@ namespace Widgets {
         if (target) {
             mFocusedWidget = target;
 
-            mDragStartEvent = widgetArg;
+            mDragStartEvent = arg;
+
+            Vector2i pos = mFocusedWidget->getAbsolutePosition().floor();
+            mDragStartEvent.windowPosition = mDragStartEvent.windowPosition - InterfacesVector { pos.x, pos.y };
 
             mDragStartTime = std::chrono::steady_clock::now();
 
@@ -301,20 +301,19 @@ namespace Widgets {
 
     bool WidgetManager::injectPointerRelease(const Input::PointerEventArgs &arg)
     {
-        Input::PointerEventArgs widgetArg = arg;
-        widgetArg.windowPosition = { widgetArg.windowPosition.x - mClientSpace.mTopLeft.x, widgetArg.windowPosition.y - mClientSpace.mTopLeft.y };
-
         if (mDragStartEvent.button != arg.button)
             return false;
 
         assert(mFocusedWidget);
 
+        Vector2i pos = mFocusedWidget->getAbsolutePosition().floor();
+        arg.windowPosition = arg.windowPosition - InterfacesVector { pos.x, pos.y };
         if (mDragging) {
             if (!mDraggingAborted)
-                mFocusedWidget->injectDragEnd(widgetArg);
+                mFocusedWidget->injectDragEnd(arg);
             mDragging = false;
         } else {
-            mFocusedWidget->injectPointerClick(widgetArg);
+            mFocusedWidget->injectPointerClick(arg);
         }
 
         mDragStartEvent.button = Input::MouseButton::NO_BUTTON;
@@ -364,9 +363,6 @@ namespace Widgets {
         if (std::ranges::find(mWidgets, mHoveredWidget) == mWidgets.end())
             mHoveredWidget = nullptr;
 
-        Input::PointerEventArgs widgetArg = arg;
-        widgetArg.windowPosition = { widgetArg.windowPosition.x - mClientSpace.mTopLeft.x, widgetArg.windowPosition.y - mClientSpace.mTopLeft.y };
-
         if (mDragStartEvent.button != Input::MouseButton::NO_BUTTON) {
 
             if (!mDragging) {
@@ -380,27 +376,40 @@ namespace Widgets {
             }
 
             if (mDragging && !mDraggingAborted) {
-                mFocusedWidget->injectDragMove(widgetArg);
+                Vector2i pos = mFocusedWidget->getAbsolutePosition().floor();
+                arg.windowPosition = arg.windowPosition - InterfacesVector { pos.x, pos.y };
+                mFocusedWidget->injectDragMove(arg);
             }
 
             return false;
         }
 
-        WidgetBase *hoveredWidget = getHoveredWidget(Vector2 { static_cast<float>(widgetArg.windowPosition.x), static_cast<float>(widgetArg.windowPosition.y) }, mHoveredWidget);
+        WidgetBase *hoveredWidget = getHoveredWidget(Vector2 { Vector2i { &arg.windowPosition.x } }, mHoveredWidget);
 
+        bool enter = false;
         if (mHoveredWidget != hoveredWidget) {
 
-            if (mHoveredWidget)
-                mHoveredWidget->injectPointerLeave(widgetArg);
+            if (mHoveredWidget) {
+                InterfacesVector storedWindowPosition = arg.windowPosition;
+                Vector2i pos = mHoveredWidget->getAbsolutePosition().floor();
+                arg.windowPosition = arg.windowPosition - InterfacesVector { pos.x, pos.y };
+                mHoveredWidget->injectPointerLeave(arg);
+                arg.windowPosition = storedWindowPosition;
+            }
 
             mHoveredWidget = hoveredWidget;
-
-            if (mHoveredWidget)
-                mHoveredWidget->injectPointerEnter(widgetArg);
+            enter = true;
         }
 
-        if (mHoveredWidget)
-            return mHoveredWidget->injectPointerMove(widgetArg);
+        if (mHoveredWidget) {
+            Vector2i pos = mHoveredWidget->getAbsolutePosition().floor();
+            arg.windowPosition = arg.windowPosition - InterfacesVector { pos.x, pos.y };
+
+            if (enter)
+                mHoveredWidget->injectPointerEnter(arg);
+
+            return mHoveredWidget->injectPointerMove(arg);
+        }
 
         return false;
     }

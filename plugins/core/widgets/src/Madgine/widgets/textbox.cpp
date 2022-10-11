@@ -140,7 +140,7 @@ namespace Widgets {
             return;
 
         assert(i == 0);
-        Vector3 pos = getAbsolutePosition();
+        Vector2 pos = getAbsolutePosition();
         Vector3 size = getAbsoluteSize();
         Rect2 bb = mTextRenderData.calculateBoundingBox(mText, pos, size);
         row->baseline_y_delta = bb.mSize.y;

@@ -28,12 +28,12 @@ namespace Widgets {
         std::pair<std::vector<Vertex>, TextureSettings> render(std::string_view text, Vector3 pos, Vector3 size, const Vector2 &screenSize, int cursorIndex = -1) const;
         std::vector<Vertex> renderSelection(std::string_view text, Vector3 pos, Vector3 size, const Vector2 &screenSize, const Atlas2::Entry &entry, int selectionStart, int selectionEnd, Vector4 color);
         float calculateWidth(std::string_view text, float z = 1.0f);
-        Rect2 calculateBoundingBox(std::string_view text, Vector3 pos, Vector3 size);
+        Rect2 calculateBoundingBox(std::string_view text, Vector2 pos, Vector3 size);
 
         static std::pair<std::vector<Vertex>, TextureSettings> renderText(std::string_view text, Vector3 pos, Vector2 size, const Render::Font *font, float fontSize, Color3 color, Vector2 pivot, const Vector2 &screenSize, int cursorIndex = -1);
         static std::vector<Vertex> renderSelection(std::string_view text, Vector3 pos, Vector2 size, const Render::Font *font, float fontSize, Vector2 pivot, const Vector2 &screenSize, const Atlas2::Entry &entry, int selectionStart, int selectionEnd, Vector4 color);
         static float calculateWidth(std::string_view text, const Render::Font *font, float fontSize);
-        static Rect2 calculateBoundingBox(std::string_view text, Vector3 pos, Vector2 size, const Render::Font *font, float fontSize, Vector2 pivot);
+        static Rect2 calculateBoundingBox(std::string_view text, Vector2 pos, Vector2 size, const Render::Font *font, float fontSize, Vector2 pivot);
 
         int mFontSize = 16;
 

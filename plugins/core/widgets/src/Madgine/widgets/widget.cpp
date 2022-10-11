@@ -93,10 +93,10 @@ namespace Widgets {
         return mEffectiveSize * Vector3 { Vector2 { screenSpace.mSize }, 1.0f };
     }
 
-    Vector3 WidgetBase::getAbsolutePosition() const
+    Vector2 WidgetBase::getAbsolutePosition() const
     {
         const Rect2i &screenSpace = mManager.getClientSpace();
-        return mEffectivePos * Vector3 { Vector2 { screenSpace.mSize }, 1.0f } + Vector3 { Vector2 { screenSpace.mTopLeft }, 0.0f };
+        return (mEffectivePos * Vector3 { Vector2 { screenSpace.mSize }, 1.0f }).xy();
     }
 
     void WidgetBase::updateGeometry(const Rect2i &screenSpace, const Matrix3 &parentSize, const Matrix3 &parentPos)

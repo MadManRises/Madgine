@@ -11,11 +11,11 @@
 #include "Interfaces/window/windowapi.h"
 #include "Interfaces/window/windowsettings.h"
 
+#include "Madgine/serialize/filesystem/filemanager.h"
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/configs/controlled.h"
 #include "Meta/serialize/formatter/iniformatter.h"
 #include "Meta/serialize/serializetable_impl.h"
-#include "Madgine/serialize/filesystem/filemanager.h"
 
 #include "../render/rendercontext.h"
 #include "../render/rendertarget.h"
@@ -312,8 +312,9 @@ namespace Window {
     */
     bool MainWindow::injectPointerPress(const Input::PointerEventArgs &arg)
     {
-
+        InterfacesVector storedWindowPosition = arg.windowPosition;
         for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
+            arg.windowPosition = storedWindowPosition - InterfacesVector{ comp->getClientSpace().mTopLeft.x, comp->getClientSpace().mTopLeft.y };
             if (comp->injectPointerPress(arg))
                 return true;
         }
@@ -328,8 +329,9 @@ namespace Window {
     */
     bool MainWindow::injectPointerRelease(const Input::PointerEventArgs &arg)
     {
-
+        InterfacesVector storedWindowPosition = arg.windowPosition;
         for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
+            arg.windowPosition = storedWindowPosition - InterfacesVector { comp->getClientSpace().mTopLeft.x, comp->getClientSpace().mTopLeft.y };
             if (comp->injectPointerRelease(arg))
                 return true;
         }
@@ -344,8 +346,9 @@ namespace Window {
     */
     bool MainWindow::injectPointerMove(const Input::PointerEventArgs &arg)
     {
-
+        InterfacesVector storedWindowPosition = arg.windowPosition;
         for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
+            arg.windowPosition = storedWindowPosition - InterfacesVector { comp->getClientSpace().mTopLeft.x, comp->getClientSpace().mTopLeft.y };
             if (comp->injectPointerMove(arg))
                 return true;
         }

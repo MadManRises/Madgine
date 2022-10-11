@@ -194,7 +194,8 @@ namespace Input {
         {
         }
 
-        InterfacesVector windowPosition, screenPosition, moveDelta;
+        mutable InterfacesVector windowPosition;
+        InterfacesVector screenPosition, moveDelta;
         MouseButton::MouseButton button;
     };
 

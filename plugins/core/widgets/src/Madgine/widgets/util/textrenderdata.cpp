@@ -62,7 +62,7 @@ namespace Widgets {
         return calculateWidth(text, mFont, z * mFontSize);
     }
 
-    Rect2 TextRenderData::calculateBoundingBox(std::string_view text, Vector3 pos, Vector3 size)
+    Rect2 TextRenderData::calculateBoundingBox(std::string_view text, Vector2 pos, Vector3 size)
     {
         return calculateBoundingBox(text, pos, size.xy(), mFont, size.z * mFontSize, mPivot);
     }
@@ -183,7 +183,7 @@ namespace Widgets {
         return result;
     }
 
-    Rect2 TextRenderData::calculateBoundingBox(std::string_view text, Vector3 pos, Vector2 size, const Render::Font *font, float fontSize, Vector2 pivot)
+    Rect2 TextRenderData::calculateBoundingBox(std::string_view text, Vector2 pos, Vector2 size, const Render::Font *font, float fontSize, Vector2 pivot)
     {
         float scale = fontSize / 64.0f;
 
@@ -196,7 +196,7 @@ namespace Widgets {
         float baseY = (size.y - fullHeight) * pivot.y;
 
         return {
-            pos.xy() + Vector2 { cursorX, baseY },
+            pos + Vector2 { cursorX, baseY },
             { fullWidth, fullHeight }
         };
     }

@@ -36,7 +36,7 @@ namespace Widgets {
         Matrix3 getEffectivePosition() const;
 
         Vector3 getAbsoluteSize() const;
-        Vector3 getAbsolutePosition() const;
+        Vector2 getAbsolutePosition() const;
 
         void updateGeometry(const Rect2i &screenSpace, const Matrix3 &parentSize = Matrix3::IDENTITY, const Matrix3 &parentPos = Matrix3::ZERO);
 

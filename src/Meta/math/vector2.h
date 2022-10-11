@@ -560,13 +560,9 @@ public:
         for (int i = 0; i < 2; ++i) {
             in >> v[i];
             in >> c;
-            if (i != 1) {
-                if (c != ',')
-                    std::terminate();
-            } else {
-                if (c != ']')
-                    std::terminate();
-            }
+            char expectedChar = (i == 1) ? ']' : ',';
+            if (c != expectedChar)
+                std::terminate();
         }
         return in;
     }
