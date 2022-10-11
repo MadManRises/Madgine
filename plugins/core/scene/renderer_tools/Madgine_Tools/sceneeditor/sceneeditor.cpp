@@ -524,7 +524,7 @@ namespace Tools {
         if (ImGui::BeginPopup("sceneSettings")) {
             ImGui::Text("Bone-Forward");
             ImGui::SameLine();
-            ImGui::DragFloat4(nullptr, &mBoneForward.x);
+            ImGui::DragFloat4("bone-forward", &mBoneForward.x);
             ImGui::DragFloat("Default Bone Length", &mDefaultBoneLength);
             ImGui::Checkbox("Show Bone Names", &mShowBoneNames);
             ImGui::Checkbox("Render 3D-Cursor", &mRender3DCursor);
