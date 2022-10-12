@@ -13,6 +13,12 @@
 namespace Engine {
 namespace Render {
 
+    static constexpr D3D11_PRIMITIVE_TOPOLOGY sModes[] {
+        D3D11_PRIMITIVE_TOPOLOGY_POINTLIST,
+        D3D11_PRIMITIVE_TOPOLOGY_LINELIST,
+        D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
+    };
+
     DirectX11PipelineInstance::DirectX11PipelineInstance(const PipelineConfiguration &config, typename DirectX11VertexShaderLoader::Handle vertexShader, typename DirectX11PixelShaderLoader::Handle pixelShader, typename DirectX11GeometryShaderLoader::Handle geometryShader, bool dynamic)
         : PipelineInstance(config)
         , mVertexShaderHandle(std::move(vertexShader))
@@ -34,7 +40,7 @@ namespace Render {
         }
     }
 
-    void DirectX11PipelineInstance::bind(VertexFormat format) const
+    bool DirectX11PipelineInstance::bind(VertexFormat format, size_t groupSize) const
     {
         if (mIsDynamic) {
             if (mVertexShaders[format])
@@ -46,6 +52,10 @@ namespace Render {
         }
         sDeviceContext->PSSetShader(mPixelShader, nullptr, 0);
         sDeviceContext->GSSetShader(mGeometryShader, nullptr, 0);
+
+        assert(groupSize > 0 && groupSize <= 3);
+        D3D11_PRIMITIVE_TOPOLOGY mode = sModes[groupSize - 1];
+        sDeviceContext->IASetPrimitiveTopology(mode);
 
         ID3D11Buffer *buffers[20];
         assert(mConstantBuffers.size() <= 20);
@@ -61,6 +71,10 @@ namespace Render {
         sDeviceContext->VSSetConstantBuffers(3, mDynamicBuffers.size(), buffers);
         sDeviceContext->PSSetConstantBuffers(3, mDynamicBuffers.size(), buffers);
         sDeviceContext->GSSetConstantBuffers(3, mDynamicBuffers.size(), buffers);
+
+        DirectX11RenderContext::getSingleton().bindFormat(format, mInstanceDataSize);
+
+        return true;
     }
 
     WritableByteBuffer DirectX11PipelineInstance::mapParameters(size_t index)
@@ -89,21 +103,10 @@ namespace Render {
     {
         const DirectX11MeshData *mesh = static_cast<const DirectX11MeshData *>(m);
 
+        if (!bind(mesh->mFormat, mesh->mGroupSize))
+            return;
+
         mesh->mVertices.bindVertex(mesh->mVertexSize);
-
-        bind(mesh->mFormat);
-
-        DirectX11RenderContext::getSingleton().bindFormat(mesh->mFormat, mInstanceDataSize);
-
-        constexpr D3D11_PRIMITIVE_TOPOLOGY modes[] {
-            D3D11_PRIMITIVE_TOPOLOGY_POINTLIST,
-            D3D11_PRIMITIVE_TOPOLOGY_LINELIST,
-            D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
-        };
-
-        assert(mesh->mGroupSize > 0 && mesh->mGroupSize <= 3);
-        D3D11_PRIMITIVE_TOPOLOGY mode = modes[mesh->mGroupSize - 1];
-        sDeviceContext->IASetPrimitiveTopology(mode);
 
         if (mesh->mIndices) {
             mesh->mIndices.bindIndex();
@@ -115,30 +118,18 @@ namespace Render {
 
     void DirectX11PipelineInstance::renderMeshInstanced(size_t count, const GPUMeshData *m, const ByteBuffer &instanceData) const
     {
-        const DirectX11MeshData *mesh = static_cast<const DirectX11MeshData *>(m);
-
-        mesh->mVertices.bindVertex(mesh->mVertexSize);
-
-        bind(mesh->mFormat);
-
-        DirectX11Buffer instanceBuffer { D3D11_BIND_VERTEX_BUFFER, instanceData };
-
         assert(mInstanceDataSize * count == instanceData.mSize);
         assert(instanceData.mSize > 0);
 
+        const DirectX11MeshData *mesh = static_cast<const DirectX11MeshData *>(m);
+
+        if (!bind(mesh->mFormat, mesh->mGroupSize))
+            return;
+
+        mesh->mVertices.bindVertex(mesh->mVertexSize);
+
+        DirectX11Buffer instanceBuffer { D3D11_BIND_VERTEX_BUFFER, instanceData };
         instanceBuffer.bindVertex(mInstanceDataSize, 1);
-
-        DirectX11RenderContext::getSingleton().bindFormat(mesh->mFormat, mInstanceDataSize);
-
-        constexpr D3D11_PRIMITIVE_TOPOLOGY modes[] {
-            D3D11_PRIMITIVE_TOPOLOGY_POINTLIST,
-            D3D11_PRIMITIVE_TOPOLOGY_LINELIST,
-            D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
-        };
-
-        assert(mesh->mGroupSize > 0 && mesh->mGroupSize <= 3);
-        D3D11_PRIMITIVE_TOPOLOGY mode = modes[mesh->mGroupSize - 1];
-        sDeviceContext->IASetPrimitiveTopology(mode);
 
         if (mesh->mIndices) {
             mesh->mIndices.bindIndex();

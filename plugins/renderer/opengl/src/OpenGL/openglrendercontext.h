@@ -30,7 +30,7 @@ namespace Render {
 
         virtual bool supportsMultisampling() const override;
 
-        void bindFormat(VertexFormat format);
+        void bindFormat(VertexFormat format, OpenGLBuffer *instanceBuffer, size_t instanceDataSize);
         void unbindFormat();
 
     private:

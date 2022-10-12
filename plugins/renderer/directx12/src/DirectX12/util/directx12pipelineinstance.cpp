@@ -9,6 +9,12 @@
 namespace Engine {
 namespace Render {
 
+    static constexpr D3D12_PRIMITIVE_TOPOLOGY sModes[] {
+        D3D_PRIMITIVE_TOPOLOGY_POINTLIST,
+        D3D_PRIMITIVE_TOPOLOGY_LINELIST,
+        D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
+    };
+
     DirectX12PipelineInstance::DirectX12PipelineInstance(const PipelineConfiguration &config, DirectX12PipelineLoader::Handle pipeline)
         : PipelineInstance(config)
         , mPipelineHandle(std::move(pipeline))
@@ -31,6 +37,10 @@ namespace Render {
         }
         commandList->SetPipelineState(pipeline);
 
+        assert(groupSize > 0 && groupSize <= 3);
+        D3D12_PRIMITIVE_TOPOLOGY mode = sModes[groupSize - 1];
+        commandList->IASetPrimitiveTopology(mode);
+
         for (size_t i = 0; i < std::min(size_t { 3 }, mConstantBuffers.size()); ++i) {
             if (mConstantBuffers[i])
                 commandList->SetGraphicsRootConstantBufferView(i, mConstantBuffers[i].gpuAddress());
@@ -39,6 +49,7 @@ namespace Render {
             if (mDynamicBuffers[i])
                 commandList->SetGraphicsRootConstantBufferView(i + 3, mDynamicBuffers[i].gpuAddress());
         }*/
+
         DX12_CHECK();
 
         return true;
@@ -66,63 +77,45 @@ namespace Render {
 
         const DirectX12MeshData *mesh = static_cast<const DirectX12MeshData *>(m);
 
-        if (!bind(commandList, m->mFormat, m->mGroupSize))
+        if (!bind(commandList, mesh->mFormat, mesh->mGroupSize))
             return;
 
         mesh->mVertices.bindVertex(commandList, mesh->mVertexSize);
 
-        constexpr D3D12_PRIMITIVE_TOPOLOGY modes[] {
-            D3D_PRIMITIVE_TOPOLOGY_POINTLIST,
-            D3D_PRIMITIVE_TOPOLOGY_LINELIST,
-            D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
-        };
-
-        assert(m->mGroupSize > 0 && m->mGroupSize <= 3);
-        D3D12_PRIMITIVE_TOPOLOGY mode = modes[m->mGroupSize - 1];
-        commandList->IASetPrimitiveTopology(mode);
-
         if (mesh->mIndices) {
             mesh->mIndices.bindIndex(commandList);
-            commandList->DrawIndexedInstanced(m->mElementCount, 1, 0, 0, 0);
+            commandList->DrawIndexedInstanced(mesh->mElementCount, 1, 0, 0, 0);
         } else {
-            commandList->DrawInstanced(m->mElementCount, 1, 0, 0);
+            commandList->DrawInstanced(mesh->mElementCount, 1, 0, 0);
         }
     }
 
     void DirectX12PipelineInstance::renderMeshInstanced(size_t count, const GPUMeshData *m, const ByteBuffer &instanceData) const
     {
+        assert(instanceData.mSize > 0);
+        assert(mInstanceDataSize * count == instanceData.mSize);
+
         ID3D12GraphicsCommandList *commandList = DirectX12RenderContext::getSingleton().mCommandList.mList;
 
         const DirectX12MeshData *mesh = static_cast<const DirectX12MeshData *>(m);
 
-        if (!bind(commandList, m->mFormat, m->mGroupSize))
+        if (!bind(commandList, mesh->mFormat, mesh->mGroupSize))
             return;
 
-        assert(instanceData.mSize > 0);
-        assert(mInstanceDataSize * count == instanceData.mSize);
-        
-        DirectX12Buffer instanceBuffer;
-        auto target = instanceBuffer.mapData(instanceData.mSize);
-        std::memcpy(target.mData, instanceData.mData, instanceData.mSize);
-        instanceBuffer.bindVertex(commandList, mInstanceDataSize, 1);
-        
         mesh->mVertices.bindVertex(commandList, mesh->mVertexSize);
 
-        constexpr D3D12_PRIMITIVE_TOPOLOGY modes[] {
-            D3D_PRIMITIVE_TOPOLOGY_POINTLIST,
-            D3D_PRIMITIVE_TOPOLOGY_LINELIST,
-            D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
-        };
-
-        assert(m->mGroupSize > 0 && m->mGroupSize <= 3);
-        D3D12_PRIMITIVE_TOPOLOGY mode = modes[m->mGroupSize - 1];
-        commandList->IASetPrimitiveTopology(mode);
+        DirectX12Buffer instanceBuffer;
+        {
+            auto target = instanceBuffer.mapData(instanceData.mSize);
+            std::memcpy(target.mData, instanceData.mData, instanceData.mSize);
+        }
+        instanceBuffer.bindVertex(commandList, mInstanceDataSize, 1);
 
         if (mesh->mIndices) {
             mesh->mIndices.bindIndex(commandList);
-            commandList->DrawIndexedInstanced(m->mElementCount, count, 0, 0, 0);
+            commandList->DrawIndexedInstanced(mesh->mElementCount, count, 0, 0, 0);
         } else {
-            commandList->DrawInstanced(m->mElementCount, count, 0, 0);
+            commandList->DrawInstanced(mesh->mElementCount, count, 0, 0);
         }
     }
 

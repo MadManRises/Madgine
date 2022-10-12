@@ -15,7 +15,7 @@ namespace Render {
 
         DirectX11PipelineInstance(const PipelineConfiguration &config, typename DirectX11VertexShaderLoader::Handle vertexShader, typename DirectX11PixelShaderLoader::Handle pixelShader, typename DirectX11GeometryShaderLoader::Handle geometryShader, bool dynamic);
 
-        void bind(VertexFormat format) const;
+        bool bind(VertexFormat format, size_t groupSize) const;
 
         virtual WritableByteBuffer mapParameters(size_t index) override;
 

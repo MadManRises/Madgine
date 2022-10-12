@@ -617,7 +617,7 @@ namespace Render {
         GL_FLOAT
     };
 
-    void OpenGLRenderContext::bindFormat(VertexFormat format)
+    void OpenGLRenderContext::bindFormat(VertexFormat format, OpenGLBuffer *instanceBuffer, size_t instanceDataSize)
     {
         assert(!format.has(0) || !format.has(1));
 
@@ -677,6 +677,22 @@ namespace Render {
         }
         if (format.has(0) || format.has(1))
             glEnableVertexAttribArray(0);
+
+        glDisableVertexAttribArray(7);
+        glDisableVertexAttribArray(8);
+
+        if (instanceBuffer) {
+            instanceBuffer->bind();
+
+            for (size_t i = 0; i < instanceDataSize / 16; ++i) {
+                glVertexAttribPointer(7 + i, 4, GL_FLOAT, GL_FALSE, instanceDataSize, reinterpret_cast<void *>(i * sizeof(float[4])));
+                GL_CHECK();
+                glVertexAttribDivisor(7 + i, 1);
+                GL_CHECK();
+                glEnableVertexAttribArray(7 + i);
+                GL_CHECK();
+            }
+        }
     }
 
     void OpenGLRenderContext::unbindFormat()

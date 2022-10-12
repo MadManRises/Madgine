@@ -18,6 +18,7 @@ namespace Render {
         explicit operator bool() const;
 
         void bind() const;
+        void bindVertex(size_t stride) const;
 
         void reset();
         void setData(const ByteBuffer &data);

@@ -15,7 +15,7 @@ namespace Render {
 
         OpenGLPipelineInstance(const PipelineConfiguration &config, OpenGLPipelineLoader::Handle pipeline);
 
-        void bind() const;
+        bool bind(VertexFormat format, OpenGLBuffer *instanceBuffer) const;
 
         virtual WritableByteBuffer mapParameters(size_t index) override;
 

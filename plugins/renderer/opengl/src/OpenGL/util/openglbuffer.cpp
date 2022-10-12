@@ -50,6 +50,22 @@ namespace Render {
         GL_CHECK();
     }
 
+    void OpenGLBuffer::bindVertex(size_t stride) const
+    {
+        assert(mTarget == GL_ARRAY_BUFFER);
+
+        bind();
+
+#if !OPENGL_ES || OPENGL_ES >= 310
+#    if !OPENGL_ES
+        if (glBindVertexBuffer)
+#    endif
+            glBindVertexBuffer(0, mHandle, 0, stride);
+#endif
+
+        GL_CHECK();
+    }
+
     void OpenGLBuffer::reset()
     {
         if (mHandle) {

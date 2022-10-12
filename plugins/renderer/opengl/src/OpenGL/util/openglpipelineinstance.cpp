@@ -18,6 +18,12 @@
 namespace Engine {
 namespace Render {
 
+    static constexpr GLenum sModes[] {
+        GL_POINTS,
+        GL_LINES,
+        GL_TRIANGLES
+    };
+
     OpenGLPipelineInstance::OpenGLPipelineInstance(const PipelineConfiguration &config, OpenGLPipelineLoader::Handle pipeline)
         : PipelineInstance(config)
         , mPipeline(std::move(pipeline))
@@ -28,11 +34,12 @@ namespace Render {
         }
     }
 
-    void OpenGLPipelineInstance::bind() const
+    bool OpenGLPipelineInstance::bind(VertexFormat format, OpenGLBuffer *instanceBuffer) const
     {
         if (!mHandle) {
-            if (mPipeline.available())
-                mHandle = mPipeline->handle();
+            if (!mPipeline.available())
+                return false;
+            mHandle = mPipeline->handle();
         }
         glUseProgram(mHandle);
         GL_CHECK();
@@ -62,6 +69,10 @@ namespace Render {
             GL_CHECK();
         }
 #endif
+
+        OpenGLRenderContext::getSingleton().bindFormat(format, instanceBuffer, mInstanceDataSize);
+
+        return true;
     }
 
     WritableByteBuffer OpenGLPipelineInstance::mapParameters(size_t index)
@@ -95,29 +106,14 @@ namespace Render {
     {
         const OpenGLMeshData *mesh = static_cast<const OpenGLMeshData *>(m);
 
-        mesh->mVertices.bind();
-        OpenGLRenderContext::getSingleton().bindFormat(mesh->mFormat);
-#if !OPENGL_ES || OPENGL_ES >= 310
-#    if !OPENGL_ES
-        if (glBindVertexBuffer)
-#    endif
-            glBindVertexBuffer(0, mesh->mVertices.handle(), 0, mesh->mVertexSize);
-#endif
+        mesh->mVertices.bindVertex(mesh->mVertexSize);
 
-        bind();
-
-        glDisableVertexAttribArray(7);
-        glDisableVertexAttribArray(8);
+        if (!bind(mesh->mFormat, nullptr))
+            return;
 
         verify();
 
-        constexpr GLenum modes[] {
-            GL_POINTS,
-            GL_LINES,
-            GL_TRIANGLES
-        };
-
-        GLenum mode = modes[mesh->mGroupSize - 1];
+        GLenum mode = sModes[mesh->mGroupSize - 1];
 
         if (mesh->mIndices) {
             mesh->mIndices.bind();
@@ -131,43 +127,21 @@ namespace Render {
 
     void OpenGLPipelineInstance::renderMeshInstanced(size_t count, const GPUMeshData *m, const ByteBuffer &instanceData) const
     {
-        const OpenGLMeshData *mesh = static_cast<const OpenGLMeshData *>(m);
-
-        mesh->mVertices.bind();
-        OpenGLRenderContext::getSingleton().bindFormat(mesh->mFormat);
-#if !OPENGL_ES || OPENGL_ES >= 310
-#    if !OPENGL_ES
-        if (glBindVertexBuffer)
-#    endif
-            glBindVertexBuffer(0, mesh->mVertices.handle(), 0, mesh->mVertexSize);
-#endif
-
-        bind();
-
-        OpenGLBuffer instanceBuffer { GL_ARRAY_BUFFER, instanceData };
-
         assert(mInstanceDataSize * count == instanceData.mSize);
         assert(mInstanceDataSize % 16 == 0);
 
-        instanceBuffer.bind();
-        for (size_t i = 0; i < mInstanceDataSize / 16; ++i) {
-            glVertexAttribPointer(7 + i, 4, GL_FLOAT, GL_FALSE, mInstanceDataSize, reinterpret_cast<void *>(i * sizeof(float[4])));
-            GL_CHECK();
-            glVertexAttribDivisor(7 + i, 1);
-            GL_CHECK();
-            glEnableVertexAttribArray(7 + i);
-            GL_CHECK();
-        }
+        const OpenGLMeshData *mesh = static_cast<const OpenGLMeshData *>(m);
+
+        OpenGLBuffer instanceBuffer { GL_ARRAY_BUFFER, instanceData };
+
+        mesh->mVertices.bindVertex(mesh->mVertexSize);
+
+        if (!bind(mesh->mFormat, &instanceBuffer))
+            return;
 
         verify();
 
-        constexpr GLenum modes[] {
-            GL_POINTS,
-            GL_LINES,
-            GL_TRIANGLES
-        };
-
-        GLenum mode = modes[mesh->mGroupSize - 1];
+        GLenum mode = sModes[mesh->mGroupSize - 1];
 
         if (mesh->mIndices) {
             mesh->mIndices.bind();
