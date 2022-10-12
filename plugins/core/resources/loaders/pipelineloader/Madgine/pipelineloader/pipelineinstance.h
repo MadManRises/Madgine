@@ -9,7 +9,6 @@ namespace Render {
 
     struct GPUMeshData;
     struct TextureDescriptor;
-    struct RenderTarget;
 
     struct PipelineConfiguration {
         std::string_view vs;
@@ -26,20 +25,28 @@ namespace Render {
             , mInstanceDataSize(config.instanceDataSize)
         {
         }
+        PipelineInstance(const PipelineInstance &) = delete;
         virtual ~PipelineInstance() = default;
+
+        PipelineInstance &operator=(const PipelineInstance &) = delete;
 
         virtual WritableByteBuffer mapParameters(size_t index) = 0;
         template <typename T>
-        ByteBufferImpl<T> mapParameters(size_t index) {
+        ByteBufferImpl<T> mapParameters(size_t index)
+        {
             return mapParameters(index).cast<T>();
         }
-
-        virtual void setInstanceData(const ByteBuffer &data) = 0;
 
         virtual void setDynamicParameters(size_t index, const ByteBuffer &data) = 0;
 
         virtual void renderMesh(const GPUMeshData *mesh) const = 0;
-        virtual void renderMeshInstanced(size_t count, const GPUMeshData *mesh) const = 0;
+        virtual void renderMeshInstanced(size_t count, const GPUMeshData *mesh, const ByteBuffer &instanceData) const = 0;
+        template <typename T>
+        void renderMeshInstanced(T &&instanceData, const GPUMeshData *mesh) const
+        {
+            ByteBufferImpl buffer { std::forward<T>(instanceData) };
+            renderMeshInstanced(buffer.elementCount(), mesh, std::move(buffer).template cast<const void>());
+        }
 
         void renderQuad() const;
 

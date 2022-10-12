@@ -19,12 +19,10 @@ namespace Render {
 
         virtual WritableByteBuffer mapParameters(size_t index) override;
 
-        virtual void setInstanceData(const ByteBuffer &data) override;
-
         virtual void setDynamicParameters(size_t index, const ByteBuffer &data) override;
 
         virtual void renderMesh(const GPUMeshData *mesh) const override;
-        virtual void renderMeshInstanced(size_t count, const GPUMeshData *mesh) const override;
+        virtual void renderMeshInstanced(size_t count, const GPUMeshData *mesh, const ByteBuffer &instanceData) const override;
 
         virtual void bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset = 0) const override;
         static void bindTexturesImpl(const std::vector<TextureDescriptor> &tex, size_t offset = 0);
@@ -39,8 +37,6 @@ namespace Render {
 
         std::vector<DirectX11Buffer> mConstantBuffers;
         std::vector<DirectX11Buffer> mDynamicBuffers;
-        
-        DirectX11Buffer mInstanceBuffer = D3D11_BIND_VERTEX_BUFFER;
 
         DirectX11VertexShaderLoader::Handle mVertexShaderHandle;
         DirectX11PixelShaderLoader::Handle mPixelShaderHandle;

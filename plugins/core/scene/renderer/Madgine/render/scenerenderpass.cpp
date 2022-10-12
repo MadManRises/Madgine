@@ -173,17 +173,6 @@ namespace Render {
                 perObject->diffuseColor = material ? material->mDiffuseColor : Vector4::UNIT_SCALE;
             }
 
-            std::vector<SceneInstanceData> instanceData;
-
-            std::ranges::transform(instance.second, std::back_inserter(instanceData), [](const Matrix4 &m) {
-                return SceneInstanceData {
-                    m,
-                    m.Inverse().Transpose()
-                };
-            });
-
-            mPipeline->setInstanceData(std::move(instanceData));
-
             if (skeleton) {
                 mPipeline->setDynamicParameters(0, skeleton->matrices());
             } else {
@@ -194,7 +183,16 @@ namespace Render {
                 { material && material->mDiffuseTexture.available() ? material->mDiffuseTexture->mTextureHandle : 0, TextureType_2D },
                 { material && material->mEmissiveTexture.available() ? material->mEmissiveTexture->mTextureHandle : 0, TextureType_2D } });
 
-            mPipeline->renderMeshInstanced(instance.second.size(), meshData);
+            std::vector<SceneInstanceData> instanceData;
+
+            std::ranges::transform(instance.second, std::back_inserter(instanceData), [](const Matrix4 &m) {
+                return SceneInstanceData {
+                    m,
+                    m.Inverse().Transpose()
+                };
+            });
+
+            mPipeline->renderMeshInstanced(std::move(instanceData), meshData);
         }
         target->popAnnotation();
     }

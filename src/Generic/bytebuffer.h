@@ -117,9 +117,17 @@ struct ByteBufferImpl<Data[]> : ByteBufferImpl<Data> {
     {
         return this->mData[index];
     }
+
+    size_t elementCount() const {
+        assert(this->mSize % sizeof(Data) == 0);
+        return this->mSize / sizeof(Data);
+    }
 };
 
 using ByteBuffer = ByteBufferImpl<const void>;
 using WritableByteBuffer = ByteBufferImpl<void>;
+
+template <typename T>
+ByteBufferImpl(std::vector<T>) -> ByteBufferImpl<T[]>;
 
 }

@@ -58,13 +58,13 @@ namespace Render {
                 }
 
                 OpenGLShaderLoader::Handle pixelShader;
-                if (!co_await pixelShader.load(config.ps, PixelShader) && pixelShader) {
+                if (!config.ps.empty() && !co_await pixelShader.load(config.ps, PixelShader)) {
                     LOG_ERROR("Failed to load PS '" << config.ps << "'!");
                     co_return false;
                 }
 
                 OpenGLShaderLoader::Handle geometryShader;
-                if (!co_await geometryShader.load(config.gs, GeometryShader) && geometryShader) {
+                if (!config.gs.empty() && !co_await geometryShader.load(config.gs, GeometryShader)) {
                     LOG_ERROR("Failed to load GS '" << config.gs << "'!");
                     co_return false;
                 }

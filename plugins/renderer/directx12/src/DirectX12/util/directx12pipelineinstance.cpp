@@ -17,7 +17,7 @@ namespace Render {
 
         mConstantBuffers.reserve(config.bufferSizes.size());
         for (size_t i = 0; i < config.bufferSizes.size(); ++i) {
-            mConstantBuffers.emplace_back(ByteBuffer{ nullptr, config.bufferSizes[i] });
+            mConstantBuffers.emplace_back(ByteBuffer { nullptr, config.bufferSizes[i] });
         }
     }
 
@@ -30,9 +30,6 @@ namespace Render {
                 return false;
         }
         commandList->SetPipelineState(pipeline);
-
-        if (mInstanceBuffer)
-            mInstanceBuffer.bindVertex(commandList, mInstanceDataSize, 1);
 
         for (size_t i = 0; i < std::min(size_t { 3 }, mConstantBuffers.size()); ++i) {
             if (mConstantBuffers[i])
@@ -52,14 +49,6 @@ namespace Render {
         return mConstantBuffers[index].mapData();
     }
 
-    void DirectX12PipelineInstance::setInstanceData(const ByteBuffer &data)
-    {
-        if (data.mSize > 0) {
-            auto target = mInstanceBuffer.mapData(data.mSize);
-            std::memcpy(target.mData, data.mData, data.mSize);
-        }
-    }
-
     void DirectX12PipelineInstance::setDynamicParameters(size_t index, const ByteBuffer &data)
     {
         if (mDynamicBuffers.size() <= index)
@@ -71,41 +60,7 @@ namespace Render {
         }
     }
 
-    
     void DirectX12PipelineInstance::renderMesh(const GPUMeshData *m) const
-    {
-        renderMeshInstanced(1, m);
-        /* ID3D12GraphicsCommandList *commandList = context()->mCommandList.mList;
-
-        const DirectX12MeshData *mesh = static_cast<const DirectX12MeshData *>(m);
-        const DirectX12PipelineInstance *pipeline = static_cast<const DirectX12PipelineInstance *>(p);
-
-        mesh->mVertices.bindVertex(commandList, mesh->mVertexSize);
-
-        pipeline->bind(commandList, mesh->mFormat, mesh->mGroupSize);
-
-        if (material)
-            bindTextures({ { material->mDiffuseTexture, TextureType_2D } });
-
-        constexpr D3D12_PRIMITIVE_TOPOLOGY modes[] {
-            D3D_PRIMITIVE_TOPOLOGY_POINTLIST,
-            D3D_PRIMITIVE_TOPOLOGY_LINELIST,
-            D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
-        };
-
-        assert(mesh->mGroupSize > 0 && mesh->mGroupSize <= 3);
-        D3D12_PRIMITIVE_TOPOLOGY mode = modes[mesh->mGroupSize - 1];
-        commandList->IASetPrimitiveTopology(mode);
-
-        if (mesh->mIndices) {
-            mesh->mIndices.bindIndex(commandList);
-            commandList->DrawIndexedInstanced(mesh->mElementCount, 1, 0, 0, 0);
-        } else {
-            commandList->DrawInstanced(mesh->mElementCount, 1, 0, 0);
-        }*/
-    }
-
-    void DirectX12PipelineInstance::renderMeshInstanced(size_t count, const GPUMeshData *m) const
     {
         ID3D12GraphicsCommandList *commandList = DirectX12RenderContext::getSingleton().mCommandList.mList;
 
@@ -114,6 +69,43 @@ namespace Render {
         if (!bind(commandList, m->mFormat, m->mGroupSize))
             return;
 
+        mesh->mVertices.bindVertex(commandList, mesh->mVertexSize);
+
+        constexpr D3D12_PRIMITIVE_TOPOLOGY modes[] {
+            D3D_PRIMITIVE_TOPOLOGY_POINTLIST,
+            D3D_PRIMITIVE_TOPOLOGY_LINELIST,
+            D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
+        };
+
+        assert(m->mGroupSize > 0 && m->mGroupSize <= 3);
+        D3D12_PRIMITIVE_TOPOLOGY mode = modes[m->mGroupSize - 1];
+        commandList->IASetPrimitiveTopology(mode);
+
+        if (mesh->mIndices) {
+            mesh->mIndices.bindIndex(commandList);
+            commandList->DrawIndexedInstanced(m->mElementCount, 1, 0, 0, 0);
+        } else {
+            commandList->DrawInstanced(m->mElementCount, 1, 0, 0);
+        }
+    }
+
+    void DirectX12PipelineInstance::renderMeshInstanced(size_t count, const GPUMeshData *m, const ByteBuffer &instanceData) const
+    {
+        ID3D12GraphicsCommandList *commandList = DirectX12RenderContext::getSingleton().mCommandList.mList;
+
+        const DirectX12MeshData *mesh = static_cast<const DirectX12MeshData *>(m);
+
+        if (!bind(commandList, m->mFormat, m->mGroupSize))
+            return;
+
+        assert(instanceData.mSize > 0);
+        assert(mInstanceDataSize * count == instanceData.mSize);
+        
+        DirectX12Buffer instanceBuffer;
+        auto target = instanceBuffer.mapData(instanceData.mSize);
+        std::memcpy(target.mData, instanceData.mData, instanceData.mSize);
+        instanceBuffer.bindVertex(commandList, mInstanceDataSize, 1);
+        
         mesh->mVertices.bindVertex(commandList, mesh->mVertexSize);
 
         constexpr D3D12_PRIMITIVE_TOPOLOGY modes[] {

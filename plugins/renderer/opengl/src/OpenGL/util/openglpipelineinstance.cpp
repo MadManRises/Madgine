@@ -13,7 +13,6 @@
 
 #include "../openglmeshdata.h"
 
-#include "../openglrendertarget.h"
 #include "../openglrendercontext.h"
 
 namespace Engine {
@@ -25,29 +24,12 @@ namespace Render {
     {
         mUniformBuffers.reserve(config.bufferSizes.size());
         for (size_t i = 0; i < config.bufferSizes.size(); ++i) {
-            mUniformBuffers.emplace_back(GL_UNIFORM_BUFFER, ByteBuffer{ nullptr, config.bufferSizes[i] });
+            mUniformBuffers.emplace_back(GL_UNIFORM_BUFFER, ByteBuffer { nullptr, config.bufferSizes[i] });
         }
     }
 
     void OpenGLPipelineInstance::bind() const
     {
-        if (mInstanceDataSize > 0) {
-            assert(mInstanceDataSize % 16 == 0);
-
-            mInstanceBuffer.bind();
-            for (size_t i = 0; i < mInstanceDataSize / 16; ++i) {
-                glVertexAttribPointer(7 + i, 4, GL_FLOAT, GL_FALSE, mInstanceDataSize, reinterpret_cast<void *>(i * sizeof(float[4])));
-                GL_CHECK();
-                glVertexAttribDivisor(7 + i, 1);
-                GL_CHECK();
-                glEnableVertexAttribArray(7 + i);
-                GL_CHECK();
-            }
-        } else {
-            glDisableVertexAttribArray(7);
-            glDisableVertexAttribArray(8);
-        }
-
         if (!mHandle) {
             if (mPipeline.available())
                 mHandle = mPipeline->handle();
@@ -87,11 +69,6 @@ namespace Render {
         return mUniformBuffers[index].mapData();
     }
 
-    void OpenGLPipelineInstance::setInstanceData(const ByteBuffer &data)
-    {
-        mInstanceBuffer.setData(data);
-    }
-
     void OpenGLPipelineInstance::setDynamicParameters(size_t index, const ByteBuffer &data)
     {
         if (mShaderStorageBuffers.size() <= index) {
@@ -114,7 +91,6 @@ namespace Render {
         }
     }
 
-    
     void OpenGLPipelineInstance::renderMesh(const GPUMeshData *m) const
     {
         const OpenGLMeshData *mesh = static_cast<const OpenGLMeshData *>(m);
@@ -129,6 +105,9 @@ namespace Render {
 #endif
 
         bind();
+
+        glDisableVertexAttribArray(7);
+        glDisableVertexAttribArray(8);
 
         verify();
 
@@ -150,7 +129,7 @@ namespace Render {
         OpenGLRenderContext::getSingleton().unbindFormat();
     }
 
-    void OpenGLPipelineInstance::renderMeshInstanced(size_t count, const GPUMeshData *m) const
+    void OpenGLPipelineInstance::renderMeshInstanced(size_t count, const GPUMeshData *m, const ByteBuffer &instanceData) const
     {
         const OpenGLMeshData *mesh = static_cast<const OpenGLMeshData *>(m);
 
@@ -165,6 +144,21 @@ namespace Render {
 
         bind();
 
+        OpenGLBuffer instanceBuffer { GL_ARRAY_BUFFER, instanceData };
+
+        assert(mInstanceDataSize * count == instanceData.mSize);
+        assert(mInstanceDataSize % 16 == 0);
+
+        instanceBuffer.bind();
+        for (size_t i = 0; i < mInstanceDataSize / 16; ++i) {
+            glVertexAttribPointer(7 + i, 4, GL_FLOAT, GL_FALSE, mInstanceDataSize, reinterpret_cast<void *>(i * sizeof(float[4])));
+            GL_CHECK();
+            glVertexAttribDivisor(7 + i, 1);
+            GL_CHECK();
+            glEnableVertexAttribArray(7 + i);
+            GL_CHECK();
+        }
+
         verify();
 
         constexpr GLenum modes[] {
@@ -177,7 +171,7 @@ namespace Render {
 
         if (mesh->mIndices) {
             mesh->mIndices.bind();
-            glDrawElementsInstanced(mode, mesh->mElementCount, GL_UNSIGNED_SHORT, 0, count);
+            glDrawElementsInstanced(mode, mesh->mElementCount, GL_UNSIGNED_INT, 0, count);
         } else
             glDrawArraysInstanced(mode, 0, mesh->mElementCount, count);
         GL_CHECK();

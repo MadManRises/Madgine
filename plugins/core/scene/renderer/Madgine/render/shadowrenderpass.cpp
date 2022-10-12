@@ -104,6 +104,12 @@ namespace Render {
                 perObject->hasSkeleton = skeleton != nullptr;
             }
 
+            if (skeleton) {
+                mPipeline->setDynamicParameters(0, skeleton->matrices());
+            } else {
+                mPipeline->setDynamicParameters(0, {});
+            }
+
             std::vector<SceneInstanceData> instanceData;
 
             std::ranges::transform(instance.second, std::back_inserter(instanceData), [](const Matrix4 &m) {
@@ -113,15 +119,7 @@ namespace Render {
                 };
             });
 
-            mPipeline->setInstanceData(std::move(instanceData));
-
-            if (skeleton) {
-                mPipeline->setDynamicParameters(0, skeleton->matrices());
-            } else {
-                mPipeline->setDynamicParameters(0, {});
-            }
-
-            mPipeline->renderMeshInstanced(instance.second.size(), meshData);
+            mPipeline->renderMeshInstanced(std::move(instanceData), meshData);
         }
 
         target->popAnnotation();

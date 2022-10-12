@@ -44,14 +44,20 @@ namespace Render {
     Threading::Task<bool> DirectX11PipelineLoader::create(Instance &instance, PipelineConfiguration config, bool dynamic)
     {
         DirectX11VertexShaderLoader::Handle vertexShader;
-        if (!co_await vertexShader.load(config.vs))
+        if (!co_await vertexShader.load(config.vs)) {
+            LOG_ERROR("Failed to load VS '" << config.vs << "'!");
             co_return false;
+        }
         DirectX11GeometryShaderLoader::Handle geometryShader;
-        if (!co_await geometryShader.load(config.gs) && geometryShader)
+        if (!config.gs.empty() && !co_await geometryShader.load(config.gs)) {
+            LOG_ERROR("Failed to load GS '" << config.vs << "'!");
             co_return false;
+        }
         DirectX11PixelShaderLoader::Handle pixelShader;
-        if (!co_await pixelShader.load(config.ps) && pixelShader)
+        if (!config.ps.empty() && !co_await pixelShader.load(config.ps)) {
+            LOG_ERROR("Failed to load PS '" << config.vs << "'!");
             co_return false;
+        }
 
         instance = std::make_unique<DirectX11PipelineInstance>(config, std::move(vertexShader), std::move(pixelShader), std::move(geometryShader), dynamic);
 

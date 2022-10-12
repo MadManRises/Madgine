@@ -51,11 +51,15 @@ namespace Render {
 
         if (!co_await pipeline.create(buffer, {}, [&](DirectX12PipelineLoader *loader, DirectX12Pipeline &pipeline, ResourceDataInfo &info) -> Threading::Task<bool> {
                 DirectX12GeometryShaderLoader::Handle geometryShader;
-                if (!co_await geometryShader.load(config.gs))
+                if (!config.gs.empty() && !co_await geometryShader.load(config.gs)) {
+                    LOG_ERROR("Failed to load GS '" << config.gs << "'!");
                     co_return false;
+                }
                 DirectX12PixelShaderLoader::Handle pixelShader;
-                if (!co_await pixelShader.load(config.ps))
+                if (!config.ps.empty() && !co_await pixelShader.load(config.ps)) {
+                    LOG_ERROR("Failed to load PS '" << config.ps << "'!");
                     co_return false;
+                }
                 co_return pipeline.link(config.vs, std::move(geometryShader), std::move(pixelShader));
             }))
             co_return false;

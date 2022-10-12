@@ -110,16 +110,13 @@ namespace Render {
                 perObject->hasSkeleton = skeleton != nullptr;
             }
 
-            size_t instanceCount = instance.second.size();
-            mPipeline->setInstanceData(std::move(instance.second));
-
             if (skeleton) {
                 mPipeline->setDynamicParameters(0, skeleton->matrices());
             } else {
                 mPipeline->setDynamicParameters(0, {});
             }
 
-            mPipeline->renderMeshInstanced(instanceCount, meshData);
+            mPipeline->renderMeshInstanced(std::move(instance.second), meshData);
         }
 
         target->popAnnotation();

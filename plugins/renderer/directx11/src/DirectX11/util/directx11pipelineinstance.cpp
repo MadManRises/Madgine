@@ -47,9 +47,6 @@ namespace Render {
         sDeviceContext->PSSetShader(mPixelShader, nullptr, 0);
         sDeviceContext->GSSetShader(mGeometryShader, nullptr, 0);
 
-        if (mInstanceBuffer)
-            mInstanceBuffer.bindVertex(mInstanceDataSize, 1);
-
         ID3D11Buffer *buffers[20];
         assert(mConstantBuffers.size() <= 20);
         std::ranges::transform(mConstantBuffers, buffers, [](const DirectX11Buffer &buf) { return buf.handle(); });
@@ -69,11 +66,6 @@ namespace Render {
     WritableByteBuffer DirectX11PipelineInstance::mapParameters(size_t index)
     {
         return mConstantBuffers[index].mapData();
-    }
-
-    void DirectX11PipelineInstance::setInstanceData(const ByteBuffer &data)
-    {
-        mInstanceBuffer.setData(data);
     }
 
     void DirectX11PipelineInstance::setDynamicParameters(size_t index, const ByteBuffer &data)
@@ -121,13 +113,20 @@ namespace Render {
         }
     }
 
-    void DirectX11PipelineInstance::renderMeshInstanced(size_t count, const GPUMeshData *m) const
+    void DirectX11PipelineInstance::renderMeshInstanced(size_t count, const GPUMeshData *m, const ByteBuffer &instanceData) const
     {
         const DirectX11MeshData *mesh = static_cast<const DirectX11MeshData *>(m);
 
         mesh->mVertices.bindVertex(mesh->mVertexSize);
 
         bind(mesh->mFormat);
+
+        DirectX11Buffer instanceBuffer { D3D11_BIND_VERTEX_BUFFER, instanceData };
+
+        assert(mInstanceDataSize * count == instanceData.mSize);
+        assert(instanceData.mSize > 0);
+
+        instanceBuffer.bindVertex(mInstanceDataSize, 1);
 
         DirectX11RenderContext::getSingleton().bindFormat(mesh->mFormat, mInstanceDataSize);
 
