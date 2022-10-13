@@ -29,7 +29,7 @@ SamplerState clampSampler : register(s1);
 struct PixelShaderInput {
     float4 position : SV_POSITION;
     float4 color : COLOR;
-    float4 worldPos : POSITION;
+    float4 viewPos : POSITION;
     float3 normal : NORMAL;
     float2 uv : TEXCOORD0;
 	float4 lightViewPosition : TEXCOORD1;
@@ -46,7 +46,8 @@ float median(float r, float g, float b) {
 
 PixelShaderOutput main(PixelShaderInput IN)
 {
-    float4 baseColor = IN.color * object.diffuseColor;
+    float4 diffuseColor = IN.color * object.diffuseColor;
+	float4 specularColor = object.specularColor;
 
 	if (object.hasTexture){
 		if (object.hasDistanceField){
@@ -56,51 +57,71 @@ PixelShaderOutput main(PixelShaderInput IN)
 			//sigDist *= dot(msdfUnit, float2(0.5));
 			sigDist *= 4.0;
 			float opacity = saturate(sigDist + 0.5);
-			baseColor = lerp(float4(0,0,0,0), baseColor, opacity);
+			diffuseColor = lerp(float4(0,0,0,0), diffuseColor, opacity);
 		}
 		else
 		{
-			baseColor = baseColor * diffuseTex.Sample(texSampler, IN.uv);
+			diffuseColor = diffuseColor * diffuseTex.Sample(texSampler, IN.uv);
 		}
 	}
 
 	PixelShaderOutput OUT;
-	OUT.fragColor = float4(0.0, 0.0, 0.0, 0.0);
 	
 	if (object.hasLight){
-		OUT.fragColor += castDirectionalShadowLight(
+		float4 lightDiffuseIntensity = float4(0.0, 0.0, 0.0, 0.0);
+		float4 lightSpecularIntensity = float4(0.0, 0.0, 0.0, 0.0);
+		
+		castDirectionalShadowLight(
+			lightDiffuseIntensity,
+			lightSpecularIntensity,
 			frame.light, 
-			IN.lightViewPosition, 
+			IN.lightViewPosition,
+			IN.viewPos.xyz,
 			IN.normal,
 			shadowDepthMap, 
 			app.ambientFactor, 
-			app.diffuseFactor
-		) * baseColor;
+			app.diffuseFactor,
+			app.specularFactor,
+			object.shininess
+		);
 		for (int i = 0; i < frame.pointLightCount; ++i){
 			if (i == 0)
-				OUT.fragColor += castPointShadowLight(
+				castPointShadowLight(
+					lightDiffuseIntensity,
+					lightSpecularIntensity,
 					frame.pointLights[i],
-					IN.worldPos.xyz,
+					IN.viewPos.xyz,
 					IN.normal,
 					pointShadowDepthMaps0,
 					texSampler,
 					app.ambientFactor,
-					app.diffuseFactor
-				) * baseColor;
+					app.diffuseFactor,
+					app.specularFactor,
+					object.shininess
+				);
 			else
-				OUT.fragColor += castPointShadowLight(
+				castPointShadowLight(
+					lightDiffuseIntensity,
+					lightSpecularIntensity,
 					frame.pointLights[i],
-					IN.worldPos.xyz,
+					IN.viewPos.xyz,
 					IN.normal,
 					pointShadowDepthMaps1,
 					texSampler,
 					app.ambientFactor,
-					app.diffuseFactor
-				) * baseColor;			
+					app.diffuseFactor,
+					app.specularFactor,
+					object.shininess
+				);			
 		}
+
+		OUT.fragColor = 
+			lightDiffuseIntensity * diffuseColor +
+			lightSpecularIntensity * specularColor;
 	}else{
-		OUT.fragColor += baseColor;
+		OUT.fragColor = diffuseColor;
 	}
+
 	
 	if (app.hasHDR){
 		OUT.brightColor = emissiveTex.Sample(texSampler, IN.uv);
@@ -109,7 +130,7 @@ PixelShaderOutput main(PixelShaderInput IN)
 		if(brightness > 1.0)
 			OUT.brightColor.rgb += OUT.fragColor.rgb;
 	}else{
-		OUT.fragColor.xyz += emissiveTex.Sample(texSampler, IN.uv).rgb;
+		OUT.fragColor.rgb += emissiveTex.Sample(texSampler, IN.uv).rgb;
 	}
 	
     return OUT;

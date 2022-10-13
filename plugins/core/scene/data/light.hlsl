@@ -8,28 +8,46 @@ float4 projectShadow(
     return mul(caster.viewProjectionMatrix, pos);
 }
 
-float4 castDirectionalLight(
+void castDirectionalLight(
+    inout float4 diffuseIntensity,
+    inout float4 specularIntensity,
     DirectionalLight light,
+    float3 pos,
     float3 normal,
     float ambientFactor,
-    float diffuseFactor)
+    float diffuseFactor,
+    float specularFactor,
+    float shininess)
 {
     float3 ambient = ambientFactor * light.color;
 
     float3 norm = normalize(normal);
+    
     float diff = max(dot(norm, -light.dir), 0.0);
     float3 diffuse = diffuseFactor * diff * light.color;
 
-    return float4(ambient + diffuse, 1.0);
+    diffuseIntensity += float4(ambient + diffuse, 1.0);
+
+    float3 viewDir = normalize(/* -pos*/ float3(0.0, 0.0, -1.0));
+    float3 reflectDir = reflect(-light.dir, norm);
+    float spec = pow(max(dot(viewDir, -reflectDir), 0.0), shininess);
+    float3 specular = specularFactor * spec * light.color;
+
+    specularIntensity += float4(specular, 1.0);
 }
 
-float4 castDirectionalShadowLight(
+void castDirectionalShadowLight(
+    inout float4 diffuseIntensity,
+    inout float4 specularIntensity,
     DirectionalShadowLight light,
     float4 lightViewPosition,
+    float3 pos,
     float3 normal,
     Texture2DMS<float> shadowMap,
     float ambientFactor,
-    float diffuseFactor)
+    float diffuseFactor,
+    float specularFactor,
+    float shininess)
 {
     float bias = 0.001;
     float3 normalizedLightViewPosition = (lightViewPosition.xyz / lightViewPosition.w) * 0.5 + 0.5;
@@ -38,22 +56,36 @@ float4 castDirectionalShadowLight(
 
     float lightDepth = normalizedLightViewPosition.z - bias;
 
-    float diffuseStrength = 1.0;
+    float lightStrength = 1.0;
 
     for (int i = 0; i < light.caster.shadowSamples; ++i) {
         float shadowDepth = shadowMap.Load(lightTexCoord, i).r;
-        diffuseStrength -= float(lightDepth > shadowDepth) / light.caster.shadowSamples;
+        lightStrength -= float(lightDepth > shadowDepth) / light.caster.shadowSamples;
     }
 
-    return castDirectionalLight(light.light, normal, ambientFactor, diffuseFactor * diffuseStrength);
+    castDirectionalLight(
+        diffuseIntensity,
+        specularIntensity, 
+        light.light, 
+        pos,
+        normal, 
+        ambientFactor, 
+        diffuseFactor * lightStrength,
+        specularFactor * lightStrength,
+        shininess
+    );
 }
 
-float4 castPointLight(
+void castPointLight(
+    inout float4 diffuseIntensity,
+    inout float4 specularIntensity,
     PointLight light,
     float3 pos,
     float3 normal,
     float ambientFactor,
-    float diffuseFactor)
+    float diffuseFactor,
+    float specularFactor,
+    float shininess)
 {
     float3 ambient = ambientFactor * light.color;
 
@@ -65,32 +97,41 @@ float4 castPointLight(
     float distance = length(light.position - pos);
     float attenuation = 1.0 / (light.constant + light.linearFactor * distance + light.quadratic * (distance * distance));
 
-    ambient *= attenuation;
-    diffuse *= attenuation;
-
-    return float4(ambient + diffuse, 0.0);
+    diffuseIntensity += attenuation * float4(ambient + diffuse, 0.0);
 }
 
-float4 castPointShadowLight(
+void castPointShadowLight(
+    inout float4 diffuseIntensity,
+    inout float4 specularIntensity,
     PointLight light,
     float3 pos,
     float3 normal,
     TextureCube<float> shadowMap,
     SamplerState samplerState,
     float ambientFactor,
-    float diffuseFactor)
+    float diffuseFactor,
+    float specularFactor,
+    float shininess)
 {
-     float bias = 0.001;
+    float bias = 0.001;
     float3 lightDir = pos - light.position;
 
     float lightDepth = length(lightDir) / 100.0 - bias;
 
-    float ambientStrength = 1.0;
-    float diffuseStrength = 1.0;
+    float lightStrength = 1.0;
     
     float shadowDepth = shadowMap.Sample(samplerState, lightDir);
-    diffuseStrength -= float(lightDepth > shadowDepth);
-    ambientStrength -= float(lightDepth > shadowDepth);
+    lightStrength -= float(lightDepth > shadowDepth);
     
-    return castPointLight(light, pos, normal, ambientFactor * ambientStrength, diffuseFactor * diffuseStrength * 10.0);
+    castPointLight(
+        diffuseIntensity,
+        specularIntensity, 
+        light, 
+        pos, 
+        normal, 
+        ambientFactor, 
+        diffuseFactor * lightStrength * 10.0,
+        specularFactor * lightStrength * 10.0,
+        shininess
+    );
 }

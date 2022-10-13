@@ -24,6 +24,7 @@ namespace Render {
 
         float mAmbientFactor = 0.4f;
         float mDiffuseFactor = 0.7f;
+        float mSpecularFactor = 1.0f;
 
     private:
         PipelineLoader::Instance mPipeline;

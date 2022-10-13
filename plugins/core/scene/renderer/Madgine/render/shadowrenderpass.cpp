@@ -79,13 +79,13 @@ namespace Render {
             perApplication->p = projectionMatrix();
         }
 
+        Matrix4 v = viewMatrix();
+
         {
             auto perFrame = mPipeline->mapParameters<ScenePerFrame>(1);
 
-            perFrame->v = viewMatrix();
-
             perFrame->light.light.color = mScene.mAmbientLightColor;
-            perFrame->light.light.dir = mScene.mAmbientLightDirection;
+            perFrame->light.light.dir = (v * Vector4{mScene.mAmbientLightDirection, 0.0f}).xyz();
         }
 
         for (const std::pair<const std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> &instance : instances) {
@@ -112,10 +112,11 @@ namespace Render {
 
             std::vector<SceneInstanceData> instanceData;
 
-            std::ranges::transform(instance.second, std::back_inserter(instanceData), [](const Matrix4 &m) {
+            std::ranges::transform(instance.second, std::back_inserter(instanceData), [&](const Matrix4 &m) {
+                Matrix4 mv = v * m;
                 return SceneInstanceData {
-                    m,
-                    m.Inverse().Transpose()
+                    mv,
+                    mv.Inverse().Transpose()
                 };
             });
 

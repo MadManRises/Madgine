@@ -29,6 +29,7 @@
 METATABLE_BEGIN(Engine::Render::SceneRenderPass)
 MEMBER(mAmbientFactor)
 MEMBER(mDiffuseFactor)
+MEMBER(mSpecularFactor)
 METATABLE_END(Engine::Render::SceneRenderPass)
 
 namespace Engine {
@@ -119,18 +120,20 @@ namespace Render {
 
             perApplication->ambientFactor = mAmbientFactor;
             perApplication->diffuseFactor = mDiffuseFactor;
+            perApplication->specularFactor = mSpecularFactor;
         }
+
+        Matrix4 v = mCamera->getViewMatrix();
 
         {
             auto perFrame = mPipeline->mapParameters<ScenePerFrame>(1);
 
-            perFrame->v = mCamera->getViewMatrix();
-            perFrame->light.caster.viewProjectionMatrix = mShadowPass.viewProjectionMatrix();
+            perFrame->light.caster.viewProjectionMatrix = mShadowPass.viewProjectionMatrix() * v.Inverse();
 
             perFrame->light.caster.shadowSamples = 4;
 
             perFrame->light.light.color = mScene.mAmbientLightColor;
-            perFrame->light.light.dir = mScene.mAmbientLightDirection;
+            perFrame->light.light.dir = (v * Vector4 { mScene.mAmbientLightDirection, 0.0f }).xyz();
 
             Scene::Entity::EntityComponentList<Scene::Entity::PointLight> &lights = mScene.entityComponentList<Scene::Entity::PointLight>();
             perFrame->pointLightCount = lights.size();
@@ -143,7 +146,7 @@ namespace Render {
                 Scene::Entity::Transform *t = lights.getEntity(i)->getComponent<Scene::Entity::Transform>();
                 if (t) {
                     float range = lights[i].mRange;
-                    perFrame->pointLights[i].position = t->mPosition;
+                    perFrame->pointLights[i].position = (v * Vector4 { t->mPosition, 1.0f }).xyz();
                     perFrame->pointLights[i].color = lights[i].mColor;
                     perFrame->pointLights[i].constant = 1.0f;
                     perFrame->pointLights[i].linearFactor = 4.5f / range;
@@ -153,6 +156,7 @@ namespace Render {
         }
 
         mPipeline->bindTextures({ mShadowMap->depthTexture(), mPointShadowMaps[0]->depthTexture(), mPointShadowMaps[1]->depthTexture() }, 2);
+
 
         for (const std::pair<const std::tuple<const GPUMeshData *, const GPUMeshData::Material *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> &instance : instances) {
             const GPUMeshData *meshData = std::get<0>(instance.first);
@@ -171,6 +175,10 @@ namespace Render {
                 perObject->hasSkeleton = skeleton != nullptr;
 
                 perObject->diffuseColor = material ? material->mDiffuseColor : Vector4::UNIT_SCALE;
+
+                perObject->specularColor = Vector4 { 1.0f, 1.0f, 1.0f, 1.0f };
+
+                perObject->shininess = 32.0f;
             }
 
             if (skeleton) {
@@ -185,10 +193,11 @@ namespace Render {
 
             std::vector<SceneInstanceData> instanceData;
 
-            std::ranges::transform(instance.second, std::back_inserter(instanceData), [](const Matrix4 &m) {
+            std::ranges::transform(instance.second, std::back_inserter(instanceData), [&](const Matrix4 &m) {
+                Matrix4 mv = v * m;
                 return SceneInstanceData {
-                    m,
-                    m.Inverse().Transpose()
+                    mv,
+                    mv.Inverse().Transpose()
                 };
             });
 

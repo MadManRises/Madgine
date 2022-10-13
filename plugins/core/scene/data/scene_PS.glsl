@@ -45,7 +45,8 @@ float median(float r, float g, float b) {
 void main()
 {
 
-	vec4 baseColor = color * object.diffuseColor;
+	vec4 diffuseColor = color * object.diffuseColor;
+	vec4 specularColor = object.specularColor;
 
 	if (object.hasTexture){
 		if (object.hasDistanceField){
@@ -55,46 +56,59 @@ void main()
 			//sigDist *= dot(msdfUnit, vec2(0.5));
 			sigDist *= 4.0;
 			float opacity = clamp(sigDist + 0.5, 0.0, 1.0);
-			baseColor = mix(vec4(0), baseColor, opacity);
+			diffuseColor = mix(vec4(0), diffuseColor, opacity);
 		}
 		else
 		{
-			baseColor = baseColor * texture2D(diffuseTex, uv);
+			diffuseColor = diffuseColor * texture2D(diffuseTex, uv);
 		}
 	}
 
-	fragColor = vec4(0.0);
-
 	if (object.hasLight){
-		fragColor += castDirectionalShadowLight(
+		vec4 lightDiffuseIntensity = vec4(0);
+		vec4 lightSpecularIntensity = vec4(0);
+
+		castDirectionalShadowLight(
+			lightDiffuseIntensity,
+			lightSpecularIntensity,
 			frame.light, 
 			lightViewPosition, 
 			normal,
 			shadowDepthMap, 
 			app.ambientFactor, 
-			app.diffuseFactor
-		) * baseColor;
+			app.diffuseFactor,
+			app.specularFactor,
+			object.shininess
+		);
 		for (int i = 0; i < frame.pointLightCount; ++i){
-			fragColor += castPointShadowLight(
+			castPointShadowLight(
+				lightDiffuseIntensity,
+				lightSpecularIntensity,
 				frame.pointLights[i],
 				worldPos.xyz,
 				normal,
 				pointShadowDepthMaps[i],
 				app.ambientFactor,
-				app.diffuseFactor
-			) * baseColor;
+				app.diffuseFactor,
+				app.specularFactor,
+				object.shininess
+			);
 		}
+
+		fragColor = 
+			lightDiffuseIntensity * diffuseColor +
+			lightSpecularIntensity * specularColor;
 	}else{
-		fragColor += baseColor;
+		fragColor = diffuseColor;
 	}
 
-	fragColor.xyz += texture2D(emissiveTex, uv).xyz;
-
 	if (app.hasHDR){
+		brightColor += texture2D(emissiveTex, uv);
+		brightColor.a = 1.0;
 		float brightness = dot(fragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
 		if(brightness > 1.0)
 			brightColor = vec4(fragColor.rgb, 1.0);
-		else
-			brightColor = vec4(0.0, 0.0, 0.0, 1.0);
+	}else{
+		fragColor.rgb += texture2D(emissiveTex, uv).rgb;
 	}
 }

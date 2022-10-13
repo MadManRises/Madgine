@@ -10,11 +10,15 @@ vec4 projectShadow(
 	return caster.viewProjectionMatrix * pos;
 }
 
-vec4 castDirectionalLight(
+void castDirectionalLight(
+	inout vec4 diffuseIntensity,
+    inout vec4 specularIntensity,
 	DirectionalLight light, 
 	vec3 normal, 
 	float ambientFactor, 
-	float diffuseFactor
+	float diffuseFactor,
+    float specularFactor,
+    float shininess
 ){
 	vec3 ambient = ambientFactor * light.color;
 	
@@ -22,16 +26,20 @@ vec4 castDirectionalLight(
 	float diff = max(dot(norm, -light.dir), 0.0);
 	vec3 diffuse = diffuseFactor * diff * light.color;
 
-	return vec4(ambient + diffuse, 1.0);
+	diffuseIntensity += vec4(ambient + diffuse, 1.0);
 }
 
-vec4 castDirectionalShadowLight(
+void castDirectionalShadowLight(
+	inout vec4 diffuseIntensity,
+    inout vec4 specularIntensity,
 	DirectionalShadowLight light, 
 	vec4 lightViewPosition, 
 	vec3 normal, 
 	sampler2DMS shadowMap, 
 	float ambientFactor, 
-	float diffuseFactor
+	float diffuseFactor,
+    float specularFactor,
+    float shininess
 ){
 	float bias = 0.001;
 	vec3 normalizedLightViewPosition = (lightViewPosition.xyz / lightViewPosition.w) * 0.5 + 0.5;
@@ -39,22 +47,35 @@ vec4 castDirectionalShadowLight(
 		
 	float lightDepth = normalizedLightViewPosition.z - bias;
 
-	float diffuseStrength = 1.0;
+	float lightStrength = 1.0;
 
 	for (int i = 0; i < light.caster.shadowSamples; ++i){
 		float shadowDepth = texelFetch(shadowMap, lightTexCoord, i).r;	
-		diffuseStrength -= float(lightDepth > shadowDepth) / light.caster.shadowSamples;
+		lightStrength -= float(lightDepth > shadowDepth) / light.caster.shadowSamples;
 	}
 
-	return castDirectionalLight(light.light, normal, ambientFactor, diffuseFactor * diffuseStrength);
+	castDirectionalLight(
+		diffuseIntensity,
+        specularIntensity, 
+		light.light, 
+		normal, 
+		ambientFactor, 
+		diffuseFactor * lightStrength,
+		specularFactor * lightStrength,
+		shininess
+	);
 }
 
-vec4 castPointLight(
+void castPointLight(
+	inout vec4 diffuseIntensity,
+    inout vec4 specularIntensity,
 	PointLight light, 
 	vec3 pos,
 	vec3 normal, 
 	float ambientFactor, 
-	float diffuseFactor
+	float diffuseFactor,
+    float specularFactor,
+    float shininess
 ){
 	vec3 ambient = ambientFactor * light.color;
 	
@@ -63,35 +84,43 @@ vec4 castPointLight(
 	float diff = max(dot(norm, lightDir), 0.0);
 	vec3 diffuse = diffuseFactor * diff * light.color;
 
-	float distance    = length(light.position - pos);
-    float attenuation = 1.0 / (light.constant + light.linearFactor * distance + 
-  			     light.quadratic * (distance * distance));
+	float distance = length(light.position - pos);
+    float attenuation = 1.0 / (light.constant + light.linearFactor * distance + light.quadratic * (distance * distance));
 
-	ambient *= attenuation;
-	diffuse *= attenuation;
-
-	return vec4(ambient + diffuse, 0.0);
+	diffuseIntensity += attenuation * vec4(ambient + diffuse, 0.0);
 }
 
-vec4 castPointShadowLight(
+void castPointShadowLight(
+	inout vec4 diffuseIntensity,
+    inout vec4 specularIntensity,
 	PointLight light, 
 	vec3 pos,
 	vec3 normal, 
 	samplerCube shadowMap, 
 	float ambientFactor, 
-	float diffuseFactor
+	float diffuseFactor,
+    float specularFactor,
+    float shininess
 ){
 	float bias = 0.001;
 	vec3 lightDir = pos - light.position;
 	
 	float lightDepth = length(lightDir) / 100.0 - bias;
 
-	float ambientStrength = 1.0;
-	float diffuseStrength = 1.0;
+	float lightStrength = 1.0;
 
 	float shadowDepth = texture(shadowMap, lightDir).r;	
-	diffuseStrength -= float(lightDepth > shadowDepth);
-	ambientStrength -= float(lightDepth > shadowDepth);
+	lightStrength -= float(lightDepth > shadowDepth);
 
-	return castPointLight(light, pos, normal, ambientFactor * ambientStrength, diffuseFactor *  diffuseStrength * 10.0);
+	castPointLight(
+		diffuseIntensity,
+        specularIntensity, 
+		light, 
+		pos, 
+		normal, 
+		ambientFactor, 
+		diffuseFactor * lightStrength * 10.0,
+		specularFactor * lightStrength * 10.0,
+		shininess
+	);
 }

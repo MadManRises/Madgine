@@ -7,11 +7,11 @@ struct ScenePerApplication {
 
 	float ambientFactor;
 	float diffuseFactor;
+	float specularFactor;
 };
 
 struct ScenePerFrame {
 	int pointLightCount;
-	float4x4 v;
 
 	DirectionalShadowLight light;
 
@@ -19,13 +19,16 @@ struct ScenePerFrame {
 };
 
 struct SceneInstanceData{
-	float4x4 m;
-	float4x4 anti_m;
+	float4x4 mv;
+	float4x4 anti_mv;
 };
 
 struct ScenePerObject {
 
 	float4 diffuseColor;
+	float4 specularColor;
+
+	float shininess;
 
 	bool hasLight;
 	bool hasTexture;
