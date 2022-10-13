@@ -332,7 +332,7 @@ namespace Tools {
 
             io.MouseWheel += mZAxis * 0.3f;
 
-            io.DeltaTime = (float)mFrameClock.tick<std::chrono::microseconds>().count() / 1000000.0f;
+            io.DeltaTime = mFrameClock.tick<std::chrono::duration<float>>().count();
 
             io.BackendPlatformUserData = &mWindow;
 
