@@ -11,6 +11,8 @@
 
 #include "Interfaces/input/inputevents.h"
 
+#include "Madgine/widgets/button.h"
+
 namespace Engine {
 namespace Input {
 
@@ -77,6 +79,14 @@ namespace Input {
         virtual void onAxisEvent(const AxisEventArgs &evt);
 
         bool dragging() const;
+
+        template <typename... Ty>
+        Widgets::Button* setupButton(std::string_view name, Ty&&... args) {
+            Widgets::Button *button = mWidget->getChildRecursive<Widgets::Button>(name);
+            if (button)
+                button->clickEvent().connect(std::forward<Ty>(args)..., &mConStore);
+            return button;
+        }
 
     public:
         void injectPointerMove(const PointerEventArgs &evt);

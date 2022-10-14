@@ -31,7 +31,7 @@ void MainMenuHandler::setWidget(Engine::Widgets::WidgetBase *w)
 {
     Engine::Input::HandlerBase::setWidget(w);
     if (widget()) {
-        widget()->getChildRecursive<Engine::Widgets::Button>("StartGameButton")->clickEvent().connect(&MainMenuHandler::startGame, this, &mConStore);
+        setupButton("StartGameButton", &MainMenuHandler::startGame, this);
     }
 }
 
