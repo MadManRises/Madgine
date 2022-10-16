@@ -37,7 +37,7 @@
 
 #include "Generic/areaview.h"
 
-#define SL_SHADER ui
+#define SL_SHADER widgets
 #include INCLUDE_SL_SHADER
 
 UNIQUECOMPONENT(Engine::Widgets::WidgetManager)
@@ -116,7 +116,7 @@ namespace Widgets {
         if (!co_await MainWindowComponentBase::init())
             co_return false;
 
-        mData->mPipeline.createStatic({ .vs = "ui", .ps = "ui", .format = type_holder<Vertex>, .bufferSizes = { 0, 0, sizeof(WidgetsPerObject) } });
+        mData->mPipeline.createStatic({ .vs = "widgets", .ps = "widgets", .format = type_holder<Vertex>, .bufferSizes = { 0, 0, sizeof(WidgetsPerObject) } });
 
         mData->mMesh.create({ 3, std::vector<Vertex> {} });
 
