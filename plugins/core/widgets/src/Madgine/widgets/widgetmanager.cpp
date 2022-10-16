@@ -343,7 +343,7 @@ namespace Widgets {
                 }
             }
         } else {
-            for (WidgetBase *w : uniquePtrToPtr(static_cast<const std::vector<std::unique_ptr<WidgetBase>> &>(mTopLevelWidgets))) {
+            for (WidgetBase *w : uniquePtrToPtr(mTopLevelWidgets)) {
                 if (w->mVisible && w->containsPoint(pos, { { 0, 0 }, mClientSpace.mSize })) {
                     return getHoveredWidgetDown(pos, w);
                 }
