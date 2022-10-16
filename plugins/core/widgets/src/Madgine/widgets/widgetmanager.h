@@ -61,7 +61,7 @@ namespace Widgets {
             return uniquePtrToPtr(mTopLevelWidgets);
         }
 
-        Generator<WidgetBase *> visibleWidgets();
+        Generator<std::pair<WidgetBase *, size_t>> visibleWidgets();
 
         WidgetBase *mStartupWidget = nullptr;
         void openStartupWidget();

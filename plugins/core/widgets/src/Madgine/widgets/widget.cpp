@@ -175,9 +175,9 @@ namespace Widgets {
     template SceneWindow *WidgetBase::createChild<SceneWindow>();
     template Image *WidgetBase::createChild<Image>();
 
-    size_t WidgetBase::depth()
+    size_t WidgetBase::depth(size_t layer)
     {
-        return mParent ? mParent->depth() + 1 : 0;
+        return mParent ? mParent->depth(layer) + 1 : 20 * layer;
     }
 
     WidgetManager &WidgetBase::manager()
@@ -363,7 +363,7 @@ namespace Widgets {
         return min.x <= point.x && min.y <= point.y && max.x >= point.x && max.y >= point.y;
     }
 
-    std::vector<std::pair<std::vector<Vertex>, TextureSettings>> WidgetBase::vertices(const Vector3 &screenSize)
+    std::vector<std::pair<std::vector<Vertex>, TextureSettings>> WidgetBase::vertices(const Vector3 &screenSize, size_t layer)
     {
         return {};
     }

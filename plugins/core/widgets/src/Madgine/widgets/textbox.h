@@ -19,7 +19,7 @@ namespace Widgets {
 
         void setEditable(bool b);
 
-        std::vector<std::pair<std::vector<Vertex>, TextureSettings>> vertices(const Vector3 &screenSize) override;
+        std::vector<std::pair<std::vector<Vertex>, TextureSettings>> vertices(const Vector3 &screenSize, size_t layer) override;
 
         virtual WidgetClass getClass() const override;
 

@@ -542,9 +542,9 @@ namespace Widgets {
 
         std::map<TextureSettings, std::vector<Vertex>> vertices;
 
-        for (Widgets::WidgetBase *w : visibleWidgets()) {
+        for (auto [w, layer] : visibleWidgets()) {
 
-            std::vector<std::pair<std::vector<Vertex>, TextureSettings>> localVerticesList = w->vertices(Vector3 { Vector2 { mClientSpace.mSize }, 1.0f });
+            std::vector<std::pair<std::vector<Vertex>, TextureSettings>> localVerticesList = w->vertices(Vector3 { Vector2 { mClientSpace.mSize }, 1.0f }, layer);
 
             for (auto &[localVertices, tex] : localVerticesList) {
                 if (!localVertices.empty())
@@ -573,30 +573,33 @@ namespace Widgets {
         target->popAnnotation();
     }
 
-    Generator<WidgetBase *> WidgetManager::visibleWidgets()
+    Generator<std::pair<WidgetBase *, size_t>> WidgetManager::visibleWidgets()
     {
-        std::queue<Widgets::WidgetBase *> q;
-        for (Widgets::WidgetBase *w : widgets()) {
+        std::queue<std::pair<Widgets::WidgetBase *, size_t>> q;
+        if (mCurrentRoot)
+            q.emplace(mCurrentRoot, 0);
+        int layer = 0;
+        for (Widgets::WidgetBase *w : mModalWidgetList) {
             if (w->mVisible) {
-                q.push(w);
+                q.emplace(w, ++layer);
             }
         }
         while (!q.empty()) {
-            Widgets::WidgetBase *w = q.front();
+            auto [w, l] = q.front();
             q.pop();
 
             for (Widgets::WidgetBase *c : w->children()) {
                 if (c->mVisible)
-                    q.push(c);
+                    q.emplace(c, l);
             }
 
-            co_yield w;
+            co_yield { w, l };
         }
     }
 
     void WidgetManager::preRender()
     {
-        for (WidgetBase *w : visibleWidgets()) {
+        for (auto [w, _] : visibleWidgets()) {
             w->preRender();
         }
     }

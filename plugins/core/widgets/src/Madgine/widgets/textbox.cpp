@@ -66,7 +66,7 @@ namespace Widgets {
     {
     }
 
-    std::vector<std::pair<std::vector<Vertex>, TextureSettings>> Textbox::vertices(const Vector3 &screenSize)
+    std::vector<std::pair<std::vector<Vertex>, TextureSettings>> Textbox::vertices(const Vector3 &screenSize, size_t layer)
     {
         const Atlas2::Entry *entry = manager().lookUpImage(mImageRenderData.image());
         if (!entry)
@@ -74,7 +74,7 @@ namespace Widgets {
 
         Vector3 pos = (getEffectivePosition() * screenSize) / screenSize;
         Vector3 size = (getEffectiveSize() * screenSize) / screenSize;
-        pos.z = depth();
+        pos.z = depth(layer);
 
         std::vector<std::pair<std::vector<Vertex>, TextureSettings>> returnSet;
 

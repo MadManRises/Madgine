@@ -36,11 +36,11 @@ namespace Widgets {
     {
     }
 
-    std::vector<std::pair<std::vector<Vertex>, TextureSettings>> SceneWindow::vertices(const Vector3 &screenSize)
+    std::vector<std::pair<std::vector<Vertex>, TextureSettings>> SceneWindow::vertices(const Vector3 &screenSize, size_t layer)
     {
         Vector3 pos = (getEffectivePosition() * screenSize) / screenSize;
         Vector3 size = (getEffectiveSize() * screenSize) / screenSize;
-        pos.z = depth();
+        pos.z = depth(layer);
 
         std::vector<Vertex> result;
 

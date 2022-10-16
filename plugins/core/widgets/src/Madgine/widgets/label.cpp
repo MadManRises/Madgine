@@ -23,14 +23,14 @@ namespace Widgets {
         return WidgetClass::LABEL;
     }
 
-    std::vector<std::pair<std::vector<Vertex>, TextureSettings>> Label::vertices(const Vector3 &screenSize)
+    std::vector<std::pair<std::vector<Vertex>, TextureSettings>> Label::vertices(const Vector3 &screenSize, size_t layer)
     {
         if (!mTextRenderData.available())
             return {};
 
         Vector3 pos = (getEffectivePosition() * screenSize) / screenSize;
         Vector3 size = (getEffectiveSize() * screenSize) / screenSize;
-        pos.z = depth();
+        pos.z = depth(layer);
 
         return { mTextRenderData.render(mText, pos, size, screenSize.xy()) };
     }
