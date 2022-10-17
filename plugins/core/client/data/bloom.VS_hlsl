@@ -1,7 +1,5 @@
 struct AppData {
-#ifdef HAS_POS_3D
     float3 aPos : POSITION0;
-#endif
 };
 
 struct VertexShaderOutput {

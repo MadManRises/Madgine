@@ -25,7 +25,7 @@ namespace Render {
         : mCamera(camera)
         , mPriority(priority)
     {
-        mPipeline.createDynamic({ .vs = "im3d", .ps = "im3d", .bufferSizes = { sizeof(Im3DPerApplication), sizeof(Im3DPerFrame), sizeof(Im3DPerObject) } });
+        mPipeline.create({ .vs = "im3d", .ps = "im3d", .bufferSizes = { sizeof(Im3DPerApplication), sizeof(Im3DPerFrame), sizeof(Im3DPerObject) } });
 
         for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
             mMeshes[i][0].create({ i + 1, std::vector<Render::Vertex> {} });

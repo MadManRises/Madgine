@@ -12,7 +12,7 @@ namespace Render {
 
         bool loadImpl(Pipeline &pipeline, ResourceDataInfo &info);
         void unloadImpl(Pipeline &pipeline);
-        Threading::Task<bool> create(Instance &instance, PipelineConfiguration config, bool dynamic) override;
+        Threading::Task<bool> create(Instance &instance, PipelineConfiguration config) override;
         Threading::Task<bool> create(Instance &instance, PipelineConfiguration config, CodeGen::ShaderFile file) override;
 
         virtual Threading::TaskQueue *loadingTaskQueue() const override;

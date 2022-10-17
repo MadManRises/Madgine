@@ -20,18 +20,16 @@ namespace Render {
             {
             }
 
-            Threading::TaskFuture<bool> load(std::string_view name, VertexFormat format);
-
-            void create(const std::string &name, const CodeGen::ShaderFile &file, DirectX12VertexShaderLoader *loader = &DirectX12VertexShaderLoader::getSingleton());
+            Threading::TaskFuture<bool> create(std::string_view name, const CodeGen::ShaderFile &file, DirectX12VertexShaderLoader *loader = &DirectX12VertexShaderLoader::getSingleton());
         };
 
 
-        Threading::Task<bool> loadImpl(ReleasePtr<IDxcBlob> &shader, ResourceDataInfo &info);
+        bool loadImpl(ReleasePtr<IDxcBlob> &shader, ResourceDataInfo &info);
         void unloadImpl(ReleasePtr<IDxcBlob> &shader);
 
         bool create(ReleasePtr<IDxcBlob> &shader, Resource *res, const CodeGen::ShaderFile &file);
 
-        bool loadFromSource(ReleasePtr<IDxcBlob> &shader, std::string_view name, std::string source, VertexFormat format);
+        bool loadFromSource(ReleasePtr<IDxcBlob> &shader, std::string_view name, std::string source);
 
         virtual Threading::TaskQueue *loadingTaskQueue() const override;
 

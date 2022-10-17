@@ -14,8 +14,6 @@
 
 #include "directx12rendercontext.h"
 
-#include "directx12vertexshadersourceloader.h"
-
 UNIQUECOMPONENT(Engine::Render::DirectX12VertexShaderLoader);
 
 METATABLE_BEGIN(Engine::Render::DirectX12VertexShaderLoader)
@@ -27,36 +25,13 @@ METATABLE_END(Engine::Render::DirectX12VertexShaderLoader::Resource)
 namespace Engine {
 namespace Render {
 
-    Threading::TaskFuture<bool> DirectX12VertexShaderLoader::Handle::load(std::string_view name, VertexFormat format)
-    {
-        char buffer[256];
-#if WINDOWS
-        sprintf_s(buffer, "%s_%hu", name.data(), format);
-#else
-        sprintf(buffer, "%s_%hu", name.data(), format);
-#endif
-
-        return Base::Handle::create(buffer);
-    }
-
-    static constexpr const wchar_t *vMacros[] = {
-        L"HAS_POS_3D",
-        L"HAS_POS_4D",
-        L"HAS_POS2",
-        L"HAS_NORMAL",
-        L"HAS_COLOR",
-        L"HAS_UV",
-        L"HAS_BONE_INDICES",
-        L"HAS_BONE_WEIGHTS"
-    };
-
     std::wstring GetLatestVertexProfile()
     {
         return L"vs_6_0";
     }
 
     DirectX12VertexShaderLoader::DirectX12VertexShaderLoader()
-        : ResourceLoader(std::vector<std::string> {})
+        : ResourceLoader({ ".vs_hlsl" })
     {
         HRESULT hr = DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&mLibrary));
         //if(FAILED(hr)) Handle error...
@@ -65,29 +40,17 @@ namespace Render {
         //if(FAILED(hr)) Handle error
     }
 
-    /* void DirectX12PixelShaderLoader::Handle::create(const std::string &name, const CodeGen::ShaderFile &file, DirectX12PixelShaderLoader *loader)
+    Threading::TaskFuture<bool> DirectX12VertexShaderLoader::Handle::create(std::string_view name, const CodeGen::ShaderFile &file, DirectX12VertexShaderLoader *loader)
     {
-        *this = DirectX12PixelShaderLoader::loadManual(
-            name, {}, [=, &file](DirectX12PixelShaderLoader *loader, DirectX12PixelShader &shader, const DirectX12PixelShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, loader);
-    }*/
+        return Base::Handle::create(
+            name, {}, [=, &file](DirectX12VertexShaderLoader *loader, ReleasePtr<IDxcBlob> &shader, const DirectX12VertexShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, loader);
+    }
 
-    Threading::Task<bool> DirectX12VertexShaderLoader::loadImpl(ReleasePtr<IDxcBlob> &shader, ResourceDataInfo &info)
+   bool DirectX12VertexShaderLoader::loadImpl(ReleasePtr<IDxcBlob> &shader, ResourceDataInfo &info)
     {
-        if (info.resource()->path().empty()) {
-            std::string_view fullName = info.resource()->name();
-            auto pos = fullName.rfind('_');
-            std::string_view name = fullName.substr(0, pos);
-            VertexFormat format;
-            std::from_chars(fullName.data() + pos + 1, fullName.data() + fullName.size(), reinterpret_cast<uint16_t &>(format));
+        std::string source = info.resource()->readAsText();
 
-            DirectX12VertexShaderSourceLoader::Handle source;
-            if (!co_await source.load(name))
-                co_return false;
-
-            co_return loadFromSource(shader, name, *source, format);
-        } else {
-            throw 0;
-        }
+        return loadFromSource(shader, info.resource()->path().stem(), source);
     }
 
     void DirectX12VertexShaderLoader::unloadImpl(ReleasePtr<IDxcBlob> &shader)
@@ -95,14 +58,14 @@ namespace Render {
         shader.reset();
     }
 
-    /* bool DirectX12PixelShaderLoader::create(DirectX12PixelShader &shader, Resource *res, const CodeGen::ShaderFile &file)
+    bool DirectX12VertexShaderLoader::create(ReleasePtr<IDxcBlob> &shader, Resource *res, const CodeGen::ShaderFile &file)
     {
         if (res->path().empty()) {
             Filesystem::Path dir = Filesystem::appDataPath() / "generated/shader/directx12";
 
             Filesystem::createDirectories(dir);
 
-            res->setPath(dir / (std::string { res->name() } + ".PS_hlsl"));
+            res->setPath(dir / (std::string { res->name() } + ".VS_hlsl"));
         }
 
         std::ostringstream ss;
@@ -114,9 +77,9 @@ namespace Render {
         }
 
         return loadFromSource(shader, res->name(), ss.str());
-    }*/
+    }
 
-    bool DirectX12VertexShaderLoader::loadFromSource(ReleasePtr<IDxcBlob> &shader, std::string_view name, std::string source, VertexFormat format)
+    bool DirectX12VertexShaderLoader::loadFromSource(ReleasePtr<IDxcBlob> &shader, std::string_view name, std::string source)
     {
         std::wstring profile = L"latest";
         if (profile == L"latest")
@@ -143,20 +106,13 @@ namespace Render {
         arguments.push_back(L"-T");
         arguments.push_back(profile.c_str());
 
-        for (size_t i = 0; i < VertexElements::size; ++i) {
-            if (format.has(i)) {
-                arguments.push_back(L"-D");
-                arguments.push_back(vMacros[i]);
-            }
-        }
-
         ReleasePtr<IDxcResult> result;
         HRESULT hr = mCompiler->Compile(
-            &sourceBuffer, // pSource
-            arguments.data(), // pSourceName
-            arguments.size(), // pEntryPoint
+            &sourceBuffer,
+            arguments.data(),
+            arguments.size(),
             nullptr,
-            IID_PPV_ARGS(&result)); // ppResult
+            IID_PPV_ARGS(&result));
         if (SUCCEEDED(hr))
             result->GetStatus(&hr);
         if (FAILED(hr)) {

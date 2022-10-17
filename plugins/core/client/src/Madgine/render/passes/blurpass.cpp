@@ -21,7 +21,7 @@ namespace Render {
 
     void BlurPass::setup(RenderTarget *target)
     {
-        mPipeline.createStatic({ .vs = "blur", .ps = "blur", .format = type_holder<Compound<Render::VertexPos_3D>>, .bufferSizes = { sizeof(BlurData) } });
+        mPipeline.create({ .vs = "blur", .ps = "blur", .bufferSizes = { sizeof(BlurData) } });
     }
 
     void BlurPass::shutdown()

@@ -26,8 +26,6 @@ namespace Render {
 
         virtual void bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset = 0) const override;
 
-        void verify() const;
-
         mutable GLuint mHandle = 0;
         std::vector<OpenGLBuffer> mUniformBuffers;
 #if !OPENGL_ES

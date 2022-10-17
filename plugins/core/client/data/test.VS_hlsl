@@ -1,5 +1,5 @@
 struct AppData {
-    float3 aPos : POSITION0;
+    float4 aPos : POSITION0;
     float4 aColor : COLOR;
 };
 
@@ -12,7 +12,7 @@ VertexShaderOutput main(AppData IN)
 {
     VertexShaderOutput OUT;
     
-    OUT.position = float4(IN.aPos, 1.0f);    
+    OUT.position = IN.aPos;    
     OUT.color = IN.aColor;
 
     return OUT;

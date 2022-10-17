@@ -50,9 +50,9 @@ namespace Render {
         glLinkProgram(mHandle);
         // check for linking errors
         GLint success;
-        char infoLog[512];
         glGetProgramiv(mHandle, GL_LINK_STATUS, &success);
         if (!success) {
+            char infoLog[512];
             glGetProgramInfoLog(mHandle, 512, NULL, infoLog);
             LOG_ERROR("ERROR::SHADER::PROGRAM::LINKING_FAILED");
             LOG_ERROR(infoLog);

@@ -24,7 +24,7 @@ namespace Tools {
 
         mMesh.load("Plane");
 
-        mPipeline.createStatic({ .vs = "grid", .ps = "grid", .format = type_holder<Compound<Render::VertexPos_4D>>, .bufferSizes = { 0, sizeof(GridPerFrame) } });
+        mPipeline.create({ .vs = "grid", .ps = "grid", .bufferSizes = { 0, sizeof(GridPerFrame) } });
 
     }
 

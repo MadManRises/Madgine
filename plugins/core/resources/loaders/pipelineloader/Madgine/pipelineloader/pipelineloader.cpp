@@ -35,17 +35,10 @@ namespace Render {
         return *this;
     }
 
-    Threading::TaskFuture<bool> PipelineLoader::Instance::createStatic(PipelineConfiguration config, PipelineLoader *loader)
+    Threading::TaskFuture<bool> PipelineLoader::Instance::create(PipelineConfiguration config, PipelineLoader *loader)
     {
         assert(!mState.valid());
-        mState = loader->queueLoading(loader->create(*this, std::move(config), false));
-        return mState;
-    }
-
-    Threading::TaskFuture<bool> PipelineLoader::Instance::createDynamic(PipelineConfiguration config, PipelineLoader *loader)
-    {
-        assert(!mState.valid());
-        mState = loader->queueLoading(loader->create(*this, std::move(config), true));
+        mState = loader->queueLoading(loader->create(*this, std::move(config)));
         return mState;
     }
 
@@ -80,7 +73,7 @@ namespace Render {
     void PipelineInstance::renderQuad() const
     {
         static GPUMeshLoader::Handle quad = GPUMeshLoader::loadManual("quad", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &data, Render::GPUMeshLoader::ResourceDataInfo &info) {
-            std::vector<Compound<Render::VertexPos_3D>> vertices {
+            std::vector<Compound<Render::VertexPos>> vertices {
                 { { -1, -1, 0 } },
                 { { 1, -1, 0 } },
                 { { -1, 1, 0 } },

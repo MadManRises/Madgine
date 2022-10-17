@@ -4,12 +4,15 @@
 
 #include "Modules/threading/workgroupstorage.h"
 
-#include "util/directx11vertexshaderlist.h"
-
 namespace Engine {
 namespace Render {
 
-    struct DirectX11VertexShaderLoader : Resources::ResourceLoader<DirectX11VertexShaderLoader, DirectX11VertexShaderList, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
+    struct DirectX11VertexShader {
+        ReleasePtr<ID3D11VertexShader> mShader;
+        ReleasePtr<ID3D10Blob> mBlob;
+    };
+
+    struct DirectX11VertexShaderLoader : Resources::ResourceLoader<DirectX11VertexShaderLoader, DirectX11VertexShader, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
         DirectX11VertexShaderLoader();
 
         struct Handle : Base::Handle {
@@ -23,10 +26,12 @@ namespace Render {
             Threading::TaskFuture<bool> create(std::string_view name, const CodeGen::ShaderFile &file, DirectX11VertexShaderLoader *loader = &DirectX11VertexShaderLoader::getSingleton());
         };
 
-        bool loadImpl(DirectX11VertexShaderList &list, ResourceDataInfo &info);
-        void unloadImpl(DirectX11VertexShaderList &list);
+        bool loadImpl(DirectX11VertexShader &shader, ResourceDataInfo &info);
+        void unloadImpl(DirectX11VertexShader &shader);
 
-        bool create(DirectX11VertexShaderList &shader, Resource *res, const CodeGen::ShaderFile &file);
+        bool create(DirectX11VertexShader &shader, Resource *res, const CodeGen::ShaderFile &file);
+
+        bool loadFromSource(DirectX11VertexShader &shader, std::string_view name, std::string source);
 
         virtual Threading::TaskQueue *loadingTaskQueue() const override;
     };

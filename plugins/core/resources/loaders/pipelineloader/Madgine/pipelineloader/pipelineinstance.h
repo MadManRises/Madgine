@@ -14,15 +14,13 @@ namespace Render {
         std::string_view vs;
         std::string_view ps;
         std::string_view gs;
-        VertexFormat format;
         std::vector<size_t> bufferSizes;
         size_t instanceDataSize = 0;
     };
 
     struct MADGINE_PIPELINELOADER_EXPORT PipelineInstance {
         PipelineInstance(const PipelineConfiguration &config)
-            : mFormat(config.format)
-            , mInstanceDataSize(config.instanceDataSize)
+            : mInstanceDataSize(config.instanceDataSize)
         {
         }
         PipelineInstance(const PipelineInstance &) = delete;
@@ -52,7 +50,6 @@ namespace Render {
 
         virtual void bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset = 0) const = 0;
 
-        VertexFormat mFormat;
         size_t mInstanceDataSize = 0;
     };
 

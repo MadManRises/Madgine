@@ -11,44 +11,11 @@
 namespace Engine {
 namespace Render {
 
-    static constexpr const char *vSemantics[] = {
-        "POSITION",
-        "POSITION",
-        "POSITION",
-        "NORMAL",
-        "COLOR",
-        "TEXCOORD",
-        "BONEINDICES",
-        "WEIGHTS"
-    };
-
-    static constexpr unsigned int vSemanticIndices[] = {
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-    };
-
-    static constexpr DXGI_FORMAT vFormats[] = {
-        DXGI_FORMAT_R32G32B32_FLOAT,
-        DXGI_FORMAT_R32G32B32A32_FLOAT,
-        DXGI_FORMAT_R32G32_FLOAT,
-        DXGI_FORMAT_R32G32B32_FLOAT,
-        DXGI_FORMAT_R32G32B32A32_FLOAT,
-        DXGI_FORMAT_R32G32_FLOAT,
-        DXGI_FORMAT_R32G32B32A32_SINT,
-        DXGI_FORMAT_R32G32B32A32_FLOAT
-    };
-
-    bool DirectX12Pipeline::link(std::string_view vertexShader, typename DirectX12GeometryShaderLoader::Handle geometryShader, typename DirectX12PixelShaderLoader::Handle pixelShader)
+    bool DirectX12Pipeline::link(typename DirectX12VertexShaderLoader::Handle vertexShader, typename DirectX12GeometryShaderLoader::Handle geometryShader, typename DirectX12PixelShaderLoader::Handle pixelShader)
     {
         reset();
 
-        mVertexShader = std::string { vertexShader };
+        mVertexShader = std::move(vertexShader);
         mGeometryShader = std::move(geometryShader);
         mPixelShader = std::move(pixelShader);
 
@@ -61,48 +28,24 @@ namespace Render {
 
         if (!pipeline) {
 
+            if (!mVertexShader.available())
+                return nullptr;
             if (mGeometryShader && !mGeometryShader.available())
                 return nullptr;
             if (mPixelShader && !mPixelShader.available())
                 return nullptr;
 
-            if (!mVertexShaders[format])
-                mVertexShaders[format].load(mVertexShader, format);
-            if (!mVertexShaders[format].available())
-                return nullptr;
-            
             D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineDesc;
             ZeroMemory(&pipelineDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 
-            pipelineDesc.VS = { (*mVertexShaders[format])->GetBufferPointer(), (*mVertexShaders[format])->GetBufferSize() };
+            pipelineDesc.VS = { (*mVertexShader)->GetBufferPointer(), (*mVertexShader)->GetBufferSize() };
             if (mGeometryShader)
                 pipelineDesc.GS = { (*mGeometryShader)->GetBufferPointer(), (*mGeometryShader)->GetBufferSize() };
             if (mPixelShader)
                 pipelineDesc.PS = { (*mPixelShader)->GetBufferPointer(), (*mPixelShader)->GetBufferSize() };
 
-            std::vector<D3D12_INPUT_ELEMENT_DESC> vertexLayoutDesc;
+            std::vector<D3D12_INPUT_ELEMENT_DESC> vertexLayoutDesc = DirectX12RenderContext::createVertexLayout(format, instanceDataSize);
 
-            UINT offset = 0;
-            for (size_t i = 0; i < VertexElements::size; ++i) {
-                if (format.has(i)) {
-                    vertexLayoutDesc.push_back({ vSemantics[i],
-                        vSemanticIndices[i], vFormats[i], 0, offset, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
-                    offset += sVertexElementSizes[i];
-                }
-            }
-
-            if (instanceDataSize > 0) {
-                assert(instanceDataSize % 16 == 0);
-                for (size_t i = 0; i < instanceDataSize / 16; ++i) {
-                    vertexLayoutDesc.push_back({ "INSTANCEDATA",
-                        static_cast<UINT>(i),
-                        DXGI_FORMAT_R32G32B32A32_FLOAT,
-                        1,
-                        i == 0 ? 0 : D3D12_APPEND_ALIGNED_ELEMENT,
-                        D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA,
-                        1 });
-                }
-            }
             pipelineDesc.InputLayout.pInputElementDescs = vertexLayoutDesc.data();
             pipelineDesc.InputLayout.NumElements = vertexLayoutDesc.size();
 
@@ -171,7 +114,7 @@ namespace Render {
         for (std::array<ReleasePtr<ID3D12PipelineState>, 3> &groupPipelines : mPipelines)
             for (ReleasePtr<ID3D12PipelineState> &pipeline : groupPipelines)
                 pipeline.reset();
-        mVertexShader.clear();
+        mVertexShader.reset();
         mGeometryShader.reset();
         mPixelShader.reset();
     }

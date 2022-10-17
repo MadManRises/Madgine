@@ -443,8 +443,9 @@ namespace Render {
             //Pos
             glVertexAttrib3f(0, 0, 0, 0);
             GL_CHECK();
+            glVertexAttrib1f(1, 1);
             //Pos2
-            glVertexAttrib2f(1, 0, 0);
+            glVertexAttrib2f(2, 0, 0);
             GL_CHECK();
             //Color
             glVertexAttrib4f(3, 1, 1, 1, 1);
@@ -632,16 +633,15 @@ namespace Render {
 
             GLuint offset = 0;
             for (size_t i = 0; i < VertexElements::size; ++i) {
-                size_t attribIndex = i > 0 ? i - 1 : 0;
                 if (format.has(i)) {
                     if (vTypes[i] == GL_FLOAT)
-                        glVertexAttribFormat(attribIndex, sVertexElementSizes[i] / 4, vTypes[i], GL_FALSE, offset);
+                        glVertexAttribFormat(i, sVertexElementSizes[i] / 4, vTypes[i], GL_FALSE, offset);
                     else
-                        glVertexAttribIFormat(attribIndex, sVertexElementSizes[i] / 4, vTypes[i], offset);
+                        glVertexAttribIFormat(i, sVertexElementSizes[i] / 4, vTypes[i], offset);
                     GL_CHECK();
-                    glVertexAttribBinding(attribIndex, 0);
+                    glVertexAttribBinding(i, 0);
                     GL_CHECK();
-                    glEnableVertexAttribArray(attribIndex);
+                    glEnableVertexAttribArray(i);
                     offset += sVertexElementSizes[i];
                 } else {
                     //glDisableVertexAttribArray(attribIndex);
@@ -662,34 +662,31 @@ namespace Render {
 
         const std::byte *offset = 0;
         for (size_t i = 0; i < VertexElements::size; ++i) {
-            size_t attribIndex = i > 0 ? i - 1 : 0;
             if (format.has(i)) {
                 if (vTypes[i] == GL_FLOAT)
-                    glVertexAttribPointer(attribIndex, sVertexElementSizes[i] / 4, vTypes[i], GL_FALSE, stride, offset);
+                    glVertexAttribPointer(i, sVertexElementSizes[i] / 4, vTypes[i], GL_FALSE, stride, offset);
                 else
-                    glVertexAttribIPointer(attribIndex, sVertexElementSizes[i] / 4, vTypes[i], stride, offset);
+                    glVertexAttribIPointer(i, sVertexElementSizes[i] / 4, vTypes[i], stride, offset);
                 GL_CHECK();
-                glEnableVertexAttribArray(attribIndex);
+                glEnableVertexAttribArray(i);
                 offset += sVertexElementSizes[i];
             } else {
-                glDisableVertexAttribArray(attribIndex);
+                glDisableVertexAttribArray(i);
             }
         }
-        if (format.has(0) || format.has(1))
-            glEnableVertexAttribArray(0);
 
-        glDisableVertexAttribArray(7);
-        glDisableVertexAttribArray(8);
+        glDisableVertexAttribArray(VertexElements::size);
+        glDisableVertexAttribArray(VertexElements::size + 1);
 
         if (instanceBuffer) {
             instanceBuffer->bind();
 
             for (size_t i = 0; i < instanceDataSize / 16; ++i) {
-                glVertexAttribPointer(7 + i, 4, GL_FLOAT, GL_FALSE, instanceDataSize, reinterpret_cast<void *>(i * sizeof(float[4])));
+                glVertexAttribPointer(VertexElements::size + i, 4, GL_FLOAT, GL_FALSE, instanceDataSize, reinterpret_cast<void *>(i * sizeof(float[4])));
                 GL_CHECK();
-                glVertexAttribDivisor(7 + i, 1);
+                glVertexAttribDivisor(VertexElements::size + i, 1);
                 GL_CHECK();
-                glEnableVertexAttribArray(7 + i);
+                glEnableVertexAttribArray(VertexElements::size + i);
                 GL_CHECK();
             }
         }

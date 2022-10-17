@@ -25,27 +25,14 @@ cbuffer Bones : register(b3)
 
 
 struct AppData {
-#ifdef HAS_POS_3D
     float3 aPos : POSITION0;
-#endif
-#ifdef HAS_POS2
-    float2 aPos2 : POSITION1;
-#endif
-#ifdef HAS_NORMAL
+	float aW : POSITION1;
+    float2 aPos2 : POSITION2;
     float3 aNormal : NORMAL;
-#endif
-#ifdef HAS_COLOR
     float4 aColor : COLOR;
-#endif
-#ifdef HAS_UV
     float2 aUV : TEXCOORD;
-#endif
-#ifdef HAS_BONE_INDICES
 	int4 aBoneIDs : BONEINDICES;
-#endif
-#ifdef HAS_BONE_WEIGHTS
 	float4 aWeights : WEIGHTS;
-#endif
     PointShadowInstanceData aInstance : INSTANCEDATA;
 };
 
@@ -58,27 +45,20 @@ VertexShaderOutput main(AppData IN)
 {
 	VertexShaderOutput OUT;
 
-#ifdef HAS_POS2
     float2 aPos2 = IN.aPos2;
-#else
-    float2 aPos2 = float2(0,0);
-#endif
+	float4 aPos = float4(IN.aPos, IN.aW);
 	
 	float4 worldPos;
 
-#ifdef HAS_BONE_INDICES
 	if (object.hasSkeleton){
-		float4x4 BoneTransform = bones[aBoneIDs[0]] * aWeights[0]
-		+ bones[aBoneIDs[1]] * aWeights[1]
-		+ bones[aBoneIDs[2]] * aWeights[2]
-		+ bones[aBoneIDs[3]] * aWeights[3];
-		worldPos = mul(IN.aInstance.m, mul(BoneTransform, float4(IN.aPos, 1.0)));
+		float4x4 BoneTransform = bones[IN.aBoneIDs[0]] * IN.aWeights[0]
+		+ bones[IN.aBoneIDs[1]] * IN.aWeights[1]
+		+ bones[IN.aBoneIDs[2]] * IN.aWeights[2]
+		+ bones[IN.aBoneIDs[3]] * IN.aWeights[3];
+		worldPos = mul(IN.aInstance.m, mul(BoneTransform, aPos));
 	}else{
-		worldPos = mul(IN.aInstance.m, float4(IN.aPos, 1.0));
+		worldPos = mul(IN.aInstance.m, aPos);
 	}
-#else
-	worldPos = mul(IN.aInstance.m, float4(IN.aPos, 1.0));
-#endif
 
     OUT.position = worldPos + float4(aPos2, 0.0, 0.0) - float4(frame.position, 0.0f);	
 

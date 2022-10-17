@@ -6,7 +6,7 @@ namespace Engine {
 namespace Widgets {
 
 	using Vertex = Compound<
-		Render::VertexPos_3D, 
+		Render::VertexPos, 
 		Render::VertexColor, 
 		Render::VertexUV>;
 

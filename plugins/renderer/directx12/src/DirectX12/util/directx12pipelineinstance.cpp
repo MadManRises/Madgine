@@ -82,6 +82,8 @@ namespace Render {
 
         mesh->mVertices.bindVertex(commandList, mesh->mVertexSize);
 
+        DirectX12RenderContext::getSingleton().mConstantBuffer.bindVertex(commandList, 0, 2);
+
         if (mesh->mIndices) {
             mesh->mIndices.bindIndex(commandList);
             commandList->DrawIndexedInstanced(mesh->mElementCount, 1, 0, 0, 0);
@@ -104,6 +106,8 @@ namespace Render {
 
         mesh->mVertices.bindVertex(commandList, mesh->mVertexSize);
 
+        DirectX12RenderContext::getSingleton().mConstantBuffer.bindVertex(commandList, 0, 2);
+
         DirectX12Buffer instanceBuffer;
         {
             auto target = instanceBuffer.mapData(instanceData.mSize);
@@ -125,7 +129,7 @@ namespace Render {
             if (tex[i].mTextureHandle) {
                 D3D12_GPU_DESCRIPTOR_HANDLE handle;
                 handle.ptr = tex[i].mTextureHandle;
-                DirectX12RenderContext::getSingleton().mCommandList.mList->SetGraphicsRootDescriptorTable(3 + offset + i, handle);
+                DirectX12RenderContext::getSingleton().mCommandList.mList->SetGraphicsRootDescriptorTable(4 + offset + i, handle);
             }
         }
     }

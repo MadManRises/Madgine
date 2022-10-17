@@ -111,8 +111,6 @@ namespace Render {
         if (!bind(mesh->mFormat, nullptr))
             return;
 
-        verify();
-
         GLenum mode = sModes[mesh->mGroupSize - 1];
 
         if (mesh->mIndices) {
@@ -138,8 +136,6 @@ namespace Render {
 
         if (!bind(mesh->mFormat, &instanceBuffer))
             return;
-
-        verify();
 
         GLenum mode = sModes[mesh->mGroupSize - 1];
 
@@ -178,58 +174,5 @@ namespace Render {
         }
     }
 
-    void OpenGLPipelineInstance::verify() const
-    {
-#if !OPENGL_ES
-        int maxLength;
-        std::unique_ptr<char[]> name;
-
-        int uniformCount;
-        glGetProgramiv(mHandle, GL_ACTIVE_UNIFORM_BLOCKS, &uniformCount);
-        GL_CHECK();
-
-        for (int i = 0; i < uniformCount; ++i) {
-            int expectedSize;
-            glGetActiveUniformBlockiv(mHandle, i, GL_UNIFORM_BLOCK_DATA_SIZE, &expectedSize);
-            GL_CHECK();
-
-            int index;
-            glGetActiveUniformBlockiv(mHandle, i, GL_UNIFORM_BLOCK_BINDING, &index);
-            GL_CHECK();
-
-            int bufferName;
-            glGetIntegeri_v(GL_UNIFORM_BUFFER_BINDING, index, &bufferName);
-            GL_CHECK();
-
-            int size;
-            glBindBuffer(GL_UNIFORM_BUFFER, bufferName);
-            glGetBufferParameteriv(GL_UNIFORM_BUFFER, GL_BUFFER_SIZE, &size);
-            glBindBuffer(GL_UNIFORM_BUFFER, 0);
-            GL_CHECK();
-
-            if (size < expectedSize) {
-                if (!name) {
-                    glGetProgramiv(mHandle, GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH, &maxLength);
-                    GL_CHECK();
-                    name = std::make_unique<char[]>(maxLength + 1);
-                }
-                glGetActiveUniformBlockName(mHandle, i, maxLength, NULL, name.get());
-                GL_CHECK();
-
-                LOG_ERROR("Uniform Buffer '" << name.get() << "'(index: " << index << ", size: " << expectedSize << ") is bound with too small buffer " << bufferName << " of size " << size);
-            } /*else {
-                if (!name) {
-                    glGetProgramiv(mHandle, GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH, &maxLength);
-                    GL_CHECK();
-                    name = std::make_unique<char[]>(maxLength + 1);
-                }
-                glGetActiveUniformBlockName(mHandle, i, maxLength, NULL, name.get());
-                GL_CHECK();
-
-				LOG("Uniform Buffer '" << name.get() << "' " << index << ", " << size << "/" << expectedSize);
-            }*/
-        }
-#endif
-    }
 }
 }

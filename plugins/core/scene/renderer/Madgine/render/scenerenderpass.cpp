@@ -48,7 +48,7 @@ namespace Render {
 
     void SceneRenderPass::setup(RenderTarget *target)
     {
-        mPipeline.createDynamic({ .vs = "scene", .ps = "scene", .bufferSizes = { sizeof(ScenePerApplication), sizeof(ScenePerFrame), sizeof(ScenePerObject) }, .instanceDataSize = sizeof(SceneInstanceData) });
+        mPipeline.create({ .vs = "scene", .ps = "scene", .bufferSizes = { sizeof(ScenePerApplication), sizeof(ScenePerFrame), sizeof(ScenePerObject) }, .instanceDataSize = sizeof(SceneInstanceData) });
 
         mShadowMap = target->context()->createRenderTexture({ 2048, 2048 }, { .mCreateDepthBufferView = true, .mSamples = 4, .mTextureCount = 0, .mType = TextureType_2DMultiSample });
         mPointShadowMaps[0] = target->context()->createRenderTexture({ 2048, 2048 }, { .mCreateDepthBufferView = true, .mTextureCount = 0, .mType = TextureType_Cube });

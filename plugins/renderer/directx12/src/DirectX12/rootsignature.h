@@ -2,6 +2,7 @@ RootFlags(ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | DENY_HULL_SHADER_ROOT_ACCESS | DE
 CBV(b0),
 CBV(b1),
 CBV(b2),
+CBV(b3),
 DescriptorTable(SRV(t0)),
 DescriptorTable(SRV(t1)),
 DescriptorTable(SRV(t2)),

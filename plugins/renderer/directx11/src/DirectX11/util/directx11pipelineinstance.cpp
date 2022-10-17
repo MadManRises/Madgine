@@ -19,18 +19,14 @@ namespace Render {
         D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
     };
 
-    DirectX11PipelineInstance::DirectX11PipelineInstance(const PipelineConfiguration &config, typename DirectX11VertexShaderLoader::Handle vertexShader, typename DirectX11PixelShaderLoader::Handle pixelShader, typename DirectX11GeometryShaderLoader::Handle geometryShader, bool dynamic)
+    DirectX11PipelineInstance::DirectX11PipelineInstance(const PipelineConfiguration &config, typename DirectX11VertexShaderLoader::Handle vertexShader, typename DirectX11PixelShaderLoader::Handle pixelShader, typename DirectX11GeometryShaderLoader::Handle geometryShader)
         : PipelineInstance(config)
         , mVertexShaderHandle(std::move(vertexShader))
         , mPixelShaderHandle(std::move(pixelShader))
         , mGeometryShaderHandle(std::move(geometryShader))
-        , mIsDynamic(dynamic)
     {
-        if (dynamic)
-            mVertexShaders = mVertexShaderHandle->ptr();
-        else
-            mVertexShader = mVertexShaderHandle->get(mFormat, mInstanceDataSize);
-
+        mVertexShader = mVertexShaderHandle ? mVertexShaderHandle->mShader.get() : nullptr;
+        mVertexShaderBlob = mVertexShaderHandle ? mVertexShaderHandle->mBlob.get() : nullptr;
         mPixelShader = mPixelShaderHandle ? mPixelShaderHandle->get() : nullptr;
         mGeometryShader = mGeometryShaderHandle ? mGeometryShaderHandle->get() : nullptr;
 
@@ -42,14 +38,7 @@ namespace Render {
 
     bool DirectX11PipelineInstance::bind(VertexFormat format, size_t groupSize) const
     {
-        if (mIsDynamic) {
-            if (mVertexShaders[format])
-                sDeviceContext->VSSetShader(mVertexShaders[format], nullptr, 0);
-            else
-                sDeviceContext->VSSetShader(mVertexShaderHandle->get(format, mInstanceDataSize), nullptr, 0);
-        } else {
-            sDeviceContext->VSSetShader(mVertexShader, nullptr, 0);
-        }
+        sDeviceContext->VSSetShader(mVertexShader, nullptr, 0);
         sDeviceContext->PSSetShader(mPixelShader, nullptr, 0);
         sDeviceContext->GSSetShader(mGeometryShader, nullptr, 0);
 
@@ -72,7 +61,7 @@ namespace Render {
         sDeviceContext->PSSetConstantBuffers(3, mDynamicBuffers.size(), buffers);
         sDeviceContext->GSSetConstantBuffers(3, mDynamicBuffers.size(), buffers);
 
-        DirectX11RenderContext::getSingleton().bindFormat(format, mInstanceDataSize);
+        DirectX11RenderContext::getSingleton().bindFormat(format, mInstanceDataSize, mVertexShaderBlob);
 
         return true;
     }

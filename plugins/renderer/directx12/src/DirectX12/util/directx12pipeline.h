@@ -13,19 +13,18 @@ namespace Render {
 
     struct MADGINE_DIRECTX12_EXPORT DirectX12Pipeline : Pipeline {
 
-        bool link(std::string_view vertexShader, typename DirectX12GeometryShaderLoader::Handle geometryShader, typename DirectX12PixelShaderLoader::Handle pixelShader);
+        bool link(typename DirectX12VertexShaderLoader::Handle vertexShader, typename DirectX12GeometryShaderLoader::Handle geometryShader, typename DirectX12PixelShaderLoader::Handle pixelShader);
 
         ID3D12PipelineState *get(VertexFormat format, size_t groupSize, size_t instanceDataSize);
 
-        std::array<ReleasePtr<ID3D12PipelineState>, 3> *ptr();
+         std::array<ReleasePtr<ID3D12PipelineState>, 3> *ptr();
 
         void reset();
 
     private:
         std::array<std::array<ReleasePtr<ID3D12PipelineState>, 3>, 256> mPipelines;
-        std::array<DirectX12VertexShaderLoader::Handle, 256> mVertexShaders;
 
-        std::string mVertexShader;
+        typename DirectX12VertexShaderLoader::Handle mVertexShader;
         typename DirectX12GeometryShaderLoader::Handle mGeometryShader;
         typename DirectX12PixelShaderLoader::Handle mPixelShader;
     };

@@ -125,6 +125,17 @@ namespace Render {
         return *sDevice;
     }
 
+    struct ConstantValues {
+        Vector3 mPos { 0, 0, 0 };
+        float mW = 1;
+        Vector2 mPos2 { 0, 0 };
+        Vector3 mNormal { 0, 0, 0 };
+        Vector4 mColor { 1, 1, 1, 1 };
+        Vector2 mUV { 0, 0 };
+        int mBoneIndices[4] { 0, 0, 0, 0 };
+        float mBoneWeights[4] { 0.0f, 0.0f, 0.0f, 0.0f };
+    };
+
     DirectX12RenderContext::DirectX12RenderContext(Threading::TaskQueue *queue)
         : Component(queue)
     {
@@ -155,7 +166,7 @@ namespace Render {
         {
             ReleasePtr<ID3D12InfoQueue1> infoQueue;
             hr = GetDevice()->QueryInterface(IID_PPV_ARGS(&infoQueue));
-            
+
             if (SUCCEEDED(hr)) {
 
                 hr = infoQueue->RegisterMessageCallback(
@@ -165,7 +176,6 @@ namespace Render {
                     nullptr);
                 DX12_CHECK(hr);
             }
-            
         }
 
         mDescriptorHeap = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -205,6 +215,9 @@ namespace Render {
         mFenceEvent = CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
 
         createRootSignature();
+
+        ConstantValues values;
+        mConstantBuffer.setData({ &values, sizeof(values) });
     }
 
     DirectX12RenderContext::~DirectX12RenderContext()
@@ -269,17 +282,18 @@ namespace Render {
 
     void DirectX12RenderContext::createRootSignature()
     {
-        CD3DX12_ROOT_PARAMETER rootParameters[8];
+        CD3DX12_ROOT_PARAMETER rootParameters[9];
 
         rootParameters[0].InitAsConstantBufferView(0);
         rootParameters[1].InitAsConstantBufferView(1);
         rootParameters[2].InitAsConstantBufferView(2);
+        rootParameters[3].InitAsConstantBufferView(3);
 
         CD3DX12_DESCRIPTOR_RANGE range[5];
 
         for (size_t i = 0; i < 5; ++i) {
             range[i].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, i);
-            rootParameters[3 + i].InitAsDescriptorTable(1, range + i);
+            rootParameters[4 + i].InitAsDescriptorTable(1, range + i);
         }
 
         CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
@@ -307,7 +321,7 @@ namespace Render {
         samplerDesc[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
         samplerDesc[1].ShaderRegister = 1;
 
-        rootSignatureDesc.Init(8, rootParameters, 2, samplerDesc, rootSignatureFlags);
+        rootSignatureDesc.Init(9, rootParameters, 2, samplerDesc, rootSignatureFlags);
 
         ReleasePtr<ID3DBlob> signature;
         ReleasePtr<ID3DBlob> error;
@@ -373,6 +387,80 @@ namespace Render {
     bool DirectX12RenderContext::supportsMultisampling() const
     {
         return true;
+    }
+
+    static constexpr const char *vSemantics[] = {
+        "POSITION",
+        "POSITION",
+        "POSITION",
+        "NORMAL",
+        "COLOR",
+        "TEXCOORD",
+        "BONEINDICES",
+        "WEIGHTS"
+    };
+
+    static constexpr unsigned int vSemanticIndices[] = {
+        0,
+        1,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+    };
+
+    static constexpr UINT vConstantOffsets[] = {
+        offsetof(ConstantValues, mPos),
+        offsetof(ConstantValues, mW),
+        offsetof(ConstantValues, mPos2),
+        offsetof(ConstantValues, mNormal),
+        offsetof(ConstantValues, mColor),
+        offsetof(ConstantValues, mUV),
+        offsetof(ConstantValues, mBoneIndices),
+        offsetof(ConstantValues, mBoneWeights)
+    };
+
+    static constexpr DXGI_FORMAT vFormats[] = {
+        DXGI_FORMAT_R32G32B32_FLOAT,
+        DXGI_FORMAT_R32_FLOAT,
+        DXGI_FORMAT_R32G32_FLOAT,
+        DXGI_FORMAT_R32G32B32_FLOAT,
+        DXGI_FORMAT_R32G32B32A32_FLOAT,
+        DXGI_FORMAT_R32G32_FLOAT,
+        DXGI_FORMAT_R32G32B32A32_SINT,
+        DXGI_FORMAT_R32G32B32A32_FLOAT
+    };
+
+    std::vector<D3D12_INPUT_ELEMENT_DESC> Engine::Render::DirectX12RenderContext::createVertexLayout(VertexFormat format, size_t instanceDataSize)
+    {
+        std::vector<D3D12_INPUT_ELEMENT_DESC> vertexLayoutDesc;
+
+        UINT offset = 0;
+        for (size_t i = 0; i < VertexElements::size; ++i) {
+            if (format.has(i)) {
+                vertexLayoutDesc.push_back({ vSemantics[i],
+                    vSemanticIndices[i], vFormats[i], 0, offset, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
+                offset += sVertexElementSizes[i];
+            } else {
+                vertexLayoutDesc.push_back({ vSemantics[i],
+                    vSemanticIndices[i], vFormats[i], 2, vConstantOffsets[i], D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
+            }
+        }
+
+        assert(instanceDataSize % 16 == 0);
+        for (size_t i = 0; i < instanceDataSize / 16; ++i) {
+            vertexLayoutDesc.push_back({ "INSTANCEDATA",
+                static_cast<UINT>(i),
+                DXGI_FORMAT_R32G32B32A32_FLOAT,
+                1,
+                i == 0 ? 0 : D3D12_APPEND_ALIGNED_ELEMENT,
+                D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA,
+                1 });
+        }
+
+        return vertexLayoutDesc;
     }
 
 }

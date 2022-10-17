@@ -7,6 +7,8 @@
 
 #include "Madgine/render/vertexformat.h"
 
+#include "util/directx11buffer.h"
+
 namespace Engine {
 namespace Render {
 
@@ -33,12 +35,12 @@ namespace Render {
 
         virtual bool supportsMultisampling() const override;
 
-        void ensureFormat(VertexFormat format, size_t instanceDataSize, ID3DBlob *blob);
-
-        void bindFormat(VertexFormat format, size_t instanceDataSize);
+        void bindFormat(VertexFormat format, size_t instanceDataSize, ID3D10Blob *blob);
 
     private:
         std::array<std::map<size_t, ReleasePtr<ID3D11InputLayout>>, 256> mInputLayouts;
+
+        DirectX11Buffer mConstantBuffer = D3D11_BIND_VERTEX_BUFFER;
     };
 
 }

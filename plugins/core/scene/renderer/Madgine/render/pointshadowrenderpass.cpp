@@ -35,7 +35,7 @@ namespace Render {
 
     void PointShadowRenderPass::setup(RenderTarget *target)
     {
-        mPipeline.createDynamic({ .vs = "pointshadow", .ps = "pointshadow", .gs = "pointshadow", .bufferSizes = { sizeof(PointShadowPerApplication), sizeof(PointShadowPerFrame), sizeof(PointShadowPerObject) }, .instanceDataSize = sizeof(PointShadowInstanceData) });
+        mPipeline.create({ .vs = "pointshadow", .ps = "pointshadow", .gs = "pointshadow", .bufferSizes = { sizeof(PointShadowPerApplication), sizeof(PointShadowPerFrame), sizeof(PointShadowPerObject) }, .instanceDataSize = sizeof(PointShadowInstanceData) });
     }
 
     void PointShadowRenderPass::shutdown()

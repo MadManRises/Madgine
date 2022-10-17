@@ -39,7 +39,7 @@ namespace Render {
         pipeline.reset();
     }
 
-    Threading::Task<bool> OpenGLPipelineLoader::create(Instance &instance, PipelineConfiguration config, bool dynamic)
+    Threading::Task<bool> OpenGLPipelineLoader::create(Instance &instance, PipelineConfiguration config)
     {
 
         char buffer[256];

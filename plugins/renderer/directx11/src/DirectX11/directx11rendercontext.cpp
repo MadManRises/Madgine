@@ -37,6 +37,17 @@ namespace Render {
         return sDevice;
     }
 
+    struct ConstantValues {
+        Vector3 mPos { 0, 0, 0 };
+        float mW = 1;
+        Vector2 mPos2 { 0, 0 };
+        Vector3 mNormal { 0, 0, 0 };
+        Vector4 mColor { 1, 1, 1, 1 };
+        Vector2 mUV { 0, 0 };
+        int mBoneIndices[4] { 0, 0, 0, 0 };
+        float mBoneWeights[4] { 0.0f, 0.0f, 0.0f, 0.0f };
+    };
+
     DirectX11RenderContext::DirectX11RenderContext(Threading::TaskQueue *queue)
         : Component(queue)
     {
@@ -80,6 +91,10 @@ namespace Render {
         sDeviceContext->QueryInterface(IID_PPV_ARGS(&sAnnotator));
 
         DX11_CHECK(hr);
+
+        ConstantValues values;
+        mConstantBuffer.setData({ &values, sizeof(values) });
+        mConstantBuffer.bindVertex(0, 2);
     }
 
     DirectX11RenderContext::~DirectX11RenderContext()
@@ -153,8 +168,8 @@ namespace Render {
 
     static constexpr unsigned int vSemanticIndices[] = {
         0,
-        0,
         1,
+        2,
         0,
         0,
         0,
@@ -162,9 +177,20 @@ namespace Render {
         0,
     };
 
+    static constexpr UINT vConstantOffsets[] = {
+        offsetof(ConstantValues, mPos),
+        offsetof(ConstantValues, mW),
+        offsetof(ConstantValues, mPos2),
+        offsetof(ConstantValues, mNormal),
+        offsetof(ConstantValues, mColor),
+        offsetof(ConstantValues, mUV),
+        offsetof(ConstantValues, mBoneIndices),
+        offsetof(ConstantValues, mBoneWeights)
+    };
+
     static constexpr DXGI_FORMAT vFormats[] = {
         DXGI_FORMAT_R32G32B32_FLOAT,
-        DXGI_FORMAT_R32G32B32A32_FLOAT,
+        DXGI_FORMAT_R32_FLOAT,
         DXGI_FORMAT_R32G32_FLOAT,
         DXGI_FORMAT_R32G32B32_FLOAT,
         DXGI_FORMAT_R32G32B32A32_FLOAT,
@@ -173,11 +199,12 @@ namespace Render {
         DXGI_FORMAT_R32G32B32A32_FLOAT
     };
 
-    void DirectX11RenderContext::ensureFormat(VertexFormat format, size_t instanceDataSize, ID3DBlob *blob)
+    void DirectX11RenderContext::bindFormat(VertexFormat format, size_t instanceDataSize, ID3D10Blob *blob)
     {
         ReleasePtr<ID3D11InputLayout> &layout = mInputLayouts[format][instanceDataSize];
 
         if (!layout) {
+
             std::vector<D3D11_INPUT_ELEMENT_DESC> vertexLayoutDesc;
 
             UINT offset = 0;
@@ -186,29 +213,28 @@ namespace Render {
                     vertexLayoutDesc.push_back({ vSemantics[i],
                         vSemanticIndices[i], vFormats[i], 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 });
                     offset += sVertexElementSizes[i];
+                } else {
+                    vertexLayoutDesc.push_back({ vSemantics[i],
+                        vSemanticIndices[i], vFormats[i], 2, vConstantOffsets[i], D3D11_INPUT_PER_VERTEX_DATA, 0 });
                 }
             }
 
-            if (instanceDataSize > 0) {
-                assert(instanceDataSize % 16 == 0);
-                for (size_t i = 0; i < instanceDataSize / 16; ++i) {
-                    vertexLayoutDesc.push_back({ "INSTANCEDATA",
-                        static_cast<UINT>(i),
-                        DXGI_FORMAT_R32G32B32A32_FLOAT,
-                        1,
-                        i == 0 ? 0 : D3D11_APPEND_ALIGNED_ELEMENT,
-                        D3D11_INPUT_PER_INSTANCE_DATA,
-                        1 });
-                }
+            assert(instanceDataSize % 16 == 0);
+            for (size_t i = 0; i < instanceDataSize / 16; ++i) {
+                vertexLayoutDesc.push_back({ "INSTANCEDATA",
+                    static_cast<UINT>(i),
+                    DXGI_FORMAT_R32G32B32A32_FLOAT,
+                    1,
+                    i == 0 ? 0 : D3D11_APPEND_ALIGNED_ELEMENT,
+                    D3D11_INPUT_PER_INSTANCE_DATA,
+                    1 });
             }
+
             HRESULT hr = sDevice->CreateInputLayout(vertexLayoutDesc.data(), vertexLayoutDesc.size(), blob->GetBufferPointer(), blob->GetBufferSize(), &layout);
             DX11_CHECK(hr);
         }
-    }
 
-    void DirectX11RenderContext::bindFormat(VertexFormat format, size_t instanceDataSize)
-    {
-        sDeviceContext->IASetInputLayout(mInputLayouts[format].at(instanceDataSize));
+        sDeviceContext->IASetInputLayout(layout);
     }
 
 }

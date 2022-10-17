@@ -11,6 +11,10 @@
 
 #include "Generic/lambda.h"
 
+#include "Madgine/render/vertexformat.h"
+
+#include "util/directx12buffer.h"
+
 namespace Engine {
 namespace Render {
 
@@ -44,6 +48,8 @@ namespace Render {
 
         ReleasePtr<ID3D12CommandAllocator> fetchCommandAllocator(ReleasePtr<ID3D12CommandAllocator> discardAllocator = nullptr, Lambda<void()> dtor = {});
 
+        static std::vector<D3D12_INPUT_ELEMENT_DESC> createVertexLayout(VertexFormat format, size_t instanceDataSize);
+
         DirectX12DescriptorHeap mDescriptorHeap;
         DirectX12DescriptorHeap mRenderTargetDescriptorHeap;
         DirectX12DescriptorHeap mDepthStencilDescriptorHeap;
@@ -59,6 +65,8 @@ namespace Render {
         uint64_t mNextFenceValue;
         ID3D12Fence *mFence;
         HANDLE mFenceEvent;
+
+        DirectX12Buffer mConstantBuffer;
     };
 
 }

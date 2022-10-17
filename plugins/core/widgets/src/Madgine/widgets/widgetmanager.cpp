@@ -116,7 +116,7 @@ namespace Widgets {
         if (!co_await MainWindowComponentBase::init())
             co_return false;
 
-        mData->mPipeline.createStatic({ .vs = "widgets", .ps = "widgets", .format = type_holder<Vertex>, .bufferSizes = { 0, 0, sizeof(WidgetsPerObject) } });
+        mData->mPipeline.create({ .vs = "widgets", .ps = "widgets", .bufferSizes = { 0, 0, sizeof(WidgetsPerObject) } });
 
         mData->mMesh.create({ 3, std::vector<Vertex> {} });
 

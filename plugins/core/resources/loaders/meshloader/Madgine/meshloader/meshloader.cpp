@@ -31,7 +31,7 @@ namespace Render {
 
         getOrCreateManual(
             "Cube", {}, [](Render::MeshLoader *loader, MeshData &data, Render::MeshLoader::ResourceDataInfo &info) -> Threading::Task<bool> {
-                std::vector<Compound<Render::VertexPos_3D, Render::VertexColor>> vertices {
+                std::vector<Compound<Render::VertexPos, Render::VertexColor>> vertices {
                     { { -0.5f, -0.5f, -0.5f }, { 0, 0, 0, 1 } },
                     { { 0.5f, -0.5f, -0.5f }, { 1, 0, 0, 1 } },
                     { { -0.5f, 0.5f, -0.5f }, { 0, 1, 0, 1 } },
@@ -58,12 +58,12 @@ namespace Render {
 
         getOrCreateManual(
             "Plane", {}, [](Render::MeshLoader *loader, MeshData &data, Render::MeshLoader::ResourceDataInfo &info) -> Threading::Task<bool> {
-                std::vector<Compound<Render::VertexPos_4D>> vertices {
-                    { { 0, 0, 0, 1 } },
-                    { { 1, 0, 0, 0 } },
-                    { { 0, 0, 1, 0 } },
-                    { { -1, 0, 0, 0 } },
-                    { { 0, 0, -1, 0 } }
+                std::vector<Compound<Render::VertexPos, Render::VertexPosW>> vertices {
+                    { { 0, 0, 0 }, 1 },
+                    { { 1, 0, 0 }, 0 },
+                    { { 0, 0, 1 }, 0 },
+                    { { -1, 0, 0 }, 0 },
+                    { { 0, 0, -1 }, 0 }
                 };
 
                 std::vector<uint32_t> indices {
@@ -146,31 +146,31 @@ namespace Render {
                         }
                     }
 
-                        if constexpr (V::template holds<VertexBoneIndices>) {
-                            static_assert(V::template holds<VertexBoneWeights>);
-                            for (size_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
-                                aiBone *bone = mesh->mBones[boneIndex];
-                                size_t actualIndex = boneIndices.at(scene->mRootNode->FindNode(bone->mName));
-                                for (size_t weightIndex = 0; weightIndex < bone->mNumWeights; ++weightIndex) {
-                                    size_t vertexIndex = baseVertexIndex + bone->mWeights[weightIndex].mVertexId;
-                                    float weight = bone->mWeights[weightIndex].mWeight;
-                                    float (&weights)[4] = vertices[vertexIndex].mBoneWeights;
-                                    int (&indices)[4] = vertices[vertexIndex].mBoneIndices;
-                                    size_t freeIndex = 0;
-                                    while (freeIndex < 4 && weights[freeIndex] != 0.0f)
-                                        ++freeIndex;
-                                    if (freeIndex == 4) {
-                                        if (warnOnce) {
-                                            warnOnce = false;
-                                            LOG_WARNING("Vertex is assigned more than 4 Bones. That is not supported currently, animation might look wrong.");
-                                        }
-                                    } else {
-                                        indices[freeIndex] = actualIndex;
-                                        weights[freeIndex] = weight;
+                    if constexpr (V::template holds<VertexBoneIndices>) {
+                        static_assert(V::template holds<VertexBoneWeights>);
+                        for (size_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
+                            aiBone *bone = mesh->mBones[boneIndex];
+                            size_t actualIndex = boneIndices.at(scene->mRootNode->FindNode(bone->mName));
+                            for (size_t weightIndex = 0; weightIndex < bone->mNumWeights; ++weightIndex) {
+                                size_t vertexIndex = baseVertexIndex + bone->mWeights[weightIndex].mVertexId;
+                                float weight = bone->mWeights[weightIndex].mWeight;
+                                float(&weights)[4] = vertices[vertexIndex].mBoneWeights;
+                                int(&indices)[4] = vertices[vertexIndex].mBoneIndices;
+                                size_t freeIndex = 0;
+                                while (freeIndex < 4 && weights[freeIndex] != 0.0f)
+                                    ++freeIndex;
+                                if (freeIndex == 4) {
+                                    if (warnOnce) {
+                                        warnOnce = false;
+                                        LOG_WARNING("Vertex is assigned more than 4 Bones. That is not supported currently, animation might look wrong.");
                                     }
+                                } else {
+                                    indices[freeIndex] = actualIndex;
+                                    weights[freeIndex] = weight;
                                 }
                             }
                         }
+                    }
 
                     for (size_t i = 0; i < mesh->mNumFaces; ++i) {
                         aiFace &face = mesh->mFaces[i];
@@ -269,14 +269,14 @@ namespace Render {
         }
     }
 
-        void MeshLoader::unloadImpl(MeshData &data)
-        {
-            data.mGroupSize = 0;
-            data.mIndices.clear();
-            data.mMaterials.clear();
-            data.mVertexSize = 0;
-            data.mVertices.clear();            
-        }
+    void MeshLoader::unloadImpl(MeshData &data)
+    {
+        data.mGroupSize = 0;
+        data.mIndices.clear();
+        data.mMaterials.clear();
+        data.mVertexSize = 0;
+        data.mVertices.clear();
+    }
 
 }
 }

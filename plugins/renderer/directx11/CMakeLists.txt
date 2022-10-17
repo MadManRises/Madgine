@@ -5,7 +5,7 @@ Project(DirectX11)
 set(sources "")
 FolderSources(sources "" src)
 FolderSources(sources src DirectX11 directx11forward.h directx11geometryshaderloader.cpp directx11geometryshaderloader.h directx11lib.h directx11meshdata.h directx11meshloader.cpp directx11meshloader.h directx11pixelshaderloader.cpp directx11pixelshaderloader.h directx11pipelineloader.cpp directx11pipelineloader.h directx11rendertexture.cpp directx11rendertexture.h directx11renderwindow.cpp directx11renderwindow.h directx11vertexshaderloader.cpp directx11vertexshaderloader.h directx11textureloader.cpp directx11textureloader.h directx11rendertarget.cpp directx11rendertarget.h directx11rendercontext.cpp directx11rendercontext.h directx11shadercodegen.cpp directx11shadercodegen.h)
-	FolderSources(sources DirectX11 util dx11dump.cpp directx11buffer.cpp directx11buffer.h directx11texture.cpp directx11texture.h directx11pipelineinstance.cpp directx11pipelineinstance.h directx11vertexshaderlist.cpp directx11vertexshaderlist.h)
+	FolderSources(sources DirectX11 util dx11dump.cpp directx11buffer.cpp directx11buffer.h directx11texture.cpp directx11texture.h directx11pipelineinstance.cpp directx11pipelineinstance.h)
 
 add_plugin(DirectX11 Madgine Renderer ${sources} PRECOMPILED_HEADER src/DirectX11/directx11lib.h)
 

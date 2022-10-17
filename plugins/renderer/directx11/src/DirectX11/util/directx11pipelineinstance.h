@@ -13,7 +13,7 @@ namespace Render {
 
     struct MADGINE_DIRECTX11_EXPORT DirectX11PipelineInstance : PipelineInstance {
 
-        DirectX11PipelineInstance(const PipelineConfiguration &config, typename DirectX11VertexShaderLoader::Handle vertexShader, typename DirectX11PixelShaderLoader::Handle pixelShader, typename DirectX11GeometryShaderLoader::Handle geometryShader, bool dynamic);
+        DirectX11PipelineInstance(const PipelineConfiguration &config, typename DirectX11VertexShaderLoader::Handle vertexShader, typename DirectX11PixelShaderLoader::Handle pixelShader, typename DirectX11GeometryShaderLoader::Handle geometryShader);
 
         bool bind(VertexFormat format, size_t groupSize) const;
 
@@ -28,10 +28,8 @@ namespace Render {
         static void bindTexturesImpl(const std::vector<TextureDescriptor> &tex, size_t offset = 0);
 
     private:
-        union {
-            ID3D11VertexShader *mVertexShader;
-            const ReleasePtr<ID3D11VertexShader> *mVertexShaders;
-        };
+        ID3D11VertexShader *mVertexShader;
+        ID3D10Blob *mVertexShaderBlob;
         ID3D11PixelShader *mPixelShader;
         ID3D11GeometryShader *mGeometryShader;
 
@@ -41,7 +39,7 @@ namespace Render {
         DirectX11VertexShaderLoader::Handle mVertexShaderHandle;
         DirectX11PixelShaderLoader::Handle mPixelShaderHandle;
         DirectX11GeometryShaderLoader::Handle mGeometryShaderHandle;
-        
+
         bool mIsDynamic;
     };
 

@@ -32,7 +32,7 @@ namespace Render {
 
     void ShadowRenderPass::setup(RenderTarget *target)
     {
-        mPipeline.createDynamic({ .vs = "scene", .bufferSizes = { sizeof(ScenePerApplication), sizeof(ScenePerFrame), sizeof(ScenePerObject) }, .instanceDataSize = sizeof(SceneInstanceData) });
+        mPipeline.create({ .vs = "scene", .bufferSizes = { sizeof(ScenePerApplication), sizeof(ScenePerFrame), sizeof(ScenePerObject) }, .instanceDataSize = sizeof(SceneInstanceData) });
     }
 
     void ShadowRenderPass::shutdown()

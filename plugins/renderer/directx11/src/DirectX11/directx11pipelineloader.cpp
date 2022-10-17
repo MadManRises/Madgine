@@ -41,7 +41,7 @@ namespace Render {
         throw 0;
     }
 
-    Threading::Task<bool> DirectX11PipelineLoader::create(Instance &instance, PipelineConfiguration config, bool dynamic)
+    Threading::Task<bool> DirectX11PipelineLoader::create(Instance &instance, PipelineConfiguration config)
     {
         DirectX11VertexShaderLoader::Handle vertexShader;
         if (!co_await vertexShader.load(config.vs)) {
@@ -59,7 +59,7 @@ namespace Render {
             co_return false;
         }
 
-        instance = std::make_unique<DirectX11PipelineInstance>(config, std::move(vertexShader), std::move(pixelShader), std::move(geometryShader), dynamic);
+        instance = std::make_unique<DirectX11PipelineInstance>(config, std::move(vertexShader), std::move(pixelShader), std::move(geometryShader));
 
         co_return true;
     }
@@ -77,7 +77,7 @@ namespace Render {
         if (!co_await pixelShader.create(config.ps, file))
             co_return false;
 
-        instance = std::make_unique<DirectX11PipelineInstance>(config, std::move(vertexShader), std::move(pixelShader), DirectX11GeometryShaderLoader::Handle {}, true);
+        instance = std::make_unique<DirectX11PipelineInstance>(config, std::move(vertexShader), std::move(pixelShader), DirectX11GeometryShaderLoader::Handle {});
 
         co_return true;
     }
