@@ -7,11 +7,6 @@
 #include "Madgine/meshloader/gpumeshloader.h"
 #include "Madgine/pipelineloader/pipelineloader.h"
 
-#include "Madgine/render/shadinglanguage/sl.h"
-
-#define SL_SHADER grid
-#include INCLUDE_SL_SHADER
-
 namespace Engine {
 namespace Tools {
 

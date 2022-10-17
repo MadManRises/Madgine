@@ -20,7 +20,7 @@
 
 //#include "Madgine/render/rendercontext.h"
 
-#define SL_SHADER pointshadow
+#define SL_SHADER shaders/pointshadow
 #include INCLUDE_SL_SHADER
 
 namespace Engine {

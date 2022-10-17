@@ -21,7 +21,7 @@
 
 #include "Madgine/scene/entity/components/material.h"
 
-#define SL_SHADER scene
+#define SL_SHADER shaders/scene
 #include INCLUDE_SL_SHADER
 
 #include "Meta/keyvalue/metatable_impl.h"

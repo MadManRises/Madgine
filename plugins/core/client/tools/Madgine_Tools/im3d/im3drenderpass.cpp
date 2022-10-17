@@ -15,7 +15,7 @@
 
 #include "Madgine/meshloader/meshdata.h"
 
-#define SL_SHADER im3d
+#define SL_SHADER shaders/im3d
 #include INCLUDE_SL_SHADER
 
 namespace Engine {

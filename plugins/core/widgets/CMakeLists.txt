@@ -6,6 +6,7 @@ set(sources "")
 FolderSources(sources "" src)
 	FolderSources(sources src Madgine widgetsforward.h widgetslib.h)
 		FolderSources(sources Madgine widgets bar.cpp bar.h button.cpp button.h checkbox.cpp checkbox.h classid.h combobox.cpp combobox.h image.cpp image.h label.cpp label.h scenewindow.cpp scenewindow.h textbox.cpp textbox.h widget.cpp widget.h widgetclass.h widgetmanager.cpp widgetmanager.h)
+			FolderSources(sources widgets shaders widgets.PS_hlsl widgets.VS_hlsl widgets.sl)
 			FolderSources(sources widgets util renderdata.cpp scalableimagerenderdata.cpp textrenderdata.cpp)
 
 add_plugin(Widgets Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/widgetslib.h)

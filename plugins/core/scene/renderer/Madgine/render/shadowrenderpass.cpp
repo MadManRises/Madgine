@@ -17,7 +17,7 @@
 
 //#include "Madgine/render/rendercontext.h"
 
-#define SL_SHADER scene
+#define SL_SHADER shaders/scene
 #include INCLUDE_SL_SHADER
 
 namespace Engine {

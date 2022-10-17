@@ -90,8 +90,6 @@ macro(collect_data target)
 
 	if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/data)
 
-		target_include_directories(${target} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/data>)
-
 		if (NOT BUILD_SHARED_LIBS OR MADGINE_FORCE_DATA_COLLECT)
 
 			add_custom_target(

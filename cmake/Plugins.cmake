@@ -5,6 +5,7 @@ once()
 include(Workspace)
 include(util/ini)
 include(Packaging)
+include(Shaders)
 
 set (PLUGIN_DEFINITION_FILE "" CACHE FILEPATH "Provide path to fixed plugin selection (optional)")
 
@@ -83,6 +84,8 @@ macro(add_plugin name base type)
 	else()
 		generate_binary_info(${name})
 	endif()
+
+	compile_shaders(${name})
 
 	set(installPlugin TRUE)
 

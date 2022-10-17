@@ -37,7 +37,7 @@
 
 #include "Generic/areaview.h"
 
-#define SL_SHADER widgets
+#define SL_SHADER shaders/widgets
 #include INCLUDE_SL_SHADER
 
 UNIQUECOMPONENT(Engine::Widgets::WidgetManager)
