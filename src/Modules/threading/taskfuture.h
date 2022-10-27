@@ -62,7 +62,7 @@ namespace Threading {
 
         bool await_suspend(TaskHandle handle)
         {
-            return mState->then(std::move(handle));
+            return mState->then_await(std::move(handle));
         }
 
         const T &await_resume() const
@@ -137,7 +137,7 @@ namespace Threading {
 
         bool await_suspend(TaskHandle handle)
         {
-            return mState->then(std::move(handle));
+            return mState->then_await(std::move(handle));
         }
 
         void await_resume() const

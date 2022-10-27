@@ -23,7 +23,8 @@ namespace Threading {
 
         void notifyDestroyed();
 
-        bool then(TaskHandle handle);
+        bool then_await(TaskHandle handle);
+        void then(TaskHandle handle);
 
         void setException(std::exception_ptr exception);
         void rethrowIfException();
