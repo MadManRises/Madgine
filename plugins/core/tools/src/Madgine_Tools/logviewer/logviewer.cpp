@@ -72,7 +72,9 @@ namespace Tools {
 
             std::lock_guard guard { mMutex };
 
-            if (filterChanged) {
+            static bool first = true;
+            if (filterChanged || first) {
+                first = false;
                 mFilteredMsgCount = 0;
                 mLookup.clear();
                 size_t i = 0;
