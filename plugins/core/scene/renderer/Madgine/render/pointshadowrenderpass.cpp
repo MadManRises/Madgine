@@ -51,10 +51,6 @@ namespace Render {
 
         //TODO Culling
 
-        auto guard = mScene.lock(AccessMode::READ);
-
-        mScene.updateRender();
-
         Scene::Entity::Entity *entity = lights.getEntity(mIndex);
         Scene::Entity::Transform *transform = entity->getComponent<Scene::Entity::Transform>();
         if (!transform)
@@ -120,6 +116,13 @@ namespace Render {
         }
 
         target->popAnnotation();
+    }
+
+    void PointShadowRenderPass::preRender()
+    {
+        auto guard = mScene.lock(AccessMode::READ);
+
+        mScene.updateRender();
     }
 
     int PointShadowRenderPass::priority() const

@@ -8,6 +8,8 @@
 
 #include "openglrendercontext.h"
 
+#include "Meta/math/matrix4.h"
+
 namespace Engine {
 namespace Render {
 
@@ -290,6 +292,14 @@ namespace Render {
     TextureDescriptor OpenGLRenderTexture::depthTexture() const
     {
         return mDepthTexture.descriptor();
+    }
+
+    Matrix4 OpenGLRenderTexture::getClipSpaceMatrix() const
+    {
+        return Matrix4 { 1, 0, 0, 0,
+            0, -1, 0, 0,
+            0, 0, 2, -1,
+            0, 0, 0, 1 };
     }
 
     Vector2i OpenGLRenderTexture::size() const

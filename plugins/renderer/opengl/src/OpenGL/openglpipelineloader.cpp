@@ -50,27 +50,27 @@ namespace Render {
 #endif
 
         Handle pipeline;
-        if (!co_await pipeline.create(buffer, {}, [&](OpenGLPipelineLoader *loader, OpenGLPipeline &pipeline, ResourceDataInfo &info) -> Threading::Task<bool> {
+        if (!co_await pipeline.create(buffer, {}, [vs { std::string { config.vs } }, ps { std::string { config.ps } }, gs { std::string { config.gs } }](OpenGLPipelineLoader *loader, OpenGLPipeline &pipeline, ResourceDataInfo &info) -> Threading::Task<bool> {
                 OpenGLShaderLoader::Handle vertexShader;
-                if (!co_await vertexShader.load(config.vs, VertexShader)) {
-                    LOG_ERROR("Failed to load VS '" << config.vs << "'!");
+                if (!co_await vertexShader.load(vs, VertexShader)) {
+                    LOG_ERROR("Failed to load VS '" << vs << "'!");
                     co_return false;
                 }
 
                 OpenGLShaderLoader::Handle pixelShader;
-                if (!config.ps.empty() && !co_await pixelShader.load(config.ps, PixelShader)) {
-                    LOG_ERROR("Failed to load PS '" << config.ps << "'!");
+                if (!ps.empty() && !co_await pixelShader.load(ps, PixelShader)) {
+                    LOG_ERROR("Failed to load PS '" << ps << "'!");
                     co_return false;
                 }
 
                 OpenGLShaderLoader::Handle geometryShader;
-                if (!config.gs.empty() && !co_await geometryShader.load(config.gs, GeometryShader)) {
-                    LOG_ERROR("Failed to load GS '" << config.gs << "'!");
+                if (!gs.empty() && !co_await geometryShader.load(gs, GeometryShader)) {
+                    LOG_ERROR("Failed to load GS '" << gs << "'!");
                     co_return false;
                 }
 
                 if (!pipeline.link(std::move(vertexShader), std::move(geometryShader), std::move(pixelShader))) {
-                    LOG_ERROR("Failed to link Program '" << config.vs << "|" << config.gs << "|" << config.ps
+                    LOG_ERROR("Failed to link Program '" << vs << "|" << gs << "|" << ps
                                                          << "'!");
                     co_return false;
                 }
@@ -129,7 +129,6 @@ namespace Render {
 
         co_return true;
     }
-
 
     Threading::TaskQueue *OpenGLPipelineLoader::loadingTaskQueue() const
     {

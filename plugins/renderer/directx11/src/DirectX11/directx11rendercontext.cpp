@@ -210,19 +210,19 @@ namespace Render {
             UINT offset = 0;
             for (size_t i = 0; i < VertexElements::size; ++i) {
                 if (format.has(i)) {
-                    vertexLayoutDesc.push_back({ vSemantics[i],
-                        vSemanticIndices[i], vFormats[i], 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 });
+                    vertexLayoutDesc.push_back({ "TEXCOORD",
+                        (UINT)i, vFormats[i], 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 });
                     offset += sVertexElementSizes[i];
                 } else {
-                    vertexLayoutDesc.push_back({ vSemantics[i],
-                        vSemanticIndices[i], vFormats[i], 2, vConstantOffsets[i], D3D11_INPUT_PER_VERTEX_DATA, 0 });
+                    vertexLayoutDesc.push_back({ "TEXCOORD",
+                        (UINT)i, vFormats[i], 2, vConstantOffsets[i], D3D11_INPUT_PER_VERTEX_DATA, 0 });
                 }
             }
 
             assert(instanceDataSize % 16 == 0);
             for (size_t i = 0; i < instanceDataSize / 16; ++i) {
-                vertexLayoutDesc.push_back({ "INSTANCEDATA",
-                    static_cast<UINT>(i),
+                vertexLayoutDesc.push_back({ "TEXCOORD",
+                    (UINT)(VertexElements::size + i),
                     DXGI_FORMAT_R32G32B32A32_FLOAT,
                     1,
                     i == 0 ? 0 : D3D11_APPEND_ALIGNED_ELEMENT,

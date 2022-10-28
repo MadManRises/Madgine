@@ -25,11 +25,11 @@ namespace Render {
         : mCamera(camera)
         , mPriority(priority)
     {
-        mPipeline.create({ .vs = "im3d", .ps = "im3d", .bufferSizes = { sizeof(Im3DPerApplication), sizeof(Im3DPerFrame), sizeof(Im3DPerObject) } });
+        mPipeline.create({ .vs = "im3d", .ps = "im3d", .bufferSizes = { sizeof(Im3DPerApplication), 0, sizeof(Im3DPerObject) } });
 
         for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
-            mMeshes[i][0].create({ i + 1, std::vector<Render::Vertex> {} });
-            mMeshes[i][1].create({ i + 1, std::vector<Render::Vertex2> {} });
+            mMeshes[i][0].create({ i + 1, std::vector<Im3D::Vertex> {} });
+            mMeshes[i][1].create({ i + 1, std::vector<Im3D::Vertex2> {} });
         }
     }
 
@@ -51,13 +51,7 @@ namespace Render {
         {
             auto perApplication = mPipeline->mapParameters<Im3DPerApplication>(0);
 
-            perApplication->p = mCamera->getProjectionMatrix(aspectRatio);
-        }
-
-        {
-            auto perFrame = mPipeline->mapParameters<Im3DPerFrame>(1);
-
-            perFrame->v = mCamera->getViewMatrix();
+            perApplication->p = target->getClipSpaceMatrix() * mCamera->getProjectionMatrix(aspectRatio);
         }
 
         /*for (const std::pair<Im3DNativeMesh, std::vector<Matrix4>> &p : context->mNativeMeshes)
@@ -72,7 +66,7 @@ namespace Render {
 
                 perObject->hasDistanceField = false;
 
-                perObject->m = Matrix4::IDENTITY;
+                perObject->mv = mCamera->getViewMatrix();
 
                 perObject->hasTexture = p.first != 0;
                 perObject->hasDistanceField = bool(p.second.mFlags & RenderPassFlags_DistanceField);

@@ -21,6 +21,8 @@ namespace Render {
         virtual size_t textureCount() const override;
         virtual TextureDescriptor depthTexture() const override;
 
+        virtual Matrix4 getClipSpaceMatrix() const override;
+
     private:
         GLuint mFramebuffers[6] = { 0 };
         GLuint mDepthRenderbuffer = 0;

@@ -4,6 +4,8 @@
 #include "renderpass.h"
 #include "rendertarget.h"
 
+#include "Meta/math/matrix4.h"
+
 namespace Engine {
 namespace Render {
 
@@ -104,6 +106,11 @@ namespace Render {
                 pass->onTargetResize(size);
         }
         return resized;
+    }
+
+    Matrix4 RenderTarget::getClipSpaceMatrix() const
+    {
+        return Matrix4::IDENTITY;
     }
 
 }

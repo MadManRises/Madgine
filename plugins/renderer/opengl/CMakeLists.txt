@@ -56,3 +56,9 @@ target_include_directories(OpenGLTools PRIVATE ${OPENGL_INCLUDE_DIR})
 if (BUILD_TESTING)
 	add_subdirectory(test)
 endif()
+
+add_executable(ShadergenGLSL "util/shadergenGLSL.cpp")
+
+add_shadergen_target(ShadergenGLSL)
+
+target_link_libraries(ShadergenGLSL spirv-cross-core spirv-cross-glsl)

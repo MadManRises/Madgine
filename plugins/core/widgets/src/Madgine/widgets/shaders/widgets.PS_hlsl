@@ -1,7 +1,10 @@
+#include "widgets.sl"
+
 cbuffer PerObject : register(b2)
-{
-	bool hasDistanceField;
+{ 
+    WidgetsPerObject object;
 }
+
 
 Texture2D tex : register(t0);
 SamplerState texSampler : register(s0);
@@ -19,7 +22,7 @@ float4 main(PixelShaderInput IN)
     : SV_TARGET
 {
     float4 texColor;
-	if (hasDistanceField){
+	if (object.hasDistanceField){
 		float2 msdfUnit = 4.0/float2(512.0, 512.0);
 		float4 sample = tex.Sample(texSampler, IN.uv);
 		float sigDist = median(sample.r, sample.g, sample.b) - 0.5;

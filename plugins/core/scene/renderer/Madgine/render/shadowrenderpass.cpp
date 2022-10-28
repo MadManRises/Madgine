@@ -46,10 +46,6 @@ namespace Render {
         if (!mPipeline.available())
             return;
 
-        auto guard = mScene.lock(AccessMode::READ);
-
-        mScene.updateRender();
-
         std::map<std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> instances;
 
         for (const auto &[mesh, e] : mScene.entityComponentList<Scene::Entity::Mesh>().data()) {
@@ -114,9 +110,9 @@ namespace Render {
 
             std::ranges::transform(instance.second, std::back_inserter(instanceData), [&](const Matrix4 &m) {
                 Matrix4 mv = v * m;
-                return SceneInstanceData {
-                    mv,
-                    mv.Inverse().Transpose()
+                return SceneInstanceData { //TODO: Additional Transpose() to make generated HLSL work
+                    mv.Transpose(),
+                    mv.Inverse().Transpose().Transpose()
                 };
             });
 
@@ -124,6 +120,12 @@ namespace Render {
         }
 
         target->popAnnotation();
+    }
+
+    void ShadowRenderPass::preRender() {
+        auto guard = mScene.lock(AccessMode::READ);
+
+        mScene.updateRender();
     }
 
     int ShadowRenderPass::priority() const

@@ -116,15 +116,13 @@ namespace Widgets {
         if (!co_await MainWindowComponentBase::init())
             co_return false;
 
-        mData->mPipeline.create({ .vs = "widgets", .ps = "widgets", .bufferSizes = { 0, 0, sizeof(WidgetsPerObject) } });
+        mData->mPipeline.create({ .vs = "widgets", .ps = "widgets", .bufferSizes = { sizeof(WidgetsPerApplication), 0, sizeof(WidgetsPerObject) } });
 
         mData->mMesh.create({ 3, std::vector<Vertex> {} });
 
         mData->mUIAtlasTexture.create(Render::TextureType_2D, Render::FORMAT_RGBA8);
 
         mData->mDefaultTexture.load("default_tex");
-
-        mWindow.getRenderWindow()->addRenderPass(this);
 
         co_return true;
     }
@@ -551,6 +549,8 @@ namespace Widgets {
                     std::ranges::move(localVertices, std::back_inserter(vertices[tex]));
             }
         }
+
+        mData->mPipeline->mapParameters<WidgetsPerApplication>(0)->c = target->getClipSpaceMatrix();
 
         for (auto &[tex, vertices] : vertices) {
             assert(!vertices.empty());

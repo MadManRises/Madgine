@@ -191,7 +191,7 @@ namespace Render {
         const char *guessSemantic(std::string_view name, bool rasterized)
         {
             if (name.find("pos") != std::string_view::npos)
-                return rasterized ? "SV_POSITION" : "POSITION";
+                return rasterized ? "SV_Position" : "POSITION";
             else if (name.find("col") != std::string_view::npos)
                 return "COLOR";
             else if (StringUtil::toLower(name).find("uv") != std::string::npos)

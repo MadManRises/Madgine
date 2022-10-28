@@ -49,7 +49,7 @@ namespace Tools {
         {
             auto parameters = mPipeline->mapParameters<GridPerFrame>(1);
 
-            parameters->vp = mCamera->getViewProjectionMatrix(aspectRatio);
+            parameters->vp = target->getClipSpaceMatrix() * mCamera->getViewProjectionMatrix(aspectRatio);
         }
 
         mPipeline->renderMesh(mMesh);

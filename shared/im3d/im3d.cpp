@@ -171,7 +171,7 @@ namespace Im3D {
         }
     }
 
-    void Mesh(Im3DMeshType type, const Render::Vertex *vertices, size_t vertexCount, const MeshParameters &param, const uint32_t *indices, size_t indexCount)
+    void Mesh(Im3DMeshType type, const Vertex *vertices, size_t vertexCount, const MeshParameters &param, const uint32_t *indices, size_t indexCount)
     {
         Im3DContext &c = *sContext;
 
@@ -183,8 +183,8 @@ namespace Im3D {
         size_t vertexPivot = c.mRenderData[0].mVertexBase[type];
         size_t indexPivot = c.mRenderData[0].mIndices[type].size();
 
-        std::transform(vertices, vertices + vertexCount, std::back_inserter(c.mRenderData[0].mVertices[type]), [&](const Render::Vertex &v) {
-            Render::Vertex result = v;
+        std::transform(vertices, vertices + vertexCount, std::back_inserter(c.mRenderData[0].mVertices[type]), [&](const Vertex &v) {
+            Vertex result = v;
 
             minP = min(v.mPos, minP);
             maxP = max(v.mPos, maxP);
@@ -212,14 +212,14 @@ namespace Im3D {
         }
 
         if (param.mDuration != std::chrono::microseconds::zero()) {
-            auto &data = c.mRenderData[0].mPersistentMeshes[type].emplace_back(std::chrono::steady_clock::now() + param.mDuration, std::vector<Render::Vertex> { c.mRenderData[0].mVertices[type].begin() + vertexPivot, c.mRenderData[0].mVertices[type].end() }, std::vector<unsigned short> {});
+            auto &data = c.mRenderData[0].mPersistentMeshes[type].emplace_back(std::chrono::steady_clock::now() + param.mDuration, std::vector<Vertex> { c.mRenderData[0].mVertices[type].begin() + vertexPivot, c.mRenderData[0].mVertices[type].end() }, std::vector<unsigned short> {});
             std::transform(c.mRenderData[0].mIndices[type].begin() + indexPivot, c.mRenderData[0].mIndices[type].end(), std::back_inserter(std::get<2>(data)), [&](unsigned int i) { return i - vertexPivot; });
         }
 
         assert(c.mRenderData[0].mIndices[type].size() % groupSize == 0);
     }
 
-    void Mesh(Im3DMeshType type, Render::RenderPassFlags flags, const Render::Vertex2 *vertices, size_t vertexCount, const MeshParameters &param, const uint32_t *indices, size_t indexCount, Im3DTextureId texId)
+    void Mesh(Im3DMeshType type, Render::RenderPassFlags flags, const Vertex2 *vertices, size_t vertexCount, const MeshParameters &param, const uint32_t *indices, size_t indexCount, Im3DTextureId texId)
     {
         Im3DContext &c = *sContext;
 
@@ -228,8 +228,8 @@ namespace Im3D {
         Vector3 minP { std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max() };
         Vector3 maxP { std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest() };
 
-        std::transform(vertices, vertices + vertexCount, std::back_inserter(c.mRenderData[texId].mVertices2[type]), [&](const Render::Vertex2 &v) {
-            Render::Vertex2 result = v;
+        std::transform(vertices, vertices + vertexCount, std::back_inserter(c.mRenderData[texId].mVertices2[type]), [&](const Vertex2 &v) {
+            Vertex2 result = v;
 
             minP = min(v.mPos, minP);
             maxP = max(v.mPos, maxP);
@@ -304,7 +304,7 @@ namespace Im3D {
         float cursorX = -fullWidth * param.mPivot.x;
         float originY = fullHeight * param.mPivot.y - maxY;
 
-        std::unique_ptr<Render::Vertex2[]> vertices = std::make_unique<Render::Vertex2[]>(4 * textLen);
+        std::unique_ptr<Vertex2[]> vertices = std::make_unique<Vertex2[]>(4 * textLen);
         std::unique_ptr<uint32_t[]> indices = std::make_unique<uint32_t[]>(6 * textLen);
 
         for (size_t i = 0; i < textLen; ++i) {
@@ -384,9 +384,9 @@ namespace Im3D {
 
     void Line(const Vector3 &a, const Vector3 &b, const LineParameters &param)
     {
-        Render::Vertex vertices[] = {
-            { a, Vector3::ZERO, param.mColorA },
-            { b, Vector3::ZERO, param.mColorB }
+        Vertex vertices[] = {
+            { a, param.mColorA },
+            { b, param.mColorB }
         };
         Mesh(IM3D_LINES, vertices, 2, param);
     }
@@ -395,17 +395,17 @@ namespace Im3D {
     {
         constexpr int segments = 6;
 
-        Render::Vertex vertices[2 + segments];
+        Vertex vertices[2 + segments];
         uint32_t indices[2 + 2 * segments];
 
         Vector3 d = b - a;
 
         vertices[0] = {
-            a, -d, param.mColor
+            a, param.mColor
         };
         indices[0] = 0;
         vertices[1] = {
-            b, d, param.mColor
+            b, param.mColor
         };
         indices[1] = 1;
 
@@ -416,7 +416,7 @@ namespace Im3D {
 
         for (int i = 0; i < segments; ++i) {
             Vector3 dir = Quaternion { i * 2 * PI / segments, d } * p;
-            vertices[2 + i] = { b + dir, dir, param.mColor };
+            vertices[2 + i] = { b + dir, param.mColor };
             indices[2 + 2 * i] = 1;
             indices[2 + 2 * i + 1] = 2 + i;
         }
@@ -435,13 +435,13 @@ namespace Im3D {
         d2 *= radius;
         Vector3 d0 = radius * dist.normalizedCopy();
 
-        const Render::Vertex vertices[]
-            = { { a, -dist, param.mColor },
-                  { a + d0 + d1, d1, param.mColor },
-                  { a + d0 + d2, d2, param.mColor },
-                  { a + d0 - d1, -d1, param.mColor },
-                  { a + d0 - d2, -d2, param.mColor },
-                  { b, dist, param.mColor } };
+        const Vertex vertices[]
+            = { { a, param.mColor },
+                  { a + d0 + d1, param.mColor },
+                  { a + d0 + d2, param.mColor },
+                  { a + d0 - d1, param.mColor },
+                  { a + d0 - d2, param.mColor },
+                  { b, param.mColor } };
 
         switch (type) {
         case IM3D_TRIANGLES: {
@@ -469,7 +469,7 @@ namespace Im3D {
     {
         size_t faceVertexCount = (param.mDetail + 2) * (param.mDetail + 3) / 2 - 3;
         size_t vertexCount = 20 * faceVertexCount + 12;
-        std::unique_ptr<Render::Vertex[]> vertices = std::make_unique<Render::Vertex[]>(vertexCount);
+        std::unique_ptr<Vertex[]> vertices = std::make_unique<Vertex[]>(vertexCount);
 
         size_t indexCount = 60 * (param.mDetail + 1) * (param.mDetail + 2);
         std::unique_ptr<uint32_t[]> indices = std::make_unique<uint32_t[]>(indexCount);
@@ -485,62 +485,50 @@ namespace Im3D {
 
         vertices[0] = {
             Vector3 { -radius, t, 0 },
-            { 1, 1, 1 },
             param.mColor
         };
         vertices[1] = {
-            Vector3 { radius, t, 0 },
-            { 1, 1, 1 },
+            Vector3 { radius, t, 0 },            
             param.mColor
         };
         vertices[2] = {
-            Vector3 { -radius, -t, 0 },
-            { 1, 1, 1 },
+            Vector3 { -radius, -t, 0 },            
             param.mColor
         };
         vertices[3] = {
             Vector3 { radius, -t, 0 },
-            { 1, 1, 1 },
             param.mColor
         };
         vertices[4] = {
-            Vector3 { 0, -radius, t },
-            { 1, 1, 1 },
+            Vector3 { 0, -radius, t },            
             param.mColor
         };
         vertices[5] = {
-            Vector3 { 0, radius, t },
-            { 1, 1, 1 },
+            Vector3 { 0, radius, t },            
             param.mColor
         };
         vertices[6] = {
-            Vector3 { 0, -radius, -t },
-            { 1, 1, 1 },
+            Vector3 { 0, -radius, -t },            
             param.mColor
         };
         vertices[7] = {
-            Vector3 { 0, radius, -t },
-            { 1, 1, 1 },
+            Vector3 { 0, radius, -t },            
             param.mColor
         };
         vertices[8] = {
-            Vector3 { t, 0, -radius },
-            { 1, 1, 1 },
+            Vector3 { t, 0, -radius },            
             param.mColor
         };
         vertices[9] = {
-            Vector3 { t, 0, radius },
-            { 1, 1, 1 },
+            Vector3 { t, 0, radius },            
             param.mColor
         };
         vertices[10] = {
-            Vector3 { -t, 0, -radius },
-            { 1, 1, 1 },
+            Vector3 { -t, 0, -radius },            
             param.mColor
         };
         vertices[11] = {
-            Vector3 { -t, 0, radius },
-            { 1, 1, 1 },
+            Vector3 { -t, 0, radius },            
             param.mColor
         };
 
@@ -581,8 +569,7 @@ namespace Im3D {
                     if ((y == 0 && (x == 0 || x == param.mDetail + 1)) || y == param.mDetail + 1)
                         continue;
                     vertices[vertexCounter++] = {
-                        slerp(left, right, x / float(param.mDetail + 1 - y)),
-                        { 1, 1, 1 },
+                        slerp(left, right, x / float(param.mDetail + 1 - y)),                        
                         param.mColor
                     };
                 }
@@ -615,7 +602,7 @@ namespace Im3D {
 
     MADGINE_IM3D_EXPORT void Frustum(const struct Frustum &frustum, const Parameters &param)
     {
-        Render::Vertex vertices[8];
+        Vertex vertices[8];
         auto corners = frustum.getCorners();
         for (size_t i = 0; i < 8; ++i) {
             vertices[i].mPos = corners[i];
@@ -689,15 +676,15 @@ namespace Im3D {
 
         if ((flags & Im3DBoundingObjectFlags_ShowOutline) || (hovered && (flags & Im3DBoundingObjectFlags_ShowOnHover))) {
             std::array<Vector3, 8> corners = bb.corners();
-            Render::Vertex vertices[] = {
-                { corners[0], { 0, 0, 0 }, { 1, 1, 1, 1 } },
-                { corners[1], { 0, 0, 0 }, { 1, 1, 1, 1 } },
-                { corners[2], { 0, 0, 0 }, { 1, 1, 1, 1 } },
-                { corners[3], { 0, 0, 0 }, { 1, 1, 1, 1 } },
-                { corners[4], { 0, 0, 0 }, { 1, 1, 1, 1 } },
-                { corners[5], { 0, 0, 0 }, { 1, 1, 1, 1 } },
-                { corners[6], { 0, 0, 0 }, { 1, 1, 1, 1 } },
-                { corners[7], { 0, 0, 0 }, { 1, 1, 1, 1 } },
+            Vertex vertices[] = {
+                { corners[0], { 1, 1, 1, 1 } },
+                { corners[1], { 1, 1, 1, 1 } },
+                { corners[2], { 1, 1, 1, 1 } },
+                { corners[3], { 1, 1, 1, 1 } },
+                { corners[4], { 1, 1, 1, 1 } },
+                { corners[5], { 1, 1, 1, 1 } },
+                { corners[6], { 1, 1, 1, 1 } },
+                { corners[7], { 1, 1, 1, 1 } },
             };
             constexpr uint32_t indices[] = {
                 0, 1, 0, 2, 0, 4, 1, 3, 1, 5, 2, 3, 2, 6, 3, 7, 4, 5, 4, 6, 5, 7, 6, 7

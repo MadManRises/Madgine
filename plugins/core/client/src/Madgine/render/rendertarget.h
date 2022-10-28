@@ -20,6 +20,8 @@ namespace Render {
         virtual size_t textureCount() const = 0;
         virtual TextureDescriptor depthTexture() const = 0;
 
+        virtual Matrix4 getClipSpaceMatrix() const;
+
         virtual bool resizeImpl(const Vector2i &size) = 0;
         bool resize(const Vector2i &size);
         virtual Vector2i size() const = 0;

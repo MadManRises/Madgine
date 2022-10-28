@@ -74,10 +74,6 @@ namespace Render {
             return;
         //TODO Culling
 
-        auto guard = mScene.lock(AccessMode::READ);
-
-        mScene.updateRender();
-
         std::map<std::tuple<const GPUMeshData *, const GPUMeshData::Material *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> instances;
 
         for (const auto &[mesh, e] : mScene.entityComponentList<Scene::Entity::Mesh>().data()) {
@@ -114,7 +110,7 @@ namespace Render {
         {
             auto perApplication = mPipeline->mapParameters<ScenePerApplication>(0);
 
-            perApplication->p = mCamera->getProjectionMatrix(aspectRatio);
+            perApplication->p = target->getClipSpaceMatrix() * mCamera->getProjectionMatrix(aspectRatio);
 
             perApplication->hasHDR = target->textureCount() > 1;
 
@@ -157,7 +153,6 @@ namespace Render {
 
         mPipeline->bindTextures({ mShadowMap->depthTexture(), mPointShadowMaps[0]->depthTexture(), mPointShadowMaps[1]->depthTexture() }, 2);
 
-
         for (const std::pair<const std::tuple<const GPUMeshData *, const GPUMeshData::Material *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> &instance : instances) {
             const GPUMeshData *meshData = std::get<0>(instance.first);
             const GPUMeshData::Material *material = std::get<1>(instance.first);
@@ -187,17 +182,16 @@ namespace Render {
                 mPipeline->setDynamicParameters(0, {});
             }
 
-            mPipeline->bindTextures({
-                { material && material->mDiffuseTexture.available() ? material->mDiffuseTexture->mTextureHandle : 0, TextureType_2D },
+            mPipeline->bindTextures({ { material && material->mDiffuseTexture.available() ? material->mDiffuseTexture->mTextureHandle : 0, TextureType_2D },
                 { material && material->mEmissiveTexture.available() ? material->mEmissiveTexture->mTextureHandle : 0, TextureType_2D } });
 
             std::vector<SceneInstanceData> instanceData;
 
             std::ranges::transform(instance.second, std::back_inserter(instanceData), [&](const Matrix4 &m) {
                 Matrix4 mv = v * m;
-                return SceneInstanceData {
-                    mv,
-                    mv.Inverse().Transpose()
+                return SceneInstanceData { //TODO: Additional Transpose() to make generated HLSL work
+                    mv.Transpose(),
+                    mv.Inverse().Transpose().Transpose()
                 };
             });
 
@@ -208,6 +202,12 @@ namespace Render {
 
     void SceneRenderPass::preRender()
     {
+        {
+            auto guard = mScene.lock(AccessMode::READ);
+
+            mScene.updateRender();
+        }
+
         mShadowMap->render();
         mPointShadowMaps[0]->render();
         mPointShadowMaps[1]->render();

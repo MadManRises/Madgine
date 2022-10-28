@@ -15,11 +15,11 @@ cbuffer PerFrame : register(b1)
 cbuffer PerObject : register(b2)
 {
 	ScenePerObject object;
-}
+} 
 
 Texture2D diffuseTex : register(t0);
 Texture2D emissiveTex : register(t1);
-Texture2DMS<float> shadowDepthMap : register(t2);
+Texture2DMS<float> shadowDepthMap : register(t2); 
 TextureCube<float> pointShadowDepthMaps0 : register(t3);
 TextureCube<float> pointShadowDepthMaps1 : register(t4);
 
@@ -27,8 +27,7 @@ SamplerState texSampler : register(s0);
 SamplerState clampSampler : register(s1);
 
 struct PixelShaderInput {
-    float4 position : SV_POSITION;
-    float4 color : COLOR;
+    float4 color : COLOR; 
     float4 viewPos : POSITION;
     float3 normal : NORMAL;
     float2 uv : TEXCOORD0;
@@ -68,8 +67,8 @@ PixelShaderOutput main(PixelShaderInput IN)
 	PixelShaderOutput OUT;
 	
 	if (object.hasLight){
-		float4 lightDiffuseIntensity = float4(0.0, 0.0, 0.0, 0.0);
-		float4 lightSpecularIntensity = float4(0.0, 0.0, 0.0, 0.0);
+		float3 lightDiffuseIntensity = float3(0.0, 0.0, 0.0);
+		float3 lightSpecularIntensity = float3(0.0, 0.0, 0.0);
 		
 		castDirectionalShadowLight(
 			lightDiffuseIntensity,
@@ -116,8 +115,11 @@ PixelShaderOutput main(PixelShaderInput IN)
 		}
 
 		OUT.fragColor = 
-			lightDiffuseIntensity * diffuseColor +
-			lightSpecularIntensity * specularColor;
+			float4(
+				lightDiffuseIntensity * diffuseColor +
+				lightSpecularIntensity * specularColor, 
+				diffuseColor.a
+			);
 	}else{
 		OUT.fragColor = diffuseColor;
 	}

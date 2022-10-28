@@ -1,11 +1,11 @@
 #include "pointshadow.sl"
 
 struct GeometryShaderInput {
-    float4 position : SV_POSITION;
+    float4 position : SV_Position;
 };
 
 struct GeometryShaderOutput {
-    float4 position : SV_POSITION;
+    float4 position : SV_Position;
     float4 worldPos : POSITION;
     uint layer : SV_RenderTargetArrayIndex;
 };

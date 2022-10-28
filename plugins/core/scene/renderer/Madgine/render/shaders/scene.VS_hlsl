@@ -13,7 +13,7 @@ cbuffer PerFrame : register(b1)
 }
 
 cbuffer PerObject : register(b2)
-{
+{ 
     ScenePerObject object;
 }
 
@@ -35,12 +35,12 @@ struct AppData {
 };
 
 struct VertexShaderOutput {
-    float4 position : SV_POSITION;
     float4 color : COLOR;
     float4 viewPos : POSITION;
     float3 normal : NORMAL;
     float2 uv : TEXCOORD0;
     float4 lightViewPosition : TEXCOORD1;
+    float4 position : SV_Position;
 };
 
 VertexShaderOutput main(AppData IN)
@@ -64,9 +64,7 @@ VertexShaderOutput main(AppData IN)
     OUT.viewPos = mul(IN.aInstance.mv, effectivePos);
     
     OUT.position = mul(app.p, OUT.viewPos + float4(aPos2, 0.0, 0.0));
-    OUT.position.z += OUT.position.w;
-    OUT.position.z /= 2;
-    
+
     OUT.color = IN.aColor;
 
 	OUT.normal = mul((float3x3)IN.aInstance.anti_mv, IN.aNormal);

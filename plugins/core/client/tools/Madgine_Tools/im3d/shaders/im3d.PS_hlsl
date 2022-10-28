@@ -5,11 +5,6 @@ cbuffer PerApplication : register(b0)
     Im3DPerApplication app;
 }
 
-cbuffer PerFrame : register(b1)
-{   
-    Im3DPerFrame frame;
-}
-
 cbuffer PerObject : register(b2)
 {
     Im3DPerObject object;
@@ -20,10 +15,8 @@ Texture2D tex : register(t0);
 SamplerState texSampler : register(s0);
 
 struct PixelShaderInput {
-    float4 position : SV_POSITION;
+    float4 position : SV_Position;
     float4 color : COLOR;
-    float4 worldPos : POSITION;
-    float3 normal : NORMAL;
     float2 uv : TEXCOORD0;
 };
 

@@ -4,13 +4,10 @@
 
 #include "openglrendertarget.h"
 
-#include "Madgine/meshloader/meshdata.h"
-#include "openglmeshdata.h"
-#include "openglmeshloader.h"
-
 #include "Meta/math/rect2i.h"
 
-#include "util/openglpipelineinstance.h"
+#include "Meta/math/matrix4.h"
+
 
 namespace Engine {
 namespace Render {
@@ -70,6 +67,14 @@ namespace Render {
 
         glViewport(space.mTopLeft.x, screenSize.y - (space.mTopLeft.y + space.mSize.y), space.mSize.x, space.mSize.y);
         GL_CHECK();
+    }
+
+    Matrix4 OpenGLRenderTarget::getClipSpaceMatrix() const
+    {
+        return Matrix4 {1,0,0,0,
+                        0,1,0,0,
+                        0,0,2,-1,
+                        0,0,0,1};
     }
 
     void OpenGLRenderTarget::clearDepthBuffer()

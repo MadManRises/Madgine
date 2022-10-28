@@ -11,7 +11,7 @@ Texture2D blurred : register(t1);
 SamplerState texSampler : register(s0);
 
 struct PixelShaderInput {
-    float4 position : SV_POSITION;
+    float4 position : SV_Position;
     float2 texCoord : TEXCOORD0;
 };
 

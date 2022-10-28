@@ -1,6 +1,6 @@
 struct PixelShaderInput
 {
-    float4 pos : SV_POSITION;
+    float4 pos : SV_Position;
     float4 worldPos : POSITION;
 };
 

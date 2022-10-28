@@ -6,12 +6,12 @@
 #    define MADGINE_IM3D_EXPORT DLL_IMPORT
 #endif
 
+#include "Madgine/render/renderforward.h"
+#include "Madgine/render/vertex.h"
+#include "Meta/math/frustum.h"
 #include "Meta/math/matrix4.h"
 #include "Meta/math/ray.h"
 #include "Meta/math/vector2i.h"
-#include "Meta/math/frustum.h"
-#include "Madgine/render/vertex.h"
-#include "Madgine/render/renderforward.h"
 
 #include "im3d_parameters.h"
 
@@ -51,6 +51,16 @@ struct Im3DIO {
 
 namespace Im3D {
 
+    using Vertex = Engine::Compound<
+        Engine::Render::VertexPos,
+        Engine::Render::VertexColor>;
+
+    using Vertex2 = Engine::Compound<
+        Engine::Render::VertexPos,
+        Engine::Render::VertexPos2,
+        Engine::Render::VertexColor,
+        Engine::Render::VertexUV>;
+
     struct Im3DContext;
     struct Im3DObject;
 
@@ -67,8 +77,8 @@ namespace Im3D {
     MADGINE_IM3D_EXPORT void PushID(const void *ptr);
     MADGINE_IM3D_EXPORT void PopID();
 
-    MADGINE_IM3D_EXPORT void Mesh(Im3DMeshType type, const Render::Vertex *vertices, size_t vertexCount, const MeshParameters &param = {}, const uint32_t *indices = nullptr, size_t indexCount = 0);
-    MADGINE_IM3D_EXPORT void Mesh(Im3DMeshType type, Render::RenderPassFlags flags, const Render::Vertex2 *vertices, size_t vertexCount, const MeshParameters &param = {}, const uint32_t *indices = nullptr, size_t indexCount = 0, Im3DTextureId texId = 0);
+    MADGINE_IM3D_EXPORT void Mesh(Im3DMeshType type, const Vertex *vertices, size_t vertexCount, const MeshParameters &param = {}, const uint32_t *indices = nullptr, size_t indexCount = 0);
+    MADGINE_IM3D_EXPORT void Mesh(Im3DMeshType type, Render::RenderPassFlags flags, const Vertex2 *vertices, size_t vertexCount, const MeshParameters &param = {}, const uint32_t *indices = nullptr, size_t indexCount = 0, Im3DTextureId texId = 0);
 
     MADGINE_IM3D_EXPORT void NativeMesh(Im3DNativeMesh mesh, const AABB &bb, const Matrix4 &transform = Matrix4::IDENTITY);
 

@@ -46,6 +46,8 @@ set (CPACK_PACKAGE_VENDOR "MadMan Studios")
 enable_packaging()
 
 
+add_subdirectory(util)
+
 add_subdirectory(src)
 
 add_subdirectory(shared)

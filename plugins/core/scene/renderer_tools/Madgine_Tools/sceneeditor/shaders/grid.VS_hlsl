@@ -11,7 +11,7 @@ struct AppData
 
 struct VertexShaderOutput
 {
-    float4 pos : SV_POSITION;
+    float4 pos : SV_Position;
     float4 worldPos : POSITION;
 };
 
@@ -20,7 +20,5 @@ VertexShaderOutput main( AppData IN )
     VertexShaderOutput OUT;
     OUT.worldPos = float4(IN.aPos, IN.aW);
     OUT.pos = mul( vp, OUT.worldPos );
-    OUT.pos.z += OUT.pos.w;
-    OUT.pos.z /= 2;
     return OUT;
 }

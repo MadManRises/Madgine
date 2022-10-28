@@ -27,6 +27,7 @@ namespace Tools {
         bool render();
 
         Render::Camera &camera();
+        Render::SceneRenderPass &sceneRenderer();
 
     private:
         Render::Camera mCamera;

@@ -76,6 +76,8 @@ namespace Render {
 
     void GPUMeshLoader::update(GPUMeshData &data, const MeshData &mesh)
     {
+        assert(data.mFormat == mesh.mFormat);
+
         if (mesh.mIndices.empty()) {
             data.mElementCount = mesh.mVertices.mSize / mesh.mVertexSize;
         } else {

@@ -25,3 +25,12 @@ target_link_libraries(DirectX11Tools PRIVATE d3d11 dxgi d3dcompiler)
 if (BUILD_TESTING)
 	add_subdirectory(test)
 endif()
+
+add_executable(ShadergenHLSL "util/shadergenHLSL.cpp")
+
+add_shadergen_target(ShadergenHLSL)
+
+add_custom_command(TARGET ShadergenHLSL POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:dxcompiler> ${CMAKE_BINARY_DIR}/util)
+
+target_link_libraries(ShadergenHLSL dxcompiler spirv-cross-core spirv-cross-hlsl spirv-cross-glsl)

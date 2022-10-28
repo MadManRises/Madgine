@@ -9,8 +9,8 @@ float4 projectShadow(
 }
 
 void castDirectionalLight(
-    inout float4 diffuseIntensity,
-    inout float4 specularIntensity,
+    inout float3 diffuseIntensity,
+    inout float3 specularIntensity,
     DirectionalLight light,
     float3 pos,
     float3 normal,
@@ -26,19 +26,19 @@ void castDirectionalLight(
     float diff = max(dot(norm, -light.dir), 0.0);
     float3 diffuse = diffuseFactor * diff * light.color;
 
-    diffuseIntensity += float4(ambient + diffuse, 1.0);
+    diffuseIntensity += ambient + diffuse;
 
-    float3 viewDir = normalize(/* -pos */ float3(0.0, 0.0, -1.0));
+    float3 viewDir = normalize(-pos /* float3(0.0, 0.0, -1.0)*/);
     float3 reflectDir = reflect(-light.dir, norm);
     float spec = pow(max(dot(viewDir, -reflectDir), 0.0), shininess);
     float3 specular = specularFactor * spec * light.color;
 
-    specularIntensity += float4(specular, 1.0);
+    specularIntensity += specular;
 }
 
 void castDirectionalShadowLight(
-    inout float4 diffuseIntensity,
-    inout float4 specularIntensity,
+    inout float3 diffuseIntensity,
+    inout float3 specularIntensity,
     DirectionalShadowLight light,
     float4 lightViewPosition,
     float3 pos,
@@ -50,10 +50,10 @@ void castDirectionalShadowLight(
     float shininess)
 {
     float bias = 0.001;
-    float3 normalizedLightViewPosition = (lightViewPosition.xyz / lightViewPosition.w) * 0.5 + 0.5;
-    normalizedLightViewPosition.y = 1.0 - normalizedLightViewPosition.y;
-    int2 lightTexCoord = int2(2048 * normalizedLightViewPosition.xy);
-
+    float3 normalizedLightViewPosition = lightViewPosition.xyz / lightViewPosition.w;    
+    normalizedLightViewPosition.y *= -1;
+    int2 lightTexCoord = int2(2048 * (normalizedLightViewPosition.xy * 0.5 + 0.5));
+    
     float lightDepth = normalizedLightViewPosition.z - bias;
 
     float lightStrength = 1.0;
@@ -77,8 +77,8 @@ void castDirectionalShadowLight(
 }
 
 void castPointLight(
-    inout float4 diffuseIntensity,
-    inout float4 specularIntensity,
+    inout float3 diffuseIntensity,
+    inout float3 specularIntensity,
     PointLight light,
     float3 pos,
     float3 normal,
@@ -97,12 +97,12 @@ void castPointLight(
     float distance = length(light.position - pos);
     float attenuation = 1.0 / (light.constant + light.linearFactor * distance + light.quadratic * (distance * distance));
 
-    diffuseIntensity += attenuation * float4(ambient + diffuse, 0.0);
+    diffuseIntensity += attenuation * ambient + diffuse;
 }
 
 void castPointShadowLight(
-    inout float4 diffuseIntensity,
-    inout float4 specularIntensity,
+    inout float3 diffuseIntensity,
+    inout float3 specularIntensity,
     PointLight light,
     float3 pos,
     float3 normal,

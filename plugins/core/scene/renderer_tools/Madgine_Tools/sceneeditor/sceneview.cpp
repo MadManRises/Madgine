@@ -202,9 +202,15 @@ namespace Tools {
         return mCamera;
     }
 
+    Render::SceneRenderPass &SceneView::sceneRenderer()
+    {
+        return mSceneRenderer;
+    }
+
 }
 }
 
 METATABLE_BEGIN(Engine::Tools::SceneView)
 READONLY_PROPERTY(Camera, camera)
+READONLY_PROPERTY(SceneRenderer, sceneRenderer)
 METATABLE_END(Engine::Tools::SceneView)

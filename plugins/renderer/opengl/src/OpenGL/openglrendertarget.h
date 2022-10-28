@@ -18,6 +18,8 @@ namespace Render {
         virtual void popAnnotation() override;
 
         virtual void setRenderSpace(const Rect2i &space) override;
+
+        virtual Matrix4 getClipSpaceMatrix() const override;
     };
 
 }

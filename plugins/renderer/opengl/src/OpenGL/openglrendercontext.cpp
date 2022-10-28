@@ -447,17 +447,20 @@ namespace Render {
             //Pos2
             glVertexAttrib2f(2, 0, 0);
             GL_CHECK();
+            //Normal
+            glVertexAttrib3f(3, 0, 0, 0);
+            GL_CHECK();
             //Color
-            glVertexAttrib4f(3, 1, 1, 1, 1);
+            glVertexAttrib4f(4, 1, 1, 1, 1);
             GL_CHECK();
             //UV
-            glVertexAttrib2f(4, 0, 0);
+            glVertexAttrib2f(5, 0, 0);
             GL_CHECK();
             //BoneIndices
-            glVertexAttribI4i(5, 0, 0, 0, 0);
+            glVertexAttribI4i(6, 0, 0, 0, 0);
             GL_CHECK();
             //Weights
-            glVertexAttrib4f(6, 0, 0, 0, 0);
+            glVertexAttrib4f(7, 0, 0, 0, 0);
             GL_CHECK();
 
             glEnable(GL_BLEND);
@@ -620,8 +623,6 @@ namespace Render {
 
     void OpenGLRenderContext::bindFormat(VertexFormat format, OpenGLBuffer *instanceBuffer, size_t instanceDataSize)
     {
-        assert(!format.has(0) || !format.has(1));
-
 #if !OPENGL_ES || OPENGL_ES >= 310
 #    if !OPENGL_ES
         if (glVertexAttribFormat) {
@@ -675,8 +676,9 @@ namespace Render {
             }
         }
 
-        glDisableVertexAttribArray(VertexElements::size);
-        glDisableVertexAttribArray(VertexElements::size + 1);
+        for (size_t i = 0; i < 8; ++i) {
+            glDisableVertexAttribArray(VertexElements::size + i);         
+        }
 
         if (instanceBuffer) {
             instanceBuffer->bind();

@@ -86,7 +86,7 @@ namespace Render {
             rasterizerDesc.CullMode = /*D3D11_CULL_BACK*/ D3D11_CULL_NONE;
             rasterizerDesc.DepthBias = 0;
             rasterizerDesc.DepthBiasClamp = 0.0f;
-            rasterizerDesc.DepthClipEnable = FALSE;
+            rasterizerDesc.DepthClipEnable = TRUE;
             rasterizerDesc.FillMode = D3D11_FILL_SOLID;
             rasterizerDesc.FrontCounterClockwise = FALSE;
             rasterizerDesc.MultisampleEnable = FALSE;

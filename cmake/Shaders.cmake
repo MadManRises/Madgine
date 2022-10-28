@@ -7,39 +7,50 @@ macro(compile_shaders target)
 
     get_property(sources TARGET ${target} PROPERTY SOURCES)
     
+    add_dependencies(${target} ShaderGen)
+
     foreach (source ${sources})
         set (compile FALSE)
         
         get_filename_component(ext ${source} EXT)
 
         if (ext STREQUAL ".PS_hlsl")
+            set(profile ps_6_2)
+            set(extension ".PS_spirv")
             set(compile TRUE)
-            set(shadertype ps)
         endif()
         if (ext STREQUAL ".VS_hlsl")
-            set(compile TRUE)
-            set(shadertype vs)
+            set(profile vs_6_2)
+            set(extension ".VS_spirv")
+            set(compile TRUE)            
         endif()
         if (ext STREQUAL ".GS_hlsl")
+            set(profile gs_6_2)
+            set(extension ".GS_spirv")
             set(compile TRUE)
-            set(shadertype gs)
         endif()
-        if (ext STREQUAL ".sl")
-            set(compile TRUE)
-            set(shadertype sl)
-        endif()
-        if (ext STREQUAL ".hlsl")
-            set(compile TRUE)
+        if (ext STREQUAL ".hlsl")            
             set_source_files_properties(${source} PROPERTIES VS_TOOL_OVERRIDE "None")
         endif()
         if (compile)
-            get_filename_component(name ${source} NAME)
-            add_custom_command(TARGET ${target}
-                COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${source} data/${name}
+            get_filename_component(name ${source} NAME_WE)
+            add_custom_command(OUTPUT spirv/${name}${extension}
+                COMMAND $<TARGET_FILE:dxc>
+                    -E main
+                    -T ${profile} 
+                    -spirv 
+                    -Fo spirv/${name}${extension}
+                    ${CMAKE_CURRENT_SOURCE_DIR}/${source}   
+                COMMAND ${CMAKE_COMMAND} 
+                    -DTools=$<GENEX_EVAL:$<TARGET_PROPERTY:ShaderGen,ShaderGenTools>>
+                    -DInputFile=${CMAKE_CURRENT_BINARY_DIR}/spirv/${name}${extension}
+                    -DOutputFolder=${CMAKE_BINARY_DIR}/data
+                    -P ${workspace_file_dir}/transpileShaders.cmake
                 MAIN_DEPENDENCY ${source}
-                COMMENT "Copying HLSL ${shadertype} shader: ${name}"
-                WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+                DEPENDS dxc ShaderGen ${workspace_file_dir}/transpileShaders.cmake $<GENEX_EVAL:$<TARGET_PROPERTY:ShaderGen,ShaderGenTools>>
+                COMMENT "Transpiling shader: ${name}"
                 VERBATIM)
+            target_sources(${target} PRIVATE spirv/${name}${extension})
         endif()
 
     endforeach()
