@@ -40,11 +40,7 @@ namespace Render {
 
     Matrix4 Camera::getViewMatrix()
     {
-        Matrix4 rotate = Matrix4 { mOrientation.inverse().toMatrix() };
-
-        Matrix4 translate = TranslationMatrix(-mPosition);
-
-        return rotate * translate;
+        return Matrix4 { mOrientation.inverse().toMatrix() } * TranslationMatrix(-mPosition);
     }
 
     Matrix4 Camera::getProjectionMatrix(float aspectRatio)
