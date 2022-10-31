@@ -10,10 +10,6 @@
 
 #include "Interfaces/filesystem/api.h"
 
-#include "Madgine/render/shadinglanguage/slloader.h"
-
-#include "Madgine/codegen/resolveincludes.h"
-
 UNIQUECOMPONENT(Engine::Render::DirectX11PixelShaderLoader);
 
 namespace Engine {
@@ -99,13 +95,6 @@ namespace Render {
             profile = GetLatestPixelProfile();
 
         std::map<std::string, size_t> files;
-
-        CodeGen::resolveIncludes(
-            source, [](const Filesystem::Path &path, size_t line, std::string_view filename) {
-                Resources::ResourceBase *res = SlLoader::get(path.stem());
-                return "#line 1 \"" + path.filename().str() + "\"\n" + res->readAsText() + "\n#line " + std::to_string(line + 1) + " \"" + std::string { filename } + "\"";
-            },
-            name, files);
 
         const char *cSource = source.data();
 

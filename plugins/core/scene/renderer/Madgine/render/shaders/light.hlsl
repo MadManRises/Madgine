@@ -5,7 +5,7 @@ float4 projectShadow(
     ShadowCaster caster,
     float4 pos)
 {
-    return mul(caster.viewProjectionMatrix, pos);
+    return mul(caster.reprojectionMatrix, pos);
 }
 
 void castDirectionalLight(
@@ -18,18 +18,16 @@ void castDirectionalLight(
     float diffuseFactor,
     float specularFactor,
     float shininess)
-{
+{ 
     float3 ambient = ambientFactor * light.color;
-
-    float3 norm = normalize(normal);
     
-    float diff = max(dot(norm, -light.dir), 0.0);
+    float diff = max(dot(normal, -light.dir), 0.0);
     float3 diffuse = diffuseFactor * diff * light.color;
 
     diffuseIntensity += ambient + diffuse;
 
     float3 viewDir = normalize(-pos /* float3(0.0, 0.0, -1.0)*/);
-    float3 reflectDir = reflect(-light.dir, norm);
+    float3 reflectDir = reflect(-light.dir, normal);
     float spec = pow(max(dot(viewDir, -reflectDir), 0.0), shininess);
     float3 specular = specularFactor * spec * light.color;
 
@@ -49,7 +47,7 @@ void castDirectionalShadowLight(
     float specularFactor,
     float shininess)
 {
-    float bias = 0.001;
+    float bias = max(0.05 * (1.0 - dot(normal, light.light.dir)), 0.005);  
     float3 normalizedLightViewPosition = lightViewPosition.xyz / lightViewPosition.w;    
     normalizedLightViewPosition.y *= -1;
     int2 lightTexCoord = int2(2048 * (normalizedLightViewPosition.xy * 0.5 + 0.5));
@@ -90,20 +88,20 @@ void castPointLight(
     float3 ambient = ambientFactor * light.color;
 
     float3 lightDir = normalize(light.position - pos);
-    float3 norm = normalize(normal);
-    float diff = max(dot(norm, lightDir), 0.0);
+
+    float diff = max(dot(normal, lightDir), 0.0);
     float3 diffuse = diffuseFactor * diff * light.color;
 
     float distance = length(light.position - pos);
     float attenuation = 1.0 / (light.constant + light.linearFactor * distance + light.quadratic * (distance * distance));
 
-    diffuseIntensity += attenuation * ambient + diffuse;
+    diffuseIntensity += attenuation * (ambient + diffuse);
 }
 
 void castPointShadowLight(
     inout float3 diffuseIntensity,
     inout float3 specularIntensity,
-    PointLight light,
+    PointShadowLight light,
     float3 pos,
     float3 normal,
     TextureCube<float> shadowMap,
@@ -114,9 +112,9 @@ void castPointShadowLight(
     float shininess)
 {
     float bias = 0.001;
-    float3 lightDir = pos - light.position;
+    float3 lightDir = projectShadow(light.caster, float4(pos - light.light.position, 0.0)).xyz;
 
-    float lightDepth = length(lightDir) / 100.0 - bias;
+    float lightDepth = (length(lightDir) - 0.01) / 99.99 - bias;
 
     float lightStrength = 1.0;
     
@@ -126,7 +124,7 @@ void castPointShadowLight(
     castPointLight(
         diffuseIntensity,
         specularIntensity, 
-        light, 
+        light.light, 
         pos, 
         normal, 
         ambientFactor, 

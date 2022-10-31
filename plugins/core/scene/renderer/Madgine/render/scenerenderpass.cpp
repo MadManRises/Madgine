@@ -21,6 +21,8 @@
 
 #include "Madgine/scene/entity/components/material.h"
 
+#include "Meta/math/transformation.h"
+
 #define SL_SHADER shaders/scene
 #include INCLUDE_SL_SHADER
 
@@ -124,7 +126,7 @@ namespace Render {
         {
             auto perFrame = mPipeline->mapParameters<ScenePerFrame>(1);
 
-            perFrame->light.caster.viewProjectionMatrix = mShadowPass.viewProjectionMatrix() * v.Inverse();
+            perFrame->light.caster.reprojectionMatrix = mShadowPass.viewProjectionMatrix() * v.Inverse();
 
             perFrame->light.caster.shadowSamples = 4;
 
@@ -142,11 +144,12 @@ namespace Render {
                 Scene::Entity::Transform *t = lights.getEntity(i)->getComponent<Scene::Entity::Transform>();
                 if (t) {
                     float range = lights[i].mRange;
-                    perFrame->pointLights[i].position = (v * Vector4 { t->mPosition, 1.0f }).xyz();
-                    perFrame->pointLights[i].color = lights[i].mColor;
-                    perFrame->pointLights[i].constant = 1.0f;
-                    perFrame->pointLights[i].linearFactor = 4.5f / range;
-                    perFrame->pointLights[i].quadratic = 75.0f / (range * range);
+                    perFrame->pointLights[i].light.position = (v * Vector4 { t->mPosition, 1.0f }).xyz();
+                    perFrame->pointLights[i].light.color = lights[i].mColor;
+                    perFrame->pointLights[i].light.constant = 1.0f;
+                    perFrame->pointLights[i].light.linearFactor = 4.5f / range;
+                    perFrame->pointLights[i].light.quadratic = 75.0f / (range * range);
+                    perFrame->pointLights[i].caster.reprojectionMatrix = v.Inverse();
                 }
             }
         }
@@ -189,9 +192,9 @@ namespace Render {
 
             std::ranges::transform(instance.second, std::back_inserter(instanceData), [&](const Matrix4 &m) {
                 Matrix4 mv = v * m;
-                return SceneInstanceData { //TODO: Additional Transpose() to make generated HLSL work
+                return SceneInstanceData { 
                     mv.Transpose(),
-                    mv.Inverse().Transpose().Transpose()
+                    mv.Inverse() /*.Transpose().Transpose()*/
                 };
             });
 

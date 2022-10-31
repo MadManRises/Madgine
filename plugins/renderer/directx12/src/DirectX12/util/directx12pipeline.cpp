@@ -4,10 +4,6 @@
 
 #include "../directx12rendercontext.h"
 
-#include "Madgine/codegen/resolveincludes.h"
-
-#include "Madgine/render/shadinglanguage/slloader.h"
-
 namespace Engine {
 namespace Render {
 

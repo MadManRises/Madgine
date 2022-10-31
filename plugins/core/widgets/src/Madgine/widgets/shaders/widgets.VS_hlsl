@@ -6,11 +6,8 @@ cbuffer PerApplication : register(b0)
 }
 
 struct AppData {
-    [[vk::location(0)]]
     float3 aPos : POSITION0;
-    [[vk::location(4)]]
     float4 aColor : COLOR;
-    [[vk::location(5)]]
     float2 aUV : TEXCOORD;
 };
 

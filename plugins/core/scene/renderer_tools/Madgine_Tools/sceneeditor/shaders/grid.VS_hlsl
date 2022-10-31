@@ -1,3 +1,4 @@
+
 cbuffer PerFrame : register( b1 )
 {
     matrix vp;
@@ -7,7 +8,7 @@ struct AppData
 {
     float3 aPos : POSITION0; 
     float aW : POSITION1;
-};
+}; 
 
 struct VertexShaderOutput
 {
@@ -21,4 +22,4 @@ VertexShaderOutput main( AppData IN )
     OUT.worldPos = float4(IN.aPos, IN.aW);
     OUT.pos = mul( vp, OUT.worldPos );
     return OUT;
-}
+} 

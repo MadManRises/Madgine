@@ -54,60 +54,106 @@ struct ReleasePtr : std::unique_ptr<T, ReleaseDeleter> {
 
 int usage()
 {
-    std::cerr << "Usage: Shadergen <input-file> <output-folder>\n";
+    std::cerr << "Usage: Shadergen <source-file> <input-file> <output-folder> [-g]\n";
     return -1;
 }
 
-int transpileGLSL(std::string &out, const std::vector<unsigned char> &code)
+static std::map<std::string, uint32_t> sSemanticLocationMappings {
+    { "POSITION0", 0 },
+    { "POSITION1", 1 },
+    { "POSITION2", 2 },
+    { "NORMAL", 3 },
+    { "COLOR", 4 },
+    { "TEXCOORD", 5 },
+    { "BONEINDICES", 6 },
+    { "WEIGHTS", 7 },
+    { "INSTANCEDATA", 8 },
+    { "INSTANCEDATA1", std::numeric_limits<uint32_t>::max() }
+};
+
+int transpileGLSL(std::string &out, const std::vector<unsigned char> &code, const std::string &filename)
 {
-    spirv_cross::CompilerGLSL glsl { (uint32_t *)code.data(), code.size() / 4 };    
+    try {
+        spirv_cross::CompilerGLSL glsl { (uint32_t *)code.data(), code.size() / 4 };
 
-    spirv_cross::ShaderResources resources = glsl.get_shader_resources();
+        glsl.set_common_options(spirv_cross::CompilerGLSL::Options { .relax_nan_checks = true });
 
-    std::map<spirv_cross::ID, std::pair<std::string, uint32_t>> imageData;
+        spirv_cross::ShaderResources resources = glsl.get_shader_resources();
 
-    for (auto& resource : resources.separate_images) {
-        imageData[resource.id] = { glsl.get_name(resource.id), glsl.get_decoration(resource.id, spv::DecorationBinding) };
+        std::map<spirv_cross::ID, std::pair<std::string, uint32_t>> imageData;
+
+        for (auto &resource : resources.separate_images) {
+            imageData[resource.id] = { glsl.get_name(resource.id), glsl.get_decoration(resource.id, spv::DecorationBinding) };
+        }
+
+        glsl.build_dummy_sampler_for_combined_images();
+
+        glsl.build_combined_image_samplers();
+
+        auto &mappings = glsl.get_combined_image_samplers();
+        std::map<spirv_cross::ID, spirv_cross::ID> map;
+        for (auto &mapping : mappings) {
+            map[mapping.combined_id] = mapping.image_id;
+        }
+
+        resources = glsl.get_shader_resources();
+
+        for (auto &resource : resources.sampled_images) {
+            auto &data = imageData[map[resource.id]];
+            glsl.set_name(resource.id, data.first);
+            glsl.set_decoration(resource.id, spv::DecorationBinding, data.second);
+        }
+
+        for (const spirv_cross::VariableID &id : glsl.get_active_interface_variables()) {
+            if (glsl.get_storage_class(id) == spv::StorageClassInput && glsl.get_execution_model() == spv::ExecutionModelVertex) {
+                std::string name = glsl.get_name(id);
+                std::string semantic = name.substr(name.rfind('.') + 1);
+                auto it = sSemanticLocationMappings.find(semantic);
+                if (it != sSemanticLocationMappings.end()) {
+                    uint32_t location = it->second;
+                    if (location != std::numeric_limits<uint32_t>::max())
+                        glsl.set_decoration(id, spv::DecorationLocation, location);
+                } else {
+                    std::cerr << filename << "(1,1): warning : Unsupported semantic " << semantic << " used for " << name << std::endl;
+                }
+            }
+        }
+
+        out = glsl.compile();
+    } catch (spirv_cross::CompilerError &error) {
+        std::cout << std::endl;
+        std::cerr << filename << "(1,1): error: " << error.what()
+                  << "\n";
+        return -1;
     }
-
-    glsl.build_dummy_sampler_for_combined_images();
-
-    glsl.build_combined_image_samplers();
-
-    auto &mappings = glsl.get_combined_image_samplers();
-    std::map<spirv_cross::ID, spirv_cross::ID> map;
-    for (auto& mapping : mappings) {
-        map[mapping.combined_id] = mapping.image_id;
-    }
-
-    resources = glsl.get_shader_resources();
-
-    for (auto &resource : resources.sampled_images) {
-        auto &data = imageData[map[resource.id]];
-        glsl.set_name(resource.id, data.first);
-        glsl.set_decoration(resource.id, spv::DecorationBinding, data.second);
-    }
-
-    out = glsl.compile();
 
     return 0;
 }
 
 int main(int argc, char **argv)
 {
-    if (argc != 3) {
+    if (argc != 4 && argc != 5) {
         return usage();
     }
 
-    std::filesystem::path inputFile = argv[1];
-    std::filesystem::path outputFolder = argv[2];
+    std::filesystem::path sourceFile = argv[1];
+    std::filesystem::path inputFile = argv[2];
+    std::filesystem::path outputFolder = argv[3];
 
     if (!inputFile.has_filename()) {
         std::cerr << "Error: input path must be a file!\n";
         return -1;
     }
 
-    std::cout << "Transpiling " << inputFile.filename() << " to GLSL..." << std::endl;
+    bool debug = false;
+    if (argc == 5) {
+        std::string debugFlag = argv[4];
+        if (debugFlag != "-g")
+            return usage();
+        debug = true;
+    }
+
+    std::cout << "GLSL... ";
 
     std::ifstream ifs { inputFile, std::ios_base::binary };
     ifs >> std::noskipws;
@@ -118,15 +164,9 @@ int main(int argc, char **argv)
 
     std::string shaderCode;
 
-    try {
-        int result = transpileGLSL(shaderCode, code);
-        if (result != 0)
-            return result;
-    } catch (spirv_cross::CompilerError &error) {
-        std::cerr << inputFile.string() << "(1,1): error: " << error.what()
-                  << "\n";
-        return -1;
-    }
+    int result = transpileGLSL(shaderCode, code, inputFile.string());
+    if (result != 0)
+        return result;
 
     std::string extension = "_" + inputFile.extension().string().substr(1, 2) + ".glsl";
 

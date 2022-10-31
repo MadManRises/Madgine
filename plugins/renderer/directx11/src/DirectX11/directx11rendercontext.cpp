@@ -205,24 +205,36 @@ namespace Render {
 
         if (!layout) {
 
+#ifndef NDEBUG
+#    define semantic(i) vSemantics[i]
+#    define semanticIndex(i) vSemanticIndices[i]
+#    define instanceSemantic "INSTANCEDATA"
+#    define instanceSemanticIndex(i) (UINT) i
+#else
+#    define semantic(i) "TEXCOORD"
+#    define semanticIndex(i) (UINT) i
+#    define instanceSemantic "TEXCOORD"
+#    define instanceSemanticIndex(i) (UINT)(VertexElements::size + i)
+#endif
+
             std::vector<D3D11_INPUT_ELEMENT_DESC> vertexLayoutDesc;
 
             UINT offset = 0;
             for (size_t i = 0; i < VertexElements::size; ++i) {
                 if (format.has(i)) {
-                    vertexLayoutDesc.push_back({ "TEXCOORD",
-                        (UINT)i, vFormats[i], 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 });
+                    vertexLayoutDesc.push_back({ semantic(i),
+                        semanticIndex(i), vFormats[i], 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 });
                     offset += sVertexElementSizes[i];
                 } else {
-                    vertexLayoutDesc.push_back({ "TEXCOORD",
-                        (UINT)i, vFormats[i], 2, vConstantOffsets[i], D3D11_INPUT_PER_VERTEX_DATA, 0 });
+                    vertexLayoutDesc.push_back({ semantic(i),
+                        semanticIndex(i), vFormats[i], 2, vConstantOffsets[i], D3D11_INPUT_PER_VERTEX_DATA, 0 });
                 }
             }
 
             assert(instanceDataSize % 16 == 0);
             for (size_t i = 0; i < instanceDataSize / 16; ++i) {
-                vertexLayoutDesc.push_back({ "TEXCOORD",
-                    (UINT)(VertexElements::size + i),
+                vertexLayoutDesc.push_back({ instanceSemantic,
+                    instanceSemanticIndex(i),
                     DXGI_FORMAT_R32G32B32A32_FLOAT,
                     1,
                     i == 0 ? 0 : D3D11_APPEND_ALIGNED_ELEMENT,

@@ -16,13 +16,19 @@ struct PointLight {
 };
 
 struct ShadowCaster {
-	float4x4 viewProjectionMatrix;
+	float4x4 reprojectionMatrix;
 
 	int shadowSamples;
 };
 
 struct DirectionalShadowLight {
 	DirectionalLight light;
+
+	ShadowCaster caster;
+};
+
+struct PointShadowLight {
+	PointLight light;
 
 	ShadowCaster caster;
 };

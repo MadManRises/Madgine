@@ -1,5 +1,22 @@
 #include "pointshadow.sl"
 
+
+cbuffer PerApplication : register(b0)
+{
+	PointShadowPerApplication app;
+};
+
+cbuffer PerFrame : register(b1)
+{
+	PointShadowPerFrame frame;
+};
+
+cbuffer PerObject : register(b2)
+{
+	PointShadowPerObject object;
+};
+
+
 struct GeometryShaderInput {
     float4 position : SV_Position;
 };
@@ -10,19 +27,13 @@ struct GeometryShaderOutput {
     uint layer : SV_RenderTargetArrayIndex;
 };
 
-cbuffer PerApplication : register(b0)
-{
-	PointShadowPerApplication app;
-};
-
-
 void helper(GeometryShaderInput IN[3], float4x4 m, int layer, inout TriangleStream<GeometryShaderOutput> stream){
     GeometryShaderOutput OUT;
     OUT.layer = layer; // built-in variable that specifies to which face we render.
     for(int i = 0; i < 3; ++i) // for each triangle vertex
     {
         OUT.worldPos = IN[i].position;
-        OUT.position = mul(app.p, mul(m, IN[i].position));
+        OUT.position = mul(app.p, mul(m, IN[i].position - float4(frame.position * IN[i].position.w, 0.0)));
         stream.Append(OUT);
     }    
     stream.RestartStrip();
@@ -32,16 +43,16 @@ void helper(GeometryShaderInput IN[3], float4x4 m, int layer, inout TriangleStre
 void main(triangle GeometryShaderInput IN[3], inout TriangleStream<GeometryShaderOutput> stream)
 {
     float4x4 mx1 = float4x4(0,0,-1,0, 0,1,0,0, 1,0,0,0, 0,0,0,1);
-   float4x4 mx2 = float4x4(0,0,1,0, 0,1,0,0, -1,0,0,0, 0,0,0,1);
-   float4x4 my1 = float4x4(1,0,0,0, 0,0,-1,0, 0,1,0,0, 0,0,0,1);
-   float4x4 my2 = float4x4(1,0,0,0, 0,0,1,0, 0,-1,0,0, 0,0,0,1);
-   float4x4 mz1 = float4x4(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1);
-   float4x4 mz2 = float4x4(-1,0,0,0, 0,1,0,0, 0,0,-1,0, 0,0,0,1);
+    float4x4 mx2 = float4x4(0,0,1,0, 0,1,0,0, -1,0,0,0, 0,0,0,1);
+    float4x4 my1 = float4x4(1,0,0,0, 0,0,-1,0, 0,1,0,0, 0,0,0,1);
+    float4x4 my2 = float4x4(1,0,0,0, 0,0,1,0, 0,-1,0,0, 0,0,0,1);
+    float4x4 mz1 = float4x4(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1);
+    float4x4 mz2 = float4x4(-1,0,0,0, 0,1,0,0, 0,0,-1,0, 0,0,0,1);
    
-   helper(IN, mx1, 0, stream);
-   helper(IN, mx2, 1, stream);
-   helper(IN, my1, 2, stream);
-   helper(IN, my2, 3, stream);
-   helper(IN, mz1, 4, stream);
-   helper(IN, mz2, 5, stream);
+    helper(IN, mx1, 0, stream);
+    helper(IN, mx2, 1, stream);
+    helper(IN, my1, 2, stream);
+    helper(IN, my2, 3, stream);
+    helper(IN, mz1, 4, stream);
+    helper(IN, mz2, 5, stream);
 }  

@@ -60,7 +60,7 @@ VertexShaderOutput main(AppData IN)
 		worldPos = mul(IN.aInstance.m, aPos);
 	}
 
-    OUT.position = worldPos + float4(aPos2, 0.0, 0.0) - float4(frame.position, 0.0f);	
+    OUT.position = worldPos + float4(aPos2, 0.0, 0.0);	
 
 	return OUT;
 }

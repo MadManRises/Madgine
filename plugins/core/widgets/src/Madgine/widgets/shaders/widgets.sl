@@ -5,5 +5,5 @@ struct WidgetsPerApplication{
 };
 
 struct WidgetsPerObject {
-	bool(hasDistanceField);
+	bool hasDistanceField;
 };

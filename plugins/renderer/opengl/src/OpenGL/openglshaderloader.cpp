@@ -10,10 +10,6 @@
 
 #include "Interfaces/filesystem/api.h"
 
-#include "Madgine/render/shadinglanguage/slloader.h"
-
-#include "Madgine/codegen/resolveincludes.h"
-
 #include "openglrendercontext.h"
 
 UNIQUECOMPONENT(Engine::Render::OpenGLShaderLoader);
@@ -132,20 +128,6 @@ namespace Render {
         std::map<std::string, size_t> files {
             { std::string { path.filename() }, 0 }
         };
-
-        CodeGen::resolveIncludes(
-            source, [this, &files](const Filesystem::Path &path, size_t line, std::string_view filename) {
-                Resources::ResourceBase *res;
-
-                if (path.extension() == ".sl") {
-                    res = SlLoader::get(path.stem());
-                } else {
-                    res = get(path.stem(), this);
-                }
-
-                return "#line 1 " + std::to_string(files.at(path)) + "\n" + res->readAsText() + "\n#line " + std::to_string(line + 1) + " " + std::to_string(files.at(std::string { filename }));
-            },
-            path.filename().str(), files);
 
         const char *cSource = source.data();
 

@@ -54,151 +54,159 @@ struct ReleasePtr : std::unique_ptr<T, ReleaseDeleter> {
 
 int usage()
 {
-    std::cerr << "Usage: Shadergen <input-file> <output-folder>\n";
+    std::cerr << "Usage: Shadergen <source-file> <input-file> <output-folder> [-g]\n";
     return -1;
 }
 
-/* int generateSpirV(ReleasePtr<IDxcBlob> &out, std::filesystem::path inputFile)
+static std::map<std::string, uint32_t> sSemanticLocationMappings {
+    { "POSITION0", 0 },
+    { "POSITION1", 1 },
+    { "POSITION2", 2 },
+    { "NORMAL", 3 },
+    { "COLOR", 4 },
+    { "TEXCOORD", 5 },
+    { "BONEINDICES", 6 },
+    { "WEIGHTS", 7 },
+    { "INSTANCEDATA", 8 },
+    { "INSTANCEDATA1", std::numeric_limits<uint32_t>::max() }
+};
+
+int transpileHLSL(std::string &out, const std::vector<unsigned char> &code, const std::string &filename)
 {
-    std::wstring shaderType = inputFile.extension().wstring().substr(1, 2);
-    std::ranges::transform(shaderType, shaderType.begin(), static_cast<int (*)(int)>(std::tolower));
-    if (shaderType == L"ps") {
+    try {
+        spirv_cross::CompilerHLSL hlsl { (uint32_t *)code.data(), code.size() / 4 };
 
-    } else if (shaderType == L"vs") {
+        hlsl.set_hlsl_options(spirv_cross::CompilerHLSL::Options { .shader_model = 50, .flatten_matrix_vertex_input_semantics = true });
+        hlsl.set_common_options(spirv_cross::CompilerGLSL::Options { .relax_nan_checks = true });
 
-    } else if (shaderType == L"gs") {
+        for (const spirv_cross::VariableID &id : hlsl.get_active_interface_variables()) {
+            if (hlsl.get_storage_class(id) == spv::StorageClassInput && hlsl.get_execution_model() == spv::ExecutionModelVertex) {
+                std::string name = hlsl.get_name(id);
+                std::string semantic = name.substr(name.rfind('.') + 1);
+                auto it = sSemanticLocationMappings.find(semantic);
+                if (it != sSemanticLocationMappings.end()) {
+                    uint32_t location = it->second;
+                    if (location != std::numeric_limits<uint32_t>::max())
+                        hlsl.set_decoration(id, spv::DecorationLocation, location);
+                } else {
+                    std::cerr << filename << "(1,1): warning : Unsupported semantic " << semantic << " used for " << name << std::endl;
+                }
+            }
+        }
 
-    } else {
-        std::cerr << "Unable to detect shader type!";
+        //hlsl.build_dummy_sampler_for_combined_images();
+
+        //hlsl.build_combined_image_samplers();
+
+        out = hlsl.compile();
+
+    } catch (spirv_cross::CompilerError &error) {
+        std::cerr << filename << "(1,1): error: " << error.what()
+                  << "\n";
         return -1;
     }
-
-    wchar_t cwd[1024];
-    if (GetCurrentDirectoryW(1024, cwd) == 0)
-        return GetLastError();
-
-    if (inputFile.has_parent_path()) {
-        SetCurrentDirectoryW(inputFile.parent_path().c_str());
-    }
-
-    ReleasePtr<IDxcLibrary> library;
-    ReleasePtr<IDxcCompiler3> compiler;
-
-    HRESULT hr = DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&library));
-    CHECK_HR(DxcCreateInstance / Library);
-
-    hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&compiler));
-    CHECK_HR(DxcCreateInstance / Compiler);
-
-    ReleasePtr<IDxcIncludeHandler> pIncludeHandler;
-    hr = library->CreateIncludeHandler(&pIncludeHandler);
-    CHECK_HR(CreateIncludeHandler);
-
-    ReleasePtr<IDxcBlobEncoding> pSource;
-    hr = library->CreateBlobFromFile(inputFile.filename().c_str(), nullptr, &pSource);
-    CHECK_HR(CreateBlobFromFile);
-
-    std::vector<LPCWSTR> arguments;
-
-    arguments.push_back(inputFile.c_str());
-
-    //-E for the entry point (eg. PSMain)
-    arguments.push_back(L"-E");
-    arguments.push_back(L"main");
-
-    //-T for the target profile (eg. ps_6_2)
-    shaderType += L"_6_2";
-    arguments.push_back(L"-T");
-    arguments.push_back(shaderType.c_str());
-
-    arguments.push_back(L"-spirv");
-
-    //arguments.push_back(L"-fspv-print-all");
-
-    DxcBuffer sourceBuffer;
-    sourceBuffer.Ptr = pSource->GetBufferPointer();
-    sourceBuffer.Size = pSource->GetBufferSize();
-    sourceBuffer.Encoding = 0;
-
-    ReleasePtr<IDxcResult> pCompileResult;
-    hr = compiler->Compile(&sourceBuffer, arguments.data(), arguments.size(), pIncludeHandler, IID_PPV_ARGS(&pCompileResult));
-    CHECK_HR(Compile);
-
-    //Error Handling
-    ReleasePtr<IDxcBlobUtf8> pErrors;
-    hr = pCompileResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), nullptr);
-    CHECK_HR(GetOutput);
-    if (pErrors && pErrors->GetStringLength() > 0) {
-        std::cerr << (char *)pErrors->GetBufferPointer() << std::endl;
-    }
-
-    if (inputFile.has_parent_path()) {
-        SetCurrentDirectoryW(cwd);
-    }
-
-    if (!pCompileResult->HasOutput(DXC_OUT_OBJECT))
-        return -1;
-
-    hr = pCompileResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&out), nullptr);
-    CHECK_HR(GetOutput);
-
-    if (out->GetBufferSize() == 0)
-        return -1;
-
-    return 0;
-}
-*/
-int transpileHLSL(std::string &out, const std::vector<unsigned char> &code)
-{
-    spirv_cross::CompilerHLSL hlsl { (uint32_t *)code.data(), code.size() / 4 };
-
-    hlsl.set_hlsl_options(spirv_cross::CompilerHLSL::Options { .shader_model = 50, .flatten_matrix_vertex_input_semantics = true });
-
-    //hlsl.build_dummy_sampler_for_combined_images();
-
-    //hlsl.build_combined_image_samplers();
-
-    out = hlsl.compile();
 
     return 0;
 }
 
 int main(int argc, char **argv)
 {
-    if (argc != 3) {
+    if (argc != 4 && argc != 5) {
         return usage();
     }
 
-    std::filesystem::path inputFile = argv[1];
-    std::filesystem::path outputFolder = argv[2];
+    std::filesystem::path sourceFile = argv[1];
+    std::filesystem::path inputFile = argv[2];
+    std::filesystem::path outputFolder = argv[3];
+
+    bool debug = false;
+    if (argc == 5) {
+        std::string debugFlag = argv[4];
+        if (debugFlag != "-g")
+            return usage();
+        debug = true;
+    }
 
     if (!inputFile.has_filename()) {
         std::cerr << "Error: input path must be a file!\n";
         return -1;
     }
 
-    std::cout << "Transpiling " << inputFile.filename() << " to HLSL..." << std::endl;
-
-    std::ifstream ifs { inputFile, std::ios_base::binary };
-    ifs >> std::noskipws;
-
-    std::vector<unsigned char> code {
-        std::istream_iterator<char> { ifs }, std::istream_iterator<char> {}
-    };
+    std::string extension = sourceFile.extension().string();
 
     std::string shaderCode;
 
-    try {
-        int result = transpileHLSL(shaderCode, code);
+    if (debug || extension == ".GS_hlsl") {
+        std::string reason;
+        if (debug) {
+            reason = "for Debugging";
+        } else {
+            reason = "due to SpirV - Cross limitation";
+        }
+        std::cout << "Skipping HLSL, " << reason
+                  << ", only preprocessing... ";
+
+        ReleasePtr<IDxcLibrary> library;
+        ReleasePtr<IDxcCompiler3> compiler;
+
+        HRESULT hr = DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&library));
+        CHECK_HR(DxcCreateInstance / Library);
+
+        hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&compiler));
+        CHECK_HR(DxcCreateInstance / Compiler);
+
+        ReleasePtr<IDxcIncludeHandler> pIncludeHandler;
+        hr = library->CreateIncludeHandler(&pIncludeHandler);
+        CHECK_HR(CreateIncludeHandler);
+
+        ReleasePtr<IDxcBlobEncoding> pSource;
+        hr = library->CreateBlobFromFile(sourceFile.c_str(), nullptr, &pSource);
+        CHECK_HR(CreateBlobFromFile);
+
+        std::vector<LPCWSTR> arguments;
+
+        arguments.push_back(sourceFile.c_str());
+
+        arguments.push_back(L"-P");
+
+        DxcBuffer sourceBuffer;
+        sourceBuffer.Ptr = pSource->GetBufferPointer();
+        sourceBuffer.Size = pSource->GetBufferSize();
+        sourceBuffer.Encoding = 0;
+
+        ReleasePtr<IDxcResult> pCompileResult;
+        hr = compiler->Compile(&sourceBuffer, arguments.data(), arguments.size(), pIncludeHandler, IID_PPV_ARGS(&pCompileResult));
+        CHECK_HR(Compile);
+
+        //Error Handling
+        ReleasePtr<IDxcBlobUtf8> pErrors;
+        hr = pCompileResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), nullptr);
+        CHECK_HR(GetOutput);
+        if (pErrors && pErrors->GetStringLength() > 0) {
+            std::cerr << (char *)pErrors->GetBufferPointer() << std::endl;
+            return -1;
+        }
+
+        ReleasePtr<IDxcBlobEncoding> pPrecompiled;
+        hr = pCompileResult->GetOutput(DXC_OUT_HLSL, IID_PPV_ARGS(&pPrecompiled), nullptr);
+
+        shaderCode = { static_cast<char *>(pPrecompiled->GetBufferPointer()), pPrecompiled->GetBufferSize() };
+
+    } else {
+
+        std::cout << "HLSL..." << std::endl;
+
+        std::ifstream ifs { inputFile, std::ios_base::binary };
+        ifs >> std::noskipws;
+
+        std::vector<unsigned char> code {
+            std::istream_iterator<char> { ifs }, std::istream_iterator<char> {}
+        };
+
+        int result = transpileHLSL(shaderCode, code, inputFile.string());
         if (result != 0)
             return result;
-    } catch (spirv_cross::CompilerError &error) {
-        std::cerr << inputFile.string() << "(1,1): error: " << error.what()
-                  << "\n";
-        return -1;
     }
-
-    std::string extension = inputFile.extension().string().substr(0, 3) + "_hlsl";
 
     std::filesystem::path outputFile = outputFolder / (inputFile.stem().string() + extension);
 

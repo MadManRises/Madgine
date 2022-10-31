@@ -15,12 +15,12 @@ struct ScenePerFrame {
 
 	DirectionalShadowLight light;
 
-	PointLight pointLights[2];
+	PointShadowLight pointLights[2];
 };
 
 struct SceneInstanceData{
-	float4x4 mv;
-	float4x4 anti_mv;
+	row_major float4x4 mv;
+	row_major float4x4 anti_mv;
 };
 
 struct ScenePerObject {

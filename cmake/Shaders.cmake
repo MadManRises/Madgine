@@ -2,6 +2,7 @@ include(Util)
 
 once()
 
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data)
 
 macro(compile_shaders target)
 
@@ -38,17 +39,21 @@ macro(compile_shaders target)
                 COMMAND $<TARGET_FILE:dxc>
                     -E main
                     -T ${profile} 
-                    -spirv 
+                    -spirv
+                    -Zpc
                     -Fo spirv/${name}${extension}
                     ${CMAKE_CURRENT_SOURCE_DIR}/${source}   
                 COMMAND ${CMAKE_COMMAND} 
                     -DTools=$<GENEX_EVAL:$<TARGET_PROPERTY:ShaderGen,ShaderGenTools>>
                     -DInputFile=${CMAKE_CURRENT_BINARY_DIR}/spirv/${name}${extension}
                     -DOutputFolder=${CMAKE_BINARY_DIR}/data
+                    -DSourceFile=${CMAKE_CURRENT_SOURCE_DIR}/${source}
+                    -DDebug=$<IF:$<CONFIG:DEBUG>,ON,OFF>
                     -P ${workspace_file_dir}/transpileShaders.cmake
                 MAIN_DEPENDENCY ${source}
                 DEPENDS dxc ShaderGen ${workspace_file_dir}/transpileShaders.cmake $<GENEX_EVAL:$<TARGET_PROPERTY:ShaderGen,ShaderGenTools>>
-                COMMENT "Transpiling shader: ${name}"
+                IMPLICIT_DEPENDS C ${source}
+                COMMENT "Transpiling shader: ${name}${ext}"
                 VERBATIM)
             target_sources(${target} PRIVATE spirv/${name}${extension})
         endif()

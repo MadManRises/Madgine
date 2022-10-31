@@ -9,6 +9,8 @@
 #define float4x4 alignas(16) Engine::Matrix4
 #define bool uint32_t
 
+#define row_major
+
 #include STRINGIFY2(SL_SHADER.sl)
 
 #undef NAMED
@@ -20,5 +22,7 @@
 #undef float4
 #undef float4x4
 #undef bool
+
+#undef row_major
 
 #undef SL_SHADER

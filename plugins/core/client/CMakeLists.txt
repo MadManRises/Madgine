@@ -5,7 +5,7 @@ FolderSources(sources "" src)
 	FolderSources(sources src Madgine clientforward.h clientlib.h)
 		FolderSources(sources Madgine render camera.cpp camera.h rendercontext.cpp rendercontext.h rendertarget.cpp rendertarget.h rendercontextcollector.cpp rendercontextcollector.h)	
 			FolderSources(sources render passes bloompass.cpp bloompass.h blurpass.cpp blurpass.h)
-			FolderSources(sources render shadinglanguage sl.h sl_include.h slloader.cpp slloader.h)
+			FolderSources(sources render shadinglanguage sl.h sl_include.h)
 		FolderSources(sources Madgine window mainwindow.cpp mainwindow.h mainwindowcomponent.cpp mainwindowcomponent.h mainwindowcomponentcollector.cpp mainwindowcomponentcollector.h toolwindow.cpp toolwindow.h)
 
 add_plugin(Client Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/clientlib.h)

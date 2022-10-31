@@ -48,6 +48,8 @@ PixelShaderOutput main(PixelShaderInput IN)
     float4 diffuseColor = IN.color * object.diffuseColor;
 	float4 specularColor = object.specularColor;
 
+	float3 normal = normalize(IN.normal);
+
 	if (object.hasTexture){
 		if (object.hasDistanceField){
 			float2 msdfUnit = 4.0/float2(512.0, 512.0);
@@ -64,7 +66,7 @@ PixelShaderOutput main(PixelShaderInput IN)
 		}
 	}
 
-	PixelShaderOutput OUT;
+	PixelShaderOutput OUT; 
 	
 	if (object.hasLight){
 		float3 lightDiffuseIntensity = float3(0.0, 0.0, 0.0);
@@ -75,8 +77,8 @@ PixelShaderOutput main(PixelShaderInput IN)
 			lightSpecularIntensity,
 			frame.light, 
 			IN.lightViewPosition,
-			IN.viewPos.xyz,
-			IN.normal,
+			IN.viewPos.xyz / IN.viewPos.w,
+			normal,
 			shadowDepthMap, 
 			app.ambientFactor, 
 			app.diffuseFactor,
@@ -89,8 +91,8 @@ PixelShaderOutput main(PixelShaderInput IN)
 					lightDiffuseIntensity,
 					lightSpecularIntensity,
 					frame.pointLights[i],
-					IN.viewPos.xyz,
-					IN.normal,
+					IN.viewPos.xyz / IN.viewPos.w,
+					normal,
 					pointShadowDepthMaps0,
 					texSampler,
 					app.ambientFactor,
@@ -103,8 +105,8 @@ PixelShaderOutput main(PixelShaderInput IN)
 					lightDiffuseIntensity,
 					lightSpecularIntensity,
 					frame.pointLights[i],
-					IN.viewPos.xyz,
-					IN.normal,
+					IN.viewPos.xyz / IN.viewPos.w,
+					normal,
 					pointShadowDepthMaps1,
 					texSampler,
 					app.ambientFactor,
@@ -116,8 +118,8 @@ PixelShaderOutput main(PixelShaderInput IN)
 
 		OUT.fragColor = 
 			float4(
-				lightDiffuseIntensity * diffuseColor +
-				lightSpecularIntensity * specularColor, 
+				lightDiffuseIntensity * diffuseColor.xyz +
+				lightSpecularIntensity * specularColor.xyz, 
 				diffuseColor.a
 			);
 	}else{

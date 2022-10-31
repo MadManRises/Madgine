@@ -110,7 +110,7 @@ namespace Render {
 
             std::ranges::transform(instance.second, std::back_inserter(instanceData), [&](const Matrix4 &m) {
                 Matrix4 mv = v * m;
-                return SceneInstanceData { //TODO: Additional Transpose() to make generated HLSL work
+                return SceneInstanceData {
                     mv.Transpose(),
                     mv.Inverse().Transpose().Transpose()
                 };
