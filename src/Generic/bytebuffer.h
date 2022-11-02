@@ -28,21 +28,21 @@ struct ByteBufferImpl {
 
     ByteBufferImpl() = default;
 
-    template <typename T, typename SizeAccessor = ByteBufferSizeAccessor, typename DataAccessor = ByteBufferDataAccessor>
-    requires(!Pointer<std::remove_reference_t<T>> && !std::convertible_to<SizeAccessor, size_t> && !std::convertible_to<DataAccessor, const void *>)
-        ByteBufferImpl(T &&t, SizeAccessor &&sizeAccess = {}, DataAccessor &&dataAccess = {})
+    template <typename T>
+    requires(!Pointer<std::remove_reference_t<T>>)
+        ByteBufferImpl(T &&t)
         : mKeep(std::forward<T>(t))
-        , mSize(TupleUnpacker::invoke(std::forward<SizeAccessor>(sizeAccess), mKeep.as<T>()))
-        , mData(TupleUnpacker::invoke(std::forward<DataAccessor>(dataAccess), mKeep.as<T>()))
+        , mSize(TupleUnpacker::invoke(ByteBufferSizeAccessor {}, mKeep.as<T>()))
+        , mData(TupleUnpacker::invoke(ByteBufferDataAccessor {}, mKeep.as<T>()))
     {
     }
 
-    template <typename T, typename DataAccessor = ByteBufferDataAccessor>
-    requires(!Pointer<std::remove_reference_t<T>> && !std::convertible_to<DataAccessor, const void *>)
-        ByteBufferImpl(T &&t, size_t size, DataAccessor &&dataAccess = {})
+    template <typename T>
+    requires(!Pointer<std::remove_reference_t<T>>)
+        ByteBufferImpl(T &&t, size_t size)
         : mKeep(std::forward<T>(t))
         , mSize(size)
-        , mData(TupleUnpacker::invoke(std::forward<DataAccessor>(dataAccess), mKeep.as<T>()))
+        , mData(TupleUnpacker::invoke(ByteBufferDataAccessor {}, mKeep.as<T>()))
     {
     }
 
@@ -118,7 +118,8 @@ struct ByteBufferImpl<Data[]> : ByteBufferImpl<Data> {
         return this->mData[index];
     }
 
-    size_t elementCount() const {
+    size_t elementCount() const
+    {
         assert(this->mSize % sizeof(Data) == 0);
         return this->mSize / sizeof(Data);
     }
