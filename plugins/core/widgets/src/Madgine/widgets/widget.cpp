@@ -368,16 +368,6 @@ namespace Widgets {
         return {};
     }
 
-    void *WidgetBase::userData()
-    {
-        return mUserData;
-    }
-
-    void WidgetBase::setUserData(void *userData)
-    {
-        mUserData = userData;
-    }
-
     std::unique_ptr<WidgetBase> WidgetBase::createWidgetByClass(WidgetClass _class)
     {
         return mManager.createWidgetByClass(_class, this);

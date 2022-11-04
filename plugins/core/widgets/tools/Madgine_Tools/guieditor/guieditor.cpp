@@ -212,10 +212,7 @@ namespace Tools {
 
             if (acceptHover) {
                 if (hoveredWidget) {
-                    hoveredSettings = static_cast<WidgetSettings *>(hoveredWidget->userData());
-                    if (!hoveredSettings) {
-                        hoveredSettings = &mSettings.emplace_back(hoveredWidget, getTool<Inspector>());
-                    }
+                    hoveredSettings = &mSettings.try_emplace(hoveredWidget, hoveredWidget, getTool<Inspector>()).first->second;
 
                     if (!mDragging && hoveredSettings != mSelected) {
                         Vector3 size = hoveredWidget->getEffectiveSize() * Vector3 { Vector2 { screenSpace.mSize }, 1.0f };
@@ -425,7 +422,7 @@ namespace Tools {
 
                 if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(0)) {
                     if (hoveredWidget && *hoveredWidget)
-                        mSelected = static_cast<WidgetSettings *>((*hoveredWidget)->userData());
+                        mSelected = &mSettings.try_emplace(*hoveredWidget, *hoveredWidget, getTool<Inspector>()).first->second;
                     else
                         mSelected = nullptr;
                 }

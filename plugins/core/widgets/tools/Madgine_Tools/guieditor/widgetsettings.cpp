@@ -19,12 +19,10 @@ namespace Tools {
         : mWidget(widget)
         , mInspector(inspector)
     {
-        mWidget->setUserData(this);
     }
 
     WidgetSettings::~WidgetSettings()
     {
-        mWidget->setUserData(nullptr);
     }
 
     Widgets::WidgetBase *WidgetSettings::widget()

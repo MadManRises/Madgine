@@ -98,9 +98,6 @@ namespace Widgets {
         virtual std::vector<std::pair<std::vector<Vertex>, TextureSettings>> vertices(const Vector3 &screenSize, size_t layer = 0);
         virtual void preRender();
 
-        void *userData();
-        void setUserData(void *userData);
-
         size_t depth(size_t layer);
 
         bool mVisible = true;
@@ -138,8 +135,6 @@ namespace Widgets {
         Matrix3 mSize = Matrix3::IDENTITY;
 
         Matrix3 mEffectivePos, mEffectiveSize;
-
-        void *mUserData = nullptr;
     };
 
     template <typename T>

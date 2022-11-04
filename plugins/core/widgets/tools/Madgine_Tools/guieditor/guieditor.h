@@ -32,7 +32,7 @@ namespace Tools {
     private:        
         Widgets::WidgetManager *mWidgetManager = nullptr;
         WidgetSettings *mSelected = nullptr;
-        std::list<WidgetSettings> mSettings;
+        std::map<Widgets::WidgetBase *, WidgetSettings> mSettings;
 
         bool mMouseDown = false;
         bool mDragging = false;
