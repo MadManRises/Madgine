@@ -28,9 +28,8 @@ namespace Widgets {
         if (!mTextRenderData.available())
             return {};
 
-        Vector3 pos = (getEffectivePosition() * screenSize) / screenSize;
-        Vector3 size = (getEffectiveSize() * screenSize) / screenSize;
-        pos.z = depth(layer);
+        Vector3 pos { getAbsolutePosition() / screenSize.xy(), static_cast<float>(depth(layer)) };
+        Vector3 size = getAbsoluteSize() / screenSize;
 
         return { mTextRenderData.render(mText, pos, size, screenSize.xy()) };
     }

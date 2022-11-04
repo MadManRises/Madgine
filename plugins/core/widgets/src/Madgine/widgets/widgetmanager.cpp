@@ -37,7 +37,7 @@
 
 #include "Generic/areaview.h"
 
-#define SL_SHADER shaders/widgets
+#define SL_SHADER "shaders/widgets.sl"
 #include INCLUDE_SL_SHADER
 
 UNIQUECOMPONENT(Engine::Widgets::WidgetManager)
@@ -49,7 +49,7 @@ METATABLE_END(Engine::Widgets::WidgetManager)
 
 SERIALIZETABLE_BEGIN(Engine::Widgets::WidgetManager)
 FIELD(mStartupWidget)
-FIELD(mTopLevelWidgets, Serialize::ParentCreator<&Engine::Widgets::WidgetManager::readWidget, &Engine::Widgets::WidgetManager::writeWidget>)
+FIELD(mTopLevelWidgets, Serialize::ParentCreator<&Engine::Widgets::WidgetManager::readWidgetStub, &Engine::Widgets::WidgetManager::writeWidget>)
 SERIALIZETABLE_END(Engine::Widgets::WidgetManager)
 
 namespace Engine {
@@ -147,7 +147,12 @@ namespace Widgets {
     template <typename WidgetType>
     std::unique_ptr<WidgetType> WidgetManager::create(WidgetBase *parent)
     {
-        return std::make_unique<WidgetType>(*this, parent);
+        std::unique_ptr<WidgetType> w = std::make_unique<WidgetType>(*this, parent);
+        if (!parent) {
+            w->hide();
+        }
+        w->updateGeometry(parent ? parent->getAbsoluteSize() : Vector3 { Vector2 { mClientSpace.mSize }, 1.0f });
+        return w;
     }
 
     template std::unique_ptr<WidgetBase> WidgetManager::create<WidgetBase>(WidgetBase *);
@@ -165,8 +170,6 @@ namespace Widgets {
     {
         std::unique_ptr<WidgetType> p = create<WidgetType>();
         WidgetType *w = p.get();
-        w->hide();
-        w->updateGeometry(mClientSpace);
         mTopLevelWidgets.emplace_back(std::move(p));
         return w;
     }
@@ -175,45 +178,43 @@ namespace Widgets {
 
     std::unique_ptr<WidgetBase> WidgetManager::createWidgetByClass(WidgetClass _class, WidgetBase *parent)
     {
-        std::unique_ptr<WidgetBase> w = [=]() -> std::unique_ptr<WidgetBase> {
-            switch (_class) {
-            case WidgetClass::WIDGET:
-                return create<WidgetBase>(parent);
-            case WidgetClass::BAR:
-                return create<Bar>(parent);
-            case WidgetClass::CHECKBOX:
-                return create<Checkbox>(parent);
-            case WidgetClass::LABEL:
-                return create<Label>(parent);
-            case WidgetClass::BUTTON:
-                return create<Button>(parent);
-            case WidgetClass::COMBOBOX:
-                return create<Combobox>(parent);
-            case WidgetClass::TEXTBOX:
-                return create<Textbox>(parent);
-            case WidgetClass::SCENEWINDOW:
-                return create<SceneWindow>(parent);
-            case WidgetClass::IMAGE:
-                return create<Image>(parent);
-            default:
-                std::terminate();
-            }
-        }();
-        if (!parent) {
-            w->hide();
-            w->updateGeometry(mClientSpace);
+        switch (_class) {
+        case WidgetClass::WIDGET:
+            return create<WidgetBase>(parent);
+        case WidgetClass::BAR:
+            return create<Bar>(parent);
+        case WidgetClass::CHECKBOX:
+            return create<Checkbox>(parent);
+        case WidgetClass::LABEL:
+            return create<Label>(parent);
+        case WidgetClass::BUTTON:
+            return create<Button>(parent);
+        case WidgetClass::COMBOBOX:
+            return create<Combobox>(parent);
+        case WidgetClass::TEXTBOX:
+            return create<Textbox>(parent);
+        case WidgetClass::SCENEWINDOW:
+            return create<SceneWindow>(parent);
+        case WidgetClass::IMAGE:
+            return create<Image>(parent);
+        default:
+            std::terminate();
         }
-        return w;
     }
 
-    Serialize::StreamResult WidgetManager::readWidget(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget)
+    Serialize::StreamResult WidgetManager::readWidget(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget, WidgetBase *parent)
     {
         STREAM_PROPAGATE_ERROR(in.beginExtendedRead("Widget", 1));
         WidgetClass _class;
         STREAM_PROPAGATE_ERROR(read(in, _class, "type"));
 
-        widget = createWidgetByClass(_class);
+        widget = createWidgetByClass(_class, parent);
         return {};
+    }
+
+    Serialize::StreamResult WidgetManager::readWidgetStub(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget)
+    {
+        return readWidget(in, widget, nullptr);
     }
 
     const char *WidgetManager::writeWidget(Serialize::FormattedSerializeStream &out, const std::unique_ptr<WidgetBase> &widget) const
@@ -525,7 +526,7 @@ namespace Widgets {
     {
         MainWindowComponentBase::onResize(space);
         for (WidgetBase *topLevel : uniquePtrToPtr(mTopLevelWidgets)) {
-            topLevel->updateGeometry(space);
+            topLevel->updateGeometry(Vector3 { Vector2 { space.mSize }, 1.0f });
         }
     }
 

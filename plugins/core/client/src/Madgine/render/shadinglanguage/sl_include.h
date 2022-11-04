@@ -11,7 +11,7 @@
 
 #define row_major
 
-#include STRINGIFY2(SL_SHADER.sl)
+#include SL_SHADER
 
 #undef NAMED
 

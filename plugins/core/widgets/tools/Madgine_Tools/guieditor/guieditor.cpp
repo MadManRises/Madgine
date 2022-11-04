@@ -128,8 +128,8 @@ namespace Tools {
             if (mSelected) {
                 Widgets::WidgetBase *selectedWidget = mSelected->widget();
 
-                Vector3 absoluteSize = selectedWidget->getEffectiveSize() * Vector3 { Vector2 { screenSpace.mSize }, 1.0f };
-                Vector3 absolutePos = selectedWidget->getEffectivePosition() * Vector3 { Vector2 { screenSpace.mSize }, 1.0f } + Vector3 { Vector2 { screenSpace.mTopLeft }, 0.0f };
+                Vector3 absoluteSize = selectedWidget->getAbsoluteSize();
+                Vector2 absolutePos = selectedWidget->getAbsolutePosition() + Vector2 { screenSpace.mTopLeft };
 
                 Bounds bounds(absolutePos.x, absolutePos.y + absoluteSize.y, absolutePos.x + absoluteSize.x, absolutePos.y);
 
@@ -215,8 +215,8 @@ namespace Tools {
                     hoveredSettings = &mSettings.try_emplace(hoveredWidget, hoveredWidget, getTool<Inspector>()).first->second;
 
                     if (!mDragging && hoveredSettings != mSelected) {
-                        Vector3 size = hoveredWidget->getEffectiveSize() * Vector3 { Vector2 { screenSpace.mSize }, 1.0f };
-                        Vector3 pos = hoveredWidget->getEffectivePosition() * Vector3 { Vector2 { screenSpace.mSize }, 1.0f } + Vector3 { Vector2 { screenSpace.mTopLeft }, 0.0f };
+                        Vector3 size = hoveredWidget->getAbsoluteSize();
+                        Vector2 pos = hoveredWidget->getAbsolutePosition() + Vector2 { screenSpace.mTopLeft };
 
                         Bounds bounds(pos.x, pos.y + size.y, pos.x + size.x, pos.y);
 
@@ -244,9 +244,9 @@ namespace Tools {
 
                     auto [pos, size] = mSelected->savedGeometry();
 
-                    Matrix3 parentSize = mSelected->widget()->getParent() ? mSelected->widget()->getParent()->getEffectiveSize() : Matrix3::IDENTITY;
+                    Vector3 parentSize = mSelected->widget()->getParent() ? mSelected->widget()->getParent()->getAbsoluteSize() : Vector3 { Vector2 { screenSpace.mSize }, 1.0f };
 
-                    Vector2 relDragDistance = dragDistance / (parentSize * Vector3 { Vector2 { screenSpace.mSize }, 1.0f }).xy();
+                    Vector2 relDragDistance = dragDistance / parentSize.xy();
 
                     Matrix3 dragDistanceSize;
 
@@ -260,8 +260,8 @@ namespace Tools {
                         break;
                     case ABSOLUTE:
                         dragDistanceSize = Matrix3 {
-                            0, 0, dragDistance.x / parentSize[2][2],
-                            0, 0, dragDistance.y / parentSize[2][2],
+                            0, 0, dragDistance.x / parentSize.z,
+                            0, 0, dragDistance.y / parentSize.z,
                             0, 0, 0
                         };
                         break;

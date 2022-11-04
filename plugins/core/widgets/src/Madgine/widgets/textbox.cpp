@@ -72,9 +72,8 @@ namespace Widgets {
         if (!entry)
             return {};
 
-        Vector3 pos = (getEffectivePosition() * screenSize) / screenSize;
-        Vector3 size = (getEffectiveSize() * screenSize) / screenSize;
-        pos.z = depth(layer);
+        Vector3 pos { getAbsolutePosition() / screenSize.xy(), static_cast<float>(depth(layer)) };
+        Vector3 size = getAbsoluteSize() / screenSize;
 
         std::vector<std::pair<std::vector<Vertex>, TextureSettings>> returnSet;
 

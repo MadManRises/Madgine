@@ -27,31 +27,25 @@ namespace Widgets {
 
         virtual ~WidgetBase();
 
-        void setSize(const Matrix3 &size);
-        const Matrix3 &getSize();
-        void setPos(const Matrix3 &pos);
-        const Matrix3 &getPos() const;
-
-        Matrix3 getEffectiveSize() const;
-        Matrix3 getEffectivePosition() const;
-
-        Vector3 getAbsoluteSize() const;
-        Vector2 getAbsolutePosition() const;
-
-        void updateGeometry(const Rect2i &screenSpace, const Matrix3 &parentSize = Matrix3::IDENTITY, const Matrix3 &parentPos = Matrix3::ZERO);
-
         virtual WidgetClass getClass() const;
+
+        WidgetManager &manager();
+        const std::string &key() const;
 
         void destroy();
 
         void show();
         void hide();
 
-        virtual void setEnabled(bool b);
+        void setSize(const Matrix3 &size);
+        const Matrix3 &getSize();
+        void setPos(const Matrix3 &pos);
+        const Matrix3 &getPos() const;
 
-        bool isFocused() const;
+        Vector3 getAbsoluteSize() const;
+        Vector2 getAbsolutePosition() const;
 
-        const std::string &key() const;
+        void updateGeometry(const Vector3 &parentSize, const Vector2 &parentPos = Vector2::ZERO);
 
         WidgetBase *createChild(WidgetClass _class);
         template <typename WidgetType = WidgetBase>
@@ -63,8 +57,19 @@ namespace Widgets {
         {
             return dynamic_cast<T *>(getChildRecursive(name));
         }
+
+        decltype(auto) children() const
+        {
+            return uniquePtrToPtr(static_cast<const std::vector<std::unique_ptr<WidgetBase>> &>(mChildren));
+        }
+
         void setParent(WidgetBase *parent);
         WidgetBase *getParent() const;
+
+        bool isFocused() const;
+
+        bool dragging() const;
+        void abortDrag();
 
         virtual bool injectPointerClick(const Input::PointerEventArgs &arg);
         virtual bool injectPointerMove(const Input::PointerEventArgs &arg);
@@ -88,25 +93,13 @@ namespace Widgets {
         Threading::SignalStub<const Input::AxisEventArgs &> &axisEvent();
         Threading::SignalStub<const Input::KeyEventArgs &> &keyEvent();
 
-        decltype(auto) children() const
-        {
-            return uniquePtrToPtr(static_cast<const std::vector<std::unique_ptr<WidgetBase>> &>(mChildren));
-        }
-
         bool containsPoint(const Vector2 &point, const Rect2i &screenSpace, float extend = 0.0f) const;
 
         virtual std::vector<std::pair<std::vector<Vertex>, TextureSettings>> vertices(const Vector3 &screenSize, size_t layer = 0);
         virtual void preRender();
 
-        size_t depth(size_t layer);
-
         bool mVisible = true;
         std::string mName = "Unnamed";
-
-        WidgetManager &manager();
-
-        bool dragging() const;
-        void abortDrag();
 
     protected:
         std::unique_ptr<WidgetBase> createWidgetByClass(WidgetClass _class);
@@ -114,6 +107,8 @@ namespace Widgets {
         const char *writeWidget(Serialize::FormattedSerializeStream &out, const std::unique_ptr<WidgetBase> &widget) const;
 
         virtual void sizeChanged(const Vector3i &pixelSize);
+
+        size_t depth(size_t layer);
 
     protected:
         void destroyChild(WidgetBase *w);
@@ -131,10 +126,11 @@ namespace Widgets {
 
         std::vector<std::unique_ptr<WidgetBase>> mChildren;
 
+        Vector2 mAbsolutePos;
+        Vector3 mAbsoluteSize;
+
         Matrix3 mPos = Matrix3::ZERO;
         Matrix3 mSize = Matrix3::IDENTITY;
-
-        Matrix3 mEffectivePos, mEffectiveSize;
     };
 
     template <typename T>

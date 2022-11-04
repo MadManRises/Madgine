@@ -17,7 +17,7 @@
 
 #include "Madgine/render/shadinglanguage/sl.h"
 
-#define SL_SHADER shaders/grid
+#define SL_SHADER "shaders/grid.sl"
 #include INCLUDE_SL_SHADER
 
 

@@ -53,9 +53,9 @@ namespace Widgets {
     {
         mSize = size;
         if (mParent)
-            updateGeometry(manager().getScreenSpace(), mParent->getEffectiveSize(), mParent->getEffectivePosition());
+            updateGeometry(mParent->getAbsoluteSize(), mParent->getAbsolutePosition());
         else
-            updateGeometry(manager().getScreenSpace());
+            updateGeometry(Vector3 { Vector2 { manager().getScreenSpace().mSize }, 1.0f });
     }
 
     const Matrix3 &WidgetBase::getSize()
@@ -67,9 +67,9 @@ namespace Widgets {
     {
         mPos = pos;
         if (mParent)
-            updateGeometry(manager().getScreenSpace(), mParent->getEffectiveSize(), mParent->getEffectivePosition());
+            updateGeometry(mParent->getAbsoluteSize(), mParent->getAbsolutePosition());
         else
-            updateGeometry(manager().getScreenSpace());
+            updateGeometry(Vector3 { Vector2 { manager().getScreenSpace().mSize }, 1.0f });
     }
 
     const Matrix3 &WidgetBase::getPos() const
@@ -77,37 +77,25 @@ namespace Widgets {
         return mPos;
     }
 
-    Matrix3 WidgetBase::getEffectiveSize() const
-    {
-        return mEffectiveSize;
-    }
-
-    Matrix3 WidgetBase::getEffectivePosition() const
-    {
-        return mEffectivePos;
-    }
-
     Vector3 WidgetBase::getAbsoluteSize() const
     {
-        const Rect2i &screenSpace = mManager.getClientSpace();
-        return mEffectiveSize * Vector3 { Vector2 { screenSpace.mSize }, 1.0f };
+        return mAbsoluteSize;
     }
 
     Vector2 WidgetBase::getAbsolutePosition() const
     {
-        const Rect2i &screenSpace = mManager.getClientSpace();
-        return (mEffectivePos * Vector3 { Vector2 { screenSpace.mSize }, 1.0f }).xy();
+        return mAbsolutePos;
     }
 
-    void WidgetBase::updateGeometry(const Rect2i &screenSpace, const Matrix3 &parentSize, const Matrix3 &parentPos)
+    void WidgetBase::updateGeometry(const Vector3 &parentSize, const Vector2 &parentPos)
     {
-        mEffectiveSize = mSize * parentSize;
-        mEffectivePos = mPos * parentSize + parentPos;
+        mAbsoluteSize = mSize * parentSize;
+        mAbsolutePos = (mPos * parentSize).xy() + parentPos;
 
-        sizeChanged((mEffectiveSize * Vector3 { Vector2 { screenSpace.mSize }, 1.0f }).floor());
+        sizeChanged(mAbsoluteSize.floor());
 
         for (WidgetBase *child : uniquePtrToPtr(mChildren)) {
-            child->updateGeometry(screenSpace, mEffectiveSize, mEffectivePos);
+            child->updateGeometry(mAbsoluteSize, mAbsolutePos);
         }
     }
 
@@ -131,28 +119,7 @@ namespace Widgets {
 
     WidgetBase *WidgetBase::createChild(WidgetClass _class)
     {
-        switch (_class) {
-        case WidgetClass::WIDGET:
-            return createChild<WidgetBase>();
-        case WidgetClass::BAR:
-            return createChild<Bar>();
-        case WidgetClass::CHECKBOX:
-            return createChild<Checkbox>();
-        case WidgetClass::LABEL:
-            return createChild<Label>();
-        case WidgetClass::BUTTON:
-            return createChild<Button>();
-        case WidgetClass::COMBOBOX:
-            return createChild<Combobox>();
-        case WidgetClass::TEXTBOX:
-            return createChild<Textbox>();
-        case WidgetClass::SCENEWINDOW:
-            return createChild<SceneWindow>();
-        case WidgetClass::IMAGE:
-            return createChild<Image>();
-        default:
-            std::terminate();
-        }
+        return mChildren.emplace_back(mManager.createWidgetByClass(_class, this)).get();
     }
 
     template <typename WidgetType>
@@ -161,7 +128,6 @@ namespace Widgets {
         std::unique_ptr<WidgetType> p = mManager.create<WidgetType>(this);
         WidgetType *w = p.get();
         mChildren.emplace_back(std::move(p));
-        w->updateGeometry(mManager.getScreenSpace(), mEffectiveSize, mEffectivePos);
         return w;
     }
 
@@ -212,10 +178,6 @@ namespace Widgets {
         mVisible = false;
     }
 
-    void WidgetBase::setEnabled(bool b)
-    {
-    }
-
     bool WidgetBase::isFocused() const
     {
         return mManager.focusedWidget() == this;
@@ -238,7 +200,7 @@ namespace Widgets {
             parent->mChildren.emplace_back(std::move(*it));
             mParent->mChildren.erase(it);
             mParent = parent;
-            updateGeometry(mManager.getScreenSpace(), parent->mEffectiveSize, parent->mEffectivePos);
+            updateGeometry(parent->getAbsoluteSize(), parent->getAbsolutePosition());
         }
     }
 
@@ -358,8 +320,8 @@ namespace Widgets {
 
     bool WidgetBase::containsPoint(const Vector2 &point, const Rect2i &screenSpace, float extend) const
     {
-        Vector3 min = mEffectivePos * Vector3 { Vector2 { screenSpace.mSize }, 1.0f } + Vector3 { Vector2 { screenSpace.mTopLeft }, 0.0f } - extend;
-        Vector3 max = mEffectiveSize * Vector3 { Vector2 { screenSpace.mSize }, 1.0f } + min + 2 * extend;
+        Vector2 min = mAbsolutePos + Vector2 { screenSpace.mTopLeft } - extend;
+        Vector2 max = mAbsoluteSize.xy() + min + 2 * extend;
         return min.x <= point.x && min.y <= point.y && max.x >= point.x && max.y >= point.y;
     }
 
@@ -368,19 +330,9 @@ namespace Widgets {
         return {};
     }
 
-    std::unique_ptr<WidgetBase> WidgetBase::createWidgetByClass(WidgetClass _class)
-    {
-        return mManager.createWidgetByClass(_class, this);
-    }
-
     Serialize::StreamResult WidgetBase::readWidget(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget)
     {
-        STREAM_PROPAGATE_ERROR(in.beginExtendedRead("Widget", 1));
-        WidgetClass _class;
-        STREAM_PROPAGATE_ERROR(read(in, _class, "type"));
-
-        widget = createWidgetByClass(_class);
-        return {};
+        return mManager.readWidget(in, widget, this);
     }
 
     const char *WidgetBase::writeWidget(Serialize::FormattedSerializeStream &out, const std::unique_ptr<WidgetBase> &widget) const

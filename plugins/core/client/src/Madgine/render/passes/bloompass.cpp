@@ -5,7 +5,7 @@
 #include "../rendercontext.h"
 #include "../rendertarget.h"
 
-#define SL_SHADER shaders/bloom
+#define SL_SHADER "shaders/bloom.sl"
 #include "../shadinglanguage/sl_include.h"
 
 #include "Meta/keyvalue/metatable_impl.h"

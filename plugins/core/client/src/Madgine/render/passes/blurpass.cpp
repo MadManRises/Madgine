@@ -8,7 +8,7 @@
 
 #include "Madgine/render/texturedescriptor.h"
 
-#define SL_SHADER shaders/blur
+#define SL_SHADER "shaders/blur.sl"
 #include "../shadinglanguage/sl_include.h"
 
 namespace Engine {
