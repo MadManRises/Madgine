@@ -15,6 +15,9 @@ namespace Widgets {
     struct Label;
     struct Image;
 
+    struct Geometry;
+    struct GeometrySourceInfo;
+
     FORWARD_ENUM(WidgetClass);
 
 }

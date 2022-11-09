@@ -654,7 +654,7 @@ void RightAlignText(const char *s, ...)
     ImGui::Text("%s", buffer);
 }
 
-bool DragMatrix3(const char *label, Engine::Matrix3 *m, float *v_speeds, bool *enabled)
+bool DragMatrix3(const char *label, Engine::Matrix3 *m, float *v_speeds)
 {
     ImGuiWindow *window = GetCurrentWindow();
     if (window->SkipItems)
@@ -673,11 +673,7 @@ bool DragMatrix3(const char *label, Engine::Matrix3 *m, float *v_speeds, bool *e
             if (j > 0) {
                 SameLine(0, g.Style.ItemInnerSpacing.x);
             }
-            if (enabled && !enabled[3 * i + j])
-                BeginDisabled();
             value_changed |= DragFloat("", &(*m)[i][j], v_speeds[3 * i + j]);
-            if (enabled && !enabled[3 * i + j])
-                EndDisabled();
             PopItemWidth();
             PopID();
         }
@@ -693,14 +689,14 @@ bool DragMatrix3(const char *label, Engine::Matrix3 *m, float *v_speeds, bool *e
     return value_changed;
 }
 
-bool DragMatrix3(const char *label, Engine::Matrix3 *m, float v_speed, bool *enabled)
+bool DragMatrix3(const char *label, Engine::Matrix3 *m, float v_speed)
 {
     float speeds[9];
     std::fill_n(speeds, 9, v_speed);
-    return DragMatrix3(label, m, speeds, enabled);
+    return DragMatrix3(label, m, speeds);
 }
 
-bool DragMatrix4(const char *label, Engine::Matrix4 *m, float *v_speeds, bool *enabled)
+bool DragMatrix4(const char *label, Engine::Matrix4 *m, float *v_speeds)
 {
     ImGuiWindow *window = GetCurrentWindow();
     if (window->SkipItems)
@@ -720,11 +716,7 @@ bool DragMatrix4(const char *label, Engine::Matrix4 *m, float *v_speeds, bool *e
         PushMultiItemsWidths(4, std::min(400.0f, CalcItemWidth()));
         for (int j = 0; j < 4; ++j) {
             PushID(4 * i + j);
-            if (enabled && !enabled[4 * i + j])
-                BeginDisabled();
             value_changed |= DragFloat("", &(*m)[i][j], v_speeds[4 * i + j]);
-            if (enabled && !enabled[4 * i + j])
-                EndDisabled();
             PopItemWidth();
             PopID();
             if (j < 3) {
@@ -738,11 +730,11 @@ bool DragMatrix4(const char *label, Engine::Matrix4 *m, float *v_speeds, bool *e
     return value_changed;
 }
 
-bool DragMatrix4(const char *label, Engine::Matrix4 *m, float v_speed, bool *enabled)
+bool DragMatrix4(const char *label, Engine::Matrix4 *m, float v_speed)
 {
     float speeds[16];
     std::fill_n(speeds, 16, v_speed);
-    return DragMatrix4(label, m, speeds, enabled);
+    return DragMatrix4(label, m, speeds);
 }
 
 bool MethodPicker(const char *label, const std::vector<std::pair<std::string, Engine::BoundApiFunction>> &methods, Engine::BoundApiFunction *m, std::string *currentName, std::string *filter, int expectedArgumentCount)

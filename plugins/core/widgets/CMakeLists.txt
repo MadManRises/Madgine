@@ -5,7 +5,7 @@ Project(Widgets)
 set(sources "")
 FolderSources(sources "" src)
 	FolderSources(sources src Madgine widgetsforward.h widgetslib.h)
-		FolderSources(sources Madgine widgets bar.cpp bar.h button.cpp button.h checkbox.cpp checkbox.h classid.h combobox.cpp combobox.h image.cpp image.h label.cpp label.h scenewindow.cpp scenewindow.h textbox.cpp textbox.h widget.cpp widget.h widgetclass.h widgetmanager.cpp widgetmanager.h)
+		FolderSources(sources Madgine widgets bar.cpp bar.h button.cpp button.h checkbox.cpp checkbox.h classid.h combobox.cpp combobox.h condition.cpp condition.h image.cpp image.h label.cpp label.h properties.cpp properties.h scenewindow.cpp scenewindow.h textbox.cpp textbox.h widget.cpp widget.h widgetclass.h widgetmanager.cpp widgetmanager.h)
 			FolderSources(sources widgets shaders widgets.PS_hlsl widgets.VS_hlsl widgets.sl)
 			FolderSources(sources widgets util renderdata.cpp scalableimagerenderdata.cpp textrenderdata.cpp)
 

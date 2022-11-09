@@ -35,6 +35,9 @@ namespace Tools {
 
         bool mEnforceAspectRatio = false;
         float mAspectRatio = 1.0f;
+
+        uint16_t mCurrentConditional = 0;
+        std::vector<bool> mBoolBuffer;
     };
 
 }

@@ -323,10 +323,7 @@ namespace Tools {
             }
 
             if (mSelected) {
-                if (ImGui::BeginTable("columns", 2, ImGuiTableFlags_Resizable)) {
-                    mSelected->render();
-                    ImGui::EndTable();
-                }
+                mSelected->render();
             }
             /*if (hoveredSettings && !mDragging && hoveredSettings != mSelected) {
                 ImGui::Text("Hovered");

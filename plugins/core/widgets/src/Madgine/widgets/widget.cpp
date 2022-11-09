@@ -16,7 +16,7 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
-#include "Madgine/fontloader/font.h"
+#include "geometry.h"
 
 METATABLE_BEGIN(Engine::Widgets::WidgetBase)
 READONLY_PROPERTY(Children, children)
@@ -24,6 +24,7 @@ MEMBER(mName)
 READONLY_PROPERTY(Pos, getPos)
 READONLY_PROPERTY(Size, getSize)
 MEMBER(mVisible)
+MEMBER(mConditions)
 METATABLE_END(Engine::Widgets::WidgetBase)
 
 SERIALIZETABLE_BEGIN(Engine::Widgets::WidgetBase)
@@ -31,6 +32,8 @@ FIELD(mChildren, Serialize::ParentCreator<&Engine::Widgets::WidgetBase::readWidg
 FIELD(mName)
 FIELD(mPos)
 FIELD(mSize)
+FIELD(mConditions)
+FIELD(mProperties)
 SERIALIZETABLE_END(Engine::Widgets::WidgetBase)
 
 namespace Engine {
@@ -53,9 +56,9 @@ namespace Widgets {
     {
         mSize = size;
         if (mParent)
-            updateGeometry(mParent->getAbsoluteSize(), mParent->getAbsolutePosition());
+            applyGeometry(mParent->getAbsoluteSize(), mParent->getAbsolutePosition());
         else
-            updateGeometry(Vector3 { Vector2 { manager().getScreenSpace().mSize }, 1.0f });
+            applyGeometry(Vector3 { Vector2 { manager().getScreenSpace().mSize }, 1.0f });
     }
 
     const Matrix3 &WidgetBase::getSize()
@@ -67,9 +70,9 @@ namespace Widgets {
     {
         mPos = pos;
         if (mParent)
-            updateGeometry(mParent->getAbsoluteSize(), mParent->getAbsolutePosition());
+            applyGeometry(mParent->getAbsoluteSize(), mParent->getAbsolutePosition());
         else
-            updateGeometry(Vector3 { Vector2 { manager().getScreenSpace().mSize }, 1.0f });
+            applyGeometry(Vector3 { Vector2 { manager().getScreenSpace().mSize }, 1.0f });
     }
 
     const Matrix3 &WidgetBase::getPos() const
@@ -87,16 +90,55 @@ namespace Widgets {
         return mAbsolutePos;
     }
 
-    void WidgetBase::updateGeometry(const Vector3 &parentSize, const Vector2 &parentPos)
+    void WidgetBase::applyGeometry(const Vector3 &parentSize, const Vector2 &parentPos)
     {
-        mAbsoluteSize = mSize * parentSize;
-        mAbsolutePos = (mPos * parentSize).xy() + parentPos;
+        Geometry geometry = calculateGeometry(fetchActiveConditions());
+
+        mAbsoluteSize = geometry.mSize * parentSize;
+        mAbsolutePos = (geometry.mPos * parentSize).xy() + parentPos;
 
         sizeChanged(mAbsoluteSize.floor());
 
         for (WidgetBase *child : uniquePtrToPtr(mChildren)) {
-            child->updateGeometry(mAbsoluteSize, mAbsolutePos);
+            child->applyGeometry(mAbsoluteSize, mAbsolutePos);
         }
+    }
+
+    void applyProperties(Geometry &geometry, PropertyRange range, uint16_t activeConditions, uint16_t rangeMask, GeometrySourceInfo *source)
+    {
+
+        for (auto it = range.begin(); it != range.end(); ++it) {
+            const PropertyDescriptor &desc = *it;
+            switch (desc.mType) {
+            case PropertyType::POSITION:
+                geometry.mPos[desc.mAnnotator1 / 3][desc.mAnnotator1 % 3] = it.value(0);
+                if (source)
+                    source->mPos[desc.mAnnotator1] = rangeMask;
+                break;
+            case PropertyType::SIZE:
+                geometry.mSize[desc.mAnnotator1 / 3][desc.mAnnotator1 % 3] = it.value(0);
+                if (source)
+                    source->mSize[desc.mAnnotator1] = rangeMask;
+                break;
+            case PropertyType::CONDITIONAL:
+                assert(rangeMask == 0);
+                if ((activeConditions & desc.mAnnotator1) == desc.mAnnotator1)
+                    applyProperties(geometry, it.conditionalRange(), activeConditions, desc.mAnnotator1, source);
+                break;
+            }
+        }
+
+    }
+
+    Geometry WidgetBase::calculateGeometry(uint16_t activeConditions, GeometrySourceInfo *source)
+    {
+        Geometry geometry;
+        geometry.mPos = getPos();
+        geometry.mSize = getSize();
+
+        applyProperties(geometry, mProperties, activeConditions, 0, source);
+
+        return geometry;
     }
 
     WidgetClass WidgetBase::getClass() const
@@ -200,7 +242,7 @@ namespace Widgets {
             parent->mChildren.emplace_back(std::move(*it));
             mParent->mChildren.erase(it);
             mParent = parent;
-            updateGeometry(parent->getAbsoluteSize(), parent->getAbsolutePosition());
+            applyGeometry(parent->getAbsoluteSize(), parent->getAbsolutePosition());
         }
     }
 
@@ -346,6 +388,110 @@ namespace Widgets {
 
     void WidgetBase::preRender()
     {
+    }
+
+    uint16_t WidgetBase::fetchActiveConditions(std::vector<Condition *> *conditions)
+    {
+        if (!mParent)
+            return 0;
+        if (conditions) {
+            return mParent->fetchActiveConditionsImpl(*conditions);
+        } else {
+            std::vector<Condition *> conditionsDummy;
+            return mParent->fetchActiveConditionsImpl(conditionsDummy);
+        }
+    }
+
+    uint16_t WidgetBase::fetchActiveConditionsImpl(std::vector<Condition *> &conditions)
+    {
+        uint16_t acc = 0;
+
+        if (mParent)
+            acc = mParent->fetchActiveConditionsImpl(conditions);
+
+        for (Condition &cond : mConditions) {
+            acc |= evalCondition(cond) << conditions.size();
+            conditions.push_back(&cond);
+        }
+
+        return acc;
+    }
+
+    bool WidgetBase::evalCondition(Condition &cond)
+    {
+        float formulaValue;
+        switch (cond.mFormula) {
+        case Formula::W:
+            formulaValue = mAbsoluteSize.x;
+            break;
+        case Formula::H:
+            formulaValue = mAbsoluteSize.y;
+            break;
+        case Formula::W_MINUS_H:
+            formulaValue = mAbsoluteSize.x - mAbsoluteSize.y;
+            break;
+        case Formula::ABS_W_MINUS_H:
+            formulaValue = abs(mAbsoluteSize.x - mAbsoluteSize.y);
+            break;
+        case Formula::W_OVER_H:
+            formulaValue = mAbsoluteSize.x / mAbsoluteSize.y;
+            break;
+        default:
+            throw 0;
+        }
+        switch (cond.mOperator) {
+        case Operator::LESS:
+            return formulaValue < cond.mReferenceValue;
+        case Operator::GREATER:
+            return formulaValue > cond.mReferenceValue;
+        case Operator::LESS_OR_EQUAL:
+            return formulaValue <= cond.mReferenceValue;
+        case Operator::GREATER_OR_EQUAL:
+            return formulaValue >= cond.mReferenceValue;
+        default:
+            throw 0;
+        }
+    }
+
+    void WidgetBase::addConditional(uint16_t mask)
+    {
+        mProperties.set(PropertyDescriptor { PropertyType::CONDITIONAL, 0, mask });
+    }
+
+    PropertyRange WidgetBase::conditionals()
+    {
+        return {
+            std::ranges::find_if(mProperties, [](const PropertyDescriptor &prop) { return prop.mType == PropertyType::CONDITIONAL; }), mProperties.end()
+        };
+    }
+
+    void WidgetBase::setPosValue(uint16_t index, float value, uint16_t mask)
+    {
+        if (mask == 0) {
+            mPos[index / 3][index % 3] = value;
+        }
+        else {
+            mProperties.setConditional(mask, { PropertyType::POSITION, 0, index }, { value });
+        }
+    }
+
+    void WidgetBase::setSizeValue(uint16_t index, float value, uint16_t mask)
+    {
+        if (mask == 0) {
+            mSize[index / 3][index % 3] = value;
+        }
+        else {
+            mProperties.setConditional(mask, { PropertyType::SIZE, 0, index }, { value });
+        }
+    }
+
+    void WidgetBase::unsetSizeValue(uint16_t index, uint16_t mask)
+    {
+        if (mask == 0) {
+            LOG_WARNING("Unsetting a size value without conditional has no effect.");
+        } else {
+            mProperties.unsetConditional(mask, { PropertyType::SIZE, 0, index });
+        }
     }
 
 }

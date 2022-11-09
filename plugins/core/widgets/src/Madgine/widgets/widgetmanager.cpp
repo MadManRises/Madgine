@@ -55,6 +55,18 @@ SERIALIZETABLE_END(Engine::Widgets::WidgetManager)
 namespace Engine {
 namespace Widgets {
 
+    static constexpr const char *sTags[] = {
+        "Widget",
+        "SceneWindow",
+        "Combobox",
+        "Checkbox",
+        "Textbox",
+        "Button",
+        "Label",
+        "Bar",
+        "Image"
+    };
+
     static float sDragDistanceThreshold = 2.0f;
     static std::chrono::steady_clock::duration sDragTimeThreshold = 5ms;
 
@@ -151,7 +163,7 @@ namespace Widgets {
         if (!parent) {
             w->hide();
         }
-        w->updateGeometry(parent ? parent->getAbsoluteSize() : Vector3 { Vector2 { mClientSpace.mSize }, 1.0f });
+        w->applyGeometry(parent ? parent->getAbsoluteSize() : Vector3 { Vector2 { mClientSpace.mSize }, 1.0f });
         return w;
     }
 
@@ -204,9 +216,8 @@ namespace Widgets {
 
     Serialize::StreamResult WidgetManager::readWidget(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget, WidgetBase *parent)
     {
-        STREAM_PROPAGATE_ERROR(in.beginExtendedRead("Widget", 1));
         WidgetClass _class;
-        STREAM_PROPAGATE_ERROR(read(in, _class, "type"));
+        STREAM_PROPAGATE_ERROR(in.beginExtendedTypedRead(_class, sTags));
 
         widget = createWidgetByClass(_class, parent);
         return {};
@@ -219,10 +230,7 @@ namespace Widgets {
 
     const char *WidgetManager::writeWidget(Serialize::FormattedSerializeStream &out, const std::unique_ptr<WidgetBase> &widget) const
     {
-        out.beginExtendedWrite("Widget", 1);
-        write(out, widget->getClass(), "type");
-
-        return "Widget";
+        return out.beginExtendedTypedWrite(widget->getClass(), sTags);
     }
 
     WidgetBase *WidgetManager::propagateInput(WidgetBase *w, const Input::PointerEventArgs &arg)
@@ -526,7 +534,7 @@ namespace Widgets {
     {
         MainWindowComponentBase::onResize(space);
         for (WidgetBase *topLevel : uniquePtrToPtr(mTopLevelWidgets)) {
-            topLevel->updateGeometry(Vector3 { Vector2 { space.mSize }, 1.0f });
+            topLevel->applyGeometry(Vector3 { Vector2 { space.mSize }, 1.0f });
         }
     }
 

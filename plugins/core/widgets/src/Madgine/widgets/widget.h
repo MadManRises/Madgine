@@ -15,6 +15,9 @@
 #include "util/texturesettings.h"
 #include "util/vertex.h"
 
+#include "condition.h"
+#include "properties.h"
+
 namespace Engine {
 namespace Widgets {
 
@@ -45,7 +48,8 @@ namespace Widgets {
         Vector3 getAbsoluteSize() const;
         Vector2 getAbsolutePosition() const;
 
-        void updateGeometry(const Vector3 &parentSize, const Vector2 &parentPos = Vector2::ZERO);
+        void applyGeometry(const Vector3 &parentSize, const Vector2 &parentPos = Vector2::ZERO);
+        Geometry calculateGeometry(uint16_t activeConditions, GeometrySourceInfo *source = nullptr);
 
         WidgetBase *createChild(WidgetClass _class);
         template <typename WidgetType = WidgetBase>
@@ -98,17 +102,32 @@ namespace Widgets {
         virtual std::vector<std::pair<std::vector<Vertex>, TextureSettings>> vertices(const Vector3 &screenSize, size_t layer = 0);
         virtual void preRender();
 
+        uint16_t fetchActiveConditions(std::vector<Condition *> *conditions = nullptr);
+
+        void addConditional(uint16_t mask);
+        PropertyRange conditionals();
+
+        void setPosValue(uint16_t index, float value, uint16_t mask = 0);
+
+        void setSizeValue(uint16_t index, float value, uint16_t mask = 0);
+        void unsetSizeValue(uint16_t index, uint16_t mask);
+
         bool mVisible = true;
         std::string mName = "Unnamed";
 
+        std::vector<Condition> mConditions;
+
     protected:
-        std::unique_ptr<WidgetBase> createWidgetByClass(WidgetClass _class);
         Serialize::StreamResult readWidget(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget);
         const char *writeWidget(Serialize::FormattedSerializeStream &out, const std::unique_ptr<WidgetBase> &widget) const;
 
         virtual void sizeChanged(const Vector3i &pixelSize);
 
         size_t depth(size_t layer);
+
+        uint16_t fetchActiveConditionsImpl(std::vector<Condition *> &conditions);
+
+        bool evalCondition(Condition &cond);
 
     protected:
         void destroyChild(WidgetBase *w);
@@ -128,6 +147,8 @@ namespace Widgets {
 
         Vector2 mAbsolutePos;
         Vector3 mAbsoluteSize;
+
+        PropertyList mProperties;
 
         Matrix3 mPos = Matrix3::ZERO;
         Matrix3 mSize = Matrix3::IDENTITY;

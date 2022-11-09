@@ -12,6 +12,8 @@
 
 #include "imgui/imgui_internal.h"
 
+#include "Madgine/widgets/geometry.h"
+
 namespace Engine {
 namespace Tools {
 
@@ -33,58 +35,220 @@ namespace Tools {
     void WidgetSettings::render()
     {
 
-        Matrix3 pos = mWidget->getPos();
-        Matrix3 size = mWidget->getSize();
+        if (ImGui::CollapsingHeader("Geometry", ImGuiTreeNodeFlags_SpanFullWidth)) {
 
-        bool enabled[9] = {
-            true, true, true,
-            !mEnforceAspectRatio, !mEnforceAspectRatio, !mEnforceAspectRatio,
-            true, true, true
-        };
+            std::vector<Widgets::Condition *> conditions;
 
-        float speeds[9] = {
-            0.01f,
-            0.01f,
-            1.0f,
-            0.01f,
-            0.01f,
-            1.0f,
-            0.01f,
-            0.01f,
-            1.0f,
-        };
+            uint16_t activeConditions = mWidget->fetchActiveConditions(&conditions);
 
-        ImGui::TableNextRow();  
-        ImGui::TableNextColumn();
-        ImGui::Text("Pos");
-        ImGui::TableNextColumn();
-        if (ImGui::DragMatrix3("##Pos", &pos, speeds))
-            mWidget->setPos(pos);
-        ImGui::TableNextRow();   
-        ImGui::TableNextColumn();
-        ImGui::Text("Size");
-        ImGui::TableNextColumn();
-        if (ImGui::DragMatrix3("##Size", &size, speeds, enabled)) {
-            mWidget->setSize(size);
-            enforceAspectRatio();
+            if (ImGui::BeginPopup("AddConditional")) {
+                mBoolBuffer.resize(conditions.size());
+                size_t i = 0;
+                uint16_t selection = 0;
+                for (Widgets::Condition *cond : conditions) {
+                    auto ref = mBoolBuffer[i];
+                    bool v = ref;
+                    if (ImGui::Checkbox(cond->mName.empty() ? "<>" : cond->mName.c_str(), &v)) {
+                        ref = v;
+                    }
+                    selection |= v << i;
+                    ++i;
+                }
+                if (selection == 0)
+                    ImGui::BeginDisabled();
+                if (ImGui::Button("Create")) {
+                    mWidget->addConditional(selection);
+                    mCurrentConditional = selection;
+                    ImGui::CloseCurrentPopup();
+                }
+                if (selection == 0)
+                    ImGui::EndDisabled();
+                ImGui::EndPopup();
+            }
+
+            if (ImGui::Button("+ Conditionals")) {
+                mBoolBuffer.clear();
+                ImGui::OpenPopup("AddConditional");
+            }
+
+            if (ImGui::Selectable("Effective", mCurrentConditional == std::numeric_limits<uint16_t>::max())) {
+                mCurrentConditional = std::numeric_limits<uint16_t>::max();
+            }
+
+            if (ImGui::Selectable("Base", mCurrentConditional == 0)) {
+                mCurrentConditional = 0;
+            }
+
+            for (Widgets::PropertyDescriptor property : mWidget->conditionals()) {
+                uint16_t conditional = property.mAnnotator1;
+
+                std::string name;
+                bool first = true;
+                for (size_t i = 0; i < conditions.size(); ++i) {
+                    if (conditional & (1 << i)) {
+                        if (!first)
+                            name += '|';
+                        first = false;
+                        name += conditions[i]->mName.empty() ? "<>" : conditions[i]->mName;
+                    }
+                }
+                if ((activeConditions & conditional) == conditional)
+                    name += " x";
+                if (ImGui::Selectable(name.c_str(), mCurrentConditional == conditional)) {
+                    mCurrentConditional = conditional;
+                }
+            }
+
+            ImGui::Separator();
+
+            uint16_t effectiveConditional = mCurrentConditional;
+            if (mCurrentConditional == std::numeric_limits<uint16_t>::max()) {
+                ImGui::BeginDisabled();
+                effectiveConditional = activeConditions;
+            }
+
+            Widgets::GeometrySourceInfo source;
+            Widgets::Geometry geometry = mWidget->calculateGeometry(effectiveConditional, &source);
+
+            if (ImGui::BeginTable("Geometry-columns", 2, ImGuiTableFlags_Resizable)) {
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::Indent();
+                ImGui::Text("Pos");
+                ImGui::Unindent();
+                ImGui::TableNextColumn();
+
+                ImGui::BeginGroup();
+                ImGui::PushID("##pos");
+
+                for (int i = 0; i < 3; ++i) {
+                    ImGui::PushMultiItemsWidths(3, std::min(300.0f, ImGui::CalcItemWidth()));
+                    for (int j = 0; j < 3; ++j) {
+                        int compoundId = 3 * i + j;
+                        ImGui::PushID(compoundId);
+                        if (j > 0)
+                            ImGui::SameLine(0, 5.0f);
+                        if (source.mPos[compoundId] == mCurrentConditional && mCurrentConditional != 0) {
+                            ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32(150, 150, 0, 255));
+                            ImGui::PushStyleColor(ImGuiCol_FrameBgActive, IM_COL32(255, 255, 0, 255));
+                            ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, IM_COL32(220, 220, 0, 255));
+                            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
+                        }
+                        if (ImGui::DragFloat("", &geometry.mPos[i][j], j == 2 ? 1.0f : 0.01f)) {
+                            mWidget->setPosValue(compoundId, geometry.mPos[i][j], mCurrentConditional);
+                        }
+                        if (source.mPos[compoundId] == mCurrentConditional && mCurrentConditional != 0)
+                            ImGui::PopStyleColor(4);
+                        ImGui::PopID();
+                        ImGui::PopItemWidth();
+                    }
+                }
+
+                ImGui::PopID();
+                ImGui::EndGroup();
+
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::Indent();
+                ImGui::Text("Size");
+                ImGui::Unindent();
+                ImGui::TableNextColumn();
+
+                ImGui::BeginGroup();
+                ImGui::PushID("##size");
+
+                for (int i = 0; i < 3; ++i) {
+                    ImGui::PushMultiItemsWidths(3, std::min(300.0f, ImGui::CalcItemWidth()));
+                    for (int j = 0; j < 3; ++j) {
+                        int compoundId = 3 * i + j;
+                        ImGui::PushID(compoundId);
+                        if (j > 0)
+                            ImGui::SameLine(0, 5.0f);
+                        if (source.mSize[compoundId] == mCurrentConditional && mCurrentConditional != 0) {
+                            ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32(150, 150, 0, 255));
+                            ImGui::PushStyleColor(ImGuiCol_FrameBgActive, IM_COL32(255, 255, 0, 255));
+                            ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, IM_COL32(220, 220, 0, 255));
+                            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
+                        }
+                        if (ImGui::DragFloat("", &geometry.mSize[i][j], j == 2 ? 1.0f : 0.01f)) {
+                            mWidget->setSizeValue(compoundId, geometry.mSize[i][j], mCurrentConditional);
+                        }
+                        if (source.mSize[compoundId] == mCurrentConditional && mCurrentConditional != 0) {
+                            ImGui::PopStyleColor(4);
+                            if (ImGui::BeginPopupCompoundContextItem()) {
+                                if (ImGui::MenuItem("Reset")) {
+                                    mWidget->unsetSizeValue(compoundId, mCurrentConditional);
+                                }
+                                ImGui::EndPopup();
+                            }
+                        }
+                        ImGui::PopID();
+                        ImGui::PopItemWidth();
+                    }
+                }
+
+                ImGui::PopID();
+                ImGui::EndGroup();
+
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::Indent();
+                ImGui::Text("AspectRatio");
+                ImGui::Unindent();
+                ImGui::TableNextColumn();
+                if (ImGui::Checkbox("##aspectratioEnabled", &mEnforceAspectRatio))
+                    enforceAspectRatio();
+                ImGui::SameLine();
+
+                if (!mEnforceAspectRatio)
+                    ImGui::BeginDisabled();
+                if (ImGui::DragFloat("##aspectratio", &mAspectRatio, 0.05f))
+                    enforceAspectRatio();
+                if (!mEnforceAspectRatio)
+                    ImGui::EndDisabled();
+
+                ImGui::EndTable();
+            }
+
+            if (mCurrentConditional == std::numeric_limits<uint16_t>::max()) {
+                ImGui::EndDisabled();
+            }
         }
 
-        ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-        ImGui::Text("AspectRatio");
-        ImGui::TableNextColumn();
-        if (ImGui::Checkbox("##aspectrationEnabled", &mEnforceAspectRatio))
-            enforceAspectRatio();
-        ImGui::SameLine();
+        if (ImGui::CollapsingHeader("WidgetData")) {
+            if (ImGui::BeginTable("WidgetData-columns", 2, ImGuiTableFlags_Resizable)) {
+                mInspector.drawMembers(mWidget, { "Pos", "Size", "Children", "mConditions" });
+                ImGui::EndTable();
+            }
+        }
 
-        if (!mEnforceAspectRatio)
-            ImGui::BeginDisabled();
-        if (ImGui::DragFloat("##aspectratio", &mAspectRatio, 0.05f))
-            enforceAspectRatio();
-        if (!mEnforceAspectRatio)
-            ImGui::EndDisabled();
+        if (ImGui::CollapsingHeader("Conditions")) {
+            if (ImGui::Button("+")) {
+                mWidget->mConditions.emplace_back();
+            }
+            if (ImGui::BeginTable("Conditions-columns", 2, ImGuiTableFlags_Resizable)) {
+                for (Widgets::Condition &condition : mWidget->mConditions) {
+                    ImGui::TableNextRow();
+                    ImGui::PushID(&condition);
+                    ImGui::TableNextColumn();
+                    ImGui::InputText("##condName", &condition.mName);
+                    ImGui::TableNextColumn();
+                    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x / 4.0f);
+                    ImGui::EnumCombo("##formula", &condition.mFormula);
+                    ImGui::SameLine();
+                    ImGui::EnumCombo("##operator", &condition.mOperator);
+                    ImGui::SameLine();
+                    ImGui::DragFloat("##reference", &condition.mReferenceValue);
+                    ImGui::PopItemWidth();
+                    ImGui::PopID();
+                }
+                ImGui::EndTable();
+            }
+        }
 
-        mInspector.drawMembers(mWidget, { "Pos", "Size", "Children" });
+        if (ImGui::BeginPopupCompoundContextWindow()) {
+            ImGui::EndPopup();
+        }
     }
 
     void WidgetSettings::saveGeometry()

@@ -5,6 +5,8 @@
 
 #include "Meta/keyvalue/valuetype_forward.h"
 
+#include "Generic/coroutines/generator.h"
+
 namespace ImGui {
 
 struct ValueTypePayload;
@@ -88,10 +90,10 @@ IMGUI_API void RightAlignDuration(std::chrono::nanoseconds dur);
 IMGUI_API void RightAlignText(const char *s, ...);
 IMGUI_API void RightAlign(float size);
 
-IMGUI_API bool DragMatrix3(const char *label, Engine::Matrix3 *m, float v_speed, bool *enabled = nullptr);
-IMGUI_API bool DragMatrix3(const char *label, Engine::Matrix3 *m, float *v_speeds, bool *enabled = nullptr);
-IMGUI_API bool DragMatrix4(const char *label, Engine::Matrix4 *m, float v_speed, bool *enabled = nullptr);
-IMGUI_API bool DragMatrix4(const char *label, Engine::Matrix4 *m, float *v_speeds, bool *enabled = nullptr);
+IMGUI_API bool DragMatrix3(const char *label, Engine::Matrix3 *m, float v_speed);
+IMGUI_API bool DragMatrix3(const char *label, Engine::Matrix3 *m, float *v_speeds);
+IMGUI_API bool DragMatrix4(const char *label, Engine::Matrix4 *m, float v_speed);
+IMGUI_API bool DragMatrix4(const char *label, Engine::Matrix4 *m, float *v_speeds);
 
 IMGUI_API bool MethodPicker(const char *label, const std::vector<std::pair<std::string, Engine::BoundApiFunction>> &methods, Engine::BoundApiFunction *m, std::string *currentName, std::string *filter = nullptr, int expectedArgumentCount = -1);
 
@@ -218,5 +220,20 @@ IMGUI_API bool BeginPopupCompoundContextWindow(const char *str_id = nullptr, ImG
 
 IMGUI_API bool IsNewWindow(const char *name);
 IMGUI_API void SetWindowDockingDir(ImGuiID dockSpaceId, ImGuiDir dir, float ratio, bool outer, ImGuiCond cond = 0);
+
+template <typename E>
+bool EnumCombo(const char* name, E *val) {
+    bool changed = false;
+    if (ImGui::BeginCombo(name, std::string { val->toString() }.c_str())) {
+        for (E v : E::values()) {
+            if (ImGui::Selectable(std::string { v.toString() }.c_str())) {
+                *val = v;
+                changed = true;
+            }
+        }
+        ImGui::EndCombo();
+    }
+    return changed;
+}
 
 }
