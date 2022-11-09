@@ -8,10 +8,9 @@ ExternalProject_Add(DirectXShaderCompiler
 	BINARY_DIR DirectXShaderCompiler/build
 	SOURCE_DIR ${dxCompilerSourceDir}
 	CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release -DHLSL_BUILD_DXILCONV=OFF -DHLSL_COPY_GENERATED_SOURCES=ON -DCMAKE_VERBOSE_MAKEFILE=ON -C ${dxCompilerSourceDir}/cmake/caches/PredefinedParams.cmake 
+	BUILD_BYPRODUCTS
+		${dxCompilerBinaryDir}/lib/dxcompiler.lib
 	INSTALL_COMMAND "")
-
-set(spirVCrossSourceDir ${CMAKE_CURRENT_SOURCE_DIR}/ext/SPIRV-Cross)
-set(spirVCrossBinaryDir ${CMAKE_CURRENT_BINARY_DIR}/SPIRV-Cross/build)
 
 add_executable(dxc IMPORTED GLOBAL)
 set_target_properties(dxc PROPERTIES 
@@ -27,11 +26,22 @@ add_dependencies(dxcompiler DirectXShaderCompiler)
 
 
 
+set(spirVCrossSourceDir ${CMAKE_CURRENT_SOURCE_DIR}/ext/SPIRV-Cross)
+set(spirVCrossBinaryDir ${CMAKE_CURRENT_BINARY_DIR}/SPIRV-Cross/build)
+
+
 ExternalProject_Add(SPIRV-Cross
 	PREFIX SPIRV-Cross 
 	BINARY_DIR SPIRV-Cross/build
 	SOURCE_DIR ${spirVCrossSourceDir}
 	CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DSPIRV_CROSS_STATIC=ON -DSPIRV_CROSS_SHARED=OFF -DSPIRV_CROSS_CLI=OFF -DCMAKE_VERBOSE_MAKEFILE=ON
+	BUILD_BYPRODUCTS
+		${spirVCrossBinaryDir}/spirv-cross-cored.lib
+		${spirVCrossBinaryDir}/spirv-cross-core.lib	
+		${spirVCrossBinaryDir}/spirv-cross-hlsld.lib
+		${spirVCrossBinaryDir}/spirv-cross-hlsl.lib
+		${spirVCrossBinaryDir}/spirv-cross-glsld.lib
+		${spirVCrossBinaryDir}/spirv-cross-glsl.lib
 	INSTALL_COMMAND "")
 
 add_library(spirv-cross-core STATIC IMPORTED GLOBAL)
@@ -64,15 +74,15 @@ set_target_properties(ShaderGen PROPERTIES ShaderGenTools "")
 
 function(add_shadergen_target target)
 
-set_target_properties(${target} PROPERTIES 
-	FOLDER "Util"
-	RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/util
-	RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/util) 
+	set_target_properties(${target} PROPERTIES 
+		FOLDER "Util"
+		RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/util
+		RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/util) 
 
-add_dependencies(ShaderGen ${target})
+	add_dependencies(ShaderGen ${target})
 
-get_target_property(tools ShaderGen ShaderGenTools)
-set (tools ${tools} $<TARGET_FILE:${target}>)
-set_target_properties(ShaderGen PROPERTIES ShaderGenTools "${tools}")
+	get_target_property(tools ShaderGen ShaderGenTools)
+	set (tools ${tools} $<TARGET_FILE:${target}>)
+	set_target_properties(ShaderGen PROPERTIES ShaderGenTools "${tools}")
 
 endfunction(add_shadergen_target)
