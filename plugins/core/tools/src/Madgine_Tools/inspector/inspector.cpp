@@ -137,6 +137,7 @@ namespace Tools {
                     ImGui::TableNextColumn();
 
                 ImGui::Indent();
+                ImGui::AlignTextToFramePadding();
                 ImGui::Text(id);
                 ImGui::Unindent();
 
@@ -193,6 +194,7 @@ namespace Tools {
             open = ImGui::TreeNode(id.data());
         else {
             ImGui::Indent();
+            ImGui::AlignTextToFramePadding();
             ImGui::Text(id);
             ImGui::Unindent();
         }
