@@ -57,21 +57,6 @@ namespace Render {
         swapBuffers(mOsWindow, mContext);
     }
 
-    TextureDescriptor OpenGLRenderWindow::texture(size_t index, size_t iteration) const
-    {
-        return {};
-    }
-
-    size_t OpenGLRenderWindow::textureCount() const
-    {
-        return 0;
-    }
-
-    TextureDescriptor OpenGLRenderWindow::depthTexture() const
-    {
-        return {};
-    }
-
     Vector2i OpenGLRenderWindow::size() const
     {
         InterfacesVector size = mOsWindow->renderSize();

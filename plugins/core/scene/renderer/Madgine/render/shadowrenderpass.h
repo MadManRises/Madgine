@@ -10,12 +10,11 @@ namespace Engine {
 namespace Render {
 
     struct MADGINE_SCENE_RENDERER_EXPORT ShadowRenderPass : RenderPass {
-        ShadowRenderPass(Scene::SceneManager &scene, Render::Camera *camera, int priority);
+        ShadowRenderPass(SceneMainWindowComponent &scene, Render::Camera *camera, int priority);
 
         virtual void setup(RenderTarget *target) override;
         virtual void shutdown() override;
-        virtual void render(RenderTarget *target, size_t iteration) override;
-        virtual void preRender() override;
+        virtual void render(RenderTarget *target, size_t iteration) override;        
 
         virtual int priority() const override;
 
@@ -28,7 +27,7 @@ namespace Render {
     private:
         PipelineLoader::Instance mPipeline;
 
-        Scene::SceneManager &mScene;        
+        SceneMainWindowComponent &mScene;        
 
         Render::Camera *mCamera;
 

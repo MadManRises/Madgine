@@ -95,21 +95,6 @@ namespace Render {
         mSwapChain->Present(0, 0);
     }
 
-    TextureDescriptor DirectX11RenderWindow::texture(size_t index, size_t iteration) const
-    {
-        return {};
-    }
-
-    size_t DirectX11RenderWindow::textureCount() const
-    {
-        return 0;
-    }
-
-    TextureDescriptor DirectX11RenderWindow::depthTexture() const
-    {
-        return {};
-    }
-
     Vector2i DirectX11RenderWindow::size() const
     {
         InterfacesVector size = mWindow->renderSize();

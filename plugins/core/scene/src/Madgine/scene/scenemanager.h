@@ -139,9 +139,6 @@ namespace Scene {
 
         std::atomic<size_t> mPauseStack = 0;
 
-    public:
-        Vector3 mAmbientLightColor = { 1.0f, 1.0f, 1.0f };
-        NormalizedVector3 mAmbientLightDirection = { -0.0f, -1.0f, 1.5f };
     };
 
 }

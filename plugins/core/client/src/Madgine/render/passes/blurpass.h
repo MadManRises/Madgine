@@ -14,7 +14,6 @@ namespace Render {
         virtual void setup(RenderTarget *target) override;
         virtual void shutdown() override;
         virtual void render(RenderTarget *target, size_t iteration) override;
-        virtual void preRender() override;
         virtual void onTargetResize(const Vector2i &size) override;
 
         virtual int priority() const override;

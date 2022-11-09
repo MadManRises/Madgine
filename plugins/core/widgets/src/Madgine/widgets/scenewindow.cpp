@@ -30,10 +30,12 @@ namespace Widgets {
         : Widget(manager, parent)
     {
         mTarget = manager.window().getRenderer()->createRenderTexture({ 1, 1 }, { .mSamples = 1 });
+        manager.addDependency(mTarget.get());
     }
 
     SceneWindow::~SceneWindow()
     {
+        manager().removeDependency(mTarget.get());
     }
 
     std::vector<std::pair<std::vector<Vertex>, TextureSettings>> SceneWindow::vertices(const Vector3 &screenSize, size_t layer)
@@ -61,11 +63,6 @@ namespace Widgets {
     WidgetClass SceneWindow::getClass() const
     {
         return WidgetClass::SCENEWINDOW;
-    }
-
-    void SceneWindow::preRender()
-    {
-        mTarget->render();
     }
 
 }

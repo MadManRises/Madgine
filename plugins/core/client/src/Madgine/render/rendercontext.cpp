@@ -54,7 +54,7 @@ namespace Render {
     {
         beginFrame();
         for (RenderTarget *target : safeIterate(mRenderTargets))
-            target->render();
+            target->update();
         endFrame();
     }
 

@@ -113,16 +113,6 @@ namespace Render {
 #endif
     }
 
-    void DirectX12RenderTarget::pushAnnotation(const char *tag)
-    {
-        PIXBeginEvent(context()->mCommandList.mList, PIX_COLOR(255, 255, 255), tag);
-    }
-
-    void DirectX12RenderTarget::popAnnotation()
-    {
-        PIXEndEvent(context()->mCommandList.mList);
-    }
-
     void DirectX12RenderTarget::setRenderSpace(const Rect2i &space)
     {
         ID3D12GraphicsCommandList *commandList = context()->mCommandList.mList;

@@ -222,6 +222,8 @@ namespace Render {
 
     DirectX12RenderContext::~DirectX12RenderContext()
     {
+        mConstantBuffer.reset();
+
         (*sDevice).reset();
 
         assert(sSingleton == this);
@@ -381,12 +383,22 @@ namespace Render {
     {
         checkThread();
 
-        return std::make_unique<DirectX12RenderWindow>(this, w);
+        return std::make_unique<DirectX12RenderWindow>(this, w, samples);
     }
 
     bool DirectX12RenderContext::supportsMultisampling() const
     {
         return true;
+    }
+
+    void DirectX12RenderContext::pushAnnotation(const char *tag)
+    {
+        PIXBeginEvent(mCommandList.mList, PIX_COLOR(255, 255, 255), tag);
+    }
+
+    void DirectX12RenderContext::popAnnotation()
+    {
+        PIXEndEvent(mCommandList.mList);
     }
 
     static constexpr const char *vSemantics[] = {
@@ -437,22 +449,36 @@ namespace Render {
     {
         std::vector<D3D12_INPUT_ELEMENT_DESC> vertexLayoutDesc;
 
+        
+#ifndef NDEBUG
+#    define semantic(i) vSemantics[i]
+#    define semanticIndex(i) vSemanticIndices[i]
+#    define instanceSemantic "INSTANCEDATA"
+#    define instanceSemanticIndex(i) (UINT) i
+#else
+#    define semantic(i) "TEXCOORD"
+#    define semanticIndex(i) (UINT) i
+#    define instanceSemantic "TEXCOORD"
+#    define instanceSemanticIndex(i) (UINT)(VertexElements::size + i)
+#endif
+
+
         UINT offset = 0;
-        for (size_t i = 0; i < VertexElements::size; ++i) {
+        for (UINT i = 0; i < VertexElements::size; ++i) {
             if (format.has(i)) {
-                vertexLayoutDesc.push_back({ vSemantics[i],
-                    vSemanticIndices[i], vFormats[i], 0, offset, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
+                vertexLayoutDesc.push_back({ semantic(i),
+                    semanticIndex(i), vFormats[i], 0, offset, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
                 offset += sVertexElementSizes[i];
             } else {
-                vertexLayoutDesc.push_back({ vSemantics[i],
-                    vSemanticIndices[i], vFormats[i], 2, vConstantOffsets[i], D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
+                vertexLayoutDesc.push_back({ semantic(i),
+                    semanticIndex(i), vFormats[i], 2, vConstantOffsets[i], D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 });
             }
         }
 
         assert(instanceDataSize % 16 == 0);
         for (size_t i = 0; i < instanceDataSize / 16; ++i) {
-            vertexLayoutDesc.push_back({ "INSTANCEDATA",
-                static_cast<UINT>(i),
+            vertexLayoutDesc.push_back({ instanceSemantic,
+                instanceSemanticIndex(i),
                 DXGI_FORMAT_R32G32B32A32_FLOAT,
                 1,
                 i == 0 ? 0 : D3D12_APPEND_ALIGNED_ELEMENT,

@@ -21,9 +21,6 @@ namespace Render {
         virtual void beginIteration(size_t iteration) const override;
         virtual void endIteration(size_t iteration) const override;
 
-        virtual void pushAnnotation(const char *tag) override;
-        virtual void popAnnotation() override;
-
         virtual void clearDepthBuffer() override;
 
         virtual void setRenderSpace(const Rect2i &space) override;

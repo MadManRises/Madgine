@@ -37,6 +37,9 @@ namespace Render {
 
         virtual bool supportsMultisampling() const override;
 
+        virtual void pushAnnotation(const char *tag) override;
+        virtual void popAnnotation() override;
+
         void waitForGPU();
         void waitForFence(uint64_t fenceValue);
         bool isFenceComplete(uint64_t fenceValue);

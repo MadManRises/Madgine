@@ -79,5 +79,10 @@ namespace Window {
         return mClientSpace;
     }
 
+    int MainWindowComponentBase::priority() const
+    {
+        return mPriority;
+    }
+
 }
 }

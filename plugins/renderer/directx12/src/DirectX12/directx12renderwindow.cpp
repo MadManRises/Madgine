@@ -13,7 +13,7 @@
 namespace Engine {
 namespace Render {
 
-    DirectX12RenderWindow::DirectX12RenderWindow(DirectX12RenderContext *context, Window::OSWindow *w)
+    DirectX12RenderWindow::DirectX12RenderWindow(DirectX12RenderContext *context, Window::OSWindow *w, size_t samples)
         : DirectX12RenderTarget(context, true, w->title())
         , mWindow(w)
     {
@@ -31,7 +31,7 @@ namespace Render {
         swapChainDesc.BufferDesc.RefreshRate = /*QueryRefreshRate(clientWidth, clientHeight, vSync)*/ { 60, 1 };
         swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
         swapChainDesc.OutputWindow = reinterpret_cast<HWND>(w->mHandle);
-        swapChainDesc.SampleDesc.Count = 1;
+        swapChainDesc.SampleDesc.Count = samples;
         swapChainDesc.SampleDesc.Quality = 0;
         swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
         swapChainDesc.Windowed = TRUE;
@@ -80,21 +80,6 @@ namespace Render {
         DirectX12RenderTarget::endIteration(iteration);
 
         mSwapChain->Present(0, 0);
-    }
-
-    TextureDescriptor DirectX12RenderWindow::texture(size_t index, size_t iteration) const
-    {
-        return {};
-    }
-
-    size_t DirectX12RenderWindow::textureCount() const
-    {
-        return 0;
-    }
-
-    TextureDescriptor DirectX12RenderWindow::depthTexture() const
-    {
-        return {};
     }
 
     Vector2i DirectX12RenderWindow::size() const

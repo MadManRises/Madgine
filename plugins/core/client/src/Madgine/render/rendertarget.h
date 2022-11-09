@@ -1,24 +1,23 @@
 #pragma once
 
-#include "Madgine/render/vertex.h"
 #include "Madgine/render/texturedescriptor.h"
+#include "Madgine/render/vertex.h"
+#include "renderdata.h"
 
 namespace Engine {
 namespace Render {
 
-    struct MADGINE_CLIENT_EXPORT RenderTarget {
+    struct MADGINE_CLIENT_EXPORT RenderTarget : RenderData {
         RenderTarget(RenderContext *context, bool global, std::string name, size_t iterations = 1);
         RenderTarget(const RenderTarget &) = delete;
         RenderTarget(RenderTarget &&) = default;
         virtual ~RenderTarget();
 
-        void render();
-
         virtual void clearDepthBuffer() = 0;
 
-        virtual TextureDescriptor texture(size_t index = 0, size_t iteration = std::numeric_limits<size_t>::max()) const = 0;
-        virtual size_t textureCount() const = 0;
-        virtual TextureDescriptor depthTexture() const = 0;
+        virtual TextureDescriptor texture(size_t index = 0, size_t iteration = std::numeric_limits<size_t>::max()) const;
+        virtual size_t textureCount() const;
+        virtual TextureDescriptor depthTexture() const;
 
         virtual Matrix4 getClipSpaceMatrix() const;
 
@@ -37,27 +36,21 @@ namespace Render {
         virtual void beginFrame();
         virtual void endFrame();
 
-        virtual void pushAnnotation(const char *tag) = 0;
-        virtual void popAnnotation() = 0;
-
         virtual void setRenderSpace(const Rect2i &space) = 0;
-
-        RenderContext *context() const;
 
         size_t iterations() const;
 
-    private:
-        RenderContext *mContext;
+    protected:
+        virtual void render() override;
 
+    private:
         std::vector<RenderPass *> mRenderPasses;
 
         bool mGlobal;
 
-        size_t mFrame;
-
         std::string mName;
 
-        size_t mIterations;        
+        size_t mIterations;
     };
 
 }

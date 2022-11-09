@@ -10,13 +10,13 @@ namespace Engine {
 namespace Render {
 
     RenderTarget::RenderTarget(RenderContext *context, bool global, std::string name, size_t iterations)
-        : mContext(context)
+        : RenderData(context)
         , mGlobal(global)
         , mName(std::move(name))
         , mIterations(iterations)
     {
         if (global)
-            mContext->addRenderTarget(this);
+            context->addRenderTarget(this);
     }
 
     RenderTarget::~RenderTarget()
@@ -25,19 +25,16 @@ namespace Render {
             pass->shutdown();
         }
         if (mGlobal)
-            mContext->removeRenderTarget(this);
+            context()->removeRenderTarget(this);
     }
 
     void RenderTarget::render()
     {
-        if (mContext->frame() == mFrame)
-            return;
-        mFrame = mContext->frame();
+        for (RenderPass *pass : mRenderPasses)
+            pass->preRender();
 
         beginFrame();
 
-        for (RenderPass *pass : mRenderPasses)
-            pass->preRender();
         for (size_t iteration = 0; iteration < mIterations; ++iteration) {
             beginIteration(iteration);
             for (RenderPass *pass : mRenderPasses)
@@ -70,14 +67,12 @@ namespace Render {
 
     void RenderTarget::beginFrame()
     {
-        if (!mName.empty())
-            pushAnnotation(mName.c_str());
+        context()->pushAnnotation(mName.empty() ? "<unnamed target>" : mName.c_str());
     }
 
     void RenderTarget::endFrame()
     {
-        if (!mName.empty())
-            popAnnotation();
+        context()->popAnnotation();
     }
 
     void RenderTarget::beginIteration(size_t iteration) const
@@ -93,11 +88,6 @@ namespace Render {
         return mIterations;
     }
 
-    RenderContext *RenderTarget::context() const
-    {
-        return mContext;
-    }
-
     bool RenderTarget::resize(const Vector2i &size)
     {
         bool resized = resizeImpl(size);
@@ -111,6 +101,21 @@ namespace Render {
     Matrix4 RenderTarget::getClipSpaceMatrix() const
     {
         return Matrix4::IDENTITY;
+    }
+
+    TextureDescriptor RenderTarget::texture(size_t index, size_t iteration) const
+    {
+        return {};
+    }
+
+    size_t RenderTarget::textureCount() const
+    {
+        return 0;
+    }
+
+    TextureDescriptor RenderTarget::depthTexture() const
+    {
+        return {};
     }
 
 }

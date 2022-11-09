@@ -34,10 +34,14 @@ namespace Render {
         mBlurTarget = target->context()->createRenderTexture(target->size(), { .mIterations = 10, .mFormat = FORMAT_RGBA16F });
 
         mBlurTarget->addRenderPass(&mBlur);
+
+        addDependency(mBlurTarget.get());
     }
 
     void BloomPass::shutdown()
     {
+        removeDependency(mBlurTarget.get());
+
         mBlurTarget.reset();
 
         mPipeline.reset();
@@ -49,7 +53,7 @@ namespace Render {
             return;
 
         if (iteration == 0)
-            target->pushAnnotation("Bloom");
+            target->context()->pushAnnotation("Bloom");
 
         mPipeline->bindTextures({ mInput->texture(mInputIndex), mBlurTarget->texture(0) });
 
@@ -58,13 +62,7 @@ namespace Render {
         mPipeline->renderQuad();
 
         if (iteration == target->iterations() - 1)
-            target->popAnnotation();
-    }
-
-    void BloomPass::preRender()
-    {
-        mInput->render();
-        mBlurTarget->render();
+            target->context()->popAnnotation();
     }
 
     void BloomPass::onTargetResize(const Vector2i &size)
@@ -81,6 +79,7 @@ namespace Render {
     void BloomPass::setInput(RenderTarget *input, size_t inputIndex, RenderTarget *blurInput, size_t blurIndex)
     {
         mInput = input;
+        addDependency(input);
         mInputIndex = inputIndex;
         mBlur.setInput(blurInput ? blurInput : input, blurIndex);
     }

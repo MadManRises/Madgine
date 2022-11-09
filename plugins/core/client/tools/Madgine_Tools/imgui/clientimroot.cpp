@@ -15,6 +15,7 @@
 #include "Meta/keyvalue/metatable_impl.h"
 
 #include "Madgine/render/rendertarget.h"
+#include "Madgine/render/rendercontext.h"
 
 #include "Modules/debug/profiler/profile.h"
 
@@ -281,18 +282,12 @@ namespace Tools {
 
     void ClientImRoot::addRenderTarget(Render::RenderTarget *target)
     {
-        mRenderTargets.push_back(target);
+        addDependency(target);        
     }
 
     void ClientImRoot::removeRenderTarget(Render::RenderTarget *target)
     {
-        std::erase(mRenderTargets, target);
-    }
-
-    void ClientImRoot::preRender()
-    {
-        for (Render::RenderTarget *target : mRenderTargets)
-            target->render();
+        removeDependency(target);
     }
 
     static Input::CursorIcon convertCursorIcon(ImGuiMouseCursor cursor)
@@ -319,7 +314,7 @@ namespace Tools {
     {
         PROFILE();
 
-        target->pushAnnotation("ImGui");
+        target->context()->pushAnnotation("ImGui");
 
         if (mWindow.getRenderWindow() == target) {
 
@@ -360,7 +355,7 @@ namespace Tools {
             renderViewport(mViewportMappings.at(target));
         }
 
-        target->popAnnotation();
+        target->context()->popAnnotation();
     }
 
     void ClientImRoot::addViewportMapping(Render::RenderTarget *target, ImGuiViewport *vp)
@@ -371,11 +366,6 @@ namespace Tools {
     void ClientImRoot::removeViewportMapping(Render::RenderTarget *target)
     {
         mViewportMappings.erase(target);
-    }
-
-    int ClientImRoot::priority() const
-    {
-        return 100;
     }
 
     std::string_view ClientImRoot::key() const

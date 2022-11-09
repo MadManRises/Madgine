@@ -32,6 +32,7 @@
 #include "Madgine/textureloader/textureloader.h"
 
 #include "Madgine/render/rendertarget.h"
+#include "Madgine/render/rendercontext.h"
 
 #include "Madgine/render/shadinglanguage/sl.h"
 
@@ -543,7 +544,7 @@ namespace Widgets {
         if (!mData->mPipeline.available())
             return;
 
-        target->pushAnnotation("WidgetManager");
+        target->context()->pushAnnotation("WidgetManager");
 
         MainWindowComponentBase::render(target, iteration);
 
@@ -579,7 +580,7 @@ namespace Widgets {
             mData->mPipeline->renderMesh(mData->mMesh);
         }
 
-        target->popAnnotation();
+        target->context()->popAnnotation();
     }
 
     Generator<std::pair<WidgetBase *, size_t>> WidgetManager::visibleWidgets()
@@ -606,13 +607,6 @@ namespace Widgets {
         }
     }
 
-    void WidgetManager::preRender()
-    {
-        for (auto [w, _] : visibleWidgets()) {
-            w->preRender();
-        }
-    }
-
     const Render::Texture &WidgetManager::uiTexture() const
     {
         return *mData->mUIAtlasTexture;
@@ -621,11 +615,6 @@ namespace Widgets {
     Threading::SignalStub<> &WidgetManager::updatedSignal()
     {
         return mUpdatedSignal;
-    }
-
-    int WidgetManager::priority() const
-    {
-        return mPriority;
     }
 
     void WidgetManager::onActivate(bool active)

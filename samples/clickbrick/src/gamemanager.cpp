@@ -33,6 +33,10 @@
 
 #include "Madgine/input/uimanager.h"
 
+#include "Madgine/window/mainwindow.h"
+
+#include "Madgine/render/scenemainwindowcomponent.h"
+
 UNIQUECOMPONENT(ClickBrick::GameManager)
 
 METATABLE_BEGIN_BASE(ClickBrick::GameManager, Engine::Input::HandlerBase)
@@ -44,7 +48,7 @@ namespace ClickBrick {
 GameManager::GameManager(Engine::Input::UIManager &ui)
     : Engine::Input::Handler<GameManager>(ui, "GameView")
     , mSceneMgr(ui.app().getGlobalAPIComponent<Engine::Scene::SceneManager>())
-    , mSceneRenderer(mSceneMgr, &mCamera, 50)
+    , mSceneRenderer(ui.window().getWindowComponent<Engine::Render::SceneMainWindowComponent>(), &mCamera, 50)
 {
 }
 

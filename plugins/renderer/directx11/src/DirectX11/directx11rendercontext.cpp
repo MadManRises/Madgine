@@ -22,9 +22,7 @@ namespace Render {
     sDevice = nullptr;
     THREADLOCAL(ID3D11DeviceContext *)
     sDeviceContext = nullptr;
-    THREADLOCAL(ID3DUserDefinedAnnotation *)
-    sAnnotator = nullptr;
-
+    
     Threading::WorkgroupLocal<DirectX11RenderContext *> sSingleton = nullptr;
 
     ID3D11DeviceContext *GetDeviceContext()
@@ -88,7 +86,7 @@ namespace Render {
                 &sDeviceContext);
         }
 
-        sDeviceContext->QueryInterface(IID_PPV_ARGS(&sAnnotator));
+        sDeviceContext->QueryInterface(IID_PPV_ARGS(&mAnnotator));
 
         DX11_CHECK(hr);
 
@@ -99,9 +97,9 @@ namespace Render {
 
     DirectX11RenderContext::~DirectX11RenderContext()
     {
-        if (sAnnotator) {
-            sAnnotator->Release();
-            sAnnotator = nullptr;
+        if (mAnnotator) {
+            mAnnotator->Release();
+            mAnnotator = nullptr;
         }
         if (sDeviceContext) {
             sDeviceContext->Release();
@@ -153,6 +151,16 @@ namespace Render {
     bool DirectX11RenderContext::supportsMultisampling() const
     {
         return true;
+    }
+
+    void DirectX11RenderContext::pushAnnotation(const char *tag)
+    {
+        mAnnotator->BeginEvent(StringUtil::toWString(tag).c_str());
+    }
+
+    void DirectX11RenderContext::popAnnotation()
+    {
+        mAnnotator->EndEvent();
     }
 
     static constexpr const char *vSemantics[] = {

@@ -14,7 +14,6 @@ namespace Render {
 
     extern THREADLOCAL(ID3D11DeviceContext *) sDeviceContext;
     extern THREADLOCAL(ID3D11Device *) sDevice;
-    extern THREADLOCAL(ID3DUserDefinedAnnotation *) sAnnotator;
 
     MADGINE_DIRECTX11_EXPORT ID3D11DeviceContext *GetDeviceContext();
     MADGINE_DIRECTX11_EXPORT ID3D11Device *GetDevice();
@@ -35,12 +34,17 @@ namespace Render {
 
         virtual bool supportsMultisampling() const override;
 
+        virtual void pushAnnotation(const char *tag) override;
+        virtual void popAnnotation() override;
+
         void bindFormat(VertexFormat format, size_t instanceDataSize, ID3D10Blob *blob);
 
     private:
         std::array<std::map<size_t, ReleasePtr<ID3D11InputLayout>>, 256> mInputLayouts;
 
         DirectX11Buffer mConstantBuffer = D3D11_BIND_VERTEX_BUFFER;
+
+        ID3DUserDefinedAnnotation *mAnnotator = nullptr;
     };
 
 }

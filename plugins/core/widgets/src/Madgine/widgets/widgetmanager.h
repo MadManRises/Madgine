@@ -73,10 +73,7 @@ namespace Widgets {
         virtual bool injectKeyPress(const Input::KeyEventArgs &arg) override;
 
         virtual void onResize(const Rect2i &space) override;
-        virtual void render(Render::RenderTarget *target, size_t iteration) override;
-        virtual void preRender() override;
-
-        virtual int priority() const override;
+        virtual void render(Render::RenderTarget *target, size_t iteration) override;        
 
         const Render::Texture &uiTexture() const;
 
@@ -87,6 +84,9 @@ namespace Widgets {
 
         bool dragging(const WidgetBase *widget);
         void abortDrag(WidgetBase *widget);
+
+        using RenderPass::addDependency;
+        using RenderPass::removeDependency;
 
     protected:
         WidgetBase *getHoveredWidget(const Vector2 &pos, WidgetBase *current);
@@ -116,9 +116,7 @@ namespace Widgets {
 
         WidgetBase *mCurrentRoot = nullptr;
 
-        std::vector<WidgetBase *> mModalWidgetList;
-
-        void expandUIAtlas();
+        std::vector<WidgetBase *> mModalWidgetList;        
 
         Threading::Signal<> mUpdatedSignal;
 

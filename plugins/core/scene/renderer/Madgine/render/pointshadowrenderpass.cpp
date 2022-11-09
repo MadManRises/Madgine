@@ -11,6 +11,7 @@
 #include "Madgine/scene/entity/entity.h"
 
 #include "Madgine/render/rendertarget.h"
+#include "Madgine/render/rendercontext.h"
 
 #include "Madgine/render/shadinglanguage/sl.h"
 
@@ -75,7 +76,7 @@ namespace Render {
             instances[std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *> { meshData, skeleton }].push_back(transform->worldMatrix());
         }
 
-        target->pushAnnotation("PointShadow");
+        target->context()->pushAnnotation("PointShadow");
 
         {
             auto perApplication = mPipeline->mapParameters<PointShadowPerApplication>(0);
@@ -115,14 +116,7 @@ namespace Render {
             mPipeline->renderMeshInstanced(std::move(instance.second), meshData);
         }
 
-        target->popAnnotation();
-    }
-
-    void PointShadowRenderPass::preRender()
-    {
-        auto guard = mScene.lock(AccessMode::READ);
-
-        mScene.updateRender();
+        target->context()->popAnnotation();
     }
 
     int PointShadowRenderPass::priority() const

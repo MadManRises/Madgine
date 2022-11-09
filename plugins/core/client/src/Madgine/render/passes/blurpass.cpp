@@ -8,6 +8,8 @@
 
 #include "Madgine/render/texturedescriptor.h"
 
+#include "../rendercontext.h"
+
 #define SL_SHADER "shaders/blur.sl"
 #include "../shadinglanguage/sl_include.h"
 
@@ -35,7 +37,7 @@ namespace Render {
             return;
 
         if (iteration == 0) {
-            target->pushAnnotation("Blur");
+            target->context()->pushAnnotation("Blur");
         }
 
         {
@@ -53,12 +55,7 @@ namespace Render {
         mPipeline->renderQuad();
 
         if (iteration == target->iterations() - 1)
-            target->popAnnotation();
-    }
-
-    void BlurPass::preRender()
-    {
-        mInput->render();
+            target->context()->popAnnotation();
     }
 
     void BlurPass::onTargetResize(const Vector2i &size)
@@ -74,6 +71,7 @@ namespace Render {
     void BlurPass::setInput(RenderTarget *input, size_t inputIndex)
     {
         mInput = input;
+        addDependency(input);
         mInputIndex = inputIndex;
     }
 

@@ -204,16 +204,6 @@ namespace Render {
         RenderTarget::endIteration(iteration);
     }
 
-    void DirectX11RenderTarget::pushAnnotation(const char *tag)
-    {
-        sAnnotator->BeginEvent(StringUtil::toWString(tag).c_str());
-    }
-
-    void DirectX11RenderTarget::popAnnotation()
-    {
-        sAnnotator->EndEvent();
-    }
-
     void DirectX11RenderTarget::setRenderSpace(const Rect2i &space)
     {
         D3D11_VIEWPORT viewport;

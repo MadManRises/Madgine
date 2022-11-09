@@ -31,6 +31,8 @@ namespace Window {
 
         virtual std::string_view key() const = 0;
 
+        virtual int priority() const override;
+
         Rect2i getScreenSpace() const;
         const Rect2i &getClientSpace() const;
         virtual Rect2i getChildClientSpace();

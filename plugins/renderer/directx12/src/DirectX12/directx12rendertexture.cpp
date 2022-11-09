@@ -60,6 +60,8 @@ namespace Render {
 
             mDepthBufferView = DirectX12RenderContext::getSingleton().mDescriptorHeap.allocate();
             GetDevice()->CreateShaderResourceView(mDepthStencilBuffer, &depthViewDesc, DirectX12RenderContext::getSingleton().mDescriptorHeap.cpuHandle(mDepthBufferView));            
+
+            Transition(mDepthStencilBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
         }
 
         DX12_CHECK();
@@ -76,12 +78,18 @@ namespace Render {
     {
         Transition(mTexture.resource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
+        if (mDepthBufferView)
+            Transition(mDepthStencilBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+
         DirectX12RenderTarget::beginIteration(iteration);
     }
 
     void DirectX12RenderTexture::endIteration(size_t iteration) const
     {
         Transition(mTexture.resource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+        if (mDepthBufferView)
+            Transition(mDepthStencilBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
         DirectX12RenderTarget::endIteration(iteration);
     }

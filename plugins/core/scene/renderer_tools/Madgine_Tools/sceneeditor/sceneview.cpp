@@ -36,6 +36,10 @@
 
 #include "Madgine_Tools/imgui/clientimroot.h"
 
+#include "Madgine/window/mainwindow.h"
+
+#include "Madgine/render/scenemainwindowcomponent.h"
+
 namespace Engine {
 namespace Tools {
 
@@ -63,7 +67,7 @@ namespace Tools {
 
     SceneView::SceneView(SceneEditor *editor, Engine::Render::RenderContext *context)
         : mEditor(editor)
-        , mSceneRenderer(editor->sceneMgr(), &mCamera, 25)
+        , mSceneRenderer(static_cast<ClientImRoot&>(editor->root()).window().getWindowComponent<Render::SceneMainWindowComponent>(), &mCamera, 25)
         , mGridRenderer(&mCamera, 50)
         , mIm3DRenderer(&mCamera, 75)
         , mIndex(editor->createViewIndex())

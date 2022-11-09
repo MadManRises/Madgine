@@ -33,8 +33,7 @@ namespace Render {
 
         switch (type) {
         case TextureType_2D: {
-            D3D12_RESOURCE_DESC textureDesc;
-            ZeroMemory(&textureDesc, sizeof(D3D12_RESOURCE_DESC));
+            D3D12_RESOURCE_DESC textureDesc {};
 
             textureDesc.DepthOrArraySize = 1;
             textureDesc.Format = xFormat;
@@ -99,8 +98,7 @@ namespace Render {
             std::terminate();
         }
 
-        D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
-        ZeroMemory(&shaderResourceViewDesc, sizeof(D3D12_SHADER_RESOURCE_VIEW_DESC));
+        D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc {};
         shaderResourceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
         shaderResourceViewDesc.Format = xFormat;
         shaderResourceViewDesc.ViewDimension = dimension;

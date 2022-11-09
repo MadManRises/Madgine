@@ -3,17 +3,24 @@
 namespace Engine {
 namespace Render {
 
-    struct RenderPass {
+    struct MADGINE_CLIENT_EXPORT RenderPass {
         virtual ~RenderPass() = default;
 
         virtual void setup(RenderTarget *target) { }
         virtual void shutdown() { }
         virtual void render(RenderTarget *target, size_t iteration) = 0;
-        virtual void preRender() { }        
+        void preRender();
 
         virtual void onTargetResize(const Vector2i &size) {};
 
         virtual int priority() const = 0;
+
+    protected:
+        void addDependency(RenderData *dep);
+        void removeDependency(RenderData *dep);
+    
+    private:
+        std::vector<RenderData *> mDependencies;
     };
 
 }

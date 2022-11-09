@@ -36,6 +36,9 @@ namespace Render {
 
         virtual bool supportsMultisampling() const = 0;
 
+        virtual void pushAnnotation(const char *tag) = 0;
+        virtual void popAnnotation() = 0;
+
     protected:
         void checkThread();
 

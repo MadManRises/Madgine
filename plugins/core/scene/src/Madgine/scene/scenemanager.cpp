@@ -30,8 +30,6 @@ METATABLE_BEGIN(Engine::Scene::SceneManager)
 //SYNCABLEUNIT_MEMBERS()
 READONLY_PROPERTY(entities, entities)
 MEMBER(mSceneComponents)
-MEMBER(mAmbientLightColor)
-MEMBER(mAmbientLightDirection)
 METATABLE_END(Engine::Scene::SceneManager)
 
 static Engine::Threading::DataLock static_lock(Engine::Scene::SceneManager *mgr)

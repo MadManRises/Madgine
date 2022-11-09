@@ -3,6 +3,7 @@
 #include "im3drenderpass.h"
 
 #include "Madgine/render/rendertarget.h"
+#include "Madgine/render/rendercontext.h"
 
 #include "im3d/im3d.h"
 #include "im3d/im3d_internal.h"
@@ -38,7 +39,7 @@ namespace Render {
         if (!mPipeline.available())
             return;
 
-        target->pushAnnotation("Im3D");
+        target->context()->pushAnnotation("Im3D");
 
         Im3D::Im3DContext *context = Im3D::GetCurrentContext();
 
@@ -87,7 +88,7 @@ namespace Render {
             }
         }
 
-        target->popAnnotation();
+        target->context()->popAnnotation();
     }
 
     int Im3DRenderPass::priority() const

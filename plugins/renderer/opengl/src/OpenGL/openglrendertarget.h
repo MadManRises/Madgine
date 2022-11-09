@@ -14,9 +14,6 @@ namespace Render {
 
         virtual void clearDepthBuffer() override;
 
-        virtual void pushAnnotation(const char *tag) override;
-        virtual void popAnnotation() override;
-
         virtual void setRenderSpace(const Rect2i &space) override;
 
         virtual Matrix4 getClipSpaceMatrix() const override;

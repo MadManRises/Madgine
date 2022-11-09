@@ -10,6 +10,7 @@
 
 #include "Madgine/render/camera.h"
 #include "Madgine/render/rendertarget.h"
+#include "Madgine/render/rendercontext.h"
 #include "Madgine/render/vertex.h"
 
 #include "Madgine/meshloader/gpumeshloader.h"
@@ -42,7 +43,7 @@ namespace Tools {
         if (!mMesh.available())
             return;
 
-        target->pushAnnotation("Grid");
+        target->context()->pushAnnotation("Grid");
 
         Vector2i size = target->size();
         float aspectRatio = float(size.x) / size.y;
@@ -54,7 +55,7 @@ namespace Tools {
 
         mPipeline->renderMesh(mMesh);
 
-        target->popAnnotation();
+        target->context()->popAnnotation();
     }
 
     int GridPass::priority() const

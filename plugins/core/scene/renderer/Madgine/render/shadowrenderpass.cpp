@@ -10,10 +10,13 @@
 #include "Madgine/scene/entity/entity.h"
 
 #include "Madgine/render/rendertarget.h"
+#include "Madgine/render/rendercontext.h"
 
 #include "Madgine/render/shadinglanguage/sl.h"
 
 #include "Madgine/render/camera.h"
+
+#include "scenemainwindowcomponent.h"
 
 //#include "Madgine/render/rendercontext.h"
 
@@ -23,7 +26,7 @@
 namespace Engine {
 namespace Render {
 
-    ShadowRenderPass::ShadowRenderPass(Scene::SceneManager &scene, Render::Camera *camera, int priority)
+    ShadowRenderPass::ShadowRenderPass(SceneMainWindowComponent &scene, Render::Camera *camera, int priority)
         : mScene(scene)
         , mCamera(camera)
         , mPriority(priority)
@@ -48,7 +51,7 @@ namespace Render {
 
         std::map<std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> instances;
 
-        for (const auto &[mesh, e] : mScene.entityComponentList<Scene::Entity::Mesh>().data()) {
+        for (const auto &[mesh, e] : mScene.scene().entityComponentList<Scene::Entity::Mesh>().data()) {
             if (!mesh.isVisible())
                 continue;
 
@@ -65,7 +68,7 @@ namespace Render {
             instances[std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *> { meshData, skeleton }].push_back(transform->worldMatrix());
         }
 
-        target->pushAnnotation("Shadow");
+        target->context()->pushAnnotation("Shadow");
 
         updateFrustum();
 
@@ -119,13 +122,7 @@ namespace Render {
             mPipeline->renderMeshInstanced(std::move(instanceData), meshData);
         }
 
-        target->popAnnotation();
-    }
-
-    void ShadowRenderPass::preRender() {
-        auto guard = mScene.lock(AccessMode::READ);
-
-        mScene.updateRender();
+        target->context()->popAnnotation();
     }
 
     int ShadowRenderPass::priority() const
