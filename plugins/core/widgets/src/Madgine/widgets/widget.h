@@ -48,6 +48,7 @@ namespace Widgets {
         Vector3 getAbsoluteSize() const;
         Vector2 getAbsolutePosition() const;
 
+        void applyGeometry();
         void applyGeometry(const Vector3 &parentSize, const Vector2 &parentPos = Vector2::ZERO);
         Geometry calculateGeometry(uint16_t activeConditions, GeometrySourceInfo *source = nullptr);
 

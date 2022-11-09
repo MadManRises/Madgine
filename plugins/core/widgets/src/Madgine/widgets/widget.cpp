@@ -55,10 +55,7 @@ namespace Widgets {
     void WidgetBase::setSize(const Matrix3 &size)
     {
         mSize = size;
-        if (mParent)
-            applyGeometry(mParent->getAbsoluteSize(), mParent->getAbsolutePosition());
-        else
-            applyGeometry(Vector3 { Vector2 { manager().getScreenSpace().mSize }, 1.0f });
+        applyGeometry();
     }
 
     const Matrix3 &WidgetBase::getSize()
@@ -69,10 +66,7 @@ namespace Widgets {
     void WidgetBase::setPos(const Matrix3 &pos)
     {
         mPos = pos;
-        if (mParent)
-            applyGeometry(mParent->getAbsoluteSize(), mParent->getAbsolutePosition());
-        else
-            applyGeometry(Vector3 { Vector2 { manager().getScreenSpace().mSize }, 1.0f });
+        applyGeometry();
     }
 
     const Matrix3 &WidgetBase::getPos() const
@@ -88,6 +82,14 @@ namespace Widgets {
     Vector2 WidgetBase::getAbsolutePosition() const
     {
         return mAbsolutePos;
+    }
+
+    void WidgetBase::applyGeometry()
+    {
+        if (mParent)
+            applyGeometry(mParent->getAbsoluteSize(), mParent->getAbsolutePosition());
+        else
+            applyGeometry(Vector3 { Vector2 { manager().getScreenSpace().mSize }, 1.0f });
     }
 
     void WidgetBase::applyGeometry(const Vector3 &parentSize, const Vector2 &parentPos)
@@ -386,10 +388,6 @@ namespace Widgets {
     {
     }
 
-    void WidgetBase::preRender()
-    {
-    }
-
     uint16_t WidgetBase::fetchActiveConditions(std::vector<Condition *> *conditions)
     {
         if (!mParent)
@@ -473,6 +471,7 @@ namespace Widgets {
         else {
             mProperties.setConditional(mask, { PropertyType::POSITION, 0, index }, { value });
         }
+        applyGeometry();
     }
 
     void WidgetBase::setSizeValue(uint16_t index, float value, uint16_t mask)
@@ -483,6 +482,7 @@ namespace Widgets {
         else {
             mProperties.setConditional(mask, { PropertyType::SIZE, 0, index }, { value });
         }
+        applyGeometry();
     }
 
     void WidgetBase::unsetSizeValue(uint16_t index, uint16_t mask)
@@ -492,6 +492,7 @@ namespace Widgets {
         } else {
             mProperties.unsetConditional(mask, { PropertyType::SIZE, 0, index });
         }
+        applyGeometry();
     }
 
 }
