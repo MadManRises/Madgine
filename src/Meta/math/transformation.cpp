@@ -43,8 +43,8 @@ Matrix4 ProjectionMatrix(const Frustum &frustum)
 
     if (frustum.mOrthographic) {
         p = {
-            near / r, 0, 0, 0,
-            0, near / t, 0, 0,
+            1 / r, 0, 0, 0,
+            0, 1 / t, 0, 0,
             0, 0, 1 / (far - near), -1 * near / (far - near),
             0, 0, 0, 1
         };
