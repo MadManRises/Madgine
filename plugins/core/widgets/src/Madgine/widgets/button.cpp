@@ -28,6 +28,11 @@ SERIALIZETABLE_END(Engine::Widgets::Button)
 namespace Engine {
 namespace Widgets {
 
+    Button::Button(WidgetManager &manager, WidgetBase *parent)
+        : Widget(manager, parent, true)
+    {
+    }
+
     Threading::SignalStub<> &Button::clickEvent()
     {
         return mClicked;
@@ -57,22 +62,22 @@ namespace Widgets {
         return returnSet;
     }
 
-    bool Button::injectPointerEnter(const Input::PointerEventArgs &arg)
+    void Button::injectPointerEnter(const Input::PointerEventArgs &arg)
     {
         mHovered = true;
-        return true;
+        WidgetBase::injectPointerEnter(arg);
     }
 
-    bool Button::injectPointerLeave(const Input::PointerEventArgs &arg)
+    void Button::injectPointerLeave(const Input::PointerEventArgs &arg)
     {
         mHovered = false;
-        return true;
+        WidgetBase::injectPointerLeave(arg);
     }
 
-    bool Button::injectPointerClick(const Input::PointerEventArgs &arg)
+    void Button::injectPointerClick(const Input::PointerEventArgs &arg)
     {
         emitClicked();
-        return true;
+        WidgetBase::injectPointerClick(arg);
     }
 
     void Button::emitClicked()

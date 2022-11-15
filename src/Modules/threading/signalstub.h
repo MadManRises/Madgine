@@ -28,7 +28,8 @@ namespace Threading {
         SignalStub<_Ty...> &operator=(const SignalStub<_Ty...> &other) = delete;
 
         template <typename T, typename R, typename... Args>
-        std::weak_ptr<ConnectionBase> connect(R(T::* f)(Args...), T* t, ConnectionStore* store = nullptr) {
+        std::weak_ptr<ConnectionBase> connect(R (T::*f)(Args...), T *t, ConnectionStore *store = nullptr)
+        {
             return connect([t, f](Args... args) { return (t->*f)(std::forward<Args>(args)...); }, store);
         }
 
@@ -39,7 +40,8 @@ namespace Threading {
         }
 
         template <typename T>
-        std::weak_ptr<ConnectionBase> connect(T&& slot, ConnectionStore* store = nullptr) {
+        std::weak_ptr<ConnectionBase> connect(T &&slot, ConnectionStore *store = nullptr)
+        {
             if (!store)
                 store = &ConnectionStore::globalStore();
             std::lock_guard<std::mutex> guard(sSignalConnectMutex);
@@ -51,7 +53,7 @@ namespace Threading {
 
         template <typename T>
         std::weak_ptr<ConnectionBase> connect(
-            T &&slot, TaskQueue *queue, const std::vector<DataMutex *> &dependencies = {}, ConnectionStore * store = nullptr)
+            T &&slot, TaskQueue *queue, const std::vector<DataMutex *> &dependencies = {}, ConnectionStore *store = nullptr)
         {
             if (!store)
                 store = &ConnectionStore::globalStore();

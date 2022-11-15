@@ -31,8 +31,8 @@
 #include "Madgine/meshloader/meshloader.h"
 #include "Madgine/textureloader/textureloader.h"
 
-#include "Madgine/render/rendertarget.h"
 #include "Madgine/render/rendercontext.h"
+#include "Madgine/render/rendertarget.h"
 
 #include "Madgine/render/shadinglanguage/sl.h"
 
@@ -234,45 +234,14 @@ namespace Widgets {
         return out.beginExtendedTypedWrite(widget->getClass(), sTags);
     }
 
-    WidgetBase *WidgetManager::propagateInput(WidgetBase *w, const Input::PointerEventArgs &arg)
-    {
-        if (!w->mVisible)
-            return nullptr;
-
-        if (!w->containsPoint(Vector2 { Vector2i { &arg.windowPosition.x } }, { { 0, 0 }, mClientSpace.mSize }))
-            return nullptr;
-
-        for (WidgetBase *c : w->children()) {
-            if (WidgetBase *target = propagateInput(c, arg))
-                return target;
-        }
-        return /*passthrough ? nullptr : */ w;
-    }
-
     bool WidgetManager::injectPointerPress(const Input::PointerEventArgs &arg)
     {
         assert(mDragStartEvent.button != arg.button);
         if (mDragStartEvent.button != Input::MouseButton::NO_BUTTON)
             return true;
 
-        WidgetBase *target = nullptr;
-
-        for (WidgetBase *modalWidget : mModalWidgetList) {
-            target = propagateInput(modalWidget, arg);
-            if (target)
-                break;
-        }
-
-        if (!target) {
-            for (WidgetBase *w : uniquePtrToPtr(mTopLevelWidgets)) {
-                target = propagateInput(w, arg);
-                if (target)
-                    break;
-            }
-        }
-
-        if (target) {
-            mFocusedWidget = target;
+        if (mPointerEventTargetWidget) {
+            mFocusedWidget = mPointerEventTargetWidget;
 
             mDragStartEvent = arg;
 
@@ -282,6 +251,8 @@ namespace Widgets {
             mDragStartTime = std::chrono::steady_clock::now();
 
             return true;
+        } else {
+            mFocusedWidget = nullptr;
         }
 
         return false;
@@ -342,8 +313,6 @@ namespace Widgets {
 
     WidgetBase *WidgetManager::getHoveredWidgetDown(const Vector2 &pos, WidgetBase *current)
     {
-        LOG_WARNING_ONCE("TODO: Handle modal widgets for hover (WidgetManager)");
-
         if (current) {
             for (WidgetBase *w : current->children()) {
                 if (w->mVisible && w->containsPoint(pos, { { 0, 0 }, mClientSpace.mSize })) {
@@ -351,6 +320,10 @@ namespace Widgets {
                 }
             }
         } else {
+            if (!mModalWidgetList.empty()){
+                assert(mModalWidgetList.front()->mVisible);
+                return getHoveredWidgetDown(pos, mModalWidgetList.front());
+            }
             for (WidgetBase *w : uniquePtrToPtr(mTopLevelWidgets)) {
                 if (w->mVisible && w->containsPoint(pos, { { 0, 0 }, mClientSpace.mSize })) {
                     return getHoveredWidgetDown(pos, w);
@@ -407,16 +380,22 @@ namespace Widgets {
 
             mHoveredWidget = hoveredWidget;
             enter = true;
+
+            mPointerEventTargetWidget = hoveredWidget;
+            while (mPointerEventTargetWidget && !mPointerEventTargetWidget->acceptsPointerEvents()) {
+                mPointerEventTargetWidget = mPointerEventTargetWidget->getParent();
+            }
         }
 
-        if (mHoveredWidget) {
-            Vector2i pos = mHoveredWidget->getAbsolutePosition().floor();
+        if (mPointerEventTargetWidget) {
+            Vector2i pos = mPointerEventTargetWidget->getAbsolutePosition().floor();
             arg.windowPosition = arg.windowPosition - InterfacesVector { pos.x, pos.y };
 
             if (enter)
-                mHoveredWidget->injectPointerEnter(arg);
+                mPointerEventTargetWidget->injectPointerEnter(arg);
 
-            return mHoveredWidget->injectPointerMove(arg);
+            mPointerEventTargetWidget->injectPointerMove(arg);
+            return true;
         }
 
         return false;
@@ -466,9 +445,14 @@ namespace Widgets {
         return mHoveredWidget;
     }
 
-    WidgetBase *Engine::Widgets::WidgetManager::focusedWidget()
+    WidgetBase *WidgetManager::focusedWidget()
     {
         return mFocusedWidget;
+    }
+
+    WidgetBase *WidgetManager::pointerEventTargetWidget()
+    {
+        return mPointerEventTargetWidget;
     }
 
     WidgetBase *WidgetManager::getWidget(std::string_view name)
@@ -491,19 +475,43 @@ namespace Widgets {
         assert(count == 1);
     }
 
+    void WidgetManager::resetPointerState()
+    {
+        mFocusedWidget = nullptr;
+        mHoveredWidget = nullptr;
+        if (mPointerEventTargetWidget) {
+            Input::PointerEventArgs arg {
+                { 0, 0 }, { 0, 0 }, { 0, 0 }
+            };
+            mPointerEventTargetWidget->injectPointerLeave(arg);
+            mPointerEventTargetWidget = nullptr;
+        }
+    }
+
+    void WidgetManager::swapCurrentRoot(std::string_view name)
+    {
+        auto it = std::ranges::find(mTopLevelWidgets, name, &WidgetBase::mName);
+        if (it != mTopLevelWidgets.end())
+            swapCurrentRoot(it->get());
+    }
+
     void WidgetManager::swapCurrentRoot(WidgetBase *newRoot)
     {
         if (mCurrentRoot)
             mCurrentRoot->hide();
-        mHoveredWidget = nullptr;
+
+        resetPointerState();
+
         mCurrentRoot = newRoot;
         newRoot->show();
     }
 
     void WidgetManager::openModalWidget(WidgetBase *widget)
     {
-        widget->show();
+        resetPointerState();
+
         mModalWidgetList.emplace(mModalWidgetList.begin(), widget);
+        widget->show();
     }
 
     void WidgetManager::openWidget(WidgetBase *widget)
@@ -513,6 +521,8 @@ namespace Widgets {
 
     void WidgetManager::closeModalWidget(WidgetBase *widget)
     {
+        resetPointerState();
+
         assert(mModalWidgetList.size() > 0 && mModalWidgetList.front() == widget);
         widget->hide();
         mModalWidgetList.erase(mModalWidgetList.begin());

@@ -24,7 +24,7 @@ namespace Widgets {
     struct MADGINE_WIDGETS_EXPORT WidgetBase : VirtualScope<WidgetBase, Serialize::VirtualData<WidgetBase, Serialize::VirtualSerializableDataBase<VirtualScopeBase<>, Serialize::SerializableDataUnit>>> {
         SERIALIZABLEUNIT(WidgetBase)
 
-        WidgetBase(WidgetManager &manager, WidgetBase *parent = nullptr);
+        WidgetBase(WidgetManager &manager, WidgetBase *parent = nullptr, bool acceptsPointerEvents = false);
 
         WidgetBase(const WidgetBase &) = delete;
 
@@ -39,6 +39,7 @@ namespace Widgets {
 
         void show();
         void hide();
+        void setVisible(bool v);
 
         void setSize(const Matrix3 &size);
         const Matrix3 &getSize();
@@ -71,18 +72,21 @@ namespace Widgets {
         void setParent(WidgetBase *parent);
         WidgetBase *getParent() const;
 
+        void setAcceptsPointerEvents(bool v);
+        bool acceptsPointerEvents() const;
+
         bool isFocused() const;
 
         bool dragging() const;
         void abortDrag();
 
-        virtual bool injectPointerClick(const Input::PointerEventArgs &arg);
-        virtual bool injectPointerMove(const Input::PointerEventArgs &arg);
-        virtual bool injectPointerEnter(const Input::PointerEventArgs &arg);
-        virtual bool injectPointerLeave(const Input::PointerEventArgs &arg);
-        virtual bool injectDragBegin(const Input::PointerEventArgs &arg);
-        virtual bool injectDragMove(const Input::PointerEventArgs &arg);
-        virtual bool injectDragEnd(const Input::PointerEventArgs &arg);
+        virtual void injectPointerClick(const Input::PointerEventArgs &arg);
+        virtual void injectPointerMove(const Input::PointerEventArgs &arg);
+        virtual void injectPointerEnter(const Input::PointerEventArgs &arg);
+        virtual void injectPointerLeave(const Input::PointerEventArgs &arg);
+        virtual void injectDragBegin(const Input::PointerEventArgs &arg);
+        virtual void injectDragMove(const Input::PointerEventArgs &arg);
+        virtual void injectDragEnd(const Input::PointerEventArgs &arg);
         virtual void injectDragAbort();
         virtual bool injectAxisEvent(const Input::AxisEventArgs &arg);
         virtual bool injectKeyPress(const Input::KeyEventArgs &arg);
@@ -108,6 +112,7 @@ namespace Widgets {
         PropertyRange conditionals();
 
         void setPosValue(uint16_t index, float value, uint16_t mask = 0);
+        void unsetPosValue(uint16_t index, uint16_t mask);
 
         void setSizeValue(uint16_t index, float value, uint16_t mask = 0);
         void unsetSizeValue(uint16_t index, uint16_t mask);
@@ -139,14 +144,16 @@ namespace Widgets {
         Threading::Signal<const Input::KeyEventArgs &> mKeyPressSignal;
 
     private:
-        WidgetBase *mParent;
-
         WidgetManager &mManager;
+
+        WidgetBase *mParent;
 
         std::vector<std::unique_ptr<WidgetBase>> mChildren;
 
         Vector2 mAbsolutePos;
         Vector3 mAbsoluteSize;
+
+        bool mAcceptsPointerEvents;
 
         PropertyList mProperties;
 

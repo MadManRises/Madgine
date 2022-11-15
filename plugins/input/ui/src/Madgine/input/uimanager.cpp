@@ -79,6 +79,11 @@ namespace Input {
         return mWindow;
     }
 
+    void UIManager::shutdown()
+    {
+        mWindow.shutdown();
+    }
+
     void UIManager::onUpdate()
     {
         for (const std::unique_ptr<HandlerBase> &handler : mHandlers)

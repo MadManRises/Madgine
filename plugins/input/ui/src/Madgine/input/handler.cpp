@@ -58,6 +58,7 @@ namespace Input {
                 mWidget->dragEndEvent().connect(&HandlerBase::injectDragEnd, this, &mConStore);
                 mWidget->axisEvent().connect(&HandlerBase::injectAxisEvent, this, &mConStore);
                 mWidget->keyEvent().connect(&HandlerBase::injectKeyPress, this, &mConStore);
+                mWidget->setAcceptsPointerEvents(true);
             }
         }
     }

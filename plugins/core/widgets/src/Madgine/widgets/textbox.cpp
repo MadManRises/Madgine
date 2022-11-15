@@ -98,22 +98,22 @@ namespace Widgets {
         return WidgetClass::TEXTBOX;
     }
 
-    bool Textbox::injectPointerClick(const Input::PointerEventArgs &arg)
+    void Textbox::injectPointerClick(const Input::PointerEventArgs &arg)
     {
         stb_textedit_click(this, &mState, arg.screenPosition.x, arg.screenPosition.y);
-        return WidgetBase::injectPointerClick(arg);
+        WidgetBase::injectPointerClick(arg);
     }
 
-    bool Textbox::injectDragBegin(const Input::PointerEventArgs &arg)
+    void Textbox::injectDragBegin(const Input::PointerEventArgs &arg)
     {
         stb_textedit_click(this, &mState, arg.screenPosition.x, arg.screenPosition.y);
-        return WidgetBase::injectDragBegin(arg);
+        WidgetBase::injectDragBegin(arg);
     }
 
-    bool Textbox::injectDragMove(const Input::PointerEventArgs &arg)
+    void Textbox::injectDragMove(const Input::PointerEventArgs &arg)
     {
         stb_textedit_drag(this, &mState, arg.screenPosition.x, arg.screenPosition.y);
-        return WidgetBase::injectDragMove(arg);
+        WidgetBase::injectDragMove(arg);
     }
 
     bool Textbox::injectKeyPress(const Input::KeyEventArgs &arg)

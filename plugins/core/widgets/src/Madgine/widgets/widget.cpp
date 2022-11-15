@@ -40,9 +40,10 @@ namespace Engine {
 
 namespace Widgets {
 
-    WidgetBase::WidgetBase(WidgetManager &manager, WidgetBase *parent)
-        : mParent(parent)
-        , mManager(manager)
+    WidgetBase::WidgetBase(WidgetManager &manager, WidgetBase *parent, bool acceptsPointerEvents)
+        : mManager(manager)
+        , mParent(parent)
+        , mAcceptsPointerEvents(acceptsPointerEvents || !parent)
     {
         mManager.registerWidget(this);
     }
@@ -222,6 +223,11 @@ namespace Widgets {
         mVisible = false;
     }
 
+    void WidgetBase::setVisible(bool v)
+    {
+        mVisible = v;
+    }
+
     bool WidgetBase::isFocused() const
     {
         return mManager.focusedWidget() == this;
@@ -253,46 +259,49 @@ namespace Widgets {
         return mParent;
     }
 
-    bool WidgetBase::injectPointerClick(const Input::PointerEventArgs &arg)
+    void WidgetBase::setAcceptsPointerEvents(bool v)
+    {
+        mAcceptsPointerEvents = v;
+    }
+
+    bool WidgetBase::acceptsPointerEvents() const
+    {
+        return mAcceptsPointerEvents;
+    }
+
+    void WidgetBase::injectPointerClick(const Input::PointerEventArgs &arg)
     {
         mPointerClickSignal.emit(arg);
-        return true;
     }
 
-    bool WidgetBase::injectPointerMove(const Input::PointerEventArgs &arg)
+    void WidgetBase::injectPointerMove(const Input::PointerEventArgs &arg)
     {
         mPointerMoveSignal.emit(arg);
-        return true;
     }
 
-    bool WidgetBase::injectPointerEnter(const Input::PointerEventArgs &arg)
+    void WidgetBase::injectPointerEnter(const Input::PointerEventArgs &arg)
     {
-        mPointerEnterSignal.emit(arg);
-        return true;
+        mPointerEnterSignal.emit(arg);        
     }
 
-    bool WidgetBase::injectPointerLeave(const Input::PointerEventArgs &arg)
+    void WidgetBase::injectPointerLeave(const Input::PointerEventArgs &arg)
     {
-        mPointerLeaveSignal.emit(arg);
-        return true;
+        mPointerLeaveSignal.emit(arg);        
     }
 
-    bool Engine::Widgets::WidgetBase::injectDragBegin(const Input::PointerEventArgs &arg)
+    void WidgetBase::injectDragBegin(const Input::PointerEventArgs &arg)
     {
         mDragBeginSignal.emit(arg);
-        return true;
     }
 
-    bool WidgetBase::injectDragMove(const Input::PointerEventArgs &arg)
+    void WidgetBase::injectDragMove(const Input::PointerEventArgs &arg)
     {
         mDragMoveSignal.emit(arg);
-        return true;
     }
 
-    bool WidgetBase::injectDragEnd(const Input::PointerEventArgs &arg)
+    void WidgetBase::injectDragEnd(const Input::PointerEventArgs &arg)
     {
-        mDragEndSignal.emit(arg);
-        return true;
+        mDragEndSignal.emit(arg);        
     }
 
     void WidgetBase::injectDragAbort()
@@ -470,6 +479,16 @@ namespace Widgets {
         }
         else {
             mProperties.setConditional(mask, { PropertyType::POSITION, 0, index }, { value });
+        }
+        applyGeometry();
+    }
+
+    void WidgetBase::unsetPosValue(uint16_t index, uint16_t mask)
+    {
+        if (mask == 0) {
+            LOG_WARNING("Unsetting a pos value without conditional has no effect.");
+        } else {
+            mProperties.unsetConditional(mask, { PropertyType::POSITION, 0, index });
         }
         applyGeometry();
     }

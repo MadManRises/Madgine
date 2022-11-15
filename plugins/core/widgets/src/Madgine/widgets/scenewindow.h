@@ -15,11 +15,17 @@ namespace Widgets {
 
         virtual WidgetClass getClass() const override;
 
+        bool sampled() const;
+
+        void setSampled(bool samples);
+
     protected:
         void sizeChanged(const Vector3i &pixelSize) override;
 
     private:
         std::unique_ptr<Render::RenderTarget> mTarget;
+
+        bool mSampled = false;
     };
 }
 }

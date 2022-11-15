@@ -28,6 +28,7 @@ namespace Widgets {
         WidgetManager(const WidgetManager &) = delete;
         ~WidgetManager();
 
+        void swapCurrentRoot(std::string_view name);
         void swapCurrentRoot(WidgetBase *newRoot);
         void openModalWidget(WidgetBase *widget);
         void closeModalWidget(WidgetBase *widget);
@@ -37,6 +38,7 @@ namespace Widgets {
         bool isHovered(WidgetBase *w);
         WidgetBase *hoveredWidget();
         WidgetBase *focusedWidget();
+        WidgetBase *pointerEventTargetWidget();
 
         WidgetBase *getWidget(std::string_view name);
 
@@ -92,7 +94,8 @@ namespace Widgets {
         WidgetBase *getHoveredWidget(const Vector2 &pos, WidgetBase *current);
         WidgetBase *getHoveredWidgetUp(const Vector2 &pos, WidgetBase *current);
         WidgetBase *getHoveredWidgetDown(const Vector2 &pos, WidgetBase *current);
-        WidgetBase *propagateInput(WidgetBase *w, const Input::PointerEventArgs &arg);
+
+        void resetPointerState();
 
         std::unique_ptr<WidgetBase> createWidgetByClass(WidgetClass _class, WidgetBase *parent = nullptr);
         Serialize::StreamResult readWidget(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget, WidgetBase *parent);
@@ -113,6 +116,8 @@ namespace Widgets {
 
         WidgetBase *mHoveredWidget = nullptr;
         WidgetBase *mFocusedWidget = nullptr;
+
+        WidgetBase *mPointerEventTargetWidget = nullptr;
 
         WidgetBase *mCurrentRoot = nullptr;
 

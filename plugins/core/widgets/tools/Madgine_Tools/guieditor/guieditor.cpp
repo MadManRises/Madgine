@@ -99,6 +99,19 @@ namespace Tools {
         return "GuiEditor";
     }
 
+    void renderWidgetBorders(Widgets::WidgetBase *widget, Engine::Vector2i screenOffset, ImU32 color, ImDrawList *drawList)
+    {
+        ImGuiIO &io = ImGui::GetIO();
+        
+        Vector3 absoluteSize = widget->getAbsoluteSize();
+        Vector2 absolutePos = widget->getAbsolutePosition() + Vector2 { screenOffset };
+
+        Bounds bounds(absolutePos.x, absolutePos.y + absoluteSize.y, absolutePos.x + absoluteSize.x, absolutePos.y);
+              
+
+        drawList->AddRect(bounds.topLeft() / io.DisplayFramebufferScale, bounds.bottomRight() / io.DisplayFramebufferScale, color);
+    }
+
     void GuiEditor::renderSelection(Widgets::WidgetBase *hoveredWidget)
     {
         constexpr float borderSize = 10.0f;
@@ -133,12 +146,7 @@ namespace Tools {
 
                 Bounds bounds(absolutePos.x, absolutePos.y + absoluteSize.y, absolutePos.x + absoluteSize.x, absolutePos.y);
 
-                background->AddRect(bounds.topLeft() / io.DisplayFramebufferScale, bounds.bottomRight() / io.DisplayFramebufferScale, IM_COL32(255, 255, 255, 255));
-
-                ImU32 resizeColor = IM_COL32(0, 255, 255, 255);
-                if (io.KeyShift) {
-                    resizeColor = IM_COL32(0, 255, 0, 255);
-                }
+                background->AddRect(bounds.topLeft() / io.DisplayFramebufferScale, bounds.bottomRight() / io.DisplayFramebufferScale, IM_COL32(255, 255, 255, 255));                
 
                 if (!io.WantCaptureMouse) {
 
@@ -198,7 +206,6 @@ namespace Tools {
                         }
                     }
 
-
                     if (mMouseDown && dragDistance.length() >= io.MouseDragThreshold && !mDragging) {
                         mSelected->saveGeometry();
                         mDragging = true;
@@ -206,11 +213,19 @@ namespace Tools {
                 }
             }
 
+            Widgets::WidgetBase *pointerEventTargetWidget = mWidgetManager->pointerEventTargetWidget();
+            if (pointerEventTargetWidget)
+                renderWidgetBorders(pointerEventTargetWidget, screenSpace.mTopLeft, IM_COL32(127, 100, 10, 255), background);
+
+            Widgets::WidgetBase *focusedWidget = mWidgetManager->focusedWidget();
+            if (focusedWidget)
+                renderWidgetBorders(focusedWidget, screenSpace.mTopLeft, IM_COL32(255, 200, 10, 255), background);
+
             if (!hoveredWidget)
                 hoveredWidget = mWidgetManager->hoveredWidget();
-            WidgetSettings *hoveredSettings = nullptr;
 
             if (acceptHover) {
+                WidgetSettings *hoveredSettings = nullptr;
                 if (hoveredWidget) {
                     hoveredSettings = &mSettings.try_emplace(hoveredWidget, hoveredWidget, getTool<Inspector>()).first->second;
 
@@ -325,10 +340,6 @@ namespace Tools {
             if (mSelected) {
                 mSelected->render();
             }
-            /*if (hoveredSettings && !mDragging && hoveredSettings != mSelected) {
-                ImGui::Text("Hovered");
-                hoveredSettings->render();
-            }*/
 
             //io.WantCaptureMouse = true;
         }

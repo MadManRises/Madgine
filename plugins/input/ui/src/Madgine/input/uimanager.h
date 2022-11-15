@@ -59,6 +59,8 @@ namespace Input {
         App::Application &app() const;
         Window::MainWindow &window() const;
 
+        void shutdown();
+
         void onUpdate();
 
     private:

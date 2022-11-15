@@ -23,9 +23,9 @@ namespace Widgets {
 
         virtual WidgetClass getClass() const override;
 
-        virtual bool injectPointerClick(const Input::PointerEventArgs &arg) override;        
-        virtual bool injectDragBegin(const Input::PointerEventArgs &arg) override;
-        virtual bool injectDragMove(const Input::PointerEventArgs &arg) override;
+        virtual void injectPointerClick(const Input::PointerEventArgs &arg) override;        
+        virtual void injectDragBegin(const Input::PointerEventArgs &arg) override;
+        virtual void injectDragMove(const Input::PointerEventArgs &arg) override;
         virtual bool injectKeyPress(const Input::KeyEventArgs &arg) override;
 
         void layoutRow(StbTexteditRow *row, size_t i);

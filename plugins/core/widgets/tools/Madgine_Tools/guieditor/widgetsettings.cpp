@@ -82,7 +82,7 @@ namespace Tools {
             for (Widgets::PropertyDescriptor property : mWidget->conditionals()) {
                 uint16_t conditional = property.mAnnotator1;
 
-                std::string name;
+                std::string name = "  ";
                 bool first = true;
                 for (size_t i = 0; i < conditions.size(); ++i) {
                     if (conditional & (1 << i)) {
@@ -93,7 +93,7 @@ namespace Tools {
                     }
                 }
                 if ((activeConditions & conditional) == conditional)
-                    name += " x";
+                    name[0] = 'x';
                 if (ImGui::Selectable(name.c_str(), mCurrentConditional == conditional)) {
                     mCurrentConditional = conditional;
                 }
@@ -137,8 +137,15 @@ namespace Tools {
                         if (ImGui::DragFloat("", &geometry.mPos[i][j], j == 2 ? 1.0f : 0.01f)) {
                             mWidget->setPosValue(compoundId, geometry.mPos[i][j], mCurrentConditional);
                         }
-                        if (source.mPos[compoundId] == mCurrentConditional && mCurrentConditional != 0)
+                        if (source.mPos[compoundId] == mCurrentConditional && mCurrentConditional != 0) {
                             ImGui::PopStyleColor(4);
+                            if (ImGui::BeginPopupCompoundContextItem()) {
+                                if (ImGui::MenuItem("Reset")) {
+                                    mWidget->unsetPosValue(compoundId, mCurrentConditional);
+                                }
+                                ImGui::EndPopup();
+                            }
+                        }
                         ImGui::PopID();
                         ImGui::PopItemWidth();
                     }

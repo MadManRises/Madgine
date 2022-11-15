@@ -10,7 +10,9 @@
 namespace Engine {
 namespace Widgets {
     struct MADGINE_WIDGETS_EXPORT Button : Widget<Button> {
-        using Widget::Widget;
+        
+        Button(WidgetManager &manager, WidgetBase *parent = nullptr);
+
         virtual ~Button() = default;
 
         Threading::SignalStub<> &clickEvent();
@@ -25,10 +27,10 @@ namespace Widgets {
         std::string mText;
 
     protected:
-        bool injectPointerEnter(const Input::PointerEventArgs &arg) override;
-        bool injectPointerLeave(const Input::PointerEventArgs &arg) override;
+        void injectPointerEnter(const Input::PointerEventArgs &arg) override;
+        void injectPointerLeave(const Input::PointerEventArgs &arg) override;
 
-        bool injectPointerClick(const Input::PointerEventArgs &arg) override;        
+        void injectPointerClick(const Input::PointerEventArgs &arg) override;        
 
         void emitClicked();
 
