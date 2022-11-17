@@ -10,6 +10,7 @@ ExternalProject_Add(DirectXShaderCompiler
 	CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release -DHLSL_BUILD_DXILCONV=OFF -DHLSL_COPY_GENERATED_SOURCES=ON -DCMAKE_VERBOSE_MAKEFILE=ON -C ${dxCompilerSourceDir}/cmake/caches/PredefinedParams.cmake 
 	BUILD_BYPRODUCTS
 		${dxCompilerBinaryDir}/lib/dxcompiler.lib
+		${dxCompilerBinaryDir}/bin/dxc.exe
 	INSTALL_COMMAND "")
 
 add_executable(dxc IMPORTED GLOBAL)
