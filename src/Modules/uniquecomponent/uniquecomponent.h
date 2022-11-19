@@ -1,6 +1,6 @@
 #pragma once
 
-#    include "component_index.h"
+#include "component_index.h"
 
 #if ENABLE_PLUGINS
 
@@ -49,6 +49,11 @@ namespace UniqueComponent {
         static size_t component_index()
         {
             return preg()->index();
+        }
+
+        static bool is_instantiated()
+        {
+            return preg();
         }
 
     protected:
