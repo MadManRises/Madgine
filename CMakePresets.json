@@ -26,6 +26,12 @@
       "architecture": {
         "strategy": "external",
         "value": "x64"
+      },
+      "warnings": {
+        "dev": false
+      },
+      "errors": {
+        "dev": false
       }
     },
     {
