@@ -134,6 +134,7 @@ namespace Threading {
     struct MODULES_EXPORT TaskPromiseTypeBase {
         TaskPromiseTypeBase() = default;
         TaskPromiseTypeBase(const TaskPromiseTypeBase &) = delete;
+        TaskPromiseTypeBase(TaskPromiseTypeBase &&) = default;
         TaskPromiseTypeBase &operator=(TaskPromiseTypeBase &&) = default;
         ~TaskPromiseTypeBase()
         {
@@ -172,10 +173,10 @@ namespace Threading {
 
     protected:
         std::shared_ptr<TaskPromiseSharedStateBase> mState;
+        TaskHandle mThenReturn;
 
     private:
         TaskQueue *mQueue = nullptr;
-        TaskHandle mThenReturn;
     };
 
     template <typename T>
@@ -185,6 +186,13 @@ namespace Threading {
         {
             if (mState)
                 static_cast<TaskPromiseSharedState<T> *>(mState.get())->set_value(std::move(value));
+        }
+
+        void set_value(T value)
+        {
+            return_value(value);
+            mState->finalize();
+            assert(!mThenReturn);
         }
 
         std::shared_ptr<TaskPromiseSharedState<T>> get_state()
@@ -211,6 +219,12 @@ namespace Threading {
         {
             if (mState)
                 static_cast<TaskPromiseSharedState<void> *>(mState.get())->set_value();
+        }
+
+        void set_value() {
+            return_void();
+            mState->finalize();
+            assert(!mThenReturn);
         }
 
         std::shared_ptr<TaskPromiseSharedState<void>> get_state()

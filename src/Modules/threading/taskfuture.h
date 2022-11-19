@@ -73,7 +73,10 @@ namespace Threading {
         template <typename F>
         auto then(F &&f, Threading::TaskQueue *queue)
         {
-            auto task = make_task(std::forward<F>(f), TaskFuture<T> { *this });
+            auto task = [](F f, TaskFuture<T> fut) -> decltype(make_task(std::forward<F>(f), fut)) {
+                co_return co_await make_task(std::forward<F>(f), fut);
+            }(std::forward<F>(f), *this);
+
             auto fut = task.get_future();
             auto handle = task.assign(queue);
             mState->then(std::move(handle));
