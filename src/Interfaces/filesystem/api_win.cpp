@@ -70,6 +70,15 @@ namespace Filesystem {
     }
 #    endif
 
+    static char sTempPathBuffer[1024] = { 0 };
+    Path tempPath()
+    {
+        if (sTempPathBuffer[0] == 0) {
+            GetTempPathA(sizeof(sTempPathBuffer), sTempPathBuffer);
+        }
+        return sTempPathBuffer;
+    }
+
     bool createDirectory(const Path &p)
     {
         auto result = CreateDirectory(p.c_str(), NULL);

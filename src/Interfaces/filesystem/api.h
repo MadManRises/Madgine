@@ -20,6 +20,7 @@ namespace Filesystem {
     INTERFACES_EXPORT Path executablePath();
     INTERFACES_EXPORT std::string executableName();
     INTERFACES_EXPORT Path appDataPath();
+    INTERFACES_EXPORT Path tempPath();
 
     INTERFACES_EXPORT void makeNormalized(std::string &p);
     INTERFACES_EXPORT bool isValidPath(const std::string &p);
