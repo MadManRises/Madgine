@@ -13,6 +13,8 @@ namespace Scripting {
 
             using PyObjectPtr::operator=;
 
+            using value_type = PyObject*;
+
             struct iterator {
                 iterator() = default;
                 iterator(PyObject *list);

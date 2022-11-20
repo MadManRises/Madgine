@@ -13,6 +13,8 @@ namespace Scripting {
 
             using PyObjectPtr::operator=;
 
+            using value_type = std::pair<PyObject*, PyObject*>;
+
             struct iterator {
                 iterator() = default;
                 iterator(PyObject *dict);
