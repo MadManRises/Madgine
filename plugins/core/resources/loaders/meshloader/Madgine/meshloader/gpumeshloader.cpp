@@ -52,7 +52,6 @@ namespace Render {
         data.mFormat = mesh.mFormat;
         data.mVertexSize = mesh.mVertexSize;
         data.mAABB = mesh.mAABB;
-        data.mGroupSize = mesh.mGroupSize;
 
         GPUMeshLoader::update(data, mesh);
 
@@ -77,6 +76,7 @@ namespace Render {
     void GPUMeshLoader::update(GPUMeshData &data, const MeshData &mesh)
     {
         assert(data.mFormat == mesh.mFormat);
+        data.mGroupSize = mesh.mGroupSize;
 
         if (mesh.mIndices.empty()) {
             data.mElementCount = mesh.mVertices.mSize / mesh.mVertexSize;
