@@ -4,15 +4,17 @@ namespace Engine {
 
 template <typename... T>
 struct ConcatItContainer {
-    using iterator_traits = derive_iterator<typename first<T...>::type>;
+    using iterator_traits = derive_iterator<first_t<T...>>;
+    using value_type = typename std::remove_reference_t<first_t<T...>>::value_type;
+    using reference = typename std::remove_reference_t<first_t<T...>>::reference;
 
     template <typename... It>
     struct ConcatIterator {
-        using iterator_category = typename first<It...>::type::iterator_category;
-        using value_type = typename first<It...>::type::value_type;
+        using iterator_category = typename first_t<It...>::iterator_category;
+        using value_type = typename first_t<It...>::value_type;
         using difference_type = ptrdiff_t;
         using pointer = void;
-        using reference = typename first<It...>::type::reference;
+        using reference = typename first_t<It...>::reference;
 
         ConcatIterator() = default;
 

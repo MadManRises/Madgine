@@ -140,6 +140,8 @@ decltype(auto) convert_ValueType(T &&t)
             return TypedScopePtr { t };
         } else if constexpr (InstanceOf<std::decay_t<T>, std::unique_ptr>) {
             return TypedScopePtr { t.get() };
+        } else if constexpr (InstanceOf<std::decay_t<T>, std::reference_wrapper>){
+            return TypedScopePtr { &t.get() };
         } else if constexpr (std::is_reference_v<T> && reference_to_ptr) {
             return TypedScopePtr { &t };
         } else {

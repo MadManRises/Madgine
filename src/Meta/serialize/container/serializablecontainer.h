@@ -486,7 +486,7 @@ namespace Serialize {
         {
             typename _traits::emplace_return it = _traits::emplace(*this, where, std::forward<_Ty>(args)...);
             if (_traits::was_emplace_successful(it)) {
-                _traits::revalidateHandleAfterInsert(mActiveIterator, *this, { it });
+                _traits::revalidateHandleAfterInsert(mActiveIterator, *this, static_cast<_traits::iterator&>(it) );
                 position_handle newHandle = _traits::toPositionHandle(*this, it);
                 if (_traits::next(*this, newHandle) == mActiveIterator && !this->isActive())
                     mActiveIterator = newHandle;

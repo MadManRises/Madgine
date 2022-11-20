@@ -5,14 +5,17 @@ namespace Engine {
 template <typename T, typename Converter>
 struct TransformItContainer {
     using iterator_traits = derive_iterator<T>;
+    using reference = decltype(std::declval<Converter>()(std::declval<typename std::remove_reference_t<T>::reference>()));
+    using value_type = std::remove_reference_t<reference>;
 
     template <typename It>
     struct TransformIterator {
         using iterator_category = typename It::iterator_category;
-        using value_type = typename std::remove_reference<decltype(std::declval<Converter>()(std::declval<typename It::reference>()))>::type;
+        using reference = decltype(std::declval<Converter>()(std::declval<typename It::reference>()));
+        using value_type = std::remove_reference_t<reference>;
         using difference_type = ptrdiff_t;
         using pointer = void;
-        using reference = value_type;
+        
 
         TransformIterator() = default;
 

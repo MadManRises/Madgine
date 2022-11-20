@@ -164,4 +164,7 @@ struct auto_holder;
 template <auto f, auto g>
 concept FSameAs = std::same_as<auto_holder<f>, auto_holder<g>>;
 
+template <bool b, typename T>
+using const_if = std::conditional_t<b, const T, T>;
+
 }

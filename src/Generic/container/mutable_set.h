@@ -9,16 +9,13 @@ struct mutable_set : std::set<T, Cmp> {
 
     using _traits = container_traits<Base>;
 
-    template <typename It>
-    struct const_iterator_prototype;
-
-    template <typename It>
+    template <typename It, bool isConst>
     struct iterator_prototype {
         using iterator_category = typename It::iterator_category;
-        using value_type = typename It::value_type;
+        using value_type = const_if<isConst, std::remove_const_t<typename It::value_type>>;
         using difference_type = typename It::difference_type;
-        using pointer = std::remove_const_t<typename It::value_type> *;
-        using reference = std::remove_const_t<typename It::value_type> &;
+        using pointer = value_type *;
+        using reference = value_type &;
 
         iterator_prototype()
         {
@@ -37,8 +34,9 @@ struct mutable_set : std::set<T, Cmp> {
         {
         }
 
-        template <typename It2>
-        iterator_prototype(const iterator_prototype<It2> &other)
+        template <typename It2, bool isConst2>
+        requires (!isConst2 || isConst)
+        iterator_prototype(const iterator_prototype<It2, isConst2> &other)
             : mIterator(static_cast<const It2 &>(other))
         {
         }
@@ -56,35 +54,32 @@ struct mutable_set : std::set<T, Cmp> {
             return &const_cast<T &>(*mIterator);
         }
 
-        bool operator!=(const iterator_prototype<It> &other) const
+        template <bool isConst2>
+        bool operator!=(const iterator_prototype<It, isConst2> &other) const
         {
             return mIterator != other.mIterator;
         }
 
-        bool operator==(const iterator_prototype<It> &other) const
+        template <bool isConst2>
+        bool operator==(const iterator_prototype<It, isConst2> &other) const
         {
             return mIterator == other.mIterator;
         }
 
-        bool operator==(const const_iterator_prototype<It> &other) const
-        {
-            return mIterator == other.mIterator;
-        }
-
-        iterator_prototype<It> &operator++()
+        iterator_prototype &operator++()
         {
             ++mIterator;
             return *this;
         }
 
-        iterator_prototype<It> operator++(int)
+        iterator_prototype operator++(int)
         {
-            iterator_prototype<It> copy = *this;
+            iterator_prototype copy = *this;
             ++*this;
             return copy;
         }
 
-        iterator_prototype<It> &operator--()
+        iterator_prototype &operator--()
         {
             --mIterator;
             return *this;
@@ -96,79 +91,13 @@ struct mutable_set : std::set<T, Cmp> {
         }
 
     private:
-        friend struct const_iterator_prototype<It>;
-
         It mIterator;
     };
 
-    template <typename It>
-    struct const_iterator_prototype {
-        using iterator_category = typename It::iterator_category;
-        using value_type = typename It::value_type;
-        using difference_type = typename It::difference_type;
-        using pointer = typename It::pointer;
-        using reference = typename It::reference;
-
-        const_iterator_prototype(It &&it)
-            : mIterator(std::forward<It>(it))
-        {
-        }
-
-        const_iterator_prototype(const It &it)
-            : mIterator(it)
-        {
-        }
-
-        const_iterator_prototype(const iterator_prototype<It> &it)
-            : mIterator(it.mIterator)
-        {
-        }
-
-        const T &operator*() const
-        {
-            return *mIterator;
-        }
-
-        const T *operator->() const
-        {
-            return &*mIterator;
-        }
-
-        bool operator!=(const const_iterator_prototype<It> &other) const
-        {
-            return mIterator != other.mIterator;
-        }
-
-        bool operator==(const const_iterator_prototype<It> &other) const
-        {
-            return mIterator == other.mIterator;
-        }
-
-        void operator++()
-        {
-            ++mIterator;
-        }
-
-        void operator--()
-        {
-            --mIterator;
-        }
-
-        operator const It &() const
-        {
-            return mIterator;
-        }
-
-    private:
-        friend struct iterator_prototype<It>;
-
-        It mIterator;
-    };
-
-    typedef iterator_prototype<typename Base::iterator> iterator;
-    typedef const_iterator_prototype<typename Base::const_iterator> const_iterator;
-    typedef iterator_prototype<typename Base::reverse_iterator> reverse_iterator;
-    typedef const_iterator_prototype<typename Base::const_reverse_iterator> const_reverse_iterator;
+    typedef iterator_prototype<typename Base::iterator, false> iterator;
+    typedef iterator_prototype<typename Base::const_iterator, true> const_iterator;
+    typedef iterator_prototype<typename Base::reverse_iterator, false> reverse_iterator;
+    typedef iterator_prototype<typename Base::const_reverse_iterator, true> const_reverse_iterator;
 
     template <typename Arg>
     iterator find(Arg &&arg)
