@@ -29,7 +29,7 @@ struct AreaView {
         size_t acc = 0;
         for (int i = Dim - 1; i >= 0; --i) {
             size_t axis = mAxisMapping[i];
-            assert(topLeft[i] < mSizes[axis]);
+            assert(topLeft[i] <= mSizes[axis]);
             acc *= mFullSizes[axis];
             if (!mFlipped[axis]) {
                 acc += topLeft[i];
