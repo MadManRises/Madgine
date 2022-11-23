@@ -277,10 +277,10 @@ namespace Tools {
                 } else if (value.is<OwnedScopePtr>()) {
                     key = "[" + std::to_string(i) + "] " + value.as<OwnedScopePtr>().name() + "##" + key;
                 }
-                std::pair<bool, bool> result = drawValue(key, value, /*editable && */ vValue.isEditable(), false, element);
-                if (result.first)
+                std::pair<bool, bool> modified = drawValue(key, value, /*editable && */ vValue.isEditable(), false, element);
+                if (modified.first)
                     vValue = value;
-                changed |= result.second;
+                changed |= modified.first || (modified.second && !range.isReference());
                 ++i;
             }
             ImGui::TreePop();
