@@ -128,7 +128,7 @@ namespace Render {
     {
         checkThread();
 
-        return std::make_unique<DirectX11RenderWindow>(this, w);
+        return std::make_unique<DirectX11RenderWindow>(this, w, samples);
     }
 
     void DirectX11RenderContext::unloadAllResources()

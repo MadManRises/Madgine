@@ -20,7 +20,7 @@
 namespace Engine {
 namespace Render {
 
-    DirectX11RenderWindow::DirectX11RenderWindow(DirectX11RenderContext *context, Window::OSWindow *w)
+    DirectX11RenderWindow::DirectX11RenderWindow(DirectX11RenderContext *context, Window::OSWindow *w, size_t samples)
         : DirectX11RenderTarget(context, true, w->title())
         , mWindow(w)
     {
@@ -29,7 +29,7 @@ namespace Render {
         DXGI_SWAP_CHAIN_DESC swapChainDesc;
         ZeroMemory(&swapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
 
-        swapChainDesc.BufferCount = 1;
+        swapChainDesc.BufferCount = 2;
         swapChainDesc.BufferDesc.Width = w->renderSize().x;
         swapChainDesc.BufferDesc.Height = w->renderSize().y;
         swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -38,7 +38,7 @@ namespace Render {
         swapChainDesc.OutputWindow = reinterpret_cast<HWND>(w->mHandle);
         swapChainDesc.SampleDesc.Count = 1;
         swapChainDesc.SampleDesc.Quality = 0;
-        swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+        swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
         swapChainDesc.Windowed = TRUE;
 
         ReleasePtr<IDXGIDevice> device;
@@ -73,7 +73,7 @@ namespace Render {
 
         std::vector<ReleasePtr<ID3D11RenderTargetView>> views;
         views.emplace_back(std::move(targetView));
-        setup(std::move(views), { size.x, size.y }, TextureType_2D);
+        setup(std::move(views), { size.x, size.y }, TextureType_2D, samples);
     }
 
     DirectX11RenderWindow::~DirectX11RenderWindow()

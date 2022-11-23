@@ -9,7 +9,7 @@ namespace Engine {
 namespace Render {
 
     struct MADGINE_DIRECTX11_EXPORT DirectX11RenderWindow : DirectX11RenderTarget {
-        DirectX11RenderWindow(DirectX11RenderContext *context, Window::OSWindow *w);
+        DirectX11RenderWindow(DirectX11RenderContext *context, Window::OSWindow *w, size_t samples);
         ~DirectX11RenderWindow();
 
         virtual void beginIteration(size_t iteration) const override;
