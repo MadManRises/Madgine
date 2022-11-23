@@ -52,17 +52,14 @@ PixelShaderOutput main(PixelShaderInput IN)
 
 	if (object.hasTexture){
 		if (object.hasDistanceField){
-			float2 msdfUnit = 4.0/float2(512.0, 512.0);
 			float4 sample = diffuseTex.Sample(texSampler, IN.uv);
 			float sigDist = median(sample.r, sample.g, sample.b) - 0.5;
-			//sigDist *= dot(msdfUnit, float2(0.5));
-			sigDist *= 4.0;
-			float opacity = saturate(sigDist + 0.5);
-			diffuseColor = lerp(float4(0,0,0,0), diffuseColor, opacity);
+			float opacity = saturate(sigDist/fwidth(sigDist) + 0.5);
+			diffuseColor = opacity * diffuseColor;
 		}
 		else
 		{
-			diffuseColor = diffuseColor * diffuseTex.Sample(texSampler, IN.uv);
+			diffuseColor = diffuseTex.Sample(texSampler, IN.uv) * diffuseColor;
 		}
 	}
 
