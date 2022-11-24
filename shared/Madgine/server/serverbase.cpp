@@ -6,6 +6,8 @@
 
 #    include "Meta/keyvalue/metatable_impl.h"
 
+#include "Modules/threading/awaitables/awaitabletimepoint.h"
+
 METATABLE_BEGIN(Engine::Server::ServerBase)
 METATABLE_END(Engine::Server::ServerBase)
 
@@ -17,12 +19,16 @@ namespace Server {
     {
         Util::setLog(&mLog);
         mLog.startConsole();
-        mTaskQueue.addRepeatedTask([this]() { consoleCheck(); }, std::chrono::milliseconds(20));
+        mTaskQueue.queue([this]() -> Threading::Task<void> {
+            while (mTaskQueue.running()) {
+                consoleCheck();
+                co_await 20ms;
+            }
+        });
     }
 
     ServerBase::~ServerBase()
     {
-        mTaskQueue.removeRepeatedTasks(this);
         mLog.stopConsole();
         mInstances.clear();
         Util::setLog(nullptr);

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "taskhandle.h"
-#include "taskpromise.h"
+#include "taskpromisesharedstate.h"
 
 namespace Engine {
 namespace Threading {

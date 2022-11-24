@@ -82,7 +82,7 @@ struct shared_future {
     bool is_ready() const
     {
         return std::visit(overloaded {
-                              [](const std::shared_future<T> &f) { return f.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready; },
+                              [](const std::shared_future<T> &f) { return f.wait_for(0ms) == std::future_status::ready; },
                               [](const DeferredPtr &d) { return d->is_ready(); } },
             mValue);
     }
@@ -186,7 +186,7 @@ struct shared_future<void> {
     bool is_ready() const
     {
         return std::visit(overloaded {
-                              [](const std::shared_future<void> &f) { return f.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready; },
+                              [](const std::shared_future<void> &f) { return f.wait_for(0ms) == std::future_status::ready; },
                               [](const std::unique_ptr<DeferredFutureBase> &d) { return d->is_ready(); } },
             mValue);
     }
@@ -272,7 +272,7 @@ struct future {
     bool is_ready() const
     {
         return std::visit(overloaded {
-                              [](const std::future<T> &f) { return f.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready; },
+                              [](const std::future<T> &f) { return f.wait_for(0ms) == std::future_status::ready; },
                               [](const DeferredPtr &d) { return d->is_ready(); } },
             mValue);
     }
@@ -375,7 +375,7 @@ private:
         bool is_ready() const
         {
             return std::visit(overloaded {
-                                  [](const std::future<void> &f) { return f.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready; },
+                                  [](const std::future<void> &f) { return f.wait_for(0ms) == std::future_status::ready; },
                                   [](const std::unique_ptr<DeferredBase> &d) { return d->is_ready(); } },
                 mValue);
         }

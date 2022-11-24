@@ -1,32 +1,49 @@
 #pragma once
 
 #include "Generic/coroutines/handle.h"
-#include "taskfuture.h"
+#include "taskpromise.h"
 
 namespace Engine {
 namespace Threading {
 
+    template <typename>
+    struct is_task : std::false_type {
+    };
 
-    template <typename T, typename Immediate>
+    template <typename T, bool I>
+    struct is_task<Task<T, I>> : std::true_type {
+    };
+
+    template <typename T>
+    concept IsTask = is_task<T>::value;
+
+    template <typename T, bool Immediate>
     struct [[nodiscard]] Task {
 
-        static_assert(!InstanceOf<T, Task>);
+        static_assert(!IsTask<T>);
 
-        struct promise_type : TaskPromise<T> {
+        struct promise_type : TaskSuspendablePromise<T> {
+            
+            promise_type()
+                : TaskSuspendablePromise<T>(Immediate)
+            {
+            }
+
             Task<T, Immediate> get_return_object()
             {
                 return { CoroutineHandle<promise_type>::fromPromise(*this) };
             }
         };
 
-        template <typename T2, typename I>
+        template <typename T2, bool I>
         friend struct Task;
 
-        template <typename I>
+        Task() = default;
+
+        template <bool I>
         Task(Task<T, I> &&other)
             : mHandle(std::move(other.mHandle))
             , mState(std::move(other.mState))
-            , mImmediate(other.mImmediate)
         {
         }
 
@@ -57,12 +74,14 @@ namespace Threading {
 
         TaskHandle assign(TaskQueue *queue)
         {
+            TaskHandle handle;
             if (mHandle) {
                 mHandle->setQueue(queue);
+                bool immediate = mHandle->immediate();
+                handle = { std::move(mHandle) };
+                if (immediate)
+                    handle();
             }
-            TaskHandle handle { std::move(mHandle) };
-            if (mImmediate)
-                handle();
             return handle;
         }
 
@@ -87,13 +106,12 @@ namespace Threading {
         }
 
     private:
-        CoroutineHandle<TaskPromise<T>> mHandle;
+        CoroutineHandle<TaskSuspendablePromise<T>> mHandle;
         std::shared_ptr<TaskPromiseSharedState<T>> mState;
-        bool mImmediate = Immediate {};
     };
 
     template <typename T>
-    using ImmediateTask = Task<T, std::true_type>;
+    using ImmediateTask = Task<T, true>;
 
     template <typename T>
     Task<T> make_ready_task(T &&val)
@@ -101,7 +119,6 @@ namespace Threading {
         return { std::make_shared<TaskPromiseSharedState<T>>(std::forward<T>(val)) };
     }
 
-    
     template <typename F, typename... Args>
     auto make_task(F f, Args &&...args)
     {
@@ -109,7 +126,7 @@ namespace Threading {
 
         using R = std::invoke_result_t<F, Args...>;
 
-        if constexpr (InstanceOf<R, Task>) {
+        if constexpr (IsTask<R>) {
             return std::invoke(std::move(f), std::forward<Args>(args)...);
         } else {
             return [](F f, Args... args) -> Task<R> {

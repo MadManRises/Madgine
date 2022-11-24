@@ -18,6 +18,8 @@
 
 #include "Madgine/widgets/widgetmanager.h"
 
+#include "Modules/threading/awaitables/awaitabletimepoint.h"
+
 METATABLE_BEGIN(Engine::Input::UIManager)
 MEMBER(mHandlers)
 METATABLE_END(Engine::Input::UIManager)
@@ -25,6 +27,8 @@ METATABLE_END(Engine::Input::UIManager)
 namespace Engine {
 
 namespace Input {
+
+    static std::chrono::milliseconds fixedUpdateInterval = 15ms;
 
     UIManager::UIManager(App::Application &app, Window::MainWindow &window)
         : mApp(app)
@@ -48,16 +52,24 @@ namespace Input {
         for (const std::unique_ptr<HandlerBase> &handler : mHandlers)
             co_await handler->callInit();
 
-        mWindow.taskQueue()->addRepeatedTask([this]() {
-            updateRender();
+        mWindow.taskQueue()->queue([this]() -> Threading::Task<void> {
+            while (mWindow.taskQueue()->running()) {
+                updateRender();
+                co_await 0ms;
+            }
         });
-        mWindow.taskQueue()->addRepeatedTask([this]() {
-            fixedUpdateRender();
-        },
-            std::chrono::microseconds { 15000 });
+        mWindow.taskQueue()->queue([this]() -> Threading::Task<void> {
+            while (mWindow.taskQueue()->running()) {
+                fixedUpdateRender();
+                co_await fixedUpdateInterval;
+            }
+        });
 
-        mApp.taskQueue()->addRepeatedTask([this]() {
-            updateApp();
+        mApp.taskQueue()->queue([this]() -> Threading::Task<void> {
+            while (mApp.taskQueue()->running()) {
+                updateApp();
+                co_await 0ms;
+            }            
         });
 
         co_return true;
@@ -156,7 +168,7 @@ namespace Input {
     void UIManager::fixedUpdateRender()
     {
         for (const std::unique_ptr<HandlerBase> &h : mHandlers)
-            h->fixedUpdateRender(std::chrono::microseconds { 15000 });
+            h->fixedUpdateRender(fixedUpdateInterval);
     }
 
     void UIManager::updateApp()

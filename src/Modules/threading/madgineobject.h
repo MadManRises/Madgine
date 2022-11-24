@@ -52,7 +52,7 @@ struct MadgineObject : MadgineObjectState {
     {
         assert(mState.load());
         mState.reset();
-        if constexpr (InstanceOf<decltype(static_cast<T *>(this)->finalize()), Threading::Task>) {
+        if constexpr (Threading::IsTask<decltype(static_cast<T *>(this)->finalize())>) {
             co_await static_cast<T *>(this)->finalize();
         } else {
             static_cast<T *>(this)->finalize();

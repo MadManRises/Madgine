@@ -11,7 +11,7 @@
 namespace Engine {
 namespace Threading {
 
-    TaskHandle::TaskHandle(CoroutineHandle<TaskPromiseTypeBase> handle)
+    TaskHandle::TaskHandle(CoroutineHandle<TaskSuspendablePromiseTypeBase> handle)
         : mHandle(handle.release())
     {
     }
@@ -39,7 +39,7 @@ namespace Threading {
         TaskQueue *q = queue();
 #endif
         //Reset mHandle to allow exception handling
-        std::coroutine_handle<TaskPromiseTypeBase> handle = mHandle;
+        std::coroutine_handle<TaskSuspendablePromiseTypeBase> handle = mHandle;
         mHandle = {};
         handle.resume();
 #if MODULES_ENABLE_TASK_TRACKING
@@ -52,9 +52,9 @@ namespace Threading {
         queue()->queueHandle(std::move(*this));
     }
 
-    std::coroutine_handle<TaskPromiseTypeBase> TaskHandle::release()
+    std::coroutine_handle<TaskSuspendablePromiseTypeBase> TaskHandle::release()
     {
-        return std::exchange(mHandle, std::coroutine_handle<TaskPromiseTypeBase> {});
+        return std::exchange(mHandle, std::coroutine_handle<TaskSuspendablePromiseTypeBase> {});
     }
 
     TaskQueue *TaskHandle::queue() const

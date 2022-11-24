@@ -106,7 +106,7 @@ void GameManager::updateRender(std::chrono::microseconds timeSinceLastFrame)
     mAcc += timeSinceLastFrame;
     while (mAcc > mSpawnInterval) {
         mAcc -= mSpawnInterval;
-        mAcc = std::chrono::microseconds { 0 };
+        mAcc = 0us;
         mSpawnInterval *= 999;
         mSpawnInterval /= 1000;
         spawnBrick();
@@ -225,8 +225,8 @@ void GameManager::modLife(int diff)
 
 void GameManager::start()
 {
-    mSpawnInterval = std::chrono::microseconds { 1000000 };
-    mAcc = std::chrono::microseconds { 0 };
+    mSpawnInterval = 1s;
+    mAcc = 0us;
 
     mScore = 0;
     mScoreLabel->mText = "Score: " + std::to_string(mScore);

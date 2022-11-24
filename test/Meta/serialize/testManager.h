@@ -110,7 +110,7 @@ struct TestManager : SyncManager {
     {
         std::unique_ptr<buffered_streambuf> buf = std::make_unique<buffered_streambuf>(std::make_unique<BufferedTestBuf>(buffer, !slave));
         if (slave) {
-            return setSlaveStream(FormattedBufferedStream { std::move(format), std::move(buf), std::make_unique<SyncStreamData>(*this, 0) }, shareState, std::chrono::milliseconds { 1000 });
+            return setSlaveStream(FormattedBufferedStream { std::move(format), std::move(buf), std::make_unique<SyncStreamData>(*this, 0) }, shareState, 1s);
         } else {
             return addMasterStream(FormattedBufferedStream { std::move(format), std::move(buf), std::make_unique<SyncStreamData>(*this, 1) }, shareState);
         }

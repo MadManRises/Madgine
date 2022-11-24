@@ -41,8 +41,8 @@ namespace ClickBrick {
         int mScore = 0;
         int mLife = 100000;
 
-        std::chrono::microseconds mSpawnInterval { 1000000 };
-        std::chrono::microseconds mAcc { 0 };
+        std::chrono::microseconds mSpawnInterval;
+        std::chrono::microseconds mAcc;
 
         std::list<Engine::Scene::Entity::EntityPtr> mBricks;
 

@@ -20,6 +20,8 @@
 #include "../render/rendercontext.h"
 #include "../render/rendertarget.h"
 
+#include "Modules/threading/awaitables/awaitabletimepoint.h"
+
 METATABLE_BEGIN(Engine::Window::MainWindow)
 READONLY_PROPERTY(Components, components)
 METATABLE_END(Engine::Window::MainWindow)
@@ -107,11 +109,13 @@ namespace Window {
 
         applyClientSpaceResize();
 
-        mTaskQueue.addRepeatedTask([this]() {
-            render();
-            update();
-        },
-            std::chrono::microseconds(/*1*/ 000000 / 60), this);
+        mTaskQueue.queue([this]() -> Threading::Task<void> {
+            while (mTaskQueue.running()) {
+                render();
+                update();
+                co_await std::chrono::milliseconds(/*1*/ 000000 / 60);
+            }
+        });
 
         co_return true;
     }

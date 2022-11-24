@@ -23,6 +23,8 @@
 
 #include "Meta/serialize/configs/guard.h"
 
+#include "Modules/threading/awaitables/awaitabletimepoint.h"
+
 UNIQUECOMPONENT(Engine::Serialize::NoParent<Engine::Scene::SceneManager>);
 
 METATABLE_BEGIN(Engine::Scene::SceneManager)
@@ -71,7 +73,12 @@ namespace Scene {
                 co_return false;
         }
 
-        mApp.taskQueue()->addRepeatedTask([this]() { update(); }, std::chrono::microseconds { 33 }, this);
+        mApp.taskQueue()->queue([this]() -> Threading::Task<void> {
+            while (mApp.taskQueue()->running()) {
+                update();
+                co_await 33ms;
+            }
+        });
 
         co_return true;
     }
@@ -79,8 +86,6 @@ namespace Scene {
     Threading::Task<void> SceneManager::finalize()
     {
         clear();
-
-        mApp.taskQueue()->removeRepeatedTasks(this);
 
         for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
             co_await component->callFinalize();

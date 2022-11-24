@@ -19,6 +19,8 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
+#include "Modules/threading/awaitables/awaitabletimepoint.h"
+
 UNIQUECOMPONENT(Engine::Resources::ResourceManager)
 
 namespace Engine {
@@ -102,7 +104,12 @@ namespace Resources {
             updateResources(Filesystem::FileEventType::FILE_CREATED, p.first, p.second, loaderByExtension);
         }
 
-        mIOQueue.addRepeatedTask([this]() { update(); }, std::chrono::seconds { 1 });
+        mIOQueue.queue([this]() -> Threading::Task<void> {
+            while (mIOQueue.running()) {
+                update();
+                co_await 1s;
+            }
+        });
 
         mInitialized = true;
 

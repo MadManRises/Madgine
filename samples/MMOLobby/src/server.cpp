@@ -5,6 +5,8 @@
 
 #include "Meta/serialize/formatter/xmlformatter.h"
 
+#include "Modules/threading/awaitables/awaitabletimepoint.h"
+
 namespace MMOLobby {
 
 Server::Server()
@@ -18,7 +20,12 @@ Server::Server()
         shutdown();
     }
 
-    mTaskQueue.addRepeatedTask([this]() { checkConnections(); }, std::chrono::milliseconds(400));
+    mTaskQueue.queue([this]() -> Engine::Threading::Task<void> {
+        while (mTaskQueue.running()) {
+            checkConnections();
+            co_await 400ms;
+        }
+    });
 }
 
 Server::~Server()
