@@ -28,8 +28,11 @@ namespace Widgets {
 
     struct MADGINE_WIDGETS_EXPORT PropertyIterator {
 
-        using value_type = PropertyDescriptor;
         using difference_type = std::deque<PropertyValue>::const_iterator::difference_type;
+        using value_type = PropertyDescriptor;
+        using pointer = value_type *;
+        using reference = value_type &;
+        using iterator_category = std::forward_iterator_tag;
 
         const PropertyDescriptor &operator*() const;
         const PropertyDescriptor *operator->() const;
@@ -37,6 +40,7 @@ namespace Widgets {
         bool operator==(const PropertyIterator &other) const;
         PropertyIterator &operator++();
         PropertyIterator operator++(int);
+
 
         PropertyRange conditionalRange() const;
         float value(size_t i) const;
@@ -80,8 +84,7 @@ namespace Widgets {
 namespace Serialize {
 
     template <>
-    struct Operations<Widgets::PropertyList>
-    {
+    struct Operations<Widgets::PropertyList> {
         static StreamResult read(Serialize::FormattedSerializeStream &in, Widgets::PropertyList &list, const char *name);
         static void write(Serialize::FormattedSerializeStream &out, Widgets::PropertyRange list, const char *name);
     };

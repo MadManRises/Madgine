@@ -1,6 +1,5 @@
 #define NOMINMAX
-#include <Windows.h>
-#include <dxcapi.h>
+
 #include <spirv_glsl.hpp>
 
 #include <vector>

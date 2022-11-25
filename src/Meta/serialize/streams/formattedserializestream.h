@@ -30,34 +30,6 @@ namespace Serialize {
 
         bool hasContainerItem();
 
-        template <typename T>
-        StreamResult beginExtendedTypedRead(T &t, std::span<const char * const> tags)
-        {
-            if (supportsNameLookup()) {
-                std::string tag;
-                STREAM_PROPAGATE_ERROR(lookupFieldName(tag));
-                auto p = std::ranges::find(tags, tag);
-                if (p == tags.end())
-                    return STREAM_INTEGRITY_ERROR(*this) << "Unknown Tag: " << tag;
-                t = static_cast<T>(std::distance(tags.begin(), p));
-            } else {
-                STREAM_PROPAGATE_ERROR(beginExtendedRead(nullptr, 1));
-                STREAM_PROPAGATE_ERROR(Serialize::read(*this, t, "type"));
-            }
-            return {};
-        }
-
-        template <typename T>
-        const char *beginExtendedTypedWrite(const T &t, std::span<const char * const> tags)
-        {
-            const char *tag = tags[t];
-            if (!supportsNameLookup()) {
-                beginExtendedWrite(tag, 1);
-                Serialize::write(*this, t, "type");
-            }
-            return tag;
-        }
-
         StreamResult lookupFieldName(std::string &name);
 
         bool supportsNameLookup() const;

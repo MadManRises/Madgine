@@ -36,6 +36,9 @@ macro(compile_shaders target)
         if (compile)
             get_filename_component(name ${source} NAME_WE)
             add_custom_command(OUTPUT spirv/${name}${extension}
+                COMMAND ${CMAKE_COMMAND}
+                    -E make_directory 
+                    spirv
                 COMMAND $<TARGET_FILE:dxc>
                     -E main
                     -T ${profile} 

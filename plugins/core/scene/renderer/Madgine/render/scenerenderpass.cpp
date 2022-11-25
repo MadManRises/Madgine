@@ -11,8 +11,6 @@
 
 #include "Madgine/render/camera.h"
 
-#include "Madgine/render/shadinglanguage/sl.h"
-
 #include "Madgine/render/rendercontext.h"
 
 #include "Madgine/render/rendertarget.h"
@@ -25,8 +23,9 @@
 
 #include "scenemainwindowcomponent.h"
 
-#define SL_SHADER "shaders/scene.sl"
-#include INCLUDE_SL_SHADER
+#include "Madgine/render/shadinglanguage/sl_support_begin.h"
+#include "shaders/scene.sl"
+#include "Madgine/render/shadinglanguage/sl_support_end.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
 

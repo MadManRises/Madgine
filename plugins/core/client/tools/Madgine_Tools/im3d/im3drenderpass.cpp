@@ -10,14 +10,13 @@
 
 #include "Madgine/render/camera.h"
 
-#include "Madgine/render/shadinglanguage/sl.h"
-
 #include "Madgine/render/texturedescriptor.h"
 
 #include "Madgine/meshloader/meshdata.h"
 
-#define SL_SHADER "shaders/im3d.sl"
-#include INCLUDE_SL_SHADER
+#include "Madgine/render/shadinglanguage/sl_support_begin.h"
+#include "shaders/im3d.sl"
+#include "Madgine/render/shadinglanguage/sl_support_end.h"
 
 namespace Engine {
 namespace Render {

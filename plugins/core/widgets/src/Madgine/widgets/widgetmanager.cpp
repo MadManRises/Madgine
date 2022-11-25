@@ -34,12 +34,13 @@
 #include "Madgine/render/rendercontext.h"
 #include "Madgine/render/rendertarget.h"
 
-#include "Madgine/render/shadinglanguage/sl.h"
+#include "Meta/serialize/helper/typedobjectserialize.h"
 
 #include "Generic/areaview.h"
 
-#define SL_SHADER "shaders/widgets.sl"
-#include INCLUDE_SL_SHADER
+#include "Madgine/render/shadinglanguage/sl_support_begin.h"
+#include "shaders/widgets.sl"
+#include "Madgine/render/shadinglanguage/sl_support_end.h"
 
 UNIQUECOMPONENT(Engine::Widgets::WidgetManager)
 
@@ -218,7 +219,7 @@ namespace Widgets {
     Serialize::StreamResult WidgetManager::readWidget(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget, WidgetBase *parent)
     {
         WidgetClass _class;
-        STREAM_PROPAGATE_ERROR(in.beginExtendedTypedRead(_class, sTags));
+        STREAM_PROPAGATE_ERROR(Serialize::beginExtendedTypedRead(in, _class, sTags));
 
         widget = createWidgetByClass(_class, parent);
         return {};
@@ -231,7 +232,7 @@ namespace Widgets {
 
     const char *WidgetManager::writeWidget(Serialize::FormattedSerializeStream &out, const std::unique_ptr<WidgetBase> &widget) const
     {
-        return out.beginExtendedTypedWrite(widget->getClass(), sTags);
+        return Serialize::beginExtendedTypedWrite(out, widget->getClass(), sTags);
     }
 
     bool WidgetManager::injectPointerPress(const Input::PointerEventArgs &arg)

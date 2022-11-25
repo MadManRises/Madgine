@@ -12,16 +12,15 @@
 #include "Madgine/render/rendertarget.h"
 #include "Madgine/render/rendercontext.h"
 
-#include "Madgine/render/shadinglanguage/sl.h"
-
 #include "Madgine/render/camera.h"
 
 #include "scenemainwindowcomponent.h"
 
 //#include "Madgine/render/rendercontext.h"
 
-#define SL_SHADER "shaders/scene.sl"
-#include INCLUDE_SL_SHADER
+#include "Madgine/render/shadinglanguage/sl_support_begin.h"
+#include "shaders/scene.sl"
+#include "Madgine/render/shadinglanguage/sl_support_end.h"
 
 namespace Engine {
 namespace Render {

@@ -4,14 +4,14 @@
 
 #include "../rendertarget.h"
 
-#include "../shadinglanguage/sl.h"
-
 #include "Madgine/render/texturedescriptor.h"
 
 #include "../rendercontext.h"
 
-#define SL_SHADER "shaders/blur.sl"
-#include "../shadinglanguage/sl_include.h"
+
+#include "../shadinglanguage/sl_support_begin.h"
+#include "shaders/blur.sl"
+#include "../shadinglanguage/sl_support_end.h"
 
 namespace Engine {
 namespace Render {

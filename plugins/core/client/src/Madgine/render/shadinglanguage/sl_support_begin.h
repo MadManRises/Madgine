@@ -11,19 +11,3 @@
 #define bool uint32_t
 
 #define row_major
-
-#include SL_SHADER
-
-#undef NAMED
-
-#undef struct
-
-#undef int2
-#undef float3
-#undef float4
-#undef float4x4
-#undef bool
-
-#undef row_major
-
-#undef SL_SHADER

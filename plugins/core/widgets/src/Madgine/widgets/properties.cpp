@@ -4,6 +4,8 @@
 
 #include "Meta/serialize/operations.h"
 
+#include "Meta/serialize/helper/typedobjectserialize.h"
+
 namespace Engine {
 namespace Widgets {
 
@@ -179,7 +181,7 @@ namespace Widgets {
 
 namespace Serialize {
 
-    static constexpr const char* sTags[] = {
+    static constexpr const char *sTags[] = {
         "Position",
         "Size",
         "Conditional"
@@ -193,7 +195,7 @@ namespace Serialize {
 
     static StreamResult readPropertyDescriptor(Serialize::FormattedSerializeStream &in, Widgets::PropertyDescriptor &desc, std::vector<float> &values)
     {
-        STREAM_PROPAGATE_ERROR(in.beginExtendedTypedRead(desc.mType, sTags));
+        STREAM_PROPAGATE_ERROR(Serialize::beginExtendedTypedRead(in, desc.mType, sTags));
         const char *annotator1Name = sAnnotator1Names[desc.mType];
         if (annotator1Name) {
             STREAM_PROPAGATE_ERROR(in.beginExtendedRead(nullptr, 1));
@@ -201,7 +203,7 @@ namespace Serialize {
         }
         if (desc.mType != Widgets::PropertyType::CONDITIONAL) {
             STREAM_PROPAGATE_ERROR(in.readPrimitive(values.emplace_back(), nullptr));
-        } 
+        }
         return {};
     }
 
@@ -223,7 +225,7 @@ namespace Serialize {
                     list.setConditional(mask, desc, std::move(values));
                 }
                 STREAM_PROPAGATE_ERROR(in.endContainerRead("Conditional"));
-            }else{
+            } else {
                 list.set(desc, std::move(values));
             }
         }
@@ -236,18 +238,18 @@ namespace Serialize {
         out.beginContainerWrite(name, list.size());
         for (auto it = list.begin(); it != list.end(); ++it) {
             const Widgets::PropertyDescriptor &desc = *it;
-            
-            const char *tag = out.beginExtendedTypedWrite(desc.mType, sTags);
+
+            const char *tag = Serialize::beginExtendedTypedWrite(out, desc.mType, sTags);
 
             const char *annotator1Name = sAnnotator1Names[desc.mType];
             if (annotator1Name) {
                 out.beginExtendedWrite(tag, 1);
                 Serialize::write(out, desc.mAnnotator1, annotator1Name);
             }
-             
+
             if (desc.mType == Widgets::PropertyType::CONDITIONAL) {
                 write(out, it.conditionalRange(), tag);
-            }else{
+            } else {
                 out.writePrimitive(it.value(0), tag);
             }
         }

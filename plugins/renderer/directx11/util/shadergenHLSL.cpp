@@ -1,5 +1,7 @@
 #define NOMINMAX
+#ifdef _WIN32
 #include <Windows.h>
+#endif
 #include <dxcapi.h>
 #include <spirv_hlsl.hpp>
 
