@@ -283,21 +283,24 @@ namespace Widgets {
         if (mDragStartEvent.button != arg.button)
             return false;
 
-        assert(mFocusedWidget);
+        if (mFocusedWidget) {
 
-        Vector2i pos = mFocusedWidget->getAbsolutePosition().floor();
-        arg.windowPosition = arg.windowPosition - InterfacesVector { pos.x, pos.y };
-        if (mDragging) {
-            if (!mDraggingAborted)
-                mFocusedWidget->injectDragEnd(arg);
-            mDragging = false;
-        } else {
-            mFocusedWidget->injectPointerClick(arg);
+            Vector2i pos = mFocusedWidget->getAbsolutePosition().floor();
+            arg.windowPosition = arg.windowPosition - InterfacesVector { pos.x, pos.y };
+            if (mDragging) {
+                if (!mDraggingAborted)
+                    mFocusedWidget->injectDragEnd(arg);
+                mDragging = false;
+            } else {
+                mFocusedWidget->injectPointerClick(arg);
+            }
+
+            mDragStartEvent.button = Input::MouseButton::NO_BUTTON;
+
+            return true;
         }
 
-        mDragStartEvent.button = Input::MouseButton::NO_BUTTON;
-
-        return true;
+        return false;
     }
 
     WidgetBase *WidgetManager::getHoveredWidgetUp(const Vector2 &pos, WidgetBase *current)
