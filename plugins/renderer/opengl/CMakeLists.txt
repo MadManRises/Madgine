@@ -57,8 +57,4 @@ if (BUILD_TESTING)
 	add_subdirectory(test)
 endif()
 
-add_executable(ShadergenGLSL "util/shadergenGLSL.cpp")
-
-add_shadergen_target(ShadergenGLSL)
-
-target_link_libraries(ShadergenGLSL spirv-cross-core spirv-cross-glsl)
+add_shadergen_target(OpenGL -GLSL)

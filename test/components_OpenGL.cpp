@@ -1,24 +1,6 @@
 #include "Modules/moduleslib.h"
 #include "Modules/uniquecomponent/uniquecomponent.h"
 #include "Modules/uniquecomponent/uniquecomponentregistry.h"
-#if defined(BUILD_Widgets)
-#include "Madgine/widgetslib.h"
-#endif
-#if defined(BUILD_FontLoader)
-#include "Madgine/fontloaderlib.h"
-#endif
-#if defined(BUILD_ImageLoader)
-#include "Madgine/imageloaderlib.h"
-#endif
-#if defined(BUILD_MeshLoader)
-#include "Madgine/meshloaderlib.h"
-#endif
-#if defined(BUILD_ClientNodes)
-#include "Madgine/clientnodeslib.h"
-#endif
-#if defined(BUILD_Client)
-#include "Madgine/clientlib.h"
-#endif
 #if defined(BUILD_Root)
 #include "Madgine/rootlib.h"
 #endif
@@ -34,15 +16,39 @@
 #if defined(BUILD_NodeGraph)
 #include "Madgine/nodegraphlib.h"
 #endif
+#if defined(BUILD_Widgets)
+#include "Madgine/widgetslib.h"
+#endif
+#if defined(BUILD_MeshLoader)
+#include "Madgine/meshloaderlib.h"
+#endif
+#if defined(BUILD_ClientNodes)
+#include "Madgine/clientnodeslib.h"
+#endif
+#if defined(BUILD_ImageLoader)
+#include "Madgine/imageloaderlib.h"
+#endif
+#if defined(BUILD_FontLoader)
+#include "Madgine/fontloaderlib.h"
+#endif
+#if defined(BUILD_Client)
+#include "Madgine/clientlib.h"
+#endif
 
+#if defined(BUILD_Root)
+#include "Madgine/root/rootcomponentcollector.h"
+#endif
+#if defined(BUILD_UI)
+#include "Madgine/input/handlercollector.h"
+#endif
+#if defined(BUILD_App)
+#include "Madgine/app/globalapicollector.h"
+#endif
 #if defined(BUILD_Resources)
 #include "Madgine/resources/resourceloadercollector.h"
 #endif
-#if defined(BUILD_FontLoader) && defined(BUILD_Resources)
-#include "Madgine/fontloader/fontloader.h"
-#endif
-#if defined(BUILD_ImageLoader) && defined(BUILD_Resources)
-#include "Madgine/imageloader/imageloader.h"
+#if defined(BUILD_Root) && defined(BUILD_Resources)
+#include "Madgine/resources/resourcemanager.h"
 #endif
 #if defined(BUILD_TestShared)
 #include "uniquecomponent/uniquecomponentshared.h"
@@ -53,39 +59,11 @@
 #if defined(BUILD_TestShared) && defined(BUILD_LibB)
 #include "uniquecomponent/libB.h"
 #endif
-#if defined(BUILD_MeshLoader) && defined(BUILD_Resources)
-#include "Madgine/meshloader/meshloader.h"
-#endif
-#if defined(BUILD_Client)
-#include "Madgine/render/rendercontextcollector.h"
-#include "Madgine/window/mainwindowcomponentcollector.h"
-#endif
-#if defined(BUILD_Client) && defined(BUILD_Widgets)
-#include "Madgine/widgets/widgetmanager.h"
-#endif
-#if defined(BUILD_Client) && defined(BUILD_Resources)
-#include "Madgine/render/shadinglanguage/slloader.h"
-#endif
-#if defined(BUILD_Root)
-#include "Madgine/root/rootcomponentcollector.h"
-#endif
-#if defined(BUILD_Root) && defined(BUILD_Resources)
-#include "Madgine/resources/resourcemanager.h"
-#endif
-#if defined(BUILD_UI)
-#include "Madgine/input/handlercollector.h"
-#endif
-#if defined(BUILD_App)
-#include "Madgine/app/globalapicollector.h"
-#endif
 #if defined(BUILD_OpenGL) && defined(BUILD_Resources)
 #include "OpenGL/openglmeshloader.h"
 #include "OpenGL/openglpipelineloader.h"
 #include "OpenGL/openglshaderloader.h"
 #include "OpenGL/opengltextureloader.h"
-#endif
-#if defined(BUILD_Client) && defined(BUILD_OpenGL)
-#include "OpenGL/openglrendercontext.h"
 #endif
 #if defined(BUILD_NodeGraph)
 #include "Madgine/nodegraph/nodecollector.h"
@@ -100,11 +78,30 @@
 #if defined(BUILD_NodeGraph) && defined(BUILD_Resources)
 #include "Madgine/nodegraph/nodegraphloader.h"
 #endif
-#if defined(BUILD_ClientNodes) && defined(BUILD_NodeGraph)
+#if defined(BUILD_MeshLoader) && defined(BUILD_Resources)
+#include "Madgine/meshloader/meshloader.h"
+#endif
+#if defined(BUILD_NodeGraph) && defined(BUILD_ClientNodes)
 #include "Madgine/client/nodes/framebuffernode.h"
 #include "Madgine/client/nodes/gpubuffernode.h"
 #include "Madgine/client/nodes/meshrenderernode.h"
 #include "Madgine/client/nodes/rasterizernode.h"
+#endif
+#if defined(BUILD_ImageLoader) && defined(BUILD_Resources)
+#include "Madgine/imageloader/imageloader.h"
+#endif
+#if defined(BUILD_FontLoader) && defined(BUILD_Resources)
+#include "Madgine/fontloader/fontloader.h"
+#endif
+#if defined(BUILD_Client)
+#include "Madgine/render/rendercontextcollector.h"
+#include "Madgine/window/mainwindowcomponentcollector.h"
+#endif
+#if defined(BUILD_OpenGL) && defined(BUILD_Client)
+#include "OpenGL/openglrendercontext.h"
+#endif
+#if defined(BUILD_Widgets) && defined(BUILD_Client)
+#include "Madgine/widgets/widgetmanager.h"
 #endif
 
 
@@ -150,9 +147,6 @@ std::vector<Engine::Resources::ResourceLoaderRegistry::F> Engine::Resources::Res
 {
 	return {
 #endif
-#if defined(BUILD_Client) && defined(BUILD_Resources)
-		UniqueComponent::createComponent<Engine::Render::SlLoader>,
-#endif
 #if defined(BUILD_NodeGraph) && defined(BUILD_Resources)
 		UniqueComponent::createComponent<Engine::NodeGraph::NodeGraphLoader>,
 #endif
@@ -186,17 +180,6 @@ std::vector<Engine::Resources::ResourceLoaderRegistry::F> Engine::Resources::Res
 
 #    define ACC 0
 
-#endif
-#if defined(BUILD_Client) && defined(BUILD_Resources)
-constexpr size_t CollectorBaseIndex_ResourceLoaderBase_Client = ACC;
-#endif
-#if defined(BUILD_Client) && defined(BUILD_Resources)
-template <>
-size_t UniqueComponent::component_index<Engine::Render::SlLoader>() { return CollectorBaseIndex_ResourceLoaderBase_Client + 0; }
-#endif
-#if defined(BUILD_Client) && defined(BUILD_Resources)
-#        undef ACC
-#        define ACC CollectorBaseIndex_ResourceLoaderBase_Client + 1
 #endif
 #if defined(BUILD_NodeGraph) && defined(BUILD_Resources)
 constexpr size_t CollectorBaseIndex_ResourceLoaderBase_NodeGraph = ACC;
@@ -288,7 +271,7 @@ std::vector<Engine::Render::RenderContextRegistry::F> Engine::Render::RenderCont
 {
 	return {
 #endif
-#if defined(BUILD_Client) && defined(BUILD_OpenGL)
+#if defined(BUILD_OpenGL) && defined(BUILD_Client)
 		UniqueComponent::createComponent<Engine::Render::OpenGLRenderContext>,
 #endif
 #if defined(BUILD_Client)
@@ -301,14 +284,14 @@ std::vector<Engine::Render::RenderContextRegistry::F> Engine::Render::RenderCont
 #    define ACC 0
 
 #endif
-#if defined(BUILD_Client) && defined(BUILD_OpenGL)
+#if defined(BUILD_OpenGL) && defined(BUILD_Client)
 constexpr size_t CollectorBaseIndex_RenderContext_OpenGL = ACC;
 #endif
-#if defined(BUILD_Client) && defined(BUILD_OpenGL)
+#if defined(BUILD_OpenGL) && defined(BUILD_Client)
 template <>
 size_t UniqueComponent::component_index<Engine::Render::OpenGLRenderContext>() { return CollectorBaseIndex_RenderContext_OpenGL + 0; }
 #endif
-#if defined(BUILD_Client) && defined(BUILD_OpenGL)
+#if defined(BUILD_OpenGL) && defined(BUILD_Client)
 #        undef ACC
 #        define ACC CollectorBaseIndex_RenderContext_OpenGL + 1
 #endif
@@ -323,7 +306,7 @@ std::vector<Engine::Window::MainWindowComponentRegistry::F> Engine::Window::Main
 {
 	return {
 #endif
-#if defined(BUILD_Client) && defined(BUILD_Widgets)
+#if defined(BUILD_Widgets) && defined(BUILD_Client)
 		UniqueComponent::createComponent<Engine::Widgets::WidgetManager>,
 #endif
 #if defined(BUILD_Client)
@@ -336,14 +319,14 @@ std::vector<Engine::Window::MainWindowComponentRegistry::F> Engine::Window::Main
 #    define ACC 0
 
 #endif
-#if defined(BUILD_Client) && defined(BUILD_Widgets)
+#if defined(BUILD_Widgets) && defined(BUILD_Client)
 constexpr size_t CollectorBaseIndex_MainWindowComponentBase_Widgets = ACC;
 #endif
-#if defined(BUILD_Client) && defined(BUILD_Widgets)
+#if defined(BUILD_Widgets) && defined(BUILD_Client)
 template <>
 size_t UniqueComponent::component_index<Engine::Widgets::WidgetManager>() { return CollectorBaseIndex_MainWindowComponentBase_Widgets + 0; }
 #endif
-#if defined(BUILD_Client) && defined(BUILD_Widgets)
+#if defined(BUILD_Widgets) && defined(BUILD_Client)
 #        undef ACC
 #        define ACC CollectorBaseIndex_MainWindowComponentBase_Widgets + 1
 #endif
@@ -400,16 +383,16 @@ std::vector<Engine::NodeGraph::NodeBaseRegistry::F> Engine::NodeGraph::NodeBaseR
 {
 	return {
 #endif
-#if defined(BUILD_ClientNodes) && defined(BUILD_NodeGraph)
+#if defined(BUILD_NodeGraph) && defined(BUILD_ClientNodes)
 		UniqueComponent::createComponent<Engine::Render::GPUBufferNode>,
 #endif
-#if defined(BUILD_ClientNodes) && defined(BUILD_NodeGraph)
+#if defined(BUILD_NodeGraph) && defined(BUILD_ClientNodes)
 		UniqueComponent::createComponent<Engine::Render::FrameBufferNode>,
 #endif
-#if defined(BUILD_ClientNodes) && defined(BUILD_NodeGraph)
+#if defined(BUILD_NodeGraph) && defined(BUILD_ClientNodes)
 		UniqueComponent::createComponent<Engine::Render::MeshRendererNode>,
 #endif
-#if defined(BUILD_ClientNodes) && defined(BUILD_NodeGraph)
+#if defined(BUILD_NodeGraph) && defined(BUILD_ClientNodes)
 		UniqueComponent::createComponent<Engine::Render::RasterizerNode>,
 #endif
 #if defined(BUILD_NodeGraph)
@@ -443,26 +426,26 @@ std::vector<Engine::NodeGraph::NodeBaseRegistry::F> Engine::NodeGraph::NodeBaseR
 #    define ACC 0
 
 #endif
-#if defined(BUILD_ClientNodes) && defined(BUILD_NodeGraph)
+#if defined(BUILD_NodeGraph) && defined(BUILD_ClientNodes)
 constexpr size_t CollectorBaseIndex_NodeBase_ClientNodes = ACC;
 #endif
-#if defined(BUILD_ClientNodes) && defined(BUILD_NodeGraph)
+#if defined(BUILD_NodeGraph) && defined(BUILD_ClientNodes)
 template <>
 size_t UniqueComponent::component_index<Engine::Render::GPUBufferNode>() { return CollectorBaseIndex_NodeBase_ClientNodes + 0; }
 #endif
-#if defined(BUILD_ClientNodes) && defined(BUILD_NodeGraph)
+#if defined(BUILD_NodeGraph) && defined(BUILD_ClientNodes)
 template <>
 size_t UniqueComponent::component_index<Engine::Render::FrameBufferNode>() { return CollectorBaseIndex_NodeBase_ClientNodes + 1; }
 #endif
-#if defined(BUILD_ClientNodes) && defined(BUILD_NodeGraph)
+#if defined(BUILD_NodeGraph) && defined(BUILD_ClientNodes)
 template <>
 size_t UniqueComponent::component_index<Engine::Render::MeshRendererNode>() { return CollectorBaseIndex_NodeBase_ClientNodes + 2; }
 #endif
-#if defined(BUILD_ClientNodes) && defined(BUILD_NodeGraph)
+#if defined(BUILD_NodeGraph) && defined(BUILD_ClientNodes)
 template <>
 size_t UniqueComponent::component_index<Engine::Render::RasterizerNode>() { return CollectorBaseIndex_NodeBase_ClientNodes + 3; }
 #endif
-#if defined(BUILD_ClientNodes) && defined(BUILD_NodeGraph)
+#if defined(BUILD_NodeGraph) && defined(BUILD_ClientNodes)
 #        undef ACC
 #        define ACC CollectorBaseIndex_NodeBase_ClientNodes + 4
 #endif
@@ -512,16 +495,16 @@ std::map<std::string_view, size_t> Engine::NodeGraph::NodeRegistry::sComponentsB
 {
 	return {
 #endif
-#if defined(BUILD_ClientNodes) && defined(BUILD_NodeGraph)
+#if defined(BUILD_NodeGraph) && defined(BUILD_ClientNodes)
 		{"GPUBufferNode", CollectorBaseIndex_NodeBase_ClientNodes + 0},
 #endif
-#if defined(BUILD_ClientNodes) && defined(BUILD_NodeGraph)
+#if defined(BUILD_NodeGraph) && defined(BUILD_ClientNodes)
 		{"FrameBufferNode", CollectorBaseIndex_NodeBase_ClientNodes + 1},
 #endif
-#if defined(BUILD_ClientNodes) && defined(BUILD_NodeGraph)
+#if defined(BUILD_NodeGraph) && defined(BUILD_ClientNodes)
 		{"MeshRendererNode", CollectorBaseIndex_NodeBase_ClientNodes + 2},
 #endif
-#if defined(BUILD_ClientNodes) && defined(BUILD_NodeGraph)
+#if defined(BUILD_NodeGraph) && defined(BUILD_ClientNodes)
 		{"RasterizerNode", CollectorBaseIndex_NodeBase_ClientNodes + 3},
 #endif
 #if defined(BUILD_NodeGraph)

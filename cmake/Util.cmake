@@ -65,6 +65,16 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 	cmake_log("Build Compiler Clang")
 endif()
 
+if (CMAKE_CROSSCOMPILING)
+    if (CMAKE_HOST_WIN32)
+		set(HOST_EXECUTABLE_SUFFIX ".exe")
+    else()
+		set(HOST_EXECUTABLE_SUFFIX "")
+    endif()
+else()
+    set(HOST_EXECUTABLE_SUFFIX ${CMAKE_EXECUTABLE_SUFFIX})
+endif()
+
 set (CMAKE_CXX_VISIBILITY_PRESET hidden)
 set (CMAKE_C_VISIBILITY_PRESET hidden)
 
