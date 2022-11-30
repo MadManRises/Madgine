@@ -36,32 +36,32 @@ if (CMAKE_BUILD_TYPE STREQUAL "")
 endif()
 
 if (WIN32)
-	set (WINDOWS 1)
+	set (WINDOWS 1 CACHE INTERNAL "")
 	cmake_log("Build Platform Windows")
 endif()
 
 if (CMAKE_ANDROID_ARCH_ABI)
-	set (ANDROID 1)
+	set (ANDROID 1 CACHE INTERNAL "")
 	cmake_log("Build Platform Android")
 endif()
 
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-	set (LINUX 1)
+	set (LINUX 1 CACHE INTERNAL "")
 	cmake_log("Build Platform Linux")
 endif()
 
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
-	set (OSX 1)
+	set (OSX 1 CACHE INTERNAL "")
 	cmake_log("Build Platform OSX")
 endif() 
   
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	set(GCC 1)
+	set(GCC 1 CACHE INTERNAL "")
 	cmake_log("Build Compiler Gcc")
 endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-	set(CLANG 1)
+	set(CLANG 1 CACHE INTERNAL "")
 	cmake_log("Build Compiler Clang")
 endif()
 
