@@ -13,6 +13,9 @@ endif (OSX)
 if (IOS)
 	FolderSources(sources "" ios ios_main.mm)
 endif (IOS)
+if (WINDOWS)
+	FolderSources(sources "" windows windows_main.cpp)
+endif (WINDOWS)
 
 add_workspace_application(MadgineLauncher ${sources})
 

@@ -26,7 +26,7 @@ int desktopMain(int argc, char **argv)
     }
 }
 
-#if !EMSCRIPTEN && !OSX && !IOS
+#if !EMSCRIPTEN && !OSX && !IOS && !WINDOWS
 DLL_EXPORT_TAG int main(int argc, char **argv)
 {
     return desktopMain(argc, argv);
