@@ -19,5 +19,15 @@ namespace Root {
             return static_cast<T&>(getRootComponent(Engine::UniqueComponent::component_index<T>()));
         }
     };
+
+    template <typename T>
+    struct VirtualRootComponentBase : RootComponentVirtualBase<T> {
+        using RootComponentVirtualBase<T>::RootComponentVirtualBase;
+
+        static T &getSingleton()
+        {
+            return static_cast<T &>(getRootComponent(Engine::UniqueComponent::component_index<T>()));
+        }
+    };
 }
 }
