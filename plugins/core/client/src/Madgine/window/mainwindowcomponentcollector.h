@@ -19,7 +19,7 @@ namespace Window {
     using MainWindowVirtualBase = Serialize::VirtualData<T, MainWindowComponentVirtualBase<T>>;
 
     template <typename T, typename Base>
-    using MainWindowVirtualImpl = UniqueComponent::VirtualComponentImpl<T, Base>;
+    using MainWindowVirtualImpl = MainWindowComponentVirtualImpl<T, Base>;
 
 }
 }
