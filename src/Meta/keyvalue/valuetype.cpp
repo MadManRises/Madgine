@@ -92,6 +92,11 @@ std::string ValueType::toShortString() const
             ss << c;
             return ss.str();
         },
+        [](const Color4 &c) {
+            std::ostringstream ss;
+            ss << c;
+            return ss.str();
+        },
         [](const Quaternion &q) {
             std::ostringstream ss;
             ss << q;
@@ -231,6 +236,7 @@ void ValueType::call(ValueType &retVal, const ArgumentList &args) const
 ValueTypeRef::ValueTypeRef(ValueTypeRef &&other)
     : mValue(std::move(other.mValue))
     , mData(std::exchange(other.mData, nullptr))
+    , mSetter(std::exchange(other.mSetter, nullptr))
 {
 }
 
@@ -246,7 +252,7 @@ ValueTypeRef::operator const ValueType &() const
 
 bool ValueTypeRef::isEditable() const
 {
-    return mData != nullptr;
+    return mSetter != nullptr;
 }
 
 ValueTypeRef &ValueTypeRef::operator=(const ValueType &v)
@@ -255,14 +261,7 @@ ValueTypeRef &ValueTypeRef::operator=(const ValueType &v)
         std::terminate();
 
     mValue = v;
-    mValue.visit(overloaded {
-#define VALUETYPE_SEP ,
-#define VALUETYPE_TYPE(Name, Storage, T, ...)       \
-    [this](T t) {                                   \
-        *static_cast<std::decay_t<T> *>(mData) = t; \
-    }
-#include "valuetypedefinclude.h"
-    });
+    mSetter(mData, mValue);
 
     return *this;
 }
@@ -271,6 +270,7 @@ ValueTypeRef &ValueTypeRef::operator=(ValueTypeRef &&other)
 {
     mValue = std::move(other.mValue);
     mData = std::exchange(other.mData, nullptr);
+    mSetter = std::exchange(other.mSetter, nullptr);
     return *this;
 }
 

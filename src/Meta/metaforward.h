@@ -154,6 +154,7 @@ struct Vector3i;
 struct Vector4i;
 
 struct Color3;
+struct Color4;
 
 struct Rect2i;
 

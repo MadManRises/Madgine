@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../math/color3.h"
+#include "../math/color4.h"
 #include "../math/matrix3.h"
 #include "../math/matrix4.h"
 #include "../math/quaternion.h"
@@ -163,13 +164,9 @@ struct META_EXPORT ValueTypeRef {
 
 private:
     template <typename T>
-    void *toPtrHelper(T &&val)
+    static void setterHelper(void *object, const ValueType &value)
     {
-        if constexpr (!std::is_reference_v<T> || std::is_const_v<std::remove_reference_t<T>>) {
-            return nullptr;
-        } else {
-            return &val;
-        }
+        *static_cast<T *>(object) = ValueType_as<T>(value);
     }
 
 public:
@@ -178,7 +175,8 @@ public:
     template <typename T>
     explicit ValueTypeRef(T &&val)
         : mValue(std::forward<T>(val))
-        , mData(toPtrHelper(convert_ValueType<false>(std::forward<T>(val))))
+        , mData(std::is_reference_v<T> ? &val : nullptr)
+        , mSetter(std::is_reference_v<T> ? setterHelper<std::remove_reference_t<T>> : nullptr)
     {
     }
 
@@ -201,6 +199,7 @@ public:
 private:
     ValueType mValue;
     void *mData = nullptr;
+    void (*mSetter)(void *, const ValueType &) = nullptr;
 };
 
 template <typename T>
