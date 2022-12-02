@@ -68,6 +68,10 @@ struct IMGUI_API ValueTypeDrawer {
     static bool draw(const Engine::Filesystem::Path &p);
     static bool draw(Engine::EnumHolder &e);
     static bool draw(const Engine::EnumHolder &e);
+    static bool draw(Engine::Color3 &c);
+    static bool draw(const Engine::Color3 &c);
+    static bool draw(Engine::Color4 &c);
+    static bool draw(const Engine::Color4 &c);
 };
 
 IMGUI_API void setPayloadStatus(std::string_view s);

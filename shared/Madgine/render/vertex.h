@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Generic/compound.h"
-#include "Meta/math/vector4.h"
+#include "Meta/math/color4.h"
 
 namespace Engine {
 namespace Render {
@@ -27,8 +27,8 @@ namespace Render {
     };
 
     struct VertexColor {
-        using ctor = Vector4;
-        Vector4 mColor;
+        using ctor = Color4;
+        Color4 mColor;
     };
 
     struct VertexUV {

@@ -14,7 +14,7 @@ namespace Im3D {
     struct Parameters {
         Engine::Matrix4 mTransform = Engine::Matrix4::IDENTITY;
         std::chrono::microseconds mDuration = {};
-        Engine::Vector4 mColor = { 1, 1, 1, 1 };
+        Engine::Color4 mColor = { 1, 1, 1, 1 };
 
         operator const MeshParameters &() const
         {
@@ -25,8 +25,8 @@ namespace Im3D {
     struct LineParameters {
         Engine::Matrix4 mTransform = Engine::Matrix4::IDENTITY;
         std::chrono::microseconds mDuration = {};
-        Engine::Vector4 mColorA = { 1, 1, 1, 1 };
-        Engine::Vector4 mColorB = mColorA;
+        Engine::Color4 mColorA = { 1, 1, 1, 1 };
+        Engine::Color4 mColorB = mColorA;
 
         operator const MeshParameters &() const
         {
@@ -37,7 +37,7 @@ namespace Im3D {
     struct SphereParameters {
         Engine::Matrix4 mTransform = Engine::Matrix4::IDENTITY;
         std::chrono::microseconds mDuration = {};
-        Engine::Vector4 mColor = { 1, 1, 1, 1 };
+        Engine::Color4 mColor = { 1, 1, 1, 1 };
         size_t mDetail = 2;
 
         operator const MeshParameters &() const
@@ -49,7 +49,7 @@ namespace Im3D {
     struct TextParameters {
         Engine::Matrix4 mTransform = Engine::Matrix4::IDENTITY;
         std::chrono::microseconds mDuration = {};
-        Engine::Vector4 mColor = { 1, 1, 1, 1 };
+        Engine::Color4 mColor = { 1, 1, 1, 1 };
         float mFontSize = 24;
         bool mFacingX = true;
         bool mFacingY = true;

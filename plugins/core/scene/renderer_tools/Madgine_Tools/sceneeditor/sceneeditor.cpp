@@ -434,7 +434,7 @@ namespace Tools {
         }
 
         if (Engine::Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> t = entity->getComponent<Scene::Entity::Transform>()) {
-            constexpr Vector4 colors[] = {
+            constexpr Color4 colors[] = {
                 { 0.5f, 0, 0, 0.7f },
                 { 0, 0.5f, 0, 0.7f },
                 { 0, 0, 0.5f, 0.7f }

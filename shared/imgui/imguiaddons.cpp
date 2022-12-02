@@ -395,6 +395,26 @@ bool ValueTypeDrawer::draw(const Engine::EnumHolder &e)
     return false;
 }
 
+bool ValueTypeDrawer::draw(Engine::Color3 &c)
+{
+    return ColorEdit3("##ValueTypeDrawer", c.ptr(), ImGuiColorEditFlags_NoInputs);
+}
+
+bool ValueTypeDrawer::draw(const Engine::Color3 &c)
+{
+    return ColorEdit3("##ValueTypeDrawer", const_cast<float*>(c.ptr()), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoPicker);
+}
+
+bool ValueTypeDrawer::draw(Engine::Color4 &c)
+{
+    return ColorEdit4("##ValueTypeDrawer", c.ptr(), ImGuiColorEditFlags_NoInputs);
+}
+
+bool ValueTypeDrawer::draw(const Engine::Color4 &c)
+{
+    return ColorEdit4("##ValueTypeDrawer", const_cast<float *>(c.ptr()), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoPicker);
+}
+
 void setPayloadStatus(std::string_view msg)
 {
     if (ImGui::GetIO().KeyShift)
