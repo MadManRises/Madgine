@@ -391,7 +391,7 @@ namespace Tools {
 
         if (ImGui::BeginPopupCompoundContextWindow()) {
             if (ImGui::BeginMenu(IMGUI_ICON_PLUS " Add Component")) {
-                for (const std::pair<const std::string_view, size_t> &componentDesc : Scene::Entity::EntityComponentRegistry::sComponentsByName()) {
+                for (const std::pair<const std::string_view, IndexType<uint32_t>> &componentDesc : Scene::Entity::EntityComponentRegistry::sComponentsByName()) {
                     if (!entity->hasComponent(componentDesc.first)) {
                         if (ImGui::MenuItem(componentDesc.first.data())) {
                             entity->addComponent(componentDesc.first);
