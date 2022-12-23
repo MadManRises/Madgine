@@ -52,8 +52,7 @@ namespace Threading {
     {
         std::unique_lock<std::mutex> lock(mMutex);
 
-        auto cond = [this]() { return !mQueue.empty() || !mRunning; };
-        mCv.wait_until(lock, until, cond);
+        mCv.wait_until(lock, until);
     }
 
     bool TaskQueue::running() const
