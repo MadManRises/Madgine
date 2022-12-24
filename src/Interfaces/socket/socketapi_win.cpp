@@ -118,11 +118,14 @@ SocketAPIResult Socket::open(int port)
     return SocketAPIResult::SUCCESS;
 }
 
-std::pair<Socket, SocketAPIResult> Socket::accept(TimeOut timeout) const
+SocketAPIResult Socket::accept(const Socket &from, TimeOut timeout)
 {
+    if (*this)
+        return SocketAPIResult::ALREADY_IN_USE;
+
     fd_set readSet;
     FD_ZERO(&readSet);
-    FD_SET(mSocket, &readSet);
+    FD_SET(from.mSocket, &readSet);
     timeval timeout_s;
     timeval *timeout_p = &timeout_s;
     if (timeout.isInfinite()) {
@@ -135,25 +138,23 @@ std::pair<Socket, SocketAPIResult> Socket::accept(TimeOut timeout) const
         timeout_s.tv_sec = static_cast<long>(remainder.count()) / 1000;
         timeout_s.tv_usec = static_cast<long>(remainder.count()) % 1000 * 1000;
     }
-    if (int error = select(static_cast<int>(mSocket), &readSet, nullptr, nullptr, timeout_p); error <= 0) {
+    if (int error = select(static_cast<int>(from.mSocket), &readSet, nullptr, nullptr, timeout_p); error <= 0) {
         if (error == 0)
-            return { Socket {}, SocketAPIResult::TIMEOUT };
+            return SocketAPIResult::TIMEOUT;
         else
-            return { Socket {}, SocketAPI::getError("select") };
+            return SocketAPI::getError("select");
     }
 
-    SOCKET s = ::accept(mSocket, nullptr, nullptr);
-    assert(s != INVALID_SOCKET);
-    Socket sock;
-    sock.mSocket = s;
+    mSocket = ::accept(from.mSocket, nullptr, nullptr);
+    assert(mSocket != INVALID_SOCKET);
 
     u_long iMode = 1;
-    if (ioctlsocket(s, FIONBIO, &iMode) == SOCKET_ERROR) {
+    if (ioctlsocket(mSocket, FIONBIO, &iMode) == SOCKET_ERROR) {
         SocketAPIResult result = SocketAPI::getError("accept");
-        sock.close();
-        return { std::move(sock), result };
+        close();
+        return result;
     }
-    return { std::move(sock), SocketAPIResult::SUCCESS };
+    return SocketAPIResult::SUCCESS;
 }
 
 SocketAPIResult Socket::connect(std::string_view url, int portNr)

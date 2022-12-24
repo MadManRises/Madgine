@@ -88,16 +88,15 @@ namespace Network {
     {
         int count = 0;
         if (isServer()) {
-            SocketAPIResult error;
             Socket sock;
-            std::tie(sock, error) = mServerSocket.accept(timeout);
+            SocketAPIResult error = sock.accept(mServerSocket, timeout);
             while (error != SocketAPIResult::TIMEOUT && (limit == -1 || count < limit)) {
                 if (sock) {
                     if (addMasterStream(Serialize::FormattedBufferedStream { format(), std::make_unique<Engine::Serialize::buffered_streambuf>(std::make_unique<NetworkBuffer>(std::move(sock))), createStreamData() }) == Serialize::SyncManagerResult::SUCCESS) {
                         ++count;
                     }
                 }
-                std::tie(sock, error) = mServerSocket.accept(timeout);
+                error = sock.accept(mServerSocket, timeout);
             }
         }
         return count;
@@ -108,9 +107,8 @@ namespace Network {
         if (!isServer())
             return NetworkManagerResult::NO_SERVER;
 
-        SocketAPIResult error;
         Socket sock;
-        std::tie(sock, error) = mServerSocket.accept(timeout);
+        SocketAPIResult error = sock.accept(mServerSocket, timeout);
         if (!sock)
             return recordSocketError(error);
 

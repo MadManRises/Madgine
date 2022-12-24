@@ -35,7 +35,7 @@ struct INTERFACES_EXPORT Socket {
     int send(const char *buf, size_t len) const;
     int recv(char *buf, size_t len) const;
 
-    std::pair<Socket, SocketAPIResult> accept(TimeOut timeout = {}) const;
+    SocketAPIResult accept(const Socket &from, TimeOut timeout = {});
 
     int in_available() const;
 
