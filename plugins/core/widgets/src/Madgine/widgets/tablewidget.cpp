@@ -23,7 +23,7 @@ SERIALIZETABLE_END(Engine::Widgets::TableWidget)
 namespace Engine {
 namespace Widgets {
 
-    void TableWidget::setRowCount(size_t count)
+    void TableWidget::setRowCount(uint32_t count)
     {
 
         if (mRowCount != count) {
@@ -34,7 +34,7 @@ namespace Widgets {
         }
     }
 
-    void TableWidget::setColumnCount(size_t count)
+    void TableWidget::setColumnCount(uint32_t count)
     {
         size_t oldColumnCount = columnCount();
         if (oldColumnCount != count) {
@@ -59,12 +59,12 @@ namespace Widgets {
         }
     }
 
-    size_t TableWidget::rowCount() const
+    uint32_t TableWidget::rowCount() const
     {
         return mRowCount;
     }
 
-    size_t TableWidget::columnCount() const
+    uint32_t TableWidget::columnCount() const
     {
         return mColumnConfigs.size();
     }

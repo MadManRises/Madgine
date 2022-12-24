@@ -77,12 +77,12 @@ namespace Widgets {
         return WidgetClass::TABBAR;
     }
 
-    size_t TabBar::tabCount() const
+    uint32_t TabBar::tabCount() const
     {
         return mTabNames.size();
     }
 
-    void TabBar::setTabCount(size_t count)
+    void TabBar::setTabCount(uint32_t count)
     {
         mTabNames.resize(count);
         applyGeometry();

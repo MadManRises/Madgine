@@ -23,8 +23,8 @@ namespace Widgets {
 
         virtual void sizeChanged(const Vector3i &pixelSize) override;
 
-        size_t tabCount() const;
-        void setTabCount(size_t count);
+        uint32_t tabCount() const;
+        void setTabCount(uint32_t count);
 
         uint32_t selectedTab() const;
 

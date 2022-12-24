@@ -17,11 +17,11 @@ namespace Widgets {
         using Widget::Widget;
         virtual ~TableWidget() = default;
 
-        void setRowCount(size_t count);
-        void setColumnCount(size_t count);
+        void setRowCount(uint32_t count);
+        void setColumnCount(uint32_t count);
 
-        size_t rowCount() const;
-        size_t columnCount() const;
+        uint32_t rowCount() const;
+        uint32_t columnCount() const;
 
         std::vector<ExplicitLayoutConfig> columnConfigs() const;
         void setColumnConfigs(const std::vector<ExplicitLayoutConfig> &configs);
@@ -42,7 +42,7 @@ namespace Widgets {
 
         std::vector<std::string> mCellData;
 
-        size_t mRowCount = 0;        
+        uint32_t mRowCount = 0;        
         std::vector<ExplicitLayoutConfig> mColumnConfigs;
     };
 }
