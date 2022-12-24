@@ -110,7 +110,7 @@ namespace Widgets {
         void onActivate(bool active);
 
     private:
-        std::set<WidgetBase *> mWidgets;
+        std::vector<WidgetBase *> mWidgets;
 
         std::vector<std::unique_ptr<WidgetBase>> mTopLevelWidgets;
 

@@ -378,9 +378,8 @@ namespace Widgets {
         return min.x <= point.x && min.y <= point.y && max.x >= point.x && max.y >= point.y;
     }
 
-    std::vector<std::pair<std::vector<Vertex>, TextureSettings>> WidgetBase::vertices(const Vector3 &screenSize, size_t layer)
+    void WidgetBase::vertices(WidgetsRenderData &renderData, size_t layer)
     {
-        return {};
     }
 
     Serialize::StreamResult WidgetBase::readWidget(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget)

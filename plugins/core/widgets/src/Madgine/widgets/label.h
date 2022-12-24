@@ -12,7 +12,7 @@ namespace Widgets {
 
         virtual WidgetClass getClass() const override;
 
-        std::vector<std::pair<std::vector<Vertex>, TextureSettings>> vertices(const Vector3 &screenSize, size_t layer) override;
+        void vertices(WidgetsRenderData &renderData, size_t layer) override;
 
         TextRenderData mTextRenderData;
         std::string mText;

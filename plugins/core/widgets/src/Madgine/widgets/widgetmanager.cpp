@@ -17,7 +17,9 @@
 #include "image.h"
 #include "label.h"
 #include "scenewindow.h"
+#include "tablewidget.h"
 #include "textbox.h"
+#include "tabbar.h"
 
 #include "Madgine/imageloader/imagedata.h"
 
@@ -65,7 +67,9 @@ namespace Widgets {
         "Button",
         "Label",
         "Bar",
-        "Image"
+        "Image",
+        "TableWidget",
+        "TabBar"
     };
 
     static float sDragDistanceThreshold = 2.0f;
@@ -177,6 +181,7 @@ namespace Widgets {
     template std::unique_ptr<Textbox> WidgetManager::create<Textbox>(WidgetBase *);
     template std::unique_ptr<SceneWindow> WidgetManager::create<SceneWindow>(WidgetBase *);
     template std::unique_ptr<Image> WidgetManager::create<Image>(WidgetBase *);
+    template std::unique_ptr<TableWidget> WidgetManager::create<TableWidget>(WidgetBase *);
 
     template <typename WidgetType>
     WidgetType *WidgetManager::createTopLevel()
@@ -210,6 +215,10 @@ namespace Widgets {
             return create<SceneWindow>(parent);
         case WidgetClass::IMAGE:
             return create<Image>(parent);
+        case WidgetClass::TABLEWIDGET:
+            return create<TableWidget>(parent);
+        case WidgetClass::TABBAR:
+            return create<TabBar>(parent);
         default:
             std::terminate();
         }
@@ -320,7 +329,7 @@ namespace Widgets {
                 }
             }
         } else {
-            if (!mModalWidgetList.empty()){
+            if (!mModalWidgetList.empty()) {
                 assert(mModalWidgetList.front()->mVisible);
                 return getHoveredWidgetDown(pos, mModalWidgetList.front());
             }
@@ -465,13 +474,12 @@ namespace Widgets {
 
     void WidgetManager::registerWidget(WidgetBase *w)
     {
-        auto pib = mWidgets.insert(w);
-        assert(pib.second);
+        mWidgets.push_back(w);        
     }
 
     void WidgetManager::unregisterWidget(WidgetBase *w)
     {
-        auto count = mWidgets.erase(w);
+        auto count = std::erase(mWidgets, w);       
         assert(count == 1);
     }
 
@@ -558,26 +566,26 @@ namespace Widgets {
 
         MainWindowComponentBase::render(target, iteration);
 
-        std::map<TextureSettings, std::vector<Vertex>> vertices;
+        WidgetsRenderData renderData;
 
         for (auto [w, layer] : visibleWidgets()) {
-
-            std::vector<std::pair<std::vector<Vertex>, TextureSettings>> localVerticesList = w->vertices(Vector3 { Vector2 { mClientSpace.mSize }, 1.0f }, layer);
-
-            for (auto &[localVertices, tex] : localVerticesList) {
-                if (!localVertices.empty())
-                    std::ranges::move(localVertices, std::back_inserter(vertices[tex]));
-            }
+            w->vertices(renderData, layer);
         }
 
-        mData->mPipeline->mapParameters<WidgetsPerApplication>(0)->c = target->getClipSpaceMatrix();
+        {
+            auto perApp = mData->mPipeline->mapParameters<WidgetsPerApplication>(0);
+            perApp->c = target->getClipSpaceMatrix();
+            perApp->screenSize = Vector2 { mClientSpace.mSize };
+        }
 
-        for (auto &[tex, vertices] : vertices) {
-            assert(!vertices.empty());
+        for (auto &[tex, vertexData] : renderData.mVertexData) {
+            if (vertexData.mTriangleVertices.empty())
+                continue;
 
             {
                 auto parameters = mData->mPipeline->mapParameters<WidgetsPerObject>(2);
                 parameters->hasDistanceField = bool(tex.mFlags & TextureFlag_IsDistanceField);
+                parameters->hasTexture = true;
             }
 
             if (tex.mTexture.mTextureHandle)
@@ -585,7 +593,20 @@ namespace Widgets {
             else
                 mData->mPipeline->bindTextures({ { mData->mUIAtlasTexture->mTextureHandle, Render::TextureType_2D } });
 
-            mData->mMesh.update({ 3, std::move(vertices) });
+            mData->mMesh.update({ 3, std::move(vertexData.mTriangleVertices) });
+
+            mData->mPipeline->renderMesh(mData->mMesh);
+        }
+        if (!renderData.mLineData.mLineVertices.empty()) {
+            {
+                auto parameters = mData->mPipeline->mapParameters<WidgetsPerObject>(2);
+                parameters->hasDistanceField = false;
+                parameters->hasTexture = false;
+            }
+
+            mData->mPipeline->bindTextures({ { mData->mUIAtlasTexture->mTextureHandle, Render::TextureType_2D } });
+
+            mData->mMesh.update({ 2, std::move(renderData.mLineData.mLineVertices) });
 
             mData->mPipeline->renderMesh(mData->mMesh);
         }
@@ -637,9 +658,11 @@ namespace Widgets {
 
     const Atlas2::Entry *WidgetManager::lookUpImage(Resources::ImageLoader::Resource *image)
     {
+        if (!image)
+            return nullptr;
         auto it = mData->mUIAtlasEntries.find(image);
         if (it == mData->mUIAtlasEntries.end()) {
-            Resources::ImageLoader::Handle data = image ? image->loadData() : mData->mDefaultTexture;
+            Resources::ImageLoader::Handle data = image->loadData();
             if (!data.available()) {
                 mData->mImageLoadingTasks.emplace(std::move(data));
                 return nullptr;

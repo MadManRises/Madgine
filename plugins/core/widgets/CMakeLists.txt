@@ -5,9 +5,10 @@ Project(Widgets)
 set(sources "")
 FolderSources(sources "" src)
 	FolderSources(sources src Madgine widgetsforward.h widgetslib.h)
-		FolderSources(sources Madgine widgets bar.cpp bar.h button.cpp button.h checkbox.cpp checkbox.h classid.h combobox.cpp combobox.h condition.cpp condition.h image.cpp image.h label.cpp label.h properties.cpp properties.h scenewindow.cpp scenewindow.h textbox.cpp textbox.h widget.cpp widget.h widgetclass.h widgetmanager.cpp widgetmanager.h)
+		FolderSources(sources Madgine widgets bar.cpp bar.h button.cpp button.h checkbox.cpp checkbox.h classid.h combobox.cpp combobox.h condition.cpp condition.h image.cpp image.h label.cpp label.h properties.cpp properties.h scenewindow.cpp scenewindow.h tabbar.cpp tabbar.h tablewidget.cpp tablewidget.h textbox.cpp textbox.h widget.cpp widget.h widgetclass.h widgetmanager.cpp widgetmanager.h)
 			FolderSources(sources widgets shaders widgets.PS_hlsl widgets.VS_hlsl widgets.sl)
-			FolderSources(sources widgets util renderdata.cpp scalableimagerenderdata.cpp textrenderdata.cpp)
+			FolderSources(sources widgets util colortintrenderdata.cpp renderdata.cpp scalableimagerenderdata.cpp tabbarrenderdata.cpp textrenderdata.cpp widgetsrenderdata.cpp)
+				FolderSources(sources util layouts explicitlayoutrenderdata.cpp uniformlayoutrenderdata.cpp)
 
 add_plugin(Widgets Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/widgetslib.h)
 

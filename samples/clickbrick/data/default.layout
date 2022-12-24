@@ -13,7 +13,7 @@
                                     <Element>0.5</Element>
                                     <Element>0.5</Element>
                                 </mPivot>
-                                <mColor>[1, 1, 1]</mColor>
+                                <mColor>[1, 1, 1, 1]</mColor>
                                 <mFont>OpenSans-Regular</mFont>
                             </mTextRenderData>
                             <mImageRenderData serId=6>
@@ -64,7 +64,7 @@
                                             <Element>1</Element>
                                             <Element>0</Element>
                                         </mPivot>
-                                        <mColor>[1, 1, 1]</mColor>
+                                        <mColor>[1, 1, 1, 1]</mColor>
                                         <mFont>OpenSans-Bold</mFont>
                                     </mTextRenderData>
                                     <mChildren>
@@ -85,7 +85,7 @@
                                             <Element>0</Element>
                                             <Element>0</Element>
                                         </mPivot>
-                                        <mColor>[1, 1, 1]</mColor>
+                                        <mColor>[1, 1, 1, 1]</mColor>
                                         <mFont>OpenSans-Bold</mFont>
                                     </mTextRenderData>
                                     <mChildren>
@@ -126,7 +126,7 @@
                                     <Element>0.5</Element>
                                     <Element>0.5</Element>
                                 </mPivot>
-                                <mColor>[1, 1, 1]</mColor>
+                                <mColor>[1, 1, 1, 1]</mColor>
                                 <mFont>OpenSans-Bold</mFont>
                             </mTextRenderData>
                             <mChildren>
@@ -147,7 +147,7 @@
                                     <Element>0.5</Element>
                                     <Element>0.5</Element>
                                 </mPivot>
-                                <mColor>[1, 1, 1]</mColor>
+                                <mColor>[1, 1, 1, 1]</mColor>
                                 <mFont>OpenSans-Regular</mFont>
                             </mTextRenderData>
                             <mChildren>

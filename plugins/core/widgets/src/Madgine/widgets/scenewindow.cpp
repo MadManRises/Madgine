@@ -40,16 +40,12 @@ namespace Widgets {
         manager().removeDependency(mTarget.get());
     }
 
-    std::vector<std::pair<std::vector<Vertex>, TextureSettings>> SceneWindow::vertices(const Vector3 &screenSize, size_t layer)
+    void SceneWindow::vertices(WidgetsRenderData &renderData, size_t layer)
     {
-        Vector3 pos { getAbsolutePosition() / screenSize.xy(), static_cast<float>(depth(layer)) };
-        Vector3 size = getAbsoluteSize() / screenSize;
+        Vector3 pos { getAbsolutePosition(), static_cast<float>(depth(layer)) };
+        Vector3 size = getAbsoluteSize();
 
-        std::vector<Vertex> result;
-
-        RenderData::renderQuad(result, pos, size.xy());
-
-        return { { result, { mTarget->texture() } } };
+        renderData.mVertexData[{mTarget->texture()}].renderQuad(pos, size.xy());
     }
 
     Render::RenderTarget *SceneWindow::getRenderTarget()

@@ -23,18 +23,18 @@ float4 main(PixelShaderInput IN)
 {
     float4 texColor;
 	if (object.hasDistanceField){
-		float2 msdfUnit = 4.0/float2(512.0, 512.0);
-		float4 sample = tex.Sample(texSampler, IN.uv);
-		float sigDist = median(sample.r, sample.g, sample.b) - 0.5;
-		//sigDist *= dot(msdfUnit, float2(0.5));
-		sigDist *= 4.0;
-		float opacity = clamp(sigDist + 0.5, 0.0, 1.0);
-		texColor = lerp(float4(0,0,0,0), float4(1,1,1,1), opacity);
+		float3 sample = tex.Sample(texSampler, IN.uv).rgb;
+		float sigDist = median(sample.r, sample.g, sample.b) - 0.5;				
+		float opacity = saturate(sigDist/fwidth(sigDist) + 0.5);
+		
 		if (opacity == 0.0){
 			discard;
 		}
+		texColor = opacity;
+	} else if (object.hasTexture) {
+		texColor = tex.Sample(texSampler, IN.uv);	
 	} else {
-		texColor = tex.Sample(texSampler, IN.uv);		
+		texColor = 1;
 	}
     return IN.color * texColor;	
 }

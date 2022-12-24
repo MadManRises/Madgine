@@ -12,8 +12,7 @@
 #include "Meta/keyvalue/virtualscope.h"
 
 #include "Madgine/render/texturedescriptor.h"
-#include "util/texturesettings.h"
-#include "util/vertex.h"
+#include "util/widgetsrenderdata.h"
 
 #include "condition.h"
 #include "properties.h"
@@ -104,7 +103,7 @@ namespace Widgets {
 
         bool containsPoint(const Vector2 &point, const Rect2i &screenSpace, float extend = 0.0f) const;
 
-        virtual std::vector<std::pair<std::vector<Vertex>, TextureSettings>> vertices(const Vector3 &screenSize, size_t layer = 0);        
+        virtual void vertices(WidgetsRenderData &renderData, size_t layer = 0);        
 
         uint16_t fetchActiveConditions(std::vector<Condition *> *conditions = nullptr);
 

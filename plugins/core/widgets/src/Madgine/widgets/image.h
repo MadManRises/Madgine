@@ -10,7 +10,7 @@ namespace Widgets {
         using Widget::Widget;
         virtual ~Image() = default;
 
-        std::vector<std::pair<std::vector<Vertex>, TextureSettings>> vertices(const Vector3 &screenSize, size_t layer) override;
+        void vertices(WidgetsRenderData &renderData, size_t layer) override;
 
         virtual WidgetClass getClass() const override;
 

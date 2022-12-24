@@ -14,9 +14,13 @@ namespace Widgets {
     struct Textbox;
     struct Label;
     struct Image;
+    struct TableWidget;
+    struct TabBar;
 
     struct Geometry;
     struct GeometrySourceInfo;
+
+    struct WidgetsRenderData;
 
     FORWARD_ENUM(WidgetClass);
 

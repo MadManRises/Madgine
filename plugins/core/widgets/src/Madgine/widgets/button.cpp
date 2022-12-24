@@ -17,12 +17,14 @@ METATABLE_BEGIN_BASE(Engine::Widgets::Button, Engine::Widgets::WidgetBase)
 MEMBER(mText)
 NAMED_MEMBER(TextData, mTextRenderData)
 NAMED_MEMBER(Image, mImageRenderData)
+NAMED_MEMBER(ColorTint, mColorTintRenderData)
 METATABLE_END(Engine::Widgets::Button)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::Button, Engine::Widgets::WidgetBase)
 FIELD(mText)
 FIELD(mTextRenderData)
 FIELD(mImageRenderData)
+FIELD(mColorTintRenderData)
 SERIALIZETABLE_END(Engine::Widgets::Button)
 
 namespace Engine {
@@ -38,28 +40,22 @@ namespace Widgets {
         return mClicked;
     }
 
-    std::vector<std::pair<std::vector<Vertex>, TextureSettings>> Button::vertices(const Vector3 &screenSize, size_t layer)
+    void Button::vertices(WidgetsRenderData &renderData, size_t layer)
     {
         const Atlas2::Entry *entry = manager().lookUpImage(mImageRenderData.image());
-        if (!entry)
-            return {};
 
-        Vector3 pos { getAbsolutePosition() / screenSize.xy(), static_cast<float>(depth(layer)) };
-        Vector3 size = getAbsoluteSize() / screenSize;
+        Vector3 pos { getAbsolutePosition(), static_cast<float>(depth(layer)) };
+        Vector3 size = getAbsoluteSize();
 
-        std::vector<std::pair<std::vector<Vertex>, TextureSettings>> returnSet;
+        Color4 color = mHovered ? mColorTintRenderData.mHighlightedColor : mColorTintRenderData.mNormalColor;
 
-        Vector4 color = mHovered ? Vector4 { 1.0f, 0.1f, 0.1f, 1.0f } : Vector4 { 0.4f, 0.4f, 0.4f, 1.0f };
-
-        returnSet.push_back({ mImageRenderData.renderImage(pos, size.xy(), screenSize.xy(), *entry, color), { 0 } });
-
-        if (mTextRenderData.available()) {
-            std::pair<std::vector<Vertex>, TextureSettings> fontVertices = mTextRenderData.render(mText, pos, size, screenSize.xy());
-            if (!fontVertices.first.empty())
-                returnSet.push_back(fontVertices);
+        if (entry) {
+            mImageRenderData.renderImage(renderData, pos, size.xy(), *entry, color);
         }
 
-        return returnSet;
+        if (mTextRenderData.available()) {
+            mTextRenderData.render(renderData, mText, pos, size);
+        }
     }
 
     void Button::injectPointerEnter(const Input::PointerEventArgs &arg)

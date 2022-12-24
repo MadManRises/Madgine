@@ -21,16 +21,16 @@ SERIALIZETABLE_END(Engine::Widgets::Image)
 namespace Engine {
 namespace Widgets {
 
-    std::vector<std::pair<std::vector<Vertex>, TextureSettings>> Image::vertices(const Vector3 &screenSize, size_t layer)
+    void Image::vertices(WidgetsRenderData &renderData, size_t layer)
     {
         const Atlas2::Entry* entry = manager().lookUpImage(mImageRenderData.image());
         if (!entry)
-            return {};
+            return;
 
-        Vector3 pos { getAbsolutePosition() / screenSize.xy(), static_cast<float>(depth(layer)) };
-        Vector3 size = getAbsoluteSize() / screenSize;
+        Vector3 pos { getAbsolutePosition(), static_cast<float>(depth(layer)) };
+        Vector3 size = getAbsoluteSize();
 
-        return { { mImageRenderData.renderImage(pos, size.xy(), screenSize.xy(), *entry), { 0 } } };
+        mImageRenderData.renderImage(renderData, pos, size.xy(), *entry);
     }
 
     WidgetClass Image::getClass() const

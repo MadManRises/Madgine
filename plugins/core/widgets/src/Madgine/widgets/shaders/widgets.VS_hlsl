@@ -21,8 +21,11 @@ VertexShaderOutput main(AppData IN)
 {
     VertexShaderOutput OUT;
 
-    OUT.position = float4((IN.aPos * float3(2, -2, 0)) - float3(1, -1, 0), 1);
+
+
+    OUT.position.xy = ((IN.aPos.xy / app.screenSize) * float2(2, -2)) - float2(1, -1);
     OUT.position.z = 1.0 / (IN.aPos.z + 1.0);
+    OUT.position.w = 1.0;
     OUT.position = mul(app.c, OUT.position);
     OUT.color = IN.aColor;
     OUT.uv = IN.aUV;

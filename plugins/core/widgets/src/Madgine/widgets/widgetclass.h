@@ -12,6 +12,8 @@ namespace Widgets {
         BUTTON,
         LABEL,
         BAR,
-        IMAGE)
+        IMAGE,
+        TABLEWIDGET,
+        TABBAR)
 }
 }

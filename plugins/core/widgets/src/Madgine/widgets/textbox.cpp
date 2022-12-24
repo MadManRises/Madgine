@@ -66,31 +66,27 @@ namespace Widgets {
     {
     }
 
-    std::vector<std::pair<std::vector<Vertex>, TextureSettings>> Textbox::vertices(const Vector3 &screenSize, size_t layer)
+    void Textbox::vertices(WidgetsRenderData &renderData, size_t layer)
     {
         const Atlas2::Entry *entry = manager().lookUpImage(mImageRenderData.image());
         if (!entry)
-            return {};
+            return;
 
-        Vector3 pos { getAbsolutePosition() / screenSize.xy(), static_cast<float>(depth(layer)) };
-        Vector3 size = getAbsoluteSize() / screenSize;
+        Vector3 pos { getAbsolutePosition(), static_cast<float>(depth(layer)) };
+        Vector3 size = getAbsoluteSize();
 
-        std::vector<std::pair<std::vector<Vertex>, TextureSettings>> returnSet;
-
-        returnSet.push_back({ mImageRenderData.renderImage(pos, size.xy(), screenSize.xy(), *entry), { 0 } });
+        mImageRenderData.renderImage(renderData, pos, size.xy(), *entry);
 
         if (mTextRenderData.available()) {
-            returnSet.push_back(mTextRenderData.render(mText, pos, size, screenSize.xy(), isFocused() && mTextRenderData.animationInterval(1200ms, 600ms) ? mState.cursor : -1));
+            mTextRenderData.render(renderData, mText, pos, size, isFocused() && mTextRenderData.animationInterval(1200ms, 600ms) ? mState.cursor : -1);
             if (mState.select_start != mState.select_end) {
                 const Atlas2::Entry *blankEntry = manager().lookUpImage("blank_white");
                 if (blankEntry) {
-                    Vector4 color = { 0.0f, 0.0f, 0.8f, 0.8f };
-                    returnSet.push_back({ mTextRenderData.renderSelection(mText, pos, size, screenSize.xy(), *blankEntry, mState.select_start, mState.select_end, color), { 0 } });
+                    Color4 color = { 0.0f, 0.0f, 0.8f, 0.8f };
+                    mTextRenderData.renderSelection(renderData, mText, pos, size, *blankEntry, mState.select_start, mState.select_end, color);
                 }
             }
         }
-
-        return returnSet;
     }
 
     WidgetClass Textbox::getClass() const

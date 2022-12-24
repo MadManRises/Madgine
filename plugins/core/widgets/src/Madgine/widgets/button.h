@@ -6,6 +6,7 @@
 
 #include "util/textrenderdata.h"
 #include "util/scalableimagerenderdata.h"
+#include "util/colortintrenderdata.h"
 
 namespace Engine {
 namespace Widgets {
@@ -17,12 +18,13 @@ namespace Widgets {
 
         Threading::SignalStub<> &clickEvent();
 
-        std::vector<std::pair<std::vector<Vertex>, TextureSettings>> vertices(const Vector3 &screenSize, size_t layer) override;
+        void vertices(WidgetsRenderData &renderData, size_t layer) override;
 
         virtual WidgetClass getClass() const override;
 
         TextRenderData mTextRenderData;
-        ScalableImageRenderData mImageRenderData;        
+        ScalableImageRenderData mImageRenderData;     
+        ColorTintRenderData mColorTintRenderData;
 
         std::string mText;
 
