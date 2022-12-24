@@ -27,6 +27,10 @@ set_target_properties(Im3D PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 add_subdirectory(Madgine)
 
+add_subdirectory(steamworks)
+
+add_subdirectory(EOS)
+
 ######################## Static Libs #################
 
 set(OLD_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
