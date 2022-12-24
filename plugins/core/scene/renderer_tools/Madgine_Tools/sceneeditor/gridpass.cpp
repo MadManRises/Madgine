@@ -16,10 +16,9 @@
 #include "Madgine/meshloader/gpumeshloader.h"
 
 
-#include "Madgine/render/shadinglanguage/sl.h"
-
-#define SL_SHADER "shaders/grid.sl"
-#include INCLUDE_SL_SHADER
+#include "Madgine/render/shadinglanguage/sl_support_begin.h"
+#include "shaders/grid.sl"
+#include "Madgine/render/shadinglanguage/sl_support_end.h"
 
 
 namespace Engine {

@@ -42,7 +42,7 @@ namespace Threading {
     void TaskInitialSuspend::await_resume() noexcept
     {
 #if ENABLE_TASK_TRACKING
-        Debug::Threading::onAssign(std::coroutine_handle<TaskPromiseTypeBase>::from_promise(*mPromise), mPromise->queue(), Debug::StackTrace<1>::getCurrent(1));
+        Debug::Threading::onAssign(std::coroutine_handle<TaskSuspendablePromiseTypeBase>::from_promise(*mPromise), mPromise->queue(), Debug::StackTrace<1>::getCurrent(1));
 #endif
     }
 

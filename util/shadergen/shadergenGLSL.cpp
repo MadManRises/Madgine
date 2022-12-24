@@ -1,6 +1,9 @@
 #define NOMINMAX
-#include <Windows.h>
-#include <dxcapi.h>
+#ifdef _WIN32
+#    include <Windows.h>
+#endif
+#include "dxc/dxcapi.h"
+
 #include <spirv_glsl.hpp>
 
 #include <vector>
@@ -12,8 +15,6 @@
 #include <iostream>
 
 #include <map>
-
-#include <filesystem>
 
 #include <fstream>
 
@@ -52,11 +53,6 @@ struct ReleasePtr : std::unique_ptr<T, ReleaseDeleter> {
         return -1;                                                   \
     }
 
-int usage()
-{
-    std::cerr << "Usage: Shadergen <source-file> <input-file> <output-folder> [-g]\n";
-    return -1;
-}
 
 static std::map<std::string, uint32_t> sSemanticLocationMappings {
     { "POSITION0", 0 },
@@ -71,12 +67,22 @@ static std::map<std::string, uint32_t> sSemanticLocationMappings {
     { "INSTANCEDATA1", std::numeric_limits<uint32_t>::max() }
 };
 
-int transpileGLSL(std::string &out, const std::vector<unsigned char> &code, const std::string &filename)
+int transpileGLSL(const std::string &fileName, const std::string &outFolder, IDxcResult *result)
 {
-    try {
-        spirv_cross::CompilerGLSL glsl { (uint32_t *)code.data(), code.size() / 4 };
+    std::cout << "GLSL... ";
 
-        glsl.set_common_options(spirv_cross::CompilerGLSL::Options { .relax_nan_checks = true });
+    std::string shaderCode;
+
+    try {
+
+        ReleasePtr<IDxcBlob> pSpirv;
+        HRESULT hr = result->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&pSpirv), nullptr);
+        CHECK_HR(GetOutput / Object);
+
+        spirv_cross::CompilerGLSL glsl { (uint32_t *)pSpirv->GetBufferPointer(), pSpirv->GetBufferSize() / 4 };
+        spirv_cross::CompilerGLSL::Options options {};
+        options.relax_nan_checks = true;
+        glsl.set_common_options(options);
 
         spirv_cross::ShaderResources resources = glsl.get_shader_resources();
 
@@ -114,63 +120,24 @@ int transpileGLSL(std::string &out, const std::vector<unsigned char> &code, cons
                     if (location != std::numeric_limits<uint32_t>::max())
                         glsl.set_decoration(id, spv::DecorationLocation, location);
                 } else {
-                    std::cerr << filename << "(1,1): warning : Unsupported semantic " << semantic << " used for " << name << std::endl;
+                    std::cerr << fileName << "(1,1): warning : Unsupported semantic " << semantic << " used for " << name << std::endl;
                 }
             }
         }
 
-        out = glsl.compile();
+        shaderCode = glsl.compile();
     } catch (spirv_cross::CompilerError &error) {
         std::cout << std::endl;
-        std::cerr << filename << "(1,1): error: " << error.what()
+        std::cerr << fileName << "(1,1): error: " << error.what()
                   << "\n";
         return -1;
     }
 
-    return 0;
-}
+    auto extIt = fileName.rfind('.');
+    std::string extension = "_" + fileName.substr(extIt + 1, 2) + ".glsl";
 
-int main(int argc, char **argv)
-{
-    if (argc != 4 && argc != 5) {
-        return usage();
-    }
-
-    std::filesystem::path sourceFile = argv[1];
-    std::filesystem::path inputFile = argv[2];
-    std::filesystem::path outputFolder = argv[3];
-
-    if (!inputFile.has_filename()) {
-        std::cerr << "Error: input path must be a file!\n";
-        return -1;
-    }
-
-    bool debug = false;
-    if (argc == 5) {
-        std::string debugFlag = argv[4];
-        if (debugFlag != "-g")
-            return usage();
-        debug = true;
-    }
-
-    std::cout << "GLSL... ";
-
-    std::ifstream ifs { inputFile, std::ios_base::binary };
-    ifs >> std::noskipws;
-
-    std::vector<unsigned char> code {
-        std::istream_iterator<char> { ifs }, std::istream_iterator<char> {}
-    };
-
-    std::string shaderCode;
-
-    int result = transpileGLSL(shaderCode, code, inputFile.string());
-    if (result != 0)
-        return result;
-
-    std::string extension = "_" + inputFile.extension().string().substr(1, 2) + ".glsl";
-
-    std::filesystem::path outputFile = outputFolder / (inputFile.stem().string() + extension);
+    auto fileNameBegin = fileName.rfind('/');
+    std::string outputFile = outFolder + "/" + (fileName.substr(fileNameBegin + 1, extIt - fileNameBegin - 1) + extension);
 
     std::ofstream of { outputFile };
 

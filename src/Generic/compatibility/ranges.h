@@ -73,6 +73,12 @@ namespace ranges {
         return std::sort(std::forward<C>(c).begin(), std::forward<C>(c).end(), std::forward<Cmp>(cmp));
     }
 
+    template <typename C, typename T>
+    constexpr auto lower_bound(C &&c, T &&t)
+    {
+        return std::lower_bound(std::forward<C>(c).begin(), std::forward<C>(c).end(), std::forward<T>(t));
+    }
+
 }
 }
 

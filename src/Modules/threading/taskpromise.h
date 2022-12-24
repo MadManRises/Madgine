@@ -37,7 +37,7 @@ namespace Threading {
         void await_resume() noexcept;
 
 #if ENABLE_TASK_TRACKING
-        TaskPromiseTypeBase *mPromise;
+        TaskSuspendablePromiseTypeBase *mPromise;
 #endif
     };
 
@@ -121,8 +121,8 @@ namespace Threading {
 
         void set_future(TaskFuture<T> future)
         {
-            assert(!mState && state.valid());
-            mState = state.release();
+            assert(!mState && future.valid());
+            mState = future.release();
             mState->attach();
         }
     };

@@ -36,22 +36,17 @@ macro(compile_shaders target)
         if (compile)
             get_filename_component(name ${source} NAME_WE)
             add_custom_command(OUTPUT spirv/${name}${extension}
-                COMMAND $<TARGET_FILE:dxc>
-                    -E main
-                    -T ${profile} 
-                    -spirv
-                    -Zpc
-                    -Fo spirv/${name}${extension}
-                    ${CMAKE_CURRENT_SOURCE_DIR}/${source}   
-                COMMAND ${CMAKE_COMMAND} 
-                    -DTools=$<GENEX_EVAL:$<TARGET_PROPERTY:ShaderGen,ShaderGenTools>>
-                    -DInputFile=${CMAKE_CURRENT_BINARY_DIR}/spirv/${name}${extension}
-                    -DOutputFolder=${CMAKE_BINARY_DIR}/data
-                    -DSourceFile=${CMAKE_CURRENT_SOURCE_DIR}/${source}
-                    -DDebug=$<IF:$<CONFIG:DEBUG>,ON,OFF>
-                    -P ${workspace_file_dir}/transpileShaders.cmake
+                COMMAND ${CMAKE_COMMAND}
+                    -E make_directory 
+                    spirv
+                COMMAND $<TARGET_FILE:ShaderGen>
+                    ${CMAKE_CURRENT_SOURCE_DIR}/${source}       
+                    spirv/${name}${extension}
+                    ${CMAKE_BINARY_DIR}/data
+                    $<TARGET_PROPERTY:ShaderGen,ShaderGenTargets>
+                COMMAND_EXPAND_LISTS
                 MAIN_DEPENDENCY ${source}
-                DEPENDS dxc ShaderGen ${workspace_file_dir}/transpileShaders.cmake $<GENEX_EVAL:$<TARGET_PROPERTY:ShaderGen,ShaderGenTools>>
+                DEPENDS ShaderGen
                 IMPLICIT_DEPENDS C ${source}
                 COMMENT "Transpiling shader: ${name}${ext}"
                 VERBATIM)
