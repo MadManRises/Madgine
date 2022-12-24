@@ -167,7 +167,7 @@ namespace Threading {
         std::erase(mTaskQueues, taskQueue);
     }
 
-    const std::vector<TaskQueue *> WorkGroup::taskQueues() const
+    const std::vector<TaskQueue *> &WorkGroup::taskQueues() const
     {
         return mTaskQueues;
     }

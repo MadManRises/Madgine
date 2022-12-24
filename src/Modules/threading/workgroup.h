@@ -44,7 +44,7 @@ namespace Threading {
 
         void addTaskQueue(TaskQueue *taskQueue);
         void removeTaskQueue(TaskQueue *taskQueue);
-        const std::vector<TaskQueue *> taskQueues() const;
+        const std::vector<TaskQueue *> &taskQueues() const;
 
     private:
 #if ENABLE_THREADING
