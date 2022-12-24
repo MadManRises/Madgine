@@ -483,8 +483,8 @@ namespace Widgets {
 
     void WidgetManager::unregisterWidget(WidgetBase *w)
     {
-        auto count = std::erase(mWidgets, w);       
-        assert(count == 1);
+        /* auto count = */std::erase(mWidgets, w);       
+        //assert(count == 1);
     }
 
     void WidgetManager::resetPointerState()
