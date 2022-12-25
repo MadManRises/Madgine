@@ -160,7 +160,7 @@ int main(int argc, char **argv)
             int glsl_result = transpileGLSL(sourceFile, dataFolder, pCompileResult);
             if (glsl_result != 0)
                 result = glsl_result;
-        } else {
+        } else if (strcmp(argv[i], "-g") != 0) {
             std::cerr << "Unknown target language: " << argv[i] << std::endl;
             result = -1;
         }

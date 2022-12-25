@@ -99,6 +99,10 @@ int transpileHLSL(const std::string &fileName, const std::string &outFolder, IDx
 
         std::vector<LPCWSTR> arguments;
 
+        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+        std::wstring wPath = converter.from_bytes(fileName);
+        arguments.push_back(wPath.c_str());
+
         arguments.push_back(L"-P");
 
         DxcBuffer sourceBuffer;

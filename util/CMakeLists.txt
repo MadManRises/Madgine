@@ -11,6 +11,7 @@ ExternalProject_Add(ShaderGenExt
 	CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release
 	BUILD_BYPRODUCTS ${shadergenBinaryDir}/ShaderGen${HOST_EXECUTABLE_SUFFIX}
 	BUILD_COMMAND ${CMAKE_COMMAND} --build . --target ShaderGen
+	BUILD_ALWAYS true
 	INSTALL_COMMAND "")
 
 	

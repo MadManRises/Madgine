@@ -43,6 +43,7 @@ macro(compile_shaders target)
                     ${CMAKE_CURRENT_SOURCE_DIR}/${source}       
                     spirv/${name}${extension}
                     ${CMAKE_BINARY_DIR}/data
+                    $<IF:$<CONFIG:DEBUG>,-g,>
                     $<TARGET_PROPERTY:ShaderGen,ShaderGenTargets>
                 COMMAND_EXPAND_LISTS
                 MAIN_DEPENDENCY ${source}
