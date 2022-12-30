@@ -1,3 +1,9 @@
 #pragma once
 
-int desktopMain(int argc, char **argv);
+#include <functional>
+
+namespace Engine::Window {
+struct MainWindow;
+}
+
+int desktopMain(int argc, char **argv, std::function<void(Engine::Window::MainWindow &)> callback = {});

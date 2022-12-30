@@ -1,7 +1,9 @@
 #pragma once
 
+#include <functional>
+
 namespace Engine::Window {
 struct MainWindow;
 }
 
-int launch(Engine::Window::MainWindow **topLevelPointer = nullptr);
+int launch(std::function<void(Engine::Window::MainWindow &)> callback = {});

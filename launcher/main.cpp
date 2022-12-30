@@ -11,7 +11,7 @@
 
 #include "main.h"
 
-int desktopMain(int argc, char **argv)
+int desktopMain(int argc, char **argv, std::function<void(Engine::Window::MainWindow&)> callback)
 {
     Engine::Filesystem::setup();
     Engine::Threading::WorkGroup workGroup { "Launcher" };
@@ -20,7 +20,7 @@ int desktopMain(int argc, char **argv)
     Engine::Root::Root root { argc, argv };
 
     if (!root.toolMode()) {
-        return launch();
+        return launch(callback);
     } else {
         return root.errorCode();
     }

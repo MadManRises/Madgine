@@ -1,4 +1,6 @@
 
+set(MADGINE_LAUNCHER_SPLASH_IMAGE "" CACHE FILEPATH "Path to an image file for the applications splash screen")
+
 set(sources "")
 FolderSources(sources "" "" launcher.cpp main.cpp terminate_handler.cpp)
 if (EMSCRIPTEN)
@@ -39,6 +41,16 @@ elseif (OSX)
 elseif (IOS)
     target_link_libraries(MadgineLauncher PRIVATE "-framework UIKit")
 endif()
+
+if (MADGINE_LAUNCHER_SPLASH_IMAGE)
+	target_compile_definitions(MadgineLauncher PRIVATE SPLASH_IMAGE="${MADGINE_LAUNCHER_SPLASH_IMAGE}")
+
+	if (WINDOWS)
+		string(REPLACE "\\" "\\\\" escaped_image ${MADGINE_LAUNCHER_SPLASH_IMAGE})
+		file(CONFIGURE OUTPUT resources.rc CONTENT "SPLASH BITMAP \"${escaped_image}\"")
+		target_sources(MadgineLauncher PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/resources.rc)
+	endif ()
+endif ()
 
 
 

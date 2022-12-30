@@ -30,7 +30,7 @@
 #    define FIX_LOCAL
 #endif
 
-int launch(Engine::Window::MainWindow **topLevelPointer)
+int launch(std::function<void(Engine::Window::MainWindow &)> callback)
 {
     FIX_LOCAL Engine::KeyValueWorkGroupLocal<Engine::App::Application> app { "Application" };
 
@@ -38,8 +38,8 @@ int launch(Engine::Window::MainWindow **topLevelPointer)
     windowSettings.mTitle = "Maditor";
     FIX_LOCAL Engine::KeyValueWorkGroupLocal<Engine::Window::MainWindow> window { "MainWindow", windowSettings };
 
-    if (topLevelPointer)
-        *topLevelPointer = &window;
+    if (callback)
+        callback(window);
 
 #if !ENABLE_PLUGINS
     window.taskQueue()

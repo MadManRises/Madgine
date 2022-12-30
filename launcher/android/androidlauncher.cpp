@@ -11,8 +11,8 @@
 
 #include "Generic/systemvariable.h"
 
-#include "Interfaces/filesystem/api.h"
 #include "../launcher.h"
+#include "Interfaces/filesystem/api.h"
 
 namespace Engine {
 
@@ -51,9 +51,9 @@ namespace Android {
 
         static Engine::Root::Root root;
 
-		launch(&mWindow);
-		
-		ANativeActivity_finish(activity);
+        launch([this](Engine::Window::MainWindow &mainWindow) { mWindow = &mainWindow; });
+
+        ANativeActivity_finish(activity);
     }
 
     void AndroidLauncher::onDestroy()
