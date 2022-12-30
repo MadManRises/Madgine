@@ -19,10 +19,29 @@ namespace Audio {
         return (static_cast<OggDecodeBuf *>(buf)->*f)(args...);
     }
 
-    OggDecodeBuf::OggDecodeBuf(AudioInfo &info, std::unique_ptr<std::basic_streambuf<char>> &&base)
-        : mBase(std::move(base))
+    OggDecodeBuf::OggDecodeBuf()
     {
-        setg(mBuffer.data(), mBuffer.data(), mBuffer.data());
+    }
+
+    OggDecodeBuf::~OggDecodeBuf()
+    {
+        close();
+    }
+
+    void OggDecodeBuf::close()
+    {
+        if (mBase) {
+            setg(nullptr, nullptr, nullptr);
+            ov_clear(&mFile);
+            mBase.reset();
+        }
+    }
+
+    bool OggDecodeBuf::open(AudioInfo &info, std::unique_ptr<std::basic_streambuf<char>> base)
+    {
+        close();
+
+        mBase = std::move(base);
 
         ov_callbacks callbacks;
         callbacks.close_func = nullptr;
@@ -45,7 +64,8 @@ namespace Audio {
                     out << "UNKNOWN_ERROR";
                 }
             }
-            std::terminate();
+            mBase.reset();
+            return false;
         }
 
         vorbis_info *vorbisInfo = ov_info(&mFile, -1);
@@ -55,11 +75,8 @@ namespace Audio {
         info.mSampleRate = vorbisInfo->rate;
         info.mDuration = std::chrono::microseconds { static_cast<long long>(ov_time_total(&mFile, -1) * 1000000.0f) };
         info.mSampleCount = ov_pcm_total(&mFile, -1);
-    }
 
-    OggDecodeBuf::~OggDecodeBuf()
-    {
-        ov_clear(&mFile);
+        return true;
     }
 
     OggDecodeBuf::pos_type OggDecodeBuf::seekoff(off_type off, std::ios_base::seekdir dir, std::ios_base::openmode mode)
@@ -82,6 +99,9 @@ namespace Audio {
 
     OggDecodeBuf::int_type OggDecodeBuf::underflow()
     {
+        if (!mBase)
+            return traits_type::eof();
+
         int bitstream = 0;
         auto result = ov_read(&mFile, mBuffer.data(), BUFFER_SIZE, 0, 2, 1, &bitstream);
         if (result < 0)
@@ -94,7 +114,8 @@ namespace Audio {
 
     int OggDecodeBuf::sync()
     {
-        mBase->pubsync();
+        if (mBase)
+            mBase->pubsync();
         return 0;
     }
 
@@ -125,7 +146,7 @@ namespace Audio {
 
     long int OggDecodeBuf::ogg_tell()
     {
-        return mBase->pubseekoff(0, std::ios_base::cur, std::ios_base::in);;
+        return mBase->pubseekoff(0, std::ios_base::cur, std::ios_base::in);
     }
 
 }

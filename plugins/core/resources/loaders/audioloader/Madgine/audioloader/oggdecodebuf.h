@@ -6,8 +6,11 @@ namespace Engine {
 namespace Audio {
 
     struct OggDecodeBuf : std::basic_streambuf<char> {
-        OggDecodeBuf(AudioInfo &info, std::unique_ptr<std::basic_streambuf<char>> &&base);
+        OggDecodeBuf();
         ~OggDecodeBuf();
+
+        void close();
+        bool open(AudioInfo &info, std::unique_ptr<std::basic_streambuf<char>> base);
 
         static const constexpr size_t BUFFER_SIZE = 1024;
 

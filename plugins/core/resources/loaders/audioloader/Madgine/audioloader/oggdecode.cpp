@@ -11,7 +11,10 @@ namespace Audio {
 
     Stream DecodeOggFile(AudioInfo &info, Stream &&file)
     {
-        return { std::make_unique<OggDecodeBuf>(info, file.release()) };
+        std::unique_ptr<OggDecodeBuf> buf = std::make_unique<OggDecodeBuf>();
+        if (!buf->open(info, file.release()))
+            return {};
+        return { std::move(buf) };
     }
 
 }

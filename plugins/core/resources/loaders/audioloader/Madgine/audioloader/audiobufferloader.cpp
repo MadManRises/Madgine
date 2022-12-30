@@ -28,6 +28,8 @@ namespace Audio {
     bool AudioBufferLoader::loadImpl(AudioBuffer &data, ResourceDataInfo &info)
     {
         Stream stream = DecodeOggFile(data.mInfo, info.resource()->readAsStream(true));
+        if (!stream)
+            return false;
 
         size_t bufferSize = (data.mInfo.mBitsPerSample * data.mInfo.mSampleCount * data.mInfo.mChannels) / 8;
 
