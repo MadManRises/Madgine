@@ -3,19 +3,18 @@
 namespace Engine {
 namespace Threading {
 
-	
     struct MODULES_EXPORT TaskPromiseSharedStateBase {
 
-        TaskPromiseSharedStateBase();
+        TaskPromiseSharedStateBase(bool ready = false);
         ~TaskPromiseSharedStateBase();
 
         std::mutex mMutex;
         std::vector<TaskHandle> mThenResumes;
         std::exception_ptr mException;
 
-        bool mAttached = false;
-        bool mDestroyed = false;
-        bool mDone = false;
+        bool mAttached;
+        bool mDestroyed;
+        bool mDone;
 
         void attach();
         void finalize();
@@ -34,7 +33,8 @@ namespace Threading {
 
         TaskPromiseSharedState() = default;
         TaskPromiseSharedState(T val)
-            : mValue(std::move(val))
+            : TaskPromiseSharedStateBase(true)
+            , mValue(std::move(val))
         {
         }
 
@@ -98,7 +98,6 @@ namespace Threading {
             assert(mHasValue);
         }
     };
-
 
 }
 }

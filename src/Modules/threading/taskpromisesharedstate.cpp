@@ -7,7 +7,10 @@
 namespace Engine {
 namespace Threading {
 
-    TaskPromiseSharedStateBase::TaskPromiseSharedStateBase()
+    TaskPromiseSharedStateBase::TaskPromiseSharedStateBase(bool ready)
+        : mAttached(ready)
+        , mDestroyed(ready)
+        , mDone(ready)
     {
     }
 
@@ -72,7 +75,6 @@ namespace Threading {
             std::rethrow_exception(mException);
         }
     }
-
 
 }
 }
