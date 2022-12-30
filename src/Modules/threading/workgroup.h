@@ -18,6 +18,7 @@ namespace Threading {
         template <typename F, typename... Args>
         void createThread(F &&main, Args &&... args)
         {
+            std::unique_lock lock { mThreadsMutex };
             mSubThreads.emplace_back(
                 std::async(std::launch::async, &WorkGroup::threadMain<F, std::decay_t<Args>...>, this, std::forward<F>(main), std::forward<Args>(args)...));
         }
@@ -105,6 +106,8 @@ namespace Threading {
         std::string mName;
 
 #if ENABLE_THREADING
+        mutable std::mutex mThreadsMutex;
+
         std::vector<std::thread::id> mThreads;
 
         std::vector<Future<int>> mSubThreads;

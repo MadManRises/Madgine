@@ -76,7 +76,10 @@ namespace Threading {
     void WorkGroup::addThreadInitializer(std::function<void()> &&task)
     {
 #if ENABLE_THREADING
-        assert(mSubThreads.empty());
+        {
+            std::unique_lock lock { mThreadsMutex };
+            assert(mSubThreads.empty());
+        }
 #endif
         mThreadInitializers.emplace_back(std::move(task));
     }
@@ -99,6 +102,7 @@ namespace Threading {
 
     void WorkGroup::checkThreadStates()
     {
+        std::unique_lock lock { mThreadsMutex };
         std::erase_if(mSubThreads,
             [](Future<int> &f) {
                 bool result = f.is_ready();
@@ -110,12 +114,16 @@ namespace Threading {
 
     bool WorkGroup::contains(std::thread::id id) const
     {
+        std::unique_lock lock { mThreadsMutex };
         return std::ranges::find(mThreads, id) != mThreads.end();
     }
 
     void WorkGroup::initThread()
     {
-        mThreads.push_back(std::this_thread::get_id());
+        {
+            std::unique_lock lock { mThreadsMutex };
+            mThreads.push_back(std::this_thread::get_id());
+        }
 
         ThreadStorage::init(true);
         ThreadStorage::init(false);
