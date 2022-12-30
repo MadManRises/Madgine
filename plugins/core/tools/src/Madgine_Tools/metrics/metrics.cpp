@@ -22,7 +22,7 @@ namespace Tools {
     {
         if (ImGui::BeginChild(label)) {
             const Debug::HistoryData<float> &d = data.data();
-            ImGui::Text("Average: %.5f, Current: %.5f, Min: %.5f, Max: %.5f", d.average(S), data.buffer()[(d.mIndex + S - 1) % S], d.mMin, d.mMax);
+            ImGui::Text("Average: %.1f, Current: %.1f, Min: %.1f, Max: %.1f", data.average(), data.buffer()[(d.mIndex + S - 1) % S], d.mMin, d.mMax);
             float range = d.mMax - d.mMin;
             ImGui::PlotHistogram("", data.buffer(), S, static_cast<int>(d.mIndex), overlayText, d.mMin - 0.05f * range, d.mMax + 0.05f * range, ImVec2(0, 80));
             if (ImGui::Button("Reset extreme values"))
