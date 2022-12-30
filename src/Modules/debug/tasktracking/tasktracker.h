@@ -8,7 +8,7 @@ namespace Debug {
     namespace Threading {
 
         MODULES_EXPORT void onAssign(const std::coroutine_handle<> &handle, Engine::Threading::TaskQueue *queue, StackTrace<1> stacktrace);
-        MODULES_EXPORT void onDestroy(Engine::Threading::TaskPromiseTypeBase &promise);        
+        MODULES_EXPORT void onDestroy(Engine::Threading::TaskSuspendablePromiseTypeBase &promise);        
 
         MODULES_EXPORT void onResume(const Engine::Threading::TaskHandle &handle);
         MODULES_EXPORT void onSuspend(Engine::Threading::TaskQueue *queue);
@@ -69,11 +69,13 @@ namespace Debug {
             };
 
             const std::deque<Event> &events() const;
+            const std::map<void *, StackTrace<1>> tasksInFlight() const;
 
             std::mutex mMutex;
 
         private:
-            std::deque<Event> mEvents;            
+            std::deque<Event> mEvents;   
+            std::map<void *, StackTrace<1>> mTasksInFlight;
         };
 
     }

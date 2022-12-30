@@ -14,6 +14,8 @@ namespace Debug {
         {
             std::lock_guard guard { mMutex };
             mEvents.emplace_back(Event::ASSIGN, ident, stacktrace);
+            auto pib = mTasksInFlight.try_emplace(ident, stacktrace);
+            assert(pib.second);
         }
 
         void TaskTracker::onEnter(void *ident)
@@ -43,12 +45,19 @@ namespace Debug {
         void TaskTracker::onDestroy(void *ident)
         {
             std::lock_guard guard { mMutex };
-            mEvents.emplace_back(Event::DESTROY, ident);
+            //mEvents.emplace_back(Event::DESTROY, ident);
+            auto count = mTasksInFlight.erase(ident);
+            assert(count == 1);
         }
 
         const std::deque<TaskTracker::Event> &TaskTracker::events() const
         {
             return mEvents;
+        }
+
+        const std::map<void *, StackTrace<1>> TaskTracker::tasksInFlight() const
+        {
+            return mTasksInFlight;
         }
 
         void onAssign(const std::coroutine_handle<> &handle, Engine::Threading::TaskQueue *queue, StackTrace<1> stacktrace)

@@ -69,7 +69,7 @@ namespace Tools {
             ImGui::Columns(2);
 
             for (Threading::TaskQueue *queue : Threading::WorkGroup::self().taskQueues()) {
-                ImGui::Text(queue->name());
+                ImGui::Text("%s (%zu)", queue->name().c_str(), queue->tasksInFlightCount());
 
                 ImGui::NextColumn();
 
@@ -216,9 +216,6 @@ namespace Tools {
                 }
             }
 
-            //ImGui::Text("Scroll");
-            ImGui::Text("%f", mouseRatio);
-
             ImGui::NextColumn();
 
             ImVec2 canvas_p0 = ImGui::GetCursorScreenPos(); // ImDrawList API uses screen coordinates!
@@ -228,8 +225,8 @@ namespace Tools {
 
             ImGui::EndColumns();
 
-            ImGui::Text("%lld < %lld < %lld", 0, mScroll, fullPlotSize);
-            ImGui::DragScalar("debug", ImGuiDataType_S64, &mScroll);
+            //ImGui::Text("%lld < %lld < %lld", 0, mScroll, fullPlotSize);
+            //ImGui::DragScalar("debug", ImGuiDataType_S64, &mScroll);
 
             if (isHovered) {
                 float factor = powf(1.1f, io.MouseWheel);
@@ -251,6 +248,19 @@ namespace Tools {
                     ImGui::Text("%s", tb.mFunction);
                 }
                 ImGui::EndTooltip();
+            }
+
+            for (Threading::TaskQueue *queue : Threading::WorkGroup::self().taskQueues()) {
+                if (ImGui::TreeNode(queue->name().c_str())) {
+                    if (ImGui::TreeNode("Tasks in Flight")) {
+                        std::lock_guard guard { queue->mTracker.mMutex };
+                        for (auto& [id, stacktrace] : queue->mTracker.tasksInFlight()) {
+                            ImGui::Text(stacktrace.calculateReadable().front().mFunction);
+                        }
+                        ImGui::TreePop();
+                    }
+                    ImGui::TreePop();
+                }
             }
         }
         ImGui::End();

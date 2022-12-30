@@ -17,8 +17,12 @@ namespace Threading {
 
     TaskSuspendablePromiseTypeBase::~TaskSuspendablePromiseTypeBase()
     {
-        if (mQueue)
+        if (mQueue) {
             mQueue->decreaseTaskInFlightCount();
+#if ENABLE_TASK_TRACKING
+            Debug::Threading::onDestroy(*this);
+#endif
+        }
     }
 
     void TaskSuspendablePromiseTypeBase::setQueue(TaskQueue *queue)
