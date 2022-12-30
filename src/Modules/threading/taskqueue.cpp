@@ -16,6 +16,7 @@ namespace Threading {
     TaskQueue::~TaskQueue()
     {
         assert(mQueue.empty());
+        assert(mTaskInFlightCount == 0);
         WorkGroup::self().removeTaskQueue(this);
     }
 
@@ -51,8 +52,7 @@ namespace Threading {
     void TaskQueue::waitForTasks(std::chrono::steady_clock::time_point until)
     {
         std::unique_lock<std::mutex> lock(mMutex);
-
-        mCv.wait_until(lock, until);
+        mCv.wait_until(lock, until, [this]() { return !mRunning && idle(); });
     }
 
     bool TaskQueue::running() const
@@ -62,7 +62,10 @@ namespace Threading {
 
     void TaskQueue::stop()
     {
-        mRunning = false;
+        {
+            std::unique_lock<std::mutex> lock(mMutex);
+            mRunning = false;
+        }
         mCv.notify_all();
     }
 
