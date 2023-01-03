@@ -32,8 +32,8 @@ struct ByteBufferImpl {
     requires(!Pointer<std::remove_reference_t<T>>)
         ByteBufferImpl(T &&t)
         : mKeep(std::forward<T>(t))
-        , mSize(TupleUnpacker::invoke(ByteBufferSizeAccessor {}, mKeep.as<T>()))
-        , mData(TupleUnpacker::invoke(ByteBufferDataAccessor {}, mKeep.as<T>()))
+        , mSize(ByteBufferSizeAccessor {}(mKeep.as<T>()))
+        , mData(ByteBufferDataAccessor {}(mKeep.as<T>()))
     {
     }
 
@@ -42,7 +42,7 @@ struct ByteBufferImpl {
         ByteBufferImpl(T &&t, size_t size)
         : mKeep(std::forward<T>(t))
         , mSize(size)
-        , mData(TupleUnpacker::invoke(ByteBufferDataAccessor {}, mKeep.as<T>()))
+        , mData(ByteBufferDataAccessor {}(mKeep.as<T>()))
     {
     }
 
