@@ -171,10 +171,6 @@ macro(add_workspace_library name)
 		"${IWYU};-Xiwyu;--pch_in_code;-Xiwyu;--prefix_header_includes=remove;-Xiwyu;--max_line_length=200;--driver-mode=cl")
 	endif (IWYU)
 
-	foreach (hook ${WORKSPACE_HOOKS})
-		cmake_language(CALL ${hook} ${name})
-	endforeach()
-
 endmacro(add_workspace_library)
 
 macro(add_workspace_interface_library name)
@@ -227,26 +223,6 @@ function(install_interface_to_workspace name)
 
 endfunction(install_interface_to_workspace)
 
-
-function(get_all_targets var)
-    set(targets)
-    get_all_targets_recursive(targets ${CMAKE_SOURCE_DIR})
-    set(${var} ${targets} PARENT_SCOPE)
-endfunction()
-
-macro(get_all_targets_recursive targets dir)
-    get_property(subdirectories DIRECTORY "${dir}" PROPERTY SUBDIRECTORIES)
-    foreach(subdir ${subdirectories})
-        get_all_targets_recursive(${targets} ${subdir})
-    endforeach()
-
-    get_property(current_targets DIRECTORY ${dir} PROPERTY BUILDSYSTEM_TARGETS)
-    list(APPEND ${targets} ${current_targets})
-endmacro()
-
-macro (add_workspace_hook hook)
-	list(APPEND WORKSPACE_HOOKS ${hook})
-endmacro()
 
 #Iterate over all files in platform
 
