@@ -37,8 +37,9 @@ namespace Resources {
 
         size_t extensionIndex(std::string_view ext) const;
 
-        virtual std::vector<std::pair<std::string_view, TypedScopePtr>> resources() = 0;
+        virtual std::vector<std::pair<std::string_view, TypedScopePtr>> typedResources() = 0;
         virtual std::vector<const MetaTable *> resourceTypes() const = 0;
+        virtual std::vector<ResourceBase *> resources() = 0; 
 
         virtual Threading::TaskQueue *loadingTaskQueue() const;
         Threading::TaskFuture<bool> queueLoading(Threading::Task<bool> task);

@@ -162,6 +162,13 @@ namespace Tools {
 #endif
 
         if (ImGui::BeginMenu("Project")) {
+
+            if (ImGui::MenuItem("Export Resources")) {
+                Resources::ResourceManager::getSingleton().writeResourceList("resources.list");
+            }
+
+            ImGui::Separator();
+
             if (ImGui::MenuItem("Quit")) {
                 mWindow->osWindow()->close();
             }

@@ -64,10 +64,10 @@ macro(add_plugin name base type)
 		PLUGIN_TYPE ${type}
 		FOLDER "Plugins")
 
+	generate_binary_info(${name})
+
 	if (NOT PLUGIN_CONFIG_NO_DATA_COPY)
-		collect_data(${name})
-	else()
-		generate_binary_info(${name})
+		collect_data(${name})		
 	endif()
 
 	compile_shaders(${name})

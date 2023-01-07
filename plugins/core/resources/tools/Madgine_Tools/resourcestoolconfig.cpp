@@ -27,7 +27,7 @@ namespace Tools {
         for (std::unique_ptr<Resources::ResourceLoaderBase> &loader : Resources::ResourceManager::getSingleton().mCollector) {
             for (const MetaTable *type : loader->resourceTypes()) {
                 mRoot.getTool<Inspector>().addObjectSuggestion(type, [&]() {
-                    return loader->resources();
+                    return loader->typedResources();
                 });
             }
         }

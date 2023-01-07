@@ -86,12 +86,8 @@ endfunction(collect_custom_dependencies)
 
 macro(collect_data target)
 
-	generate_binary_info(${target})
-
 	if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/data)
-
-		if (NOT BUILD_SHARED_LIBS OR MADGINE_FORCE_DATA_COLLECT)
-
+		if (NOT MADGINE_DATA_LISTS AND (NOT BUILD_SHARED_LIBS OR MADGINE_FORCE_DATA_COLLECT))
 			add_custom_target(
 				${target}_copy_data ALL 				
 				COMMAND ${CMAKE_COMMAND} -DSOURCE=${CMAKE_CURRENT_SOURCE_DIR}/data -DTARGET=${CMAKE_BINARY_DIR}/data -P ${workspace_file_dir}/util/flatcopy.cmake				
@@ -99,4 +95,12 @@ macro(collect_data target)
 		endif()
 	endif()
 
+endmacro()
+
+macro(collect_data_lists lists)
+	set(MADGINE_DATA_LISTS "${lists}" CACHE INTERNAL "")	
+	add_custom_target(
+		copy_data ALL
+		COMMAND ${CMAKE_COMMAND} "-DLISTS=\"${lists}\"" -DTARGET=${CMAKE_BINARY_DIR}/data -P ${workspace_file_dir}/util/listcopy.cmake
+	)
 endmacro()

@@ -26,7 +26,7 @@ set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT MadgineLa
 if (MADGINE_AS_SDK)
 	MESSAGE("Using binary name: ${MADGINE_BINARY_NAME}")
 	set_target_properties(MadgineLauncher PROPERTIES OUTPUT_NAME ${MADGINE_BINARY_NAME})
-elseif (NOT MODULES_ENABLE_PLUGINS)
+elseif (MADGINE_CONFIGURATION)
 	get_filename_component(name ${MADGINE_CONFIGURATION} NAME)
 	set_target_properties(MadgineLauncher PROPERTIES OUTPUT_NAME MadgineLauncher_${name})
 endif()
@@ -54,9 +54,15 @@ if (MADGINE_LAUNCHER_SPLASH_IMAGE)
 endif ()
 
 
-
 target_depend_on_all_plugins(MadgineLauncher)
 
 generate_binary_info(MadgineLauncher)
 
 install_to_workspace(Madgine TARGETS MadgineLauncher)
+
+
+file(GLOB lists "${MADGINE_CONFIGURATION}/*.list")
+if (lists)
+
+	collect_data_lists("${lists}")
+endif()

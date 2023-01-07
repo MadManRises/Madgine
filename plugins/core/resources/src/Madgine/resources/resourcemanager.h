@@ -54,6 +54,8 @@ namespace Resources {
 
         Threading::TaskQueue *taskQueue();
 
+        void writeResourceList(const Filesystem::Path &path);
+
     private:
         void updateResources(Filesystem::FileEventType event, const Filesystem::Path &path, int priority);
         void updateResources(Filesystem::FileEventType event, const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> &loaderByExtension);

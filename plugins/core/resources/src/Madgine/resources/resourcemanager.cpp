@@ -211,6 +211,21 @@ namespace Resources {
         return loaderByExtension;
     }
 
+    void ResourceManager::writeResourceList(const Filesystem::Path &path)
+    {
+        std::ofstream out { path };
+        if (out) {
+            for (const std::unique_ptr<ResourceLoaderBase> &loader : mCollector) {
+                for (ResourceBase *res : loader->resources()) {
+                    if (!res->path().empty())
+                        out << res->path() << "\n";
+                }
+            }
+        } else {
+            LOG_ERROR("Opening " << path << " for write failed!");
+        }
+    }
+
     bool ResourceManager::SubDirCompare::operator()(const Filesystem::Path &first, const Filesystem::Path &second) const
     {
         auto [firstEnd, secondEnd] = std::mismatch(first.str().begin(), first.str().end(), second.str().begin(), second.str().end());

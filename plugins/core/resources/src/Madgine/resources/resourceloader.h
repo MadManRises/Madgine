@@ -14,7 +14,6 @@
 #include "Modules/uniquecomponent/uniquecomponent.h"
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-
 #include "Interfaces/filesystem/filewatcher.h"
 
 #include "Generic/lambda.h"
@@ -207,8 +206,8 @@ namespace Resources {
             ResourceDataInfo &info = *getInfo(handle, loader);
             Threading::TaskFuture<void> task = info.unloadingTask();
 
-            if (!task.valid()) {                
-                task = loader->queueUnloading(Threading::make_task(&T::unloadImpl, (T*)loader, *getDataPtr(handle, loader, false)));
+            if (!task.valid()) {
+                task = loader->queueUnloading(Threading::make_task(&T::unloadImpl, (T *)loader, *getDataPtr(handle, loader, false)));
 
                 info.setUnloadingTask(task);
             }
@@ -221,7 +220,7 @@ namespace Resources {
             if (!ptr)
                 return;
 
-            Threading::TaskFuture<void> task = loader->queueUnloading(Threading::make_task(&T::unloadImpl, (T*)loader, *ptr));
+            Threading::TaskFuture<void> task = loader->queueUnloading(Threading::make_task(&T::unloadImpl, (T *)loader, *ptr));
 
             auto cleanup = [ptr { std::move(ptr) }]() {};
             if (task.is_ready()) {
@@ -268,8 +267,6 @@ namespace Resources {
                             loader),
                 Filesystem::FileEventType::FILE_CREATED, loader);
         }
-
-
 
         static typename Interface::Ptr createUnnamed()
         {
@@ -332,7 +329,16 @@ namespace Resources {
             return mResources.end();
         }
 
-        virtual std::vector<std::pair<std::string_view, TypedScopePtr>> resources() override
+        virtual std::vector<ResourceBase*> resources() override
+        {
+            std::vector<ResourceBase*> result;
+            std::ranges::transform(mResources, std::back_inserter(result), [](std::pair<const std::string, Resource> &p) {
+                return &p.second;
+            });
+            return result;
+        }
+
+        virtual std::vector<std::pair<std::string_view, TypedScopePtr>> typedResources() override
         {
             std::vector<std::pair<std::string_view, TypedScopePtr>> result;
             std::ranges::transform(mResources, std::back_inserter(result), [](std::pair<const std::string, Resource> &p) {
