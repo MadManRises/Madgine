@@ -1,9 +1,6 @@
 #include "Madgine/applib.h"
 #include "Madgine/clientlib.h"
 #include "Madgine/uilib.h"
-#include "Madgine/rootlib.h"
-#include "Madgine/resourceslib.h"
-#include "Madgine/serialize/filesystem/filesystemlib.h"
 
 #include "launcher.h"
 
@@ -11,16 +8,7 @@
 #include "Madgine/app/application.h"
 #include "Madgine/root/keyvalueregistry.h"
 #include "Madgine/window/mainwindow.h"
-#include "Meta/serialize/operations.h"
-#include "Meta/serialize/streams/formattedserializestream.h"
 #include "Modules/threading/scheduler.h"
-
-#include "Meta/serialize/formatter/xmlformatter.h"
-#include "Madgine/serialize/filesystem/filemanager.h"
-
-#include "Meta/serialize/hierarchy/statetransmissionflags.h"
-
-#include "Madgine/resources/resourcemanager.h"
 
 #include "Madgine/input/uimanager.h"
 
@@ -40,26 +28,6 @@ int launch(std::function<void(Engine::Window::MainWindow &)> callback)
 
     if (callback)
         callback(window);
-
-#if !ENABLE_PLUGINS
-    window.taskQueue()
-        ->addSetupSteps([&]() {
-            Engine::Filesystem::FileManager mgr { "Layout" };
-            Engine::Serialize::FormattedSerializeStream file = mgr.openRead(Engine::Resources::ResourceManager::getSingleton().findResourceFile("default.layout"), std::make_unique<Engine::Serialize::XMLFormatter>());
-
-            if (file) {
-                Engine::Serialize::StreamResult result = Engine::Serialize::read(file, window, nullptr, {}, Engine::Serialize::StateTransmissionFlags_ApplyMap);
-                if (result.mState != Engine::Serialize::StreamState::OK) {
-                    LOG_ERROR(result);
-                    return false;
-                }
-                return true;
-            } else {
-                LOG_ERROR("Could not find default.layout!");
-                return false;
-            }
-        });
-#endif
 
     FIX_LOCAL Engine::KeyValueWorkGroupLocal<Engine::Input::UIManager> ui { "UI", app, window };
 

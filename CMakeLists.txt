@@ -37,6 +37,13 @@ if (MADGINE_CONFIGURATION)
 	if (NOT IS_ABSOLUTE ${MADGINE_CONFIGURATION})
 		set (MADGINE_CONFIGURATION ${CMAKE_SOURCE_DIR}/${MADGINE_CONFIGURATION} CACHE FILEPATH "A directory containing configuration data for a release build of the engine" FORCE)
 	endif ()
+
+	file(GLOB configs "${MADGINE_CONFIGURATION}/*.cmake")
+	foreach(config ${configs})
+		message(STATUS "Adding configuration-code: ${config}")
+		include (${config})
+	endforeach()
+
 endif()
 
 

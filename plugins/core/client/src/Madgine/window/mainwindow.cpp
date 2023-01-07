@@ -22,6 +22,10 @@
 
 #include "Modules/threading/awaitables/awaitabletimepoint.h"
 
+#include "Madgine/resources/resourcemanager.h"
+
+#include "Meta/serialize/formatter/xmlformatter.h"
+
 METATABLE_BEGIN(Engine::Window::MainWindow)
 READONLY_PROPERTY(Components, components)
 METATABLE_END(Engine::Window::MainWindow)
@@ -70,6 +74,38 @@ namespace Window {
     */
     MainWindow::~MainWindow() = default;
 
+    void MainWindow::saveLayout(const Filesystem::Path &path)
+    {
+        Filesystem::FileManager mgr { "Layout" };
+        Serialize::FormattedSerializeStream file = mgr.openWrite(path, std::make_unique<Serialize::XMLFormatter>());
+
+        if (file) {
+            Serialize::write(file, *this, "Layout");
+        } else {
+            LOG_ERROR("Failed to open \"" << path << "\" for write!");
+        }
+    }
+
+    bool MainWindow::loadLayout(const Filesystem::Path &path)
+    {
+        Filesystem::FileManager mgr { "Layout" };
+        Serialize::FormattedSerializeStream file = mgr.openRead(path, std::make_unique<Serialize::XMLFormatter>());
+
+        if (file) {
+            Serialize::StreamResult result = Serialize::read(file, *this, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap | Serialize::StateTransmissionFlags_Activation);
+            if (result.mState != Serialize::StreamState::OK) {
+                LOG_ERROR("Failed loading '" << path << "' with following Error: "
+                                             << "\n"
+                                             << result);
+                return false;
+            }
+            return true;
+        } else {
+            LOG_ERROR("Could not find default.layout!");
+            return false;
+        }
+    }
+
     /**
      * @brief 
      * @return 
@@ -83,15 +119,15 @@ namespace Window {
             settings.mData = sTestPositions.front();
             sTestPositions.pop();
         } else if (settings.mRestoreGeometry) {
-            Filesystem::FileManager mgr { "MainWindow-Layout" };
+            Filesystem::FileManager mgr { "MainWindow-Geometry" };
 
             Filesystem::Path path = Filesystem::appDataPath() / "mainwindow.ini";
 
             if (Serialize::FormattedSerializeStream in = mgr.openRead(path, std::make_unique<Serialize::IniFormatter>())) {
                 Serialize::StreamResult result = read(in, settings.mData, nullptr);
                 if (result.mState != Serialize::StreamState::OK) {
-                    LOG_ERROR("Error loading MainWindow-Layout from " << path << ": \n"
-                                                                      << result);
+                    LOG_ERROR("Error loading MainWindow-Geometry from " << path << ": \n"
+                                                                        << result);
                 }
             }
         }
@@ -108,6 +144,11 @@ namespace Window {
         }
 
         applyClientSpaceResize();
+
+#ifdef MADGINE_MAINWINDOW_LAYOUT
+        if (!loadLayout(Resources::ResourceManager::getSingleton().findResourceFile(STRINGIFY2(MADGINE_MAINWINDOW_LAYOUT))))
+            co_return false;
+#endif
 
         mTaskQueue.queue([this]() -> Threading::Task<void> {
             while (mTaskQueue.running()) {
@@ -318,7 +359,7 @@ namespace Window {
     {
         InterfacesVector storedWindowPosition = arg.windowPosition;
         for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
-            arg.windowPosition = storedWindowPosition - InterfacesVector{ comp->getClientSpace().mTopLeft.x, comp->getClientSpace().mTopLeft.y };
+            arg.windowPosition = storedWindowPosition - InterfacesVector { comp->getClientSpace().mTopLeft.x, comp->getClientSpace().mTopLeft.y };
             if (comp->injectPointerPress(arg))
                 return true;
         }

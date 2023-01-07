@@ -52,6 +52,8 @@ namespace Input {
         for (const std::unique_ptr<HandlerBase> &handler : mHandlers)
             co_await handler->callInit();
 
+        onUpdate();
+
         mWindow.taskQueue()->queue([this]() -> Threading::Task<void> {
             while (mWindow.taskQueue()->running()) {
                 updateRender();

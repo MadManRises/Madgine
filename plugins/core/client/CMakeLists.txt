@@ -17,6 +17,11 @@ target_link_plugin_groups(Client Renderer)
 
 target_link_libraries(Client PUBLIC Render Meta Modules)
 
+if (MADGINE_MAINWINDOW_LAYOUT)
+	target_compile_definitions(Client PRIVATE MADGINE_MAINWINDOW_LAYOUT=${MADGINE_MAINWINDOW_LAYOUT})
+endif ()
+
+
 project(ClientNodes)
 set(sources "")
 FolderSources(sources "" nodes)

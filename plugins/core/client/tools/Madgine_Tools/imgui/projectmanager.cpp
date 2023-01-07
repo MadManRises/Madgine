@@ -1,5 +1,4 @@
 #include "../clienttoolslib.h"
-#include "Madgine/serialize/filesystem/filesystemlib.h"
 
 #include "projectmanager.h"
 
@@ -18,12 +17,6 @@
 
 #include "Madgine/window/mainwindow.h"
 #include "clientimroot.h"
-
-#include "Meta/serialize/formatter/xmlformatter.h"
-
-#include "Madgine/serialize/filesystem/filemanager.h"
-
-#include "Meta/serialize/streams/serializestreamdata.h"
 
 #include "Meta/serialize/hierarchy/statetransmissionflags.h"
 
@@ -146,10 +139,9 @@ namespace Tools {
             }
             if (mProjectRoot.empty())
                 ImGui::EndDisabled();
+
             ImGui::Separator();
-            if (ImGui::MenuItem("Quit")) {
-                mWindow->osWindow()->close();
-            }
+
             ImGui::EndMenu();
         }
 
@@ -168,6 +160,13 @@ namespace Tools {
             ImGui::OpenPopup("NewLayout");
         }
 #endif
+
+        if (ImGui::BeginMenu("Project")) {
+            if (ImGui::MenuItem("Quit")) {
+                mWindow->osWindow()->close();
+            }
+            ImGui::EndMenu();
+        }
     }
 
 #if ENABLE_PLUGINS
@@ -181,7 +180,6 @@ namespace Tools {
 
             mProjectRoot = root;
 
-            
             if (!mProjectRoot.empty()) {
                 Resources::ResourceManager::getSingleton().registerResourceLocation(mProjectRoot / "data", 80);
             }
@@ -237,14 +235,7 @@ namespace Tools {
         Filesystem::createDirectory(folder);
         Filesystem::Path filePath = folder / (mLayout + ".layout");
 
-        Filesystem::FileManager file("Layout");
-        Serialize::FormattedSerializeStream out = file.openWrite(filePath, std::make_unique<Serialize::XMLFormatter>());
-
-        if (out) {
-            Serialize::write(out, *mWindow, "Layout");
-        } else {
-            LOG_ERROR("Failed to open \"" << filePath << "\" for write!");
-        }
+        mWindow->saveLayout(filePath);
     }
 
     void ProjectManager::load()
@@ -253,18 +244,8 @@ namespace Tools {
 
             Filesystem::Path filePath = mProjectRoot / "data" / (mLayout + ".layout");
 
-            Filesystem::FileManager file("Layout");
-            Serialize::FormattedSerializeStream in = file.openRead(filePath, std::make_unique<Serialize::XMLFormatter>());
-            if (in) {
-                Serialize::StreamResult result = Serialize::read(in, *mWindow, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap | Serialize::StateTransmissionFlags_Activation | Serialize::StateTransmissionFlags_SkipId);
-                if (result.mState != Serialize::StreamState::OK) {
-                    LOG_ERROR("Failed loading '" << filePath << "' with following Error: "
-                                                 << "\n"
-                                                 << result);
-                }
-            } else {
-                LOG_ERROR("File not found '" << filePath << "'!");
-            }
+            mWindow->loadLayout(filePath);
+
         }
     }
 

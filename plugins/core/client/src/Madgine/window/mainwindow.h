@@ -52,6 +52,9 @@ namespace Window {
         MainWindow(const WindowSettings &settings);
         ~MainWindow();
 
+        void saveLayout(const Filesystem::Path &path);
+        bool loadLayout(const Filesystem::Path &path);
+
         /**
      * @name MadgineObject interface
     */

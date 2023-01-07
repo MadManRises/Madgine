@@ -1,0 +1,1 @@
+set (MADGINE_MAINWINDOW_LAYOUT default.layout)

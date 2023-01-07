@@ -62,19 +62,11 @@ Engine::Threading::Task<bool> GameManager::init()
     mCamera.mPosition = { 0, 0, -10 };
     mCamera.mOrientation = {};
 
-    if (mGameWindow) {
-        mGameWindow->getRenderTarget()->addRenderPass(&mSceneRenderer);
-    }
-
     co_return co_await HandlerBase::init();
 }
 
 Engine::Threading::Task<void> GameManager::finalize()
 {
-    if (mGameWindow) {
-        mGameWindow->getRenderTarget()->removeRenderPass(&mSceneRenderer);
-    }
-
     co_await HandlerBase::finalize();
 }
 
