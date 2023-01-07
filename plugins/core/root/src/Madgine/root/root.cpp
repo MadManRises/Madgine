@@ -59,16 +59,14 @@ namespace Root {
                 Ini::IniFile file;
                 LOG("Saving Plugins to '" << path << "'");
                 mPluginManager->saveSelection(file, hasTools);
-                file.saveToDisk(path);
+                file.saveToDisk(path / "plugins.cfg");                
 
-                Filesystem::Path exportPath = path.parentPath() / ("components_" + std::string { path.stem() } + ".cpp");
-
-                exportStaticComponentHeader(exportPath, hasTools);
+                exportStaticComponentHeader(path / "components.cpp", hasTools);
             };
 
             Filesystem::Path p = *exportPlugins;
             helper(p, false);
-            Filesystem::Path p_tools = p.parentPath() / (std::string { p.stem() } + "_tools" + std::string { p.extension() });
+            Filesystem::Path p_tools = p.parentPath() / (std::string { p.stem() } + "_tools");
             helper(p_tools, true);
         }
 #endif
@@ -269,11 +267,11 @@ size_t UniqueComponent::component_index<)"
 
             if (reg->mIsNamed) {
                 file << R"(template <>
-std::map<std::string_view, size_t> )"
+const std::map<std::string_view, IndexType<uint32_t>> &)"
                      << reg->named_type_info()->mFullName
                      << R"(::sComponentsByName()
 {
-	return {
+    static std::map<std::string_view, IndexType<uint32_t>> mapping {
 )";
 
                 for (UniqueComponent::CollectorInfoBase *collector : *reg) {
@@ -293,6 +291,7 @@ std::map<std::string_view, size_t> )"
 
                 file << R"(
 	}; 
+    return mapping;
 }
 )";
             }

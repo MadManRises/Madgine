@@ -277,7 +277,7 @@ namespace UniqueComponent {
     template <typename _Base, typename... _Ty>
     struct NamedRegistry : Registry<_Base, _Ty...> {
 
-        static std::map<std::string_view, size_t> sComponentsByName();
+        static const std::map<std::string_view, IndexType<uint32_t>> &sComponentsByName();
     };
 
 }

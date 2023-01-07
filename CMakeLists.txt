@@ -28,6 +28,16 @@ if (MADGINE_AS_SDK)
 	set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} PARENT_SCOPE)
 endif(MADGINE_AS_SDK)
 
+set (MADGINE_CONFIGURATION "" CACHE FILEPATH "A directory containing configuration data for a release build of the engine")
+
+if (MADGINE_CONFIGURATION)
+	if (NOT EXISTS ${MADGINE_CONFIGURATION})
+		MESSAGE(FATAL_ERROR "The provided directory for MADGINE_CONFIGURATION does not exist: ${MADGINE_CONFIGURATION}")
+	endif ()
+	if (NOT IS_ABSOLUTE ${MADGINE_CONFIGURATION})
+		set (MADGINE_CONFIGURATION ${CMAKE_SOURCE_DIR}/${MADGINE_CONFIGURATION} CACHE FILEPATH "A directory containing configuration data for a release build of the engine" FORCE)
+	endif ()
+endif()
 
 
 include(Workspace)

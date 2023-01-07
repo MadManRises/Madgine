@@ -7,14 +7,24 @@ include(util/ini)
 include(Packaging)
 include(Shaders)
 
-set (PLUGIN_DEFINITION_FILE "" CACHE FILEPATH "Provide path to fixed plugin selection (optional)")
+set (PLUGIN_DEFINITION_FILE)
+
+if (MADGINE_CONFIGURATION)	
+	if (NOT EXISTS ${MADGINE_CONFIGURATION}/plugins.cfg)
+		MESSAGE(WARNING "You provided a configuration directory without a plugins.cfg in it. If this was intended, ignore this warning.")
+	else()
+		set(PLUGIN_DEFINITION_FILE ${MADGINE_CONFIGURATION}/plugins.cfg)
+		
+		MESSAGE(STATUS "Using ${PLUGIN_DEFINITION_FILE} for plugin selection.")
+	endif()
+endif ()
 
 set(MODULES_ENABLE_PLUGINS ON CACHE INTERNAL "")
 if (PLUGIN_DEFINITION_FILE)
 	set(MODULES_ENABLE_PLUGINS OFF CACHE INTERNAL "")
 	set(BUILD_SHARED_LIBS OFF CACHE BOOL "") #Provide default value OFF for given plugin config
 else()
-	set(BUILD_SHARED_LIBS ON CACHE BOOL "") #Provide default value ON for given plugin config
+	set(BUILD_SHARED_LIBS ON CACHE BOOL "") #Provide default value ON without given plugin config
 endif()
 
 if (MODULES_ENABLE_PLUGINS AND NOT BUILD_SHARED_LIBS)
@@ -26,38 +36,13 @@ set(PLUGIN_LIST "" CACHE INTERNAL "")
 
 if (NOT MODULES_ENABLE_PLUGINS)
 
-	MESSAGE(STATUS ${PLUGIN_DEFINITION_FILE})
-
-	if (NOT IS_ABSOLUTE ${PLUGIN_DEFINITION_FILE})
-		set (PLUGIN_DEFINITION_FILE ${CMAKE_SOURCE_DIR}/${PLUGIN_DEFINITION_FILE})
-	endif()
-
-	if (NOT EXISTS ${PLUGIN_DEFINITION_FILE})
-		MESSAGE(FATAL_ERROR "Config file ${PLUGIN_DEFINITION_FILE} not found! Please set PLUGIN_DEFINITION_FILE to a proper file if using MODULES_ENABLE_PLUGINS.")
-	endif()
-
-	get_filename_component(extension ${PLUGIN_DEFINITION_FILE} EXT)
-	if (NOT extension STREQUAL ".cfg")
-		MESSAGE(FATAL_ERROR "PLUGIN_DEFINITION_FILE ${PLUGIN_DEFINITION_FILE} must have extension .cfg!")
-	endif()
-
-	get_filename_component(PLUGIN_DEFINITION_NAME ${PLUGIN_DEFINITION_FILE} NAME_WE)
-	get_filename_component(PLUGIN_DEFINITION_DIR ${PLUGIN_DEFINITION_FILE} DIRECTORY)	
-	set(PLUGIN_DEFINITION_NAME ${PLUGIN_DEFINITION_NAME} CACHE INTERNAL "")
-	set(PLUGIN_DEFINITION_DIR ${PLUGIN_DEFINITION_DIR} CACHE INTERNAL "")
-
-	function(get_static_config_file var name ext)
-		set(${var} "${PLUGIN_DEFINITION_DIR}/${name}_${PLUGIN_DEFINITION_NAME}${ext}" PARENT_SCOPE)
-	endfunction(get_static_config_file)
-
 	read_ini_file(${PLUGIN_DEFINITION_FILE} PLUGINSELECTION)
 
 	function(patch_toplevel_target target)
 		get_target_property(target_flag ${target} PATCH_TOPLEVEL)
 		if (NOT target_flag)
-			set_target_properties(${target} PROPERTIES PATCH_TOPLEVEL TRUE)
-			get_static_config_file(components_source components ".cpp")
-			target_sources(${target} PRIVATE ${components_source})
+			set_target_properties(${target} PROPERTIES PATCH_TOPLEVEL TRUE)			
+			target_sources(${target} PRIVATE ${MADGINE_CONFIGURATION}/components.cpp)
 		endif()
 	endfunction(patch_toplevel_target)
 

@@ -70,7 +70,7 @@ def staticTask = {
     def name = toolchain.name + '-' + configuration.name + '-' + staticConfig.name
 	def parentName = toolchain.name + '-' + configuration.name  
 
-	def staticConfigFile = "../test/${staticConfig.name}_base.cfg"	
+	def staticConfigFile = "../test/configs/${staticConfig.name}_base.cfg"	
 
 	def archivePattern = toolchain.artifacts.collect{name + "/" + it}.join(",")
 
@@ -86,15 +86,15 @@ def staticTask = {
 				fi
 				mkdir -p ${name}
 				cd ${name}
+				mkdir -p config
+				rsync -ur ../test/configs/${staticConfig.name}/ config
 				if ../${parentName}/bin/MadgineLauncher -t \
 				--load-plugins ${staticConfigFile} \
-				--export-plugins plugins.cfg \
+				--export-plugins config/plugins.cfg \
 				--no-plugin-cache ; then
-					echo "Success"
+					echo "Generated config"
 				else
-					echo "generating failed! Falling back to repository version"
-					rsync -u ../test/${staticConfig.name}_tools.cfg plugins_tools.cfg
-					rsync -u ../test/components_${staticConfig.name}_tools.cpp components_plugins_tools.cpp
+					echo "Generating failed! Falling back to repository version"					
 				fi
 				"""
 			}
@@ -103,7 +103,7 @@ def staticTask = {
 				cd ${name}
 				cmake .. \
 				-DCMAKE_BUILD_TYPE=${configuration.name} \
-				-DPLUGIN_DEFINITION_FILE=plugins_tools.cfg \
+				-DMADGINE_CONFIGURATION=config \
 				-DBUILD_SHARED_LIBS=OFF \
 				${toolchain.args} \
 				${cmake_args}
@@ -226,6 +226,7 @@ pipeline {
         booleanParam(defaultValue: false, description: '', name: 'fullBuild')
 		booleanParam(defaultValue: false, description: '', name: 'timeTrace')
 		booleanParam(defaultValue: false, description: '', name: 'iwyu')
+		booleanParam(defaultValue: false, description: '', name: 'taskTracker')
     }
 
 	options{
@@ -244,12 +245,15 @@ pipeline {
         stage ("Multiconfiguration Parallel Tasks") {
 	        steps {
 			    script {
-					cmake_args = "-DUSE_CMAKE_LOG=1 -DMODULES_ENABLE_TASK_TRACKING=ON"
+					cmake_args = "-DUSE_CMAKE_LOG=1 "
 					if (params.timeTrace){
 						cmake_args = cmake_args + "-DCMAKE_CXX_FLAGS=-ftime-trace "
 					}
 					if (params.iwyu){
 						cmake_args = cmake_args + """-DCMAKE_CXX_INCLUDE_WHAT_YOU_USE="/home/jenkins/tools/usr/local/bin/include-what-you-use;-Xiwyu;--pch_in_code;-Xiwyu;--prefix_header_includes=remove" """
+					}
+					if (params.taskTracker){
+						cmake_args = cmake_args + "-DMODULES_ENABLE_TASK_TRACKING=ON "
 					}
 				    parallel tasks
 			    }

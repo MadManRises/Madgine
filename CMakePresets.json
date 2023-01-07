@@ -17,11 +17,7 @@
       "cacheVariables": {
         "CMAKE_DEBUG_POSTFIX": "",
         "CMAKE_MINSIZEREL_POSTFIX": "",
-        "CMAKE_RELWITHDEBINFO_POSTFIX": "",
-        "BUILD_SHARED_LIBS": {
-          "type": "BOOL",
-          "value": "True"
-        }
+        "CMAKE_RELWITHDEBINFO_POSTFIX": ""
       },
       "architecture": {
         "strategy": "external",
@@ -77,15 +73,15 @@
     {
       "name": "OpenGL",
       "displayName": "-OpenGL",
-      "description": "Uses OpenGL config as plugin definition file",
+      "description": "Uses OpenGL config as madgine configuration",
       "cacheVariables": {
-        "PLUGIN_DEFINITION_FILE": {
+        "MADGINE_CONFIGURATION": {
           "type": "FILEPATH",
-          "value": "${sourceDir}/test/OpenGL.cfg"
+          "value": "${sourceDir}/test/configs/OpenGL"
         },
         "BUILD_SHARED_LIBS": {
           "type": "BOOL",
-          "value": "False"
+          "value": "OFF"
         }
       },
       "hidden": true
@@ -94,11 +90,15 @@
       "name": "OpenGL-Tools",
       "inherits": "OpenGL",
       "displayName": "-OpenGL (Tools)",
-      "description": "Uses OpenGL including Tools config as plugin definition file",
+      "description": "Uses OpenGL including Tools config as madgine configuration",
       "cacheVariables": {
-        "PLUGIN_DEFINITION_FILE": {
+        "MADGINE_CONFIGURATION": {
           "type": "FILEPATH",
-          "value": "${sourceDir}/test/OpenGL_tools.cfg"
+          "value": "${sourceDir}/test/configs/OpenGL_tools"
+        },
+        "BUILD_SHARED_LIBS": {
+          "type": "BOOL",
+          "value": "OFF"
         }
       },
       "hidden": true
