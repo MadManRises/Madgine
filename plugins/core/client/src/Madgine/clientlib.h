@@ -14,6 +14,7 @@
 #    define MADGINE_CLIENT_EXPORT DLL_IMPORT
 #endif
 
+#include "clientconfig.h"
 
 #include "clientforward.h"
 

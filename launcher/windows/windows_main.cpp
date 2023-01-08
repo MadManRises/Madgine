@@ -11,6 +11,8 @@
 
 #include "Madgine/window/mainwindow.h"
 
+#include "launcherconfig.h"
+
 static const char *CreateWindowClass(HINSTANCE hInstance)
 {
     // Register class
@@ -86,7 +88,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 {
     std::function<void(Engine::Window::MainWindow &)> callback;
 
-#ifdef SPLASH_IMAGE
+#ifdef MADGINE_LAUNCHER_SPLASH_IMAGE
     const char *className = CreateWindowClass(hInstance);
 
     HWND splashWindow = CreateSplashWindow(hInstance, className);

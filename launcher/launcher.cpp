@@ -12,10 +12,16 @@
 
 #include "Madgine/input/uimanager.h"
 
+#include "launcherconfig.h"
+
 #if EMSCRIPTEN
 #    define FIX_LOCAL static
 #else
 #    define FIX_LOCAL
+#endif
+
+#ifndef MADGINE_LAUNCHER_WINDOW_TITLE
+#    define MADGINE_LAUNCHER_WINDOW_TITLE "Maditor"
 #endif
 
 int launch(std::function<void(Engine::Window::MainWindow &)> callback)
@@ -23,7 +29,7 @@ int launch(std::function<void(Engine::Window::MainWindow &)> callback)
     FIX_LOCAL Engine::KeyValueWorkGroupLocal<Engine::App::Application> app { "Application" };
 
     FIX_LOCAL Engine::Window::WindowSettings windowSettings;
-    windowSettings.mTitle = "Maditor";
+    windowSettings.mTitle = MADGINE_LAUNCHER_WINDOW_TITLE;
     FIX_LOCAL Engine::KeyValueWorkGroupLocal<Engine::Window::MainWindow> window { "MainWindow", windowSettings };
 
     if (callback)

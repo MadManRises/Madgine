@@ -28,7 +28,6 @@ namespace Tools {
         void save();
         void load();
 
-#if ENABLE_PLUGINS
         void setProjectRoot(const Filesystem::Path &root);
         void setLayout(const std::string &layout);
 
@@ -37,7 +36,6 @@ namespace Tools {
     private:
         Filesystem::Path mCurrentSelectionPath;
         Filesystem::Path mCurrentPath;
-#endif
 
     private:
         Window::MainWindow *mWindow = nullptr;

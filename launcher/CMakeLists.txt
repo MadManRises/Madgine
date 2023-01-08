@@ -44,8 +44,6 @@ elseif (IOS)
 endif()
 
 if (MADGINE_LAUNCHER_SPLASH_IMAGE)
-	target_compile_definitions(MadgineLauncher PRIVATE SPLASH_IMAGE="${MADGINE_LAUNCHER_SPLASH_IMAGE}")
-
 	if (WINDOWS)
 		string(REPLACE "\\" "\\\\" escaped_image ${MADGINE_LAUNCHER_SPLASH_IMAGE})
 		file(CONFIGURE OUTPUT resources.rc CONTENT "SPLASH BITMAP \"${escaped_image}\"")
@@ -53,6 +51,8 @@ if (MADGINE_LAUNCHER_SPLASH_IMAGE)
 	endif ()
 endif ()
 
+configure_file(launcherconfig.in.h launcherconfig.h)
+target_include_directories(MadgineLauncher PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
 target_depend_on_all_plugins(MadgineLauncher)
 

@@ -17,9 +17,8 @@ target_link_plugin_groups(Client Renderer)
 
 target_link_libraries(Client PUBLIC Render Meta Modules)
 
-if (MADGINE_MAINWINDOW_LAYOUT)
-	target_compile_definitions(Client PRIVATE MADGINE_MAINWINDOW_LAYOUT=${MADGINE_MAINWINDOW_LAYOUT})
-endif ()
+configure_file(src/Madgine/clientconfig.in.h clientconfig.h)
+target_include_directories(Client PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
 
 project(ClientNodes)

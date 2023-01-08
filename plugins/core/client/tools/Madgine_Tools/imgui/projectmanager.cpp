@@ -23,17 +23,13 @@
 #include "Interfaces/window/windowapi.h"
 
 METATABLE_BEGIN_BASE(Engine::Tools::ProjectManager, Engine::Tools::ToolBase)
-#if ENABLE_PLUGINS
 PROPERTY(ProjectRoot, projectRootString, setProjectRoot)
 PROPERTY(Layout, layout, setLayout)
-#endif
 METATABLE_END(Engine::Tools::ProjectManager)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::ProjectManager, Engine::Tools::ToolBase)
-#if ENABLE_PLUGINS
 ENCAPSULATED_FIELD(ProjectRoot, projectRoot, setProjectRoot)
 ENCAPSULATED_FIELD(Layout, layout, setLayout)
-#endif
 SERIALIZETABLE_END(Engine::Tools::ProjectManager)
 
 UNIQUECOMPONENT(Engine::Tools::ProjectManager)
@@ -50,11 +46,9 @@ namespace Tools {
     {
         mWindow = &static_cast<const ClientImRoot &>(mRoot).window();
 
-#if ENABLE_PLUGINS
         mWindow->taskQueue()->queue([this]() {
             load();
         });
-#endif
 
         co_return co_await ToolBase::init();
     }
@@ -72,7 +66,6 @@ namespace Tools {
 
     void ProjectManager::renderMenu()
     {
-#if ENABLE_PLUGINS
         ImGui::SetNextWindowSize({ 500, 400 }, ImGuiCond_FirstUseEver);
         if (ImGui::BeginPopupModal("OpenFolder")) {
 
@@ -142,6 +135,16 @@ namespace Tools {
 
             ImGui::Separator();
 
+            if (ImGui::MenuItem("Export Resources")) {
+                Resources::ResourceManager::getSingleton().writeResourceList("resources.list");
+            }
+
+            ImGui::Separator();
+
+            if (ImGui::MenuItem("Quit")) {
+                mWindow->osWindow()->close();
+            }
+
             ImGui::EndMenu();
         }
 
@@ -159,24 +162,9 @@ namespace Tools {
             layoutNameBuffer.clear();
             ImGui::OpenPopup("NewLayout");
         }
-#endif
 
-        if (ImGui::BeginMenu("Project")) {
-
-            if (ImGui::MenuItem("Export Resources")) {
-                Resources::ResourceManager::getSingleton().writeResourceList("resources.list");
-            }
-
-            ImGui::Separator();
-
-            if (ImGui::MenuItem("Quit")) {
-                mWindow->osWindow()->close();
-            }
-            ImGui::EndMenu();
-        }
     }
 
-#if ENABLE_PLUGINS
     void ProjectManager::setProjectRoot(const Filesystem::Path &root)
     {
         if (mProjectRoot != root) {
@@ -219,7 +207,6 @@ namespace Tools {
             load();
         }
     }
-#endif
 
     const Filesystem::Path &ProjectManager::projectRoot() const
     {
