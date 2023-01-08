@@ -89,9 +89,11 @@ def staticTask = {
 				mkdir -p config
 				rsync -ur ../test/configs/${staticConfig.name}/ config
 				if ../${parentName}/bin/MadgineLauncher -t \
-				--load-plugins ${staticConfigFile} \
-				--export-plugins config/plugins.cfg \
-				--no-plugin-cache ; then
+					--load-plugins ${staticConfigFile} \
+					--export-plugins config/plugins.cfg \
+					--export-resources config/resources.list \
+					--no-plugin-cache \
+				; then
 					echo "Generated config"
 				else
 					echo "Generating failed! Falling back to repository version"					

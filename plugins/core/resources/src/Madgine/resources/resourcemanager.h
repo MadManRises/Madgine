@@ -54,7 +54,7 @@ namespace Resources {
 
         Threading::TaskQueue *taskQueue();
 
-        void writeResourceList(const Filesystem::Path &path);
+        bool writeResourceList(const Filesystem::Path &path);
 
     private:
         void updateResources(Filesystem::FileEventType event, const Filesystem::Path &path, int priority);
@@ -63,6 +63,8 @@ namespace Resources {
         void updateResource(Filesystem::FileEventType event, const Filesystem::Path &path, int priority, const std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> &loaderByExtension);
 
         std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> getLoaderByExtension();
+
+        void enumerateResources();
 
     private:
         struct SubDirCompare {
@@ -73,7 +75,7 @@ namespace Resources {
 
         std::map<Filesystem::Path, int, SubDirCompare> mResourcePaths;
 
-        SystemVariable<bool, false> mInitialized;
+        SystemVariable<bool, false> mEnumerated;
 
         Threading::TaskQueue mIOQueue;
     };

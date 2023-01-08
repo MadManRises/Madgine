@@ -21,10 +21,14 @@
 
 #include "Modules/threading/awaitables/awaitabletimepoint.h"
 
+#include "Madgine/cli/parameter.h"
+
 UNIQUECOMPONENT(Engine::Resources::ResourceManager)
 
 namespace Engine {
 namespace Resources {
+
+    CLI::Parameter<std::string> exportResources { { "--export-resources", "-er" }, "", "If set the resource manager will write all available resources to the specified list file." };
 
     static ResourceManager *sSingleton = nullptr;
 
@@ -45,6 +49,11 @@ namespace Resources {
             mIOQueue.addSetupSteps(
                 [this]() { return callInit(); },
                 [this]() { return callFinalize(); });
+        } else if (!exportResources->empty()) {
+            enumerateResources();
+
+            if (!writeResourceList(*exportResources))
+                mErrorCode = -1;
         }
     }
 
@@ -68,14 +77,16 @@ namespace Resources {
         if (b) {
             mFileWatcher.addWatch(absolutePath);
 
-            if (mInitialized) {
+            if (mEnumerated) {
                 updateResources(Filesystem::FileEventType::FILE_CREATED, path, priority);
             }
         }
     }
 
-    bool ResourceManager::init()
+    void ResourceManager::enumerateResources()
     {
+        assert(!mEnumerated);
+
 #if ENABLE_PLUGINS
         for (auto &section : Plugins::PluginManager::getSingleton()) {
             for (std::pair<const std::string, Plugins::Plugin> &p : section.second) {
@@ -104,6 +115,13 @@ namespace Resources {
             updateResources(Filesystem::FileEventType::FILE_CREATED, p.first, p.second, loaderByExtension);
         }
 
+        mEnumerated = true;
+    }
+
+    bool ResourceManager::init()
+    {
+        enumerateResources();
+
         mIOQueue.queue([this]() -> Threading::Task<void> {
             while (mIOQueue.running()) {
                 update();
@@ -111,16 +129,12 @@ namespace Resources {
             }
         });
 
-        mInitialized = true;
-
         return true;
     }
 
     void ResourceManager::finalize()
     {
         mFileWatcher.clear();
-
-        mInitialized = false;
     }
 
     Filesystem::Path ResourceManager::findResourceFile(const std::string &fileName)
@@ -147,7 +161,7 @@ namespace Resources {
 
     void ResourceManager::waitForInit()
     {
-        mInitialized.wait();
+        mEnumerated.wait();
     }
 
     Threading::TaskQueue *ResourceManager::taskQueue()
@@ -211,18 +225,21 @@ namespace Resources {
         return loaderByExtension;
     }
 
-    void ResourceManager::writeResourceList(const Filesystem::Path &path)
+    bool ResourceManager::writeResourceList(const Filesystem::Path &path)
     {
         std::ofstream out { path };
         if (out) {
+            LOG("Writing Resource list to '" << path << "'");
             for (const std::unique_ptr<ResourceLoaderBase> &loader : mCollector) {
                 for (ResourceBase *res : loader->resources()) {
                     if (!res->path().empty())
                         out << res->path() << "\n";
                 }
             }
+            return true;
         } else {
             LOG_ERROR("Opening " << path << " for write failed!");
+            return false;
         }
     }
 
