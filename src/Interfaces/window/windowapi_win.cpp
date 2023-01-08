@@ -385,6 +385,13 @@ namespace Window {
                 return nullptr;
         }
 
+        if (settings.mIcon) {
+            HICON icon = (HICON)LoadImage(GetModuleHandle(nullptr), (LPCSTR)settings.mIcon, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
+            SendMessage(handle, WM_SETICON, ICON_SMALL, (LPARAM)icon);
+            SendMessage(handle, WM_SETICON, ICON_BIG, (LPARAM)icon);
+            //DestroyIcon(icon);
+        }
+
         if (!settings.mHidden) {
             UINT showCmd = settings.mData.mMaximized ? SW_SHOWMAXIMIZED : SW_SHOW;
             if (settings.mData.mPosition.x >= 0 && settings.mData.mPosition.y >= 0) {

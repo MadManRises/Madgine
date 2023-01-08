@@ -21,6 +21,8 @@ namespace Window {
         bool mHeadless = false;
 
         bool mRestoreGeometry = true;
+
+        uintptr_t mIcon = 0;
     };
 
 }

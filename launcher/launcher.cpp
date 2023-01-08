@@ -30,6 +30,7 @@ int launch(std::function<void(Engine::Window::MainWindow &)> callback)
 
     FIX_LOCAL Engine::Window::WindowSettings windowSettings;
     windowSettings.mTitle = MADGINE_LAUNCHER_WINDOW_TITLE;
+    windowSettings.mIcon = MADGINE_LAUNCHER_ICON;
     FIX_LOCAL Engine::KeyValueWorkGroupLocal<Engine::Window::MainWindow> window { "MainWindow", windowSettings };
 
     if (callback)

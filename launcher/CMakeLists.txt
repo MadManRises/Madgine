@@ -1,5 +1,7 @@
 
 set(MADGINE_LAUNCHER_SPLASH_IMAGE "" CACHE FILEPATH "Path to an image file for the applications splash screen")
+set(MADGINE_LAUNCHER_WINDOW_TITLE "" CACHE STRING "Title of the Main window of the game")
+set(MADGINE_LAUNCHER_ICON "${CMAKE_SOURCE_DIR}/test/madgineIcon.ico" CACHE FILEPATH "Path to an image file for the applications tray icon")
 
 set(sources "")
 FolderSources(sources "" "" launcher.cpp main.cpp terminate_handler.cpp)
@@ -43,12 +45,10 @@ elseif (IOS)
     target_link_libraries(MadgineLauncher PRIVATE "-framework UIKit")
 endif()
 
-if (MADGINE_LAUNCHER_SPLASH_IMAGE)
-	if (WINDOWS)
-		string(REPLACE "\\" "\\\\" escaped_image ${MADGINE_LAUNCHER_SPLASH_IMAGE})
-		file(CONFIGURE OUTPUT resources.rc CONTENT "SPLASH BITMAP \"${escaped_image}\"")
-		target_sources(MadgineLauncher PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/resources.rc)
-	endif ()
+if (WINDOWS)
+	configure_file(windows/resources.in.rc resources.rc)
+	configure_file(windows/resources.in.h resources.h)
+	target_sources(MadgineLauncher PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/resources.rc)
 endif ()
 
 configure_file(launcherconfig.in.h launcherconfig.h)
@@ -63,6 +63,5 @@ install_to_workspace(Madgine TARGETS MadgineLauncher)
 
 file(GLOB lists "${MADGINE_CONFIGURATION}/*.list")
 if (lists)
-
 	collect_data_lists("${lists}")
 endif()

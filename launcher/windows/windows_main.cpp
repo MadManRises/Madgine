@@ -93,9 +93,11 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 
     HWND splashWindow = CreateSplashWindow(hInstance, className);
 
-    HBITMAP bitmap = (HBITMAP)LoadImage(hInstance, "SPLASH", IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR);
+    HBITMAP bitmap = (HBITMAP)LoadImage(hInstance, MAKEINTRESOURCE(MADGINE_LAUNCHER_SPLASH_IMAGE), IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR);
 
     SetSplashImage(splashWindow, bitmap);
+
+    DeleteObject(bitmap);
 
     callback = [=](Engine::Window::MainWindow &window) {
         window.taskQueue()->queue([=]() {
