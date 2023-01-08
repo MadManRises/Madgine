@@ -114,7 +114,7 @@ namespace Root {
     {
         Filesystem::Path p = pStr;
         if (p.isRelative())
-            p = Filesystem::Path { BINARY_OUT_DIR } / p;
+            p = Filesystem::Path { BINARY_DIR } / p;
         return p.relative(binInfo->mSourceRoot).str();
     };
 

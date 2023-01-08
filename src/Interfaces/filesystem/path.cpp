@@ -225,6 +225,12 @@ namespace Filesystem {
         return !isAbsolute();
     }
 
+    bool Path::isRelative(const Path &base) const
+    {
+        auto [firstEnd, secondEnd] = std::mismatch(mPath.begin(), mPath.end(), base.str().begin(), base.str().end());
+        return secondEnd == base.str().end();
+    }
+
     void Path::clear()
     {
         mPath.clear();

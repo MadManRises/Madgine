@@ -232,8 +232,15 @@ namespace Resources {
             LOG("Writing Resource list to '" << path << "'");
             for (const std::unique_ptr<ResourceLoaderBase> &loader : mCollector) {
                 for (ResourceBase *res : loader->resources()) {
-                    if (!res->path().empty())
-                        out << res->path() << "\n";
+                    Filesystem::Path path = res->path();
+                    if (!path.empty() && !path.isRelative(BINARY_DIR)) {
+                        if (path.isRelative(SOURCE_DIR)) {
+                            out << path.relative(SOURCE_DIR);
+                        } else {
+                            out << path;
+                        }
+                        out << "\n";
+                    }
                 }
             }
             return true;

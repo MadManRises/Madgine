@@ -101,6 +101,7 @@ macro(collect_data_lists lists)
 	set(MADGINE_DATA_LISTS "${lists}" CACHE INTERNAL "")	
 	add_custom_target(
 		copy_data ALL
-		COMMAND ${CMAKE_COMMAND} "-DLISTS=\"${lists}\"" -DTARGET=${CMAKE_BINARY_DIR}/data -P ${workspace_file_dir}/util/listcopy.cmake
+		COMMAND ${CMAKE_COMMAND} "-DLISTS=\"${lists}\"" -DTARGET=${CMAKE_BINARY_DIR}/data -DBINARY_DIR=${CMAKE_BINARY_DIR} -P ${workspace_file_dir}/util/listcopy.cmake
+		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 	)
 endmacro()
