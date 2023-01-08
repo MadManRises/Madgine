@@ -23,7 +23,7 @@ FolderSources(sources "" tools)
 add_tools(Bullet ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/bullettoolslib.h SOURCE_ROOT tools)
 
 target_link_plugins(BulletTools Bullet ClientTools)
-target_link_libraries(BulletTools PRIVATE LinearMath)
+target_link_libraries(BulletTools PRIVATE BulletCollision LinearMath)
 
 if (BUILD_TESTING)
 	add_subdirectory(test)

@@ -1,3 +1,5 @@
+SET(CMAKE_DEBUG_POSTFIX "" CACHE STRING "" FORCE) #Some libs set this value
+
 set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_FBX_IMPORTER ON)
@@ -5,6 +7,7 @@ set(ASSIMP_BUILD_COLLADA_IMPORTER ON)
 set(ASSIMP_BUILD_STL_IMPORTER ON)
 set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 set(ASSIMP_WARNINGS_AS_ERRORS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 add_subdirectory(assimp-5.2.5)
 
 install_to_workspace(assimp TARGETS assimp EXPORT_LIB)
@@ -12,6 +15,8 @@ install_to_workspace(assimp TARGETS assimp EXPORT_LIB)
 export_to_workspace(assimp)
 
 set(DISABLE_FORCE_DEBUG_POSTFIX ON)
+set(FT_DISABLE_ZLIB ON CACHE BOOL "" FORCE)
+#comment definition of FT_CONFIG_OPTION_USE_ZLIB out in ftconfig.h
 add_subdirectory(freetype-2.12.1)
 set_target_properties(freetype PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
