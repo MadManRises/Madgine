@@ -53,7 +53,7 @@ macro(add_plugin name base type)
 
 	set(options NO_DATA_COPY)
 	set(oneValueArgs)
-	set(multiValueArgs)
+	set(multiValueArgs EXTERNAL_DEPS)
 	cmake_parse_arguments(PLUGIN_CONFIG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})	
 
 	add_workspace_library(${name} ${PLUGIN_CONFIG_UNPARSED_ARGUMENTS})
@@ -84,6 +84,7 @@ macro(add_plugin name base type)
 
 	if (installPlugin)
 		install_to_workspace(${name} TARGETS ${name} EXPORT_LIB)
+		install_to_workspace(${name} TARGETS ${PLUGIN_CONFIG_EXTERNAL_DEPS})
 		export_to_workspace(${name})
 
 		cpack_add_component(${name} GROUP ${type})
