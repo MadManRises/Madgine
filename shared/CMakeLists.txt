@@ -12,7 +12,7 @@ install_to_workspace(assimp TARGETS assimp EXPORT_LIB)
 export_to_workspace(assimp)
 
 set(DISABLE_FORCE_DEBUG_POSTFIX ON)
-add_subdirectory(freetype-2.10.1)
+add_subdirectory(freetype-2.12.1)
 set_target_properties(freetype PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 add_subdirectory(msdfgen)
