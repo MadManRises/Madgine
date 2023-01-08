@@ -16,7 +16,7 @@ namespace Ini {
 
         void clear();
 
-        void saveToDisk(const Filesystem::Path &path) const;
+        bool saveToDisk(const Filesystem::Path &path) const;
         bool loadFromDisk(const Filesystem::Path &path);
 
         std::map<std::string, IniSection>::iterator begin();

@@ -26,14 +26,18 @@ namespace Ini {
         mSections.clear();
     }
 
-    void IniFile::saveToDisk(const Filesystem::Path &path) const
+    bool IniFile::saveToDisk(const Filesystem::Path &path) const
     {
         Stream stream = Filesystem::openFileWrite(path);
-        assert(stream);
+        if (!stream) {
+            LOG_ERROR("Opening " << path << " for write failed!");
+            return false;
+        }
         for (const std::pair<const std::string, IniSection> &p : mSections) {
             stream << "[" << p.first << "]\n";
             p.second.save(stream);
         }
+        return true;
     }
 
     bool IniFile::loadFromDisk(const Filesystem::Path &path)

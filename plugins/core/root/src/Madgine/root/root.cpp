@@ -23,6 +23,8 @@
 
 #include "Interfaces/util/standardlog.h"
 
+#include "Interfaces/filesystem/api.h"
+
 namespace Engine {
 namespace Root {
 
@@ -54,14 +56,17 @@ namespace Root {
         mErrorCode = mPluginManager->setup(!noPluginCache, mCLI->mProgramPath.stem(), loadPlugins);
         mCollectorManager = std::make_unique<UniqueComponent::CollectorManager>(*mPluginManager);
 
-        if (!exportPlugins->empty()) {
+        if (mErrorCode == 0 && !exportPlugins->empty()) {
+
             auto helper = [this](const Filesystem::Path &path, bool hasTools) {
+                Filesystem::createDirectories(path);
                 Ini::IniFile file;
                 LOG("Saving Plugins to '" << path << "'");
                 mPluginManager->saveSelection(file, hasTools);
-                file.saveToDisk(path / "plugins.cfg");                
-
-                exportStaticComponentHeader(path / "components.cpp", hasTools);
+                if (!file.saveToDisk(path / "plugins.cfg"))
+                    mErrorCode = -1;
+                else
+                    exportStaticComponentHeader(path / "components.cpp", hasTools);
             };
 
             Filesystem::Path p = *exportPlugins;
@@ -79,6 +84,9 @@ namespace Root {
 
         for (std::unique_ptr<RootComponentBase> &component : *mComponents) {
             KeyValueRegistry::registerGlobal(component->key().data(), component.get());
+
+            if (mErrorCode == 0)
+                mErrorCode = component->mErrorCode;
         }
     }
 

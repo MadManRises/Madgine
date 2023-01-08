@@ -1,50 +1,50 @@
 #include "Modules/moduleslib.h"
 #include "Modules/uniquecomponent/uniquecomponent.h"
 #include "Modules/uniquecomponent/uniquecomponentregistry.h"
-#if defined(BUILD_SceneRenderer)
-#include "Madgine/scenerendererlib.h"
-#endif
-#if defined(BUILD_ClientNodes)
-#include "Madgine/clientnodeslib.h"
-#endif
 #if defined(BUILD_FontLoader)
 #include "Madgine/fontloaderlib.h"
-#endif
-#if defined(BUILD_ImageLoader)
-#include "Madgine/imageloaderlib.h"
-#endif
-#if defined(BUILD_UI)
-#include "Madgine/uilib.h"
-#endif
-#if defined(BUILD_Root)
-#include "Madgine/rootlib.h"
-#endif
-#if defined(BUILD_Client)
-#include "Madgine/clientlib.h"
-#endif
-#if defined(BUILD_App)
-#include "Madgine/applib.h"
-#endif
-#if defined(BUILD_OpenGL)
-#include "OpenGL/opengllib.h"
-#endif
-#if defined(BUILD_Scene)
-#include "Madgine/scenelib.h"
-#endif
-#if defined(BUILD_NodeGraph)
-#include "Madgine/nodegraphlib.h"
 #endif
 #if defined(BUILD_Widgets)
 #include "Madgine/widgetslib.h"
 #endif
-#if defined(BUILD_AnimationLoader)
-#include "Madgine/animationloaderlib.h"
+#if defined(BUILD_Client)
+#include "Madgine/clientlib.h"
+#endif
+#if defined(BUILD_ClientNodes)
+#include "Madgine/clientnodeslib.h"
+#endif
+#if defined(BUILD_SceneRenderer)
+#include "Madgine/scenerendererlib.h"
+#endif
+#if defined(BUILD_Root)
+#include "Madgine/rootlib.h"
+#endif
+#if defined(BUILD_App)
+#include "Madgine/applib.h"
+#endif
+#if defined(BUILD_UI)
+#include "Madgine/uilib.h"
+#endif
+#if defined(BUILD_OpenGL)
+#include "OpenGL/opengllib.h"
 #endif
 #if defined(BUILD_SkeletonLoader)
 #include "Madgine/skeletonloaderlib.h"
 #endif
+#if defined(BUILD_AnimationLoader)
+#include "Madgine/animationloaderlib.h"
+#endif
+#if defined(BUILD_Scene)
+#include "Madgine/scenelib.h"
+#endif
 #if defined(BUILD_ClickBrick)
 #include "clickbricklib.h"
+#endif
+#if defined(BUILD_NodeGraph)
+#include "Madgine/nodegraphlib.h"
+#endif
+#if defined(BUILD_ImageLoader)
+#include "Madgine/imageloaderlib.h"
 #endif
 #if defined(BUILD_MeshLoader)
 #include "Madgine/meshloaderlib.h"
@@ -65,11 +65,15 @@
 #if defined(BUILD_FontLoader) && defined(BUILD_Resources)
 #include "Madgine/fontloader/fontloader.h"
 #endif
-#if defined(BUILD_ImageLoader) && defined(BUILD_Resources)
-#include "Madgine/imageloader/imageloader.h"
+#if defined(BUILD_Client)
+#include "Madgine/render/rendercontextcollector.h"
+#include "Madgine/window/mainwindowcomponentcollector.h"
 #endif
-#if defined(BUILD_UI)
-#include "Madgine/input/handlercollector.h"
+#if defined(BUILD_Widgets) && defined(BUILD_Client)
+#include "Madgine/widgets/widgetmanager.h"
+#endif
+#if defined(BUILD_Client) && defined(BUILD_SceneRenderer)
+#include "Madgine/render/scenemainwindowcomponent.h"
 #endif
 #if defined(BUILD_Root)
 #include "Madgine/root/rootcomponentcollector.h"
@@ -77,15 +81,11 @@
 #if defined(BUILD_Root) && defined(BUILD_Resources)
 #include "Madgine/resources/resourcemanager.h"
 #endif
-#if defined(BUILD_Client)
-#include "Madgine/render/rendercontextcollector.h"
-#include "Madgine/window/mainwindowcomponentcollector.h"
-#endif
-#if defined(BUILD_SceneRenderer) && defined(BUILD_Client)
-#include "Madgine/render/scenemainwindowcomponent.h"
-#endif
 #if defined(BUILD_App)
 #include "Madgine/app/globalapicollector.h"
+#endif
+#if defined(BUILD_UI)
+#include "Madgine/input/handlercollector.h"
 #endif
 #if defined(BUILD_OpenGL) && defined(BUILD_Resources)
 #include "OpenGL/openglmeshloader.h"
@@ -95,6 +95,12 @@
 #endif
 #if defined(BUILD_OpenGL) && defined(BUILD_Client)
 #include "OpenGL/openglrendercontext.h"
+#endif
+#if defined(BUILD_SkeletonLoader) && defined(BUILD_Resources)
+#include "Madgine/skeletonloader/skeletonloader.h"
+#endif
+#if defined(BUILD_AnimationLoader) && defined(BUILD_Resources)
+#include "Madgine/animationloader/animationloader.h"
 #endif
 #if defined(BUILD_Scene)
 #include "Madgine/scene/entity/components/animation.h"
@@ -108,6 +114,15 @@
 #endif
 #if defined(BUILD_Scene) && defined(BUILD_App)
 #include "Madgine/scene/scenemanager.h"
+#endif
+#if defined(BUILD_ClickBrick) && defined(BUILD_UI)
+#include "gamehandler.h"
+#include "gamemanager.h"
+#include "gameoverhandler.h"
+#include "mainmenuhandler.h"
+#endif
+#if defined(BUILD_Scene) && defined(BUILD_ClickBrick)
+#include "brick.h"
 #endif
 #if defined(BUILD_NodeGraph)
 #include "Madgine/nodegraph/nodecollector.h"
@@ -128,23 +143,8 @@
 #include "Madgine/client/nodes/meshrenderernode.h"
 #include "Madgine/client/nodes/rasterizernode.h"
 #endif
-#if defined(BUILD_Widgets) && defined(BUILD_Client)
-#include "Madgine/widgets/widgetmanager.h"
-#endif
-#if defined(BUILD_AnimationLoader) && defined(BUILD_Resources)
-#include "Madgine/animationloader/animationloader.h"
-#endif
-#if defined(BUILD_SkeletonLoader) && defined(BUILD_Resources)
-#include "Madgine/skeletonloader/skeletonloader.h"
-#endif
-#if defined(BUILD_ClickBrick) && defined(BUILD_UI)
-#include "gamehandler.h"
-#include "gamemanager.h"
-#include "gameoverhandler.h"
-#include "mainmenuhandler.h"
-#endif
-#if defined(BUILD_Scene) && defined(BUILD_ClickBrick)
-#include "brick.h"
+#if defined(BUILD_ImageLoader) && defined(BUILD_Resources)
+#include "Madgine/imageloader/imageloader.h"
 #endif
 #if defined(BUILD_MeshLoader) && defined(BUILD_Resources)
 #include "Madgine/meshloader/meshloader.h"
@@ -380,7 +380,7 @@ std::vector<Engine::Window::MainWindowComponentRegistry::F> Engine::Window::Main
 {
 	return {
 #endif
-#if defined(BUILD_SceneRenderer) && defined(BUILD_Client)
+#if defined(BUILD_Client) && defined(BUILD_SceneRenderer)
 		UniqueComponent::createComponent<Engine::Render::SceneMainWindowComponent>,
 #endif
 #if defined(BUILD_Widgets) && defined(BUILD_Client)
@@ -396,14 +396,14 @@ std::vector<Engine::Window::MainWindowComponentRegistry::F> Engine::Window::Main
 #    define ACC 0
 
 #endif
-#if defined(BUILD_SceneRenderer) && defined(BUILD_Client)
+#if defined(BUILD_Client) && defined(BUILD_SceneRenderer)
 constexpr size_t CollectorBaseIndex_MainWindowComponentBase_SceneRenderer = ACC;
 #endif
-#if defined(BUILD_SceneRenderer) && defined(BUILD_Client)
+#if defined(BUILD_Client) && defined(BUILD_SceneRenderer)
 template <>
 size_t UniqueComponent::component_index<Engine::Render::SceneMainWindowComponent>() { return CollectorBaseIndex_MainWindowComponentBase_SceneRenderer + 0; }
 #endif
-#if defined(BUILD_SceneRenderer) && defined(BUILD_Client)
+#if defined(BUILD_Client) && defined(BUILD_SceneRenderer)
 #        undef ACC
 #        define ACC CollectorBaseIndex_MainWindowComponentBase_SceneRenderer + 1
 #endif

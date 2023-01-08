@@ -22,13 +22,13 @@ foreach(list ${LISTS})
 
 endforeach()
 
-file(GLOB targetFiles "${TARGET}/*")
-foreach(file ${targetFiles})
-	get_filename_component(name ${file} NAME)
-	if (NOT ${name} IN_LIST filenames)
-		MESSAGE(STATUS "Removing old file: ${name}")
-		file(REMOVE ${file})
-	endif()
-endforeach()
+#file(GLOB targetFiles "${TARGET}/*")
+#foreach(file ${targetFiles})
+#	get_filename_component(name ${file} NAME)
+#	if (NOT ${name} IN_LIST filenames)
+#		MESSAGE(STATUS "Removing old file: ${name}")
+#		file(REMOVE ${file})
+#	endif()
+#endforeach()
 
 

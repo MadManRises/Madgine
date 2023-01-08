@@ -90,7 +90,7 @@ def staticTask = {
 				rsync -ur ../test/configs/${staticConfig.name}/ config
 				if ../${parentName}/bin/MadgineLauncher -t \
 					--load-plugins ${staticConfigFile} \
-					--export-plugins config/plugins.cfg \
+					--export-plugins config \
 					--export-resources config/resources.list \
 					--no-plugin-cache \
 				; then
