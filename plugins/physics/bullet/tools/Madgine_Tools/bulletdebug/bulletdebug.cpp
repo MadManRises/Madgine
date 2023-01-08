@@ -15,7 +15,7 @@
 #include "Madgine/physics/physicsmanager.h"
 #include "Madgine/scene/scenemanager.h"
 
-#include "bullet3-2.89/src/BulletSoftBody/btSoftRigidDynamicsWorld.h"
+#include "bullet3-3.24/src/BulletSoftBody/btSoftRigidDynamicsWorld.h"
 
 namespace Engine {
 namespace Tools {

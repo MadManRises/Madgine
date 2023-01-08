@@ -16,7 +16,7 @@
 
 #include "rigidbody.h"
 
-#include "bullet3-2.89/src/BulletSoftBody/btSoftRigidDynamicsWorld.h"
+#include "bullet3-3.24/src/BulletSoftBody/btSoftRigidDynamicsWorld.h"
 
 ENTITYCOMPONENT_IMPL(RigidBody, Engine::Physics::RigidBody)
 

@@ -18,9 +18,9 @@
 
 #include "rigidbody.h"
 
-#include "bullet3-2.89/src/BulletSoftBody/btSoftBody.h"
-#include "bullet3-2.89/src/BulletSoftBody/btSoftBodyHelpers.h"
-#include "bullet3-2.89/src/BulletSoftBody/btSoftRigidDynamicsWorld.h"
+#include "bullet3-3.24/src/BulletSoftBody/btSoftBody.h"
+#include "bullet3-3.24/src/BulletSoftBody/btSoftBodyHelpers.h"
+#include "bullet3-3.24/src/BulletSoftBody/btSoftRigidDynamicsWorld.h"
 
 ENTITYCOMPONENT_IMPL(SoftBodySkeleton, Engine::Physics::SoftBodySkeleton)
 

@@ -46,8 +46,8 @@ set(BUILD_TESTING OFF)
 set (BUILD_UNIT_TESTS OFF CACHE BOOL "" FORCE)
 set (BUILD_EXTRAS OFF CACHE BOOL "" FORCE)
 set (BUILD_BULLET2_DEMOS OFF CACHE BOOL "" FORCE)
-add_subdirectory(bullet3-2.89)
-target_include_directories(LinearMath PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/bullet3-2.89/src>)
+add_subdirectory(bullet3-3.24)
+target_include_directories(LinearMath PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/bullet3-3.24/src>)
 
 install_to_workspace(BulletLib TARGETS BulletDynamics BulletCollision LinearMath EXPORT_LIB)
 

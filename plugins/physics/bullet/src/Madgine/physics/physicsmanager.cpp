@@ -13,8 +13,8 @@
 
 #include "Madgine/scene/scenemanager.h"
 
-#include "bullet3-2.89/src/BulletSoftBody/btSoftRigidDynamicsWorld.h"
-#include "bullet3-2.89/src/btBulletDynamicsCommon.h"
+#include "bullet3-3.24/src/BulletSoftBody/btSoftRigidDynamicsWorld.h"
+#include "bullet3-3.24/src/btBulletDynamicsCommon.h"
 
 UNIQUECOMPONENT(Engine::Physics::PhysicsManager)
 
