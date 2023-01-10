@@ -1,3 +1,7 @@
-<svg width="16px" height="16px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-x-lg">
-  <path d="M1.293 1.293a1 1 0 0 1 1.414 0L8 6.586l5.293-5.293a1 1 0 1 1 1.414 1.414L9.414 8l5.293 5.293a1 1 0 0 1-1.414 1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L6.586 8 1.293 2.707a1 1 0 0 1 0-1.414z"/>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Svg Vector Icons : http://www.onlinewebfonts.com/icon -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 1000 1000" enable-background="new 0 0 1000 1000" xml:space="preserve">
+<metadata> Svg Vector Icons : http://www.onlinewebfonts.com/icon </metadata>
+<g><g><g><path d="M909.8,797L649.9,500l259.8-297c44.2-44.2,44.2-115.8,0-159.9C865.6-1,794-1,749.8,43.1L500,328.7L250.2,43.1C206-1,134.4-1,90.2,43.1c-44.2,44.2-44.2,115.8,0,159.9l259.8,297L90.2,797c-44.2,44.2-44.2,115.8,0,159.9c44.2,44.2,115.8,44.2,159.9,0L500,671.3l249.8,285.6c44.2,44.2,115.8,44.2,159.9,0C953.9,912.7,953.9,841.1,909.8,797z"/></g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></g>
 </svg>
