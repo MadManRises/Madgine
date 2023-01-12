@@ -13,9 +13,9 @@ namespace Threading {
         TaskQueue(const std::string &name, bool wantsMainThread = false);
         ~TaskQueue();
 
-        void queueHandle(TaskHandle task, const std::vector<Threading::DataMutex *> &dependencies = {});
-        void queueHandle_after(TaskHandle task, std::chrono::steady_clock::duration duration, const std::vector<Threading::DataMutex *> &dependencies = {});
-        void queueHandle_for(TaskHandle task, std::chrono::steady_clock::time_point time_point, const std::vector<Threading::DataMutex *> &dependencies = {});
+        void queueHandle(TaskHandle task);
+        void queueHandle_after(TaskHandle task, std::chrono::steady_clock::duration duration);
+        void queueHandle_for(TaskHandle task, std::chrono::steady_clock::time_point time_point);
 
         template <typename T>
         TaskFuture<T> queueTask(Task<T> task)
@@ -71,7 +71,7 @@ namespace Threading {
         void decreaseTaskInFlightCount();
         size_t tasksInFlightCount() const;
 
-        TaskHandle fetch(std::chrono::steady_clock::time_point &nextTask, int &taskCount);
+        TaskHandle fetch(std::chrono::steady_clock::time_point &nextTask);
 
         bool idle() const;
 

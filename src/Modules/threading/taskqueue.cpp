@@ -43,8 +43,14 @@ namespace Threading {
     std::chrono::steady_clock::time_point TaskQueue::update(int taskCount)
     {
         std::chrono::steady_clock::time_point nextAvailableTaskTime = std::chrono::steady_clock::time_point::max();
-        while (TaskHandle task = fetch(nextAvailableTaskTime, taskCount)) {
+        while (TaskHandle task = fetch(nextAvailableTaskTime)) {
             task();
+            if (taskCount > 0) {
+                --taskCount;
+                if (taskCount == 0) {
+                    return std::chrono::steady_clock::time_point::min();
+                }
+            }
         }
         return nextAvailableTaskTime;
     }
@@ -69,17 +75,17 @@ namespace Threading {
         mCv.notify_all();
     }
 
-    void TaskQueue::queueHandle(TaskHandle task, const std::vector<Threading::DataMutex *> &dependencies)
+    void TaskQueue::queueHandle(TaskHandle task)
     {
         queueInternal({ std::move(task) });
     }
 
-    void TaskQueue::queueHandle_after(TaskHandle task, std::chrono::steady_clock::duration duration, const std::vector<Threading::DataMutex *> &dependencies)
+    void TaskQueue::queueHandle_after(TaskHandle task, std::chrono::steady_clock::duration duration)
     {
         queueHandle_for(std::move(task), std::chrono::steady_clock::now() + duration);
     }
 
-    void TaskQueue::queueHandle_for(TaskHandle task, std::chrono::steady_clock::time_point time_point, const std::vector<Threading::DataMutex *> &dependencies)
+    void TaskQueue::queueHandle_for(TaskHandle task, std::chrono::steady_clock::time_point time_point)
     {
         queueInternal({ std::move(task), time_point });
     }
@@ -99,7 +105,7 @@ namespace Threading {
         return mTaskInFlightCount;
     }
 
-    TaskHandle TaskQueue::fetch(std::chrono::steady_clock::time_point &nextTask, int &taskCount)
+    TaskHandle TaskQueue::fetch(std::chrono::steady_clock::time_point &nextTask)
     {
         //TODO use taskCount
         std::chrono::steady_clock::time_point nextTaskTimepoint = nextTask;
