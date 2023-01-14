@@ -1,3 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <path fill="var(--ci-primary-color, currentColor)" d="M47.547,63.547V448.453a16,16,0,0,0,16,16H448.453a16,16,0,0,0,16-16V63.547a16,16,0,0,0-16-16H63.547A16,16,0,0,0,47.547,63.547Zm288.6,16h96.3v96.3h-96.3Zm0,128.3h96.3v96.3h-96.3Zm0,128.3h96.3v96.3h-96.3Zm-128.3-256.6h96.3v96.3h-96.3Zm0,128.3h96.3v96.3h-96.3Zm0,128.3h96.3v96.3h-96.3Zm-128.3-256.6h96.3v96.3h-96.3Zm0,128.3h96.3v96.3h-96.3Zm0,128.3h96.3v96.3h-96.3Z" class="ci-primary"/>
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+<line x1="11" x2="11" y2="48" stroke="black" stroke-width="2"/>
+<line x1="24" x2="24" y2="50" stroke="black" stroke-width="2"/>
+<line x1="37" x2="37" y2="48" stroke="black" stroke-width="2"/>
+<line y1="11" x2="48" y2="11" stroke="black" stroke-width="2"/>
+<line y1="24" x2="48" y2="24" stroke="black" stroke-width="2"/>
+<line y1="37" x2="48" y2="37" stroke="black" stroke-width="2"/>
 </svg>
