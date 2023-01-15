@@ -13,8 +13,19 @@ struct Rect2 {
         return *this;
     }
 
-    float bottom() const {
+    float right() const
+    {
+        return mTopLeft.x + mSize.x;
+    }
+
+    float bottom() const
+    {
         return mTopLeft.y + mSize.y;
+    }
+
+    Vector2 bottomRight() const
+    {
+        return mTopLeft + mSize;
     }
 };
 
