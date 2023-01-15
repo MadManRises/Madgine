@@ -14,6 +14,7 @@ namespace Widgets {
         BAR,
         IMAGE,
         TABLEWIDGET,
-        TABBAR)
+        TABBAR,
+        TEXTEDIT)
 }
 }

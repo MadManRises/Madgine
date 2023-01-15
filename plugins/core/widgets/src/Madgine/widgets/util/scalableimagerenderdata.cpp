@@ -82,34 +82,31 @@ namespace Widgets {
             bottomRightUV.y -= mBottomBorder * uvSize.y / imageSize.y;
         }
 
-        WidgetsVertexData &target = renderData.mVertexData[{ 0 }];
-
-        target.renderQuad(pos, size, color, topLeftUV, bottomRightUV);
+        renderData.renderQuad(pos, size, color, {}, topLeftUV, bottomRightUV);
 
         if (mLeftBorder > 0)
-            target.renderQuad({ posOuter.x, pos.y, pos.z }, { static_cast<float>(mLeftBorder), size.y }, color, { topLeftUVOuter.x, topLeftUV.y }, { topLeftUV.x, bottomRightUV.y });
+            renderData.renderQuad({ posOuter.x, pos.y, pos.z }, { static_cast<float>(mLeftBorder), size.y }, color, {}, { topLeftUVOuter.x, topLeftUV.y }, { topLeftUV.x, bottomRightUV.y });
 
         if (mTopBorder > 0)
-            target.renderQuad({ pos.x, posOuter.y, pos.z }, { size.x, static_cast<float>(mTopBorder) }, color, { topLeftUV.x, topLeftUVOuter.y }, { bottomRightUV.x, topLeftUV.y });
+            renderData.renderQuad({ pos.x, posOuter.y, pos.z }, { size.x, static_cast<float>(mTopBorder) }, color, {}, { topLeftUV.x, topLeftUVOuter.y }, { bottomRightUV.x, topLeftUV.y });
 
         if (mRightBorder > 0)
-            target.renderQuad({ pos.x + size.x, pos.y, pos.z }, { static_cast<float>(mRightBorder), size.y }, color, { bottomRightUV.x, topLeftUV.y }, { bottomRightUVOuter.x, bottomRightUV.y });
+            renderData.renderQuad({ pos.x + size.x, pos.y, pos.z }, { static_cast<float>(mRightBorder), size.y }, color, {}, { bottomRightUV.x, topLeftUV.y }, { bottomRightUVOuter.x, bottomRightUV.y });
 
         if (mBottomBorder > 0)
-            target.renderQuad({ pos.x, pos.y + size.y, pos.z }, { size.x, static_cast<float>(mBottomBorder) }, color, { topLeftUV.x, bottomRightUV.y }, { bottomRightUV.x, bottomRightUVOuter.y });
+            renderData.renderQuad({ pos.x, pos.y + size.y, pos.z }, { size.x, static_cast<float>(mBottomBorder) }, color, {}, { topLeftUV.x, bottomRightUV.y }, { bottomRightUV.x, bottomRightUVOuter.y });
 
         if (mLeftBorder > 0 && mTopBorder > 0)
-            target.renderQuad(posOuter, { static_cast<float>(mLeftBorder), static_cast<float>(mTopBorder) }, color, topLeftUVOuter, topLeftUV);
+            renderData.renderQuad(posOuter, { static_cast<float>(mLeftBorder), static_cast<float>(mTopBorder) }, color, {}, topLeftUVOuter, topLeftUV);
 
         if (mRightBorder > 0 && mBottomBorder > 0)
-            target.renderQuad({ pos.x + size.x, pos.y + size.y, pos.z }, { static_cast<float>(mRightBorder), static_cast<float>(mBottomBorder) }, color, bottomRightUV, bottomRightUVOuter);
+            renderData.renderQuad({ pos.x + size.x, pos.y + size.y, pos.z }, { static_cast<float>(mRightBorder), static_cast<float>(mBottomBorder) }, color, {}, bottomRightUV, bottomRightUVOuter);
 
         if (mLeftBorder > 0 && mBottomBorder > 0)
-            target.renderQuad({ posOuter.x, pos.y + size.y, pos.z }, { static_cast<float>(mLeftBorder), static_cast<float>(mBottomBorder) }, color, { topLeftUVOuter.x, bottomRightUV.y }, { topLeftUV.x, bottomRightUVOuter.y });
+            renderData.renderQuad({ posOuter.x, pos.y + size.y, pos.z }, { static_cast<float>(mLeftBorder), static_cast<float>(mBottomBorder) }, color, {}, { topLeftUVOuter.x, bottomRightUV.y }, { topLeftUV.x, bottomRightUVOuter.y });
 
         if (mRightBorder > 0 && mTopBorder > 0)
-            target.renderQuad({ pos.x + size.x, posOuter.y, pos.z }, { static_cast<float>(mRightBorder), static_cast<float>(mTopBorder) }, color, { bottomRightUV.x, topLeftUVOuter.y }, { bottomRightUVOuter.x, topLeftUV.y });
-
+            renderData.renderQuad({ pos.x + size.x, posOuter.y, pos.z }, { static_cast<float>(mRightBorder), static_cast<float>(mTopBorder) }, color, {}, { bottomRightUV.x, topLeftUVOuter.y }, { bottomRightUVOuter.x, topLeftUV.y });
     }
 
 }

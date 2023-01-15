@@ -123,7 +123,7 @@ namespace Widgets {
                     pos.y + y,
                     pos.z + 0.4f
                 };
-                renderData.mLineData.renderLine(leftPoint, rightPoint);
+                renderData.renderLine(leftPoint, rightPoint);
             }
         }
 
@@ -141,7 +141,7 @@ namespace Widgets {
                     pos.y + fullHeight,
                     pos.z + 0.4f
                 };
-                renderData.mLineData.renderLine(topPoint, bottomPoint);
+                renderData.renderLine(topPoint, bottomPoint);
             }
         }
     }
@@ -149,7 +149,12 @@ namespace Widgets {
     void TableWidget::sizeChanged(const Vector3i &pixelSize)
     {
         if (mTextRenderData.available()) {
-            SizeConstraints rowHeightConstraints = mTextRenderData.calculateHeightConstraints();
+            float lineHeight = mTextRenderData.calculateLineHeight();
+            SizeConstraints rowHeightConstraints {
+                lineHeight + 2.0f,
+                lineHeight + 6.0f,
+                lineHeight + 12.0f
+            };
             mHorizontalLayoutRenderData.update(mRowCount, rowHeightConstraints, pixelSize.y);
         }
         mVerticalLayoutRenderData.update(mColumnConfigs, pixelSize.x);

@@ -57,9 +57,14 @@ namespace Engine {
 namespace Widgets {
 
     Textbox::Textbox(WidgetManager &manager, WidgetBase *parent)
-        : Widget(manager, parent)
+        : Widget(manager, parent, true)
     {
         stb_textedit_initialize_state(&mState, true);
+    }
+
+    bool Textbox::editable() const
+    {
+        return false;
     }
 
     void Textbox::setEditable(bool b)
@@ -96,19 +101,19 @@ namespace Widgets {
 
     void Textbox::injectPointerClick(const Input::PointerEventArgs &arg)
     {
-        stb_textedit_click(this, &mState, arg.screenPosition.x, arg.screenPosition.y);
+        stb_textedit_click(this, &mState, arg.windowPosition.x, arg.windowPosition.y);
         WidgetBase::injectPointerClick(arg);
     }
 
     void Textbox::injectDragBegin(const Input::PointerEventArgs &arg)
     {
-        stb_textedit_click(this, &mState, arg.screenPosition.x, arg.screenPosition.y);
+        stb_textedit_click(this, &mState, arg.windowPosition.x, arg.windowPosition.y);
         WidgetBase::injectDragBegin(arg);
     }
 
     void Textbox::injectDragMove(const Input::PointerEventArgs &arg)
     {
-        stb_textedit_drag(this, &mState, arg.screenPosition.x, arg.screenPosition.y);
+        stb_textedit_drag(this, &mState, arg.windowPosition.x, arg.windowPosition.y);
         WidgetBase::injectDragMove(arg);
     }
 
@@ -135,22 +140,21 @@ namespace Widgets {
             return;
 
         assert(i == 0);
-        Vector2 pos = getAbsolutePosition();
+        Vector2 pos = Vector2::ZERO;
         Vector3 size = getAbsoluteSize();
         Rect2 bb = mTextRenderData.calculateBoundingBox(mText, pos, size);
-        row->baseline_y_delta = bb.mSize.y;
+        row->baseline_y_delta = bb.mTopLeft.y + bb.mSize.y;
         row->num_chars = mText.size();
         row->x0 = bb.mTopLeft.x;
         row->x1 = bb.mTopLeft.x + bb.mSize.x;
-        row->ymax = 39; //TODO
-        row->ymin = -19;
+        row->ymax = bb.mTopLeft.y + bb.mSize.y;
+        row->ymin = bb.mTopLeft.y;
     }
 
     float Textbox::calculateWidth(size_t i, size_t n)
     {
-        assert(n == 0);
 
-        return mTextRenderData.calculateWidth(StringUtil::substr(mText, i, i + 1), getAbsoluteSize().z);
+        return mTextRenderData.calculateWidth(mText.at(i), getAbsoluteSize().z);
     }
 }
 }

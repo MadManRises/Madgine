@@ -45,7 +45,7 @@ namespace Widgets {
         Vector3 pos { getAbsolutePosition(), static_cast<float>(depth(layer)) };
         Vector3 size = getAbsoluteSize();
 
-        renderData.mVertexData[{mTarget->texture()}].renderQuad(pos, size.xy());
+        renderData.renderQuad(pos, size.xy(), { 1.0f, 1.0f, 1.0f, 1.0f }, { mTarget->texture() });
     }
 
     Render::RenderTarget *SceneWindow::getRenderTarget()

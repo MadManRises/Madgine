@@ -20,6 +20,7 @@
 #include "tablewidget.h"
 #include "textbox.h"
 #include "tabbar.h"
+#include "textedit.h"
 
 #include "Madgine/imageloader/imagedata.h"
 
@@ -70,7 +71,8 @@ namespace Widgets {
         "Bar",
         "Image",
         "TableWidget",
-        "TabBar"
+        "TabBar",
+        "TextEdit"
     };
 
     static float sDragDistanceThreshold = 2.0f;
@@ -183,6 +185,7 @@ namespace Widgets {
     template std::unique_ptr<SceneWindow> WidgetManager::create<SceneWindow>(WidgetBase *);
     template std::unique_ptr<Image> WidgetManager::create<Image>(WidgetBase *);
     template std::unique_ptr<TableWidget> WidgetManager::create<TableWidget>(WidgetBase *);
+    template std::unique_ptr<TextEdit> WidgetManager::create<TextEdit>(WidgetBase *);
 
     template <typename WidgetType>
     WidgetType *WidgetManager::createTopLevel()
@@ -220,6 +223,8 @@ namespace Widgets {
             return create<TableWidget>(parent);
         case WidgetClass::TABBAR:
             return create<TabBar>(parent);
+        case WidgetClass::TEXTEDIT:
+            return create<TextEdit>(parent);
         default:
             std::terminate();
         }
@@ -582,7 +587,7 @@ namespace Widgets {
             perApp->screenSize = Vector2 { mClientSpace.mSize };
         }
 
-        for (auto &[tex, vertexData] : renderData.mVertexData) {
+        for (auto &[tex, vertexData] : renderData.vertexData()) {
             if (vertexData.mTriangleVertices.empty())
                 continue;
 
@@ -601,7 +606,7 @@ namespace Widgets {
 
             mData->mPipeline->renderMesh(mData->mMesh);
         }
-        if (!renderData.mLineData.mLineVertices.empty()) {
+        if (!renderData.lineVertices().empty()) {
             {
                 auto parameters = mData->mPipeline->mapParameters<WidgetsPerObject>(2);
                 parameters->hasDistanceField = false;
@@ -610,7 +615,7 @@ namespace Widgets {
 
             mData->mPipeline->bindTextures({ { mData->mUIAtlasTexture->mTextureHandle, Render::TextureType_2D } });
 
-            mData->mMesh.update({ 2, std::move(renderData.mLineData.mLineVertices) });
+            mData->mMesh.update({ 2, std::move(renderData.lineVertices()) });
 
             mData->mPipeline->renderMesh(mData->mMesh);
         }
