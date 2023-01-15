@@ -70,7 +70,13 @@ namespace Window {
                 case WM_SYSKEYDOWN:
                     mKeyDown[keycode] = std::numeric_limits<BYTE>::max();
                     WORD buffer;
-                    ToAscii(keycode, scancode, mKeyDown, &buffer, 0);
+                    switch (keycode) {
+                    case Input::Key::Key::Return:
+                        buffer = '\n';
+                        break;
+                    default:
+                        ToAscii(keycode, scancode, mKeyDown, &buffer, 0);
+                    }
                     injectKeyPress(Input::KeyEventArgs { keycode, static_cast<char>(buffer) });
                     break;
                 case WM_KEYUP:
