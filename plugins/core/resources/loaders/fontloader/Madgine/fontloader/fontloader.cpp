@@ -155,12 +155,10 @@ namespace Render {
         font.mAscender = face->size->metrics.ascender;
         font.mDescender = face->size->metrics.descender;
 
-        std::vector<Vector2i> sizes;
-        sizes.resize(128);
-        std::vector<Vector2i> extendedSizes;
-        extendedSizes.resize(128);
+        std::array<Vector2i, Font::sFontGlyphCount> sizes;
+        std::array<Vector2i, Font::sFontGlyphCount> extendedSizes;        
 
-        for (unsigned char c = 0; c < 128; c++) {
+        for (unsigned char c = 0; c < Font::sFontGlyphCount; c++) {
             // Load character glyph
             if (FT_Load_Char(face, c, FT_LOAD_DEFAULT)) {
                 LOG_ERROR("FREETYTPE: Failed to load Glyph");
@@ -199,7 +197,7 @@ namespace Render {
         std::unique_ptr<std::array<unsigned char, 4>[]> texBuffer = std::make_unique<std::array<unsigned char, 4>[]>(byteSize);
         AreaView<std::array<unsigned char, 4>, 2> tex { texBuffer.get(), { static_cast<size_t>(font.mTextureSize.x), static_cast<size_t>(font.mTextureSize.y) } };
 
-        for (unsigned char c = 0; c < 128; c++) {
+        for (unsigned char c = 0; c < Font::sFontGlyphCount; c++) {
 
             // Load character glyph
             if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
@@ -259,7 +257,7 @@ namespace Render {
 
         FT_Set_Pixel_Sizes(face, 0, 24);
 
-        for (unsigned char c = 0; c < 128; c++) {
+        for (unsigned char c = 0; c < Font::sFontGlyphCount; c++) {
             // Load character glyph
             if (FT_Load_Char(face, c, FT_LOAD_DEFAULT)) {
                 LOG_ERROR("FREETYTPE: Failed to load Glyph");
@@ -274,7 +272,7 @@ namespace Render {
         entries = atlas.insert(
             extendedSizes, expand, true);
 
-        for (unsigned char c = 0; c < 128; c++) {
+        for (unsigned char c = 0; c < Font::sFontGlyphCount; c++) {
 
             // Load character glyph
             if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {

@@ -14,7 +14,8 @@ namespace Render {
         //TextureHandle *mTextureHandle;
         Vector2i mTextureSize;
 
-        std::array<Glyph, 128> mGlyphs;
+        static constexpr size_t sFontGlyphCount = 255;
+        std::array<Glyph, sFontGlyphCount> mGlyphs;
 
         int mAscender;
         int mDescender;

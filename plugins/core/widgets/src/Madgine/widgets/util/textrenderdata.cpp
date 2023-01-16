@@ -136,7 +136,7 @@ namespace Widgets {
             if (c == line.mEnd)
                 break;
 
-            const Render::Glyph &g = font->mGlyphs[*c];
+            const Render::Glyph &g = font->mGlyphs[static_cast<unsigned char>(*c)];
 
             float width = g.mSize.x * scale;
             float height = g.mSize.y * scale;

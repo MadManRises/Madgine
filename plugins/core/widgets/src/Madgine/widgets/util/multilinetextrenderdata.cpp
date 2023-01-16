@@ -131,7 +131,7 @@ namespace Widgets {
         float lastSpaceWidth = 0.0f;
         float lastSpaceGlyphWidth = 0.0f;
         for (const char *cursor = sol; cursor != end; ++cursor) {
-            const Render::Glyph &g = font->mGlyphs[*cursor];
+            const Render::Glyph &g = font->mGlyphs[static_cast<unsigned char>(*cursor)];
 
             float width = g.mAdvance / 64.0f * scale;
 
