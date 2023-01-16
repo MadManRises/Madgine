@@ -77,12 +77,12 @@ namespace Window {
                     default:
                         ToAscii(keycode, scancode, mKeyDown, &buffer, 0);
                     }
-                    injectKeyPress(Input::KeyEventArgs { keycode, static_cast<char>(buffer) });
+                    injectKeyPress(Input::KeyEventArgs { keycode, static_cast<char>(buffer), controlKeyState() });
                     break;
                 case WM_KEYUP:
                 case WM_SYSKEYUP:
                     mKeyDown[keycode] = 0;
-                    injectKeyRelease(Input::KeyEventArgs { keycode, 0 });
+                    injectKeyRelease(Input::KeyEventArgs { keycode, 0, controlKeyState() });
                     break;
                 default:
                     LOG("Unknown KeyEvent " << msg);
@@ -137,6 +137,15 @@ namespace Window {
             }
 
             return true;
+        }
+
+        Input::ControlKeyState controlKeyState() const
+        {
+            return {
+                (bool)mKeyDown[Input::Key::Shift],
+                (bool)mKeyDown[Input::Key::Control],
+                (bool)mKeyDown[Input::Key::Alt]
+            };
         }
 
         BYTE mKeyDown[512];

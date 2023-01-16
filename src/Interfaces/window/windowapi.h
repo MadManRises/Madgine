@@ -87,14 +87,10 @@ namespace Window {
         //Input
         bool injectKeyPress(const Input::KeyEventArgs &arg)
         {
-            if (arg.scancode == Input::Key::Shift)
-                return false;
             return mListener->injectKeyPress(arg);
         }
         bool injectKeyRelease(const Input::KeyEventArgs &arg)
         {
-            if (arg.scancode == Input::Key::Shift)
-                return false;
             return mListener->injectKeyRelease(arg);
         }
         bool injectPointerPress(const Input::PointerEventArgs &arg)

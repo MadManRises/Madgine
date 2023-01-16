@@ -105,14 +105,25 @@ namespace Window {
             switch (eventType) {
             case EMSCRIPTEN_EVENT_KEYDOWN:
                 _this->mKeyDown[keyEvent->keyCode] = true;
-                return _this->injectKeyPress({ static_cast<Input::Key::Key>(keyEvent->code[0]), keyEvent->key[0] });
+                return _this->injectKeyPress({ static_cast<Input::Key::Key>(keyEvent->code[0]), keyEvent->key[0], controlKeyState() });
             case EMSCRIPTEN_EVENT_KEYUP:
                 _this->mKeyDown[keyEvent->keyCode] = false;
-                return _this->injectKeyRelease({ static_cast<Input::Key::Key>(keyEvent->code[0]), 0 });
+                return _this->injectKeyRelease({ static_cast<Input::Key::Key>(keyEvent->code[0]), 0, controlKeyState() });
             }
 
             return EM_FALSE;
         }
+
+        
+        Input::ControlKeyState controlKeyState() const
+        {
+            return {
+                mKeyDown[Input::Key::Shift],
+                mKeyDown[Input::Key::Control],
+                mKeyDown[Input::Key::Alt]
+            };
+        }
+
 
         InterfacesVector mSize;
         InterfacesVector mLastMousePosition;
