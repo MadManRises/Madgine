@@ -14,8 +14,8 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
-#include "Madgine/render/rendertarget.h"
 #include "Madgine/render/rendercontext.h"
+#include "Madgine/render/rendertarget.h"
 
 #include "Modules/debug/profiler/profile.h"
 
@@ -282,7 +282,7 @@ namespace Tools {
 
     void ClientImRoot::addRenderTarget(Render::RenderTarget *target)
     {
-        addDependency(target);        
+        addDependency(target);
     }
 
     void ClientImRoot::removeRenderTarget(Render::RenderTarget *target)
@@ -321,9 +321,6 @@ namespace Tools {
             MainWindowComponentBase::render(target, iteration);
 
             ImGuiIO &io = ImGui::GetIO();
-            io.KeyShift = mWindow.osWindow()->isKeyDown(Input::Key::Shift);
-            io.KeyCtrl = mWindow.osWindow()->isKeyDown(Input::Key::Control);
-            io.KeyAlt = mWindow.osWindow()->isKeyDown(Input::Key::Alt);
 
             io.MouseWheel += mZAxis * 0.3f;
 
@@ -392,6 +389,10 @@ namespace Tools {
 
         io.AddInputCharacter(arg.text);
 
+        io.KeyShift = arg.mControlKeys.mShift;
+        io.KeyCtrl = arg.mControlKeys.mCtrl;
+        io.KeyAlt = arg.mControlKeys.mAlt;
+
         return io.WantCaptureKeyboard;
     }
 
@@ -400,6 +401,10 @@ namespace Tools {
         ImGuiIO &io = ImGui::GetIO();
 
         io.KeysDown[arg.scancode] = false;
+
+        io.KeyShift = arg.mControlKeys.mShift;
+        io.KeyCtrl = arg.mControlKeys.mCtrl;
+        io.KeyAlt = arg.mControlKeys.mAlt;
 
         return io.WantCaptureKeyboard;
     }
