@@ -329,6 +329,43 @@ namespace Window {
         }(icon)));
     }
 
+    std::string OSWindow::getClipboardString()
+    {
+        std::string result;
+        if (OpenClipboard(NULL)) {
+            HANDLE handle = GetClipboardData(CF_TEXT);
+            if (handle != NULL) {
+                result = (const char *)GlobalLock(handle);
+                GlobalUnlock(handle);
+            }
+            CloseClipboard();
+        }
+        return result;
+    }
+
+    bool OSWindow::setClipboardString(std::string_view s)
+    {
+        if (!OpenClipboard(NULL))
+            return false;
+
+        HGLOBAL handle = GlobalAlloc(GMEM_MOVEABLE, s.size() + 1);
+        if (handle == NULL) {
+            CloseClipboard();
+            return false;
+        }
+        char *buffer = (char *)GlobalLock(handle);
+        std::strncpy(buffer, s.data(), s.size());
+        GlobalUnlock(handle);
+        EmptyClipboard();
+        if (SetClipboardData(CF_TEXT, handle) == NULL) {
+            GlobalFree(handle);
+            CloseClipboard();
+            return false;
+        }
+        CloseClipboard();
+        return true;
+    }
+
     WindowData OSWindow::data()
     {
         WINDOWPLACEMENT wndpl;

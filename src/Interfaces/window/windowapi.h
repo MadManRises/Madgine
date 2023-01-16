@@ -65,6 +65,11 @@ namespace Window {
 
         void setCursorIcon(Input::CursorIcon icon);
 
+        //Clipboard
+        static std::string getClipboardString();
+        static bool setClipboardString(std::string_view s);
+
+
         const uintptr_t mHandle;
 
     protected:
