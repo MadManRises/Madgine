@@ -128,7 +128,7 @@ namespace Widgets {
                 float startY = originY - ref.mBearing.y * scale;
 
                 if (useSmallSize)
-                    renderData.renderQuadUV({ pos.x + startX, pos.y + startY, pos.z + 0.6f }, { width, cursorHeight }, color, tex, { cursor.mUV2, cursor.mSize }, font->mTextureSize, cursor.mFlipped2);
+                    renderData.renderQuadUV({ pos.x + startX, pos.y + startY, pos.z + 0.6f }, { width, cursorHeight }, color, tex, { cursor.mUV2, cursor.mSize2 }, font->mTextureSize, cursor.mFlipped2);
                 else
                     renderData.renderQuadUV({ pos.x + startX, pos.y + startY, pos.z + 0.6f }, { width, cursorHeight }, color, tex, { cursor.mUV, cursor.mSize }, font->mTextureSize, cursor.mFlipped);
             }

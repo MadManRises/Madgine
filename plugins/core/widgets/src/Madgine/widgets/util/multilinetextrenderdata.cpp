@@ -36,6 +36,11 @@ namespace Widgets {
         mLines = calculateLines(text, size.xy(), mFont, size.z * mFontSize, loc);
     }
 
+    float MultilineTextRenderData::calculateTotalHeight(float z)
+    {
+        return calculateTotalHeight(mLines.size(), mFont, z * mFontSize);
+    }
+
     void MultilineTextRenderData::renderText(WidgetsRenderData &renderData, const std::vector<Line> &lines, Vector3 pos, Vector2 size, const Render::Font *font, float fontSize, Color4 color, Vector2 pivot, int cursorIndex)
     {
         float scale = fontSize / 64.0f;
@@ -154,6 +159,11 @@ namespace Widgets {
         lines.push_back({ sol, end, currentLineWidth });
 
         return lines;
+    }
+
+    float MultilineTextRenderData::calculateTotalHeight(size_t lineCount, const Render::Font *font, float fontSize)
+    {
+        return lineCount * calculateLineHeight(font, fontSize);
     }
 
 }

@@ -52,7 +52,6 @@ MEMBER(mVerticalScroll)
 METATABLE_END(Engine::Widgets::TextEdit)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::TextEdit, Engine::Widgets::WidgetBase)
-ENCAPSULATED_FIELD(mText, text, setText)
 FIELD(mTextRenderData)
 FIELD(mImageRenderData)
 ENCAPSULATED_FIELD(Border, border, setBorder)
@@ -210,7 +209,9 @@ namespace Widgets {
     bool TextEdit::injectAxisEvent(const Input::AxisEventArgs &arg)
     {
         if (arg.mAxisType == Input::AxisEventArgs::WHEEL) {
-            mVerticalScroll -= 50.0f * arg.mAxis1;
+            float textHeight = mTextRenderData.calculateTotalHeight(getAbsoluteTextSize().z);
+            float maxScroll = max(textHeight - getAbsoluteTextSize().y, 0.0f);
+            mVerticalScroll = clamp(mVerticalScroll - 50.0f * arg.mAxis1, 0.0f, maxScroll);
         }
         return WidgetBase::injectAxisEvent(arg);
     }

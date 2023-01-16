@@ -48,7 +48,6 @@ NAMED_MEMBER(Image, mImageRenderData)
 METATABLE_END(Engine::Widgets::Textbox)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::Textbox, Engine::Widgets::WidgetBase)
-FIELD(mText)
 FIELD(mTextRenderData)
 FIELD(mImageRenderData)
 SERIALIZETABLE_END(Engine::Widgets::Textbox)
