@@ -8,7 +8,9 @@
 
 #include "Interfaces/input/inputevents.h"
 
-#define STB_TEXTEDIT_KEYTYPE uint16_t
+#include "Interfaces/window/windowapi.h"
+
+#define STB_TEXTEDIT_KEYTYPE uint32_t
 
 #define STB_TEXTEDIT_STRING Engine::Widgets::TextEdit
 #define STB_TEXTEDIT_STRINGLEN(obj) obj->size()
@@ -20,9 +22,9 @@
 #define STB_TEXTEDIT_DELETECHARS(obj, i, n) obj->erase(i, n)
 #define STB_TEXTEDIT_INSERTCHARS(obj, i, c, n) obj->insert(i, { c, static_cast<size_t>(n) })
 
-#define STB_TEXTEDIT_K(key) (static_cast<uint16_t>(key) << 8)
+#define STB_TEXTEDIT_K(key) (static_cast<uint32_t>(key) << 8)
 
-#define STB_TEXTEDIT_K_SHIFT STB_TEXTEDIT_K(Engine::Input::Key::Shift)
+#define STB_TEXTEDIT_K_SHIFT 0x10000
 #define STB_TEXTEDIT_K_LEFT STB_TEXTEDIT_K(Engine::Input::Key::LeftArrow)
 #define STB_TEXTEDIT_K_RIGHT STB_TEXTEDIT_K(Engine::Input::Key::RightArrow)
 #define STB_TEXTEDIT_K_UP STB_TEXTEDIT_K(Engine::Input::Key::UpArrow)
@@ -69,6 +71,7 @@ namespace Widgets {
     {
         mText = text;
         mTextRenderData.updateText(text, getAbsoluteTextSize());
+        stb_textedit_clamp(this, &mState);
     }
 
     std::string_view TextEdit::text() const
@@ -172,7 +175,6 @@ namespace Widgets {
     bool TextEdit::injectKeyPress(const Input::KeyEventArgs &arg)
     {
         if (std::isalnum(arg.text)
-            || arg.scancode == Input::Key::Control
             || arg.scancode == Input::Key::LeftArrow
             || arg.scancode == Input::Key::RightArrow
             || arg.scancode == Input::Key::UpArrow
@@ -181,8 +183,26 @@ namespace Widgets {
             || arg.scancode == Input::Key::Delete
             || arg.scancode == Input::Key::Space
             || arg.scancode == Input::Key::Return) {
-            uint32_t val = (static_cast<uint16_t>(arg.scancode) << 8) | arg.text;
+            uint32_t val = (static_cast<uint32_t>(arg.mControlKeys.mAlt) << 18)
+                | (static_cast<uint32_t>(arg.mControlKeys.mCtrl) << 17)
+                | (static_cast<uint32_t>(arg.mControlKeys.mShift) << 16)
+                | (static_cast<uint32_t>(arg.scancode) << 8)
+                | arg.text;
             stb_textedit_key(this, &mState, val);
+        } else if (arg.mControlKeys.mCtrl && arg.scancode == Input::Key::V) {
+            std::string s = Window::OSWindow::getClipboardString();
+            stb_textedit_paste(this, &mState, s.c_str(), s.size());
+            mTextRenderData.updateText(mText, getAbsoluteTextSize());
+        } else if (arg.mControlKeys.mCtrl && arg.scancode == Input::Key::C) {
+            std::string_view s = mText;
+            int start = mState.select_start;
+            int end = mState.select_end;
+            if (start != end) {
+                if (start > end)
+                    std::swap(start, end);
+                s = s.substr(start, end);
+            }
+            Window::OSWindow::setClipboardString(s);
         }
         return WidgetBase::injectKeyPress(arg);
     }
@@ -190,7 +210,7 @@ namespace Widgets {
     bool TextEdit::injectAxisEvent(const Input::AxisEventArgs &arg)
     {
         if (arg.mAxisType == Input::AxisEventArgs::WHEEL) {
-            mVerticalScroll -= 50.0f * arg.mAxis1;            
+            mVerticalScroll -= 50.0f * arg.mAxis1;
         }
         return WidgetBase::injectAxisEvent(arg);
     }
@@ -217,9 +237,9 @@ namespace Widgets {
         row->ymax = bb.mSize.y;
         row->ymin = 0;
         if (it == lines.begin()) {
-            row->baseline_y_delta += bb.mTopLeft.y;
-            row->ymax += bb.mTopLeft.y;
-            row->ymin += bb.mTopLeft.y;
+            row->baseline_y_delta += bb.mTopLeft.y - mVerticalScroll;
+            row->ymax += bb.mTopLeft.y - mVerticalScroll;
+            row->ymin += bb.mTopLeft.y - mVerticalScroll;
         }
     }
 
@@ -231,7 +251,7 @@ namespace Widgets {
     Vector3 TextEdit::getAbsoluteTextSize()
     {
         Vector3 size = getAbsoluteSize();
-        size -= Vector3{ 2 * mBorder, 0.0f };        
+        size -= Vector3 { 2 * mBorder, 0.0f };
         return size;
     }
 
