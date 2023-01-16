@@ -20,7 +20,7 @@ struct META_EXPORT Atlas2 {
     void addBin(const Vector2i &origin);
 
 	Entry insert(const Vector2i &size, const std::function<void()> &expand, bool allowFlip = true);
-    std::vector<Entry> insert(const std::vector<Vector2i> &sizes, const std::function<void()> &expand, bool allowFlip = true);
+    std::vector<Entry> insert(const std::span<Vector2i> &sizes, const std::function<void()> &expand, bool allowFlip = true);
 
 
 private:

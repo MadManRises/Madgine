@@ -124,7 +124,7 @@ Atlas2::Entry Atlas2::insert(const Vector2i &size, const std::function<void()> &
         return Entry();
 }
 
-std::vector<Atlas2::Entry> Atlas2::insert(const std::vector<Vector2i> &sizes, const std::function<void()> &expand, bool allowFlip)
+std::vector<Atlas2::Entry> Atlas2::insert(const std::span<Vector2i> &sizes, const std::function<void()> &expand, bool allowFlip)
 {
 
     std::vector<std::pair<Vector2i, int>> items;
