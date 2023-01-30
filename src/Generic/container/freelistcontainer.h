@@ -16,7 +16,7 @@ struct FreeListContainer {
     using reference = typename C::reference;
     using const_reference = typename C::const_reference;
 
-    template <typename It, typename type, bool skipping>
+    template <typename It, bool skipping>
     struct IteratorImpl {
 
         using iterator_category = typename It::iterator_category;
@@ -36,18 +36,18 @@ struct FreeListContainer {
                 update();
         }
 
-        template <typename It2, typename type2, bool>
+        template <typename It2, bool>
         friend struct IteratorImpl;
 
-        template <typename It2, typename type2, bool skipping2>
-        IteratorImpl(const IteratorImpl<It2, type2, skipping2> &other)
+        template <typename It2, bool skipping2>
+        IteratorImpl(const IteratorImpl<It2, skipping2> &other)
             : mIt(other.mIt)
             , mContainer(other.mContainer)
         {
         }
 
-        template <typename It2, typename type2>
-        IteratorImpl(const Pib<IteratorImpl<It2, type2, skipping>> &other)
+        template <typename It2>
+        IteratorImpl(const Pib<IteratorImpl<It2, skipping>> &other)
             : IteratorImpl(other.first)
         {
         }
@@ -62,8 +62,8 @@ struct FreeListContainer {
             return &*mIt;
         }
 
-        template <typename It2, typename type2>
-        difference_type operator-(const IteratorImpl<It2, type2, skipping> &other) const
+        template <typename It2>
+        difference_type operator-(const IteratorImpl<It2, skipping> &other) const
         {
             return mIt - other.mIt;
         }
@@ -135,10 +135,10 @@ struct FreeListContainer {
         const C *mContainer = nullptr;
     };
 
-    using iterator = IteratorImpl<typename internal_traits::iterator, value_type, true>;
-    using reverse_iterator = IteratorImpl<typename internal_traits::reverse_iterator, value_type, true>;
-    using const_iterator = IteratorImpl<typename internal_traits::const_iterator, const value_type, true>;
-    using const_reverse_iterator = IteratorImpl<typename internal_traits::const_reverse_iterator, const value_type, true>;
+    using iterator = IteratorImpl<typename internal_traits::iterator, true>;
+    using reverse_iterator = IteratorImpl<typename internal_traits::reverse_iterator, true>;
+    using const_iterator = IteratorImpl<typename internal_traits::const_iterator, true>;
+    using const_reverse_iterator = IteratorImpl<typename internal_traits::const_reverse_iterator, true>;
 
     iterator begin()
     {
@@ -160,10 +160,10 @@ struct FreeListContainer {
         return { mContainer.end(), mContainer };
     }
 
-    using nodes_iterator = IteratorImpl<typename internal_traits::iterator, value_type, false>;
-    using nodes_reverse_iterator = IteratorImpl<typename internal_traits::reverse_iterator, value_type, false>;
-    using nodes_const_iterator = IteratorImpl<typename internal_traits::const_iterator, const value_type, false>;
-    using nodes_const_reverse_iterator = IteratorImpl<typename internal_traits::const_reverse_iterator, const value_type, false>;
+    using nodes_iterator = IteratorImpl<typename internal_traits::iterator, false>;
+    using nodes_reverse_iterator = IteratorImpl<typename internal_traits::reverse_iterator, false>;
+    using nodes_const_iterator = IteratorImpl<typename internal_traits::const_iterator, false>;
+    using nodes_const_reverse_iterator = IteratorImpl<typename internal_traits::const_reverse_iterator, false>;
 
     nodes_iterator nodes_begin()
     {
