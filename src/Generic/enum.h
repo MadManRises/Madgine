@@ -157,6 +157,7 @@ struct BaseEnum : Base, _Representation {
 public:
     using Representation = _Representation;
     using BaseType = typename Representation::EnumType;
+    using underlying_type = typename Base::underlying_type;
     
 
     static constexpr int MIN = Base::MIN;
