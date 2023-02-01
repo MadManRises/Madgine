@@ -6,7 +6,7 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
-#include "Interfaces/filesystem/api.h"
+#include "Interfaces/filesystem/fsapi.h"
 
 #include <eos_auth.h>
 #include <eos_leaderboards.h>
@@ -14,9 +14,13 @@
 #include <eos_sdk.h>
 #include <eos_stats.h>
 
-#include "eos_awaitable.h"
+#include "eos_sender.h"
 
 #include "Modules/threading/awaitables/awaitabletimepoint.h"
+
+#include "Madgine/root/root.h"
+
+#include "Modules/threading/awaitables/awaitablesender.h"
 
 METATABLE_BEGIN_BASE(Engine::FirstParty::EpicServices, Engine::FirstParty::FirstPartyServices)
 READONLY_PROPERTY(Initialized, mInitialized)
@@ -58,7 +62,6 @@ namespace FirstParty {
 
     EpicServices::EpicServices(Root::Root &root)
         : FirstPartyServicesImpl<EpicServices>(root)
-        , mQueue("Epic Services")
     {
         LOG("[EOS SDK] Initializing ...");
 
@@ -124,16 +127,16 @@ namespace FirstParty {
 
         mInitialized = true;
 
-        mQueue.queue([this]() -> Threading::Task<void> {
-            while (mQueue.running() || mQueue.tasksInFlightCount() > 1) {
+        root.taskQueue()->queue([this]() -> Threading::Task<void> {
+            while (mRoot.taskQueue()->running() || mRoot.taskQueue()->tasksInFlightCount() > 1) {
                 EOS_Platform_Tick(mPlatformHandle);
                 co_await 100ms;
             }
         });
 
-        mUserId = mQueue.queueTask(loginUser());
+        mUserId = root.taskQueue()->queueTask(loginUser());
 
-        mProductUserId = mUserId.then([this](EOS_EpicAccountId id) { return connectLogin(id); }, &mQueue);
+        mProductUserId = mUserId.then([this](EOS_EpicAccountId id) { return connectLogin(id); }, root.taskQueue());
     }
 
     EpicServices::~EpicServices()
@@ -180,12 +183,12 @@ namespace FirstParty {
         options.ScopeFlags = EOS_EAuthScopeFlags::EOS_AS_BasicProfile | EOS_EAuthScopeFlags::EOS_AS_FriendsList | EOS_EAuthScopeFlags::EOS_AS_Presence;
         options.Credentials = &credentials;
 
-        const EOS_Auth_LoginCallbackInfo *info = co_await EOS_Awaitable<EOS_Auth_Login>(mAuthInterface, &options);
+        EOS_Auth_LoginCallbackInfo info = co_await EOS_sender<EOS_Auth_Login>(mAuthInterface, &options);
 
-        switch (info->ResultCode) {
+        switch (info.ResultCode) {
         case EOS_EResult::EOS_Success:
             LOG("[EOS SDK] Login Success!");
-            co_return info->LocalUserId;
+            co_return info.LocalUserId;
             break;
         case EOS_EResult::EOS_InvalidAuth:
         case EOS_EResult::EOS_Auth_Expired:
@@ -196,7 +199,7 @@ namespace FirstParty {
             }
 #endif
         default:
-            LOG_ERROR("[EOS SDK] Unknown login error: " << EOS_EResult_ToString(info->ResultCode));
+            LOG_ERROR("[EOS SDK] Unknown login error: " << EOS_EResult_ToString(info.ResultCode));
             co_return nullptr;
         }
     }
@@ -225,25 +228,25 @@ namespace FirstParty {
             Options.UserLoginInfo = nullptr;
 
             assert(mConnectInterface != nullptr);
-            const EOS_Connect_LoginCallbackInfo *info = co_await EOS_Awaitable<EOS_Connect_Login>(mConnectInterface, &Options);
+            EOS_Connect_LoginCallbackInfo info = co_await EOS_sender<EOS_Connect_Login>(mConnectInterface, &Options);
             EOS_Auth_Token_Release(userAuthToken);
 
-            switch (info->ResultCode) {
+            switch (info.ResultCode) {
             case EOS_EResult::EOS_Success:
                 LOG("[EOS SDK] Connect Login Success!");
                 {
                     char buffer[EOS_PRODUCTUSERID_MAX_LENGTH + 1];
                     int32_t bufferSize = sizeof(buffer);
-                    EOS_EResult Result = EOS_ProductUserId_ToString(info->LocalUserId, buffer, &bufferSize);
+                    EOS_EResult Result = EOS_ProductUserId_ToString(info.LocalUserId, buffer, &bufferSize);
 
                     if (Result == EOS_EResult::EOS_Success) {
                         LOG("Product User ID: " << buffer);
                     }
                 }
-                co_return info->LocalUserId;
+                co_return info.LocalUserId;
                 break;
             default:
-                LOG_ERROR("[EOS SDK] Unknown connect login error: " << EOS_EResult_ToString(info->ResultCode));
+                LOG_ERROR("[EOS SDK] Unknown connect login error: " << EOS_EResult_ToString(info.ResultCode));
                 co_return nullptr;
             }
         }
@@ -254,11 +257,6 @@ namespace FirstParty {
     std::string_view EpicServices::key() const
     {
         return "EpicServices";
-    }
-
-    Threading::TaskFuture<Leaderboard> EpicServices::getLeaderboard(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd, uint32_t *fullSize)
-    {
-        return mQueue.queueTask(getLeaderboardTask(name, accessmode, referenceRank, rangeBegin, rangeEnd, fullSize));
     }
 
     Threading::Task<Leaderboard> EpicServices::getLeaderboardTask(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd, uint32_t *fullSize)
@@ -278,10 +276,10 @@ namespace FirstParty {
             options.LeaderboardId = name;
             options.LocalUserId = userId;
 
-            const EOS_Leaderboards_OnQueryLeaderboardRanksCompleteCallbackInfo *info = co_await EOS_Awaitable<EOS_Leaderboards_QueryLeaderboardRanks>(mLeaderboardsInterface, &options);
+            EOS_Leaderboards_OnQueryLeaderboardRanksCompleteCallbackInfo info = co_await EOS_sender<EOS_Leaderboards_QueryLeaderboardRanks>(mLeaderboardsInterface, &options);
 
-            if (info->ResultCode != EOS_EResult::EOS_Success) {
-                LOG_ERROR("[EOS SDK] Leaderboards - Query Leaderboard Ranks Error: " << EOS_EResult_ToString(info->ResultCode));
+            if (info.ResultCode != EOS_EResult::EOS_Success) {
+                LOG_ERROR("[EOS SDK] Leaderboards - Query Leaderboard Ranks Error: " << EOS_EResult_ToString(info.ResultCode));
                 co_return {};
             }
 
@@ -356,10 +354,10 @@ namespace FirstParty {
         QueryDefinitionsOptions.EndTime = EOS_LEADERBOARDS_TIME_UNDEFINED;
         QueryDefinitionsOptions.LocalUserId = userId;
 
-        const EOS_Leaderboards_OnQueryLeaderboardDefinitionsCompleteCallbackInfo *info = co_await EOS_Awaitable<EOS_Leaderboards_QueryLeaderboardDefinitions>(mLeaderboardsInterface, &QueryDefinitionsOptions);
+        EOS_Leaderboards_OnQueryLeaderboardDefinitionsCompleteCallbackInfo info = co_await EOS_sender<EOS_Leaderboards_QueryLeaderboardDefinitions>(mLeaderboardsInterface, &QueryDefinitionsOptions);
 
-        if (info->ResultCode != EOS_EResult::EOS_Success) {
-            LOG_ERROR("[EOS SDK] Leaderboards - Query Definitions Error: " << EOS_EResult_ToString(info->ResultCode));
+        if (info.ResultCode != EOS_EResult::EOS_Success) {
+            LOG_ERROR("[EOS SDK] Leaderboards - Query Definitions Error: " << EOS_EResult_ToString(info.ResultCode));
             co_return {};
         }
 
@@ -420,11 +418,6 @@ namespace FirstParty {
         co_return leaderboards;
     }
 
-    Threading::TaskFuture<bool> EpicServices::ingestStat(const char *name, const char *leaderboardName, int32_t value)
-    {
-        return mQueue.queueTask(ingestStatTask(name, leaderboardName, value));
-    }
-
     Threading::Task<bool> EpicServices::ingestStatTask(const char *name, const char *leaderboardName, int32_t value)
     {
         EOS_ProductUserId userId = co_await mProductUserId;
@@ -445,10 +438,10 @@ namespace FirstParty {
 
         options.Stats = &data;
 
-        const EOS_Stats_IngestStatCompleteCallbackInfo *info = co_await EOS_Awaitable<EOS_Stats_IngestStat>(mStatsInterface, &options);
+        EOS_Stats_IngestStatCompleteCallbackInfo info = co_await EOS_sender<EOS_Stats_IngestStat>(mStatsInterface, &options);
 
-        if (info->ResultCode != EOS_EResult::EOS_Success) {
-            LOG_ERROR("[EOS SDK] Stats - Ingest Stats Error: " << EOS_EResult_ToString(info->ResultCode));
+        if (info.ResultCode != EOS_EResult::EOS_Success) {
+            LOG_ERROR("[EOS SDK] Stats - Ingest Stats Error: " << EOS_EResult_ToString(info.ResultCode));
             co_return false;
         }
 

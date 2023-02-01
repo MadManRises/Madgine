@@ -18,14 +18,11 @@ namespace FirstParty {
 
         ////////// LEADERBOARD
 
-        virtual Threading::TaskFuture<Leaderboard> getLeaderboard(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd, uint32_t *fullSize) override;
-        Threading::Task<Leaderboard> getLeaderboardTask(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd, uint32_t *fullSize);
+        virtual Threading::Task<Leaderboard> getLeaderboardTask(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd, uint32_t *fullSize) override;
 
-        /////////// STATS
+        /////////// STATS        
 
-        virtual Threading::TaskFuture<bool> ingestStat(const char *name, const char *leaderboardName, int32_t value) override;
-
-        Threading::Task<bool> ingestStatTask(const char *name, const char *leaderboardName, int32_t value);
+        virtual Threading::Task<bool> ingestStatTask(const char *name, const char *leaderboardName, int32_t value) override;
         void requestCurrentStats();
 
         Threading::TaskPromise<bool> mStatsRequestedPromise;
@@ -35,8 +32,6 @@ namespace FirstParty {
         //////////////////
 
         bool mInitialized = false;
-
-        Threading::TaskQueue mQueue;
     };
 
 }

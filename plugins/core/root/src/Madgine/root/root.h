@@ -1,7 +1,8 @@
 #pragma once
 
-#include "rootcomponentcollector.h"
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
+#include "rootcomponentcollector.h"
+#include "Modules/threading/taskqueue.h"
 
 namespace Engine {
 namespace Root {
@@ -16,7 +17,8 @@ namespace Root {
 
         int errorCode();
 
-        
+        Threading::TaskQueue *taskQueue();
+
         template <typename T>
         T &getComponent()
         {
@@ -42,6 +44,8 @@ namespace Root {
 #if ENABLE_MEMTRACKING
         std::unique_ptr<Debug::Memory::MemoryTracker> mMemTracker;
 #endif
+
+        Threading::TaskQueue mTaskQueue;
 
         std::unique_ptr<RootComponentContainer<std::vector<Placeholder<0>>>> mComponents;
     };

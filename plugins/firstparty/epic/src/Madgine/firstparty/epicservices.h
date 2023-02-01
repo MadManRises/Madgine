@@ -36,9 +36,7 @@ namespace FirstParty {
             } mAggregation;
         };
 
-        virtual Threading::TaskFuture<Leaderboard> getLeaderboard(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd, uint32_t *fullSize) override;
-
-        Threading::Task<Leaderboard> getLeaderboardTask(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd, uint32_t *fullSize);
+        virtual Threading::Task<Leaderboard> getLeaderboardTask(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd, uint32_t *fullSize) override;
         Threading::Task<std::vector<LeaderboardInfo>> getLeaderboards();
 
         struct LeaderboardCache {
@@ -55,9 +53,7 @@ namespace FirstParty {
 
         /////////// STATS
 
-        virtual Threading::TaskFuture<bool> ingestStat(const char *name, const char *leaderboardName, int32_t value) override;
-
-        Threading::Task<bool> ingestStatTask(const char *name, const char *leaderboardName, int32_t value);
+        virtual Threading::Task<bool> ingestStatTask(const char *name, const char *leaderboardName, int32_t value) override;
 
         //////////////////
 
@@ -72,8 +68,6 @@ namespace FirstParty {
 #if EOS_LOGIN_METHOD_CREDENTIALS
         bool mRetryAccountOnFailure = false;
 #endif
-
-        Threading::TaskQueue mQueue;
 
         Threading::TaskFuture<EOS_EpicAccountId> mUserId;
         Threading::TaskFuture<EOS_ProductUserId> mProductUserId;

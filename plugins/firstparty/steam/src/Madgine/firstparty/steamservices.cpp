@@ -8,9 +8,13 @@
 
 #include <steam/steam_api.h>
 
-#include "steam_awaitable.h"
+#include "steam_sender.h"
 
 #include "Modules/threading/awaitables/awaitabletimepoint.h"
+
+#include "Madgine/root/root.h"
+
+#include "Modules/threading/awaitables/awaitablesender.h"
 
 METATABLE_BEGIN_BASE(Engine::FirstParty::SteamServices, Engine::FirstParty::FirstPartyServices)
 READONLY_PROPERTY(Initialized, mInitialized)
@@ -23,13 +27,12 @@ namespace FirstParty {
 
     SteamServices::SteamServices(Root::Root &root)
         : FirstPartyServicesImpl<SteamServices>(root)
-        , mQueue("Steam Services")
     {
 
         mInitialized = SteamAPI_Init();
 
-        mQueue.queue([this]() -> Threading::Task<void> {
-            while (mQueue.running()) {
+        root.taskQueue()->queue([this]() -> Threading::Task<void> {
+            while (mRoot.taskQueue()->running()) {
                 SteamAPI_RunCallbacks();
                 co_await 100ms;
             }
@@ -48,11 +51,6 @@ namespace FirstParty {
         return "SteamServices";
     }
 
-    Threading::TaskFuture<Leaderboard> SteamServices::getLeaderboard(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd, uint32_t *fullSize)
-    {
-        return mQueue.queueTask(getLeaderboardTask(name, accessmode, referenceRank, rangeBegin, rangeEnd, fullSize));        
-    }
-
     Threading::Task<Leaderboard> SteamServices::getLeaderboardTask(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd, uint32_t *fullSize)
     {
         ELeaderboardDataRequest requestmode;
@@ -69,19 +67,19 @@ namespace FirstParty {
             co_return {};
         }
 
-        LeaderboardFindResult_t *leaderboard = co_await Steam_Awaitable<LeaderboardFindResult_t>(SteamUserStats()->FindLeaderboard(name));
-        if (!leaderboard->m_bLeaderboardFound)
+        LeaderboardFindResult_t leaderboard = co_await steam_sender<LeaderboardFindResult_t>(SteamUserStats()->FindLeaderboard(name));
+        if (!leaderboard.m_bLeaderboardFound)
             co_return {};
 
-        LeaderboardScoresDownloaded_t *download = co_await Steam_Awaitable<LeaderboardScoresDownloaded_t>(SteamUserStats()->DownloadLeaderboardEntries(leaderboard->m_hSteamLeaderboard, requestmode, rangeBegin, rangeEnd));
+        LeaderboardScoresDownloaded_t download = co_await steam_sender<LeaderboardScoresDownloaded_t>(SteamUserStats()->DownloadLeaderboardEntries(leaderboard.m_hSteamLeaderboard, requestmode, rangeBegin, rangeEnd));
 
         Leaderboard result;
-        for (size_t i = 0; i < download->m_cEntryCount; ++i) {
+        for (size_t i = 0; i < download.m_cEntryCount; ++i) {
             Leaderboard::Entry &entry = result.mEntries.emplace_back();
 
             LeaderboardEntry_t leaderboardEntry;
 
-            if (!SteamUserStats()->GetDownloadedLeaderboardEntry(download->m_hSteamLeaderboardEntries, i, &leaderboardEntry, nullptr, 0))
+            if (!SteamUserStats()->GetDownloadedLeaderboardEntry(download.m_hSteamLeaderboardEntries, i, &leaderboardEntry, nullptr, 0))
                 co_return {};
 
             entry.mRank = leaderboardEntry.m_nGlobalRank;
@@ -92,11 +90,6 @@ namespace FirstParty {
         co_return result;
     }
 
-    Threading::TaskFuture<bool> SteamServices::ingestStat(const char *name, const char *leaderboardName, int32_t value)
-    {
-        return mQueue.queueTask(ingestStatTask(name, leaderboardName, value));        
-    }
-
     Threading::Task<bool> SteamServices::ingestStatTask(const char *name, const char *leaderboardName, int32_t value)
     {
         if (!co_await mStatsRequestedFuture)
@@ -105,15 +98,15 @@ namespace FirstParty {
         if (!SteamUserStats()->SetStat(name, value))
             co_return false;
 
-        LeaderboardFindResult_t *leaderboardFound = co_await Steam_Awaitable<LeaderboardFindResult_t>(SteamUserStats()->FindLeaderboard(leaderboardName));
-        if (!leaderboardFound->m_bLeaderboardFound)
+        LeaderboardFindResult_t leaderboardFound = co_await steam_sender<LeaderboardFindResult_t>(SteamUserStats()->FindLeaderboard(leaderboardName));
+        if (!leaderboardFound.m_bLeaderboardFound)
             co_return false;
 
-        auto upload = Steam_Awaitable<LeaderboardScoreUploaded_t>(SteamUserStats()->UploadLeaderboardScore(leaderboardFound->m_hSteamLeaderboard, k_ELeaderboardUploadScoreMethodKeepBest, value, nullptr, 0));
+        auto upload = steam_sender<LeaderboardScoreUploaded_t>(SteamUserStats()->UploadLeaderboardScore(leaderboardFound.m_hSteamLeaderboard, k_ELeaderboardUploadScoreMethodKeepBest, value, nullptr, 0));
 
         bool success = SteamUserStats()->StoreStats();
 
-        co_return success && (co_await upload)->m_bSuccess;
+        co_return success && (co_await upload).m_bSuccess;
     }
 
     void SteamServices::requestCurrentStats()

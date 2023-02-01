@@ -37,11 +37,13 @@ namespace FirstParty {
 
         ///////// LEADERBOARD
 
-        virtual Threading::TaskFuture<Leaderboard> getLeaderboard(const char *name, Leaderboard::AccessMode accessmode = Leaderboard::GLOBAL, Leaderboard::ReferenceRank referenceRank = Leaderboard::FIRST, int32_t rangeBegin = 0, int32_t rangeEnd = 99, uint32_t *fullSize = nullptr) = 0;
+        Threading::TaskFuture<Leaderboard> getLeaderboard(const char *name, Leaderboard::AccessMode accessmode = Leaderboard::GLOBAL, Leaderboard::ReferenceRank referenceRank = Leaderboard::FIRST, int32_t rangeBegin = 0, int32_t rangeEnd = 99, uint32_t *fullSize = nullptr);
+        virtual Threading::Task<Leaderboard> getLeaderboardTask(const char *name, Leaderboard::AccessMode accessmode = Leaderboard::GLOBAL, Leaderboard::ReferenceRank referenceRank = Leaderboard::FIRST, int32_t rangeBegin = 0, int32_t rangeEnd = 99, uint32_t *fullSize = nullptr) = 0;
 
         ///////// STATS
 
-        virtual Threading::TaskFuture<bool> ingestStat(const char *name, const char *leaderboardName, int32_t value) = 0;
+        Threading::TaskFuture<bool> ingestStat(const char *name, const char *leaderboardName, int32_t value);
+        virtual Threading::Task<bool> ingestStatTask(const char *name, const char *leaderboardName, int32_t value) = 0;
     };
 
     template <typename T>

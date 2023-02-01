@@ -44,6 +44,7 @@ namespace Root {
 
     Root::Root(std::unique_ptr<CLI::CLICore> cli)
         : mCLI(std::move(cli))
+        , mTaskQueue("Root")
     {
 
         assert(!sSingleton);
@@ -115,6 +116,11 @@ namespace Root {
     int Root::errorCode()
     {
         return mErrorCode;
+    }
+
+    Threading::TaskQueue *Root::taskQueue()
+    {
+        return &mTaskQueue;
     }
 
 #if ENABLE_PLUGINS

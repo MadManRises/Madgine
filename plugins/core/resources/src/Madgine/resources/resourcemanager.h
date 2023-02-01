@@ -76,8 +76,6 @@ namespace Resources {
         std::map<Filesystem::Path, int, SubDirCompare> mResourcePaths;
 
         SystemVariable<bool, false> mEnumerated;
-
-        Threading::TaskQueue mIOQueue;
     };
 
 }

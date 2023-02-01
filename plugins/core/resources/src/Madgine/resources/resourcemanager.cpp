@@ -39,14 +39,13 @@ namespace Resources {
     }
 
     ResourceManager::ResourceManager(Root::Root &root)
-        : RootComponent(root)
-        , mIOQueue("IO")
+        : RootComponent(root)        
     {
         assert(!sSingleton);
         sSingleton = this;
 
         if (!root.toolMode()) {
-            mIOQueue.addSetupSteps(
+            root.taskQueue()->addSetupSteps(
                 [this]() { return callInit(); },
                 [this]() { return callFinalize(); });
         } else if (!exportResources->empty()) {
@@ -122,8 +121,8 @@ namespace Resources {
     {
         enumerateResources();
 
-        mIOQueue.queue([this]() -> Threading::Task<void> {
-            while (mIOQueue.running()) {
+        taskQueue()->queue([this]() -> Threading::Task<void> {
+            while (taskQueue()->running()) {
                 update();
                 co_await 1s;
             }
@@ -166,7 +165,7 @@ namespace Resources {
 
     Threading::TaskQueue *ResourceManager::taskQueue()
     {
-        return &mIOQueue;
+        return mRoot.taskQueue();
     }
 
     void ResourceManager::updateResources(Filesystem::FileEventType event, const Filesystem::Path &path, int priority)
