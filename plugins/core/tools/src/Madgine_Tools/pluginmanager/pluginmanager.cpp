@@ -14,7 +14,7 @@
 
 #    include "Generic/guard.h"
 
-#    include "Interfaces/filesystem/api.h"
+#    include "Interfaces/filesystem/fsapi.h"
 
 #    include "Modules/plugins/plugin.h"
 #    include "Modules/plugins/pluginsection.h"

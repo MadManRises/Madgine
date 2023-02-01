@@ -1,6 +1,6 @@
 #include "../interfaceslib.h"
 
-#include "api.h"
+#include "fsapi.h"
 #include "filequery.h"
 
 namespace Engine {

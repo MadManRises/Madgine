@@ -2,7 +2,7 @@
 
 #if WINDOWS
 
-#    include "api.h"
+#    include "fsapi.h"
 
 #    include "filewatcher.h"
 

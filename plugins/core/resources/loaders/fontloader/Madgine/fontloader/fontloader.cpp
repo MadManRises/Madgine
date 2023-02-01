@@ -16,7 +16,7 @@
 
 #include "Meta/math/vector3.h"
 
-#include "Interfaces/filesystem/api.h"
+#include "Interfaces/filesystem/fsapi.h"
 
 #include "Meta/serialize/container/container_operations.h"
 

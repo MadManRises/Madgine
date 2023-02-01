@@ -6,7 +6,7 @@
 
 #include "directx12shadercodegen.h"
 
-#include "Interfaces/filesystem/api.h"
+#include "Interfaces/filesystem/fsapi.h"
 
 #include "directx12rendercontext.h"
 

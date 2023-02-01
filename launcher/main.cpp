@@ -1,7 +1,7 @@
 #include "Madgine/applib.h"
 #include "Madgine/resourceslib.h"
 
-#include "Interfaces/filesystem/api.h"
+#include "Interfaces/filesystem/fsapi.h"
 
 #include "Modules/threading/workgroup.h"
 

@@ -8,7 +8,7 @@
 
 #include "directx11shadercodegen.h"
 
-#include "Interfaces/filesystem/api.h"
+#include "Interfaces/filesystem/fsapi.h"
 
 UNIQUECOMPONENT(Engine::Render::DirectX11PixelShaderLoader);
 

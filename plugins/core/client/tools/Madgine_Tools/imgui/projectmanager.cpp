@@ -8,7 +8,7 @@
 #include "imgui/imgui.h"
 #include "imgui/imguiaddons.h"
 
-#include "Interfaces/filesystem/api.h"
+#include "Interfaces/filesystem/fsapi.h"
 
 #include "Madgine/resources/resourcemanager.h"
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"

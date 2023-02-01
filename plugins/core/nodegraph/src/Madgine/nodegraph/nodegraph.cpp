@@ -7,7 +7,7 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
-#include "Interfaces/filesystem/api.h"
+#include "Interfaces/filesystem/fsapi.h"
 
 #include "Madgine/serialize/filesystem/filemanager.h"
 

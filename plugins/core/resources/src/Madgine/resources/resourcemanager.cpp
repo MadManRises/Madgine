@@ -7,7 +7,7 @@
 #include "Modules/plugins/plugin.h"
 #include "Modules/plugins/pluginmanager.h"
 
-#include "Interfaces/filesystem/api.h"
+#include "Interfaces/filesystem/fsapi.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
 

@@ -2,7 +2,7 @@
 
 #include "resourcebase.h"
 
-#include "Interfaces/filesystem/api.h"
+#include "Interfaces/filesystem/fsapi.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
 
