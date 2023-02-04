@@ -173,12 +173,12 @@ namespace Serialize {
             return {};
         }
 
-        static void writeRequest(const C &c, FormattedBufferedStream &out, const void *_data, const CallerHierarchyBasePtr &hierarchy = {})
+        static void writeRequest(const C &c, FormattedBufferedStream &out, const void *data, const CallerHierarchyBasePtr &hierarchy = {})
         {
             if (RequestPolicy::sCallByMasterOnly)
                 throw 0;
 
-            const auto &[op, it, item] = *static_cast<const std::tuple<ContainerEvent, typename C::const_iterator, T &> *>(_data);
+            const auto &[op, it, item] = *static_cast<const std::tuple<ContainerEvent, typename C::const_iterator, T &> *>(data);
             Serialize::write(out, op, "operation");
             switch (op) {
             case EMPLACE: {

@@ -33,7 +33,7 @@ namespace Serialize {
             } else {
                 std::pair<ContainerEvent, typename Base::Base> temp { RESET, other };
 
-                this->writeRequest(&temp); //??? Is the temp object used?
+                this->writeRequest(0, 0, &temp); //??? Is the temp object used?
             }
             return *this;
         }
@@ -50,7 +50,7 @@ namespace Serialize {
                 ResetOperation { *this, false }.clear();
             } else {
                 ContainerEvent op = RESET;
-                this->writeRequest(&op);
+                this->writeRequest(0, 0, &op);
             }
         }
 
@@ -63,8 +63,7 @@ namespace Serialize {
                         receiver.set_value(emplace_impl(where, std::forward<_Ty>(args)...));
                     } else {
                         value_type temp { std::forward<_Ty>(args)... };
-                        std::tuple<ContainerEvent, const_iterator, const value_type &> data { EMPLACE, where, temp };
-                        this->writeRequest(&data, 0, 0, receiver);
+                        this->writeRequest(receiver, EMPLACE, where, std::ref(temp));
                     }
                 },
                 where,
@@ -81,8 +80,7 @@ namespace Serialize {
                     } else {
                         value_type temp { std::forward<_Ty>(args)... };
                         TupleUnpacker::invoke(std::forward<Init>(init), temp);
-                        std::tuple<ContainerEvent, const_iterator, const value_type &> data { EMPLACE, where, temp };
-                        this->writeRequest(&data, 0, 0, receiver);
+                        this->writeRequest(receiver, EMPLACE, where, std::ref(temp));
                     }
                 },
                 where, std::forward<Init>(init), std::forward<_Ty>(args)...);
@@ -95,8 +93,7 @@ namespace Serialize {
                     if (this->isMaster()) {
                         receiver.set_value(erase_impl(where));
                     } else {
-                        std::tuple<ContainerEvent, const_iterator> data { ERASE, where };
-                        this->writeRequest(&data, 0, 0, receiver);
+                        this->writeRequest(receiver, ERASE, where);
                     }
                 },
                 where);
@@ -110,9 +107,7 @@ namespace Serialize {
                     if (this->isMaster()) {
                         receiver.set_value(erase_impl(from, to));
                     } else {
-                        std::tuple<ContainerEvent, const_iterator, const_iterator> data { ERASE_RANGE, from,
-                            to };
-                        this->writeRequest(&data, 0, 0, receiver);
+                        this->writeRequest(receiver, ERASE_RANGE, from, to);
                     }
                 },
                 from, to);
@@ -130,8 +125,7 @@ namespace Serialize {
                 assert(this->mCalled);
                 if (this->mInserted) {
                     if (this->mContainer.isSynced()) {
-                        std::tuple<ContainerEvent, const_iterator> data { EMPLACE, this->mIt };
-                        container().writeAction(&data, mAnswerTarget, mAnswerId);
+                        container().writeAction(mAnswerTarget, mAnswerId, EMPLACE, this->mIt);
                     }
                 }
             }
@@ -151,8 +145,7 @@ namespace Serialize {
                 : Base::RemoveOperation(c, it)
             {
                 if (this->mContainer.isSynced()) {
-                    std::tuple<ContainerEvent, const_iterator> data { ERASE, it };
-                    container().writeAction(&data, answerTarget, answerId);
+                    container().writeAction(answerTarget, answerId, ERASE, it);
                 }
             }
 
@@ -167,8 +160,7 @@ namespace Serialize {
                 : Base::RemoveRangeOperation(c, from, to)
             {
                 if (this->mContainer.isSynced()) {
-                    std::tuple<ContainerEvent, const_iterator, const_iterator> data { ERASE_RANGE, from, to };
-                    this->writeAction(&data, answerTarget, answerId);
+                    this->writeAction(answerTarget, answerId, ERASE_RANGE, from, to);
                 }
             }
 
@@ -188,8 +180,7 @@ namespace Serialize {
             ~_ResetOperation()
             {
                 if (this->mContainer.isSynced()) {
-                    std::tuple<ContainerEvent, const_iterator> data { RESET, container().end() };
-                    container().writeAction(&data, mAnswerTarget, mAnswerId);
+                    container().writeAction(mAnswerTarget, mAnswerId, RESET, container().end());
                 }
             }
 

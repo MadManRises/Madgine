@@ -142,16 +142,17 @@ namespace Serialize {
                     } else {
                         this->writeFunctionRequest(functionIndex<f>, CALL, &argTuple, 0, 0, receiver);
                     }
-                }, std::forward<Args>(args)...);
+                },
+                std::forward<Args>(args)...);
         }
 
         template <auto f, typename... Args>
         void notify(const std::set<ParticipantId> &targets, Args &&...args)
         {
+            assert(this->isMaster());
             if (!targets.empty()) {
                 using traits = typename Callable<f>::traits;
                 typename traits::decay_argument_types::as_tuple argTuple { std::forward<Args>(args)... };
-                assert(this->isMaster());
                 this->writeFunctionAction(functionIndex<f>, &argTuple, targets);
             }
         }
@@ -182,9 +183,7 @@ namespace Serialize {
                 (static_cast<T *>(this)->*f)(std::forward<Args>(args)...);
             } else {
                 typename traits::decay_argument_types::as_tuple argTuple { std::forward<Args>(args)... };
-                this->writeFunctionRequest(
-                    functionIndex<f>, QUERY,
-                    &argTuple);
+                this->writeFunctionRequest(functionIndex<f>, QUERY, &argTuple);
             }
         }
 

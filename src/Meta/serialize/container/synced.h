@@ -68,7 +68,7 @@ namespace Serialize {
                 notify(old);
             } else {
                 std::pair<Operation, T> data { Operation::SUB, std::forward<Ty>(v) };
-                this->writeRequest(, &data);
+                this->writeRequest(&data);
             }
         }
 

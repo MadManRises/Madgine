@@ -35,7 +35,7 @@ namespace Serialize {
 
     PendingRequest message_streambuf::getRequest(MessageId id)
     {
-        auto it = std::ranges::find_if(mPendingRequests, [&](const PendingRequest &r) { return r.mId == id; });
+        auto it = std::ranges::find(mPendingRequests, id, &PendingRequest::mId);
         if (it == mPendingRequests.end())
             return { id };
         else {
