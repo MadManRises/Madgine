@@ -45,33 +45,7 @@ inline void dx12Check(HRESULT result = 0)
 
 #include "Generic/offsetptr.h"
 
-struct ReleaseDeleter {
-    template <typename T>
-    void operator()(T *ptr)
-    {
-        ptr->Release();
-    }
-};
-template <typename T>
-struct ReleasePtr : std::unique_ptr<T, ReleaseDeleter> {
-    using std::unique_ptr<T, ReleaseDeleter>::unique_ptr;
-
-    T **operator&()
-    {
-        assert(!*this);
-        return reinterpret_cast<T **>(this);
-    }
-
-    T *const *operator&() const
-    {
-        return reinterpret_cast<T *const *>(this);
-    }
-
-    operator T *() const
-    {
-        return this->get();
-    }
-};
+#include "Interfaces/helpers/win_ptrs.h"
 
 constexpr D3D12_CPU_DESCRIPTOR_HANDLE operator+(D3D12_CPU_DESCRIPTOR_HANDLE handle, Engine::OffsetPtr offset)
 {

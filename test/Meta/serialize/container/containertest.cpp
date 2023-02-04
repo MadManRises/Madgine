@@ -15,6 +15,9 @@
 
 #include "Meta/serialize/container/container_operations.h"
 
+#include "Generic/execution/algorithm.h"
+#include "Generic/execution/execution.h"
+
 using namespace Engine::Serialize;
 using namespace std::chrono_literals;
 
@@ -49,7 +52,8 @@ TEST(Serialize_Container, SyncedUnit)
     ASSERT_EQ(unit1.list2, unit2.list2);
     ASSERT_EQ(unit1.set1, unit2.set1);
     
-    auto calledFuture = unit1.list2.emplace(unit1.list2.end(), 6);
+    GenericTestReceiver calledFuture;
+    Engine::Execution::detach(Engine::Execution::then_receiver(unit1.list2.emplace(unit1.list2.end(), 6), calledFuture));
     ASSERT_TRUE(calledFuture.is_ready());
     ASSERT_EQ(unit1.list2.back(), 6);
 
@@ -58,7 +62,8 @@ TEST(Serialize_Container, SyncedUnit)
 
     ASSERT_EQ(unit1.list2, unit2.list2);
 
-    calledFuture = unit2.list2.emplace(unit2.list2.end(), 7);
+    calledFuture.reset();
+    Engine::Execution::detach(Engine::Execution::then_receiver(unit2.list2.emplace(unit2.list2.end(), 7), calledFuture));
 
     ASSERT_EQ(unit1.list2, unit2.list2);
 
@@ -74,15 +79,16 @@ TEST(Serialize_Container, SyncedUnit)
 
     ASSERT_EQ(unit1.list2, unit2.list2);
 
-    calledFuture = unit1.list2.erase(std::next(unit1.list2.begin()));
+    calledFuture.reset();
+    Engine::Execution::detach(Engine::Execution::then_receiver(unit1.list2.erase(std::next(unit1.list2.begin())), calledFuture));
     ASSERT_TRUE(calledFuture.is_ready());
 
-    ASSERT_EQ(unit1.list2.size(), 3);
+    ASSERT_EQ(unit1.list2.size(), 1);
 
     mgr1.sendMessages();
     mgr2.receiveMessages(1, 0ms);
 
-    ASSERT_EQ(unit2.list2.size(), 3);
+    ASSERT_EQ(unit2.list2.size(), 1);
     ASSERT_EQ(unit1.list2, unit2.list2);
 }
 

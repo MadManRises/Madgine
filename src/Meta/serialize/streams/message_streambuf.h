@@ -12,7 +12,7 @@ namespace Serialize {
 
         message_streambuf &operator=(const message_streambuf &) = delete;
 
-        void beginMessageWrite(ParticipantId requester = 0, MessageId requestId = 0, GenericMessagePromise promise = {});
+        void beginMessageWrite(ParticipantId requester = 0, MessageId requestId = 0, GenericMessageReceiver receiver = {});
         void endMessageWrite();
 
         MessageId beginMessageRead();

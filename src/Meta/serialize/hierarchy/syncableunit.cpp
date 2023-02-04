@@ -211,10 +211,10 @@ namespace Serialize {
         mType->writeFunctionResult(out, index, result);
     }
 
-    void SyncableUnitBase::writeFunctionRequest(uint16_t index, FunctionType type, const void *args, ParticipantId requester, MessageId requesterTransactionId, GenericMessagePromise promise)
+    void SyncableUnitBase::writeFunctionRequest(uint16_t index, FunctionType type, const void *args, ParticipantId requester, MessageId requesterTransactionId, GenericMessageReceiver receiver)
     {
         FormattedBufferedStream &out = getSlaveMessageTarget();
-        out.beginMessageWrite(requester, requesterTransactionId, std::move(promise));
+        out.beginMessageWrite(requester, requesterTransactionId, std::move(receiver));
         SyncManager::writeHeader(out, this, MessageType::FUNCTION_REQUEST);
         mType->writeFunctionArguments({ out }, index, type, args);
     }

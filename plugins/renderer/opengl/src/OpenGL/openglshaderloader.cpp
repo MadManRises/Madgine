@@ -125,10 +125,6 @@ namespace Render {
 
         GLuint handle = tempShader.mHandle;
 
-        std::map<std::string, size_t> files {
-            { std::string { path.filename() }, 0 }
-        };
-
         const char *cSource = source.data();
 
         glShaderSource(handle, 1, &cSource, NULL);

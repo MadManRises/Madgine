@@ -8,6 +8,8 @@
 
 #    include "Generic/coroutines/generator.h"
 
+#include "../helpers/win_ptrs.h"
+
 #    define NOMINMAX
 #    include <Windows.h>
 
@@ -15,25 +17,6 @@ namespace Engine {
 namespace Filesystem {
 #    if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_SYSTEM)
     static std::mutex sFilewatcherMutex;
-
-    struct SCOPED_HANDLE {
-        SCOPED_HANDLE(HANDLE handle)
-            : mHandle(handle)
-        {
-        }
-
-        ~SCOPED_HANDLE()
-        {
-            CloseHandle(mHandle);
-        }
-
-        operator HANDLE() const
-        {
-            return mHandle;
-        }
-
-        HANDLE mHandle;
-    };
 
     PFILE_NOTIFY_INFORMATION bump(PFILE_NOTIFY_INFORMATION p)
     {
@@ -45,8 +28,8 @@ namespace Filesystem {
 
         std::vector<FileEvent> result;
 
-        SCOPED_HANDLE dir = CreateFile(path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED, NULL);
-        SCOPED_HANDLE event = CreateEvent(NULL, true, false, path.c_str());
+        UniqueHandle dir = CreateFile(path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED, NULL);
+        UniqueHandle event = CreateEvent(NULL, true, false, path.c_str());
         assert(event);
 
         OVERLAPPED overlapped;

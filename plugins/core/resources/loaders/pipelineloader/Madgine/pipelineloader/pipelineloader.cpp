@@ -8,6 +8,8 @@
 
 #include "Madgine/meshloader/gpumeshloader.h"
 
+#include "Modules/threading/taskqueue.h"
+
 METATABLE_BEGIN(Engine::Render::PipelineLoader)
 METATABLE_END(Engine::Render::PipelineLoader)
 
@@ -38,14 +40,14 @@ namespace Render {
     Threading::TaskFuture<bool> PipelineLoader::Instance::create(PipelineConfiguration config, PipelineLoader *loader)
     {
         assert(!mState.valid());
-        mState = loader->queueLoading(loader->create(*this, std::move(config)));
+        mState = loader->loadingTaskQueue()->queueTask(loader->create(*this, std::move(config)));
         return mState;
     }
 
     Threading::TaskFuture<bool> PipelineLoader::Instance::createGenerated(PipelineConfiguration config, CodeGen::ShaderFile file, PipelineLoader *loader)
     {
         assert(!mState.valid());
-        mState = loader->queueLoading(loader->create(*this, std::move(config), std::move(file)));
+        mState = loader->loadingTaskQueue()->queueTask(loader->create(*this, std::move(config), std::move(file)));
         return mState;
     }
 

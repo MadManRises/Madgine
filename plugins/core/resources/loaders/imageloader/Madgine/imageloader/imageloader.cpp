@@ -4,6 +4,8 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
+#include "Modules/threading/awaitables/awaitablesender.h"
+
 #include "imagedata.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -26,26 +28,28 @@ namespace Resources {
     {
     }
 
-    bool ImageLoader::loadImpl(ImageData &data, ResourceDataInfo &info)
+    Threading::Task<bool> ImageLoader::loadImpl(ImageData &data, ResourceDataInfo &info)
     {
-        std::vector<unsigned char> buffer = info.resource()->readAsBlob();
+        ByteBuffer buffer;
+        GenericResult result = (co_await info.resource()->readAsync()).get(buffer);
 
-        stbi_uc *ptr = stbi_load_from_memory(buffer.data(), buffer.size(),
+        stbi_uc *ptr = stbi_load_from_memory(static_cast<const stbi_uc *>(buffer.mData), buffer.mSize,
             &data.mSize.x,
             &data.mSize.y,
             nullptr,
             STBI_rgb_alpha);
-        
+
         data.mChannels = 4;
 
         data.mBuffer = { std::unique_ptr<stbi_uc, Functor<&stbi_image_free>> { ptr }, static_cast<size_t>(data.mSize.x) * data.mSize.y * data.mChannels };
 
-        return true;
+        co_return true;
     }
 
-    void ImageLoader::unloadImpl(ImageData &data)
+    Threading::Task<void> ImageLoader::unloadImpl(ImageData &data)
     {
         data.mBuffer.clear();
+        co_return;
     }
 
 }

@@ -70,6 +70,14 @@ namespace Threading {
 
     template <>
     struct TaskPromiseSharedState<void> : TaskPromiseSharedStateBase {
+
+        TaskPromiseSharedState(bool ready = false)
+            : TaskPromiseSharedStateBase(ready)
+            , mHasValue(ready)
+        {
+        }
+
+        
         bool mHasValue = false;
 
         bool valid()

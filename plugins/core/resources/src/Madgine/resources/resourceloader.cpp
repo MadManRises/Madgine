@@ -17,5 +17,15 @@ namespace Resources {
         ResourceManager::getSingleton().waitForInit();
     }
 
+    Threading::TaskFuture<bool> queueLoad(Threading::Task<bool> task, Threading::TaskQueue *queue)
+    {
+        return queue->queueTask(std::move(task));
+    }
+
+    Threading::TaskFuture<void> queueUnload(Threading::Task<void> task, Threading::TaskQueue *queue)
+    {
+        return queue->queueTask(std::move(task));
+    }
+
 }
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Interfaces/filesystem/path.h"
+#include "Interfaces/filesystem/async.h"
 
 namespace Engine {
 namespace Resources {
@@ -18,6 +18,8 @@ namespace Resources {
         Stream readAsStream(bool isBinary = false) const;
         std::string readAsText() const;
         std::vector<unsigned char> readAsBlob() const;
+
+        Filesystem::AsyncFileRead readAsync() const;
 
         static constexpr const char sUnnamed[] = "__unnamed__";
 

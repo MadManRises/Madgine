@@ -63,18 +63,18 @@ namespace Serialize {
         parent->serializeType()->writeAction(parent, index, getMasterActionMessageTargets(parent, answerTarget, answerId, targets), data);
     }
 
-    FormattedBufferedStream &SyncableBase::getSlaveRequestMessageTarget(const SyncableUnitBase *parent, ParticipantId requester, MessageId requesterTransactionId, GenericMessagePromise promise) const
+    FormattedBufferedStream &SyncableBase::getSlaveRequestMessageTarget(const SyncableUnitBase *parent, ParticipantId requester, MessageId requesterTransactionId, GenericMessageReceiver receiver) const
     {
         FormattedBufferedStream &out = parent->getSlaveMessageTarget();
-        out.beginMessageWrite(requester, requesterTransactionId, std::move(promise));
+        out.beginMessageWrite(requester, requesterTransactionId, std::move(receiver));
         SyncManager::writeHeader(out, parent, MessageType::REQUEST);
         return out;
     }
 
-    void SyncableBase::writeRequest(const SyncableUnitBase *parent, OffsetPtr offset, const void *data, ParticipantId requester, MessageId requesterTransactionId, GenericMessagePromise promise) const
+    void SyncableBase::writeRequest(const SyncableUnitBase *parent, OffsetPtr offset, const void *data, ParticipantId requester, MessageId requesterTransactionId, GenericMessageReceiver receiver) const
     {
         uint16_t index = parent->serializeType()->getIndex(offset);
-        parent->serializeType()->writeRequest(parent, index, getSlaveRequestMessageTarget(parent, requester, requesterTransactionId, std::move(promise)), data);
+        parent->serializeType()->writeRequest(parent, index, getSlaveRequestMessageTarget(parent, requester, requesterTransactionId, std::move(receiver)), data);
     }
 
     void SyncableBase::writeRequestResponse(const SyncableUnitBase *parent, OffsetPtr offset, const void *data, ParticipantId answerTarget, MessageId answerId) const

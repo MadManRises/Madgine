@@ -4,6 +4,8 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
+#include "Modules/threading/awaitables/awaitablesender.h"
+
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
@@ -40,22 +42,23 @@ namespace Render {
     {
     }
 
-    bool SkeletonLoader::loadImpl(SkeletonDescriptor &skeleton, ResourceDataInfo &info)
+    Threading::Task<bool> SkeletonLoader::loadImpl(SkeletonDescriptor &skeleton, ResourceDataInfo &info)
     {
         Assimp::Importer importer;
 
-        std::vector<unsigned char> buffer = info.resource()->readAsBlob();
+        ByteBuffer buffer;
+        GenericResult result = (co_await info.resource()->readAsync()).get(buffer);
 
-        const aiScene *scene = importer.ReadFileFromMemory(buffer.data(), buffer.size(), aiProcess_MakeLeftHanded | aiProcess_Triangulate | aiProcess_LimitBoneWeights | aiProcess_OptimizeGraph);
+        const aiScene *scene = importer.ReadFileFromMemory(buffer.mData, buffer.mSize, aiProcess_MakeLeftHanded | aiProcess_Triangulate | aiProcess_LimitBoneWeights | aiProcess_OptimizeGraph);
 
         if (!scene) {
             LOG_ERROR(importer.GetErrorString());
-            return false;
+            co_return false;
         }
 
         if (scene->mNumMeshes == 0) {
             LOG_ERROR("No mesh in file '" << info.resource()->path().str() << "'");
-            return false;
+            co_return false;
         }
 
         std::map<aiNode *, size_t> indices;
@@ -169,12 +172,13 @@ namespace Render {
             bone.mTTransform = skeleton.mMatrix * bone.mTTransform * bone.mOffsetMatrix;
         }
 
-        return true;
+        co_return true;
     }
 
-    void SkeletonLoader::unloadImpl(SkeletonDescriptor &data)
+    Threading::Task<void> SkeletonLoader::unloadImpl(SkeletonDescriptor &data)
     {
         data.mBones.clear();
+        co_return;
     }
 
 }

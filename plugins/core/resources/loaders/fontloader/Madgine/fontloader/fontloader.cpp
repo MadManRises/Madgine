@@ -7,7 +7,7 @@
 #include "Meta/math/atlas2.h"
 #include "Meta/math/vector2i.h"
 
-#include "Madgine/serialize/filesystem/filemanager.h"
+#include "Madgine/serialize/memory/memorymanager.h"
 #include "Meta/serialize/formatter/safebinaryformatter.h"
 #include "Meta/serialize/operations.h"
 
@@ -17,6 +17,10 @@
 #include "Meta/math/vector3.h"
 
 #include "Interfaces/filesystem/fsapi.h"
+
+#include "Modules/threading/awaitables/awaitablesender.h"
+
+#include "Madgine/serialize/filesystem/filemanager.h"
 
 #include "Meta/serialize/container/container_operations.h"
 
@@ -122,8 +126,12 @@ namespace Render {
 
         if (info.resource()->path().extension() == ".msdf") {
 
-            Filesystem::FileManager cache("msdf_cache");
-            Serialize::FormattedSerializeStream in = cache.openRead(info.resource()->path().parentPath() / (std::string { info.resource()->name() } + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
+            ByteBuffer fileBuffer;
+            GenericResult readResult = (co_await info.resource()->readAsync()).get(fileBuffer);
+
+
+            Memory::MemoryManager cache("msdf_cache");
+            Serialize::FormattedSerializeStream in = cache.openRead(std::move(fileBuffer), std::make_unique<Serialize::SafeBinaryFormatter>());
             assert(in);
             ByteBuffer b;
             Serialize::StreamResult result = [&]() {

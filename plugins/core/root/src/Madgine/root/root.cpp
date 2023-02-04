@@ -25,6 +25,10 @@
 
 #include "Interfaces/filesystem/fsapi.h"
 
+#include "Interfaces/filesystem/async.h"
+
+#include "Modules/threading/awaitables/awaitabletimepoint.h"
+
 namespace Engine {
 namespace Root {
 
@@ -89,6 +93,18 @@ namespace Root {
             if (mErrorCode == 0)
                 mErrorCode = component->mErrorCode;
         }
+
+        mTaskQueue.queue([this]() -> Threading::Task<void> {
+            while (mTaskQueue.running()) {
+                Filesystem::checkAsyncIOCompletion();
+                co_await 500ms;
+            }
+            do {
+                Filesystem::cancelAllAsyncIO();
+                Filesystem::checkAsyncIOCompletion();
+                co_await 0ms;
+            } while (Filesystem::pendingIOOperationCount() > 0);
+        });
     }
 
     Root::~Root()

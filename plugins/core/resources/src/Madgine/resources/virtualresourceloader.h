@@ -50,7 +50,7 @@ namespace Resources {
         template <typename C>
         static Threading::TaskFuture<bool> loadUnnamed(typename Base::Ptr &ptr, C &&ctor, T *loader = &Base::getSingleton())
         {
-            return loader->queueLoading(loadUnnamedTask(ptr, std::forward<C>(ctor), loader));
+            return queueLoad(loadUnnamedTask(ptr, std::forward<C>(ctor), loader), loader->loadingTaskQueue());
         }
 
         template <typename C = typename Base::Ctor>

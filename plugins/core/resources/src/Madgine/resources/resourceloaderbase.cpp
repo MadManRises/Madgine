@@ -38,15 +38,5 @@ namespace Resources {
         return ResourceManager::getSingleton().taskQueue();
     }
 
-    Threading::TaskFuture<bool> ResourceLoaderBase::queueLoading(Threading::Task<bool> task)
-    {        
-        return loadingTaskQueue()->queueTask(std::move(task));        
-    }
-
-    Threading::TaskFuture<void> ResourceLoaderBase::queueUnloading(Threading::Task<void> task)
-    {        
-        return loadingTaskQueue()->queueTask(std::move(task));        
-    }
-
 }
 }

@@ -11,8 +11,8 @@ namespace Resources {
 
         ImageLoader();
 
-        bool loadImpl(ImageData &data, ResourceDataInfo &info);
-        void unloadImpl(ImageData &data);
+        Threading::Task<bool> loadImpl(ImageData &data, ResourceDataInfo &info);
+        Threading::Task<void> unloadImpl(ImageData &data);
     };
 
 }

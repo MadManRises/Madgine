@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Generic/sender.h"
+#include "Generic/execution/sender.h"
+#include "Generic/genericresult.h"
 
 namespace Engine {
 namespace FirstParty {
@@ -8,7 +9,7 @@ namespace FirstParty {
     template <typename R>
     auto steam_sender(SteamAPICall_t call)
     {
-        return make_sender<R>(
+        return Execution::make_sender<R, GenericResult>(
             [=]<typename Rec>(Rec &&rec) {
                 struct state {
                     void start()
@@ -17,7 +18,7 @@ namespace FirstParty {
                     }
                     void callback(R *result, bool bIOFailure)
                     {
-                        mRec.set_value(*result);
+                        mRec.set_value(GenericResult::SUCCESS, *result);
                     }
                     Rec mRec;
                     SteamAPICall_t mCall;

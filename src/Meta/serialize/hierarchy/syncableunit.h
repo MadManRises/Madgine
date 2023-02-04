@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Generic/callerhierarchy.h"
+#include "Generic/execution/sender.h"
 #include "serializableunit.h"
 
 #include "../streams/pendingrequest.h"
@@ -53,19 +54,11 @@ namespace Serialize {
 
         friend META_EXPORT void writeFunctionAction(SyncableUnitBase *unit, uint16_t index, const void *args, const std::set<ParticipantId> &targets, ParticipantId answerTarget, MessageId answerId);
         friend META_EXPORT void writeFunctionResult(SyncableUnitBase *unit, uint16_t index, const void *result, ParticipantId answerTarget, MessageId answerId);
-        friend META_EXPORT void writeFunctionRequest(SyncableUnitBase *unit, uint16_t index, FunctionType type, const void *args, ParticipantId requester, MessageId requesterTransactionId, GenericMessagePromise promise);
+        friend META_EXPORT void writeFunctionRequest(SyncableUnitBase *unit, uint16_t index, FunctionType type, const void *args, ParticipantId requester, MessageId requesterTransactionId, GenericMessageReceiver receiver);
 
         void writeFunctionAction(uint16_t index, const void *args, const std::set<ParticipantId> &targets = {}, ParticipantId answerTarget = 0, MessageId answerId = 0);
         void writeFunctionResult(uint16_t index, const void *result, ParticipantId answerTarget, MessageId answerId);
-        void writeFunctionRequest(uint16_t index, FunctionType type, const void *args, ParticipantId requester = 0, MessageId requesterTransactionId = 0, GenericMessagePromise promise = {});
-        template <typename T>
-        MessageFuture<T> writeFunctionRequest(uint16_t index, FunctionType type, const void *args, ParticipantId requester = 0, MessageId requesterTransactionId = 0)
-        {
-            MessagePromise<T> p;
-            MessageFuture<T> f { p.get_future() };
-            writeFunctionRequest(index, type, args, requester, requesterTransactionId, std::move(p));
-            return f;
-        }
+        void writeFunctionRequest(uint16_t index, FunctionType type, const void *args, ParticipantId requester = 0, MessageId requesterTransactionId = 0, GenericMessageReceiver receiver = {});
 
     private:
         std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterMessageTargets(const std::set<ParticipantId> &targets = {}) const;
@@ -136,19 +129,20 @@ namespace Serialize {
         friend TableInitializer<T, _Base>;
 
         template <auto f, typename... Args>
-        MessageFuture<typename Callable<f>::traits::return_type> call(Args &&...args)
+        auto call(Args &&...args)
         {
             using traits = typename Callable<f>::traits;
             using R = typename traits::return_type;
-            typename traits::decay_argument_types::as_tuple argTuple { std::forward<Args>(args)... };
-            if (this->isMaster()) {
-                this->writeFunctionAction(functionIndex<f>, &argTuple);
-                return invoke_patch_void(LIFT(TupleUnpacker::invokeExpand), f, static_cast<T *>(this), argTuple);
-            } else {
-                return this->template writeFunctionRequest<R>(
-                    functionIndex<f>, CALL,
-                    &argTuple);
-            }
+            return make_message_sender<R>(
+                [this](auto &receiver, Args &&...args) {
+                    typename traits::decay_argument_types::as_tuple argTuple { std::forward<Args>(args)... };
+                    if (this->isMaster()) {
+                        this->writeFunctionAction(functionIndex<f>, &argTuple);
+                        receiver.set_value(invoke_patch_void(LIFT(TupleUnpacker::invokeExpand), f, static_cast<T *>(this), argTuple));
+                    } else {
+                        this->writeFunctionRequest(functionIndex<f>, CALL, &argTuple, 0, 0, receiver);
+                    }
+                }, std::forward<Args>(args)...);
         }
 
         template <auto f, typename... Args>
@@ -163,18 +157,20 @@ namespace Serialize {
         }
 
         template <auto f, typename... Args>
-        MessageFuture<typename Callable<f>::traits::return_type> query(Args &&...args)
+        auto query(Args &&...args)
         {
             using traits = typename Callable<f>::traits;
             using R = typename traits::return_type;
-            if (this->isMaster()) {
-                return invoke_patch_void(f, static_cast<T *>(this), std::forward<Args>(args)...);
-            } else {
-                typename traits::decay_argument_types::as_tuple argTuple { std::forward<Args>(args)... };
-                return this->template writeFunctionRequest<R>(
-                    functionIndex<f>, QUERY,
-                    &argTuple);
-            }
+            return make_message_sender<R>(
+                [this](auto &receiver, Args &&...args) {
+                    if (this->isMaster()) {
+                        receiver.set_value((static_cast<T *>(this)->*f)(std::forward<Args>(args)...));
+                    } else {
+                        typename traits::decay_argument_types::as_tuple argTuple { std::forward<Args>(args)... };
+                        this->writeFunctionRequest(functionIndex<f>, QUERY, &argTuple, 0, 0, receiver);
+                    }
+                },
+                std::forward<Args>(args)...);
         }
 
         template <auto f, typename... Args>

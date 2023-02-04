@@ -26,9 +26,9 @@ namespace Serialize {
         mFormatter->beginMessageWrite();
     }
 
-    void FormattedBufferedStream::beginMessageWrite(ParticipantId requester, MessageId requestId, GenericMessagePromise promise)
+    void FormattedBufferedStream::beginMessageWrite(ParticipantId requester, MessageId requestId, GenericMessageReceiver receiver)
     {
-        static_cast<buffered_streambuf &>(mFormatter->stream().buffer()).beginMessageWrite(requester, requestId, std::move(promise));
+        static_cast<buffered_streambuf &>(mFormatter->stream().buffer()).beginMessageWrite(requester, requestId, std::move(receiver));
         mFormatter->beginMessageWrite();
     }
 

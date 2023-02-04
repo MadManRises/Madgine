@@ -17,8 +17,11 @@
 namespace Engine {
 namespace Filesystem {
 
+    void setup_async();
+
     void setup(void *)
     {
+        setup_async();
     }
 
     bool isDir(const Path &p)

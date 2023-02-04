@@ -126,9 +126,8 @@ struct TestManager : SyncManager {
         StreamResult result = __VA_ARGS__;                   \
         ASSERT_EQ(result.mState, StreamState::OK) << result; \
     }
-#define ASSERT_MESSAGEFUTURE_EQ(f, ...)             \
-    {                                               \
-        typename decltype(f)::type value;           \
-        ASSERT_EQ(f.get(value), MessageResult::OK); \
-        ASSERT_EQ(value, __VA_ARGS__);              \
+#define ASSERT_MESSAGEFUTURE_EQ(f, ...)          \
+    {                                            \
+        ASSERT_EQ(f.mResult, MessageResult::OK); \
+        ASSERT_EQ(f.mValue, __VA_ARGS__);        \
     }

@@ -42,8 +42,6 @@ namespace Resources {
         virtual std::vector<ResourceBase *> resources() = 0; 
 
         virtual Threading::TaskQueue *loadingTaskQueue() const;
-        Threading::TaskFuture<bool> queueLoading(Threading::Task<bool> task);
-        Threading::TaskFuture<void> queueUnloading(Threading::Task<void> task);  
 
     protected:
         std::vector<std::string> mExtensions;

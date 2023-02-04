@@ -94,8 +94,6 @@ namespace Render {
         if (profile == "latest")
             profile = GetLatestPixelProfile();
 
-        std::map<std::string, size_t> files;
-
         const char *cSource = source.data();
 
         ReleasePtr<ID3DBlob> pShaderBlob;

@@ -30,9 +30,9 @@ namespace Serialize {
         unit->writeFunctionResult(index, result, answerTarget, answerId);
     }
 
-    void writeFunctionRequest(SyncableUnitBase *unit, uint16_t index, FunctionType type, const void *args, ParticipantId requester, MessageId requesterTransactionId, GenericMessagePromise promise)
+    void writeFunctionRequest(SyncableUnitBase *unit, uint16_t index, FunctionType type, const void *args, ParticipantId requester, MessageId requesterTransactionId, GenericMessageReceiver receiver)
     {
-        unit->writeFunctionRequest(index, type, args, requester, requesterTransactionId, std::move(promise));
+        unit->writeFunctionRequest(index, type, args, requester, requesterTransactionId, std::move(receiver));
     }
 
     void SerializeTable::writeState(const SerializableDataUnit *unit, FormattedSerializeStream &out, CallerHierarchyBasePtr hierarchy) const

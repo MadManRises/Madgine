@@ -17,14 +17,12 @@ namespace Render {
                 : Base::Handle(std::move(handle))
             {
             }
-
         };
 
         SkeletonLoader();
 
-        bool loadImpl(SkeletonDescriptor &data, ResourceDataInfo &info);
-        void unloadImpl(SkeletonDescriptor &data);
-
+        Threading::Task<bool> loadImpl(SkeletonDescriptor &data, ResourceDataInfo &info);
+        Threading::Task<void> unloadImpl(SkeletonDescriptor &data);
     };
 
 }

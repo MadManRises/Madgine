@@ -55,50 +55,67 @@ namespace Serialize {
         }
 
         template <typename... _Ty>
-        MessageFuture<typename _traits::emplace_return> emplace(const iterator &where, _Ty &&...args)
+        auto emplace(const iterator &where, _Ty &&...args)
         {
-            if (this->isMaster()) {
-                return emplace_impl(where, std::forward<_Ty>(args)...);
-            } else {
-                value_type temp { std::forward<_Ty>(args)... };
-                std::tuple<ContainerEvent, const_iterator, const value_type &> data { EMPLACE, where, temp };
-                return this->template writeRequest<typename _traits::emplace_return>(&data);
-            }
+            return make_message_sender<typename _traits::emplace_return>(
+                [this](auto &receiver, const iterator &where, _Ty &&...args) {
+                    if (this->isMaster()) {
+                        receiver.set_value(emplace_impl(where, std::forward<_Ty>(args)...));
+                    } else {
+                        value_type temp { std::forward<_Ty>(args)... };
+                        std::tuple<ContainerEvent, const_iterator, const value_type &> data { EMPLACE, where, temp };
+                        this->writeRequest(&data, 0, 0, receiver);
+                    }
+                },
+                where,
+                std::forward<_Ty>(args)...);
         }
 
         template <typename Init, typename... _Ty>
-        MessageFuture<typename _traits::emplace_return> emplace_init(const iterator &where, Init &&init, _Ty &&...args)
+        auto emplace_init(const iterator &where, Init &&init, _Ty &&...args)
         {
-            if (this->isMaster()) {
-                return emplace_impl_init(where, std::forward<decltype(init)>(init), std::forward<_Ty>(args)...);
-            } else {
-                value_type temp { std::forward<_Ty>(args)... };
-                TupleUnpacker::invoke(std::forward<Init>(init), temp);
-                std::tuple<ContainerEvent, const_iterator, const value_type &> data { EMPLACE, where, temp };
-                return this->template writeRequest<typename _traits::emplace_return>(&data);
-            }
+            return make_message_sender<typename _traits::emplace_return>(
+                [this](auto &receiver, const iterator &where, Init &&init, _Ty &&...args) {
+                    if (this->isMaster()) {
+                        receiver.set_value(emplace_impl_init(where, std::forward<decltype(init)>(init), std::forward<_Ty>(args)...));
+                    } else {
+                        value_type temp { std::forward<_Ty>(args)... };
+                        TupleUnpacker::invoke(std::forward<Init>(init), temp);
+                        std::tuple<ContainerEvent, const_iterator, const value_type &> data { EMPLACE, where, temp };
+                        this->writeRequest(&data, 0, 0, receiver);
+                    }
+                },
+                where, std::forward<Init>(init), std::forward<_Ty>(args)...);
         }
 
-        MessageFuture<iterator> erase(const iterator &where)
+        auto erase(const iterator &where)
         {
-            if (this->isMaster()) {
-                return erase_impl(where);
-            } else {
-                std::tuple<ContainerEvent, const_iterator> data { ERASE, where };
-                return this->template writeRequest<iterator>(&data);                
-            }
+            return make_message_sender<iterator>(
+                [this](auto &receiver, const iterator &where) {
+                    if (this->isMaster()) {
+                        receiver.set_value(erase_impl(where));
+                    } else {
+                        std::tuple<ContainerEvent, const_iterator> data { ERASE, where };
+                        this->writeRequest(&data, 0, 0, receiver);
+                    }
+                },
+                where);
         }
 
-        MessageFuture<iterator> erase(const iterator &from, const iterator &to)
+        auto erase(const iterator &from, const iterator &to)
         {
-            iterator it = this->end();
-            if (this->isMaster()) {
-                return erase_impl(from, to);                
-            } else {
-                std::tuple<ContainerEvent, const_iterator, const_iterator> data { ERASE_RANGE, from,
-                    to };
-                return this->template writeRequest<iterator>(&data);                
-            }
+            return make_message_sender<iterator>(
+                [this](auto &receiver, const iterator &from, const iterator &to) {
+                    iterator it = this->end();
+                    if (this->isMaster()) {
+                        receiver.set_value(erase_impl(from, to));
+                    } else {
+                        std::tuple<ContainerEvent, const_iterator, const_iterator> data { ERASE_RANGE, from,
+                            to };
+                        this->writeRequest(&data, 0, 0, receiver);
+                    }
+                },
+                from, to);
         }
 
         struct _InsertOperation : Base::InsertOperation {

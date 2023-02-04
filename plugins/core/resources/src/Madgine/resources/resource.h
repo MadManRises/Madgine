@@ -3,6 +3,8 @@
 namespace Engine {
 namespace Resources {
 
+    MADGINE_RESOURCES_EXPORT Threading::TaskFuture<bool> queueLoad(Threading::Task<bool> task, Threading::TaskQueue *queue);
+
     template <typename Interface>
     struct ResourceDataInfoBase {
         ResourceDataInfoBase(typename Interface::Resource *res)
@@ -45,34 +47,47 @@ namespace Resources {
             mPersistent = b;
         }
 
-        void setLoadingTask(Threading::TaskFuture<bool> task)
+        Threading::TaskFuture<bool> setLoadingTask(Threading::Task<bool> task, Threading::TaskQueue *queue)
         {
-            assert(!mLoadingTask.valid());
-            assert(!mUnloadingTask.valid() || mUnloadingTask.is_ready());
-            mUnloadingTask.reset();
-            mLoadingTask = task;
+            std::unique_lock lock { mMutex };
+
+            if (mLoadingTask.valid()) {
+                mLoadingTask = mLoadingTask.then_task(std::move(task), queue);
+                assert(!mUnloadingTask.valid());
+            } else if (mUnloadingTask.valid()) {
+                mLoadingTask = mUnloadingTask.then_task(std::move(task), queue);
+                mUnloadingTask.reset();
+            } else {
+                mLoadingTask = queueLoad(std::move(task), queue);
+            }
+            return mLoadingTask;
         }
 
-        void setUnloadingTask(Threading::TaskFuture<void> task)
+        Threading::TaskFuture<void> setUnloadingTask(Threading::Task<void> task, Threading::TaskQueue *queue)
         {
-            assert(!mUnloadingTask.valid());
-            assert(mLoadingTask.is_ready());
-            mLoadingTask.reset();
-            mUnloadingTask = task;
+            std::unique_lock lock { mMutex };
+            if (mLoadingTask.valid()) {
+                mUnloadingTask = mLoadingTask.then_task(std::move(task), queue);
+                mLoadingTask.reset();
+            }
+            return mUnloadingTask.valid() ? mUnloadingTask : Threading::TaskFuture<void>::make_ready();
         }
 
-        bool verify()
+        bool verify() const
         {
+            std::unique_lock lock { mMutex };
             return mLoadingTask.valid() && mLoadingTask.is_ready() && mLoadingTask && !mUnloadingTask.valid();
         }
 
         Threading::TaskFuture<bool> loadingTask()
         {
+            std::unique_lock lock { mMutex };
             return mLoadingTask;
         }
 
         Threading::TaskFuture<void> unloadingTask()
         {
+            std::unique_lock lock { mMutex };
             return mUnloadingTask;
         }
 
@@ -82,6 +97,7 @@ namespace Resources {
         bool mPersistent = false;
         Threading::TaskFuture<bool> mLoadingTask;
         Threading::TaskFuture<void> mUnloadingTask;
+        mutable std::mutex mMutex;
     };
 
     template <typename Interface>

@@ -81,8 +81,6 @@ namespace Render {
         if (profile == L"latest")
             profile = GetLatestVertexProfile();
 
-        std::map<std::string, size_t> files;
-
         DxcBuffer sourceBuffer;
         sourceBuffer.Ptr = source.c_str();
         sourceBuffer.Size = source.size();

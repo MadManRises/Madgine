@@ -20,7 +20,7 @@ namespace Serialize {
 
     void META_EXPORT writeFunctionAction(SyncableUnitBase *unit, uint16_t index, const void *args, const std::set<ParticipantId> &targets, ParticipantId answerTarget, MessageId answerId);
     void META_EXPORT writeFunctionResult(SyncableUnitBase *unit, uint16_t index, const void *result, ParticipantId answerTarget, MessageId answerId);
-    void META_EXPORT writeFunctionRequest(SyncableUnitBase *unit, uint16_t index, FunctionType type, const void *args, ParticipantId requester, MessageId requesterTransactionId, GenericMessagePromise promise = {});
+    void META_EXPORT writeFunctionRequest(SyncableUnitBase *unit, uint16_t index, FunctionType type, const void *args, ParticipantId requester, MessageId requesterTransactionId, GenericMessageReceiver receiver = {});
 
     namespace __serialize_impl__ {
 
@@ -243,7 +243,7 @@ namespace Serialize {
                         STREAM_PROPAGATE_ERROR(read(in, args, "Args"));
                         writeFunctionAction(unit, index, &args, {}, request.mRequester, request.mRequesterTransactionId);
                         patch_void_t<R> result = invoke_patch_void(LIFT(TupleUnpacker::invokeExpand), f, static_cast<T *>(unit), args);
-                        request.mPromise.setValue(result);
+                        request.mReceiver.set_value(result);
                     } break;
                     case QUERY: {
                         patch_void_t<R> result;
@@ -251,7 +251,7 @@ namespace Serialize {
                         if (request.mRequesterTransactionId) {
                             writeFunctionResult(unit, index, &result, request.mRequester, request.mRequesterTransactionId);
                         }
-                        request.mPromise.setValue(result);
+                        request.mReceiver.set_value(result);
                     } break;
                     }
                     return StreamResult {};

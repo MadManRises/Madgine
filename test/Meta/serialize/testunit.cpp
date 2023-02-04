@@ -6,6 +6,9 @@
 
 #include "Meta/serialize/configs/creator.h"
 
+#include "Generic/execution/algorithm.h"
+#include "Generic/execution/execution.h"
+
 SERIALIZETABLE_BEGIN(ComplexDataType)
 SERIALIZETABLE_END(ComplexDataType)
 
@@ -59,12 +62,12 @@ SYNCFUNCTION(fooImpl)
 
 SERIALIZETABLE_END(TestUnit)
 
-Engine::Serialize::MessageFuture<int> TestUnit::call(int i)
+void TestUnit::call(int i, TestReceiver<int, Engine::Serialize::MessageResult> &rec)
 {
-    return TopLevelUnit<TestUnit>::call<&TestUnit::fooImpl>(i);
+    Engine::Execution::detach(Engine::Execution::then_receiver(TopLevelUnit<TestUnit>::call<&TestUnit::fooImpl>(i), rec));
 }
 
-Engine::Serialize::MessageFuture<int> TestUnit::query(int i)
+void TestUnit::query(int i, TestReceiver<int, Engine::Serialize::MessageResult> &rec)
 {
-    return TopLevelUnit<TestUnit>::query<&TestUnit::fooImpl>(i);
+    Engine::Execution::detach(Engine::Execution::then_receiver(TopLevelUnit<TestUnit>::query<&TestUnit::fooImpl>(i), rec));
 }

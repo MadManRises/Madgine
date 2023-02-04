@@ -12,6 +12,8 @@
 
 #include "../assimptools.h"
 
+#include "Modules/threading/awaitables/awaitablesender.h"
+
 METATABLE_BEGIN(Engine::Render::MeshLoader)
 MEMBER(mResources)
 METATABLE_END(Engine::Render::MeshLoader)
@@ -194,22 +196,23 @@ namespace Render {
         return true;
     }
 
-    bool MeshLoader::loadImpl(MeshData &mesh, ResourceDataInfo &info)
+    Threading::Task<bool> MeshLoader::loadImpl(MeshData &mesh, ResourceDataInfo &info)
     {
         Assimp::Importer importer;
 
-        std::vector<unsigned char> buffer = info.resource()->readAsBlob();
+        ByteBuffer buffer;
+        GenericResult result = (co_await info.resource()->readAsync()).get(buffer);
 
-        const aiScene *scene = importer.ReadFileFromMemory(buffer.data(), buffer.size(), aiProcess_MakeLeftHanded | aiProcess_Triangulate | aiProcess_LimitBoneWeights);
+        const aiScene *scene = importer.ReadFileFromMemory(buffer.mData, buffer.mSize, aiProcess_MakeLeftHanded | aiProcess_Triangulate | aiProcess_LimitBoneWeights);
 
         if (!scene) {
             LOG_ERROR(importer.GetErrorString());
-            return false;
+            co_return false;
         }
 
         if (scene->mNumMeshes == 0) {
             LOG_ERROR("No mesh in file '" << info.resource()->path().str() << "'");
-            return false;
+            co_return false;
         }
 
         std::vector<MeshData::Material> materials;
@@ -256,26 +259,27 @@ namespace Render {
 
         if (!hasSkeleton) {
             if (materials.empty()) {
-                return loadVertices<Render::Vertex>(mesh, *this, scene, std::move(materials));
+                co_return loadVertices<Render::Vertex>(mesh, *this, scene, std::move(materials));
             } else {
-                return loadVertices<Render::Vertex3>(mesh, *this, scene, std::move(materials));
+                co_return loadVertices<Render::Vertex3>(mesh, *this, scene, std::move(materials));
             }
         } else {
             if (materials.empty()) {
-                return loadVertices<Render::Vertex4>(mesh, *this, scene, std::move(materials));
+                co_return loadVertices<Render::Vertex4>(mesh, *this, scene, std::move(materials));
             } else {
-                return loadVertices<Render::Vertex5>(mesh, *this, scene, std::move(materials));
+                co_return loadVertices<Render::Vertex5>(mesh, *this, scene, std::move(materials));
             }
         }
     }
 
-    void MeshLoader::unloadImpl(MeshData &data)
+    Threading::Task<void> MeshLoader::unloadImpl(MeshData &data)
     {
         data.mGroupSize = 0;
         data.mIndices.clear();
         data.mMaterials.clear();
         data.mVertexSize = 0;
         data.mVertices.clear();
+        co_return;
     }
 
 }

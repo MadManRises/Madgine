@@ -35,7 +35,7 @@ namespace Threading {
             return static_cast<bool>(mState);
         }
 
-        bool attached()
+        bool attached() const
         {
             return mState && mState->mAttached;
         }
@@ -71,12 +71,18 @@ namespace Threading {
         }
 
         template <typename F>
-        auto then(F &&f, Threading::TaskQueue *queue)
+        auto then(F &&f, TaskQueue *queue)
         {
             auto task = [](F f, TaskFuture<T> fut) -> decltype(make_task(std::forward<F>(f), fut)) {
                 co_return co_await make_task(std::forward<F>(f), fut);
             }(std::forward<F>(f), *this);
 
+            return then_task(std::move(task), queue);
+        }
+
+        template <typename R>
+        auto then_task(Task<R> task, TaskQueue *queue)
+        {
             auto fut = task.get_future();
             auto handle = task.assign(queue);
             mState->then(std::move(handle));
@@ -108,12 +114,17 @@ namespace Threading {
         {
         }
 
-        bool valid()
+        static TaskFuture make_ready()
+        {
+            return { std::make_shared<TaskPromiseSharedState<void>>(true) };
+        }
+
+        bool valid() const
         {
             return static_cast<bool>(mState);
         }
 
-        bool attached()
+        bool attached() const
         {
             return mState && mState->mAttached;
         }
@@ -149,9 +160,16 @@ namespace Threading {
         }
 
         template <typename F>
-        auto then(F &&f, Threading::TaskQueue *queue)
+        auto then(F &&f, TaskQueue *queue)
         {
             auto task = make_task(std::forward<F>(f));
+
+            return then_task(std::move(task), queue);
+        }
+
+        template <typename R>
+        auto then_task(Task<R> task, TaskQueue *queue)
+        {
             auto fut = task.get_future();
             auto handle = task.assign(queue);
             mState->then(std::move(handle));

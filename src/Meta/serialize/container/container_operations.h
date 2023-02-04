@@ -161,14 +161,14 @@ namespace Serialize {
             if (accepted) {
                 typename container_traits<C>::emplace_return it;
                 STREAM_PROPAGATE_ERROR(performOperation(c, op, in, it, request.mRequester, request.mRequesterTransactionId, hierarchy));                
-                request.mPromise.setValue(it);
+                request.mReceiver.set_value(it);
             } else {
                 if (request.mRequesterTransactionId) {
                     FormattedBufferedStream &out = c.getRequestResponseTarget(request.mRequester, request.mRequesterTransactionId);
                     Serialize::write(out, op, "operation");
                     out.endMessageWrite();
                 }
-                request.mPromise.setResult(MessageResult::REJECTED);
+                request.mReceiver.set_error(MessageResult::REJECTED);
             }
             return {};
         }

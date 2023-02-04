@@ -6,6 +6,8 @@
 
 #include "Generic/bytebuffer.h"
 
+#include "../../Generic/testreceiver.h"
+
 using namespace Engine::Serialize;
 
 struct PODDataType {
@@ -57,8 +59,8 @@ struct TestUnit : TopLevelUnit<TestUnit> {
     int mData;
     int mCallCount = 0;
 
-    Engine::Serialize::MessageFuture<int> call(int i);
-    Engine::Serialize::MessageFuture<int> query(int i);
+    void call(int i, TestReceiver<int, Engine::Serialize::MessageResult> &rec);
+    void query(int i, TestReceiver<int, Engine::Serialize::MessageResult> &rec);
 
     SERIALIZABLE_CONTAINER(list1, std::list<int>);
     SERIALIZABLE_CONTAINER(set1, std::set<int>);

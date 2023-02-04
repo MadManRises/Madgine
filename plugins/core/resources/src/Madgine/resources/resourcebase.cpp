@@ -6,6 +6,8 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
+#include "Interfaces/filesystem/async.h"
+
 METATABLE_BEGIN(Engine::Resources::ResourceBase)
 READONLY_PROPERTY(Name, name)
 METATABLE_END(Engine::Resources::ResourceBase)
@@ -49,10 +51,15 @@ namespace Resources {
         return std::string { buffer.iterator(), buffer.end() };
     }
 
-    std::vector<unsigned char> Engine::Resources::ResourceBase::readAsBlob() const
+    std::vector<unsigned char> ResourceBase::readAsBlob() const
     {
         Stream buffer = readAsStream(true);
         return std::vector<unsigned char> { buffer.iterator(), buffer.end() };
+    }
+
+    Filesystem::AsyncFileRead ResourceBase::readAsync() const
+    {
+        return Filesystem::readFileAsync(mPath);
     }
 
 }

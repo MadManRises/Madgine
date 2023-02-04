@@ -54,4 +54,9 @@ enum class AccessMode {
     WRITE
 };
 
+namespace Execution {
+    template <typename, typename, typename>
+    struct Sender;
+}
+
 }

@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Generic/sender.h"
+#include "Generic/execution/sender.h"
 #include "Generic/type_pack.h"
+#include "Generic/genericresult.h"
 
 namespace Engine {
 namespace FirstParty {
@@ -19,7 +20,7 @@ namespace FirstParty {
         using C = typename argument_types::template select<argument_types::size - 1>;
 
         using R = InfoTypeHelper<C>;
-        return make_sender<R>(
+        return Execution::make_sender<R, GenericResult>(
             [args = std::tuple<Args...> { std::forward<Args>(args)... }]<typename Rec>(Rec &&rec) mutable {
                 struct state {
                     void start()
@@ -32,7 +33,7 @@ namespace FirstParty {
                     static void callback(const R *result)
                     {
                         state *self = static_cast<state *>(result->ClientData);
-                        self->mRec.set_value(*result);
+                        self->mRec.set_value(GenericResult::SUCCESS, *result);
                     }
                     Rec mRec;
                     std::tuple<Args...> mArgs;

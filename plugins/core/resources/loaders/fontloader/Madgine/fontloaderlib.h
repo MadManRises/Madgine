@@ -2,6 +2,7 @@
 
 #include "Madgine/resourceslib.h"
 #include "Madgine/textureloaderlib.h"
+#include "Madgine/serialize/memory/memorylib.h"
 #include "Madgine/serialize/filesystem/filesystemlib.h"
 
 #if defined(FontLoader_EXPORTS)

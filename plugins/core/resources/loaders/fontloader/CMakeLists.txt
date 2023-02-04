@@ -10,5 +10,5 @@ add_plugin(FontLoader Madgine Utility ${sources} PRECOMPILED_HEADER Madgine/font
 
 target_link_plugins(FontLoader TextureLoader)
 
-target_link_libraries(FontLoader PUBLIC FilesystemSerialize)
+target_link_libraries(FontLoader PUBLIC MemorySerialize FilesystemSerialize)
 target_link_libraries(FontLoader PRIVATE freetype lib_msdfgen)

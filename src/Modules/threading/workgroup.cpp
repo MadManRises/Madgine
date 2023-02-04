@@ -104,8 +104,8 @@ namespace Threading {
     {
         std::unique_lock lock { mThreadsMutex };
         std::erase_if(mSubThreads,
-            [](Future<int> &f) {
-                bool result = f.is_ready();
+            [](std::future<int> &f) {
+                bool result = f.wait_for(0ms) != std::future_status::timeout;
                 if (result)
                     f.get();
                 return result;

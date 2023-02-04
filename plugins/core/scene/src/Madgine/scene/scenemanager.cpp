@@ -25,6 +25,9 @@
 
 #include "Modules/threading/awaitables/awaitabletimepoint.h"
 
+#include "Generic/execution/algorithm.h"
+#include "Generic/execution/promise.h"
+
 UNIQUECOMPONENT(Engine::Serialize::NoParent<Engine::Scene::SceneManager>);
 
 METATABLE_BEGIN(Engine::Scene::SceneManager)
@@ -216,12 +219,17 @@ namespace Scene {
             if (!behavior.empty())
                 LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
         }
-        Serialize::MessageFuture<Pib<typename RefcountedContainer<std::deque<Entity::Entity>>::iterator>> f;
+        auto toPtr = [](const typename RefcountedContainer<std::deque<Entity::Entity>>::iterator &it) { return Entity::EntityPtr { &*it }; };
         if (init)
-            f = TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_init, this), mEntities.end(), init, createEntityData(name, false), table);
+            return Execution::detach_with_future(
+                Execution::then(
+                    TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_init, this), mEntities.end(), init, createEntityData(name, false), table),
+                    std::move(toPtr)));
         else
-            f = TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace, this), mEntities.end(), createEntityData(name, false), table);
-        return { f.then([](const typename RefcountedContainer<std::deque<Entity::Entity>>::iterator &it) { return Entity::EntityPtr { &*it }; }) };
+            return Execution::detach_with_future(
+                Execution::then(
+                    TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace, this), mEntities.end(), createEntityData(name, false), table),
+                    std::move(toPtr)));
     }
 
     Entity::EntityPtr SceneManager::createLocalEntity(const std::string &behavior, const std::string &name)

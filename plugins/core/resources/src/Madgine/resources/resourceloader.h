@@ -24,6 +24,8 @@ namespace Resources {
     MADGINE_RESOURCES_EXPORT ResourceLoaderBase &getLoaderByIndex(size_t i);
     MADGINE_RESOURCES_EXPORT void waitForIOThread();
 
+    MADGINE_RESOURCES_EXPORT Threading::TaskFuture<void> queueUnload(Threading::Task<void> task, Threading::TaskQueue *queue);
+
     template <typename T, typename _Data, typename _Container = std::list<Placeholder<0>>, typename _Storage = Threading::GlobalStorage, typename _Base = ResourceLoaderCollector::Base>
     struct ResourceLoaderInterface : _Base {
         using Base = _Base;
@@ -186,7 +188,7 @@ namespace Resources {
                 handle = create(resource, event, loader);
 
                 ResourceDataInfo &info = *getInfo(handle, loader);
-                info.setLoadingTask(loader->queueLoading(resource->mCtor(loader, *getDataPtr(handle, loader, false), info, event)));
+                info.setLoadingTask(resource->mCtor(loader, *getDataPtr(handle, loader, false), info, event), loader->loadingTaskQueue());
             }
 
             return handle;
@@ -207,9 +209,7 @@ namespace Resources {
             Threading::TaskFuture<void> task = info.unloadingTask();
 
             if (!task.valid()) {
-                task = loader->queueUnloading(Threading::make_task(&T::unloadImpl, (T *)loader, *getDataPtr(handle, loader, false)));
-
-                info.setUnloadingTask(task);
+                task = info.setUnloadingTask(Threading::make_task(&T::unloadImpl, (T *)loader, *getDataPtr(handle, loader, false)), loader->loadingTaskQueue());
             }
 
             return task;
@@ -220,14 +220,9 @@ namespace Resources {
             if (!ptr)
                 return;
 
-            Threading::TaskFuture<void> task = loader->queueUnloading(Threading::make_task(&T::unloadImpl, (T *)loader, *ptr));
+            Threading::TaskFuture<void> task = queueUnload(Threading::make_task(&T::unloadImpl, (T *)loader, *ptr), loader->loadingTaskQueue());
 
-            auto cleanup = [ptr { std::move(ptr) }]() {};
-            if (task.is_ready()) {
-                cleanup();
-            } else {
-                task.then(std::move(cleanup), loader->loadingTaskQueue());
-            }
+            task.then([ptr { std::move(ptr) }]() mutable { ptr.reset(); }, loader->loadingTaskQueue());
         }
 
         static void resetHandle(const Handle &handle, T *loader = nullptr)

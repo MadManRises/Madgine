@@ -20,7 +20,7 @@ namespace Serialize {
         FormattedBufferedStream &operator=(FormattedBufferedStream &&) = default;
 
         void beginMessageWrite();
-        void beginMessageWrite(ParticipantId requester, MessageId requestId, GenericMessagePromise promise);
+        void beginMessageWrite(ParticipantId requester, MessageId requestId, GenericMessageReceiver receiver);
         void endMessageWrite();
 
         struct META_EXPORT MessageReadMarker {

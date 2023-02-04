@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Generic/future.h"
-
-
 
 namespace Engine {
 namespace Threading {
@@ -110,7 +107,7 @@ namespace Threading {
 
         std::vector<std::thread::id> mThreads;
 
-        std::vector<Future<int>> mSubThreads;
+        std::vector<std::future<int>> mSubThreads;
 #endif
         std::vector<std::function<void()>> mThreadInitializers;
 

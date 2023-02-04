@@ -1,59 +1,81 @@
 #pragma once
 
-#include "Generic/sender.h"
+#include "Generic/execution/sender.h"
+#include "Generic/withresult.h"
 
 namespace Engine {
 namespace Threading {
 
-    template <typename R>
+    template <typename V, typename R>
     struct AwaitableSenderReceiver {
 
-        void set_value(R value)
+        void set_value(R result, V value)
         {
-            mResult.emplace(std::forward<R>(value));
-            mTask.resumeInQueue();
+            mResult = { std::forward<R>(result), std::forward<V>(value) };
+            if (mFlag.test_and_set())
+                mTask.resumeInQueue();
         }
 
+        void set_done()
+        {
+            if (mFlag.test_and_set())
+                mTask.resumeInQueue();
+        }
+
+        void set_error(R result)
+        {
+            mResult = std::forward<R>(result);
+            if (mFlag.test_and_set())
+                mTask.resumeInQueue();
+        }
+
+        std::atomic_flag mFlag;
         TaskHandle mTask;
-        std::optional<R> mResult;
+        WithResult<V, R> mResult;
     };
 
-    template <typename S, typename R>
+    template <typename S, typename V, typename R>
     struct AwaitableSender {
 
         template <typename F>
-        AwaitableSender(Engine::Sender<F, R> sender)
+        AwaitableSender(Execution::Sender<F, V, R> sender)
             : mState(sender(mReceiver))
         {
         }
 
         bool await_ready()
         {
-            return false;
-        }
-
-        void await_suspend(TaskHandle task)
-        {
-            mReceiver.mTask = std::move(task);
             mState.start();
+            return mReceiver.mFlag.test();
         }
 
-        R await_resume()
+        bool await_suspend(TaskHandle task)
         {
-            return std::move(*mReceiver.mResult);
+            mReceiver.mTask = std::move(task);            
+            if (mReceiver.mFlag.test_and_set()) {
+                mReceiver.mTask.release();
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        WithResult<V, R> await_resume()
+        {
+            return std::move(mReceiver.mResult);
         }
 
     private:
-        AwaitableSenderReceiver<R> mReceiver;
+        AwaitableSenderReceiver<V, R> mReceiver;
         S mState;
     };
 
 }
 }
 
-template <typename F, typename R>
-auto operator co_await(Engine::Sender<F, R> sender)
+template <typename F, typename V, typename R>
+auto operator co_await(Engine::Execution::Sender<F, V, R> sender)
 {
-    using S = decltype(sender(std::declval<Engine::Threading::AwaitableSenderReceiver<R>&>()));
-    return Engine::Threading::AwaitableSender<S, R> { std::move(sender) };
+    using S = decltype(sender(std::declval<Engine::Threading::AwaitableSenderReceiver<V, R> &>()));
+    return Engine::Threading::AwaitableSender<S, V, R> { std::move(sender) };
 }

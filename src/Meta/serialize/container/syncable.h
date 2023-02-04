@@ -14,14 +14,14 @@ namespace Serialize {
         virtual void readAction(SerializeInStream &in) = 0;*/
 
     protected:
-        FormattedBufferedStream &getSlaveRequestMessageTarget(const SyncableUnitBase *parent, ParticipantId requester, MessageId requesterTransactionId, GenericMessagePromise promise) const;
+        FormattedBufferedStream &getSlaveRequestMessageTarget(const SyncableUnitBase *parent, ParticipantId requester, MessageId requesterTransactionId, GenericMessageReceiver receiver) const;
         std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterActionMessageTargets(const SyncableUnitBase *parent, ParticipantId answerTarget, MessageId answerId,
             const std::set<ParticipantId> &targets = {}) const;
         FormattedBufferedStream &getMasterRequestResponseTarget(const SyncableUnitBase *parent, ParticipantId answerTarget, MessageId answerId) const;
         ParticipantId participantId(const SerializableUnitBase *parent);
 
         void writeAction(const SyncableUnitBase *parent, OffsetPtr offset, const void *data, ParticipantId answerTarget, MessageId answerId, const std::set<ParticipantId> &targets = {}) const;
-        void writeRequest(const SyncableUnitBase *parent, OffsetPtr offset, const void *data, ParticipantId requester, MessageId requesterTransactionId, GenericMessagePromise promise = {}) const;
+        void writeRequest(const SyncableUnitBase *parent, OffsetPtr offset, const void *data, ParticipantId requester, MessageId requesterTransactionId, GenericMessageReceiver receiver = {}) const;
         void writeRequestResponse(const SyncableUnitBase *parent, OffsetPtr offset, const void *data, ParticipantId answerTarget, MessageId answerId) const;
 
         void beginRequestResponseMessage(const SyncableUnitBase *parent, FormattedBufferedStream &stream, MessageId id) const;
@@ -38,9 +38,9 @@ namespace Serialize {
             return SyncableBase::getMasterActionMessageTargets(parent(), answerTarget, answerId, targets);
         }
 
-        FormattedBufferedStream &getSlaveRequestMessageTarget(ParticipantId requester = 0, MessageId requesterTransactionId = 0, GenericMessagePromise promise = {}) const
+        FormattedBufferedStream &getSlaveRequestMessageTarget(ParticipantId requester = 0, MessageId requesterTransactionId = 0, GenericMessageReceiver receiver = {}) const
         {
-            return SyncableBase::getSlaveRequestMessageTarget(parent(), requester, requesterTransactionId, std::move(promise));
+            return SyncableBase::getSlaveRequestMessageTarget(parent(), requester, requesterTransactionId, std::move(receiver));
         }
 
         ParticipantId participantId()
@@ -53,18 +53,9 @@ namespace Serialize {
             SyncableBase::writeAction(parent(), OffsetPtr::template offset<SerializableDataUnit>(), data, answerTarget, answerId, targets);
         }
         
-        void writeRequest(const void *data, ParticipantId requester = 0, MessageId requesterTransactionId = 0) const
+        void writeRequest(const void *data, ParticipantId requester = 0, MessageId requesterTransactionId = 0, GenericMessageReceiver receiver = {}) const
         {
-            SyncableBase::writeRequest(parent(), OffsetPtr::template offset<SerializableDataUnit>(), data, requester, requesterTransactionId);
-        }
-
-        template <typename T>
-        MessageFuture<T> writeRequest(const void *data, ParticipantId requester = 0, MessageId requesterTransactionId = 0) const
-        {
-            MessagePromise<T> p;
-            MessageFuture<T> f { Future<MessageData<T>>{ p.get_future() } };
-            SyncableBase::writeRequest(parent(), OffsetPtr::template offset<SerializableDataUnit>(), data, requester, requesterTransactionId, std::move(p));
-            return f;
+            SyncableBase::writeRequest(parent(), OffsetPtr::template offset<SerializableDataUnit>(), data, requester, requesterTransactionId, std::move(receiver));
         }
 
         void writeRequestResponse(const void *data, ParticipantId answerTarget, MessageId answerId) const
