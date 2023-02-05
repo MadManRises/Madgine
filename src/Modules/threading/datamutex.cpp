@@ -16,7 +16,7 @@ namespace Threading {
         if (mode == AccessMode::READ) {
             return holder == std::thread::id {} || holder == std::this_thread::get_id();
         } else {
-            return (holder == std::thread::id {} && mReaderCount == 0) || isHeldWrite();
+            return (holder == std::thread::id {} && mReaderCount == 0) || holder == std::this_thread::get_id();
         }
     }
 
@@ -53,8 +53,7 @@ namespace Threading {
             std::thread::id expected = {};
             std::thread::id self = std::this_thread::get_id();
             if (!mCurrentHolder.compare_exchange_strong(expected, self)) {
-                if (expected != self)
-                    std::terminate();
+                assert(expected == self);
             }
             result = expected != self;
         }
