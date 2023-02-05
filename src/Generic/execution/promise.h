@@ -1,6 +1,7 @@
 #pragma once
 
 #include "execution.h"
+#include "../withresultfuture.h"
 
 namespace Engine {
 namespace Execution {

@@ -4,20 +4,10 @@
 #include "Generic/execution/virtualreceiver.h"
 #include "Generic/forward_capture.h"
 #include "Generic/nulledptr.h"
-#include "Generic/withresultfuture.h"
 #include "messageresult.h"
 
 namespace Engine {
 namespace Serialize {
-
-    template <typename T>
-    using MessageData = WithResult<T, MessageResult>;
-
-    template <typename T>
-    using MessagePromise = std::promise<MessageData<T>>;
-
-    template <typename T>
-    using MessageFuture = WithResultFuture<T, MessageResult>;
 
     struct GenericMessageReceiver {
 
