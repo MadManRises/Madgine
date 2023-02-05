@@ -49,7 +49,7 @@ namespace Serialize {
     {
         stream.beginHeaderWrite();
         write(stream, SerializeManager::convertPtr(stream.stream(), unit), "Object");
-        write(stream, type, "MessageType");        
+        write(stream, type, "MessageType");
         stream.endHeaderWrite();
     }
 
@@ -88,13 +88,17 @@ namespace Serialize {
             MessageType type;
             STREAM_PROPAGATE_ERROR(read(stream, type, "MessageType"));
             MessageId transactionId;
-            if (type == MessageType::ACTION || type == MessageType::FUNCTION_ACTION)
+            if (type == MessageType::ACTION || type == MessageType::FUNCTION_ACTION || type == MessageType::ERROR)
                 STREAM_PROPAGATE_ERROR(read(stream, transactionId, "TransactionId"));
             STREAM_PROPAGATE_ERROR(stream.endHeaderRead());
             switch (type) {
             case MessageType::ACTION: {
                 PendingRequest request = stream.getRequest(transactionId);
-                STREAM_PROPAGATE_ERROR(object->readAction(stream, request));
+                StreamResult result = object->readAction(stream, request);
+                if (result.mState != StreamState::OK) {
+                    setError(object, request, MessageResult::DATA_CORRUPTION);
+                    return result;
+                }
                 break;
             }
             case MessageType::REQUEST:
@@ -105,12 +109,21 @@ namespace Serialize {
                 break;
             case MessageType::FUNCTION_ACTION: {
                 PendingRequest request = stream.getRequest(transactionId);
-                STREAM_PROPAGATE_ERROR(object->readFunctionAction(stream, request));
+                StreamResult result = object->readFunctionAction(stream, request);
+                if (result.mState != StreamState::OK) {
+                    setError(object, request, MessageResult::DATA_CORRUPTION);
+                    return result;
+                }
                 break;
             }
             case MessageType::FUNCTION_REQUEST:
                 STREAM_PROPAGATE_ERROR(object->readFunctionRequest(stream, id));
                 break;
+            case MessageType::ERROR: {
+                PendingRequest request = stream.getRequest(transactionId);                
+                setError(object, request, MessageResult::SERVER_ERROR);
+                break;
+            }
             default:
                 return STREAM_INTEGRITY_ERROR(stream) << "Invalid Message-Type: " << type;
             }
@@ -340,6 +353,20 @@ namespace Serialize {
     StreamResult SyncManager::fetchStreamError()
     {
         return std::move(mStreamError);
+    }
+
+    void SyncManager::setError(SyncableUnitBase *unit, PendingRequest &pending, MessageResult error)
+    {
+        if (pending.mReceiver)
+            pending.mReceiver.set_error(error);
+        if (pending.mRequester) {
+            auto it = mMasterStreams.find(pending.mRequester);
+            assert(it != mMasterStreams.end());
+            FormattedBufferedStream &stream = *it;
+            stream.beginMessageWrite();
+            writeActionHeader(stream, unit, MessageType::ERROR, pending.mRequesterTransactionId);
+            stream.endMessageWrite();
+        }
     }
 
     StreamResult SyncManager::receiveMessages(int msgCount, TimeOut timeout)

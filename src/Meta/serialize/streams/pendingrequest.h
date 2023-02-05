@@ -34,10 +34,10 @@ namespace Serialize {
         GenericMessageReceiver &operator=(GenericMessageReceiver &&) = default;
 
         template <typename T>
-        void set_value(const T &t)
+        void set_value(MessageResult result, const T &t)
         {
             if (mPtr) {
-                mPtr->set_value(MessageResult::OK, &t);
+                mPtr->set_value(result, &t);
                 mPtr.reset();
             }
         }

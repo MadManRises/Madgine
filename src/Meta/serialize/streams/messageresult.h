@@ -7,7 +7,9 @@ namespace Serialize {
 
     ENUM(MessageResult,
         OK,
-        REJECTED)
+        REJECTED,
+        DATA_CORRUPTION,
+        SERVER_ERROR)
 
 }
 }

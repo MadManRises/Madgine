@@ -245,7 +245,7 @@ namespace Serialize {
                         STREAM_PROPAGATE_ERROR(read(in, args, "Args"));
                         writeFunctionAction(unit, index, &args, {}, request.mRequester, request.mRequesterTransactionId);
                         patch_void_t<R> result = invoke_patch_void(LIFT(TupleUnpacker::invokeExpand), f, static_cast<T *>(unit), args);
-                        request.mReceiver.set_value(result);
+                        request.mReceiver.set_value(MessageResult::OK, result);
                     } break;
                     case QUERY: {
                         patch_void_t<R> result;
@@ -253,7 +253,7 @@ namespace Serialize {
                         if (request.mRequesterTransactionId) {
                             writeFunctionResult(unit, index, &result, request.mRequester, request.mRequesterTransactionId);
                         }
-                        request.mReceiver.set_value(result);
+                        request.mReceiver.set_value(MessageResult::OK, result);
                     } break;
                     }
                     return StreamResult {};

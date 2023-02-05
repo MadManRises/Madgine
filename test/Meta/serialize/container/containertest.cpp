@@ -53,7 +53,7 @@ TEST(Serialize_Container, SyncedUnit)
     ASSERT_EQ(unit1.set1, unit2.set1);
     
     GenericTestReceiver calledFuture;
-    Engine::Execution::detach(Engine::Execution::then_receiver(unit1.list2.emplace(unit1.list2.end(), 6), calledFuture));
+    Engine::Execution::detach(Engine::Execution::then_receiver(unit1.list2.emplace_async(unit1.list2.end(), 6), calledFuture));
     ASSERT_TRUE(calledFuture.is_ready());
     ASSERT_EQ(unit1.list2.back(), 6);
 
@@ -63,7 +63,7 @@ TEST(Serialize_Container, SyncedUnit)
     ASSERT_EQ(unit1.list2, unit2.list2);
 
     calledFuture.reset();
-    Engine::Execution::detach(Engine::Execution::then_receiver(unit2.list2.emplace(unit2.list2.end(), 7), calledFuture));
+    Engine::Execution::detach(Engine::Execution::then_receiver(unit2.list2.emplace_async(unit2.list2.end(), 7), calledFuture));
 
     ASSERT_EQ(unit1.list2, unit2.list2);
 
@@ -80,15 +80,15 @@ TEST(Serialize_Container, SyncedUnit)
     ASSERT_EQ(unit1.list2, unit2.list2);
 
     calledFuture.reset();
-    Engine::Execution::detach(Engine::Execution::then_receiver(unit1.list2.erase(std::next(unit1.list2.begin())), calledFuture));
+    Engine::Execution::detach(Engine::Execution::then_receiver(unit1.list2.erase_async(std::next(unit1.list2.begin())), calledFuture));
     ASSERT_TRUE(calledFuture.is_ready());
 
-    ASSERT_EQ(unit1.list2.size(), 1);
+    ASSERT_EQ(unit1.list2.size(), 3);
 
     mgr1.sendMessages();
     mgr2.receiveMessages(1, 0ms);
 
-    ASSERT_EQ(unit2.list2.size(), 1);
+    ASSERT_EQ(unit2.list2.size(), 3);
     ASSERT_EQ(unit1.list2, unit2.list2);
 }
 

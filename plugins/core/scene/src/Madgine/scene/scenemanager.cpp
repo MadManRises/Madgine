@@ -205,7 +205,7 @@ namespace Scene {
         return "Entity";
     }
 
-    Serialize::MessageFuture<Entity::EntityPtr> SceneManager::createEntity(const std::string &behavior, const std::string &name,
+    Entity::EntityPtr SceneManager::createEntity(const std::string &behavior, const std::string &name,
         const std::function<void(Entity::Entity &)> &init)
     {
         assert(mMutex.isHeldWrite());
@@ -221,15 +221,41 @@ namespace Scene {
         }
         auto toPtr = [](const typename RefcountedContainer<std::deque<Entity::Entity>>::iterator &it) { return Entity::EntityPtr { &*it }; };
         if (init)
-            return Execution::detach_with_future(
-                Execution::then(
-                    TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_init, this), mEntities.end(), init, createEntityData(name, false), table),
-                    std::move(toPtr)));
+            return toPtr(TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_init, this), mEntities.end(), init, createEntityData(name, false), table));
         else
-            return Execution::detach_with_future(
-                Execution::then(
-                    TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace, this), mEntities.end(), createEntityData(name, false), table),
-                    std::move(toPtr)));
+            return toPtr(TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace, this), mEntities.end(), createEntityData(name, false), table));
+    }
+
+    void SceneManager::createEntityAsyncImpl(Serialize::GenericMessageReceiver &receiver, const std::string &behavior, const std::string &name, const std::function<void(Entity::Entity &)> &init)
+    {
+        assert(mMutex.isHeldWrite());
+
+        //ValueType behaviorTable /* = app().table()[behavior]*/;
+        ObjectPtr table;
+        /*if (behaviorTable.is<ObjectPtr>()) {
+                table = behaviorTable.as<ObjectPtr>();
+            } else*/
+        {
+            if (!behavior.empty())
+                LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
+        }
+        auto toPtr = [](const typename RefcountedContainer<std::deque<Entity::Entity>>::iterator &it) { return Entity::EntityPtr { &*it }; };
+        if (init)
+            Execution::detach(
+                Execution::then_receiver(
+                    Execution::then(
+                        TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_init_async, this), mEntities.end(), init, createEntityData(name, false), table),
+                        std::move(toPtr)
+                    ),
+                    receiver));
+        else
+            Execution::detach(
+                Execution::then_receiver(
+                    Execution::then(
+                        TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_async, this), mEntities.end(), createEntityData(name, false), table),
+                        std::move(toPtr)
+                    ), 
+                    receiver));
     }
 
     Entity::EntityPtr SceneManager::createLocalEntity(const std::string &behavior, const std::string &name)

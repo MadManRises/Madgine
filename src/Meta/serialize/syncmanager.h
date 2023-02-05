@@ -53,6 +53,8 @@ namespace Serialize {
 
         StreamResult fetchStreamError();
 
+        void setError(SyncableUnitBase *unit, PendingRequest &pending, MessageResult error);
+
     protected:
         StreamResult receiveMessages(FormattedBufferedStream &stream, int &msgCount, TimeOut timeout = {});
         bool sendAllMessages(FormattedBufferedStream &stream, TimeOut timeout = {});

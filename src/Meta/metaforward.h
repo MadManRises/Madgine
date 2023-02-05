@@ -122,7 +122,8 @@ namespace Serialize {
         ACTION,
         REQUEST,
         FUNCTION_ACTION,
-        FUNCTION_REQUEST
+        FUNCTION_REQUEST,
+        ERROR
     )
 
     enum FunctionType {
