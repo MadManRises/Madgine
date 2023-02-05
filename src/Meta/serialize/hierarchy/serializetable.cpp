@@ -172,7 +172,7 @@ namespace Serialize {
         }
     }
 
-    void SerializeTable::writeAction(const SyncableUnitBase *unit, uint16_t index, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, const void *data) const
+    void SerializeTable::writeAction(const SyncableUnitBase *unit, uint16_t index, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, void *data) const
     {
         for (FormattedBufferedStream &out : outStreams) {
             write(out, index, "index");
@@ -180,7 +180,7 @@ namespace Serialize {
         get(index).mWriteAction(unit, outStreams, data);
     }
 
-    void SerializeTable::writeRequest(const SyncableUnitBase *unit, uint16_t index, FormattedBufferedStream &out, const void *data) const
+    void SerializeTable::writeRequest(const SyncableUnitBase *unit, uint16_t index, FormattedBufferedStream &out, void *data) const
     {
         write(out, index, "index");
         get(index).mWriteRequest(unit, out, data);

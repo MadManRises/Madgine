@@ -57,7 +57,7 @@ namespace Serialize {
         return parent->mTopLevel->participantId();
     }
 
-    void SyncableBase::writeAction(const SyncableUnitBase *parent, OffsetPtr offset, const void *data, ParticipantId answerTarget, MessageId answerId, const std::set<ParticipantId> &targets) const
+    void SyncableBase::writeAction(const SyncableUnitBase *parent, OffsetPtr offset, void *data, ParticipantId answerTarget, MessageId answerId, const std::set<ParticipantId> &targets) const
     {
         uint16_t index = parent->serializeType()->getIndex(offset);
         parent->serializeType()->writeAction(parent, index, getMasterActionMessageTargets(parent, answerTarget, answerId, targets), data);
@@ -71,13 +71,13 @@ namespace Serialize {
         return out;
     }
 
-    void SyncableBase::writeRequest(const SyncableUnitBase *parent, OffsetPtr offset, const void *data, ParticipantId requester, MessageId requesterTransactionId, GenericMessageReceiver receiver) const
+    void SyncableBase::writeRequest(const SyncableUnitBase *parent, OffsetPtr offset, void *data, ParticipantId requester, MessageId requesterTransactionId, GenericMessageReceiver receiver) const
     {
         uint16_t index = parent->serializeType()->getIndex(offset);
         parent->serializeType()->writeRequest(parent, index, getSlaveRequestMessageTarget(parent, requester, requesterTransactionId, std::move(receiver)), data);
     }
 
-    void SyncableBase::writeRequestResponse(const SyncableUnitBase *parent, OffsetPtr offset, const void *data, ParticipantId answerTarget, MessageId answerId) const
+    void SyncableBase::writeRequestResponse(const SyncableUnitBase *parent, OffsetPtr offset, void *data, ParticipantId answerTarget, MessageId answerId) const
     {
         if (answerTarget != 0) {
             uint16_t index = parent->serializeType()->getIndex(offset);

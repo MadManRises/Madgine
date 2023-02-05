@@ -20,9 +20,9 @@ namespace Serialize {
         FormattedBufferedStream &getMasterRequestResponseTarget(const SyncableUnitBase *parent, ParticipantId answerTarget, MessageId answerId) const;
         ParticipantId participantId(const SerializableUnitBase *parent);
 
-        void writeAction(const SyncableUnitBase *parent, OffsetPtr offset, const void *data, ParticipantId answerTarget, MessageId answerId, const std::set<ParticipantId> &targets = {}) const;
-        void writeRequest(const SyncableUnitBase *parent, OffsetPtr offset, const void *data, ParticipantId requester = 0, MessageId requesterTransactionId = 0, GenericMessageReceiver receiver = {}) const;
-        void writeRequestResponse(const SyncableUnitBase *parent, OffsetPtr offset, const void *data, ParticipantId answerTarget, MessageId answerId) const;
+        void writeAction(const SyncableUnitBase *parent, OffsetPtr offset, void *data, ParticipantId answerTarget, MessageId answerId, const std::set<ParticipantId> &targets = {}) const;
+        void writeRequest(const SyncableUnitBase *parent, OffsetPtr offset, void *data, ParticipantId requester = 0, MessageId requesterTransactionId = 0, GenericMessageReceiver receiver = {}) const;
+        void writeRequestResponse(const SyncableUnitBase *parent, OffsetPtr offset, void *data, ParticipantId answerTarget, MessageId answerId) const;
 
         void beginRequestResponseMessage(const SyncableUnitBase *parent, FormattedBufferedStream &stream, MessageId id) const;
         
@@ -51,35 +51,28 @@ namespace Serialize {
         template <typename... Args>
         void writeAction(ParticipantId answerTarget, MessageId answerId, Args&&... args) const
         {
-            std::tuple<std::decay_t<Args>...> data { std::forward<Args>(args)... };
+            typename OffsetPtr::member_type::action_payload data { std::forward<Args>(args)... };
             SyncableBase::writeAction(parent(), OffsetPtr::template offset<SerializableDataUnit>(), &data, answerTarget, answerId, {});
         }
-        
-        /* template <typename... Args>
-        void writeRequest(Args&&... args) const
-        {
-            std::tuple<std::decay_t<Args>...> data { std::forward<Args>(args)... };
-            SyncableBase::writeRequest(parent(), OffsetPtr::template offset<SerializableDataUnit>(), &data);
-        }*/
 
         template <typename... Args>
         void writeRequest(ParticipantId requester, MessageId requesterTransactionId, Args&&... args) const
         {
-            std::tuple<std::decay_t<Args>...> data { std::forward<Args>(args)... };
+            typename OffsetPtr::member_type::request_payload data { std::forward<Args>(args)... };
             SyncableBase::writeRequest(parent(), OffsetPtr::template offset<SerializableDataUnit>(), &data, requester, requesterTransactionId);
         }
            
         template <typename... Args>
         void writeRequest(GenericMessageReceiver receiver, Args &&...args) const
         {
-            std::tuple<std::decay_t<Args>...> data { std::forward<Args>(args)... };
+            typename OffsetPtr::member_type::request_payload data { std::forward<Args>(args)... };
             SyncableBase::writeRequest(parent(), OffsetPtr::template offset<SerializableDataUnit>(), &data, 0, 0, std::move(receiver));
         }
 
         template <typename... Args>
         void writeRequestResponse(ParticipantId answerTarget, MessageId answerId, Args &&...args) const
         {
-            std::tuple<std::decay_t<Args>...> data { std::forward<Args>(args)... };
+            typename OffsetPtr::member_type::action_payload data { std::forward<Args>(args)... };
             SyncableBase::writeRequestResponse(parent(), OffsetPtr::template offset<SerializableDataUnit>(), &data, answerTarget, answerId);
         }
 

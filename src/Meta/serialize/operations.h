@@ -104,16 +104,16 @@ namespace Serialize {
         return Operations<T, Configs...>::readRequest(t, inout, id, hierarchy);
     }
 
-    template <typename T, typename... Configs>
-    void writeAction(const T &t, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, const void *data, const CallerHierarchyBasePtr &hierarchy = {})
+    template <typename T, typename... Configs, typename Payload>
+    void writeAction(const T &t, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, Payload &&payload, const CallerHierarchyBasePtr &hierarchy = {})
     {
-        Operations<T, Configs...>::writeAction(t, outStreams, data, hierarchy);
+        Operations<T, Configs...>::writeAction(t, outStreams, std::forward<Payload>(payload), hierarchy);
     }
 
-    template <typename T, typename... Configs>
-    void writeRequest(const T &t, FormattedBufferedStream &out, const void *data, const CallerHierarchyBasePtr &hierarchy = {})
+    template <typename T, typename... Configs, typename Payload>
+    void writeRequest(const T &t, FormattedBufferedStream &out, Payload &&payload, const CallerHierarchyBasePtr &hierarchy = {})
     {
-        Operations<T, Configs...>::writeRequest(t, out, data, hierarchy);
+        Operations<T, Configs...>::writeRequest(t, out, std::forward<Payload>(payload), hierarchy);
     }
 
 

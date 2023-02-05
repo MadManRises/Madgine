@@ -20,6 +20,28 @@ namespace Serialize {
         typedef typename _traits::const_iterator const_iterator;
         typedef typename _traits::value_type value_type;
 
+        struct emplace_request_t {
+            iterator mWhere;
+            value_type &mDummy;
+        };
+        struct emplace_action_t {
+            const_iterator mIt;
+        };
+        struct reset_t {
+        };
+        struct reset_to_request_t {
+            const typename Base::Base mNewData;
+        };
+        struct erase_t {
+            iterator mWhere;
+        };
+        struct erase_range_t {
+            iterator mFrom;
+            iterator mTo;
+        };
+        using request_payload = std::variant<emplace_request_t, reset_t, reset_to_request_t, erase_t, erase_range_t>;
+        using action_payload = std::variant<emplace_action_t, reset_t, erase_t, erase_range_t>;
+
         SyncableContainerImpl() = default;
 
         SyncableContainerImpl(const SyncableContainerImpl &other) = default;
@@ -31,9 +53,7 @@ namespace Serialize {
             if (this->isMaster()) {
                 ResetOperation { *this, false } = other;
             } else {
-                std::pair<ContainerEvent, typename Base::Base> temp { RESET, other };
-
-                this->writeRequest(0, 0, &temp); //??? Is the temp object used?
+                this->writeRequest(0, 0, reset_to_request_t { other });
             }
             return *this;
         }
@@ -48,9 +68,8 @@ namespace Serialize {
         {
             if (this->isMaster()) {
                 ResetOperation { *this, false }.clear();
-            } else {
-                ContainerEvent op = RESET;
-                this->writeRequest(0, 0, &op);
+            } else {                
+                this->writeRequest(0, 0, reset_t {});
             }
         }
 
@@ -63,7 +82,7 @@ namespace Serialize {
                         receiver.set_value(emplace_impl(where, std::forward<_Ty>(args)...));
                     } else {
                         value_type temp { std::forward<_Ty>(args)... };
-                        this->writeRequest(receiver, EMPLACE, where, std::ref(temp));
+                        this->writeRequest(receiver, emplace_request_t { where, temp });
                     }
                 },
                 where,
@@ -80,7 +99,7 @@ namespace Serialize {
                     } else {
                         value_type temp { std::forward<_Ty>(args)... };
                         TupleUnpacker::invoke(std::forward<Init>(init), temp);
-                        this->writeRequest(receiver, EMPLACE, where, std::ref(temp));
+                        this->writeRequest(receiver, emplace_request_t { where, temp });
                     }
                 },
                 where, std::forward<Init>(init), std::forward<_Ty>(args)...);
@@ -93,7 +112,7 @@ namespace Serialize {
                     if (this->isMaster()) {
                         receiver.set_value(erase_impl(where));
                     } else {
-                        this->writeRequest(receiver, ERASE, where);
+                        this->writeRequest(receiver, erase_t { where });
                     }
                 },
                 where);
@@ -107,7 +126,7 @@ namespace Serialize {
                     if (this->isMaster()) {
                         receiver.set_value(erase_impl(from, to));
                     } else {
-                        this->writeRequest(receiver, ERASE_RANGE, from, to);
+                        this->writeRequest(receiver, erase_range_t { from, to });
                     }
                 },
                 from, to);
@@ -125,7 +144,7 @@ namespace Serialize {
                 assert(this->mCalled);
                 if (this->mInserted) {
                     if (this->mContainer.isSynced()) {
-                        container().writeAction(mAnswerTarget, mAnswerId, EMPLACE, this->mIt);
+                        container().writeAction(mAnswerTarget, mAnswerId, emplace_action_t { this->mIt });
                     }
                 }
             }
@@ -145,7 +164,7 @@ namespace Serialize {
                 : Base::RemoveOperation(c, it)
             {
                 if (this->mContainer.isSynced()) {
-                    container().writeAction(answerTarget, answerId, ERASE, it);
+                    container().writeAction(answerTarget, answerId, erase_t { it });
                 }
             }
 
@@ -160,7 +179,7 @@ namespace Serialize {
                 : Base::RemoveRangeOperation(c, from, to)
             {
                 if (this->mContainer.isSynced()) {
-                    this->writeAction(answerTarget, answerId, ERASE_RANGE, from, to);
+                    this->writeAction(answerTarget, answerId, erase_range_t { from, to });
                 }
             }
 
@@ -180,7 +199,7 @@ namespace Serialize {
             ~_ResetOperation()
             {
                 if (this->mContainer.isSynced()) {
-                    container().writeAction(mAnswerTarget, mAnswerId, RESET, container().end());
+                    container().writeAction(mAnswerTarget, mAnswerId, reset_t {});
                 }
             }
 
