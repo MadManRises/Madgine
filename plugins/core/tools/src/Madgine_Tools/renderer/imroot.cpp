@@ -19,11 +19,11 @@
 
 #include "Meta/serialize/streams/serializestreamdata.h"
 
-#include "Generic/container/transformIt.h"
-
 #include "Meta/serialize/hierarchy/statetransmissionflags.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+
+#include "Generic/projections.h"
 
 METATABLE_BEGIN(Engine::Tools::ImRoot)
 READONLY_PROPERTY(Tools, tools)
@@ -40,7 +40,7 @@ namespace Tools {
         root->finishToolRead();
 
         root->mToolReadBuffer.str("");
-        for (ToolBase *tool : uniquePtrToPtr(root->tools())) {
+        for (ToolBase *tool : root->tools() | std::views::transform(projectionUniquePtrToPtr)) {
             if (tool->key() == name) {
                 root->mToolReadTool = tool;
                 return tool;
@@ -63,7 +63,7 @@ namespace Tools {
         Serialize::FormattedSerializeStream out { std::make_unique<Serialize::IniFormatter>(), { std::move(buf) } };
 
         ImRoot *root = static_cast<ImRoot *>(handler->UserData);
-        for (ToolBase *tool : uniquePtrToPtr(root->tools())) {
+        for (ToolBase *tool : root->tools() | std::views::transform(projectionUniquePtrToPtr)) {
             std::string name = std::string { tool->key() };
             out_buf->appendf("[Tool][%s]\n", name.c_str());
 
@@ -129,7 +129,7 @@ namespace Tools {
                 ImGui::EndMenu();
             }
 
-            for (ToolBase *tool : uniquePtrToPtr(mCollector)) {
+            for (ToolBase *tool : mCollector | std::views::transform(projectionUniquePtrToPtr)) {
                 if (tool->isEnabled())
                     tool->renderMenu();
             }
@@ -139,7 +139,7 @@ namespace Tools {
 
         if (ImGui::BeginViewportSideBar("##MainStatusBar", viewport, ImGuiDir_Down, ImGui::GetFrameHeight(), ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar)) {
             if (ImGui::BeginMenuBar()) {
-                for (ToolBase *tool : uniquePtrToPtr(mCollector)) {
+                for (ToolBase *tool : mCollector | std::views::transform(projectionUniquePtrToPtr)) {
                     if (tool->isEnabled())
                         tool->renderStatus();
                 }
@@ -171,7 +171,7 @@ namespace Tools {
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
         mDockSpaceId = dockspace_id;
 
-        for (ToolBase *tool : uniquePtrToPtr(mCollector)) {
+        for (ToolBase *tool : mCollector | std::views::transform(projectionUniquePtrToPtr)) {
             if (tool->isEnabled())
                 tool->update();
         }

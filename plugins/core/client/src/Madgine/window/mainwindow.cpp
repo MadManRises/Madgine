@@ -5,8 +5,6 @@
 #include "mainwindowcomponent.h"
 #include "toolwindow.h"
 
-#include "Generic/container/reverseIt.h"
-
 #include "Interfaces/filesystem/fsapi.h"
 #include "Interfaces/window/windowapi.h"
 #include "Interfaces/window/windowsettings.h"
@@ -25,6 +23,8 @@
 #include "Madgine/resources/resourcemanager.h"
 
 #include "Meta/serialize/formatter/xmlformatter.h"
+
+#include "Generic/projections.h"
 
 METATABLE_BEGIN(Engine::Window::MainWindow)
 READONLY_PROPERTY(Components, components)
@@ -167,7 +167,7 @@ namespace Window {
     */
     Threading::Task<void> MainWindow::finalize()
     {
-        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : components() | std::views::reverse) {
             co_await comp->callFinalize();
         }
 
@@ -310,7 +310,7 @@ namespace Window {
         } else
             space = component->getChildClientSpace();
 
-        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : components() | std::views::reverse) {
             if (component) {
                 if (component == comp.get()) {
                     component = nullptr;
@@ -329,7 +329,7 @@ namespace Window {
     */
     bool MainWindow::injectKeyPress(const Input::KeyEventArgs &arg)
     {
-        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : components() | std::views::reverse) {
             if (comp->injectKeyPress(arg))
                 return true;
         }
@@ -343,7 +343,7 @@ namespace Window {
     */
     bool MainWindow::injectKeyRelease(const Input::KeyEventArgs &arg)
     {
-        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : components() | std::views::reverse) {
             if (comp->injectKeyRelease(arg))
                 return true;
         }
@@ -358,7 +358,7 @@ namespace Window {
     bool MainWindow::injectPointerPress(const Input::PointerEventArgs &arg)
     {
         InterfacesVector storedWindowPosition = arg.windowPosition;
-        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : components() | std::views::reverse) {
             arg.windowPosition = storedWindowPosition - InterfacesVector { comp->getClientSpace().mTopLeft.x, comp->getClientSpace().mTopLeft.y };
             if (comp->injectPointerPress(arg))
                 return true;
@@ -375,7 +375,7 @@ namespace Window {
     bool MainWindow::injectPointerRelease(const Input::PointerEventArgs &arg)
     {
         InterfacesVector storedWindowPosition = arg.windowPosition;
-        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : components() | std::views::reverse) {
             arg.windowPosition = storedWindowPosition - InterfacesVector { comp->getClientSpace().mTopLeft.x, comp->getClientSpace().mTopLeft.y };
             if (comp->injectPointerRelease(arg))
                 return true;
@@ -392,7 +392,7 @@ namespace Window {
     bool MainWindow::injectPointerMove(const Input::PointerEventArgs &arg)
     {
         InterfacesVector storedWindowPosition = arg.windowPosition;
-        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : components() | std::views::reverse) {
             arg.windowPosition = storedWindowPosition - InterfacesVector { comp->getClientSpace().mTopLeft.x, comp->getClientSpace().mTopLeft.y };
             if (comp->injectPointerMove(arg))
                 return true;
@@ -408,7 +408,7 @@ namespace Window {
     */
     bool MainWindow::injectAxisEvent(const Input::AxisEventArgs &arg)
     {
-        for (const std::unique_ptr<MainWindowComponentBase> &comp : reverseIt(components())) {
+        for (const std::unique_ptr<MainWindowComponentBase> &comp : components() | std::views::reverse) {
             if (comp->injectAxisEvent(arg))
                 return true;
         }

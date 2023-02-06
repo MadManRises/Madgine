@@ -1,7 +1,6 @@
 #pragma once
 
 #include "comparator_traits.h"
-#include "container/transformIt.h"
 #include "functor.h"
 
 namespace Engine {
@@ -141,6 +140,8 @@ decltype(auto) kvValue(T &&v)
     return KeyValue<std::remove_reference_t<T>>::value(std::forward<T>(v));
 }
 
+constexpr auto projectionValue = LIFT(kvValue);
+
 template <typename T>
 decltype(auto) kvKey(T &&v)
 {
@@ -152,13 +153,13 @@ constexpr auto projectionKey = LIFT(kvKey);
 template <typename T>
 decltype(auto) kvValues(T &v)
 {
-    return transformIt<Functor<kvValue<decltype(*v.begin())>>>(v);
+    return std::views::transform(v, projectionValue);
 }
 
 template <typename T>
 decltype(auto) kvKeys(T &v)
 {
-    return transformIt<Functor<kvKey<decltype(*v.begin())>>>(v);
+    return std::views::transform(v, projectionKey);
 }
 
 template <typename T>

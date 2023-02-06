@@ -32,11 +32,18 @@ namespace Scripting {
             return { mKey, mValue };
         }
 
-        void PyDictPtr::iterator::operator++()
+        PyDictPtr::iterator & PyDictPtr::iterator::operator++()
         {
             mDone = !PyDict_Next(mDict, &mPos, &mKey, &mValue);
             if (mDone)
                 mPos = 0;
+            return *this;
+        }
+
+        PyDictPtr::iterator PyDictPtr::iterator::operator++(int) {
+            iterator copy = *this;
+            ++copy;
+            return copy;
         }
 
         bool PyDictPtr::iterator::operator==(const iterator &other) const
@@ -47,12 +54,12 @@ namespace Scripting {
             return mPos == other.mPos;
         }
 
-        PyDictPtr::iterator PyDictPtr::begin()
+        PyDictPtr::iterator PyDictPtr::begin() const
         {
             return { mObject };
         }
 
-        PyDictPtr::iterator PyDictPtr::end()
+        PyDictPtr::iterator PyDictPtr::end() const
         {
             return {};
         }

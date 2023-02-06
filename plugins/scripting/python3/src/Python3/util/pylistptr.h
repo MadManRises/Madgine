@@ -16,11 +16,15 @@ namespace Scripting {
             using value_type = PyObject*;
 
             struct iterator {
+                using value_type = PyObject*;
+                using difference_type = ptrdiff_t;
+
                 iterator() = default;
                 iterator(PyObject *list);
 
                 PyObject *operator*() const;
-                void operator++();
+                iterator &operator++();
+                iterator operator++(int);
                 bool operator==(const iterator &) const;
 
             private:
@@ -28,8 +32,8 @@ namespace Scripting {
                 Py_ssize_t mIndex = 0;
             };
 
-            iterator begin();
-            iterator end();
+            iterator begin() const;
+            iterator end() const;
 
             size_t size() const;
         };

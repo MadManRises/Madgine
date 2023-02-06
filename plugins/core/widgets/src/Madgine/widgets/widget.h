@@ -5,8 +5,6 @@
 #include "Modules/threading/signal.h"
 #include "widgetclass.h"
 
-#include "Generic/container/transformIt.h"
-
 #include "Meta/serialize/hierarchy/virtualserializableunit.h"
 
 #include "Meta/keyvalue/virtualscope.h"
@@ -16,6 +14,8 @@
 
 #include "condition.h"
 #include "properties.h"
+
+#include "Generic/projections.h"
 
 namespace Engine {
 namespace Widgets {
@@ -65,7 +65,7 @@ namespace Widgets {
 
         decltype(auto) children() const
         {
-            return uniquePtrToPtr(static_cast<const std::vector<std::unique_ptr<WidgetBase>> &>(mChildren));
+            return mChildren | std::views::transform(projectionUniquePtrToPtr);
         }
 
         void setParent(WidgetBase *parent);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../pipable.h"
 #include "sender.h"
 
 namespace Engine {
@@ -30,6 +31,8 @@ namespace Execution {
             });
     }
 
+    MAKE_PIPABLE(then)
+
     template <typename F, typename V, typename R, typename Rec1>
     auto then_receiver(Sender<F, V, R> &&sender, Rec1 &&rec1)
     {
@@ -57,6 +60,8 @@ namespace Execution {
                 return sender(CombinedRec { std::forward<Rec1>(rec1), std::forward<Rec2>(rec2) });
             });
     }
+
+    MAKE_PIPABLE(then_receiver)
 
 }
 }

@@ -8,6 +8,8 @@
 
 #include "entitycomponentlist.h"
 
+#include "Generic/projections.h"
+
 using EntityComponentBasePtr = Engine::Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::EntityComponentBase>;
 
 METATABLE_BEGIN(EntityComponentBasePtr);

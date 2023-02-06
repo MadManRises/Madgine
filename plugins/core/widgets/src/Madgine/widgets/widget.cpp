@@ -102,7 +102,7 @@ namespace Widgets {
 
         sizeChanged(mAbsoluteSize.floor());
 
-        for (WidgetBase *child : uniquePtrToPtr(mChildren)) {
+        for (WidgetBase *child : children()) {
             child->applyGeometry(mAbsoluteSize, mAbsolutePos);
         }
     }

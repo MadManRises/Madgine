@@ -342,7 +342,7 @@ namespace Widgets {
                 assert(mModalWidgetList.front()->mVisible);
                 return getHoveredWidgetDown(pos, mModalWidgetList.front());
             }
-            for (WidgetBase *w : uniquePtrToPtr(mTopLevelWidgets)) {
+            for (WidgetBase *w : widgets()) {
                 if (w->mVisible && w->containsPoint(pos, { { 0, 0 }, mClientSpace.mSize })) {
                     return getHoveredWidgetDown(pos, w);
                 }
@@ -561,7 +561,7 @@ namespace Widgets {
     void WidgetManager::onResize(const Rect2i &space)
     {
         MainWindowComponentBase::onResize(space);
-        for (WidgetBase *topLevel : uniquePtrToPtr(mTopLevelWidgets)) {
+        for (WidgetBase *topLevel : widgets()) {
             topLevel->applyGeometry(Vector3 { Vector2 { space.mSize }, 1.0f });
         }
     }

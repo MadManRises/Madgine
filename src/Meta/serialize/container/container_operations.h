@@ -143,7 +143,7 @@ namespace Serialize {
 
         static void setActive(C &c, bool active, bool existenceChange)
         {
-            c.setActive(active, existenceChange, ContainerOperations<SyncableContainerImpl<C, Observer, OffsetPtr>, Configs...>::Creator::controlled);
+            c.setActive(active, existenceChange, Creator::controlled);
         }
 
         static StreamResult performOperation(C &c, ContainerEvent op, FormattedSerializeStream &in, typename container_traits<C>::emplace_return &it, ParticipantId answerTarget, MessageId answerId, const CallerHierarchyBasePtr &hierarchy = {})
@@ -152,14 +152,14 @@ namespace Serialize {
             switch (op) {
             case EMPLACE: {
                 if constexpr (!container_traits<C>::sorted) {
-                    STREAM_PROPAGATE_ERROR(readIterator(in, c, it));
+                    STREAM_PROPAGATE_ERROR(Base::readIterator(in, c, it));
                 }
                 decltype(auto) op = insertOperation(c, it, answerTarget, answerId);
                 typename container_traits<C>::const_iterator cit = static_cast<const typename container_traits<C>::iterator &>(it);
                 return TupleUnpacker::invoke(&Creator::template readItem<decltype(op)>, in, op, it, cit, hierarchy);
             }
             case ERASE:
-                STREAM_PROPAGATE_ERROR(readIterator(in, c, it));
+                STREAM_PROPAGATE_ERROR(Base::readIterator(in, c, it));
                 it = removeOperation(c, it, answerTarget, answerId).erase(it);
                 return {};
                 /*case REMOVE_RANGE: {
@@ -180,23 +180,23 @@ namespace Serialize {
         {
             for (FormattedBufferedStream &out : outStreams) {
                 std::visit(overloaded {
-                               [&](C::emplace_action_t &&emplace) {
+                               [&](typename C::emplace_action_t &&emplace) {
                                    Serialize::write(out, EMPLACE, "operation");
                                    if constexpr (!container_traits<C>::sorted) {
-                                       writeIterator(out, c, emplace.mIt);
+                                       Base::writeIterator(out, c, emplace.mIt);
                                    }
                                    TupleUnpacker::invoke(&Creator::template writeItem<C>, out, *emplace.mIt, hierarchy);
                                },
-                               [&](C::erase_t &&erase) {
+                               [&](typename C::erase_t &&erase) {
                                    Serialize::write(out, ERASE, "operation");
-                                   writeIterator(out, c, erase.mWhere);
+                                   Base::writeIterator(out, c, erase.mWhere);
                                },
-                               [&](C::erase_range_t &&erase) {
+                               [&](typename C::erase_range_t &&erase) {
                                    Serialize::write(out, ERASE_RANGE, "operation");
-                                   writeIterator(out, c, erase.mFrom);
-                                   writeIterator(out, c, erase.mTo);
+                                   Base::writeIterator(out, c, erase.mFrom);
+                                   Base::writeIterator(out, c, erase.mTo);
                                },
-                               [&](C::reset_t &&reset) {
+                               [&](typename C::reset_t &&reset) {
                                    Serialize::write(out, RESET, "operation");
                                    Base::write(out, c, "content", hierarchy);
                                } },
@@ -234,27 +234,27 @@ namespace Serialize {
                 throw 0;
 
             std::visit(overloaded {
-                           [&](C::emplace_request_t &&emplace) {
+                           [&](typename C::emplace_request_t &&emplace) {
                                Serialize::write(out, EMPLACE, "operation");
                                if constexpr (!container_traits<C>::sorted) {
-                                   writeIterator(out, c, emplace.mWhere);
+                                   Base::writeIterator(out, c, emplace.mWhere);
                                }
                                TupleUnpacker::invoke(&Creator::template writeItem<C>, out, emplace.mDummy, hierarchy);
                            },
-                           [&](C::erase_t &&erase) {
+                           [&](typename C::erase_t &&erase) {
                                Serialize::write(out, ERASE, "operation");
-                               writeIterator(out, c, erase.mWhere);
+                               Base::writeIterator(out, c, erase.mWhere);
                            },
-                           [&](C::erase_range_t &&erase) {
+                           [&](typename C::erase_range_t &&erase) {
                                Serialize::write(out, ERASE_RANGE, "operation");
-                               writeIterator(out, c, erase.mFrom);
-                               writeIterator(out, c, erase.mTo);
+                               Base::writeIterator(out, c, erase.mFrom);
+                               Base::writeIterator(out, c, erase.mTo);
                            },
-                           [&](C::reset_t &&reset) {
+                           [&](typename C::reset_t &&reset) {
                                Serialize::write(out, RESET, "operation");
                                Base::write(out, c, "content", hierarchy);
                            },
-                           [&](C::reset_to_request_t &&reset) {
+                           [&](typename C::reset_to_request_t &&reset) {
                                Serialize::write(out, RESET, "operation");
                                //Base::write(out, reset.mNewData, "content", hierarchy);
                                throw "TODO";

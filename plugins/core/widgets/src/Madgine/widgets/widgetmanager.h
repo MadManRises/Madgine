@@ -5,8 +5,6 @@
 
 #include "Madgine/render/renderpass.h"
 
-#include "Generic/container/transformIt.h"
-
 #include "Modules/threading/signal.h"
 
 #include "Generic/coroutines/generator.h"
@@ -16,6 +14,8 @@
 #include "Madgine/imageloader/imageloader.h"
 
 #include "Interfaces/input/inputevents.h"
+
+#include "Generic/projections.h"
 
 namespace Engine {
 namespace Widgets {
@@ -60,7 +60,7 @@ namespace Widgets {
 
         decltype(auto) widgets()
         {
-            return uniquePtrToPtr(mTopLevelWidgets);
+            return mTopLevelWidgets | std::views::transform(projectionUniquePtrToPtr);
         }
 
         Generator<std::pair<WidgetBase *, size_t>> visibleWidgets();

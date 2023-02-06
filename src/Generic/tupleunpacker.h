@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Generic/defaultassign.h"
+#include "Generic/concepts.h"
 
 namespace Engine {
 namespace TupleUnpacker {

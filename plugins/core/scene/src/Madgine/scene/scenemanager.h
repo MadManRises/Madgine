@@ -134,7 +134,7 @@ namespace Scene {
 
         decltype(auto) entities()
         {
-            return transformIt<EntityHelper>(concatIt(mEntities, mLocalEntities));
+            return concatIt(mEntities, mLocalEntities) | std::views::transform(EntityHelper{});
         }
 
         ////////////////////////////////////////// ECS End

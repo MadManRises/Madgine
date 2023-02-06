@@ -32,7 +32,8 @@ namespace Scripting {
             return PyList_GetItem(mList, mIndex);
         }
 
-        void PyListPtr::iterator::operator++()
+        
+        PyListPtr::iterator &PyListPtr::iterator::operator++()
         {
             assert(mList);
             ++mIndex;
@@ -40,6 +41,14 @@ namespace Scripting {
                 mIndex = 0;
                 mList = nullptr;
             }
+            return *this;
+        }
+
+        PyListPtr::iterator PyListPtr::iterator::operator++(int)
+        {
+            iterator copy = *this;
+            ++copy;
+            return copy;
         }
 
         bool PyListPtr::iterator::operator==(const iterator &other) const
@@ -50,12 +59,12 @@ namespace Scripting {
             return mIndex == other.mIndex;
         }
 
-        PyListPtr::iterator PyListPtr::begin()
+        PyListPtr::iterator PyListPtr::begin() const
         {
             return { mObject };
         }
 
-        PyListPtr::iterator PyListPtr::end()
+        PyListPtr::iterator PyListPtr::end() const
         {
             return {};
         }

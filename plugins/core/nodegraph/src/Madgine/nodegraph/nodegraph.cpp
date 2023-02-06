@@ -23,6 +23,8 @@
 
 #include "Meta/serialize/hierarchy/statetransmissionflags.h"
 
+#include "Generic/projections.h"
+
 METATABLE_BEGIN(Engine::NodeGraph::NodeGraph)
 METATABLE_END(Engine::NodeGraph::NodeGraph)
 
@@ -94,7 +96,7 @@ namespace NodeGraph {
             Serialize::FormattedSerializeStream in = mgr.openRead(mPath, std::make_unique<Serialize::XMLFormatter>());
             STREAM_PROPAGATE_ERROR(Serialize::read(in, *this, "Graph", {}, Serialize::StateTransmissionFlags_ApplyMap));
 
-            for (NodeBase *node : uniquePtrToPtr(mNodes))
+            for (NodeBase *node : mNodes | std::views::transform(projectionUniquePtrToPtr))
                 node->setup();
 
             uint32_t i = 0;
@@ -124,7 +126,7 @@ namespace NodeGraph {
             std::vector<std::optional<FlowInPinPrototype>> inFlows;
             std::vector<std::optional<DataProviderPinPrototype>> providerPins;
             std::vector<std::optional<DataReceiverPinPrototype>> receiverPins;
-            for (NodeBase *node : uniquePtrToPtr(mNodes)) {
+            for (NodeBase *node : mNodes | std::views::transform(projectionUniquePtrToPtr)) {
                 for (uint32_t i = 0; i < node->dataInCount(); ++i) {
                     Pin pin = node->dataInSource(i);
                     if (pin) {

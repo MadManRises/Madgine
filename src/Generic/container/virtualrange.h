@@ -205,7 +205,7 @@ namespace __generic_impl__ {
 
         virtual bool isReference() const override
         {
-            if constexpr (std::is_reference_v<C> || InstanceOf<typename std::remove_reference_t<C>::value_type, std::reference_wrapper>)
+            if constexpr (std::is_reference_v<C> || InstanceOf<std::ranges::range_value_t<C>, std::reference_wrapper>)
                 return true;
             else if constexpr (has_function_isReference_v<C>)
                 return mContainer.isReference();

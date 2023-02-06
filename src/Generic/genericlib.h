@@ -19,6 +19,7 @@
 #include <sstream>
 #include <functional>
 #include <compare>
+#include <ranges>
 
 #include <assert.h>
 

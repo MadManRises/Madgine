@@ -2,8 +2,6 @@
 
 #include "rendercontext.h"
 
-#include "Generic/container/reverseIt.h"
-
 #include "Generic/container/safeiterator.h"
 
 #include "Modules/threading/workgroupstorage.h"

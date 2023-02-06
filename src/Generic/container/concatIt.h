@@ -37,7 +37,7 @@ struct ConcatItContainer {
             return *this;
         }
 
-        void operator++()
+        ConcatIterator &operator++()
         {
             assert(mIndex < sizeof...(It));
             TupleUnpacker::select(
@@ -46,6 +46,14 @@ struct ConcatItContainer {
                 },
                 mIndex);
             update();
+            return *this;
+        }
+
+        ConcatIterator operator++(int)
+        {
+            ConcatIterator copy = *this;
+            ++copy;
+            return copy;
         }
 
         decltype(auto) operator*() const
@@ -90,12 +98,16 @@ struct ConcatItContainer {
 
 private:
     ConcatItContainer() = delete;
-    ConcatItContainer(const ConcatItContainer<T...> &) = delete;
+    ConcatItContainer(const ConcatItContainer &) = delete;
+
+    ConcatItContainer &operator=(const ConcatItContainer &) = delete;
 
 public:
-    ConcatItContainer(ConcatItContainer<T...> &&) = default;
+    ConcatItContainer(ConcatItContainer &&) = default;
 
-    ConcatItContainer(T &&... containers)
+    ConcatItContainer &operator=(ConcatItContainer &&) = default;
+
+    ConcatItContainer(T &&...containers)
         : mContainers(std::forward<T>(containers)...)
     {
     }
@@ -155,7 +167,7 @@ public:
     bool isReference() const
     {
         constexpr auto check = [](auto &&c) {
-            if constexpr (std::is_reference_v<decltype(c)>) {
+            if constexpr (std::ranges::borrowed_range<decltype(c)>) {
                 return true;
             } else if constexpr (has_function_isReference_v<decltype(c)>) {
                 return c.isReference();
@@ -169,13 +181,16 @@ public:
     }
 
 private:
-    std::tuple<T...> mContainers;
+    std::tuple<std::views::all_t<T>...> mContainers;
 };
 
 template <typename... T>
-ConcatItContainer<T...> concatIt(T &&... t)
+ConcatItContainer<T...> concatIt(T &&...t)
 {
     return { std::forward<T>(t)... };
 }
 
 }
+
+template <typename... T>
+inline constexpr bool std::ranges::enable_borrowed_range<Engine::ConcatItContainer<T...>> = (std::ranges::borrowed_range<T> && ...);

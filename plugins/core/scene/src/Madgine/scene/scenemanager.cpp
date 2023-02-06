@@ -28,6 +28,8 @@
 #include "Generic/execution/algorithm.h"
 #include "Generic/execution/promise.h"
 
+#include "Generic/projections.h"
+
 UNIQUECOMPONENT(Engine::Serialize::NoParent<Engine::Scene::SceneManager>);
 
 METATABLE_BEGIN(Engine::Scene::SceneManager)
@@ -242,20 +244,14 @@ namespace Scene {
         auto toPtr = [](const typename RefcountedContainer<std::deque<Entity::Entity>>::iterator &it) { return Entity::EntityPtr { &*it }; };
         if (init)
             Execution::detach(
-                Execution::then_receiver(
-                    Execution::then(
-                        TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_init_async, this), mEntities.end(), init, createEntityData(name, false), table),
-                        std::move(toPtr)
-                    ),
-                    receiver));
+                TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_init_async, this), mEntities.end(), init, createEntityData(name, false), table)
+                | Execution::then(std::move(toPtr))
+                | Execution::then_receiver(receiver));
         else
             Execution::detach(
-                Execution::then_receiver(
-                    Execution::then(
-                        TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_async, this), mEntities.end(), createEntityData(name, false), table),
-                        std::move(toPtr)
-                    ), 
-                    receiver));
+                TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_async, this), mEntities.end(), createEntityData(name, false), table)
+                | Execution::then(std::move(toPtr))
+                | Execution::then_receiver(receiver));
     }
 
     Entity::EntityPtr SceneManager::createLocalEntity(const std::string &behavior, const std::string &name)

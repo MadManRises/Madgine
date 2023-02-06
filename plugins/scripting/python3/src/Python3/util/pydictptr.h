@@ -16,11 +16,15 @@ namespace Scripting {
             using value_type = std::pair<PyObject*, PyObject*>;
 
             struct iterator {
+                using value_type = std::pair<PyObject*, PyObject*>;
+                using difference_type = ptrdiff_t;
+
                 iterator() = default;
                 iterator(PyObject *dict);
 
                 std::pair<PyObject *, PyObject *> operator*() const;
-                void operator++();
+                iterator &operator++();
+                iterator operator++(int);
                 bool operator==(const iterator &) const;
 
             private:
@@ -31,8 +35,8 @@ namespace Scripting {
                 PyObject *mValue = nullptr;
             };
 
-            iterator begin();
-            iterator end();
+            iterator begin() const;
+            iterator end() const;
 
             size_t size() const;
         };

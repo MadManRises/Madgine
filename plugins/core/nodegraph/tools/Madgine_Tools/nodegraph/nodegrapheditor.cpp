@@ -28,6 +28,8 @@
 
 #include "Madgine_Tools/imguiicons.h"
 
+#include "Generic/projections.h"
+
 UNIQUECOMPONENT(Engine::Tools::NodeGraphEditor);
 
 METATABLE_BEGIN_BASE(Engine::Tools::NodeGraphEditor, Engine::Tools::ToolBase)
@@ -360,7 +362,7 @@ namespace Tools {
 
             uint32_t nodeId = 1;
             NodeGraph::NodeBase *hoveredNode = nullptr;
-            for (NodeGraph::NodeBase *node : uniquePtrToPtr(mGraph.nodes())) {
+            for (NodeGraph::NodeBase *node : mGraph.nodes() | std::views::transform(projectionUniquePtrToPtr)) {
                 ed::BeginNode(6000 * nodeId);
                 ImGui::Text(node->name());
 
@@ -516,7 +518,7 @@ namespace Tools {
                 ++pinId;
             }
             nodeId = 1;
-            for (NodeGraph::NodeBase *node : uniquePtrToPtr(mGraph.nodes())) {
+            for (NodeGraph::NodeBase *node : mGraph.nodes() | std::views::transform(projectionUniquePtrToPtr)) {
                 uint32_t outFlowCount = node->flowOutCount();
                 for (uint32_t flowIndex = 0; flowIndex < outFlowCount; ++flowIndex) {
                     if (NodeGraph::Pin target = node->flowOutTarget(flowIndex)) {

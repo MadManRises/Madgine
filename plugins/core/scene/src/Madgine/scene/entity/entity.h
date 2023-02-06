@@ -6,10 +6,11 @@
 
 #include "Meta/serialize/hierarchy/syncableunit.h"
 
-#include "Generic/container/transformIt.h"
 #include "Generic/container/mutable_set.h"
 
 #include "Modules/uniquecomponent/component_index.h"
+
+#include "entitycomponentptr.h"
 
 namespace Engine {
 namespace Scene {
@@ -65,11 +66,11 @@ namespace Scene {
 
             struct MADGINE_SCENE_EXPORT Helper {
                 Entity *mEntity;
-                EntityComponentPtr<EntityComponentBase> operator()(const EntityComponentOwningHandle<EntityComponentBase> &p);
+                EntityComponentPtr<EntityComponentBase> operator()(const EntityComponentOwningHandle<EntityComponentBase> &p) const;
             };
             decltype(auto) components()
-            {                
-                return transformIt(mComponents, Helper { this });
+            {
+                return mComponents | std::views::transform(Helper { this });
             }
 
             template <typename T>

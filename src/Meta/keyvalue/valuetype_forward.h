@@ -123,7 +123,7 @@ decltype(auto) convert_ValueType(T &&t)
     } else if constexpr (String<std::decay_t<T>>) {
         return std::string { std::forward<T>(t) };
     } else if constexpr (std::ranges::range<T>) {
-        if constexpr (std::same_as<KeyType_t<typename std::remove_reference_t<T>::iterator::value_type>, Void>)
+        if constexpr (std::same_as<KeyType_t<std::ranges::range_value_t<T>>, Void>)
             return KeyValueVirtualSequenceRange { std::forward<T>(t) };
         else
             return KeyValueVirtualAssociativeRange { std::forward<T>(t) };
