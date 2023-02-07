@@ -1,7 +1,7 @@
 
 set(MADGINE_LAUNCHER_SPLASH_IMAGE "" CACHE FILEPATH "Path to an image file for the applications splash screen")
 set(MADGINE_LAUNCHER_WINDOW_TITLE "" CACHE STRING "Title of the Main window of the game")
-set(MADGINE_LAUNCHER_ICON "${CMAKE_SOURCE_DIR}/test/madgineIcon.ico" CACHE FILEPATH "Path to an image file for the applications tray icon")
+set(MADGINE_LAUNCHER_ICON "${CMAKE_CURRENT_SOURCE_DIR}/madgineIcon.ico" CACHE FILEPATH "Path to an image file for the applications tray icon")
 
 set(sources "")
 FolderSources(sources "" "" launcher.cpp main.cpp terminate_handler.cpp)
