@@ -22,20 +22,20 @@ namespace Serialize {
 
     void FormattedBufferedStream::beginMessageWrite()
     {
-        static_cast<buffered_streambuf &>(mFormatter->stream().buffer()).beginMessageWrite();
+        static_cast<message_streambuf &>(mFormatter->stream().buffer()).beginMessageWrite();
         mFormatter->beginMessageWrite();
     }
 
     void FormattedBufferedStream::beginMessageWrite(ParticipantId requester, MessageId requestId, GenericMessageReceiver receiver)
     {
-        static_cast<buffered_streambuf &>(mFormatter->stream().buffer()).beginMessageWrite(requester, requestId, std::move(receiver));
+        static_cast<message_streambuf &>(mFormatter->stream().buffer()).beginMessageWrite(requester, requestId, std::move(receiver));
         mFormatter->beginMessageWrite();
     }
 
     void FormattedBufferedStream::endMessageWrite()
     {
         mFormatter->endMessageWrite();
-        static_cast<buffered_streambuf &>(mFormatter->stream().buffer()).endMessageWrite();
+        static_cast<message_streambuf &>(mFormatter->stream().buffer()).endMessageWrite();
     }
 
     StreamResult FormattedBufferedStream::beginMessageRead(MessageReadMarker &msg)

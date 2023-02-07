@@ -33,6 +33,39 @@ struct TestReceiver {
     bool mCanceled = false;
 };
 
+template <typename R>
+struct TestReceiver<void, R> {
+
+    void set_value(R result)
+    {
+        mHasValue = true;
+        mResult = std::forward<R>(result);
+        mFinished = true;
+    }
+
+    void set_done()
+    {
+        mCanceled = true;
+    }
+
+    void set_error(R result)
+    {
+        mResult = std::forward<R>(result);
+        mFinished = true;
+    }
+
+    bool is_ready()
+    {
+        return mFinished;
+    }
+
+    bool mHasValue;
+    R mResult;
+
+    bool mFinished = false;
+    bool mCanceled = false;
+};
+
 struct GenericTestReceiver {
     template <typename R, typename T>
     void set_value(R result, T value)

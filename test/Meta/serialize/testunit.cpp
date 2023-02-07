@@ -58,16 +58,22 @@ FIELD(pod)
 
 FIELD(bytes)
 
-SYNCFUNCTION(fooImpl)
+SYNCFUNCTION(foo)
+SYNCFUNCTION(bar)
 
 SERIALIZETABLE_END(TestUnit)
 
+void TestUnit::call_void(int i, TestReceiver<void, Engine::Serialize::MessageResult> &rec)
+{
+    Engine::Execution::detach(Engine::Execution::then_receiver(TopLevelUnit<TestUnit>::call<&TestUnit::bar>(i), rec));
+}
+
 void TestUnit::call(int i, TestReceiver<int, Engine::Serialize::MessageResult> &rec)
 {
-    Engine::Execution::detach(Engine::Execution::then_receiver(TopLevelUnit<TestUnit>::call<&TestUnit::fooImpl>(i), rec));
+    Engine::Execution::detach(Engine::Execution::then_receiver(TopLevelUnit<TestUnit>::call<&TestUnit::foo>(i), rec));
 }
 
 void TestUnit::query(int i, TestReceiver<int, Engine::Serialize::MessageResult> &rec)
 {
-    Engine::Execution::detach(Engine::Execution::then_receiver(TopLevelUnit<TestUnit>::query<&TestUnit::fooImpl>(i), rec));
+    Engine::Execution::detach(Engine::Execution::then_receiver(TopLevelUnit<TestUnit>::query<&TestUnit::foo>(i), rec));
 }

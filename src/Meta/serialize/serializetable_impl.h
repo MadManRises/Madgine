@@ -222,7 +222,7 @@ namespace Serialize {
         constexpr SyncFunction syncFunction()
         {
             using traits = typename Callable<f>::traits;
-            using R = typename traits::return_type;
+            using R = patch_void_t<typename traits::return_type>;
             using T = typename traits::class_type;
             using Tuple = typename traits::decay_argument_types::as_tuple;
 
@@ -235,7 +235,7 @@ namespace Serialize {
                     }
                 },
                 [](FormattedBufferedStream &out, const void *result) {
-                    write(out, *static_cast<const patch_void_t<R> *>(result), "Result");
+                    write(out, *static_cast<const R *>(result), "Result");
                     out.endMessageWrite();
                 },
                 [](SyncableUnitBase *unit, FormattedBufferedStream &in, uint16_t index, FunctionType type, PendingRequest &request) {
@@ -244,11 +244,11 @@ namespace Serialize {
                         Tuple args;
                         STREAM_PROPAGATE_ERROR(read(in, args, "Args"));
                         writeFunctionAction(unit, index, &args, {}, request.mRequester, request.mRequesterTransactionId);
-                        patch_void_t<R> result = invoke_patch_void(LIFT(TupleUnpacker::invokeExpand), f, static_cast<T *>(unit), args);
+                        R result = invoke_patch_void(LIFT(TupleUnpacker::invokeExpand), f, static_cast<T *>(unit), args);
                         request.mReceiver.set_value(MessageResult::OK, result);
                     } break;
                     case QUERY: {
-                        patch_void_t<R> result;
+                        R result;
                         STREAM_PROPAGATE_ERROR(read(in, result, "Result"));
                         if (request.mRequesterTransactionId) {
                             writeFunctionResult(unit, index, &result, request.mRequester, request.mRequesterTransactionId);
@@ -265,7 +265,7 @@ namespace Serialize {
                     if (static_cast<T *>(unit)->isMaster()) {
                         if (type == CALL)
                             writeFunctionAction(unit, index, &args, {}, answerId, id);
-                        patch_void_t<R> result = invoke_patch_void(LIFT(TupleUnpacker::invokeExpand), f, static_cast<T *>(unit), args);
+                        R result = invoke_patch_void(LIFT(TupleUnpacker::invokeExpand), f, static_cast<T *>(unit), args);
                         if (type == QUERY && id != 0)
                             writeFunctionResult(unit, index, &result, answerId, id);
                     } else {

@@ -44,9 +44,10 @@ TEST(Serialize_Container, SyncedUnit)
     ASSERT_TRUE(mgr2.addTopLevelItem(&unit2));
 
     Buffer buffer;
-    HANDLE_MGR_RESULT(mgr1, mgr1.setBuffer(buffer, false));
+    HANDLE_MGR_RESULT(mgr1, mgr1.setMasterBuffer(buffer));
     mgr1.sendMessages();
-    HANDLE_MGR_RESULT(mgr2, mgr2.setBuffer(buffer, true));
+    HANDLE_MGR_RECEIVER(mgr2.setSlaveBuffer(receiver, buffer));
+
 
     ASSERT_EQ(unit1.list1, unit2.list1);
     ASSERT_EQ(unit1.list2, unit2.list2);

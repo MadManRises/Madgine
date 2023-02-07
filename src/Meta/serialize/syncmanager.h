@@ -12,6 +12,10 @@
 
 #include "streams/formattedbufferedstream.h"
 
+#include "Generic/execution/virtualsender.h"
+
+#include "Generic/functor.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -24,7 +28,6 @@ namespace Serialize {
         SyncManager(const SerializeManager &) = delete;
         SyncManager(SyncManager &&) noexcept;
         ~SyncManager();
-
 
         static void writeHeader(FormattedBufferedStream &stream, const SyncableUnitBase *unit, MessageType type);
         static void writeActionHeader(FormattedBufferedStream &stream, const SyncableUnitBase *unit, MessageType type, MessageId id);
@@ -49,7 +52,7 @@ namespace Serialize {
         std::vector<ParticipantId> getMasterParticipantIds();
         size_t clientCount() const;
 
-		static ParticipantId getParticipantId(SyncManager *manager);
+        static ParticipantId getParticipantId(SyncManager *manager);
 
         StreamResult fetchStreamError();
 
@@ -63,11 +66,12 @@ namespace Serialize {
         FormattedBufferedStream &getMasterStream(ParticipantId id);
 
         void removeAllStreams();
-        SyncManagerResult setSlaveStream(FormattedBufferedStream &&stream, bool receiveState = true, TimeOut timeout = {});
-        void removeSlaveStream();
+        void setSlaveStreamImpl(Execution::VirtualReceiverBase<void, SyncManagerResult> &receiver, FormattedBufferedStream &&stream, bool receiveState = true, TimeOut timeout = {});
+        ASYNC_STUB(setSlaveStream, setSlaveStreamImpl, Execution::make_virtual_sender<void, SyncManagerResult>);
+
+        void removeSlaveStream(SyncManagerResult reason = SyncManagerResult::UNKNOWN_ERROR);
         SyncManagerResult addMasterStream(FormattedBufferedStream &&stream, bool sendState = true);
         SyncManagerResult moveMasterStream(ParticipantId streamId, SyncManager *target);
-
 
         const std::set<TopLevelUnitBase *> &getTopLevelUnits() const;
 
@@ -77,16 +81,15 @@ namespace Serialize {
 
         std::unique_ptr<SyncStreamData> createStreamData();
 
-        bool mSlaveStreamInvalid = false;
+        Execution::VirtualReceiverBase<void, SyncManagerResult> *mReceivingMasterState = nullptr;
+        TimeOut mReceivingMasterStateTimeout;
 
     private:
-
         mutable_set<FormattedBufferedStream, CompareStreamId> mMasterStreams;
         std::optional<FormattedBufferedStream> mSlaveStream;
 
-        std::set<TopLevelUnitBase *> mTopLevelUnits; //TODO: Sort by MasterId    
+        std::set<TopLevelUnitBase *> mTopLevelUnits; //TODO: Sort by MasterId
 
-        bool mReceivingMasterState = false;
 
         StreamResult mStreamError;
     };

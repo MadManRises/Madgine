@@ -17,16 +17,13 @@ namespace Serialize {
 
     SyncManager::SyncManager(const std::string &name)
         : SerializeManager(name)
-        , mSlaveStreamInvalid(false)
-        , mReceivingMasterState(false)
     {
     }
 
     SyncManager::SyncManager(SyncManager &&other) noexcept
         : SerializeManager(std::move(other))
-        , mSlaveStreamInvalid(other.mSlaveStreamInvalid)
         , mTopLevelUnits(std::move(other.mTopLevelUnits))
-        , mReceivingMasterState(other.mReceivingMasterState)
+        , mReceivingMasterState(std::exchange(other.mReceivingMasterState, nullptr))
     {
         for (TopLevelUnitBase *unit : mTopLevelUnits) {
             unit->removeManager(&other);
@@ -43,7 +40,14 @@ namespace Serialize {
         }
     }
 
-    SyncManager::~SyncManager() { clearTopLevelItems(); }
+    SyncManager::~SyncManager()
+    {
+        if (mReceivingMasterState) {
+            mReceivingMasterState->set_error(SyncManagerResult::UNKNOWN_ERROR);
+            mReceivingMasterState = nullptr;
+        }
+        clearTopLevelItems();
+    }
 
     void SyncManager::writeHeader(FormattedBufferedStream &stream, const SyncableUnitBase *unit, MessageType type)
     {
@@ -75,9 +79,12 @@ namespace Serialize {
             STREAM_PROPAGATE_ERROR(stream.endHeaderRead());
             switch (cmd) {
             case INITIAL_STATE_DONE:
-                mReceivingMasterState = false;
+                assert(mSlaveStream && &stream == &*mSlaveStream);
+                assert(mReceivingMasterState);
                 STREAM_PROPAGATE_ERROR(read(stream, id, "Id"));
                 stream.setId(id);
+                mReceivingMasterState->set_value(SyncManagerResult::SUCCESS);
+                mReceivingMasterState = nullptr;
                 break;
             default:
                 return STREAM_INTEGRITY_ERROR(stream) << "Invalid command used in message header: " << cmd;
@@ -106,6 +113,9 @@ namespace Serialize {
                 break;
             case MessageType::STATE:
                 STREAM_PROPAGATE_ERROR(read(stream, *object, "State", {}, StateTransmissionFlags_ApplyMap | StateTransmissionFlags_Activation));
+                for (FormattedBufferedStream& out : mMasterStreams) {
+                    sendState(out, object);
+                }
                 break;
             case MessageType::FUNCTION_ACTION: {
                 PendingRequest request = stream.getRequest(transactionId);
@@ -120,7 +130,7 @@ namespace Serialize {
                 STREAM_PROPAGATE_ERROR(object->readFunctionRequest(stream, id));
                 break;
             case MessageType::ERROR: {
-                PendingRequest request = stream.getRequest(transactionId);                
+                PendingRequest request = stream.getRequest(transactionId);
                 setError(object, request, MessageResult::SERVER_ERROR);
                 break;
             }
@@ -219,69 +229,52 @@ namespace Serialize {
         mMasterStreams.clear();
     }
 
-    SyncManagerResult SyncManager::setSlaveStream(FormattedBufferedStream &&stream,
+    void SyncManager::setSlaveStreamImpl(Execution::VirtualReceiverBase<void, SyncManagerResult> &receiver, FormattedBufferedStream &&stream,
         bool receiveState,
         TimeOut timeout)
     {
-        if (mSlaveStream)
-            return SyncManagerResult::UNKNOWN_ERROR;
+        if (mSlaveStream) {
+            receiver.set_error(SyncManagerResult::UNKNOWN_ERROR);
+            return;
+        }
 
         SyncManagerResult state = SyncManagerResult::SUCCESS;
 
-        auto it = mTopLevelUnits.begin();
+        std::vector<TopLevelUnitBase *> updatedUnits;
 
-        for (; it != mTopLevelUnits.end(); ++it) {
-            if (!(*it)->updateManagerType(this, false)) {
+        for (TopLevelUnitBase *unit : mTopLevelUnits) {
+            if (unit->updateManagerType(this, false)) {
+                updatedUnits.push_back(unit);
+            } else {
                 state = SyncManagerResult::UNKNOWN_ERROR;
                 break;
             }
         }
 
-        mSlaveStreamInvalid = true;
-        mSlaveStream.emplace(std::move(stream));
-        setSlaveStreamData(mSlaveStream->data());
+        if (state == SyncManagerResult::SUCCESS) {
+            mSlaveStream.emplace(std::move(stream));
+            setSlaveStreamData(mSlaveStream->data());
 
-        if (receiveState) {
-            if (state == SyncManagerResult::SUCCESS) {
+            if (receiveState) {
                 for (TopLevelUnitBase *unit : mTopLevelUnits) {
                     unit->initSlaveId(this);
                 }
-                mReceivingMasterState = true;
-                while (mReceivingMasterState) {
-                    int msgCount = -1;
-                    if (StreamResult result = receiveMessages(*mSlaveStream, msgCount); result.mState != StreamState::OK) {
-                        state = recordStreamError(std::move(result));
-                        mReceivingMasterState = false;
-                    }
-                    if (mReceivingMasterState && timeout.expired()) {
-                        state = SyncManagerResult::TIMEOUT;
-                        mReceivingMasterState = false;
-                    }
-                }
-                if (state != SyncManagerResult::SUCCESS) {
-                    while (!mSlaveMappings.empty()) {
-                        mSlaveMappings.begin()->second->clearSlaveId(this);
-                    }
-                }
+                assert(!mReceivingMasterState);
+                mReceivingMasterState = &receiver;
+                mReceivingMasterStateTimeout = timeout;
+            } else {
+                receiver.set_value(state);
             }
-        }
-
-        if (state != SyncManagerResult::SUCCESS) {
-            for (auto it2 = mTopLevelUnits.begin(); it2 != it; ++it2) {
-                bool result = (*it2)->updateManagerType(this, true);
+        } else {
+            for (TopLevelUnitBase *unit : updatedUnits | std::views::reverse) {
+                bool result = unit->updateManagerType(this, true);
                 assert(result);
             }
-            setSlaveStreamData(nullptr);
-            mSlaveStream.reset();
-            mReceivingMasterState = false;
-        } else {
-            mSlaveStreamInvalid = false;
+            receiver.set_error(state);
         }
-
-        return state;
     }
 
-    void SyncManager::removeSlaveStream()
+    void SyncManager::removeSlaveStream(SyncManagerResult reason)
     {
         if (mSlaveStream) {
             while (!mSlaveMappings.empty()) {
@@ -294,6 +287,12 @@ namespace Serialize {
             }
             mSlaveStream->setId(0);
             mSlaveStream.reset();
+            setSlaveStreamData(nullptr);
+        }
+
+        if (mReceivingMasterState) {
+            mReceivingMasterState->set_error(reason);
+            mReceivingMasterState = nullptr;
         }
     }
 
@@ -371,9 +370,14 @@ namespace Serialize {
 
     StreamResult SyncManager::receiveMessages(int msgCount, TimeOut timeout)
     {
-        if (mSlaveStream && !mSlaveStreamInvalid) {
+        if (mSlaveStream) {
             if (StreamResult result = receiveMessages(*mSlaveStream, msgCount, timeout); result.mState != StreamState::OK) {
                 removeSlaveStream();
+                return result;
+            }
+            if (mReceivingMasterState && mReceivingMasterStateTimeout.expired()) {
+                StreamResult result = STREAM_INTEGRITY_ERROR(*mSlaveStream) << "Server did not provide initial state in time (timeout)";
+                removeSlaveStream(SyncManagerResult::TIMEOUT);
                 return result;
             }
         }
@@ -394,7 +398,7 @@ namespace Serialize {
 
     void SyncManager::sendMessages()
     {
-        if (mSlaveStream && !mSlaveStreamInvalid) {
+        if (mSlaveStream) {
             if (!mSlaveStream->sendMessages()) {
                 removeSlaveStream();
             }

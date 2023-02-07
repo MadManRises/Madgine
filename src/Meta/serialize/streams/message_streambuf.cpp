@@ -23,7 +23,9 @@ namespace Serialize {
     MessageId message_streambuf::beginMessageRead()
     {
         assert(!egptr());
-        return beginMessageReadImpl();
+        MessageId id = beginMessageReadImpl();
+        assert(!id || egptr());
+        return id;
     }
 
     std::streamsize message_streambuf::endMessageRead()

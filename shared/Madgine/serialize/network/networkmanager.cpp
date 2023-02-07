@@ -55,10 +55,11 @@ namespace Network {
         return NetworkManagerResult::SUCCESS;
     }
 
-    NetworkManagerResult NetworkManager::connect(std::string_view url, int portNr, std::unique_ptr<Serialize::Formatter> (*format)(), TimeOut timeout)
+    void NetworkManager::connectImpl(Execution::VirtualReceiverBase<void, NetworkManagerResult, Serialize::SyncManagerResult> &receiver, std::string_view url, int portNr, std::unique_ptr<Serialize::Formatter> (*format)(), TimeOut timeout)
     {
         if (isConnected()) {
-            return NetworkManagerResult::ALREADY_CONNECTED;
+            receiver.set_error(NetworkManagerResult::ALREADY_CONNECTED);
+            return;
         }
 
         Socket socket;
@@ -66,12 +67,11 @@ namespace Network {
 
         if (!socket) {
             NetworkManagerResult result = recordSocketError(error);
-            return result;
+            receiver.set_error(result);
+            return;
         }
 
-        NetworkManagerResult result = setSlaveStream(Serialize::FormattedBufferedStream { format(), std::make_unique<Engine::Serialize::buffered_streambuf>(std::make_unique<NetworkBuffer>(std::move(socket))), createStreamData() }, true, timeout);
-
-        return result;
+        setSlaveStreamImpl(receiver, Serialize::FormattedBufferedStream { format(), std::make_unique<Engine::Serialize::buffered_streambuf>(std::make_unique<NetworkBuffer>(std::move(socket))), createStreamData() }, true, timeout);        
     }
 
     void NetworkManager::close()
@@ -118,7 +118,7 @@ namespace Network {
 
     bool NetworkManager::isConnected() const
     {
-        return !isMaster() && !mSlaveStreamInvalid;
+        return !isMaster() && !mReceivingMasterState;
     }
 
     bool NetworkManager::isServer() const

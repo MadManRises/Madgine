@@ -54,11 +54,8 @@ namespace Scene {
             const std::function<void(Entity::Entity &)> &init = {});
         void createEntityAsyncImpl(Serialize::GenericMessageReceiver &receiver, const std::string &behavior = "", const std::string &name = "",
             const std::function<void(Entity::Entity &)> &init = {});
-        auto createEntityAsync(const std::string &behavior = "", const std::string &name = "",
-            const std::function<void(Entity::Entity &)> &init = {})
-        {
-            return Serialize::make_message_sender<Entity::EntityPtr>(&SceneManager::createEntityAsyncImpl, behavior, name, init);
-        }
+        ASYNC_STUB(createEntityAsync, createEntityAsyncImpl, Serialize::make_message_sender<Entity::EntityPtr>);
+
         Entity::EntityPtr createLocalEntity(const std::string &behavior = "", const std::string &name = "");
         Entity::EntityPtr findEntity(const std::string &name);
         void remove(Entity::Entity *e);

@@ -17,7 +17,8 @@ namespace Serialize {
         {
         }
         GenericMessageReceiver(GenericMessageReceiver &&) = default;
-        ~GenericMessageReceiver() {
+        ~GenericMessageReceiver()
+        {
             assert(!mPtr);
         }
 
@@ -61,18 +62,40 @@ namespace Serialize {
             : mRec(std::forward<Rec>(rec))
         {
         }
-        void set_value(T &&value)
+        void set_value(MessageResult result, T &&value)
         {
-            mRec.set_value(MessageResult::OK, std::forward<T>(value));
+            mRec.set_value(result, std::forward<T>(value));
         }
         virtual void set_value(MessageResult result, const void *data) override final
         {
             assert(data);
-            if constexpr (std::same_as<T, void>) {
-                mRec.set_value(result);
-            } else if (data) {
-                mRec.set_value(result, *static_cast<const T *>(data));
-            }
+            mRec.set_value(result, *static_cast<const T *>(data));
+        }
+        virtual void set_done() override final
+        {
+            mRec.set_done();
+        }
+        virtual void set_error(MessageResult result) override final
+        {
+            mRec.set_error(result);
+        }
+        Rec mRec;
+    };
+
+    template <typename Rec>
+    struct MessageReceiver<Rec, void> : Execution::VirtualReceiverBase<const void *, MessageResult> {
+        MessageReceiver(Rec &&rec)
+            : mRec(std::forward<Rec>(rec))
+        {
+        }
+        void set_value(MessageResult result)
+        {
+            mRec.set_value(result);
+        }
+        virtual void set_value(MessageResult result, const void *data) override final
+        {
+            assert(data);
+            mRec.set_value(result);
         }
         virtual void set_done() override final
         {
@@ -130,7 +153,7 @@ namespace Serialize {
             mId = std::exchange(other.mId, 0);
             mRequester = std::exchange(other.mRequester, 0);
             mRequesterTransactionId = std::exchange(other.mRequesterTransactionId, 0);
-            mReceiver = std::move(other.mReceiver);
+            std::swap(mReceiver, other.mReceiver);
             return *this;
         }
 

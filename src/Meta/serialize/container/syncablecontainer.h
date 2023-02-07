@@ -88,7 +88,7 @@ namespace Serialize {
             return make_message_sender<typename _traits::emplace_return>(
                 [this](auto &receiver, const iterator &where, _Ty &&...args) {
                     if (this->isMaster()) {
-                        receiver.set_value(emplace(where, std::forward<_Ty>(args)...));
+                        receiver.set_value(MessageResult::OK, emplace(where, std::forward<_Ty>(args)...));
                     } else {
                         value_type temp { std::forward<_Ty>(args)... };
                         this->writeRequest(receiver, emplace_request_t { where, temp });
@@ -116,7 +116,7 @@ namespace Serialize {
             return make_message_sender<typename _traits::emplace_return>(
                 [this](auto &receiver, const iterator &where, Init &&init, _Ty &&...args) {
                     if (this->isMaster()) {
-                        receiver.set_value(emplace_init(where, std::forward<decltype(init)>(init), std::forward<_Ty>(args)...));
+                        receiver.set_value(MessageResult::OK, emplace_init(where, std::forward<decltype(init)>(init), std::forward<_Ty>(args)...));
                     } else {
                         value_type temp { std::forward<_Ty>(args)... };
                         TupleUnpacker::invoke(std::forward<Init>(init), temp);
@@ -125,7 +125,7 @@ namespace Serialize {
                 },
                 where, std::forward<Init>(init), std::forward<_Ty>(args)...);
         }
-                
+
         iterator erase(const iterator &it)
         {
             assert(this->isMaster());
@@ -137,7 +137,7 @@ namespace Serialize {
             return make_message_sender<iterator>(
                 [this](auto &receiver, const iterator &where) {
                     if (this->isMaster()) {
-                        receiver.set_value(erase(where));
+                        receiver.set_value(MessageResult::OK, erase(where));
                     } else {
                         this->writeRequest(receiver, erase_t { where });
                     }

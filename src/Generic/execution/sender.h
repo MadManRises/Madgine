@@ -14,5 +14,12 @@ namespace Execution {
         return { std::forward<F>(f) };
     }
 
+#define ASYNC_STUB(Name, Impl, ...)                                                                                                                                                                         \
+    template <typename... Args>                                                                                                                                                                             \
+    auto Name(Args &&...args)                                                                                                                                                                               \
+    {                                                                                                                                                                                                       \
+        return __VA_ARGS__(LIFT(Impl, this), std::forward<Args>(args)...); \
+    }
+
 }
 }

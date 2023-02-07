@@ -8,6 +8,11 @@
 
 #include "Meta/serialize/streams/buffered_streambuf.h"
 
+#include "Generic/execution/algorithm.h"
+#include "Generic/execution/execution.h"
+
+#include "../../Generic/testreceiver.h"
+
 using namespace Engine::Serialize;
 
 struct Buffer {
@@ -106,14 +111,19 @@ struct TestManager : SyncManager {
     {
     }
 
-    SyncManagerResult setBuffer(Buffer &buffer, bool slave, bool shareState = true, std::unique_ptr<Engine::Serialize::Formatter> format = std::make_unique<Engine::Serialize::SafeBinaryFormatter>())
+    void setSlaveBuffer(TestReceiver<void, Engine::Serialize::SyncManagerResult> &receiver, Buffer &buffer, bool shareState = true, std::unique_ptr<Engine::Serialize::Formatter> format = std::make_unique<Engine::Serialize::SafeBinaryFormatter>())
     {
-        std::unique_ptr<buffered_streambuf> buf = std::make_unique<buffered_streambuf>(std::make_unique<BufferedTestBuf>(buffer, !slave));
-        if (slave) {
-            return setSlaveStream(FormattedBufferedStream { std::move(format), std::move(buf), std::make_unique<SyncStreamData>(*this, 0) }, shareState, 1s);
-        } else {
-            return addMasterStream(FormattedBufferedStream { std::move(format), std::move(buf), std::make_unique<SyncStreamData>(*this, 1) }, shareState);
-        }
+        std::unique_ptr<buffered_streambuf> buf = std::make_unique<buffered_streambuf>(std::make_unique<BufferedTestBuf>(buffer, false));
+        Engine::Execution::detach(
+            setSlaveStream(FormattedBufferedStream { std::move(format), std::move(buf), std::make_unique<SyncStreamData>(*this, 0) }, bool { shareState }, 1s)
+            | Engine::Execution::then_receiver(receiver));
+        receiveMessages(-1, 1s);
+    }
+
+    SyncManagerResult setMasterBuffer(Buffer &buffer, bool shareState = true, std::unique_ptr<Engine::Serialize::Formatter> format = std::make_unique<Engine::Serialize::SafeBinaryFormatter>())
+    {
+        std::unique_ptr<buffered_streambuf> buf = std::make_unique<buffered_streambuf>(std::make_unique<BufferedTestBuf>(buffer, true));
+        return addMasterStream(FormattedBufferedStream { std::move(format), std::move(buf), std::make_unique<SyncStreamData>(*this, 1) }, shareState);
     }
 
     using SyncManager::getMasterStream;
@@ -130,4 +140,12 @@ struct TestManager : SyncManager {
     {                                            \
         ASSERT_EQ(f.mResult, MessageResult::OK); \
         ASSERT_EQ(f.mValue, __VA_ARGS__);        \
+    }
+#define HANDLE_MGR_RECEIVER(...)                                 \
+    {                                                            \
+        TestReceiver<void, SyncManagerResult> receiver;          \
+        __VA_ARGS__;                                             \
+        ASSERT_TRUE(receiver.mFinished);                         \
+        ASSERT_EQ(receiver.mResult, SyncManagerResult::SUCCESS); \
+        ASSERT_TRUE(receiver.mHasValue);                         \
     }

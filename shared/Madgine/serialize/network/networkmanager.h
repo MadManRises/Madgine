@@ -21,7 +21,9 @@ namespace Network {
         void operator=(const NetworkManager &) = delete;
 
         NetworkManagerResult startServer(int port);
-        NetworkManagerResult connect(std::string_view url, int portNr, std::unique_ptr<Serialize::Formatter> (*format)(), TimeOut timeout = {});
+        void connectImpl(Execution::VirtualReceiverBase<void, NetworkManagerResult, Serialize::SyncManagerResult> &receiver, std::string_view url, int portNr, std::unique_ptr<Serialize::Formatter> (*format)(), TimeOut timeout = {});
+        ASYNC_STUB(connect, connectImpl, Execution::make_virtual_sender<void, NetworkManagerResult, Serialize::SyncManagerResult>);
+        
 
         void close();
 

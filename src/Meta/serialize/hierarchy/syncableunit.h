@@ -138,7 +138,12 @@ namespace Serialize {
                     typename traits::decay_argument_types::as_tuple argTuple { std::forward<Args>(args)... };
                     if (this->isMaster()) {
                         this->writeFunctionAction(functionIndex<f>, &argTuple);
-                        receiver.set_value(invoke_patch_void(LIFT(TupleUnpacker::invokeExpand), f, static_cast<T *>(this), argTuple));
+                        if constexpr (std::same_as<decltype(TupleUnpacker::invokeExpand(f, static_cast<T*>(this), argTuple)), void>) {
+                            TupleUnpacker::invokeExpand(f, static_cast<T *>(this), argTuple);
+                            receiver.set_value(MessageResult::OK);
+                        } else {
+                            receiver.set_value(MessageResult::OK, TupleUnpacker::invokeExpand(f, static_cast<T *>(this), argTuple));
+                        }
                     } else {
                         this->writeFunctionRequest(functionIndex<f>, CALL, &argTuple, 0, 0, receiver);
                     }
@@ -165,7 +170,7 @@ namespace Serialize {
             return make_message_sender<R>(
                 [this](auto &receiver, Args &&...args) {
                     if (this->isMaster()) {
-                        receiver.set_value((static_cast<T *>(this)->*f)(std::forward<Args>(args)...));
+                        receiver.set_value(MessageResult::OK, (static_cast<T *>(this)->*f)(std::forward<Args>(args)...));
                     } else {
                         typename traits::decay_argument_types::as_tuple argTuple { std::forward<Args>(args)... };
                         this->writeFunctionRequest(functionIndex<f>, QUERY, &argTuple, 0, 0, receiver);

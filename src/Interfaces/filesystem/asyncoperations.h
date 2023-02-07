@@ -34,7 +34,7 @@ namespace Filesystem {
         template <typename Rec>
         auto operator()(Rec &&rec)
         {
-            return Execution::VirtualReceiver<Rec, ByteBuffer, GenericResult, AsyncFileReadState> {
+            return Execution::VirtualReceiverEx<Rec, AsyncFileReadState, ByteBuffer, GenericResult> {
                 std::forward<Rec>(rec),
                 std::move(mPath)
             };

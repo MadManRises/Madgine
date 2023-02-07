@@ -3,6 +3,42 @@
 namespace Engine {
 namespace Execution {
 
+    template <typename S, typename V, typename R>
+    struct DeleteRec {        
+        void set_value(R, V)
+        {
+            mDeleter(mState);
+        }
+        void set_done()
+        {
+            mDeleter(mState);
+        }        
+        void set_error(R)
+        {
+            mDeleter(mState);
+        }
+        void (*mDeleter)(S *);
+        S *mState;
+    };
+        
+    template <typename S, typename R>
+    struct DeleteRec<S, void, R> {
+        void set_value(R)
+        {
+            mDeleter(mState);
+        }
+        void set_done()
+        {
+            mDeleter(mState);
+        }
+        void set_error(R)
+        {
+            mDeleter(mState);
+        }
+        void (*mDeleter)(S *);
+        S *mState;
+    };
+
     template <typename F, typename V, typename R>
     void detach(Sender<F, V, R> &&sender)
     {
@@ -16,23 +52,8 @@ namespace Execution {
             {
                 mState.start();
             }
-            struct DeleteRec {
-                void set_value(R, V)
-                {
-                    mDeleter(mState);
-                }
-                void set_done()
-                {
-                    mDeleter(mState);
-                }
-                void set_error(R)
-                {
-                    mDeleter(mState);
-                }
-                void (*mDeleter)(state *);
-                state *mState;
-            } mRec;
-            std::invoke_result_t<F, DeleteRec &> mState;
+            DeleteRec<state, V, R> mRec;
+            std::invoke_result_t<F, DeleteRec<state, V, R> &> mState;
         };
         (new state { std::move(sender) })->start();
     }
