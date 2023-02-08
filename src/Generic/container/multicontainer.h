@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../type_pack.h"
 #include "../referencetuple.h"
 
 namespace Engine {
@@ -363,16 +362,12 @@ struct container_api_impl<C, MultiContainer<Container, Ty...>> : C {
 
     decltype(auto) push_back(const value_type &item)
     {
-        return then(emplace_back(item), [](auto &&it) -> decltype(auto) {
-            return *it;
-        });
+        return *emplace_back(item);
     }
 
     decltype(auto) push_back(value_type &&item)
     {
-        return then(emplace_back(std::move(item)), [](auto &&it) -> decltype(auto) {
-            return *it;
-        });
+        return *emplace_back(std::move(item));
     }
 
     template <typename... _Ty>

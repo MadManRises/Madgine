@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../then.h"
 #include "sortedcontainerapi.h"
 #include "underlying_container.h"
 
@@ -45,9 +44,7 @@ struct container_api_impl<C, std::list<Ty...>> : C {
     template <typename... _Ty>
     decltype(auto) emplace_back(_Ty &&... args)
     {
-        return then(this->emplace(this->end(), std::forward<_Ty>(args)...), [](auto &&it) -> decltype(auto) {
-            return *it;
-        });
+        return *this->emplace(this->end(), std::forward<_Ty>(args)...);
     }
 
     const typename C::value_type &back() const
@@ -88,16 +85,12 @@ struct container_api_impl<C, std::vector<Ty...>> : C {
 
     decltype(auto) push_back(const value_type &item)
     {
-        return then(emplace_back(item), [](auto &&it) -> decltype(auto) {
-            return *it;
-        });
+        return *emplace_back(item);
     }
 
     decltype(auto) push_back(value_type &&item)
     {
-        return then(emplace_back(std::move(item)), [](auto &&it) -> decltype(auto) {
-            return *it;
-        });
+        return *emplace_back(std::move(item));
     }
 
     template <typename... _Ty>
@@ -154,16 +147,12 @@ struct container_api_impl<C, std::deque<Ty...>> : C {
 
     decltype(auto) push_back(const value_type &item)
     {
-        return then(emplace_back(item), [](auto &&it) -> decltype(auto) {
-            return *it;
-        });
+        return *emplace_back(item);        
     }
 
     decltype(auto) push_back(value_type &&item)
     {
-        return then(emplace_back(std::move(item)), [](auto &&it) -> decltype(auto) {
-            return *it;
-        });
+        return *emplace_back(std::move(item));
     }
 
     template <typename... _Ty>
