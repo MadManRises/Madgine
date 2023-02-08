@@ -32,7 +32,7 @@ namespace Widgets {
 
         virtual void vertices(WidgetsRenderData &renderData, size_t layer) override;
 
-        virtual void sizeChanged(const Vector3i &pixelSize) override;
+        virtual void sizeChanged(const Vector3 &pixelSize) override;
 
         TextRenderData mTextRenderData;
 
@@ -44,6 +44,8 @@ namespace Widgets {
 
         uint32_t mRowCount = 0;        
         std::vector<ExplicitLayoutConfig> mColumnConfigs;
+
+        bool mNeedResize = false;
     };
 }
 }

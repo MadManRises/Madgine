@@ -21,7 +21,7 @@ namespace Widgets {
 
         virtual WidgetClass getClass() const override;
 
-        virtual void sizeChanged(const Vector3i &pixelSize) override;
+        virtual void sizeChanged(const Vector3 &pixelSize) override;
 
         uint32_t tabCount() const;
         void setTabCount(uint32_t count);

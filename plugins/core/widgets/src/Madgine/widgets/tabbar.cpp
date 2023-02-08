@@ -93,7 +93,7 @@ namespace Widgets {
         return mSelectedTab;
     }
 
-    void TabBar::sizeChanged(const Vector3i &pixelSize)
+    void TabBar::sizeChanged(const Vector3 &pixelSize)
     {
         mTabBarRenderData.update(tabCount(), { 0.0f, 1.0f, 1000.0f }, pixelSize.x);
     }

@@ -138,7 +138,7 @@ namespace Widgets {
         }
     }
 
-    void TextEdit::sizeChanged(const Vector3i &pixelSize)
+    void TextEdit::sizeChanged(const Vector3 &pixelSize)
     {
         mTextRenderData.updateText(mText, getAbsoluteTextSize());
     }

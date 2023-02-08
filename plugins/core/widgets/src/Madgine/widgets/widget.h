@@ -125,7 +125,7 @@ namespace Widgets {
         Serialize::StreamResult readWidget(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget);
         const char *writeWidget(Serialize::FormattedSerializeStream &out, const std::unique_ptr<WidgetBase> &widget) const;
 
-        virtual void sizeChanged(const Vector3i &pixelSize);
+        virtual void sizeChanged(const Vector3 &pixelSize);
 
         size_t depth(size_t layer);
 

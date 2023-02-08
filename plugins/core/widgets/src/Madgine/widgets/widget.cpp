@@ -100,7 +100,7 @@ namespace Widgets {
         mAbsoluteSize = geometry.mSize * parentSize;
         mAbsolutePos = (geometry.mPos * parentSize).xy() + parentPos;
 
-        sizeChanged(mAbsoluteSize.floor());
+        sizeChanged(mAbsoluteSize);
 
         for (WidgetBase *child : children()) {
             child->applyGeometry(mAbsoluteSize, mAbsolutePos);
@@ -392,7 +392,7 @@ namespace Widgets {
         return mManager.writeWidget(out, widget);
     }
 
-    void WidgetBase::sizeChanged(const Vector3i &pixelSize)
+    void WidgetBase::sizeChanged(const Vector3 &pixelSize)
     {
     }
 

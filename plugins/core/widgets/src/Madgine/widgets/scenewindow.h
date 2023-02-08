@@ -20,7 +20,7 @@ namespace Widgets {
         void setSampled(bool samples);
 
     protected:
-        void sizeChanged(const Vector3i &pixelSize) override;
+        void sizeChanged(const Vector3 &pixelSize) override;
 
     private:
         std::unique_ptr<Render::RenderTarget> mTarget;

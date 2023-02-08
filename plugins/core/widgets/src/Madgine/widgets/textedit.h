@@ -31,7 +31,7 @@ namespace Widgets {
 
         void vertices(WidgetsRenderData &renderData, size_t layer) override;
 
-        virtual void sizeChanged(const Vector3i &pixelSize) override;
+        virtual void sizeChanged(const Vector3 &pixelSize) override;
 
         virtual WidgetClass getClass() const override;
 

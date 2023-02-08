@@ -53,9 +53,9 @@ namespace Widgets {
         return mTarget.get();
     }
 
-    void SceneWindow::sizeChanged(const Vector3i &pixelSize)
+    void SceneWindow::sizeChanged(const Vector3 &pixelSize)
     {
-        mTarget->resize(pixelSize.xy());
+        mTarget->resize(pixelSize.xy().floor());
     }
 
     WidgetClass SceneWindow::getClass() const

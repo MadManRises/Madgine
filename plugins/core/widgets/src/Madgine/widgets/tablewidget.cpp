@@ -99,6 +99,9 @@ namespace Widgets {
         Vector3 pos { getAbsolutePosition(), static_cast<float>(depth(layer)) };
         Vector3 size = getAbsoluteSize();
 
+        if (mNeedResize)
+            sizeChanged(size);
+
         float fullWidth = mVerticalLayoutRenderData.fullSize();
         float fullHeight = mHorizontalLayoutRenderData.fullSize(mRowCount);
 
@@ -146,7 +149,7 @@ namespace Widgets {
         }
     }
 
-    void TableWidget::sizeChanged(const Vector3i &pixelSize)
+    void TableWidget::sizeChanged(const Vector3 &pixelSize)
     {
         if (mTextRenderData.available()) {
             float lineHeight = mTextRenderData.calculateLineHeight();
@@ -156,6 +159,9 @@ namespace Widgets {
                 lineHeight + 12.0f
             };
             mHorizontalLayoutRenderData.update(mRowCount, rowHeightConstraints, pixelSize.y);
+            mNeedResize = false;
+        } else {
+            mNeedResize = true;
         }
         mVerticalLayoutRenderData.update(mColumnConfigs, pixelSize.x);
     }
