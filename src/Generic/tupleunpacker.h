@@ -1,15 +1,10 @@
 #pragma once
 
-#include "Generic/defaultassign.h"
-#include "Generic/concepts.h"
+#include "defaultassign.h"
+#include "callable_traits.h"
 
 namespace Engine {
 namespace TupleUnpacker {
-
-#define LIFT(fname, ...)                                       \
-    [__VA_ARGS__](auto &&...args) -> decltype(auto) {          \
-        return (fname)(std::forward<decltype(args)>(args)...); \
-    }
 
     template <typename Tuple>
     Tuple &&shiftTupleReference(Tuple &&tuple)

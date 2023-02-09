@@ -14,8 +14,8 @@ plugins/core/widgets/data/fonts/opensans/OpenSans-Bold.msdf
 plugins/core/widgets/data/fonts/opensans/OpenSans-BoldItalic.ttf
 plugins/core/widgets/data/fonts/opensans/OpenSans-ExtraBold.ttf
 plugins/core/widgets/data/fonts/opensans/OpenSans-ExtraBoldItalic.ttf
-plugins/core/widgets/data/fonts/opensans/OpenSans-Italic.msdf
-plugins/core/widgets/data/fonts/opensans/OpenSans-Light.msdf
+plugins/core/widgets/data/fonts/opensans/OpenSans-Italic.ttf
+plugins/core/widgets/data/fonts/opensans/OpenSans-Light.ttf
 plugins/core/widgets/data/fonts/opensans/OpenSans-LightItalic.ttf
 plugins/core/widgets/data/fonts/opensans/OpenSans-Regular.msdf
 plugins/core/widgets/data/fonts/opensans/OpenSans-Semibold.ttf

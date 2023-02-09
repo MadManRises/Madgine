@@ -1,11 +1,17 @@
 #pragma once
 
+#include "../pipable.h"
+
+#if __cpp_lib_ranges >= 201911L
+#    include <ranges>
+#endif
+
 #if __cpp_lib_ranges < 202110L
 
 namespace std {
 namespace ranges {
 
-#    if (__cpp_lib_ranges < 201911L) || ANDROID || OSX || IOS
+#    if (__cpp_lib_ranges < 201911L)
     template <class T>
     concept range = requires(T &t)
     {
@@ -79,7 +85,166 @@ namespace ranges {
         return std::lower_bound(std::forward<C>(c).begin(), std::forward<C>(c).end(), std::forward<T>(t));
     }
 
+    template <typename T>
+    using range_value_t = typename std::remove_reference_t<T>::value_type;
+
 }
+
+namespace views {
+
+    template <typename R>
+    struct all_t {
+
+        all_t(R &&r)
+            : mR(std::forward<R>(r))
+        {
+        }
+
+        using iterator = decltype(std::declval<R>().begin());
+
+        iterator begin()
+        {
+            return mR.begin();
+        }
+
+        iterator end()
+        {
+            return mR.end();
+        }
+
+        size_t size() const
+        {
+            return mR.size();
+        }
+
+        R mR;
+    };
+
+    template <typename R, typename F>
+    struct TransformView {
+
+        struct iterator {
+            using It = decltype(std::declval<R>().begin());
+            using difference_type = typename It::difference_type;
+            using value_type = std::invoke_result_t<F, decltype(*std::declval<It>())>;
+
+            decltype(auto) operator*() const
+            {
+                return (*mF)(*mIt);
+            }
+
+            bool operator==(const iterator &other) const
+            {
+                return mIt == other.mIt;
+            }
+
+            bool operator!=(const iterator &other) const
+            {
+                return mIt != other.mIt;
+            }
+
+            iterator &operator++()
+            {
+                ++mIt;
+                return *this;
+            }
+
+            iterator operator++(int)
+            {
+                iterator copy = *this;
+                ++(*this);
+                return copy;
+            }
+
+            It mIt;
+            std::remove_reference_t<F> *mF;
+        };
+
+        using value_type = typename iterator::value_type;
+
+        iterator begin()
+        {
+            return { mR.begin(), &mF };
+        }
+
+        iterator end()
+        {
+            return { mR.end(), &mF };
+        }
+
+        size_t size() const
+        {
+            return mR.size();
+        }
+
+        bool empty() const
+        {
+            return mR.empty();
+        }
+
+        R mR;
+        F mF;
+    };
+
+    template <typename R, typename F>
+    TransformView<R, F> transform(R &&r, F &&f)
+    {
+        return { std::forward<R>(r), std::forward<F>(f) };
+    }
+
+    MAKE_PIPABLE(transform)
+
+    template <typename R>
+    struct ReverseView {
+
+        using iterator = std::reverse_iterator<decltype(std::declval<R>().begin())>;
+
+        iterator begin()
+        {
+            return mR.rbegin();
+        }
+
+        iterator end()
+        {
+            return mR.rend();
+        }
+
+        R mR;
+    };
+
+    struct reverse_t {
+
+        template <typename R>
+        ReverseView<R> operator()(R &&r)
+        {
+            return { std::forward<R>(r) };
+        }
+
+        template <typename R>
+        friend ReverseView<R> operator|(R &&r, reverse_t)
+        {
+            return { std::forward<R>(r) };
+        }
+    };
+
+    static constexpr reverse_t reverse;
+
+}
+
+namespace ranges {
+    template <typename T>
+    inline constexpr bool enable_borrowed_range = false;
+
+    template <typename R>
+    concept borrowed_range = range<R> &&(std::is_lvalue_reference_v<R> || enable_borrowed_range<std::remove_cvref_t<R>>);
+}
+
+template <typename R>
+inline constexpr bool ranges::enable_borrowed_range<views::ReverseView<R>> = ranges::borrowed_range<R>;
+
+template <typename R, typename F>
+inline constexpr bool ranges::enable_borrowed_range<views::TransformView<R, F>> = ranges::borrowed_range<R>;
+
 }
 
 #endif

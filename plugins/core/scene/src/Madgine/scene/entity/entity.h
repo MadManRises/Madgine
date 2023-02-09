@@ -12,6 +12,8 @@
 
 #include "entitycomponentptr.h"
 
+#include "Generic/customfunctors.h"
+
 namespace Engine {
 namespace Scene {
     namespace Entity {

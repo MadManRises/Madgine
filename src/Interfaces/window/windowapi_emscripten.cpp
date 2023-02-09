@@ -267,6 +267,16 @@ namespace Window {
             }(icon)));*/
     }
 
+    std::string OSWindow::getClipboardString()
+    {
+        return "";
+    }
+
+    bool OSWindow::setClipboardString(std::string_view s)
+    {
+        return true;
+    }
+
     EM_BOOL eventCallback(int type, const EmscriptenUiEvent *event, void *userData)
     {
         double w;

@@ -1,6 +1,15 @@
 #pragma once
 
 namespace Engine {
+		
+template <typename, template <typename...> typename>
+struct is_instance : std::false_type {
+};
+
+template <typename... T, template <typename...> typename U>
+struct is_instance<U<T...>, U> : std::true_type {
+    using argument_types = type_pack<T...>;
+};
 
 template <typename T, template <typename...> typename U>
 concept InstanceOf = is_instance<T, U>::value;

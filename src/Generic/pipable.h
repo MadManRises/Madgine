@@ -1,6 +1,7 @@
 #pragma once
 
 #include "functor.h"
+#include "lift.h"
 
 namespace Engine {
 
@@ -9,8 +10,14 @@ struct Pipable {
     template <typename Ty>
     friend decltype(auto) operator|(Ty &&ty, Pipable &&p)
     {
-        return TupleUnpacker::invokeExpand(p.mF, std::forward<Ty>(ty), std::move(p.mArgs));
+        return p.call(std::forward<Ty>(ty), std::make_index_sequence<sizeof...(Args)> {});
     }
+
+    template <typename Ty, size_t... I>
+    decltype(auto) call(Ty&& ty, std::index_sequence<I...>) {
+        return std::move(mF)(std::forward<Ty>(ty), std::get<I>(std::move(mArgs))...);
+    }
+
     F mF;
     std::tuple<Args...> mArgs;
 };
@@ -25,7 +32,7 @@ Pipable<F, Args...> pipable(F &&f, Args &&...args)
     template <typename... Args>                               \
     auto f(Args &&...args)                                    \
     {                                                         \
-        return pipable(LIFT(f), std::forward<Args>(args)...); \
+        return ::Engine::pipable(LIFT(f), std::forward<Args>(args)...); \
     }
 
 }

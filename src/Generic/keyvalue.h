@@ -151,13 +151,13 @@ decltype(auto) kvKey(T &&v)
 constexpr auto projectionKey = LIFT(kvKey);
 
 template <typename T>
-decltype(auto) kvValues(T &v)
+auto kvValues(T &v)
 {
     return std::views::transform(v, projectionValue);
 }
 
 template <typename T>
-decltype(auto) kvKeys(T &v)
+auto kvKeys(T &v)
 {
     return std::views::transform(v, projectionKey);
 }

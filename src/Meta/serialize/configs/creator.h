@@ -4,7 +4,7 @@
 
 #include "Generic/makeowning.h"
 
-#include "Generic/functor.h"
+#include "Generic/customfunctors.h"
 
 #include "../streams/formattedserializestream.h"
 

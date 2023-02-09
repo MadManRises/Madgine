@@ -138,7 +138,7 @@ SocketAPIResult Socket::accept(const Socket &from, TimeOut timeout)
         timeout_s.tv_sec = static_cast<long>(remainder.count()) / 1000;
         timeout_s.tv_usec = static_cast<long>(remainder.count()) % 1000 * 1000;
     }
-    if (int error = select(static_cast<int>(from.mSocket), &readSet, nullptr, nullptr, timeout_p); error <= 0) {
+    if (int error = ::select(static_cast<int>(from.mSocket), &readSet, nullptr, nullptr, timeout_p); error <= 0) {
         if (error == 0)
             return SocketAPIResult::TIMEOUT;
         else

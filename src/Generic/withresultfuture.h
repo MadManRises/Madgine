@@ -35,18 +35,6 @@ struct WithResultFuture {
         return mFuture.is_ready();
     }
 
-    template <typename F>
-    WithResultFuture<std::invoke_result_t<F, T>, R> then(F &&f)
-    {
-        return Future<WithResult<std::invoke_result_t<F, T>, R>> { mFuture.then([f { std::forward<F>(f) }](WithResult<T, R> &&data) -> WithResult<std::invoke_result_t<F, T>, R> {
-            if (data.mData) {
-                return { data.mResult, f(*data.mData) };
-            } else {
-                return { data.mResult };
-            }
-        }) };
-    }
-
 private:
     std::future<WithResult<T, R>> mFuture;
 };

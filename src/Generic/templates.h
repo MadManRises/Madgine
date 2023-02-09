@@ -61,15 +61,6 @@ struct transform_if<F, T, true> {
 template <template <typename> typename F, typename T, bool b>
 using transform_if_t = typename transform_if<F, T, b>::type;
 
-template <typename, template <typename...> typename>
-struct is_instance : std::false_type {
-};
-
-template <typename... T, template <typename...> typename U>
-struct is_instance<U<T...>, U> : std::true_type {
-    using argument_types = type_pack<T...>;
-};
-
 template <size_t add, typename Sequence>
 struct index_range_add;
 
@@ -130,6 +121,12 @@ using patch_void_t = std::conditional_t<std::same_as<T, void>, R, T>;
 
 template <auto a>
 struct auto_holder;
+	
+template <typename>
+struct type_holder_t {};
+
+template <typename T>
+const constexpr type_holder_t<T> type_holder = {};
 
 template <auto f, auto g>
 concept FSameAs = std::same_as<auto_holder<f>, auto_holder<g>>;
