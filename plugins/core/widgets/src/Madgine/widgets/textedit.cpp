@@ -69,7 +69,7 @@ namespace Widgets {
     void TextEdit::setText(std::string_view text)
     {
         mText = text;
-        mTextRenderData.updateText(text, getAbsoluteTextSize());
+        mTextRenderData.updateText(mText, getAbsoluteTextSize());
         stb_textedit_clamp(this, &mState);
     }
 
