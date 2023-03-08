@@ -94,17 +94,23 @@ namespace Serialize {
         template <typename C>
         static void writeItem(FormattedSerializeStream &out, const typename container_traits<C>::value_type &t)
         {
-            writeCreationData<typename container_traits<C>::value_type>(out, t);
-            write<typename container_traits<C>::value_type>(out, t, "Item");
+            using T = typename container_traits<C>::value_type;
+            writeCreationData<T>(out, t);
+            if constexpr (!std::is_const_v<T>) {
+                write<typename container_traits<C>::value_type>(out, t, "Item");
+            }
         }
 
         template <typename Op>
         static StreamResult readItem(FormattedSerializeStream &in, Op &op, typename container_traits<Op>::emplace_return &it, const typename container_traits<Op>::const_iterator &where)
         {
-            ArgsTuple<typename container_traits<Op>::value_type> tuple;
-            STREAM_PROPAGATE_ERROR(readCreationData<typename container_traits<Op>::value_type>(in, tuple));
+            using T = typename container_traits<Op>::value_type;
+            ArgsTuple<T> tuple;
+            STREAM_PROPAGATE_ERROR(readCreationData<T>(in, tuple));
             it = TupleUnpacker::invokeExpand(LIFT(container_traits<Op>::emplace), op, where, std::move(tuple));
-            STREAM_PROPAGATE_ERROR(read(in, *it, "Item"));
+            if constexpr (!std::is_const_v<T>) {
+                STREAM_PROPAGATE_ERROR(read(in, *it, "Item"));
+            }
             assert(container_traits<Op>::was_emplace_successful(it));
             return {};
         }
