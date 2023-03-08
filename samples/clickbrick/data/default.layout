@@ -181,7 +181,5 @@
                 </Widget>
             </mTopLevelWidgets>
         </Item>
-        <Item key="ClientImRoot" serId=24>
-        </Item>
     </mComponents>
 </Layout>

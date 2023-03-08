@@ -49,6 +49,8 @@ namespace Tools {
 
         Rect2i getChildClientSpace() override;
 
+        virtual bool includeInLayout() const override;
+
         virtual Threading::TaskQueue *taskQueue() const override;
 
         void addRenderTarget(Render::RenderTarget *target);

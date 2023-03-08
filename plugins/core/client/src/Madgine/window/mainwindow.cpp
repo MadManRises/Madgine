@@ -26,12 +26,20 @@
 
 #include "Generic/projections.h"
 
+namespace Engine {
+namespace Window {
+    static bool filterComponent(const std::unique_ptr<MainWindowComponentBase>& comp) {
+        return comp->includeInLayout();
+    }
+}
+}
+
 METATABLE_BEGIN(Engine::Window::MainWindow)
 READONLY_PROPERTY(Components, components)
 METATABLE_END(Engine::Window::MainWindow)
 
 SERIALIZETABLE_BEGIN(Engine::Window::MainWindow)
-FIELD(mComponents, Serialize::ControlledConfig<KeyCompare<std::unique_ptr<Engine::Window::MainWindowComponentBase>>>)
+FIELD(mComponents, Serialize::ControlledConfig<KeyCompare<std::unique_ptr<Engine::Window::MainWindowComponentBase>>>, Serialize::CustomFilter<Engine::Window::filterComponent>)
 SERIALIZETABLE_END(Engine::Window::MainWindow)
 
 namespace Engine {

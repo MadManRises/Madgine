@@ -52,6 +52,8 @@ namespace Window {
 
         Threading::TaskQueue *taskQueue() const;
 
+        virtual bool includeInLayout() const;
+
     protected:
         virtual Threading::Task<bool> init();
         virtual Threading::Task<void> finalize();

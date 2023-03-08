@@ -381,6 +381,11 @@ namespace Tools {
             return { mAreaPos.floor(), mAreaSize.floor() };
     }
 
+    bool ClientImRoot::includeInLayout() const
+    {
+        return false;
+    }
+
     bool ClientImRoot::injectKeyPress(const Engine::Input::KeyEventArgs &arg)
     {
         ImGuiIO &io = ImGui::GetIO();

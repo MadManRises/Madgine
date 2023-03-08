@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../configs/filter.h"
 #include "../primitivetypes.h"
 #include "../streams/comparestreamid.h"
 
@@ -12,6 +13,7 @@ namespace Serialize {
         using T = typename C::value_type;
 
         using Creator = CreatorSelector<Configs...>;
+        using Filter = FilterSelector<Configs...>;
 
         template <typename Op>
         static StreamResult readOp(FormattedSerializeStream &in, Op &op, const char *name, const CallerHierarchyBasePtr &hierarchy = {})
@@ -27,7 +29,8 @@ namespace Serialize {
                 }
             } else {
                 for (T &t : physical(op)) {
-                    STREAM_PROPAGATE_ERROR(Serialize::read(in, t, "Item"));
+                    if (Filter::filter(t))
+                        STREAM_PROPAGATE_ERROR(Serialize::read(in, t, "Item"));
                 }
             }
 
@@ -44,10 +47,22 @@ namespace Serialize {
         {
             if constexpr (container_traits<C>::is_fixed_size)
                 out.beginContainerWrite(name);
-            else
-                out.beginContainerWrite(name, physical(container).size());
+            else {
+                size_t size;
+                if constexpr (std::is_same_v<Filter, DefaultFilter>) {
+                    size = physical(container).size();
+                } else {
+                    size = 0;
+                    for (const auto &t : physical(container)) {
+                        if (Filter::filter(t))
+                            ++size;
+                    }
+                }
+                out.beginContainerWrite(name, size);
+            }
             for (const auto &t : physical(container)) {
-                TupleUnpacker::invoke(&Creator::template writeItem<C>, out, t, hierarchy);
+                if (Filter::filter(t))
+                    TupleUnpacker::invoke(&Creator::template writeItem<C>, out, t, hierarchy);
             }
             out.endContainerWrite(name);
         }
@@ -93,7 +108,6 @@ namespace Serialize {
         {
             Serialize::write<int32_t>(out, std::distance(c.begin(), it), "it");
         }
-
     };
 
     template <typename C>

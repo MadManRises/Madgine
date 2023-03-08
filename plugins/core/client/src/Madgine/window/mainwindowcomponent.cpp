@@ -35,6 +35,11 @@ namespace Window {
         return mWindow.taskQueue();
     }
 
+    bool MainWindowComponentBase::includeInLayout() const
+    {
+        return true;
+    }
+
     Threading::Task<bool> MainWindowComponentBase::init()
     {
         mWindow.getRenderWindow()->addRenderPass(this);
