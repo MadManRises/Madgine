@@ -941,9 +941,9 @@ bool DirectoryPicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *s
                 *path = result.path();
             }
         }
-
-        ImGui::EndChild();
     }
+
+    ImGui::EndChild();
 
     return EndFilesystemPicker(true, accepted);
 }
