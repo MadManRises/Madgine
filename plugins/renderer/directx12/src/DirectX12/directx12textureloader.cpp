@@ -8,7 +8,7 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
-VIRTUALUNIQUECOMPONENT(Engine::Render::DirectX12TextureLoader);
+UNIQUECOMPONENT(Engine::Render::DirectX12TextureLoader);
 
 METATABLE_BEGIN(Engine::Render::DirectX12TextureLoader)
 MEMBER(mResources)

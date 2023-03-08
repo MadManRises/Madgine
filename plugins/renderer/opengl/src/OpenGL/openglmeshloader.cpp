@@ -11,7 +11,7 @@
 #include "openglrendercontext.h"
 
 
-VIRTUALUNIQUECOMPONENT(Engine::Render::OpenGLMeshLoader);
+UNIQUECOMPONENT(Engine::Render::OpenGLMeshLoader);
 
 METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader, Engine::Render::GPUMeshLoader)
 MEMBER(mResources)

@@ -8,7 +8,7 @@
 
 #include "openglrendercontext.h"
 
-VIRTUALUNIQUECOMPONENT(Engine::Render::OpenGLTextureLoader);
+UNIQUECOMPONENT(Engine::Render::OpenGLTextureLoader);
 
 METATABLE_BEGIN(Engine::Render::OpenGLTextureLoader)
 MEMBER(mResources)

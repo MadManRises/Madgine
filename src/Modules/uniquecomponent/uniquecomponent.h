@@ -15,28 +15,25 @@ namespace UniqueComponent {
         using T = _T;
         using _Base::_Base;
 
-        struct Inner {
-            Inner()
+        template <typename Col>
+        struct Registrator : Col::template ComponentRegistrator<T> {
+            Registrator()
             {
                 if (!_Base::preg())
-                    _Base::preg() = &reg;
+                    _Base::preg() = this;
             }
-            ~Inner()
+            ~Registrator()
             {
-                if (_Base::preg() == &reg)
+                if (_Base::preg() == this)
                     _Base::preg() = nullptr;
             }
-
-        private:
-            typename _Base::Collector::template ComponentRegistrator<T> reg;
         };
+
+        static size_t component_index()
+        {
+            return _reg<T>().index();
+        }
     };
-
-    DLL_IMPORT_VARIABLE2(typename T::Inner, _vreg, typename T, typename Base);
-
-#    define VIRTUALUNIQUECOMPONENT(Name) DLL_EXPORT_VARIABLE2(, Name::Inner, Engine::UniqueComponent::, _vreg, {}, Name, Name::VBase)
-
-    DLL_IMPORT_VARIABLE2(Engine::UniqueComponent::IndexHolder *, _preg, typename T);
 
     template <typename _T, typename _Collector, typename _Base>
     struct VirtualComponentBase : public _Base {
@@ -63,13 +60,6 @@ namespace UniqueComponent {
         }
     };
 
-    DLL_IMPORT_VARIABLE2(Engine::UniqueComponent::IndexHolder, _reg, typename T);
-
-#    define UNIQUECOMPONENT(Type) DLL_EXPORT_VARIABLE3(, Engine::UniqueComponent::IndexHolder, Type::Collector::ComponentRegistrator<Type>, Engine::UniqueComponent::, _reg, , {}, Type)
-#    define UNIQUECOMPONENT2(Type, ext) DLL_EXPORT_VARIABLE3(, Engine::UniqueComponent::IndexHolder, Type::Collector::ComponentRegistrator<Type>, Engine::UniqueComponent::, _reg, ext, {}, Type)
-
-#    define VIRTUALUNIQUECOMPONENTBASE(Name) DLL_EXPORT_VARIABLE2(, Engine::UniqueComponent::IndexHolder *, Engine::UniqueComponent::, _preg, nullptr, Name)
-
     template <typename _T, typename _Collector, typename _Base>
     struct Component : _Base {
         using Collector = _Collector;
@@ -81,7 +71,19 @@ namespace UniqueComponent {
         {
             return _reg<T>().index();
         }
+        
+        template <typename Col>
+        using Registrator = typename Col::template ComponentRegistrator<T>;
     };
+
+    DLL_IMPORT_VARIABLE2(Engine::UniqueComponent::IndexHolder, _reg, typename T);
+    DLL_IMPORT_VARIABLE2(Engine::UniqueComponent::IndexHolder *, _preg, typename T);
+
+#    define UNIQUECOMPONENT(Type) DLL_EXPORT_VARIABLE3(, Engine::UniqueComponent::IndexHolder, Type::Registrator<Type::Collector>, Engine::UniqueComponent::, _reg, , {}, Type)
+#    define UNIQUECOMPONENT2(Type, ext) DLL_EXPORT_VARIABLE3(, Engine::UniqueComponent::IndexHolder, Type::Collector::ComponentRegistrator<Type>, Engine::UniqueComponent::, _reg, ext, {}, Type)
+
+#    define VIRTUALUNIQUECOMPONENTBASE(Name) DLL_EXPORT_VARIABLE2(, Engine::UniqueComponent::IndexHolder *, Engine::UniqueComponent::, _preg, nullptr, Name)
+
 
 }
 }
@@ -116,7 +118,6 @@ namespace UniqueComponent {
 
 #    define UNIQUECOMPONENT(Type)
 #    define UNIQUECOMPONENT2(Name, ext)
-#    define VIRTUALUNIQUECOMPONENT(Name)
 #    define VIRTUALUNIQUECOMPONENTBASE(Name)
 
 #endif

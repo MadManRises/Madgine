@@ -15,7 +15,7 @@
 
 #include "Madgine/window/mainwindow.h"
 
-VIRTUALUNIQUECOMPONENT(Engine::Tools::DirectX11ImRoot)
+UNIQUECOMPONENT(Engine::Tools::DirectX11ImRoot)
 
 METATABLE_BEGIN_BASE(Engine::Tools::DirectX11ImRoot, Engine::Tools::ClientImRoot)
 METATABLE_END(Engine::Tools::DirectX11ImRoot)

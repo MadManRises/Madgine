@@ -20,7 +20,7 @@ METATABLE_BEGIN_BASE(Engine::FirstParty::SteamServices, Engine::FirstParty::Firs
 READONLY_PROPERTY(Initialized, mInitialized)
 METATABLE_END(Engine::FirstParty::SteamServices)
 
-VIRTUALUNIQUECOMPONENT(Engine::FirstParty::SteamServices)
+UNIQUECOMPONENT(Engine::FirstParty::SteamServices)
 
 namespace Engine {
 namespace FirstParty {

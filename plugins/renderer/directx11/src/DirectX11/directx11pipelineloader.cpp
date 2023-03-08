@@ -16,7 +16,7 @@
 
 #include "Modules/threading/taskqueue.h"
 
-VIRTUALUNIQUECOMPONENT(Engine::Render::DirectX11PipelineLoader);
+UNIQUECOMPONENT(Engine::Render::DirectX11PipelineLoader);
 
 METATABLE_BEGIN_BASE(Engine::Render::DirectX11PipelineLoader, Engine::Render::PipelineLoader)
 METATABLE_END(Engine::Render::DirectX11PipelineLoader)

@@ -12,7 +12,7 @@
 
 #include "directx12rendercontext.h"
 
-VIRTUALUNIQUECOMPONENT(Engine::Render::DirectX12PipelineLoader);
+UNIQUECOMPONENT(Engine::Render::DirectX12PipelineLoader);
 
 METATABLE_BEGIN_BASE(Engine::Render::DirectX12PipelineLoader, Engine::Render::PipelineLoader)
 METATABLE_END(Engine::Render::DirectX12PipelineLoader)

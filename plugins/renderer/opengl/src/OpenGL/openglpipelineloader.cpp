@@ -12,7 +12,7 @@
 
 #include "util/openglpipelineinstance.h"
 
-VIRTUALUNIQUECOMPONENT(Engine::Render::OpenGLPipelineLoader);
+UNIQUECOMPONENT(Engine::Render::OpenGLPipelineLoader);
 
 METATABLE_BEGIN_BASE(Engine::Render::OpenGLPipelineLoader, Engine::Render::PipelineLoader)
 MEMBER(mResources)

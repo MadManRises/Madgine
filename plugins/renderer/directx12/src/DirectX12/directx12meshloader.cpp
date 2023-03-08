@@ -13,7 +13,7 @@
 
 #include "directx12rendercontext.h"
 
-VIRTUALUNIQUECOMPONENT(Engine::Render::DirectX12MeshLoader);
+UNIQUECOMPONENT(Engine::Render::DirectX12MeshLoader);
 
 METATABLE_BEGIN_BASE(Engine::Render::DirectX12MeshLoader, Engine::Render::GPUMeshLoader)
 METATABLE_END(Engine::Render::DirectX12MeshLoader)
