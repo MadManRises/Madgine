@@ -1,3 +1,5 @@
+include(util/config)
+
 Project(Client)     
 
 set(sources "")
@@ -16,6 +18,8 @@ target_link_plugins(Client PipelineLoader FontLoader)
 target_link_plugin_groups(Client Renderer)
 
 target_link_libraries(Client PUBLIC Render Meta Modules)
+
+set_config(MADGINE_MAINWINDOW_LAYOUT CLIENT LAYOUT)
 
 configure_file(src/Madgine/clientconfig.in.h clientconfig.h)
 target_include_directories(Client PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)

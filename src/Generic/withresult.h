@@ -2,7 +2,7 @@
 
 namespace Engine {
 
-template <typename T, typename R>
+template <typename R, typename T = void>
 struct WithResult {
     WithResult() = default;
     WithResult(T t)
@@ -32,7 +32,7 @@ struct WithResult {
 };
 
 template <typename R>
-struct WithResult<void, R> {
+struct WithResult<R, void> {
     WithResult() = default;
     WithResult(R result)
         : mResult(result)

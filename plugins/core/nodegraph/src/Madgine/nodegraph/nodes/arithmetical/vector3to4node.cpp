@@ -65,7 +65,7 @@ namespace NodeGraph {
 
     CodeGen::Statement Vector3to4Node::generateRead(CodeGenerator &generator, uint32_t providerIndex, std::unique_ptr<CodeGeneratorData> &data) const
     {
-        return CodeGen::Constructor { toValueTypeDesc<Vector4>(), { generator.read(0), CodeGen::Constant { ValueType { mFillValue } } } };
+        return CodeGen::Constructor { {}, toValueTypeDesc<Vector4>(), { generator.read(0), CodeGen::Constant { ValueType { mFillValue } } } };
     }
 
 }

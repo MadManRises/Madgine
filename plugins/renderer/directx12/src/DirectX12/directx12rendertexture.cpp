@@ -40,10 +40,13 @@ namespace Render {
         renderTargetViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
         renderTargetViewDesc.Texture2D.MipSlice = 0;
 
-        OffsetPtr targetView = DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.allocate();
-        GetDevice()->CreateRenderTargetView(mTexture.resource(), &renderTargetViewDesc, DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(targetView));
+        OffsetPtr targetView = mTargetView;
+        if (!targetView)
+            targetView = DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.allocate();
+        GetDevice()->CreateRenderTargetView(mTexture, &renderTargetViewDesc, DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(targetView));
 
-        setup(targetView, size);
+        setup(targetView, size,
+            mDepthBufferView || config.mCreateDepthBufferView ? D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE : D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
         if (mDepthBufferView || config.mCreateDepthBufferView) {
             if (mDepthBufferView) {
@@ -56,12 +59,11 @@ namespace Render {
             depthViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
             depthViewDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
             depthViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-            depthViewDesc.Texture2D.MipLevels = 1; 
+            depthViewDesc.Texture2D.MipLevels = 1;
 
-            mDepthBufferView = DirectX12RenderContext::getSingleton().mDescriptorHeap.allocate();
-            GetDevice()->CreateShaderResourceView(mDepthStencilBuffer, &depthViewDesc, DirectX12RenderContext::getSingleton().mDescriptorHeap.cpuHandle(mDepthBufferView));            
-
-            Transition(mDepthStencilBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+            if (!mDepthBufferView)
+                mDepthBufferView = DirectX12RenderContext::getSingleton().mDescriptorHeap.allocate();
+            GetDevice()->CreateShaderResourceView(mDepthStencilBuffer, &depthViewDesc, DirectX12RenderContext::getSingleton().mDescriptorHeap.cpuHandle(mDepthBufferView));
         }
 
         DX12_CHECK();
@@ -76,20 +78,20 @@ namespace Render {
 
     void DirectX12RenderTexture::beginIteration(size_t iteration) const
     {
-        Transition(mTexture.resource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+        mCommandList.Transition(mTexture, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
         if (mDepthBufferView)
-            Transition(mDepthStencilBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+            mCommandList.Transition(mDepthStencilBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
         DirectX12RenderTarget::beginIteration(iteration);
     }
 
     void DirectX12RenderTexture::endIteration(size_t iteration) const
     {
-        Transition(mTexture.resource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        mCommandList.Transition(mTexture, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
         if (mDepthBufferView)
-            Transition(mDepthStencilBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+            mCommandList.Transition(mDepthStencilBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
         DirectX12RenderTarget::endIteration(iteration);
     }
@@ -109,9 +111,25 @@ namespace Render {
         return { DirectX12RenderContext::getSingleton().mDescriptorHeap.gpuHandle(mDepthBufferView).ptr, TextureType_2D };
     }
 
+    const DirectX12Texture &DirectX12RenderTexture::texture() const
+    {
+        return mTexture;
+    }
+
     Vector2i DirectX12RenderTexture::size() const
     {
         return mSize;
+    }
+
+    void DirectX12RenderTexture::beginFrame()
+    {
+        DirectX12RenderTarget::beginFrame();
+        mCommandList.attachResource(mTexture);
+    }
+
+    void DirectX12RenderTexture::endFrame()
+    {
+        DirectX12RenderTarget::endFrame();
     }
 
 }

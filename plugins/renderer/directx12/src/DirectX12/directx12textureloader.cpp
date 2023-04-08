@@ -53,5 +53,10 @@ namespace Render {
         static_cast<DirectX12Texture &>(tex).setSubData(offset, size, data);
     }
 
+    Threading::TaskQueue *DirectX12TextureLoader::loadingTaskQueue() const
+    {
+        return DirectX12RenderContext::renderQueue();
+    }
+
 }
 }

@@ -63,5 +63,30 @@ namespace Render {
         GL_CHECK();
     }
 
+    void OpenGLRenderTarget::pushAnnotation(const char *tag)
+    {
+#if OPENGL_ES
+        //glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, tag);
+#else
+        if (glPushDebugGroupKHR)
+            glPushDebugGroupKHR(GL_DEBUG_SOURCE_APPLICATION, 0, -1, tag);
+#endif
+    }
+
+    void OpenGLRenderTarget::popAnnotation()
+    {
+#if OPENGL_ES
+        //glPopDebugGroup();
+#else
+        if (glPopDebugGroupKHR)
+            glPopDebugGroupKHR();
+#endif
+    }
+
+    OpenGLRenderContext *OpenGLRenderTarget::context() const
+    {
+        return static_cast<OpenGLRenderContext *>(RenderTarget::context());
+    }
+
 }
 }

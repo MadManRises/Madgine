@@ -9,8 +9,11 @@
 #include "util/directx12pipelineinstance.h"
 
 #include "directx12rendercontext.h"
+#include "directx12rendertexture.h"
 
 #include "Meta/math/rect2i.h"
+
+#include "Madgine/render/renderpass.h"
 
 namespace Engine {
 namespace Render {
@@ -24,7 +27,7 @@ namespace Render {
     {
     }
 
-    void DirectX12RenderTarget::setup(OffsetPtr targetView, const Vector2i &size)
+    void DirectX12RenderTarget::setup(OffsetPtr targetView, const Vector2i &size, D3D12_RESOURCE_STATES depthBufferState)
     {
         mTargetView = targetView;
 
@@ -41,7 +44,7 @@ namespace Render {
             &depthHeapProperties,
             D3D12_HEAP_FLAG_NONE,
             &depthResourceDesc,
-            D3D12_RESOURCE_STATE_DEPTH_WRITE,
+            depthBufferState,
             &depthOptimizedClearValue,
             IID_PPV_ARGS(&mDepthStencilBuffer));
         DX12_CHECK(hr);
@@ -61,11 +64,35 @@ namespace Render {
         mDepthStencilBuffer.reset();
     }
 
+    void DirectX12RenderTarget::beginFrame()
+    {
+        mCommandList = context()->fetchCommandList(name());
+
+        mCommandList->SetGraphicsRootSignature(context()->mRootSignature);
+
+        mCommandList.attachResource(mDepthStencilBuffer);
+
+        for (RenderPass *pass : renderPasses()) {
+            for (RenderData *data : pass->dependencies()) {
+                DirectX12RenderTexture *tex = dynamic_cast<DirectX12RenderTexture *>(data);
+                if (tex) {
+                    mCommandList.attachResource(tex->texture());
+                }
+            }
+        }
+
+        RenderTarget::beginFrame();
+    }
+
+    void DirectX12RenderTarget::endFrame()
+    {
+        RenderTarget::endFrame();
+
+        mCommandList.reset();
+    }
+
     void DirectX12RenderTarget::beginIteration(size_t iteration) const
     {
-        ID3D12GraphicsCommandList *commandList = context()->mCommandList.mList;
-
-        commandList->SetGraphicsRootSignature(context()->mRootSignature);
 
         const Vector2i &screenSize = size();
 
@@ -76,7 +103,7 @@ namespace Render {
         viewport.TopLeftY = 0.0f;
         viewport.MinDepth = 0.0f;
         viewport.MaxDepth = 1.0f;
-        commandList->RSSetViewports(1, &viewport);
+        mCommandList->RSSetViewports(1, &viewport);
 
         D3D12_RECT scissorRect;
         scissorRect.left = 0.0f;
@@ -84,7 +111,7 @@ namespace Render {
         scissorRect.right = static_cast<float>(screenSize.x);
         scissorRect.bottom = static_cast<float>(screenSize.y);
 
-        commandList->RSSetScissorRects(1, &scissorRect);
+        mCommandList->RSSetScissorRects(1, &scissorRect);
 
         //TransitionBarrier();
 
@@ -93,10 +120,10 @@ namespace Render {
         D3D12_CPU_DESCRIPTOR_HANDLE targetView = DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(mTargetView);
         D3D12_CPU_DESCRIPTOR_HANDLE depthStencilView = DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.cpuHandle(mDepthStencilView);
 
-        commandList->ClearRenderTargetView(targetView, color, 0, nullptr);
-        commandList->ClearDepthStencilView(depthStencilView, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+        mCommandList->ClearRenderTargetView(targetView, color, 0, nullptr);
+        mCommandList->ClearDepthStencilView(depthStencilView, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-        commandList->OMSetRenderTargets(1, &targetView, false, &depthStencilView);
+        mCommandList->OMSetRenderTargets(1, &targetView, false, &depthStencilView);
         /*sDeviceContext->OMSetDepthStencilState(mDepthStencilState, 1);
         sDeviceContext->OMSetBlendState(mBlendState, 0, 0xffffffff);*/
 
@@ -108,15 +135,10 @@ namespace Render {
     void DirectX12RenderTarget::endIteration(size_t iteration) const
     {
         RenderTarget::endIteration(iteration);
-#if !MADGINE_DIRECTX12_USE_SINGLE_COMMAND_LIST
-        context()->ExecuteCommandList(context()->mCommandList);
-#endif
     }
 
     void DirectX12RenderTarget::setRenderSpace(const Rect2i &space)
     {
-        ID3D12GraphicsCommandList *commandList = context()->mCommandList.mList;
-
         D3D12_VIEWPORT viewport;
         viewport.Width = static_cast<float>(space.mSize.x);
         viewport.Height = static_cast<float>(space.mSize.y);
@@ -124,7 +146,7 @@ namespace Render {
         viewport.TopLeftY = static_cast<float>(space.mTopLeft.y);
         viewport.MinDepth = 0.0f;
         viewport.MaxDepth = 1.0f;
-        commandList->RSSetViewports(1, &viewport);
+        mCommandList->RSSetViewports(1, &viewport);
 
         D3D12_RECT scissorRect;
         scissorRect.left = static_cast<float>(space.mTopLeft.x);
@@ -132,38 +154,27 @@ namespace Render {
         scissorRect.right = static_cast<float>(space.mTopLeft.x + space.mSize.x);
         scissorRect.bottom = static_cast<float>(space.mTopLeft.y + space.mSize.y);
 
-        commandList->RSSetScissorRects(1, &scissorRect);
+        mCommandList->RSSetScissorRects(1, &scissorRect);
+    }
+
+    void DirectX12RenderTarget::pushAnnotation(const char *tag)
+    {
+        PIXBeginEvent(mCommandList, PIX_COLOR(255, 255, 255), tag);
+    }
+
+    void DirectX12RenderTarget::popAnnotation()
+    {
+        PIXEndEvent(mCommandList);
     }
 
     void DirectX12RenderTarget::clearDepthBuffer()
     {
-        context()->mCommandList.mList->ClearDepthStencilView(DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.cpuHandle(mDepthStencilView), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+        mCommandList->ClearDepthStencilView(DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.cpuHandle(mDepthStencilView), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
     }
 
     DirectX12RenderContext *DirectX12RenderTarget::context() const
     {
         return static_cast<DirectX12RenderContext *>(RenderTarget::context());
-    }
-
-    void DirectX12RenderTarget::TransitionBarrier(ID3D12GraphicsCommandList *commandList, ID3D12Resource *res, D3D12_RESOURCE_STATES from, D3D12_RESOURCE_STATES to)
-    {
-        D3D12_RESOURCE_BARRIER barrierDesc;
-        ZeroMemory(&barrierDesc, sizeof(D3D12_RESOURCE_BARRIER));
-
-        barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        barrierDesc.Transition.pResource = res;
-        barrierDesc.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-        barrierDesc.Transition.StateBefore = from;
-        barrierDesc.Transition.StateAfter = to;
-        barrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-
-        commandList->ResourceBarrier(1, &barrierDesc);
-        DX12_CHECK();
-    }
-
-    void DirectX12RenderTarget::Transition(ID3D12Resource *res, D3D12_RESOURCE_STATES from, D3D12_RESOURCE_STATES to) const
-    {
-        TransitionBarrier(context()->mCommandList.mList, res, from, to);
     }
 
 }

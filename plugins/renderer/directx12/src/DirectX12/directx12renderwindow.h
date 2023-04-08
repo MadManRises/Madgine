@@ -10,6 +10,10 @@ namespace Render {
         DirectX12RenderWindow(const DirectX12RenderWindow &) = delete;
         ~DirectX12RenderWindow();
 
+        virtual bool skipFrame() override;
+        virtual void beginFrame() override;
+        virtual void endFrame() override;
+
         virtual void beginIteration(size_t iteration) const override;
         virtual void endIteration(size_t iteration) const override;
 
@@ -26,6 +30,9 @@ namespace Render {
 
         OffsetPtr mTargetViews[2];
         ReleasePtr<ID3D12Resource> mBackBuffers[2];
+
+        uint64_t mResizeFence;
+        Vector2i mResizeTarget;
     };
 
 }

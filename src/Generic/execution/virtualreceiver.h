@@ -1,32 +1,35 @@
 #pragma once
 
+#include "Generic/type_pack.h"
+
 namespace Engine {
 namespace Execution {
 
-    template <typename V, typename...>
-    struct VirtualReceiverBase {
-    protected:
-        ~VirtualReceiverBase() = default;
+    template <typename R, typename... V>
+    struct VirtualReceiverBaseEx;
+
+    template <typename... V>
+    struct VirtualReceiverBaseEx<type_pack<>, V...> {
+        ~VirtualReceiverBaseEx() = default;
 
     public:
         virtual void set_done() = 0;
+        virtual void set_value(V... v) = 0;
     };
 
-    template <typename V, typename R, typename... ExtraR>
-    struct VirtualReceiverBase<V, R, ExtraR...> : VirtualReceiverBase<V, ExtraR...> {
-        virtual void set_value(R r, V v) = 0;        
-        virtual void set_error(R r) = 0;
-    };
-        
-    template <typename R, typename... ExtraR>
-    struct VirtualReceiverBase<void, R, ExtraR...> : VirtualReceiverBase<void, ExtraR...> {
-        virtual void set_value(R r) = 0;        
+    template <typename R, typename... ExtraR, typename... V>
+    struct VirtualReceiverBaseEx<type_pack<R, ExtraR...>, V...> : VirtualReceiverBaseEx<type_pack<ExtraR...>, V...> {
         virtual void set_error(R r) = 0;
     };
 
-    
-    template <typename Rec, typename Base, typename V, typename...>
-    struct VirtualReceiverEx : Base {
+    template <typename R, typename... V>
+    using VirtualReceiverBase = VirtualReceiverBaseEx<make_type_pack_t<R>, V...>;
+
+    template <typename Rec, typename Base, typename R, typename... V>
+    struct VirtualReceiverEx;
+
+    template <typename Rec, typename Base, typename... V>
+    struct VirtualReceiverEx<Rec, Base, type_pack<>, V...> : Base {
         template <typename... Args>
         VirtualReceiverEx(Rec &&rec, Args &&...args)
             : Base(std::forward<Args>(args)...)
@@ -37,38 +40,25 @@ namespace Execution {
         {
             mRec.set_done();
         }
+        virtual void set_value(V... v) override
+        {
+            this->mRec.set_value(std::forward<V>(v)...);
+        }
         Rec mRec;
     };
 
+    template <typename Rec, typename Base, typename R, typename... ExtraR, typename... V>
+    struct VirtualReceiverEx<Rec, Base, type_pack<R, ExtraR...>, V...> : VirtualReceiverEx<Rec, Base, type_pack<ExtraR...>, V...> {
+        using VirtualReceiverEx<Rec, Base, type_pack<ExtraR...>, V...>::VirtualReceiverEx;
 
-    template <typename Rec, typename Base, typename V, typename R, typename... ExtraR>
-    struct VirtualReceiverEx<Rec, Base, V, R, ExtraR...> : VirtualReceiverEx<Rec, Base, V, ExtraR...> {
-        using VirtualReceiverEx<Rec, Base, V, ExtraR...>::VirtualReceiverEx;
-        virtual void set_value(R r, V v) override
-        {
-            this->mRec.set_value(std::forward<R>(r), std::forward<V>(v));
-        }
         virtual void set_error(R r) override
         {
             this->mRec.set_error(std::forward<R>(r));
         }
     };
 
-    template <typename Rec, typename Base, typename R, typename... ExtraR>
-    struct VirtualReceiverEx<Rec, Base, void, R, ExtraR...> : VirtualReceiverEx<Rec, Base, void, ExtraR...> {
-        using VirtualReceiverEx<Rec, Base, void, ExtraR...>::VirtualReceiverEx;
-        virtual void set_value(R r) override
-        {
-            this->mRec.set_value(std::forward<R>(r));
-        }
-        virtual void set_error(R r) override
-        {
-            this->mRec.set_error(std::forward<R>(r));
-        }
-    };
-
-    template <typename Rec, typename V, typename R, typename... ExtraR>
-    using VirtualReceiver = VirtualReceiverEx<Rec, VirtualReceiverBase<V, R, ExtraR...>, V, R, ExtraR...>;
+    template <typename Rec, typename R, typename... V>
+    using VirtualReceiver = VirtualReceiverEx<Rec, VirtualReceiverBase<R, V...>, make_type_pack_t<R>, V...>;
 
 }
 }

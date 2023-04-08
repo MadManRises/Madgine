@@ -14,7 +14,7 @@ namespace Render {
         OpenGLTexture(TextureType type, DataFormat format, size_t samples = 1);
         OpenGLTexture() = default;
         OpenGLTexture(const OpenGLTexture &) = delete;
-        OpenGLTexture(OpenGLTexture &&);
+        OpenGLTexture(OpenGLTexture &&) = default;
         ~OpenGLTexture();
 
         OpenGLTexture &operator=(OpenGLTexture &&);
@@ -25,10 +25,7 @@ namespace Render {
         void setData(Vector2i size, const ByteBuffer &data);
         void setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data);
 
-        TextureDescriptor descriptor() const;
         GLenum target() const;
-
-        void resize(Vector2i size);
 
         void setWrapMode(GLint mode);
 
@@ -36,9 +33,6 @@ namespace Render {
         void setFilter(GLint filter);
 
     private:
-        DataFormat mFormat;
-        TextureType mType;
-        Vector2i mSize = { 0, 0 };
         size_t mSamples = 1;
     };
 

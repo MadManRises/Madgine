@@ -15,6 +15,8 @@
 
 #include "Madgine/window/mainwindow.h"
 
+#include "DirectX12/directx12rendertarget.h"
+
 UNIQUECOMPONENT(Engine::Tools::DirectX12ImRoot)
 
 METATABLE_BEGIN_BASE(Engine::Tools::DirectX12ImRoot, Engine::Tools::ClientImRoot)
@@ -63,9 +65,9 @@ namespace Tools {
         ImGui_ImplDX12_NewFrame();
     }
 
-    void DirectX12ImRoot::renderViewport(ImGuiViewport *vp)
+    void DirectX12ImRoot::renderViewport(Render::RenderTarget *target, ImGuiViewport *vp)
     {
-        ImGui_ImplDX12_RenderDrawData(vp->DrawData, Render::DirectX12RenderContext::getSingleton().mCommandList.mList);
+        ImGui_ImplDX12_RenderDrawData(vp->DrawData, static_cast<Render::DirectX12RenderTarget *>(target)->mCommandList);
     }
 
 }

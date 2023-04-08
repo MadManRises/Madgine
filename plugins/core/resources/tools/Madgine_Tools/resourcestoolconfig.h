@@ -10,14 +10,20 @@ namespace Tools {
 
         SERIALIZABLEUNIT(ResourcesToolConfig)
 
-        ResourcesToolConfig(ImRoot &root);        
+        ResourcesToolConfig(ImRoot &root);
 
         virtual Threading::Task<bool> init() override;
 
         virtual void renderMenu() override;
+        virtual bool renderConfiguration(const Filesystem::Path &config) override;
+        virtual void loadConfiguration(const Filesystem::Path &config) override;
+        virtual void saveConfiguration(const Filesystem::Path &config) override;
 
         std::string_view key() const override;
 
+    private:
+        std::map<Filesystem::Path, std::vector<Resources::ResourceBase *>> mResourceCache;
+        std::set<Filesystem::Path> mResourceConfig;
     };
 
 }

@@ -53,7 +53,6 @@ namespace Plugins {
 }
 
 namespace Threading {
-    struct ConnectionBase;
     template <typename T, typename... _Ty>
     struct ConnectionInstance;
     struct TaskQueue;
@@ -68,7 +67,12 @@ namespace Threading {
     struct Scheduler;
 
     struct DataMutex;
+
+    template <typename... _Ty>
+    struct SignalStub;
+    struct ConnectionStore;
 }
+
 
 namespace Ini {
     struct IniFile;

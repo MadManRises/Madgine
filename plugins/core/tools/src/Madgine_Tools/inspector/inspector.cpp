@@ -90,7 +90,7 @@ namespace Tools {
         return changed;
     }
 
-    bool Inspector::drawMember(TypedScopePtr parent, const ScopeIterator &it, tinyxml2::XMLElement *element)
+    bool Inspector::drawMember(TypedScopePtr parent, const ScopeIterator &it)
     {
         ValueType value;
         if (streq(it->key(), "__proxy")) {
@@ -103,30 +103,30 @@ namespace Tools {
         bool generic = it->isGeneric();
 
         it->value(value);
-        std::pair<bool, bool> modified = drawValue(id, value, editable, generic, element);
+        std::pair<bool, bool> modified = drawValue(id, value, editable, generic);
 
         if (modified.first || (modified.second && !value.isReference()))
             *it = value;
         return modified.first || modified.second;
     }
 
-    std::pair<bool, bool> Inspector::drawValue(std::string_view id, ValueType &value, bool editable, bool generic, tinyxml2::XMLElement *element)
+    std::pair<bool, bool> Inspector::drawValue(std::string_view id, ValueType &value, bool editable, bool generic)
     {
         std::pair<bool, bool> modified = value.visit(overloaded {
             [&](TypedScopePtr &scope) {
-                return drawValue(id, scope, editable, generic ? &value : nullptr, element);
+                return drawValue(id, scope, editable, generic ? &value : nullptr);
             },
             [&](OwnedScopePtr scope) {
-                return drawValue(id, scope, editable, generic ? &value : nullptr, element);
+                return drawValue(id, scope, editable, generic ? &value : nullptr);
             },
             [&](KeyValueVirtualSequenceRange &range) {
-                return std::make_pair(false, drawValue(id, range, editable, element));
+                return std::make_pair(false, drawValue(id, range, editable));
             },
             [&](KeyValueVirtualAssociativeRange &range) {
-                return std::make_pair(false, drawValue(id, range, editable, element));
+                return std::make_pair(false, drawValue(id, range, editable));
             },
             [&](BoundApiFunction &function) {
-                drawValue(id, function, editable, element);
+                drawValue(id, function, editable);
                 return std::make_pair(false, false);
             },
             [&](auto &other) {
@@ -176,7 +176,7 @@ namespace Tools {
         return modified;
     }
 
-    std::pair<bool, bool> Inspector::drawValue(std::string_view id, TypedScopePtr &scope, bool editable, ValueType *generic, tinyxml2::XMLElement *element)
+    std::pair<bool, bool> Inspector::drawValue(std::string_view id, TypedScopePtr &scope, bool editable, ValueType *generic)
     {
         bool modified = false;
         bool changed = false;
@@ -250,13 +250,13 @@ namespace Tools {
         return std::make_pair(modified, changed);
     }
 
-    std::pair<bool, bool> Inspector::drawValue(std::string_view id, OwnedScopePtr &scope, bool editable, ValueType *generic, tinyxml2::XMLElement *element)
+    std::pair<bool, bool> Inspector::drawValue(std::string_view id, OwnedScopePtr &scope, bool editable, ValueType *generic)
     {
         TypedScopePtr ptr = scope.get();
-        return drawValue(id, ptr, editable, generic, element);
+        return drawValue(id, ptr, editable, generic);
     }
 
-    bool Inspector::drawValue(std::string_view id, KeyValueVirtualSequenceRange &range, bool editable, tinyxml2::XMLElement *element)
+    bool Inspector::drawValue(std::string_view id, KeyValueVirtualSequenceRange &range, bool editable)
     {
         ImGui::TableNextColumn();
 
@@ -277,7 +277,7 @@ namespace Tools {
                 } else if (value.is<OwnedScopePtr>()) {
                     key = "[" + std::to_string(i) + "] " + value.as<OwnedScopePtr>().name() + "##" + key;
                 }
-                std::pair<bool, bool> modified = drawValue(key, value, /*editable && */ vValue.isEditable(), false, element);
+                std::pair<bool, bool> modified = drawValue(key, value, /*editable && */ vValue.isEditable(), false);
                 if (modified.first)
                     vValue = value;
                 changed |= modified.first || (modified.second && !range.isReference());
@@ -289,7 +289,7 @@ namespace Tools {
         return changed;
     }
 
-    bool Inspector::drawValue(std::string_view id, KeyValueVirtualAssociativeRange &range, bool editable, tinyxml2::XMLElement *element)
+    bool Inspector::drawValue(std::string_view id, KeyValueVirtualAssociativeRange &range, bool editable)
     {
         ImGui::TableNextColumn();
 
@@ -305,7 +305,7 @@ namespace Tools {
                 ImGui::TableNextRow();
                 ValueType value = vValue;
                 std::string key = vKey.toShortString() /* + "##" + std::to_string(i)*/;
-                std::pair<bool, bool> result = drawValue(key, value, /*editable && */ vValue.isEditable(), false, element);
+                std::pair<bool, bool> result = drawValue(key, value, /*editable && */ vValue.isEditable(), false);
                 if (result.first)
                     vValue = value;
                 changed |= result.second;
@@ -316,7 +316,7 @@ namespace Tools {
         return changed;
     }
 
-    void Inspector::drawValue(std::string_view id, BoundApiFunction &function, bool editable, tinyxml2::XMLElement *element)
+    void Inspector::drawValue(std::string_view id, BoundApiFunction &function, bool editable)
     {
         ImGui::TableNextColumn();
         ImGui::TableNextColumn();

@@ -1,6 +1,0 @@
-
-set (MADGINE_MAINWINDOW_LAYOUT default.layout)
-
-set (MADGINE_LAUNCHER_SPLASH_IMAGE ${CMAKE_CURRENT_LIST_DIR}/../../splash.bmp)
-
-set (MADGINE_LAUNCHER_WINDOW_TITLE "ClickBrick (Tools)")

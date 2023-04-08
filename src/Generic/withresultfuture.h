@@ -4,7 +4,7 @@
 
 namespace Engine {
 
-template <typename T, typename R>
+template <typename R, typename T = void>
 struct WithResultFuture {
 
     using type = T;
@@ -13,7 +13,7 @@ struct WithResultFuture {
 
     WithResultFuture(WithResultFuture &&) = default;
 
-    WithResultFuture(std::future<WithResult<T, R>> future)
+    WithResultFuture(std::future<WithResult<R, T>> future)
         : mFuture(std::move(future))
     {
     }
@@ -36,11 +36,11 @@ struct WithResultFuture {
     }
 
 private:
-    std::future<WithResult<T, R>> mFuture;
+    std::future<WithResult<R, T>> mFuture;
 };
 
 template <typename R>
-struct WithResultFuture<void, R> {
+struct WithResultFuture<R, void> {
 
     using type = void;
 
@@ -49,11 +49,11 @@ struct WithResultFuture<void, R> {
     WithResultFuture(WithResultFuture &&) = default;
 
     WithResultFuture(Void v)
-        : mFuture(WithResult<void, R> {})
+        : mFuture(WithResult<R, void> {})
     {
     }
 
-    WithResultFuture(std::future<WithResult<void, R>> future)
+    WithResultFuture(std::future<WithResult<R, void>> future)
         : mFuture(std::move(future))
     {
     }
@@ -71,7 +71,7 @@ struct WithResultFuture<void, R> {
     }
 
 private:
-    std::future<WithResult<void, R>> mFuture;
+    std::future<WithResult<R, void>> mFuture;
 };
 
 }

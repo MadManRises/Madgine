@@ -2,16 +2,17 @@
 
 #include "Generic/execution/sender.h"
 #include "Generic/withresult.h"
+#include "Generic/makeowning.h"
 
 namespace Engine {
 namespace Threading {
 
-    template <typename V, typename R>
+    template <typename R, typename V>
     struct AwaitableSenderReceiver {
 
-        void set_value(R result, V value)
+        void set_value(V value)
         {
-            mResult = { std::forward<R>(result), std::forward<V>(value) };
+            mResult = { std::forward<V>(value) };
             if (mFlag.test_and_set())
                 mTask.resumeInQueue();
         }
@@ -31,14 +32,15 @@ namespace Threading {
 
         std::atomic_flag mFlag;
         TaskHandle mTask;
-        WithResult<V, R> mResult;
+        WithResult<R, MakeOwning_t<V>> mResult;
     };
 
-    template <typename S, typename V, typename R>
+    template <typename F, typename R, typename V>
     struct AwaitableSender {
 
-        template <typename F>
-        AwaitableSender(Execution::Sender<F, V, R> sender)
+        using S = std::invoke_result_t<Execution::Sender<F, R, V>, Engine::Threading::AwaitableSenderReceiver<R, V> &>;
+
+        AwaitableSender(Execution::Sender<F, R, V> sender)
             : mState(sender(mReceiver))
         {
         }
@@ -51,7 +53,7 @@ namespace Threading {
 
         bool await_suspend(TaskHandle task)
         {
-            mReceiver.mTask = std::move(task);            
+            mReceiver.mTask = std::move(task);
             if (mReceiver.mFlag.test_and_set()) {
                 mReceiver.mTask.release();
                 return false;
@@ -60,22 +62,21 @@ namespace Threading {
             }
         }
 
-        WithResult<V, R> await_resume()
+        WithResult<R, MakeOwning_t<V>> await_resume()
         {
             return std::move(mReceiver.mResult);
         }
 
     private:
-        AwaitableSenderReceiver<V, R> mReceiver;
+        AwaitableSenderReceiver<R, V> mReceiver;
         S mState;
     };
 
 }
 }
 
-template <typename F, typename V, typename R>
-auto operator co_await(Engine::Execution::Sender<F, V, R> sender)
+template <typename F, typename R, typename... V>
+auto operator co_await(Engine::Execution::Sender<F, R, V...> sender)
 {
-    using S = decltype(sender(std::declval<Engine::Threading::AwaitableSenderReceiver<V, R> &>()));
-    return Engine::Threading::AwaitableSender<S, V, R> { std::move(sender) };
+    return Engine::Threading::AwaitableSender<F, R, V...> { std::move(sender) };
 }

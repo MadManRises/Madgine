@@ -25,8 +25,6 @@ namespace Render {
 
         void reset();
 
-        void bind() const;
-
         void setData(Vector2i size, const ByteBuffer &data);
         void setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data);
 
@@ -34,18 +32,8 @@ namespace Render {
 
         ID3D11Resource *resource() const;
 
-        TextureDescriptor descriptor() const;
-        DataFormat format() const;
-        TextureType type() const;
-
-        /*void setWrapMode(GLint mode);
-        void setFilter(GLint filter);*/
-
     private:
         ReleasePtr<ID3D11Resource> mResource;
-        TextureType mType;
-        Vector2i mSize = { 0, 0 };
-        DataFormat mFormat;
         UINT mBind;
         size_t mSamples;
     };

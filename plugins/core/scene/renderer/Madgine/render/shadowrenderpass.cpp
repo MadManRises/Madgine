@@ -67,7 +67,7 @@ namespace Render {
             instances[std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *> { meshData, skeleton }].push_back(transform->worldMatrix());
         }
 
-        target->context()->pushAnnotation("Shadow");
+        target->pushAnnotation("Shadow");
 
         updateFrustum();
 
@@ -118,10 +118,10 @@ namespace Render {
                 };
             });
 
-            mPipeline->renderMeshInstanced(std::move(instanceData), meshData);
+            mPipeline->renderMeshInstanced(target, std::move(instanceData), meshData);
         }
 
-        target->context()->popAnnotation();
+        target->popAnnotation();
     }
 
     int ShadowRenderPass::priority() const

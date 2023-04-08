@@ -111,6 +111,11 @@ struct mutable_set : std::set<T, Cmp> {
         return Base::find(std::forward<Arg>(arg));
     }
 
+    template <typename... Args>
+    std::pair<iterator, bool> emplace(Args &&...args) {
+        return Base::emplace(std::forward<Args>(args)...);
+    }
+
     iterator begin()
     {
         return Base::begin();

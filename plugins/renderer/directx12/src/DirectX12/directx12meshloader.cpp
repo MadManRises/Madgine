@@ -6,9 +6,9 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
-#include "Madgine/imageloaderlib.h"
 #include "Madgine/imageloader/imagedata.h"
 #include "Madgine/imageloader/imageloader.h"
+#include "Madgine/imageloaderlib.h"
 #include "Madgine/meshloader/meshdata.h"
 
 #include "directx12rendercontext.h"
@@ -58,6 +58,11 @@ namespace Render {
     void DirectX12MeshLoader::reset(GPUMeshData &data)
     {
         static_cast<DirectX12MeshData &>(data).reset();
+    }
+
+    Threading::TaskQueue *DirectX12MeshLoader::loadingTaskQueue() const
+    {
+        return DirectX12RenderContext::renderQueue();
     }
 
 }

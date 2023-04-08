@@ -50,15 +50,17 @@ namespace Render {
 
     void RenderContext::render()
     {
-        beginFrame();
+        if (!beginFrame())
+            return;
         for (RenderTarget *target : safeIterate(mRenderTargets))
             target->update();
         endFrame();
     }
 
-    void RenderContext::beginFrame()
+    bool RenderContext::beginFrame()
     {
         ++mFrame;
+        return true;
     }
 
     void RenderContext::endFrame()

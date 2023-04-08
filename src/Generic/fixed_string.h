@@ -23,7 +23,6 @@ struct fixed_string {
         return { mData, Size };
     }
 
-private:
     char mData[Size + 1];
 };
 

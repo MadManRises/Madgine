@@ -13,27 +13,13 @@ namespace Threading {
 
         Signal(Signal<_Ty...> &&other) noexcept = default;
 
-        ~Signal()
-        {
-            this->disconnectAll();
-        }
-
         void emit(_Ty... args)
         {
-            std::vector<std::shared_ptr<Connection<_Ty...>>> connections;
-
-            std::erase_if(this->mConnectedSlots,
-                [&](const std::weak_ptr<Connection<_Ty...>> &weak) {
-                    if (std::shared_ptr<Connection<_Ty...>> ptr = weak.lock()) {
-                        connections.emplace_back(std::move(ptr));
-                        return false;
-                    } else {
-                        return true;
-                    }
-                });
-
-            for (std::shared_ptr<Connection<_Ty...>> &con : connections) {
-                (*con)(args...);
+            std::lock_guard guard { mMutex };
+            Connection<_Ty...> *current = this->mConnectedSlots;
+            this->mConnectedSlots = nullptr;
+            while (current) {
+                current = current->signal(args...);
             }
         }
     };

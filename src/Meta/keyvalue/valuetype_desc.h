@@ -2,7 +2,7 @@
 
 #include "valuetype_types.h"
 
-#include "Generic/bits.h"
+#include "Generic/bits/array.h"
 
 #include "Generic/keyvalue.h"
 
@@ -44,7 +44,7 @@ enum class ExtendedValueTypeEnum : unsigned char {
 };
 
 struct META_EXPORT ExtendedValueTypeIndex {
-    static constexpr size_t bitCount = bitSize(static_cast<unsigned char>(ExtendedValueTypeEnum::MAX_EXTENDEDVALUETYPE_TYPE) - 1);
+    static constexpr size_t bitCount = std::bit_width(static_cast<unsigned char>(ExtendedValueTypeEnum::MAX_EXTENDEDVALUETYPE_TYPE) - 1u);
 
     BitArray<(sizeof(uintptr_t) * 8) / bitCount, bitCount, ExtendedValueTypeEnum> mTypeList;
 

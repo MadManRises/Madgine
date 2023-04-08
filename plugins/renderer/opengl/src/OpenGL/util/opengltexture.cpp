@@ -9,8 +9,7 @@ namespace Engine {
 namespace Render {
 
     OpenGLTexture::OpenGLTexture(TextureType type, DataFormat format, size_t samples)
-        : mType(type)
-        , mFormat(format)
+        : Texture(type, format)
         , mSamples(samples)
     {
         GLuint temp;
@@ -30,13 +29,6 @@ namespace Render {
 #endif
     }
 
-    OpenGLTexture::OpenGLTexture(OpenGLTexture &&other)
-        : mType(other.mType)
-        , mFormat(other.mFormat)
-    {
-        mTextureHandle = std::exchange(other.mTextureHandle, 0);
-    }
-
     OpenGLTexture::~OpenGLTexture()
     {
         reset();
@@ -44,9 +36,7 @@ namespace Render {
 
     OpenGLTexture &OpenGLTexture::operator=(OpenGLTexture &&other)
     {
-        std::swap(mTextureHandle, other.mTextureHandle);
-        std::swap(mType, other.mType);
-        std::swap(mFormat, other.mFormat);
+        Texture::operator=(std::move(other));
         return *this;
     }
 
@@ -112,13 +102,13 @@ namespace Render {
             break;
         case TextureType_2DMultiSample:
 #if OPENGL_ES
-#if OPENGL_ES >= 31
+#    if OPENGL_ES >= 31
             glTexStorage2DMultisample(target(), mSamples, sizedFormat, size.x, size.y, true);
+#    else
+            throw 0;
+#    endif
 #else
-                throw 0;
-#endif
-#else
-                glTexImage2DMultisample(target(), mSamples, sizedFormat, size.x, size.y, true);
+            glTexImage2DMultisample(target(), mSamples, sizedFormat, size.x, size.y, true);
 #endif
             break;
         case TextureType_Cube:
@@ -166,26 +156,6 @@ namespace Render {
         GL_CHECK();
     }
 
-    void OpenGLTexture::resize(Vector2i size)
-    {
-        /* Vector2i commonSize = min(size, mSize);
-        GLuint tempTex;
-        TextureHandle helper;
-        glGenTextures(1, &tempTex);
-        GL_CHECK();
-        helper = tempTex;
-        std::swap(helper, mTextureHandle);
-        tempTex = helper;
-        */
-        setData(size, {});
-
-        /* glCopyImageSubData(tempTex, GL_TEXTURE_2D, 0, 0, 0, 0, mTextureHandle, GL_TEXTURE_2D, 0, 0, 0, 0, commonSize.x, commonSize.y, 1);
-        GL_CHECK();
-
-        glDeleteTextures(1, &tempTex);
-        GL_CHECK();*/
-    }
-
     void OpenGLTexture::setWrapMode(GLint mode)
     {
         bind();
@@ -203,11 +173,6 @@ namespace Render {
         GL_CHECK();
         glTexParameteri(target(), GL_TEXTURE_MAG_FILTER, filter);
         GL_CHECK();
-    }
-
-    TextureDescriptor OpenGLTexture::descriptor() const
-    {
-        return { mTextureHandle, mType };
     }
 
     GLenum OpenGLTexture::target() const

@@ -7,5 +7,5 @@ FolderSources(sources "" src)
 
 add_plugin(Root Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/rootlib.h)
 
-target_link_libraries(Root PUBLIC CLI CodeGen Modules)
+target_link_libraries(Root PUBLIC CLI Meta Modules)
 

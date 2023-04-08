@@ -99,9 +99,7 @@ namespace StringUtil {
     }
 
     inline std::wstring toWString(std::string_view input) {
-        std::wstring s;
-        std::ranges::copy(input, std::back_inserter(s));
-        return s;
+        return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> {}.from_bytes(input.data(), input.data() + input.size());
     }
 
     template <typename Cont>

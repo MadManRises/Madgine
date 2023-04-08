@@ -2,7 +2,6 @@
 
 #include "Meta/keyvalue/virtualscope.h"
 #include "Meta/serialize/hierarchy/virtualserializableunit.h"
-#include "Modules/threading/connectionstore.h"
 #include "Modules/threading/madgineobject.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
@@ -81,10 +80,11 @@ namespace Input {
         bool dragging() const;
 
         template <typename... Ty>
-        Widgets::Button* setupButton(std::string_view name, Ty&&... args) {
+        Widgets::Button *setupButton(std::string_view name, Ty &&...args)
+        {
             Widgets::Button *button = mWidget->getChildRecursive<Widgets::Button>(name);
             if (button)
-                button->clickEvent().connect(std::forward<Ty>(args)..., &mConStore);
+                button->clickEvent().connect(std::forward<Ty>(args)..., mStopSource.get_token());
             return button;
         }
 
@@ -106,7 +106,7 @@ namespace Input {
 
         UIManager &mUI;
 
-        Engine::Threading::ConnectionStore mConStore;
+        std::stop_source mStopSource { std::nostopstate };
 
         const WidgetType mType;
     };

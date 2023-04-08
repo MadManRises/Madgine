@@ -34,17 +34,14 @@ namespace Render {
 
         virtual bool supportsMultisampling() const override;
 
-        virtual void pushAnnotation(const char *tag) override;
-        virtual void popAnnotation() override;
-
         void bindFormat(VertexFormat format, size_t instanceDataSize, ID3D10Blob *blob);
+
+        ID3DUserDefinedAnnotation *mAnnotator = nullptr;
 
     private:
         std::array<std::map<size_t, ReleasePtr<ID3D11InputLayout>>, 256> mInputLayouts;
 
         DirectX11Buffer mConstantBuffer = D3D11_BIND_VERTEX_BUFFER;
-
-        ID3DUserDefinedAnnotation *mAnnotator = nullptr;
     };
 
 }

@@ -39,7 +39,7 @@ namespace Resources {
     }
 
     ResourceManager::ResourceManager(Root::Root &root)
-        : RootComponent(root)        
+        : RootComponent(root)
     {
         assert(!sSingleton);
         sSingleton = this;
@@ -51,8 +51,15 @@ namespace Resources {
         } else if (!exportResources->empty()) {
             enumerateResources();
 
-            if (!writeResourceList(*exportResources))
+            std::map<Filesystem::Path, std::vector<ResourceBase *>> resourceList = buildResourceList();
+            std::ofstream out { *exportResources };
+            if (!out) {
+                LOG_ERROR("Error opening for writing: " << *exportResources);
                 mErrorCode = -1;
+            }
+            for (const auto &[path, resources] : resourceList) {
+                out << path << "\n";
+            }
         }
     }
 
@@ -87,13 +94,14 @@ namespace Resources {
         assert(!mEnumerated);
 
 #if ENABLE_PLUGINS
-        for (auto &section : Plugins::PluginManager::getSingleton()) {
-            for (std::pair<const std::string, Plugins::Plugin> &p : section.second) {
-                if (!p.second.isLoaded())
+        Plugins::PluginManager &pMgr = Plugins::PluginManager::getSingleton();
+        for (auto &section : pMgr) {
+            for (Plugins::Plugin &p : section) {
+                if (!p.isLoaded(pMgr.selection()))
                     continue;
-                const Plugins::BinaryInfo *info = p.second.info();
+                const Plugins::BinaryInfo *info = p.info();
                 Filesystem::Path binPath = info->mBinaryDir;
-                bool isLocal = p.second.fullPath().parentPath() == binPath;
+                bool isLocal = p.fullPath().parentPath() == binPath;
                 if (isLocal)
                     registerResourceLocation(Filesystem::Path { info->mProjectRoot } / "data", 75);
                 //else
@@ -224,29 +232,20 @@ namespace Resources {
         return loaderByExtension;
     }
 
-    bool ResourceManager::writeResourceList(const Filesystem::Path &path)
+    std::map<Filesystem::Path, std::vector<ResourceBase *>> ResourceManager::buildResourceList()
     {
-        std::ofstream out { path };
-        if (out) {
-            LOG("Writing Resource list to '" << path << "'");
-            for (const std::unique_ptr<ResourceLoaderBase> &loader : mCollector) {
-                for (ResourceBase *res : loader->resources()) {
-                    Filesystem::Path path = res->path();
-                    if (!path.empty() && !path.isRelative(BINARY_DIR)) {
-                        if (path.isRelative(SOURCE_DIR)) {
-                            out << path.relative(SOURCE_DIR);
-                        } else {
-                            out << path;
-                        }
-                        out << "\n";
-                    }
+        std::map<Filesystem::Path, std::vector<ResourceBase *>> result;
+        for (const std::unique_ptr<ResourceLoaderBase> &loader : mCollector) {
+            for (ResourceBase *res : loader->resources()) {
+                Filesystem::Path path = res->path();
+                if (!path.empty() && !path.isRelative(BINARY_DIR)) {
+                    if (path.isRelative(SOURCE_DIR))
+                        path = path.relative(SOURCE_DIR);
+                    result[path].push_back(res);
                 }
             }
-            return true;
-        } else {
-            LOG_ERROR("Opening " << path << " for write failed!");
-            return false;
         }
+        return result;
     }
 
     bool ResourceManager::SubDirCompare::operator()(const Filesystem::Path &first, const Filesystem::Path &second) const

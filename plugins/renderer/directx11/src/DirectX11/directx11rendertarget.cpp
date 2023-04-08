@@ -221,5 +221,20 @@ namespace Render {
         sDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
     }
 
+    void DirectX11RenderTarget::pushAnnotation(const char *tag)
+    {
+        context()->mAnnotator->BeginEvent(StringUtil::toWString(tag).c_str());
+    }
+
+    void DirectX11RenderTarget::popAnnotation()
+    {
+        context()->mAnnotator->EndEvent();
+    }
+
+    DirectX11RenderContext *DirectX11RenderTarget::context() const
+    {
+        return static_cast<DirectX11RenderContext *>(RenderTarget::context());
+    }
+
 }
 }

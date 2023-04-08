@@ -3,6 +3,8 @@
 namespace Engine {
 namespace Render {
 
+    typedef uintptr_t TextureHandle;
+
     enum TextureType {
         TextureType_2D,
         TextureType_2DMultiSample,

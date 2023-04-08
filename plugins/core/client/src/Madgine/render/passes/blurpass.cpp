@@ -37,7 +37,7 @@ namespace Render {
             return;
 
         if (iteration == 0) {
-            target->context()->pushAnnotation("Blur");
+            target->pushAnnotation("Blur");
         }
 
         {
@@ -47,15 +47,15 @@ namespace Render {
         }
 
         if (iteration == 0) {
-            mPipeline->bindTextures({ mInput->texture(mInputIndex) });
+            mPipeline->bindTextures(target, { mInput->texture(mInputIndex) });
         } else {
-            mPipeline->bindTextures({ target->texture(0, iteration) });
+            mPipeline->bindTextures(target, { target->texture(0, iteration) });
         }
 
-        mPipeline->renderQuad();
+        mPipeline->renderQuad(target);
 
         if (iteration == target->iterations() - 1)
-            target->context()->popAnnotation();
+            target->popAnnotation();
     }
 
     void BlurPass::onTargetResize(const Vector2i &size)

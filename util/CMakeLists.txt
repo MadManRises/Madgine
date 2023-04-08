@@ -27,6 +27,7 @@ function(add_shadergen_target target flag)
 
 	get_target_property(targets ShaderGen ShaderGenTargets)
 	set (targets ${targets} ${flag})
+	list(REMOVE_DUPLICATES targets)
 	set_target_properties(ShaderGen PROPERTIES ShaderGenTargets "${targets}")
 
 endfunction(add_shadergen_target)

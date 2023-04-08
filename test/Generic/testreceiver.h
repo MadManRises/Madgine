@@ -3,10 +3,9 @@
 template <typename T, typename R>
 struct TestReceiver {
 
-    void set_value(R result, T value)
+    void set_value(T value)
     {
         mValue = std::forward<T>(value);
-        mResult = std::forward<R>(result);
         mFinished = true;
     }
 
@@ -36,10 +35,9 @@ struct TestReceiver {
 template <typename R>
 struct TestReceiver<void, R> {
 
-    void set_value(R result)
+    void set_value()
     {
         mHasValue = true;
-        mResult = std::forward<R>(result);
         mFinished = true;
     }
 
@@ -67,8 +65,8 @@ struct TestReceiver<void, R> {
 };
 
 struct GenericTestReceiver {
-    template <typename R, typename T>
-    void set_value(R result, T value)
+    template <typename T>
+    void set_value(T value)
     {
         mFinished = true;
     }

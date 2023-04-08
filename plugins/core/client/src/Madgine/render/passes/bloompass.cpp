@@ -54,16 +54,16 @@ namespace Render {
             return;
 
         if (iteration == 0)
-            target->context()->pushAnnotation("Bloom");
+            target->pushAnnotation("Bloom");
 
-        mPipeline->bindTextures({ mInput->texture(mInputIndex), mBlurTarget->texture(0) });
+        mPipeline->bindTextures(target, { mInput->texture(mInputIndex), mBlurTarget->texture(0) });
 
         mPipeline->mapParameters<BloomData>(0)->exposure = mExposure;
 
-        mPipeline->renderQuad();
+        mPipeline->renderQuad(target);
 
         if (iteration == target->iterations() - 1)
-            target->context()->popAnnotation();
+            target->popAnnotation();
     }
 
     void BloomPass::onTargetResize(const Vector2i &size)

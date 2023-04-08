@@ -53,8 +53,4 @@ target_link_plugins(OpenGLTools ClientTools)
 target_link_libraries(OpenGLTools PRIVATE ${OPENGL_LIBRARIES})
 target_include_directories(OpenGLTools PRIVATE ${OPENGL_INCLUDE_DIR})
 
-if (BUILD_TESTING)
-	add_subdirectory(test)
-endif()
-
 add_shadergen_target(OpenGL -GLSL)

@@ -106,7 +106,6 @@ namespace Tools {
 
             bool openOpenScenePopup = false;
             bool openSaveScenePopup = false;
-            bool openSettingsPopup = false;
 
             if (ImGui::BeginMenu("SceneEditor")) {
 
@@ -129,11 +128,6 @@ namespace Tools {
                     mSceneViews.emplace_back(std::make_unique<SceneView>(this, mWindow.getRenderer()));
                 }
 
-                ImGui::Separator();
-
-                if (ImGui::MenuItem("Settings"))
-                    openSettingsPopup = true;
-
                 ImGui::EndMenu();
             }
 
@@ -141,11 +135,23 @@ namespace Tools {
                 ImGui::OpenPopup("openScene");
             if (openSaveScenePopup)
                 ImGui::OpenPopup("saveScene");
-            if (openSettingsPopup)
-                ImGui::OpenPopup("sceneSettings");
 
             renderPopups();
         }
+    }
+
+    void SceneEditor::renderSettings()
+    {
+        ImGui::BeginGroupPanel("Scene Editor");
+
+        ImGui::Text("Bone-Forward");
+        ImGui::SameLine();
+        ImGui::DragFloat4("bone-forward", &mBoneForward.x);
+        ImGui::DragFloat("Default Bone Length", &mDefaultBoneLength);
+        ImGui::Checkbox("Show Bone Names", &mShowBoneNames);
+        ImGui::Checkbox("Render 3D-Cursor", &mRender3DCursor);
+
+        ImGui::EndGroupPanel();
     }
 
     std::string_view SceneEditor::key() const
@@ -521,15 +527,6 @@ namespace Tools {
             }
             ImGui::EndPopup();
         }
-        if (ImGui::BeginPopup("sceneSettings")) {
-            ImGui::Text("Bone-Forward");
-            ImGui::SameLine();
-            ImGui::DragFloat4("bone-forward", &mBoneForward.x);
-            ImGui::DragFloat("Default Bone Length", &mDefaultBoneLength);
-            ImGui::Checkbox("Show Bone Names", &mShowBoneNames);
-            ImGui::Checkbox("Render 3D-Cursor", &mRender3DCursor);
-            ImGui::EndPopup();
-        }
     }
 
     void SceneEditor::handleInputs()
@@ -627,12 +624,10 @@ namespace Tools {
             }
         }
 
-        
         const Ray &ray = Im3D::GetMouseRay();
 
         if (mRender3DCursor)
             Im3D::Arrow3D(IM3D_LINES, 0.3f, ray.mPoint + 10.0f * ray.mDir, ray.mPoint + 20.0f * ray.mDir);
-
     }
 
 }

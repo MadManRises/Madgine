@@ -235,8 +235,8 @@ namespace Tools {
 
             if (font.available()) {
                 return Im3DFont {
-                    (Im3DTextureId)font->mTexture->mTextureHandle,
-                    font->mTextureSize,
+                    (Im3DTextureId)font->mTexture->handle(),
+                    font->mTexture->size(),
                     font->mGlyphs.data()
                 };
             } else {
@@ -314,7 +314,7 @@ namespace Tools {
     {
         PROFILE();
 
-        target->context()->pushAnnotation("ImGui");
+        target->pushAnnotation("ImGui");
 
         if (mWindow.getRenderWindow() == target) {
 
@@ -347,12 +347,12 @@ namespace Tools {
                 ImGui::Render();
             }
 
-            renderViewport(main_viewport);
+            renderViewport(target, main_viewport);
         } else {
-            renderViewport(mViewportMappings.at(target));
+            renderViewport(target, mViewportMappings.at(target));
         }
 
-        target->context()->popAnnotation();
+        target->popAnnotation();
     }
 
     void ClientImRoot::addViewportMapping(Render::RenderTarget *target, ImGuiViewport *vp)

@@ -12,7 +12,6 @@
 
 #include "Madgine/render/rendertarget.h"
 
-
 #include "Madgine/pipelineloader/pipelineloader.h"
 
 #include "shadercodegenerator.h"
@@ -146,7 +145,7 @@ namespace Render {
 
             for (const Provider &provider : sProviders) {
                 gen.mFile.beginCondition(provider.mGuardName);
-                vertexData->mVariables.push_back({ std::string { provider.mName }, provider.mType, gen.mFile.mConditionalsBitMask });
+                vertexData->mVariables.push_back({ { { gen.mFile.mConditionalsBitMask } }, { std::string { provider.mName }, provider.mType } });
                 gen.mFile.endCondition(provider.mGuardName);
             }
 
@@ -190,7 +189,8 @@ namespace Render {
             if (interpretData->mMesh.resource() != mesh)
                 interpretData->mMesh = mesh;
             if (interpretData->mMesh.available()) {
-                interpretData->mPipeline->renderMesh(interpretData->mMesh);
+                //interpretData->mPipeline->renderMesh(interpretData->mMesh);
+                throw 0;
             }
         }
     }

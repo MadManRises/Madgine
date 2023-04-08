@@ -36,7 +36,7 @@ namespace Render {
 
                     std::string_view name = mGraph.node(pin.mNode)->dataProviderName(pin.mIndex);
 
-                    mRasterizerData->mVariables.push_back({ std::string { name }, toValueTypeDesc<Vector4>(), mFile.mConditionalsBitMask, { "nointerpolation" } });
+                    mRasterizerData->mVariables.push_back({ { { mFile.mConditionalsBitMask } }, std::string { name }, toValueTypeDesc<Vector4>(), { "nointerpolation" } });
 
                     mAdditionalRasterizerStatements.push_back(CodeGen::Assignment { "OUT." + std::string { name }, CodeGenerator::read(dataInIndex) });
 

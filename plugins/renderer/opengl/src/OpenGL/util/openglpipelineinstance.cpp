@@ -14,6 +14,7 @@
 #include "../openglmeshdata.h"
 
 #include "../openglrendercontext.h"
+#include "../openglrendertarget.h"
 
 namespace Engine {
 namespace Render {
@@ -102,7 +103,7 @@ namespace Render {
         }
     }
 
-    void OpenGLPipelineInstance::renderMesh(const GPUMeshData *m) const
+    void OpenGLPipelineInstance::renderMesh(RenderTarget *target, const GPUMeshData *m) const
     {
         const OpenGLMeshData *mesh = static_cast<const OpenGLMeshData *>(m);
 
@@ -120,10 +121,10 @@ namespace Render {
             glDrawArrays(mode, 0, mesh->mElementCount);
         GL_CHECK();
 
-        OpenGLRenderContext::getSingleton().unbindFormat();
+        static_cast<OpenGLRenderTarget *>(target)->context()->unbindFormat();
     }
 
-    void OpenGLPipelineInstance::renderMeshInstanced(size_t count, const GPUMeshData *m, const ByteBuffer &instanceData) const
+    void OpenGLPipelineInstance::renderMeshInstanced(RenderTarget *target, size_t count, const GPUMeshData *m, const ByteBuffer &instanceData) const
     {
         assert(mInstanceDataSize * count == instanceData.mSize);
         assert(mInstanceDataSize % 16 == 0);
@@ -146,10 +147,10 @@ namespace Render {
             glDrawArraysInstanced(mode, 0, mesh->mElementCount, count);
         GL_CHECK();
 
-        OpenGLRenderContext::getSingleton().unbindFormat();
+        static_cast<OpenGLRenderTarget *>(target)->context()->unbindFormat();
     }
 
-    void OpenGLPipelineInstance::bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset) const
+    void OpenGLPipelineInstance::bindTextures(RenderTarget *target, const std::vector<TextureDescriptor> &tex, size_t offset) const
     {
         for (size_t i = 0; i < tex.size(); ++i) {
             glActiveTexture(GL_TEXTURE0 + offset + i);

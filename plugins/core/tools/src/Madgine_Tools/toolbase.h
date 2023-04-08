@@ -20,7 +20,12 @@ namespace Tools {
         virtual void render();
         virtual void renderMenu();
         virtual void renderStatus();
+        virtual bool renderConfiguration(const Filesystem::Path &config);
+        virtual void renderSettings();
         virtual void update();
+
+        virtual void loadConfiguration(const Filesystem::Path &config);
+        virtual void saveConfiguration(const Filesystem::Path &config);
 
         virtual std::string_view key() const = 0;
  

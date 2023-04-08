@@ -1,4 +1,6 @@
 
+include(util/config)
+
 set(MADGINE_LAUNCHER_SPLASH_IMAGE "" CACHE FILEPATH "Path to an image file for the applications splash screen")
 set(MADGINE_LAUNCHER_WINDOW_TITLE "" CACHE STRING "Title of the Main window of the game")
 set(MADGINE_LAUNCHER_ICON "${CMAKE_CURRENT_SOURCE_DIR}/madgineIcon.ico" CACHE FILEPATH "Path to an image file for the applications tray icon")
@@ -33,6 +35,11 @@ elseif (MADGINE_CONFIGURATION)
 	set_target_properties(MadgineLauncher PROPERTIES OUTPUT_NAME MadgineLauncher_${name})
 endif()
 
+
+set_target_properties(MadgineLauncher PROPERTIES 
+		PLUGIN_BASE Madgine
+		)
+
 target_link_plugins(MadgineLauncher App Client UI Root)
 
 if (EMSCRIPTEN)
@@ -45,14 +52,32 @@ elseif (IOS)
     target_link_libraries(MadgineLauncher PRIVATE "-framework UIKit")
 endif()
 
+
+set_config(MADGINE_LAUNCHER_WINDOW_TITLE LAUNCHER WINDOW_TITLE)
+set_config(MADGINE_LAUNCHER_SPLASH_IMAGE LAUNCHER SPLASH_IMAGE)
+set_config(MADGINE_LAUNCHER_ICON LAUNCHER ICON)
+
+
 if (WINDOWS)
 	configure_file(windows/resources.in.rc resources.rc)
 	configure_file(windows/resources.in.h resources.h)
 	target_sources(MadgineLauncher PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/resources.rc)
 endif ()
 
+
 configure_file(launcherconfig.in.h launcherconfig.h)
 target_include_directories(MadgineLauncher PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+
+
+set(sources "")
+FolderSources(sources "" tools)
+	FolderSources(sources tools Madgine_Tools)
+		FolderSources(sources Madgine_Tools launcher launchertool.cpp launchertool.h)
+
+add_tools(MadgineLauncher ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/launchertoolslib.h SOURCE_ROOT tools NO_DEFAULT_LINK)
+
+target_link_plugins(MadgineLauncherTools Tools ClientTools)
+
 
 target_depend_on_all_plugins(MadgineLauncher)
 
@@ -60,9 +85,12 @@ generate_binary_info(MadgineLauncher)
 
 install_to_workspace(Madgine TARGETS MadgineLauncher)
 
+write_notices(MadgineLauncher)
 
 file(GLOB lists "${MADGINE_CONFIGURATION}/*.list")
 if (lists)
 	collect_data_lists("${lists}")
 	add_dependencies(MadgineLauncher copy_data)
 endif()
+
+

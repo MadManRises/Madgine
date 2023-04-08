@@ -66,8 +66,8 @@ namespace Serialize {
         FormattedBufferedStream &getMasterStream(ParticipantId id);
 
         void removeAllStreams();
-        void setSlaveStreamImpl(Execution::VirtualReceiverBase<void, SyncManagerResult> &receiver, FormattedBufferedStream &&stream, bool receiveState = true, TimeOut timeout = {});
-        ASYNC_STUB(setSlaveStream, setSlaveStreamImpl, Execution::make_virtual_sender<void, SyncManagerResult>);
+        void setSlaveStreamImpl(Execution::VirtualReceiverBase<SyncManagerResult> &receiver, FormattedBufferedStream &&stream, bool receiveState = true, TimeOut timeout = {});
+        ASYNC_STUB(setSlaveStream, setSlaveStreamImpl, Execution::make_simple_virtual_sender<SyncManagerResult>);
 
         void removeSlaveStream(SyncManagerResult reason = SyncManagerResult::UNKNOWN_ERROR);
         SyncManagerResult addMasterStream(FormattedBufferedStream &&stream, bool sendState = true);
@@ -81,7 +81,7 @@ namespace Serialize {
 
         std::unique_ptr<SyncStreamData> createStreamData();
 
-        Execution::VirtualReceiverBase<void, SyncManagerResult> *mReceivingMasterState = nullptr;
+        Execution::VirtualReceiverBase<SyncManagerResult> *mReceivingMasterState = nullptr;
         TimeOut mReceivingMasterStateTimeout;
 
     private:

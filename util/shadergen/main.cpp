@@ -65,6 +65,7 @@ int usage()
 
 int transpileGLSL(const std::string &fileName, const std::string &outFolder, IDxcResult *result);
 int transpileHLSL(const std::string &fileName, const std::string &outFolder, IDxcResult *result, bool debug);
+int transpileSPIRV(const std::string &fileName, const std::string &outFolder, std::vector<LPCWSTR> arguments, IDxcBlobEncoding *pSource);
 
 int main(int argc, char **argv)
 {
@@ -122,8 +123,6 @@ int main(int argc, char **argv)
 
     arguments.push_back(L"-Zpc");
 
-    //arguments.push_back(L"-P");
-
     DxcBuffer sourceBuffer;
     sourceBuffer.Ptr = pSource->GetBufferPointer();
     sourceBuffer.Size = pSource->GetBufferSize();
@@ -146,7 +145,7 @@ int main(int argc, char **argv)
     hr = pCompileResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&pSpirv), nullptr);
     CHECK_HR(GetOutput / Spirv)
 
-    std::ofstream of { outputFile };
+    std::ofstream of { outputFile, std::ios::binary };
     of.write(static_cast<char *>(pSpirv->GetBufferPointer()), pSpirv->GetBufferSize());
 
     int result = 0;
@@ -160,6 +159,10 @@ int main(int argc, char **argv)
             int glsl_result = transpileGLSL(sourceFile, dataFolder, pCompileResult);
             if (glsl_result != 0)
                 result = glsl_result;
+        } else if (strcmp(argv[i], "-SPIRV") == 0) {
+            int spirv_result = transpileSPIRV(sourceFile, dataFolder, std::move(arguments), pSource);
+            if (spirv_result != 0)
+                result = spirv_result;
         } else if (strcmp(argv[i], "-g") != 0) {
             std::cerr << "Unknown target language: " << argv[i] << std::endl;
             result = -1;

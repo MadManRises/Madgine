@@ -33,12 +33,19 @@ namespace Render {
         virtual void beginIteration(size_t iteration) const;
         virtual void endIteration(size_t iteration) const;
 
+        virtual bool skipFrame();
+
         virtual void beginFrame();
         virtual void endFrame();
+
+        virtual void pushAnnotation(const char *tag) = 0;
+        virtual void popAnnotation() = 0;
 
         virtual void setRenderSpace(const Rect2i &space) = 0;
 
         size_t iterations() const;
+
+        const std::string &name() const;
 
     protected:
         virtual void render() override;

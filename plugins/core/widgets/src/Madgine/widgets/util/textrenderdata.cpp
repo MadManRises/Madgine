@@ -111,7 +111,7 @@ namespace Widgets {
 
         bool useSmallSize = fontSize < 32;
 
-        TextureSettings tex { { font->mTexture->mTextureHandle, Render::TextureType_2D }, useSmallSize ? 0 : TextureFlag_IsDistanceField };
+        TextureSettings tex { font->mTexture->descriptor(), useSmallSize ? 0 : TextureFlag_IsDistanceField };
 
         const Render::Glyph &ref = font->mGlyphs['D'];
 
@@ -128,9 +128,9 @@ namespace Widgets {
                 float startY = originY - ref.mBearing.y * scale;
 
                 if (useSmallSize)
-                    renderData.renderQuadUV({ pos.x + startX, pos.y + startY, pos.z + 0.6f }, { width, cursorHeight }, color, tex, { cursor.mUV2, cursor.mSize2 }, font->mTextureSize, cursor.mFlipped2);
+                    renderData.renderQuadUV({ pos.x + startX, pos.y + startY, pos.z + 0.6f }, { width, cursorHeight }, color, tex, { cursor.mUV2, cursor.mSize2 }, font->mTexture->size(), cursor.mFlipped2);
                 else
-                    renderData.renderQuadUV({ pos.x + startX, pos.y + startY, pos.z + 0.6f }, { width, cursorHeight }, color, tex, { cursor.mUV, cursor.mSize }, font->mTextureSize, cursor.mFlipped);
+                    renderData.renderQuadUV({ pos.x + startX, pos.y + startY, pos.z + 0.6f }, { width, cursorHeight }, color, tex, { cursor.mUV, cursor.mSize }, font->mTexture->size(), cursor.mFlipped);
             }
 
             if (c == line.mEnd)
@@ -145,9 +145,9 @@ namespace Widgets {
             float startY = originY - g.mBearing.y * scale;
 
             if (useSmallSize)
-                renderData.renderQuadUV({ pos.x + startX, pos.y + startY, pos.z + 0.5f }, { width, height }, color, tex, { g.mUV2, g.mSize2 }, font->mTextureSize, g.mFlipped2);
+                renderData.renderQuadUV({ pos.x + startX, pos.y + startY, pos.z + 0.5f }, { width, height }, color, tex, { g.mUV2, g.mSize2 }, font->mTexture->size(), g.mFlipped2);
             else
-                renderData.renderQuadUV({ pos.x + startX, pos.y + startY, pos.z + 0.5f }, { width, height }, color, tex, { g.mUV, g.mSize }, font->mTextureSize, g.mFlipped);
+                renderData.renderQuadUV({ pos.x + startX, pos.y + startY, pos.z + 0.5f }, { width, height }, color, tex, { g.mUV, g.mSize }, font->mTexture->size(), g.mFlipped);
 
             cursorX += g.mAdvance / 64.0f * scale;
         }

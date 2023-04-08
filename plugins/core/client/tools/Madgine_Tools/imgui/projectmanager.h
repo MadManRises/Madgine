@@ -7,11 +7,15 @@
 
 #include "Modules/threading/signal.h"
 
+#include "Modules/ini/inifile.h"
+
 namespace Engine {
 
 namespace Tools {
 
     struct MADGINE_CLIENT_TOOLS_EXPORT ProjectManager : Tool<ProjectManager> {
+        SERIALIZABLEUNIT(ProjectManager);
+
         ProjectManager(ImRoot &root);
 
         virtual Threading::Task<bool> init() override;
@@ -20,6 +24,9 @@ namespace Tools {
 
         virtual void render() override;
         virtual void renderMenu() override;
+        virtual bool renderConfiguration(const Filesystem::Path &config) override;
+        virtual void loadConfiguration(const Filesystem::Path &config) override;
+        virtual void saveConfiguration(const Filesystem::Path &config) override;
 
         const Filesystem::Path &projectRoot() const;
         const std::string &projectRootString() const;
@@ -33,9 +40,22 @@ namespace Tools {
 
         std::vector<std::string> projectLayouts() const;
 
+        void setCurrentConfig(const Filesystem::Path &config);
+        
+        bool mShowConfigurations = false;
+        bool mShowSettings = false;
+
     private:
         Filesystem::Path mCurrentSelectionPath;
         Filesystem::Path mCurrentPath;
+
+        std::set<Filesystem::Path> mConfigs;
+        Filesystem::Path mCurrentConfig;
+        Filesystem::Path mConfigSelectionBuffer;
+
+        bool mUnsavedConfiguration = false;
+
+        Ini::IniFile mConfiguration;
 
     private:
         Window::MainWindow *mWindow = nullptr;

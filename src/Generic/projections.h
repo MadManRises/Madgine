@@ -42,4 +42,12 @@ decltype(auto) toRawPtr(const T &t)
 
 constexpr auto projectionToRawPtr = LIFT(toRawPtr);
 
+template <typename T>
+decltype(auto) deref(T&& t)
+{
+    return *t;
+}
+
+constexpr auto projectionDeref = LIFT(deref);
+
 }

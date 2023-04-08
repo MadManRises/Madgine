@@ -9,7 +9,7 @@ namespace FirstParty {
     template <typename R>
     auto steam_sender(SteamAPICall_t call)
     {
-        return Execution::make_sender<R, GenericResult>(
+        return Execution::make_sender<GenericResult, R>(
             [=]<typename Rec>(Rec &&rec) {
                 struct state {
                     void start()

@@ -13,10 +13,11 @@ struct Function;
 struct ArithOperation;
 struct Constructor;
 struct Constant;
+struct Comment;
 
 struct Struct;
 
-using Statement = std::variant<Assignment, Return, VariableRead, CustomCodeBlock, Namespace, MemberAccess, VariableDefinition, ArithOperation, Constructor, Constant>;
+using Statement = std::variant<Assignment, Return, VariableRead, CustomCodeBlock, Namespace, MemberAccess, VariableDefinition, ArithOperation, Constructor, Constant, Comment>;
 using Type = std::variant<Engine::ValueTypeDesc, Struct *>;
 
 struct ShaderFile;

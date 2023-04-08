@@ -8,9 +8,7 @@ namespace Engine {
 namespace Render {
 
     DirectX11Texture::DirectX11Texture(TextureType type, DataFormat format, UINT bind, size_t width, size_t height, size_t samples, const ByteBuffer &data)
-        : mType(type)
-        , mSize { static_cast<int>(width), static_cast<int>(height) }
-        , mFormat(format)
+        : Texture(type, format, { static_cast<int>(width), static_cast<int>(height) })
         , mBind(bind)
         , mSamples(samples)
     {
@@ -100,22 +98,18 @@ namespace Render {
     }
 
     DirectX11Texture::DirectX11Texture(TextureType type, DataFormat format, UINT bind, size_t samples)
-        : mType(type)
-        , mFormat(format)
+        : Texture(type, format)
         , mBind(bind)
         , mSamples(samples)
     {
     }
 
     DirectX11Texture::DirectX11Texture(DirectX11Texture &&other)
-        : mResource(std::exchange(other.mResource, nullptr))
-        , mType(other.mType)
-        , mSize(std::move(other.mSize))
-        , mFormat(std::exchange(other.mFormat, {}))
+        : Texture(std::move(other))
+        , mResource(std::exchange(other.mResource, nullptr))
         , mBind(std::exchange(other.mBind, 0))
         , mSamples(std::exchange(other.mSamples, 1))
     {
-        mTextureHandle = std::exchange(other.mTextureHandle, 0);
     }
 
     DirectX11Texture::~DirectX11Texture()
@@ -125,12 +119,9 @@ namespace Render {
 
     DirectX11Texture &DirectX11Texture::operator=(DirectX11Texture &&other)
     {
+        Texture::operator=(std::move(other));
         std::swap(mResource, other.mResource);
-        std::swap(mTextureHandle, other.mTextureHandle);
-        std::swap(mType, other.mType);
         std::swap(mBind, other.mBind);
-        std::swap(mFormat, other.mFormat);
-        std::swap(mSize, other.mSize);
         std::swap(mSamples, other.mSamples);
         return *this;
     }
@@ -143,11 +134,6 @@ namespace Render {
             reinterpret_cast<ID3D11ShaderResourceView *>(mTextureHandle)->Release();
             mTextureHandle = 0;
         }
-    }
-
-    void DirectX11Texture::bind() const
-    {
-        sDeviceContext->PSSetShaderResources(0, 1, reinterpret_cast<ID3D11ShaderResourceView *const *>(&mTextureHandle));
     }
 
     void DirectX11Texture::setData(Vector2i size, const ByteBuffer &data)
@@ -203,36 +189,5 @@ namespace Render {
         return mResource;
     }
 
-    TextureDescriptor DirectX11Texture::descriptor() const
-    {
-        return { mTextureHandle, mType };
-    }
-
-    DataFormat DirectX11Texture::format() const
-    {
-        return mFormat;
-    }
-
-    TextureType DirectX11Texture::type() const
-    {
-        return mType;
-    }
-
-    /*void DirectX11Texture::setWrapMode(GLint mode)
-    {
-        bind();
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, mode);
-        GL_CHECK();
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, mode);
-        GL_CHECK();
-    }
-
-    void DirectX11Texture::setFilter(GLint filter)
-    {
-        bind();
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
-        GL_CHECK();
-    }*/
 }
 }

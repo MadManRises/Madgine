@@ -30,6 +30,9 @@ namespace Render {
 
     void RenderTarget::render()
     {
+        if (skipFrame())
+            return;
+
         for (RenderPass *pass : mRenderPasses)
             pass->preRender();
 
@@ -65,14 +68,19 @@ namespace Render {
         return mRenderPasses;
     }
 
+    bool RenderTarget::skipFrame()
+    {
+        return false;
+    }
+
     void RenderTarget::beginFrame()
     {
-        context()->pushAnnotation(mName.empty() ? "<unnamed target>" : mName.c_str());
+        pushAnnotation(mName.empty() ? "<unnamed target>" : mName.c_str());
     }
 
     void RenderTarget::endFrame()
     {
-        context()->popAnnotation();
+        popAnnotation();
     }
 
     void RenderTarget::beginIteration(size_t iteration) const
@@ -86,6 +94,11 @@ namespace Render {
     size_t RenderTarget::iterations() const
     {
         return mIterations;
+    }
+
+    const std::string &RenderTarget::name() const
+    {
+        return mName;
     }
 
     bool RenderTarget::resize(const Vector2i &size)

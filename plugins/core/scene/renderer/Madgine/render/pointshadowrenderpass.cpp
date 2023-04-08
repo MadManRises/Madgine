@@ -75,7 +75,7 @@ namespace Render {
             instances[std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *> { meshData, skeleton }].push_back(transform->worldMatrix());
         }
 
-        target->context()->pushAnnotation("PointShadow");
+        target->pushAnnotation("PointShadow");
 
         {
             auto perApplication = mPipeline->mapParameters<PointShadowPerApplication>(0);
@@ -112,10 +112,10 @@ namespace Render {
                 mPipeline->setDynamicParameters(0, {});
             }
 
-            mPipeline->renderMeshInstanced(std::move(instance.second), meshData);
+            mPipeline->renderMeshInstanced(target, std::move(instance.second), meshData);
         }
 
-        target->context()->popAnnotation();
+        target->popAnnotation();
     }
 
     int PointShadowRenderPass::priority() const

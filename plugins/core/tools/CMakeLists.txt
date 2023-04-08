@@ -10,19 +10,18 @@ FolderSources(sources "" src )
 		FolderSources(sources Madgine_Tools memory memoryviewer.cpp memoryviewer.h)
 		FolderSources(sources Madgine_Tools messagelogger messagelogger.cpp messagelogger.h)
 		FolderSources(sources Madgine_Tools metrics metrics.cpp metrics.h)
-		FolderSources(sources Madgine_Tools pluginmanager pluginmanager.cpp pluginmanager.h)
+		FolderSources(sources Madgine_Tools pluginmanager pluginexporter.cpp pluginexporter.h pluginmanager.cpp pluginmanager.h)
 		FolderSources(sources Madgine_Tools profiler profiler.cpp profiler.h)
 		FolderSources(sources Madgine_Tools renderer imguidemo.cpp imguidemo.h imroot.cpp imroot.h)
 if (MODULES_ENABLE_TASK_TRACKING)
 		FolderSources(sources Madgine_Tools tasktracker tasktracker.cpp tasktracker.h)
 endif()
 		FolderSources(sources Madgine_Tools testtool testtool.cpp testtool.h)
-		FolderSources(sources Madgine_Tools tinyxml tinyxml2.cpp tinyxml2.h)
 	
 
 add_plugin(Tools Madgine Tools ${sources} PRECOMPILED_HEADER src/Madgine_Tools/toolslib.h)
 
 target_link_plugins(Tools Root)
 
-target_link_libraries(Tools PUBLIC ImGui Im3D )
+target_link_libraries(Tools PUBLIC ImGui Im3D CodeGen)
 

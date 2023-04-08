@@ -10,6 +10,12 @@
 
 #include "Modules/threading/workgroupstorage.h"
 
+#include "directx12meshloader.h"
+#include "directx12pipelineloader.h"
+#include "directx12textureloader.h"
+
+#include "Madgine/render/constantvalues.h"
+
 UNIQUECOMPONENT(Engine::Render::DirectX12RenderContext)
 
 METATABLE_BEGIN(Engine::Render::DirectX12RenderContext)
@@ -125,17 +131,6 @@ namespace Render {
         return *sDevice;
     }
 
-    struct ConstantValues {
-        Vector3 mPos { 0, 0, 0 };
-        float mW = 1;
-        Vector2 mPos2 { 0, 0 };
-        Vector3 mNormal { 0, 0, 0 };
-        Vector4 mColor { 1, 1, 1, 1 };
-        Vector2 mUV { 0, 0 };
-        int mBoneIndices[4] { 0, 0, 0, 0 };
-        float mBoneWeights[4] { 0.0f, 0.0f, 0.0f, 0.0f };
-    };
-
     DirectX12RenderContext::DirectX12RenderContext(Threading::TaskQueue *queue)
         : Component(queue)
     {
@@ -181,7 +176,7 @@ namespace Render {
         mDescriptorHeap = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
         mRenderTargetDescriptorHeap = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
         mDepthStencilDescriptorHeap = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-        mConstantBufferHeap = { 64 * 1024 };
+        mConstantBufferHeap = { 16 * 1024 * 1024 };
 
         D3D12_COMMAND_QUEUE_DESC queueDesc {};
         queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
@@ -190,29 +185,11 @@ namespace Render {
         hr = GetDevice()->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&mCommandQueue));
         DX12_CHECK(hr);
 
-        mCommandList.mAllocator = fetchCommandAllocator();
-
-        ID3D12DescriptorHeap *heap = mDescriptorHeap.resource();
-
-        hr = GetDevice()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, mCommandList.mAllocator, nullptr, IID_PPV_ARGS(&mCommandList.mList));
-        DX12_CHECK(hr);
-        mCommandList.mList->SetName(L"Main CommandList");
-
-        mCommandList.mList->SetDescriptorHeaps(1, &heap);
-
-        mTempCommandList.mAllocator = fetchCommandAllocator();
-
-        hr = GetDevice()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, mTempCommandList.mAllocator, nullptr, IID_PPV_ARGS(&mTempCommandList.mList));
-        DX12_CHECK(hr);
-
-        mTempCommandList.mList->SetDescriptorHeaps(1, &heap);
-
+        mLastCompletedFenceValue = 5;
         hr = GetDevice()->CreateFence(mLastCompletedFenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mFence));
         DX12_CHECK(hr);
 
         mNextFenceValue = mLastCompletedFenceValue + 1;
-
-        mFenceEvent = CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
 
         createRootSignature();
 
@@ -235,36 +212,24 @@ namespace Render {
         return std::make_unique<DirectX12RenderTexture>(this, size, config);
     }
 
-    void DirectX12RenderContext::beginFrame()
+    bool DirectX12RenderContext::beginFrame()
     {
-        mLastCompletedFenceValue = std::max(mLastCompletedFenceValue, mFence->GetCompletedValue());
-        RenderContext::beginFrame();
+        if (!isFenceComplete(mNextFenceValue - 2))
+            return false;
+        return RenderContext::beginFrame();
     }
 
     void DirectX12RenderContext::endFrame()
     {
         RenderContext::endFrame();
-#if MADGINE_DIRECTX12_USE_SINGLE_COMMAND_LIST
-        ExecuteCommandList(mCommandList);
-#endif
+
+        mCommandQueue->Signal(mFence, mNextFenceValue);
+        ++mNextFenceValue;
     }
 
-    void DirectX12RenderContext::waitForGPU()
+    uint64_t DirectX12RenderContext::currentFence()
     {
-        waitForFence(mNextFenceValue - 1);
-    }
-
-    void DirectX12RenderContext::waitForFence(uint64_t fenceValue)
-    {
-        if (isFenceComplete(fenceValue))
-            return;
-
-        // Wait until the fence has been processed.
-        HRESULT hr = mFence->SetEventOnCompletion(fenceValue, mFenceEvent);
-        DX12_CHECK(hr);
-        WaitForSingleObject(mFenceEvent, INFINITE);
-
-        mLastCompletedFenceValue = fenceValue;
+        return mNextFenceValue - 1;
     }
 
     bool DirectX12RenderContext::isFenceComplete(uint64_t fenceValue)
@@ -333,50 +298,59 @@ namespace Render {
         DX12_CHECK(hr);
     }
 
-    void DirectX12RenderContext::ExecuteCommandList(DirectX12CommandList &list, Lambda<void()> dtor)
+    DirectX12CommandList DirectX12RenderContext::fetchCommandList(std::string_view name)
     {
-        HRESULT hr = list.mList->Close();
-        DX12_CHECK(hr);
-
-        ID3D12CommandList *cmdList = list.mList;
-        mCommandQueue->ExecuteCommandLists(1, &cmdList);
-        DX12_CHECK();
-
-        mCommandQueue->Signal(mFence, mNextFenceValue);
-        ++mNextFenceValue;
-
-        list.mAllocator = fetchCommandAllocator(std::move(list.mAllocator), std::move(dtor));
-
-        hr = list.mList->Reset(list.mAllocator, nullptr);
-        DX12_CHECK(hr);
-
-        ID3D12DescriptorHeap *heap = mDescriptorHeap.resource();
-        list.mList->SetDescriptorHeaps(1, &heap);
-    }
-
-    ReleasePtr<ID3D12CommandAllocator> DirectX12RenderContext::fetchCommandAllocator(ReleasePtr<ID3D12CommandAllocator> discardAllocator, Lambda<void()> dtor)
-    {
-        if (discardAllocator)
-            mAllocatorPool.emplace_back(mNextFenceValue, std::move(discardAllocator), std::move(dtor));
+        ReleasePtr<ID3D12CommandAllocator> alloc;
 
         if (!mAllocatorPool.empty()) {
-            auto &[fenceValue, allocator, dtor] = mAllocatorPool.front();
+            auto &[fenceValue, allocator, discard] = mAllocatorPool.front();
 
-            if (fenceValue <= mLastCompletedFenceValue) {
-                if (dtor)
-                    dtor();
-                ReleasePtr<ID3D12CommandAllocator> alloc = std::move(allocator);
+            if (isFenceComplete(fenceValue)) {
+                alloc = std::move(allocator);
                 mAllocatorPool.erase(mAllocatorPool.begin());
                 HRESULT hr = alloc->Reset();
                 DX12_CHECK(hr);
-                return alloc;
             }
         }
 
-        ReleasePtr<ID3D12CommandAllocator> alloc;
-        HRESULT hr = GetDevice()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&alloc));
+        if (!alloc) {
+            HRESULT hr = GetDevice()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&alloc));
+            DX12_CHECK(hr);
+        }
+
+        ReleasePtr<ID3D12GraphicsCommandList> list;
+
+        if (!mCommandListPool.empty()) {
+            list = std::move(mCommandListPool.back());
+            mCommandListPool.pop_back();
+            HRESULT hr = list->Reset(alloc, nullptr);
+            DX12_CHECK(hr);
+        } else {
+            HRESULT hr = GetDevice()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, alloc, nullptr, IID_PPV_ARGS(&list));
+            DX12_CHECK(hr);
+        }
+
+        list->SetName(StringUtil::toWString(name).c_str());
+
+        ID3D12DescriptorHeap *heap = mDescriptorHeap.resource();
+        list->SetDescriptorHeaps(1, &heap);
+
+        return { std::move(list), std::move(alloc) };
+    }
+
+    void DirectX12RenderContext::ExecuteCommandList(ReleasePtr<ID3D12GraphicsCommandList> list, ReleasePtr<ID3D12CommandAllocator> allocator, std::vector<ReleasePtr<ID3D12Pageable>> discardResources)
+    {
+        HRESULT hr = list->Close();
         DX12_CHECK(hr);
-        return alloc;
+
+        ID3D12CommandList *cList = list;
+        mCommandQueue->ExecuteCommandLists(1, &cList);
+        DX12_CHECK();
+
+        if (allocator || !discardResources.empty())
+            mAllocatorPool.emplace_back(mNextFenceValue, std::move(allocator), std::move(discardResources));
+
+        mCommandListPool.push_back(std::move(list));
     }
 
     std::unique_ptr<RenderTarget> DirectX12RenderContext::createRenderWindow(Window::OSWindow *w, size_t samples)
@@ -386,19 +360,26 @@ namespace Render {
         return std::make_unique<DirectX12RenderWindow>(this, w, samples);
     }
 
+    void DirectX12RenderContext::unloadAllResources()
+    {
+        RenderContext::unloadAllResources();
+
+        for (std::pair<const std::string, DirectX12PipelineLoader::Resource> &res : DirectX12PipelineLoader::getSingleton()) {
+            res.second.forceUnload();
+        }
+
+        for (std::pair<const std::string, DirectX12TextureLoader::Resource> &res : DirectX12TextureLoader::getSingleton()) {
+            res.second.forceUnload();
+        }
+
+        for (std::pair<const std::string, DirectX12MeshLoader::Resource> &res : DirectX12MeshLoader::getSingleton()) {
+            res.second.forceUnload();
+        }
+    }
+
     bool DirectX12RenderContext::supportsMultisampling() const
     {
         return true;
-    }
-
-    void DirectX12RenderContext::pushAnnotation(const char *tag)
-    {
-        PIXBeginEvent(mCommandList.mList, PIX_COLOR(255, 255, 255), tag);
-    }
-
-    void DirectX12RenderContext::popAnnotation()
-    {
-        PIXEndEvent(mCommandList.mList);
     }
 
     static constexpr const char *vSemantics[] = {
@@ -423,17 +404,6 @@ namespace Render {
         0,
     };
 
-    static constexpr UINT vConstantOffsets[] = {
-        offsetof(ConstantValues, mPos),
-        offsetof(ConstantValues, mW),
-        offsetof(ConstantValues, mPos2),
-        offsetof(ConstantValues, mNormal),
-        offsetof(ConstantValues, mColor),
-        offsetof(ConstantValues, mUV),
-        offsetof(ConstantValues, mBoneIndices),
-        offsetof(ConstantValues, mBoneWeights)
-    };
-
     static constexpr DXGI_FORMAT vFormats[] = {
         DXGI_FORMAT_R32G32B32_FLOAT,
         DXGI_FORMAT_R32_FLOAT,
@@ -449,7 +419,6 @@ namespace Render {
     {
         std::vector<D3D12_INPUT_ELEMENT_DESC> vertexLayoutDesc;
 
-        
 #ifndef NDEBUG
 #    define semantic(i) vSemantics[i]
 #    define semanticIndex(i) vSemanticIndices[i]
@@ -461,7 +430,6 @@ namespace Render {
 #    define instanceSemantic "TEXCOORD"
 #    define instanceSemanticIndex(i) (UINT)(VertexElements::size + i)
 #endif
-
 
         UINT offset = 0;
         for (UINT i = 0; i < VertexElements::size; ++i) {

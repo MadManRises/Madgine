@@ -83,7 +83,7 @@ namespace Serialize {
                 assert(mReceivingMasterState);
                 STREAM_PROPAGATE_ERROR(read(stream, id, "Id"));
                 stream.setId(id);
-                mReceivingMasterState->set_value(SyncManagerResult::SUCCESS);
+                mReceivingMasterState->set_value();
                 mReceivingMasterState = nullptr;
                 break;
             default:
@@ -229,7 +229,7 @@ namespace Serialize {
         mMasterStreams.clear();
     }
 
-    void SyncManager::setSlaveStreamImpl(Execution::VirtualReceiverBase<void, SyncManagerResult> &receiver, FormattedBufferedStream &&stream,
+    void SyncManager::setSlaveStreamImpl(Execution::VirtualReceiverBase<SyncManagerResult> &receiver, FormattedBufferedStream &&stream,
         bool receiveState,
         TimeOut timeout)
     {
@@ -263,7 +263,7 @@ namespace Serialize {
                 mReceivingMasterState = &receiver;
                 mReceivingMasterStateTimeout = timeout;
             } else {
-                receiver.set_value(state);
+                receiver.set_value();
             }
         } else {
             for (TopLevelUnitBase *unit : updatedUnits | std::views::reverse) {

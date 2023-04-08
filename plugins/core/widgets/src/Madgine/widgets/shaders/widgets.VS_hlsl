@@ -6,15 +6,15 @@ cbuffer PerApplication : register(b0)
 }
 
 struct AppData {
-    float3 aPos : POSITION0;
-    float4 aColor : COLOR;
-    float2 aUV : TEXCOORD;
+ [[vk::location(0)]]   float3 aPos : POSITION0;
+ [[vk::location(4)]]    float4 aColor : COLOR;
+ [[vk::location(5)]]   float2 aUV : TEXCOORD;
 };
 
 struct VertexShaderOutput {
-    float4 color : COLOR;
-    float2 uv : TEXCOORD;
-    float4 position : SV_Position;
+   float4 color : COLOR;
+float2 uv : TEXCOORD;
+ float4 position : SV_Position;
 };
 
 VertexShaderOutput main(AppData IN)

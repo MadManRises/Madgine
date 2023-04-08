@@ -10,6 +10,8 @@
 #include "directx11pipelineloader.h"
 #include "directx11textureloader.h"
 
+#include "Madgine/render/constantvalues.h"
+
 UNIQUECOMPONENT(Engine::Render::DirectX11RenderContext)
 
 METATABLE_BEGIN(Engine::Render::DirectX11RenderContext)
@@ -34,17 +36,6 @@ namespace Render {
     {
         return sDevice;
     }
-
-    struct ConstantValues {
-        Vector3 mPos { 0, 0, 0 };
-        float mW = 1;
-        Vector2 mPos2 { 0, 0 };
-        Vector3 mNormal { 0, 0, 0 };
-        Vector4 mColor { 1, 1, 1, 1 };
-        Vector2 mUV { 0, 0 };
-        int mBoneIndices[4] { 0, 0, 0, 0 };
-        float mBoneWeights[4] { 0.0f, 0.0f, 0.0f, 0.0f };
-    };
 
     DirectX11RenderContext::DirectX11RenderContext(Threading::TaskQueue *queue)
         : Component(queue)
@@ -153,16 +144,6 @@ namespace Render {
         return true;
     }
 
-    void DirectX11RenderContext::pushAnnotation(const char *tag)
-    {
-        mAnnotator->BeginEvent(StringUtil::toWString(tag).c_str());
-    }
-
-    void DirectX11RenderContext::popAnnotation()
-    {
-        mAnnotator->EndEvent();
-    }
-
     static constexpr const char *vSemantics[] = {
         "POSITION",
         "POSITION",
@@ -183,17 +164,6 @@ namespace Render {
         0,
         0,
         0,
-    };
-
-    static constexpr UINT vConstantOffsets[] = {
-        offsetof(ConstantValues, mPos),
-        offsetof(ConstantValues, mW),
-        offsetof(ConstantValues, mPos2),
-        offsetof(ConstantValues, mNormal),
-        offsetof(ConstantValues, mColor),
-        offsetof(ConstantValues, mUV),
-        offsetof(ConstantValues, mBoneIndices),
-        offsetof(ConstantValues, mBoneWeights)
     };
 
     static constexpr DXGI_FORMAT vFormats[] = {

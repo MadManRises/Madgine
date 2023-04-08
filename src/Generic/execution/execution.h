@@ -3,60 +3,46 @@
 namespace Engine {
 namespace Execution {
 
-    template <typename S, typename V, typename R>
-    struct DeleteRec {        
-        void set_value(R, V)
-        {
-            mDeleter(mState);
-        }
-        void set_done()
-        {
-            mDeleter(mState);
-        }        
-        void set_error(R)
-        {
-            mDeleter(mState);
-        }
-        void (*mDeleter)(S *);
-        S *mState;
-    };
-        
-    template <typename S, typename R>
-    struct DeleteRec<S, void, R> {
-        void set_value(R)
-        {
-            mDeleter(mState);
-        }
-        void set_done()
-        {
-            mDeleter(mState);
-        }
-        void set_error(R)
-        {
-            mDeleter(mState);
-        }
-        void (*mDeleter)(S *);
-        S *mState;
-    };
+    struct detach_t {
+        template <typename S, typename R, typename... V>
+        struct receiver {
+            void set_value(V...)
+            {
+                delete mState;
+            }
+            void set_done()
+            {
+                delete mState;
+            }
+            void set_error(patch_void_t<R>)
+            {
+                delete mState;
+            }
+            S *mState;
+        };
 
-    template <typename F, typename V, typename R>
-    void detach(Sender<F, V, R> &&sender)
-    {
+        template <typename F, typename R, typename... V>
         struct state {
-            state(Sender<F, V, R> &&sender)
-                : mRec { [](state *s) { delete s; }, this }
-                , mState(sender(mRec))
+            state(Sender<F, R, V...> &&sender)
+                : mState(sender(receiver<state, R, V...> { this }))
             {
             }
             void start()
             {
                 mState.start();
             }
-            DeleteRec<state, V, R> mRec;
-            std::invoke_result_t<F, DeleteRec<state, V, R> &> mState;
+
+            std::invoke_result_t<F, receiver<state, R, V...>> mState;
         };
-        (new state { std::move(sender) })->start();
-    }
+
+        template <typename F, typename R, typename... V>
+        void operator()(Sender<F, R, V...> &&sender) const
+        {
+            (new state<F, R, V...> { std::move(sender) })->start();
+        }
+    };
+
+    inline constexpr detach_t detach;
 
 }
 }

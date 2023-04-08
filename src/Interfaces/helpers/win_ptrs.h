@@ -11,6 +11,19 @@ struct ReleaseDeleter {
 template <typename T>
 struct ReleasePtr : std::unique_ptr<T, ReleaseDeleter> {
     using std::unique_ptr<T, ReleaseDeleter>::unique_ptr;
+    ReleasePtr(const ReleasePtr &other)
+        : std::unique_ptr<T, ReleaseDeleter> { other.get() }
+    {
+        this->get()->AddRef();
+    }
+    ReleasePtr(ReleasePtr &&) = default;
+    template <typename U>
+    ReleasePtr(ReleasePtr<U> &&other)
+        : std::unique_ptr<T, ReleaseDeleter> { std::move(other) }
+    {
+    }
+
+    ReleasePtr &operator=(ReleasePtr &&) = default;
 
     T **operator&()
     {
@@ -48,15 +61,16 @@ struct INTERFACES_EXPORT UniqueHandle {
     ~UniqueHandle();
 
     UniqueHandle &operator=(const UniqueHandle &) = delete;
-    UniqueHandle& operator=(UniqueHandle&& other) {
+    UniqueHandle &operator=(UniqueHandle &&other)
+    {
         std::swap(mHandle, other.mHandle);
         return *this;
     }
 
-    operator HANDLE() const {
+    operator HANDLE() const
+    {
         return mHandle;
     }
-
 
 private:
     HANDLE mHandle = INVALID_HANDLE_VALUE;

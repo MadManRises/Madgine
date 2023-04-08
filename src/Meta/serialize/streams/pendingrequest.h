@@ -2,6 +2,7 @@
 
 #include "Generic/execution/sender.h"
 #include "Generic/execution/virtualreceiver.h"
+#include "Generic/execution/virtualsender.h"
 #include "Generic/forward_capture.h"
 #include "Generic/nulledptr.h"
 #include "messageresult.h"
@@ -12,7 +13,7 @@ namespace Serialize {
     struct GenericMessageReceiver {
 
         GenericMessageReceiver() = default;
-        GenericMessageReceiver(Execution::VirtualReceiverBase<const void *, MessageResult> &receiver)
+        GenericMessageReceiver(Execution::VirtualReceiverBase<MessageResult, const void *> &receiver)
             : mPtr(&receiver)
         {
         }
@@ -25,10 +26,10 @@ namespace Serialize {
         GenericMessageReceiver &operator=(GenericMessageReceiver &&) = default;
 
         template <typename T>
-        void set_value(MessageResult result, const T &t)
+        void set_value(const T &t)
         {
             if (mPtr) {
-                mPtr->set_value(result, &t);
+                mPtr->set_value(&t);
                 mPtr.reset();
             }
         }
@@ -53,23 +54,23 @@ namespace Serialize {
         }
 
     private:
-        NulledPtr<Execution::VirtualReceiverBase<const void *, MessageResult>> mPtr;
+        NulledPtr<Execution::VirtualReceiverBase<MessageResult, const void *>> mPtr;
     };
 
     template <typename Rec, typename T>
-    struct MessageReceiver : Execution::VirtualReceiverBase<const void *, MessageResult> {
+    struct MessageReceiver : Execution::VirtualReceiverBase<MessageResult, const void *> {
         MessageReceiver(Rec &&rec)
             : mRec(std::forward<Rec>(rec))
         {
         }
-        void set_value(MessageResult result, T &&value)
+        void set_value(T &&value)
         {
-            mRec.set_value(result, std::forward<T>(value));
+            mRec.set_value(std::forward<T>(value));
         }
-        virtual void set_value(MessageResult result, const void *data) override final
+        virtual void set_value(const void *data) override final
         {
             assert(data);
-            mRec.set_value(result, *static_cast<const T *>(data));
+            mRec.set_value(*static_cast<const T *>(data));
         }
         virtual void set_done() override final
         {
@@ -83,19 +84,19 @@ namespace Serialize {
     };
 
     template <typename Rec>
-    struct MessageReceiver<Rec, void> : Execution::VirtualReceiverBase<const void *, MessageResult> {
+    struct MessageReceiver<Rec, void> : Execution::VirtualReceiverBase<MessageResult, const void *> {
         MessageReceiver(Rec &&rec)
             : mRec(std::forward<Rec>(rec))
         {
         }
-        void set_value(MessageResult result)
+        void set_value()
         {
-            mRec.set_value(result);
+            mRec.set_value();
         }
-        virtual void set_value(MessageResult result, const void *data) override final
+        virtual void set_value(const void *data) override final
         {
             assert(data);
-            mRec.set_value(result);
+            mRec.set_value();
         }
         virtual void set_done() override final
         {
@@ -111,18 +112,9 @@ namespace Serialize {
     template <typename T, typename F, typename... Args>
     auto make_message_sender(F &&f, Args &&...args)
     {
-        return Execution::make_sender<T, MessageResult>(
+        return Execution::make_sender<MessageResult, T>(
             [f { forward_capture(std::forward<F>(f)) }, args = std::tuple<Args...> { std::forward<Args>(args)... }]<typename Rec>(Rec &&rec) mutable {
-                struct State {
-                    void start()
-                    {
-                        TupleUnpacker::invokeExpand(std::forward<F>(mF), mRec, std::move(mArgs));
-                    }
-                    F mF;
-                    MessageReceiver<Rec, T> mRec;
-                    std::tuple<Args...> mArgs;
-                };
-                return State { std::forward<F>(f), std::forward<Rec>(rec), std::move(args) };
+                return Execution::make_simple_state<MessageReceiver<Rec, T>, MessageResult, T>(std::forward<F>(f), std::move(args), std::forward<Rec>(rec));
             });
     }
 

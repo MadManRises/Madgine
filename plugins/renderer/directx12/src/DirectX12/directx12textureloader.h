@@ -16,9 +16,11 @@ namespace Render {
         void unloadImpl(DirectX12Texture &tex);
         bool create(Texture &texture, TextureType type, DataFormat format) override;
 
-		virtual void setData(Texture &tex, Vector2i size, const ByteBuffer &data) override;
+        virtual void setData(Texture &tex, Vector2i size, const ByteBuffer &data) override;
         virtual void setSubData(Texture &tex, Vector2i offset, Vector2i size, const ByteBuffer &data) override;
-	};
+
+        virtual Threading::TaskQueue *loadingTaskQueue() const override;
+    };
 }
 }
 

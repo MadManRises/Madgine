@@ -13,6 +13,11 @@ namespace Render {
             dep->update();
     }
 
+    const std::vector<RenderData *> &RenderPass::dependencies() const
+    {
+        return mDependencies;
+    }
+
     void RenderPass::addDependency(RenderData *dep)
     {
         mDependencies.push_back(dep);

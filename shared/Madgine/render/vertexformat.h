@@ -28,6 +28,16 @@ namespace Render {
             return mFormat;
         }
 
+        size_t stride() const
+        {
+            size_t stride = 0;
+            for (size_t i = 0; i < VertexElements::size; ++i) {
+                if (has(i))
+                    stride += sVertexElementSizes[i];
+            }
+            return stride;
+        }
+
     private:
         template <typename VertexType, size_t... Is>
         static uint16_t toVertexFormat(std::index_sequence<Is...>)

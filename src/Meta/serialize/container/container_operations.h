@@ -230,7 +230,7 @@ namespace Serialize {
             if (accepted) {
                 typename container_traits<C>::emplace_return it;
                 STREAM_PROPAGATE_ERROR(performOperation(c, op, in, it, request.mRequester, request.mRequesterTransactionId, hierarchy));
-                request.mReceiver.set_value(MessageResult::OK, it);
+                request.mReceiver.set_value(it);
             } else {
                 if (request.mRequesterTransactionId) {
                     FormattedBufferedStream &out = c.getRequestResponseTarget(request.mRequester, request.mRequesterTransactionId);

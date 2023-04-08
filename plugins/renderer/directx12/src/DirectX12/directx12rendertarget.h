@@ -2,6 +2,7 @@
 
 #include "Madgine/render/rendertarget.h"
 
+#include "util/directx12commandlist.h"
 
 namespace Engine {
 namespace Render {
@@ -11,11 +12,17 @@ namespace Render {
         DirectX12RenderTarget(DirectX12RenderContext *context, bool global, std::string name);
         ~DirectX12RenderTarget();
 
-        void setup(OffsetPtr targetView, const Vector2i &size);
+        void setup(OffsetPtr targetView, const Vector2i &size, D3D12_RESOURCE_STATES depthBufferState = D3D12_RESOURCE_STATE_DEPTH_WRITE);
         void shutdown();
+
+        void beginFrame() override;
+        void endFrame() override;
 
         virtual void beginIteration(size_t iteration) const override;
         virtual void endIteration(size_t iteration) const override;
+
+        virtual void pushAnnotation(const char *tag) override;
+        virtual void popAnnotation() override;
 
         virtual void setRenderSpace(const Rect2i &space) override;
 
@@ -23,12 +30,8 @@ namespace Render {
 
         DirectX12RenderContext *context() const;
 
-        static void TransitionBarrier(ID3D12GraphicsCommandList *commandList, ID3D12Resource *res, D3D12_RESOURCE_STATES from, D3D12_RESOURCE_STATES to);
-        void Transition(ID3D12Resource *res, D3D12_RESOURCE_STATES from, D3D12_RESOURCE_STATES to) const;
 
-
-        //void setupProgram(RenderPassFlags flags = RenderPassFlags_None, unsigned int textureId = 0) override;
-
+        mutable DirectX12CommandList mCommandList;
         mutable OffsetPtr mTargetView;
         ReleasePtr<ID3D12Resource> mDepthStencilBuffer;  
         OffsetPtr mDepthStencilView;
@@ -37,7 +40,6 @@ namespace Render {
         D3D12_BLEND_DESC mBlendState;
         D3D12_RESOURCE_STATES mResourceState;
 
-        //ID3D12SamplerState *mSamplers[2] = { nullptr, nullptr };
         
     };
 

@@ -136,6 +136,7 @@ namespace Tools {
         for (Util::MessageType type : Util::MessageType::values()) {
             ImGui::Text("%s %d", sIcons[type], mMsgCounts[type]);
         }
+        ImGui::Separator();
     }
 
     void LogViewer::messageLogged(std::string_view message, Util::MessageType lml, const char *file, size_t line, Util::Log *log)

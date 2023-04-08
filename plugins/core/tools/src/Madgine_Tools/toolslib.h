@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Madgine/rootlib.h"
+#include "Madgine/codegen/codegenlib.h"
 
 #if defined(Tools_EXPORTS)
 #    define MADGINE_TOOLS_EXPORT DLL_EXPORT

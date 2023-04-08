@@ -10,6 +10,8 @@
 
 #include "directx12rendercontext.h"
 
+#include "Modules/threading/taskqueue.h"
+
 namespace Engine {
 namespace Render {
 
@@ -62,24 +64,54 @@ namespace Render {
         shutdown();
     }
 
-    void DirectX12RenderWindow::beginIteration(size_t iteration) const
+    bool DirectX12RenderWindow::skipFrame()
     {
-        PROFILE();
+        if (!mTargetView && context()->isFenceComplete(mResizeFence)) {
 
+            for (size_t i = 0; i < 2; ++i) {
+                mBackBuffers[i].reset();
+            }
+
+            HRESULT hr = mSwapChain->ResizeBuffers(2, mResizeTarget.x, mResizeTarget.y, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+            DX12_CHECK(hr);
+
+            createRenderTargetViews();
+
+            setup(mTargetViews[0], mResizeTarget);                
+        }
+        return !mTargetView;
+    }
+
+    void DirectX12RenderWindow::beginFrame()
+    {
         mTargetView = mTargetViews[mSwapChain->GetCurrentBackBufferIndex()];
 
-        Transition(mBackBuffers[mSwapChain->GetCurrentBackBufferIndex()], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+        DirectX12RenderTarget::beginFrame();
 
+        //mCommandList.attachResource(mBackBuffers[mSwapChain->GetCurrentBackBufferIndex()]);
+
+        mCommandList.Transition(mBackBuffers[mSwapChain->GetCurrentBackBufferIndex()], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+    }
+
+    void DirectX12RenderWindow::endFrame()
+    {
+
+        mCommandList.Transition(mBackBuffers[mSwapChain->GetCurrentBackBufferIndex()], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+
+        DirectX12RenderTarget::endFrame();
+
+        mSwapChain->Present(0, 0);
+    }
+
+    void DirectX12RenderWindow::beginIteration(size_t iteration) const
+    {
         DirectX12RenderTarget::beginIteration(iteration);
     }
 
     void DirectX12RenderWindow::endIteration(size_t iteration) const
     {
-        Transition(mBackBuffers[mSwapChain->GetCurrentBackBufferIndex()], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
         DirectX12RenderTarget::endIteration(iteration);
-
-        mSwapChain->Present(0, 0);
     }
 
     Vector2i DirectX12RenderWindow::size() const
@@ -104,13 +136,10 @@ namespace Render {
 
     bool DirectX12RenderWindow::resizeImpl(const Vector2i &size)
     {
-        HRESULT hr = mSwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
-        DX12_CHECK(hr);
-
-        createRenderTargetViews();
-
-        setup(mTargetViews[0], size);
-
+        mTargetView.reset();
+        mResizeFence = context()->currentFence();
+        mResizeTarget = size;
+        
         return true;
     }
 }

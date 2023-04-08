@@ -5,6 +5,7 @@
 #include "../directx12rendercontext.h"
 
 #include "../directx12meshdata.h"
+#include "../directx12rendertarget.h"
 
 namespace Engine {
 namespace Render {
@@ -71,9 +72,9 @@ namespace Render {
         }
     }
 
-    void DirectX12PipelineInstance::renderMesh(const GPUMeshData *m) const
+    void DirectX12PipelineInstance::renderMesh(RenderTarget *target, const GPUMeshData *m) const
     {
-        ID3D12GraphicsCommandList *commandList = DirectX12RenderContext::getSingleton().mCommandList.mList;
+        ID3D12GraphicsCommandList *commandList = static_cast<DirectX12RenderTarget*>(target)->mCommandList;
 
         const DirectX12MeshData *mesh = static_cast<const DirectX12MeshData *>(m);
 
@@ -92,12 +93,12 @@ namespace Render {
         }
     }
 
-    void DirectX12PipelineInstance::renderMeshInstanced(size_t count, const GPUMeshData *m, const ByteBuffer &instanceData) const
+    void DirectX12PipelineInstance::renderMeshInstanced(RenderTarget *target, size_t count, const GPUMeshData *m, const ByteBuffer &instanceData) const
     {
         assert(instanceData.mSize > 0);
         assert(mInstanceDataSize * count == instanceData.mSize);
 
-        ID3D12GraphicsCommandList *commandList = DirectX12RenderContext::getSingleton().mCommandList.mList;
+        ID3D12GraphicsCommandList *commandList = static_cast<DirectX12RenderTarget *>(target)->mCommandList;
 
         const DirectX12MeshData *mesh = static_cast<const DirectX12MeshData *>(m);
 
@@ -123,13 +124,13 @@ namespace Render {
         }
     }
 
-    void DirectX12PipelineInstance::bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset) const
+    void DirectX12PipelineInstance::bindTextures(RenderTarget *target, const std::vector<TextureDescriptor> &tex, size_t offset) const
     {
         for (size_t i = 0; i < tex.size(); ++i) {
             if (tex[i].mTextureHandle) {
                 D3D12_GPU_DESCRIPTOR_HANDLE handle;
                 handle.ptr = tex[i].mTextureHandle;
-                DirectX12RenderContext::getSingleton().mCommandList.mList->SetGraphicsRootDescriptorTable(4 + offset + i, handle);
+                static_cast<DirectX12RenderTarget *>(target)->mCommandList->SetGraphicsRootDescriptorTable(4 + offset + i, handle);
             }
         }
     }

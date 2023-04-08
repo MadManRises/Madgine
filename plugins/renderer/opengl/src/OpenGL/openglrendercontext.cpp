@@ -610,26 +610,6 @@ namespace Render {
         return checkMultisampling();
     }
 
-    void OpenGLRenderContext::pushAnnotation(const char *tag)
-    {
-#if OPENGL_ES
-        //glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, tag);
-#else
-        if (glPushDebugGroupKHR)
-            glPushDebugGroupKHR(GL_DEBUG_SOURCE_APPLICATION, 0, -1, tag);
-#endif
-    }
-
-    void OpenGLRenderContext::popAnnotation()
-    {
-#if OPENGL_ES
-        //glPopDebugGroup();
-#else
-        if (glPopDebugGroupKHR)
-            glPopDebugGroupKHR();
-#endif
-    }
-
     static constexpr GLenum vTypes[] = {
         GL_FLOAT,
         GL_FLOAT,
@@ -675,11 +655,7 @@ namespace Render {
 #    endif
 #endif
 
-        GLuint stride = 0;
-        for (size_t i = 0; i < VertexElements::size; ++i) {
-            if (format.has(i))
-                stride += sVertexElementSizes[i];
-        }
+        GLuint stride = format.stride();        
 
         const std::byte *offset = 0;
         for (size_t i = 0; i < VertexElements::size; ++i) {

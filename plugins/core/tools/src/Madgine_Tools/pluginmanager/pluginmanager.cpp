@@ -12,8 +12,6 @@
 #    include "Meta/keyvalue/metatable_impl.h"
 #    include "Meta/serialize/serializetable_impl.h"
 
-#    include "Generic/guard.h"
-
 #    include "Interfaces/filesystem/fsapi.h"
 
 #    include "Modules/plugins/plugin.h"
@@ -25,16 +23,14 @@
 
 #    include "imgui/imguiaddons.h"
 
+#    include "Modules/ini/inisection.h"
+
+#include "pluginexporter.h"
+
 UNIQUECOMPONENT(Engine::Tools::PluginManager);
 
 namespace Engine {
 namespace Tools {
-
-    static Guard excludeFromExport {
-        []() {
-            Root::skipUniqueComponentOnExport(&typeInfo<PluginManager>);
-        }
-    };
 
     PluginManager::PluginManager(ImRoot &root)
         : Tool<PluginManager>(root)
@@ -47,93 +43,126 @@ namespace Tools {
         ImGui::SetNextWindowSize({ 550, 400 }, ImGuiCond_FirstUseEver);
         if (ImGui::Begin("Plugin Manager", &mVisible)) {
 
-            if (ImGui::Button("Export (with Tools)")) {
-                Root::exportStaticComponentHeader("components_default(tools).cpp", true);
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Export (without Tools)")) {
-                Root::exportStaticComponentHeader("components_default.cpp", false);
-            }
-
             ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 40, 40, 255));
             ImGui::Text("Changes are only applied on restart!");
             ImGui::PopStyleColor();
 
-            for (auto &[sectionName, section] : mManager) {
-                if (ImGui::CollapsingHeader(sectionName.c_str())) {
-                    for (auto &[pluginName, plugin] : section) {
-                        const std::string &project = plugin.project();
-
-                        bool loaded = plugin.isLoaded();
-
-                        bool clicked = false;
-                        std::string displayName { pluginName + " (" + project + ")" };
-                        ImGui::BeginTreeArrow(&plugin);
-                        ImGui::SameLine();
-                        if (plugin.isDependencyOf(PLUGIN_SELF)) {
-                            ImGui::BeginDisabled();
-                        }
-                        if (section.isExclusive()) {
-                            clicked = ImGui::RadioButton(displayName.c_str(), loaded);
-                            if (clicked)
-                                loaded = true;
-                        } else
-                            clicked = ImGui::Checkbox(displayName.c_str(), &loaded);
-                        if (clicked) {
-                            if (loaded) {
-                                if (section.loadPlugin(pluginName))
-                                    updateConfigFile();
-                            } else {
-                                if (!section.unloadPlugin(pluginName))
-                                    updateConfigFile();
-                            }
-                        }
-                        if (plugin.isDependencyOf(PLUGIN_SELF)) {
-                            ImGui::EndDisabled();
-                        }
-                        if (ImGui::EndTreeArrow()) {
-                            if (loaded) {
-                                const Plugins::BinaryInfo *binInfo = plugin.info();
-
-                                const char **dep = binInfo->mPluginDependencies;
-                                if (*dep && ImGui::TreeNode("Dependencies")) {
-                                    while (*dep) {
-                                        ImGui::Text("%s", *dep);
-                                        ++dep;
-                                    }
-                                    ImGui::TreePop();
-                                }
-
-                                if (ImGui::TreeNode("UniqueComponents")) {
-                                    for (UniqueComponent::RegistryBase *reg : UniqueComponent::registryRegistry()) {
-                                        for (UniqueComponent::CollectorInfoBase *info : *reg) {
-                                            if (info->mBinary == binInfo && ImGui::TreeNode(info->mBaseInfo->mTypeName.data(), "%.*s", static_cast<int>(info->mBaseInfo->mTypeName.size()), info->mBaseInfo->mTypeName.data())) {
-                                                for (const std::vector<const TypeInfo *> &components : info->mElementInfos) {
-                                                    ImGui::Text(components.front()->mTypeName);
-                                                }
-                                                ImGui::TreePop();
-                                            }
-                                        }
-                                    }
-                                    ImGui::TreePop();
-                                }
-                            }
-                            ImGui::TreePop();
-                        }
-                    }                    
-                }
-            }
+            renderPluginSelection(false);
         }
         ImGui::End();
     }
 
+    bool PluginManager::renderConfiguration(const Filesystem::Path &config)
+    {
+        bool changed = false;
+
+        if (ImGui::CollapsingHeader("Plugins")) {
+
+            ImGui::Indent();
+
+            changed |= renderPluginSelection(true);
+            ImGui::Unindent();
+        }
+
+        return changed;
+    }
+
+    void PluginManager::loadConfiguration(const Filesystem::Path &config)
+    {
+        mCurrentConfiguration.loadFromDisk(config / "plugins.cfg");
+        for (auto &[sectionName, section] : mCurrentConfiguration) {
+            if (!mManager.hasSection(sectionName))
+                continue;
+            Plugins::PluginSection &pSection = mManager[sectionName];
+            for (auto &[pluginName, plugin] : section) {
+                Plugins::Plugin *p = pSection.getPlugin(pluginName);
+                if (p)
+                    p->ensureModule(mManager);
+            }
+        }
+    }
+
+    void PluginManager::saveConfiguration(const Filesystem::Path &config)
+    {
+        mCurrentConfiguration.saveToDisk(config / "plugins.cfg");
+        PluginExporter::exportStaticComponentHeader(config / "components.cpp");
+    }
+
+    bool PluginManager::renderPluginSelection(bool isConfiguration)
+    {
+        bool changed = false;
+
+        for (auto &section : mManager) {
+            if (ImGui::CollapsingHeader(section.name().c_str())) {
+                Ini::IniFile &file = isConfiguration ? mCurrentConfiguration : mManager.selection();
+                if (isConfiguration) {
+                    ImGui::Indent();
+                }
+                for (auto &plugin : section) {
+                    const std::string &project = plugin.project();
+
+                    bool loaded = plugin.isLoaded(file);
+
+                    bool clicked = false;
+                    std::string displayName { plugin.name() + " (" + project + ")" };
+                    if (!isConfiguration) {
+                        ImGui::BeginTreeArrow(&plugin);
+                        ImGui::SameLine();
+                    }
+                    if (section.isExclusive()) {
+                        clicked = ImGui::RadioButton(displayName.c_str(), loaded);
+                        if (clicked)
+                            loaded = true;
+                    } else
+                        clicked = ImGui::Checkbox(displayName.c_str(), &loaded);
+                    if (clicked) {
+                        changed = true;
+                        if (loaded) {
+                            section.loadPlugin(plugin.name(), file);
+                        } else {
+                            section.unloadPlugin(plugin.name(), file);
+                        }
+                    }
+                    if (!isConfiguration && ImGui::EndTreeArrow()) {
+                        if (loaded) {
+                            const Plugins::BinaryInfo *binInfo = plugin.info();
+
+                            const char **dep = binInfo->mPluginDependencies;
+                            if (*dep && ImGui::TreeNode("Dependencies")) {
+                                while (*dep) {
+                                    ImGui::Text("%s", *dep);
+                                    ++dep;
+                                }
+                                ImGui::TreePop();
+                            }
+
+                            if (ImGui::TreeNode("UniqueComponents")) {
+                                for (UniqueComponent::RegistryBase *reg : UniqueComponent::registryRegistry()) {
+                                    for (UniqueComponent::CollectorInfoBase *info : *reg) {
+                                        if (info->mBinary == binInfo && ImGui::TreeNode(info->mBaseInfo->mTypeName.data(), "%.*s", static_cast<int>(info->mBaseInfo->mTypeName.size()), info->mBaseInfo->mTypeName.data())) {
+                                            for (const std::vector<const TypeInfo *> &components : info->mElementInfos) {
+                                                ImGui::Text(components.front()->mTypeName);
+                                            }
+                                            ImGui::TreePop();
+                                        }
+                                    }
+                                }
+                                ImGui::TreePop();
+                            }
+                        }
+                        ImGui::TreePop();
+                    }
+                }
+                if (isConfiguration)
+                    ImGui::Unindent();
+            }
+        }
+
+        return changed;
+    }
+
     Threading::Task<bool> PluginManager::init()
     {
-        //ProjectManager &project = getTool<ProjectManager>();
-
-        //project.mProjectChanged.connect(&PluginManager::updateConfigFile, this);
-        //setCurrentConfig(project.projectRoot(), project.config());
-
         co_return co_await ToolBase::init();
     }
 
@@ -142,27 +171,6 @@ namespace Tools {
         return "Plugin Manager";
     }
 
-    /* void PluginManager::setCurrentConfig(const Filesystem::Path &path, const std::string &name)
-    {
-        if (!name.empty()) {
-            Filesystem::Path p = path / (name + ".cfg");
-            if (Filesystem::exists(p)) {
-                mManager.loadFromFile(p, true);
-            }
-        }
-        updateConfigFile();
-    }
-    */
-    void PluginManager::updateConfigFile()
-    {
-        /* ProjectManager &project = getTool<ProjectManager>();
-        if (!project.config().empty()) {
-            Filesystem::Path p = project.projectRoot() / (project.config() + "(tools).cfg");
-            mManager.saveToFile(p, true);
-            Filesystem::Path p_notools = project.projectRoot() / (project.config() + ".cfg");
-            mManager.saveToFile(p_notools, false);
-        }*/
-    }
 }
 }
 

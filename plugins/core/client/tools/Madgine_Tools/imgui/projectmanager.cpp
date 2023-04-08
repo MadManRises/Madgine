@@ -22,6 +22,8 @@
 
 #include "Interfaces/window/windowapi.h"
 
+#include "Generic/projections.h"
+
 METATABLE_BEGIN_BASE(Engine::Tools::ProjectManager, Engine::Tools::ToolBase)
 PROPERTY(ProjectRoot, projectRootString, setProjectRoot)
 PROPERTY(Layout, layout, setLayout)
@@ -30,6 +32,9 @@ METATABLE_END(Engine::Tools::ProjectManager)
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::ProjectManager, Engine::Tools::ToolBase)
 ENCAPSULATED_FIELD(ProjectRoot, projectRoot, setProjectRoot)
 ENCAPSULATED_FIELD(Layout, layout, setLayout)
+FIELD(mShowConfigurations)
+FIELD(mShowSettings)
+FIELD(mConfigs)
 SERIALIZETABLE_END(Engine::Tools::ProjectManager)
 
 UNIQUECOMPONENT(Engine::Tools::ProjectManager)
@@ -60,8 +65,98 @@ namespace Tools {
 
     void ProjectManager::render()
     {
-        /* ImGui::Begin("Game", nullptr, ImGuiWindowFlags_NoBackground);
-        ImGui::End();*/
+
+        if (mShowConfigurations) {
+            if (ImGui::Begin("Project Configurations", &mShowConfigurations, mUnsavedConfiguration ? ImGuiWindowFlags_UnsavedDocument : 0)) {
+
+                bool openNewConfigPopup = false;
+
+                if (ImGui::BeginCombo("##CurrentConfig", mCurrentConfig.c_str())) {
+
+                    for (const Filesystem::Path &config : mConfigs)
+                        if (ImGui::Selectable(config.c_str(), mCurrentConfig == config))
+                            setCurrentConfig(config);
+
+                    if (ImGui::Selectable("..."))
+                        openNewConfigPopup = true;
+
+                    ImGui::EndCombo();
+                }
+
+                if (ImGui::Button("Save")) {
+                    for (ToolBase *tool : mRoot.tools() | std::views::transform(projectionUniquePtrToPtr)) {
+                        if (tool->isEnabled())
+                            tool->saveConfiguration(mCurrentConfig);
+                    }
+                    mUnsavedConfiguration = false;
+                }
+
+                if (!mCurrentConfig.empty()) {
+
+                    for (ToolBase *tool : mRoot.tools() | std::views::transform(projectionUniquePtrToPtr)) {
+                        if (tool->isEnabled())
+                            mUnsavedConfiguration |= tool->renderConfiguration(mCurrentConfig);
+                    }
+                }
+
+                ImGui::End();
+
+                bool openCreateNewConfigPopup = false;
+                bool openOpenExistingConfigPopup = false;
+                bool openCopyConfigPopup = false;
+
+                if (ImGui::BeginPopup("NewConfig")) {
+                    if (ImGui::MenuItem("Create New"))
+                        openCreateNewConfigPopup = true;
+                    if (ImGui::MenuItem("Open Existing"))
+                        openOpenExistingConfigPopup = true;
+                    if (ImGui::MenuItem("Copy Config"))
+                        openCopyConfigPopup = true;
+
+                    ImGui::EndPopup();
+                }
+
+                if (ImGui::BeginPopupModal("CreateNewConfig")) {
+
+                    ImGui::EndPopup();
+                }
+
+                if (ImGui::BeginPopupModal("OpenExistingConfig")) {
+                    bool accepted;
+                    if (ImGui::DirectoryPicker(&mCurrentPath, &mCurrentSelectionPath, accepted)) {
+                        if (accepted) {
+                            setCurrentConfig(mCurrentSelectionPath);
+                        }
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::EndPopup();
+                }
+
+                if (ImGui::BeginPopupModal("CopyConfig")) {
+
+                    ImGui::EndPopup();
+                }
+
+                if (openNewConfigPopup)
+                    ImGui::OpenPopup("NewConfig");
+                if (openCreateNewConfigPopup)
+                    ImGui::OpenPopup("CreateNewConfig");
+                if (openOpenExistingConfigPopup)
+                    ImGui::OpenPopup("OpenExistingConfig");
+                if (openCopyConfigPopup)
+                    ImGui::OpenPopup("CopyConfig");
+            }
+        }
+
+        if (mShowSettings) {
+            if (ImGui::Begin("Settings", &mShowSettings)) {
+                for (ToolBase *tool : mRoot.tools() | std::views::transform(projectionUniquePtrToPtr)) {
+                    if (tool->isEnabled())
+                        tool->renderSettings();
+                }
+                ImGui::End();
+            }
+        }
     }
 
     void ProjectManager::renderMenu()
@@ -135,9 +230,8 @@ namespace Tools {
 
             ImGui::Separator();
 
-            if (ImGui::MenuItem("Export Resources")) {
-                Resources::ResourceManager::getSingleton().writeResourceList("resources.list");
-            }
+            ImGui::MenuItem("Configurations", "", &mShowConfigurations);
+            ImGui::MenuItem("Settings", "", &mShowSettings);
 
             ImGui::Separator();
 
@@ -162,7 +256,30 @@ namespace Tools {
             layoutNameBuffer.clear();
             ImGui::OpenPopup("NewLayout");
         }
+    }
 
+    bool ProjectManager::renderConfiguration(const Filesystem::Path &config)
+    {
+        bool changed = false;
+
+        if (ImGui::CollapsingHeader("Client")) {
+            ImGui::Indent();
+
+            changed |= ImGui::InputText("Layout", &mConfiguration["General"]["LAYOUT"]);
+
+            ImGui::Unindent();
+        }
+        return false;
+    }
+
+    void ProjectManager::loadConfiguration(const Filesystem::Path &config)
+    {
+        mConfiguration.loadFromDisk(config / "client.ini");
+    }
+
+    void ProjectManager::saveConfiguration(const Filesystem::Path &config)
+    {
+        mConfiguration.saveToDisk(config / "client.ini");
     }
 
     void ProjectManager::setProjectRoot(const Filesystem::Path &root)
@@ -197,6 +314,16 @@ namespace Tools {
             }
         }
         return result;
+    }
+
+    void ProjectManager::setCurrentConfig(const Filesystem::Path &config)
+    {
+        mCurrentConfig = config;
+        mConfigs.insert(mCurrentConfig);
+        for (ToolBase *tool : mRoot.tools() | std::views::transform(projectionUniquePtrToPtr)) {
+            if (tool->isEnabled())
+                tool->loadConfiguration(mCurrentConfig);
+        }
     }
 
     void ProjectManager::setLayout(const std::string &layout)
@@ -239,7 +366,6 @@ namespace Tools {
             Filesystem::Path filePath = mProjectRoot / "data" / (mLayout + ".layout");
 
             mWindow->loadLayout(filePath);
-
         }
     }
 

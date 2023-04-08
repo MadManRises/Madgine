@@ -42,7 +42,7 @@ namespace Tools {
         if (!mMesh.available())
             return;
 
-        target->context()->pushAnnotation("Grid");
+        target->pushAnnotation("Grid");
 
         Vector2i size = target->size();
         float aspectRatio = float(size.x) / size.y;
@@ -52,9 +52,9 @@ namespace Tools {
             parameters->vp = target->getClipSpaceMatrix() * mCamera->getViewProjectionMatrix(aspectRatio);
         }
 
-        mPipeline->renderMesh(mMesh);
+        mPipeline->renderMesh(target, mMesh);
 
-        target->context()->popAnnotation();
+        target->popAnnotation();
     }
 
     int GridPass::priority() const

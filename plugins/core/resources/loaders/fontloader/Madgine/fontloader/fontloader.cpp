@@ -134,15 +134,16 @@ namespace Render {
             Serialize::FormattedSerializeStream in = cache.openRead(std::move(fileBuffer), std::make_unique<Serialize::SafeBinaryFormatter>());
             assert(in);
             ByteBuffer b;
+            Vector2i textureSize;
             Serialize::StreamResult result = [&]() {
                 STREAM_PROPAGATE_ERROR(read(in, font.mGlyphs, nullptr));
-                STREAM_PROPAGATE_ERROR(read(in, font.mTextureSize, nullptr));
+                STREAM_PROPAGATE_ERROR(read(in, textureSize, nullptr));
                 STREAM_PROPAGATE_ERROR(read(in, font.mAscender, nullptr));
                 STREAM_PROPAGATE_ERROR(read(in, font.mDescender, nullptr));
                 return read(in, b, nullptr);
             }();
             if (result.mState == Serialize::StreamState::OK) {
-                co_return co_await font.mTexture.createTask(TextureType_2D, FORMAT_RGBA8, font.mTextureSize, std::move(b));
+                co_return co_await font.mTexture.createTask(TextureType_2D, FORMAT_RGBA8, textureSize, std::move(b));
             }
             LOG_ERROR("Failed to load \"" << info.resource()->path() << "\": \n"
                                           << result);
@@ -216,11 +217,11 @@ namespace Render {
         std::vector<Atlas2::Entry> entries = atlas.insert(
             extendedSizes, expand, true);
 
-        font.mTextureSize = { areaSize * UNIT_SIZE,
+        Vector2i textureSize = { areaSize * UNIT_SIZE,
             areaSize * UNIT_SIZE };
-        size_t byteSize = font.mTextureSize.x * font.mTextureSize.y;
+        size_t byteSize = textureSize.x * textureSize.y;
         std::unique_ptr<std::array<unsigned char, 4>[]> texBuffer = std::make_unique<std::array<unsigned char, 4>[]>(byteSize);
-        AreaView<std::array<unsigned char, 4>, 2> tex { texBuffer.get(), { static_cast<size_t>(font.mTextureSize.x), static_cast<size_t>(font.mTextureSize.y) } };
+        AreaView<std::array<unsigned char, 4>, 2> tex { texBuffer.get(), { static_cast<size_t>(textureSize.x), static_cast<size_t>(textureSize.y) } };
 
         for (unsigned char c = 0; c < Font::sFontGlyphCount; c++) {
             if (ignore(c, &font.mGlyphs[c]))
@@ -346,14 +347,14 @@ namespace Render {
         FT_Done_Face(face);
         FT_Done_FreeType(ft);
 
-        if (!co_await font.mTexture.createTask(TextureType_2D, FORMAT_RGBA8, font.mTextureSize, { texBuffer.get(), 4 * byteSize }))
+        if (!co_await font.mTexture.createTask(TextureType_2D, FORMAT_RGBA8, textureSize, { texBuffer.get(), 4 * byteSize }))
             co_return false;
 
         Filesystem::FileManager cache("msdf_cache");
         Serialize::FormattedSerializeStream out = cache.openWrite(info.resource()->path().parentPath() / (std::string { info.resource()->name() } + ".msdf"), std::make_unique<Serialize::SafeBinaryFormatter>());
         if (out) {
             write(out, font.mGlyphs, "glyphs");
-            write(out, font.mTextureSize, "size");
+            write(out, textureSize, "size");
             write(out, font.mAscender, "ascender");
             write(out, font.mDescender, "descender");
             write(out, ByteBuffer { texBuffer.get(), 4 * byteSize }, "texture");

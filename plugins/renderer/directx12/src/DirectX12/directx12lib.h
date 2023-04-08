@@ -26,8 +26,6 @@
 MADGINE_DIRECTX12_EXPORT void dx12Dump(HRESULT result);
 MADGINE_DIRECTX12_EXPORT bool checkDevice(HRESULT &result);
 
-#define MADGINE_DIRECTX12_USE_SINGLE_COMMAND_LIST 0
-
 inline void dx12Check(HRESULT result = 0)
 {
     if (FAILED(result) || !checkDevice(result)) {

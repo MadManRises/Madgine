@@ -1,22 +1,23 @@
 #pragma once
 
+#include "Generic/execution/algorithm.h"
+#include "Generic/execution/execution.h"
+#include "Generic/execution/virtualsender.h"
 #include "connection.h"
-#include "connectionstore.h"
 
 namespace Engine {
 namespace Threading {
-    extern MODULES_EXPORT std::mutex sSignalConnectMutex;
 
-    template <typename... _Ty>
+    template <typename... Ty>
     struct SignalStub {
     public:
         SignalStub() = default;
 
-        SignalStub(const SignalStub<_Ty...> &other)
+        SignalStub(const SignalStub<Ty...> &other)
         {
         }
 
-        SignalStub(SignalStub<_Ty...> &&) noexcept
+        SignalStub(SignalStub<Ty...> &&) noexcept
         {
         }
 
@@ -25,66 +26,103 @@ namespace Threading {
             disconnectAll();
         }
 
-        SignalStub<_Ty...> &operator=(const SignalStub<_Ty...> &other) = delete;
+        SignalStub<Ty...> &operator=(const SignalStub<Ty...> &other) = delete;
 
         template <typename T, typename R, typename... Args>
-        std::weak_ptr<ConnectionBase> connect(R (T::*f)(Args...), T *t, ConnectionStore *store = nullptr)
+        void connect(R (T::*f)(Args...), T *t)
         {
-            return connect([t, f](Args... args) { return (t->*f)(std::forward<Args>(args)...); }, store);
+            connect([t, f](Args... args) { return (t->*f)(std::forward<Args>(args)...); });
         }
 
         template <typename T, typename R, typename... Args>
-        std::weak_ptr<ConnectionBase> connect(R (T::*f)(Args...), T *t, TaskQueue *queue, ConnectionStore *store = nullptr)
+        void connect(R (T::*f)(Args...), T *t, TaskQueue *queue)
         {
-            return connect([t, f](Args... args) { return (t->*f)(std::forward<Args>(args)...); }, queue, {}, store);
+            connect([t, f](Args... args) { return (t->*f)(std::forward<Args>(args)...); }, queue);
         }
 
         template <typename T>
-        std::weak_ptr<ConnectionBase> connect(T &&slot, ConnectionStore *store = nullptr)
+        void connect(T &&slot)
         {
-            if (!store)
-                store = &ConnectionStore::globalStore();
-            std::lock_guard<std::mutex> guard(sSignalConnectMutex);
-            std::weak_ptr<Connection<_Ty...>> conn = store->template emplace_front<DirectConnection<T, _Ty...>>(
-                std::forward<T>(slot));
-            mConnectedSlots.emplace_back(conn);
-            return conn;
+            Execution::detach(
+                sender() | Execution::then(TupleUnpacker::wrap(std::forward<T>(slot))) | Execution::repeat);
         }
 
         template <typename T>
-        std::weak_ptr<ConnectionBase> connect(
-            T &&slot, TaskQueue *queue, const std::vector<DataMutex *> &dependencies = {}, ConnectionStore *store = nullptr)
+        void connect(T &&slot, TaskQueue *queue)
         {
-            if (!store)
-                store = &ConnectionStore::globalStore();
-            std::lock_guard<std::mutex> guard(sSignalConnectMutex);
-            std::weak_ptr<Connection<_Ty...>> conn = store->template emplace_front<QueuedConnection<T, _Ty...>>(
-                std::forward<T>(slot), queue);
-            mConnectedSlots.emplace_back(conn);
-            return conn;
+            Execution::detach(
+                sender() | Execution::then([queue, slot { std::forward<T>(slot) }]() mutable { queue->queue(slot); }) | Execution::repeat);
+        }
+
+        auto sender()
+        {
+            return Execution::make_virtual_sender<Connection<Ty...>, GenericResult, Ty...>(this);
+        }
+
+        template <typename T, typename R, typename... Args>
+        void connect(R (T::*f)(Args...), T *t, std::stop_token stop)
+        {
+            connect([t, f](Args... args) { return (t->*f)(std::forward<Args>(args)...); }, stop);
+        }
+
+        template <typename T, typename R, typename... Args>
+        void connect(R (T::*f)(Args...), T *t, TaskQueue *queue, std::stop_token stop)
+        {
+            connect([t, f](Args... args) { return (t->*f)(std::forward<Args>(args)...); }, queue, stop);
+        }
+
+        template <typename T>
+        void connect(T &&slot, std::stop_token stop)
+        {
+            Execution::detach(
+                sender(stop) | Execution::then(TupleUnpacker::wrap(std::forward<T>(slot))) | Execution::repeat);
+        }
+
+        template <typename T>
+        void connect(T &&slot, TaskQueue *queue, std::stop_token stop)
+        {
+            Execution::detach(
+                sender(stop) | Execution::then([queue, slot { std::forward<T>(slot) }]() mutable { queue->queue(slot); }) | Execution::repeat);
+        }
+
+        auto sender(std::stop_token stop)
+        {
+            return Execution::make_virtual_sender<StoppableConnection<Ty...>, GenericResult, Ty...>(this, stop);
+        }
+
+        void enqueue(Connection<Ty...> *con, Connection<Ty...> *&next)
+        {
+            assert(!next);
+            assert(con);
+            next = mConnectedSlots;
+            mConnectedSlots = con;
+        }
+
+        void disconnect(Connection<Ty...> *con)
+        {
+            std::lock_guard guard { mMutex };
+            assert(con);
+            if (mConnectedSlots) {
+                mConnectedSlots->cancel(con, mConnectedSlots);
+            }
         }
 
     protected:
         void disconnectAll()
         {
-            for (const std::weak_ptr<Connection<_Ty...>> &conn : mConnectedSlots) {
-                if (std::shared_ptr<Connection<_Ty...>> ptr = conn.lock()) {
-                    ptr->disconnect();
-                }
+            Connection<Ty...> *current;
+            {
+                std::lock_guard guard { mMutex };
+                current = this->mConnectedSlots;
+                this->mConnectedSlots = nullptr;
             }
-            mConnectedSlots.clear();
-        }
-
-        void copyConnections(const SignalStub<_Ty...> &other)
-        {
-            for (const std::weak_ptr<Connection<_Ty...>> &conn : other.mConnectedSlots) {
-                if (std::shared_ptr<Connection<_Ty...>> ptr = conn.lock()) {
-                    mConnectedSlots.emplace_back(ptr->clone());
-                }
+            while (current) {
+                current->cancel(current);
             }
         }
 
-        std::vector<std::weak_ptr<Connection<_Ty...>>> mConnectedSlots;
+        Connection<Ty...> *mConnectedSlots = nullptr;
+        std::mutex mMutex;
     };
 
 }

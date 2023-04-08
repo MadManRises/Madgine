@@ -3,15 +3,20 @@
 namespace Engine {
 namespace Execution {
 
-    template <typename F, typename V, typename R>
+    template <typename F, typename R, typename... V>
     struct Sender : F {
         using F::operator();
+
+        using result_type = R;
     };
 
-    template <typename V, typename R, typename F>
-    Sender<F, V, R> make_sender(F &&f)
+    template <typename R, typename... V, typename F>
+    auto make_sender(F &&f)
     {
-        return { std::forward<F>(f) };
+        if constexpr (std::same_as<type_pack<V...>, type_pack<void>>)
+            return make_sender<R>(std::forward<F>(f));
+        else
+            return Sender<F, R, V...> { std::forward<F>(f) };
     }
 
 #define ASYNC_STUB(Name, Impl, ...)                                                                                                                                                                         \

@@ -33,10 +33,27 @@ namespace Tools {
     {
     }
 
+    bool ToolBase::renderConfiguration(const Filesystem::Path &config)
+    {
+        return false;
+    }
+
+    void ToolBase::renderSettings()
+    {
+    }
+
     void ToolBase::update()
     {
         if (mVisible)
             render();
+    }
+
+    void ToolBase::loadConfiguration(const Filesystem::Path &config)
+    {
+    }
+
+    void ToolBase::saveConfiguration(const Filesystem::Path &config)
+    {
     }
 
     bool ToolBase::isVisible() const

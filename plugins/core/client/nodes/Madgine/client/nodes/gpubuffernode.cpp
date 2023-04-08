@@ -205,7 +205,7 @@ namespace Render {
             bufferStruct->mAnnotations.push_back("buffer" + std::to_string(_data->mIndex));
 
             for (uint32_t i = 0; i < dataInCount(); ++i) {
-                bufferStruct->mVariables.push_back({ std::string { dataInName(i) }, dataInType(i) });
+                bufferStruct->mVariables.push_back({ {}, { std::string { dataInName(i) }, dataInType(i) } });
             }
 
             data = std::move(_data);

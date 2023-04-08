@@ -88,7 +88,7 @@ namespace Render {
         }
     }
 
-    void DirectX11PipelineInstance::renderMesh(const GPUMeshData *m) const
+    void DirectX11PipelineInstance::renderMesh(RenderTarget *target, const GPUMeshData *m) const
     {
         const DirectX11MeshData *mesh = static_cast<const DirectX11MeshData *>(m);
 
@@ -105,7 +105,7 @@ namespace Render {
         }
     }
 
-    void DirectX11PipelineInstance::renderMeshInstanced(size_t count, const GPUMeshData *m, const ByteBuffer &instanceData) const
+    void DirectX11PipelineInstance::renderMeshInstanced(RenderTarget *target, size_t count, const GPUMeshData *m, const ByteBuffer &instanceData) const
     {
         assert(mInstanceDataSize * count == instanceData.mSize);
         assert(instanceData.mSize > 0);
@@ -128,7 +128,7 @@ namespace Render {
         }
     }
 
-    void DirectX11PipelineInstance::bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset) const
+    void DirectX11PipelineInstance::bindTextures(RenderTarget *target, const std::vector<TextureDescriptor> &tex, size_t offset) const
     {
         bindTexturesImpl(tex, offset);
     }

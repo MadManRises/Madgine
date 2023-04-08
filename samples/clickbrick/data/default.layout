@@ -46,6 +46,37 @@
                                 </Conditional>
                             </mProperties>
                         </Button>
+                        <TextEdit serId=9>
+                            <mTextRenderData serId=10>
+                                <mFontSize>16</mFontSize>
+                                <mPivot>
+                                    <Element>0.5</Element>
+                                    <Element>0.5</Element>
+                                </mPivot>
+                                <mColor>[0, 0, 0, 1]</mColor>
+                                <mFont>OpenSans-Regular</mFont>
+                            </mTextRenderData>
+                            <mImageRenderData serId=11>
+                                <Image>blank_white</Image>
+                                <mLeftBorder>0</mLeftBorder>
+                                <mTopBorder>0</mTopBorder>
+                                <mBottomBorder>0</mBottomBorder>
+                                <mRightBorder>0</mRightBorder>
+                            </mImageRenderData>
+                            <Border>
+                                <Element>0</Element>
+                                <Element>0</Element>
+                            </Border>
+                            <mChildren>
+                            </mChildren>
+                            <mName>Unnamed</mName>
+                            <mPos>[0, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
+                            <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
+                            <mConditions>
+                            </mConditions>
+                            <mProperties>
+                            </mProperties>
+                        </TextEdit>
                     </mChildren>
                     <mName>MainMenu</mName>
                     <mPos>[0, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>

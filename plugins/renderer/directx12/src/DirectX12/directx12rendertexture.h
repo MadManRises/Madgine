@@ -16,6 +16,9 @@ namespace Render {
         bool resizeImpl(const Vector2i &size) override;
         Vector2i size() const override;
         
+        virtual void beginFrame() override;
+        virtual void endFrame() override;
+
         virtual void beginIteration(size_t iteration) const override;
         virtual void endIteration(size_t iteration) const override;
 
@@ -23,6 +26,8 @@ namespace Render {
         virtual size_t textureCount() const override;
         virtual TextureDescriptor depthTexture() const override;
         
+        const DirectX12Texture &texture() const;
+
     private:        
         OffsetPtr mDepthBufferView;
         DirectX12Texture mTexture;

@@ -143,18 +143,14 @@ namespace Render {
 
         uploadHeap->Unmap(0, nullptr);
 
-        DirectX12CommandList &list = DirectX12RenderContext::getSingleton().mTempCommandList;
+        DirectX12CommandList list = DirectX12RenderContext::getSingleton().fetchCommandList("upload");
 
-        auto transition = CD3DX12_RESOURCE_BARRIER::Transition(mPersistentHeap, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_COPY_DEST);
-        list.mList->ResourceBarrier(1, &transition);
-        list.mList->CopyBufferRegion(mPersistentHeap, ptr - mPersistentHeap->GetGPUVirtualAddress(), uploadHeap, 0, data.mSize);
+        list.Transition(mPersistentHeap, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_COPY_DEST);        
+        list->CopyBufferRegion(mPersistentHeap, ptr - mPersistentHeap->GetGPUVirtualAddress(), uploadHeap, 0, data.mSize);
 
-        auto transition2 = CD3DX12_RESOURCE_BARRIER::Transition(mPersistentHeap, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
-        list.mList->ResourceBarrier(1, &transition2);
+        list.Transition(mPersistentHeap, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);        
 
-        DirectX12RenderContext::getSingleton().ExecuteCommandList(list, [uploadHeap { std::move(uploadHeap) }]() {
-
-        });
+        list.attachResource(std::move(uploadHeap));
     }
 
     ID3D12Resource *DirectX12ConstantBufferHeap::resourceTemp() const

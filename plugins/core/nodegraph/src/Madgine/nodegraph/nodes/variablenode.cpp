@@ -103,7 +103,7 @@ namespace NodeGraph {
         if (!data) {
             data = std::make_unique<CodeGeneratorData>();
 
-            generator.file().statement(CodeGen::VariableDefinition { { varName, mDefaultValue.type() }, mDefaultValue });
+            generator.file().statement(CodeGen::VariableDefinition { {}, { varName, mDefaultValue.type() }, mDefaultValue });
         }
 
         return CodeGen::VariableRead { varName };

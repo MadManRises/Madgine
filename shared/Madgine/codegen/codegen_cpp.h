@@ -19,30 +19,6 @@ struct MADGINE_CODEGEN_EXPORT CppFile : File {
 
     virtual void statement(Statement statement) override;
 
-    struct MADGINE_CODEGEN_EXPORT CustomCodeBuilder {
-        CustomCodeBuilder(CppFile *file)
-            : mFile(file)
-        {
-        }
-        CustomCodeBuilder(CustomCodeBuilder &&) = default;
-        ~CustomCodeBuilder();
-
-        CustomCodeBuilder &operator<<(std::string_view code);
-        template <typename T>
-            requires (!std::convertible_to<T, std::string_view>)
-        CustomCodeBuilder &operator<<(const T &t) 
-        {
-            return (*this) << std::to_string(t);
-        }
-
-        CppFile *mFile;
-        std::ostringstream mStream;
-    };
-
-    CustomCodeBuilder operator<<(std::string_view code);
-
-    void addCustomCodeBlock(std::string_view code);
-
     void generate(std::ostream &stream);
 
     void generate(std::ostream &stream, Namespace &ns);
@@ -55,11 +31,12 @@ struct MADGINE_CODEGEN_EXPORT CppFile : File {
     void generate(std::ostream &stream, ArithOperation &op);
     void generate(std::ostream &stream, Constructor &con);
     void generate(std::ostream &stream, Constant &c);
+    void generate(std::ostream &stream, Comment &c);
+
+    void generate(std::ostream &stream, Statement &s);
 
 private:
-    std::string generateIncludeGuard(const Engine::BitArray<64> &conditionals);
-
-    std::vector<std::map<Engine::BitArray<64>, std::set<std::string>>> mIncludes;
+    std::vector<std::map<Engine::BitArray<62>, std::set<std::string>>> mIncludes;
 
     Namespace mGlobalNamespace;
     std::stack<Namespace *> mNamespaceStack;

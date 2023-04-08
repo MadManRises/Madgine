@@ -11,7 +11,7 @@ Project(DirectX12)
 set(sources "")
 FolderSources(sources "" src)
 FolderSources(sources src DirectX12 directx12forward.h directx12lib.h directx12geometryshaderloader.cpp directx12geometryshaderloader.h directx12meshdata.h directx12meshloader.cpp directx12meshloader.h directx12pixelshaderloader.cpp directx12pixelshaderloader.h directx12pipelineloader.cpp directx12pipelineloader.h directx12rendertexture.cpp directx12rendertexture.h directx12renderwindow.cpp directx12renderwindow.h directx12vertexshaderloader.cpp directx12vertexshaderloader.h directx12textureloader.cpp directx12textureloader.h directx12rendertarget.cpp directx12rendertarget.h directx12rendercontext.cpp directx12rendercontext.h directx12shadercodegen.cpp directx12shadercodegen.h)
-	FolderSources(sources DirectX12 util dx12dump.cpp directx12buffer.cpp directx12buffer.h directx12constantbufferheap.cpp directx12constantbufferheap.h directx12descriptorheap.cpp directx12descriptorheap.h directx12texture.cpp directx12texture.h directx12pipeline.cpp directx12pipeline.h directx12pipelineinstance.cpp directx12pipelineinstance.h)
+	FolderSources(sources DirectX12 util dx12dump.cpp directx12buffer.cpp directx12buffer.h directx12commandlist.cpp directx12commandlist.h directx12constantbufferheap.cpp directx12constantbufferheap.h directx12descriptorheap.cpp directx12descriptorheap.h directx12texture.cpp directx12texture.h directx12pipeline.cpp directx12pipeline.h directx12pipelineinstance.cpp directx12pipelineinstance.h)
 
 add_plugin(DirectX12 Madgine Renderer ${sources} PRECOMPILED_HEADER src/DirectX12/directx12lib.h)
 
@@ -39,6 +39,4 @@ add_tools(DirectX12 ${sources} PRECOMPILED_HEADER tools/DirectX12_Tools/directx1
 target_link_plugins(DirectX12Tools ClientTools)
 target_link_libraries(DirectX12Tools PRIVATE d3d12 dxgi dxcompiler)
 
-if (BUILD_TESTING)
-	add_subdirectory(test)
-endif()
+add_shadergen_target(DirectX11 -HLSL)

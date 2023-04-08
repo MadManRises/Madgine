@@ -71,7 +71,7 @@ namespace Tools {
             ImVec2 cursor = window->DC.CursorPos;
 
             if (mGamepadTexture.available())
-                ImGui::Image((void *)mGamepadTexture->mTextureHandle, Canvas);
+                ImGui::Image((void *)mGamepadTexture->handle(), Canvas);
 
             size_t i = 0;
             constexpr float offsets[2][2] = {

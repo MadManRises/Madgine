@@ -65,7 +65,7 @@ namespace Tools {
         ImGui_ImplDX11_NewFrame();
     }
 
-    void DirectX11ImRoot::renderViewport(ImGuiViewport *vp)
+    void DirectX11ImRoot::renderViewport(Render::RenderTarget *target, ImGuiViewport *vp)
     {
         ImGui_ImplDX11_RenderDrawData(vp->DrawData);
     }

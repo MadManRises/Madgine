@@ -38,7 +38,7 @@ namespace Render {
         if (!mPipeline.available())
             return;
 
-        target->context()->pushAnnotation("Im3D");
+        target->pushAnnotation("Im3D");
 
         Im3D::Im3DContext *context = Im3D::GetCurrentContext();
 
@@ -59,7 +59,7 @@ namespace Render {
 
         for (std::pair<const Im3DTextureId, Im3D::Im3DContext::RenderData> &p : context->mRenderData) {
 
-            mPipeline->bindTextures({ { p.first, Render::TextureType_2D } });
+            mPipeline->bindTextures(target, { { p.first, Render::TextureType_2D } });
 
             {
                 auto perObject = mPipeline->mapParameters<Im3DPerObject>(2);
@@ -72,22 +72,22 @@ namespace Render {
                 perObject->hasDistanceField = bool(p.second.mFlags & RenderPassFlags_DistanceField);
             }
 
-            mPipeline->bindTextures({ { p.first, TextureType_2D } });
+            mPipeline->bindTextures(target, { { p.first, TextureType_2D } });
 
             for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
                 if (!p.second.mVertices[i].empty()) {
                     mMeshes[i][0].update({ i + 1, p.second.mVertices[i], p.second.mIndices[i] });
-                    mPipeline->renderMesh(mMeshes[i][0]);
+                    mPipeline->renderMesh(target, mMeshes[i][0]);
                 }
                 
                 if (!p.second.mVertices2[i].empty()) {
                     mMeshes[i][1].update({ i + 1, p.second.mVertices2[i], p.second.mIndices2[i] });
-                    mPipeline->renderMesh(mMeshes[i][1]);
+                    mPipeline->renderMesh(target, mMeshes[i][1]);
                 }
             }
         }
 
-        target->context()->popAnnotation();
+        target->popAnnotation();
     }
 
     int Im3DRenderPass::priority() const

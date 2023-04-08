@@ -15,7 +15,7 @@ namespace Tools {
 
         virtual void newFrame() override;
 
-        virtual void renderViewport(ImGuiViewport *vp) override;
+        virtual void renderViewport(Render::RenderTarget *target, ImGuiViewport *vp) override;
     };
 
 }

@@ -34,7 +34,7 @@ namespace Render {
         if (glFramebufferTexture){
 #endif
             assert(j == 0);
-            glFramebufferTexture(GL_FRAMEBUFFER, attachment, tex.mTextureHandle, 0);
+            glFramebufferTexture(GL_FRAMEBUFFER, attachment, tex.handle(), 0);
             GL_CHECK();
 #if !OPENGL_ES
         }
@@ -50,7 +50,7 @@ namespace Render {
                 assert(j == 0);
             }
 
-            glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, target, tex.mTextureHandle, 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, target, tex.handle(), 0);
             GL_CHECK();
         }
 #endif
@@ -119,7 +119,7 @@ namespace Render {
                 glBindFramebuffer(GL_FRAMEBUFFER, mMultisampledFramebuffer);
                 GL_CHECK();
                 for (size_t i = 0; i < config.mTextureCount; ++i) {
-                    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, mTextures[i].mTextureHandle, 0);
+                    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, mTextures[i].handle(), 0);
                     GL_CHECK();
                 }
                 glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffers[0]);
@@ -231,7 +231,7 @@ namespace Render {
             GL_CHECK();
         }
         if (mDepthTexture) {
-            mDepthTexture.resize({ width, height });
+            mDepthTexture.setData({ width, height }, {});
         }
 
         return true;

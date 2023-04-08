@@ -21,10 +21,10 @@ namespace Render {
 
         virtual void setDynamicParameters(size_t index, const ByteBuffer &data) override;
 
-        virtual void renderMesh(const GPUMeshData *mesh) const override;
-        virtual void renderMeshInstanced(size_t count, const GPUMeshData *mesh, const ByteBuffer &instanceData) const override;
+        virtual void renderMesh(RenderTarget *target, const GPUMeshData *mesh) const override;
+        virtual void renderMeshInstanced(RenderTarget *target, size_t count, const GPUMeshData *mesh, const ByteBuffer &instanceData) const override;
 
-        virtual void bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset = 0) const override;
+        virtual void bindTextures(RenderTarget *target, const std::vector<TextureDescriptor> &tex, size_t offset = 0) const override;
         static void bindTexturesImpl(const std::vector<TextureDescriptor> &tex, size_t offset = 0);
 
     private:

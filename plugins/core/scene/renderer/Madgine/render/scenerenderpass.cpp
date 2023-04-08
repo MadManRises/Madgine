@@ -102,7 +102,7 @@ namespace Render {
             instances[std::tuple<const GPUMeshData *, const GPUMeshData::Material *, Scene::Entity::Skeleton *> { meshData, material, skeleton }].push_back(transform->worldMatrix());
         }
 
-        target->context()->pushAnnotation("Scene");
+        target->pushAnnotation("Scene");
 
         Vector2i size = target->size();
 
@@ -153,7 +153,7 @@ namespace Render {
             }
         }
 
-        mPipeline->bindTextures(mScene.depthTextures(), 2);
+        mPipeline->bindTextures(target, mScene.depthTextures(), 2);
 
         for (const std::pair<const std::tuple<const GPUMeshData *, const GPUMeshData::Material *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> &instance : instances) {
             const GPUMeshData *meshData = std::get<0>(instance.first);
@@ -167,7 +167,7 @@ namespace Render {
 
                 perObject->hasDistanceField = false;
 
-                perObject->hasTexture = material && material->mDiffuseTexture.available() && material->mDiffuseTexture->mTextureHandle != 0;
+                perObject->hasTexture = material && material->mDiffuseTexture.available() && material->mDiffuseTexture->handle() != 0;
 
                 perObject->hasSkeleton = skeleton != nullptr;
 
@@ -184,22 +184,21 @@ namespace Render {
                 mPipeline->setDynamicParameters(0, {});
             }
 
-            mPipeline->bindTextures({ { material && material->mDiffuseTexture.available() ? material->mDiffuseTexture->mTextureHandle : 0, TextureType_2D },
-                { material && material->mEmissiveTexture.available() ? material->mEmissiveTexture->mTextureHandle : 0, TextureType_2D } });
+            mPipeline->bindTextures(target, { material && material->mDiffuseTexture.available() ? material->mDiffuseTexture->descriptor() : TextureDescriptor {}, material && material->mEmissiveTexture.available() ? material->mEmissiveTexture->descriptor() : TextureDescriptor {} });
 
             std::vector<SceneInstanceData> instanceData;
 
             std::ranges::transform(instance.second, std::back_inserter(instanceData), [&](const Matrix4 &m) {
                 Matrix4 mv = v * m;
-                return SceneInstanceData { 
+                return SceneInstanceData {
                     mv.Transpose(),
                     mv.Inverse() /*.Transpose().Transpose()*/
                 };
             });
 
-            mPipeline->renderMeshInstanced(std::move(instanceData), meshData);
+            mPipeline->renderMeshInstanced(target, std::move(instanceData), meshData);
         }
-        target->context()->popAnnotation();
+        target->popAnnotation();
     }
 
     int SceneRenderPass::priority() const

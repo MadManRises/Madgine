@@ -9,6 +9,7 @@ namespace Render {
 
     struct GPUMeshData;
     struct TextureDescriptor;
+    struct RenderTarget;
 
     struct PipelineConfiguration {
         std::string_view vs;
@@ -37,18 +38,18 @@ namespace Render {
 
         virtual void setDynamicParameters(size_t index, const ByteBuffer &data) = 0;
 
-        virtual void renderMesh(const GPUMeshData *mesh) const = 0;
-        virtual void renderMeshInstanced(size_t count, const GPUMeshData *mesh, const ByteBuffer &instanceData) const = 0;
+        virtual void renderMesh(RenderTarget *target, const GPUMeshData *mesh) const = 0;
+        virtual void renderMeshInstanced(RenderTarget *target, size_t count, const GPUMeshData *mesh, const ByteBuffer &instanceData) const = 0;
         template <typename T>
-        void renderMeshInstanced(T &&instanceData, const GPUMeshData *mesh) const
+        void renderMeshInstanced(RenderTarget *target, T &&instanceData, const GPUMeshData *mesh) const
         {
             ByteBufferImpl buffer { std::forward<T>(instanceData) };
-            renderMeshInstanced(buffer.elementCount(), mesh, std::move(buffer).template cast<const void>());
+            renderMeshInstanced(target, buffer.elementCount(), mesh, std::move(buffer).template cast<const void>());
         }
 
-        void renderQuad() const;
+        void renderQuad(RenderTarget *target) const;
 
-        virtual void bindTextures(const std::vector<TextureDescriptor> &tex, size_t offset = 0) const = 0;
+        virtual void bindTextures(RenderTarget *target, const std::vector<TextureDescriptor> &tex, size_t offset = 0) const = 0;
 
         size_t mInstanceDataSize = 0;
     };

@@ -30,9 +30,6 @@ namespace Render {
 
         virtual bool supportsMultisampling() const override;
 
-        virtual void pushAnnotation(const char *tag) override;
-        virtual void popAnnotation() override;
-
         void bindFormat(VertexFormat format, OpenGLBuffer *instanceBuffer, size_t instanceDataSize);
         void unbindFormat();
 

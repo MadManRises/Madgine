@@ -16,7 +16,12 @@ namespace Render {
 
         virtual void setRenderSpace(const Rect2i &space) override;
 
+        virtual void pushAnnotation(const char *tag) override;
+        virtual void popAnnotation() override;
+
         virtual Matrix4 getClipSpaceMatrix() const override;
+
+        OpenGLRenderContext *context() const;
     };
 
 }

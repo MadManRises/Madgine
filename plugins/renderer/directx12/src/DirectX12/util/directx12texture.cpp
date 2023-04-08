@@ -10,9 +10,7 @@ namespace Engine {
 namespace Render {
 
     DirectX12Texture::DirectX12Texture(TextureType type, bool isRenderTarget, DataFormat format, size_t width, size_t height, const ByteBuffer &data)
-        : mType(type)
-        , mSize { static_cast<int>(width), static_cast<int>(height) }
-        , mFormat(format)
+        : Texture(type, format, { static_cast<int>(width), static_cast<int>(height) })
         , mIsRenderTarget(isRenderTarget)
     {
         DXGI_FORMAT xFormat;
@@ -82,13 +80,12 @@ namespace Render {
                 subResourceDesc.RowPitch = width * byteCount;
                 subResourceDesc.SlicePitch = subResourceDesc.RowPitch * height;
 
-                DirectX12CommandList &list = DirectX12RenderContext::getSingleton().mTempCommandList;
+                DirectX12CommandList list = DirectX12RenderContext::getSingleton().fetchCommandList("upload");
 
-                UpdateSubresources(list.mList, mResource, uploadHeap, 0, 0, 1, &subResourceDesc);
-                auto transition = CD3DX12_RESOURCE_BARRIER::Transition(mResource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-                list.mList->ResourceBarrier(1, &transition);
+                UpdateSubresources(list, mResource, uploadHeap, 0, 0, 1, &subResourceDesc);
+                list.Transition(mResource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
-                DirectX12RenderContext::getSingleton().ExecuteCommandList(list, [uploadHeap { std::move(uploadHeap) }]() {});
+                list.attachResource(std::move(uploadHeap));
             }
             dimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 
@@ -112,20 +109,16 @@ namespace Render {
     }
 
     DirectX12Texture::DirectX12Texture(TextureType type, bool isRenderTarget, DataFormat format)
-        : mType(type)
-        , mFormat(format)
+        : Texture(type, format)
         , mIsRenderTarget(isRenderTarget)
     {
     }
 
     DirectX12Texture::DirectX12Texture(DirectX12Texture &&other)
-        : mResource(std::exchange(other.mResource, nullptr))
-        , mType(other.mType)
-        , mFormat(std::exchange(other.mFormat, {}))
-        , mSize(other.mSize)
+        : Texture(std::move(other))
+        , mResource(std::exchange(other.mResource, nullptr))
         , mIsRenderTarget(std::exchange(other.mIsRenderTarget, false))
     {
-        mTextureHandle = std::exchange(other.mTextureHandle, 0);
     }
 
     DirectX12Texture::~DirectX12Texture()
@@ -135,11 +128,8 @@ namespace Render {
 
     DirectX12Texture &DirectX12Texture::operator=(DirectX12Texture &&other)
     {
+        Texture::operator=(std::move(other));
         std::swap(mResource, other.mResource);
-        std::swap(mTextureHandle, other.mTextureHandle);
-        std::swap(mType, other.mType);
-        std::swap(mFormat, other.mFormat);
-        std::swap(mSize, other.mSize);
         std::swap(mIsRenderTarget, other.mIsRenderTarget);
         return *this;
     }
@@ -151,12 +141,6 @@ namespace Render {
             DirectX12RenderContext::getSingleton().mDescriptorHeap.deallocate(DirectX12RenderContext::getSingleton().mDescriptorHeap.fromGpuHandle({ mTextureHandle }));
             mTextureHandle = 0;
         }
-    }
-
-    void DirectX12Texture::bind() const
-    {
-        throw 0;
-        //sDeviceContext->PSSetShaderResources(0, 1, reinterpret_cast<ID3D12ShaderResourceView *const *>(&mTextureHandle));
     }
 
     void DirectX12Texture::setData(Vector2i size, const ByteBuffer &data)
@@ -217,65 +201,28 @@ namespace Render {
         MemcpySubresource(&DestData, &subResourceDesc, rowSize, numRows, 1);
         uploadHeap->Unmap(0, nullptr);
 
-        DirectX12CommandList &list = DirectX12RenderContext::getSingleton().mTempCommandList;
+        DirectX12CommandList list = DirectX12RenderContext::getSingleton().fetchCommandList("upload");
 
-        auto transition = CD3DX12_RESOURCE_BARRIER::Transition(mResource, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
-        list.mList->ResourceBarrier(1, &transition);
+        list.Transition(mResource, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
 
         CD3DX12_TEXTURE_COPY_LOCATION Dst(mResource, 0);
         CD3DX12_TEXTURE_COPY_LOCATION Src(uploadHeap, layout);
-        list.mList->CopyTextureRegion(&Dst, offset.x, offset.y, 0, &Src, nullptr);
+        list->CopyTextureRegion(&Dst, offset.x, offset.y, 0, &Src, nullptr);
 
-        transition = CD3DX12_RESOURCE_BARRIER::Transition(mResource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-        list.mList->ResourceBarrier(1, &transition);
+        list.Transition(mResource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
-        DirectX12RenderContext::getSingleton().ExecuteCommandList(list, [uploadHeap { std::move(uploadHeap) }]() {});
+        list.attachResource(std::move(uploadHeap));
     }
 
-    void DirectX12Texture::resize(Vector2i size)
-    {
-        throw "TODO";
-        /*Vector2i commonSize = min(size, mSize);
-        GLuint tempTex;
-        glGenTextures(1, &tempTex);
-        GL_CHECK();
-        std::swap(tempTex, mHandle);
-
-        setData(size, nullptr);
-
-        glCopyImageSubData(tempTex, GL_TEXTURE_2D, 0, 0, 0, 0, mHandle, GL_TEXTURE_2D, 0, 0, 0, 0, commonSize.x, commonSize.y, 1);
-        GL_CHECK();
-
-        glDeleteTextures(1, &tempTex);
-        GL_CHECK();*/
-    }
-
-    ID3D12Resource *DirectX12Texture::resource() const
+    DirectX12Texture::operator ID3D12Resource *() const
     {
         return mResource;
     }
 
-    TextureDescriptor DirectX12Texture::descriptor() const
+    DirectX12Texture::operator ReleasePtr<ID3D12Resource>() const
     {
-        return { mTextureHandle, mType };
+        return mResource;
     }
-
-    /*void DirectX12Texture::setWrapMode(GLint mode)
-    {
-        bind();
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, mode);
-        GL_CHECK();
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, mode);
-        GL_CHECK();
-    }
-
-    void DirectX12Texture::setFilter(GLint filter)
-    {
-        bind();
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
-        GL_CHECK();
-    }*/
 
     void DirectX12Texture::setName(std::string_view name)
     {

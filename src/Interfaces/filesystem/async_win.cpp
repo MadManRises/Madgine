@@ -72,7 +72,7 @@ namespace Filesystem {
             if (result) {
                 assert(bytesTransferred == state->mBuffer.mSize);
 
-                state->set_value(GenericResult::SUCCESS, std::move(state->mBuffer));
+                state->set_value(std::move(state->mBuffer));
             } else {
                 auto error = GetLastError();
                 if (error == ERROR_OPERATION_ABORTED) {

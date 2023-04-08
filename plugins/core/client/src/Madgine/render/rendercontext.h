@@ -25,7 +25,7 @@ namespace Render {
 
         void render();
 
-        virtual void beginFrame();
+        virtual bool beginFrame();
         virtual void endFrame();
 
 		static RenderContext &getSingleton();
@@ -35,9 +35,6 @@ namespace Render {
         static Threading::TaskQueue *renderQueue();
 
         virtual bool supportsMultisampling() const = 0;
-
-        virtual void pushAnnotation(const char *tag) = 0;
-        virtual void popAnnotation() = 0;
 
     protected:
         void checkThread();

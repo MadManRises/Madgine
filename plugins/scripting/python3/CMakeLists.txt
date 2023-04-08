@@ -7,6 +7,11 @@ if (NOT Python3_Development.Embed_FOUND)
 	return()
 endif()
 
+add_notices(Python3::Python 
+	READABLE_NAME Python3
+	LICENSE_FILE ${PYTHON_EXECUTABLE}/../LICENSE.txt
+	CREDITS "Scripting-Language: Python3 - https://www.python.org/")
+
 
 set(sources "")
 FolderSources(sources "" src)

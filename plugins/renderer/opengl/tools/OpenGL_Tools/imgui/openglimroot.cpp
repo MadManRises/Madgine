@@ -60,7 +60,7 @@ METATABLE_END(Engine::Tools::OpenGLImRoot)
             ImGui_ImplOpenGL3_NewFrame();
         }
 
-        void OpenGLImRoot::renderViewport(ImGuiViewport *vp)
+        void OpenGLImRoot::renderViewport(Render::RenderTarget *target, ImGuiViewport *vp)
         {
             ImGui_ImplOpenGL3_RenderDrawData(vp->DrawData);
         }

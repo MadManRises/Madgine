@@ -16,9 +16,24 @@ namespace Ini {
     {
     }
 
-    IniSection &IniFile::operator[](const std::string &key)
+    IniSection &IniFile::operator[](std::string_view key)
     {
-        return mSections[key];
+        return mSections[std::string { key }];
+    }
+
+    const IniSection &IniFile::at(std::string_view key) const
+    {
+        return mSections.find(key)->second;
+    }
+
+    bool IniFile::hasSection(std::string_view key) const
+    {
+        return mSections.contains(key);
+    }
+
+    void IniFile::removeSection(std::string_view key)
+    {
+        mSections.erase(std::string { key });
     }
 
     void IniFile::clear()
@@ -48,9 +63,10 @@ namespace Ini {
         mSections.clear();
         std::string line;
         while (std::getline(stream.stream(), line)) {
-            if (!StringUtil::startsWith(line, "[") || !StringUtil::endsWith(line, "]"))
-                std::terminate();
-            std::string sectionName { StringUtil::substr(line, 1, -1) };
+            std::string sectionName = "General";
+            if (StringUtil::startsWith(line, "[") && StringUtil::endsWith(line, "]"))
+                sectionName = StringUtil::substr(line, 1, -1);
+            
             auto pib = mSections.try_emplace(sectionName);
             if (!pib.second) {
                 LOG_WARNING("Ini-File '" << path.c_str() << "' contains section '" << sectionName << "' twice. Second instance is ignored!");

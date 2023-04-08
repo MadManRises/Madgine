@@ -38,6 +38,8 @@ namespace Input {
 
     Threading::Task<void> HandlerBase::finalize()
     {
+        bool result = mStopSource.request_stop();
+        assert(result);
         mWidget = nullptr;
         co_return;
     }
@@ -45,19 +47,21 @@ namespace Input {
     void HandlerBase::setWidget(Widgets::WidgetBase *widget)
     {
         if (mWidget != widget) {
-            if (mWidget) {
-                mConStore.clear();
+            if (mStopSource.stop_possible()) {
+                bool result = mStopSource.request_stop();
+                assert(result);
             }
             mWidget = widget;
+            mStopSource = std::stop_source {};
 
             if (mWidget) {
-                mWidget->pointerMoveEvent().connect(&HandlerBase::injectPointerMove, this, &mConStore);
-                mWidget->pointerClickEvent().connect(&HandlerBase::injectPointerClick, this, &mConStore);
-                mWidget->dragBeginEvent().connect(&HandlerBase::injectDragBegin, this, &mConStore);
-                mWidget->dragMoveEvent().connect(&HandlerBase::injectDragMove, this, &mConStore);
-                mWidget->dragEndEvent().connect(&HandlerBase::injectDragEnd, this, &mConStore);
-                mWidget->axisEvent().connect(&HandlerBase::injectAxisEvent, this, &mConStore);
-                mWidget->keyEvent().connect(&HandlerBase::injectKeyPress, this, &mConStore);
+                mWidget->pointerMoveEvent().connect(&HandlerBase::injectPointerMove, this, mStopSource.get_token());
+                mWidget->pointerClickEvent().connect(&HandlerBase::injectPointerClick, this, mStopSource.get_token());
+                mWidget->dragBeginEvent().connect(&HandlerBase::injectDragBegin, this, mStopSource.get_token());
+                mWidget->dragMoveEvent().connect(&HandlerBase::injectDragMove, this, mStopSource.get_token());
+                mWidget->dragEndEvent().connect(&HandlerBase::injectDragEnd, this, mStopSource.get_token());
+                mWidget->axisEvent().connect(&HandlerBase::injectAxisEvent, this, mStopSource.get_token());
+                mWidget->keyEvent().connect(&HandlerBase::injectKeyPress, this, mStopSource.get_token());
                 mWidget->setAcceptsPointerEvents(true);
             }
         }

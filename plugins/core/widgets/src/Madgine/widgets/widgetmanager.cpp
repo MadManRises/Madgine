@@ -571,7 +571,7 @@ namespace Widgets {
         if (!mData->mPipeline.available())
             return;
 
-        target->context()->pushAnnotation("WidgetManager");
+        target->pushAnnotation("WidgetManager");
 
         MainWindowComponentBase::render(target, iteration);
 
@@ -598,13 +598,13 @@ namespace Widgets {
             }
 
             if (tex.mTexture.mTextureHandle)
-                mData->mPipeline->bindTextures({ tex.mTexture });
+                mData->mPipeline->bindTextures(target, { tex.mTexture });
             else
-                mData->mPipeline->bindTextures({ { mData->mUIAtlasTexture->mTextureHandle, Render::TextureType_2D } });
+                mData->mPipeline->bindTextures(target, { mData->mUIAtlasTexture->descriptor() });
 
             mData->mMesh.update({ 3, std::move(vertexData.mTriangleVertices) });
 
-            mData->mPipeline->renderMesh(mData->mMesh);
+            mData->mPipeline->renderMesh(target, mData->mMesh);
         }
         if (!renderData.lineVertices().empty()) {
             {
@@ -613,14 +613,14 @@ namespace Widgets {
                 parameters->hasTexture = false;
             }
 
-            mData->mPipeline->bindTextures({ { mData->mUIAtlasTexture->mTextureHandle, Render::TextureType_2D } });
+            mData->mPipeline->bindTextures(target, { mData->mUIAtlasTexture->descriptor() });
 
             mData->mMesh.update({ 2, std::move(renderData.lineVertices()) });
 
-            mData->mPipeline->renderMesh(mData->mMesh);
+            mData->mPipeline->renderMesh(target, mData->mMesh);
         }
 
-        target->context()->popAnnotation();
+        target->popAnnotation();
     }
 
     Generator<std::pair<WidgetBase *, size_t>> WidgetManager::visibleWidgets()

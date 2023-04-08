@@ -20,7 +20,7 @@ namespace FirstParty {
         using C = typename argument_types::template select<argument_types::size - 1>;
 
         using R = InfoTypeHelper<C>;
-        return Execution::make_sender<R, GenericResult>(
+        return Execution::make_sender<GenericResult, R>(
             [args = std::tuple<Args...> { std::forward<Args>(args)... }]<typename Rec>(Rec &&rec) mutable {
                 struct state {
                     void start()

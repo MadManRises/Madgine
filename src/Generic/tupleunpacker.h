@@ -131,6 +131,12 @@ namespace TupleUnpacker {
         return constructFromTuple<T>(expand<sizeof...(args) - 1>(std::forward_as_tuple(std::forward<Args>(args)...)));
     }
 
+    template <typename F>
+    auto wrap(F &&f) {
+        return [f { std::forward<F>(f) }](auto&&... args) mutable {
+            return invoke(f, std::forward<decltype(args)>(args)...); };
+    }
+
 #if !CLANG
     namespace detail {
         template <typename Struct, typename = void, typename... T>

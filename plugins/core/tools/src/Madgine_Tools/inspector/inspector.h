@@ -18,14 +18,13 @@ namespace Tools {
         virtual void render() override;
 
         bool drawRemainingMembers(TypedScopePtr scope, std::set<std::string> &drawn);
-        bool drawMember(TypedScopePtr parent, const ScopeIterator &it, tinyxml2::XMLElement *element = nullptr);
-        //void drawValue(tinyxml2::XMLElement *element, TypedScopePtr parent, std::string id, std::string key, ValueType value, bool editable);
-        std::pair<bool, bool> drawValue(std::string_view id, ValueType &value, bool editable, bool generic, tinyxml2::XMLElement *element = nullptr);
-        std::pair<bool, bool> drawValue(std::string_view id, TypedScopePtr &scope, bool editable, ValueType *generic = nullptr, tinyxml2::XMLElement *element = nullptr);
-        std::pair<bool, bool> drawValue(std::string_view id, OwnedScopePtr &scope, bool editable, ValueType *generic = nullptr, tinyxml2::XMLElement *element = nullptr);
-        bool drawValue(std::string_view id, KeyValueVirtualSequenceRange &range, bool editable, tinyxml2::XMLElement *element = nullptr);
-        bool drawValue(std::string_view id, KeyValueVirtualAssociativeRange &range, bool editable, tinyxml2::XMLElement *element = nullptr);
-        void drawValue(std::string_view id, BoundApiFunction &function, bool editable, tinyxml2::XMLElement *element = nullptr);
+        bool drawMember(TypedScopePtr parent, const ScopeIterator &it);
+        std::pair<bool, bool> drawValue(std::string_view id, ValueType &value, bool editable, bool generic);
+        std::pair<bool, bool> drawValue(std::string_view id, TypedScopePtr &scope, bool editable, ValueType *generic = nullptr);
+        std::pair<bool, bool> drawValue(std::string_view id, OwnedScopePtr &scope, bool editable, ValueType *generic = nullptr);
+        bool drawValue(std::string_view id, KeyValueVirtualSequenceRange &range, bool editable);
+        bool drawValue(std::string_view id, KeyValueVirtualAssociativeRange &range, bool editable);
+        void drawValue(std::string_view id, BoundApiFunction &function, bool editable);
 
         bool drawMembers(TypedScopePtr scope, std::set<std::string> drawn = {});
 

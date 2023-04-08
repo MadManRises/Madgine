@@ -12,7 +12,7 @@ namespace Filesystem {
 
     struct AsyncFileReadAuxiliaryData;
 
-    struct INTERFACES_EXPORT AsyncFileReadState : Execution::VirtualReceiverBase<ByteBuffer, GenericResult> {
+    struct INTERFACES_EXPORT AsyncFileReadState : Execution::VirtualReceiverBase<GenericResult, ByteBuffer> {
         AsyncFileReadState(Path &&path);
         AsyncFileReadState(const AsyncFileReadState &) = delete;
         AsyncFileReadState(AsyncFileReadState &&) = delete;
@@ -34,7 +34,7 @@ namespace Filesystem {
         template <typename Rec>
         auto operator()(Rec &&rec)
         {
-            return Execution::VirtualReceiverEx<Rec, AsyncFileReadState, ByteBuffer, GenericResult> {
+            return Execution::VirtualReceiverEx<Rec, AsyncFileReadState, type_pack<GenericResult>, ByteBuffer> {
                 std::forward<Rec>(rec),
                 std::move(mPath)
             };
@@ -42,7 +42,7 @@ namespace Filesystem {
         Path mPath;
     };
 
-    using AsyncFileRead = Execution::Sender<AsyncFileReadSender, ByteBuffer, GenericResult>;
+    using AsyncFileRead = Execution::Sender<AsyncFileReadSender, GenericResult, ByteBuffer>;
 
 }
 }

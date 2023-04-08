@@ -23,8 +23,12 @@ namespace Render {
 
         virtual void clearDepthBuffer() override;
 
+        virtual void pushAnnotation(const char *tag) override;
+        virtual void popAnnotation() override;
+
         virtual void setRenderSpace(const Rect2i &space) override;
 
+        DirectX11RenderContext *context() const;
 
         std::vector<ReleasePtr<ID3D11RenderTargetView>> mTargetViews;
         DirectX11Texture mDepthBuffer;

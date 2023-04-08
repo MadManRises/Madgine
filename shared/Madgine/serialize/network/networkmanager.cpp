@@ -55,7 +55,7 @@ namespace Network {
         return NetworkManagerResult::SUCCESS;
     }
 
-    void NetworkManager::connectImpl(Execution::VirtualReceiverBase<void, NetworkManagerResult, Serialize::SyncManagerResult> &receiver, std::string_view url, int portNr, std::unique_ptr<Serialize::Formatter> (*format)(), TimeOut timeout)
+    void NetworkManager::connectImpl(Execution::VirtualReceiverBase<type_pack<NetworkManagerResult, Serialize::SyncManagerResult>> &receiver, std::string_view url, int portNr, std::unique_ptr<Serialize::Formatter> (*format)(), TimeOut timeout)
     {
         if (isConnected()) {
             receiver.set_error(NetworkManagerResult::ALREADY_CONNECTED);

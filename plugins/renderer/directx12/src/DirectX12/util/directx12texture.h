@@ -24,27 +24,16 @@ namespace Render {
 
         void reset();
 
-        void bind() const;
-
         void setData(Vector2i size, const ByteBuffer &data);
         void setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data);
 
-        void resize(Vector2i size);
-
-        ID3D12Resource *resource() const;
-
-        TextureDescriptor descriptor() const;
-
-        /*void setWrapMode(GLint mode);
-        void setFilter(GLint filter);*/
+        operator ID3D12Resource *() const;
+        operator ReleasePtr<ID3D12Resource> () const;
 
         void setName(std::string_view name);
 
     private:
         ReleasePtr<ID3D12Resource> mResource;
-        TextureType mType;
-        Vector2i mSize = { 0, 0 };
-        DataFormat mFormat;        
         bool mIsRenderTarget;
     };
 

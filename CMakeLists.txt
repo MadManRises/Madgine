@@ -43,6 +43,15 @@ if (MADGINE_CONFIGURATION)
 		include (${config})
 	endforeach()
 
+	include(util/ini)
+
+	file(GLOB inis "${MADGINE_CONFIGURATION}/*.ini")
+	foreach(ini ${inis})
+		get_filename_component(name ${ini} NAME_WE)
+		string(TOUPPER ${name} name)
+		read_ini_file(${ini} ${name})
+	endforeach()
+
 endif()
 
 

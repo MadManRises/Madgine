@@ -17,7 +17,7 @@ namespace Render {
 
         ID3D12PipelineState *get(VertexFormat format, size_t groupSize, size_t instanceDataSize);
 
-         std::array<ReleasePtr<ID3D12PipelineState>, 3> *ptr();
+        std::array<ReleasePtr<ID3D12PipelineState>, 3> *ptr();
 
         void reset();
 
