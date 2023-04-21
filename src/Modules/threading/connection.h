@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Generic/execution/virtualreceiver.h"
+#include "Generic/execution/virtualstate.h"
 #include "Generic/genericresult.h"
 
 namespace Engine {

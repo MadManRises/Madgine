@@ -26,12 +26,15 @@ namespace Execution {
     using VirtualReceiverBase = VirtualReceiverBaseEx<make_type_pack_t<R>, V...>;
 
     template <typename Rec, typename Base, typename R, typename... V>
-    struct VirtualReceiverEx;
+    struct VirtualStateEx;
 
-    template <typename Rec, typename Base, typename... V>
-    struct VirtualReceiverEx<Rec, Base, type_pack<>, V...> : Base {
+    template <typename _Rec, typename Base, typename... V>
+    struct VirtualStateEx<_Rec, Base, type_pack<>, V...> : Base {
+
+        using Rec = _Rec;
+        
         template <typename... Args>
-        VirtualReceiverEx(Rec &&rec, Args &&...args)
+        VirtualStateEx(Rec &&rec, Args &&...args)
             : Base(std::forward<Args>(args)...)
             , mRec(std::forward<Rec>(rec))
         {
@@ -48,8 +51,11 @@ namespace Execution {
     };
 
     template <typename Rec, typename Base, typename R, typename... ExtraR, typename... V>
-    struct VirtualReceiverEx<Rec, Base, type_pack<R, ExtraR...>, V...> : VirtualReceiverEx<Rec, Base, type_pack<ExtraR...>, V...> {
-        using VirtualReceiverEx<Rec, Base, type_pack<ExtraR...>, V...>::VirtualReceiverEx;
+    struct VirtualStateEx<Rec, Base, type_pack<R, ExtraR...>, V...> : VirtualStateEx<Rec, Base, type_pack<ExtraR...>, V...> {
+        
+        using VirtualStateEx<Rec, Base, type_pack<ExtraR...>, V...>::VirtualStateEx;
+
+        using result_type = R;
 
         virtual void set_error(R r) override
         {
@@ -58,7 +64,7 @@ namespace Execution {
     };
 
     template <typename Rec, typename R, typename... V>
-    using VirtualReceiver = VirtualReceiverEx<Rec, VirtualReceiverBase<R, V...>, make_type_pack_t<R>, V...>;
+    using VirtualState = VirtualStateEx<Rec, VirtualReceiverBase<R, V...>, make_type_pack_t<R>, V...>;
 
 }
 }

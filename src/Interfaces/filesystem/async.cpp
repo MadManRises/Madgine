@@ -7,7 +7,7 @@ namespace Filesystem {
 
     AsyncFileRead readFileAsync(const Path &path)
     {
-        return { AsyncFileReadSender { path } };
+        return { path };
     }
 
 }

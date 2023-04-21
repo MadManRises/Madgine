@@ -20,19 +20,20 @@ struct MADGINE_CODEGEN_EXPORT CMakeFile : File {
 
     void generate(std::ostream &stream);
 
-    void generate(std::ostream &stream, Namespace &ns);
-    void generate(std::ostream &stream, CustomCodeBlock &block);
-    void generate(std::ostream &stream, VariableRead &read);
-    void generate(std::ostream &stream, VariableDefinition &def);
-    void generate(std::ostream &stream, MemberAccess &access);
-    void generate(std::ostream &stream, Return &ret);
-    void generate(std::ostream &stream, Assignment &assign);
-    void generate(std::ostream &stream, ArithOperation &op);
-    void generate(std::ostream &stream, Constructor &con);
-    void generate(std::ostream &stream, Constant &c);
-    void generate(std::ostream &stream, Comment &c);
+    void generate(std::ostream &stream, const Namespace &ns);
+    void generate(std::ostream &stream, const CustomCodeBlock &block);
+    void generate(std::ostream &stream, const VariableAccess &access);
+    void generate(std::ostream &stream, const VariableDefinition &def);
+    void generate(std::ostream &stream, const MemberAccess &access);
+    void generate(std::ostream &stream, const Return &ret);
+    void generate(std::ostream &stream, const Assignment &assign);
+    void generate(std::ostream &stream, const ArithOperation &op);
+    void generate(std::ostream &stream, const Constructor &con);
+    void generate(std::ostream &stream, const Constant &c);
+    void generate(std::ostream &stream, const Comment &c);
+    void generate(std::ostream &stream, const ForEach &c);
 
-    void generate(std::ostream &stream, Statement &s);
+    void generate(std::ostream &stream, const Statement &s);
 
 private:
     std::vector<Statement> mStatements;

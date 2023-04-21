@@ -211,7 +211,7 @@ namespace Render {
             data = std::move(_data);
         }
 
-        return CodeGen::VariableRead { std::string { dataProviderName(providerIndex) } };
+        return CodeGen::VariableAccess { std::string { dataProviderName(providerIndex) } };
     }
 
 }

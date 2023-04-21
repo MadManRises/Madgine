@@ -15,7 +15,7 @@ namespace Threading {
 
         void emit(_Ty... args)
         {
-            std::lock_guard guard { mMutex };
+            std::lock_guard guard { this->mMutex };
             Connection<_Ty...> *current = this->mConnectedSlots;
             this->mConnectedSlots = nullptr;
             while (current) {

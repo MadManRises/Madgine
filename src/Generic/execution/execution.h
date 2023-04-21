@@ -4,9 +4,15 @@ namespace Engine {
 namespace Execution {
 
     struct detach_t {
-        template <typename S, typename R, typename... V>
-        struct receiver {
-            void set_value(V...)
+
+        template <typename Sender>
+        struct state;
+
+        template <typename Sender>
+        struct receiver : execution_receiver<> {
+
+            template <typename... V>
+            void set_value(V &&...)
             {
                 delete mState;
             }
@@ -14,17 +20,19 @@ namespace Execution {
             {
                 delete mState;
             }
-            void set_error(patch_void_t<R>)
+            template <typename... R>
+            void set_error(R &&...)
             {
                 delete mState;
             }
-            S *mState;
+
+            state<Sender> *mState;
         };
 
-        template <typename F, typename R, typename... V>
+        template <typename Sender>
         struct state {
-            state(Sender<F, R, V...> &&sender)
-                : mState(sender(receiver<state, R, V...> { this }))
+            state(Sender &&sender)
+                : mState(connect(std::forward<Sender>(sender), receiver<Sender> { {}, this }))
             {
             }
             void start()
@@ -32,13 +40,13 @@ namespace Execution {
                 mState.start();
             }
 
-            std::invoke_result_t<F, receiver<state, R, V...>> mState;
+            connect_result_t<Sender, receiver<Sender>> mState;
         };
 
-        template <typename F, typename R, typename... V>
-        void operator()(Sender<F, R, V...> &&sender) const
+        template <typename Sender>
+        void operator()(Sender &&sender) const
         {
-            (new state<F, R, V...> { std::move(sender) })->start();
+            (new state<Sender> { std::forward<Sender>(sender) })->start();
         }
     };
 

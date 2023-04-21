@@ -6,6 +6,11 @@
 
 namespace CodeGen {
 
+struct Type {
+    std::variant<Engine::ExtendedValueTypeDesc, Struct *> mBaseType;
+    bool mIsReference = false;
+};
+
 struct MADGINE_CODEGEN_EXPORT StatementVector {
     StatementVector();
     StatementVector(std::initializer_list<Statement> statements);
@@ -19,6 +24,22 @@ struct MADGINE_CODEGEN_EXPORT StatementVector {
 
 private:
     std::vector<Statement> mVector;
+};
+
+struct MADGINE_CODEGEN_EXPORT StatementPtr {
+    template <typename T>
+    StatementPtr(T t)
+        : StatementPtr(Statement { t })
+    {
+    }
+    StatementPtr(Statement statement);
+    StatementPtr(const StatementPtr &other);
+
+    StatementPtr &operator=(const StatementPtr &other);
+
+    operator const Statement &() const;
+
+    std::unique_ptr<Statement> mPtr;
 };
 
 struct FullStatement {
@@ -46,58 +67,52 @@ struct Namespace : FullStatement {
     std::list<Statement> mElements;
 };
 
-struct MADGINE_CODEGEN_EXPORT Assignment : FullStatement {
-    Assignment(std::string_view variableName, Statement statement);
-    Assignment(const Assignment &other);
+struct Assignment : FullStatement {
 
-    Assignment &operator=(const Assignment &other);
-
-    std::string mVariableName;
-    std::unique_ptr<Statement> mStatement;
+    StatementPtr mTarget;
+    StatementPtr mStatement;
 };
 
-struct MADGINE_CODEGEN_EXPORT Return : FullStatement {
-    Return(Statement statement);
-    Return(const Return &other);
+struct Return : FullStatement {
 
-    Return &operator=(const Return &other);
-
-    std::unique_ptr<Statement> mStatement;
+    StatementPtr mStatement;
 };
 
-struct MADGINE_CODEGEN_EXPORT VariableRead {
+struct VariableAccess {
     std::string mVariableName;
 };
 
 struct MADGINE_CODEGEN_EXPORT VariableDefinition : FullStatement {
+    VariableDefinition(Variable variable);
+    VariableDefinition(Variable variable, Statement initializer);
+    VariableDefinition(Engine::TinyVector<Engine::BitArray<62>> conditionals, Variable variable);
+    VariableDefinition(const VariableDefinition &other);
+
+    VariableDefinition &operator=(const VariableDefinition &other);
+
     Variable mVariable;
-    Engine::ValueType mDefaultValue;
+    std::unique_ptr<Statement> mInitializer;
 };
 
-struct MADGINE_CODEGEN_EXPORT MemberAccess {
-    MemberAccess(std::string_view memberName, Statement statement);
-    MemberAccess(const MemberAccess &other);
-
-    MemberAccess &operator=(const MemberAccess &other);
-
+struct MemberAccess {
     std::string mMemberName;
-    std::unique_ptr<Statement> mStatement;
+    StatementPtr mStatement;
 };
 
-struct MADGINE_CODEGEN_EXPORT Constructor : FullStatement {
+struct Constructor : FullStatement {
     Type mType;
     StatementVector mArguments;
 };
 
-struct MADGINE_CODEGEN_EXPORT Constant {
+struct Constant {
     Engine::ValueType mValue;
 };
 
-struct MADGINE_CODEGEN_EXPORT Comment {
+struct Comment {
     std::string mText;
 };
 
-struct MADGINE_CODEGEN_EXPORT ArithOperation {
+struct ArithOperation {
 
     enum {
         ADD,
@@ -118,6 +133,12 @@ struct MADGINE_CODEGEN_EXPORT Function : FullStatement {
     std::vector<std::string> mAnnotations;
 };
 
+struct ForEach : FullStatement {
+    StatementPtr mInput;
+    std::string mVariableName;
+    std::list<Statement> mBody;
+};
+
 struct Struct : FullStatement {
     Struct(std::string_view name);
 
@@ -125,5 +146,18 @@ struct Struct : FullStatement {
     std::vector<VariableDefinition> mVariables;
     std::vector<std::string> mAnnotations;
 };
+
+template <typename T>
+requires(!std::is_constructible_v<Statement, T>)
+    ArithOperation
+    operator+(const Statement &first, const T &second)
+{
+    throw 0;
+}
+
+inline ArithOperation operator+(const Statement &first, const Statement &second)
+{
+    return ArithOperation { ArithOperation::ADD, { first, second } };
+}
 
 }

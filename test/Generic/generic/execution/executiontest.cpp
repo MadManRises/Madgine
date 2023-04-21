@@ -14,24 +14,22 @@ TEST(Execution, Basic)
 
     std::vector<int> cont { 1, 2, 3, 4 };
     int v = 12;
-
-    auto inner = [](int i, int a) {
-        return just(int { i }, int { a })
+    auto inner = [](int a, int &i) {
+        return just(a, i)
             | then([](const auto &...v) { return (v + ...); })
-            | then([](int i) { std::cout << i << std::endl; });
+            | let_value([&](int sum) {
+                  return sequence(just(sum) | write_var<"test">(), just(sum) | assign(i));
+              });
     };
 
     auto graph = [&](std::vector<int> &cont) {
-        return sequence(
-            for_each(cont,
-                [&](int i) {
-                    return Engine::Execution::read<"test">() | let_value([&, i](int a) {
-                        return inner(i, a);
-                    });
-                }),
-            Variable<"test">(12));
+        return read_var<int &, "test">()
+            | let_value([&](int &a) { return for_each(cont, [&](int &i) { return inner(a, i); }); })
+            | Variable<"test">(12);
     };
 
-    //detach(graph(cont));
-    detach(sequence(Engine::Execution::read<"test">(), Variable<"test">(12)));
+    detach(graph(cont));
+
+    std::vector<int> expected { 13, 15, 18, 22 };
+    ASSERT_EQ(cont, expected);
 }

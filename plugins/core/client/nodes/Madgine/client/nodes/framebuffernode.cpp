@@ -83,7 +83,7 @@ namespace Render {
 
         CodeGen::ShaderFile &file = generator.mFile;
 
-        file.statement(CodeGen::Return { generator.read(0) });
+        file.statement(CodeGen::Return { {}, generator.read(0) });
 
         flowInOut.reset();
     }

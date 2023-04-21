@@ -4,22 +4,6 @@
 
 namespace CodeGen {
 
-Return::Return(Statement statement)
-    : mStatement(std::make_unique<Statement>(std::move(statement)))
-{
-}
-
-Return::Return(const Return &other)
-    : mStatement(std::make_unique<Statement>(*other.mStatement))
-{
-}
-
-Return &Return::operator=(const Return &other)
-{
-    *mStatement = *other.mStatement;
-    return *this;
-}
-
 Function::Function(std::string_view name, Type returnType, std::vector<Variable> arguments, std::vector<std::string> annotations)
     : mName(name)
     , mReturnType(returnType)
@@ -28,47 +12,9 @@ Function::Function(std::string_view name, Type returnType, std::vector<Variable>
 {
 }
 
-MemberAccess::MemberAccess(std::string_view memberName, Statement statement)
-    : mMemberName(memberName)
-    , mStatement(std::make_unique<Statement>(std::move(statement)))
-{
-}
-
-MemberAccess::MemberAccess(const MemberAccess &other)
-    : mMemberName(other.mMemberName)
-    , mStatement(std::make_unique<Statement>(*other.mStatement))
-{
-}
-
-MemberAccess &MemberAccess::operator=(const MemberAccess &other)
-{
-    mMemberName = other.mMemberName;
-    *mStatement = *other.mStatement;
-    return *this;
-}
-
 Struct::Struct(std::string_view name)
     : mName(name)
 {
-}
-
-Assignment::Assignment(std::string_view variableName, Statement statement)
-    : mVariableName(variableName)
-    , mStatement(std::make_unique<Statement>(std::move(statement)))
-{
-}
-
-Assignment::Assignment(const Assignment &other)
-    : mVariableName(other.mVariableName)
-    , mStatement(std::make_unique<Statement>(*other.mStatement))
-{
-}
-
-Assignment &Assignment::operator=(const Assignment &other)
-{
-    mVariableName = other.mVariableName;
-    *mStatement = *other.mStatement;
-    return *this;
 }
 
 StatementVector::StatementVector() = default;
@@ -88,6 +34,65 @@ std::vector<Statement>::const_iterator StatementVector::begin() const
 std::vector<Statement>::const_iterator StatementVector::end() const
 {
     return mVector.end();
+}
+
+VariableDefinition::VariableDefinition(Variable variable)
+    : mVariable(variable)
+{
+}
+
+VariableDefinition::VariableDefinition(Variable variable, Statement initializer)
+    : mVariable(variable)
+    , mInitializer(std::make_unique<Statement>(initializer))
+{
+}
+
+VariableDefinition::VariableDefinition(Engine::TinyVector<Engine::BitArray<62>> conditionals, Variable variable)
+    : FullStatement { conditionals }
+    , mVariable(variable)
+{
+}
+
+VariableDefinition::VariableDefinition(const VariableDefinition &other)
+    : mVariable(other.mVariable)
+    , mInitializer(other.mInitializer ? std::make_unique<Statement>(*other.mInitializer) : std::unique_ptr<Statement> {})
+{
+}
+
+VariableDefinition &VariableDefinition::operator=(const VariableDefinition &other)
+{
+    mVariable = other.mVariable;
+    if (!other.mInitializer) {
+        mInitializer.reset();
+    } else {
+        if (!mInitializer) {
+            mInitializer = std::make_unique<Statement>(*other.mInitializer);
+        } else {
+            *mInitializer = *other.mInitializer;
+        }
+    }
+    return *this;
+}
+
+StatementPtr::StatementPtr(Statement statement)
+    : mPtr(std::make_unique<Statement>(statement))
+{
+}
+
+StatementPtr::StatementPtr(const StatementPtr &other)
+    : mPtr(std::make_unique<Statement>(*other.mPtr))
+{
+}
+
+StatementPtr &StatementPtr::operator=(const StatementPtr &other)
+{
+    *mPtr = *other.mPtr;
+    return *this;
+}
+
+StatementPtr::operator const Statement &() const
+{
+    return *mPtr;
 }
 
 }

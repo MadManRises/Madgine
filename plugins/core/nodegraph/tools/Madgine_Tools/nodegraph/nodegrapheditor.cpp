@@ -30,6 +30,14 @@
 
 #include "Generic/projections.h"
 
+#include "Generic/execution/algorithm.h"
+#include "Generic/execution/state.h"
+
+#include "Madgine/codegen/codegen_cpp.h"
+#include "Madgine/codegen/fromsender.h"
+
+#include "Madgine/nodegraph/nodes/util/sendernode.h"
+
 UNIQUECOMPONENT(Engine::Tools::NodeGraphEditor);
 
 METATABLE_BEGIN_BASE(Engine::Tools::NodeGraphEditor, Engine::Tools::ToolBase)
@@ -730,6 +738,39 @@ namespace Tools {
         }
     }
 
+    void NodeGraphEditor::testSenderCodegen()
+    {
+        using namespace Engine::Execution;
+
+        auto inner = [](auto a, auto &i) {
+            return just(a, i)
+                | then([](const auto &...v) { return (v + ...); })
+                | let_value([&](auto sum) {
+                      return sequence(just(sum) | write_var<"test">(), just(sum) | assign(i));
+                  });
+        };
+
+        auto graph = [&](auto &cont) {
+            return read_var<int &, "test">()
+                | let_value([&](auto &&a) { return for_each(cont, [&](auto &i) { return inner(a, i); }); })
+                | Variable<"test">(12);
+        };
+
+        CodeGen::CppFile file;
+
+        CodeGen::VariableAccess access { "cont" };
+        TupleUnpacker::forEach(CodeGen::generatorFromSender(graph(access)).generate(), [&](auto &&s) {
+            file.statement(s);
+        });
+
+        std::stringstream ss;
+        file.generate(ss);
+        std::string result = ss.str();
+
+        NodeGraph::SenderConnection con;
+        NodeGraph::graphBuilderFromSender(graph(con)).build(mGraph);
+    }
+
     void NodeGraphEditor::renderMenu()
     {
         ToolBase::renderMenu();
@@ -758,6 +799,15 @@ namespace Tools {
                     } catch (const std::out_of_range &e) {
                         LOG_ERROR("Uncaught out_of_range exception during NodeGraph debugging: " << e.what());
                     }
+                }
+
+                if (ImGui::BeginMenu("Test")) {
+
+                    if (ImGui::MenuItem("Sender Codegen")) {
+                        testSenderCodegen();
+                    }
+
+                    ImGui::EndMenu();
                 }
 
                 ImGui::Separator();

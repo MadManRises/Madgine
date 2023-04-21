@@ -19,7 +19,7 @@ CMakeFile::CMakeFile()
 
 void CMakeFile::setVariable(std::string_view name, std::string_view string)
 {
-    statement(Assignment { name, Constant { Engine::ValueType { string } } });
+    statement(Assignment { {} , VariableAccess { std::string { name } }, Constant { Engine::ValueType { string } } });
 }
 
 void CMakeFile::statement(Statement statement)
@@ -37,64 +37,71 @@ void CMakeFile::generate(std::ostream &stream)
     }
 }
 
-void CMakeFile::generate(std::ostream &stream, CustomCodeBlock &block)
+void CMakeFile::generate(std::ostream &stream, const CustomCodeBlock &block)
 {
     stream << block.mCode;
 }
 
-void CMakeFile::generate(std::ostream &stream, Namespace &ns)
+void CMakeFile::generate(std::ostream &stream, const Namespace &ns)
 {
     throw 0;
 }
 
-void CMakeFile::generate(std::ostream &stream, VariableRead &read)
+void CMakeFile::generate(std::ostream &stream, const VariableAccess &access)
 {
     throw 0;
 }
 
-void CMakeFile::generate(std::ostream &stream, VariableDefinition &def)
+void CMakeFile::generate(std::ostream &stream, const VariableDefinition &def)
 {
     throw 0;
 }
 
-void CMakeFile::generate(std::ostream &stream, MemberAccess &access)
+void CMakeFile::generate(std::ostream &stream, const MemberAccess &access)
 {
     throw 0;
 }
 
-void CMakeFile::generate(std::ostream &stream, Return &ret)
+void CMakeFile::generate(std::ostream &stream, const Return &ret)
 {
     throw 0;
 }
 
-void CMakeFile::generate(std::ostream &stream, Assignment &assign)
+void CMakeFile::generate(std::ostream &stream, const Assignment &assign)
 {
-    stream << "set(" << assign.mVariableName << " ";
-    generate(stream, *assign.mStatement);
+    stream << "set(";
+    generate(stream, assign.mTarget);
+    stream << " ";
+    generate(stream, assign.mStatement);
     stream << ")";
 }
 
-void CMakeFile::generate(std::ostream &stream, ArithOperation &op)
+void CMakeFile::generate(std::ostream &stream, const ArithOperation &op)
 {
     throw 0;
 }
 
-void CMakeFile::generate(std::ostream &stream, Constructor &con)
+void CMakeFile::generate(std::ostream &stream, const Constructor &con)
 {
     throw 0;
 }
 
-void CMakeFile::generate(std::ostream &stream, Constant &c)
+void CMakeFile::generate(std::ostream &stream, const Constant &c)
 {
     stream << c.mValue.toShortString();
 }
 
-void CMakeFile::generate(std::ostream &stream, Comment &c)
+void CMakeFile::generate(std::ostream &stream, const Comment &c)
 {
     throw 0;
 }
 
-void CMakeFile::generate(std::ostream &stream, Statement &s)
+void CMakeFile::generate(std::ostream &stream, const ForEach &c)
+{
+    throw 0;
+}
+
+void CMakeFile::generate(std::ostream &stream, const Statement &s)
 {
 
     std::visit([&](auto &block) {

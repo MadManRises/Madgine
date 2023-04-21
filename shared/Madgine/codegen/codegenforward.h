@@ -4,7 +4,7 @@ namespace CodeGen {
 
 struct Assignment;
 struct Return;
-struct VariableRead;
+struct VariableAccess;
 struct VariableDefinition;
 struct MemberAccess;
 struct CustomCodeBlock;
@@ -14,11 +14,12 @@ struct ArithOperation;
 struct Constructor;
 struct Constant;
 struct Comment;
+struct ForEach;
 
 struct Struct;
 
-using Statement = std::variant<Assignment, Return, VariableRead, CustomCodeBlock, Namespace, MemberAccess, VariableDefinition, ArithOperation, Constructor, Constant, Comment>;
-using Type = std::variant<Engine::ValueTypeDesc, Struct *>;
+using Statement = std::variant<Assignment, Return, VariableAccess, CustomCodeBlock, Namespace, MemberAccess, VariableDefinition, ArithOperation, Constructor, Constant, Comment, ForEach>;
+struct Type;
 
 struct ShaderFile;
 struct CppFile;

@@ -35,6 +35,7 @@ struct META_EXPORT ValueTypeIndex {
     }
 
     std::string_view toString() const;
+    std::string_view toTypeName() const;
 };
 
 enum class ExtendedValueTypeEnum : unsigned char {
@@ -181,6 +182,7 @@ struct META_EXPORT ValueTypeDesc {
 
     bool canAccept(const ValueTypeDesc &valueType);
     std::string toString() const;
+    std::string toTypeName() const;
 
     std::strong_ordering operator<=>(const ValueTypeDesc &other) const
     {

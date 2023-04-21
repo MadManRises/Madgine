@@ -181,7 +181,7 @@ namespace Render {
 
         for (uint32_t i = 0; i < dataInCount(); ++i) {
             rasterizerData->mVariables.push_back({ {}, { std::string { dataInName(i) }, dataInType(i) } });
-            file.statement(CodeGen::Assignment { "OUT." + std::string { dataInName(i) }, generator.read(i) });
+            file.statement(CodeGen::Assignment { {} , CodeGen::VariableAccess { "OUT." + std::string { dataInName(i) } }, generator.read(i) });
         }
 
         assert(!generator.mRasterizerData);
@@ -189,7 +189,7 @@ namespace Render {
 
         std::vector<CodeGen::Function> *vertexInstance = file.nextInstance();
 
-        file.beginFunction("main", toValueTypeDesc<Vector4>(), { { "IN", generator.mRasterizerData } });
+        file.beginFunction("main", { toValueTypeDesc<Vector4>() }, { { "IN", generator.mRasterizerData } });
         NodeGraph::Pin pin = flowOutTarget(0);
         generator.generate(pin);
         file.endFunction();
@@ -201,14 +201,14 @@ namespace Render {
         }
         generator.mAdditionalRasterizerStatements.clear();
 
-        file.statement(CodeGen::Return { CodeGen::VariableRead { "OUT" } });
+        file.statement(CodeGen::Return { {} ,CodeGen::VariableAccess { "OUT" } });
 
         flowInOut.reset();
     }
 
     CodeGen::Statement RasterizerNode::generateRead(NodeGraph::CodeGenerator &generator, uint32_t providerIndex, std::unique_ptr<NodeGraph::CodeGeneratorData> &data) const
     {
-        return CodeGen::VariableRead { "IN." + std::string { dataInName(providerIndex) } };
+        return CodeGen::VariableAccess { "IN." + std::string { dataInName(providerIndex) } };
     }
 
 }

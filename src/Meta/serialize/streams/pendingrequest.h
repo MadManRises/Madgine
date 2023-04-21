@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Generic/execution/sender.h"
-#include "Generic/execution/virtualreceiver.h"
+#include "Generic/execution/virtualstate.h"
 #include "Generic/execution/virtualsender.h"
 #include "Generic/forward_capture.h"
 #include "Generic/nulledptr.h"
@@ -57,9 +57,11 @@ namespace Serialize {
         NulledPtr<Execution::VirtualReceiverBase<MessageResult, const void *>> mPtr;
     };
 
-    template <typename Rec, typename T>
-    struct MessageReceiver : Execution::VirtualReceiverBase<MessageResult, const void *> {
-        MessageReceiver(Rec &&rec)
+    template <typename _Rec, typename T>
+    struct MessageState : Execution::VirtualReceiverBase<MessageResult, const void *> {
+        using Rec = _Rec;
+        
+        MessageState(Rec &&rec)
             : mRec(std::forward<Rec>(rec))
         {
         }
@@ -83,9 +85,11 @@ namespace Serialize {
         Rec mRec;
     };
 
-    template <typename Rec>
-    struct MessageReceiver<Rec, void> : Execution::VirtualReceiverBase<MessageResult, const void *> {
-        MessageReceiver(Rec &&rec)
+    template <typename _Rec>
+    struct MessageState<_Rec, void> : Execution::VirtualReceiverBase<MessageResult, const void *> {
+        using Rec = _Rec;
+        
+        MessageState(Rec &&rec)
             : mRec(std::forward<Rec>(rec))
         {
         }
@@ -114,7 +118,7 @@ namespace Serialize {
     {
         return Execution::make_sender<MessageResult, T>(
             [f { forward_capture(std::forward<F>(f)) }, args = std::tuple<Args...> { std::forward<Args>(args)... }]<typename Rec>(Rec &&rec) mutable {
-                return Execution::make_simple_state<MessageReceiver<Rec, T>, MessageResult, T>(std::forward<F>(f), std::move(args), std::forward<Rec>(rec));
+                return Execution::make_simple_state<MessageState<Rec, T>>(std::forward<F>(f), std::move(args), std::forward<Rec>(rec));
             });
     }
 

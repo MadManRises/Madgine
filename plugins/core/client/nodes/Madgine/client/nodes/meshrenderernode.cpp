@@ -151,7 +151,7 @@ namespace Render {
 
             CodeGen::Struct *rasterizerData = gen.mFile.getStruct("RasterizerData");
 
-            gen.mFile.beginFunction("main", rasterizerData, { { "IN", vertexData } });
+            gen.mFile.beginFunction("main", { rasterizerData }, { { "IN", vertexData } });
             IndexType<uint32_t> dummy = 1;
             gen.generate(dummy, this);
             gen.mFile.endFunction();
@@ -209,7 +209,7 @@ namespace Render {
 
     CodeGen::Statement MeshRendererNode::generateRead(NodeGraph::CodeGenerator &generator, uint32_t providerIndex, std::unique_ptr<NodeGraph::CodeGeneratorData> &data) const
     {
-        return CodeGen::MemberAccess { std::string { sProviders[providerIndex].mName }, CodeGen::VariableRead { "IN" } };
+        return CodeGen::MemberAccess { std::string { sProviders[providerIndex].mName }, CodeGen::VariableAccess { "IN" } };
     }
 
 }

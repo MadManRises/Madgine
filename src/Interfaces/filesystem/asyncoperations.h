@@ -3,8 +3,8 @@
 #include "Generic/bytebuffer.h"
 #include "Generic/functor.h"
 #include "Generic/genericresult.h"
-#include "Generic/execution/sender.h"
-#include "Generic/execution/virtualreceiver.h"
+#include "Generic/execution/virtualstate.h"
+#include "Generic/execution/concepts.h"
 #include "path.h"
 
 namespace Engine {
@@ -13,6 +13,7 @@ namespace Filesystem {
     struct AsyncFileReadAuxiliaryData;
 
     struct INTERFACES_EXPORT AsyncFileReadState : Execution::VirtualReceiverBase<GenericResult, ByteBuffer> {
+        
         AsyncFileReadState(Path &&path);
         AsyncFileReadState(const AsyncFileReadState &) = delete;
         AsyncFileReadState(AsyncFileReadState &&) = delete;
@@ -30,19 +31,23 @@ namespace Filesystem {
         ByteBuffer mBuffer;
     };
 
-    struct AsyncFileReadSender {
+    struct AsyncFileRead {
+        using is_sender = void;
+
+        using result_type = GenericResult;
+        template <template <typename...> typename Tuple>
+        using value_types = Tuple<ByteBuffer>;
+
         template <typename Rec>
-        auto operator()(Rec &&rec)
+        friend auto tag_invoke(Execution::connect_t, AsyncFileRead &&read, Rec &&rec)
         {
-            return Execution::VirtualReceiverEx<Rec, AsyncFileReadState, type_pack<GenericResult>, ByteBuffer> {
+            return Execution::VirtualStateEx<Rec, AsyncFileReadState, type_pack<GenericResult>, ByteBuffer> {
                 std::forward<Rec>(rec),
-                std::move(mPath)
+                std::move(read.mPath)
             };
         }
         Path mPath;
     };
-
-    using AsyncFileRead = Execution::Sender<AsyncFileReadSender, GenericResult, ByteBuffer>;
 
 }
 }
