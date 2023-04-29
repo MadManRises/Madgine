@@ -124,10 +124,11 @@ namespace Tools {
     void NodeRendererTester::NodeRenderPass::render(Render::RenderTarget *target, size_t iteration)
     {
         if (mHandle) {
-            mInterpreter.setGraph(&*mHandle);
+            /* mInterpreter.setGraph(&*mHandle);
 
             IndexType<uint32_t> flow = 0;
-            mInterpreter.interpret(flow, mArguments);
+            mInterpreter.interpret(flow, mArguments);*/
+            throw 0;
         }
     }
 

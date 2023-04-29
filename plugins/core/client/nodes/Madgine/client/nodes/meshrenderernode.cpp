@@ -20,6 +20,8 @@
 
 #include "Madgine/meshloader/gpumeshloader.h"
 
+#include "Madgine/nodegraph/nodes/util/sendernode.h"
+
 NODE(MeshRendererNode, Engine::Render::MeshRendererNode)
 
 METATABLE_BEGIN_BASE(Engine::Render::MeshRendererNode, Engine::NodeGraph::NodeBase)
@@ -130,14 +132,14 @@ namespace Render {
         Render::GPUMeshLoader::Handle mMesh;
     };
 
-    void MeshRendererNode::interpret(NodeGraph::NodeInterpreter &interpreter, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const
+    void MeshRendererNode::interpret(NodeGraph::NodeReceiver receiver, uint32_t flowIn, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const
     {
 
         if (!data) {
             std::unique_ptr<MeshRendererNodeInterpret> interpret = std::make_unique<MeshRendererNodeInterpret>();
 
             ShaderCodeGenerator gen { mGraph };
-            gen.mInterpreter = &interpreter;
+            gen.mInterpreter = &receiver.mInterpreter;
             NodeGraph::Pin pin = flowOutTarget(1);
 
             CodeGen::Struct *vertexData = gen.mFile.getStruct("VertexData");
@@ -182,7 +184,8 @@ namespace Render {
         MeshRendererNodeInterpret *interpretData = static_cast<MeshRendererNodeInterpret *>(data.get());
 
         ValueType meshV;
-        interpreter.read(meshV, 0);
+        //receiver.read(meshV, 0);
+        throw 0;
         Render::GPUMeshLoader::Resource *mesh = ValueType_as<Render::GPUMeshLoader::Resource *>(meshV);
 
         if (mesh) {
@@ -193,6 +196,8 @@ namespace Render {
                 throw 0;
             }
         }
+
+        receiver.set_value();
     }
 
     void MeshRendererNode::generate(NodeGraph::CodeGenerator &generator, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeGraph::CodeGeneratorData> &data) const

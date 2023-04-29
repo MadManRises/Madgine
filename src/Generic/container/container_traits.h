@@ -56,7 +56,12 @@ struct Pib {
 };
 
 template <typename C, typename = void>
-struct container_traits : container_traits<typename underlying_container<C>::type> {
+struct container_traits;
+
+template <typename C>
+requires requires { typename underlying_container<C>::type; }
+struct container_traits<C> : container_traits<typename underlying_container<C>::type>
+{
     typedef C container;
 };
 

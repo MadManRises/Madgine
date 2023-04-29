@@ -11,6 +11,7 @@
 #include "Meta/math/vector4.h"
 
 #include "Madgine/nodegraph/nodegraph.h"
+#include "Madgine/nodegraph/nodes/util/sendernode.h"
 
 NODE(GPUBufferNode, Engine::Render::GPUBufferNode)
 
@@ -143,9 +144,9 @@ namespace Render {
         }
     }
 
-    void GPUBufferNode::interpret(NodeGraph::NodeInterpreter &interpreter, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const
+    void GPUBufferNode::interpret(NodeGraph::NodeReceiver receiver, uint32_t flowIn, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const
     {
-        assert(flowInOut == 0);
+        assert(flowIn == 0);
 
         if (!data) {
             data = std::make_unique<GPUBufferInterpreterData>();
@@ -164,20 +165,21 @@ namespace Render {
 
         if (ptr) {
             for (uint32_t i = 0; i < mAdditionalPins; ++i) {
-                ValueType v;
-                interpreter.read(v, i);
+                /* ValueType v;
+                receiver.read(v, i);
 
                 v.visit([&]<typename T>(const T &v) {
                     *static_cast<MakeOwning_t<T> *>(ptr) = v;
                     ptr = reinterpret_cast<char *>(ptr) + sizeof(MakeOwning_t<T>);
-                });
+                });*/
+                throw 0;
             }
         }
 
         if (bufferData->mMapper)
             bufferData->mBuffer.clear();
 
-        flowInOut = 0;
+        receiver.set_value();
     }
 
     void GPUBufferNode::generate(NodeGraph::CodeGenerator &_generator, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeGraph::CodeGeneratorData> &data) const

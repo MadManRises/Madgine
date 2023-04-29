@@ -6,7 +6,7 @@ FolderSources(sources "" src)
 		FolderSources(sources Madgine nodegraph codegenerator.cpp codegenerator.h nodegraph.cpp nodegraph.h nodegraphloader.cpp nodegraphloader.h nodebase.cpp nodebase.h nodecollector.cpp nodecollector.h nodeinterpreter.cpp nodeinterpreter.h)
 			FolderSources(sources nodegraph nodes functionnode.cpp functionnode.h pumpnode.cpp pumpnode.h testnode.cpp testnode.h variablenode.cpp variablenode.h)
 				FolderSources(sources nodes arithmetical additionnode.cpp additionnode.h multiplicationnode.cpp multiplicationnode.h vector3to4node.cpp vector3to4node.h)
-				FolderSources(sources nodes util)
+				FolderSources(sources nodes util sendernode.cpp)
 			
 add_plugin(NodeGraph Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/nodegraphlib.h)
 

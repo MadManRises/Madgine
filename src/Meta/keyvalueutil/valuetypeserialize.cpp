@@ -23,6 +23,9 @@ namespace Serialize {
             using T = std::remove_reference_t<decltype(value)>;
             if constexpr (PrimitiveType<T>) {
                 return Serialize::read(in, value, name);
+            } else if constexpr (std::same_as<T, std::monostate>) {
+                Void v;
+                Serialize::read(in, v, name);
             } else
                 throw 0;
         });
@@ -36,6 +39,8 @@ namespace Serialize {
             using T = std::remove_const_t<std::remove_reference_t<decltype(value)>>;
             if constexpr (PrimitiveType<T>) {
                 Serialize::write(out, value, name);
+            } else if constexpr (std::same_as<T, std::monostate>){
+                Serialize::write(out, Void {}, name);
             } else
                 throw 0;
         });

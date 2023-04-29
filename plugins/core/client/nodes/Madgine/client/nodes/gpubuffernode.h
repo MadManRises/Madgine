@@ -50,7 +50,7 @@ namespace Render {
 
         virtual void onDataInUpdate(uint32_t index, NodeGraph::Pin source, NodeGraph::EdgeEvent event) override;
 
-        virtual void interpret(NodeGraph::NodeInterpreter &interpreter, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const override;
+        virtual void interpret(NodeGraph::NodeReceiver receiver, uint32_t flowIn, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const override;
 
         virtual void generate(NodeGraph::CodeGenerator &generator, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeGraph::CodeGeneratorData> &data) const override;
 

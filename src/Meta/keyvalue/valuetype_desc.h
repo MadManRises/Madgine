@@ -253,7 +253,8 @@ struct META_EXPORT ExtendedValueTypeDesc {
             return cmp;
         return mSecondary.compare(mType, other.mSecondary);
     }
-    constexpr bool operator==(const ExtendedValueTypeDesc& other) const {
+    constexpr bool operator==(const ExtendedValueTypeDesc &other) const
+    {
         return mType == other.mType && mSecondary.compare(mType, other.mSecondary) == 0;
     }
 

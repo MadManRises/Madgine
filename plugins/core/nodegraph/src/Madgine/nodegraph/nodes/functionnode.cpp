@@ -59,11 +59,6 @@ namespace NodeGraph {
         return mFunction ? 1 : 0;
     }
 
-    std::string_view FunctionNode::dataProviderName(uint32_t index) const
-    {
-        return "call";
-    }
-
     ExtendedValueTypeDesc FunctionNode::dataProviderType(uint32_t index, bool bidir ) const
     {
         return mFunction->mReturnType;
@@ -71,11 +66,12 @@ namespace NodeGraph {
 
     void FunctionNode::interpretRead(NodeInterpreter &interpreter, ValueType &retVal, uint32_t providerIndex, std::unique_ptr<NodeInterpreterData> &data) const
     {
-        ArgumentList arguments { dataInCount() };
+        /* ArgumentList arguments { dataInCount() };
         for (size_t i = 0; i < dataInCount(); ++i) {
             interpreter.read(arguments[i], i);
         }
-        mFunction->mFunctionPtr(mFunction, retVal, arguments);        
+        mFunction->mFunctionPtr(mFunction, retVal, arguments);        */
+        throw 0;
     }
 
     CodeGen::Statement FunctionNode::generateRead(CodeGenerator &generator, uint32_t providerIndex, std::unique_ptr<CodeGeneratorData> &data) const

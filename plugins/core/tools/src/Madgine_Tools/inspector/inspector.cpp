@@ -21,6 +21,8 @@
 
 #include "../renderer/imroot.h"
 
+#include "../imguiicons.h"
+
 UNIQUECOMPONENT(Engine::Tools::Inspector);
 
 METATABLE_BEGIN_BASE(Engine::Tools::Inspector, Engine::Tools::ToolBase)
@@ -158,7 +160,6 @@ namespace Tools {
 
                 ImGui::BeginDisabled(!editable);
                 std::pair<bool, bool> result = std::make_pair(ImGui::ValueTypeDrawer::draw(other), false);
-                ImGui::EndDisabled();
 
                 ImGui::PopItemWidth();
 
@@ -167,6 +168,7 @@ namespace Tools {
                     result.first |= ImGui::ValueTypeTypePicker(&value);
                     ImGui::EndGroup();
                 }
+                ImGui::EndDisabled();
 
                 ImGui::PopID();
 
@@ -265,6 +267,11 @@ namespace Tools {
         ImGui::DraggableValueTypeSource(id, range);
 
         ImGui::TableNextColumn();
+        
+        if (range.canInsert()) {
+            if (ImGui::Button(IMGUI_ICON_PLUS))
+                range.insert(range.end());
+        }        
 
         if (b) {
             size_t i = 0;

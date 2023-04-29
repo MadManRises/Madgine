@@ -36,7 +36,7 @@ namespace Tools {
 
             NodeGraph::NodeGraphLoader::Handle mHandle;
 
-            NodeGraph::NodeInterpreter mInterpreter;
+            //NodeGraph::NodeInterpreter mInterpreter;
 
             ArgumentList mArguments;
         };

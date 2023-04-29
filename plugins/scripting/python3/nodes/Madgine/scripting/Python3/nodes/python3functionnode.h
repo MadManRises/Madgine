@@ -30,7 +30,7 @@ namespace Scripting {
             virtual std::string_view dataInName(uint32_t index) const override;
             virtual ExtendedValueTypeDesc dataInType(uint32_t index, bool bidir = true) const override;
 
-            virtual void interpret(NodeGraph::NodeInterpreter &interpreter, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const override;
+            virtual void interpret(NodeGraph::NodeReceiver receiver, uint32_t flowIn, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const override;
 
             Python3FileLoader::Resource *getFile() const;
             void setFile(Python3FileLoader::Resource *file);
@@ -46,6 +46,8 @@ namespace Scripting {
             ExtendedValueTypeDesc mReturnType;
 
             std::string mName;
+
+            bool mDirty = false;
         };
 
     }

@@ -10,6 +10,8 @@
 
 #include "../nodegraph.h"
 
+#include "util/sendernode.h"
+
 NODE(PumpNode, Engine::NodeGraph::PumpNode)
 
 METATABLE_BEGIN_BASE(Engine::NodeGraph::PumpNode, Engine::NodeGraph::NodeBase)
@@ -37,29 +39,14 @@ namespace NodeGraph {
         return 1;
     }
 
-    std::string_view PumpNode::flowInName(uint32_t index) const
-    {
-        return "pump";
-    }
-
     size_t PumpNode::flowOutCount() const
     {
         return 1;
     }
 
-    std::string_view PumpNode::flowOutName(uint32_t index) const
-    {
-        return "return";
-    }
-
     size_t PumpNode::dataInCount() const
     {
         return 1;
-    }
-
-    std::string_view PumpNode::dataInName(uint32_t index) const
-    {
-        return "read";
     }
 
     ExtendedValueTypeDesc PumpNode::dataInType(uint32_t index, bool bidir) const
@@ -78,11 +65,6 @@ namespace NodeGraph {
         return 1;
     }
 
-    std::string_view PumpNode::dataOutName(uint32_t index) const
-    {
-        return "write";
-    }
-
     ExtendedValueTypeDesc PumpNode::dataOutType(uint32_t index, bool bidir) const
     {
         assert(index == 0);
@@ -94,11 +76,12 @@ namespace NodeGraph {
         return desc;
     }
 
-    void PumpNode::interpret(NodeInterpreter &interpreter, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeInterpreterData> &data) const
+    void PumpNode::interpret(NodeReceiver receiver, uint32_t flowIn, std::unique_ptr<NodeInterpreterData> &data) const
     {
         ValueType v;
-        interpreter.read(v, 0);
-        interpreter.write(0, v);
+        receiver.read(v, 0);
+        receiver.write(0, v);
+        receiver.set_value();
     }
 
 }

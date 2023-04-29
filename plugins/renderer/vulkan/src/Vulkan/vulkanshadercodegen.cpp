@@ -23,13 +23,13 @@ namespace Render {
         void generateType(std::ostream &stream, const CodeGen::Type &type)
         {
             std::visit(overloaded {
-                           [&](const ValueTypeDesc &type) {
+                           [&](const ExtendedValueTypeDesc &type) {
                                stream << sTypeMap.at(type);
                            },
                            [&](CodeGen::Struct *structInfo) {
                                stream << structInfo->mName;
                            } },
-                type);
+                type.mBaseType);
         }
 
         void generate(std::ostream &stream, const CodeGen::Statement &statement);
@@ -67,17 +67,18 @@ namespace Render {
 
         void generate(std::ostream &stream, const CodeGen::Assignment &statement)
         {
-            stream << statement.mVariableName << " = ";
-            generate(stream, *statement.mStatement);
+            generate(stream, statement.mTarget);
+            stream << " = ";
+            generate(stream, statement.mStatement);
         }
 
         void generate(std::ostream &stream, const CodeGen::Return &statement)
         {
             stream << "return ";
-            generate(stream, *statement.mStatement);
+            generate(stream, statement.mStatement);
         }
 
-        void generate(std::ostream &stream, const CodeGen::VariableRead &statement)
+        void generate(std::ostream &stream, const CodeGen::VariableAccess &statement)
         {
             stream << statement.mVariableName;
         }
@@ -86,15 +87,15 @@ namespace Render {
         {
             generateType(stream, def.mVariable.mType);
             stream << " " << def.mVariable.mName;
-            if (!def.mDefaultValue.is<std::monostate>()) {
+            if (def.mInitializer) {
                 stream << " = ";
-                def.mDefaultValue.visit([&](const auto &part) { generate(stream, part); });
+                generate(stream, *def.mInitializer);
             }
         }
 
         void generate(std::ostream &stream, const CodeGen::MemberAccess &access)
         {
-            generate(stream, *access.mStatement);
+            generate(stream, access.mStatement);
             stream << "." << access.mMemberName;
         }
 

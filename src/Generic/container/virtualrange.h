@@ -20,7 +20,7 @@ namespace __generic_impl__ {
     struct VirtualIteratorBase {
         virtual ~VirtualIteratorBase() = default;
         virtual void increment() = 0;
-        virtual void get(RefT &ref) const = 0;
+        virtual void getValue(RefT &ref) const = 0;
         virtual std::unique_ptr<VirtualIteratorBase<RefT>> clone() const = 0;
         virtual bool ended() const = 0;
 
@@ -54,7 +54,7 @@ namespace __generic_impl__ {
             ++mIt;
         }
 
-        virtual void get(RefT &ref) const override
+        virtual void getValue(RefT &ref) const override
         {
             Assign {}(ref, *mIt);
         }
@@ -67,6 +67,11 @@ namespace __generic_impl__ {
         virtual bool ended() const override
         {
             return mIt == mEnd;
+        }
+
+        It get() const
+        {
+            return mIt;
         }
 
     private:
@@ -130,14 +135,14 @@ struct VirtualIterator {
     RefT operator*() const
     {
         RefT result;
-        mImpl->get(result);
+        mImpl->getValue(result);
         return result;
     }
 
     Proxy<RefT, false> operator->() const
     {
         RefT result;
-        mImpl->get(result);
+        mImpl->getValue(result);
         return result;
     }
 
@@ -161,6 +166,11 @@ struct VirtualIterator {
         return mImpl->ended();
     }
 
+    __generic_impl__::VirtualIteratorBase<RefT> *get() const
+    {
+        return mImpl.get();
+    }
+
 private:
     std::unique_ptr<__generic_impl__::VirtualIteratorBase<RefT>> mImpl;
 };
@@ -172,7 +182,10 @@ namespace __generic_impl__ {
         virtual ~VirtualRangeBase() = default;
         virtual VirtualIterator<RefT> begin(std::shared_ptr<VirtualRangeBase<RefT>> self) = 0;
         virtual size_t size() const = 0;
+        virtual VirtualIterator<RefT> insert(const VirtualIterator<RefT> &where, std::shared_ptr<VirtualRangeBase<RefT>> self) = 0;
+        virtual VirtualIterator<RefT> insert(const VirtualSentinel &where, std::shared_ptr<VirtualRangeBase<RefT>> self) = 0;
         virtual bool isReference() const = 0;
+        virtual bool canInsert() const = 0;
     };
 
     template <typename RefT, typename C>
@@ -183,6 +196,13 @@ namespace __generic_impl__ {
     template <typename RefT, typename C, typename Assign>
     struct VirtualRangeImpl : VirtualRangeSecondBase<RefT, std::remove_reference_t<C>> {
 
+        using It = decltype(std::declval<C>().begin());
+        using Sentinel = decltype(std::declval<C>().end());
+        using IteratorImpl = __generic_impl__::VirtualIteratorImpl<RefT, It, Sentinel, Assign>;
+
+        static constexpr bool sCanInsert = requires { typename container_traits<std::remove_reference_t<C>>::container; }
+        &&!std::is_const_v<std::remove_reference_t<C>> && !std::is_same_v<RefT, KeyValuePair>;
+
         VirtualRangeImpl(C &&c)
             : mContainer(std::forward<C>(c))
         {
@@ -190,12 +210,34 @@ namespace __generic_impl__ {
 
         virtual VirtualIterator<RefT> begin(std::shared_ptr<VirtualRangeBase<RefT>> self) override
         {
-            return { std::make_unique<__generic_impl__::VirtualIteratorImpl<RefT, decltype(mContainer.begin()), decltype(mContainer.end()), Assign>>(mContainer.begin(), mContainer.end(), std::move(self)) };
+            return { std::make_unique<IteratorImpl>(mContainer.begin(), mContainer.end(), std::move(self)) };
         }
 
         virtual size_t size() const override
         {
             return mContainer.size();
+        }
+
+        virtual VirtualIterator<RefT> insert(const VirtualIterator<RefT> &where, std::shared_ptr<VirtualRangeBase<RefT>> self) override
+        {
+            if constexpr (sCanInsert) {
+                VirtualIteratorBase<RefT> *innerIt = where.get();
+                assert(dynamic_cast<IteratorImpl *>(innerIt));
+                auto it = container_traits<std::remove_reference_t<C>>::emplace(mContainer, static_cast<IteratorImpl *>(innerIt)->get());
+                return { std::make_unique<IteratorImpl>(it, mContainer.end(), self) };
+            } else {
+                throw 0;
+            }
+        }
+
+        virtual VirtualIterator<RefT> insert(const VirtualSentinel &where, std::shared_ptr<VirtualRangeBase<RefT>> self) override
+        {
+            if constexpr (sCanInsert) {                
+                auto it = container_traits<std::remove_reference_t<C>>::emplace(mContainer, mContainer.end());
+                return { std::make_unique<IteratorImpl>(it, mContainer.end(), self) };
+            } else {
+                throw 0;
+            }
         }
 
         virtual C &get() override
@@ -211,6 +253,11 @@ namespace __generic_impl__ {
                 return mContainer.isReference();
             else
                 return false;
+        }
+
+        virtual bool canInsert() const override
+        {
+            return sCanInsert;
         }
 
     private:
@@ -269,6 +316,16 @@ struct VirtualRange {
         return mRange->size();
     }
 
+    VirtualIterator<RefT> insert(const VirtualIterator<RefT> &where)
+    {
+        return mRange->insert(where, mRange);
+    }
+
+    VirtualIterator<RefT> insert(const VirtualSentinel &where)
+    {
+        return mRange->insert(where, mRange);
+    }
+
     template <typename C>
     HeapObject<C, std::shared_ptr<C>> safe_cast()
     {
@@ -318,6 +375,11 @@ struct VirtualRange {
     bool isReference() const
     {
         return mRange->isReference();
+    }
+
+    bool canInsert() const
+    {
+        return mRange->canInsert();
     }
 
     bool operator==(const VirtualRange &other) const

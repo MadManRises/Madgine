@@ -68,6 +68,11 @@ struct ValueType_ReturnHelper<T *> {
     typedef T *type;
 };
 
+template <>
+struct ValueType_ReturnHelper<ValueType> {
+    typedef ValueType type;
+};
+
 template <typename T>
 using ValueType_Return = typename ValueType_ReturnHelper<T>::type;
 

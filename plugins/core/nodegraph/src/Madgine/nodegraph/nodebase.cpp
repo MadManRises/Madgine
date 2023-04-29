@@ -7,6 +7,8 @@
 
 #include "nodegraph.h"
 
+#include "nodes/util/sendernode.h"
+
 METATABLE_BEGIN(Engine::NodeGraph::NodeBase)
 METATABLE_END(Engine::NodeGraph::NodeBase)
 
@@ -312,7 +314,11 @@ namespace NodeGraph {
         }
     }
 
-    void NodeBase::interpret(NodeInterpreter &interpreter, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeInterpreterData> &data) const
+    void NodeBase::setupInterpret(NodeInterpreter &interpreter, std::unique_ptr<NodeInterpreterData> &data) const
+    {
+    }
+
+    void NodeBase::interpret(NodeReceiver receiver, uint32_t flowIn, std::unique_ptr<NodeInterpreterData> &data) const
     {
         throw 0;
     }

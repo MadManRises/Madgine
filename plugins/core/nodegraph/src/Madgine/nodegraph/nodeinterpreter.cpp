@@ -6,91 +6,56 @@
 
 #include "Meta/keyvalue/valuetype.h"
 
+#include "nodeexecution.h"
+
 namespace Engine {
 namespace NodeGraph {
 
-    NodeInterpreter::NodeInterpreter(const NodeGraph *graph)
-        : mGraph(graph)        
+    NodeInterpreter::NodeInterpreter(const NodeGraph *graph, const ArgumentList &args)
+        : mGraph(graph)
+        , mArguments(args)
     {
     }
 
-    void NodeInterpreter::interpret(IndexType<uint32_t> &flowInOut, const ArgumentList &args, const NodeBase *startNode)
+    void NodeInterpreter::start()
     {
-        assert(mGraph);
-
-        Pin pin;
-        if (startNode) {
-            pin.mIndex = flowInOut;
-            pin.mNode = mGraph->nodeIndex(startNode);
-        } else {
-            pin = mGraph->mFlowOutPins[flowInOut].mTarget;
-        }
-
-        interpret(pin, args);
-
-        flowInOut = pin.mIndex;
+        interpret(mGraph->mFlowOutPins[0].mTarget);
     }
 
-    void NodeInterpreter::interpret(Pin &pin, const ArgumentList &args)
+    void NodeInterpreter::interpret(Pin pin)
     {
         assert(mGraph);
 
         if (mGraphGeneration != mGraph->generation()) {
             mData.clear();
             mData.resize(mGraph->nodes().size());
+
+            for (size_t i = 0; i < mData.size(); ++i) {
+                mGraph->node(i + 1)->setupInterpret(*this, mData[i]);
+            }
+
             mGraphGeneration = mGraph->generation();
         }
-        assert(!mCurrentArguments);
-        const ArgumentList *oldCurrentArguments = mCurrentArguments;
 
-        mCurrentArguments = &args;
-
-        branch(pin);
-
-        mCurrentArguments = oldCurrentArguments;
+        branch(*this, pin);
     }
 
-    void NodeInterpreter::branch(IndexType<uint32_t> flow)
+    void NodeInterpreter::branch(Execution::VirtualReceiverBase<GenericResult> &receiver, uint32_t flow)
     {
         Pin pin = mCurrentNode->flowOutTarget(flow);
-        branch(pin);
+        branch(receiver, pin);
     }
 
-    void NodeInterpreter::branch(Pin &pin)
+    void NodeInterpreter::branch(Execution::VirtualReceiverBase<GenericResult> &receiver, Pin pin)
     {
-        const NodeBase *oldCurrentNode = mCurrentNode;
-
-        while (pin && pin.mNode) {
-            mCurrentNode = mGraph->node(pin.mNode);
-            IndexType<uint32_t> flowIndex = pin.mIndex;
-            mCurrentNode->interpret(*this, flowIndex, mData[pin.mNode - 1]);
-            if (flowIndex)
-                pin = mCurrentNode->flowOutTarget(flowIndex);
-            else
-                pin = {};
-        }
-
-        mCurrentNode = oldCurrentNode;
-    }
-
-    void NodeInterpreter::read(ValueType &retVal, uint32_t dataInIndex)
-    {
-        Pin pin = mCurrentNode->dataInSource(dataInIndex);
-        if (!pin.mNode) {
-            retVal = mCurrentArguments->at(pin.mIndex);
+        if (pin && pin.mNode) {
+            const NodeBase *node = mGraph->node(pin.mNode);
+            mCurrentNode = node;
+            uint32_t flowIndex = pin.mIndex;
+            node->interpret({ node, *this, receiver }, flowIndex, mData[pin.mNode - 1]);
         } else {
-            const NodeBase *oldCurrentNode = mCurrentNode;
-            mCurrentNode = mGraph->node(pin.mNode);
-            mCurrentNode->interpretRead(*this, retVal, pin.mIndex, mData[pin.mNode - 1]);
-            mCurrentNode = oldCurrentNode;
+            receiver.set_value();
         }
-    }
-
-    void NodeInterpreter::write(uint32_t dataOutIndex, const ValueType &v)
-    {
-        Pin pin = mCurrentNode->dataOutTarget(dataOutIndex);
-        if (pin)
-            mGraph->node(pin.mNode)->interpretWrite(*this, pin.mIndex, mData[pin.mNode - 1], v);
     }
 
     void NodeInterpreter::setGraph(const NodeGraph *graph)
@@ -113,7 +78,19 @@ namespace NodeGraph {
 
     std::unique_ptr<NodeInterpreterData> &NodeInterpreter::data(uint32_t index)
     {
-        return mData[index-1];
+        return mData[index - 1];
+    }
+
+    bool NodeInterpreter::resolveVar(OutRef<ValueType> &result, std::string_view name)
+    {
+        for (const std::unique_ptr<NodeInterpreterData> &data : mData) {
+            if (data) {
+                bool hadValue = result.mPtr;
+                bool gotValue = data->resolveVar(result, name);
+                assert(!hadValue || !gotValue);
+            }
+        }
+        return result.mPtr;
     }
 
 }

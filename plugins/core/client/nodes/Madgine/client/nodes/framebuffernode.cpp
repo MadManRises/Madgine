@@ -8,6 +8,8 @@
 
 #include "shadercodegenerator.h"
 
+#include "Madgine/nodegraph/nodes/util/sendernode.h"
+
 NODE(FrameBufferNode, Engine::Render::FrameBufferNode)
 
 METATABLE_BEGIN_BASE(Engine::Render::FrameBufferNode, Engine::NodeGraph::NodeBase)
@@ -70,7 +72,7 @@ namespace Render {
         return NodeGraph::NodeExecutionMask::GPU;
     }
 
-    void FrameBufferNode::interpret(NodeGraph::NodeInterpreter &interpreter, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const
+    void FrameBufferNode::interpret(NodeGraph::NodeReceiver receiver, uint32_t flowIn, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const
     {
         throw 0;
     }

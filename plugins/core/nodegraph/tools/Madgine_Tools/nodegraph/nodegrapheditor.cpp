@@ -36,7 +36,7 @@
 #include "Madgine/codegen/codegen_cpp.h"
 #include "Madgine/codegen/fromsender.h"
 
-#include "Madgine/nodegraph/nodes/util/sendernode.h"
+#include "Madgine/nodegraph/nodes/util/graphbuilder.h"
 
 UNIQUECOMPONENT(Engine::Tools::NodeGraphEditor);
 
@@ -69,7 +69,9 @@ namespace Tools {
         auto rectMax = labelPos + size + padding;
 
         auto drawList = ImGui::GetWindowDrawList();
+        //drawList->ChannelsSetCurrent(3);
         drawList->AddRectFilled(rectMin, rectMax, color, size.y * 0.15f);
+        //drawList->ChannelsSetCurrent(4);
         drawList->AddText(labelPos, IM_COL32(255, 255, 255, 255), label.data(), label.data() + label.size());
     };
 
@@ -267,7 +269,7 @@ namespace Tools {
         }
         fileName += "###editor";
 
-        ImGuiWindowFlags flags = 0;
+        ImGuiWindowFlags flags = ImGuiWindowFlags_NoScrollbar;
         if (mIsDirty)
             flags |= ImGuiWindowFlags_UnsavedDocument;
 
@@ -501,9 +503,6 @@ namespace Tools {
                 ++nodeId;
             }
 
-            if (hoveredPin)
-                HoverPin(*hoveredPin);
-
             pinId = 0;
             for (NodeGraph::FlowOutPinPrototype &pin : mGraph.mFlowOutPins) {
                 assert(pin.mTarget);
@@ -690,6 +689,9 @@ namespace Tools {
 
             ed::End();
 
+            if (hoveredPin)
+                HoverPin(*hoveredPin);
+
             ImGui::GetCurrentContext()->MouseViewport->Pos = oldViewportPos;
             ImGui::GetCurrentContext()->MouseViewport->Size = oldViewportSize;
 
@@ -767,8 +769,9 @@ namespace Tools {
         file.generate(ss);
         std::string result = ss.str();
 
-        NodeGraph::SenderConnection con;
-        NodeGraph::graphBuilderFromSender(graph(con)).build(mGraph);
+        NodeGraph::SenderConnection<0, 0> con;
+        auto generated = NodeGraph::graphBuilderFromSender<decltype(graph(con)), 1, NodeGraph::SenderConnection<0, 0>, type_pack<>>(mGraph);
+        mGraph.connectFlow(generated.flowInPin(mGraph), { 0, 0 });
     }
 
     void NodeGraphEditor::renderMenu()
@@ -792,13 +795,7 @@ namespace Tools {
                 }
 
                 if (ImGui::MenuItem("Debug", "", false)) {
-                    NodeGraph::NodeInterpreter interpreter { &mGraph };
-                    try {
-                        IndexType<uint32_t> index = 0;
-                        interpreter.interpret(index, {});
-                    } catch (const std::out_of_range &e) {
-                        LOG_ERROR("Uncaught out_of_range exception during NodeGraph debugging: " << e.what());
-                    }
+                    Execution::detach(mGraph.interpret({ ValueType { 2 } }) | Execution::then([]() { LOG("SUCCESS"); }));
                 }
 
                 if (ImGui::BeginMenu("Test")) {

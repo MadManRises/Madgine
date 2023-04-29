@@ -19,14 +19,18 @@ struct type_pack;
 template <>
 struct type_pack<> {
 
-    template <typename T>
-    using append = type_pack<T>;
+    static constexpr const size_t size = 0;
+
+    template <typename... T>
+    using append = type_pack<T...>;
     template <typename... T>
     using prepend = type_pack<T...>;
     template <bool Cond, typename T>
     using prepend_if = std::conditional_t<Cond, type_pack<T>, type_pack<>>;
+    template <typename Pack2>
+    using concat = Pack2;
 
-    template <template <typename> typename Filter>
+    template <template <typename...> typename Filter, typename... Args>
     using filter = type_pack<>;
 
     template <template <typename...> typename Wrapper>
@@ -34,11 +38,19 @@ struct type_pack<> {
 
     using as_tuple = instantiate<std::tuple>;
 
+    template <template <typename> typename F>
+    using transform = type_pack<>;
+    template <template <size_t> typename F, size_t offset = 0>
+    using transform_index = type_pack<>;
+
     template <typename T>
     using unique = T;
 
     template <typename Default>
     using unpack_unique = Default;
+
+    template <size_t I>
+    using select = std::enable_if_t<dependent_bool<std::integral_constant<size_t, I>, false>::value>;
 };
 
 template <typename Head, typename... Ty>
@@ -67,8 +79,7 @@ struct type_pack<Head, Ty...> {
         };
 
         template <typename... Ty2, typename T>
-        requires type_pack<Ty2...>::template contains<T> 
-        struct is_or_contains<type_pack<Ty2...>, T> : is_or_contains<T, T> {
+        requires type_pack<Ty2...>::template contains<T> struct is_or_contains<type_pack<Ty2...>, T> : is_or_contains<T, T> {
         };
     };
 
@@ -79,13 +90,15 @@ struct type_pack<Head, Ty...> {
 
     template <template <typename> typename F>
     using transform = type_pack<F<Head>, F<Ty>...>;
+    template <template <size_t> typename F, size_t offset = 0>
+    using transform_index = typename type_pack<Ty...>::template transform_index<F, offset + 1>::template prepend<F<offset>>;
 
-    template <template <typename> typename Filter>
-    using filter = typename type_pack<Ty...>::template filter<Filter>::template prepend_if<Filter<Head>::value, Head>;
+    template <template <typename...> typename Filter, typename... Args>
+    using filter = typename type_pack<Ty...>::template filter<Filter>::template prepend_if<Filter<Head, Args...>::value, Head>;
 
     using pop_front = type_pack<Ty...>;
-    template <typename T>
-    using append = type_pack<Head, Ty..., T>;
+    template <typename... T>
+    using append = type_pack<Head, Ty..., T...>;
     template <typename... T>
     using prepend = type_pack<T..., Head, Ty...>;
     template <bool Cond, typename T>
@@ -121,7 +134,6 @@ struct type_pack<Head, Ty...> {
     using unpack_unique = typename type_pack<Ty...>::template unique<Head>;
 };
 
-
 template <typename Pack>
 using type_pack_first = typename Pack::first;
 
@@ -149,16 +161,5 @@ namespace __generic_impl__ {
 
 template <typename T, size_t n>
 using type_pack_repeat_n_times = typename __generic_impl__::type_pack_repeat_n_times_helper<T, std::make_index_sequence<n>>::type;
-
-template <typename T>
-struct make_type_pack {
-    using type = type_pack<T>;
-};
-template <typename... T>
-struct make_type_pack<type_pack<T...>> {
-    using type = type_pack<T...>;
-};
-template <typename T>
-using make_type_pack_t = typename make_type_pack<T>::type;
 
 }

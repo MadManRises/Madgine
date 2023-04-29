@@ -10,6 +10,8 @@
 
 #include "Madgine/nodegraph/nodegraph.h"
 
+#include "Madgine/nodegraph/nodes/util/sendernode.h"
+
 NODE(RasterizerNode, Engine::Render::RasterizerNode)
 
 METATABLE_BEGIN_BASE(Engine::Render::RasterizerNode, Engine::NodeGraph::NodeBase)
@@ -156,7 +158,7 @@ namespace Render {
         }
     }
 
-    void RasterizerNode::interpret(NodeGraph::NodeInterpreter &interpreter, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const
+    void RasterizerNode::interpret(NodeGraph::NodeReceiver receiver, uint32_t flowIn, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const
     {
         throw 0;
     }

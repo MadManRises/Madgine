@@ -25,19 +25,19 @@ namespace NodeGraph {
         virtual std::string_view className() const = 0;
 
         virtual size_t flowInCount() const { return 0; }
-        virtual std::string_view flowInName(uint32_t index) const { throw 0; }
+        virtual std::string_view flowInName(uint32_t index) const { return "call"; }
         virtual uint32_t flowInMask(uint32_t index, bool bidir = true) const { return NodeExecutionMask::CPU; }
         const std::vector<Pin> &flowInSources(uint32_t index) const;
         static uint32_t flowInId(uint32_t index);
 
         virtual size_t flowOutCount() const { return 0; }
-        virtual std::string_view flowOutName(uint32_t index) const { throw 0; }
+        virtual std::string_view flowOutName(uint32_t index) const { return "return"; }
         virtual uint32_t flowOutMask(uint32_t index, bool bidir = true) const { return NodeExecutionMask::CPU; }
         Pin flowOutTarget(uint32_t index) const;
         static uint32_t flowOutId(uint32_t index);
 
         virtual size_t dataInCount() const { return 0; }
-        virtual std::string_view dataInName(uint32_t index) const { throw 0; }
+        virtual std::string_view dataInName(uint32_t index) const { return "read"; }
         virtual uint32_t dataInMask(uint32_t index, bool bidir = true) const { return NodeExecutionMask::CPU; }
         virtual ExtendedValueTypeDesc dataInType(uint32_t index, bool bidir = true) const { throw 0; }
         virtual bool dataInVariadic() const { return false; }
@@ -46,7 +46,7 @@ namespace NodeGraph {
         static uint32_t dataInId(uint32_t index);
 
         virtual size_t dataOutCount() const { return 0; }
-        virtual std::string_view dataOutName(uint32_t index) const { throw 0; }
+        virtual std::string_view dataOutName(uint32_t index) const { return "write"; }
         virtual uint32_t dataOutMask(uint32_t index, bool bidir = true) const { return NodeExecutionMask::CPU; }
         virtual ExtendedValueTypeDesc dataOutType(uint32_t index, bool bidir = true) const { throw 0; }
         virtual bool dataOutVariadic() const { return false; }
@@ -54,7 +54,7 @@ namespace NodeGraph {
         static uint32_t dataOutId(uint32_t index);
 
         virtual size_t dataReceiverCount() const { return 0; }
-        virtual std::string_view dataReceiverName(uint32_t index) const { throw 0; }
+        virtual std::string_view dataReceiverName(uint32_t index) const { return "in"; }
         virtual uint32_t dataReceiverMask(uint32_t index, bool bidir = true) const { return NodeExecutionMask::CPU; }
         virtual ExtendedValueTypeDesc dataReceiverType(uint32_t index, bool bidir = true) const { throw 0; }
         virtual bool dataReceiverVariadic() const { return false; }
@@ -62,7 +62,7 @@ namespace NodeGraph {
         static uint32_t dataReceiverId(uint32_t index);
 
         virtual size_t dataProviderCount() const { return 0; }
-        virtual std::string_view dataProviderName(uint32_t index) const { throw 0; }
+        virtual std::string_view dataProviderName(uint32_t index) const { return "out"; }
         virtual uint32_t dataProviderMask(uint32_t index, bool bidir = true) const { return NodeExecutionMask::CPU; }
         virtual ExtendedValueTypeDesc dataProviderType(uint32_t index, bool bidir = true) const { throw 0; }
         virtual bool dataProviderVariadic() const { return false; }
@@ -94,7 +94,8 @@ namespace NodeGraph {
         void onDataProviderRemove(Pin pin);
         void onNodeReindex(uint32_t oldIndex, uint32_t newIndex);
 
-        virtual void interpret(NodeInterpreter &interpreter, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeInterpreterData> &data) const;
+        virtual void setupInterpret(NodeInterpreter &interpreter, std::unique_ptr<NodeInterpreterData> &data) const;
+        virtual void interpret(NodeReceiver receiver, uint32_t flowIn, std::unique_ptr<NodeInterpreterData> &data) const;
         virtual void interpretRead(NodeInterpreter &interpreter, ValueType &retVal, uint32_t providerIndex, std::unique_ptr<NodeInterpreterData> &data) const;
         virtual void interpretWrite(NodeInterpreter &interpreter, uint32_t receiverIndex, std::unique_ptr<NodeInterpreterData> &data, const ValueType &v) const;
 

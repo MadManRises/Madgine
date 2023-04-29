@@ -3,8 +3,10 @@
 namespace Engine {
 namespace NodeGraph {
 
-    struct NodeBase;    
+    struct NodeBase;
     struct NodeGraph;
+
+    struct NodeReceiver;
 
     struct NodeInterpreter;
     struct NodeInterpreterData;
@@ -25,5 +27,11 @@ namespace NodeGraph {
         DISCONNECT,
         UPDATE
     };
+
+    template <typename Signature>
+    struct algorithm;
+
+    using NodeResults = std::vector<ValueType>;
+
 }
 }

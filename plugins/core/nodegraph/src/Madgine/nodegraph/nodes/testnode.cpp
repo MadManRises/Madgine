@@ -10,6 +10,8 @@
 
 #include "Meta/keyvalue/valuetype.h"
 
+#include "util/sendernode.h"
+
 NODE(TestNode, Engine::NodeGraph::TestNode)
 
 METATABLE_BEGIN_BASE(Engine::NodeGraph::TestNode, Engine::NodeGraph::NodeBase)
@@ -38,19 +40,9 @@ namespace NodeGraph {
         return 1;
     }
 
-    std::string_view TestNode::flowInName(uint32_t index) const
-    {
-        return "execute";
-    }
-
     size_t TestNode::flowOutCount() const
     {
         return 1;
-    }
-
-    std::string_view TestNode::flowOutName(uint32_t index) const
-    {
-        return "1";
     }
 
     size_t TestNode::dataInCount() const
@@ -83,14 +75,17 @@ namespace NodeGraph {
         return { ValueTypeIndex { ValueTypeEnum::FloatValue } };
     }
 
-    void TestNode::interpret(NodeInterpreter &interpreter, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeInterpreterData> &data) const
+    void TestNode::interpret(NodeReceiver receiver, uint32_t flowIn, std::unique_ptr<NodeInterpreterData> &data) const
     {
         ValueType v;
-        interpreter.read(v, 1);
+        receiver.read(v, 1);
+        ValueType v2;
+        receiver.read(v2, 0);
         float f = v.as<float>();
-        LOG(f << " -> " << f * 2.0f);
-        interpreter.write(0, ValueType { 2.0f * f });
-        flowInOut = 0;
+        int i = v2.as<int>();
+        LOG(i << " * " << f << " -> " << f * i);
+        receiver.write(0, ValueType { i * f });
+        receiver.set_value();
     }
 
 }

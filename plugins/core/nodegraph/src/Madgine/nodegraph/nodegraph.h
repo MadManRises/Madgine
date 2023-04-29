@@ -4,6 +4,8 @@
 
 #include "nodebase.h"
 
+#include "nodeinterpreter.h"
+
 namespace Engine {
 namespace NodeGraph {
 
@@ -29,7 +31,7 @@ namespace NodeGraph {
         void removeNode(uint32_t index);
 
         const std::vector<std::unique_ptr<NodeBase>> &nodes() const;
-        const NodeBase *node(IndexType<uint32_t,0> index) const;
+        const NodeBase *node(IndexType<uint32_t, 0> index) const;
         NodeBase *node(IndexType<uint32_t, 0> index);
         uint32_t nodeIndex(const NodeBase *node) const;
 
@@ -43,18 +45,18 @@ namespace NodeGraph {
         ExtendedValueTypeDesc dataOutType(Pin target, bool bidir = true);
 
         uint32_t flowInMask(Pin target, bool bidir = true);
-        uint32_t flowOutMask(Pin source, bool bidir = true);        
+        uint32_t flowOutMask(Pin source, bool bidir = true);
         uint32_t dataReceiverMask(Pin source, bool bidir = true);
         uint32_t dataProviderMask(Pin target, bool bidir = true);
         uint32_t dataInMask(Pin source, bool bidir = true);
         uint32_t dataOutMask(Pin target, bool bidir = true);
 
         std::string_view flowInName(Pin target);
-        std::string_view flowOutName(Pin source);        
+        std::string_view flowOutName(Pin source);
         std::string_view dataReceiverName(Pin source);
         std::string_view dataProviderName(Pin target);
         std::string_view dataInName(Pin source);
-        std::string_view dataOutName(Pin target);        
+        std::string_view dataOutName(Pin target);
 
         void connectFlow(Pin source, Pin target);
         void connectDataIn(Pin target, Pin source);
@@ -64,19 +66,24 @@ namespace NodeGraph {
         void disconnectDataIn(Pin target);
         void disconnectDataOut(Pin source);
 
-        void onFlowInRemove(const NodeBase *node, uint32_t index);  
-        void onFlowOutRemove(const NodeBase *node, uint32_t index);           
+        void onFlowInRemove(const NodeBase *node, uint32_t index);
+        void onFlowOutRemove(const NodeBase *node, uint32_t index);
         void onDataReceiverRemove(const NodeBase *node, uint32_t index);
-        void onDataProviderRemove(const NodeBase *node, uint32_t index);     
+        void onDataProviderRemove(const NodeBase *node, uint32_t index);
         void onDataInRemove(const NodeBase *node, uint32_t index);
-        void onDataOutRemove(const NodeBase *node, uint32_t index);        
+        void onDataOutRemove(const NodeBase *node, uint32_t index);
 
         std::vector<FlowInPinPrototype> mFlowInPins;
         std::vector<FlowOutPinPrototype> mFlowOutPins;
         std::vector<DataReceiverPinPrototype> mDataReceiverPins;
         std::vector<DataProviderPinPrototype> mDataProviderPins;
         std::vector<DataInPinPrototype> mDataInPins;
-        std::vector<DataOutPinPrototype> mDataOutPins;   
+        std::vector<DataOutPinPrototype> mDataOutPins;
+
+        auto interpret(const ArgumentList &args = {}) const
+        {
+            return Execution::make_virtual_sender<NodeInterpreter, GenericResult>(this, args);
+        }
 
     protected:
         std::unique_ptr<NodeBase> createNode(std::string_view name);

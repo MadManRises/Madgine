@@ -3,260 +3,266 @@
 #include "Generic/execution/concepts.h"
 #include "Generic/execution/state.h"
 
-#include "../variablenode.h"
 #include "../../nodecollector.h"
+#include "../../nodeinterpreter.h"
+#include "Generic/execution/algorithm.h"
+#include "Generic/execution/execution.h"
+#include "Generic/execution/state.h"
+
+#include "../../pins.h"
+#include "../../nodegraph.h"
+#include "sendertraits.h"
 
 namespace Engine {
 namespace NodeGraph {
 
-    template <template <typename...> Sender>
-    struct SenderNode : Node<SenderNode<Sender>> {
-
-    };
-
-    struct NodeGraph_Context {
-
-    };
-
-    struct nodegraph_receiver : Engine::Execution::execution_receiver<NodeGraph_Context> {
-
-        NodeGraph_Context mContext;
-
-        friend NodeGraph_Context &tag_invoke(Engine::Execution::get_context_t, nodegraph_receiver &self)
-        {
-            return self.mContext;
-        }
-    };
-
-    template <typename _Rec>
-    struct nodegraph_base_state {
-        using Rec = _Rec;
-
-        Rec mRec;
-
-        template <typename CPO>
-        friend decltype(auto) tag_invoke(CPO f, nodegraph_base_state &state)
-        {
-            return f(state.mRec);
-        }
-    };
-
-    struct nodegraph_connect_t;
-
-    template <typename Sender, typename Rec>
-    using nodegraph_connect_result_t = tag_invoke_result_t<nodegraph_connect_t, Sender, Rec>;
-
-    struct SenderConnection {
-    };
+    template <typename T>
+    using instance_helper = is_instance<T, algorithm>;
 
     template <typename T>
-    SenderConnection operator+(SenderConnection, T&& t) {
-        return {};
-    }
+    using value_helper = std::negation<is_instance<T, algorithm>>;
 
-    template <typename State>
-    struct nodegraph_algorithm_state_helper {
+    template <typename... T>
+    struct algorithm_argument_helper;
 
-        using InnerRec = typename State::Rec;
-        using Rec = InnerRec;
+    template <>
+    struct algorithm_argument_helper<> {
+        static constexpr size_t count = 0;
 
-        template <typename Sender, typename... Args>
-        nodegraph_algorithm_state_helper(Sender &&sender, Rec &&rec, Args &&...args)
-            : mState { nodegraph_connect(std::forward<Sender>(sender), InnerRec { std::forward<Rec>(rec), std::forward<Args>(args)... }) }
+        static ExtendedValueTypeDesc type(uint32_t index)
         {
-        }
-
-        ~nodegraph_algorithm_state_helper() { }
-
-        State mState;
-
-        template <typename CPO>
-        friend decltype(auto) tag_invoke(CPO f, nodegraph_algorithm_state_helper &state)
-        {
-            return f(state.mState);
+            throw 0;
         }
     };
 
-    template <typename Sender, typename InnerRec>
-    using nodegraph_algorithm_state = nodegraph_algorithm_state_helper<nodegraph_connect_result_t<Sender, InnerRec>>;
+    template <typename Signature, typename... Rest>
+    struct algorithm_argument_helper<algorithm<Signature>, Rest...> {
+        using base = algorithm_argument_helper<Rest...>;
 
-    extern const nodegraph_connect_t nodegraph_connect;
+        static constexpr size_t count = Signature::count + base::count;
 
-    struct nodegraph_connect_t {
-
-        template <Engine::fixed_string Name, typename Sender, typename T, typename Rec>
-        friend auto tag_invoke(nodegraph_connect_t, Engine::Execution::Variable_t::sender<Name, Sender, T> &&sender, Rec &&rec)
+        static ExtendedValueTypeDesc type(uint32_t index)
         {
-            struct state : nodegraph_algorithm_state<Sender, Rec> {
-                auto build(NodeGraph &graph)
-                {
-                    std::unique_ptr<VariableNode> node = std::make_unique<VariableNode>(graph);
-                    node->mDefaultValue = mInitialValue;
-                    graph.addNode(std::move(node));
-
-                    mState.build(graph);
-                }
-                T mInitialValue;
-            };
-            return state { { std::move(sender.mSender), std::forward<Rec>(rec) }, std::forward<T>(sender.mInitialValue) };
-        }
-
-        template <typename T, Engine::fixed_string Name, typename Rec>
-        friend auto tag_invoke(nodegraph_connect_t, Engine::Execution::read_var_t::sender<T, Name> &&sender, Rec &&rec)
-        {
-            struct state : nodegraph_base_state<Rec> {
-                auto build(NodeGraph &graph)
-                {
-                    return std::make_tuple(SenderConnection {});                
-                }
-            };
-            return state { std::forward<Rec>(rec) };
-        }
-
-        template <typename Sender, Engine::fixed_string Name, typename Rec>
-        friend auto tag_invoke(nodegraph_connect_t, Engine::Execution::write_var_t::sender<Sender, Name> &&sender, Rec &&rec)
-        {
-            struct state : nodegraph_algorithm_state<Sender, Rec> {
-                auto generate()
-                {
-                    
-                }
-            };
-            return state { { std::move(sender.mSender), std::forward<Rec>(rec) } };
-        }
-
-        struct nodegraph_let_value_t {
-            
-            template <typename Sender, typename F, typename Rec>
-            struct state : nodegraph_base_state<Rec> {
-                auto build(NodeGraph &graph)
-                {
-                    auto connections = nodegraph_connect(std::move(mSender), mRec).build(graph);
-                    nodegraph_connect(TupleUnpacker::invokeExpand(mF, connections), mRec).build(graph);
-                }
-
-                Sender mSender;
-                F mF;
-            };
-        };
-
-        template <typename Sender, typename F, typename Rec>
-        friend auto tag_invoke(nodegraph_connect_t, Engine::Execution::let_value_t::sender<Sender, F> &&sender, Rec &&rec)
-        {
-            return nodegraph_let_value_t::state<Sender, F, Rec> { std::forward<Rec>(rec), std::move(sender.mSender), std::forward<F>(sender.mF) };
-        }
-
-        template <typename Sender, typename T, typename Rec>
-        friend auto tag_invoke(nodegraph_connect_t, Engine::Execution::assign_t::sender<Sender, T> &&sender, Rec &&rec)
-        {
-            struct state : nodegraph_algorithm_state<Sender, Rec> {
-                auto generate()
-                {
-
-                }
-                T mVar;
-            };
-            return state { { std::move(sender.mSender), std::forward<Rec>(rec) }, std::forward<T>(sender.mVar) };
-        }
-
-        template <typename Sender1, typename Sender2, typename Rec>
-        friend auto tag_invoke(nodegraph_connect_t, Engine::Execution::sequence_t::sender<Sender1, Sender2> &&sender, Rec &&rec)
-        {
-            struct state : nodegraph_base_state<Rec> {
-
-                auto generate()
-                {
-                    
-                }
-                Sender1 mSender1;
-                Sender2 mSender2;
-            };
-            return state { std::forward<Rec>(rec), std::forward<Sender1>(sender.mSender1), std::forward<Sender2>(sender.mSender2) };
-        }
-
-        template <typename... Args, typename Rec>
-        friend auto tag_invoke(nodegraph_connect_t, Engine::Execution::just_t::sender<Args...> &&sender, Rec &&rec)
-        {
-            struct state : nodegraph_base_state<Rec> {
-                auto generate()
-                {
-                    
-                }
-                std::tuple<Args...> mArgs;
-            };
-            return state { std::forward<Rec>(rec), std::move(sender.mArgs) };
-        }
-
-        template <typename Sender, typename T, typename Rec>
-        friend auto tag_invoke(nodegraph_connect_t, Engine::Execution::then_t::sender<Sender, T> &&sender, Rec &&rec)
-        {
-            struct state : nodegraph_algorithm_state<Sender, Rec> {
-                auto generate()
-                {
-                    return std::make_tuple(
-                        Engine::TupleUnpacker::invokeExpand(mTransform, mState.generate()));
-                }
-                T mTransform;
-            };
-            return state { { std::move(sender.mSender), std::forward<Rec>(rec) }, std::forward<T>(sender.mTransform) };
-        }
-
-        template <typename Sender, typename Rec>
-        requires tag_invocable<nodegraph_connect_t, Sender, Rec>
-        auto operator()(Sender &&sender, Rec &&rec) const
-            noexcept(is_nothrow_tag_invocable_v<nodegraph_connect_t, Sender, Rec>)
-                -> tag_invoke_result_t<nodegraph_connect_t, Sender, Rec>
-        {
-            return tag_invoke(*this, std::forward<Sender>(sender), std::forward<Rec>(rec));
-        }
-    };
-
-    inline constexpr nodegraph_connect_t nodegraph_connect;
-
-    struct nodegraph_for_each_t {
-
-        template <typename C, typename F>
-        struct sender {
-            //using value_type = typename std::remove_reference_t<C>::value_type &;
-            //using inner_sender_t = std::invoke_result_t<F, value_type>;
-            using result_type = void;
-            template <template <typename...> typename Tuple>
-            using value_types = Tuple<>;
-
-            template <typename Rec>
-            friend auto tag_invoke(nodegraph_connect_t, sender &&sender, Rec &&rec)
-            {
-                struct state : nodegraph_base_state<Rec> {
-                    auto build(NodeGraph &graph)
-                    {
-                        std::unique_ptr<SenderNode<Execution::for_each_t::sender>> node = std::make_unique<SenderNode<Execution::for_each_t::sender>>(graph, std::forward<C>(mContainer), std::forward<F>(mF));
-                        node->mDefaultValue = mInitialValue;
-                        graph.addNode(std::move(node));
-
-                        mState.build(graph);
-                    }
-                    C mContainer;
-                    F mF;
-                };
-                return state { std::forward<Rec>(rec), std::forward<C>(sender.mContainer), std::forward<F>(sender.mF) };
+            if (index < count) {
+                return Signature::type(index);
+            } else {
+                return base::type(index - count);
             }
-            C mContainer;
-            F mF;
-        };
+        }
     };
 
-    template <typename C, typename F>
-    requires std::same_as<std::remove_reference_t<C>, SenderConnection>
-    auto tag_invoke(Engine::Execution::for_each_t, C &&c, F &&f)
-    {
-        return nodegraph_for_each_t::sender<C, F> { std::forward<C>(c), std::forward<F>(f) };
-    }
+    template <typename Algorithm>
+    struct SenderNode : Node<SenderNode<Algorithm>> {
 
-    template <typename Sender>
-    auto graphBuilderFromSender(Sender &&sender)
-    {
-        return nodegraph_connect(std::move(sender), nodegraph_receiver {});
-    }
+        using Traits = sender_traits<Algorithm>;
+        using Sender = typename Traits::Sender;
+
+        using algorithm_arguments = typename Traits::argument_types::filter<instance_helper>::instantiate<algorithm_argument_helper>;
+        using value_argument_tuple = typename Traits::argument_types::filter<value_helper>::instantiate<std::tuple>;
+
+        SenderNode(NodeGraph &graph)
+            : Node<SenderNode<Algorithm>>(graph)
+        {
+            setup();
+        }
+
+        SenderNode(const SenderNode &other, NodeGraph &graph)
+            : Node<SenderNode<Algorithm>>(graph)
+        {
+        }
+
+        size_t flowInCount() const override
+        {
+            return !Traits::constant;
+        }
+
+        std::string_view flowInName(uint32_t index) const override
+        {
+            return "in";
+        }
+
+        size_t flowOutCount() const override
+        {
+            constexpr size_t algorithm_count = Traits::argument_types::filter<instance_helper>::size;
+            return !Traits::constant + algorithm_count;
+        }
+
+        std::string_view flowOutName(uint32_t index) const override
+        {
+            return "out";
+        }
+
+        size_t dataInCount() const override
+        {
+            return Traits::in_types::count;
+        }
+
+        ExtendedValueTypeDesc dataInType(uint32_t index, bool bidir = true) const override
+        {
+            return Traits::in_types::type(index);
+        }
+
+        size_t dataProviderCount() const override
+        {
+            return Sender::value_types<type_pack>::size + algorithm_arguments::count;
+        }
+
+        ExtendedValueTypeDesc dataProviderType(uint32_t index, bool bidir = true) const override
+        {
+            if (index >= Sender::value_types<type_pack>::size)
+                return algorithm_arguments::type(index - Sender::value_types<type_pack>::size);
+            else
+                return toValueTypeDesc<ValueType>();
+        }
+
+        struct InterpretData : NodeInterpreterData {
+
+            using NodeSender = typename Traits::Sender;
+
+            InterpretData(NodeInterpretHandle handle, const value_argument_tuple &args)
+            {
+                if constexpr (Traits::constant) {
+                    new (&mState) State { Execution::connect(TupleUnpacker::invokeExpand(&Traits::buildSender, mAlgorithmResults, args), NoopReceiver { handle }) };
+                }
+            }
+
+            ~InterpretData()
+            {
+                if constexpr (Traits::constant) {
+                    mState.~State();
+                }
+            }
+
+            struct Receiver {
+                NodeReceiver mReceiver;
+                InterpretData *mData;
+
+                template <typename... Args>
+                void set_value(Args &&...args)
+                {
+                    mData->mResults = { ValueType { std::forward<Args>(args) }... };
+                    mData->mState.~State();
+                    mReceiver.set_value();
+                }
+
+                void set_done()
+                {
+                    mData->mState.~State();
+                    mReceiver.set_done();
+                }
+
+                void set_error(GenericResult result)
+                {
+                    mData->mState.~State();
+                    mReceiver.set_error(result);
+                }
+
+                template <typename CPO>
+                friend decltype(auto) tag_invoke(CPO f, Receiver &receiver)
+                {
+                    return f(receiver.mReceiver);
+                }
+            };
+
+            using State = Execution::connect_result_t<NodeSender, std::conditional_t<Traits::constant, NoopReceiver, Receiver>>;
+
+            void start(NodeReceiver receiver, const value_argument_tuple &args)
+            {
+                if constexpr (!Traits::constant) {
+                    new (&mState) State { Execution::connect(TupleUnpacker::invokeExpand(&Traits::buildSender, mAlgorithmResults, args), Receiver { receiver, this }) };
+
+                    mState.start();
+                } else {
+                    throw 0;
+                }
+            }
+
+            template <fixed_string... Names>
+            bool resolveHelper(OutRef<ValueType> &result, std::string_view name, type_pack<auto_holder<Names>...>)
+            {
+                return ([&]() {                    
+                    if (name == Names) {
+                        result = Execution::resolve_var<Names>(mState);
+                        return true;
+                    }
+                    return false; }() || ...);
+            }
+
+            virtual bool resolveVar(OutRef<ValueType> &result, std::string_view name) override
+            {
+                if constexpr (requires { typename Traits::exposedVariables; }) {
+                    return resolveHelper(result, name, typename Traits::exposedVariables {});
+                }
+                return false;
+            }
+
+            NodeResults mResults;
+            union {
+                State mState;
+            };
+            NodeResults mAlgorithmResults;
+        };
+
+        void setupInterpret(NodeInterpreter &interpreter, std::unique_ptr<NodeInterpreterData> &data) const override
+        {
+            if constexpr (Traits::eagerNode) {
+                data = std::make_unique<InterpretData>(NodeInterpretHandle { this, interpreter }, mArguments);
+            }
+        }
+
+        void interpret(NodeReceiver receiver, uint32_t flowIn, std::unique_ptr<NodeInterpreterData> &data) const override
+        {
+            if (!data) {
+                data = std::make_unique<InterpretData>(receiver, mArguments);
+            }
+            static_cast<InterpretData *>(data.get())->start(std::move(receiver), mArguments);
+        }
+
+        struct DummyReceiver : NodeInterpretHandle {
+            template <typename... Args>
+            void set_value(Args &&...args)
+            {
+                mValues = { ValueType { std::forward<Args>(args) }... };
+                mHasReturned = true;
+            }
+
+            bool mHasReturned = false;
+            NodeResults mValues;
+        };
+
+        void interpretRead(NodeInterpreter &interpreter, ValueType &retVal, uint32_t providerIndex, std::unique_ptr<NodeInterpreterData> &data) const override
+        {
+            if constexpr (Traits::constant) {
+
+                DummyReceiver rec { this, interpreter };
+
+                NodeResults algorithmResults;
+                Execution::connect(TupleUnpacker::invokeExpand(&Traits::buildSender, algorithmResults, mArguments), rec).start();
+
+                assert(rec.mHasReturned);
+                retVal = rec.mValues[providerIndex];
+            } else {
+                assert(data);
+
+                if (providerIndex >= Sender::value_types<type_pack>::size)
+                    retVal = static_cast<InterpretData *>(data.get())->mAlgorithmResults[providerIndex - Sender::value_types<type_pack>::size];
+                else
+                    retVal = static_cast<InterpretData *>(data.get())->mResults[providerIndex];
+            }
+        }
+
+        value_argument_tuple mArguments;
+        template <size_t I>
+        auto &getArguments()
+        {
+            return std::get<I>(mArguments);
+        }
+        template <size_t I>
+        void setArguments(std::tuple_element_t<I, value_argument_tuple> v)
+        {
+            std::get<I>(mArguments) = v;
+        }
+    };
 
 }
 }

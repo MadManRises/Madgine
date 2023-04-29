@@ -20,6 +20,8 @@
 
 #include <iostream>
 
+#include "Madgine/nodegraph/nodes/util/sendernode.h"
+
 NODE(Python3FunctionNode, Engine::Scripting::Python3::Python3FunctionNode)
 
 METATABLE_BEGIN_BASE(Engine::Scripting::Python3::Python3FunctionNode, Engine::NodeGraph::NodeBase)
@@ -52,6 +54,9 @@ namespace Scripting {
 
         std::string_view Python3FunctionNode::name() const
         {
+            if (mDirty && mFile.available()) {
+                const_cast<Python3FunctionNode*>(this)->updatePins();
+            }
             return mName;
         }
 
@@ -105,7 +110,7 @@ namespace Scripting {
             return mArguments[index].second;
         }
 
-        void Python3FunctionNode::interpret(NodeGraph::NodeInterpreter &interpreter, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const
+        void Python3FunctionNode::interpret(NodeGraph::NodeReceiver receiver, uint32_t flowIn, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const
         {
             ValueType retVal;
             {
@@ -113,14 +118,15 @@ namespace Scripting {
                 PyObjectPtr args = PyTuple_New(mArguments.size());
                 for (size_t i = 0; i < mArguments.size(); ++i) {
                     ValueType v;
-                    interpreter.read(v, i);
+                    //receiver.read(v, i);
+                    throw 0;
                     PyTuple_SET_ITEM(static_cast<PyObject *>(args), i, toPyObject(v));
                 }
                 fromPyObject(retVal, mFile->get("__call__").call(args, PyObjectPtr{}));
             }
 
-            interpreter.write(0, retVal);
-            flowInOut = 0;
+            receiver.write(0, retVal);
+            receiver.set_value();
         }
 
         Python3FileLoader::Resource *Python3FunctionNode::getFile() const
@@ -142,7 +148,7 @@ namespace Scripting {
         void Python3FunctionNode::setName(std::string_view name)
         {
             mFile.load(name);
-            updatePins();
+            mDirty = true;
         }
 
         void Python3FunctionNode::updatePins()
@@ -175,6 +181,8 @@ namespace Scripting {
                 }
             }
             setup();
+
+            mDirty = false;
         }
 
     }

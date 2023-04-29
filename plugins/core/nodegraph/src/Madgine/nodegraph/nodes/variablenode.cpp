@@ -44,11 +44,6 @@ namespace NodeGraph {
         return 1;
     }
 
-    std::string_view VariableNode::dataProviderName(uint32_t index) const
-    {
-        return "out";
-    }
-
     ExtendedValueTypeDesc VariableNode::dataProviderType(uint32_t index, bool bidir) const
     {
         return mDefaultValue.type();
@@ -57,11 +52,6 @@ namespace NodeGraph {
     size_t VariableNode::dataReceiverCount() const
     {
         return 1;
-    }
-
-    std::string_view VariableNode::dataReceiverName(uint32_t index) const
-    {
-        return "in";
     }
 
     ExtendedValueTypeDesc VariableNode::dataReceiverType(uint32_t index, bool bidir) const
@@ -75,8 +65,24 @@ namespace NodeGraph {
         {
         }
 
+        virtual bool resolveVar(OutRef<ValueType> &result, std::string_view name) override
+        {
+            if (name == "test") {
+                result = mData;
+                return true;
+            }
+            return false;
+        }
+
         ValueType mData;
     };
+
+    void VariableNode::setupInterpret(NodeInterpreter &interpreter, std::unique_ptr<NodeInterpreterData> &data) const
+    {
+        if (!data) {
+            data = std::make_unique<VariableNodeInterpret>(mDefaultValue);
+        }
+    }
 
     void VariableNode::interpretRead(NodeInterpreter &interpreter, ValueType &retVal, uint32_t providerIndex, std::unique_ptr<NodeInterpreterData> &data) const
     {
