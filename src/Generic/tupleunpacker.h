@@ -1,10 +1,26 @@
 #pragma once
 
-#include "defaultassign.h"
 #include "callable_traits.h"
+#include "defaultassign.h"
 
 namespace Engine {
 namespace TupleUnpacker {
+
+    template <typename Tuple, size_t... Is>
+    auto popFrontImpl(const Tuple &tuple, std::index_sequence<Is...>)
+    {
+        return std::make_tuple(std::get<1 + Is>(tuple)...);
+    }
+
+    template <typename Tuple>
+    auto popFront(const Tuple &tuple)
+    {
+
+        return popFrontImpl(tuple,
+            std::make_index_sequence<std::tuple_size_v<Tuple> - 1>());
+    }
+
+    void popFront(std::tuple<>) = delete;
 
     template <typename Tuple>
     Tuple &&shiftTupleReference(Tuple &&tuple)
@@ -132,9 +148,9 @@ namespace TupleUnpacker {
     }
 
     template <typename F>
-    auto wrap(F &&f) {
-        return [f { std::forward<F>(f) }](auto&&... args) mutable {
-            return invoke(f, std::forward<decltype(args)>(args)...); };
+    auto wrap(F &&f)
+    {
+        return [f { std::forward<F>(f) }](auto &&...args) mutable { return invoke(f, std::forward<decltype(args)>(args)...); };
     }
 
 #if !CLANG

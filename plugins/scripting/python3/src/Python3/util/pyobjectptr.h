@@ -15,6 +15,8 @@ namespace Scripting {
             PyObjectPtr(PyObjectPtr &&other);
             ~PyObjectPtr();
 
+            static PyObjectPtr fromBorrowed(PyObject *object);
+
             PyObjectPtr get(std::string_view name) const;
             PyObjectPtr call(const ArgumentList &args) const;
             PyObjectPtr call(const char *format, ...) const;

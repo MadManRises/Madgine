@@ -36,6 +36,12 @@ namespace Scripting {
             reset();
         }
 
+        PyObjectPtr PyObjectPtr::fromBorrowed(PyObject *object)
+        {
+            Py_INCREF(object);
+            return object;
+        }
+
         PyObjectPtr PyObjectPtr::get(std::string_view name) const
         {
             return PyObject_GetAttrString(mObject, name.data());
@@ -91,12 +97,17 @@ namespace Scripting {
                 PyObjectPtr type, value, traceback;
                 PyErr_Fetch(&type, &value, &traceback);
 
-                PyTracebackObject *tb = reinterpret_cast<PyTracebackObject*>(static_cast<PyObject*>(traceback));
-                while (tb->tb_next)
-                    tb = tb->tb_next;
-                
-                const char *filename = PyUnicode_AsUTF8(tb->tb_frame->f_code->co_filename);
-                size_t line = tb->tb_frame->f_code->co_firstlineno;
+                const char *filename = "";
+                size_t line = 0;
+
+                if (traceback) {
+                    PyTracebackObject *tb = reinterpret_cast<PyTracebackObject *>(static_cast<PyObject *>(traceback));
+                    while (tb->tb_next)
+                        tb = tb->tb_next;
+
+                    filename = PyUnicode_AsUTF8(tb->tb_frame->f_code->co_filename);
+                    line = tb->tb_frame->f_code->co_firstlineno;
+                }
 
                 const char *errorMessage = PyUnicode_AsUTF8(value);
                 Engine::Util::LogDummy { Engine::Util::MessageType::ERROR_TYPE, filename, line } << "Unhandled Python Exception:\n"

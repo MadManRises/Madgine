@@ -33,32 +33,32 @@ namespace NodeGraph {
     {
     }
 
-    size_t Vector3to4Node::dataInCount() const
+    size_t Vector3to4Node::dataInBaseCount(uint32_t group) const
     {
         return 1;
     }
 
-    ExtendedValueTypeDesc Vector3to4Node::dataInType(uint32_t index, bool bidir) const
+    ExtendedValueTypeDesc Vector3to4Node::dataInType(uint32_t index, uint32_t group, bool bidir) const
     {
         return toValueTypeDesc<Vector3>();
     }
 
-    std::string_view Vector3to4Node::dataInName(uint32_t index) const
+    std::string_view Vector3to4Node::dataInName(uint32_t index, uint32_t group) const
     {
         return "in";
     }
 
-    size_t Vector3to4Node::dataProviderCount() const
+    size_t Vector3to4Node::dataProviderBaseCount(uint32_t group) const
     {
         return 1;
     }
 
-    ExtendedValueTypeDesc Vector3to4Node::dataProviderType(uint32_t index, bool bidir) const
+    ExtendedValueTypeDesc Vector3to4Node::dataProviderType(uint32_t index, uint32_t group, bool bidir) const
     {
         return toValueTypeDesc<Vector4>();
     }
 
-    std::string_view Vector3to4Node::dataProviderName(uint32_t index) const
+    std::string_view Vector3to4Node::dataProviderName(uint32_t index, uint32_t group) const
     {
         return "out";
     }

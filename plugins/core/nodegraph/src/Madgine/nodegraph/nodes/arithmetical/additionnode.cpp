@@ -30,23 +30,23 @@ namespace NodeGraph {
     {
     }
 
-    size_t AdditionNode::dataInCount() const
+    size_t AdditionNode::dataInBaseCount(uint32_t group) const
     {
         return 2;
     }
 
-    ExtendedValueTypeDesc AdditionNode::dataInType(uint32_t index, bool bidir) const
+    ExtendedValueTypeDesc AdditionNode::dataInType(uint32_t index, uint32_t group, bool bidir) const
     {
         ExtendedValueTypeDesc desc { ExtendedValueTypeEnum::GenericType };
-        if (!mDataProviderPins[0].mTargets.empty()) {
-            desc = mGraph.dataInType(mDataProviderPins[0].mTargets.front(), false);
+        if (!mDataProviderPins[0][0].mTargets.empty()) {
+            desc = mGraph.dataInType(mDataProviderPins[0][0].mTargets.front(), false);
             if (desc.mType != ExtendedValueTypeEnum::GenericType)
                 return desc;
         }
         for (uint32_t i = 0; i < 2; ++i) {
             if (bidir || i != index) {
-                if (mDataInPins[i].mSource) {
-                    desc = mGraph.dataProviderType(mDataInPins[i].mSource, false);
+                if (mDataInPins[0][i].mSource) {
+                    desc = mGraph.dataProviderType(mDataInPins[0][i].mSource, false);
                     if (desc.mType != ExtendedValueTypeEnum::GenericType)
                         return desc;
                 }
@@ -55,29 +55,29 @@ namespace NodeGraph {
         return desc;
     }
 
-    std::string_view AdditionNode::dataInName(uint32_t index) const
+    std::string_view AdditionNode::dataInName(uint32_t index, uint32_t group) const
     {
         return "summand";
     }
 
-    size_t AdditionNode::dataProviderCount() const
+    size_t AdditionNode::dataProviderBaseCount(uint32_t group) const
     {
         return 1;
     }
 
-    ExtendedValueTypeDesc AdditionNode::dataProviderType(uint32_t index, bool bidir) const
+    ExtendedValueTypeDesc AdditionNode::dataProviderType(uint32_t index, uint32_t group, bool bidir) const
     {
         ExtendedValueTypeDesc desc { ExtendedValueTypeEnum::GenericType };
         for (uint32_t i = 0; i < 2; ++i) {
-            if (mDataInPins[i].mSource) {
-                desc = mGraph.dataProviderType(mDataInPins[i].mSource, false);
+            if (mDataInPins[0][i].mSource) {
+                desc = mGraph.dataProviderType(mDataInPins[0][i].mSource, false);
                 if (desc.mType != ExtendedValueTypeEnum::GenericType)
                     return desc;
             }
         }
         if (bidir && desc.mType == ExtendedValueTypeEnum::GenericType) {
-            if (!mDataProviderPins[0].mTargets.empty()) {
-                desc = mGraph.dataInType(mDataProviderPins[0].mTargets.front(), false);
+            if (!mDataProviderPins[0][0].mTargets.empty()) {
+                desc = mGraph.dataInType(mDataProviderPins[0][0].mTargets.front(), false);
                 if (desc.mType != ExtendedValueTypeEnum::GenericType)
                     return desc;
             }
@@ -85,7 +85,7 @@ namespace NodeGraph {
         return desc;
     }
 
-    std::string_view AdditionNode::dataProviderName(uint32_t index) const
+    std::string_view AdditionNode::dataProviderName(uint32_t index, uint32_t group) const
     {
         return "result";
     }

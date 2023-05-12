@@ -15,6 +15,7 @@ BoundApiFunction::BoundApiFunction(const ApiFunction &f, const TypedScopePtr &sc
 {
     assert(f.mTable->mArguments[0].mType.mType == ValueTypeEnum::ScopeValue);
     assert(*f.mTable->mArguments[0].mType.mSecondary.mMetaTable == scope.mType);
+    assert(f.mTable->mIsMemberFunction);
 }
 
 TypedScopePtr BoundApiFunction::scope() const

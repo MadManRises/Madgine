@@ -35,47 +35,47 @@ namespace NodeGraph {
     {
     }
 
-    size_t TestNode::flowInCount() const
+    size_t TestNode::flowInCount(uint32_t group) const
     {
         return 1;
     }
 
-    size_t TestNode::flowOutCount() const
+    size_t TestNode::flowOutBaseCount(uint32_t group) const
     {
         return 1;
     }
 
-    size_t TestNode::dataInCount() const
+    size_t TestNode::dataInBaseCount(uint32_t group) const
     {
         return 2;
     }
 
-    std::string_view TestNode::dataInName(uint32_t index) const
+    std::string_view TestNode::dataInName(uint32_t index, uint32_t group) const
     {
         return "data_in";
     }
 
-    ExtendedValueTypeDesc TestNode::dataInType(uint32_t index, bool bidir) const
+    ExtendedValueTypeDesc TestNode::dataInType(uint32_t index, uint32_t group, bool bidir) const
     {
         return { ValueTypeIndex { index == 0 ? ValueTypeEnum::IntValue : ValueTypeEnum::FloatValue } };
     }
 
-    size_t TestNode::dataOutCount() const
+    size_t TestNode::dataOutBaseCount(uint32_t group) const
     {
         return 1;
     }
 
-    std::string_view TestNode::dataOutName(uint32_t index) const
+    std::string_view TestNode::dataOutName(uint32_t index, uint32_t group) const
     {
         return "data_out";
     }
 
-    ExtendedValueTypeDesc TestNode::dataOutType(uint32_t index, bool bidir) const
+    ExtendedValueTypeDesc TestNode::dataOutType(uint32_t index, uint32_t group, bool bidir) const
     {
         return { ValueTypeIndex { ValueTypeEnum::FloatValue } };
     }
 
-    void TestNode::interpret(NodeReceiver receiver, uint32_t flowIn, std::unique_ptr<NodeInterpreterData> &data) const
+    void TestNode::interpret(NodeReceiver receiver, std::unique_ptr<NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const
     {
         ValueType v;
         receiver.read(v, 1);
@@ -84,7 +84,7 @@ namespace NodeGraph {
         float f = v.as<float>();
         int i = v2.as<int>();
         LOG(i << " * " << f << " -> " << f * i);
-        receiver.write(0, ValueType { i * f });
+        receiver.write(ValueType { i * f }, 0);
         receiver.set_value();
     }
 

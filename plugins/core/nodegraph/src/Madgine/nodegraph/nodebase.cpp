@@ -42,72 +42,100 @@ namespace NodeGraph {
     {
     }
 
-    uint32_t NodeBase::flowInId(uint32_t index)
+    uint32_t NodeBase::flowInId(uint32_t index, uint32_t group)
     {
-        return 1 + index;
+        return 6000 * group + 1 + index;
     }
 
-    const std::vector<Pin> &NodeBase::flowInSources(uint32_t index) const
+    const std::vector<Pin> &NodeBase::flowInSources(uint32_t index, uint32_t group) const
     {
-        return mFlowInPins[index].mSources;
+        return mFlowInPins[group][index].mSources;
     }
 
-    Pin NodeBase::flowOutTarget(uint32_t index) const
+    size_t NodeBase::flowOutCount(uint32_t group) const
     {
-        return mFlowOutPins[index].mTarget;
+        return mFlowOutPins[group].size();
     }
 
-    uint32_t NodeBase::flowOutId(uint32_t index)
+    Pin NodeBase::flowOutTarget(uint32_t index, uint32_t group) const
     {
-        return 1001 + index;
+        if (index == mFlowOutPins[group].size() && flowOutVariadic(group)) {
+            return {};
+        }
+        return mFlowOutPins[group][index].mTarget;
     }
 
-    ValueType NodeBase::dataInDefault(uint32_t index) const
+    uint32_t NodeBase::flowOutId(uint32_t index, uint32_t group)
+    {
+        return 6000 * group + 1001 + index;
+    }
+
+    size_t NodeBase::dataInCount(uint32_t group) const
+    {
+        return mDataInPins[group].size();
+    }
+
+    ValueType NodeBase::dataInDefault(uint32_t index, uint32_t group) const
     {
         return {};
     }
 
-    Pin NodeBase::dataInSource(uint32_t index) const
+    Pin NodeBase::dataInSource(uint32_t index, uint32_t group) const
     {
-        if (index == mDataInPins.size() && dataInVariadic()) {
+        if (index == mDataInPins[group].size() && dataInVariadic(group)) {
             return {};
         }
-        return mDataInPins[index].mSource;
+        return mDataInPins[group][index].mSource;
     }
 
-    uint32_t NodeBase::dataInId(uint32_t index)
+    uint32_t NodeBase::dataInId(uint32_t index, uint32_t group)
     {
-        return 2001 + index;
+        return 6000 * group + 2001 + index;
     }
 
-    Pin NodeBase::dataOutTarget(uint32_t index) const
+    size_t NodeBase::dataOutCount(uint32_t group) const
     {
-        return mDataOutPins[index].mTarget;
+        return mDataOutPins[group].size();
     }
 
-    uint32_t NodeBase::dataOutId(uint32_t index)
+    Pin NodeBase::dataOutTarget(uint32_t index, uint32_t group) const
     {
-        return 3001 + index;
+        return mDataOutPins[group][index].mTarget;
     }
 
-    const std::vector<Pin> &NodeBase::dataReceiverSources(uint32_t index) const
+    uint32_t NodeBase::dataOutId(uint32_t index, uint32_t group)
     {
-        return mDataReceiverPins[index].mSources;
+        return 6000 * group + 3001 + index;
     }
 
-    uint32_t NodeBase::dataReceiverId(uint32_t index)
+    size_t NodeBase::dataReceiverCount(uint32_t group) const
     {
-        return 4001 + index;
+        return mDataReceiverPins[group].size();
     }
 
-    const std::vector<Pin> &NodeBase::dataProviderTargets(uint32_t index) const
+    const std::vector<Pin> &NodeBase::dataReceiverSources(uint32_t index, uint32_t group) const
     {
-        return mDataProviderPins[index].mTargets;
+        return mDataReceiverPins[group][index].mSources;
     }
 
-    uint32_t NodeBase::dataProviderId(uint32_t index)
+    uint32_t NodeBase::dataReceiverId(uint32_t index, uint32_t group)
     {
-        return 5001 + index;
+        return 6000 * group + 4001 + index;
+    }
+
+    size_t NodeBase::dataProviderCount(uint32_t group) const
+    {
+        return mDataProviderPins[group].size();
+    }
+
+    const std::vector<Pin> &NodeBase::dataProviderTargets(uint32_t index, uint32_t group) const
+    {
+        return mDataProviderPins[group][index].mTargets;
+    }
+
+    uint32_t NodeBase::dataProviderId(uint32_t index, uint32_t group)
+    {
+        return 6000 * group + 5001 + index;
     }
 
     PinDesc NodeBase::pinFromId(uint32_t id)
@@ -116,93 +144,157 @@ namespace NodeGraph {
         PinDesc desc;
         desc.mDir = ((smallId % 2000) < 1000 ? PinDir::In : PinDir::Out);
         desc.mType = (smallId < 4000 ? (smallId < 2000 ? PinType::Flow : PinType::Data) : PinType::DataInstance);
-        desc.mPin = { id / 6000, id % 1000 - 1 };
+        desc.mPin = { id / 60000, id % 1000 - 1, (id / 6000) % 10 };
         return desc;
     }
 
-    void NodeBase::onFlowOutUpdate(uint32_t index, Pin target, EdgeEvent event)
+    void NodeBase::onFlowOutUpdate(Pin source, EdgeEvent event)
     {
-    }
-
-    void NodeBase::onDataInUpdate(uint32_t index, Pin source, EdgeEvent event)
-    {
-    }
-
-    void NodeBase::onDataOutUpdate(uint32_t index, Pin target, EdgeEvent event)
-    {
-    }
-
-    void NodeBase::onFlowInUpdate(uint32_t index, Pin source, EdgeEvent event)
-    {
-    }
-
-    void NodeBase::onDataProviderUpdate(uint32_t index, Pin target, EdgeEvent event)
-    {
-    }
-
-    void NodeBase::onDataReceiverUpdate(uint32_t index, Pin source, EdgeEvent event)
-    {
-    }
-
-    void NodeBase::removeFlowOutPin(uint32_t index)
-    {
-        mGraph.onFlowOutRemove(this, index);
-        if (mFlowOutPins[index].mTarget)
-            mGraph.disconnectFlow({ mGraph.nodeIndex(this), index });
-        mFlowOutPins.erase(mFlowOutPins.begin() + index);
-    }
-
-    void NodeBase::removeFlowInPin(uint32_t index)
-    {
-        mGraph.onFlowInRemove(this, index);
-        while (!mFlowInPins[index].mSources.empty()) {
-            mGraph.disconnectFlow(mFlowInPins[index].mSources.front());
+        switch (event) {
+        case CONNECT:
+            if (flowOutVariadic(source.mGroup) && source.mIndex == flowOutCount(source.mGroup))
+                addVariadicPin(source.mGroup);
+            break;
+        case DISCONNECT:
+            if (flowOutVariadic(source.mGroup) && source.mIndex >= flowOutBaseCount(source.mGroup))
+                removeVariadicPin({ source.mNode, source.mIndex - dataInBaseCount(source.mGroup), source.mGroup });
+            break;
         }
-        mFlowInPins.erase(mFlowInPins.begin() + index);
     }
 
-    void NodeBase::removeDataInPin(uint32_t index)
+    void NodeBase::onDataInUpdate(Pin target, EdgeEvent event)
     {
-        mGraph.onDataInRemove(this, index);
-        if (mDataInPins[index].mSource)
-            mGraph.disconnectDataIn({ mGraph.nodeIndex(this), index });
-        mDataInPins.erase(mDataInPins.begin() + index);
-    }
-
-    void NodeBase::removeDataProviderPin(uint32_t index)
-    {
-        mGraph.onDataProviderRemove(this, index);
-        while (!mDataProviderPins[index].mTargets.empty()) {
-            mGraph.disconnectDataIn(mDataProviderPins[index].mTargets.front());
+        switch (event) {
+        case CONNECT:
+            if (dataInVariadic(target.mGroup) && target.mIndex == dataInCount(target.mGroup))
+                addVariadicPin(target.mGroup);
+            break;
+        case DISCONNECT:
+            if (dataInVariadic(target.mGroup) && target.mIndex >= dataInBaseCount(target.mGroup))
+                removeVariadicPin({ target.mNode, target.mIndex - dataInBaseCount(target.mGroup), target.mGroup });
+            break;
         }
-        mDataProviderPins.erase(mDataProviderPins.begin() + index);
     }
 
-    void NodeBase::removeDataOutPin(uint32_t index)
+    void NodeBase::onDataOutUpdate(Pin source, EdgeEvent event)
     {
-        mGraph.onDataOutRemove(this, index);
-        if (mDataOutPins[index].mTarget)
-            mGraph.disconnectDataOut({ mGraph.nodeIndex(this), index });
-        mDataOutPins.erase(mDataOutPins.begin() + index);
     }
 
-    void NodeBase::removeDataReceiverPin(uint32_t index)
+    void NodeBase::onFlowInUpdate(Pin target, EdgeEvent event)
     {
-        mGraph.onDataReceiverRemove(this, index);
-        while (!mDataReceiverPins[index].mSources.empty()) {
-            mGraph.disconnectDataOut(mDataReceiverPins[index].mSources.front());
+    }
+
+    void NodeBase::onDataProviderUpdate(Pin source, EdgeEvent event)
+    {
+    }
+
+    void NodeBase::onDataReceiverUpdate(Pin target, EdgeEvent event)
+    {
+    }
+
+    void NodeBase::addVariadicPin(uint32_t group)
+    {
+        if (flowOutVariadic(group))
+            mFlowOutPins[group].emplace_back();
+        if (dataInVariadic(group))
+            mDataInPins[group].emplace_back();
+        if (dataOutVariadic(group))
+            mDataOutPins[group].emplace_back();
+        if (dataProviderVariadic(group))
+            mDataProviderPins[group].emplace_back();
+        if (dataReceiverVariadic(group))
+            mDataReceiverPins[group].emplace_back();
+    }
+
+    void NodeBase::removeVariadicPin(Pin pin)
+    {
+        if (flowOutVariadic(pin.mGroup))
+            removeFlowOutPin({ pin.mNode, pin.mIndex + flowOutBaseCount(pin.mGroup), pin.mGroup });
+        if (dataInVariadic(pin.mGroup))
+            removeDataInPin({ pin.mNode, pin.mIndex + dataInBaseCount(pin.mGroup), pin.mGroup });
+        if (dataOutVariadic(pin.mGroup))
+            removeFlowOutPin({ pin.mNode, pin.mIndex + dataOutBaseCount(pin.mGroup), pin.mGroup });
+        if (dataProviderVariadic(pin.mGroup))
+            removeDataProviderPin({ pin.mNode, pin.mIndex + dataProviderBaseCount(pin.mGroup), pin.mGroup });
+        if (dataReceiverVariadic(pin.mGroup))
+            removeDataReceiverPin({ pin.mNode, pin.mIndex + dataReceiverBaseCount(pin.mGroup), pin.mGroup });
+    }
+
+    size_t NodeBase::variadicPinCount(uint32_t group) const
+    {
+        if (flowOutVariadic(group))
+            return flowOutCount(group) - flowOutBaseCount(group);
+        if (dataInVariadic(group))
+            return dataInCount(group) - dataInBaseCount(group);
+        if (dataOutVariadic(group))
+            return dataOutCount(group) - dataOutBaseCount(group);
+        if (dataProviderVariadic(group))
+            return dataProviderCount(group) - dataProviderBaseCount(group);
+        if (dataReceiverVariadic(group))
+            return dataReceiverCount(group) - dataReceiverBaseCount(group);
+        return 0;
+    }
+
+    void NodeBase::removeFlowOutPin(Pin pin)
+    {
+        mGraph.onFlowOutRemove(pin);
+        if (mFlowOutPins[pin.mGroup][pin.mIndex].mTarget)
+            mGraph.disconnectFlow({ mGraph.nodeIndex(this), pin.mIndex, pin.mGroup });
+        mFlowOutPins[pin.mGroup].erase(mFlowOutPins[pin.mGroup].begin() + pin.mIndex);
+    }
+
+    void NodeBase::removeFlowInPin(Pin pin)
+    {
+        mGraph.onFlowInRemove(pin);
+        while (!mFlowInPins[pin.mGroup][pin.mIndex].mSources.empty()) {
+            mGraph.disconnectFlow(mFlowInPins[pin.mGroup][pin.mIndex].mSources.front());
         }
-        mDataReceiverPins.erase(mDataReceiverPins.begin() + index);
+        mFlowInPins[pin.mGroup].erase(mFlowInPins[pin.mGroup].begin() + pin.mIndex);
     }
 
-    
+    void NodeBase::removeDataInPin(Pin pin)
+    {
+        mGraph.onDataInRemove(pin);
+        if (mDataInPins[pin.mGroup][pin.mIndex].mSource)
+            mGraph.disconnectDataIn(pin);
+        mDataInPins[pin.mGroup].erase(mDataInPins[pin.mGroup].begin() + pin.mIndex);
+    }
+
+    void NodeBase::removeDataProviderPin(Pin pin)
+    {
+        mGraph.onDataProviderRemove(pin);
+        while (!mDataProviderPins[pin.mGroup][pin.mIndex].mTargets.empty()) {
+            mGraph.disconnectDataIn(mDataProviderPins[pin.mGroup][pin.mIndex].mTargets.front());
+        }
+        mDataProviderPins[pin.mGroup].erase(mDataProviderPins[pin.mGroup].begin() + pin.mIndex);
+    }
+
+    void NodeBase::removeDataOutPin(Pin pin)
+    {
+        mGraph.onDataOutRemove(pin);
+        if (mDataOutPins[pin.mGroup][pin.mIndex].mTarget)
+            mGraph.disconnectDataOut(pin);
+        mDataOutPins[pin.mGroup].erase(mDataOutPins[pin.mGroup].begin() + pin.mIndex);
+    }
+
+    void NodeBase::removeDataReceiverPin(Pin pin)
+    {
+        mGraph.onDataReceiverRemove(pin);
+        while (!mDataReceiverPins[pin.mGroup][pin.mIndex].mSources.empty()) {
+            mGraph.disconnectDataOut(mDataReceiverPins[pin.mGroup][pin.mIndex].mSources.front());
+        }
+        mDataReceiverPins[pin.mGroup].erase(mDataReceiverPins[pin.mGroup].begin() + pin.mIndex);
+    }
+
     void NodeBase::onFlowInRemove(Pin pin)
     {
-        for (FlowInPinPrototype &inPin : mFlowInPins) {
-            for (Pin &source : inPin.mSources) {
-                if (source.mNode == pin.mNode) {
-                    if (source && source.mIndex > pin.mIndex) {
-                        --source.mIndex;
+        for (auto &group : mFlowInPins) {
+            for (FlowInPinPrototype &inPin : group) {
+                for (Pin &source : inPin.mSources) {
+                    if (source.mNode == pin.mNode && source.mGroup == pin.mGroup) {
+                        if (source && source.mIndex > pin.mIndex) {
+                            --source.mIndex;
+                        }
                     }
                 }
             }
@@ -211,48 +303,10 @@ namespace NodeGraph {
 
     void NodeBase::onFlowOutRemove(Pin pin)
     {
-        for (FlowOutPinPrototype &outPin : mFlowOutPins) {
-            Pin &target = outPin.mTarget;
-            if (target.mNode == pin.mNode) {
-                if (target && target.mIndex > pin.mIndex) {
-                    --target.mIndex;
-                }
-            }
-        }
-    }
-
-    
-    void NodeBase::onDataOutRemove(Pin pin)
-    {
-        for (DataReceiverPinPrototype &receiver : mDataReceiverPins) {
-            for (Pin &source : receiver.mSources) {
-                if (source.mNode == pin.mNode) {
-                    if (source && source.mIndex > pin.mIndex) {
-                        --source.mIndex;
-                    }
-                }
-            }
-        }
-    }
-
-    void NodeBase::onDataReceiverRemove(Pin pin)
-    {
-        for (DataOutPinPrototype &outPin : mDataOutPins) {
-            Pin &target = outPin.mTarget;
-            if (target.mNode == pin.mNode) {
-                if (target && target.mIndex > pin.mIndex) {
-                    --target.mIndex;
-                }
-            }
-        }
-    }
-
-
-    void NodeBase::onDataInRemove(Pin pin)
-    {
-        for (DataProviderPinPrototype &provider : mDataProviderPins) {
-            for (Pin &target : provider.mTargets) {
-                if (target.mNode == pin.mNode) {
+        for (auto &group : mFlowOutPins) {
+            for (FlowOutPinPrototype &outPin : group) {
+                Pin &target = outPin.mTarget;
+                if (target.mNode == pin.mNode && target.mGroup == pin.mGroup) {
                     if (target && target.mIndex > pin.mIndex) {
                         --target.mIndex;
                     }
@@ -261,13 +315,59 @@ namespace NodeGraph {
         }
     }
 
+    void NodeBase::onDataOutRemove(Pin pin)
+    {
+        for (auto &group : mDataReceiverPins) {
+            for (DataReceiverPinPrototype &receiver : group) {
+                for (Pin &source : receiver.mSources) {
+                    if (source.mNode == pin.mNode && source.mGroup == pin.mGroup) {
+                        if (source && source.mIndex > pin.mIndex) {
+                            --source.mIndex;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    void NodeBase::onDataReceiverRemove(Pin pin)
+    {
+        for (auto &group : mDataOutPins) {
+            for (DataOutPinPrototype &outPin : group) {
+                Pin &target = outPin.mTarget;
+                if (target.mNode == pin.mNode && target.mGroup == pin.mGroup) {
+                    if (target && target.mIndex > pin.mIndex) {
+                        --target.mIndex;
+                    }
+                }
+            }
+        }
+    }
+
+    void NodeBase::onDataInRemove(Pin pin)
+    {
+        for (auto &group : mDataProviderPins) {
+            for (DataProviderPinPrototype &provider : group) {
+                for (Pin &target : provider.mTargets) {
+                    if (target.mNode == pin.mNode && target.mGroup == pin.mGroup) {
+                        if (target && target.mIndex > pin.mIndex) {
+                            --target.mIndex;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     void NodeBase::onDataProviderRemove(Pin pin)
     {
-        for (DataInPinPrototype &inPin : mDataInPins) {
-            Pin &source = inPin.mSource;
-            if (source.mNode == pin.mNode) {
-                if (source && source.mIndex > pin.mIndex) {
-                    --source.mIndex;
+        for (auto &group : mDataInPins) {
+            for (DataInPinPrototype &inPin : group) {
+                Pin &source = inPin.mSource;
+                if (source.mNode == pin.mNode && source.mGroup == pin.mGroup) {
+                    if (source && source.mIndex > pin.mIndex) {
+                        --source.mIndex;
+                    }
                 }
             }
         }
@@ -275,41 +375,53 @@ namespace NodeGraph {
 
     void NodeBase::onNodeReindex(uint32_t oldIndex, uint32_t newIndex)
     {
-        for (FlowOutPinPrototype &pin : mFlowOutPins) {
-            assert(pin.mTarget.mNode != newIndex);
-            if (pin.mTarget.mNode == oldIndex)
-                pin.mTarget.mNode = newIndex;
+        for (auto &group : mFlowOutPins) {
+            for (FlowOutPinPrototype &pin : group) {
+                assert(pin.mTarget.mNode != newIndex);
+                if (pin.mTarget.mNode == oldIndex)
+                    pin.mTarget.mNode = newIndex;
+            }
         }
-        for (DataInPinPrototype &pin : mDataInPins) {
-            assert(pin.mSource.mNode != newIndex);
-            if (pin.mSource.mNode == oldIndex)
-                pin.mSource.mNode = newIndex;
+        for (auto &group : mDataInPins) {
+            for (DataInPinPrototype &pin : group) {
+                assert(pin.mSource.mNode != newIndex);
+                if (pin.mSource.mNode == oldIndex)
+                    pin.mSource.mNode = newIndex;
+            }
         }
-        for (DataOutPinPrototype &pin : mDataOutPins) {
-            assert(pin.mTarget.mNode != newIndex);
-            if (pin.mTarget.mNode == oldIndex)
-                pin.mTarget.mNode = newIndex;
+        for (auto &group : mDataOutPins) {
+            for (DataOutPinPrototype &pin : group) {
+                assert(pin.mTarget.mNode != newIndex);
+                if (pin.mTarget.mNode == oldIndex)
+                    pin.mTarget.mNode = newIndex;
+            }
         }
 
-        for (FlowInPinPrototype &pin : mFlowInPins) {
-            for (Pin &source : pin.mSources) {
-                assert(source.mNode != newIndex);
-                if (source.mNode == oldIndex)
-                    source.mNode = newIndex;
+        for (auto &group : mFlowInPins) {
+            for (FlowInPinPrototype &pin : group) {
+                for (Pin &source : pin.mSources) {
+                    assert(source.mNode != newIndex);
+                    if (source.mNode == oldIndex)
+                        source.mNode = newIndex;
+                }
             }
         }
-        for (DataReceiverPinPrototype &pin : mDataReceiverPins) {
-            for (Pin &source : pin.mSources) {
-                assert(source.mNode != newIndex);
-                if (source.mNode == oldIndex)
-                    source.mNode = newIndex;
+        for (auto &group : mDataReceiverPins) {
+            for (DataReceiverPinPrototype &pin : group) {
+                for (Pin &source : pin.mSources) {
+                    assert(source.mNode != newIndex);
+                    if (source.mNode == oldIndex)
+                        source.mNode = newIndex;
+                }
             }
         }
-        for (DataProviderPinPrototype &pin : mDataProviderPins) {
-            for (Pin &target : pin.mTargets) {
-                assert(target.mNode != newIndex);
-                if (target.mNode == oldIndex)
-                    target.mNode = newIndex;
+        for (auto &group : mDataProviderPins) {
+            for (DataProviderPinPrototype &pin : group) {
+                for (Pin &target : pin.mTargets) {
+                    assert(target.mNode != newIndex);
+                    if (target.mNode == oldIndex)
+                        target.mNode = newIndex;
+                }
             }
         }
     }
@@ -318,17 +430,17 @@ namespace NodeGraph {
     {
     }
 
-    void NodeBase::interpret(NodeReceiver receiver, uint32_t flowIn, std::unique_ptr<NodeInterpreterData> &data) const
+    void NodeBase::interpret(NodeReceiver receiver, std::unique_ptr<NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const
     {
         throw 0;
     }
 
-    void NodeBase::interpretRead(NodeInterpreter &interpreter, ValueType &retVal, uint32_t providerIndex, std::unique_ptr<NodeInterpreterData> &data) const
+    void NodeBase::interpretRead(NodeInterpreter &interpreter, ValueType &retVal, std::unique_ptr<NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group) const
     {
         throw 0;
     }
 
-    void NodeBase::interpretWrite(NodeInterpreter &interpreter, uint32_t receiverIndex, std::unique_ptr<NodeInterpreterData> &data, const ValueType &v) const
+    void NodeBase::interpretWrite(NodeInterpreter &interpreter, std::unique_ptr<NodeInterpreterData> &data, const ValueType &v, uint32_t receiverIndex, uint32_t group) const
     {
         throw 0;
     }
@@ -350,13 +462,31 @@ namespace NodeGraph {
 
     void NodeBase::setup()
     {
-        mFlowOutPins.resize(flowOutCount());
-        mDataInPins.resize(dataInCount());
-        mDataOutPins.resize(dataOutCount());
+        mFlowOutPins.resize(flowOutGroupCount());
+        for (size_t i = 0; i < flowOutGroupCount(); ++i) {
+            mFlowOutPins[i].resize(flowOutBaseCount(i));
+        }
+        mDataInPins.resize(dataInGroupCount());
+        for (size_t i = 0; i < dataInGroupCount(); ++i) {
+            mDataInPins[i].resize(dataInBaseCount(i));
+        }
+        mDataOutPins.resize(dataOutGroupCount());
+        for (size_t i = 0; i < dataOutGroupCount(); ++i) {
+            mDataOutPins[i].resize(dataOutBaseCount(i));
+        }
 
-        mFlowInPins.resize(flowInCount());
-        mDataProviderPins.resize(dataProviderCount());
-        mDataReceiverPins.resize(dataReceiverCount());
+        mFlowInPins.resize(flowInGroupCount());
+        for (size_t i = 0; i < flowInGroupCount(); ++i) {
+            mFlowInPins[i].resize(flowInCount(i));
+        }
+        mDataProviderPins.resize(dataProviderGroupCount());
+        for (size_t i = 0; i < dataProviderGroupCount(); ++i) {
+            mDataProviderPins[i].resize(dataProviderBaseCount(i));
+        }
+        mDataReceiverPins.resize(dataReceiverGroupCount());
+        for (size_t i = 0; i < dataReceiverGroupCount(); ++i) {
+            mDataReceiverPins[i].resize(dataReceiverBaseCount(i));
+        }
     }
 
 }

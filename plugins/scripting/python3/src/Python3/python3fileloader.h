@@ -6,6 +6,8 @@
 
 #include "Meta/keyvalue/objectptr.h"
 
+#include "Meta/keyvalue/functiontable.h"
+
 namespace Engine {
 namespace Scripting {
     namespace Python3 {
@@ -25,8 +27,9 @@ namespace Scripting {
             Python3FileLoader();
 
             void setup();
+            void cleanup();
 
-            bool loadImpl(PyModulePtr &module, ResourceDataInfo &info, Filesystem::FileEventType event);
+            Threading::Task<bool> loadImpl(PyModulePtr &module, ResourceDataInfo &info, Filesystem::FileEventType event);
             void unloadImpl(PyModulePtr &module);
 
             void find_spec(ValueType &retVal, std::string_view name, std::optional<std::string_view> import_path, ObjectPtr target_module);
@@ -34,6 +37,18 @@ namespace Scripting {
             void create_module(ValueType &retVal, ObjectPtr spec);
             void exec_module(ValueType &retVal, ObjectPtr module);
 
+        private:
+            struct Python3FunctionTable : FunctionTable{
+                Python3FunctionTable(PyObjectPtr fn);
+                ~Python3FunctionTable();
+
+                std::vector<FunctionArgument> mArgumentsHolder;
+                std::vector<std::string> mArgumentsNames;
+                std::string mNameHolder;
+
+                PyObjectPtr mFunctionObject;
+            };
+            std::list<Python3FunctionTable> mTables;
         };
 
     }

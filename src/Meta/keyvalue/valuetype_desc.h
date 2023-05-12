@@ -307,6 +307,7 @@ constexpr ExtendedValueTypeDesc toValueTypeDesc()
         else
             return { { ValueTypeEnum::ScopeValue }, &table<std::remove_pointer_t<T>> };
     } else {
+        static_assert(!std::same_as<T, void>);
         return { { ValueTypeEnum::OwnedScopeValue }, &table<T> };
     }
 }

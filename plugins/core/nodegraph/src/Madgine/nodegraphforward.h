@@ -28,8 +28,15 @@ namespace NodeGraph {
         UPDATE
     };
 
-    template <typename Signature>
-    struct algorithm;
+    template <typename _Signature>
+    struct algorithm {
+        using Signature = _Signature;
+    };
+    template <typename _Signature>
+    struct pred_sender {
+        using Signature = _Signature;
+    };
+    struct succ_sender;
 
     using NodeResults = std::vector<ValueType>;
 

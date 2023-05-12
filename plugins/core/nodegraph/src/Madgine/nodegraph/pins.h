@@ -9,10 +9,11 @@ namespace NodeGraph {
     struct MADGINE_NODEGRAPH_EXPORT Pin {
         IndexType<uint32_t, 0> mNode;
         IndexType<uint32_t> mIndex;
+        uint32_t mGroup = 0;
 
         explicit operator bool() const;
         bool operator==(const Pin& other) {
-            return mNode == other.mNode && mIndex == other.mIndex;
+            return mNode == other.mNode && mIndex == other.mIndex && mGroup == other.mGroup;
         }
     };
 

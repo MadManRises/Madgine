@@ -15,15 +15,7 @@ struct CodeGen_Context {
     size_t mRunningIndex = 0;
 };
 
-struct codegen_receiver : Engine::Execution::execution_receiver<CodeGen_Context> {
-
-    CodeGen_Context mContext;
-
-    friend CodeGen_Context &tag_invoke(Engine::Execution::get_context_t, codegen_receiver &self)
-    {
-        return self.mContext;
-    }
-};
+using codegen_receiver = Engine::Execution::execution_receiver<CodeGen_Context>;
 
 template <typename _Rec>
 struct codegen_base_state {
@@ -168,21 +160,20 @@ struct codegen_connect_t {
         return state { { std::move(sender.mSender), std::forward<Rec>(rec) }, std::forward<T>(sender.mVar) };
     }
 
-    template <typename Sender1, typename Sender2, typename Rec>
-    friend auto tag_invoke(codegen_connect_t, Engine::Execution::sequence_t::sender<Sender1, Sender2> &&sender, Rec &&rec)
+    template <typename... Sender, typename Rec>
+    friend auto tag_invoke(codegen_connect_t, Engine::Execution::sequence_t::sender<Sender...> &&sender, Rec &&rec)
     {
         struct state : codegen_base_state<Rec> {
 
             auto generate()
             {
                 return std::tuple_cat(
-                    codegen_connect(std::forward<Sender1>(mSender1), mRec).generate(),
-                    codegen_connect(std::forward<Sender2>(mSender2), mRec).generate());
+                    codegen_connect(std::get<Sender>(std::move(mSenders)), mRec).generate()...
+                );
             }
-            Sender1 mSender1;
-            Sender2 mSender2;
+            std::tuple<Sender...> mSenders;
         };
-        return state { std::forward<Rec>(rec), std::forward<Sender1>(sender.mSender1), std::forward<Sender2>(sender.mSender2) };
+        return state { std::forward<Rec>(rec), std::move(sender.mSenders) };
     }
 
     template <typename... Args, typename Rec>

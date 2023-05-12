@@ -66,12 +66,12 @@ namespace NodeGraph {
         void disconnectDataIn(Pin target);
         void disconnectDataOut(Pin source);
 
-        void onFlowInRemove(const NodeBase *node, uint32_t index);
-        void onFlowOutRemove(const NodeBase *node, uint32_t index);
-        void onDataReceiverRemove(const NodeBase *node, uint32_t index);
-        void onDataProviderRemove(const NodeBase *node, uint32_t index);
-        void onDataInRemove(const NodeBase *node, uint32_t index);
-        void onDataOutRemove(const NodeBase *node, uint32_t index);
+        void onFlowInRemove(Pin pin);
+        void onFlowOutRemove(Pin pin);
+        void onDataReceiverRemove(Pin pin);
+        void onDataProviderRemove(Pin pin);
+        void onDataInRemove(Pin pin);
+        void onDataOutRemove(Pin pin);
 
         std::vector<FlowInPinPrototype> mFlowInPins;
         std::vector<FlowOutPinPrototype> mFlowOutPins;

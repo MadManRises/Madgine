@@ -66,63 +66,63 @@ namespace Render {
     {
     }
 
-    size_t MeshRendererNode::flowInCount() const
+    size_t MeshRendererNode::flowInCount(uint32_t group) const
     {
         return 1;
     }
 
-    std::string_view MeshRendererNode::flowInName(uint32_t index) const
+    std::string_view MeshRendererNode::flowInName(uint32_t index, uint32_t group) const
     {
         return "execute";
     }
 
-    size_t MeshRendererNode::flowOutCount() const
+    size_t MeshRendererNode::flowOutBaseCount(uint32_t group) const
     {
         return 2;
     }
 
-    std::string_view MeshRendererNode::flowOutName(uint32_t index) const
+    std::string_view MeshRendererNode::flowOutName(uint32_t index, uint32_t group) const
     {
         return index == 0 ? "return" : "vertex";
     }
 
-    uint32_t MeshRendererNode::flowOutMask(uint32_t index, bool bidir) const
+    uint32_t MeshRendererNode::flowOutMask(uint32_t index, uint32_t group, bool bidir) const
     {
         return index == 0 ? NodeGraph::NodeExecutionMask::CPU : NodeGraph::NodeExecutionMask::GPU;
     }
 
-    size_t MeshRendererNode::dataProviderCount() const
+    size_t MeshRendererNode::dataProviderBaseCount(uint32_t group) const
     {
         return sProviders.size();
     }
 
-    std::string_view MeshRendererNode::dataProviderName(uint32_t index) const
+    std::string_view MeshRendererNode::dataProviderName(uint32_t index, uint32_t group) const
     {
 
         return sProviders[index].mName;
     }
 
-    ExtendedValueTypeDesc MeshRendererNode::dataProviderType(uint32_t index, bool bidir) const
+    ExtendedValueTypeDesc MeshRendererNode::dataProviderType(uint32_t index, uint32_t group, bool bidir) const
     {
         return sProviders[index].mType;
     }
 
-    uint32_t MeshRendererNode::dataProviderMask(uint32_t index, bool bidir) const
+    uint32_t MeshRendererNode::dataProviderMask(uint32_t index, uint32_t group, bool bidir) const
     {
         return NodeGraph::NodeExecutionMask::GPU;
     }
 
-    size_t MeshRendererNode::dataInCount() const
+    size_t MeshRendererNode::dataInBaseCount(uint32_t group) const
     {
         return 1;
     }
 
-    std::string_view MeshRendererNode::dataInName(uint32_t index) const
+    std::string_view MeshRendererNode::dataInName(uint32_t index, uint32_t group) const
     {
         return "mesh";
     }
 
-    ExtendedValueTypeDesc MeshRendererNode::dataInType(uint32_t index, bool bidir) const
+    ExtendedValueTypeDesc MeshRendererNode::dataInType(uint32_t index, uint32_t group, bool bidir) const
     {
         return toValueTypeDesc<Render::GPUMeshLoader::Resource *>();
     }
@@ -132,7 +132,7 @@ namespace Render {
         Render::GPUMeshLoader::Handle mMesh;
     };
 
-    void MeshRendererNode::interpret(NodeGraph::NodeReceiver receiver, uint32_t flowIn, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const
+    void MeshRendererNode::interpret(NodeGraph::NodeReceiver receiver, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const
     {
 
         if (!data) {

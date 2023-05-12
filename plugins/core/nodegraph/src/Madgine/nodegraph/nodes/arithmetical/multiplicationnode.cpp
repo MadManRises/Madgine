@@ -30,32 +30,32 @@ namespace NodeGraph {
     {
     }
 
-    size_t MultiplicationNode::dataInCount() const
+    size_t MultiplicationNode::dataInBaseCount(uint32_t group) const
     {
         return 2;
     }
 
-    ExtendedValueTypeDesc MultiplicationNode::dataInType(uint32_t index, bool bidir) const
+    ExtendedValueTypeDesc MultiplicationNode::dataInType(uint32_t index, uint32_t group, bool bidir) const
     {
         return { ExtendedValueTypeEnum::GenericType };
     }
 
-    std::string_view MultiplicationNode::dataInName(uint32_t index) const
+    std::string_view MultiplicationNode::dataInName(uint32_t index, uint32_t group) const
     {
         return "factor";
     }
 
-    size_t MultiplicationNode::dataProviderCount() const
+    size_t MultiplicationNode::dataProviderBaseCount(uint32_t group) const
     {
         return 1;
     }
 
-    ExtendedValueTypeDesc MultiplicationNode::dataProviderType(uint32_t index, bool bidir) const
+    ExtendedValueTypeDesc MultiplicationNode::dataProviderType(uint32_t index, uint32_t group, bool bidir) const
     {
         return { ExtendedValueTypeEnum::GenericType };
     }
 
-    std::string_view MultiplicationNode::dataProviderName(uint32_t index) const
+    std::string_view MultiplicationNode::dataProviderName(uint32_t index, uint32_t group) const
     {
         return "result";
     }

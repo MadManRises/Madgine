@@ -21,32 +21,32 @@ SERIALIZETABLE_END(Engine::Scene::TransformAccessorNode)
 namespace Engine {
 namespace Scene {
 
-    size_t TransformAccessorNode::dataProviderCount() const
+    size_t TransformAccessorNode::dataProviderBaseCount(uint32_t group) const
     {
         return 1;
     }
 
-    std::string_view TransformAccessorNode::dataProviderName(uint32_t index) const
+    std::string_view TransformAccessorNode::dataProviderName(uint32_t index, uint32_t group) const
     {
         return "out";
     }
 
-    ExtendedValueTypeDesc TransformAccessorNode::dataProviderType(uint32_t index, bool bidir) const
+    ExtendedValueTypeDesc TransformAccessorNode::dataProviderType(uint32_t index, uint32_t group, bool bidir) const
     {
         return toValueTypeDesc<std::vector<Entity::Transform>>();
     }
 
-    size_t TransformAccessorNode::dataReceiverCount() const
+    size_t TransformAccessorNode::dataReceiverBaseCount(uint32_t group) const
     {
         return 1;
     }
 
-    std::string_view TransformAccessorNode::dataReceiverName(uint32_t index) const
+    std::string_view TransformAccessorNode::dataReceiverName(uint32_t index, uint32_t group) const
     {
         return "in";
     }
 
-    ExtendedValueTypeDesc TransformAccessorNode::dataReceiverType(uint32_t index, bool bidir) const
+    ExtendedValueTypeDesc TransformAccessorNode::dataReceiverType(uint32_t index, uint32_t group, bool bidir) const
     {
         return toValueTypeDesc<std::vector<Entity::Transform>>();
     }
@@ -58,7 +58,7 @@ namespace Scene {
         
     };
 
-    void TransformAccessorNode::interpretRead(NodeGraph::NodeInterpreter &interpreter, ValueType &retVal, uint32_t providerIndex, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const
+    void TransformAccessorNode::interpretRead(NodeGraph::NodeInterpreter &interpreter, ValueType &retVal, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group) const
     {
         if (!data) {
             data = std::make_unique<TransformAccessorNodeInterpret>();
@@ -66,7 +66,7 @@ namespace Scene {
         TransformAccessorNodeInterpret *variable = static_cast<TransformAccessorNodeInterpret *>(data.get());
     }
 
-    void TransformAccessorNode::interpretWrite(NodeGraph::NodeInterpreter &interpreter, uint32_t receiverIndex, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, const ValueType &v) const
+    void TransformAccessorNode::interpretWrite(NodeGraph::NodeInterpreter &interpreter, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, const ValueType &v, uint32_t receiverIndex, uint32_t group) const
     {
         if (!data) {
             data = std::make_unique<TransformAccessorNodeInterpret>();

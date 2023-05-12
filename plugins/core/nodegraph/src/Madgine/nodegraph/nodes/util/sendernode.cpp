@@ -36,17 +36,29 @@ METATABLE_END(LetValueNode)
 SERIALIZETABLE_INHERIT_BEGIN(LetValueNode, Engine::NodeGraph::NodeBase)
 SERIALIZETABLE_END(LetValueNode)
 
-using ThenNode = Engine::NodeGraph::SenderNode<Engine::Execution::then_t>;
+using AddNode = Engine::NodeGraph::SenderNode<Engine::Execution::then_t::typed<Engine::NodeGraph::Add>>;
 
-NAMED_UNIQUECOMPONENT(Then, ThenNode)
+NAMED_UNIQUECOMPONENT(Add, AddNode)
 
-REGISTER_TYPE(ThenNode)
+REGISTER_TYPE(AddNode)
 
-METATABLE_BEGIN_BASE(ThenNode, Engine::NodeGraph::NodeBase)
-METATABLE_END(ThenNode)
+METATABLE_BEGIN_BASE(AddNode, Engine::NodeGraph::NodeBase)
+METATABLE_END(AddNode)
 
-SERIALIZETABLE_INHERIT_BEGIN(ThenNode, Engine::NodeGraph::NodeBase)
-SERIALIZETABLE_END(ThenNode)
+SERIALIZETABLE_INHERIT_BEGIN(AddNode, Engine::NodeGraph::NodeBase)
+SERIALIZETABLE_END(AddNode)
+
+using LogNode = Engine::NodeGraph::SenderNode<Engine::Execution::then_t::typed<Engine::NodeGraph::Log>>;
+
+NAMED_UNIQUECOMPONENT(Log, LogNode)
+
+REGISTER_TYPE(LogNode)
+
+METATABLE_BEGIN_BASE(LogNode, Engine::NodeGraph::NodeBase)
+METATABLE_END(LogNode)
+
+SERIALIZETABLE_INHERIT_BEGIN(LogNode, Engine::NodeGraph::NodeBase)
+SERIALIZETABLE_END(LogNode)
 
 using JustNode = Engine::NodeGraph::SenderNode<Engine::Execution::just_t>;
 
@@ -55,6 +67,7 @@ NAMED_UNIQUECOMPONENT(Just, JustNode)
 REGISTER_TYPE(JustNode)
 
 METATABLE_BEGIN_BASE(JustNode, Engine::NodeGraph::NodeBase)
+PROPERTY(Arguments, getArguments<0>, setArguments<0>)
 METATABLE_END(JustNode)
 
 SERIALIZETABLE_INHERIT_BEGIN(JustNode, Engine::NodeGraph::NodeBase)
@@ -79,7 +92,7 @@ NAMED_UNIQUECOMPONENT(Variable, VariableNode)
 REGISTER_TYPE(VariableNode)
 
 METATABLE_BEGIN_BASE(VariableNode, Engine::NodeGraph::NodeBase)
-PROPERTY(Arguments, getArguments<0>, setArguments<0>)
+PROPERTY(Arguments, getArguments<1>, setArguments<1>)
 METATABLE_END(VariableNode)
 
 SERIALIZETABLE_INHERIT_BEGIN(VariableNode, Engine::NodeGraph::NodeBase)

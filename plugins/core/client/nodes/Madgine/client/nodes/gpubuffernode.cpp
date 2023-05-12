@@ -19,7 +19,6 @@ METATABLE_BEGIN_BASE(Engine::Render::GPUBufferNode, Engine::NodeGraph::NodeBase)
 METATABLE_END(Engine::Render::GPUBufferNode)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Render::GPUBufferNode, Engine::NodeGraph::NodeBase)
-FIELD(mAdditionalPins)
 SERIALIZETABLE_END(Engine::Render::GPUBufferNode)
 
 namespace Engine {
@@ -33,7 +32,6 @@ namespace Render {
 
     GPUBufferNode::GPUBufferNode(const GPUBufferNode &other, NodeGraph::NodeGraph &graph)
         : Node(other, graph)
-        , mAdditionalPins(other.mAdditionalPins)
     {
     }
 
@@ -42,76 +40,76 @@ namespace Render {
         return sizeof(Matrix4) + sizeof(Vector4);
     }
 
-    size_t GPUBufferNode::flowInCount() const
+    size_t GPUBufferNode::flowInCount(uint32_t group) const
     {
         return 1;
     }
 
-    std::string_view GPUBufferNode::flowInName(uint32_t index) const
+    std::string_view GPUBufferNode::flowInName(uint32_t index, uint32_t group) const
     {
         return "write";
     }
 
-    size_t GPUBufferNode::flowOutCount() const
+    size_t GPUBufferNode::flowOutBaseCount(uint32_t group) const
     {
         return 1;
     }
 
-    std::string_view GPUBufferNode::flowOutName(uint32_t index) const
+    std::string_view GPUBufferNode::flowOutName(uint32_t index, uint32_t group) const
     {
         return "return";
     }
 
-    size_t GPUBufferNode::dataProviderCount() const
+    size_t GPUBufferNode::dataProviderBaseCount(uint32_t group) const
     {
-        return mAdditionalPins;
+        return 0;
     }
 
-    std::string_view GPUBufferNode::dataProviderName(uint32_t index) const
+    std::string_view GPUBufferNode::dataProviderName(uint32_t index, uint32_t group) const
     {
-        return dataInName(index);
+        return dataInName(index, group);
     }
 
-    ExtendedValueTypeDesc GPUBufferNode::dataProviderType(uint32_t index, bool bidir) const
+    ExtendedValueTypeDesc GPUBufferNode::dataProviderType(uint32_t index, uint32_t group, bool bidir) const
     {
-        if (index == mAdditionalPins)
+        if (index == dataProviderCount(group))
             return { ExtendedValueTypeEnum::GenericType };
         ExtendedValueTypeDesc desc { ExtendedValueTypeEnum::GenericType };
-        NodeGraph::Pin pin = mDataInPins[index].mSource;
+        NodeGraph::Pin pin = mDataInPins[0][index].mSource;
         desc = mGraph.dataProviderType(pin, false);
         if (bidir && desc.mType == ExtendedValueTypeEnum::GenericType)
-            return dataInType(index, false);
+            return dataInType(index, group, false);
         return desc;
     }
 
-    uint32_t GPUBufferNode::dataProviderMask(uint32_t index, bool bidir) const
+    uint32_t GPUBufferNode::dataProviderMask(uint32_t index, uint32_t group, bool bidir) const
     {
         return NodeGraph::NodeExecutionMask::GPU;
     }
 
-    size_t GPUBufferNode::dataInCount() const
+    size_t GPUBufferNode::dataInBaseCount(uint32_t group) const
     {
-        return mAdditionalPins;
+        return 0;
     }
 
-    std::string_view GPUBufferNode::dataInName(uint32_t index) const
+    std::string_view GPUBufferNode::dataInName(uint32_t index, uint32_t group) const
     {
-        if (index < mAdditionalPins) {
-            NodeGraph::Pin pin = mDataInPins[index].mSource;
+        if (index < dataProviderCount(group)) {
+            NodeGraph::Pin pin = mDataInPins[0][index].mSource;
             return pin ? mGraph.dataProviderName(pin) : "??";
         }
-        if (index == mAdditionalPins)
+        if (index == dataProviderCount(group))
             return "<>";
         throw 0;
     }
 
-    ExtendedValueTypeDesc GPUBufferNode::dataInType(uint32_t index, bool bidir) const
+    ExtendedValueTypeDesc GPUBufferNode::dataInType(uint32_t index, uint32_t group, bool bidir) const
     {
-        if (index == mAdditionalPins)
+        if (index == dataProviderCount(group))
             return { ExtendedValueTypeEnum::GenericType };
         ExtendedValueTypeDesc desc { ExtendedValueTypeEnum::GenericType };
-        if (!mDataProviderPins[index].mTargets.empty()) {
-            NodeGraph::Pin pin = mDataProviderPins[index].mTargets.front();
+        if (!mDataProviderPins[0][index].mTargets.empty()) {
+            NodeGraph::Pin pin = mDataProviderPins[0][index].mTargets.front();
             desc = mGraph.dataInType(pin, false);
         }
         if (bidir && desc.mType == ExtendedValueTypeEnum::GenericType)
@@ -119,32 +117,17 @@ namespace Render {
         return desc;
     }
 
-    uint32_t GPUBufferNode::dataInMask(uint32_t index, bool bidir) const
+    uint32_t GPUBufferNode::dataInMask(uint32_t index, uint32_t group, bool bidir) const
     {
         return NodeGraph::NodeExecutionMask::CPU;
     }
 
-    bool GPUBufferNode::dataInVariadic() const
+    bool GPUBufferNode::dataInVariadic(uint32_t group) const
     {
         return true;
     }
 
-    void GPUBufferNode::onDataInUpdate(uint32_t index, NodeGraph::Pin source, NodeGraph::EdgeEvent event)
-    {
-        if (event == NodeGraph::CONNECT) {
-            if (index == dataInCount()) {
-                ++mAdditionalPins;
-                setup();
-            }
-        } else if (event == NodeGraph::DISCONNECT) {
-            removeDataInPin(index);
-            removeDataProviderPin(index);            
-
-            --mAdditionalPins;
-        }
-    }
-
-    void GPUBufferNode::interpret(NodeGraph::NodeReceiver receiver, uint32_t flowIn, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const
+    void GPUBufferNode::interpret(NodeGraph::NodeReceiver receiver, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const
     {
         assert(flowIn == 0);
 
@@ -164,7 +147,7 @@ namespace Render {
         void *ptr = bufferData->mBuffer.mData;
 
         if (ptr) {
-            for (uint32_t i = 0; i < mAdditionalPins; ++i) {
+            //for (uint32_t i = 0; i < mAdditionalPins; ++i) {
                 /* ValueType v;
                 receiver.read(v, i);
 
@@ -173,7 +156,7 @@ namespace Render {
                     ptr = reinterpret_cast<char *>(ptr) + sizeof(MakeOwning_t<T>);
                 });*/
                 throw 0;
-            }
+            //}
         }
 
         if (bufferData->mMapper)

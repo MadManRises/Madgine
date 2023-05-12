@@ -34,7 +34,7 @@ namespace Scripting {
     namespace Python3 {
 
         Python3FileLoader::Python3FileLoader()
-            : ResourceLoader({ ".py" }, { .mInplaceReload = true })
+            : ResourceLoader({ ".py" }, { .mAutoLoad = true, .mInplaceReload = true })
         {
         }
 
@@ -44,7 +44,12 @@ namespace Scripting {
             assert(result == 0);
         }
 
-        bool Python3FileLoader::loadImpl(PyModulePtr &module, ResourceDataInfo &info, Filesystem::FileEventType event)
+        void Python3FileLoader::cleanup()
+        {
+            mTables.clear();
+        }
+
+        Threading::Task<bool> Python3FileLoader::loadImpl(PyModulePtr &module, ResourceDataInfo &info, Filesystem::FileEventType event)
         {
             Python3Lock lock;
 
@@ -53,13 +58,59 @@ namespace Scripting {
             } else {
                 PyModulePtr { "importlib" }.call("reload", "(O)", (PyObject *)module);
             }
-            return true;
+
+            co_return true;
         }
 
         void Python3FileLoader::unloadImpl(PyModulePtr &module)
         {
             Python3Lock lock;
             module.reset();
+        }
+
+        Python3FileLoader::Python3FunctionTable::Python3FunctionTable(PyObjectPtr fn)
+            : mFunctionObject(fn)
+        {
+
+            PyObjectPtr signature = PyModulePtr { "inspect" }.get("signature").call("(O)", (PyObject *)fn);
+            PyObjectPtr parameters = signature.get("parameters");
+
+            PyObject *key = NULL, *value = NULL;
+            Py_ssize_t pos = 0;
+
+            PyObjectPtr iter = PyObject_GetIter(parameters);
+
+            while (PyObjectPtr key = PyIter_Next(iter)) {
+                PyObjectPtr parameter = PyObject_GetItem(parameters, key);
+                PyObjectPtr type = parameter.get("annotation");
+
+                PyObjectPtr ascii = PyUnicode_AsASCIIString(key);
+                mArgumentsNames.emplace_back(PyBytes_AsString(ascii));
+                mArgumentsHolder.push_back({ PyToValueTypeDesc(type), mArgumentsNames.back() });
+            }
+            mArguments = mArgumentsHolder.data();
+            mArgumentsCount = mArgumentsHolder.size();
+
+            mIsMemberFunction = false;
+
+            mReturnType = PyToValueTypeDesc(signature.get("return_annotation"));
+            PyObjectPtr name = fn.get("__name__");
+            PyObjectPtr ascii_name = PyUnicode_AsASCIIString(name);
+            mNameHolder = PyBytes_AsString(ascii_name);
+            mName = mNameHolder;
+
+            mFunctionPtr = [](const FunctionTable *self, ValueType &retVal, const ArgumentList &args) {
+                Python3Lock lock;
+                PyObjectPtr result = static_cast<const Python3FunctionTable *>(self)->mFunctionObject.call(args);
+                return fromPyObject(retVal, result);
+            };
+
+            registerFunction(*this);
+        }
+
+        Python3FileLoader::Python3FunctionTable::~Python3FunctionTable()
+        {
+            unregisterFunction(*this);
         }
 
         void Python3FileLoader::find_spec(ValueType &retVal, std::string_view name, std::optional<std::string_view> import_path, ObjectPtr target_module)
@@ -98,7 +149,18 @@ namespace Scripting {
 
             PyObjectPtr spec = importlib.get("spec_from_file_location").call("ss", res->name().data(), res->path().c_str());
 
-            return fromPyObject(retVal, spec.get("loader").get("exec_module").call("(O)", (PyObject *)moduleObject));            
+            fromPyObject(retVal, spec.get("loader").get("exec_module").call("(O)", (PyObject *)moduleObject));
+
+            PyObject *dict = PyModule_GetDict(moduleObject);
+
+            PyObject *key, *value = NULL;
+            Py_ssize_t pos = 0;
+
+            while (PyDict_Next(dict, &pos, &key, &value)) {
+                if (PyFunction_Check(value)) {
+                    Python3FunctionTable &table = mTables.emplace_back(PyObjectPtr::fromBorrowed(value));
+                }
+            }
         }
     }
 }

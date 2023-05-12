@@ -34,53 +34,53 @@ namespace NodeGraph {
     {
     }
 
-    size_t PumpNode::flowInCount() const
+    size_t PumpNode::flowInCount(uint32_t group) const
     {
         return 1;
     }
 
-    size_t PumpNode::flowOutCount() const
+    size_t PumpNode::flowOutBaseCount(uint32_t group) const
     {
         return 1;
     }
 
-    size_t PumpNode::dataInCount() const
+    size_t PumpNode::dataInBaseCount(uint32_t group) const
     {
         return 1;
     }
 
-    ExtendedValueTypeDesc PumpNode::dataInType(uint32_t index, bool bidir) const
+    ExtendedValueTypeDesc PumpNode::dataInType(uint32_t index, uint32_t group, bool bidir) const
     {
         assert(index == 0);
         ExtendedValueTypeDesc desc { ExtendedValueTypeEnum::GenericType };
-        if (mDataOutPins[0].mTarget)
-            desc = mGraph.dataReceiverType(mDataOutPins[0].mTarget, false);
+        if (mDataOutPins[0][0].mTarget)
+            desc = mGraph.dataReceiverType(mDataOutPins[0][0].mTarget, false);
         if (bidir && desc.mType == ExtendedValueTypeEnum::GenericType)
-            return dataOutType(index, false);
+            return dataOutType(index, group, false);
         return desc;
     }
 
-    size_t PumpNode::dataOutCount() const
+    size_t PumpNode::dataOutBaseCount(uint32_t group) const
     {
         return 1;
     }
 
-    ExtendedValueTypeDesc PumpNode::dataOutType(uint32_t index, bool bidir) const
+    ExtendedValueTypeDesc PumpNode::dataOutType(uint32_t index, uint32_t group, bool bidir) const
     {
         assert(index == 0);
         ExtendedValueTypeDesc desc { ExtendedValueTypeEnum::GenericType };
-        if (mDataInPins[0].mSource)
-            desc = mGraph.dataProviderType(mDataInPins[0].mSource, false);
+        if (mDataInPins[0][0].mSource)
+            desc = mGraph.dataProviderType(mDataInPins[0][0].mSource, false);
         if (bidir && desc.mType == ExtendedValueTypeEnum::GenericType)
-            return dataInType(index, false);
+            return dataInType(index, group, false);
         return desc;
     }
 
-    void PumpNode::interpret(NodeReceiver receiver, uint32_t flowIn, std::unique_ptr<NodeInterpreterData> &data) const
+    void PumpNode::interpret(NodeReceiver receiver, std::unique_ptr<NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const
     {
         ValueType v;
         receiver.read(v, 0);
-        receiver.write(0, v);
+        receiver.write(v, 0);
         receiver.set_value();
     }
 

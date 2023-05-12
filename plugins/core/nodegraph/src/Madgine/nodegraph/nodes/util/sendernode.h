@@ -9,18 +9,24 @@
 #include "Generic/execution/execution.h"
 #include "Generic/execution/state.h"
 
-#include "../../pins.h"
 #include "../../nodegraph.h"
+#include "../../pins.h"
 #include "sendertraits.h"
 
 namespace Engine {
 namespace NodeGraph {
 
     template <typename T>
-    using instance_helper = is_instance<T, algorithm>;
+    using is_algorithm = is_instance<decayed_t<T>, algorithm>;
 
     template <typename T>
-    using value_helper = std::negation<is_instance<T, algorithm>>;
+    using is_pred_sender = is_instance<decayed_t<T>, pred_sender>;
+
+    template <typename T>
+    using is_succ_sender = std::is_same<decayed_t<T>, succ_sender>;
+
+    template <typename T>
+    using is_value = std::negation<std::disjunction<is_algorithm<T>, is_pred_sender<T>, is_succ_sender<T>>>;
 
     template <typename... T>
     struct algorithm_argument_helper;
@@ -35,30 +41,88 @@ namespace NodeGraph {
         }
     };
 
-    template <typename Signature, typename... Rest>
-    struct algorithm_argument_helper<algorithm<Signature>, Rest...> {
-        using base = algorithm_argument_helper<Rest...>;
-
-        static constexpr size_t count = Signature::count + base::count;
-
-        static ExtendedValueTypeDesc type(uint32_t index)
-        {
-            if (index < count) {
-                return Signature::type(index);
-            } else {
-                return base::type(index - count);
-            }
+    template <typename Traits>
+    auto variadic_helper()
+    {
+        if constexpr (requires { typename Traits::variadic; }) {
+            return typename Traits::variadic {};
+        } else {
+            return type_pack<> {};
         }
-    };
+    }
 
     template <typename Algorithm>
     struct SenderNode : Node<SenderNode<Algorithm>> {
 
         using Traits = sender_traits<Algorithm>;
-        using Sender = typename Traits::Sender;
 
-        using algorithm_arguments = typename Traits::argument_types::filter<instance_helper>::instantiate<algorithm_argument_helper>;
-        using value_argument_tuple = typename Traits::argument_types::filter<value_helper>::instantiate<std::tuple>;
+        using argument_types = typename Traits::argument_types;
+        using algorithms = typename argument_types::filter<is_algorithm>;
+        using value_argument_tuple = typename argument_types::filter<is_value>::instantiate<std::tuple>;
+        using in_types = typename argument_types::filter<is_pred_sender>;
+        using variadic = decltype(variadic_helper<Traits>());
+
+        template <uint32_t I>
+        static auto buildArgs(const std::tuple<> &values, type_pack<> args, std::vector<NodeResults> *results = nullptr, NodeResults *variadicBuffer = nullptr, size_t *recursiveOffset = nullptr)
+        {
+            return std::make_tuple();
+        }
+
+        template <uint32_t I, typename Values, typename T, typename... Ts>
+        static auto buildArgs(const Values &values, type_pack<T, Ts...> args, std::vector<NodeResults> *results = nullptr, NodeResults *variadicBuffer = nullptr, size_t *recursiveOffset = nullptr)
+        {
+            if constexpr (is_pred_sender<T>::value) {
+                return std::tuple_cat(
+                    std::make_tuple(typename T::Signature::instantiate<NodeReader> { recursiveOffset, variadicBuffer }),
+                    buildArgs<I>(values, type_pack<Ts...> {}, results, variadicBuffer, recursiveOffset));
+            } else if constexpr (is_succ_sender<T>::value) {
+                return std::tuple_cat(
+                    std::make_tuple(NodeSender<I + 1> {}),
+                    buildArgs<I + 1>(values, type_pack<Ts...> {}, results, variadicBuffer, recursiveOffset));
+            } else if constexpr (is_algorithm<T>::value) {
+                assert(results);
+                return std::tuple_cat(
+                    std::make_tuple(NodeAlgorithm<I + 1> { *results }),
+                    buildArgs<I + 1>(values, type_pack<Ts...> {}, results, variadicBuffer, recursiveOffset));
+            } else {
+                return std::tuple_cat(
+                    std::make_tuple(std::get<0>(values)),
+                    buildArgs<I>(TupleUnpacker::popFront(values), type_pack<Ts...> {}, results, variadicBuffer));
+            }
+        }
+
+        static auto buildSender(const value_argument_tuple &values, std::vector<NodeResults> *results = nullptr, NodeResults *variadicBuffer = nullptr)
+        {
+            return TupleUnpacker::invokeFromTuple(Traits::algorithm, buildArgs<0>(values, argument_types {}, results, variadicBuffer));
+        }
+
+        static auto buildVariadicSender(size_t *recursiveOffset, NodeResults *variadicBuffer = nullptr)
+        {
+            if constexpr (requires { typename Traits::variadic; }) {
+                return TupleUnpacker::invokeFromTuple(Traits::algorithm, buildArgs<0>(std::make_tuple(), variadic {}, nullptr, variadicBuffer, recursiveOffset));
+            }
+        }
+
+        using Sender = decltype(buildSender(std::declval<value_argument_tuple>()));
+        using VariadicSender = decltype(buildVariadicSender(nullptr));
+
+        struct DummyReceiver : NodeExecutionReceiver {
+            template <typename... Args>
+            void set_value(Args &&...args)
+            {
+                mValues = { ValueType { std::forward<Args>(args) }... };
+                mHasReturned = true;
+            }
+
+            bool mHasReturned = false;
+            NodeResults mValues;
+
+            template <typename CPO>
+            friend decltype(auto) tag_invoke(CPO f, DummyReceiver &receiver)
+            {
+                return f(static_cast<NodeExecutionReceiver &>(receiver));
+            }
+        };
 
         SenderNode(NodeGraph &graph)
             : Node<SenderNode<Algorithm>>(graph)
@@ -71,65 +135,122 @@ namespace NodeGraph {
         {
         }
 
-        size_t flowInCount() const override
+        size_t flowInCount(uint32_t group) const override
         {
             return !Traits::constant;
         }
 
-        std::string_view flowInName(uint32_t index) const override
+        std::string_view flowInName(uint32_t index, uint32_t group) const override
         {
             return "in";
         }
 
-        size_t flowOutCount() const override
+        size_t flowOutGroupCount() const override
         {
-            constexpr size_t algorithm_count = Traits::argument_types::filter<instance_helper>::size;
-            return !Traits::constant + algorithm_count;
+            constexpr size_t algorithm_count = argument_types::filter<is_algorithm>::size;
+            constexpr size_t succ_sender_count = argument_types::filter<is_succ_sender>::size;
+            constexpr size_t variadic_succ_sender_count = variadic::filter<is_succ_sender>::size;
+
+            return 1 + algorithm_count + succ_sender_count + variadic_succ_sender_count;
         }
 
-        std::string_view flowOutName(uint32_t index) const override
+        size_t flowOutBaseCount(uint32_t group) const override
+        {
+            static constexpr auto counts = []<typename... Algorithm, typename... SuccSender, typename... VariadicSuccSender>(type_pack<Algorithm...>, type_pack<SuccSender...>, type_pack<VariadicSuccSender...>)
+            {
+                return std::array {
+                    static_cast<int>(!Traits::constant),
+                    (sizeof(type_pack<Algorithm>), 1)...,
+                    (sizeof(type_pack<SuccSender>), 1)...,
+                    (sizeof(type_pack<VariadicSuccSender>), 0)...
+                };
+            }
+            (typename argument_types::filter<is_algorithm> {}, typename argument_types::filter<is_succ_sender> {}, typename variadic::filter<is_succ_sender> {});
+            return counts[group];
+        }
+
+        std::string_view flowOutName(uint32_t index, uint32_t group) const override
         {
             return "out";
         }
 
-        size_t dataInCount() const override
+        bool flowOutVariadic(uint32_t group = 0) const override
         {
-            return Traits::in_types::count;
+            if constexpr (requires { typename Traits::variadic; }) {
+                return group == 1 && std::same_as<typename Traits::variadic::unpack_unique<void>, succ_sender>;
+            } else {
+                return false;
+            }
         }
 
-        ExtendedValueTypeDesc dataInType(uint32_t index, bool bidir = true) const override
+        size_t dataInBaseCount(uint32_t group) const override
         {
-            return Traits::in_types::type(index);
+            return in_types::unpack_unique<pred_sender<signature<>>>::Signature::count;
         }
 
-        size_t dataProviderCount() const override
+        ExtendedValueTypeDesc dataInType(uint32_t index, uint32_t group, bool bidir = true) const override
         {
-            return Sender::value_types<type_pack>::size + algorithm_arguments::count;
+            return in_types::unpack_unique<pred_sender<signature<>>>::Signature::type(index);
         }
 
-        ExtendedValueTypeDesc dataProviderType(uint32_t index, bool bidir = true) const override
+        bool dataInVariadic(uint32_t group = 0) const override
         {
-            if (index >= Sender::value_types<type_pack>::size)
-                return algorithm_arguments::type(index - Sender::value_types<type_pack>::size);
-            else
-                return toValueTypeDesc<ValueType>();
+            return group == 0 && in_types::unpack_unique<pred_sender<signature<>>>::Signature::variadic;
+        }
+
+        size_t dataProviderGroupCount() const override
+        {
+            return 1 + algorithms::size;
+        }
+
+        size_t dataProviderBaseCount(uint32_t group) const override
+        {
+            static constexpr auto sizes = []<typename... Algorithm>(type_pack<Algorithm...>)
+            {
+                return std::array {
+                    Sender::value_types<type_pack>::size,
+                    Algorithm::Signature::count...
+                };
+            }
+            (algorithms {});
+            return sizes[group];
+        }
+
+        ExtendedValueTypeDesc dataProviderType(uint32_t index, uint32_t group, bool bidir = true) const override
+        {
+            static constexpr auto types = []<typename... Algorithm>(type_pack<Algorithm...>)
+            {
+                return std::array {
+                    Sender::value_types<signature>::type,
+                    Algorithm::Signature::type...
+                };
+            }
+            (algorithms {});
+            return types[group](index);
         }
 
         struct InterpretData : NodeInterpreterData {
 
-            using NodeSender = typename Traits::Sender;
+            struct Receiver;
 
-            InterpretData(NodeInterpretHandle handle, const value_argument_tuple &args)
+            using InnerReceiver = std::conditional_t<Traits::constant, DummyReceiver &, Receiver>;
+            using State = Execution::connect_result_t<Sender, InnerReceiver>;
+
+            InterpretData()
             {
-                if constexpr (Traits::constant) {
-                    new (&mState) State { Execution::connect(TupleUnpacker::invokeExpand(&Traits::buildSender, mAlgorithmResults, args), NoopReceiver { handle }) };
-                }
+                static_assert(!Traits::constant);
+            }
+
+            InterpretData(DummyReceiver &receiver, const value_argument_tuple &args)
+            {
+                static_assert(Traits::constant);
+                buildState(receiver, args);
             }
 
             ~InterpretData()
             {
                 if constexpr (Traits::constant) {
-                    mState.~State();
+                    cleanup();
                 }
             }
 
@@ -140,20 +261,22 @@ namespace NodeGraph {
                 template <typename... Args>
                 void set_value(Args &&...args)
                 {
-                    mData->mResults = { ValueType { std::forward<Args>(args) }... };
-                    mData->mState.~State();
+                    if (mData->mResults.empty())
+                        mData->mResults.emplace_back();
+                    mData->mResults.front() = { ValueType { std::forward<Args>(args) }... };
+                    mData->cleanup();
                     mReceiver.set_value();
                 }
 
                 void set_done()
                 {
-                    mData->mState.~State();
+                    mData->cleanup();
                     mReceiver.set_done();
                 }
 
                 void set_error(GenericResult result)
                 {
-                    mData->mState.~State();
+                    mData->cleanup();
                     mReceiver.set_error(result);
                 }
 
@@ -164,90 +287,207 @@ namespace NodeGraph {
                 }
             };
 
-            using State = Execution::connect_result_t<NodeSender, std::conditional_t<Traits::constant, NoopReceiver, Receiver>>;
+            struct RecursiveReceiver {
+                InterpretData *mData;
+
+                template <typename... Args>
+                void set_value(Args &&...args)
+                {
+                    if (mData->mRecursiveBuffer.empty())
+                        mData->mRecursiveBuffer.emplace_back();
+                    mData->mRecursiveBuffer.front() = { ValueType { std::forward<Args>(args) }... };
+                    mData->continueRecursion();
+                }
+
+                void set_done()
+                {
+                    if constexpr (!Traits::constant) {
+                        mData->cleanup();
+                    }
+                    throw 0;
+                }
+
+                void set_error(GenericResult result)
+                {
+                    if constexpr (!Traits::constant) {
+                        mData->cleanup();
+                    }
+                    throw 0;
+                }
+
+                template <typename CPO>
+                friend decltype(auto) tag_invoke(CPO f, RecursiveReceiver &receiver)
+                {
+                    return f(receiver.mData->mState);
+                }
+            };
 
             void start(NodeReceiver receiver, const value_argument_tuple &args)
             {
-                if constexpr (!Traits::constant) {
-                    new (&mState) State { Execution::connect(TupleUnpacker::invokeExpand(&Traits::buildSender, mAlgorithmResults, args), Receiver { receiver, this }) };
+                static_assert(!Traits::constant);
+                buildState(Receiver { receiver, this }, args);
+                start();
+            }
 
-                    mState.start();
+            void start()
+            {
+                if constexpr (requires { typename Traits::variadic; }) {
+
+                    using PredSender = typename argument_types::filter<is_pred_sender>::unpack_unique<pred_sender<signature<>>>;
+                    if constexpr (PredSender::Signature::variadic) {
+                        mRecursiveBuffer.resize(1);
+                        Execution::get_context(mState).read(mRecursiveBuffer[0], PredSender::Signature::variadicIndex);
+                    }
+
+                    mVariadicInfo.mRecursionLevel = 0;
+                    if (!mVariadicInfo.mStates.empty()) {
+                        mVariadicInfo.mStates.front().mState.start();
+                    } else {
+                        mState.start();
+                    }
                 } else {
-                    throw 0;
+                    mState.start();
                 }
             }
 
-            template <fixed_string... Names>
-            bool resolveHelper(OutRef<ValueType> &result, std::string_view name, type_pack<auto_holder<Names>...>)
+            void buildState(InnerReceiver receiver, const value_argument_tuple &args)
             {
-                return ([&]() {                    
-                    if (name == Names) {
-                        result = Execution::resolve_var<Names>(mState);
-                        return true;
+                new (&mState) State { Execution::connect(buildSender(args, &mResults, &mRecursiveBuffer), std::forward<InnerReceiver>(receiver)) };
+
+                if constexpr (requires { typename Traits::variadic; }) {
+
+                    size_t baseIndex = 0;
+                    uint32_t group = 1;
+
+                    using PredSender = typename argument_types::filter<is_pred_sender>::unpack_unique<pred_sender<signature<>>>;
+                    if constexpr (PredSender::Signature::variadic) {
+                        baseIndex = PredSender::Signature::variadicIndex + 1;
+                        group = 0;
                     }
-                    return false; }() || ...);
+
+                    mVariadicInfo.mStates.resize(Execution::get_context(receiver).mNode->variadicPinCount(group));
+                    for (auto &state : mVariadicInfo.mStates) {
+                        new (&state.mState) std::remove_reference_t<decltype(state.mState)> {
+                            Execution::connect(buildVariadicSender(&baseIndex, &mRecursiveBuffer), RecursiveReceiver { this })
+                        };
+                    }
+                }
+            }
+
+            void cleanup()
+            {
+                if constexpr (requires { typename Traits::variadic; }) {
+                    while (mVariadicInfo.mRecursionLevel < mVariadicInfo.mStates.size()) {
+                        auto &state = mVariadicInfo.mStates[mVariadicInfo.mRecursionLevel];
+                        using State = std::remove_reference_t<decltype(state)>;
+                        state.~State();
+                    }
+                    mVariadicInfo.mStates.clear();
+                }
+                mState.~State();
+            }
+
+            void continueRecursion()
+            {
+                if constexpr (!Traits::constant) {
+                    auto &state = mVariadicInfo.mStates[mVariadicInfo.mRecursionLevel];
+                    using State = std::remove_reference_t<decltype(state)>;
+                    state.~State();
+                }
+                ++mVariadicInfo.mRecursionLevel;
+                if (mVariadicInfo.mRecursionLevel < mVariadicInfo.mStates.size()) {
+                    mVariadicInfo.mStates[mVariadicInfo.mRecursionLevel].mState.start();
+                } else {
+                    mState.start();
+                }
             }
 
             virtual bool resolveVar(OutRef<ValueType> &result, std::string_view name) override
             {
                 if constexpr (requires { typename Traits::exposedVariables; }) {
-                    return resolveHelper(result, name, typename Traits::exposedVariables {});
+                    return [&]<fixed_string... Names>(type_pack<auto_holder<Names>...>)
+                    {
+                        return ([&]() {                    
+                            if (name == Names) {
+                                result = Execution::resolve_var<Names>(mState);
+                                return true;
+                            }
+                            return false; }() || ...);
+                    }
+                    (typename Traits::exposedVariables {});
                 }
                 return false;
             }
 
-            NodeResults mResults;
+            ValueType read(uint32_t providerIndex, uint32_t group) const
+            {
+                return mResults[group][providerIndex];
+            }
+
+            std::vector<NodeResults> mResults;
+            NodeResults mRecursiveBuffer;
             union {
                 State mState;
             };
-            NodeResults mAlgorithmResults;
+
+            static auto variadicHelper()
+            {
+                if constexpr (requires { typename Traits::variadic; }) {
+                    struct VariadicState {
+                        VariadicState() { }
+                        ~VariadicState() { }
+                        union {
+                            Execution::connect_result_t<VariadicSender, RecursiveReceiver> mState;
+                        };
+                    };
+                    struct VariadicInfo {
+                        std::vector<VariadicState> mStates;
+                        size_t mRecursionLevel;
+                    };
+                    return std::declval<VariadicInfo>();
+                } else {
+                    return std::declval<std::monostate>();
+                }
+            }
+
+            decltype(variadicHelper()) mVariadicInfo;
         };
 
         void setupInterpret(NodeInterpreter &interpreter, std::unique_ptr<NodeInterpreterData> &data) const override
         {
-            if constexpr (Traits::eagerNode) {
-                data = std::make_unique<InterpretData>(NodeInterpretHandle { this, interpreter }, mArguments);
+            if constexpr (requires { typename Traits::exposedVariables; }) {
+                DummyReceiver rec { this, interpreter };
+                data = std::make_unique<InterpretData>(rec, mArguments);
             }
         }
 
-        void interpret(NodeReceiver receiver, uint32_t flowIn, std::unique_ptr<NodeInterpreterData> &data) const override
+        void interpret(NodeReceiver receiver, std::unique_ptr<NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const override
         {
-            if (!data) {
-                data = std::make_unique<InterpretData>(receiver, mArguments);
+            if constexpr (!Traits::constant) {
+                if (!data) {
+                    data = std::make_unique<InterpretData>();
+                }
+                static_cast<InterpretData *>(data.get())->start(receiver, mArguments);
+            } else {
+                throw 0;
             }
-            static_cast<InterpretData *>(data.get())->start(std::move(receiver), mArguments);
         }
 
-        struct DummyReceiver : NodeInterpretHandle {
-            template <typename... Args>
-            void set_value(Args &&...args)
-            {
-                mValues = { ValueType { std::forward<Args>(args) }... };
-                mHasReturned = true;
-            }
-
-            bool mHasReturned = false;
-            NodeResults mValues;
-        };
-
-        void interpretRead(NodeInterpreter &interpreter, ValueType &retVal, uint32_t providerIndex, std::unique_ptr<NodeInterpreterData> &data) const override
+        void interpretRead(NodeInterpreter &interpreter, ValueType &retVal, std::unique_ptr<NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group) const override
         {
             if constexpr (Traits::constant) {
 
                 DummyReceiver rec { this, interpreter };
 
-                NodeResults algorithmResults;
-                Execution::connect(TupleUnpacker::invokeExpand(&Traits::buildSender, algorithmResults, mArguments), rec).start();
+                InterpretData data { rec, mArguments };
+
+                data.start();
 
                 assert(rec.mHasReturned);
                 retVal = rec.mValues[providerIndex];
             } else {
                 assert(data);
-
-                if (providerIndex >= Sender::value_types<type_pack>::size)
-                    retVal = static_cast<InterpretData *>(data.get())->mAlgorithmResults[providerIndex - Sender::value_types<type_pack>::size];
-                else
-                    retVal = static_cast<InterpretData *>(data.get())->mResults[providerIndex];
+                retVal = static_cast<InterpretData *>(data.get())->read(providerIndex, group);
             }
         }
 

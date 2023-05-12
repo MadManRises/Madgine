@@ -50,9 +50,8 @@ namespace NodeGraph {
     {
         if (pin && pin.mNode) {
             const NodeBase *node = mGraph->node(pin.mNode);
-            mCurrentNode = node;
-            uint32_t flowIndex = pin.mIndex;
-            node->interpret({ node, *this, receiver }, flowIndex, mData[pin.mNode - 1]);
+            mCurrentNode = node;            
+            node->interpret({ node, *this, receiver }, mData[pin.mNode - 1], pin.mIndex, pin.mGroup);
         } else {
             receiver.set_value();
         }

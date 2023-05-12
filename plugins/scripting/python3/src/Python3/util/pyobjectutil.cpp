@@ -17,6 +17,8 @@
 #include "pydictptr.h"
 #include "pylistptr.h"
 
+#include "pymoduleptr.h"
+
 #include "Meta/keyvalue/valuetype.h"
 #include "Meta/keyvalue/keyvaluepair.h"
 
@@ -309,6 +311,8 @@ namespace Scripting {
             PyTypeObject *type = reinterpret_cast<PyTypeObject *>(obj);
             if (type == &PyUnicode_Type) {
                 return toValueTypeDesc<std::string>();
+            } else if (obj == PyModulePtr{ "inspect" }.get("Parameter").get("empty")) {
+                return toValueTypeDesc<ValueType>();
             }
             throw 0;
         }

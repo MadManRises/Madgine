@@ -35,6 +35,8 @@ struct type_pack<> {
 
     template <template <typename...> typename Wrapper>
     using instantiate = Wrapper<>;
+    template <template <typename...> typename Op, typename Init>
+    using fold = Init;
 
     using as_tuple = instantiate<std::tuple>;
 
@@ -109,6 +111,8 @@ struct type_pack<Head, Ty...> {
 
     template <template <typename...> typename Wrapper>
     using instantiate = Wrapper<Head, Ty...>;
+    template <template <typename...> typename Op, typename Init>
+    using fold = Op<Head, typename type_pack<Ty...>::fold<Op, Init>>;
 
     using as_tuple = instantiate<std::tuple>;
 
@@ -139,6 +143,9 @@ using type_pack_first = typename Pack::first;
 
 template <typename Pack>
 using type_pack_as_tuple = typename Pack::as_tuple;
+
+template <typename Pack1, typename Pack2>
+using type_pack_concat = typename Pack1::concat<Pack2>;
 
 template <typename T>
 struct type_pack_appender {

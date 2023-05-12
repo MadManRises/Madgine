@@ -27,13 +27,12 @@ namespace Execution {
     template <typename Sender, typename Rec>
     using connect_result_t = tag_invoke_result_t<connect_t, Sender, Rec>;
 
-    
     struct get_context_t {
         template <typename T>
-        requires tag_invocable<get_context_t, T&>
+        requires tag_invocable<get_context_t, T &>
         auto operator()(T &t) const
-            noexcept(is_nothrow_tag_invocable_v<get_context_t, T&>)
-                -> tag_invoke_result_t<get_context_t, T&>
+            noexcept(is_nothrow_tag_invocable_v<get_context_t, T &>)
+                -> tag_invoke_result_t<get_context_t, T &>
         {
             return tag_invoke(*this, t);
         }
@@ -41,14 +40,18 @@ namespace Execution {
 
     inline constexpr get_context_t get_context;
 
-    
-    struct CPU_context;
-
-    template <typename _Context = CPU_context>
-    struct execution_receiver {
-        using Context = _Context;
+    struct CPU_context {
     };
 
+    template <typename _Context = CPU_context>
+    struct execution_receiver : _Context {
+        using Context = _Context;
+
+        friend Context &tag_invoke(Engine::Execution::get_context_t, execution_receiver &self)
+        {
+            return self;
+        }
+    };
 
     template <typename Rec>
     struct algorithm_receiver {
@@ -121,7 +124,7 @@ namespace Execution {
         using Rec = typename InnerRec::inner;
 
         template <typename Sender, typename... Args>
-        algorithm_state_helper(Sender &&sender, Rec &&rec, Args &&... args)
+        algorithm_state_helper(Sender &&sender, Rec &&rec, Args &&...args)
             : mState { connect(std::forward<Sender>(sender), InnerRec { std::forward<Rec>(rec), std::forward<Args>(args)... }) }
         {
         }

@@ -37,42 +37,42 @@ namespace Render {
     {
     }
 
-    size_t FrameBufferNode::flowInCount() const
+    size_t FrameBufferNode::flowInCount(uint32_t group) const
     {
         return 1;
     }
 
-    std::string_view FrameBufferNode::flowInName(uint32_t index) const
+    std::string_view FrameBufferNode::flowInName(uint32_t index, uint32_t group) const
     {
         return "pixel";
     }
 
-    uint32_t FrameBufferNode::flowInMask(uint32_t index, bool bidir) const
+    uint32_t FrameBufferNode::flowInMask(uint32_t index, uint32_t group, bool bidir) const
     {
         return NodeGraph::NodeExecutionMask::GPU;
     }
 
-    size_t FrameBufferNode::dataInCount() const
+    size_t FrameBufferNode::dataInBaseCount(uint32_t group) const
     {
         return 1;
     }
 
-    std::string_view FrameBufferNode::dataInName(uint32_t index) const
+    std::string_view FrameBufferNode::dataInName(uint32_t index, uint32_t group) const
     {
         return "color";
     }
 
-    ExtendedValueTypeDesc FrameBufferNode::dataInType(uint32_t index, bool bidir ) const
+    ExtendedValueTypeDesc FrameBufferNode::dataInType(uint32_t index, uint32_t group, bool bidir) const
     {
         return toValueTypeDesc<Vector4>();
     }
 
-    uint32_t FrameBufferNode::dataInMask(uint32_t index, bool bidir) const
+    uint32_t FrameBufferNode::dataInMask(uint32_t index, uint32_t group, bool bidir) const
     {
         return NodeGraph::NodeExecutionMask::GPU;
     }
 
-    void FrameBufferNode::interpret(NodeGraph::NodeReceiver receiver, uint32_t flowIn, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const
+    void FrameBufferNode::interpret(NodeGraph::NodeReceiver receiver, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const
     {
         throw 0;
     }

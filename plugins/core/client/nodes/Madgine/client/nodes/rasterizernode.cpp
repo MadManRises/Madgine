@@ -18,7 +18,6 @@ METATABLE_BEGIN_BASE(Engine::Render::RasterizerNode, Engine::NodeGraph::NodeBase
 METATABLE_END(Engine::Render::RasterizerNode)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Render::RasterizerNode, Engine::NodeGraph::NodeBase)
-FIELD(mAdditionalPins)
 SERIALIZETABLE_END(Engine::Render::RasterizerNode)
 
 namespace Engine {
@@ -32,58 +31,57 @@ namespace Render {
 
     RasterizerNode::RasterizerNode(const RasterizerNode &other, NodeGraph::NodeGraph &graph)
         : Node(other, graph)
-        , mAdditionalPins(other.mAdditionalPins)
     {
     }
 
-    size_t RasterizerNode::flowInCount() const
+    size_t RasterizerNode::flowInCount(uint32_t group) const
     {
         return 1;
     }
 
-    std::string_view RasterizerNode::flowInName(uint32_t index) const
+    std::string_view RasterizerNode::flowInName(uint32_t index, uint32_t group) const
     {
         return "vertex";
     }
 
-    uint32_t RasterizerNode::flowInMask(uint32_t index, bool bidir) const
+    uint32_t RasterizerNode::flowInMask(uint32_t index, uint32_t group, bool bidir) const
     {
         return NodeGraph::NodeExecutionMask::GPU;
     }
 
-    size_t RasterizerNode::flowOutCount() const
+    size_t RasterizerNode::flowOutBaseCount(uint32_t group) const
     {
         return 1;
     }
 
-    std::string_view RasterizerNode::flowOutName(uint32_t index) const
+    std::string_view RasterizerNode::flowOutName(uint32_t index, uint32_t group) const
     {
         return "pixel";
     }
 
-    uint32_t RasterizerNode::flowOutMask(uint32_t index, bool bidir) const
+    uint32_t RasterizerNode::flowOutMask(uint32_t index, uint32_t group, bool bidir) const
     {
         return NodeGraph::NodeExecutionMask::GPU;
     }
 
-    size_t RasterizerNode::dataProviderCount() const
+    size_t RasterizerNode::dataProviderBaseCount(uint32_t group) const
     {
-        return dataInCount();
+        return dataInBaseCount();
     }
 
-    std::string_view RasterizerNode::dataProviderName(uint32_t index) const
+    std::string_view RasterizerNode::dataProviderName(uint32_t index, uint32_t group) const
     {
         return dataInName(index);
     }
 
-    ExtendedValueTypeDesc RasterizerNode::dataProviderType(uint32_t index, bool bidir) const
+    ExtendedValueTypeDesc RasterizerNode::dataProviderType(uint32_t index, uint32_t group, bool bidir) const
     {
         if (index == 0)
             return toValueTypeDesc<Vector4>();
-        if (index == mAdditionalPins + 1)
+        if (index == dataProviderCount(group))
             return { ExtendedValueTypeEnum::GenericType };
         ExtendedValueTypeDesc desc = { ExtendedValueTypeEnum::GenericType };
-        if (index <= mAdditionalPins) {
+        if (index <= dataProviderCount(group)) {
             NodeGraph::Pin pin = dataInSource(index);
             desc = mGraph.dataProviderType(pin, false);
         }
@@ -92,39 +90,39 @@ namespace Render {
         return desc;
     }
 
-    uint32_t RasterizerNode::dataProviderMask(uint32_t index, bool bidir) const
+    uint32_t RasterizerNode::dataProviderMask(uint32_t index, uint32_t group, bool bidir) const
     {
         return NodeGraph::NodeExecutionMask::GPU;
     }
 
-    size_t RasterizerNode::dataInCount() const
+    size_t RasterizerNode::dataInBaseCount(uint32_t group) const
     {
-        return 1 + mAdditionalPins;
+        return 1;
     }
 
-    std::string_view RasterizerNode::dataInName(uint32_t index) const
+    std::string_view RasterizerNode::dataInName(uint32_t index, uint32_t group) const
     {
         if (index == 0)
             return "pos";
-        if (index <= mAdditionalPins) {
-            NodeGraph::Pin pin = dataInSource(index);
+        if (index < dataInCount(group)) {
+            NodeGraph::Pin pin = dataInSource(index, group);
             return mGraph.dataProviderName(pin);
         }
-        if (index == mAdditionalPins + 1)
+        if (index == dataInCount(group))
             return "<>";
         throw 0;
     }
 
-    ExtendedValueTypeDesc RasterizerNode::dataInType(uint32_t index, bool bidir) const
+    ExtendedValueTypeDesc RasterizerNode::dataInType(uint32_t index, uint32_t group, bool bidir) const
     {
         if (index == 0)
             return toValueTypeDesc<Vector4>();
-        if (index == mAdditionalPins + 1)
+        if (index == dataInCount(group))
             return { ExtendedValueTypeEnum::GenericType };
         ExtendedValueTypeDesc desc = { ExtendedValueTypeEnum::GenericType };
-        if (index <= mAdditionalPins) {
-            if (!mDataProviderPins[index].mTargets.empty()) {
-                NodeGraph::Pin pin = mDataProviderPins[index].mTargets.front();
+        if (index < dataInCount(group)) {
+            if (!mDataProviderPins[0][index].mTargets.empty()) {
+                NodeGraph::Pin pin = mDataProviderPins[0][index].mTargets.front();
                 desc = mGraph.dataInType(pin, false);
             }
         }
@@ -133,32 +131,17 @@ namespace Render {
         return desc;
     }
 
-    uint32_t RasterizerNode::dataInMask(uint32_t index, bool bidir) const
+    uint32_t RasterizerNode::dataInMask(uint32_t index, uint32_t group, bool bidir) const
     {
         return NodeGraph::NodeExecutionMask::GPU;
     }
 
-    bool RasterizerNode::dataInVariadic() const
+    bool RasterizerNode::dataInVariadic(uint32_t group) const
     {
         return true;
     }
 
-    void RasterizerNode::onDataInUpdate(uint32_t index, NodeGraph::Pin source, NodeGraph::EdgeEvent event)
-    {
-        if (event == NodeGraph::CONNECT) {
-            if (index == dataInCount()) {
-                ++mAdditionalPins;
-                setup();
-            }
-        } else if (event == NodeGraph::DISCONNECT) {
-            removeDataInPin(index);
-            removeDataProviderPin(index);
-
-            --mAdditionalPins;
-        }
-    }
-
-    void RasterizerNode::interpret(NodeGraph::NodeReceiver receiver, uint32_t flowIn, std::unique_ptr<NodeGraph::NodeInterpreterData> &data) const
+    void RasterizerNode::interpret(NodeGraph::NodeReceiver receiver, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const
     {
         throw 0;
     }

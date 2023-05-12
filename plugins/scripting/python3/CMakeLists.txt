@@ -40,20 +40,5 @@ add_tools(Python3 ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/Python3/pyth
 target_link_plugins(Python3Tools Tools)
 
 
-project(Python3Nodes)
-
-set(sources "")
-FolderSources(sources "" nodes)
-	FolderSources(sources nodes Madgine python3nodesforward.h python3nodeslib.h)
-		FolderSources(sources Madgine scripting)
-			FolderSources(sources scripting Python3)
-				FolderSources(sources Python3 nodes python3functionnode.cpp python3functionnode.h)
-
-add_plugin(Python3Nodes Madgine Scripting ${sources} PRECOMPILED_HEADER nodes/Madgine/python3nodeslib.h)
-
-target_link_plugins(Python3Nodes Python3 NodeGraph)
-
-
-
 
 

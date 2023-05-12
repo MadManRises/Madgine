@@ -24,67 +24,78 @@ namespace NodeGraph {
         virtual std::string_view name() const = 0;
         virtual std::string_view className() const = 0;
 
-        virtual size_t flowInCount() const { return 0; }
-        virtual std::string_view flowInName(uint32_t index) const { return "call"; }
-        virtual uint32_t flowInMask(uint32_t index, bool bidir = true) const { return NodeExecutionMask::CPU; }
-        const std::vector<Pin> &flowInSources(uint32_t index) const;
-        static uint32_t flowInId(uint32_t index);
+        virtual size_t flowInGroupCount() const { return 1; }
+        virtual size_t flowInCount(uint32_t group = 0) const { return 0; }
+        virtual std::string_view flowInName(uint32_t index, uint32_t group = 0) const { return "call"; }
+        virtual uint32_t flowInMask(uint32_t index, uint32_t group = 0, bool bidir = true) const { return NodeExecutionMask::CPU; }
+        const std::vector<Pin> &flowInSources(uint32_t index, uint32_t group = 0) const;
+        static uint32_t flowInId(uint32_t index, uint32_t group = 0);
 
-        virtual size_t flowOutCount() const { return 0; }
-        virtual std::string_view flowOutName(uint32_t index) const { return "return"; }
-        virtual uint32_t flowOutMask(uint32_t index, bool bidir = true) const { return NodeExecutionMask::CPU; }
-        Pin flowOutTarget(uint32_t index) const;
-        static uint32_t flowOutId(uint32_t index);
+        virtual size_t flowOutGroupCount() const { return 1; }
+        size_t flowOutCount(uint32_t group = 0) const;
+        virtual std::string_view flowOutName(uint32_t index, uint32_t group = 0) const { return "return"; }
+        virtual uint32_t flowOutMask(uint32_t index, uint32_t group = 0, bool bidir = true) const { return NodeExecutionMask::CPU; }
+        virtual bool flowOutVariadic(uint32_t group = 0) const { return false; }
+        Pin flowOutTarget(uint32_t index, uint32_t group = 0) const;
+        static uint32_t flowOutId(uint32_t index, uint32_t group = 0);
 
-        virtual size_t dataInCount() const { return 0; }
-        virtual std::string_view dataInName(uint32_t index) const { return "read"; }
-        virtual uint32_t dataInMask(uint32_t index, bool bidir = true) const { return NodeExecutionMask::CPU; }
-        virtual ExtendedValueTypeDesc dataInType(uint32_t index, bool bidir = true) const { throw 0; }
-        virtual bool dataInVariadic() const { return false; }
-        virtual ValueType dataInDefault(uint32_t index) const;
-        Pin dataInSource(uint32_t index) const;
-        static uint32_t dataInId(uint32_t index);
+        virtual size_t dataInGroupCount() const { return 1; }
+        size_t dataInCount(uint32_t group = 0) const;
+        virtual std::string_view dataInName(uint32_t index, uint32_t group = 0) const { return "read"; }
+        virtual uint32_t dataInMask(uint32_t index, uint32_t group = 0, bool bidir = true) const { return NodeExecutionMask::CPU; }
+        virtual ExtendedValueTypeDesc dataInType(uint32_t index, uint32_t group = 0, bool bidir = true) const { throw 0; }
+        virtual bool dataInVariadic(uint32_t group = 0) const { return false; }
+        virtual ValueType dataInDefault(uint32_t index, uint32_t group = 0) const;
+        Pin dataInSource(uint32_t index, uint32_t group = 0) const;
+        static uint32_t dataInId(uint32_t index, uint32_t group = 0);
 
-        virtual size_t dataOutCount() const { return 0; }
-        virtual std::string_view dataOutName(uint32_t index) const { return "write"; }
-        virtual uint32_t dataOutMask(uint32_t index, bool bidir = true) const { return NodeExecutionMask::CPU; }
-        virtual ExtendedValueTypeDesc dataOutType(uint32_t index, bool bidir = true) const { throw 0; }
-        virtual bool dataOutVariadic() const { return false; }
-        Pin dataOutTarget(uint32_t index) const;
-        static uint32_t dataOutId(uint32_t index);
+        virtual size_t dataOutGroupCount() const { return 1; }
+        size_t dataOutCount(uint32_t group = 0) const;
+        virtual std::string_view dataOutName(uint32_t index, uint32_t group = 0) const { return "write"; }
+        virtual uint32_t dataOutMask(uint32_t index, uint32_t group = 0, bool bidir = true) const { return NodeExecutionMask::CPU; }
+        virtual ExtendedValueTypeDesc dataOutType(uint32_t index, uint32_t group = 0, bool bidir = true) const { throw 0; }
+        virtual bool dataOutVariadic(uint32_t group = 0) const { return false; }
+        Pin dataOutTarget(uint32_t index, uint32_t group = 0) const;
+        static uint32_t dataOutId(uint32_t index, uint32_t group = 0);
 
-        virtual size_t dataReceiverCount() const { return 0; }
-        virtual std::string_view dataReceiverName(uint32_t index) const { return "in"; }
-        virtual uint32_t dataReceiverMask(uint32_t index, bool bidir = true) const { return NodeExecutionMask::CPU; }
-        virtual ExtendedValueTypeDesc dataReceiverType(uint32_t index, bool bidir = true) const { throw 0; }
-        virtual bool dataReceiverVariadic() const { return false; }
-        const std::vector<Pin> &dataReceiverSources(uint32_t index) const;
-        static uint32_t dataReceiverId(uint32_t index);
+        virtual size_t dataReceiverGroupCount() const { return 1; }
+        size_t dataReceiverCount(uint32_t group = 0) const;
+        virtual std::string_view dataReceiverName(uint32_t index, uint32_t group = 0) const { return "in"; }
+        virtual uint32_t dataReceiverMask(uint32_t index, uint32_t group = 0, bool bidir = true) const { return NodeExecutionMask::CPU; }
+        virtual ExtendedValueTypeDesc dataReceiverType(uint32_t index, uint32_t group = 0, bool bidir = true) const { throw 0; }
+        virtual bool dataReceiverVariadic(uint32_t group = 0) const { return false; }
+        const std::vector<Pin> &dataReceiverSources(uint32_t index, uint32_t group = 0) const;
+        static uint32_t dataReceiverId(uint32_t index, uint32_t group = 0);
 
-        virtual size_t dataProviderCount() const { return 0; }
-        virtual std::string_view dataProviderName(uint32_t index) const { return "out"; }
-        virtual uint32_t dataProviderMask(uint32_t index, bool bidir = true) const { return NodeExecutionMask::CPU; }
-        virtual ExtendedValueTypeDesc dataProviderType(uint32_t index, bool bidir = true) const { throw 0; }
-        virtual bool dataProviderVariadic() const { return false; }
-        const std::vector<Pin> &dataProviderTargets(uint32_t index) const;
-        static uint32_t dataProviderId(uint32_t index);
+        virtual size_t dataProviderGroupCount() const { return 1; }
+        size_t dataProviderCount(uint32_t group = 0) const;
+        virtual std::string_view dataProviderName(uint32_t index, uint32_t group = 0) const { return "out"; }
+        virtual uint32_t dataProviderMask(uint32_t index, uint32_t group = 0, bool bidir = true) const { return NodeExecutionMask::CPU; }
+        virtual ExtendedValueTypeDesc dataProviderType(uint32_t index, uint32_t group = 0, bool bidir = true) const { throw 0; }
+        virtual bool dataProviderVariadic(uint32_t group = 0) const { return false; }
+        const std::vector<Pin> &dataProviderTargets(uint32_t index, uint32_t group = 0) const;
+        static uint32_t dataProviderId(uint32_t index, uint32_t group = 0);
 
         static PinDesc pinFromId(uint32_t id);
 
-        virtual void onFlowOutUpdate(uint32_t index, Pin target, EdgeEvent event);
-        virtual void onDataInUpdate(uint32_t index, Pin source, EdgeEvent event);
-        virtual void onDataOutUpdate(uint32_t index, Pin target, EdgeEvent event);
+        virtual void onFlowOutUpdate(Pin source, EdgeEvent event);
+        virtual void onDataInUpdate(Pin target, EdgeEvent event);
+        virtual void onDataOutUpdate(Pin source, EdgeEvent event);
 
-        virtual void onFlowInUpdate(uint32_t index, Pin source, EdgeEvent event);
-        virtual void onDataProviderUpdate(uint32_t index, Pin target, EdgeEvent event);
-        virtual void onDataReceiverUpdate(uint32_t index, Pin source, EdgeEvent event);
+        virtual void onFlowInUpdate(Pin target, EdgeEvent event);
+        virtual void onDataProviderUpdate(Pin source, EdgeEvent event);
+        virtual void onDataReceiverUpdate(Pin target, EdgeEvent event);
 
-        void removeFlowInPin(uint32_t index);
-        void removeFlowOutPin(uint32_t index);
-        void removeDataInPin(uint32_t index);
-        void removeDataOutPin(uint32_t index);
-        void removeDataReceiverPin(uint32_t index);
-        void removeDataProviderPin(uint32_t index);
+        void addVariadicPin(uint32_t group);
+        void removeVariadicPin(Pin pin);
+        size_t variadicPinCount(uint32_t group) const;
+
+        void removeFlowInPin(Pin pin);
+        void removeFlowOutPin(Pin pin);
+        void removeDataInPin(Pin pin);
+        void removeDataOutPin(Pin pin);
+        void removeDataReceiverPin(Pin pin);
+        void removeDataProviderPin(Pin pin);
 
         void onFlowInRemove(Pin pin);
         void onFlowOutRemove(Pin pin);
@@ -95,9 +106,9 @@ namespace NodeGraph {
         void onNodeReindex(uint32_t oldIndex, uint32_t newIndex);
 
         virtual void setupInterpret(NodeInterpreter &interpreter, std::unique_ptr<NodeInterpreterData> &data) const;
-        virtual void interpret(NodeReceiver receiver, uint32_t flowIn, std::unique_ptr<NodeInterpreterData> &data) const;
-        virtual void interpretRead(NodeInterpreter &interpreter, ValueType &retVal, uint32_t providerIndex, std::unique_ptr<NodeInterpreterData> &data) const;
-        virtual void interpretWrite(NodeInterpreter &interpreter, uint32_t receiverIndex, std::unique_ptr<NodeInterpreterData> &data, const ValueType &v) const;
+        virtual void interpret(NodeReceiver receiver, std::unique_ptr<NodeInterpreterData> &data, uint32_t flowIn, uint32_t group = 0) const;
+        virtual void interpretRead(NodeInterpreter &interpreter, ValueType &retVal, std::unique_ptr<NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group = 0) const;
+        virtual void interpretWrite(NodeInterpreter &interpreter, std::unique_ptr<NodeInterpreterData> &data, const ValueType &v, uint32_t receiverIndex, uint32_t group = 0) const;
 
         virtual void generate(CodeGenerator &generator, IndexType<uint32_t> &flowInOut, std::unique_ptr<CodeGeneratorData> &data) const;
         virtual CodeGen::Statement generateRead(CodeGenerator &generator, uint32_t providerIndex, std::unique_ptr<CodeGeneratorData> &data) const;
@@ -106,19 +117,25 @@ namespace NodeGraph {
         virtual std::unique_ptr<NodeBase> clone(NodeGraph &graph) const = 0;
 
     protected:
+        virtual size_t flowOutBaseCount(uint32_t group = 0) const { return 0; }
+        virtual size_t dataInBaseCount(uint32_t group = 0) const { return 0; }
+        virtual size_t dataOutBaseCount(uint32_t group = 0) const { return 0; }
+        virtual size_t dataReceiverBaseCount(uint32_t group = 0) const { return 0; }
+        virtual size_t dataProviderBaseCount(uint32_t group = 0) const { return 0; }
+
         void setup();
 
         NodeGraph &mGraph;
 
         friend struct NodeGraph;
 
-        std::vector<FlowOutPinPrototype> mFlowOutPins;
-        std::vector<DataInPinPrototype> mDataInPins;
-        std::vector<DataOutPinPrototype> mDataOutPins;
+        std::vector<std::vector<FlowOutPinPrototype>> mFlowOutPins;
+        std::vector<std::vector<DataInPinPrototype>> mDataInPins;
+        std::vector<std::vector<DataOutPinPrototype>> mDataOutPins;
 
-        std::vector<DataProviderPinPrototype> mDataProviderPins;
-        std::vector<DataReceiverPinPrototype> mDataReceiverPins;
-        std::vector<FlowInPinPrototype> mFlowInPins;
+        std::vector<std::vector<DataProviderPinPrototype>> mDataProviderPins;
+        std::vector<std::vector<DataReceiverPinPrototype>> mDataReceiverPins;
+        std::vector<std::vector<FlowInPinPrototype>> mFlowInPins;
     };
 
 }

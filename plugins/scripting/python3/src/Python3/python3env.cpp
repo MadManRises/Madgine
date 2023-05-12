@@ -167,7 +167,8 @@ namespace Scripting {
 
         Python3Environment::~Python3Environment()
         {
-            lock(std::cout.rdbuf());
+            std::stringstream ss;
+            lock(ss.rdbuf());
 
             sStream.reset("stdout");
             sStream.reset("stderr");

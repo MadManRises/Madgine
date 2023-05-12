@@ -14,6 +14,8 @@
 
 #include "Meta/keyvalue/functiontable.h"
 
+#include "../nodeexecution.h"
+
 NODE(FunctionNode, Engine::NodeGraph::FunctionNode)
 
 METATABLE_BEGIN_BASE(Engine::NodeGraph::FunctionNode, Engine::NodeGraph::NodeBase)
@@ -34,44 +36,43 @@ namespace NodeGraph {
     }
 
     FunctionNode::FunctionNode(const FunctionNode &other, NodeGraph &graph)
-        : Node(other, graph),
-        mFunction(other.mFunction)
+        : Node(other, graph)
+        , mFunction(other.mFunction)
     {
     }
 
-    size_t FunctionNode::dataInCount() const
+    size_t FunctionNode::dataInBaseCount(uint32_t group) const
     {
         return mFunction ? mFunction->mArgumentsCount : 0;
     }
 
-    std::string_view FunctionNode::dataInName(uint32_t index) const
+    std::string_view FunctionNode::dataInName(uint32_t index, uint32_t group) const
     {
         return mFunction->mArguments[index].mName;
     }
 
-    ExtendedValueTypeDesc FunctionNode::dataInType(uint32_t index, bool bidir ) const
+    ExtendedValueTypeDesc FunctionNode::dataInType(uint32_t index, uint32_t group, bool bidir) const
     {
         return mFunction->mArguments[index].mType;
     }
 
-    size_t FunctionNode::dataProviderCount() const
+    size_t FunctionNode::dataProviderBaseCount(uint32_t group) const
     {
         return mFunction ? 1 : 0;
     }
 
-    ExtendedValueTypeDesc FunctionNode::dataProviderType(uint32_t index, bool bidir ) const
+    ExtendedValueTypeDesc FunctionNode::dataProviderType(uint32_t index, uint32_t group, bool bidir) const
     {
         return mFunction->mReturnType;
     }
 
-    void FunctionNode::interpretRead(NodeInterpreter &interpreter, ValueType &retVal, uint32_t providerIndex, std::unique_ptr<NodeInterpreterData> &data) const
+    void FunctionNode::interpretRead(NodeInterpreter &interpreter, ValueType &retVal, std::unique_ptr<NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group) const
     {
-        /* ArgumentList arguments { dataInCount() };
+        ArgumentList arguments { dataInCount() };
         for (size_t i = 0; i < dataInCount(); ++i) {
-            interpreter.read(arguments[i], i);
+            NodeInterpretHandle { this, interpreter }.read(arguments[i], i);
         }
-        mFunction->mFunctionPtr(mFunction, retVal, arguments);        */
-        throw 0;
+        mFunction->mFunctionPtr(mFunction, retVal, arguments);
     }
 
     CodeGen::Statement FunctionNode::generateRead(CodeGenerator &generator, uint32_t providerIndex, std::unique_ptr<CodeGeneratorData> &data) const

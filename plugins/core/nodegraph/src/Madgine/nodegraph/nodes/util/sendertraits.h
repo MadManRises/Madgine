@@ -1,59 +1,49 @@
 #pragma once
 
+#include "../../nodeexecution.h"
 #include "Generic/execution/concepts.h"
 #include "Generic/execution/state.h"
-#include "../../nodeexecution.h"
+
+#include "functors.h"
 
 namespace Engine {
 namespace NodeGraph {
 
-    template <uint32_t Node, uint32_t Index>
-    struct SenderConnection {
-        using value_type = SenderConnection;
-        static constexpr uint32_t node = Node;
-
-        static constexpr Pin pin(NodeGraph &graph, std::vector<NodeBase *> &nodes)
-        {
-            return { Node > 0 ? graph.nodeIndex(nodes[Node - 1]) : 0, Index };
-        }
-
-        using next = SenderConnection<Node, Index + 1>;
+    template <typename T>
+    struct recursive {
+        using decay_t = T;
     };
 
     template <typename T>
-    struct isConnectionHelper : std::false_type {
-    };
-
-    template <uint32_t Node, uint32_t Index>
-    struct isConnectionHelper<SenderConnection<Node, Index>> : std::true_type {
-    };
-
-    template <typename T>
-    concept IsConnection = isConnectionHelper<std::remove_reference_t<T>>::value;
-
-    template <typename T, uint32_t Node, uint32_t Index>
-    SenderConnection<Node, Index> operator+(SenderConnection<Node, Index>, T &&t)
-    {
-    }
-
-    template <typename T, uint32_t Node, uint32_t Index>
-    requires(!IsConnection<std::remove_reference_t<T>>)
-        SenderConnection<Node, Index>
-    operator+(T &&t, SenderConnection<Node, Index>)
-    {
-    }
-
+    using is_recursive = is_instance<T, recursive>;
 
     template <typename... T>
-    struct signature {
+    struct signature : type_pack<T...> {
 
         static constexpr size_t count = sizeof...(T);
 
-        static ExtendedValueTypeDesc type(uint32_t index)
+        using recursive_t = decayed_t<typename type_pack<T...>::filter<is_recursive>::unpack_unique<void>>;
+
+        static constexpr bool variadic = !std::same_as<recursive_t, void>;
+
+        static constexpr size_t variadicIndex = []() {
+            if constexpr (variadic) {
+                return type_pack<T...>::index<size_t, recursive<recursive_t>>;
+            } else {
+                return std::numeric_limits<size_t>::max();
+            }
+        }();
+
+        static ExtendedValueTypeDesc
+        type(uint32_t index)
         {
             static constexpr ExtendedValueTypeDesc types[] = {
-                toValueTypeDesc<T>()...
+                toValueTypeDesc<std::remove_reference_t<decayed_t<T>>>()...
             };
+            if constexpr (variadic) {
+                if (index >= count)
+                    return toValueTypeDesc<recursive_t>();
+            }
             return types[index];
         }
     };
@@ -64,159 +54,102 @@ namespace NodeGraph {
     template <>
     struct sender_traits<Execution::for_each_t> {
         static constexpr bool constant = false;
-        static constexpr bool eagerNode = false;
         using argument_types = type_pack<std::vector<int>, algorithm<signature<ValueType>>>;
-        using in_types = signature<>;
 
-        using Sender = Execution::for_each_t::sender<std::vector<int>, NodeAlgorithm<1>>;
-
-        static auto buildSender(NodeResults &results, std::vector<int> v)
-        {
-            return Sender {
-                v, NodeAlgorithm<1> { results }
-            };
-        }
+        static constexpr auto &algorithm = Execution::for_each;
     };
 
     template <>
     struct sender_traits<Execution::let_value_t> {
         static constexpr bool constant = false;
-        static constexpr bool eagerNode = false;
-        using argument_types = type_pack<algorithm<signature<ValueType>>>;
-        using in_types = signature<ValueType>;
+        using argument_types = type_pack<pred_sender<signature<ValueType>>, algorithm<signature<ValueType>>>;
 
-        using Sender = Execution::let_value_t::sender<NodeReader<ValueType>, NodeAlgorithm<1>>;
-
-        static auto buildSender(NodeResults &results)
-        {
-            return Sender { {},
-                NodeReader<ValueType> {},
-                NodeAlgorithm<1> { results } };
-        }
+        static constexpr auto &algorithm = Execution::let_value;
     };
 
     template <>
     struct sender_traits<Execution::Variable_t> {
         static constexpr bool constant = true;
-        static constexpr bool eagerNode = true;
-        using argument_types = type_pack<ValueType>;
-        using in_types = signature<>;
+        using argument_types = type_pack<Execution::just_t::sender<>, ValueType>;
 
-        using Sender = Execution::Variable_t::sender<"test", Execution::just_t::sender<>, ValueType>;
+        static constexpr auto &algorithm = Execution::Variable<"Name">;
 
-        using exposedVariables = type_pack<auto_holder<fixed_string { "test" }>>;
-
-        static auto buildSender(NodeResults &results, ValueType value)
-        {
-            return Sender { {}, Execution::just(), value };
-        }
+        using exposedVariables = type_pack<auto_holder<fixed_string { "Name" }>>;
     };
 
     template <>
     struct sender_traits<Execution::read_var_t> {
         static constexpr bool constant = true;
-        static constexpr bool eagerNode = false;
         using argument_types = type_pack<>;
-        using in_types = signature<>;
 
-        using Sender = Execution::read_var_t::sender<int &, "test">;
-
-        static auto buildSender(NodeResults &results)
-        {
-            return Sender {};
-        }
+        static constexpr auto &algorithm = Execution::read_var<int &, "Name">;
     };
 
     template <>
     struct sender_traits<Execution::write_var_t> {
         static constexpr bool constant = false;
-        static constexpr bool eagerNode = false;
-        using argument_types = type_pack<>;
-        using in_types = signature<ValueType>;
+        using argument_types = type_pack<pred_sender<signature<ValueType>>>;
 
-        using Sender = Execution::write_var_t::sender<NodeReader<ValueType>, "test">;
-
-        static auto buildSender(NodeResults &results)
-        {
-            return Sender { {}, NodeReader<ValueType> {} };
-        }
+        static constexpr auto &algorithm = Execution::write_var<"Name">;
     };
 
     template <>
-    struct sender_traits<Execution::then_t> {
+    struct sender_traits<Execution::then_t::typed<Add>> {
         static constexpr bool constant = true;
-        static constexpr bool eagerNode = false;
-        using argument_types = type_pack<>;
-        using in_types = signature<ValueType, ValueType>;
+        using argument_types = type_pack<pred_sender<signature<recursive<int>>>>;
+        using variadic = type_pack<pred_sender<signature<recursive<int>, int>>>;
 
-        static constexpr auto test = [](auto &&...v) { return (v + ...); };
+        static constexpr auto &algorithm = Execution::typed_then<Add>;
+    };
 
-        using Sender = Execution::then_t::sender<NodeReader<int, int>, decltype(test)>;
+    template <>
+    struct sender_traits<Execution::then_t::typed<Log>> {
+        static constexpr bool constant = false;
+        using argument_types = type_pack<pred_sender<signature<ValueType>>>;
+        using variadic = type_pack<pred_sender<signature<ValueType>>>;
 
-        static auto buildSender(NodeResults &results)
-        {
-            return Sender { {}, NodeReader<int, int> {} };
-        }
+        static constexpr auto &algorithm = Execution::typed_then<Log>;
     };
 
     template <>
     struct sender_traits<Execution::sequence_t> {
         static constexpr bool constant = false;
-        static constexpr bool eagerNode = false;
-        using argument_types = type_pack<algorithm<signature<>>, algorithm<signature<>>>;
-        using in_types = signature<>;
+        using argument_types = type_pack<>;
+        using variadic = type_pack<succ_sender>;
 
-        using Sender = Execution::sequence_t::sender<NodeSender<1>, NodeSender<2>>;
-
-        static auto buildSender(NodeResults &results)
-        {
-            return Sender { {}, NodeSender<1> {}, NodeSender<2> {} };
-        }
+        static constexpr auto &algorithm = Execution::sequence;
     };
 
     template <>
     struct sender_traits<Execution::just_t> {
         static constexpr bool constant = true;
-        static constexpr bool eagerNode = false;
-        using argument_types = type_pack<>;
-        using in_types = signature<>;
+        using argument_types = type_pack<ValueType>;
 
-        using Sender = Execution::just_t::sender<ValueType>;
-
-        static auto buildSender(NodeResults &results)
-        {
-            return Sender { ValueType { 3 } };
-        }
+        static constexpr auto &algorithm = Execution::just;
     };
 
     template <>
     struct sender_traits<Execution::assign_t> {
         static constexpr bool constant = false;
-        static constexpr bool eagerNode = false;
-        using argument_types = type_pack<>;
-        using in_types = signature<ValueType>;
+        using argument_types = type_pack<pred_sender<signature<ValueType>>, ValueType>;
 
-        using Sender = Execution::assign_t::sender<NodeReader<ValueType>, ValueType>;
-
-        static auto buildSender(NodeResults &results)
-        {
-            return Sender { {}, NodeReader<ValueType> {}, *new ValueType };
-        }
+        static constexpr auto &algorithm = Execution::assign;
     };
 
     template <typename Sender>
     struct typed_sender_traits;
 
+    template <typename _F, uint32_t _argCount>
+    struct typed_algorithm {
+        using F = _F;
+        static constexpr uint32_t argCount = _argCount;
+    };
+
     template <typename C, typename F>
     struct typed_sender_traits<Execution::for_each_t::sender<C, F>> {
-        static constexpr bool hasNode = true;
         using Algorithm = Execution::for_each_t;
 
-        template <uint32_t nodeIndex>
-        struct subgraphs {
-            template <typename... Providers>
-            using type = type_pack<std::invoke_result_t<F, SenderConnection<nodeIndex, 0> &>>;
-        };
+        using subgraphs = type_pack<typed_algorithm<F, 1>>;
     };
 
     template <fixed_string Name, typename Sender, typename T>
@@ -224,8 +157,6 @@ namespace NodeGraph {
         using Algorithm = Execution::Variable_t;
 
         using Pred = Sender;
-
-        static constexpr bool hasNode = true;
     };
 
     template <typename Sender, typename F>
@@ -234,20 +165,12 @@ namespace NodeGraph {
 
         using Pred = Sender;
 
-        static constexpr bool hasNode = false;
-
-        template <uint32_t nodeIndex>
-        struct subgraphs {
-            template <typename... Providers>
-            using type = type_pack<std::invoke_result_t<F, Providers...>>;
-        };
+        using subgraphs = type_pack<typed_algorithm<F, 1>>;
     };
 
     template <typename T, fixed_string Name>
     struct typed_sender_traits<Execution::read_var_t::sender<T, Name>> {
         using Algorithm = Execution::read_var_t;
-
-        static constexpr bool hasNode = true;
     };
 
     template <typename Sender, fixed_string Name>
@@ -255,27 +178,19 @@ namespace NodeGraph {
         using Algorithm = Execution::write_var_t;
 
         using Pred = Sender;
-        static constexpr bool hasNode = true;
     };
 
-    template <typename Sender1, typename Sender2>
-    struct typed_sender_traits<Execution::sequence_t::sender<Sender1, Sender2>> {
+    template <typename... Sender>
+    struct typed_sender_traits<Execution::sequence_t::sender<Sender...>> {
         using Algorithm = Execution::sequence_t;
 
-        template <uint32_t nodeIndex>
-        struct subgraphs {
-            template <typename... Providers>
-            using type = type_pack<Sender1, Sender2>;
-        };
-
-        static constexpr bool hasNode = true;
+        using subgraphs = type_pack<type_pack<Sender...>>;
     };
 
     template <typename Sender, typename T>
     struct typed_sender_traits<Execution::then_t::sender<Sender, T>> {
-        using Algorithm = Execution::then_t;
+        using Algorithm = Execution::then_t::typed<T>;
         using Pred = Sender;
-        static constexpr bool hasNode = true;
     };
 
     template <typename... T>
@@ -283,15 +198,12 @@ namespace NodeGraph {
         using Algorithm = Execution::just_t;
 
         using argument_providers = type_pack<T...>;
-
-        static constexpr bool hasNode = false;
     };
 
     template <typename Sender, typename T>
     struct typed_sender_traits<Execution::assign_t::sender<Sender, T>> {
         using Algorithm = Execution::assign_t;
         using Pred = Sender;
-        static constexpr bool hasNode = true;
     };
 
 }

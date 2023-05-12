@@ -3,11 +3,12 @@
 #include "Generic/execution/concepts.h"
 #include "Generic/execution/state.h"
 
-#include "nodecollector.h"
-#include "nodeinterpreter.h"
 #include "Generic/execution/algorithm.h"
 #include "Generic/execution/execution.h"
 #include "Generic/execution/state.h"
+#include "nodecollector.h"
+#include "nodegraph.h"
+#include "nodeinterpreter.h"
 
 namespace Engine {
 namespace NodeGraph {
@@ -16,21 +17,21 @@ namespace NodeGraph {
         const NodeBase *mNode;
         NodeInterpreter &mInterpreter;
 
-        void read(ValueType &retVal, uint32_t dataInIndex)
+        void read(ValueType &retVal, uint32_t dataInIndex, uint32_t group = 0)
         {
-            Pin pin = mNode->dataInSource(dataInIndex);
+            Pin pin = mNode->dataInSource(dataInIndex, group);
             if (!pin.mNode) {
                 retVal = mInterpreter.mArguments.at(pin.mIndex);
             } else {
-                mInterpreter.mGraph->node(pin.mNode)->interpretRead(mInterpreter, retVal, pin.mIndex, mInterpreter.mData[pin.mNode - 1]);
+                mInterpreter.mGraph->node(pin.mNode)->interpretRead(mInterpreter, retVal, mInterpreter.mData[pin.mNode - 1], pin.mIndex, pin.mGroup);
             }
         }
 
-        void write(uint32_t dataOutIndex, const ValueType &v)
+        void write(const ValueType &v, uint32_t dataOutIndex, uint32_t group = 0)
         {
-            Pin pin = mNode->dataOutTarget(dataOutIndex);
+            Pin pin = mNode->dataOutTarget(dataOutIndex, group);
             if (pin)
-                mInterpreter.mGraph->node(pin.mNode)->interpretWrite(mInterpreter, pin.mIndex, mInterpreter.mData[pin.mNode - 1], v);
+                mInterpreter.mGraph->node(pin.mNode)->interpretWrite(mInterpreter, mInterpreter.mData[pin.mNode - 1], v, pin.mIndex, pin.mGroup);
         }
 
         template <fixed_string Name>
@@ -41,12 +42,9 @@ namespace NodeGraph {
             assert(result);
             return v;
         }
-
-        friend NodeInterpretHandle &tag_invoke(Execution::get_context_t, NodeInterpretHandle &handle)
-        {
-            return handle;
-        }
     };
+
+    using NodeExecutionReceiver = Execution::execution_receiver<NodeInterpretHandle>;
 
     template <uint32_t flowOutIndex, typename _Rec>
     struct NodeState {
@@ -55,7 +53,7 @@ namespace NodeGraph {
         void start()
         {
             NodeInterpretHandle &handle = Execution::get_context(mRec);
-            Execution::connect(handle.mInterpreter.interpretSubGraph(handle.mNode->flowOutTarget(flowOutIndex)), std::forward<Rec>(mRec)).start();
+            Execution::connect(handle.mInterpreter.interpretSubGraph(handle.mNode->flowOutTarget(0, flowOutIndex)), std::forward<Rec>(mRec)).start();
         }
 
         Rec mRec;
@@ -78,11 +76,23 @@ namespace NodeGraph {
     struct NodeReader {
         using result_type = void;
         template <template <typename...> typename Tuple>
-        using value_types = Tuple<T...>;
+        using value_types = Tuple<decayed_t<T>...>;
+
+        NodeReader(size_t *baseIndex = nullptr, NodeResults *variadicBuffer = nullptr)
+            : mBaseIndex(baseIndex ? *baseIndex : 0)
+            , mVariadicBuffer(variadicBuffer)
+        {
+            if (baseIndex)
+                *baseIndex += sizeof...(T);
+        }
 
         template <typename Rec>
-        struct state {
-            using Rec = Rec;
+        struct state : Execution::base_state<Rec> {
+
+            template <typename T>
+            struct typed_Value : ValueType {
+                using ValueType::operator=;
+            };
             void start()
             {
                 helper(std::index_sequence_for<T...> {});
@@ -90,21 +100,32 @@ namespace NodeGraph {
             template <size_t... I>
             void helper(std::index_sequence<I...>)
             {
+                size_t variadicIndex = 0;
                 NodeInterpretHandle &handle = Execution::get_context(mRec);
-                std::tuple<std::conditional_t<true, ValueType, T>...> data;
-                size_t index = 0;
-                TupleUnpacker::forEach(data, [&](ValueType &v) { handle.read(v, index++); });
-                mRec.set_value(std::get<I>(data).as<T>()...);
+                std::tuple<typed_Value<T>...> data;
+                TupleUnpacker::forEach(data, [&]<typename T>(typed_Value<T> &v) {
+                    if constexpr (InstanceOf<T, recursive>) {
+                        assert(mVariadicBuffer);
+                        v = (*mVariadicBuffer)[variadicIndex++];
+                    } else {
+                        handle.read(v, mIndex++);
+                    }
+                });
+                set_value(std::get<I>(data).as<decayed_t<T>>()...);
             }
 
-            Rec mRec;
+            size_t mIndex = 0;
+            NodeResults *mVariadicBuffer = nullptr;
         };
 
         template <typename Rec>
-        friend auto tag_invoke(Execution::connect_t, NodeReader &&sender, Rec &&rec)
+        friend auto tag_invoke(Execution::connect_t, NodeReader &&reader, Rec &&rec)
         {
-            return state<Rec> { std::forward<Rec>(rec) };
+            return state<Rec> { std::forward<Rec>(rec), reader.mBaseIndex, reader.mVariadicBuffer };
         }
+
+        size_t mBaseIndex = 0;
+        NodeResults *mVariadicBuffer = nullptr;
     };
 
     template <uint32_t flowOutIndex>
@@ -112,16 +133,15 @@ namespace NodeGraph {
         template <typename... Args>
         auto operator()(Args &&...args)
         {
-            mArguments = { ValueType { std::forward<Args>(args) }... };
+            if (mResults.size() <= flowOutIndex)
+                mResults.resize(flowOutIndex + 1);
+            mResults[flowOutIndex] = { ValueType { std::forward<Args>(args) }... };
             return NodeSender<flowOutIndex> {};
         }
-        NodeResults &mArguments;
+        std::vector<NodeResults> &mResults;
     };
 
-    struct NoopReceiver : NodeInterpretHandle {
-    };
-
-    struct NodeReceiver : NodeInterpretHandle {
+    struct NodeReceiver : NodeExecutionReceiver {
         Execution::VirtualReceiverBase<GenericResult> &mReceiver;
 
         void set_value()
