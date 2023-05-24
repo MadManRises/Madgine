@@ -6,7 +6,7 @@ namespace Scripting {
 
         struct Python3StreamRedirect {
 
-            Python3StreamRedirect(std::streambuf *buf);
+            Python3StreamRedirect(std::streambuf *buf = nullptr);
             Python3StreamRedirect(const Python3StreamRedirect &) = delete;
             ~Python3StreamRedirect();
 

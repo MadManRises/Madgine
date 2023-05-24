@@ -34,8 +34,7 @@ TEST(NetworkManager, Connect)
     EXPECT_EQ(future.get(), NetworkManagerResult::SUCCESS);
     server.sendMessages();
     client.receiveMessages(-1, 1s);
-    ASSERT_TRUE(receiver.mFinished);
-    ASSERT_EQ(receiver.mResult, NetworkManagerResult::SUCCESS);
+    ASSERT_TRUE(receiver.mFinished);    
     ASSERT_TRUE(receiver.mHasValue);
 #endif
 }

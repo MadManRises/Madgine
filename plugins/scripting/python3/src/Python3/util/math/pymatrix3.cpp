@@ -11,7 +11,7 @@ namespace Scripting {
         PyTypeObject PyMatrix3Type = {
             .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
                 .tp_name
-            = "Environment.Matrix3",
+            = "Engine.Matrix3",
             .tp_basicsize = sizeof(PyMatrix3),
             .tp_itemsize = 0,
             .tp_dealloc = &PyDealloc<PyMatrix3, &PyMatrix3::mMatrix>,

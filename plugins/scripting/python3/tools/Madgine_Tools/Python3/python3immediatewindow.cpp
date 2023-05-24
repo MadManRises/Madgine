@@ -13,6 +13,8 @@
 #include "Python3/python3env.h"
 #include "Python3/util/python3lock.h"
 
+#include "Generic/execution/execution.h"
+
 METATABLE_BEGIN_BASE(Engine::Tools::Python3ImmediateWindow, Engine::Tools::ToolBase)
 METATABLE_END(Engine::Tools::Python3ImmediateWindow)
 
@@ -71,9 +73,8 @@ namespace Tools {
 
             if (exec) {
                 mCommandLog << ">>> " << mCommandBuffer << "\n";
-                {
-                    Scripting::Python3::Python3Lock lock { mCommandLog.rdbuf() };
-                    mEnv->execute(mCommandBuffer);
+                {                    
+                    Execution::detach(mEnv->execute(mCommandBuffer, mCommandLog.rdbuf()));
                 }
                 mCommandBuffer.clear();
                 ImGui::SetKeyboardFocusHere(-1);

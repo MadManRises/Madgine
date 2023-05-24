@@ -135,6 +135,28 @@ struct KeyValue<const std::unique_ptr<T, D>> {
 };
 
 template <typename T>
+struct KeyValue<std::reference_wrapper<T>> {
+    using Inner = KeyValue<T>;
+
+    static decltype(auto) value(std::reference_wrapper<T> ref) {
+        if constexpr (std::is_reference_v<decltype(Inner::value(ref.get()))>) {
+            return std::ref(Inner::value(ref.get()));
+        }else{
+            return Inner::value(ref.get());            
+        }
+    }
+
+    static decltype(auto) key(std::reference_wrapper<T> ref)
+    {
+        if constexpr (std::is_reference_v<decltype(Inner::key(ref.get()))>) {
+            return std::ref(Inner::key(ref.get()));
+        } else {
+            return Inner::key(ref.get());
+        }
+    }
+};
+
+template <typename T>
 decltype(auto) kvValue(T &&v)
 {
     return KeyValue<std::remove_reference_t<T>>::value(std::forward<T>(v));

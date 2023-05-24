@@ -22,6 +22,8 @@
 
 #include "imgui/imgui_internal.h"
 
+#include "Generic/execution/execution.h"
+
 UNIQUECOMPONENT(Engine::Tools::FunctionTool);
 
 namespace Engine {
@@ -179,8 +181,7 @@ namespace Tools {
     {
         if (ImGui::Begin("FunctionTool", &mVisible)) {
             if (renderFunctionSelect(mCurrentFunction, mCurrentFunctionName, mCurrentArguments)) {
-                ValueType result;
-                mCurrentFunction(result, mCurrentArguments);
+                Execution::detach(mCurrentFunction.sender(mCurrentArguments));
             }
         }
         ImGui::End();

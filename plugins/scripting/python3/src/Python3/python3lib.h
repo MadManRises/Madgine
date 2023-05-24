@@ -2,6 +2,7 @@
 
 #include "Madgine/resourceslib.h"
 #include "Madgine/rootlib.h"
+#include "Madgine/debuglib.h"
 
 #if defined(Python3_EXPORTS)
 #    define MADGINE_PYTHON3_EXPORT DLL_EXPORT

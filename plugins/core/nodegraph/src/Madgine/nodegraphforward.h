@@ -7,6 +7,7 @@ namespace NodeGraph {
     struct NodeGraph;
 
     struct NodeReceiver;
+    struct DebuggableReceiverBase;
 
     struct NodeInterpreter;
     struct NodeInterpreterData;
@@ -27,16 +28,6 @@ namespace NodeGraph {
         DISCONNECT,
         UPDATE
     };
-
-    template <typename _Signature>
-    struct algorithm {
-        using Signature = _Signature;
-    };
-    template <typename _Signature>
-    struct pred_sender {
-        using Signature = _Signature;
-    };
-    struct succ_sender;
 
     using NodeResults = std::vector<ValueType>;
 

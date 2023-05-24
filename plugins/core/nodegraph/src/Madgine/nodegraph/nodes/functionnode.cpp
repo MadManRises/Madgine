@@ -72,7 +72,7 @@ namespace NodeGraph {
         for (size_t i = 0; i < dataInCount(); ++i) {
             NodeInterpretHandle { this, interpreter }.read(arguments[i], i);
         }
-        mFunction->mFunctionPtr(mFunction, retVal, arguments);
+        retVal = Execution::sync_expect(ApiFunction { mFunction }.sender(arguments)).mData->at(providerIndex);
     }
 
     CodeGen::Statement FunctionNode::generateRead(CodeGenerator &generator, uint32_t providerIndex, std::unique_ptr<CodeGeneratorData> &data) const

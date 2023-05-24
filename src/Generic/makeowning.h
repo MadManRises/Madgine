@@ -12,6 +12,11 @@ struct MakeOwning {
     using type = T;
 };
 
+template <>
+struct MakeOwning<void> {
+    using type = void;
+};
+
 template <typename T>
 struct MakeOwning<T &> : MakeOwning<T> {
 };

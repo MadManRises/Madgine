@@ -5,11 +5,12 @@
 #include "pydictptr.h"
 
 #include "pyobjectutil.h"
+#include "pyobjectiter.h"
 
 #include "Meta/keyvalue/valuetype.h"
 
-#include <traceback.h>
 #include <frameobject.h>
+#include <traceback.h>
 
 namespace Engine {
 namespace Scripting {
@@ -23,7 +24,7 @@ namespace Scripting {
         PyObjectPtr::PyObjectPtr(const PyObjectPtr &other)
             : mObject(other.mObject)
         {
-            Py_INCREF(mObject);
+            Py_XINCREF(mObject);
         }
 
         PyObjectPtr::PyObjectPtr(PyObjectPtr &&other)
@@ -34,6 +35,20 @@ namespace Scripting {
         PyObjectPtr::~PyObjectPtr()
         {
             reset();
+        }
+
+        PyObjectPtr &PyObjectPtr::operator=(const PyObjectPtr &other)
+        {
+            Py_XDECREF(mObject);
+            mObject = other.mObject;
+            Py_XINCREF(mObject);
+            return *this;
+        }
+
+        PyObjectPtr &PyObjectPtr::operator=(PyObjectPtr &&other)
+        {
+            std::swap(mObject, other.mObject);
+            return *this;
         }
 
         PyObjectPtr PyObjectPtr::fromBorrowed(PyObject *object)
@@ -91,6 +106,11 @@ namespace Scripting {
             mObject = nullptr;
         }
 
+        PyObject *PyObjectPtr::release()
+        {
+            return std::exchange(mObject, nullptr);
+        }
+
         void PyObjectPtr::handleError()
         {
             if (!mObject) {
@@ -110,15 +130,11 @@ namespace Scripting {
                 }
 
                 const char *errorMessage = PyUnicode_AsUTF8(value);
-                Engine::Util::LogDummy { Engine::Util::MessageType::ERROR_TYPE, filename, line } << "Unhandled Python Exception:\n"
-                                                                                           << errorMessage;
-            }
-        }
 
-        PyObjectPtr &PyObjectPtr::operator=(PyObjectPtr &&other)
-        {
-            std::swap(mObject, other.mObject);
-            return *this;
+                if (errorMessage)
+                    Engine::Util::LogDummy { Engine::Util::MessageType::ERROR_TYPE, filename, line } << "Unhandled Python Exception:\n"
+                                                                                                     << errorMessage;
+            }
         }
 
         PyObjectPtr::operator bool() const
@@ -140,6 +156,16 @@ namespace Scripting {
         PyObjectPtr PyObjectPtr::None()
         {
             Py_RETURN_NONE;
+        }
+
+        PyObjectIterator PyObjectPtr::begin() const
+        {
+            return { *this, PyListPtr { PyObject_Dir(mObject) }.begin() };
+        }
+
+        PyObjectIterator PyObjectPtr::end() const
+        {
+            return { *this };
         }
 
         PyObjectFieldAccessor &PyObjectFieldAccessor::operator=(const PyObjectPtr &value)

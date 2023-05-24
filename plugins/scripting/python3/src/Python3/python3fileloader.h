@@ -32,10 +32,10 @@ namespace Scripting {
             Threading::Task<bool> loadImpl(PyModulePtr &module, ResourceDataInfo &info, Filesystem::FileEventType event);
             void unloadImpl(PyModulePtr &module);
 
-            void find_spec(ValueType &retVal, std::string_view name, std::optional<std::string_view> import_path, ObjectPtr target_module);
+            void find_spec(ValueType &result, std::string_view name, std::optional<std::string_view> import_path, ObjectPtr target_module);
 
-            void create_module(ValueType &retVal, ObjectPtr spec);
-            void exec_module(ValueType &retVal, ObjectPtr module);
+            void create_module(ValueType &result, ObjectPtr spec);
+            void exec_module(ValueType &result, ObjectPtr module);
 
         private:
             struct Python3FunctionTable : FunctionTable{

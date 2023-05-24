@@ -11,19 +11,20 @@
 
 #include "../../nodegraph.h"
 #include "../../pins.h"
-#include "sendertraits.h"
+#include "nodesendertraits.h"
 
 namespace Engine {
+
 namespace NodeGraph {
 
     template <typename T>
-    using is_algorithm = is_instance<decayed_t<T>, algorithm>;
+    using is_algorithm = is_instance<decayed_t<T>, Execution::algorithm>;
 
     template <typename T>
-    using is_pred_sender = is_instance<decayed_t<T>, pred_sender>;
+    using is_pred_sender = is_instance<decayed_t<T>, Execution::pred_sender>;
 
     template <typename T>
-    using is_succ_sender = std::is_same<decayed_t<T>, succ_sender>;
+    using is_succ_sender = std::is_same<decayed_t<T>, Execution::succ_sender>;
 
     template <typename T>
     using is_value = std::negation<std::disjunction<is_algorithm<T>, is_pred_sender<T>, is_succ_sender<T>>>;
@@ -54,7 +55,7 @@ namespace NodeGraph {
     template <typename Algorithm>
     struct SenderNode : Node<SenderNode<Algorithm>> {
 
-        using Traits = sender_traits<Algorithm>;
+        using Traits = Execution::sender_traits<Algorithm>;
 
         using argument_types = typename Traits::argument_types;
         using algorithms = typename argument_types::filter<is_algorithm>;
@@ -177,7 +178,7 @@ namespace NodeGraph {
         bool flowOutVariadic(uint32_t group = 0) const override
         {
             if constexpr (requires { typename Traits::variadic; }) {
-                return group == 1 && std::same_as<typename Traits::variadic::unpack_unique<void>, succ_sender>;
+                return group == 1 && std::same_as<typename Traits::variadic::unpack_unique<void>, Execution::succ_sender>;
             } else {
                 return false;
             }
@@ -185,17 +186,17 @@ namespace NodeGraph {
 
         size_t dataInBaseCount(uint32_t group) const override
         {
-            return in_types::unpack_unique<pred_sender<signature<>>>::Signature::count;
+            return in_types::unpack_unique<Execution::pred_sender<Execution::signature<>>>::Signature::count;
         }
 
         ExtendedValueTypeDesc dataInType(uint32_t index, uint32_t group, bool bidir = true) const override
         {
-            return in_types::unpack_unique<pred_sender<signature<>>>::Signature::type(index);
+            return in_types::unpack_unique<Execution::pred_sender<Execution::signature<>>>::Signature::type(index);
         }
 
         bool dataInVariadic(uint32_t group = 0) const override
         {
-            return group == 0 && in_types::unpack_unique<pred_sender<signature<>>>::Signature::variadic;
+            return group == 0 && in_types::unpack_unique<Execution::pred_sender<Execution::signature<>>>::Signature::variadic;
         }
 
         size_t dataProviderGroupCount() const override
@@ -221,7 +222,7 @@ namespace NodeGraph {
             static constexpr auto types = []<typename... Algorithm>(type_pack<Algorithm...>)
             {
                 return std::array {
-                    Sender::value_types<signature>::type,
+                    Sender::value_types<Execution::signature>::type,
                     Algorithm::Signature::type...
                 };
             }
@@ -254,8 +255,7 @@ namespace NodeGraph {
                 }
             }
 
-            struct Receiver {
-                NodeReceiver mReceiver;
+            struct Receiver : NodeReceiver {
                 InterpretData *mData;
 
                 template <typename... Args>
@@ -265,25 +265,19 @@ namespace NodeGraph {
                         mData->mResults.emplace_back();
                     mData->mResults.front() = { ValueType { std::forward<Args>(args) }... };
                     mData->cleanup();
-                    mReceiver.set_value();
+                    NodeReceiver::set_value();
                 }
 
                 void set_done()
                 {
                     mData->cleanup();
-                    mReceiver.set_done();
+                    NodeReceiver::set_done();
                 }
 
                 void set_error(GenericResult result)
                 {
                     mData->cleanup();
-                    mReceiver.set_error(result);
-                }
-
-                template <typename CPO>
-                friend decltype(auto) tag_invoke(CPO f, Receiver &receiver)
-                {
-                    return f(receiver.mReceiver);
+                    NodeReceiver::set_error(result);
                 }
             };
 
@@ -333,7 +327,7 @@ namespace NodeGraph {
             {
                 if constexpr (requires { typename Traits::variadic; }) {
 
-                    using PredSender = typename argument_types::filter<is_pred_sender>::unpack_unique<pred_sender<signature<>>>;
+                    using PredSender = typename argument_types::filter<is_pred_sender>::unpack_unique<Execution::pred_sender<Execution::signature<>>>;
                     if constexpr (PredSender::Signature::variadic) {
                         mRecursiveBuffer.resize(1);
                         Execution::get_context(mState).read(mRecursiveBuffer[0], PredSender::Signature::variadicIndex);
@@ -359,7 +353,7 @@ namespace NodeGraph {
                     size_t baseIndex = 0;
                     uint32_t group = 1;
 
-                    using PredSender = typename argument_types::filter<is_pred_sender>::unpack_unique<pred_sender<signature<>>>;
+                    using PredSender = typename argument_types::filter<is_pred_sender>::unpack_unique<Execution::pred_sender<Execution::signature<>>>;
                     if constexpr (PredSender::Signature::variadic) {
                         baseIndex = PredSender::Signature::variadicIndex + 1;
                         group = 0;
@@ -402,7 +396,7 @@ namespace NodeGraph {
                 }
             }
 
-            virtual bool resolveVar(OutRef<ValueType> &result, std::string_view name) override
+            virtual bool resolveVar(ValueType &result, std::string_view name) override
             {
                 if constexpr (requires { typename Traits::exposedVariables; }) {
                     return [&]<fixed_string... Names>(type_pack<auto_holder<Names>...>)
@@ -417,6 +411,20 @@ namespace NodeGraph {
                     (typename Traits::exposedVariables {});
                 }
                 return false;
+            }
+
+            virtual std::map<std::string_view, ValueType> variables() override
+            {
+                if constexpr (requires { typename Traits::exposedVariables; }) {
+                    return [&]<fixed_string... Names>(type_pack<auto_holder<Names>...>)
+                    {
+                        std::map<std::string_view, ValueType> result;
+                        (result.try_emplace(Names, Execution::resolve_var<Names>(mState)), ...);
+                        return result;
+                    }
+                    (typename Traits::exposedVariables {});
+                } else
+                    return {};
             }
 
             ValueType read(uint32_t providerIndex, uint32_t group) const

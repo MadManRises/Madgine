@@ -47,7 +47,12 @@ namespace Scripting {
 
         int Python3StreamRedirect::write(std::string_view text)
         {
-            return mBuf->sputn(text.data(), text.size());
+            if (mBuf)
+                return mBuf->sputn(text.data(), text.size());
+            else {
+                LOG(text);
+                return text.size();
+            }
         }
 
         void Python3StreamRedirect::setBuf(std::streambuf *buf)
@@ -55,7 +60,8 @@ namespace Scripting {
             mBuf = buf;
         }
 
-        std::streambuf* Python3StreamRedirect::buf() const {
+        std::streambuf *Python3StreamRedirect::buf() const
+        {
             return mBuf;
         }
 

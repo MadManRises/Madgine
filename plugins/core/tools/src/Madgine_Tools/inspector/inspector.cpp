@@ -131,6 +131,9 @@ namespace Tools {
                 drawValue(id, function, editable);
                 return std::make_pair(false, false);
             },
+            [&](ObjectPtr &object) {
+                return drawValue(id, object, editable, generic ? &value : nullptr);
+            },
             [&](auto &other) {
                 int columns = ImGui::TableGetColumnCount();
                 assert(columns == 0 || columns == 2);
@@ -163,7 +166,7 @@ namespace Tools {
 
                 ImGui::PopItemWidth();
 
-                if (generic) {                    
+                if (generic) {
                     ImGui::SameLine(0);
                     result.first |= ImGui::ValueTypeTypePicker(&value);
                     ImGui::EndGroup();
@@ -258,6 +261,67 @@ namespace Tools {
         return drawValue(id, ptr, editable, generic);
     }
 
+    std::pair<bool, bool> Inspector::drawValue(std::string_view id, ObjectPtr &object, bool editable, ValueType *generic)
+    {
+        bool modified = false;
+        bool changed = false;
+
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+
+        //ImGui::BeginGroup();
+
+        bool open = false;
+        if (object)
+            open = ImGui::TreeNode(id.data());
+        else {
+            ImGui::Indent();
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text(id);
+            ImGui::Unindent();
+        }
+
+        ImGui::TableNextColumn();
+
+        ImGui::Text(object.descriptor());
+
+        if (generic) {
+            ImGui::SameLine();
+            modified |= ImGui::ValueTypeTypePicker(generic);
+        }
+
+        //ImGui::EndGroup();
+
+        ImGui::DraggableValueTypeSource(id, object, ImGuiDragDropFlags_SourceAllowNullID);
+        if (editable && ImGui::BeginDragDropTarget()) {
+            if (ImGui::AcceptDraggableValueType(object)) {
+                modified = true;
+            }
+            /*OwnedScopePtr dummy;
+            if (ImGui::AcceptDraggableValueType(dummy, nullptr, [&](const OwnedScopePtr &ptr) {
+                    return ptr.type()->isDerivedFrom(scope.mType);
+                })) {
+                scope = dummy;
+                modified = true;
+            }*/
+            ImGui::EndDragDropTarget();
+        }
+
+        if (open) {
+
+            for (auto& [key, value] : object.values()) {
+                ValueType v = value;
+                std::pair<bool, bool> p = drawValue(key, v, value.isReference());
+                changed |= p.first || p.second;
+                if (p.first){
+                    value = v;
+                }
+            }
+            ImGui::TreePop();
+        }
+        return std::make_pair(modified, changed);
+    }
+
     bool Inspector::drawValue(std::string_view id, KeyValueVirtualSequenceRange &range, bool editable)
     {
         ImGui::TableNextColumn();
@@ -267,11 +331,11 @@ namespace Tools {
         ImGui::DraggableValueTypeSource(id, range);
 
         ImGui::TableNextColumn();
-        
+
         if (range.canInsert()) {
             if (ImGui::Button(IMGUI_ICON_PLUS))
                 range.insert(range.end());
-        }        
+        }
 
         if (b) {
             size_t i = 0;
@@ -284,14 +348,14 @@ namespace Tools {
                 } else if (value.is<OwnedScopePtr>()) {
                     key = "[" + std::to_string(i) + "] " + value.as<OwnedScopePtr>().name() + "##" + key;
                 }
-                std::pair<bool, bool> modified = drawValue(key, value, /*editable && */ vValue.isEditable(), false);
+                std::pair<bool, bool> modified = drawValue(key, value, /*editable && */ vValue.isReference(), false);
                 if (modified.first)
                     vValue = value;
                 changed |= modified.first || (modified.second && !range.isReference());
                 ++i;
             }
             ImGui::TreePop();
-        }     
+        }
 
         return changed;
     }
@@ -312,7 +376,7 @@ namespace Tools {
                 ImGui::TableNextRow();
                 ValueType value = vValue;
                 std::string key = vKey.toShortString() /* + "##" + std::to_string(i)*/;
-                std::pair<bool, bool> result = drawValue(key, value, /*editable && */ vValue.isEditable(), false);
+                std::pair<bool, bool> result = drawValue(key, value, /*editable && */ vValue.isReference(), false);
                 if (result.first)
                     vValue = value;
                 changed |= result.second;

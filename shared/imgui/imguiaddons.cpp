@@ -347,13 +347,13 @@ bool ValueTypeDrawer::draw(const Engine::Quaternion &q)
 
 bool ValueTypeDrawer::draw(Engine::ObjectPtr &o)
 {
-    Text("<object>");
+    Text(o.descriptor());
     return false;
 }
 
 bool ValueTypeDrawer::draw(const Engine::ObjectPtr &o)
 {
-    Text("<object>");
+    Text(o.descriptor());
     return false;
 }
 

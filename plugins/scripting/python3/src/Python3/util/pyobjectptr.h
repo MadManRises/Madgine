@@ -7,6 +7,8 @@ namespace Scripting {
         struct PyObjectFieldAccessor;
         struct PyDictPtr;
 
+        struct PyObjectIterator;
+
         struct MADGINE_PYTHON3_EXPORT PyObjectPtr {
 
             PyObjectPtr() = default;
@@ -14,6 +16,9 @@ namespace Scripting {
             PyObjectPtr(const PyObjectPtr &other);
             PyObjectPtr(PyObjectPtr &&other);
             ~PyObjectPtr();
+
+            PyObjectPtr &operator=(const PyObjectPtr &other);
+            PyObjectPtr &operator=(PyObjectPtr &&other);            
 
             static PyObjectPtr fromBorrowed(PyObject *object);
 
@@ -26,16 +31,18 @@ namespace Scripting {
             PyObjectFieldAccessor operator[](const PyObjectPtr &name) const;
 
             void reset();
+            PyObject *release();
 
             void handleError();
-
-            PyObjectPtr &operator=(PyObjectPtr &&other);
 
             explicit operator bool() const;
             operator PyObject *() const;
             PyObject **operator&();
 
             static PyObjectPtr None();
+
+            PyObjectIterator begin() const;
+            PyObjectIterator end() const;
 
         protected:
             PyObject *mObject = nullptr;

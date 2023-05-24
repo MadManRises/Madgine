@@ -47,21 +47,9 @@ struct META_EXPORT ValueType {
 
     ValueType(ValueType &&other) noexcept;
 
-    template <typename T>
-    requires(!std::same_as<std::decay_t<T>, ValueType>) explicit ValueType(T &&v)
+    template <DecayedNoneOf<ValueType> T>
+    explicit ValueType(T &&v)
         : mUnion(std::in_place_index<static_cast<size_t>(static_cast<ValueTypeEnum>(toValueTypeIndex<std::decay_t<T>>()))>, std::forward<T>(v))
-    {
-    }
-
-    template <Enum T>
-    explicit ValueType(T val)
-        : ValueType(static_cast<std::underlying_type_t<T>>(val))
-    {
-    }
-
-    template <typename T>
-    explicit ValueType(T *val)
-        : ValueType(TypedScopePtr { val })
     {
     }
 
@@ -72,8 +60,8 @@ struct META_EXPORT ValueType {
     void operator=(const ValueType &other);
     void operator=(ValueType &&other);
 
-    template <typename T>
-    requires(!std::same_as<std::decay_t<T>, ValueType>) void operator=(T &&t)
+    template <DecayedNoneOf<ValueType> T>
+    void operator=(T &&t)
     {
         constexpr size_t index = static_cast<size_t>(static_cast<ValueTypeEnum>(toValueTypeIndex<std::decay_t<T>>()));
         if (mUnion.index() == index)
@@ -149,57 +137,22 @@ struct META_EXPORT ValueType {
 
     void setType(ValueTypeDesc type);
 
-    void call(ValueType &retVal, const ArgumentList &args) const;
+    ArgumentList call(const ArgumentList &args) const;
     template <typename... Args>
-    void call(ValueType &retVal, Args &&...args)
+    ArgumentList call(Args &&...args)
     {
-        return call(retVal, { ValueType { std::forward<Args>(args)... } });
+        return call({ ValueType { std::forward<Args>(args) }... });
     }
+
+    auto sender(const ArgumentList &args) const
+    {
+        return make_key_value_sender(*this, args);
+    }
+
+    void operator()(KeyValueReceiver &receiver, const ArgumentList &args) const;
 
 private:
     Union mUnion;
-};
-
-struct META_EXPORT ValueTypeRef {
-
-private:
-    template <typename T>
-    static void setterHelper(void *object, const ValueType &value)
-    {
-        *static_cast<T *>(object) = ValueType_as<T>(value);
-    }
-
-public:
-    ValueTypeRef() = default;
-
-    template <typename T>
-    explicit ValueTypeRef(T &&val)
-        : mValue(std::forward<T>(val))
-        , mData(std::is_reference_v<T> ? &val : nullptr)
-        , mSetter(std::is_reference_v<T> ? setterHelper<std::remove_reference_t<T>> : nullptr)
-    {
-    }
-
-    ValueTypeRef(const ValueTypeRef &) = delete;
-    ValueTypeRef(ValueTypeRef &&other);
-
-    ValueTypeRef &operator=(const ValueTypeRef &) = delete;
-    ValueTypeRef &operator=(ValueTypeRef &&);
-
-    const ValueType &value() const;
-
-    operator const ValueType &() const;
-
-    bool isEditable() const;
-
-    ValueTypeRef &operator=(const ValueType &v);
-
-    void call(ValueType &retVal, const ArgumentList &args) const;
-
-private:
-    ValueType mValue;
-    void *mData = nullptr;
-    void (*mSetter)(void *, const ValueType &) = nullptr;
 };
 
 template <typename T>

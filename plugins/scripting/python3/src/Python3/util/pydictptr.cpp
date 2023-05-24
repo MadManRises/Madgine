@@ -21,6 +21,12 @@ namespace Scripting {
             }
         }
 
+        PyDictPtr PyDictPtr::fromBorrowed(PyObject *dict)
+        {
+            Py_INCREF(dict);
+            return dict;
+        }
+
         PyDictPtr::iterator::iterator(PyObject *dict)
             : mDict(dict)
         {

@@ -3,6 +3,7 @@
 /// @cond
 
 #include "Madgine/codegen/codegenlib.h"
+#include "Madgine/debuglib.h"
 
 #include "Modules/moduleslib.h"
 #include "Madgine/resourceslib.h"

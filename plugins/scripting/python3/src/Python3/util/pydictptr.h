@@ -13,10 +13,12 @@ namespace Scripting {
 
             using PyObjectPtr::operator=;
 
-            using value_type = std::pair<PyObject*, PyObject*>;
+            static PyDictPtr fromBorrowed(PyObject *dict);
+
+            using value_type = std::pair<PyObject *, PyObject *>;
 
             struct iterator {
-                using value_type = std::pair<PyObject*, PyObject*>;
+                using value_type = std::pair<PyObject *, PyObject *>;
                 using difference_type = ptrdiff_t;
 
                 iterator() = default;

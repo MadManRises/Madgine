@@ -762,7 +762,7 @@ namespace Tools {
     {
         using namespace Engine::Execution;
 
-        auto inner = [](auto a, auto &i) {
+        /* auto inner = [](auto a, auto &i) {
             return just(a, i)
                 | then(NodeGraph::Add {})
                 | let_value([&](auto sum) {
@@ -786,9 +786,11 @@ namespace Tools {
         std::stringstream ss;
         file.generate(ss);
         std::string result = ss.str();
+        */
+        auto graph = just("Foo") | then(NodeGraph::Log {});
 
         NodeGraph::SenderConnection<0, 0> con;
-        auto generated = NodeGraph::graphBuilderFromSender<decltype(graph(con)), 1, NodeGraph::SenderConnection<0, 0>, type_pack<>>(mGraph);
+        auto generated = NodeGraph::graphBuilderFromSender<decltype(graph), 1, NodeGraph::SenderConnection<0, 0>, type_pack<>>(mGraph);
         mGraph.connectFlow(generated.flowInPin(mGraph), { 0, 0 });
     }
 
@@ -813,7 +815,7 @@ namespace Tools {
                 }
 
                 if (ImGui::MenuItem("Debug", "", false)) {
-                    Execution::detach(mGraph.interpret({ ValueType { 2 } }) | Execution::then([]() { LOG("SUCCESS"); }));
+                    Execution::detach(mGraph.interpret({ ValueType { 2 } }) | Execution::then([](const ArgumentList &) { LOG("SUCCESS"); }));
                 }
 
                 if (ImGui::BeginMenu("Test")) {
@@ -940,7 +942,7 @@ namespace Tools {
 
     bool NodeGraphEditor::saveImpl(std::string_view view)
     {
-        verify();
+        //verify();
 
         if (mInitialLoad) {
             mInitialLoad = false;

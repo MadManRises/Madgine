@@ -27,7 +27,7 @@ ScopeIterator TypedScopePtr::find(std::string_view key) const
 
 ScopeIterator TypedScopePtr::begin() const
 {
-    return { *this, mType ? mType->mMember : nullptr };
+    return { *this, mType ? mType->mMembers : nullptr };
 }
 
 ScopeIterator TypedScopePtr::end() const
@@ -43,9 +43,9 @@ std::string TypedScopePtr::name() const
         return "<NULL>";
 }
 
-void TypedScopePtr::call(ValueType &retVal, const ArgumentList &args) const
+void TypedScopePtr::call(KeyValueReceiver &receiver, const ArgumentList &args) const
 {
-    return mType->call(*this, retVal, args);
+    return mType->call(*this, receiver, args);
 }
 
 }

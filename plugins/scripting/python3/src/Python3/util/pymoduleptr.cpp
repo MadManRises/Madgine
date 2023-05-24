@@ -10,7 +10,7 @@ METATABLE_END(Engine::Scripting::Python3::PyModulePtr)
 namespace Engine {
 namespace Scripting {
     namespace Python3 {
- 
+
         PyModulePtr::PyModulePtr(std::string_view name)
         {
             PyObject *modules = PyImport_GetModuleDict();
@@ -20,7 +20,6 @@ namespace Scripting {
             } else {
                 mObject = PyImport_ImportModule(name.data());
             }
-
         }
 
         PyModulePtr PyModulePtr::create(std::string_view name)
@@ -28,6 +27,11 @@ namespace Scripting {
             PyModulePtr module;
             module.mObject = PyModule_NewObject(PyUnicode_FromString(name.data()));
             return module;
+        }
+
+        PyDictPtr PyModulePtr::getDict() const
+        {
+            return PyDictPtr::fromBorrowed(PyModule_GetDict(mObject));
         }
 
     }

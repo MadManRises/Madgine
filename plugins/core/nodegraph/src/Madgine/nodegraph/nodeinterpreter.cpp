@@ -8,8 +8,37 @@
 
 #include "nodeexecution.h"
 
+#include "Madgine/debug/debugger.h"
+
 namespace Engine {
 namespace NodeGraph {
+
+    struct NodeDebugLocation : Debug::DebugLocation {
+        NodeDebugLocation(const NodeBase *node, NodeInterpreter *interpreter)
+            : mNode(node)
+            , mInterpreter(interpreter)
+        {
+        }
+
+        virtual std::string toString() const override
+        {
+            std::stringstream ss;
+            if (mNode) {
+                ss << mNode->className() << " [" << mNode << "]";
+            } else {
+                ss << "Graph [" << mInterpreter->graph() << "]";
+            }
+            return ss.str();
+        }
+
+        virtual std::map<std::string_view, ValueType> localVariables() const override
+        {
+            return mInterpreter->variables();
+        }
+
+        const NodeBase *mNode;
+        NodeInterpreter *mInterpreter;
+    };
 
     NodeInterpreter::NodeInterpreter(const NodeGraph *graph, const ArgumentList &args)
         : mGraph(graph)
@@ -37,24 +66,48 @@ namespace NodeGraph {
             mGraphGeneration = mGraph->generation();
         }
 
+        Debug::Debugger::getSingleton().stepInto(static_cast<Execution::VirtualReceiverBase<GenericResult> *>(this), std::make_unique<NodeDebugLocation>(nullptr, this));
         branch(*this, pin);
     }
 
-    void NodeInterpreter::branch(Execution::VirtualReceiverBase<GenericResult> &receiver, uint32_t flow)
+    void NodeInterpreter::set_value()
     {
-        Pin pin = mCurrentNode->flowOutTarget(flow);
-        branch(receiver, pin);
+        KeyValueReceiver::set_value();
     }
 
     void NodeInterpreter::branch(Execution::VirtualReceiverBase<GenericResult> &receiver, Pin pin)
     {
+        const NodeBase *node = nullptr;
         if (pin && pin.mNode) {
-            const NodeBase *node = mGraph->node(pin.mNode);
-            mCurrentNode = node;            
-            node->interpret({ node, *this, receiver }, mData[pin.mNode - 1], pin.mIndex, pin.mGroup);
-        } else {
-            receiver.set_value();
+            node = mGraph->node(pin.mNode);
         }
+        static_cast<NodeDebugLocation *>(Debug::Debugger::getSingleton().getLocation(&receiver))->mNode = node;
+
+        Execution::detach(Debug::Debugger::getSingleton().yield(&receiver)
+            | Execution::then([=, &receiver]() {
+                  if (pin && pin.mNode) {
+                      node->interpret({ node, *this, receiver }, mData[pin.mNode - 1], pin.mIndex, pin.mGroup);
+                  } else {
+                      Debug::Debugger::getSingleton().stepOut(&receiver);
+                      receiver.set_value();
+                  }
+              }));
+    }
+
+    void NodeInterpreter::read(ValueType &retVal, Pin pin)
+    {
+        if (!pin) {
+            throw 0;
+        } else if (!pin.mNode) {
+            retVal = mArguments.at(pin.mIndex);
+        } else {
+            mGraph->node(pin.mNode)->interpretRead(*this, retVal, mData[pin.mNode - 1], pin.mIndex, pin.mGroup);
+        }
+    }
+
+    void NodeInterpreter::write(Pin pin, const ValueType &v)
+    {
+        mGraph->node(pin.mNode)->interpretWrite(*this, mData[pin.mNode - 1], v, pin.mIndex, pin.mGroup);
     }
 
     void NodeInterpreter::setGraph(const NodeGraph *graph)
@@ -80,17 +133,28 @@ namespace NodeGraph {
         return mData[index - 1];
     }
 
-    bool NodeInterpreter::resolveVar(OutRef<ValueType> &result, std::string_view name)
+    bool NodeInterpreter::resolveVar(ValueType &result, std::string_view name)
     {
+        bool gotValue = false;
         for (const std::unique_ptr<NodeInterpreterData> &data : mData) {
             if (data) {
-                bool hadValue = result.mPtr;
-                bool gotValue = data->resolveVar(result, name);
+                bool hadValue = gotValue;
+                gotValue = data->resolveVar(result, name);
                 assert(!hadValue || !gotValue);
             }
         }
-        return result.mPtr;
+        return gotValue;
     }
 
+    std::map<std::string_view, ValueType> NodeInterpreter::variables()
+    {
+        std::map<std::string_view, ValueType> variables;
+        for (const std::unique_ptr<NodeInterpreterData> &data : mData) {
+            if (data) {
+                std::ranges::move(data->variables(), std::inserter(variables, variables.end()));
+            }
+        }
+        return variables;
+    }
 }
 }

@@ -11,7 +11,7 @@ namespace Scripting {
         PyTypeObject PyQuaternionType = {
             .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
                 .tp_name
-            = "Environment.Quaternion",
+            = "Engine.Quaternion",
             .tp_basicsize = sizeof(PyQuaternion),
             .tp_itemsize = 0,
             .tp_dealloc = &PyDealloc<PyQuaternion, &PyQuaternion::mQuaternion>,

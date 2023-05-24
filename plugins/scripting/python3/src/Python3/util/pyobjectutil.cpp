@@ -9,21 +9,22 @@
 #include "math/pyvector4.h"
 #include "pyapifunction.h"
 #include "pyboundapifunction.h"
+#include "pydictptr.h"
+#include "pylistptr.h"
 #include "pyownedscopeptr.h"
 #include "pyscopeiterator.h"
 #include "pytypedscopeptr.h"
 #include "pyvirtualiterator.h"
 #include "pyvirtualrange.h"
-#include "pydictptr.h"
-#include "pylistptr.h"
 
 #include "pymoduleptr.h"
 
-#include "Meta/keyvalue/valuetype.h"
 #include "Meta/keyvalue/keyvaluepair.h"
+#include "Meta/keyvalue/valuetype.h"
 
 #include "Meta/keyvalue/objectinstance.h"
 #include "Meta/keyvalue/objectptr.h"
+#include "pyobjectiter.h"
 
 #include "pyobjectptr.h"
 
@@ -40,9 +41,14 @@ namespace Scripting {
             {
             }
 
+            ~PyObjectInstance() {
+                Python3InnerLock lock;
+                mPtr.reset();
+            }
+
             virtual bool getValue(ValueType &retVal, std::string_view name) const override
             {
-                fromPyObject(retVal, mPtr.get(name));
+                retVal = fromPyObject(mPtr.get(name));
                 return true;
             }
 
@@ -51,11 +57,28 @@ namespace Scripting {
                 throw 0;
             }
 
-            virtual void call(ValueType &retVal, const ArgumentList &args) override
+            virtual std::map<std::string_view, ValueType> values() const override
             {
-                Python3Lock lock;
-                
-                fromPyObject(retVal, mPtr.call(args));
+                Python3InnerLock lock;
+                std::map<std::string_view, ValueType> results;
+                std::ranges::transform(mPtr, std::inserter(results, results.end()), [](std::pair<PyObject *, PyObject *> p) {
+                    return std::make_pair(PyUnicode_AsUTF8(p.first), fromPyObject(p.second));
+                });
+                return results;
+            }
+
+            virtual void call(KeyValueReceiver &receiver, const ArgumentList &args) override
+            {
+                Python3InnerLock lock;
+
+                fromPyObject(receiver, mPtr.call(args));
+            }
+
+            virtual std::string descriptor() const override
+            {
+                Python3InnerLock lock;
+                PyObjectPtr repr = PyObject_Repr(mPtr);
+                return PyUnicode_AsUTF8(repr);
             }
 
             PyObject *get() const
@@ -147,10 +170,10 @@ namespace Scripting {
             return obj;
         }
 
-        PyObject *toPyObject(const VirtualIterator<ValueTypeRef> &it)
+        PyObject *toPyObject(const VirtualIterator<ValueType> &it)
         {
             PyObject *obj = PyObject_CallObject((PyObject *)&PyVirtualSequenceIteratorType, NULL);
-            new (&reinterpret_cast<PyVirtualSequenceIterator *>(obj)->mIt) VirtualIterator<ValueTypeRef>(it);
+            new (&reinterpret_cast<PyVirtualSequenceIterator *>(obj)->mIt) VirtualIterator<ValueType>(it);
             return obj;
         }
 
@@ -238,7 +261,7 @@ namespace Scripting {
         {
             PyObject *obj = PyObject_CallObject((PyObject *)&PyMatrix4Type, NULL);
             new (&reinterpret_cast<PyMatrix4 *>(obj)->mMatrix) Matrix4(m);
-            return nullptr;
+            return obj;
         }
 
         PyObject *toPyObject(const EnumHolder &e)
@@ -253,55 +276,84 @@ namespace Scripting {
             return nullptr;
         }
 
-        struct Functor_to_KeyValuePair {            
-            void operator()(KeyValuePair &p, const std::pair<PyObject*, PyObject*> &o)
+        struct Functor_to_KeyValuePair {
+            void operator()(KeyValuePair &p, const std::pair<PyObject *, PyObject *> &o)
             {
-                fromPyObject(p.mKey, o.first);
-                ValueType v;
-                fromPyObject(v, o.second);
-                p.mValue = ValueTypeRef { v };
+                p.mKey = fromPyObject(o.first);
+                p.mValue = fromPyObject(o.second);
             }
         };
 
         struct Functor_to_ValueRef {
-            void operator()(ValueTypeRef &r, PyObject *o)
+            void operator()(ValueType &r, PyObject *o)
             {
-                ValueType v;
-                fromPyObject(v, o);
-                r = ValueTypeRef { v };
+                r = fromPyObject(o);
             }
         };
 
-        void fromPyObject(ValueType &retVal, PyObject *obj)
+        ValueType fromPyObject(PyObject *obj)
         {
             if (!obj) {
                 PyErr_Print();
                 throw 0;
             } else if (obj == Py_None) {
-                retVal = std::monostate {};
+                return ValueType { std::monostate {} };
             } else if (PyUnicode_Check(obj)) {
                 const char *s;
                 if (!PyArg_Parse(obj, "s", &s))
                     throw 0;
-                retVal = std::string { s };
-            } else if (PyBool_Check(obj)){
-                retVal = (obj == Py_True);
+                return ValueType { std::string { s } };
+            } else if (PyBool_Check(obj)) {
+                return ValueType { obj == Py_True };
             } else if (PyLong_Check(obj)) {
                 int i;
                 if (!PyArg_Parse(obj, "i", &i))
                     throw 0;
-                retVal = i;
+                return ValueType { i };
             } else if (PyDict_Check(obj)) {
                 Py_INCREF(obj);
-                retVal = KeyValueVirtualAssociativeRange { PyDictPtr { obj }, Engine::type_holder<Functor_to_KeyValuePair> };
+                return ValueType { KeyValueVirtualAssociativeRange { PyDictPtr { obj }, Engine::type_holder<Functor_to_KeyValuePair> } };
             } else if (PyList_Check(obj)) {
                 Py_INCREF(obj);
-                retVal = KeyValueVirtualSequenceRange { PyListPtr { obj }, Engine::type_holder<Functor_to_ValueRef> };
+                return ValueType { KeyValueVirtualSequenceRange { PyListPtr { obj }, Engine::type_holder<Functor_to_ValueRef> } };
             } else if (obj->ob_type == &PyTypedScopePtrType) {
-                retVal = reinterpret_cast<PyTypedScopePtr *>(obj)->mPtr;
+                return ValueType { reinterpret_cast<PyTypedScopePtr *>(obj)->mPtr };
             } else {
                 Py_INCREF(obj);
-                retVal = ObjectPtr { std::make_unique<PyObjectInstance>(obj) };
+                return ValueType { ObjectPtr { std::make_unique<PyObjectInstance>(obj) } };
+            }
+        }
+
+        void fromPyObject(KeyValueReceiver &receiver, PyObject *obj)
+        {
+            if (!obj) {
+                PyErr_Print();
+                receiver.set_error(GenericResult::UNKNOWN_ERROR);
+            } else if (obj == Py_None) {
+                receiver.set_value(std::monostate {});
+            } else if (PyUnicode_Check(obj)) {
+                const char *s;
+                if (!PyArg_Parse(obj, "s", &s))
+                    throw 0;
+                receiver.set_value(std::string { s });
+            } else if (PyBool_Check(obj)) {
+                receiver.set_value(obj == Py_True);
+            } else if (PyLong_Check(obj)) {
+                int i;
+                if (!PyArg_Parse(obj, "i", &i))
+                    throw 0;
+                receiver.set_value(i);
+            } else if (PyDict_Check(obj)) {
+                Py_INCREF(obj);
+                receiver.set_value(KeyValueVirtualAssociativeRange { PyDictPtr { obj }, Engine::type_holder<Functor_to_KeyValuePair> });
+            } else if (PyList_Check(obj)) {
+                Py_INCREF(obj);
+                receiver.set_value(KeyValueVirtualSequenceRange { PyListPtr { obj }, Engine::type_holder<Functor_to_ValueRef> });
+            } else if (obj->ob_type == &PyTypedScopePtrType) {
+                receiver.set_value(reinterpret_cast<PyTypedScopePtr *>(obj)->mPtr);
+            } else {
+                Py_INCREF(obj);
+                receiver.set_value(ObjectPtr { std::make_unique<PyObjectInstance>(obj) });
             }
         }
 
@@ -311,7 +363,7 @@ namespace Scripting {
             PyTypeObject *type = reinterpret_cast<PyTypeObject *>(obj);
             if (type == &PyUnicode_Type) {
                 return toValueTypeDesc<std::string>();
-            } else if (obj == PyModulePtr{ "inspect" }.get("Parameter").get("empty")) {
+            } else if (obj == PyModulePtr { "inspect" }.get("Parameter").get("empty")) {
                 return toValueTypeDesc<ValueType>();
             }
             throw 0;

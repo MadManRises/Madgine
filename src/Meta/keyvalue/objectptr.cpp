@@ -1,6 +1,8 @@
+#include "objectptr.h"
 #include "../metalib.h"
 #include "objectptr.h"
 #include "objectinstance.h"
+#include "valuetype.h"
 
 namespace Engine {
 
@@ -45,9 +47,19 @@ bool ObjectPtr::getValue(ValueType &retVal, std::string_view name) const
     return mInstance->getValue(retVal, name);
 }
 
-void ObjectPtr::call(ValueType &retVal, const ArgumentList &args) const
+std::map<std::string_view, ValueType> ObjectPtr::values() const
 {
-    mInstance->call(retVal, args);
+    return mInstance->values();
+}
+
+void ObjectPtr::call(KeyValueReceiver &receiver, const ArgumentList &args) const
+{
+    mInstance->call(receiver, args);
+}
+
+std::string ObjectPtr::descriptor() const
+{
+    return mInstance->descriptor();
 }
 
 bool ObjectPtr::operator==(const ObjectPtr &other) const

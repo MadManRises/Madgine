@@ -102,10 +102,10 @@ namespace NodeGraph {
     {
         ([&]() {
             if constexpr (!IsConnection<T>) {
-                /* std::unique_ptr<SenderNode<Algorithm>> uNode = std::make_unique<SenderNode<Algorithm>>(graph);
+                std::unique_ptr<SenderNode<Execution::just_t>> uNode = std::make_unique<SenderNode<Execution::just_t>>(graph);
+                uNode->setArguments<0>(ValueType { std::string { "Foo" } });
                 NodeBase *node = graph.addNode(std::move(uNode));
-                parent.mNodes.push_back(node);*/
-                throw 0;
+                parent.mNodes.push_back(node);                
             }
         }(),
             ...);
@@ -149,7 +149,7 @@ namespace NodeGraph {
     struct is_typed_algorithm_helper : std::false_type {
     };
     template <typename F, uint32_t argCount>
-    struct is_typed_algorithm_helper<typed_algorithm<F, argCount>> : std::true_type {
+    struct is_typed_algorithm_helper<Execution::typed_algorithm<F, argCount>> : std::true_type {
     };
     template <typename T>
     concept is_typed_algorithm = is_typed_algorithm_helper<T>::value;
@@ -225,9 +225,9 @@ namespace NodeGraph {
             parent.mNodes.push_back(node);
             assert(parent.mNodes.size() == decltype(parent)::index);
 
-            using in_types = typename sender_traits<TypedTraits::Algorithm>::argument_types::filter<is_pred_sender>::unpack_unique<pred_sender<signature<>>>::Signature;
+            using in_types = typename Execution::sender_traits<TypedTraits::Algorithm>::argument_types::filter<is_pred_sender>::unpack_unique<Execution::pred_sender<Execution::signature<>>>::Signature;
             static_assert(in_types::count == decltype(parent)::Providers::size || (in_types::count <= decltype(parent)::Providers::size && in_types::variadic));
-            connectHelper<sender_traits<TypedTraits::Algorithm>>(graph, parent, graph.nodeIndex(node), std::make_index_sequence<decltype(parent)::Providers::size> {});
+            connectHelper<Execution::sender_traits<TypedTraits::Algorithm>>(graph, parent, graph.nodeIndex(node), std::make_index_sequence<decltype(parent)::Providers::size> {});
 
             ConnectionData incremented = ConnectionData<decltype(parent)::index + 1, decltype(parent)::FlowIn, decltype(parent)::Providers, type_pack<>> { std::move(parent) };
 
@@ -256,7 +256,7 @@ namespace NodeGraph {
         if constexpr (hasNode<TypedTraits>) {
             return ConnectionData<
                 decltype(sub)::index,
-                std::conditional_t<sender_traits<TypedTraits::Algorithm>::constant, decltype(sub)::FlowIn, SenderConnection<nodeIndex, 0, 0>>,
+                std::conditional_t<Execution::sender_traits<TypedTraits::Algorithm>::constant, decltype(sub)::FlowIn, SenderConnection<nodeIndex, 0, 0>>,
                 typename NodeHelper<TypedTraits>::Sender::value_types<type_pack>::transform_index<helper<nodeIndex>::template type>::concat<typename decltype(sub)::Providers>, type_pack<>> {
                 std::move(sub)
             };
@@ -267,7 +267,7 @@ namespace NodeGraph {
     template <typename Sender, uint32_t baseIndex = 0, typename FlowIn = SenderConnection<0, 0, 0>, typename Providers = type_pack<>, typename Receivers = type_pack<>>
     auto graphBuilderFromSender(NodeGraph &graph, ConnectionData<baseIndex, FlowIn, Providers, Receivers> parent = {})
     {
-        using Traits = typed_sender_traits<Sender>;
+        using Traits = Execution::typed_sender_traits<Sender>;
 
         return generate<Traits>(graph, std::move(parent));
     }

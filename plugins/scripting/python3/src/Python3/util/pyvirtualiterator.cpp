@@ -32,7 +32,7 @@ namespace Scripting {
         PyTypeObject PyVirtualSequenceIteratorType = {
             .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
                            .tp_name
-            = "Environment.VirtualSequenceIterator",
+            = "Engine.VirtualSequenceIterator",
             .tp_basicsize = sizeof(PyVirtualSequenceIterator),
             .tp_itemsize = 0,
             .tp_dealloc = &PyDealloc<PyVirtualSequenceIterator, &PyVirtualSequenceIterator::mIt>,
@@ -63,7 +63,7 @@ namespace Scripting {
         PyTypeObject PyVirtualAssociativeIteratorType = {
             .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
                            .tp_name
-            = "Environment.VirtualAssociativeIterator",
+            = "Engine.VirtualAssociativeIterator",
             .tp_basicsize = sizeof(PyVirtualAssociativeIterator),
             .tp_itemsize = 0,
             .tp_dealloc = &PyDealloc<PyVirtualAssociativeIterator, &PyVirtualAssociativeIterator::mIt>,

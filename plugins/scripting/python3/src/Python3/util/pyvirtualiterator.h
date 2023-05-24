@@ -10,7 +10,7 @@ namespace Scripting {
 
         struct PyVirtualSequenceIterator {
             PyObject_HEAD
-                VirtualIterator<ValueTypeRef>
+                VirtualIterator<ValueType>
                     mIt;
         };
 

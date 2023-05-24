@@ -20,7 +20,7 @@ namespace Scripting {
                 using difference_type = ptrdiff_t;
 
                 iterator() = default;
-                iterator(PyObject *list);
+                iterator(PyObjectPtr list);
 
                 PyObject *operator*() const;
                 iterator &operator++();
@@ -28,7 +28,7 @@ namespace Scripting {
                 bool operator==(const iterator &) const;
 
             private:
-                PyObject *mList = nullptr;
+                PyObjectPtr mList;
                 Py_ssize_t mIndex = 0;
             };
 

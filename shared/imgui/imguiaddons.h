@@ -106,7 +106,7 @@ template <typename T>
 void DraggableValueTypeSource(std::string_view name, T &&data, ImGuiDragDropFlags flags = 0)
 {
     DraggableValueTypeSource(
-        name, [](Engine::ValueType &retVal, void *data) { Engine::to_ValueType<true>(retVal, static_cast<T &&>(*static_cast<std::remove_reference_t<T> *>(data))); }, &data, flags);
+        name, [](Engine::ValueType &retVal, void *data) { Engine::to_ValueType(retVal, static_cast<T &&>(*static_cast<std::remove_reference_t<T> *>(data))); }, &data, flags);
 }
 
 IMGUI_API const Engine::ValueType *GetValuetypePayload();

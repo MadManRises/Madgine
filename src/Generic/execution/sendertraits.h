@@ -1,13 +1,17 @@
 #pragma once
 
-#include "../../nodeexecution.h"
-#include "Generic/execution/concepts.h"
-#include "Generic/execution/state.h"
-
-#include "functors.h"
-
 namespace Engine {
-namespace NodeGraph {
+namespace Execution {
+
+    template <typename _Signature>
+    struct algorithm {
+        using Signature = _Signature;
+    };
+    template <typename _Signature>
+    struct pred_sender {
+        using Signature = _Signature;
+    };
+    struct succ_sender;
 
     template <typename T>
     struct recursive {
@@ -91,24 +95,6 @@ namespace NodeGraph {
         using argument_types = type_pack<pred_sender<signature<ValueType>>>;
 
         static constexpr auto &algorithm = Execution::write_var<"Name">;
-    };
-
-    template <>
-    struct sender_traits<Execution::then_t::typed<Add>> {
-        static constexpr bool constant = true;
-        using argument_types = type_pack<pred_sender<signature<recursive<int>>>>;
-        using variadic = type_pack<pred_sender<signature<recursive<int>, int>>>;
-
-        static constexpr auto &algorithm = Execution::typed_then<Add>;
-    };
-
-    template <>
-    struct sender_traits<Execution::then_t::typed<Log>> {
-        static constexpr bool constant = false;
-        using argument_types = type_pack<pred_sender<signature<ValueType>>>;
-        using variadic = type_pack<pred_sender<signature<ValueType>>>;
-
-        static constexpr auto &algorithm = Execution::typed_then<Log>;
     };
 
     template <>

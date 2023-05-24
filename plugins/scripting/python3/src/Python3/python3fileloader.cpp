@@ -2,6 +2,8 @@
 
 #include "python3fileloader.h"
 
+#include "python3env.h"
+
 #include "Meta/keyvalue/metatable_impl.h"
 
 #include "util/python3lock.h"
@@ -51,7 +53,7 @@ namespace Scripting {
 
         Threading::Task<bool> Python3FileLoader::loadImpl(PyModulePtr &module, ResourceDataInfo &info, Filesystem::FileEventType event)
         {
-            Python3Lock lock;
+            Python3Lock lock { nullptr };
 
             if (!module) {
                 module = { info.resource()->name() };
@@ -64,7 +66,7 @@ namespace Scripting {
 
         void Python3FileLoader::unloadImpl(PyModulePtr &module)
         {
-            Python3Lock lock;
+            Python3Lock lock { nullptr };
             module.reset();
         }
 
@@ -99,10 +101,10 @@ namespace Scripting {
             mNameHolder = PyBytes_AsString(ascii_name);
             mName = mNameHolder;
 
-            mFunctionPtr = [](const FunctionTable *self, ValueType &retVal, const ArgumentList &args) {
-                Python3Lock lock;
-                PyObjectPtr result = static_cast<const Python3FunctionTable *>(self)->mFunctionObject.call(args);
-                return fromPyObject(retVal, result);
+            mFunctionPtr = [](const FunctionTable *self, KeyValueReceiver &receiver, const ArgumentList &args) {
+                Python3InnerLock lock;
+                Python3Environment::getSingleton().execute(receiver,
+                    reinterpret_cast<PyCodeObject *>(PyFunction_GetCode(static_cast<const Python3FunctionTable *>(self)->mFunctionObject)));
             };
 
             registerFunction(*this);
@@ -113,43 +115,42 @@ namespace Scripting {
             unregisterFunction(*this);
         }
 
-        void Python3FileLoader::find_spec(ValueType &retVal, std::string_view name, std::optional<std::string_view> import_path, ObjectPtr target_module)
+        void Python3FileLoader::find_spec(ValueType &result, std::string_view name, std::optional<std::string_view> import_path, ObjectPtr target_module)
         {
             Resource *res = get(name, this);
             if (!res)
                 return;
-            Python3Lock lock;
+            Python3InnerLock lock;
             PyObjectPtr spec = PyModulePtr { "importlib.machinery" }.get("ModuleSpec").call({ { { "loader_state", toPyObject(TypedScopePtr { res }) } } }, "sO", res->name().data(), toPyObject(TypedScopePtr { this }));
-            return fromPyObject(retVal, spec);
+            result = fromPyObject(spec);
         }
 
-        void Python3FileLoader::create_module(ValueType &retVal, ObjectPtr spec)
+        void Python3FileLoader::create_module(ValueType &result, ObjectPtr spec)
         {
-            Python3Lock lock;
-            ValueType resourcePtr;
-            fromPyObject(resourcePtr, PyObjectPtr { toPyObject(spec) }.get("loader_state"));
+            Python3InnerLock lock;
+            ValueType resourcePtr = fromPyObject(PyObjectPtr { toPyObject(spec) }.get("loader_state"));            
             Resource *res = resourcePtr.as<TypedScopePtr>().safe_cast<Resource>();
             Handle handle = create(res, Filesystem::FileEventType::FILE_CREATED, this);
             handle.info()->setPersistent(true);
             PyModulePtr &module = *getDataPtr(handle, this, false);
             assert(!module);
             module = PyModulePtr::create(res->name());
-            return fromPyObject(retVal, module);
+            result = fromPyObject(module);
         }
 
-        void Python3FileLoader::exec_module(ValueType &retVal, ObjectPtr module)
+        void Python3FileLoader::exec_module(ValueType &result, ObjectPtr module)
         {
-            Python3Lock lock;
-            ValueType resourcePtr;
+            Python3InnerLock lock;
+            
             PyObjectPtr moduleObject { toPyObject(module) };
-            fromPyObject(resourcePtr, moduleObject.get("__spec__").get("loader_state"));
+            ValueType resourcePtr = fromPyObject(moduleObject.get("__spec__").get("loader_state"));
             Resource *res = resourcePtr.as<TypedScopePtr>().safe_cast<Resource>();
 
             PyModulePtr importlib { "importlib.util" };
 
             PyObjectPtr spec = importlib.get("spec_from_file_location").call("ss", res->name().data(), res->path().c_str());
 
-            fromPyObject(retVal, spec.get("loader").get("exec_module").call("(O)", (PyObject *)moduleObject));
+            result = fromPyObject(spec.get("loader").get("exec_module").call("(O)", (PyObject *)moduleObject));
 
             PyObject *dict = PyModule_GetDict(moduleObject);
 
@@ -161,6 +162,7 @@ namespace Scripting {
                     Python3FunctionTable &table = mTables.emplace_back(PyObjectPtr::fromBorrowed(value));
                 }
             }
+
         }
     }
 }

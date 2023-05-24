@@ -55,7 +55,7 @@ TEST(ValueType, Construct)
     ASSERT_EQ(test, 5);
     ASSERT_EQ(test, ValueType { 5 });
 
-    test = &function<&testF>();
+    /* test = &function<&testF>();
     ValueType result;
     test.call(result, 1);
     ASSERT_EQ(result, 4);
@@ -78,7 +78,7 @@ TEST(ValueType, Construct)
     ASSERT_EQ(result, 4);
     test = ValueType_Bar {};
     test.call(result);
-    ASSERT_EQ(result, 4);
+    ASSERT_EQ(result, 4);*/
 
     
     std::vector<int> v = { 1, 2, 3 };

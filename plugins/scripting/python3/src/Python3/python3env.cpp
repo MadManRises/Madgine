@@ -22,7 +22,17 @@
 
 #include "python3fileloader.h"
 
-#include <iostream>
+#include "util/pydictptr.h"
+#include "util/pyframeptr.h"
+#include "util/pylistptr.h"
+
+#include "python3streamredirect.h"
+
+#include "util/python3lock.h"
+
+#include "Generic/cowstring.h"
+
+#include <frameobject.h>
 
 UNIQUECOMPONENT(Engine::Scripting::Python3::Python3Environment)
 
@@ -32,6 +42,8 @@ METATABLE_END(Engine::Scripting::Python3::Python3Environment)
 namespace Engine {
 namespace Scripting {
     namespace Python3 {
+
+        extern PyTypeObject PySuspendExceptionType;
 
         static PyObject *
         PyEnvironment_get(PyObject *self, PyObject *args)
@@ -55,9 +67,25 @@ namespace Scripting {
             return NULL;
         }
 
+        static PyObject *
+        PyEnvironment_dir(PyObject *self, PyObject *args)
+        {
+            PyObject *list = PyList_New(KeyValueRegistry::globals().size() + KeyValueRegistry::workgroupLocals().size());
+            size_t i = 0;
+            for (std::string_view key : kvKeys(KeyValueRegistry::globals())) {
+                PyList_SetItem(list, i++, toPyObject(key));
+            }
+            for (std::string_view key : kvKeys(KeyValueRegistry::workgroupLocals())) {
+                PyList_SetItem(list, i++, toPyObject(key));
+            }
+
+            return list;
+        }
+
         static PyMethodDef PyEnvironmentMethods[] = {
             { "__getattr__", PyEnvironment_get, METH_VARARGS,
                 "Execute a shell command." },
+            { "__dir__", PyEnvironment_dir, METH_NOARGS, "List all Environment globals" },
             { NULL, NULL, 0, NULL } /* Sentinel */
         };
 
@@ -70,8 +98,20 @@ namespace Scripting {
             PyEnvironmentMethods
         };
 
-        PyMODINIT_FUNC
-        PyInit_Environment(void)
+        static PyMethodDef PyEngineMethods[] = {
+            { NULL, NULL, 0, NULL } /* Sentinel */
+        };
+
+        static PyModuleDef PyEngine_module = {
+            PyModuleDef_HEAD_INIT,
+            "Engine", /* name of module */
+            "Wrappers for engine C++ classes", /* module documentation, may be NULL */
+            -1, /* size of per-interpreter state of the module,
+                 or -1 if the module keeps state in global variables. */
+            PyEngineMethods
+        };
+
+        PyMODINIT_FUNC PyInit_Engine(void)
         {
 
             if (PyType_Ready(&PyTypedScopePtrType) < 0)
@@ -102,8 +142,12 @@ namespace Scripting {
                 return NULL;
             if (PyType_Ready(&PyQuaternionType) < 0)
                 return NULL;
+            if (PyType_Ready(&PySuspendExceptionType) < 0)
+                return NULL;
+            if (PyType_Ready(&PySenderType) < 0)
+                return NULL;
 
-            PyObject *m = PyModule_Create(&PyEnv_module);
+            PyObject *m = PyModule_Create(&PyEngine_module);
             if (m == NULL)
                 return NULL;
 
@@ -129,12 +173,31 @@ namespace Scripting {
             return m;
         }
 
-        static Python3StreamRedirect sStream { std::cout.rdbuf() };
+        PyMODINIT_FUNC PyInit_Environment(void)
+        {
+
+            PyObject *m = PyModule_Create(&PyEnv_module);
+            if (m == NULL)
+                return NULL;
+
+            return m;
+        }
+
+        static Python3StreamRedirect sStream {};
 
         Python3Environment::Python3Environment(Root::Root &root)
             : RootComponent(root)
         {
             wchar_t *program = Py_DecodeLocale("Madgine-Python3-Env", NULL);
+
+            Py_SetProgramName(program);
+
+            /* Add a built-in module, before Py_Initialize */
+            if (PyImport_AppendInittab("Engine", PyInit_Engine) == -1) {
+                LOG("Error: could not extend built-in modules table");
+                mErrorCode = -1;
+                return;
+            }
 
             /* Add a built-in module, before Py_Initialize */
             if (PyImport_AppendInittab("Environment", PyInit_Environment) == -1) {
@@ -143,16 +206,17 @@ namespace Scripting {
                 return;
             }
 
-            /* Pass argv[0] to the Python interpreter */
-            Py_SetProgramName(program);
-
             Py_InitializeEx(0);
 
+            setupExecution();
+
             PyRun_SimpleString("import Environment");
+            PyRun_SimpleString("import Engine");
             sStream.redirect("stdout");
             sStream.redirect("stderr");
 
             Python3FileLoader::getSingleton().setup();
+            mDebugger.setup();
 
             PyEval_SaveThread();
 
@@ -182,18 +246,38 @@ namespace Scripting {
             return "Python3Environment";
         }
 
-        void Python3Environment::execute(std::string_view command)
+        extern PyFrameObject *sFrame;
+
+        void Python3Environment::execute(KeyValueReceiver &receiver, std::string_view command, std::streambuf *out)
         {
-            PyRun_SimpleString(command.data());
+            Python3Lock lock { out };
+
+            PyObjectPtr code = Py_CompileString(command.data(), "<eval>", Py_single_input);
+            if (code) {
+                execute(receiver, reinterpret_cast<PyCodeObject *>(static_cast<PyObject *>(code)));
+            } else {
+                code.handleError();
+            }
         }
 
-        PyGILState_STATE Python3Environment::lock(std::streambuf *buf)
+        void Python3Environment::execute(KeyValueReceiver &receiver, PyCodeObject *code)
+        {
+            PyModulePtr main { "__main__" };
+
+            PyFramePtr frame = PyFrame_New(
+                PyThreadState_Get(),
+                code,
+                main.getDict(),
+                main.getDict());
+
+            evalFrame(receiver, std::move(frame));
+        }
+
+        PyGILState_STATE Python3Environment::lock()
         {
             //assert(PyGILState_Check() == 0);
             PyGILState_STATE handle = PyGILState_Ensure();
             assert(PyGILState_Check() == 1);
-            if (buf)
-                sStream.setBuf(buf);
             return handle;
         }
 
@@ -202,7 +286,24 @@ namespace Scripting {
             std::streambuf *result = sStream.buf();
             assert(PyGILState_Check() == 1);
             PyGILState_Release(handle);
+            return result;
+        }
+
+        void Python3Environment::lock(std::streambuf *buf)
+        {
             //assert(PyGILState_Check() == 0);
+            PyGILState_STATE handle = PyGILState_Ensure();
+            assert(PyGILState_Check() == 1);
+            assert(handle == PyGILState_UNLOCKED);
+            sStream.setBuf(buf);
+        }
+
+        std::streambuf *Python3Environment::unlock()
+        {
+            std::streambuf *result = sStream.buf();
+            sStream.setBuf(nullptr);
+            assert(PyGILState_Check() == 1);
+            PyGILState_Release(PyGILState_UNLOCKED);
             return result;
         }
 

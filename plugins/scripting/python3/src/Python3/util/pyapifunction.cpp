@@ -6,7 +6,13 @@
 
 #include "pyobjectutil.h"
 
+#include "Meta/keyvalue/functiontable.h"
+
+#include "pyexecution.h"
+
 #include "../python3env.h"
+
+#include "python3lock.h"
 
 namespace Engine {
 namespace Scripting {
@@ -16,25 +22,27 @@ namespace Scripting {
         PyApiFunction_call(PyApiFunction *self, PyObject *args, PyObject *kwargs)
         {
             size_t argCount = PyTuple_Size(args);
-            ArgumentList arguments;
-            arguments.reserve(argCount);
+            ArgumentList arguments { argCount };
 
             for (size_t i = 0; i < argCount; ++i) {
-                fromPyObject(arguments.emplace_back(), PyTuple_GetItem(args, i));
+                arguments[i] = fromPyObject(PyTuple_GetItem(args, i));
             }
 
-            ValueType retVal;
-            Py_BEGIN_ALLOW_THREADS;
-            self->mFunction(retVal, arguments);
-            Py_END_ALLOW_THREADS;
-
-            return toPyObject(retVal);
+            return std::visit(overloaded {
+                                  [&](FunctionTable::FSyncPtr f) {
+                                      //Python3Unlock unlock;
+                                      return toPyObject(self->mFunction(arguments)[0]);
+                                  },
+                                  [&](FunctionTable::FAsyncPtr f) {
+                                      return suspend(self->mFunction.sender(arguments));
+                                  } },
+                self->mFunction.mTable->mFunctionPtr);
         }
 
         PyTypeObject PyApiFunctionType = {
             .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
                            .tp_name
-            = "Environment.ApiFunction",
+            = "Engine.ApiFunction",
             .tp_basicsize = sizeof(PyApiFunction),
             .tp_itemsize = 0,
             .tp_dealloc = &PyDealloc<PyApiFunction, &PyApiFunction::mFunction>,

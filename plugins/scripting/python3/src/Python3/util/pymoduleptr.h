@@ -1,6 +1,7 @@
 #pragma once
 
 #include "pyobjectptr.h"
+#include "pydictptr.h"
 
 namespace Engine {
 namespace Scripting {
@@ -13,6 +14,8 @@ namespace Scripting {
             using PyObjectPtr::operator=;
 
             static PyModulePtr create(std::string_view name);
+
+            PyDictPtr getDict() const;
         };
     
     }

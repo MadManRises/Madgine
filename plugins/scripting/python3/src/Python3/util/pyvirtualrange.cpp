@@ -21,7 +21,7 @@ namespace Scripting {
         PyTypeObject PyVirtualSequenceRangeType = {
             .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
                 .tp_name
-            = "Environment.VirtualSequenceRange",
+            = "Engine.VirtualSequenceRange",
             .tp_basicsize = sizeof(PyVirtualSequenceRange),
             .tp_itemsize = 0,
             .tp_dealloc = &PyDealloc<PyVirtualSequenceRange, &PyVirtualSequenceRange::mRange>,
@@ -40,8 +40,8 @@ namespace Scripting {
         static PyObject *
         PyVirtualAssociativeRange_subscript(PyVirtualAssociativeRange *self, PyObject *key)
         {
-            ValueType val;
-            fromPyObject(val, key);
+            ValueType val = fromPyObject(key);            
+            
             auto it = std::ranges::find(self->mRange, val, &KeyValuePair::mKey);
             if (it == self->mRange.end()) {
                 PyErr_Format(PyExc_KeyError, "No key %R in %R!", key, self);
@@ -57,7 +57,7 @@ namespace Scripting {
         PyTypeObject PyVirtualAssociativeRangeType = {
             .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
                 .tp_name
-            = "Environment.VirtualAssociativeRange",
+            = "Engine.VirtualAssociativeRange",
             .tp_basicsize = sizeof(PyVirtualAssociativeRange),
             .tp_itemsize = 0,
             .tp_dealloc = &PyDealloc<PyVirtualAssociativeRange, &PyVirtualAssociativeRange::mRange>,

@@ -11,7 +11,7 @@ namespace Scripting {
         PyTypeObject PyVector3Type = {
             .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
                 .tp_name
-            = "Environment.Vector3",
+            = "Engine.Vector3",
             .tp_basicsize = sizeof(PyVector3),
             .tp_itemsize = 0,
             .tp_dealloc = &PyDealloc<PyVector3, &PyVector3::mVector>,

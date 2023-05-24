@@ -4,11 +4,38 @@
 
 #include "functiontable.h"
 
+#include "Generic/execution/execution.h"
+
+#include "valuetype.h"
+
 namespace Engine {
 
-void ApiFunction::operator()(ValueType &retVal, const ArgumentList &args) const
+ArgumentList ApiFunction::operator()(const ArgumentList &args) const
 {
-    mTable->mFunctionPtr(mTable, retVal, args);
+    return std::visit(overloaded {
+                          [&](FunctionTable::FSyncPtr f) {
+                              ArgumentList results;
+                              f(mTable, results, args);
+                              return results;
+                          },
+                          [&](FunctionTable::FAsyncPtr f) {
+                              return static_cast<ArgumentList>(Execution::sync_expect(sender(args)));
+                          } },
+        mTable->mFunctionPtr);
+}
+
+void ApiFunction::operator()(KeyValueReceiver &receiver, const ArgumentList &args) const
+{
+    return std::visit(overloaded {
+                          [&](FunctionTable::FSyncPtr f) {
+                              ArgumentList results;
+                              f(mTable, results, args);
+                              receiver.set_value(std::move(results));
+                          },
+                          [&](FunctionTable::FAsyncPtr f) {
+                              f(mTable, receiver, args);
+                          } },
+        mTable->mFunctionPtr);
 }
 
 size_t ApiFunction::argumentsCount(bool excludeThis) const
@@ -20,5 +47,4 @@ bool ApiFunction::isMemberFunction() const
 {
     return mTable->mIsMemberFunction;
 }
-
 }

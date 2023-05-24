@@ -25,6 +25,10 @@
 
 UNIQUECOMPONENT(Engine::Resources::ResourceManager)
 
+METATABLE_BEGIN(Engine::Resources::ResourceManager)
+MEMBER(mCollector)
+METATABLE_END(Engine::Resources::ResourceManager)
+
 namespace Engine {
 namespace Resources {
 
@@ -258,7 +262,3 @@ namespace Resources {
 
 }
 }
-
-METATABLE_BEGIN(Engine::Resources::ResourceManager)
-MEMBER(mCollector)
-METATABLE_END(Engine::Resources::ResourceManager)

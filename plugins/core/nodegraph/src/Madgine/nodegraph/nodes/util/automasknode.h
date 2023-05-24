@@ -10,7 +10,7 @@ namespace NodeGraph {
     struct AutoMaskNode : Base {
         using Base::Base;
 
-        virtual uint32_t flowInMask(uint32_t index, uint32_t group, bool bidir = true) const override
+        uint32_t inMask(uint32_t index, uint32_t group, bool bidir = true) const
         {
             uint32_t mask = NodeExecutionMask::ALL;
             for (auto &group : this->mFlowOutPins) {
@@ -35,12 +35,12 @@ namespace NodeGraph {
                 }
             }
             if (bidir) {
-                mask &= flowOutMask(0, 0, false);
+                mask &= outMask(0, 0, false);
             }
             return mask;
         }
 
-        virtual uint32_t flowOutMask(uint32_t index, uint32_t group, bool bidir = true) const override
+        uint32_t outMask(uint32_t index, uint32_t group, bool bidir = true) const
         {
             uint32_t mask = NodeExecutionMask::ALL;
             for (auto &group : this->mFlowInPins) {
@@ -65,29 +65,39 @@ namespace NodeGraph {
                 }
             }
             if (bidir) {
-                mask &= flowInMask(0, 0, false);
+                mask &= inMask(0, 0, false);
             }
             return mask;
+        }
+        
+        virtual uint32_t flowInMask(uint32_t index, uint32_t group, bool bidir = true) const override
+        {
+            return inMask(0, 0, bidir);
+        }
+
+        virtual uint32_t flowOutMask(uint32_t index, uint32_t group, bool bidir = true) const override
+        {
+            return outMask(0, 0, bidir);
         }
 
         virtual uint32_t dataInMask(uint32_t index, uint32_t group, bool bidir = true) const override
         {
-            return flowOutMask(0, 0, bidir);
+            return outMask(0, 0, bidir);
         }
 
         virtual uint32_t dataOutMask(uint32_t index, uint32_t group, bool bidir = true) const override
         {
-            return flowOutMask(0, 0, bidir);
+            return outMask(0, 0, bidir);
         }
 
         virtual uint32_t dataReceiverMask(uint32_t index, uint32_t group, bool bidir = true) const override
         {
-            return flowInMask(0, 0, bidir);
+            return inMask(0, 0, bidir);
         }
 
         virtual uint32_t dataProviderMask(uint32_t index, uint32_t group, bool bidir = true) const override
         {
-            return flowInMask(0, 0, bidir);
+            return inMask(0, 0, bidir);
         }
 
 

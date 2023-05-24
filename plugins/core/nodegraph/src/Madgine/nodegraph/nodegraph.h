@@ -82,7 +82,7 @@ namespace NodeGraph {
 
         auto interpret(const ArgumentList &args = {}) const
         {
-            return Execution::make_virtual_sender<NodeInterpreter, GenericResult>(this, args);
+            return Execution::make_virtual_sender<NodeInterpreter, GenericResult, ArgumentList>(this, args);
         }
 
     protected:

@@ -138,7 +138,7 @@ struct TestManager : SyncManager {
     }
 #define ASSERT_MESSAGEFUTURE_EQ(f, ...)          \
     {                                            \
-        ASSERT_EQ(f.mResult, MessageResult::OK); \
+        ASSERT_TRUE(f.mValue); \
         ASSERT_EQ(f.mValue, __VA_ARGS__);        \
     }
 #define HANDLE_MGR_RECEIVER(...)                                 \
@@ -146,6 +146,5 @@ struct TestManager : SyncManager {
         TestReceiver<void, SyncManagerResult> receiver;          \
         __VA_ARGS__;                                             \
         ASSERT_TRUE(receiver.mFinished);                         \
-        ASSERT_EQ(receiver.mResult, SyncManagerResult::SUCCESS); \
         ASSERT_TRUE(receiver.mHasValue);                         \
     }

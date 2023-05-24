@@ -44,7 +44,7 @@ namespace Scripting {
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const KeyValueVirtualSequenceRange &range);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const KeyValueVirtualAssociativeRange &range);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const VirtualIterator<KeyValuePair> &it);
-        MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const VirtualIterator<ValueTypeRef> &it);
+        MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const VirtualIterator<ValueType> &it);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const CoWString &s);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const Vector4 &v);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const Vector3 &v);
@@ -59,7 +59,8 @@ namespace Scripting {
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const EnumHolder &e);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const KeyValueFunction &f);
 
-        MADGINE_PYTHON3_EXPORT void fromPyObject(ValueType &retVal, PyObject *obj);
+        MADGINE_PYTHON3_EXPORT ValueType fromPyObject(PyObject *obj);
+        MADGINE_PYTHON3_EXPORT void fromPyObject(KeyValueReceiver &receiver, PyObject *obj);
 
         MADGINE_PYTHON3_EXPORT ExtendedValueTypeDesc PyToValueTypeDesc(PyObject *obj);
 

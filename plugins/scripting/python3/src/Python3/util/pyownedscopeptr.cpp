@@ -62,7 +62,7 @@ namespace Scripting {
         PyTypeObject PyOwnedScopePtrType = {
             .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
                 .tp_name
-            = "Environment.OwnedScopePtr",
+            = "Engine.OwnedScopePtr",
             .tp_basicsize = sizeof(PyOwnedScopePtr),
             .tp_itemsize = 0,
             .tp_dealloc = &PyDealloc<PyOwnedScopePtr, &PyOwnedScopePtr::mPtr>,

@@ -19,9 +19,10 @@ namespace Tools {
 
         bool drawRemainingMembers(TypedScopePtr scope, std::set<std::string> &drawn);
         bool drawMember(TypedScopePtr parent, const ScopeIterator &it);
-        std::pair<bool, bool> drawValue(std::string_view id, ValueType &value, bool editable, bool generic);
+        std::pair<bool, bool> drawValue(std::string_view id, ValueType &value, bool editable, bool generic = false);
         std::pair<bool, bool> drawValue(std::string_view id, TypedScopePtr &scope, bool editable, ValueType *generic = nullptr);
         std::pair<bool, bool> drawValue(std::string_view id, OwnedScopePtr &scope, bool editable, ValueType *generic = nullptr);
+        std::pair<bool, bool> drawValue(std::string_view id, ObjectPtr &object, bool editable, ValueType *generic = nullptr);
         bool drawValue(std::string_view id, KeyValueVirtualSequenceRange &range, bool editable);
         bool drawValue(std::string_view id, KeyValueVirtualAssociativeRange &range, bool editable);
         void drawValue(std::string_view id, BoundApiFunction &function, bool editable);

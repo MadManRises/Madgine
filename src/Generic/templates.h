@@ -134,4 +134,24 @@ concept FSameAs = std::same_as<auto_holder<f>, auto_holder<g>>;
 template <bool b, typename T>
 using const_if = std::conditional_t<b, const T, T>;
 
+template <typename T>
+decltype(auto) forward_ref(std::remove_reference_t<T> &t)
+{
+    if constexpr (Reference<T>) {
+        return std::ref(t);
+    } else {
+        return std::forward<T>(t);
+    }
+}
+
+template <typename T>
+decltype(auto) forward_ref(std::remove_reference_t<T> &&t)
+{
+    if constexpr (Reference<T>) {
+        return std::ref(t);
+    } else {
+        return std::forward<T>(t);
+    }
+}
+
 }

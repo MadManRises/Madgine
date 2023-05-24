@@ -1,7 +1,7 @@
 #pragma once
 
-#include "virtualstate.h"
 #include "sender.h"
+#include "virtualstate.h"
 
 namespace Engine {
 namespace Execution {
@@ -47,13 +47,10 @@ namespace Execution {
             });
     }
 
-    template <typename F, typename Tuple, typename R, typename... V>
-    using SimpleVirtualState = SimpleState<F, Tuple, VirtualReceiverBase<R, V...>>;
-
     template <typename R, typename... V, typename F, typename... Args>
     auto make_simple_virtual_sender(F &&f, Args &&...args)
     {
-        return make_virtual_sender<SimpleVirtualState<F, std::tuple<Args...>, R, V...>, R, V...>(std::forward<F>(f), std::tuple<Args...> { std::forward<Args>(args)... });
+        return make_virtual_sender<SimpleState<F, std::tuple<Args...>, VirtualReceiverBase<R, V...>>, R, V...>(std::forward<F>(f), std::tuple<Args...> { std::forward<Args>(args)... });
     }
 
 }

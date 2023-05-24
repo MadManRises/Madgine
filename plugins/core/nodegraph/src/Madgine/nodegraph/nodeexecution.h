@@ -6,41 +6,26 @@
 #include "Generic/execution/algorithm.h"
 #include "Generic/execution/execution.h"
 #include "Generic/execution/state.h"
-#include "nodecollector.h"
-#include "nodegraph.h"
-#include "nodeinterpreter.h"
+
+#include "Meta/keyvalue/valuetype.h"
 
 namespace Engine {
 namespace NodeGraph {
 
-    struct NodeInterpretHandle {
+    struct MADGINE_NODEGRAPH_EXPORT NodeInterpretHandle {
         const NodeBase *mNode;
         NodeInterpreter &mInterpreter;
 
-        void read(ValueType &retVal, uint32_t dataInIndex, uint32_t group = 0)
-        {
-            Pin pin = mNode->dataInSource(dataInIndex, group);
-            if (!pin.mNode) {
-                retVal = mInterpreter.mArguments.at(pin.mIndex);
-            } else {
-                mInterpreter.mGraph->node(pin.mNode)->interpretRead(mInterpreter, retVal, mInterpreter.mData[pin.mNode - 1], pin.mIndex, pin.mGroup);
-            }
-        }
+        void read(ValueType &retVal, uint32_t dataInIndex, uint32_t group = 0);
 
-        void write(const ValueType &v, uint32_t dataOutIndex, uint32_t group = 0)
-        {
-            Pin pin = mNode->dataOutTarget(dataOutIndex, group);
-            if (pin)
-                mInterpreter.mGraph->node(pin.mNode)->interpretWrite(mInterpreter, mInterpreter.mData[pin.mNode - 1], v, pin.mIndex, pin.mGroup);
-        }
+        void write(const ValueType &v, uint32_t dataOutIndex, uint32_t group = 0);
+
+        ValueType resolveVar(std::string_view name);
 
         template <fixed_string Name>
-        friend ValueType &tag_invoke(Execution::resolve_var_t<Name>, NodeInterpretHandle &handle)
+        friend ValueType tag_invoke(Execution::resolve_var_t<Name>, NodeInterpretHandle &handle)
         {
-            OutRef<ValueType> v;
-            bool result = handle.mInterpreter.resolveVar(v, Name);
-            assert(result);
-            return v;
+            return handle.resolveVar(Name);
         }
     };
 
@@ -104,7 +89,7 @@ namespace NodeGraph {
                 NodeInterpretHandle &handle = Execution::get_context(mRec);
                 std::tuple<typed_Value<T>...> data;
                 TupleUnpacker::forEach(data, [&]<typename T>(typed_Value<T> &v) {
-                    if constexpr (InstanceOf<T, recursive>) {
+                    if constexpr (InstanceOf<T, Execution::recursive>) {
                         assert(mVariadicBuffer);
                         v = (*mVariadicBuffer)[variadicIndex++];
                     } else {
@@ -141,27 +126,12 @@ namespace NodeGraph {
         std::vector<NodeResults> &mResults;
     };
 
-    struct NodeReceiver : NodeExecutionReceiver {
+    struct MADGINE_NODEGRAPH_EXPORT NodeReceiver : NodeExecutionReceiver {
         Execution::VirtualReceiverBase<GenericResult> &mReceiver;
 
-        void set_value()
-        {
-            Pin pin = mNode->flowOutTarget(0);
-            if (pin)
-                mInterpreter.branch(mReceiver, pin);
-            else
-                mReceiver.set_value();
-        }
-
-        void set_done()
-        {
-            mReceiver.set_done();
-        }
-
-        void set_error(GenericResult result)
-        {
-            mReceiver.set_error(result);
-        }
+        void set_value();
+        void set_done();
+        void set_error(GenericResult result);
     };
 
 }

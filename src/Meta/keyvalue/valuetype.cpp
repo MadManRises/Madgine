@@ -3,6 +3,8 @@
 
 #include "metatable.h"
 
+#include "Generic/execution/execution.h"
+
 namespace Engine {
 
 ValueType::ValueType()
@@ -209,74 +211,33 @@ void ValueType::setType(ValueTypeDesc type)
     }
 }
 
-void ValueType::call(ValueType &retVal, const ArgumentList &args) const
+ArgumentList ValueType::call(const ArgumentList &args) const
+{
+    return Execution::sync_expect(sender(args));
+}
+
+void ValueType::operator()(KeyValueReceiver &receiver, const ArgumentList &args) const
 {
     return std::visit(overloaded {
-                   [&](const ApiFunction &function) {
-                       return function(retVal, args);
-                   },
-                   [&](const KeyValueFunction &function) {
-                       return function(retVal, args);
-                   },
-                   [&](const TypedScopePtr &scope) {
-                       return scope.call(retVal, args);
-                   },
-                   [&](const OwnedScopePtr &scope) {
-                       return scope.get().call(retVal, args);
-                   },
-                   [&](const ObjectPtr &o) {
-                       return o.call(retVal, args);
-                   },
-                   [](const auto &) {
-                       throw "calling operator is not supported";
-                   } },
+                          [&](const ApiFunction &function) {
+                              return function(receiver, args);
+                          },
+                          [&](const KeyValueFunction &function) {
+                              return function(receiver, args);
+                          },
+                          [&](const TypedScopePtr &scope) {
+                              return scope.call(receiver, args);
+                          },
+                          [&](const OwnedScopePtr &scope) {
+                              return scope.get().call(receiver, args);
+                          },
+                          [&](const ObjectPtr &o) {
+                              return o.call(receiver, args);
+                          },
+                          [](const auto &) {
+                              throw "calling operator is not supported";
+                          } },
         mUnion);
-}
-
-ValueTypeRef::ValueTypeRef(ValueTypeRef &&other)
-    : mValue(std::move(other.mValue))
-    , mData(std::exchange(other.mData, nullptr))
-    , mSetter(std::exchange(other.mSetter, nullptr))
-{
-}
-
-const ValueType &ValueTypeRef::value() const
-{
-    return mValue;
-}
-
-ValueTypeRef::operator const ValueType &() const
-{
-    return mValue;
-}
-
-bool ValueTypeRef::isEditable() const
-{
-    return mSetter != nullptr;
-}
-
-ValueTypeRef &ValueTypeRef::operator=(const ValueType &v)
-{
-    if (!v.type().canAccept(mValue.type()))
-        std::terminate();
-
-    mValue = v;
-    mSetter(mData, mValue);
-
-    return *this;
-}
-
-ValueTypeRef &ValueTypeRef::operator=(ValueTypeRef &&other)
-{
-    mValue = std::move(other.mValue);
-    mData = std::exchange(other.mData, nullptr);
-    mSetter = std::exchange(other.mSetter, nullptr);
-    return *this;
-}
-
-void ValueTypeRef::call(ValueType &retVal, const ArgumentList &args) const
-{
-    return mValue.call(retVal, args);
 }
 
 DERIVE_OPERATOR(StreamOut, <<)

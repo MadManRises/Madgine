@@ -35,7 +35,7 @@ namespace Scripting {
         PyTypeObject PyScopeIteratorType = {
             .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
                 .tp_name
-            = "Environment.ScopeIterator",
+            = "Engine.ScopeIterator",
             .tp_basicsize = sizeof(PyScopeIterator),
             .tp_itemsize = 0,
             .tp_dealloc = &PyDealloc<PyScopeIterator, &PyScopeIterator::mIt>,

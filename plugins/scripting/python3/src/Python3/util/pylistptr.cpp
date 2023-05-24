@@ -22,7 +22,7 @@ namespace Scripting {
             }
         }
 
-        PyListPtr::iterator::iterator(PyObject *list)
+        PyListPtr::iterator::iterator(PyObjectPtr list)
             : mList(PyList_Size(list) == 0 ? nullptr : list)
         {
         }
@@ -61,7 +61,7 @@ namespace Scripting {
 
         PyListPtr::iterator PyListPtr::begin() const
         {
-            return { mObject };
+            return { fromBorrowed(mObject) };
         }
 
         PyListPtr::iterator PyListPtr::end() const

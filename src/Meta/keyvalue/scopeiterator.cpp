@@ -63,7 +63,7 @@ void ScopeIterator::checkDerived()
 {
     while (!mPointer->first && mCurrentTable->mBase) {
         mCurrentTable = *mCurrentTable->mBase;
-        mPointer = mCurrentTable->mMember;
+        mPointer = mCurrentTable->mMembers;
     }
 }
 

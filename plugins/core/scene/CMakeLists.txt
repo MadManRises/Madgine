@@ -11,17 +11,6 @@ add_plugin(Scene Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/scenelib
 
 target_link_plugins(Scene MeshLoader AnimationLoader App)
 
-project(SceneNodes)
-set(sources "")
-FolderSources(sources "" nodes)
-	FolderSources(sources nodes Madgine scenenodesforward.h scenenodeslib.h)
-		FolderSources(sources Madgine scene)
-			FolderSources(sources scene nodes transformaccessornode.cpp transformaccessornode.h)
-
-add_plugin(SceneNodes Madgine Core ${sources} PRECOMPILED_HEADER nodes/Madgine/scenenodeslib.h SOURCE_ROOT nodes)
-
-target_link_plugins(SceneNodes Scene NodeGraph)
-
 
 Project(SceneRenderer)
 

@@ -41,6 +41,9 @@ concept OneOf = (std::same_as<T, Ty> || ...);
 template <typename T, typename... Ty>
 concept NoneOf = !OneOf<T, Ty...>;
 
+template <typename T, typename... Ty>
+concept DecayedNoneOf = NoneOf<std::decay_t<T>, Ty...>;
+
 template <typename T>
 concept Reference = std::is_reference_v<T> || InstanceOf<T, std::reference_wrapper>;
 

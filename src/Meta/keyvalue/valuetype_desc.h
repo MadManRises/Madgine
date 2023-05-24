@@ -153,6 +153,7 @@ union ValueTypeSecondaryTypeInfo {
         : mDummy(nullptr)
     {
     }
+
     constexpr ValueTypeSecondaryTypeInfo(const MetaTable **metaTable)
         : mMetaTable(metaTable)
     {
@@ -264,7 +265,7 @@ struct META_EXPORT ExtendedValueTypeDesc {
 template <typename T>
 constexpr ValueTypeIndex toValueTypeIndex()
 {
-    static_assert(!std::same_as<T, ValueType>);
+    static_assert(!std::is_rvalue_reference_v<T>);
     if constexpr (ValueTypePrimitive<T>) {
         return static_cast<ValueTypeEnum>(ValueTypeList::index<size_t, T>);
     } else if constexpr (std::ranges::range<T>) {
@@ -287,6 +288,7 @@ constexpr ValueTypeIndex toValueTypeIndex()
 template <typename T>
 constexpr ExtendedValueTypeDesc toValueTypeDesc()
 {
+    static_assert(!std::is_rvalue_reference_v<T>);
     if constexpr (InstanceOf<T, std::optional>) {
         return { { ExtendedValueTypeEnum::OptionalType }, toValueTypeDesc<typename is_instance<T, std::optional>::argument_types::template unpack_unique<>>() };
     } else if constexpr (ValueTypePrimitive<T>) {
@@ -307,7 +309,6 @@ constexpr ExtendedValueTypeDesc toValueTypeDesc()
         else
             return { { ValueTypeEnum::ScopeValue }, &table<std::remove_pointer_t<T>> };
     } else {
-        static_assert(!std::same_as<T, void>);
         return { { ValueTypeEnum::OwnedScopeValue }, &table<T> };
     }
 }

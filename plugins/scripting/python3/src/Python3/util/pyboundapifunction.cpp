@@ -6,7 +6,11 @@
 
 #include "pyobjectutil.h"
 
-#include "../python3env.h"
+#include "Meta/keyvalue/functiontable.h"
+
+#include "pyexecution.h"
+
+#include "python3lock.h"
 
 namespace Engine {
 namespace Scripting {
@@ -16,32 +20,34 @@ namespace Scripting {
         PyBoundApiFunction_call(PyBoundApiFunction *self, PyObject *args, PyObject *kwargs)
         {
             size_t argCount = PyTuple_Size(args);
-            ArgumentList arguments;
-            arguments.resize(argCount);
+            ArgumentList arguments { argCount };
 
             for (size_t i = 0; i < argCount; ++i) {
-                fromPyObject(arguments[i], PyTuple_GetItem(args, i));
+                arguments[i] = fromPyObject(PyTuple_GetItem(args, i));
             }
-            
-            ValueType retVal;
-            Py_BEGIN_ALLOW_THREADS
-            self->mFunction(retVal, arguments);
-            Py_END_ALLOW_THREADS
 
-            return toPyObject(retVal);
+            return std::visit(overloaded {
+                                  [&](FunctionTable::FSyncPtr f) {
+                                      //Python3Unlock unlock;
+                                      return toPyObject(self->mFunction(arguments)[0]);
+                                  },
+                                  [&](FunctionTable::FAsyncPtr f) {
+                                      return suspend(self->mFunction.sender(arguments));
+                                  } },
+                self->mFunction.mFunction.mTable->mFunctionPtr);
         }
 
         PyTypeObject PyBoundApiFunctionType = {
             .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
-                .tp_name
-            = "Environment.BoundApiFunction",
+                           .tp_name
+            = "Engine.BoundApiFunction",
             .tp_basicsize = sizeof(PyBoundApiFunction),
             .tp_itemsize = 0,
             .tp_dealloc = &PyDealloc<PyBoundApiFunction, &PyBoundApiFunction::mFunction>,
             .tp_call = (ternaryfunc)PyBoundApiFunction_call,
             .tp_flags = Py_TPFLAGS_DEFAULT,
             .tp_doc = "Python implementation of BoundApiFunction",
-            .tp_new = PyType_GenericNew,            
+            .tp_new = PyType_GenericNew,
         };
 
     }

@@ -50,28 +50,28 @@ private:
     static constexpr const auto sArgs = metafunctionArgs(&Functor::operator());
 
     template <auto F, typename R, typename T, typename... Args, size_t... I>
-    static void unpackMemberHelper(const FunctionTable *table, ValueType &retVal, const ArgumentList &args, std::index_sequence<I...>)
+    static void unpackMemberHelper(const FunctionTable *table, ArgumentList &results, const ArgumentList &args, std::index_sequence<I...>)
     {
         TypedScopePtr scope = ValueType_as<TypedScopePtr>(getArgument(args, 0));
         assert(scope.mType == &sMetaTable);
         T *t = static_cast<T *>(scope.mScope);
-        to_ValueType<true>(retVal, invoke_patch_void<std::monostate>(F, t, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...));
+        results = { invoke_patch_void<std::monostate>(F, t, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...) };
     }
 
     template <auto F, typename R, typename T, typename... Args>
-    static void unpackMemberApiMethod(const FunctionTable *table, ValueType &retVal, const ArgumentList &args)
+    static void unpackMemberApiMethod(const FunctionTable *table, ArgumentList &results, const ArgumentList &args)
     {
-        unpackMemberHelper<F, R, T, Args...>(table, retVal, args, std::make_index_sequence<sizeof...(Args)>());
+        unpackMemberHelper<F, R, T, Args...>(table, results, args, std::make_index_sequence<sizeof...(Args)>());
     }
 
     template <auto F, typename R, typename T, typename... Args>
-    static CONSTEVAL typename FunctionTable::FPtr wrapHelper(R (T::*f)(Args...))
+    static CONSTEVAL typename FunctionTable::FSyncPtr wrapHelper(R (T::*f)(Args...))
     {
         return &unpackMemberApiMethod<F, R, T, Args...>;
     }
 
     template <auto F, typename R, typename T, typename... Args>
-    static CONSTEVAL typename FunctionTable::FPtr wrapHelper(R (T::*f)(Args...) const)
+    static CONSTEVAL typename FunctionTable::FSyncPtr wrapHelper(R (T::*f)(Args...) const)
     {
         return &unpackMemberApiMethod<F, R, T, Args...>;
     }
@@ -98,8 +98,6 @@ private:
     static const constexpr MetaTable sMetaTable {
         &sMetaTablePtr,
         "<Lambda>",
-        nullptr,
-        nullptr,
         sMembers
     };
 };
