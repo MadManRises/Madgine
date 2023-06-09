@@ -8,7 +8,7 @@ namespace Engine {
 namespace Render {
 
     struct MADGINE_CLIENT_EXPORT RenderTarget : RenderData {
-        RenderTarget(RenderContext *context, bool global, std::string name, size_t iterations = 1);
+        RenderTarget(RenderContext *context, bool global, std::string name, size_t iterations = 1, RenderTarget * blitSource = nullptr);
         RenderTarget(const RenderTarget &) = delete;
         RenderTarget(RenderTarget &&) = default;
         virtual ~RenderTarget();
@@ -49,6 +49,8 @@ namespace Render {
 
     protected:
         virtual void render() override;
+
+        RenderTarget *mBlitSource;
 
     private:
         std::vector<RenderPass *> mRenderPasses;

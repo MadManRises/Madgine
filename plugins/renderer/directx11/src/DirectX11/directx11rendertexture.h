@@ -23,10 +23,11 @@ namespace Render {
         virtual TextureDescriptor texture(size_t index, size_t iteration = std::numeric_limits<size_t>::max()) const override;     
         virtual size_t textureCount() const override;
         virtual TextureDescriptor depthTexture() const override;
+
+        void blit(RenderTarget *input) const;
         
     private:        
         std::vector<DirectX11Texture> mTextures;
-        std::vector<DirectX11Texture> mMultisampledTextures;
 
         TextureType mType;
         size_t mSamples;

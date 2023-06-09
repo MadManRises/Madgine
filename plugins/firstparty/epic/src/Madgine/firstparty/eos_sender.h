@@ -33,7 +33,7 @@ namespace FirstParty {
                     static void callback(const R *result)
                     {
                         state *self = static_cast<state *>(result->ClientData);
-                        self->mRec.set_value(GenericResult::SUCCESS, *result);
+                        self->mRec.set_value(*result);
                     }
                     Rec mRec;
                     std::tuple<Args...> mArgs;

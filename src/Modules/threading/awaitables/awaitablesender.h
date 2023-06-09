@@ -90,7 +90,7 @@ namespace Threading {
 
     private:
         S mState;
-        std::atomic_flag mFlag;
+        std::atomic_flag mFlag = ATOMIC_FLAG_INIT;
         TaskHandle mTask;
         WithResult<R, MakeOwning_t<V>> mResult;
     };

@@ -28,7 +28,7 @@ namespace Render {
 
         ReleasePtr<IDXGISwapChain3> mSwapChain;
 
-        OffsetPtr mTargetViews[2];
+        OffsetPtr mCachedTargetViews[2];
         ReleasePtr<ID3D12Resource> mBackBuffers[2];
 
         uint64_t mResizeFence;

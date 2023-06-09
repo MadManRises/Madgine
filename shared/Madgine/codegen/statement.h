@@ -28,10 +28,7 @@ private:
 
 struct MADGINE_CODEGEN_EXPORT StatementPtr {
     template <typename T>
-    StatementPtr(T t)
-        : StatementPtr(Statement { t })
-    {
-    }
+    StatementPtr(T t);
     StatementPtr(Statement statement);
     StatementPtr(const StatementPtr &other);
 
@@ -158,6 +155,12 @@ requires(!std::is_constructible_v<Statement, T>)
 inline ArithOperation operator+(const Statement &first, const Statement &second)
 {
     return ArithOperation { ArithOperation::ADD, { first, second } };
+}
+
+template <typename T>
+inline StatementPtr::StatementPtr(T t)
+    : StatementPtr(Statement { t })
+{
 }
 
 }

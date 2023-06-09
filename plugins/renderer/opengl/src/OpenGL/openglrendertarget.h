@@ -7,7 +7,7 @@ namespace Render {
 
     struct MADGINE_OPENGL_EXPORT OpenGLRenderTarget : RenderTarget {
 
-        OpenGLRenderTarget(OpenGLRenderContext *context, bool global, std::string name, size_t iterations = 1);
+        OpenGLRenderTarget(OpenGLRenderContext *context, bool global, std::string name, size_t iterations = 1, RenderTarget *blitSource = nullptr);
         ~OpenGLRenderTarget();
 
         virtual void beginIteration(size_t iteration) const override;

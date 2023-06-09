@@ -39,7 +39,9 @@ namespace Tools {
 
         bool filter(const LogEntry &entry);
 
-        void addFilteredMessage(size_t index);
+        void addFilteredMessage(size_t index, std::string_view text);
+
+        float calculateTextHeight(std::string_view text);
 
     private:
         Threading::WorkGroup *mWorkgroup;
@@ -50,7 +52,12 @@ namespace Tools {
         std::array<bool, Util::MessageType::COUNT> mMsgFilters;
         std::string mMessageWordFilter;
         size_t mFilteredMsgCount = 0;
-        std::vector<size_t> mLookup;
+        struct Lookup {
+            size_t mIndex;
+            float mOffset;
+        };
+        std::vector<Lookup> mLookup;
+        float mFilteredOffsetAcc = 0.0f;
     };
 
 }

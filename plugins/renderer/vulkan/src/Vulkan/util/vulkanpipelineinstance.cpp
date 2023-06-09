@@ -61,17 +61,20 @@ namespace Render {
         VK_CHECK(result);
     }
 
-    bool VulkanPipelineInstance::bind(VkCommandBuffer commandList, VertexFormat format, size_t groupSize, VkRenderPass renderpass) const
+    bool VulkanPipelineInstance::bind(VkCommandBuffer commandList, VertexFormat format, size_t groupSize, size_t samples, VkRenderPass renderpass) const
     {
-        VkPipeline pipeline = mPipelines[format][groupSize - 1];
+        size_t samplesBits = sqrt(samples);
+        assert(samplesBits * samplesBits == samples);
+
+        VkPipeline pipeline = mPipelines[format][groupSize - 1][samplesBits - 1];
         if (!pipeline) {
-            pipeline = mPipelineHandle->get(format, groupSize, mInstanceDataSize, renderpass);
+            pipeline = mPipelineHandle->get(format, groupSize, samples, mInstanceDataSize, renderpass);
             if (!pipeline)
                 return false;
         }
         vkCmdBindPipeline(commandList, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 
-        uint32_t offsets[4] {};        
+        uint32_t offsets[4] {};
         for (size_t i = 0; i < std::min(size_t { 4 }, mConstantBuffers.size()); ++i) {
             if (!mConstantBuffers[i])
                 continue;
@@ -105,7 +108,7 @@ namespace Render {
 
         const VulkanMeshData *mesh = static_cast<const VulkanMeshData *>(m);
 
-        if (!bind(commandList, mesh->mFormat, mesh->mGroupSize, renderpass))
+        if (!bind(commandList, mesh->mFormat, mesh->mGroupSize, static_cast<VulkanRenderTarget *>(target)->samples(), renderpass))
             return;
 
         mesh->mVertices.bindVertex(commandList);
@@ -130,7 +133,7 @@ namespace Render {
 
         const VulkanMeshData *mesh = static_cast<const VulkanMeshData *>(m);
 
-        if (!bind(commandList, mesh->mFormat, mesh->mGroupSize, renderpass))
+        if (!bind(commandList, mesh->mFormat, mesh->mGroupSize, static_cast<VulkanRenderTarget *>(target)->samples(), renderpass))
             return;
 
         mesh->mVertices.bindVertex(commandList);

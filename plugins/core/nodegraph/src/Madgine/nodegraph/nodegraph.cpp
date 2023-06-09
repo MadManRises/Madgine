@@ -815,6 +815,16 @@ namespace NodeGraph {
         }
     }
 
+    void NodeGraph::NodeInterpreterWrapper::start()
+    {
+        interpret(this, 0);
+    }
+
+    void NodeGraph::NodeInterpreterWrapper::set_value()
+    {
+        KeyValueReceiver::set_value();
+    }
+
     std::unique_ptr<NodeBase> NodeGraph::createNode(std::string_view name)
     {
         return NodeRegistry::getConstructor(NodeRegistry::sComponentsByName().at(name))(*this);

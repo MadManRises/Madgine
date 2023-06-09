@@ -6,6 +6,10 @@
 
 #include "vulkanrendercontext.h"
 
+#if ANDROID
+#    include <vulkan/vulkan_android.h>
+#endif
+
 namespace Engine {
 namespace Render {
 
@@ -51,12 +55,11 @@ namespace Render {
         return availableFormats[0];
     }
 
-    VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities, Window::OSWindow *w)
+    VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities, const Vector2i &size)
     {
         if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
             return capabilities.currentExtent;
         } else {
-            InterfacesVector size = w->renderSize();
 
             VkExtent2D actualExtent = {
                 static_cast<uint32_t>(size.x),
@@ -76,7 +79,7 @@ namespace Render {
     }
 
     VulkanRenderWindow::VulkanRenderWindow(VulkanRenderContext *context, Window::OSWindow *w, size_t samples)
-        : VulkanRenderTarget(context, true, w->title())
+        : VulkanRenderTarget(context, true, w->title(), samples)
         , mWindow(w)
     {
         VkSemaphoreCreateInfo binarySemaphoreInfo {};
@@ -87,6 +90,7 @@ namespace Render {
         result = vkCreateSemaphore(GetDevice(), &binarySemaphoreInfo, nullptr, &mRenderSemaphore);
         VK_CHECK(result);
 
+#if WINDOWS
         VkWin32SurfaceCreateInfoKHR createInfo {};
         createInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
         createInfo.hwnd = (HWND)w->mHandle;
@@ -94,6 +98,32 @@ namespace Render {
 
         result = vkCreateWin32SurfaceKHR(GetInstance(), &createInfo, nullptr, &mSurface);
         VK_CHECK(result);
+#elif ANDROID
+        VkAndroidSurfaceCreateInfoKHR createInfo {};
+        createInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
+        createInfo.window = (ANativeWindow *)w->mHandle;
+
+        result = vkCreateAndroidSurfaceKHR(GetInstance(), &createInfo, nullptr, &mSurface);
+        VK_CHECK(result);
+#else
+#    error "Unsupported Platform!"
+#endif
+
+        SwapChainSupportDetails support = querySwapChainSupport(GetPhysicalDevice(), mSurface);
+        assert(!support.formats.empty() && !support.presentModes.empty());
+
+        mSurfaceCapabilities = support.capabilities;
+
+        mFormat = chooseSwapSurfaceFormat(support.formats);
+
+        VkSubpassDependency dependency {};
+        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+        dependency.dstSubpass = 0;
+        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependency.srcAccessMask = 0;
+        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        createRenderPass(1, mFormat.format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, false, { &dependency, 1 });
 
         InterfacesVector size = w->renderSize();
         create({ size.x, size.y });
@@ -108,10 +138,9 @@ namespace Render {
     bool VulkanRenderWindow::skipFrame()
     {
         if (mSwapChainImages.empty() && isFenceComplete(mResizeFence)) {
-            mRenderPass.reset();
-
             mFramebuffers.clear();
             mSwapChainImageViews.clear();
+
             mSwapChain.reset();
 
             create(mResizeTarget);
@@ -182,15 +211,7 @@ namespace Render {
 
     void VulkanRenderWindow::create(const Vector2i &size)
     {
-
-        SwapChainSupportDetails support = querySwapChainSupport(GetPhysicalDevice(), mSurface);
-        assert(!support.formats.empty() && !support.presentModes.empty());
-
-        mSurfaceCapabilities = support.capabilities;
-
-        VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(support.formats);
-        VkPresentModeKHR presentMode = chooseSwapPresentMode(support.presentModes);
-        mExtent = chooseSwapExtent(mSurfaceCapabilities, mWindow);
+        VkExtent2D extent = chooseSwapExtent(mSurfaceCapabilities, size);
 
         uint32_t imageCount = mSurfaceCapabilities.minImageCount + 1;
         if (mSurfaceCapabilities.maxImageCount > 0 && imageCount > mSurfaceCapabilities.maxImageCount) {
@@ -201,9 +222,9 @@ namespace Render {
         createInfo2.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
         createInfo2.surface = mSurface;
         createInfo2.minImageCount = imageCount;
-        createInfo2.imageFormat = surfaceFormat.format;
-        createInfo2.imageColorSpace = surfaceFormat.colorSpace;
-        createInfo2.imageExtent = mExtent;
+        createInfo2.imageFormat = mFormat.format;
+        createInfo2.imageColorSpace = mFormat.colorSpace;
+        createInfo2.imageExtent = extent;
         createInfo2.imageArrayLayers = 1;
         createInfo2.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
@@ -224,7 +245,7 @@ namespace Render {
 
         createInfo2.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 
-        createInfo2.presentMode = presentMode;
+        createInfo2.presentMode = VK_PRESENT_MODE_FIFO_KHR;
         createInfo2.clipped = VK_TRUE;
 
         createInfo2.oldSwapchain = VK_NULL_HANDLE;
@@ -232,18 +253,13 @@ namespace Render {
         VkResult result = vkCreateSwapchainKHR(GetDevice(), &createInfo2, nullptr, &mSwapChain);
         VK_CHECK(result);
 
-        mFormat = surfaceFormat.format;
+        setup(size);
 
-        VkSubpassDependency dependency {};
-        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-        dependency.dstSubpass = 0;
-        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.srcAccessMask = 0;
-        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        setup(size, mFormat, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 1, &dependency);
+        result = vkGetSwapchainImagesKHR(GetDevice(), mSwapChain, &imageCount, nullptr);
+        VK_CHECK(result);
 
         mSwapChainImages.resize(imageCount);
+
         result = vkGetSwapchainImagesKHR(GetDevice(), mSwapChain, &imageCount, mSwapChainImages.data());
         VK_CHECK(result);
 
@@ -254,7 +270,7 @@ namespace Render {
             createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
             createInfo.image = mSwapChainImages[i];
             createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            createInfo.format = mFormat;
+            createInfo.format = mFormat.format;
             createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
             createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
             createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -268,7 +284,7 @@ namespace Render {
             VkResult result = vkCreateImageView(GetDevice(), &createInfo, nullptr, &mSwapChainImageViews[i]);
             VK_CHECK(result);
 
-            VkImageView attachments[2] { mSwapChainImageViews[i], mDepthView };
+            VkImageView attachments[2] { mDepthView, mSwapChainImageViews[i] };
             VkFramebufferCreateInfo framebufferInfo {};
             framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
             framebufferInfo.renderPass = mRenderPass;
@@ -291,6 +307,11 @@ namespace Render {
         mResizeTarget = size;
 
         return true;
+    }
+
+    void VulkanRenderWindow::blit(RenderTarget *source)
+    {
+        throw 0;
     }
 }
 }

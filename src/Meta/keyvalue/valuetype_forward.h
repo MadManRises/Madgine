@@ -118,7 +118,7 @@ template <bool reference_as_ptr = false, typename T>
 decltype(auto) convert_ValueType(T &&t)
 {
     if constexpr (InstanceOf<std::decay_t<T>, std::reference_wrapper>) {
-        using Ty = std::decay_t<T>::type;
+        using Ty = typename std::decay_t<T>::type;
         return convert_ValueType<true>(t.get());
     } else if constexpr (InstanceOf<T, std::optional>) {
         return std::forward<T>(t);

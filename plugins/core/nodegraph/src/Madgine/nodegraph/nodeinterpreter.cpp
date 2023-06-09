@@ -46,12 +46,12 @@ namespace NodeGraph {
     {
     }
 
-    void NodeInterpreter::start()
+    void NodeInterpreter::interpret(Execution::VirtualReceiverBase<GenericResult> *receiver, uint32_t flowIn)
     {
-        interpret(mGraph->mFlowOutPins[0].mTarget);
+        interpret(receiver, mGraph->mFlowOutPins[flowIn].mTarget);
     }
 
-    void NodeInterpreter::interpret(Pin pin)
+    void NodeInterpreter::interpret(Execution::VirtualReceiverBase<GenericResult> *receiver, Pin pin)
     {
         assert(mGraph);
 
@@ -66,13 +66,8 @@ namespace NodeGraph {
             mGraphGeneration = mGraph->generation();
         }
 
-        Debug::Debugger::getSingleton().stepInto(static_cast<Execution::VirtualReceiverBase<GenericResult> *>(this), std::make_unique<NodeDebugLocation>(nullptr, this));
-        branch(*this, pin);
-    }
-
-    void NodeInterpreter::set_value()
-    {
-        KeyValueReceiver::set_value();
+        Debug::Debugger::getSingleton().stepInto(receiver, std::make_unique<NodeDebugLocation>(nullptr, this));
+        branch(*receiver, pin);
     }
 
     void NodeInterpreter::branch(Execution::VirtualReceiverBase<GenericResult> &receiver, Pin pin)

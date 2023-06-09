@@ -33,11 +33,25 @@ namespace Window {
 }
 #elif ANDROID || EMSCRIPTEN
 #    include <EGL/egl.h>
-namespace Engine {
-namespace Window {
-    extern EGLDisplay sDisplay;
-}
-}
+
+EGLDisplay sDisplay = EGL_NO_DISPLAY;
+
+static struct DisplayGuard {
+    DisplayGuard()
+    {
+        sDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+        if (sDisplay != EGL_NO_DISPLAY) {
+            if (!eglInitialize(sDisplay, nullptr, nullptr))
+                sDisplay = EGL_NO_DISPLAY;
+        }
+    }
+
+    ~DisplayGuard()
+    {
+        if (sDisplay != EGL_NO_DISPLAY)
+            eglTerminate(sDisplay);
+    }
+} sDisplayGuard;
 
 #    define X(VAL)    \
         {             \
@@ -62,7 +76,7 @@ static constexpr struct {
     X(EGL_NATIVE_RENDERABLE),
     X(EGL_NATIVE_VISUAL_ID),
     X(EGL_NATIVE_VISUAL_TYPE),
-    //X(EGL_PRESERVED_RESOURCES),
+    // X(EGL_PRESERVED_RESOURCES),
     X(EGL_SAMPLE_BUFFERS),
     X(EGL_SAMPLES),
     // X(EGL_STENCIL_BITS),
@@ -182,7 +196,7 @@ namespace Render {
 #elif LINUX
         glXMakeCurrent(Window::sDisplay(), None, NULL);
 #elif ANDROID || EMSCRIPTEN
-        eglMakeCurrent(Window::sDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+        eglMakeCurrent(sDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 #elif OSX
         OSXBridge::resetContext();
 #elif IOS
@@ -190,7 +204,7 @@ namespace Render {
 #endif
     }
 
-    void makeCurrent(Window::OSWindow *window, ContextHandle context)
+    void makeCurrent(SurfaceHandle surface, ContextHandle context)
     {
         GL_LOG("Setting Context: " << context);
 #if WINDOWS
@@ -205,8 +219,7 @@ namespace Render {
             std::terminate();
         }
 #elif ANDROID || EMSCRIPTEN
-        EGLSurface surface = (EGLSurface)window->mHandle;
-        if (!eglMakeCurrent(Window::sDisplay, surface, surface, context)) {
+        if (!eglMakeCurrent(sDisplay, surface, surface, context)) {
             LOG_ERROR("Error-Code: " << eglGetError());
             std::terminate();
         }
@@ -217,14 +230,14 @@ namespace Render {
 #endif
     }
 
-    void swapBuffers(Window::OSWindow *window, ContextHandle context)
+    void swapBuffers(SurfaceHandle surface, ContextHandle context)
     {
 #if WINDOWS
         SwapBuffers(GetDC((HWND)window->mHandle));
 #elif LINUX
         glXSwapBuffers(Window::sDisplay(), window->mHandle);
 #elif ANDROID || EMSCRIPTEN
-        eglSwapBuffers(Window::sDisplay, (EGLSurface)window->mHandle);
+        eglSwapBuffers(sDisplay, context);
 #elif OSX
         OSXBridge::swapBuffers(context);
 #elif IOS
@@ -245,7 +258,7 @@ namespace Render {
 
         EGLint numConfigs;
 
-        return eglChooseConfig(Window::sDisplay, attribs, nullptr, 0, &numConfigs);
+        return eglChooseConfig(sDisplay, attribs, nullptr, 0, &numConfigs);
 #    else
         return glTexImage2DMultisample;
 #    endif
@@ -254,16 +267,14 @@ namespace Render {
 #endif
     }
 
-    ContextHandle createContext(Window::OSWindow *window, size_t samples, ContextHandle reusedContext, bool setup)
+    ContextHandle createContext(SurfaceHandle surface, size_t samples, ContextHandle reusedContext, bool setup)
     {
 
 #if WINDOWS
-        HDC windowDC = GetDC((HWND)window->mHandle);
-
         PIXELFORMATDESCRIPTOR pfd = {
             sizeof(PIXELFORMATDESCRIPTOR),
             1,
-            PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER, //Flags
+            PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER, // Flags
             PFD_TYPE_RGBA, // The kind of framebuffer. RGBA or palette.
             32, // Colordepth of the framebuffer.
             0, 0, 0, 0, 0, 0,
@@ -300,13 +311,13 @@ namespace Render {
             };
 
             UINT numFormats;
-            bool result = wglChoosePixelFormatARB(windowDC, piAttribIList, pfAttribFList, 1, &format, &numFormats);
+            bool result = wglChoosePixelFormatARB(surface, piAttribIList, pfAttribFList, 1, &format, &numFormats);
             assert(result);
             assert(numFormats > 0);
         } else {
-            format = ChoosePixelFormat(windowDC, &pfd);
+            format = ChoosePixelFormat(surface, &pfd);
         }
-        SetPixelFormat(windowDC, format, &pfd);
+        SetPixelFormat(surface, format, &pfd);
 
         HGLRC context;
         if (reusedContext) {
@@ -319,9 +330,9 @@ namespace Render {
                     0
                 };
 
-                context = wglCreateContextAttribsARB(windowDC, NULL, attribs);
+                context = wglCreateContextAttribsARB(surface, NULL, attribs);
             } else {
-                context = wglCreateContext(windowDC);
+                context = wglCreateContext(surface);
             }
         }
 
@@ -364,17 +375,17 @@ namespace Render {
             EGLConfig config;
             EGLint numConfigs;
 
-            if (!eglChooseConfig(Window::sDisplay, attribs, &config, 1, &numConfigs)) {
+            if (!eglChooseConfig(sDisplay, attribs, &config, 1, &numConfigs)) {
                 LOG_ERROR("Could not find suitable EGL configuration");
 
-                bool result = eglGetConfigs(Window::sDisplay, NULL, 0, &numConfigs);
+                bool result = eglGetConfigs(sDisplay, NULL, 0, &numConfigs);
                 assert(result);
 
                 LOG("Number of EGL configuration: " << numConfigs);
 
                 std::unique_ptr<EGLConfig[]> configs = std::make_unique<EGLConfig[]>(numConfigs);
 
-                result = eglGetConfigs(Window::sDisplay, configs.get(), numConfigs, &numConfigs);
+                result = eglGetConfigs(sDisplay, configs.get(), numConfigs, &numConfigs);
                 assert(result);
 
                 for (int i = 0; i < numConfigs; i++) {
@@ -383,7 +394,7 @@ namespace Render {
                     EGLConfig config = configs[i];
                     for (int j = 0; j < sizeof(eglAttributeNames) / sizeof(eglAttributeNames[0]); j++) {
                         EGLint value = -1;
-                        result = eglGetConfigAttrib(Window::sDisplay, config, eglAttributeNames[j].attribute, &value);
+                        result = eglGetConfigAttrib(sDisplay, config, eglAttributeNames[j].attribute, &value);
                         if (result) {
                             out << " " << eglAttributeNames[j].name << " = " << value << "\n";
                         }
@@ -392,7 +403,7 @@ namespace Render {
                 std::terminate();
             }
 
-            context = eglCreateContext(Window::sDisplay, config, /*sharedContext*/ nullptr, contextAttribs);
+            context = eglCreateContext(sDisplay, config, /*sharedContext*/ nullptr, contextAttribs);
             if (!context) {
                 LOG_ERROR("eglCreateContext - ErrorCode: " << eglGetError());
             }
@@ -419,7 +430,7 @@ namespace Render {
 #endif
 
         if (!reusedContext) {
-            makeCurrent(window, context);
+            makeCurrent(surface, context);
         }
 
         if (!reusedContext && setup) {
@@ -440,26 +451,26 @@ namespace Render {
             GL_CHECK();
 #endif
 
-            //Pos
+            // Pos
             glVertexAttrib3f(0, 0, 0, 0);
             GL_CHECK();
             glVertexAttrib1f(1, 1);
-            //Pos2
+            // Pos2
             glVertexAttrib2f(2, 0, 0);
             GL_CHECK();
-            //Normal
+            // Normal
             glVertexAttrib3f(3, 0, 0, 0);
             GL_CHECK();
-            //Color
+            // Color
             glVertexAttrib4f(4, 1, 1, 1, 1);
             GL_CHECK();
-            //UV
+            // UV
             glVertexAttrib2f(5, 0, 0);
             GL_CHECK();
-            //BoneIndices
+            // BoneIndices
             glVertexAttribI4i(6, 0, 0, 0, 0);
             GL_CHECK();
-            //Weights
+            // Weights
             glVertexAttrib4f(7, 0, 0, 0, 0);
             GL_CHECK();
 
@@ -474,7 +485,7 @@ namespace Render {
             GL_CHECK();
             glDepthFunc(GL_LESS);
             GL_CHECK();
-            //glDepthRange(0.0, 1.0);
+            // glDepthRange(0.0, 1.0);
 
             if (glGetString) {
                 const GLubyte *val;
@@ -496,7 +507,7 @@ namespace Render {
         return context;
     }
 
-    void destroyContext(Window::OSWindow *window, ContextHandle context, bool reusedContext)
+    void destroyContext(SurfaceHandle surface, ContextHandle context, bool reusedContext)
     {
         if (!reusedContext)
             resetContext();
@@ -513,7 +524,7 @@ namespace Render {
             glXDestroyContext(Window::sDisplay(), context);
 #elif ANDROID || EMSCRIPTEN
         if (!reusedContext)
-            eglDestroyContext(Window::sDisplay, context);
+            eglDestroyContext(sDisplay, context);
 #elif OSX
         if (!reusedContext)
             OSXBridge::destroyContext(context);
@@ -645,7 +656,7 @@ namespace Render {
                     glEnableVertexAttribArray(i);
                     offset += sVertexElementSizes[i];
                 } else {
-                    //glDisableVertexAttribArray(attribIndex);
+                    // glDisableVertexAttribArray(attribIndex);
                 }
             }
 
@@ -655,7 +666,7 @@ namespace Render {
 #    endif
 #endif
 
-        GLuint stride = format.stride();        
+        GLuint stride = format.stride();
 
         const std::byte *offset = 0;
         for (size_t i = 0; i < VertexElements::size; ++i) {
@@ -673,7 +684,7 @@ namespace Render {
         }
 
         for (size_t i = 0; i < 8; ++i) {
-            glDisableVertexAttribArray(VertexElements::size + i);         
+            glDisableVertexAttribArray(VertexElements::size + i);
         }
 
         if (instanceBuffer) {

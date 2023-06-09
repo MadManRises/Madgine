@@ -11,21 +11,15 @@ namespace Widgets {
 
         virtual void vertices(WidgetsRenderData &renderData, size_t layer) override;        
 
-        Render::RenderTarget *getRenderTarget();
+        void setRenderSource(Render::RenderTarget *source);
 
         virtual WidgetClass getClass() const override;
-
-        bool sampled() const;
-
-        void setSampled(bool samples);
 
     protected:
         void sizeChanged(const Vector3 &pixelSize) override;
 
     private:
-        std::unique_ptr<Render::RenderTarget> mTarget;
-
-        bool mSampled = false;
+        Render::RenderTarget *mSource = nullptr;
     };
 }
 }

@@ -17,7 +17,7 @@
 
 #if !ANDROID && !EMSCRIPTEN && !IOS
 #    include "../glad/glad.h"
-#    define OPENGL_ES 0
+#    define OPENGL_ES 31
 #elif IOS
 #    include <OpenGLES/ES3/gl.h>
 #    define OPENGL_ES 30
@@ -42,7 +42,7 @@ inline void glCheck()
     int e = glGetError();
     if (e) {
         {
-            Engine::Util::LogDummy out { Engine::Util::MessageType::ERROR_TYPE };
+            std::stringstream out;
             out << "GL-Error: ";
             switch (e) {
                 CONSTANT_CASE(GL_INVALID_ENUM, out)
@@ -52,6 +52,7 @@ inline void glCheck()
                 out << "UNKNOWN";
             }
             out << "(" << e << ")";
+            Engine::Util::log_fatal(out.str());
         }
         glDump();
         std::terminate();
@@ -80,6 +81,7 @@ inline void glCheck()
 
 #    undef NO_ERROR
 typedef HGLRC ContextHandle;
+typedef HDC SurfaceHandle;
 
 #elif LINUX
 
@@ -87,19 +89,24 @@ struct __GLXcontextRec;
 typedef struct __GLXcontextRec *GLXContext;
 
 typedef GLXContext ContextHandle;
+typedef uintptr_t SurfaceHandle;
 
 #elif ANDROID || EMSCRIPTEN
 
 typedef void *EGLContext;
+typedef void *EGLSurface;
 typedef EGLContext ContextHandle;
+typedef EGLSurface SurfaceHandle;
 
 #elif OSX
 
 typedef void *ContextHandle;
+typedef Window::OSWindow *SurfaceHandle;
 
 #elif IOS
 
 typedef void *ContextHandle;
+typedef Window::OSWindow *SurfaceHandle;
 
 #else
 

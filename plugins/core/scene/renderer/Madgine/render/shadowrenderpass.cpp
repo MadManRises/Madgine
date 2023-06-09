@@ -74,7 +74,7 @@ namespace Render {
         {
             auto perApplication = mPipeline->mapParameters<ScenePerApplication>(0);
 
-            perApplication->p = projectionMatrix();
+            perApplication->p = target->getClipSpaceMatrix() * projectionMatrix();
         }
 
         Matrix4 v = viewMatrix();

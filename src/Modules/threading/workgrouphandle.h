@@ -24,7 +24,8 @@ namespace Threading {
             if (mThread.joinable()) {
                 mThread.join();
             }
-            mResult.get();
+            if (mResult.valid())
+                mResult.get();
         }
 
         WorkGroupHandle &operator=(WorkGroupHandle &&other)

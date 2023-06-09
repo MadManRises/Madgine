@@ -10,7 +10,7 @@ namespace Render {
     bool VulkanPipeline::link(typename VulkanShaderLoader::Handle vertexShader, typename VulkanShaderLoader::Handle geometryShader, typename VulkanShaderLoader::Handle pixelShader)
     {
         reset();
-        
+
         mVertexShader = std::move(vertexShader);
         mGeometryShader = std::move(geometryShader);
         mPixelShader = std::move(pixelShader);
@@ -18,9 +18,12 @@ namespace Render {
         return true;
     }
 
-    VkPipeline VulkanPipeline::get(VertexFormat format, size_t groupSize, size_t instanceDataSize, VkRenderPass renderpass)
+    VkPipeline VulkanPipeline::get(VertexFormat format, size_t groupSize, size_t samples, size_t instanceDataSize, VkRenderPass renderpass)
     {
-        VulkanPtr<VkPipeline, &vkDestroyPipeline> &pipeline = mPipelines[format][groupSize - 1];
+        size_t samplesBits = sqrt(samples);
+        assert(samplesBits * samplesBits == samples);
+
+        VulkanPtr<VkPipeline, &vkDestroyPipeline> &pipeline = mPipelines[format][groupSize - 1][samplesBits - 1];
 
         if (!pipeline) {
 
@@ -77,7 +80,6 @@ namespace Render {
             vertexInputInfo.vertexAttributeDescriptionCount = vertexLayoutDesc.second.size();
             vertexInputInfo.pVertexAttributeDescriptions = vertexLayoutDesc.second.data();
 
-            
             constexpr VkPrimitiveTopology types[] {
                 VK_PRIMITIVE_TOPOLOGY_POINT_LIST,
                 VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
@@ -105,7 +107,7 @@ namespace Render {
             VkPipelineMultisampleStateCreateInfo multisampling {};
             multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
             multisampling.sampleShadingEnable = VK_FALSE;
-            multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+            multisampling.rasterizationSamples = static_cast<VkSampleCountFlagBits>(samples);
             multisampling.minSampleShading = 1.0f; // Optional
             multisampling.pSampleMask = nullptr; // Optional
             multisampling.alphaToCoverageEnable = VK_FALSE; // Optional
@@ -149,7 +151,6 @@ namespace Render {
             colorBlending.blendConstants[2] = 0.0f; // Optional
             colorBlending.blendConstants[3] = 0.0f; // Optional
 
-            
             VkGraphicsPipelineCreateInfo pipelineInfo {};
             pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
             pipelineInfo.stageCount = count;
@@ -159,7 +160,7 @@ namespace Render {
             pipelineInfo.pViewportState = &viewportState;
             pipelineInfo.pRasterizationState = &rasterizer;
             pipelineInfo.pMultisampleState = &multisampling;
-            pipelineInfo.pDepthStencilState = &depthStencilState; 
+            pipelineInfo.pDepthStencilState = &depthStencilState;
             pipelineInfo.pColorBlendState = &colorBlending;
             pipelineInfo.pDynamicState = &dynamicState;
             pipelineInfo.renderPass = renderpass;
@@ -174,16 +175,17 @@ namespace Render {
         return pipeline;
     }
 
-    std::array<VulkanPtr<VkPipeline, &vkDestroyPipeline>, 3> *VulkanPipeline::ptr()
+    std::array<std::array<VulkanPtr<VkPipeline, &vkDestroyPipeline>, 3>, 3> *VulkanPipeline::ptr()
     {
         return mPipelines.data();
     }
 
     void VulkanPipeline::reset()
     {
-        for (std::array<VulkanPtr<VkPipeline, &vkDestroyPipeline>, 3> &groupPipelines : mPipelines)
-            for (VulkanPtr<VkPipeline, &vkDestroyPipeline> &pipeline : groupPipelines)
-                pipeline.reset();
+        for (std::array<std::array<VulkanPtr<VkPipeline, &vkDestroyPipeline>, 3>, 3> &groupPipelines : mPipelines)
+            for (std::array<VulkanPtr<VkPipeline, &vkDestroyPipeline>, 3> &samplePipelines : groupPipelines)
+                for (VulkanPtr<VkPipeline, &vkDestroyPipeline> &pipeline : samplePipelines)
+                    pipeline.reset();
         mVertexShader.reset();
         mGeometryShader.reset();
         mPixelShader.reset();

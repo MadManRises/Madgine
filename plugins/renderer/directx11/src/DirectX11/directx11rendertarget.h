@@ -12,7 +12,7 @@ namespace Render {
 
     struct MADGINE_DIRECTX11_EXPORT DirectX11RenderTarget : RenderTarget {
 
-        DirectX11RenderTarget(DirectX11RenderContext *context, bool global, std::string name, size_t iterations = 1);
+        DirectX11RenderTarget(DirectX11RenderContext *context, bool global, std::string name, size_t iterations = 1, RenderTarget *blitSource = nullptr);
         ~DirectX11RenderTarget();
 
         void setup(std::vector<ReleasePtr<ID3D11RenderTargetView>> targetViews, const Vector2i &size, TextureType type, size_t samples = 1);

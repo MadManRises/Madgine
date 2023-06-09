@@ -37,6 +37,7 @@ namespace Render {
     OpenGLTexture &OpenGLTexture::operator=(OpenGLTexture &&other)
     {
         Texture::operator=(std::move(other));
+        std::swap(mSamples, other.mSamples);
         return *this;
     }
 

@@ -9,6 +9,7 @@
 #include "Generic/execution/execution.h"
 #include "Generic/execution/state.h"
 
+#include "../../nodeexecution.h"
 #include "../../nodegraph.h"
 #include "../../pins.h"
 #include "nodesendertraits.h"
@@ -52,15 +53,32 @@ namespace NodeGraph {
         }
     }
 
+    template <typename Signature>
+    static ExtendedValueTypeDesc signature_type(uint32_t index)
+    {
+        return [index]<typename... T>(type_pack<T...>)
+        {
+            static constexpr ExtendedValueTypeDesc types[] = {
+                toValueTypeDesc<std::remove_reference_t<decayed_t<T>>>()...
+            };
+            if constexpr (Signature::variadic) {
+                if (index >= Signature::count)
+                    return toValueTypeDesc<typename Signature::recursive_t>();
+            }
+            return types[index];
+        }
+        (Signature {});
+    }
+
     template <typename Algorithm>
     struct SenderNode : Node<SenderNode<Algorithm>> {
 
         using Traits = Execution::sender_traits<Algorithm>;
 
         using argument_types = typename Traits::argument_types;
-        using algorithms = typename argument_types::filter<is_algorithm>;
-        using value_argument_tuple = typename argument_types::filter<is_value>::instantiate<std::tuple>;
-        using in_types = typename argument_types::filter<is_pred_sender>;
+        using algorithms = typename argument_types::template filter<is_algorithm>;
+        using value_argument_tuple = typename argument_types::template filter<is_value>::template instantiate<std::tuple>;
+        using in_types = typename argument_types::template filter<is_pred_sender>;
         using variadic = decltype(variadic_helper<Traits>());
 
         template <uint32_t I>
@@ -69,32 +87,32 @@ namespace NodeGraph {
             return std::make_tuple();
         }
 
-        template <uint32_t I, typename Values, typename T, typename... Ts>
-        static auto buildArgs(const Values &values, type_pack<T, Ts...> args, std::vector<NodeResults> *results = nullptr, NodeResults *variadicBuffer = nullptr, size_t *recursiveOffset = nullptr)
+        template <uint32_t I, typename... Vs, typename T, typename... Ts>
+        static auto buildArgs(std::tuple<Vs...> &&values, type_pack<T, Ts...> args, std::vector<NodeResults> *results = nullptr, NodeResults *variadicBuffer = nullptr, size_t *recursiveOffset = nullptr)
         {
             if constexpr (is_pred_sender<T>::value) {
                 return std::tuple_cat(
-                    std::make_tuple(typename T::Signature::instantiate<NodeReader> { recursiveOffset, variadicBuffer }),
-                    buildArgs<I>(values, type_pack<Ts...> {}, results, variadicBuffer, recursiveOffset));
+                    std::make_tuple(typename T::Signature::template instantiate<NodeReader> { recursiveOffset, variadicBuffer }),
+                    buildArgs<I>(std::move(values), type_pack<Ts...> {}, results, variadicBuffer, recursiveOffset));
             } else if constexpr (is_succ_sender<T>::value) {
                 return std::tuple_cat(
                     std::make_tuple(NodeSender<I + 1> {}),
-                    buildArgs<I + 1>(values, type_pack<Ts...> {}, results, variadicBuffer, recursiveOffset));
+                    buildArgs<I + 1>(std::move(values), type_pack<Ts...> {}, results, variadicBuffer, recursiveOffset));
             } else if constexpr (is_algorithm<T>::value) {
                 assert(results);
                 return std::tuple_cat(
                     std::make_tuple(NodeAlgorithm<I + 1> { *results }),
-                    buildArgs<I + 1>(values, type_pack<Ts...> {}, results, variadicBuffer, recursiveOffset));
+                    buildArgs<I + 1>(std::move(values), type_pack<Ts...> {}, results, variadicBuffer, recursiveOffset));
             } else {
-                return std::tuple_cat(
-                    std::make_tuple(std::get<0>(values)),
-                    buildArgs<I>(TupleUnpacker::popFront(values), type_pack<Ts...> {}, results, variadicBuffer));
+                return TupleUnpacker::prepend<first_t<Vs...>>(
+                    std::get<0>(std::move(values)),
+                    buildArgs<I>(TupleUnpacker::popFront(std::move(values)), type_pack<Ts...> {}, results, variadicBuffer));
             }
         }
 
-        static auto buildSender(const value_argument_tuple &values, std::vector<NodeResults> *results = nullptr, NodeResults *variadicBuffer = nullptr)
+        static auto buildSender(value_argument_tuple &&values, std::vector<NodeResults> *results = nullptr, NodeResults *variadicBuffer = nullptr)
         {
-            return TupleUnpacker::invokeFromTuple(Traits::algorithm, buildArgs<0>(values, argument_types {}, results, variadicBuffer));
+            return TupleUnpacker::invokeFromTuple(Traits::algorithm, buildArgs<0>(std::move(values), argument_types {}, results, variadicBuffer));
         }
 
         static auto buildVariadicSender(size_t *recursiveOffset, NodeResults *variadicBuffer = nullptr)
@@ -128,7 +146,7 @@ namespace NodeGraph {
         SenderNode(NodeGraph &graph)
             : Node<SenderNode<Algorithm>>(graph)
         {
-            setup();
+            this->setup();
         }
 
         SenderNode(const SenderNode &other, NodeGraph &graph)
@@ -148,25 +166,25 @@ namespace NodeGraph {
 
         size_t flowOutGroupCount() const override
         {
-            constexpr size_t algorithm_count = argument_types::filter<is_algorithm>::size;
-            constexpr size_t succ_sender_count = argument_types::filter<is_succ_sender>::size;
-            constexpr size_t variadic_succ_sender_count = variadic::filter<is_succ_sender>::size;
+            constexpr size_t algorithm_count = argument_types::template filter<is_algorithm>::size;
+            constexpr size_t succ_sender_count = argument_types::template filter<is_succ_sender>::size;
+            constexpr size_t variadic_succ_sender_count = variadic::template filter<is_succ_sender>::size;
 
             return 1 + algorithm_count + succ_sender_count + variadic_succ_sender_count;
         }
 
         size_t flowOutBaseCount(uint32_t group) const override
         {
-            static constexpr auto counts = []<typename... Algorithm, typename... SuccSender, typename... VariadicSuccSender>(type_pack<Algorithm...>, type_pack<SuccSender...>, type_pack<VariadicSuccSender...>)
+            static constexpr auto counts = []<typename... InnerAlg, typename... SuccSender, typename... VariadicSuccSender>(type_pack<InnerAlg...>, type_pack<SuccSender...>, type_pack<VariadicSuccSender...>)
             {
                 return std::array {
                     static_cast<int>(!Traits::constant),
-                    (sizeof(type_pack<Algorithm>), 1)...,
+                    (sizeof(type_pack<InnerAlg>), 1)...,
                     (sizeof(type_pack<SuccSender>), 1)...,
                     (sizeof(type_pack<VariadicSuccSender>), 0)...
                 };
             }
-            (typename argument_types::filter<is_algorithm> {}, typename argument_types::filter<is_succ_sender> {}, typename variadic::filter<is_succ_sender> {});
+            (typename argument_types::template filter<is_algorithm> {}, typename argument_types::template filter<is_succ_sender> {}, typename variadic::template filter<is_succ_sender> {});
             return counts[group];
         }
 
@@ -178,7 +196,7 @@ namespace NodeGraph {
         bool flowOutVariadic(uint32_t group = 0) const override
         {
             if constexpr (requires { typename Traits::variadic; }) {
-                return group == 1 && std::same_as<typename Traits::variadic::unpack_unique<void>, Execution::succ_sender>;
+                return group == 1 && std::same_as<typename Traits::variadic::template unpack_unique<void>, Execution::succ_sender>;
             } else {
                 return false;
             }
@@ -186,17 +204,17 @@ namespace NodeGraph {
 
         size_t dataInBaseCount(uint32_t group) const override
         {
-            return in_types::unpack_unique<Execution::pred_sender<Execution::signature<>>>::Signature::count;
+            return in_types::template unpack_unique<Execution::pred_sender<Execution::signature<>>>::Signature::count;
         }
 
         ExtendedValueTypeDesc dataInType(uint32_t index, uint32_t group, bool bidir = true) const override
         {
-            return in_types::unpack_unique<Execution::pred_sender<Execution::signature<>>>::Signature::type(index);
+            return signature_type<typename in_types::template unpack_unique<Execution::pred_sender<Execution::signature<>>>::Signature>(index);
         }
 
         bool dataInVariadic(uint32_t group = 0) const override
         {
-            return group == 0 && in_types::unpack_unique<Execution::pred_sender<Execution::signature<>>>::Signature::variadic;
+            return group == 0 && in_types::template unpack_unique<Execution::pred_sender<Execution::signature<>>>::Signature::variadic;
         }
 
         size_t dataProviderGroupCount() const override
@@ -206,11 +224,11 @@ namespace NodeGraph {
 
         size_t dataProviderBaseCount(uint32_t group) const override
         {
-            static constexpr auto sizes = []<typename... Algorithm>(type_pack<Algorithm...>)
+            static constexpr auto sizes = []<typename... InnerAlg>(type_pack<InnerAlg...>)
             {
                 return std::array {
-                    Sender::value_types<type_pack>::size,
-                    Algorithm::Signature::count...
+                    Sender::template value_types<type_pack>::size,
+                    InnerAlg::Signature::count...
                 };
             }
             (algorithms {});
@@ -219,11 +237,11 @@ namespace NodeGraph {
 
         ExtendedValueTypeDesc dataProviderType(uint32_t index, uint32_t group, bool bidir = true) const override
         {
-            static constexpr auto types = []<typename... Algorithm>(type_pack<Algorithm...>)
+            static constexpr auto types = []<typename... InnerAlg>(type_pack<InnerAlg...>)
             {
                 return std::array {
-                    Sender::value_types<Execution::signature>::type,
-                    Algorithm::Signature::type...
+                    signature_type<typename Sender::template value_types<Execution::signature>>,
+                    signature_type<typename InnerAlg::Signature>...
                 };
             }
             (algorithms {});
@@ -242,10 +260,10 @@ namespace NodeGraph {
                 static_assert(!Traits::constant);
             }
 
-            InterpretData(DummyReceiver &receiver, const value_argument_tuple &args)
+            InterpretData(DummyReceiver &receiver, value_argument_tuple args)
             {
                 static_assert(Traits::constant);
-                buildState(receiver, args);
+                buildState(receiver, std::move(args));
             }
 
             ~InterpretData()
@@ -316,10 +334,10 @@ namespace NodeGraph {
                 }
             };
 
-            void start(NodeReceiver receiver, const value_argument_tuple &args)
+            void start(NodeReceiver receiver, value_argument_tuple args)
             {
                 static_assert(!Traits::constant);
-                buildState(Receiver { receiver, this }, args);
+                buildState(Receiver { receiver, this }, std::move(args));
                 start();
             }
 
@@ -327,7 +345,7 @@ namespace NodeGraph {
             {
                 if constexpr (requires { typename Traits::variadic; }) {
 
-                    using PredSender = typename argument_types::filter<is_pred_sender>::unpack_unique<Execution::pred_sender<Execution::signature<>>>;
+                    using PredSender = typename argument_types::template filter<is_pred_sender>::template unpack_unique<Execution::pred_sender<Execution::signature<>>>;
                     if constexpr (PredSender::Signature::variadic) {
                         mRecursiveBuffer.resize(1);
                         Execution::get_context(mState).read(mRecursiveBuffer[0], PredSender::Signature::variadicIndex);
@@ -344,16 +362,16 @@ namespace NodeGraph {
                 }
             }
 
-            void buildState(InnerReceiver receiver, const value_argument_tuple &args)
+            void buildState(InnerReceiver receiver, value_argument_tuple &&args)
             {
-                new (&mState) State { Execution::connect(buildSender(args, &mResults, &mRecursiveBuffer), std::forward<InnerReceiver>(receiver)) };
+                new (&mState) State { Execution::connect(buildSender(std::move(args), &mResults, &mRecursiveBuffer), std::forward<InnerReceiver>(receiver)) };
 
                 if constexpr (requires { typename Traits::variadic; }) {
 
                     size_t baseIndex = 0;
                     uint32_t group = 1;
 
-                    using PredSender = typename argument_types::filter<is_pred_sender>::unpack_unique<Execution::pred_sender<Execution::signature<>>>;
+                    using PredSender = typename argument_types::template filter<is_pred_sender>::template unpack_unique<Execution::pred_sender<Execution::signature<>>>;
                     if constexpr (PredSender::Signature::variadic) {
                         baseIndex = PredSender::Signature::variadicIndex + 1;
                         group = 0;
@@ -452,9 +470,9 @@ namespace NodeGraph {
                         std::vector<VariadicState> mStates;
                         size_t mRecursionLevel;
                     };
-                    return std::declval<VariadicInfo>();
+                    return VariadicInfo {};
                 } else {
-                    return std::declval<std::monostate>();
+                    return std::monostate {};
                 }
             }
 

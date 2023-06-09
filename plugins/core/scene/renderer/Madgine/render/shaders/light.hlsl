@@ -61,6 +61,8 @@ void castDirectionalShadowLight(
         lightStrength -= float(lightDepth > shadowDepth) / light.caster.shadowSamples;
     }
 
+    //diffuseIntensity = float3(lightDepth, shadowMap.Load(lightTexCoord, 0).r, lightTexCoord.y);
+
     castDirectionalLight(
         diffuseIntensity,
         specularIntensity, 

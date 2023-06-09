@@ -38,7 +38,7 @@ android {
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
-            jniLibs.srcDirs = ['@CMAKE_CURRENT_BINARY_DIR@/bin/', '@CMAKE_ANDROID_NDK@/sources/cxx-stl/llvm-libc++/libs/']
+            jniLibs.srcDirs = ['@CMAKE_CURRENT_BINARY_DIR@/bin/', '@CMAKE_ANDROID_NDK@/sources/cxx-stl/llvm-libc++/libs/' @ANDROID_ADDITIONAL_DEPENDENCIES@]
 			assets.srcDirs = ['@CMAKE_BINARY_DIR@/data/']
         }
     }

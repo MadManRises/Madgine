@@ -134,8 +134,8 @@ namespace Serialize {
             using traits = typename Callable<f>::traits;
             using R = typename traits::return_type;
             return make_message_sender<R>(
-                [this](auto &receiver, Args &&...args) {
-                    typename traits::decay_argument_types::as_tuple argTuple { std::forward<Args>(args)... };
+                [this](auto &receiver, Args &&...args2) {
+                    typename traits::decay_argument_types::as_tuple argTuple { std::forward<Args>(args2)... };
                     if (this->isMaster()) {
                         this->writeFunctionAction(functionIndex<f>, &argTuple);
                         if constexpr (std::same_as<decltype(TupleUnpacker::invokeExpand(f, static_cast<T*>(this), argTuple)), void>) {
@@ -168,16 +168,16 @@ namespace Serialize {
             using traits = typename Callable<f>::traits;
             using R = typename traits::return_type;
             return make_message_sender<R>(
-                [this](auto &receiver, Args &&...args) {
+                [this](auto &receiver, Args &&...args2) {
                     if (this->isMaster()) {
                         if constexpr (std::same_as<decltype((static_cast<T *>(this)->*f)(std::forward<Args>(args)...)), void>) {
-                            (static_cast<T *>(this)->*f)(std::forward<Args>(args)...);
+                            (static_cast<T *>(this)->*f)(std::forward<Args>(args2)...);
                             receiver.set_value();
                         } else {
-                            receiver.set_value((static_cast<T *>(this)->*f)(std::forward<Args>(args)...));
+                            receiver.set_value((static_cast<T *>(this)->*f)(std::forward<Args>(args2)...));
                         }
                     } else {
-                        typename traits::decay_argument_types::as_tuple argTuple { std::forward<Args>(args)... };
+                        typename traits::decay_argument_types::as_tuple argTuple { std::forward<Args>(args2)... };
                         this->writeFunctionRequest(functionIndex<f>, QUERY, &argTuple, 0, 0, receiver);
                     }
                 },

@@ -19,11 +19,18 @@ namespace Render {
 
         ContextHandle mContext = 0;
 
+    protected:
+        SurfaceHandle getSurface() const;
+
     private:
         Window::OSWindow *mOsWindow;
         bool mReusedContext;
 
 #if OPENGL_ES
+#    if ANDROID || EMSCRIPTEN
+        EGLSurface mSurface = nullptr;
+#    endif
+
         static THREADLOCAL(OpenGLSSBOBufferStorage *) sCurrentSSBOBuffer;
         mutable std::optional<OpenGLSSBOBufferStorage> mSSBOBuffer;
 

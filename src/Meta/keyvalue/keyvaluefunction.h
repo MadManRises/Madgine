@@ -1,6 +1,7 @@
 #pragma once
 
 #include "valuetype_forward.h"
+#include "keyvaluereceiver.h"
 
 namespace Engine {
 

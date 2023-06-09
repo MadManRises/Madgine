@@ -14,7 +14,7 @@ namespace Render {
         float mBoneWeights[4] { 0.0f, 0.0f, 0.0f, 0.0f };
     };
 
-    static constexpr UINT vConstantOffsets[] = {
+    static constexpr uint32_t vConstantOffsets[] = {
         offsetof(ConstantValues, mPos),
         offsetof(ConstantValues, mW),
         offsetof(ConstantValues, mPos2),

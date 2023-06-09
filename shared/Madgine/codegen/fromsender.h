@@ -73,7 +73,7 @@ struct codegen_connect_t {
             {
                 return std::tuple_cat(
                     std::make_tuple(VariableDefinition { Variable { std::string { Name }, Engine::toValueTypeDesc<T>() }, Constant { Engine::ValueType { mInitialValue } } }),
-                    mState.generate());
+                    this->mState.generate());
             }
             T mInitialValue;
         };
@@ -98,7 +98,7 @@ struct codegen_connect_t {
         struct state : codegen_algorithm_state<Sender, Rec> {
             auto generate()
             {
-                auto inner = mState.generate();
+                auto inner = this->mState.generate();
                 static_assert(std::tuple_size_v<decltype(inner)> == 1);
                 return std::make_tuple(Assignment { {}, VariableAccess { std::string { Name } }, std::get<0>(inner) });
             }
@@ -121,16 +121,16 @@ struct codegen_connect_t {
             auto generateHelper(Engine::type_pack<V...>, std::index_sequence<Is...>)
             {
                 std::string variableName = Engine::Execution::get_context(*this).generateName("v");
-                auto inner = codegen_connect(std::move(mSender), mRec).generate();
+                auto inner = codegen_connect(std::move(mSender), this->mRec).generate();
                 static_assert(std::tuple_size_v<decltype(inner)> == sizeof...(V));
                 return std::tuple_cat(
                     std::make_tuple(VariableDefinition { { variableName + "_" + std::to_string(Is), typeHelper<V>(), std::is_reference_v<V> }, std::get<Is>(inner) }...),
-                    codegen_connect(mF(VariableAccess { variableName + "_" + std::to_string(Is) }...), mRec).generate());
+                    codegen_connect(mF(VariableAccess { variableName + "_" + std::to_string(Is) }...), this->mRec).generate());
             }
 
             auto generate()
             {
-                using Pack = typename Sender::value_types<Engine::type_pack>;
+                using Pack = typename Sender::template value_types<Engine::type_pack>;
                 return generateHelper(Pack {}, typename Pack::indices {});
             }
 
@@ -151,7 +151,7 @@ struct codegen_connect_t {
         struct state : codegen_algorithm_state<Sender, Rec> {
             auto generate()
             {
-                auto inner = mState.generate();
+                auto inner = this->mState.generate();
                 static_assert(std::tuple_size_v<decltype(inner)> == 1);
                 return std::make_tuple(Assignment { {}, mVar, std::get<0>(inner) });
             }
@@ -168,7 +168,7 @@ struct codegen_connect_t {
             auto generate()
             {
                 return std::tuple_cat(
-                    codegen_connect(std::get<Sender>(std::move(mSenders)), mRec).generate()...
+                    codegen_connect(std::get<Sender>(std::move(mSenders)), this->mRec).generate()...
                 );
             }
             std::tuple<Sender...> mSenders;
@@ -196,7 +196,7 @@ struct codegen_connect_t {
             auto generate()
             {
                 return std::make_tuple(
-                    Engine::TupleUnpacker::invokeExpand(mTransform, mState.generate()));
+                    Engine::TupleUnpacker::invokeExpand(mTransform, this->mState.generate()));
             }
             T mTransform;
         };
@@ -234,7 +234,7 @@ struct codegen_for_each_t {
                     std::string variableName = Engine::Execution::get_context(*this).generateName("e");
                     VariableAccess read { variableName };
                     ForEach block { {}, mContainer, variableName };
-                    Engine::TupleUnpacker::forEach(codegen_connect(mF(read), std::forward<Rec>(mRec)).generate(), [&](auto s) {
+                    Engine::TupleUnpacker::forEach(codegen_connect(mF(read), std::forward<Rec>(this->mRec)).generate(), [&](auto s) {
                         block.mBody.push_back(s);
                     });
                     return std::make_tuple(block);

@@ -4,6 +4,7 @@
 #include "Generic/execution/execution.h"
 #include "Generic/execution/virtualsender.h"
 #include "connection.h"
+#include "taskqueue.h"
 
 namespace Engine {
 namespace Threading {

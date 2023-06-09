@@ -13,11 +13,10 @@ namespace ranges {
 
 #    if (__cpp_lib_ranges < 201911L)
     template <class T>
-    concept range = requires(T &t)
-    {
-        t.begin();
-        t.end();
-    };
+    concept range = requires(T &t) {
+                        t.begin();
+                        t.end();
+                    };
 #    endif
 
     template <typename C, typename F>
@@ -33,6 +32,19 @@ namespace ranges {
         auto it = c.begin();
         for (; it != end; ++it) {
             if (f(*it)) {
+                return it;
+            }
+        }
+        return it;
+    }
+
+    template <typename C, typename F, typename P>
+    constexpr auto find_if(C &&c, F &&f, P &&p)
+    {
+        auto end = c.end();
+        auto it = c.begin();
+        for (; it != end; ++it) {
+            if (f(std::invoke(p, *it))) {
                 return it;
             }
         }
@@ -83,6 +95,13 @@ namespace ranges {
     constexpr auto lower_bound(C &&c, T &&t)
     {
         return std::lower_bound(std::forward<C>(c).begin(), std::forward<C>(c).end(), std::forward<T>(t));
+    }
+
+    template <typename C, typename F>
+    constexpr bool all_of(C &&c, F &&f)
+    {
+        return std::all_of(std::forward<C>(c).begin(), std::forward<C>(c).end(),
+            std::forward<F>(f));
     }
 
     template <typename T>
@@ -192,7 +211,7 @@ namespace views {
         return { std::forward<R>(r), std::forward<F>(f) };
     }
 
-    MAKE_PIPABLE(transform)
+    MAKE_PIPABLE_FROM_RIGHT(transform)
 
     template <typename R>
     struct ReverseView {
@@ -215,7 +234,7 @@ namespace views {
     struct reverse_t {
 
         template <typename R>
-        ReverseView<R> operator()(R &&r)
+        ReverseView<R> operator()(R &&r) const
         {
             return { std::forward<R>(r) };
         }
@@ -236,7 +255,7 @@ namespace ranges {
     inline constexpr bool enable_borrowed_range = false;
 
     template <typename R>
-    concept borrowed_range = range<R> &&(std::is_lvalue_reference_v<R> || enable_borrowed_range<std::remove_cvref_t<R>>);
+    concept borrowed_range = range<R> && (std::is_lvalue_reference_v<R> || enable_borrowed_range<std::remove_cvref_t<R>>);
 }
 
 template <typename R>

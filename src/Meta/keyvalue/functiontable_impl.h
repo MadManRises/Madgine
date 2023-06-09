@@ -5,6 +5,7 @@
 
 #include "functionargument.h"
 #include "functiontable.h"
+#include "argumentlist.h"
 
 namespace Engine {
 

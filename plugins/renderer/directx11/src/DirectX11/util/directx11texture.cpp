@@ -75,9 +75,11 @@ namespace Render {
         shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
         shaderResourceViewDesc.Texture2D.MipLevels = 1;
 
+        assert(samples == 1 || type == TextureType_2DMultiSample);
+
         switch (type) {
         case TextureType_2D:
-            shaderResourceViewDesc.ViewDimension = samples > 1 ? D3D11_SRV_DIMENSION_TEXTURE2DMS : D3D11_SRV_DIMENSION_TEXTURE2D;
+            shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
             break;
         case TextureType_2DMultiSample:
             shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;

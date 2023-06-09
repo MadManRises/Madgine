@@ -21,7 +21,12 @@ namespace Render {
         virtual size_t textureCount() const override;
         virtual TextureDescriptor depthTexture() const override;
 
+        void blit(RenderTarget *input) const;
+
         virtual Matrix4 getClipSpaceMatrix() const override;
+
+    protected:
+        size_t getFramebufferCount(bool *emulateCube = nullptr) const;
 
     private:
         GLuint mFramebuffers[6] = { 0 };
@@ -29,16 +34,14 @@ namespace Render {
 
         OpenGLTexture mDepthTexture;
 
-
-        std::vector<GLuint> mMultisampledTextures;
-        GLuint mMultisampledFramebuffer = 0;
-
         size_t mSamples;
         bool mHDR;
 
         std::vector<OpenGLTexture> mTextures;
 
         Vector2i mSize;
+
+        TextureType mType;
     };
 
 }

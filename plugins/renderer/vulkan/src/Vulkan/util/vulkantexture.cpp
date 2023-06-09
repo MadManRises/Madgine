@@ -42,6 +42,10 @@ namespace Render {
             barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
             sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
             break;
+        case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+            barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+            sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+            break;
         default:
             throw 0;
         }
@@ -49,6 +53,10 @@ namespace Render {
         switch (newLayout) {
         case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
             barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+            break;
+        case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
             destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
             break;
         case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
@@ -71,20 +79,19 @@ namespace Render {
             1, &barrier);
     }
 
-    VulkanTexture::VulkanTexture(TextureType type, bool isRenderTarget, DataFormat format, size_t width, size_t height, const ByteBuffer &data)
+    VulkanTexture::VulkanTexture(TextureType type, bool isRenderTarget, DataFormat format, size_t width, size_t height, size_t samples, const ByteBuffer &data)
         : Texture(type, format, { static_cast<int>(width), static_cast<int>(height) })
         , mIsRenderTarget(isRenderTarget)
+        , mSamples(samples)
     {
-        VkFormat vFormat;
+        VkFormat vFormat = this->format();
         VkImageViewType vType;
         size_t byteCount;
         switch (format) {
         case FORMAT_RGBA8:
-            vFormat = VK_FORMAT_R8G8B8A8_UNORM;
             byteCount = 4;
             break;
         case FORMAT_RGBA16F:
-            vFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
             byteCount = 8;
             break;
         default:
@@ -93,8 +100,11 @@ namespace Render {
 
         VkDeviceSize imageSize = width * height * byteCount;
 
+        assert(samples == 1 || type == TextureType_2DMultiSample);
+
         switch (type) {
-        case TextureType_2D: {
+        case TextureType_2D:
+        case TextureType_2DMultiSample: {
             VkImageCreateInfo imageInfo {};
             imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
             imageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -106,11 +116,11 @@ namespace Render {
             imageInfo.format = vFormat;
             imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
             imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-            imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+            imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
             if (isRenderTarget)
                 imageInfo.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
             imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-            imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+            imageInfo.samples = static_cast<VkSampleCountFlagBits>(samples);
             imageInfo.flags = 0; // Optional
 
             VkResult result = vkCreateImage(GetDevice(), &imageInfo, nullptr, &mImage);
@@ -223,15 +233,17 @@ namespace Render {
         VK_CHECK(result);
     }
 
-    VulkanTexture::VulkanTexture(TextureType type, bool isRenderTarget, DataFormat format)
+    VulkanTexture::VulkanTexture(TextureType type, bool isRenderTarget, DataFormat format, size_t samples)
         : Texture(type, format)
         , mIsRenderTarget(isRenderTarget)
+        , mSamples(samples)
     {
     }
 
     VulkanTexture::VulkanTexture(VulkanTexture &&other)
         : Texture(std::move(other))
         , mIsRenderTarget(std::exchange(other.mIsRenderTarget, false))
+        , mSamples(std::exchange(other.mSamples, 1))
     {
     }
 
@@ -246,6 +258,7 @@ namespace Render {
         std::swap(mDeviceMemory, other.mDeviceMemory);
         std::swap(mImage, other.mImage);
         std::swap(mIsRenderTarget, other.mIsRenderTarget);
+        std::swap(mSamples, other.mSamples);
         return *this;
     }
 
@@ -257,25 +270,24 @@ namespace Render {
         }
         mDeviceMemory.reset();
         mImage.reset();
+        mSamples = 1;
     }
 
     void VulkanTexture::setData(Vector2i size, const ByteBuffer &data)
     {
-        *this = VulkanTexture { mType, mIsRenderTarget, mFormat, static_cast<size_t>(size.x), static_cast<size_t>(size.y), data };
+        *this = VulkanTexture { mType, mIsRenderTarget, mFormat, static_cast<size_t>(size.x), static_cast<size_t>(size.y), mSamples, data };
     }
 
     void VulkanTexture::setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data)
     {
-        VkFormat vFormat;
+        VkFormat vFormat = format();
         VkImageViewType vType;
         size_t byteCount;
         switch (mFormat) {
-        case FORMAT_RGBA8:
-            vFormat = VK_FORMAT_R8G8B8A8_UNORM;
+        case FORMAT_RGBA8:            
             byteCount = 4;
             break;
-        case FORMAT_RGBA16F:
-            vFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+        case FORMAT_RGBA16F:            
             byteCount = 8;
             break;
         default:
@@ -360,8 +372,30 @@ namespace Render {
         return reinterpret_cast<VkImageView>(mTextureHandle);
     }
 
+    VkImage VulkanTexture::image() const
+    {
+        return mImage;
+    }
+
+    VkFormat VulkanTexture::format() const
+    {
+        switch (mFormat) {
+        case FORMAT_RGBA8:
+            return VK_FORMAT_R8G8B8A8_UNORM;                        
+        case FORMAT_RGBA16F:
+            return VK_FORMAT_R16G16B16A16_SFLOAT;
+        default:
+            std::terminate();
+        }
+    }
+
     void VulkanTexture::setName(std::string_view name)
     {
+    }
+
+    void VulkanTexture::transition(VkCommandBuffer commandList, VkImageLayout oldLayout, VkImageLayout newLayout)
+    {
+        transitionImageLayout(commandList, mImage, format(), VK_IMAGE_ASPECT_COLOR_BIT, oldLayout, newLayout); 
     }
 }
 }

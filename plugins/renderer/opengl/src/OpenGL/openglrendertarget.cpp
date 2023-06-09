@@ -8,12 +8,11 @@
 
 #include "Meta/math/matrix4.h"
 
-
 namespace Engine {
 namespace Render {
 
-    OpenGLRenderTarget::OpenGLRenderTarget(OpenGLRenderContext *context, bool global, std::string name, size_t iterations)
-        : RenderTarget(context, global, name, iterations)
+    OpenGLRenderTarget::OpenGLRenderTarget(OpenGLRenderContext *context, bool global, std::string name, size_t iterations, RenderTarget *blitSource)
+        : RenderTarget(context, global, name, iterations, blitSource)
     {
     }
 
@@ -35,10 +34,12 @@ namespace Render {
         glViewport(0, 0, static_cast<GLsizei>(screenSize.x), static_cast<GLsizei>(screenSize.y));
         GL_CHECK();
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        GL_CHECK();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        GL_CHECK();
+        if (!mBlitSource) {
+            glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+            GL_CHECK();
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            GL_CHECK();
+        }
     }
 
     void OpenGLRenderTarget::setRenderSpace(const Rect2i &space)
@@ -51,10 +52,10 @@ namespace Render {
 
     Matrix4 OpenGLRenderTarget::getClipSpaceMatrix() const
     {
-        return Matrix4 {1,0,0,0,
-                        0,1,0,0,
-                        0,0,2,-1,
-                        0,0,0,1};
+        return Matrix4 { 1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 2, -1,
+            0, 0, 0, 1 };
     }
 
     void OpenGLRenderTarget::clearDepthBuffer()

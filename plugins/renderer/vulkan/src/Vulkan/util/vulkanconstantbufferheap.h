@@ -11,6 +11,8 @@ namespace Render {
 
         VulkanConstantBufferHeap &operator=(VulkanConstantBufferHeap &&other);
 
+        void reset();
+
         OffsetPtr allocateTemp(size_t size);
         void deallocateTemp(OffsetPtr ptr, size_t size);
         OffsetPtr allocatePersistent(size_t size);

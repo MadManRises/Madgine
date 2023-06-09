@@ -41,7 +41,7 @@ namespace Filesystem {
         if (!file)
             set_error(GenericResult::UNKNOWN_ERROR);
         else        
-            set_value(GenericResult::SUCCESS, std::vector<unsigned char> { file.iterator(), file.end() });
+            set_value(std::vector<unsigned char> { file.iterator(), file.end() });
     }
 
 }

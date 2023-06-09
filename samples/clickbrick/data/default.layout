@@ -95,7 +95,6 @@
                 <Widget serId=13>
                     <mChildren>
                         <SceneWindow serId=14>
-                            <Sampled>false</Sampled>
                             <mChildren>
                                 <Label serId=15>
                                     <mText>Score: 0</mText>

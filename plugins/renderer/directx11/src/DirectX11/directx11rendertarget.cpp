@@ -21,8 +21,8 @@
 namespace Engine {
 namespace Render {
 
-    DirectX11RenderTarget::DirectX11RenderTarget(DirectX11RenderContext *context, bool global, std::string name, size_t iterations)
-        : RenderTarget(context, global, name, iterations)
+    DirectX11RenderTarget::DirectX11RenderTarget(DirectX11RenderContext *context, bool global, std::string name, size_t iterations, RenderTarget *blitSource)
+        : RenderTarget(context, global, name, iterations, blitSource)
     {
     }
 
@@ -185,9 +185,11 @@ namespace Render {
         sDeviceContext->OMSetDepthStencilState(mDepthStencilState, 1);
         sDeviceContext->OMSetBlendState(mBlendState, 0, 0xffffffff);
 
-        for (ID3D11RenderTargetView *view : std::span { mTargetViews.begin() + size * offset, size })
-            sDeviceContext->ClearRenderTargetView(view, color);
-        sDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+        if (!mBlitSource) {
+            for (ID3D11RenderTargetView *view : std::span { mTargetViews.begin() + size * offset, size })
+                sDeviceContext->ClearRenderTargetView(view, color);
+            sDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+        }
 
         sDeviceContext->PSSetSamplers(0, 2, &mSamplers[0]);
 

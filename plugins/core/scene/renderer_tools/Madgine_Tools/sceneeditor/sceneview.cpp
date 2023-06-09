@@ -74,13 +74,15 @@ namespace Tools {
     {
         mCamera.mPosition = { 0, 0.5, -1 };
 
-        mRenderTarget = context->createRenderTexture({ 1000, 1000 }, { .mSamples = 4, .mName = "SceneView" });
+        mRenderTargetSampled = context->createRenderTexture({ 1000, 1000 }, { .mType = Render::TextureType_2DMultiSample, .mSamples = 4 });
 
-        mRenderTarget->addRenderPass(&mSceneRenderer);
+        mRenderTargetSampled->addRenderPass(&mSceneRenderer);
 
-        mRenderTarget->addRenderPass(&mGridRenderer);
+        mRenderTargetSampled->addRenderPass(&mGridRenderer);
 
-        mRenderTarget->addRenderPass(&mIm3DRenderer);
+        mRenderTargetSampled->addRenderPass(&mIm3DRenderer);
+
+        mRenderTarget = context->createRenderTexture({ 1000, 1000 }, {.mBlitSource = mRenderTargetSampled.get()});
 
         static_cast<ClientImRoot &>(mEditor->root()).addRenderTarget(mRenderTarget.get());
     }

@@ -6,6 +6,8 @@
 
 #include "Madgine/render/scenerenderpass.h"
 
+#include "Madgine/render/rendertarget.h"
+
 namespace ClickBrick {
 
     struct GameManager : Engine::Input::Handler<GameManager> {
@@ -48,6 +50,7 @@ namespace ClickBrick {
 
         Engine::Scene::SceneManager &mSceneMgr;
         Engine::Render::SceneRenderPass mSceneRenderer;
+        std::unique_ptr<Engine::Render::RenderTarget> mGameRenderTarget;
     };
 
 }

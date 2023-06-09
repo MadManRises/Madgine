@@ -42,10 +42,12 @@ namespace Render {
     };
 
     const std::vector<const char *> extensions = {
-        VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
         VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
-        VK_KHR_SURFACE_EXTENSION_NAME,
+        VK_KHR_SURFACE_EXTENSION_NAME
+#if WINDOWS
+        ,
         VK_KHR_WIN32_SURFACE_EXTENSION_NAME
+#endif
     };
 
     const std::vector<const char *> deviceExtensions = {
@@ -105,12 +107,17 @@ namespace Render {
             break;
         }
 
-        Util::LogDummy cout(lvl);
+        std::stringstream cout;
         cout << "Debug message";
         if (pCallbackData->pMessageIdName) {
             cout << "(" << pCallbackData->pMessageIdName << ")";
         }
         cout << ": " << pCallbackData->pMessage;
+
+        Util::LogDummy { lvl } << cout.str();
+
+        if (lvl == Util::MessageType::ERROR_TYPE)
+            Util::log_fatal(cout.str());
 
         return VK_FALSE;
     }
@@ -134,7 +141,7 @@ namespace Render {
         appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
         appInfo.pEngineName = "Madgine";
         appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.apiVersion = VK_API_VERSION_1_0;
+        appInfo.apiVersion = VK_MAKE_API_VERSION(0, 1, 1, 0);
 
         VkInstanceCreateInfo createInfo {};
         createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -159,7 +166,9 @@ namespace Render {
         VkResult result = vkCreateInstance(&createInfo, nullptr, &instance);
         VK_CHECK(result);
 
+#if !ANDROID
         gladLoaderLoadVulkan(instance, nullptr, nullptr);
+#endif
 
         result = vkCreateDebugUtilsMessengerEXT(instance, &createInfo2, nullptr, &sDebugMessenger);
         VK_CHECK(result);
@@ -183,8 +192,16 @@ namespace Render {
                 indices.graphicsFamily = i;
             }
 
+#if WINDOWS
             if (vkGetPhysicalDeviceWin32PresentationSupportKHR(device, i))
                 indices.presentFamily = i;
+#elif ANDROID
+            if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+                indices.presentFamily = i;
+            }
+#else
+#    error "Unsupported Platform!"
+#endif
 
             i++;
         }
@@ -248,10 +265,14 @@ namespace Render {
 
     Environment createEnvironment()
     {
+#if !ANDROID
         gladLoaderLoadVulkan(nullptr, nullptr, nullptr);
+#endif
         auto instance = createInstance();
         auto physicalDevice = selectPhysicalDevice(instance);
+#if !ANDROID
         gladLoaderLoadVulkan(instance, physicalDevice, nullptr);
+#endif
 
         return { std::move(instance), std::move(physicalDevice) };
     }
@@ -362,8 +383,28 @@ namespace Render {
 
     VulkanRenderContext::~VulkanRenderContext()
     {
+        mConstantBuffer.reset();
+
+        mPipelineLayout.reset();
+
+        mDescriptorSetLayouts[0].reset();
+        mDescriptorSetLayouts[1].reset();
+        mDescriptorSetLayouts[2].reset();
+
+        mSamplers[0].reset();
+        mSamplers[1].reset();
+
+        mCommandPool.reset();
+
         VkResult result = vkFreeDescriptorSets(GetDevice(), mDescriptorPool, 1, &mSamplerDescriptorSet);
         VK_CHECK(result);
+
+        mConstantBufferHeap.reset();
+
+        mCommandPool.reset();
+        mDescriptorPool.reset();
+
+        sDevice->reset();
 
         assert(sSingleton == this);
         sSingleton = nullptr;
@@ -538,8 +579,8 @@ namespace Render {
         vertexLayoutDesc.first.push_back({ 0, stride, VK_VERTEX_INPUT_RATE_VERTEX });
         vertexLayoutDesc.first.push_back({ 2, 0, VK_VERTEX_INPUT_RATE_VERTEX });
 
-        UINT offset = 0;
-        for (UINT i = 0; i < VertexElements::size; ++i) {
+        uint32_t offset = 0;
+        for (uint32_t i = 0; i < VertexElements::size; ++i) {
             if (format.has(i)) {
                 vertexLayoutDesc.second.push_back({ i, 0, vFormats[i], offset });
                 offset += sVertexElementSizes[i];

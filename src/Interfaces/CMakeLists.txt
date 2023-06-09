@@ -37,7 +37,7 @@ if (WINDOWS)
 endif()
 
 if (ANDROID)
-	target_link_libraries(Interfaces PRIVATE android EGL log)	
+	target_link_libraries(Interfaces PRIVATE android log)	
 endif()
 
 if (UNIX)

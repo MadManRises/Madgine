@@ -46,9 +46,9 @@ namespace Render {
 
     void SceneMainWindowComponent::setup(RenderTarget *target)
     {
-        mShadowMap = target->context()->createRenderTexture({ 2048, 2048 }, { .mCreateDepthBufferView = true, .mSamples = 4, .mTextureCount = 0, .mType = TextureType_2DMultiSample, .mName = "ShadowMap" });
-        mPointShadowMaps[0] = target->context()->createRenderTexture({ 2048, 2048 }, { .mCreateDepthBufferView = true, .mTextureCount = 0, .mType = TextureType_Cube, .mName = "PointShadowMap0" });
-        mPointShadowMaps[1] = target->context()->createRenderTexture({ 2048, 2048 }, { .mCreateDepthBufferView = true, .mTextureCount = 0, .mType = TextureType_Cube, .mName = "PointShadowMap1" });
+        mShadowMap = target->context()->createRenderTexture({ 2048, 2048 }, { .mName = "ShadowMap", .mType = TextureType_2DMultiSample, .mCreateDepthBufferView = true, .mSamples = 4, .mTextureCount = 0 });
+        mPointShadowMaps[0] = target->context()->createRenderTexture({ 2048, 2048 }, { .mName = "PointShadowMap0", .mType = TextureType_Cube, .mCreateDepthBufferView = true, .mTextureCount = 0 });
+        mPointShadowMaps[1] = target->context()->createRenderTexture({ 2048, 2048 }, { .mName = "PointShadowMap1",.mType = TextureType_Cube, .mCreateDepthBufferView = true, .mTextureCount = 0 });
 
         mSceneData = std::make_unique<SceneRenderData>(mScene, target->context());
 

@@ -2,10 +2,10 @@
 
 /// @cond
 
+#include "Madgine/clientlib.h"
 #include "Madgine/meshloaderlib.h"
 #include "Madgine/pipelineloaderlib.h"
 #include "Madgine/textureloaderlib.h"
-#include "Madgine/clientlib.h"
 
 #if defined(Vulkan_EXPORTS)
 #    define MADGINE_VULKAN_EXPORT DLL_EXPORT
@@ -15,7 +15,6 @@
 
 #include "vulkanforward.h"
 
-
 #define NOMINMAX
 #if !ANDROID && !EMSCRIPTEN && !IOS
 #    include "../glad/vulkan.h"
@@ -24,7 +23,34 @@
 #elif EMSCRIPTEN
 #    include <GLES3/gl3.h>
 #else
-#    include <GLES3/gl31.h>
+#    include <vulkan/vulkan.h>
+
+#    include "util/vulkanstub.h"
+
+inline VkResult vkCreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo, const VkAllocationCallbacks *pAllocator, VkDebugUtilsMessengerEXT *pMessenger)
+{
+    return Engine::Render::vulkanInstanceStub<"vkCreateDebugUtilsMessengerEXT", VkResult>(instance, pCreateInfo, pAllocator, pMessenger);
+}
+inline void vkDestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks *pAllocator)
+{
+    return Engine::Render::vulkanInstanceStub<"vkDestroyDebugUtilsMessengerEXT", void>(instance, debugMessenger, pAllocator);
+}
+inline VkResult vkGetSemaphoreCounterValueKHR(VkDevice device, VkSemaphore semaphore, uint64_t *pValue)
+{
+    return Engine::Render::vulkanDeviceStub<"vkGetSemaphoreCounterValueKHR", VkResult>(device, semaphore, pValue);
+}
+inline void vkCmdBeginDebugUtilsLabelEXT(VkCommandBuffer commandBuffer, const VkDebugUtilsLabelEXT *pLabelInfo)
+{
+    return Engine::Render::vulkanInstanceStub<"vkCmdBeginDebugUtilsLabelEXT", void>(commandBuffer, pLabelInfo);
+}
+inline void vkCmdEndDebugUtilsLabelEXT(VkCommandBuffer commandBuffer)
+{
+    return Engine::Render::vulkanInstanceStub<"vkCmdEndDebugUtilsLabelEXT", void>(commandBuffer);
+}
+inline void vkCmdPushDescriptorSetKHR(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint32_t set, uint32_t descriptorWriteCount, const VkWriteDescriptorSet *pDescriptorWrites)
+{
+    return Engine::Render::vulkanDeviceStub<"vkCmdPushDescriptorSetKHR", void>(commandBuffer, pipelineBindPoint, layout, set, descriptorWriteCount, pDescriptorWrites);
+}
 #endif
 
 #include "util/vulkanptr.h"
@@ -40,7 +66,7 @@ inline void vkCheck(VkResult result)
 
 #define VK_CHECK(...) vkCheck(__VA_ARGS__)
 
-//#define VK_LOG(x) LOG("VK: " << x)
+// #define VK_LOG(x) LOG("VK: " << x)
 #define VK_LOG(x)
 
 /// @endcond

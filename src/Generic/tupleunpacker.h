@@ -6,17 +6,45 @@
 namespace Engine {
 namespace TupleUnpacker {
 
-    template <typename Tuple, size_t... Is>
-    auto popFrontImpl(const Tuple &tuple, std::index_sequence<Is...>)
+    
+    template <typename T, typename... Ts, size_t... Is>
+    auto prependImpl(T &&val, std::tuple<Ts...> &&tuple, std::index_sequence<Is...>)
     {
-        return std::make_tuple(std::get<1 + Is>(tuple)...);
+        return std::tuple<T, Ts...> { std::forward<T>(val), std::get<Is>(std::move(tuple))... };
+    }
+
+    template <typename T, typename... Ts, size_t... Is>
+    auto prependImpl(T &&val, const std::tuple<Ts...> &tuple, std::index_sequence<Is...>)
+    {
+        return std::tuple<T, Ts...> { std::forward<T>(val), std::get<Is>(tuple)... };
+    }
+
+    template <typename T, typename Tuple>
+    auto prepend(T &&val, Tuple &&tuple)
+    {
+
+        return prependImpl(std::forward<T>(val), std::forward<Tuple>(tuple),
+            std::make_index_sequence<std::tuple_size_v<Tuple>>());
+    }
+
+
+    template <typename T, typename... Ts, size_t... Is>
+    auto popFrontImpl(std::tuple<T, Ts...> &&tuple, std::index_sequence<Is...>)
+    {
+        return std::tuple<Ts...>{std::get<1 + Is>(std::move(tuple))...};
+    }
+    
+    template <typename T, typename... Ts, size_t... Is>
+    auto popFrontImpl(const std::tuple<T, Ts...> &tuple, std::index_sequence<Is...>)
+    {
+        return std::tuple<Ts...>{std::get<1 + Is>(tuple)...};
     }
 
     template <typename Tuple>
-    auto popFront(const Tuple &tuple)
+    auto popFront(Tuple &&tuple)
     {
 
-        return popFrontImpl(tuple,
+        return popFrontImpl(std::forward<Tuple>(tuple),
             std::make_index_sequence<std::tuple_size_v<Tuple> - 1>());
     }
 

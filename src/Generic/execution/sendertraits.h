@@ -26,30 +26,18 @@ namespace Execution {
 
         static constexpr size_t count = sizeof...(T);
 
-        using recursive_t = decayed_t<typename type_pack<T...>::filter<is_recursive>::unpack_unique<void>>;
+        using recursive_t = decayed_t<typename type_pack<T...>::template filter<is_recursive>::template unpack_unique<void>>;
 
         static constexpr bool variadic = !std::same_as<recursive_t, void>;
 
         static constexpr size_t variadicIndex = []() {
             if constexpr (variadic) {
-                return type_pack<T...>::index<size_t, recursive<recursive_t>>;
+                return type_pack<T...>::template index<size_t, recursive<recursive_t>>;
             } else {
                 return std::numeric_limits<size_t>::max();
             }
         }();
 
-        static ExtendedValueTypeDesc
-        type(uint32_t index)
-        {
-            static constexpr ExtendedValueTypeDesc types[] = {
-                toValueTypeDesc<std::remove_reference_t<decayed_t<T>>>()...
-            };
-            if constexpr (variadic) {
-                if (index >= count)
-                    return toValueTypeDesc<recursive_t>();
-            }
-            return types[index];
-        }
     };
 
     template <typename Algorithm>

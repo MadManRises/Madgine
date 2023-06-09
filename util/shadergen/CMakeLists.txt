@@ -26,7 +26,7 @@ set(SPIRV_CROSS_CLI OFF CACHE BOOL "" FORCE)
 add_subdirectory(ext/SPIRV-Cross)
 
 
-add_executable(ShaderGen main.cpp shadergenGLSL.cpp shadergenHLSL.cpp shadergenSPIRV.cpp)
+add_executable(ShaderGen main.cpp shadergenGLSL.cpp shadergenGLSLES.cpp shadergenHLSL.cpp shadergenSPIRV.cpp)
 
 target_link_libraries(ShaderGen PRIVATE dxcompiler spirv-cross-glsl spirv-cross-hlsl spirv-cross-core)
 

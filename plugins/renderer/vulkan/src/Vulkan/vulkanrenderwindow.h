@@ -25,6 +25,8 @@ namespace Render {
 
         VkSurfaceKHR surface() const;
 
+        virtual void blit(RenderTarget *source) override;
+
     protected:
         void create(const Vector2i &size);
 
@@ -41,8 +43,7 @@ namespace Render {
         std::vector<VkImage> mSwapChainImages;
         std::vector<VulkanPtr<VkImageView, &vkDestroyImageView>> mSwapChainImageViews;
         std::vector<VulkanPtr<VkFramebuffer, &vkDestroyFramebuffer>> mFramebuffers;
-        VkFormat mFormat;
-        VkExtent2D mExtent;
+        VkSurfaceFormatKHR mFormat;        
     };
 
 }

@@ -13,8 +13,9 @@ namespace Render {
     extern uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
     extern void transitionImageLayout(VkCommandBuffer commandList, VkImage image, VkFormat format, VkImageAspectFlags aspectMask, VkImageLayout oldLayout, VkImageLayout newLayout);
 
-    VulkanRenderTarget::VulkanRenderTarget(VulkanRenderContext *context, bool global, std::string name)
-        : RenderTarget(context, global, name)
+    VulkanRenderTarget::VulkanRenderTarget(VulkanRenderContext *context, bool global, std::string name, size_t samples, RenderTarget *blitSource)
+        : RenderTarget(context, global, name, 1, blitSource)
+        , mSamples(samples)
     {
 
         mLastCompletedFenceValue = 5;
@@ -43,7 +44,67 @@ namespace Render {
         }
     }
 
-    void VulkanRenderTarget::setup(const Vector2i &size, VkFormat format, VkImageLayout layout, size_t dependencyCount, VkSubpassDependency *dependencies, bool createDepthView)
+    void VulkanRenderTarget::createRenderPass(size_t colorAttachmentCount, VkFormat format, VkImageLayout layout, bool createDepthBufferView, std::span<VkSubpassDependency> dependencies)
+    {
+
+        std::vector<VkAttachmentDescription> attachments { 1 + colorAttachmentCount };
+        std::vector<VkAttachmentReference> colorAttachmentRef { colorAttachmentCount };
+
+        attachments[0].format = VK_FORMAT_D24_UNORM_S8_UINT;
+        attachments[0].samples = static_cast<VkSampleCountFlagBits>(mSamples);
+
+        attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        attachments[0].storeOp = createDepthBufferView ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+
+        attachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+
+        attachments[0].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        attachments[0].finalLayout = createDepthBufferView ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+        for (size_t i = 0; i < colorAttachmentCount; ++i) {
+            attachments[i + 1].format = format;
+            attachments[i + 1].samples = static_cast<VkSampleCountFlagBits>(mSamples);
+
+            attachments[i + 1].loadOp = mBlitSource ? VK_ATTACHMENT_LOAD_OP_LOAD : VK_ATTACHMENT_LOAD_OP_CLEAR;
+            attachments[i + 1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+
+            attachments[i + 1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            attachments[i + 1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+
+            attachments[i + 1].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            attachments[i + 1].finalLayout = layout;
+
+            colorAttachmentRef[i].attachment = i + 1;
+            colorAttachmentRef[i].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        }
+
+        VkAttachmentReference depthAttachmentRef {};
+        depthAttachmentRef.attachment = 0;
+        depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+        VkSubpassDescription subpass {};
+        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+
+        subpass.colorAttachmentCount = colorAttachmentCount;
+        subpass.pColorAttachments = colorAttachmentRef.data();
+        subpass.pDepthStencilAttachment = &depthAttachmentRef;
+
+        VkRenderPassCreateInfo renderPassInfo {};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+        renderPassInfo.attachmentCount = 1 + colorAttachmentCount;
+        renderPassInfo.pAttachments = attachments.data();
+        renderPassInfo.subpassCount = 1;
+        renderPassInfo.pSubpasses = &subpass;
+        renderPassInfo.dependencyCount = dependencies.size();
+        renderPassInfo.pDependencies = dependencies.data();
+
+        mRenderPass.reset();
+        VkResult result = vkCreateRenderPass(GetDevice(), &renderPassInfo, nullptr, &mRenderPass);
+        VK_CHECK(result);
+    }
+
+    void VulkanRenderTarget::setup(const Vector2i &size, bool createDepthBufferView)
     {
         mSize = size;
 
@@ -63,10 +124,10 @@ namespace Render {
         imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
         imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-        if (createDepthView)
+        if (createDepthBufferView)
             imageInfo.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
         imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+        imageInfo.samples = static_cast<VkSampleCountFlagBits>(mSamples);
         imageInfo.flags = 0; // Optional
 
         VkResult result = vkCreateImage(GetDevice(), &imageInfo, nullptr, &mDepthImage);
@@ -98,59 +159,6 @@ namespace Render {
 
         result = vkCreateImageView(GetDevice(), &viewInfo, nullptr, &mDepthView);
         VK_CHECK(result);
-
-        VkAttachmentDescription attachments[2] {};
-        attachments[0].format = format;
-        attachments[0].samples = VK_SAMPLE_COUNT_1_BIT;
-
-        attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-
-        attachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-
-        attachments[0].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        attachments[0].finalLayout = layout;
-
-        attachments[1].format = VK_FORMAT_D24_UNORM_S8_UINT;
-        attachments[1].samples = VK_SAMPLE_COUNT_1_BIT;
-
-        attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        attachments[1].storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-
-        attachments[1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        attachments[1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-
-        attachments[1].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        attachments[1].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-        VkAttachmentReference colorAttachmentRef {};
-        colorAttachmentRef.attachment = 0;
-        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-        VkAttachmentReference depthAttachmentRef {};
-        depthAttachmentRef.attachment = 1;
-        depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-        VkSubpassDescription subpass {};
-        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-
-        subpass.colorAttachmentCount = 1;
-        subpass.pColorAttachments = &colorAttachmentRef;
-        subpass.pDepthStencilAttachment = &depthAttachmentRef;
-
-        VkRenderPassCreateInfo renderPassInfo {};
-        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassInfo.attachmentCount = 2;
-        renderPassInfo.pAttachments = attachments;
-        renderPassInfo.subpassCount = 1;
-        renderPassInfo.pSubpasses = &subpass;
-        renderPassInfo.dependencyCount = dependencyCount;
-        renderPassInfo.pDependencies = dependencies;
-
-        mRenderPass.reset();
-        result = vkCreateRenderPass(GetDevice(), &renderPassInfo, nullptr, &mRenderPass);
-        VK_CHECK(result);
     }
 
     void VulkanRenderTarget::shutdown()
@@ -169,6 +177,9 @@ namespace Render {
     {
         mCommandList = fetchCommandList(name(), false);
 
+        if (mBlitSource)
+            blit(mBlitSource);
+
         VkRenderPassBeginInfo renderPassInfo {};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderPassInfo.renderPass = mRenderPass;
@@ -177,7 +188,7 @@ namespace Render {
         renderPassInfo.renderArea.offset = { 0, 0 };
         renderPassInfo.renderArea.extent = { static_cast<uint32_t>(mSize.x), static_cast<uint32_t>(mSize.y) };
 
-        VkClearValue clearColors[2] { { { 0.2f, 0.3f, 0.3f, 1.0f } }, { { 1.0f, 1.0f, 1.0f, 1.0f } } };
+        VkClearValue clearColors[2] { { { 1.0f, 1.0f, 1.0f, 1.0f } }, { { 0.2f, 0.3f, 0.3f, 1.0f } } };
         renderPassInfo.clearValueCount = 2;
         renderPassInfo.pClearValues = clearColors;
 
@@ -350,6 +361,11 @@ namespace Render {
     VulkanRenderContext *VulkanRenderTarget::context() const
     {
         return static_cast<VulkanRenderContext *>(RenderTarget::context());
+    }
+
+    size_t VulkanRenderTarget::samples() const
+    {
+        return mSamples;
     }
 
 }

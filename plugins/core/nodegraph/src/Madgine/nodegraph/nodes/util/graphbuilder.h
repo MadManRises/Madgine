@@ -52,7 +52,7 @@ namespace NodeGraph {
     }
 
     template <typename TypedTraits>
-    using NodeHelper = SenderNode<TypedTraits::Algorithm>;
+    using NodeHelper = SenderNode<typename TypedTraits::Algorithm>;
 
     template <uint32_t baseIndex, typename _FlowIn, typename _Providers = type_pack<>, typename Writes = type_pack<>>
     struct ConnectionData {
@@ -110,7 +110,7 @@ namespace NodeGraph {
         }(),
             ...);
 
-        return ConnectionData<baseIndex + (!IsConnection<T> + ... + 0), FlowIn, typename Providers::append<std::conditional_t<IsConnection<T>, T, SenderConnection<baseIndex, 0, 0>>...>> { std::move(parent) };
+        return ConnectionData<baseIndex + (!IsConnection<T> + ... + 0), FlowIn, typename Providers::template append<std::conditional_t<IsConnection<T>, T, SenderConnection<baseIndex, 0, 0>>...>> { std::move(parent) };
     }
 
     template <typename TypedTraits, uint32_t baseIndex, typename FlowIn, typename Providers, typename Receivers>
@@ -165,11 +165,11 @@ namespace NodeGraph {
     {
         if constexpr (is_typed_algorithm<T>) {
             if constexpr (groupIndex == 0) {
-                return std::declval<typename Providers::template instantiate<subHelper5<T::F>::template type>>();
+                return std::declval<typename Providers::template instantiate<subHelper5<typename T::F>::template type>>();
             } else {
                 return []<size_t... Is>(std::index_sequence<Is...>)
                 {
-                    return std::declval<std::invoke_result_t<T::F, SenderConnection<nodeIndex, Is, groupIndex> &...>>();
+                    return std::declval<std::invoke_result_t<typename T::F, SenderConnection<nodeIndex, Is, groupIndex> &...>>();
                 }
                 (std::make_index_sequence<T::argCount> {});
             }
@@ -225,13 +225,13 @@ namespace NodeGraph {
             parent.mNodes.push_back(node);
             assert(parent.mNodes.size() == decltype(parent)::index);
 
-            using in_types = typename Execution::sender_traits<TypedTraits::Algorithm>::argument_types::filter<is_pred_sender>::unpack_unique<Execution::pred_sender<Execution::signature<>>>::Signature;
+            using in_types = typename Execution::sender_traits<typename TypedTraits::Algorithm>::argument_types::template filter<is_pred_sender>::template unpack_unique<Execution::pred_sender<Execution::signature<>>>::Signature;
             static_assert(in_types::count == decltype(parent)::Providers::size || (in_types::count <= decltype(parent)::Providers::size && in_types::variadic));
-            connectHelper<Execution::sender_traits<TypedTraits::Algorithm>>(graph, parent, graph.nodeIndex(node), std::make_index_sequence<decltype(parent)::Providers::size> {});
+            connectHelper<Execution::sender_traits<typename TypedTraits::Algorithm>>(graph, parent, graph.nodeIndex(node), std::make_index_sequence<decltype(parent)::Providers::size> {});
 
-            ConnectionData incremented = ConnectionData<decltype(parent)::index + 1, decltype(parent)::FlowIn, decltype(parent)::Providers, type_pack<>> { std::move(parent) };
+            ConnectionData incremented = ConnectionData<decltype(parent)::index + 1, typename decltype(parent)::FlowIn, typename decltype(parent)::Providers, type_pack<>> { std::move(parent) };
 
-            ConnectionData erased = ConnectionData<decltype(incremented)::index, decltype(incremented)::FlowIn, type_pack<>, type_pack<>> { std::move(incremented) };
+            ConnectionData erased = ConnectionData<decltype(incremented)::index, typename decltype(incremented)::FlowIn, type_pack<>, type_pack<>> { std::move(incremented) };
 
             return erased;
         } else {
@@ -256,8 +256,8 @@ namespace NodeGraph {
         if constexpr (hasNode<TypedTraits>) {
             return ConnectionData<
                 decltype(sub)::index,
-                std::conditional_t<Execution::sender_traits<TypedTraits::Algorithm>::constant, decltype(sub)::FlowIn, SenderConnection<nodeIndex, 0, 0>>,
-                typename NodeHelper<TypedTraits>::Sender::value_types<type_pack>::transform_index<helper<nodeIndex>::template type>::concat<typename decltype(sub)::Providers>, type_pack<>> {
+                std::conditional_t<Execution::sender_traits<typename TypedTraits::Algorithm>::constant, typename decltype(sub)::FlowIn, SenderConnection<nodeIndex, 0, 0>>,
+                typename NodeHelper<TypedTraits>::Sender::template value_types<type_pack>::template transform_index<helper<nodeIndex>::template type>::template concat<typename decltype(sub)::Providers>, type_pack<>> {
                 std::move(sub)
             };
         } else

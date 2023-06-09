@@ -9,6 +9,7 @@ namespace Util {
 
     INTERFACES_EXPORT void setLog(Log *log = nullptr);
     INTERFACES_EXPORT void log(std::string_view msg, MessageType lvl, const char *file = nullptr);
+    INTERFACES_EXPORT void log_fatal(std::string_view msg);
 
     struct INTERFACES_EXPORT LogDummy {
         LogDummy(MessageType lvl, const char *file = nullptr, size_t line = 0);

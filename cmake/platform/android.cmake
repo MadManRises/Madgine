@@ -8,6 +8,8 @@ if (ANDROID)
 
 	set (Android_List_dir ${CMAKE_CURRENT_LIST_DIR})
 
+	set (ANDROID_DEPENDENCIES "" CACHE INTERNAL "")
+
 	if (NOT ANDROID_SDK)
 		MESSAGE(SEND_ERROR "No ANDROID_SDK location provided!")
 	endif()
@@ -38,6 +40,12 @@ if (ANDROID)
 		set(target ${target})
 
 		string(REGEX REPLACE "\\\\" "\\\\\\\\" ANDROID_SDK_ESCAPED "${ANDROID_SDK}")
+
+		if (ANDROID_DEPENDENCIES)
+			list(JOIN ANDROID_DEPENDENCIES "', '" ANDROID_ADDITIONAL_DEPENDENCIES)
+			set(ANDROID_ADDITIONAL_DEPENDENCIES ", '${ANDROID_ADDITIONAL_DEPENDENCIES}'")
+			
+		endif()
 
 		configure_file(${Android_List_dir}/android/build.gradle.in build.gradle @ONLY)
 		configure_file(${Android_List_dir}/android/local.properties.in local.properties @ONLY)

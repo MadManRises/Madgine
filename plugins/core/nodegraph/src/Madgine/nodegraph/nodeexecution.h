@@ -6,8 +6,12 @@
 #include "Generic/execution/algorithm.h"
 #include "Generic/execution/execution.h"
 #include "Generic/execution/state.h"
+#include "Generic/execution/sendertraits.h"
 
 #include "Meta/keyvalue/valuetype.h"
+
+#include "nodeinterpreter.h"
+#include "nodebase.h"
 
 namespace Engine {
 namespace NodeGraph {
@@ -74,7 +78,7 @@ namespace NodeGraph {
         template <typename Rec>
         struct state : Execution::base_state<Rec> {
 
-            template <typename T>
+            template <typename Ty>
             struct typed_Value : ValueType {
                 using ValueType::operator=;
             };
@@ -86,17 +90,17 @@ namespace NodeGraph {
             void helper(std::index_sequence<I...>)
             {
                 size_t variadicIndex = 0;
-                NodeInterpretHandle &handle = Execution::get_context(mRec);
+                NodeInterpretHandle &handle = Execution::get_context(this->mRec);
                 std::tuple<typed_Value<T>...> data;
-                TupleUnpacker::forEach(data, [&]<typename T>(typed_Value<T> &v) {
-                    if constexpr (InstanceOf<T, Execution::recursive>) {
+                TupleUnpacker::forEach(data, [&]<typename Ty>(typed_Value<Ty> &v) {
+                    if constexpr (InstanceOf<Ty, Execution::recursive>) {
                         assert(mVariadicBuffer);
                         v = (*mVariadicBuffer)[variadicIndex++];
                     } else {
                         handle.read(v, mIndex++);
                     }
                 });
-                set_value(std::get<I>(data).as<decayed_t<T>>()...);
+                this->set_value(std::get<I>(data).template as<decayed_t<T>>()...);
             }
 
             size_t mIndex = 0;

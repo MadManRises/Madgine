@@ -32,7 +32,7 @@ namespace Render {
     {
         mPipeline.create({ .vs = "bloom", .ps = "bloom", .bufferSizes = { sizeof(BloomData) } });
 
-        mBlurTarget = target->context()->createRenderTexture(target->size(), { .mIterations = 10, .mFormat = FORMAT_RGBA16F });
+        mBlurTarget = target->context()->createRenderTexture(target->size(), { .mFormat = FORMAT_RGBA16F, .mIterations = 10 });
 
         mBlurTarget->addRenderPass(&mBlur);
 

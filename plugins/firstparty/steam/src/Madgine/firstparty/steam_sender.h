@@ -18,7 +18,7 @@ namespace FirstParty {
                     }
                     void callback(R *result, bool bIOFailure)
                     {
-                        mRec.set_value(GenericResult::SUCCESS, *result);
+                        mRec.set_value(*result);
                     }
                     Rec mRec;
                     SteamAPICall_t mCall;

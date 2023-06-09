@@ -80,9 +80,14 @@ namespace NodeGraph {
         std::vector<DataInPinPrototype> mDataInPins;
         std::vector<DataOutPinPrototype> mDataOutPins;
 
+        struct NodeInterpreterWrapper : NodeInterpreter, private KeyValueReceiver, private Execution::VirtualReceiverBase<GenericResult> {
+            void start();
+            virtual void set_value() override;
+        };
+
         auto interpret(const ArgumentList &args = {}) const
         {
-            return Execution::make_virtual_sender<NodeInterpreter, GenericResult, ArgumentList>(this, args);
+            return Execution::make_virtual_sender<NodeInterpreterWrapper, GenericResult, ArgumentList>(this, args);
         }
 
     protected:

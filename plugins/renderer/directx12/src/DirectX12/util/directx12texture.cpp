@@ -9,9 +9,10 @@
 namespace Engine {
 namespace Render {
 
-    DirectX12Texture::DirectX12Texture(TextureType type, bool isRenderTarget, DataFormat format, size_t width, size_t height, const ByteBuffer &data)
+    DirectX12Texture::DirectX12Texture(TextureType type, bool isRenderTarget, DataFormat format, size_t width, size_t height, size_t samples, const ByteBuffer &data)
         : Texture(type, format, { static_cast<int>(width), static_cast<int>(height) })
         , mIsRenderTarget(isRenderTarget)
+        , mSamples(samples)
     {
         DXGI_FORMAT xFormat;
         D3D12_SRV_DIMENSION dimension;
@@ -29,8 +30,11 @@ namespace Render {
             std::terminate();
         }
 
+        assert(samples == 1 || type == TextureType_2DMultiSample);
+
         switch (type) {
-        case TextureType_2D: {
+        case TextureType_2D:
+        case TextureType_2DMultiSample: {
             D3D12_RESOURCE_DESC textureDesc {};
 
             textureDesc.DepthOrArraySize = 1;
@@ -38,7 +42,7 @@ namespace Render {
             textureDesc.Width = width;
             textureDesc.Height = height;
             textureDesc.MipLevels = 1;
-            textureDesc.SampleDesc.Count = 1;
+            textureDesc.SampleDesc.Count = samples;
             textureDesc.SampleDesc.Quality = 0;
             textureDesc.Flags = isRenderTarget ? D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET : D3D12_RESOURCE_FLAG_NONE;
             textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -87,7 +91,7 @@ namespace Render {
 
                 list.attachResource(std::move(uploadHeap));
             }
-            dimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+            dimension = type == TextureType_2DMultiSample ? D3D12_SRV_DIMENSION_TEXTURE2DMS : D3D12_SRV_DIMENSION_TEXTURE2D;
 
             break;
         }
@@ -108,9 +112,10 @@ namespace Render {
         DX12_CHECK();
     }
 
-    DirectX12Texture::DirectX12Texture(TextureType type, bool isRenderTarget, DataFormat format)
+    DirectX12Texture::DirectX12Texture(TextureType type, bool isRenderTarget, DataFormat format, size_t samples)
         : Texture(type, format)
         , mIsRenderTarget(isRenderTarget)
+        , mSamples(samples)
     {
     }
 
@@ -118,6 +123,7 @@ namespace Render {
         : Texture(std::move(other))
         , mResource(std::exchange(other.mResource, nullptr))
         , mIsRenderTarget(std::exchange(other.mIsRenderTarget, false))
+        , mSamples(std::exchange(other.mSamples, 0))
     {
     }
 
@@ -131,6 +137,7 @@ namespace Render {
         Texture::operator=(std::move(other));
         std::swap(mResource, other.mResource);
         std::swap(mIsRenderTarget, other.mIsRenderTarget);
+        std::swap(mSamples, other.mSamples);
         return *this;
     }
 
@@ -140,12 +147,13 @@ namespace Render {
             mResource.reset();
             DirectX12RenderContext::getSingleton().mDescriptorHeap.deallocate(DirectX12RenderContext::getSingleton().mDescriptorHeap.fromGpuHandle({ mTextureHandle }));
             mTextureHandle = 0;
+            mSamples = 0;
         }
     }
 
     void DirectX12Texture::setData(Vector2i size, const ByteBuffer &data)
     {
-        *this = DirectX12Texture { mType, mIsRenderTarget, mFormat, static_cast<size_t>(size.x), static_cast<size_t>(size.y), data };
+        *this = DirectX12Texture { mType, mIsRenderTarget, mFormat, static_cast<size_t>(size.x), static_cast<size_t>(size.y), mSamples, data };
     }
 
     void DirectX12Texture::setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data)

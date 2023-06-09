@@ -91,7 +91,7 @@ namespace Threading {
         {
             bool before = mStopped.test_and_set();
             assert(!before);
-            mStub->disconnect(this);
+            this->mStub->disconnect(this);
         }
 
         std::stop_callback<callback> mCallback;

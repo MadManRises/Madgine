@@ -45,8 +45,9 @@ namespace Render {
         hr = swapChain->QueryInterface(&mSwapChain);
         DX12_CHECK(hr);
 
-        mTargetViews[0] = context->mRenderTargetDescriptorHeap.allocate();
-        mTargetViews[1] = context->mRenderTargetDescriptorHeap.allocate();
+        
+        mCachedTargetViews[0] = context->mRenderTargetDescriptorHeap.allocate();
+        mCachedTargetViews[1] = context->mRenderTargetDescriptorHeap.allocate();
 
         createRenderTargetViews();
 
@@ -56,7 +57,7 @@ namespace Render {
         // render target view.
 
         InterfacesVector size = w->renderSize();
-        setup(mTargetViews[0], { size.x, size.y });
+        setup({ mCachedTargetViews[0] }, { size.x, size.y });
     }
 
     DirectX12RenderWindow::~DirectX12RenderWindow()
@@ -66,7 +67,7 @@ namespace Render {
 
     bool DirectX12RenderWindow::skipFrame()
     {
-        if (!mTargetView && context()->isFenceComplete(mResizeFence)) {
+        if (mTargetViews.empty() && context()->isFenceComplete(mResizeFence)) {
 
             for (size_t i = 0; i < 2; ++i) {
                 mBackBuffers[i].reset();
@@ -77,14 +78,14 @@ namespace Render {
 
             createRenderTargetViews();
 
-            setup(mTargetViews[0], mResizeTarget);                
+            setup({ mCachedTargetViews[0] }, mResizeTarget);                
         }
-        return !mTargetView;
+        return mTargetViews.empty();
     }
 
     void DirectX12RenderWindow::beginFrame()
     {
-        mTargetView = mTargetViews[mSwapChain->GetCurrentBackBufferIndex()];
+        mTargetViews[0] = mCachedTargetViews[mSwapChain->GetCurrentBackBufferIndex()];        
 
         DirectX12RenderTarget::beginFrame();
 
@@ -130,13 +131,13 @@ namespace Render {
 
             mBackBuffers[i]->SetName((L"Window - BackBuffer " + std::to_wstring(i)).c_str());
 
-            GetDevice()->CreateRenderTargetView(mBackBuffers[i], nullptr, DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(mTargetViews[i]));
+            GetDevice()->CreateRenderTargetView(mBackBuffers[i], nullptr, DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(mCachedTargetViews[i]));
         }
     }
 
     bool DirectX12RenderWindow::resizeImpl(const Vector2i &size)
     {
-        mTargetView.reset();
+        mTargetViews.clear();
         mResizeFence = context()->currentFence();
         mResizeTarget = size;
         

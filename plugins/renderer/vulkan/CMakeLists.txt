@@ -37,3 +37,9 @@ target_link_libraries(VulkanTools PRIVATE Vulkan::Vulkan)
 
 add_shadergen_target(Vulkan -SPIRV)
 
+
+if (ANDROID)
+	list(APPEND ANDROID_DEPENDENCIES ${CMAKE_CURRENT_SOURCE_DIR}/ext/android_validation_layer;${ANDROID_DEPENDENCIES})
+	set(ANDROID_DEPENDENCIES "${ANDROID_DEPENDENCIES}" CACHE INTERNAL "")
+endif ()
+

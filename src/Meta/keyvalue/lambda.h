@@ -87,7 +87,7 @@ private:
     static void sGetter(ValueType &retVal, const TypedScopePtr &scope)
     {
         assert(scope.mType == &sMetaTable);
-        to_ValueType<true>(retVal, BoundApiFunction { &sFunctionTable, scope });
+        to_ValueType(retVal, BoundApiFunction { &sFunctionTable, scope });
     }
 
     static const constexpr std::pair<const char *, Accessor> sMembers[2] {

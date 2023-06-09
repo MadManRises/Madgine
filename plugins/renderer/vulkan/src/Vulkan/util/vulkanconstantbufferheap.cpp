@@ -70,6 +70,14 @@ namespace Render {
         return *this;
     }
 
+    void VulkanConstantBufferHeap::reset()
+    {
+        mTempHeap.reset();
+        mTempMemory.reset();
+        mPersistentHeap.reset();
+        mPersistentMemory.reset();
+    }
+
     OffsetPtr VulkanConstantBufferHeap::allocateTemp(size_t size)
     {
         /* for (auto it = mFreeListTemp.begin(); it != mFreeListTemp.end(); ++it) {

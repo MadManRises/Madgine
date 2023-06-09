@@ -28,7 +28,7 @@ namespace Ini {
 
     bool IniFile::hasSection(std::string_view key) const
     {
-        return mSections.contains(key);
+        return mSections.contains(std::string { key });
     }
 
     void IniFile::removeSection(std::string_view key)

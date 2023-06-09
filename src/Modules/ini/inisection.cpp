@@ -18,7 +18,7 @@ namespace Ini {
 
     std::string IniSection::operator[](std::string_view key) const
     {
-        if (!mValues.contains(key))
+        if (!mValues.contains(std::string { key }))
             return "";
         return mValues.at(std::string { key });
     }

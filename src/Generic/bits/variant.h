@@ -36,7 +36,7 @@ struct BitVariant {
         if (i != 0) {
             using F = void (*)(type *);
             F fs[] = {
-                [](BitVariant *v, type *other) {
+                [this](BitVariant *v, type *other) {
                     Ty *p = address<Ty>(other->mData);
                     v->set<Ty>(std::move(*p));
                     p->~Ty();

@@ -25,7 +25,7 @@ namespace Serialize {
                 return Serialize::read(in, value, name);
             } else if constexpr (std::same_as<T, std::monostate>) {
                 Void v;
-                Serialize::read(in, v, name);
+                return Serialize::read(in, v, name);
             } else
                 throw 0;
         });

@@ -18,24 +18,25 @@
 namespace Engine {
 namespace Render {
 
-    DirectX12RenderTarget::DirectX12RenderTarget(DirectX12RenderContext *context, bool global, std::string name)
-        : RenderTarget(context, global, name)
+    DirectX12RenderTarget::DirectX12RenderTarget(DirectX12RenderContext *context, bool global, std::string name, RenderTarget *blitSource)
+        : RenderTarget(context, global, name, 1, blitSource)
     {
+        mDepthStencilView = DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.allocate();
     }
 
     DirectX12RenderTarget::~DirectX12RenderTarget()
     {
     }
 
-    void DirectX12RenderTarget::setup(OffsetPtr targetView, const Vector2i &size, D3D12_RESOURCE_STATES depthBufferState)
+    void DirectX12RenderTarget::setup(std::vector<OffsetPtr> targetViews, const Vector2i &size, size_t samples, bool createDepthBufferView)
     {
-        mTargetView = targetView;
+        mTargetViews = targetViews;
 
         mDepthStencilBuffer.reset();
 
         D3D12_HEAP_PROPERTIES depthHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 
-        D3D12_RESOURCE_DESC depthResourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_R24G8_TYPELESS, size.x, size.y);
+        D3D12_RESOURCE_DESC depthResourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_R24G8_TYPELESS, size.x, size.y, 1, 1, samples);
         depthResourceDesc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 
         CD3DX12_CLEAR_VALUE depthOptimizedClearValue(DXGI_FORMAT_D24_UNORM_S8_UINT, 1.0f, 0);
@@ -44,7 +45,7 @@ namespace Render {
             &depthHeapProperties,
             D3D12_HEAP_FLAG_NONE,
             &depthResourceDesc,
-            depthBufferState,
+            createDepthBufferView ? D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE : D3D12_RESOURCE_STATE_DEPTH_WRITE,
             &depthOptimizedClearValue,
             IID_PPV_ARGS(&mDepthStencilBuffer));
         DX12_CHECK(hr);
@@ -52,10 +53,8 @@ namespace Render {
         D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc {};
         dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
         dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-        dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+        dsvDesc.ViewDimension = samples > 1 ? D3D12_DSV_DIMENSION_TEXTURE2DMS : D3D12_DSV_DIMENSION_TEXTURE2D;
 
-        if (!mDepthStencilView)
-            mDepthStencilView = DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.allocate();
         GetDevice()->CreateDepthStencilView(mDepthStencilBuffer, &dsvDesc, DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.cpuHandle(mDepthStencilView));
     }
 
@@ -76,7 +75,8 @@ namespace Render {
             for (RenderData *data : pass->dependencies()) {
                 DirectX12RenderTexture *tex = dynamic_cast<DirectX12RenderTexture *>(data);
                 if (tex) {
-                    mCommandList.attachResource(tex->texture());
+                    for (const DirectX12Texture &texture : tex->textures())
+                        mCommandList.attachResource(texture);
                 }
             }
         }
@@ -117,13 +117,18 @@ namespace Render {
 
         constexpr FLOAT color[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
 
-        D3D12_CPU_DESCRIPTOR_HANDLE targetView = DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(mTargetView);
+        std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> targetViews { mTargetViews.size() };
+        for (size_t i = 0; i < targetViews.size(); ++i)
+            targetViews[i] = DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(mTargetViews[i]);
         D3D12_CPU_DESCRIPTOR_HANDLE depthStencilView = DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.cpuHandle(mDepthStencilView);
 
-        mCommandList->ClearRenderTargetView(targetView, color, 0, nullptr);
-        mCommandList->ClearDepthStencilView(depthStencilView, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+        if (!mBlitSource) {
+            for (D3D12_CPU_DESCRIPTOR_HANDLE &targetView : targetViews)
+                mCommandList->ClearRenderTargetView(targetView, color, 0, nullptr);
+            mCommandList->ClearDepthStencilView(depthStencilView, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+        }
 
-        mCommandList->OMSetRenderTargets(1, &targetView, false, &depthStencilView);
+        mCommandList->OMSetRenderTargets(targetViews.size(), targetViews.data(), false, &depthStencilView);
         /*sDeviceContext->OMSetDepthStencilState(mDepthStencilState, 1);
         sDeviceContext->OMSetBlendState(mBlendState, 0, 0xffffffff);*/
 

@@ -3,6 +3,11 @@
 #include "log.h"
 #include "standardlog.h"
 
+#if WINDOWS
+#define NOMINMAX
+#include <Windows.h>
+#endif
+
 namespace Engine {
 namespace Util {
 
@@ -19,6 +24,15 @@ namespace Util {
             sLog->log(msg, level, file, line);
         else
             StandardLog::sLog(msg, level);
+    }
+
+    void log_fatal(std::string_view msg) //TODO: Add Fatal as message level
+    {
+#if WINDOWS
+        OutputDebugStringA(msg.data());
+#else
+//#    error "Unsupported Platform!"
+#endif
     }
 
     LogDummy::LogDummy(MessageType lvl, const char *file, size_t line)

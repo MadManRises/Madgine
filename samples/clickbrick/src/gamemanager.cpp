@@ -37,6 +37,8 @@
 
 #include "Madgine/render/scenemainwindowcomponent.h"
 
+#include "Madgine/render/rendercontext.h"
+
 UNIQUECOMPONENT(ClickBrick::GameManager)
 
 METATABLE_BEGIN_BASE(ClickBrick::GameManager, Engine::Input::HandlerBase)
@@ -62,11 +64,16 @@ Engine::Threading::Task<bool> GameManager::init()
     mCamera.mPosition = { 0, 0, -10 };
     mCamera.mOrientation = {};
 
+    mGameRenderTarget = mUI.window().getRenderer()->createRenderTexture({ 1, 1 }, {});
+    mGameRenderTarget->addRenderPass(&mSceneRenderer);
+
     co_return co_await HandlerBase::init();
 }
 
 Engine::Threading::Task<void> GameManager::finalize()
 {
+    mGameRenderTarget.reset();
+
     co_await HandlerBase::finalize();
 }
 
@@ -76,7 +83,7 @@ void GameManager::setWidget(Engine::Widgets::WidgetBase *w)
 
     if (widget()) {
         mGameWindow = widget()->getChildRecursive<Engine::Widgets::SceneWindow>("GameView");
-        mGameWindow->getRenderTarget()->addRenderPass(&mSceneRenderer);
+        mGameWindow->setRenderSource(mGameRenderTarget.get());
 
         mScoreLabel = widget()->getChildRecursive<Engine::Widgets::Label>("Score");
         mLifeLabel = widget()->getChildRecursive<Engine::Widgets::Label>("Life");

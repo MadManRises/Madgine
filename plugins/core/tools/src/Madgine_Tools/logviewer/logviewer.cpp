@@ -22,6 +22,8 @@
 
 #include "../renderer/imroot.h"
 
+#include "imgui/imgui_internal.h"
+
 UNIQUECOMPONENT(Engine::Tools::LogViewer);
 
 METATABLE_BEGIN_BASE(Engine::Tools::LogViewer, Engine::Tools::ToolBase)
@@ -33,6 +35,30 @@ SERIALIZETABLE_END(Engine::Tools::LogViewer)
 
 namespace Engine {
 namespace Tools {
+
+    static void SeekCursorAndSetupPrevLine(float pos_y, float line_height)
+    {
+        // Set cursor position and a few other things so that SetScrollHereY() and Columns() can work when seeking cursor.
+        // FIXME: It is problematic that we have to do that here, because custom/equivalent end-user code would stumble on the same issue.
+        // The clipper should probably have a final step to display the last item in a regular manner, maybe with an opt-out flag for data sets which may have costly seek?
+        ImGuiContext &g = *GImGui;
+        ImGuiWindow *window = g.CurrentWindow;
+        float off_y = pos_y - window->DC.CursorPos.y;
+        window->DC.CursorPos.y = pos_y;
+        window->DC.CursorMaxPos.y = ImMax(window->DC.CursorMaxPos.y, pos_y - g.Style.ItemSpacing.y);
+        window->DC.CursorPosPrevLine.y = window->DC.CursorPos.y - line_height; // Setting those fields so that SetScrollHereY() can properly function after the end of our clipper usage.
+        window->DC.PrevLineSize.y = (line_height - g.Style.ItemSpacing.y); // If we end up needing more accurate data (to e.g. use SameLine) we may as well make the clipper have a fourth step to let user process and display the last item in their list.
+        if (ImGuiOldColumns *columns = window->DC.CurrentColumns)
+            columns->LineMinY = window->DC.CursorPos.y; // Setting this so that cell Y position are set properly
+        if (ImGuiTable *table = g.CurrentTable) {
+            table->RowPosY2 = window->DC.CursorPos.y;
+            if (table->IsInsideRow)
+                ImGui::TableEndRow(table);
+            const int row_increase = (int)((off_y / line_height) + 0.5f);
+            //table->CurrentRow += row_increase; // Can't do without fixing TableEndRow()
+            table->RowBgColorCounter += row_increase;
+        }
+    }
 
     static constexpr size_t sLookupStep = 1;
     static constexpr std::array<const char *, 4> sIcons { "D", IMGUI_ICON_INFO, IMGUI_ICON_WARNING, IMGUI_ICON_ERROR };
@@ -76,17 +102,15 @@ namespace Tools {
             if (filterChanged || first) {
                 first = false;
                 mFilteredMsgCount = 0;
+                mFilteredOffsetAcc = 0.0f;
                 mLookup.clear();
                 size_t i = 0;
                 for (LogEntry &entry : mEntries) {
                     if (filter(entry))
-                        addFilteredMessage(i);
+                        addFilteredMessage(i, entry.mMsg);
                     ++i;
                 }
             }
-
-            auto end = mEntries.end();
-            auto begin = mEntries.size() <= 100 ? mEntries.begin() : std::prev(end, 100);
 
             if (ImGui::BeginTable("Messages", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Hideable | ImGuiTableFlags_SizingFixedFit)) {
 
@@ -97,23 +121,45 @@ namespace Tools {
                 ImGui::TableSetupScrollFreeze(0, 1);
                 ImGui::TableHeadersRow();
 
-                ImGuiListClipper clipper(mFilteredMsgCount);
-                while (clipper.Step()) {
-                    if (clipper.DisplayStart == clipper.DisplayEnd)
-                        continue;
-                    size_t skip = clipper.DisplayStart % sLookupStep;
-                    size_t count = clipper.DisplayEnd - clipper.DisplayStart;
-                    for (auto it = mEntries.begin() + mLookup[clipper.DisplayStart / sLookupStep]; it != mEntries.end() && count > 0; ++it) {
+                ImGui::TableNextRow();
+
+                ImGuiWindow *window = ImGui::GetCurrentWindow();
+                float lossyness = window->DC.CursorStartPosLossyness.y;
+
+                float startPos = window->DC.CursorPos.y;
+
+                float startOffset = window->ClipRect.Min.y - startPos - lossyness;
+                float endOffset = window->ClipRect.Max.y - startPos - lossyness;
+
+                auto begin = std::ranges::find_if(
+                    std::views::reverse(mLookup), [&](float off) { return off <= startOffset; }, &Lookup::mOffset)
+                              .base();
+                if (begin != mLookup.begin())
+                    --begin;
+
+                auto end = std::ranges::find_if(
+                    mLookup, [&](float off) { return off >= endOffset; }, &Lookup::mOffset);
+
+                if (begin != mLookup.end()) {
+
+                    const Lookup &lookup = *begin;
+                    size_t count = (end - begin) * sLookupStep;
+
+                    auto it = mEntries.begin() + lookup.mIndex;
+                    SeekCursorAndSetupPrevLine(startPos + lookup.mOffset + lossyness, calculateTextHeight(it->mMsg));
+
+                    for (; it != mEntries.end() && count > 0; ++it) {
                         const LogEntry &entry = *it;
                         if (filter(entry)) {
-                            if (skip > 0) {
+                            /* if (skip > 0) {
                                 --skip;
-                            } else {
+                            } else */
+                            {
                                 ImGui::TableNextRow();
                                 ImGui::TableNextColumn();
                                 ImGui::Text("%s", sIcons[entry.mType]);
                                 ImGui::TableNextColumn();
-                                ImGui::Selectable(entry.mMsg.c_str(), false, ImGuiSelectableFlags_SpanAllColumns);
+                                ImGui::TextWrapped("%s", entry.mMsg.c_str());
                                 ImGui::TableNextColumn();
                                 if (entry.mFile)
                                     ImGui::Text("%s", entry.mFile);
@@ -122,9 +168,15 @@ namespace Tools {
                                     ImGui::Text("%zu", entry.mLine);
                                 --count;
                             }
-                        }                        
+                        }
                     }
                 }
+
+                if (!mLookup.empty()) {
+                    const Lookup &last = *std::prev(mLookup.end());
+                    SeekCursorAndSetupPrevLine(startPos + last.mOffset + lossyness, calculateTextHeight(mEntries[last.mIndex].mMsg));
+                }
+
                 ImGui::EndTable();
             }
         }
@@ -146,7 +198,7 @@ namespace Tools {
         ++mMsgCounts[lml];
         std::lock_guard guard { mMutex };
         if (filter(mEntries.emplace_back(std::string { message }, lml, file, line)))
-            addFilteredMessage(mEntries.size() - 1);
+            addFilteredMessage(mEntries.size() - 1, message);
     }
 
     std::string_view LogViewer::key() const
@@ -159,12 +211,20 @@ namespace Tools {
         return mMsgFilters[entry.mType] && (mMessageWordFilter.empty() || StringUtil::contains(entry.mMsg, mMessageWordFilter));
     }
 
-    void LogViewer::addFilteredMessage(size_t index)
+    void LogViewer::addFilteredMessage(size_t index, std::string_view text)
     {
         if (mFilteredMsgCount % sLookupStep == 0) {
-            mLookup.push_back(index);
+            mLookup.push_back({ index, mFilteredOffsetAcc });
         }
         ++mFilteredMsgCount;
+        if (ImGui::GetCurrentContext() && ImGui::GetCurrentContext()->Font)
+            mFilteredOffsetAcc += calculateTextHeight(text);
+    }
+
+    float LogViewer::calculateTextHeight(std::string_view text)
+    {
+        
+        return ImGui::CalcTextSize(text.data(), text.data() + text.size(), false, 0.0f).y + ImGui::GetCurrentContext()->Style.ItemSpacing.y;
     }
 
 }

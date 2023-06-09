@@ -98,12 +98,19 @@ endmacro(add_plugin)
 
 function(target_link_plugins target)
 
+	set(options NO_FATAL)
+	set(oneValueArgs)
+	set(multiValueArgs)
+	cmake_parse_arguments(DEPENDENCIES "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})	
+
 	get_target_property(plugin_dependencies ${target} PLUGIN_DEPENDENCIES)
 	if (NOT plugin_dependencies)
 		set(plugin_dependencies)
 	endif()
 
-	foreach(plugin ${ARGN})
+	get_target_property(excludeSelf ${target} EXCLUDE_FROM_ALL)
+
+	foreach(plugin ${DEPENDENCIES_UNPARSED_ARGUMENTS})
 
 		get_target_property(exclude ${plugin} EXCLUDE_FROM_ALL)
 		if (NOT exclude)
@@ -111,7 +118,9 @@ function(target_link_plugins target)
 			list(APPEND plugin_dependencies ${plugin})
 			#MESSAGE(STATUS "Linking ${plugin} to ${target}")
 		else()
-			#MESSAGE(STATUS "Not linking ${plugin} to ${target}")
+			if (NOT excludeSelf AND NOT DEPENDENCIES_NO_FATAL)
+				MESSAGE(FATAL_ERROR "Trying to link ${plugin} to ${target}, but ${plugin} is not enabled in the plugin configuration.")
+			endif()
 		endif()
 
 	endforeach()
@@ -149,7 +158,7 @@ endfunction(target_link_plugin_groups)
 function(target_depend_on_all_plugins target)
 	
 	if (NOT MODULES_ENABLE_PLUGINS)
-		target_link_plugins(${target} ${PLUGIN_LIST})
+		target_link_plugins(${target} ${PLUGIN_LIST} NO_FATAL)
 	else()
 		add_dependencies(${target} ${PLUGIN_LIST})
 	endif()

@@ -5,7 +5,6 @@
 #    include "windowapi.h"
 #    include "windowsettings.h"
 
-#    include <EGL/egl.h>
 #    include <android/input.h>
 #    include <android/native_window.h>
 
@@ -25,36 +24,12 @@ namespace Window {
 
     DLL_EXPORT SystemVariable<ANativeWindow *> sNativeWindow = nullptr;
 
-    DLL_EXPORT EGLDisplay sDisplay = EGL_NO_DISPLAY;
-
     DLL_EXPORT AInputQueue *sQueue = nullptr;
 
-    static struct DisplayGuard {
-        DisplayGuard()
-        {
-            sDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-            if (sDisplay != EGL_NO_DISPLAY) {
-                if (!eglInitialize(sDisplay, nullptr, nullptr))
-                    sDisplay = EGL_NO_DISPLAY;
-            }
-        }
-
-        ~DisplayGuard()
-        {
-            if (sDisplay != EGL_NO_DISPLAY)
-                eglTerminate(sDisplay);
-        }
-    } sDisplayGuard;
-
     struct AndroidWindow final : OSWindow {
-        AndroidWindow(EGLSurface surface, WindowEventListener *listener)
-            : OSWindow((uintptr_t)surface, listener)
+        AndroidWindow(ANativeWindow *window, WindowEventListener *listener)
+            : OSWindow((uintptr_t)window, listener)
         {
-            EGLint width;
-            EGLint height;
-            if (!eglQuerySurface(sDisplay, surface, EGL_WIDTH, &width) || !eglQuerySurface(sDisplay, surface, EGL_HEIGHT, &height))
-                std::terminate();
-            mSize = { width, height };
         }
 
         bool handleMotionEvent(const AInputEvent *event)
@@ -116,14 +91,11 @@ namespace Window {
             return handled;
         }
 
-        InterfacesVector mSize;
-
-        //Input
+        // Input
         InterfacesVector mLastKnownMousePos;
     };
 
-    static std::unordered_map<EGLSurface, AndroidWindow>
-        sWindows;
+    static std::optional<AndroidWindow> sWindow;
 
     void OSWindow::update()
     {
@@ -136,7 +108,7 @@ namespace Window {
                 bool handled = false;
                 switch (AInputEvent_getType(event)) {
                 case AINPUT_EVENT_TYPE_KEY:
-                    //TODO
+                    // TODO
                     std::terminate();
                     break;
                 case AINPUT_EVENT_TYPE_MOTION:
@@ -153,12 +125,16 @@ namespace Window {
 
     InterfacesVector OSWindow::size()
     {
-        return static_cast<AndroidWindow *>(this)->mSize;
+        ANativeWindow *window = reinterpret_cast<ANativeWindow *>(mHandle);
+        return {
+            ANativeWindow_getWidth(window),
+            ANativeWindow_getHeight(window)
+        };
     }
 
     InterfacesVector OSWindow::renderSize()
     {
-        //TODO
+        // TODO
         return size();
     }
 
@@ -174,7 +150,7 @@ namespace Window {
 
     void OSWindow::setSize(const InterfacesVector &size)
     {
-        static_cast<AndroidWindow *>(this)->mSize = size;
+        // static_cast<AndroidWindow *>(this)->mSize = size;
     }
 
     void OSWindow::setRenderSize(const InterfacesVector &size)
@@ -233,8 +209,7 @@ namespace Window {
 
     void OSWindow::destroy()
     {
-        eglDestroySurface(sDisplay, (EGLSurface)mHandle);
-        sWindows.erase((EGLSurface)mHandle);
+        sWindow.reset();
     }
 
     void OSWindow::setCursorIcon(Input::CursorIcon icon)
@@ -280,7 +255,7 @@ namespace Window {
         return {};
     }
 
-    //Input
+    // Input
     bool OSWindow::isKeyDown(Input::Key::Key key)
     {
         return false;
@@ -296,46 +271,12 @@ namespace Window {
 
     OSWindow *sCreateWindow(const WindowSettings &settings, WindowEventListener *listener)
     {
-        assert(sDisplay);
+        sNativeWindow.wait();
 
-        EGLSurface handle = (EGLSurface)settings.mHandle;
-        if (!handle) {
+        assert(!sWindow);
+        sWindow.emplace(sNativeWindow, listener);
 
-            const EGLint attribs[] = {
-                EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-                EGL_BLUE_SIZE, 8,
-                EGL_GREEN_SIZE, 8,
-                EGL_RED_SIZE, 8,
-                EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-                EGL_CONFORMANT, EGL_OPENGL_ES2_BIT,
-                /* EGL_SAMPLE_BUFFERS, 1,*/
-                EGL_NONE
-            };
-
-            EGLConfig config;
-            EGLint numConfigs;
-            EGLint format;
-
-            if (!eglChooseConfig(sDisplay, attribs, &config, 1, &numConfigs))
-                return nullptr;
-
-            if (!eglGetConfigAttrib(sDisplay, config, EGL_NATIVE_VISUAL_ID, &format))
-                return nullptr;
-
-            sNativeWindow.wait();
-
-            ANativeWindow_setBuffersGeometry(sNativeWindow, 0, 0, format);
-
-            handle = eglCreateWindowSurface(sDisplay, config, sNativeWindow, 0);
-
-            if (!handle)
-                return nullptr;
-        }
-
-        auto pib = sWindows.try_emplace(handle, handle, listener);
-        assert(pib.second);
-
-        return &pib.first->second;
+        return &*sWindow;
     }
 
     std::vector<MonitorInfo> listMonitors()

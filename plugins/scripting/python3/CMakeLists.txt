@@ -1,5 +1,9 @@
 project(Python3)
 
+if (ANDROID)
+	return()
+endif()
+
 find_package (Python3 COMPONENTS Development.Embed)
 
 if (NOT Python3_Development.Embed_FOUND)

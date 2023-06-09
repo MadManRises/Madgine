@@ -11,10 +11,11 @@ namespace Render {
 
     struct MADGINE_VULKAN_EXPORT VulkanRenderTarget : RenderTarget {
 
-        VulkanRenderTarget(VulkanRenderContext *context, bool global, std::string name);
+        VulkanRenderTarget(VulkanRenderContext *context, bool global, std::string name, size_t samples = 1, RenderTarget *blitSource = nullptr);
         ~VulkanRenderTarget();
 
-        void setup(const Vector2i &size, VkFormat format, VkImageLayout layout, size_t dependencyCount, VkSubpassDependency *dependencies, bool createDepthView = false);
+        void createRenderPass(size_t colorAttachmentCount, VkFormat format, VkImageLayout layout, bool createDepthBufferView, std::span<VkSubpassDependency> dependencies);
+        void setup(const Vector2i &size, bool createDepthBufferView = false);
         void shutdown();
 
         virtual bool skipFrame() override;
@@ -34,11 +35,15 @@ namespace Render {
 
         virtual Matrix4 getClipSpaceMatrix() const override;
 
+        size_t samples() const;
+
         virtual void setRenderSpace(const Rect2i &space) override;
 
         virtual TextureDescriptor depthTexture() const override;
 
         virtual void clearDepthBuffer() override;
+
+        virtual void blit(RenderTarget *input) = 0;
 
         VulkanRenderContext *context() const;
 
@@ -63,6 +68,8 @@ namespace Render {
 
         uint64_t mLastCompletedFenceValue = 0;
         uint64_t mNextFenceValue;
+
+        size_t mSamples;
     };
 
 }

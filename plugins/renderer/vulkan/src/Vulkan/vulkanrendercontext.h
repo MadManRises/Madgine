@@ -27,6 +27,7 @@ namespace Render {
     };
 
     MADGINE_VULKAN_EXPORT VkDevice GetDevice();
+    MADGINE_VULKAN_EXPORT VkInstance GetInstance();
     MADGINE_VULKAN_EXPORT VkPhysicalDevice GetPhysicalDevice();
 
     struct MADGINE_VULKAN_EXPORT VulkanRenderContext : public RenderContextComponent<VulkanRenderContext> {

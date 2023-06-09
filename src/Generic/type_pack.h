@@ -90,11 +90,6 @@ struct type_pack<Head, Ty...> {
     using indices = std::index_sequence_for<Head, Ty...>;
     static constexpr const size_t size = 1 + sizeof...(Ty);
 
-    template <template <typename> typename F>
-    using transform = type_pack<F<Head>, F<Ty>...>;
-    template <template <size_t> typename F, size_t offset = 0>
-    using transform_index = typename type_pack<Ty...>::template transform_index<F, offset + 1>::template prepend<F<offset>>;
-
     template <template <typename...> typename Filter, typename... Args>
     using filter = typename type_pack<Ty...>::template filter<Filter>::template prepend_if<Filter<Head, Args...>::value, Head>;
 
@@ -109,10 +104,15 @@ struct type_pack<Head, Ty...> {
     template <typename Pack2>
     using concat = typename Pack2::template prepend<Head, Ty...>;
 
+    template <template <typename> typename F>
+    using transform = type_pack<F<Head>, F<Ty>...>;
+    template <template <size_t> typename F, size_t offset = 0>
+    using transform_index = typename type_pack<Ty...>::template transform_index<F, offset + 1>::template prepend<F<offset>>;
+
     template <template <typename...> typename Wrapper>
     using instantiate = Wrapper<Head, Ty...>;
     template <template <typename...> typename Op, typename Init>
-    using fold = Op<Head, typename type_pack<Ty...>::fold<Op, Init>>;
+    using fold = Op<Head, typename type_pack<Ty...>::template fold<Op, Init>>;
 
     using as_tuple = instantiate<std::tuple>;
 
@@ -145,7 +145,7 @@ template <typename Pack>
 using type_pack_as_tuple = typename Pack::as_tuple;
 
 template <typename Pack1, typename Pack2>
-using type_pack_concat = typename Pack1::concat<Pack2>;
+using type_pack_concat = typename Pack1::template concat<Pack2>;
 
 template <typename T>
 struct type_pack_appender {

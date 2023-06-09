@@ -86,11 +86,11 @@ namespace Serialize {
         auto emplace_async(const iterator &where, _Ty &&...args)
         {
             return make_message_sender<typename _traits::emplace_return>(
-                [this](auto &receiver, const iterator &where, _Ty &&...args) {
+                [this](auto &receiver, const iterator &where, _Ty &&...args2) {
                     if (this->isMaster()) {
-                        receiver.set_value(emplace(where, std::forward<_Ty>(args)...));
+                        receiver.set_value(emplace(where, std::forward<_Ty>(args2)...));
                     } else {
-                        value_type temp { std::forward<_Ty>(args)... };
+                        value_type temp { std::forward<_Ty>(args2)... };
                         this->writeRequest(receiver, emplace_request_t { where, temp });
                     }
                 },

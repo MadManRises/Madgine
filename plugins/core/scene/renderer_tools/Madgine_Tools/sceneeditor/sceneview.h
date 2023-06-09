@@ -32,6 +32,7 @@ namespace Tools {
     private:
         Render::Camera mCamera;
         std::unique_ptr<Render::RenderTarget> mRenderTarget;
+        std::unique_ptr<Render::RenderTarget> mRenderTargetSampled;
 
         SceneEditor *mEditor;
 

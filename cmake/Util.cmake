@@ -85,7 +85,7 @@ else()
 endif()
 
 if (GCC OR CLANG)
-	add_compile_options(-Wno-extra-qualification -Wno-instantiation-after-specialization -Wno-dll-attribute-on-redeclaration -Wno-pragma-pack -Wno-undefined-var-template)	
+	add_compile_options(-Wno-extra-qualification -Wno-instantiation-after-specialization -Wno-dll-attribute-on-redeclaration -Wno-pragma-pack -Wno-undefined-var-template -Wno-deprecated-non-prototype)	
 	if (NOT MSVC)
 		add_compile_options(-Wall -fpermissive)
 	else ()

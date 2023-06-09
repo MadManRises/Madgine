@@ -4,7 +4,7 @@
 
 #include "Generic/genericresult.h"
 
-#include "nodeexecution.h"
+#include "Meta/keyvalue/keyvaluereceiver.h"
 
 namespace Engine {
 namespace NodeGraph {
@@ -16,7 +16,7 @@ namespace NodeGraph {
         virtual std::map<std::string_view, ValueType> variables() { return {}; }
     };
 
-    struct MADGINE_NODEGRAPH_EXPORT NodeInterpreter : private KeyValueReceiver, private Execution::VirtualReceiverBase<GenericResult> {
+    struct MADGINE_NODEGRAPH_EXPORT NodeInterpreter {
 
         NodeInterpreter(const NodeGraph *graph, const ArgumentList &args);
         NodeInterpreter(const NodeInterpreter &) = delete;
@@ -25,10 +25,8 @@ namespace NodeGraph {
 
         NodeInterpreter &operator=(const NodeInterpreter &) = delete;
 
-        void start();
-        void interpret(Pin pin);
-
-        virtual void set_value() override;
+        void interpret(Execution::VirtualReceiverBase<GenericResult> *receiver, uint32_t flowIn);
+        void interpret(Execution::VirtualReceiverBase<GenericResult> *receiver, Pin pin);
 
         ASYNC_STUB(interpretSubGraph, branch, Execution::make_simple_virtual_sender<GenericResult>);
 

@@ -8,15 +8,28 @@ namespace Engine {
 namespace Render {
 
     DirectX12RenderTexture::DirectX12RenderTexture(DirectX12RenderContext *context, const Vector2i &size, const RenderTextureConfig &config)
-        : DirectX12RenderTarget(context, false, config.mName)
-        , mTexture(TextureType_2D, true, FORMAT_RGBA8)
+        : DirectX12RenderTarget(context, false, config.mName, config.mBlitSource)
         , mSize { 0, 0 }
+        , mSamples(config.mSamples)
     {
-        //context->waitForGPU();
+        size_t bufferCount = config.mIterations > 1 ? 2 : 1;
 
-        resize(size, config);
+        for (size_t i = 0; i < config.mTextureCount * bufferCount; ++i) {
+            mTextures.emplace_back(config.mType, true, config.mFormat, config.mSamples);
+        }
 
-        mTexture.setName(config.mName.empty() ? "RenderTexture" : config.mName);
+        if (config.mCreateDepthBufferView)
+            mDepthBufferView = DirectX12RenderContext::getSingleton().mDescriptorHeap.allocate();
+
+        mTargetViews.resize(mTextures.size());
+        for (OffsetPtr &ptr : mTargetViews)
+            ptr = DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.allocate();
+
+        resize(size);
+
+        for (DirectX12Texture &tex : mTextures) {
+            tex.setName(config.mName.empty() ? "RenderTexture" : config.mName);
+        }
     }
 
     DirectX12RenderTexture::~DirectX12RenderTexture()
@@ -24,45 +37,40 @@ namespace Render {
         shutdown();
     }
 
-    bool DirectX12RenderTexture::resize(const Vector2i &size, const RenderTextureConfig &config)
+    bool DirectX12RenderTexture::resizeImpl(const Vector2i &size)
     {
         if (mSize == size)
             return false;
 
         mSize = size;
 
-        //mTexture.resize(size);
-        mTexture.setData(size, {});
+        size_t i = 0;
+        std::vector<OffsetPtr> targetViews = std::move(mTargetViews);
 
-        D3D12_RENDER_TARGET_VIEW_DESC renderTargetViewDesc {};
+        for (DirectX12Texture &tex : mTextures) {
+            tex.setData(size, {});
 
-        renderTargetViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-        renderTargetViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-        renderTargetViewDesc.Texture2D.MipSlice = 0;
+            D3D12_RENDER_TARGET_VIEW_DESC renderTargetViewDesc {};
 
-        OffsetPtr targetView = mTargetView;
-        if (!targetView)
-            targetView = DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.allocate();
-        GetDevice()->CreateRenderTargetView(mTexture, &renderTargetViewDesc, DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(targetView));
+            renderTargetViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+            renderTargetViewDesc.ViewDimension = mSamples > 1 ? D3D12_RTV_DIMENSION_TEXTURE2DMS : D3D12_RTV_DIMENSION_TEXTURE2D;
+            renderTargetViewDesc.Texture2D.MipSlice = 0;
 
-        setup(targetView, size,
-            mDepthBufferView || config.mCreateDepthBufferView ? D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE : D3D12_RESOURCE_STATE_DEPTH_WRITE);
+            GetDevice()->CreateRenderTargetView(tex, &renderTargetViewDesc, DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(targetViews[i]));
 
-        if (mDepthBufferView || config.mCreateDepthBufferView) {
-            if (mDepthBufferView) {
-                throw 0;
-                /*mDepthBufferView->Release();
-                mDepthBufferView = nullptr;*/
-            }
+            ++i;
+        }
+
+        setup(std::move(targetViews), size, mSamples, bool(mDepthBufferView));
+
+        if (mDepthBufferView) {
             D3D12_SHADER_RESOURCE_VIEW_DESC depthViewDesc;
             ZeroMemory(&depthViewDesc, sizeof(D3D12_SHADER_RESOURCE_VIEW_DESC));
             depthViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
             depthViewDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-            depthViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+            depthViewDesc.ViewDimension = mSamples > 1 ? D3D12_SRV_DIMENSION_TEXTURE2DMS : D3D12_SRV_DIMENSION_TEXTURE2D;
             depthViewDesc.Texture2D.MipLevels = 1;
 
-            if (!mDepthBufferView)
-                mDepthBufferView = DirectX12RenderContext::getSingleton().mDescriptorHeap.allocate();
             GetDevice()->CreateShaderResourceView(mDepthStencilBuffer, &depthViewDesc, DirectX12RenderContext::getSingleton().mDescriptorHeap.cpuHandle(mDepthBufferView));
         }
 
@@ -71,24 +79,24 @@ namespace Render {
         return true;
     }
 
-    bool DirectX12RenderTexture::resizeImpl(const Vector2i &size)
-    {
-        return resize(size, {});
-    }
-
     void DirectX12RenderTexture::beginIteration(size_t iteration) const
     {
-        mCommandList.Transition(mTexture, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+        for (const DirectX12Texture &tex : mTextures)
+            mCommandList.Transition(tex, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
         if (mDepthBufferView)
             mCommandList.Transition(mDepthStencilBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
         DirectX12RenderTarget::beginIteration(iteration);
+
+        if (mBlitSource)
+            blit(mBlitSource);
     }
 
     void DirectX12RenderTexture::endIteration(size_t iteration) const
     {
-        mCommandList.Transition(mTexture, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        for (const DirectX12Texture &tex : mTextures)
+            mCommandList.Transition(tex, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
         if (mDepthBufferView)
             mCommandList.Transition(mDepthStencilBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
@@ -98,7 +106,12 @@ namespace Render {
 
     TextureDescriptor DirectX12RenderTexture::texture(size_t index, size_t iteration) const
     {
-        return mTexture.descriptor();
+        if (iteration == std::numeric_limits<size_t>::max())
+            iteration = iterations();
+
+        int bufferCount = iterations() > 1 ? 2 : 1;
+        int offset = iterations() > 1 ? 1 - iteration % 2 : 0;
+        return mTextures[(mTextures.size() / bufferCount) * offset + index].descriptor();
     }
 
     size_t DirectX12RenderTexture::textureCount() const
@@ -111,9 +124,9 @@ namespace Render {
         return { DirectX12RenderContext::getSingleton().mDescriptorHeap.gpuHandle(mDepthBufferView).ptr, TextureType_2D };
     }
 
-    const DirectX12Texture &DirectX12RenderTexture::texture() const
+    const std::vector<DirectX12Texture> &DirectX12RenderTexture::textures() const
     {
-        return mTexture;
+        return mTextures;
     }
 
     Vector2i DirectX12RenderTexture::size() const
@@ -124,12 +137,43 @@ namespace Render {
     void DirectX12RenderTexture::beginFrame()
     {
         DirectX12RenderTarget::beginFrame();
-        mCommandList.attachResource(mTexture);
+        for (DirectX12Texture &tex : mTextures)
+            mCommandList.attachResource(tex);
     }
 
     void DirectX12RenderTexture::endFrame()
     {
         DirectX12RenderTarget::endFrame();
+    }
+
+    void DirectX12RenderTexture::blit(RenderTarget *input) const
+    {
+        DirectX12RenderTexture *inputTex = dynamic_cast<DirectX12RenderTexture *>(input);
+        assert(inputTex);
+
+        size_t count = std::min(mTextures.size(), inputTex->mTextures.size());
+
+        for (size_t i = 0; i < count; ++i) {
+            DXGI_FORMAT xFormat;
+            switch (mTextures[i].format()) {
+            case FORMAT_RGBA8:
+                xFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+                break;
+            case FORMAT_RGBA16F:
+                xFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
+                break;
+            case FORMAT_D24:
+                xFormat = DXGI_FORMAT_R24G8_TYPELESS;
+                break;
+            case FORMAT_D32:
+                xFormat = DXGI_FORMAT_R32_TYPELESS;
+                break;
+            default:
+                std::terminate();
+            }
+
+            mCommandList->ResolveSubresource(mTextures[i], 0, inputTex->mTextures[i], 0, xFormat);
+        }
     }
 
 }

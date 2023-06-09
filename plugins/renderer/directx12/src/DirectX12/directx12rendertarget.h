@@ -9,10 +9,10 @@ namespace Render {
 
     struct MADGINE_DIRECTX12_EXPORT DirectX12RenderTarget : RenderTarget {
 
-        DirectX12RenderTarget(DirectX12RenderContext *context, bool global, std::string name);
+        DirectX12RenderTarget(DirectX12RenderContext *context, bool global, std::string name, RenderTarget *blitSource = nullptr);
         ~DirectX12RenderTarget();
 
-        void setup(OffsetPtr targetView, const Vector2i &size, D3D12_RESOURCE_STATES depthBufferState = D3D12_RESOURCE_STATE_DEPTH_WRITE);
+        void setup(std::vector<OffsetPtr> targetViews, const Vector2i &size, size_t samples = 1, bool createDepthBufferView = false);
         void shutdown();
 
         void beginFrame() override;
@@ -32,7 +32,7 @@ namespace Render {
 
 
         mutable DirectX12CommandList mCommandList;
-        mutable OffsetPtr mTargetView;
+        mutable std::vector<OffsetPtr> mTargetViews;
         ReleasePtr<ID3D12Resource> mDepthStencilBuffer;  
         OffsetPtr mDepthStencilView;
         D3D12_DEPTH_STENCIL_DESC mDepthStencilStateDesc;

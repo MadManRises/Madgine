@@ -14,7 +14,7 @@ namespace Render {
         VulkanPipelineInstance(const PipelineConfiguration &config, VulkanPipelineLoader::Handle pipeline);
         ~VulkanPipelineInstance();
 
-        bool bind(VkCommandBuffer commandList, VertexFormat format, size_t groupSize, VkRenderPass renderpass) const;
+        bool bind(VkCommandBuffer commandList, VertexFormat format, size_t groupSize, size_t samples, VkRenderPass renderpass) const;
 
         virtual WritableByteBuffer mapParameters(size_t index) override;
 
@@ -23,10 +23,10 @@ namespace Render {
         virtual void renderMesh(RenderTarget *target, const GPUMeshData *mesh) const override;
         virtual void renderMeshInstanced(RenderTarget *target, size_t count, const GPUMeshData *mesh, const ByteBuffer &instanceData) const override;
 
-        virtual void bindTextures(RenderTarget *target, const std::vector<TextureDescriptor> &tex, size_t offset = 0) const override;        
+        virtual void bindTextures(RenderTarget *target, const std::vector<TextureDescriptor> &tex, size_t offset = 0) const override;
 
     private:
-        std::array<VulkanPtr<VkPipeline, &vkDestroyPipeline>, 3> *mPipelines;
+        std::array<std::array<VulkanPtr<VkPipeline, &vkDestroyPipeline>, 3>, 3> *mPipelines;
 
         std::vector<VulkanBuffer> mConstantBuffers;
         std::vector<VulkanBuffer> mDynamicBuffers;

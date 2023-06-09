@@ -104,6 +104,38 @@
       "hidden": true
     },
     {
+      "name": "Vulkan",
+      "displayName": "-Vulkan",
+      "description": "Uses Vulkan config as madgine configuration",
+      "cacheVariables": {
+        "MADGINE_CONFIGURATION": {
+          "type": "FILEPATH",
+          "value": "${sourceDir}/test/configs/Vulkan"
+        },
+        "BUILD_SHARED_LIBS": {
+          "type": "BOOL",
+          "value": "OFF"
+        }
+      },
+      "hidden": true
+    },
+    {
+      "name": "Vulkan-Tools",
+      "displayName": "-Vulkan (Tools)",
+      "description": "Uses Vulkan including Tools config as madgine configuration",
+      "cacheVariables": {
+        "MADGINE_CONFIGURATION": {
+          "type": "FILEPATH",
+          "value": "${sourceDir}/test/configs/Vulkan_tools"
+        },
+        "BUILD_SHARED_LIBS": {
+          "type": "BOOL",
+          "value": "OFF"
+        }
+      },
+      "hidden": true
+    },
+    {
       "name": "debug",
       "displayName": "-Debug-",
       "cacheVariables": {
@@ -224,28 +256,52 @@
       "inherits": [ "android-x64", "relwithdebinfo", "OpenGL-Tools" ]
     },
     {
-      "name": "Android-armv7-Debug-OpenGL",
-      "inherits": [ "android-armv7", "debug", "OpenGL" ]
+      "name": "Android-x64-Debug-Vulkan",
+      "inherits": [ "android-x64", "debug", "Vulkan" ]
     },
     {
-      "name": "Android-armv7-Debug-OpenGL (Tools)",
-      "inherits": [ "android-armv7", "debug", "OpenGL-Tools" ]
+      "name": "Android-x64-Debug-Vulkan (Tools)",
+      "inherits": [ "android-x64", "debug", "Vulkan-Tools" ]
     },
     {
-      "name": "Android-armv7-Release-OpenGL",
-      "inherits": [ "android-armv7", "release", "OpenGL" ]
+      "name": "Android-x64-Release-Vulkan",
+      "inherits": [ "android-x64", "release", "Vulkan" ]
     },
     {
-      "name": "Android-armv7-Release-OpenGL (Tools)",
-      "inherits": [ "android-armv7", "release", "OpenGL-Tools" ]
+      "name": "Android-x64-Release-Vulkan (Tools)",
+      "inherits": [ "android-x64", "release", "Vulkan-Tools" ]
     },
     {
-      "name": "Android-armv7-RelWithDebInfo-OpenGL",
-      "inherits": [ "android-armv7", "relwithdebinfo", "OpenGL" ]
+      "name": "Android-x64-RelWithDebInfo-Vulkan",
+      "inherits": [ "android-x64", "relwithdebinfo", "Vulkan" ]
     },
     {
-      "name": "Android-armv7-RelWithDebInfo-OpenGL (Tools)",
-      "inherits": [ "android-armv7", "relwithdebinfo", "OpenGL-Tools" ]
+      "name": "Android-x64-RelWithDebInfo-Vulkan (Tools)",
+      "inherits": [ "android-x64", "relwithdebinfo", "Vulkan-Tools" ]
+    },
+    {
+      "name": "Android-armv7-Debug-Vulkan",
+      "inherits": [ "android-armv7", "debug", "Vulkan" ]
+    },
+    {
+      "name": "Android-armv7-Debug-Vulkan (Tools)",
+      "inherits": [ "android-armv7", "debug", "Vulkan-Tools" ]
+    },
+    {
+      "name": "Android-armv7-Release-Vulkan",
+      "inherits": [ "android-armv7", "release", "Vulkan" ]
+    },
+    {
+      "name": "Android-armv7-Release-Vulkan (Tools)",
+      "inherits": [ "android-armv7", "release", "Vulkan-Tools" ]
+    },
+    {
+      "name": "Android-armv7-RelWithDebInfo-Vulkan",
+      "inherits": [ "android-armv7", "relwithdebinfo", "Vulkan" ]
+    },
+    {
+      "name": "Android-armv7-RelWithDebInfo-Vulkan (Tools)",
+      "inherits": [ "android-armv7", "relwithdebinfo", "Vulkan-Tools" ]
     }
   ],
   "buildPresets": [],

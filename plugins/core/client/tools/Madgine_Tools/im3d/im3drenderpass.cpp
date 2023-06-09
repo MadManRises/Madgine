@@ -59,8 +59,6 @@ namespace Render {
 
         for (std::pair<const Im3DTextureId, Im3D::Im3DContext::RenderData> &p : context->mRenderData) {
 
-            mPipeline->bindTextures(target, { { p.first, Render::TextureType_2D } });
-
             {
                 auto perObject = mPipeline->mapParameters<Im3DPerObject>(2);
 

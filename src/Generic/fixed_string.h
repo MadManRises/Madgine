@@ -23,6 +23,10 @@ struct fixed_string {
         return { mData, Size };
     }
 
+    constexpr const char* c_str() const {
+        return mData;
+    }
+
     char mData[Size + 1];
 };
 

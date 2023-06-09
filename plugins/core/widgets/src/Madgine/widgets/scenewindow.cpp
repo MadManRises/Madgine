@@ -6,10 +6,6 @@
 
 #include "Meta/math/vector4.h"
 
-#include "Madgine/window/mainwindow.h"
-
-#include "Madgine/render/rendercontext.h"
-
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
@@ -18,11 +14,9 @@
 #include "util/renderdata.h"
 
 METATABLE_BEGIN_BASE(Engine::Widgets::SceneWindow, Engine::Widgets::WidgetBase)
-PROPERTY(Sampled, sampled, setSampled)
 METATABLE_END(Engine::Widgets::SceneWindow)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::SceneWindow, Engine::Widgets::WidgetBase)
-ENCAPSULATED_FIELD(Sampled, sampled, setSampled)
 SERIALIZETABLE_END(Engine::Widgets::SceneWindow)
 
 namespace Engine {
@@ -31,13 +25,12 @@ namespace Widgets {
     SceneWindow::SceneWindow(WidgetManager &manager, WidgetBase *parent)
         : Widget(manager, parent)
     {
-        mTarget = manager.window().getRenderer()->createRenderTexture({ 1, 1 }, { .mSamples = mSampled ? 4u : 1u });
-        manager.addDependency(mTarget.get());
     }
 
     SceneWindow::~SceneWindow()
     {
-        manager().removeDependency(mTarget.get());
+        if (mSource)
+            manager().removeDependency(mSource);
     }
 
     void SceneWindow::vertices(WidgetsRenderData &renderData, size_t layer)
@@ -45,43 +38,28 @@ namespace Widgets {
         Vector3 pos { getAbsolutePosition(), static_cast<float>(depth(layer)) };
         Vector3 size = getAbsoluteSize();
 
-        renderData.renderQuad(pos, size.xy(), { 1.0f, 1.0f, 1.0f, 1.0f }, { mTarget->texture() });
+        renderData.renderQuad(pos, size.xy(), { 1.0f, 1.0f, 1.0f, 1.0f }, { mSource->texture() });
     }
 
-    Render::RenderTarget *SceneWindow::getRenderTarget()
+    void SceneWindow::setRenderSource(Render::RenderTarget *source)
     {
-        return mTarget.get();
+        if (mSource)
+            manager().removeDependency(mSource);
+        mSource = source;
+        if (mSource)
+            manager().addDependency(mSource);
+        mSource->resize(getAbsoluteSize().xy().floor());
     }
 
     void SceneWindow::sizeChanged(const Vector3 &pixelSize)
     {
-        mTarget->resize(pixelSize.xy().floor());
+        if (mSource)
+            mSource->resize(pixelSize.xy().floor());
     }
 
     WidgetClass SceneWindow::getClass() const
     {
         return WidgetClass::SCENEWINDOW;
-    }
-
-    bool SceneWindow::sampled() const
-    {
-        return mSampled;
-    }
-
-    void SceneWindow::setSampled(bool sampled)
-    {
-        if (sampled != mSampled) {
-            mSampled = sampled;
-
-            std::vector<Render::RenderPass *> passes = mTarget->renderPasses();
-
-            manager().removeDependency(mTarget.get());
-            mTarget = mTarget->context()->createRenderTexture(mTarget->size(), { .mSamples = mSampled ? 4u : 1u });
-            manager().addDependency(mTarget.get());
-
-            for (Render::RenderPass *pass : passes)
-                mTarget->addRenderPass(pass);
-        }
     }
 
 }

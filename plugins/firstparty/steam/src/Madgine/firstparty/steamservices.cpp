@@ -106,7 +106,7 @@ namespace FirstParty {
 
         bool success = SteamUserStats()->StoreStats();
 
-        LeaderboardScoreUploaded_t payload = co_await upload;
+        LeaderboardScoreUploaded_t payload = co_await std::move(upload);
 
         co_return success && payload.m_bSuccess;
     }

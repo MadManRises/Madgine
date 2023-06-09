@@ -4,6 +4,8 @@ namespace Engine {
 
 struct META_EXPORT ArgumentList {
 
+    using value_type = ValueType;
+
     ArgumentList();
     ArgumentList(std::initializer_list<ValueType> vals);
     ArgumentList(size_t size);

@@ -12,7 +12,6 @@ namespace Render {
         DirectX12RenderTexture(DirectX12RenderContext *context, const Vector2i &size, const RenderTextureConfig &config);
         ~DirectX12RenderTexture();
         
-        bool resize(const Vector2i &size, const RenderTextureConfig &config);
         bool resizeImpl(const Vector2i &size) override;
         Vector2i size() const override;
         
@@ -25,14 +24,17 @@ namespace Render {
         virtual TextureDescriptor texture(size_t index, size_t iteration = std::numeric_limits<size_t>::max()) const override;        
         virtual size_t textureCount() const override;
         virtual TextureDescriptor depthTexture() const override;
+
+        void blit(RenderTarget *input) const;
         
-        const DirectX12Texture &texture() const;
+        const std::vector<DirectX12Texture> &textures() const;
 
     private:        
         OffsetPtr mDepthBufferView;
-        DirectX12Texture mTexture;
+        std::vector<DirectX12Texture> mTextures;
 
 		Vector2i mSize;
+        size_t mSamples;
     };
 
 }

@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include <variant>
 
 #include <codecvt>
 

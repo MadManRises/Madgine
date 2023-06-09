@@ -97,8 +97,8 @@ namespace Execution {
             }
 
             template <typename... T>
-            using helper = typename type_pack<T...>::unpack_unique<void>;
-            WithResult<Sender::result_type, MakeOwning_t<typename Sender::template value_types<helper>>> mResult;
+            using helper = typename type_pack<T...>::template unpack_unique<void>;
+            WithResult<typename Sender::result_type, MakeOwning_t<typename Sender::template value_types<helper>>> mResult;
             bool mFinished = false;
             connect_result_t<Sender, receiver<Sender>> mState;
         };

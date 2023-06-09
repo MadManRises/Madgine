@@ -9,11 +9,12 @@
 namespace Engine {
 namespace Render {
 
-    RenderTarget::RenderTarget(RenderContext *context, bool global, std::string name, size_t iterations)
+    RenderTarget::RenderTarget(RenderContext *context, bool global, std::string name, size_t iterations, RenderTarget *blitSource)
         : RenderData(context)
         , mGlobal(global)
         , mName(std::move(name))
         , mIterations(iterations)
+        , mBlitSource(blitSource)
     {
         if (global)
             context->addRenderTarget(this);
@@ -32,6 +33,9 @@ namespace Render {
     {
         if (skipFrame())
             return;
+
+        if (mBlitSource)
+            mBlitSource->update();
 
         for (RenderPass *pass : mRenderPasses)
             pass->preRender();
@@ -103,10 +107,12 @@ namespace Render {
 
     bool RenderTarget::resize(const Vector2i &size)
     {
+        if (mBlitSource)
+            mBlitSource->resize(size);
         bool resized = resizeImpl(size);
         if (resized) {
             for (RenderPass *pass : mRenderPasses)
-                pass->onTargetResize(size);
+                pass->onTargetResize(size);            
         }
         return resized;
     }

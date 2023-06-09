@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../pipable.h"
-#include "concepts.h"
 #include "../type_pack.h"
+#include "concepts.h"
 
 namespace Engine {
 namespace Execution {
@@ -72,7 +72,7 @@ namespace Execution {
             using helper = std::invoke_result_t<T, V...>;
             using helper_type = typename Sender::template value_types<helper>;
             template <template <typename...> typename Tuple>
-            using value_types = typename std::conditional_t<std::same_as<helper_type, void>, type_pack<>, type_pack<helper_type>>::instantiate<Tuple>;
+            using value_types = typename std::conditional_t<std::same_as<helper_type, void>, type_pack<>, type_pack<helper_type>>::template instantiate<Tuple>;
 
             template <typename Rec>
             friend auto tag_invoke(connect_t, sender &&sender, Rec &&rec)
@@ -123,7 +123,7 @@ namespace Execution {
         };
     };
 
-    inline constexpr then_t then;    
+    inline constexpr then_t then;
 
     template <typename T>
     inline constexpr then_t::typed<T> typed_then;
@@ -407,7 +407,7 @@ namespace Execution {
             template <typename... V>
             void set_value(Rec &, V &&...args)
             {
-                start();
+                this->start();
             }
         };
 
@@ -644,15 +644,10 @@ namespace Execution {
         template <typename Rec, typename... Sender>
         struct state : base_state<Rec> {
 
-            static auto helper()
-            {
-                return []<size_t... Is>(std::index_sequence<Is...>)
-                {
-                    return std::declval<std::tuple<connect_result_t<Sender, receiver<Rec, inner_tag<Is>, Sender...>>...>>();
-                }
-                (std::make_index_sequence<sizeof...(Sender)> {});
-            }
-            using StateTuple = decltype(helper());
+            template <size_t I>
+            using inner_rec = receiver<Rec, inner_tag<I>, Sender...>;
+
+            using StateTuple = decltype ([]<size_t... Is>(std::index_sequence<Is...>) -> std::tuple<connect_result_t<Sender, inner_rec<Is>>...>{}(std::make_index_sequence<sizeof...(Sender)> {}));
 
             state(Rec &&rec, std::tuple<Sender...> &&senders)
                 : base_state<Rec> { std::forward<Rec>(rec) }

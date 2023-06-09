@@ -64,6 +64,7 @@ int usage()
 }
 
 int transpileGLSL(const std::string &fileName, const std::string &outFolder, IDxcResult *result);
+int transpileGLSLES(const std::string &fileName, const std::string &outFolder, IDxcResult *result);
 int transpileHLSL(const std::string &fileName, const std::string &outFolder, IDxcResult *result, bool debug);
 int transpileSPIRV(const std::string &fileName, const std::string &outFolder, std::vector<LPCWSTR> arguments, IDxcBlobEncoding *pSource);
 
@@ -159,6 +160,10 @@ int main(int argc, char **argv)
             int glsl_result = transpileGLSL(sourceFile, dataFolder, pCompileResult);
             if (glsl_result != 0)
                 result = glsl_result;
+        } else if (strcmp(argv[i], "-GLSLES") == 0) {
+            int glsles_result = transpileGLSLES(sourceFile, dataFolder, pCompileResult);
+            if (glsles_result != 0)
+                result = glsles_result;
         } else if (strcmp(argv[i], "-SPIRV") == 0) {
             int spirv_result = transpileSPIRV(sourceFile, dataFolder, std::move(arguments), pSource);
             if (spirv_result != 0)
