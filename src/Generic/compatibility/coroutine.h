@@ -98,7 +98,7 @@ struct suspend_never {
     void await_resume() noexcept { }
 };
 
-/*
+
 namespace experimental {
 
     template <typename T = void>
@@ -109,7 +109,7 @@ namespace experimental {
     };
     using suspend_always = std::suspend_always;
     using suspend_never = std::suspend_never;
-}*/
+}
 
 }
 #else

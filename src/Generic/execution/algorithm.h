@@ -647,7 +647,9 @@ namespace Execution {
             template <size_t I>
             using inner_rec = receiver<Rec, inner_tag<I>, Sender...>;
 
-            using StateTuple = decltype ([]<size_t... Is>(std::index_sequence<Is...>) -> std::tuple<connect_result_t<Sender, inner_rec<Is>>...>{}(std::make_index_sequence<sizeof...(Sender)> {}));
+            template <size_t... Is>
+            static auto stateTupleHelper(std::index_sequence<Is...>) -> std::tuple<connect_result_t<Sender, inner_rec<Is>>...> { }
+            using StateTuple = decltype(stateTupleHelper(std::make_index_sequence<sizeof...(Sender)> {}));
 
             state(Rec &&rec, std::tuple<Sender...> &&senders)
                 : base_state<Rec> { std::forward<Rec>(rec) }

@@ -80,7 +80,9 @@ namespace NodeGraph {
         std::vector<DataInPinPrototype> mDataInPins;
         std::vector<DataOutPinPrototype> mDataOutPins;
 
-        struct NodeInterpreterWrapper : NodeInterpreter, private KeyValueReceiver, private Execution::VirtualReceiverBase<GenericResult> {
+        struct MADGINE_NODEGRAPH_EXPORT NodeInterpreterWrapper : NodeInterpreter, private KeyValueReceiver, private Execution::VirtualReceiverBase<GenericResult> {
+            using NodeInterpreter::NodeInterpreter;
+            
             void start();
             virtual void set_value() override;
         };

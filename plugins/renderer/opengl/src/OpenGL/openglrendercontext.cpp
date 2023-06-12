@@ -208,8 +208,7 @@ namespace Render {
     {
         GL_LOG("Setting Context: " << context);
 #if WINDOWS
-        HDC windowDC = GetDC((HWND)window->mHandle);
-        if (!wglMakeCurrent(windowDC, context)) {
+        if (!wglMakeCurrent(surface, context)) {
             LOG_ERROR("Error-Code: " << GetLastError());
             std::terminate();
         }
@@ -233,7 +232,7 @@ namespace Render {
     void swapBuffers(SurfaceHandle surface, ContextHandle context)
     {
 #if WINDOWS
-        SwapBuffers(GetDC((HWND)window->mHandle));
+        SwapBuffers(surface);
 #elif LINUX
         glXSwapBuffers(Window::sDisplay(), window->mHandle);
 #elif ANDROID || EMSCRIPTEN
@@ -513,9 +512,7 @@ namespace Render {
             resetContext();
 
 #if WINDOWS
-        HDC device = GetDC((HWND)window->mHandle);
-
-        ReleaseDC((HWND)window->mHandle, device);
+        ReleaseDC(WindowFromDC(surface), surface);
 
         if (!reusedContext)
             wglDeleteContext(context);
@@ -541,7 +538,16 @@ namespace Render {
                 Engine::Window::WindowSettings settings;
                 settings.mHidden = true;
                 Window::OSWindow *tmp = Window::sCreateWindow(settings, nullptr);
-                ContextHandle context = createContext(tmp, 1, nullptr, false);
+#    if WINDOWS
+                SurfaceHandle surface = GetDC((HWND)tmp->mHandle);
+#    elif LINUX
+                SurfaceHandle surface = tmp->mHandle;
+#    elif OSX
+                SurfaceHandle surface = mOsWindow;
+#    else
+#        error "Unsupported Platform!"
+#    endif
+                ContextHandle context = createContext(surface, 1, nullptr, false);
 
 #    if WINDOWS
                 wglCreateContextAttribsARB = reinterpret_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(wglGetProcAddress("wglCreateContextAttribsARB"));
@@ -553,7 +559,7 @@ namespace Render {
                 bool result = gladLoadGL();
                 assert(result);
 
-                destroyContext(tmp, context);
+                destroyContext(surface, context);
                 tmp->destroy();
             });
         }

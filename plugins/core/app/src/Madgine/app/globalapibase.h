@@ -17,7 +17,7 @@ namespace App {
         template <typename T>
         T &getGlobalAPIComponent()
         {
-            return static_cast<T &>(getGlobalAPIComponent(component_index<T>()));
+            return static_cast<T &>(getGlobalAPIComponent(UniqueComponent::component_index<T>()));
         }
 
         GlobalAPIBase &getGlobalAPIComponent(size_t i);
