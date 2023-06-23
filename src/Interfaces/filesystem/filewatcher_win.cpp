@@ -16,7 +16,6 @@
 namespace Engine {
 namespace Filesystem {
 #    if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_SYSTEM)
-    static std::mutex sFilewatcherMutex;
 
     PFILE_NOTIFY_INFORMATION bump(PFILE_NOTIFY_INFORMATION p)
     {

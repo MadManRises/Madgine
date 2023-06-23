@@ -83,7 +83,7 @@ namespace Threading {
         void connect(T &&slot, TaskQueue *queue, std::stop_token stop)
         {
             Execution::detach(
-                sender(stop) | Execution::then([queue, slot { std::forward<T>(slot) }]() mutable { queue->queue(slot); }) | Execution::repeat);
+                sender(stop) | Execution::then([queue, slot { std::forward<T>(slot) }]<typename... Args>(Args&&... args) mutable { queue->queueTask(make_task(TupleUnpacker::wrap(slot), std::forward<Args>(args)...)); }) | Execution::repeat);
         }
 
         auto sender(std::stop_token stop)

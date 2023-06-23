@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Generic/enum.h"
+#include "Generic/callerhierarchy.h"
 
 namespace Engine {
 
@@ -31,7 +32,6 @@ struct KeyValueReceiver;
 
 struct ExtendedValueTypeDesc;
 struct ValueTypeDesc;
-	
 
 struct ObjectInstance;
 struct ObjectPtr;
@@ -50,7 +50,6 @@ using KeyValueVirtualAssociativeIterator = VirtualIterator<KeyValuePair>;
 using KeyValueVirtualAssociativeRange = VirtualRange<KeyValuePair, Functor_to_KeyValuePair>;
 using KeyValueVirtualSequenceIterator = VirtualIterator<ValueType>;
 using KeyValueVirtualSequenceRange = VirtualRange<ValueType, Functor_to_ValueType>;
-    
 
 namespace Serialize {
     struct SerializeStream;
@@ -69,6 +68,9 @@ namespace Serialize {
     struct FormattedSerializeStream;
     struct FormattedBufferedStream;
 
+    template <typename T>
+    struct Syncable;
+
     struct StreamResult;
 
     struct SerializableUnitPtr;
@@ -76,7 +78,7 @@ namespace Serialize {
     struct SerializableDataPtr;
     struct SerializableDataConstPtr;
 
-	struct Serializer;
+    struct Serializer;
     struct SyncFunction;
     struct SerializeTableCallbacks;
 
@@ -85,6 +87,8 @@ namespace Serialize {
     struct CompareStreamId;
 
     struct PendingRequest;
+
+    struct GenericMessageReceiver;
 
     struct CreatorCategory;
 
@@ -99,19 +103,15 @@ namespace Serialize {
         SERIALIZABLE = 2
     };
 
-
-
-
     struct message_streambuf;
 
     struct noparent_deleter;
 
     struct SerializeTable;
 
-    
     using SyncableUnitMap = std::map<UnitId, SyncableUnitBase *>;
     using SerializableUnitMap = std::map<const SerializableDataUnit *, uint32_t>;
-    using SerializableUnitList = std::vector<SerializableDataUnit*>;
+    using SerializableUnitList = std::vector<SerializableDataUnit *>;
 
     struct SerializableMapHolder;
     struct SerializableListHolder;
@@ -120,10 +120,16 @@ namespace Serialize {
         STATE,
         ACTION,
         REQUEST,
+        ERROR,
         FUNCTION_ACTION,
         FUNCTION_REQUEST,
-        ERROR
-    )
+        FUNCTION_ERROR)
+
+    ENUM(MessageResult,
+        OK,
+        REJECTED,
+        DATA_CORRUPTION,
+        SERVER_ERROR)
 
     enum FunctionType {
         QUERY,
@@ -141,6 +147,13 @@ namespace Serialize {
         template <typename T>
         struct SyncFunctionTable;
     }
+
+    
+    template <typename T, typename... Configs>
+    void setActive(T &t, bool active, bool existenceChanged, CallerHierarchyBasePtr hierarchy = {});
+    template <typename T, typename... Configs>
+    void setSynced(T &t, bool b, CallerHierarchyBasePtr hierarchy = {});
+
 }
 
 struct Vector2;
@@ -170,4 +183,3 @@ struct Plane;
 struct AABB;
 struct BoundingBox;
 }
-

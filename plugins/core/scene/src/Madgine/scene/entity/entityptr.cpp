@@ -32,12 +32,11 @@ namespace Scene {
             SceneManager::ControlBlock *mBlock;
         };
 
-        static constexpr uintptr_t mask = 3 ^ static_cast<uintptr_t>(Serialize::UnitIdTag::SYNCABLE);
-
         EntityPtr::EntityPtr(const EntityPtr &other)
             : mEntity(other.mEntity)
         {
-            if (holdsRef())
+            mHoldsRef = other.mHoldsRef;
+            if (mHoldsRef)
                 getBlock()->incRef();
         }
 
@@ -47,21 +46,22 @@ namespace Scene {
         }
 
         EntityPtr::EntityPtr(Entity *entity)
-            : mEntity(reinterpret_cast<uintptr_t>(SceneManager::ControlBlock::fromPtr(entity)))
+            : mEntity(entity)
         {
             if (mEntity) {
-                assert(!getBlock()->dead());
-                mEntity |= mask;
+                mHoldsRef = true;
                 getBlock()->incRef();
+                assert(!getBlock()->dead());
             }
         }
 
         EntityPtr &EntityPtr::operator=(const EntityPtr &other)
         {
-            if (holdsRef())
+            if (mHoldsRef)
                 getBlock()->decRef();
             mEntity = other.mEntity;
-            if (holdsRef())
+            mHoldsRef = other.mHoldsRef;
+            if (mHoldsRef)
                 getBlock()->incRef();
             return *this;
         }
@@ -79,17 +79,19 @@ namespace Scene {
 
         void EntityPtr::update() const
         {
-            if (holdsRef() && getBlock()->dead()) {
+            if (mHoldsRef && getBlock()->dead()) {
                 getBlock()->decRef();
-                mEntity &= ~mask;
+                mHoldsRef = false;
             }
         }
 
         void EntityPtr::reset()
         {
-            if (holdsRef())
+            if (mHoldsRef) {
                 getBlock()->decRef();
-            mEntity = 0;
+                mHoldsRef = false;
+            }
+            mEntity = nullptr;
         }
 
         /*EntityPtr::operator bool() const
@@ -130,17 +132,13 @@ namespace Scene {
 
         bool EntityPtr::isDead() const
         {
-            return !holdsRef() || getBlock()->dead();
-        }
-
-        bool EntityPtr::holdsRef() const
-        {
-            return mEntity & mask;
+            return !mHoldsRef || getBlock()->dead();
         }
 
         typename EntityPtr::ControlBlockDummy EntityPtr::getBlock() const
         {
-            return { reinterpret_cast<SceneManager::ControlBlock *>(mEntity & ~mask) };
+            assert(mHoldsRef);
+            return { SceneManager::ControlBlock::fromPtr(mEntity) };
         }
     }
 }
@@ -150,7 +148,7 @@ namespace Serialize {
     {
         Scene::Entity::Entity *dummy;
         STREAM_PROPAGATE_ERROR(Serialize::read(in, dummy, name));
-        ptr.mEntity = reinterpret_cast<uintptr_t>(dummy);
+        reinterpret_cast<uintptr_t&>(ptr) = reinterpret_cast<uintptr_t>(dummy);
         return {};
     }
 
@@ -161,8 +159,9 @@ namespace Serialize {
 
     StreamResult Operations<Scene::Entity::EntityPtr>::applyMap(Serialize::FormattedSerializeStream &in, Scene::Entity::EntityPtr &ptr, bool success)
     {
-        if (ptr.mEntity & static_cast<uintptr_t>(UnitIdTag::SYNCABLE)) {
-            Scene::Entity::Entity *dummy = reinterpret_cast<Scene::Entity::Entity *>(ptr.mEntity);
+        uintptr_t v = reinterpret_cast<uintptr_t&>(ptr);
+        if (v & static_cast<uintptr_t>(UnitIdTag::SYNCABLE)) {
+            Scene::Entity::Entity *dummy = reinterpret_cast<Scene::Entity::Entity *>(v);
             STREAM_PROPAGATE_ERROR(Serialize::applyMap(in, dummy, success));
             ptr = dummy;
         }

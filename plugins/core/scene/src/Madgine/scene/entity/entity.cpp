@@ -14,13 +14,65 @@
 
 #include "entitycomponentlistbase.h"
 
+#include "entitycomponentbase.h"
+
 METATABLE_BEGIN(Engine::Scene::Entity::Entity)
 NAMED_MEMBER(Name, mName)
 READONLY_PROPERTY(Components, components)
 METATABLE_END(Engine::Scene::Entity::Entity)
 
+using namespace Engine::Serialize;
+static constexpr Serializer sComponentSynchronizer {
+    "ComponentSynchronizer",
+    nullptr,
+    [](const SerializableDataUnit *, FormattedSerializeStream &, const char *, Engine::CallerHierarchyBasePtr) {
+    },
+    [](SerializableDataUnit *, FormattedSerializeStream &, const char *, Engine::CallerHierarchyBasePtr) -> StreamResult {
+        throw 0;
+        return {};
+    },
+    [](SerializableDataUnit *unit, FormattedBufferedStream &in, PendingRequest &request) -> StreamResult {
+        std::string name;
+        STREAM_PROPAGATE_ERROR(read(in, name, "name"));
+        auto it = Engine::Scene::Entity::EntityComponentRegistry::sComponentsByName().find(name);
+        if (it == Engine::Scene::Entity::EntityComponentRegistry::sComponentsByName().end())
+            return STREAM_INTEGRITY_ERROR(in) << "Received message for component '" << name << "', which is not registered.";
+        Engine::Scene::Entity::Entity *entity = static_cast<Engine::Scene::Entity::Entity *>(unit);
+        Engine::Scene::Entity::EntityComponentPtr<Engine::Scene::Entity::EntityComponentBase> component = entity->getComponent(it->second);
+        if (!component)
+            return STREAM_INTEGRITY_ERROR(in) << "Received message for component '" << name << "', which is not a component of this Entity.";
+        SerializableDataPtr serializedComponent = component.getSerialized();
+        return serializedComponent.mType->readAction(serializedComponent.unit(), in, request);
+    },
+    [](SerializableDataUnit *, FormattedBufferedStream &, MessageId) -> StreamResult {
+        throw 0;
+        return {};
+    },
+    [](SerializableDataUnit *, FormattedSerializeStream &, bool, Engine::CallerHierarchyBasePtr) -> StreamResult {
+        return {};
+    },
+    [](SerializableDataUnit *, bool) {
+    },
+    [](SerializableDataUnit *, bool, bool) {
+    },
+    [](SerializableDataUnit *) {
+    },
+    [](const SerializableDataUnit *unit, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, void *data) {
+        Engine::Scene::Entity::EntityComponentActionPayload &payload = *static_cast<Engine::Scene::Entity::EntityComponentActionPayload *>(data);
+        for (FormattedBufferedStream &stream : outStreams) {
+            write(stream, Engine::Scene::Entity::EntityComponentRegistry::sComponentName(payload.mComponentIndex), "name");
+        }
+        const Engine::Scene::Entity::Entity *entity = static_cast<const Engine::Scene::Entity::Entity *>(unit);
+        const SerializeTable *type = entity->sceneMgr().entityComponentList(payload.mComponentIndex).serializeTable();
+        uint16_t index = type->getIndex(payload.mOffset);
+        type->writeAction(payload.mComponent, index, outStreams, payload.mData);
+    },
+    [](const SerializableDataUnit *, FormattedBufferedStream &out, void *) { throw 0; }
+};
+
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Entity)
 FIELD(mComponents, Serialize::ParentCreator<&Engine::Scene::Entity::Entity::readComponent, &Engine::Scene::Entity::Entity::writeComponent, &Engine::Scene::Entity::Entity::clearComponents>)
+SERIALIZETABLE_ENTRY(sComponentSynchronizer)
 SERIALIZETABLE_END(Engine::Scene::Entity::Entity)
 
 namespace Engine {
@@ -36,7 +88,7 @@ namespace Scene {
         }*/
 
         Entity::Entity(Entity &&other, bool local)
-            : SyncableUnit(std::move(other))
+            : SyncableUnitEx(std::move(other))
             , mName(std::move(other.mName))
             , mLocal(local)
             , mComponents(std::move(other.mComponents))
@@ -185,13 +237,8 @@ namespace Scene {
         const char *Entity::writeComponent(Serialize::FormattedSerializeStream &out, const EntityComponentOwningHandle<EntityComponentBase> &comp) const
         {
             out.beginExtendedWrite("Component", 1);
-            for (const auto &p : EntityComponentRegistry::sComponentsByName()) {
-                if (p.second == comp.mHandle.mType) {
-                    write(out, p.first, "name");
-                    return "Component";
-                }
-            }
-            throw 0;
+            write(out, EntityComponentRegistry::sComponentName(comp.mHandle.mType), "name");
+            return "Component";
         }
 
         bool Entity::isLocal() const

@@ -24,7 +24,7 @@ namespace UniqueComponent {
 namespace Engine {
 namespace UniqueComponent {
 
-    struct CollectorInfoBase {
+    struct MODULES_EXPORT CollectorInfoBase {
         const TypeInfo *mRegistryInfo;
         const TypeInfo *mBaseInfo;
         const Plugins::BinaryInfo *mBinary;
@@ -231,6 +231,22 @@ namespace UniqueComponent {
         static const std::map<std::string_view, IndexType<uint32_t>> &sComponentsByName()
         {
             return sInstance().mComponentsByName;
+        }
+
+        std::string_view componentName(uint32_t index)
+        {
+            for (CollectorInfoBase *info : mLoadedCollectors) {
+                assert(index >= info->mBaseIndex);
+                if (index < info->mBaseIndex + info->mComponentNames.size()) {
+                    return info->mComponentNames[index - info->mBaseIndex];
+                }
+            }
+            throw 0;
+        }
+
+        static std::string_view sComponentName(uint32_t index)
+        {
+            return sInstance().componentName(index);
         }
 
         void onPluginLoad(const Plugins::BinaryInfo *bin)

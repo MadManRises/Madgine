@@ -31,7 +31,7 @@ struct PipableFromRight {
 template <typename F, typename... Args>
 PipableFromRight<F, Args...> pipable_from_right(F &&f, Args &&...args)
 {
-    return { std::forward<F>(f), std::forward<Args>(args)... };
+    return { std::forward<F>(f), { std::forward<Args>(args)... } };
 }
 
 #define MAKE_PIPABLE_FROM_RIGHT(f)                                       \
@@ -63,7 +63,7 @@ struct PipableFromLeft {
 template <typename F, typename... Args>
 PipableFromLeft<F, Args...> pipable_from_left(F &&f, Args &&...args)
 {
-    return { std::forward<F>(f), std::forward<Args>(args)... };
+    return { std::forward<F>(f), { std::forward<Args>(args)... } };
 }
 
 #define MAKE_PIPABLE_FROM_LEFT(f)                                                 \

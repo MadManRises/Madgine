@@ -15,7 +15,7 @@ namespace Scene {
         template <typename T>
         using VirtualEntityComponentBase = EntityComponentVirtualBase<T>;
 
-        template <typename T, typename Base = EntityComponentBase>
+        template <typename T, typename Base = SerializableEntityComponentBase>
         using EntityComponent = EntityComponentComponent<T, Base>;
 
 #define ENTITYCOMPONENTVIRTUALBASE_IMPL(Name, FullType) \

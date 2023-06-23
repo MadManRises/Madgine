@@ -12,6 +12,10 @@
 
 #include "operations.h"
 
+#include "Generic/execution/execution.h"
+
+#include "Generic/projections.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -35,8 +39,9 @@ namespace Serialize {
             mSlaveStream.emplace(std::move(*other.mSlaveStream), this);
             other.mSlaveStream.reset();
         }
-        for (FormattedBufferedStream &stream : other.mMasterStreams) {
-            mMasterStreams.emplace(std::move(stream), this);
+        for (FormattedBufferedStream &stream : other.mMasterStreams | std::views::transform(projectionPairSecond)) {
+            ParticipantId id = stream.id();
+            mMasterStreams.try_emplace(id, std::move(stream), this);
         }
     }
 
@@ -83,6 +88,8 @@ namespace Serialize {
                 assert(mReceivingMasterState);
                 STREAM_PROPAGATE_ERROR(read(stream, id, "Id"));
                 stream.setId(id);
+                for (TopLevelUnitBase *unit : mTopLevelUnits)
+                    assert(unit->slaveId());
                 mReceivingMasterState->set_value();
                 mReceivingMasterState = nullptr;
                 break;
@@ -95,9 +102,12 @@ namespace Serialize {
             MessageType type;
             STREAM_PROPAGATE_ERROR(read(stream, type, "MessageType"));
             MessageId transactionId;
-            if (type == MessageType::ACTION || type == MessageType::FUNCTION_ACTION || type == MessageType::ERROR)
+            if (type == MessageType::ACTION || type == MessageType::ERROR || type == MessageType::FUNCTION_ACTION || type == MessageType::FUNCTION_ERROR)
                 STREAM_PROPAGATE_ERROR(read(stream, transactionId, "TransactionId"));
             STREAM_PROPAGATE_ERROR(stream.endHeaderRead());
+
+            assert(!mReceivingMasterState || type == MessageType::STATE);
+
             switch (type) {
             case MessageType::ACTION: {
                 PendingRequest request = stream.getRequest(transactionId);
@@ -113,10 +123,15 @@ namespace Serialize {
                 break;
             case MessageType::STATE:
                 STREAM_PROPAGATE_ERROR(read(stream, *object, "State", {}, StateTransmissionFlags_ApplyMap | StateTransmissionFlags_Activation));
-                for (FormattedBufferedStream& out : mMasterStreams) {
+                for (FormattedBufferedStream &out : mMasterStreams | std::views::transform(projectionPairSecond)) {
                     sendState(out, object);
                 }
                 break;
+            case MessageType::ERROR: {
+                PendingRequest request = stream.getRequest(transactionId);
+                setError(object, request, MessageResult::SERVER_ERROR);
+                break;
+            }
             case MessageType::FUNCTION_ACTION: {
                 PendingRequest request = stream.getRequest(transactionId);
                 StreamResult result = object->readFunctionAction(stream, request);
@@ -129,9 +144,9 @@ namespace Serialize {
             case MessageType::FUNCTION_REQUEST:
                 STREAM_PROPAGATE_ERROR(object->readFunctionRequest(stream, id));
                 break;
-            case MessageType::ERROR: {
+            case MessageType::FUNCTION_ERROR: {
                 PendingRequest request = stream.getRequest(transactionId);
-                setError(object, request, MessageResult::SERVER_ERROR);
+                STREAM_PROPAGATE_ERROR(object->readFunctionError(stream, request));
                 break;
             }
             default:
@@ -146,10 +161,8 @@ namespace Serialize {
     {
         std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> result;
 
-        for (FormattedBufferedStream &stream : mMasterStreams) {
-            //if (!stream.isClosed()) {
+        for (FormattedBufferedStream &stream : mMasterStreams | std::views::transform(projectionPairSecond)) {
             result.insert(stream);
-            //}
         }
         return result;
     }
@@ -172,15 +185,22 @@ namespace Serialize {
             return false;
         mTopLevelUnits.insert(unit);
 
-        if (mSlaveStream) {
-            unit->initSlaveId(this);
-        }
-
-        if (sendStateFlag && unit->mSynced) {
-            for (FormattedBufferedStream &stream : mMasterStreams) {
-                this->sendState(stream, unit);
+        if (unit->mSynced) {
+            if (mSlaveStream) {
+                unit->initSlaveId(this);
+                if (sendStateFlag) {
+                    assert(!mReceivingMasterState);
+                    Execution::detach(Execution::make_simple_virtual_sender<SyncManagerResult>([this](Execution::VirtualReceiverBase<SyncManagerResult> &rec) { mReceivingMasterState = &rec; }));
+                }
+            } else {
+                if (sendStateFlag) {
+                    for (FormattedBufferedStream &stream : mMasterStreams | std::views::transform(projectionPairSecond)) {
+                        this->sendState(stream, unit);
+                    }
+                }
             }
         }
+
         return true;
     }
 
@@ -315,7 +335,8 @@ namespace Serialize {
         if (!stream)
             return SyncManagerResult::UNKNOWN_ERROR;
 
-        mMasterStreams.emplace(std::move(stream));
+        ParticipantId id = stream.id();
+        mMasterStreams.try_emplace(id, std::move(stream));
         return SyncManagerResult::SUCCESS;
     }
 
@@ -325,10 +346,11 @@ namespace Serialize {
         auto it = mMasterStreams.find(streamId);
         assert(it != mMasterStreams.end());
         if (SyncManagerResult result = target->addMasterStream(
-                std::move(*it), false);
+                std::move(it->second), false);
             result != SyncManagerResult::SUCCESS)
             return result;
-        FormattedBufferedStream &stream = *target->mMasterStreams.find(streamId);
+        //mMasterStreams.erase(it);
+        FormattedBufferedStream &stream = target->mMasterStreams.find(streamId)->second;
         std::vector<TopLevelUnitBase *> newTopLevels;
         newTopLevels.reserve(16);
         set_difference(target->getTopLevelUnits().begin(),
@@ -337,6 +359,13 @@ namespace Serialize {
         for (TopLevelUnitBase *newTopLevel : newTopLevels) {
             sendState(stream, newTopLevel);
         }
+        stream.beginMessageWrite();
+        stream.beginHeaderWrite();
+        write<UnitId>(stream, SERIALIZE_MANAGER, "Object");
+        write(stream, INITIAL_STATE_DONE, "Command");
+        stream.endHeaderWrite();
+        write(stream, stream.id(), "Id");
+        stream.endMessageWrite();
         return SyncManagerResult::SUCCESS;
     }
 
@@ -361,7 +390,7 @@ namespace Serialize {
         if (pending.mRequester) {
             auto it = mMasterStreams.find(pending.mRequester);
             assert(it != mMasterStreams.end());
-            FormattedBufferedStream &stream = *it;
+            FormattedBufferedStream &stream = it->second;
             stream.beginMessageWrite();
             writeActionHeader(stream, unit, MessageType::ERROR, pending.mRequesterTransactionId);
             stream.endMessageWrite();
@@ -382,12 +411,12 @@ namespace Serialize {
             }
         }
         for (auto it = mMasterStreams.begin(); it != mMasterStreams.end();) {
-            if (StreamResult result = receiveMessages(*it, msgCount,
+            if (StreamResult result = receiveMessages(it->second, msgCount,
                     timeout);
                 result.mState != StreamState::OK) {
                 it = mMasterStreams.erase(it);
                 return result;
-            } else if (!*it) {
+            } else if (!it->second) {
                 it = mMasterStreams.erase(it);
             } else {
                 ++it;
@@ -404,7 +433,7 @@ namespace Serialize {
             }
         }
         for (auto it = mMasterStreams.begin(); it != mMasterStreams.end();) {
-            if (!it->sendMessages()) {
+            if (!it->second.sendMessages()) {
                 it = mMasterStreams.erase(it);
             } else {
                 ++it;
@@ -458,7 +487,7 @@ namespace Serialize {
     {
         std::vector<ParticipantId> result;
         result.reserve(mMasterStreams.size());
-        for (const FormattedBufferedStream &stream : mMasterStreams) {
+        for (const FormattedBufferedStream &stream : mMasterStreams | std::views::transform(projectionPairSecond)) {
             result.push_back(stream.id());
         }
         return result;
@@ -510,7 +539,7 @@ namespace Serialize {
 
     FormattedBufferedStream &SyncManager::getMasterStream(ParticipantId id)
     {
-        return *mMasterStreams.find(id);
+        return mMasterStreams.find(id)->second;
     }
 
     const std::set<TopLevelUnitBase *> &

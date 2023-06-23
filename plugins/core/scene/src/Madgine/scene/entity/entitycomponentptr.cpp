@@ -60,6 +60,11 @@ namespace Scene {
             return mSceneMgr->entityComponentList(mHandle.mType).get(mHandle);
         }
 
+        Serialize::SerializableDataPtr EntityComponentPtrBase<EntityComponentBase>::getSerialized() const
+        {
+            return mSceneMgr->entityComponentList(mHandle.mType).getSerialized(mHandle);
+        }
+
         SceneManager *EntityComponentPtrBase<EntityComponentBase>::sceneMgr() const
         {
             return mSceneMgr;

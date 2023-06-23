@@ -14,6 +14,7 @@ namespace Scene {
             virtual TypedScopePtr getTyped(const EntityComponentHandle<EntityComponentBase> &index) = 0;
             virtual Serialize::SerializableDataPtr getSerialized(const EntityComponentHandle<EntityComponentBase> &index) = 0;
             virtual Serialize::SerializableDataConstPtr getSerialized(const EntityComponentHandle<EntityComponentBase> &index) const = 0;
+            virtual const Serialize::SerializeTable *serializeTable() const = 0;
             virtual void init(const EntityComponentHandle<EntityComponentBase> &index, Entity *entity) = 0;
             virtual void finalize(const EntityComponentHandle<EntityComponentBase> &index, Entity *entity) = 0;
             virtual Entity *getEntity(const EntityComponentHandle<EntityComponentBase> &index) const = 0; 
@@ -23,6 +24,9 @@ namespace Scene {
             virtual void clear() = 0;
             virtual size_t size() const = 0;
             virtual void updateRender() = 0;
+
+            virtual void setSynced(const EntityComponentHandle<EntityComponentBase> &index, bool synced) = 0;
+            virtual void setActive(const EntityComponentHandle<EntityComponentBase> &index, bool active, bool existenceChanged) = 0;
 
             
             Serialize::StreamResult readState(const EntityComponentHandle<EntityComponentBase> &index, Serialize::FormattedSerializeStream &in, const char *name, CallerHierarchyBasePtr hierarchy);

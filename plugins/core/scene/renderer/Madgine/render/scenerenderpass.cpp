@@ -73,11 +73,14 @@ namespace Render {
     {
         if (!mPipeline.available())
             return;
+        
+        auto guard = mScene.scene()->lock(AccessMode::READ);
+
         //TODO Culling
 
         std::map<std::tuple<const GPUMeshData *, const GPUMeshData::Material *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> instances;
 
-        for (const auto &[mesh, e] : mScene.scene().entityComponentList<Scene::Entity::Mesh>().data()) {
+        for (const auto &[mesh, e] : mScene.scene()->entityComponentList<Scene::Entity::Mesh>().data()) {
             if (!mesh.isVisible())
                 continue;
 
@@ -132,7 +135,7 @@ namespace Render {
             perFrame->light.light.color = mScene.mAmbientLightColor;
             perFrame->light.light.dir = (v * Vector4 { mScene.mAmbientLightDirection, 0.0f }).xyz();
 
-            Scene::Entity::EntityComponentList<Scene::Entity::PointLight> &lights = mScene.scene().entityComponentList<Scene::Entity::PointLight>();
+            Scene::Entity::EntityComponentList<Scene::Entity::PointLight> &lights = mScene.scene()->entityComponentList<Scene::Entity::PointLight>();
             perFrame->pointLightCount = lights.size();
             if (perFrame->pointLightCount > 2) {
                 LOG_WARNING("Too many point lights in scene!");

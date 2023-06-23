@@ -81,9 +81,9 @@ struct MemberOffsetPtrWrapper {
         static inline ::Engine::MemberOffsetPtr<Self, decltype(Name)> value = __##Name##_value__(); \
     };
 
-#define MEMBER_OFFSET_CONTAINER(Name, ...)                                                                                                \
+#define MEMBER_OFFSET_CONTAINER(Name, Init, ...)                                                                                                \
     DECLARE_MEMBER_OFFSET(Name)                                                                                                           \
-    typename ::Engine::replace<__VA_ARGS__>::tagged<::Engine::MemberOffsetPtrTag, ::Engine::MemberOffsetPtrWrapper<__access_##Name##__>> Name; \
+    ::Engine::replace<__VA_ARGS__>::tagged<::Engine::MemberOffsetPtrTag, ::Engine::MemberOffsetPtrWrapper<__access_##Name##__>> Name Init; \
     DEFINE_MEMBER_OFFSET(Name)
 
 }

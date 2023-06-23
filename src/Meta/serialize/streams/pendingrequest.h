@@ -5,7 +5,6 @@
 #include "Generic/execution/virtualsender.h"
 #include "Generic/forward_capture.h"
 #include "Generic/nulledptr.h"
-#include "messageresult.h"
 
 namespace Engine {
 namespace Serialize {

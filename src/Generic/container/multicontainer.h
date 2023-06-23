@@ -152,7 +152,13 @@ struct MultiContainer {
     template <typename... Tuples>
     void construct(reference item, std::piecewise_construct_t, Tuples &&...tuples)
     {
-        (TupleUnpacker::invokeFromTuple([&](auto... par){ new (&get<Ty>(item)) Ty(std::forward<decltype(par)>(par)...); }, std::forward<Tuples>(tuples)),...);   
+        (TupleUnpacker::invokeFromTuple([&](auto&&... par){ new (&get<Ty>(item)) Ty(std::forward<decltype(par)>(par)...); }, std::forward<Tuples>(tuples)),...);   
+    }
+
+    template <typename... Args>
+    void construct(reference item, Args &&...args)
+    {
+        (new (&get<Ty>(item)) Ty(std::forward<Args>(args)), ...);
     }
 
     void destruct(reference item)
@@ -170,6 +176,12 @@ struct MultiContainer {
     iterator emplace(const const_iterator &where, std::piecewise_construct_t, Tuples &&...tuples)
     {
         return { { TupleUnpacker::invokeExpand(LIFT(std::get<Container<Ty>>(mData).emplace, &), std::get<typename Container<Ty>::const_iterator>(where.mIt), std::forward<Tuples>(tuples))... } };
+    }
+
+    template <typename... Args>
+    iterator emplace(const const_iterator &where, Args &&...args)
+    {
+        return { { std::get<Container<Ty>>(mData).emplace(std::get<typename Container<Ty>::const_iterator>(where.mIt), std::forward<Args>(args))... } };
     }
 
     iterator erase(const iterator &where)

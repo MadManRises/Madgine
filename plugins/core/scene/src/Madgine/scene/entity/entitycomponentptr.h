@@ -36,6 +36,7 @@ namespace Scene {
             uint32_t type() const;
 
             EntityComponentBase *get() const;
+            Serialize::SerializableDataPtr getSerialized() const;
 
             EntityComponentBase *operator->() const
             {

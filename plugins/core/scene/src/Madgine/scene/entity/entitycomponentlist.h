@@ -5,8 +5,8 @@
 #include "Meta/keyvalue/typedscopeptr.h"
 #include "Meta/serialize/hierarchy/serializableunitptr.h"
 #include "entitycomponentcollector.h"
-#include "entitycomponentlistbase.h"
 #include "entitycomponentcontainer.h"
+#include "entitycomponentlistbase.h"
 
 namespace Engine {
 namespace Scene {
@@ -17,7 +17,6 @@ namespace Scene {
         DERIVE_FUNCTION(updateRender, Entity *)
         DERIVE_FUNCTION(relocateComponent, const EntityComponentHandle<EntityComponentBase> &, Entity *)
 
-        
         template <typename T>
         struct EntityComponentList : EntityComponentListComponent<EntityComponentList<T>> {
 
@@ -35,49 +34,54 @@ namespace Scene {
 
             T *get(const EntityComponentHandle<EntityComponentBase> &index) override final
             {
-                return &(mData.at(index.mIndex).template get<0>());
+                return &(get_component(mData.at(index.mIndex)));
             }
 
             const T *get(const EntityComponentHandle<EntityComponentBase> &index) const override final
             {
-                return &(mData.at(index.mIndex).template get<0>());
+                return &(get_component(mData.at(index.mIndex)));
             }
 
             TypedScopePtr getTyped(const EntityComponentHandle<EntityComponentBase> &index) override final
             {
-                return &(mData.at(index.mIndex).template get<0>());
+                return &(get_component(mData.at(index.mIndex)));
             }
 
             Serialize::SerializableDataPtr getSerialized(const EntityComponentHandle<EntityComponentBase> &index) override final
             {
-                return &(mData.at(index.mIndex).template get<0>());
+                return &(get_component(mData.at(index.mIndex)));
             }
 
             Serialize::SerializableDataConstPtr getSerialized(const EntityComponentHandle<EntityComponentBase> &index) const override final
             {
-                return &(mData.at(index.mIndex).template get<0>());
+                return &(get_component(mData.at(index.mIndex)));
+            }
+
+            const Serialize::SerializeTable *serializeTable() const override final
+            {
+                return &::serializeTable<T>();
             }
 
             void init(const EntityComponentHandle<EntityComponentBase> &index, Entity *entity) override final
             {
                 if constexpr (has_function_init_v<T>)
-                    mData.at(index.mIndex).template get<0>().init(entity);
+                    get_component(mData.at(index.mIndex)).init(entity);
             }
 
             void finalize(const EntityComponentHandle<EntityComponentBase> &index, Entity *entity) override final
             {
                 if constexpr (has_function_finalize_v<T>)
-                    mData.at(index.mIndex).template get<0>().finalize(entity);
+                    get_component(mData.at(index.mIndex)).finalize(entity);
             }
 
             T *get(const EntityComponentHandle<T> &index)
             {
-                return &(mData.at(index.mIndex).template get<0>());
+                return &(get_component(mData.at(index.mIndex)));
             }
 
             const T *get(const EntityComponentHandle<T> &index) const
             {
-                return &(mData.at(index.mIndex).template get<0>());
+                return &(get_component(mData.at(index.mIndex)));
             }
 
             Entity *getEntity(const EntityComponentHandle<EntityComponentBase> &index) const override final
@@ -91,12 +95,12 @@ namespace Scene {
 
             Entity *getEntity(uint32_t index) const
             {
-                return mData.at(index).template get<1>();
+                return get_entity_ptr(mData.at(index));
             }
 
             EntityComponentOwningHandle<EntityComponentBase> emplace(const ObjectPtr &table, Entity *entity) override final
             {
-                typename Vector::iterator it = mData.emplace(mData.end(), std::piecewise_construct, std::forward_as_tuple(table), std::make_tuple(entity));
+                typename Vector::iterator it = mData.emplace(mData.end(), table, entity);
                 uint32_t index = container_traits<Vector>::toHandle(mData, it);
                 return { { index, static_cast<uint32_t>(UniqueComponent::component_index<T>()) } };
             }
@@ -131,6 +135,16 @@ namespace Scene {
                 }
             }
 
+            void setSynced(const EntityComponentHandle<EntityComponentBase> &index, bool synced) override final
+            {
+                Serialize::setSynced(get_component(mData.at(index.mIndex)), synced);
+            }
+
+            void setActive(const EntityComponentHandle<EntityComponentBase> &index, bool active, bool existenceChanged) override final
+            {
+                Serialize::setActive(get_component(mData.at(index.mIndex)), active, existenceChanged);
+            }
+
             auto begin()
             {
                 return mData.begin();
@@ -148,12 +162,12 @@ namespace Scene {
 
             T &front()
             {
-                return mData.front().template get<0>();
+                return get_component(mData.front());
             }
 
             T &operator[](size_t index)
             {
-                return mData[index].template get<0>();
+                return get_component(mData[index]);
             }
 
             Vector mData;

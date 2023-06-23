@@ -11,7 +11,7 @@
 namespace Engine {
 namespace Widgets {
 
-    struct ScalableImageRenderData : RenderData {
+    struct MADGINE_WIDGETS_EXPORT ScalableImageRenderData : RenderData {
 
         void setImageName(std::string_view name);
         void setImage(Resources::ImageLoader::Resource *image);

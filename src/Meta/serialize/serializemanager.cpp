@@ -122,11 +122,11 @@ namespace Serialize {
         }
         SyncableUnitBase *ptr = nullptr;
 
-        if (in.isMaster(AccessMode::READ)) { //TODO: Same branch????
-            ptr = in.manager()->getByMasterId(unit);
+        if (in.isMaster(AccessMode::READ)) {
+            ptr = getByMasterId(unit);
         } else {
-            auto it = sMasterMappings.find(unit);
-            if (it != sMasterMappings.end())
+            auto it = in.manager()->mSlaveMappings.find(unit);
+            if (it != in.manager()->mSlaveMappings.end())
                 ptr = it->second;
         }
         if (!ptr) {

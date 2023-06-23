@@ -22,7 +22,7 @@ namespace Render {
 
         virtual std::string_view key() const override;
 
-        Scene::SceneManager &scene();
+        Scene::SceneManager *scene();
 
         std::vector<TextureDescriptor> depthTextures();
 
@@ -41,7 +41,7 @@ namespace Render {
         NormalizedVector3 mAmbientLightDirection = { -0.0f, -1.0f, 1.5f };
 
     private:
-        Scene::SceneManager &mScene;
+        Scene::SceneManager *mScene = nullptr;
 
         SceneRenderPass mPass;
 

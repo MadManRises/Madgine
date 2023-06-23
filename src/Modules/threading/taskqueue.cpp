@@ -107,7 +107,6 @@ namespace Threading {
 
     TaskHandle TaskQueue::fetch(std::chrono::steady_clock::time_point &nextTask)
     {
-        //TODO use taskCount
         std::chrono::steady_clock::time_point nextTaskTimepoint = nextTask;
 
         if (mRunning) {
@@ -131,13 +130,15 @@ namespace Threading {
                     nextTaskTimepoint = std::min(it->mScheduledFor, nextTaskTimepoint);
                 }
             }
-            while (!mAwaiterStack.empty()) {
-                TaskHandle handle = std::move(mAwaiterStack.top());
-                mAwaiterStack.pop();
-                if (handle.queue() == this) {
-                    return handle;
+            if (mTaskInFlightCount == 0) {
+                while (!mAwaiterStack.empty()) {
+                    TaskHandle handle = std::move(mAwaiterStack.top());
+                    mAwaiterStack.pop();
+                    if (handle.queue() == this) {
+                        return handle;
+                    }
+                    handle.resumeInQueue();
                 }
-                handle.resumeInQueue();
             }
         }
 

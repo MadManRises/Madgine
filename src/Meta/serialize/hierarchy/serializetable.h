@@ -30,6 +30,7 @@ namespace Serialize {
         const char *mTypeName;
         SerializeTableCallbacks mCallbacks;
         const SerializeTable &(*mBaseType)();
+        StreamResult (*mReadState)(const SerializeTable *, SerializableDataUnit *, FormattedSerializeStream &, StateTransmissionFlags, CallerHierarchyBasePtr);
         const Serializer *mFields;
         const SyncFunction *mFunctions;
         bool mIsTopLevelUnit;
@@ -37,8 +38,8 @@ namespace Serialize {
         void writeState(const SerializableDataUnit *unit, FormattedSerializeStream &out, CallerHierarchyBasePtr hierarchy = {}) const;
         StreamResult readState(SerializableDataUnit *unit, FormattedSerializeStream &in, StateTransmissionFlags flags = 0, CallerHierarchyBasePtr hierarchy = {}) const;
 
-        StreamResult readAction(SyncableUnitBase *unit, FormattedBufferedStream &in, PendingRequest &request) const;
-        StreamResult readRequest(SyncableUnitBase *unit, FormattedBufferedStream &in, MessageId id) const;
+        StreamResult readAction(SerializableDataUnit *unit, FormattedBufferedStream &in, PendingRequest &request) const;
+        StreamResult readRequest(SerializableDataUnit *unit, FormattedBufferedStream &in, MessageId id) const;
 
         StreamResult applyMap(SerializableDataUnit *unit, FormattedSerializeStream &in, bool success, CallerHierarchyBasePtr hierarchy) const;
         void setSynced(SerializableUnitBase *unit, bool b) const;
@@ -46,8 +47,8 @@ namespace Serialize {
         void setActive(SerializableUnitBase *unit, bool active, bool existenceChanged) const;
         void setParent(SerializableUnitBase *unit) const;
 
-        void writeAction(const SyncableUnitBase *unit, uint16_t index, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, void *data) const;
-        void writeRequest(const SyncableUnitBase *unit, uint16_t index, FormattedBufferedStream &out, void *data) const;
+        void writeAction(const SerializableDataUnit *unit, uint16_t index, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, void *data) const;
+        void writeRequest(const SerializableDataUnit *unit, uint16_t index, FormattedBufferedStream &out, void *data) const;
 
         uint16_t getIndex(OffsetPtr offset) const;
         const Serializer &get(uint16_t index) const;
@@ -56,8 +57,10 @@ namespace Serialize {
 
         void writeFunctionArguments(const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, uint16_t index, FunctionType type, const void *args) const;
         void writeFunctionResult(FormattedBufferedStream &out, uint16_t index, const void *args) const;
+        void writeFunctionError(FormattedBufferedStream &out, uint16_t index, MessageResult error) const;
         StreamResult readFunctionAction(SyncableUnitBase *unit, FormattedBufferedStream &in, PendingRequest &request) const;
         StreamResult readFunctionRequest(SyncableUnitBase *unit, FormattedBufferedStream &in, MessageId id) const;
+        StreamResult readFunctionError(SyncableUnitBase *unit, FormattedBufferedStream &in, PendingRequest &request) const;
     };
 
 }

@@ -39,30 +39,6 @@ struct ReferenceTuple {
         return std::get<T>(data.mData);
     }
 
-    template <size_t I>
-    decltype(auto) get()
-    {
-        return std::get<I>(mData);
-    }
-
-    template <size_t I>
-    decltype(auto) get() const
-    {
-        return std::get<I>(mData);
-    }
-
-    template <typename T>
-    decltype(auto) get()
-    {
-        return std::get<T &>(mData);
-    }
-
-    template <typename T>
-    decltype(auto) get() const
-    {
-        return std::get<T>(mData);
-    }
-
     std::tuple<Ty *...> operator&() const
     {
         return {

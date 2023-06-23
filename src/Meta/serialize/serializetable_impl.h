@@ -15,12 +15,16 @@
 
 #include "streams/comparestreamid.h"
 
+#include "configs/verifier.h"
+
 namespace Engine {
 namespace Serialize {
 
     void META_EXPORT writeFunctionAction(SyncableUnitBase *unit, uint16_t index, const void *args, const std::set<ParticipantId> &targets, ParticipantId answerTarget, MessageId answerId);
-    void META_EXPORT writeFunctionResult(SyncableUnitBase *unit, uint16_t index, const void *result, ParticipantId answerTarget, MessageId answerId);
+    void META_EXPORT writeFunctionResult(SyncableUnitBase *unit, uint16_t index, const void *result, FormattedBufferedStream &target, MessageId answerId);
     void META_EXPORT writeFunctionRequest(SyncableUnitBase *unit, uint16_t index, FunctionType type, const void *args, ParticipantId requester, MessageId requesterTransactionId, GenericMessageReceiver receiver = {});
+    void META_EXPORT writeFunctionError(SyncableUnitBase *unit, uint16_t index, MessageResult error, FormattedBufferedStream &target, MessageId answerId);
+    StreamResult META_EXPORT readState(const SerializeTable *table, SerializableDataUnit *unit, FormattedSerializeStream &in, StateTransmissionFlags flags, CallerHierarchyBasePtr hierarchy);
 
     namespace __serialize_impl__ {
 
@@ -127,10 +131,10 @@ namespace Serialize {
                     (unit->*Setter)(std::move(dummy));
                     return {};
                 },
-                [](SyncableUnitBase *unit, FormattedBufferedStream &in, PendingRequest &request) -> StreamResult {
+                [](SerializableDataUnit *unit, FormattedBufferedStream &in, PendingRequest &request) -> StreamResult {
                     throw "Unsupported";
                 },
-                [](SyncableUnitBase *unit, FormattedBufferedStream &inout, MessageId id) -> StreamResult {
+                [](SerializableDataUnit *unit, FormattedBufferedStream &inout, MessageId id) -> StreamResult {
                     throw "Unsupported";
                 },
                 [](SerializableDataUnit *_unit, FormattedSerializeStream &in, bool success, CallerHierarchyBasePtr hierarchy) {
@@ -142,17 +146,17 @@ namespace Serialize {
                 },
                 [](SerializableDataUnit *unit) {
                 },
-                [](const SyncableUnitBase *unit, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, void *data) {
+                [](const SerializableDataUnit *unit, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, void *data) {
                     throw "Unsupported";
                 },
-                [](const SyncableUnitBase *_unit, FormattedBufferedStream &out, void *data) {
+                [](const SerializableDataUnit *_unit, FormattedBufferedStream &out, void *data) {
                     throw "Unsupported";
                 }
             };
         }
 
-        template <typename _disambiguate__dont_remove, auto P, typename... Configs>
-        constexpr Serializer field(const char *name)
+        template <typename _disambiguate__dont_remove, auto P, typename... Configs, typename... ParentConfigs>
+        constexpr Serializer field(const char *name, type_pack<ParentConfigs...>)
         {
             using traits = CallableTraits<decltype(P)>;
             using Unit = typename traits::class_type;
@@ -171,17 +175,17 @@ namespace Serialize {
                     Unit *unit = static_cast<Unit *>(_unit);
                     return read<T, Configs...>(in, unit->*P, name, CallerHierarchyPtr { hierarchy.append(unit) });
                 },
-                [](SyncableUnitBase *_unit, FormattedBufferedStream &in, PendingRequest &request) -> StreamResult {
+                [](SerializableDataUnit *_unit, FormattedBufferedStream &in, PendingRequest &request) -> StreamResult {
                     if constexpr (std::derived_from<T, SyncableBase>) {
                         Unit *unit = static_cast<Unit *>(_unit);
-                        return readAction<T, Configs...>(unit->*P, in, request, CallerHierarchyPtr { CallerHierarchy { unit } });
+                        return readAction<T, ParentConfigs..., Configs...>(unit->*P, in, request, CallerHierarchyPtr { CallerHierarchy { unit } });
                     } else
                         throw "Unsupported";
                 },
-                [](SyncableUnitBase *_unit, FormattedBufferedStream &inout, MessageId id) -> StreamResult {
+                [](SerializableDataUnit *_unit, FormattedBufferedStream &inout, MessageId id) -> StreamResult {
                     if constexpr (std::derived_from<T, SyncableBase>) {
                         Unit *unit = static_cast<Unit *>(_unit);
-                        return readRequest<T, Configs...>(unit->*P, inout, id, CallerHierarchyPtr { CallerHierarchy { unit } });
+                        return readRequest<T, ParentConfigs..., Configs...>(unit->*P, inout, id, CallerHierarchyPtr { CallerHierarchy { unit } });
                     } else
                         throw "Unsupported";
                 },
@@ -199,7 +203,7 @@ namespace Serialize {
                     if constexpr (std::derived_from<T, SerializableUnitBase>)
                         setParent<T, Configs...>(static_cast<Unit *>(unit)->*P, unit);
                 },
-                [](const SyncableUnitBase *_unit, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, void *data) {
+                [](const SerializableDataUnit *_unit, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, void *data) {
                     if constexpr (std::derived_from<T, SyncableBase>) {
                         const Unit *unit = static_cast<const Unit *>(_unit);
                         typename T::action_payload &payload = *static_cast<typename T::action_payload *>(data);
@@ -207,7 +211,7 @@ namespace Serialize {
                     } else
                         throw "Unsupported";
                 },
-                [](const SyncableUnitBase *_unit, FormattedBufferedStream &out, void *data) {
+                [](const SerializableDataUnit *_unit, FormattedBufferedStream &out, void *data) {
                     if constexpr (std::derived_from<T, SyncableBase>) {
                         const Unit *unit = static_cast<const Unit *>(_unit);
                         typename T::request_payload &payload = *static_cast<typename T::request_payload *>(data);
@@ -218,7 +222,7 @@ namespace Serialize {
             };
         }
 
-        template <auto f>
+        template <auto f, typename... Configs>
         constexpr SyncFunction syncFunction()
         {
             using traits = typename Callable<f>::traits;
@@ -231,18 +235,17 @@ namespace Serialize {
                     const Tuple &argTuple = *static_cast<const Tuple *>(args);
                     for (FormattedBufferedStream &out : outStreams) {
                         write(out, argTuple, "Args");
-                        out.endMessageWrite();
                     }
                 },
                 [](FormattedBufferedStream &out, const void *result) {
                     write(out, *static_cast<const R *>(result), "Result");
-                    out.endMessageWrite();
                 },
                 [](SyncableUnitBase *unit, FormattedBufferedStream &in, uint16_t index, FunctionType type, PendingRequest &request) {
                     switch (type) {
                     case CALL: {
                         Tuple args;
                         STREAM_PROPAGATE_ERROR(read(in, args, "Args"));
+                        STREAM_PROPAGATE_ERROR(applyMap(in, args));
                         writeFunctionAction(unit, index, &args, {}, request.mRequester, request.mRequesterTransactionId);
                         R result = invoke_patch_void(LIFT(TupleUnpacker::invokeExpand), f, static_cast<T *>(unit), args);
                         request.mReceiver.set_value(result);
@@ -251,23 +254,28 @@ namespace Serialize {
                         R result;
                         STREAM_PROPAGATE_ERROR(read(in, result, "Result"));
                         if (request.mRequesterTransactionId) {
-                            writeFunctionResult(unit, index, &result, request.mRequester, request.mRequesterTransactionId);
+                            assert(in.id() == request.mRequester);
+                            writeFunctionResult(unit, index, &result, in, request.mRequesterTransactionId);
                         }
                         request.mReceiver.set_value(result);
                     } break;
                     }
                     return StreamResult {};
                 },
-                [](SyncableUnitBase *unit, FormattedBufferedStream &in, uint16_t index, FunctionType type, MessageId id) {
+                [](SyncableUnitBase *_unit, FormattedBufferedStream &in, uint16_t index, FunctionType type, MessageId id) {
+                    T *unit = static_cast<T *>(_unit);
                     Tuple args;
                     STREAM_PROPAGATE_ERROR(read(in, args, "Args"));
+                    STREAM_PROPAGATE_ERROR(applyMap(in, args));
                     ParticipantId answerId = in.id();
-                    if (static_cast<T *>(unit)->isMaster()) {
+                    if (!TupleUnpacker::invokeExpand(VerifierSelector<Configs...>::verify, CallerHierarchyPtr { CallerHierarchy { unit } }, answerId, args)) {
+                        writeFunctionError(unit, index, MessageResult::REJECTED, in, id);
+                    } else if (unit->isMaster()) {
                         if (type == CALL)
                             writeFunctionAction(unit, index, &args, {}, answerId, id);
-                        R result = invoke_patch_void(LIFT(TupleUnpacker::invokeExpand), f, static_cast<T *>(unit), args);
+                        R result = invoke_patch_void(LIFT(TupleUnpacker::invokeExpand), f, unit, args);
                         if (type == QUERY && id != 0)
-                            writeFunctionResult(unit, index, &result, answerId, id);
+                            writeFunctionResult(unit, index, &result, in, id);
                     } else {
                         writeFunctionRequest(
                             unit, index, type, &args, answerId, id);
@@ -276,36 +284,48 @@ namespace Serialize {
                 }
             };
         }
+
+        template <typename T, typename... Configs>
+        StreamResult readState(const SerializeTable *table, SerializableDataUnit *unit, FormattedSerializeStream &in, StateTransmissionFlags flags, CallerHierarchyBasePtr hierarchy)
+        {
+            CallerHierarchy newHierarchy = hierarchy.append(static_cast<T *>(unit));
+            CallerHierarchyPtr newHierarchyPtr = newHierarchy;
+
+            auto guard = GuardSelector<Configs...>::guard(newHierarchyPtr);
+            return Serialize::readState(table, unit, in, flags, newHierarchyPtr);
+        }
     }
 
 }
 }
 
-#define SERIALIZETABLE_BEGIN_IMPL(T, Base)                                                \
-    namespace Serialize_##T                                                               \
-    {                                                                                     \
-        static constexpr const ::Engine::Serialize::SerializeTable &(*baseType)() = Base; \
-    }                                                                                     \
-    namespace Engine {                                                                    \
-        template <>                                                                       \
-        struct LineStruct<Serialize::__serialize_impl__::SerializerTag, __LINE__> {       \
-            using Ty = T;                                                                 \
-            static constexpr const bool base = true;                                      \
-            constexpr const Serialize::Serializer *data() const;                          \
-        };                                                                                \
-        template <>                                                                       \
-        struct LineStruct<Serialize::__serialize_impl__::FunctionTag, __LINE__> {         \
-            using Ty = T;                                                                 \
-            static constexpr const bool base = true;                                      \
-            static constexpr const size_t count = 0;                                      \
-            constexpr const Serialize::SyncFunction *data() const { return nullptr; }     \
-            template <auto g>                                                             \
-            static constexpr uint16_t getIndex();                                         \
-        };                                                                                \
+#define SERIALIZETABLE_BEGIN_IMPL(T, Base, ...)                                                                     \
+    namespace Serialize_##T                                                                                         \
+    {                                                                                                               \
+        static constexpr const ::Engine::Serialize::SerializeTable &(*baseType)() = Base;                           \
+        static constexpr const auto readState = ::Engine::Serialize::__serialize_impl__::readState<T, __VA_ARGS__>; \
+    }                                                                                                               \
+    namespace Engine {                                                                                              \
+        template <>                                                                                                 \
+        struct LineStruct<Serialize::__serialize_impl__::SerializerTag, __LINE__> {                                 \
+            using Ty = T;                                                                                           \
+            static constexpr auto parentConfigs = type_pack<__VA_ARGS__> {};                                        \
+            static constexpr const bool base = true;                                                                \
+            constexpr const Serialize::Serializer *data() const;                                                    \
+        };                                                                                                          \
+        template <>                                                                                                 \
+        struct LineStruct<Serialize::__serialize_impl__::FunctionTag, __LINE__> {                                   \
+            using Ty = T;                                                                                           \
+            static constexpr const bool base = true;                                                                \
+            static constexpr const size_t count = 0;                                                                \
+            constexpr const Serialize::SyncFunction *data() const { return nullptr; }                               \
+            template <auto g>                                                                                       \
+            static constexpr uint16_t getIndex();                                                                   \
+        };                                                                                                          \
     }
 
-#define SERIALIZETABLE_INHERIT_BEGIN(T, Base) SERIALIZETABLE_BEGIN_IMPL(T, &serializeTable<Base>)
-#define SERIALIZETABLE_BEGIN(T) SERIALIZETABLE_BEGIN_IMPL(T, nullptr)
+#define SERIALIZETABLE_INHERIT_BEGIN(T, Base, ...) SERIALIZETABLE_BEGIN_IMPL(T, &serializeTable<Base>, __VA_ARGS__)
+#define SERIALIZETABLE_BEGIN(T, ...) SERIALIZETABLE_BEGIN_IMPL(T, nullptr, __VA_ARGS__)
 
 #define SERIALIZETABLE_ENTRY(Ser)                                                                                                                       \
     namespace Engine {                                                                                                                                  \
@@ -323,7 +343,7 @@ namespace Serialize {
         };                                                                                                                                              \
     }
 
-#define SYNCFUNCTION(f)                                                                                                                             \
+#define SYNCFUNCTION(f, ...)                                                                                                                        \
     namespace Engine {                                                                                                                              \
         template <>                                                                                                                                 \
         struct LineStruct<Serialize::__serialize_impl__::FunctionTag, __LINE__> : Serialize::__serialize_impl__::FunctionLineStruct<__LINE__ - 1> { \
@@ -336,7 +356,7 @@ namespace Serialize {
             }                                                                                                                                       \
             static constexpr const bool base = false;                                                                                               \
             static constexpr const size_t count = Serialize::__serialize_impl__::FunctionLineStruct<__LINE__ - 1>::count + 1;                       \
-            Serialize::SyncFunction mData = Serialize::__serialize_impl__::syncFunction<&Ty::f>();                                                  \
+            Serialize::SyncFunction mData = Serialize::__serialize_impl__::syncFunction<&Ty::f, __VA_ARGS__>();                                     \
             template <auto g>                                                                                                                       \
             static constexpr uint16_t getIndex()                                                                                                    \
             {                                                                                                                                       \
@@ -364,10 +384,10 @@ namespace Serialize {
             }                                                                                                         \
         }                                                                                                             \
     }                                                                                                                 \
-    DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::Serialize::SerializeTable, ::, serializeTable, SINGLE_ARG({ #T, ::Engine::type_holder<T>, ::Serialize_##T::baseType, ::Serialize_##T::fields.data(), ::Serialize_##T::functions.data(), std::derived_from<T, ::Engine::Serialize::TopLevelUnitBase> }), T);
+    DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::Serialize::SerializeTable, ::, serializeTable, SINGLE_ARG({ #T, ::Engine::type_holder<T>, ::Serialize_##T::baseType, ::Serialize_##T::readState, ::Serialize_##T::fields.data(), ::Serialize_##T::functions.data(), std::derived_from<T, ::Engine::Serialize::TopLevelUnitBase> }), T);
 
 #define FIELD(...) \
-    SERIALIZETABLE_ENTRY(SINGLE_ARG(::Engine::Serialize::__serialize_impl__::field<Ty, &Ty::__VA_ARGS__>(STRINGIFY2(FIRST(__VA_ARGS__)))))
+    SERIALIZETABLE_ENTRY(SINGLE_ARG(::Engine::Serialize::__serialize_impl__::field<Ty, &Ty::__VA_ARGS__>(STRINGIFY2(FIRST(__VA_ARGS__)), parentConfigs)))
 
 #define ENCAPSULATED_FIELD(Name, Getter, Setter) \
     SERIALIZETABLE_ENTRY(SINGLE_ARG(::Engine::Serialize::__serialize_impl__::encapsulated_field<Ty, &Ty::Getter, &Ty::Setter>(#Name)))

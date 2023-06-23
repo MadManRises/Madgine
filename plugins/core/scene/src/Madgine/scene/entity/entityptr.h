@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Generic/bits/field.h"
+#include "Generic/bits/ptr.h"
+
 namespace Engine {
 namespace Scene {
     namespace Entity {
@@ -31,14 +34,16 @@ namespace Scene {
             bool isDead() const;
 
         private:
-            bool holdsRef() const;
             struct ControlBlockDummy;
             ControlBlockDummy getBlock() const;
 
             friend struct Serialize::Operations<EntityPtr>;
 
         private:
-            mutable uintptr_t mEntity = 0;
+            union {
+                BitPtr<Entity, 2> mEntity = nullptr;
+                mutable BitField<1, 1> mHoldsRef; // Make sure not to conflict with Serialize::UnitIdTag::SYNCABLE
+            };
         };
 
     }

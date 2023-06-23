@@ -47,6 +47,18 @@ namespace Scene {
             return mgr->entityComponentList(index.mType).applyMap(index, in, success, hierarchy);
         }
 
+        void entityComponentOwningHelperSetSynced(EntityComponentHandle<EntityComponentBase> &index, bool synced, CallerHierarchyBasePtr hierarchy)
+        {
+            Entity *entity = hierarchy;
+            entity->sceneMgr().entityComponentList(index.mType).setSynced(index, synced);
+        }
+
+        void entityComponentOwningHelperSetActive(EntityComponentHandle<EntityComponentBase> &index, bool active, bool existenceChanged, CallerHierarchyBasePtr hierarchy)
+        {
+            Entity *entity = hierarchy;
+            entity->sceneMgr().entityComponentList(index.mType).setActive(index, active, existenceChanged);
+        }
+
     }
 }
 }

@@ -39,9 +39,11 @@ namespace Serialize {
 
         StreamResult readFunctionAction(FormattedBufferedStream &in, PendingRequest &request);
         StreamResult readFunctionRequest(FormattedBufferedStream &in, MessageId id);
+        StreamResult readFunctionError(FormattedBufferedStream &in, PendingRequest &request);
 
         UnitId slaveId() const;
         UnitId masterId() const;
+        ParticipantId participantId() const;
 
         bool isMaster() const;
 
@@ -53,12 +55,25 @@ namespace Serialize {
         UnitId moveMasterId(UnitId newId = 0);
 
         friend META_EXPORT void writeFunctionAction(SyncableUnitBase *unit, uint16_t index, const void *args, const std::set<ParticipantId> &targets, ParticipantId answerTarget, MessageId answerId);
-        friend META_EXPORT void writeFunctionResult(SyncableUnitBase *unit, uint16_t index, const void *result, ParticipantId answerTarget, MessageId answerId);
+        friend META_EXPORT void writeFunctionResult(SyncableUnitBase *unit, uint16_t index, const void *result, FormattedBufferedStream &target, MessageId answerId);
         friend META_EXPORT void writeFunctionRequest(SyncableUnitBase *unit, uint16_t index, FunctionType type, const void *args, ParticipantId requester, MessageId requesterTransactionId, GenericMessageReceiver receiver);
+        friend META_EXPORT void writeFunctionError(SyncableUnitBase *unit, uint16_t index, MessageResult error, FormattedBufferedStream &target, MessageId answerId);
 
         void writeFunctionAction(uint16_t index, const void *args, const std::set<ParticipantId> &targets = {}, ParticipantId answerTarget = 0, MessageId answerId = 0);
-        void writeFunctionResult(uint16_t index, const void *result, ParticipantId answerTarget, MessageId answerId);
+        void writeFunctionResult(uint16_t index, const void *result, FormattedBufferedStream &target, MessageId answerId);
         void writeFunctionRequest(uint16_t index, FunctionType type, const void *args, ParticipantId requester = 0, MessageId requesterTransactionId = 0, GenericMessageReceiver receiver = {});
+        void writeFunctionError(uint16_t index, MessageResult error, FormattedBufferedStream &target, MessageId answerId);
+
+        void writeAction(OffsetPtr offset, void *data, ParticipantId answerTarget, MessageId answerId, const std::set<ParticipantId> &targets = {}) const;
+        void writeRequest(OffsetPtr offset, void *data, ParticipantId requester = 0, MessageId requesterTransactionId = 0, GenericMessageReceiver receiver = {}) const;
+        void writeRequestResponse(OffsetPtr offset, void *data, ParticipantId answerTarget, MessageId answerId) const;
+
+        FormattedBufferedStream &getSlaveRequestMessageTarget(ParticipantId requester, MessageId requesterTransactionId, GenericMessageReceiver receiver) const;
+        std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterActionMessageTargets(ParticipantId answerTarget, MessageId answerId,
+            const std::set<ParticipantId> &targets = {}) const;
+        FormattedBufferedStream &getMasterRequestResponseTarget(ParticipantId answerTarget, MessageId answerId) const;
+
+        void beginRequestResponseMessage(FormattedBufferedStream &stream, MessageId id) const;
 
     private:
         std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> getMasterMessageTargets(const std::set<ParticipantId> &targets = {}) const;
@@ -97,21 +112,21 @@ namespace Serialize {
     };
 
     template <typename T, typename Base>
-    struct SyncableUnit;
+    struct TableInitialized;
 
     template <typename T, typename Base>
     struct TableInitializer {
         TableInitializer()
         {
-            static_cast<SyncableUnit<T, Base> *>(this)->mType = &serializeTable<T>();
+            static_cast<TableInitialized<T, Base> *>(this)->mType = &serializeTable<T>();
         }
         TableInitializer(const TableInitializer &)
         {
-            static_cast<SyncableUnit<T, Base> *>(this)->mType = &serializeTable<T>();
+            static_cast<TableInitialized<T, Base> *>(this)->mType = &serializeTable<T>();
         }
         TableInitializer(TableInitializer &&)
         {
-            static_cast<SyncableUnit<T, Base> *>(this)->mType = &serializeTable<T>();
+            static_cast<TableInitialized<T, Base> *>(this)->mType = &serializeTable<T>();
         }
         TableInitializer &operator=(const TableInitializer &)
         {
@@ -124,10 +139,21 @@ namespace Serialize {
     };
 
     template <typename T, typename _Base = SyncableUnitBase>
-    struct SyncableUnit : _Base, private TableInitializer<T, _Base> {
-    protected:
+    struct TableInitialized : _Base, private TableInitializer<T, _Base> {
         friend TableInitializer<T, _Base>;
 
+        using _Base::_Base;
+    };
+
+    template <typename T, typename _Base>
+    struct SyncableUnitEx : _Base {
+
+        using _Base::_Base;
+
+        template <typename OffsetPtr>
+        friend struct Syncable;
+
+    protected:
         template <auto f, typename... Args>
         auto call(Args &&...args)
         {
@@ -138,7 +164,7 @@ namespace Serialize {
                     typename traits::decay_argument_types::as_tuple argTuple { std::forward<Args>(args2)... };
                     if (this->isMaster()) {
                         this->writeFunctionAction(functionIndex<f>, &argTuple);
-                        if constexpr (std::same_as<decltype(TupleUnpacker::invokeExpand(f, static_cast<T*>(this), argTuple)), void>) {
+                        if constexpr (std::same_as<decltype(TupleUnpacker::invokeExpand(f, static_cast<T *>(this), argTuple)), void>) {
                             TupleUnpacker::invokeExpand(f, static_cast<T *>(this), argTuple);
                             receiver.set_value();
                         } else {
@@ -197,8 +223,44 @@ namespace Serialize {
             }
         }
 
-        using _Base::_Base;
+        using _Base::writeAction;
+        template <typename Ty, typename... Args>
+        void writeAction(Ty *field, ParticipantId answerTarget, MessageId answerId, Args &&...args) const
+        {
+            OffsetPtr offset { static_cast<const SerializableDataUnit *>(this), field };
+            typename Ty::action_payload data { std::forward<Args>(args)... };
+            _Base::writeAction(offset, &data, answerTarget, answerId, {});
+        }
+
+        using _Base::writeRequest;
+        template <typename Ty, typename... Args>
+        void writeRequest(Ty *field, ParticipantId requester, MessageId requesterTransactionId, Args &&...args) const
+        {
+            OffsetPtr offset { static_cast<const SerializableDataUnit *>(this), field };
+            typename Ty::request_payload data { std::forward<Args>(args)... };
+            _Base::writeRequest(offset, &data, requester, requesterTransactionId);
+        }
+
+        template <typename Ty, typename... Args>
+        void writeRequest(Ty *field, GenericMessageReceiver receiver, Args &&...args) const
+        {
+            OffsetPtr offset { static_cast<const SerializableDataUnit *>(this), field };
+            typename Ty::request_payload data { std::forward<Args>(args)... };
+            _Base::writeRequest(offset, &data, 0, 0, std::move(receiver));
+        }
+
+        using _Base::writeRequestResponse;
+        template <typename Ty, typename... Args>
+        void writeRequestResponse(Ty *field, ParticipantId answerTarget, MessageId answerId, Args &&...args) const
+        {
+            OffsetPtr offset { static_cast<const SerializableDataUnit *>(this), field };
+            typename Ty::action_payload data { std::forward<Args>(args)... };
+            _Base::writeRequestResponse(offset, &data, answerTarget, answerId);
+        }
     };
+
+    template <typename T, typename _Base = SyncableUnitBase>
+    using SyncableUnit = SyncableUnitEx<T, TableInitialized<T, _Base>>;
 
 } // namespace Serialize
 } // namespace Core

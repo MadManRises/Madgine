@@ -10,6 +10,8 @@ add_plugin(Resources Madgine Core ${sources})
 
 target_link_plugins(Resources Root)
 
+target_link_options(Resources PUBLIC "/NATVIS:${CMAKE_CURRENT_LIST_DIR}/src/Resources.natvis")
+
 set(sources "")
 FolderSources(sources "" tools)
 	FolderSources(sources tools Madgine_Tools resourcestoolconfig.cpp resourcestoolconfig.h resourcestoolsforward.h resourcestoolslib.h)

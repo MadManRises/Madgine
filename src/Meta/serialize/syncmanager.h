@@ -21,7 +21,8 @@ namespace Serialize {
 
     ENUM_BASE(SyncManagerResult, GenericResult,
         STREAM_ERROR,
-        TIMEOUT)
+        TIMEOUT,
+        CANCELED)
 
     struct META_EXPORT SyncManager : SerializeManager {
         SyncManager(const std::string &name);
@@ -85,11 +86,10 @@ namespace Serialize {
         TimeOut mReceivingMasterStateTimeout;
 
     private:
-        mutable_set<FormattedBufferedStream, CompareStreamId> mMasterStreams;
+        std::map<ParticipantId, FormattedBufferedStream> mMasterStreams;
         std::optional<FormattedBufferedStream> mSlaveStream;
 
         std::set<TopLevelUnitBase *> mTopLevelUnits; //TODO: Sort by MasterId
-
 
         StreamResult mStreamError;
     };

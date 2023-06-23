@@ -137,6 +137,11 @@ namespace Serialize {
         {
             c.setActive(active, existenceChange, ContainerOperations<SerializableContainerImpl<C, Observer, OffsetPtr>, Configs...>::Creator::controlled);
         }
+
+        static void setSynced(SerializableContainerImpl<C, Observer, OffsetPtr> &c, bool synced)
+        {
+            c.setSynced(synced);
+        }
     };
 
     template <typename C, typename Observer, typename OffsetPtr>
@@ -158,6 +163,11 @@ namespace Serialize {
         static void setActive(C &c, bool active, bool existenceChange)
         {
             c.setActive(active, existenceChange, Creator::controlled);
+        }
+
+        static void setSynced(C &c, bool synced)
+        {
+            c.setSynced(synced);
         }
 
         static StreamResult performOperation(C &c, ContainerEvent op, FormattedSerializeStream &in, typename container_traits<C>::emplace_return &it, ParticipantId answerTarget, MessageId answerId, const CallerHierarchyBasePtr &hierarchy = {})
@@ -215,8 +225,6 @@ namespace Serialize {
                                    Base::write(out, c, "content", hierarchy);
                                } },
                     std::move(payload));
-
-                out.endMessageWrite();
             }
         }
 
@@ -274,7 +282,6 @@ namespace Serialize {
                                throw "TODO";
                            } },
                 std::move(payload));
-            out.endMessageWrite();
         }
 
         static StreamResult readRequest(C &c, FormattedBufferedStream &inout, MessageId id, const CallerHierarchyBasePtr &hierarchy = {})

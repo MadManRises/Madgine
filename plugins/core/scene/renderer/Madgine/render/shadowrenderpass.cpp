@@ -48,9 +48,11 @@ namespace Render {
         if (!mPipeline.available())
             return;
 
+        auto guard = mScene.scene()->lock(AccessMode::READ);
+
         std::map<std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> instances;
 
-        for (const auto &[mesh, e] : mScene.scene().entityComponentList<Scene::Entity::Mesh>().data()) {
+        for (const auto &[mesh, e] : mScene.scene()->entityComponentList<Scene::Entity::Mesh>().data()) {
             if (!mesh.isVisible())
                 continue;
 

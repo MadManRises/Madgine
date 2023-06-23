@@ -39,7 +39,7 @@ namespace Serialize {
         std::unique_ptr<SerializeStreamData> createStreamData();
         static ParticipantId createStreamId();
 
-		SyncableUnitBase *getByMasterId(UnitId unit);
+		static SyncableUnitBase *getByMasterId(UnitId unit);
 
         SyncableUnitMap mSlaveMappings;   
 

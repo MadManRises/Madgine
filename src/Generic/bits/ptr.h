@@ -2,10 +2,10 @@
 
 namespace Engine {
 
-template <typename T>
+template <typename T, size_t FreeBits = std::bit_width(alignof(T) - 1)>
 struct BitPtr {
 
-    static constexpr size_t FreeBitCount = std::bit_width(alignof(T) - 1);
+    static constexpr size_t FreeBitCount = FreeBits;
     static constexpr uintptr_t Mask = (1 << FreeBitCount) - 1;
 
     constexpr BitPtr() = default;
@@ -15,7 +15,8 @@ struct BitPtr {
         setMasked(p);
     }
 
-    BitPtr& operator=(T* p) {
+    BitPtr &operator=(T *p)
+    {
         setMasked(p);
         return *this;
     }
@@ -30,9 +31,24 @@ struct BitPtr {
         return *maskedPtr();
     }
 
+    constexpr operator T *() const
+    {
+        return maskedPtr();
+    }
+
     bool operator==(nullptr_t) const
     {
         return maskedPtr() == nullptr;
+    }
+
+    auto operator<=>(T *other)
+    {
+        return maskedPtr() <=> other;
+    }
+
+    explicit constexpr operator bool() const
+    {
+        return maskedPtr() != nullptr;
     }
 
 protected:
@@ -41,7 +57,8 @@ protected:
         return reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(mPtr) & ~Mask);
     }
 
-    void setMasked(T* p) {
+    void setMasked(T *p)
+    {
         uintptr_t &ref = reinterpret_cast<uintptr_t &>(mPtr);
         uintptr_t masked = ref & Mask;
         ref = (reinterpret_cast<uintptr_t>(p) & ~Mask) | masked;
@@ -80,7 +97,8 @@ struct BitUniquePtr : private BitPtr<T> {
         reset();
     }
 
-    void reset() {
+    void reset()
+    {
         T *p = this->maskedPtr();
         if (p) {
             delete p;
@@ -88,7 +106,8 @@ struct BitUniquePtr : private BitPtr<T> {
         }
     }
 
-    T* release() {
+    T *release()
+    {
         T *p = this->maskedPtr();
         if (p) {
             this->setMasked(nullptr);

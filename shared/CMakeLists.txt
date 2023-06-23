@@ -43,6 +43,7 @@ add_notices(lib_msdfgen
 add_subdirectory(imgui)
 set_target_properties(ImGui PROPERTIES EXCLUDE_FROM_ALL TRUE)
 target_include_directories(ImGui PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+target_link_options(ImGui PUBLIC "/NATVIS:${CMAKE_CURRENT_LIST_DIR}/imgui/misc/debuggers/imgui.natvis")
 
 add_notices(ImGui 
 	LICENSE_FILE imgui/LICENSE.txt 

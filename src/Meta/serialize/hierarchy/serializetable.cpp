@@ -25,14 +25,53 @@ namespace Serialize {
         unit->writeFunctionAction(index, args, targets, answerTarget, answerId);
     }
 
-    void writeFunctionResult(SyncableUnitBase *unit, uint16_t index, const void *result, ParticipantId answerTarget, MessageId answerId)
+    void writeFunctionResult(SyncableUnitBase *unit, uint16_t index, const void *result, FormattedBufferedStream &target, MessageId answerId)
     {
-        unit->writeFunctionResult(index, result, answerTarget, answerId);
+        unit->writeFunctionResult(index, result, target, answerId);
     }
 
     void writeFunctionRequest(SyncableUnitBase *unit, uint16_t index, FunctionType type, const void *args, ParticipantId requester, MessageId requesterTransactionId, GenericMessageReceiver receiver)
     {
         unit->writeFunctionRequest(index, type, args, requester, requesterTransactionId, std::move(receiver));
+    }
+
+    void writeFunctionError(SyncableUnitBase *unit, uint16_t index, MessageResult error, FormattedBufferedStream &target, MessageId answerId)
+    {
+        unit->writeFunctionError(index, error, target, answerId);
+    }
+
+    StreamResult META_EXPORT readState(const SerializeTable *table, SerializableDataUnit *unit, FormattedSerializeStream &in, StateTransmissionFlags flags, CallerHierarchyBasePtr hierarchy)
+    {
+        if (in.supportsNameLookup()) {
+            std::string name;
+            STREAM_PROPAGATE_ERROR(in.lookupFieldName(name));
+            while (!name.empty()) {
+                bool found = false;
+                const SerializeTable *tableAcc = table;
+                while (tableAcc && !found) {
+                    for (const Serializer *it = tableAcc->mFields; it->mFieldName; ++it) {
+                        if (name == it->mFieldName) {
+                            STREAM_PROPAGATE_ERROR(it->mReadState(unit, in, it->mFieldName, hierarchy));
+                            found = true;
+                            break;
+                        }
+                    }
+                    tableAcc = tableAcc->mBaseType ? &tableAcc->mBaseType() : nullptr;
+                }
+                if (!found)
+                    return STREAM_PARSE_ERROR(in) << "Could not find field '" << name << "'";
+                STREAM_PROPAGATE_ERROR(in.lookupFieldName(name));
+            }
+        } else {
+            const SerializeTable *tableAcc = table;
+            while (tableAcc) {
+                for (const Serializer *it = tableAcc->mFields; it->mFieldName; ++it) {
+                    STREAM_PROPAGATE_ERROR(it->mReadState(unit, in, it->mFieldName, hierarchy));
+                }
+                tableAcc = tableAcc->mBaseType ? &tableAcc->mBaseType() : nullptr;
+            }
+        }
+        return {};
     }
 
     void SerializeTable::writeState(const SerializableDataUnit *unit, FormattedSerializeStream &out, CallerHierarchyBasePtr hierarchy) const
@@ -48,46 +87,17 @@ namespace Serialize {
 
     StreamResult SerializeTable::readState(SerializableDataUnit *unit, FormattedSerializeStream &in, StateTransmissionFlags flags, CallerHierarchyBasePtr hierarchy) const
     {
-        if (in.supportsNameLookup()) {
-            std::string name;
-            STREAM_PROPAGATE_ERROR(in.lookupFieldName(name));
-            while (!name.empty()) {
-                bool found = false;
-                const SerializeTable *table = this;
-                while (table && !found) {
-                    for (const Serializer *it = table->mFields; it->mFieldName; ++it) {
-                        if (name == it->mFieldName) {
-                            STREAM_PROPAGATE_ERROR(it->mReadState(unit, in, it->mFieldName, hierarchy));
-                            found = true;
-                            break;
-                        }
-                    }
-                    table = table->mBaseType ? &table->mBaseType() : nullptr;
-                }
-                if (!found)
-                    return STREAM_PARSE_ERROR(in) << "Could not find field '" << name << "'";
-                STREAM_PROPAGATE_ERROR(in.lookupFieldName(name));
-            }
-        } else {
-            const SerializeTable *table = this;
-            while (table) {
-                for (const Serializer *it = table->mFields; it->mFieldName; ++it) {
-                    STREAM_PROPAGATE_ERROR(it->mReadState(unit, in, it->mFieldName, hierarchy));
-                }
-                table = table->mBaseType ? &table->mBaseType() : nullptr;
-            }
-        }
-        return {};
+        return mReadState(this, unit, in, flags, hierarchy);
     }
 
-    StreamResult SerializeTable::readAction(SyncableUnitBase *unit, FormattedBufferedStream &in, PendingRequest &request) const
+    StreamResult SerializeTable::readAction(SerializableDataUnit *unit, FormattedBufferedStream &in, PendingRequest &request) const
     {
         uint16_t index;
         STREAM_PROPAGATE_ERROR(read(in, index, "index"));
         return get(index).mReadAction(unit, in, request);
     }
 
-    StreamResult SerializeTable::readRequest(SyncableUnitBase *unit, FormattedBufferedStream &inout, MessageId id) const
+    StreamResult SerializeTable::readRequest(SerializableDataUnit *unit, FormattedBufferedStream &inout, MessageId id) const
     {
         uint16_t index;
         STREAM_PROPAGATE_ERROR(read(inout, index, "index"));
@@ -172,7 +182,7 @@ namespace Serialize {
         }
     }
 
-    void SerializeTable::writeAction(const SyncableUnitBase *unit, uint16_t index, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, void *data) const
+    void SerializeTable::writeAction(const SerializableDataUnit *unit, uint16_t index, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, void *data) const
     {
         for (FormattedBufferedStream &out : outStreams) {
             write(out, index, "index");
@@ -180,7 +190,7 @@ namespace Serialize {
         get(index).mWriteAction(unit, outStreams, data);
     }
 
-    void SerializeTable::writeRequest(const SyncableUnitBase *unit, uint16_t index, FormattedBufferedStream &out, void *data) const
+    void SerializeTable::writeRequest(const SerializableDataUnit *unit, uint16_t index, FormattedBufferedStream &out, void *data) const
     {
         write(out, index, "index");
         get(index).mWriteRequest(unit, out, data);
@@ -276,6 +286,11 @@ namespace Serialize {
         getFunction(index).mWriteFunctionResult(out, args);
     }
 
+    void SerializeTable::writeFunctionError(FormattedBufferedStream &out, uint16_t index, MessageResult error) const
+    {
+        write(out, error, "error");
+    }
+
     StreamResult SerializeTable::readFunctionAction(SyncableUnitBase *unit, FormattedBufferedStream &in, PendingRequest &request) const
     {
         uint16_t index;
@@ -292,6 +307,14 @@ namespace Serialize {
         FunctionType type;
         STREAM_PROPAGATE_ERROR(read(in, type, "functionType"));
         return getFunction(index).mReadFunctionRequest(unit, in, index, type, id);
+    }
+
+    StreamResult SerializeTable::readFunctionError(SyncableUnitBase *unit, FormattedBufferedStream &in, PendingRequest &request) const
+    {
+        MessageResult error;
+        STREAM_PROPAGATE_ERROR(read(in, error, "error"));
+        request.mReceiver.set_error(error);
+        return {};
     }
 
 }

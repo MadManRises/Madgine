@@ -42,7 +42,7 @@ if (WINDOWS)
 	endif()
 endif()
 
-
+target_link_options(Modules PUBLIC "/NATVIS:${CMAKE_CURRENT_LIST_DIR}/Modules.natvis")
 
 generate_binary_info(Modules)
 

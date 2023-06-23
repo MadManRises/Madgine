@@ -20,6 +20,8 @@ namespace Scene {
         void entityComponentOwningHelperWrite(Serialize::FormattedSerializeStream &out, const EntityComponentHandle<EntityComponentBase> &index, const char *name, CallerHierarchyBasePtr hierarchy);
         Serialize::StreamResult entityComponentOwningHelperRead(Serialize::FormattedSerializeStream &in, const EntityComponentHandle<EntityComponentBase> &index, const char *name, CallerHierarchyBasePtr hierarchy);
         Serialize::StreamResult entityComponentOwningHelperApplyMap(Serialize::FormattedSerializeStream &in, EntityComponentHandle<EntityComponentBase> &index, bool success, CallerHierarchyBasePtr hierarchy);
+        void entityComponentOwningHelperSetSynced(EntityComponentHandle<EntityComponentBase> &index, bool synced, CallerHierarchyBasePtr hierarchy);
+        void entityComponentOwningHelperSetActive(EntityComponentHandle<EntityComponentBase> &index, bool active, bool existenceChanged, CallerHierarchyBasePtr hierarchy);
 
         template <>
         struct EntityComponentHandle<EntityComponentBase> {
@@ -216,6 +218,16 @@ namespace Serialize {
 
         static StreamResult applyMap(FormattedSerializeStream& in, Scene::Entity::EntityComponentOwningHandle<T>& handle, bool success, CallerHierarchyBasePtr hierarchy) {
             return entityComponentOwningHelperApplyMap(in, handle.mHandle, success, hierarchy);
+        }
+
+        static void setSynced(Scene::Entity::EntityComponentOwningHandle<T> &handle, bool synced, CallerHierarchyBasePtr hierarchy)
+        {
+            entityComponentOwningHelperSetSynced(handle.mHandle, synced, hierarchy);
+        }
+
+        static void setActive(Scene::Entity::EntityComponentOwningHandle<T> &handle, bool active, bool existenceChanged, CallerHierarchyBasePtr hierarchy)
+        {
+            entityComponentOwningHelperSetActive(handle.mHandle, active, existenceChanged, hierarchy);
         }
     };
 

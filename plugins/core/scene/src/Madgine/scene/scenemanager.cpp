@@ -44,11 +44,11 @@ static Engine::Threading::DataLock static_lock(Engine::Scene::SceneManager *mgr)
     return mgr->lock(Engine::AccessMode::WRITE);
 }
 
-SERIALIZETABLE_BEGIN(Engine::Scene::SceneManager)
+SERIALIZETABLE_BEGIN(Engine::Scene::SceneManager,
+    Engine::Serialize::CallableGuard<&static_lock>)
 FIELD(mEntities,
     Serialize::ParentCreator<&Engine::Scene::SceneManager::readNonLocalEntity, &Engine::Scene::SceneManager::writeEntity>,
-    Serialize::RequestPolicy::no_requests,
-    Serialize::CallableGuard<&static_lock>)
+    Serialize::RequestPolicy::no_requests)
 FIELD(mSceneComponents, Serialize::ControlledConfig<KeyCompare<std::unique_ptr<Engine::Scene::SceneComponentBase>>>)
 SERIALIZETABLE_END(Engine::Scene::SceneManager)
 
@@ -56,7 +56,7 @@ namespace Engine {
 namespace Scene {
 
     SceneManager::SceneManager(App::Application &app)
-        : SyncableUnit(Serialize::SCENE_MANAGER)
+        : SyncableUnitEx(Serialize::SCENE_MANAGER)
         , VirtualScope(app)
         , mSceneComponents(*this)
     {

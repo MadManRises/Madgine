@@ -13,6 +13,8 @@
 #include "Madgine/render/rendertarget.h"
 #include "Madgine/render/rendercontext.h"
 
+#include "scenemainwindowcomponent.h"
+
 #include "Meta/math/transformation.h"
 
 #include "Meta/math/frustum.h"
@@ -26,7 +28,7 @@
 namespace Engine {
 namespace Render {
 
-    PointShadowRenderPass::PointShadowRenderPass(size_t index, Scene::SceneManager &scene, int priority)
+    PointShadowRenderPass::PointShadowRenderPass(size_t index, SceneMainWindowComponent &scene, int priority)
         : mScene(scene)
         , mIndex(index)
         , mPriority(priority)
@@ -45,7 +47,7 @@ namespace Render {
 
     void PointShadowRenderPass::render(Render::RenderTarget *target, size_t iteration)
     {
-        Scene::Entity::EntityComponentList<Scene::Entity::PointLight> &lights = mScene.entityComponentList<Scene::Entity::PointLight>();
+        Scene::Entity::EntityComponentList<Scene::Entity::PointLight> &lights = mScene.scene()->entityComponentList<Scene::Entity::PointLight>();
         if (mIndex >= lights.size())
             return;
 
@@ -58,7 +60,7 @@ namespace Render {
 
         std::map<std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> instances;
 
-        for (const auto &[mesh, e] : mScene.entityComponentList<Scene::Entity::Mesh>().data()) {
+        for (const auto &[mesh, e] : mScene.scene()->entityComponentList<Scene::Entity::Mesh>().data()) {
             if (!mesh.isVisible())
                 continue;
 

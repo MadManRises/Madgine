@@ -102,7 +102,7 @@ namespace Scene {
         virtual Threading::Task<void> finalize() final;
 
     public:
-        MEMBER_OFFSET_CONTAINER(mSceneComponents, SceneComponentContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, NoOpFunctor>>);
+        MEMBER_OFFSET_CONTAINER(mSceneComponents,, SceneComponentContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, NoOpFunctor>>);
 
         ////////////////////////////////////////////// ECS
 

@@ -258,7 +258,7 @@ namespace Serialize {
     template <typename C, typename Observer = NoOpFunctor, typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
     using SyncableContainer = container_api<SyncableContainerImpl<C, Observer, OffsetPtr>>;
 
-#define SYNCABLE_CONTAINER(Name, ...) MEMBER_OFFSET_CONTAINER(Name, ::Engine::Serialize::SyncableContainer<__VA_ARGS__>)
+#define SYNCABLE_CONTAINER(Name, ...) MEMBER_OFFSET_CONTAINER(Name,, ::Engine::Serialize::SyncableContainer<__VA_ARGS__>)
 
 }
 

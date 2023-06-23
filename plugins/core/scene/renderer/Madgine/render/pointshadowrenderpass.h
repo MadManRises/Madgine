@@ -9,7 +9,7 @@ namespace Engine {
 namespace Render {
 
     struct MADGINE_SCENE_RENDERER_EXPORT PointShadowRenderPass : RenderPass {
-        PointShadowRenderPass(size_t index, Scene::SceneManager &scene, int priority);
+        PointShadowRenderPass(size_t index, SceneMainWindowComponent &scene, int priority);
 
         virtual void setup(RenderTarget *target) override;
         virtual void shutdown() override;
@@ -20,7 +20,7 @@ namespace Render {
     private:
         PipelineLoader::Instance mPipeline;
 
-        Scene::SceneManager &mScene;        
+        SceneMainWindowComponent &mScene;        
 
         size_t mIndex;
 

@@ -19,24 +19,34 @@ struct OffsetPtr {
     {
     }
 
-    constexpr uintptr_t offset() const {
+    explicit OffsetPtr(const void *from, const void *to)
+        : mOffset(static_cast<const std::byte *>(to) - static_cast<const std::byte *>(from))
+    {
+    }
+
+    constexpr uintptr_t offset() const
+    {
         return mOffset;
     }
 
-    constexpr void reset() {
+    constexpr void reset()
+    {
         mOffset = std::numeric_limits<uintptr_t>::max();
     }
 
     constexpr std::strong_ordering operator<=>(const OffsetPtr &other) const = default;
-    constexpr std::strong_ordering operator<=>(uintptr_t offset) const {
+    constexpr std::strong_ordering operator<=>(uintptr_t offset) const
+    {
         return mOffset <=> offset;
     }
 
-    constexpr explicit operator bool() const {
+    constexpr explicit operator bool() const
+    {
         return mOffset != std::numeric_limits<uintptr_t>::max();
     }
 
-    constexpr OffsetPtr& operator+=(uintptr_t offset) {
+    constexpr OffsetPtr &operator+=(uintptr_t offset)
+    {
         mOffset += offset;
         return *this;
     }
@@ -61,17 +71,18 @@ struct OffsetPtr {
         return p - offset.mOffset;
     }
 
-    constexpr OffsetPtr operator+(uintptr_t offset) const {
-        return OffsetPtr{ mOffset + offset };
+    constexpr OffsetPtr operator+(uintptr_t offset) const
+    {
+        return OffsetPtr { mOffset + offset };
     }
 
-    friend constexpr OffsetPtr operator+(uintptr_t offset, OffsetPtr ptr) {
+    friend constexpr OffsetPtr operator+(uintptr_t offset, OffsetPtr ptr)
+    {
         return ptr + offset;
     }
 
 private:
     uintptr_t mOffset = std::numeric_limits<uintptr_t>::max();
 };
-
 
 }

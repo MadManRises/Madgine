@@ -12,7 +12,7 @@ namespace Engine {
 namespace Serialize {
     TopLevelUnitBase::TopLevelUnitBase(UnitId staticId)
         : SyncableUnitBase(staticId)
-        , mStaticSlaveId(staticId)
+        , mStaticSlaveId(staticId) 
     {
         assert(staticId == 0 || (staticId >= BEGIN_STATIC_ID_SPACE && staticId < RESERVED_ID_COUNT));
         mTopLevel = this;
@@ -69,7 +69,8 @@ namespace Serialize {
 
     void TopLevelUnitBase::initSlaveId(SyncManager *mgr)
     {
-        setSlaveId(mStaticSlaveId ? mStaticSlaveId : masterId(), mgr);
+        if (mStaticSlaveId)
+            setSlaveId(mStaticSlaveId, mgr);                
     }
 
     std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> TopLevelUnitBase::getMasterMessageTargets() const

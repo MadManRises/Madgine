@@ -13,7 +13,7 @@ namespace Serialize {
     struct Serializable : SerializableBase {
         bool isSynced() const
         {
-            return OffsetPtr::parent(this) && OffsetPtr::parent(this)->mSynced;
+            return OffsetPtr::parent(this) && OffsetPtr::parent(this)->isSynced();
         }
 
         bool isActive() const

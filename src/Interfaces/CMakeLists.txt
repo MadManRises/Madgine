@@ -64,4 +64,6 @@ if (UNIX)
 	endif ()
 endif (UNIX)
 
+target_link_options(Interfaces PUBLIC "/NATVIS:${CMAKE_CURRENT_LIST_DIR}/Interfaces.natvis")
+
 install_to_workspace(Madgine TARGETS Interfaces EXPORT_LIB)

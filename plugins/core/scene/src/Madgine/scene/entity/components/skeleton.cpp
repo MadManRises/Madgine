@@ -11,6 +11,7 @@
 
 #include "Madgine/resources/resourcemanager.h"
 
+
 ENTITYCOMPONENT_IMPL(Skeleton, Engine::Scene::Entity::Skeleton);
 
 METATABLE_BEGIN(Engine::Scene::Entity::Skeleton)

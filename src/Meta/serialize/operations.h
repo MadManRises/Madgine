@@ -3,8 +3,8 @@
 #include "Generic/container/containerevent.h"
 #include "configs/configselector.h"
 #include "configs/creator.h"
-#include "configs/requestpolicy.h"
 #include "configs/guard.h"
+#include "configs/requestpolicy.h"
 
 #include "hierarchy/serializableunitptr.h"
 
@@ -26,9 +26,8 @@ namespace Serialize {
     META_EXPORT StreamResult convertSyncablePtr(FormattedSerializeStream &in, UnitId id, SyncableUnitBase *&out);
     META_EXPORT StreamResult convertSerializablePtr(FormattedSerializeStream &in, uint32_t id, SerializableDataUnit *&out);
 
-
     template <typename T, typename... Configs>
-    StreamResult applyMap(FormattedSerializeStream &in, T &t, bool success, const CallerHierarchyBasePtr &hierarchy = {})
+    StreamResult applyMap(FormattedSerializeStream &in, T &t, bool success = true, const CallerHierarchyBasePtr &hierarchy = {})
     {
         if constexpr (requires { &Operations<T, Configs...>::applyMap; })
             return TupleUnpacker::invoke(Operations<T, Configs...>::applyMap, in, t, success, hierarchy);
@@ -37,17 +36,17 @@ namespace Serialize {
     }
 
     template <typename T, typename... Configs>
-    void setSynced(T &t, bool b)
+    void setSynced(T &t, bool b, CallerHierarchyBasePtr hierarchy)
     {
         if constexpr (requires { &Operations<T, Configs...>::setSynced; })
-            Operations<T, Configs...>::setSynced(t, b);
+            TupleUnpacker::invoke(Operations<T, Configs...>::setSynced, t, b, hierarchy);
     }
 
     template <typename T, typename... Configs>
-    void setActive(T &t, bool active, bool existenceChanged)
+    void setActive(T &t, bool active, bool existenceChanged, CallerHierarchyBasePtr hierarchy)
     {
         if constexpr (requires { &Operations<T, Configs...>::setActive; })
-            Operations<T, Configs...>::setActive(t, active, existenceChanged);
+            TupleUnpacker::invoke(Operations<T, Configs...>::setActive, t, active, existenceChanged, hierarchy);
     }
 
     template <typename T>
@@ -115,7 +114,6 @@ namespace Serialize {
     {
         Operations<T, Configs...>::writeRequest(t, out, std::forward<Payload>(payload), hierarchy);
     }
-
 
     template <typename T, typename... Configs>
     struct Operations {
@@ -307,6 +305,16 @@ namespace Serialize {
                 Serialize::write(out, e, "Element", hierarchy);
             });
             out.endContainerWrite(name);
+        }
+
+        static StreamResult applyMap(FormattedSerializeStream &in, std::tuple<Ty...> &t, bool success, const CallerHierarchyBasePtr &hierarchy = {})
+        {
+            return TupleUnpacker::accumulate(
+                t, [&](auto &e, StreamResult r) {
+                    STREAM_PROPAGATE_ERROR(std::move(r));
+                    return Serialize::applyMap(in, e, success, hierarchy);
+                },
+                StreamResult {});            
         }
     };
 

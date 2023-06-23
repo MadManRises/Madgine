@@ -972,5 +972,85 @@ namespace Execution {
     };
 
     inline constexpr assign_t assign;
+        
+    template <typename R>
+    struct to_result_t {
+
+        template <typename Rec, typename Sender>
+        struct state;
+
+        template <typename Rec, typename Sender>
+        struct receiver : algorithm_receiver<Rec> {
+
+            template <typename... V>
+            void set_value(V &&...value)
+            {
+                this->mRec.set_value(mOnValue, std::forward<V>(value)...);
+            }
+
+            void set_done()
+            {
+                this->mRec.set_value(mOnDone);
+            }
+
+            template <typename... R2>
+            void set_error(R fixedResult, R2 &&...result)
+            {
+                this->mRec.set_error(fixedResult, std::forward<R>(result)...);
+            }
+
+            R mOnValue;
+            R mOnDone;
+        };
+
+        template <typename Rec, typename Sender>
+        struct state : algorithm_state<Sender, receiver<Rec, Sender>> {
+
+            state(Rec &&rec, Sender &&sender, R onValue, R onDone)
+                : algorithm_state<Sender, receiver<Rec, Sender>>(std::forward<Sender>(sender), std::forward<Rec>(rec), onValue, onDone)
+            {
+            }
+
+        };
+
+        template <typename Sender>
+        struct sender : algorithm_sender<Sender> {
+
+            template <template <typename...> typename Tuple>
+            using value_types = typename Sender::value_types<type_pack>::prepend<R>::instantiate<Tuple>;
+
+            template <typename Rec>
+            friend auto tag_invoke(connect_t, sender &&sender, Rec &&rec)
+            {
+                return state<Rec, Sender> { std::forward<Rec>(rec), std::forward<Sender>(sender.mSender), sender.mOnValue, sender.mOnDone };
+            }
+
+            Sender mSender;
+            R mOnValue;
+            R mOnDone;
+        };
+
+        template <typename Sender>
+        friend auto tag_invoke(to_result_t, Sender &&inner, R onValue, R onDone)
+        {
+            return sender<Sender> { {}, std::forward<Sender>(inner), onValue, onDone };
+        }
+
+        template <typename Sender>
+        auto operator()(Sender &&sender, R onValue, R onDone) const
+            noexcept(is_nothrow_tag_invocable_v<to_result_t, Sender, R, R>)
+                -> tag_invoke_result_t<to_result_t, Sender, R, R>
+        {
+            return tag_invoke(*this, std::forward<Sender>(sender), onValue, onDone);
+        }
+
+        auto operator()(R onValue, R onDone) const
+        {
+            return pipable_from_right(*this, onValue, onDone);
+        }
+    };
+
+    template <typename R>
+    inline constexpr to_result_t<R> to_result;
 }
 }

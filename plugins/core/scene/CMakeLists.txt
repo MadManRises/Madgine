@@ -11,6 +11,7 @@ add_plugin(Scene Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/scenelib
 
 target_link_plugins(Scene MeshLoader AnimationLoader App)
 
+target_link_options(Scene PUBLIC "/NATVIS:${CMAKE_CURRENT_LIST_DIR}/src/Scene.natvis")
 
 Project(SceneRenderer)
 

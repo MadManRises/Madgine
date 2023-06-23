@@ -10,6 +10,7 @@ struct CompactContainer : C, Observer {
     typename C::iterator erase(const typename C::iterator& it) {
         auto last = --C::end();
         if (last != it) {
+            using std::swap;
             swap(*it, *last);
             Observer::operator()(it, C::begin());
         }

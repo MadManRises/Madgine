@@ -98,6 +98,8 @@ namespace Scene {
             SceneManager &sceneMgr();
             const SceneManager &sceneMgr() const;
 
+            friend struct SyncableEntityComponentBase;
+
         public:
             std::string mName;
 

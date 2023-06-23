@@ -2,6 +2,7 @@
 
 #include "../type_pack.h"
 #include "freebits.h"
+#include "pair.h"
 #include "types.h"
 
 namespace Engine {
@@ -18,8 +19,6 @@ struct BitVariant {
 
     static constexpr size_t FreeBitCount = sizeof(type) * 8 - TotalBitCount;
 
-    static constexpr type IndexMask = (1 << NeededBitCount) - 1;
-
     BitVariant()
     {
         set<0>();
@@ -32,7 +31,7 @@ struct BitVariant {
 
     BitVariant &operator=(BitVariant &&other)
     {
-        size_t i = other.index();
+        size_t i = other.mIndex;
         if (i != 0) {
             using F = void (*)(type *);
             F fs[] = {
@@ -43,8 +42,8 @@ struct BitVariant {
                 }...
             };
             fs[i - 1](this, &other->mData);
-            other.setIndex(0);
-            setIndex(i);
+            other.mIndex = 0;
+            mIndex = i;
         }
     }
 
@@ -60,7 +59,7 @@ struct BitVariant {
     template <typename T>
     constexpr bool is() const
     {
-        return type_pack<Ty...>::template index<type, T> == index() - 1;
+        return type_pack<Ty...>::template index<type, T> == mIndex - 1;
     }
 
     template <typename T>
@@ -87,7 +86,7 @@ struct BitVariant {
                 return std::forward<F>(f)(v->ref<Ty>());
             }...
         };
-        return fs[index() - 1](this, std::forward<F>(f));
+        return fs[mIndex - 1](this, std::forward<F>(f));
     }
 
 private:
@@ -121,37 +120,28 @@ private:
         reset();
         using T = typename type_pack<Ty...>::template select<I>;
         new (address<T>()) T { std::forward<Args>(args)... };
-        setIndex(I + 1);
+        mIndex = I + 1;
     }
 
     void reset()
-    {
-        type i = index();
-        if (i != 0) {
+    {        
+        if (mIndex != 0) {
             using F = void (*)(BitVariant *);
             F fs[] = {
                 [](BitVariant *v) {
                     v->address<Ty>()->~Ty();
                 }...
             };
-            fs[i - 1](this);
-            setIndex(0);
+            fs[mIndex - 1](this);
+            mIndex = 0;
         }
     }
 
-    constexpr type index() const
-    {
-        return (mData >> FreeBitCount) & IndexMask;
-    }
-
-    constexpr void setIndex(type index)
-    {
-        assert((index & IndexMask) == index);
-        mData = (mData & ~(IndexMask << FreeBitCount)) | (index << FreeBitCount);
-    }
-
 private:
-    type mData = 0;
+    union {
+        type mData = 0;
+        BitField<FreeBitCount, NeededBitCount> mIndex;
+    };
 };
 
 }
