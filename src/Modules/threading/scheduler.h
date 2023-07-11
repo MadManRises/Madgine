@@ -15,6 +15,8 @@ namespace Threading {
         void schedulerLoop(Threading::TaskQueue *queue);
 #endif
 
+        void setupThreadInfo(Threading::TaskQueue *queue, std::string tags = "");
+
     private:
         WorkGroup &mWorkgroup;
     };

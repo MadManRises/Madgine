@@ -20,7 +20,7 @@ namespace NodeGraph {
 
         virtual void interpretRead(NodeInterpreter &interpreter, ValueType &retVal, std::unique_ptr<NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group) const override;
     
-        virtual CodeGen::Statement generateRead(CodeGenerator &generator, uint32_t providerIndex, std::unique_ptr<CodeGeneratorData> &data) const override;
+        virtual CodeGen::Statement generateRead(CodeGenerator &generator, std::unique_ptr<CodeGeneratorData> &data, uint32_t providerIndex, uint32_t group = 0) const override;
 
         void setFunction(FunctionTable *function);
         FunctionTable *getFunction() const;

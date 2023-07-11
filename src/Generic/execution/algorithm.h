@@ -58,12 +58,25 @@ namespace Execution {
                 if constexpr (std::same_as<V2, void>) {
                     mTransform(std::forward<V>(values)...);
                     this->mRec.set_value();
-                } else
+                } else if constexpr (InstanceOf<V2, std::tuple>)
+                    TupleUnpacker::invokeExpand(LIFT(this->mRec.set_value, this), mTransform(std::forward<V>(values)...));
+                else
                     this->mRec.set_value(mTransform(std::forward<V>(values)...));
             }
 
             T mTransform;
         };
+
+        template <typename T>
+        static auto return_types_helper() {
+            if constexpr (std::same_as<T, void>) {
+                return type_pack<> {};
+            } else if constexpr (InstanceOf<T, std::tuple>) {
+                return to_type_pack<T> {};
+            } else {
+                return type_pack<T> {};
+            }
+        }
 
         template <typename Sender, typename T>
         struct sender : algorithm_sender<Sender> {
@@ -72,7 +85,7 @@ namespace Execution {
             using helper = std::invoke_result_t<T, V...>;
             using helper_type = typename Sender::template value_types<helper>;
             template <template <typename...> typename Tuple>
-            using value_types = typename std::conditional_t<std::same_as<helper_type, void>, type_pack<>, type_pack<helper_type>>::template instantiate<Tuple>;
+            using value_types = typename decltype(return_types_helper<helper_type>())::template instantiate<Tuple>;
 
             template <typename Rec>
             friend auto tag_invoke(connect_t, sender &&sender, Rec &&rec)
@@ -972,7 +985,7 @@ namespace Execution {
     };
 
     inline constexpr assign_t assign;
-        
+
     template <typename R>
     struct to_result_t {
 
@@ -1010,7 +1023,6 @@ namespace Execution {
                 : algorithm_state<Sender, receiver<Rec, Sender>>(std::forward<Sender>(sender), std::forward<Rec>(rec), onValue, onDone)
             {
             }
-
         };
 
         template <typename Sender>

@@ -8,6 +8,8 @@
 
 #include "Madgine/render/rendertarget.h"
 
+#include "Generic/intervalclock.h"
+
 namespace ClickBrick {
 
     struct GameManager : Engine::Input::Handler<GameManager> {
@@ -21,7 +23,7 @@ namespace ClickBrick {
 
         virtual void setWidget(Engine::Widgets::WidgetBase *w) override;
 
-        virtual void updateRender(std::chrono::microseconds timeSinceLastFrame) override;
+        Engine::Threading::Task<void> updateApp();
 
         void updateBricks(std::chrono::microseconds timeSinceLastFrame);
         void spawnBrick();
@@ -43,12 +45,15 @@ namespace ClickBrick {
         int mScore = 0;
         int mLife = 100000;
 
+        Engine::Scene::SceneManager &mSceneMgr;
+
         std::chrono::microseconds mSpawnInterval;
         std::chrono::microseconds mAcc;
+        Engine::IntervalClock<Engine::Threading::CustomTimepoint> mSceneClock;
 
         std::list<Engine::Scene::Entity::EntityPtr> mBricks;
 
-        Engine::Scene::SceneManager &mSceneMgr;
+        
         Engine::Render::SceneRenderPass mSceneRenderer;
         std::unique_ptr<Engine::Render::RenderTarget> mGameRenderTarget;
     };

@@ -128,7 +128,7 @@ namespace FirstParty {
         mInitialized = true;
 
         root.taskQueue()->queue([this]() -> Threading::Task<void> {
-            while (mRoot.taskQueue()->running() || mRoot.taskQueue()->tasksInFlightCount() > 1) {
+            while (mRoot.taskQueue()->running() || mRoot.taskQueue()->taskInFlightCount() > 1) {
                 EOS_Platform_Tick(mPlatformHandle);
                 co_await 100ms;
             }

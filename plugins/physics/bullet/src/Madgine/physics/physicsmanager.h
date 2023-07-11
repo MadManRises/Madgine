@@ -7,6 +7,10 @@
 
 #include "Meta/math/vector3.h"
 
+#include "Generic/intervalclock.h"
+
+#include "Modules/threading/customclock.h"
+
 class btSoftRigidDynamicsWorld;
 struct btSoftBodyWorldInfo;
 class btManifoldPoint;
@@ -76,7 +80,7 @@ namespace Physics {
         virtual Threading::Task<bool> init() override;
         virtual Threading::Task<void> finalize() override;
 
-        virtual void update(std::chrono::microseconds, bool paused) override;
+        Threading::Task<void> update();
 
         static bool sContactCallback(btManifoldPoint &cp, const btCollisionObjectWrapper *colObj0, int partId0, int index0, const btCollisionObjectWrapper *colObj1, int partId1, int index1);
         bool contactCallback(ContactPoint &p, RigidBody *body0, RigidBody *body1);
@@ -85,6 +89,8 @@ namespace Physics {
         std::unique_ptr<PhysicsData> mData;
 
         std::vector<PhysicsListener *> mListener;
+
+        IntervalClock<Threading::CustomTimepoint> mClock;
     };
 
 }

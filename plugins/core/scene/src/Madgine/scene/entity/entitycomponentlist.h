@@ -14,7 +14,7 @@ namespace Scene {
 
         DERIVE_FUNCTION(init, Entity *)
         DERIVE_FUNCTION(finalize, Entity *)
-        DERIVE_FUNCTION(updateRender, Entity *)
+        DERIVE_FUNCTION(updateRender, Entity *, std::chrono::microseconds, std::chrono::microseconds)
         DERIVE_FUNCTION(relocateComponent, const EntityComponentHandle<EntityComponentBase> &, Entity *)
 
         template <typename T>
@@ -126,11 +126,11 @@ namespace Scene {
                 return mData.size();
             }
 
-            void updateRender() override final
+            void updateRender(std::chrono::microseconds frameTimeSinceLastFrame, std::chrono::microseconds sceneTimeSinceLastFrame) override final
             {
                 if constexpr (has_function_updateRender_v<T>) {
                     for (const std::tuple<T &, NulledPtr<Entity> &> &t : mData) {
-                        std::get<0>(t).updateRender(std::get<1>(t));
+                        std::get<0>(t).updateRender(std::get<1>(t), frameTimeSinceLastFrame, sceneTimeSinceLastFrame);
                     }
                 }
             }

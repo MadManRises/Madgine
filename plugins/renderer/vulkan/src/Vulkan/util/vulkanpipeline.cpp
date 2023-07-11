@@ -18,7 +18,18 @@ namespace Render {
         return true;
     }
 
-    VkPipeline VulkanPipeline::get(VertexFormat format, size_t groupSize, size_t samples, size_t instanceDataSize, VkRenderPass renderpass)
+    bool VulkanPipeline::link(typename VulkanShaderLoader::Ptr vertexShader, typename VulkanShaderLoader::Ptr geometryShader, typename VulkanShaderLoader::Ptr pixelShader)
+    {
+        reset();
+
+        mVertexShader = std::move(vertexShader);
+        mGeometryShader = std::move(geometryShader);
+        mPixelShader = std::move(pixelShader);
+
+        return true;
+    }
+
+    VkPipeline VulkanPipeline::get(VertexFormat format, size_t groupSize, size_t samples, size_t instanceDataSize, VkRenderPass renderpass) const
     {
         size_t samplesBits = sqrt(samples);
         assert(samplesBits * samplesBits == samples);
@@ -27,37 +38,59 @@ namespace Render {
 
         if (!pipeline) {
 
-            if (!mVertexShader.available())
+            auto check = [](auto &variant) {
+                return std::visit(overloaded {
+                                      [](const typename VulkanShaderLoader::Handle &handle) {
+                                          return !handle || handle.available();
+                                      },
+                                      [](const typename VulkanShaderLoader::Ptr &ptr) {
+                                          return true;
+                                      } },
+                    variant);
+            };
+
+            auto resolve = [](auto &variant) ->const VulkanPtr<VkShaderModule, &vkDestroyShaderModule>& {
+                return std::visit(overloaded {
+                                      [](const typename VulkanShaderLoader::Handle &handle) -> const VulkanPtr<VkShaderModule, &vkDestroyShaderModule> & {
+                                          return *handle;
+                                      },
+                                      [](const typename VulkanShaderLoader::Ptr &ptr) -> const VulkanPtr<VkShaderModule, &vkDestroyShaderModule> & {
+                                          return *ptr;
+                                      } },
+                    variant);
+            };
+
+            if (!check(mVertexShader))
                 return nullptr;
-            if (mGeometryShader && !mGeometryShader.available())
+            if (!check(mGeometryShader))
                 return nullptr;
-            if (mPixelShader && !mPixelShader.available())
+            if (!check(mPixelShader))
                 return nullptr;
 
             VkPipelineShaderStageCreateInfo shaderStages[3] = {};
             size_t count = 0;
 
-            if (mVertexShader) {
+            if (resolve(mVertexShader)) {
                 VkPipelineShaderStageCreateInfo &vertShaderStageInfo = shaderStages[count++];
                 vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
                 vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-                vertShaderStageInfo.module = *mVertexShader;
+                vertShaderStageInfo.module = resolve(mVertexShader);
                 vertShaderStageInfo.pName = "main";
             }
 
-            if (mGeometryShader) {
+            if (resolve(mGeometryShader)) {
                 VkPipelineShaderStageCreateInfo &geomShaderStageInfo = shaderStages[count++];
                 geomShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
                 geomShaderStageInfo.stage = VK_SHADER_STAGE_GEOMETRY_BIT;
-                geomShaderStageInfo.module = *mGeometryShader;
+                geomShaderStageInfo.module = resolve(mGeometryShader);
                 geomShaderStageInfo.pName = "main";
             }
 
-            if (mPixelShader) {
+            if (resolve(mPixelShader)) {
                 VkPipelineShaderStageCreateInfo &fragShaderStageInfo = shaderStages[count++];
                 fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
                 fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-                fragShaderStageInfo.module = *mPixelShader;
+                fragShaderStageInfo.module = resolve(mPixelShader);
                 fragShaderStageInfo.pName = "main";
             }
 
@@ -175,7 +208,7 @@ namespace Render {
         return pipeline;
     }
 
-    std::array<std::array<VulkanPtr<VkPipeline, &vkDestroyPipeline>, 3>, 3> *VulkanPipeline::ptr()
+    const std::array<std::array<VulkanPtr<VkPipeline, &vkDestroyPipeline>, 3>, 3> *VulkanPipeline::ptr() const
     {
         return mPipelines.data();
     }
@@ -186,9 +219,9 @@ namespace Render {
             for (std::array<VulkanPtr<VkPipeline, &vkDestroyPipeline>, 3> &samplePipelines : groupPipelines)
                 for (VulkanPtr<VkPipeline, &vkDestroyPipeline> &pipeline : samplePipelines)
                     pipeline.reset();
-        mVertexShader.reset();
-        mGeometryShader.reset();
-        mPixelShader.reset();
+        mVertexShader = {};
+        mGeometryShader = {};
+        mPixelShader = {};
     }
 
 }

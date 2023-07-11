@@ -31,7 +31,6 @@ namespace Input {
 
         void updateRender();
         void fixedUpdateRender();
-        void updateApp();
 
         //Scene::ContextMask currentContext();
 
@@ -74,7 +73,7 @@ namespace Input {
         Vector2 mKeptCursorPosition;
         bool mKeepingCursorPos = false;
 
-        IntervalClock<std::chrono::steady_clock> mFrameClock, mAppClock;
+        IntervalClock<> mFrameClock;
     };
 }
 }

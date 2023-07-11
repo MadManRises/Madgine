@@ -51,7 +51,7 @@ namespace Render {
             mPointShadowMaps[0] = target->context()->createRenderTexture({ 2048, 2048 }, { .mName = "PointShadowMap0", .mType = TextureType_Cube, .mCreateDepthBufferView = true, .mTextureCount = 0 });
             mPointShadowMaps[1] = target->context()->createRenderTexture({ 2048, 2048 }, { .mName = "PointShadowMap1", .mType = TextureType_Cube, .mCreateDepthBufferView = true, .mTextureCount = 0 });
 
-            mSceneData = std::make_unique<SceneRenderData>(*mScene, target->context());
+            mSceneData = std::make_unique<SceneRenderData>(*mScene);
 
             mShadowMap->addRenderPass(&mShadowPass);
             mPointShadowMaps[0]->addRenderPass(&mPointShadowPasses[0]);

@@ -158,13 +158,7 @@ namespace Window {
             co_return false;
 #endif
 
-        mTaskQueue.queue([this]() -> Threading::Task<void> {
-            while (mTaskQueue.running()) {
-                render();
-                update();
-                co_await std::chrono::milliseconds(/*1*/ 000000 / 60);
-            }
-        });
+        mTaskQueue.queueTask(renderLoop());
 
         co_return true;
     }
@@ -179,9 +173,7 @@ namespace Window {
             co_await comp->callFinalize();
         }
 
-        (*mRenderContext)->unloadAllResources();
-
-        co_await mTaskQueue;
+        co_await (*mRenderContext)->unloadAllResources();
 
         mRenderWindow.reset();
         mRenderContext.reset();
@@ -195,19 +187,15 @@ namespace Window {
         co_return;
     }
 
-    /**
-     * @brief 
-    */
-    void MainWindow::render()
+    Threading::Task<void> MainWindow::renderLoop()
     {
-        (*mRenderContext)->render();
-    }
-
-    void MainWindow::update()
-    {
-        mOsWindow->update();
-        for (ToolWindow &window : mToolWindows)
-            window.osWindow()->update();
+        while (mTaskQueue.running()) {
+            co_await(*mRenderContext)->render();
+            mOsWindow->update();
+            for (ToolWindow &window : mToolWindows)
+                window.osWindow()->update();
+            co_await (/*1*/ 000000ms / 60);
+        }        
     }
 
     /**

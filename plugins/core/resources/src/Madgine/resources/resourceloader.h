@@ -24,6 +24,7 @@ namespace Resources {
     MADGINE_RESOURCES_EXPORT ResourceLoaderBase &getLoaderByIndex(size_t i);
     MADGINE_RESOURCES_EXPORT void waitForIOThread();
 
+    MADGINE_RESOURCES_EXPORT Threading::TaskFuture<bool> queueLoad(Threading::Task<bool> task, Threading::TaskQueue *queue);
     MADGINE_RESOURCES_EXPORT Threading::TaskFuture<void> queueUnload(Threading::Task<void> task, Threading::TaskQueue *queue);
 
     template <typename T, typename _Data, typename _Container = std::list<Placeholder<0>>, typename _Storage = Threading::GlobalStorage, typename _Base = ResourceLoaderCollector::Base>
@@ -107,7 +108,7 @@ namespace Resources {
         static_assert(!container_traits<DataContainer>::remove_invalidates_handles);
 
         using Handle = Handle<T, typename container_traits<DataContainer>::handle>;
-        //using Ptr = Ptr<T, Data>;
+        using Ptr = Ptr<T, Data>;
 
         using Ctor = Lambda<Threading::Task<bool>(T *, Data &, ResourceDataInfo &, Filesystem::FileEventType event)>;
 
@@ -141,14 +142,23 @@ namespace Resources {
 
         static ResourceDataInfo *getInfo(const Handle &handle, T *loader = nullptr)
         {
+            ResourceData<T> *data = getData(handle, loader);
+            if (!data)
+                return nullptr;
+            else
+                return &data->mInfo;
+        }
+
+        static ResourceData<T> *getData(const Handle &handle, T *loader = nullptr)
+        {
             if (!handle)
                 return nullptr;
             if constexpr (container_traits<DataContainer>::has_dependent_handle) {
                 if (!loader)
                     loader = &getSingleton();
-                return &(*loader->mData)[handle.mData].mInfo;
+                return &(*loader->mData)[handle.mData];
             } else {
-                return &handle.mData->mInfo;
+                return handle.mData;
             }
         }
 
@@ -170,8 +180,8 @@ namespace Resources {
                     if (!loader)
                         loader = &getSingleton();
                     typename container_traits<DataContainer>::iterator it = container_traits<DataContainer>::emplace(*loader->mData, loader->mData->end(), resource);
-                    *resource->mHolder = container_traits<DataContainer>::toPositionHandle(*loader->mData, it);
-                    handle = container_traits<DataContainer>::toHandle(*loader->mData, *resource->mHolder);
+                    it->mHolder = container_traits<DataContainer>::toPositionHandle(*loader->mData, it);
+                    handle = container_traits<DataContainer>::toHandle(*loader->mData, it->mHolder);
                     *resource->mData = (decltype(*resource->mData))handle.mData;
                 }
             }
@@ -235,7 +245,7 @@ namespace Resources {
                 Threading::TaskFuture<void> task = unload(handle, loader);
 
                 Resource *resource = handle.resource();
-                auto cleanup = [&data { *loader->mData }, handle { *resource->mHolder }]() {
+                auto cleanup = [&data { *loader->mData }, handle { getData(handle)->mHolder }]() {
                     typename container_traits<DataContainer>::iterator it = container_traits<DataContainer>::toIterator(data, handle);
                     data.erase(it);
                 };
@@ -246,12 +256,24 @@ namespace Resources {
                         loader->loadingTaskQueue());
                 }
 
-                *resource->mData = {};
-                *resource->mHolder = {};
+                if ((typename container_traits<DataContainer>::handle) * resource->mData == handle.mData)
+                    *resource->mData = {};
 
                 //if (resource->name() == ResourceBase::sUnnamed)
                 //    delete resource;
             }
+        }
+
+        static Handle refreshHandle(const Handle &handle, T *loader = nullptr)
+        {
+            if (!handle)
+                return {};
+
+            Resource *resource = handle.resource();
+            if ((typename container_traits<DataContainer>::handle) * resource->mData != handle.mData) {
+                return load(resource, Filesystem::FileEventType::FILE_CREATED, loader);
+            }
+            return {};
         }
 
         template <typename C = Ctor>
@@ -263,35 +285,31 @@ namespace Resources {
                 Filesystem::FileEventType::FILE_CREATED, loader);
         }
 
-        static typename Interface::Ptr createUnnamed()
+        static Ptr createUnnamed()
         {
             return std::make_unique<Data>();
         }
 
         template <typename C>
-        static Threading::Task<bool> loadUnnamedTask(typename Interface::Ptr &ptr, C &&ctor)
+        static Threading::Task<bool> loadUnnamedTask(Ptr &ptr, C &&ctor, T *loader)
         {
             ptr = createUnnamed();
-            return Threading::make_task(std::forward<C>(ctor), *ptr);
+            return Threading::make_task(std::forward<C>(ctor), loader, *ptr);
         }
 
         template <typename C>
-        static Threading::TaskFuture<bool> loadUnnamed(typename Interface::Ptr &ptr, C &&ctor, T *loader = &getSingleton())
+        static Threading::TaskFuture<bool> loadUnnamed(Ptr &ptr, C &&ctor, T *loader = &getSingleton())
         {
-            return loader->queueLoading(loadUnnamedTask(ptr, std::forward<C>(ctor)));
+            return queueLoad(loadUnnamedTask(ptr, std::forward<C>(ctor), loader), loader->loadingTaskQueue());
         }
 
         static Data *getDataPtr(const Handle &handle, T *loader = nullptr, bool verified = true)
         {
-            if (!handle)
+            ResourceData<T> *data = getData(handle, loader);
+            if (!data)
                 return nullptr;
-            if constexpr (container_traits<DataContainer>::has_dependent_handle) {
-                if (!loader)
-                    loader = &getSingleton();
-                return (*loader->mData)[handle.mData].verified(verified);
-            } else {
-                return handle.mData->verified(verified);
-            }
+            else
+                return data->verified(verified);
         }
 
         std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path, std::string_view name = {}) override
@@ -309,8 +327,13 @@ namespace Resources {
         {
             if (static_cast<T *>(this)->mSettings.mAutoReload) {
                 Resource *res = static_cast<Resource *>(resource);
-                if (*res->mData)
-                    load(res, Filesystem::FileEventType::FILE_MODIFIED);
+                if (*res->mData) {
+                    if (static_cast<T *>(this)->mSettings.mInplaceReload) {
+                        load(res, Filesystem::FileEventType::FILE_MODIFIED);
+                    } else {
+                        *res->mData = {};
+                    }
+                }
             }
         }
 
@@ -324,9 +347,9 @@ namespace Resources {
             return mResources.end();
         }
 
-        virtual std::vector<ResourceBase*> resources() override
+        virtual std::vector<ResourceBase *> resources() override
         {
-            std::vector<ResourceBase*> result;
+            std::vector<ResourceBase *> result;
             std::ranges::transform(mResources, std::back_inserter(result), [](std::pair<const std::string, Resource> &p) {
                 return &p.second;
             });

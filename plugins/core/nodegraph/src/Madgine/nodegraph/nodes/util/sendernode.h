@@ -12,7 +12,10 @@
 #include "../../nodeexecution.h"
 #include "../../nodegraph.h"
 #include "../../pins.h"
+#include "automasknode.h"
 #include "nodesendertraits.h"
+
+#include "Madgine/codegen/fromsender.h"
 
 namespace Engine {
 
@@ -53,7 +56,7 @@ namespace NodeGraph {
         }
     }
 
-    template <typename Signature>
+    template <typename Signature, typename Variadic = void>
     static ExtendedValueTypeDesc signature_type(uint32_t index)
     {
         return [index]<typename... T>(type_pack<T...>)
@@ -63,7 +66,15 @@ namespace NodeGraph {
             };
             if constexpr (Signature::variadic) {
                 if (index >= Signature::count)
-                    return toValueTypeDesc<typename Signature::recursive_t>();
+                    return [index]<typename... V>(type_pack<V...>)
+                    {
+                        static_assert(sizeof...(V) > 0);
+                        static constexpr ExtendedValueTypeDesc variadicTypes[] = {
+                            toValueTypeDesc<std::remove_reference_t<decayed_t<V>>>()...
+                        };
+                        return variadicTypes[(index - sizeof...(T)) % sizeof...(V)];
+                    }
+                (typename Variadic::non_recursive_arguments {});
             }
             return types[index];
         }
@@ -71,7 +82,7 @@ namespace NodeGraph {
     }
 
     template <typename Algorithm>
-    struct SenderNode : Node<SenderNode<Algorithm>> {
+    struct SenderNode : Node<SenderNode<Algorithm>, AutoMaskNode<>> {
 
         using Traits = Execution::sender_traits<Algorithm>;
 
@@ -144,13 +155,14 @@ namespace NodeGraph {
         };
 
         SenderNode(NodeGraph &graph)
-            : Node<SenderNode<Algorithm>>(graph)
+            : Node<SenderNode<Algorithm>, AutoMaskNode<>>(graph)
         {
             this->setup();
         }
 
         SenderNode(const SenderNode &other, NodeGraph &graph)
-            : Node<SenderNode<Algorithm>>(graph)
+            : Node<SenderNode<Algorithm>, AutoMaskNode<>>(other, graph)
+            , mArguments(other.mArguments)
         {
         }
 
@@ -209,7 +221,7 @@ namespace NodeGraph {
 
         ExtendedValueTypeDesc dataInType(uint32_t index, uint32_t group, bool bidir = true) const override
         {
-            return signature_type<typename in_types::template unpack_unique<Execution::pred_sender<Execution::signature<>>>::Signature>(index);
+            return signature_type<typename in_types::template unpack_unique<Execution::pred_sender<Execution::signature<>>>::Signature, typename variadic::filter<is_pred_sender>::template unpack_unique<Execution::pred_sender<Execution::signature<>>>::Signature>(index);
         }
 
         bool dataInVariadic(uint32_t group = 0) const override
@@ -517,9 +529,39 @@ namespace NodeGraph {
             }
         }
 
+        virtual CodeGen::Statement generateRead(CodeGenerator &generator, std::unique_ptr<CodeGeneratorData> &data, uint32_t providerIndex, uint32_t group) const override
+        {
+
+            auto result = CodeGen::generatorFromSender(buildSender(value_argument_tuple { mArguments }), NodeCodegenReceiver { 0, this, generator }).generate();
+            if constexpr (std::tuple_size_v<decltype(result)> < 1)
+                throw 0;
+            else {
+                using R = decltype(TupleUnpacker::ensureTuple(std::get<0>(result)));
+                using F = CodeGen::Statement(*)(R&&);
+                static constexpr auto accessors = []<size_t... Is>(std::index_sequence<Is...>){
+                    return std::array {
+                        F { [](R &&result) { return CodeGen::Statement { std::get<Is>(result) }; } }...
+                    };
+                }(std::make_index_sequence<std::tuple_size_v<std::decay_t<R>>>{});
+                CodeGen::Statement current = accessors[providerIndex](TupleUnpacker::ensureTuple(std::get<0>(result)));
+
+                if constexpr (requires { typename Traits::variadic; }) {
+                    for (size_t i = 0; i < variadicPinCount(group); ++i) {
+                        auto result = CodeGen::generatorFromSender(buildVariadicSender(nullptr), NodeCodegenReceiver {0, this, generator}).generate();
+                        if constexpr (std::tuple_size_v<decltype(result)> >= 1)
+                            current = std::get<0>(result);
+                        else
+                            throw 0;
+                    }
+                }
+
+                return current;
+            }
+        }
+
         value_argument_tuple mArguments;
         template <size_t I>
-        auto &getArguments()
+        const auto &getArguments() const
         {
             return std::get<I>(mArguments);
         }

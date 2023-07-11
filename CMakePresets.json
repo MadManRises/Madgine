@@ -160,6 +160,14 @@
       "hidden": true
     },
     {
+      "name": "tracking",
+      "displayName": " (tracking)",
+      "cacheVariables": {
+        "MODULES_ENABLE_TASK_TRACKING": "ON"
+      },
+      "hidden": true
+    },
+    {
       "name": "Debug",
       "inherits": [ "base", "debug" ]
     },
@@ -174,6 +182,10 @@
     {
       "name": "Clang-Debug",
       "inherits": [ "clang", "debug" ]
+    },
+    {
+      "name": "Clang-Debug (Tracking)",
+      "inherits": [ "clang", "debug", "tracking" ]
     },
     {
       "name": "Clang-Debug-OpenGL",

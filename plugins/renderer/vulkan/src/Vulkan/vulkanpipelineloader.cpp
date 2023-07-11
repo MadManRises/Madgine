@@ -68,7 +68,7 @@ namespace Render {
             }))
             co_return false;
 
-        instance = std::make_unique<VulkanPipelineInstance>(config, std::move(pipeline));
+        instance = std::make_unique<VulkanPipelineInstanceHandle>(config, std::move(pipeline));
 
         co_return true;
     }
@@ -77,23 +77,16 @@ namespace Render {
     {
         assert(file.mInstances.size() == 2);
 
-        Handle pipeline;
+        Ptr pipeline;
 
-        char buffer[256];
-#if WINDOWS
-        sprintf_s(buffer, "%s|%s|%s", config.vs.data(), config.gs.data(), config.ps.data());
-#else
-        sprintf(buffer, "%s|%s|%s", config.vs.data(), config.gs.data(), config.ps.data());
-#endif
-
-        if (!co_await pipeline.create(buffer, {}, [file { std::move(file) }, vs { std::string { config.vs } }, ps { std::string { config.ps } }, gs { std::string { config.gs } }](VulkanPipelineLoader *loader, VulkanPipeline &pipeline, ResourceDataInfo &info) -> Threading::Task<bool> {
-                VulkanShaderLoader::Handle vertexShader;
-                if (!co_await vertexShader.create(vs, file, ShaderType::VertexShader))
+        if (!co_await pipeline.create([file { std::move(file) }](VulkanPipelineLoader *loader, VulkanPipeline &pipeline) -> Threading::Task<bool> {
+                VulkanShaderLoader::Ptr vertexShader;
+                if (!co_await vertexShader.create(file, ShaderType::VertexShader))
                     co_return false;
             /* DirectX12GeometryShaderLoader::Handle geometryShader;
                 geometryShader.create(config.gs, file);*/
-                VulkanShaderLoader::Handle pixelShader;
-                if (!co_await pixelShader.create(ps, file, ShaderType::PixelShader))
+                VulkanShaderLoader::Ptr pixelShader;
+                if (!co_await pixelShader.create(file, ShaderType::PixelShader))
                     co_return false;
                 co_return pipeline.link(std::move(vertexShader), {}, std::move(pixelShader));
             }))

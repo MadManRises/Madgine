@@ -20,37 +20,30 @@ namespace Tools {
         NodeRendererTester(const NodeRendererTester &) = delete;
         ~NodeRendererTester();
 
-        virtual Threading::Task < bool> init() override;
-        virtual Threading::Task < void> finalize() override;
+        virtual Threading::Task<bool> init() override;
+        virtual Threading::Task<void> finalize() override;
 
         virtual void render() override;
         virtual void renderMenu() override;
 
         virtual std::string_view key() const override;
 
-        struct NodeRenderPass : Render::RenderPass {
+        struct NodeRenderPass {
+            NodeGraph::NodeGraphLoader::Handle mHandle, mLoadingHandle;
 
-            virtual void render(Render::RenderTarget *target, size_t iteration) override;
+            NodeGraph::NodeInterpreter mInterpreter;
 
-            virtual int priority() const override;
-
-            NodeGraph::NodeGraphLoader::Handle mHandle;
-
-            //NodeGraph::NodeInterpreter mInterpreter;
-
-            ArgumentList mArguments;
+            Render::RenderPass *mPass = nullptr;
         };
 
     private:
         std::unique_ptr<Render::RenderTarget> mTexture;
 
-        Render::Camera mCamera;
-
         std::vector<NodeRenderPass> mPasses;
 
         Tools::Inspector *mInspector;
 
-        ImGui::InteractiveViewState mState;
+        //ImGui::InteractiveViewState mState;
     };
 }
 }

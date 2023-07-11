@@ -95,6 +95,11 @@ namespace Render {
         return NodeGraph::NodeExecutionMask::GPU;
     }
 
+    bool RasterizerNode::dataProviderVariadic(uint32_t group) const
+    {
+        return true;
+    }
+
     size_t RasterizerNode::dataInBaseCount(uint32_t group) const
     {
         return 1;
@@ -146,9 +151,9 @@ namespace Render {
         throw 0;
     }
 
-    void RasterizerNode::generate(NodeGraph::CodeGenerator &_generator, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeGraph::CodeGeneratorData> &data) const
+    void RasterizerNode::generate(NodeGraph::CodeGenerator &_generator, std::unique_ptr<NodeGraph::CodeGeneratorData> &data, uint32_t flowIn, uint32_t group) const
     {
-        assert(flowInOut == 0);
+        assert(flowIn == 0);
         assert(!data);
 
         std::unique_ptr<ShaderCodeGeneratorData> _data = std::make_unique<ShaderCodeGeneratorData>();
@@ -166,7 +171,7 @@ namespace Render {
 
         for (uint32_t i = 0; i < dataInCount(); ++i) {
             rasterizerData->mVariables.push_back({ {}, { std::string { dataInName(i) }, dataInType(i) } });
-            file.statement(CodeGen::Assignment { {} , CodeGen::VariableAccess { "OUT." + std::string { dataInName(i) } }, generator.read(i) });
+            file.statement(CodeGen::Assignment { {} , CodeGen::VariableAccess { "OUT." + std::string { dataInName(i) } }, generator.read(dataInSource(i)) });
         }
 
         assert(!generator.mRasterizerData);
@@ -188,10 +193,10 @@ namespace Render {
 
         file.statement(CodeGen::Return { {} ,CodeGen::VariableAccess { "OUT" } });
 
-        flowInOut.reset();
+
     }
 
-    CodeGen::Statement RasterizerNode::generateRead(NodeGraph::CodeGenerator &generator, uint32_t providerIndex, std::unique_ptr<NodeGraph::CodeGeneratorData> &data) const
+    CodeGen::Statement RasterizerNode::generateRead(NodeGraph::CodeGenerator &generator, std::unique_ptr<NodeGraph::CodeGeneratorData> &data, uint32_t providerIndex, uint32_t group) const
     {
         return CodeGen::VariableAccess { "IN." + std::string { dataInName(providerIndex) } };
     }

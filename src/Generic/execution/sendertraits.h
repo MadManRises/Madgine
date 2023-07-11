@@ -27,6 +27,7 @@ namespace Execution {
         static constexpr size_t count = sizeof...(T);
 
         using recursive_t = decayed_t<typename type_pack<T...>::template filter<is_recursive>::template unpack_unique<void>>;
+        using non_recursive_arguments = typename type_pack<T...>::template filter<Not<is_recursive>::type>;
 
         static constexpr bool variadic = !std::same_as<recursive_t, void>;
 

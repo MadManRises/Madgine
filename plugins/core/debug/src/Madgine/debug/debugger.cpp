@@ -22,7 +22,10 @@ namespace Debug {
     void Debugger::yield(Execution::VirtualReceiverBase<type_pack<>> &receiver, void *address)
     {
         ContextInfo &context = getOrCreateContext(address);
-        context.suspend(receiver);
+        if (false)
+            context.suspend(receiver);
+        else
+            receiver.set_value();
     }
 
     void Debugger::stepInto(void *address, std::unique_ptr<DebugLocation> location, void *parent)

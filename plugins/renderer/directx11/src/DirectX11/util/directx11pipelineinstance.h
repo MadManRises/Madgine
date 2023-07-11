@@ -13,7 +13,7 @@ namespace Render {
 
     struct MADGINE_DIRECTX11_EXPORT DirectX11PipelineInstance : PipelineInstance {
 
-        DirectX11PipelineInstance(const PipelineConfiguration &config, typename DirectX11VertexShaderLoader::Handle vertexShader, typename DirectX11PixelShaderLoader::Handle pixelShader, typename DirectX11GeometryShaderLoader::Handle geometryShader);
+        DirectX11PipelineInstance(const PipelineConfiguration &config, ID3D11VertexShader *vertexShader, ID3D10Blob *vertexBlob, ID3D11PixelShader *pixelShader, ID3D11GeometryShader *geometryShader);
 
         bool bind(VertexFormat format, size_t groupSize) const;
 
@@ -39,8 +39,27 @@ namespace Render {
         DirectX11VertexShaderLoader::Handle mVertexShaderHandle;
         DirectX11PixelShaderLoader::Handle mPixelShaderHandle;
         DirectX11GeometryShaderLoader::Handle mGeometryShaderHandle;
+    };
 
-        bool mIsDynamic;
+    struct MADGINE_DIRECTX11_EXPORT DirectX11PipelineInstanceHandle : DirectX11PipelineInstance {
+
+        DirectX11PipelineInstanceHandle(const PipelineConfiguration &config, typename DirectX11VertexShaderLoader::Handle vertexShader, typename DirectX11PixelShaderLoader::Handle pixelShader, typename DirectX11GeometryShaderLoader::Handle geometryShader);
+
+    private:
+
+        DirectX11VertexShaderLoader::Handle mVertexShaderHandle;
+        DirectX11PixelShaderLoader::Handle mPixelShaderHandle;
+        DirectX11GeometryShaderLoader::Handle mGeometryShaderHandle;
+    };
+
+    struct MADGINE_DIRECTX11_EXPORT DirectX11PipelineInstancePtr : DirectX11PipelineInstance {
+
+        DirectX11PipelineInstancePtr(const PipelineConfiguration &config, typename DirectX11VertexShaderLoader::Ptr vertexShader, typename DirectX11PixelShaderLoader::Ptr pixelShader, typename DirectX11GeometryShaderLoader::Ptr geometryShader);
+
+    private:
+        DirectX11VertexShaderLoader::Ptr mVertexShaderHandle;
+        DirectX11PixelShaderLoader::Ptr mPixelShaderHandle;
+        DirectX11GeometryShaderLoader::Ptr mGeometryShaderHandle;
     };
 
 }

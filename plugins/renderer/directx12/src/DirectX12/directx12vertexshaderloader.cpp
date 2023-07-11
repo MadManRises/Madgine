@@ -36,10 +36,10 @@ namespace Render {
         //if(FAILED(hr)) Handle error
     }
 
-    Threading::TaskFuture<bool> DirectX12VertexShaderLoader::Handle::create(std::string_view name, const CodeGen::ShaderFile &file, DirectX12VertexShaderLoader *loader)
+    Threading::TaskFuture<bool> DirectX12VertexShaderLoader::Ptr::create(const CodeGen::ShaderFile &file, DirectX12VertexShaderLoader *loader)
     {
-        return Base::Handle::create(
-            name, {}, [=, &file](DirectX12VertexShaderLoader *loader, ReleasePtr<IDxcBlob> &shader, const DirectX12VertexShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, loader);
+        return Base::Ptr::create(
+            [=, &file](DirectX12VertexShaderLoader *loader, ReleasePtr<IDxcBlob> &shader) { return loader->create(shader, file); }, loader);
     }
 
    bool DirectX12VertexShaderLoader::loadImpl(ReleasePtr<IDxcBlob> &shader, ResourceDataInfo &info)
@@ -54,25 +54,25 @@ namespace Render {
         shader.reset();
     }
 
-    bool DirectX12VertexShaderLoader::create(ReleasePtr<IDxcBlob> &shader, Resource *res, const CodeGen::ShaderFile &file)
+    bool DirectX12VertexShaderLoader::create(ReleasePtr<IDxcBlob> &shader, const CodeGen::ShaderFile &file)
     {
-        if (res->path().empty()) {
+        /* if (res->path().empty()) {
             Filesystem::Path dir = Filesystem::appDataPath() / "generated/shader/directx12";
 
             Filesystem::createDirectories(dir);
 
             res->setPath(dir / (std::string { res->name() } + ".VS_hlsl"));
-        }
+        }*/
 
         std::ostringstream ss;
         DirectX12ShaderCodeGen::generate(ss, file, 1);
 
-        {
+        /* {
             std::ofstream f { res->path() };
             f << ss.str();
-        }
+        }*/
 
-        return loadFromSource(shader, res->name(), ss.str());
+        return loadFromSource(shader, "<generated>", ss.str());
     }
 
     bool DirectX12VertexShaderLoader::loadFromSource(ReleasePtr<IDxcBlob> &shader, std::string_view name, std::string source)

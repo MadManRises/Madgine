@@ -1,8 +1,8 @@
 #pragma once
 
+#include "Modules/threading/taskqueue.h"
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 #include "rootcomponentcollector.h"
-#include "Modules/threading/taskqueue.h"
 
 namespace Engine {
 namespace Root {
@@ -27,6 +27,9 @@ namespace Root {
         static Root &getSingleton();
 
         bool toolMode() const;
+
+    protected:
+        Threading::Task<void> updateAsyncIO();
 
     private:
         int mErrorCode = 0;

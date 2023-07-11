@@ -63,9 +63,7 @@ namespace Window {
         Threading::Task<void> finalize();
         ///@}
 
-        void render();
-
-        void update();
+        Threading::Task<void> renderLoop();
 
         /**
      * @name Components

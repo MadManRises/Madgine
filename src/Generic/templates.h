@@ -154,4 +154,12 @@ decltype(auto) forward_ref(std::remove_reference_t<T> &&t)
     }
 }
 
+template <template <typename> typename Inner>
+struct Not
+{
+    template <typename T>
+    struct type : std::bool_constant<!Inner<T>::value> {
+    };
+};
+
 }

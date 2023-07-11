@@ -11,7 +11,7 @@ namespace Render {
 
     struct MADGINE_VULKAN_EXPORT VulkanPipelineInstance : PipelineInstance {
 
-        VulkanPipelineInstance(const PipelineConfiguration &config, VulkanPipelineLoader::Handle pipeline);
+        VulkanPipelineInstance(const PipelineConfiguration &config, const VulkanPipeline *pipeline);
         ~VulkanPipelineInstance();
 
         bool bind(VkCommandBuffer commandList, VertexFormat format, size_t groupSize, size_t samples, VkRenderPass renderpass) const;
@@ -26,14 +26,20 @@ namespace Render {
         virtual void bindTextures(RenderTarget *target, const std::vector<TextureDescriptor> &tex, size_t offset = 0) const override;
 
     private:
-        std::array<std::array<VulkanPtr<VkPipeline, &vkDestroyPipeline>, 3>, 3> *mPipelines;
+        const VulkanPipeline *mPipeline;
 
         std::vector<VulkanBuffer> mConstantBuffers;
         std::vector<VulkanBuffer> mDynamicBuffers;
 
-        VulkanPipelineLoader::Handle mPipelineHandle;
-
         VkDescriptorSet mUboDescriptorSet;
+    };
+
+    struct MADGINE_VULKAN_EXPORT VulkanPipelineInstanceHandle : VulkanPipelineInstance {
+
+        VulkanPipelineInstanceHandle(const PipelineConfiguration &config, VulkanPipelineLoader::Handle pipeline);
+        
+    private:
+        VulkanPipelineLoader::Handle mPipelineHandle;
     };
 
 }

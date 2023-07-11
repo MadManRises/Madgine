@@ -34,6 +34,7 @@ namespace Input {
         : mApp(app)
         , mWindow(window)
         , mHandlers(*this)
+        , mFrameClock(std::chrono::steady_clock::now())
     {
         window.taskQueue()->addSetupSteps(
             [this]() { return callInit(); },
@@ -53,26 +54,6 @@ namespace Input {
             co_await handler->callInit();
 
         onUpdate();
-
-        mWindow.taskQueue()->queue([this]() -> Threading::Task<void> {
-            while (mWindow.taskQueue()->running()) {
-                updateRender();
-                co_await 0ms;
-            }
-        });
-        mWindow.taskQueue()->queue([this]() -> Threading::Task<void> {
-            while (mWindow.taskQueue()->running()) {
-                fixedUpdateRender();
-                co_await fixedUpdateInterval;
-            }
-        });
-
-        mApp.taskQueue()->queue([this]() -> Threading::Task<void> {
-            while (mApp.taskQueue()->running()) {
-                updateApp();
-                co_await 0ms;
-            }            
-        });
 
         co_return true;
     }
@@ -157,28 +138,6 @@ namespace Input {
             result.insert(h.get());
         }
         return result;
-    }
-
-    void UIManager::updateRender()
-    {
-        std::chrono::microseconds timeSinceLastFrame = mFrameClock.tick<std::chrono::microseconds>();
-
-        for (const std::unique_ptr<HandlerBase> &h : mHandlers)
-            h->updateRender(timeSinceLastFrame);
-    }
-
-    void UIManager::fixedUpdateRender()
-    {
-        for (const std::unique_ptr<HandlerBase> &h : mHandlers)
-            h->fixedUpdateRender(fixedUpdateInterval);
-    }
-
-    void UIManager::updateApp()
-    {
-        std::chrono::microseconds timeSinceLastFrame = mAppClock.tick<std::chrono::microseconds>();
-
-        for (const std::unique_ptr<HandlerBase> &h : mHandlers)
-            h->updateApp(timeSinceLastFrame);
     }
 
     std::string_view UIManager::key() const

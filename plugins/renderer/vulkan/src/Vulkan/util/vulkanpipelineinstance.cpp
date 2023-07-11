@@ -10,12 +10,10 @@
 namespace Engine {
 namespace Render {
 
-    VulkanPipelineInstance::VulkanPipelineInstance(const PipelineConfiguration &config, VulkanPipelineLoader::Handle pipeline)
+    VulkanPipelineInstance::VulkanPipelineInstance(const PipelineConfiguration &config, const VulkanPipeline *pipeline)
         : PipelineInstance(config)
-        , mPipelineHandle(std::move(pipeline))
+        , mPipeline(pipeline)
     {
-        mPipelines = mPipelineHandle->ptr();
-
         mConstantBuffers.resize(config.bufferSizes.size());
         for (size_t i = 0; i < config.bufferSizes.size(); ++i) {
             if (config.bufferSizes[i] > 0)
@@ -66,9 +64,9 @@ namespace Render {
         size_t samplesBits = sqrt(samples);
         assert(samplesBits * samplesBits == samples);
 
-        VkPipeline pipeline = mPipelines[format][groupSize - 1][samplesBits - 1];
+        VkPipeline pipeline = mPipeline->ptr()[format][groupSize - 1][samplesBits - 1];
         if (!pipeline) {
-            pipeline = mPipelineHandle->get(format, groupSize, samples, mInstanceDataSize, renderpass);
+            pipeline = mPipeline->get(format, groupSize, samples, mInstanceDataSize, renderpass);
             if (!pipeline)
                 return false;
         }
@@ -180,6 +178,12 @@ namespace Render {
                 vkCmdPushDescriptorSetKHR(static_cast<VulkanRenderTarget *>(target)->mCommandList, VK_PIPELINE_BIND_POINT_GRAPHICS, VulkanRenderContext::getSingleton().mPipelineLayout, 1, 1, &descriptorWrite);
             }
         }
+    }
+
+    VulkanPipelineInstanceHandle::VulkanPipelineInstanceHandle(const PipelineConfiguration &config, VulkanPipelineLoader::Handle pipeline)
+        : VulkanPipelineInstance(config, &*pipeline)
+        , mPipelineHandle(std::move(pipeline))
+    {
     }
 
 }

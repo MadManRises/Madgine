@@ -89,6 +89,7 @@ namespace Physics {
 
     PhysicsManager::PhysicsManager(Scene::SceneManager &sceneMgr)
         : VirtualScope(sceneMgr)
+        , mClock(sceneMgr.clock().now())
     {
     }
 
@@ -127,6 +128,8 @@ namespace Physics {
 
         gContactAddedCallback = &PhysicsManager::sContactCallback;
 
+        mSceneMgr.taskQueue()->queueTask(update());
+
         co_return co_await VirtualScope::init();
     }
 
@@ -137,17 +140,23 @@ namespace Physics {
         co_await VirtualScope::finalize();
     }
 
-    void PhysicsManager::update(std::chrono::microseconds timeSinceLastFrame, bool paused)
+    Threading::Task<void> PhysicsManager::update()
     {
-        //TODO
-        if (!paused)
-            mData->mWorld.stepSimulation(timeSinceLastFrame.count() / 1000000.0f, 1, 1.0f / 30.0f);
-        //else {
-        //    mData->mWorld.synchronizeMotionStates();
-        //}
+        while (mSceneMgr.taskQueue()->running()) {
 
-        for (const auto &[body, _] : sceneMgr().entityComponentList<RigidBody>()) {
-            body.update();
+            auto awaiter = mSceneMgr.mutex(AccessMode::WRITE).operator co_await();
+            co_await Threading::TaskQualifiers { std::chrono::duration_cast<std::chrono::steady_clock::duration>(33ms), &awaiter };
+            std::chrono::duration<float> timeSinceLastFrame = mClock.tick(mSceneMgr.clock().now());
+
+            if (timeSinceLastFrame.count() > 0.0f) {
+                mData->mWorld.stepSimulation(timeSinceLastFrame.count(), 1, 1.0f / 30.0f);
+            } else {
+                mData->mWorld.synchronizeMotionStates();
+            }
+
+            for (const auto &[body, _] : sceneMgr().entityComponentList<RigidBody>()) {
+                body.update();
+            }
         }
     }
 
@@ -235,6 +244,5 @@ namespace Physics {
         mPoint.m_combinedFriction = result.calculateCombinedFriction(mObj0, mObj1);
         mPoint.m_combinedRestitution = result.calculateCombinedRestitution(mObj0, mObj1);
     }
-
 }
 }

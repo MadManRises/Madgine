@@ -108,7 +108,8 @@ struct codegen_connect_t {
 
     struct codegen_let_value_t {
         template <typename T>
-        static Engine::ExtendedValueTypeDesc typeHelper() {
+        static Engine::ExtendedValueTypeDesc typeHelper()
+        {
             if constexpr (Engine::ValueTypePrimitive<std::remove_reference_t<T>>)
                 return Engine::toValueTypeDesc<std::remove_reference_t<T>>();
             else
@@ -125,7 +126,7 @@ struct codegen_connect_t {
                 static_assert(std::tuple_size_v<decltype(inner)> == sizeof...(V));
                 return std::tuple_cat(
                     std::make_tuple(VariableDefinition { { variableName + "_" + std::to_string(Is), typeHelper<V>(), std::is_reference_v<V> }, std::get<Is>(inner) }...),
-                    codegen_connect(mF(VariableAccess { variableName + "_" + std::to_string(Is) }...), this->mRec).generate());
+                    codegen_connect(mF((variableName + "_" + std::to_string(Is))...), this->mRec).generate());
             }
 
             auto generate()
@@ -141,7 +142,7 @@ struct codegen_connect_t {
 
     template <typename Sender, typename F, typename Rec>
     friend auto tag_invoke(codegen_connect_t, Engine::Execution::let_value_t::sender<Sender, F> &&sender, Rec &&rec)
-    {  
+    {
         return codegen_let_value_t::state<Sender, F, Rec> { std::forward<Rec>(rec), std::move(sender.mSender), std::forward<F>(sender.mF) };
     }
 
@@ -153,7 +154,7 @@ struct codegen_connect_t {
             {
                 auto inner = this->mState.generate();
                 static_assert(std::tuple_size_v<decltype(inner)> == 1);
-                return std::make_tuple(Assignment { {}, mVar, std::get<0>(inner) });
+                return std::make_tuple(Assignment { {}, VariableAccess { "TODO" }, std::get<0>(inner) });
             }
             T mVar;
         };
@@ -168,8 +169,7 @@ struct codegen_connect_t {
             auto generate()
             {
                 return std::tuple_cat(
-                    codegen_connect(std::get<Sender>(std::move(mSenders)), this->mRec).generate()...
-                );
+                    codegen_connect(std::get<Sender>(std::move(mSenders)), this->mRec).generate()...);
             }
             std::tuple<Sender...> mSenders;
         };
@@ -182,7 +182,9 @@ struct codegen_connect_t {
         struct state : codegen_base_state<Rec> {
             auto generate()
             {
-                return std::move(mArgs);
+                return[this]<size_t... Is>(std::index_sequence<Is...>) {
+                    return std::make_tuple(CodeGen::Constant { std::get<Is>(mArgs)... });
+                }(std::index_sequence_for<Args...> {});      
             }
             std::tuple<Args...> mArgs;
         };
@@ -203,11 +205,31 @@ struct codegen_connect_t {
         return state { { std::move(sender.mSender), std::forward<Rec>(rec) }, std::forward<T>(sender.mTransform) };
     }
 
+    template <typename C, typename F, typename Rec>
+    friend auto tag_invoke(codegen_connect_t, Engine::Execution::for_each_t::sender<C, F> &&sender, Rec &&rec)
+    {
+        struct state : codegen_base_state<Rec> {
+            auto generate()
+            {
+                std::string variableName = Engine::Execution::get_context(*this).generateName("e");
+                VariableAccess read { variableName };
+                ForEach block { {}, VariableAccess { "TODO" }, variableName };
+                Engine::TupleUnpacker::forEach(codegen_connect(mF(variableName), std::forward<Rec>(this->mRec)).generate(), [&](auto s) {
+                    block.mBody.push_back(s);
+                });
+                return std::make_tuple(block);
+            }
+            C mContainer;
+            F mF;
+        };
+        return state { std::forward<Rec>(rec), std::forward<C>(sender.mContainer), std::forward<F>(sender.mF) };
+    }
+
     template <typename Sender, typename Rec>
-    requires tag_invocable<codegen_connect_t, Sender, Rec>
+    //requires tag_invocable<codegen_connect_t, Sender, Rec>
     auto operator()(Sender &&sender, Rec &&rec) const
-        noexcept(is_nothrow_tag_invocable_v<codegen_connect_t, Sender, Rec>)
-            -> tag_invoke_result_t<codegen_connect_t, Sender, Rec>
+    /* noexcept(is_nothrow_tag_invocable_v<codegen_connect_t, Sender, Rec>)
+         -> tag_invoke_result_t<codegen_connect_t, Sender, Rec>*/
     {
         return tag_invoke(*this, std::forward<Sender>(sender), std::forward<Rec>(rec));
     }
@@ -249,17 +271,10 @@ struct codegen_for_each_t {
     };
 };
 
-template <typename C, typename F>
-requires std::constructible_from<Statement, C>
-auto tag_invoke(Engine::Execution::for_each_t, C &&c, F &&f)
+template <typename Sender, typename Rec = codegen_receiver>
+auto generatorFromSender(Sender &&sender, Rec rec = {})
 {
-    return codegen_for_each_t::sender<C, F> { std::forward<C>(c), std::forward<F>(f) };
-}
-
-template <typename Sender>
-auto generatorFromSender(Sender &&sender)
-{
-    return codegen_connect(std::move(sender), codegen_receiver {});
+    return codegen_connect(std::move(sender), rec);
 }
 
 }

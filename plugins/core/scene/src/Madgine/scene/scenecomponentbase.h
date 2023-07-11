@@ -16,8 +16,7 @@ namespace Scene {
 
         SceneManager &sceneMgr() const;
 
-        virtual void update(std::chrono::microseconds, bool paused);
-
+        virtual void updateRender(std::chrono::microseconds frameTimeSinceLastFrame, std::chrono::microseconds sceneTimeSinceLastFrame);
         std::string_view key() const;
 
         template <typename T>
@@ -44,7 +43,6 @@ namespace Scene {
 
         friend struct MadgineObject<SceneComponentBase>;
 
-    private:
         SceneManager &mSceneMgr;
     };
 

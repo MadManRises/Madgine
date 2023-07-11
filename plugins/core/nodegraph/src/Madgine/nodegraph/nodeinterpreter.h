@@ -9,6 +9,8 @@
 namespace Engine {
 namespace NodeGraph {
 
+    ENUM_BASE(NodeInterpretResult, GenericResult);
+
     struct NodeInterpreterData {
         virtual ~NodeInterpreterData() = default;
 
@@ -17,7 +19,7 @@ namespace NodeGraph {
     };
 
     struct MADGINE_NODEGRAPH_EXPORT NodeInterpreter {
-
+        NodeInterpreter() = default;
         NodeInterpreter(const NodeGraph *graph, const ArgumentList &args);
         NodeInterpreter(const NodeInterpreter &) = delete;
         NodeInterpreter(NodeInterpreter &&) = default;
@@ -25,18 +27,25 @@ namespace NodeGraph {
 
         NodeInterpreter &operator=(const NodeInterpreter &) = delete;
 
-        void interpret(Execution::VirtualReceiverBase<GenericResult> *receiver, uint32_t flowIn);
-        void interpret(Execution::VirtualReceiverBase<GenericResult> *receiver, Pin pin);
+        void interpretImpl(Execution::VirtualReceiverBase<NodeInterpretResult> &receiver, uint32_t flowIn);
+        void interpretImpl(Execution::VirtualReceiverBase<NodeInterpretResult> &receiver, Pin pin);
 
-        ASYNC_STUB(interpretSubGraph, branch, Execution::make_simple_virtual_sender<GenericResult>);
+        ASYNC_STUB(interpret, interpretImpl, Execution::make_simple_virtual_sender<NodeInterpretResult>);
+        ASYNC_STUB(interpretSubGraph, branch, Execution::make_simple_virtual_sender<NodeInterpretResult>);
 
-        void branch(Execution::VirtualReceiverBase<GenericResult> &receiver, Pin pin);
+        void branch(Execution::VirtualReceiverBase<NodeInterpretResult> &receiver, Pin pin);
 
         void read(ValueType &retVal, Pin pin);
         void write(Pin pin, const ValueType &v);
 
+        void read(ValueType &retVal, uint32_t dataProvider);
+        void write(uint32_t dataReceiver, const ValueType &v);
+
         void setGraph(const NodeGraph *graph);
         const NodeGraph *graph() const;
+
+        void setArguments(const ArgumentList &args);
+        ArgumentList &arguments();
 
         std::unique_ptr<NodeInterpreterData> &data(uint32_t index);
 
@@ -49,7 +58,6 @@ namespace NodeGraph {
         ArgumentList mArguments;
 
         std::vector<std::unique_ptr<NodeInterpreterData>> mData;
-        IndexType<uint32_t> mGraphGeneration;
     };
 
 }

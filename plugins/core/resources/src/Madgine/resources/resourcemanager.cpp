@@ -133,12 +133,7 @@ namespace Resources {
     {
         enumerateResources();
 
-        taskQueue()->queue([this]() -> Threading::Task<void> {
-            while (taskQueue()->running()) {
-                update();
-                co_await 1s;
-            }
-        });
+        taskQueue()->queueTask(update());
 
         return true;
     }
@@ -159,14 +154,18 @@ namespace Resources {
         return {};
     }
 
-    void ResourceManager::update()
+    Threading::Task<void> ResourceManager::update()
     {
-        std::vector<Filesystem::FileEvent> events = mFileWatcher.fetchChangesReduced();
+        while (taskQueue()->running()) {
+            std::vector<Filesystem::FileEvent> events = mFileWatcher.fetchChangesReduced();
 
-        std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> loaderByExtension = getLoaderByExtension();
+            std::map<std::string, std::vector<ResourceLoaderBase *>, std::less<>> loaderByExtension = getLoaderByExtension();
 
-        for (const Filesystem::FileEvent &event : events) {
-            updateResource(event.mType, event.mPath, mResourcePaths.at(event.mPath), loaderByExtension);
+            for (const Filesystem::FileEvent &event : events) {
+                updateResource(event.mType, event.mPath, mResourcePaths.at(event.mPath), loaderByExtension);
+            }
+
+            co_await 1s;
         }
     }
 

@@ -165,12 +165,12 @@ namespace Render {
         receiver.set_value();
     }
 
-    void GPUBufferNode::generate(NodeGraph::CodeGenerator &_generator, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeGraph::CodeGeneratorData> &data) const
+    void GPUBufferNode::generate(NodeGraph::CodeGenerator &_generator, std::unique_ptr<NodeGraph::CodeGeneratorData> &data, uint32_t flowIn, uint32_t group) const
     {
         throw 0;
     }
 
-    CodeGen::Statement GPUBufferNode::generateRead(NodeGraph::CodeGenerator &_generator, uint32_t providerIndex, std::unique_ptr<NodeGraph::CodeGeneratorData> &data) const
+    CodeGen::Statement GPUBufferNode::generateRead(NodeGraph::CodeGenerator &_generator, std::unique_ptr<NodeGraph::CodeGeneratorData> &data, uint32_t providerIndex, uint32_t group) const
     {
 
         if (!data) {

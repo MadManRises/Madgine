@@ -5,13 +5,15 @@
 
 #include "Generic/execution/algorithm.h"
 #include "Generic/execution/execution.h"
-#include "Generic/execution/state.h"
 #include "Generic/execution/sendertraits.h"
+#include "Generic/execution/state.h"
 
 #include "Meta/keyvalue/valuetype.h"
 
-#include "nodeinterpreter.h"
 #include "nodebase.h"
+#include "nodeinterpreter.h"
+
+#include "Madgine/codegen/fromsender.h"
 
 namespace Engine {
 namespace NodeGraph {
@@ -34,6 +36,15 @@ namespace NodeGraph {
     };
 
     using NodeExecutionReceiver = Execution::execution_receiver<NodeInterpretHandle>;
+
+    struct MADGINE_NODEGRAPH_EXPORT NodeCodegenHandle : CodeGen::CodeGen_Context {
+        const NodeBase *mNode;
+        CodeGenerator &mGenerator;
+
+        CodeGen::Statement read(uint32_t dataInIndex, uint32_t group = 0);
+    };
+
+    using NodeCodegenReceiver = Execution::execution_receiver<NodeCodegenHandle>;
 
     template <uint32_t flowOutIndex, typename _Rec>
     struct NodeState {
@@ -58,6 +69,18 @@ namespace NodeGraph {
         friend auto tag_invoke(Execution::connect_t, NodeSender &&sender, Rec &&rec)
         {
             return NodeState<flowOutIndex, Rec> { std::forward<Rec>(rec) };
+        }
+
+        template <typename Rec>
+        friend auto tag_invoke(CodeGen::codegen_connect_t, NodeSender &&sender, Rec &&rec)
+        {
+            struct state : CodeGen::codegen_base_state<Rec> {
+                auto generate()
+                {
+                    return std::make_tuple(CodeGen::Constant { ValueType { 0 } });
+                }
+            };
+            return state { std::forward<Rec>(rec) };
         }
     };
 
@@ -113,6 +136,26 @@ namespace NodeGraph {
             return state<Rec> { std::forward<Rec>(rec), reader.mBaseIndex, reader.mVariadicBuffer };
         }
 
+        template <typename Rec>
+        struct codegen_state : CodeGen::codegen_base_state<Rec> {
+            auto generate()
+            {
+                return helper(std::index_sequence_for<T...> {});
+            }
+            template <size_t... I>
+            auto helper(std::index_sequence<I...>)
+            {
+                return std::make_tuple(Execution::get_context(mRec).read(mIndex + I)...);
+            }
+            size_t mIndex;
+        };
+
+        template <typename Rec>
+        friend auto tag_invoke(CodeGen::codegen_connect_t, NodeReader &&reader, Rec &&rec)
+        {            
+            return codegen_state<Rec> { std::forward<Rec>(rec), reader.mBaseIndex };
+        }
+
         size_t mBaseIndex = 0;
         NodeResults *mVariadicBuffer = nullptr;
     };
@@ -121,7 +164,7 @@ namespace NodeGraph {
     struct NodeAlgorithm {
         template <typename... Args>
         auto operator()(Args &&...args)
-        {
+        {            
             if (mResults.size() <= flowOutIndex)
                 mResults.resize(flowOutIndex + 1);
             mResults[flowOutIndex] = { ValueType { std::forward<Args>(args) }... };
@@ -131,7 +174,7 @@ namespace NodeGraph {
     };
 
     struct MADGINE_NODEGRAPH_EXPORT NodeReceiver : NodeExecutionReceiver {
-        Execution::VirtualReceiverBase<GenericResult> &mReceiver;
+        Execution::VirtualReceiverBase<NodeInterpretResult> &mReceiver;
 
         void set_value();
         void set_done();

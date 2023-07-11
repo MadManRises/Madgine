@@ -1,6 +1,5 @@
 #include "../nodegraphlib.h"
 
-
 #include "codegenerator.h"
 
 #include "nodegraph.h"
@@ -14,58 +13,43 @@ namespace NodeGraph {
     {
     }
 
-    void CodeGenerator::generate(IndexType<uint32_t> &flowInOut, const NodeBase *startNode)
+    void CodeGenerator::generate(uint32_t flowIn, const NodeBase *startNode)
     {
         Pin pin;
         if (startNode) {
-            pin.mIndex = flowInOut;
+            pin.mIndex = flowIn;
             pin.mNode = mGraph.nodeIndex(startNode);
         } else {
-            pin = mGraph.mFlowOutPins[flowInOut].mTarget;
+            pin = mGraph.mFlowOutPins[flowIn].mTarget;
         }
 
         generate(pin);
-
-        flowInOut = pin.mIndex;
     }
 
-    void CodeGenerator::generate(Pin &pin)
+    void CodeGenerator::generate(Pin pin)
     {
-        const NodeBase *oldCurrentNode = mCurrentNode;
-
-        while (pin && pin.mNode) {
-            mCurrentNode = mGraph.node(pin.mNode);
-            IndexType<uint32_t> flowIndex = pin.mIndex;
-            mCurrentNode->generate(*this, flowIndex, mData[pin.mNode - 1]);
-            if (flowIndex)
-                pin = mCurrentNode->flowOutTarget(flowIndex);
-            else
-                pin = {};
+        if (pin && pin.mNode) {
+            const NodeBase *node = mGraph.node(pin.mNode);
+            node->generate(*this, mData[pin.mNode - 1], pin.mIndex, pin.mGroup);
         }
-
-        mCurrentNode = oldCurrentNode;
     }
 
-    CodeGen::Statement CodeGenerator::read(uint32_t dataInIndex)
+    CodeGen::Statement CodeGenerator::read(Pin pin)
     {
-        Pin pin = mCurrentNode->dataInSource(dataInIndex);
-        if (!pin.mNode) { 
+        if (!pin) {
+            throw 0;
+        } else if (!pin.mNode) {
             //retVal = mCurrentArguments->at(pin.mIndex);
             throw 0;
         } else {
-            const NodeBase *oldCurrentNode = mCurrentNode;
-            mCurrentNode = mGraph.node(pin.mNode);
-            CodeGen::Statement result = mCurrentNode->generateRead(*this, pin.mIndex, mData[pin.mNode - 1]);
-            mCurrentNode = oldCurrentNode;
-            return result;
+            return mGraph.node(pin.mNode)->generateRead(*this, mData[pin.mNode - 1], pin.mIndex, pin.mGroup);
         }
     }
 
-    CodeGen::Statement CodeGenerator::write(uint32_t dataOutIndex, CodeGen::Statement statement)
+    CodeGen::Statement CodeGenerator::write(Pin pin, CodeGen::Statement statement)
     {
-        Pin pin = mCurrentNode->dataOutTarget(dataOutIndex);
         if (pin)
-            return mGraph.node(pin.mNode)->generateWrite(*this, pin.mIndex, mData[pin.mNode - 1]);
+            return mGraph.node(pin.mNode)->generateWrite(*this, mData[pin.mNode - 1], pin.mIndex, pin.mGroup);
         else
             throw 0;
     }

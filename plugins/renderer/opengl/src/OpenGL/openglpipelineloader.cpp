@@ -79,7 +79,7 @@ namespace Render {
             }))
             co_return false;
 
-        instance = std::make_unique<OpenGLPipelineInstance>(config, std::move(pipeline));
+        instance = std::make_unique<OpenGLPipelineInstanceHandle>(config, std::move(pipeline));
 
         co_return true;
     }
@@ -88,23 +88,16 @@ namespace Render {
     {
         assert(file.mInstances.size() == 2);
 
-        char buffer[256];
-#if WINDOWS
-        sprintf_s(buffer, "%s|%s|%s", config.vs.data(), config.gs.data(), config.ps.data());
-#else
-        sprintf(buffer, "%s|%s|%s", config.vs.data(), config.gs.data(), config.ps.data());
-#endif
-
-        Handle pipeline;
-        if (!co_await pipeline.create(buffer, {}, [&](OpenGLPipelineLoader *loader, OpenGLPipeline &pipeline, ResourceDataInfo &info) -> Threading::Task<bool> {
-                OpenGLShaderLoader::Handle vertexShader;
-                if (!co_await vertexShader.create(config.vs, file, VertexShader)) {
+        Ptr pipeline;
+        if (!co_await pipeline.create([&](OpenGLPipelineLoader *loader, OpenGLPipeline &pipeline) -> Threading::Task<bool> {
+                OpenGLShaderLoader::Ptr vertexShader;
+                if (!co_await vertexShader.create(file, VertexShader)) {
                     LOG_ERROR("Failed to load VS '" << config.vs << "'!");
                     co_return false;
                 }
 
-                OpenGLShaderLoader::Handle pixelShader;
-                if (!co_await pixelShader.create(config.ps, file, PixelShader) && pixelShader) {
+                OpenGLShaderLoader::Ptr pixelShader;
+                if (!co_await pixelShader.create(file, PixelShader) && pixelShader) {
                     LOG_ERROR("Failed to load PS '" << config.ps << "'!");
                     co_return false;
                 }
@@ -125,7 +118,7 @@ namespace Render {
             }))
             co_return false;
 
-        instance = std::make_unique<OpenGLPipelineInstance>(config, std::move(pipeline));
+        instance = std::make_unique<OpenGLPipelineInstancePtr>(config, std::move(pipeline));
 
         co_return true;
     }

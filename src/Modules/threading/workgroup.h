@@ -1,6 +1,5 @@
 #pragma once
 
-
 namespace Engine {
 namespace Threading {
 
@@ -11,9 +10,22 @@ namespace Threading {
 
         void operator=(const WorkGroup &) = delete;
 
+        
+        enum State {
+            INITIALIZING,
+            RUNNING,
+            STOPPING,
+            FINALIZING,
+            DONE
+        };
+
+        State state() const;
+
+        void stop();
+
 #if ENABLE_THREADING
         template <typename F, typename... Args>
-        void createThread(F &&main, Args &&... args)
+        void createThread(F &&main, Args &&...args)
         {
             std::unique_lock lock { mThreadsMutex };
             mSubThreads.emplace_back(
@@ -21,13 +33,13 @@ namespace Threading {
         }
 
         template <typename F, typename... Args>
-        auto spawnTaskThread(F &&task, Args &&... args)
+        auto spawnTaskThread(F &&task, Args &&...args)
         {
             return std::async(std::launch::async, &WorkGroup::taskMain<F, std::decay_t<Args>...>, this, std::forward<F>(task), std::forward<Args>(args)...);
         }
 
         bool singleThreaded();
-        void checkThreadStates();
+        void update();
 
         bool contains(std::thread::id id) const;
 #endif
@@ -66,7 +78,7 @@ namespace Threading {
         };
 
         template <typename F, typename... Args>
-        int threadMain(F &&main, Args &&... args)
+        int threadMain(F &&main, Args &&...args)
         {
             ThreadGuard guard(*this);
             try {
@@ -83,7 +95,7 @@ namespace Threading {
         }
 
         template <typename F, typename... Args>
-        auto taskMain(F &&main, Args &&... args)
+        auto taskMain(F &&main, Args &&...args)
         {
             ThreadGuard guard(*this);
             try {
@@ -92,9 +104,11 @@ namespace Threading {
                 LOG_ERROR("Uncaught Exception in Workgroup-Task-Thread!");
                 LOG_ERROR(e.what());
                 throw;
-            } 
+            }
         }
 #endif
+
+        void setState(State state);
 
     private:
         friend struct WorkGroupStorage;
@@ -112,6 +126,8 @@ namespace Threading {
         std::vector<std::function<void()>> mThreadInitializers;
 
         std::vector<TaskQueue *> mTaskQueues;
+
+        std::atomic<State> mState = INITIALIZING;
     };
 }
 }

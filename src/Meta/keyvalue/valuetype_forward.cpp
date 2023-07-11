@@ -68,4 +68,16 @@ META_EXPORT void to_ValueType_impl<ValueType &>(ValueType &v, ValueType &t)
     v = t;
 }
 
+template <>
+META_EXPORT void to_ValueType_impl<const ValueType>(ValueType &v, const ValueType &&t)
+{
+    v = std::move(t);
+}
+
+template <>
+META_EXPORT void to_ValueType_impl<const ValueType &>(ValueType &v, const ValueType &t)
+{
+    v = t;
+}
+
 }

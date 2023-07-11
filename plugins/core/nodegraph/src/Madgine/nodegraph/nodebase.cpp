@@ -186,6 +186,16 @@ namespace NodeGraph {
 
     void NodeBase::onDataProviderUpdate(Pin source, EdgeEvent event)
     {
+        switch (event) {
+        case CONNECT:
+            if (dataProviderVariadic(source.mGroup) && source.mIndex == dataProviderCount(source.mGroup))
+                addVariadicPin(source.mGroup);
+            break;
+        case DISCONNECT:
+            if (dataProviderVariadic(source.mGroup) && source.mIndex >= dataProviderBaseCount(source.mGroup))
+                removeVariadicPin({ source.mNode, source.mIndex - dataProviderBaseCount(source.mGroup), source.mGroup });
+            break;
+        }
     }
 
     void NodeBase::onDataReceiverUpdate(Pin target, EdgeEvent event)
@@ -239,7 +249,7 @@ namespace NodeGraph {
     {
         mGraph.onFlowOutRemove(pin);
         if (mFlowOutPins[pin.mGroup][pin.mIndex].mTarget)
-            mGraph.disconnectFlow({ mGraph.nodeIndex(this), pin.mIndex, pin.mGroup });
+            mGraph.disconnectFlow({ mGraph.nodeIndex(this), pin.mIndex, pin.mGroup }, { .mIgnoreSource=true });
         mFlowOutPins[pin.mGroup].erase(mFlowOutPins[pin.mGroup].begin() + pin.mIndex);
     }
 
@@ -247,7 +257,7 @@ namespace NodeGraph {
     {
         mGraph.onFlowInRemove(pin);
         while (!mFlowInPins[pin.mGroup][pin.mIndex].mSources.empty()) {
-            mGraph.disconnectFlow(mFlowInPins[pin.mGroup][pin.mIndex].mSources.front());
+            mGraph.disconnectFlow(mFlowInPins[pin.mGroup][pin.mIndex].mSources.front(), { .mIgnoreTarget = true });
         }
         mFlowInPins[pin.mGroup].erase(mFlowInPins[pin.mGroup].begin() + pin.mIndex);
     }
@@ -256,7 +266,7 @@ namespace NodeGraph {
     {
         mGraph.onDataInRemove(pin);
         if (mDataInPins[pin.mGroup][pin.mIndex].mSource)
-            mGraph.disconnectDataIn(pin);
+            mGraph.disconnectDataIn(pin, { .mIgnoreTarget = true });
         mDataInPins[pin.mGroup].erase(mDataInPins[pin.mGroup].begin() + pin.mIndex);
     }
 
@@ -264,7 +274,7 @@ namespace NodeGraph {
     {
         mGraph.onDataProviderRemove(pin);
         while (!mDataProviderPins[pin.mGroup][pin.mIndex].mTargets.empty()) {
-            mGraph.disconnectDataIn(mDataProviderPins[pin.mGroup][pin.mIndex].mTargets.front());
+            mGraph.disconnectDataIn(mDataProviderPins[pin.mGroup][pin.mIndex].mTargets.front(), { .mIgnoreSource = true });
         }
         mDataProviderPins[pin.mGroup].erase(mDataProviderPins[pin.mGroup].begin() + pin.mIndex);
     }
@@ -273,7 +283,7 @@ namespace NodeGraph {
     {
         mGraph.onDataOutRemove(pin);
         if (mDataOutPins[pin.mGroup][pin.mIndex].mTarget)
-            mGraph.disconnectDataOut(pin);
+            mGraph.disconnectDataOut(pin, { .mIgnoreSource = true });
         mDataOutPins[pin.mGroup].erase(mDataOutPins[pin.mGroup].begin() + pin.mIndex);
     }
 
@@ -281,7 +291,7 @@ namespace NodeGraph {
     {
         mGraph.onDataReceiverRemove(pin);
         while (!mDataReceiverPins[pin.mGroup][pin.mIndex].mSources.empty()) {
-            mGraph.disconnectDataOut(mDataReceiverPins[pin.mGroup][pin.mIndex].mSources.front());
+            mGraph.disconnectDataOut(mDataReceiverPins[pin.mGroup][pin.mIndex].mSources.front(), { .mIgnoreTarget = true });
         }
         mDataReceiverPins[pin.mGroup].erase(mDataReceiverPins[pin.mGroup].begin() + pin.mIndex);
     }
@@ -445,17 +455,17 @@ namespace NodeGraph {
         throw 0;
     }
 
-    void NodeBase::generate(CodeGenerator &generator, IndexType<uint32_t> &flowInOut, std::unique_ptr<CodeGeneratorData> &data) const
+    void NodeBase::generate(CodeGenerator &generator, std::unique_ptr<CodeGeneratorData> &data, uint32_t flowIn, uint32_t group) const
     {
         throw 0;
     }
 
-    CodeGen::Statement NodeBase::generateRead(CodeGenerator &generator, uint32_t providerIndex, std::unique_ptr<CodeGeneratorData> &data) const
+    CodeGen::Statement NodeBase::generateRead(CodeGenerator &generator, std::unique_ptr<CodeGeneratorData> &data, uint32_t providerIndex, uint32_t group) const
     {
         throw 0;
     }
 
-    CodeGen::Statement NodeBase::generateWrite(CodeGenerator &generator, uint32_t receiverIndex, std::unique_ptr<CodeGeneratorData> &data) const
+    CodeGen::Statement NodeBase::generateWrite(CodeGenerator &generator, std::unique_ptr<CodeGeneratorData> &data, uint32_t receiverIndex, uint32_t group) const
     {
         throw 0;
     }

@@ -75,7 +75,7 @@ namespace NodeGraph {
         retVal = Execution::sync_expect(ApiFunction { mFunction }.sender(arguments)).mData->at(providerIndex);
     }
 
-    CodeGen::Statement FunctionNode::generateRead(CodeGenerator &generator, uint32_t providerIndex, std::unique_ptr<CodeGeneratorData> &data) const
+    CodeGen::Statement FunctionNode::generateRead(CodeGenerator &generator, std::unique_ptr<CodeGeneratorData> &data, uint32_t providerIndex, uint32_t group) const
     {
         throw 0;
     }

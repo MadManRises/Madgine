@@ -25,6 +25,7 @@ namespace Render {
         virtual std::string_view dataProviderName(uint32_t index, uint32_t group = 0) const override;
         virtual ExtendedValueTypeDesc dataProviderType(uint32_t index, uint32_t group = 0, bool bidir = true) const override;
         virtual uint32_t dataProviderMask(uint32_t index, uint32_t group = 0, bool bidir = true) const override;
+        virtual bool dataProviderVariadic(uint32_t group = 0) const override;
 
         virtual size_t dataInBaseCount(uint32_t group = 0) const override;
         virtual std::string_view dataInName(uint32_t index, uint32_t group = 0) const override;
@@ -33,9 +34,9 @@ namespace Render {
         virtual bool dataInVariadic(uint32_t group = 0) const override;
 
         virtual void interpret(NodeGraph::NodeReceiver receiver, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const override;
-        virtual void generate(NodeGraph::CodeGenerator &generator, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeGraph::CodeGeneratorData> &data) const override;
+        virtual void generate(NodeGraph::CodeGenerator &generator, std::unique_ptr<NodeGraph::CodeGeneratorData> &data, uint32_t flowIn, uint32_t group = 0) const override;
 
-        virtual CodeGen::Statement generateRead(NodeGraph::CodeGenerator &generator, uint32_t providerIndex, std::unique_ptr<NodeGraph::CodeGeneratorData> &data) const override;
+        virtual CodeGen::Statement generateRead(NodeGraph::CodeGenerator &generator, std::unique_ptr<NodeGraph::CodeGeneratorData> &data, uint32_t providerIndex, uint32_t group = 0) const override;
     };
 
 }

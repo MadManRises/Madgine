@@ -181,7 +181,7 @@ ValueType_Return<T> ValueType::as() const
         if constexpr (Pointer<T>) {
             return std::get<TypedScopePtr>(mUnion).safe_cast<std::remove_pointer_t<T>>();
         } else {
-            return std::get<OwnedScopePtr>(mUnion).safe_cast<T>();
+            return std::get<OwnedScopePtr>(mUnion).safe_cast<std::remove_reference_t<T>>();
         }
     }
     //static_assert(dependent_bool<T, false>::value, "Invalid target type for Valuetype cast provided!");

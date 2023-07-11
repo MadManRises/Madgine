@@ -77,23 +77,16 @@ namespace Render {
     {
         assert(file.mInstances.size() == 2);
 
-        Handle pipeline;
+        Ptr pipeline;
 
-        char buffer[256];
-#if WINDOWS
-        sprintf_s(buffer, "%s|%s|%s", config.vs.data(), config.gs.data(), config.ps.data());
-#else
-        sprintf(buffer, "%s|%s|%s", config.vs.data(), config.gs.data(), config.ps.data());
-#endif
-
-        if (!co_await pipeline.create(buffer, {}, [file { std::move(file) }, vs { std::string { config.vs } }, ps { std::string { config.ps } }, gs { std::string { config.gs } }](DirectX12PipelineLoader *loader, DirectX12Pipeline &pipeline, ResourceDataInfo &info) -> Threading::Task<bool> {
-                DirectX12VertexShaderLoader::Handle vertexShader;
-                if (!co_await vertexShader.create(vs, file))
+        if (!co_await pipeline.create([file { std::move(file) }](DirectX12PipelineLoader *loader, DirectX12Pipeline &pipeline) -> Threading::Task<bool> {
+                DirectX12VertexShaderLoader::Ptr vertexShader;
+                if (!co_await vertexShader.create(file))
                     co_return false;
             /* DirectX12GeometryShaderLoader::Handle geometryShader;
                 geometryShader.create(config.gs, file);*/
-                DirectX12PixelShaderLoader::Handle pixelShader;
-                if (!co_await pixelShader.create(ps, file))
+                DirectX12PixelShaderLoader::Ptr pixelShader;
+                if (!co_await pixelShader.create(file))
                     co_return false;
                 co_return pipeline.link(std::move(vertexShader), {}, std::move(pixelShader));
             }))

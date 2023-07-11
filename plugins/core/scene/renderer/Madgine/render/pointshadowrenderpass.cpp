@@ -47,6 +47,7 @@ namespace Render {
 
     void PointShadowRenderPass::render(Render::RenderTarget *target, size_t iteration)
     {
+        return; //TODO
         Scene::Entity::EntityComponentList<Scene::Entity::PointLight> &lights = mScene.scene()->entityComponentList<Scene::Entity::PointLight>();
         if (mIndex >= lights.size())
             return;

@@ -122,6 +122,7 @@ namespace Resources {
 
         typename Loader::ResourceDataInfo mInfo;
         typename Loader::Data mData;
+        typename container_traits<typename Loader::DataContainer>::position_handle mHolder;
     };
 
     template <typename Loader>
@@ -149,8 +150,6 @@ namespace Resources {
         }
 
         typename Loader::Ctor mCtor;
-
-        typename Loader::Storage::template container_type<typename container_traits<typename Loader::DataContainer>::position_handle> mHolder;
     };
 
 }

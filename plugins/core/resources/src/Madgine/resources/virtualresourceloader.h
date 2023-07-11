@@ -4,9 +4,8 @@
 
 #include "Meta/keyvalue/virtualscope.h"
 
-namespace Engine{
+namespace Engine {
 namespace Resources {
-
 
     template <typename T, typename _Data, typename _Container = std::list<Placeholder<0>>, typename _Storage = Threading::GlobalStorage>
     struct VirtualResourceLoaderBase : ResourceLoaderVirtualBase<T, ResourceLoaderInterface<T, _Data, _Container, _Storage>> {
@@ -40,6 +39,11 @@ namespace Resources {
             return loader->resetHandleVImpl(handle);
         }
 
+        static typename Base::Handle refreshHandle(const typename Base::Handle &handle, T *loader = &Base::getSingleton())
+        {
+            return loader->refreshHandleVImpl(handle);
+        }
+
         template <typename C = typename Base::Ctor>
         static typename Base::Handle loadManual(std::string_view name, const Filesystem::Path &path = {}, C &&ctor = {}, T *loader = &Base::getSingleton())
         {
@@ -57,7 +61,7 @@ namespace Resources {
         static Threading::Task<bool> loadUnnamedTask(typename Base::Ptr &ptr, C &&ctor, T *loader = &Base::getSingleton())
         {
             ptr = loader->createUnnamedVImpl();
-            return Threading::make_task(std::forward<C>(ctor), (T*)loader, *ptr);
+            return Threading::make_task(std::forward<C>(ctor), (T *)loader, *ptr);
         }
 
         static typename Base::Data *getDataPtr(const typename Base::Handle &handle, T *loader = nullptr, bool verified = true)
@@ -100,6 +104,7 @@ namespace Resources {
         virtual Threading::TaskFuture<void> unloadVImpl(typename Base::Resource *resource) = 0;
         virtual void unloadVImpl(std::unique_ptr<_Data> ptr) = 0;
         virtual void resetHandleVImpl(const typename Base::Handle &handle) = 0;
+        virtual typename Base::Handle refreshHandleVImpl(const typename Base::Handle &handle) = 0;
         virtual typename Base::Data *getDataPtrVImpl(const typename Base::Handle &handle, bool verified) = 0;
         virtual typename Base::ResourceDataInfo *getInfoVImpl(const typename Base::Handle &handle) = 0;
     };
@@ -136,11 +141,15 @@ namespace Resources {
         }
         virtual void unloadVImpl(std::unique_ptr<typename Base::Data> data) override
         {
-            return Self::unload(std::unique_ptr<Data> { static_cast<Data*>(data.release()) });
+            return Self::unload(std::unique_ptr<Data> { static_cast<Data *>(data.release()) });
         }
         virtual void resetHandleVImpl(const typename Base::OriginalHandle &handle) override
         {
             Self::resetHandle(handle, static_cast<T *>(this));
+        }
+        virtual typename Base::OriginalHandle refreshHandleVImpl(const typename Base::OriginalHandle &handle) override
+        {
+            return Self::refreshHandle(handle, static_cast<T *>(this));
         }
         virtual typename Base::Data *getDataPtrVImpl(const typename Base::OriginalHandle &handle, bool verified) override
         {

@@ -30,10 +30,10 @@ namespace Render {
         sContext = nullptr;
     }
 
-    void RenderContext::unloadAllResources()
+    Threading::Task<void> RenderContext::unloadAllResources()
     {
         for (std::pair<const std::string, FontLoader::Resource> &res : FontLoader::getSingleton()) {
-            res.second.forceUnload();
+            co_await res.second.forceUnload();
         }
     }
     
@@ -48,12 +48,15 @@ namespace Render {
         std::erase(mRenderTargets, target);
     }
 
-    void RenderContext::render()
+    Threading::Task<void> RenderContext::render()
     {
         if (!beginFrame())
-            return;
+            co_return;
+        std::vector<Threading::TaskFuture<void>> targets;
         for (RenderTarget *target : safeIterate(mRenderTargets))
-            target->update();
+            targets.push_back(target->update(this));
+        for (Threading::TaskFuture<void> &wait : targets)
+            co_await wait;
         endFrame();
     }
 

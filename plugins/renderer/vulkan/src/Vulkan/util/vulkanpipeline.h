@@ -12,19 +12,20 @@ namespace Render {
     struct MADGINE_VULKAN_EXPORT VulkanPipeline : Pipeline {
 
         bool link(typename VulkanShaderLoader::Handle vertexShader, typename VulkanShaderLoader::Handle geometryShader, typename VulkanShaderLoader::Handle pixelShader);
+        bool link(typename VulkanShaderLoader::Ptr vertexShader, typename VulkanShaderLoader::Ptr geometryShader, typename VulkanShaderLoader::Ptr pixelShader);
 
-        VkPipeline get(VertexFormat format, size_t groupSize, size_t samples, size_t instanceDataSize, VkRenderPass renderpass);
+        VkPipeline get(VertexFormat format, size_t groupSize, size_t samples, size_t instanceDataSize, VkRenderPass renderpass) const;
 
-        std::array<std::array<VulkanPtr<VkPipeline, &vkDestroyPipeline>, 3>, 3> *ptr();
-        
+        const std::array<std::array<VulkanPtr<VkPipeline, &vkDestroyPipeline>, 3>, 3> *ptr() const;
+
         void reset();
 
     private:
-        std::array < std::array<std::array<VulkanPtr<VkPipeline, &vkDestroyPipeline>, 3>, 3>, 256> mPipelines;
+        mutable std::array<std::array<std::array<VulkanPtr<VkPipeline, &vkDestroyPipeline>, 3>, 3>, 256> mPipelines;
 
-        typename VulkanShaderLoader::Handle mVertexShader;
-        typename VulkanShaderLoader::Handle mGeometryShader;
-        typename VulkanShaderLoader::Handle mPixelShader;
+        std::variant<typename VulkanShaderLoader::Handle, typename VulkanShaderLoader::Ptr> mVertexShader;
+        std::variant<typename VulkanShaderLoader::Handle, typename VulkanShaderLoader::Ptr> mGeometryShader;
+        std::variant<typename VulkanShaderLoader::Handle, typename VulkanShaderLoader::Ptr> mPixelShader;
     };
 
 }

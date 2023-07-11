@@ -435,20 +435,20 @@ namespace Render {
         return std::make_unique<VulkanRenderWindow>(this, w, samples);
     }
 
-    void VulkanRenderContext::unloadAllResources()
+    Threading::Task<void> VulkanRenderContext::unloadAllResources()
     {
-        RenderContext::unloadAllResources();
+        co_await RenderContext::unloadAllResources();
 
         for (std::pair<const std::string, VulkanPipelineLoader::Resource> &res : VulkanPipelineLoader::getSingleton()) {
-            res.second.forceUnload();
+            co_await res.second.forceUnload();
         }
 
         for (std::pair<const std::string, VulkanTextureLoader::Resource> &res : VulkanTextureLoader::getSingleton()) {
-            res.second.forceUnload();
+            co_await res.second.forceUnload();
         }
 
         for (std::pair<const std::string, VulkanMeshLoader::Resource> &res : VulkanMeshLoader::getSingleton()) {
-            res.second.forceUnload();
+            co_await res.second.forceUnload();
         }
     }
 

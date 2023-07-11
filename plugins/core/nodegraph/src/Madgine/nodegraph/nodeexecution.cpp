@@ -5,6 +5,8 @@
 #include "nodebase.h"
 #include "nodeinterpreter.h"
 
+#include "codegenerator.h"
+
 namespace Engine {
 namespace NodeGraph {
 
@@ -42,6 +44,11 @@ namespace NodeGraph {
     void NodeReceiver::set_error(GenericResult result)
     {
         mReceiver.set_error(result);
+    }
+
+    CodeGen::Statement NodeCodegenHandle::read(uint32_t dataInIndex, uint32_t group)
+    {
+        return mGenerator.read(mNode->dataInSource(dataInIndex, group));
     }
 
 }

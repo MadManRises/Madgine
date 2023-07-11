@@ -6,6 +6,8 @@
 
 #include "Meta/math/frustum.h"
 
+#include "shadowscenerenderdata.h"
+
 namespace Engine {
 namespace Render {
 
@@ -27,9 +29,7 @@ namespace Render {
     private:
         PipelineLoader::Instance mPipeline;
 
-        SceneMainWindowComponent &mScene;        
-
-        Render::Camera *mCamera;
+        ShadowSceneRenderData mData;
 
         int mPriority;
 

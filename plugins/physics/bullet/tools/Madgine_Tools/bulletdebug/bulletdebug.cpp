@@ -75,7 +75,7 @@ namespace Tools {
                 ImGui::EndMenu();
             }
 
-            auto guard = mManager->sceneMgr().lock(AccessMode::READ);
+            auto guard = mManager->sceneMgr().mutex(AccessMode::READ).lock();
             mManager->world().debugDrawWorld();
         }
     }

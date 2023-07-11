@@ -136,6 +136,7 @@ namespace Tools {
     ClientImRoot::ClientImRoot(Window::MainWindow &window)
         : VirtualData(window, 80)
         , mImGuiIniFilePath(Filesystem::appDataPath() / "imgui.ini")
+        , mFrameClock(std::chrono::steady_clock::now())
     {
     }
 
@@ -324,7 +325,7 @@ namespace Tools {
 
             io.MouseWheel += mZAxis * 0.3f;
 
-            io.DeltaTime = mFrameClock.tick<std::chrono::duration<float>>().count();
+            io.DeltaTime = std::chrono::duration_cast<std::chrono::duration<float>>(mFrameClock.tick(std::chrono::steady_clock::now())).count();
 
             io.BackendPlatformUserData = &mWindow;
 

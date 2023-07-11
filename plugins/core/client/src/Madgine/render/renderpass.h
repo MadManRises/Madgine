@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Modules/threading/taskfuture.h"
+
 namespace Engine {
 namespace Render {
 
@@ -9,7 +11,7 @@ namespace Render {
         virtual void setup(RenderTarget *target) { }
         virtual void shutdown() { }
         virtual void render(RenderTarget *target, size_t iteration) = 0;
-        void preRender();
+        void preRender(std::vector<Threading::TaskFuture<void>> &dependencies, RenderContext *context);
 
         const std::vector<RenderData *> &dependencies() const;
 

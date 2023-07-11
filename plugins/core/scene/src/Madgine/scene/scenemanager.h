@@ -47,7 +47,6 @@ namespace Scene {
 
         virtual std::string_view key() const override;
 
-        void update();
         void updateRender();
 
         Entity::EntityPtr createEntity(const std::string &behavior = "", const std::string &name = "",
@@ -68,6 +67,7 @@ namespace Scene {
         void pause();
         bool unpause();
         bool isPaused() const;
+        const Threading::CustomClock &clock() const;
 
         template <typename T>
         T &getComponent()
@@ -76,8 +76,8 @@ namespace Scene {
         }
         SceneComponentBase &getComponent(size_t i);
         size_t getComponentCount();
-        
-        Threading::DataLock lock(AccessMode mode);
+
+        Threading::DataMutex::Moded mutex(AccessMode mode);
 
         Threading::SignalStub<const EntityContainer::iterator &, int> &entitiesSignal();
 
@@ -97,12 +97,31 @@ namespace Scene {
             return *mEntityComponentLists.at(index);
         }
 
+        void addRenderUpdate(std::function<void(std::chrono::microseconds, std::chrono::microseconds)> update);
+
     protected:
         virtual Threading::Task<bool> init() final;
         virtual Threading::Task<void> finalize() final;
 
+    private:
+        struct Clock : Threading::CustomClock {
+            virtual std::chrono::steady_clock::time_point get(std::chrono::steady_clock::time_point timepoint) const override;
+            virtual std::chrono::steady_clock::time_point revert(std::chrono::steady_clock::time_point timepoint) const override;
+
+            std::chrono::steady_clock::duration mPauseAcc = std::chrono::steady_clock::duration::zero();
+            std::chrono::steady_clock::time_point mPauseStart;
+            std::atomic<size_t> mPauseStack = 0;
+        } mClock;
+
+        Threading::DataMutex mMutex;
+
+        IntervalClock<Threading::CustomTimepoint> mSceneClock;
+        IntervalClock<std::chrono::steady_clock::time_point> mFrameClock;
+
+        std::vector<std::function<void(std::chrono::microseconds, std::chrono::microseconds)>> mRenderUpdates;
+
     public:
-        MEMBER_OFFSET_CONTAINER(mSceneComponents,, SceneComponentContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, NoOpFunctor>>);
+        MEMBER_OFFSET_CONTAINER(mSceneComponents, , SceneComponentContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, NoOpFunctor>>);
 
         ////////////////////////////////////////////// ECS
 
@@ -131,18 +150,10 @@ namespace Scene {
 
         decltype(auto) entities()
         {
-            return concatIt(mEntities, mLocalEntities) | std::views::transform(EntityHelper{});
+            return concatIt(mEntities, mLocalEntities) | std::views::transform(EntityHelper {});
         }
 
         ////////////////////////////////////////// ECS End
-
-    private:
-        Threading::DataMutex mMutex;
-
-        IntervalClock<std::chrono::steady_clock> mFrameClock;
-
-        std::atomic<size_t> mPauseStack = 0;
-
     };
 
 }

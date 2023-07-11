@@ -19,17 +19,13 @@ namespace Render {
         D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
     };
 
-    DirectX11PipelineInstance::DirectX11PipelineInstance(const PipelineConfiguration &config, typename DirectX11VertexShaderLoader::Handle vertexShader, typename DirectX11PixelShaderLoader::Handle pixelShader, typename DirectX11GeometryShaderLoader::Handle geometryShader)
+    DirectX11PipelineInstance::DirectX11PipelineInstance(const PipelineConfiguration &config, ID3D11VertexShader *vertexShader, ID3D10Blob *vertexBlob, ID3D11PixelShader *pixelShader, ID3D11GeometryShader *geometryShader)
         : PipelineInstance(config)
-        , mVertexShaderHandle(std::move(vertexShader))
-        , mPixelShaderHandle(std::move(pixelShader))
-        , mGeometryShaderHandle(std::move(geometryShader))
+        , mVertexShader(vertexShader)
+        , mVertexShaderBlob(vertexBlob)
+        , mGeometryShader(geometryShader)
+        , mPixelShader(pixelShader)
     {
-        mVertexShader = mVertexShaderHandle ? mVertexShaderHandle->mShader.get() : nullptr;
-        mVertexShaderBlob = mVertexShaderHandle ? mVertexShaderHandle->mBlob.get() : nullptr;
-        mPixelShader = mPixelShaderHandle ? mPixelShaderHandle->get() : nullptr;
-        mGeometryShader = mGeometryShaderHandle ? mGeometryShaderHandle->get() : nullptr;
-
         mConstantBuffers.reserve(config.bufferSizes.size());
         for (size_t i = 0; i < config.bufferSizes.size(); ++i) {
             mConstantBuffers.emplace_back(D3D11_BIND_CONSTANT_BUFFER, ByteBuffer { nullptr, config.bufferSizes[i] });
@@ -140,6 +136,30 @@ namespace Render {
             return reinterpret_cast<ID3D11ShaderResourceView *>(desc.mTextureHandle);
         });
         sDeviceContext->PSSetShaderResources(offset, tex.size(), handles.data());
+    }
+
+    DirectX11PipelineInstanceHandle::DirectX11PipelineInstanceHandle(const PipelineConfiguration &config, typename DirectX11VertexShaderLoader::Handle vertexShader, typename DirectX11PixelShaderLoader::Handle pixelShader, typename DirectX11GeometryShaderLoader::Handle geometryShader)
+        : DirectX11PipelineInstance(config,
+            vertexShader ? vertexShader->mShader.get() : nullptr,
+            vertexShader ? vertexShader->mBlob.get() : nullptr,
+            pixelShader ? pixelShader->get() : nullptr,
+            geometryShader ? geometryShader->get() : nullptr)
+        , mVertexShaderHandle(std::move(vertexShader))
+        , mPixelShaderHandle(std::move(pixelShader))
+        , mGeometryShaderHandle(std::move(geometryShader))
+    {
+    }
+
+    DirectX11PipelineInstancePtr::DirectX11PipelineInstancePtr(const PipelineConfiguration &config, typename DirectX11VertexShaderLoader::Ptr vertexShader, typename DirectX11PixelShaderLoader::Ptr pixelShader, typename DirectX11GeometryShaderLoader::Ptr geometryShader)
+        : DirectX11PipelineInstance(config,
+            vertexShader ? vertexShader->mShader.get() : nullptr,
+            vertexShader ? vertexShader->mBlob.get() : nullptr,
+            pixelShader ? pixelShader->get() : nullptr,
+            geometryShader ? geometryShader->get() : nullptr)
+        , mVertexShaderHandle(std::move(vertexShader))
+        , mPixelShaderHandle(std::move(pixelShader))
+        , mGeometryShaderHandle(std::move(geometryShader))
+    {
     }
 
 }

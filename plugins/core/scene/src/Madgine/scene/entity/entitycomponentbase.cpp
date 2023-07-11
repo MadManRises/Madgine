@@ -65,11 +65,12 @@ namespace Scene {
 
         void Engine::Scene::Entity::SyncableEntityComponentBase::writeRequest(OffsetPtr offset, void *data, Serialize::ParticipantId requester, Serialize::MessageId requesterTransactionId, Serialize::GenericMessageReceiver receiver) const
         {
+            throw 0;
         }
 
         Serialize::FormattedBufferedStream &Engine::Scene::Entity::SyncableEntityComponentBase::getSlaveRequestMessageTarget(Serialize::ParticipantId requester, Serialize::MessageId requesterTransactionId, Serialize::GenericMessageReceiver receiver) const
         {
-            // TODO: hier return-Anweisung eingeben
+            throw 0;
         }
 
     }

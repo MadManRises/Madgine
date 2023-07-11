@@ -43,6 +43,8 @@ namespace Render {
         virtual void update(GPUMeshData &data, const MeshData &mesh) = 0;
 
         virtual void reset(GPUMeshData &data) = 0;
+    
+        Handle mQuad;
     };
 
 }

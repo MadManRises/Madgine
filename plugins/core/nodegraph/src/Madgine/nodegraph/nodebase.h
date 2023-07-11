@@ -110,9 +110,9 @@ namespace NodeGraph {
         virtual void interpretRead(NodeInterpreter &interpreter, ValueType &retVal, std::unique_ptr<NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group = 0) const;
         virtual void interpretWrite(NodeInterpreter &interpreter, std::unique_ptr<NodeInterpreterData> &data, const ValueType &v, uint32_t receiverIndex, uint32_t group = 0) const;
 
-        virtual void generate(CodeGenerator &generator, IndexType<uint32_t> &flowInOut, std::unique_ptr<CodeGeneratorData> &data) const;
-        virtual CodeGen::Statement generateRead(CodeGenerator &generator, uint32_t providerIndex, std::unique_ptr<CodeGeneratorData> &data) const;
-        virtual CodeGen::Statement generateWrite(CodeGenerator &generator, uint32_t receiverIndex, std::unique_ptr<CodeGeneratorData> &data) const;
+        virtual void generate(CodeGenerator &generator, std::unique_ptr<CodeGeneratorData> &data, uint32_t flowIn, uint32_t group = 0) const;
+        virtual CodeGen::Statement generateRead(CodeGenerator &generator, std::unique_ptr<CodeGeneratorData> &data, uint32_t providerIndex, uint32_t group = 0) const;
+        virtual CodeGen::Statement generateWrite(CodeGenerator &generator, std::unique_ptr<CodeGeneratorData> &data, uint32_t receiverIndex, uint32_t group = 0) const;
 
         virtual std::unique_ptr<NodeBase> clone(NodeGraph &graph) const = 0;
 

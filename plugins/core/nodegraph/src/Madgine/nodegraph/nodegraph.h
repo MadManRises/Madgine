@@ -9,6 +9,11 @@
 namespace Engine {
 namespace NodeGraph {
 
+    struct Ignore {
+        bool mIgnoreSource = false;
+        bool mIgnoreTarget = false;
+    };
+
     struct MADGINE_NODEGRAPH_EXPORT NodeGraph : Serialize::SerializableDataUnit {
 
         SERIALIZABLEUNIT(NodeGraph)
@@ -21,7 +26,6 @@ namespace NodeGraph {
         NodeGraph &operator=(const NodeGraph &other);
 
         std::string_view name() const;
-        uint32_t generation() const;
 
         Serialize::StreamResult loadFromFile(const Filesystem::Path &path);
         void saveToFile();
@@ -62,9 +66,9 @@ namespace NodeGraph {
         void connectDataIn(Pin target, Pin source);
         void connectDataOut(Pin source, Pin target);
 
-        void disconnectFlow(Pin source);
-        void disconnectDataIn(Pin target);
-        void disconnectDataOut(Pin source);
+        void disconnectFlow(Pin source, Ignore ignore = {});
+        void disconnectDataIn(Pin target, Ignore ignore = {});
+        void disconnectDataOut(Pin source, Ignore ignore = {});
 
         void onFlowInRemove(Pin pin);
         void onFlowOutRemove(Pin pin);
@@ -101,8 +105,6 @@ namespace NodeGraph {
         Filesystem::Path mPath;
 
         std::vector<std::unique_ptr<NodeBase>> mNodes;
-
-        uint32_t mGeneration = 0;
     };
 
 }

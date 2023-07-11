@@ -22,9 +22,14 @@ struct WithResult {
         return mResult;
     }
 
-    operator T()
+    operator T&() &
     {
         return *mData;
+    }
+
+    operator T() &&
+    {
+        return std::move(*mData);
     }
 
     std::optional<T> mData;

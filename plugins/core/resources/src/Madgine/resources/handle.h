@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Modules/threading/taskfuture.h"
 #include "Modules/threading/task.h"
+#include "Modules/threading/taskfuture.h"
 
 namespace Engine {
 namespace Resources {
@@ -94,7 +94,8 @@ namespace Resources {
             return *this && info()->verify();
         }
 
-        const typename Loader::Data* getUnsafe() const {
+        const typename Loader::Data *getUnsafe() const
+        {
             return Loader::getDataPtr(*this, nullptr, false);
         }
 
@@ -157,6 +158,11 @@ namespace Resources {
                 Loader::resetHandle(*this);
                 mData = Data {};
             }
+        }
+
+        Handle refresh() const
+        {
+            return Loader::refreshHandle(*this);
         }
 
         Data mData = {};

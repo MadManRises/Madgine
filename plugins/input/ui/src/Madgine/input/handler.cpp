@@ -170,18 +170,6 @@ namespace Input {
         return mUI.viewTaskQueue();
     }
 
-    void HandlerBase::updateRender(std::chrono::microseconds timeSinceLastFrame)
-    {
-    }
-
-    void HandlerBase::fixedUpdateRender(std::chrono::microseconds timeStep)
-    {
-    }
-
-    void HandlerBase::updateApp(std::chrono::microseconds timeSinceLastFrame)
-    {
-    }
-
     void HandlerBase::open()
     {
         assert(mType != WidgetType::DEFAULT_WIDGET);
@@ -191,7 +179,7 @@ namespace Input {
 
         auto state = this->state();
         if (!state.is_ready() || !state) {
-            LOG_ERROR("Failed to open unitialized GuiHandler!");
+            LOG_ERROR("Failed to open unitialized Handler!");
             return;
         }
 

@@ -49,10 +49,6 @@ namespace Input {
         Threading::TaskQueue *viewTaskQueue() const;
         Threading::TaskQueue *modelTaskQueue() const;
 
-        virtual void updateRender(std::chrono::microseconds timeSinceLastFrame);
-        virtual void fixedUpdateRender(std::chrono::microseconds timeStep);
-        virtual void updateApp(std::chrono::microseconds timeSinceLastFrame);
-
         virtual void open();
         virtual void close();
         bool isOpen() const;

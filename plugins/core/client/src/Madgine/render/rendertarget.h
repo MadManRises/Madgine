@@ -47,10 +47,14 @@ namespace Render {
 
         const std::string &name() const;
 
+        RenderContext *context() const;
+
     protected:
-        virtual void render() override;
+        virtual Threading::ImmediateTask<void> render(RenderContext *context) override;
 
         RenderTarget *mBlitSource;
+
+        RenderContext *mContext;
 
     private:
         std::vector<RenderPass *> mRenderPasses;

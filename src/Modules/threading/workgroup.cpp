@@ -73,6 +73,17 @@ namespace Threading {
 #endif
     }
 
+    WorkGroup::State WorkGroup::state() const
+    {
+        return mState;
+    }
+
+    void WorkGroup::stop()
+    {
+        if (mState == INITIALIZING || mState == RUNNING)
+            setState(STOPPING);
+    }
+
     void WorkGroup::addThreadInitializer(std::function<void()> &&task)
     {
 #if ENABLE_THREADING
@@ -100,16 +111,36 @@ namespace Threading {
         return mSubThreads.empty();
     }
 
-    void WorkGroup::checkThreadStates()
+    void WorkGroup::update()
     {
-        std::unique_lock lock { mThreadsMutex };
-        std::erase_if(mSubThreads,
-            [](std::future<int> &f) {
-                bool result = f.wait_for(0ms) != std::future_status::timeout;
-                if (result)
-                    f.get();
-                return result;
-            });
+        {
+            std::unique_lock lock { mThreadsMutex };
+            std::erase_if(mSubThreads,
+                [](std::future<int> &f) {
+                    bool result = f.wait_for(0ms) != std::future_status::timeout;
+                    if (result)
+                        f.get();
+                    return result;
+                });
+        }
+
+        if (mState != RUNNING) {
+            for (TaskQueue *queue : mTaskQueues)
+                if (!queue->idle())
+                    return;
+
+            switch (mState) {
+            case INITIALIZING:
+                setState(RUNNING);
+                break;
+            case STOPPING:
+                setState(FINALIZING);
+                break;
+            case FINALIZING:
+                setState(DONE);
+                break;
+            }
+        }
     }
 
     bool WorkGroup::contains(std::thread::id id) const
@@ -147,6 +178,13 @@ namespace Threading {
 
         ThreadStorage::finalize(false);
         ThreadStorage::finalize(true);
+    }
+
+    void WorkGroup::setState(State state)
+    {
+        mState = state;
+        for (TaskQueue *queue : mTaskQueues)
+            queue->notify();
     }
 
 #endif

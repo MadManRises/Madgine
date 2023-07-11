@@ -24,7 +24,7 @@ namespace Render {
         virtual std::unique_ptr<RenderTarget> createRenderWindow(Window::OSWindow *w, size_t samples) override;
         virtual std::unique_ptr<RenderTarget> createRenderTexture(const Vector2i &size = { 1, 1 }, const RenderTextureConfig &config = {}) override;
 
-        virtual void unloadAllResources() override;
+        virtual Threading::Task<void> unloadAllResources() override;
 
         static OpenGLRenderContext &getSingleton();
 

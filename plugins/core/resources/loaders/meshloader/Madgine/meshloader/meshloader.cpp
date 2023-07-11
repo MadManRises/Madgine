@@ -30,10 +30,27 @@ namespace Render {
     MeshLoader::MeshLoader()
         : ResourceLoader({ ".fbx", ".dae", ".stl" })
     {
+        getOrCreateManual(
+            "quad", {}, [](MeshLoader *loader, MeshData &data, MeshLoader::ResourceDataInfo &info) -> Threading::Task<bool> {
+                std::vector<Compound<VertexPos>> vertices {
+                    { { -1, -1, 0 } },
+                    { { 1, -1, 0 } },
+                    { { -1, 1, 0 } },
+                    { { 1, 1, 0 } }
+                };
+
+                std::vector<uint32_t> indices {
+                    0, 1, 2, 1, 2, 3
+                };
+
+                data = { 3, std::move(vertices), std::move(indices) };
+                co_return true;
+            },
+            this);
 
         getOrCreateManual(
-            "Cube", {}, [](Render::MeshLoader *loader, MeshData &data, Render::MeshLoader::ResourceDataInfo &info) -> Threading::Task<bool> {
-                std::vector<Compound<Render::VertexPos, Render::VertexColor>> vertices {
+            "Cube", {}, [](MeshLoader *loader, MeshData &data, MeshLoader::ResourceDataInfo &info) -> Threading::Task<bool> {
+                std::vector<Compound<VertexPos, VertexColor>> vertices {
                     { { -0.5f, -0.5f, -0.5f }, { 0, 0, 0, 1 } },
                     { { 0.5f, -0.5f, -0.5f }, { 1, 0, 0, 1 } },
                     { { -0.5f, 0.5f, -0.5f }, { 0, 1, 0, 1 } },
@@ -59,8 +76,8 @@ namespace Render {
             this);
 
         getOrCreateManual(
-            "Plane", {}, [](Render::MeshLoader *loader, MeshData &data, Render::MeshLoader::ResourceDataInfo &info) -> Threading::Task<bool> {
-                std::vector<Compound<Render::VertexPos, Render::VertexPosW>> vertices {
+            "Plane", {}, [](MeshLoader *loader, MeshData &data, MeshLoader::ResourceDataInfo &info) -> Threading::Task<bool> {
+                std::vector<Compound<VertexPos, VertexPosW>> vertices {
                     { { 0, 0, 0 }, 1 },
                     { { 1, 0, 0 }, 0 },
                     { { 0, 0, 1 }, 0 },

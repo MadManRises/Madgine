@@ -18,13 +18,11 @@ struct PixelShaderInput {
 float4 main(PixelShaderInput IN)
     : SV_TARGET
 {		
-    const float gamma = 2.2;
     float3 hdrColor = input.Sample(texSampler, IN.texCoord).rgb;      
     float3 bloomColor = blurred.Sample(texSampler, IN.texCoord).rgb;
     hdrColor += bloomColor; // additive blending
     // tone mapping
-    float3 result = float3(1.0, 1.0, 1.0) - exp(-hdrColor * data.exposure);
-    // also gamma correct while we're at it       
-    result = pow(result, 1.0 / gamma);
+    float3 result = hdrColor / (1.0f + hdrColor);  
+
     return float4(result, 1.0);
 }

@@ -113,7 +113,8 @@ struct ArithOperation {
 
     enum {
         ADD,
-        MUL
+        MUL,
+        DIV
     } mType;
     StatementVector mOperands;
 };
@@ -144,17 +145,22 @@ struct Struct : FullStatement {
     std::vector<std::string> mAnnotations;
 };
 
-template <typename T>
+/* template <typename T>
 requires(!std::is_constructible_v<Statement, T>)
     ArithOperation
     operator+(const Statement &first, const T &second)
 {
     throw 0;
-}
+}*/
 
 inline ArithOperation operator+(const Statement &first, const Statement &second)
 {
     return ArithOperation { ArithOperation::ADD, { first, second } };
+}
+
+inline ArithOperation operator/(const Statement &first, const Statement &second)
+{
+    return ArithOperation { ArithOperation::DIV, { first, second } };
 }
 
 template <typename T>

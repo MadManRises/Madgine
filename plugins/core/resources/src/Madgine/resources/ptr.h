@@ -3,7 +3,7 @@
 namespace Engine {
 namespace Resources {
 
-    template <typename T, typename Data>
+    template <typename Loader, typename Data>
     struct Ptr {
 
         Ptr() = default;
@@ -13,6 +13,13 @@ namespace Resources {
         {
         }
         Ptr(Ptr &&) = default;
+
+        template <typename Loader2, typename Data2>
+        Ptr(Ptr<Loader2, Data2> &&other)
+            : mData(std::move(other.mData))
+        {
+            static_assert(std::derived_from<Loader2, Loader> || std::derived_from<Loader, Loader2>, "Invalid conversion-type for Ptr!");
+        }
 
         ~Ptr()
         {
@@ -36,21 +43,21 @@ namespace Resources {
         }
 
         template <typename C>
-        Threading::TaskFuture<bool> create(C &&c, T *loader = &T::getSingleton())
+        Threading::TaskFuture<bool> create(C &&c, Loader *loader = &Loader::getSingleton())
         {
-            return T::loadUnnamed(*this, std::forward<C>(c), loader);
+            return Loader::loadUnnamed(*this, std::forward<C>(c), loader);
         }
 
         template <typename C>
-        Threading::Task<bool> createTask(C &&c, T *loader = &T::getSingleton())
+        Threading::Task<bool> createTask(C &&c, Loader *loader = &Loader::getSingleton())
         {
-            return T::loadUnnamedTask(*this, std::forward<C>(c), loader);
+            return Loader::loadUnnamedTask(*this, std::forward<C>(c), loader);
         }
 
         void reset()
         {
             if (mData) {
-                T::unload(std::move(mData));
+                Loader::unload(std::move(mData));
                 mData.reset();
             }
         }

@@ -2,18 +2,21 @@
 
 namespace Engine {
 
-template <typename Clock>
+template <typename Timepoint = std::chrono::steady_clock::time_point>
 struct IntervalClock {
 
-    template <typename Duration>
-    Duration tick()
+    IntervalClock(Timepoint start)
+        : mLastTick(start)
     {
-        typename Clock::time_point now = Clock::now();
-        return std::chrono::duration_cast<Duration>(now - std::exchange(mLastTick, now));
+    }
+
+    std::chrono::microseconds tick(Timepoint now)
+    {
+        return std::chrono::duration_cast<std::chrono::microseconds>(now - std::exchange(mLastTick, now));
     }
 
 private:
-    typename Clock::time_point mLastTick = Clock::now();
+    Timepoint mLastTick;
 };
 
 }

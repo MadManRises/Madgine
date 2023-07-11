@@ -15,21 +15,21 @@ namespace Render {
     struct DirectX11VertexShaderLoader : Resources::ResourceLoader<DirectX11VertexShaderLoader, DirectX11VertexShader, std::list<Placeholder<0>>, Threading::WorkGroupStorage> {
         DirectX11VertexShaderLoader();
 
-        struct Handle : Base::Handle {
+        struct Ptr : Base::Ptr {
 
-            using Base::Handle::Handle;
-            Handle(Base::Handle handle)
-                : Base::Handle(std::move(handle))
+            using Base::Ptr::Ptr;
+            Ptr(Base::Ptr ptr)
+                : Base::Ptr(std::move(ptr))
             {
             }
 
-            Threading::TaskFuture<bool> create(std::string_view name, const CodeGen::ShaderFile &file, DirectX11VertexShaderLoader *loader = &DirectX11VertexShaderLoader::getSingleton());
+            Threading::TaskFuture<bool> create(const CodeGen::ShaderFile &file, DirectX11VertexShaderLoader *loader = &DirectX11VertexShaderLoader::getSingleton());
         };
 
         bool loadImpl(DirectX11VertexShader &shader, ResourceDataInfo &info);
         void unloadImpl(DirectX11VertexShader &shader);
 
-        bool create(DirectX11VertexShader &shader, Resource *res, const CodeGen::ShaderFile &file);
+        bool create(DirectX11VertexShader &shader, const CodeGen::ShaderFile &file);
 
         bool loadFromSource(DirectX11VertexShader &shader, std::string_view name, std::string source);
 

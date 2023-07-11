@@ -4,13 +4,18 @@
 
 #include "renderdata.h"
 
+#include "Meta/keyvalue/metatable_impl.h"
+
+METATABLE_BEGIN(Engine::Render::RenderPass)
+METATABLE_END(Engine::Render::RenderPass)
+
 namespace Engine {
 namespace Render {
 
-    void RenderPass::preRender()
+    void RenderPass::preRender(std::vector<Threading::TaskFuture<void>> &dependencies, RenderContext *context)
     {
         for (RenderData *dep : mDependencies)
-            dep->update();
+            dependencies.push_back(dep->update(context));
     }
 
     const std::vector<RenderData *> &RenderPass::dependencies() const

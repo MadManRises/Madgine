@@ -11,7 +11,7 @@ namespace Render {
 
     struct MADGINE_DIRECTX12_EXPORT DirectX12PipelineInstance : PipelineInstance {
 
-        DirectX12PipelineInstance(const PipelineConfiguration &config, DirectX12PipelineLoader::Handle pipeline);
+        DirectX12PipelineInstance(const PipelineConfiguration &config, const DirectX12Pipeline *pipeline);
 
         bool bind(ID3D12GraphicsCommandList *commandList, VertexFormat format, size_t groupSize) const;
 
@@ -25,11 +25,19 @@ namespace Render {
         virtual void bindTextures(RenderTarget *target, const std::vector<TextureDescriptor> &tex, size_t offset = 0) const override;        
 
     private:
-        std::array<ReleasePtr<ID3D12PipelineState>, 3> *mPipelines;
+        const DirectX12Pipeline *mPipeline;
 
         std::vector<DirectX12Buffer> mConstantBuffers;
         std::vector<DirectX12Buffer> mDynamicBuffers;
 
+        DirectX12PipelineLoader::Handle mPipelineHandle;
+    };
+
+    struct MADGINE_DIRECTX12_EXPORT DirectX12PipelineInstanceHandle : DirectX12PipelineInstance {
+
+        DirectX12PipelineInstanceHandle(const PipelineConfiguration &config, DirectX12PipelineLoader::Handle pipeline);
+
+    private:
         DirectX12PipelineLoader::Handle mPipelineHandle;
     };
 

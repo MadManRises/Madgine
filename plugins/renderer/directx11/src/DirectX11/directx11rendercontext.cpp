@@ -122,20 +122,20 @@ namespace Render {
         return std::make_unique<DirectX11RenderWindow>(this, w, samples);
     }
 
-    void DirectX11RenderContext::unloadAllResources()
+    Threading::Task<void> DirectX11RenderContext::unloadAllResources()
     {
-        RenderContext::unloadAllResources();
+        co_await RenderContext::unloadAllResources();
 
         for (std::pair<const std::string, DirectX11PipelineLoader::Resource> &res : DirectX11PipelineLoader::getSingleton()) {
-            res.second.forceUnload();
+            co_await res.second.forceUnload();
         }
 
         for (std::pair<const std::string, DirectX11TextureLoader::Resource> &res : DirectX11TextureLoader::getSingleton()) {
-            res.second.forceUnload();
+            co_await res.second.forceUnload();
         }
 
         for (std::pair<const std::string, DirectX11MeshLoader::Resource> &res : DirectX11MeshLoader::getSingleton()) {
-            res.second.forceUnload();
+            co_await res.second.forceUnload();
         }
     }
 

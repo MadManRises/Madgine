@@ -18,27 +18,77 @@ namespace Render {
         return true;
     }
 
-    ID3D12PipelineState *DirectX12Pipeline::get(VertexFormat format, size_t groupSize, size_t instanceDataSize)
+    bool DirectX12Pipeline::link(typename DirectX12VertexShaderLoader::Ptr vertexShader, typename DirectX12GeometryShaderLoader::Ptr geometryShader, typename DirectX12PixelShaderLoader::Ptr pixelShader)
+    {
+        reset();
+
+        mVertexShader = std::move(vertexShader);
+        mGeometryShader = std::move(geometryShader);
+        mPixelShader = std::move(pixelShader);
+
+        return true;
+    }
+
+    ID3D12PipelineState *DirectX12Pipeline::get(VertexFormat format, size_t groupSize, size_t instanceDataSize) const
     {
         ReleasePtr<ID3D12PipelineState> &pipeline = mPipelines[format][groupSize - 1];
 
         if (!pipeline) {
 
-            if (!mVertexShader.available())
+            auto checkVertex = [](auto &variant) {
+                return std::visit(overloaded {
+                                      [](const typename DirectX12VertexShaderLoader::Handle &handle) {
+                                          return !handle || handle.available();
+                                      },
+                                      [](const typename DirectX12VertexShaderLoader::Ptr &ptr) {
+                                          return true;
+                                      } },
+                    variant);
+            };
+            auto checkGeometry = [](auto &variant) {
+                return std::visit(overloaded {
+                                      [](const typename DirectX12GeometryShaderLoader::Handle &handle) {
+                                          return !handle || handle.available();
+                                      },
+                                      [](const typename DirectX12GeometryShaderLoader::Ptr &ptr) {
+                                          return true;
+                                      } },
+                    variant);
+            };
+            auto checkPixel = [](auto &variant) {
+                return std::visit(overloaded {
+                                      [](const typename DirectX12PixelShaderLoader::Handle &handle) {
+                                          return !handle || handle.available();
+                                      },
+                                      [](const typename DirectX12PixelShaderLoader::Ptr &ptr) {
+                                          return true;
+                                      } },
+                    variant);
+            };
+
+            auto resolve = [](auto &variant) -> const ReleasePtr<IDxcBlob> & {
+                return std::visit(overloaded {
+                                      [](const auto &handle) -> const ReleasePtr<IDxcBlob> & {
+                                          return *handle;
+                                      } },
+                    variant);
+            };
+
+            if (!checkVertex(mVertexShader))
                 return nullptr;
-            if (mGeometryShader && !mGeometryShader.available())
+            if (!checkGeometry(mGeometryShader))
                 return nullptr;
-            if (mPixelShader && !mPixelShader.available())
+            if (!checkPixel(mPixelShader))
                 return nullptr;
 
             D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineDesc;
             ZeroMemory(&pipelineDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 
-            pipelineDesc.VS = { (*mVertexShader)->GetBufferPointer(), (*mVertexShader)->GetBufferSize() };
-            if (mGeometryShader)
-                pipelineDesc.GS = { (*mGeometryShader)->GetBufferPointer(), (*mGeometryShader)->GetBufferSize() };
-            if (mPixelShader)
-                pipelineDesc.PS = { (*mPixelShader)->GetBufferPointer(), (*mPixelShader)->GetBufferSize() };
+            pipelineDesc.VS = { resolve(mVertexShader)->GetBufferPointer(), resolve(mVertexShader)->GetBufferSize() };
+            if (resolve(mGeometryShader))
+                pipelineDesc.GS = { resolve(mGeometryShader)->GetBufferPointer(), resolve(mGeometryShader)->GetBufferSize() };
+            if (resolve(mPixelShader))
+                pipelineDesc.PS = { resolve(mPixelShader)->GetBufferPointer(), resolve(mPixelShader)->GetBufferSize() };
 
             std::vector<D3D12_INPUT_ELEMENT_DESC> vertexLayoutDesc = DirectX12RenderContext::createVertexLayout(format, instanceDataSize);
 
@@ -100,7 +150,7 @@ namespace Render {
         return pipeline;
     }
 
-    std::array<ReleasePtr<ID3D12PipelineState>, 3> *DirectX12Pipeline::ptr()
+    const std::array<ReleasePtr<ID3D12PipelineState>, 3> *DirectX12Pipeline::ptr() const
     {
         return mPipelines.data();
     }
@@ -110,9 +160,9 @@ namespace Render {
         for (std::array<ReleasePtr<ID3D12PipelineState>, 3> &groupPipelines : mPipelines)
             for (ReleasePtr<ID3D12PipelineState> &pipeline : groupPipelines)
                 pipeline.reset();
-        mVertexShader.reset();
-        mGeometryShader.reset();
-        mPixelShader.reset();
+        mVertexShader = {};
+        mGeometryShader = {};
+        mPixelShader = {};
     }
 
 }

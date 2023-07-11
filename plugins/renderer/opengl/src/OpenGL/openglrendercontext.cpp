@@ -605,20 +605,20 @@ namespace Render {
         return window;
     }
 
-    void OpenGLRenderContext::unloadAllResources()
+    Threading::Task<void> OpenGLRenderContext::unloadAllResources()
     {
-        RenderContext::unloadAllResources();
+        co_await RenderContext::unloadAllResources();
 
         for (std::pair<const std::string, OpenGLPipelineLoader::Resource> &res : OpenGLPipelineLoader::getSingleton()) {
-            res.second.forceUnload();
+            co_await res.second.forceUnload();
         }
 
         for (std::pair<const std::string, OpenGLTextureLoader::Resource> &res : OpenGLTextureLoader::getSingleton()) {
-            res.second.forceUnload();
+            co_await res.second.forceUnload();
         }
 
         for (std::pair<const std::string, OpenGLMeshLoader::Resource> &res : OpenGLMeshLoader::getSingleton()) {
-            res.second.forceUnload();
+            co_await res.second.forceUnload();
         }
     }
 

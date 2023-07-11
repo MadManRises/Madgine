@@ -51,18 +51,13 @@ namespace Threading {
                 mWorkgroup.createThread(&Scheduler::schedulerLoop, this, queue);
         }
 
-        setCurrentThreadName(mWorkgroup.name() + "_" + main_queue->name() + " (Main)");
+        setupThreadInfo(main_queue, " (Main)");
 
-        do {
+        while (mWorkgroup.state() != WorkGroup::DONE || !mWorkgroup.singleThreaded()){
             std::chrono::steady_clock::time_point nextAvailableTaskTime = main_queue->update();
-            main_queue->waitForTasks(nextAvailableTaskTime);
-            mWorkgroup.checkThreadStates();
-            if (!main_queue->running() && main_queue->idle()) {
-                for (Threading::TaskQueue *queue : mWorkgroup.taskQueues()) {
-                    queue->stop();
-                }
-            }
-        } while (!main_queue->idle() || !mWorkgroup.singleThreaded());
+            //main_queue->waitForTasks(nextAvailableTaskTime);
+            mWorkgroup.update();
+        }
 
         for (Threading::TaskQueue *queue : mWorkgroup.taskQueues()) {
             assert(queue->idle());
@@ -75,13 +70,22 @@ namespace Threading {
 #if !EMSCRIPTEN
     void Scheduler::schedulerLoop(Threading::TaskQueue *queue)
     {
-        setCurrentThreadName(mWorkgroup.name() + "_" + queue->name());
-        while (queue->running() || !queue->idle()) {
+        setupThreadInfo(queue);
+        while (mWorkgroup.state() != WorkGroup::DONE) {
             std::chrono::steady_clock::time_point nextAvailableTaskTime = queue->update();
             queue->waitForTasks(nextAvailableTaskTime);
-        }        
+        }
+        assert(queue->idle());
     }
 #endif
+
+    void Scheduler::setupThreadInfo(Threading::TaskQueue *queue, std::string tags)
+    {
+#if MODULES_ENABLE_TASK_TRACKING
+        queue->mTracker.mThread = std::this_thread::get_id();
+#endif
+        setCurrentThreadName(mWorkgroup.name() + "_" + queue->name() + tags);
+    }
 
     void Scheduler::singleLoop()
     {

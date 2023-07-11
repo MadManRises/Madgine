@@ -49,10 +49,10 @@ namespace Render {
     {
     }
 
-    Threading::TaskFuture<bool> DirectX11VertexShaderLoader::Handle::create(std::string_view name, const CodeGen::ShaderFile &file, DirectX11VertexShaderLoader *loader)
+    Threading::TaskFuture<bool> DirectX11VertexShaderLoader::Ptr::create(const CodeGen::ShaderFile &file, DirectX11VertexShaderLoader *loader)
     {
-        return Base::Handle::create(
-            name, {}, [=, &file](DirectX11VertexShaderLoader *loader, DirectX11VertexShader &shader, const DirectX11VertexShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, loader);
+        return Base::Ptr::create(
+            [=, &file](DirectX11VertexShaderLoader *loader, DirectX11VertexShader &shader) { return loader->create(shader, file); }, loader);
     }
 
     bool DirectX11VertexShaderLoader::loadImpl(DirectX11VertexShader &shader, ResourceDataInfo &info)
@@ -68,30 +68,25 @@ namespace Render {
         shader.mBlob.reset();
     }
 
-    bool DirectX11VertexShaderLoader::create(DirectX11VertexShader &shader, Resource *res, const CodeGen::ShaderFile &file)
+    bool DirectX11VertexShaderLoader::create(DirectX11VertexShader &shader, const CodeGen::ShaderFile &file)
     {
-        if (res->path().empty()) {
+        /* if (res->path().empty()) {
             Filesystem::Path dir = Filesystem::appDataPath() / "generated/shader/directx11";
 
             Filesystem::createDirectories(dir);
 
             res->setPath(dir / (std::string { res->name() } + ".VS_hlsl"));
-        }
-
-        {
-            std::ofstream f { res->path() };
-            DirectX11ShaderCodeGen::generate(f, file, 0);
-        }
+        }*/
 
         std::ostringstream ss;
-        DirectX11ShaderCodeGen::generate(ss, file, 1);
+        DirectX11ShaderCodeGen::generate(ss, file, 0);
 
-        {
+        /* {
             std::ofstream f { res->path() };
             f << ss.str();
-        }
+        }*/
 
-        return loadFromSource(shader, res->name(), ss.str());
+        return loadFromSource(shader, "<generated>", ss.str());
     }
 
     bool DirectX11VertexShaderLoader::loadFromSource(DirectX11VertexShader &shader, std::string_view name, std::string source)

@@ -66,17 +66,7 @@ namespace Root {
                 mErrorCode = component->mErrorCode;
         }
 
-        mTaskQueue.queue([this]() -> Threading::Task<void> {
-            while (mTaskQueue.running()) {
-                Filesystem::checkAsyncIOCompletion();
-                co_await 500ms;
-            }
-            do {
-                Filesystem::cancelAllAsyncIO();
-                Filesystem::checkAsyncIOCompletion();
-                co_await 0ms;
-            } while (Filesystem::pendingIOOperationCount() > 0);
-        });
+        mTaskQueue.queueTask(updateAsyncIO());
     }
 
     Root::~Root()
@@ -99,6 +89,19 @@ namespace Root {
     bool Root::toolMode() const
     {
         return toolModeParameter;
+    }
+
+    Threading::Task<void> Root::updateAsyncIO()
+    {
+        while (mTaskQueue.running()) {
+            Filesystem::checkAsyncIOCompletion();
+            co_await 500ms;
+        }
+        do {
+            Filesystem::cancelAllAsyncIO();
+            Filesystem::checkAsyncIOCompletion();
+            co_await 0ms;
+        } while (Filesystem::pendingIOOperationCount() > 0);
     }
 
     int Root::errorCode()

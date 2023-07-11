@@ -39,17 +39,6 @@ namespace Render {
         std::string_view mGuardName;
     };
 
-    static constexpr std::array<Provider, 7> sProviders {
-        { { "pos", toValueTypeDesc<Vector3>(), "HAS_POS_3D" },
-            //{ "pos", toValueTypeDesc<Vector4>(), "HAS_POS_4D" },
-            { "pos2", toValueTypeDesc<Vector2>(), "HAS_POS2" },
-            { "normal", toValueTypeDesc<Vector3>(), "HAS_NORMAL" },
-            { "color", toValueTypeDesc<Vector4>(), "HAS_COLOR" },
-            { "UV", toValueTypeDesc<Vector2>(), "HAS_UV" },
-            { "boneIDs", toValueTypeDesc<Vector4i>(), "HAS_BONE_INDICES" },
-            { "weights", toValueTypeDesc<Vector4>(), "HAS_BONE_WEIGHTS" } }
-    };
-
     /*std::string_view Python3FunctionNode::name() const
         {
             return mName;
@@ -78,143 +67,78 @@ namespace Render {
 
     size_t MeshRendererNode::flowOutBaseCount(uint32_t group) const
     {
-        return 2;
+        return 1;
     }
 
     std::string_view MeshRendererNode::flowOutName(uint32_t index, uint32_t group) const
     {
-        return index == 0 ? "return" : "vertex";
-    }
-
-    uint32_t MeshRendererNode::flowOutMask(uint32_t index, uint32_t group, bool bidir) const
-    {
-        return index == 0 ? NodeGraph::NodeExecutionMask::CPU : NodeGraph::NodeExecutionMask::GPU;
-    }
-
-    size_t MeshRendererNode::dataProviderBaseCount(uint32_t group) const
-    {
-        return sProviders.size();
-    }
-
-    std::string_view MeshRendererNode::dataProviderName(uint32_t index, uint32_t group) const
-    {
-
-        return sProviders[index].mName;
-    }
-
-    ExtendedValueTypeDesc MeshRendererNode::dataProviderType(uint32_t index, uint32_t group, bool bidir) const
-    {
-        return sProviders[index].mType;
-    }
-
-    uint32_t MeshRendererNode::dataProviderMask(uint32_t index, uint32_t group, bool bidir) const
-    {
-        return NodeGraph::NodeExecutionMask::GPU;
+        return "return";
     }
 
     size_t MeshRendererNode::dataInBaseCount(uint32_t group) const
     {
-        return 1;
+        return 3;
     }
 
     std::string_view MeshRendererNode::dataInName(uint32_t index, uint32_t group) const
     {
-        return "mesh";
+        static constexpr std::array<std::string_view, 3> sInputNames {
+            "target",
+            "mesh",
+            "pipeline"
+        };
+        return sInputNames[index];
     }
 
     ExtendedValueTypeDesc MeshRendererNode::dataInType(uint32_t index, uint32_t group, bool bidir) const
     {
-        return toValueTypeDesc<Render::GPUMeshLoader::Resource *>();
+        static constexpr std::array<ExtendedValueTypeDesc, 3> sInputTypes {
+            toValueTypeDesc<Render::RenderTarget *>(),
+            toValueTypeDesc<Render::GPUMeshLoader::Resource *>(),
+            toValueTypeDesc<Render::PipelineInstance *>()
+        };
+        return sInputTypes[index];
     }
 
     struct MeshRendererNodeInterpret : NodeGraph::NodeInterpreterData {
-        Render::PipelineLoader::Instance mPipeline;
         Render::GPUMeshLoader::Handle mMesh;
     };
 
     void MeshRendererNode::interpret(NodeGraph::NodeReceiver receiver, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const
     {
-
         if (!data) {
-            std::unique_ptr<MeshRendererNodeInterpret> interpret = std::make_unique<MeshRendererNodeInterpret>();
-
-            ShaderCodeGenerator gen { mGraph };
-            gen.mInterpreter = &receiver.mInterpreter;
-            NodeGraph::Pin pin = flowOutTarget(1);
-
-            CodeGen::Struct *vertexData = gen.mFile.getStruct("VertexData");
-            vertexData->mAnnotations.push_back("semantic");
-
-            for (const Provider &provider : sProviders) {
-                gen.mFile.beginCondition(provider.mGuardName);
-                vertexData->mVariables.push_back({ { { gen.mFile.mConditionalsBitMask } }, { std::string { provider.mName }, provider.mType } });
-                gen.mFile.endCondition(provider.mGuardName);
-            }
-
-            CodeGen::Struct *rasterizerData = gen.mFile.getStruct("RasterizerData");
-
-            gen.mFile.beginFunction("main", { rasterizerData }, { { "IN", vertexData } });
-            IndexType<uint32_t> dummy = 1;
-            gen.generate(dummy, this);
-            gen.mFile.endFunction();
-
-            std::vector<size_t> bufferSizes;
-
-            for (GPUBufferCodeGeneratorData *buffer : gen.mBuffers) {
-                bufferSizes.push_back(buffer->mInterpretData->mBuffer.mSize);
-            }
-
-            interpret->mPipeline.createGenerated({ .vs = "node", .ps = "node", .bufferSizes = std::move(bufferSizes) }, std::move(gen.mFile));
-
-            for (GPUBufferCodeGeneratorData *buffer : gen.mBuffers) {
-                buffer->mInterpretData->mMapper = [&pipeline { interpret->mPipeline }, index { buffer->mIndex }]() mutable {
-                    WritableByteBuffer buffer;
-                    if (pipeline)
-                        buffer = pipeline->mapParameters(index);
-                    return buffer;
-                };
-
-                //auto targetBuffer = buffer->mInterpretData->mMapper();
-                //std::memcpy(targetBuffer.mData, buffer->mInterpretData->mBuffer.mData, buffer->mInterpretData->mBuffer.mSize);
-            }
-
-            data = std::move(interpret);
+            data = std::make_unique<MeshRendererNodeInterpret>();
         }
 
         MeshRendererNodeInterpret *interpretData = static_cast<MeshRendererNodeInterpret *>(data.get());
 
-        ValueType meshV;
-        //receiver.read(meshV, 0);
-        throw 0;
-        Render::GPUMeshLoader::Resource *mesh = ValueType_as<Render::GPUMeshLoader::Resource *>(meshV);
+        ValueType in;
+        receiver.read(in, 0);
+        Render::RenderTarget *target = in.as<Render::RenderTarget *>();
+        receiver.read(in, 1);
+        Render::GPUMeshLoader::Resource *mesh = in.as<Render::GPUMeshLoader::Resource *>();
+        receiver.read(in, 2);
+        Render::PipelineInstance *pipeline = in.as<Render::PipelineInstance *>();
 
         if (mesh) {
             if (interpretData->mMesh.resource() != mesh)
                 interpretData->mMesh = mesh;
             if (interpretData->mMesh.available()) {
-                //interpretData->mPipeline->renderMesh(interpretData->mMesh);
-                throw 0;
+                pipeline->renderMesh(target, interpretData->mMesh);
             }
         }
 
         receiver.set_value();
     }
 
-    void MeshRendererNode::generate(NodeGraph::CodeGenerator &generator, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeGraph::CodeGeneratorData> &data) const
+    void MeshRendererNode::generate(NodeGraph::CodeGenerator &generator, std::unique_ptr<NodeGraph::CodeGeneratorData> &data, uint32_t flowIn, uint32_t group) const
     {
-        assert(flowInOut == 1);
+        assert(flowIn == 1);
         assert(!data);
 
         std::unique_ptr<ShaderCodeGeneratorData> _data = std::make_unique<ShaderCodeGeneratorData>();
         _data->mInstanceIndex = 0;
         data = std::move(_data);
-
-        flowInOut = 1;
-    }
-
-    CodeGen::Statement MeshRendererNode::generateRead(NodeGraph::CodeGenerator &generator, uint32_t providerIndex, std::unique_ptr<NodeGraph::CodeGeneratorData> &data) const
-    {
-        return CodeGen::MemberAccess { std::string { sProviders[providerIndex].mName }, CodeGen::VariableAccess { "IN" } };
     }
 
 }

@@ -1,24 +1,21 @@
 #pragma once
 
+#include "Modules/threading/task.h"
+
 namespace Engine {
 
 namespace Render {
 
     struct MADGINE_CLIENT_EXPORT RenderData {
 
-        RenderData(RenderContext *context);
-
-        void update();
-
-        RenderContext *context() const;
+        Threading::TaskFuture<void> update(RenderContext *context);
 
     protected:
-        virtual void render() = 0;
+        virtual Threading::ImmediateTask<void> render(RenderContext *context) = 0;
 
     private:
-        RenderContext *mContext;
-
         size_t mFrame = 0;
+        Threading::TaskFuture<void> mCurrentFrame;
     };
 
 }

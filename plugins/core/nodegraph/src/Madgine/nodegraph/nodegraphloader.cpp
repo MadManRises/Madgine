@@ -23,7 +23,7 @@ METATABLE_END(Engine::NodeGraph::NodeGraphLoader::Resource)
     namespace NodeGraph {
 
         NodeGraphLoader::NodeGraphLoader()
-            : ResourceLoader({ ".ngp" }, { .mAutoReload = false })
+            : ResourceLoader({ ".ngp" }, { .mAutoReload = true })
         {
         }
 

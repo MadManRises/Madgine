@@ -25,9 +25,9 @@ namespace Render {
         GL_TRIANGLES
     };
 
-    OpenGLPipelineInstance::OpenGLPipelineInstance(const PipelineConfiguration &config, OpenGLPipelineLoader::Handle pipeline)
+    OpenGLPipelineInstance::OpenGLPipelineInstance(const PipelineConfiguration &config, GLuint pipeline)
         : PipelineInstance(config)
-        , mPipeline(std::move(pipeline))
+        , mHandle(pipeline)
     {
         mUniformBuffers.reserve(config.bufferSizes.size());
         for (size_t i = 0; i < config.bufferSizes.size(); ++i) {
@@ -37,11 +37,6 @@ namespace Render {
 
     bool OpenGLPipelineInstance::bind(VertexFormat format, OpenGLBuffer *instanceBuffer) const
     {
-        if (!mHandle) {
-            if (!mPipeline.available())
-                return false;
-            mHandle = mPipeline->handle();
-        }
         glUseProgram(mHandle);
         GL_CHECK();
 
@@ -173,6 +168,19 @@ namespace Render {
             glBindTexture(type, tex[i].mTextureHandle);
             GL_CHECK();
         }
+    }
+
+    OpenGLPipelineInstanceHandle::OpenGLPipelineInstanceHandle(const PipelineConfiguration &config, OpenGLPipelineLoader::Handle pipeline)
+        : OpenGLPipelineInstance(config, pipeline->handle())
+        , mPipeline(std::move(pipeline))
+    {
+    }
+
+    
+    OpenGLPipelineInstancePtr::OpenGLPipelineInstancePtr(const PipelineConfiguration &config, OpenGLPipelineLoader::Ptr pipeline)
+        : OpenGLPipelineInstance(config, pipeline->handle())
+        , mPipeline(std::move(pipeline))
+    {
     }
 
 }

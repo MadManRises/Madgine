@@ -6,6 +6,13 @@
 namespace Engine {
 namespace TupleUnpacker {
 
+    template <typename T>
+    decltype(auto) ensureTuple(T&& value) {
+        if constexpr (InstanceOf<std::decay_t<T>, std::tuple>)
+            return T { std::forward<T>(value) };
+        else
+            return std::make_tuple(std::forward<T>(value));
+    }
     
     template <typename T, typename... Ts, size_t... Is>
     auto prependImpl(T &&val, std::tuple<Ts...> &&tuple, std::index_sequence<Is...>)

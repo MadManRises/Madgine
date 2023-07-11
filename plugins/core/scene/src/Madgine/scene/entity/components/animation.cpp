@@ -115,8 +115,9 @@ namespace Scene {
             }
         }
 
-        void Animation::updateRender(Entity *entity)
+        void Animation::updateRender(Entity *entity, std::chrono::microseconds frameTimeSinceLastFrame, std::chrono::microseconds sceneTimeSinceLastFrame)
         {
+            mCurrentStep += std::chrono::duration_cast<std::chrono::duration<float>>(sceneTimeSinceLastFrame).count();
             if (mAnimationList.available() && mCurrentAnimation) {
                 Render::AnimationDescriptor &animation = mAnimationList->mAnimations[mCurrentAnimation];
                 Skeleton *skeleton = entity->getComponent<Skeleton>();

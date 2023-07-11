@@ -49,10 +49,10 @@ namespace Render {
     {
     }
 
-    Threading::TaskFuture<bool> DirectX11PixelShaderLoader::Handle::create(std::string_view name, const CodeGen::ShaderFile &file, DirectX11PixelShaderLoader *loader)
+    Threading::TaskFuture<bool> DirectX11PixelShaderLoader::Ptr::create(const CodeGen::ShaderFile &file, DirectX11PixelShaderLoader *loader)
     {
-        return Base::Handle::create(
-            name, {}, [=, &file](DirectX11PixelShaderLoader *loader, ReleasePtr<ID3D11PixelShader> &shader, const DirectX11PixelShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, loader);
+        return Base::Ptr::create(
+            [=, &file](DirectX11PixelShaderLoader *loader, ReleasePtr<ID3D11PixelShader> &shader) { return loader->create(shader, file); }, loader);
     }
 
     bool DirectX11PixelShaderLoader::loadImpl(ReleasePtr<ID3D11PixelShader> &shader, ResourceDataInfo &info)
@@ -67,25 +67,25 @@ namespace Render {
         shader.reset();
     }
 
-    bool DirectX11PixelShaderLoader::create(ReleasePtr<ID3D11PixelShader> &shader, Resource *res, const CodeGen::ShaderFile &file)
+    bool DirectX11PixelShaderLoader::create(ReleasePtr<ID3D11PixelShader> &shader, const CodeGen::ShaderFile &file)
     {
-        if (res->path().empty()) {
+        /* if (res->path().empty()) {
             Filesystem::Path dir = Filesystem::appDataPath() / "generated/shader/directx11";
 
             Filesystem::createDirectories(dir);
 
             res->setPath(dir / (std::string { res->name() } + ".PS_hlsl"));
-        }
+        }*/
 
         std::ostringstream ss;
         DirectX11ShaderCodeGen::generate(ss, file, 1);
 
-        {
+        /* {
             std::ofstream f { res->path() };
             f << ss.str();
-        }
+        }*/
 
-        return loadFromSource(shader, res->name(), ss.str());
+        return loadFromSource(shader, "<generated>", ss.str());
     }
 
     bool DirectX11PixelShaderLoader::loadFromSource(ReleasePtr<ID3D11PixelShader> &shader, std::string_view name, std::string source)

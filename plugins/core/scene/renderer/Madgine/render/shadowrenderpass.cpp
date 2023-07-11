@@ -26,8 +26,7 @@ namespace Engine {
 namespace Render {
 
     ShadowRenderPass::ShadowRenderPass(SceneMainWindowComponent &scene, Render::Camera *camera, int priority)
-        : mScene(scene)
-        , mCamera(camera)
+        : mData(scene, camera)        
         , mPriority(priority)
     {
     }
@@ -44,31 +43,11 @@ namespace Render {
 
     void ShadowRenderPass::render(Render::RenderTarget *target, size_t iteration)
     {
-        //TODO Culling
+
         if (!mPipeline.available())
             return;
 
-        auto guard = mScene.scene()->lock(AccessMode::READ);
-
-        std::map<std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> instances;
-
-        for (const auto &[mesh, e] : mScene.scene()->entityComponentList<Scene::Entity::Mesh>().data()) {
-            if (!mesh.isVisible())
-                continue;
-
-            const GPUMeshData *meshData = mesh.data();
-            if (!meshData)
-                continue;
-
-            Scene::Entity::Transform *transform = e->getComponent<Scene::Entity::Transform>();
-            if (!transform)
-                continue;
-
-            Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
-
-            instances[std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *> { meshData, skeleton }].push_back(transform->worldMatrix());
-        }
-
+        
         target->pushAnnotation("Shadow");
 
         updateFrustum();
@@ -84,11 +63,11 @@ namespace Render {
         {
             auto perFrame = mPipeline->mapParameters<ScenePerFrame>(1);
 
-            perFrame->light.light.color = mScene.mAmbientLightColor;
-            perFrame->light.light.dir = (v * Vector4{mScene.mAmbientLightDirection, 0.0f}).xyz();
+            perFrame->light.light.color = mData.mScene.mAmbientLightColor;
+            perFrame->light.light.dir = (v * Vector4{mData.mScene.mAmbientLightDirection, 0.0f}).xyz();
         }
 
-        for (const std::pair<const std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> &instance : instances) {
+        for (const std::pair<const std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> &instance : mData.mInstances) {
             const GPUMeshData *meshData = std::get<0>(instance.first);
             Scene::Entity::Skeleton *skeleton = std::get<1>(instance.first);
 
@@ -151,10 +130,10 @@ namespace Render {
         Vector3 minBounds = std::numeric_limits<float>::max() * Vector3 { Vector3::UNIT_SCALE };
         Vector3 maxBounds = std::numeric_limits<float>::lowest() * Vector3 { Vector3::UNIT_SCALE };
 
-        Quaternion q = Quaternion::FromDirection(mScene.mAmbientLightDirection);
+        Quaternion q = Quaternion::FromDirection(mData.mScene.mAmbientLightDirection);
         Quaternion qInv = q.inverse();
 
-        Frustum cameraFrustum = mCamera->getFrustum(1.0f);
+        Frustum cameraFrustum = mData.mCamera->getFrustum(1.0f);
         Frustum localFrustum = qInv * cameraFrustum;
         auto corners = localFrustum.getCorners();
 

@@ -48,7 +48,7 @@ namespace Resources {
 
         Filesystem::Path findResourceFile(const std::string &fileName);
 
-        void update();
+        Threading::Task<void> update();
 
         void waitForInit();
 

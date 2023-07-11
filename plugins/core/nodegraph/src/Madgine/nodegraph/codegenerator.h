@@ -15,18 +15,17 @@ namespace NodeGraph {
 
         CodeGenerator &operator=(const CodeGenerator &) = delete;
 
-        void generate(IndexType<uint32_t> &flowInOut, const NodeBase *startNode = nullptr);
-        void generate(Pin &pin);
+        void generate(uint32_t flowIn, const NodeBase *startNode = nullptr);
+        void generate(Pin pin);
 
-        virtual CodeGen::Statement read(uint32_t dataInIndex);
-        virtual CodeGen::Statement write(uint32_t dataOutIndex, CodeGen::Statement statement);
+        virtual CodeGen::Statement read(Pin pin);
+        virtual CodeGen::Statement write(Pin pin, CodeGen::Statement statement);
 
         virtual CodeGen::File &file() = 0;
 
     protected:
         const NodeGraph &mGraph;    
-        std::vector<std::unique_ptr<CodeGeneratorData>> mData;
-        const NodeBase *mCurrentNode = nullptr;        
+        std::vector<std::unique_ptr<CodeGeneratorData>> mData;        
     };
 
 }

@@ -3,26 +3,20 @@
 #include "rendercontext.h"
 #include "renderdata.h"
 
+#include "Modules/threading/taskqueue.h"
+
 namespace Engine {
 namespace Render {
 
-    RenderData::RenderData(RenderContext *context)
-        : mContext(context)
+    Threading::TaskFuture<void> RenderData::update(RenderContext *context)
     {
-    }
+        if (context->frame() != mFrame) {
+            mFrame = context->frame();
 
-    void RenderData::update()
-    {
-        if (mContext->frame() == mFrame)
-            return;
-        mFrame = mContext->frame();
+            mCurrentFrame = context->renderQueue()->queueTask(render(context));
+        }
 
-        render();
-    }
-
-    RenderContext *RenderData::context() const
-    {
-        return mContext;
+        return mCurrentFrame;
     }
 
 }

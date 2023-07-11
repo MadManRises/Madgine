@@ -77,17 +77,15 @@ namespace Render {
         throw 0;
     }
 
-    void FrameBufferNode::generate(NodeGraph::CodeGenerator &_generator, IndexType<uint32_t> &flowInOut, std::unique_ptr<NodeGraph::CodeGeneratorData> &data) const
+    void FrameBufferNode::generate(NodeGraph::CodeGenerator &_generator, std::unique_ptr<NodeGraph::CodeGeneratorData> &data, uint32_t flowIn, uint32_t group) const
     {
-        assert(flowInOut == 0);
+        assert(flowIn == 0);
 
         ShaderCodeGenerator &generator = dynamic_cast<ShaderCodeGenerator &>(_generator);
 
         CodeGen::ShaderFile &file = generator.mFile;
 
-        file.statement(CodeGen::Return { {}, generator.read(0) });
-
-        flowInOut.reset();
+        file.statement(CodeGen::Return { {}, generator.read(dataInSource(0)) });
     }
 
 }

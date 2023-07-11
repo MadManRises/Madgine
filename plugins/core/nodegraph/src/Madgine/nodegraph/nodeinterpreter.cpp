@@ -44,18 +44,19 @@ namespace NodeGraph {
         : mGraph(graph)
         , mArguments(args)
     {
+        if (mGraph) {
+            mData.resize(mGraph->nodes().size());
+        }
     }
 
-    void NodeInterpreter::interpret(Execution::VirtualReceiverBase<GenericResult> *receiver, uint32_t flowIn)
+    void NodeInterpreter::interpretImpl(Execution::VirtualReceiverBase<NodeInterpretResult> &receiver, uint32_t flowIn)
     {
-        interpret(receiver, mGraph->mFlowOutPins[flowIn].mTarget);
+        interpretImpl(receiver, mGraph->mFlowOutPins[flowIn].mTarget);
     }
 
-    void NodeInterpreter::interpret(Execution::VirtualReceiverBase<GenericResult> *receiver, Pin pin)
+    void NodeInterpreter::interpretImpl(Execution::VirtualReceiverBase<NodeInterpretResult> &receiver, Pin pin)
     {
-        assert(mGraph);
-
-        if (mGraphGeneration != mGraph->generation()) {
+/*
             mData.clear();
             mData.resize(mGraph->nodes().size());
 
@@ -64,19 +65,22 @@ namespace NodeGraph {
             }
 
             mGraphGeneration = mGraph->generation();
-        }
+        }*/
 
-        Debug::Debugger::getSingleton().stepInto(receiver, std::make_unique<NodeDebugLocation>(nullptr, this));
-        branch(*receiver, pin);
+        Debug::Debugger::getSingleton().stepInto(&receiver, std::make_unique<NodeDebugLocation>(nullptr, this));
+        branch(receiver, pin);
     }
 
-    void NodeInterpreter::branch(Execution::VirtualReceiverBase<GenericResult> &receiver, Pin pin)
+    void NodeInterpreter::branch(Execution::VirtualReceiverBase<NodeInterpretResult> &receiver, Pin pin)
     {
+
         const NodeBase *node = nullptr;
         if (pin && pin.mNode) {
             node = mGraph->node(pin.mNode);
         }
-        static_cast<NodeDebugLocation *>(Debug::Debugger::getSingleton().getLocation(&receiver))->mNode = node;
+        NodeDebugLocation *location = static_cast<NodeDebugLocation *>(Debug::Debugger::getSingleton().getLocation(&receiver));
+        if (location)
+            location->mNode = node;
 
         Execution::detach(Debug::Debugger::getSingleton().yield(&receiver)
             | Execution::then([=, &receiver]() {
@@ -105,6 +109,16 @@ namespace NodeGraph {
         mGraph->node(pin.mNode)->interpretWrite(*this, mData[pin.mNode - 1], v, pin.mIndex, pin.mGroup);
     }
 
+    void NodeInterpreter::read(ValueType &retVal, uint32_t dataProvider)
+    {
+        read(retVal, mGraph->mDataInPins[dataProvider].mSource);
+    }
+
+    void NodeInterpreter::write(uint32_t dataReceiver, const ValueType &v)
+    {
+        write(mGraph->mDataOutPins[dataReceiver].mTarget, v);
+    }
+
     void NodeInterpreter::setGraph(const NodeGraph *graph)
     {
         if (mGraph != graph) {
@@ -113,7 +127,6 @@ namespace NodeGraph {
             mData.clear();
             if (mGraph) {
                 mData.resize(mGraph->nodes().size());
-                mGraphGeneration = mGraph->generation();
             }
         }
     }
@@ -121,6 +134,16 @@ namespace NodeGraph {
     const NodeGraph *NodeInterpreter::graph() const
     {
         return mGraph;
+    }
+
+    void NodeInterpreter::setArguments(const ArgumentList &args)
+    {
+        mArguments = args;
+    }
+
+    ArgumentList &NodeInterpreter::arguments()
+    {
+        return mArguments;
     }
 
     std::unique_ptr<NodeInterpreterData> &NodeInterpreter::data(uint32_t index)

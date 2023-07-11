@@ -68,36 +68,58 @@ namespace Tools {
         if (ImGui::Begin("NodeRendererTester", &mVisible)) {
 
             ImGui::ImageButton((void *)mTexture->texture().mTextureHandle, { 512, 512 }, { 0, 0 }, { 1, 1 }, 0);
-            ImGui::InteractiveView(mState);
+            //ImGui::InteractiveView(mState);
 
-            Tools::InteractiveCamera(mState, mCamera);
+            //Tools::InteractiveCamera(mState, mCamera);
 
             ImGui::Text("Passes:");
             ImGui::SameLine();
             if (ImGui::Button("+")) {
-                mTexture->addRenderPass(&mPasses.emplace_back());
+                mPasses.emplace_back();
             }
             if (ImGui::BeginTable("columns", 2, ImGuiTableFlags_Resizable)) {
                 for (NodeRenderPass &pass : mPasses) {
-                    TypedScopePtr ptr = pass.mHandle.resource();
-                    if (mInspector->drawValue("pass", ptr, true).first) {
-                        pass.mHandle = ptr.safe_cast<NodeGraph::NodeGraphLoader::Resource>();
+                    if (pass.mLoadingHandle && pass.mLoadingHandle.available()) {
+
+                        if (pass.mPass)
+                            mTexture->removeRenderPass(pass.mPass);
+
+                        pass.mHandle = std::move(pass.mLoadingHandle);
+                        pass.mLoadingHandle.reset();
+
+                        pass.mInterpreter.setGraph(&*pass.mHandle);
+
                         size_t argCount = pass.mHandle->mDataProviderPins.size();
-                        pass.mArguments.resize(argCount);
+                        pass.mInterpreter.arguments().resize(argCount);
                         for (uint32_t i = 0; i < argCount; ++i) {
                             ExtendedValueTypeDesc desc = pass.mHandle->dataProviderType({ 0, i });
-                            if (desc == toValueTypeDesc<Engine::Vector4>()) {
-                                pass.mArguments[i] = Engine::Vector4 { Engine::Vector4::ZERO };
-                            } else if (desc == Engine::toValueTypeDesc<Render::Camera *>()) {
-                                pass.mArguments[i] = &mCamera;
-                            } else {
-                                pass.mArguments[i].setType(desc);
+                            if (static_cast<ValueTypeDesc>(desc) != pass.mInterpreter.arguments()[i].type()) {
+                                if (desc == toValueTypeDesc<Engine::Vector4>()) {
+                                    pass.mInterpreter.arguments()[i] = Engine::Vector4 { Engine::Vector4::ZERO };
+                                } else {
+                                    pass.mInterpreter.arguments()[i].setType(desc);
+                                }
                             }
                         }
+
+                        ValueType retVal;
+                        pass.mInterpreter.read(retVal, 0);
+                        pass.mPass = retVal.as<Render::RenderPass *>();
+
+                        if (pass.mPass)
+                            mTexture->addRenderPass(pass.mPass);
+                    }
+
+                    TypedScopePtr ptr = pass.mHandle.resource();
+                    if (mInspector->drawValue("pass", ptr, true).first) {
+                        pass.mLoadingHandle = ptr.safe_cast<NodeGraph::NodeGraphLoader::Resource>();
                     }
                     size_t i = 0;
-                    for (ValueType &v : pass.mArguments) {
+                    for (ValueType &v : pass.mInterpreter.arguments()) {
                         mInspector->drawValue(std::to_string(i++), v, true, false);
+                    }
+                    if (NodeGraph::NodeGraphLoader::Handle newHandle = pass.mHandle.refresh()) {
+                        pass.mLoadingHandle = newHandle;
                     }
                 }
                 ImGui::EndTable();
@@ -119,22 +141,6 @@ namespace Tools {
     std::string_view NodeRendererTester::key() const
     {
         return "NodeRendererTester";
-    }
-
-    void NodeRendererTester::NodeRenderPass::render(Render::RenderTarget *target, size_t iteration)
-    {
-        if (mHandle) {
-            /* mInterpreter.setGraph(&*mHandle);
-
-            IndexType<uint32_t> flow = 0;
-            mInterpreter.interpret(flow, mArguments);*/
-            throw 0;
-        }
-    }
-
-    int NodeRendererTester::NodeRenderPass::priority() const
-    {
-        return 50;
     }
 
 }

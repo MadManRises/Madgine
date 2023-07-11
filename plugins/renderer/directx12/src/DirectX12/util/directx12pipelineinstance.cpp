@@ -16,11 +16,10 @@ namespace Render {
         D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
     };
 
-    DirectX12PipelineInstance::DirectX12PipelineInstance(const PipelineConfiguration &config, DirectX12PipelineLoader::Handle pipeline)
+    DirectX12PipelineInstance::DirectX12PipelineInstance(const PipelineConfiguration &config, const DirectX12Pipeline *pipeline)
         : PipelineInstance(config)
-        , mPipelineHandle(std::move(pipeline))
-    {
-        mPipelines = mPipelineHandle->ptr();
+        , mPipeline(pipeline)
+    {        
 
         mConstantBuffers.reserve(config.bufferSizes.size());
         for (size_t i = 0; i < config.bufferSizes.size(); ++i) {
@@ -30,9 +29,9 @@ namespace Render {
 
     bool DirectX12PipelineInstance::bind(ID3D12GraphicsCommandList *commandList, VertexFormat format, size_t groupSize) const
     {
-        ID3D12PipelineState *pipeline = mPipelines[format][groupSize - 1];
+        ID3D12PipelineState *pipeline = mPipeline->ptr()[format][groupSize - 1];
         if (!pipeline) {
-            pipeline = mPipelineHandle->get(format, groupSize, mInstanceDataSize);
+            pipeline = mPipeline->get(format, groupSize, mInstanceDataSize);
             if (!pipeline)
                 return false;
         }
@@ -133,6 +132,12 @@ namespace Render {
                 static_cast<DirectX12RenderTarget *>(target)->mCommandList->SetGraphicsRootDescriptorTable(4 + offset + i, handle);
             }
         }
+    }
+
+DirectX12PipelineInstanceHandle::DirectX12PipelineInstanceHandle(const PipelineConfiguration &config, DirectX12PipelineLoader::Handle pipeline)
+        : DirectX12PipelineInstance(config, &*pipeline)
+        , mPipelineHandle(std::move(pipeline))
+    {
     }
 
 }

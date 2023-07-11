@@ -18,12 +18,12 @@ namespace Render {
         virtual std::unique_ptr<RenderTarget> createRenderWindow(Window::OSWindow *w, size_t samples = 1) = 0;
         virtual std::unique_ptr<RenderTarget> createRenderTexture(const Vector2i &size = { 1, 1 }, const RenderTextureConfig &config = {}) = 0;
 
-        virtual void unloadAllResources();
+        virtual Threading::Task<void> unloadAllResources();
 
         void addRenderTarget(RenderTarget *target);
         void removeRenderTarget(RenderTarget *target);
 
-        void render();
+        Threading::Task<void> render();
 
         virtual bool beginFrame();
         virtual void endFrame();

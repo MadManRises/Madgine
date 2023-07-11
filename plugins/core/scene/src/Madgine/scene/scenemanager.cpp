@@ -23,12 +23,15 @@
 
 #include "Meta/serialize/configs/guard.h"
 
+#include "Modules/threading/awaitables/awaitablesender.h"
 #include "Modules/threading/awaitables/awaitabletimepoint.h"
 
 #include "Generic/execution/algorithm.h"
 #include "Generic/execution/promise.h"
 
 #include "Generic/projections.h"
+
+#include "Modules/threading/senders/with_lock.h"
 
 UNIQUECOMPONENT(Engine::Serialize::NoParent<Engine::Scene::SceneManager>);
 
@@ -39,9 +42,9 @@ READONLY_PROPERTY(entities, entities)
 MEMBER(mSceneComponents)
 METATABLE_END(Engine::Scene::SceneManager)
 
-static Engine::Threading::DataLock static_lock(Engine::Scene::SceneManager *mgr)
+static Engine::Threading::DataMutex::Lock static_lock(Engine::Scene::SceneManager *mgr)
 {
-    return mgr->lock(Engine::AccessMode::WRITE);
+    return mgr->mutex(Engine::AccessMode::WRITE).lock();
 }
 
 SERIALIZETABLE_BEGIN(Engine::Scene::SceneManager,
@@ -59,6 +62,9 @@ namespace Scene {
         : SyncableUnitEx(Serialize::SCENE_MANAGER)
         , VirtualScope(app)
         , mSceneComponents(*this)
+        , mMutex("SceneData")
+        , mFrameClock(std::chrono::steady_clock::now())
+        , mSceneClock(mClock.now())
     {
     }
 
@@ -77,13 +83,6 @@ namespace Scene {
             if (!co_await component->callInit())
                 co_return false;
         }
-
-        mApp.taskQueue()->queue([this]() -> Threading::Task<void> {
-            while (mApp.taskQueue()->running()) {
-                update();
-                co_await 33ms;
-            }
-        });
 
         co_return true;
     }
@@ -107,29 +106,26 @@ namespace Scene {
         return mSceneComponents.size();
     }
 
-    Threading::DataLock SceneManager::lock(AccessMode mode)
+    Threading::DataMutex::Moded SceneManager::mutex(AccessMode mode)
     {
-        return Threading::DataLock { mMutex, mode };
-    }
-
-    void SceneManager::update()
-    {
-        PROFILE();
-
-        auto guard = lock(AccessMode::WRITE);
-
-        std::chrono::microseconds timeSinceLastFrame = mFrameClock.tick<std::chrono::microseconds>();
-
-        for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
-            //PROFILE(component->componentName());
-            component->update(timeSinceLastFrame, mPauseStack > 0);
-        }
+        return mMutex(mode);
     }
 
     void SceneManager::updateRender()
     {
+        std::chrono::microseconds frameTimeSinceLastFrame = mFrameClock.tick(std::chrono::steady_clock::now());
+        std::chrono::microseconds sceneTimeSinceLastFrame = mSceneClock.tick(mClock.now());
+
+        for (const auto &update : mRenderUpdates) {
+            update(frameTimeSinceLastFrame, sceneTimeSinceLastFrame);
+        }
+
         for (const std::unique_ptr<Entity::EntityComponentListBase> &list : mEntityComponentLists) {
-            list->updateRender();
+            list->updateRender(frameTimeSinceLastFrame, sceneTimeSinceLastFrame);
+        }
+
+        for (const std::unique_ptr<SceneComponentBase> &comp : mSceneComponents) {
+            comp->updateRender(frameTimeSinceLastFrame, sceneTimeSinceLastFrame);
         }
     }
 
@@ -167,17 +163,28 @@ namespace Scene {
 
     void SceneManager::pause()
     {
-        ++mPauseStack;
+        if (mClock.mPauseStack++ == 0) {
+            mClock.mPauseStart = std::chrono::steady_clock::now();
+        }
     }
 
     bool SceneManager::unpause()
     {
-        return --mPauseStack == 0;
+        if (--mClock.mPauseStack == 0) {
+            mClock.mPauseAcc += std::chrono::steady_clock::now() - mClock.mPauseStart;
+            return true;
+        }
+        return false;
     }
 
     bool SceneManager::isPaused() const
     {
-        return mPauseStack > 0;
+        return mClock.mPauseStack > 0;
+    }
+
+    const Threading::CustomClock &SceneManager::clock() const
+    {
+        return mClock;
     }
 
     Entity::Entity *SceneManager::makeLocalCopy(Entity::Entity &&e)
@@ -210,7 +217,7 @@ namespace Scene {
     Entity::EntityPtr SceneManager::createEntity(const std::string &behavior, const std::string &name,
         const std::function<void(Entity::Entity &)> &init)
     {
-        assert(mMutex.isHeldWrite());
+
 
         //ValueType behaviorTable /* = app().table()[behavior]*/;
         ObjectPtr table;
@@ -230,7 +237,6 @@ namespace Scene {
 
     void SceneManager::createEntityAsyncImpl(Serialize::GenericMessageReceiver receiver, const std::string &behavior, const std::string &name, const std::function<void(Entity::Entity &)> &init)
     {
-        assert(mMutex.isHeldWrite());
 
         //ValueType behaviorTable /* = app().table()[behavior]*/;
         ObjectPtr table;
@@ -244,19 +250,20 @@ namespace Scene {
         auto toPtr = [](const typename RefcountedContainer<std::deque<Entity::Entity>>::iterator &it) { return Entity::EntityPtr { &*it }; };
         if (init)
             Execution::detach(
-                TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_init_async, this), mEntities.end(), init, createEntityData(name, false), table)
-                | Execution::then(std::move(toPtr))
+                Threading::start_with_lock(mutex(AccessMode::WRITE), taskQueue(),
+                    TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_init_async, this), mEntities.end(), init, createEntityData(name, false), table)
+                        | Execution::then(std::move(toPtr)))
                 | Execution::then_receiver(std::move(receiver)));
         else
             Execution::detach(
-                TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_async, this), mEntities.end(), createEntityData(name, false), table)
-                | Execution::then(std::move(toPtr))
+                Threading::start_with_lock(mutex(AccessMode::WRITE), taskQueue(),
+                    TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_async, this), mEntities.end(), createEntityData(name, false), table)
+                        | Execution::then(std::move(toPtr)))
                 | Execution::then_receiver(std::move(receiver)));
     }
 
     Entity::EntityPtr SceneManager::createLocalEntity(const std::string &behavior, const std::string &name)
     {
-        assert(mMutex.isHeldWrite());
 
         //ValueType behaviorTable /* = app().table()[behavior]*/;
         ObjectPtr table;
@@ -274,5 +281,21 @@ namespace Scene {
     {
         return mEntities.observer().signal();
     }
+
+    std::chrono::steady_clock::time_point SceneManager::Clock::get(std::chrono::steady_clock::time_point timepoint) const
+    {
+        return (mPauseStack > 0 ? mPauseStart : timepoint) - mPauseAcc;
+    }
+
+    std::chrono::steady_clock::time_point SceneManager::Clock::revert(std::chrono::steady_clock::time_point timepoint) const
+    {
+        return timepoint + mPauseAcc + (mPauseStack > 0 ? std::chrono::steady_clock::now() - mPauseStart : 0s);
+    }
+
+    void SceneManager::addRenderUpdate(std::function<void(std::chrono::microseconds, std::chrono::microseconds)> update)
+    {
+        mRenderUpdates.push_back(std::move(update));
+    }
+
 }
 }

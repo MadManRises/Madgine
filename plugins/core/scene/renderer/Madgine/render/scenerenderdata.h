@@ -7,9 +7,9 @@ namespace Render {
 
     struct SceneRenderData : RenderData {
 
-        SceneRenderData(Scene::SceneManager &scene, RenderContext *context);
+        SceneRenderData(Scene::SceneManager &scene);
 
-        virtual void render() override;
+        virtual Threading::ImmediateTask<void> render(RenderContext *context) override;
 
     private:
         Scene::SceneManager &mScene;

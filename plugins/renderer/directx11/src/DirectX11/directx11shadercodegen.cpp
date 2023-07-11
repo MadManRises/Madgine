@@ -14,6 +14,7 @@ namespace Render {
             { toValueTypeDesc<Vector4>(), "float4" },
             { toValueTypeDesc<Vector3>(), "float3" },
             { toValueTypeDesc<Vector2>(), "float2" },
+            { toValueTypeDesc<float>(), "float" },
             { toValueTypeDesc<Vector4i>(), "int4" },
             { toValueTypeDesc<Vector3i>(), "int3" },
             { toValueTypeDesc<Vector2i>(), "int2" },
@@ -41,7 +42,37 @@ namespace Render {
 
         void generate(std::ostream &stream, const Vector3 &v)
         {
-            stream << "float4(" << v.x << ", " << v.y << ", " << v.z << ")";
+            stream << "float3(" << v.x << ", " << v.y << ", " << v.z << ")";
+        }
+                
+        void generate(std::ostream &stream, const Vector2 &v)
+        {
+            stream << "float2(" << v.x << ", " << v.y << ")";
+        }
+
+        void generate(std::ostream &stream, const Vector2i &v)
+        {
+            stream << "int2(" << v.x << ", " << v.y << ")";
+        }
+
+        void generate(std::ostream &stream, const Vector4i &v)
+        {
+            stream << "int4(" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ")";
+        }
+                
+        void generate(std::ostream &stream, const Quaternion &q)
+        {
+            throw 0;
+        }
+
+        void generate(std::ostream &stream, const CoW<Matrix3> &m)
+        {
+            throw 0;
+        }
+
+        void generate(std::ostream &stream, const CoW<Matrix4> &m)
+        {
+            throw 0;
         }
 
         void generate(std::ostream &stream, const Void &v)
@@ -59,8 +90,47 @@ namespace Render {
             stream << f;
         }
 
-        template <typename T>
-        void generate(std::ostream &stream, const T &v)
+        void generate(std::ostream &stream, const EnumHolder &e)
+        {
+            stream << e.toString();
+        }
+
+        void generate(std::ostream &stream, const ObjectPtr &o)
+        {
+            throw 0;
+        }
+
+        void generate(std::ostream &stream, const OwnedScopePtr &o)
+        {
+            throw 0;
+        }
+
+        void generate(std::ostream &stream, const TypedScopePtr &t)
+        {
+            throw 0;
+        }
+
+        void generate(std::ostream &stream, const KeyValueFunction &f)
+        {
+            throw 0;
+        }
+
+        void generate(std::ostream &stream, const BoundApiFunction &f)
+        {
+            throw 0;
+        }
+
+        void generate(std::ostream &stream, const ApiFunction &f)
+        {
+            throw 0;
+        }
+
+        void generate(std::ostream &stream, const KeyValueVirtualSequenceRange &c)
+        {
+            throw 0;
+        }
+
+        void generate(std::ostream &stream, const KeyValueVirtualAssociativeRange &c)
         {
             throw 0;
         }
@@ -120,6 +190,9 @@ namespace Render {
                 stream << "mul(";
                 opCode = ", ";
                 break;
+            case CodeGen::ArithOperation::DIV:
+                opCode = " / ";
+                break;
             default:
                 throw 0;
             }
@@ -169,7 +242,11 @@ namespace Render {
 
         const char *guessSemantic(std::string_view name, bool rasterized)
         {
-            if (name.find("pos") != std::string_view::npos)
+            if (name.find("pos2") != std::string_view::npos)
+                return "POSITION2";
+            else if (name == "w")
+                return "POSITION1";
+            else if (name.find("pos") != std::string_view::npos)
                 return rasterized ? "SV_Position" : "POSITION";
             else if (name.find("col") != std::string_view::npos)
                 return "COLOR";
@@ -185,26 +262,6 @@ namespace Render {
                 throw 0;
         }
 
-        const char *guessDefault(std::string_view name)
-        {
-            if (name.find("pos2") != std::string_view::npos)
-                return "float2(0,0)";
-            else if (name.find("pos") != std::string_view::npos)
-                return "float3(0,0,0)";
-            else if (name.find("col") != std::string_view::npos)
-                return "float4(1,1,1,1)";
-            else if (StringUtil::toLower(name).find("uv") != std::string::npos)
-                return "float2(0,0)";
-            else if (StringUtil::toLower(name).find("normal") != std::string::npos)
-                return "float3(0,0,0)";
-            else if (StringUtil::toLower(name).find("bone") != std::string::npos)
-                return "int4(0,0,0,0)";
-            else if (StringUtil::toLower(name).find("weights") != std::string::npos)
-                return "float4(0,0,0,0)";
-            else
-                throw 0;
-        }
-
         void generate(std::ostream &stream, const CodeGen::ShaderFile &file, uint32_t index)
         {
             for (const std::pair<const std::string, CodeGen::Struct> &structInfo : file.mStructs) {
@@ -213,11 +270,9 @@ namespace Render {
                     if (index == 0) {
                         stream << "struct VertexDataIn {\n";
                         for (const CodeGen::VariableDefinition &arg : structInfo.second.mVariables) {
-                            bool hasGuard = file.openCStyleGuard(stream, arg.mConditionals);
                             stream << "\t";
                             generateType(stream, arg.mVariable.mType);
-                            stream << " " << arg.mVariable.mName << " : " << guessSemantic(arg.mVariable.mName, false) << ";\n";
-                            file.closeCStyleGuard(stream, hasGuard);                                
+                            stream << " " << arg.mVariable.mName << " : " << guessSemantic(arg.mVariable.mName, false) << ";\n";                            
                         }
                         stream << "};\n";
                     } else {
@@ -280,13 +335,7 @@ namespace Render {
                 stream << "RasterizerData main(VertexDataIn dataIn){\n";
                 stream << "\tVertexData IN;\n";
                 for (const CodeGen::VariableDefinition &inVar : file.mStructs.at("VertexData").mVariables) {
-                    bool hasGuard = file.openCStyleGuard(stream, inVar.mConditionals);
                     stream << "\tIN." << inVar.mVariable.mName << " = dataIn." << inVar.mVariable.mName << ";\n";
-                    if (hasGuard) {
-                        stream << "#else\n";
-                        stream << "\tIN." << inVar.mVariable.mName << " = " << guessDefault(inVar.mVariable.mName) << ";\n";
-                        stream << "#endif\n";
-                    }
                 }
                 stream << "\treturn mainImpl(IN);\n";
                 stream << "}\n\n";

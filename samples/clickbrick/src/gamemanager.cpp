@@ -38,6 +38,7 @@
 #include "Madgine/render/scenemainwindowcomponent.h"
 
 #include "Madgine/render/rendercontext.h"
+#include "Modules/threading/awaitables/awaitabletimepoint.h"
 
 UNIQUECOMPONENT(ClickBrick::GameManager)
 
@@ -51,6 +52,7 @@ GameManager::GameManager(Engine::Input::UIManager &ui)
     : Engine::Input::Handler<GameManager>(ui, "GameView")
     , mSceneMgr(ui.app().getGlobalAPIComponent<Engine::Scene::SceneManager>())
     , mSceneRenderer(ui.window().getWindowComponent<Engine::Render::SceneMainWindowComponent>(), &mCamera, 50)
+    , mSceneClock(mSceneMgr.clock().now())
 {
 }
 
@@ -66,6 +68,8 @@ Engine::Threading::Task<bool> GameManager::init()
 
     mGameRenderTarget = mUI.window().getRenderer()->createRenderTexture({ 1, 1 }, {});
     mGameRenderTarget->addRenderPass(&mSceneRenderer);
+
+    mUI.app().taskQueue()->queueTask(updateApp());
 
     co_return co_await HandlerBase::init();
 }
@@ -95,26 +99,27 @@ void GameManager::setWidget(Engine::Widgets::WidgetBase *w)
     }
 }
 
-void GameManager::updateRender(std::chrono::microseconds timeSinceLastFrame)
+Engine::Threading::Task<void> GameManager::updateApp()
 {
-    if (mSceneMgr.isPaused())
-        return;
+    while (mUI.app().taskQueue()->running()) {
+        auto awaiter = mSceneMgr.mutex(Engine::AccessMode::WRITE).operator co_await();
+        co_await Engine::Threading::TaskQualifiers { mSceneMgr.clock()(1ms), &awaiter };
+        std::chrono::microseconds timeSinceLastFrame = mSceneClock.tick(mSceneMgr.clock().now());
 
-    updateBricks(timeSinceLastFrame);
+        updateBricks(timeSinceLastFrame);
 
-    mAcc += timeSinceLastFrame;
-    while (mAcc > mSpawnInterval) {
-        mAcc -= mSpawnInterval;
-        mSpawnInterval *= 999;
-        mSpawnInterval /= 1000;
-        spawnBrick();
-    }
+        mAcc += timeSinceLastFrame;
+        while (mAcc > mSpawnInterval) {
+            mAcc -= mSpawnInterval;
+            mSpawnInterval *= 999;
+            mSpawnInterval /= 1000;
+            spawnBrick();
+        }
+    }    
 }
 
 void GameManager::updateBricks(std::chrono::microseconds timeSinceLastFrame)
 {
-    auto guard = mSceneMgr.lock(Engine::AccessMode::WRITE);
-
     float ratio = (timeSinceLastFrame.count() / 1000000.0f);
 
     mBricks.remove_if([=](const Engine::Scene::Entity::EntityPtr &e) {
@@ -148,8 +153,6 @@ void GameManager::updateBricks(std::chrono::microseconds timeSinceLastFrame)
 
 void GameManager::spawnBrick()
 {
-    auto guard = mUI.app().getGlobalAPIComponent<Engine::Scene::SceneManager>().lock(Engine::AccessMode::WRITE);
-
     Engine::Scene::Entity::EntityPtr brick = mUI.app().getGlobalAPIComponent<Engine::Scene::SceneManager>().createEntity();
 
     Engine::Scene::Entity::Transform *t = brick->addComponent<Engine::Scene::Entity::Transform>().get();
@@ -196,7 +199,7 @@ void GameManager::onPointerClick(const Engine::Input::PointerEventArgs &evt)
     }
 
     if (hit) {
-        auto guard = mUI.app().getGlobalAPIComponent<Engine::Scene::SceneManager>().lock(Engine::AccessMode::WRITE);
+        auto guard = mUI.app().getGlobalAPIComponent<Engine::Scene::SceneManager>().mutex(Engine::AccessMode::WRITE).lock();
 
         mBricks.remove(hit);
         hit->remove();
@@ -231,7 +234,7 @@ void GameManager::start()
     mLife = 3;
     mLifeLabel->mText = "Life: " + std::to_string(mLife);
 
-    auto guard = mSceneMgr.lock(Engine::AccessMode::WRITE);
+    auto guard = mSceneMgr.mutex(Engine::AccessMode::WRITE).lock();
 
     for (const Engine::Scene::Entity::EntityPtr &brick : mBricks) {
         brick->remove();

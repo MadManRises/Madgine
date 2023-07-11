@@ -25,6 +25,7 @@ namespace Render {
 
     OpenGLMeshLoader::OpenGLMeshLoader()
     {
+        getOrCreateManual("quad", {}, {}, this);
         getOrCreateManual("Cube", {}, {}, this);
         getOrCreateManual("Plane", {}, {}, this);
     }

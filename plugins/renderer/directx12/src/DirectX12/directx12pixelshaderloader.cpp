@@ -30,10 +30,10 @@ namespace Render {
         //if(FAILED(hr)) Handle error
     }
 
-    Threading::TaskFuture<bool> DirectX12PixelShaderLoader::Handle::create(std::string_view name, const CodeGen::ShaderFile &file, DirectX12PixelShaderLoader *loader)
+    Threading::TaskFuture<bool> DirectX12PixelShaderLoader::Ptr::create(const CodeGen::ShaderFile &file, DirectX12PixelShaderLoader *loader)
     {
-        return Base::Handle::create(
-            name, {}, [=, &file](DirectX12PixelShaderLoader *loader, ReleasePtr<IDxcBlob> &shader, const DirectX12PixelShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file); }, loader);
+        return Base::Ptr::create(
+            [=, &file](DirectX12PixelShaderLoader *loader, ReleasePtr<IDxcBlob> &shader) { return loader->create(shader, file); }, loader);
     }
 
     bool DirectX12PixelShaderLoader::loadImpl(ReleasePtr<IDxcBlob> &shader, ResourceDataInfo &info)
@@ -48,25 +48,25 @@ namespace Render {
         shader.reset();
     }
 
-    bool DirectX12PixelShaderLoader::create(ReleasePtr<IDxcBlob> &shader, Resource *res, const CodeGen::ShaderFile &file)
+    bool DirectX12PixelShaderLoader::create(ReleasePtr<IDxcBlob> &shader, const CodeGen::ShaderFile &file)
     {
-        if (res->path().empty()) {
+        /* if (res->path().empty()) {
             Filesystem::Path dir = Filesystem::appDataPath() / "generated/shader/directx12";
 
             Filesystem::createDirectories(dir);
 
             res->setPath(dir / (std::string { res->name() } + ".PS_hlsl"));
-        }
+        }*/
 
         std::ostringstream ss;
         DirectX12ShaderCodeGen::generate(ss, file, 1);
 
-        {
+        /* {
             std::ofstream f { res->path() };
             f << ss.str();
-        }
+        }*/
 
-        return loadFromSource(shader, res->name(), ss.str());
+        return loadFromSource(shader, "<generated>", ss.str());
     }
 
     bool DirectX12PixelShaderLoader::loadFromSource(ReleasePtr<IDxcBlob> &shader, std::string_view name, std::string source)

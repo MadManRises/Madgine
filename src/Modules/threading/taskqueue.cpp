@@ -6,6 +6,20 @@
 namespace Engine {
 namespace Threading {
 
+    bool TaskQualifiers::await_ready()
+    {
+        return false;
+    }
+
+    void TaskQualifiers::await_suspend(TaskHandle handle)
+    {
+        handle.queue()->queueHandle(std::move(handle), std::move(*this));
+    }
+
+    void TaskQualifiers::await_resume()
+    {
+    }
+
     TaskQueue::TaskQueue(const std::string &name, bool wantsMainThread)
         : mName(name)
         , mWantsMainThread(wantsMainThread)
@@ -27,6 +41,7 @@ namespace Threading {
 
     void TaskQueue::queueInternal(ScheduledTask task)
     {
+        assert(WorkGroup::self().state() != WorkGroup::DONE);
         {
             //TODO: priority Queue
             std::lock_guard<std::mutex> lock(mMutex);
@@ -58,36 +73,22 @@ namespace Threading {
     void TaskQueue::waitForTasks(std::chrono::steady_clock::time_point until)
     {
         std::unique_lock<std::mutex> lock(mMutex);
-        mCv.wait_until(lock, until, [this]() { return !mRunning && idle(); });
+        mCv.wait_until(lock, until, [this]() { return !idle() || WorkGroup::self().state() == WorkGroup::DONE; });
     }
 
     bool TaskQueue::running() const
     {
-        return mRunning;
+        return WorkGroup::self().state() == WorkGroup::RUNNING;
     }
 
     void TaskQueue::stop()
     {
-        {
-            std::unique_lock<std::mutex> lock(mMutex);
-            mRunning = false;
-        }
-        mCv.notify_all();
+        WorkGroup::self().stop();
     }
 
-    void TaskQueue::queueHandle(TaskHandle task)
+    void TaskQueue::queueHandle(TaskHandle task, TaskQualifiers qualifiers)
     {
-        queueInternal({ std::move(task) });
-    }
-
-    void TaskQueue::queueHandle_after(TaskHandle task, std::chrono::steady_clock::duration duration)
-    {
-        queueHandle_for(std::move(task), std::chrono::steady_clock::now() + duration);
-    }
-
-    void TaskQueue::queueHandle_for(TaskHandle task, std::chrono::steady_clock::time_point time_point)
-    {
-        queueInternal({ std::move(task), time_point });
+        queueInternal({ std::move(task), std::move(qualifiers) });
     }
 
     void TaskQueue::increaseTaskInFlightCount()
@@ -100,7 +101,7 @@ namespace Threading {
         --mTaskInFlightCount;
     }
 
-    size_t TaskQueue::tasksInFlightCount() const
+    size_t TaskQueue::taskInFlightCount() const
     {
         return mTaskInFlightCount;
     }
@@ -109,7 +110,8 @@ namespace Threading {
     {
         std::chrono::steady_clock::time_point nextTaskTimepoint = nextTask;
 
-        if (mRunning) {
+        WorkGroup::State state = WorkGroup::self().state();
+        if (state == WorkGroup::INITIALIZING) {
             while (mSetupState != mSetupSteps.end()) {
                 TaskHandle init = mSetupState->first.assign(this);
                 ++mSetupState;
@@ -117,38 +119,28 @@ namespace Threading {
                     return init;
                 }
             }
-        }
-
-        {
-            std::lock_guard<std::mutex> lock(mMutex);
-            for (auto it = mQueue.begin(); it != mQueue.end(); ++it) {
-                if (it->mScheduledFor <= std::chrono::steady_clock::now()) {
-                    TaskHandle task = std::move(it->mTask);
-                    mQueue.erase(it);
-                    return task;
-                } else {
-                    nextTaskTimepoint = std::min(it->mScheduledFor, nextTaskTimepoint);
-                }
-            }
-            if (mTaskInFlightCount == 0) {
-                while (!mAwaiterStack.empty()) {
-                    TaskHandle handle = std::move(mAwaiterStack.top());
-                    mAwaiterStack.pop();
-                    if (handle.queue() == this) {
-                        return handle;
+        } else if (state != WorkGroup::DONE) {
+            {
+                std::lock_guard<std::mutex> lock(mMutex);
+                auto now = std::chrono::steady_clock::now();
+                for (auto it = mQueue.begin(); it != mQueue.end(); ++it) {
+                    if ((it->mQualifiers.mScheduledFor <= now || WorkGroup::self().state() == WorkGroup::STOPPING) && (!it->mQualifiers.mMutex || it->mQualifiers.mMutex->tryLock(this))) {
+                        TaskHandle task = std::move(it->mTask);
+                        mQueue.erase(it);
+                        return task;
+                    } else {
+                        nextTaskTimepoint = std::min(it->mQualifiers.mScheduledFor.revert(), nextTaskTimepoint);
                     }
-                    handle.resumeInQueue();
                 }
             }
-        }
 
-        if (!mRunning && mTaskInFlightCount == 0) {
-
-            while (mSetupState != mSetupSteps.begin()) {
-                --mSetupState;
-                TaskHandle finalize = mSetupState->second.assign(this);
-                if (finalize) {
-                    return finalize;
+            if (state == WorkGroup::FINALIZING) {
+                while (mSetupState != mSetupSteps.begin()) {
+                    --mSetupState;
+                    TaskHandle finalize = mSetupState->second.assign(this);
+                    if (finalize) {
+                        return finalize;
+                    }
                 }
             }
         }
@@ -159,44 +151,29 @@ namespace Threading {
 
     bool TaskQueue::idle() const
     {
-        if (mTaskInFlightCount > 0)
-            return false;
-
-        if (mRunning) {
+        switch (WorkGroup::self().state()) {
+        case WorkGroup::INITIALIZING:
             return mSetupState == mSetupSteps.end();
-        } else {
-            return mSetupState == mSetupSteps.begin();
+        case WorkGroup::FINALIZING:
+            return mSetupState == mSetupSteps.begin() && mTaskInFlightCount == 0;
+        default:
+            return mTaskInFlightCount == 0;
         }
+    }
+
+    void TaskQueue::notify()
+    {
+        mCv.notify_all();
     }
 
     void TaskQueue::addSetupStepTasks(Task<bool> init, Task<void> finalize)
     {
+        assert(WorkGroup::self().state() == WorkGroup::INITIALIZING);
         bool isItEnd = mSetupState == mSetupSteps.end();
         mSetupSteps.emplace_back(std::move(init), std::move(finalize));
         if (isItEnd) {
             mSetupState = std::prev(mSetupState);
         }
-    }
-
-    bool TaskQueue::await_ready()
-    {
-        return idle();
-    }
-
-    bool TaskQueue::await_suspend(TaskHandle handle)
-    {
-        std::lock_guard<std::mutex> lock { mMutex };
-        if (!idle()) {
-            mAwaiterStack.emplace(std::move(handle));
-            return true;
-        } else {
-            handle.release();
-            return false;
-        }
-    }
-
-    void TaskQueue::await_resume()
-    {
     }
 
 }

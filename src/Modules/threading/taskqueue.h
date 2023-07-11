@@ -2,78 +2,73 @@
 
 #include "task.h"
 
+#include "customclock.h"
+
+#include "datamutex.h"
+
 #if ENABLE_TASK_TRACKING
-#include "../debug/tasktracking/tasktracker.h"
+#    include "../debug/tasktracking/tasktracker.h"
 #endif
 
 namespace Engine {
 namespace Threading {
 
+    struct MODULES_EXPORT TaskQualifiers {
+
+        TaskQualifiers() = default;
+
+        TaskQualifiers(CustomTimepoint timepoint, DataMutex::Awaiter *mutex = nullptr)
+            : mScheduledFor(timepoint)
+            , mMutex(mutex)
+        {
+        }
+
+        TaskQualifiers(DataMutex::Awaiter *mutex)
+            : mMutex(mutex)
+        {
+        }
+
+        bool await_ready();
+        void await_suspend(TaskHandle handle);
+        void await_resume();
+
+        CustomTimepoint mScheduledFor = std::chrono::steady_clock::now();
+        DataMutex::Awaiter *mMutex = nullptr;
+    };
+
     struct MODULES_EXPORT TaskQueue {
+
         TaskQueue(const std::string &name, bool wantsMainThread = false);
         ~TaskQueue();
 
-        void queueHandle(TaskHandle task);
-        void queueHandle_after(TaskHandle task, std::chrono::steady_clock::duration duration);
-        void queueHandle_for(TaskHandle task, std::chrono::steady_clock::time_point time_point);
+        void queueHandle(TaskHandle task, TaskQualifiers qualifiers = {});
 
-        template <typename T>
-        TaskFuture<T> queueTask(Task<T> task)
+        template <typename T, bool Immediate>
+        TaskFuture<T> queueTask(Task<T, Immediate> task, TaskQualifiers qualifiers = {})
         {
             TaskFuture<T> fut = task.get_future();
             TaskHandle handle = task.assign(this);
             if (handle)
-                queueHandle(std::move(handle));
-            return fut;
-        }
-        template <typename T>
-        TaskFuture<T> queueTask_after(Task<T> task, std::chrono::steady_clock::duration duration)
-        {
-            TaskFuture<T> fut = task.get_future();
-            TaskHandle handle = task.assign(this);
-            if (handle)
-                queueHandle_after(std::move(handle), duration);
-            return fut;
-        }
-        template <typename T>
-        TaskFuture<T> queueTask_for(Task<T> task, std::chrono::steady_clock::time_point time_point)
-        {
-            TaskFuture<T> fut = task.get_future();
-            TaskHandle handle = task.assign(this);
-            if (handle)
-                queueHandle_for(std::move(handle), time_point);
+                queueHandle(std::move(handle), std::move(qualifiers));
             return fut;
         }
 
         template <typename F>
-        void queue(F &&f)
+        void queue(F &&f, TaskQualifiers qualifiers = {})
         {
             TaskHandle handle = make_task(std::forward<F>(f)).assign(this);
             if (handle)
-                queueHandle(std::move(handle));
-        }
-        template <typename F>
-        void queue_after(F &&f, std::chrono::steady_clock::duration duration)
-        {
-            TaskHandle handle = make_task(std::forward<F>(f)).assign(this);
-            if (handle)
-                queueHandle_after(std::move(handle), duration);
-        }
-        template <typename F>
-        void queue_for(F &&f, std::chrono::steady_clock::time_point time_point)
-        {
-            TaskHandle handle = make_task(std::forward<F>(f)).assign(this);
-            if (handle)
-                queueHandle_for(std::move(handle), time_point);
+                queueHandle(std::move(handle), std::move(qualifiers));
         }
 
         void increaseTaskInFlightCount();
         void decreaseTaskInFlightCount();
-        size_t tasksInFlightCount() const;
+        size_t taskInFlightCount() const;
 
         TaskHandle fetch(std::chrono::steady_clock::time_point &nextTask);
 
         bool idle() const;
+        void notify();
 
         const std::string &name() const;
 
@@ -101,10 +96,6 @@ namespace Threading {
             addSetupStepTasks(std::move(initTask));
         }
 
-        bool await_ready();
-        bool await_suspend(TaskHandle handle);
-        void await_resume();
-
 #if ENABLE_TASK_TRACKING
         Debug::Threading::TaskTracker mTracker;
 #endif
@@ -112,7 +103,7 @@ namespace Threading {
     protected:
         struct ScheduledTask {
             TaskHandle mTask;
-            std::chrono::steady_clock::time_point mScheduledFor = std::chrono::steady_clock::time_point::min();
+            TaskQualifiers mQualifiers;
         };
 
         void queueInternal(ScheduledTask tracker);
@@ -123,11 +114,9 @@ namespace Threading {
         std::string mName;
         bool mWantsMainThread;
 
-        std::atomic<bool> mRunning = true;
         std::atomic<size_t> mTaskInFlightCount = 0;
 
         std::list<ScheduledTask> mQueue;
-        std::stack<TaskHandle> mAwaiterStack;
         std::list<std::pair<Task<bool>, Task<void>>> mSetupSteps;
         std::list<std::pair<Task<bool>, Task<void>>>::iterator mSetupState = mSetupSteps.begin();
 

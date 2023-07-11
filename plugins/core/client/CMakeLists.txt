@@ -7,6 +7,7 @@ FolderSources(sources "" src)
 	FolderSources(sources src Madgine clientforward.h clientlib.h)
 		FolderSources(sources Madgine render camera.cpp camera.h rendercontext.cpp rendercontext.h renderdata.cpp renderdata.h renderpass.cpp renderpass.h rendertarget.cpp rendertarget.h rendercontextcollector.cpp rendercontextcollector.h)	
 			FolderSources(sources render passes bloompass.cpp bloompass.h blurpass.cpp blurpass.h)
+				FolderSources(sources passes shaders bloom.PS_hlsl bloom.VS_hlsl blur.PS_hlsl blur.VS_hlsl)
 			FolderSources(sources render shadinglanguage sl_support_begin.h sl_support_end.h)
 		FolderSources(sources Madgine window mainwindow.cpp mainwindow.h mainwindowcomponent.cpp mainwindowcomponent.h mainwindowcomponentcollector.cpp mainwindowcomponentcollector.h toolwindow.cpp toolwindow.h)
 
@@ -30,7 +31,7 @@ set(sources "")
 FolderSources(sources "" nodes)
 	FolderSources(sources nodes Madgine clientnodesforward.h clientnodeslib.h)
 		FolderSources(sources Madgine client)
-			FolderSources(sources client nodes gpubuffernode.cpp gpubuffernode.h framebuffernode.cpp framebuffernode.h meshrenderernode.cpp meshrenderernode.h rasterizernode.cpp rasterizernode.h shadercodegenerator.cpp shadercodegenerator.h)
+			FolderSources(sources client nodes gpubuffernode.cpp gpubuffernode.h framebuffernode.cpp framebuffernode.h meshrenderernode.cpp meshrenderernode.h rasterizernode.cpp rasterizernode.h renderpassnode.cpp renderpassnode.h renderpipelinenode.cpp renderpipelinenode.h rendertexturenode.cpp rendertexturenode.h shadercodegenerator.cpp shadercodegenerator.h)
 
 add_plugin(ClientNodes Madgine Core ${sources} PRECOMPILED_HEADER nodes/Madgine/clientnodeslib.h SOURCE_ROOT nodes)
 

@@ -71,6 +71,9 @@ namespace Threading {
     template <typename... _Ty>
     struct SignalStub;
     struct ConnectionStore;
+
+    struct CustomClock;
+    struct CustomTimepoint;
 }
 
 

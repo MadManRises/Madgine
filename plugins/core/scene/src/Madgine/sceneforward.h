@@ -12,6 +12,7 @@ namespace Scene {
         struct Transform;
         struct Animation;
         struct Mesh;
+        struct Skeleton;
 
         struct EntityPtr;
         template <typename T>

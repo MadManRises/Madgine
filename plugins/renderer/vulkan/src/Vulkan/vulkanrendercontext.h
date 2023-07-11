@@ -40,7 +40,7 @@ namespace Render {
         virtual bool beginFrame() override;
         virtual void endFrame() override;
 
-        virtual void unloadAllResources() override;
+        virtual Threading::Task<void> unloadAllResources() override;
 
         virtual bool supportsMultisampling() const override;
 

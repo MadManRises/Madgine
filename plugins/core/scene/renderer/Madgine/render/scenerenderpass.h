@@ -7,6 +7,8 @@
 #include "pointshadowrenderpass.h"
 #include "shadowrenderpass.h"
 
+#include "litscenerenderdata.h"
+
 namespace Engine {
 namespace Render {
 
@@ -28,9 +30,8 @@ namespace Render {
     private:
         PipelineLoader::Instance mPipeline;
 
-        SceneMainWindowComponent &mScene;
+        LitSceneRenderData mData;
 
-        Camera *mCamera;
 
         int mPriority;
     };

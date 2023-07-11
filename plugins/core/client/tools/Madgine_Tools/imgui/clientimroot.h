@@ -68,7 +68,7 @@ namespace Tools {
 
         Filesystem::Path mImGuiIniFilePath;
 
-        IntervalClock<std::chrono::steady_clock> mFrameClock;
+        IntervalClock<> mFrameClock;
 
         std::vector<Render::RenderTarget *> mRenderTargets;
     };

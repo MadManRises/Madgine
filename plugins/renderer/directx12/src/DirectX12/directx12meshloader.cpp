@@ -26,6 +26,7 @@ namespace Render {
 
     DirectX12MeshLoader::DirectX12MeshLoader()
     {
+        getOrCreateManual("quad", {}, {}, this);
         getOrCreateManual("Cube", {}, {}, this);
         getOrCreateManual("Plane", {}, {}, this);
     }

@@ -21,6 +21,7 @@ namespace Render {
 
     VulkanMeshLoader::VulkanMeshLoader()
     {
+        getOrCreateManual("quad", {}, {}, this);
         getOrCreateManual("Cube", {}, {}, this);
         getOrCreateManual("Plane", {}, {}, this);
     }

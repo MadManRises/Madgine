@@ -62,9 +62,10 @@ namespace Tools {
             void *hoveredId = nullptr;
             bool renderHovered = true;
             Debug::StackTrace<1> hoveredTraceback;
+            Engine::Threading::DataMutex *hoveredMutex = nullptr;
 
             std::chrono::high_resolution_clock::time_point timeAreaBegin = mStart + std::chrono::nanoseconds { mScroll };
-            std::chrono::high_resolution_clock::time_point timeAreaEnd = timeAreaBegin + std::chrono::nanoseconds{ static_cast<long long>(1000000000 / mZoom) };
+            std::chrono::high_resolution_clock::time_point timeAreaEnd = timeAreaBegin + std::chrono::nanoseconds { static_cast<long long>(1000000000 / mZoom) };
 
             ImGui::Columns(2);
 
@@ -73,13 +74,33 @@ namespace Tools {
 
                 ImGui::NextColumn();
 
-                beginPlot();
+                Rect2 threadPlotRect = beginPlot();
 
                 isHovered |= ImGui::IsItemHovered(); // Hovered
 
+                struct MutexData {
+                    AccessMode mMode;
+                    bool mLocked = false;
+                    float mLockStart;
+                };
+                std::map<Engine::Threading::DataMutex *, MutexData> mutexData;
+
+                auto plotMutex = [&](float from, float to, AccessMode mode, Engine::Threading::DataMutex *mutex) {
+                    to = std::max(to, from + 1.0f);
+
+                    ImU32 color = mode == AccessMode::WRITE ? IM_COL32(255, 0, 0, 255) : IM_COL32(0, 0, 255, 255);
+                    draw_list->AddRectFilled({ threadPlotRect.mTopLeft.x + from, threadPlotRect.mTopLeft.y }, { threadPlotRect.mTopLeft.x + to, threadPlotRect.bottom() }, color);
+                    ImGui::SetCursorScreenPos({ threadPlotRect.mTopLeft.x + from, threadPlotRect.mTopLeft.y });
+                    ImGui::InvisibleButton("id", { to - from, threadPlotRect.mSize.y }, ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
+
+                    if (ImGui::IsItemHovered()) {
+                        hoveredMutex = mutex;
+                    }
+                };
+
                 ImGui::NextColumn();
 
-                ImGui::Text("\tThread [%llu]", std::this_thread::get_id());
+                ImGui::Text("\tThread [%llu]", queue->mTracker.mThread);
 
                 ImGui::NextColumn();
 
@@ -94,24 +115,11 @@ namespace Tools {
                 auto begin = queue->mTracker.events().begin();
                 auto end = queue->mTracker.events().end();
                 auto cmp1 = [](const Debug::Threading::TaskTracker::Event &event, const std::chrono::high_resolution_clock::time_point &t) { return event.mTimePoint < t; };
-                auto start = std::lower_bound(begin, end, timeAreaBegin, cmp1);
+                auto start = std::lower_bound(begin, end, timeAreaBegin - 50ms, cmp1);
                 auto cmp2 = [](const std::chrono::high_resolution_clock::time_point &t, const Debug::Threading::TaskTracker::Event &event) { return t < event.mTimePoint; };
-                end = std::upper_bound(start, end, timeAreaEnd, cmp2);
-
-                bool found = false;
-
-                for (auto it = start; it != end; ++it) {
-                    if (it->mType != Debug::Threading::TaskTracker::Event::ASSIGN) {
-                        found = it->mType == Debug::Threading::TaskTracker::Event::RESUME;
-                        break;
-                    }
-                }
+                end = std::upper_bound(start, end, timeAreaEnd + 50ms, cmp2);
 
                 auto it = start;
-                if (!found) {
-                    while (it != begin && it->mType != Debug::Threading::TaskTracker::Event::RESUME)
-                        --it;
-                }
 
                 struct Plot {
                     float x;
@@ -142,7 +150,7 @@ namespace Tools {
                     nullptr,
                     0
                 };
-                bool suspended = true;
+                size_t callDepth = 0;
                 std::stack<Plot> plots;
                 std::stack<std::pair<float, void *>> xs;
 
@@ -156,26 +164,46 @@ namespace Tools {
                         }
                         break;
                     case Debug::Threading::TaskTracker::Event::RESUME:
-                        p.x = getEventCoordinate(ev.mTimePoint, plotRect.mSize.x);
-                        p.id = ev.mIdentifier;
-                        assert(suspended);
-                        suspended = false;
+                        if (callDepth == 0) {
+                            p.x = getEventCoordinate(ev.mTimePoint, plotRect.mSize.x);
+                            p.id = ev.mIdentifier;
+                        } else {
+                            xs.push({ getEventCoordinate(ev.mTimePoint, plotRect.mSize.x), ev.mIdentifier });
+                        }
+                        ++callDepth;
                         break;
                     case Debug::Threading::TaskTracker::Event::SUSPEND:
-                        assert(xs.empty());
-                        p.x_end = getEventCoordinate(ev.mTimePoint, plotRect.mSize.x);
-                        plots.push(p);
-                        p.x = 0.0f;
-                        p.x_end = plotRect.mSize.x;
-                        p.id = nullptr;
-                        assert(!suspended);
-                        suspended = true;
+                        if (callDepth == 0) {
+                            assert(p.x == 0.0f && p.x_end == plotRect.mSize.x);
+                            plots.push({ 0.0f, getEventCoordinate(ev.mTimePoint, plotRect.mSize.x), ev.mIdentifier, xs.size() });
+                            break;
+                        } else if (callDepth == 1) {
+                            p.x_end = getEventCoordinate(ev.mTimePoint, plotRect.mSize.x);
+                            while (!xs.empty()) {
+                                plots.push({ xs.top().first, p.x_end, xs.top().second, xs.size() });
+                                xs.pop();
+                            }
+                            plots.push(p);
+                            p.x = 0.0f;
+                            p.x_end = plotRect.mSize.x;
+                            p.id = nullptr;
+                        } else {
+                            float x = 0.0f;
+                            void *identifier = nullptr;
+                            if (!xs.empty()) {
+                                //assert(xs.top().second == ev.mIdentifier);
+                                identifier = xs.top().second;
+                                x = xs.top().first;
+                                xs.pop();
+                            }
+                            plots.push({ x, getEventCoordinate(ev.mTimePoint, plotRect.mSize.x), identifier, xs.size() + 1 });
+                        }
+                        --callDepth;
                         break;
                     case Debug::Threading::TaskTracker::Event::ENTER:
-                        suspended = false;
                         xs.push({ getEventCoordinate(ev.mTimePoint, plotRect.mSize.x), ev.mIdentifier });
                         break;
-                    case Debug::Threading::TaskTracker::Event::RETURN:
+                    case Debug::Threading::TaskTracker::Event::RETURN: {
                         float x = 0.0f;
                         if (!xs.empty()) {
                             assert(xs.top().second == ev.mIdentifier);
@@ -183,21 +211,43 @@ namespace Tools {
                             xs.pop();
                         }
                         plots.push({ x, getEventCoordinate(ev.mTimePoint, plotRect.mSize.x), ev.mIdentifier, xs.size() + 1 });
-                        break;
+                    } break;
+                    case Debug::Threading::TaskTracker::Event::LOCK_MUTEX: {
+                        MutexData &data = mutexData[ev.mMutex];
+                        assert(!data.mLocked);
+                        data.mLocked = true;
+                        data.mLockStart = getEventCoordinate(ev.mTimePoint, plotRect.mSize.x);
+                        data.mMode = ev.mLockMode;
+                    } break;
+                    case Debug::Threading::TaskTracker::Event::UNLOCK_MUTEX: {
+                        MutexData &data = mutexData[ev.mMutex];
+                        float x = 0.0f;
+                        if (data.mLocked) {
+                            x = data.mLockStart;
+                        }
+                        data.mLocked = false;
+                        plotMutex(x, getEventCoordinate(ev.mTimePoint, plotRect.mSize.x), ev.mLockMode, ev.mMutex);
+                    } break;
                     }
                 }
-                assert(!suspended || xs.empty());
+                //assert(callDepth > 0 || xs.empty());
 
                 while (!xs.empty()) {
                     plots.push({ xs.top().first, plotRect.mSize.x, xs.top().second, xs.size() });
                     xs.pop();
                 }
 
-                if (!suspended)
+                if (callDepth > 0)
                     plot(p);
                 while (!plots.empty()) {
                     plot(plots.top());
                     plots.pop();
+                }
+
+                for (auto& [mutex, data] : mutexData) {
+                    if (data.mLocked) {
+                        plotMutex(data.mLockStart, plotRect.mSize.x, data.mMode, mutex);
+                    }
                 }
 
                 ImGui::SetCursorScreenPos(keep);
@@ -252,13 +302,19 @@ namespace Tools {
                 ImGui::EndTooltip();
             }
 
+            if (hoveredMutex) {
+                ImGui::BeginTooltip();
+                ImGui::Text("%s", hoveredMutex->name().c_str());
+                ImGui::EndTooltip();
+            }
+
             ImGui::Separator();
 
             for (Threading::TaskQueue *queue : Threading::WorkGroup::self().taskQueues()) {
                 if (ImGui::TreeNode(queue->name().c_str())) {
-                    if (ImGui::TreeNode("tasks", "Tasks in Flight (%zu)", queue->tasksInFlightCount())) {
+                    if (ImGui::TreeNode("tasks", "Tasks in Flight (%zu)", queue->taskInFlightCount())) {
                         std::lock_guard guard { queue->mTracker.mMutex };
-                        for (auto& [id, stacktrace] : queue->mTracker.tasksInFlight()) {
+                        for (auto &[id, stacktrace] : queue->mTracker.tasksInFlight()) {
                             ImGui::Text("%s", stacktrace.calculateReadable().front().mFunction);
                         }
                         ImGui::TreePop();
@@ -302,9 +358,12 @@ namespace Tools {
     float TaskTracker::getEventCoordinate(std::chrono::high_resolution_clock::time_point t, float pixelWidth)
     {
         long long timePoint = std::chrono::duration_cast<std::chrono::nanoseconds>(t - mStart).count() - mScroll;
-        if (timePoint < 0)
-            timePoint = 0;
-        return ((timePoint / 1000000000.0f) * mZoom) * pixelWidth;
+        float scaledPoint = (timePoint / 1000000000.0f) * mZoom;
+        if (scaledPoint < 0)
+            scaledPoint = 0.0f;        
+        if (scaledPoint > 1)
+            scaledPoint = 1.0f;
+        return scaledPoint * pixelWidth;
     }
 }
 }

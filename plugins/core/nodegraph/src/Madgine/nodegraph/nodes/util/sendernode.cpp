@@ -8,6 +8,7 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
+#include "Meta/keyvalueutil/valuetypeserialize.h"
 
 using ForEachNode = Engine::NodeGraph::SenderNode<Engine::Execution::for_each_t>;
 
@@ -48,6 +49,18 @@ METATABLE_END(AddNode)
 SERIALIZETABLE_INHERIT_BEGIN(AddNode, Engine::NodeGraph::NodeBase)
 SERIALIZETABLE_END(AddNode)
 
+using DivideNode = Engine::NodeGraph::SenderNode<Engine::Execution::then_t::typed<Engine::NodeGraph::Divide>>;
+
+NAMED_UNIQUECOMPONENT(Divide, DivideNode)
+
+REGISTER_TYPE(DivideNode)
+
+METATABLE_BEGIN_BASE(DivideNode, Engine::NodeGraph::NodeBase)
+METATABLE_END(DivideNode)
+
+SERIALIZETABLE_INHERIT_BEGIN(DivideNode, Engine::NodeGraph::NodeBase)
+SERIALIZETABLE_END(DivideNode)
+
 using LogNode = Engine::NodeGraph::SenderNode<Engine::Execution::then_t::typed<Engine::NodeGraph::Log>>;
 
 NAMED_UNIQUECOMPONENT(Log, LogNode)
@@ -67,10 +80,11 @@ NAMED_UNIQUECOMPONENT(Just, JustNode)
 REGISTER_TYPE(JustNode)
 
 METATABLE_BEGIN_BASE(JustNode, Engine::NodeGraph::NodeBase)
-PROPERTY(Arguments, getArguments<0>, setArguments<0>)
+PROPERTY(Value, getArguments<0>, setArguments<0>)
 METATABLE_END(JustNode)
 
 SERIALIZETABLE_INHERIT_BEGIN(JustNode, Engine::NodeGraph::NodeBase)
+ENCAPSULATED_FIELD(Value, getArguments<0>, setArguments<0>)
 SERIALIZETABLE_END(JustNode)
 
 using SequenceNode = Engine::NodeGraph::SenderNode<Engine::Execution::sequence_t>;
@@ -133,3 +147,51 @@ METATABLE_END(AssignNode)
 
 SERIALIZETABLE_INHERIT_BEGIN(AssignNode, Engine::NodeGraph::NodeBase)
 SERIALIZETABLE_END(AssignNode)
+
+using Vector3To4Node = Engine::NodeGraph::SenderNode<Engine::Execution::then_t::typed<Engine::NodeGraph::Vector3To4>>;
+
+NAMED_UNIQUECOMPONENT(Vector3To4, Vector3To4Node)
+
+REGISTER_TYPE(Vector3To4Node)
+
+METATABLE_BEGIN_BASE(Vector3To4Node, Engine::NodeGraph::NodeBase)
+METATABLE_END(Vector3To4Node)
+
+SERIALIZETABLE_INHERIT_BEGIN(Vector3To4Node, Engine::NodeGraph::NodeBase)
+SERIALIZETABLE_END(Vector3To4Node)
+
+using BreakVector3Node = Engine::NodeGraph::SenderNode<Engine::Execution::then_t::typed<Engine::NodeGraph::BreakVector3>>;
+
+NAMED_UNIQUECOMPONENT(BreakVector3, BreakVector3Node)
+
+REGISTER_TYPE(BreakVector3Node)
+
+METATABLE_BEGIN_BASE(BreakVector3Node, Engine::NodeGraph::NodeBase)
+METATABLE_END(BreakVector3Node)
+
+SERIALIZETABLE_INHERIT_BEGIN(BreakVector3Node, Engine::NodeGraph::NodeBase)
+SERIALIZETABLE_END(BreakVector3Node)
+
+using BreakVector4Node = Engine::NodeGraph::SenderNode<Engine::Execution::then_t::typed<Engine::NodeGraph::BreakVector4>>;
+
+NAMED_UNIQUECOMPONENT(BreakVector4, BreakVector4Node)
+
+REGISTER_TYPE(BreakVector4Node)
+
+METATABLE_BEGIN_BASE(BreakVector4Node, Engine::NodeGraph::NodeBase)
+METATABLE_END(BreakVector4Node)
+
+SERIALIZETABLE_INHERIT_BEGIN(BreakVector4Node, Engine::NodeGraph::NodeBase)
+SERIALIZETABLE_END(BreakVector4Node)
+
+using MakeVector3Node = Engine::NodeGraph::SenderNode<Engine::Execution::then_t::typed<Engine::NodeGraph::MakeVector3>>;
+
+NAMED_UNIQUECOMPONENT(MakeVector3, MakeVector3Node)
+
+REGISTER_TYPE(MakeVector3Node)
+
+METATABLE_BEGIN_BASE(MakeVector3Node, Engine::NodeGraph::NodeBase)
+METATABLE_END(MakeVector3Node)
+
+SERIALIZETABLE_INHERIT_BEGIN(MakeVector3Node, Engine::NodeGraph::NodeBase)
+SERIALIZETABLE_END(MakeVector3Node)

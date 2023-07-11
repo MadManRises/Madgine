@@ -6,15 +6,20 @@
 
 #include "Meta/math/matrix4.h"
 
+#include "Meta/keyvalue/metatable_impl.h"
+
+METATABLE_BEGIN(Engine::Render::RenderTarget)
+METATABLE_END(Engine::Render::RenderTarget)
+
 namespace Engine {
 namespace Render {
 
     RenderTarget::RenderTarget(RenderContext *context, bool global, std::string name, size_t iterations, RenderTarget *blitSource)
-        : RenderData(context)
-        , mGlobal(global)
+        : mGlobal(global)
         , mName(std::move(name))
         , mIterations(iterations)
         , mBlitSource(blitSource)
+        , mContext(context)
     {
         if (global)
             context->addRenderTarget(this);
@@ -29,16 +34,21 @@ namespace Render {
             context()->removeRenderTarget(this);
     }
 
-    void RenderTarget::render()
+    Threading::ImmediateTask<void> RenderTarget::render(RenderContext *context)
     {
         if (skipFrame())
-            return;
+            co_return;
+
+        std::vector<Threading::TaskFuture<void>> dependencies;
 
         if (mBlitSource)
-            mBlitSource->update();
+            dependencies.push_back(mBlitSource->update(context));
 
         for (RenderPass *pass : mRenderPasses)
-            pass->preRender();
+            pass->preRender(dependencies, context);
+
+        for (Threading::TaskFuture<void> &dependency : dependencies)
+            co_await dependency;
 
         beginFrame();
 
@@ -135,6 +145,11 @@ namespace Render {
     TextureDescriptor RenderTarget::depthTexture() const
     {
         return {};
+    }
+
+    RenderContext *RenderTarget::context() const
+    {
+        return mContext;
     }
 
 }

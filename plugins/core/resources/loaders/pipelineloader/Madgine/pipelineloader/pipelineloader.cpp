@@ -16,6 +16,9 @@ METATABLE_END(Engine::Render::PipelineLoader)
 METATABLE_BEGIN_BASE(Engine::Render::PipelineLoader::Resource, Engine::Resources::ResourceBase)
 METATABLE_END(Engine::Render::PipelineLoader::Resource)
 
+METATABLE_BEGIN(Engine::Render::PipelineInstance)
+METATABLE_END(Engine::Render::PipelineInstance)
+
 VIRTUALUNIQUECOMPONENTBASE(Engine::Render::PipelineLoader)
 
 namespace Engine {
@@ -74,23 +77,10 @@ namespace Render {
 
     void PipelineInstance::renderQuad(RenderTarget *target) const
     {
-        static GPUMeshLoader::Handle quad = GPUMeshLoader::loadManual("quad", {}, [](Render::GPUMeshLoader *loader, Render::GPUMeshData &data, Render::GPUMeshLoader::ResourceDataInfo &info) {
-            std::vector<Compound<Render::VertexPos>> vertices {
-                { { -1, -1, 0 } },
-                { { 1, -1, 0 } },
-                { { -1, 1, 0 } },
-                { { 1, 1, 0 } }
-            };
-
-            std::vector<uint32_t> indices {
-                0, 1, 2, 1, 2, 3
-            };
-
-            return loader->generate(data, { 3, std::move(vertices), std::move(indices) });
-        });
-
-        if (quad.available())
-            renderMesh(target, quad);
+        if (!GPUMeshLoader::getSingleton().mQuad)
+            GPUMeshLoader::getSingleton().mQuad.load("quad");
+        if (GPUMeshLoader::getSingleton().mQuad.available())
+            renderMesh(target, GPUMeshLoader::getSingleton().mQuad);
     }
 
 }

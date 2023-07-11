@@ -23,24 +23,10 @@ METATABLE_END(Engine::Render::OpenGLShaderLoader::Resource)
 namespace Engine {
 namespace Render {
 
-    Threading::TaskFuture<bool> OpenGLShaderLoader::Handle::create(std::string_view name, const CodeGen::ShaderFile &file, ShaderType type, OpenGLShaderLoader *loader)
+    Threading::TaskFuture<bool> OpenGLShaderLoader::Ptr::create(const CodeGen::ShaderFile &file, ShaderType type, OpenGLShaderLoader *loader)
     {
-        std::string fullName { name };
-        if (fullName != Resources::ResourceBase::sUnnamed) {
-            switch (type) {
-            case ShaderType::PixelShader:
-                fullName += "_PS";
-                break;
-            case ShaderType::VertexShader:
-                fullName += "_VS";
-                break;
-            default:
-                throw 0;
-            }
-        }
-
-        return Base::Handle::create(
-            fullName, {}, [=, &file](OpenGLShaderLoader *loader, OpenGLShader &shader, OpenGLShaderLoader::ResourceDataInfo &info) { return loader->create(shader, info.resource(), file, type); }, loader);
+        return Base::Ptr::create(
+            [=, &file](OpenGLShaderLoader *loader, OpenGLShader &shader) { return loader->create(shader, file, type); }, loader);
     }
 
     Threading::TaskFuture<bool> OpenGLShaderLoader::Handle::load(std::string_view name, ShaderType type, OpenGLShaderLoader *loader)
@@ -98,25 +84,25 @@ namespace Render {
         shader.reset();
     }
 
-    bool OpenGLShaderLoader::create(OpenGLShader &shader, Resource *res, const CodeGen::ShaderFile &file, ShaderType type)
+    bool OpenGLShaderLoader::create(OpenGLShader &shader, const CodeGen::ShaderFile &file, ShaderType type)
     {
-        if (res->path().empty()) {
+        /* if (res->path().empty()) {
             Filesystem::Path dir = Filesystem::appDataPath() / "generated/shader/opengl";
 
             Filesystem::createDirectories(dir);
 
             res->setPath(dir / (std::string { res->name() } + (type == VertexShader ? "_VS" : "_PS") + ".glsl"));
-        }
+        }*/
 
         std::ostringstream ss;
         OpenGLShaderCodeGen::generate(ss, file, type);
 
-        {
+        /* {
             std::ofstream f { res->path() };
             f << ss.str();
-        }
+        }*/
 
-        return loadFromSource(shader, res->name(), ss.str(), type, res->path());
+        return loadFromSource(shader, "<generated>", ss.str(), type, "<generated>");
     }
 
     bool OpenGLShaderLoader::loadFromSource(OpenGLShader &shader, std::string_view name, std::string source, ShaderType type, const Filesystem::Path &path)

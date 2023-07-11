@@ -13,7 +13,7 @@ namespace Render {
 
     struct MADGINE_OPENGL_EXPORT OpenGLPipelineInstance : PipelineInstance {
 
-        OpenGLPipelineInstance(const PipelineConfiguration &config, OpenGLPipelineLoader::Handle pipeline);
+        OpenGLPipelineInstance(const PipelineConfiguration &config, GLuint pipeline);
 
         bool bind(VertexFormat format, OpenGLBuffer *instanceBuffer) const;
 
@@ -33,9 +33,23 @@ namespace Render {
 #else
         std::vector<OpenGLSSBOBuffer> mShaderStorageBuffers;
         mutable OpenGLBuffer mShaderStorageOffsetBuffer = { GL_UNIFORM_BUFFER };
-#endif
+#endif        
+    };
+
+    
+    struct MADGINE_OPENGL_EXPORT OpenGLPipelineInstanceHandle : OpenGLPipelineInstance {
+
+        OpenGLPipelineInstanceHandle(const PipelineConfiguration &config, OpenGLPipelineLoader::Handle pipeline);
 
         OpenGLPipelineLoader::Handle mPipeline;
+    };
+
+        
+    struct MADGINE_OPENGL_EXPORT OpenGLPipelineInstancePtr : OpenGLPipelineInstance {
+
+        OpenGLPipelineInstancePtr(const PipelineConfiguration &config, OpenGLPipelineLoader::Ptr pipeline);
+
+        OpenGLPipelineLoader::Ptr mPipeline;
     };
 
 }

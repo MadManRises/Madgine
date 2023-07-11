@@ -17,7 +17,7 @@ namespace Render {
 
         using CodeGenerator::CodeGenerator;
 
-        virtual CodeGen::Statement read(uint32_t dataInIndex) override;
+        virtual CodeGen::Statement read(NodeGraph::Pin pin) override;
 
         virtual CodeGen::File &file() override;
 

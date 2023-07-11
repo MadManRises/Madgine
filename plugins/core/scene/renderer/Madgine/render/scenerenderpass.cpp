@@ -27,6 +27,7 @@
 #include "shaders/scene.sl"
 #include "Madgine/render/shadinglanguage/sl_support_end.h"
 
+
 #include "Meta/keyvalue/metatable_impl.h"
 
 METATABLE_BEGIN(Engine::Render::SceneRenderPass)
@@ -39,8 +40,7 @@ namespace Engine {
 namespace Render {
 
     SceneRenderPass::SceneRenderPass(SceneMainWindowComponent &scene, Camera *camera, int priority)
-        : mScene(scene)
-        , mCamera(camera)
+        : mData(scene, camera)
         , mPriority(priority)
     {
     }
@@ -53,18 +53,20 @@ namespace Render {
     {
         mPipeline.create({ .vs = "scene", .ps = "scene", .bufferSizes = { sizeof(ScenePerApplication), sizeof(ScenePerFrame), sizeof(ScenePerObject) }, .instanceDataSize = sizeof(SceneInstanceData) });
 
-        addDependency(mScene.shadowTarget());
-        addDependency(mScene.pointShadowTarget(0));
-        addDependency(mScene.pointShadowTarget(1));
-        addDependency(mScene.data());
+        addDependency(&mData);
+        addDependency(mData.mScene.shadowTarget());
+        addDependency(mData.mScene.pointShadowTarget(0));
+        addDependency(mData.mScene.pointShadowTarget(1));
+        addDependency(mData.mScene.data());
     }
 
     void SceneRenderPass::shutdown()
     {
-        removeDependency(mScene.shadowTarget());
-        removeDependency(mScene.pointShadowTarget(0));
-        removeDependency(mScene.pointShadowTarget(1));
-        removeDependency(mScene.data());
+        removeDependency(&mData);
+        removeDependency(mData.mScene.shadowTarget());
+        removeDependency(mData.mScene.pointShadowTarget(0));
+        removeDependency(mData.mScene.pointShadowTarget(1));
+        removeDependency(mData.mScene.data());
 
         mPipeline.reset();
     }
@@ -73,37 +75,6 @@ namespace Render {
     {
         if (!mPipeline.available())
             return;
-        
-        auto guard = mScene.scene()->lock(AccessMode::READ);
-
-        //TODO Culling
-
-        std::map<std::tuple<const GPUMeshData *, const GPUMeshData::Material *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> instances;
-
-        for (const auto &[mesh, e] : mScene.scene()->entityComponentList<Scene::Entity::Mesh>().data()) {
-            if (!mesh.isVisible())
-                continue;
-
-            const GPUMeshData *meshData = mesh.data();
-            if (!meshData)
-                continue;
-
-            Scene::Entity::Transform *transform = e->getComponent<Scene::Entity::Transform>();
-            if (!transform)
-                continue;
-
-            const GPUMeshData::Material *material = nullptr;
-            Scene::Entity::Material *materialComponent = e->getComponent<Scene::Entity::Material>();
-            if (materialComponent) {
-                material = materialComponent->get();
-            } else if (mesh.material() < meshData->mMaterials.size()) {
-                material = &meshData->mMaterials[mesh.material()];
-            }
-
-            Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
-
-            instances[std::tuple<const GPUMeshData *, const GPUMeshData::Material *, Scene::Entity::Skeleton *> { meshData, material, skeleton }].push_back(transform->worldMatrix());
-        }
 
         target->pushAnnotation("Scene");
 
@@ -114,7 +85,7 @@ namespace Render {
         {
             auto perApplication = mPipeline->mapParameters<ScenePerApplication>(0);
 
-            perApplication->p = target->getClipSpaceMatrix() * mCamera->getProjectionMatrix(aspectRatio);
+            perApplication->p = target->getClipSpaceMatrix() * mData.mCamera->getProjectionMatrix(aspectRatio);
 
             perApplication->hasHDR = target->textureCount() > 1;
 
@@ -123,19 +94,19 @@ namespace Render {
             perApplication->specularFactor = mSpecularFactor;
         }
 
-        Matrix4 v = mCamera->getViewMatrix();
+        Matrix4 v = mData.mCamera->getViewMatrix();
 
         {
             auto perFrame = mPipeline->mapParameters<ScenePerFrame>(1);
 
-            perFrame->light.caster.reprojectionMatrix = mScene.getDirectionShadowViewProjectionMatrix() * v.Inverse();
+            perFrame->light.caster.reprojectionMatrix = mData.mScene.getDirectionShadowViewProjectionMatrix() * v.Inverse();
 
             perFrame->light.caster.shadowSamples = 4;
 
-            perFrame->light.light.color = mScene.mAmbientLightColor;
-            perFrame->light.light.dir = (v * Vector4 { mScene.mAmbientLightDirection, 0.0f }).xyz();
+            perFrame->light.light.color = mData.mScene.mAmbientLightColor;
+            perFrame->light.light.dir = (v * Vector4 { mData.mScene.mAmbientLightDirection, 0.0f }).xyz();
 
-            Scene::Entity::EntityComponentList<Scene::Entity::PointLight> &lights = mScene.scene()->entityComponentList<Scene::Entity::PointLight>();
+            Scene::Entity::EntityComponentList<Scene::Entity::PointLight> &lights = mData.mScene.scene()->entityComponentList<Scene::Entity::PointLight>();
             perFrame->pointLightCount = lights.size();
             if (perFrame->pointLightCount > 2) {
                 LOG_WARNING("Too many point lights in scene!");
@@ -156,9 +127,9 @@ namespace Render {
             }
         }
 
-        mPipeline->bindTextures(target, mScene.depthTextures(), 2);
+        mPipeline->bindTextures(target, mData.mScene.depthTextures(), 2);
 
-        for (const std::pair<const std::tuple<const GPUMeshData *, const GPUMeshData::Material *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> &instance : instances) {
+        for (const std::pair<const std::tuple<const GPUMeshData *, const GPUMeshData::Material *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> &instance : mData.mInstances) {
             const GPUMeshData *meshData = std::get<0>(instance.first);
             const GPUMeshData::Material *material = std::get<1>(instance.first);
             Scene::Entity::Skeleton *skeleton = std::get<2>(instance.first);

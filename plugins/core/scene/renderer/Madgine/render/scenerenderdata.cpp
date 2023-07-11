@@ -4,18 +4,19 @@
 
 #include "Madgine/scene/scenemanager.h"
 
+#include "Modules/threading/awaitables/awaitablesender.h"
+
 namespace Engine {
 namespace Render {
 
-    SceneRenderData::SceneRenderData(Scene::SceneManager &scene, RenderContext *context)
-        : RenderData(context)
-        , mScene(scene)
+    SceneRenderData::SceneRenderData(Scene::SceneManager &scene)
+        : mScene(scene)
     {
     }
 
-    void SceneRenderData::render()
+    Threading::ImmediateTask<void> SceneRenderData::render(RenderContext *context)
     {
-        auto lock = mScene.lock(Engine::AccessMode::READ);
+        auto lock = co_await mScene.mutex(Engine::AccessMode::READ);
         mScene.updateRender();
     }
 

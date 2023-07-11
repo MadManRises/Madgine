@@ -2,135 +2,190 @@
 
 #include "datamutex.h"
 
+#include "Generic/execution/execution.h"
+
+#include "taskqueue.h"
+
 namespace Engine {
 namespace Threading {
 
-    bool DataMutex::isHeldWrite() const
+    DataMutex::Lock::Lock(DataMutex &mutex, AccessMode mode
+#if MODULES_ENABLE_TASK_TRACKING
+        ,
+        Threading::TaskQueue *queue
+#endif
+        )
+        : mMutex(&mutex)
+        , mMode(mode)
+#if MODULES_ENABLE_TASK_TRACKING
+        , mQueue(queue)
+#endif
     {
-        return mCurrentHolder == std::this_thread::get_id();
     }
 
-    bool DataMutex::isAvailable(AccessMode mode) const
+    DataMutex::Lock::Lock(Lock &&other)
+        : mMutex(std::exchange(other.mMutex, nullptr))
+        , mMode(other.mMode)
+#if MODULES_ENABLE_TASK_TRACKING
+        , mQueue(std::exchange(other.mQueue, nullptr))
+#endif
     {
-        std::thread::id holder = mCurrentHolder;
-        if (mode == AccessMode::READ) {
-            return holder == std::thread::id {} || holder == std::this_thread::get_id();
-        } else {
-            return (holder == std::thread::id {} && mReaderCount == 0) || holder == std::this_thread::get_id();
-        }
     }
 
-    DataMutex::ConsiderResult DataMutex::consider(AccessMode mode)
+    DataMutex::Lock::~Lock()
     {
-        bool alreadyConsidered = mConsidered.test_and_set();
-        if (!isAvailable(mode)) {
-            if (!alreadyConsidered)
-                mConsidered.clear();
-            return UNAVAILABLE;
-        } else {
-            return alreadyConsidered ? ALREADY_CONSIDERED : CONSIDERED;
-        }
+        if (mMutex)
+            mMutex->unlockImpl(mMode
+#if MODULES_ENABLE_TASK_TRACKING
+                ,
+                mQueue
+#endif
+            );
     }
 
-    void DataMutex::unconsider()
+    DataMutex::Lock &DataMutex::Lock::operator=(Lock &&other)
     {
-        mConsidered.clear();
+        std::swap(mMutex, other.mMutex);
+        std::swap(mMode, other.mMode);
+#if MODULES_ENABLE_TASK_TRACKING
+        std::swap(mQueue, other.mQueue);
+#endif
+        return *this;
     }
 
-    bool DataMutex::lock(AccessMode mode)
+    bool DataMutex::Lock::isHeld() const
     {
-        while (consider(mode) != CONSIDERED) //TODO: rewrite to us wait
-            ;
-        bool result = true;
-        if (mode == AccessMode::READ) {
-            if (mCurrentHolder == std::thread::id {}) {
-                ++mReaderCount;
-            } else {
-                assert(mCurrentHolder == std::this_thread::get_id());
-                result = false;
-            }
-        } else {
-            std::thread::id expected = {};
-            std::thread::id self = std::this_thread::get_id();
-            if (!mCurrentHolder.compare_exchange_strong(expected, self)) {
-                assert(expected == self);
-            }
-            result = expected != self;
-        }
-        unconsider();
-        return result;
+        return mMutex;
     }
 
-    void DataMutex::unlock(AccessMode mode)
-    {
-        if (mode == AccessMode::READ) {
-            --mReaderCount;
-        } else {
-            std::thread::id expected = std::this_thread::get_id();
-            if (!mCurrentHolder.compare_exchange_strong(expected, {}))
-                std::terminate();
-        }
-    }
-
-    DataLock::DataLock(DataMutex &mutex, AccessMode mode)
+    DataMutex::Awaiter::Awaiter(DataMutex *mutex, AccessMode mode)
         : mMutex(mutex)
-        , mHoldsLock(mutex.lock(mode))
         , mMode(mode)
     {
     }
 
-    DataLock::DataLock(DataLock &&other)
-        : mMutex(other.mMutex)
-        , mHoldsLock(std::exchange(other.mHoldsLock, false))
-        , mMode(other.mMode)
+    bool DataMutex::Awaiter::await_ready() noexcept
+    {
+        return false;
+    }
+
+    bool DataMutex::Awaiter::await_suspend(TaskHandle task)
+    {
+        if (tryLock(task.queue())) {
+            task.release();
+            return false;
+        } else {
+            task.queue()->queueHandle(std::move(task), this);
+            return true;
+        }
+    }
+
+    DataMutex::Lock DataMutex::Awaiter::await_resume()
+    {
+        return std::move(mLock);
+    }
+
+    DataMutex::Moded::Moded(DataMutex *mutex, AccessMode mode)
+        : mMutex(mutex)
+        , mMode(mode)
     {
     }
 
-    DataLock::~DataLock()
+    DataMutex::Lock DataMutex::Moded::lock()
     {
-        if (mHoldsLock)
-            mMutex.unlock(mMode);
+        return mMutex->lock(mMode);
     }
 
-    bool try_lockData_sorted(DataMutex **begin, DataMutex **end, AccessMode mode)
+    DataMutex::Lock DataMutex::Moded::tryLock(TaskQueue *queue)
     {
-        DataMutex **it = begin;
+        return mMutex->tryLock(queue, mMode);
+    }
 
-        bool success = true;
-        bool checkAvailability = true;
+    DataMutex::Awaiter DataMutex::Moded::operator co_await()
+    {
+        return { mMutex, mMode };
+    }
 
-        while (it != end && success) {
-            if (checkAvailability) {
-                checkAvailability = false;
-                for (DataMutex **check = it; check != end && success; ++check) {
-                    if (!(*check)->isAvailable(mode)) {
-                        success = false;
-                    }
-                }
-            }
+    bool DataMutex::Awaiter::tryLock(TaskQueue *queue)
+    {
+        assert(!mLock.isHeld());
+        mLock = mMutex->tryLock(queue, mMode);
+        return mLock.isHeld();
+    }
 
-            if (success) {
-                switch ((*it)->consider(mode)) {
-                case DataMutex::UNAVAILABLE:
-                    success = false;
-                    break;
-                case DataMutex::ALREADY_CONSIDERED:
-                    checkAvailability = true;
-                    break;
-                case DataMutex::CONSIDERED:
-                    ++it;
-                    break;
-                }
-            }
+    DataMutex::DataMutex(std::string_view name)
+        : mName(name)
+    {
+    }
+
+    DataMutex::Moded DataMutex::operator()(AccessMode mode)
+    {
+        return { this, mode };
+    }
+
+    const std::string &DataMutex::name() const
+    {
+        return mName;
+    }
+
+    DataMutex::Lock DataMutex::lock(AccessMode mode)
+    {
+        switch (mode) {
+        case AccessMode::READ:
+            mMutex.lock_shared();
+            break;
+        case AccessMode::WRITE:
+            mMutex.lock();
+            break;
+        default:
+            throw 0;
         }
+        return { *this, mode };
+    }
 
-        //cleanup
-        while (it != begin) {
-            --it;
-            (*it)->unconsider();
+    DataMutex::Lock DataMutex::tryLock(TaskQueue *queue, AccessMode mode)
+    {
+        bool success;
+        switch (mode) {
+        case AccessMode::READ:
+            success = mMutex.try_lock_shared();
+            break;
+        case AccessMode::WRITE:
+            success = mMutex.try_lock();
+            break;
+        default:
+            throw 0;
         }
+        if (success) {
+#if MODULES_ENABLE_TASK_TRACKING
+            Debug::Threading::onLock(this, mode, queue);
+            return { *this, mode, queue };
+#else
+            return { *this, mode };
+#endif
+        } else
+            return {};
+    }
 
-        return success;
+    void DataMutex::unlockImpl(AccessMode mode
+#if MODULES_ENABLE_TASK_TRACKING
+        ,
+        TaskQueue *queue
+#endif
+    )
+    {
+#if MODULES_ENABLE_TASK_TRACKING
+        if (queue)
+            Debug::Threading::onUnlock(this, mode, queue);
+#endif
+        switch (mode) {
+        case AccessMode::READ:
+            return mMutex.unlock_shared();
+        case AccessMode::WRITE:
+            return mMutex.unlock();
+        default:
+            throw 0;
+        }
     }
 
 }

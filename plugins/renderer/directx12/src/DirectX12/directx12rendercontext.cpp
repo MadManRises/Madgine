@@ -360,20 +360,20 @@ namespace Render {
         return std::make_unique<DirectX12RenderWindow>(this, w, samples);
     }
 
-    void DirectX12RenderContext::unloadAllResources()
+    Threading::Task<void> DirectX12RenderContext::unloadAllResources()
     {
-        RenderContext::unloadAllResources();
+        co_await RenderContext::unloadAllResources();
 
         for (std::pair<const std::string, DirectX12PipelineLoader::Resource> &res : DirectX12PipelineLoader::getSingleton()) {
-            res.second.forceUnload();
+            co_await res.second.forceUnload();
         }
 
         for (std::pair<const std::string, DirectX12TextureLoader::Resource> &res : DirectX12TextureLoader::getSingleton()) {
-            res.second.forceUnload();
+            co_await res.second.forceUnload();
         }
 
         for (std::pair<const std::string, DirectX12MeshLoader::Resource> &res : DirectX12MeshLoader::getSingleton()) {
-            res.second.forceUnload();
+            co_await res.second.forceUnload();
         }
     }
 

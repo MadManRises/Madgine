@@ -59,7 +59,7 @@ namespace Render {
             co_return false;
         }
 
-        instance = std::make_unique<DirectX11PipelineInstance>(config, std::move(vertexShader), std::move(pixelShader), std::move(geometryShader));
+        instance = std::make_unique<DirectX11PipelineInstanceHandle>(config, std::move(vertexShader), std::move(pixelShader), std::move(geometryShader));
 
         co_return true;
     }
@@ -68,16 +68,16 @@ namespace Render {
     {
         assert(file.mInstances.size() == 2);
 
-        DirectX11VertexShaderLoader::Handle vertexShader;
-        if (!co_await vertexShader.create(config.vs, file))
+        DirectX11VertexShaderLoader::Ptr vertexShader;
+        if (!co_await vertexShader.create(file))
             co_return false;
         //DirectX11GeometryShaderLoader::Handle geometryShader;
         //geometryShader.create(name, file);
-        DirectX11PixelShaderLoader::Handle pixelShader;
-        if (!co_await pixelShader.create(config.ps, file))
+        DirectX11PixelShaderLoader::Ptr pixelShader;
+        if (!co_await pixelShader.create(file))
             co_return false;
 
-        instance = std::make_unique<DirectX11PipelineInstance>(config, std::move(vertexShader), std::move(pixelShader), DirectX11GeometryShaderLoader::Handle {});
+        instance = std::make_unique<DirectX11PipelineInstancePtr>(config, std::move(vertexShader), std::move(pixelShader), DirectX11GeometryShaderLoader::Ptr {});
 
         co_return true;
     }
