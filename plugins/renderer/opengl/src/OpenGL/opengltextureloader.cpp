@@ -43,7 +43,6 @@ namespace Render {
 
     void OpenGLTextureLoader::setData(Texture &tex, Vector2i size, const ByteBuffer &data)
     {
-        static_cast<OpenGLTexture &>(tex) = { TextureType_2D, DataFormat::FORMAT_RGBA8 };
         static_cast<OpenGLTexture &>(tex).setData(size, data);
     }
 

@@ -13,7 +13,7 @@ namespace Render {
 
         DirectX12PipelineInstance(const PipelineConfiguration &config, const DirectX12Pipeline *pipeline);
 
-        bool bind(ID3D12GraphicsCommandList *commandList, VertexFormat format, size_t groupSize) const;
+        bool bind(ID3D12GraphicsCommandList *commandList, VertexFormat format, size_t groupSize, size_t samples) const;
 
         virtual WritableByteBuffer mapParameters(size_t index) override;
 
@@ -39,6 +39,14 @@ namespace Render {
 
     private:
         DirectX12PipelineLoader::Handle mPipelineHandle;
+    };
+
+    struct MADGINE_DIRECTX12_EXPORT DirectX12PipelineInstancePtr : DirectX12PipelineInstance {
+
+        DirectX12PipelineInstancePtr(const PipelineConfiguration &config, DirectX12PipelineLoader::Ptr pipeline);
+
+    private:
+        DirectX12PipelineLoader::Ptr mPipelinePtr;
     };
 
 }

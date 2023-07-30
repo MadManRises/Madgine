@@ -2,7 +2,7 @@
 
 #include "../entitycomponent.h"
 
-#include "Meta/math/vector3.h"
+#include "Meta/math/color3.h"
 
 namespace Engine {
 namespace Scene {
@@ -12,7 +12,7 @@ namespace Scene {
             PointLight(const ObjectPtr &init);
 
             uint32_t mRange = 10;
-            Vector3 mColor = { 1.0f, 1.0f, 1.0f };
+            Color3 mColor = { 1.0f, 1.0f, 1.0f };
         };
 
         using PointLightPtr = EntityComponentPtr<PointLight>;

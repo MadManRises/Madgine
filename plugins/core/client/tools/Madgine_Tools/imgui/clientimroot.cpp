@@ -254,6 +254,17 @@ namespace Tools {
                 return IMGUI_ICON_FILE " ";
         };
 
+        const auto toLinear = [](float x) {
+            if (x <= 0.04045f) {
+                return x / 12.92f;
+            } else {
+                return std::pow((x + 0.055f) / 1.055f, 2.4f);
+            }
+        };
+        for (auto &c : std::span { ImGui::GetStyle().Colors, size_t(ImGuiCol_COUNT) }) {
+            c = { toLinear(c.x), toLinear(c.y), toLinear(c.z), c.w };
+        }
+
         if (!co_await ImRoot::init())
             co_return false;
 

@@ -102,6 +102,11 @@ namespace StringUtil {
         return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> {}.from_bytes(input.data(), input.data() + input.size());
     }
 
+    inline std::string fromWString(std::wstring_view input)
+    {
+        return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> {}.to_bytes(input.data(), input.data() + input.size());
+    }
+
     template <typename Cont>
     std::string join(Cont &&cont, const char *sep)
     {

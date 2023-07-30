@@ -45,7 +45,6 @@ namespace Render {
         hr = swapChain->QueryInterface(&mSwapChain);
         DX12_CHECK(hr);
 
-        
         mCachedTargetViews[0] = context->mRenderTargetDescriptorHeap.allocate();
         mCachedTargetViews[1] = context->mRenderTargetDescriptorHeap.allocate();
 
@@ -78,14 +77,14 @@ namespace Render {
 
             createRenderTargetViews();
 
-            setup({ mCachedTargetViews[0] }, mResizeTarget);                
+            setup({ mCachedTargetViews[0] }, mResizeTarget);
         }
         return mTargetViews.empty();
     }
 
     void DirectX12RenderWindow::beginFrame()
     {
-        mTargetViews[0] = mCachedTargetViews[mSwapChain->GetCurrentBackBufferIndex()];        
+        mTargetViews[0] = mCachedTargetViews[mSwapChain->GetCurrentBackBufferIndex()];
 
         DirectX12RenderTarget::beginFrame();
 
@@ -131,7 +130,11 @@ namespace Render {
 
             mBackBuffers[i]->SetName((L"Window - BackBuffer " + std::to_wstring(i)).c_str());
 
-            GetDevice()->CreateRenderTargetView(mBackBuffers[i], nullptr, DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(mCachedTargetViews[i]));
+            D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+            rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+            rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+
+            GetDevice()->CreateRenderTargetView(mBackBuffers[i], &rtvDesc, DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(mCachedTargetViews[i]));
         }
     }
 
@@ -140,7 +143,7 @@ namespace Render {
         mTargetViews.clear();
         mResizeFence = context()->currentFence();
         mResizeTarget = size;
-        
+
         return true;
     }
 }

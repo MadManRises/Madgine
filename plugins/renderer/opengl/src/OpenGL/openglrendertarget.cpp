@@ -35,7 +35,7 @@ namespace Render {
         GL_CHECK();
 
         if (!mBlitSource) {
-            glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+            glClearColor(0.033f, 0.073f, 0.073f, 1.0f);
             GL_CHECK();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             GL_CHECK();

@@ -30,6 +30,7 @@ namespace Util {
     {
 #if WINDOWS
         OutputDebugStringA(msg.data());
+        OutputDebugStringA("\n");
 #else
 //#    error "Unsupported Platform!"
 #endif

@@ -82,7 +82,7 @@ namespace Render {
     void DirectX12RenderTexture::beginIteration(size_t iteration) const
     {
         for (const DirectX12Texture &tex : mTextures)
-            mCommandList.Transition(tex, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+            mCommandList.Transition(tex, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_RESOLVE_SOURCE, mBlitSource ? D3D12_RESOURCE_STATE_RESOLVE_DEST : D3D12_RESOURCE_STATE_RENDER_TARGET);
 
         if (mDepthBufferView)
             mCommandList.Transition(mDepthStencilBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
@@ -95,13 +95,14 @@ namespace Render {
 
     void DirectX12RenderTexture::endIteration(size_t iteration) const
     {
+        DirectX12RenderTarget::endIteration(iteration);
+
         for (const DirectX12Texture &tex : mTextures)
-            mCommandList.Transition(tex, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+            mCommandList.Transition(tex, mBlitSource ? D3D12_RESOURCE_STATE_RESOLVE_DEST : D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_RESOLVE_SOURCE);
 
         if (mDepthBufferView)
             mCommandList.Transition(mDepthStencilBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
-        DirectX12RenderTarget::endIteration(iteration);
     }
 
     TextureDescriptor DirectX12RenderTexture::texture(size_t index, size_t iteration) const

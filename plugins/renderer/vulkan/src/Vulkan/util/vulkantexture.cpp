@@ -89,6 +89,7 @@ namespace Render {
         size_t byteCount;
         switch (format) {
         case FORMAT_RGBA8:
+        case FORMAT_RGBA8_SRGB:
             byteCount = 4;
             break;
         case FORMAT_RGBA16F:
@@ -284,10 +285,11 @@ namespace Render {
         VkImageViewType vType;
         size_t byteCount;
         switch (mFormat) {
-        case FORMAT_RGBA8:            
+        case FORMAT_RGBA8:
+        case FORMAT_RGBA8_SRGB:
             byteCount = 4;
             break;
-        case FORMAT_RGBA16F:            
+        case FORMAT_RGBA16F:
             byteCount = 8;
             break;
         default:
@@ -381,9 +383,11 @@ namespace Render {
     {
         switch (mFormat) {
         case FORMAT_RGBA8:
-            return VK_FORMAT_R8G8B8A8_UNORM;                        
+            return VK_FORMAT_R8G8B8A8_UNORM;
         case FORMAT_RGBA16F:
             return VK_FORMAT_R16G16B16A16_SFLOAT;
+        case FORMAT_RGBA8_SRGB:
+            return VK_FORMAT_R8G8B8A8_SRGB;
         default:
             std::terminate();
         }
@@ -395,7 +399,7 @@ namespace Render {
 
     void VulkanTexture::transition(VkCommandBuffer commandList, VkImageLayout oldLayout, VkImageLayout newLayout)
     {
-        transitionImageLayout(commandList, mImage, format(), VK_IMAGE_ASPECT_COLOR_BIT, oldLayout, newLayout); 
+        transitionImageLayout(commandList, mImage, format(), VK_IMAGE_ASPECT_COLOR_BIT, oldLayout, newLayout);
     }
 }
 }

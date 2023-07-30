@@ -188,7 +188,7 @@ namespace Render {
         renderPassInfo.renderArea.offset = { 0, 0 };
         renderPassInfo.renderArea.extent = { static_cast<uint32_t>(mSize.x), static_cast<uint32_t>(mSize.y) };
 
-        VkClearValue clearColors[2] { { { 1.0f, 1.0f, 1.0f, 1.0f } }, { { 0.2f, 0.3f, 0.3f, 1.0f } } };
+        VkClearValue clearColors[2] { { { 1.0f, 1.0f, 1.0f, 1.0f } }, { { 0.033f, 0.073f, 0.073f, 1.0f } } };
         renderPassInfo.clearValueCount = 2;
         renderPassInfo.pClearValues = clearColors;
 

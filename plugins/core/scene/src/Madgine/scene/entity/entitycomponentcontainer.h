@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Generic/replace.h"
-#include "Generic/nulledptr.h"
 #include "Generic/container/multicontainer.h"
+#include "Generic/nulledptr.h"
+#include "Generic/replace.h"
 
 #include "Generic/tag_invoke.h"
 
@@ -24,7 +24,7 @@ namespace Scene {
                 return tag_invoke(*this, std::forward<T>(item));
             }
         };
-        
+
         inline constexpr get_component_t get_component;
 
         struct get_entity_ptr_t {
@@ -49,16 +49,15 @@ namespace Scene {
         template <template <typename...> typename C, typename T = Placeholder<0>>
         using EntityComponentContainerImpl = MultiContainer<C, T, NulledPtr<Entity>>;
 
+        template <typename T>
         struct EntityComponentFreeListConfig {
 
-            template <typename T>
-            static bool isFree(ReferenceTuple<T, NulledPtr<Entity>> data)
+            static bool isFree(ReferenceTuple<ManualLifetime<T>, ManualLifetime<NulledPtr<Entity>>> data)
             {
                 return !get<1>(data);
             }
 
-            template <typename T>
-            static uintptr_t *getLocation(ReferenceTuple<T, NulledPtr<Entity>> data)
+            static uintptr_t *getLocation(ReferenceTuple<ManualLifetime<T>, ManualLifetime<NulledPtr<Entity>>> data)
             {
                 static_assert(sizeof(T) >= sizeof(uintptr_t));
                 return &reinterpret_cast<uintptr_t &>(get<0>(data));
@@ -73,7 +72,6 @@ namespace Scene {
                 relocateEntityComponent(get_entity_ptr(*it), EntityComponentHandle<T> { static_cast<uint32_t>(std::distance(begin, it)) });
             }
         };
-
 
     }
 }

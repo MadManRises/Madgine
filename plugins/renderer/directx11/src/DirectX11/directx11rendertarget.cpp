@@ -176,7 +176,7 @@ namespace Render {
         viewport.MaxDepth = 1.0f;
         sDeviceContext->RSSetViewports(1, &viewport);
 
-        constexpr FLOAT color[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
+        constexpr FLOAT color[4] = { 0.033f, 0.073f, 0.073f, 1.0f };        
 
         int bufferCount = iterations() > 1 ? 2 : 1;
         int offset = iterations() > 1 ? iteration % 2 : 0;

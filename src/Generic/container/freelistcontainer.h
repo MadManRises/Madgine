@@ -1,53 +1,53 @@
 #pragma once
 
-namespace Engine {
+#include "../manuallifetime.h"
 
-DERIVE_FUNCTION(construct)
-DERIVE_FUNCTION(destruct)
+namespace Engine {
 
 template <typename C, typename DataTraits = typename C::value_type>
 struct FreeListContainer {
 
-    using value_type = typename C::value_type;
-
-    using internal_traits = container_traits<C>;
+    using internal_container_type = typename container_traits<C>::template wrap_t<ManualLifetime>;
+    using internal_traits = container_traits<internal_container_type>;
     using position_handle = typename internal_traits::position_handle;
 
+    using value_type = typename C::value_type;
     using reference = typename C::reference;
     using const_reference = typename C::const_reference;
+    using pointer = typename C::pointer;
+    using const_pointer = typename C::const_pointer;
 
-    template <typename It, bool skipping>
+    template <typename It, typename _reference, typename _pointer>
     struct IteratorImpl {
 
         using iterator_category = typename It::iterator_category;
 
-        using value_type = value_type;
+        using value_type = typename C::value_type;
         using difference_type = ptrdiff_t;
-        using pointer = typename It::pointer;
-        using reference = typename It::reference;
+        using pointer = _pointer;
+        using reference = _reference;
 
         IteratorImpl() = default;
 
-        IteratorImpl(It it, const C &cont)
+        IteratorImpl(It it, const internal_container_type &cont)
             : mIt(std::move(it))
             , mContainer(&cont)
         {
-            if constexpr (skipping)
-                update();
+            update();
         }
 
-        template <typename It2, bool>
+        template <typename It2, typename R2, typename P2>
         friend struct IteratorImpl;
 
-        template <typename It2, bool skipping2>
-        IteratorImpl(const IteratorImpl<It2, skipping2> &other)
+        template <typename It2, typename R2, typename P2>
+        IteratorImpl(const IteratorImpl<It2, R2, P2> &other)
             : mIt(other.mIt)
             , mContainer(other.mContainer)
         {
         }
 
-        template <typename It2>
-        IteratorImpl(const Pib<IteratorImpl<It2, skipping>> &other)
+        template <typename It2, typename R2, typename P2>
+        IteratorImpl(const Pib<IteratorImpl<It2, R2, P2>> &other)
             : IteratorImpl(other.first)
         {
         }
@@ -62,20 +62,23 @@ struct FreeListContainer {
             return &*mIt;
         }
 
-        template <typename It2>
-        difference_type operator-(const IteratorImpl<It2, skipping> &other) const
+        template <typename It2, typename R2, typename P2>
+        difference_type operator-(const IteratorImpl<It2, R2, P2> &other) const
         {
             return mIt - other.mIt;
         }
 
         IteratorImpl operator+(difference_type diff) const
         {
-            return { mIt + diff, *mContainer };
+            IteratorImpl result = *this;
+            result += diff;
+            return result;
         }
 
         IteratorImpl &operator+=(difference_type diff)
         {
-            mIt += diff;
+            while (diff-- > 0)
+                ++(*this);
             return *this;
         }
 
@@ -94,16 +97,14 @@ struct FreeListContainer {
         IteratorImpl &operator++()
         {
             ++mIt;
-            if constexpr (skipping)
-                update();
+            update();
             return *this;
         }
 
         IteratorImpl &operator--()
         {
             --mIt;
-            if constexpr (skipping)
-                updateBack();
+            updateBack();
             return *this;
         }
 
@@ -126,19 +127,20 @@ struct FreeListContainer {
             return mIt;
         }
 
-        const C& container() const {
+        const internal_container_type &container() const
+        {
             return *mContainer;
         }
 
     private:
         It mIt;
-        const C *mContainer = nullptr;
+        const internal_container_type *mContainer = nullptr;
     };
 
-    using iterator = IteratorImpl<typename internal_traits::iterator, true>;
-    using reverse_iterator = IteratorImpl<typename internal_traits::reverse_iterator, true>;
-    using const_iterator = IteratorImpl<typename internal_traits::const_iterator, true>;
-    using const_reverse_iterator = IteratorImpl<typename internal_traits::const_reverse_iterator, true>;
+    using iterator = IteratorImpl<typename internal_traits::iterator, reference, pointer>;
+    using reverse_iterator = IteratorImpl<typename internal_traits::reverse_iterator, reference, pointer>;
+    using const_iterator = IteratorImpl<typename internal_traits::const_iterator, const_reference, const_pointer>;
+    using const_reverse_iterator = IteratorImpl<typename internal_traits::const_reverse_iterator, const_reference, const_pointer>;
 
     iterator begin()
     {
@@ -160,10 +162,10 @@ struct FreeListContainer {
         return { mContainer.end(), mContainer };
     }
 
-    using nodes_iterator = IteratorImpl<typename internal_traits::iterator, false>;
-    using nodes_reverse_iterator = IteratorImpl<typename internal_traits::reverse_iterator, false>;
-    using nodes_const_iterator = IteratorImpl<typename internal_traits::const_iterator, false>;
-    using nodes_const_reverse_iterator = IteratorImpl<typename internal_traits::const_reverse_iterator, false>;
+    using nodes_iterator = typename internal_traits::iterator;
+    using nodes_reverse_iterator = typename internal_traits::reverse_iterator;
+    using nodes_const_iterator = typename internal_traits::const_iterator;
+    using nodes_const_reverse_iterator = typename internal_traits::const_reverse_iterator;
 
     nodes_iterator nodes_begin()
     {
@@ -186,32 +188,26 @@ struct FreeListContainer {
     }
 
 private:
-    static position_handle &handle(reference block)
+    static position_handle &handle(internal_container_type::reference block)
     {
         assert(DataTraits::isFree(block));
         return *reinterpret_cast<position_handle *>(DataTraits::getLocation(block));
     }
 
     template <typename... Args>
-    position_handle emplace(reference block, Args &&...args)
+    position_handle emplace(internal_container_type::reference block, Args &&...args)
     {
         assert(DataTraits::isFree(block));
         position_handle next = handle(block);
         handle(block).~position_handle();
-        if constexpr (has_function_construct_v<C, reference, Args &&...>)
-            mContainer.construct(block, std::forward<Args>(args)...);
-        else
-            new (&block) value_type(std::forward<Args>(args)...);
+        construct(block, std::forward<Args>(args)...);
         return next;
     }
 
-    void destroy(reference block, const position_handle &head)
+    void destroy(internal_container_type::reference block, const position_handle &head)
     {
         assert(!DataTraits::isFree(block));
-        if constexpr (has_function_destruct_v<C, reference>)
-            mContainer.destruct(block);
-        else
-            block.~value_type();
+        destruct(block);
         new (&handle(block)) position_handle(head);
     }
 
@@ -237,7 +233,7 @@ public:
     void clear()
     {
         for (auto it = begin(); it != end(); ++it) {
-            destroy(*it, mFreeListHead);
+            destroy(*it.it(), mFreeListHead);
             mFreeListHead = internal_traits::toPositionHandle(mContainer, it.it());
         }
         mSize = 0;
@@ -246,7 +242,7 @@ public:
     iterator erase(const iterator &where)
     {
         --mSize;
-        destroy(*where, mFreeListHead);
+        destroy(*where.it(), mFreeListHead);
         mFreeListHead = internal_traits::toPositionHandle(mContainer, where.it());
 
         return { where.it(), mContainer };
@@ -286,7 +282,7 @@ public:
 private:
     friend struct container_traits<FreeListContainer<C, DataTraits>, void>;
 
-    C mContainer;
+    internal_container_type mContainer;
     position_handle mFreeListHead = internal_traits::toPositionHandle(mContainer, mContainer.end());
     size_t mSize = 0;
 };

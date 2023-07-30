@@ -150,23 +150,6 @@ struct MultiContainer {
     }
 
     template <typename... Tuples>
-    void construct(reference item, std::piecewise_construct_t, Tuples &&...tuples)
-    {
-        (TupleUnpacker::invokeFromTuple([&](auto&&... par){ new (&get<Ty>(item)) Ty(std::forward<decltype(par)>(par)...); }, std::forward<Tuples>(tuples)),...);   
-    }
-
-    template <typename... Args>
-    void construct(reference item, Args &&...args)
-    {
-        (new (&get<Ty>(item)) Ty(std::forward<Args>(args)), ...);
-    }
-
-    void destruct(reference item)
-    {
-        (get<Ty>(item).~Ty(),...);
-    }
-
-    template <typename... Tuples>
     reference emplace_back(std::piecewise_construct_t, Tuples &&...tuples)
     {
         return { { TupleUnpacker::invokeFromTuple(LIFT(std::get<Container<Ty>>(mData).emplace_back, &), std::forward<Tuples>(tuples))... } };
@@ -297,6 +280,9 @@ struct container_traits<MultiContainer<Container, Ty...>> {
     static_assert((std::same_as<const_handle, typename container_traits<Container<Ty>>::const_handle> && ...));
     using const_position_handle = typename helper_traits::const_position_handle;
     static_assert((std::same_as<const_position_handle, typename container_traits<Container<Ty>>::const_position_handle> && ...));
+
+    template <template <typename> typename W>
+    using wrap_t = MultiContainer<Container, W<Ty>...>;
 
     template <typename... _Ty>
     static emplace_return emplace(container &c, const const_iterator &where, _Ty &&...args)

@@ -50,12 +50,16 @@ namespace Render {
             IID_PPV_ARGS(&mDepthStencilBuffer));
         DX12_CHECK(hr);
 
+        mDepthStencilBuffer->SetName(StringUtil::toWString(name() + "DepthTexture").c_str());
+
         D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc {};
         dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
         dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
         dsvDesc.ViewDimension = samples > 1 ? D3D12_DSV_DIMENSION_TEXTURE2DMS : D3D12_DSV_DIMENSION_TEXTURE2D;
 
         GetDevice()->CreateDepthStencilView(mDepthStencilBuffer, &dsvDesc, DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.cpuHandle(mDepthStencilView));
+
+        mSamples = samples;
     }
 
     void DirectX12RenderTarget::shutdown()
@@ -115,7 +119,7 @@ namespace Render {
 
         //TransitionBarrier();
 
-        constexpr FLOAT color[4] = { 0.2f, 0.3f, 0.3f, 1.0f };
+        constexpr FLOAT color[4] = { 0.033f, 0.073f, 0.073f, 1.0f };
 
         std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> targetViews { mTargetViews.size() };
         for (size_t i = 0; i < targetViews.size(); ++i)
@@ -180,6 +184,11 @@ namespace Render {
     DirectX12RenderContext *DirectX12RenderTarget::context() const
     {
         return static_cast<DirectX12RenderContext *>(RenderTarget::context());
+    }
+
+    size_t DirectX12RenderTarget::samples() const
+    {
+        return mSamples;
     }
 
 }

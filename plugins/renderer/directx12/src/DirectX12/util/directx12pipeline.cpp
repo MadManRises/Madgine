@@ -29,9 +29,12 @@ namespace Render {
         return true;
     }
 
-    ID3D12PipelineState *DirectX12Pipeline::get(VertexFormat format, size_t groupSize, size_t instanceDataSize) const
+    ID3D12PipelineState *DirectX12Pipeline::get(VertexFormat format, size_t groupSize, size_t samples, size_t instanceDataSize) const
     {
-        ReleasePtr<ID3D12PipelineState> &pipeline = mPipelines[format][groupSize - 1];
+        size_t samplesBits = sqrt(samples);
+        assert(samplesBits * samplesBits == samples);
+
+        ReleasePtr<ID3D12PipelineState> &pipeline = mPipelines[format][groupSize - 1][samplesBits - 1];
 
         if (!pipeline) {
 
@@ -66,11 +69,11 @@ namespace Render {
                     variant);
             };
 
-            auto resolve = [](auto &variant) -> const ReleasePtr<IDxcBlob> & {
-                return std::visit(overloaded {
-                                      [](const auto &handle) -> const ReleasePtr<IDxcBlob> & {
-                                          return *handle;
-                                      } },
+            auto resolve = [](auto &variant) -> IDxcBlob * {
+                return std::visit(
+                    [](const auto &handle) -> IDxcBlob * {
+                        return handle ? *handle : nullptr;
+                    },
                     variant);
             };
 
@@ -140,7 +143,7 @@ namespace Render {
             pipelineDesc.NumRenderTargets = 1;
             pipelineDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 
-            pipelineDesc.SampleDesc.Count = 1;
+            pipelineDesc.SampleDesc.Count = samples;
             pipelineDesc.SampleDesc.Quality = 0;
 
             HRESULT hr = GetDevice()->CreateGraphicsPipelineState(&pipelineDesc, IID_PPV_ARGS(&pipeline));
@@ -150,16 +153,17 @@ namespace Render {
         return pipeline;
     }
 
-    const std::array<ReleasePtr<ID3D12PipelineState>, 3> *DirectX12Pipeline::ptr() const
+    const std::array<std::array<ReleasePtr<ID3D12PipelineState>, 3>, 3> *DirectX12Pipeline::ptr() const
     {
         return mPipelines.data();
     }
 
     void DirectX12Pipeline::reset()
     {
-        for (std::array<ReleasePtr<ID3D12PipelineState>, 3> &groupPipelines : mPipelines)
-            for (ReleasePtr<ID3D12PipelineState> &pipeline : groupPipelines)
-                pipeline.reset();
+        for (std::array<std::array<ReleasePtr<ID3D12PipelineState>, 3>, 3> &groupPipelines : mPipelines)
+            for (std::array<ReleasePtr<ID3D12PipelineState>, 3> &samplePipelines : groupPipelines)
+                for (ReleasePtr<ID3D12PipelineState> &pipeline : samplePipelines)
+                    pipeline.reset();
         mVertexShader = {};
         mGeometryShader = {};
         mPixelShader = {};

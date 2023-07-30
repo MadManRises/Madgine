@@ -69,7 +69,13 @@ namespace Render {
             internalFormat = GL_RGBA;
             sizedFormat = GL_RGBA8;
             byteWidth = 4;
-            break;
+            break;            
+        case FORMAT_RGBA8_SRGB:
+            internalStorage = GL_UNSIGNED_BYTE;
+            internalFormat = GL_RGBA;
+            sizedFormat = GL_SRGB_ALPHA;
+            byteWidth = 4;
+            break;            
         case FORMAT_RGBA16F:
             internalStorage = GL_FLOAT;
             internalFormat = GL_RGBA;
@@ -126,13 +132,16 @@ namespace Render {
         GLenum internalStorage;
         GLenum internalFormat;
         GLenum sizedFormat;
-        size_t byteWidth;
         switch (mFormat) {
         case FORMAT_RGBA8:
             internalStorage = GL_UNSIGNED_BYTE;
             internalFormat = GL_RGBA;
             sizedFormat = GL_RGBA8;
-            byteWidth = 4;
+            break;
+        case FORMAT_RGBA8_SRGB:
+            internalStorage = GL_UNSIGNED_BYTE;
+            internalFormat = GL_RGBA;
+            sizedFormat = GL_SRGB;
             break;
         case FORMAT_RGBA16F:
             internalStorage = GL_FLOAT;

@@ -13,6 +13,7 @@ namespace Render {
 
     enum DataFormat {
         FORMAT_RGBA8,
+        FORMAT_RGBA8_SRGB,
         FORMAT_RGBA16F,
         FORMAT_R32F,
         FORMAT_D24,

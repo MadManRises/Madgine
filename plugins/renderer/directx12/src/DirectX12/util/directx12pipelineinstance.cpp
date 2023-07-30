@@ -19,7 +19,7 @@ namespace Render {
     DirectX12PipelineInstance::DirectX12PipelineInstance(const PipelineConfiguration &config, const DirectX12Pipeline *pipeline)
         : PipelineInstance(config)
         , mPipeline(pipeline)
-    {        
+    {
 
         mConstantBuffers.reserve(config.bufferSizes.size());
         for (size_t i = 0; i < config.bufferSizes.size(); ++i) {
@@ -27,11 +27,14 @@ namespace Render {
         }
     }
 
-    bool DirectX12PipelineInstance::bind(ID3D12GraphicsCommandList *commandList, VertexFormat format, size_t groupSize) const
+    bool DirectX12PipelineInstance::bind(ID3D12GraphicsCommandList *commandList, VertexFormat format, size_t groupSize, size_t samples) const
     {
-        ID3D12PipelineState *pipeline = mPipeline->ptr()[format][groupSize - 1];
+        size_t samplesBits = sqrt(samples);
+        assert(samplesBits * samplesBits == samples);
+
+        ID3D12PipelineState *pipeline = mPipeline->ptr()[format][groupSize - 1][samplesBits - 1];
         if (!pipeline) {
-            pipeline = mPipeline->get(format, groupSize, mInstanceDataSize);
+            pipeline = mPipeline->get(format, groupSize, samples, mInstanceDataSize);
             if (!pipeline)
                 return false;
         }
@@ -73,11 +76,11 @@ namespace Render {
 
     void DirectX12PipelineInstance::renderMesh(RenderTarget *target, const GPUMeshData *m) const
     {
-        ID3D12GraphicsCommandList *commandList = static_cast<DirectX12RenderTarget*>(target)->mCommandList;
+        ID3D12GraphicsCommandList *commandList = static_cast<DirectX12RenderTarget *>(target)->mCommandList;
 
         const DirectX12MeshData *mesh = static_cast<const DirectX12MeshData *>(m);
 
-        if (!bind(commandList, mesh->mFormat, mesh->mGroupSize))
+        if (!bind(commandList, mesh->mFormat, mesh->mGroupSize, static_cast<DirectX12RenderTarget*>(target)->samples()))
             return;
 
         mesh->mVertices.bindVertex(commandList, mesh->mVertexSize);
@@ -101,7 +104,7 @@ namespace Render {
 
         const DirectX12MeshData *mesh = static_cast<const DirectX12MeshData *>(m);
 
-        if (!bind(commandList, mesh->mFormat, mesh->mGroupSize))
+        if (!bind(commandList, mesh->mFormat, mesh->mGroupSize, static_cast<DirectX12RenderTarget *>(target)->samples()))
             return;
 
         mesh->mVertices.bindVertex(commandList, mesh->mVertexSize);
@@ -134,9 +137,15 @@ namespace Render {
         }
     }
 
-DirectX12PipelineInstanceHandle::DirectX12PipelineInstanceHandle(const PipelineConfiguration &config, DirectX12PipelineLoader::Handle pipeline)
+    DirectX12PipelineInstanceHandle::DirectX12PipelineInstanceHandle(const PipelineConfiguration &config, DirectX12PipelineLoader::Handle pipeline)
         : DirectX12PipelineInstance(config, &*pipeline)
         , mPipelineHandle(std::move(pipeline))
+    {
+    }
+
+    DirectX12PipelineInstancePtr::DirectX12PipelineInstancePtr(const PipelineConfiguration &config, DirectX12PipelineLoader::Ptr pipeline)
+        : DirectX12PipelineInstance(config, &*pipeline)
+        , mPipelinePtr(std::move(pipeline))
     {
     }
 

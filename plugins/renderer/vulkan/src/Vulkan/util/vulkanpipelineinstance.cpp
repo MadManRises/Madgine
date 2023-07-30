@@ -186,5 +186,11 @@ namespace Render {
     {
     }
 
+    VulkanPipelineInstancePtr::VulkanPipelineInstancePtr(const PipelineConfiguration &config, VulkanPipelineLoader::Ptr pipeline)
+        : VulkanPipelineInstance(config, &*pipeline)
+        , mPipelinePtr(std::move(pipeline))
+    {
+    }
+
 }
 }

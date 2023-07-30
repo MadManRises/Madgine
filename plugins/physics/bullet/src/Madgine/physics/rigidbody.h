@@ -14,7 +14,7 @@ namespace Physics {
     struct MADGINE_BULLET_EXPORT RigidBody : Scene::Entity::EntityComponent<RigidBody> {
         SERIALIZABLEUNIT(RigidBody)
 
-        using Container = FreeListContainer<Scene::Entity::EntityComponentContainerImpl<std::vector>, Scene::Entity::EntityComponentFreeListConfig>;
+        using Container = FreeListContainer<Scene::Entity::EntityComponentContainerImpl<std::deque>, Scene::Entity::EntityComponentFreeListConfig<RigidBody>>;
 
         RigidBody(const ObjectPtr &data = {});
         RigidBody(RigidBody &&other);

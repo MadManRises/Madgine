@@ -79,14 +79,14 @@ struct RefcountedContainer {
             return mDeadFlag;
         }
 
-        static bool isFree(const ControlBlock &block)
+        static bool isFree(const ManualLifetime<ControlBlock> &block)
         {
-            return block.mFree;
+            return block.unsafeAccess().mFree;
         }
 
-        static uintptr_t *getLocation(ControlBlock &block)
+        static uintptr_t *getLocation(ManualLifetime<ControlBlock> &block)
         {
-            return &block.mBuffer;
+            return &block.unsafeAccess().mBuffer;
         }
 
     private:

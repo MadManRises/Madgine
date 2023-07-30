@@ -12,9 +12,6 @@ namespace Render {
     OpenGLBuffer::OpenGLBuffer(GLenum target, const ByteBuffer &data)
         : mTarget(target)
     {
-        glGenBuffers(1, &mHandle);
-        GL_CHECK();
-
         setData(data);
     }
 
@@ -78,10 +75,16 @@ namespace Render {
 
     void OpenGLBuffer::setData(const ByteBuffer &data)
     {
-        bind();
-        glBufferData(mTarget, data.mSize, data.mData, data.mData ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
-        GL_CHECK();
         mSize = data.mSize;
+        if (mSize > 0) {
+            if (!mHandle) {
+                glGenBuffers(1, &mHandle);
+                GL_CHECK();
+            }
+            bind();
+            glBufferData(mTarget, data.mSize, data.mData, data.mData ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+            GL_CHECK();
+        }
     }
 
     void OpenGLBuffer::resize(size_t size)

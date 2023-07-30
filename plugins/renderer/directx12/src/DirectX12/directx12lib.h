@@ -38,8 +38,8 @@ inline void dx12Check(HRESULT result = 0)
 
 #define DX12_CHECK(...) dx12Check(__VA_ARGS__)
 
-//#define DX12_LOG(x) LOG("DX12: " << x)
-#define DX12_LOG(x)
+#define DX12_LOG(x) LOG_DEBUG("DX12: " << x)
+//#define DX12_LOG(x)
 
 #include "Generic/offsetptr.h"
 

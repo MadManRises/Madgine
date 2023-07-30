@@ -95,12 +95,16 @@ namespace Render {
         sCurrentSSBOBuffer = &*mSSBOBuffer;
 #endif
 
-        OpenGLRenderTarget::beginIteration(iteration);
+        glEnable(GL_FRAMEBUFFER_SRGB); 
+
+        OpenGLRenderTarget::beginIteration(iteration);        
     }
 
     void OpenGLRenderWindow::endIteration(size_t iteration) const
     {
         OpenGLRenderTarget::endIteration(iteration);
+
+        glDisable(GL_FRAMEBUFFER_SRGB); 
 
         swapBuffers(getSurface(), mContext);
     }

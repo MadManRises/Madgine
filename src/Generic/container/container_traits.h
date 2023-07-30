@@ -508,6 +508,9 @@ struct container_traits<std::deque<T>> {
     template <typename U>
     using rebind_t = std::deque<U>;
 
+    template <template <typename> typename W>
+    using wrap_t = std::deque<W<T>>;
+
     template <typename... _Ty>
     static emplace_return emplace(container &c, const const_iterator &where, _Ty &&... args)
     {

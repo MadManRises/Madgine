@@ -67,6 +67,13 @@ namespace Render {
 
         mList->ResourceBarrier(1, &barrierDesc);
         DX12_CHECK();
+
+        wchar_t name[128] = {};
+        UINT size = sizeof(name);
+        res->GetPrivateData(WKPDID_D3DDebugObjectNameW, &size, name);
+        std::stringstream ss;
+        ss << "Transitioning " << StringUtil::fromWString(name) << ": " << from << " -> " << to;
+        Util::log_fatal(ss.str());
     }
 
 }

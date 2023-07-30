@@ -18,6 +18,8 @@
 
 #include <codecvt>
 
+#include <sstream>
+
 struct ReleaseDeleter {
     template <typename T>
     void operator()(T *ptr)
@@ -123,6 +125,9 @@ int main(int argc, char **argv)
     arguments.push_back(L"main");
 
     arguments.push_back(L"-Zpc");
+
+    arguments.push_back(L"-HV");
+    arguments.push_back(L"2021");
 
     DxcBuffer sourceBuffer;
     sourceBuffer.Ptr = pSource->GetBufferPointer();

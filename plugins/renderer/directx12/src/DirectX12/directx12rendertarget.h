@@ -30,6 +30,8 @@ namespace Render {
 
         DirectX12RenderContext *context() const;
 
+        size_t samples() const;
+
 
         mutable DirectX12CommandList mCommandList;
         mutable std::vector<OffsetPtr> mTargetViews;
@@ -40,7 +42,7 @@ namespace Render {
         D3D12_BLEND_DESC mBlendState;
         D3D12_RESOURCE_STATES mResourceState;
 
-        
+        size_t mSamples;
     };
 
 }

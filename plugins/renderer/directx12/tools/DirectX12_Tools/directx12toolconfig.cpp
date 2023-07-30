@@ -38,8 +38,10 @@ namespace Tools {
             Resources::ImageLoader::Handle data = image->loadData();
             data.info()->setPersistent(true);
 
-            mImageTexture.setData(data->mSize, data->mBuffer);
-            ImGui::Image((void *)mImageTexture.handle(), data->mSize);
+            if (data.available()) {
+                mImageTexture.setData(data->mSize, data->mBuffer);
+                ImGui::Image((void *)mImageTexture.handle(), data->mSize);
+            }
         });
 
         co_return co_await ToolBase::init();

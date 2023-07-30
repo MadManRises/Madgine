@@ -62,11 +62,11 @@ namespace Render {
             gpuMat.mDiffuseColor = mat.mDiffuseColor;
 
             if (!mat.mDiffuseName.empty()) {
-                gpuMat.mDiffuseTexture.loadFromImage(mat.mDiffuseName, TextureType_2D, FORMAT_RGBA8);
+                gpuMat.mDiffuseTexture.loadFromImage(mat.mDiffuseName, TextureType_2D, FORMAT_RGBA8_SRGB);
             }
 
             if (!mat.mEmissiveName.empty()) {
-                gpuMat.mEmissiveTexture.loadFromImage(mat.mEmissiveName, TextureType_2D, FORMAT_RGBA8);
+                gpuMat.mEmissiveTexture.loadFromImage(mat.mEmissiveName, TextureType_2D, FORMAT_RGBA8_SRGB);
             }
         }
 

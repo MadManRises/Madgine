@@ -16,14 +16,14 @@ namespace Render {
         bool link(typename DirectX12VertexShaderLoader::Handle vertexShader, typename DirectX12GeometryShaderLoader::Handle geometryShader, typename DirectX12PixelShaderLoader::Handle pixelShader);
         bool link(typename DirectX12VertexShaderLoader::Ptr vertexShader, typename DirectX12GeometryShaderLoader::Ptr geometryShader, typename DirectX12PixelShaderLoader::Ptr pixelShader);
 
-        ID3D12PipelineState *get(VertexFormat format, size_t groupSize, size_t instanceDataSize) const;
+        ID3D12PipelineState *get(VertexFormat format, size_t groupSize, size_t samples, size_t instanceDataSize) const;
 
-        const std::array<ReleasePtr<ID3D12PipelineState>, 3> *ptr() const;
+        const std::array<std::array<ReleasePtr<ID3D12PipelineState>, 3>, 3> *ptr() const;
 
         void reset();
 
     private:
-        mutable std::array<std::array<ReleasePtr<ID3D12PipelineState>, 3>, 256> mPipelines;
+        mutable std::array<std::array<std::array<ReleasePtr<ID3D12PipelineState>, 3>, 3>, 256> mPipelines;
 
         std::variant<typename DirectX12VertexShaderLoader::Handle, typename DirectX12VertexShaderLoader::Ptr> mVertexShader;
         std::variant<typename DirectX12GeometryShaderLoader::Handle, typename DirectX12GeometryShaderLoader::Ptr> mGeometryShader;

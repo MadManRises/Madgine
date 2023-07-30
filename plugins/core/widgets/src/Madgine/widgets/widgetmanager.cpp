@@ -140,7 +140,7 @@ namespace Widgets {
 
         mData->mMesh.create({ 3, std::vector<Vertex> {} });
 
-        mData->mUIAtlasTexture.create(Render::TextureType_2D, Render::FORMAT_RGBA8);
+        mData->mUIAtlasTexture.create(Render::TextureType_2D, Render::FORMAT_RGBA8_SRGB);
 
         mData->mDefaultTexture.load("default_tex");
 

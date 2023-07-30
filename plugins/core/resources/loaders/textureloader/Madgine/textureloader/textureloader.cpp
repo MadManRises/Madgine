@@ -55,6 +55,7 @@ namespace Render {
                 Resources::ImageLoader::Handle image;
                 if (!co_await image.load(info.resource()->name()))
                     co_return false;
+                loader->create(texture, type, format);
                 loader->setData(texture, image->mSize, image->mBuffer);
                 co_return true;
             },

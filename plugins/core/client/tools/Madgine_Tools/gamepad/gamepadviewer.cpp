@@ -42,7 +42,7 @@ namespace Tools {
         if (!co_await ToolBase::init())
             co_return false;
 
-        mGamepadTexture.loadFromImage("Gamepad", Render::TextureType_2D, Render::FORMAT_RGBA8);
+        mGamepadTexture.loadFromImage("Gamepad", Render::TextureType_2D, Render::FORMAT_RGBA8_SRGB);
 
         co_return true;
     }

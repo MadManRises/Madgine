@@ -20,6 +20,11 @@ namespace Render {
             xViewFormat = xFormat;
             byteCount = 4;
             break;
+        case FORMAT_RGBA8_SRGB:
+            xFormat = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+            xViewFormat = xFormat;
+            byteCount = 4;
+            break;
         case FORMAT_RGBA16F:
             xFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
             xViewFormat = xFormat;
@@ -148,6 +153,9 @@ namespace Render {
         size_t byteCount;
         switch (mFormat) {
         case FORMAT_RGBA8:
+            byteCount = 4;
+            break;
+        case FORMAT_RGBA8_SRGB:
             byteCount = 4;
             break;
         case FORMAT_RGBA16F:

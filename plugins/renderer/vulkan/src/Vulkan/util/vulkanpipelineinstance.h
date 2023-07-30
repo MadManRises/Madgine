@@ -37,9 +37,17 @@ namespace Render {
     struct MADGINE_VULKAN_EXPORT VulkanPipelineInstanceHandle : VulkanPipelineInstance {
 
         VulkanPipelineInstanceHandle(const PipelineConfiguration &config, VulkanPipelineLoader::Handle pipeline);
-        
+
     private:
         VulkanPipelineLoader::Handle mPipelineHandle;
+    };
+
+    struct MADGINE_VULKAN_EXPORT VulkanPipelineInstancePtr : VulkanPipelineInstance {
+
+        VulkanPipelineInstancePtr(const PipelineConfiguration &config, VulkanPipelineLoader::Ptr pipeline);
+
+    private:
+        VulkanPipelineLoader::Ptr mPipelinePtr;
     };
 
 }

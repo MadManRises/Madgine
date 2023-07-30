@@ -49,14 +49,11 @@ namespace Render {
                     variant);
             };
 
-            auto resolve = [](auto &variant) ->const VulkanPtr<VkShaderModule, &vkDestroyShaderModule>& {
-                return std::visit(overloaded {
-                                      [](const typename VulkanShaderLoader::Handle &handle) -> const VulkanPtr<VkShaderModule, &vkDestroyShaderModule> & {
-                                          return *handle;
-                                      },
-                                      [](const typename VulkanShaderLoader::Ptr &ptr) -> const VulkanPtr<VkShaderModule, &vkDestroyShaderModule> & {
-                                          return *ptr;
-                                      } },
+            auto resolve = [](auto &variant) -> VkShaderModule {
+                return std::visit(
+                    [](const auto &handle) -> VkShaderModule {
+                        return handle ? *handle : nullptr;
+                    },
                     variant);
             };
 

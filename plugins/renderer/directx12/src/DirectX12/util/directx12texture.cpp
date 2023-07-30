@@ -26,6 +26,10 @@ namespace Render {
             xFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
             byteCount = 8;
             break;
+        case FORMAT_RGBA8_SRGB:
+            xFormat = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+            byteCount = 4;
+            break;
         default:
             std::terminate();
         }
@@ -59,7 +63,7 @@ namespace Render {
                 &heapDesc,
                 D3D12_HEAP_FLAG_NONE,
                 &textureDesc,
-                data.mData ? D3D12_RESOURCE_STATE_COPY_DEST : D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+                data.mData ? D3D12_RESOURCE_STATE_COPY_DEST : D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_RESOLVE_SOURCE,
                 isRenderTarget ? &clear : nullptr,
                 IID_PPV_ARGS(&mResource));
             DX12_CHECK(hr);
@@ -87,7 +91,7 @@ namespace Render {
                 DirectX12CommandList list = DirectX12RenderContext::getSingleton().fetchCommandList("upload");
 
                 UpdateSubresources(list, mResource, uploadHeap, 0, 0, 1, &subResourceDesc);
-                list.Transition(mResource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+                list.Transition(mResource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_RESOLVE_SOURCE);
 
                 list.attachResource(std::move(uploadHeap));
             }
@@ -170,6 +174,10 @@ namespace Render {
             xFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
             byteCount = 8;
             break;
+        case FORMAT_RGBA8_SRGB:
+            xFormat = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+            byteCount = 4;
+            break;
         default:
             std::terminate();
         }
@@ -211,13 +219,13 @@ namespace Render {
 
         DirectX12CommandList list = DirectX12RenderContext::getSingleton().fetchCommandList("upload");
 
-        list.Transition(mResource, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
+        list.Transition(mResource, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_RESOLVE_SOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
 
         CD3DX12_TEXTURE_COPY_LOCATION Dst(mResource, 0);
         CD3DX12_TEXTURE_COPY_LOCATION Src(uploadHeap, layout);
         list->CopyTextureRegion(&Dst, offset.x, offset.y, 0, &Src, nullptr);
 
-        list.Transition(mResource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        list.Transition(mResource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_RESOLVE_SOURCE);
 
         list.attachResource(std::move(uploadHeap));
     }
