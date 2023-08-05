@@ -709,7 +709,7 @@ bool    ImGui_ImplDX12_CreateDeviceObjects()
 			[RootSignature("RootFlags(ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | DENY_HULL_SHADER_ROOT_ACCESS | DENY_DOMAIN_SHADER_ROOT_ACCESS | DENY_GEOMETRY_SHADER_ROOT_ACCESS), RootConstants(num32BitConstants=16, b0, space=0, visibility=SHADER_VISIBILITY_VERTEX), DescriptorTable(SRV(t0), visibility=SHADER_VISIBILITY_PIXEL), StaticSampler(s0, filter = FILTER_MIN_MAG_MIP_LINEAR, addressU = TEXTURE_ADDRESS_WRAP, addressV = TEXTURE_ADDRESS_WRAP, addressW = TEXTURE_ADDRESS_WRAP, visibility = SHADER_VISIBILITY_PIXEL)")]
             float4 main(PS_INPUT input) : SV_Target
             {
-              float4 out_col = input.col * texture0.Sample(sampler0, input.uv); 
+              float4 out_col = pow(input.col, 2.2) * texture0.Sample(sampler0, input.uv); 
               return out_col; 
             })A";
 

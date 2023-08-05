@@ -729,7 +729,7 @@ bool ImGui_ImplOpenGL3_CreateDeviceObjects()
                                              "varying vec4 Frag_Color;\n"
                                              "void main()\n"
                                              "{\n"
-                                             "    gl_FragColor = Frag_Color * texture2D(Texture, Frag_UV.st);\n"
+                                             "    gl_FragColor = vec4(pow(Frag_Color.r, 2.2), pow(Frag_Color.g, 2.2), pow(Frag_Color.b, 2.2), pow(Frag_Color.a, 2.2)) * texture2D(Texture, Frag_UV.st);\n"
                                              "}\n";
 
     const GLchar *fragment_shader_glsl_130 = "uniform sampler2D Texture;\n"
@@ -738,7 +738,7 @@ bool ImGui_ImplOpenGL3_CreateDeviceObjects()
                                              "out vec4 Out_Color;\n"
                                              "void main()\n"
                                              "{\n"
-                                             "    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);\n"
+                                             "    Out_Color = vec4(pow(Frag_Color.r, 2.2), pow(Frag_Color.g, 2.2), pow(Frag_Color.b, 2.2), pow(Frag_Color.a, 2.2)) * texture(Texture, Frag_UV.st);\n"
                                              "}\n";
 
     const GLchar *fragment_shader_glsl_300_es = "precision mediump float;\n"
@@ -748,7 +748,7 @@ bool ImGui_ImplOpenGL3_CreateDeviceObjects()
                                                 "layout (location = 0) out vec4 Out_Color;\n"
                                                 "void main()\n"
                                                 "{\n"
-                                                "    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);\n"
+                                                "    Out_Color = vec4(pow(Frag_Color.r, 2.2), pow(Frag_Color.g, 2.2), pow(Frag_Color.b, 2.2), pow(Frag_Color.a, 2.2)) * texture(Texture, Frag_UV.st);\n"
                                                 "}\n";
 
     const GLchar *fragment_shader_glsl_410_core = "in vec2 Frag_UV;\n"
@@ -757,7 +757,7 @@ bool ImGui_ImplOpenGL3_CreateDeviceObjects()
                                                   "layout (location = 0) out vec4 Out_Color;\n"
                                                   "void main()\n"
                                                   "{\n"
-                                                  "    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);\n"
+                                                  "    Out_Color = vec4(pow(Frag_Color.r, 2.2), pow(Frag_Color.g, 2.2), pow(Frag_Color.b, 2.2), pow(Frag_Color.a, 2.2)) * texture(Texture, Frag_UV.st);\n"
                                                   "}\n";
 
     // Select shaders matching our GLSL versions

@@ -28,7 +28,7 @@ namespace Render {
 
     struct VertexColor {
         using ctor = Color4;
-        Color4 mColor;
+        Vector4 mColor;
     };
 
     struct VertexUV {

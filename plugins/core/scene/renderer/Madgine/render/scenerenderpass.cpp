@@ -34,6 +34,9 @@ METATABLE_BEGIN(Engine::Render::SceneRenderPass)
 MEMBER(mAmbientFactor)
 MEMBER(mDiffuseFactor)
 MEMBER(mSpecularFactor)
+MEMBER(mLightConstantFactor)
+MEMBER(mLightLinearFactor)
+MEMBER(mLightSquaredFactor)
 METATABLE_END(Engine::Render::SceneRenderPass)
 
 namespace Engine {
@@ -119,9 +122,9 @@ namespace Render {
                     float range = lights[i].mRange;
                     perFrame->pointLights[i].light.position = (v * Vector4 { t->mPosition, 1.0f }).xyz();
                     perFrame->pointLights[i].light.color = lights[i].mColor;
-                    perFrame->pointLights[i].light.constant = 1.0f;
-                    perFrame->pointLights[i].light.linearFactor = 4.5f / range;
-                    perFrame->pointLights[i].light.quadratic = 75.0f / (range * range);
+                    perFrame->pointLights[i].light.constantFactor = mLightConstantFactor;
+                    perFrame->pointLights[i].light.linearFactor = mLightLinearFactor / range;
+                    perFrame->pointLights[i].light.squaredFactor = mLightSquaredFactor / (range * range);
                     perFrame->pointLights[i].caster.reprojectionMatrix = v.Inverse();
                 }
             }

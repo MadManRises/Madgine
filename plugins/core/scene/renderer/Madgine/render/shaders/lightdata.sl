@@ -10,9 +10,9 @@ struct PointLight {
 	float3 position;
 	float3 color;
 
-	float constant;
+	float constantFactor;
 	float linearFactor;
-	float quadratic;
+	float squaredFactor;
 };
 
 struct ShadowCaster {

@@ -95,7 +95,7 @@ void castPointLight(
     float3 diffuse = diffuseFactor * diff * light.color;
 
     float distance = length(light.position - pos);
-    float attenuation = 1.0 / (light.constant + light.linearFactor * distance + light.quadratic * (distance * distance));
+    float attenuation = 1.0 / (light.constantFactor + light.linearFactor * distance + light.squaredFactor * (distance * distance));
 
     diffuseIntensity += attenuation * (ambient + diffuse);
 }

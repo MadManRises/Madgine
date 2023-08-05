@@ -11,7 +11,6 @@
 namespace Engine {
 namespace Render {
 
-
     struct MADGINE_DIRECTX12_EXPORT DirectX12Texture : Texture {
 
         DirectX12Texture(TextureType type, bool isRenderTarget, DataFormat format, size_t width, size_t height, size_t samples = 1, const ByteBuffer &data = {});
@@ -28,9 +27,11 @@ namespace Render {
         void setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data);
 
         operator ID3D12Resource *() const;
-        operator ReleasePtr<ID3D12Resource> () const;
+        operator ReleasePtr<ID3D12Resource>() const;
 
         void setName(std::string_view name);
+
+        D3D12_RESOURCE_STATES readStateFlags() const;
 
     private:
         ReleasePtr<ID3D12Resource> mResource;

@@ -52,7 +52,17 @@ namespace Render {
 
             D3D12_RENDER_TARGET_VIEW_DESC renderTargetViewDesc {};
 
-            renderTargetViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+            switch (tex.format()) {
+            case FORMAT_RGBA8:
+                renderTargetViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+                break;
+            case FORMAT_RGBA8_SRGB:
+                renderTargetViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+                break;
+            default:
+                throw 0;
+            }
+
             renderTargetViewDesc.ViewDimension = mSamples > 1 ? D3D12_RTV_DIMENSION_TEXTURE2DMS : D3D12_RTV_DIMENSION_TEXTURE2D;
             renderTargetViewDesc.Texture2D.MipSlice = 0;
 
@@ -82,7 +92,7 @@ namespace Render {
     void DirectX12RenderTexture::beginIteration(size_t iteration) const
     {
         for (const DirectX12Texture &tex : mTextures)
-            mCommandList.Transition(tex, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_RESOLVE_SOURCE, mBlitSource ? D3D12_RESOURCE_STATE_RESOLVE_DEST : D3D12_RESOURCE_STATE_RENDER_TARGET);
+            mCommandList.Transition(tex, tex.readStateFlags(), mBlitSource ? D3D12_RESOURCE_STATE_RESOLVE_DEST : D3D12_RESOURCE_STATE_RENDER_TARGET);
 
         if (mDepthBufferView)
             mCommandList.Transition(mDepthStencilBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
@@ -98,7 +108,7 @@ namespace Render {
         DirectX12RenderTarget::endIteration(iteration);
 
         for (const DirectX12Texture &tex : mTextures)
-            mCommandList.Transition(tex, mBlitSource ? D3D12_RESOURCE_STATE_RESOLVE_DEST : D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_RESOLVE_SOURCE);
+            mCommandList.Transition(tex, mBlitSource ? D3D12_RESOURCE_STATE_RESOLVE_DEST : D3D12_RESOURCE_STATE_RENDER_TARGET, tex.readStateFlags());
 
         if (mDepthBufferView)
             mCommandList.Transition(mDepthStencilBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
@@ -159,6 +169,9 @@ namespace Render {
             switch (mTextures[i].format()) {
             case FORMAT_RGBA8:
                 xFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+                break;
+            case FORMAT_RGBA8_SRGB:
+                xFormat = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
                 break;
             case FORMAT_RGBA16F:
                 xFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;

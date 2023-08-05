@@ -254,7 +254,7 @@ namespace Tools {
                 return IMGUI_ICON_FILE " ";
         };
 
-        const auto toLinear = [](float x) {
+        /* const auto toLinear = [](float x) {
             if (x <= 0.04045f) {
                 return x / 12.92f;
             } else {
@@ -263,7 +263,7 @@ namespace Tools {
         };
         for (auto &c : std::span { ImGui::GetStyle().Colors, size_t(ImGuiCol_COUNT) }) {
             c = { toLinear(c.x), toLinear(c.y), toLinear(c.z), c.w };
-        }
+        }*/
 
         if (!co_await ImRoot::init())
             co_return false;

@@ -63,7 +63,7 @@ namespace Render {
                 &heapDesc,
                 D3D12_HEAP_FLAG_NONE,
                 &textureDesc,
-                data.mData ? D3D12_RESOURCE_STATE_COPY_DEST : D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_RESOLVE_SOURCE,
+                data.mData ? D3D12_RESOURCE_STATE_COPY_DEST : readStateFlags(),
                 isRenderTarget ? &clear : nullptr,
                 IID_PPV_ARGS(&mResource));
             DX12_CHECK(hr);
@@ -91,7 +91,7 @@ namespace Render {
                 DirectX12CommandList list = DirectX12RenderContext::getSingleton().fetchCommandList("upload");
 
                 UpdateSubresources(list, mResource, uploadHeap, 0, 0, 1, &subResourceDesc);
-                list.Transition(mResource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_RESOLVE_SOURCE);
+                list.Transition(mResource, D3D12_RESOURCE_STATE_COPY_DEST, readStateFlags());
 
                 list.attachResource(std::move(uploadHeap));
             }
@@ -219,13 +219,13 @@ namespace Render {
 
         DirectX12CommandList list = DirectX12RenderContext::getSingleton().fetchCommandList("upload");
 
-        list.Transition(mResource, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_RESOLVE_SOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
+        list.Transition(mResource, readStateFlags(), D3D12_RESOURCE_STATE_COPY_DEST);
 
         CD3DX12_TEXTURE_COPY_LOCATION Dst(mResource, 0);
         CD3DX12_TEXTURE_COPY_LOCATION Src(uploadHeap, layout);
         list->CopyTextureRegion(&Dst, offset.x, offset.y, 0, &Src, nullptr);
 
-        list.Transition(mResource, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_RESOLVE_SOURCE);
+        list.Transition(mResource, D3D12_RESOURCE_STATE_COPY_DEST, readStateFlags());
 
         list.attachResource(std::move(uploadHeap));
     }
@@ -243,6 +243,14 @@ namespace Render {
     void DirectX12Texture::setName(std::string_view name)
     {
         mResource->SetName(StringUtil::toWString(name).c_str());
+    }
+
+    D3D12_RESOURCE_STATES DirectX12Texture::readStateFlags() const
+    {
+        D3D12_RESOURCE_STATES flags = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+        if (mSamples > 1)
+            flags |= D3D12_RESOURCE_STATE_RESOLVE_SOURCE;
+        return flags;
     }
 }
 }

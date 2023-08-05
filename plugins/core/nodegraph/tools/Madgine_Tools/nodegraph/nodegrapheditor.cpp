@@ -1009,19 +1009,6 @@ namespace Tools {
 
         mEditor = { ed::CreateEditor(&config), &ed::DestroyEditor };
 
-        ed::SetCurrentEditor(mEditor.get());
-        const auto toLinear = [](float x) {
-            if (x <= 0.04045f) {
-                return x / 12.92f;
-            } else {
-                return std::pow((x + 0.055f) / 1.055f, 2.4f);
-            }
-        };
-        for (auto &c : std::span { ed::GetStyle().Colors, size_t(ed::StyleColor_Count) }) {        
-            c = { toLinear(c.x), toLinear(c.y), toLinear(c.z), c.w };
-        }
-
-
         mInitialLoad = true;
     }
 

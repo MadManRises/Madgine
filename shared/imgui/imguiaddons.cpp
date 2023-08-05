@@ -397,22 +397,22 @@ bool ValueTypeDrawer::draw(const Engine::EnumHolder &e)
 
 bool ValueTypeDrawer::draw(Engine::Color3 &c)
 {
-    return ColorEdit3("##ValueTypeDrawer", c.ptr(), ImGuiColorEditFlags_NoInputs);
+    return ColorEdit3("##ValueTypeDrawer", &c.r, ImGuiColorEditFlags_NoInputs);
 }
 
 bool ValueTypeDrawer::draw(const Engine::Color3 &c)
 {
-    return ColorEdit3("##ValueTypeDrawer", const_cast<float*>(c.ptr()), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoPicker);
+    return ColorEdit3("##ValueTypeDrawer", const_cast<float*>(&c.r), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoPicker);
 }
 
 bool ValueTypeDrawer::draw(Engine::Color4 &c)
 {
-    return ColorEdit4("##ValueTypeDrawer", c.ptr(), ImGuiColorEditFlags_NoInputs);
+    return ColorEdit4("##ValueTypeDrawer", &c.r, ImGuiColorEditFlags_NoInputs);
 }
 
 bool ValueTypeDrawer::draw(const Engine::Color4 &c)
 {
-    return ColorEdit4("##ValueTypeDrawer", const_cast<float *>(c.ptr()), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoPicker);
+    return ColorEdit4("##ValueTypeDrawer", const_cast<float *>(&c.r), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoPicker);
 }
 
 void setPayloadStatus(std::string_view msg)

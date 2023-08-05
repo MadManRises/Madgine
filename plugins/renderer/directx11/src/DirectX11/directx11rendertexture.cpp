@@ -58,6 +58,9 @@ namespace Render {
             case FORMAT_RGBA8:
                 renderTargetViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
                 break;
+            case FORMAT_RGBA8_SRGB:
+                renderTargetViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+                break;
             case FORMAT_RGBA16F:
                 renderTargetViewDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
                 break;
@@ -129,6 +132,9 @@ namespace Render {
             switch (mTextures[i].format()) {
             case FORMAT_RGBA8:
                 xFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+                break;
+            case FORMAT_RGBA8_SRGB:
+                xFormat = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
                 break;
             case FORMAT_RGBA16F:
                 xFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;

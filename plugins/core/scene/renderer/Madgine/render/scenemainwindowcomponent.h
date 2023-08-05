@@ -7,6 +7,8 @@
 
 #include "Madgine/render/camera.h"
 
+#include "Meta/math/color3.h"
+
 namespace Engine {
 namespace Render {
 
@@ -37,7 +39,7 @@ namespace Render {
 
         Camera mCamera;
 
-        Vector3 mAmbientLightColor = { 1.0f, 1.0f, 1.0f };
+        Color3 mAmbientLightColor = { 1.0f, 1.0f, 1.0f };
         NormalizedVector3 mAmbientLightDirection = { -0.0f, -1.0f, 1.5f };
 
     private:

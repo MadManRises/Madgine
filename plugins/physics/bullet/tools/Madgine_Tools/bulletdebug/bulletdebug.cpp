@@ -17,6 +17,8 @@
 
 #include "bullet3-3.24/src/BulletSoftBody/btSoftRigidDynamicsWorld.h"
 
+#include "Meta/math/color4.h"
+
 namespace Engine {
 namespace Tools {
 
@@ -87,12 +89,12 @@ namespace Tools {
 
     void BulletDebug::drawLine(const btVector3 &from, const btVector3 &to, const btVector3 &fromColor, const btVector3 &toColor)
     {
-        Im3D::Line(Vector3 { from }, Vector3 { to }, { .mColorA = { Vector3 { fromColor }, 1 }, .mColorB = { Vector3 { toColor }, 1 } });
+        Im3D::Line(Vector3 { from }, Vector3 { to }, { .mColorA = { Color3 { fromColor }, 1 }, .mColorB = { Color3 { toColor }, 1 } });
     }
 
     void BulletDebug::drawLine(const btVector3 &from, const btVector3 &to, const btVector3 &color)
     {
-        Im3D::Line(Vector3 { from }, Vector3 { to }, { .mColorA = { Vector3 { color }, 1 } });
+        Im3D::Line(Vector3 { from }, Vector3 { to }, { .mColorA = { Color3 { color }, 1 } });
     }
 
     void BulletDebug::drawSphere(const btVector3 &p, btScalar radius, const btVector3 &color)
@@ -107,7 +109,7 @@ namespace Tools {
 
     void BulletDebug::drawContactPoint(const btVector3 &PointOnB, const btVector3 &normalOnB, btScalar distance, int lifeTime, const btVector3 &color)
     {
-        Im3D::Sphere(Vector3 { PointOnB }, distance + 0.01f, { .mColor = { Vector3 { color }, 1 }, .mDetail = 0 });
+        Im3D::Sphere(Vector3 { PointOnB }, distance + 0.01f, { .mColor = { Color3 { color }, 1 }, .mDetail = 0 });
     }
 
     void BulletDebug::reportErrorWarning(const char *warningString)

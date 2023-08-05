@@ -28,7 +28,7 @@ namespace Tools {
 
     Threading::Task<bool> OpenGLToolConfig::init()
     {
-        mImageTexture = { Render::TextureType_2D, Render::FORMAT_RGBA8 };
+        mImageTexture = { Render::TextureType_2D, Render::FORMAT_RGBA8_SRGB };
 
         getTool<Inspector>().addPreviewDefinition<Render::FontLoader::Resource>([](Render::FontLoader::Resource *font) {
             Render::FontLoader::Handle handle = font->loadData();
@@ -41,8 +41,10 @@ namespace Tools {
             Resources::ImageLoader::Handle data = image->loadData();
             data.info()->setPersistent(true);
 
-            mImageTexture.setData(data->mSize, data->mBuffer);
-            ImGui::Image((void *)(uintptr_t)mImageTexture.handle(), data->mSize);
+            if (data.available()) {
+                mImageTexture.setData(data->mSize, data->mBuffer);
+                ImGui::Image((void *)(uintptr_t)mImageTexture.handle(), data->mSize);
+            }
         });
 
         co_return co_await ToolBase::init();

@@ -26,7 +26,7 @@ namespace Tools {
 
     Threading::Task<bool> DirectX12ToolConfig::init()
     {
-        mImageTexture = { Render::TextureType_2D, false, Render::FORMAT_RGBA8, 100, 100 };
+        mImageTexture = { Render::TextureType_2D, false, Render::FORMAT_RGBA8_SRGB, 100, 100 };
 
         getTool<Inspector>().addPreviewDefinition<Render::FontLoader::Resource>([](Render::FontLoader::Resource *font) {
             Render::FontLoader::Handle handle = font->loadData();
