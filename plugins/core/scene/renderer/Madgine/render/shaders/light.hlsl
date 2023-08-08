@@ -47,7 +47,7 @@ void castDirectionalShadowLight(
     float specularFactor,
     float shininess)
 {
-    float bias = max(0.05 * (1.0 - dot(normal, light.light.dir)), 0.005);  
+    float bias = /* max(0.05 * (1.0 - dot(normal, light.light.dir)), */0.0005/*)*/;  
     float3 normalizedLightViewPosition = lightViewPosition.xyz / lightViewPosition.w;    
     normalizedLightViewPosition.y *= -1;
     int2 lightTexCoord = int2(2048 * (normalizedLightViewPosition.xy * 0.5 + 0.5));
@@ -61,8 +61,6 @@ void castDirectionalShadowLight(
         lightStrength -= float(lightDepth > shadowDepth) / light.caster.shadowSamples;
     }
 
-    //diffuseIntensity = float3(lightDepth, shadowMap.Load(lightTexCoord, 0).r, lightTexCoord.y);
-
     castDirectionalLight(
         diffuseIntensity,
         specularIntensity, 
@@ -74,6 +72,9 @@ void castDirectionalShadowLight(
         specularFactor * lightStrength,
         shininess
     );
+
+    //diffuseIntensity = float3(lightDepth, shadowMap.Load(lightTexCoord, 0).r, lightTexCoord.y);
+    //diffuseIntensity = normalizedLightViewPosition;
 }
 
 void castPointLight(

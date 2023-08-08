@@ -3,6 +3,7 @@
 #include "physicsmanager.h"
 
 #include "rigidbody.h"
+#include "softbodyskeleton.h"
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
@@ -155,6 +156,10 @@ namespace Physics {
             }
 
             for (const auto &[body, _] : sceneMgr().entityComponentList<RigidBody>()) {
+                body.update();
+            }
+
+            for (const auto &[body, _] : sceneMgr().entityComponentList<SoftBodySkeleton>()) {
                 body.update();
             }
         }

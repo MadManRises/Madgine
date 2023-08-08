@@ -33,7 +33,6 @@ namespace Render {
 #    if !OPENGL_ES
         if (glFramebufferTexture) {
 #    endif
-            assert(j == 0);
             glFramebufferTexture(GL_FRAMEBUFFER, attachment, tex.handle(), 0);
             GL_CHECK();
 #    if !OPENGL_ES
@@ -45,8 +44,6 @@ namespace Render {
             GLenum target = tex.target();
             if (target == GL_TEXTURE_CUBE_MAP) {
                 target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + j;
-            } else {
-                assert(j == 0);
             }
 
             glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, target, tex.handle(), 0);
@@ -171,11 +168,11 @@ namespace Render {
             GL_CHECK();
             for (size_t i = 0; i < mTextures.size() / bufferCount; ++i) {
                 OpenGLTexture &tex = mTextures[i * bufferCount + j];
-                attachFramebufferTexture(GL_COLOR_ATTACHMENT0 + i, tex, j);
+                attachFramebufferTexture(GL_COLOR_ATTACHMENT0 + i, tex, i);
             }
 
             if (mDepthTexture) {
-                attachFramebufferTexture(GL_DEPTH_ATTACHMENT, mDepthTexture, j);
+                attachFramebufferTexture(GL_DEPTH_ATTACHMENT, mDepthTexture, 0);
             } else {
                 glBindRenderbuffer(GL_RENDERBUFFER, mDepthRenderbuffer);
                 GL_CHECK();

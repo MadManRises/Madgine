@@ -82,6 +82,11 @@ namespace Render {
         return mRenderPasses;
     }
 
+    std::vector<const RenderPass *> RenderTarget::renderPasses() const
+    {
+        return { mRenderPasses.begin(), mRenderPasses.end() };
+    }
+
     bool RenderTarget::skipFrame()
     {
         return false;
@@ -122,7 +127,7 @@ namespace Render {
         bool resized = resizeImpl(size);
         if (resized) {
             for (RenderPass *pass : mRenderPasses)
-                pass->onTargetResize(size);            
+                pass->onTargetResize(size);
         }
         return resized;
     }
@@ -150,6 +155,11 @@ namespace Render {
     RenderContext *RenderTarget::context() const
     {
         return mContext;
+    }
+
+    const RenderTarget *RenderTarget::blitSource() const
+    {
+        return mBlitSource;
     }
 
 }

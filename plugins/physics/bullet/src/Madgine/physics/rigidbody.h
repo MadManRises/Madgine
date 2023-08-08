@@ -66,21 +66,17 @@ namespace Physics {
         uint16_t collisionMask() const;
         void setCollisionMask(uint16_t group);
 
-        PhysicsManager *mgr();
-
         void setShape(typename CollisionShapeManager::Handle handle);
         void setShapeName(std::string_view name);
         CollisionShapeManager::Resource *getShape() const;
         CollisionShapeInstance *getShapeInstance() const;
 
-        void add();
-        void remove();
+        PhysicsManager *mgr() const;
 
         friend struct PhysicsManager;
 
     protected:
         typename CollisionShapeManager::InstanceHandle mShapeHandle;
-        PhysicsManager *mMgr = nullptr;
         struct Data;
         std::unique_ptr<Data> mData;
     };

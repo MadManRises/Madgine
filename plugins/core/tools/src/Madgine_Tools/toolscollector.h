@@ -14,5 +14,11 @@ namespace Tools {
 	template <typename T>
 	using Tool = Serialize::VirtualUnit<T, VirtualScope<T, ToolsComponent<T>>>;
 
+	template <typename T>
+	using ToolVirtualBase = ToolsVirtualBase<T>;
+
+	template <typename T, typename Base>
+	using ToolVirtualImpl = Serialize::VirtualUnit<T, VirtualScope<T, ToolsVirtualImpl<T, Base>>>;
+
 }
 }

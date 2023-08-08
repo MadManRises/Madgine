@@ -31,7 +31,8 @@ namespace Render {
 
             //TODO Culling
 
-            std::map<std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> instances;
+            for (auto &[key, transforms] : mInstances)
+                transforms.clear();
 
             for (const auto &[mesh, e] : mScene.scene()->entityComponentList<Scene::Entity::Mesh>().data()) {
                 if (!mesh.isVisible())
@@ -47,7 +48,7 @@ namespace Render {
 
                 Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
 
-                instances[std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *> { meshData, skeleton }].push_back(transform->worldMatrix());
+                mInstances[std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *> { meshData, skeleton }].push_back(transform->worldMatrix());
             }
         }
 

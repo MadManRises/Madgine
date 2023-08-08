@@ -28,11 +28,8 @@ namespace Render {
 
         std::vector<TextureDescriptor> depthTextures();
 
-        Render::RenderTarget *shadowTarget();
         Render::RenderTarget *pointShadowTarget(size_t index);
         Render::RenderData *data();
-
-        Matrix4 getDirectionShadowViewProjectionMatrix();
 
         void enableSceneRendering();
         void disableSceneRendering();
@@ -47,12 +44,10 @@ namespace Render {
 
         SceneRenderPass mPass;
 
-        std::unique_ptr<Render::RenderTarget> mShadowMap;
         std::unique_ptr<Render::RenderTarget> mPointShadowMaps[2];
 
         std::unique_ptr<SceneRenderData> mSceneData;
 
-        ShadowRenderPass mShadowPass;
         PointShadowRenderPass mPointShadowPasses[2];
     };
 

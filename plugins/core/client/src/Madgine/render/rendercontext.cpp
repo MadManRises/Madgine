@@ -48,6 +48,11 @@ namespace Render {
         std::erase(mRenderTargets, target);
     }
 
+    std::vector<const RenderTarget *> RenderContext::renderTargets() const
+    {
+        return { mRenderTargets.begin(), mRenderTargets.end() };
+    }
+
     Threading::Task<void> RenderContext::render()
     {
         if (!beginFrame())

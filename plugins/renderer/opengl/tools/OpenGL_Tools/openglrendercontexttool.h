@@ -4,21 +4,19 @@
 #include "Madgine_Tools/toolscollector.h"
 
 #include "OpenGL/util/opengltexture.h"
+#include "Madgine_Tools/render/rendercontexttool.h"
 
 namespace Engine {
 namespace Tools {
 
-    struct OpenGLToolConfig : public Tool<OpenGLToolConfig> {
+    struct OpenGLRenderContextTool : public ToolVirtualImpl<OpenGLRenderContextTool, RenderContextTool> {
 
-        SERIALIZABLEUNIT(OpenGLToolConfig)
+        SERIALIZABLEUNIT(OpenGLRenderContextTool)
 
-        OpenGLToolConfig(ImRoot &root);
-        OpenGLToolConfig(const SceneEditor &) = delete;
+        OpenGLRenderContextTool(ImRoot &root);
 
         virtual Threading::Task<bool> init() override;
         virtual Threading::Task<void> finalize() override;
-
-        virtual void renderMenu() override;
 
         std::string_view key() const override;
 
@@ -29,4 +27,4 @@ namespace Tools {
 }
 }
 
-REGISTER_TYPE(Engine::Tools::OpenGLToolConfig)
+REGISTER_TYPE(Engine::Tools::OpenGLRenderContextTool)

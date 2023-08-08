@@ -367,10 +367,9 @@ namespace Widgets {
             if (!mDragging) {
                 InterfacesVector dist = arg.screenPosition - mDragStartEvent.screenPosition;
                 if (std::abs(dist.x) + std::abs(dist.y) > sDragDistanceThreshold && std::chrono::steady_clock::now() - mDragStartTime > sDragTimeThreshold) {
-
-                    mFocusedWidget->injectDragBegin(mDragStartEvent);
                     mDragging = true;
                     mDraggingAborted = false;
+                    mFocusedWidget->injectDragBegin(mDragStartEvent);
                 }
             }
 

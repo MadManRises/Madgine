@@ -4,6 +4,8 @@
 
 #include "Madgine/pipelineloader/pipelineloader.h"
 
+#include "shadowscenerenderdata.h"
+
 
 namespace Engine {
 namespace Render {
@@ -20,7 +22,7 @@ namespace Render {
     private:
         PipelineLoader::Instance mPipeline;
 
-        SceneMainWindowComponent &mScene;        
+        ShadowSceneRenderData mData;     
 
         size_t mIndex;
 

@@ -22,6 +22,7 @@ namespace Render {
 
         void addRenderTarget(RenderTarget *target);
         void removeRenderTarget(RenderTarget *target);
+        std::vector<const RenderTarget *> renderTargets() const;
 
         Threading::Task<void> render();
 

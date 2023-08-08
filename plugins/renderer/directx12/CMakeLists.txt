@@ -30,7 +30,7 @@ add_custom_command(TARGET DirectX12 POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy 
 
 set(sources "")
 FolderSources(sources "" tools)
-	FolderSources(sources tools DirectX12_Tools directx12toolconfig.cpp directx12toolconfig.h directx12toolsforward.h directx12toolslib.h)
+	FolderSources(sources tools DirectX12_Tools directx12rendercontexttool.cpp directx12rendercontexttool.h directx12toolsforward.h directx12toolslib.h)
 		FolderSources(sources DirectX12_Tools imgui imgui_impl_dx12.cpp imgui_impl_dx12.h directx12imroot.cpp directx12imroot.h)
 
 

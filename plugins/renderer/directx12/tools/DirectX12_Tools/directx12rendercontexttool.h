@@ -4,21 +4,19 @@
 #include "Madgine_Tools/toolscollector.h"
 
 #include "DirectX12/util/directx12texture.h"
+#include "Madgine_Tools/render/rendercontexttool.h"
 
 namespace Engine {
 namespace Tools {
 
-    struct DirectX12ToolConfig : public Tool<DirectX12ToolConfig> {
+    struct DirectX12RenderContextTool : public ToolVirtualImpl<DirectX12RenderContextTool, RenderContextTool> {
 
-        SERIALIZABLEUNIT(DirectX12ToolConfig)
+        SERIALIZABLEUNIT(DirectX12RenderContextTool)
 
-        DirectX12ToolConfig(ImRoot &root);
-        DirectX12ToolConfig(const SceneEditor &) = delete;
+        DirectX12RenderContextTool(ImRoot &root);
 
         virtual Threading::Task<bool> init() override;
         virtual Threading::Task<void> finalize() override;
-
-        virtual void renderMenu() override;
 
         std::string_view key() const override;
 
@@ -29,4 +27,4 @@ namespace Tools {
 }
 }
 
-REGISTER_TYPE(Engine::Tools::DirectX12ToolConfig)
+REGISTER_TYPE(Engine::Tools::DirectX12RenderContextTool)

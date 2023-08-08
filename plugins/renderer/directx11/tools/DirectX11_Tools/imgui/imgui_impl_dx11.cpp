@@ -479,7 +479,7 @@ bool ImGui_ImplDX11_CreateDeviceObjects()
             \
             float4 main(PS_INPUT input) : SV_Target\
             {\
-            float4 out_col = pow(input.col, 2.2) * texture0.Sample(sampler0, input.uv); \
+            float4 out_col = float4(pow(input.col.xyz, 2.2), input.col.w) * texture0.Sample(sampler0, input.uv); \
             return out_col; \
             }";
 

@@ -23,13 +23,12 @@ namespace Physics {
         void init(Scene::Entity::Entity *entity);
         void finalize(Scene::Entity::Entity *entity);
 
+        void update();
+
         btSoftBody *get();
         void activate();
 
         Scene::Entity::Transform *transform();
-
-        void add();
-        void remove();
 
         void attach(RigidBody *rigidbody, size_t index, const Engine::Vector3 &offset = Engine::Vector3::ZERO);
 
@@ -38,7 +37,6 @@ namespace Physics {
     private:
         struct Data;
         std::unique_ptr<Data> mData;
-        PhysicsManager *mMgr = nullptr;
     };
 
     using SoftBodySkeletonPtr = Scene::Entity::EntityComponentPtr<SoftBodySkeleton>;

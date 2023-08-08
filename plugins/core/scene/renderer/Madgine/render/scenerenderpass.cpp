@@ -45,6 +45,7 @@ namespace Render {
     SceneRenderPass::SceneRenderPass(SceneMainWindowComponent &scene, Camera *camera, int priority)
         : mData(scene, camera)
         , mPriority(priority)
+        , mShadowPass(scene, camera, 50)
     {
     }
 
@@ -54,10 +55,14 @@ namespace Render {
 
     void SceneRenderPass::setup(RenderTarget *target)
     {
+        mShadowMap = target->context()->createRenderTexture({ 2048, 2048 }, { .mName = "ShadowMap", .mType = TextureType_2DMultiSample, .mCreateDepthBufferView = true, .mSamples = 4, .mTextureCount = 0 });
+        
+        mShadowMap->addRenderPass(&mShadowPass);
+
         mPipeline.create({ .vs = "scene", .ps = "scene", .bufferSizes = { sizeof(ScenePerApplication), sizeof(ScenePerFrame), sizeof(ScenePerObject) }, .instanceDataSize = sizeof(SceneInstanceData) });
 
         addDependency(&mData);
-        addDependency(mData.mScene.shadowTarget());
+        addDependency(mShadowMap.get());
         addDependency(mData.mScene.pointShadowTarget(0));
         addDependency(mData.mScene.pointShadowTarget(1));
         addDependency(mData.mScene.data());
@@ -66,12 +71,14 @@ namespace Render {
     void SceneRenderPass::shutdown()
     {
         removeDependency(&mData);
-        removeDependency(mData.mScene.shadowTarget());
+        removeDependency(mShadowMap.get());
         removeDependency(mData.mScene.pointShadowTarget(0));
         removeDependency(mData.mScene.pointShadowTarget(1));
         removeDependency(mData.mScene.data());
 
         mPipeline.reset();
+
+        mShadowMap.reset();
     }
 
     void SceneRenderPass::render(Render::RenderTarget *target, size_t iteration)
@@ -102,7 +109,7 @@ namespace Render {
         {
             auto perFrame = mPipeline->mapParameters<ScenePerFrame>(1);
 
-            perFrame->light.caster.reprojectionMatrix = mData.mScene.getDirectionShadowViewProjectionMatrix() * v.Inverse();
+            perFrame->light.caster.reprojectionMatrix = mShadowPass.viewProjectionMatrix() * v.Inverse();
 
             perFrame->light.caster.shadowSamples = 4;
 
@@ -130,7 +137,8 @@ namespace Render {
             }
         }
 
-        mPipeline->bindTextures(target, mData.mScene.depthTextures(), 2);
+        mPipeline->bindTextures(target, { mShadowMap->depthTexture() }, 2);
+        mPipeline->bindTextures(target, mData.mScene.depthTextures(), 3);
 
         for (const std::pair<const std::tuple<const GPUMeshData *, const GPUMeshData::Material *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> &instance : mData.mInstances) {
             const GPUMeshData *meshData = std::get<0>(instance.first);
@@ -181,6 +189,11 @@ namespace Render {
     int SceneRenderPass::priority() const
     {
         return mPriority;
+    }
+
+    void SceneRenderPass::debugCameras(Lambda<void(const Camera &, std::string_view)> handler) const
+    {
+        handler(*mData.mCamera, "SceneRenderPass");
     }
 
 }

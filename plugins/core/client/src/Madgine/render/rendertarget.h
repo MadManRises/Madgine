@@ -29,6 +29,7 @@ namespace Render {
         void removeRenderPass(RenderPass *pass);
 
         const std::vector<RenderPass *> &renderPasses();
+        std::vector<const RenderPass *> renderPasses() const;
 
         virtual void beginIteration(size_t iteration) const;
         virtual void endIteration(size_t iteration) const;
@@ -48,6 +49,8 @@ namespace Render {
         const std::string &name() const;
 
         RenderContext *context() const;
+
+        const RenderTarget *blitSource() const;
 
     protected:
         virtual Threading::ImmediateTask<void> render(RenderContext *context) override;

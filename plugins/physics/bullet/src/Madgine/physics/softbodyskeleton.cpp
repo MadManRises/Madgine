@@ -48,20 +48,46 @@ namespace Physics {
 
     struct SoftBodySkeleton::Data {
 
-        Data(btSoftBodyWorldInfo &info, Scene::Entity::Transform *transform)
-            : mTransform(transform)
-        // : mSoftBody(btSoftBody btSoftBody::btSoftBodyConstructionInfo { 0.0f, this, nullptr, { 0.0f, 0.0f, 0.0f } })
+        Data() = default;
+
+        void setup(SoftBodySkeleton *component, PhysicsManager *mgr, Scene::Entity::Transform *transform)
         {
-            mSoftBody = std::unique_ptr<btSoftBody> { btSoftBodyHelpers::CreateRope(info, { 0, 0, 0 }, { 0, 1, 0 }, 5, 0) };
+            mMgr = mgr;
+            mTransform = transform;
+            mSoftBody = std::unique_ptr<btSoftBody> { btSoftBodyHelpers::CreateRope(mgr->worldInfo(), { 0, 0, 0 }, { 0, 0.5f, 0 }, 5, 0) };
+        }
+
+        void add()
+        {
+            if (!mSoftBody->getUserIndex()) {
+                for (size_t i = 0; i < mSoftBody->m_anchors.size(); ++i) {
+                    btRigidBody *rigidbody = mSoftBody->m_anchors[i].m_body;
+                    if (!rigidbody->getUserIndex())
+                        return;
+                }
+                mMgr->world().addSoftBody(mSoftBody.get());
+                mSoftBody->setUserIndex(1);
+            }
+        }
+
+        void remove()
+        {
+            if (mSoftBody->getUserIndex()) {                
+                mMgr->world().removeSoftBody(mSoftBody.get());
+                mSoftBody->setUserIndex(0);
+            }
         }
 
         Scene::Entity::Transform *mTransform = nullptr;
+        PhysicsManager *mMgr = nullptr;
+
         std::unique_ptr<btSoftBody> mSoftBody;
     };
 
     SoftBodySkeleton::SoftBodySkeleton(const ObjectPtr &data)
         : NamedComponent(data)
     {
+        mData = std::make_unique<Data>();
     }
 
     SoftBodySkeleton::SoftBodySkeleton(SoftBodySkeleton &&other) = default;
@@ -72,16 +98,21 @@ namespace Physics {
 
     void SoftBodySkeleton::init(Scene::Entity::Entity *entity)
     {
-        mMgr = &entity->sceneMgr().getComponent<PhysicsManager>();
+        mData->setup(this, &entity->sceneMgr().getComponent<PhysicsManager>(), entity->addComponent<Scene::Entity::Transform>());
 
-        mData = std::make_unique<Data>(mMgr->worldInfo(), entity->addComponent<Scene::Entity::Transform>());
-
-        add();
+        mData->add();
     }
 
     void SoftBodySkeleton::finalize(Scene::Entity::Entity *entity)
     {
-        remove();
+        mData->remove();
+    }
+
+    void SoftBodySkeleton::update()
+    {
+        if (!get()->getUserIndex()) {
+            mData->add();
+        }
     }
 
     btSoftBody *SoftBodySkeleton::get()
@@ -94,18 +125,11 @@ namespace Physics {
         get()->activate(true);
     }
 
-    void SoftBodySkeleton::add()
-    {
-        mMgr->world().addSoftBody(get());
-    }
-
-    void SoftBodySkeleton::remove()
-    {
-        mMgr->world().removeSoftBody(get());
-    }
-
     void SoftBodySkeleton::attach(RigidBody *rigidbody, size_t index, const Engine::Vector3 &offset)
     {
+        bool wasAdded = get()->getUserIndex();
+        if (wasAdded && !rigidbody->get()->getUserIndex())
+            mData->remove();
         get()->appendAnchor(index, rigidbody->get(), { offset.x, offset.y, offset.z });
     }
 

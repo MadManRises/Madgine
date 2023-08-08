@@ -34,10 +34,14 @@ namespace Render {
     void ShadowRenderPass::setup(RenderTarget *target)
     {
         mPipeline.create({ .vs = "scene", .bufferSizes = { sizeof(ScenePerApplication), sizeof(ScenePerFrame), sizeof(ScenePerObject) }, .instanceDataSize = sizeof(SceneInstanceData) });
+
+        addDependency(&mData);
     }
 
     void ShadowRenderPass::shutdown()
     {
+        removeDependency(&mData);
+
         mPipeline.reset();
     }
 
@@ -50,7 +54,8 @@ namespace Render {
         
         target->pushAnnotation("Shadow");
 
-        updateFrustum();
+        Vector2i size = target->size();
+        updateFrustum(1.0f);
 
         {
             auto perApplication = mPipeline->mapParameters<ScenePerApplication>(0);
@@ -125,7 +130,7 @@ namespace Render {
         return mLightFrustum.getViewProjectionMatrix();
     }
 
-    void ShadowRenderPass::updateFrustum()
+    void ShadowRenderPass::updateFrustum(float aspectRatio)
     {
         Vector3 minBounds = std::numeric_limits<float>::max() * Vector3 { Vector3::UNIT_SCALE };
         Vector3 maxBounds = std::numeric_limits<float>::lowest() * Vector3 { Vector3::UNIT_SCALE };
@@ -133,7 +138,7 @@ namespace Render {
         Quaternion q = Quaternion::FromDirection(mData.mScene.mAmbientLightDirection);
         Quaternion qInv = q.inverse();
 
-        Frustum cameraFrustum = mData.mCamera->getFrustum(1.0f);
+        Frustum cameraFrustum = mData.mCamera->getFrustum(aspectRatio);
         Frustum localFrustum = qInv * cameraFrustum;
         auto corners = localFrustum.getCorners();
 
@@ -152,6 +157,11 @@ namespace Render {
             1.0f, maxBounds.z - minBounds.z + 1.0f,
             true
         };
+    }
+
+    void ShadowRenderPass::debugFrustums(Lambda<void(const Frustum &, std::string_view)> handler) const
+    {
+        handler(mLightFrustum, "ShadowRenderPass");
     }
 
 }

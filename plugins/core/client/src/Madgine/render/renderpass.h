@@ -1,11 +1,12 @@
 #pragma once
 
 #include "Modules/threading/taskfuture.h"
+#include "renderdebuggable.h"
 
 namespace Engine {
 namespace Render {
 
-    struct MADGINE_CLIENT_EXPORT RenderPass {
+    struct MADGINE_CLIENT_EXPORT RenderPass : RenderDebuggable {
         virtual ~RenderPass() = default;
 
         virtual void setup(RenderTarget *target) { }

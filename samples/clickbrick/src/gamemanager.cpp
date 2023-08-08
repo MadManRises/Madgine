@@ -66,7 +66,7 @@ Engine::Threading::Task<bool> GameManager::init()
     mCamera.mPosition = { 0, 0, -10 };
     mCamera.mOrientation = {};
 
-    mGameRenderTarget = mUI.window().getRenderer()->createRenderTexture({ 1, 1 }, {});
+    mGameRenderTarget = mUI.window().getRenderer()->createRenderTexture({ 1, 1 }, { .mName = "Game" });
     mGameRenderTarget->addRenderPass(&mSceneRenderer);
 
     mUI.app().taskQueue()->queueTask(updateApp());

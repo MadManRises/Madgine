@@ -43,7 +43,7 @@ endif ()
 
 set(sources "")
 FolderSources(sources "" tools)
-	FolderSources(sources tools OpenGL_Tools opengltoolconfig.cpp opengltoolconfig.h opengltoolsforward.h opengltoolslib.h)
+	FolderSources(sources tools OpenGL_Tools openglrendercontexttool.cpp openglrendercontexttool.h opengltoolsforward.h opengltoolslib.h)
 		FolderSources(sources OpenGL_Tools imgui imgui_impl_opengl3.cpp imgui_impl_opengl3.h openglimroot.cpp openglimroot.h)
 
 

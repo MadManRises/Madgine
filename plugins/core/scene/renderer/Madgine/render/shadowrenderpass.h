@@ -24,7 +24,9 @@ namespace Render {
         Matrix4 viewMatrix() const;
         Matrix4 viewProjectionMatrix() const;
 
-        void updateFrustum();
+        void updateFrustum(float aspectRatio);
+
+        virtual void debugFrustums(Lambda<void(const Frustum &, std::string_view)> handler) const override;
 
     private:
         PipelineLoader::Instance mPipeline;

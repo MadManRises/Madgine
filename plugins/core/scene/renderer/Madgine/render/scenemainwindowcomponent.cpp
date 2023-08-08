@@ -37,7 +37,6 @@ namespace Render {
         : VirtualData(window, 5)
         , mScene(Engine::App::Application::getSingletonPtr() ? &Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>() : nullptr)
         , mPass(*this, &mCamera, 1)
-        , mShadowPass(*this, &mCamera, 50)
         , mPointShadowPasses { { 0, *this, 50 }, { 1, *this, 50 } }
     {
     }
@@ -47,17 +46,14 @@ namespace Render {
     void SceneMainWindowComponent::setup(RenderTarget *target)
     {
         if (mScene) {
-            mShadowMap = target->context()->createRenderTexture({ 2048, 2048 }, { .mName = "ShadowMap", .mType = TextureType_2DMultiSample, .mCreateDepthBufferView = true, .mSamples = 4, .mTextureCount = 0 });
             mPointShadowMaps[0] = target->context()->createRenderTexture({ 2048, 2048 }, { .mName = "PointShadowMap0", .mType = TextureType_Cube, .mCreateDepthBufferView = true, .mTextureCount = 0 });
             mPointShadowMaps[1] = target->context()->createRenderTexture({ 2048, 2048 }, { .mName = "PointShadowMap1", .mType = TextureType_Cube, .mCreateDepthBufferView = true, .mTextureCount = 0 });
 
             mSceneData = std::make_unique<SceneRenderData>(*mScene);
-
-            mShadowMap->addRenderPass(&mShadowPass);
+            
             mPointShadowMaps[0]->addRenderPass(&mPointShadowPasses[0]);
             mPointShadowMaps[1]->addRenderPass(&mPointShadowPasses[1]);
 
-            addDependency(mShadowMap.get());
             addDependency(mPointShadowMaps[0].get());
             addDependency(mPointShadowMaps[1].get());
 
@@ -68,13 +64,11 @@ namespace Render {
     void SceneMainWindowComponent::shutdown()
     {
         if (mScene) {
-            removeDependency(mShadowMap.get());
             removeDependency(mPointShadowMaps[0].get());
             removeDependency(mPointShadowMaps[1].get());
 
             removeDependency(mSceneData.get());
 
-            mShadowMap.reset();
             mPointShadowMaps[0].reset();
             mPointShadowMaps[1].reset();
 
@@ -94,12 +88,7 @@ namespace Render {
 
     std::vector<TextureDescriptor> SceneMainWindowComponent::depthTextures()
     {
-        return { mShadowMap->depthTexture(), mPointShadowMaps[0]->depthTexture(), mPointShadowMaps[1]->depthTexture() };
-    }
-
-    Render::RenderTarget *SceneMainWindowComponent::shadowTarget()
-    {
-        return mShadowMap.get();
+        return { mPointShadowMaps[0]->depthTexture(), mPointShadowMaps[1]->depthTexture() };
     }
 
     Render::RenderTarget *SceneMainWindowComponent::pointShadowTarget(size_t index)
@@ -110,11 +99,6 @@ namespace Render {
     Render::RenderData *SceneMainWindowComponent::data()
     {
         return mSceneData.get();
-    }
-
-    Matrix4 SceneMainWindowComponent::getDirectionShadowViewProjectionMatrix()
-    {
-        return mShadowPass.viewProjectionMatrix();
     }
 
     void SceneMainWindowComponent::enableSceneRendering()

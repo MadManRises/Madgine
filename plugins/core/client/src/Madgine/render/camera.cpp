@@ -48,7 +48,7 @@ namespace Render {
         return getFrustum(aspectRatio).getProjectionMatrix();
     }
 
-    Frustum Camera::getFrustum(float aspectRatio)
+    Frustum Camera::getFrustum(float aspectRatio) const
     {
         float r = tanf((mFOV / 180.0f * PI) / 2.0f) * mN;
         float t = r / aspectRatio;

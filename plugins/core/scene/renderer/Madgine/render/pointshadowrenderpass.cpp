@@ -29,7 +29,7 @@ namespace Engine {
 namespace Render {
 
     PointShadowRenderPass::PointShadowRenderPass(size_t index, SceneMainWindowComponent &scene, int priority)
-        : mScene(scene)
+        : mData(scene, nullptr)
         , mIndex(index)
         , mPriority(priority)
     {
@@ -38,17 +38,20 @@ namespace Render {
     void PointShadowRenderPass::setup(RenderTarget *target)
     {
         mPipeline.create({ .vs = "pointshadow", .ps = "pointshadow", .gs = "pointshadow", .bufferSizes = { sizeof(PointShadowPerApplication), sizeof(PointShadowPerFrame), sizeof(PointShadowPerObject) }, .instanceDataSize = sizeof(PointShadowInstanceData) });
+
+        addDependency(&mData);
     }
 
     void PointShadowRenderPass::shutdown()
     {
+        removeDependency(&mData);
+
         mPipeline.reset();
     }
 
     void PointShadowRenderPass::render(Render::RenderTarget *target, size_t iteration)
     {
-        return; //TODO
-        Scene::Entity::EntityComponentList<Scene::Entity::PointLight> &lights = mScene.scene()->entityComponentList<Scene::Entity::PointLight>();
+        Scene::Entity::EntityComponentList<Scene::Entity::PointLight> &lights = mData.mScene.scene()->entityComponentList<Scene::Entity::PointLight>();
         if (mIndex >= lights.size())
             return;
 
@@ -58,25 +61,6 @@ namespace Render {
         Scene::Entity::Transform *transform = entity->getComponent<Scene::Entity::Transform>();
         if (!transform)
             return;
-
-        std::map<std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> instances;
-
-        for (const auto &[mesh, e] : mScene.scene()->entityComponentList<Scene::Entity::Mesh>().data()) {
-            if (!mesh.isVisible())
-                continue;
-
-            const GPUMeshData *meshData = mesh.data();
-            if (!meshData)
-                continue;
-
-            Scene::Entity::Transform *transform = e->getComponent<Scene::Entity::Transform>();
-            if (!transform)
-                continue;
-
-            Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
-
-            instances[std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *> { meshData, skeleton }].push_back(transform->worldMatrix());
-        }
 
         target->pushAnnotation("PointShadow");
 
@@ -99,7 +83,7 @@ namespace Render {
             perFrame->position = transform->mPosition;
         }
 
-        for (std::pair<const std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> &instance : instances) {
+        for (std::pair<const std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> &instance : mData.mInstances) {
             const GPUMeshData *meshData = std::get<0>(instance.first);
             Scene::Entity::Skeleton *skeleton = std::get<1>(instance.first);
 

@@ -13,7 +13,7 @@ target_link_libraries(DirectX11 PRIVATE d3d11 dxgi d3dcompiler Client)
 
 set(sources "")
 FolderSources(sources "" tools)
-	FolderSources(sources tools DirectX11_Tools directx11toolconfig.cpp directx11toolconfig.h directx11toolsforward.h directx11toolslib.h)
+	FolderSources(sources tools DirectX11_Tools directx11rendercontexttool.cpp directx11rendercontexttool.h directx11toolsforward.h directx11toolslib.h)
 		FolderSources(sources DirectX11_Tools imgui imgui_impl_dx11.cpp imgui_impl_dx11.h directx11imroot.cpp directx11imroot.h)
 
 

@@ -4,21 +4,19 @@
 #include "Madgine_Tools/toolscollector.h"
 
 #include "Vulkan/util/vulkantexture.h"
+#include "Madgine_Tools/render/rendercontexttool.h"
 
 namespace Engine {
 namespace Tools {
 
-    struct VulkanToolConfig : public Tool<VulkanToolConfig> {
+    struct VulkanRenderContextTool : public ToolVirtualImpl<VulkanRenderContextTool, RenderContextTool> {
 
-        SERIALIZABLEUNIT(VulkanToolConfig)
+        SERIALIZABLEUNIT(VulkanRenderContextTool)
 
-        VulkanToolConfig(ImRoot &root);
-        VulkanToolConfig(const SceneEditor &) = delete;
+        VulkanRenderContextTool(ImRoot &root);
 
         virtual Threading::Task<bool> init() override;
         virtual Threading::Task<void> finalize() override;
-
-        virtual void renderMenu() override;
 
         std::string_view key() const override;
 
@@ -29,4 +27,4 @@ namespace Tools {
 }
 }
 
-REGISTER_TYPE(Engine::Tools::VulkanToolConfig)
+REGISTER_TYPE(Engine::Tools::VulkanRenderContextTool)

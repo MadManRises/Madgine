@@ -12,11 +12,10 @@
 
 #include "Madgine/scene/entity/entity.h"
 
-#include "Meta/math/transformation.h"
-
 #include "rigidbody.h"
 
-#include "bullet3-3.24/src/BulletSoftBody/btSoftRigidDynamicsWorld.h"
+#include "rigidbodydata.h"
+
 
 ENTITYCOMPONENT_IMPL(RigidBody, Engine::Physics::RigidBody)
 
@@ -48,51 +47,6 @@ SERIALIZETABLE_END(Engine::Physics::RigidBody)
 namespace Engine {
 namespace Physics {
 
-    struct RigidBody::Data : btMotionState {
-        Data(RigidBody *component, Scene::Entity::Entity *entity = nullptr, Scene::Entity::Transform *transform = nullptr)
-            : mRigidBody(btRigidBody::btRigidBodyConstructionInfo { 0.0f, this, nullptr, { 0.0f, 0.0f, 0.0f } })
-            , mEntity(entity)
-            , mTransform(transform)
-        {
-            mRigidBody.setUserPointer(component);
-            mRigidBody.setUserIndex(65533);
-            mRigidBody.setUserIndex2(2);
-        }
-
-        virtual void setWorldTransform(const btTransform &transform) override
-        {
-            if (mTransform) {
-                Matrix4 p = mTransform->parentMatrix();
-
-                btQuaternion q = transform.getRotation();
-
-                Matrix4 m = p.Inverse() * TransformMatrix(Vector3 { transform.getOrigin() }, Vector3::UNIT_SCALE, Quaternion { q.x(), q.y(), q.z(), q.w() });
-
-                std::tie(mTransform->mPosition, mTransform->mScale, mTransform->mOrientation) = DecomposeTransformMatrix(m);
-            }
-        }
-
-        virtual void getWorldTransform(btTransform &transform) const override
-        {
-            if (mTransform) {
-                Matrix4 m = mTransform->worldMatrix();
-
-                Vector3 pos;
-                Vector3 scale;
-                Quaternion orientation;
-                std::tie(pos, scale, orientation) = DecomposeTransformMatrix(m);
-                transform = btTransform { { orientation.x, orientation.y, orientation.z, orientation.w }, { pos.x, pos.y, pos.z } };
-            } else {
-                transform = btTransform { { 0.0f, 0.0f, 0.0f, 1.0f } };
-            }
-        }
-
-        Scene::Entity::Entity *mEntity = nullptr;
-        Scene::Entity::Transform *mTransform = nullptr;
-
-        btRigidBody mRigidBody;
-    };
-
     RigidBody::RigidBody(const ObjectPtr &data)
         : NamedComponent(data)
 
@@ -103,7 +57,6 @@ namespace Physics {
     RigidBody::RigidBody(RigidBody &&other)
         : NamedComponent(std::move(other))
         , mShapeHandle(std::move(other.mShapeHandle))
-        , mMgr(other.mMgr)
         , mData(std::move(other.mData))
     {
         if (mData)
@@ -116,7 +69,6 @@ namespace Physics {
     {
         NamedComponent::operator=(std::move(other));
         std::swap(mShapeHandle, other.mShapeHandle);
-        mMgr = other.mMgr;
         std::swap(mData, other.mData);
         if (mData)
             get()->setUserPointer(this);
@@ -130,22 +82,21 @@ namespace Physics {
         mData->mEntity = entity;
         mData->mTransform = transform;
 
-        mMgr = &entity->sceneMgr().getComponent<PhysicsManager>();
+        mData->mMgr = &entity->sceneMgr().getComponent<PhysicsManager>();
 
-        Matrix4 m = transform->worldMatrix();
+        get()->saveKinematicState(1.0f);
+        get()->saveKinematicState(1.0f);
 
-        const auto &[pos, scale, orientation] = DecomposeTransformMatrix(m);
-        get()->setWorldTransform(btTransform { { orientation.x, orientation.y, orientation.z, orientation.w }, { pos.x, pos.y, pos.z } });
-
-        if (mShapeHandle && mShapeHandle->available())
+        if (mShapeHandle && mShapeHandle->available()) {
             get()->setCollisionShape(mShapeHandle->get());
+        }
 
-        add();
+        mData->add();
     }
 
     void RigidBody::finalize(Scene::Entity::Entity *entity)
     {
-        remove();
+        mData->remove();
     }
 
     void RigidBody::update()
@@ -156,7 +107,7 @@ namespace Physics {
             btVector3 inertia;
             mShapeHandle->get()->calculateLocalInertia(mass, inertia);
             get()->setMassProps(mass, inertia);
-            add();
+            mData->add();
         }
     }
 
@@ -194,13 +145,15 @@ namespace Physics {
     {
         float oldMass = get()->getMass();
         if (mass != oldMass) {
-            remove();
-            btVector3 inertia;
-            if (mShapeHandle && mShapeHandle->available()) {
-                mShapeHandle->get()->calculateLocalInertia(mass, inertia);
+            if (get()->getCollisionShape()) {
+                mData->remove();
+                btVector3 inertia;
+                get()->getCollisionShape()->calculateLocalInertia(mass, inertia);
+                get()->setMassProps(mass, inertia);
+                mData->add();
+            } else {
+                get()->setMassProps(mass, {});
             }
-            get()->setMassProps(mass, inertia);
-            add();
         }
     }
 
@@ -219,8 +172,8 @@ namespace Physics {
             get()->setCollisionFlags(get()->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
             get()->forceActivationState(ISLAND_SLEEPING);
             if (get()->getMass() > 0) {
-                remove();
-                add();
+                mData->remove();
+                mData->add();
             }
         }
     }
@@ -298,52 +251,54 @@ namespace Physics {
 
     uint16_t RigidBody::collisionGroup() const
     {
-        return get()->getUserIndex2();
+        return mData->collisionGroup();
     }
 
     void RigidBody::setCollisionGroup(uint16_t group)
     {
-        if (get()->getBroadphaseProxy())
-            get()->getBroadphaseProxy()->m_collisionFilterGroup = group;
-        get()->setUserIndex2(group);
+        mData->setCollisionGroup(group);
     }
 
     uint16_t RigidBody::collisionMask() const
     {
-        return get()->getUserIndex();
+        return mData->collisionMask();
     }
 
     void RigidBody::setCollisionMask(uint16_t mask)
     {
-        if (get()->getBroadphaseProxy())
-            get()->getBroadphaseProxy()->m_collisionFilterMask = mask;
-        get()->setUserIndex(mask);
+        mData->setCollisionMask(mask);
     }
 
     void RigidBody::setShape(typename CollisionShapeManager::Handle handle)
     {
-        remove();
+        mData->remove();
 
         mShapeHandle = std::move(handle);
         if (mShapeHandle->available()) {
             get()->setCollisionShape(mShapeHandle->get());
+            btVector3 inertia;
+            get()->getCollisionShape()->calculateLocalInertia(mass(), inertia);
+            get()->setMassProps(mass(), inertia);
+            mData->add();
         } else {
             get()->setCollisionShape(nullptr);
         }
-        add();
     }
 
     void RigidBody::setShapeName(std::string_view name)
     {
-        remove();
+        mData->remove();
 
         mShapeHandle.load(name);
         if (mShapeHandle->available()) {
             get()->setCollisionShape(mShapeHandle->get());
+            btVector3 inertia;
+            get()->getCollisionShape()->calculateLocalInertia(mass(), inertia);
+            get()->setMassProps(mass(), inertia);
+            mData->add();
         } else {
             get()->setCollisionShape(nullptr);
         }
-        add();
     }
 
     CollisionShapeManager::Resource *RigidBody::getShape() const
@@ -356,24 +311,9 @@ namespace Physics {
         return mShapeHandle;
     }
 
-    void RigidBody::add()
+    PhysicsManager *RigidBody::mgr() const
     {
-        if (mMgr && get()->getCollisionShape()) {
-            mMgr->world().addRigidBody(get(), collisionGroup(), collisionMask());
-            get()->activate(true);
-            get()->clearForces();
-        }
-    }
-
-    void RigidBody::remove()
-    {
-        if (mMgr)
-            mMgr->world().removeRigidBody(get());
-    }
-
-    PhysicsManager *RigidBody::mgr()
-    {
-        return mMgr;
+        return mData->mMgr;
     }
 
 }

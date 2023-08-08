@@ -15,7 +15,7 @@ namespace Render {
         Matrix4 getViewProjectionMatrix(float aspectRatio);
         Matrix4 getViewMatrix();
         Matrix4 getProjectionMatrix(float aspectRatio);
-        Frustum getFrustum(float aspectRatio);
+        Frustum getFrustum(float aspectRatio) const;
 
         Ray mousePointToRay(const Vector2 &mousePos, const Vector2 &viewportSize);
         Ray toRay() const;

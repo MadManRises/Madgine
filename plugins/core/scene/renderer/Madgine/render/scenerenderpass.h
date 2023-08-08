@@ -23,8 +23,10 @@ namespace Render {
 
         virtual int priority() const override;
 
-        float mAmbientFactor = 0.4f;
-        float mDiffuseFactor = 0.7f;
+        virtual void debugCameras(Lambda<void(const Camera &, std::string_view)> handler) const override;
+
+        float mAmbientFactor = 1.0f;
+        float mDiffuseFactor = 1.0f;
         float mSpecularFactor = 1.0f;
 
         float mLightConstantFactor = 1.0f;
@@ -36,6 +38,9 @@ namespace Render {
 
         LitSceneRenderData mData;
 
+        ShadowRenderPass mShadowPass;
+
+        std::unique_ptr<Render::RenderTarget> mShadowMap;
 
         int mPriority;
     };
