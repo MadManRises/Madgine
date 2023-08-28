@@ -120,7 +120,9 @@ template <typename T, typename R = Void>
 using patch_void_t = std::conditional_t<std::same_as<T, void>, R, T>;
 
 template <auto a>
-struct auto_holder;
+struct auto_holder {
+    static constexpr auto value = a;
+};
 	
 template <typename>
 struct type_holder_t {};

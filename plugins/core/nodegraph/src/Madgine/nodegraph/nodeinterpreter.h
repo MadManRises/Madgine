@@ -18,14 +18,20 @@ namespace NodeGraph {
         virtual std::map<std::string_view, ValueType> variables() { return {}; }
     };
 
-    struct MADGINE_NODEGRAPH_EXPORT NodeInterpreter {
+    struct NodeVariableScope {
+        virtual bool resolveVar(ValueType &ref, std::string_view name, bool recursive = true) = 0;
+        virtual std::map<std::string_view, ValueType> variables(bool recursive = true) = 0;
+    };
+
+    struct MADGINE_NODEGRAPH_EXPORT NodeInterpreter : NodeVariableScope {
         NodeInterpreter() = default;
-        NodeInterpreter(const NodeGraph *graph, const ArgumentList &args);
+        NodeInterpreter(const NodeGraph *graph, const ArgumentList &args, NodeVariableScope *parent = nullptr);
         NodeInterpreter(const NodeInterpreter &) = delete;
         NodeInterpreter(NodeInterpreter &&) = default;
         virtual ~NodeInterpreter() = default;
 
         NodeInterpreter &operator=(const NodeInterpreter &) = delete;
+        NodeInterpreter &operator=(NodeInterpreter &&) = default;
 
         void interpretImpl(Execution::VirtualReceiverBase<NodeInterpretResult> &receiver, uint32_t flowIn);
         void interpretImpl(Execution::VirtualReceiverBase<NodeInterpretResult> &receiver, Pin pin);
@@ -49,8 +55,8 @@ namespace NodeGraph {
 
         std::unique_ptr<NodeInterpreterData> &data(uint32_t index);
 
-        bool resolveVar(ValueType &result, std::string_view name);
-        std::map<std::string_view, ValueType> variables();
+        bool resolveVar(ValueType &result, std::string_view name, bool recursive = true) override;
+        std::map<std::string_view, ValueType> variables(bool recursive = true) override;
 
     private:
         const NodeGraph *mGraph = nullptr;
@@ -58,6 +64,8 @@ namespace NodeGraph {
         ArgumentList mArguments;
 
         std::vector<std::unique_ptr<NodeInterpreterData>> mData;
+
+        NodeVariableScope *mParentScope = nullptr;
     };
 
 }

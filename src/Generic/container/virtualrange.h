@@ -201,7 +201,7 @@ namespace __generic_impl__ {
         using IteratorImpl = __generic_impl__::VirtualIteratorImpl<RefT, It, Sentinel, Assign>;
 
         static constexpr bool sCanInsert = requires { typename container_traits<std::remove_reference_t<C>>::container; }
-        &&!std::is_const_v<std::remove_reference_t<C>> && !std::is_same_v<RefT, KeyValuePair>;
+        &&!std::is_const_v<std::remove_reference_t<C>> && !std::is_same_v<RefT, KeyValuePair> && std::is_default_constructible_v<It::value_type>;
 
         VirtualRangeImpl(C &&c)
             : mContainer(std::forward<C>(c))
@@ -232,7 +232,7 @@ namespace __generic_impl__ {
 
         virtual VirtualIterator<RefT> insert(const VirtualSentinel &where, std::shared_ptr<VirtualRangeBase<RefT>> self) override
         {
-            if constexpr (sCanInsert) {                
+            if constexpr (sCanInsert) {
                 auto it = container_traits<std::remove_reference_t<C>>::emplace(mContainer, mContainer.end());
                 return { std::make_unique<IteratorImpl>(it, mContainer.end(), self) };
             } else {

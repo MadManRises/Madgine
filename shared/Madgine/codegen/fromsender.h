@@ -72,12 +72,12 @@ struct codegen_connect_t {
             auto generate()
             {
                 return std::tuple_cat(
-                    std::make_tuple(VariableDefinition { Variable { std::string { Name }, Engine::toValueTypeDesc<T>() }, Constant { Engine::ValueType { mInitialValue } } }),
+                    std::make_tuple(VariableDefinition { Variable { std::string { Name }, Engine::toValueTypeDesc<Engine::decayed_t<T>>() }, Constant { Engine::ValueType { mInitialValue } } }),
                     this->mState.generate());
             }
-            T mInitialValue;
+            Engine::decayed_t<T> mInitialValue;
         };
-        return state { { std::move(sender.mSender), std::forward<Rec>(rec) }, std::forward<T>(sender.mInitialValue) };
+        return state { { std::move(sender.mSender), std::forward<Rec>(rec) }, std::forward<Engine::decayed_t<T>>(sender.mInitialValue) };
     }
 
     template <typename T, Engine::fixed_string Name, typename Rec>

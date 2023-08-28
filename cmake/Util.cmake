@@ -142,5 +142,3 @@ if (MSVC)
 	endif()
 endif()
 
-
-

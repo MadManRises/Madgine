@@ -407,6 +407,14 @@ namespace Tools {
                 }
                 ImGui::EndMenu();
             }
+            if (ImGui::BeginMenu(IMGUI_ICON_PLUS " Add Behavior")) {
+                for (auto &[name, resource] : NodeGraph::NodeGraphLoader::getSingleton()) {
+                    if (ImGui::MenuItem(name.data())) {
+                        entity->addBehavior(&resource);
+                    }
+                }
+                ImGui::EndMenu();
+            }
             ImGui::EndPopup();
         }
 
@@ -492,6 +500,28 @@ namespace Tools {
                         Im3D::Arrow3D(IM3D_LINES, 0.1f * length, start.xyz(), end.xyz());
                     }
                 }
+            }
+        }
+
+        for (Scene::Entity::EntityBehavior &behavior : entity->behaviors()) {
+            
+            ImGui::BeginGroupPanel(behavior.getName().data());
+            if (ImGui::BeginTable("columns", 2, ImGuiTableFlags_Resizable)) {
+                for (auto &[name, value] : behavior.variables()) {
+                    mInspector->drawValue(name, value, false);
+                }
+                ImGui::EndTable();
+            }
+
+            ImGui::ItemSize({ ImGui::GetItemRectSize().x, 0 });
+
+            ImGui::EndGroupPanel();
+
+            if (ImGui::BeginPopupCompoundContextItem()) {
+                if (ImGui::MenuItem((IMGUI_ICON_X " Delete " + std::string { behavior.getName() }).c_str())) {
+                    throw 0;
+                }
+                ImGui::EndPopup();
             }
         }
     }

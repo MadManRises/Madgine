@@ -127,7 +127,7 @@ namespace Render {
         return true;
     }
 
-    void GPUBufferNode::interpret(NodeGraph::NodeReceiver receiver, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const
+    void GPUBufferNode::interpret(NodeGraph::NodeReceiver<NodeBase> receiver, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const
     {
         assert(flowIn == 0);
 

@@ -25,10 +25,8 @@ namespace NodeGraph {
 
         NodeGraph &operator=(const NodeGraph &other);
 
-        std::string_view name() const;
-
         Serialize::StreamResult loadFromFile(const Filesystem::Path &path);
-        void saveToFile();
+        void saveToFile(const Filesystem::Path &path);
 
         NodeBase *addNode(std::unique_ptr<NodeBase> node);
         NodeBase *addNode(std::string_view name);
@@ -62,6 +60,8 @@ namespace NodeGraph {
         std::string_view dataInName(Pin source);
         std::string_view dataOutName(Pin target);
 
+        ExtendedValueTypeDesc resolveVariableType(std::string_view name) const;
+
         void connectFlow(Pin source, Pin target);
         void connectDataIn(Pin target, Pin source);
         void connectDataOut(Pin source, Pin target);
@@ -84,11 +84,12 @@ namespace NodeGraph {
         std::vector<DataInPinPrototype> mDataInPins;
         std::vector<DataOutPinPrototype> mDataOutPins;
 
-        struct MADGINE_NODEGRAPH_EXPORT NodeInterpreterWrapper : NodeInterpreter, private KeyValueReceiver, private Execution::VirtualReceiverBase<GenericResult> {
+        struct MADGINE_NODEGRAPH_EXPORT NodeInterpreterWrapper : NodeInterpreter, private KeyValueReceiver, private Execution::VirtualReceiverBase<NodeInterpretResult> {
             using NodeInterpreter::NodeInterpreter;
-            
+
             void start();
             virtual void set_value() override;
+            virtual void set_error(NodeInterpretResult result) override;
         };
 
         auto interpret(const ArgumentList &args = {}) const
@@ -102,8 +103,6 @@ namespace NodeGraph {
         const char *writeNode(Serialize::FormattedSerializeStream &out, const std::unique_ptr<NodeBase> &node) const;
 
     private:
-        Filesystem::Path mPath;
-
         std::vector<std::unique_ptr<NodeBase>> mNodes;
     };
 

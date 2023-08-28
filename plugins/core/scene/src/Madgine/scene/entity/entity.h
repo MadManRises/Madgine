@@ -14,6 +14,8 @@
 
 #include "Generic/customfunctors.h"
 
+#include "entitybehavior.h"
+
 namespace Engine {
 namespace Scene {
     namespace Entity {
@@ -91,6 +93,11 @@ namespace Scene {
             void clearComponents();
             void relocateComponent(EntityComponentHandle<EntityComponentBase> newIndex);
 
+
+            void addBehavior(std::string_view name);
+            void addBehavior(NodeGraph::NodeGraphLoader::Resource *res);
+            std::vector<EntityBehavior> &behaviors();
+
             bool isLocal() const;
 
             void handleEntityEvent(const typename std::set<EntityComponentOwningHandle<EntityComponentBase>>::iterator &it, int op);
@@ -107,9 +114,14 @@ namespace Scene {
             Serialize::StreamResult readComponent(Serialize::FormattedSerializeStream &in, EntityComponentOwningHandle<EntityComponentBase> &handle);
             const char *writeComponent(Serialize::FormattedSerializeStream &out, const EntityComponentOwningHandle<EntityComponentBase> &comp) const;
 
+            Serialize::StreamResult readBehavior(Serialize::FormattedSerializeStream &in, std::string &name, Entity *&entity);
+            const char *writeBehavior(Serialize::FormattedSerializeStream &out, const EntityBehavior &behavior) const;
+
             bool mLocal;
 
             SERIALIZABLE_CONTAINER(mComponents, mutable_set<EntityComponentOwningHandle<EntityComponentBase>, std::less<>>, ParentFunctor<&Entity::handleEntityEvent>);
+
+            std::vector<EntityBehavior> mBehaviors;
 
             SceneManager &mSceneManager;
         };

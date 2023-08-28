@@ -19,6 +19,7 @@
 METATABLE_BEGIN(Engine::Scene::Entity::Entity)
 NAMED_MEMBER(Name, mName)
 READONLY_PROPERTY(Components, components)
+NAMED_MEMBER(Behaviors, mBehaviors)
 METATABLE_END(Engine::Scene::Entity::Entity)
 
 using namespace Engine::Serialize;
@@ -73,6 +74,7 @@ static constexpr Serializer sComponentSynchronizer {
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Entity)
 FIELD(mComponents, Serialize::ParentCreator<&Engine::Scene::Entity::Entity::readComponent, &Engine::Scene::Entity::Entity::writeComponent, &Engine::Scene::Entity::Entity::clearComponents>)
 SERIALIZETABLE_ENTRY(sComponentSynchronizer)
+FIELD(mBehaviors, Serialize::ParentCreator<&Engine::Scene::Entity::Entity::readBehavior, &Engine::Scene::Entity::Entity::writeBehavior>)
 SERIALIZETABLE_END(Engine::Scene::Entity::Entity)
 
 namespace Engine {
@@ -239,6 +241,36 @@ namespace Scene {
             out.beginExtendedWrite("Component", 1);
             write(out, EntityComponentRegistry::sComponentName(comp.mHandle.mType), "name");
             return "Component";
+        }
+
+        void Entity::addBehavior(std::string_view name)
+        {
+            mBehaviors.emplace_back(name, this);
+        }
+
+        void Entity::addBehavior(NodeGraph::NodeGraphLoader::Resource *res)
+        {
+            mBehaviors.emplace_back(res, this);
+        }
+
+        std::vector<EntityBehavior> &Entity::behaviors()
+        {
+            return mBehaviors;
+        }
+
+        Serialize::StreamResult Entity::readBehavior(Serialize::FormattedSerializeStream &in, std::string &name, Entity *&entity)
+        {
+            STREAM_PROPAGATE_ERROR(in.beginExtendedRead("Behavior", 1));
+            STREAM_PROPAGATE_ERROR(read(in, name, "Graph"));
+            entity = this;
+            return {};
+        }
+
+        const char *Entity::writeBehavior(Serialize::FormattedSerializeStream &out, const EntityBehavior &behavior) const
+        {
+            out.beginExtendedWrite("Behavior", 1);
+            write(out, behavior.getName(), "Graph");
+            return "Behavior";
         }
 
         bool Entity::isLocal() const

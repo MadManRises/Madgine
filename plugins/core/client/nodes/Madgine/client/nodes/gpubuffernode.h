@@ -48,7 +48,7 @@ namespace Render {
         virtual uint32_t dataInMask(uint32_t index, uint32_t group = 0, bool bidir = true) const override;
         virtual bool dataInVariadic(uint32_t group = 0) const override;
 
-        virtual void interpret(NodeGraph::NodeReceiver receiver, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const override;
+        virtual void interpret(NodeGraph::NodeReceiver<NodeBase> receiver, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const override;
 
         virtual void generate(NodeGraph::CodeGenerator &generator, std::unique_ptr<NodeGraph::CodeGeneratorData> &data, uint32_t flowIn, uint32_t group = 0) const override;
 

@@ -4,13 +4,13 @@ set(sources "")
 FolderSources(sources "" src)
 	FolderSources(sources src Madgine sceneforward.h scenelib.h)
 		FolderSources(sources Madgine scene scenemanager.cpp scenemanager.h scenecomponentcollector.cpp scenecomponentcollector.h scenecomponentbase.cpp scenecomponentbase.h)
-			FolderSources(sources scene entity entitycomponentbase.cpp entitycomponentbase.h entitycomponentcollector.cpp entitycomponentcollector.h entitycomponentptr.cpp entityptr.cpp entityptr.h entity.cpp entity.h entitycomponent.h entitycomponentlistbase.cpp entitycomponentlist.cpp entitycomponenthandle.cpp entitycomponenthandle.h masks.h)
+			FolderSources(sources scene entity entitycomponentbase.cpp entitycomponentbase.h entitycomponentcollector.cpp entitycomponentcollector.h entitycomponentptr.cpp entityptr.cpp entityptr.h entity.cpp entity.h entitybehavior.cpp entitybehavior.h entitycomponent.h entitycomponentlistbase.cpp entitycomponentlist.cpp entitycomponenthandle.cpp entitycomponenthandle.h masks.h)
 				FolderSources(sources entity components animation.cpp animation.h material.cpp material.h mesh.cpp mesh.h pointlight.cpp pointlight.h skeleton.cpp skeleton.h transform.cpp transform.h)
 			FolderSources(sources scene senders scenesenders.cpp scenesenders.h)
 
 add_plugin(Scene Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/scenelib.h)
 
-target_link_plugins(Scene MeshLoader AnimationLoader App)
+target_link_plugins(Scene MeshLoader AnimationLoader App NodeGraph)
 
 target_link_options(Scene PUBLIC "/NATVIS:${CMAKE_CURRENT_LIST_DIR}/src/Scene.natvis")
 

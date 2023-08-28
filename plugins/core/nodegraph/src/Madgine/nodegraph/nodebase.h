@@ -78,6 +78,8 @@ namespace NodeGraph {
 
         static PinDesc pinFromId(uint32_t id);
 
+        virtual bool resolveVariableType(ExtendedValueTypeDesc &type, std::string_view name) const { return false; }
+
         virtual void onFlowOutUpdate(Pin source, EdgeEvent event);
         virtual void onDataInUpdate(Pin target, EdgeEvent event);
         virtual void onDataOutUpdate(Pin source, EdgeEvent event);
@@ -106,7 +108,7 @@ namespace NodeGraph {
         void onNodeReindex(uint32_t oldIndex, uint32_t newIndex);
 
         virtual void setupInterpret(NodeInterpreter &interpreter, std::unique_ptr<NodeInterpreterData> &data) const;
-        virtual void interpret(NodeReceiver receiver, std::unique_ptr<NodeInterpreterData> &data, uint32_t flowIn, uint32_t group = 0) const;
+        virtual void interpret(NodeReceiver<NodeBase> receiver, std::unique_ptr<NodeInterpreterData> &data, uint32_t flowIn, uint32_t group = 0) const;
         virtual void interpretRead(NodeInterpreter &interpreter, ValueType &retVal, std::unique_ptr<NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group = 0) const;
         virtual void interpretWrite(NodeInterpreter &interpreter, std::unique_ptr<NodeInterpreterData> &data, const ValueType &v, uint32_t receiverIndex, uint32_t group = 0) const;
 

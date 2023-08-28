@@ -288,6 +288,8 @@ constexpr ValueTypeIndex toValueTypeIndex()
 template <typename T>
 constexpr ExtendedValueTypeDesc toValueTypeDesc()
 {
+    static_assert(!requires { typename std::decay_t<T>::no_value_type; });
+
     static_assert(!std::is_rvalue_reference_v<T>);
     if constexpr (InstanceOf<T, std::optional>) {
         return { { ExtendedValueTypeEnum::OptionalType }, toValueTypeDesc<typename is_instance<T, std::optional>::argument_types::template unpack_unique<>>() };

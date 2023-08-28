@@ -75,7 +75,7 @@ namespace NodeGraph {
         return { ValueTypeIndex { ValueTypeEnum::FloatValue } };
     }
 
-    void TestNode::interpret(NodeReceiver receiver, std::unique_ptr<NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const
+    void TestNode::interpret(NodeReceiver<NodeBase> receiver, std::unique_ptr<NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const
     {
         ValueType v;
         receiver.read(v, 1);

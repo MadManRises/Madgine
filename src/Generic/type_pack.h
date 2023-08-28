@@ -44,6 +44,8 @@ struct type_pack<> {
     using transform = type_pack<>;
     template <template <size_t> typename F, size_t offset = 0>
     using transform_index = type_pack<>;
+    template <template <typename, size_t> typename F, size_t offset = 0>
+    using transform_with_index = type_pack<>;
 
     template <typename T>
     using unique = T;
@@ -108,6 +110,8 @@ struct type_pack<Head, Ty...> {
     using transform = type_pack<F<Head>, F<Ty>...>;
     template <template <size_t> typename F, size_t offset = 0>
     using transform_index = typename type_pack<Ty...>::template transform_index<F, offset + 1>::template prepend<F<offset>>;
+    template <template <typename, size_t> typename F, size_t offset = 0>
+    using transform_with_index = typename type_pack<Ty...>::template transform_with_index<F, offset + 1>::template prepend<F<Head, offset>>;
 
     template <template <typename...> typename Wrapper>
     using instantiate = Wrapper<Head, Ty...>;

@@ -1,3 +1,3 @@
 #pragma once
 
-DLL_IMPORT_VARIABLE(const Engine::MetaTable, table, Engine::NoneOf<Engine::Void>);
+DLL_IMPORT_VARIABLE(const Engine::MetaTable, table, SINGLE_ARG(Engine::NoneOf<Engine::Void, Engine::ValueType>));

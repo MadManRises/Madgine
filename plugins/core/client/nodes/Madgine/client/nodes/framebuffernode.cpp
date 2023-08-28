@@ -72,7 +72,7 @@ namespace Render {
         return NodeGraph::NodeExecutionMask::GPU;
     }
 
-    void FrameBufferNode::interpret(NodeGraph::NodeReceiver receiver, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const
+    void FrameBufferNode::interpret(NodeGraph::NodeReceiver<NodeBase> receiver, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const
     {
         throw 0;
     }

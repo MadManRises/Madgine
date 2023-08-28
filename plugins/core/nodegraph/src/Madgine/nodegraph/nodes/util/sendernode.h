@@ -5,9 +5,11 @@
 
 #include "../../nodecollector.h"
 #include "../../nodeinterpreter.h"
+#include "Generic/delayedconstruct.h"
 #include "Generic/execution/algorithm.h"
 #include "Generic/execution/execution.h"
 #include "Generic/execution/state.h"
+#include "Generic/manuallifetime.h"
 
 #include "../../nodeexecution.h"
 #include "../../nodegraph.h"
@@ -33,53 +35,26 @@ namespace NodeGraph {
     template <typename T>
     using is_value = std::negation<std::disjunction<is_algorithm<T>, is_pred_sender<T>, is_succ_sender<T>>>;
 
-    template <typename... T>
-    struct algorithm_argument_helper;
-
-    template <>
-    struct algorithm_argument_helper<> {
-        static constexpr size_t count = 0;
-
-        static ExtendedValueTypeDesc type(uint32_t index)
-        {
-            throw 0;
-        }
+    template <typename T, size_t>
+    struct remove_deductors_impl {
+        using type = T;
     };
 
-    template <typename Traits>
-    auto variadic_helper()
-    {
-        if constexpr (requires { typename Traits::variadic; }) {
-            return typename Traits::variadic {};
-        } else {
-            return type_pack<> {};
-        }
-    }
+    template <size_t I>
+    struct dynamic_value_type : ValueType {
+        static constexpr size_t index = I;
+        using decay_t = ValueType;
+        using ValueType::operator=;
+        using no_value_type = void;
+    };
 
-    template <typename Signature, typename Variadic = void>
-    static ExtendedValueTypeDesc signature_type(uint32_t index)
-    {
-        return [index]<typename... T>(type_pack<T...>)
-        {
-            static constexpr ExtendedValueTypeDesc types[] = {
-                toValueTypeDesc<std::remove_reference_t<decayed_t<T>>>()...
-            };
-            if constexpr (Signature::variadic) {
-                if (index >= Signature::count)
-                    return [index]<typename... V>(type_pack<V...>)
-                    {
-                        static_assert(sizeof...(V) > 0);
-                        static constexpr ExtendedValueTypeDesc variadicTypes[] = {
-                            toValueTypeDesc<std::remove_reference_t<decayed_t<V>>>()...
-                        };
-                        return variadicTypes[(index - sizeof...(T)) % sizeof...(V)];
-                    }
-                (typename Variadic::non_recursive_arguments {});
-            }
-            return types[index];
-        }
-        (Signature {});
-    }
+    template <size_t I>
+    struct remove_deductors_impl<ValueType, I> {
+        using type = dynamic_value_type<I>;
+    };
+
+    template <typename T, size_t I>
+    using remove_deductors = typename remove_deductors_impl<T, I>::type;
 
     template <typename Algorithm>
     struct SenderNode : Node<SenderNode<Algorithm>, AutoMaskNode<>> {
@@ -88,18 +63,32 @@ namespace NodeGraph {
 
         using argument_types = typename Traits::argument_types;
         using algorithms = typename argument_types::template filter<is_algorithm>;
-        using value_argument_tuple = typename argument_types::template filter<is_value>::template instantiate<std::tuple>;
+        using value_arguments = typename argument_types::template filter<is_value>;
+        using value_argument_tuple = typename value_arguments::template transform_with_index<remove_deductors>::template instantiate<std::tuple>;
         using in_types = typename argument_types::template filter<is_pred_sender>;
-        using variadic = decltype(variadic_helper<Traits>());
+
+        static constexpr bool isVariadic = requires { typename Traits::variadic; };
+        static constexpr bool hasVariables = requires { typename Traits::exposedVariables; };
+        static_assert(Traits::constant || !hasVariables);
+
+        static auto variadic_helper()
+        {
+            if constexpr (isVariadic) {
+                return typename Traits::variadic{};
+            } else {
+                return type_pack<> {};
+            }
+        }
+        using variadic = decltype(variadic_helper());
 
         template <uint32_t I>
-        static auto buildArgs(const std::tuple<> &values, type_pack<> args, std::vector<NodeResults> *results = nullptr, NodeResults *variadicBuffer = nullptr, size_t *recursiveOffset = nullptr)
+        static auto buildArgs(const std::tuple<>& values, type_pack<> args, std::vector<NodeResults>* results = nullptr, NodeResults* variadicBuffer = nullptr, size_t* recursiveOffset = nullptr)
         {
             return std::make_tuple();
         }
 
         template <uint32_t I, typename... Vs, typename T, typename... Ts>
-        static auto buildArgs(std::tuple<Vs...> &&values, type_pack<T, Ts...> args, std::vector<NodeResults> *results = nullptr, NodeResults *variadicBuffer = nullptr, size_t *recursiveOffset = nullptr)
+        static auto buildArgs(std::tuple<Vs...>&& values, type_pack<T, Ts...> args, std::vector<NodeResults>* results = nullptr, NodeResults* variadicBuffer = nullptr, size_t* recursiveOffset = nullptr)
         {
             if constexpr (is_pred_sender<T>::value) {
                 return std::tuple_cat(
@@ -121,26 +110,68 @@ namespace NodeGraph {
             }
         }
 
-        static auto buildSender(value_argument_tuple &&values, std::vector<NodeResults> *results = nullptr, NodeResults *variadicBuffer = nullptr)
+        static auto buildSender(value_argument_tuple&& values, std::vector<NodeResults>* results = nullptr, NodeResults* variadicBuffer = nullptr)
         {
             return TupleUnpacker::invokeFromTuple(Traits::algorithm, buildArgs<0>(std::move(values), argument_types {}, results, variadicBuffer));
         }
 
-        static auto buildVariadicSender(size_t *recursiveOffset, NodeResults *variadicBuffer = nullptr)
+        static auto buildVariadicSender(size_t* recursiveOffset, NodeResults* variadicBuffer = nullptr)
         {
-            if constexpr (requires { typename Traits::variadic; }) {
-                return TupleUnpacker::invokeFromTuple(Traits::algorithm, buildArgs<0>(std::make_tuple(), variadic {}, nullptr, variadicBuffer, recursiveOffset));
+            if constexpr (isVariadic) {
+                return TupleUnpacker::invokeFromTuple(Traits::algorithm, buildArgs<0>(std::make_tuple(), typename Traits::variadic {}, nullptr, variadicBuffer, recursiveOffset));
             }
+        }
+
+        template <typename T>
+        ExtendedValueTypeDesc resolveType() const
+        {
+            using decayedT = std::decay_t<T>;
+            if constexpr (InstanceOfA<decayedT, Execution::variable_type>) {
+                return mGraph.resolveVariableType(getDynamicName<is_instance_auto<decayedT, Execution::variable_type>::arguments::value>());
+            } else if constexpr (InstanceOfA<decayedT, Execution::dynamic_argument_type>) {
+                return getArguments<T::index>().type();
+            } else if constexpr (InstanceOfA<decayedT, dynamic_value_type>) {
+                return getArguments<T::index>().type();
+            } else {
+                return toValueTypeDesc<std::remove_reference_t<decayed_t<T>>>();
+            }
+        }
+
+        template <typename Signature, typename Variadic = void>
+        ExtendedValueTypeDesc signature_type(uint32_t index) const
+        {
+            if constexpr (Signature::variadic) {
+                if (index >= Signature::count) {
+                    static constexpr size_t variadicCount = Variadic::non_recursive_arguments::size;
+                    static_assert(variadicCount > 0);   
+                    return [ this, index ]<typename... V>(type_pack<V...>)
+                    {
+                        ExtendedValueTypeDesc variadicTypes[] = {
+                            resolveType<V>()...
+                        };
+                        return variadicTypes[(index - Signature::count) % variadicCount];
+                    }
+                    (typename Variadic::non_recursive_arguments {});
+                }
+            }
+            return [ this, index ]<typename... T>(type_pack<T...>)
+            {
+                ExtendedValueTypeDesc types[] = {
+                    resolveType<T>()...
+                };                
+                return types[index];
+            }
+            (Signature {});
         }
 
         using Sender = decltype(buildSender(std::declval<value_argument_tuple>()));
         using VariadicSender = decltype(buildVariadicSender(nullptr));
 
-        struct DummyReceiver : NodeExecutionReceiver {
+        struct DummyReceiver : NodeExecutionReceiver<SenderNode<Algorithm>> {
             template <typename... Args>
-            void set_value(Args &&...args)
+            void set_value(Args&&... args)
             {
-                mValues = { ValueType { std::forward<Args>(args) }... };
+                mValues = { ValueType { std::forward<decayed_t<Args>>(args) }... };
                 mHasReturned = true;
             }
 
@@ -148,21 +179,22 @@ namespace NodeGraph {
             NodeResults mValues;
 
             template <typename CPO>
-            friend decltype(auto) tag_invoke(CPO f, DummyReceiver &receiver)
+            friend decltype(auto) tag_invoke(CPO f, DummyReceiver& receiver)
             {
-                return f(static_cast<NodeExecutionReceiver &>(receiver));
+                return f(static_cast<NodeExecutionReceiver<SenderNode<Algorithm>>&>(receiver));
             }
         };
 
-        SenderNode(NodeGraph &graph)
+        SenderNode(NodeGraph& graph)
             : Node<SenderNode<Algorithm>, AutoMaskNode<>>(graph)
         {
             this->setup();
         }
 
-        SenderNode(const SenderNode &other, NodeGraph &graph)
+        SenderNode(const SenderNode& other, NodeGraph& graph)
             : Node<SenderNode<Algorithm>, AutoMaskNode<>>(other, graph)
             , mArguments(other.mArguments)
+            , mDynamicNames(other.mDynamicNames)
         {
         }
 
@@ -207,7 +239,7 @@ namespace NodeGraph {
 
         bool flowOutVariadic(uint32_t group = 0) const override
         {
-            if constexpr (requires { typename Traits::variadic; }) {
+            if constexpr (isVariadic) {
                 return group == 1 && std::same_as<typename Traits::variadic::template unpack_unique<void>, Execution::succ_sender>;
             } else {
                 return false;
@@ -252,19 +284,41 @@ namespace NodeGraph {
             static constexpr auto types = []<typename... InnerAlg>(type_pack<InnerAlg...>)
             {
                 return std::array {
-                    signature_type<typename Sender::template value_types<Execution::signature>>,
-                    signature_type<typename InnerAlg::Signature>...
+                    &SenderNode<Algorithm>::signature_type<typename Sender::template value_types<Execution::signature>>,
+                    &SenderNode<Algorithm>::signature_type<typename InnerAlg::Signature>...
                 };
             }
             (algorithms {});
-            return types[group](index);
+            return (this->*types[group])(index);
+        }
+
+        bool resolveVariableType(ExtendedValueTypeDesc& type, std::string_view name) const override
+        {
+            if constexpr (hasVariables) {
+                return [&]<fixed_string... Names, typename... T>(type_pack<Execution::variable<Names, T>...>)
+                {
+                    return ([&]() {
+                        if (name == getDynamicName<Names>()) {
+                            type = resolveType<T>();
+                            return true;
+                        }
+                        return false;
+                    }() || ...);
+                }
+                (typename Traits::exposedVariables {});
+            }
+            return false;
         }
 
         struct InterpretData : NodeInterpreterData {
 
             struct Receiver;
 
-            using InnerReceiver = std::conditional_t<Traits::constant, DummyReceiver &, Receiver>;
+            using InnerReceiver = std::conditional_t<Traits::constant,
+                std::conditional_t<hasVariables,
+                    DummyReceiver,
+                    DummyReceiver&>,
+                Receiver>;
             using State = Execution::connect_result_t<Sender, InnerReceiver>;
 
             InterpretData()
@@ -272,10 +326,10 @@ namespace NodeGraph {
                 static_assert(!Traits::constant);
             }
 
-            InterpretData(DummyReceiver &receiver, value_argument_tuple args)
+            InterpretData(InnerReceiver receiver, value_argument_tuple args)
             {
                 static_assert(Traits::constant);
-                buildState(receiver, std::move(args));
+                buildState(std::forward<InnerReceiver>(receiver), std::move(args));
             }
 
             ~InterpretData()
@@ -285,11 +339,11 @@ namespace NodeGraph {
                 }
             }
 
-            struct Receiver : NodeReceiver {
-                InterpretData *mData;
+            struct Receiver : NodeReceiver<SenderNode<Algorithm>> {
+                InterpretData* mData;
 
                 template <typename... Args>
-                void set_value(Args &&...args)
+                void set_value(Args&&... args)
                 {
                     if (mData->mResults.empty())
                         mData->mResults.emplace_back();
@@ -312,10 +366,10 @@ namespace NodeGraph {
             };
 
             struct RecursiveReceiver {
-                InterpretData *mData;
+                InterpretData* mData;
 
                 template <typename... Args>
-                void set_value(Args &&...args)
+                void set_value(Args&&... args)
                 {
                     if (mData->mRecursiveBuffer.empty())
                         mData->mRecursiveBuffer.emplace_back();
@@ -340,13 +394,13 @@ namespace NodeGraph {
                 }
 
                 template <typename CPO>
-                friend decltype(auto) tag_invoke(CPO f, RecursiveReceiver &receiver)
+                friend decltype(auto) tag_invoke(CPO f, RecursiveReceiver& receiver)
                 {
                     return f(receiver.mData->mState);
                 }
             };
 
-            void start(NodeReceiver receiver, value_argument_tuple args)
+            void start(NodeReceiver<SenderNode<Algorithm>> receiver, value_argument_tuple args)
             {
                 static_assert(!Traits::constant);
                 buildState(Receiver { receiver, this }, std::move(args));
@@ -355,7 +409,7 @@ namespace NodeGraph {
 
             void start()
             {
-                if constexpr (requires { typename Traits::variadic; }) {
+                if constexpr (isVariadic) {
 
                     using PredSender = typename argument_types::template filter<is_pred_sender>::template unpack_unique<Execution::pred_sender<Execution::signature<>>>;
                     if constexpr (PredSender::Signature::variadic) {
@@ -365,20 +419,21 @@ namespace NodeGraph {
 
                     mVariadicInfo.mRecursionLevel = 0;
                     if (!mVariadicInfo.mStates.empty()) {
-                        mVariadicInfo.mStates.front().mState.start();
+                        mVariadicInfo.mStates.front()->start();
                     } else {
-                        mState.start();
+                        mState->start();
                     }
                 } else {
-                    mState.start();
+                    mState->start();
                 }
             }
 
-            void buildState(InnerReceiver receiver, value_argument_tuple &&args)
+            void buildState(InnerReceiver receiver, value_argument_tuple&& args)
             {
-                new (&mState) State { Execution::connect(buildSender(std::move(args), &mResults, &mRecursiveBuffer), std::forward<InnerReceiver>(receiver)) };
+                construct(mState,
+                    DelayedConstruct<State> { [&]() { return Execution::connect(buildSender(std::move(args), &mResults, &mRecursiveBuffer), std::forward<InnerReceiver>(receiver)); } });
 
-                if constexpr (requires { typename Traits::variadic; }) {
+                if constexpr (isVariadic) {
 
                     size_t baseIndex = 0;
                     uint32_t group = 1;
@@ -389,51 +444,53 @@ namespace NodeGraph {
                         group = 0;
                     }
 
-                    mVariadicInfo.mStates.resize(Execution::get_context(receiver).mNode->variadicPinCount(group));
-                    for (auto &state : mVariadicInfo.mStates) {
-                        new (&state.mState) std::remove_reference_t<decltype(state.mState)> {
-                            Execution::connect(buildVariadicSender(&baseIndex, &mRecursiveBuffer), RecursiveReceiver { this })
-                        };
+                    mVariadicInfo.mStates.resize(Execution::get_context(receiver).mNode.variadicPinCount(group), std::nullopt);
+                    for (auto& state : mVariadicInfo.mStates) {
+                        construct(state, Execution::connect(buildVariadicSender(&baseIndex, &mRecursiveBuffer), RecursiveReceiver { this }));
                     }
                 }
             }
 
             void cleanup()
             {
-                if constexpr (requires { typename Traits::variadic; }) {
+                if constexpr (isVariadic) {
                     while (mVariadicInfo.mRecursionLevel < mVariadicInfo.mStates.size()) {
-                        auto &state = mVariadicInfo.mStates[mVariadicInfo.mRecursionLevel];
-                        using State = std::remove_reference_t<decltype(state)>;
-                        state.~State();
+                        auto& state = mVariadicInfo.mStates[mVariadicInfo.mRecursionLevel];
+                        destruct(state);
                     }
                     mVariadicInfo.mStates.clear();
                 }
-                mState.~State();
+                destruct(mState);
             }
 
             void continueRecursion()
             {
                 if constexpr (!Traits::constant) {
-                    auto &state = mVariadicInfo.mStates[mVariadicInfo.mRecursionLevel];
-                    using State = std::remove_reference_t<decltype(state)>;
-                    state.~State();
+                    auto& state = mVariadicInfo.mStates[mVariadicInfo.mRecursionLevel];
+                    destruct(state);
                 }
                 ++mVariadicInfo.mRecursionLevel;
                 if (mVariadicInfo.mRecursionLevel < mVariadicInfo.mStates.size()) {
-                    mVariadicInfo.mStates[mVariadicInfo.mRecursionLevel].mState.start();
+                    mVariadicInfo.mStates[mVariadicInfo.mRecursionLevel]->start();
                 } else {
-                    mState.start();
+                    mState->start();
                 }
             }
 
-            virtual bool resolveVar(ValueType &result, std::string_view name) override
+            template <fixed_string Name>
+            std::string_view getDynamicName()
             {
-                if constexpr (requires { typename Traits::exposedVariables; }) {
-                    return [&]<fixed_string... Names>(type_pack<auto_holder<Names>...>)
+                return Execution::get_context(mState).mNode.template getDynamicName<Name>();
+            }
+
+            virtual bool resolveVar(ValueType& result, std::string_view name) override
+            {
+                if constexpr (hasVariables) {
+                    return [&]<fixed_string... Names, typename... T>(type_pack<Execution::variable<Names, T>...>)
                     {
                         return ([&]() {                    
-                            if (name == Names) {
-                                result = Execution::resolve_var<Names>(mState);
+                            if (name == getDynamicName<Names>()) {
+                                result = decay(Execution::resolve_var<Names>(mState));
                                 return true;
                             }
                             return false; }() || ...);
@@ -445,11 +502,11 @@ namespace NodeGraph {
 
             virtual std::map<std::string_view, ValueType> variables() override
             {
-                if constexpr (requires { typename Traits::exposedVariables; }) {
-                    return [&]<fixed_string... Names>(type_pack<auto_holder<Names>...>)
+                if constexpr (hasVariables) {
+                    return [&]<fixed_string... Names, typename... T>(type_pack<Execution::variable<Names, T>...>)
                     {
                         std::map<std::string_view, ValueType> result;
-                        (result.try_emplace(Names, Execution::resolve_var<Names>(mState)), ...);
+                        (result.try_emplace(getDynamicName<Names>(), decay(Execution::resolve_var<Names>(mState))), ...);
                         return result;
                     }
                     (typename Traits::exposedVariables {});
@@ -464,22 +521,14 @@ namespace NodeGraph {
 
             std::vector<NodeResults> mResults;
             NodeResults mRecursiveBuffer;
-            union {
-                State mState;
-            };
+            ManualLifetime<State> mState = std::nullopt;
 
             static auto variadicHelper()
             {
-                if constexpr (requires { typename Traits::variadic; }) {
-                    struct VariadicState {
-                        VariadicState() { }
-                        ~VariadicState() { }
-                        union {
-                            Execution::connect_result_t<VariadicSender, RecursiveReceiver> mState;
-                        };
-                    };
+                if constexpr (isVariadic) {
                     struct VariadicInfo {
-                        std::vector<VariadicState> mStates;
+                        using State = Execution::connect_result_t<VariadicSender, RecursiveReceiver>;
+                        std::vector<ManualLifetime<State>> mStates;
                         size_t mRecursionLevel;
                     };
                     return VariadicInfo {};
@@ -491,63 +540,61 @@ namespace NodeGraph {
             decltype(variadicHelper()) mVariadicInfo;
         };
 
-        void setupInterpret(NodeInterpreter &interpreter, std::unique_ptr<NodeInterpreterData> &data) const override
+        void setupInterpret(NodeInterpreter& interpreter, std::unique_ptr<NodeInterpreterData>& data) const override
         {
-            if constexpr (requires { typename Traits::exposedVariables; }) {
-                DummyReceiver rec { this, interpreter };
-                data = std::make_unique<InterpretData>(rec, mArguments);
+            if constexpr (hasVariables) {
+                data = std::make_unique<InterpretData>(DummyReceiver { interpreter, *this }, mArguments);
             }
         }
 
-        void interpret(NodeReceiver receiver, std::unique_ptr<NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const override
+        void interpret(NodeReceiver<NodeBase> receiver, std::unique_ptr<NodeInterpreterData>& data, uint32_t flowIn, uint32_t group) const override
         {
             if constexpr (!Traits::constant) {
                 if (!data) {
                     data = std::make_unique<InterpretData>();
                 }
-                static_cast<InterpretData *>(data.get())->start(receiver, mArguments);
+                static_cast<InterpretData*>(data.get())->start({ receiver.mInterpreter, static_cast<const SenderNode<Algorithm>&>(receiver.mNode), receiver.mReceiver }, mArguments);
             } else {
                 throw 0;
             }
         }
 
-        void interpretRead(NodeInterpreter &interpreter, ValueType &retVal, std::unique_ptr<NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group) const override
+        void interpretRead(NodeInterpreter& interpreter, ValueType& retVal, std::unique_ptr<NodeInterpreterData>& data, uint32_t providerIndex, uint32_t group) const override
         {
             if constexpr (Traits::constant) {
+                if constexpr (hasVariables) {
+                    throw 0; //TODO
+                } else {
+                    DummyReceiver rec { interpreter, *this };
 
-                DummyReceiver rec { this, interpreter };
+                    InterpretData data { rec, mArguments };
 
-                InterpretData data { rec, mArguments };
+                    data.start();
 
-                data.start();
-
-                assert(rec.mHasReturned);
-                retVal = rec.mValues[providerIndex];
+                    assert(rec.mHasReturned);
+                    retVal = rec.mValues[providerIndex];
+                }
             } else {
                 assert(data);
-                retVal = static_cast<InterpretData *>(data.get())->read(providerIndex, group);
+                retVal = static_cast<InterpretData*>(data.get())->read(providerIndex, group);
             }
         }
 
-        virtual CodeGen::Statement generateRead(CodeGenerator &generator, std::unique_ptr<CodeGeneratorData> &data, uint32_t providerIndex, uint32_t group) const override
+        virtual CodeGen::Statement generateRead(CodeGenerator& generator, std::unique_ptr<CodeGeneratorData>& data, uint32_t providerIndex, uint32_t group) const override
         {
 
             auto result = CodeGen::generatorFromSender(buildSender(value_argument_tuple { mArguments }), NodeCodegenReceiver { 0, this, generator }).generate();
             if constexpr (std::tuple_size_v<decltype(result)> < 1)
                 throw 0;
             else {
-                using R = decltype(TupleUnpacker::ensureTuple(std::get<0>(result)));
-                using F = CodeGen::Statement(*)(R&&);
-                static constexpr auto accessors = []<size_t... Is>(std::index_sequence<Is...>){
-                    return std::array {
-                        F { [](R &&result) { return CodeGen::Statement { std::get<Is>(result) }; } }...
-                    };
-                }(std::make_index_sequence<std::tuple_size_v<std::decay_t<R>>>{});
-                CodeGen::Statement current = accessors[providerIndex](TupleUnpacker::ensureTuple(std::get<0>(result)));
+                CodeGen::Statement current = TupleUnpacker::select(
+                    TupleUnpacker::ensureTuple(std::get<0>(result)),
+                    [](auto&& val) { return CodeGen::Statement { std::forward<decltype(val)>(val) }; },
+                    providerIndex);
 
-                if constexpr (requires { typename Traits::variadic; }) {
+                if constexpr (isVariadic) {
                     for (size_t i = 0; i < variadicPinCount(group); ++i) {
-                        auto result = CodeGen::generatorFromSender(buildVariadicSender(nullptr), NodeCodegenReceiver {0, this, generator}).generate();
+                        auto result = CodeGen::generatorFromSender(buildVariadicSender(nullptr), NodeCodegenReceiver { 0, this, generator }).generate();
                         if constexpr (std::tuple_size_v<decltype(result)> >= 1)
                             current = std::get<0>(result);
                         else
@@ -561,16 +608,44 @@ namespace NodeGraph {
 
         value_argument_tuple mArguments;
         template <size_t I>
-        const auto &getArguments() const
+        const decayed_t<std::tuple_element_t<I, value_argument_tuple>>& getArguments() const
         {
             return std::get<I>(mArguments);
         }
         template <size_t I>
-        void setArguments(std::tuple_element_t<I, value_argument_tuple> v)
+        void setArguments(decayed_t<std::tuple_element_t<I, value_argument_tuple>> v)
         {
             std::get<I>(mArguments) = v;
         }
-    };
 
+        template <fixed_string Name>
+        struct NamedString {
+            std::string mString;
+        };
+
+        static auto namesHelper()
+        {
+            if constexpr (requires { typename Traits::dynamicVariableNames; }) {
+                return []<fixed_string... Names>(type_pack<auto_holder<Names>...>)
+                {
+                    return std::make_tuple(NamedString<Names> { std::string { Names } }...);
+                }
+                (typename Traits::dynamicVariableNames {});
+            } else {
+                return std::monostate {};
+            }
+        }
+        decltype(namesHelper()) mDynamicNames = namesHelper();
+        template <fixed_string Name>
+        std::string_view getDynamicName() const
+        {
+            return std::get<NamedString<Name>>(mDynamicNames).mString;
+        }
+        template <fixed_string Name>
+        void setDynamicName(std::string_view name)
+        {
+            std::get<NamedString<Name>>(mDynamicNames).mString = std::string { name };
+        }
+    };
 }
 }

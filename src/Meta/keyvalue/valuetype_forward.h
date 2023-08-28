@@ -37,7 +37,7 @@ struct Functor_to_ValueType {
     template <typename... Args>
     decltype(auto) operator()(Args &&...args)
     {
-        return to_ValueType(std::forward<Args>(args)...);
+        return to_ValueType(forward_ref<Args>(args)...);
     }
 };
 
@@ -117,6 +117,8 @@ decltype(auto) ValueType_as(const ValueType &v)
 template <bool reference_as_ptr = false, typename T>
 decltype(auto) convert_ValueType(T &&t)
 {
+    static_assert(!requires { typename std::decay_t<T>::no_value_type; });
+
     if constexpr (InstanceOf<std::decay_t<T>, std::reference_wrapper>) {
         using Ty = typename std::decay_t<T>::type;
         return convert_ValueType<true>(t.get());

@@ -10,19 +10,19 @@
 namespace Engine {
 namespace NodeGraph {
 
-    void NodeInterpretHandle::read(ValueType &retVal, uint32_t dataInIndex, uint32_t group)
+    void NodeInterpretHandleBase::read(const NodeBase &node, ValueType &retVal, uint32_t dataInIndex, uint32_t group)
     {
-        Pin pin = mNode->dataInSource(dataInIndex, group);
+        Pin pin = node.dataInSource(dataInIndex, group);
         mInterpreter.read(retVal, pin);
     }
 
-    void NodeInterpretHandle::write(const ValueType &v, uint32_t dataOutIndex, uint32_t group)
+    void NodeInterpretHandleBase::write(const NodeBase &node, const ValueType &v, uint32_t dataOutIndex, uint32_t group)
     {
-        Pin pin = mNode->dataOutTarget(dataOutIndex, group);
+        Pin pin = node.dataOutTarget(dataOutIndex, group);
         mInterpreter.write(pin, v);
     }
 
-    ValueType NodeInterpretHandle::resolveVar(std::string_view name)
+    ValueType NodeInterpretHandleBase::resolveVar(std::string_view name)
     {
         ValueType v;
         bool result = mInterpreter.resolveVar(v, name);
@@ -30,20 +30,10 @@ namespace NodeGraph {
         return v;
     }
 
-    void NodeReceiver::set_value()
+    void continueExecution(NodeInterpreter &interpreter, const NodeBase &node, Execution::VirtualReceiverBase<NodeInterpretResult> &receiver)
     {
-        Pin pin = mNode->flowOutTarget(0);
-        mInterpreter.branch(mReceiver, pin);
-    }
-
-    void NodeReceiver::set_done()
-    {
-        mReceiver.set_done();
-    }
-
-    void NodeReceiver::set_error(GenericResult result)
-    {
-        mReceiver.set_error(result);
+        Pin pin = node.flowOutTarget(0);
+        interpreter.branch(receiver, pin);
     }
 
     CodeGen::Statement NodeCodegenHandle::read(uint32_t dataInIndex, uint32_t group)

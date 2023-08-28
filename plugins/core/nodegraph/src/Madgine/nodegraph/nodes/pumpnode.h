@@ -24,7 +24,7 @@ namespace NodeGraph {
         virtual size_t dataOutBaseCount(uint32_t group) const override;
         virtual ExtendedValueTypeDesc dataOutType(uint32_t index, uint32_t group, bool bidir = true) const override;
 
-        virtual void interpret(NodeReceiver receiver, std::unique_ptr<NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const override;
+        virtual void interpret(NodeReceiver<NodeBase> receiver, std::unique_ptr<NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const override;
     };
 
 }

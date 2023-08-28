@@ -3,6 +3,9 @@
 namespace Engine {
 namespace Execution {
 
+    template <fixed_string Name, typename T>
+    struct variable;
+
     template <typename _Signature>
     struct algorithm {
         using Signature = _Signature;
@@ -16,6 +19,14 @@ namespace Execution {
     template <typename T>
     struct recursive {
         using decay_t = T;
+    };
+
+    template <fixed_string Name>
+    struct variable_type;
+
+    template <size_t I>
+    struct dynamic_argument_type {
+        static constexpr size_t index = I;
     };
 
     template <typename T>
@@ -38,7 +49,6 @@ namespace Execution {
                 return std::numeric_limits<size_t>::max();
             }
         }();
-
     };
 
     template <typename Algorithm>
@@ -67,7 +77,8 @@ namespace Execution {
 
         static constexpr auto &algorithm = Execution::Variable<"Name">;
 
-        using exposedVariables = type_pack<auto_holder<fixed_string { "Name" }>>;
+        using exposedVariables = type_pack<variable<"Name", dynamic_argument_type<1>>>;
+        using dynamicVariableNames = type_pack<auto_holder<fixed_string { "Name" }>>;
     };
 
     template <>
@@ -75,7 +86,9 @@ namespace Execution {
         static constexpr bool constant = true;
         using argument_types = type_pack<>;
 
-        static constexpr auto &algorithm = Execution::read_var<int &, "Name">;
+        static constexpr auto &algorithm = Execution::read_var<variable_type<"Name"> &, "Name">;
+
+        using dynamicVariableNames = type_pack<auto_holder<fixed_string { "Name" }>>;
     };
 
     template <>
@@ -84,6 +97,8 @@ namespace Execution {
         using argument_types = type_pack<pred_sender<signature<ValueType>>>;
 
         static constexpr auto &algorithm = Execution::write_var<"Name">;
+
+        using dynamicVariableNames = type_pack<auto_holder<fixed_string { "Name" }>>;
     };
 
     template <>

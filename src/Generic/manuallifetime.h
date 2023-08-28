@@ -32,6 +32,12 @@ inline constexpr construct_t construct;
 
 template <typename T>
 struct ManualLifetime {
+
+    ManualLifetime(std::nullopt_t)
+        : mAlive(false)
+    {
+    }
+
     template <DecayedNoneOf<ManualLifetime<T>>... Args>
     ManualLifetime(Args &&...args)
         : mData(std::forward<Args>(args)...)
@@ -70,7 +76,8 @@ struct ManualLifetime {
     }
 
     template <typename U>
-    explicit operator U() const requires std::convertible_to<T, U>{
+    explicit operator U() const requires std::convertible_to<T, U>
+    {
         return static_cast<U>(mData);
     }
 
@@ -86,11 +93,25 @@ struct ManualLifetime {
         return &mData;
     }
 
-    T& unsafeAccess() {
+    T *operator->()
+    {
+        assert(mAlive);
+        return &mData;
+    }
+
+    const T *operator->() const
+    {
+        assert(mAlive);
+        return &mData;
+    }
+
+    T &unsafeAccess()
+    {
         return mData;
     }
 
-    const T& unsafeAccess() const {
+    const T &unsafeAccess() const
+    {
         return mData;
     }
 

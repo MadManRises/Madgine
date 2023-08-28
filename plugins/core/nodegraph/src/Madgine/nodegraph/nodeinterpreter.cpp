@@ -40,13 +40,11 @@ namespace NodeGraph {
         NodeInterpreter *mInterpreter;
     };
 
-    NodeInterpreter::NodeInterpreter(const NodeGraph *graph, const ArgumentList &args)
-        : mGraph(graph)
-        , mArguments(args)
+    NodeInterpreter::NodeInterpreter(const NodeGraph *graph, const ArgumentList &args, NodeVariableScope *parent)
+        : mArguments(args)
+        , mParentScope(parent)
     {
-        if (mGraph) {
-            mData.resize(mGraph->nodes().size());
-        }
+        setGraph(graph);
     }
 
     void NodeInterpreter::interpretImpl(Execution::VirtualReceiverBase<NodeInterpretResult> &receiver, uint32_t flowIn)
@@ -56,17 +54,6 @@ namespace NodeGraph {
 
     void NodeInterpreter::interpretImpl(Execution::VirtualReceiverBase<NodeInterpretResult> &receiver, Pin pin)
     {
-/*
-            mData.clear();
-            mData.resize(mGraph->nodes().size());
-
-            for (size_t i = 0; i < mData.size(); ++i) {
-                mGraph->node(i + 1)->setupInterpret(*this, mData[i]);
-            }
-
-            mGraphGeneration = mGraph->generation();
-        }*/
-
         Debug::Debugger::getSingleton().stepInto(&receiver, std::make_unique<NodeDebugLocation>(nullptr, this));
         branch(receiver, pin);
     }
@@ -85,7 +72,7 @@ namespace NodeGraph {
         Execution::detach(Debug::Debugger::getSingleton().yield(&receiver)
             | Execution::then([=, &receiver]() {
                   if (pin && pin.mNode) {
-                      node->interpret({ node, *this, receiver }, mData[pin.mNode - 1], pin.mIndex, pin.mGroup);
+                      node->interpret({ *this, *node, receiver }, mData[pin.mNode - 1], pin.mIndex, pin.mGroup);
                   } else {
                       Debug::Debugger::getSingleton().stepOut(&receiver);
                       receiver.set_value();
@@ -127,6 +114,10 @@ namespace NodeGraph {
             mData.clear();
             if (mGraph) {
                 mData.resize(mGraph->nodes().size());
+
+                for (size_t i = 0; i < mData.size(); ++i) {
+                    mGraph->node(i + 1)->setupInterpret(*this, mData[i]);
+                }
             }
         }
     }
@@ -151,7 +142,7 @@ namespace NodeGraph {
         return mData[index - 1];
     }
 
-    bool NodeInterpreter::resolveVar(ValueType &result, std::string_view name)
+    bool NodeInterpreter::resolveVar(ValueType &result, std::string_view name, bool recursive)
     {
         bool gotValue = false;
         for (const std::unique_ptr<NodeInterpreterData> &data : mData) {
@@ -161,12 +152,16 @@ namespace NodeGraph {
                 assert(!hadValue || !gotValue);
             }
         }
+        if (!gotValue && recursive && mParentScope)
+            return mParentScope->resolveVar(result, name);
         return gotValue;
     }
 
-    std::map<std::string_view, ValueType> NodeInterpreter::variables()
+    std::map<std::string_view, ValueType> NodeInterpreter::variables(bool recursive)
     {
         std::map<std::string_view, ValueType> variables;
+        if (recursive && mParentScope)
+            variables = mParentScope->variables();
         for (const std::unique_ptr<NodeInterpreterData> &data : mData) {
             if (data) {
                 std::ranges::move(data->variables(), std::inserter(variables, variables.end()));

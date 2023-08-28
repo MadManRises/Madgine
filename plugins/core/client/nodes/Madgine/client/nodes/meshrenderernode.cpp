@@ -104,7 +104,7 @@ namespace Render {
         Render::GPUMeshLoader::Handle mMesh;
     };
 
-    void MeshRendererNode::interpret(NodeGraph::NodeReceiver receiver, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const
+    void MeshRendererNode::interpret(NodeGraph::NodeReceiver<NodeGraph::NodeBase> receiver, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const
     {
         if (!data) {
             data = std::make_unique<MeshRendererNodeInterpret>();

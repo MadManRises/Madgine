@@ -262,8 +262,8 @@ namespace Tools {
         ImGui::PushID(this);
 
         std::string fileName;
-        if (mGraphHandle.available()) {
-            fileName = mGraphHandle.resource()->path().filename().str();
+        if (!mFilePath.empty()) {
+            fileName = mFilePath.filename().str();
         } else {
             fileName = "Node graph";
         }
@@ -417,7 +417,7 @@ namespace Tools {
                         ImGui::NextColumn();
                     }
                     if (mDragPin && mDragPin->mType == NodeGraph::PinType::Flow && (node->flowOutVariadic(group) && mDragPin->mDir == NodeGraph::PinDir::In)) {
-                        
+
                         ImGui::NextColumn();
 
                         uint32_t index = node->flowOutCount(group);
@@ -521,21 +521,21 @@ namespace Tools {
             for (NodeGraph::FlowOutPinPrototype &pin : mGraph.mFlowOutPins) {
                 assert(pin.mTarget);
                 uint32_t id = NodeGraph::NodeBase::flowOutId(pinId);
-                ed::Link(id, id, 60000 * pin.mTarget.mNode + NodeGraph::NodeBase::flowInId(pin.mTarget.mIndex), ImColor { 255, 0, 0, 255 });
+                ed::Link(id, id, 60000 * pin.mTarget.mNode + NodeGraph::NodeBase::flowInId(pin.mTarget.mIndex), FlowColor(mGraph.flowOutMask({0, pinId})));
                 ++pinId;
             }
             pinId = 0;
             for (NodeGraph::DataInPinPrototype &pin : mGraph.mDataInPins) {
                 assert(pin.mSource);
                 uint32_t id = NodeGraph::NodeBase::dataInId(pinId);
-                ed::Link(id, 60000 * pin.mSource.mNode + NodeGraph::NodeBase::dataProviderId(pin.mSource.mIndex), id, ImColor { 0, 255, 0, 255 });
+                ed::Link(id, 60000 * pin.mSource.mNode + NodeGraph::NodeBase::dataProviderId(pin.mSource.mIndex), id, DataColor(mGraph.dataInMask({0, pinId})));
                 ++pinId;
             }
             pinId = 0;
             for (NodeGraph::DataOutPinPrototype &pin : mGraph.mDataOutPins) {
                 assert(pin.mTarget);
                 uint32_t id = NodeGraph::NodeBase::dataOutId(pinId);
-                ed::Link(id, id, 60000 * pin.mTarget.mNode + NodeGraph::NodeBase::dataReceiverId(pin.mTarget.mIndex), ImColor { 0, 255, 0, 255 });
+                ed::Link(id, id, 60000 * pin.mTarget.mNode + NodeGraph::NodeBase::dataReceiverId(pin.mTarget.mIndex), DataColor(mGraph.dataOutMask({0, pinId})));
                 ++pinId;
             }
             nodeId = 1;
@@ -799,19 +799,22 @@ namespace Tools {
         ToolBase::renderMenu();
         if (mVisible) {
 
-            bool openNewGraphPopup = false;
-            bool openGraphPopup = false;
+            bool openSaveGraphPopup = false;
+            bool openOpenGraphPopup = false;
 
             if (ImGui::BeginMenu("Node Graph Editor")) {
 
                 if (ImGui::MenuItem("New Graph...")) {
-                    openNewGraphPopup = true;
+                    create();
                 }
                 if (ImGui::MenuItem("Open Graph")) {
-                    openGraphPopup = true;
+                    openOpenGraphPopup = true;
                 }
                 if (ImGui::MenuItem("Save Graph", "", false)) {
-                    save();
+                    if (mFilePath.empty())
+                        openSaveGraphPopup = true;
+                    else
+                        save();
                 }
 
                 if (ImGui::MenuItem("Debug", "", false)) {
@@ -835,24 +838,24 @@ namespace Tools {
                 ImGui::EndMenu();
             }
 
-            if (openNewGraphPopup) {
+            if (openSaveGraphPopup) {
                 mDirBuffer.clear();
                 mSelectionBuffer.clear();
-                ImGui::OpenPopup("NewGraph");
+                ImGui::OpenPopup("SaveGraph");
             }
 
-            if (openGraphPopup) {
+            if (openOpenGraphPopup) {
                 ImGui::OpenPopup("OpenGraph");
             }
 
             ImGui::SetNextWindowSize({ 500, 400 }, ImGuiCond_FirstUseEver);
-            if (ImGui::BeginPopupModal("NewGraph")) {
+            if (ImGui::BeginPopupModal("SaveGraph")) {
 
                 bool accepted;
                 if (ImGui::FilePicker(&mDirBuffer, &mSelectionBuffer, accepted, true)) {
                     if (accepted) {
-                        Filesystem::remove(mSelectionBuffer);
-                        create(mSelectionBuffer);
+                        mFilePath = mSelectionBuffer;
+                        save();
                     }
                     ImGui::CloseCurrentPopup();
                 }
@@ -914,30 +917,27 @@ namespace Tools {
     void NodeGraphEditor::load(std::string_view name)
     {
         mGraphHandle.load(name).then([this](bool b) {
-            if (b)
+            if (b) {
                 mGraph = *mGraphHandle;
-            else
+                mFilePath = mGraphHandle.info()->resource()->path();
+            } else
                 mGraph = {};
             createEditor();
         },
             mRoot.taskQueue());
     }
 
-    void NodeGraphEditor::create(const Filesystem::Path &path)
+    void NodeGraphEditor::create()
     {
-        mGraphHandle.create(path.stem(), path).then([this](bool b) {
-            if (b)
-                mGraph = *mGraphHandle;
-            else
-                mGraph = {};
-            createEditor();
-        },
-            mRoot.taskQueue());
+        mGraph = {};
+        mGraphHandle.reset();
+        mFilePath.clear();
+        createEditor();
     }
 
     std::string_view NodeGraphEditor::getCurrentName() const
     {
-        return mGraphHandle.available() ? mGraphHandle->name() : "";
+        return mFilePath.stem();
     }
 
     bool NodeGraphEditor::saveImpl(std::string_view view)
@@ -957,20 +957,20 @@ namespace Tools {
         mSaveQueued = false;
         mIsDirty = false;
 
-        if (!mGraphHandle)
-            throw 0;
-
         Stream layout = Filesystem::openFileWrite(layoutPath());
         layout.write(view.data(), view.size());
 
-        mGraph.saveToFile();
+        mGraph.saveToFile(mFilePath);
+
+        if (!mGraphHandle)
+            mGraphHandle.create(mFilePath.stem(), mFilePath);
 
         return true;
     }
 
     size_t NodeGraphEditor::loadImpl(char *data)
     {
-        if (!mGraphHandle)
+        if (mFilePath.empty())
             return 0;
 
         Filesystem::Path path = layoutPath();
@@ -985,10 +985,9 @@ namespace Tools {
 
     Filesystem::Path NodeGraphEditor::layoutPath() const
     {
-        if (!mGraphHandle)
-            return {};
+        assert(!mFilePath.empty());
 
-        return mGraphHandle.resource()->path().parentPath() / (std::string { mGraphHandle.resource()->name() } + ".json");
+        return mFilePath.parentPath() / (std::string { getCurrentName() } + ".json");
     }
 
     void NodeGraphEditor::createEditor()

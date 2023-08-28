@@ -63,6 +63,8 @@ struct META_EXPORT ValueType {
     template <DecayedNoneOf<ValueType> T>
     void operator=(T &&t)
     {
+        static_assert(!requires { typename std::decay_t<T>::no_value_type; });
+
         constexpr size_t index = static_cast<size_t>(static_cast<ValueTypeEnum>(toValueTypeIndex<std::decay_t<T>>()));
         if (mUnion.index() == index)
             std::get<index>(mUnion) = std::forward<T>(t);

@@ -18,24 +18,39 @@
 namespace Engine {
 namespace NodeGraph {
 
-    struct MADGINE_NODEGRAPH_EXPORT NodeInterpretHandle {
-        const NodeBase *mNode;
+    struct MADGINE_NODEGRAPH_EXPORT NodeInterpretHandleBase {
         NodeInterpreter &mInterpreter;
 
-        void read(ValueType &retVal, uint32_t dataInIndex, uint32_t group = 0);
+        void read(const NodeBase &node, ValueType &retVal, uint32_t dataInIndex, uint32_t group = 0);
 
-        void write(const ValueType &v, uint32_t dataOutIndex, uint32_t group = 0);
+        void write(const NodeBase &node, const ValueType &v, uint32_t dataOutIndex, uint32_t group = 0);
 
         ValueType resolveVar(std::string_view name);
+    };
+
+    template <typename Node>
+    struct NodeInterpretHandle : NodeInterpretHandleBase {
+        const Node &mNode;
+
+        void read(ValueType &retVal, uint32_t dataInIndex, uint32_t group = 0)
+        {
+            NodeInterpretHandleBase::read(mNode, retVal, dataInIndex, group);
+        }
+
+        void write(const ValueType &v, uint32_t dataOutIndex, uint32_t group = 0)
+        {
+            NodeInterpretHandleBase::write(mNode, v, dataOutIndex, group);
+        }
 
         template <fixed_string Name>
         friend ValueType tag_invoke(Execution::resolve_var_t<Name>, NodeInterpretHandle &handle)
         {
-            return handle.resolveVar(Name);
+            return handle.resolveVar(handle.mNode.template getDynamicName<Name>());
         }
     };
 
-    using NodeExecutionReceiver = Execution::execution_receiver<NodeInterpretHandle>;
+    template <typename Node>
+    using NodeExecutionReceiver = Execution::execution_receiver<NodeInterpretHandle<Node>>;
 
     struct MADGINE_NODEGRAPH_EXPORT NodeCodegenHandle : CodeGen::CodeGen_Context {
         const NodeBase *mNode;
@@ -52,8 +67,8 @@ namespace NodeGraph {
 
         void start()
         {
-            NodeInterpretHandle &handle = Execution::get_context(mRec);
-            Execution::connect(handle.mInterpreter.interpretSubGraph(handle.mNode->flowOutTarget(0, flowOutIndex)), std::forward<Rec>(mRec)).start();
+            auto &handle = Execution::get_context(mRec);
+            Execution::connect(handle.mInterpreter.interpretSubGraph(handle.mNode.flowOutTarget(0, flowOutIndex)), std::forward<Rec>(mRec)).start();
         }
 
         Rec mRec;
@@ -113,7 +128,7 @@ namespace NodeGraph {
             void helper(std::index_sequence<I...>)
             {
                 size_t variadicIndex = 0;
-                NodeInterpretHandle &handle = Execution::get_context(this->mRec);
+                auto &handle = Execution::get_context(this->mRec);
                 std::tuple<typed_Value<T>...> data;
                 TupleUnpacker::forEach(data, [&]<typename Ty>(typed_Value<Ty> &v) {
                     if constexpr (InstanceOf<Ty, Execution::recursive>) {
@@ -152,7 +167,7 @@ namespace NodeGraph {
 
         template <typename Rec>
         friend auto tag_invoke(CodeGen::codegen_connect_t, NodeReader &&reader, Rec &&rec)
-        {            
+        {
             return codegen_state<Rec> { std::forward<Rec>(rec), reader.mBaseIndex };
         }
 
@@ -164,7 +179,7 @@ namespace NodeGraph {
     struct NodeAlgorithm {
         template <typename... Args>
         auto operator()(Args &&...args)
-        {            
+        {
             if (mResults.size() <= flowOutIndex)
                 mResults.resize(flowOutIndex + 1);
             mResults[flowOutIndex] = { ValueType { std::forward<Args>(args) }... };
@@ -173,12 +188,21 @@ namespace NodeGraph {
         std::vector<NodeResults> &mResults;
     };
 
-    struct MADGINE_NODEGRAPH_EXPORT NodeReceiver : NodeExecutionReceiver {
+    MADGINE_NODEGRAPH_EXPORT void continueExecution(NodeInterpreter &interpreter, const NodeBase &node, Execution::VirtualReceiverBase<NodeInterpretResult> &receiver);
+
+    template <typename Node>
+    struct NodeReceiver : NodeExecutionReceiver<Node> {
         Execution::VirtualReceiverBase<NodeInterpretResult> &mReceiver;
 
-        void set_value();
-        void set_done();
-        void set_error(GenericResult result);
+        void set_value() {
+            continueExecution(mInterpreter, mNode, mReceiver);
+        }
+        void set_done() {
+            mReceiver.set_done();
+        }
+        void set_error(GenericResult result) {
+            mReceiver.set_error(result);
+        }
     };
 
 }

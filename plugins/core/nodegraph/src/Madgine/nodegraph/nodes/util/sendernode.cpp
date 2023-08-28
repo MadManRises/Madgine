@@ -7,8 +7,8 @@
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
-#include "Meta/serialize/serializetable_impl.h"
 #include "Meta/keyvalueutil/valuetypeserialize.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 using ForEachNode = Engine::NodeGraph::SenderNode<Engine::Execution::for_each_t>;
 
@@ -16,14 +16,12 @@ NAMED_UNIQUECOMPONENT(ForEach, ForEachNode)
 
 REGISTER_TYPE(ForEachNode)
 
-
 METATABLE_BEGIN_BASE(ForEachNode, Engine::NodeGraph::NodeBase)
 PROPERTY(Arguments, getArguments<0>, setArguments<0>)
 METATABLE_END(ForEachNode)
 
 SERIALIZETABLE_INHERIT_BEGIN(ForEachNode, Engine::NodeGraph::NodeBase)
 SERIALIZETABLE_END(ForEachNode)
-
 
 using LetValueNode = Engine::NodeGraph::SenderNode<Engine::Execution::let_value_t>;
 
@@ -106,10 +104,13 @@ NAMED_UNIQUECOMPONENT(Variable, VariableNode)
 REGISTER_TYPE(VariableNode)
 
 METATABLE_BEGIN_BASE(VariableNode, Engine::NodeGraph::NodeBase)
-PROPERTY(Arguments, getArguments<1>, setArguments<1>)
+PROPERTY(Name, getDynamicName<"Name">, setDynamicName<"Name">)
+PROPERTY(DefaultValue, getArguments<1>, setArguments<1>)
 METATABLE_END(VariableNode)
 
 SERIALIZETABLE_INHERIT_BEGIN(VariableNode, Engine::NodeGraph::NodeBase)
+ENCAPSULATED_FIELD(Name, getDynamicName<"Name">, setDynamicName<"Name">)
+ENCAPSULATED_FIELD(DefaultValue, getArguments<1>, setArguments<1>)
 SERIALIZETABLE_END(VariableNode)
 
 using WriteVarNode = Engine::NodeGraph::SenderNode<Engine::Execution::write_var_t>;
@@ -119,9 +120,11 @@ NAMED_UNIQUECOMPONENT(WriteVar, WriteVarNode)
 REGISTER_TYPE(WriteVarNode)
 
 METATABLE_BEGIN_BASE(WriteVarNode, Engine::NodeGraph::NodeBase)
+PROPERTY(Name, getDynamicName<"Name">, setDynamicName<"Name">)
 METATABLE_END(WriteVarNode)
 
 SERIALIZETABLE_INHERIT_BEGIN(WriteVarNode, Engine::NodeGraph::NodeBase)
+ENCAPSULATED_FIELD(Name, getDynamicName<"Name">, setDynamicName<"Name">)
 SERIALIZETABLE_END(WriteVarNode)
 
 using ReadVarNode = Engine::NodeGraph::SenderNode<Engine::Execution::read_var_t>;
@@ -131,9 +134,11 @@ NAMED_UNIQUECOMPONENT(ReadVar, ReadVarNode)
 REGISTER_TYPE(ReadVarNode)
 
 METATABLE_BEGIN_BASE(ReadVarNode, Engine::NodeGraph::NodeBase)
+PROPERTY(Name, getDynamicName<"Name">, setDynamicName<"Name">)
 METATABLE_END(ReadVarNode)
 
 SERIALIZETABLE_INHERIT_BEGIN(ReadVarNode, Engine::NodeGraph::NodeBase)
+ENCAPSULATED_FIELD(Name, getDynamicName<"Name">, setDynamicName<"Name">)
 SERIALIZETABLE_END(ReadVarNode)
 
 using AssignNode = Engine::NodeGraph::SenderNode<Engine::Execution::assign_t>;

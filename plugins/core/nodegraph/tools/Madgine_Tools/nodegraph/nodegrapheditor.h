@@ -28,7 +28,7 @@ namespace Tools {
 
         void save();
         void load(std::string_view name);
-        void create(const Filesystem::Path &path);
+        void create();
         std::string_view getCurrentName() const;
 
     protected:
@@ -57,6 +57,7 @@ namespace Tools {
 
         NodeGraph::NodeGraphLoader::Handle mGraphHandle;
         NodeGraph::NodeGraph mGraph;
+        Filesystem::Path mFilePath;
 
         struct NodeMessages {
             std::vector<std::string> mErrorMessages;

@@ -6,6 +6,7 @@ namespace NodeGraph {
     struct NodeBase;
     struct NodeGraph;
 
+    template <typename Node>
     struct NodeReceiver;
     struct DebuggableReceiverBase;
 
@@ -25,8 +26,7 @@ namespace NodeGraph {
 
     enum EdgeEvent {
         CONNECT,
-        DISCONNECT,
-        UPDATE
+        DISCONNECT
     };
 
     using NodeResults = std::vector<ValueType>;

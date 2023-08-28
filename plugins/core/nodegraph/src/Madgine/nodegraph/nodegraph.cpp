@@ -48,7 +48,6 @@ namespace NodeGraph {
         , mDataProviderPins(other.mDataProviderPins)
         , mDataInPins(other.mDataInPins)
         , mDataOutPins(other.mDataOutPins)
-        , mPath(other.mPath)
     {
         mNodes.reserve(other.mNodes.size());
         std::ranges::transform(other.mNodes, std::back_inserter(mNodes), [&](const std::unique_ptr<NodeBase> &node) { return node->clone(*this); });
@@ -61,7 +60,6 @@ namespace NodeGraph {
 
     NodeGraph &NodeGraph::operator=(const NodeGraph &other)
     {
-        mPath = other.mPath;
         mFlowInPins = other.mFlowInPins;
         mFlowOutPins = other.mFlowOutPins;
         mDataInPins = other.mDataInPins;
@@ -76,17 +74,11 @@ namespace NodeGraph {
         return *this;
     }
 
-    std::string_view NodeGraph::name() const
-    {
-        return mPath.stem();
-    }
-
     Serialize::StreamResult NodeGraph::loadFromFile(const Filesystem::Path &path)
     {
-        mPath = path;
-        if (Filesystem::exists(mPath)) {
+        if (Filesystem::exists(path)) {
             Filesystem::FileManager mgr("Graph-Serializer");
-            Serialize::FormattedSerializeStream in = mgr.openRead(mPath, std::make_unique<Serialize::XMLFormatter>());
+            Serialize::FormattedSerializeStream in = mgr.openRead(path, std::make_unique<Serialize::XMLFormatter>());
             STREAM_PROPAGATE_ERROR(Serialize::read(in, *this, "Graph", {}, Serialize::StateTransmissionFlags_ApplyMap));
 
             for (NodeBase *node : mNodes | std::views::transform(projectionUniquePtrToPtr)) {
@@ -221,16 +213,14 @@ namespace NodeGraph {
             std::transform(std::make_move_iterator(receiverPins.begin()), std::make_move_iterator(receiverPins.end()), std::back_inserter(mDataReceiverPins),
                 [](std::optional<DataReceiverPinPrototype> &&pin) { return DataReceiverPinPrototype { std::move(*pin) }; });
 
-        } else {
-            saveToFile();
-        }
+        } 
         return {};
     }
 
-    void NodeGraph::saveToFile()
+    void NodeGraph::saveToFile(const Filesystem::Path &path)
     {
         Filesystem::FileManager mgr("Graph-Serializer");
-        Serialize::FormattedSerializeStream out = mgr.openWrite(mPath, std::make_unique<Serialize::XMLFormatter>());
+        Serialize::FormattedSerializeStream out = mgr.openWrite(path, std::make_unique<Serialize::XMLFormatter>());
         Serialize::write(out, *this, "Graph");
     }
 
@@ -439,7 +429,7 @@ namespace NodeGraph {
     {
         if (source.mNode)
             return node(source.mNode)->flowOutTarget(source.mIndex, source.mGroup);
-        if (source.mIndex == mFlowInPins.size())
+        if (source.mIndex == mFlowOutPins.size())
             return {};
         return mFlowOutPins[source.mIndex].mTarget;
     }
@@ -448,7 +438,7 @@ namespace NodeGraph {
     {
         if (source.mNode)
             return node(source.mNode)->flowOutMask(source.mIndex, source.mGroup, bidir);
-        if (source.mIndex == mFlowOutPins.size())
+        if (!bidir || source.mIndex == mFlowOutPins.size())
             return NodeExecutionMask::ALL;
         Pin target = mFlowOutPins[source.mIndex].mTarget;
         return node(target.mNode)->flowInMask(target.mIndex, target.mGroup, false);
@@ -458,7 +448,7 @@ namespace NodeGraph {
     {
         if (target.mNode)
             return node(target.mNode)->flowInMask(target.mIndex, target.mGroup, bidir);
-        if (target.mIndex == mFlowInPins.size())
+        if (!bidir || target.mIndex == mFlowInPins.size())
             return NodeExecutionMask::ALL;
         Pin source = mFlowInPins[target.mIndex].mSources.front();
         return node(source.mNode)->flowOutMask(source.mIndex, source.mGroup, false);
@@ -590,6 +580,16 @@ namespace NodeGraph {
     std::string_view NodeGraph::dataOutName(Pin target)
     {
         return node(target.mNode)->dataOutName(target.mIndex, target.mGroup);
+    }
+
+    ExtendedValueTypeDesc NodeGraph::resolveVariableType(std::string_view name) const
+    {
+        ExtendedValueTypeDesc type = { ExtendedValueTypeEnum::GenericType };
+        for (const std::unique_ptr<NodeBase> &node : mNodes) {
+            if (node->resolveVariableType(type, name))
+                return type;
+        }
+        return type;
     }
 
     void NodeGraph::connectFlow(Pin source, Pin target)
@@ -842,12 +842,17 @@ namespace NodeGraph {
 
     void NodeGraph::NodeInterpreterWrapper::start()
     {
-        interpret(this, 0);
+        interpretImpl(*this, 0);
     }
 
     void NodeGraph::NodeInterpreterWrapper::set_value()
     {
         KeyValueReceiver::set_value();
+    }
+
+    void NodeGraph::NodeInterpreterWrapper::set_error(NodeInterpretResult result)
+    {
+        set_error(GenericResult::UNKNOWN_ERROR);
     }
 
     std::unique_ptr<NodeBase> NodeGraph::createNode(std::string_view name)

@@ -70,7 +70,7 @@ namespace NodeGraph {
     {
         ArgumentList arguments { dataInCount() };
         for (size_t i = 0; i < dataInCount(); ++i) {
-            NodeInterpretHandle { this, interpreter }.read(arguments[i], i);
+            NodeInterpretHandle<NodeBase> { interpreter, *this }.read(arguments[i], i);
         }
         retVal = Execution::sync_expect(ApiFunction { mFunction }.sender(arguments)).mData->at(providerIndex);
     }
