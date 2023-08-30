@@ -19,8 +19,6 @@ namespace Render {
 
         virtual WritableByteBuffer mapParameters(size_t index) override;
 
-        virtual void setDynamicParameters(size_t index, const ByteBuffer &data) override;
-
         virtual void renderMesh(RenderTarget *target, const GPUMeshData *mesh) const override;
         virtual void renderMeshInstanced(RenderTarget *target, size_t count, const GPUMeshData *mesh, const ByteBuffer &instanceData) const override;
 
@@ -34,7 +32,6 @@ namespace Render {
         ID3D11GeometryShader *mGeometryShader;
 
         std::vector<DirectX11Buffer> mConstantBuffers;
-        std::vector<DirectX11Buffer> mDynamicBuffers;
 
         DirectX11VertexShaderLoader::Handle mVertexShaderHandle;
         DirectX11PixelShaderLoader::Handle mPixelShaderHandle;

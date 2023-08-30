@@ -37,7 +37,7 @@ namespace Scene {
             setCurrentAnimation({});
             refreshCache();
         }
-        
+
         std::string_view Animation::getName() const
         {
             return mAnimationList.name();
@@ -134,7 +134,7 @@ namespace Scene {
                     float step = fmodf(mCurrentStep, animation.mDuration);
                     if (step < 0.0f)
                         step += animation.mDuration;
-
+                    /*
                     std::vector<Matrix4> &matrices = skeleton->matrices();
                     std::set<size_t> parentTransformToDos;
 
@@ -179,16 +179,13 @@ namespace Scene {
                                 orientation = it_orientation->mValue;
                             }
 
-                            matrices[i] = mSkeletonCache->mBones[i].mPreTransform * TransformMatrix(
-                                pos,
-                                scale,
-                                orientation);
+                            matrices[i] = mSkeletonCache->mBones[i].mPreTransform * TransformMatrix(pos, scale, orientation);
 
                             IndexType<uint32_t> parent = mSkeletonCache->mBones[i].mParent;
                             if (parent) {
-                                /*if (parent < i && parentTransformToDos.count(parent) == 0)
-                                    matrices[i] = matrices[parent] * matrices[i];
-                                else*/
+                                //if (parent < i && parentTransformToDos.count(parent) == 0)
+                                //    matrices[i] = matrices[parent] * matrices[i];
+                                //else
                                 parentTransformToDos.emplace(i);
                             }
                         }
@@ -210,6 +207,8 @@ namespace Scene {
                         if (mappedBone != -1)
                             matrices[i] = mSkeletonCache->mMatrix * matrices[i] * mSkeletonCache->mBones[i].mOffsetMatrix;
                     }
+                    */
+                    throw "TODO";
                 }
             }
         }
@@ -217,5 +216,3 @@ namespace Scene {
     }
 }
 }
-
-

@@ -55,7 +55,7 @@ namespace Scene {
         return mSceneMgr.taskQueue();
     }
 
-    void SceneComponentBase::updateRender(std::chrono::microseconds frameTimeSinceLastFrame, std::chrono::microseconds sceneTimeSinceLastFrame) {
+    void SceneComponentBase::updateFrame(std::chrono::microseconds frameTimeSinceLastFrame, std::chrono::microseconds sceneTimeSinceLastFrame) {
 
     }
 

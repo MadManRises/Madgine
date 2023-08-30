@@ -44,27 +44,6 @@ namespace Render {
             glBindBufferBase(GL_UNIFORM_BUFFER, i, mUniformBuffers[i].handle());
             GL_CHECK();
         }
-#if !OPENGL_ES
-        for (size_t i = 0; i < mShaderStorageBuffers.size(); ++i) {
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, i, mShaderStorageBuffers[i].handle());
-            GL_CHECK();
-        }
-#else
-        size_t size = mShaderStorageBuffers.size();
-        if (size > 0) {
-            size = (((size - 1) / 4) + 1) * 4;
-            mShaderStorageOffsetBuffer.resize(size * sizeof(unsigned int));
-            {
-                auto offsets = mShaderStorageOffsetBuffer.mapData<unsigned int[]>();
-                size_t i = 0;
-                for (const OpenGLSSBOBuffer &buffer : mShaderStorageBuffers) {
-                    offsets[i++] = buffer.offset();
-                }
-            }
-            glBindBufferBase(GL_UNIFORM_BUFFER, 4, mShaderStorageOffsetBuffer.handle());
-            GL_CHECK();
-        }
-#endif
 
         OpenGLRenderContext::getSingleton().bindFormat(format, instanceBuffer, mInstanceDataSize);
 
@@ -74,28 +53,6 @@ namespace Render {
     WritableByteBuffer OpenGLPipelineInstance::mapParameters(size_t index)
     {
         return mUniformBuffers[index].mapData();
-    }
-
-    void OpenGLPipelineInstance::setDynamicParameters(size_t index, const ByteBuffer &data)
-    {
-        if (mShaderStorageBuffers.size() <= index) {
-            mShaderStorageBuffers.reserve(index + 1);
-            while (mShaderStorageBuffers.size() <= index)
-                mShaderStorageBuffers.emplace_back(
-#if OPENGL_ES
-                    GL_UNIFORM_BUFFER
-#else
-                    GL_SHADER_STORAGE_BUFFER
-#endif
-                );
-        }
-
-        mShaderStorageBuffers[index].resize(data.mSize);
-
-        if (data.mSize > 0) {
-            auto target = mShaderStorageBuffers[index].mapData();
-            std::memcpy(target.mData, data.mData, data.mSize);
-        }
     }
 
     void OpenGLPipelineInstance::renderMesh(RenderTarget *target, const GPUMeshData *m) const

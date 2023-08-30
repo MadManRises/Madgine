@@ -158,7 +158,7 @@ struct container_api_impl<C, std::deque<Ty...>> : C {
     template <typename... _Ty>
     decltype(auto) emplace_back(_Ty &&...args)
     {
-        return this->emplace(this->end(), std::forward<_Ty>(args)...);
+        return *emplace(static_cast<C&>(*this), this->end(), std::forward<_Ty>(args)...);
     }
 
     value_type &at(size_t i)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../referencetuple.h"
+#include "emplace.h"
 
 namespace Engine {
 
@@ -92,7 +93,7 @@ struct MultiContainer {
             return std::get<0>(mIt) == std::get<0>(other.mIt);
         }
 
-                template <typename It2, bool isConst2>
+        template <typename It2, bool isConst2>
         constexpr bool operator==(const IteratorImpl<It2, isConst2> &other) const
         {
             return std::get<0>(mIt) == std::get<0>(other.mIt);
@@ -102,6 +103,13 @@ struct MultiContainer {
         {
             TupleUnpacker::forEach(mIt, [](auto &it) { ++it; });
             return *this;
+        }
+
+        IteratorImpl operator++(int)
+        {
+            IteratorImpl other = *this;
+            ++other;
+            return other;
         }
 
         IteratorImpl &operator--()
@@ -165,6 +173,13 @@ struct MultiContainer {
     iterator emplace(const const_iterator &where, Args &&...args)
     {
         return { { std::get<Container<Ty>>(mData).emplace(std::get<typename Container<Ty>::const_iterator>(where.mIt), std::forward<Args>(args))... } };
+    }
+
+    template <typename It, typename... Args>
+    friend iterator tag_invoke(emplace_t, bool &success, MultiContainer<Container, Ty...> &self, const It &where, Args &&...args)
+    {
+        success = true;
+        return self.emplace(where, std::forward<Args>(args)...);
     }
 
     iterator erase(const iterator &where)
@@ -261,14 +276,8 @@ private:
 template <template <typename...> typename Container, typename... Ty>
 struct container_traits<MultiContainer<Container, Ty...>> {
 
-    typedef MultiContainer<Container, Ty...> container;
-    typedef typename container::value_type value_type;
-    typedef typename container::iterator iterator;
-    typedef typename container::const_iterator const_iterator;
-    typedef typename container::reverse_iterator reverse_iterator;
-    typedef typename container::const_reverse_iterator const_reverse_iterator;
-
-    typedef Pib<iterator> emplace_return;
+    typedef typename MultiContainer<Container, Ty...>::iterator iterator;
+    typedef typename MultiContainer<Container, Ty...>::const_iterator const_iterator;
 
     using helper_traits = container_traits<Container<first_t<Ty...>>>;
 
@@ -284,53 +293,42 @@ struct container_traits<MultiContainer<Container, Ty...>> {
     template <template <typename> typename W>
     using wrap_t = MultiContainer<Container, W<Ty>...>;
 
-    template <typename... _Ty>
-    static emplace_return emplace(container &c, const const_iterator &where, _Ty &&...args)
-    {
-        return c.emplace(where, std::forward<_Ty>(args)...);
-    }
-
-    static bool was_emplace_successful(const emplace_return &ret)
-    {
-        return ret.success();
-    }
-
-    static position_handle toPositionHandle(container &c, const iterator &it)
+    static position_handle toPositionHandle(MultiContainer<Container, Ty...> &c, const iterator &it)
     {
         return helper_traits::toPositionHandle(get<0>(c), get<0>(it));
     }
 
-    static handle toHandle(container &c, const iterator &it)
+    static handle toHandle(MultiContainer<Container, Ty...> &c, const iterator &it)
     {
         return helper_traits::toHandle(get<0>(c), get<0>(it));
     }
 
-    static void revalidateHandleAfterInsert(position_handle &handle, const container &c, const const_iterator &it)
+    static void revalidateHandleAfterInsert(position_handle &handle, const MultiContainer<Container, Ty...> &c, const const_iterator &it)
     {
         helper_traits::revalidateHandleAfterInsert(handle, get<0>(c), get<0>(it));
     }
 
-    static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const const_iterator &it, bool wasIn, size_t count = 1)
+    static void revalidateHandleAfterRemove(position_handle &handle, const MultiContainer<Container, Ty...> &c, const const_iterator &it, bool wasIn, size_t count = 1)
     {
         helper_traits::revalidateHandleAfterRemove(handle, get<0>(c), get<0>(it));
     }
 
-    static iterator toIterator(container &c, const position_handle &handle)
+    static iterator toIterator(MultiContainer<Container, Ty...> &c, const position_handle &handle)
     {
         return { { container_traits<Container<Ty>>::toIterator(std::get<Container<Ty>>(c.mData), handle)... } };
     }
 
-    static const_iterator toIterator(const container &c, const const_position_handle &handle)
+    static const_iterator toIterator(const MultiContainer<Container, Ty...> &c, const const_position_handle &handle)
     {
         return { container_traits<Container<Ty>>::toIterator(std::get<Container<Ty>>(c.mData), handle)... };
     }
 
-    static position_handle next(container &c, const position_handle &handle)
+    static position_handle next(MultiContainer<Container, Ty...> &c, const position_handle &handle)
     {
         return toPositionHandle(c, ++toIterator(c, handle));
     }
 
-    static position_handle prev(container &c, const position_handle &handle)
+    static position_handle prev(MultiContainer<Container, Ty...> &c, const position_handle &handle)
     {
         return toPositionHandle(c, --toIterator(c, handle));
     }

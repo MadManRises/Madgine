@@ -8,6 +8,10 @@
 
 #include "Modules/threading/taskfuture.h"
 
+#include "Madgine/render/buffer.h"
+
+#include "Generic/bytebuffer.h"
+
 namespace Engine {
 namespace Render {
 
@@ -29,7 +33,7 @@ namespace Render {
         virtual bool beginFrame();
         virtual void endFrame();
 
-		static RenderContext &getSingleton();
+        static RenderContext &getSingleton();
 
         size_t frame() const;
 
@@ -37,10 +41,42 @@ namespace Render {
 
         virtual bool supportsMultisampling() const = 0;
 
+        template <typename T>
+        requires (!std::is_array_v<T>)
+        GPUBuffer<T> allocateBuffer()
+        {
+            return allocateBufferImpl(sizeof(T)).cast<T>();
+        }
+
+        template <typename T>
+        requires std::is_unbounded_array_v<T>
+            GPUBuffer<T> allocateBuffer(size_t elementCount)
+        {
+            return static_cast<GPUBuffer<T>>(allocateBufferImpl(sizeof(std::remove_extent_t<T>) * elementCount));
+        }
+
+        template <typename T>
+        void deallocateBuffer(GPUBuffer<T> buffer)
+        {
+            deallocateBufferImpl(std::move(buffer));
+        }
+
+        template <typename T>
+        auto mapBuffer(GPUBuffer<T> &buffer)
+        {
+            return mapBufferImpl(buffer).template cast<T>();
+        }
+
+    protected:
+        virtual GPUBuffer<void> allocateBufferImpl(size_t size) { throw 0; };
+        virtual void deallocateBufferImpl(GPUBuffer<void> buffer) { throw 0; };
+        virtual WritableByteBuffer mapBufferImpl(GPUBuffer<void> &buffer) { throw 0; };
+
     protected:
         void checkThread();
 
         static bool isRenderThread();
+
     protected:
         std::vector<RenderTarget *> mRenderTargets;
 
@@ -52,6 +88,5 @@ namespace Render {
 
 }
 }
-
 
 REGISTER_TYPE(Engine::Render::RenderContext)

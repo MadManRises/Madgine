@@ -24,7 +24,6 @@ namespace Window {
 
         struct traits {
             using type = int;
-            using cmp_type = MainWindowComponentComparator;
             using item_type = std::unique_ptr<MainWindowComponentBase>;
 
             static int to_cmp_type(const item_type &value);

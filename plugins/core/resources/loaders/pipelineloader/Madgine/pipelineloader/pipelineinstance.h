@@ -36,8 +36,6 @@ namespace Render {
             return mapParameters(index).cast<T>();
         }
 
-        virtual void setDynamicParameters(size_t index, const ByteBuffer &data) = 0;
-
         virtual void renderMesh(RenderTarget *target, const GPUMeshData *mesh) const = 0;
         virtual void renderMeshInstanced(RenderTarget *target, size_t count, const GPUMeshData *mesh, const ByteBuffer &instanceData) const = 0;
         template <typename T>

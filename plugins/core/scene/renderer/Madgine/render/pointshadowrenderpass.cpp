@@ -37,7 +37,7 @@ namespace Render {
 
     void PointShadowRenderPass::setup(RenderTarget *target)
     {
-        mPipeline.create({ .vs = "pointshadow", .ps = "pointshadow", .gs = "pointshadow", .bufferSizes = { sizeof(PointShadowPerApplication), sizeof(PointShadowPerFrame), sizeof(PointShadowPerObject) }, .instanceDataSize = sizeof(PointShadowInstanceData) });
+        mPipeline.create({ .vs = "pointshadow", .ps = "pointshadow", .gs = "pointshadow", .bufferSizes = { sizeof(PointShadowPerApplication), sizeof(PointShadowPerFrame), 0 }, .instanceDataSize = sizeof(PointShadowInstanceData) });
 
         addDependency(&mData);
     }
@@ -83,21 +83,8 @@ namespace Render {
             perFrame->position = transform->mPosition;
         }
 
-        for (std::pair<const std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> &instance : mData.mInstances) {
-            const GPUMeshData *meshData = std::get<0>(instance.first);
-            Scene::Entity::Skeleton *skeleton = std::get<1>(instance.first);
-
-            {
-                auto perObject = mPipeline->mapParameters<PointShadowPerObject>(2);
-
-                perObject->hasSkeleton = skeleton != nullptr;
-            }
-
-            if (skeleton) {
-                mPipeline->setDynamicParameters(0, skeleton->matrices());
-            } else {
-                mPipeline->setDynamicParameters(0, {});
-            }
+        for (std::pair<const GPUMeshData *const, std::vector<ShadowSceneRenderData::ObjectData>> &instance : mData.mInstances) {
+            const GPUMeshData *meshData = instance.first;
 
             mPipeline->renderMeshInstanced(target, std::move(instance.second), meshData);
         }

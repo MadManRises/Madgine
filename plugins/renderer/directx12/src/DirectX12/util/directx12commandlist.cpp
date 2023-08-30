@@ -1,13 +1,14 @@
 #include "../directx12lib.h"
 
-#include "../directx12rendercontext.h"
 #include "directx12commandlist.h"
+#include "directx12commandallocator.h"
 
 namespace Engine {
 namespace Render {
 
-    DirectX12CommandList::DirectX12CommandList(ReleasePtr<ID3D12GraphicsCommandList> list, ReleasePtr<ID3D12CommandAllocator> allocator)
-        : mList(std::move(list))
+    DirectX12CommandList::DirectX12CommandList(DirectX12CommandAllocator *manager, ReleasePtr<ID3D12GraphicsCommandList> list, ReleasePtr<ID3D12CommandAllocator> allocator)
+        : mManager(manager)
+        , mList(std::move(list))
         , mAllocator(std::move(allocator))
     {
     }
@@ -20,6 +21,7 @@ namespace Render {
     DirectX12CommandList &DirectX12CommandList::operator=(DirectX12CommandList &&other)
     {
         reset();
+        mManager = other.mManager;
         mList = std::move(other.mList);
         mAllocator = std::move(other.mAllocator);
         mAttachedResources = std::move(other.mAttachedResources);
@@ -29,7 +31,7 @@ namespace Render {
     void DirectX12CommandList::reset()
     {
         if (mList) {
-            DirectX12RenderContext::getSingleton().ExecuteCommandList(std::move(mList), std::move(mAllocator), std::move(mAttachedResources));
+            mManager->ExecuteCommandList(std::move(mList), std::move(mAllocator), std::move(mAttachedResources));
         }
     }
 
@@ -43,12 +45,7 @@ namespace Render {
         return mList;
     }
 
-    void DirectX12CommandList::attachResource(ReleasePtr<ID3D12Resource> resource)
-    {
-        mAttachedResources.push_back(std::move(resource));
-    }
-
-    void DirectX12CommandList::attachResource(ReleasePtr<ID3D12PipelineState> resource)
+    void DirectX12CommandList::attachResource(Any resource)
     {
         mAttachedResources.push_back(std::move(resource));
     }

@@ -21,14 +21,11 @@ namespace Serialize {
     public:
         using container = SerializableContainerImpl<C, Observer, OffsetPtr>;
 
-        typedef typename _traits::container Base;
+        using Base = C;
+
         typedef typename _traits::iterator iterator;
         typedef typename _traits::const_iterator const_iterator;
-        typedef typename _traits::reverse_iterator reverse_iterator;
-        typedef typename _traits::const_reverse_iterator const_reverse_iterator;
-        typedef typename _traits::position_handle position_handle;
-
-        typedef typename _traits::value_type value_type;
+        typedef typename _traits::position_handle position_handle;        
 
     public:
         SerializableContainerImpl()
@@ -104,7 +101,7 @@ namespace Serialize {
             return _traits::toIterator(*this, mActiveIterator);
         }
 
-        reverse_iterator rbegin()
+        /* reverse_iterator rbegin()
         {
             return std::make_reverse_iterator(_traits::toIterator(*this, mActiveIterator));
         }
@@ -122,7 +119,7 @@ namespace Serialize {
         const_reverse_iterator rend() const
         {
             return Base::rend();
-        }
+        }*/
 
         size_t size() const
         {
@@ -134,18 +131,26 @@ namespace Serialize {
             ResetOperation { *this, false }.clear();
         }
 
-        template <typename... _Ty>
-        typename _traits::emplace_return emplace(const iterator &where, _Ty &&...args)
+        template <typename... Ty>
+        friend iterator tag_invoke(emplace_t, bool &success, SerializableContainerImpl<C, Observer, OffsetPtr> &self, const iterator &where, Ty &&...args)
         {
-            return InsertOperation { *this, where }.emplace(where, std::forward<_Ty>(args)...);
+            InsertOperation op { self, where };
+            return Engine::emplace(success, op, where, std::forward<Ty>(args)...);
         }
 
         template <typename Init, typename... _Ty>
-        typename _traits::emplace_return emplace_init(const iterator &where, Init &&init, _Ty &&...args)
+        iterator emplace_init(const iterator &where, Init &&init, _Ty &&...args)
+        {
+            bool success;
+            return emplace_init(success, where, std::forward<Init>(init), std::forward<_Ty>(args)...);
+        }
+
+        template <typename Init, typename... _Ty>
+        iterator emplace_init(bool &success, const iterator &where, Init &&init, _Ty &&...args)
         {
             InsertOperation op { *this, where };
-            typename _traits::emplace_return it = op.emplace(where, std::forward<_Ty>(args)...);
-            if (_traits::was_emplace_successful(it)) {
+            iterator it = emplace(success, op, where, std::forward<_Ty>(args)...);
+            if (success) {
                 init(*it);
             }
             return it;
@@ -161,10 +166,10 @@ namespace Serialize {
             return RemoveRangeOperation { *this, from, to }.erase(from, to);
         }
 
-        value_type extract(const iterator &which)
+        std::ranges::range_value_t<Base> extract(const iterator &which)
         {
             RemoveOperation op { *this, which };
-            value_type temp = std::move(*which);
+            std::ranges::range_value_t<Base> temp = std::move(*which);
             op.erase(which);
             return temp;
         }
@@ -200,7 +205,7 @@ namespace Serialize {
 
         void setSynced(bool synced)
         {
-            for (auto& e : physical()) {
+            for (auto &e : physical()) {
                 Serialize::setSynced(e, synced, CallerHierarchyPtr { OffsetPtr::parent(this) });
             }
         }
@@ -225,9 +230,9 @@ namespace Serialize {
             }
 
             template <typename... Ty>
-            auto emplace(const const_iterator &it, Ty &&...args)
+            friend auto tag_invoke(emplace_t, bool &success, Operation &self, const const_iterator &it, Ty &&...args)
             {
-                return this->mContainer.emplace_intern(it, std::forward<Ty>(args)...);
+                return self.mContainer.emplace_intern(success, it, std::forward<Ty>(args)...);
             }
 
             decltype(auto) physical()
@@ -248,13 +253,13 @@ namespace Serialize {
             }
 
             template <typename... Ty>
-            auto emplace(const const_iterator &it, Ty &&...args)
+            friend auto tag_invoke(emplace_t, bool &success, _InsertOperation &self, const const_iterator &it, Ty &&...args)
             {
-                assert(!mCalled);
-                mCalled = true;
-                auto retIt = Operation::emplace(it, std::forward<Ty>(args)...);
-                mIt = retIt;
-                mInserted = _traits::was_emplace_successful(retIt);
+                assert(!self.mCalled);
+                self.mCalled = true;
+                auto retIt = Engine::emplace(success, static_cast<Operation &>(self), it, std::forward<Ty>(args)...);
+                self.mIt = retIt;
+                self.mInserted = success;
                 return retIt;
             }
 
@@ -293,21 +298,20 @@ namespace Serialize {
             }
 
             template <typename... Ty>
-            auto emplace(const const_iterator &it, Ty &&...args)
+            friend auto tag_invoke(emplace_t, bool &success, _MultiInsertOperation &self, const const_iterator &it, Ty &&...args)
             {
                 if constexpr (!_traits::sorted) {
-                    if (this->mContainer.isItemActive(it)) {
-                        this->mContainer.Observer::operator()(it, BEFORE | EMPLACE);
+                    if (self.mContainer.isItemActive(it)) {
+                        self.mContainer.Observer::operator()(it, BEFORE | EMPLACE);
                     }
                 }
-                auto retIt = Operation::emplace(it, std::forward<Ty>(args)...);
-                bool wasInserted = _traits::was_emplace_successful(retIt);
-                if (wasInserted) {
-                    for (std::tuple<position_handle, bool, const_iterator> &handle : mIterators) {
-                        _traits::revalidateHandleAfterInsert(std::get<0>(handle), this->mContainer, static_cast<iterator>(retIt));
+                auto retIt = Engine::emplace(success, static_cast<Operation &>(self), it, std::forward<Ty>(args)...);
+                if (success) {
+                    for (std::tuple<position_handle, bool, const_iterator> &handle : self.mIterators) {
+                        _traits::revalidateHandleAfterInsert(std::get<0>(handle), self.mContainer, static_cast<iterator>(retIt));
                     }
                 }
-                mIterators.emplace_back(_traits::toPositionHandle(this->mContainer, retIt), wasInserted, it);
+                self.mIterators.emplace_back(_traits::toPositionHandle(self.mContainer, retIt), success, it);
                 return retIt;
             }
 
@@ -484,11 +488,11 @@ namespace Serialize {
         }
 
         template <typename... _Ty>
-        typename _traits::emplace_return emplace_intern(const const_iterator &where, _Ty &&...args)
+        iterator emplace_intern(bool &success, const const_iterator &where, _Ty &&...args)
         {
-            typename _traits::emplace_return it = _traits::emplace(*this, where, std::forward<_Ty>(args)...);
-            if (_traits::was_emplace_successful(it)) {
-                _traits::revalidateHandleAfterInsert(mActiveIterator, *this, static_cast<typename _traits::iterator &>(it));
+            iterator it = Engine::emplace(success, static_cast<Base&>(*this), where, std::forward<_Ty>(args)...);
+            if (success) {
+                _traits::revalidateHandleAfterInsert(mActiveIterator, *this, it);
                 position_handle newHandle = _traits::toPositionHandle(*this, it);
                 if (_traits::next(*this, newHandle) == mActiveIterator && !this->isActive())
                     mActiveIterator = newHandle;
@@ -541,19 +545,6 @@ namespace Serialize {
 template <typename C, typename Observer, typename _OffsetPtr>
 struct underlying_container<Serialize::SerializableContainerImpl<C, Observer, _OffsetPtr>, void> {
     typedef C type;
-};
-
-template <typename C, typename Observer, typename _OffsetPtr>
-struct container_traits<Serialize::SerializableContainerImpl<C, Observer, _OffsetPtr>, void> : container_traits<C> {
-    typedef Serialize::SerializableContainerImpl<C, Observer, _OffsetPtr> container;
-
-    using _traits = container_traits<C>;
-
-    template <typename... Args>
-    static typename _traits::emplace_return emplace(container &c, const typename _traits::iterator &where, Args &&...args)
-    {
-        return c.emplace(where, std::forward<Args>(args)...);
-    }
 };
 
 }

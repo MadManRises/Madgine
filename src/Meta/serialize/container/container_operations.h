@@ -24,7 +24,7 @@ namespace Serialize {
                 TupleUnpacker::invoke(&Creator::template clear<Op>, op, hierarchy);
 
                 while (in.hasContainerItem()) {
-                    typename container_traits<Op>::emplace_return it;
+                    std::ranges::iterator_t<Op> it;
                     STREAM_PROPAGATE_ERROR(TupleUnpacker::invoke(&Creator::template readItem<Op>, in, op, it, physical(op).end(), hierarchy));
                 }
             } else {
@@ -170,7 +170,7 @@ namespace Serialize {
             c.setSynced(synced);
         }
 
-        static StreamResult performOperation(C &c, ContainerEvent op, FormattedSerializeStream &in, typename container_traits<C>::emplace_return &it, ParticipantId answerTarget, MessageId answerId, const CallerHierarchyBasePtr &hierarchy = {})
+        static StreamResult performOperation(C &c, ContainerEvent op, FormattedSerializeStream &in, std::ranges::iterator_t<C> &it, ParticipantId answerTarget, MessageId answerId, const CallerHierarchyBasePtr &hierarchy = {})
         {
             it = c.end();
             switch (op) {
@@ -178,9 +178,8 @@ namespace Serialize {
                 if constexpr (!container_traits<C>::sorted) {
                     STREAM_PROPAGATE_ERROR(Base::readIterator(in, c, it));
                 }
-                decltype(auto) op = insertOperation(c, it, answerTarget, answerId);
-                typename container_traits<C>::const_iterator cit = static_cast<const typename container_traits<C>::iterator &>(it);
-                return TupleUnpacker::invoke(&Creator::template readItem<decltype(op)>, in, op, it, cit, hierarchy);
+                decltype(auto) op = insertOperation(c, it, answerTarget, answerId);                
+                return TupleUnpacker::invoke(&Creator::template readItem<decltype(op)>, in, op, it, it, hierarchy);
             }
             case ERASE:
                 STREAM_PROPAGATE_ERROR(Base::readIterator(in, c, it));
@@ -236,7 +235,7 @@ namespace Serialize {
             bool accepted = (op & ~MASK) != ABORTED;
 
             if (accepted) {
-                typename container_traits<C>::emplace_return it;
+                std::ranges::iterator_t<C> it;
                 STREAM_PROPAGATE_ERROR(performOperation(c, op, in, it, request.mRequester, request.mRequesterTransactionId, hierarchy));
                 request.mReceiver.set_value(it);
             } else {
@@ -299,7 +298,7 @@ namespace Serialize {
                 }
             } else {
                 if (c.isMaster()) {
-                    typename container_traits<C>::emplace_return it;
+                    std::ranges::iterator_t<C> it;
                     STREAM_PROPAGATE_ERROR(performOperation(c, op, inout, it, inout.id(), id, hierarchy));
                 } else {
                     FormattedBufferedStream &out = c.getSlaveRequestMessageTarget(inout.id(), id);

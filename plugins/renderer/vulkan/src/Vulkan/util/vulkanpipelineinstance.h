@@ -18,8 +18,6 @@ namespace Render {
 
         virtual WritableByteBuffer mapParameters(size_t index) override;
 
-        virtual void setDynamicParameters(size_t index, const ByteBuffer &data) override;
-
         virtual void renderMesh(RenderTarget *target, const GPUMeshData *mesh) const override;
         virtual void renderMeshInstanced(RenderTarget *target, size_t count, const GPUMeshData *mesh, const ByteBuffer &instanceData) const override;
 
@@ -29,7 +27,6 @@ namespace Render {
         const VulkanPipeline *mPipeline;
 
         std::vector<VulkanBuffer> mConstantBuffers;
-        std::vector<VulkanBuffer> mDynamicBuffers;
 
         VkDescriptorSet mUboDescriptorSet;
     };

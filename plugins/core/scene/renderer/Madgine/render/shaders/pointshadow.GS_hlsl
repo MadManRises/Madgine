@@ -11,11 +11,6 @@ cbuffer PerFrame : register(b1)
 	PointShadowPerFrame frame;
 };
 
-cbuffer PerObject : register(b2)
-{
-	PointShadowPerObject object;
-};
-
 
 struct GeometryShaderInput {
     float4 position : SV_Position;

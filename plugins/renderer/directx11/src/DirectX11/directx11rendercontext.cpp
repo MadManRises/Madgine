@@ -183,17 +183,17 @@ namespace Render {
 
         if (!layout) {
 
-#ifndef NDEBUG
+/* #ifndef NDEBUG
 #    define semantic(i) vSemantics[i]
 #    define semanticIndex(i) vSemanticIndices[i]
 #    define instanceSemantic "INSTANCEDATA"
 #    define instanceSemanticIndex(i) (UINT) i
-#else
+#else*/
 #    define semantic(i) "TEXCOORD"
 #    define semanticIndex(i) (UINT) i
 #    define instanceSemantic "TEXCOORD"
 #    define instanceSemanticIndex(i) (UINT)(VertexElements::size + i)
-#endif
+//#endif
 
             std::vector<D3D11_INPUT_ELEMENT_DESC> vertexLayoutDesc;
 

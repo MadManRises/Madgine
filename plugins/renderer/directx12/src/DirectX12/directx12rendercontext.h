@@ -3,15 +3,22 @@
 #include "Madgine/render/rendercontext.h"
 #include "Madgine/render/rendercontextcollector.h"
 
+#include "util/directx12commandlist.h"
 #include "util/directx12constantbufferheap.h"
 #include "util/directx12descriptorheap.h"
-#include "util/directx12commandlist.h"
 
 #include "Generic/lambda.h"
 
 #include "Madgine/render/vertexformat.h"
 
 #include "util/directx12buffer.h"
+
+#include "util/directx12heapallocator.h"
+
+#include "util/directx12commandallocator.h"
+
+#include "Generic/allocator/bucket.h"
+#include "Generic/allocator/heap.h"
 
 namespace Engine {
 namespace Render {
@@ -32,16 +39,17 @@ namespace Render {
 
         virtual bool supportsMultisampling() const override;
 
-        uint64_t currentFence();
-
-        bool isFenceComplete(uint64_t fenceValue);
+        virtual GPUBuffer<void> allocateBufferImpl(size_t size) override;
+        virtual void deallocateBufferImpl(GPUBuffer<void> buffer) override;
+        virtual WritableByteBuffer mapBufferImpl(GPUBuffer<void> &buffer) override;
 
         static DirectX12RenderContext &getSingleton();
 
         void createRootSignature();
 
-        DirectX12CommandList fetchCommandList(std::string_view name);
-        void ExecuteCommandList(ReleasePtr<ID3D12GraphicsCommandList> list, ReleasePtr<ID3D12CommandAllocator> allocator, std::vector<ReleasePtr<ID3D12Pageable>> discardResources);
+        DirectX12CommandList fetchCommandList(D3D12_COMMAND_LIST_TYPE type);
+
+        DirectX12CommandAllocator *graphicsQueue();
 
         static std::vector<D3D12_INPUT_ELEMENT_DESC> createVertexLayout(VertexFormat format, size_t instanceDataSize);
 
@@ -49,17 +57,21 @@ namespace Render {
         DirectX12DescriptorHeap mRenderTargetDescriptorHeap;
         DirectX12DescriptorHeap mDepthStencilDescriptorHeap;
         DirectX12ConstantBufferHeap mConstantBufferHeap;
-        ReleasePtr<ID3D12CommandQueue> mCommandQueue;
-        std::vector<std::tuple<uint64_t, ReleasePtr<ID3D12CommandAllocator>, std::vector<ReleasePtr<ID3D12Pageable>>>> mAllocatorPool;
-        std::vector<ReleasePtr<ID3D12GraphicsCommandList>> mCommandListPool;
+        
         ReleasePtr<ID3D12RootSignature> mRootSignature;
         ReleasePtr<IDXGIFactory4> mFactory;
 
-        uint64_t mLastCompletedFenceValue = 0;
-        uint64_t mNextFenceValue;
-        ID3D12Fence *mFence;
+        DirectX12CommandAllocator mGraphicsQueue;
+        DirectX12CommandAllocator mCopyQueue;
+        DirectX12CommandAllocator mComputeQueue;
 
         DirectX12Buffer mConstantBuffer;
+
+        DirectX12HeapAllocator mDefaultMemoryHeap;
+        LogBucketAllocator<HeapAllocator<DirectX12HeapAllocator &>, 64, 4096, 4> mDefaultAllocator;
+
+        DirectX12MappedHeapAllocator mUploadHeap = D3D12_HEAP_TYPE_UPLOAD;
+        BucketAllocator<HeapAllocator<DirectX12MappedHeapAllocator &>, 16, 64, 16> mUploadAllocator;
     };
 
 }

@@ -1,4 +1,5 @@
 #include "lightdata.sl"
+#include "Madgine/render/shadinglanguage/memory.sl"
 
 struct PointShadowPerApplication {
 	float4x4 p;
@@ -10,8 +11,5 @@ struct PointShadowPerFrame {
 
 struct PointShadowInstanceData {
 	float4x4 m;
-};
-
-struct PointShadowPerObject {
-	bool hasSkeleton;
+	ArrayPtr<float4x4> bones;
 };

@@ -35,12 +35,12 @@ namespace Scripting {
             .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
                            .tp_name
             = "PySuspendException",
-            .tp_base = (PyTypeObject *)PyExc_Exception,
             .tp_basicsize = sizeof(PySuspendExceptionObject),
             .tp_itemsize = 0,
             .tp_dealloc = &PyDealloc<PySuspendExceptionObject, &PySuspendExceptionObject::mException>,
             .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASE_EXC_SUBCLASS,
             .tp_doc = "Utility exception for Python suspension",
+            .tp_base = (PyTypeObject *)PyExc_Exception,
             .tp_new = PyType_GenericNew,
         };
 

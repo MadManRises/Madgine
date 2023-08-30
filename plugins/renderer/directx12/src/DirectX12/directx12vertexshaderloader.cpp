@@ -27,7 +27,7 @@ namespace Render {
     }
 
     DirectX12VertexShaderLoader::DirectX12VertexShaderLoader()
-        : ResourceLoader({ ".vs_hlsl" })
+        : ResourceLoader({ ".vs_hlsl12" })
     {
         HRESULT hr = DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&mLibrary));
         //if(FAILED(hr)) Handle error...
@@ -42,7 +42,7 @@ namespace Render {
             [=, &file](DirectX12VertexShaderLoader *loader, ReleasePtr<IDxcBlob> &shader) { return loader->create(shader, file); }, loader);
     }
 
-   bool DirectX12VertexShaderLoader::loadImpl(ReleasePtr<IDxcBlob> &shader, ResourceDataInfo &info)
+    bool DirectX12VertexShaderLoader::loadImpl(ReleasePtr<IDxcBlob> &shader, ResourceDataInfo &info)
     {
         std::string source = info.resource()->readAsText();
 
@@ -92,6 +92,9 @@ namespace Render {
 
         arguments.push_back(L"-T");
         arguments.push_back(profile.c_str());
+
+        arguments.push_back(L"-HV");
+        arguments.push_back(L"2021");
 
         ReleasePtr<IDxcResult> result;
         HRESULT hr = mCompiler->Compile(

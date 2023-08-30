@@ -69,7 +69,7 @@ namespace Render {
 
     void DirectX12RenderTarget::beginFrame()
     {
-        mCommandList = context()->fetchCommandList(name());
+        mCommandList = context()->fetchCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT);
 
         mCommandList->SetGraphicsRootSignature(context()->mRootSignature);
 
@@ -80,7 +80,7 @@ namespace Render {
                 DirectX12RenderTexture *tex = dynamic_cast<DirectX12RenderTexture *>(data);
                 if (tex) {
                     for (const DirectX12Texture &texture : tex->textures())
-                        mCommandList.attachResource(texture);
+                        mCommandList.attachResource(texture.operator ReleasePtr<ID3D12Resource>());
                 }
             }
         }

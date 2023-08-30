@@ -16,7 +16,7 @@ namespace Scene {
 
         SceneManager &sceneMgr() const;
 
-        virtual void updateRender(std::chrono::microseconds frameTimeSinceLastFrame, std::chrono::microseconds sceneTimeSinceLastFrame);
+        virtual void updateFrame(std::chrono::microseconds frameTimeSinceLastFrame, std::chrono::microseconds sceneTimeSinceLastFrame);
         std::string_view key() const;
 
         template <typename T>

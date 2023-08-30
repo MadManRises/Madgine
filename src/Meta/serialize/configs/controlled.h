@@ -15,7 +15,7 @@ namespace Serialize {
         static const constexpr bool controlled = true;
 
         template <typename C>
-        static void writeItem(FormattedSerializeStream &out, const typename container_traits<C>::value_type &t)
+        static void writeItem(FormattedSerializeStream &out, const std::ranges::range_value_t<C> &t)
         {
             out.beginExtendedWrite("Item", 1);
             write(out, comparator_traits<Cmp>::to_cmp_type(t), "key");
@@ -23,7 +23,7 @@ namespace Serialize {
         }
 
         template <typename Op>
-        static StreamResult readItem(FormattedSerializeStream &in, Op &op, typename container_traits<Op>::iterator &it)
+        static StreamResult readItem(FormattedSerializeStream &in, Op &op, std::ranges::iterator_t<Op> &it)
         {
             /*if (it != physical(op).end())
                 return STREAM_ERROR(in, StreamState::UNKNOWN_ERROR, "Reading currently only supported at end()");*/

@@ -235,7 +235,7 @@ namespace UniqueComponent {
 
         std::string_view componentName(uint32_t index)
         {
-            for (CollectorInfoBase *info : mLoadedCollectors) {
+            for (CollectorInfoBase *info : this->mLoadedCollectors) {
                 assert(index >= info->mBaseIndex);
                 if (index < info->mBaseIndex + info->mComponentNames.size()) {
                     return info->mComponentNames[index - info->mBaseIndex];

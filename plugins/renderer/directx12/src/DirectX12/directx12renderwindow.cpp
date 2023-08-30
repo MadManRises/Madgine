@@ -9,6 +9,7 @@
 #include "Interfaces/window/windowapi.h"
 
 #include "directx12rendercontext.h"
+#include "util/directx12commandallocator.h"
 
 #include "Modules/threading/taskqueue.h"
 
@@ -39,7 +40,7 @@ namespace Render {
         swapChainDesc.Windowed = TRUE;
 
         IDXGISwapChain *swapChain;
-        hr = context->mFactory->CreateSwapChain(context->mCommandQueue, &swapChainDesc, &swapChain);
+        hr = context->mFactory->CreateSwapChain(context->graphicsQueue()->queue(), &swapChainDesc, &swapChain);
         DX12_CHECK(hr);
 
         hr = swapChain->QueryInterface(&mSwapChain);
@@ -66,7 +67,7 @@ namespace Render {
 
     bool DirectX12RenderWindow::skipFrame()
     {
-        if (mTargetViews.empty() && context()->isFenceComplete(mResizeFence)) {
+        if (mTargetViews.empty() && context()->graphicsQueue()->isFenceComplete(mResizeFence)) {
 
             for (size_t i = 0; i < 2; ++i) {
                 mBackBuffers[i].reset();
@@ -141,7 +142,7 @@ namespace Render {
     bool DirectX12RenderWindow::resizeImpl(const Vector2i &size)
     {
         mTargetViews.clear();
-        mResizeFence = context()->currentFence();
+        mResizeFence = context()->graphicsQueue()->currentFence();
         mResizeTarget = size;
 
         return true;

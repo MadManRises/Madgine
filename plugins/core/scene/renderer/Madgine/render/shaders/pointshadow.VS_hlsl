@@ -13,15 +13,6 @@ cbuffer PerFrame : register(b1)
 	PointShadowPerFrame frame;
 };
 
-cbuffer PerObject : register(b2)
-{
-	PointShadowPerObject object;
-};
-
-cbuffer Bones : register(b3)
-{
-    matrix bones[32];
-}
 
 
 struct AppData {
@@ -50,11 +41,11 @@ VertexShaderOutput main(AppData IN)
 	
 	float4 worldPos;
 
-	if (object.hasSkeleton){
-		float4x4 BoneTransform = bones[IN.aBoneIDs[0]] * IN.aWeights[0]
-		+ bones[IN.aBoneIDs[1]] * IN.aWeights[1]
-		+ bones[IN.aBoneIDs[2]] * IN.aWeights[2]
-		+ bones[IN.aBoneIDs[3]] * IN.aWeights[3];
+	if (IN.aInstance.bones.offset != 65535){
+		float4x4 BoneTransform = IN.aInstance.bones[IN.aBoneIDs[0]] * IN.aWeights[0]
+		+ IN.aInstance.bones[IN.aBoneIDs[1]] * IN.aWeights[1]
+		+ IN.aInstance.bones[IN.aBoneIDs[2]] * IN.aWeights[2]
+		+ IN.aInstance.bones[IN.aBoneIDs[3]] * IN.aWeights[3];
 		worldPos = mul(IN.aInstance.m, mul(BoneTransform, aPos));
 	}else{
 		worldPos = mul(IN.aInstance.m, aPos);

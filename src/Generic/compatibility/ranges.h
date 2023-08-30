@@ -6,19 +6,19 @@
 #    include <ranges>
 #endif
 
-#if __cpp_lib_ranges < 202110L
-
 namespace std {
 namespace ranges {
 
-#    if (__cpp_lib_ranges < 201911L)
+#if (__cpp_lib_ranges < 201911L)
     template <class T>
-    concept range = requires(T &t) {
-                        t.begin();
-                        t.end();
-                    };
-#    endif
+    concept range = requires(T &t)
+    {
+        t.begin();
+        t.end();
+    };
+#endif
 
+#if __cpp_lib_ranges < 202110L
     template <typename C, typename F>
     constexpr auto find_if_not(C &&c, F &&f)
     {
@@ -106,11 +106,16 @@ namespace ranges {
 
     template <typename T>
     using range_value_t = typename std::remove_reference_t<T>::value_type;
+#endif
 
+#if __cpp_lib_ranges < 202207L
+    template<range R>
+    using const_iterator_t = decltype(cbegin(std::declval<R&>()));
+#endif
 }
 
+#if __cpp_lib_ranges < 202110L
 namespace views {
-
     template <typename R>
     struct all_t {
 
@@ -247,7 +252,6 @@ namespace views {
     };
 
     static constexpr reverse_t reverse;
-
 }
 
 namespace ranges {
@@ -255,7 +259,7 @@ namespace ranges {
     inline constexpr bool enable_borrowed_range = false;
 
     template <typename R>
-    concept borrowed_range = range<R> && (std::is_lvalue_reference_v<R> || enable_borrowed_range<std::remove_cvref_t<R>>);
+    concept borrowed_range = range<R> &&(std::is_lvalue_reference_v<R> || enable_borrowed_range<std::remove_cvref_t<R>>);
 }
 
 template <typename R>
@@ -264,6 +268,7 @@ inline constexpr bool ranges::enable_borrowed_range<views::ReverseView<R>> = ran
 template <typename R, typename F>
 inline constexpr bool ranges::enable_borrowed_range<views::TransformView<R, F>> = ranges::borrowed_range<R>;
 
+#endif
+
 }
 
-#endif

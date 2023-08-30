@@ -43,7 +43,9 @@ struct ReleasePtr : std::unique_ptr<T, ReleaseDeleter> {
 };
 
 typedef void *HANDLE;
-#define INVALID_HANDLE_VALUE ((HANDLE)(long long)-1)
+#if !defined(INVALID_HANDLE_VALUE)
+#    define INVALID_HANDLE_VALUE ((HANDLE)(long long)-1)
+#endif
 
 struct INTERFACES_EXPORT UniqueHandle {
 

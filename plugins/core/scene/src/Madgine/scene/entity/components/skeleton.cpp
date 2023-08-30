@@ -11,12 +11,10 @@
 
 #include "Madgine/resources/resourcemanager.h"
 
-
 ENTITYCOMPONENT_IMPL(Skeleton, Engine::Scene::Entity::Skeleton);
 
 METATABLE_BEGIN(Engine::Scene::Entity::Skeleton)
 PROPERTY(Skeleton, get, set)
-READONLY_PROPERTY(Matrices, matrices)
 METATABLE_END(Engine::Scene::Entity::Skeleton)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Skeleton)
@@ -38,10 +36,7 @@ namespace Scene {
 
         const Render::SkeletonDescriptor *Skeleton::data() const
         {
-            if (mLoaded)
-                return mSkeleton;
-            else
-                return nullptr;
+            return mSkeleton;
         }
 
         std::string_view Skeleton::getName() const
@@ -51,16 +46,14 @@ namespace Scene {
 
         void Skeleton::setName(std::string_view name)
         {
-            mLoaded = false;
+            mDirty = true;
             mSkeleton.load(name);
-            mSkeleton.info()->loadingTask().then([this](bool) { resetMatrices(); mLoaded = true; }, Resources::ResourceManager::getSingleton().taskQueue());
         }
 
         void Skeleton::set(Render::SkeletonLoader::Handle handle)
         {
-            mLoaded = false;
-            mSkeleton = std::move(handle);
-            mSkeleton.info()->loadingTask().then([this](bool) { resetMatrices(); mLoaded=true; }, Resources::ResourceManager::getSingleton().taskQueue());
+            mDirty = true;
+            mSkeleton = std::move(handle);            
         }
 
         Render::SkeletonLoader::Resource *Skeleton::get() const
@@ -73,7 +66,7 @@ namespace Scene {
             return mSkeleton;
         }
 
-        void Skeleton::resetMatrices()
+        /* void Skeleton::resetMatrices()
         {
             if (!mSkeleton.available())
                 mBoneMatrices.clear();
@@ -84,12 +77,7 @@ namespace Scene {
                     mBoneMatrices[i] = mSkeleton->mBones[i].mTTransform;
                 }
             }
-        }
-
-        std::vector<Matrix4> &Skeleton::matrices()
-        {
-            return mBoneMatrices;
-        }
+        }*/
     }
 }
 }

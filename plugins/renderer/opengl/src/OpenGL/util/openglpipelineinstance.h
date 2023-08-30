@@ -19,8 +19,6 @@ namespace Render {
 
         virtual WritableByteBuffer mapParameters(size_t index) override;
 
-        virtual void setDynamicParameters(size_t index, const ByteBuffer &data) override;
-
         virtual void renderMesh(RenderTarget *target, const GPUMeshData *mesh) const override;
         virtual void renderMeshInstanced(RenderTarget *target, size_t count, const GPUMeshData *mesh, const ByteBuffer &instanceData) const override;
 
@@ -28,12 +26,6 @@ namespace Render {
 
         mutable GLuint mHandle = 0;
         std::vector<OpenGLBuffer> mUniformBuffers;
-#if !OPENGL_ES
-        std::vector<OpenGLBuffer> mShaderStorageBuffers;
-#else
-        std::vector<OpenGLSSBOBuffer> mShaderStorageBuffers;
-        mutable OpenGLBuffer mShaderStorageOffsetBuffer = { GL_UNIFORM_BUFFER };
-#endif        
     };
 
     

@@ -29,6 +29,9 @@ namespace Execution {
         static constexpr size_t index = I;
     };
 
+    template <fixed_string From, fixed_string To>
+    struct name_mapping;
+
     template <typename T>
     using is_recursive = is_instance<T, recursive>;
 
@@ -147,6 +150,8 @@ namespace Execution {
         using Algorithm = Execution::Variable_t;
 
         using Pred = Sender;
+
+        using NameMappings = type_pack<name_mapping<"Name", Name>>;
     };
 
     template <typename Sender, typename F>
@@ -161,6 +166,8 @@ namespace Execution {
     template <typename T, fixed_string Name>
     struct typed_sender_traits<Execution::read_var_t::sender<T, Name>> {
         using Algorithm = Execution::read_var_t;
+
+        using NameMappings = type_pack<name_mapping<"Name", Name>>;
     };
 
     template <typename Sender, fixed_string Name>
@@ -168,6 +175,8 @@ namespace Execution {
         using Algorithm = Execution::write_var_t;
 
         using Pred = Sender;
+
+        using NameMappings = type_pack<name_mapping<"Name", Name>>;
     };
 
     template <typename... Sender>

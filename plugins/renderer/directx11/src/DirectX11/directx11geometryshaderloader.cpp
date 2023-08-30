@@ -45,7 +45,7 @@ namespace Render {
     }
 
     DirectX11GeometryShaderLoader::DirectX11GeometryShaderLoader()
-        : ResourceLoader({ ".gs_hlsl" })
+        : ResourceLoader({ ".gs_hlsl11" })
     {
     }
 

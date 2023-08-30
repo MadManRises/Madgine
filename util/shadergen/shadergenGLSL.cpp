@@ -64,10 +64,15 @@ static std::map<std::string, uint32_t> sSemanticLocationMappings {
     { "BONEINDICES", 6 },
     { "WEIGHTS", 7 },
     { "INSTANCEDATA", 8 },
-    { "INSTANCEDATA1", std::numeric_limits<uint32_t>::max() }
+    { "INSTANCEDATA1", std::numeric_limits<uint32_t>::max() },
+    { "INSTANCEDATA2", std::numeric_limits<uint32_t>::max() },
+    { "INSTANCEDATA3", std::numeric_limits<uint32_t>::max() },
+    { "INSTANCEDATA4", std::numeric_limits<uint32_t>::max() },
+    { "INSTANCEDATA5", std::numeric_limits<uint32_t>::max() },
+    { "INSTANCEDATA6", std::numeric_limits<uint32_t>::max() }
 };
 
-int transpileGLSL(const std::string &fileName, const std::string &outFolder, IDxcResult *result)
+int transpileGLSL(const std::wstring &fileName, const std::wstring &outFolder, IDxcResult *result)
 {
     std::cout << "GLSL... ";
 
@@ -120,7 +125,8 @@ int transpileGLSL(const std::string &fileName, const std::string &outFolder, IDx
                     if (location != std::numeric_limits<uint32_t>::max())
                         glsl.set_decoration(id, spv::DecorationLocation, location);
                 } else {
-                    std::cerr << fileName << "(1,1): warning : Unsupported semantic " << semantic << " used for " << name << std::endl;
+                    std::wcerr << fileName;
+                    std::cerr << "(1,1): warning : Unsupported semantic " << semantic << " used for " << name << std::endl;
                 }
             }
         }
@@ -128,16 +134,17 @@ int transpileGLSL(const std::string &fileName, const std::string &outFolder, IDx
         shaderCode = glsl.compile();
     } catch (spirv_cross::CompilerError &error) {
         std::cout << std::endl;
-        std::cerr << fileName << "(1,1): error: " << error.what()
+        std::wcerr << fileName;
+        std::cerr << "(1,1): error: " << error.what()
                   << "\n";
         return -1;
     }
 
     auto extIt = fileName.rfind('.');
-    std::string extension = "_" + fileName.substr(extIt + 1, 2) + ".glsl";
+    std::wstring extension = L"_" + fileName.substr(extIt + 1, 2) + L".glsl";
 
     auto fileNameBegin = fileName.rfind('/');
-    std::string outputFile = outFolder + "/" + (fileName.substr(fileNameBegin + 1, extIt - fileNameBegin - 1) + extension);
+    std::wstring outputFile = outFolder + L"/" + (fileName.substr(fileNameBegin + 1, extIt - fileNameBegin - 1) + extension);
 
     std::ofstream of { outputFile };
 

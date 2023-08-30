@@ -14,7 +14,6 @@ namespace Scene {
 
         DERIVE_FUNCTION(init, Entity *)
         DERIVE_FUNCTION(finalize, Entity *)
-        DERIVE_FUNCTION(updateRender, Entity *, std::chrono::microseconds, std::chrono::microseconds)
         DERIVE_FUNCTION(relocateComponent, const EntityComponentHandle<EntityComponentBase> &, Entity *)
 
         template <typename T>
@@ -99,8 +98,8 @@ namespace Scene {
             }
 
             EntityComponentOwningHandle<EntityComponentBase> emplace(const ObjectPtr &table, Entity *entity) override final
-            {
-                typename Vector::iterator it = mData.emplace(mData.end(), table, entity);
+            {   
+                typename Vector::iterator it = Engine::emplace(mData, mData.end(), table, entity);
                 uint32_t index = container_traits<Vector>::toHandle(mData, it);
                 return { { index, static_cast<uint32_t>(UniqueComponent::component_index<T>()) } };
             }
@@ -124,15 +123,6 @@ namespace Scene {
             size_t size() const override final
             {
                 return mData.size();
-            }
-
-            void updateRender(std::chrono::microseconds frameTimeSinceLastFrame, std::chrono::microseconds sceneTimeSinceLastFrame) override final
-            {
-                if constexpr (has_function_updateRender_v<T>) {
-                    for (const std::tuple<T &, NulledPtr<Entity> &> &t : mData) {
-                        std::get<0>(t).updateRender(std::get<1>(t), frameTimeSinceLastFrame, sceneTimeSinceLastFrame);
-                    }
-                }
             }
 
             void setSynced(const EntityComponentHandle<EntityComponentBase> &index, bool synced) override final

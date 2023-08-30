@@ -4,6 +4,8 @@
 
 #include "Madgine/skeletonloader/skeletonloader.h"
 
+#include "Madgine/render/buffer.h"
+
 namespace Engine {
 namespace Scene {
     namespace Entity {
@@ -21,15 +23,12 @@ namespace Scene {
             Render::SkeletonLoader::Resource *get() const;
             const Render::SkeletonLoader::Handle &handle() const;
 
-			void resetMatrices();
-            std::vector<Matrix4> &matrices();
+            Render::GPUBuffer<Matrix4[]> mBoneMatrices;
 
         private:
             typename Render::SkeletonLoader::Handle mSkeleton;
 
-			std::vector<Matrix4> mBoneMatrices;
-
-            bool mLoaded = true;
+            bool mDirty = false;
         };
 
         using SkeletonPtr = EntityComponentPtr<Skeleton>;

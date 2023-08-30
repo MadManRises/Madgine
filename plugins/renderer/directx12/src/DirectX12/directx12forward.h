@@ -19,6 +19,8 @@ namespace Render {
 
     struct DirectX12DescriptorHeap;
 
+    struct DirectX12CommandAllocator;
+
     constexpr struct create_t {
     } create;
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "emplace.h"
+
 namespace Engine {
 
 template <typename T, typename Cmp>
@@ -35,8 +37,8 @@ struct mutable_set : std::set<T, Cmp> {
         }
 
         template <typename It2, bool isConst2>
-        requires (!isConst2 || isConst)
-        iterator_prototype(const iterator_prototype<It2, isConst2> &other)
+        requires(!isConst2 || isConst)
+            iterator_prototype(const iterator_prototype<It2, isConst2> &other)
             : mIterator(static_cast<const It2 &>(other))
         {
         }
@@ -112,8 +114,17 @@ struct mutable_set : std::set<T, Cmp> {
     }
 
     template <typename... Args>
-    std::pair<iterator, bool> emplace(Args &&...args) {
+    std::pair<iterator, bool> emplace(Args &&...args)
+    {
         return Base::emplace(std::forward<Args>(args)...);
+    }
+
+    template <typename... Args>
+    friend iterator tag_invoke(emplace_t, bool &success, mutable_set<T, Cmp> &self, const const_iterator &where, Args &&...args)
+    {
+        auto [it, b] = self.emplace(std::forward<Args>(args)...);
+        success = b;
+        return it;
     }
 
     iterator begin()
@@ -165,72 +176,54 @@ struct underlying_container<mutable_set<T, Cmp>> {
 template <typename T, typename Cmp>
 struct container_traits<mutable_set<T, Cmp>> : container_traits<std::set<T, Cmp>> {
 
-    typedef mutable_set<T, Cmp> container;
-    typedef typename container::iterator iterator;
-    typedef typename container::const_iterator const_iterator;
-    typedef typename container::reverse_iterator reverse_iterator;
-    typedef typename container::const_reverse_iterator const_reverse_iterator;
+    typedef typename mutable_set<T, Cmp>::iterator iterator;
+    typedef typename mutable_set<T, Cmp>::const_iterator const_iterator;
 
     typedef T *handle;
     typedef const T *const_handle;
     typedef iterator position_handle;
     typedef const_iterator const_position_handle;
-    typedef Cmp cmp_type;
-    typedef T value_type;
 
     //static_assert(sizeof(position_handle) <= sizeof(void *));
 
-    typedef Pib<iterator> emplace_return;
-
-    template <typename... _Ty>
-    static emplace_return emplace(container &c, const const_iterator &where, _Ty &&...args)
-    {
-        return c.emplace(std::forward<_Ty>(args)...);
-    }
-
-    static bool was_emplace_successful(const emplace_return &pib)
-    {
-        return pib.success();
-    }
-
-    static position_handle toPositionHandle(container &c, const iterator &it)
+    static position_handle toPositionHandle(mutable_set<T, Cmp> &c, const iterator &it)
     {
         return it;
     }
 
-    static handle toHandle(container &c, const iterator &it)
+    static handle toHandle(mutable_set<T, Cmp> &c, const iterator &it)
     {
         if (it == c.end())
             return nullptr;
         return &*it;
     }
 
-    static void revalidateHandleAfterInsert(position_handle &handle, const container &c, const const_iterator &it)
+    static void revalidateHandleAfterInsert(position_handle &handle, const mutable_set<T, Cmp> &c, const const_iterator &it)
     {
     }
 
-    static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const iterator &it, bool wasIn, size_t count = 1)
+    static void revalidateHandleAfterRemove(position_handle &handle, const mutable_set<T, Cmp> &c, const iterator &it, bool wasIn, size_t count = 1)
     {
         if (wasIn)
             handle = it;
     }
 
-    static iterator toIterator(container &c, const position_handle &handle)
+    static iterator toIterator(mutable_set<T, Cmp> &c, const position_handle &handle)
     {
         return handle;
     }
 
-    static const_iterator toIterator(const container &c, const const_position_handle &handle)
+    static const_iterator toIterator(const mutable_set<T, Cmp> &c, const const_position_handle &handle)
     {
         return handle;
     }
 
-    static position_handle next(container &c, const position_handle &handle)
+    static position_handle next(mutable_set<T, Cmp> &c, const position_handle &handle)
     {
         return std::next(handle);
     }
 
-    static position_handle prev(container &c, const position_handle &handle)
+    static position_handle prev(mutable_set<T, Cmp> &c, const position_handle &handle)
     {
         return std::prev(handle);
     }

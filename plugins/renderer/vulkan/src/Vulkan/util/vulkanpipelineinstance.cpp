@@ -88,17 +88,6 @@ namespace Render {
         return mConstantBuffers[index].mapData();
     }
 
-    void VulkanPipelineInstance::setDynamicParameters(size_t index, const ByteBuffer &data)
-    {
-        if (mDynamicBuffers.size() <= index)
-            mDynamicBuffers.resize(index + 1);
-
-        if (data.mSize > 0) {
-            auto target = mDynamicBuffers[index].mapData(data.mSize);
-            std::memcpy(target.mData, data.mData, data.mSize);
-        }
-    }
-
     void VulkanPipelineInstance::renderMesh(RenderTarget *target, const GPUMeshData *m) const
     {
         VkCommandBuffer commandList = static_cast<VulkanRenderTarget *>(target)->mCommandList;

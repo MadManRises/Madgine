@@ -111,21 +111,13 @@ namespace Scene {
         return mMutex(mode);
     }
 
-    void SceneManager::updateRender()
+    void SceneManager::updateFrame()
     {
         std::chrono::microseconds frameTimeSinceLastFrame = mFrameClock.tick(std::chrono::steady_clock::now());
         std::chrono::microseconds sceneTimeSinceLastFrame = mSceneClock.tick(mClock.now());
 
-        for (const auto &update : mRenderUpdates) {
-            update(frameTimeSinceLastFrame, sceneTimeSinceLastFrame);
-        }
-
-        for (const std::unique_ptr<Entity::EntityComponentListBase> &list : mEntityComponentLists) {
-            list->updateRender(frameTimeSinceLastFrame, sceneTimeSinceLastFrame);
-        }
-
         for (const std::unique_ptr<SceneComponentBase> &comp : mSceneComponents) {
-            comp->updateRender(frameTimeSinceLastFrame, sceneTimeSinceLastFrame);
+            comp->updateFrame(frameTimeSinceLastFrame, sceneTimeSinceLastFrame);
         }
     }
 
@@ -232,7 +224,7 @@ namespace Scene {
         if (init)
             return toPtr(TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_init, this), mEntities.end(), init, createEntityData(name, false), table));
         else
-            return toPtr(TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace, this), mEntities.end(), createEntityData(name, false), table));
+            return toPtr(TupleUnpacker::invokeFlatten(emplace, mEntities, mEntities.end(), createEntityData(name, false), table));
     }
 
     void SceneManager::createEntityAsyncImpl(Serialize::GenericMessageReceiver receiver, const std::string &behavior, const std::string &name, const std::function<void(Entity::Entity &)> &init)
@@ -274,7 +266,7 @@ namespace Scene {
             if (!behavior.empty())
                 LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
         }
-        return &*TupleUnpacker::invokeFlatten(LIFT(mLocalEntities.emplace, this), mLocalEntities.end(), createEntityData(name, true), table);
+        return &*TupleUnpacker::invokeFlatten(emplace, mLocalEntities, mLocalEntities.end(), createEntityData(name, true), table);
     }
 
     Threading::SignalStub<const RefcountedContainer<std::deque<Entity::Entity>>::iterator &, int> &SceneManager::entitiesSignal()
@@ -290,11 +282,6 @@ namespace Scene {
     std::chrono::steady_clock::time_point SceneManager::Clock::revert(std::chrono::steady_clock::time_point timepoint) const
     {
         return timepoint + mPauseAcc + (mPauseStack > 0 ? std::chrono::steady_clock::now() - mPauseStart : 0s);
-    }
-
-    void SceneManager::addRenderUpdate(std::function<void(std::chrono::microseconds, std::chrono::microseconds)> update)
-    {
-        mRenderUpdates.push_back(std::move(update));
     }
 
 }

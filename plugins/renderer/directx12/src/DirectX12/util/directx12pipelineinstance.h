@@ -17,8 +17,6 @@ namespace Render {
 
         virtual WritableByteBuffer mapParameters(size_t index) override;
 
-        virtual void setDynamicParameters(size_t index, const ByteBuffer &data) override;
-
         virtual void renderMesh(RenderTarget *target, const GPUMeshData *mesh) const override;
         virtual void renderMeshInstanced(RenderTarget *target, size_t count, const GPUMeshData *mesh, const ByteBuffer &instanceData) const override;
 
@@ -28,7 +26,6 @@ namespace Render {
         const DirectX12Pipeline *mPipeline;
 
         std::vector<DirectX12Buffer> mConstantBuffers;
-        std::vector<DirectX12Buffer> mDynamicBuffers;
 
         DirectX12PipelineLoader::Handle mPipelineHandle;
     };

@@ -40,16 +40,12 @@ namespace NodeGraph {
     concept IsConnection = isConnectionHelper<std::remove_reference_t<T>>::value;
 
     template <typename T, uint32_t Node, uint32_t Index, uint32_t Group>
-    SenderConnection<Node, Index, Group> operator+(SenderConnection<Node, Index, Group>, T &&t)
-    {
-    }
+    SenderConnection<Node, Index, Group> operator+(SenderConnection<Node, Index, Group>, T &&t);
 
     template <typename T, uint32_t Node, uint32_t Index, uint32_t Group>
     requires(!IsConnection<std::remove_reference_t<T>>)
         SenderConnection<Node, Index, Group>
-    operator+(T &&t, SenderConnection<Node, Index, Group>)
-    {
-    }
+    operator+(T &&t, SenderConnection<Node, Index, Group>);
 
     template <typename TypedTraits>
     using NodeHelper = SenderNode<typename TypedTraits::Algorithm>;
@@ -105,7 +101,7 @@ namespace NodeGraph {
                 std::unique_ptr<SenderNode<Execution::just_t>> uNode = std::make_unique<SenderNode<Execution::just_t>>(graph);
                 uNode->setArguments<0>(ValueType { std::string { "Foo" } });
                 NodeBase *node = graph.addNode(std::move(uNode));
-                parent.mNodes.push_back(node);                
+                parent.mNodes.push_back(node);
             }
         }(),
             ...);
@@ -216,17 +212,28 @@ namespace NodeGraph {
         (graph.connectDataIn({ node, Is }, pred.template provider<Is>(graph)), ...);
     }
 
+    template <typename TypedTraits>
+    static void nameHelper(NodeHelper<TypedTraits> &node)
+    {
+        if constexpr (requires { typename TypedTraits::NameMappings; }) {
+            [&]<fixed_string... From, fixed_string... To>(type_pack<Execution::name_mapping<From, To>...>) {
+                (node.template setDynamicName<From>(To), ...);
+            }(typename TypedTraits::NameMappings {});
+        }
+    }
+
     template <typename TypedTraits, uint32_t baseIndex, typename FlowIn, typename Providers, typename Receivers>
     static auto nodeHelper(NodeGraph &graph, ConnectionData<baseIndex, FlowIn, Providers, Receivers> parent)
     {
         if constexpr (hasNode<TypedTraits>) {
-            std::unique_ptr<NodeBase> uNode = std::make_unique<NodeHelper<TypedTraits>>(graph);
+            std::unique_ptr<NodeHelper<TypedTraits>> uNode = std::make_unique<NodeHelper<TypedTraits>>(graph);
+            nameHelper<TypedTraits>(*uNode);
             NodeBase *node = graph.addNode(std::move(uNode));
             parent.mNodes.push_back(node);
             assert(parent.mNodes.size() == decltype(parent)::index);
 
             using in_types = typename Execution::sender_traits<typename TypedTraits::Algorithm>::argument_types::template filter<is_pred_sender>::template unpack_unique<Execution::pred_sender<Execution::signature<>>>::Signature;
-            static_assert(in_types::count == decltype(parent)::Providers::size || (in_types::count <= decltype(parent)::Providers::size && in_types::variadic));
+            static_assert(in_types::count == decltype(parent)::Providers::size || (in_types::count <= decltype(parent)::Providers::size &&in_types::variadic));
             connectHelper<Execution::sender_traits<typename TypedTraits::Algorithm>>(graph, parent, graph.nodeIndex(node), std::make_index_sequence<decltype(parent)::Providers::size> {});
 
             ConnectionData incremented = ConnectionData<decltype(parent)::index + 1, typename decltype(parent)::FlowIn, typename decltype(parent)::Providers, type_pack<>> { std::move(parent) };

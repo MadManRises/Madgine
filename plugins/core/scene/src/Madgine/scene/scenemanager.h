@@ -47,7 +47,7 @@ namespace Scene {
 
         virtual std::string_view key() const override;
 
-        void updateRender();
+        void updateFrame();
 
         Entity::EntityPtr createEntity(const std::string &behavior = "", const std::string &name = "",
             const std::function<void(Entity::Entity &)> &init = {});
@@ -97,8 +97,6 @@ namespace Scene {
             return *mEntityComponentLists.at(index);
         }
 
-        void addRenderUpdate(std::function<void(std::chrono::microseconds, std::chrono::microseconds)> update);
-
     protected:
         virtual Threading::Task<bool> init() final;
         virtual Threading::Task<void> finalize() final;
@@ -118,8 +116,6 @@ namespace Scene {
         IntervalClock<Threading::CustomTimepoint> mSceneClock;
         IntervalClock<std::chrono::steady_clock::time_point> mFrameClock;
 
-        std::vector<std::function<void(std::chrono::microseconds, std::chrono::microseconds)>> mRenderUpdates;
-
     public:
         MEMBER_OFFSET_CONTAINER(mSceneComponents, , SceneComponentContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, NoOpFunctor>>);
 
@@ -136,7 +132,7 @@ namespace Scene {
         Entity::EntityComponentListContainer<std::vector<Placeholder<0>>> mEntityComponentLists;
 
         SYNCABLE_CONTAINER(mEntities, EntityContainer, Threading::SignalFunctor<const EntityContainer::iterator &, int>);
-        RefcountedContainer<std::deque<Serialize::NoParent<Entity::Entity>>> mLocalEntities;
+        container_api<RefcountedContainer<std::deque<Serialize::NoParent<Entity::Entity>>>> mLocalEntities;
 
         struct EntityHelper {
             Entity::EntityPtr operator()(Entity::Entity &ref)

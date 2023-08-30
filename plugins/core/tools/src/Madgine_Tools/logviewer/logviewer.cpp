@@ -186,7 +186,7 @@ namespace Tools {
     void LogViewer::renderStatus()
     {
         for (Util::MessageType type : Util::MessageType::values()) {
-            ImGui::Text("%s %d", sIcons[type], mMsgCounts[type]);
+            ImGui::Text("%s %d", sIcons[type], static_cast<int>(mMsgCounts[type]));
         }
         ImGui::Separator();
     }

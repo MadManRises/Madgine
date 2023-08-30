@@ -50,13 +50,6 @@ namespace Render {
         sDeviceContext->PSSetConstantBuffers(0, mConstantBuffers.size(), buffers);
         sDeviceContext->GSSetConstantBuffers(0, mConstantBuffers.size(), buffers);
 
-        assert(mDynamicBuffers.size() <= 20);
-        std::ranges::transform(mDynamicBuffers, buffers, [](const DirectX11Buffer &buf) { return buf.handle(); });
-
-        sDeviceContext->VSSetConstantBuffers(3, mDynamicBuffers.size(), buffers);
-        sDeviceContext->PSSetConstantBuffers(3, mDynamicBuffers.size(), buffers);
-        sDeviceContext->GSSetConstantBuffers(3, mDynamicBuffers.size(), buffers);
-
         DirectX11RenderContext::getSingleton().bindFormat(format, mInstanceDataSize, mVertexShaderBlob);
 
         return true;
@@ -65,23 +58,6 @@ namespace Render {
     WritableByteBuffer DirectX11PipelineInstance::mapParameters(size_t index)
     {
         return mConstantBuffers[index].mapData();
-    }
-
-    void DirectX11PipelineInstance::setDynamicParameters(size_t index, const ByteBuffer &data)
-    {
-        if (mDynamicBuffers.size() <= index) {
-            mDynamicBuffers.reserve(index + 1);
-            while (mDynamicBuffers.size() <= index)
-                mDynamicBuffers.emplace_back(
-                    D3D11_BIND_CONSTANT_BUFFER);
-        }
-
-        mDynamicBuffers[index].resize(data.mSize);
-
-        if (data.mSize > 0) {
-            auto target = mDynamicBuffers[index].mapData();
-            std::memcpy(target.mData, data.mData, data.mSize);
-        }
     }
 
     void DirectX11PipelineInstance::renderMesh(RenderTarget *target, const GPUMeshData *m) const

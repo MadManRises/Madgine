@@ -72,9 +72,8 @@ namespace Render {
             perFrame->light.light.dir = (v * Vector4{mData.mScene.mAmbientLightDirection, 0.0f}).xyz();
         }
 
-        for (const std::pair<const std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> &instance : mData.mInstances) {
-            const GPUMeshData *meshData = std::get<0>(instance.first);
-            Scene::Entity::Skeleton *skeleton = std::get<1>(instance.first);
+        for (const std::pair<const GPUMeshData *, std::vector<ShadowSceneRenderData::ObjectData>> &instance : mData.mInstances) {
+            const GPUMeshData *meshData = instance.first;
 
             {
                 auto perObject = mPipeline->mapParameters<ScenePerObject>(2);
@@ -84,23 +83,16 @@ namespace Render {
                 perObject->hasDistanceField = false;
 
                 perObject->hasTexture = false;
-
-                perObject->hasSkeleton = skeleton != nullptr;
-            }
-
-            if (skeleton) {
-                mPipeline->setDynamicParameters(0, skeleton->matrices());
-            } else {
-                mPipeline->setDynamicParameters(0, {});
             }
 
             std::vector<SceneInstanceData> instanceData;
 
-            std::ranges::transform(instance.second, std::back_inserter(instanceData), [&](const Matrix4 &m) {
-                Matrix4 mv = v * m;
+            std::ranges::transform(instance.second, std::back_inserter(instanceData), [&](const ShadowSceneRenderData::ObjectData &o) {
+                Matrix4 mv = v * o.mTransform;
                 return SceneInstanceData {
                     mv.Transpose(),
-                    mv.Inverse().Transpose().Transpose()
+                    mv.Inverse().Transpose().Transpose(),
+                    o.mBones
                 };
             });
 

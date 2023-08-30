@@ -88,7 +88,8 @@ namespace StringUtil {
         return std::move(s);
     }
 
-    inline std::string toLower(std::string_view s) {
+    inline std::string toLower(std::string_view s)
+    {
         return toLower(std::string { s });
     }
 
@@ -96,15 +97,6 @@ namespace StringUtil {
     {
         std::ranges::transform(s, s.begin(), ::toupper);
         return std::move(s);
-    }
-
-    inline std::wstring toWString(std::string_view input) {
-        return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> {}.from_bytes(input.data(), input.data() + input.size());
-    }
-
-    inline std::string fromWString(std::wstring_view input)
-    {
-        return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> {}.to_bytes(input.data(), input.data() + input.size());
     }
 
     template <typename Cont>
@@ -185,7 +177,8 @@ constexpr bool strcpy_s(char *dest, size_t size, const char *source)
     return true;
 }
 
-constexpr std::strong_ordering strcmp(const char* first, const char* second) {
+constexpr std::strong_ordering strcmp(const char *first, const char *second)
+{
     while (*first || *second) {
         std::strong_ordering comp = *first <=> *second;
         if (comp != 0)

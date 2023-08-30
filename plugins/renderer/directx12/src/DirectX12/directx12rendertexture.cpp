@@ -149,7 +149,7 @@ namespace Render {
     {
         DirectX12RenderTarget::beginFrame();
         for (DirectX12Texture &tex : mTextures)
-            mCommandList.attachResource(tex);
+            mCommandList.attachResource(tex.operator ReleasePtr<ID3D12Resource>());
     }
 
     void DirectX12RenderTexture::endFrame()

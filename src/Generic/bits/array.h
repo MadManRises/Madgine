@@ -70,14 +70,25 @@ struct BitArray {
 
     struct const_pointer {
 
+        using difference_type = ptrdiff_t;
+        using value_type = type;
+
         constexpr const_reference operator*() const
         {
             return { mPointer, mOffset };
         }
 
-        constexpr void operator++()
+        constexpr const_pointer &operator++()
         {
             mOffset += MemberSize;
+            return *this;
+        }
+
+        constexpr const_pointer operator++(int)
+        {
+            const_pointer other = *this;
+            ++other;
+            return other;
         }
 
         constexpr bool operator!=(const const_pointer &other) const
@@ -86,26 +97,60 @@ struct BitArray {
             return mOffset != other.mOffset;
         }
 
+        constexpr bool operator==(const const_pointer &other) const
+        {
+            assert(mPointer == other.mPointer);
+            return mOffset == other.mOffset;
+        }
+
         const uint8_t *mPointer;
         size_t mOffset;
     };
 
     struct pointer {
 
+        using difference_type = ptrdiff_t;
+        using value_type = type;
+
         constexpr reference operator*() const
         {
             return { mPointer, mOffset };
         }
 
-        constexpr void operator++()
+        constexpr pointer &operator++()
         {
             mOffset += MemberSize;
+            return *this;
+        }
+
+        constexpr pointer operator++(int)
+        {
+            pointer other = *this;
+            ++other;
+            return other;
+        }
+
+        constexpr pointer& operator+=(size_t diff) {
+            mOffset += diff;
+            return *this;
+        }
+
+        constexpr pointer operator+(size_t diff) const {
+            pointer other = *this;
+            other += diff;
+            return other;
         }
 
         constexpr bool operator!=(const pointer &other) const
         {
             assert(mPointer == other.mPointer);
             return mOffset != other.mOffset;
+        }
+
+        constexpr bool operator==(const pointer &other) const
+        {
+            assert(mPointer == other.mPointer);
+            return mOffset == other.mOffset;
         }
 
         uint8_t *mPointer;

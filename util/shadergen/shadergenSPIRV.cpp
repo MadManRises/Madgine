@@ -56,7 +56,7 @@ extern ReleasePtr<IDxcIncludeHandler> includeHandler;
         return -1;                                                   \
     }
 
-int transpileSPIRV(const std::string &fileName, const std::string &outFolder, std::vector<LPCWSTR> arguments, IDxcBlobEncoding *pSource)
+int transpileSPIRV(const std::wstring &fileName, const std::wstring &outFolder, std::vector<LPCWSTR> arguments, IDxcBlobEncoding *pSource)
 {
     std::cout << "SPIRV... ";
 
@@ -79,10 +79,10 @@ int transpileSPIRV(const std::string &fileName, const std::string &outFolder, st
     arguments.push_back(L"0");
 
     arguments.push_back(L"-fvk-bind-register");
-    arguments.push_back(L"b3");
+    arguments.push_back(L"t5");
+    arguments.push_back(L"0");
     arguments.push_back(L"0");
     arguments.push_back(L"3");
-    arguments.push_back(L"0");
 
     arguments.push_back(L"-fvk-bind-register");
     arguments.push_back(L"t0");
@@ -151,10 +151,10 @@ int transpileSPIRV(const std::string &fileName, const std::string &outFolder, st
     CHECK_HR(GetOutput / Spirv)
 
     auto extIt = fileName.rfind('.');
-    std::string extension = "_" + fileName.substr(extIt + 1, 2) + ".spirv";
+    std::wstring extension = L"_" + fileName.substr(extIt + 1, 2) + L".spirv";
 
     auto fileNameBegin = fileName.rfind('/');
-    std::string outputFile = outFolder + "/" + (fileName.substr(fileNameBegin + 1, extIt - fileNameBegin - 1) + extension);
+    std::wstring outputFile = outFolder + L"/" + (fileName.substr(fileNameBegin + 1, extIt - fileNameBegin - 1) + extension);
     std::ofstream of { outputFile, std::ios::binary };
     of.write(static_cast<char *>(pSpirv->GetBufferPointer()), pSpirv->GetBufferSize());
 

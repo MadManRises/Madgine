@@ -45,7 +45,7 @@ namespace Render {
     }
 
     DirectX11VertexShaderLoader::DirectX11VertexShaderLoader()
-        : ResourceLoader({ ".vs_hlsl" })
+        : ResourceLoader({ ".vs_hlsl11" })
     {
     }
 

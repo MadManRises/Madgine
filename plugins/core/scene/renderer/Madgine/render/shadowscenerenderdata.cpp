@@ -47,8 +47,11 @@ namespace Render {
                     continue;
 
                 Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
+                Engine::Render::GPUPtr<Matrix4[]> bones;
+                if (skeleton)
+                    bones = skeleton->mBoneMatrices;
 
-                mInstances[std::tuple<const GPUMeshData *, Scene::Entity::Skeleton *> { meshData, skeleton }].push_back(transform->worldMatrix());
+                mInstances[meshData].push_back({ transform->worldMatrix(), bones });
             }
         }
 

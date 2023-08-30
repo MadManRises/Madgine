@@ -677,56 +677,39 @@ struct container_traits<GenerationContainer<C>> {
     static constexpr const bool remove_invalidates_handles = true;
     static constexpr const bool is_fixed_size = false;
 
-    typedef GenerationContainer<C> container;
-    typedef typename container::iterator iterator;
-    typedef typename container::const_iterator const_iterator;
-    typedef typename container::reverse_iterator reverse_iterator;
-    typedef typename container::const_reverse_iterator const_reverse_iterator;
+    typedef typename GenerationContainer<C>::iterator iterator;
+    typedef typename GenerationContainer<C>::const_iterator const_iterator;
 
     typedef IndexType<size_t> handle;
     typedef IndexType<size_t> const_handle;
     typedef IndexType<size_t> position_handle;
     typedef IndexType<size_t> const_position_handle;
-    typedef typename container::value_type value_type;
 
     static_assert(sizeof(position_handle) <= sizeof(void *));
 
-    typedef iterator emplace_return;
-
-    template <typename... _Ty>
-    static emplace_return emplace(container &c, const const_iterator &where, _Ty &&... args)
-    {
-        return c.emplace(std::forward<_Ty>(args)...);
-    }
-
-    static bool was_emplace_successful(const emplace_return &)
-    {
-        return true;
-    }
-
-    static position_handle toPositionHandle(container &c, const iterator &it)
+    static position_handle toPositionHandle(GenerationContainer<C> &c, const iterator &it)
     {
         return std::distance(c.begin(), it);
     }
 
-    static handle toHandle(container &c, const position_handle &handle)
+    static handle toHandle(GenerationContainer<C> &c, const position_handle &handle)
     {
         return handle;
     }
 
-    static handle toHandle(container &c, const iterator &it)
+    static handle toHandle(GenerationContainer<C> &c, const iterator &it)
     {
         return std::distance(c.begin(), it);
     }
 
-    static void revalidateHandleAfterInsert(position_handle &handle, const container &c, const const_iterator &it)
+    static void revalidateHandleAfterInsert(position_handle &handle, const GenerationContainer<C> &c, const const_iterator &it)
     {
         size_t item = std::distance(c.begin(), it);
         if (item <= handle)
             ++handle;
     }
 
-    static void revalidateHandleAfterRemove(position_handle &handle, const container &c, const const_iterator &it, bool wasIn, size_t count = 1)
+    static void revalidateHandleAfterRemove(position_handle &handle, const GenerationContainer<C> &c, const const_iterator &it, bool wasIn, size_t count = 1)
     {
         size_t pivot = std::distance(c.begin(), it);
         if (wasIn) {
@@ -738,12 +721,12 @@ struct container_traits<GenerationContainer<C>> {
         }
     }
 
-    static iterator toIterator(container &c, const position_handle &handle)
+    static iterator toIterator(GenerationContainer<C> &c, const position_handle &handle)
     {
         return c.begin() + handle;
     }
 
-    static const_iterator toIterator(const container &c, const const_position_handle &handle)
+    static const_iterator toIterator(const GenerationContainer<C> &c, const const_position_handle &handle)
     {
         return c.begin() + handle;
     }

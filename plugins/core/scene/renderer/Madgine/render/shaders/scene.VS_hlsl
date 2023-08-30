@@ -17,11 +17,6 @@ cbuffer PerObject : register(b2)
     ScenePerObject object;
 }
 
-cbuffer Bones : register(b3)
-{
-    matrix bones[32];
-}
-
 struct AppData {
     float3 aPos : POSITION0;
     float aW : POSITION1;
@@ -45,19 +40,19 @@ struct VertexShaderOutput {
 
 VertexShaderOutput main(AppData IN)
 {
-    VertexShaderOutput OUT;
-
+    VertexShaderOutput OUT; 
+     
     float4 pos = float4(IN.aPos, IN.aW);
 
     float2 aPos2 = IN.aPos2;
 
-    float4 effectivePos = pos;
+    float4 effectivePos = pos; 
 
-    if (object.hasSkeleton) {
-	    matrix BoneTransform = bones[IN.aBoneIDs[0]] * IN.aWeights[0]
-	    + bones[IN.aBoneIDs[1]] * IN.aWeights[1]
-	    + bones[IN.aBoneIDs[2]] * IN.aWeights[2]
-	    + bones[IN.aBoneIDs[3]] * IN.aWeights[3];
+    if (IN.aInstance.bones.buffer != 0) {
+	    matrix BoneTransform = IN.aInstance.bones[IN.aBoneIDs[0]] * IN.aWeights[0]
+	    + IN.aInstance.bones[IN.aBoneIDs[1]] * IN.aWeights[1]
+	    + IN.aInstance.bones[IN.aBoneIDs[2]] * IN.aWeights[2]
+	    + IN.aInstance.bones[IN.aBoneIDs[3]] * IN.aWeights[3];
 	    effectivePos = mul(BoneTransform, effectivePos);
     }
 

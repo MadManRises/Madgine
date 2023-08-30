@@ -74,7 +74,7 @@ namespace Tools {
     {
         mCamera.mPosition = { 0, 0.5, -1 };
 
-        mRenderTargetSampled = context->createRenderTexture({ 1000, 1000 }, { .mName = "SceneView 4x", .mType = Render::TextureType_2DMultiSample, .mSamples = 4, .mFormat = Render::FORMAT_RGBA8_SRGB });
+        mRenderTargetSampled = context->createRenderTexture({ 1000, 1000 }, { .mName = "SceneView 4x", .mType = Render::TextureType_2DMultiSample, .mFormat = Render::FORMAT_RGBA8_SRGB, .mSamples = 4 });
 
         mRenderTargetSampled->addRenderPass(&mSceneRenderer);
 
@@ -82,7 +82,7 @@ namespace Tools {
 
         mRenderTargetSampled->addRenderPass(&mIm3DRenderer);
 
-        mRenderTarget = context->createRenderTexture({ 1000, 1000 }, { .mName = "SceneView", .mBlitSource = mRenderTargetSampled.get(), .mFormat = Render::FORMAT_RGBA8_SRGB });
+        mRenderTarget = context->createRenderTexture({ 1000, 1000 }, { .mName = "SceneView", .mFormat = Render::FORMAT_RGBA8_SRGB, .mBlitSource = mRenderTargetSampled.get() });
 
         static_cast<ClientImRoot &>(mEditor->root()).addRenderTarget(mRenderTarget.get());
     }

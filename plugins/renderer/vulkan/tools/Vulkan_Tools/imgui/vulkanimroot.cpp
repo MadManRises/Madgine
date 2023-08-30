@@ -56,7 +56,6 @@ namespace Tools {
         init.Device = Render::GetDevice();
         init.QueueFamily = *context->mIndices.graphicsFamily;
         init.Queue = context->mGraphicsQueue;
-        init.PipelineCache;
         init.DescriptorPool = context->mDescriptorPool;
         init.Subpass = 0;
         init.MinImageCount = window->minImageCount(); // >= 2

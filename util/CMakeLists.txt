@@ -20,7 +20,7 @@ add_dependencies(ShaderGen ShaderGenExt)
 set_target_properties(ShaderGen 
 	PROPERTIES ShaderGenTargets ""
 	IMPORTED_LOCATION ${shadergenBinaryDir}/ShaderGen${HOST_EXECUTABLE_SUFFIX})
-
+	
 function(add_shadergen_target target flag)
 
 	add_dependencies(${target} ShaderGen)

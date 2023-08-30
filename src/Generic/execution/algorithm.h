@@ -1029,7 +1029,7 @@ namespace Execution {
         struct sender : algorithm_sender<Sender> {
 
             template <template <typename...> typename Tuple>
-            using value_types = typename Sender::value_types<type_pack>::prepend<R>::instantiate<Tuple>;
+            using value_types = typename Sender::template value_types<type_pack>::template prepend<R>::template instantiate<Tuple>;
 
             template <typename Rec>
             friend auto tag_invoke(connect_t, sender &&sender, Rec &&rec)

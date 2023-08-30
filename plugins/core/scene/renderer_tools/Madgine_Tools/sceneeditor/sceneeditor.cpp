@@ -476,7 +476,7 @@ namespace Tools {
                 }
             }
 
-            if (Scene::Entity::Skeleton *s = entity->getComponent<Scene::Entity::Skeleton>()) {
+            /* if (Scene::Entity::Skeleton *s = entity->getComponent<Scene::Entity::Skeleton>()) {
                 if (const Render::SkeletonDescriptor *skeleton = s->data()) {
                     for (size_t i = 0; i < skeleton->mBones.size(); ++i) {
                         const Engine::Render::Bone &bone = skeleton->mBones[i];
@@ -500,7 +500,7 @@ namespace Tools {
                         Im3D::Arrow3D(IM3D_LINES, 0.1f * length, start.xyz(), end.xyz());
                     }
                 }
-            }
+            }*/
         }
 
         for (Scene::Entity::EntityBehavior &behavior : entity->behaviors()) {

@@ -127,7 +127,7 @@ namespace NodeGraph {
         {
             using decayedT = std::decay_t<T>;
             if constexpr (InstanceOfA<decayedT, Execution::variable_type>) {
-                return mGraph.resolveVariableType(getDynamicName<is_instance_auto<decayedT, Execution::variable_type>::arguments::value>());
+                return this->mGraph.resolveVariableType(getDynamicName<is_instance_auto<decayedT, Execution::variable_type>::arguments::value>());
             } else if constexpr (InstanceOfA<decayedT, Execution::dynamic_argument_type>) {
                 return getArguments<T::index>().type();
             } else if constexpr (InstanceOfA<decayedT, dynamic_value_type>) {
@@ -223,9 +223,9 @@ namespace NodeGraph {
             {
                 return std::array {
                     static_cast<int>(!Traits::constant),
-                    (sizeof(type_pack<InnerAlg>), 1)...,
-                    (sizeof(type_pack<SuccSender>), 1)...,
-                    (sizeof(type_pack<VariadicSuccSender>), 0)...
+                    ((void)sizeof(type_pack<InnerAlg>), 1)...,
+                    ((void)sizeof(type_pack<SuccSender>), 1)...,
+                    ((void)sizeof(type_pack<VariadicSuccSender>), 0)...
                 };
             }
             (typename argument_types::template filter<is_algorithm> {}, typename argument_types::template filter<is_succ_sender> {}, typename variadic::template filter<is_succ_sender> {});
@@ -253,7 +253,7 @@ namespace NodeGraph {
 
         ExtendedValueTypeDesc dataInType(uint32_t index, uint32_t group, bool bidir = true) const override
         {
-            return signature_type<typename in_types::template unpack_unique<Execution::pred_sender<Execution::signature<>>>::Signature, typename variadic::filter<is_pred_sender>::template unpack_unique<Execution::pred_sender<Execution::signature<>>>::Signature>(index);
+            return signature_type<typename in_types::template unpack_unique<Execution::pred_sender<Execution::signature<>>>::Signature, typename variadic::template filter<is_pred_sender>::template unpack_unique<Execution::pred_sender<Execution::signature<>>>::Signature>(index);
         }
 
         bool dataInVariadic(uint32_t group = 0) const override
@@ -349,19 +349,19 @@ namespace NodeGraph {
                         mData->mResults.emplace_back();
                     mData->mResults.front() = { ValueType { std::forward<Args>(args) }... };
                     mData->cleanup();
-                    NodeReceiver::set_value();
+                    NodeReceiver<SenderNode<Algorithm>>::set_value();
                 }
 
                 void set_done()
                 {
                     mData->cleanup();
-                    NodeReceiver::set_done();
+                    NodeReceiver<SenderNode<Algorithm>>::set_done();
                 }
 
                 void set_error(GenericResult result)
                 {
                     mData->cleanup();
-                    NodeReceiver::set_error(result);
+                    NodeReceiver<SenderNode<Algorithm>>::set_error(result);
                 }
             };
 
@@ -593,7 +593,7 @@ namespace NodeGraph {
                     providerIndex);
 
                 if constexpr (isVariadic) {
-                    for (size_t i = 0; i < variadicPinCount(group); ++i) {
+                    for (size_t i = 0; i < this->variadicPinCount(group); ++i) {
                         auto result = CodeGen::generatorFromSender(buildVariadicSender(nullptr), NodeCodegenReceiver { 0, this, generator }).generate();
                         if constexpr (std::tuple_size_v<decltype(result)> >= 1)
                             current = std::get<0>(result);

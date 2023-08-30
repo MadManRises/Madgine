@@ -63,17 +63,6 @@ namespace Render {
         return mConstantBuffers[index].mapData();
     }
 
-    void DirectX12PipelineInstance::setDynamicParameters(size_t index, const ByteBuffer &data)
-    {
-        if (mDynamicBuffers.size() <= index)
-            mDynamicBuffers.resize(index + 1);
-
-        if (data.mSize > 0) {
-            auto target = mDynamicBuffers[index].mapData(data.mSize);
-            std::memcpy(target.mData, data.mData, data.mSize);
-        }
-    }
-
     void DirectX12PipelineInstance::renderMesh(RenderTarget *target, const GPUMeshData *m) const
     {
         ID3D12GraphicsCommandList *commandList = static_cast<DirectX12RenderTarget *>(target)->mCommandList;

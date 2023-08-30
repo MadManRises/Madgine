@@ -18,11 +18,10 @@ namespace Serialize {
 
         typedef typename _traits::iterator iterator;
         typedef typename _traits::const_iterator const_iterator;
-        typedef typename _traits::value_type value_type;
 
         struct emplace_request_t {
             iterator mWhere;
-            value_type &mDummy;
+            std::ranges::range_value_t<C> &mDummy;
         };
         struct emplace_action_t {
             const_iterator mIt;
@@ -73,24 +72,23 @@ namespace Serialize {
             }
         }
 
-        template <typename... _Ty>
-        typename _traits::emplace_return emplace(const iterator &where, _Ty &&...args)
+        template <typename... Ty>
+        friend iterator tag_invoke(emplace_t, bool &success, SyncableContainerImpl<C, Observer, OffsetPtr> &self, const iterator &where, Ty &&...args)
         {
-            assert(this->isMaster());
-            InsertOperation op { *this, where };
-            typename _traits::emplace_return it = op.emplace(where, std::forward<_Ty>(args)...);
-            return it;
+            assert(self.isMaster());
+            InsertOperation op { self, where };
+            return Engine::emplace(success, op, where, std::forward<Ty>(args)...);
         }
 
         template <typename... _Ty>
         auto emplace_async(const iterator &where, _Ty &&...args)
         {
-            return make_message_sender<typename _traits::emplace_return>(
+            return make_message_sender<iterator>(
                 [this](auto &receiver, const iterator &where, _Ty &&...args2) {
                     if (this->isMaster()) {
-                        receiver.set_value(emplace(where, std::forward<_Ty>(args2)...));
+                        receiver.set_value(Engine::emplace(*this, where, std::forward<_Ty>(args2)...));
                     } else {
-                        value_type temp { std::forward<_Ty>(args2)... };
+                        std::ranges::range_value_t<C> temp { std::forward<_Ty>(args2)... };
                         this->writeRequest(receiver, emplace_request_t { where, temp });
                     }
                 },
@@ -99,12 +97,19 @@ namespace Serialize {
         }
 
         template <typename Init, typename... _Ty>
-        typename _traits::emplace_return emplace_init(const iterator &where, Init &&init, _Ty &&...args)
+        iterator emplace_init(const iterator &where, Init &&init, _Ty &&...args)
+        {
+            bool success;
+            return emplace_init(success, where, std::forward<Init>(init), std::forward<_Ty>(args)...);
+        }
+
+        template <typename Init, typename... _Ty>
+        iterator emplace_init(bool &success, const iterator &where, Init &&init, _Ty &&...args)
         {
             assert(this->isMaster());
             InsertOperation op { *this, where };
-            typename _traits::emplace_return it = op.emplace(where, std::forward<_Ty>(args)...);
-            if (_traits::was_emplace_successful(it)) {
+            iterator it = Engine::emplace(success, op, where, std::forward<_Ty>(args)...);
+            if (success) {
                 init(*it);
             }
             return it;
@@ -113,12 +118,12 @@ namespace Serialize {
         template <typename Init, typename... _Ty>
         auto emplace_init_async(const iterator &where, Init &&init, _Ty &&...args)
         {
-            return make_message_sender<typename _traits::emplace_return>(
+            return make_message_sender<iterator>(
                 [this](auto &receiver, const iterator &where, Init &&init, _Ty &&...args) {
                     if (this->isMaster()) {
                         receiver.set_value(emplace_init(where, std::forward<decltype(init)>(init), std::forward<_Ty>(args)...));
                     } else {
-                        value_type temp { std::forward<_Ty>(args)... };
+                        std::ranges::range_value_t<C> temp { std::forward<_Ty>(args)... };
                         TupleUnpacker::invoke(std::forward<Init>(init), temp);
                         this->writeRequest(receiver, emplace_request_t { where, temp });
                     }
@@ -258,7 +263,7 @@ namespace Serialize {
     template <typename C, typename Observer = NoOpFunctor, typename OffsetPtr = TaggedPlaceholder<MemberOffsetPtrTag, 0>>
     using SyncableContainer = container_api<SyncableContainerImpl<C, Observer, OffsetPtr>>;
 
-#define SYNCABLE_CONTAINER(Name, ...) MEMBER_OFFSET_CONTAINER(Name,, ::Engine::Serialize::SyncableContainer<__VA_ARGS__>)
+#define SYNCABLE_CONTAINER(Name, ...) MEMBER_OFFSET_CONTAINER(Name, , ::Engine::Serialize::SyncableContainer<__VA_ARGS__>)
 
 }
 
@@ -267,16 +272,4 @@ struct underlying_container<Serialize::SyncableContainerImpl<C, Observer, _Offse
     typedef C type;
 };
 
-template <typename C, typename Observer, typename _OffsetPtr>
-struct container_traits<Serialize::SyncableContainerImpl<C, Observer, _OffsetPtr>> : container_traits<C> {
-    typedef Serialize::SyncableContainerImpl<C, Observer, _OffsetPtr> container;
-
-    using _traits = container_traits<C>;
-
-    template <typename... Args>
-    static typename _traits::emplace_return emplace(container &c, const typename _traits::iterator &where, Args &&...args)
-    {
-        return c.emplace(where, std::forward<Args>(args)...);
-    }
-};
 }

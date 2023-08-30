@@ -143,7 +143,7 @@ namespace Render {
 
         uploadHeap->Unmap(0, nullptr);
 
-        DirectX12CommandList list = DirectX12RenderContext::getSingleton().fetchCommandList("upload");
+        DirectX12CommandList list = DirectX12RenderContext::getSingleton().fetchCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT);
 
         list.Transition(mPersistentHeap, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_COPY_DEST);        
         list->CopyBufferRegion(mPersistentHeap, ptr - mPersistentHeap->GetGPUVirtualAddress(), uploadHeap, 0, data.mSize);

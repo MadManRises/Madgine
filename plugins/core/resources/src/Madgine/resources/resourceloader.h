@@ -18,6 +18,8 @@
 
 #include "Generic/lambda.h"
 
+#include "Generic/container/emplace.h"
+
 namespace Engine {
 namespace Resources {
 
@@ -38,7 +40,9 @@ namespace Resources {
 
         using DataContainer = typename replace<Container>::template type<ResourceData<T>>;
 
-        using Handle = Handle<T, typename container_traits<DataContainer>::handle>;
+        using traits = container_traits<DataContainer>;
+
+        using Handle = Handle<T, typename traits::handle>;
         using Ptr = Ptr<T, Data>;
         using OriginalHandle = Handle;
         using OriginalPtr = Ptr;
@@ -65,9 +69,7 @@ namespace Resources {
                 return T::getDataPtr(loadData());
             }
 
-            using traits = container_traits<DataContainer>;
-
-            typename Storage::template container_type<typename container_traits<DataContainer>::handle> mData;
+            typename Storage::template container_type<typename traits::handle> mData;
         };
 
         template <typename Loader = T, typename C = void>
@@ -105,9 +107,11 @@ namespace Resources {
 
         using DataContainer = typename replace<typename Base::Container>::template type<ResourceData<T>>;
 
-        static_assert(!container_traits<DataContainer>::remove_invalidates_handles);
+        using traits = container_traits<DataContainer>;
 
-        using Handle = Handle<T, typename container_traits<DataContainer>::handle>;
+        static_assert(!traits::remove_invalidates_handles);
+
+        using Handle = Handle<T, typename traits::handle>;
         using Ptr = Ptr<T, Data>;
 
         using Ctor = Lambda<Threading::Task<bool>(T *, Data &, ResourceDataInfo &, Filesystem::FileEventType event)>;
@@ -153,7 +157,7 @@ namespace Resources {
         {
             if (!handle)
                 return nullptr;
-            if constexpr (container_traits<DataContainer>::has_dependent_handle) {
+            if constexpr (traits::has_dependent_handle) {
                 if (!loader)
                     loader = &getSingleton();
                 return &(*loader->mData)[handle.mData];
@@ -173,15 +177,15 @@ namespace Resources {
 
         static Handle create(Resource *resource, Filesystem::FileEventType event = Filesystem::FileEventType::FILE_CREATED, T *loader = nullptr)
         {
-            Handle handle { (typename container_traits<DataContainer>::handle) * resource->mData };
+            Handle handle { (typename traits::handle) * resource->mData };
             assert(event == Filesystem::FileEventType::FILE_CREATED || handle);
             if (!handle || event != Filesystem::FileEventType::FILE_CREATED) {
                 if (event == Filesystem::FileEventType::FILE_CREATED || !loader->mSettings.mInplaceReload) {
                     if (!loader)
                         loader = &getSingleton();
-                    typename container_traits<DataContainer>::iterator it = container_traits<DataContainer>::emplace(*loader->mData, loader->mData->end(), resource);
-                    it->mHolder = container_traits<DataContainer>::toPositionHandle(*loader->mData, it);
-                    handle = container_traits<DataContainer>::toHandle(*loader->mData, it->mHolder);
+                    auto it = emplace(*loader->mData, loader->mData->end(), resource);
+                    it->mHolder = traits::toPositionHandle(*loader->mData, it);
+                    handle = traits::toHandle(*loader->mData, it->mHolder);
                     *resource->mData = (decltype(*resource->mData))handle.mData;
                 }
             }
@@ -190,7 +194,7 @@ namespace Resources {
 
         static Handle load(Resource *resource, Filesystem::FileEventType event = Filesystem::FileEventType::FILE_CREATED, T *loader = nullptr)
         {
-            Handle handle { (typename container_traits<DataContainer>::handle) * resource->mData };
+            Handle handle { (typename traits::handle) * resource->mData };
 
             if (!handle || event != Filesystem::FileEventType::FILE_CREATED) {
                 if (!loader)
@@ -206,7 +210,7 @@ namespace Resources {
 
         static Threading::TaskFuture<void> unload(Resource *resource, T *loader = &getSingleton())
         {
-            Handle handle { (typename container_traits<DataContainer>::handle) * resource->mData };
+            Handle handle { (typename traits::handle) * resource->mData };
             return unload(handle, loader);
         }
 
@@ -246,7 +250,7 @@ namespace Resources {
 
                 Resource *resource = handle.resource();
                 auto cleanup = [&data { *loader->mData }, handle { getData(handle)->mHolder }]() {
-                    typename container_traits<DataContainer>::iterator it = container_traits<DataContainer>::toIterator(data, handle);
+                    typename traits::iterator it = traits::toIterator(data, handle);
                     data.erase(it);
                 };
                 if (task.is_ready()) {
@@ -256,7 +260,7 @@ namespace Resources {
                         loader->loadingTaskQueue());
                 }
 
-                if ((typename container_traits<DataContainer>::handle) * resource->mData == handle.mData)
+                if ((typename traits::handle) * resource->mData == handle.mData)
                     *resource->mData = {};
 
                 //if (resource->name() == ResourceBase::sUnnamed)
@@ -270,7 +274,7 @@ namespace Resources {
                 return {};
 
             Resource *resource = handle.resource();
-            if ((typename container_traits<DataContainer>::handle) * resource->mData != handle.mData) {
+            if ((typename traits::handle) * resource->mData != handle.mData) {
                 return load(resource, Filesystem::FileEventType::FILE_CREATED, loader);
             }
             return {};

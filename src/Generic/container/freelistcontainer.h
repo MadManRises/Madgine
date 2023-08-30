@@ -46,12 +46,6 @@ struct FreeListContainer {
         {
         }
 
-        template <typename It2, typename R2, typename P2>
-        IteratorImpl(const Pib<IteratorImpl<It2, R2, P2>> &other)
-            : IteratorImpl(other.first)
-        {
-        }
-
         reference operator*() const
         {
             return *mIt;
@@ -101,6 +95,13 @@ struct FreeListContainer {
             return *this;
         }
 
+        IteratorImpl operator++(int)
+        {
+            IteratorImpl other = *this;
+            ++other;
+            return other;
+        }
+
         IteratorImpl &operator--()
         {
             --mIt;
@@ -138,9 +139,7 @@ struct FreeListContainer {
     };
 
     using iterator = IteratorImpl<typename internal_traits::iterator, reference, pointer>;
-    using reverse_iterator = IteratorImpl<typename internal_traits::reverse_iterator, reference, pointer>;
-    using const_iterator = IteratorImpl<typename internal_traits::const_iterator, const_reference, const_pointer>;
-    using const_reverse_iterator = IteratorImpl<typename internal_traits::const_reverse_iterator, const_reference, const_pointer>;
+    using const_iterator = IteratorImpl<typename internal_traits::const_iterator, const_reference, const_pointer>;    
 
     iterator begin()
     {
@@ -163,9 +162,7 @@ struct FreeListContainer {
     }
 
     using nodes_iterator = typename internal_traits::iterator;
-    using nodes_reverse_iterator = typename internal_traits::reverse_iterator;
     using nodes_const_iterator = typename internal_traits::const_iterator;
-    using nodes_const_reverse_iterator = typename internal_traits::const_reverse_iterator;
 
     nodes_iterator nodes_begin()
     {
@@ -188,14 +185,14 @@ struct FreeListContainer {
     }
 
 private:
-    static position_handle &handle(internal_container_type::reference block)
+    static position_handle &handle(typename internal_container_type::reference block)
     {
         assert(DataTraits::isFree(block));
         return *reinterpret_cast<position_handle *>(DataTraits::getLocation(block));
     }
 
     template <typename... Args>
-    position_handle emplace(internal_container_type::reference block, Args &&...args)
+    position_handle emplace(typename internal_container_type::reference block, Args &&...args)
     {
         assert(DataTraits::isFree(block));
         position_handle next = handle(block);
@@ -204,7 +201,7 @@ private:
         return next;
     }
 
-    void destroy(internal_container_type::reference block, const position_handle &head)
+    void destroy(typename internal_container_type::reference block, const position_handle &head)
     {
         assert(!DataTraits::isFree(block));
         destruct(block);
@@ -212,22 +209,24 @@ private:
     }
 
 public:
-    template <typename... Args>
-    Pib<iterator> emplace(const const_iterator &where, Args &&...args)
+    template <typename... Ty>
+    friend iterator tag_invoke(emplace_t, bool &success, FreeListContainer<C, DataTraits> &self, const const_iterator &where, Ty &&...args)
     {
-        typename internal_traits::iterator freeListIterator = internal_traits::toIterator(mContainer, mFreeListHead);
+        typename internal_traits::iterator freeListIterator = internal_traits::toIterator(self.mContainer, self.mFreeListHead);
 
-        assert(where.it() == mContainer.end() || where.it() == freeListIterator);
-        ++mSize;
-        typename internal_traits::emplace_return it;
-        if (freeListIterator == mContainer.end()) {
-            it = internal_traits::emplace(mContainer, where.it(), std::forward<Args>(args)...);
-            mFreeListHead = internal_traits::toPositionHandle(mContainer, mContainer.end());
+        assert(where.it() == self.mContainer.end() || where.it() == freeListIterator);
+        ++self.mSize;
+        typename internal_traits::iterator it;
+        if (freeListIterator == self.mContainer.end()) {
+            it = Engine::emplace(success, self.mContainer, where.it(), std::forward<Ty>(args)...);
+            self.mFreeListHead = internal_traits::toPositionHandle(self.mContainer, self.mContainer.end());
         } else {
             it = freeListIterator;
-            mFreeListHead = emplace(*freeListIterator, std::forward<Args>(args)...);
+            self.mFreeListHead = self.emplace(*freeListIterator, std::forward<Ty>(args)...);
+            success = true;
+
         }
-        return { { it, mContainer }, internal_traits::was_emplace_successful(it) };
+        return { it, self.mContainer };
     }
 
     void clear()
@@ -295,66 +294,49 @@ struct underlying_container<FreeListContainer<C, DataTraits>> {
 template <typename C, typename DataTraits>
 struct container_traits<FreeListContainer<C, DataTraits>, void> : FreeListContainer<C, DataTraits>::internal_traits {
 
-    typedef typename C::value_type value_type;
 
-    typedef FreeListContainer<C, DataTraits> container;
-    typedef typename container::iterator iterator;
-    typedef typename container::const_iterator const_iterator;
-    typedef typename container::reverse_iterator reverse_iterator;
-    typedef typename container::const_reverse_iterator const_reverse_iterator;
+    typedef typename FreeListContainer<C, DataTraits>::iterator iterator;
+    typedef typename FreeListContainer<C, DataTraits>::const_iterator const_iterator;
 
-    typedef Pib<iterator> emplace_return;
-
-    template <typename... _Ty>
-    static emplace_return emplace(container &c, const const_iterator &where, _Ty &&...args)
+    static typename FreeListContainer<C, DataTraits>::internal_traits::position_handle toPositionHandle(FreeListContainer<C, DataTraits> &c, const iterator &it)
     {
-        return c.emplace(where, std::forward<_Ty>(args)...);
+        return FreeListContainer<C, DataTraits>::internal_traits::toPositionHandle(c.mContainer, it.it());
     }
 
-    static bool was_emplace_successful(const emplace_return &ret)
+    static typename FreeListContainer<C, DataTraits>::internal_traits::handle toHandle(FreeListContainer<C, DataTraits> &c, const iterator &it)
     {
-        return ret.success();
+        return FreeListContainer<C, DataTraits>::internal_traits::toHandle(c.mContainer, it.it());
     }
 
-    static typename container::internal_traits::position_handle toPositionHandle(container &c, const iterator &it)
-    {
-        return container::internal_traits::toPositionHandle(c.mContainer, it.it());
-    }
-
-    static typename container::internal_traits::handle toHandle(container &c, const iterator &it)
-    {
-        return container::internal_traits::toHandle(c.mContainer, it.it());
-    }
-
-    static void revalidateHandleAfterInsert(typename container::internal_traits::position_handle &handle, const container &c, const const_iterator &it)
+    static void revalidateHandleAfterInsert(typename FreeListContainer<C, DataTraits>::internal_traits::position_handle &handle, const FreeListContainer<C, DataTraits> &c, const const_iterator &it)
     {
         if (toIterator(c, handle) == it)
-            container::internal_traits::revalidateHandleAfterInsert(handle, c.mContainer, it.it());
+            FreeListContainer<C, DataTraits>::internal_traits::revalidateHandleAfterInsert(handle, c.mContainer, it.it());
     }
 
-    static void revalidateHandleAfterRemove(typename container::internal_traits::position_handle &handle, const container &c, const const_iterator &it, bool wasIn, size_t count = 1)
+    static void revalidateHandleAfterRemove(typename FreeListContainer<C, DataTraits>::internal_traits::position_handle &handle, const FreeListContainer<C, DataTraits> &c, const const_iterator &it, bool wasIn, size_t count = 1)
     {
         /*size_t pivot = std::distance(c.begin(), it);
         if (pivot != handle)
             RefcountedContainer<C>::internal_traits::revalidateHandleAfterRemove(handle, c.mData, it.it(), wasIn, count);*/
     }
 
-    static iterator toIterator(container &c, const typename container::internal_traits::position_handle &handle)
+    static iterator toIterator(FreeListContainer<C, DataTraits> &c, const typename FreeListContainer<C, DataTraits>::internal_traits::position_handle &handle)
     {
-        return { container::internal_traits::toIterator(c.mContainer, handle), c.mContainer };
+        return { FreeListContainer<C, DataTraits>::internal_traits::toIterator(c.mContainer, handle), c.mContainer };
     }
 
-    static const_iterator toIterator(const container &c, const typename container::internal_traits::const_position_handle &handle)
+    static const_iterator toIterator(const FreeListContainer<C, DataTraits> &c, const typename FreeListContainer<C, DataTraits>::internal_traits::const_position_handle &handle)
     {
-        return { container::internal_traits::toIterator(c.mContainer, handle), c.mContainer };
+        return { FreeListContainer<C, DataTraits>::internal_traits::toIterator(c.mContainer, handle), c.mContainer };
     }
 
-    static typename container::internal_traits::position_handle next(container &c, const typename container::internal_traits::position_handle &handle)
+    static typename FreeListContainer<C, DataTraits>::internal_traits::position_handle next(FreeListContainer<C, DataTraits> &c, const typename FreeListContainer<C, DataTraits>::internal_traits::position_handle &handle)
     {
         return toPositionHandle(c, ++toIterator(c, handle));
     }
 
-    static typename container::internal_traits::position_handle prev(container &c, const typename container::internal_traits::position_handle &handle)
+    static typename FreeListContainer<C, DataTraits>::internal_traits::position_handle prev(FreeListContainer<C, DataTraits> &c, const typename FreeListContainer<C, DataTraits>::internal_traits::position_handle &handle)
     {
         return toPositionHandle(c, --toIterator(c, handle));
     }

@@ -160,7 +160,7 @@ namespace NodeGraph {
             template <size_t... I>
             auto helper(std::index_sequence<I...>)
             {
-                return std::make_tuple(Execution::get_context(mRec).read(mIndex + I)...);
+                return std::make_tuple(Execution::get_context(this->mRec).read(mIndex + I)...);
             }
             size_t mIndex;
         };
@@ -195,7 +195,7 @@ namespace NodeGraph {
         Execution::VirtualReceiverBase<NodeInterpretResult> &mReceiver;
 
         void set_value() {
-            continueExecution(mInterpreter, mNode, mReceiver);
+            continueExecution(this->mInterpreter, this->mNode, mReceiver);
         }
         void set_done() {
             mReceiver.set_done();

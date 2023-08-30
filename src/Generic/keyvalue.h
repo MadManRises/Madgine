@@ -217,7 +217,6 @@ struct KeyCompare {
 
 template <typename _Ty>
 struct comparator_traits<KeyCompare<_Ty>> {
-    typedef KeyCompare<_Ty> cmp_type;
     typedef KeyType_t<_Ty> type;
     typedef _Ty item_type;
 

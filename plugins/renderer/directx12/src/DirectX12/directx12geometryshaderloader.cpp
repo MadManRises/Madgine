@@ -21,7 +21,7 @@ namespace Render {
     }
 
     DirectX12GeometryShaderLoader::DirectX12GeometryShaderLoader()
-        : ResourceLoader({ ".gs_hlsl" })
+        : ResourceLoader({ ".gs_hlsl12" })
     {
         HRESULT hr = DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&mLibrary));
         //if(FAILED(hr)) Handle error...
@@ -86,6 +86,9 @@ namespace Render {
 
         arguments.push_back(L"-T");
         arguments.push_back(profile.c_str());
+
+        arguments.push_back(L"-HV");
+        arguments.push_back(L"2021");
 
         ReleasePtr<IDxcResult> result;
         HRESULT hr = mCompiler->Compile(

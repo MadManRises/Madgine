@@ -191,8 +191,8 @@ namespace Scene {
             if (it != mComponents.physical().end()) {
                 return { *it, &mSceneManager };
             } else {
-                auto pib = mComponents.emplace(mSceneManager.entityComponentList(i).emplace(table, this));
-                return EntityComponentPtr<EntityComponentBase> { *pib.first, &mSceneManager };
+                auto it = mComponents.emplace(mSceneManager.entityComponentList(i).emplace(table, this));
+                return EntityComponentPtr<EntityComponentBase> { *it, &mSceneManager };
             }
         }
 

@@ -45,7 +45,7 @@ namespace Render {
     }
 
     DirectX11PixelShaderLoader::DirectX11PixelShaderLoader()
-        : ResourceLoader({ ".ps_hlsl" })
+        : ResourceLoader({ ".ps_hlsl11" })
     {
     }
 

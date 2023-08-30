@@ -45,6 +45,7 @@ macro(compile_shaders target)
                     ${CMAKE_BINARY_DIR}/data
                     $<IF:$<CONFIG:DEBUG>,-g,>
                     $<TARGET_PROPERTY:ShaderGen,ShaderGenTargets>
+                    -I "$<JOIN:$<TARGET_PROPERTY:${target},INCLUDE_DIRECTORIES>,;-I;>"
                 COMMAND_EXPAND_LISTS
                 MAIN_DEPENDENCY ${source}
                 DEPENDS ShaderGen

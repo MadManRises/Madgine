@@ -40,5 +40,6 @@ inline void dx11Check(HRESULT result)
 #include <span>
 
 #include "Interfaces/helpers/win_ptrs.h"
+#include "Interfaces/helpers/win_wstring.h"
 
 /// @endcond

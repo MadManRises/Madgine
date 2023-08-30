@@ -140,10 +140,9 @@ namespace Render {
         mPipeline->bindTextures(target, { mShadowMap->depthTexture() }, 2);
         mPipeline->bindTextures(target, mData.mScene.depthTextures(), 3);
 
-        for (const std::pair<const std::tuple<const GPUMeshData *, const GPUMeshData::Material *, Scene::Entity::Skeleton *>, std::vector<Matrix4>> &instance : mData.mInstances) {
+        for (const std::pair<const std::tuple<const GPUMeshData *, const GPUMeshData::Material *>, std::vector<LitSceneRenderData::ObjectData>> &instance : mData.mInstances) {
             const GPUMeshData *meshData = std::get<0>(instance.first);
-            const GPUMeshData::Material *material = std::get<1>(instance.first);
-            Scene::Entity::Skeleton *skeleton = std::get<2>(instance.first);
+            const GPUMeshData::Material *material = std::get<1>(instance.first);            
 
             {
                 auto perObject = mPipeline->mapParameters<ScenePerObject>(2);
@@ -154,8 +153,6 @@ namespace Render {
 
                 perObject->hasTexture = material && material->mDiffuseTexture.available() && material->mDiffuseTexture->handle() != 0;
 
-                perObject->hasSkeleton = skeleton != nullptr;
-
                 perObject->diffuseColor = material ? material->mDiffuseColor : Vector4::UNIT_SCALE;
 
                 perObject->specularColor = Vector4 { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -163,21 +160,16 @@ namespace Render {
                 perObject->shininess = 32.0f;
             }
 
-            if (skeleton) {
-                mPipeline->setDynamicParameters(0, skeleton->matrices());
-            } else {
-                mPipeline->setDynamicParameters(0, {});
-            }
-
             mPipeline->bindTextures(target, { material && material->mDiffuseTexture.available() ? material->mDiffuseTexture->descriptor() : TextureDescriptor {}, material && material->mEmissiveTexture.available() ? material->mEmissiveTexture->descriptor() : TextureDescriptor {} });
 
             std::vector<SceneInstanceData> instanceData;
 
-            std::ranges::transform(instance.second, std::back_inserter(instanceData), [&](const Matrix4 &m) {
-                Matrix4 mv = v * m;
+            std::ranges::transform(instance.second, std::back_inserter(instanceData), [&](const LitSceneRenderData::ObjectData &o) {
+                Matrix4 mv = v * o.mTransform;
                 return SceneInstanceData {
                     mv.Transpose(),
-                    mv.Inverse() /*.Transpose().Transpose()*/
+                    mv.Inverse() /*.Transpose().Transpose()*/,
+                    o.mBones
                 };
             });
 

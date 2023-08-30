@@ -762,7 +762,7 @@ namespace Tools {
     {
         using namespace Engine::Execution;
 
-        /* auto inner = [](auto a, auto &i) {
+        auto inner = [](auto a, auto &i) {
             return just(a, i)
                 | then(NodeGraph::Add {})
                 | let_value([&](auto sum) {
@@ -776,7 +776,7 @@ namespace Tools {
                 | Variable<"test">(12);
         };
 
-        CodeGen::CppFile file;
+        /* CodeGen::CppFile file;
 
         CodeGen::VariableAccess access { "cont" };
         TupleUnpacker::forEach(CodeGen::generatorFromSender(graph(access)).generate(), [&](auto &&s) {
@@ -787,10 +787,11 @@ namespace Tools {
         file.generate(ss);
         std::string result = ss.str();
         */
-        auto graph = just("Foo") | then(NodeGraph::Log {});
+        //auto graph = just("Foo") | then(NodeGraph::Log {});
 
         NodeGraph::SenderConnection<0, 0> con;
-        auto generated = NodeGraph::graphBuilderFromSender<decltype(graph), 1, NodeGraph::SenderConnection<0, 0>, type_pack<>>(mGraph);
+        std::vector<int> c { 1, 2, 3 };
+        auto generated = NodeGraph::graphBuilderFromSender<decltype(graph(c)), 1, NodeGraph::SenderConnection<0, 0>, type_pack<>>(mGraph);
         mGraph.connectFlow(generated.flowInPin(mGraph), { 0, 0 });
     }
 

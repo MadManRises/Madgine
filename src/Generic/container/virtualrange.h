@@ -6,6 +6,8 @@
 
 #include "../heapobject.h"
 
+#include "emplace.h"
+
 namespace Engine {
 
 struct VirtualSentinel {
@@ -200,8 +202,10 @@ namespace __generic_impl__ {
         using Sentinel = decltype(std::declval<C>().end());
         using IteratorImpl = __generic_impl__::VirtualIteratorImpl<RefT, It, Sentinel, Assign>;
 
-        static constexpr bool sCanInsert = requires { typename container_traits<std::remove_reference_t<C>>::container; }
-        &&!std::is_const_v<std::remove_reference_t<C>> && !std::is_same_v<RefT, KeyValuePair> && std::is_default_constructible_v<It::value_type>;
+        static constexpr bool sCanInsert = requires(C & c)
+        {
+            emplace(c, c.end());
+        };
 
         VirtualRangeImpl(C &&c)
             : mContainer(std::forward<C>(c))
@@ -223,7 +227,7 @@ namespace __generic_impl__ {
             if constexpr (sCanInsert) {
                 VirtualIteratorBase<RefT> *innerIt = where.get();
                 assert(dynamic_cast<IteratorImpl *>(innerIt));
-                auto it = container_traits<std::remove_reference_t<C>>::emplace(mContainer, static_cast<IteratorImpl *>(innerIt)->get());
+                auto it = emplace(mContainer, static_cast<IteratorImpl *>(innerIt)->get());
                 return { std::make_unique<IteratorImpl>(it, mContainer.end(), self) };
             } else {
                 throw 0;
@@ -233,7 +237,7 @@ namespace __generic_impl__ {
         virtual VirtualIterator<RefT> insert(const VirtualSentinel &where, std::shared_ptr<VirtualRangeBase<RefT>> self) override
         {
             if constexpr (sCanInsert) {
-                auto it = container_traits<std::remove_reference_t<C>>::emplace(mContainer, mContainer.end());
+                auto it = emplace(mContainer, mContainer.end());
                 return { std::make_unique<IteratorImpl>(it, mContainer.end(), self) };
             } else {
                 throw 0;

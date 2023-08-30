@@ -22,4 +22,4 @@ add_tools(DirectX11 ${sources} PRECOMPILED_HEADER tools/DirectX11_Tools/directx1
 target_link_plugins(DirectX11Tools ClientTools)
 target_link_libraries(DirectX11Tools PRIVATE d3d11 dxgi d3dcompiler)
 
-add_shadergen_target(DirectX11 -HLSL)
+add_shadergen_target(DirectX11 -HLSL11)

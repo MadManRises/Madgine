@@ -88,7 +88,7 @@ namespace Render {
                 subResourceDesc.RowPitch = width * byteCount;
                 subResourceDesc.SlicePitch = subResourceDesc.RowPitch * height;
 
-                DirectX12CommandList list = DirectX12RenderContext::getSingleton().fetchCommandList("upload");
+                DirectX12CommandList list = DirectX12RenderContext::getSingleton().fetchCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT);
 
                 UpdateSubresources(list, mResource, uploadHeap, 0, 0, 1, &subResourceDesc);
                 list.Transition(mResource, D3D12_RESOURCE_STATE_COPY_DEST, readStateFlags());
@@ -217,7 +217,7 @@ namespace Render {
         MemcpySubresource(&DestData, &subResourceDesc, rowSize, numRows, 1);
         uploadHeap->Unmap(0, nullptr);
 
-        DirectX12CommandList list = DirectX12RenderContext::getSingleton().fetchCommandList("upload");
+        DirectX12CommandList list = DirectX12RenderContext::getSingleton().fetchCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT);
 
         list.Transition(mResource, readStateFlags(), D3D12_RESOURCE_STATE_COPY_DEST);
 

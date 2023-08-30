@@ -69,41 +69,47 @@ static std::map<std::string, uint32_t> sSemanticLocationMappings {
     { "BONEINDICES", 6 },
     { "WEIGHTS", 7 },
     { "INSTANCEDATA", 8 },
-    { "INSTANCEDATA1", std::numeric_limits<uint32_t>::max() }
+    { "INSTANCEDATA1", std::numeric_limits<uint32_t>::max() },
+    { "INSTANCEDATA2", std::numeric_limits<uint32_t>::max() },
+    { "INSTANCEDATA3", std::numeric_limits<uint32_t>::max() },
+    { "INSTANCEDATA4", std::numeric_limits<uint32_t>::max() },
+    { "INSTANCEDATA5", std::numeric_limits<uint32_t>::max() },
+    { "INSTANCEDATA6", std::numeric_limits<uint32_t>::max() }
 };
 
-int transpileHLSL(const std::string &fileName, const std::string &outFolder, IDxcResult *result, bool debug)
+int transpileHLSL(int apilevel, const std::wstring &fileName, const std::wstring &outFolder, IDxcResult *result, bool debug, const std::vector<LPCWSTR> &includes)
 {
 
-    std::cout << "HLSL...";
+    std::cout << "HLSL (DX" << apilevel << ") ... ";
 
-    std::string extension = fileName.substr(fileName.rfind('.'));
+    std::wstring extension = fileName.substr(fileName.rfind('.'));
 
     std::string shaderCode;
 
-    if (debug || extension == ".GS_hlsl") {
+    if ((apilevel == 12 && debug) || extension == L".GS_hlsl") {
         std::string reason;
-        if (debug) {
+        if (apilevel == 12 && debug) {
             reason = "for Debugging";
         } else {
             reason = "due to SpirV - Cross limitation";
         }
-        std::cout << "Skipping HLSL, " << reason
+        std::cout << "Skipping " << reason
                   << ", only preprocessing... ";
 
-        std::wstring wSource = std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> {}.from_bytes(fileName);
-
         ReleasePtr<IDxcBlobEncoding> pSource;
-        HRESULT hr = library->CreateBlobFromFile(wSource.c_str(), nullptr, &pSource);
+        HRESULT hr = library->CreateBlobFromFile(fileName.c_str(), nullptr, &pSource);
         CHECK_HR(CreateBlobFromFile);
 
         std::vector<LPCWSTR> arguments;
 
-        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-        std::wstring wPath = converter.from_bytes(fileName);
-        arguments.push_back(wPath.c_str());
+        arguments.push_back(fileName.c_str());
 
         arguments.push_back(L"-P");
+
+        for (LPCWSTR include : includes) {
+            arguments.push_back(L"-I");
+            arguments.push_back(include);
+        }
 
         DxcBuffer sourceBuffer;
         sourceBuffer.Ptr = pSource->GetBufferPointer();
@@ -147,7 +153,8 @@ int transpileHLSL(const std::string &fileName, const std::string &outFolder, IDx
                         if (location != std::numeric_limits<uint32_t>::max())
                             hlsl.set_decoration(id, spv::DecorationLocation, location);
                     } else {
-                        std::cerr << fileName << "(1,1): warning : Unsupported semantic " << semantic << " used for " << name << std::endl;
+                        std::wcerr << fileName;
+                        std::cerr << "(1,1): warning : Unsupported semantic " << semantic << " used for " << name << std::endl;
                     }
                 }
             }
@@ -159,14 +166,14 @@ int transpileHLSL(const std::string &fileName, const std::string &outFolder, IDx
             shaderCode = hlsl.compile();
 
         } catch (spirv_cross::CompilerError &error) {
-            std::cerr << fileName << "(1,1): error: " << error.what()
-                      << "\n";
+            std::wcerr << fileName;
+            std::cerr << "(1,1): error: " << error.what() << "\n";
             return -1;
         }
     }
 
     auto fileNameBegin = fileName.rfind('/');
-    std::string outputFile = outFolder + "/" + fileName.substr(fileNameBegin + 1);
+    std::wstring outputFile = outFolder + L"/" + fileName.substr(fileNameBegin + 1) + std::to_wstring(apilevel);
 
     std::ofstream of { outputFile };
 

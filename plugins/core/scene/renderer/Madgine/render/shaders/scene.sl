@@ -1,4 +1,5 @@
 #include "lightdata.sl"
+#include "Madgine/render/shadinglanguage/memory.sl"
 
 struct ScenePerApplication {
 	float4x4 p;
@@ -21,6 +22,7 @@ struct ScenePerFrame {
 struct SceneInstanceData{
 	row_major float4x4 mv;
 	row_major float4x4 anti_mv;
+	ArrayPtr<float4x4> bones;
 };
 
 struct ScenePerObject {
@@ -33,6 +35,5 @@ struct ScenePerObject {
 	bool hasLight;
 	bool hasTexture;
 	bool hasDistanceField;
-	bool hasSkeleton;
 
 };

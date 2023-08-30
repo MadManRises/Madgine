@@ -23,7 +23,6 @@ namespace Scene {
             virtual bool empty() = 0;
             virtual void clear() = 0;
             virtual size_t size() const = 0;
-            virtual void updateRender(std::chrono::microseconds frameTimeSinceLastFrame, std::chrono::microseconds sceneTimeSinceLastFrame) = 0;
 
             virtual void setSynced(const EntityComponentHandle<EntityComponentBase> &index, bool synced) = 0;
             virtual void setActive(const EntityComponentHandle<EntityComponentBase> &index, bool active, bool existenceChanged) = 0;
