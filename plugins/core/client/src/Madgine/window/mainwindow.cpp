@@ -71,6 +71,7 @@ namespace Window {
         : mSettings(settings)
         , mTaskQueue("FrameLoop", true)
         , mComponents(*this)
+        , mRenderContext(&mTaskQueue)
     {
         mTaskQueue.addSetupSteps(
             [this]() { return callInit(); },
@@ -141,10 +142,7 @@ namespace Window {
         }
 
         mOsWindow = sCreateWindow(settings, this);
-
-        assert(!mRenderContext);
-        mRenderContext.emplace(&mTaskQueue);
-        mRenderWindow = (*mRenderContext)->createRenderWindow(mOsWindow);
+        mRenderWindow = mRenderContext->createRenderWindow(mOsWindow);
 
         for (const std::unique_ptr<MainWindowComponentBase> &comp : components()) {
             bool result = co_await comp->callInit();
@@ -173,10 +171,9 @@ namespace Window {
             co_await comp->callFinalize();
         }
 
-        co_await (*mRenderContext)->unloadAllResources();
+        co_await mRenderContext->unloadAllResources();
 
         mRenderWindow.reset();
-        mRenderContext.reset();
 
         if (mOsWindow) {
             storeWindowData();
@@ -190,7 +187,7 @@ namespace Window {
     Threading::Task<void> MainWindow::renderLoop()
     {
         while (mTaskQueue.running()) {
-            co_await(*mRenderContext)->render();
+            co_await mRenderContext->render();
             mOsWindow->update();
             for (ToolWindow &window : mToolWindows)
                 window.osWindow()->update();
@@ -244,7 +241,7 @@ namespace Window {
     */
     Render::RenderContext *MainWindow::getRenderer()
     {
-        return *mRenderContext;
+        return mRenderContext;
     }
 
     /**

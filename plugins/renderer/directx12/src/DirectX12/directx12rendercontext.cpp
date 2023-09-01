@@ -176,7 +176,7 @@ namespace Render {
 
     void DirectX12RenderContext::createRootSignature()
     {
-        CD3DX12_ROOT_PARAMETER rootParameters[9];
+        CD3DX12_ROOT_PARAMETER rootParameters[10];
 
         rootParameters[0].InitAsConstantBufferView(0);
         rootParameters[1].InitAsConstantBufferView(1);
@@ -192,6 +192,10 @@ namespace Render {
             ranges[i].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, i);
             rootParameters[4 + i].InitAsDescriptorTable(1, ranges + i);
         }
+
+        CD3DX12_DESCRIPTOR_RANGE bindlessRange;
+        bindlessRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 256, 5);
+        rootParameters[9].InitAsDescriptorTable(1, &bindlessRange);
 
         CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
         // Allow input layout and deny uneccessary access to certain pipeline stages.
@@ -218,7 +222,7 @@ namespace Render {
         samplerDesc[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
         samplerDesc[1].ShaderRegister = 1;
 
-        rootSignatureDesc.Init(9, rootParameters, 2, samplerDesc, rootSignatureFlags);
+        rootSignatureDesc.Init(10, rootParameters, 2, samplerDesc, rootSignatureFlags);
 
         ReleasePtr<ID3DBlob> signature;
         ReleasePtr<ID3DBlob> error;

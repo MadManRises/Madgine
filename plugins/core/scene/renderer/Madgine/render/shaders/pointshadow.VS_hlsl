@@ -41,7 +41,7 @@ VertexShaderOutput main(AppData IN)
 	
 	float4 worldPos;
 
-	if (IN.aInstance.bones.offset != 65535){
+	if (IN.aInstance.bones.buffer() != 0){ 
 		float4x4 BoneTransform = IN.aInstance.bones[IN.aBoneIDs[0]] * IN.aWeights[0]
 		+ IN.aInstance.bones[IN.aBoneIDs[1]] * IN.aWeights[1]
 		+ IN.aInstance.bones[IN.aBoneIDs[2]] * IN.aWeights[2]

@@ -120,7 +120,7 @@ decltype(auto) convert_ValueType(T &&t)
     static_assert(!requires { typename std::decay_t<T>::no_value_type; });
 
     if constexpr (InstanceOf<std::decay_t<T>, std::reference_wrapper>) {
-        using Ty = typename std::decay_t<T>::type;
+        //using Ty = typename std::decay_t<T>::type;
         return convert_ValueType<true>(t.get());
     } else if constexpr (InstanceOf<T, std::optional>) {
         return std::forward<T>(t);

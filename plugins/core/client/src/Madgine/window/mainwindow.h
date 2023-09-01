@@ -128,7 +128,7 @@ namespace Window {
         std::list<ToolWindow> mToolWindows;
 
         OSWindow *mOsWindow = nullptr;
-        std::optional<Render::RenderContextSelector> mRenderContext;
+        Render::RenderContextSelector mRenderContext;
         std::unique_ptr<Render::RenderTarget> mRenderWindow;
     };
 

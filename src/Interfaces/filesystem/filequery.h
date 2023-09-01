@@ -6,7 +6,7 @@ namespace Engine {
 namespace Filesystem {
 
     FileQueryState *createQueryState();
-    void destroyQueryState(FileQueryState *state);
+    INTERFACES_EXPORT void destroyQueryState(FileQueryState *state);
     struct FileQueryStateDeleter {
         void operator()(FileQueryState *state) { destroyQueryState(state); }
     };

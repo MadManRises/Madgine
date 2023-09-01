@@ -29,9 +29,6 @@ namespace Input {
         void showCursor();
         bool isCursorVisible() const;
 
-        void updateRender();
-        void fixedUpdateRender();
-
         //Scene::ContextMask currentContext();
 
         std::set<HandlerBase *> getHandlers();        

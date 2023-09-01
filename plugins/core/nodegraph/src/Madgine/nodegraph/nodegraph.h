@@ -84,12 +84,21 @@ namespace NodeGraph {
         std::vector<DataInPinPrototype> mDataInPins;
         std::vector<DataOutPinPrototype> mDataOutPins;
 
-        struct MADGINE_NODEGRAPH_EXPORT NodeInterpreterWrapper : NodeInterpreter, private KeyValueReceiver, private Execution::VirtualReceiverBase<NodeInterpretResult> {
+        struct NodeInterpreterWrapper : NodeInterpreter, private KeyValueReceiver, private Execution::VirtualReceiverBase<NodeInterpretResult> {
             using NodeInterpreter::NodeInterpreter;
 
-            void start();
-            virtual void set_value() override;
-            virtual void set_error(NodeInterpretResult result) override;
+            void start()
+            {
+                interpretImpl(*this, 0);
+            }
+            virtual void set_value() override
+            {
+                static_cast<KeyValueReceiver*>(this)->set_value();
+            }
+            virtual void set_error(NodeInterpretResult result) override
+            {
+                static_cast<KeyValueReceiver *>(this)->set_error(GenericResult::UNKNOWN_ERROR);
+            }
         };
 
         auto interpret(const ArgumentList &args = {}) const

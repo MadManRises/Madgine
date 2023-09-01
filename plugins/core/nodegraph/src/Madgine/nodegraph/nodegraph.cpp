@@ -840,21 +840,6 @@ namespace NodeGraph {
         }
     }
 
-    void NodeGraph::NodeInterpreterWrapper::start()
-    {
-        interpretImpl(*this, 0);
-    }
-
-    void NodeGraph::NodeInterpreterWrapper::set_value()
-    {
-        KeyValueReceiver::set_value();
-    }
-
-    void NodeGraph::NodeInterpreterWrapper::set_error(NodeInterpretResult result)
-    {
-        set_error(GenericResult::UNKNOWN_ERROR);
-    }
-
     std::unique_ptr<NodeBase> NodeGraph::createNode(std::string_view name)
     {
         return NodeRegistry::getConstructor(NodeRegistry::sComponentsByName().at(name))(*this);
