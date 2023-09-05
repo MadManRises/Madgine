@@ -652,10 +652,10 @@ namespace Tools {
             }
         }
 
-        const Ray &ray = Im3D::GetMouseRay();
+        const Ray3 &ray = Im3D::GetMouseRay();
 
         if (mRender3DCursor)
-            Im3D::Arrow3D(IM3D_LINES, 0.3f, ray.mPoint + 10.0f * ray.mDir, ray.mPoint + 20.0f * ray.mDir);
+            Im3D::Arrow3D(IM3D_LINES, 0.3f, ray.point(10.0f), ray.point(20.0f));
     }
 
 }

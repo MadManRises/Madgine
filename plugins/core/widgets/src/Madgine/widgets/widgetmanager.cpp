@@ -575,6 +575,7 @@ namespace Widgets {
         MainWindowComponentBase::render(target, iteration);
 
         WidgetsRenderData renderData;
+        auto keep = renderData.pushClipRect(Vector2::ZERO, Vector2 { mClientSpace.mSize });
 
         for (auto [w, layer] : visibleWidgets()) {
             w->vertices(renderData, layer);

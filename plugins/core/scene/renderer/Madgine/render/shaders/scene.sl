@@ -22,7 +22,7 @@ struct ScenePerFrame {
 struct SceneInstanceData{
 	row_major float4x4 mv;
 	row_major float4x4 anti_mv;
-	ArrayPtr<float4x4> bones;
+	//ArrayPtr<float4x4> bones;
 };
 
 struct ScenePerObject {

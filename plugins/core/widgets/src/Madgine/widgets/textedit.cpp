@@ -44,17 +44,20 @@
 #include "stb_textedit.h"
 
 METATABLE_BEGIN_BASE(Engine::Widgets::TextEdit, Engine::Widgets::WidgetBase)
-PROPERTY(mText, text, setText)
+PROPERTY(Text, text, setText)
 NAMED_MEMBER(TextData, mTextRenderData)
 NAMED_MEMBER(Image, mImageRenderData)
 PROPERTY(Border, border, setBorder)
 MEMBER(mVerticalScroll)
+PROPERTY(Editable, editable, setEditable)
 METATABLE_END(Engine::Widgets::TextEdit)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::TextEdit, Engine::Widgets::WidgetBase)
+ENCAPSULATED_FIELD(Text, text, setText)
 FIELD(mTextRenderData)
 FIELD(mImageRenderData)
 ENCAPSULATED_FIELD(Border, border, setBorder)
+ENCAPSULATED_FIELD(Editable, editable, setEditable)
 SERIALIZETABLE_END(Engine::Widgets::TextEdit)
 
 namespace Engine {
@@ -103,11 +106,12 @@ namespace Widgets {
 
     bool TextEdit::editable() const
     {
-        return false;
+        return mEditable;
     }
 
     void TextEdit::setEditable(bool b)
     {
+        mEditable = b;
     }
 
     void TextEdit::vertices(WidgetsRenderData &renderData, size_t layer)
@@ -122,6 +126,9 @@ namespace Widgets {
         mImageRenderData.renderImage(renderData, pos, size.xy(), *entry);
 
         if (mTextRenderData.available()) {
+            if (mTextRenderData.lines().empty() && !mText.empty())
+                mTextRenderData.updateText(mText, getAbsoluteTextSize());
+
             Vector3 textPos { pos.xy() + mBorder, pos.z };
             Vector3 textSize = getAbsoluteTextSize();
             auto keep = renderData.pushClipRect(textPos.xy(), textSize.xy());
@@ -173,35 +180,37 @@ namespace Widgets {
 
     bool TextEdit::injectKeyPress(const Input::KeyEventArgs &arg)
     {
-        if (std::isalnum(arg.text)
-            || arg.scancode == Input::Key::LeftArrow
-            || arg.scancode == Input::Key::RightArrow
-            || arg.scancode == Input::Key::UpArrow
-            || arg.scancode == Input::Key::DownArrow
-            || arg.scancode == Input::Key::Backspace
-            || arg.scancode == Input::Key::Delete
-            || arg.scancode == Input::Key::Space
-            || arg.scancode == Input::Key::Return) {
-            uint32_t val = (static_cast<uint32_t>(arg.mControlKeys.mAlt) << 18)
-                | (static_cast<uint32_t>(arg.mControlKeys.mCtrl) << 17)
-                | (static_cast<uint32_t>(arg.mControlKeys.mShift) << 16)
-                | (static_cast<uint32_t>(arg.scancode) << 8)
-                | arg.text;
-            stb_textedit_key(this, &mState, val);
-        } else if (arg.mControlKeys.mCtrl && arg.scancode == Input::Key::V) {
-            std::string s = Window::OSWindow::getClipboardString();
-            stb_textedit_paste(this, &mState, s.c_str(), s.size());
-            mTextRenderData.updateText(mText, getAbsoluteTextSize());
-        } else if (arg.mControlKeys.mCtrl && arg.scancode == Input::Key::C) {
-            std::string_view s = mText;
-            int start = mState.select_start;
-            int end = mState.select_end;
-            if (start != end) {
-                if (start > end)
-                    std::swap(start, end);
-                s = s.substr(start, end);
+        if (mEditable) {
+            if (std::isalnum(arg.text)
+                || arg.scancode == Input::Key::LeftArrow
+                || arg.scancode == Input::Key::RightArrow
+                || arg.scancode == Input::Key::UpArrow
+                || arg.scancode == Input::Key::DownArrow
+                || arg.scancode == Input::Key::Backspace
+                || arg.scancode == Input::Key::Delete
+                || arg.scancode == Input::Key::Space
+                || arg.scancode == Input::Key::Return) {
+                uint32_t val = (static_cast<uint32_t>(arg.mControlKeys.mAlt) << 18)
+                    | (static_cast<uint32_t>(arg.mControlKeys.mCtrl) << 17)
+                    | (static_cast<uint32_t>(arg.mControlKeys.mShift) << 16)
+                    | (static_cast<uint32_t>(arg.scancode) << 8)
+                    | arg.text;
+                stb_textedit_key(this, &mState, val);
+            } else if (arg.mControlKeys.mCtrl && arg.scancode == Input::Key::V) {
+                std::string s = Window::OSWindow::getClipboardString();
+                stb_textedit_paste(this, &mState, s.c_str(), s.size());
+                mTextRenderData.updateText(mText, getAbsoluteTextSize());
+            } else if (arg.mControlKeys.mCtrl && arg.scancode == Input::Key::C) {
+                std::string_view s = mText;
+                int start = mState.select_start;
+                int end = mState.select_end;
+                if (start != end) {
+                    if (start > end)
+                        std::swap(start, end);
+                    s = s.substr(start, end);
+                }
+                Window::OSWindow::setClipboardString(s);
             }
-            Window::OSWindow::setClipboardString(s);
         }
         return WidgetBase::injectKeyPress(arg);
     }

@@ -46,7 +46,7 @@ namespace Tools {
     static Plane cameraPlane(const Render::Camera &camera, const Vector3 &point, const Vector3 *axis1 = nullptr, const Vector3 *axis2 = nullptr)
     {
 
-        const Ray &ray = camera.toRay();
+        const Ray3 &ray = camera.toRay();
 
         Vector3 normal;
 
@@ -117,7 +117,7 @@ namespace Tools {
             ImGuiIO &io = ImGui::GetIO();
             Im3DIO &io3D = Im3D::GetIO();
 
-            const Ray &ray = Im3D::GetMouseRay();
+            const Ray3 &ray = Im3D::GetMouseRay();
 
             ImVec2 region = ImGui::GetContentRegionAvail();
             Vector2i iRegion { static_cast<int>(region.x), static_cast<int>(region.y) };

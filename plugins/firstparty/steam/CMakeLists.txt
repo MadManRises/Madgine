@@ -32,5 +32,5 @@ add_plugin(SteamServices Madgine FirstParty ${sources} PRECOMPILED_HEADER src/Ma
 
 target_link_plugins(SteamServices FirstParty)
 
-target_link_libraries(SteamServices PRIVATE Steamworks)
+target_link_libraries(SteamServices PUBLIC Steamworks)
 

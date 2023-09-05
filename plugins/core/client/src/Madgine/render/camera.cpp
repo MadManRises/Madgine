@@ -8,7 +8,7 @@
 
 #include "Meta/math/pi.h"
 
-#include "Meta/math/ray.h"
+#include "Meta/math/ray3.h"
 
 #include "Meta/math/transformation.h"
 
@@ -60,14 +60,14 @@ namespace Render {
             mOrthographic };
     }
 
-    Ray Camera::mousePointToRay(const Vector2 &mousePos, const Vector2 &viewportSize)
+    Ray3 Camera::mousePointToRay(const Vector2 &mousePos, const Vector2 &viewportSize)
     {
         float aspectRatio = viewportSize.x / viewportSize.y;
 
         return getFrustum(aspectRatio).toRay(mousePos / viewportSize);
     }
 
-    Ray Camera::toRay() const
+    Ray3 Camera::toRay() const
     {
         Vector3 dir = mOrientation * Vector3 { 0, 0, mN };
         return { mPosition, dir };

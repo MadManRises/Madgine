@@ -46,15 +46,15 @@ VertexShaderOutput main(AppData IN)
 
     float2 aPos2 = IN.aPos2;
 
-    float4 effectivePos = pos; 
+    float4 effectivePos = pos;
      
-    if (IN.aInstance.bones.buffer() != 0) {
+    /*if (IN.aInstance.bones.buffer() != 0) {
 	    matrix BoneTransform = IN.aInstance.bones[IN.aBoneIDs[0]] * IN.aWeights[0]
 	    + IN.aInstance.bones[IN.aBoneIDs[1]] * IN.aWeights[1]
 	    + IN.aInstance.bones[IN.aBoneIDs[2]] * IN.aWeights[2]
 	    + IN.aInstance.bones[IN.aBoneIDs[3]] * IN.aWeights[3];
 	    effectivePos = mul(BoneTransform, effectivePos);
-    }
+    }*/
 
     OUT.viewPos = mul(IN.aInstance.mv, effectivePos);
     

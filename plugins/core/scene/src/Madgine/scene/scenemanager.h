@@ -116,9 +116,6 @@ namespace Scene {
         IntervalClock<Threading::CustomTimepoint> mSceneClock;
         IntervalClock<std::chrono::steady_clock::time_point> mFrameClock;
 
-    public:
-        MEMBER_OFFSET_CONTAINER(mSceneComponents, , SceneComponentContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, NoOpFunctor>>);
-
         ////////////////////////////////////////////// ECS
 
     private:
@@ -150,6 +147,9 @@ namespace Scene {
         }
 
         ////////////////////////////////////////// ECS End
+
+    public:
+        MEMBER_OFFSET_CONTAINER(mSceneComponents, , SceneComponentContainer<Serialize::SerializableContainer<std::set<Placeholder<0>, KeyCompare<Placeholder<0>>>, NoOpFunctor>>);
     };
 
 }

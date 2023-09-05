@@ -138,8 +138,8 @@ struct FreeListContainer {
         const internal_container_type *mContainer = nullptr;
     };
 
-    using iterator = IteratorImpl<typename internal_traits::iterator, reference, pointer>;
-    using const_iterator = IteratorImpl<typename internal_traits::const_iterator, const_reference, const_pointer>;    
+    using iterator = IteratorImpl<std::ranges::iterator_t<internal_container_type>, reference, pointer>;
+    using const_iterator = IteratorImpl<std::ranges::const_iterator_t<internal_container_type>, const_reference, const_pointer>;
 
     iterator begin()
     {
@@ -209,6 +209,17 @@ private:
     }
 
 public:
+    ~FreeListContainer()
+    {
+        for (typename internal_container_type::reference block : mContainer) {
+            if (!DataTraits::isFree(block)) {
+                destruct(block);
+            } else {
+                handle(block).~position_handle();
+            }
+        }
+    }
+
     template <typename... Ty>
     friend iterator tag_invoke(emplace_t, bool &success, FreeListContainer<C, DataTraits> &self, const const_iterator &where, Ty &&...args)
     {
@@ -224,7 +235,6 @@ public:
             it = freeListIterator;
             self.mFreeListHead = self.emplace(*freeListIterator, std::forward<Ty>(args)...);
             success = true;
-
         }
         return { it, self.mContainer };
     }
@@ -293,7 +303,6 @@ struct underlying_container<FreeListContainer<C, DataTraits>> {
 
 template <typename C, typename DataTraits>
 struct container_traits<FreeListContainer<C, DataTraits>, void> : FreeListContainer<C, DataTraits>::internal_traits {
-
 
     typedef typename FreeListContainer<C, DataTraits>::iterator iterator;
     typedef typename FreeListContainer<C, DataTraits>::const_iterator const_iterator;

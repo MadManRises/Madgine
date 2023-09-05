@@ -97,13 +97,10 @@ namespace Render {
 
         OpenGLRenderTarget::beginIteration(iteration);        
 
-        glEnable(GL_FRAMEBUFFER_SRGB); 
     }
 
     void OpenGLRenderWindow::endIteration(size_t iteration) const
     {
-        glDisable(GL_FRAMEBUFFER_SRGB);
-
         OpenGLRenderTarget::endIteration(iteration);
 
         swapBuffers(getSurface(), mContext);

@@ -123,5 +123,16 @@ namespace FirstParty {
         mStatsRequestedPromise.set_value(info->m_eResult == EResult::k_EResultOK);
     }
 
+    Threading::Task<bool> SteamServices::unlockAchievementTask(const char *name)
+    {
+        if (!co_await mStatsRequestedFuture)
+            co_return false;
+
+        if (!SteamUserStats()->SetAchievement(name))
+            co_return false;
+        
+        co_return SteamUserStats()->StoreStats();
+    }
+
 }
 }

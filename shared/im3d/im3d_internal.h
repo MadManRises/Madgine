@@ -43,7 +43,7 @@ namespace Im3D {
         std::map<Im3DID, Im3DObject> mObjects;
         std::vector<Im3DID> mIDStack;
 
-        Ray mMouseRay;
+        Ray3 mMouseRay;
         Im3DObject *mHoveredObject;
         Im3DObject *mNextHoveredObject;
         float mNextHoveredDistance;

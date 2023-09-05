@@ -23,11 +23,14 @@ set_target_properties(ShaderGen
 	
 function(add_shadergen_target target flag)
 
-	add_dependencies(${target} ShaderGen)
+	get_target_property(exclude ${target} EXCLUDE_FROM_ALL)
+	if (NOT exclude)
+		add_dependencies(${target} ShaderGen)
 
-	get_target_property(targets ShaderGen ShaderGenTargets)
-	set (targets ${targets} ${flag})
-	list(REMOVE_DUPLICATES targets)
-	set_target_properties(ShaderGen PROPERTIES ShaderGenTargets "${targets}")
+		get_target_property(targets ShaderGen ShaderGenTargets)
+		set (targets ${targets} ${flag})
+		list(REMOVE_DUPLICATES targets)
+		set_target_properties(ShaderGen PROPERTIES ShaderGenTargets "${targets}")
+	endif()
 
 endfunction(add_shadergen_target)

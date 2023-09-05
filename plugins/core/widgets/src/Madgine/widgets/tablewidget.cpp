@@ -4,6 +4,8 @@
 
 #include "util/layouts/gridlayoutrenderdata.h"
 
+#include "Meta/math/line3.h"
+
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
@@ -99,6 +101,8 @@ namespace Widgets {
         Vector3 pos { getAbsolutePosition(), static_cast<float>(depth(layer)) };
         Vector3 size = getAbsoluteSize();
 
+        auto keep = renderData.pushClipRect(pos.xy(), size.xy());
+
         if (mNeedResize)
             sizeChanged(size);
 
@@ -116,17 +120,15 @@ namespace Widgets {
             if (row + 1 < mRowCount) {
                 auto [rowPos, rowSize] = mHorizontalLayoutRenderData.getElementDimensions(row);
                 float y = rowPos + rowSize;
-                Vector3 leftPoint {
-                    pos.x,
-                    pos.y + y,
-                    pos.z + 0.4f
+                Line3 line {
+                    { pos.x,
+                        pos.y + y,
+                        pos.z + 0.4f },
+                    { pos.x + fullWidth,
+                        pos.y + y,
+                        pos.z + 0.4f }
                 };
-                Vector3 rightPoint {
-                    pos.x + fullWidth,
-                    pos.y + y,
-                    pos.z + 0.4f
-                };
-                renderData.renderLine(leftPoint, rightPoint);
+                renderData.renderLine(line);
             }
         }
 
@@ -134,17 +136,15 @@ namespace Widgets {
             for (size_t col = 0; col < mColumnConfigs.size() - 1; ++col) {
                 auto [colPos, colSize] = mVerticalLayoutRenderData.getElementDimensions(col);
                 float x = colPos + colSize;
-                Vector3 topPoint {
-                    pos.x + x,
-                    pos.y,
-                    pos.z + 0.4f
+                Line3 line {
+                    { pos.x + x,
+                        pos.y,
+                        pos.z + 0.4f },
+                    { pos.x + x,
+                        pos.y + fullHeight,
+                        pos.z + 0.4f }
                 };
-                Vector3 bottomPoint {
-                    pos.x + x,
-                    pos.y + fullHeight,
-                    pos.z + 0.4f
-                };
-                renderData.renderLine(topPoint, bottomPoint);
+                renderData.renderLine(line);
             }
         }
     }
@@ -154,7 +154,7 @@ namespace Widgets {
         if (mTextRenderData.available()) {
             float lineHeight = mTextRenderData.calculateLineHeight();
             SizeConstraints rowHeightConstraints {
-                lineHeight + 2.0f,
+                lineHeight + 0.1f,
                 lineHeight + 6.0f,
                 lineHeight + 12.0f
             };

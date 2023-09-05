@@ -53,7 +53,7 @@ namespace Widgets {
         case SizingPolicy::EXPLICIT_RELATIVE:
             return { config.mFactor * pixelSize, config.mFactor * pixelSize, config.mFactor * pixelSize };
         case SizingPolicy::STRETCH:
-            return { 40.0f * config.mFactor, 60.0f * config.mFactor, 1000.0f * config.mFactor };
+            return { 40.0f * config.mFactor, 60.0f * config.mFactor, 100000.0f * config.mFactor };
         default:
             throw 0;
         }

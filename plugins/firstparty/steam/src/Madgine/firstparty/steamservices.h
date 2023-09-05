@@ -29,6 +29,10 @@ namespace FirstParty {
         Threading::TaskFuture<bool> mStatsRequestedFuture;
         STEAM_CALLBACK(SteamServices, onUserStatsReceived, UserStatsReceived_t);
 
+        /////////// ACHIEVEMENTS
+
+        virtual Threading::Task<bool> unlockAchievementTask(const char *name) override;
+
         //////////////////
 
         bool mInitialized = false;

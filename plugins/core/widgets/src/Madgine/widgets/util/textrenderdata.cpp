@@ -201,7 +201,7 @@ namespace Widgets {
         float result = 0.0f;
 
         for (char c : text) {
-            const Render::Glyph &g = font->mGlyphs[c];
+            const Render::Glyph &g = font->mGlyphs[static_cast<uint8_t>(c)];
 
             result += g.mAdvance / 64.0f * scale;
         }

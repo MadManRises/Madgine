@@ -2,6 +2,9 @@
 
 #include "widgetsrenderdata.h"
 
+#include "Meta/math/geometry2.h"
+#include "Meta/math/line3.h"
+
 namespace Engine {
 namespace Widgets {
 
@@ -84,10 +87,21 @@ namespace Widgets {
         renderQuad(pos, size, clipRect, color, topLeftUV, bottomRightUV, flippedUV);
     }
 
-    void WidgetsLinesData::renderLine(Vector3 posA, Vector3 posB, const Rect2 &clipRect, Color4 color)
+    void WidgetsLinesData::renderLine(Line3 line, const Rect2 &clipRect, Color4 color)
     {
-        mLineVertices.push_back({ posA, color, { 0, 0 } });
-        mLineVertices.push_back({ posB, color, { 0, 0 } });
+        Line2 line2 = line.xy();
+        bool aIsInClipRect = clipRect.contains(line2.mPointA, true);
+        if (auto result = Intersect(line2, clipRect)) {
+            Vector2 lineStart = line2.point(result[0]);
+            Vector2 lineEnd = result.size() > 1 ? line2.point(result[1]) : (aIsInClipRect ? line2.mPointA : line2.mPointB);
+            line = { Vector3 { lineStart, line.mPointA.z }, Vector3 { lineEnd, line.mPointB.z } };
+        } else {
+            if (!aIsInClipRect)
+                return;
+        }
+
+        mLineVertices.push_back({ line.mPointA, color, { 0, 0 } });
+        mLineVertices.push_back({ line.mPointB, color, { 0, 0 } });
     }
 
     void WidgetsRenderData::renderQuad(Vector3 pos, Vector2 size, Color4 color, TextureSettings tex, Vector2 topLeftUV, Vector2 bottomRightUV, bool flippedUV)
@@ -100,9 +114,9 @@ namespace Widgets {
         mVertexData[tex].renderQuadUV(pos, size, mClipRect, color, rect, textureSize, flippedUV);
     }
 
-    void WidgetsRenderData::renderLine(Vector3 posA, Vector3 posB, Color4 color)
+    void WidgetsRenderData::renderLine(const Line3 &line, Color4 color)
     {
-        mLineData.renderLine(posA, posB, mClipRect, color);
+        mLineData.renderLine(line, mClipRect, color);
     }
 
     const std::map<TextureSettings, WidgetsVertexData> &WidgetsRenderData::vertexData() const
@@ -113,6 +127,11 @@ namespace Widgets {
     const std::vector<Vertex> &WidgetsRenderData::lineVertices() const
     {
         return mLineData.mLineVertices;
+    }
+
+    WidgetsRenderData::WidgetsRenderDataClipRectKeep::~WidgetsRenderDataClipRectKeep()
+    {
+        mRenderData.mClipRect = mOldRect;
     }
 
     WidgetsRenderData::WidgetsRenderDataClipRectKeep WidgetsRenderData::pushClipRect(Vector2 pos, Vector2 size)

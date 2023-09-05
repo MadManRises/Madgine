@@ -149,12 +149,12 @@ namespace Window {
             assert(result);
         }
 
-        applyClientSpaceResize();
-
 #ifdef MADGINE_MAINWINDOW_LAYOUT
         if (!loadLayout(Resources::ResourceManager::getSingleton().findResourceFile(STRINGIFY2(MADGINE_MAINWINDOW_LAYOUT))))
             co_return false;
 #endif
+
+        applyClientSpaceResize();
 
         mTaskQueue.queueTask(renderLoop());
 
@@ -326,6 +326,8 @@ namespace Window {
             if (comp->injectKeyPress(arg))
                 return true;
         }
+        /* if (arg.mControlKeys.mAlt && arg.scancode == Input::Key::Return)
+            mOsWindow->setFullscreen(!mOsWindow->isFullscreen());*/
         return false;
     }
 

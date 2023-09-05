@@ -72,7 +72,7 @@ namespace Render {
             attachments[i + 1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
             attachments[i + 1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
-            attachments[i + 1].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            attachments[i + 1].initialLayout = mBlitSource ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_UNDEFINED;
             attachments[i + 1].finalLayout = layout;
 
             colorAttachmentRef[i].attachment = i + 1;

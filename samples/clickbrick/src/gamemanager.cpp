@@ -23,7 +23,7 @@
 
 #include "Madgine/app/application.h"
 
-#include "Meta/math/ray.h"
+#include "Meta/math/ray3.h"
 
 #include "Madgine/scene/entity/entity.h"
 
@@ -66,7 +66,7 @@ Engine::Threading::Task<bool> GameManager::init()
     mCamera.mPosition = { 0, 0, -10 };
     mCamera.mOrientation = {};
 
-    mGameRenderTarget = mUI.window().getRenderer()->createRenderTexture({ 1, 1 }, { .mName = "Game" });
+    mGameRenderTarget = mUI.window().getRenderer()->createRenderTexture({ 1, 1 }, { .mName = "Game", .mFormat = Engine::Render::FORMAT_RGBA8_SRGB });
     mGameRenderTarget->addRenderPass(&mSceneRenderer);
 
     mUI.app().taskQueue()->queueTask(updateApp());
@@ -182,7 +182,7 @@ void GameManager::spawnBrick()
 
 void GameManager::onPointerClick(const Engine::Input::PointerEventArgs &evt)
 {
-    Engine::Ray ray = mCamera.mousePointToRay(Engine::Vector2 { static_cast<float>(evt.windowPosition.x), static_cast<float>(evt.windowPosition.y) }, mGameWindow->getAbsoluteSize().xy());
+    Engine::Ray3 ray = mCamera.mousePointToRay(Engine::Vector2 { static_cast<float>(evt.windowPosition.x), static_cast<float>(evt.windowPosition.y) }, mGameWindow->getAbsoluteSize().xy());
 
     Engine::Scene::Entity::EntityPtr hit;
     float distance = std::numeric_limits<float>::max();

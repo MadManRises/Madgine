@@ -356,7 +356,7 @@ public:
     }
 
     /// @copydoc Vector3::normalise
-    float normalise()
+    float normalize()
     {
         float fLength = sqrtf(x * x + y * y);
 
@@ -482,10 +482,10 @@ public:
 
     /** As normalise, except that this vector is unaffected and the
 		normalised vector is returned as a copy. */
-    Vector2 normalisedCopy() const
+    Vector2 normalizedCopy() const
     {
         Vector2 ret = *this;
-        ret.normalise();
+        ret.normalize();
         return ret;
     }
 
@@ -570,6 +570,28 @@ public:
     constexpr Vector2i floor() const
     {
         return { static_cast<int>(x), static_cast<int>(y) };
+    }
+};
+
+struct NormalizedVector2 : Vector2 {
+
+    constexpr NormalizedVector2(float x, float y)
+        : Vector2(x, y)
+    {
+        normalize();
+    }
+
+    constexpr NormalizedVector2(const Vector2 &v)
+        : Vector2(v)
+    {
+        normalize();
+    }
+
+    constexpr NormalizedVector2 &operator=(const Vector2 &v)
+    {
+        Vector2::operator=(v);
+        normalize();
+        return *this;
     }
 };
 

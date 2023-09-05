@@ -44,7 +44,6 @@ namespace Window {
         void show();
         bool isMinimized();
         bool isMaximized();
-        bool isFullscreen();
 
         void focus();
         bool hasFocus();

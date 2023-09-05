@@ -40,6 +40,16 @@ namespace Render {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             GL_CHECK();
         }
+
+        glEnable(GL_FRAMEBUFFER_SRGB);
+    }
+
+    void OpenGLRenderTarget::endIteration(size_t iteration) const
+    {
+
+        glDisable(GL_FRAMEBUFFER_SRGB);
+
+        RenderTarget::endIteration(iteration);
     }
 
     void OpenGLRenderTarget::setRenderSpace(const Rect2i &space)

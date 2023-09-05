@@ -44,6 +44,11 @@ namespace FirstParty {
 
         Threading::TaskFuture<bool> ingestStat(const char *name, const char *leaderboardName, int32_t value);
         virtual Threading::Task<bool> ingestStatTask(const char *name, const char *leaderboardName, int32_t value) = 0;
+
+        ///////// ACHIEVEMENTS
+
+        Threading::TaskFuture<bool> unlockAchievement(const char *name);
+        virtual Threading::Task<bool> unlockAchievementTask(const char *name) = 0;
     };
 
     template <typename T>

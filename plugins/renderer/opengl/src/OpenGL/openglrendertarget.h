@@ -11,6 +11,7 @@ namespace Render {
         ~OpenGLRenderTarget();
 
         virtual void beginIteration(size_t iteration) const override;
+        virtual void endIteration(size_t iteration) const override;
 
         virtual void clearDepthBuffer() override;
 

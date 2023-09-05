@@ -169,6 +169,7 @@ struct Vector4i;
 struct Color3;
 struct Color4;
 
+struct Rect2;
 struct Rect2i;
 
 struct Matrix3;
@@ -176,8 +177,13 @@ struct Matrix4;
 
 struct Quaternion;
 
+struct Line3;
+struct Line2;
+
+struct Ray2;
+struct Ray3;
+
 struct Frustum;
-struct Ray;
 struct Sphere;
 struct Plane;
 struct AABB;

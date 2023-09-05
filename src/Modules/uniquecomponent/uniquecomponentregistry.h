@@ -294,6 +294,11 @@ namespace UniqueComponent {
     struct NamedRegistry : Registry<_Base, _Ty...> {
 
         static const std::map<std::string_view, IndexType<uint32_t>> &sComponentsByName();
+
+        static std::string_view sComponentName(uint32_t index)
+        {
+            return std::ranges::find_if(sComponentsByName(), [=](const auto &v) { return v.second == index; })->first;
+        }
     };
 
 }

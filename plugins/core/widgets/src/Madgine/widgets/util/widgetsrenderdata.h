@@ -21,7 +21,7 @@ namespace Widgets {
     struct WidgetsLinesData {
         std::vector<Vertex> mLineVertices;
 
-        void renderLine(Vector3 posA, Vector3 posB, const Rect2 &clipRect, Color4 color = { 1.0f, 1.0f, 1.0f, 1.0f });
+        void renderLine(Line3 line, const Rect2 &clipRect, Color4 color = { 1.0f, 1.0f, 1.0f, 1.0f });
     };
 
     struct WidgetsRenderData {
@@ -30,12 +30,13 @@ namespace Widgets {
         void renderQuad(Vector3 pos, Vector2 size, Color4 color = { 1.0f, 1.0f, 1.0f, 1.0f }, TextureSettings tex = {}, Vector2 topLeftUV = { 0.0f, 0.0f }, Vector2 bottomRightUV = { 1.0f, 1.0f }, bool flippedUV = false);
         void renderQuadUV(Vector3 pos, Vector2 size, Color4 color, TextureSettings tex, Rect2i rect, Vector2i textureSize, bool flippedUV = false);
 
-        void renderLine(Vector3 posA, Vector3 posB, Color4 color = { 1.0f, 1.0f, 1.0f, 1.0f });
+        void renderLine(const Line3 &line, Color4 color = { 1.0f, 1.0f, 1.0f, 1.0f });
 
         const std::map<TextureSettings, WidgetsVertexData> &vertexData() const;
         const std::vector<Vertex> &lineVertices() const;
 
         struct WidgetsRenderDataClipRectKeep {
+            ~WidgetsRenderDataClipRectKeep();
             Rect2 mOldRect;
             WidgetsRenderData &mRenderData;
         };

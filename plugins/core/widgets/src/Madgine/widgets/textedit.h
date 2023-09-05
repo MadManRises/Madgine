@@ -60,6 +60,7 @@ namespace Widgets {
     private:
         STB_TexteditState mState;
         std::string mText;
+        bool mEditable = true;
 
         Vector2 mBorder = Vector2::ZERO;        
     };

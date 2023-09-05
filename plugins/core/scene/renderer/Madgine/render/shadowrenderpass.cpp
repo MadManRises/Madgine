@@ -91,8 +91,8 @@ namespace Render {
                 Matrix4 mv = v * o.mTransform;
                 return SceneInstanceData {
                     mv.Transpose(),
-                    mv.Inverse().Transpose().Transpose(),
-                    o.mBones
+                    mv.Inverse().Transpose().Transpose() /*,
+                    o.mBones*/
                 };
             });
 

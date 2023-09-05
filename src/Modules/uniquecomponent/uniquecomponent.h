@@ -103,6 +103,10 @@ namespace UniqueComponent {
     struct VirtualComponentBase : _Base {
         using _Base::_Base;
 
+        static bool is_instantiated() {
+            return true;
+        }
+
         using T = _T;
     };
 

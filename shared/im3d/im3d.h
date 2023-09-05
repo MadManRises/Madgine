@@ -10,7 +10,7 @@
 #include "Madgine/render/vertex.h"
 #include "Meta/math/frustum.h"
 #include "Meta/math/matrix4.h"
-#include "Meta/math/ray.h"
+#include "Meta/math/ray3.h"
 #include "Meta/math/vector2i.h"
 
 #include "im3d_parameters.h"
@@ -43,7 +43,7 @@ struct Im3DFont {
 };
 
 struct Im3DIO {
-    Ray mNextFrameMouseRay;
+    Ray3 mNextFrameMouseRay;
 
     Im3DFont (*mFetchFont)(const char *) = nullptr;
     void (*mReleaseFont)(Im3DFont &) = nullptr;
@@ -70,7 +70,7 @@ namespace Im3D {
 
     MADGINE_IM3D_EXPORT Im3DIO &GetIO();
 
-    MADGINE_IM3D_EXPORT const Ray &GetMouseRay();
+    MADGINE_IM3D_EXPORT const Ray3 &GetMouseRay();
 
     MADGINE_IM3D_EXPORT void NewFrame();
 

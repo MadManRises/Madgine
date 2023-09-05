@@ -3,7 +3,7 @@
 #include "Madgine/render/camera.h"
 
 #include "Meta/math/matrix4.h"
-#include "Meta/math/ray.h"
+#include "Meta/math/ray3.h"
 
 #include "Madgine/render/scenerenderpass.h"
 
@@ -38,7 +38,7 @@ namespace Tools {
 
         ImGui::InteractiveViewState mState;
         int mDraggedAxis;
-        Ray mDragStartRay;
+        Ray3 mDragStartRay;
         Engine::Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> mDragTransform;
         Matrix4 mDragStoredMatrix;
         Vector3 mDragStoredPosition;

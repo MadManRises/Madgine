@@ -53,7 +53,7 @@ namespace Im3D {
         return sContext->mIO;
     }
 
-    const Ray &GetMouseRay()
+    const Ray3 &GetMouseRay()
     {
         return sContext->mMouseRay;
     }

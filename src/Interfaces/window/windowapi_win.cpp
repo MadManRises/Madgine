@@ -257,11 +257,6 @@ namespace Window {
         return placement.showCmd == SW_MAXIMIZE;
     }
 
-    bool OSWindow::isFullscreen()
-    {
-        return false;
-    }
-
     void OSWindow::focus()
     {
         SetFocus((HWND)mHandle);
@@ -368,16 +363,14 @@ namespace Window {
 
     WindowData OSWindow::data()
     {
-        WINDOWPLACEMENT wndpl;
-        wndpl.length = sizeof(WINDOWPLACEMENT);
+        WINDOWPLACEMENT wndpl = { sizeof(WINDOWPLACEMENT) };
         GetWindowPlacement((HWND)mHandle, &wndpl);
 
         return {
             { wndpl.rcNormalPosition.left, wndpl.rcNormalPosition.top },
             { wndpl.rcNormalPosition.right - wndpl.rcNormalPosition.left,
                 wndpl.rcNormalPosition.bottom - wndpl.rcNormalPosition.top },
-            wndpl.showCmd == SW_MAXIMIZE,
-            isFullscreen()
+            wndpl.showCmd == SW_MAXIMIZE
         };
     }
 
@@ -414,7 +407,7 @@ namespace Window {
         if (!handle) {
             static const char *windowClass = CreateWindowClass();
 
-            DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_SIZEBOX | WS_MAXIMIZEBOX;
+            DWORD style = WS_OVERLAPPEDWINDOW;
             if (settings.mHeadless) {
                 style = WS_POPUP;
             }

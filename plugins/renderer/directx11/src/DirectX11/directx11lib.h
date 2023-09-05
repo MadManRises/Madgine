@@ -20,6 +20,7 @@
 #include <d3d11.h>
 #include <d3d11_1.h>
 #include <d3dcompiler.h>
+#undef ERROR
 
 MADGINE_DIRECTX11_EXPORT void dx11Dump();
 
