@@ -63,8 +63,8 @@ namespace Render {
     protected:
         TextureHandle mTextureHandle = 0;
         TextureType mType;
-        Vector2i mSize = { 0, 0 };
         DataFormat mFormat;
+        Vector2i mSize = { 0, 0 };
     };
 
 }

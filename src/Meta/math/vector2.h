@@ -555,14 +555,18 @@ public:
     {
         char c;
         in >> c;
-        if (c != '[')
-            std::terminate();
+        if (c != '[') {
+            in.setstate(std::ios_base::failbit);
+            return in;
+        }
         for (int i = 0; i < 2; ++i) {
             in >> v[i];
             in >> c;
             char expectedChar = (i == 1) ? ']' : ',';
-            if (c != expectedChar)
-                std::terminate();
+            if (c != expectedChar) {
+                in.setstate(std::ios_base::failbit);
+                return in;
+            }
         }
         return in;
     }

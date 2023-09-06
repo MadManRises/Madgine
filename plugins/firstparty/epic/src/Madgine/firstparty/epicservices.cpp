@@ -449,5 +449,10 @@ namespace FirstParty {
         co_return true;
     }
 
+    Threading::Task<bool> EpicServices::unlockAchievementTask(const char *name)
+    {
+        throw 0;
+    }
+
 }
 }

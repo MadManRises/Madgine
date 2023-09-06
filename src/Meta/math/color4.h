@@ -55,17 +55,23 @@ struct Color4 {
     {
         char c;
         in >> c;
-        if (c != '(')
-            std::terminate();
+        if (c != '(') {
+            in.setstate(std::ios_base::failbit);
+            return in;
+        }
         for (int i = 0; i < 4; ++i) {
             in >> (&color.r)[i];
             in >> c;
             if (i != 3) {
-                if (c != ',')
-                    std::terminate();
+                if (c != ',') {
+                    in.setstate(std::ios_base::failbit);
+                    return in;
+                }
             } else {
-                if (c != ')')
-                    std::terminate();
+                if (c != ')') {
+                    in.setstate(std::ios_base::failbit);
+                    return in;
+                }
             }
         }
         return in;

@@ -26,7 +26,7 @@ namespace Serialize {
     };
 
     template <typename... Configs>
-    using GuardSelector = ConfigGroupSelector<GuardCategory, Guard, Configs...>;
+    using GuardSelector = typename ConfigGroupSelector<GuardCategory, Configs...>::template instantiate<Guard>;
 
 }
 }

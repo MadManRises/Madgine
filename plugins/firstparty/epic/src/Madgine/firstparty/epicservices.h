@@ -55,6 +55,10 @@ namespace FirstParty {
 
         virtual Threading::Task<bool> ingestStatTask(const char *name, const char *leaderboardName, int32_t value) override;
 
+        /////////// ACHIEVEMENTS
+
+        virtual Threading::Task<bool> unlockAchievementTask(const char *name) override;
+
         //////////////////
 
         bool mInitialized = false;

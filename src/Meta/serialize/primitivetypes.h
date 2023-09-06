@@ -23,6 +23,7 @@ namespace Serialize {
         std::string,
         ByteBuffer,
         Void,
+        Vector2,
         Vector3,
         Vector4,
         Matrix3,

@@ -21,6 +21,8 @@ struct type_pack<> {
 
     static constexpr const size_t size = 0;
 
+    using indices = std::index_sequence<>;
+
     template <typename... T>
     using append = type_pack<T...>;
     template <typename... T>
