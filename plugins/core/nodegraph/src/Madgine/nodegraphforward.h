@@ -8,10 +8,9 @@ namespace NodeGraph {
 
     template <typename Node>
     struct NodeReceiver;
-    struct DebuggableReceiverBase;
 
-    struct NodeInterpreter;
     struct NodeInterpreterData;
+    struct NodeInterpreterState;
 
     struct CodeGenerator;
     struct CodeGeneratorData;

@@ -14,7 +14,7 @@
 
 #include "Generic/customfunctors.h"
 
-#include "entitybehavior.h"
+#include "Madgine/behavior.h"
 
 namespace Engine {
 namespace Scene {
@@ -94,9 +94,8 @@ namespace Scene {
             void relocateComponent(EntityComponentHandle<EntityComponentBase> newIndex);
 
 
-            void addBehavior(std::string_view name);
-            void addBehavior(NodeGraph::NodeGraphLoader::Resource *res);
-            std::vector<EntityBehavior> &behaviors();
+            void addBehavior(Behavior behavior);
+            std::vector<Behavior> &behaviors();
 
             bool isLocal() const;
 
@@ -114,14 +113,14 @@ namespace Scene {
             Serialize::StreamResult readComponent(Serialize::FormattedSerializeStream &in, EntityComponentOwningHandle<EntityComponentBase> &handle);
             const char *writeComponent(Serialize::FormattedSerializeStream &out, const EntityComponentOwningHandle<EntityComponentBase> &comp) const;
 
-            Serialize::StreamResult readBehavior(Serialize::FormattedSerializeStream &in, std::string &name, Entity *&entity);
-            const char *writeBehavior(Serialize::FormattedSerializeStream &out, const EntityBehavior &behavior) const;
+            Serialize::StreamResult readBehavior(Serialize::FormattedSerializeStream &in, Behavior &behavior);
+            const char *writeBehavior(Serialize::FormattedSerializeStream &out, const Behavior &behavior) const;
 
             bool mLocal;
 
             SERIALIZABLE_CONTAINER(mComponents, mutable_set<EntityComponentOwningHandle<EntityComponentBase>, std::less<>>, ParentFunctor<&Entity::handleEntityEvent>);
 
-            std::vector<EntityBehavior> mBehaviors;
+            std::vector<Behavior> mBehaviors;
 
             SceneManager &mSceneManager;
         };

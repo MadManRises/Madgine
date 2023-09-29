@@ -79,7 +79,7 @@ namespace Tools {
             }
             if (ImGui::BeginTable("columns", 2, ImGuiTableFlags_Resizable)) {
                 for (NodeRenderPass &pass : mPasses) {
-                    if (pass.mLoadingHandle && pass.mLoadingHandle.available()) {
+                    /* if (pass.mLoadingHandle && pass.mLoadingHandle.available()) {
 
                         if (pass.mPass)
                             mTexture->removeRenderPass(pass.mPass);
@@ -120,7 +120,8 @@ namespace Tools {
                     }
                     if (NodeGraph::NodeGraphLoader::Handle newHandle = pass.mHandle.refresh()) {
                         pass.mLoadingHandle = newHandle;
-                    }
+                    }*/
+                    throw 0;
                 }
                 ImGui::EndTable();
             }

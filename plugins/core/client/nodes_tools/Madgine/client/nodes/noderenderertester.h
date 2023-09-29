@@ -12,6 +12,7 @@
 
 #include "imgui/imguiaddons.h"
 
+
 namespace Engine {
 namespace Tools {
 
@@ -31,7 +32,7 @@ namespace Tools {
         struct NodeRenderPass {
             NodeGraph::NodeGraphLoader::Handle mHandle, mLoadingHandle;
 
-            NodeGraph::NodeInterpreter mInterpreter;
+            Behavior mInterpreter;
 
             Render::RenderPass *mPass = nullptr;
         };

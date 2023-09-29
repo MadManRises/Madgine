@@ -819,7 +819,7 @@ namespace Tools {
                 }
 
                 if (ImGui::MenuItem("Debug", "", false)) {
-                    Execution::detach(mGraph.interpret({ ValueType { 2 } }) | Execution::then([](const ArgumentList &) { LOG("SUCCESS"); }));
+                    Execution::detach(mGraph.interpret({ ValueType { 2 } }) | Execution::then([]() { LOG("SUCCESS"); }));
                 }
 
                 if (ImGui::BeginMenu("Test")) {

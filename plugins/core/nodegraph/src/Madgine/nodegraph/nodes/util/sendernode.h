@@ -540,7 +540,7 @@ namespace NodeGraph {
             decltype(variadicHelper()) mVariadicInfo;
         };
 
-        void setupInterpret(NodeInterpreter& interpreter, std::unique_ptr<NodeInterpreterData>& data) const override
+        void setupInterpret(NodeInterpreterState& interpreter, std::unique_ptr<NodeInterpreterData>& data) const override
         {
             if constexpr (hasVariables) {
                 data = std::make_unique<InterpretData>(DummyReceiver { interpreter, *this }, mArguments);
@@ -559,7 +559,7 @@ namespace NodeGraph {
             }
         }
 
-        void interpretRead(NodeInterpreter& interpreter, ValueType& retVal, std::unique_ptr<NodeInterpreterData>& data, uint32_t providerIndex, uint32_t group) const override
+        void interpretRead(NodeInterpreterState& interpreter, ValueType& retVal, std::unique_ptr<NodeInterpreterData>& data, uint32_t providerIndex, uint32_t group) const override
         {
             if constexpr (Traits::constant) {
                 if constexpr (hasVariables) {

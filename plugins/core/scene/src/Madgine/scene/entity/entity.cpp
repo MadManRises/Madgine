@@ -243,33 +243,27 @@ namespace Scene {
             return "Component";
         }
 
-        void Entity::addBehavior(std::string_view name)
+        void Entity::addBehavior(Behavior behavior)
         {
-            mBehaviors.emplace_back(name, this);
+            mBehaviors.emplace_back(std::move(behavior));
         }
 
-        void Entity::addBehavior(NodeGraph::NodeGraphLoader::Resource *res)
-        {
-            mBehaviors.emplace_back(res, this);
-        }
-
-        std::vector<EntityBehavior> &Entity::behaviors()
+        std::vector<Behavior> &Entity::behaviors()
         {
             return mBehaviors;
         }
 
-        Serialize::StreamResult Entity::readBehavior(Serialize::FormattedSerializeStream &in, std::string &name, Entity *&entity)
+        Serialize::StreamResult Entity::readBehavior(Serialize::FormattedSerializeStream &in, Behavior &behavior)
         {
-            STREAM_PROPAGATE_ERROR(in.beginExtendedRead("Behavior", 1));
-            STREAM_PROPAGATE_ERROR(read(in, name, "Graph"));
-            entity = this;
+            STREAM_PROPAGATE_ERROR(in.beginExtendedRead("Behavior", 0));
+            
             return {};
         }
 
-        const char *Entity::writeBehavior(Serialize::FormattedSerializeStream &out, const EntityBehavior &behavior) const
+        const char *Entity::writeBehavior(Serialize::FormattedSerializeStream &out, const Behavior &behavior) const
         {
             out.beginExtendedWrite("Behavior", 1);
-            write(out, behavior.getName(), "Graph");
+            //write(out, behavior.getName(), "Graph");
             return "Behavior";
         }
 

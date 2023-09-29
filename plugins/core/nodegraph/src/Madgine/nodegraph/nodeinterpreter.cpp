@@ -10,11 +10,20 @@
 
 #include "Madgine/debug/debugger.h"
 
+#include "Meta/keyvalue/metatable_impl.h"
+
+NAMED_UNIQUECOMPONENT(NodeGraph, Engine::NodeGraph::NodeInterpreterState);
+
+METATABLE_BEGIN(Engine::NodeGraph::NodeInterpreterState)
+PROPERTY(Graph, get, set)
+READONLY_PROPERTY(Variables, variables)
+METATABLE_END(Engine::NodeGraph::NodeInterpreterState)
+
 namespace Engine {
 namespace NodeGraph {
 
     struct NodeDebugLocation : Debug::DebugLocation {
-        NodeDebugLocation(const NodeBase *node, NodeInterpreter *interpreter)
+        NodeDebugLocation(const NodeBase *node, NodeInterpreterState *interpreter)
             : mNode(node)
             , mInterpreter(interpreter)
         {
@@ -37,28 +46,50 @@ namespace NodeGraph {
         }
 
         const NodeBase *mNode;
-        NodeInterpreter *mInterpreter;
+        NodeInterpreterState *mInterpreter;
     };
 
-    NodeInterpreter::NodeInterpreter(const NodeGraph *graph, const ArgumentList &args, NodeVariableScope *parent)
+    NodeInterpreterState::NodeInterpreterState(VariableScope *parent)
+        : mParentScope(parent)
+    {
+    }
+
+    NodeInterpreterState::NodeInterpreterState(const NodeGraph *graph, const ArgumentList &args, VariableScope *parent)
         : mArguments(args)
         , mParentScope(parent)
     {
         setGraph(graph);
     }
 
-    void NodeInterpreter::interpretImpl(Execution::VirtualReceiverBase<NodeInterpretResult> &receiver, uint32_t flowIn)
+    NodeInterpreterState::NodeInterpreterState(NodeGraphLoader::Resource *graph, const ArgumentList &args, VariableScope *parent)
+        : mArguments(args)
+        , mParentScope(parent)
+        , mGraphHandle(graph)
+    {
+        mGraphHandle.info()->loadingTask().then([=](bool result) {if (result)
+                setGraph(&*mGraphHandle); }, NodeGraphLoader::getSingleton().loadingTaskQueue());
+    }
+
+    NodeInterpreterState::NodeInterpreterState(std::string_view name, const ArgumentList &args, VariableScope *parent)
+        : mArguments(args)
+        , mParentScope(parent)
+    {
+        mGraphHandle.load(name).then([=](bool result) {if (result)
+                setGraph(&*mGraphHandle); }, NodeGraphLoader::getSingleton().loadingTaskQueue());
+    }
+
+    void NodeInterpreterState::interpretImpl(Execution::VirtualReceiverBase<InterpretResult> &receiver, uint32_t flowIn)
     {
         interpretImpl(receiver, mGraph->mFlowOutPins[flowIn].mTarget);
     }
 
-    void NodeInterpreter::interpretImpl(Execution::VirtualReceiverBase<NodeInterpretResult> &receiver, Pin pin)
+    void NodeInterpreterState::interpretImpl(Execution::VirtualReceiverBase<InterpretResult> &receiver, Pin pin)
     {
         Debug::Debugger::getSingleton().stepInto(&receiver, std::make_unique<NodeDebugLocation>(nullptr, this));
         branch(receiver, pin);
     }
 
-    void NodeInterpreter::branch(Execution::VirtualReceiverBase<NodeInterpretResult> &receiver, Pin pin)
+    void NodeInterpreterState::branch(Execution::VirtualReceiverBase<InterpretResult> &receiver, Pin pin)
     {
 
         const NodeBase *node = nullptr;
@@ -80,7 +111,7 @@ namespace NodeGraph {
               }));
     }
 
-    void NodeInterpreter::read(ValueType &retVal, Pin pin)
+    void NodeInterpreterState::read(ValueType &retVal, Pin pin)
     {
         if (!pin) {
             throw 0;
@@ -91,22 +122,22 @@ namespace NodeGraph {
         }
     }
 
-    void NodeInterpreter::write(Pin pin, const ValueType &v)
+    void NodeInterpreterState::write(Pin pin, const ValueType &v)
     {
         mGraph->node(pin.mNode)->interpretWrite(*this, mData[pin.mNode - 1], v, pin.mIndex, pin.mGroup);
     }
 
-    void NodeInterpreter::read(ValueType &retVal, uint32_t dataProvider)
+    void NodeInterpreterState::read(ValueType &retVal, uint32_t dataProvider)
     {
         read(retVal, mGraph->mDataInPins[dataProvider].mSource);
     }
 
-    void NodeInterpreter::write(uint32_t dataReceiver, const ValueType &v)
+    void NodeInterpreterState::write(uint32_t dataReceiver, const ValueType &v)
     {
         write(mGraph->mDataOutPins[dataReceiver].mTarget, v);
     }
 
-    void NodeInterpreter::setGraph(const NodeGraph *graph)
+    void NodeInterpreterState::setGraph(const NodeGraph *graph)
     {
         if (mGraph != graph) {
             mGraph = graph;
@@ -122,27 +153,27 @@ namespace NodeGraph {
         }
     }
 
-    const NodeGraph *NodeInterpreter::graph() const
+    const NodeGraph *NodeInterpreterState::graph() const
     {
         return mGraph;
     }
 
-    void NodeInterpreter::setArguments(const ArgumentList &args)
+    void NodeInterpreterState::setArguments(const ArgumentList &args)
     {
         mArguments = args;
     }
 
-    ArgumentList &NodeInterpreter::arguments()
+    ArgumentList &NodeInterpreterState::arguments()
     {
         return mArguments;
     }
 
-    std::unique_ptr<NodeInterpreterData> &NodeInterpreter::data(uint32_t index)
+    std::unique_ptr<NodeInterpreterData> &NodeInterpreterState::data(uint32_t index)
     {
         return mData[index - 1];
     }
 
-    bool NodeInterpreter::resolveVar(ValueType &result, std::string_view name, bool recursive)
+    bool NodeInterpreterState::resolveVar(ValueType &result, std::string_view name, bool recursive)
     {
         bool gotValue = false;
         for (const std::unique_ptr<NodeInterpreterData> &data : mData) {
@@ -157,10 +188,10 @@ namespace NodeGraph {
         return gotValue;
     }
 
-    std::map<std::string_view, ValueType> NodeInterpreter::variables(bool recursive)
+    std::map<std::string_view, ValueType> NodeInterpreterState::variables()
     {
         std::map<std::string_view, ValueType> variables;
-        if (recursive && mParentScope)
+        if (false && mParentScope)
             variables = mParentScope->variables();
         for (const std::unique_ptr<NodeInterpreterData> &data : mData) {
             if (data) {
@@ -169,5 +200,24 @@ namespace NodeGraph {
         }
         return variables;
     }
+
+    std::string_view NodeInterpreterState::graphName() const
+    {
+        return mGraphHandle.name();
+    }
+
+    void NodeInterpreterState::set(NodeGraphLoader::Resource *resource)
+    {
+        setGraph(nullptr);
+        mGraphHandle = resource;
+        mGraphHandle.info()->loadingTask().then([=](bool result) {if (result)
+                setGraph(&*mGraphHandle); }, NodeGraphLoader::getSingleton().loadingTaskQueue());
+    }
+
+    NodeGraphLoader::Resource *NodeInterpreterState::get() const
+    {
+        return mGraphHandle.resource();
+    }
+
 }
 }

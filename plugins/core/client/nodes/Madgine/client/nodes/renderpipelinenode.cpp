@@ -114,7 +114,7 @@ namespace Render {
         Render::PipelineLoader::Instance mPipeline;
     };
 
-    void RenderPipelineNode::interpretRead(NodeGraph::NodeInterpreter &interpreter, ValueType &retVal, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group) const
+    void RenderPipelineNode::interpretRead(NodeGraph::NodeInterpreterState &interpreter, ValueType &retVal, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group) const
     {
         if (!data) {
             std::unique_ptr<RenderPipelineNodeInterpret> interpret = std::make_unique<RenderPipelineNodeInterpret>();

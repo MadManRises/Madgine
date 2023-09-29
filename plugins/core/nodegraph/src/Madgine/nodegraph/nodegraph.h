@@ -4,7 +4,7 @@
 
 #include "nodebase.h"
 
-#include "nodeinterpreter.h"
+#include "Madgine/behavior.h"
 
 namespace Engine {
 namespace NodeGraph {
@@ -84,27 +84,12 @@ namespace NodeGraph {
         std::vector<DataInPinPrototype> mDataInPins;
         std::vector<DataOutPinPrototype> mDataOutPins;
 
-        struct NodeInterpreterWrapper : NodeInterpreter, private KeyValueReceiver, private Execution::VirtualReceiverBase<NodeInterpretResult> {
-            using NodeInterpreter::NodeInterpreter;
-
-            void start()
-            {
-                interpretImpl(*this, 0);
-            }
-            virtual void set_value() override
-            {
-                static_cast<KeyValueReceiver*>(this)->set_value();
-            }
-            virtual void set_error(NodeInterpretResult result) override
-            {
-                static_cast<KeyValueReceiver *>(this)->set_error(GenericResult::UNKNOWN_ERROR);
-            }
-        };
-
         auto interpret(const ArgumentList &args = {}) const
         {
-            return Execution::make_virtual_sender<NodeInterpreterWrapper, GenericResult, ArgumentList>(this, args);
+            return behavior(args).sender();
         }
+
+        Behavior behavior(const ArgumentList &args = {}) const;
 
     protected:
         std::unique_ptr<NodeBase> createNode(std::string_view name);

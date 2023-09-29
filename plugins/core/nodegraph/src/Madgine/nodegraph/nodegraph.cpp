@@ -25,6 +25,8 @@
 
 #include "Generic/projections.h"
 
+#include "nodeinterpreter.h"
+
 METATABLE_BEGIN(Engine::NodeGraph::NodeGraph)
 METATABLE_END(Engine::NodeGraph::NodeGraph)
 
@@ -867,5 +869,10 @@ namespace NodeGraph {
 
         return "Node";
     }
+
+    Behavior NodeGraph::behavior(const ArgumentList& args) const {
+        return Behavior { std::make_unique<NodeInterpreterState>(this, args) };
+    }
+
 }
 }

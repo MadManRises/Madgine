@@ -30,7 +30,7 @@ namespace NodeGraph {
         return v;
     }
 
-    void continueExecution(NodeInterpreter &interpreter, const NodeBase &node, Execution::VirtualReceiverBase<NodeInterpretResult> &receiver)
+    void continueExecution(NodeInterpreterState &interpreter, const NodeBase &node, Execution::VirtualReceiverBase<InterpretResult> &receiver)
     {
         Pin pin = node.flowOutTarget(0);
         interpreter.branch(receiver, pin);

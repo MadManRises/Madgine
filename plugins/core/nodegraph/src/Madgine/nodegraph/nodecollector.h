@@ -17,7 +17,7 @@ namespace NodeGraph {
 
         virtual std::string_view className() const override final
         {
-            return this->componentName();
+            return T::componentName();
         }
         virtual std::string_view name() const override
         {

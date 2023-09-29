@@ -36,6 +36,8 @@
 
 #include "Interfaces/input/inputevents.h"
 
+#include "Madgine/behaviorcollector.h"
+
 UNIQUECOMPONENT(Engine::Tools::SceneEditor);
 
 METATABLE_BEGIN_BASE(Engine::Tools::SceneEditor, Engine::Tools::ToolBase)
@@ -395,11 +397,11 @@ namespace Tools {
 
         if (ImGui::BeginPopupCompoundContextWindow()) {
             if (ImGui::BeginMenu(IMGUI_ICON_PLUS " Add Component")) {
-                for (const std::pair<const std::string_view, IndexType<uint32_t>> &componentDesc : Scene::Entity::EntityComponentRegistry::sComponentsByName()) {
-                    if (!entity->hasComponent(componentDesc.first)) {
-                        if (ImGui::MenuItem(componentDesc.first.data())) {
-                            entity->addComponent(componentDesc.first);
-                            if (componentDesc.first == "Transform") {
+                for (auto [name, index] : Scene::Entity::EntityComponentRegistry::sComponentsByName()) {
+                    if (!entity->hasComponent(name)) {
+                        if (ImGui::MenuItem(name.data())) {
+                            entity->addComponent(index);
+                            if (name == "Transform") {
                                 entity->getComponent<Scene::Entity::Transform>()->mPosition = { 0, 0, 0 };
                             }
                         }
@@ -408,9 +410,9 @@ namespace Tools {
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu(IMGUI_ICON_PLUS " Add Behavior")) {
-                for (auto &[name, resource] : NodeGraph::NodeGraphLoader::getSingleton()) {
+                for (auto [name, index] : BehaviorRegistry::sComponentsByName()) {
                     if (ImGui::MenuItem(name.data())) {
-                        entity->addBehavior(&resource);
+                        entity->addBehavior(BehaviorRegistry::getConstructor(index)(nullptr));
                     }
                 }
                 ImGui::EndMenu();
@@ -503,13 +505,11 @@ namespace Tools {
             }*/
         }
 
-        for (Scene::Entity::EntityBehavior &behavior : entity->behaviors()) {
+        for (Behavior &behavior : entity->behaviors()) {
             
-            ImGui::BeginGroupPanel(behavior.getName().data());
+            ImGui::BeginGroupPanel(behavior.name().data());
             if (ImGui::BeginTable("columns", 2, ImGuiTableFlags_Resizable)) {
-                for (auto &[name, value] : behavior.variables()) {
-                    mInspector->drawValue(name, value, false);
-                }
+                mInspector->drawMembers(&behavior);
                 ImGui::EndTable();
             }
 
@@ -518,7 +518,7 @@ namespace Tools {
             ImGui::EndGroupPanel();
 
             if (ImGui::BeginPopupCompoundContextItem()) {
-                if (ImGui::MenuItem((IMGUI_ICON_X " Delete " + std::string { behavior.getName() }).c_str())) {
+                if (ImGui::MenuItem((IMGUI_ICON_X " Delete " + std::string { behavior.name() }).c_str())) {
                     throw 0;
                 }
                 ImGui::EndPopup();

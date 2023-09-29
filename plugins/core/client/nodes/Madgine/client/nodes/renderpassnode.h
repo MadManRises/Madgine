@@ -23,7 +23,7 @@ namespace Render {
         virtual ExtendedValueTypeDesc dataProviderType(uint32_t index, uint32_t group = 0, bool bidir = true) const override;
 
         virtual void interpret(NodeGraph::NodeReceiver<NodeBase> receiver, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const override;
-        virtual void interpretRead(NodeGraph::NodeInterpreter &interpreter, ValueType &retVal, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group = 0) const override;
+        virtual void interpretRead(NodeGraph::NodeInterpreterState &interpreter, ValueType &retVal, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group = 0) const override;
     };
 
 }

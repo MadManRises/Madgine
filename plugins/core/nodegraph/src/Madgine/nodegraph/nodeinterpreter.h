@@ -1,15 +1,16 @@
 #pragma once
 
-#include "Generic/execution/virtualstate.h"
-
 #include "Generic/genericresult.h"
 
 #include "Meta/keyvalue/keyvaluereceiver.h"
 
+#include "Madgine/behavior.h"
+#include "Madgine/behaviorcollector.h"
+
+#include "nodegraphloader.h"
+
 namespace Engine {
 namespace NodeGraph {
-
-    ENUM_BASE(NodeInterpretResult, GenericResult);
 
     struct NodeInterpreterData {
         virtual ~NodeInterpreterData() = default;
@@ -18,28 +19,26 @@ namespace NodeGraph {
         virtual std::map<std::string_view, ValueType> variables() { return {}; }
     };
 
-    struct NodeVariableScope {
-        virtual bool resolveVar(ValueType &ref, std::string_view name, bool recursive = true) = 0;
-        virtual std::map<std::string_view, ValueType> variables(bool recursive = true) = 0;
-    };
+    struct MADGINE_NODEGRAPH_EXPORT NodeInterpreterState : BehaviorState<NodeInterpreterState>, VariableScope {
+        NodeInterpreterState() = default;
+        NodeInterpreterState(VariableScope *parent);
+        NodeInterpreterState(const NodeGraph *graph, const ArgumentList &args = {}, VariableScope *parent = nullptr);
+        NodeInterpreterState(NodeGraphLoader::Resource *graph, const ArgumentList &args = {}, VariableScope *parent = nullptr);
+        NodeInterpreterState(std::string_view name, const ArgumentList &args = {}, VariableScope *parent = nullptr);
+        NodeInterpreterState(const NodeInterpreterState &) = delete;
+        NodeInterpreterState(NodeInterpreterState &&) = default;
+        virtual ~NodeInterpreterState() = default;
 
-    struct MADGINE_NODEGRAPH_EXPORT NodeInterpreter : NodeVariableScope {
-        NodeInterpreter() = default;
-        NodeInterpreter(const NodeGraph *graph, const ArgumentList &args, NodeVariableScope *parent = nullptr);
-        NodeInterpreter(const NodeInterpreter &) = delete;
-        NodeInterpreter(NodeInterpreter &&) = default;
-        virtual ~NodeInterpreter() = default;
+        NodeInterpreterState &operator=(const NodeInterpreterState &) = delete;
+        NodeInterpreterState &operator=(NodeInterpreterState &&) = default;
 
-        NodeInterpreter &operator=(const NodeInterpreter &) = delete;
-        NodeInterpreter &operator=(NodeInterpreter &&) = default;
+        void interpretImpl(Execution::VirtualReceiverBase<InterpretResult> &receiver, uint32_t flowIn) override;
+        void interpretImpl(Execution::VirtualReceiverBase<InterpretResult> &receiver, Pin pin);
 
-        void interpretImpl(Execution::VirtualReceiverBase<NodeInterpretResult> &receiver, uint32_t flowIn);
-        void interpretImpl(Execution::VirtualReceiverBase<NodeInterpretResult> &receiver, Pin pin);
+        ASYNC_STUB(interpret, interpretImpl, Execution::make_simple_virtual_sender<InterpretResult>);
+        ASYNC_STUB(interpretSubGraph, branch, Execution::make_simple_virtual_sender<InterpretResult>);
 
-        ASYNC_STUB(interpret, interpretImpl, Execution::make_simple_virtual_sender<NodeInterpretResult>);
-        ASYNC_STUB(interpretSubGraph, branch, Execution::make_simple_virtual_sender<NodeInterpretResult>);
-
-        void branch(Execution::VirtualReceiverBase<NodeInterpretResult> &receiver, Pin pin);
+        void branch(Execution::VirtualReceiverBase<InterpretResult> &receiver, Pin pin);
 
         void read(ValueType &retVal, Pin pin);
         void write(Pin pin, const ValueType &v);
@@ -56,7 +55,13 @@ namespace NodeGraph {
         std::unique_ptr<NodeInterpreterData> &data(uint32_t index);
 
         bool resolveVar(ValueType &result, std::string_view name, bool recursive = true) override;
-        std::map<std::string_view, ValueType> variables(bool recursive = true) override;
+        std::map<std::string_view, ValueType> variables() override;
+
+
+        std::string_view graphName() const;
+
+        void set(NodeGraphLoader::Resource *resource);
+        NodeGraphLoader::Resource *get() const;
 
     private:
         const NodeGraph *mGraph = nullptr;
@@ -65,8 +70,12 @@ namespace NodeGraph {
 
         std::vector<std::unique_ptr<NodeInterpreterData>> mData;
 
-        NodeVariableScope *mParentScope = nullptr;
+        VariableScope *mParentScope = nullptr;
+
+        NodeGraphLoader::Handle mGraphHandle;
     };
 
 }
 }
+
+REGISTER_TYPE(Engine::NodeGraph::NodeInterpreterState);

@@ -19,7 +19,7 @@ namespace Engine {
 namespace NodeGraph {
 
     struct MADGINE_NODEGRAPH_EXPORT NodeInterpretHandleBase {
-        NodeInterpreter &mInterpreter;
+        NodeInterpreterState &mInterpreter;
 
         void read(const NodeBase &node, ValueType &retVal, uint32_t dataInIndex, uint32_t group = 0);
 
@@ -188,11 +188,11 @@ namespace NodeGraph {
         std::vector<NodeResults> &mResults;
     };
 
-    MADGINE_NODEGRAPH_EXPORT void continueExecution(NodeInterpreter &interpreter, const NodeBase &node, Execution::VirtualReceiverBase<NodeInterpretResult> &receiver);
+    MADGINE_NODEGRAPH_EXPORT void continueExecution(NodeInterpreterState &interpreter, const NodeBase &node, Execution::VirtualReceiverBase<InterpretResult> &receiver);
 
     template <typename Node>
     struct NodeReceiver : NodeExecutionReceiver<Node> {
-        Execution::VirtualReceiverBase<NodeInterpretResult> &mReceiver;
+        Execution::VirtualReceiverBase<InterpretResult> &mReceiver;
 
         void set_value() {
             continueExecution(this->mInterpreter, this->mNode, mReceiver);
