@@ -7,6 +7,7 @@
 #include "entitycomponentcollector.h"
 #include "entitycomponentcontainer.h"
 #include "entitycomponentlistbase.h"
+#include "Meta/serialize/operations.h"
 
 namespace Engine {
 namespace Scene {
