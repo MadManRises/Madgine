@@ -11,19 +11,17 @@
 
 #include "main.h"
 
-int desktopMain(int argc, char **argv, std::function<void(Engine::Window::MainWindow&)> callback)
+int desktopMain(int argc, char **argv, std::function<void(Engine::Window::MainWindow &)> callback)
 {
     Engine::Filesystem::setup();
     Engine::Threading::WorkGroup workGroup { "Launcher" };
 
-
     Engine::Root::Root root { argc, argv };
 
-    if (!root.toolMode()) {
-        return launch(callback);
-    } else {
+    if (root.toolMode() || root.errorCode() != 0)
         return root.errorCode();
-    }
+
+    return launch(callback);
 }
 
 #if !EMSCRIPTEN && !OSX && !IOS && !WINDOWS
