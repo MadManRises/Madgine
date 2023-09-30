@@ -28,6 +28,10 @@ namespace FirstParty {
     SteamServices::SteamServices(Root::Root &root)
         : FirstPartyServicesImpl<SteamServices>(root)
     {
+        if (SteamAPI_RestartAppIfNecessary(STEAM_APP_ID)) {
+            mErrorCode = -1;
+            return;
+        }
 
         mInitialized = SteamAPI_Init();
 

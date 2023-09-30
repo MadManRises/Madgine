@@ -34,3 +34,5 @@ target_link_plugins(SteamServices FirstParty)
 
 target_link_libraries(SteamServices PUBLIC Steamworks)
 
+target_compile_definitions(SteamServices PRIVATE STEAM_APP_ID=${Steam_AppId})
+
