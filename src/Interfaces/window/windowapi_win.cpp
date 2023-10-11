@@ -129,7 +129,6 @@ namespace Window {
                         ignore = true;
                     break;
                 case WM_SETCURSOR:
-                    ignore = true;
                     break;
                     //default:
                     //LOG_WARNING("Unhandled Event type: " << msg);
