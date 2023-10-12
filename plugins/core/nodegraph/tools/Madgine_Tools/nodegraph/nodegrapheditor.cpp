@@ -274,7 +274,7 @@ namespace Tools {
             flags |= ImGuiWindowFlags_UnsavedDocument;
 
         ImGui::SetNextWindowDockID(mRoot.dockSpaceId(), ImGuiCond_FirstUseEver);
-        if (ImGui::Begin(fileName.c_str(), nullptr, flags)) {
+        if (ImGui::Begin(fileName.c_str(), &mVisible, flags)) {
 
             ImVec2 topLeftScreen = ImGui::GetCursorScreenPos();
 
