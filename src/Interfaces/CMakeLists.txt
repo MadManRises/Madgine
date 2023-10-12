@@ -26,7 +26,11 @@ target_include_directories(Interfaces PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_B
 target_link_libraries(Interfaces PUBLIC Generic)
 
 if (WINDOWS)
-	target_link_libraries (Interfaces PRIVATE ws2_32 DbgHelp)	
+	target_link_libraries (Interfaces PRIVATE ws2_32)		
+	if (CMAKE_BUILD_TYPE MATCHES "Debug")
+		target_link_libraries (Interfaces PRIVATE DbgHelp)		
+	endif()
+	
 	if (MINGW)
 		if (NOT BUILD_SHARED_LIBS)
 			target_link_libraries (Interfaces PRIVATE -Wl,-Bstatic,--whole-archive pthread -Wl,-Bdynamic,--no-whole-archive)

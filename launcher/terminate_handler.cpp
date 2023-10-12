@@ -2,6 +2,7 @@
 #include "Interfaces/debug/stacktrace.h"
 #include "Generic/guard.h"
 
+#ifndef NDEBUG
 void madgine_terminate_handler()
 {
     {
@@ -16,3 +17,4 @@ void madgine_terminate_handler()
 }
 
 static Engine::Guard global { []() { std::set_terminate(&madgine_terminate_handler); } };
+#endif

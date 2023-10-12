@@ -1,5 +1,7 @@
 #include "../interfaceslib.h"
 
+#ifndef NDEBUG
+
 #include "memory/statsmemoryresource.h"
 #include "memory/untrackedmemoryresource.h"
 #include "stacktrace.h"
@@ -168,3 +170,5 @@ namespace Debug {
 
 }
 }
+
+#endif
