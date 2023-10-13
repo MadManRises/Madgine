@@ -1,7 +1,7 @@
 #pragma once
 
 namespace Engine {
-namespace Util {
+namespace Log {
 
     struct INTERFACES_EXPORT Log {
         virtual ~Log() = default;

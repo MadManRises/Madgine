@@ -31,23 +31,23 @@ namespace Render {
         void *context)
     {
 
-        Util::MessageType lvl;
+        Log::MessageType lvl;
         switch (severity) {
         case D3D12_MESSAGE_SEVERITY_ERROR:
-            lvl = Util::MessageType::ERROR_TYPE;
+            lvl = Log::MessageType::ERROR_TYPE;
             break;
         case D3D12_MESSAGE_SEVERITY_WARNING:
-            lvl = Util::MessageType::WARNING_TYPE;
+            lvl = Log::MessageType::WARNING_TYPE;
             break;
         case D3D12_MESSAGE_SEVERITY_INFO:
-            lvl = Util::MessageType::INFO_TYPE;
+            lvl = Log::MessageType::INFO_TYPE;
             break;
         case D3D12_MESSAGE_SEVERITY_MESSAGE:
-            lvl = Util::MessageType::DEBUG_TYPE;
+            lvl = Log::MessageType::DEBUG_TYPE;
             break;
         }
 
-        Util::LogDummy cout(lvl);
+        Log::LogDummy cout(lvl);
         cout << "Debug message (" << id << "): " << message << "\n";
     }
 

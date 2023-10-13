@@ -3,12 +3,12 @@
 #include "../toolbase.h"
 #include "../toolscollector.h"
 
-#include "Interfaces/util/loglistener.h"
+#include "Interfaces/log/loglistener.h"
 
 namespace Engine {
 namespace Tools {
 
-    struct LogViewer : Tool<LogViewer>, Util::LogListener {
+    struct LogViewer : Tool<LogViewer>, Log::LogListener {
         SERIALIZABLEUNIT(LogViewer)
 
         LogViewer(ImRoot &root);
@@ -17,13 +17,13 @@ namespace Tools {
         virtual void render() override;
         virtual void renderStatus() override;
 
-        virtual void messageLogged(std::string_view message, Util::MessageType lml, const char *file, size_t line, Util::Log *log) override;
+        virtual void messageLogged(std::string_view message, Log::MessageType lml, const char *file, size_t line, Log::Log *log) override;
 
         std::string_view key() const override;
 
     protected:
         struct LogEntry {
-            LogEntry(std::string msg, Util::MessageType type, const char *file, size_t line)
+            LogEntry(std::string msg, Log::MessageType type, const char *file, size_t line)
                 : mMsg(msg)
                 , mType(type)
                 , mFile(file)
@@ -32,7 +32,7 @@ namespace Tools {
             }
 
             std::string mMsg;
-            Util::MessageType mType;
+            Log::MessageType mType;
             const char *mFile;
             size_t mLine;
         };
@@ -46,10 +46,10 @@ namespace Tools {
     private:
         Threading::WorkGroup *mWorkgroup;
         std::deque<LogEntry> mEntries;
-        std::array<size_t, Util::MessageType::COUNT> mMsgCounts;
+        std::array<size_t, Log::MessageType::COUNT> mMsgCounts;
         std::mutex mMutex;
 
-        std::array<bool, Util::MessageType::COUNT> mMsgFilters;
+        std::array<bool, Log::MessageType::COUNT> mMsgFilters;
         std::string mMessageWordFilter;
         size_t mFilteredMsgCount = 0;
         struct Lookup {

@@ -24,7 +24,7 @@ namespace Server {
         stopConsole();
     }
 
-    void ServerLog::log(std::string_view msg, Util::MessageType lvl, const char *file, size_t line)
+    void ServerLog::log(std::string_view msg, Engine::Log::MessageType lvl, const char *file, size_t line)
     {
         std::cout << "\r";
         StandardLog::log(msg, lvl, file, line);

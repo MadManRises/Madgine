@@ -132,7 +132,7 @@ namespace Scripting {
                 const char *errorMessage = PyUnicode_AsUTF8(value);
 
                 if (errorMessage)
-                    Engine::Util::LogDummy { Engine::Util::MessageType::ERROR_TYPE, filename, line } << "Unhandled Python Exception:\n"
+                    Engine::Log::LogDummy { Engine::Log::MessageType::ERROR_TYPE, filename, line } << "Unhandled Python Exception:\n"
                                                                                                      << errorMessage;
             }
         }

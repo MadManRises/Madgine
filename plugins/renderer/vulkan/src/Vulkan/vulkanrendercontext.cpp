@@ -91,19 +91,19 @@ namespace Render {
         const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
         void *pUserData)
     {
-        Util::MessageType lvl;
+        Log::MessageType lvl;
         switch (messageSeverity) {
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-            lvl = Util::MessageType::ERROR_TYPE;
+            lvl = Log::MessageType::ERROR_TYPE;
             break;
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-            lvl = Util::MessageType::WARNING_TYPE;
+            lvl = Log::MessageType::WARNING_TYPE;
             break;
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-            lvl = Util::MessageType::INFO_TYPE;
+            lvl = Log::MessageType::INFO_TYPE;
             break;
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-            lvl = Util::MessageType::DEBUG_TYPE;
+            lvl = Log::MessageType::DEBUG_TYPE;
             break;
         }
 
@@ -114,10 +114,10 @@ namespace Render {
         }
         cout << ": " << pCallbackData->pMessage;
 
-        Util::LogDummy { lvl } << cout.str();
+        Log::LogDummy { lvl } << cout.str();
 
-        if (lvl == Util::MessageType::ERROR_TYPE)
-            Util::log_fatal(cout.str());
+        if (lvl == Log::MessageType::ERROR_TYPE)
+            Log::log_fatal(cout.str());
 
         return VK_FALSE;
     }

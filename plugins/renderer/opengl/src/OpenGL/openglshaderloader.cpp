@@ -121,7 +121,7 @@ namespace Render {
         glGetShaderiv(handle, GL_COMPILE_STATUS, &success);
         if (!success) {
             glGetShaderInfoLog(handle, 512, NULL, infoLog);
-            Engine::Util::LogDummy { Engine::Util::MessageType::ERROR_TYPE, path.c_str() }
+            Engine::Log::LogDummy { Engine::Log::MessageType::ERROR_TYPE, path.c_str() }
                 << "Compilation of " << (type == VertexShader ? "VS" : "PS")
                 << " Shader '" << name << "' failed:\n"
                 << infoLog;

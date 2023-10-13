@@ -16,7 +16,7 @@ namespace NodeGraph {
     struct Log {
         void operator()(const auto &...v) const
         {
-            (Util::LogDummy { Util::MessageType::INFO_TYPE } << ... << v);
+            (Engine::Log::LogDummy { Engine::Log::MessageType::INFO_TYPE } << ... << v);
         }
         CodeGen::Statement operator()(const CodeGen::Statement &s) const
         {

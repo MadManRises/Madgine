@@ -2,10 +2,8 @@
 
 #include "messagetype.h"
 
-#define ENABLE_DEBUG_LOGGING 0
-
 namespace Engine {
-namespace Util {
+namespace Log {
 
     INTERFACES_EXPORT void setLog(Log *log = nullptr);
     INTERFACES_EXPORT void log(std::string_view msg, MessageType lvl, const char *file = nullptr);
@@ -30,13 +28,13 @@ namespace Util {
     };
 
 #if ENABLE_DEBUG_LOGGING
-#    define LOG_DEBUG(s) Engine::Util::LogDummy { Engine::Util::MessageType::DEBUG_TYPE } << s
+#    define LOG_DEBUG(s) Engine::Log::LogDummy { Engine::Log::MessageType::DEBUG_TYPE } << s
 #else
 #    define LOG_DEBUG(s)
 #endif
-#define LOG(s) Engine::Util::LogDummy { Engine::Util::MessageType::INFO_TYPE, __FILE__, __LINE__ } << s
-#define LOG_WARNING(s) Engine::Util::LogDummy { Engine::Util::MessageType::WARNING_TYPE, __FILE__, __LINE__ } << s
-#define LOG_ERROR(s) Engine::Util::LogDummy { Engine::Util::MessageType::ERROR_TYPE, __FILE__, __LINE__ } << s
+#define LOG(s) Engine::Log::LogDummy { Engine::Log::MessageType::INFO_TYPE, __FILE__, __LINE__ } << s
+#define LOG_WARNING(s) Engine::Log::LogDummy { Engine::Log::MessageType::WARNING_TYPE, __FILE__, __LINE__ } << s
+#define LOG_ERROR(s) Engine::Log::LogDummy { Engine::Log::MessageType::ERROR_TYPE, __FILE__, __LINE__ } << s
 
 #define ONCE(f) std::call_once([]() -> std::once_flag & {static std::once_flag dummy; return dummy; }(), [&]() { f; })
 

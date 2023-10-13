@@ -3,7 +3,7 @@
 #include "Generic/enum.h"
 
 namespace Engine {
-namespace Util {
+namespace Log {
 
     ENUM(MessageType,
         DEBUG_TYPE,

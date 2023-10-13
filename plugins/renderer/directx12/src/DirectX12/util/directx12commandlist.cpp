@@ -70,7 +70,7 @@ namespace Render {
         res->GetPrivateData(WKPDID_D3DDebugObjectNameW, &size, name);
         std::stringstream ss;
         ss << "Transitioning " << StringUtil::fromWString(name) << ": " << from << " -> " << to;
-        Util::log_fatal(ss.str());
+        Log::log_fatal(ss.str());
     }
 
 }

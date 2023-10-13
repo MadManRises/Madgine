@@ -2,7 +2,7 @@
 
 template <typename T>
 void logContainer(const T &c) {
-    Engine::Util::LogDummy ss { Engine::Util::MessageType::INFO_TYPE };
+    Engine::Log::LogDummy ss { Engine::Log::MessageType::INFO_TYPE };
     bool first = true;
     for (const auto &i : c) {
         if (first) {

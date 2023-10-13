@@ -114,23 +114,23 @@ namespace Render {
         if (id == 131169 || id == 131185 || id == 131218 || id == 131204)
             return;
 
-        Util::MessageType lvl;
+        Log::MessageType lvl;
         switch (severity) {
         case GL_DEBUG_SEVERITY_HIGH:
-            lvl = Util::MessageType::ERROR_TYPE;
+            lvl = Log::MessageType::ERROR_TYPE;
             break;
         case GL_DEBUG_SEVERITY_MEDIUM:
-            lvl = Util::MessageType::WARNING_TYPE;
+            lvl = Log::MessageType::WARNING_TYPE;
             break;
         case GL_DEBUG_SEVERITY_LOW:
-            lvl = Util::MessageType::INFO_TYPE;
+            lvl = Log::MessageType::INFO_TYPE;
             break;
         case GL_DEBUG_SEVERITY_NOTIFICATION:
-            lvl = Util::MessageType::DEBUG_TYPE;
+            lvl = Log::MessageType::DEBUG_TYPE;
             break;
         }
 
-        Util::LogDummy cout(lvl);
+        Log::LogDummy cout(lvl);
         cout << "Debug message (" << id << "): " << message << "\n";
 
         switch (source) {

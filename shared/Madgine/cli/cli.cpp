@@ -70,7 +70,7 @@ namespace CLI {
 
     void CLICore::help()
     {
-        Util::LogDummy out { Util::MessageType::INFO_TYPE };
+        Log::LogDummy out { Log::MessageType::INFO_TYPE };
         out << "Help:\n";
         for (ParameterBase *parameter : parameters()) {
             out << parameter->help() << "\n";

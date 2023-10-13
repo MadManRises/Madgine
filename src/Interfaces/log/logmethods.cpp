@@ -4,14 +4,14 @@
 #include "standardlog.h"
 
 #if WINDOWS
-#define NOMINMAX
-#include <Windows.h>
+#    define NOMINMAX
+#    include <Windows.h>
 #endif
 
 namespace Engine {
-namespace Util {
+namespace Log {
 
-    Log *sLog = nullptr;
+    Log *sLog = &StandardLog::getSingleton();
 
     void setLog(Log *log)
     {
@@ -20,10 +20,7 @@ namespace Util {
 
     void log(std::string_view msg, MessageType level, const char *file, size_t line)
     {
-        if (sLog)
-            sLog->log(msg, level, file, line);
-        else
-            StandardLog::sLog(msg, level);
+        sLog->log(msg, level, file, line);
     }
 
     void log_fatal(std::string_view msg) //TODO: Add Fatal as message level

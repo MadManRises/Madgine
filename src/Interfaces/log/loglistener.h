@@ -3,7 +3,7 @@
 #include "../debug/stacktrace.h"
 
 namespace Engine {
-namespace Util {
+namespace Log {
 
     struct LogListener {
         virtual ~LogListener() = default;

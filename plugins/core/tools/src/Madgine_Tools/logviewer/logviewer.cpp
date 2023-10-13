@@ -10,7 +10,7 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
-#include "Interfaces/util/standardlog.h"
+#include "Interfaces/log/standardlog.h"
 
 #include "Generic/coroutines/generator.h"
 
@@ -67,16 +67,16 @@ namespace Tools {
         : Tool<LogViewer>(root, true)
         , mWorkgroup(&Threading::WorkGroup::self())
     {
-        for (Util::MessageType type : Util::MessageType::values()) {
+        for (Log::MessageType type : Log::MessageType::values()) {
             mMsgCounts[type] = 0;
             mMsgFilters[type] = true;
         }
-        Util::StandardLog::getSingleton().addListener(this);
+        Log::StandardLog::getSingleton().addListener(this);
     }
 
     LogViewer::~LogViewer()
     {
-        Util::StandardLog::getSingleton().removeListener(this);
+        Log::StandardLog::getSingleton().removeListener(this);
     }
 
     void LogViewer::render()
@@ -87,7 +87,7 @@ namespace Tools {
             int mTotalMsgCount = 0;
             bool filterChanged = false;
 
-            for (Util::MessageType type : Util::MessageType::values()) {
+            for (Log::MessageType type : Log::MessageType::values()) {
                 filterChanged |= ImGui::Checkbox(sIcons[type], &mMsgFilters[type]);
                 ImGui::SameLine();
 
@@ -185,13 +185,13 @@ namespace Tools {
 
     void LogViewer::renderStatus()
     {
-        for (Util::MessageType type : Util::MessageType::values()) {
+        for (Log::MessageType type : Log::MessageType::values()) {
             ImGui::Text("%s %d", sIcons[type], static_cast<int>(mMsgCounts[type]));
         }
         ImGui::Separator();
     }
 
-    void LogViewer::messageLogged(std::string_view message, Util::MessageType lml, const char *file, size_t line, Util::Log *log)
+    void LogViewer::messageLogged(std::string_view message, Log::MessageType lml, const char *file, size_t line, Log::Log *log)
     {
         if (mWorkgroup != &Threading::WorkGroup::self())
             return;

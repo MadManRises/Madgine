@@ -3,6 +3,7 @@
 #include "Modules/threading/taskqueue.h"
 #include "Modules/uniquecomponent/uniquecomponentcontainer.h"
 #include "rootcomponentcollector.h"
+#include "Interfaces/log/fileloglistener.h"
 
 namespace Engine {
 namespace Root {
@@ -35,6 +36,7 @@ namespace Root {
         int mErrorCode = 0;
 
         std::unique_ptr<CLI::CLICore> mCLI;
+        Log::FileLogListener mFileLogListener;
 
 #if ENABLE_PLUGINS
         std::unique_ptr<Plugins::PluginManager> mPluginManager;

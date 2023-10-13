@@ -13,7 +13,7 @@
 
 #include "rootcomponentbase.h"
 
-#include "Interfaces/util/standardlog.h"
+#include "Interfaces/log/standardlog.h"
 
 #include "Interfaces/filesystem/async.h"
 
@@ -30,7 +30,8 @@ namespace Root {
 #endif
 
     CLI::Parameter<bool> toolModeParameter { { "--toolMode", "-t" }, false, "If set, no application will be started. Only the root will be initialized and then immediately shutdown again." };
-    CLI::Parameter<Engine::Util::MessageType> logLevel { { "--logLevel", "-l" }, Engine::Util::MessageType::INFO_TYPE, "Specify log-level." };
+    CLI::Parameter<Engine::Log::MessageType> logLevel { { "--logLevel", "-l" }, Engine::Log::MessageType::INFO_TYPE, "Specify log-level." };
+    CLI::Parameter<std::string> logFile { { "--logFile" }, "", "If set, the log output will be written to the specified path" };
 
     Root::Root(int argc, char **argv)
         : Root(std::make_unique<CLI::CLICore>(argc, argv))
@@ -39,13 +40,16 @@ namespace Root {
 
     Root::Root(std::unique_ptr<CLI::CLICore> cli)
         : mCLI(std::move(cli))
+        , mFileLogListener(*logFile)
         , mTaskQueue("Root")
     {
 
         assert(!sSingleton);
         sSingleton = this;
 
-        Util::StandardLog::setLogLevel(logLevel);
+        Log::StandardLog::setLogLevel(logLevel);
+        if (!logFile->empty())
+            Log::StandardLog::getSingleton().addListener(&mFileLogListener);
 
 #if ENABLE_PLUGINS
         mPluginManager = std::make_unique<Plugins::PluginManager>();

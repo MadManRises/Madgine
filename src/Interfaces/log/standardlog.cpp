@@ -10,7 +10,7 @@
 #endif
 
 namespace Engine {
-namespace Util {
+namespace Log {
     MessageType sLogLevel = MessageType::DEBUG_TYPE;
     extern Log *sLog;
 
@@ -19,8 +19,8 @@ namespace Util {
     StandardLog::StandardLog(const std::string &name)
         : mName(name)
     {
-        if (!Util::sLog) {
-            Util::sLog = this;
+        if (!sLog) {
+            Engine::Log::sLog = this;
         }
     }
 

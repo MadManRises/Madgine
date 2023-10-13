@@ -36,7 +36,7 @@ inline void dx11Check(HRESULT result)
 
 #define DX11_CHECK(result) dx11Check(result)
 
-#define DX11_LOG(x) LOG_DEBUG("DX11: " << x << " (" << Engine::Threading::WorkGroup::self().name() << ")")
+#define DX11_LOG(x) LOG_DEBUG("DX11: " << x)
 
 #include <span>
 

@@ -3,6 +3,8 @@ Project(Interfaces VERSION 1.0.0)
 option(INTERFACES_ENABLE_PROFILER "Activates the builtin runtime-profiler." ON)
 option(INTERFACES_ENABLE_MEMTRACKING "Enables Memory Tracking for Heap-Allocations")
 
+option(INTERFACES_ENABLE_DEBUG_LOGGING "Enables very detailed log messages for debugging")
+
 
 set(sources)
 
@@ -15,7 +17,7 @@ FolderSources(sources "" "" interfacesforward.h interfaceslib.h)
 	FolderSources(sources "" input rawinput_win.cpp rawinput_win.h)
 	FolderSources(sources "" socket socketapi.h socketapi_unix.cpp socketapi_win.cpp)
 	FolderSources(sources "" threading threadapi.h threadapi_posix.cpp threadapi_win.cpp)
-	FolderSources(sources "" util log.cpp log.h standardlog.cpp standardlog.h utilmethods.cpp utilmethods.h)
+	FolderSources(sources "" log fileloglistener.cpp fileloglistener.h log.cpp log.h standardlog.cpp standardlog.h logmethods.cpp logmethods.h)
 	FolderSources(sources "" window windowapi.h windowapi_android.cpp windowapi_emscripten.cpp windowapi_linux.cpp windowapi_win.cpp windoweventlistener.h)
 
 add_workspace_library(Interfaces ${sources} SOURCE_ROOT .. PRECOMPILED_HEADER interfaceslib.h)

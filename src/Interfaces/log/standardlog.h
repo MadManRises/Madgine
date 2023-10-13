@@ -3,7 +3,7 @@
 #include "log.h"
 
 namespace Engine {
-namespace Util {
+namespace Log {
     struct INTERFACES_EXPORT StandardLog : Log {
         StandardLog(const std::string &name);
 

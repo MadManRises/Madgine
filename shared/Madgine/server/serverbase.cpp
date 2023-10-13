@@ -17,7 +17,7 @@ namespace Server {
         : mTaskQueue(name + "-Server")
         , mLog(name + "-Log")
     {
-        Util::setLog(&mLog);
+        Log::setLog(&mLog);
         mLog.startConsole();
         mTaskQueue.queue([this]() -> Threading::Task<void> {
             while (mTaskQueue.running()) {
@@ -31,7 +31,7 @@ namespace Server {
     {
         mLog.stopConsole();
         mInstances.clear();
-        Util::setLog(nullptr);
+        Log::setLog(nullptr);
     }
 
     ServerLog &ServerBase::log()
