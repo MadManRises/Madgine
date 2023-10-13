@@ -75,8 +75,8 @@ namespace Widgets {
         "TextEdit"
     };
 
-    static float sDragDistanceThreshold = 2.0f;
-    static std::chrono::steady_clock::duration sDragTimeThreshold = 5ms;
+    static float sDragDistanceThreshold = 5.0f;
+    static std::chrono::steady_clock::duration sDragTimeThreshold = 20ms;
 
     struct WidgetManager::WidgetManagerData {
 
