@@ -6,7 +6,7 @@ endif()
 
 find_package (Python3 COMPONENTS Development.Embed)
 
-if (NOT Python3_Development.Embed_FOUND)
+if (NOT Python3_Development.Embed_FOUND OR NOT PYTHON_EXECUTABLE)
 	MESSAGE(STATUS "Failed to find Python3 - Skipping plugin")
 	return()
 endif()
