@@ -192,7 +192,7 @@ namespace Window {
             mOsWindow->update();
             for (ToolWindow &window : mToolWindows)
                 window.osWindow()->update();
-            co_await (now + (1000000us / 60));
+            co_await (now + (1000000us / 120));
         }        
     }
 

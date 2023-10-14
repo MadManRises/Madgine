@@ -41,8 +41,12 @@ struct MadgineObject : MadgineObjectState {
     {
         assert(!mState.load().attached());
         mTypeInfo = &typeid(static_cast<T &>(*this));
-        LOG("Initializing: " << mTypeInfo->name() << "...");
-        auto task = Threading::make_task(&T::init, static_cast<T *>(this));
+        auto task = [this]() -> Threading::Task<bool> {
+            LOG("Initializing: " << mTypeInfo->name() << "...");
+            bool result = co_await Threading::make_task(&T::init, static_cast<T *>(this));
+            LOG("Initializing: " << mTypeInfo->name() << "..." << (result ? "Success" : "Failure"));
+            co_return result;
+        }();
         task.set_future(state());
 
         return task;

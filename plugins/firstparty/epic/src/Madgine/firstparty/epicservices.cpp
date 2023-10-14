@@ -38,26 +38,26 @@ namespace FirstParty {
         if (msg->Level == EOS_ELogLevel::EOS_LOG_Off)
             return;
 
-        Util::MessageType type;
+        Log::MessageType type;
         switch (msg->Level) {
         case EOS_ELogLevel::EOS_LOG_Fatal:
         case EOS_ELogLevel::EOS_LOG_Error:
-            type = Util::MessageType::ERROR_TYPE;
+            type = Log::MessageType::ERROR_TYPE;
             break;
         case EOS_ELogLevel::EOS_LOG_Warning:
-            type = Util::MessageType::WARNING_TYPE;
+            type = Log::MessageType::WARNING_TYPE;
             break;
         case EOS_ELogLevel::EOS_LOG_Info:
-            type = Util::MessageType::INFO_TYPE;
+            type = Log::MessageType::INFO_TYPE;
             break;
         case EOS_ELogLevel::EOS_LOG_Verbose:
         case EOS_ELogLevel::EOS_LOG_VeryVerbose:
-            type = Util::MessageType::DEBUG_TYPE;
+            type = Log::MessageType::DEBUG_TYPE;
             break;
         default:
             throw 0;
         }
-        Util::LogDummy { type } << msg->Category << ": " << msg->Message;
+        Log::LogDummy { type } << msg->Category << ": " << msg->Message;
     }
 
     EpicServices::EpicServices(Root::Root &root)

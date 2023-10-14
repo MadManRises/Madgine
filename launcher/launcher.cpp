@@ -39,5 +39,7 @@ int launch(std::function<void(Engine::Window::MainWindow &)> callback)
     FIX_LOCAL Engine::KeyValueWorkGroupLocal<Engine::Input::UIManager> ui { "UI", app, window };
 
     FIX_LOCAL Engine::Threading::Scheduler scheduler;
-    return scheduler.go();
+    int result = scheduler.go();
+    LOG_DEBUG("Launcher finished with code " << result);
+    return result;
 }

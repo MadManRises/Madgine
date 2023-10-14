@@ -31,6 +31,7 @@ namespace Threading {
     WorkGroup::WorkGroup(std::string_view name)
         : mInstanceCounter(sWorkgroupInstanceCounter++)
         , mName(name.empty() ? "Workgroup_" + std::to_string(mInstanceCounter) : name)
+        , mState(WorkGroupState::INITIALIZING)
     {
 #if ENABLE_THREADING
         mThreads.push_back(std::this_thread::get_id());
@@ -73,15 +74,15 @@ namespace Threading {
 #endif
     }
 
-    WorkGroup::State WorkGroup::state() const
+    WorkGroupState WorkGroup::state() const
     {
-        return mState;
+        return { mState };
     }
 
     void WorkGroup::stop()
     {
-        if (mState == INITIALIZING || mState == RUNNING)
-            setState(STOPPING);
+        if (mState == WorkGroupState::INITIALIZING || mState == WorkGroupState::RUNNING)
+            setState(WorkGroupState::STOPPING);
     }
 
     void WorkGroup::addThreadInitializer(std::function<void()> &&task)
@@ -124,20 +125,20 @@ namespace Threading {
                 });
         }
 
-        if (mState != RUNNING) {
+        if (mState != WorkGroupState::RUNNING) {
             for (TaskQueue *queue : mTaskQueues)
                 if (!queue->idle())
                     return;
 
             switch (mState) {
-            case INITIALIZING:
-                setState(RUNNING);
+            case WorkGroupState::INITIALIZING:
+                setState(WorkGroupState::RUNNING);
                 break;
-            case STOPPING:
-                setState(FINALIZING);
+            case WorkGroupState::STOPPING:
+                setState(WorkGroupState::FINALIZING);
                 break;
-            case FINALIZING:
-                setState(DONE);
+            case WorkGroupState::FINALIZING:
+                setState(WorkGroupState::DONE);
                 break;
             }
         }
@@ -180,8 +181,9 @@ namespace Threading {
         ThreadStorage::finalize(true);
     }
 
-    void WorkGroup::setState(State state)
+    void WorkGroup::setState(WorkGroupState state)
     {
+        LOG_DEBUG("Changing Workgroup state to " << state);
         mState = state;
         for (TaskQueue *queue : mTaskQueues)
             queue->notify();

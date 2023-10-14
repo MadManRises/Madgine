@@ -53,7 +53,7 @@ namespace Threading {
 
         setupThreadInfo(main_queue, " (Main)");
 
-        while (mWorkgroup.state() != WorkGroup::DONE || !mWorkgroup.singleThreaded()){
+        while (mWorkgroup.state() != WorkGroupState::DONE || !mWorkgroup.singleThreaded()){
             std::chrono::steady_clock::time_point nextAvailableTaskTime = main_queue->update();
             main_queue->waitForTasks(nextAvailableTaskTime);
             mWorkgroup.update();
@@ -71,7 +71,7 @@ namespace Threading {
     void Scheduler::schedulerLoop(Threading::TaskQueue *queue)
     {
         setupThreadInfo(queue);
-        while (mWorkgroup.state() != WorkGroup::DONE) {
+        while (mWorkgroup.state() != WorkGroupState::DONE) {
             std::chrono::steady_clock::time_point nextAvailableTaskTime = queue->update();
             queue->waitForTasks(nextAvailableTaskTime);
         }

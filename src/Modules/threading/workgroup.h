@@ -3,6 +3,13 @@
 namespace Engine {
 namespace Threading {
 
+    ENUM(WorkGroupState,
+        INITIALIZING,
+        RUNNING,
+        STOPPING,
+        FINALIZING,
+        DONE);
+
     struct MODULES_EXPORT WorkGroup {
         WorkGroup(std::string_view name = {});
         WorkGroup(const WorkGroup &) = delete;
@@ -10,16 +17,7 @@ namespace Threading {
 
         void operator=(const WorkGroup &) = delete;
 
-        
-        enum State {
-            INITIALIZING,
-            RUNNING,
-            STOPPING,
-            FINALIZING,
-            DONE
-        };
-
-        State state() const;
+        WorkGroupState state() const;
 
         void stop();
 
@@ -108,7 +106,7 @@ namespace Threading {
         }
 #endif
 
-        void setState(State state);
+        void setState(WorkGroupState state);
 
     private:
         friend struct WorkGroupStorage;
@@ -127,7 +125,7 @@ namespace Threading {
 
         std::vector<TaskQueue *> mTaskQueues;
 
-        std::atomic<State> mState = INITIALIZING;
+        std::atomic<WorkGroupState::BaseType> mState;
     };
 }
 }

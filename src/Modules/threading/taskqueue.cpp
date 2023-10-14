@@ -41,7 +41,7 @@ namespace Threading {
 
     void TaskQueue::queueInternal(ScheduledTask task)
     {
-        assert(WorkGroup::self().state() != WorkGroup::DONE);
+        assert(WorkGroup::self().state() != WorkGroupState::DONE);
         {
             //TODO: priority Queue
             std::lock_guard<std::mutex> lock(mMutex);
@@ -80,7 +80,7 @@ namespace Threading {
 
     bool TaskQueue::running() const
     {
-        return WorkGroup::self().state() == WorkGroup::RUNNING;
+        return WorkGroup::self().state() == WorkGroupState::RUNNING;
     }
 
     void TaskQueue::stop()
@@ -112,8 +112,8 @@ namespace Threading {
     {
         std::chrono::steady_clock::time_point nextTaskTimepoint = nextTask;
 
-        WorkGroup::State state = WorkGroup::self().state();
-        if (state == WorkGroup::INITIALIZING) {
+        WorkGroupState state = WorkGroup::self().state();
+        if (state == WorkGroupState::INITIALIZING) {
             while (mSetupState != mSetupSteps.end()) {
                 TaskHandle init = mSetupState->first.assign(this);
                 ++mSetupState;
@@ -121,12 +121,12 @@ namespace Threading {
                     return init;
                 }
             }
-        } else if (state != WorkGroup::DONE) {
+        } else if (state != WorkGroupState::DONE) {
             {
                 std::lock_guard<std::mutex> lock(mMutex);
                 auto now = std::chrono::steady_clock::now();
                 for (auto it = mQueue.begin(); it != mQueue.end(); ++it) {
-                    if ((it->mQualifiers.mScheduledFor <= now || WorkGroup::self().state() == WorkGroup::STOPPING) && (!it->mQualifiers.mMutex || it->mQualifiers.mMutex->tryLock(this))) {
+                    if ((it->mQualifiers.mScheduledFor <= now || WorkGroup::self().state() == WorkGroupState::STOPPING) && (!it->mQualifiers.mMutex || it->mQualifiers.mMutex->tryLock(this))) {
                         TaskHandle task = std::move(it->mTask);
                         mQueue.erase(it);
                         return task;
@@ -136,7 +136,7 @@ namespace Threading {
                 }
             }
 
-            if (state == WorkGroup::FINALIZING) {
+            if (state == WorkGroupState::FINALIZING) {
                 while (mSetupState != mSetupSteps.begin()) {
                     --mSetupState;
                     TaskHandle finalize = mSetupState->second.assign(this);
@@ -154,9 +154,9 @@ namespace Threading {
     bool TaskQueue::idle() const
     {
         switch (WorkGroup::self().state()) {
-        case WorkGroup::INITIALIZING:
+        case WorkGroupState::INITIALIZING:
             return mSetupState == mSetupSteps.end();
-        case WorkGroup::FINALIZING:
+        case WorkGroupState::FINALIZING:
             return mSetupState == mSetupSteps.begin() && mTaskInFlightCount == 0;
         default:
             return mTaskInFlightCount == 0;
@@ -170,7 +170,7 @@ namespace Threading {
 
     void TaskQueue::addSetupStepTasks(Task<bool> init, Task<void> finalize)
     {
-        assert(WorkGroup::self().state() == WorkGroup::INITIALIZING);
+        assert(WorkGroup::self().state() == WorkGroupState::INITIALIZING);
         bool isItEnd = mSetupState == mSetupSteps.end();
         mSetupSteps.emplace_back(std::move(init), std::move(finalize));
         if (isItEnd) {
