@@ -187,11 +187,12 @@ namespace Window {
     Threading::Task<void> MainWindow::renderLoop()
     {
         while (mTaskQueue.running()) {
+            std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
             co_await mRenderContext->render();
             mOsWindow->update();
             for (ToolWindow &window : mToolWindows)
                 window.osWindow()->update();
-            co_await (/*1*/ 000000ms / 60);
+            co_await (now + (1000000us / 60));
         }        
     }
 

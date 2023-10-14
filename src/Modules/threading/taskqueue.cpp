@@ -72,8 +72,10 @@ namespace Threading {
 
     void TaskQueue::waitForTasks(std::chrono::steady_clock::time_point until)
     {
-        std::unique_lock<std::mutex> lock(mMutex);
-        mCv.wait_until(lock, until, [this]() { return !idle() || WorkGroup::self().state() == WorkGroup::DONE; });
+        if (running()) {
+            std::unique_lock<std::mutex> lock(mMutex);
+            mCv.wait_until(lock, until);
+        }
     }
 
     bool TaskQueue::running() const

@@ -55,7 +55,7 @@ namespace Threading {
 
         while (mWorkgroup.state() != WorkGroup::DONE || !mWorkgroup.singleThreaded()){
             std::chrono::steady_clock::time_point nextAvailableTaskTime = main_queue->update();
-            //main_queue->waitForTasks(nextAvailableTaskTime);
+            main_queue->waitForTasks(nextAvailableTaskTime);
             mWorkgroup.update();
         }
 
