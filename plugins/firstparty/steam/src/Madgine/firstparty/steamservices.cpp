@@ -58,14 +58,23 @@ namespace FirstParty {
     Threading::Task<Leaderboard> SteamServices::getLeaderboardTask(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd, uint32_t *fullSize)
     {
         ELeaderboardDataRequest requestmode;
-        switch (referenceRank) {
-        case Leaderboard::FIRST:
-            requestmode = k_ELeaderboardDataRequestGlobal;
-            ++rangeBegin;
-            ++rangeEnd;
+        switch (accessmode) {
+        case Leaderboard::GLOBAL:
+            switch (referenceRank) {
+            case Leaderboard::FIRST:
+                requestmode = k_ELeaderboardDataRequestGlobal;
+                ++rangeBegin;
+                ++rangeEnd;
+                break;
+            case Leaderboard::USER:
+                requestmode = k_ELeaderboardDataRequestGlobalAroundUser;
+                break;
+            default:
+                co_return {};
+            }
             break;
-        case Leaderboard::USER:
-            requestmode = k_ELeaderboardDataRequestGlobalAroundUser;
+        case Leaderboard::FRIENDS:
+            requestmode = k_ELeaderboardDataRequestFriends;
             break;
         default:
             co_return {};
