@@ -6,8 +6,7 @@ namespace Engine {
 namespace Log {
 
     INTERFACES_EXPORT void setLog(Log *log = nullptr);
-    INTERFACES_EXPORT void log(std::string_view msg, MessageType lvl, const char *file = nullptr);
-    INTERFACES_EXPORT void log_fatal(std::string_view msg);
+    INTERFACES_EXPORT void log(std::string_view msg, MessageType lvl, const char *file = nullptr, size_t line = 0);
 
     struct INTERFACES_EXPORT LogDummy {
         LogDummy(MessageType lvl, const char *file = nullptr, size_t line = 0);
@@ -35,6 +34,7 @@ namespace Log {
 #define LOG(s) Engine::Log::LogDummy { Engine::Log::MessageType::INFO_TYPE, __FILE__, __LINE__ } << s
 #define LOG_WARNING(s) Engine::Log::LogDummy { Engine::Log::MessageType::WARNING_TYPE, __FILE__, __LINE__ } << s
 #define LOG_ERROR(s) Engine::Log::LogDummy { Engine::Log::MessageType::ERROR_TYPE, __FILE__, __LINE__ } << s
+#define LOG_FATAL(s) Engine::Log::LogDummy { Engine::Log::MessageType::FATAL_TYPE, __FILE__, __LINE__ } << s
 
 #define ONCE(f) std::call_once([]() -> std::once_flag & {static std::once_flag dummy; return dummy; }(), [&]() { f; })
 

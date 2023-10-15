@@ -20,17 +20,13 @@ namespace Log {
 
     void log(std::string_view msg, MessageType level, const char *file, size_t line)
     {
-        sLog->log(msg, level, file, line);
-    }
-
-    void log_fatal(std::string_view msg) //TODO: Add Fatal as message level
-    {
 #if WINDOWS
-        OutputDebugStringA(msg.data());
-        OutputDebugStringA("\n");
-#else
-//#    error "Unsupported Platform!"
+        if (level == MessageType::FATAL_TYPE) {
+            OutputDebugStringA(msg.data());
+            OutputDebugStringA("\n");
+        }
 #endif
+        sLog->log(msg, level, file, line);
     }
 
     LogDummy::LogDummy(MessageType lvl, const char *file, size_t line)

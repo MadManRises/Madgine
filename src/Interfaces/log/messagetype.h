@@ -9,7 +9,8 @@ namespace Log {
         DEBUG_TYPE,
         INFO_TYPE,
         WARNING_TYPE,
-        ERROR_TYPE
+        ERROR_TYPE,
+        FATAL_TYPE
     )
 
 }

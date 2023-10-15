@@ -94,7 +94,7 @@ namespace Render {
         Log::MessageType lvl;
         switch (messageSeverity) {
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-            lvl = Log::MessageType::ERROR_TYPE;
+            lvl = Log::MessageType::FATAL_TYPE;
             break;
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
             lvl = Log::MessageType::WARNING_TYPE;
@@ -115,9 +115,6 @@ namespace Render {
         cout << ": " << pCallbackData->pMessage;
 
         Log::LogDummy { lvl } << cout.str();
-
-        if (lvl == Log::MessageType::ERROR_TYPE)
-            Log::log_fatal(cout.str());
 
         return VK_FALSE;
     }

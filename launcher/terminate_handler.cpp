@@ -11,7 +11,7 @@ void madgine_terminate_handler()
         cout << "Stack-Trace:\n";
         for (const Engine::Debug::TraceBack &trace : Engine::Debug::StackTrace<64>::getCurrent(1).calculateReadable())
             cout << trace.mFunction << " (" << trace.mFile << ": " << trace.mLineNr << ")\n";
-        Engine::Log::log_fatal(cout.str());
+        LOG_FATAL(cout.str());
     }
     abort();
 }

@@ -52,7 +52,7 @@ inline void glCheck()
                 out << "UNKNOWN";
             }
             out << "(" << e << ")";
-            Engine::Log::log_fatal(out.str());
+            LOG_FATAL(out.str());
         }
         glDump();
         std::terminate();
