@@ -24,7 +24,7 @@ namespace Render {
     sDevice = nullptr;
     THREADLOCAL(ID3D11DeviceContext *)
     sDeviceContext = nullptr;
-    
+
     Threading::WorkgroupLocal<DirectX11RenderContext *> sSingleton = nullptr;
 
     ID3D11DeviceContext *GetDeviceContext()
@@ -44,9 +44,9 @@ namespace Render {
 
         sSingleton = this;
 
-        HRESULT hr;
+        HRESULT hr = E_INVALIDARG;
 
-        UINT createDeviceFlags = D3D11_CREATE_DEVICE_DEBUG;
+        UINT createDeviceFlags = 0;
 
         // These are the feature levels that we will accept.
         D3D_FEATURE_LEVEL featureLevels[] = {
@@ -65,21 +65,37 @@ namespace Render {
 
         assert(sDeviceContext == nullptr);
 
-        hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE,
-            nullptr, createDeviceFlags, featureLevels, _countof(featureLevels),
-            D3D11_SDK_VERSION, &sDevice, &featureLevel,
-            &sDeviceContext);
+        if (FAILED(hr)) {
+            hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE,
+                nullptr, createDeviceFlags | D3D11_CREATE_DEVICE_DEBUG, featureLevels, _countof(featureLevels),
+                D3D11_SDK_VERSION, &sDevice, &featureLevel,
+                &sDeviceContext);
+        }
 
-        if (hr == E_INVALIDARG) {
+        if (FAILED(hr)) {
+            hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE,
+                nullptr, createDeviceFlags | D3D11_CREATE_DEVICE_DEBUG, &featureLevels[1], _countof(featureLevels) - 1,
+                D3D11_SDK_VERSION, &sDevice, &featureLevel,
+                &sDeviceContext);
+        }
+
+        if (FAILED(hr)) {
+            hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE,
+                nullptr, createDeviceFlags, featureLevels, _countof(featureLevels),
+                D3D11_SDK_VERSION, &sDevice, &featureLevel,
+                &sDeviceContext);
+        }
+
+        if (FAILED(hr)) {
             hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE,
                 nullptr, createDeviceFlags, &featureLevels[1], _countof(featureLevels) - 1,
                 D3D11_SDK_VERSION, &sDevice, &featureLevel,
                 &sDeviceContext);
         }
 
-        sDeviceContext->QueryInterface(IID_PPV_ARGS(&mAnnotator));
-
         DX11_CHECK(hr);
+
+        sDeviceContext->QueryInterface(IID_PPV_ARGS(&mAnnotator));
 
         ConstantValues values;
         mConstantBuffer.setData({ &values, sizeof(values) });
@@ -189,11 +205,11 @@ namespace Render {
 #    define instanceSemantic "INSTANCEDATA"
 #    define instanceSemanticIndex(i) (UINT) i
 #else*/
-#    define semantic(i) "TEXCOORD"
-#    define semanticIndex(i) (UINT) i
-#    define instanceSemantic "TEXCOORD"
-#    define instanceSemanticIndex(i) (UINT)(VertexElements::size + i)
-//#endif
+#define semantic(i) "TEXCOORD"
+#define semanticIndex(i) (UINT) i
+#define instanceSemantic "TEXCOORD"
+#define instanceSemanticIndex(i) (UINT)(VertexElements::size + i)
+            //#endif
 
             std::vector<D3D11_INPUT_ELEMENT_DESC> vertexLayoutDesc;
 

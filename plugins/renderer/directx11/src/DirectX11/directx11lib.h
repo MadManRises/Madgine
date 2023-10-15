@@ -20,6 +20,7 @@
 #include <d3d11.h>
 #include <d3d11_1.h>
 #include <d3dcompiler.h>
+#include <comdef.h>
 #undef ERROR
 
 MADGINE_DIRECTX11_EXPORT void dx11Dump();
@@ -27,8 +28,8 @@ MADGINE_DIRECTX11_EXPORT void dx11Dump();
 inline void dx11Check(HRESULT result)
 {
     if (FAILED(result)) {
-        LOG("DX11-Error: "
-            << "?");
+        _com_error error { result };
+        LOG("DX11-Error: " << error.ErrorMessage());
         dx11Dump();
         std::terminate();
     }
