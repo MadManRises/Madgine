@@ -61,7 +61,7 @@ namespace Tools {
     }
 
     static constexpr size_t sLookupStep = 1;
-    static constexpr std::array<const char *, 4> sIcons { "D", IMGUI_ICON_INFO, IMGUI_ICON_WARNING, IMGUI_ICON_ERROR };
+    static constexpr std::array<const char *, 5> sIcons { "D", IMGUI_ICON_INFO, IMGUI_ICON_WARNING, IMGUI_ICON_ERROR, "F" };
 
     LogViewer::LogViewer(ImRoot &root)
         : Tool<LogViewer>(root, true)
