@@ -31,7 +31,7 @@ namespace Engine {
 namespace Widgets {
 
     Button::Button(WidgetManager &manager, WidgetBase *parent)
-        : Widget(manager, parent, true)
+        : Widget(manager, parent, { .acceptsPointerEvents = true })
     {
     }
 

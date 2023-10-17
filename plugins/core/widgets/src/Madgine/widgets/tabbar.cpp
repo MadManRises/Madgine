@@ -26,7 +26,7 @@ namespace Engine {
 namespace Widgets {
 
     TabBar::TabBar(WidgetManager &manager, WidgetBase *parent)
-        : Widget(manager, parent, true)
+        : Widget(manager, parent, { .acceptsPointerEvents = true })
     {
     }
 

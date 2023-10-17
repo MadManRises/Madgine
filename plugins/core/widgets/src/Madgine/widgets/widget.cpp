@@ -40,10 +40,11 @@ namespace Engine {
 
 namespace Widgets {
 
-    WidgetBase::WidgetBase(WidgetManager &manager, WidgetBase *parent, bool acceptsPointerEvents)
+    WidgetBase::WidgetBase(WidgetManager &manager, WidgetBase *parent, const WidgetConfig &config)
         : mManager(manager)
         , mParent(parent)
-        , mAcceptsPointerEvents(acceptsPointerEvents || !parent)
+        , mAcceptsPointerEvents(config.acceptsPointerEvents || !parent)
+        , mAllowsDragging(config.allowsDragging)
     {
         mManager.registerWidget(this);
     }
@@ -267,6 +268,16 @@ namespace Widgets {
     bool WidgetBase::acceptsPointerEvents() const
     {
         return mAcceptsPointerEvents;
+    }
+
+    void WidgetBase::setAllowsDragging(bool v)
+    {
+        mAllowsDragging = v;
+    }
+
+    bool WidgetBase::allowsDragging() const
+    {
+        return mAllowsDragging;
     }
 
     void WidgetBase::injectPointerClick(const Input::PointerEventArgs &arg)

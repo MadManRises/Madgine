@@ -364,7 +364,7 @@ namespace Widgets {
 
         if (mDragStartEvent.button != Input::MouseButton::NO_BUTTON) {
 
-            if (!mDragging) {
+            if (!mDragging && mFocusedWidget->allowsDragging()) {
                 InterfacesVector dist = arg.screenPosition - mDragStartEvent.screenPosition;
                 if (std::abs(dist.x) + std::abs(dist.y) > sDragDistanceThreshold && std::chrono::steady_clock::now() - mDragStartTime > sDragTimeThreshold) {
                     mDragging = true;

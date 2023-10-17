@@ -64,7 +64,7 @@ namespace Engine {
 namespace Widgets {
 
     TextEdit::TextEdit(WidgetManager &manager, WidgetBase *parent)
-        : Widget(manager, parent, true)
+        : Widget(manager, parent, { .acceptsPointerEvents = true, .allowsDragging = true })
     {
         stb_textedit_initialize_state(&mState, false);
     }

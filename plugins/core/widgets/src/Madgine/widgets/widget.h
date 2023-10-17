@@ -20,10 +20,15 @@
 namespace Engine {
 namespace Widgets {
 
+    struct WidgetConfig {
+        bool acceptsPointerEvents = false;
+        bool allowsDragging = false;
+    };
+
     struct MADGINE_WIDGETS_EXPORT WidgetBase : VirtualScope<WidgetBase, Serialize::VirtualData<WidgetBase, Serialize::VirtualSerializableDataBase<VirtualScopeBase<>, Serialize::SerializableDataUnit>>> {
         SERIALIZABLEUNIT(WidgetBase)
 
-        WidgetBase(WidgetManager &manager, WidgetBase *parent = nullptr, bool acceptsPointerEvents = false);
+        WidgetBase(WidgetManager &manager, WidgetBase *parent = nullptr, const WidgetConfig &config = {});
 
         WidgetBase(const WidgetBase &) = delete;
 
@@ -73,6 +78,9 @@ namespace Widgets {
 
         void setAcceptsPointerEvents(bool v);
         bool acceptsPointerEvents() const;
+
+        void setAllowsDragging(bool v);
+        bool allowsDragging() const;
 
         bool isFocused() const;
 
@@ -153,6 +161,7 @@ namespace Widgets {
         Vector3 mAbsoluteSize;
 
         bool mAcceptsPointerEvents;
+        bool mAllowsDragging;
 
         PropertyList mProperties;
 
