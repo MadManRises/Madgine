@@ -6,6 +6,7 @@ include(Workspace)
 include(util/ini)
 include(Packaging)
 include(Shaders)
+include(Tooling)
 
 set (PLUGIN_DEFINITION_FILE)
 
@@ -38,11 +39,23 @@ if (NOT MODULES_ENABLE_PLUGINS)
 
 	read_ini_file(${PLUGIN_DEFINITION_FILE} PLUGINSELECTION)
 
+	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/components.cpp 
+		COMMAND ./${MADGINE_TOOLING_BINARY} 
+					-t
+					-npc
+					-lp ${PLUGIN_DEFINITION_FILE}
+					-epc ${CMAKE_BINARY_DIR}/components.cpp
+		WORKING_DIRECTORY ${MADGINE_TOOLING_WORKING_DIRECTORY}
+		DEPENDS MadgineTooling ${PLUGIN_DEFINITION_FILE})
+	add_custom_target(GenerateComponentsSource DEPENDS ${CMAKE_BINARY_DIR}/components.cpp)
+
 	function(patch_toplevel_target target)
 		get_target_property(target_flag ${target} PATCH_TOPLEVEL)
 		if (NOT target_flag)
-			set_target_properties(${target} PROPERTIES PATCH_TOPLEVEL TRUE)			
-			target_sources(${target} PRIVATE ${MADGINE_CONFIGURATION}/components.cpp)
+			set_target_properties(${target} PROPERTIES PATCH_TOPLEVEL TRUE)		
+			set_property(SOURCE ${CMAKE_BINARY_DIR}/components.cpp PROPERTY GENERATED 1)
+			target_sources(${target} PRIVATE ${CMAKE_BINARY_DIR}/components.cpp)
+			add_dependencies(${target} GenerateComponentsSource)
 		endif()
 	endfunction(patch_toplevel_target)
 

@@ -20,7 +20,7 @@ namespace Plugins {
 
         PluginManager &operator=(const PluginManager &) = delete;
 
-        int setup(bool loadCache, std::string_view programName, std::string_view configFile);
+        int setup(bool loadCache, std::string_view programName, const Filesystem::Path &configFile);
 
         PluginSection &section(std::string_view name);
         PluginSection &operator[](std::string_view name);

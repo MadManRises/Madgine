@@ -30,7 +30,8 @@ METATABLE_END(Engine::Tools::PluginExporter)
 namespace Engine {
 namespace Tools {
 
-    CLI::Parameter<std::string> exportPlugins { { "--export-plugins", "-ep" }, "", "If set the pluginmanager will save the current plugin selection after the boot to the specified config file and will export a corresponding uniquecomponent configuration source file." };
+    CLI::Parameter<Filesystem::Path> exportPlugins { { "--export-plugins", "-ep" }, "", "If set, the pluginmanager will save the current plugin selection after the boot to the specified config file." };
+    CLI::Parameter<Filesystem::Path> generatePluginsCode { { "--generate-plugins-code", "-epc" }, "", "If set, the pluginmanager will export a uniquecomponent configuration source file for the current plugin selection to the specified path." };
 
     PluginExporter::PluginExporter(Root::Root &root)
         : RootComponent(root)
@@ -39,14 +40,15 @@ namespace Tools {
 
             Filesystem::Path p = *exportPlugins;
 
-            Filesystem::createDirectories(p);
+            Filesystem::createDirectories(p.parentPath());
             Ini::IniFile file;
             LOG("Saving Plugins to '" << p << "'");
             Plugins::PluginManager::getSingleton().saveSelection(file, true);
-            if (!file.saveToDisk(p / "plugins.cfg"))
-                mErrorCode = -1;
-            else
-                exportStaticComponentHeader(p / "components.cpp");
+            if (!file.saveToDisk(p))
+                mErrorCode = -1;                
+        } 
+        if (!generatePluginsCode->empty()){            
+            exportStaticComponentHeader(generatePluginsCode);
         }
     }
 

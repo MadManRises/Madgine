@@ -79,7 +79,7 @@ inline void glCheck()
 #    define NOMINMAX
 #    include <Windows.h>
 
-#    undef NO_ERROR
+#    undef ERROR
 typedef HGLRC ContextHandle;
 typedef HDC SurfaceHandle;
 

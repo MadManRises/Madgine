@@ -2,6 +2,9 @@
 
 #include "parameterbase.h"
 
+
+#include "Interfaces/filesystem/path.h"
+
 namespace Engine {
 
 namespace CLI {
@@ -77,6 +80,13 @@ namespace CLI {
 
     template <>
     inline bool ParameterImpl<std::string>::parse(const std::vector<std::string_view> &args)
+    {
+        mValue = args.front();
+        return true;
+    }
+
+    template <>
+    inline bool ParameterImpl<Filesystem::Path>::parse(const std::vector<std::string_view> &args)
     {
         mValue = args.front();
         return true;

@@ -35,12 +35,14 @@ namespace FirstParty {
 
         mInitialized = SteamAPI_Init();
 
-        root.taskQueue()->queue([this]() -> Threading::Task<void> {
-            while (mRoot.taskQueue()->running()) {
-                SteamAPI_RunCallbacks();
-                co_await 100ms;
-            }
-        });
+        if (!root.toolMode()) {
+            root.taskQueue()->queue([this]() -> Threading::Task<void> {
+                while (mRoot.taskQueue()->running()) {
+                    SteamAPI_RunCallbacks();
+                    co_await 100ms;
+                }
+            });
+        }
 
         requestCurrentStats();
     }

@@ -17,6 +17,8 @@
 
 #include "Interfaces/filesystem/async.h"
 
+#include "Interfaces/filesystem/path.h"
+
 #include "Modules/threading/awaitables/awaitabletimepoint.h"
 
 namespace Engine {
@@ -26,12 +28,12 @@ namespace Root {
 
 #if ENABLE_PLUGINS
     CLI::Parameter<bool> noPluginCache { { "--no-plugin-cache", "-npc" }, false, "Disables the loading of the cached plugin selection at startup." };
-    CLI::Parameter<std::string> loadPlugins { { "--load-plugins", "-lp" }, "", "If set the pluginmanager will load the specified config file after loading the cached plugin-file." };
+    CLI::Parameter<Filesystem::Path> loadPlugins { { "--load-plugins", "-lp" }, "", "If set the pluginmanager will load the specified config file after loading the cached plugin-file." };
 #endif
 
     CLI::Parameter<bool> toolModeParameter { { "--toolMode", "-t" }, false, "If set, no application will be started. Only the root will be initialized and then immediately shutdown again." };
     CLI::Parameter<Engine::Log::MessageType> logLevel { { "--logLevel", "-l" }, Engine::Log::MessageType::INFO_TYPE, "Specify log-level." };
-    CLI::Parameter<std::string> logFile { { "--logFile" }, "", "If set, the log output will be written to the specified path" };
+    CLI::Parameter<Filesystem::Path> logFile { { "--logFile" }, "", "If set, the log output will be written to the specified path" };
 
     Root::Root(int argc, char **argv)
         : Root(std::make_unique<CLI::CLICore>(argc, argv))
@@ -70,7 +72,8 @@ namespace Root {
                 mErrorCode = component->mErrorCode;
         }
 
-        mTaskQueue.queueTask(updateAsyncIO());
+        if (!toolMode())
+            mTaskQueue.queueTask(updateAsyncIO());
     }
 
     Root::~Root()

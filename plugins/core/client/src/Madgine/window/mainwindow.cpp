@@ -26,6 +26,8 @@
 
 #include "Generic/projections.h"
 
+#include "layoutloader.h"
+
 namespace Engine {
 namespace Window {
     static bool filterComponent(const std::unique_ptr<MainWindowComponentBase>& comp) {
@@ -95,22 +97,30 @@ namespace Window {
         }
     }
 
-    bool MainWindow::loadLayout(const Filesystem::Path &path)
+    bool MainWindow::loadLayout(std::string_view name)
     {
-        Filesystem::FileManager mgr { "Layout" };
-        Serialize::FormattedSerializeStream file = mgr.openRead(path, std::make_unique<Serialize::XMLFormatter>());
+        LayoutLoader::Resource *res = LayoutLoader::get(name);
 
-        if (file) {
-            Serialize::StreamResult result = Serialize::read(file, *this, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap | Serialize::StateTransmissionFlags_Activation);
-            if (result.mState != Serialize::StreamState::OK) {
-                LOG_ERROR("Failed loading '" << path << "' with following Error: "
-                                             << "\n"
-                                             << result);
+        
+        if (res) {
+            Filesystem::FileManager mgr { "Layout" };
+            Serialize::FormattedSerializeStream file = mgr.openRead(res->path(), std::make_unique<Serialize::XMLFormatter>());
+
+            if (file) {
+                Serialize::StreamResult result = Serialize::read(file, *this, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap | Serialize::StateTransmissionFlags_Activation);
+                if (result.mState != Serialize::StreamState::OK) {
+                    LOG_ERROR("Failed loading '" << res->path() << "' with following Error: "
+                                                 << "\n"
+                                                 << result);
+                    return false;
+                }
+                return true;
+            } else {
+                LOG_ERROR("Failed to open " << res->path() << "!");
                 return false;
             }
-            return true;
         } else {
-            LOG_ERROR("Could not find default.layout!");
+            LOG_ERROR("Could not find layout " << name << "!");
             return false;
         }
     }
@@ -150,7 +160,7 @@ namespace Window {
         }
 
 #ifdef MADGINE_MAINWINDOW_LAYOUT
-        if (!loadLayout(Resources::ResourceManager::getSingleton().findResourceFile(STRINGIFY2(MADGINE_MAINWINDOW_LAYOUT))))
+        if (!loadLayout(STRINGIFY2(MADGINE_MAINWINDOW_LAYOUT)))
             co_return false;
 #endif
 

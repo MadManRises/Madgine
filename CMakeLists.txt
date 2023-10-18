@@ -71,7 +71,7 @@ set (CPACK_PACKAGE_VENDOR "MadMan Studios")
 enable_packaging()
 
 
-add_subdirectory(util)
+add_subdirectory(util ${CMAKE_BINARY_DIR}/../util)
 
 add_subdirectory(src)
 
@@ -88,6 +88,9 @@ endif()
 if (MADGINE_AS_SDK)
 	set (LAUNCHER_LOCATION ${CMAKE_CURRENT_LIST_DIR}/launcher CACHE INTERNAL "")
 	function(create_launcher MADGINE_BINARY_NAME)
+		if (TARGET MadgineTooling)
+			set_target_properties(MadgineTooling PROPERTIES BinaryName ${MADGINE_BINARY_NAME})
+		endif()
 		add_subdirectory(${LAUNCHER_LOCATION} launcher)
 	endfunction()
 else()

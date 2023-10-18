@@ -32,7 +32,7 @@ METATABLE_END(Engine::Resources::ResourceManager)
 namespace Engine {
 namespace Resources {
 
-    CLI::Parameter<std::string> exportResources { { "--export-resources", "-er" }, "", "If set the resource manager will write all available resources to the specified list file." };
+    CLI::Parameter<Filesystem::Path> exportResources { { "--export-resources", "-er" }, "", "If set the resource manager will write all available resources to the specified list file." };
 
     static ResourceManager *sSingleton = nullptr;
 

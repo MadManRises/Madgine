@@ -85,7 +85,6 @@ namespace Tools {
     void PluginManager::saveConfiguration(const Filesystem::Path &config)
     {
         mCurrentConfiguration.saveToDisk(config / "plugins.cfg");
-        PluginExporter::exportStaticComponentHeader(config / "components.cpp");
     }
 
     bool PluginManager::renderPluginSelection(bool isConfiguration)

@@ -9,7 +9,7 @@ FolderSources(sources "" src)
 			FolderSources(sources render passes bloompass.cpp bloompass.h blurpass.cpp blurpass.h)
 				FolderSources(sources passes shaders bloom.PS_hlsl bloom.VS_hlsl blur.PS_hlsl blur.VS_hlsl)
 			FolderSources(sources render shadinglanguage sl_support_begin.h sl_support_end.h)
-		FolderSources(sources Madgine window mainwindow.cpp mainwindow.h mainwindowcomponent.cpp mainwindowcomponent.h mainwindowcomponentcollector.cpp mainwindowcomponentcollector.h toolwindow.cpp toolwindow.h)
+		FolderSources(sources Madgine window layoutloader.cpp layoutloader.h mainwindow.cpp mainwindow.h mainwindowcomponent.cpp mainwindowcomponent.h mainwindowcomponentcollector.cpp mainwindowcomponentcollector.h toolwindow.cpp toolwindow.h)
 
 add_plugin(Client Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/clientlib.h)
 

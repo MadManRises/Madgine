@@ -24,6 +24,8 @@
 
 #include "Generic/projections.h"
 
+#include "Madgine/window/layoutloader.h"
+
 METATABLE_BEGIN_BASE(Engine::Tools::ProjectManager, Engine::Tools::ToolBase)
 PROPERTY(ProjectRoot, projectRootString, setProjectRoot)
 PROPERTY(Layout, layout, setLayout)
@@ -265,11 +267,20 @@ namespace Tools {
         if (ImGui::CollapsingHeader("Client")) {
             ImGui::Indent();
 
-            changed |= ImGui::InputText("Layout", &mConfiguration["General"]["LAYOUT"]);
+            std::string layout = mConfiguration["General"]["LAYOUT"];
+            if (ImGui::BeginCombo("Layout", layout.c_str())) {
+                for (Resources::ResourceBase *res : Window::LayoutLoader::getSingleton().resources()) {
+                    if (ImGui::Selectable(res->name().data(), res->name() == layout)) {
+                        mConfiguration["General"]["LAYOUT"] = res->name();
+                        changed = true;
+                    }
+                }
+                ImGui::EndCombo();
+            }
 
             ImGui::Unindent();
         }
-        return false;
+        return changed;
     }
 
     void ProjectManager::loadConfiguration(const Filesystem::Path &config)
@@ -352,9 +363,15 @@ namespace Tools {
 
     void ProjectManager::save()
     {
-        Filesystem::Path folder = mProjectRoot / "data";
-        Filesystem::createDirectory(folder);
-        Filesystem::Path filePath = folder / (mLayout + ".layout");
+        Window::LayoutLoader::Resource *res = Window::LayoutLoader::get(mLayout);
+        Filesystem::Path filePath;
+        if (res) {
+            filePath = res->path();
+        } else {
+            Filesystem::Path folder = mProjectRoot / "data";
+            Filesystem::createDirectory(folder);
+            filePath = folder / (mLayout + ".layout");
+        }
 
         mWindow->saveLayout(filePath);
     }
@@ -362,10 +379,7 @@ namespace Tools {
     void ProjectManager::load()
     {
         if (!mLayout.empty()) {
-
-            Filesystem::Path filePath = mProjectRoot / "data" / (mLayout + ".layout");
-
-            mWindow->loadLayout(filePath);
+            mWindow->loadLayout(mLayout);
         }
     }
 

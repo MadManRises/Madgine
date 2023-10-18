@@ -3,16 +3,20 @@ include(ExternalProject)
 set(shadergenSourceDir ${CMAKE_CURRENT_SOURCE_DIR}/shadergen)
 set(shadergenBinaryDir ${CMAKE_CURRENT_BINARY_DIR}/shadergen)
 
+if (MADGINE_CONFIGURATION)
+	set (DEPENDS MadgineTooling)
+endif ()
 
 ExternalProject_Add(ShaderGenExt
 	PREFIX shadergen 
-	BINARY_DIR shadergen/build
+	BINARY_DIR ${shadergenBinaryDir}/build
 	SOURCE_DIR ${shadergenSourceDir}
 	CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release
 	BUILD_BYPRODUCTS ${shadergenBinaryDir}/ShaderGen${HOST_EXECUTABLE_SUFFIX}
 	BUILD_COMMAND ${CMAKE_COMMAND} --build . --target ShaderGen
 	BUILD_ALWAYS true
-	INSTALL_COMMAND "")
+	INSTALL_COMMAND ""
+	DEPENDS ${DEPENDS})
 
 	
 add_executable(ShaderGen IMPORTED GLOBAL)

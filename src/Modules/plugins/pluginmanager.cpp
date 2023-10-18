@@ -56,7 +56,7 @@ namespace Plugins {
         }
     }
 
-    int PluginManager::setup(bool loadCache, std::string_view programName, std::string_view configFile)
+    int PluginManager::setup(bool loadCache, std::string_view programName, const Filesystem::Path &configFile)
     {
         mUseCache = loadCache;
 

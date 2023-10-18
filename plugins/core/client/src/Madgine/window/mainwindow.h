@@ -52,7 +52,7 @@ namespace Window {
         ~MainWindow();
 
         void saveLayout(const Filesystem::Path &path);
-        bool loadLayout(const Filesystem::Path &path);
+        bool loadLayout(std::string_view name);
 
         /**
      * @name MadgineObject interface
