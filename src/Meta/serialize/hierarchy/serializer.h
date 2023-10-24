@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Generic/callerhierarchy.h"
+#include "Generic/lambda.h"
 
 namespace Engine {
 namespace Serialize {
@@ -22,6 +23,8 @@ namespace Serialize {
 
         void (*mWriteAction)(const SerializableDataUnit *, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, void *) = nullptr;
         void (*mWriteRequest)(const SerializableDataUnit *, FormattedBufferedStream &out, void *) = nullptr;
+
+        StreamResult (*mScanStream)(FormattedSerializeStream &, const char *, const Lambda<ScanCallback> &) = nullptr;
     };
 
 }

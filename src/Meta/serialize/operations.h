@@ -5,6 +5,7 @@
 #include "configs/creator.h"
 #include "configs/guard.h"
 #include "configs/requestpolicy.h"
+#include "configs/tags.h"
 
 #include "hierarchy/serializableunitptr.h"
 
@@ -116,15 +117,49 @@ namespace Serialize {
     }
 
     template <typename T, typename... Configs>
+    StreamResult scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+    {
+        return Operations<T, Configs...>::scanStream(in, name, callback);
+    }
+
+    template <typename Compound, typename Primitive, typename F>
+    requires(!Reference<F> && PrimitiveType<Primitive>)
+        StreamResult scanPrimitive(FormattedSerializeStream &in, const char *name, F &&callback)
+    {
+        return scanStream<Compound>(in, name, [callback { std::move(callback) }](bool &wasRead, FormattedSerializeStream &stream, std::span<std::string_view> tags, IndexType<size_t> primitiveType, const SerializeTable *type) -> StreamResult {
+            if (primitiveType == PrimitiveTypeIndex_v<Primitive>) {
+                Primitive v;
+                STREAM_PROPAGATE_ERROR(stream.readPrimitive(v, nullptr));
+                callback(v, tags);
+                wasRead = true;
+            }
+            return {};
+        });
+    }
+
+    template <typename Compound, typename TargetCompound, typename F>
+    requires(!Reference<F> && !PrimitiveType<TargetCompound>)
+        StreamResult scanCompound(FormattedSerializeStream &in, const char *name, F &&callback)
+    {
+        return scanStream<Compound>(in, name, [callback { std::move(callback) }](bool &wasRead, FormattedSerializeStream &stream, std::span<std::string_view> tags, IndexType<size_t> primitiveType, const SerializeTable *type) -> StreamResult {
+            if (type == &serializeTable<TargetCompound>()) {
+                STREAM_PROPAGATE_ERROR(callback(stream));
+                wasRead = true;
+            }
+            return {};
+        });
+    }
+
+    template <typename T, typename... Configs>
     struct Operations {
         static StreamResult read(FormattedSerializeStream &in, T &t, const char *name, const CallerHierarchyBasePtr &hierarchy = {}, StateTransmissionFlags flags = 0)
         {
-            if constexpr (PrimitiveType<T>) {
-                return in.readPrimitive(t, name);
-                //mLog.log(t);
-            } else if constexpr (std::is_const_v<T>) {
+            if constexpr (std::is_const_v<T>) {
                 //Don't do anything here
                 return {};
+            } else if constexpr (PrimitiveType<T>) {
+                return in.readPrimitive(t, name);
+                //mLog.log(t);
             } else if constexpr (std::derived_from<T, SyncableUnitBase>) {
                 return t.readState(in, name, hierarchy, flags);
             } else if constexpr (std::derived_from<T, SerializableDataUnit>) {
@@ -138,11 +173,11 @@ namespace Serialize {
 
         static void write(FormattedSerializeStream &out, const T &t, const char *name, const CallerHierarchyBasePtr &hierarchy = {}, StateTransmissionFlags flags = 0)
         {
-            if constexpr (PrimitiveType<T>) {
+            if constexpr (std::is_const_v<T>) {
+                //Don't do anything here
+            } else if constexpr (PrimitiveType<T>) {
                 out.writePrimitive(t, name);
                 //mLog.log(t);
-            } else if constexpr (std::is_const_v<T>) {
-                //Don't do anything here
             } else if constexpr (std::derived_from<T, SyncableUnitBase>) {
                 t.writeState(out, name, hierarchy, flags);
             } else if constexpr (std::derived_from<T, SerializableDataUnit>) {
@@ -243,6 +278,32 @@ namespace Serialize {
                 });
             }
         }
+
+        static StreamResult scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+        {
+            if constexpr (std::is_const_v<T>) {
+                //Don't do anything here
+                return {};
+            } else if constexpr (PrimitiveType<T>) {
+                size_t typeIndex = PrimitiveTypeIndex_v<T>;
+                bool wasRead = false;
+                auto tags = TagsSelector<Configs...>::getTags();
+                STREAM_PROPAGATE_ERROR(callback(wasRead, in, tags, typeIndex, nullptr));
+                if (!wasRead) {
+                    T dummy;
+                    STREAM_PROPAGATE_ERROR(in.readPrimitive(dummy, name));
+                }
+                return {};
+            } else if constexpr (std::derived_from<T, SyncableUnitBase>) {
+                return T::scanStream(&serializeTable<T>(), in, name, callback);
+            } else if constexpr (std::derived_from<T, SerializableDataUnit>) {
+                return SerializableDataPtr::scanStream<T>(in, name, callback);
+            } else if constexpr (TupleUnpacker::Tuplefyable<T>) {
+                return Operations<decltype(TupleUnpacker::toTuple(std::declval<T &>())), Configs...>::scanStream(in, name, callback);
+            } else {
+                static_assert(dependent_bool<T, false>::value, "Invalid Type");
+            }
+        }
     };
 
     template <typename T, typename... Configs>
@@ -276,6 +337,11 @@ namespace Serialize {
         static void setParent(const std::unique_ptr<T> &p, SerializableUnitBase *parent)
         {
             Operations<T, Configs...>::setParent(*p, parent);
+        }
+
+        static StreamResult scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+        {
+            return Operations<T, Configs...>::scanStream(in, name, callback);
         }
     };
 
@@ -314,7 +380,28 @@ namespace Serialize {
                     STREAM_PROPAGATE_ERROR(std::move(r));
                     return Serialize::applyMap(in, e, success, hierarchy);
                 },
-                StreamResult {});            
+                StreamResult {});
+        }
+
+        struct ScanHelper {
+            template <typename T>
+            StreamResult operator()(StreamResult r)
+            {
+                STREAM_PROPAGATE_ERROR(std::move(r));
+                return Serialize::scanStream<T>(in, nullptr, callback);
+            }
+
+            FormattedSerializeStream &in;
+            const Lambda<ScanCallback> &callback;
+        };
+
+        static StreamResult scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+        {
+            STREAM_PROPAGATE_ERROR(in.beginContainerRead(name, false));
+            STREAM_PROPAGATE_ERROR(TypeUnpacker::accumulate<type_pack<Ty...>>(
+                ScanHelper { in, callback },
+                StreamResult {}));
+            return in.endContainerRead(name);
         }
     };
 
@@ -341,6 +428,27 @@ namespace Serialize {
             });
             out.endContainerWrite(name);
         }
+
+        struct ScanHelper {
+            template <typename T>
+            StreamResult operator()(StreamResult r)
+            {
+                STREAM_PROPAGATE_ERROR(std::move(r));
+                return Serialize::scanStream<T>(in, nullptr, callback);
+            }
+
+            FormattedSerializeStream &in;
+            const Lambda<ScanCallback> &callback;
+        };
+
+        static StreamResult scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+        {
+            STREAM_PROPAGATE_ERROR(in.beginContainerRead(name, false));
+            STREAM_PROPAGATE_ERROR(TypeUnpacker::accumulate<type_pack<Ty...>>(
+                ScanHelper { in, callback },
+                StreamResult {}));
+            return in.endContainerRead(name);
+        }
     };
 
     template <typename U, typename V, typename... Configs>
@@ -360,6 +468,14 @@ namespace Serialize {
             Serialize::write<U>(out, t.first, "First", hierarchy);
             Serialize::write<V>(out, t.second, "Second", hierarchy);
             out.endCompoundWrite(name);
+        }
+
+        static StreamResult scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+        {
+            STREAM_PROPAGATE_ERROR(in.beginCompoundRead(name));
+            STREAM_PROPAGATE_ERROR(Serialize::scanStream<U>(in, nullptr, callback));
+            STREAM_PROPAGATE_ERROR(Serialize::scanStream<V>(in, nullptr, callback));
+            return in.endCompoundRead(name);
         }
     };
 

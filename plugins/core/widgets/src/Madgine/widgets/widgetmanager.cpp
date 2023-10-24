@@ -17,35 +17,31 @@
 #include "image.h"
 #include "label.h"
 #include "scenewindow.h"
+#include "tabbar.h"
 #include "tablewidget.h"
 #include "textbox.h"
-#include "tabbar.h"
 #include "textedit.h"
 
 #include "Madgine/imageloader/imagedata.h"
 
 #include "Madgine/window/mainwindow.h"
 
-#include "Meta/math/atlas2.h"
-
 #include "Interfaces/input/inputevents.h"
 
-#include "Madgine/imageloader/imageloader.h"
 #include "Madgine/meshloader/meshloader.h"
-#include "Madgine/textureloader/textureloader.h"
 
 #include "Madgine/render/rendercontext.h"
 #include "Madgine/render/rendertarget.h"
 
 #include "Meta/serialize/helper/typedobjectserialize.h"
 
-#include "Generic/areaview.h"
-
 #include "Madgine/render/shadinglanguage/sl_support_begin.h"
 #include "shaders/widgets.sl"
 #include "Madgine/render/shadinglanguage/sl_support_end.h"
 
-UNIQUECOMPONENT(Engine::Widgets::WidgetManager)
+#include "atlasloader.h"
+
+NAMED_UNIQUECOMPONENT(WidgetManager, Engine::Widgets::WidgetManager)
 
 METATABLE_BEGIN(Engine::Widgets::WidgetManager)
 READONLY_PROPERTY(Widgets, widgets)
@@ -54,7 +50,7 @@ METATABLE_END(Engine::Widgets::WidgetManager)
 
 SERIALIZETABLE_BEGIN(Engine::Widgets::WidgetManager)
 FIELD(mStartupWidget)
-FIELD(mTopLevelWidgets, Serialize::ParentCreator<&Engine::Widgets::WidgetManager::readWidgetStub, &Engine::Widgets::WidgetManager::writeWidget>)
+FIELD(mTopLevelWidgets, Serialize::ParentCreator<&Engine::Widgets::WidgetManager::readWidgetStub, &Engine::Widgets::WidgetManager::writeWidget, nullptr, &Engine::Widgets::WidgetManager::scanWidget>)
 SERIALIZETABLE_END(Engine::Widgets::WidgetManager)
 
 namespace Engine {
@@ -83,40 +79,11 @@ namespace Widgets {
         Render::PipelineLoader::Instance mPipeline;
         Render::GPUMeshLoader::Ptr mMesh;
 
-        Resources::ImageLoader::Handle mDefaultTexture;
-        Render::TextureLoader::Ptr mUIAtlasTexture;
-        std::set<Resources::ImageLoader::Handle> mImageLoadingTasks;
-        Atlas2 mUIAtlas { { 2048, 2048 } };
-        int mUIAtlasSize = 0;
-        std::map<Resources::ImageLoader::Resource *, Atlas2::Entry> mUIAtlasEntries;
-
-        void expandUIAtlas()
-        {
-            if (mUIAtlasSize == 0) {
-                mUIAtlasSize = 1;
-                mUIAtlasTexture.setData({ mUIAtlasSize * 2048, mUIAtlasSize * 2048 }, {});
-                for (int x = 0; x < mUIAtlasSize; ++x) {
-                    for (int y = 0; y < mUIAtlasSize; ++y) {
-                        mUIAtlas.addBin({ 2048 * x, 2048 * y });
-                    }
-                }
-            } else {
-                /*for (int x = 0; x < mUIAtlasSize; ++x) {
-                for (int y = 0; y < mUIAtlasSize; ++y) {
-                    mUIAtlas.addBin({ 512 * x, 512 * (y + mUIAtlasSize) });
-                    mUIAtlas.addBin({ 512 * (x + mUIAtlasSize), 512 * y });
-                    mUIAtlas.addBin({ 512 * (x + mUIAtlasSize), 512 * (y + mUIAtlasSize) });
-                }
-            }
-            mUIAtlasSize *= 2;
-            mUIAtlasTexture.resize({ 512 * mUIAtlasSize, 512 * mUIAtlasSize });*/
-                throw "TODO";
-            }
-        }
+        UIAtlas mAtlas;
     };
 
     WidgetManager::WidgetManager(Window::MainWindow &window)
-        : VirtualData(window, 20)
+        : MainWindowComponent(window, 20)
         , mData(std::make_unique<WidgetManagerData>())
     {
     }
@@ -124,11 +91,6 @@ namespace Widgets {
     WidgetManager::~WidgetManager()
     {
         assert(mWidgets.empty());
-    }
-
-    std::string_view WidgetManager::key() const
-    {
-        return "WidgetManager";
     }
 
     Threading::Task<bool> WidgetManager::init()
@@ -140,9 +102,15 @@ namespace Widgets {
 
         mData->mMesh.create({ 3, std::vector<Vertex> {} });
 
-        mData->mUIAtlasTexture.create(Render::TextureType_2D, Render::FORMAT_RGBA8_SRGB);
+        mData->mAtlas.createTexture();
 
-        mData->mDefaultTexture.load("default_tex");
+#ifdef MADGINE_MAINWINDOW_LAYOUT
+        AtlasLoader::Handle atlas;
+        bool hasAtlas = co_await atlas.load(STRINGIFY2(MADGINE_MAINWINDOW_LAYOUT));
+        if (hasAtlas) {
+            mData->mAtlas.preload(*atlas);
+        }
+#endif
 
         co_return true;
     }
@@ -151,9 +119,7 @@ namespace Widgets {
     {
         mTopLevelWidgets.clear();
 
-        mData->mDefaultTexture.reset();
-
-        mData->mUIAtlasTexture.reset();
+        mData->mAtlas.reset();
 
         mData->mMesh.reset();
 
@@ -247,6 +213,53 @@ namespace Widgets {
     const char *WidgetManager::writeWidget(Serialize::FormattedSerializeStream &out, const std::unique_ptr<WidgetBase> &widget) const
     {
         return Serialize::beginExtendedTypedWrite(out, widget->getClass(), sTags);
+    }
+
+    Serialize::StreamResult WidgetManager::scanWidget(const Serialize::SerializeTable *&out, Serialize::FormattedSerializeStream &in)
+    {
+        WidgetClass _class;
+        STREAM_PROPAGATE_ERROR(Serialize::beginExtendedTypedRead(in, _class, sTags));
+        switch (_class) {
+        case WidgetClass::WIDGET:
+            out = &serializeTable<WidgetBase>();
+            break;
+        case WidgetClass::BAR:
+            out = &serializeTable<Bar>();
+            break;
+        case WidgetClass::CHECKBOX:
+            out = &serializeTable<Checkbox>();
+            break;
+        case WidgetClass::LABEL:
+            out = &serializeTable<Label>();
+            break;
+        case WidgetClass::BUTTON:
+            out = &serializeTable<Button>();
+            break;
+        case WidgetClass::COMBOBOX:
+            out = &serializeTable<Combobox>();
+            break;
+        case WidgetClass::TEXTBOX:
+            out = &serializeTable<Textbox>();
+            break;
+        case WidgetClass::SCENEWINDOW:
+            out = &serializeTable<SceneWindow>();
+            break;
+        case WidgetClass::IMAGE:
+            out = &serializeTable<Image>();
+            break;
+        case WidgetClass::TABLEWIDGET:
+            out = &serializeTable<TableWidget>();
+            break;
+        case WidgetClass::TABBAR:
+            out = &serializeTable<TabBar>();
+            break;
+        case WidgetClass::TEXTEDIT:
+            out = &serializeTable<TextEdit>();
+            break;
+        default:
+            std::terminate();
+        }
+        return {};
     }
 
     bool WidgetManager::injectPointerPress(const Input::PointerEventArgs &arg)
@@ -482,12 +495,12 @@ namespace Widgets {
 
     void WidgetManager::registerWidget(WidgetBase *w)
     {
-        mWidgets.push_back(w);        
+        mWidgets.push_back(w);
     }
 
     void WidgetManager::unregisterWidget(WidgetBase *w)
     {
-        /* auto count = */std::erase(mWidgets, w);       
+        /* auto count = */ std::erase(mWidgets, w);
         //assert(count == 1);
     }
 
@@ -600,7 +613,7 @@ namespace Widgets {
             if (tex.mTexture.mTextureHandle)
                 mData->mPipeline->bindTextures(target, { tex.mTexture });
             else
-                mData->mPipeline->bindTextures(target, { mData->mUIAtlasTexture->descriptor() });
+                mData->mPipeline->bindTextures(target, { mData->mAtlas.texture() });
 
             mData->mMesh.update({ 3, std::move(vertexData.mTriangleVertices) });
 
@@ -613,7 +626,7 @@ namespace Widgets {
                 parameters->hasTexture = false;
             }
 
-            mData->mPipeline->bindTextures(target, { mData->mUIAtlasTexture->descriptor() });
+            mData->mPipeline->bindTextures(target, { mData->mAtlas.texture() });
 
             mData->mMesh.update({ 2, std::move(renderData.lineVertices()) });
 
@@ -647,14 +660,24 @@ namespace Widgets {
         }
     }
 
-    const Render::Texture &WidgetManager::uiTexture() const
-    {
-        return *mData->mUIAtlasTexture;
-    }
-
     Threading::SignalStub<> &WidgetManager::updatedSignal()
     {
         return mUpdatedSignal;
+    }
+
+    Resources::ImageLoader::Resource *WidgetManager::getImage(std::string_view name)
+    {
+        return mData->mAtlas.getImage(name);
+    }
+
+    const Atlas2::Entry *WidgetManager::lookUpImage(Resources::ImageLoader::Resource *image)
+    {
+        return mData->mAtlas.lookUpImage(image);
+    }
+
+    const Atlas2::Entry *WidgetManager::lookUpImage(std::string_view name)
+    {
+        return mData->mAtlas.lookUpImage(name);
     }
 
     void WidgetManager::onActivate(bool active)
@@ -663,57 +686,6 @@ namespace Widgets {
             openStartupWidget();
             mUpdatedSignal.emit();
         }
-    }
-
-    const Atlas2::Entry *WidgetManager::lookUpImage(Resources::ImageLoader::Resource *image)
-    {
-        if (!image)
-            return nullptr;
-        auto it = mData->mUIAtlasEntries.find(image);
-        if (it == mData->mUIAtlasEntries.end()) {
-            Resources::ImageLoader::Handle data = image->loadData();
-            if (!data.available()) {
-                mData->mImageLoadingTasks.emplace(std::move(data));
-                return nullptr;
-            } else {
-
-                size_t width = data->mSize.x;
-                size_t height = data->mSize.y;
-
-                assert(data->mChannels == 4);
-
-                const uint32_t *source = static_cast<const uint32_t *>(data->mBuffer.mData);
-
-                std::vector<uint32_t> targetBuffer;
-                targetBuffer.resize((width + 2) * (height + 2));
-
-                AreaView<uint32_t, 2> targetArea { targetBuffer.data(), { width + 2, height + 2 } };
-
-                AreaView<const uint32_t, 2> sourceArea { source, { width, height } };
-
-                std::ranges::copy(sourceArea, targetArea.subArea({ 1, 1 }, { width, height }).begin());
-                std::ranges::copy(sourceArea.subArea({ 0, 0 }, { 1, height }), targetArea.subArea({ 0, 1 }, { 1, height }).begin());
-                std::ranges::copy(sourceArea.subArea({ width - 1, 0 }, { 1, height }), targetArea.subArea({ width + 1, 1 }, { 1, height }).begin());
-                std::ranges::copy(sourceArea.subArea({ 0, 0 }, { width, 1 }), targetArea.subArea({ 1, 0 }, { width, 1 }).begin());
-                std::ranges::copy(sourceArea.subArea({ 0, height - 1 }, { width, 1 }), targetArea.subArea({ 1, height + 1 }, { width, 1 }).begin());
-
-                targetArea[0][0] = sourceArea[0][0];
-                targetArea[0][width + 1] = sourceArea[0][width - 1];
-                targetArea[height + 1][0] = sourceArea[height - 1][0];
-                targetArea[height + 1][width + 1] = sourceArea[height - 1][width - 1];
-
-                Atlas2::Entry entry = mData->mUIAtlas.insert(data->mSize + Vector2i { 2, 2 }, [this]() { mData->expandUIAtlas(); });
-                it = mData->mUIAtlasEntries.try_emplace(image, entry).first;
-                mData->mUIAtlasTexture.setSubData(entry.mArea.mTopLeft, data->mSize + Vector2i { 2, 2 }, targetBuffer);
-                mData->mImageLoadingTasks.erase(data);
-            }
-        }
-        return &it->second;
-    }
-
-    const Atlas2::Entry *WidgetManager::lookUpImage(std::string_view name)
-    {
-        return lookUpImage(Resources::ImageLoader::getSingleton().get(name));
     }
 
     bool WidgetManager::dragging(const WidgetBase *widget)

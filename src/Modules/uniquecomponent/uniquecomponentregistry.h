@@ -1,20 +1,12 @@
 #pragma once
 
 #include "../plugins/binaryinfo.h"
+#include "annotations.h"
 
 namespace Engine {
 namespace UniqueComponent {
 
     DERIVE_TYPENAME(VBase)
-
-    template <typename T, typename Base, typename... _Ty>
-    std::unique_ptr<Base> createComponent(_Ty... arg)
-    {
-        return std::make_unique<T>(std::forward<_Ty>(arg)...);
-    }
-
-    template <typename Base, typename... _Ty>
-    using Collector_F = std::unique_ptr<Base> (*)(_Ty...);
 
 }
 }
@@ -88,12 +80,11 @@ namespace UniqueComponent {
 
     DLL_IMPORT_VARIABLE2(Registry, registry, typename Registry);
 
-    template <typename _Base, typename... _Ty>
+    template <typename _Base, typename... _Annotations>
     struct Registry : RegistryBase {
 
         typedef _Base Base;
-        typedef std::tuple<_Ty...> Ty;
-        typedef Collector_F<Base, _Ty...> F;
+        using Annotations = GroupedAnnotation<_Annotations...>;
 
         struct CollectorInfo : CollectorInfoBase {
 
@@ -102,7 +93,7 @@ namespace UniqueComponent {
             {
 
                 LOG("Registering Component: " << typeName<T>());
-                mComponents.emplace_back(&createComponent<T, Base, _Ty...>);
+                mComponents.emplace_back(type_holder<T>);
                 std::vector<const TypeInfo *> elementInfos;
                 elementInfos.push_back(&typeInfo<T>);
                 if constexpr (has_typename_VBase<T>) {
@@ -114,11 +105,11 @@ namespace UniqueComponent {
 
             void unregisterComponent(size_t i)
             {
-                mComponents[i] = nullptr;
+                //mComponents[i] = nullptr; ??
                 mElementInfos[i].clear();
             }
 
-            std::vector<F> mComponents;
+            std::vector<Annotations> mComponents;
         };
 
         Registry(const TypeInfo *namedTi = nullptr)
@@ -128,15 +119,15 @@ namespace UniqueComponent {
 
         static Registry &sInstance()
         {
-            return registry<Registry<_Base, _Ty...>>();
+            return registry<Registry<_Base, _Annotations...>>();
         }
 
-        static std::vector<F> &sComponents()
+        static std::vector<Annotations> &sComponents()
         {
             return sInstance().mComponents;
         }
 
-        static F getConstructor(size_t i)
+        static const Annotations &get(size_t i)
         {
             return sInstance().mComponents[i];
         }
@@ -153,9 +144,8 @@ namespace UniqueComponent {
                 if (info->mBinary == bin) {
                     mLoadedCollectors.push_back(info);
                     info->mBaseIndex = mComponents.size();
-                    const std::vector<F> &comps = reinterpret_cast<const std::vector<F> &>(info->mComponents);
-                    for (F f : comps) {
-                        mComponents.push_back(f);
+                    for (const Annotations &annotations : info->mComponents) {
+                        mComponents.push_back(annotations);
                     }
                     it = mUnloadedCollectors.erase(it);
                 } else {
@@ -194,38 +184,38 @@ namespace UniqueComponent {
     protected:
         static inline Registry *sSelf = &sInstance(); //Keep to ensure instantiation of registry, even with no component/collector in it
 
-        std::vector<F> mComponents;
+        std::vector<Annotations> mComponents;
 
         std::vector<CollectorInfo *> mUnloadedCollectors;
     };
 
-    template <typename _Base, typename... _Ty>
-    struct NamedRegistry : Registry<_Base, _Ty...> {
+    template <typename _Base, typename... _Annotations>
+    struct NamedRegistry : Registry<_Base, _Annotations...> {
 
-        struct CollectorInfo : Registry<_Base, _Ty...>::CollectorInfo {
+        struct CollectorInfo : Registry<_Base, _Annotations...>::CollectorInfo {
             template <typename T>
             size_t registerComponent()
             {
                 this->mComponentNames.emplace_back(T::componentName());
-                return Registry<_Base, _Ty...>::CollectorInfo::template registerComponent<T>();
+                return Registry<_Base, _Annotations...>::CollectorInfo::template registerComponent<T>();
             }
 
             void unregisterComponent(size_t i)
             {
-                Registry<_Base, _Ty...>::CollectorInfo::unregisterComponent(i);
+                Registry<_Base, _Annotations...>::CollectorInfo::unregisterComponent(i);
                 this->mComponentNames[i] = {};
             }
         };
 
         NamedRegistry()
-            : Registry<_Base, _Ty...>(&typeInfo<NamedRegistry>)
+            : Registry<_Base, _Annotations...>(&typeInfo<NamedRegistry>)
         {
             this->mIsNamed = true;
         }
 
         static NamedRegistry &sInstance()
         {
-            return static_cast<NamedRegistry &>(registry<Registry<_Base, _Ty...>>());
+            return static_cast<NamedRegistry &>(registry<Registry<_Base, _Annotations...>>());
         }
 
         static const std::map<std::string_view, IndexType<uint32_t>> &sComponentsByName()
@@ -253,7 +243,7 @@ namespace UniqueComponent {
         {
             size_t counter = this->mComponentsByName.size();
 
-            for (typename Registry<_Base, _Ty...>::CollectorInfo *info : this->mUnloadedCollectors) {
+            for (typename Registry<_Base, _Annotations...>::CollectorInfo *info : this->mUnloadedCollectors) {
                 if (info->mBinary == bin) {
                     const std::vector<std::string_view> &names = static_cast<CollectorInfo *>(info)->mComponentNames;
                     for (std::string_view name : names) {
@@ -263,7 +253,7 @@ namespace UniqueComponent {
                 }
             }
 
-            Registry<_Base, _Ty...>::onPluginLoad(bin);
+            Registry<_Base, _Annotations...>::onPluginLoad(bin);
         }
     };
 
@@ -275,23 +265,22 @@ namespace UniqueComponent {
 namespace Engine {
 namespace UniqueComponent {
 
-    template <typename _Base, typename... _Ty>
+    template <typename _Base, typename... _Annotations>
     struct Registry {
 
         typedef _Base Base;
-        typedef std::tuple<_Ty...> Ty;
-        typedef Collector_F<Base, _Ty...> F;
+        using Annotations = GroupedAnnotation<_Annotations...>;
 
-        static std::vector<F> sComponents();
+        static std::vector<Annotations> sComponents();
 
-        static F getConstructor(size_t i)
+        static const Annotations &get(size_t i)
         {
             return sComponents()[i];
         }
     };
 
-    template <typename _Base, typename... _Ty>
-    struct NamedRegistry : Registry<_Base, _Ty...> {
+    template <typename _Base, typename... _Annotations>
+    struct NamedRegistry : Registry<_Base, _Annotations...> {
 
         static const std::map<std::string_view, IndexType<uint32_t>> &sComponentsByName();
 

@@ -10,6 +10,8 @@ namespace Root {
 
         virtual std::string_view key() const = 0;
 
+        virtual Threading::Task<int> runTools();
+
         int mErrorCode = 0;
 
     protected:

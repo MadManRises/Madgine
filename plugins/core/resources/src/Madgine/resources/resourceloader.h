@@ -169,7 +169,6 @@ namespace Resources {
         template <typename C = Ctor>
         static Resource *getOrCreateManual(std::string_view name, const Filesystem::Path &path = {}, C &&ctor = {}, T *loader = &getSingleton())
         {
-            assert(name != ResourceBase::sUnnamed);
             return &loader->mResources.try_emplace(
                                           std::string { name }, std::string { name }, path, Interface::template toCtor<T>(std::forward<C>(ctor)))
                         .first->second;
@@ -217,7 +216,7 @@ namespace Resources {
         static Threading::TaskFuture<void> unload(const Handle &handle, T *loader = &getSingleton())
         {
             if (!handle)
-                return {};
+                return Threading::TaskFuture<void>::make_ready();
 
             ResourceDataInfo &info = *getInfo(handle, loader);
             Threading::TaskFuture<void> task = info.unloadingTask();
@@ -263,8 +262,6 @@ namespace Resources {
                 if ((typename traits::handle) * resource->mData == handle.mData)
                     *resource->mData = {};
 
-                //if (resource->name() == ResourceBase::sUnnamed)
-                //    delete resource;
             }
         }
 

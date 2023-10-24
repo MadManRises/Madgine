@@ -6,6 +6,8 @@
 
 #include "Modules/uniquecomponent/component_index.h"
 
+#include "Generic/lambda.h"
+
 namespace Engine {
 namespace Scene {
 
@@ -216,6 +218,11 @@ namespace Serialize {
             entityComponentOwningHelperWrite(out, handle.mHandle, name, hierarchy);
         }
 
+        static StreamResult scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+        {
+            return SerializableDataPtr::scanStream<T>(in, name, callback);
+        }
+
         static StreamResult applyMap(FormattedSerializeStream& in, Scene::Entity::EntityComponentOwningHandle<T>& handle, bool success, CallerHierarchyBasePtr hierarchy) {
             return entityComponentOwningHelperApplyMap(in, handle.mHandle, success, hierarchy);
         }
@@ -242,6 +249,12 @@ namespace Serialize {
         static void write(Serialize::FormattedSerializeStream &out, const Scene::Entity::EntityComponentOwningHandle<T> &handle, const char *name, Scene::SceneManager *mgr)
         {
             entityComponentHelperWrite(out, handle, name, mgr);
+        }
+
+        static StreamResult scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+        {
+            throw 0;
+            return {};
         }
     };
 

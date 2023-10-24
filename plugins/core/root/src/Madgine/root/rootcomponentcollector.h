@@ -3,7 +3,7 @@
 #include "Modules/uniquecomponent/uniquecomponentdefine.h"
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
-DECLARE_UNIQUE_COMPONENT(Engine::Root, RootComponent, RootComponentBase, Engine::Root::Root &)
+DECLARE_UNIQUE_COMPONENT(Engine::Root, RootComponent, RootComponentBase, Engine::UniqueComponent::Constructor<RootComponentBase, Engine::Root::Root &>)
 
 namespace Engine {
 namespace Root {

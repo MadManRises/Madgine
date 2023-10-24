@@ -35,14 +35,12 @@ namespace FirstParty {
 
         mInitialized = SteamAPI_Init();
 
-        if (!root.toolMode()) {
-            root.taskQueue()->queue([this]() -> Threading::Task<void> {
-                while (mRoot.taskQueue()->running()) {
-                    SteamAPI_RunCallbacks();
-                    co_await 100ms;
-                }
-            });
-        }
+        root.taskQueue()->queue([this]() -> Threading::Task<void> {
+            while (mRoot.taskQueue()->running()) {
+                SteamAPI_RunCallbacks();
+                co_await 100ms;
+            }
+        });
 
         requestCurrentStats();
     }
@@ -123,7 +121,7 @@ namespace FirstParty {
 
         LeaderboardScoreUploaded_t payload = co_await std::move(upload);
 
-        co_return success && payload.m_bSuccess;
+        co_return success &&payload.m_bSuccess;
     }
 
     void SteamServices::requestCurrentStats()
@@ -145,7 +143,7 @@ namespace FirstParty {
 
         if (!SteamUserStats()->SetAchievement(name))
             co_return false;
-        
+
         co_return SteamUserStats()->StoreStats();
     }
 

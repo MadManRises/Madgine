@@ -2,6 +2,7 @@
 
 #include "Generic/callerhierarchy.h"
 #include "Generic/execution/sender.h"
+#include "Generic/lambda.h"
 #include "serializableunit.h"
 
 #include "../streams/pendingrequest.h"
@@ -33,6 +34,8 @@ namespace Serialize {
 
         StreamResult applyMap(FormattedSerializeStream &in, bool success, CallerHierarchyBasePtr hierarchy = {});
         void setActive(bool active, bool existenceChanged);
+
+        static StreamResult scanStream(const SerializeTable *table, FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback);
 
         StreamResult readAction(FormattedBufferedStream &in, PendingRequest &request);
         StreamResult readRequest(FormattedBufferedStream &in, MessageId id);

@@ -128,7 +128,7 @@ namespace Resources {
     template <typename Loader>
     struct Resource : Loader::Interface::Resource {
 
-        Resource(const std::string &name, const Filesystem::Path &path, typename Loader::Ctor ctor = {})
+        Resource(const std::string &name, const Filesystem::Path &path = {}, typename Loader::Ctor ctor = {})
             : Loader::Interface::Resource(name, path)
             , mCtor(ctor ? std::move(ctor) : Loader::Interface::template toCtor<Loader>(&Loader::loadImpl))
         {

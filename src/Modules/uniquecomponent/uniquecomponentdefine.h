@@ -1,22 +1,23 @@
 #pragma once
 
 #include "Generic/replace.h"
+#include "annotations.h"
 
 //base is included in __VA_ARGS__ to circumvent the problem with empty __VA_ARGS__ and ,
 #define DECLARE_UNIQUE_COMPONENT2(ns, prefix, registry, component, /*base, */...)                                                                                                 \
     namespace ns {                                                                                                                                                                \
     using prefix##Registry = registry<__VA_ARGS__>;                                                                                                                               \
     using prefix##BaseRegistry = Engine::UniqueComponent::Registry<__VA_ARGS__>;                                                                                                  \
-    using prefix##Collector = Engine::UniqueComponent::Collector<prefix##Registry, __VA_ARGS__>;                                                                                  \
+    using prefix##Collector = Engine::UniqueComponent::Collector<prefix##Registry>;                                                                                  \
     template <typename C>                                                                                                                                                         \
-    using prefix##Container = Engine::UniqueComponent::Container<typename Engine::replace<C>::template type<std::unique_ptr<FIRST(__VA_ARGS__)>>, prefix##Registry, __VA_ARGS__>; \
-    using prefix##Selector = Engine::UniqueComponent::Selector<prefix##Registry, __VA_ARGS__>;                                                                                    \
+    using prefix##Container = Engine::UniqueComponent::Container<typename Engine::replace<C>::template type<std::unique_ptr<FIRST(__VA_ARGS__)>>, prefix##Registry>; \
+    using prefix##Selector = Engine::UniqueComponent::Selector<prefix##Registry>;                                                                                    \
     template <typename T, typename Base = FIRST(__VA_ARGS__)>                                                                                                                     \
     using prefix##Component = component<Engine::UniqueComponent::Component<T, prefix##Collector, Base>>;                                                                          \
     template <typename T, typename Base = FIRST(__VA_ARGS__)>                                                                                                                     \
     using prefix##VirtualBase = component<Engine::UniqueComponent::VirtualComponentBase<T, prefix##Collector, Base>>;                                                             \
     template <typename T, typename Base>                                                                                                                                          \
-    using prefix##VirtualImpl = component<Engine::UniqueComponent::VirtualComponentImpl<T, Base>>;                                                                                \
+    using prefix##VirtualImpl = Engine::UniqueComponent::VirtualComponentImpl<T, Base>;                                                                                \
     }                                                                                                                                                                             \
     REGISTER_TYPE(ns::prefix##Registry)
 

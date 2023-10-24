@@ -9,21 +9,21 @@
 namespace Engine {
 namespace UniqueComponent {
 
-    template <typename C, typename Registry, typename __dont_remove_Base, typename... _Ty>
+    template <typename C, typename Registry>
     struct Container : C {
 
-        typedef typename Registry::F F;
         typedef typename Registry::Base Base;
 
-        Container(_Ty... arg)
+        template <typename... Args>
+        Container(Args&&... arg)
         {
             size_t count = Registry::sComponents().size();
             mSortedComponents.reserve(count);
             if constexpr (InstanceOf<C, std::vector>) {
                 this->reserve(count);
             }
-            for (auto f : Registry::sComponents()) {
-                auto p = f(arg...);
+            for (const auto &annotations : Registry::sComponents()) {
+                auto p = annotations.construct(arg...);
                 mSortedComponents.push_back(p.get());
                 Engine::emplace(static_cast<typename base_container<C>::type &>(*this), C::end(), std::move(p));
             }
@@ -48,8 +48,8 @@ namespace UniqueComponent {
     };
 }
 
-template <typename C, typename Registry, typename __dont_remove_Base, typename... _Ty>
-struct underlying_container<UniqueComponent::Container<C, Registry, __dont_remove_Base, _Ty...>> {
+template <typename C, typename Registry>
+struct underlying_container<UniqueComponent::Container<C, Registry>> {
     typedef C type;
 };
 

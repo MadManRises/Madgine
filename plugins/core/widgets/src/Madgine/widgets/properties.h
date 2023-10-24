@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Generic/enum.h"
+#include "Generic/lambda.h"
 
 namespace Engine {
 namespace Widgets {
@@ -87,6 +88,7 @@ namespace Serialize {
     struct Operations<Widgets::PropertyList> {
         static StreamResult read(Serialize::FormattedSerializeStream &in, Widgets::PropertyList &list, const char *name);
         static void write(Serialize::FormattedSerializeStream &out, Widgets::PropertyRange list, const char *name);
+        static StreamResult scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback);
     };
 }
 

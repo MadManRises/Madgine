@@ -13,6 +13,8 @@ namespace Tools {
         static void exportStaticComponentHeader(const Filesystem::Path &outFile);
 
         virtual std::string_view key() const override;
+
+        virtual Threading::Task<int> runTools() override;
     };
 
 }

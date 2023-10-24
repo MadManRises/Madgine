@@ -148,6 +148,7 @@ namespace Serialize {
         struct SyncFunctionTable;
     }
 
+    using ScanCallback = StreamResult(bool&, FormattedSerializeStream &, std::span<std::string_view>, IndexType<size_t>, const SerializeTable *);
     
     template <typename T, typename... Configs>
     void setActive(T &t, bool active, bool existenceChanged, CallerHierarchyBasePtr hierarchy = {});

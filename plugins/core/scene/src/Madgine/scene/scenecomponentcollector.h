@@ -7,7 +7,7 @@
 
 #include "Meta/keyvalue/virtualscope.h"
 
-DECLARE_UNIQUE_COMPONENT(Engine::Scene, SceneComponent, SceneComponentBase, SceneManager &)
+DECLARE_UNIQUE_COMPONENT(Engine::Scene, SceneComponent, SceneComponentBase, Engine::UniqueComponent::Constructor<SceneComponentBase, SceneManager &>)
 
 namespace Engine
 {

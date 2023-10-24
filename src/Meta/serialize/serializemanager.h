@@ -33,6 +33,8 @@ namespace Serialize {
 
 		SerializeStreamData *getSlaveStreamData();        
 
+        SerializeStream wrapStream(Stream stream, bool isSlave = false);
+
     protected:
         void setSlaveStreamData(SerializeStreamData *data);
 

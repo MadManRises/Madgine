@@ -2,9 +2,13 @@
 
 #include "Meta/keyvalue/virtualscope.h"
 #include "Modules/threading/task.h"
+#include "Generic/genericresult.h"
 
 namespace Engine {
 namespace Resources {
+
+    ENUM_BASE(BakeResult, GenericResult,
+        NOTHING_TO_DO);
 
     struct ResourceLoaderSettings {
         bool mAutoLoad = false;
@@ -22,6 +26,16 @@ namespace Resources {
 
         ResourceLoaderBase &operator=(const ResourceLoaderBase &) = delete;
 
+        virtual Threading::Task<BakeResult> bakeResources(std::vector<Filesystem::Path> &resources, const Filesystem::Path &intermediateDir);
+        
+        virtual Threading::TaskQueue *loadingTaskQueue() const;
+        
+        const std::vector<std::string> &fileExtensions() const;
+
+        size_t extensionIndex(std::string_view ext) const;
+
+
+        //Implemented by ResourceManager template class
         virtual std::pair<ResourceBase *, bool> addResource(const Filesystem::Path &path, std::string_view name = {}) = 0;
         virtual void updateResourceData(ResourceBase *res) = 0;
 
@@ -33,15 +47,9 @@ namespace Resources {
             }
         }
 
-        const std::vector<std::string> &fileExtensions() const;
-
-        size_t extensionIndex(std::string_view ext) const;
-
         virtual std::vector<std::pair<std::string_view, TypedScopePtr>> typedResources() = 0;
         virtual std::vector<const MetaTable *> resourceTypes() const = 0;
         virtual std::vector<ResourceBase *> resources() = 0; 
-
-        virtual Threading::TaskQueue *loadingTaskQueue() const;
 
     protected:
         std::vector<std::string> mExtensions;

@@ -196,6 +196,40 @@ namespace Serialize {
         get(index).mWriteRequest(unit, out, data);
     }
 
+    StreamResult SerializeTable::scanStream(FormattedSerializeStream &in, const Lambda<ScanCallback> &callback) const
+    {
+        if (in.supportsNameLookup()) {
+            std::string name;
+            STREAM_PROPAGATE_ERROR(in.lookupFieldName(name));
+            while (!name.empty()) {
+                bool found = false;
+                const SerializeTable *tableAcc = this;
+                while (tableAcc && !found) {
+                    for (const Serializer *it = tableAcc->mFields; it->mFieldName; ++it) {
+                        if (name == it->mFieldName) {
+                            STREAM_PROPAGATE_ERROR(it->mScanStream(in, it->mFieldName, callback));
+                            found = true;
+                            break;
+                        }
+                    }
+                    tableAcc = tableAcc->mBaseType ? &tableAcc->mBaseType() : nullptr;
+                }
+                if (!found)
+                    return STREAM_PARSE_ERROR(in) << "Could not find field '" << name << "'";
+                STREAM_PROPAGATE_ERROR(in.lookupFieldName(name));
+            }
+        } else {
+            const SerializeTable *tableAcc = this;
+            while (tableAcc) {
+                for (const Serializer *it = tableAcc->mFields; it->mFieldName; ++it) {
+                    STREAM_PROPAGATE_ERROR(it->mScanStream(in, it->mFieldName, callback));
+                }
+                tableAcc = tableAcc->mBaseType ? &tableAcc->mBaseType() : nullptr;
+            }
+        }
+        return {};
+    }
+
     uint16_t SerializeTable::getIndex(OffsetPtr offset) const
     {
         uint16_t index = 0;

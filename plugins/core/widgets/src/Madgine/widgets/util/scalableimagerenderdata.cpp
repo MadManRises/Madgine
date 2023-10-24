@@ -8,6 +8,8 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
+#include "../widgetmanager.h"
+
 METATABLE_BEGIN_BASE(Engine::Widgets::ScalableImageRenderData, Engine::Widgets::RenderData)
 PROPERTY(Image, image, setImage)
 MEMBER(mLeftBorder)
@@ -17,7 +19,7 @@ MEMBER(mRightBorder)
 METATABLE_END(Engine::Widgets::ScalableImageRenderData)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Widgets::ScalableImageRenderData, Engine::Widgets::RenderData)
-ENCAPSULATED_FIELD(Image, imageName, setImageName)
+ENCAPSULATED_FIELD(Image, imageName, setImageName, Engine::Serialize::Tags<"Image">)
 FIELD(mLeftBorder)
 FIELD(mTopBorder)
 FIELD(mBottomBorder)
@@ -27,9 +29,9 @@ SERIALIZETABLE_END(Engine::Widgets::ScalableImageRenderData)
 namespace Engine {
 namespace Widgets {
 
-    void ScalableImageRenderData::setImageName(std::string_view name)
+    void ScalableImageRenderData::setImageName(std::string_view name, WidgetManager *mgr)
     {
-        setImage(Resources::ImageLoader::getSingleton().get(name));
+        setImage(mgr->getImage(name));
     }
 
     void ScalableImageRenderData::setImage(Resources::ImageLoader::Resource *image)

@@ -9,11 +9,9 @@
 namespace Engine {
 namespace UniqueComponent {
 
-    template <typename Registry, typename __Base, typename... _Ty>
+    template <typename Registry>
     struct Collector {
         typedef typename Registry::Base Base;
-        typedef std::tuple<_Ty...> Ty;
-        typedef typename Registry::F F;
 
         Collector()
         {
@@ -55,8 +53,8 @@ namespace UniqueComponent {
         };
     };
 
-    template <typename Registry, typename __Base, typename... _Ty>
-    Collector<Registry, __Base, _Ty...> &Collector<Registry, __Base, _Ty...>::sInstance()
+    template <typename Registry>
+    Collector<Registry> &Collector<Registry>::sInstance()
     {
         static Collector dummy;
         return dummy;
@@ -70,11 +68,9 @@ namespace UniqueComponent {
 namespace Engine {
 namespace UniqueComponent {
 
-    template <typename Registry, typename __Base, typename... _Ty>
+    template <typename Registry>
     struct Collector {
         typedef typename Registry::Base Base;
-        typedef std::tuple<_Ty...> Ty;
-        typedef typename Registry::F F;
     };
 
 }

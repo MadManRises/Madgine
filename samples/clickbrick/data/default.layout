@@ -1,6 +1,6 @@
 <Layout serId=1>
     <mComponents>
-        <Item key="Main-Scene" serId=2>
+        <Item key="SceneMainWindowComponent" serId=2>
         </Item>
         <Item key="WidgetManager" serId=3>
             <mStartupWidget>4</mStartupWidget>

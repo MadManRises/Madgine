@@ -45,6 +45,7 @@ METATABLE_END(Engine::Tools::ClientImRoot)
 SERIALIZETABLE_BEGIN(Engine::Tools::ClientImRoot)
 SERIALIZETABLE_END(Engine::Tools::ClientImRoot)
 
+COMPONENT_NAME(ClientImRoot, Engine::Tools::ClientImRoot)
 VIRTUALUNIQUECOMPONENTBASE(Engine::Tools::ClientImRoot)
 
 namespace Engine {
@@ -134,7 +135,7 @@ namespace Tools {
     }
 
     ClientImRoot::ClientImRoot(Window::MainWindow &window)
-        : VirtualData(window, 80)
+        : MainWindowVirtualBase(window, 80)
         , mImGuiIniFilePath(Filesystem::appDataPath() / "imgui.ini")
         , mFrameClock(std::chrono::steady_clock::now())
     {
@@ -375,11 +376,6 @@ namespace Tools {
     void ClientImRoot::removeViewportMapping(Render::RenderTarget *target)
     {
         mViewportMappings.erase(target);
-    }
-
-    std::string_view ClientImRoot::key() const
-    {
-        return "ClientImRoot";
     }
 
     Rect2i ClientImRoot::getChildClientSpace()

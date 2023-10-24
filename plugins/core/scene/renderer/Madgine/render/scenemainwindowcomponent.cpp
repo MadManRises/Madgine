@@ -19,7 +19,7 @@
 
 #include "scenerenderdata.h"
 
-UNIQUECOMPONENT(Engine::Render::SceneMainWindowComponent)
+NAMED_UNIQUECOMPONENT(SceneMainWindowComponent, Engine::Render::SceneMainWindowComponent)
 
 METATABLE_BEGIN(Engine::Render::SceneMainWindowComponent)
 MEMBER(mAmbientLightColor)
@@ -34,7 +34,7 @@ namespace Engine {
 namespace Render {
 
     SceneMainWindowComponent::SceneMainWindowComponent(Window::MainWindow &window)
-        : VirtualData(window, 5)
+        : MainWindowComponent(window, 5)
         , mScene(Engine::App::Application::getSingletonPtr() ? &Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>() : nullptr)
         , mPass(*this, &mCamera, 1)
         , mPointShadowPasses { { 0, *this, 50 }, { 1, *this, 50 } }
@@ -74,11 +74,6 @@ namespace Render {
 
             mSceneData.reset();
         }
-    }
-
-    std::string_view SceneMainWindowComponent::key() const
-    {
-        return "Main-Scene";
     }
 
     Scene::SceneManager *SceneMainWindowComponent::scene()

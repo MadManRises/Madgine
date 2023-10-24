@@ -8,6 +8,8 @@
 
 #include "Generic/container/emplace.h"
 
+#include "Generic/lambda.h"
+
 #include "../streams/formattedserializestream.h"
 
 namespace Engine {
@@ -27,9 +29,10 @@ namespace Serialize {
         static void writeItem(FormattedSerializeStream &out, const std::ranges::range_value_t<C> &t)
         {
             out.beginCompoundWrite("Item");
-            writeCreationData<std::ranges::range_value_t<C>>(out, t);
-            write<typename std::ranges::range_value_t<C>::first_type>(out, t.first, "Key");
-            write<typename std::ranges::range_value_t<C>::second_type>(out, t.second, "Value");
+            using T = std::ranges::range_value_t<C>;
+            writeCreationData<T>(out, t);
+            write<typename T::first_type>(out, t.first, "Key");
+            write<typename T::second_type>(out, t.second, "Value");
             out.endCompoundWrite("Item");
         }
 
@@ -37,13 +40,26 @@ namespace Serialize {
         static StreamResult readItem(FormattedSerializeStream &in, Op &op, std::ranges::iterator_t<Op> &it, const std::ranges::const_iterator_t<Op> &where)
         {
             STREAM_PROPAGATE_ERROR(in.beginCompoundRead(nullptr));
-            ArgsTuple<std::ranges::range_value_t<Op>> tuple;
-            STREAM_PROPAGATE_ERROR(readCreationData<std::ranges::range_value_t<Op>>(in, tuple));
+            using T = std::ranges::range_value_t<Op>;
+            ArgsTuple<T> tuple;
+            STREAM_PROPAGATE_ERROR(readCreationData<T>(in, tuple));
             bool success;
             it = TupleUnpacker::invokeExpand(emplace, success, op, where, std::move(tuple));
             assert(success);
-            STREAM_PROPAGATE_ERROR(read<typename std::ranges::range_value_t<Op>::first_type>(in, it->first, "Key"));
-            STREAM_PROPAGATE_ERROR(read<typename std::ranges::range_value_t<Op>::second_type>(in, it->second, "Value"));
+            STREAM_PROPAGATE_ERROR(read<typename T::first_type>(in, it->first, "Key"));
+            STREAM_PROPAGATE_ERROR(read<typename T::second_type>(in, it->second, "Value"));
+            return in.endCompoundRead(nullptr);
+        }
+
+        template <typename C>
+        static StreamResult scanStream(FormattedSerializeStream &in, const Lambda<ScanCallback> &callback)
+        {
+            STREAM_PROPAGATE_ERROR(in.beginCompoundRead(nullptr));
+            using T = std::ranges::range_value_t<C>;
+            ArgsTuple<T> tuple;
+            STREAM_PROPAGATE_ERROR(readCreationData<T>(in, tuple));
+            STREAM_PROPAGATE_ERROR(Serialize::scanStream<typename T::first_type>(in, "Key", callback));
+            STREAM_PROPAGATE_ERROR(Serialize::scanStream<typename T::second_type>(in, "Value", callback));
             return in.endCompoundRead(nullptr);
         }
 
@@ -119,6 +135,18 @@ namespace Serialize {
             return {};
         }
 
+        template <typename C>
+        static StreamResult scanStream(FormattedSerializeStream &in, const Lambda<ScanCallback> &callback)
+        {
+            using T = std::remove_reference_t<std::ranges::range_reference_t<C>>;
+            ArgsTuple<T> tuple;
+            STREAM_PROPAGATE_ERROR(readCreationData<T>(in, tuple));
+            if constexpr (!std::is_const_v<T>) {
+                STREAM_PROPAGATE_ERROR(Serialize::scanStream<T>(in, "Item", callback));
+            }
+            return {};
+        }
+
         template <typename Op>
         static void clear(Op &op)
         {
@@ -179,6 +207,14 @@ namespace Serialize {
                 return {};
             }
 
+            template <typename C>
+            static StreamResult scanStream(FormattedSerializeStream &in, const Lambda<ScanCallback> &callback)
+            {
+                ArgsTuple tuple;          
+                STREAM_PROPAGATE_ERROR(readCreationData(in, tuple));
+                return Serialize::scanStream<std::ranges::range_value_t<C>>(in, nullptr, callback);
+            }
+
             template <typename Arg>
             static const char *writeCreationData(FormattedSerializeStream &out, const Arg &arg, const CallerHierarchyBasePtr &hierarchy)
             {
@@ -199,7 +235,7 @@ namespace Serialize {
             }
         };
 
-        template <auto reader, typename WriteFunctor, typename ClearFunctor, OneOf<void, StreamResult> R, typename T, typename Stream, typename... _Ty>
+        template <auto reader, typename WriteFunctor, typename ClearFunctor, typename Scan, OneOf<void, StreamResult> R, typename T, typename Stream, typename... _Ty>
         struct _ParentCreator {
 
             using Category = CreatorCategory;
@@ -238,6 +274,19 @@ namespace Serialize {
                 return {};
             }
 
+            template <typename C>
+            static StreamResult scanStream(FormattedSerializeStream &in, const Lambda<ScanCallback> &callback)
+            {
+                if constexpr (std::same_as<std::remove_const_t<decltype(Scan::value)>, nullptr_t>) {
+                    throw 0;
+                } else {
+                    const SerializeTable *type = nullptr;
+                    STREAM_PROPAGATE_ERROR(Scan::value(type, in));
+                    assert(type);
+                    return SerializableDataPtr::scanStream(type, in, nullptr, callback);
+                }                
+            }
+
             template <typename Arg>
             static const char *writeCreationData(FormattedSerializeStream &out, const Arg &arg, const CallerHierarchyBasePtr &hierarchy)
             {
@@ -263,8 +312,8 @@ namespace Serialize {
 
     }
 
-    template <auto reader, auto writer, auto clear = nullptr>
-    using ParentCreator = typename FunctionCapture<__serialize_impl__::_ParentCreator, reader, MemberFunctor<writer>, std::conditional_t<std::same_as<decltype(clear), std::nullptr_t>, __serialize_impl__::DefaultClear, UnpackingMemberFunctor<clear>>>::type;
+    template <auto reader, auto writer, auto clear = nullptr, auto scan = nullptr>
+    using ParentCreator = typename FunctionCapture<__serialize_impl__::_ParentCreator, reader, MemberFunctor<writer>, std::conditional_t<std::same_as<decltype(clear), std::nullptr_t>, __serialize_impl__::DefaultClear, UnpackingMemberFunctor<clear>>, auto_holder<scan>>::type;
 
     template <auto reader, auto writer, auto clear = nullptr>
     using CustomCreator = typename FunctionCapture<__serialize_impl__::_CustomCreator, reader, Functor<writer>, std::conditional_t<std::same_as<decltype(clear), std::nullptr_t>, __serialize_impl__::DefaultClear, Functor<clear>>>::type;

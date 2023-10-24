@@ -567,6 +567,11 @@ namespace Serialize {
             Serialize::write(out, *handle.mInstance, name);
         }
     }
+
+    StreamResult Operations<Physics::CollisionShapeManager::InstanceHandle>::scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+    {
+        throw 0;
+    }
 }
 
 }

@@ -98,11 +98,14 @@ namespace Serialize {
                 },
                 [](const SyncableUnitBase *_unit, FormattedBufferedStream &out, void *data) {
                     throw "Unsupported";
+                },
+                [](size_t, FormattedSerializeStream &, const char *, const Lambda<ScanCallback> &) -> StreamResult {
+                    return {};
                 }
             };
         }
 
-        template <typename _disambiguate__dont_remove, auto Getter, auto Setter>
+        template <typename _disambiguate__dont_remove, auto Getter, auto Setter, typename... Configs>
         constexpr Serializer encapsulated_field(const char *name)
         {
 
@@ -113,7 +116,9 @@ namespace Serialize {
             using setter_traits = CallableTraits<decltype(Setter)>;
             static_assert(std::same_as<Unit, std::decay_t<typename setter_traits::class_type>>);
 
-            static_assert(std::same_as<typename setter_traits::decay_argument_types, type_pack<T>>);
+            static_assert(requires(Unit * unit, MakeOwning_t<T> dummy, CallerHierarchyBasePtr hierarchy) {
+                TupleUnpacker::invoke(Setter, unit, std::move(dummy), hierarchy);
+            });
 
             return {
                 name,
@@ -122,13 +127,13 @@ namespace Serialize {
                 },
                 [](const SerializableDataUnit *_unit, FormattedSerializeStream &out, const char *name, CallerHierarchyBasePtr hierarchy) {
                     const Unit *unit = static_cast<const Unit *>(_unit);
-                    write(out, (unit->*Getter)(), name, hierarchy.append(unit));
+                    write<T, Configs...>(out, (unit->*Getter)(), name, hierarchy.append(unit));
                 },
                 [](SerializableDataUnit *_unit, FormattedSerializeStream &in, const char *name, CallerHierarchyBasePtr hierarchy) -> StreamResult {
                     Unit *unit = static_cast<Unit *>(_unit);
                     MakeOwning_t<T> dummy;
-                    STREAM_PROPAGATE_ERROR(read(in, dummy, name, CallerHierarchyPtr { hierarchy.append(unit) }));
-                    (unit->*Setter)(std::move(dummy));
+                    STREAM_PROPAGATE_ERROR(SINGLE_ARG(read<MakeOwning_t<T>, Configs...>)(in, dummy, name, CallerHierarchyPtr { hierarchy.append(unit) }));
+                    TupleUnpacker::invoke(Setter, unit, std::move(dummy), hierarchy);
                     return {};
                 },
                 [](SerializableDataUnit *unit, FormattedBufferedStream &in, PendingRequest &request) -> StreamResult {
@@ -151,6 +156,9 @@ namespace Serialize {
                 },
                 [](const SerializableDataUnit *_unit, FormattedBufferedStream &out, void *data) {
                     throw "Unsupported";
+                },
+                [](FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback) -> StreamResult {
+                    return Serialize::scanStream<T, Configs...>(in, name, callback);
                 }
             };
         }
@@ -218,6 +226,9 @@ namespace Serialize {
                         writeRequest<T, Configs...>(unit->*P, out, std::move(payload), CallerHierarchyPtr { CallerHierarchy { unit } });
                     } else
                         throw "Unsupported";
+                },
+                [](FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback) -> StreamResult {
+                    return scanStream<T, Configs...>(in, name, callback);
                 }
             };
         }
@@ -389,8 +400,8 @@ namespace Serialize {
 #define FIELD(...) \
     SERIALIZETABLE_ENTRY(SINGLE_ARG(::Engine::Serialize::__serialize_impl__::field<Ty, &Ty::__VA_ARGS__>(STRINGIFY2(FIRST(__VA_ARGS__)), parentConfigs)))
 
-#define ENCAPSULATED_FIELD(Name, Getter, Setter) \
-    SERIALIZETABLE_ENTRY(SINGLE_ARG(::Engine::Serialize::__serialize_impl__::encapsulated_field<Ty, &Ty::Getter, &Ty::Setter>(#Name)))
+#define ENCAPSULATED_FIELD(Name, Getter /*, Setter*/, ...) \
+    SERIALIZETABLE_ENTRY(SINGLE_ARG(::Engine::Serialize::__serialize_impl__::encapsulated_field<Ty, &Ty::Getter, &Ty::__VA_ARGS__>(#Name)))
 
 #define ENCAPSULATED_POINTER(Name, Getter, Setter) \
     SERIALIZETABLE_ENTRY(SINGLE_ARG(::Engine::Serialize::__serialize_impl__::encapsulated_pointer<Ty, &Ty::Name, &Ty::Getter, &Ty::Setter>(#Name)))

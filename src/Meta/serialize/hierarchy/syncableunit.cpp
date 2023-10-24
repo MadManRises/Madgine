@@ -88,6 +88,15 @@ namespace Serialize {
         mType->setActive(this, active, existenceChanged);
     }
 
+    StreamResult SyncableUnitBase::scanStream(const SerializeTable *table, FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+    {
+        assert(!in.isMaster(AccessMode::READ));
+        STREAM_PROPAGATE_ERROR(in.beginExtendedRead(name, 1));
+        UnitId id;
+        STREAM_PROPAGATE_ERROR(read(in, id, "syncId"));
+        return SerializableDataPtr::scanStream(table, in, name, callback);
+    }
+
     StreamResult SyncableUnitBase::readAction(FormattedBufferedStream &in, PendingRequest &request)
     {
         return mType->readAction(this, in, request);

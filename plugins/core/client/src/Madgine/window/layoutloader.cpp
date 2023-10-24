@@ -4,6 +4,16 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
+#include "Madgine/serialize/filesystem/filemanager.h"
+
+#include "Meta/serialize/streams/formattedserializestream.h"
+
+#include "Meta/serialize/formatter/xmlformatter.h"
+
+#include "Meta/serialize/operations.h"
+
+#include "mainwindow.h"
+
 UNIQUECOMPONENT(Engine::Window::LayoutLoader)
 
 METATABLE_BEGIN(Engine::Window::LayoutLoader)
@@ -29,6 +39,16 @@ namespace Window {
     Threading::Task<void> LayoutLoader::unloadImpl(LayoutDummy &data)
     {
         throw 0;
+    }
+
+    Threading::Task<Resources::BakeResult> LayoutLoader::bakeResources(std::vector<Filesystem::Path> &resourcesToBake, const Filesystem::Path &intermediateDir)
+    {
+        co_return Resources::BakeResult::NOTHING_TO_DO;
+    }
+
+    Serialize::FormattedSerializeStream LayoutLoader::Interface::Resource::readAsFormattedStream(Serialize::SerializeManager &mgr)
+    {
+        return Serialize::FormattedSerializeStream { std::make_unique<Serialize::XMLFormatter>(), mgr.wrapStream(readAsStream(), true) };
     }
 
 }

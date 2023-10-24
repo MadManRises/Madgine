@@ -110,7 +110,7 @@ namespace Serialize {
         return unit == nullptr
             ? NULL_UNIT_ID
             : out.isMaster(AccessMode::WRITE) ? unit->masterId()
-                             : unit->slaveId();
+                                              : unit->slaveId();
     }
 
     StreamResult SerializeManager::convertPtr(SerializeStream &in,
@@ -141,6 +141,17 @@ namespace Serialize {
         return mSlaveStreamData;
     }
 
+    SerializeStream SerializeManager::wrapStream(Stream stream, bool isSlave)
+    {
+        std::unique_ptr<SerializeStreamData> data = createStreamData();
+        if (isSlave)
+            setSlaveStreamData(data.get());
+        return SerializeStream {
+            stream.release(),
+            std::move(data)
+        };
+    }
+
     void SerializeManager::setSlaveStreamData(SerializeStreamData *data)
     {
         if (mSlaveStreamData && data)
@@ -148,7 +159,8 @@ namespace Serialize {
         mSlaveStreamData = data;
     }
 
-    std::unique_ptr<SerializeStreamData> SerializeManager::createStreamData() {
+    std::unique_ptr<SerializeStreamData> SerializeManager::createStreamData()
+    {
         return std::make_unique<SerializeStreamData>(*this, createStreamId());
     }
 

@@ -30,8 +30,14 @@
 
 namespace Engine {
 namespace Window {
-    static bool filterComponent(const std::unique_ptr<MainWindowComponentBase>& comp) {
+    static bool filterComponent(const std::unique_ptr<MainWindowComponentBase> &comp)
+    {
         return comp->includeInLayout();
+    }
+    static Serialize::StreamResult staticTypeResolve(const Serialize::SerializeTable *&out, std::string_view key)
+    {
+        out = MainWindowComponentRegistry::get(MainWindowComponentRegistry::sComponentsByName().at(key)).mType;
+        return {};
     }
 }
 }
@@ -41,7 +47,11 @@ READONLY_PROPERTY(Components, components)
 METATABLE_END(Engine::Window::MainWindow)
 
 SERIALIZETABLE_BEGIN(Engine::Window::MainWindow)
-FIELD(mComponents, Serialize::ControlledConfig<KeyCompare<std::unique_ptr<Engine::Window::MainWindowComponentBase>>>, Serialize::CustomFilter<Engine::Window::filterComponent>)
+FIELD(mComponents,
+    Serialize::ControlledConfig<
+        KeyCompare<std::unique_ptr<Engine::Window::MainWindowComponentBase>>,
+        Engine::Window::staticTypeResolve>,
+    Serialize::CustomFilter<Engine::Window::filterComponent>)
 SERIALIZETABLE_END(Engine::Window::MainWindow)
 
 namespace Engine {
@@ -101,10 +111,9 @@ namespace Window {
     {
         LayoutLoader::Resource *res = LayoutLoader::get(name);
 
-        
         if (res) {
-            Filesystem::FileManager mgr { "Layout" };
-            Serialize::FormattedSerializeStream file = mgr.openRead(res->path(), std::make_unique<Serialize::XMLFormatter>());
+            Serialize::SerializeManager mgr { "Layout" };
+            Serialize::FormattedSerializeStream file = res->readAsFormattedStream(mgr);
 
             if (file) {
                 Serialize::StreamResult result = Serialize::read(file, *this, nullptr, {}, Serialize::StateTransmissionFlags_ApplyMap | Serialize::StateTransmissionFlags_Activation);
@@ -202,8 +211,8 @@ namespace Window {
             mOsWindow->update();
             for (ToolWindow &window : mToolWindows)
                 window.osWindow()->update();
-            co_await (now + (1000000us / 120));
-        }        
+            co_await(now + (1000000us / 120));
+        }
     }
 
     /**

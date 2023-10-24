@@ -679,7 +679,7 @@ namespace Tools {
                 if (ImGui::BeginMenu(IMGUI_ICON_PLUS " Add Node")) {
                     for (const std::pair<const std::string_view, IndexType<uint32_t>> &nodeDesc : NodeGraph::NodeRegistry::sComponentsByName()) {
                         if (ImGui::MenuItem(nodeDesc.first.data())) {
-                            NodeGraph::NodeBase *node = mGraph.addNode(NodeGraph::NodeRegistry::getConstructor(nodeDesc.second)(mGraph));
+                            NodeGraph::NodeBase *node = mGraph.addNode(NodeGraph::NodeRegistry::get(nodeDesc.second).construct(mGraph));
                             ed::SetNodePosition(ed::NodeId { node }, mPopupPosition);
                         }
                     }

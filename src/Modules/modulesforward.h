@@ -10,19 +10,19 @@ namespace UniqueComponent {
     struct Component;
     template <typename Base>
     struct NamedComponent;
-    template <typename Registry, typename _Base, typename... _Ty>
+    template <typename Registry>
     struct Selector;
-    template <typename C, typename Registry, typename __dont_remove_Base, typename... _Ty>
+    template <typename C, typename Registry>
     struct Container;
     template <typename T, typename _Collector, typename Base>
     struct VirtualComponentBase;
     template <typename T, typename Base, typename _VBase = Base>
     struct VirtualComponentImpl;
-    template <typename _Base, typename... _Ty>
+    template <typename _Base, typename... Annotations>
     struct Registry;
-    template <typename _Base, typename... _Ty>
+    template <typename _Base, typename... Annotations>
     struct NamedRegistry;
-    template <typename Registry, typename __Base, typename... _Ty>
+    template <typename Registry>
     struct Collector;
 
     struct RegistryBase;

@@ -13,7 +13,7 @@ namespace Widgets {
 
     struct MADGINE_WIDGETS_EXPORT ScalableImageRenderData : RenderData {
 
-        void setImageName(std::string_view name);
+        void setImageName(std::string_view name, WidgetManager *mgr);
         void setImage(Resources::ImageLoader::Resource *image);
 
         std::string_view imageName() const;

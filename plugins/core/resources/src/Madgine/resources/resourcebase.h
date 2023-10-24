@@ -21,8 +21,6 @@ namespace Resources {
 
         Filesystem::AsyncFileRead readAsync() const;
 
-        static constexpr const char sUnnamed[] = "__unnamed__";
-
     private:        
 
         std::string mName;

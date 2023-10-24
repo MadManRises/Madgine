@@ -91,6 +91,11 @@ void Atlas2::addBin(const Vector2i &origin)
     mBins.emplace_back(Bin { origin }).mCorners.emplace_back(Vector2i { 0, 0 });
 }
 
+void Atlas2::clear()
+{
+    mBins.clear();
+}
+
 Atlas2::Entry Atlas2::insert(const Vector2i &size, const std::function<void()> &expand, bool allowFlip)
 {
     assert(size.x <= mBinSize.x && size.y <= mBinSize.y);

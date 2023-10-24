@@ -18,6 +18,11 @@ namespace Resources {
     {
     }
 
+    Threading::Task<BakeResult> ResourceLoaderBase::bakeResources(std::vector<Filesystem::Path> &resources, const Filesystem::Path &intermediateDir)
+    {
+        co_return BakeResult::NOTHING_TO_DO;
+    }
+
     const std::vector<std::string> &ResourceLoaderBase::fileExtensions() const
     {
         return mExtensions;

@@ -71,9 +71,20 @@ namespace Root {
             if (mErrorCode == 0)
                 mErrorCode = component->mErrorCode;
         }
+        if (mErrorCode != 0)
+            return;
 
-        if (!toolMode())
-            mTaskQueue.queueTask(updateAsyncIO());
+        mTaskQueue.queueTask(updateAsyncIO());
+
+        mTaskQueue.queue([this]() -> Threading::Task<void> {
+            for (std::unique_ptr<RootComponentBase> &component : *mComponents) {
+                int result = co_await component->runTools();
+                if (mErrorCode == 0)
+                    mErrorCode = result;
+            }
+            if (toolMode())
+                mTaskQueue.stop();
+        });
     }
 
     Root::~Root()

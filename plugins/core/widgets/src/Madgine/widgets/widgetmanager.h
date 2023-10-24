@@ -45,8 +45,6 @@ namespace Widgets {
         void registerWidget(WidgetBase *w);
         void unregisterWidget(WidgetBase *w);
 
-        virtual std::string_view key() const override;
-
         virtual Threading::Task<bool> init() override;
         virtual Threading::Task<void> finalize() override;
 
@@ -77,9 +75,9 @@ namespace Widgets {
         virtual void onResize(const Rect2i &space) override;
         virtual void render(Render::RenderTarget *target, size_t iteration) override;        
 
-        const Render::Texture &uiTexture() const;
-
         Threading::SignalStub<> &updatedSignal();
+
+        Resources::ImageLoader::Resource *getImage(std::string_view name);
 
         const Atlas2::Entry *lookUpImage(Resources::ImageLoader::Resource *image);
         const Atlas2::Entry *lookUpImage(std::string_view name);
@@ -101,6 +99,7 @@ namespace Widgets {
         Serialize::StreamResult readWidget(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget, WidgetBase *parent);
         Serialize::StreamResult readWidgetStub(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget);
         const char *writeWidget(Serialize::FormattedSerializeStream &out, const std::unique_ptr<WidgetBase> &widget) const;
+        static Serialize::StreamResult scanWidget(const Serialize::SerializeTable *&out, Serialize::FormattedSerializeStream &in);
 
         template <typename WidgetType = WidgetBase>
         std::unique_ptr<WidgetType> create(WidgetBase *parent = nullptr);

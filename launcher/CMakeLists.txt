@@ -87,9 +87,8 @@ install_to_workspace(Madgine TARGETS MadgineLauncher)
 
 write_notices(MadgineLauncher)
 
-file(GLOB lists "${MADGINE_CONFIGURATION}/*.list")
-if (lists)
-	collect_data_lists("${lists}")
+collect_data_lists()
+if (TARGET copy_data)
 	add_dependencies(MadgineLauncher copy_data)
 endif()
 

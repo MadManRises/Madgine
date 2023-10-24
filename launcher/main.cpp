@@ -6,6 +6,7 @@
 #include "Modules/threading/workgroup.h"
 
 #include "Madgine/root/root.h"
+#include "Modules/threading/scheduler.h"
 
 #include "launcher.h"
 
@@ -18,10 +19,17 @@ int desktopMain(int argc, char **argv, std::function<void(Engine::Window::MainWi
 
     Engine::Root::Root root { argc, argv };
 
-    if (root.toolMode() || root.errorCode() != 0)
+    if (root.errorCode() != 0)
         return root.errorCode();
 
-    return launch(callback);
+    if (root.toolMode()) {
+        int result = Engine::Threading::Scheduler {}.go();
+        if (result != 0)
+            return result;
+        return root.errorCode();
+    } else {
+        return launch(callback);
+    }
 }
 
 #if !EMSCRIPTEN && !OSX && !IOS && !WINDOWS

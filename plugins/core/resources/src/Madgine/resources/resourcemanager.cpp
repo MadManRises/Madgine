@@ -32,7 +32,9 @@ METATABLE_END(Engine::Resources::ResourceManager)
 namespace Engine {
 namespace Resources {
 
-    CLI::Parameter<Filesystem::Path> exportResources { { "--export-resources", "-er" }, "", "If set the resource manager will write all available resources to the specified list file." };
+    CLI::Parameter<Filesystem::Path> exportResources { { "--export-resources", "-er" }, "", "If set, the resource manager will write all available resources to the specified list file." };
+    CLI::Parameter<Filesystem::Path> bakeResources { { "--bake" }, "", "If set, all resources listed in the specified list file will be baked." };
+    CLI::Parameter<Filesystem::Path> bakeOutputList { { "--bake-output-list" }, "", "If set, all baked resources will be written to a list file at the specified location." };
 
     static ResourceManager *sSingleton = nullptr;
 
@@ -48,23 +50,9 @@ namespace Resources {
         assert(!sSingleton);
         sSingleton = this;
 
-        if (!root.toolMode()) {
-            root.taskQueue()->addSetupSteps(
-                [this]() { return callInit(); },
-                [this]() { return callFinalize(); });
-        } else if (!exportResources->empty()) {
-            enumerateResources();
-
-            std::map<Filesystem::Path, std::vector<ResourceBase *>> resourceList = buildResourceList();
-            std::ofstream out { *exportResources };
-            if (!out) {
-                LOG_ERROR("Error opening for writing: " << *exportResources);
-                mErrorCode = -1;
-            }
-            for (const auto &[path, resources] : resourceList) {
-                out << path << "\n";
-            }
-        }
+        root.taskQueue()->addSetupSteps(
+            [this]() { return callInit(); },
+            [this]() { return callFinalize(); });
     }
 
     ResourceManager::~ResourceManager()
@@ -74,6 +62,61 @@ namespace Resources {
     std::string_view ResourceManager::key() const
     {
         return "ResourceManager";
+    }
+
+    Threading::Task<int> ResourceManager::runTools()
+    {
+        if (!exportResources->empty()) {
+
+            std::map<Filesystem::Path, std::vector<ResourceBase *>> resourceList = buildResourceList();
+            std::ofstream out { *exportResources };
+            if (!out) {
+                LOG_ERROR("Error opening for writing: " << *exportResources);
+                co_return -1;
+            }
+            for (const auto &[path, resources] : resourceList) {
+                out << path << "\n";
+            }
+        }
+
+        if (bakeResources->empty() != bakeOutputList->empty()) {
+            LOG_ERROR("Both baking options need to be specified or none of them!");
+            co_return -1;
+        }
+
+        if (!bakeResources->empty()) {
+            std::ifstream list { *bakeResources };
+            if (!list) {
+                LOG_ERROR("Error opening for reading: " << *bakeResources);
+                co_return -1;
+            }
+            LOG("Baking resources in " << bakeResources << ".");
+            std::vector<Filesystem::Path> resourcesToBake;
+            std::string line;
+            while (std::getline(list, line)) {
+                resourcesToBake.emplace_back(line);
+            }
+
+            for (const std::unique_ptr<ResourceLoaderBase> &loader : mCollector) {
+                BakeResult result = co_await loader->bakeResources(resourcesToBake, bakeOutputList->parentPath());
+                if (result == BakeResult::SUCCESS) {
+                } else if (result != BakeResult::NOTHING_TO_DO) {
+                    LOG_ERROR("Baking failed!");
+                    co_return -1;
+                }
+            }
+
+            LOG("Writing resource list for baked Resources to " << bakeOutputList);
+            std::ofstream out { *bakeOutputList };
+            if (!out) {
+                LOG_ERROR("Error opening for writing: " << *bakeOutputList);
+                co_return -1;
+            }
+            for (const Filesystem::Path &resource : resourcesToBake) {
+                out << resource << "\n";
+            }
+        }
+        co_return 0;
     }
 
     void ResourceManager::registerResourceLocation(const Filesystem::Path &path, int priority)
@@ -133,7 +176,8 @@ namespace Resources {
     {
         enumerateResources();
 
-        taskQueue()->queueTask(update());
+        if (!Root::Root::getSingleton().toolMode())
+            taskQueue()->queueTask(update());
 
         return true;
     }

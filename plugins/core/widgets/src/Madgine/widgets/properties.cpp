@@ -256,6 +256,27 @@ namespace Serialize {
         out.endContainerWrite(name);
     }
 
+    StreamResult Operations<Widgets::PropertyList>::scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+    {
+        STREAM_PROPAGATE_ERROR(in.beginContainerRead(name, true));
+
+        while (in.hasContainerItem()) {
+            Widgets::PropertyDescriptor desc;
+            std::vector<float> values;
+            STREAM_PROPAGATE_ERROR(readPropertyDescriptor(in, desc, values));
+            if (desc.mType == Widgets::PropertyType::CONDITIONAL) {
+                uint16_t mask = desc.mAnnotator1;
+                STREAM_PROPAGATE_ERROR(in.beginContainerRead("Conditional", true));
+                while (in.hasContainerItem()) {
+                    STREAM_PROPAGATE_ERROR(readPropertyDescriptor(in, desc, values));
+                }
+                STREAM_PROPAGATE_ERROR(in.endContainerRead("Conditional"));
+            }
+        }
+
+        return in.endContainerRead(name);
+    }
+
 }
 
 }

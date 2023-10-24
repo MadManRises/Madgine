@@ -412,7 +412,7 @@ namespace Tools {
             if (ImGui::BeginMenu(IMGUI_ICON_PLUS " Add Behavior")) {
                 for (auto [name, index] : BehaviorRegistry::sComponentsByName()) {
                     if (ImGui::MenuItem(name.data())) {
-                        entity->addBehavior(BehaviorRegistry::getConstructor(index)(nullptr));
+                        entity->addBehavior(BehaviorRegistry::get(index).construct(nullptr));
                     }
                 }
                 ImGui::EndMenu();

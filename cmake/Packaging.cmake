@@ -10,7 +10,10 @@ include(InstallRequiredSystemLibraries)
 
 include(GetPrerequisites)
 
-
+if (MADGINE_CONFIGURATION)
+	file(GLOB lists "${MADGINE_CONFIGURATION}/*.list")
+	set(MADGINE_DATA_LISTS "${lists}" CACHE INTERNAL "")	
+endif ()
 
 macro(enable_packaging)
 
@@ -87,7 +90,7 @@ endfunction(collect_custom_dependencies)
 macro(collect_data target)
 
 	if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/data)
-		if (NOT MADGINE_DATA_LISTS AND (NOT BUILD_SHARED_LIBS OR MADGINE_FORCE_DATA_COLLECT))
+		if (NOT MADGINE_CONFIGURATION AND (NOT BUILD_SHARED_LIBS OR MADGINE_FORCE_DATA_COLLECT))
 			add_custom_target(
 				${target}_copy_data ALL 				
 				COMMAND ${CMAKE_COMMAND} -DSOURCE=${CMAKE_CURRENT_SOURCE_DIR}/data -DTARGET=${CMAKE_BINARY_DIR}/data -P ${workspace_file_dir}/util/flatcopy.cmake				
@@ -97,11 +100,19 @@ macro(collect_data target)
 
 endmacro()
 
-macro(collect_data_lists lists)
-	set(MADGINE_DATA_LISTS "${lists}" CACHE INTERNAL "")	
-	add_custom_target(
-		copy_data ALL
-		COMMAND ${CMAKE_COMMAND} "-DLISTS=\"${lists}\"" -DTARGET=${CMAKE_BINARY_DIR}/data -DBINARY_DIR=${CMAKE_BINARY_DIR} -P ${workspace_file_dir}/util/listcopy.cmake
-		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-	)
+macro(collect_data_lists)
+	if (MADGINE_CONFIGURATION)
+		foreach (list ${MADGINE_DATA_LISTS})
+			cmake_path(IS_PREFIX CMAKE_BINARY_DIR ${list} NORMALIZE is_generated)
+			if (is_generated)
+				set_property(SOURCE ${list} PROPERTY GENERATED 1)
+			endif()
+		endforeach()
+		add_custom_target(
+			copy_data ALL
+			COMMAND ${CMAKE_COMMAND} "-DLISTS=\"${MADGINE_DATA_LISTS}\"" -DTARGET=${CMAKE_BINARY_DIR}/data -DBINARY_DIR=${CMAKE_BINARY_DIR} -P ${workspace_file_dir}/util/listcopy.cmake
+			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+			DEPENDS ${MADGINE_DATA_LISTS}
+		)
+	endif()
 endmacro()

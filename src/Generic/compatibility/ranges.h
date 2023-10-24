@@ -108,9 +108,32 @@ namespace ranges {
     using range_value_t = typename std::remove_reference_t<T>::value_type;
 #endif
 
+#if __cpp_lib_ranges_contains < 202207L
+
+    struct __contains_fn {
+        template <std::input_iterator I, std::sentinel_for<I> S,
+            class T, class Proj = std::identity>
+        requires std::indirect_binary_predicate < ranges::equal_to, std::projected<I, Proj>,
+        const T * > constexpr bool operator()(I first, S last, const T &value, Proj proj = {}) const
+        {
+            return ranges::find(std::move(first), last, value, proj) != last;
+        }
+
+        template <ranges::input_range R, class T, class Proj = std::identity>
+        requires std::indirect_binary_predicate < ranges::equal_to,
+            std::projected<ranges::iterator_t<R>, Proj>,
+        const T * > constexpr bool operator()(R &&r, const T &value, Proj proj = {}) const
+        {
+            return (*this)(ranges::begin(r), ranges::end(r), std::move(value), proj);
+        }
+    };
+
+    inline constexpr __contains_fn contains {};
+#endif
+
 #if __cpp_lib_ranges < 202207L
-    template<range R>
-    using const_iterator_t = decltype(cbegin(std::declval<R&>()));
+    template <range R>
+    using const_iterator_t = decltype(cbegin(std::declval<R &>()));
 #endif
 }
 
@@ -271,4 +294,3 @@ inline constexpr bool ranges::enable_borrowed_range<views::TransformView<R, F>> 
 #endif
 
 }
-

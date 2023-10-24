@@ -51,6 +51,23 @@ namespace Serialize {
         mType->setActive(unit(), active, existenceChanged);
     }
 
+    StreamResult SerializableDataPtr::scanStream(const SerializeTable *type, FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+    {
+        assert(!in.isMaster(AccessMode::READ));
+        bool wasRead = false;
+        STREAM_PROPAGATE_ERROR(callback(wasRead, in, {}, {}, type));        
+        if (!wasRead) {
+            STREAM_PROPAGATE_ERROR(in.beginExtendedRead(name, 1));
+            SerializableUnitBase *idHelper;
+            STREAM_PROPAGATE_ERROR(read(in, idHelper, "serId"));
+            STREAM_PROPAGATE_ERROR(in.beginCompoundRead(name));
+            STREAM_PROPAGATE_ERROR(type->scanStream(in, callback));
+            STREAM_PROPAGATE_ERROR(in.endCompoundRead(name));
+        }        
+
+        return {};
+    }
+
     SerializableDataPtr::SerializableDataPtr(const SerializableUnitPtr &other)
         : SerializableDataPtr(other.unit(), other.mType)
     {

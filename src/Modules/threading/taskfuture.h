@@ -141,7 +141,7 @@ namespace Threading {
 
         bool is_ready() const
         {
-            return !mState || mState->is_ready();
+            return mState->is_ready();
         }
 
         bool await_ready() const
@@ -157,6 +157,7 @@ namespace Threading {
         void await_resume() const
         {
             assert(is_ready());
+            return mState->get();
         }
 
         template <typename F>

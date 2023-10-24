@@ -9,6 +9,7 @@ namespace Serialize {
     struct META_EXPORT Operations<ValueType> {
         static StreamResult read(FormattedSerializeStream &in, ValueType &v, const char *name, const CallerHierarchyBasePtr &hierarchy = {});
         static void write(FormattedSerializeStream &out, const ValueType &v, const char *name, const CallerHierarchyBasePtr &hierarchy = {});
+        static StreamResult scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback);     
     };   
 
     

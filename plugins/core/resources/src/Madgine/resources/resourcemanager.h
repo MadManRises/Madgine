@@ -22,6 +22,8 @@ namespace Resources {
 
         virtual std::string_view key() const override;
 
+        virtual Threading::Task<int> runTools() override;
+
         void registerResourceLocation(const Filesystem::Path &path, int priority);
 
         template <typename Loader>

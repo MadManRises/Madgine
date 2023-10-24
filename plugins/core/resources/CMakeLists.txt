@@ -22,3 +22,24 @@ add_tools(Resources ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/resourcest
 target_link_plugins(ResourcesTools Tools)
 
 add_subdirectory(loaders)
+
+if (MADGINE_CONFIGURATION)
+	set(local_lists ${MADGINE_DATA_LISTS})
+	list(FILTER MADGINE_DATA_LISTS EXCLUDE REGEX ".*resources\.list")
+	list(FILTER local_lists INCLUDE REGEX ".*resources\.list")
+
+	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/resources.list
+		COMMAND ./${MADGINE_TOOLING_BINARY} 
+					-t
+					-npc
+					-lp ${PLUGIN_DEFINITION_FILE}
+					--bake ${local_lists}
+					--bake-output-list ${CMAKE_BINARY_DIR}/resources.list
+		WORKING_DIRECTORY ${MADGINE_TOOLING_WORKING_DIRECTORY}
+		DEPENDS MadgineTooling ${local_lists})
+	add_custom_target(__unnamed_helper DEPENDS ${CMAKE_BINARY_DIR}/resources.list)
+
+	list(APPEND MADGINE_DATA_LISTS ${CMAKE_BINARY_DIR}/resources.list)
+	
+	set(MADGINE_DATA_LISTS ${MADGINE_DATA_LISTS} CACHE INTERNAL "")
+endif()

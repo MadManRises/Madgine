@@ -28,15 +28,10 @@ namespace Filesystem {
 
         Stream stream = openFileRead(path, format->mBinary);
         if (stream) {
-            Serialize::FormattedSerializeStream in {
+            return Serialize::FormattedSerializeStream {
                 std::move(format),
-                Serialize::SerializeStream {
-                    stream.release(),
-                    createStreamData() }
+                wrapStream(std::move(stream), true)
             };
-            setSlaveStreamData(in.data());
-
-            return in;
         } else {
             return {};
         }
@@ -46,7 +41,10 @@ namespace Filesystem {
     {
         Stream stream = openFileWrite(path, format->mBinary);
         if (stream) {
-            return Serialize::FormattedSerializeStream { std::move(format), Serialize::SerializeStream { stream.release(), createStreamData() } };
+            return Serialize::FormattedSerializeStream {
+                std::move(format),
+                wrapStream(std::move(stream))
+            };
         } else {
             return {};
         }

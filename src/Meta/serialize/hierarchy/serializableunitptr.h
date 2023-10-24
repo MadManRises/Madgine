@@ -2,6 +2,7 @@
 
 #include "Generic/callerhierarchy.h"
 #include "serializetable_forward.h"
+#include "Generic/lambda.h"
 
 namespace Engine {
 namespace Serialize {
@@ -122,6 +123,13 @@ namespace Serialize {
         StreamResult applyMap(FormattedSerializeStream &in, bool success, CallerHierarchyBasePtr hierarchy) const;
 
         void setActive(bool active, bool existenceChanged) const;
+
+        static StreamResult scanStream(const SerializeTable *type, FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback);
+        template <typename T>
+        static StreamResult scanStream(FormattedSerializeStream& in, const char* name, const Lambda<ScanCallback>& callback) {
+            return scanStream(&serializeTable<decayed_t<T>>(), in, name, callback);
+        }
+
 
         SerializableDataUnit *unit() const;
     };

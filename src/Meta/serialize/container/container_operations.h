@@ -96,6 +96,17 @@ namespace Serialize {
             }
         }
 
+        static StreamResult scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+        {
+            STREAM_PROPAGATE_ERROR(in.beginContainerRead(name, !container_traits<C>::is_fixed_size));
+
+            while (in.hasContainerItem()) {
+                STREAM_PROPAGATE_ERROR(Creator::template scanStream<C>(in, callback));
+            }
+
+            return in.endContainerRead(name);
+        }
+
         static StreamResult readIterator(FormattedSerializeStream &in, C &c, typename C::iterator &it)
         {
             int32_t dist;
@@ -178,7 +189,7 @@ namespace Serialize {
                 if constexpr (!container_traits<C>::sorted) {
                     STREAM_PROPAGATE_ERROR(Base::readIterator(in, c, it));
                 }
-                decltype(auto) op = insertOperation(c, it, answerTarget, answerId);                
+                decltype(auto) op = insertOperation(c, it, answerTarget, answerId);
                 return TupleUnpacker::invoke(&Creator::template readItem<decltype(op)>, in, op, it, it, hierarchy);
             }
             case ERASE:

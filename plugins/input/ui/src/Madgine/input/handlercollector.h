@@ -4,7 +4,7 @@
 
 #include "Meta/keyvalue/virtualscope.h"
 
-DECLARE_UNIQUE_COMPONENT(Engine::Input, Handler, HandlerBase, UIManager &)
+DECLARE_UNIQUE_COMPONENT(Engine::Input, Handler, HandlerBase, Engine::UniqueComponent::Constructor<HandlerBase, UIManager &>)
 
 namespace Engine {
 namespace Input {

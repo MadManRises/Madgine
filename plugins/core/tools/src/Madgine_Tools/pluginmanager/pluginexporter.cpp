@@ -36,6 +36,15 @@ namespace Tools {
     PluginExporter::PluginExporter(Root::Root &root)
         : RootComponent(root)
     {
+    }
+
+    std::string_view PluginExporter::key() const
+    {
+        return "Plugin Exporter";
+    }
+
+    Threading::Task<int> PluginExporter::runTools()
+    {
         if (!exportPlugins->empty()) {
 
             Filesystem::Path p = *exportPlugins;
@@ -45,16 +54,12 @@ namespace Tools {
             LOG("Saving Plugins to '" << p << "'");
             Plugins::PluginManager::getSingleton().saveSelection(file, true);
             if (!file.saveToDisk(p))
-                mErrorCode = -1;                
-        } 
-        if (!generatePluginsCode->empty()){            
+                co_return -1;
+        }
+        if (!generatePluginsCode->empty()) {
             exportStaticComponentHeader(generatePluginsCode);
         }
-    }
-
-    std::string_view PluginExporter::key() const
-    {
-        return "Plugin Exporter";
+        co_return 0;
     }
 
     std::string fixInclude(const char *pStr, const Plugins::BinaryInfo *binInfo)
@@ -119,7 +124,7 @@ namespace Tools {
 
             file << R"(template <>
 std::vector<)"
-                 << reg->type_info()->mFullName << "::F> " << reg->type_info()->mFullName
+                 << reg->type_info()->mFullName << "::Annotations> " << reg->type_info()->mFullName
                  << R"(::sComponents()
 {
 	return {
@@ -130,7 +135,7 @@ std::vector<)"
                 for (const std::vector<const TypeInfo *> &typeInfos : collector->mElementInfos) {
                     const TypeInfo *ti = typeInfos.front();
                     if (ti != &typeInfo<PluginManager>)
-                        file << "		UniqueComponent::createComponent<"
+                        file << "		type_holder<"
                              << ti->mFullName << ">,\n";
                 }
                 file.endCondition("BUILD_"s + collector->mBinary->mName);

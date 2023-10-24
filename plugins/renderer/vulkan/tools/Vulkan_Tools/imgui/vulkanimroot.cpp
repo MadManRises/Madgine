@@ -3,6 +3,7 @@
 #include "vulkanimroot.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "imgui/imgui.h"
 #include "imgui_impl_vulkan.h"
@@ -24,6 +25,9 @@ UNIQUECOMPONENT(Engine::Tools::VulkanImRoot)
 
 METATABLE_BEGIN_BASE(Engine::Tools::VulkanImRoot, Engine::Tools::ClientImRoot)
 METATABLE_END(Engine::Tools::VulkanImRoot)
+
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::VulkanImRoot, Engine::Tools::ClientImRoot)
+SERIALIZETABLE_END(Engine::Tools::VulkanImRoot)
 
 namespace Engine {
 namespace Tools {

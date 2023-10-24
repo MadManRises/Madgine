@@ -3,6 +3,7 @@
 #include "directx11imroot.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "imgui/imgui.h"
 #include "imgui_impl_dx11.h"
@@ -19,6 +20,9 @@ UNIQUECOMPONENT(Engine::Tools::DirectX11ImRoot)
 
 METATABLE_BEGIN_BASE(Engine::Tools::DirectX11ImRoot, Engine::Tools::ClientImRoot)
 METATABLE_END(Engine::Tools::DirectX11ImRoot)
+
+SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::DirectX11ImRoot, Engine::Tools::ClientImRoot)
+SERIALIZETABLE_END(Engine::Tools::DirectX11ImRoot)
 
 namespace Engine {
 namespace Tools {

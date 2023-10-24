@@ -10,6 +10,8 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
 
 UNIQUECOMPONENT(Engine::Resources::ImageLoader)
 
@@ -33,15 +35,9 @@ namespace Resources {
         ByteBuffer buffer;
         GenericResult result = (co_await info.resource()->readAsync()).get(buffer);
 
-        stbi_uc *ptr = stbi_load_from_memory(static_cast<const stbi_uc *>(buffer.mData), buffer.mSize,
-            &data.mSize.x,
-            &data.mSize.y,
-            nullptr,
-            STBI_rgb_alpha);
-
         data.mChannels = 4;
 
-        data.mBuffer = { std::unique_ptr<stbi_uc, Functor<&stbi_image_free>> { ptr }, static_cast<size_t>(data.mSize.x) * data.mSize.y * data.mChannels };
+        data.mBuffer = convertFromPNG(buffer, data.mSize);
 
         co_return true;
     }
@@ -50,6 +46,30 @@ namespace Resources {
     {
         data.mBuffer.clear();
         co_return;
+    }
+
+    ByteBuffer ImageLoader::convertFromPNG(const ByteBuffer &data, Vector2i &outSize)
+    {
+        stbi_uc *ptr = stbi_load_from_memory(static_cast<const stbi_uc *>(data.mData), data.mSize,
+            &outSize.x,
+            &outSize.y,
+            nullptr,
+            STBI_rgb_alpha);
+
+        return { std::unique_ptr<stbi_uc, Functor<&stbi_image_free>> { ptr }, static_cast<size_t>(outSize.x) * outSize.y * 4 };
+    }
+
+    ByteBuffer ImageLoader::convertToPNG(const ByteBuffer &data, Vector2i size)
+    {
+        ByteBuffer image;
+        int result = stbi_write_png_to_func([](void *context, void *data, int size) {
+            WritableByteBuffer output { std::make_unique<std::byte[]>(size), static_cast<size_t>(size) };
+            std::memcpy(output.mData, data, size);
+            *static_cast<ByteBuffer *>(context) = std::move(output).cast<const void>();
+        },
+            &image, size.x, size.y, STBI_rgb_alpha, data.mData, 4 * size.x);
+        assert(result);
+        return image;
     }
 
 }

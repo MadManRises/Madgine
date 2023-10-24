@@ -28,7 +28,7 @@ MEMBER(mConditions)
 METATABLE_END(Engine::Widgets::WidgetBase)
 
 SERIALIZETABLE_BEGIN(Engine::Widgets::WidgetBase)
-FIELD(mChildren, Serialize::ParentCreator<&Engine::Widgets::WidgetBase::readWidget, &Engine::Widgets::WidgetBase::writeWidget>)
+FIELD(mChildren, Serialize::ParentCreator<&Engine::Widgets::WidgetBase::readWidget, &Engine::Widgets::WidgetBase::writeWidget, nullptr, &Engine::Widgets::WidgetManager::scanWidget>)
 FIELD(mName)
 FIELD(mPos)
 FIELD(mSize)

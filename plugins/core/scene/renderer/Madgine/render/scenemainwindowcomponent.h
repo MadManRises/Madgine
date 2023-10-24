@@ -22,8 +22,6 @@ namespace Render {
         virtual void setup(RenderTarget *target) override;
         virtual void shutdown() override;
 
-        virtual std::string_view key() const override;
-
         Scene::SceneManager *scene();
 
         std::vector<TextureDescriptor> depthTextures();

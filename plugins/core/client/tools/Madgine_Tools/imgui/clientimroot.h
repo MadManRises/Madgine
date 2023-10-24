@@ -45,8 +45,6 @@ namespace Tools {
         
         void setCentralNode();
 
-        virtual std::string_view key() const override;
-
         Rect2i getChildClientSpace() override;
 
         virtual bool includeInLayout() const override;
