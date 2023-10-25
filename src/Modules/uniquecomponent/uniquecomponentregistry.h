@@ -269,7 +269,7 @@ namespace UniqueComponent {
     struct Registry {
 
         typedef _Base Base;
-        using Annotations = GroupedAnnotation<_Annotations...>;
+        using Annotations = GroupedAnnotation<typename replace<_Annotations>::type<Base>...>;
 
         static std::vector<Annotations> sComponents();
 
