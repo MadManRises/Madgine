@@ -55,26 +55,16 @@ namespace Threading {
         return mName;
     }
 
-    std::chrono::steady_clock::time_point TaskQueue::update(int taskCount)
+    void TaskQueue::update(int taskCount)
     {
-        std::chrono::steady_clock::time_point nextAvailableTaskTime = std::chrono::steady_clock::time_point::max();
-        while (TaskHandle task = fetch(nextAvailableTaskTime)) {
+        while (TaskHandle task = fetch()) {
             task();
             if (taskCount > 0) {
                 --taskCount;
                 if (taskCount == 0) {
-                    return std::chrono::steady_clock::time_point::min();
+                    return;
                 }
             }
-        }
-        return nextAvailableTaskTime;
-    }
-
-    void TaskQueue::waitForTasks(std::chrono::steady_clock::time_point until)
-    {
-        if (running()) {
-            std::unique_lock<std::mutex> lock(mMutex);
-            mCv.wait_until(lock, until);
         }
     }
 
@@ -108,9 +98,9 @@ namespace Threading {
         return mTaskInFlightCount;
     }
 
-    TaskHandle TaskQueue::fetch(std::chrono::steady_clock::time_point &nextTask)
+    TaskHandle TaskQueue::fetch()
     {
-        std::chrono::steady_clock::time_point nextTaskTimepoint = nextTask;
+        
 
         WorkGroupState state = WorkGroup::self().state();
         if (state == WorkGroupState::INITIALIZING) {
@@ -123,16 +113,20 @@ namespace Threading {
             }
         } else if (state != WorkGroupState::DONE) {
             {
-                std::lock_guard<std::mutex> lock(mMutex);
-                auto now = std::chrono::steady_clock::now();
-                for (auto it = mQueue.begin(); it != mQueue.end(); ++it) {
-                    if ((it->mQualifiers.mScheduledFor <= now || WorkGroup::self().state() == WorkGroupState::STOPPING) && (!it->mQualifiers.mMutex || it->mQualifiers.mMutex->tryLock(this))) {
-                        TaskHandle task = std::move(it->mTask);
-                        mQueue.erase(it);
-                        return task;
-                    } else {
-                        nextTaskTimepoint = std::min(it->mQualifiers.mScheduledFor.revert(), nextTaskTimepoint);
+                std::unique_lock<std::mutex> lock(mMutex);
+                while (!mQueue.empty()) {
+                    auto now = std::chrono::steady_clock::now();
+                    auto nextTaskTimepoint = std::chrono::steady_clock::time_point::max();
+                    for (auto it = mQueue.begin(); it != mQueue.end(); ++it) {
+                        if ((it->mQualifiers.mScheduledFor <= now || WorkGroup::self().state() == WorkGroupState::STOPPING) && (!it->mQualifiers.mMutex || it->mQualifiers.mMutex->tryLock(this))) {
+                            TaskHandle task = std::move(it->mTask);
+                            mQueue.erase(it);
+                            return task;
+                        } else {
+                            nextTaskTimepoint = std::min(it->mQualifiers.mScheduledFor.revert(), nextTaskTimepoint);
+                        }
                     }
+                    mCv.wait_until(lock, nextTaskTimepoint);                                        
                 }
             }
 
@@ -147,7 +141,6 @@ namespace Threading {
             }
         }
 
-        nextTask = nextTaskTimepoint;
         return {};
     }
 

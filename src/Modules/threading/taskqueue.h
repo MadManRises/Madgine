@@ -65,15 +65,14 @@ namespace Threading {
         void decreaseTaskInFlightCount();
         size_t taskInFlightCount() const;
 
-        TaskHandle fetch(std::chrono::steady_clock::time_point &nextTask);
+        TaskHandle fetch();
 
         bool idle() const;
         void notify();
 
         const std::string &name() const;
 
-        std::chrono::steady_clock::time_point update(int taskCount = -1);
-        void waitForTasks(std::chrono::steady_clock::time_point until = std::chrono::steady_clock::time_point::max());
+        void update(int taskCount = -1);
 
         bool running() const;
         void stop();
