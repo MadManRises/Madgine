@@ -3,4 +3,4 @@
 
 #include "Modules/uniquecomponent/uniquecomponentdefine.h"
 
-DECLARE_UNIQUE_COMPONENT(Engine::Render, RenderContext, RenderContext, Engine::UniqueComponent::Constructor<RenderContext, Threading::TaskQueue *>)
+DECLARE_UNIQUE_COMPONENT(Engine::Render, RenderContext, RenderContext, Engine::UniqueComponent::Constructor<Threading::TaskQueue *>)

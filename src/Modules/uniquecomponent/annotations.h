@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Generic/replace.h"
+
 namespace Engine {
 namespace UniqueComponent {
 
@@ -13,9 +15,9 @@ namespace UniqueComponent {
     };
 
     template <typename Base, typename... Args>
-	struct Constructor {
+	struct ConstructorImpl {
         template <typename T>
-        Constructor(type_holder_t<T>)
+        ConstructorImpl(type_holder_t<T>)
             : mCtor([](Args &&...args) -> std::unique_ptr<Base>{
                 return std::make_unique<T>(std::forward<Args>(args)...);
             })
@@ -29,6 +31,9 @@ namespace UniqueComponent {
 
         std::unique_ptr<Base> (*mCtor)(Args&&...);
     };
+
+    template <typename... Args>
+    using Constructor = ConstructorImpl<Placeholder<0>, Args...>;
 
 }
 }

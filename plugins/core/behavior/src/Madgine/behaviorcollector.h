@@ -2,7 +2,7 @@
 
 #include "Modules/uniquecomponent/uniquecomponentdefine.h"
 
-DECLARE_NAMED_UNIQUE_COMPONENT(Engine, Behavior, BehaviorStateBase, Engine::UniqueComponent::Constructor<BehaviorStateBase, VariableScope *>)
+DECLARE_NAMED_UNIQUE_COMPONENT(Engine, Behavior, BehaviorStateBase, Engine::UniqueComponent::Constructor<VariableScope *>)
 
 namespace Engine {
 

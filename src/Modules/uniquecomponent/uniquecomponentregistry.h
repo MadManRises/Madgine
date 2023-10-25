@@ -84,7 +84,7 @@ namespace UniqueComponent {
     struct Registry : RegistryBase {
 
         typedef _Base Base;
-        using Annotations = GroupedAnnotation<_Annotations...>;
+        using Annotations = GroupedAnnotation<typename replace<_Annotations>::type<Base>...>;
 
         struct CollectorInfo : CollectorInfoBase {
 

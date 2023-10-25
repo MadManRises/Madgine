@@ -6,7 +6,7 @@
 
 #include "Meta/serialize/hierarchy/virtualserializableunit.h"
 
-DECLARE_NAMED_UNIQUE_COMPONENT(Engine::NodeGraph, Node, NodeBase, Engine::UniqueComponent::Constructor<NodeBase, NodeGraph &>);
+DECLARE_NAMED_UNIQUE_COMPONENT(Engine::NodeGraph, Node, NodeBase, Engine::UniqueComponent::Constructor<NodeGraph &>);
 
 namespace Engine {
 namespace NodeGraph {

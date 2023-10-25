@@ -9,7 +9,7 @@
 #include "Meta/serialize/helper/annotations.h"
 
 DECLARE_NAMED_UNIQUE_COMPONENT(Engine::Window, MainWindowComponent, MainWindowComponentBase,
-    Engine::UniqueComponent::Constructor<MainWindowComponentBase, MainWindow &>,
+    Engine::UniqueComponent::Constructor<MainWindow &>,
     Engine::Serialize::TypeAnnotation)
 
 namespace Engine {
