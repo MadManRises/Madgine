@@ -96,12 +96,12 @@ namespace Serialize {
             }
         }
 
-        static StreamResult scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+        static StreamResult visitStream(FormattedSerializeStream &in, const char *name, const StreamVisitor &visitor)
         {
             STREAM_PROPAGATE_ERROR(in.beginContainerRead(name, !container_traits<C>::is_fixed_size));
 
             while (in.hasContainerItem()) {
-                STREAM_PROPAGATE_ERROR(Creator::template scanStream<C>(in, callback));
+                STREAM_PROPAGATE_ERROR(Creator::template visitStream<C>(in, visitor));
             }
 
             return in.endContainerRead(name);

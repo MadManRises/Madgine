@@ -568,7 +568,7 @@ namespace Serialize {
         }
     }
 
-    StreamResult Operations<Physics::CollisionShapeManager::InstanceHandle>::scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+    StreamResult Operations<Physics::CollisionShapeManager::InstanceHandle>::visitStream(FormattedSerializeStream &in, const char *name, const StreamVisitor &visitor)
     {
         throw 0;
     }

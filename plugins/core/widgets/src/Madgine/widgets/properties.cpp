@@ -256,7 +256,7 @@ namespace Serialize {
         out.endContainerWrite(name);
     }
 
-    StreamResult Operations<Widgets::PropertyList>::scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+    StreamResult Operations<Widgets::PropertyList>::visitStream(FormattedSerializeStream &in, const char *name, const StreamVisitor &visitor)
     {
         STREAM_PROPAGATE_ERROR(in.beginContainerRead(name, true));
 

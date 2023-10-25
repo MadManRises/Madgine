@@ -80,7 +80,7 @@ namespace Serialize {
     struct Operations<Physics::CollisionShapeManager::InstanceHandle> {
         static StreamResult read(FormattedSerializeStream &in, Physics::CollisionShapeManager::InstanceHandle &handle, const char *name = nullptr);
         static void write(FormattedSerializeStream &out, const Physics::CollisionShapeManager::InstanceHandle &handle, const char *name = nullptr);
-        static StreamResult scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback);
+        static StreamResult visitStream(FormattedSerializeStream &in, const char *name, const StreamVisitor &visitor);
     };
 }
 }

@@ -7,6 +7,8 @@
 
 #include "../streams/pendingrequest.h"
 
+#include "../primitivetypes.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -35,7 +37,7 @@ namespace Serialize {
         StreamResult applyMap(FormattedSerializeStream &in, bool success, CallerHierarchyBasePtr hierarchy = {});
         void setActive(bool active, bool existenceChanged);
 
-        static StreamResult scanStream(const SerializeTable *table, FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback);
+        static StreamResult visitStream(const SerializeTable *table, FormattedSerializeStream &in, const char *name, const StreamVisitor &visitor);
 
         StreamResult readAction(FormattedBufferedStream &in, PendingRequest &request);
         StreamResult readRequest(FormattedBufferedStream &in, MessageId id);

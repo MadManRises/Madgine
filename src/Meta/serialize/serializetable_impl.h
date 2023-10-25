@@ -99,7 +99,7 @@ namespace Serialize {
                 [](const SyncableUnitBase *_unit, FormattedBufferedStream &out, void *data) {
                     throw "Unsupported";
                 },
-                [](size_t, FormattedSerializeStream &, const char *, const Lambda<ScanCallback> &) -> StreamResult {
+                [](size_t, FormattedSerializeStream &, const char *, const StreamVisitor &) -> StreamResult {
                     return {};
                 }
             };
@@ -157,8 +157,8 @@ namespace Serialize {
                 [](const SerializableDataUnit *_unit, FormattedBufferedStream &out, void *data) {
                     throw "Unsupported";
                 },
-                [](FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback) -> StreamResult {
-                    return Serialize::scanStream<T, Configs...>(in, name, callback);
+                [](FormattedSerializeStream &in, const char *name, const StreamVisitor &visitor) -> StreamResult {
+                    return Serialize::visitStream<T, Configs...>(in, name, visitor);
                 }
             };
         }
@@ -227,8 +227,8 @@ namespace Serialize {
                     } else
                         throw "Unsupported";
                 },
-                [](FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback) -> StreamResult {
-                    return scanStream<T, Configs...>(in, name, callback);
+                [](FormattedSerializeStream &in, const char *name, const StreamVisitor &visitor) -> StreamResult {
+                    return visitStream<T, Configs...>(in, name, visitor);
                 }
             };
         }

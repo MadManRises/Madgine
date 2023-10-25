@@ -21,6 +21,8 @@
 
 #include "streams/serializablemapholder.h"
 
+#include "visitor.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -117,37 +119,44 @@ namespace Serialize {
     }
 
     template <typename T, typename... Configs>
-    StreamResult scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+    StreamResult visitStream(FormattedSerializeStream &in, const char *name, const StreamVisitor &visitor)
     {
-        return Operations<T, Configs...>::scanStream(in, name, callback);
+        return Operations<T, Configs...>::visitStream(in, name, visitor);
     }
 
     template <typename Compound, typename Primitive, typename F>
     requires(!Reference<F> && PrimitiveType<Primitive>)
         StreamResult scanPrimitive(FormattedSerializeStream &in, const char *name, F &&callback)
     {
-        return scanStream<Compound>(in, name, [callback { std::move(callback) }](bool &wasRead, FormattedSerializeStream &stream, std::span<std::string_view> tags, IndexType<size_t> primitiveType, const SerializeTable *type) -> StreamResult {
-            if (primitiveType == PrimitiveTypeIndex_v<Primitive>) {
-                Primitive v;
-                STREAM_PROPAGATE_ERROR(stream.readPrimitive(v, nullptr));
-                callback(v, tags);
-                wasRead = true;
-            }
+        return visitStream<Compound>(in, name, StreamVisitorImpl { [callback { std::move(callback) }](PrimitiveHolder<Primitive>, FormattedSerializeStream &stream, const char *name, std::span<std::string_view> tags) -> StreamResult {
+            Primitive v;
+            STREAM_PROPAGATE_ERROR(stream.readPrimitive(v, name));
+            callback(v, tags);
             return {};
-        });
+        } });
     }
 
     template <typename Compound, typename TargetCompound, typename F>
     requires(!Reference<F> && !PrimitiveType<TargetCompound>)
         StreamResult scanCompound(FormattedSerializeStream &in, const char *name, F &&callback)
     {
-        return scanStream<Compound>(in, name, [callback { std::move(callback) }](bool &wasRead, FormattedSerializeStream &stream, std::span<std::string_view> tags, IndexType<size_t> primitiveType, const SerializeTable *type) -> StreamResult {
-            if (type == &serializeTable<TargetCompound>()) {
-                STREAM_PROPAGATE_ERROR(callback(stream));
-                wasRead = true;
+        using BaseType = std::conditional_t<std::derived_from<TargetCompound, SyncableUnitBase>, SyncableUnitBase, SerializableDataUnit>;
+        const StreamVisitor *genericVisitor;
+        StreamVisitorImpl visitor {
+            [&, callback { std::move(callback) }](PrimitiveHolder<BaseType> holder, FormattedSerializeStream &stream, const char *name, std::span<std::string_view> tags) -> StreamResult {
+                if (holder.mTable == &serializeTable<TargetCompound>()) {
+                    return callback(stream, name);
+                } else {
+                    if constexpr (std::same_as<BaseType, SyncableUnitBase>) {
+                        return SyncableUnitBase::visitStream(holder.mTable, stream, name, *genericVisitor);
+                    } else {
+                        return SerializableDataPtr::visitStream(holder.mTable, stream, name, *genericVisitor);
+                    }
+                }
             }
-            return {};
-        });
+        };
+        genericVisitor = &visitor;
+        return visitStream<Compound>(in, name, visitor);
     }
 
     template <typename T, typename... Configs>
@@ -279,27 +288,22 @@ namespace Serialize {
             }
         }
 
-        static StreamResult scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+        static StreamResult visitStream(FormattedSerializeStream &in, const char *name, const StreamVisitor &visitor)
         {
+            auto tags = TagsSelector<Configs...>::getTags();
             if constexpr (std::is_const_v<T>) {
                 //Don't do anything here
                 return {};
+            } else if constexpr (InstanceOf<T, EnumType>) {
+                return visitor.visit(PrimitiveHolder<EnumTag> { &T::Representation::sTable }, in, name, tags);
             } else if constexpr (PrimitiveType<T>) {
-                size_t typeIndex = PrimitiveTypeIndex_v<T>;
-                bool wasRead = false;
-                auto tags = TagsSelector<Configs...>::getTags();
-                STREAM_PROPAGATE_ERROR(callback(wasRead, in, tags, typeIndex, nullptr));
-                if (!wasRead) {
-                    T dummy;
-                    STREAM_PROPAGATE_ERROR(in.readPrimitive(dummy, name));
-                }
-                return {};
+                return visitor.visit(PrimitiveHolder<PrimitiveReducer<T>::type> {}, in, name, tags);
             } else if constexpr (std::derived_from<T, SyncableUnitBase>) {
-                return T::scanStream(&serializeTable<T>(), in, name, callback);
+                return visitor.visit(PrimitiveHolder<SyncableUnitBase> { &serializeTable<T>() }, in, name, tags);
             } else if constexpr (std::derived_from<T, SerializableDataUnit>) {
-                return SerializableDataPtr::scanStream<T>(in, name, callback);
+                return visitor.visit(PrimitiveHolder<SerializableDataUnit> { &serializeTable<T>() }, in, name, tags);
             } else if constexpr (TupleUnpacker::Tuplefyable<T>) {
-                return Operations<decltype(TupleUnpacker::toTuple(std::declval<T &>())), Configs...>::scanStream(in, name, callback);
+                return Operations<decltype(TupleUnpacker::toTuple(std::declval<T &>())), Configs...>::visitStream(in, name, visitor);
             } else {
                 static_assert(dependent_bool<T, false>::value, "Invalid Type");
             }
@@ -339,9 +343,9 @@ namespace Serialize {
             Operations<T, Configs...>::setParent(*p, parent);
         }
 
-        static StreamResult scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+        static StreamResult visitStream(FormattedSerializeStream &in, const char *name, const StreamVisitor &visitor)
         {
-            return Operations<T, Configs...>::scanStream(in, name, callback);
+            return Operations<T, Configs...>::visitStream(in, name, visitor);
         }
     };
 
@@ -383,23 +387,23 @@ namespace Serialize {
                 StreamResult {});
         }
 
-        struct ScanHelper {
+        struct VisitHelper {
             template <typename T>
             StreamResult operator()(StreamResult r)
             {
                 STREAM_PROPAGATE_ERROR(std::move(r));
-                return Serialize::scanStream<T>(in, nullptr, callback);
+                return Serialize::visitStream<T>(in, nullptr, callback);
             }
 
             FormattedSerializeStream &in;
-            const Lambda<ScanCallback> &callback;
+            const StreamVisitor &visitor;
         };
 
-        static StreamResult scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+        static StreamResult visitStream(FormattedSerializeStream &in, const char *name, const StreamVisitor &visitor)
         {
             STREAM_PROPAGATE_ERROR(in.beginContainerRead(name, false));
             STREAM_PROPAGATE_ERROR(TypeUnpacker::accumulate<type_pack<Ty...>>(
-                ScanHelper { in, callback },
+                VisitHelper { in, callback },
                 StreamResult {}));
             return in.endContainerRead(name);
         }
@@ -429,23 +433,23 @@ namespace Serialize {
             out.endContainerWrite(name);
         }
 
-        struct ScanHelper {
+        struct VisitHelper {
             template <typename T>
             StreamResult operator()(StreamResult r)
             {
                 STREAM_PROPAGATE_ERROR(std::move(r));
-                return Serialize::scanStream<T>(in, nullptr, callback);
+                return Serialize::visitStream<T>(in, nullptr, visitor);
             }
 
             FormattedSerializeStream &in;
-            const Lambda<ScanCallback> &callback;
+            const StreamVisitor &visitor;
         };
 
-        static StreamResult scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+        static StreamResult visitStream(FormattedSerializeStream &in, const char *name, const StreamVisitor &visitor)
         {
             STREAM_PROPAGATE_ERROR(in.beginContainerRead(name, false));
             STREAM_PROPAGATE_ERROR(TypeUnpacker::accumulate<type_pack<Ty...>>(
-                ScanHelper { in, callback },
+                VisitHelper { in, visitor },
                 StreamResult {}));
             return in.endContainerRead(name);
         }
@@ -470,11 +474,11 @@ namespace Serialize {
             out.endCompoundWrite(name);
         }
 
-        static StreamResult scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+        static StreamResult visitStream(FormattedSerializeStream &in, const char *name, const StreamVisitor &visitor)
         {
             STREAM_PROPAGATE_ERROR(in.beginCompoundRead(name));
-            STREAM_PROPAGATE_ERROR(Serialize::scanStream<U>(in, nullptr, callback));
-            STREAM_PROPAGATE_ERROR(Serialize::scanStream<V>(in, nullptr, callback));
+            STREAM_PROPAGATE_ERROR(Serialize::visitStream<U>(in, nullptr, callback));
+            STREAM_PROPAGATE_ERROR(Serialize::visitStream<V>(in, nullptr, callback));
             return in.endCompoundRead(name);
         }
     };

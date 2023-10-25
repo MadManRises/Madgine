@@ -196,7 +196,7 @@ namespace Serialize {
         get(index).mWriteRequest(unit, out, data);
     }
 
-    StreamResult SerializeTable::scanStream(FormattedSerializeStream &in, const Lambda<ScanCallback> &callback) const
+    StreamResult SerializeTable::visitStream(FormattedSerializeStream &in, const StreamVisitor &visitor) const
     {
         if (in.supportsNameLookup()) {
             std::string name;
@@ -207,7 +207,7 @@ namespace Serialize {
                 while (tableAcc && !found) {
                     for (const Serializer *it = tableAcc->mFields; it->mFieldName; ++it) {
                         if (name == it->mFieldName) {
-                            STREAM_PROPAGATE_ERROR(it->mScanStream(in, it->mFieldName, callback));
+                            STREAM_PROPAGATE_ERROR(it->mVisitStream(in, it->mFieldName, visitor));
                             found = true;
                             break;
                         }
@@ -222,7 +222,7 @@ namespace Serialize {
             const SerializeTable *tableAcc = this;
             while (tableAcc) {
                 for (const Serializer *it = tableAcc->mFields; it->mFieldName; ++it) {
-                    STREAM_PROPAGATE_ERROR(it->mScanStream(in, it->mFieldName, callback));
+                    STREAM_PROPAGATE_ERROR(it->mVisitStream(in, it->mFieldName, visitor));
                 }
                 tableAcc = tableAcc->mBaseType ? &tableAcc->mBaseType() : nullptr;
             }

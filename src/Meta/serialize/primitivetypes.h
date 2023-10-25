@@ -59,6 +59,11 @@ namespace Serialize {
         typedef EnumTag type;
     };
 
+    template <>
+    struct PrimitiveReducer<DynamicEnum> {
+        typedef EnumTag type;
+    };
+
     template <typename T, T invalid>
     struct PrimitiveReducer<IndexType<T, invalid>> {
         typedef T type;
@@ -74,5 +79,26 @@ namespace Serialize {
 
     template <typename T>
     concept PrimitiveType = SerializePrimitives::contains<typename PrimitiveReducer<T>::type>;
+
+    template <typename T>
+    struct PrimitiveHolder {
+    };
+
+    template <>
+    struct PrimitiveHolder<SerializableDataUnit> {
+        const SerializeTable *mTable;
+    };
+
+    template <>
+    struct PrimitiveHolder<SyncableUnitBase> {
+        const SerializeTable *mTable;
+    };
+
+    template <>
+    struct PrimitiveHolder<EnumTag> {
+        const EnumMetaTable *mTable;
+    };
+
+    
 }
 }

@@ -6,6 +6,8 @@
 
 #include "Generic/lambda.h"
 
+#include "../primitivetypes.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -50,7 +52,7 @@ namespace Serialize {
         void writeAction(const SerializableDataUnit *unit, uint16_t index, const std::set<std::reference_wrapper<FormattedBufferedStream>, CompareStreamId> &outStreams, void *data) const;
         void writeRequest(const SerializableDataUnit *unit, uint16_t index, FormattedBufferedStream &out, void *data) const;
 
-        StreamResult scanStream(FormattedSerializeStream &in, const Lambda<ScanCallback> &callback) const;
+        StreamResult visitStream(FormattedSerializeStream &in, const StreamVisitor &visitor) const;
 
         uint16_t getIndex(OffsetPtr offset) const;
         const Serializer &get(uint16_t index) const;

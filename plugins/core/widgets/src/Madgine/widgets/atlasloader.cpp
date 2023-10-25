@@ -301,8 +301,8 @@ namespace Widgets {
                 Serialize::SerializeManager mgr { "Layout" };
                 Serialize::FormattedSerializeStream stream = res.readAsFormattedStream(mgr);
                 std::map<std::string, Resources::ImageLoader::Handle> images;
-                Serialize::StreamResult result = Serialize::scanCompound<Window::MainWindow, WidgetManager>(stream, nullptr, [&](Serialize::FormattedSerializeStream &stream) {
-                    return Serialize::scanPrimitive<WidgetManager, std::string>(stream, nullptr, [&](const std::string &s, std::span<std::string_view> tags) {
+                Serialize::StreamResult result = Serialize::scanCompound<Window::MainWindow, WidgetManager>(stream, nullptr, [&](Serialize::FormattedSerializeStream &stream, const char *name) {
+                    return Serialize::scanPrimitive<WidgetManager, std::string>(stream, name, [&](const std::string &s, std::span<std::string_view> tags) {
                         if (!s.empty() && std::ranges::contains(tags, "Image"))
                             images[s];
                     });

@@ -46,7 +46,8 @@ namespace Serialize {
         });
     }
 
-    StreamResult Operations<ValueType>::scanStream(FormattedSerializeStream& in, const char* name, const Lambda<ScanCallback>& callback) {
+    StreamResult Operations<ValueType>::visitStream(FormattedSerializeStream &in, const char *name, const StreamVisitor &visitor)
+    {
         STREAM_PROPAGATE_ERROR(in.beginExtendedRead(name, 1));
         ValueTypeEnum type;
         STREAM_PROPAGATE_ERROR(Serialize::read(in, type, "type"));
@@ -55,9 +56,9 @@ namespace Serialize {
         return v.visit([&](auto &value) -> StreamResult {
             using T = std::remove_reference_t<decltype(value)>;
             if constexpr (PrimitiveType<T>) {
-                return Serialize::scanStream<T>(in, name, callback);
+                return Serialize::visitStream<T>(in, name, visitor);
             } else if constexpr (std::same_as<T, std::monostate>) {                
-                return Serialize::scanStream<Void>(in, name, callback);
+                return Serialize::visitStream<Void>(in, name, visitor);
             } else
                 throw 0;
         });

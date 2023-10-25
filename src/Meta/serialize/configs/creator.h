@@ -52,14 +52,14 @@ namespace Serialize {
         }
 
         template <typename C>
-        static StreamResult scanStream(FormattedSerializeStream &in, const Lambda<ScanCallback> &callback)
+        static StreamResult visitStream(FormattedSerializeStream &in, const StreamVisitor &visitor)
         {
             STREAM_PROPAGATE_ERROR(in.beginCompoundRead(nullptr));
             using T = std::ranges::range_value_t<C>;
             ArgsTuple<T> tuple;
             STREAM_PROPAGATE_ERROR(readCreationData<T>(in, tuple));
-            STREAM_PROPAGATE_ERROR(Serialize::scanStream<typename T::first_type>(in, "Key", callback));
-            STREAM_PROPAGATE_ERROR(Serialize::scanStream<typename T::second_type>(in, "Value", callback));
+            STREAM_PROPAGATE_ERROR(Serialize::visitStream<typename T::first_type>(in, "Key", visitor));
+            STREAM_PROPAGATE_ERROR(Serialize::visitStream<typename T::second_type>(in, "Value", visitor));
             return in.endCompoundRead(nullptr);
         }
 
@@ -136,13 +136,13 @@ namespace Serialize {
         }
 
         template <typename C>
-        static StreamResult scanStream(FormattedSerializeStream &in, const Lambda<ScanCallback> &callback)
+        static StreamResult visitStream(FormattedSerializeStream &in, const StreamVisitor &visitor)
         {
             using T = std::remove_reference_t<std::ranges::range_reference_t<C>>;
             ArgsTuple<T> tuple;
             STREAM_PROPAGATE_ERROR(readCreationData<T>(in, tuple));
             if constexpr (!std::is_const_v<T>) {
-                STREAM_PROPAGATE_ERROR(Serialize::scanStream<T>(in, "Item", callback));
+                STREAM_PROPAGATE_ERROR(Serialize::visitStream<T>(in, "Item", visitor));
             }
             return {};
         }
@@ -208,11 +208,11 @@ namespace Serialize {
             }
 
             template <typename C>
-            static StreamResult scanStream(FormattedSerializeStream &in, const Lambda<ScanCallback> &callback)
+            static StreamResult visitStream(FormattedSerializeStream &in, const StreamVisitor &visitor)
             {
                 ArgsTuple tuple;          
                 STREAM_PROPAGATE_ERROR(readCreationData(in, tuple));
-                return Serialize::scanStream<std::ranges::range_value_t<C>>(in, nullptr, callback);
+                return Serialize::visitStream<std::ranges::range_value_t<C>>(in, nullptr, visitor);
             }
 
             template <typename Arg>
@@ -275,7 +275,7 @@ namespace Serialize {
             }
 
             template <typename C>
-            static StreamResult scanStream(FormattedSerializeStream &in, const Lambda<ScanCallback> &callback)
+            static StreamResult visitStream(FormattedSerializeStream &in, const StreamVisitor &visitor)
             {
                 if constexpr (std::same_as<std::remove_const_t<decltype(Scan::value)>, nullptr_t>) {
                     throw 0;
@@ -283,7 +283,7 @@ namespace Serialize {
                     const SerializeTable *type = nullptr;
                     STREAM_PROPAGATE_ERROR(Scan::value(type, in));
                     assert(type);
-                    return SerializableDataPtr::scanStream(type, in, nullptr, callback);
+                    return SerializableDataPtr::visitStream(type, in, nullptr, visitor);
                 }                
             }
 

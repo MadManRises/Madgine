@@ -203,6 +203,20 @@ private:
     }
 };
 
+struct DynamicEnum {
+    const EnumMetaTable *mTable;
+    int32_t mValue = 0;    
+
+    friend std::ostream &operator<<(std::ostream &stream, const DynamicEnum &value)
+    {
+        return value.mTable->print(stream, value.mValue, value.mTable->mName);
+    }
+    friend std::istream &operator>>(std::istream &stream, DynamicEnum &value)
+    {
+        return value.mTable->read(stream, value.mValue, value.mTable->mName);
+    }
+};
+
 }
 
 #define ENUM_REGISTRY(Name, Type, MIN_VAL, Base, ...)                                                                                                        \

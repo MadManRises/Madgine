@@ -218,9 +218,9 @@ namespace Serialize {
             entityComponentOwningHelperWrite(out, handle.mHandle, name, hierarchy);
         }
 
-        static StreamResult scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+        static StreamResult visitStream(FormattedSerializeStream &in, const char *name, const StreamVisitor &visitor)
         {
-            return SerializableDataPtr::scanStream<T>(in, name, callback);
+            return SerializableDataPtr::visitStream<T>(in, name, visitor);
         }
 
         static StreamResult applyMap(FormattedSerializeStream& in, Scene::Entity::EntityComponentOwningHandle<T>& handle, bool success, CallerHierarchyBasePtr hierarchy) {
@@ -251,7 +251,7 @@ namespace Serialize {
             entityComponentHelperWrite(out, handle, name, mgr);
         }
 
-        static StreamResult scanStream(FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback)
+        static StreamResult visitStream(FormattedSerializeStream &in, const char *name, const StreamVisitor &visitor)
         {
             throw 0;
             return {};

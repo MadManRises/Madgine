@@ -4,6 +4,8 @@
 #include "serializetable_forward.h"
 #include "Generic/lambda.h"
 
+#include "../primitivetypes.h"
+
 namespace Engine {
 namespace Serialize {
 
@@ -124,10 +126,11 @@ namespace Serialize {
 
         void setActive(bool active, bool existenceChanged) const;
 
-        static StreamResult scanStream(const SerializeTable *type, FormattedSerializeStream &in, const char *name, const Lambda<ScanCallback> &callback);
+        static StreamResult visitStream(const SerializeTable *type, FormattedSerializeStream &in, const char *name, const StreamVisitor &visitor);
         template <typename T>
-        static StreamResult scanStream(FormattedSerializeStream& in, const char* name, const Lambda<ScanCallback>& callback) {
-            return scanStream(&serializeTable<decayed_t<T>>(), in, name, callback);
+        static StreamResult visitStream(FormattedSerializeStream &in, const char *name, const StreamVisitor &visitor)
+        {
+            return visitStream(&serializeTable<decayed_t<T>>(), in, name, visitor);
         }
 
 

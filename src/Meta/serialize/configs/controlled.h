@@ -39,19 +39,19 @@ namespace Serialize {
         }
 
         template <typename C>
-        static StreamResult scanStream(FormattedSerializeStream &in, const Lambda<ScanCallback> &callback)
+        static StreamResult visitStream(FormattedSerializeStream &in, const StreamVisitor &visitor)
         {
             STREAM_PROPAGATE_ERROR(in.beginExtendedRead("Item", 1));
             MakeOwning_t<typename comparator_traits<Cmp>::type> key;
             STREAM_PROPAGATE_ERROR(read(in, key, "key"));
             if constexpr (std::same_as<decltype(staticTypeResolve), std::nullptr_t>) {
                 using T = std::remove_reference_t<std::ranges::range_reference_t<C>>;
-                return Serialize::scanStream<T>(in, "Item", callback);            
+                return Serialize::visitStream<T>(in, "Item", visitor);            
             } else {
                 const SerializeTable *type = nullptr;
                 STREAM_PROPAGATE_ERROR(staticTypeResolve(type, key));
                 assert(type);
-                return SerializableDataPtr::scanStream(type, in, "Item", callback);
+                return visitor.visit(PrimitiveHolder<SerializableDataUnit> {type}, in, "Item", {});                
             }            
         }
 
