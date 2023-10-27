@@ -51,9 +51,6 @@ namespace Render {
         if (!mPipeline.available())
             return;
 
-        
-        target->pushAnnotation("Shadow");
-
         Vector2i size = target->size();
         updateFrustum(1.0f);
 
@@ -98,13 +95,21 @@ namespace Render {
 
             mPipeline->renderMeshInstanced(target, std::move(instanceData), meshData);
         }
-
-        target->popAnnotation();
     }
 
     int ShadowRenderPass::priority() const
     {
         return mPriority;
+    }
+
+    size_t ShadowRenderPass::targetCount(size_t) const
+    {
+        return 0;
+    }
+
+    std::string_view ShadowRenderPass::name() const
+    {
+        return "Shadow";
     }
 
     Matrix4 ShadowRenderPass::projectionMatrix() const

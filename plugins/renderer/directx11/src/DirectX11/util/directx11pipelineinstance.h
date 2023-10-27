@@ -2,7 +2,6 @@
 
 #include "Madgine/pipelineloader/pipelineinstance.h"
 
-#include "../directx11geometryshaderloader.h"
 #include "../directx11pipelineloader.h"
 #include "../directx11pixelshaderloader.h"
 #include "../directx11vertexshaderloader.h"
@@ -13,7 +12,7 @@ namespace Render {
 
     struct MADGINE_DIRECTX11_EXPORT DirectX11PipelineInstance : PipelineInstance {
 
-        DirectX11PipelineInstance(const PipelineConfiguration &config, ID3D11VertexShader *vertexShader, ID3D10Blob *vertexBlob, ID3D11PixelShader *pixelShader, ID3D11GeometryShader *geometryShader);
+        DirectX11PipelineInstance(const PipelineConfiguration &config, ID3D11VertexShader *vertexShader, ID3D10Blob *vertexBlob, ID3D11PixelShader *pixelShader);
 
         bool bind(VertexFormat format, size_t groupSize) const;
 
@@ -29,34 +28,30 @@ namespace Render {
         ID3D11VertexShader *mVertexShader;
         ID3D10Blob *mVertexShaderBlob;
         ID3D11PixelShader *mPixelShader;
-        ID3D11GeometryShader *mGeometryShader;
 
         std::vector<DirectX11Buffer> mConstantBuffers;
 
         DirectX11VertexShaderLoader::Handle mVertexShaderHandle;
         DirectX11PixelShaderLoader::Handle mPixelShaderHandle;
-        DirectX11GeometryShaderLoader::Handle mGeometryShaderHandle;
     };
 
     struct MADGINE_DIRECTX11_EXPORT DirectX11PipelineInstanceHandle : DirectX11PipelineInstance {
 
-        DirectX11PipelineInstanceHandle(const PipelineConfiguration &config, typename DirectX11VertexShaderLoader::Handle vertexShader, typename DirectX11PixelShaderLoader::Handle pixelShader, typename DirectX11GeometryShaderLoader::Handle geometryShader);
+        DirectX11PipelineInstanceHandle(const PipelineConfiguration &config, typename DirectX11VertexShaderLoader::Handle vertexShader, typename DirectX11PixelShaderLoader::Handle pixelShader);
 
     private:
 
         DirectX11VertexShaderLoader::Handle mVertexShaderHandle;
         DirectX11PixelShaderLoader::Handle mPixelShaderHandle;
-        DirectX11GeometryShaderLoader::Handle mGeometryShaderHandle;
     };
 
     struct MADGINE_DIRECTX11_EXPORT DirectX11PipelineInstancePtr : DirectX11PipelineInstance {
 
-        DirectX11PipelineInstancePtr(const PipelineConfiguration &config, typename DirectX11VertexShaderLoader::Ptr vertexShader, typename DirectX11PixelShaderLoader::Ptr pixelShader, typename DirectX11GeometryShaderLoader::Ptr geometryShader);
+        DirectX11PipelineInstancePtr(const PipelineConfiguration &config, typename DirectX11VertexShaderLoader::Ptr vertexShader, typename DirectX11PixelShaderLoader::Ptr pixelShader);
 
     private:
         DirectX11VertexShaderLoader::Ptr mVertexShaderHandle;
         DirectX11PixelShaderLoader::Ptr mPixelShaderHandle;
-        DirectX11GeometryShaderLoader::Ptr mGeometryShaderHandle;
     };
 
 }

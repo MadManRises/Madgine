@@ -86,15 +86,8 @@ int transpileHLSL(int apilevel, const std::wstring &fileName, const std::wstring
 
     std::string shaderCode;
 
-    if ((apilevel == 12 && debug) || extension == L".GS_hlsl") {
-        std::string reason;
-        if (apilevel == 12 && debug) {
-            reason = "for Debugging";
-        } else {
-            reason = "due to SpirV - Cross limitation";
-        }
-        std::cout << "Skipping " << reason
-                  << ", only preprocessing... ";
+    if ((apilevel == 12 && debug)) {
+        std::cout << "Skipping for Debugging, only preprocessing... ";
 
         ReleasePtr<IDxcBlobEncoding> pSource;
         HRESULT hr = library->CreateBlobFromFile(fileName.c_str(), nullptr, &pSource);

@@ -8,14 +8,14 @@ namespace Engine {
 namespace Render {
 
     struct MADGINE_CLIENT_EXPORT RenderTarget : RenderData {
-        RenderTarget(RenderContext *context, bool global, std::string name, size_t iterations = 1, RenderTarget * blitSource = nullptr);
+        RenderTarget(RenderContext *context, bool global, std::string name, bool flipFlop = false, RenderTarget * blitSource = nullptr);
         RenderTarget(const RenderTarget &) = delete;
         RenderTarget(RenderTarget &&) = default;
         virtual ~RenderTarget();
 
         virtual void clearDepthBuffer() = 0;
 
-        virtual TextureDescriptor texture(size_t index = 0, size_t iteration = std::numeric_limits<size_t>::max()) const;
+        virtual TextureDescriptor texture(size_t index = 0) const;
         virtual size_t textureCount() const;
         virtual TextureDescriptor depthTexture() const;
 
@@ -31,8 +31,8 @@ namespace Render {
         const std::vector<RenderPass *> &renderPasses();
         std::vector<const RenderPass *> renderPasses() const;
 
-        virtual void beginIteration(size_t iteration) const;
-        virtual void endIteration(size_t iteration) const;
+        virtual void beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const;
+        virtual void endIteration() const;
 
         virtual bool skipFrame();
 
@@ -44,7 +44,7 @@ namespace Render {
 
         virtual void setRenderSpace(const Rect2i &space) = 0;
 
-        size_t iterations() const;
+        bool canFlipFlop() const;
 
         const std::string &name() const;
 
@@ -59,6 +59,8 @@ namespace Render {
 
         RenderContext *mContext;
 
+        size_t mFlipFlopIndices[4] = { 0 };
+
     private:
         std::vector<RenderPass *> mRenderPasses;
 
@@ -66,7 +68,7 @@ namespace Render {
 
         std::string mName;
 
-        size_t mIterations;
+        bool mFlipFlop;
     };
 
 }

@@ -12,14 +12,16 @@ namespace Render {
 
     struct MADGINE_DIRECTX11_EXPORT DirectX11RenderTarget : RenderTarget {
 
-        DirectX11RenderTarget(DirectX11RenderContext *context, bool global, std::string name, size_t iterations = 1, RenderTarget *blitSource = nullptr);
+        DirectX11RenderTarget(DirectX11RenderContext *context, bool global, std::string name, bool flipFlop = false, RenderTarget *blitSource = nullptr);
         ~DirectX11RenderTarget();
 
-        void setup(std::vector<ReleasePtr<ID3D11RenderTargetView>> targetViews, const Vector2i &size, TextureType type, size_t samples = 1);
+        void setup(std::vector<std::array<ReleasePtr<ID3D11RenderTargetView>, 6>> targetViews, const Vector2i &size, TextureType type, size_t samples = 1);
         void shutdown();
 
-        virtual void beginIteration(size_t iteration) const override;
-        virtual void endIteration(size_t iteration) const override;
+        virtual void beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const override;
+        virtual void endIteration() const override;
+
+        virtual void beginFrame() override;
 
         virtual void clearDepthBuffer() override;
 
@@ -30,9 +32,9 @@ namespace Render {
 
         DirectX11RenderContext *context() const;
 
-        std::vector<ReleasePtr<ID3D11RenderTargetView>> mTargetViews;
+        std::vector<std::array<ReleasePtr<ID3D11RenderTargetView>, 6>> mTargetViews;
         DirectX11Texture mDepthBuffer;
-        ReleasePtr<ID3D11DepthStencilView> mDepthStencilView;
+        ReleasePtr<ID3D11DepthStencilView> mDepthStencilViews[6];
         ReleasePtr<ID3D11DepthStencilState> mDepthStencilState;
         ReleasePtr<ID3D11RasterizerState> mRasterizerState;
         ReleasePtr<ID3D11BlendState> mBlendState;

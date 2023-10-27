@@ -12,7 +12,7 @@ namespace Render {
         , mSize { 0, 0 }
         , mCreateDepthBufferView(config.mCreateDepthBufferView)
     {
-        size_t bufferCount = config.mIterations > 1 ? 2 : 1;
+        size_t bufferCount = config.mFlipFlop ? 2 : 1;
 
         for (size_t i = 0; i < config.mTextureCount * bufferCount; ++i) {
             mTextures.emplace_back(config.mType, true, config.mFormat, config.mSamples);
@@ -65,18 +65,18 @@ namespace Render {
         return true;
     }
 
-    void VulkanRenderTexture::beginIteration(size_t iteration) const
+    void VulkanRenderTexture::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
 
-        VulkanRenderTarget::beginIteration(iteration);
+        VulkanRenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);
     }
 
-    void VulkanRenderTexture::endIteration(size_t iteration) const
+    void VulkanRenderTexture::endIteration() const
     {
-        VulkanRenderTarget::endIteration(iteration);
+        VulkanRenderTarget::endIteration();
     }
 
-    TextureDescriptor VulkanRenderTexture::texture(size_t index, size_t iteration) const
+    TextureDescriptor VulkanRenderTexture::texture(size_t index) const
     {
         return mTextures[index].descriptor();
     }

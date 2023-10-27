@@ -14,8 +14,8 @@ namespace Render {
         bool mCreateDepthBufferView = false;
 
         size_t mSamples = 1;
-        size_t mTextureCount = 1;
-        size_t mIterations = 1;        
+        size_t mTextureCount = 1; 
+        bool mFlipFlop = false;
         
         RenderTarget *mBlitSource = nullptr;
     };

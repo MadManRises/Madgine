@@ -104,15 +104,15 @@ namespace Render {
         mSwapChain->Present(0, 0);
     }
 
-    void DirectX12RenderWindow::beginIteration(size_t iteration) const
+    void DirectX12RenderWindow::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
-        DirectX12RenderTarget::beginIteration(iteration);
+        DirectX12RenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);
     }
 
-    void DirectX12RenderWindow::endIteration(size_t iteration) const
+    void DirectX12RenderWindow::endIteration() const
     {
 
-        DirectX12RenderTarget::endIteration(iteration);
+        DirectX12RenderTarget::endIteration();
     }
 
     Vector2i DirectX12RenderWindow::size() const

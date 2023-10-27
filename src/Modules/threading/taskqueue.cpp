@@ -126,7 +126,11 @@ namespace Threading {
                             nextTaskTimepoint = std::min(it->mQualifiers.mScheduledFor.revert(), nextTaskTimepoint);
                         }
                     }
-                    mCv.wait_until(lock, nextTaskTimepoint);                                        
+                    if (nextTaskTimepoint <= now) {
+                        lock.unlock();
+                        lock.lock();
+                    } else
+                        mCv.wait_until(lock, nextTaskTimepoint);                                        
                 }
             }
 

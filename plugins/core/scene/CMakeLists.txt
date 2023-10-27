@@ -20,7 +20,7 @@ set(sources "")
 FolderSources(sources "" renderer)
 	FolderSources(sources renderer Madgine scenerendererforward.h scenerendererlib.h)
 		FolderSources(sources Madgine render pointshadowrenderpass.cpp pointshadowrenderpass.h scenemainwindowcomponent.cpp scenemainwindowcomponent.h scenerenderdata.cpp scenerenderdata.h scenerenderpass.cpp scenerenderpass.h shadowrenderpass.cpp shadowrenderpass.h shadowscenerenderdata.cpp shadowscenerenderdata.h litscenerenderdata.cpp litscenerenderdata.h)
-			FolderSources(sources render shaders light.hlsl lightdata.sl pointshadow.GS_hlsl pointshadow.PS_hlsl pointshadow.sl pointshadow.VS_hlsl scene.PS_hlsl scene.sl scene.VS_hlsl)
+			FolderSources(sources render shaders light.hlsl lightdata.sl pointshadow.PS_hlsl pointshadow.sl pointshadow.VS_hlsl scene.PS_hlsl scene.sl scene.VS_hlsl)
 
 add_plugin(SceneRenderer Madgine Core ${sources} SOURCE_ROOT renderer PRECOMPILED_HEADER renderer/Madgine/scenerendererlib.h)
 

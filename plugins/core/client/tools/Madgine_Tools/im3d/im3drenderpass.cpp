@@ -38,8 +38,6 @@ namespace Render {
         if (!mPipeline.available())
             return;
 
-        target->pushAnnotation("Im3D");
-
         Im3D::Im3DContext *context = Im3D::GetCurrentContext();
 
         target->clearDepthBuffer();
@@ -84,13 +82,16 @@ namespace Render {
                 }
             }
         }
-
-        target->popAnnotation();
     }
 
     int Im3DRenderPass::priority() const
     {
         return mPriority;
+    }
+
+    std::string_view Im3DRenderPass::name() const
+    {
+        return "Im3D";
     }
 }
 }

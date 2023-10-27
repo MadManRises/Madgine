@@ -86,8 +86,6 @@ namespace Render {
         if (!mPipeline.available())
             return;
 
-        target->pushAnnotation("Scene");
-
         Vector2i size = target->size();
 
         float aspectRatio = float(size.x) / size.y;
@@ -175,12 +173,21 @@ namespace Render {
 
             mPipeline->renderMeshInstanced(target, std::move(instanceData), meshData);
         }
-        target->popAnnotation();
     }
 
     int SceneRenderPass::priority() const
     {
         return mPriority;
+    }
+
+    size_t SceneRenderPass::targetCount(size_t) const
+    {
+        return 2;
+    }
+
+    std::string_view SceneRenderPass::name() const
+    {
+        return "Scene";
     }
 
     void SceneRenderPass::debugCameras(Lambda<void(const Camera &, std::string_view)> handler) const

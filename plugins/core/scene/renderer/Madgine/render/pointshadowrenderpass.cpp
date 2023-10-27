@@ -10,8 +10,8 @@
 #include "Madgine/scene/entity/components/transform.h"
 #include "Madgine/scene/entity/entity.h"
 
-#include "Madgine/render/rendertarget.h"
 #include "Madgine/render/rendercontext.h"
+#include "Madgine/render/rendertarget.h"
 
 #include "scenemainwindowcomponent.h"
 
@@ -25,6 +25,7 @@
 #include "shaders/pointshadow.sl"
 #include "Madgine/render/shadinglanguage/sl_support_end.h"
 
+
 namespace Engine {
 namespace Render {
 
@@ -37,7 +38,7 @@ namespace Render {
 
     void PointShadowRenderPass::setup(RenderTarget *target)
     {
-        mPipeline.create({ .vs = "pointshadow", .ps = "pointshadow", .gs = "pointshadow", .bufferSizes = { sizeof(PointShadowPerApplication), sizeof(PointShadowPerFrame), 0 }, .instanceDataSize = sizeof(PointShadowInstanceData) });
+        mPipeline.create({ .vs = "pointshadow", .ps = "pointshadow", .bufferSizes = { sizeof(PointShadowPerApplication), 0, 0 }, .instanceDataSize = sizeof(PointShadowInstanceData) });
 
         addDependency(&mData);
     }
@@ -65,8 +66,6 @@ namespace Render {
         if (!transform)
             return;
 
-        target->pushAnnotation("PointShadow");
-
         {
             auto perApplication = mPipeline->mapParameters<PointShadowPerApplication>(0);
 
@@ -80,24 +79,59 @@ namespace Render {
             perApplication->p = ProjectionMatrix(f);
         }
 
-        {
-            auto perFrame = mPipeline->mapParameters<PointShadowPerFrame>(1);
-
-            perFrame->position = transform->mPosition;
-        }
-
         for (std::pair<const GPUMeshData *const, std::vector<ShadowSceneRenderData::ObjectData>> &instance : mData.mInstances) {
             const GPUMeshData *meshData = instance.first;
 
-            mPipeline->renderMeshInstanced(target, std::move(instance.second), meshData);
-        }
+            std::vector<PointShadowInstanceData> instanceData;
 
-        target->popAnnotation();
+            
+            static constexpr Matrix4 rotationMatrices[] = {
+                { 0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1 },
+                { 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1 },
+                { 1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1 },
+                { 1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1 },
+                { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 },
+                { -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1 }
+            };
+
+            Matrix4 v = rotationMatrices[iteration] * TranslationMatrix(-transform->mPosition);
+
+            std::ranges::transform(instance.second, std::back_inserter(instanceData), [&](const ShadowSceneRenderData::ObjectData &o) {
+                Matrix4 mv = v * o.mTransform;
+                return PointShadowInstanceData {
+                    mv.Transpose() /*,                    
+                    o.mBones*/
+                };
+            });
+
+
+            mPipeline->renderMeshInstanced(target, std::move(instanceData), meshData);
+        }
     }
 
     int PointShadowRenderPass::priority() const
     {
         return mPriority;
+    }
+
+    size_t PointShadowRenderPass::iterations() const
+    {
+        return 6;
+    }
+
+    size_t PointShadowRenderPass::targetSubresourceIndex(size_t iteration) const
+    {
+        return iteration;
+    }
+
+    size_t PointShadowRenderPass::targetCount(size_t) const
+    {
+        return 0;
+    }
+
+    std::string_view PointShadowRenderPass::name() const
+    {
+        return "PointShadow";
     }
 
 }

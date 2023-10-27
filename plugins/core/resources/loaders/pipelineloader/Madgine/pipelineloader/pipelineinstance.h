@@ -14,7 +14,6 @@ namespace Render {
     struct PipelineConfiguration {
         std::string_view vs;
         std::string_view ps;
-        std::string_view gs;
         std::vector<size_t> bufferSizes;
         size_t instanceDataSize = 0;
     };

@@ -23,6 +23,11 @@ namespace Window {
         {
             return T::componentName();
         }
+
+        virtual std::string_view name() const override final
+        {
+            return T::componentName();
+        }
     };
 
     template <typename T>
@@ -30,6 +35,11 @@ namespace Window {
         using Serialize::VirtualData<T, MainWindowComponentVirtualBase<T>>::VirtualData;
 
         virtual std::string_view key() const override final
+        {
+            return T::componentName();
+        }
+
+        virtual std::string_view name() const override final
         {
             return T::componentName();
         }

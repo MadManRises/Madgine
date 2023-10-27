@@ -7,11 +7,11 @@ namespace Render {
 
     struct MADGINE_OPENGL_EXPORT OpenGLRenderTarget : RenderTarget {
 
-        OpenGLRenderTarget(OpenGLRenderContext *context, bool global, std::string name, size_t iterations = 1, RenderTarget *blitSource = nullptr);
+        OpenGLRenderTarget(OpenGLRenderContext *context, bool global, std::string name, bool flipFlop = false, RenderTarget *blitSource = nullptr);
         ~OpenGLRenderTarget();
 
-        virtual void beginIteration(size_t iteration) const override;
-        virtual void endIteration(size_t iteration) const override;
+        virtual void beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const override;
+        virtual void endIteration() const override;
 
         virtual void clearDepthBuffer() override;
 

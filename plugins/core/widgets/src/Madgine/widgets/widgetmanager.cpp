@@ -583,8 +583,6 @@ namespace Widgets {
         if (!mData->mPipeline.available())
             return;
 
-        target->pushAnnotation("WidgetManager");
-
         MainWindowComponentBase::render(target, iteration);
 
         WidgetsRenderData renderData;
@@ -632,8 +630,6 @@ namespace Widgets {
 
             mData->mPipeline->renderMesh(target, mData->mMesh);
         }
-
-        target->popAnnotation();
     }
 
     Generator<std::pair<WidgetBase *, size_t>> WidgetManager::visibleWidgets()

@@ -14,10 +14,10 @@ METATABLE_END(Engine::Render::RenderTarget)
 namespace Engine {
 namespace Render {
 
-    RenderTarget::RenderTarget(RenderContext *context, bool global, std::string name, size_t iterations, RenderTarget *blitSource)
+    RenderTarget::RenderTarget(RenderContext *context, bool global, std::string name, bool flipFlop, RenderTarget *blitSource)
         : mGlobal(global)
         , mName(std::move(name))
-        , mIterations(iterations)
+        , mFlipFlop(flipFlop)
         , mBlitSource(blitSource)
         , mContext(context)
     {
@@ -52,11 +52,23 @@ namespace Render {
 
         beginFrame();
 
-        for (size_t iteration = 0; iteration < mIterations; ++iteration) {
-            beginIteration(iteration);
-            for (RenderPass *pass : mRenderPasses)
+        for (RenderPass *pass : mRenderPasses) {
+            pushAnnotation(pass->name().data());
+            for (size_t iteration = 0; iteration < pass->iterations(); ++iteration) {
+                bool flipFlopping = pass->swapFlipFlopTextures(iteration);
+                assert(mFlipFlop || !flipFlopping);
+                size_t index = pass->targetIndex(iteration);
+                size_t count = pass->targetCount(iteration);
+                size_t subIndex = pass->targetSubresourceIndex(iteration);
+                beginIteration(flipFlopping, index, count, subIndex);
                 pass->render(this, iteration);
-            endIteration(iteration);
+                endIteration();
+                if (flipFlopping) {
+                    for (size_t i = 0; i < count; ++i)
+                        mFlipFlopIndices[index + i] ^= 1;
+                }
+            }
+            popAnnotation();
         }
 
         endFrame();
@@ -102,17 +114,17 @@ namespace Render {
         popAnnotation();
     }
 
-    void RenderTarget::beginIteration(size_t iteration) const
+    void RenderTarget::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
     }
 
-    void RenderTarget::endIteration(size_t iteration) const
+    void RenderTarget::endIteration() const
     {
     }
 
-    size_t RenderTarget::iterations() const
+    bool RenderTarget::canFlipFlop() const
     {
-        return mIterations;
+        return mFlipFlop;
     }
 
     const std::string &RenderTarget::name() const
@@ -137,7 +149,7 @@ namespace Render {
         return Matrix4::IDENTITY;
     }
 
-    TextureDescriptor RenderTarget::texture(size_t index, size_t iteration) const
+    TextureDescriptor RenderTarget::texture(size_t index) const
     {
         return {};
     }

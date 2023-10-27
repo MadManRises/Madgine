@@ -94,6 +94,11 @@ namespace Render {
             return 50;
         }
 
+        virtual std::string_view name() const override
+        {
+            return "NodeGraph";
+        }
+
         NodeGraph::NodeInterpreterState &mInterpreter;
         NodeGraph::Pin mTargetPin;
         Render::RenderTarget *mTarget = nullptr;

@@ -21,12 +21,12 @@ namespace Engine {
 namespace Render {
 
     DirectX11RenderTexture::DirectX11RenderTexture(DirectX11RenderContext *context, const Vector2i &size, const RenderTextureConfig &config)
-        : DirectX11RenderTarget(context, false, config.mName, config.mIterations, config.mBlitSource)
+        : DirectX11RenderTarget(context, false, config.mName, config.mFlipFlop, config.mBlitSource)
         , mType(config.mType)
         , mSamples(config.mSamples)
         , mSize { 0, 0 }
     {
-        size_t bufferCount = config.mIterations > 1 ? 2 : 1;
+        size_t bufferCount = config.mFlipFlop ? 2 : 1;
 
         for (size_t i = 0; i < config.mTextureCount * bufferCount; ++i) {
             DirectX11Texture &tex = mTextures.emplace_back(config.mType, config.mFormat, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE, mSamples);
@@ -47,7 +47,7 @@ namespace Render {
 
         mSize = size;
 
-        std::vector<ReleasePtr<ID3D11RenderTargetView>> targetViews;
+        std::vector<std::array<ReleasePtr<ID3D11RenderTargetView>, 6>> targetViews;
 
         for (DirectX11Texture &tex : mTextures) {
             tex.resize(size);
@@ -73,10 +73,13 @@ namespace Render {
                 break;
             case TextureType_2DMultiSample:
                 renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
+                break;
+            default:
+                throw 0;
             }
             renderTargetViewDesc.Texture2D.MipSlice = 0;
 
-            HRESULT hr = sDevice->CreateRenderTargetView(tex.resource(), &renderTargetViewDesc, &targetViews.emplace_back());
+            HRESULT hr = sDevice->CreateRenderTargetView(tex.resource(), &renderTargetViewDesc, &(targetViews.emplace_back()[0]));
             DX11_CHECK(hr);
         }
 
@@ -85,34 +88,39 @@ namespace Render {
         return true;
     }
 
-    void DirectX11RenderTexture::beginIteration(size_t iteration) const
+    void DirectX11RenderTexture::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
-        DirectX11RenderTarget::beginIteration(iteration);
+        DirectX11RenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);
+    }
+
+    void DirectX11RenderTexture::endIteration() const
+    {
+        DirectX11RenderTarget::endIteration();
+    }
+
+    void DirectX11RenderTexture::beginFrame()
+    {
+        DirectX11RenderTarget::beginFrame();
 
         if (mBlitSource)
             blit(mBlitSource);
-
-        if (iteration > 0)
-            DirectX11PipelineInstance::bindTexturesImpl({ mTextures[1 - (iteration % 2)].descriptor() });
     }
 
-    void DirectX11RenderTexture::endIteration(size_t iteration) const {
-        DirectX11RenderTarget::endIteration(iteration);
-    }
-
-    TextureDescriptor DirectX11RenderTexture::texture(size_t index, size_t iteration) const
+    const DirectX11Texture &DirectX11RenderTexture::getTexture(size_t index) const
     {
-        if (iteration == std::numeric_limits<size_t>::max())
-            iteration = iterations();
+        int offset = canFlipFlop() ? mFlipFlopIndices[index] : 0;
+        return mTextures[textureCount() * offset + index];
+    }
 
-        int bufferCount = iterations() > 1 ? 2 : 1;
-        int offset = iterations() > 1 ? 1 - iteration % 2 : 0;
-        return mTextures[(mTextures.size() / bufferCount) * offset + index].descriptor();
+    TextureDescriptor DirectX11RenderTexture::texture(size_t index) const
+    {
+        return getTexture(index).descriptor();
     }
 
     size_t DirectX11RenderTexture::textureCount() const
     {
-        return mTextures.size();
+        int bufferCount = canFlipFlop() ? 2 : 1;
+        return mTextures.size() / bufferCount;
     }
 
     TextureDescriptor DirectX11RenderTexture::depthTexture() const
@@ -126,6 +134,8 @@ namespace Render {
         assert(inputTex);
 
         size_t count = std::min(mTextures.size(), inputTex->mTextures.size());
+
+        int bufferCount = canFlipFlop() ? 2 : 1;
 
         for (size_t i = 0; i < count; ++i) {
             DXGI_FORMAT xFormat;
@@ -149,7 +159,7 @@ namespace Render {
                 std::terminate();
             }
 
-            sDeviceContext->ResolveSubresource(mTextures[i].resource(), 0, inputTex->mTextures[i].resource(), 0, xFormat);
+            sDeviceContext->ResolveSubresource(getTexture(i).resource(), 0, inputTex->getTexture(i).resource(), 0, xFormat);
         }
     }
 

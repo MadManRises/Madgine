@@ -27,8 +27,8 @@ namespace Render {
 
         bool isFenceComplete(uint64_t fenceValue);
 
-        virtual void beginIteration(size_t iteration) const override;
-        virtual void endIteration(size_t iteration) const override;
+        virtual void beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const override;
+        virtual void endIteration() const override;
 
         virtual void pushAnnotation(const char *tag) override;
         virtual void popAnnotation() override;

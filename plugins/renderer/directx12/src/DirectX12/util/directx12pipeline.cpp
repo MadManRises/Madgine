@@ -7,23 +7,21 @@
 namespace Engine {
 namespace Render {
 
-    bool DirectX12Pipeline::link(typename DirectX12VertexShaderLoader::Handle vertexShader, typename DirectX12GeometryShaderLoader::Handle geometryShader, typename DirectX12PixelShaderLoader::Handle pixelShader)
+    bool DirectX12Pipeline::link(typename DirectX12VertexShaderLoader::Handle vertexShader, typename DirectX12PixelShaderLoader::Handle pixelShader)
     {
         reset();
 
         mVertexShader = std::move(vertexShader);
-        mGeometryShader = std::move(geometryShader);
         mPixelShader = std::move(pixelShader);
 
         return true;
     }
 
-    bool DirectX12Pipeline::link(typename DirectX12VertexShaderLoader::Ptr vertexShader, typename DirectX12GeometryShaderLoader::Ptr geometryShader, typename DirectX12PixelShaderLoader::Ptr pixelShader)
+    bool DirectX12Pipeline::link(typename DirectX12VertexShaderLoader::Ptr vertexShader, typename DirectX12PixelShaderLoader::Ptr pixelShader)
     {
         reset();
 
         mVertexShader = std::move(vertexShader);
-        mGeometryShader = std::move(geometryShader);
         mPixelShader = std::move(pixelShader);
 
         return true;
@@ -44,16 +42,6 @@ namespace Render {
                                           return !handle || handle.available();
                                       },
                                       [](const typename DirectX12VertexShaderLoader::Ptr &ptr) {
-                                          return true;
-                                      } },
-                    variant);
-            };
-            auto checkGeometry = [](auto &variant) {
-                return std::visit(overloaded {
-                                      [](const typename DirectX12GeometryShaderLoader::Handle &handle) {
-                                          return !handle || handle.available();
-                                      },
-                                      [](const typename DirectX12GeometryShaderLoader::Ptr &ptr) {
                                           return true;
                                       } },
                     variant);
@@ -79,8 +67,6 @@ namespace Render {
 
             if (!checkVertex(mVertexShader))
                 return nullptr;
-            if (!checkGeometry(mGeometryShader))
-                return nullptr;
             if (!checkPixel(mPixelShader))
                 return nullptr;
 
@@ -88,8 +74,6 @@ namespace Render {
             ZeroMemory(&pipelineDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 
             pipelineDesc.VS = { resolve(mVertexShader)->GetBufferPointer(), resolve(mVertexShader)->GetBufferSize() };
-            if (resolve(mGeometryShader))
-                pipelineDesc.GS = { resolve(mGeometryShader)->GetBufferPointer(), resolve(mGeometryShader)->GetBufferSize() };
             if (resolve(mPixelShader))
                 pipelineDesc.PS = { resolve(mPixelShader)->GetBufferPointer(), resolve(mPixelShader)->GetBufferSize() };
 
@@ -165,7 +149,6 @@ namespace Render {
                 for (ReleasePtr<ID3D12PipelineState> &pipeline : samplePipelines)
                     pipeline.reset();
         mVertexShader = {};
-        mGeometryShader = {};
         mPixelShader = {};
     }
 

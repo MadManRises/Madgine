@@ -18,9 +18,9 @@ METATABLE_END(Engine::Render::BloomPass)
 namespace Engine {
 namespace Render {
 
-    BloomPass::BloomPass(int priority)
+    BloomPass::BloomPass(int priority, size_t blurIterations)
         : mPriority(priority)
-        , mBlur(50)
+        , mBlur(priority - 1, blurIterations)
     {
     }
 
@@ -32,19 +32,11 @@ namespace Render {
     {
         mPipeline.create({ .vs = "bloom", .ps = "bloom", .bufferSizes = { sizeof(BloomData) } });
 
-        mBlurTarget = target->context()->createRenderTexture(target->size(), { .mName = "Blur (Bloom)", .mFormat = FORMAT_RGBA16F, .mIterations = 10 });
-
-        mBlurTarget->addRenderPass(&mBlur);
-
-        addDependency(mBlurTarget.get());
+        target->addRenderPass(&mBlur);
     }
 
     void BloomPass::shutdown()
     {
-        removeDependency(mBlurTarget.get());
-
-        mBlurTarget.reset();
-
         mPipeline.reset();
     }
 
@@ -53,22 +45,15 @@ namespace Render {
         if (!mPipeline.available())
             return;
 
-        if (iteration == 0)
-            target->pushAnnotation("Bloom");
-
-        mPipeline->bindTextures(target, { mInput->texture(mInputIndex), mBlurTarget->texture(0) });
+        mPipeline->bindTextures(target, { mInput->texture(mInputIndex), target->texture(1) });
 
         mPipeline->mapParameters<BloomData>(0)->exposure = mExposure;
 
-        mPipeline->renderQuad(target);
-
-        if (iteration == target->iterations() - 1)
-            target->popAnnotation();
+        mPipeline->renderQuad(target);        
     }
 
     void BloomPass::onTargetResize(const Vector2i &size)
     {
-        mBlurTarget->resize(size);
         mInput->resize(size);
     }
 
@@ -77,10 +62,20 @@ namespace Render {
         return mPriority;
     }
 
+    bool BloomPass::swapFlipFlopTextures(size_t) const
+    {
+        return true;
+    }
+
+    std::string_view BloomPass::name() const
+    {
+        return "Bloom";
+    }
+    
     void BloomPass::setInput(RenderTarget *input, size_t inputIndex, RenderTarget *blurInput, size_t blurIndex)
     {
         mInput = input;
-        addDependency(input);
+        //addDependency(input);
         mInputIndex = inputIndex;
         mBlur.setInput(blurInput ? blurInput : input, blurIndex);
     }

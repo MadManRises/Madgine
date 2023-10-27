@@ -327,8 +327,6 @@ namespace Tools {
     {
         PROFILE();
 
-        target->pushAnnotation("ImGui");
-
         if (mWindow.getRenderWindow() == target) {
 
             MainWindowComponentBase::render(target, iteration);
@@ -364,8 +362,6 @@ namespace Tools {
         } else {
             renderViewport(target, mViewportMappings.at(target));
         }
-
-        target->popAnnotation();
     }
 
     void ClientImRoot::addViewportMapping(Render::RenderTarget *target, ImGuiViewport *vp)

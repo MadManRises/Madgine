@@ -43,20 +43,15 @@ namespace Render {
 
         char buffer[256];
 #if WINDOWS
-        sprintf_s(buffer, "%s|%s|%s", config.vs.data(), config.gs.data(), config.ps.data());
+        sprintf_s(buffer, "%s|%s", config.vs.data(), config.ps.data());
 #else
-        sprintf(buffer, "%s|%s|%s", config.vs.data(), config.gs.data(), config.ps.data());
+        sprintf(buffer, "%s|%s", config.vs.data(), config.ps.data());
 #endif
 
-        if (!co_await pipeline.create(buffer, {}, [vs { std::string { config.vs } }, ps { std::string { config.ps } }, gs { std::string { config.gs } }](DirectX12PipelineLoader *loader, DirectX12Pipeline &pipeline, ResourceDataInfo &info) -> Threading::Task<bool> {
+        if (!co_await pipeline.create(buffer, {}, [vs { std::string { config.vs } }, ps { std::string { config.ps } }](DirectX12PipelineLoader *loader, DirectX12Pipeline &pipeline, ResourceDataInfo &info) -> Threading::Task<bool> {
                 DirectX12VertexShaderLoader::Handle vertexShader;
                 if (!co_await vertexShader.load(vs)) {
                     LOG_ERROR("Failed to load VS '" << vs << "'!");
-                    co_return false;
-                }
-                DirectX12GeometryShaderLoader::Handle geometryShader;
-                if (!gs.empty() && !co_await geometryShader.load(gs)) {
-                    LOG_ERROR("Failed to load GS '" << gs << "'!");
                     co_return false;
                 }
                 DirectX12PixelShaderLoader::Handle pixelShader;
@@ -64,7 +59,7 @@ namespace Render {
                     LOG_ERROR("Failed to load PS '" << ps << "'!");
                     co_return false;
                 }
-                co_return pipeline.link(std::move(vertexShader), std::move(geometryShader), std::move(pixelShader));
+                co_return pipeline.link(std::move(vertexShader), std::move(pixelShader));
             }))
             co_return false;
 
@@ -83,12 +78,10 @@ namespace Render {
                 DirectX12VertexShaderLoader::Ptr vertexShader;
                 if (!co_await vertexShader.create(file))
                     co_return false;
-            /* DirectX12GeometryShaderLoader::Handle geometryShader;
-                geometryShader.create(config.gs, file);*/
                 DirectX12PixelShaderLoader::Ptr pixelShader;
                 if (!co_await pixelShader.create(file))
                     co_return false;
-                co_return pipeline.link(std::move(vertexShader), {}, std::move(pixelShader));
+                co_return pipeline.link(std::move(vertexShader), std::move(pixelShader));
             }))
             co_return false;
 

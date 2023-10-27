@@ -22,6 +22,9 @@ namespace Render {
         virtual void render(Render::RenderTarget *target, size_t iteration) override;
 
         virtual int priority() const override;
+        virtual size_t targetCount(size_t) const override;
+
+        virtual std::string_view name() const override;
 
         virtual void debugCameras(Lambda<void(const Camera &, std::string_view)> handler) const override;
 

@@ -7,23 +7,21 @@
 namespace Engine {
 namespace Render {
 
-    bool VulkanPipeline::link(typename VulkanShaderLoader::Handle vertexShader, typename VulkanShaderLoader::Handle geometryShader, typename VulkanShaderLoader::Handle pixelShader)
+    bool VulkanPipeline::link(typename VulkanShaderLoader::Handle vertexShader, typename VulkanShaderLoader::Handle pixelShader)
     {
         reset();
 
         mVertexShader = std::move(vertexShader);
-        mGeometryShader = std::move(geometryShader);
         mPixelShader = std::move(pixelShader);
 
         return true;
     }
 
-    bool VulkanPipeline::link(typename VulkanShaderLoader::Ptr vertexShader, typename VulkanShaderLoader::Ptr geometryShader, typename VulkanShaderLoader::Ptr pixelShader)
+    bool VulkanPipeline::link(typename VulkanShaderLoader::Ptr vertexShader, typename VulkanShaderLoader::Ptr pixelShader)
     {
         reset();
 
         mVertexShader = std::move(vertexShader);
-        mGeometryShader = std::move(geometryShader);
         mPixelShader = std::move(pixelShader);
 
         return true;
@@ -59,8 +57,6 @@ namespace Render {
 
             if (!check(mVertexShader))
                 return nullptr;
-            if (!check(mGeometryShader))
-                return nullptr;
             if (!check(mPixelShader))
                 return nullptr;
 
@@ -73,14 +69,6 @@ namespace Render {
                 vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
                 vertShaderStageInfo.module = resolve(mVertexShader);
                 vertShaderStageInfo.pName = "main";
-            }
-
-            if (resolve(mGeometryShader)) {
-                VkPipelineShaderStageCreateInfo &geomShaderStageInfo = shaderStages[count++];
-                geomShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-                geomShaderStageInfo.stage = VK_SHADER_STAGE_GEOMETRY_BIT;
-                geomShaderStageInfo.module = resolve(mGeometryShader);
-                geomShaderStageInfo.pName = "main";
             }
 
             if (resolve(mPixelShader)) {
@@ -217,7 +205,6 @@ namespace Render {
                 for (VulkanPtr<VkPipeline, &vkDestroyPipeline> &pipeline : samplePipelines)
                     pipeline.reset();
         mVertexShader = {};
-        mGeometryShader = {};
         mPixelShader = {};
     }
 

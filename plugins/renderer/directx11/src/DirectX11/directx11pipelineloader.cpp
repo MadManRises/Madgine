@@ -2,7 +2,6 @@
 
 #include "directx11pipelineloader.h"
 
-#include "directx11geometryshaderloader.h"
 #include "directx11pixelshaderloader.h"
 #include "directx11vertexshaderloader.h"
 
@@ -48,18 +47,13 @@ namespace Render {
             LOG_ERROR("Failed to load VS '" << config.vs << "'!");
             co_return false;
         }
-        DirectX11GeometryShaderLoader::Handle geometryShader;
-        if (!config.gs.empty() && !co_await geometryShader.load(config.gs)) {
-            LOG_ERROR("Failed to load GS '" << config.vs << "'!");
-            co_return false;
-        }
         DirectX11PixelShaderLoader::Handle pixelShader;
         if (!config.ps.empty() && !co_await pixelShader.load(config.ps)) {
             LOG_ERROR("Failed to load PS '" << config.vs << "'!");
             co_return false;
         }
 
-        instance = std::make_unique<DirectX11PipelineInstanceHandle>(config, std::move(vertexShader), std::move(pixelShader), std::move(geometryShader));
+        instance = std::make_unique<DirectX11PipelineInstanceHandle>(config, std::move(vertexShader), std::move(pixelShader));
 
         co_return true;
     }
@@ -71,13 +65,11 @@ namespace Render {
         DirectX11VertexShaderLoader::Ptr vertexShader;
         if (!co_await vertexShader.create(file))
             co_return false;
-        //DirectX11GeometryShaderLoader::Handle geometryShader;
-        //geometryShader.create(name, file);
         DirectX11PixelShaderLoader::Ptr pixelShader;
         if (!co_await pixelShader.create(file))
             co_return false;
 
-        instance = std::make_unique<DirectX11PipelineInstancePtr>(config, std::move(vertexShader), std::move(pixelShader), DirectX11GeometryShaderLoader::Ptr {});
+        instance = std::make_unique<DirectX11PipelineInstancePtr>(config, std::move(vertexShader), std::move(pixelShader));
 
         co_return true;
     }

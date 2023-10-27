@@ -11,8 +11,8 @@ namespace Render {
         OpenGLRenderWindow(OpenGLRenderContext *context, Window::OSWindow *w, size_t samples = 1, OpenGLRenderWindow *sharedContext = nullptr);
         ~OpenGLRenderWindow();
 
-        virtual void beginIteration(size_t iteration) const override;
-        virtual void endIteration(size_t iteration) const override;
+        virtual void beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const override;
+        virtual void endIteration() const override;
 
         virtual bool resizeImpl(const Vector2i &size) override;
         virtual Vector2i size() const override;

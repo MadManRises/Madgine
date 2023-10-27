@@ -44,13 +44,13 @@ namespace Render {
 
         char buffer[256];
 #if WINDOWS
-        sprintf_s(buffer, "%s|%s|%s", config.vs.data(), config.gs.data(), config.ps.data());
+        sprintf_s(buffer, "%s|%s", config.vs.data(), config.ps.data());
 #else
-        sprintf(buffer, "%s|%s|%s", config.vs.data(), config.gs.data(), config.ps.data());
+        sprintf(buffer, "%s|%s", config.vs.data(), config.ps.data());
 #endif
 
         Handle pipeline;
-        if (!co_await pipeline.create(buffer, {}, [vs { std::string { config.vs } }, ps { std::string { config.ps } }, gs { std::string { config.gs } }](OpenGLPipelineLoader *loader, OpenGLPipeline &pipeline, ResourceDataInfo &info) -> Threading::Task<bool> {
+        if (!co_await pipeline.create(buffer, {}, [vs { std::string { config.vs } }, ps { std::string { config.ps } }](OpenGLPipelineLoader *loader, OpenGLPipeline &pipeline, ResourceDataInfo &info) -> Threading::Task<bool> {
                 OpenGLShaderLoader::Handle vertexShader;
                 if (!co_await vertexShader.load(vs, VertexShader)) {
                     LOG_ERROR("Failed to load VS '" << vs << "'!");
@@ -63,14 +63,8 @@ namespace Render {
                     co_return false;
                 }
 
-                OpenGLShaderLoader::Handle geometryShader;
-                if (!gs.empty() && !co_await geometryShader.load(gs, GeometryShader)) {
-                    LOG_ERROR("Failed to load GS '" << gs << "'!");
-                    co_return false;
-                }
-
-                if (!pipeline.link(std::move(vertexShader), std::move(geometryShader), std::move(pixelShader))) {
-                    LOG_ERROR("Failed to link Program '" << vs << "|" << gs << "|" << ps
+                if (!pipeline.link(std::move(vertexShader), std::move(pixelShader))) {
+                    LOG_ERROR("Failed to link Program '" << vs << "|" << ps
                                                          << "'!");
                     co_return false;
                 }
@@ -102,14 +96,8 @@ namespace Render {
                     co_return false;
                 }
 
-                /* OpenGLShaderLoader::Handle geometryShader;
-                if (!co_await geometryShader.create(config.gs, GeometryShader) && geometryShader) {
-                    LOG_ERROR("Failed to load GS '" << config.gs << "'!");
-                    co_return false;
-                }*/
-
-                if (!pipeline.link(std::move(vertexShader), {}, std::move(pixelShader))) {
-                    LOG_ERROR("Failed to link Program '" << config.vs << "|" << config.gs << "|" << config.ps
+                if (!pipeline.link(std::move(vertexShader), std::move(pixelShader))) {
+                    LOG_ERROR("Failed to link Program '" << config.vs << "|" << config.ps
                                                          << "'!");
                     co_return false;
                 }

@@ -8,7 +8,7 @@ namespace Render {
 
     struct MADGINE_CLIENT_EXPORT BloomPass : RenderPass {
 
-        BloomPass(int priority);
+        BloomPass(int priority, size_t blurIterations = 10);
         ~BloomPass();
 
         virtual void setup(RenderTarget *target) override;
@@ -17,6 +17,9 @@ namespace Render {
         virtual void onTargetResize(const Vector2i &size) override;
         
         virtual int priority() const override;
+        virtual bool swapFlipFlopTextures(size_t) const override;
+
+        virtual std::string_view name() const override;
 
         void setInput(RenderTarget *input, size_t inputIndex = 0, RenderTarget *blurInput = nullptr, size_t blurIndex = 1);
 
@@ -24,8 +27,6 @@ namespace Render {
 
     private:
         int mPriority;
-
-        std::unique_ptr<RenderTarget> mBlurTarget;
 
         BlurPass mBlur;
 

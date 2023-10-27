@@ -178,14 +178,14 @@ namespace Render {
         VK_CHECK(result);
     }
 
-    void VulkanRenderWindow::beginIteration(size_t iteration) const
+    void VulkanRenderWindow::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
-        VulkanRenderTarget::beginIteration(iteration);
+        VulkanRenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);
     }
 
-    void VulkanRenderWindow::endIteration(size_t iteration) const
+    void VulkanRenderWindow::endIteration() const
     {
-        VulkanRenderTarget::endIteration(iteration);
+        VulkanRenderTarget::endIteration();
     }
 
     Vector2i VulkanRenderWindow::size() const

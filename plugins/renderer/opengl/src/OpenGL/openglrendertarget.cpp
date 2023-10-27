@@ -11,8 +11,8 @@
 namespace Engine {
 namespace Render {
 
-    OpenGLRenderTarget::OpenGLRenderTarget(OpenGLRenderContext *context, bool global, std::string name, size_t iterations, RenderTarget *blitSource)
-        : RenderTarget(context, global, name, iterations, blitSource)
+    OpenGLRenderTarget::OpenGLRenderTarget(OpenGLRenderContext *context, bool global, std::string name, bool flipFlop, RenderTarget *blitSource)
+        : RenderTarget(context, global, name, flipFlop, blitSource)
     {
     }
 
@@ -20,9 +20,9 @@ namespace Render {
     {
     }
 
-    void OpenGLRenderTarget::beginIteration(size_t iteration) const
+    void OpenGLRenderTarget::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
-        RenderTarget::beginIteration(iteration);
+        RenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);
 
         Vector2i screenSize = size();
 
@@ -44,12 +44,12 @@ namespace Render {
         glEnable(GL_FRAMEBUFFER_SRGB);
     }
 
-    void OpenGLRenderTarget::endIteration(size_t iteration) const
+    void OpenGLRenderTarget::endIteration() const
     {
 
         glDisable(GL_FRAMEBUFFER_SRGB);
 
-        RenderTarget::endIteration(iteration);
+        RenderTarget::endIteration();
     }
 
     void OpenGLRenderTarget::setRenderSpace(const Rect2i &space)

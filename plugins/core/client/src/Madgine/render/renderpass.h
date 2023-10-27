@@ -19,6 +19,13 @@ namespace Render {
         virtual void onTargetResize(const Vector2i &size) {};
 
         virtual int priority() const = 0;
+        virtual size_t iterations() const;
+        virtual size_t targetIndex(size_t iteration) const;
+        virtual size_t targetCount(size_t iteration) const;
+        virtual size_t targetSubresourceIndex(size_t iteration) const;
+        virtual bool swapFlipFlopTextures(size_t iteration) const;
+
+        virtual std::string_view name() const = 0;
 
     protected:
         void addDependency(RenderData *dep);

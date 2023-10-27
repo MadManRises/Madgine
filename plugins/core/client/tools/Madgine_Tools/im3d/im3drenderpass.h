@@ -16,6 +16,8 @@ namespace Render {
 
         virtual int priority() const override;
 
+        virtual std::string_view name() const override;
+
     private:
         PipelineLoader::Instance mPipeline;
 

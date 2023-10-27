@@ -12,7 +12,7 @@ namespace Render {
         , mSize { 0, 0 }
         , mSamples(config.mSamples)
     {
-        size_t bufferCount = config.mIterations > 1 ? 2 : 1;
+        size_t bufferCount = config.mFlipFlop ? 2 : 1;
 
         for (size_t i = 0; i < config.mTextureCount * bufferCount; ++i) {
             mTextures.emplace_back(config.mType, true, config.mFormat, config.mSamples);
@@ -89,7 +89,7 @@ namespace Render {
         return true;
     }
 
-    void DirectX12RenderTexture::beginIteration(size_t iteration) const
+    void DirectX12RenderTexture::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
         for (const DirectX12Texture &tex : mTextures)
             mCommandList.Transition(tex, tex.readStateFlags(), mBlitSource ? D3D12_RESOURCE_STATE_RESOLVE_DEST : D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -97,15 +97,15 @@ namespace Render {
         if (mDepthBufferView)
             mCommandList.Transition(mDepthStencilBuffer, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
-        DirectX12RenderTarget::beginIteration(iteration);
+        DirectX12RenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);
 
         if (mBlitSource)
             blit(mBlitSource);
     }
 
-    void DirectX12RenderTexture::endIteration(size_t iteration) const
+    void DirectX12RenderTexture::endIteration() const
     {
-        DirectX12RenderTarget::endIteration(iteration);
+        DirectX12RenderTarget::endIteration();
 
         for (const DirectX12Texture &tex : mTextures)
             mCommandList.Transition(tex, mBlitSource ? D3D12_RESOURCE_STATE_RESOLVE_DEST : D3D12_RESOURCE_STATE_RENDER_TARGET, tex.readStateFlags());
@@ -115,13 +115,10 @@ namespace Render {
 
     }
 
-    TextureDescriptor DirectX12RenderTexture::texture(size_t index, size_t iteration) const
+    TextureDescriptor DirectX12RenderTexture::texture(size_t index) const
     {
-        if (iteration == std::numeric_limits<size_t>::max())
-            iteration = iterations();
-
-        int bufferCount = iterations() > 1 ? 2 : 1;
-        int offset = iterations() > 1 ? 1 - iteration % 2 : 0;
+        int bufferCount = canFlipFlop() ? 2 : 1;
+        int offset = canFlipFlop() ? mFlipFlopIndices[index] : 0;
         return mTextures[(mTextures.size() / bufferCount) * offset + index].descriptor();
     }
 

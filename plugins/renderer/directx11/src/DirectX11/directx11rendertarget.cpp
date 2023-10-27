@@ -21,8 +21,10 @@
 namespace Engine {
 namespace Render {
 
-    DirectX11RenderTarget::DirectX11RenderTarget(DirectX11RenderContext *context, bool global, std::string name, size_t iterations, RenderTarget *blitSource)
-        : RenderTarget(context, global, name, iterations, blitSource)
+    constexpr FLOAT sClearColor[4] = { 0.033f, 0.073f, 0.073f, 1.0f };
+
+    DirectX11RenderTarget::DirectX11RenderTarget(DirectX11RenderContext *context, bool global, std::string name, bool flipFlop, RenderTarget *blitSource)
+        : RenderTarget(context, global, name, flipFlop, blitSource)
     {
     }
 
@@ -30,14 +32,19 @@ namespace Render {
     {
     }
 
-    void DirectX11RenderTarget::setup(std::vector<ReleasePtr<ID3D11RenderTargetView>> targetViews, const Vector2i &size, TextureType type, size_t samples)
+    void DirectX11RenderTarget::setup(std::vector<std::array<ReleasePtr<ID3D11RenderTargetView>, 6>> targetViews, const Vector2i &size, TextureType type, size_t samples)
     {
-        mTargetViews = std::move(targetViews);        
+        HRESULT hr;
+
+        mTargetViews = std::move(targetViews);
 
         mDepthBuffer = { type, FORMAT_D32, D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE, static_cast<size_t>(size.x), static_cast<size_t>(size.y), samples };
 
-        mDepthStencilView.reset();
+        for (size_t i = 0; i < 6; ++i)
+            mDepthStencilViews[i].reset();
 
+        size_t count = 1;
+        UINT *target = nullptr;
         D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
         ZeroMemory(&dsvDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
         dsvDesc.Flags = 0;
@@ -51,15 +58,20 @@ namespace Render {
             break;
         case TextureType_Cube:
             dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
-            dsvDesc.Texture2DArray.ArraySize = 6;
-            dsvDesc.Texture2DArray.FirstArraySlice = 0;
+            dsvDesc.Texture2DArray.ArraySize = 1;
+            count = 6;
+            target = &dsvDesc.Texture2DArray.FirstArraySlice;
             break;
         default:
             throw 0;
         }
-
-        HRESULT hr = sDevice->CreateDepthStencilView(mDepthBuffer.resource(), &dsvDesc, &mDepthStencilView);
-        DX11_CHECK(hr);
+        
+        for (size_t i = 0; i < count; ++i) {
+            if (target)
+                *target = i;
+            hr = sDevice->CreateDepthStencilView(mDepthBuffer.resource(), &dsvDesc, &mDepthStencilViews[i]);
+            DX11_CHECK(hr);
+        }
 
         if (!mDepthStencilState) {
 
@@ -154,14 +166,49 @@ namespace Render {
         mBlendState.reset();
         mRasterizerState.reset();
         mDepthStencilState.reset();
-        mDepthStencilView.reset();
+        for (size_t i = 0; i < 6; ++i)
+            mDepthStencilViews[i].reset();
 
         mTargetViews.clear();
     }
 
-    void DirectX11RenderTarget::beginIteration(size_t iteration) const
+    void DirectX11RenderTarget::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
-        RenderTarget::beginIteration(iteration);
+        RenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);
+
+        ID3D11RenderTargetView *views[8] = { 0 };
+        int bufferCount = canFlipFlop() ? 2 : 1;
+        size_t size = mTargetViews.size() / bufferCount;
+        size_t count = std::min(size, targetCount);
+        for (size_t index = 0; index < count; ++index) {
+            int offset = flipFlopping ^ mFlipFlopIndices[index + targetIndex];
+            if (flipFlopping) {
+                sDeviceContext->ClearRenderTargetView(mTargetViews[size * offset + index + targetIndex][targetSubresourceIndex], sClearColor);
+            }
+            views[index] = std::as_const(mTargetViews[size * offset + index + targetIndex][targetSubresourceIndex]);
+        }
+        sDeviceContext->OMSetRenderTargets(count, views, mDepthStencilViews[targetSubresourceIndex]);
+
+        if (flipFlopping) {
+            sDeviceContext->ClearDepthStencilView(mDepthStencilViews[targetSubresourceIndex], D3D11_CLEAR_DEPTH, 1.0f, 0);
+        }
+
+        LOG_DEBUG("Begin Iteration");
+    }
+
+    void DirectX11RenderTarget::endIteration() const
+    {
+        LOG_DEBUG("End Iteration");
+        sDeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+        ID3D11ShaderResourceView *nullSRV[5] = { nullptr, nullptr, nullptr, nullptr };
+        sDeviceContext->PSSetShaderResources(0, 5, nullSRV);
+
+        RenderTarget::endIteration();
+    }
+
+    void DirectX11RenderTarget::beginFrame()
+    {
+        RenderTarget::beginFrame();
 
         const Vector2i &screenSize = size();
 
@@ -176,34 +223,21 @@ namespace Render {
         viewport.MaxDepth = 1.0f;
         sDeviceContext->RSSetViewports(1, &viewport);
 
-        constexpr FLOAT color[4] = { 0.033f, 0.073f, 0.073f, 1.0f };        
+        sDeviceContext->PSSetSamplers(0, 2, &std::as_const(mSamplers)[0]);
 
-        int bufferCount = iterations() > 1 ? 2 : 1;
-        int offset = iterations() > 1 ? iteration % 2 : 0;
-        size_t size = mTargetViews.size() / bufferCount;
-        sDeviceContext->OMSetRenderTargets(size, size > 0 ? &mTargetViews[size * offset] : nullptr, mDepthStencilView);
         sDeviceContext->OMSetDepthStencilState(mDepthStencilState, 1);
         sDeviceContext->OMSetBlendState(mBlendState, 0, 0xffffffff);
 
-        if (!mBlitSource) {
-            for (ID3D11RenderTargetView *view : std::span { mTargetViews.begin() + size * offset, size })
-                sDeviceContext->ClearRenderTargetView(view, color);
-            sDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+        ID3D11RenderTargetView *views[8] = { 0 };
+        int bufferCount = canFlipFlop() ? 2 : 1;
+        size_t size = mTargetViews.size() / bufferCount;
+        for (size_t index = 0; index < size; ++index) {
+            int offset = mFlipFlopIndices[index];
+            for (size_t i = 0; i < 6; ++i)
+                if (mTargetViews[size * offset + index][i])
+                    sDeviceContext->ClearRenderTargetView(mTargetViews[size * offset + index][i], sClearColor);
         }
-
-        sDeviceContext->PSSetSamplers(0, 2, &mSamplers[0]);
-
-        LOG_DEBUG("Begin Iteration");
-    }
-
-    void DirectX11RenderTarget::endIteration(size_t iteration) const
-    {
-        LOG_DEBUG("End Iteration");
-        sDeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
-        ID3D11ShaderResourceView *nullSRV[5] = { nullptr, nullptr, nullptr, nullptr };
-        sDeviceContext->PSSetShaderResources(0, 5, nullSRV);
-
-        RenderTarget::endIteration(iteration);
+        clearDepthBuffer();
     }
 
     void DirectX11RenderTarget::setRenderSpace(const Rect2i &space)
@@ -220,7 +254,9 @@ namespace Render {
 
     void DirectX11RenderTarget::clearDepthBuffer()
     {
-        sDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+        for (size_t i = 0; i < 6; ++i)
+            if (mDepthStencilViews[i])
+                sDeviceContext->ClearDepthStencilView(mDepthStencilViews[i], D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
     }
 
     void DirectX11RenderTarget::pushAnnotation(const char *tag)

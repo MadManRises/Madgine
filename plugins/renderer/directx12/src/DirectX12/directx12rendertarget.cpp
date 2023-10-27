@@ -19,7 +19,7 @@ namespace Engine {
 namespace Render {
 
     DirectX12RenderTarget::DirectX12RenderTarget(DirectX12RenderContext *context, bool global, std::string name, RenderTarget *blitSource)
-        : RenderTarget(context, global, name, 1, blitSource)
+        : RenderTarget(context, global, name, true, blitSource)
     {
         mDepthStencilView = DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.allocate();
     }
@@ -95,7 +95,7 @@ namespace Render {
         mCommandList.reset();
     }
 
-    void DirectX12RenderTarget::beginIteration(size_t iteration) const
+    void DirectX12RenderTarget::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
 
         const Vector2i &screenSize = size();
@@ -138,12 +138,12 @@ namespace Render {
 
         //sDeviceContext->PSSetSamplers(0, 2, mSamplers);
 
-        RenderTarget::beginIteration(iteration);
+        RenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);
     }
 
-    void DirectX12RenderTarget::endIteration(size_t iteration) const
+    void DirectX12RenderTarget::endIteration() const
     {
-        RenderTarget::endIteration(iteration);
+        RenderTarget::endIteration();
     }
 
     void DirectX12RenderTarget::setRenderSpace(const Rect2i &space)

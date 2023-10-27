@@ -33,7 +33,7 @@ namespace Render {
         return *this;
     }
 
-    bool OpenGLPipeline::link(GLuint vertexShader, GLuint geometryShader, GLuint pixelShader)
+    bool OpenGLPipeline::link(GLuint vertexShader, GLuint pixelShader)
     {
         reset();
 
@@ -41,8 +41,6 @@ namespace Render {
         glAttachShader(mHandle, vertexShader);
         if (pixelShader)
             glAttachShader(mHandle, pixelShader);
-        if (geometryShader)
-            glAttachShader(mHandle, geometryShader);
 
         glLinkProgram(mHandle);
         // check for linking errors
@@ -92,20 +90,20 @@ namespace Render {
         return true;
     }
 
-    bool OpenGLPipeline::link(typename OpenGLShaderLoader::Handle vertexShader, typename OpenGLShaderLoader::Handle geometryShader, typename OpenGLShaderLoader::Handle pixelShader)
+    bool OpenGLPipeline::link(typename OpenGLShaderLoader::Handle vertexShader, typename OpenGLShaderLoader::Handle pixelShader)
     {
-        if (!vertexShader || vertexShader->mType != VertexShader || (pixelShader && pixelShader->mType != PixelShader) || (geometryShader && geometryShader->mType != GeometryShader))
+        if (!vertexShader || vertexShader->mType != VertexShader || (pixelShader && pixelShader->mType != PixelShader))
             std::terminate();
 
-        return link(vertexShader ? vertexShader->mHandle : 0, geometryShader ? geometryShader->mHandle : 0, pixelShader ? pixelShader->mHandle : 0);
+        return link(vertexShader ? vertexShader->mHandle : 0, pixelShader ? pixelShader->mHandle : 0);
     }
 
-    bool OpenGLPipeline::link(typename OpenGLShaderLoader::Ptr vertexShader, typename OpenGLShaderLoader::Ptr geometryShader, typename OpenGLShaderLoader::Ptr pixelShader)
+    bool OpenGLPipeline::link(typename OpenGLShaderLoader::Ptr vertexShader, typename OpenGLShaderLoader::Ptr pixelShader)
     {
-        if (!vertexShader || vertexShader->mType != VertexShader || (pixelShader && pixelShader->mType != PixelShader) || (geometryShader && geometryShader->mType != GeometryShader))
+        if (!vertexShader || vertexShader->mType != VertexShader || (pixelShader && pixelShader->mType != PixelShader))
             std::terminate();
 
-        return link(vertexShader ? vertexShader->mHandle : 0, geometryShader ? geometryShader->mHandle : 0, pixelShader ? pixelShader->mHandle : 0);
+        return link(vertexShader ? vertexShader->mHandle : 0, pixelShader ? pixelShader->mHandle : 0);
     }
 
     void OpenGLPipeline::reset()

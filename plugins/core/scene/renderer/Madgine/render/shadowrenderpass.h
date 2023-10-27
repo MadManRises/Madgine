@@ -19,6 +19,9 @@ namespace Render {
         virtual void render(RenderTarget *target, size_t iteration) override;        
 
         virtual int priority() const override;
+        virtual size_t targetCount(size_t) const override;
+
+        virtual std::string_view name() const override;
 
         Matrix4 projectionMatrix() const;
         Matrix4 viewMatrix() const;

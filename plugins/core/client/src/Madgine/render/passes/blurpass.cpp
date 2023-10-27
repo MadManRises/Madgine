@@ -8,7 +8,6 @@
 
 #include "../rendercontext.h"
 
-
 #include "../shadinglanguage/sl_support_begin.h"
 #include "shaders/blur.sl"
 #include "../shadinglanguage/sl_support_end.h"
@@ -16,8 +15,9 @@
 namespace Engine {
 namespace Render {
 
-    BlurPass::BlurPass(int priority)
+    BlurPass::BlurPass(int priority, size_t iterations)
         : mPriority(priority)
+        , mIterations(iterations)
     {
     }
 
@@ -36,10 +36,6 @@ namespace Render {
         if (!mPipeline.available())
             return;
 
-        if (iteration == 0) {
-            target->pushAnnotation("Blur");
-        }
-
         {
             auto data = mPipeline->mapParameters<BlurData>(0);
             data->horizontal = iteration % 2;
@@ -49,18 +45,15 @@ namespace Render {
         if (iteration == 0) {
             mPipeline->bindTextures(target, { mInput->texture(mInputIndex) });
         } else {
-            mPipeline->bindTextures(target, { target->texture(0, iteration) });
+            mPipeline->bindTextures(target, { target->texture(1) });
         }
 
         mPipeline->renderQuad(target);
-
-        if (iteration == target->iterations() - 1)
-            target->popAnnotation();
     }
 
     void BlurPass::onTargetResize(const Vector2i &size)
     {
-        mInput->resize(size);        
+        mInput->resize(size);
     }
 
     int BlurPass::priority() const
@@ -68,10 +61,30 @@ namespace Render {
         return mPriority;
     }
 
+    size_t BlurPass::iterations() const
+    {
+        return mIterations;
+    }
+
+    bool BlurPass::swapFlipFlopTextures(size_t) const
+    {
+        return true;
+    }
+
+    size_t BlurPass::targetIndex(size_t) const
+    {
+        return 1;
+    }
+
+    std::string_view BlurPass::name() const
+    {
+        return "Blur";
+    }
+
     void BlurPass::setInput(RenderTarget *input, size_t inputIndex)
     {
         mInput = input;
-        addDependency(input);
+        //addDependency(input);
         mInputIndex = inputIndex;
     }
 

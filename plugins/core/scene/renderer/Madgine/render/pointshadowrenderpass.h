@@ -6,7 +6,6 @@
 
 #include "shadowscenerenderdata.h"
 
-
 namespace Engine {
 namespace Render {
 
@@ -15,18 +14,23 @@ namespace Render {
 
         virtual void setup(RenderTarget *target) override;
         virtual void shutdown() override;
-        virtual void render(Render::RenderTarget *target, size_t iteration) override;        
+        virtual void render(Render::RenderTarget *target, size_t iteration) override;
 
         virtual int priority() const override;
+        virtual size_t iterations() const override;
+        virtual size_t targetSubresourceIndex(size_t iteration) const override;
+        virtual size_t targetCount(size_t) const override;
+
+        virtual std::string_view name() const override;
 
     private:
         PipelineLoader::Instance mPipeline;
 
-        ShadowSceneRenderData mData;     
+        ShadowSceneRenderData mData;
 
         size_t mIndex;
 
-        int mPriority;        
+        int mPriority;
     };
 
 }

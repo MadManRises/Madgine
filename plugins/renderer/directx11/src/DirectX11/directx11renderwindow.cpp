@@ -75,8 +75,8 @@ namespace Render {
 
         InterfacesVector size = w->renderSize();
 
-        std::vector<ReleasePtr<ID3D11RenderTargetView>> views;
-        views.emplace_back(std::move(targetView));
+        std::vector<std::array<ReleasePtr<ID3D11RenderTargetView>, 6>> views;
+        views.emplace_back()[0] = std::move(targetView);
         setup(std::move(views), { size.x, size.y }, TextureType_2D, samples);
     }
 
@@ -85,16 +85,21 @@ namespace Render {
         shutdown();
     }
 
-    void DirectX11RenderWindow::beginIteration(size_t iteration) const
+    void DirectX11RenderWindow::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
         PROFILE();
 
-        DirectX11RenderTarget::beginIteration(iteration);
+        DirectX11RenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);
     }
 
-    void DirectX11RenderWindow::endIteration(size_t iteration) const
+    void DirectX11RenderWindow::endIteration() const
     {
-        DirectX11RenderTarget::endIteration(iteration);
+        DirectX11RenderTarget::endIteration();
+    }
+
+    void DirectX11RenderWindow::endFrame()
+    {
+        DirectX11RenderTarget::endFrame();
 
         mSwapChain->Present(0, 0);
     }
@@ -125,8 +130,8 @@ namespace Render {
         hr = sDevice->CreateRenderTargetView(backBuffer, &rtvDesc, &targetView);
         DX11_CHECK(hr);
 
-        std::vector<ReleasePtr<ID3D11RenderTargetView>> views;
-        views.emplace_back(std::move(targetView));
+        std::vector<std::array<ReleasePtr<ID3D11RenderTargetView>, 6>> views;
+        views.emplace_back()[0] = std::move(targetView);
         setup(std::move(views), size, TextureType_2D);
 
         return true;

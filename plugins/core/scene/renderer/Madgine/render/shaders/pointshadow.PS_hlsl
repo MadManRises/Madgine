@@ -8,11 +8,6 @@ cbuffer PerApplication : register(b0)
 	PointShadowPerApplication app;
 };
 
-cbuffer PerFrame : register(b1)
-{
-	PointShadowPerFrame frame;
-};
-
 
 struct PixelShaderInput {
     float4 position : SV_Position;
@@ -22,7 +17,7 @@ struct PixelShaderInput {
 float main(PixelShaderInput IN) : SV_DEPTH
 {
     // get distance between fragment and light source
-    float lightDistance = length(IN.worldPos.xyz / IN.worldPos.w - frame.position);
+    float lightDistance = length(IN.worldPos.xyz / IN.worldPos.w);
     
     // map to [0;1] range by dividing by far_plane
     lightDistance = lightDistance / 100.0;

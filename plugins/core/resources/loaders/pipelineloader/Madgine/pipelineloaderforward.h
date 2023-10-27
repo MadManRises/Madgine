@@ -7,8 +7,7 @@ namespace Render {
 
     enum ShaderType {
         VertexShader,
-        PixelShader,
-        GeometryShader
+        PixelShader
     };
 }
 }

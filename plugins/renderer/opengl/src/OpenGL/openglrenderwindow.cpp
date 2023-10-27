@@ -87,7 +87,7 @@ namespace Render {
 #endif
     }
 
-    void OpenGLRenderWindow::beginIteration(size_t iteration) const
+    void OpenGLRenderWindow::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
         makeCurrent(getSurface(), mContext);
 
@@ -95,13 +95,13 @@ namespace Render {
         sCurrentSSBOBuffer = &*mSSBOBuffer;
 #endif
 
-        OpenGLRenderTarget::beginIteration(iteration);        
+        OpenGLRenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);        
 
     }
 
-    void OpenGLRenderWindow::endIteration(size_t iteration) const
+    void OpenGLRenderWindow::endIteration() const
     {
-        OpenGLRenderTarget::endIteration(iteration);
+        OpenGLRenderTarget::endIteration();
 
         swapBuffers(getSurface(), mContext);
     }

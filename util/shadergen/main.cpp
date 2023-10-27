@@ -103,8 +103,6 @@ int wmain(int argc, wchar_t **argv)
         profile = L"ps_6_2";
     } else if (extension == L".VS_hlsl") {
         profile = L"vs_6_2";
-    } else if (extension == L".GS_hlsl") {
-        profile = L"gs_6_2";
     }
 
     HRESULT hr = DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&library));

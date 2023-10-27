@@ -42,8 +42,6 @@ namespace Tools {
         if (!mMesh.available())
             return;
 
-        target->pushAnnotation("Grid");
-
         Vector2i size = target->size();
         float aspectRatio = float(size.x) / size.y;
         {
@@ -53,13 +51,16 @@ namespace Tools {
         }
 
         mPipeline->renderMesh(target, mMesh);
-
-        target->popAnnotation();
     }
 
     int GridPass::priority() const
     {
         return mPriority;
+    }
+
+    std::string_view GridPass::name() const
+    {
+        return "Grid";
     }
 }
 }

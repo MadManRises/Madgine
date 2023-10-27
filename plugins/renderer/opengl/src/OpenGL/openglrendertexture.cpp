@@ -53,7 +53,7 @@ namespace Render {
     }
 
     OpenGLRenderTexture::OpenGLRenderTexture(OpenGLRenderContext *context, const Vector2i &size, const RenderTextureConfig &config)
-        : OpenGLRenderTarget(context, false, config.mName, config.mIterations, config.mBlitSource)
+        : OpenGLRenderTarget(context, false, config.mName, config.mFlipFlop, config.mBlitSource)
         , mSamples(context->supportsMultisampling() ? config.mSamples : 1)
         , mSize { 0, 0 }
         , mType(config.mType)
@@ -63,7 +63,7 @@ namespace Render {
 
         bool createDepthBufferView = config.mCreateDepthBufferView;
 
-        size_t bufferCount = config.mIterations > 1 ? 2 : 1;
+        size_t bufferCount = config.mFlipFlop ? 2 : 1;
         size_t framebufferCount = getFramebufferCount(&createDepthBufferView);
 
 
@@ -160,7 +160,7 @@ namespace Render {
             mDepthTexture.setData({ width, height }, {});
         }
 
-        size_t bufferCount = iterations() > 1 ? 2 : 1;
+        size_t bufferCount = canFlipFlop() ? 2 : 1;
         size_t framebufferCount = getFramebufferCount();
         for (size_t j = 0; j < framebufferCount; ++j) {
 
@@ -189,33 +189,31 @@ namespace Render {
         return true;
     }
 
-    void OpenGLRenderTexture::beginIteration(size_t iteration) const
+    void OpenGLRenderTexture::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
-        glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffers[iteration % 2]);
+        glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffers[flipFlopping ^ mFlipFlopIndices[targetIndex]]);
         GL_CHECK();
 
-        OpenGLRenderTarget::beginIteration(iteration);
+        OpenGLRenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);
 
         if (mBlitSource)
             blit(mBlitSource);
     }
 
-    void OpenGLRenderTexture::endIteration(size_t iteration) const
+    void OpenGLRenderTexture::endIteration() const
     {
-        OpenGLRenderTarget::endIteration(iteration);
+        OpenGLRenderTarget::endIteration();
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         GL_CHECK();
     }
 
-    TextureDescriptor OpenGLRenderTexture::texture(size_t index, size_t iteration) const
+    TextureDescriptor OpenGLRenderTexture::texture(size_t index) const
     {
-        if (iteration == std::numeric_limits<size_t>::max())
-            iteration = iterations();
-
-        int bufferCount = iterations() > 1 ? 2 : 1;
-        int offset = iterations() > 1 ? 1 - iteration % 2 : 0;
-        return mTextures[bufferCount * index + offset].descriptor();
+        int bufferCount = canFlipFlop() ? 2 : 1;
+        //int offset = iterations() > 1 ? 1 - iteration % 2 : 0;
+        throw 0;
+        //return mTextures[bufferCount * index + offset].descriptor();
     }
 
     size_t OpenGLRenderTexture::textureCount() const
@@ -266,7 +264,7 @@ namespace Render {
 
     size_t OpenGLRenderTexture::getFramebufferCount(bool *emulateCube) const
     {
-        size_t count = iterations() > 1 ? 2 : 1;
+        size_t count = canFlipFlop() ? 2 : 1;
 
 #if OPENGL_ES < 32
 #    if !OPENGL_ES

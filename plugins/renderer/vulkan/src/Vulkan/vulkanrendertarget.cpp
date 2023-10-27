@@ -308,14 +308,14 @@ namespace Render {
         return fenceValue <= mLastCompletedFenceValue;
     }
 
-    void VulkanRenderTarget::beginIteration(size_t iteration) const
+    void VulkanRenderTarget::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
-        RenderTarget::beginIteration(iteration);
+        RenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);
     }
 
-    void VulkanRenderTarget::endIteration(size_t iteration) const
+    void VulkanRenderTarget::endIteration() const
     {
-        RenderTarget::endIteration(iteration);
+        RenderTarget::endIteration();
     }
 
     void VulkanRenderTarget::setRenderSpace(const Rect2i &space)

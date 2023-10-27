@@ -48,9 +48,6 @@ namespace Render {
         case ShaderType::VertexShader:
             actualName += "_VS";
             break;
-        case ShaderType::GeometryShader:
-            actualName += "_GS";
-            break;
         default:
             throw 0;
         }
@@ -67,8 +64,6 @@ namespace Render {
             type = ShaderType::VertexShader;
         else if (filename.ends_with("_PS"))
             type = ShaderType::PixelShader;
-        else if (filename.ends_with("_GS"))
-            type = ShaderType::GeometryShader;
         else
             throw 0;
 
