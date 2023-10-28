@@ -100,7 +100,7 @@ namespace Filesystem {
         return sPendingCount;
     }
 
-    AsyncFileReadState::AsyncFileReadState(Path &&path)
+    AsyncFileReadState::AsyncFileReadState(Path path)
         : mPath(std::move(path))
         , mData(std::make_unique<AsyncFileReadAuxiliaryData>())
     {

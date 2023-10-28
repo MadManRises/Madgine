@@ -28,7 +28,7 @@ namespace Filesystem {
         return 0;
     }
 
-    AsyncFileReadState::AsyncFileReadState(Path &&path)
+    AsyncFileReadState::AsyncFileReadState(Path path)
         : mPath(std::move(path))
     {
     }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "asyncoperations.h"
+#include "Generic/execution/virtualsender.h"
 
 namespace Engine {
 namespace Filesystem {
@@ -9,7 +10,10 @@ namespace Filesystem {
     INTERFACES_EXPORT void cancelAllAsyncIO();
     INTERFACES_EXPORT size_t pendingIOOperationCount();
 
-    INTERFACES_EXPORT AsyncFileRead readFileAsync(const Path &path);
+    inline auto readFileAsync(const Path& path) {
+        return Execution::make_virtual_sender<AsyncFileReadState, GenericResult, ByteBuffer>(path);
+    }
+    using AsyncFileRead = std::invoke_result_t<decltype(readFileAsync), Path>;
 
 }
 }
