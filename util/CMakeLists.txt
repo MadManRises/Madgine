@@ -16,7 +16,9 @@ ExternalProject_Add(ShaderGenExt
 	BUILD_COMMAND ${CMAKE_COMMAND} --build . --target ShaderGen
 	BUILD_ALWAYS true
 	INSTALL_COMMAND ""
-	DEPENDS ${DEPENDS})
+	DEPENDS ${DEPENDS}
+	USES_TERMINAL_CONFIGURE true
+	USES_TERMINAL_BUILD true)
 
 	
 add_executable(ShaderGen IMPORTED GLOBAL)
