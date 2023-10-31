@@ -8,8 +8,11 @@
 namespace Engine {
 namespace Threading {
 
+    template <typename Sender, typename... V>
+    struct AwaitableSenderImpl;
+
     template <typename Sender>
-    struct AwaitableSender;
+    using AwaitableSender = typename Sender::template value_types<type_pack>::prepend<Sender>::instantiate<AwaitableSenderImpl>;
 
     template <typename Sender>
     struct AwaitableReceiver : Execution::execution_receiver<> {
@@ -34,14 +37,76 @@ namespace Threading {
         AwaitableSender<Sender> *mState;
     };
 
+    template <typename Sender, typename... V>
+    struct AwaitableSenderImpl;
+
     template <typename Sender>
-    struct AwaitableSender {
+    struct AwaitableSenderImpl<Sender> {
 
         using S = Execution::connect_result_t<Sender, AwaitableReceiver<Sender>>;
         using R = typename Sender::result_type;
-        using V = typename Sender::template value_types<identity>;
 
-        AwaitableSender(Sender &&sender)
+        AwaitableSenderImpl(Sender &&sender)
+            : mState(Execution::connect(std::forward<Sender>(sender), AwaitableReceiver<Sender> { {}, this }))
+        {
+        }
+
+        bool await_ready()
+        {
+            mState.start();
+            return mFlag.test();
+        }
+
+        bool await_suspend(TaskHandle task)
+        {
+            mTask = std::move(task);
+            if (mFlag.test_and_set()) {
+                mTask.release();
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        std::optional<R> await_resume()
+        {
+            return std::move(mResult);
+        }
+
+        void set_value()
+        {
+            mResult.reset();
+            if (mFlag.test_and_set())
+                mTask.resumeInQueue();
+        }
+
+        void set_done()
+        {
+            if (mFlag.test_and_set())
+                mTask.resumeInQueue();
+        }
+
+        void set_error(R result)
+        {
+            mResult = std::forward<R>(result);
+            if (mFlag.test_and_set())
+                mTask.resumeInQueue();
+        }
+
+    private:
+        S mState;
+        std::atomic_flag mFlag = ATOMIC_FLAG_INIT;
+        TaskHandle mTask;
+        std::optional<R> mResult;
+    };
+
+    template <typename Sender, typename V>
+    struct AwaitableSenderImpl<Sender, V> {
+
+        using S = Execution::connect_result_t<Sender, AwaitableReceiver<Sender>>;
+        using R = typename Sender::result_type;
+
+        AwaitableSenderImpl(Sender &&sender)
             : mState(Execution::connect(std::forward<Sender>(sender), AwaitableReceiver<Sender> { {}, this }))
         {
         }
@@ -68,9 +133,9 @@ namespace Threading {
             return std::move(mResult);
         }
 
-        void set_value(V value)
+        void set_value(V values)
         {
-            mResult = { std::forward<V>(value) };
+            mResult = { std::forward<V>(values) };
             if (mFlag.test_and_set())
                 mTask.resumeInQueue();
         }

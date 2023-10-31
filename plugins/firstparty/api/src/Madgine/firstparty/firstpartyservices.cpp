@@ -29,7 +29,7 @@ namespace FirstParty {
         return mRoot.taskQueue()->queueTask(ingestStatTask(name, leaderboardName, value));
     }
 
-    Threading::TaskFuture<bool> Engine::FirstParty::FirstPartyServices::unlockAchievement(const char *name)
+    Threading::TaskFuture<bool> FirstPartyServices::unlockAchievement(const char *name)
     {
         return mRoot.taskQueue()->queueTask(unlockAchievementTask(name));
     }

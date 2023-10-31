@@ -112,6 +112,14 @@ if (NOT IOS AND NOT EMSCRIPTEN)
 		CREDITS "Audio-Compression: Vorbis - https://xiph.org/vorbis/")
 endif()
 
+set(PA_BUILD_STATIC ON CACHE BOOL "" FORCE)
+set(PA_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+add_subdirectory(portaudio-19.7.0)
+
+add_notices(portaudio_static 
+		READABLE_NAME PortAudio
+		LICENSE_FILE portaudio-19.7.0/LICENSE.txt 
+		CREDITS "Audio-IO: PortAudio - https://www.portaudio.com/")
 
 set(BUILD_SHARED_LIBS ${OLD_BUILD_SHARED_LIBS})
 set(BUILD_TESTING ${OLD_BUILD_TESTING})

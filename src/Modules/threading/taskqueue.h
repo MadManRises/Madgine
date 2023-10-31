@@ -113,6 +113,8 @@ namespace Threading {
         std::string mName;
         bool mWantsMainThread;
 
+        WorkGroup &mWorkGroup;
+
         std::atomic<size_t> mTaskInFlightCount = 0;
 
         std::list<ScheduledTask> mQueue;

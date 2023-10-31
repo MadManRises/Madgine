@@ -227,6 +227,7 @@ namespace Tools {
         config.GlyphOffset = { 0.0f, 3.0f };
 
         io.Fonts->AddFontDefault();
+        co_await Engine::Resources::ResourceManager::getSingleton().state();
         io.Fonts->AddFontFromFileTTF(Engine::Resources::ResourceManager::getSingleton().findResourceFile("icons.ttf").c_str(), 13, &config, icons_ranges);
         io.Fonts->Build();
 

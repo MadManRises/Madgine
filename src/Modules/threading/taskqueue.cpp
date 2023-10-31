@@ -23,15 +23,16 @@ namespace Threading {
     TaskQueue::TaskQueue(const std::string &name, bool wantsMainThread)
         : mName(name)
         , mWantsMainThread(wantsMainThread)
+        , mWorkGroup(WorkGroup::self())
     {
-        WorkGroup::self().addTaskQueue(this);
+        mWorkGroup.addTaskQueue(this);
     }
 
     TaskQueue::~TaskQueue()
     {
         assert(mQueue.empty());
         assert(mTaskInFlightCount == 0);
-        WorkGroup::self().removeTaskQueue(this);
+        mWorkGroup.removeTaskQueue(this);
     }
 
     bool TaskQueue::wantsMainThread() const
@@ -41,7 +42,7 @@ namespace Threading {
 
     void TaskQueue::queueInternal(ScheduledTask task)
     {
-        assert(WorkGroup::self().state() != WorkGroupState::DONE);
+        assert(mWorkGroup.state() != WorkGroupState::DONE);
         {
             //TODO: priority Queue
             std::lock_guard<std::mutex> lock(mMutex);
@@ -70,12 +71,12 @@ namespace Threading {
 
     bool TaskQueue::running() const
     {
-        return WorkGroup::self().state() == WorkGroupState::RUNNING;
+        return mWorkGroup.state() == WorkGroupState::RUNNING;
     }
 
     void TaskQueue::stop()
     {
-        WorkGroup::self().stop();
+        mWorkGroup.stop();
     }
 
     void TaskQueue::queueHandle(TaskHandle task, TaskQualifiers qualifiers)
@@ -100,9 +101,7 @@ namespace Threading {
 
     TaskHandle TaskQueue::fetch()
     {
-        
-
-        WorkGroupState state = WorkGroup::self().state();
+        WorkGroupState state = mWorkGroup.state();
         if (state == WorkGroupState::INITIALIZING) {
             while (mSetupState != mSetupSteps.end()) {
                 TaskHandle init = mSetupState->first.assign(this);
@@ -118,7 +117,7 @@ namespace Threading {
                     auto now = std::chrono::steady_clock::now();
                     auto nextTaskTimepoint = std::chrono::steady_clock::time_point::max();
                     for (auto it = mQueue.begin(); it != mQueue.end(); ++it) {
-                        if ((it->mQualifiers.mScheduledFor <= now || WorkGroup::self().state() == WorkGroupState::STOPPING) && (!it->mQualifiers.mMutex || it->mQualifiers.mMutex->tryLock(this))) {
+                        if ((it->mQualifiers.mScheduledFor <= now || mWorkGroup.state() == WorkGroupState::STOPPING) && (!it->mQualifiers.mMutex || it->mQualifiers.mMutex->tryLock(this))) {
                             TaskHandle task = std::move(it->mTask);
                             mQueue.erase(it);
                             return task;
@@ -150,7 +149,7 @@ namespace Threading {
 
     bool TaskQueue::idle() const
     {
-        switch (WorkGroup::self().state()) {
+        switch (mWorkGroup.state()) {
         case WorkGroupState::INITIALIZING:
             return mSetupState == mSetupSteps.end();
         case WorkGroupState::FINALIZING:
@@ -167,7 +166,7 @@ namespace Threading {
 
     void TaskQueue::addSetupStepTasks(Task<bool> init, Task<void> finalize)
     {
-        assert(WorkGroup::self().state() == WorkGroupState::INITIALIZING);
+        assert(mWorkGroup.state() == WorkGroupState::INITIALIZING);
         bool isItEnd = mSetupState == mSetupSteps.end();
         mSetupSteps.emplace_back(std::move(init), std::move(finalize));
         if (isItEnd) {

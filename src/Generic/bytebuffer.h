@@ -85,7 +85,10 @@ struct ByteBufferImpl {
 
     Data *end() const
     {
-        return mData + mSize;
+        if constexpr (std::same_as<std::remove_const_t<Data>, void>)
+            return static_cast<const std::byte *>(mData) + mSize;
+        else
+            return mData + mSize;
     }
 
     Data *operator->() const
