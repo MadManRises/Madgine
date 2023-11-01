@@ -31,7 +31,7 @@ namespace Threading {
         {
             if (con == this) {
                 cancel(next);
-            } else {
+            } else if (mNext) {
                 mNext->cancel(con, mNext);
             }
         }
@@ -56,11 +56,11 @@ namespace Threading {
         Connection<Ty...> *mNext = nullptr;
     };
 
-    template <typename... Ty>
-    struct StoppableConnection : Connection<Ty...> {
+    template <typename Rec, typename... Ty>
+    struct StoppableConnection : Execution::VirtualStateEx<Rec, Connection<Ty...>, type_pack<GenericResult>, Ty...> {
 
         struct callback {
-            callback(StoppableConnection<Ty...> *con)
+            callback(StoppableConnection<Rec, Ty...> *con)
                 : mCon(con)
             {
             }
@@ -70,18 +70,18 @@ namespace Threading {
                 mCon->stop();
             }
 
-            StoppableConnection<Ty...> *mCon;
+            StoppableConnection<Rec, Ty...> *mCon;
         };
 
-        StoppableConnection(SignalStub<Ty...> *stub, std::stop_token stop)
-            : Connection<Ty...>(stub)
-            , mCallback(std::move(stop), this)
+        StoppableConnection(Rec &&rec, SignalStub<Ty...> *stub)
+            : Execution::VirtualStateEx<Rec, Connection<Ty...>, type_pack<GenericResult>, Ty...>(std::forward<Rec>(rec), stub)
+            , mCallback(Execution::get_stop_token(mRec), callback { this })
         {
         }
 
         void start()
         {
-            if (mStopped.test())
+            if (Execution::get_stop_token(mRec).stop_requested())
                 this->set_done();
             else
                 Connection<Ty...>::start();
@@ -89,13 +89,31 @@ namespace Threading {
 
         void stop()
         {
-            bool before = mStopped.test_and_set();
-            assert(!before);
             this->mStub->disconnect(this);
         }
 
         std::stop_callback<callback> mCallback;
-        std::atomic_flag mStopped = ATOMIC_FLAG_INIT;
+    };
+
+    template <typename... Ty>
+    struct ConnectionSender {
+
+        using result_type = GenericResult;
+        template <template <typename...> typename Tuple>
+        using value_types = Tuple<Ty...>;
+
+        using is_sender = void;
+
+        template <typename Rec>
+        friend auto tag_invoke(Execution::connect_t, ConnectionSender<Ty...> &&sender, Rec &&rec)
+        {
+            if constexpr (Execution::has_stop_token<Rec>)
+                return StoppableConnection<Rec, Ty...> { std::forward<Rec>(rec), sender.mStub };
+            else
+                return Execution::make_virtual_state<Connection<Ty...>, GenericResult, Ty...>(std::forward<Rec>(rec), sender.mStub);
+        }
+
+        SignalStub<Ty...> *mStub;
     };
 
 }

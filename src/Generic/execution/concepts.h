@@ -40,6 +40,33 @@ namespace Execution {
 
     inline constexpr get_context_t get_context;
 
+    struct unstoppable_token {
+    };
+
+    struct get_stop_token_t {
+
+        template <typename T>
+        requires(!tag_invocable<get_stop_token_t, T&>)
+        auto operator()(T &)
+        {
+            return unstoppable_token {};
+        }
+
+        template <typename T>
+        requires tag_invocable<get_stop_token_t, T &>
+        auto operator()(T &t) const
+            noexcept(is_nothrow_tag_invocable_v<get_stop_token_t, T &>)
+                -> tag_invoke_result_t<get_stop_token_t, T &>
+        {
+            return tag_invoke(*this, t);
+        }
+    };
+
+    inline constexpr get_stop_token_t get_stop_token;
+
+    template <typename T>
+    concept has_stop_token = !std::same_as<decltype(get_stop_token(std::declval<T &>())), unstoppable_token>;
+
     struct CPU_context {
     };
 

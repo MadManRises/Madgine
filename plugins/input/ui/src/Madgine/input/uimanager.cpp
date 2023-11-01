@@ -51,7 +51,7 @@ namespace Input {
 
         co_await mgr.state();
 
-        mgr.updatedSignal().connect([this] { onUpdate(); });
+        Execution::detach(mgr.updatedSignal().connect([this] { onUpdate(); }));
 
         for (const std::unique_ptr<HandlerBase> &handler : mHandlers)
             co_await handler->callInit();

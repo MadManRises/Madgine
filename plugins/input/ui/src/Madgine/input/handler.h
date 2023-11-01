@@ -12,6 +12,8 @@
 
 #include "Madgine/widgets/button.h"
 
+#include "Generic/execution/lifetime.h"
+
 namespace Engine {
 namespace Input {
 
@@ -80,7 +82,7 @@ namespace Input {
         {
             Widgets::Button *button = mWidget->getChildRecursive<Widgets::Button>(name);
             if (button)
-                button->clickEvent().connect(std::forward<Ty>(args)..., mStopSource.get_token());
+                mLifetime.attach(button->clickEvent().connect(std::forward<Ty>(args)...));
             return button;
         }
 
@@ -102,7 +104,7 @@ namespace Input {
 
         UIManager &mUI;
 
-        std::stop_source mStopSource { std::nostopstate };
+        Execution::Lifetime mLifetime;
 
         const WidgetType mType;
     };

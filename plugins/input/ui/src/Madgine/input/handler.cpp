@@ -7,6 +7,8 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
+#include "Modules/threading/awaitables/awaitablesender.h"
+
 DEFINE_UNIQUE_COMPONENT(Engine::Input, Handler)
 
 METATABLE_BEGIN(Engine::Input::HandlerBase)
@@ -38,8 +40,7 @@ namespace Input {
 
     Threading::Task<void> HandlerBase::finalize()
     {
-        bool result = mStopSource.request_stop();
-        assert(result);
+        co_await mLifetime.end();
         mWidget = nullptr;
         co_return;
     }
@@ -47,21 +48,18 @@ namespace Input {
     void HandlerBase::setWidget(Widgets::WidgetBase *widget)
     {
         if (mWidget != widget) {
-            if (mStopSource.stop_possible()) {
-                bool result = mStopSource.request_stop();
-                assert(result);
-            }
+            mLifetime.reset();
+
             mWidget = widget;
-            mStopSource = std::stop_source {};
 
             if (mWidget) {
-                mWidget->pointerMoveEvent().connect(&HandlerBase::injectPointerMove, this, mStopSource.get_token());
-                mWidget->pointerClickEvent().connect(&HandlerBase::injectPointerClick, this, mStopSource.get_token());
-                mWidget->dragBeginEvent().connect(&HandlerBase::injectDragBegin, this, mStopSource.get_token());
-                mWidget->dragMoveEvent().connect(&HandlerBase::injectDragMove, this, mStopSource.get_token());
-                mWidget->dragEndEvent().connect(&HandlerBase::injectDragEnd, this, mStopSource.get_token());
-                mWidget->axisEvent().connect(&HandlerBase::injectAxisEvent, this, mStopSource.get_token());
-                mWidget->keyEvent().connect(&HandlerBase::injectKeyPress, this, mStopSource.get_token());
+                mLifetime.attach(mWidget->pointerMoveEvent().connect(&HandlerBase::injectPointerMove, this));
+                mLifetime.attach(mWidget->pointerClickEvent().connect(&HandlerBase::injectPointerClick, this));
+                mLifetime.attach(mWidget->dragBeginEvent().connect(&HandlerBase::injectDragBegin, this));
+                mLifetime.attach(mWidget->dragMoveEvent().connect(&HandlerBase::injectDragMove, this));
+                mLifetime.attach(mWidget->dragEndEvent().connect(&HandlerBase::injectDragEnd, this));
+                mLifetime.attach(mWidget->axisEvent().connect(&HandlerBase::injectAxisEvent, this));
+                mLifetime.attach(mWidget->keyEvent().connect(&HandlerBase::injectKeyPress, this));
                 mWidget->setAcceptsPointerEvents(true);
             }
         }
