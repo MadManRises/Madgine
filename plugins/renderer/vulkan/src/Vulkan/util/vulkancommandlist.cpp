@@ -1,15 +1,16 @@
 #include "../vulkanlib.h"
 
-#include "vulkancommandlist.h"
+#include "../vulkanrendercontext.h"
 #include "../vulkanrendertarget.h"
+#include "vulkancommandlist.h"
 
 namespace Engine {
 namespace Render {
 
-    VulkanCommandList::VulkanCommandList(VulkanRenderTarget *target, NulledPtr<std::remove_pointer_t<VkCommandBuffer>> buffer, bool temp)
-        : mTarget(target)
-        , mBuffer(std::move(buffer))
-        , mTemp(temp)
+    VulkanCommandList::VulkanCommandList(NulledPtr<std::remove_pointer_t<VkCommandBuffer>> buffer, std::vector<VkSemaphore> waitSemaphores, std::vector<VkSemaphore> signalSemaphores)
+        : mBuffer(std::move(buffer))
+        , mWaitSemaphores(std::move(waitSemaphores))
+        , mSignalSemaphores(std::move(signalSemaphores))        
     {
     }
 
@@ -21,22 +22,28 @@ namespace Render {
     VulkanCommandList &VulkanCommandList::operator=(VulkanCommandList &&other)
     {
         reset();
-        mTarget = std::exchange(other.mTarget, nullptr);
         mBuffer = std::move(other.mBuffer);
-        mTemp = std::exchange(other.mTemp, false);
+        std::swap(mWaitSemaphores, other.mWaitSemaphores);
+        std::swap(mSignalSemaphores, other.mSignalSemaphores);
+        std::swap(mAttachedResources, other.mAttachedResources);
         return *this;
     }
 
     void VulkanCommandList::reset()
     {
         if (mBuffer) {
-            mTarget->ExecuteCommandList(std::move(mBuffer), mTemp);
+            VulkanRenderContext::getSingleton().ExecuteCommandList(std::move(mBuffer), std::move(mWaitSemaphores), std::move(mSignalSemaphores), std::move(mAttachedResources));
         }
     }
 
     VulkanCommandList::operator VkCommandBuffer() const
     {
         return mBuffer;
+    }
+
+    void VulkanCommandList::attachResource(Any resource)
+    {
+        mAttachedResources.push_back(std::move(resource));
     }
 
 }

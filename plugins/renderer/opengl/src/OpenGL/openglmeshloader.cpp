@@ -10,7 +10,6 @@
 
 #include "openglrendercontext.h"
 
-
 UNIQUECOMPONENT(Engine::Render::OpenGLMeshLoader);
 
 METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader, Engine::Render::GPUMeshLoader)
@@ -30,7 +29,7 @@ namespace Render {
         getOrCreateManual("Plane", {}, {}, this);
     }
 
-    bool OpenGLMeshLoader::generate(GPUMeshData &_data, const MeshData &mesh)
+    Threading::Task<bool> OpenGLMeshLoader::generate(GPUMeshData &_data, const MeshData &mesh)
     {
         OpenGLMeshData &data = static_cast<OpenGLMeshData &>(_data);
 
@@ -39,22 +38,7 @@ namespace Render {
         if (!mesh.mIndices.empty())
             data.mIndices.setData(mesh.mIndices);
 
-        return GPUMeshLoader::generate(data, mesh);
-    }
-
-    void OpenGLMeshLoader::update(GPUMeshData &_data, const MeshData &mesh)
-    {
-        OpenGLMeshData &data = static_cast<OpenGLMeshData &>(_data);
-
-        data.mVertices.resize(mesh.mVertices.mSize);
-        std::memcpy(data.mVertices.mapData().mData, mesh.mVertices.mData, mesh.mVertices.mSize);
-
-        if (!mesh.mIndices.empty()) {
-            data.mIndices.resize(mesh.mIndices.size() * sizeof(uint32_t));
-            std::memcpy(data.mIndices.mapData().mData, mesh.mIndices.data(), mesh.mIndices.size() * sizeof(uint32_t));
-        }
-
-        GPUMeshLoader::update(data, mesh);
+        co_return co_await GPUMeshLoader::generate(data, mesh);
     }
 
     void OpenGLMeshLoader::reset(GPUMeshData &data)
@@ -62,7 +46,12 @@ namespace Render {
         static_cast<OpenGLMeshData &>(data).reset();
     }
 
-        Threading::TaskQueue *OpenGLMeshLoader::loadingTaskQueue() const
+    UniqueResourceBlock OpenGLMeshLoader::createResourceBlock(std::vector<const Texture*> textures)
+    {
+        return OpenGLRenderContext::getSingleton().createResourceBlock(std::move(textures));
+    }
+
+    Threading::TaskQueue *OpenGLMeshLoader::loadingTaskQueue() const
     {
         return OpenGLRenderContext::renderQueue();
     }

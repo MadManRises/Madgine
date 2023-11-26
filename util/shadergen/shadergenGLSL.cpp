@@ -53,7 +53,6 @@ struct ReleasePtr : std::unique_ptr<T, ReleaseDeleter> {
         return -1;                                                   \
     }
 
-
 static std::map<std::string, uint32_t> sSemanticLocationMappings {
     { "POSITION0", 0 },
     { "POSITION1", 1 },
@@ -87,6 +86,7 @@ int transpileGLSL(const std::wstring &fileName, const std::wstring &outFolder, I
         spirv_cross::CompilerGLSL glsl { (uint32_t *)pSpirv->GetBufferPointer(), pSpirv->GetBufferSize() / 4 };
         spirv_cross::CompilerGLSL::Options options {};
         options.relax_nan_checks = true;
+        options.vertex.support_nonzero_base_instance = false;
         glsl.set_common_options(options);
 
         spirv_cross::ShaderResources resources = glsl.get_shader_resources();
@@ -94,7 +94,7 @@ int transpileGLSL(const std::wstring &fileName, const std::wstring &outFolder, I
         std::map<spirv_cross::ID, std::pair<std::string, uint32_t>> imageData;
 
         for (auto &resource : resources.separate_images) {
-            imageData[resource.id] = { glsl.get_name(resource.id), glsl.get_decoration(resource.id, spv::DecorationBinding) };
+            imageData[resource.id] = { glsl.get_name(resource.id), 4 * (glsl.get_decoration(resource.id, spv::DecorationDescriptorSet) - 1) + glsl.get_decoration(resource.id, spv::DecorationBinding) };
         }
 
         glsl.build_dummy_sampler_for_combined_images();
@@ -113,6 +113,12 @@ int transpileGLSL(const std::wstring &fileName, const std::wstring &outFolder, I
             auto &data = imageData[map[resource.id]];
             glsl.set_name(resource.id, data.first);
             glsl.set_decoration(resource.id, spv::DecorationBinding, data.second);
+        }
+
+        for (auto &resource : resources.storage_buffers) {            
+            uint32_t set = glsl.get_decoration(resource.id, spv::DecorationDescriptorSet);
+            if (set > 0)
+                glsl.set_decoration(resource.id, spv::DecorationBinding, 4 + (set - 1) + glsl.get_decoration(resource.id, spv::DecorationBinding));
         }
 
         for (const spirv_cross::VariableID &id : glsl.get_active_interface_variables()) {

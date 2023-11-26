@@ -193,7 +193,7 @@ namespace Tools {
 
     void LogViewer::messageLogged(std::string_view message, Log::MessageType lml, const char *file, size_t line, Log::Log *log)
     {
-        if (mWorkgroup != &Threading::WorkGroup::self())
+        if (Threading::WorkGroup::isInitialized() && mWorkgroup != &Threading::WorkGroup::self())
             return;
         ++mMsgCounts[lml];
         std::lock_guard guard { mMutex };

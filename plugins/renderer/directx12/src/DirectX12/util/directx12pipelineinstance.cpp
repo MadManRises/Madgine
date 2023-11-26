@@ -7,6 +7,8 @@
 #include "../directx12meshdata.h"
 #include "../directx12rendertarget.h"
 
+#include "Generic/align.h"
+
 namespace Engine {
 namespace Render {
 
@@ -19,24 +21,24 @@ namespace Render {
     DirectX12PipelineInstance::DirectX12PipelineInstance(const PipelineConfiguration &config, const DirectX12Pipeline *pipeline)
         : PipelineInstance(config)
         , mPipeline(pipeline)
+        , mConstantBufferSizes(config.bufferSizes)
+        , mDepthChecking(config.depthChecking)
     {
-
-        mConstantBuffers.reserve(config.bufferSizes.size());
-        for (size_t i = 0; i < config.bufferSizes.size(); ++i) {
-            mConstantBuffers.emplace_back(ByteBuffer { nullptr, config.bufferSizes[i] });
-        }
+        mConstantGPUAddresses.resize(config.bufferSizes.size());
+        for (size_t &size : mConstantBufferSizes)
+            size = alignTo(size, 256);
     }
 
-    bool DirectX12PipelineInstance::bind(ID3D12GraphicsCommandList *commandList, VertexFormat format, size_t groupSize, size_t samples) const
+    bool DirectX12PipelineInstance::bind(DirectX12RenderTarget *target, VertexFormat vertexFormat, size_t groupSize) const
     {
-        size_t samplesBits = sqrt(samples);
-        assert(samplesBits * samplesBits == samples);
+        ID3D12GraphicsCommandList *commandList = target->mCommandList;
 
-        ID3D12PipelineState *pipeline = mPipeline->ptr()[format][groupSize - 1][samplesBits - 1];
+        size_t samplesBits = sqrt(target->samples());
+        assert(samplesBits * samplesBits == target->samples());
+
+        ID3D12PipelineState *pipeline = mPipeline->get(vertexFormat, groupSize, target, mInstanceDataSize, mDepthChecking);
         if (!pipeline) {
-            pipeline = mPipeline->get(format, groupSize, samples, mInstanceDataSize);
-            if (!pipeline)
-                return false;
+            return false;
         }
         commandList->SetPipelineState(pipeline);
 
@@ -44,14 +46,14 @@ namespace Render {
         D3D12_PRIMITIVE_TOPOLOGY mode = sModes[groupSize - 1];
         commandList->IASetPrimitiveTopology(mode);
 
-        for (size_t i = 0; i < std::min(size_t { 3 }, mConstantBuffers.size()); ++i) {
-            if (mConstantBuffers[i])
-                commandList->SetGraphicsRootConstantBufferView(i, mConstantBuffers[i].gpuAddress());
+        for (size_t i = 0; i < std::min(size_t { 3 }, mConstantGPUAddresses.size()); ++i) {
+            if (mConstantGPUAddresses[i])
+                commandList->SetGraphicsRootConstantBufferView(i, mConstantGPUAddresses[i]);
         }
-        /* for (size_t i = 0; i < mDynamicBuffers.size(); ++i) {
-            if (mDynamicBuffers[i])
-                commandList->SetGraphicsRootConstantBufferView(i + 3, mDynamicBuffers[i].gpuAddress());
-        }*/
+        for (size_t i = 0; i < mTempGPUAddresses.size(); ++i) {
+            if (mTempGPUAddresses[i])
+                commandList->SetGraphicsRootShaderResourceView(4 + i, mTempGPUAddresses[i]);
+        }
 
         DX12_CHECK();
 
@@ -60,70 +62,173 @@ namespace Render {
 
     WritableByteBuffer DirectX12PipelineInstance::mapParameters(size_t index)
     {
-        return mConstantBuffers[index].mapData();
+        Block block = DirectX12RenderContext::getSingleton().mTempAllocator.allocate(mConstantBufferSizes[index]);
+        auto [res, offset] = DirectX12RenderContext::getSingleton().mTempMemoryHeap.resolve(block.mAddress);
+        mConstantGPUAddresses[index] = res->GetGPUVirtualAddress() + offset;
+
+        return { block.mAddress, block.mSize };
     }
 
-    void DirectX12PipelineInstance::renderMesh(RenderTarget *target, const GPUMeshData *m) const
+    void DirectX12PipelineInstance::render(RenderTarget *_target) const
     {
-        ID3D12GraphicsCommandList *commandList = static_cast<DirectX12RenderTarget *>(target)->mCommandList;
+        DirectX12RenderTarget *target = static_cast<DirectX12RenderTarget *>(_target);
+        ID3D12GraphicsCommandList *commandList = target->mCommandList;
+
+        if (!bind(target, mFormat, mGroupSize))
+            return;
+
+        if (mHasIndices){
+            commandList->DrawIndexedInstanced(mElementCount, 1, 0, 0, 0);
+        } else {
+            commandList->DrawInstanced(mElementCount, 1, 0, 0);
+        }
+
+        mHasIndices = false;
+    }
+
+    void DirectX12PipelineInstance::renderRange(RenderTarget *_target, size_t elementCount, size_t vertexOffset, IndexType<size_t> indexOffset) const
+    {
+        DirectX12RenderTarget *target = static_cast<DirectX12RenderTarget *>(_target);
+        ID3D12GraphicsCommandList *commandList = target->mCommandList;
+
+        if (!bind(target, mFormat, mGroupSize))
+            return;
+
+        assert(elementCount <= mElementCount);
+
+        if (mHasIndices) {
+            assert(indexOffset);            
+            commandList->DrawIndexedInstanced(elementCount, 1, indexOffset, vertexOffset, 0);
+        } else {
+            commandList->DrawInstanced(elementCount, 1, vertexOffset, 0);
+        }
+    }
+
+    void DirectX12PipelineInstance::renderInstanced(RenderTarget *_target, size_t count) const
+    {
+        DirectX12RenderTarget *target = static_cast<DirectX12RenderTarget *>(_target);
+        ID3D12GraphicsCommandList *commandList = target->mCommandList;
+
+        if (!bind(target, mFormat, mGroupSize))
+            return;
+
+        if (mHasIndices) {
+            commandList->DrawIndexedInstanced(mElementCount, count, 0, 0, 0);
+        } else {
+            commandList->DrawInstanced(mElementCount, count, 0, 0);
+        }
+
+        mHasIndices = false;
+    }
+
+    WritableByteBuffer DirectX12PipelineInstance::mapTempBuffer(size_t space, size_t size, size_t count) const
+    {
+        assert(space >= 1);
+        if (mTempGPUAddresses.size() <= space - 1)
+            mTempGPUAddresses.resize(space);
+
+        Block block = DirectX12RenderContext::getSingleton().mTempAllocator.allocate(alignTo(size * count, 256));
+        auto [res, offset] = DirectX12RenderContext::getSingleton().mTempMemoryHeap.resolve(block.mAddress);
+        mTempGPUAddresses[space - 1] = res->GetGPUVirtualAddress() + offset;
+
+        return { block.mAddress, block.mSize };
+    }
+
+    void DirectX12PipelineInstance::bindMesh(RenderTarget *_target, const GPUMeshData *m, const ByteBuffer &instanceData) const
+    {
+
+        DirectX12RenderTarget *target = static_cast<DirectX12RenderTarget *>(_target);
+
+        ID3D12GraphicsCommandList *commandList = target->mCommandList;
 
         const DirectX12MeshData *mesh = static_cast<const DirectX12MeshData *>(m);
 
-        if (!bind(commandList, mesh->mFormat, mesh->mGroupSize, static_cast<DirectX12RenderTarget*>(target)->samples()))
-            return;
+        mFormat = mesh->mFormat;
+        mGroupSize = mesh->mGroupSize;
 
         mesh->mVertices.bindVertex(commandList, mesh->mVertexSize);
 
         DirectX12RenderContext::getSingleton().mConstantBuffer.bindVertex(commandList, 0, 2);
 
+        if (instanceData.mSize > 0) {
+            Block block = DirectX12RenderContext::getSingleton().mTempAllocator.allocate(instanceData.mSize);
+            auto [res, offset] = DirectX12RenderContext::getSingleton().mTempMemoryHeap.resolve(block.mAddress);
+
+            std::memcpy(block.mAddress, instanceData.mData, instanceData.mSize);
+
+            D3D12_VERTEX_BUFFER_VIEW view;
+            view.BufferLocation = res->GetGPUVirtualAddress() + offset;
+            view.SizeInBytes = block.mSize;
+            view.StrideInBytes = mInstanceDataSize;
+            commandList->IASetVertexBuffers(1, 1, &view);
+            DX12_LOG("Bind Instance Buffer -> " << mAddress);
+        }
+
+        
         if (mesh->mIndices) {
             mesh->mIndices.bindIndex(commandList);
-            commandList->DrawIndexedInstanced(mesh->mElementCount, 1, 0, 0, 0);
+            mHasIndices = true;
         } else {
-            commandList->DrawInstanced(mesh->mElementCount, 1, 0, 0);
+            mHasIndices = false;
         }
+
+        mElementCount = mesh->mElementCount;
     }
 
-    void DirectX12PipelineInstance::renderMeshInstanced(RenderTarget *target, size_t count, const GPUMeshData *m, const ByteBuffer &instanceData) const
+    WritableByteBuffer DirectX12PipelineInstance::mapVertices(RenderTarget *_target, VertexFormat format, size_t count) const
     {
-        assert(instanceData.mSize > 0);
-        assert(mInstanceDataSize * count == instanceData.mSize);
+        DirectX12RenderTarget *target = static_cast<DirectX12RenderTarget *>(_target);
 
-        ID3D12GraphicsCommandList *commandList = static_cast<DirectX12RenderTarget *>(target)->mCommandList;
+        ID3D12GraphicsCommandList *commandList = target->mCommandList;
 
-        const DirectX12MeshData *mesh = static_cast<const DirectX12MeshData *>(m);
+        Block block = DirectX12RenderContext::getSingleton().mTempAllocator.allocate(alignTo(format.stride() * count, 256));
+        auto [res, offset] = DirectX12RenderContext::getSingleton().mTempMemoryHeap.resolve(block.mAddress);
 
-        if (!bind(commandList, mesh->mFormat, mesh->mGroupSize, static_cast<DirectX12RenderTarget *>(target)->samples()))
-            return;
+        D3D12_VERTEX_BUFFER_VIEW view;
+        view.BufferLocation = res->GetGPUVirtualAddress() + offset;
+        view.SizeInBytes = block.mSize;
+        view.StrideInBytes = format.stride();
+        commandList->IASetVertexBuffers(0, 1, &view);
+        DX12_LOG("Bind Vertex Buffer -> " << mAddress);
 
-        mesh->mVertices.bindVertex(commandList, mesh->mVertexSize);
+        mElementCount = count;
+        mFormat = format;
 
-        DirectX12RenderContext::getSingleton().mConstantBuffer.bindVertex(commandList, 0, 2);
-
-        DirectX12Buffer instanceBuffer;
-        {
-            auto target = instanceBuffer.mapData(instanceData.mSize);
-            std::memcpy(target.mData, instanceData.mData, instanceData.mSize);
-        }
-        instanceBuffer.bindVertex(commandList, mInstanceDataSize, 1);
-
-        if (mesh->mIndices) {
-            mesh->mIndices.bindIndex(commandList);
-            commandList->DrawIndexedInstanced(mesh->mElementCount, count, 0, 0, 0);
-        } else {
-            commandList->DrawInstanced(mesh->mElementCount, count, 0, 0);
-        }
+        return { block.mAddress, block.mSize };
     }
 
-    void DirectX12PipelineInstance::bindTextures(RenderTarget *target, const std::vector<TextureDescriptor> &tex, size_t offset) const
+    ByteBufferImpl<uint32_t> DirectX12PipelineInstance::mapIndices(RenderTarget *_target, size_t count) const
     {
-        for (size_t i = 0; i < tex.size(); ++i) {
-            if (tex[i].mTextureHandle) {
-                D3D12_GPU_DESCRIPTOR_HANDLE handle;
-                handle.ptr = tex[i].mTextureHandle;
-                static_cast<DirectX12RenderTarget *>(target)->mCommandList->SetGraphicsRootDescriptorTable(4 + offset + i, handle);
-            }
-        }
+        DirectX12RenderTarget *target = static_cast<DirectX12RenderTarget *>(_target);
+
+        ID3D12GraphicsCommandList *commandList = target->mCommandList;
+
+        Block block = DirectX12RenderContext::getSingleton().mTempAllocator.allocate(alignTo(sizeof(uint32_t) * count, 256));
+        auto [res, offset] = DirectX12RenderContext::getSingleton().mTempMemoryHeap.resolve(block.mAddress);
+
+        D3D12_INDEX_BUFFER_VIEW view;
+        view.BufferLocation = res->GetGPUVirtualAddress() + offset;
+        view.SizeInBytes = block.mSize;
+        view.Format = DXGI_FORMAT_R32_UINT;
+        commandList->IASetIndexBuffer(&view);
+        DX12_LOG("Bind Index Buffer -> " << mAddress);
+
+        mElementCount = count;
+        mHasIndices = true;
+
+        return { static_cast<uint32_t*>(block.mAddress), block.mSize };
+    }
+
+    void DirectX12PipelineInstance::setGroupSize(size_t groupSize) const
+    {
+        mGroupSize = groupSize;
+    }
+
+    void DirectX12PipelineInstance::bindResources(RenderTarget *target, size_t space, ResourceBlock block) const
+    {
+        assert(space > 1);
+        if (block)
+            static_cast<DirectX12RenderTarget *>(target)->mCommandList->SetGraphicsRootDescriptorTable(3 + space, { block.mPtr });
     }
 
     DirectX12PipelineInstanceHandle::DirectX12PipelineInstanceHandle(const PipelineConfiguration &config, DirectX12PipelineLoader::Handle pipeline)

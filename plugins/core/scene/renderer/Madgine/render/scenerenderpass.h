@@ -45,6 +45,8 @@ namespace Render {
 
         std::unique_ptr<Render::RenderTarget> mShadowMap;
 
+        UniqueResourceBlock mShadowResourceBlock;
+
         int mPriority;
     };
 

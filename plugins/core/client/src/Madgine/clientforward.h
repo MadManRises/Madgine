@@ -21,7 +21,6 @@ namespace Render {
     struct RenderData;
     struct RenderDebuggable;
     struct Camera;
-    struct TextureDescriptor;
     
 }
 

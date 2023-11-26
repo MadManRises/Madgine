@@ -27,7 +27,7 @@ namespace Render {
         return true;
     }
 
-    VkPipeline VulkanPipeline::get(VertexFormat format, size_t groupSize, size_t samples, size_t instanceDataSize, VkRenderPass renderpass) const
+    VkPipeline VulkanPipeline::get(VertexFormat format, size_t groupSize, size_t samples, size_t instanceDataSize, VkRenderPass renderpass, bool depthChecking) const
     {
         size_t samplesBits = sqrt(samples);
         assert(samplesBits * samplesBits == samples);
@@ -138,7 +138,7 @@ namespace Render {
 
             VkPipelineDepthStencilStateCreateInfo depthStencilState {};
             depthStencilState.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-            depthStencilState.depthTestEnable = VK_TRUE;
+            depthStencilState.depthTestEnable = depthChecking;
             depthStencilState.depthWriteEnable = VK_TRUE;
             depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS;
             depthStencilState.depthBoundsTestEnable = VK_FALSE;

@@ -9,3 +9,5 @@
 #undef bool
 
 #undef row_major
+
+#undef ArrayPtr

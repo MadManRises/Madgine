@@ -43,9 +43,9 @@ namespace Widgets {
     {
     }
 
-    void UIAtlas::createTexture()
+    Threading::TaskFuture<bool> UIAtlas::createTexture()
     {
-        mTexture.create(Render::TextureType_2D, Render::FORMAT_RGBA8_SRGB);
+        return mTexture.create(Render::TextureType_2D, Render::FORMAT_RGBA8_SRGB);
     }
 
     void UIAtlas::preload(const PreprocessedUIAtlas &atlas)
@@ -122,9 +122,9 @@ namespace Widgets {
         return lookUpImage(Resources::ImageLoader::get(name));
     }
 
-    Render::TextureDescriptor UIAtlas::texture()
+    Render::ResourceBlock UIAtlas::resource()
     {
-        return mTexture->descriptor();
+        return mTexture->resource();
     }
 
     void UIAtlas::expand()

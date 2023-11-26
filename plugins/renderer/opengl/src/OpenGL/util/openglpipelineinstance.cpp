@@ -28,11 +28,9 @@ namespace Render {
     OpenGLPipelineInstance::OpenGLPipelineInstance(const PipelineConfiguration &config, GLuint pipeline)
         : PipelineInstance(config)
         , mHandle(pipeline)
+        , mConstantBufferSizes(config.bufferSizes)
+        , mDepthChecking(config.depthChecking)
     {
-        mUniformBuffers.reserve(config.bufferSizes.size());
-        for (size_t i = 0; i < config.bufferSizes.size(); ++i) {
-            mUniformBuffers.emplace_back(GL_UNIFORM_BUFFER, ByteBuffer { nullptr, config.bufferSizes[i] });
-        }
     }
 
     bool OpenGLPipelineInstance::bind(VertexFormat format, OpenGLBuffer *instanceBuffer) const
@@ -40,10 +38,10 @@ namespace Render {
         glUseProgram(mHandle);
         GL_CHECK();
 
-        for (size_t i = 0; i < mUniformBuffers.size(); ++i) {
-            glBindBufferBase(GL_UNIFORM_BUFFER, i, mUniformBuffers[i].handle());
-            GL_CHECK();
-        }
+        if (mDepthChecking)
+            glEnable(GL_DEPTH_TEST);
+        else
+            glDisable(GL_DEPTH_TEST);
 
         OpenGLRenderContext::getSingleton().bindFormat(format, instanceBuffer, mInstanceDataSize);
 
@@ -52,78 +50,146 @@ namespace Render {
 
     WritableByteBuffer OpenGLPipelineInstance::mapParameters(size_t index)
     {
-        return mUniformBuffers[index].mapData();
+        static size_t alignment = []() {
+            GLint alignment;
+            glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &alignment);
+            GL_CHECK();
+            return alignment;
+        }();
+        Block block = OpenGLRenderContext::getSingleton().mTempAllocator.allocate(mConstantBufferSizes[index], alignment);
+        auto [buffer, offset] = OpenGLRenderContext::getSingleton().mTempMemoryHeap.resolve(block.mAddress);
+
+        glBindBufferRange(GL_UNIFORM_BUFFER, index, buffer, offset, block.mSize);
+        GL_CHECK();
+
+        return { block.mAddress, block.mSize };
     }
 
-    void OpenGLPipelineInstance::renderMesh(RenderTarget *target, const GPUMeshData *m) const
+    void OpenGLPipelineInstance::render(RenderTarget *target) const
     {
-        const OpenGLMeshData *mesh = static_cast<const OpenGLMeshData *>(m);
-
-        mesh->mVertices.bindVertex(mesh->mVertexSize);
-
-        if (!bind(mesh->mFormat, nullptr))
-            return;
-
-        GLenum mode = sModes[mesh->mGroupSize - 1];
-
-        if (mesh->mIndices) {
-            mesh->mIndices.bind();
-            glDrawElements(mode, mesh->mElementCount, GL_UNSIGNED_INT, 0);
+        if (mHasIndices) {
+            glDrawElements(mMode, mElementCount, GL_UNSIGNED_INT, reinterpret_cast<const void *>(mIndexOffset));
         } else
-            glDrawArrays(mode, 0, mesh->mElementCount);
+            glDrawArrays(mMode, 0, mElementCount);
         GL_CHECK();
 
         static_cast<OpenGLRenderTarget *>(target)->context()->unbindFormat();
+
+        mHasIndices = false;
     }
 
-    void OpenGLPipelineInstance::renderMeshInstanced(RenderTarget *target, size_t count, const GPUMeshData *m, const ByteBuffer &instanceData) const
+    void OpenGLPipelineInstance::renderRange(RenderTarget *target, size_t elementCount, size_t vertexOffset, IndexType<size_t> indexOffset) const
     {
-        assert(mInstanceDataSize * count == instanceData.mSize);
+        assert(elementCount <= mElementCount);
+
+        if (mHasIndices) {
+            assert(indexOffset);
+            glDrawElementsBaseVertex(mMode, elementCount, GL_UNSIGNED_INT, reinterpret_cast<const void *>(mIndexOffset + indexOffset * sizeof(uint32_t)), vertexOffset);
+        } else
+            glDrawArrays(mMode, vertexOffset, elementCount);
+        GL_CHECK();
+    }
+
+    void OpenGLPipelineInstance::renderInstanced(RenderTarget *target, size_t count) const
+    {
+        if (mHasIndices) {
+            glDrawElementsInstanced(mMode, mElementCount, GL_UNSIGNED_INT, reinterpret_cast<const void *>(mIndexOffset), count);
+        } else
+            glDrawArraysInstanced(mMode, 0, mElementCount, count);
+        GL_CHECK();
+
+        static_cast<OpenGLRenderTarget *>(target)->context()->unbindFormat();
+
+        mHasIndices = false;
+    }
+
+    WritableByteBuffer OpenGLPipelineInstance::mapTempBuffer(size_t space, size_t size, size_t count) const
+    {
+        Block block = OpenGLRenderContext::getSingleton().mTempAllocator.allocate(size * count, 16);
+        auto [buffer, offset] = OpenGLRenderContext::getSingleton().mTempMemoryHeap.resolve(block.mAddress);
+
+        glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 4 + (space - 1), buffer, offset, block.mSize);
+        GL_CHECK();
+
+        return { block.mAddress, block.mSize };
+    }
+
+    void OpenGLPipelineInstance::bindMesh(RenderTarget *target, const GPUMeshData *m, const ByteBuffer &instanceData) const
+    {
         assert(mInstanceDataSize % 16 == 0);
 
         const OpenGLMeshData *mesh = static_cast<const OpenGLMeshData *>(m);
 
-        OpenGLBuffer instanceBuffer { GL_ARRAY_BUFFER, instanceData };
+        OpenGLBuffer instanceBuffer { GL_ARRAY_BUFFER };
+        if (instanceData.mSize > 0) {
+            instanceBuffer.setData(instanceData);
+        }
+
+        if (!bind(mesh->mFormat, instanceData.mSize > 0 ? &instanceBuffer : nullptr))
+            return;
 
         mesh->mVertices.bindVertex(mesh->mVertexSize);
 
-        if (!bind(mesh->mFormat, &instanceBuffer))
-            return;
-
-        GLenum mode = sModes[mesh->mGroupSize - 1];
+        mMode = sModes[mesh->mGroupSize - 1];
 
         if (mesh->mIndices) {
             mesh->mIndices.bind();
-            glDrawElementsInstanced(mode, mesh->mElementCount, GL_UNSIGNED_INT, 0, count);
-        } else
-            glDrawArraysInstanced(mode, 0, mesh->mElementCount, count);
-        GL_CHECK();
+            mHasIndices = true;
+        } else {
+            mHasIndices = false;
+        }
 
-        static_cast<OpenGLRenderTarget *>(target)->context()->unbindFormat();
+        mElementCount = mesh->mElementCount;
+
+        mIndexOffset = 0;
     }
 
-    void OpenGLPipelineInstance::bindTextures(RenderTarget *target, const std::vector<TextureDescriptor> &tex, size_t offset) const
+    WritableByteBuffer OpenGLPipelineInstance::mapVertices(RenderTarget *target, VertexFormat format, size_t count) const
     {
-        for (size_t i = 0; i < tex.size(); ++i) {
-            glActiveTexture(GL_TEXTURE0 + offset + i);
-            GLenum type;
-            switch (tex[i].mType) {
-            case TextureType_2D:
-                type = GL_TEXTURE_2D;
-                break;
-#if MULTISAMPLING
-            case TextureType_2DMultiSample:
-                type = GL_TEXTURE_2D_MULTISAMPLE;
-                break;
-#endif
-            case TextureType_Cube:
-                type = GL_TEXTURE_CUBE_MAP;
-                break;
-            default:
-                throw 0;
+        if (!bind(format, nullptr))
+            return {};
+
+        Block block = OpenGLRenderContext::getSingleton().mTempAllocator.allocate(format.stride() * count);
+        auto [buffer, offset] = OpenGLRenderContext::getSingleton().mTempMemoryHeap.resolve(block.mAddress);
+
+        glBindVertexBuffer(0, buffer, offset, format.stride());
+        GL_CHECK();
+
+        mElementCount = count;
+
+        return { block.mAddress, block.mSize };
+    }
+
+    ByteBufferImpl<uint32_t> OpenGLPipelineInstance::mapIndices(RenderTarget *target, size_t count) const
+    {
+        Block block = OpenGLRenderContext::getSingleton().mTempAllocator.allocate(sizeof(uint32_t) * count);
+        auto [buffer, offset] = OpenGLRenderContext::getSingleton().mTempMemoryHeap.resolve(block.mAddress);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
+        GL_CHECK();
+
+        mIndexOffset = offset;
+
+        mElementCount = count;
+        mHasIndices = true;
+
+        return { static_cast<uint32_t *>(block.mAddress), block.mSize };
+    }
+
+    void OpenGLPipelineInstance::setGroupSize(size_t groupSize) const
+    {
+        mMode = sModes[groupSize - 1];
+    }
+
+    void OpenGLPipelineInstance::bindResources(RenderTarget *target, size_t space, ResourceBlock block) const
+    {
+        if (block) {
+            OpenGLResourceBlock<> *textures = block;
+            for (size_t i = 0; i < textures->mSize; ++i) {
+                glActiveTexture(GL_TEXTURE0 + 4 * (space - 1) + i);
+                glBindTexture(textures->mResources[i].mTarget, textures->mResources[i].mHandle);
+                GL_CHECK();
             }
-            glBindTexture(type, tex[i].mTextureHandle);
-            GL_CHECK();
         }
     }
 
@@ -133,12 +199,10 @@ namespace Render {
     {
     }
 
-    
     OpenGLPipelineInstancePtr::OpenGLPipelineInstancePtr(const PipelineConfiguration &config, OpenGLPipelineLoader::Ptr pipeline)
         : OpenGLPipelineInstance(config, pipeline->handle())
         , mPipeline(std::move(pipeline))
     {
     }
-
 }
 }

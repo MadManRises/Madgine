@@ -68,12 +68,12 @@ namespace Tools {
         init.Allocator = nullptr;
         init.CheckVkResultFn = vkCheck;
 
-        ImGui_ImplVulkan_Init(&init, window->mRenderPass);
+        /* ImGui_ImplVulkan_Init(&init, window->mRenderPass);
 
         {
-            Render::VulkanCommandList list = window->fetchCommandList("upload", true);
+            Render::VulkanCommandList list = context->fetchCommandList("upload");
             ImGui_ImplVulkan_CreateFontsTexture(list);
-        }
+        }*/
 
         /*if (!(ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable))
                 ImGui::GetIO().RenderDrawListsFn = [](ImDrawData *data) {
@@ -95,12 +95,16 @@ namespace Tools {
     void VulkanImRoot::newFrame()
     {       
 
-        ImGui_ImplVulkan_NewFrame();
+        //ImGui_ImplVulkan_NewFrame();
     }
 
     void VulkanImRoot::renderViewport(Render::RenderTarget *target, ImGuiViewport *vp)
     {
+        /*
         ImGui_ImplVulkan_RenderDrawData(vp->DrawData, static_cast<Render::VulkanRenderTarget *>(target)->mCommandList);
+        /*/
+        ClientImRoot::renderViewport(target, vp);
+        //*/
     }
 
 }

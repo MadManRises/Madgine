@@ -131,7 +131,7 @@ void GameManager::updateBricks(std::chrono::microseconds timeSinceLastFrame)
 
         if (t->mPosition.length() > 10.5f) {
             e->remove();
-            modLife(-1);
+            //modLife(-1);
             return true;
         }
 
@@ -167,6 +167,7 @@ void GameManager::spawnBrick()
     t->mOrientation = q;
 
     brick->addComponent<Engine::Scene::Entity::Mesh>().get()->setName("Brick");
+    brick->getComponent<Engine::Scene::Entity::Mesh>()->handle().info()->setPersistent(true);
 
     Scene::Brick *b = brick->addComponent<Scene::Brick>().get();
     b->mSpeed = rand() / float(RAND_MAX) * 2.0f + 1.0f;

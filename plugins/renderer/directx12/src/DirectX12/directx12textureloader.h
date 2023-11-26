@@ -14,7 +14,7 @@ namespace Render {
 
         bool loadImpl(DirectX12Texture &tex, ResourceDataInfo &info);
         void unloadImpl(DirectX12Texture &tex);
-        bool create(Texture &texture, TextureType type, DataFormat format) override;
+        bool create(Texture &texture, TextureType type, TextureFormat format) override;
 
         virtual void setData(Texture &tex, Vector2i size, const ByteBuffer &data) override;
         virtual void setSubData(Texture &tex, Vector2i offset, Vector2i size, const ByteBuffer &data) override;

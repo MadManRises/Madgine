@@ -90,6 +90,8 @@ namespace Render {
         arguments.push_back(L"-HV");
         arguments.push_back(L"2021");
 
+        arguments.push_back(L"/Zi");
+
         ReleasePtr<IDxcResult> result;
         HRESULT hr = mCompiler->Compile(
             &sourceBuffer, // pSource
@@ -112,6 +114,13 @@ namespace Render {
             return false;
         }
         result->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shader), nullptr);
+
+        ReleasePtr<IDxcBlob> pDebugData;
+        ReleasePtr<IDxcBlobUtf16> pDebugDataPath;
+        result->GetOutput(DXC_OUT_PDB, IID_PPV_ARGS(&pDebugData), &pDebugDataPath);
+
+        std::ofstream pdbFile { BINARY_DIR "/bin/" + StringUtil::fromWString(pDebugDataPath->GetStringPointer()), std::ios::out | std::ios::binary };
+        pdbFile.write(static_cast<const char*>(pDebugData->GetBufferPointer()), pDebugData->GetBufferSize());
 
         return true;
     }

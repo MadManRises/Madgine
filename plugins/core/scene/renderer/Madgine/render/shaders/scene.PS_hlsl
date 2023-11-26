@@ -17,11 +17,11 @@ cbuffer PerObject : register(b2)
 	ScenePerObject object;
 } 
 
-Texture2D diffuseTex : register(t0);
-Texture2D emissiveTex : register(t1);
-Texture2DMS<float> shadowDepthMap : register(t2); 
-TextureCube<float> pointShadowDepthMaps0 : register(t3);
-TextureCube<float> pointShadowDepthMaps1 : register(t4);
+Texture2D diffuseTex : register(t0, space2);
+Texture2D emissiveTex : register(t1, space2);
+Texture2DMS<float> shadowDepthMap : register(t0, space3); 
+TextureCube<float> pointShadowDepthMaps0 : register(t1, space3);
+TextureCube<float> pointShadowDepthMaps1 : register(t2, space3);
 
 SamplerState texSampler : register(s0); 
 SamplerState clampSampler : register(s1);

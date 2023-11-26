@@ -292,6 +292,14 @@ namespace Render {
 
     VulkanRenderContext::VulkanRenderContext(Threading::TaskQueue *queue)
         : Component(queue)
+        , mUploadHeap("Upload Heap")
+        , mUploadAllocator(mUploadHeap)
+        , mBufferMemoryHeap("Memory Heap")
+        , mBufferAllocator(mBufferMemoryHeap)
+        , mTempMemoryHeap("Temp Heap")
+        , mTempAllocator(mTempMemoryHeap)
+        , mConstantMemoryHeap("Constant Heap")
+        , mConstantAllocator(mConstantMemoryHeap)
     {
 
         assert(!sSingleton);
@@ -350,14 +358,15 @@ namespace Render {
 
         VkDescriptorPoolSize poolSize {};
         poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        poolSize.descriptorCount = 32;
+        poolSize.descriptorCount = 128;
 
         VkDescriptorPoolCreateInfo poolInfo {};
         poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
         poolInfo.poolSizeCount = 1;
         poolInfo.pPoolSizes = &poolSize;
+        poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 
-        poolInfo.maxSets = 32;
+        poolInfo.maxSets = 128;
 
         result = vkCreateDescriptorPool(*sDevice, &poolInfo, nullptr, &mDescriptorPool);
         VK_CHECK(result);
@@ -370,9 +379,23 @@ namespace Render {
         result = vkCreateCommandPool(*sDevice, &poolInfo2, nullptr, &mCommandPool);
         VK_CHECK(result);
 
-        mConstantBufferHeap = { 16 * 1024 * 1024 };
-
         createPipelineLayout();
+
+        VkSemaphoreTypeCreateInfo timelineCreateInfo;
+        timelineCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO;
+        timelineCreateInfo.pNext = NULL;
+        timelineCreateInfo.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE;
+        timelineCreateInfo.initialValue = mLastCompletedFenceValue;
+
+        VkSemaphoreCreateInfo semaphoreInfo;
+        semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+        semaphoreInfo.pNext = &timelineCreateInfo;
+        semaphoreInfo.flags = 0;
+
+        result = vkCreateSemaphore(GetDevice(), &semaphoreInfo, nullptr, &mSemaphore);
+        VK_CHECK(result);
+
+        mNextFenceValue = mLastCompletedFenceValue + 1;
 
         ConstantValues values;
         mConstantBuffer.setData({ &values, sizeof(values) });
@@ -384,19 +407,23 @@ namespace Render {
 
         mPipelineLayout.reset();
 
-        mDescriptorSetLayouts[0].reset();
-        mDescriptorSetLayouts[1].reset();
-        mDescriptorSetLayouts[2].reset();
+        mUBODescriptorSetLayout.reset();
+        mHeapDescriptorSetLayout.reset();
+        mTempBufferDescriptorSetLayout.reset();
+        mResourceBlockDescriptorSetLayout.reset();
+        mSamplerDescriptorSetLayout.reset();
 
         mSamplers[0].reset();
         mSamplers[1].reset();
+
+        for (auto &[fence, buffer, resources] : mBufferPool) {
+            vkFreeCommandBuffers(GetDevice(), mCommandPool, 1, &buffer);
+        }
 
         mCommandPool.reset();
 
         VkResult result = vkFreeDescriptorSets(GetDevice(), mDescriptorPool, 1, &mSamplerDescriptorSet);
         VK_CHECK(result);
-
-        mConstantBufferHeap.reset();
 
         mCommandPool.reset();
         mDescriptorPool.reset();
@@ -414,12 +441,53 @@ namespace Render {
 
     bool VulkanRenderContext::beginFrame()
     {
+        if (!isFenceComplete(mNextFenceValue - 1))
+            return false;
         return RenderContext::beginFrame();
     }
 
     void VulkanRenderContext::endFrame()
     {
         RenderContext::endFrame();
+    }
+
+    UniqueResourceBlock VulkanRenderContext::createResourceBlock(std::vector<const Texture *> textures)
+    {
+        VkDescriptorSet descriptorSet;
+
+        VkDescriptorSetAllocateInfo descAllocInfo {};
+        descAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        descAllocInfo.descriptorPool = mDescriptorPool;
+        descAllocInfo.descriptorSetCount = 1;
+        descAllocInfo.pSetLayouts = &std::as_const(mResourceBlockDescriptorSetLayout);
+        VkResult result = vkAllocateDescriptorSets(GetDevice(), &descAllocInfo, &descriptorSet);
+        VK_CHECK(result);
+
+        for (size_t i = 0; i < textures.size(); ++i) {
+            VkDescriptorImageInfo imageDescriptorInfo {};
+            imageDescriptorInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            imageDescriptorInfo.imageView = static_cast<const VulkanTexture *>(textures[i])->view();
+            imageDescriptorInfo.sampler = VK_NULL_HANDLE;
+
+            VkWriteDescriptorSet descriptorWrite {};
+            descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrite.dstSet = descriptorSet;
+            descriptorWrite.dstBinding = i;
+            descriptorWrite.dstArrayElement = 0;
+
+            descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+            descriptorWrite.descriptorCount = 1;
+
+            descriptorWrite.pBufferInfo = nullptr;
+            descriptorWrite.pImageInfo = &imageDescriptorInfo; // Optional
+            descriptorWrite.pTexelBufferView = nullptr; // Optional
+
+            vkUpdateDescriptorSets(GetDevice(), 1, &descriptorWrite, 0, nullptr);
+        }
+
+        UniqueResourceBlock block;
+        block.setupAs<VkDescriptorSet>() = descriptorSet;
+        return block;
     }
 
     VulkanRenderContext &VulkanRenderContext::getSingleton()
@@ -430,6 +498,102 @@ namespace Render {
     std::unique_ptr<RenderTarget> VulkanRenderContext::createRenderWindow(Window::OSWindow *w, size_t samples)
     {
         return std::make_unique<VulkanRenderWindow>(this, w, samples);
+    }
+
+    VulkanCommandList VulkanRenderContext::fetchCommandList(std::string_view name, std::vector<VkSemaphore> waitSemaphores, std::vector<VkSemaphore> signalSemaphores)
+    {
+        VkCommandBuffer buffer = nullptr;
+
+        if (mBufferPool.size() > 1) {
+            auto &[fenceValue, b, resources] = mBufferPool.front();
+
+            if (isFenceComplete(fenceValue)) {
+                buffer = b;
+                mBufferPool.erase(mBufferPool.begin());
+
+                VkResult result = vkResetCommandBuffer(buffer, 0);
+                VK_CHECK(result);
+            }
+        }
+
+        if (!buffer) {
+            VkCommandBufferAllocateInfo allocInfo {};
+            allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+            allocInfo.commandPool = mCommandPool;
+            allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+            allocInfo.commandBufferCount = 1;
+
+            VkResult result = vkAllocateCommandBuffers(GetDevice(), &allocInfo, &buffer);
+            VK_CHECK(result);
+        }
+
+        VkCommandBufferBeginInfo beginInfo {};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = 0; // Optional
+        beginInfo.pInheritanceInfo = nullptr; // Optional
+
+        VkResult result = vkBeginCommandBuffer(buffer, &beginInfo);
+        VK_CHECK(result);
+
+        vkCmdBindDescriptorSets(buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 6, 1, &mSamplerDescriptorSet, 0, nullptr);
+
+        return { buffer, std::move(waitSemaphores), std::move(signalSemaphores) };
+    }
+
+    void VulkanRenderContext::ExecuteCommandList(NulledPtr<std::remove_pointer_t<VkCommandBuffer>> buffer, std::vector<VkSemaphore> waitSemaphores, std::vector<VkSemaphore> signalSemaphores, std::vector<Any> attachedResources)
+    {
+        VkResult result = vkEndCommandBuffer(buffer);
+        VK_CHECK(result);
+
+        waitSemaphores.insert(waitSemaphores.begin(), mSemaphore);
+        std::vector<uint64_t> waitValues;
+        waitValues.resize(waitSemaphores.size());
+        waitValues[0] = mNextFenceValue - 1;
+        signalSemaphores.insert(signalSemaphores.begin(), mSemaphore);
+        std::vector<uint64_t> signalValues;
+        signalValues.resize(signalSemaphores.size());
+        signalValues[0] = mNextFenceValue;
+
+        VkTimelineSemaphoreSubmitInfo timelineInfo {};
+        timelineInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
+        timelineInfo.pNext = NULL;
+        timelineInfo.waitSemaphoreValueCount = waitValues.size();
+        timelineInfo.pWaitSemaphoreValues = waitValues.data();
+        timelineInfo.signalSemaphoreValueCount = signalValues.size();
+        timelineInfo.pSignalSemaphoreValues = signalValues.data();
+
+        VkSubmitInfo submitInfo {};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.pNext = &timelineInfo;
+
+        VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+        submitInfo.waitSemaphoreCount = waitSemaphores.size();
+        submitInfo.pWaitSemaphores = waitSemaphores.data();
+        submitInfo.pWaitDstStageMask = waitStages;
+
+        submitInfo.commandBufferCount = 1;
+        VkCommandBuffer dummy = buffer;
+        submitInfo.pCommandBuffers = &dummy;
+
+        submitInfo.signalSemaphoreCount = signalSemaphores.size();
+        submitInfo.pSignalSemaphores = signalSemaphores.data();
+
+        ++mNextFenceValue;
+
+        result = vkQueueSubmit(mGraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+        VK_CHECK(result);
+
+        mBufferPool.emplace_back(mNextFenceValue, buffer, std::move(attachedResources));
+    }
+
+    bool VulkanRenderContext::isFenceComplete(uint64_t fenceValue)
+    {
+        // if it's greater than last seen fence value
+        // check fence for latest completed value
+        if (fenceValue > mLastCompletedFenceValue)
+            vkGetSemaphoreCounterValueKHR(GetDevice(), mSemaphore, &mLastCompletedFenceValue);
+
+        return fenceValue <= mLastCompletedFenceValue;
     }
 
     Threading::Task<void> VulkanRenderContext::unloadAllResources()
@@ -456,14 +620,14 @@ namespace Render {
 
     void VulkanRenderContext::createPipelineLayout()
     {
-        VkDescriptorBindingFlags flags[4] { 0, 0, 0, VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT };
+        VkDescriptorBindingFlags flags[3] { 0, 0, 0 };
         VkDescriptorSetLayoutBindingFlagsCreateInfo bindingFlags {};
         bindingFlags.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
-        bindingFlags.bindingCount = 4;
+        bindingFlags.bindingCount = 3;
         bindingFlags.pBindingFlags = flags;
 
-        VkDescriptorSetLayoutBinding uboLayoutBinding[4] {};
-        for (size_t i = 0; i < 4; ++i) {
+        VkDescriptorSetLayoutBinding uboLayoutBinding[3] {};
+        for (size_t i = 0; i < 3; ++i) {
             uboLayoutBinding[i].binding = i;
             uboLayoutBinding[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
             uboLayoutBinding[i].descriptorCount = 1;
@@ -473,31 +637,69 @@ namespace Render {
 
         VkDescriptorSetLayoutCreateInfo layoutInfo {};
         layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        layoutInfo.bindingCount = 4;
+        layoutInfo.bindingCount = 3;
         layoutInfo.pBindings = uboLayoutBinding;
         layoutInfo.pNext = &bindingFlags;
 
-        VkResult result = vkCreateDescriptorSetLayout(*sDevice, &layoutInfo, nullptr, &mDescriptorSetLayouts[0]);
+        VkResult result = vkCreateDescriptorSetLayout(*sDevice, &layoutInfo, nullptr, &mUBODescriptorSetLayout);
         VK_CHECK(result);
 
-        VkDescriptorSetLayoutBinding imagePushLayoutBindings[5] {};
-        for (size_t i = 0; i < 5; ++i) {
+        VkDescriptorSetLayoutBinding heapPushLayoutBindings {};
+        VkDescriptorBindingFlags flags2;
+        heapPushLayoutBindings.binding = 0;
+        heapPushLayoutBindings.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        heapPushLayoutBindings.descriptorCount = 4;
+        heapPushLayoutBindings.stageFlags = VK_SHADER_STAGE_ALL;
+        heapPushLayoutBindings.pImmutableSamplers = nullptr;
+        flags2 = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT;
+
+        bindingFlags.bindingCount = 1;
+        bindingFlags.pBindingFlags = &flags2;
+
+        layoutInfo.bindingCount = 1;
+        layoutInfo.pBindings = &heapPushLayoutBindings;
+        layoutInfo.flags = 0;
+        layoutInfo.pNext = &bindingFlags;
+
+        result = vkCreateDescriptorSetLayout(*sDevice, &layoutInfo, nullptr, &mHeapDescriptorSetLayout);
+        VK_CHECK(result);
+
+        VkDescriptorSetLayoutBinding tempBufferPushLayoutBinding {};
+        tempBufferPushLayoutBinding.binding = 0;
+        tempBufferPushLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+        tempBufferPushLayoutBinding.descriptorCount = 1;
+        tempBufferPushLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL;
+        tempBufferPushLayoutBinding.pImmutableSamplers = nullptr;
+        VkDescriptorBindingFlags flags4 = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT;
+        bindingFlags.bindingCount = 1;
+        bindingFlags.pBindingFlags = &flags4;
+
+        layoutInfo.bindingCount = 1;
+        layoutInfo.pBindings = &tempBufferPushLayoutBinding;
+        layoutInfo.flags = 0;
+        layoutInfo.pNext = &bindingFlags;
+
+        result = vkCreateDescriptorSetLayout(*sDevice, &layoutInfo, nullptr, &mTempBufferDescriptorSetLayout);
+        VK_CHECK(result);
+
+        VkDescriptorSetLayoutBinding imagePushLayoutBindings[4] {};
+        for (size_t i = 0; i < 4; ++i) {
             imagePushLayoutBindings[i].binding = i;
             imagePushLayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
             imagePushLayoutBindings[i].descriptorCount = 1;
             imagePushLayoutBindings[i].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
             imagePushLayoutBindings[i].pImmutableSamplers = nullptr;
         }
-        VkDescriptorBindingFlags flags2[5] { VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT, VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT, VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT, VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT, VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT };
-        bindingFlags.bindingCount = 5;
-        bindingFlags.pBindingFlags = flags2;
+        VkDescriptorBindingFlags flags3[4] { VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT, VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT, VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT, VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT };
+        bindingFlags.bindingCount = 4;
+        bindingFlags.pBindingFlags = flags3;
 
-        layoutInfo.bindingCount = 5;
+        layoutInfo.bindingCount = 4;
         layoutInfo.pBindings = imagePushLayoutBindings;
-        layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR;
+        layoutInfo.flags = 0;
         layoutInfo.pNext = &bindingFlags;
 
-        result = vkCreateDescriptorSetLayout(*sDevice, &layoutInfo, nullptr, &mDescriptorSetLayouts[1]);
+        result = vkCreateDescriptorSetLayout(*sDevice, &layoutInfo, nullptr, &mResourceBlockDescriptorSetLayout);
         VK_CHECK(result);
 
         layoutInfo.flags = 0;
@@ -534,13 +736,15 @@ namespace Render {
 
         layoutInfo.bindingCount = 1;
         layoutInfo.pBindings = &samplerLayoutBinding;
-        result = vkCreateDescriptorSetLayout(*sDevice, &layoutInfo, nullptr, &mDescriptorSetLayouts[2]);
+        result = vkCreateDescriptorSetLayout(*sDevice, &layoutInfo, nullptr, &mSamplerDescriptorSetLayout);
         VK_CHECK(result);
+
+        VkDescriptorSetLayout descriptorSetLayouts[7] = { mUBODescriptorSetLayout, mHeapDescriptorSetLayout, mTempBufferDescriptorSetLayout, mResourceBlockDescriptorSetLayout, mResourceBlockDescriptorSetLayout, mResourceBlockDescriptorSetLayout, mSamplerDescriptorSetLayout };
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo {};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutInfo.setLayoutCount = 3; // Optional
-        pipelineLayoutInfo.pSetLayouts = &std::as_const(*mDescriptorSetLayouts); // Optional
+        pipelineLayoutInfo.setLayoutCount = 7; // Optional
+        pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts; // Optional
         pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
         pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
 
@@ -551,7 +755,7 @@ namespace Render {
         allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
         allocInfo.descriptorPool = mDescriptorPool;
         allocInfo.descriptorSetCount = 1;
-        allocInfo.pSetLayouts = &std::as_const(mDescriptorSetLayouts[2]);
+        allocInfo.pSetLayouts = &std::as_const(mSamplerDescriptorSetLayout);
         result = vkAllocateDescriptorSets(GetDevice(), &allocInfo, &mSamplerDescriptorSet);
         VK_CHECK(result);
     }

@@ -14,7 +14,7 @@ namespace Render {
 
         bool loadImpl(VulkanTexture &tex, ResourceDataInfo &info);
         void unloadImpl(VulkanTexture &tex);
-        bool create(Texture &texture, TextureType type, DataFormat format) override;
+        bool create(Texture &texture, TextureType type, TextureFormat format) override;
 
         virtual void setData(Texture &tex, Vector2i size, const ByteBuffer &data) override;
         virtual void setSubData(Texture &tex, Vector2i offset, Vector2i size, const ByteBuffer &data) override;

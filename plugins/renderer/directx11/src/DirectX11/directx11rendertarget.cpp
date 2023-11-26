@@ -192,13 +192,10 @@ namespace Render {
         if (flipFlopping) {
             sDeviceContext->ClearDepthStencilView(mDepthStencilViews[targetSubresourceIndex], D3D11_CLEAR_DEPTH, 1.0f, 0);
         }
-
-        LOG_DEBUG("Begin Iteration");
     }
 
     void DirectX11RenderTarget::endIteration() const
     {
-        LOG_DEBUG("End Iteration");
         sDeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
         ID3D11ShaderResourceView *nullSRV[5] = { nullptr, nullptr, nullptr, nullptr };
         sDeviceContext->PSSetShaderResources(0, 5, nullSRV);
@@ -228,7 +225,6 @@ namespace Render {
         sDeviceContext->OMSetDepthStencilState(mDepthStencilState, 1);
         sDeviceContext->OMSetBlendState(mBlendState, 0, 0xffffffff);
 
-        ID3D11RenderTargetView *views[8] = { 0 };
         int bufferCount = canFlipFlop() ? 2 : 1;
         size_t size = mTargetViews.size() / bufferCount;
         for (size_t index = 0; index < size; ++index) {

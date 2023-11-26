@@ -123,7 +123,7 @@ namespace Tools {
             Vector2i iRegion { static_cast<int>(region.x), static_cast<int>(region.y) };
             if (iRegion.x > 0 && iRegion.y > 0)
                 mRenderTarget->resize(iRegion);
-            bool pressed = ImGui::ImageButton((void *)mRenderTarget->texture().mTextureHandle, region, { 0, 0 }, { 1, 1 }, 0);
+            bool pressed = ImGui::ImageButton((void *)mRenderTarget->texture()->resource().mPtr, region, { 0, 0 }, { 1, 1 }, 0);
             if (pressed && !mState.mDragging[0])
                 if (!Im3D::IsAnyObjectHovered())
                     mEditor->deselect();
@@ -193,7 +193,7 @@ namespace Tools {
                 } else if (ImGui::IsDraggableValueTypeBeingAccepted(resource)) {
                     Render::GPUMeshLoader::Handle handle = resource->loadData();
                     handle.info()->setPersistent(true);
-                    Im3D::NativeMesh(handle->mMaterials.front().mDiffuseTexture->handle(), handle->mAABB, TranslationMatrix(pos));
+                    Im3D::NativeMesh(handle->mMaterials.front().mResourceBlock, handle->mAABB, TranslationMatrix(pos));
                 }
                 ImGui::EndDragDropTarget();
             }

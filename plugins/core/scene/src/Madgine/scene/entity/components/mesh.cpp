@@ -97,6 +97,11 @@ namespace Scene {
         {
             return mMesh.resource();
         }
+
+        const Render::GPUMeshLoader::Handle &Engine::Scene::Entity::Mesh::handle() const
+        {
+            return mMesh;
+        }
     }
 }
 }

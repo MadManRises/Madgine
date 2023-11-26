@@ -11,6 +11,7 @@ namespace Render {
     struct DirectX12FontData;
 
     struct DirectX12RenderContext;
+    struct DirectX12RenderTarget;
 
     struct DirectX12PersistentBuffer;
     struct DirectX12TempBuffer;

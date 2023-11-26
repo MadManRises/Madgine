@@ -23,33 +23,35 @@ namespace Render {
     void OpenGLRenderTarget::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
         RenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);
-
-        Vector2i screenSize = size();
-
-        if (screenSize.x <= 0)
-            screenSize.x = 1;
-        if (screenSize.y <= 0)
-            screenSize.y = 1;
-
-        glViewport(0, 0, static_cast<GLsizei>(screenSize.x), static_cast<GLsizei>(screenSize.y));
-        GL_CHECK();
-
-        if (!mBlitSource) {
-            glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-            GL_CHECK();
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            GL_CHECK();
-        }
-
-        glEnable(GL_FRAMEBUFFER_SRGB);
     }
 
     void OpenGLRenderTarget::endIteration() const
     {
+        RenderTarget::endIteration();
+    }
 
+    void OpenGLRenderTarget::beginFrame()
+    {
+        RenderTarget::beginFrame();
+
+        Vector2i screenSize = size();
+
+        glViewport(0, 0, static_cast<GLsizei>(screenSize.x), static_cast<GLsizei>(screenSize.y));
+        GL_CHECK();
+
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        GL_CHECK();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        GL_CHECK();
+
+        glEnable(GL_FRAMEBUFFER_SRGB);
+    }
+
+    void OpenGLRenderTarget::endFrame()
+    {
         glDisable(GL_FRAMEBUFFER_SRGB);
 
-        RenderTarget::endIteration();
+        RenderTarget::endFrame();
     }
 
     void OpenGLRenderTarget::setRenderSpace(const Rect2i &space)

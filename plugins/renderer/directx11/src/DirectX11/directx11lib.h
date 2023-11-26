@@ -29,7 +29,7 @@ inline void dx11Check(HRESULT result)
 {
     if (FAILED(result)) {
         _com_error error { result };
-        LOG("DX11-Error: " << error.ErrorMessage());
+        LOG_FATAL("DX11-Error: " << error.ErrorMessage());
         dx11Dump();
         std::terminate();
     }

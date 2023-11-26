@@ -23,6 +23,8 @@ namespace Scene {
             Render::SkeletonLoader::Resource *get() const;
             const Render::SkeletonLoader::Handle &handle() const;
 
+            void resetMatrices(Matrix4 *matrices);
+
             Render::GPUBuffer<Matrix4[]> mBoneMatrices;
 
         private:

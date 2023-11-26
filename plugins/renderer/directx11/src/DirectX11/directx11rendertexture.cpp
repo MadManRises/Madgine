@@ -47,6 +47,7 @@ namespace Render {
 
         mSize = size;
 
+        size_t count = 1;
         std::vector<std::array<ReleasePtr<ID3D11RenderTargetView>, 6>> targetViews;
 
         for (DirectX11Texture &tex : mTextures) {
@@ -79,8 +80,11 @@ namespace Render {
             }
             renderTargetViewDesc.Texture2D.MipSlice = 0;
 
-            HRESULT hr = sDevice->CreateRenderTargetView(tex.resource(), &renderTargetViewDesc, &(targetViews.emplace_back()[0]));
-            DX11_CHECK(hr);
+            std::array<ReleasePtr<ID3D11RenderTargetView>, 6> &views = targetViews.emplace_back();
+            for (size_t i = 0; i < count; ++i) {
+                HRESULT hr = sDevice->CreateRenderTargetView(tex.resource(), &renderTargetViewDesc, &views[i]);
+                DX11_CHECK(hr);
+            }
         }
 
         setup(std::move(targetViews), size, mType, mSamples);

@@ -26,11 +26,6 @@ namespace Render {
         , mPriority(priority)
     {
         mPipeline.create({ .vs = "im3d", .ps = "im3d", .bufferSizes = { sizeof(Im3DPerApplication), 0, sizeof(Im3DPerObject) } });
-
-        for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
-            mMeshes[i][0].create({ i + 1, std::vector<Im3D::Vertex> {} });
-            mMeshes[i][1].create({ i + 1, std::vector<Im3D::Vertex2> {} });
-        }
     }
 
     void Im3DRenderPass::render(RenderTarget *target, size_t iteration)
@@ -68,17 +63,33 @@ namespace Render {
                 perObject->hasDistanceField = bool(p.second.mFlags & RenderPassFlags_DistanceField);
             }
 
-            mPipeline->bindTextures(target, { { p.first, TextureType_2D } });
+            mPipeline->bindResources(target, 2, { p.first });
 
             for (size_t i = 0; i < IM3D_MESHTYPE_COUNT; ++i) {
                 if (!p.second.mVertices[i].empty()) {
-                    mMeshes[i][0].update({ i + 1, p.second.mVertices[i], p.second.mIndices[i] });
-                    mPipeline->renderMesh(target, mMeshes[i][0]);
+                    {
+                        auto vertices = mPipeline->mapVertices<Im3D::Vertex[]>(target, p.second.mVertices[i].size());
+                        std::ranges::copy(p.second.mVertices[i], vertices.mData);
+                    }
+                    {
+                        auto indices = mPipeline->mapIndices(target, p.second.mIndices[i].size());
+                        std::ranges::copy(p.second.mIndices[i], indices.mData);
+                    }
+                    mPipeline->setGroupSize(i + 1);
+                    mPipeline->render(target);
                 }
                 
                 if (!p.second.mVertices2[i].empty()) {
-                    mMeshes[i][1].update({ i + 1, p.second.mVertices2[i], p.second.mIndices2[i] });
-                    mPipeline->renderMesh(target, mMeshes[i][1]);
+                    {
+                        auto vertices = mPipeline->mapVertices<Im3D::Vertex2[]>(target, p.second.mVertices2[i].size());
+                        std::ranges::copy(p.second.mVertices2[i], vertices.mData);
+                    }
+                    {
+                        auto indices = mPipeline->mapIndices(target, p.second.mIndices2[i].size());
+                        std::ranges::copy(p.second.mIndices2[i], indices.mData);
+                    }
+                    mPipeline->setGroupSize(i + 1);
+                    mPipeline->render(target);
                 }
             }
         }

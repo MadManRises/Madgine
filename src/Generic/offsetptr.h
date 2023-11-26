@@ -81,6 +81,32 @@ struct OffsetPtr {
         return ptr + offset;
     }
 
+    constexpr OffsetPtr operator-(uintptr_t offset) const
+    {
+        return OffsetPtr { mOffset - offset };
+    }
+
+    friend constexpr OffsetPtr operator-(uintptr_t offset, OffsetPtr ptr)
+    {
+        return ptr - offset;
+    }
+
+    constexpr OffsetPtr operator*(uintptr_t factor) const
+    {
+        return OffsetPtr { mOffset * factor };
+    }
+
+    friend constexpr OffsetPtr operator*(uintptr_t factor, OffsetPtr ptr)
+    {
+        return ptr * factor;
+    }
+
+    constexpr OffsetPtr operator/(uintptr_t factor) const
+    {
+        assert(mOffset % factor == 0);
+        return OffsetPtr { mOffset / factor };
+    }
+
 private:
     uintptr_t mOffset = std::numeric_limits<uintptr_t>::max();
 };

@@ -559,6 +559,7 @@ namespace Tools {
 
     void SceneEditor::handleInputs()
     {
+        return;
         if (ImGui::IsKeyPressed(Input::Key::Delete)) {
             if (mSelectedEntity) {
                 mSelectedEntity->remove();

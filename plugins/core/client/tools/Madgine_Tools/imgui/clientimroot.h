@@ -13,6 +13,10 @@
 
 #include "Generic/intervalclock.h"
 
+#include "Madgine/pipelineloader/pipelineloader.h"
+
+#include "Madgine/textureloader/textureloader.h"
+
 struct ImGuiDockNode;
 struct ImGuiViewport;
 
@@ -29,9 +33,10 @@ namespace Tools {
         Threading::Task<void> finalize() override;
 
         virtual void newFrame() = 0;
+        virtual void setup(Render::RenderTarget *target) override;
         virtual void render(Render::RenderTarget *target, size_t iteration) override;
 
-        virtual void renderViewport(Render::RenderTarget *target, ImGuiViewport *vp) = 0;
+        virtual void renderViewport(Render::RenderTarget *target, ImGuiViewport *vp);
 
         void addViewportMapping(Render::RenderTarget *target, ImGuiViewport *vp);
         void removeViewportMapping(Render::RenderTarget *target);
@@ -69,6 +74,9 @@ namespace Tools {
         IntervalClock<> mFrameClock;
 
         std::vector<Render::RenderTarget *> mRenderTargets;
+
+        Render::PipelineLoader::Instance mPipeline;
+        Render::TextureLoader::Ptr mFontTexture;
     };
 
 }

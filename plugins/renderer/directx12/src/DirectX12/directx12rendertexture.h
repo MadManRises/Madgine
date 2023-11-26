@@ -21,20 +21,16 @@ namespace Render {
         virtual void beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const override;
         virtual void endIteration() const override;
 
-        virtual TextureDescriptor texture(size_t index) const override;        
+        virtual const DirectX12Texture *texture(size_t index) const override;   
         virtual size_t textureCount() const override;
-        virtual TextureDescriptor depthTexture() const override;
+        virtual const DirectX12Texture *depthTexture() const override;        
 
         void blit(RenderTarget *input) const;
         
         const std::vector<DirectX12Texture> &textures() const;
 
     private:        
-        OffsetPtr mDepthBufferView;
         std::vector<DirectX12Texture> mTextures;
-
-		Vector2i mSize;
-        size_t mSamples;
     };
 
 }

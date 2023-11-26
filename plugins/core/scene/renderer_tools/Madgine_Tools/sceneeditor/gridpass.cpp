@@ -50,7 +50,8 @@ namespace Tools {
             parameters->vp = target->getClipSpaceMatrix() * mCamera->getViewProjectionMatrix(aspectRatio);
         }
 
-        mPipeline->renderMesh(target, mMesh);
+        mPipeline->bindMesh(target, mMesh);
+        mPipeline->render(target);
     }
 
     int GridPass::priority() const

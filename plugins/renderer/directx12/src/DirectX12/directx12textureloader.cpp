@@ -36,7 +36,7 @@ namespace Render {
         tex.reset();
     }
 
-    bool DirectX12TextureLoader::create(Texture &tex, TextureType type, DataFormat format)
+    bool DirectX12TextureLoader::create(Texture &tex, TextureType type, TextureFormat format)
     {
         static_cast<DirectX12Texture &>(tex) = DirectX12Texture { type, false, format };
 

@@ -79,8 +79,10 @@ namespace Render {
     {
         if (!GPUMeshLoader::getSingleton().mQuad)
             GPUMeshLoader::getSingleton().mQuad.load("quad");
-        if (GPUMeshLoader::getSingleton().mQuad.available())
-            renderMesh(target, GPUMeshLoader::getSingleton().mQuad);
+        if (GPUMeshLoader::getSingleton().mQuad.available()) {
+            bindMesh(target, GPUMeshLoader::getSingleton().mQuad);
+            render(target);
+        }
     }
 
 }

@@ -17,9 +17,12 @@ namespace Render {
         virtual void beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const override;
         virtual void endIteration() const override;
 
-        virtual TextureDescriptor texture(size_t index) const override;
+        virtual void beginFrame() override;
+        virtual void endFrame() override;
+
+        virtual const OpenGLTexture *texture(size_t index) const override;
         virtual size_t textureCount() const override;
-        virtual TextureDescriptor depthTexture() const override;
+        virtual const OpenGLTexture *depthTexture() const override;
 
         void blit(RenderTarget *input) const;
 
@@ -29,7 +32,7 @@ namespace Render {
         size_t getFramebufferCount(bool *emulateCube = nullptr) const;
 
     private:
-        GLuint mFramebuffers[6] = { 0 };
+        mutable std::map<BitArray<4>, std::array<GLuint, 6>> mFramebuffers;
         GLuint mDepthRenderbuffer = 0;
 
         OpenGLTexture mDepthTexture;
@@ -42,6 +45,8 @@ namespace Render {
         Vector2i mSize;
 
         TextureType mType;
+
+        size_t mFramebufferCount;
     };
 
 }

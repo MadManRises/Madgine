@@ -34,7 +34,7 @@ namespace Render {
         tex.reset();
     }
 
-    bool OpenGLTextureLoader::create(Texture &tex, TextureType type, DataFormat format)
+    bool OpenGLTextureLoader::create(Texture &tex, TextureType type, TextureFormat format)
     {
         static_cast<OpenGLTexture &>(tex) = OpenGLTexture { type, format };
 

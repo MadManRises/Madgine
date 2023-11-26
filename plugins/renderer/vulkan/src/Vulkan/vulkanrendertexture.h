@@ -20,10 +20,10 @@ namespace Render {
         virtual void beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const override;
         virtual void endIteration() const override;
 
-        virtual TextureDescriptor texture(size_t index) const override;
+        virtual const Texture*texture(size_t index) const override;
         virtual size_t textureCount() const override;
 
-        virtual void blit(RenderTarget *input) override;
+        void blit(RenderTarget *input);
 
         const std::vector<VulkanTexture> &textures() const;
 

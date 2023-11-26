@@ -32,7 +32,7 @@ namespace Scene {
             void setStep(float step);
             float currentStep() const;
 
-            void updateRender(Entity *entity, std::chrono::microseconds frameTimeSinceLastFrame, std::chrono::microseconds sceneTimeSinceLastFrame);
+            void updateRender(Entity *entity, std::chrono::microseconds frameTimeSinceLastFrame, std::chrono::microseconds sceneTimeSinceLastFrame, Matrix4 *matrices);
 
         private:
             void refreshCache();

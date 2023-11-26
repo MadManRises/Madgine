@@ -1,7 +1,5 @@
 #pragma once
 
-#include "aligned.h"
-
 namespace Engine {
 namespace Render {
 
@@ -31,15 +29,29 @@ namespace Render {
             return mPtr;
         }
 
-        template <typename T>
-        T*& setupAs() {
-            assert(!mPtr);
-            return reinterpret_cast<T *&>(mPtr);
+        uintptr_t get() const
+        {
+            return mPtr;
         }
 
         template <typename T>
-        operator T* () const {
-            return reinterpret_cast<T *>(mPtr);
+        T &setupAs()
+        {
+            assert(!mPtr);
+            return reinterpret_cast<T&>(mPtr);
+        }
+
+        template <typename T>
+        operator T() const
+        {
+            assert(mPtr);
+            return (T)(mPtr);
+        }
+
+        template <typename T>
+        T release() {
+            assert(mPtr);
+            return (T)(std::exchange(mPtr, 0));
         }
 
     private:
@@ -57,23 +69,15 @@ namespace Render {
             , mBuffer(other.mBuffer)
         {
         }
-        template <typename U>        
+        template <typename U>
         explicit GPUPtr(GPUPtr<U> other)
             : mOffset(other.mOffset)
             , mBuffer(other.mBuffer)
         {
         }
 
-        uint32_t mOffset;
+        uint32_t mOffset = 0;
         IndexType<uint32_t, 0> mBuffer;
-    };
-
-    template <typename T, size_t alignment>
-    struct GPUPtr<Aligned<T, alignment>> : GPUPtr<T> {
-    };
-
-    template <typename T, size_t alignment>
-    struct GPUPtr<Aligned<T, alignment>[]> : GPUPtr<T[]> {
     };
 
     template <typename T>

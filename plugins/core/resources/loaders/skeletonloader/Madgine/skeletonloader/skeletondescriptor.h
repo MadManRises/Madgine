@@ -17,6 +17,8 @@ namespace Render {
     struct SkeletonDescriptor {
         std::vector<Bone> mBones;     
         Matrix4 mMatrix;
+        Matrix4 mMatrix1 = Matrix4::IDENTITY;
+        Matrix4 mMatrix2 = Matrix4::IDENTITY;
     };
 
 }

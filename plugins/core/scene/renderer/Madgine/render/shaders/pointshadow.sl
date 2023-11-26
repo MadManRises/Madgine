@@ -6,6 +6,6 @@ struct PointShadowPerApplication {
 };
 
 struct PointShadowInstanceData {
-	float4x4 mv;
-	//ArrayPtr<float4x4> bones;
+	row_major float4x4 mv;
+	ArrayPtr<float4x4> bones;
 };

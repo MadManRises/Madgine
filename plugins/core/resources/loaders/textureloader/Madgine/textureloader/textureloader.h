@@ -35,8 +35,8 @@ namespace Render {
             {
             }
 
-            Threading::TaskFuture<bool> create(TextureType type, DataFormat format, Vector2i size = { 0, 0 }, ByteBuffer data = {}, TextureLoader *loader = &TextureLoader::getSingleton());
-            Threading::Task<bool> createTask(TextureType type, DataFormat format, Vector2i size = { 0, 0 }, ByteBuffer data = {}, TextureLoader *loader = &TextureLoader::getSingleton());
+            Threading::TaskFuture<bool> create(TextureType type, TextureFormat format, Vector2i size = { 0, 0 }, ByteBuffer data = {}, TextureLoader *loader = &TextureLoader::getSingleton());
+            Threading::Task<bool> createTask(TextureType type, TextureFormat format, Vector2i size = { 0, 0 }, ByteBuffer data = {}, TextureLoader *loader = &TextureLoader::getSingleton());
 
             void setData(Vector2i size, const ByteBuffer &data, TextureLoader *loader = &TextureLoader::getSingleton());
             void setSubData(Vector2i offset, Vector2i size, const ByteBuffer &data, TextureLoader *loader = &TextureLoader::getSingleton());
@@ -50,12 +50,12 @@ namespace Render {
             {
             }
 
-            Threading::TaskFuture<bool> loadFromImage(std::string_view name, TextureType type, DataFormat format, TextureLoader *loader = &TextureLoader::getSingleton());
+            Threading::TaskFuture<bool> loadFromImage(std::string_view name, TextureType type, TextureFormat format, TextureLoader *loader = &TextureLoader::getSingleton());
         };
 
         TextureLoader();
 
-        virtual bool create(Texture &tex, TextureType type, DataFormat format) = 0;
+        virtual bool create(Texture &tex, TextureType type, TextureFormat format) = 0;
 
         virtual void setData(Texture &tex, Vector2i size, const ByteBuffer &data) = 0;
         virtual void setSubData(Texture &tex, Vector2i offset, Vector2i size, const ByteBuffer &data) = 0;

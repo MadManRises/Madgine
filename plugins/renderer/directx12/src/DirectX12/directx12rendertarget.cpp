@@ -18,62 +18,72 @@
 namespace Engine {
 namespace Render {
 
-    DirectX12RenderTarget::DirectX12RenderTarget(DirectX12RenderContext *context, bool global, std::string name, RenderTarget *blitSource)
-        : RenderTarget(context, global, name, true, blitSource)
+    constexpr FLOAT sClearColor[4] = { 0.033f, 0.073f, 0.073f, 1.0f };
+
+    DirectX12RenderTarget::DirectX12RenderTarget(DirectX12RenderContext *context, bool global, std::string name, TextureType type, size_t samples, bool flipFlop, RenderTarget *blitSource)
+        : RenderTarget(context, global, name, flipFlop, blitSource)
+        , mDepthTexture(type, false, FORMAT_D24, samples)
+        , mSamples(samples)
     {
-        mDepthStencilView = DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.allocate();
     }
 
     DirectX12RenderTarget::~DirectX12RenderTarget()
     {
     }
 
-    void DirectX12RenderTarget::setup(std::vector<OffsetPtr> targetViews, const Vector2i &size, size_t samples, bool createDepthBufferView)
+    void DirectX12RenderTarget::setup(std::vector<std::array<OffsetPtr, 6>> targetViews, const Vector2i &size)
     {
         mTargetViews = targetViews;
-
-        mDepthStencilBuffer.reset();
-
-        D3D12_HEAP_PROPERTIES depthHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-
-        D3D12_RESOURCE_DESC depthResourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_R24G8_TYPELESS, size.x, size.y, 1, 1, samples);
-        depthResourceDesc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-
-        CD3DX12_CLEAR_VALUE depthOptimizedClearValue(DXGI_FORMAT_D24_UNORM_S8_UINT, 1.0f, 0);
-
-        HRESULT hr = GetDevice()->CreateCommittedResource(
-            &depthHeapProperties,
-            D3D12_HEAP_FLAG_NONE,
-            &depthResourceDesc,
-            createDepthBufferView ? D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE : D3D12_RESOURCE_STATE_DEPTH_WRITE,
-            &depthOptimizedClearValue,
-            IID_PPV_ARGS(&mDepthStencilBuffer));
-        DX12_CHECK(hr);
-
-        mDepthStencilBuffer->SetName(StringUtil::toWString(name() + "DepthTexture").c_str());
 
         D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc {};
         dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
         dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-        dsvDesc.ViewDimension = samples > 1 ? D3D12_DSV_DIMENSION_TEXTURE2DMS : D3D12_DSV_DIMENSION_TEXTURE2D;
 
-        GetDevice()->CreateDepthStencilView(mDepthStencilBuffer, &dsvDesc, DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.cpuHandle(mDepthStencilView));
+        size_t count = 1;
+        UINT *target = nullptr;
+        switch (mDepthTexture.type()) {
+        case TextureType_2D:
+            dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+            break;
+        case TextureType_2DMultiSample:
+            dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMS;
+            break;
+        case TextureType_Cube:
+            dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
+            dsvDesc.Texture2DArray.ArraySize = 1;
+            count = 6;
+            target = &dsvDesc.Texture2DArray.FirstArraySlice;
+            break;
+        default:
+            throw 0;
+        }
 
-        mSamples = samples;
+        mDepthTexture.setData(size, {});
+        mDepthTexture.setName(name() + "DepthTexture");
+
+        for (size_t i = 0; i < count; ++i) {
+            if (!mDepthStencilViews[i])
+                mDepthStencilViews[i] = DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.allocate();
+            if (target)
+                *target = i;
+            GetDevice()->CreateDepthStencilView(mDepthTexture, &dsvDesc, DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.cpuHandle(mDepthStencilViews[i]));
+            DX12_CHECK();
+        }
     }
 
     void DirectX12RenderTarget::shutdown()
     {
-        mDepthStencilBuffer.reset();
     }
 
     void DirectX12RenderTarget::beginFrame()
     {
-        mCommandList = context()->fetchCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT);
+        RenderTarget::beginFrame();
 
-        mCommandList->SetGraphicsRootSignature(context()->mRootSignature);
+        mCommandList.Transition(mDepthTexture, mDepthTexture.readStateFlags(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
-        mCommandList.attachResource(mDepthStencilBuffer);
+        context()->setupRootSignature(mCommandList);
+
+        mCommandList.attachResource(mDepthTexture.operator ReleasePtr<ID3D12Resource>());
 
         for (RenderPass *pass : renderPasses()) {
             for (RenderData *data : pass->dependencies()) {
@@ -84,19 +94,6 @@ namespace Render {
                 }
             }
         }
-
-        RenderTarget::beginFrame();
-    }
-
-    void DirectX12RenderTarget::endFrame()
-    {
-        RenderTarget::endFrame();
-
-        mCommandList.reset();
-    }
-
-    void DirectX12RenderTarget::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
-    {
 
         const Vector2i &screenSize = size();
 
@@ -117,28 +114,47 @@ namespace Render {
 
         mCommandList->RSSetScissorRects(1, &scissorRect);
 
-        //TransitionBarrier();
+        int bufferCount = canFlipFlop() ? 2 : 1;
+        size_t size = mTargetViews.size() / bufferCount;
+        for (size_t index = 0; index < size; ++index) {
+            int offset = mFlipFlopIndices[index];
+            for (size_t i = 0; i < 6; ++i) {
+                if (mTargetViews[size * offset + index][i])
+                    mCommandList->ClearRenderTargetView(DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(mTargetViews[size * offset + index][i]), sClearColor, 0, nullptr);
+            }
+        }
+        clearDepthBuffer();
+    }
 
-        constexpr FLOAT color[4] = { 0.033f, 0.073f, 0.073f, 1.0f };
+    void DirectX12RenderTarget::endFrame()
+    {
 
-        std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> targetViews { mTargetViews.size() };
-        for (size_t i = 0; i < targetViews.size(); ++i)
-            targetViews[i] = DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(mTargetViews[i]);
-        D3D12_CPU_DESCRIPTOR_HANDLE depthStencilView = DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.cpuHandle(mDepthStencilView);
+        mCommandList.Transition(mDepthTexture, D3D12_RESOURCE_STATE_DEPTH_WRITE, mDepthTexture.readStateFlags());
 
-        if (!mBlitSource) {
-            for (D3D12_CPU_DESCRIPTOR_HANDLE &targetView : targetViews)
-                mCommandList->ClearRenderTargetView(targetView, color, 0, nullptr);
+        RenderTarget::endFrame();
+    }
+
+    void DirectX12RenderTarget::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
+    {
+        RenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);
+
+        D3D12_CPU_DESCRIPTOR_HANDLE targetViews[8] = { 0 };
+        int bufferCount = canFlipFlop() ? 2 : 1;
+        size_t size = mTargetViews.size() / bufferCount;
+        size_t count = std::min(size, targetCount);
+        for (size_t index = 0; index < count; ++index) {
+            int offset = flipFlopping ^ mFlipFlopIndices[index + targetIndex];
+            targetViews[index] = DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(mTargetViews[size * offset + index + targetIndex][targetSubresourceIndex]);
+            if (flipFlopping) {
+                mCommandList->ClearRenderTargetView(targetViews[index], sClearColor, 0, nullptr);
+            }
+        }
+        D3D12_CPU_DESCRIPTOR_HANDLE depthStencilView = DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.cpuHandle(mDepthStencilViews[targetSubresourceIndex]);
+        mCommandList->OMSetRenderTargets(count, targetViews, false, &depthStencilView);
+
+        if (flipFlopping) {
             mCommandList->ClearDepthStencilView(depthStencilView, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
         }
-
-        mCommandList->OMSetRenderTargets(targetViews.size(), targetViews.data(), false, &depthStencilView);
-        /*sDeviceContext->OMSetDepthStencilState(mDepthStencilState, 1);
-        sDeviceContext->OMSetBlendState(mBlendState, 0, 0xffffffff);*/
-
-        //sDeviceContext->PSSetSamplers(0, 2, mSamplers);
-
-        RenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);
     }
 
     void DirectX12RenderTarget::endIteration() const
@@ -178,7 +194,14 @@ namespace Render {
 
     void DirectX12RenderTarget::clearDepthBuffer()
     {
-        mCommandList->ClearDepthStencilView(DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.cpuHandle(mDepthStencilView), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+        for (size_t i = 0; i < 6; ++i)
+            if (mDepthStencilViews[i])
+                mCommandList->ClearDepthStencilView(DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.cpuHandle(mDepthStencilViews[i]), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+    }
+
+    TextureFormat DirectX12RenderTarget::textureFormat(size_t index) const
+    {
+        return texture(index)->format();
     }
 
     DirectX12RenderContext *DirectX12RenderTarget::context() const

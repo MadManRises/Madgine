@@ -11,6 +11,8 @@
 
 #include "Madgine/resources/resourcemanager.h"
 
+#include "Meta/math/transformation.h"
+
 ENTITYCOMPONENT_IMPL(Skeleton, Engine::Scene::Entity::Skeleton);
 
 METATABLE_BEGIN(Engine::Scene::Entity::Skeleton)
@@ -53,7 +55,7 @@ namespace Scene {
         void Skeleton::set(Render::SkeletonLoader::Handle handle)
         {
             mDirty = true;
-            mSkeleton = std::move(handle);            
+            mSkeleton = std::move(handle);
         }
 
         Render::SkeletonLoader::Resource *Skeleton::get() const
@@ -66,18 +68,14 @@ namespace Scene {
             return mSkeleton;
         }
 
-        /* void Skeleton::resetMatrices()
+        void Skeleton::resetMatrices(Matrix4 *matrices)
         {
-            if (!mSkeleton.available())
-                mBoneMatrices.clear();
-            else {
-                mBoneMatrices.resize(mSkeleton->mBones.size());
+            assert(mSkeleton.available());
 
-                for (size_t i = 0; i < mBoneMatrices.size(); ++i) {
-                    mBoneMatrices[i] = mSkeleton->mBones[i].mTTransform;
-                }
+            for (size_t i = 0; i < mSkeleton->mBones.size(); ++i) {
+                matrices[i] = Matrix4::IDENTITY;
             }
-        }*/
+        }
     }
 }
 }

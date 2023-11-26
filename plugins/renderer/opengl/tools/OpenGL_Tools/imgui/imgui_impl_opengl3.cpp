@@ -173,11 +173,20 @@ using namespace gl;
 #    define IMGUI_IMPL_OPENGL_MAY_HAVE_EXTENSIONS
 #endif
 
+struct TextureDescriptor {
+    size_t mSize = 1;
+    struct {
+        GLenum mTarget;
+        GLuint mHandle;
+    } mResources[1];
+};
+
 // OpenGL Data
 struct ImGui_ImplOpenGL3_Data {
     GLuint GlVersion; // Extracted at runtime using GL_MAJOR_VERSION, GL_MINOR_VERSION queries (e.g. 320 for GL 3.2)
     char GlslVersionString[32]; // Specified by user or detected based on compile time GL settings.
-    GLuint FontTexture;
+    TextureDescriptor FontTexture;
+
     GLuint ShaderHandle;
     GLint AttribLocationTex; // Uniforms location
     GLint AttribLocationProjMtx;
@@ -505,7 +514,8 @@ void ImGui_ImplOpenGL3_RenderDrawData(ImDrawData *draw_data)
                     glScissor((int)clip_rect.x, (int)(fb_height - clip_rect.w), (int)(clip_rect.z - clip_rect.x), (int)(clip_rect.w - clip_rect.y));
 
                     // Bind texture, Draw
-                    glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)pcmd->GetTexID());
+                    TextureDescriptor *textures = (TextureDescriptor *)pcmd->GetTexID();
+                    glBindTexture(GL_TEXTURE_2D, textures->mResources->mHandle);
 #ifdef IMGUI_IMPL_OPENGL_MAY_HAVE_VTX_OFFSET
                     if (bd->GlVersion >= 320)
                         glDrawElementsBaseVertex(GL_TRIANGLES, (GLsizei)pcmd->ElemCount, sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, (void *)(intptr_t)(pcmd->IdxOffset * sizeof(ImDrawIdx)), (GLint)pcmd->VtxOffset);
@@ -586,8 +596,9 @@ bool ImGui_ImplOpenGL3_CreateFontsTexture()
     // Upload texture to graphics system
     GLint last_texture;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
-    glGenTextures(1, &bd->FontTexture);
-    glBindTexture(GL_TEXTURE_2D, bd->FontTexture);
+    bd->FontTexture.mResources->mTarget = GL_TEXTURE_2D;
+    glGenTextures(1, &bd->FontTexture.mResources->mHandle);
+    glBindTexture(GL_TEXTURE_2D, bd->FontTexture.mResources->mHandle);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 #ifdef GL_UNPACK_ROW_LENGTH
@@ -596,7 +607,7 @@ bool ImGui_ImplOpenGL3_CreateFontsTexture()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
     // Store our identifier
-    io.Fonts->SetTexID((ImTextureID)(intptr_t)bd->FontTexture);
+    //io.Fonts->SetTexID((ImTextureID)(intptr_t)&bd->FontTexture);
 
     // Restore state
     glBindTexture(GL_TEXTURE_2D, last_texture);
@@ -608,10 +619,10 @@ void ImGui_ImplOpenGL3_DestroyFontsTexture()
 {
     ImGuiIO &io = ImGui::GetIO();
     ImGui_ImplOpenGL3_Data *bd = ImGui_ImplOpenGL3_GetBackendData();
-    if (bd->FontTexture) {
-        glDeleteTextures(1, &bd->FontTexture);
+    if (bd->FontTexture.mResources->mHandle) {
+        glDeleteTextures(1, &bd->FontTexture.mResources->mHandle);
         io.Fonts->SetTexID(0);
-        bd->FontTexture = 0;
+        bd->FontTexture.mResources->mHandle = 0;
     }
 }
 

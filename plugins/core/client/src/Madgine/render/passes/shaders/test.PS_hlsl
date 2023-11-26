@@ -3,7 +3,7 @@ struct Test{
     
 };
 
-Texture2D vertices : register(t0);
+Texture2D vertices : register(space0, t0);
 SamplerState texSampler : register(s0);
 
 cbuffer Test : register(b0){

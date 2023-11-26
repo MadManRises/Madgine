@@ -7,17 +7,28 @@ namespace Render {
 
     struct DirectX12HeapAllocator {
 
-        static constexpr size_t goodSize = 128 * 1024 * 1024; //128MB
+        static constexpr size_t goodSize = 8 * 1024 * 1024; //8MB
 
-        DirectX12HeapAllocator();
+        DirectX12HeapAllocator(DirectX12DescriptorHeap &descHeap);
 
-        Block allocate(size_t size);
+        void setup(size_t count);
+
+        Block allocate(size_t size, size_t alignment = 1);
         void deallocate(Block block);
 
         ID3D12Heap *heap(size_t index);
+        std::pair<ID3D12Resource *, size_t> resolve(void *ptr);
+
+        D3D12_GPU_DESCRIPTOR_HANDLE descriptorTable() const;
 
     private:
-        std::vector<ReleasePtr<ID3D12Heap>> mHeaps;
+        struct Heap {
+            ReleasePtr<ID3D12Heap> mHeap;
+            ReleasePtr<ID3D12Resource> mReservedResource;
+        };
+        std::vector<Heap> mHeaps;
+        OffsetPtr mDescriptors;
+        DirectX12DescriptorHeap &mDescriptorHeap;
     };
 
     struct DirectX12MappedHeapAllocator {
@@ -26,7 +37,7 @@ namespace Render {
 
         DirectX12MappedHeapAllocator(D3D12_HEAP_TYPE type);
 
-        Block allocate(size_t size);
+        Block allocate(size_t size, size_t alignment = 1);
         void deallocate(Block block);
 
         std::pair<ID3D12Resource *, size_t> resolve(void *ptr);

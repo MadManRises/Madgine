@@ -23,12 +23,6 @@ namespace Render {
         void reset();
         void setData(const ByteBuffer &data);
         void resize(size_t size);
-        WritableByteBuffer mapData(size_t offset = 0, size_t size = 0);
-        template <typename T>
-        auto mapData(size_t offset = 0, size_t size = 0)
-        {
-            return mapData(offset, size).cast<T>();
-        }
 
         void setSubData(unsigned int offset, const ByteBuffer &data);
 

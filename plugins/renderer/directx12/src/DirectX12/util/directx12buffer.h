@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Generic/allocator/concepts.h"
+
 namespace Engine {
 namespace Render {
 
@@ -19,21 +21,15 @@ namespace Render {
         void bindVertex(ID3D12GraphicsCommandList *commandList, UINT stride, size_t index = 0) const;
         void bindIndex(ID3D12GraphicsCommandList *commandList) const;
 
-        void reset(size_t size = 0);
+        void reset();
         void setData(const ByteBuffer &data);
         
-
-        WritableByteBuffer mapData(size_t size);
-        WritableByteBuffer mapData();
-
-        //D3D12_GPU_DESCRIPTOR_HANDLE handle();
+        ID3D12Resource *resource() const;
 
         D3D12_GPU_VIRTUAL_ADDRESS gpuAddress() const;
 
     private:
-        D3D12_GPU_VIRTUAL_ADDRESS mAddress = 0;
-        size_t mSize = 0;
-        bool mIsPersistent;
+        Block mBlock;
     };
 
 }

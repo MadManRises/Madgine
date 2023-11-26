@@ -124,7 +124,8 @@ namespace Render {
             if (interpretData->mMesh.resource() != mesh)
                 interpretData->mMesh = mesh;
             if (interpretData->mMesh.available()) {
-                pipeline->renderMesh(target, interpretData->mMesh);
+                pipeline->bindMesh(target, interpretData->mMesh);
+                pipeline->render(target);
             }
         }
 

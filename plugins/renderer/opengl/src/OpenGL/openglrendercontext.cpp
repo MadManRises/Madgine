@@ -568,6 +568,8 @@ namespace Render {
 
     OpenGLRenderContext::OpenGLRenderContext(Threading::TaskQueue *queue)
         : Component(queue)
+        , mBufferAllocator(mBufferMemoryHeap)
+        , mTempAllocator(mTempMemoryHeap)
     {
     }
 
@@ -625,6 +627,26 @@ namespace Render {
     bool OpenGLRenderContext::supportsMultisampling() const
     {
         return checkMultisampling();
+    }
+    
+    template <size_t I = 1>
+    struct ResourceBlockBuffer {
+        size_t mSize;
+        const Texture *mTexture[I];
+    };
+
+    UniqueResourceBlock OpenGLRenderContext::createResourceBlock(std::vector<const Texture *> textures)
+    {        
+        std::unique_ptr<OpenGLResourceBlock<4>> ptr = std::make_unique<OpenGLResourceBlock<4>>();
+        ptr->mSize = textures.size();
+        for (size_t i = 0; i < textures.size(); ++i) {
+            ptr->mResources[i].mHandle = textures[i]->handle();
+            ptr->mResources[i].mTarget = static_cast<const OpenGLTexture *>(textures[i])->target();
+        }
+
+        UniqueResourceBlock block;
+        block.setupAs<std::unique_ptr<OpenGLResourceBlock<4>>>() = std::move(ptr);
+        return block;
     }
 
     static constexpr GLenum vTypes[] = {

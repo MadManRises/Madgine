@@ -13,6 +13,9 @@ namespace Render {
         virtual void beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const override;
         virtual void endIteration() const override;
 
+        virtual void beginFrame() override;
+        virtual void endFrame() override;
+
         virtual void clearDepthBuffer() override;
 
         virtual void setRenderSpace(const Rect2i &space) override;

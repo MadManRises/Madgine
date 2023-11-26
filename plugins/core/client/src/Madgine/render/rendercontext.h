@@ -10,6 +10,8 @@
 
 #include "Madgine/render/buffer.h"
 
+#include "Madgine/render/resourceblock.h"
+
 #include "Generic/bytebuffer.h"
 
 namespace Engine {
@@ -66,6 +68,8 @@ namespace Render {
         {
             return mapBufferImpl(buffer).template cast<T>();
         }
+
+        virtual UniqueResourceBlock createResourceBlock(std::vector<const Texture*> textures) { throw 0; };
 
     protected:
         virtual GPUBuffer<void> allocateBufferImpl(size_t size) { throw 0; };

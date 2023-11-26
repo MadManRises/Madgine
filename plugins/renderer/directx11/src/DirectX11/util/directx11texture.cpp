@@ -7,7 +7,7 @@
 namespace Engine {
 namespace Render {
 
-    DirectX11Texture::DirectX11Texture(TextureType type, DataFormat format, UINT bind, size_t width, size_t height, size_t samples, const ByteBuffer &data)
+    DirectX11Texture::DirectX11Texture(TextureType type, TextureFormat format, UINT bind, size_t width, size_t height, size_t samples, const ByteBuffer &data)
         : Texture(type, format, { static_cast<int>(width), static_cast<int>(height) })
         , mBind(bind)
         , mSamples(samples)
@@ -104,7 +104,7 @@ namespace Render {
         DX11_LOG("Created SRV: " << reinterpret_cast<ID3D11ShaderResourceView *>(mTextureHandle));
     }
 
-    DirectX11Texture::DirectX11Texture(TextureType type, DataFormat format, UINT bind, size_t samples)
+    DirectX11Texture::DirectX11Texture(TextureType type, TextureFormat format, UINT bind, size_t samples)
         : Texture(type, format)
         , mBind(bind)
         , mSamples(samples)

@@ -247,6 +247,13 @@ namespace Tools {
             }
         };
 
+        unsigned char *pixels;
+        int width, height;
+        io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+        co_await mFontTexture.create(Render::TextureType_2D, Render::FORMAT_RGBA8, { width, height }, { pixels, static_cast<size_t>(width * height * 4) });
+        
+        io.Fonts->SetTexID(mFontTexture->resource());
+
         ImGui::FilesystemPickerOptions *filepickerOptions = ImGui::GetFilesystemPickerOptions();
 
         filepickerOptions->mIconLookup = [](const Filesystem::Path &path, bool isDir) {
@@ -324,6 +331,15 @@ namespace Tools {
         }
     }
 
+    void ClientImRoot::setup(Render::RenderTarget *target)
+    {
+        if (mWindow.getRenderWindow() == target) {
+            mPipeline.create({ .vs = "imgui", .ps = "imgui", .bufferSizes = { sizeof(Matrix4) }, .depthChecking = false });
+        }
+
+        MainWindowComponentBase::setup(target);
+    }
+
     void ClientImRoot::render(Render::RenderTarget *target, size_t iteration)
     {
         PROFILE();
@@ -362,6 +378,92 @@ namespace Tools {
             renderViewport(target, main_viewport);
         } else {
             renderViewport(target, mViewportMappings.at(target));
+        }
+    }
+
+    void ClientImRoot::renderViewport(Render::RenderTarget *target, ImGuiViewport *vp)
+    {
+        if (!mPipeline.available())
+            return;
+
+        ImDrawData *draw_data = vp->DrawData;
+
+        {
+            auto mvp = mPipeline->mapParameters<Matrix4>(0);
+
+            float L = draw_data->DisplayPos.x;
+            float R = draw_data->DisplayPos.x + draw_data->DisplaySize.x;
+            float T = draw_data->DisplayPos.y;
+            float B = draw_data->DisplayPos.y + draw_data->DisplaySize.y;
+            *mvp.mData = target->getClipSpaceMatrix() * Matrix4 {
+                2.0f / (R - L), 0.0f, 0.0f, (R + L) / (L - R),
+                0.0f, 2.0f / (T - B), 0.0f, (T + B) / (B - T),
+                0.0f, 0.0f, 0.5f, 0.5f,
+                0.0f, 0.0f, 0.0f, 1.0f
+            };
+        }
+
+        using Vertex = Compound<Render::VertexPos2, Render::VertexColor, Render::VertexUV>;
+
+        size_t vertexBufferCount = 0;
+        size_t indexBufferCount = 0;
+        for (int n = 0; n < draw_data->CmdListsCount; n++) {
+            const ImDrawList *cmd_list = draw_data->CmdLists[n];
+            vertexBufferCount += cmd_list->VtxBuffer.Size;
+            indexBufferCount += cmd_list->IdxBuffer.Size;
+        }
+
+        {
+            auto vertices = mPipeline->mapVertices<Vertex[]>(target, vertexBufferCount);
+            auto indices = mPipeline->mapIndices(target, indexBufferCount);
+
+            Vertex *vertexTarget = vertices.mData;
+            uint32_t *indexTarget = indices.mData;
+            for (int n = 0; n < draw_data->CmdListsCount; n++) {
+                const ImDrawList *cmd_list = draw_data->CmdLists[n];
+                std::ranges::transform(cmd_list->VtxBuffer, vertexTarget, [](const ImDrawVert &v) {
+                    Vertex result;
+                    result.mPos2 = v.pos;
+                    result.mColor = ImGui::ColorConvertU32ToFloat4(v.col);
+                    result.mUV = v.uv;
+                    return result;
+                });
+                std::ranges::copy(cmd_list->IdxBuffer, indexTarget);
+                vertexTarget += cmd_list->VtxBuffer.Size;
+                indexTarget += cmd_list->IdxBuffer.Size;
+            }
+        }
+
+        mPipeline->setGroupSize(3);
+
+        int global_vtx_offset = 0;
+        int global_idx_offset = 0;
+        ImVec2 clip_off = draw_data->DisplayPos;
+        for (int n = 0; n < draw_data->CmdListsCount; n++) {
+            const ImDrawList *cmd_list = draw_data->CmdLists[n];
+            for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++) {
+                const ImDrawCmd *pcmd = &cmd_list->CmdBuffer[cmd_i];
+                if (pcmd->UserCallback != NULL) {
+                    // User callback, registered via ImDrawList::AddCallback()
+                    // (ImDrawCallback_ResetRenderState is a special callback value used by the user to request the renderer to reset render state.)
+                    if (pcmd->UserCallback == ImDrawCallback_ResetRenderState)
+                        throw 0;
+                    else
+                        pcmd->UserCallback(cmd_list, pcmd);
+                } else {
+                    // Apply Scissor, Bind texture, Draw
+                    const Rect2i r = { { (int)(pcmd->ClipRect.x - clip_off.x), (int)(pcmd->ClipRect.y - clip_off.y) }, { (int)(pcmd->ClipRect.z - pcmd->ClipRect.x), (int)(pcmd->ClipRect.w - pcmd->ClipRect.y) } };
+                    if (r.bottomRight().x > r.mTopLeft.x && r.bottomRight().y > r.mTopLeft.y) {
+                        ImTextureID tex = pcmd->GetTexID();
+                        mPipeline->bindResources(target, 2, reinterpret_cast<Render::ResourceBlock &>(tex));
+
+                        //target->setScissorsRect(r);
+                        mPipeline->renderRange(target, pcmd->ElemCount, pcmd->VtxOffset + global_vtx_offset, pcmd->IdxOffset + global_idx_offset);
+                    }
+                }
+            }
+            global_idx_offset += cmd_list->IdxBuffer.Size;
+            global_vtx_offset += cmd_list->VtxBuffer.Size;
         }
     }
 

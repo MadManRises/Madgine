@@ -25,8 +25,6 @@ namespace Render {
 
         VkSurfaceKHR surface() const;
 
-        virtual void blit(RenderTarget *source) override;
-
     protected:
         void create(const Vector2i &size);
 
@@ -35,6 +33,8 @@ namespace Render {
 
         uint64_t mResizeFence;
         Vector2i mResizeTarget;
+
+        VulkanPtr<VkSemaphore, &vkDestroySemaphore> mImageSemaphore;
 
         VkSurfaceCapabilitiesKHR mSurfaceCapabilities;
         VulkanPtr3<VkSurfaceKHR, &vkDestroySurfaceKHR> mSurface;

@@ -81,7 +81,7 @@ namespace Render {
         return mScene;
     }
 
-    std::vector<TextureDescriptor> SceneMainWindowComponent::depthTextures()
+    std::vector<const Texture*> SceneMainWindowComponent::depthTextures()
     {
         return { mPointShadowMaps[0]->depthTexture(), mPointShadowMaps[1]->depthTexture() };
     }

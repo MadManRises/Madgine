@@ -15,10 +15,11 @@ struct BucketAllocatorImpl {
     {
     }
 
-    Block allocate(size_t size)
+    Block allocate(size_t size, size_t alignment = 1)
     {
         return TupleUnpacker::select(
-            mBuckets, [size](auto &bucket) {
+            mBuckets, [size, alignment](auto &bucket) {
+                assert(alignment == 1);
                 return bucket.allocate(size);
             },
             BucketStrategy::select(size));

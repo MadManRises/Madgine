@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Madgine/render/texturedescriptor.h"
+#include "Madgine/render/resourceblock.h"
 
 #include "Madgine/imageloader/imageloader.h"
 
@@ -13,7 +14,7 @@ namespace Widgets {
     };
 
     struct TextureSettings {
-        Render::TextureDescriptor mTexture;
+        Render::ResourceBlock mResource;
         TextureFlags mFlags = 0;
 
         auto operator<=>(const TextureSettings &other) const = default;

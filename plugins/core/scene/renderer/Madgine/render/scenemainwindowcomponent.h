@@ -24,7 +24,7 @@ namespace Render {
 
         Scene::SceneManager *scene();
 
-        std::vector<TextureDescriptor> depthTextures();
+        std::vector<const Texture*> depthTextures();
 
         Render::RenderTarget *pointShadowTarget(size_t index);
         Render::RenderData *data();

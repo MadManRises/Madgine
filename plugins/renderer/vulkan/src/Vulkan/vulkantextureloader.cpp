@@ -36,7 +36,7 @@ namespace Render {
         tex.reset();
     }
 
-    bool VulkanTextureLoader::create(Texture &tex, TextureType type, DataFormat format)
+    bool VulkanTextureLoader::create(Texture &tex, TextureType type, TextureFormat format)
     {
         static_cast<VulkanTexture &>(tex) = VulkanTexture { type, false, format };
 

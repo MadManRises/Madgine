@@ -89,19 +89,30 @@ namespace Render {
 
     void OpenGLRenderWindow::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
-        makeCurrent(getSurface(), mContext);
-
-#if OPENGL_ES
-        sCurrentSSBOBuffer = &*mSSBOBuffer;
-#endif
-
+        
         OpenGLRenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);        
 
     }
 
     void OpenGLRenderWindow::endIteration() const
     {
-        OpenGLRenderTarget::endIteration();
+        OpenGLRenderTarget::endIteration();        
+    }
+
+    void OpenGLRenderWindow::beginFrame()
+    {
+        makeCurrent(getSurface(), mContext);
+
+#if OPENGL_ES
+        sCurrentSSBOBuffer = &*mSSBOBuffer;
+#endif
+
+        OpenGLRenderTarget::beginFrame();
+    }
+
+    void OpenGLRenderWindow::endFrame()
+    {
+        OpenGLRenderTarget::endFrame();
 
         swapBuffers(getSurface(), mContext);
     }

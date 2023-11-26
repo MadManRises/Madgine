@@ -45,7 +45,7 @@ namespace Render {
         if (!mPipeline.available())
             return;
 
-        mPipeline->bindTextures(target, { mInput->texture(mInputIndex), target->texture(1) });
+        mPipeline->bindResources(target, 0, { /* mInput->texture(mInputIndex), target->texture(1)*/ });
 
         mPipeline->mapParameters<BloomData>(0)->exposure = mExposure;
 

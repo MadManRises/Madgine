@@ -13,28 +13,32 @@ namespace Render {
     VulkanPipelineInstance::VulkanPipelineInstance(const PipelineConfiguration &config, const VulkanPipeline *pipeline)
         : PipelineInstance(config)
         , mPipeline(pipeline)
+        , mConstantBufferSizes(config.bufferSizes)
+        , mDepthChecking(config.depthChecking)
     {
-        mConstantBuffers.resize(config.bufferSizes.size());
-        for (size_t i = 0; i < config.bufferSizes.size(); ++i) {
-            if (config.bufferSizes[i] > 0)
-                mConstantBuffers[i] = ByteBuffer { nullptr, config.bufferSizes[i] };
-        }
+        mConstantGPUBufferOffsets.resize(3);
+
+        VulkanRenderContext &context = VulkanRenderContext::getSingleton();
 
         VkDescriptorSetAllocateInfo allocInfo {};
         allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        allocInfo.descriptorPool = VulkanRenderContext::getSingleton().mDescriptorPool;
+        allocInfo.descriptorPool = context.mDescriptorPool;
         allocInfo.descriptorSetCount = 1;
-        allocInfo.pSetLayouts = &std::as_const(VulkanRenderContext::getSingleton().mDescriptorSetLayouts[0]);
+        allocInfo.pSetLayouts = &std::as_const(context.mUBODescriptorSetLayout);
         VkResult result = vkAllocateDescriptorSets(GetDevice(), &allocInfo, &mUboDescriptorSet);
         VK_CHECK(result);
 
-        for (size_t i = 0; i < std::min(size_t { 4 }, mConstantBuffers.size()); ++i) {
-            if (!mConstantBuffers[i])
+        context.mTempAllocator.allocate(1);
+        Block block = context.mTempAllocator.parent().getBlock();
+        VkBuffer buffer = context.mTempMemoryHeap.resolve(block.mAddress).first;
+
+        for (size_t i = 0; i < std::min(config.bufferSizes.size(), size_t { 3 }); ++i) {
+            if (config.bufferSizes[i] == 0)
                 continue;
             VkDescriptorBufferInfo bufferInfo {};
-            bufferInfo.buffer = mConstantBuffers[i].buffer();
+            bufferInfo.buffer = buffer;
             bufferInfo.offset = 0;
-            bufferInfo.range = mConstantBuffers[i].size();
+            bufferInfo.range = config.bufferSizes[i];
 
             VkWriteDescriptorSet descriptorWrite {};
             descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -51,6 +55,34 @@ namespace Render {
 
             vkUpdateDescriptorSets(GetDevice(), 1, &descriptorWrite, 0, nullptr);
         }
+
+        allocInfo.pSetLayouts = &std::as_const(context.mTempBufferDescriptorSetLayout);
+        result = vkAllocateDescriptorSets(GetDevice(), &allocInfo, &mTempBufferDescriptorSet);
+        VK_CHECK(result);
+
+        for (size_t i = 0; i < 1; ++i) {
+            VkDescriptorBufferInfo bufferInfo {};
+            bufferInfo.buffer = buffer;
+            bufferInfo.offset = 0;
+            bufferInfo.range = 64;
+            LOG_WARNING_ONCE("Find solution for dynamically sized buffer views in Vulkan");
+
+            VkWriteDescriptorSet descriptorWrite {};
+            descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrite.dstSet = mTempBufferDescriptorSet;
+            descriptorWrite.dstBinding = i;
+            descriptorWrite.dstArrayElement = 0;
+
+            descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+            descriptorWrite.descriptorCount = 1;
+
+            descriptorWrite.pBufferInfo = &bufferInfo;
+            descriptorWrite.pImageInfo = nullptr; // Optional
+            descriptorWrite.pTexelBufferView = nullptr; // Optional
+
+            vkUpdateDescriptorSets(GetDevice(), 1, &descriptorWrite, 0, nullptr);
+        }
+
     }
 
     VulkanPipelineInstance::~VulkanPipelineInstance()
@@ -66,106 +98,171 @@ namespace Render {
 
         VkPipeline pipeline = mPipeline->ptr()[format][groupSize - 1][samplesBits - 1];
         if (!pipeline) {
-            pipeline = mPipeline->get(format, groupSize, samples, mInstanceDataSize, renderpass);
+            pipeline = mPipeline->get(format, groupSize, samples, mInstanceDataSize, renderpass, mDepthChecking);
             if (!pipeline)
                 return false;
         }
         vkCmdBindPipeline(commandList, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 
-        uint32_t offsets[4] {};
-        for (size_t i = 0; i < std::min(size_t { 4 }, mConstantBuffers.size()); ++i) {
-            if (!mConstantBuffers[i])
-                continue;
-            offsets[i] = mConstantBuffers[i].address().offset();
-        }
-        vkCmdBindDescriptorSets(commandList, VK_PIPELINE_BIND_POINT_GRAPHICS, VulkanRenderContext::getSingleton().mPipelineLayout, 0, 1, &mUboDescriptorSet, 4, offsets);
+        vkCmdBindDescriptorSets(commandList, VK_PIPELINE_BIND_POINT_GRAPHICS, VulkanRenderContext::getSingleton().mPipelineLayout, 0, 1, &mUboDescriptorSet, mConstantGPUBufferOffsets.size(), mConstantGPUBufferOffsets.data());
+
+        mTempGPUAddresses.resize(1);
+        vkCmdBindDescriptorSets(commandList, VK_PIPELINE_BIND_POINT_GRAPHICS, VulkanRenderContext::getSingleton().mPipelineLayout, 2, 1, &mTempBufferDescriptorSet, mTempGPUAddresses.size(), mTempGPUAddresses.data());
 
         return true;
     }
 
     WritableByteBuffer VulkanPipelineInstance::mapParameters(size_t index)
     {
-        return mConstantBuffers[index].mapData();
+        Block block = VulkanRenderContext::getSingleton().mTempAllocator.allocate(mConstantBufferSizes[index], 256);
+        mConstantGPUBufferOffsets[index] = VulkanRenderContext::getSingleton().mTempMemoryHeap.resolve(block.mAddress).second;
+
+        return { block.mAddress, block.mSize };
     }
 
-    void VulkanPipelineInstance::renderMesh(RenderTarget *target, const GPUMeshData *m) const
+    void VulkanPipelineInstance::render(RenderTarget *_target) const
+    {
+        VulkanRenderTarget *target = static_cast<VulkanRenderTarget *>(_target);
+        VkCommandBuffer commandList = target->mCommandList;
+
+        if (!bind(commandList, mFormat, mGroupSize, target->samples(), target->mRenderPass))
+            return;
+
+        if (mHasIndices) {
+            vkCmdDrawIndexed(commandList, mElementCount, 1, 0, 0, 0);
+        } else {
+            vkCmdDraw(commandList, mElementCount, 1, 0, 0);
+        }
+
+        mHasIndices = false;
+    }
+
+    void VulkanPipelineInstance::renderRange(RenderTarget *_target, size_t elementCount, size_t vertexOffset, IndexType<size_t> indexOffset) const
+    {
+        VulkanRenderTarget *target = static_cast<VulkanRenderTarget *>(_target);
+        VkCommandBuffer commandList = target->mCommandList;
+
+        if (!bind(commandList, mFormat, mGroupSize, target->samples(), target->mRenderPass))
+            return;
+
+        if (mHasIndices) {
+            assert(indexOffset);
+            vkCmdDrawIndexed(commandList, elementCount, 1, indexOffset, vertexOffset, 0);
+        } else {
+            vkCmdDraw(commandList, elementCount, 1, vertexOffset, 0);
+        }
+    }
+
+    void VulkanPipelineInstance::renderInstanced(RenderTarget *_target, size_t count) const
+    {
+        VulkanRenderTarget *target = static_cast<VulkanRenderTarget *>(_target);
+        VkCommandBuffer commandList = target->mCommandList;
+
+        if (!bind(commandList, mFormat, mGroupSize, target->samples(), target->mRenderPass))
+            return;
+
+        if (mHasIndices) {
+            vkCmdDrawIndexed(commandList, mElementCount, count, 0, 0, 0);
+        } else {
+            vkCmdDraw(commandList, mElementCount, count, 0, 0);
+        }
+
+        mHasIndices = false;
+    }
+
+    WritableByteBuffer VulkanPipelineInstance::mapTempBuffer(size_t space, size_t size, size_t count) const
+    {
+        assert(space >= 1);
+        if (mTempGPUAddresses.size() <= space - 1)
+            mTempGPUAddresses.resize(space);
+
+        Block block = VulkanRenderContext::getSingleton().mTempAllocator.allocate(size * count, 256);
+        mTempGPUAddresses[space - 1] = VulkanRenderContext::getSingleton().mTempMemoryHeap.resolve(block.mAddress).second;
+
+        return { block.mAddress, block.mSize };
+    }
+
+    void VulkanPipelineInstance::bindMesh(RenderTarget *target, const GPUMeshData *m, const ByteBuffer &instanceData) const
     {
         VkCommandBuffer commandList = static_cast<VulkanRenderTarget *>(target)->mCommandList;
         VkRenderPass renderpass = static_cast<VulkanRenderTarget *>(target)->mRenderPass;
 
         const VulkanMeshData *mesh = static_cast<const VulkanMeshData *>(m);
 
-        if (!bind(commandList, mesh->mFormat, mesh->mGroupSize, static_cast<VulkanRenderTarget *>(target)->samples(), renderpass))
-            return;
+        mFormat = mesh->mFormat;
+        mGroupSize = mesh->mGroupSize;
 
         mesh->mVertices.bindVertex(commandList);
+
+        if (instanceData.mSize > 0) {
+            Block block = VulkanRenderContext::getSingleton().mTempAllocator.allocate(instanceData.mSize);
+            auto [buffer, offset] = VulkanRenderContext::getSingleton().mTempMemoryHeap.resolve(block.mAddress);
+
+            std::memcpy(block.mAddress, instanceData.mData, instanceData.mSize);
+
+            vkCmdBindVertexBuffers(commandList, 1, 1, &buffer, &offset);
+        }
 
         VulkanRenderContext::getSingleton().mConstantBuffer.bindVertex(commandList, 2);
 
         if (mesh->mIndices) {
             mesh->mIndices.bindIndex(commandList);
-            vkCmdDrawIndexed(commandList, mesh->mElementCount, 1, 0, 0, 0);
+            mHasIndices = true;
         } else {
-            vkCmdDraw(commandList, mesh->mElementCount, 1, 0, 0);
+            mHasIndices = false;
         }
+
+        mElementCount = mesh->mElementCount;
     }
 
-    void VulkanPipelineInstance::renderMeshInstanced(RenderTarget *target, size_t count, const GPUMeshData *m, const ByteBuffer &instanceData) const
+    WritableByteBuffer VulkanPipelineInstance::mapVertices(RenderTarget *_target, VertexFormat format, size_t count) const
     {
-        assert(instanceData.mSize > 0);
-        assert(mInstanceDataSize * count == instanceData.mSize);
+        VulkanRenderTarget *target = static_cast<VulkanRenderTarget *>(_target);
+        VkCommandBuffer commandList = target->mCommandList;
 
-        VkCommandBuffer commandList = static_cast<VulkanRenderTarget *>(target)->mCommandList;
-        VkRenderPass renderpass = static_cast<VulkanRenderTarget *>(target)->mRenderPass;
+        Block block = VulkanRenderContext::getSingleton().mTempAllocator.allocate(format.stride() * count);
+        auto [buffer, offset] = VulkanRenderContext::getSingleton().mTempMemoryHeap.resolve(block.mAddress);
 
-        const VulkanMeshData *mesh = static_cast<const VulkanMeshData *>(m);
-
-        if (!bind(commandList, mesh->mFormat, mesh->mGroupSize, static_cast<VulkanRenderTarget *>(target)->samples(), renderpass))
-            return;
-
-        mesh->mVertices.bindVertex(commandList);
+        vkCmdBindVertexBuffers(commandList, 0, 1, &buffer, &offset);
 
         VulkanRenderContext::getSingleton().mConstantBuffer.bindVertex(commandList, 2);
 
-        VulkanBuffer instanceBuffer;
-        {
-            auto target = instanceBuffer.mapData(instanceData.mSize);
-            std::memcpy(target.mData, instanceData.mData, instanceData.mSize);
-        }
-        instanceBuffer.bindVertex(commandList, 1);
+        mFormat = format;
+        mElementCount = count;
 
-        if (mesh->mIndices) {
-            mesh->mIndices.bindIndex(commandList);
-            vkCmdDrawIndexed(commandList, mesh->mElementCount, count, 0, 0, 0);
-        } else {
-            vkCmdDraw(commandList, mesh->mElementCount, count, 0, 0);
-        }
+        return { block.mAddress, block.mSize };
     }
 
-    void VulkanPipelineInstance::bindTextures(RenderTarget *target, const std::vector<TextureDescriptor> &tex, size_t offset) const
+    ByteBufferImpl<uint32_t> VulkanPipelineInstance::mapIndices(RenderTarget *_target, size_t count) const
     {
-        for (size_t i = 0; i < tex.size(); ++i) {
-            if (tex[i].mTextureHandle) {
-                VkDescriptorImageInfo imageInfo {};
-                imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                imageInfo.imageView = reinterpret_cast<VkImageView>(tex[i].mTextureHandle);
-                imageInfo.sampler = VK_NULL_HANDLE;
+        VulkanRenderTarget *target = static_cast<VulkanRenderTarget *>(_target);
 
-                VkWriteDescriptorSet descriptorWrite {};
-                descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                descriptorWrite.dstSet = VK_NULL_HANDLE;
-                descriptorWrite.dstBinding = offset + i;
-                descriptorWrite.dstArrayElement = 0;
+        Block block = VulkanRenderContext::getSingleton().mTempAllocator.allocate(sizeof(uint32_t) * count);
+        auto [buffer, offset] = VulkanRenderContext::getSingleton().mTempMemoryHeap.resolve(block.mAddress);
 
-                descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-                descriptorWrite.descriptorCount = 1;
+        vkCmdBindIndexBuffer(target->mCommandList, buffer, offset, VK_INDEX_TYPE_UINT32);
 
-                descriptorWrite.pBufferInfo = nullptr;
-                descriptorWrite.pImageInfo = &imageInfo; // Optional
-                descriptorWrite.pTexelBufferView = nullptr; // Optional
+        mHasIndices = true;
+        mElementCount = count;
 
-                vkCmdPushDescriptorSetKHR(static_cast<VulkanRenderTarget *>(target)->mCommandList, VK_PIPELINE_BIND_POINT_GRAPHICS, VulkanRenderContext::getSingleton().mPipelineLayout, 1, 1, &descriptorWrite);
-            }
+        return { static_cast<uint32_t *>(block.mAddress), block.mSize };
+    }
+
+    void VulkanPipelineInstance::setGroupSize(size_t groupSize) const
+    {
+        mGroupSize = groupSize;
+    }
+
+    void VulkanPipelineInstance::bindResources(RenderTarget *_target, size_t space, ResourceBlock block) const
+    {
+        if (block) {
+            VulkanRenderTarget *target = static_cast<VulkanRenderTarget *>(_target);
+            VkCommandBuffer commandList = target->mCommandList;
+
+            const VkDescriptorSet set = block;
+
+            assert(space > 1);
+            vkCmdBindDescriptorSets(commandList, VK_PIPELINE_BIND_POINT_GRAPHICS, target->context()->mPipelineLayout, 1 + space, 1, &set, 0, nullptr);
         }
     }
 

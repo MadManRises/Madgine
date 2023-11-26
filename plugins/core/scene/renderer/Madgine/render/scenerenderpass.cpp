@@ -27,7 +27,6 @@
 #include "shaders/scene.sl"
 #include "Madgine/render/shadinglanguage/sl_support_end.h"
 
-
 #include "Meta/keyvalue/metatable_impl.h"
 
 METATABLE_BEGIN(Engine::Render::SceneRenderPass)
@@ -56,16 +55,20 @@ namespace Render {
     void SceneRenderPass::setup(RenderTarget *target)
     {
         mShadowMap = target->context()->createRenderTexture({ 2048, 2048 }, { .mName = "ShadowMap", .mType = TextureType_2DMultiSample, .mCreateDepthBufferView = true, .mSamples = 4, .mTextureCount = 0 });
-        
+
         mShadowMap->addRenderPass(&mShadowPass);
 
-        mPipeline.create({ .vs = "scene", .ps = "scene", .bufferSizes = { sizeof(ScenePerApplication), sizeof(ScenePerFrame), sizeof(ScenePerObject) }, .instanceDataSize = sizeof(SceneInstanceData) });
+        mPipeline.create({ .vs = "scene", .ps = "scene", .bufferSizes = { sizeof(ScenePerApplication), sizeof(ScenePerFrame), sizeof(ScenePerObject) }, .instanceDataSize = 0 });
 
         addDependency(&mData);
         addDependency(mShadowMap.get());
         addDependency(mData.mScene.pointShadowTarget(0));
         addDependency(mData.mScene.pointShadowTarget(1));
         addDependency(mData.mScene.data());
+
+        std::vector<const Texture *> textures = mData.mScene.depthTextures();
+        textures.insert(textures.begin(), mShadowMap->depthTexture());
+        mShadowResourceBlock = target->context()->createResourceBlock(textures);
     }
 
     void SceneRenderPass::shutdown()
@@ -135,12 +138,11 @@ namespace Render {
             }
         }
 
-        mPipeline->bindTextures(target, { mShadowMap->depthTexture() }, 2);
-        mPipeline->bindTextures(target, mData.mScene.depthTextures(), 3);
+        mPipeline->bindResources(target, 3, mShadowResourceBlock);
 
         for (const std::pair<const std::tuple<const GPUMeshData *, const GPUMeshData::Material *>, std::vector<LitSceneRenderData::ObjectData>> &instance : mData.mInstances) {
             const GPUMeshData *meshData = std::get<0>(instance.first);
-            const GPUMeshData::Material *material = std::get<1>(instance.first);            
+            const GPUMeshData::Material *material = std::get<1>(instance.first);
 
             {
                 auto perObject = mPipeline->mapParameters<ScenePerObject>(2);
@@ -149,7 +151,7 @@ namespace Render {
 
                 perObject->hasDistanceField = false;
 
-                perObject->hasTexture = material && material->mDiffuseTexture.available() && material->mDiffuseTexture->handle() != 0;
+                perObject->hasTexture = material && material->mResourceBlock;
 
                 perObject->diffuseColor = material ? material->mDiffuseColor : Vector4::UNIT_SCALE;
 
@@ -158,20 +160,25 @@ namespace Render {
                 perObject->shininess = 32.0f;
             }
 
-            mPipeline->bindTextures(target, { material && material->mDiffuseTexture.available() ? material->mDiffuseTexture->descriptor() : TextureDescriptor {}, material && material->mEmissiveTexture.available() ? material->mEmissiveTexture->descriptor() : TextureDescriptor {} });
+            if (material)
+                mPipeline->bindResources(target, 2, material->mResourceBlock);
 
-            std::vector<SceneInstanceData> instanceData;
+            {
+                auto instanceData = mPipeline->mapTempBuffer<SceneInstanceData[]>(1, instance.second.size());
 
-            std::ranges::transform(instance.second, std::back_inserter(instanceData), [&](const LitSceneRenderData::ObjectData &o) {
-                Matrix4 mv = v * o.mTransform;
-                return SceneInstanceData {
-                    mv.Transpose(),
-                    mv.Inverse() /*.Transpose().Transpose()*/ /*,
-                    o.mBones*/
-                };
-            });
+                std::ranges::transform(instance.second, instanceData.mData, [&](const LitSceneRenderData::ObjectData &o) {
+                    Matrix4 mv = v * o.mTransform;
+                    return SceneInstanceData {
+                        mv.Transpose(),
+                        mv.Inverse() /*.Transpose().Transpose()*/,
+                        o.mBones
+                    };
+                });
+            }
 
-            mPipeline->renderMeshInstanced(target, std::move(instanceData), meshData);
+            mPipeline->bindMesh(target, meshData);
+            mPipeline->renderInstanced(target, instance.second.size());
+            //mPipeline->renderMeshInstanced(target, std::move(instanceData), meshData);
         }
     }
 

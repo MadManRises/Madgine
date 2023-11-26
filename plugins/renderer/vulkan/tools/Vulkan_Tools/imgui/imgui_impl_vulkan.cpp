@@ -68,71 +68,71 @@
 
 // Visual Studio warnings
 #ifdef _MSC_VER
-#pragma warning (disable: 4127) // condition expression is constant
+#    pragma warning(disable : 4127) // condition expression is constant
 #endif
 
 // Reusable buffers used for rendering 1 current in-flight frame, for ImGui_ImplVulkan_RenderDrawData()
 // [Please zero-clear before use!]
-struct ImGui_ImplVulkanH_FrameRenderBuffers
-{
-    VkDeviceMemory      VertexBufferMemory;
-    VkDeviceMemory      IndexBufferMemory;
-    VkDeviceSize        VertexBufferSize;
-    VkDeviceSize        IndexBufferSize;
-    VkBuffer            VertexBuffer;
-    VkBuffer            IndexBuffer;
+struct ImGui_ImplVulkanH_FrameRenderBuffers {
+    VkDeviceMemory VertexBufferMemory;
+    VkDeviceMemory IndexBufferMemory;
+    VkDeviceSize VertexBufferSize;
+    VkDeviceSize IndexBufferSize;
+    VkBuffer VertexBuffer;
+    VkBuffer IndexBuffer;
 };
 
 // Each viewport will hold 1 ImGui_ImplVulkanH_WindowRenderBuffers
 // [Please zero-clear before use!]
-struct ImGui_ImplVulkanH_WindowRenderBuffers
-{
-    uint32_t            Index;
-    uint32_t            Count;
-    ImGui_ImplVulkanH_FrameRenderBuffers*   FrameRenderBuffers;
+struct ImGui_ImplVulkanH_WindowRenderBuffers {
+    uint32_t Index;
+    uint32_t Count;
+    ImGui_ImplVulkanH_FrameRenderBuffers *FrameRenderBuffers;
 };
 
 // For multi-viewport support:
 // Helper structure we store in the void* RenderUserData field of each ImGuiViewport to easily retrieve our backend data.
-struct ImGui_ImplVulkan_ViewportData
-{
-    bool                                    WindowOwned;
-    ImGui_ImplVulkanH_Window                Window;             // Used by secondary viewports only
-    ImGui_ImplVulkanH_WindowRenderBuffers   RenderBuffers;      // Used by all viewports
+struct ImGui_ImplVulkan_ViewportData {
+    bool WindowOwned;
+    ImGui_ImplVulkanH_Window Window; // Used by secondary viewports only
+    ImGui_ImplVulkanH_WindowRenderBuffers RenderBuffers; // Used by all viewports
 
-    ImGui_ImplVulkan_ViewportData()         { WindowOwned = false; memset(&RenderBuffers, 0, sizeof(RenderBuffers)); }
-    ~ImGui_ImplVulkan_ViewportData()        { }
+    ImGui_ImplVulkan_ViewportData()
+    {
+        WindowOwned = false;
+        memset(&RenderBuffers, 0, sizeof(RenderBuffers));
+    }
+    ~ImGui_ImplVulkan_ViewportData() { }
 };
 
 // Vulkan data
-struct ImGui_ImplVulkan_Data
-{
-    ImGui_ImplVulkan_InitInfo   VulkanInitInfo;
-    VkRenderPass                RenderPass;
-    VkDeviceSize                BufferMemoryAlignment;
-    VkPipelineCreateFlags       PipelineCreateFlags;
-    VkDescriptorSetLayout       DescriptorSetLayout;
-    VkPipelineLayout            PipelineLayout;
-    VkPipeline                  Pipeline;
-    uint32_t                    Subpass;
-    VkShaderModule              ShaderModuleVert;
-    VkShaderModule              ShaderModuleFrag;
+struct ImGui_ImplVulkan_Data {
+    ImGui_ImplVulkan_InitInfo VulkanInitInfo;
+    VkRenderPass RenderPass;
+    VkDeviceSize BufferMemoryAlignment;
+    VkPipelineCreateFlags PipelineCreateFlags;
+    VkDescriptorSetLayout DescriptorSetLayout;
+    VkPipelineLayout PipelineLayout;
+    VkPipeline Pipeline;
+    uint32_t Subpass;
+    VkShaderModule ShaderModuleVert;
+    VkShaderModule ShaderModuleFrag;
 
     // Font data
-    VkSampler                   FontSampler;
-    VkDeviceMemory              FontMemory;
-    VkImage                     FontImage;
-    VkImageView                 FontView;
-    VkDescriptorSet             FontDescriptorSet;
-    VkDeviceMemory              UploadBufferMemory;
-    VkBuffer                    UploadBuffer;
+    VkSampler FontSampler;
+    VkDeviceMemory FontMemory;
+    VkImage FontImage;
+    VkImageView FontView;
+    VkDescriptorSet FontDescriptorSet;
+    VkDeviceMemory UploadBufferMemory;
+    VkBuffer UploadBuffer;
 
     // Render buffers for main window
     ImGui_ImplVulkanH_WindowRenderBuffers MainWindowRenderBuffers;
 
     ImGui_ImplVulkan_Data()
     {
-        memset((void*)this, 0, sizeof(*this));
+        memset((void *)this, 0, sizeof(*this));
         BufferMemoryAlignment = 256;
     }
 };
@@ -140,13 +140,13 @@ struct ImGui_ImplVulkan_Data
 // Forward Declarations
 bool ImGui_ImplVulkan_CreateDeviceObjects();
 void ImGui_ImplVulkan_DestroyDeviceObjects();
-void ImGui_ImplVulkanH_DestroyFrame(VkDevice device, ImGui_ImplVulkanH_Frame* fd, const VkAllocationCallbacks* allocator);
-void ImGui_ImplVulkanH_DestroyFrameSemaphores(VkDevice device, ImGui_ImplVulkanH_FrameSemaphores* fsd, const VkAllocationCallbacks* allocator);
-void ImGui_ImplVulkanH_DestroyFrameRenderBuffers(VkDevice device, ImGui_ImplVulkanH_FrameRenderBuffers* buffers, const VkAllocationCallbacks* allocator);
-void ImGui_ImplVulkanH_DestroyWindowRenderBuffers(VkDevice device, ImGui_ImplVulkanH_WindowRenderBuffers* buffers, const VkAllocationCallbacks* allocator);
-void ImGui_ImplVulkanH_DestroyAllViewportsRenderBuffers(VkDevice device, const VkAllocationCallbacks* allocator);
-void ImGui_ImplVulkanH_CreateWindowSwapChain(VkPhysicalDevice physical_device, VkDevice device, ImGui_ImplVulkanH_Window* wd, const VkAllocationCallbacks* allocator, int w, int h, uint32_t min_image_count);
-void ImGui_ImplVulkanH_CreateWindowCommandBuffers(VkPhysicalDevice physical_device, VkDevice device, ImGui_ImplVulkanH_Window* wd, uint32_t queue_family, const VkAllocationCallbacks* allocator);
+void ImGui_ImplVulkanH_DestroyFrame(VkDevice device, ImGui_ImplVulkanH_Frame *fd, const VkAllocationCallbacks *allocator);
+void ImGui_ImplVulkanH_DestroyFrameSemaphores(VkDevice device, ImGui_ImplVulkanH_FrameSemaphores *fsd, const VkAllocationCallbacks *allocator);
+void ImGui_ImplVulkanH_DestroyFrameRenderBuffers(VkDevice device, ImGui_ImplVulkanH_FrameRenderBuffers *buffers, const VkAllocationCallbacks *allocator);
+void ImGui_ImplVulkanH_DestroyWindowRenderBuffers(VkDevice device, ImGui_ImplVulkanH_WindowRenderBuffers *buffers, const VkAllocationCallbacks *allocator);
+void ImGui_ImplVulkanH_DestroyAllViewportsRenderBuffers(VkDevice device, const VkAllocationCallbacks *allocator);
+void ImGui_ImplVulkanH_CreateWindowSwapChain(VkPhysicalDevice physical_device, VkDevice device, ImGui_ImplVulkanH_Window *wd, const VkAllocationCallbacks *allocator, int w, int h, uint32_t min_image_count);
+void ImGui_ImplVulkanH_CreateWindowCommandBuffers(VkPhysicalDevice physical_device, VkDevice device, ImGui_ImplVulkanH_Window *wd, uint32_t queue_family, const VkAllocationCallbacks *allocator);
 
 // Vulkan prototypes for use with custom loaders
 // (see description of IMGUI_IMPL_VULKAN_NO_PROTOTYPES in imgui_impl_vulkan.h
@@ -156,81 +156,81 @@ static bool g_FunctionsLoaded = false;
 static bool g_FunctionsLoaded = true;
 #endif
 #ifdef VK_NO_PROTOTYPES
-#define IMGUI_VULKAN_FUNC_MAP(IMGUI_VULKAN_FUNC_MAP_MACRO) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkAllocateCommandBuffers) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkAllocateDescriptorSets) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkAllocateMemory) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkBindBufferMemory) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkBindImageMemory) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdBindDescriptorSets) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdBindIndexBuffer) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdBindPipeline) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdBindVertexBuffers) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdCopyBufferToImage) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdDrawIndexed) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdPipelineBarrier) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdPushConstants) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdSetScissor) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdSetViewport) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateBuffer) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateCommandPool) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateDescriptorSetLayout) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateFence) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateFramebuffer) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateGraphicsPipelines) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateImage) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateImageView) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreatePipelineLayout) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateRenderPass) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateSampler) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateSemaphore) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateShaderModule) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateSwapchainKHR) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroyBuffer) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroyCommandPool) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroyDescriptorSetLayout) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroyFence) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroyFramebuffer) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroyImage) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroyImageView) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroyPipeline) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroyPipelineLayout) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroyRenderPass) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroySampler) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroySemaphore) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroyShaderModule) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroySurfaceKHR) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroySwapchainKHR) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkDeviceWaitIdle) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkFlushMappedMemoryRanges) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkFreeCommandBuffers) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkFreeMemory) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkGetBufferMemoryRequirements) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkGetImageMemoryRequirements) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkGetPhysicalDeviceMemoryProperties) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkGetPhysicalDeviceSurfaceCapabilitiesKHR) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkGetPhysicalDeviceSurfaceFormatsKHR) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkGetPhysicalDeviceSurfacePresentModesKHR) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkGetSwapchainImagesKHR) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkMapMemory) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkUnmapMemory) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkUpdateDescriptorSets) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkGetPhysicalDeviceSurfaceSupportKHR) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkWaitForFences) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdBeginRenderPass) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdEndRenderPass) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkQueuePresentKHR) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkBeginCommandBuffer) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkEndCommandBuffer) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkResetFences) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkQueueSubmit) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkResetCommandPool) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkAcquireNextImageKHR)
+#    define IMGUI_VULKAN_FUNC_MAP(IMGUI_VULKAN_FUNC_MAP_MACRO)                 \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkAllocateCommandBuffers)                  \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkAllocateDescriptorSets)                  \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkAllocateMemory)                          \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkBindBufferMemory)                        \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkBindImageMemory)                         \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdBindDescriptorSets)                   \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdBindIndexBuffer)                      \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdBindPipeline)                         \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdBindVertexBuffers)                    \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdCopyBufferToImage)                    \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdDrawIndexed)                          \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdPipelineBarrier)                      \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdPushConstants)                        \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdSetScissor)                           \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdSetViewport)                          \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateBuffer)                            \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateCommandPool)                       \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateDescriptorSetLayout)               \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateFence)                             \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateFramebuffer)                       \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateGraphicsPipelines)                 \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateImage)                             \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateImageView)                         \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreatePipelineLayout)                    \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateRenderPass)                        \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateSampler)                           \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateSemaphore)                         \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateShaderModule)                      \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCreateSwapchainKHR)                      \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroyBuffer)                           \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroyCommandPool)                      \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroyDescriptorSetLayout)              \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroyFence)                            \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroyFramebuffer)                      \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroyImage)                            \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroyImageView)                        \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroyPipeline)                         \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroyPipelineLayout)                   \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroyRenderPass)                       \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroySampler)                          \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroySemaphore)                        \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroyShaderModule)                     \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroySurfaceKHR)                       \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkDestroySwapchainKHR)                     \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkDeviceWaitIdle)                          \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkFlushMappedMemoryRanges)                 \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkFreeCommandBuffers)                      \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkFreeMemory)                              \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkGetBufferMemoryRequirements)             \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkGetImageMemoryRequirements)              \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkGetPhysicalDeviceMemoryProperties)       \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkGetPhysicalDeviceSurfaceCapabilitiesKHR) \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkGetPhysicalDeviceSurfaceFormatsKHR)      \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkGetPhysicalDeviceSurfacePresentModesKHR) \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkGetSwapchainImagesKHR)                   \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkMapMemory)                               \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkUnmapMemory)                             \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkUpdateDescriptorSets)                    \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkGetPhysicalDeviceSurfaceSupportKHR)      \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkWaitForFences)                           \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdBeginRenderPass)                      \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdEndRenderPass)                        \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkQueuePresentKHR)                         \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkBeginCommandBuffer)                      \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkEndCommandBuffer)                        \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkResetFences)                             \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkQueueSubmit)                             \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkResetCommandPool)                        \
+        IMGUI_VULKAN_FUNC_MAP_MACRO(vkAcquireNextImageKHR)
 
 // Define function pointers
-#define IMGUI_VULKAN_FUNC_DEF(func) static PFN_##func func;
+#    define IMGUI_VULKAN_FUNC_DEF(func) static PFN_##func func;
 IMGUI_VULKAN_FUNC_MAP(IMGUI_VULKAN_FUNC_DEF)
-#undef IMGUI_VULKAN_FUNC_DEF
+#    undef IMGUI_VULKAN_FUNC_DEF
 #endif // VK_NO_PROTOTYPES
 
 //-----------------------------------------------------------------------------
@@ -255,54 +255,62 @@ layout(location = 0) out struct { vec4 Color; vec2 UV; } Out;
 
 void main()
 {
-    Out.Color = aColor;
+    Out.Color = vec4(pow(aColor.xyz, vec3(2.2)), aColor.w);
     Out.UV = aUV;
     gl_Position = vec4(aPos * pc.uScale + pc.uTranslate, 0, 1);
 }
 */
-static uint32_t __glsl_shader_vert_spv[] =
-{
-    0x07230203,0x00010000,0x00080001,0x0000002e,0x00000000,0x00020011,0x00000001,0x0006000b,
-    0x00000001,0x4c534c47,0x6474732e,0x3035342e,0x00000000,0x0003000e,0x00000000,0x00000001,
-    0x000a000f,0x00000000,0x00000004,0x6e69616d,0x00000000,0x0000000b,0x0000000f,0x00000015,
-    0x0000001b,0x0000001c,0x00030003,0x00000002,0x000001c2,0x00040005,0x00000004,0x6e69616d,
-    0x00000000,0x00030005,0x00000009,0x00000000,0x00050006,0x00000009,0x00000000,0x6f6c6f43,
-    0x00000072,0x00040006,0x00000009,0x00000001,0x00005655,0x00030005,0x0000000b,0x0074754f,
-    0x00040005,0x0000000f,0x6c6f4361,0x0000726f,0x00030005,0x00000015,0x00565561,0x00060005,
-    0x00000019,0x505f6c67,0x65567265,0x78657472,0x00000000,0x00060006,0x00000019,0x00000000,
-    0x505f6c67,0x7469736f,0x006e6f69,0x00030005,0x0000001b,0x00000000,0x00040005,0x0000001c,
-    0x736f5061,0x00000000,0x00060005,0x0000001e,0x73755075,0x6e6f4368,0x6e617473,0x00000074,
-    0x00050006,0x0000001e,0x00000000,0x61635375,0x0000656c,0x00060006,0x0000001e,0x00000001,
-    0x61725475,0x616c736e,0x00006574,0x00030005,0x00000020,0x00006370,0x00040047,0x0000000b,
-    0x0000001e,0x00000000,0x00040047,0x0000000f,0x0000001e,0x00000002,0x00040047,0x00000015,
-    0x0000001e,0x00000001,0x00050048,0x00000019,0x00000000,0x0000000b,0x00000000,0x00030047,
-    0x00000019,0x00000002,0x00040047,0x0000001c,0x0000001e,0x00000000,0x00050048,0x0000001e,
-    0x00000000,0x00000023,0x00000000,0x00050048,0x0000001e,0x00000001,0x00000023,0x00000008,
-    0x00030047,0x0000001e,0x00000002,0x00020013,0x00000002,0x00030021,0x00000003,0x00000002,
-    0x00030016,0x00000006,0x00000020,0x00040017,0x00000007,0x00000006,0x00000004,0x00040017,
-    0x00000008,0x00000006,0x00000002,0x0004001e,0x00000009,0x00000007,0x00000008,0x00040020,
-    0x0000000a,0x00000003,0x00000009,0x0004003b,0x0000000a,0x0000000b,0x00000003,0x00040015,
-    0x0000000c,0x00000020,0x00000001,0x0004002b,0x0000000c,0x0000000d,0x00000000,0x00040020,
-    0x0000000e,0x00000001,0x00000007,0x0004003b,0x0000000e,0x0000000f,0x00000001,0x00040020,
-    0x00000011,0x00000003,0x00000007,0x0004002b,0x0000000c,0x00000013,0x00000001,0x00040020,
-    0x00000014,0x00000001,0x00000008,0x0004003b,0x00000014,0x00000015,0x00000001,0x00040020,
-    0x00000017,0x00000003,0x00000008,0x0003001e,0x00000019,0x00000007,0x00040020,0x0000001a,
-    0x00000003,0x00000019,0x0004003b,0x0000001a,0x0000001b,0x00000003,0x0004003b,0x00000014,
-    0x0000001c,0x00000001,0x0004001e,0x0000001e,0x00000008,0x00000008,0x00040020,0x0000001f,
-    0x00000009,0x0000001e,0x0004003b,0x0000001f,0x00000020,0x00000009,0x00040020,0x00000021,
-    0x00000009,0x00000008,0x0004002b,0x00000006,0x00000028,0x00000000,0x0004002b,0x00000006,
-    0x00000029,0x3f800000,0x00050036,0x00000002,0x00000004,0x00000000,0x00000003,0x000200f8,
-    0x00000005,0x0004003d,0x00000007,0x00000010,0x0000000f,0x00050041,0x00000011,0x00000012,
-    0x0000000b,0x0000000d,0x0003003e,0x00000012,0x00000010,0x0004003d,0x00000008,0x00000016,
-    0x00000015,0x00050041,0x00000017,0x00000018,0x0000000b,0x00000013,0x0003003e,0x00000018,
-    0x00000016,0x0004003d,0x00000008,0x0000001d,0x0000001c,0x00050041,0x00000021,0x00000022,
-    0x00000020,0x0000000d,0x0004003d,0x00000008,0x00000023,0x00000022,0x00050085,0x00000008,
-    0x00000024,0x0000001d,0x00000023,0x00050041,0x00000021,0x00000025,0x00000020,0x00000013,
-    0x0004003d,0x00000008,0x00000026,0x00000025,0x00050081,0x00000008,0x00000027,0x00000024,
-    0x00000026,0x00050051,0x00000006,0x0000002a,0x00000027,0x00000000,0x00050051,0x00000006,
-    0x0000002b,0x00000027,0x00000001,0x00070050,0x00000007,0x0000002c,0x0000002a,0x0000002b,
-    0x00000028,0x00000029,0x00050041,0x00000011,0x0000002d,0x0000001b,0x0000000d,0x0003003e,
-    0x0000002d,0x0000002c,0x000100fd,0x00010038
+static uint32_t __glsl_shader_vert_spv[] = {
+    0x07230203, 0x00010000, 0x0008000b, 0x0000003c, 0x00000000, 0x00020011, 0x00000001, 0x0006000b,
+    0x00000001, 0x4c534c47, 0x6474732e, 0x3035342e, 0x00000000, 0x0003000e, 0x00000000, 0x00000001,
+    0x000a000f, 0x00000000, 0x00000004, 0x6e69616d, 0x00000000, 0x0000000b, 0x0000000f, 0x00000023,
+    0x00000029, 0x0000002a, 0x00030003, 0x00000002, 0x000001c2, 0x00040005, 0x00000004, 0x6e69616d,
+    0x00000000, 0x00030005, 0x00000009, 0x00000000, 0x00050006, 0x00000009, 0x00000000, 0x6f6c6f43,
+    0x00000072, 0x00040006, 0x00000009, 0x00000001, 0x00005655, 0x00030005, 0x0000000b, 0x0074754f,
+    0x00040005, 0x0000000f, 0x6c6f4361, 0x0000726f, 0x00030005, 0x00000023, 0x00565561, 0x00060005,
+    0x00000027, 0x505f6c67, 0x65567265, 0x78657472, 0x00000000, 0x00060006, 0x00000027, 0x00000000,
+    0x505f6c67, 0x7469736f, 0x006e6f69, 0x00030005, 0x00000029, 0x00000000, 0x00040005, 0x0000002a,
+    0x736f5061, 0x00000000, 0x00060005, 0x0000002c, 0x73755075, 0x6e6f4368, 0x6e617473, 0x00000074,
+    0x00050006, 0x0000002c, 0x00000000, 0x61635375, 0x0000656c, 0x00060006, 0x0000002c, 0x00000001,
+    0x61725475, 0x616c736e, 0x00006574, 0x00030005, 0x0000002e, 0x00006370, 0x00040047, 0x0000000b,
+    0x0000001e, 0x00000000, 0x00040047, 0x0000000f, 0x0000001e, 0x00000002, 0x00040047, 0x00000023,
+    0x0000001e, 0x00000001, 0x00050048, 0x00000027, 0x00000000, 0x0000000b, 0x00000000, 0x00030047,
+    0x00000027, 0x00000002, 0x00040047, 0x0000002a, 0x0000001e, 0x00000000, 0x00050048, 0x0000002c,
+    0x00000000, 0x00000023, 0x00000000, 0x00050048, 0x0000002c, 0x00000001, 0x00000023, 0x00000008,
+    0x00030047, 0x0000002c, 0x00000002, 0x00020013, 0x00000002, 0x00030021, 0x00000003, 0x00000002,
+    0x00030016, 0x00000006, 0x00000020, 0x00040017, 0x00000007, 0x00000006, 0x00000004, 0x00040017,
+    0x00000008, 0x00000006, 0x00000002, 0x0004001e, 0x00000009, 0x00000007, 0x00000008, 0x00040020,
+    0x0000000a, 0x00000003, 0x00000009, 0x0004003b, 0x0000000a, 0x0000000b, 0x00000003, 0x00040015,
+    0x0000000c, 0x00000020, 0x00000001, 0x0004002b, 0x0000000c, 0x0000000d, 0x00000000, 0x00040020,
+    0x0000000e, 0x00000001, 0x00000007, 0x0004003b, 0x0000000e, 0x0000000f, 0x00000001, 0x00040017,
+    0x00000010, 0x00000006, 0x00000003, 0x0004002b, 0x00000006, 0x00000013, 0x400ccccd, 0x0006002c,
+    0x00000010, 0x00000014, 0x00000013, 0x00000013, 0x00000013, 0x00040015, 0x00000016, 0x00000020,
+    0x00000000, 0x0004002b, 0x00000016, 0x00000017, 0x00000003, 0x00040020, 0x00000018, 0x00000001,
+    0x00000006, 0x00040020, 0x0000001f, 0x00000003, 0x00000007, 0x0004002b, 0x0000000c, 0x00000021,
+    0x00000001, 0x00040020, 0x00000022, 0x00000001, 0x00000008, 0x0004003b, 0x00000022, 0x00000023,
+    0x00000001, 0x00040020, 0x00000025, 0x00000003, 0x00000008, 0x0003001e, 0x00000027, 0x00000007,
+    0x00040020, 0x00000028, 0x00000003, 0x00000027, 0x0004003b, 0x00000028, 0x00000029, 0x00000003,
+    0x0004003b, 0x00000022, 0x0000002a, 0x00000001, 0x0004001e, 0x0000002c, 0x00000008, 0x00000008,
+    0x00040020, 0x0000002d, 0x00000009, 0x0000002c, 0x0004003b, 0x0000002d, 0x0000002e, 0x00000009,
+    0x00040020, 0x0000002f, 0x00000009, 0x00000008, 0x0004002b, 0x00000006, 0x00000036, 0x00000000,
+    0x0004002b, 0x00000006, 0x00000037, 0x3f800000, 0x00050036, 0x00000002, 0x00000004, 0x00000000,
+    0x00000003, 0x000200f8, 0x00000005, 0x0004003d, 0x00000007, 0x00000011, 0x0000000f, 0x0008004f,
+    0x00000010, 0x00000012, 0x00000011, 0x00000011, 0x00000000, 0x00000001, 0x00000002, 0x0007000c,
+    0x00000010, 0x00000015, 0x00000001, 0x0000001a, 0x00000012, 0x00000014, 0x00050041, 0x00000018,
+    0x00000019, 0x0000000f, 0x00000017, 0x0004003d, 0x00000006, 0x0000001a, 0x00000019, 0x00050051,
+    0x00000006, 0x0000001b, 0x00000015, 0x00000000, 0x00050051, 0x00000006, 0x0000001c, 0x00000015,
+    0x00000001, 0x00050051, 0x00000006, 0x0000001d, 0x00000015, 0x00000002, 0x00070050, 0x00000007,
+    0x0000001e, 0x0000001b, 0x0000001c, 0x0000001d, 0x0000001a, 0x00050041, 0x0000001f, 0x00000020,
+    0x0000000b, 0x0000000d, 0x0003003e, 0x00000020, 0x0000001e, 0x0004003d, 0x00000008, 0x00000024,
+    0x00000023, 0x00050041, 0x00000025, 0x00000026, 0x0000000b, 0x00000021, 0x0003003e, 0x00000026,
+    0x00000024, 0x0004003d, 0x00000008, 0x0000002b, 0x0000002a, 0x00050041, 0x0000002f, 0x00000030,
+    0x0000002e, 0x0000000d, 0x0004003d, 0x00000008, 0x00000031, 0x00000030, 0x00050085, 0x00000008,
+    0x00000032, 0x0000002b, 0x00000031, 0x00050041, 0x0000002f, 0x00000033, 0x0000002e, 0x00000021,
+    0x0004003d, 0x00000008, 0x00000034, 0x00000033, 0x00050081, 0x00000008, 0x00000035, 0x00000032,
+    0x00000034, 0x00050051, 0x00000006, 0x00000038, 0x00000035, 0x00000000, 0x00050051, 0x00000006,
+    0x00000039, 0x00000035, 0x00000001, 0x00070050, 0x00000007, 0x0000003a, 0x00000038, 0x00000039,
+    0x00000036, 0x00000037, 0x00050041, 0x0000001f, 0x0000003b, 0x00000029, 0x0000000d, 0x0003003e,
+    0x0000003b, 0x0000003a, 0x000100fd, 0x00010038
 };
 
 // glsl_shader.frag, compiled with:
@@ -317,32 +325,31 @@ void main()
     fColor = In.Color * texture(sTexture, In.UV.st);
 }
 */
-static uint32_t __glsl_shader_frag_spv[] =
-{
-    0x07230203,0x00010000,0x00080001,0x0000001e,0x00000000,0x00020011,0x00000001,0x0006000b,
-    0x00000001,0x4c534c47,0x6474732e,0x3035342e,0x00000000,0x0003000e,0x00000000,0x00000001,
-    0x0007000f,0x00000004,0x00000004,0x6e69616d,0x00000000,0x00000009,0x0000000d,0x00030010,
-    0x00000004,0x00000007,0x00030003,0x00000002,0x000001c2,0x00040005,0x00000004,0x6e69616d,
-    0x00000000,0x00040005,0x00000009,0x6c6f4366,0x0000726f,0x00030005,0x0000000b,0x00000000,
-    0x00050006,0x0000000b,0x00000000,0x6f6c6f43,0x00000072,0x00040006,0x0000000b,0x00000001,
-    0x00005655,0x00030005,0x0000000d,0x00006e49,0x00050005,0x00000016,0x78655473,0x65727574,
-    0x00000000,0x00040047,0x00000009,0x0000001e,0x00000000,0x00040047,0x0000000d,0x0000001e,
-    0x00000000,0x00040047,0x00000016,0x00000022,0x00000000,0x00040047,0x00000016,0x00000021,
-    0x00000000,0x00020013,0x00000002,0x00030021,0x00000003,0x00000002,0x00030016,0x00000006,
-    0x00000020,0x00040017,0x00000007,0x00000006,0x00000004,0x00040020,0x00000008,0x00000003,
-    0x00000007,0x0004003b,0x00000008,0x00000009,0x00000003,0x00040017,0x0000000a,0x00000006,
-    0x00000002,0x0004001e,0x0000000b,0x00000007,0x0000000a,0x00040020,0x0000000c,0x00000001,
-    0x0000000b,0x0004003b,0x0000000c,0x0000000d,0x00000001,0x00040015,0x0000000e,0x00000020,
-    0x00000001,0x0004002b,0x0000000e,0x0000000f,0x00000000,0x00040020,0x00000010,0x00000001,
-    0x00000007,0x00090019,0x00000013,0x00000006,0x00000001,0x00000000,0x00000000,0x00000000,
-    0x00000001,0x00000000,0x0003001b,0x00000014,0x00000013,0x00040020,0x00000015,0x00000000,
-    0x00000014,0x0004003b,0x00000015,0x00000016,0x00000000,0x0004002b,0x0000000e,0x00000018,
-    0x00000001,0x00040020,0x00000019,0x00000001,0x0000000a,0x00050036,0x00000002,0x00000004,
-    0x00000000,0x00000003,0x000200f8,0x00000005,0x00050041,0x00000010,0x00000011,0x0000000d,
-    0x0000000f,0x0004003d,0x00000007,0x00000012,0x00000011,0x0004003d,0x00000014,0x00000017,
-    0x00000016,0x00050041,0x00000019,0x0000001a,0x0000000d,0x00000018,0x0004003d,0x0000000a,
-    0x0000001b,0x0000001a,0x00050057,0x00000007,0x0000001c,0x00000017,0x0000001b,0x00050085,
-    0x00000007,0x0000001d,0x00000012,0x0000001c,0x0003003e,0x00000009,0x0000001d,0x000100fd,
+static uint32_t __glsl_shader_frag_spv[] = {
+    0x07230203, 0x00010000, 0x00080001, 0x0000001e, 0x00000000, 0x00020011, 0x00000001, 0x0006000b,
+    0x00000001, 0x4c534c47, 0x6474732e, 0x3035342e, 0x00000000, 0x0003000e, 0x00000000, 0x00000001,
+    0x0007000f, 0x00000004, 0x00000004, 0x6e69616d, 0x00000000, 0x00000009, 0x0000000d, 0x00030010,
+    0x00000004, 0x00000007, 0x00030003, 0x00000002, 0x000001c2, 0x00040005, 0x00000004, 0x6e69616d,
+    0x00000000, 0x00040005, 0x00000009, 0x6c6f4366, 0x0000726f, 0x00030005, 0x0000000b, 0x00000000,
+    0x00050006, 0x0000000b, 0x00000000, 0x6f6c6f43, 0x00000072, 0x00040006, 0x0000000b, 0x00000001,
+    0x00005655, 0x00030005, 0x0000000d, 0x00006e49, 0x00050005, 0x00000016, 0x78655473, 0x65727574,
+    0x00000000, 0x00040047, 0x00000009, 0x0000001e, 0x00000000, 0x00040047, 0x0000000d, 0x0000001e,
+    0x00000000, 0x00040047, 0x00000016, 0x00000022, 0x00000000, 0x00040047, 0x00000016, 0x00000021,
+    0x00000000, 0x00020013, 0x00000002, 0x00030021, 0x00000003, 0x00000002, 0x00030016, 0x00000006,
+    0x00000020, 0x00040017, 0x00000007, 0x00000006, 0x00000004, 0x00040020, 0x00000008, 0x00000003,
+    0x00000007, 0x0004003b, 0x00000008, 0x00000009, 0x00000003, 0x00040017, 0x0000000a, 0x00000006,
+    0x00000002, 0x0004001e, 0x0000000b, 0x00000007, 0x0000000a, 0x00040020, 0x0000000c, 0x00000001,
+    0x0000000b, 0x0004003b, 0x0000000c, 0x0000000d, 0x00000001, 0x00040015, 0x0000000e, 0x00000020,
+    0x00000001, 0x0004002b, 0x0000000e, 0x0000000f, 0x00000000, 0x00040020, 0x00000010, 0x00000001,
+    0x00000007, 0x00090019, 0x00000013, 0x00000006, 0x00000001, 0x00000000, 0x00000000, 0x00000000,
+    0x00000001, 0x00000000, 0x0003001b, 0x00000014, 0x00000013, 0x00040020, 0x00000015, 0x00000000,
+    0x00000014, 0x0004003b, 0x00000015, 0x00000016, 0x00000000, 0x0004002b, 0x0000000e, 0x00000018,
+    0x00000001, 0x00040020, 0x00000019, 0x00000001, 0x0000000a, 0x00050036, 0x00000002, 0x00000004,
+    0x00000000, 0x00000003, 0x000200f8, 0x00000005, 0x00050041, 0x00000010, 0x00000011, 0x0000000d,
+    0x0000000f, 0x0004003d, 0x00000007, 0x00000012, 0x00000011, 0x0004003d, 0x00000014, 0x00000017,
+    0x00000016, 0x00050041, 0x00000019, 0x0000001a, 0x0000000d, 0x00000018, 0x0004003d, 0x0000000a,
+    0x0000001b, 0x0000001a, 0x00050057, 0x00000007, 0x0000001c, 0x00000017, 0x0000001b, 0x00050085,
+    0x00000007, 0x0000001d, 0x00000012, 0x0000001c, 0x0003003e, 0x00000009, 0x0000001d, 0x000100fd,
     0x00010038
 };
 
@@ -353,15 +360,15 @@ static uint32_t __glsl_shader_frag_spv[] =
 // Backend data stored in io.BackendRendererUserData to allow support for multiple Dear ImGui contexts
 // It is STRONGLY preferred that you use docking branch with multi-viewports (== single Dear ImGui context + multiple windows) instead of multiple Dear ImGui contexts.
 // FIXME: multi-context support is not tested and probably dysfunctional in this backend.
-static ImGui_ImplVulkan_Data* ImGui_ImplVulkan_GetBackendData()
+static ImGui_ImplVulkan_Data *ImGui_ImplVulkan_GetBackendData()
 {
-    return ImGui::GetCurrentContext() ? (ImGui_ImplVulkan_Data*)ImGui::GetIO().BackendRendererUserData : NULL;
+    return ImGui::GetCurrentContext() ? (ImGui_ImplVulkan_Data *)ImGui::GetIO().BackendRendererUserData : NULL;
 }
 
 static uint32_t ImGui_ImplVulkan_MemoryType(VkMemoryPropertyFlags properties, uint32_t type_bits)
 {
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
-    ImGui_ImplVulkan_InitInfo* v = &bd->VulkanInitInfo;
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
+    ImGui_ImplVulkan_InitInfo *v = &bd->VulkanInitInfo;
     VkPhysicalDeviceMemoryProperties prop;
     vkGetPhysicalDeviceMemoryProperties(v->PhysicalDevice, &prop);
     for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
@@ -372,18 +379,18 @@ static uint32_t ImGui_ImplVulkan_MemoryType(VkMemoryPropertyFlags properties, ui
 
 static void check_vk_result(VkResult err)
 {
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
     if (!bd)
         return;
-    ImGui_ImplVulkan_InitInfo* v = &bd->VulkanInitInfo;
+    ImGui_ImplVulkan_InitInfo *v = &bd->VulkanInitInfo;
     if (v->CheckVkResultFn)
         v->CheckVkResultFn(err);
 }
 
-static void CreateOrResizeBuffer(VkBuffer& buffer, VkDeviceMemory& buffer_memory, VkDeviceSize& p_buffer_size, size_t new_size, VkBufferUsageFlagBits usage)
+static void CreateOrResizeBuffer(VkBuffer &buffer, VkDeviceMemory &buffer_memory, VkDeviceSize &p_buffer_size, size_t new_size, VkBufferUsageFlagBits usage)
 {
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
-    ImGui_ImplVulkan_InitInfo* v = &bd->VulkanInitInfo;
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
+    ImGui_ImplVulkan_InitInfo *v = &bd->VulkanInitInfo;
     VkResult err;
     if (buffer != VK_NULL_HANDLE)
         vkDestroyBuffer(v->Device, buffer, v->Allocator);
@@ -414,9 +421,9 @@ static void CreateOrResizeBuffer(VkBuffer& buffer, VkDeviceMemory& buffer_memory
     p_buffer_size = req.size;
 }
 
-static void ImGui_ImplVulkan_SetupRenderState(ImDrawData* draw_data, VkPipeline pipeline, VkCommandBuffer command_buffer, ImGui_ImplVulkanH_FrameRenderBuffers* rb, int fb_width, int fb_height)
+static void ImGui_ImplVulkan_SetupRenderState(ImDrawData *draw_data, VkPipeline pipeline, VkCommandBuffer command_buffer, ImGui_ImplVulkanH_FrameRenderBuffers *rb, int fb_width, int fb_height)
 {
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
 
     // Bind pipeline:
     {
@@ -424,8 +431,7 @@ static void ImGui_ImplVulkan_SetupRenderState(ImDrawData* draw_data, VkPipeline 
     }
 
     // Bind Vertex And Index Buffer:
-    if (draw_data->TotalVtxCount > 0)
-    {
+    if (draw_data->TotalVtxCount > 0) {
         VkBuffer vertex_buffers[1] = { rb->VertexBuffer };
         VkDeviceSize vertex_offset[1] = { 0 };
         vkCmdBindVertexBuffers(command_buffer, 0, 1, vertex_buffers, vertex_offset);
@@ -459,7 +465,7 @@ static void ImGui_ImplVulkan_SetupRenderState(ImDrawData* draw_data, VkPipeline 
 }
 
 // Render function
-void ImGui_ImplVulkan_RenderDrawData(ImDrawData* draw_data, VkCommandBuffer command_buffer, VkPipeline pipeline)
+void ImGui_ImplVulkan_RenderDrawData(ImDrawData *draw_data, VkCommandBuffer command_buffer, VkPipeline pipeline)
 {
     // Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
     int fb_width = (int)(draw_data->DisplaySize.x * draw_data->FramebufferScale.x);
@@ -467,28 +473,26 @@ void ImGui_ImplVulkan_RenderDrawData(ImDrawData* draw_data, VkCommandBuffer comm
     if (fb_width <= 0 || fb_height <= 0)
         return;
 
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
-    ImGui_ImplVulkan_InitInfo* v = &bd->VulkanInitInfo;
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
+    ImGui_ImplVulkan_InitInfo *v = &bd->VulkanInitInfo;
     if (pipeline == VK_NULL_HANDLE)
         pipeline = bd->Pipeline;
 
     // Allocate array to store enough vertex/index buffers. Each unique viewport gets its own storage.
-    ImGui_ImplVulkan_ViewportData* viewport_renderer_data = (ImGui_ImplVulkan_ViewportData*)draw_data->OwnerViewport->RendererUserData;
+    ImGui_ImplVulkan_ViewportData *viewport_renderer_data = (ImGui_ImplVulkan_ViewportData *)draw_data->OwnerViewport->RendererUserData;
     IM_ASSERT(viewport_renderer_data != NULL);
-    ImGui_ImplVulkanH_WindowRenderBuffers* wrb = &viewport_renderer_data->RenderBuffers;
-    if (wrb->FrameRenderBuffers == NULL)
-    {
+    ImGui_ImplVulkanH_WindowRenderBuffers *wrb = &viewport_renderer_data->RenderBuffers;
+    if (wrb->FrameRenderBuffers == NULL) {
         wrb->Index = 0;
         wrb->Count = v->ImageCount;
-        wrb->FrameRenderBuffers = (ImGui_ImplVulkanH_FrameRenderBuffers*)IM_ALLOC(sizeof(ImGui_ImplVulkanH_FrameRenderBuffers) * wrb->Count);
+        wrb->FrameRenderBuffers = (ImGui_ImplVulkanH_FrameRenderBuffers *)IM_ALLOC(sizeof(ImGui_ImplVulkanH_FrameRenderBuffers) * wrb->Count);
         memset(wrb->FrameRenderBuffers, 0, sizeof(ImGui_ImplVulkanH_FrameRenderBuffers) * wrb->Count);
     }
     IM_ASSERT(wrb->Count == v->ImageCount);
     wrb->Index = (wrb->Index + 1) % wrb->Count;
-    ImGui_ImplVulkanH_FrameRenderBuffers* rb = &wrb->FrameRenderBuffers[wrb->Index];
+    ImGui_ImplVulkanH_FrameRenderBuffers *rb = &wrb->FrameRenderBuffers[wrb->Index];
 
-    if (draw_data->TotalVtxCount > 0)
-    {
+    if (draw_data->TotalVtxCount > 0) {
         // Create or resize the vertex/index buffers
         size_t vertex_size = draw_data->TotalVtxCount * sizeof(ImDrawVert);
         size_t index_size = draw_data->TotalIdxCount * sizeof(ImDrawIdx);
@@ -498,15 +502,14 @@ void ImGui_ImplVulkan_RenderDrawData(ImDrawData* draw_data, VkCommandBuffer comm
             CreateOrResizeBuffer(rb->IndexBuffer, rb->IndexBufferMemory, rb->IndexBufferSize, index_size, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 
         // Upload vertex/index data into a single contiguous GPU buffer
-        ImDrawVert* vtx_dst = NULL;
-        ImDrawIdx* idx_dst = NULL;
-        VkResult err = vkMapMemory(v->Device, rb->VertexBufferMemory, 0, rb->VertexBufferSize, 0, (void**)(&vtx_dst));
+        ImDrawVert *vtx_dst = NULL;
+        ImDrawIdx *idx_dst = NULL;
+        VkResult err = vkMapMemory(v->Device, rb->VertexBufferMemory, 0, rb->VertexBufferSize, 0, (void **)(&vtx_dst));
         check_vk_result(err);
-        err = vkMapMemory(v->Device, rb->IndexBufferMemory, 0, rb->IndexBufferSize, 0, (void**)(&idx_dst));
+        err = vkMapMemory(v->Device, rb->IndexBufferMemory, 0, rb->IndexBufferSize, 0, (void **)(&idx_dst));
         check_vk_result(err);
-        for (int n = 0; n < draw_data->CmdListsCount; n++)
-        {
-            const ImDrawList* cmd_list = draw_data->CmdLists[n];
+        for (int n = 0; n < draw_data->CmdListsCount; n++) {
+            const ImDrawList *cmd_list = draw_data->CmdLists[n];
             memcpy(vtx_dst, cmd_list->VtxBuffer.Data, cmd_list->VtxBuffer.Size * sizeof(ImDrawVert));
             memcpy(idx_dst, cmd_list->IdxBuffer.Data, cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx));
             vtx_dst += cmd_list->VtxBuffer.Size;
@@ -529,39 +532,42 @@ void ImGui_ImplVulkan_RenderDrawData(ImDrawData* draw_data, VkCommandBuffer comm
     ImGui_ImplVulkan_SetupRenderState(draw_data, pipeline, command_buffer, rb, fb_width, fb_height);
 
     // Will project scissor/clipping rectangles into framebuffer space
-    ImVec2 clip_off = draw_data->DisplayPos;         // (0,0) unless using multi-viewports
+    ImVec2 clip_off = draw_data->DisplayPos; // (0,0) unless using multi-viewports
     ImVec2 clip_scale = draw_data->FramebufferScale; // (1,1) unless using retina display which are often (2,2)
 
     // Render command lists
     // (Because we merged all buffers into a single one, we maintain our own offset into them)
     int global_vtx_offset = 0;
     int global_idx_offset = 0;
-    for (int n = 0; n < draw_data->CmdListsCount; n++)
-    {
-        const ImDrawList* cmd_list = draw_data->CmdLists[n];
-        for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++)
-        {
-            const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[cmd_i];
-            if (pcmd->UserCallback != NULL)
-            {
+    for (int n = 0; n < draw_data->CmdListsCount; n++) {
+        const ImDrawList *cmd_list = draw_data->CmdLists[n];
+        for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++) {
+            const ImDrawCmd *pcmd = &cmd_list->CmdBuffer[cmd_i];
+            if (pcmd->UserCallback != NULL) {
                 // User callback, registered via ImDrawList::AddCallback()
                 // (ImDrawCallback_ResetRenderState is a special callback value used by the user to request the renderer to reset render state.)
                 if (pcmd->UserCallback == ImDrawCallback_ResetRenderState)
                     ImGui_ImplVulkan_SetupRenderState(draw_data, pipeline, command_buffer, rb, fb_width, fb_height);
                 else
                     pcmd->UserCallback(cmd_list, pcmd);
-            }
-            else
-            {
+            } else {
                 // Project scissor/clipping rectangles into framebuffer space
                 ImVec2 clip_min((pcmd->ClipRect.x - clip_off.x) * clip_scale.x, (pcmd->ClipRect.y - clip_off.y) * clip_scale.y);
                 ImVec2 clip_max((pcmd->ClipRect.z - clip_off.x) * clip_scale.x, (pcmd->ClipRect.w - clip_off.y) * clip_scale.y);
 
                 // Clamp to viewport as vkCmdSetScissor() won't accept values that are off bounds
-                if (clip_min.x < 0.0f) { clip_min.x = 0.0f; }
-                if (clip_min.y < 0.0f) { clip_min.y = 0.0f; }
-                if (clip_max.x > fb_width) { clip_max.x = (float)fb_width; }
-                if (clip_max.y > fb_height) { clip_max.y = (float)fb_height; }
+                if (clip_min.x < 0.0f) {
+                    clip_min.x = 0.0f;
+                }
+                if (clip_min.y < 0.0f) {
+                    clip_min.y = 0.0f;
+                }
+                if (clip_max.x > fb_width) {
+                    clip_max.x = (float)fb_width;
+                }
+                if (clip_max.y > fb_height) {
+                    clip_max.y = (float)fb_height;
+                }
                 if (clip_max.x <= clip_min.x || clip_max.y <= clip_min.y)
                     continue;
 
@@ -574,34 +580,13 @@ void ImGui_ImplVulkan_RenderDrawData(ImDrawData* draw_data, VkCommandBuffer comm
                 vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 
                 // Bind DescriptorSet with font or user texture
-                VkImageView desc_set[1] = { (VkImageView)pcmd->TextureId };
-                if (sizeof(ImTextureID) < sizeof(ImU64))
-                {
+                VkDescriptorSet desc_set[1] = { (VkDescriptorSet)pcmd->TextureId };
+                if (sizeof(ImTextureID) < sizeof(ImU64)) {
                     // We don't support texture switches if ImTextureID hasn't been redefined to be 64-bit. Do a flaky check that other textures haven't been used.
-                    IM_ASSERT(pcmd->TextureId == (ImTextureID)bd->FontView);
-                    desc_set[0] = bd->FontView;
+                    IM_ASSERT(pcmd->TextureId == (ImTextureID)bd->FontDescriptorSet);
+                    desc_set[0] = bd->FontDescriptorSet;
                 }
-                //vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, bd->PipelineLayout, 0, 1, desc_set, 0, NULL);
-
-                VkDescriptorImageInfo imageInfo {};
-                imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                imageInfo.imageView = desc_set[0];
-                imageInfo.sampler = bd->FontSampler;
-
-                VkWriteDescriptorSet descriptorWrite {};
-                descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                descriptorWrite.dstSet = VK_NULL_HANDLE;
-                descriptorWrite.dstBinding = 0;
-                descriptorWrite.dstArrayElement = 0;
-
-                descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-                descriptorWrite.descriptorCount = 1;
-
-                descriptorWrite.pBufferInfo = nullptr;
-                descriptorWrite.pImageInfo = &imageInfo; // Optional
-                descriptorWrite.pTexelBufferView = nullptr; // Optional
-
-                vkCmdPushDescriptorSetKHR(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, bd->PipelineLayout, 0, 1, &descriptorWrite);
+                vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, bd->PipelineLayout, 0, 1, desc_set, 0, NULL);
 
                 // Draw
                 vkCmdDrawIndexed(command_buffer, pcmd->ElemCount, 1, pcmd->IdxOffset + global_idx_offset, pcmd->VtxOffset + global_vtx_offset, 0);
@@ -624,11 +609,11 @@ void ImGui_ImplVulkan_RenderDrawData(ImDrawData* draw_data, VkCommandBuffer comm
 
 bool ImGui_ImplVulkan_CreateFontsTexture(VkCommandBuffer command_buffer)
 {
-    ImGuiIO& io = ImGui::GetIO();
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
-    ImGui_ImplVulkan_InitInfo* v = &bd->VulkanInitInfo;
+    ImGuiIO &io = ImGui::GetIO();
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
+    ImGui_ImplVulkan_InitInfo *v = &bd->VulkanInitInfo;
 
-    unsigned char* pixels;
+    unsigned char *pixels;
     int width, height;
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
     size_t upload_size = width * height * 4 * sizeof(char);
@@ -706,8 +691,8 @@ bool ImGui_ImplVulkan_CreateFontsTexture(VkCommandBuffer command_buffer)
 
     // Upload to Buffer:
     {
-        char* map = NULL;
-        err = vkMapMemory(v->Device, bd->UploadBufferMemory, 0, upload_size, 0, (void**)(&map));
+        char *map = NULL;
+        err = vkMapMemory(v->Device, bd->UploadBufferMemory, 0, upload_size, 0, (void **)(&map));
         check_vk_result(err);
         memcpy(map, pixels, upload_size);
         VkMappedMemoryRange range[1] = {};
@@ -758,38 +743,36 @@ bool ImGui_ImplVulkan_CreateFontsTexture(VkCommandBuffer command_buffer)
     }
 
     // Store our identifier
-    io.Fonts->SetTexID((ImTextureID)bd->FontView);
+    //io.Fonts->SetTexID((ImTextureID)bd->FontDescriptorSet);
 
     return true;
 }
 
-static void ImGui_ImplVulkan_CreateShaderModules(VkDevice device, const VkAllocationCallbacks* allocator)
+static void ImGui_ImplVulkan_CreateShaderModules(VkDevice device, const VkAllocationCallbacks *allocator)
 {
     // Create the shader modules
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
-    if (bd->ShaderModuleVert == VK_NULL_HANDLE)
-    {
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
+    if (bd->ShaderModuleVert == VK_NULL_HANDLE) {
         VkShaderModuleCreateInfo vert_info = {};
         vert_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         vert_info.codeSize = sizeof(__glsl_shader_vert_spv);
-        vert_info.pCode = (uint32_t*)__glsl_shader_vert_spv;
+        vert_info.pCode = (uint32_t *)__glsl_shader_vert_spv;
         VkResult err = vkCreateShaderModule(device, &vert_info, allocator, &bd->ShaderModuleVert);
         check_vk_result(err);
     }
-    if (bd->ShaderModuleFrag == VK_NULL_HANDLE)
-    {
+    if (bd->ShaderModuleFrag == VK_NULL_HANDLE) {
         VkShaderModuleCreateInfo frag_info = {};
         frag_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         frag_info.codeSize = sizeof(__glsl_shader_frag_spv);
-        frag_info.pCode = (uint32_t*)__glsl_shader_frag_spv;
+        frag_info.pCode = (uint32_t *)__glsl_shader_frag_spv;
         VkResult err = vkCreateShaderModule(device, &frag_info, allocator, &bd->ShaderModuleFrag);
         check_vk_result(err);
     }
 }
 
-static void ImGui_ImplVulkan_CreateFontSampler(VkDevice device, const VkAllocationCallbacks* allocator)
+static void ImGui_ImplVulkan_CreateFontSampler(VkDevice device, const VkAllocationCallbacks *allocator)
 {
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
     if (bd->FontSampler)
         return;
 
@@ -809,30 +792,42 @@ static void ImGui_ImplVulkan_CreateFontSampler(VkDevice device, const VkAllocati
     check_vk_result(err);
 }
 
-static void ImGui_ImplVulkan_CreateDescriptorSetLayout(VkDevice device, const VkAllocationCallbacks* allocator)
+static void ImGui_ImplVulkan_CreateDescriptorSetLayout(VkDevice device, const VkAllocationCallbacks *allocator)
 {
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
     if (bd->DescriptorSetLayout)
         return;
 
     ImGui_ImplVulkan_CreateFontSampler(device, allocator);
     VkSampler sampler[1] = { bd->FontSampler };
-    VkDescriptorSetLayoutBinding binding[1] = {};
-    binding[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    binding[0].descriptorCount = 1;
-    binding[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    binding[0].pImmutableSamplers = sampler;
+    VkDescriptorSetLayoutBinding binding[4] = {};
+    for (size_t i = 0; i < 4; ++i) {
+        binding[i].binding = i;
+        binding[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        binding[i].descriptorCount = 1;
+        binding[i].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        binding[i].pImmutableSamplers = sampler;
+    }
     VkDescriptorSetLayoutCreateInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    info.bindingCount = 1;
+    info.bindingCount = 4;
     info.pBindings = binding;
+
+    VkDescriptorBindingFlags flags[4] { VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT, VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT, VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT, VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT };
+    VkDescriptorSetLayoutBindingFlagsCreateInfo bindingFlags {};
+    bindingFlags.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+    bindingFlags.bindingCount = 4;
+    bindingFlags.pBindingFlags = flags;
+
+    info.pNext = &bindingFlags;
+
     VkResult err = vkCreateDescriptorSetLayout(device, &info, allocator, &bd->DescriptorSetLayout);
     check_vk_result(err);
 }
 
-static void ImGui_ImplVulkan_CreatePipelineLayout(VkDevice device, const VkAllocationCallbacks* allocator)
+static void ImGui_ImplVulkan_CreatePipelineLayout(VkDevice device, const VkAllocationCallbacks *allocator)
 {
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
     if (bd->PipelineLayout)
         return;
 
@@ -849,13 +844,13 @@ static void ImGui_ImplVulkan_CreatePipelineLayout(VkDevice device, const VkAlloc
     layout_info.pSetLayouts = set_layout;
     layout_info.pushConstantRangeCount = 1;
     layout_info.pPushConstantRanges = push_constants;
-    VkResult  err = vkCreatePipelineLayout(device, &layout_info, allocator, &bd->PipelineLayout);
+    VkResult err = vkCreatePipelineLayout(device, &layout_info, allocator, &bd->PipelineLayout);
     check_vk_result(err);
 }
 
-static void ImGui_ImplVulkan_CreatePipeline(VkDevice device, const VkAllocationCallbacks* allocator, VkPipelineCache pipelineCache, VkRenderPass renderPass, VkSampleCountFlagBits MSAASamples, VkPipeline* pipeline, uint32_t subpass)
+static void ImGui_ImplVulkan_CreatePipeline(VkDevice device, const VkAllocationCallbacks *allocator, VkPipelineCache pipelineCache, VkRenderPass renderPass, VkSampleCountFlagBits MSAASamples, VkPipeline *pipeline, uint32_t subpass)
 {
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
     ImGui_ImplVulkan_CreateShaderModules(device, allocator);
 
     VkPipelineShaderStageCreateInfo stage[2] = {};
@@ -961,12 +956,11 @@ static void ImGui_ImplVulkan_CreatePipeline(VkDevice device, const VkAllocationC
 
 bool ImGui_ImplVulkan_CreateDeviceObjects()
 {
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
-    ImGui_ImplVulkan_InitInfo* v = &bd->VulkanInitInfo;
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
+    ImGui_ImplVulkan_InitInfo *v = &bd->VulkanInitInfo;
     VkResult err;
 
-    if (!bd->FontSampler)
-    {
+    if (!bd->FontSampler) {
         VkSamplerCreateInfo info = {};
         info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
         info.magFilter = VK_FILTER_LINEAR;
@@ -982,25 +976,34 @@ bool ImGui_ImplVulkan_CreateDeviceObjects()
         check_vk_result(err);
     }
 
-    if (!bd->DescriptorSetLayout)
-    {
-        VkSampler sampler[1] = {bd->FontSampler};
-        VkDescriptorSetLayoutBinding binding[1] = {};
-        binding[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        binding[0].descriptorCount = 1;
-        binding[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-        binding[0].pImmutableSamplers = sampler;
+    if (!bd->DescriptorSetLayout) {
+        VkSampler sampler[1] = { bd->FontSampler };
+        VkDescriptorSetLayoutBinding binding[4] = {};
+        for (size_t i = 0; i < 4; ++i) {
+            binding[i].binding = i;
+            binding[i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+            binding[i].descriptorCount = 1;
+            binding[i].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+            binding[i].pImmutableSamplers = sampler;
+        }
         VkDescriptorSetLayoutCreateInfo info = {};
         info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        info.bindingCount = 1;
+        info.bindingCount = 4;
         info.pBindings = binding;
-        info.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR;
+
+        VkDescriptorBindingFlags flags[4] { VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT, VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT, VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT, VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT };
+        VkDescriptorSetLayoutBindingFlagsCreateInfo bindingFlags {};
+        bindingFlags.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+        bindingFlags.bindingCount = 4;
+        bindingFlags.pBindingFlags = flags;
+
+        info.pNext = &bindingFlags;
+
         err = vkCreateDescriptorSetLayout(v->Device, &info, v->Allocator, &bd->DescriptorSetLayout);
         check_vk_result(err);
     }
 
-    if (!bd->PipelineLayout)
-    {
+    if (!bd->PipelineLayout) {
         // Constants: we are using 'vec2 offset' and 'vec2 scale' instead of a full 3d projection matrix
         VkPushConstantRange push_constants[1] = {};
         push_constants[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
@@ -1022,53 +1025,78 @@ bool ImGui_ImplVulkan_CreateDeviceObjects()
     return true;
 }
 
-void    ImGui_ImplVulkan_DestroyFontUploadObjects()
+void ImGui_ImplVulkan_DestroyFontUploadObjects()
 {
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
-    ImGui_ImplVulkan_InitInfo* v = &bd->VulkanInitInfo;
-    if (bd->UploadBuffer)
-    {
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
+    ImGui_ImplVulkan_InitInfo *v = &bd->VulkanInitInfo;
+    if (bd->UploadBuffer) {
         vkDestroyBuffer(v->Device, bd->UploadBuffer, v->Allocator);
         bd->UploadBuffer = VK_NULL_HANDLE;
     }
-    if (bd->UploadBufferMemory)
-    {
+    if (bd->UploadBufferMemory) {
         vkFreeMemory(v->Device, bd->UploadBufferMemory, v->Allocator);
         bd->UploadBufferMemory = VK_NULL_HANDLE;
     }
 }
 
-void    ImGui_ImplVulkan_DestroyDeviceObjects()
+void ImGui_ImplVulkan_DestroyDeviceObjects()
 {
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
-    ImGui_ImplVulkan_InitInfo* v = &bd->VulkanInitInfo;
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
+    ImGui_ImplVulkan_InitInfo *v = &bd->VulkanInitInfo;
     ImGui_ImplVulkanH_DestroyAllViewportsRenderBuffers(v->Device, v->Allocator);
     ImGui_ImplVulkan_DestroyFontUploadObjects();
 
-    if (bd->ShaderModuleVert)     { vkDestroyShaderModule(v->Device, bd->ShaderModuleVert, v->Allocator); bd->ShaderModuleVert = VK_NULL_HANDLE; }
-    if (bd->ShaderModuleFrag)     { vkDestroyShaderModule(v->Device, bd->ShaderModuleFrag, v->Allocator); bd->ShaderModuleFrag = VK_NULL_HANDLE; }
-    if (bd->FontView)             { vkDestroyImageView(v->Device, bd->FontView, v->Allocator); bd->FontView = VK_NULL_HANDLE; }
-    if (bd->FontImage)            { vkDestroyImage(v->Device, bd->FontImage, v->Allocator); bd->FontImage = VK_NULL_HANDLE; }
-    if (bd->FontMemory)           { vkFreeMemory(v->Device, bd->FontMemory, v->Allocator); bd->FontMemory = VK_NULL_HANDLE; }
-    if (bd->FontSampler)          { vkDestroySampler(v->Device, bd->FontSampler, v->Allocator); bd->FontSampler = VK_NULL_HANDLE; }
-    if (bd->DescriptorSetLayout)  { vkDestroyDescriptorSetLayout(v->Device, bd->DescriptorSetLayout, v->Allocator); bd->DescriptorSetLayout = VK_NULL_HANDLE; }
-    if (bd->PipelineLayout)       { vkDestroyPipelineLayout(v->Device, bd->PipelineLayout, v->Allocator); bd->PipelineLayout = VK_NULL_HANDLE; }
-    if (bd->Pipeline)             { vkDestroyPipeline(v->Device, bd->Pipeline, v->Allocator); bd->Pipeline = VK_NULL_HANDLE; }
+    if (bd->ShaderModuleVert) {
+        vkDestroyShaderModule(v->Device, bd->ShaderModuleVert, v->Allocator);
+        bd->ShaderModuleVert = VK_NULL_HANDLE;
+    }
+    if (bd->ShaderModuleFrag) {
+        vkDestroyShaderModule(v->Device, bd->ShaderModuleFrag, v->Allocator);
+        bd->ShaderModuleFrag = VK_NULL_HANDLE;
+    }
+    if (bd->FontView) {
+        vkDestroyImageView(v->Device, bd->FontView, v->Allocator);
+        bd->FontView = VK_NULL_HANDLE;
+    }
+    if (bd->FontImage) {
+        vkDestroyImage(v->Device, bd->FontImage, v->Allocator);
+        bd->FontImage = VK_NULL_HANDLE;
+    }
+    if (bd->FontMemory) {
+        vkFreeMemory(v->Device, bd->FontMemory, v->Allocator);
+        bd->FontMemory = VK_NULL_HANDLE;
+    }
+    if (bd->FontSampler) {
+        vkDestroySampler(v->Device, bd->FontSampler, v->Allocator);
+        bd->FontSampler = VK_NULL_HANDLE;
+    }
+    if (bd->DescriptorSetLayout) {
+        vkDestroyDescriptorSetLayout(v->Device, bd->DescriptorSetLayout, v->Allocator);
+        bd->DescriptorSetLayout = VK_NULL_HANDLE;
+    }
+    if (bd->PipelineLayout) {
+        vkDestroyPipelineLayout(v->Device, bd->PipelineLayout, v->Allocator);
+        bd->PipelineLayout = VK_NULL_HANDLE;
+    }
+    if (bd->Pipeline) {
+        vkDestroyPipeline(v->Device, bd->Pipeline, v->Allocator);
+        bd->Pipeline = VK_NULL_HANDLE;
+    }
 }
 
-bool    ImGui_ImplVulkan_LoadFunctions(PFN_vkVoidFunction(*loader_func)(const char* function_name, void* user_data), void* user_data)
+bool ImGui_ImplVulkan_LoadFunctions(PFN_vkVoidFunction (*loader_func)(const char *function_name, void *user_data), void *user_data)
 {
     // Load function pointers
     // You can use the default Vulkan loader using:
     //      ImGui_ImplVulkan_LoadFunctions([](const char* function_name, void*) { return vkGetInstanceProcAddr(your_vk_isntance, function_name); });
     // But this would be equivalent to not setting VK_NO_PROTOTYPES.
 #ifdef VK_NO_PROTOTYPES
-#define IMGUI_VULKAN_FUNC_LOAD(func) \
-    func = reinterpret_cast<decltype(func)>(loader_func(#func, user_data)); \
-    if (func == NULL)   \
-        return false;
+#    define IMGUI_VULKAN_FUNC_LOAD(func)                                        \
+        func = reinterpret_cast<decltype(func)>(loader_func(#func, user_data)); \
+        if (func == NULL)                                                       \
+            return false;
     IMGUI_VULKAN_FUNC_MAP(IMGUI_VULKAN_FUNC_LOAD)
-#undef IMGUI_VULKAN_FUNC_LOAD
+#    undef IMGUI_VULKAN_FUNC_LOAD
 #else
     IM_UNUSED(loader_func);
     IM_UNUSED(user_data);
@@ -1077,19 +1105,19 @@ bool    ImGui_ImplVulkan_LoadFunctions(PFN_vkVoidFunction(*loader_func)(const ch
     return true;
 }
 
-bool    ImGui_ImplVulkan_Init(ImGui_ImplVulkan_InitInfo* info, VkRenderPass render_pass)
+bool ImGui_ImplVulkan_Init(ImGui_ImplVulkan_InitInfo *info, VkRenderPass render_pass)
 {
     IM_ASSERT(g_FunctionsLoaded && "Need to call ImGui_ImplVulkan_LoadFunctions() if IMGUI_IMPL_VULKAN_NO_PROTOTYPES or VK_NO_PROTOTYPES are set!");
 
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO &io = ImGui::GetIO();
     IM_ASSERT(io.BackendRendererUserData == NULL && "Already initialized a renderer backend!");
 
     // Setup backend capabilities flags
-    ImGui_ImplVulkan_Data* bd = IM_NEW(ImGui_ImplVulkan_Data)();
-    io.BackendRendererUserData = (void*)bd;
+    ImGui_ImplVulkan_Data *bd = IM_NEW(ImGui_ImplVulkan_Data)();
+    io.BackendRendererUserData = (void *)bd;
     io.BackendRendererName = "imgui_impl_vulkan";
-    io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;  // We can honor the ImDrawCmd::VtxOffset field, allowing for large meshes.
-    io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;  // We can create multi-viewports on the Renderer side (optional)
+    io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset; // We can honor the ImDrawCmd::VtxOffset field, allowing for large meshes.
+    io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports; // We can create multi-viewports on the Renderer side (optional)
 
     IM_ASSERT(info->Instance != VK_NULL_HANDLE);
     IM_ASSERT(info->PhysicalDevice != VK_NULL_HANDLE);
@@ -1107,7 +1135,7 @@ bool    ImGui_ImplVulkan_Init(ImGui_ImplVulkan_InitInfo* info, VkRenderPass rend
     ImGui_ImplVulkan_CreateDeviceObjects();
 
     // Our render function expect RendererUserData to be storing the window render buffer we need (for the main viewport we won't use ->Window)
-    ImGuiViewport* main_viewport = ImGui::GetMainViewport();
+    ImGuiViewport *main_viewport = ImGui::GetMainViewport();
     main_viewport->RendererUserData = IM_NEW(ImGui_ImplVulkan_ViewportData)();
 
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -1118,16 +1146,16 @@ bool    ImGui_ImplVulkan_Init(ImGui_ImplVulkan_InitInfo* info, VkRenderPass rend
 
 void ImGui_ImplVulkan_Shutdown()
 {
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
     IM_ASSERT(bd != NULL && "No renderer backend to shutdown, or already shutdown?");
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO &io = ImGui::GetIO();
 
     // First destroy objects in all viewports
     ImGui_ImplVulkan_DestroyDeviceObjects();
 
     // Manually delete main viewport render data in-case we haven't initialized for viewports
-    ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-    if (ImGui_ImplVulkan_ViewportData* vd = (ImGui_ImplVulkan_ViewportData*)main_viewport->RendererUserData)
+    ImGuiViewport *main_viewport = ImGui::GetMainViewport();
+    if (ImGui_ImplVulkan_ViewportData *vd = (ImGui_ImplVulkan_ViewportData *)main_viewport->RendererUserData)
         IM_DELETE(vd);
     main_viewport->RendererUserData = NULL;
 
@@ -1141,20 +1169,20 @@ void ImGui_ImplVulkan_Shutdown()
 
 void ImGui_ImplVulkan_NewFrame()
 {
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
     IM_ASSERT(bd != NULL && "Did you call ImGui_ImplVulkan_Init()?");
     IM_UNUSED(bd);
 }
 
 void ImGui_ImplVulkan_SetMinImageCount(uint32_t min_image_count)
 {
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
     IM_ASSERT(min_image_count >= 2);
     if (bd->VulkanInitInfo.MinImageCount == min_image_count)
         return;
 
     IM_ASSERT(0); // FIXME-VIEWPORT: Unsupported. Need to recreate all swap chains!
-    ImGui_ImplVulkan_InitInfo* v = &bd->VulkanInitInfo;
+    ImGui_ImplVulkan_InitInfo *v = &bd->VulkanInitInfo;
     VkResult err = vkDeviceWaitIdle(v->Device);
     check_vk_result(err);
     ImGui_ImplVulkanH_DestroyAllViewportsRenderBuffers(v->Device, v->Allocator);
@@ -1166,12 +1194,12 @@ void ImGui_ImplVulkan_SetMinImageCount(uint32_t min_image_count)
 // FIXME: This is experimental in the sense that we are unsure how to best design/tackle this problem, please post to https://github.com/ocornut/imgui/pull/914 if you have suggestions.
 VkDescriptorSet ImGui_ImplVulkan_AddTexture(VkSampler sampler, VkImageView image_view, VkImageLayout image_layout)
 {
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
-    ImGui_ImplVulkan_InitInfo* v = &bd->VulkanInitInfo;
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
+    ImGui_ImplVulkan_InitInfo *v = &bd->VulkanInitInfo;
 
     // Create Descriptor Set:
     VkDescriptorSet descriptor_set;
-    /* {
+    {
         VkDescriptorSetAllocateInfo alloc_info = {};
         alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
         alloc_info.descriptorPool = v->DescriptorPool;
@@ -1194,7 +1222,7 @@ VkDescriptorSet ImGui_ImplVulkan_AddTexture(VkSampler sampler, VkImageView image
         write_desc[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         write_desc[0].pImageInfo = desc_image;
         vkUpdateDescriptorSets(v->Device, 1, write_desc, 0, NULL);
-    }*/
+    }
     return descriptor_set;
 }
 
@@ -1214,7 +1242,7 @@ VkDescriptorSet ImGui_ImplVulkan_AddTexture(VkSampler sampler, VkImageView image
 // (The ImGui_ImplVulkanH_XXX functions do not interact with any of the state used by the regular ImGui_ImplVulkan_XXX functions)
 //-------------------------------------------------------------------------
 
-VkSurfaceFormatKHR ImGui_ImplVulkanH_SelectSurfaceFormat(VkPhysicalDevice physical_device, VkSurfaceKHR surface, const VkFormat* request_formats, int request_formats_count, VkColorSpaceKHR request_color_space)
+VkSurfaceFormatKHR ImGui_ImplVulkanH_SelectSurfaceFormat(VkPhysicalDevice physical_device, VkSurfaceKHR surface, const VkFormat *request_formats, int request_formats_count, VkColorSpaceKHR request_color_space)
 {
     IM_ASSERT(g_FunctionsLoaded && "Need to call ImGui_ImplVulkan_LoadFunctions() if IMGUI_IMPL_VULKAN_NO_PROTOTYPES or VK_NO_PROTOTYPES are set!");
     IM_ASSERT(request_formats != NULL);
@@ -1231,23 +1259,17 @@ VkSurfaceFormatKHR ImGui_ImplVulkanH_SelectSurfaceFormat(VkPhysicalDevice physic
     vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, surface, &avail_count, avail_format.Data);
 
     // First check if only one format, VK_FORMAT_UNDEFINED, is available, which would imply that any format is available
-    if (avail_count == 1)
-    {
-        if (avail_format[0].format == VK_FORMAT_UNDEFINED)
-        {
+    if (avail_count == 1) {
+        if (avail_format[0].format == VK_FORMAT_UNDEFINED) {
             VkSurfaceFormatKHR ret;
             ret.format = request_formats[0];
             ret.colorSpace = request_color_space;
             return ret;
-        }
-        else
-        {
+        } else {
             // No point in searching another format
             return avail_format[0];
         }
-    }
-    else
-    {
+    } else {
         // Request several formats, the first found will be used
         for (int request_i = 0; request_i < request_formats_count; request_i++)
             for (uint32_t avail_i = 0; avail_i < avail_count; avail_i++)
@@ -1259,7 +1281,7 @@ VkSurfaceFormatKHR ImGui_ImplVulkanH_SelectSurfaceFormat(VkPhysicalDevice physic
     }
 }
 
-VkPresentModeKHR ImGui_ImplVulkanH_SelectPresentMode(VkPhysicalDevice physical_device, VkSurfaceKHR surface, const VkPresentModeKHR* request_modes, int request_modes_count)
+VkPresentModeKHR ImGui_ImplVulkanH_SelectPresentMode(VkPhysicalDevice physical_device, VkSurfaceKHR surface, const VkPresentModeKHR *request_modes, int request_modes_count)
 {
     IM_ASSERT(g_FunctionsLoaded && "Need to call ImGui_ImplVulkan_LoadFunctions() if IMGUI_IMPL_VULKAN_NO_PROTOTYPES or VK_NO_PROTOTYPES are set!");
     IM_ASSERT(request_modes != NULL);
@@ -1282,7 +1304,7 @@ VkPresentModeKHR ImGui_ImplVulkanH_SelectPresentMode(VkPhysicalDevice physical_d
     return VK_PRESENT_MODE_FIFO_KHR; // Always available
 }
 
-void ImGui_ImplVulkanH_CreateWindowCommandBuffers(VkPhysicalDevice physical_device, VkDevice device, ImGui_ImplVulkanH_Window* wd, uint32_t queue_family, const VkAllocationCallbacks* allocator)
+void ImGui_ImplVulkanH_CreateWindowCommandBuffers(VkPhysicalDevice physical_device, VkDevice device, ImGui_ImplVulkanH_Window *wd, uint32_t queue_family, const VkAllocationCallbacks *allocator)
 {
     IM_ASSERT(physical_device != VK_NULL_HANDLE && device != VK_NULL_HANDLE);
     (void)physical_device;
@@ -1290,10 +1312,9 @@ void ImGui_ImplVulkanH_CreateWindowCommandBuffers(VkPhysicalDevice physical_devi
 
     // Create Command Buffers
     VkResult err;
-    for (uint32_t i = 0; i < wd->ImageCount; i++)
-    {
-        ImGui_ImplVulkanH_Frame* fd = &wd->Frames[i];
-        ImGui_ImplVulkanH_FrameSemaphores* fsd = &wd->FrameSemaphores[i];
+    for (uint32_t i = 0; i < wd->ImageCount; i++) {
+        ImGui_ImplVulkanH_Frame *fd = &wd->Frames[i];
+        ImGui_ImplVulkanH_FrameSemaphores *fsd = &wd->FrameSemaphores[i];
         {
             VkCommandPoolCreateInfo info = {};
             info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -1342,7 +1363,7 @@ int ImGui_ImplVulkanH_GetMinImageCountFromPresentMode(VkPresentModeKHR present_m
 }
 
 // Also destroy old swap chain and in-flight frames data, if any.
-void ImGui_ImplVulkanH_CreateWindowSwapChain(VkPhysicalDevice physical_device, VkDevice device, ImGui_ImplVulkanH_Window* wd, const VkAllocationCallbacks* allocator, int w, int h, uint32_t min_image_count)
+void ImGui_ImplVulkanH_CreateWindowSwapChain(VkPhysicalDevice physical_device, VkDevice device, ImGui_ImplVulkanH_Window *wd, const VkAllocationCallbacks *allocator, int w, int h, uint32_t min_image_count)
 {
     VkResult err;
     VkSwapchainKHR old_swapchain = wd->Swapchain;
@@ -1352,8 +1373,7 @@ void ImGui_ImplVulkanH_CreateWindowSwapChain(VkPhysicalDevice physical_device, V
 
     // We don't use ImGui_ImplVulkanH_DestroyWindow() because we want to preserve the old swapchain to create the new one.
     // Destroy old Framebuffer
-    for (uint32_t i = 0; i < wd->ImageCount; i++)
-    {
+    for (uint32_t i = 0; i < wd->ImageCount; i++) {
         ImGui_ImplVulkanH_DestroyFrame(device, &wd->Frames[i], allocator);
         ImGui_ImplVulkanH_DestroyFrameSemaphores(device, &wd->FrameSemaphores[i], allocator);
     }
@@ -1381,7 +1401,7 @@ void ImGui_ImplVulkanH_CreateWindowSwapChain(VkPhysicalDevice physical_device, V
         info.imageColorSpace = wd->SurfaceFormat.colorSpace;
         info.imageArrayLayers = 1;
         info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-        info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;           // Assume that graphics family == present family
+        info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE; // Assume that graphics family == present family
         info.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
         info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
         info.presentMode = wd->PresentMode;
@@ -1395,13 +1415,10 @@ void ImGui_ImplVulkanH_CreateWindowSwapChain(VkPhysicalDevice physical_device, V
         else if (cap.maxImageCount != 0 && info.minImageCount > cap.maxImageCount)
             info.minImageCount = cap.maxImageCount;
 
-        if (cap.currentExtent.width == 0xffffffff)
-        {
+        if (cap.currentExtent.width == 0xffffffff) {
             info.imageExtent.width = wd->Width = w;
             info.imageExtent.height = wd->Height = h;
-        }
-        else
-        {
+        } else {
             info.imageExtent.width = wd->Width = cap.currentExtent.width;
             info.imageExtent.height = wd->Height = cap.currentExtent.height;
         }
@@ -1416,8 +1433,8 @@ void ImGui_ImplVulkanH_CreateWindowSwapChain(VkPhysicalDevice physical_device, V
         check_vk_result(err);
 
         IM_ASSERT(wd->Frames == NULL);
-        wd->Frames = (ImGui_ImplVulkanH_Frame*)IM_ALLOC(sizeof(ImGui_ImplVulkanH_Frame) * wd->ImageCount);
-        wd->FrameSemaphores = (ImGui_ImplVulkanH_FrameSemaphores*)IM_ALLOC(sizeof(ImGui_ImplVulkanH_FrameSemaphores) * wd->ImageCount);
+        wd->Frames = (ImGui_ImplVulkanH_Frame *)IM_ALLOC(sizeof(ImGui_ImplVulkanH_Frame) * wd->ImageCount);
+        wd->FrameSemaphores = (ImGui_ImplVulkanH_FrameSemaphores *)IM_ALLOC(sizeof(ImGui_ImplVulkanH_FrameSemaphores) * wd->ImageCount);
         memset(wd->Frames, 0, sizeof(wd->Frames[0]) * wd->ImageCount);
         memset(wd->FrameSemaphores, 0, sizeof(wd->FrameSemaphores[0]) * wd->ImageCount);
         for (uint32_t i = 0; i < wd->ImageCount; i++)
@@ -1479,9 +1496,8 @@ void ImGui_ImplVulkanH_CreateWindowSwapChain(VkPhysicalDevice physical_device, V
         info.components.a = VK_COMPONENT_SWIZZLE_A;
         VkImageSubresourceRange image_range = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
         info.subresourceRange = image_range;
-        for (uint32_t i = 0; i < wd->ImageCount; i++)
-        {
-            ImGui_ImplVulkanH_Frame* fd = &wd->Frames[i];
+        for (uint32_t i = 0; i < wd->ImageCount; i++) {
+            ImGui_ImplVulkanH_Frame *fd = &wd->Frames[i];
             info.image = fd->Backbuffer;
             err = vkCreateImageView(device, &info, allocator, &fd->BackbufferView);
             check_vk_result(err);
@@ -1499,9 +1515,8 @@ void ImGui_ImplVulkanH_CreateWindowSwapChain(VkPhysicalDevice physical_device, V
         info.width = wd->Width;
         info.height = wd->Height;
         info.layers = 1;
-        for (uint32_t i = 0; i < wd->ImageCount; i++)
-        {
-            ImGui_ImplVulkanH_Frame* fd = &wd->Frames[i];
+        for (uint32_t i = 0; i < wd->ImageCount; i++) {
+            ImGui_ImplVulkanH_Frame *fd = &wd->Frames[i];
             attachment[0] = fd->BackbufferView;
             err = vkCreateFramebuffer(device, &info, allocator, &fd->Framebuffer);
             check_vk_result(err);
@@ -1510,7 +1525,7 @@ void ImGui_ImplVulkanH_CreateWindowSwapChain(VkPhysicalDevice physical_device, V
 }
 
 // Create or resize window
-void ImGui_ImplVulkanH_CreateOrResizeWindow(VkInstance instance, VkPhysicalDevice physical_device, VkDevice device, ImGui_ImplVulkanH_Window* wd, uint32_t queue_family, const VkAllocationCallbacks* allocator, int width, int height, uint32_t min_image_count)
+void ImGui_ImplVulkanH_CreateOrResizeWindow(VkInstance instance, VkPhysicalDevice physical_device, VkDevice device, ImGui_ImplVulkanH_Window *wd, uint32_t queue_family, const VkAllocationCallbacks *allocator, int width, int height, uint32_t min_image_count)
 {
     IM_ASSERT(g_FunctionsLoaded && "Need to call ImGui_ImplVulkan_LoadFunctions() if IMGUI_IMPL_VULKAN_NO_PROTOTYPES or VK_NO_PROTOTYPES are set!");
     (void)instance;
@@ -1519,13 +1534,12 @@ void ImGui_ImplVulkanH_CreateOrResizeWindow(VkInstance instance, VkPhysicalDevic
     ImGui_ImplVulkanH_CreateWindowCommandBuffers(physical_device, device, wd, queue_family, allocator);
 }
 
-void ImGui_ImplVulkanH_DestroyWindow(VkInstance instance, VkDevice device, ImGui_ImplVulkanH_Window* wd, const VkAllocationCallbacks* allocator)
+void ImGui_ImplVulkanH_DestroyWindow(VkInstance instance, VkDevice device, ImGui_ImplVulkanH_Window *wd, const VkAllocationCallbacks *allocator)
 {
     vkDeviceWaitIdle(device); // FIXME: We could wait on the Queue if we had the queue in wd-> (otherwise VulkanH functions can't use globals)
     //vkQueueWaitIdle(bd->Queue);
 
-    for (uint32_t i = 0; i < wd->ImageCount; i++)
-    {
+    for (uint32_t i = 0; i < wd->ImageCount; i++) {
         ImGui_ImplVulkanH_DestroyFrame(device, &wd->Frames[i], allocator);
         ImGui_ImplVulkanH_DestroyFrameSemaphores(device, &wd->FrameSemaphores[i], allocator);
     }
@@ -1541,7 +1555,7 @@ void ImGui_ImplVulkanH_DestroyWindow(VkInstance instance, VkDevice device, ImGui
     *wd = ImGui_ImplVulkanH_Window();
 }
 
-void ImGui_ImplVulkanH_DestroyFrame(VkDevice device, ImGui_ImplVulkanH_Frame* fd, const VkAllocationCallbacks* allocator)
+void ImGui_ImplVulkanH_DestroyFrame(VkDevice device, ImGui_ImplVulkanH_Frame *fd, const VkAllocationCallbacks *allocator)
 {
     vkDestroyFence(device, fd->Fence, allocator);
     vkFreeCommandBuffers(device, fd->CommandPool, 1, &fd->CommandBuffer);
@@ -1554,24 +1568,36 @@ void ImGui_ImplVulkanH_DestroyFrame(VkDevice device, ImGui_ImplVulkanH_Frame* fd
     vkDestroyFramebuffer(device, fd->Framebuffer, allocator);
 }
 
-void ImGui_ImplVulkanH_DestroyFrameSemaphores(VkDevice device, ImGui_ImplVulkanH_FrameSemaphores* fsd, const VkAllocationCallbacks* allocator)
+void ImGui_ImplVulkanH_DestroyFrameSemaphores(VkDevice device, ImGui_ImplVulkanH_FrameSemaphores *fsd, const VkAllocationCallbacks *allocator)
 {
     vkDestroySemaphore(device, fsd->ImageAcquiredSemaphore, allocator);
     vkDestroySemaphore(device, fsd->RenderCompleteSemaphore, allocator);
     fsd->ImageAcquiredSemaphore = fsd->RenderCompleteSemaphore = VK_NULL_HANDLE;
 }
 
-void ImGui_ImplVulkanH_DestroyFrameRenderBuffers(VkDevice device, ImGui_ImplVulkanH_FrameRenderBuffers* buffers, const VkAllocationCallbacks* allocator)
+void ImGui_ImplVulkanH_DestroyFrameRenderBuffers(VkDevice device, ImGui_ImplVulkanH_FrameRenderBuffers *buffers, const VkAllocationCallbacks *allocator)
 {
-    if (buffers->VertexBuffer) { vkDestroyBuffer(device, buffers->VertexBuffer, allocator); buffers->VertexBuffer = VK_NULL_HANDLE; }
-    if (buffers->VertexBufferMemory) { vkFreeMemory(device, buffers->VertexBufferMemory, allocator); buffers->VertexBufferMemory = VK_NULL_HANDLE; }
-    if (buffers->IndexBuffer) { vkDestroyBuffer(device, buffers->IndexBuffer, allocator); buffers->IndexBuffer = VK_NULL_HANDLE; }
-    if (buffers->IndexBufferMemory) { vkFreeMemory(device, buffers->IndexBufferMemory, allocator); buffers->IndexBufferMemory = VK_NULL_HANDLE; }
+    if (buffers->VertexBuffer) {
+        vkDestroyBuffer(device, buffers->VertexBuffer, allocator);
+        buffers->VertexBuffer = VK_NULL_HANDLE;
+    }
+    if (buffers->VertexBufferMemory) {
+        vkFreeMemory(device, buffers->VertexBufferMemory, allocator);
+        buffers->VertexBufferMemory = VK_NULL_HANDLE;
+    }
+    if (buffers->IndexBuffer) {
+        vkDestroyBuffer(device, buffers->IndexBuffer, allocator);
+        buffers->IndexBuffer = VK_NULL_HANDLE;
+    }
+    if (buffers->IndexBufferMemory) {
+        vkFreeMemory(device, buffers->IndexBufferMemory, allocator);
+        buffers->IndexBufferMemory = VK_NULL_HANDLE;
+    }
     buffers->VertexBufferSize = 0;
     buffers->IndexBufferSize = 0;
 }
 
-void ImGui_ImplVulkanH_DestroyWindowRenderBuffers(VkDevice device, ImGui_ImplVulkanH_WindowRenderBuffers* buffers, const VkAllocationCallbacks* allocator)
+void ImGui_ImplVulkanH_DestroyWindowRenderBuffers(VkDevice device, ImGui_ImplVulkanH_WindowRenderBuffers *buffers, const VkAllocationCallbacks *allocator)
 {
     for (uint32_t n = 0; n < buffers->Count; n++)
         ImGui_ImplVulkanH_DestroyFrameRenderBuffers(device, &buffers->FrameRenderBuffers[n], allocator);
@@ -1581,11 +1607,11 @@ void ImGui_ImplVulkanH_DestroyWindowRenderBuffers(VkDevice device, ImGui_ImplVul
     buffers->Count = 0;
 }
 
-void ImGui_ImplVulkanH_DestroyAllViewportsRenderBuffers(VkDevice device, const VkAllocationCallbacks* allocator)
+void ImGui_ImplVulkanH_DestroyAllViewportsRenderBuffers(VkDevice device, const VkAllocationCallbacks *allocator)
 {
-    ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
+    ImGuiPlatformIO &platform_io = ImGui::GetPlatformIO();
     for (int n = 0; n < platform_io.Viewports.Size; n++)
-        if (ImGui_ImplVulkan_ViewportData* vd = (ImGui_ImplVulkan_ViewportData*)platform_io.Viewports[n]->RendererUserData)
+        if (ImGui_ImplVulkan_ViewportData *vd = (ImGui_ImplVulkan_ViewportData *)platform_io.Viewports[n]->RendererUserData)
             ImGui_ImplVulkanH_DestroyWindowRenderBuffers(device, &vd->RenderBuffers, allocator);
 }
 
@@ -1595,30 +1621,29 @@ void ImGui_ImplVulkanH_DestroyAllViewportsRenderBuffers(VkDevice device, const V
 // If you are new to dear imgui or creating a new binding for dear imgui, it is recommended that you completely ignore this section first..
 //--------------------------------------------------------------------------------------------------------
 
-static void ImGui_ImplVulkan_CreateWindow(ImGuiViewport* viewport)
+static void ImGui_ImplVulkan_CreateWindow(ImGuiViewport *viewport)
 {
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
-    ImGui_ImplVulkan_ViewportData* vd = IM_NEW(ImGui_ImplVulkan_ViewportData)();
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
+    ImGui_ImplVulkan_ViewportData *vd = IM_NEW(ImGui_ImplVulkan_ViewportData)();
     viewport->RendererUserData = vd;
-    ImGui_ImplVulkanH_Window* wd = &vd->Window;
-    ImGui_ImplVulkan_InitInfo* v = &bd->VulkanInitInfo;
+    ImGui_ImplVulkanH_Window *wd = &vd->Window;
+    ImGui_ImplVulkan_InitInfo *v = &bd->VulkanInitInfo;
 
     // Create surface
-    ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
-    VkResult err = (VkResult)platform_io.Platform_CreateVkSurface(viewport, (ImU64)v->Instance, (const void*)v->Allocator, (ImU64*)&wd->Surface);
+    ImGuiPlatformIO &platform_io = ImGui::GetPlatformIO();
+    VkResult err = (VkResult)platform_io.Platform_CreateVkSurface(viewport, (ImU64)v->Instance, (const void *)v->Allocator, (ImU64 *)&wd->Surface);
     check_vk_result(err);
 
     // Check for WSI support
     VkBool32 res;
     vkGetPhysicalDeviceSurfaceSupportKHR(v->PhysicalDevice, v->QueueFamily, wd->Surface, &res);
-    if (res != VK_TRUE)
-    {
+    if (res != VK_TRUE) {
         IM_ASSERT(0); // Error: no WSI support on physical device
         return;
     }
 
     // Select Surface Format
-    const VkFormat requestSurfaceImageFormat[] = { VK_FORMAT_B8G8R8A8_SRGB, VK_FORMAT_R8G8B8A8_SRGB, VK_FORMAT_B8G8R8_SRGB, VK_FORMAT_R8G8B8_SRGB };
+    const VkFormat requestSurfaceImageFormat[] = { VK_FORMAT_R8G8B8A8_SRGB, VK_FORMAT_R8G8B8_SRGB };
     const VkColorSpaceKHR requestSurfaceColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
     wd->SurfaceFormat = ImGui_ImplVulkanH_SelectSurfaceFormat(v->PhysicalDevice, wd->Surface, requestSurfaceImageFormat, (size_t)IM_ARRAYSIZE(requestSurfaceImageFormat), requestSurfaceColorSpace);
 
@@ -1634,13 +1659,12 @@ static void ImGui_ImplVulkan_CreateWindow(ImGuiViewport* viewport)
     vd->WindowOwned = true;
 }
 
-static void ImGui_ImplVulkan_DestroyWindow(ImGuiViewport* viewport)
+static void ImGui_ImplVulkan_DestroyWindow(ImGuiViewport *viewport)
 {
     // The main viewport (owned by the application) will always have RendererUserData == NULL since we didn't create the data for it.
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
-    if (ImGui_ImplVulkan_ViewportData* vd = (ImGui_ImplVulkan_ViewportData*)viewport->RendererUserData)
-    {
-        ImGui_ImplVulkan_InitInfo* v = &bd->VulkanInitInfo;
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
+    if (ImGui_ImplVulkan_ViewportData *vd = (ImGui_ImplVulkan_ViewportData *)viewport->RendererUserData) {
+        ImGui_ImplVulkan_InitInfo *v = &bd->VulkanInitInfo;
         if (vd->WindowOwned)
             ImGui_ImplVulkanH_DestroyWindow(v->Instance, v->Device, &vd->Window, v->Allocator);
         ImGui_ImplVulkanH_DestroyWindowRenderBuffers(v->Device, &vd->RenderBuffers, v->Allocator);
@@ -1649,38 +1673,39 @@ static void ImGui_ImplVulkan_DestroyWindow(ImGuiViewport* viewport)
     viewport->RendererUserData = NULL;
 }
 
-static void ImGui_ImplVulkan_SetWindowSize(ImGuiViewport* viewport, ImVec2 size)
+static void ImGui_ImplVulkan_SetWindowSize(ImGuiViewport *viewport, ImVec2 size)
 {
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
-    ImGui_ImplVulkan_ViewportData* vd = (ImGui_ImplVulkan_ViewportData*)viewport->RendererUserData;
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
+    ImGui_ImplVulkan_ViewportData *vd = (ImGui_ImplVulkan_ViewportData *)viewport->RendererUserData;
     if (vd == NULL) // This is NULL for the main viewport (which is left to the user/app to handle)
         return;
-    ImGui_ImplVulkan_InitInfo* v = &bd->VulkanInitInfo;
+    ImGui_ImplVulkan_InitInfo *v = &bd->VulkanInitInfo;
     vd->Window.ClearEnable = (viewport->Flags & ImGuiViewportFlags_NoRendererClear) ? false : true;
     ImGui_ImplVulkanH_CreateOrResizeWindow(v->Instance, v->PhysicalDevice, v->Device, &vd->Window, v->QueueFamily, v->Allocator, (int)size.x, (int)size.y, v->MinImageCount);
 }
 
-static void ImGui_ImplVulkan_RenderWindow(ImGuiViewport* viewport, void*)
+static void ImGui_ImplVulkan_RenderWindow(ImGuiViewport *viewport, void *)
 {
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
-    ImGui_ImplVulkan_ViewportData* vd = (ImGui_ImplVulkan_ViewportData*)viewport->RendererUserData;
-    ImGui_ImplVulkanH_Window* wd = &vd->Window;
-    ImGui_ImplVulkan_InitInfo* v = &bd->VulkanInitInfo;
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
+    ImGui_ImplVulkan_ViewportData *vd = (ImGui_ImplVulkan_ViewportData *)viewport->RendererUserData;
+    ImGui_ImplVulkanH_Window *wd = &vd->Window;
+    ImGui_ImplVulkan_InitInfo *v = &bd->VulkanInitInfo;
     VkResult err;
 
-    ImGui_ImplVulkanH_Frame* fd = &wd->Frames[wd->FrameIndex];
-    ImGui_ImplVulkanH_FrameSemaphores* fsd = &wd->FrameSemaphores[wd->SemaphoreIndex];
+    ImGui_ImplVulkanH_Frame *fd = &wd->Frames[wd->FrameIndex];
+    ImGui_ImplVulkanH_FrameSemaphores *fsd = &wd->FrameSemaphores[wd->SemaphoreIndex];
     {
         {
-          err = vkAcquireNextImageKHR(v->Device, wd->Swapchain, UINT64_MAX, fsd->ImageAcquiredSemaphore, VK_NULL_HANDLE, &wd->FrameIndex);
-          check_vk_result(err);
-          fd = &wd->Frames[wd->FrameIndex];
+            err = vkAcquireNextImageKHR(v->Device, wd->Swapchain, UINT64_MAX, fsd->ImageAcquiredSemaphore, VK_NULL_HANDLE, &wd->FrameIndex);
+            check_vk_result(err);
+            fd = &wd->Frames[wd->FrameIndex];
         }
-        for (;;)
-        {
+        for (;;) {
             err = vkWaitForFences(v->Device, 1, &fd->Fence, VK_TRUE, 100);
-            if (err == VK_SUCCESS) break;
-            if (err == VK_TIMEOUT) continue;
+            if (err == VK_SUCCESS)
+                break;
+            if (err == VK_TIMEOUT)
+                continue;
             check_vk_result(err);
         }
         {
@@ -1734,17 +1759,17 @@ static void ImGui_ImplVulkan_RenderWindow(ImGuiViewport* viewport, void*)
     }
 }
 
-static void ImGui_ImplVulkan_SwapBuffers(ImGuiViewport* viewport, void*)
+static void ImGui_ImplVulkan_SwapBuffers(ImGuiViewport *viewport, void *)
 {
-    ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
-    ImGui_ImplVulkan_ViewportData* vd = (ImGui_ImplVulkan_ViewportData*)viewport->RendererUserData;
-    ImGui_ImplVulkanH_Window* wd = &vd->Window;
-    ImGui_ImplVulkan_InitInfo* v = &bd->VulkanInitInfo;
+    ImGui_ImplVulkan_Data *bd = ImGui_ImplVulkan_GetBackendData();
+    ImGui_ImplVulkan_ViewportData *vd = (ImGui_ImplVulkan_ViewportData *)viewport->RendererUserData;
+    ImGui_ImplVulkanH_Window *wd = &vd->Window;
+    ImGui_ImplVulkan_InitInfo *v = &bd->VulkanInitInfo;
 
     VkResult err;
     uint32_t present_index = wd->FrameIndex;
 
-    ImGui_ImplVulkanH_FrameSemaphores* fsd = &wd->FrameSemaphores[wd->SemaphoreIndex];
+    ImGui_ImplVulkanH_FrameSemaphores *fsd = &wd->FrameSemaphores[wd->SemaphoreIndex];
     VkPresentInfoKHR info = {};
     info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     info.waitSemaphoreCount = 1;
@@ -1758,13 +1783,13 @@ static void ImGui_ImplVulkan_SwapBuffers(ImGuiViewport* viewport, void*)
     else
         check_vk_result(err);
 
-    wd->FrameIndex = (wd->FrameIndex + 1) % wd->ImageCount;         // This is for the next vkWaitForFences()
+    wd->FrameIndex = (wd->FrameIndex + 1) % wd->ImageCount; // This is for the next vkWaitForFences()
     wd->SemaphoreIndex = (wd->SemaphoreIndex + 1) % wd->ImageCount; // Now we can use the next set of semaphores
 }
 
 void ImGui_ImplVulkan_InitPlatformInterface()
 {
-    ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
+    ImGuiPlatformIO &platform_io = ImGui::GetPlatformIO();
     if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         IM_ASSERT(platform_io.Platform_CreateVkSurface != NULL && "Platform needs to setup the CreateVkSurface handler.");
     platform_io.Renderer_CreateWindow = ImGui_ImplVulkan_CreateWindow;

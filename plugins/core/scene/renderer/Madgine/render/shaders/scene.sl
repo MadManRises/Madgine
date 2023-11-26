@@ -13,6 +13,9 @@ struct ScenePerApplication {
 
 struct ScenePerFrame {
 	int pointLightCount;
+	float _padding0;
+	float _padding1;
+	float _padding2;
 
 	DirectionalShadowLight light;
 
@@ -21,8 +24,10 @@ struct ScenePerFrame {
 
 struct SceneInstanceData{
 	row_major float4x4 mv;
-	row_major float4x4 anti_mv;
-	//ArrayPtr<float4x4> bones;
+	row_major float4x4 anti_mv;	
+	ArrayPtr<float4x4> bones;
+	float _padding0;
+	float _padding1;
 };
 
 struct ScenePerObject {

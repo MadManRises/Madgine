@@ -46,6 +46,7 @@ inline void glCheck()
             out << "GL-Error: ";
             switch (e) {
                 CONSTANT_CASE(GL_INVALID_ENUM, out)
+                CONSTANT_CASE(GL_INVALID_VALUE, out)
                 CONSTANT_CASE(GL_INVALID_FRAMEBUFFER_OPERATION, out)
                 CONSTANT_CASE(GL_INVALID_OPERATION, out)
             default:
@@ -55,7 +56,7 @@ inline void glCheck()
             LOG_FATAL(out.str());
         }
         glDump();
-        std::terminate();
+        //std::terminate();
     }
 }
 

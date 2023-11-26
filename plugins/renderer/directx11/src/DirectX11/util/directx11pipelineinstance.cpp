@@ -97,18 +97,25 @@ namespace Render {
         }
     }
 
-    void DirectX11PipelineInstance::bindTextures(RenderTarget *target, const std::vector<TextureDescriptor> &tex, size_t offset) const
+    void DirectX11PipelineInstance::bindTempBuffers(RenderTarget *target, size_t space, const std::vector<ByteBuffer> &buffers) const
     {
-        bindTexturesImpl(tex, offset);
+        for (const ByteBuffer &buffer : buffers) {
+            DirectX11Buffer instanceBuffer { D3D11_BIND_VERTEX_BUFFER, buffer };
+        }
     }
 
-    void DirectX11PipelineInstance::bindTexturesImpl(const std::vector<TextureDescriptor> &tex, size_t offset)
+    void DirectX11PipelineInstance::bindTextures(RenderTarget *target, size_t space, const std::vector<TextureDescriptor> &tex) const
+    {
+        bindTexturesImpl(space, tex);
+    }
+
+    void DirectX11PipelineInstance::bindTexturesImpl(size_t space, const std::vector<TextureDescriptor> &tex)
     {
         std::vector<ID3D11ShaderResourceView *> handles;
         std::ranges::transform(tex, std::back_inserter(handles), [](const TextureDescriptor &desc) {
             return reinterpret_cast<ID3D11ShaderResourceView *>(desc.mTextureHandle);
         });
-        sDeviceContext->PSSetShaderResources(offset, tex.size(), handles.data());
+        sDeviceContext->PSSetShaderResources(64 + 4 * space, tex.size(), handles.data());
     }
 
     DirectX11PipelineInstanceHandle::DirectX11PipelineInstanceHandle(const PipelineConfiguration &config, typename DirectX11VertexShaderLoader::Handle vertexShader, typename DirectX11PixelShaderLoader::Handle pixelShader)

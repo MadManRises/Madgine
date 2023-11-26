@@ -152,6 +152,12 @@ int transpileHLSL(int apilevel, const std::wstring &fileName, const std::wstring
                 }
             }
 
+            for (const spirv_cross::Resource &resource : hlsl.get_shader_resources().separate_images) {
+                uint32_t descriptorSpace = hlsl.get_decoration(resource.id, spv::DecorationDescriptorSet);
+                uint32_t registerIndex = hlsl.get_decoration(resource.id, spv::DecorationBinding);
+                hlsl.set_decoration(resource.id, spv::DecorationBinding, 16 + descriptorSpace * 4 + registerIndex);
+            }
+
             //hlsl.build_dummy_sampler_for_combined_images();
 
             //hlsl.build_combined_image_samplers();

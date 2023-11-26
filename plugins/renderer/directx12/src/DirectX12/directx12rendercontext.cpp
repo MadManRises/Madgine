@@ -80,11 +80,16 @@ namespace Render {
 
     DirectX12RenderContext::DirectX12RenderContext(Threading::TaskQueue *queue)
         : Component(queue)
-        , mDefaultAllocator(mDefaultMemoryHeap)
-        , mUploadAllocator(mUploadHeap)
         , mGraphicsQueue(D3D12_COMMAND_LIST_TYPE_DIRECT, "Graphics", &mDescriptorHeap)
         , mCopyQueue(D3D12_COMMAND_LIST_TYPE_COPY, "Copy", &mDescriptorHeap)
         , mComputeQueue(D3D12_COMMAND_LIST_TYPE_COMPUTE, "Compute", &mDescriptorHeap)
+        , mUploadAllocator(mUploadHeap)
+        , mBufferMemoryHeap(mDescriptorHeap)
+        , mBufferAllocator(mBufferMemoryHeap)
+        , mTempAllocator(mTempMemoryHeap)
+        , mConstantMemoryHeap(mDescriptorHeap)
+        , mConstantAllocator(mConstantMemoryHeap)
+        
     {
 
         assert(!sSingleton);
@@ -115,20 +120,22 @@ namespace Render {
             hr = GetDevice()->QueryInterface(IID_PPV_ARGS(&infoQueue));
 
             if (SUCCEEDED(hr)) {
-
-                /* hr = infoQueue->RegisterMessageCallback(
+                DWORD cookie;
+                hr = infoQueue->RegisterMessageCallback(
                     &dxDebugOutput,
                     D3D12_MESSAGE_CALLBACK_FLAG_NONE,
                     nullptr,
-                    nullptr);
-                DX12_CHECK(hr);*/
+                    &cookie);
+                DX12_CHECK(hr);
             }
         }
 
         mDescriptorHeap = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
         mRenderTargetDescriptorHeap = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
         mDepthStencilDescriptorHeap = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-        mConstantBufferHeap = { 16 * 1024 * 1024 };
+
+        mBufferMemoryHeap.setup(256);
+        mConstantMemoryHeap.setup(256);
 
         createRootSignature();
 
@@ -176,26 +183,23 @@ namespace Render {
 
     void DirectX12RenderContext::createRootSignature()
     {
-        CD3DX12_ROOT_PARAMETER rootParameters[10];
+        CD3DX12_ROOT_PARAMETER rootParameters[9];
 
         rootParameters[0].InitAsConstantBufferView(0);
         rootParameters[1].InitAsConstantBufferView(1);
         rootParameters[2].InitAsConstantBufferView(2);
 
-        CD3DX12_DESCRIPTOR_RANGE range;
-        range.Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0);
-
-        rootParameters[3].InitAsDescriptorTable(1, &range);
-
-        CD3DX12_DESCRIPTOR_RANGE ranges[5];
-        for (size_t i = 0; i < 5; ++i) {
-            ranges[i].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, i);
-            rootParameters[4 + i].InitAsDescriptorTable(1, ranges + i);
-        }
-
         CD3DX12_DESCRIPTOR_RANGE bindlessRange;
-        bindlessRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 256, 5);
-        rootParameters[9].InitAsDescriptorTable(1, &bindlessRange);
+        bindlessRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 64, 0, 0);
+        rootParameters[3].InitAsDescriptorTable(1, &bindlessRange);
+
+        rootParameters[4].InitAsShaderResourceView(0, 1);
+
+        CD3DX12_DESCRIPTOR_RANGE ranges[4];
+        for (size_t i = 0; i < 4; ++i) {
+            ranges[i].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 4, 0, i + 2);
+            rootParameters[5 + i].InitAsDescriptorTable(1, ranges + i);
+        }
 
         CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
         // Allow input layout and deny uneccessary access to certain pipeline stages.
@@ -222,7 +226,7 @@ namespace Render {
         samplerDesc[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
         samplerDesc[1].ShaderRegister = 1;
 
-        rootSignatureDesc.Init(10, rootParameters, 2, samplerDesc, rootSignatureFlags);
+        rootSignatureDesc.Init(9, rootParameters, 2, samplerDesc, rootSignatureFlags);
 
         ReleasePtr<ID3DBlob> signature;
         ReleasePtr<ID3DBlob> error;
@@ -230,6 +234,12 @@ namespace Render {
         DX12_CHECK(hr);
         hr = GetDevice()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&mRootSignature));
         DX12_CHECK(hr);
+    }
+
+    void DirectX12RenderContext::setupRootSignature(ID3D12GraphicsCommandList *list)
+    {
+        list->SetGraphicsRootSignature(mRootSignature);
+        list->SetGraphicsRootDescriptorTable(3, mBufferMemoryHeap.descriptorTable());
     }
 
     DirectX12CommandList DirectX12RenderContext::fetchCommandList(D3D12_COMMAND_LIST_TYPE type)
@@ -283,7 +293,7 @@ namespace Render {
     GPUBuffer<void> DirectX12RenderContext::allocateBufferImpl(size_t size)
     {
         GPUBuffer<void> result;
-        Block allocation = mDefaultAllocator.allocate(size);
+        Block allocation = mBufferAllocator.allocate(size);
 
         if (!allocation.mAddress)
             return {};
@@ -291,21 +301,22 @@ namespace Render {
         result.mPtr = reinterpret_cast<GPUPtr<void> &>(allocation.mAddress);
         result.mSize = allocation.mSize;
 
-        auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(result.mSize);
+        /* auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(result.mSize);
         GetDevice()->CreatePlacedResource(
             mDefaultMemoryHeap.heap(result.mPtr.mBuffer),
             result.mPtr.mOffset,
             &resourceDesc,
             D3D12_RESOURCE_STATE_GENERIC_READ,
             nullptr,
-            IID_PPV_ARGS(&result.mBuffer.setupAs<ID3D12Resource>()));
-
+            IID_PPV_ARGS(&result.mBuffer.setupAs<ID3D12Resource>()));*/
+        result.mBuffer.setupAs<ID3D12Resource*>() = mBufferMemoryHeap.resolve(allocation.mAddress).first;
         return result;
     }
 
     void DirectX12RenderContext::deallocateBufferImpl(GPUBuffer<void> buffer)
     {
-        mDefaultAllocator.deallocate({ reinterpret_cast<void *&>(buffer.mPtr), buffer.mSize });
+        buffer.mBuffer.release<ID3D12Resource *>();
+        mBufferAllocator.deallocate({ reinterpret_cast<void *&>(buffer.mPtr), buffer.mSize });
     }
 
     WritableByteBuffer DirectX12RenderContext::mapBufferImpl(GPUBuffer<void> &buffer)
@@ -343,6 +354,21 @@ namespace Render {
         return {
             std::unique_ptr<void, Deleter> { uploadAllocation.mAddress, { buffer.mPtr.mOffset, buffer.mBuffer, this, uploadAllocation.mSize } }, uploadAllocation.mSize
         };
+    }
+
+    UniqueResourceBlock DirectX12RenderContext::createResourceBlock(std::vector<const Texture*> textures)
+    {
+        OffsetPtr offset = mDescriptorHeap.allocate(textures.size());
+
+        UniqueResourceBlock block;
+
+        block.setupAs<D3D12_GPU_DESCRIPTOR_HANDLE>() = mDescriptorHeap.gpuHandle(offset);
+
+        for (size_t i = 0; i < textures.size(); ++i) {
+            static_cast<const DirectX12Texture *>(textures[i])->createShaderResourceView(offset + i);
+        }
+
+        return block;
     }
 
     static constexpr const char *vSemantics[] = {

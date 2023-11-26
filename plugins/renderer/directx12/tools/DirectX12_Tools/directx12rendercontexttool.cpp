@@ -42,7 +42,7 @@ namespace Tools {
 
             if (data.available()) {
                 mImageTexture.setData(data->mSize, data->mBuffer);
-                ImGui::Image((void *)mImageTexture.handle(), data->mSize);
+                ImGui::Image((void *)mImageTexture.resource(), data->mSize);
             }
         });
 

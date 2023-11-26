@@ -68,7 +68,7 @@ namespace Render {
         wchar_t name[128] = {};
         UINT size = sizeof(name);
         res->GetPrivateData(WKPDID_D3DDebugObjectNameW, &size, name);
-        LOG("Transitioning " << StringUtil::fromWString(name) << ": " << from << " -> " << to);
+        LOG_DEBUG("Transitioning " << StringUtil::fromWString(name) << ": " << from << " -> " << to);
     }
 
 }

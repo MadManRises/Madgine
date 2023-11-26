@@ -6,7 +6,7 @@ cbuffer PerObject : register(b2)
 }
 
 
-Texture2D tex : register(t0);
+Texture2D tex : register(t0, space2);
 SamplerState texSampler : register(s0);
 
 struct PixelShaderInput {

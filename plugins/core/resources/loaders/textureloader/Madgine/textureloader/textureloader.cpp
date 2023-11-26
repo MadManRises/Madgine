@@ -22,7 +22,7 @@ namespace Render {
     }
 
     Threading::TaskFuture<bool> TextureLoader::Ptr::create(
-        TextureType type, DataFormat format, Vector2i size, ByteBuffer data, TextureLoader * loader)
+        TextureType type, TextureFormat format, Vector2i size, ByteBuffer data, TextureLoader *loader)
     {
         return Base::Ptr::create(
             [=, data { std::move(data) }](TextureLoader *loader, Texture &texture) mutable {
@@ -36,7 +36,7 @@ namespace Render {
     }
 
     Threading::Task<bool> TextureLoader::Ptr::createTask(
-        TextureType type, DataFormat format, Vector2i size, ByteBuffer data, TextureLoader *loader)
+        TextureType type, TextureFormat format, Vector2i size, ByteBuffer data, TextureLoader *loader)
     {
         return Base::Ptr::createTask(
             [=, data { std::move(data) }](TextureLoader *loader, Texture &texture) mutable {
@@ -48,7 +48,7 @@ namespace Render {
             }, loader);
     }
 
-    Threading::TaskFuture<bool> TextureLoader::Handle::loadFromImage(std::string_view name, TextureType type, DataFormat format, TextureLoader *loader)
+    Threading::TaskFuture<bool> TextureLoader::Handle::loadFromImage(std::string_view name, TextureType type, TextureFormat format, TextureLoader *loader)
     {
         return Base::Handle::create(
             name, {}, [=](TextureLoader *loader, Texture &texture, const TextureLoader::ResourceDataInfo &info) -> Threading::Task<bool> {

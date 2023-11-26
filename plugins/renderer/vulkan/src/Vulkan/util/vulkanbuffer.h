@@ -2,6 +2,8 @@
 
 #include "Generic/offsetptr.h"
 
+#include "Generic/allocator/concepts.h"
+
 namespace Engine {
 namespace Render {
 
@@ -21,21 +23,16 @@ namespace Render {
         void bindVertex(VkCommandBuffer commandList, size_t index = 0) const;
         void bindIndex(VkCommandBuffer commandList) const;
 
-        void reset(size_t size = 0);
+        void reset();
         void setData(const ByteBuffer &data);
 
-        WritableByteBuffer mapData(size_t size);
-        WritableByteBuffer mapData();
-
-        OffsetPtr address() const;
+        size_t offset() const;
         VkBuffer buffer() const;
 
         size_t size() const;
 
     private:
-        size_t mSize = 0;
-        bool mIsPersistent;
-        OffsetPtr mAddress;
+        Block mBlock;
     };
 
 }

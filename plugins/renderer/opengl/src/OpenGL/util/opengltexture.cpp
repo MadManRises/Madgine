@@ -8,13 +8,12 @@
 namespace Engine {
 namespace Render {
 
-    OpenGLTexture::OpenGLTexture(TextureType type, DataFormat format, size_t samples)
+    OpenGLTexture::OpenGLTexture(TextureType type, TextureFormat format, size_t samples)
         : Texture(type, format)
         , mSamples(samples)
     {
         GLuint temp;
-        glGenTextures(1, &temp);
-        mTextureHandle = temp;
+        glGenTextures(1, &mTextureHandle.setupAs<GLuint>());         
         GL_CHECK();
         if (mType != TextureType_2DMultiSample)
             setFilter(GL_LINEAR);
@@ -27,6 +26,10 @@ namespace Render {
             GL_CHECK();
         }
 #endif
+
+        mBlock.mResources[0].mHandle = mTextureHandle;
+        mBlock.mResources[0].mTarget = target();
+        mResourceBlock.setupAs<OpenGLResourceBlock<1>*>() = &mBlock;
     }
 
     OpenGLTexture::~OpenGLTexture()
@@ -37,17 +40,25 @@ namespace Render {
     OpenGLTexture &OpenGLTexture::operator=(OpenGLTexture &&other)
     {
         Texture::operator=(std::move(other));
+        std::swap(mBlock, other.mBlock);
+        OpenGLResourceBlock<> *block = mResourceBlock.release<OpenGLResourceBlock<> *>();
+        assert(block == &other.mBlock);
+        mResourceBlock.setupAs<OpenGLResourceBlock<> *>() = &mBlock;
+
         std::swap(mSamples, other.mSamples);
         return *this;
     }
 
     void OpenGLTexture::reset()
     {
-        if (mTextureHandle) {
-            GLuint temp = mTextureHandle;
-            glDeleteTextures(1, &temp);
-            GL_CHECK();
-            mTextureHandle = 0;
+        if (mTextureHandle) {    
+            GLuint handle = mTextureHandle.release<GLuint>();
+            glDeleteTextures(1, &handle);
+            GL_CHECK();            
+        }
+        if (mResourceBlock) {
+            OpenGLResourceBlock<> *block = mResourceBlock.release<OpenGLResourceBlock<> *>();
+            assert(block == &mBlock);
         }
     }
 
@@ -203,7 +214,7 @@ namespace Render {
 
     OpenGLTexture::operator bool() const
     {
-        return mTextureHandle != 0;
+        return static_cast<bool>(mTextureHandle);
     }
 
 }

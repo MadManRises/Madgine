@@ -48,6 +48,7 @@ FolderSources(sources "" tools)
 			FolderSources(sources im3d shaders im3d.PS_hlsl im3d.VS_hlsl im3d.sl)
 		FolderSources(sources Madgine_Tools imgui clientimroot.cpp clientimroot.h projectmanager.cpp projectmanager.h)
 		FolderSources(sources Madgine_Tools render rendercontexttool.cpp rendercontexttool.h)
+		FolderSources(sources Madgine_Tools shaders imgui.PS_hlsl imgui.VS_hlsl)
 
 add_tools(Client ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/clienttoolslib.h)
 

@@ -32,6 +32,9 @@ METATABLE_END(Engine::Render::Bone)
 
 METATABLE_BEGIN(Engine::Render::SkeletonDescriptor)
 MEMBER(mBones)
+MEMBER(mMatrix)
+MEMBER(mMatrix1)
+MEMBER(mMatrix2)
 METATABLE_END(Engine::Render::SkeletonDescriptor)
 
 namespace Engine {

@@ -12,9 +12,7 @@ namespace Engine {
 namespace Render {
 
     DirectX12Buffer::DirectX12Buffer(DirectX12Buffer &&other)
-        : mAddress(std::exchange(other.mAddress, 0))
-        , mSize(std::exchange(other.mSize, 0))
-        , mIsPersistent(std::exchange(other.mIsPersistent, false))
+        : mBlock(std::exchange(other.mBlock, {}))
     {
     }
 
@@ -30,22 +28,20 @@ namespace Render {
 
     DirectX12Buffer &DirectX12Buffer::operator=(DirectX12Buffer &&other)
     {
-        std::swap(mAddress, other.mAddress);
-        std::swap(mSize, other.mSize);
-        std::swap(mIsPersistent, other.mIsPersistent);
+        std::swap(mBlock, other.mBlock);
         return *this;
     }
 
     DirectX12Buffer::operator bool() const
     {
-        return mSize > 0;
+        return mBlock.mAddress;
     }
 
     void DirectX12Buffer::bindVertex(ID3D12GraphicsCommandList *commandList, UINT stride, size_t index) const
     {
         D3D12_VERTEX_BUFFER_VIEW view;
-        view.BufferLocation = mAddress;
-        view.SizeInBytes = mSize;
+        view.BufferLocation = gpuAddress();
+        view.SizeInBytes = mBlock.mSize;
         view.StrideInBytes = stride;
         commandList->IASetVertexBuffers(index, 1, &view);
         DX12_LOG("Bind Vertex Buffer -> " << mAddress);
@@ -54,64 +50,65 @@ namespace Render {
     void DirectX12Buffer::bindIndex(ID3D12GraphicsCommandList *commandList) const
     {
         D3D12_INDEX_BUFFER_VIEW view;
-        view.BufferLocation = mAddress;
-        view.SizeInBytes = mSize;
+        view.BufferLocation = gpuAddress();
+        view.SizeInBytes = mBlock.mSize;
         view.Format = DXGI_FORMAT_R32_UINT;
         commandList->IASetIndexBuffer(&view);
         DX12_LOG("Bind Index Buffer -> " << mAddress);
     }
 
-    void DirectX12Buffer::reset(size_t size)
+    void DirectX12Buffer::reset()
     {
-        if (mAddress && mIsPersistent) {
-            DirectX12ConstantBufferHeap &heap = DirectX12RenderContext::getSingleton().mConstantBufferHeap;
-
-            heap.deallocatePersistent(mAddress, mSize);
+        if (mBlock.mAddress) {
+            DirectX12RenderContext::getSingleton().mConstantAllocator.deallocate(mBlock);
+            mBlock = {};
         }
-
-        mIsPersistent = false;
-        mAddress = 0;
-        mSize = size;
     }
 
     void DirectX12Buffer::setData(const ByteBuffer &data)
     {
+        assert(data.mData);
+
+        DirectX12RenderContext &context = DirectX12RenderContext::getSingleton();
+
         size_t expectedSize = alignTo(data.mSize, 256);
-        if (data.mData) {
-            DirectX12ConstantBufferHeap &heap = DirectX12RenderContext::getSingleton().mConstantBufferHeap;
+        if (mBlock.mSize != expectedSize) {
+            reset();
+            mBlock = context.mConstantAllocator.allocate(expectedSize);
+        }
 
-            if (!mIsPersistent || mSize != expectedSize) {
-                reset(expectedSize);
+        Block uploadAllocation = context.mUploadAllocator.allocate(expectedSize);
+        std::memcpy(uploadAllocation.mAddress, data.mData, data.mSize);
 
-                mAddress = heap.allocatePersistent(expectedSize);
+        auto [res, offset] = context.mConstantMemoryHeap.resolve(mBlock.mAddress);
+
+        auto list = context.mGraphicsQueue.fetchCommandList();
+        list.Transition(res, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_COPY_DEST);
+        auto [heap, srcOffset] = context.mUploadHeap.resolve(uploadAllocation.mAddress);
+        list->CopyBufferRegion(res, offset, heap, srcOffset, expectedSize);
+        list.Transition(res, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
+
+        struct Deleter {
+
+            void operator()(void *ptr)
+            {
+                DirectX12RenderContext::getSingleton().mUploadAllocator.deallocate({ ptr, mSize });
             }
 
-            mIsPersistent = true;
-            heap.setData(mAddress, data);
-        } else {
-            reset(expectedSize);
-        }
+            size_t mSize;
+        };
+        list.attachResource(std::unique_ptr<void, Deleter> { uploadAllocation.mAddress, { uploadAllocation.mSize } });
     }
 
-    WritableByteBuffer DirectX12Buffer::mapData(size_t size)
+    ID3D12Resource *DirectX12Buffer::resource() const
     {
-        DirectX12ConstantBufferHeap &heap = DirectX12RenderContext::getSingleton().mConstantBufferHeap;
-
-        reset(alignTo(size, 256));
-
-        mAddress = heap.allocateTemp(mSize);
-
-        return heap.map(mAddress, mSize);
-    }
-
-    WritableByteBuffer DirectX12Buffer::mapData()
-    {
-        return mapData(mSize);
+        return DirectX12RenderContext::getSingleton().mConstantMemoryHeap.resolve(mBlock.mAddress).first;
     }
 
     D3D12_GPU_VIRTUAL_ADDRESS DirectX12Buffer::gpuAddress() const
     {
-        return mAddress;
+        auto [res, offset] = DirectX12RenderContext::getSingleton().mConstantMemoryHeap.resolve(mBlock.mAddress);
+        return res->GetGPUVirtualAddress() + offset;
     }
 
 }

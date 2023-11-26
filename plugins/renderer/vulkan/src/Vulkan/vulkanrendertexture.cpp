@@ -4,11 +4,13 @@
 
 #include "Madgine/render/rendertextureconfig.h"
 
+#include "vulkanrendercontext.h"
+
 namespace Engine {
 namespace Render {
 
     VulkanRenderTexture::VulkanRenderTexture(VulkanRenderContext *context, const Vector2i &size, const RenderTextureConfig &config)
-        : VulkanRenderTarget(context, false, config.mName, config.mSamples, config.mBlitSource)
+        : VulkanRenderTarget(context, false, config.mName, config.mType, config.mSamples, config.mBlitSource)
         , mSize { 0, 0 }
         , mCreateDepthBufferView(config.mCreateDepthBufferView)
     {
@@ -44,7 +46,7 @@ namespace Render {
         }
         setup(size, mCreateDepthBufferView);
 
-        VkImageView views[5] { mDepthView };
+        VkImageView views[5] { mDepthTexture.view() };
         for (size_t i = 0; i < mTextures.size(); ++i)
             views[i + 1] = mTextures[i].view();
         VkFramebufferCreateInfo framebufferInfo {};
@@ -76,9 +78,9 @@ namespace Render {
         VulkanRenderTarget::endIteration();
     }
 
-    TextureDescriptor VulkanRenderTexture::texture(size_t index) const
+    const Texture *VulkanRenderTexture::texture(size_t index) const
     {
-        return mTextures[index].descriptor();
+        return &mTextures[index];
     }
 
     size_t VulkanRenderTexture::textureCount() const
@@ -123,6 +125,11 @@ namespace Render {
 
     void VulkanRenderTexture::beginFrame()
     {
+        mCommandList = context()->fetchCommandList(name(), {}, { /* mRenderSemaphore */ });
+        
+        if (mBlitSource)
+            blit(mBlitSource);
+
         VulkanRenderTarget::beginFrame();
     }
 
@@ -157,8 +164,8 @@ namespace Render {
         dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
         VulkanRenderTarget::createRenderPass(mTextures.size(), vFormat, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, mCreateDepthBufferView, dependencies);
-
     }
 
 }
 }
+

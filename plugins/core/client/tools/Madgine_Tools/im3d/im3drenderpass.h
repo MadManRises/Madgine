@@ -21,8 +21,6 @@ namespace Render {
     private:
         PipelineLoader::Instance mPipeline;
 
-        GPUMeshLoader::Ptr mMeshes[/* IM3D_MESHTYPE_COUNT*/ 3][2];
-
         Camera *mCamera;
 
         int mPriority;

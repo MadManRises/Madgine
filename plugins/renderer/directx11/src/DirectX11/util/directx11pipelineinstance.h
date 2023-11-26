@@ -17,12 +17,13 @@ namespace Render {
         bool bind(VertexFormat format, size_t groupSize) const;
 
         virtual WritableByteBuffer mapParameters(size_t index) override;
+        virtual WritableByteBuffer mapTempBuffer(size_t space, size_t size, size_t count) const override;
 
         virtual void renderMesh(RenderTarget *target, const GPUMeshData *mesh) const override;
         virtual void renderMeshInstanced(RenderTarget *target, size_t count, const GPUMeshData *mesh, const ByteBuffer &instanceData) const override;
-
-        virtual void bindTextures(RenderTarget *target, const std::vector<TextureDescriptor> &tex, size_t offset = 0) const override;
-        static void bindTexturesImpl(const std::vector<TextureDescriptor> &tex, size_t offset = 0);
+        
+        virtual void bindTextures(RenderTarget *target, size_t space, const std::vector<TextureDescriptor> &tex) const override;
+        static void bindTexturesImpl(size_t space, const std::vector<TextureDescriptor> &tex);
 
     private:
         ID3D11VertexShader *mVertexShader;

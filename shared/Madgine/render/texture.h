@@ -1,6 +1,7 @@
 #pragma once
 
 #include "texturedescriptor.h"
+#include "resourceblock.h"
 
 #include "Meta/math/vector2i.h"
 
@@ -11,7 +12,7 @@ namespace Render {
 
         Texture() = default;
 
-        Texture(TextureType type, DataFormat format, const Vector2i &size = { 0, 0 })
+        Texture(TextureType type, TextureFormat format, const Vector2i &size = { 0, 0 })
             : mType(type)
             , mFormat(format)
             , mSize(size)
@@ -22,13 +23,15 @@ namespace Render {
             : mType(other.mType)
             , mFormat(other.mFormat)
             , mSize(other.mSize)
+            , mTextureHandle(std::move(other.mTextureHandle))
+            , mResourceBlock(std::move(other.mResourceBlock))
         {
-            mTextureHandle = std::exchange(other.mTextureHandle, 0);
         }
 
         Texture &operator=(Texture &&other)
         {
             std::swap(mTextureHandle, other.mTextureHandle);
+            std::swap(mResourceBlock, other.mResourceBlock);
             std::swap(mType, other.mType);
             std::swap(mFormat, other.mFormat);
             std::swap(mSize, other.mSize);
@@ -40,17 +43,17 @@ namespace Render {
             return mTextureHandle;
         }
 
+        ResourceBlock resource() const
+        {
+            return mResourceBlock;
+        }
+
         const Vector2i &size() const
         {
             return mSize;
         }
 
-        TextureDescriptor descriptor() const
-        {
-            return { mTextureHandle, mType };
-        }
-
-        DataFormat format() const
+        TextureFormat format() const
         {
             return mFormat;
         }
@@ -61,9 +64,10 @@ namespace Render {
         }
 
     protected:
-        TextureHandle mTextureHandle = 0;
+        UniqueTextureHandle mTextureHandle;
+        UniqueResourceBlock mResourceBlock;
         TextureType mType;
-        DataFormat mFormat;
+        TextureFormat mFormat;
         Vector2i mSize = { 0, 0 };
     };
 

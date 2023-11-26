@@ -66,7 +66,7 @@ namespace Render {
 
         if (mType == D3D12_COMMAND_LIST_TYPE_DIRECT) {
             ID3D12DescriptorHeap *heap = mDescriptorHeap->resource();
-            list->SetDescriptorHeaps(1, &heap);
+            list->SetDescriptorHeaps(1, &heap);            
         }
 
         return { this, std::move(list), std::move(alloc) };

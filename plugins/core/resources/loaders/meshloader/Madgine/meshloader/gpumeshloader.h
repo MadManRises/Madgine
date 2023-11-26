@@ -26,11 +26,6 @@ namespace Render {
             {
                 return Base::Ptr::create([mesh { std::move(mesh) }](Render::GPUMeshLoader *loader, Render::GPUMeshData &data) mutable { return loader->generate(data, std::move(mesh)); });
             }
-
-            void update(const MeshData &mesh, GPUMeshLoader *loader = &GPUMeshLoader::getSingleton())
-            {
-                loader->update(**this, mesh);
-            }
         };
 
         GPUMeshLoader();
@@ -38,11 +33,11 @@ namespace Render {
         Threading::Task<bool> loadImpl(GPUMeshData &data, ResourceDataInfo &info);
         void unloadImpl(GPUMeshData &data);
 
-        virtual bool generate(GPUMeshData &data, const MeshData &mesh) = 0;
-
-        virtual void update(GPUMeshData &data, const MeshData &mesh) = 0;
+        virtual Threading::Task<bool> generate(GPUMeshData &data, const MeshData &mesh) = 0;
 
         virtual void reset(GPUMeshData &data) = 0;
+
+        virtual UniqueResourceBlock createResourceBlock(std::vector<const Texture*> textures) = 0;
     
         Handle mQuad;
     };

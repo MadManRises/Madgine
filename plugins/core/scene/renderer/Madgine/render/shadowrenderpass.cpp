@@ -9,8 +9,8 @@
 #include "Madgine/scene/entity/components/transform.h"
 #include "Madgine/scene/entity/entity.h"
 
-#include "Madgine/render/rendertarget.h"
 #include "Madgine/render/rendercontext.h"
+#include "Madgine/render/rendertarget.h"
 
 #include "Madgine/render/camera.h"
 
@@ -26,14 +26,14 @@ namespace Engine {
 namespace Render {
 
     ShadowRenderPass::ShadowRenderPass(SceneMainWindowComponent &scene, Render::Camera *camera, int priority)
-        : mData(scene, camera)        
+        : mData(scene, camera)
         , mPriority(priority)
     {
     }
 
     void ShadowRenderPass::setup(RenderTarget *target)
     {
-        mPipeline.create({ .vs = "scene", .bufferSizes = { sizeof(ScenePerApplication), sizeof(ScenePerFrame), sizeof(ScenePerObject) }, .instanceDataSize = sizeof(SceneInstanceData) });
+        mPipeline.create({ .vs = "scene", .bufferSizes = { sizeof(ScenePerApplication), sizeof(ScenePerFrame), sizeof(ScenePerObject) }, .instanceDataSize = 0 });
 
         addDependency(&mData);
     }
@@ -66,7 +66,7 @@ namespace Render {
             auto perFrame = mPipeline->mapParameters<ScenePerFrame>(1);
 
             perFrame->light.light.color = mData.mScene.mAmbientLightColor;
-            perFrame->light.light.dir = (v * Vector4{mData.mScene.mAmbientLightDirection, 0.0f}).xyz();
+            perFrame->light.light.dir = (v * Vector4 { mData.mScene.mAmbientLightDirection, 0.0f }).xyz();
         }
 
         for (const std::pair<const GPUMeshData *, std::vector<ShadowSceneRenderData::ObjectData>> &instance : mData.mInstances) {
@@ -84,16 +84,23 @@ namespace Render {
 
             std::vector<SceneInstanceData> instanceData;
 
-            std::ranges::transform(instance.second, std::back_inserter(instanceData), [&](const ShadowSceneRenderData::ObjectData &o) {
-                Matrix4 mv = v * o.mTransform;
-                return SceneInstanceData {
-                    mv.Transpose(),
-                    mv.Inverse().Transpose().Transpose() /*,
-                    o.mBones*/
-                };
-            });
+            {
+                auto instanceData = mPipeline->mapTempBuffer<SceneInstanceData[]>(1, instance.second.size());
 
-            mPipeline->renderMeshInstanced(target, std::move(instanceData), meshData);
+                std::ranges::transform(instance.second, instanceData.mData, [&](const ShadowSceneRenderData::ObjectData &o) {
+                    Matrix4 mv = v * o.mTransform;
+                    return SceneInstanceData {
+                        mv.Transpose(),
+                        mv.Inverse().Transpose().Transpose(),
+                        o.mBones
+                    };
+                });
+            }
+
+            mPipeline->bindMesh(target, meshData);
+
+            mPipeline->renderInstanced(target, instance.second.size());
+            //mPipeline->renderMeshInstanced(target, std::move(instanceData), meshData);
         }
     }
 

@@ -22,6 +22,7 @@
 #include <pix.h>
 #include "d3dx12.h"
 #include <dxcapi.h>
+#include <comdef.h>
 
 MADGINE_DIRECTX12_EXPORT void dx12Dump(HRESULT result);
 MADGINE_DIRECTX12_EXPORT bool checkDevice(HRESULT &result);
@@ -29,8 +30,8 @@ MADGINE_DIRECTX12_EXPORT bool checkDevice(HRESULT &result);
 inline void dx12Check(HRESULT result = 0)
 {
     if (FAILED(result) || !checkDevice(result)) {
-        LOG("DX12-Error: "
-            << "?");
+        _com_error error { result };
+        LOG_FATAL("DX12-Error: " << error.ErrorMessage());
         dx12Dump(result);
         std::terminate();
     }

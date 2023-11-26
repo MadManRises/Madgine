@@ -13,8 +13,8 @@ namespace Render {
 
     struct MADGINE_VULKAN_EXPORT VulkanTexture : Texture {
 
-        VulkanTexture(TextureType type, bool isRenderTarget, DataFormat format, size_t width, size_t height, size_t samples = 1, const ByteBuffer &data = {});
-        VulkanTexture(TextureType type = TextureType_2D, bool isRenderTarget = false, DataFormat format = FORMAT_RGBA8, size_t samples = 1);
+        VulkanTexture(TextureType type, bool isRenderTarget, TextureFormat format, size_t width, size_t height, size_t samples = 1, const ByteBuffer &data = {});
+        VulkanTexture(TextureType type = TextureType_2D, bool isRenderTarget = false, TextureFormat format = FORMAT_RGBA8, size_t samples = 1);
         VulkanTexture(const VulkanTexture &) = delete;
         VulkanTexture(VulkanTexture &&);
         ~VulkanTexture();
@@ -36,8 +36,8 @@ namespace Render {
         void transition(VkCommandBuffer commandList, VkImageLayout oldLayout, VkImageLayout newLayout);
 
     private:
-        VulkanPtr<VkImage, &vkDestroyImage> mImage;
         VulkanPtr<VkDeviceMemory, &vkFreeMemory> mDeviceMemory;
+        VulkanPtr<VkImageView, &vkDestroyImageView> mImageView;
         bool mIsRenderTarget;
         size_t mSamples;
     };

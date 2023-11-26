@@ -13,6 +13,9 @@
 
 #include "../entitycomponentptr.h"
 
+#include "im3d/im3d.h"
+#include "transform.h"
+
 ENTITYCOMPONENT_IMPL(Animation, Engine::Scene::Entity::Animation);
 
 METATABLE_BEGIN(Engine::Scene::Entity::Animation)
@@ -115,7 +118,7 @@ namespace Scene {
             }
         }
 
-        void Animation::updateRender(Entity *entity, std::chrono::microseconds frameTimeSinceLastFrame, std::chrono::microseconds sceneTimeSinceLastFrame)
+        void Animation::updateRender(Entity *entity, std::chrono::microseconds frameTimeSinceLastFrame, std::chrono::microseconds sceneTimeSinceLastFrame, Matrix4 *matrices)
         {
             mCurrentStep += std::chrono::duration_cast<std::chrono::duration<float>>(sceneTimeSinceLastFrame).count();
             if (mAnimationList.available() && mCurrentAnimation) {
@@ -134,11 +137,12 @@ namespace Scene {
                     float step = fmodf(mCurrentStep, animation.mDuration);
                     if (step < 0.0f)
                         step += animation.mDuration;
-                    /*
-                    std::vector<Matrix4> &matrices = skeleton->matrices();
+
                     std::set<size_t> parentTransformToDos;
 
-                    for (size_t i = 0; i < matrices.size(); ++i) {
+                    std::vector<Matrix4> localMatrices { mSkeletonCache->mBones.size() };
+
+                    for (size_t i = 0; i < mSkeletonCache->mBones.size(); ++i) {
                         int mappedBone = mBoneIndexMapping ? mBoneIndexMapping[i] : i;
                         if (mappedBone != -1) {
                             Render::AnimationBone &boneData = animation.mBones[mappedBone];
@@ -179,7 +183,7 @@ namespace Scene {
                                 orientation = it_orientation->mValue;
                             }
 
-                            matrices[i] = mSkeletonCache->mBones[i].mPreTransform * TransformMatrix(pos, scale, orientation);
+                            localMatrices[i] = /* mSkeletonCache->mBones[i].mPreTransform * */TransformMatrix(pos, scale, orientation);
 
                             IndexType<uint32_t> parent = mSkeletonCache->mBones[i].mParent;
                             if (parent) {
@@ -194,7 +198,7 @@ namespace Scene {
                         for (std::set<size_t>::iterator it = parentTransformToDos.begin(); it != parentTransformToDos.end();) {
                             size_t parentIndex = mSkeletonCache->mBones[*it].mParent;
                             if (parentTransformToDos.count(parentIndex) == 0) {
-                                matrices[*it] = matrices[parentIndex] * matrices[*it];
+                                localMatrices[*it] = localMatrices[parentIndex] * localMatrices[*it];
                                 it = parentTransformToDos.erase(it);
                             } else {
                                 ++it;
@@ -202,13 +206,12 @@ namespace Scene {
                         }
                     }
 
-                    for (size_t i = 0; i < matrices.size(); ++i) {
+                    for (size_t i = 0; i < mSkeletonCache->mBones.size(); ++i) {
                         int mappedBone = mBoneIndexMapping ? mBoneIndexMapping[i] : i;
                         if (mappedBone != -1)
-                            matrices[i] = mSkeletonCache->mMatrix * matrices[i] * mSkeletonCache->mBones[i].mOffsetMatrix;
+                            matrices[i] = (mSkeletonCache->mMatrix * localMatrices[i] * mSkeletonCache->mMatrix1 * mSkeletonCache->mBones[i].mOffsetMatrix * mSkeletonCache->mMatrix2).Transpose();
+                        Im3D::Arrow3D(IM3D_LINES, 5, ((mSkeletonCache->mMatrix * localMatrices[i] * mSkeletonCache->mMatrix1) * Vector4 { 0, 0, 0, 1 }).xyz(), ((mSkeletonCache->mMatrix * localMatrices[i] * mSkeletonCache->mMatrix1) * Vector4 { 0, 0, 20, 1 }).xyz(), { .mTransform = entity->getComponent<Transform>()->matrix()});
                     }
-                    */
-                    throw "TODO";
                 }
             }
         }

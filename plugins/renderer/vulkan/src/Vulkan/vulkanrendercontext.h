@@ -11,7 +11,12 @@
 
 #include "Madgine/render/vertexformat.h"
 
-#include "util/vulkanconstantbufferheap.h"
+#include "util/vulkanheapallocator.h"
+
+#include "Generic/allocator/bucket.h"
+#include "Generic/allocator/bump.h"
+#include "Generic/allocator/fixed.h"
+#include "Generic/allocator/heap.h"
 
 namespace Engine {
 namespace Render {
@@ -32,6 +37,7 @@ namespace Render {
 
     struct MADGINE_VULKAN_EXPORT VulkanRenderContext : public RenderContextComponent<VulkanRenderContext> {
         VulkanRenderContext(Threading::TaskQueue *queue);
+        VulkanRenderContext(const VulkanRenderContext &) = delete;
         ~VulkanRenderContext();
 
         virtual std::unique_ptr<RenderTarget> createRenderWindow(Window::OSWindow *w, size_t samples) override;
@@ -39,6 +45,13 @@ namespace Render {
 
         virtual bool beginFrame() override;
         virtual void endFrame() override;
+
+        virtual UniqueResourceBlock createResourceBlock(std::vector<const Texture *> textures) override;
+
+        VulkanCommandList fetchCommandList(std::string_view name, std::vector<VkSemaphore> waitSemaphores = {}, std::vector<VkSemaphore> signalSemaphores = {});
+        void ExecuteCommandList(NulledPtr<std::remove_pointer_t<VkCommandBuffer>> buffer, std::vector<VkSemaphore> waitSemaphores, std::vector<VkSemaphore> signalSemaphores, std::vector<Any> attachedResources);
+
+        bool isFenceComplete(uint64_t fenceValue);
 
         virtual Threading::Task<void> unloadAllResources() override;
 
@@ -55,16 +68,36 @@ namespace Render {
 
         QueueFamilyIndices mIndices;
 
+        VulkanPtr<VkSemaphore, &vkDestroySemaphore> mSemaphore;
+        uint64_t mLastCompletedFenceValue = 5;
+        uint64_t mNextFenceValue;
+
         VulkanPtr<VkDescriptorPool, &vkDestroyDescriptorPool> mDescriptorPool;
         VulkanPtr<VkCommandPool, &vkDestroyCommandPool> mCommandPool;
 
-        VulkanPtr<VkDescriptorSetLayout, &vkDestroyDescriptorSetLayout> mDescriptorSetLayouts[3];
+        std::vector<std::tuple<uint64_t, VkCommandBuffer, std::vector<Any>>> mBufferPool;
+
+        VulkanPtr<VkDescriptorSetLayout, &vkDestroyDescriptorSetLayout> mUBODescriptorSetLayout;
+        VulkanPtr<VkDescriptorSetLayout, &vkDestroyDescriptorSetLayout> mHeapDescriptorSetLayout;
+        VulkanPtr<VkDescriptorSetLayout, &vkDestroyDescriptorSetLayout> mTempBufferDescriptorSetLayout;
+        VulkanPtr<VkDescriptorSetLayout, &vkDestroyDescriptorSetLayout> mResourceBlockDescriptorSetLayout;
+        VulkanPtr<VkDescriptorSetLayout, &vkDestroyDescriptorSetLayout> mSamplerDescriptorSetLayout;
         VulkanPtr<VkPipelineLayout, &vkDestroyPipelineLayout> mPipelineLayout;
 
         VulkanPtr<VkSampler, &vkDestroySampler> mSamplers[2];
         VkDescriptorSet mSamplerDescriptorSet;
 
-        VulkanConstantBufferHeap mConstantBufferHeap;
+        VulkanMappedHeapAllocator mUploadHeap;
+        BucketAllocator<HeapAllocator<VulkanMappedHeapAllocator &>, 16, 64, 16> mUploadAllocator;
+
+        VulkanHeapAllocator mBufferMemoryHeap;
+        LogBucketAllocator<HeapAllocator<VulkanHeapAllocator &>, 64, 4096, 4> mBufferAllocator;
+
+        VulkanMappedHeapAllocator mTempMemoryHeap;
+        BumpAllocator<FixedAllocator<VulkanMappedHeapAllocator &>> mTempAllocator;
+
+        VulkanHeapAllocator mConstantMemoryHeap;
+        LogBucketAllocator<HeapAllocator<VulkanHeapAllocator &>, 64, 4096, 4> mConstantAllocator;
 
         VulkanBuffer mConstantBuffer;
     };

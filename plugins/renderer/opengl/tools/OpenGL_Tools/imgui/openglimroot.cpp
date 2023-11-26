@@ -63,7 +63,11 @@ namespace Tools {
 
     void OpenGLImRoot::renderViewport(Render::RenderTarget *target, ImGuiViewport *vp)
     {
+        /*
         ImGui_ImplOpenGL3_RenderDrawData(vp->DrawData);
+        /*/
+        ClientImRoot::renderViewport(target, vp);
+        //*/
     }
 
 }

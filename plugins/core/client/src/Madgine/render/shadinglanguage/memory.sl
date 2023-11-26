@@ -1,6 +1,6 @@
 #ifndef __cplusplus
 
-//ByteAddressBuffer memory[128] : register(t5);
+ByteAddressBuffer memory[4] : register(t0, space0);
 
 template <typename T>
 struct ArrayPtr{
@@ -9,9 +9,8 @@ struct ArrayPtr{
 
 template <>
 struct ArrayPtr<float4x4>{
-	float4x4 operator[](uint address){
-		//return memory[buffer()].Load<float4x4>(offset() + address);
-		return float4x4(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+	float4x4 operator[](uint index){
+		return memory[buffer() - 1].Load<float4x4>(offset() + 64 * index);
 	}
 
 	operator bool(){

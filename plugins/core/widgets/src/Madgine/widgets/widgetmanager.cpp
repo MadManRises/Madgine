@@ -77,7 +77,6 @@ namespace Widgets {
     struct WidgetManager::WidgetManagerData {
 
         Render::PipelineLoader::Instance mPipeline;
-        Render::GPUMeshLoader::Ptr mMesh;
 
         UIAtlas mAtlas;
     };
@@ -100,9 +99,8 @@ namespace Widgets {
 
         mData->mPipeline.create({ .vs = "widgets", .ps = "widgets", .bufferSizes = { sizeof(WidgetsPerApplication), 0, sizeof(WidgetsPerObject) } });
 
-        mData->mMesh.create({ 3, std::vector<Vertex> {} });
-
-        mData->mAtlas.createTexture();
+        if (!co_await mData->mAtlas.createTexture())
+            co_return false;
 
 #ifdef MADGINE_MAINWINDOW_LAYOUT
         AtlasLoader::Handle atlas;
@@ -120,8 +118,6 @@ namespace Widgets {
         mTopLevelWidgets.clear();
 
         mData->mAtlas.reset();
-
-        mData->mMesh.reset();
 
         mData->mPipeline.reset();
 
@@ -608,14 +604,18 @@ namespace Widgets {
                 parameters->hasTexture = true;
             }
 
-            if (tex.mTexture.mTextureHandle)
-                mData->mPipeline->bindTextures(target, { tex.mTexture });
+            if (tex.mResource)
+                mData->mPipeline->bindResources(target, 2, tex.mResource);
             else
-                mData->mPipeline->bindTextures(target, { mData->mAtlas.texture() });
+                mData->mPipeline->bindResources(target, 2, mData->mAtlas.resource());
 
-            mData->mMesh.update({ 3, std::move(vertexData.mTriangleVertices) });
+            {
+                auto vertices = mData->mPipeline->mapVertices<Vertex[]>(target, vertexData.mTriangleVertices.size());
+                std::ranges::copy(vertexData.mTriangleVertices, vertices.mData);
+            }
 
-            mData->mPipeline->renderMesh(target, mData->mMesh);
+            mData->mPipeline->setGroupSize(3);
+            mData->mPipeline->render(target);
         }
         if (!renderData.lineVertices().empty()) {
             {
@@ -623,12 +623,17 @@ namespace Widgets {
                 parameters->hasDistanceField = false;
                 parameters->hasTexture = false;
             }
+             
+            if (mData->mAtlas.resource())
+                mData->mPipeline->bindResources(target, 2, mData->mAtlas.resource());
 
-            mData->mPipeline->bindTextures(target, { mData->mAtlas.texture() });
+            {
+                auto vertices = mData->mPipeline->mapVertices<Vertex[]>(target, renderData.lineVertices().size());
+                std::ranges::copy(renderData.lineVertices(), vertices.mData);
+            }
 
-            mData->mMesh.update({ 2, std::move(renderData.lineVertices()) });
-
-            mData->mPipeline->renderMesh(target, mData->mMesh);
+            mData->mPipeline->setGroupSize(2);
+            mData->mPipeline->render(target);
         }
     }
 

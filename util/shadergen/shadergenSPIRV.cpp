@@ -79,52 +79,70 @@ int transpileSPIRV(const std::wstring &fileName, const std::wstring &outFolder, 
     arguments.push_back(L"0");
 
     arguments.push_back(L"-fvk-bind-register");
-    arguments.push_back(L"t5");
-    arguments.push_back(L"0");
-    arguments.push_back(L"0");
-    arguments.push_back(L"3");
-
-    arguments.push_back(L"-fvk-bind-register");
     arguments.push_back(L"t0");
     arguments.push_back(L"0");
     arguments.push_back(L"0");
     arguments.push_back(L"1");
 
     arguments.push_back(L"-fvk-bind-register");
-    arguments.push_back(L"t1");
+    arguments.push_back(L"t0");
+    arguments.push_back(L"1");
     arguments.push_back(L"0");
+    arguments.push_back(L"2");
+
+    arguments.push_back(L"-fvk-bind-register");
+    arguments.push_back(L"t1");
     arguments.push_back(L"1");
     arguments.push_back(L"1");
+    arguments.push_back(L"2");
+
+    arguments.push_back(L"-fvk-bind-register");
+    arguments.push_back(L"t0");
+    arguments.push_back(L"2");
+    arguments.push_back(L"0");
+    arguments.push_back(L"3");
+
+    arguments.push_back(L"-fvk-bind-register");
+    arguments.push_back(L"t1");
+    arguments.push_back(L"2");
+    arguments.push_back(L"1");
+    arguments.push_back(L"3");
 
     arguments.push_back(L"-fvk-bind-register");
     arguments.push_back(L"t2");
-    arguments.push_back(L"0");
     arguments.push_back(L"2");
-    arguments.push_back(L"1");
-
-    arguments.push_back(L"-fvk-bind-register");
-    arguments.push_back(L"t3");
-    arguments.push_back(L"0");
+    arguments.push_back(L"2");
     arguments.push_back(L"3");
-    arguments.push_back(L"1");
 
     arguments.push_back(L"-fvk-bind-register");
-    arguments.push_back(L"t4");
+    arguments.push_back(L"t0");
+    arguments.push_back(L"3");
     arguments.push_back(L"0");
     arguments.push_back(L"4");
+
+    arguments.push_back(L"-fvk-bind-register");
+    arguments.push_back(L"t1");
+    arguments.push_back(L"3");
     arguments.push_back(L"1");
+    arguments.push_back(L"4");
+
+    arguments.push_back(L"-fvk-bind-register");
+    arguments.push_back(L"t2");
+    arguments.push_back(L"3");
+    arguments.push_back(L"2");
+    arguments.push_back(L"4");
 
     arguments.push_back(L"-fvk-bind-register");
     arguments.push_back(L"s0");
     arguments.push_back(L"0");
     arguments.push_back(L"0");
-    arguments.push_back(L"2");
+    arguments.push_back(L"6");
 
     arguments.push_back(L"-fvk-bind-register");
     arguments.push_back(L"s1");
     arguments.push_back(L"0");
     arguments.push_back(L"1");
-    arguments.push_back(L"2");
+    arguments.push_back(L"6");
 
     //arguments.push_back(L"-P");
 

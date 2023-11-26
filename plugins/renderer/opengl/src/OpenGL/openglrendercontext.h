@@ -5,6 +5,12 @@
 #include "Madgine/render/vertexformat.h"
 #include "Modules/uniquecomponent/uniquecomponent.h"
 #include "util/openglvertexarray.h"
+#include "util/openglheapallocator.h"
+
+#include "Generic/allocator/bump.h"
+#include "Generic/allocator/bucket.h"
+#include "Generic/allocator/fixed.h"
+#include "Generic/allocator/heap.h"
 
 namespace Engine {
 namespace Render {
@@ -30,8 +36,16 @@ namespace Render {
 
         virtual bool supportsMultisampling() const override;
 
+        virtual UniqueResourceBlock createResourceBlock(std::vector<const Texture *> textures) override;
+
         void bindFormat(VertexFormat format, OpenGLBuffer *instanceBuffer, size_t instanceDataSize);
         void unbindFormat();
+
+        OpenGLHeapAllocator mBufferMemoryHeap;
+        LogBucketAllocator<HeapAllocator<OpenGLHeapAllocator &>, 64, 4096, 4> mBufferAllocator;
+
+        OpenGLMappedHeapAllocator mTempMemoryHeap;
+        BumpAllocator<FixedAllocator<OpenGLMappedHeapAllocator &>> mTempAllocator;
 
     private:
         std::map<VertexFormat, OpenGLVertexArray> mVAOs;

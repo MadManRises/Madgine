@@ -47,7 +47,7 @@ namespace Render {
     VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats)
     {
         for (const auto &availableFormat : availableFormats) {
-            if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+            if (availableFormat.format == VK_FORMAT_R8G8B8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
                 return availableFormat;
             }
         }
@@ -79,15 +79,12 @@ namespace Render {
     }
 
     VulkanRenderWindow::VulkanRenderWindow(VulkanRenderContext *context, Window::OSWindow *w, size_t samples)
-        : VulkanRenderTarget(context, true, w->title(), samples)
+        : VulkanRenderTarget(context, true, w->title(), TextureType_2D, samples)
         , mWindow(w)
     {
         VkSemaphoreCreateInfo binarySemaphoreInfo {};
         binarySemaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
         VkResult result = vkCreateSemaphore(GetDevice(), &binarySemaphoreInfo, nullptr, &mImageSemaphore);
-        VK_CHECK(result);
-
-        result = vkCreateSemaphore(GetDevice(), &binarySemaphoreInfo, nullptr, &mRenderSemaphore);
         VK_CHECK(result);
 
 #if WINDOWS
@@ -137,7 +134,7 @@ namespace Render {
 
     bool VulkanRenderWindow::skipFrame()
     {
-        if (mSwapChainImages.empty() && isFenceComplete(mResizeFence)) {
+        if (mSwapChainImages.empty() && context()->isFenceComplete(mResizeFence)) {
             mFramebuffers.clear();
             mSwapChainImageViews.clear();
 
@@ -155,6 +152,9 @@ namespace Render {
         VkResult result = vkAcquireNextImageKHR(GetDevice(), mSwapChain, UINT64_MAX, mImageSemaphore, VK_NULL_HANDLE, &mImageIndex);
         VK_CHECK(result);
         mFramebuffer = mFramebuffers[mImageIndex];
+
+        mCommandList = context()->fetchCommandList(name(), { mImageSemaphore }, { mRenderSemaphore });
+
         VulkanRenderTarget::beginFrame();
     }
 
@@ -284,7 +284,7 @@ namespace Render {
             VkResult result = vkCreateImageView(GetDevice(), &createInfo, nullptr, &mSwapChainImageViews[i]);
             VK_CHECK(result);
 
-            VkImageView attachments[2] { mDepthView, mSwapChainImageViews[i] };
+            VkImageView attachments[2] { mDepthTexture.view(), mSwapChainImageViews[i] };
             VkFramebufferCreateInfo framebufferInfo {};
             framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
             framebufferInfo.renderPass = mRenderPass;
@@ -303,15 +303,11 @@ namespace Render {
     {
         mSwapChainImages.clear();
 
-        mResizeFence = mNextFenceValue - 1;
+        mResizeFence = context()->mNextFenceValue - 1;
         mResizeTarget = size;
 
         return true;
     }
 
-    void VulkanRenderWindow::blit(RenderTarget *source)
-    {
-        throw 0;
-    }
 }
 }

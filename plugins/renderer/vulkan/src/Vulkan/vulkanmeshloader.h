@@ -12,11 +12,11 @@ namespace Render {
     struct MADGINE_VULKAN_EXPORT VulkanMeshLoader : Resources::VirtualResourceLoaderImpl<VulkanMeshLoader, VulkanMeshData, GPUMeshLoader> {
         VulkanMeshLoader();
 
-        virtual bool generate(GPUMeshData &data, const MeshData &mesh) override;
-
-        virtual void update(GPUMeshData &data, const MeshData &mesh) override;
+        virtual Threading::Task<bool> generate(GPUMeshData &data, const MeshData &mesh) override;
 
         virtual void reset(GPUMeshData &data) override;
+
+        virtual UniqueResourceBlock createResourceBlock(std::vector<const Texture*> textures) override;
 
         virtual Threading::TaskQueue *loadingTaskQueue() const override;
     };

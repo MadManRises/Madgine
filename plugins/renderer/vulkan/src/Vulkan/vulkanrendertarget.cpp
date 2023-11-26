@@ -13,35 +13,19 @@ namespace Render {
     extern uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
     extern void transitionImageLayout(VkCommandBuffer commandList, VkImage image, VkFormat format, VkImageAspectFlags aspectMask, VkImageLayout oldLayout, VkImageLayout newLayout);
 
-    VulkanRenderTarget::VulkanRenderTarget(VulkanRenderContext *context, bool global, std::string name, size_t samples, RenderTarget *blitSource)
+    VulkanRenderTarget::VulkanRenderTarget(VulkanRenderContext *context, bool global, std::string name, TextureType type, size_t samples, RenderTarget *blitSource)
         : RenderTarget(context, global, name, 1, blitSource)
+        , mDepthTexture(type, false, FORMAT_D24, samples)
         , mSamples(samples)
     {
-
-        mLastCompletedFenceValue = 5;
-
-        VkSemaphoreTypeCreateInfo timelineCreateInfo;
-        timelineCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO;
-        timelineCreateInfo.pNext = NULL;
-        timelineCreateInfo.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE;
-        timelineCreateInfo.initialValue = mLastCompletedFenceValue;
-
-        VkSemaphoreCreateInfo semaphoreInfo;
-        semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-        semaphoreInfo.pNext = &timelineCreateInfo;
-        semaphoreInfo.flags = 0;
-
-        VkResult result = vkCreateSemaphore(GetDevice(), &semaphoreInfo, nullptr, &mSemaphore);
+        VkSemaphoreCreateInfo binarySemaphoreInfo {};
+        binarySemaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+        VkResult result = vkCreateSemaphore(GetDevice(), &binarySemaphoreInfo, nullptr, &mRenderSemaphore);
         VK_CHECK(result);
-
-        mNextFenceValue = mLastCompletedFenceValue + 1;
     }
 
     VulkanRenderTarget::~VulkanRenderTarget()
     {
-        for (auto &[fence, buffer] : mBufferPool) {
-            vkFreeCommandBuffers(GetDevice(), context()->mCommandPool, 1, &buffer);
-        }
     }
 
     void VulkanRenderTarget::createRenderPass(size_t colorAttachmentCount, VkFormat format, VkImageLayout layout, bool createDepthBufferView, std::span<VkSubpassDependency> dependencies)
@@ -108,9 +92,7 @@ namespace Render {
     {
         mSize = size;
 
-        mDepthBuffer.reset();
-        mDepthImage.reset();
-        mDepthView.reset();
+        mDepthTexture.setData(size, {});
 
         VkImageCreateInfo imageInfo {};
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -130,25 +112,8 @@ namespace Render {
         imageInfo.samples = static_cast<VkSampleCountFlagBits>(mSamples);
         imageInfo.flags = 0; // Optional
 
-        VkResult result = vkCreateImage(GetDevice(), &imageInfo, nullptr, &mDepthImage);
-        VK_CHECK(result);
-
-        VkMemoryRequirements memRequirements;
-        vkGetImageMemoryRequirements(GetDevice(), mDepthImage, &memRequirements);
-
-        VkMemoryAllocateInfo allocInfo {};
-        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-        result = vkAllocateMemory(GetDevice(), &allocInfo, nullptr, &mDepthBuffer);
-        VK_CHECK(result);
-
-        vkBindImageMemory(GetDevice(), mDepthImage, mDepthBuffer, 0);
-
         VkImageViewCreateInfo viewInfo {};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        viewInfo.image = mDepthImage;
         viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
         viewInfo.format = VK_FORMAT_D24_UNORM_S8_UINT;
         viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
@@ -156,30 +121,14 @@ namespace Render {
         viewInfo.subresourceRange.levelCount = 1;
         viewInfo.subresourceRange.baseArrayLayer = 0;
         viewInfo.subresourceRange.layerCount = 1;
-
-        result = vkCreateImageView(GetDevice(), &viewInfo, nullptr, &mDepthView);
-        VK_CHECK(result);
     }
 
     void VulkanRenderTarget::shutdown()
     {
     }
 
-    bool VulkanRenderTarget::skipFrame()
-    {
-        if (!isFenceComplete(mNextFenceValue - 1))
-            return true;
-
-        return false;
-    }
-
     void VulkanRenderTarget::beginFrame()
     {
-        mCommandList = fetchCommandList(name(), false);
-
-        if (mBlitSource)
-            blit(mBlitSource);
-
         VkRenderPassBeginInfo renderPassInfo {};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderPassInfo.renderPass = mRenderPass;
@@ -214,98 +163,6 @@ namespace Render {
             0, -1, 0, 0,
             0, 0, 1, 0,
             0, 0, 0, 1 };
-    }
-
-    VulkanCommandList VulkanRenderTarget::fetchCommandList(std::string_view name, bool temp)
-    {
-        VkCommandBuffer buffer = nullptr;
-
-        if (mBufferPool.size() > 1) {
-            auto &[fenceValue, b] = mBufferPool.front();
-
-            if (isFenceComplete(fenceValue)) {
-                buffer = b;
-                mBufferPool.erase(mBufferPool.begin());
-
-                VkResult result = vkResetCommandBuffer(buffer, 0);
-                VK_CHECK(result);
-            }
-        }
-
-        if (!buffer) {
-            VkCommandBufferAllocateInfo allocInfo {};
-            allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-            allocInfo.commandPool = context()->mCommandPool;
-            allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-            allocInfo.commandBufferCount = 1;
-
-            VkResult result = vkAllocateCommandBuffers(GetDevice(), &allocInfo, &buffer);
-            VK_CHECK(result);
-        }
-
-        VkCommandBufferBeginInfo beginInfo {};
-        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        beginInfo.flags = 0; // Optional
-        beginInfo.pInheritanceInfo = nullptr; // Optional
-
-        VkResult result = vkBeginCommandBuffer(buffer, &beginInfo);
-        VK_CHECK(result);
-
-        vkCmdBindDescriptorSets(buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, context()->mPipelineLayout, 2, 1, &context()->mSamplerDescriptorSet, 0, nullptr);
-
-        return { this, buffer, temp };
-    }
-
-    void VulkanRenderTarget::ExecuteCommandList(NulledPtr<std::remove_pointer_t<VkCommandBuffer>> buffer, bool temp)
-    {
-        VkResult result = vkEndCommandBuffer(buffer);
-        VK_CHECK(result);
-
-        const uint64_t waitValues[] = { mNextFenceValue - 1, 0 };
-        const uint64_t signalValues[] = { mNextFenceValue, 0 };
-
-        VkTimelineSemaphoreSubmitInfo timelineInfo {};
-        timelineInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
-        timelineInfo.pNext = NULL;
-        timelineInfo.waitSemaphoreValueCount = 1 + (!temp && mImageSemaphore);
-        timelineInfo.pWaitSemaphoreValues = waitValues;
-        timelineInfo.signalSemaphoreValueCount = 1 + (!temp && mRenderSemaphore);
-        timelineInfo.pSignalSemaphoreValues = signalValues;
-
-        VkSubmitInfo submitInfo {};
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.pNext = &timelineInfo;
-
-        VkSemaphore waitSemaphores[] = { mSemaphore, mImageSemaphore };
-        VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-        submitInfo.waitSemaphoreCount = 1 + (!temp && mImageSemaphore);
-        submitInfo.pWaitSemaphores = waitSemaphores;
-        submitInfo.pWaitDstStageMask = waitStages;
-
-        submitInfo.commandBufferCount = 1;
-        VkCommandBuffer dummy = buffer;
-        submitInfo.pCommandBuffers = &dummy;
-
-        VkSemaphore signalSemaphores[] = { mSemaphore, mRenderSemaphore };
-        submitInfo.signalSemaphoreCount = 1 + (!temp && mRenderSemaphore);
-        submitInfo.pSignalSemaphores = signalSemaphores;
-
-        ++mNextFenceValue;
-
-        result = vkQueueSubmit(context()->mGraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-        VK_CHECK(result);
-
-        mBufferPool.emplace_back(mNextFenceValue, buffer);
-    }
-
-    bool VulkanRenderTarget::isFenceComplete(uint64_t fenceValue)
-    {
-        // if it's greater than last seen fence value
-        // check fence for latest completed value
-        if (fenceValue > mLastCompletedFenceValue)
-            vkGetSemaphoreCounterValueKHR(GetDevice(), mSemaphore, &mLastCompletedFenceValue);
-
-        return fenceValue <= mLastCompletedFenceValue;
     }
 
     void VulkanRenderTarget::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
@@ -351,11 +208,21 @@ namespace Render {
 
     void VulkanRenderTarget::clearDepthBuffer()
     {
+        VkClearAttachment depthAttachment {};
+        depthAttachment.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+        depthAttachment.clearValue.depthStencil.depth = 1.0f;
+        VkClearRect r {};
+        r.baseArrayLayer = 0;
+        r.layerCount = 1;
+        r.rect.extent = { (uint32_t)size().x, (uint32_t)size().y };
+        r.rect.offset = { 0, 0 };
+
+        vkCmdClearAttachments(mCommandList, 1, &depthAttachment, 1, &r);
     }
 
-    TextureDescriptor VulkanRenderTarget::depthTexture() const
+    const Texture *VulkanRenderTarget::depthTexture() const
     {
-        return { reinterpret_cast<TextureHandle>(mDepthView.get()), TextureType_2D };
+        return &mDepthTexture;
     }
 
     VulkanRenderContext *VulkanRenderTarget::context() const

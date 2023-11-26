@@ -6,6 +6,8 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
+#include "Modules/threading/taskqueue.h"
+
 METATABLE_BEGIN(Engine::Render::GPUMeshLoader)
 METATABLE_END(Engine::Render::GPUMeshLoader)
 
@@ -39,7 +41,7 @@ namespace Render {
         MeshLoader::Handle handle;
         if (!co_await handle.load(info.resource()->name()))
             co_return false;
-        co_return generate(mesh, *handle);
+        co_return co_await generate(mesh, *handle);
     }
 
     void GPUMeshLoader::unloadImpl(GPUMeshData &data)
@@ -47,35 +49,12 @@ namespace Render {
         reset(data);
     }
 
-    bool GPUMeshLoader::generate(GPUMeshData &data, const MeshData &mesh)
+    Threading::Task<bool> GPUMeshLoader::generate(GPUMeshData &data, const MeshData &mesh)
     {
         data.mFormat = mesh.mFormat;
         data.mVertexSize = mesh.mVertexSize;
         data.mAABB = mesh.mAABB;
 
-        GPUMeshLoader::update(data, mesh);
-
-        data.mMaterials.clear();
-        for (const MeshData::Material &mat : mesh.mMaterials) {
-            GPUMeshData::Material &gpuMat = data.mMaterials.emplace_back();
-            gpuMat.mName = mat.mName;
-            gpuMat.mDiffuseColor = mat.mDiffuseColor;
-
-            if (!mat.mDiffuseName.empty()) {
-                gpuMat.mDiffuseTexture.loadFromImage(mat.mDiffuseName, TextureType_2D, FORMAT_RGBA8_SRGB);
-            }
-
-            if (!mat.mEmissiveName.empty()) {
-                gpuMat.mEmissiveTexture.loadFromImage(mat.mEmissiveName, TextureType_2D, FORMAT_RGBA8_SRGB);
-            }
-        }
-
-        return true;
-    }
-
-    void GPUMeshLoader::update(GPUMeshData &data, const MeshData &mesh)
-    {
-        assert(data.mFormat == mesh.mFormat);
         data.mGroupSize = mesh.mGroupSize;
 
         if (mesh.mIndices.empty()) {
@@ -83,6 +62,29 @@ namespace Render {
         } else {
             data.mElementCount = mesh.mIndices.size();
         }
+
+        data.mMaterials.clear();
+        for (const MeshData::Material &mat : mesh.mMaterials) {
+            GPUMeshData::Material &gpuMat = data.mMaterials.emplace_back();
+            gpuMat.mName = mat.mName;
+            gpuMat.mDiffuseColor = mat.mDiffuseColor;
+
+            std::vector<Threading::TaskFuture<bool>> futures;
+
+            futures.push_back(gpuMat.mDiffuseTexture.loadFromImage(mat.mDiffuseName.empty() ? "blank_black" : mat.mDiffuseName, TextureType_2D, FORMAT_RGBA8_SRGB));
+
+            futures.push_back(gpuMat.mEmissiveTexture.loadFromImage(mat.mEmissiveName.empty() ? "blank_black" : mat.mEmissiveName, TextureType_2D, FORMAT_RGBA8_SRGB));
+
+            for (Threading::TaskFuture<bool> &fut : futures) {
+                bool result = co_await fut;
+                if (!result)
+                    co_return false;
+            }
+
+            gpuMat.mResourceBlock = createResourceBlock({ &*gpuMat.mDiffuseTexture, &*gpuMat.mEmissiveTexture });
+        }
+
+        co_return true;
     }
 
 }

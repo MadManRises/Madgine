@@ -42,7 +42,7 @@ namespace Widgets {
 
         UIAtlas();
 
-        void createTexture();
+        Threading::TaskFuture<bool> createTexture();
         void preload(const PreprocessedUIAtlas &atlas);
         void reset();
 
@@ -51,7 +51,7 @@ namespace Widgets {
         const Atlas2::Entry *lookUpImage(Resources::ImageLoader::Resource *image);
         const Atlas2::Entry *lookUpImage(std::string_view name);
 
-        Render::TextureDescriptor texture();
+        Render::ResourceBlock resource();
 
     private:
         void expand();

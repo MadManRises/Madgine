@@ -11,6 +11,8 @@
 
 #include "Madgine/render/rendertarget.h"
 
+#include "Madgine/render/texture.h"
+
 #include "util/renderdata.h"
 
 METATABLE_BEGIN_BASE(Engine::Widgets::SceneWindow, Engine::Widgets::WidgetBase)
@@ -38,7 +40,7 @@ namespace Widgets {
         Vector3 pos { getAbsolutePosition(), static_cast<float>(depth(layer)) };
         Vector3 size = getAbsoluteSize();
 
-        renderData.renderQuad(pos, size.xy(), { 1.0f, 1.0f, 1.0f, 1.0f }, { mSource->texture() });
+        renderData.renderQuad(pos, size.xy(), { 1.0f, 1.0f, 1.0f, 1.0f }, { mSource->texture()->resource() });
     }
 
     void SceneWindow::setRenderSource(Render::RenderTarget *source)

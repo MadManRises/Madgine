@@ -14,9 +14,7 @@ namespace Engine {
 namespace Render {
 
     VulkanBuffer::VulkanBuffer(VulkanBuffer &&other)
-        : mAddress(std::exchange(other.mAddress, {}))
-        , mSize(std::exchange(other.mSize, 0))
-        , mIsPersistent(std::exchange(other.mIsPersistent, false))
+        : mBlock(std::exchange(other.mBlock, {}))
     {
     }
 
@@ -32,91 +30,86 @@ namespace Render {
 
     VulkanBuffer &VulkanBuffer::operator=(VulkanBuffer &&other)
     {
-        std::swap(mAddress, other.mAddress);
-        std::swap(mSize, other.mSize);
-        std::swap(mIsPersistent, other.mIsPersistent);
+        std::swap(mBlock, other.mBlock);
         return *this;
     }
 
     VulkanBuffer::operator bool() const
     {
-        return mSize > 0;
+        return mBlock.mAddress;
     }
 
     void VulkanBuffer::bindVertex(VkCommandBuffer commandList, size_t index) const
     {
-        VkDeviceSize offset = mAddress.offset();
-        VkBuffer b = buffer();
-        vkCmdBindVertexBuffers(commandList, index, 1, &b, &offset);
+        auto [buffer, offset] = VulkanRenderContext::getSingleton().mConstantMemoryHeap.resolve(mBlock.mAddress);
+        vkCmdBindVertexBuffers(commandList, index, 1, &buffer, &offset);
     }
 
     void VulkanBuffer::bindIndex(VkCommandBuffer commandList) const
     {
-        vkCmdBindIndexBuffer(commandList, buffer(), mAddress.offset(), VK_INDEX_TYPE_UINT32);
+        auto [buffer, offset] = VulkanRenderContext::getSingleton().mConstantMemoryHeap.resolve(mBlock.mAddress);
+        vkCmdBindIndexBuffer(commandList, buffer, offset, VK_INDEX_TYPE_UINT32);
     }
 
-    void VulkanBuffer::reset(size_t size)
+    void VulkanBuffer::reset()
     {
-        if (mAddress && mIsPersistent) {
-            VulkanConstantBufferHeap &heap = VulkanRenderContext::getSingleton().mConstantBufferHeap;
-
-            heap.deallocatePersistent(mAddress, mSize);
+        if (mBlock.mAddress) {
+            VulkanRenderContext::getSingleton().mConstantAllocator.deallocate(mBlock);
+            mBlock = {};
         }
-
-        mIsPersistent = false;
-        mAddress.reset();
-        mSize = size;
     }
 
     void VulkanBuffer::setData(const ByteBuffer &data)
     {
+        assert(data.mData);
+
+        VulkanRenderContext &context = VulkanRenderContext::getSingleton();
+
         size_t expectedSize = alignTo(data.mSize, 256);
-        if (data.mData) {
-            VulkanConstantBufferHeap &heap = VulkanRenderContext::getSingleton().mConstantBufferHeap;
+        if (mBlock.mSize != expectedSize) {
+            reset();
+            mBlock = context.mConstantAllocator.allocate(expectedSize);
+        }
 
-            if (!mIsPersistent || mSize != expectedSize) {
-                reset(expectedSize);
+        Block uploadAllocation = context.mUploadAllocator.allocate(expectedSize);
+        std::memcpy(uploadAllocation.mAddress, data.mData, data.mSize);
 
-                mAddress = heap.allocatePersistent(expectedSize);
+        auto [buffer, offset] = context.mConstantMemoryHeap.resolve(mBlock.mAddress);
+        auto [heap, srcOffset] = context.mUploadHeap.resolve(uploadAllocation.mAddress);
+
+        auto list = context.fetchCommandList("BufferUpload");
+
+        VkBufferCopy copyRegion {};
+        copyRegion.srcOffset = srcOffset; // Optional
+        copyRegion.dstOffset = offset; // Optional
+        copyRegion.size = data.mSize;
+        vkCmdCopyBuffer(list, heap, buffer, 1, &copyRegion);
+        
+        struct Deleter {
+
+            void operator()(void *ptr)
+            {
+                VulkanRenderContext::getSingleton().mUploadAllocator.deallocate({ ptr, mSize });
             }
 
-            mIsPersistent = true;
-            heap.setData(mAddress, data);
-        } else {
-            reset(expectedSize);
-        }
+            size_t mSize;
+        };
+        list.attachResource(std::unique_ptr<void, Deleter> { uploadAllocation.mAddress, { uploadAllocation.mSize } });
     }
 
-    WritableByteBuffer VulkanBuffer::mapData(size_t size)
+    size_t VulkanBuffer::offset() const
     {
-        VulkanConstantBufferHeap &heap = VulkanRenderContext::getSingleton().mConstantBufferHeap;
-
-        reset(alignTo(size, 256));
-
-        mAddress = heap.allocateTemp(mSize);
-
-        return heap.map(mAddress, mSize);
-    }
-
-    WritableByteBuffer VulkanBuffer::mapData()
-    {
-        return mapData(mSize);
-    }
-
-    OffsetPtr VulkanBuffer::address() const
-    {
-        return mAddress;
+        return VulkanRenderContext::getSingleton().mConstantMemoryHeap.resolve(mBlock.mAddress).second;
     }
 
     VkBuffer VulkanBuffer::buffer() const
     {
-        VulkanConstantBufferHeap &heap = VulkanRenderContext::getSingleton().mConstantBufferHeap;
-        return mSize > 0 ? (mIsPersistent ? heap.resourcePersistent() : heap.resourceTemp()) : nullptr;
+        return VulkanRenderContext::getSingleton().mConstantMemoryHeap.resolve(mBlock.mAddress).first;
     }
 
     size_t VulkanBuffer::size() const
     {
-        return mSize;
+        return mBlock.mSize;
     }
 
 }

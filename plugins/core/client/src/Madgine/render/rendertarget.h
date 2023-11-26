@@ -1,23 +1,26 @@
 #pragma once
 
+#include "Madgine/render/resourceblock.h"
 #include "Madgine/render/texturedescriptor.h"
 #include "Madgine/render/vertex.h"
 #include "renderdata.h"
+
+#include "Generic/bits/array.h"
 
 namespace Engine {
 namespace Render {
 
     struct MADGINE_CLIENT_EXPORT RenderTarget : RenderData {
-        RenderTarget(RenderContext *context, bool global, std::string name, bool flipFlop = false, RenderTarget * blitSource = nullptr);
+        RenderTarget(RenderContext *context, bool global, std::string name, bool flipFlop = false, RenderTarget *blitSource = nullptr);
         RenderTarget(const RenderTarget &) = delete;
         RenderTarget(RenderTarget &&) = default;
         virtual ~RenderTarget();
 
         virtual void clearDepthBuffer() = 0;
 
-        virtual TextureDescriptor texture(size_t index = 0) const;
+        virtual const Texture *texture(size_t index = 0) const;        
         virtual size_t textureCount() const;
-        virtual TextureDescriptor depthTexture() const;
+        virtual const Texture *depthTexture() const;
 
         virtual Matrix4 getClipSpaceMatrix() const;
 
@@ -59,7 +62,7 @@ namespace Render {
 
         RenderContext *mContext;
 
-        size_t mFlipFlopIndices[4] = { 0 };
+        BitArray<4> mFlipFlopIndices;
 
     private:
         std::vector<RenderPass *> mRenderPasses;

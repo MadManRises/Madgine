@@ -5,8 +5,8 @@ cbuffer Data : register(b0)
 	BloomData data;
 }
 
-Texture2D input : register(t0);
-Texture2D blurred : register(t1);
+Texture2D input : register(t0, space2);
+Texture2D blurred : register(t1, space2);
 
 SamplerState texSampler : register(s0);
 

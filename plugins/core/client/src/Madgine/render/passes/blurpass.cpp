@@ -5,6 +5,7 @@
 #include "../rendertarget.h"
 
 #include "Madgine/render/texturedescriptor.h"
+#include "Madgine/render/texture.h"
 
 #include "../rendercontext.h"
 
@@ -43,9 +44,9 @@ namespace Render {
         }
 
         if (iteration == 0) {
-            mPipeline->bindTextures(target, { mInput->texture(mInputIndex) });
+            mPipeline->bindResources(target, 0, mInput->texture(mInputIndex)->resource());
         } else {
-            mPipeline->bindTextures(target, { target->texture(1) });
+            mPipeline->bindResources(target, 0, target->texture(1)->resource());
         }
 
         mPipeline->renderQuad(target);

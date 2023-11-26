@@ -10,7 +10,7 @@ cbuffer PerObject : register(b2)
     Im3DPerObject object;
 }
 
-Texture2D tex : register(t0);
+Texture2D tex : register(t0, space2);
 
 SamplerState texSampler : register(s0);
 

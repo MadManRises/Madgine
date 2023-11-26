@@ -36,15 +36,15 @@ VertexShaderOutput main(AppData IN)
 	
 	float4 worldPos;
 
-	/*if (IN.aInstance.bones.buffer() != 0){ 
+	if (IN.aInstance.bones.buffer() != 0){ 
 		float4x4 BoneTransform = IN.aInstance.bones[IN.aBoneIDs[0]] * IN.aWeights[0]
 		+ IN.aInstance.bones[IN.aBoneIDs[1]] * IN.aWeights[1]
 		+ IN.aInstance.bones[IN.aBoneIDs[2]] * IN.aWeights[2]
 		+ IN.aInstance.bones[IN.aBoneIDs[3]] * IN.aWeights[3];
-		worldPos = mul(IN.aInstance.m, mul(BoneTransform, aPos));
-	}else{*/
+		worldPos = mul(IN.aInstance.mv, mul(BoneTransform, aPos));
+	}else{
 		worldPos = mul(IN.aInstance.mv, aPos);
-	//}
+	}
 
     OUT.worldPos = worldPos + float4(aPos2, 0.0, 0.0);	
 

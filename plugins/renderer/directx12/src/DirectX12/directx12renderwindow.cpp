@@ -17,7 +17,7 @@ namespace Engine {
 namespace Render {
 
     DirectX12RenderWindow::DirectX12RenderWindow(DirectX12RenderContext *context, Window::OSWindow *w, size_t samples)
-        : DirectX12RenderTarget(context, true, w->title())
+        : DirectX12RenderTarget(context, true, w->title(), TextureType_2D, samples)
         , mWindow(w)
     {
         //context->waitForGPU();
@@ -57,7 +57,10 @@ namespace Render {
         // render target view.
 
         InterfacesVector size = w->renderSize();
-        setup({ mCachedTargetViews[0] }, { size.x, size.y });
+
+        std::vector<std::array<OffsetPtr, 6>> views;
+        views.emplace_back()[0] = mCachedTargetViews[0];
+        setup(std::move(views), { size.x, size.y });
     }
 
     DirectX12RenderWindow::~DirectX12RenderWindow()
@@ -78,28 +81,35 @@ namespace Render {
 
             createRenderTargetViews();
 
-            setup({ mCachedTargetViews[0] }, mResizeTarget);
+            std::vector<std::array<OffsetPtr, 6>> views;
+            views.emplace_back()[0] = mCachedTargetViews[0];
+            setup(std::move(views), mResizeTarget);
         }
         return mTargetViews.empty();
     }
 
     void DirectX12RenderWindow::beginFrame()
     {
-        mTargetViews[0] = mCachedTargetViews[mSwapChain->GetCurrentBackBufferIndex()];
+        mTargetViews[0][0] = mCachedTargetViews[mSwapChain->GetCurrentBackBufferIndex()];
 
-        DirectX12RenderTarget::beginFrame();
+        mCommandList = context()->fetchCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT);
+
+        mCommandList.Transition(mBackBuffers[mSwapChain->GetCurrentBackBufferIndex()], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+        
+        DirectX12RenderTarget::beginFrame();        
 
         //mCommandList.attachResource(mBackBuffers[mSwapChain->GetCurrentBackBufferIndex()]);
 
-        mCommandList.Transition(mBackBuffers[mSwapChain->GetCurrentBackBufferIndex()], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+        
     }
 
     void DirectX12RenderWindow::endFrame()
     {
+        DirectX12RenderTarget::endFrame();
 
         mCommandList.Transition(mBackBuffers[mSwapChain->GetCurrentBackBufferIndex()], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-
-        DirectX12RenderTarget::endFrame();
+                
+        mCommandList.reset();
 
         mSwapChain->Present(0, 0);
     }
@@ -119,6 +129,16 @@ namespace Render {
     {
         InterfacesVector size = mWindow->renderSize();
         return { size.x, size.y };
+    }
+
+    size_t DirectX12RenderWindow::textureCount() const
+    {
+        return 1;
+    }
+
+    TextureFormat DirectX12RenderWindow::textureFormat(size_t index) const
+    {
+        return FORMAT_RGBA8_SRGB;
     }
 
     void DirectX12RenderWindow::createRenderTargetViews()

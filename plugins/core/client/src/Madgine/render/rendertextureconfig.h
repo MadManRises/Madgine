@@ -9,7 +9,7 @@ namespace Render {
         std::string mName;
         
         TextureType mType = TextureType_2D;
-        DataFormat mFormat = FORMAT_RGBA8;
+        TextureFormat mFormat = FORMAT_RGBA8;
 
         bool mCreateDepthBufferView = false;
 

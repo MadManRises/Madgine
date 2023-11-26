@@ -4,7 +4,6 @@
 #include "Madgine/render/rendercontextcollector.h"
 
 #include "util/directx12commandlist.h"
-#include "util/directx12constantbufferheap.h"
 #include "util/directx12descriptorheap.h"
 
 #include "Generic/lambda.h"
@@ -19,6 +18,8 @@
 
 #include "Generic/allocator/bucket.h"
 #include "Generic/allocator/heap.h"
+#include "Generic/allocator/fixed.h"
+#include "Generic/allocator/bump.h"
 
 namespace Engine {
 namespace Render {
@@ -43,9 +44,12 @@ namespace Render {
         virtual void deallocateBufferImpl(GPUBuffer<void> buffer) override;
         virtual WritableByteBuffer mapBufferImpl(GPUBuffer<void> &buffer) override;
 
+        virtual UniqueResourceBlock createResourceBlock(std::vector<const Texture*> textures) override;
+
         static DirectX12RenderContext &getSingleton();
 
         void createRootSignature();
+        void setupRootSignature(ID3D12GraphicsCommandList *list);
 
         DirectX12CommandList fetchCommandList(D3D12_COMMAND_LIST_TYPE type);
 
@@ -56,7 +60,6 @@ namespace Render {
         DirectX12DescriptorHeap mDescriptorHeap;
         DirectX12DescriptorHeap mRenderTargetDescriptorHeap;
         DirectX12DescriptorHeap mDepthStencilDescriptorHeap;
-        DirectX12ConstantBufferHeap mConstantBufferHeap;
         
         ReleasePtr<ID3D12RootSignature> mRootSignature;
         ReleasePtr<IDXGIFactory4> mFactory;
@@ -65,13 +68,19 @@ namespace Render {
         DirectX12CommandAllocator mCopyQueue;
         DirectX12CommandAllocator mComputeQueue;
 
-        DirectX12Buffer mConstantBuffer;
-
-        DirectX12HeapAllocator mDefaultMemoryHeap;
-        LogBucketAllocator<HeapAllocator<DirectX12HeapAllocator &>, 64, 4096, 4> mDefaultAllocator;
-
         DirectX12MappedHeapAllocator mUploadHeap = D3D12_HEAP_TYPE_UPLOAD;
         BucketAllocator<HeapAllocator<DirectX12MappedHeapAllocator &>, 16, 64, 16> mUploadAllocator;
+
+        DirectX12HeapAllocator mBufferMemoryHeap;
+        LogBucketAllocator<HeapAllocator<DirectX12HeapAllocator &>, 64, 4096, 4> mBufferAllocator;
+
+        DirectX12MappedHeapAllocator mTempMemoryHeap = D3D12_HEAP_TYPE_UPLOAD;
+        BumpAllocator<FixedAllocator<DirectX12MappedHeapAllocator &>> mTempAllocator;
+
+        DirectX12HeapAllocator mConstantMemoryHeap;
+        LogBucketAllocator<HeapAllocator<DirectX12HeapAllocator &>, 64, 4096, 4> mConstantAllocator;
+
+        DirectX12Buffer mConstantBuffer;
     };
 
 }

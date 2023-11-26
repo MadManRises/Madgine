@@ -15,8 +15,8 @@ namespace Render {
 
     struct MADGINE_DIRECTX11_EXPORT DirectX11Texture : Texture {
 
-        DirectX11Texture(TextureType type, DataFormat format, UINT bind, size_t width, size_t height, size_t samples = 1, const ByteBuffer &data = {});
-        DirectX11Texture(TextureType type = TextureType_2D, DataFormat format = FORMAT_RGBA8, UINT bind = D3D11_BIND_SHADER_RESOURCE, size_t samples = 1);
+        DirectX11Texture(TextureType type, TextureFormat format, UINT bind, size_t width, size_t height, size_t samples = 1, const ByteBuffer &data = {});
+        DirectX11Texture(TextureType type = TextureType_2D, TextureFormat format = FORMAT_RGBA8, UINT bind = D3D11_BIND_SHADER_RESOURCE, size_t samples = 1);
         DirectX11Texture(const DirectX11Texture &) = delete;
         DirectX11Texture(DirectX11Texture &&);
         ~DirectX11Texture();

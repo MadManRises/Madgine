@@ -1,9 +1,30 @@
 #pragma once
 
+#include "ptr.h"
+
 namespace Engine {
 namespace Render {
 
-    typedef uintptr_t TextureHandle;
+    struct TextureHandle {
+
+        template <typename T>
+        operator T() const
+        {
+            return (T)(mPtr);
+        }
+
+        auto operator<=>(const TextureHandle &) const = default;
+
+        uintptr_t mPtr;
+    };
+
+    struct UniqueTextureHandle : UniqueOpaquePtr {
+
+        operator TextureHandle() const
+        {
+            return { get() };
+        }
+    };
 
     enum TextureType {
         TextureType_2D,
@@ -11,20 +32,13 @@ namespace Render {
         TextureType_Cube
     };
 
-    enum DataFormat {
+    enum TextureFormat {
         FORMAT_RGBA8,
         FORMAT_RGBA8_SRGB,
         FORMAT_RGBA16F,
         FORMAT_R32F,
         FORMAT_D24,
         FORMAT_D32
-    };
-
-    struct TextureDescriptor {
-        TextureHandle mTextureHandle = 0;
-        TextureType mType;
-
-        auto operator<=>(const TextureDescriptor &) const = default;
     };
 
 }

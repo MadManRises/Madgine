@@ -20,6 +20,9 @@ namespace Render {
         virtual bool resizeImpl(const Vector2i &size) override;
         virtual Vector2i size() const override;
 
+        virtual size_t textureCount() const override;
+        virtual TextureFormat textureFormat(size_t index) const override;
+
     protected:
         void createRenderTargetViews();
 

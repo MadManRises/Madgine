@@ -99,13 +99,13 @@ namespace Render {
             std::ranges::transform(instance.second, std::back_inserter(instanceData), [&](const ShadowSceneRenderData::ObjectData &o) {
                 Matrix4 mv = v * o.mTransform;
                 return PointShadowInstanceData {
-                    mv.Transpose() /*,                    
-                    o.mBones*/
+                    mv.Transpose(),                    
+                    o.mBones
                 };
             });
 
-
-            mPipeline->renderMeshInstanced(target, std::move(instanceData), meshData);
+            mPipeline->bindMesh(target, meshData, std::move(instanceData));
+            mPipeline->renderInstanced(target, instance.second.size());
         }
     }
 

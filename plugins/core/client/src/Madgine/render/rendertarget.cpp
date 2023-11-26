@@ -8,6 +8,8 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
+#include "Madgine/render/texture.h"
+
 METATABLE_BEGIN(Engine::Render::RenderTarget)
 METATABLE_END(Engine::Render::RenderTarget)
 
@@ -50,6 +52,8 @@ namespace Render {
         for (Threading::TaskFuture<void> &dependency : dependencies)
             co_await dependency;
 
+        LOG_DEBUG(mName << ": Begin Frame");
+
         beginFrame();
 
         for (RenderPass *pass : mRenderPasses) {
@@ -65,13 +69,15 @@ namespace Render {
                 endIteration();
                 if (flipFlopping) {
                     for (size_t i = 0; i < count; ++i)
-                        mFlipFlopIndices[index + i] ^= 1;
+                        mFlipFlopIndices[index + i] = mFlipFlopIndices[index + i] ^ 1;
                 }
             }
             popAnnotation();
         }
 
         endFrame();
+
+        LOG_DEBUG(mName << ": End Frame");
     }
 
     void RenderTarget::addRenderPass(RenderPass *pass)
@@ -149,9 +155,9 @@ namespace Render {
         return Matrix4::IDENTITY;
     }
 
-    TextureDescriptor RenderTarget::texture(size_t index) const
+    const Texture *RenderTarget::texture(size_t index) const
     {
-        return {};
+        return nullptr;
     }
 
     size_t RenderTarget::textureCount() const
@@ -159,9 +165,9 @@ namespace Render {
         return 0;
     }
 
-    TextureDescriptor RenderTarget::depthTexture() const
+    const Texture *RenderTarget::depthTexture() const
     {
-        return {};
+        return nullptr;
     }
 
     RenderContext *RenderTarget::context() const

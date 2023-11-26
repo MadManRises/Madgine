@@ -9,9 +9,18 @@
 namespace Engine {
 namespace Render {
 
+    template <size_t I = 1>
+    struct OpenGLResourceBlock {
+        size_t mSize = I;
+        struct {
+            GLenum mTarget;
+            GLint mHandle;
+        } mResources[I];
+    };
+
     struct MADGINE_OPENGL_EXPORT OpenGLTexture : Texture {
 
-        OpenGLTexture(TextureType type, DataFormat format, size_t samples = 1);
+        OpenGLTexture(TextureType type, TextureFormat format, size_t samples = 1);
         OpenGLTexture() = default;
         OpenGLTexture(const OpenGLTexture &) = delete;
         OpenGLTexture(OpenGLTexture &&) = default;
@@ -34,6 +43,8 @@ namespace Render {
 
     private:
         size_t mSamples = 1;
+
+        OpenGLResourceBlock<1> mBlock;
     };
 
 }

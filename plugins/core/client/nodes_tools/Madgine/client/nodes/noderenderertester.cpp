@@ -67,7 +67,7 @@ namespace Tools {
     {
         if (ImGui::Begin("NodeRendererTester", &mVisible)) {
 
-            ImGui::ImageButton((void *)mTexture->texture().mTextureHandle, { 512, 512 }, { 0, 0 }, { 1, 1 }, 0);
+            ImGui::ImageButton((void *)mTexture->texture(), { 512, 512 }, { 0, 0 }, { 1, 1 }, 0);
             //ImGui::InteractiveView(mState);
 
             //Tools::InteractiveCamera(mState, mCamera);

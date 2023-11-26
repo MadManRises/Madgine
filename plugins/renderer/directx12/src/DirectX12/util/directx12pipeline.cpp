@@ -4,6 +4,8 @@
 
 #include "../directx12rendercontext.h"
 
+#include "../directx12rendertarget.h"
+
 namespace Engine {
 namespace Render {
 
@@ -27,12 +29,21 @@ namespace Render {
         return true;
     }
 
-    ID3D12PipelineState *DirectX12Pipeline::get(VertexFormat format, size_t groupSize, size_t samples, size_t instanceDataSize) const
+    ID3D12PipelineState *DirectX12Pipeline::get(VertexFormat vertexFormat, size_t groupSize, DirectX12RenderTarget *target, size_t instanceDataSize, bool depthChecking) const
     {
-        size_t samplesBits = sqrt(samples);
-        assert(samplesBits * samplesBits == samples);
+        size_t samplesBits = sqrt(target->samples());
+        assert(samplesBits * samplesBits == target->samples());
 
-        ReleasePtr<ID3D12PipelineState> &pipeline = mPipelines[format][groupSize - 1][samplesBits - 1];
+        std::vector<TextureFormat> formats;
+        for (size_t i = 0; i < target->textureCount(); ++i)
+            formats.emplace_back(target->textureFormat(i));
+        PipelineDescriptor desc {
+            vertexFormat,
+            groupSize,
+            formats,
+            target->samples()
+        };
+        ReleasePtr<ID3D12PipelineState> &pipeline = mPipelines[desc];
 
         if (!pipeline) {
 
@@ -77,7 +88,7 @@ namespace Render {
             if (resolve(mPixelShader))
                 pipelineDesc.PS = { resolve(mPixelShader)->GetBufferPointer(), resolve(mPixelShader)->GetBufferSize() };
 
-            std::vector<D3D12_INPUT_ELEMENT_DESC> vertexLayoutDesc = DirectX12RenderContext::createVertexLayout(format, instanceDataSize);
+            std::vector<D3D12_INPUT_ELEMENT_DESC> vertexLayoutDesc = DirectX12RenderContext::createVertexLayout(vertexFormat, instanceDataSize);
 
             pipelineDesc.InputLayout.pInputElementDescs = vertexLayoutDesc.data();
             pipelineDesc.InputLayout.NumElements = vertexLayoutDesc.size();
@@ -106,7 +117,7 @@ namespace Render {
             pipelineDesc.BlendState.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
             pipelineDesc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
-            pipelineDesc.DepthStencilState.DepthEnable = TRUE;
+            pipelineDesc.DepthStencilState.DepthEnable = depthChecking;
             pipelineDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
             pipelineDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
             pipelineDesc.DepthStencilState.StencilEnable = FALSE;
@@ -124,10 +135,24 @@ namespace Render {
 
             pipelineDesc.SampleMask = UINT_MAX;
 
-            pipelineDesc.NumRenderTargets = 1;
-            pipelineDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+            pipelineDesc.NumRenderTargets = target->textureCount();
+            for (size_t i = 0; i < target->textureCount(); ++i) {
+                switch (target->textureFormat(i)) {
+                case FORMAT_RGBA8:
+                    pipelineDesc.RTVFormats[i] = DXGI_FORMAT_R8G8B8A8_UNORM;
+                    break;
+                case FORMAT_RGBA16F:
+                    pipelineDesc.RTVFormats[i] = DXGI_FORMAT_R16G16B16A16_FLOAT;
+                    break;
+                case FORMAT_RGBA8_SRGB:
+                    pipelineDesc.RTVFormats[i] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+                    break;
+                default:
+                    std::terminate();
+                }
+            }
 
-            pipelineDesc.SampleDesc.Count = samples;
+            pipelineDesc.SampleDesc.Count = target->samples();
             pipelineDesc.SampleDesc.Quality = 0;
 
             HRESULT hr = GetDevice()->CreateGraphicsPipelineState(&pipelineDesc, IID_PPV_ARGS(&pipeline));
@@ -137,17 +162,9 @@ namespace Render {
         return pipeline;
     }
 
-    const std::array<std::array<ReleasePtr<ID3D12PipelineState>, 3>, 3> *DirectX12Pipeline::ptr() const
-    {
-        return mPipelines.data();
-    }
-
     void DirectX12Pipeline::reset()
     {
-        for (std::array<std::array<ReleasePtr<ID3D12PipelineState>, 3>, 3> &groupPipelines : mPipelines)
-            for (std::array<ReleasePtr<ID3D12PipelineState>, 3> &samplePipelines : groupPipelines)
-                for (ReleasePtr<ID3D12PipelineState> &pipeline : samplePipelines)
-                    pipeline.reset();
+        mPipelines.clear();
         mVertexShader = {};
         mPixelShader = {};
     }
