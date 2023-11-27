@@ -42,7 +42,7 @@ struct META_EXPORT MetaTable {
 
     ScopeIterator find(std::string_view key, TypedScopePtr scope) const;
 
-    void call(TypedScopePtr scope, KeyValueReceiver &receiver, const ArgumentList &args) const;
+    void call(TypedScopePtr scope, ValueType &retVal, const ArgumentList &args) const;
 
     template <typename T>
     bool isDerivedFrom(size_t *offset = nullptr) const

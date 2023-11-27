@@ -101,10 +101,9 @@ namespace Scripting {
             mNameHolder = PyBytes_AsString(ascii_name);
             mName = mNameHolder;
 
-            mFunctionPtr = [](const FunctionTable *self, KeyValueReceiver &receiver, const ArgumentList &args) {
+            mFunctionPtr = [](const FunctionTable *self, ValueType &retVal, const ArgumentList &args) {
                 Python3InnerLock lock;
-                Python3Environment::getSingleton().execute(receiver,
-                    reinterpret_cast<PyCodeObject *>(PyFunction_GetCode(static_cast<const Python3FunctionTable *>(self)->mFunctionObject)));
+                retVal = fromPyObject(static_cast<const Python3FunctionTable *>(self)->mFunctionObject.call(args));
             };
 
             registerFunction(*this);

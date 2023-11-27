@@ -67,7 +67,7 @@ struct META_EXPORT TypedScopePtr {
 
     std::string name() const;
 
-    void call(KeyValueReceiver &receiver, const ArgumentList &args) const;
+    void call(ValueType &retVal, const ArgumentList &args) const;
 
     void *mScope = nullptr;
     const MetaTable * mType = nullptr;

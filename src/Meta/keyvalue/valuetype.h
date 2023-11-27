@@ -26,6 +26,8 @@
 #include "Generic/cow.h"
 #include "Generic/cowstring.h"
 
+#include "keyvaluesender.h"
+
 #include "valuetype_desc.h"
 #include "valuetype_forward.h"
 
@@ -139,19 +141,12 @@ struct META_EXPORT ValueType {
 
     void setType(ValueTypeDesc type);
 
-    ArgumentList call(const ArgumentList &args) const;
+    void call(ValueType &retVal, const ArgumentList &args) const;
     template <typename... Args>
-    ArgumentList call(Args &&...args)
+    void call(ValueType &retVal, Args &&...args)
     {
         return call({ ValueType { std::forward<Args>(args) }... });
     }
-
-    auto sender(const ArgumentList &args) const
-    {
-        return make_key_value_sender(*this, args);
-    }
-
-    void operator()(KeyValueReceiver &receiver, const ArgumentList &args) const;
 
 private:
     Union mUnion;

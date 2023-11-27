@@ -4,9 +4,9 @@
 
 namespace Engine {
 
-void KeyValueFunction::operator()(KeyValueReceiver &receiver, const ArgumentList &args) const
+void KeyValueFunction::operator()(ValueType &retVal, const ArgumentList &args) const
 {
-    mWrapper(mFunction, receiver, args);
+    mWrapper(mFunction, retVal, args);
 }
 
 }

@@ -43,9 +43,9 @@ std::string TypedScopePtr::name() const
         return "<NULL>";
 }
 
-void TypedScopePtr::call(KeyValueReceiver &receiver, const ArgumentList &args) const
+void TypedScopePtr::call(ValueType &retVal, const ArgumentList &args) const
 {
-    return mType->call(*this, receiver, args);
+    return mType->call(*this, retVal, args);
 }
 
 }

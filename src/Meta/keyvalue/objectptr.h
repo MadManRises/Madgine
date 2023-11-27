@@ -13,7 +13,7 @@ struct META_EXPORT ObjectPtr {
     bool getValue(ValueType &retVal, std::string_view name) const;
     std::map<std::string_view, ValueType> values() const;
 
-    void call(KeyValueReceiver &receiver, const ArgumentList &args) const;
+    void call(ValueType &retVal, const ArgumentList &args) const;
 
     std::string descriptor() const;
 

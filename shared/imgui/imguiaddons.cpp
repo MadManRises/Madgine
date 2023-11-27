@@ -415,6 +415,12 @@ bool ValueTypeDrawer::draw(const Engine::Color4 &c)
     return ColorEdit4("##ValueTypeDrawer", const_cast<float *>(&c.r), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoPicker);
 }
 
+bool ValueTypeDrawer::draw(const Engine::KeyValueSender &s)
+{
+    Text("<sender>");
+    return false;
+}
+
 void setPayloadStatus(std::string_view msg)
 {
     if (ImGui::GetIO().KeyShift)

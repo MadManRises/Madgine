@@ -25,22 +25,13 @@ TypedScopePtr BoundApiFunction::scope() const
     return { mScope, *mFunction.mTable->mArguments[0].mType.mSecondary.mMetaTable };
 }
 
-ArgumentList BoundApiFunction::operator()(const ArgumentList &args)
+void BoundApiFunction::operator()(ValueType &retVal, const ArgumentList &args) const
 {
     ArgumentList fullArgs;
     fullArgs.reserve(args.size() + 1);
     fullArgs.push_back(ValueType { scope() });
     fullArgs.insert(fullArgs.end(), args.begin(), args.end());
-    return mFunction(fullArgs);
-}
-
-void BoundApiFunction::operator()(KeyValueReceiver &receiver, const ArgumentList &args) const
-{
-    ArgumentList fullArgs;
-    fullArgs.reserve(args.size() + 1);
-    fullArgs.push_back(ValueType { scope() });
-    fullArgs.insert(fullArgs.end(), args.begin(), args.end());
-    mFunction(receiver, fullArgs);
+    return mFunction(retVal, fullArgs);
 }
 
 }

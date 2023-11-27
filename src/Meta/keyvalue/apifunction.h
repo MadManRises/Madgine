@@ -23,11 +23,7 @@ struct META_EXPORT ApiFunction {
         return mTable != nullptr;
     }
 
-    ArgumentList operator()(const ArgumentList &args) const;
-    auto sender(const ArgumentList& args) const {
-        return make_key_value_sender(*this, args);
-    }
-    void operator()(KeyValueReceiver &receiver, const ArgumentList &args) const;
+    void operator()(ValueType &retVal, const ArgumentList &args) const;
 
     size_t argumentsCount(bool excludeThis = false) const;
     bool isMemberFunction() const;

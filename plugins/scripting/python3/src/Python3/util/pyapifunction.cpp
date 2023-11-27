@@ -28,15 +28,12 @@ namespace Scripting {
                 arguments[i] = fromPyObject(PyTuple_GetItem(args, i));
             }
 
-            return std::visit(overloaded {
-                                  [&](FunctionTable::FSyncPtr f) {
-                                      //Python3Unlock unlock;
-                                      return toPyObject(self->mFunction(arguments)[0]);
-                                  },
-                                  [&](FunctionTable::FAsyncPtr f) {
-                                      return suspend(self->mFunction.sender(arguments));
-                                  } },
-                self->mFunction.mTable->mFunctionPtr);
+            ValueType retVal;
+            Py_BEGIN_ALLOW_THREADS;
+            self->mFunction(retVal, arguments);
+            Py_END_ALLOW_THREADS;
+
+            return toPyObject(retVal);
         }
 
         PyTypeObject PyApiFunctionType = {

@@ -181,7 +181,8 @@ namespace Tools {
     {
         if (ImGui::Begin("FunctionTool", &mVisible)) {
             if (renderFunctionSelect(mCurrentFunction, mCurrentFunctionName, mCurrentArguments)) {
-                Execution::detach(mCurrentFunction.sender(mCurrentArguments));
+                ValueType result;
+                mCurrentFunction(result, mCurrentArguments);
             }
         }
         ImGui::End();

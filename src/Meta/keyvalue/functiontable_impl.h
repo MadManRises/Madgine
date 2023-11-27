@@ -44,12 +44,6 @@ static constexpr std::array<FunctionArgument, sizeof...(Args) + 1> metafunctionA
 }
 
 template <typename T, typename... Args>
-static constexpr std::array<FunctionArgument, sizeof...(Args) + 1> metafunctionArgs(void (T::*f)(KeyValueReceiver &, Args...), std::string_view args)
-{
-    return metafunctionArgsMemberHelper<ValueType, T, Args...>(args, std::index_sequence_for<Args...>());
-}
-
-template <typename T, typename... Args>
 static constexpr std::array<FunctionArgument, sizeof...(Args) + 1> metafunctionArgs(void (T::*f)(ArgumentList &, Args...), std::string_view args)
 {
     return metafunctionArgsMemberHelper<ValueType, T, Args...>(args, std::index_sequence_for<Args...>());
@@ -62,104 +56,95 @@ static constexpr std::array<FunctionArgument, sizeof...(Args) + 1> metafunctionA
 }
 
 template <auto F, typename R, typename T, typename... Args, size_t... I>
-static void unpackMemberHelper(const FunctionTable *table, ArgumentList &results, const ArgumentList &args, std::index_sequence<I...>)
+static void unpackMemberHelper(const FunctionTable *table, ValueType &retVal, const ArgumentList &args, std::index_sequence<I...>)
 {
-    results.resize(1);
     T *t = ValueType_as<TypedScopePtr>(getArgument(args, 0)).safe_cast<T>();
-    to_ValueType(results[0], invoke_patch_void<std::monostate>(F, t, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...));
+    to_ValueType(retVal, invoke_patch_void<std::monostate>(F, t, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...));
 }
 
 template <auto F, typename R, typename... Args, size_t... I>
-static void unpackApiHelper(const FunctionTable *table, ArgumentList &results, const ArgumentList &args, std::index_sequence<I...>)
+static void unpackApiHelper(const FunctionTable *table, ValueType &retVal, const ArgumentList &args, std::index_sequence<I...>)
 {
-    results.resize(1);
-    to_ValueType(results[0], invoke_patch_void<std::monostate>(F, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I))...));
+    to_ValueType(retVal, invoke_patch_void<std::monostate>(F, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I))...));
 }
 
 template <auto F, typename T, typename... Args, size_t... I>
-static void unpackAsyncHelper(const FunctionTable *table, KeyValueReceiver &receiver, const ArgumentList &args, std::index_sequence<I...>)
+static void unpackAsyncHelper(const FunctionTable *table, ValueType &retVal, const ArgumentList &args, std::index_sequence<I...>)
 {
     T *t = ValueType_as<TypedScopePtr>(getArgument(args, 0)).safe_cast<T>();
-    (t->*F)(receiver, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...);
+    (t->*F)(retVal, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...);
 }
 
 template <auto F, typename T, typename... Args, size_t... I>
-static void unpackReturnListHelper(const FunctionTable *table, ArgumentList &results, const ArgumentList &args, std::index_sequence<I...>)
+static void unpackReturnListHelper(const FunctionTable *table, ValueType &retVal, const ArgumentList &args, std::index_sequence<I...>)
 {
     T *t = ValueType_as<TypedScopePtr>(getArgument(args, 0)).safe_cast<T>();
-    (t->*F)(results, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...);
+    (t->*F)(retVal, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...);
 }
 
 template <auto F, typename T, typename... Args, size_t... I>
-static void unpackReturnHelper(const FunctionTable *table, ArgumentList &results, const ArgumentList &args, std::index_sequence<I...>)
+static void unpackReturnHelper(const FunctionTable *table, ValueType &retVal, const ArgumentList &args, std::index_sequence<I...>)
 {
-    results.resize(1);
     T *t = ValueType_as<TypedScopePtr>(getArgument(args, 0)).safe_cast<T>();
-    (t->*F)(results[0], ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...);
+    (t->*F)(retVal, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...);
 }
 
 template <auto F, typename R, typename T, typename... Args>
-static void unpackMemberApiMethod(const FunctionTable *table, ArgumentList &results, const ArgumentList &args)
+static void unpackMemberApiMethod(const FunctionTable *table, ValueType &retVal, const ArgumentList &args)
 {
-    unpackMemberHelper<F, R, T, Args...>(table, results, args, std::index_sequence_for<Args...>());
+    unpackMemberHelper<F, R, T, Args...>(table, retVal, args, std::index_sequence_for<Args...>());
 }
 
 template <auto F, typename R, typename... Args>
-static void unpackApiMethod(const FunctionTable *table, ArgumentList &results, const ArgumentList &args)
+static void unpackApiMethod(const FunctionTable *table, ValueType &retVal, const ArgumentList &args)
 {
-    unpackApiHelper<F, R, Args...>(table, results, args, std::index_sequence_for<Args...>());
+    unpackApiHelper<F, R, Args...>(table, retVal, args, std::index_sequence_for<Args...>());
 }
 
 template <auto F, typename T, typename... Args>
-static void unpackAsyncMethod(const FunctionTable *table, KeyValueReceiver &receiver, const ArgumentList &args)
+static void unpackAsyncMethod(const FunctionTable *table, ValueType &retVal, const ArgumentList &args)
 {
-    unpackAsyncHelper<F, T, Args...>(table, receiver, args, std::index_sequence_for<Args...>());
+    unpackAsyncHelper<F, T, Args...>(table, retVal, args, std::index_sequence_for<Args...>());
 }
 
 template <auto F, typename T, typename... Args>
-static void unpackReturnListMethod(const FunctionTable *table, ArgumentList &results, const ArgumentList &args)
+static void unpackReturnListMethod(const FunctionTable *table, ValueType &retVal, const ArgumentList &args)
 {
-    unpackReturnListHelper<F, T, Args...>(table, results, args, std::index_sequence_for<Args...>());
+    unpackReturnListHelper<F, T, Args...>(table, retVal, args, std::index_sequence_for<Args...>());
 }
 
 template <auto F, typename T, typename... Args>
-static void unpackReturnMethod(const FunctionTable *table, ArgumentList &results, const ArgumentList &args)
+static void unpackReturnMethod(const FunctionTable *table, ValueType &retVal, const ArgumentList &args)
 {
-    unpackReturnHelper<F, T, Args...>(table, results, args, std::index_sequence_for<Args...>());
+    unpackReturnHelper<F, T, Args...>(table, retVal, args, std::index_sequence_for<Args...>());
 }
 
 template <auto F, typename R, typename... Args>
-static constexpr typename FunctionTable::FSyncPtr wrapHelper(R (*f)(Args...))
+static constexpr typename FunctionTable::FPtr wrapHelper(R (*f)(Args...))
 {
     return &unpackApiMethod<F, R, Args...>;
 }
 
 template <auto F, typename R, typename T, typename... Args>
-static constexpr typename FunctionTable::FSyncPtr wrapHelper(R (T::*f)(Args...))
+static constexpr typename FunctionTable::FPtr wrapHelper(R (T::*f)(Args...))
 {
     return &unpackMemberApiMethod<F, R, T, Args...>;
 }
 
 template <auto F, typename R, typename T, typename... Args>
-static constexpr typename FunctionTable::FSyncPtr wrapHelper(R (T::*f)(Args...) const)
+static constexpr typename FunctionTable::FPtr wrapHelper(R (T::*f)(Args...) const)
 {
     return &unpackMemberApiMethod<F, R, T, Args...>;
 }
 
 template <auto F, typename T, typename... Args>
-static constexpr typename FunctionTable::FAsyncPtr wrapHelper(void (T::*f)(KeyValueReceiver &, Args...))
-{
-    return &unpackAsyncMethod<F, T, Args...>;
-}
-
-template <auto F, typename T, typename... Args>
-static constexpr typename FunctionTable::FSyncPtr wrapHelper(void (T::*f)(ArgumentList &, Args...))
+static constexpr typename FunctionTable::FPtr wrapHelper(void (T::*f)(ArgumentList &, Args...))
 {
     return &unpackReturnListMethod<F, T, Args...>;
 }
 
 template <auto F, typename T, typename... Args>
-static constexpr typename FunctionTable::FSyncPtr wrapHelper(void (T::*f)(ValueType &, Args...))
+static constexpr typename FunctionTable::FPtr wrapHelper(void (T::*f)(ValueType &, Args...))
 {
     return &unpackReturnMethod<F, T, Args...>;
 }

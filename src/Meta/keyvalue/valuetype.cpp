@@ -131,6 +131,9 @@ std::string ValueType::toShortString() const
         [](const EnumHolder &e) {
             return std::string { e.toString() };
         },
+        [](const KeyValueSender &s) {
+            return "<sender>"s;
+        },
         [](const auto &v) {
             return std::to_string(v);
         } });
@@ -211,28 +214,23 @@ void ValueType::setType(ValueTypeDesc type)
     }
 }
 
-ArgumentList ValueType::call(const ArgumentList &args) const
-{
-    return Execution::sync_expect(sender(args));
-}
-
-void ValueType::operator()(KeyValueReceiver &receiver, const ArgumentList &args) const
+void ValueType::call(ValueType &retVal, const ArgumentList &args) const
 {
     return std::visit(overloaded {
                           [&](const ApiFunction &function) {
-                              return function(receiver, args);
+                              return function(retVal, args);
                           },
                           [&](const KeyValueFunction &function) {
-                              return function(receiver, args);
+                              return function(retVal, args);
                           },
                           [&](const TypedScopePtr &scope) {
-                              return scope.call(receiver, args);
+                              return scope.call(retVal, args);
                           },
                           [&](const OwnedScopePtr &scope) {
-                              return scope.get().call(receiver, args);
+                              return scope.get().call(retVal, args);
                           },
                           [&](const ObjectPtr &o) {
-                              return o.call(receiver, args);
+                              return o.call(retVal, args);
                           },
                           [](const auto &) {
                               throw "calling operator is not supported";

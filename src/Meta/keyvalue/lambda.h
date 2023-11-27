@@ -65,13 +65,13 @@ private:
     }
 
     template <auto F, typename R, typename T, typename... Args>
-    static CONSTEVAL typename FunctionTable::FSyncPtr wrapHelper(R (T::*f)(Args...))
+    static CONSTEVAL typename FunctionTable::FPtr wrapHelper(R (T::*f)(Args...))
     {
         return &unpackMemberApiMethod<F, R, T, Args...>;
     }
 
     template <auto F, typename R, typename T, typename... Args>
-    static CONSTEVAL typename FunctionTable::FSyncPtr wrapHelper(R (T::*f)(Args...) const)
+    static CONSTEVAL typename FunctionTable::FPtr wrapHelper(R (T::*f)(Args...) const)
     {
         return &unpackMemberApiMethod<F, R, T, Args...>;
     }

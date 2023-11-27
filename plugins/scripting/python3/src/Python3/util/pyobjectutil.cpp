@@ -67,11 +67,11 @@ namespace Scripting {
                 return results;
             }
 
-            virtual void call(KeyValueReceiver &receiver, const ArgumentList &args) override
+            virtual void call(ValueType &retVal, const ArgumentList &args) override
             {
                 Python3InnerLock lock;
 
-                fromPyObject(receiver, mPtr.call(args));
+                retVal = fromPyObject(mPtr.call(args));
             }
 
             virtual std::string descriptor() const override
@@ -273,6 +273,12 @@ namespace Scripting {
         PyObject *toPyObject(const KeyValueFunction &f)
         {
             PyErr_SetString(PyExc_NotImplementedError, "Can't convert type <Function> yet");
+            return nullptr;
+        }
+
+        PyObject *toPyObject(const KeyValueSender &s)
+        {
+            PyErr_SetString(PyExc_NotImplementedError, "Can't convert type <sender> yet");
             return nullptr;
         }
 

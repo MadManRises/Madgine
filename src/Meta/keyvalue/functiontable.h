@@ -5,9 +5,8 @@
 namespace Engine {
 
 struct FunctionTable {
-    typedef void (*FSyncPtr)(const FunctionTable *, ArgumentList &, const ArgumentList &);
-    typedef void (*FAsyncPtr)(const FunctionTable *, KeyValueReceiver &, const ArgumentList &);
-    std::variant<FSyncPtr, FAsyncPtr> mFunctionPtr;
+    typedef void (*FPtr)(const FunctionTable *, ValueType &, const ArgumentList &);
+    FPtr mFunctionPtr;
 
     std::string_view mName;
     size_t mArgumentsCount;

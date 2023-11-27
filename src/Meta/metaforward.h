@@ -26,6 +26,7 @@ struct FunctionTable;
 struct FunctionArgument;
 struct KeyValueFunction;
 struct EnumHolder;
+struct KeyValueSender;
 struct ArgumentList;
 
 struct KeyValueReceiver;
