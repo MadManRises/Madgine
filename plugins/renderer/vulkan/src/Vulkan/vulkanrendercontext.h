@@ -47,6 +47,7 @@ namespace Render {
         virtual void endFrame() override;
 
         virtual UniqueResourceBlock createResourceBlock(std::vector<const Texture *> textures) override;
+        virtual void destroyResourceBlock(UniqueResourceBlock &block) override;
 
         VulkanCommandList fetchCommandList(std::string_view name, std::vector<VkSemaphore> waitSemaphores = {}, std::vector<VkSemaphore> signalSemaphores = {});
         void ExecuteCommandList(NulledPtr<std::remove_pointer_t<VkCommandBuffer>> buffer, std::vector<VkSemaphore> waitSemaphores, std::vector<VkSemaphore> signalSemaphores, std::vector<Any> attachedResources);

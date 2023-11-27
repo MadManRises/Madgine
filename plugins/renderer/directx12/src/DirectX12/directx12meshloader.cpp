@@ -46,12 +46,19 @@ namespace Render {
 
     void DirectX12MeshLoader::reset(GPUMeshData &data)
     {
-        static_cast<DirectX12MeshData &>(data).reset();
+        static_cast<DirectX12MeshData&>(data).mVertices.reset();
+        static_cast<DirectX12MeshData &>(data).mIndices.reset();
+        GPUMeshLoader::reset(data);
     }
 
     UniqueResourceBlock DirectX12MeshLoader::createResourceBlock(std::vector<const Texture*> textures)
     {
         return DirectX12RenderContext::getSingleton().createResourceBlock(std::move(textures));
+    }
+
+    void DirectX12MeshLoader::destroyResourceBlock(UniqueResourceBlock &block)
+    {
+        DirectX12RenderContext::getSingleton().destroyResourceBlock(block);
     }
 
     Threading::TaskQueue *DirectX12MeshLoader::loadingTaskQueue() const

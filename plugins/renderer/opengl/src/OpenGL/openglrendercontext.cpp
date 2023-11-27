@@ -649,6 +649,11 @@ namespace Render {
         return block;
     }
 
+    void OpenGLRenderContext::destroyResourceBlock(UniqueResourceBlock &block)
+    {
+        block.release<std::unique_ptr<OpenGLResourceBlock<4>>>();
+    }
+
     static constexpr GLenum vTypes[] = {
         GL_FLOAT,
         GL_FLOAT,

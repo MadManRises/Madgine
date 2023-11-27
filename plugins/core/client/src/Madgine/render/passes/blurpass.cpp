@@ -27,7 +27,7 @@ namespace Render {
         mPipeline.create({ .vs = "blur", .ps = "blur", .bufferSizes = { sizeof(BlurData) } });
     }
 
-    void BlurPass::shutdown()
+    void BlurPass::shutdown(RenderTarget *target)
     {
         mPipeline.reset();
     }

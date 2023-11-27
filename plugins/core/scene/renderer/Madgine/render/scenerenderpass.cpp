@@ -71,7 +71,7 @@ namespace Render {
         mShadowResourceBlock = target->context()->createResourceBlock(textures);
     }
 
-    void SceneRenderPass::shutdown()
+    void SceneRenderPass::shutdown(RenderTarget *target)
     {
         removeDependency(&mData);
         removeDependency(mShadowMap.get());
@@ -82,6 +82,8 @@ namespace Render {
         mPipeline.reset();
 
         mShadowMap.reset();
+
+        target->context()->destroyResourceBlock(mShadowResourceBlock);
     }
 
     void SceneRenderPass::render(Render::RenderTarget *target, size_t iteration)

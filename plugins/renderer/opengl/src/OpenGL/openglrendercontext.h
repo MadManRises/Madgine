@@ -37,6 +37,7 @@ namespace Render {
         virtual bool supportsMultisampling() const override;
 
         virtual UniqueResourceBlock createResourceBlock(std::vector<const Texture *> textures) override;
+        virtual void destroyResourceBlock(UniqueResourceBlock &block) override;
 
         void bindFormat(VertexFormat format, OpenGLBuffer *instanceBuffer, size_t instanceDataSize);
         void unbindFormat();

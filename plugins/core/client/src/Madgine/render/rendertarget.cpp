@@ -30,7 +30,7 @@ namespace Render {
     RenderTarget::~RenderTarget()
     {
         for (RenderPass *pass : mRenderPasses) {
-            pass->shutdown();
+            pass->shutdown(this);
         }
         if (mGlobal)
             context()->removeRenderTarget(this);
@@ -91,7 +91,7 @@ namespace Render {
 
     void RenderTarget::removeRenderPass(RenderPass *pass)
     {
-        pass->shutdown();
+        pass->shutdown(this);
         std::erase(mRenderPasses, pass);
     }
 

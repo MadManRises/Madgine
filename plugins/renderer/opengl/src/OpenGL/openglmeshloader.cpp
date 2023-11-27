@@ -43,12 +43,19 @@ namespace Render {
 
     void OpenGLMeshLoader::reset(GPUMeshData &data)
     {
-        static_cast<OpenGLMeshData &>(data).reset();
+        static_cast<OpenGLMeshData &>(data).mVertices.reset();
+        static_cast<OpenGLMeshData &>(data).mIndices.reset();
+        GPUMeshLoader::reset(data);
     }
 
     UniqueResourceBlock OpenGLMeshLoader::createResourceBlock(std::vector<const Texture*> textures)
     {
         return OpenGLRenderContext::getSingleton().createResourceBlock(std::move(textures));
+    }
+
+    void OpenGLMeshLoader::destroyResourceBlock(UniqueResourceBlock &block)
+    {
+        OpenGLRenderContext::getSingleton().destroyResourceBlock(block);
     }
 
     Threading::TaskQueue *OpenGLMeshLoader::loadingTaskQueue() const

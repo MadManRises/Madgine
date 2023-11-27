@@ -40,12 +40,19 @@ namespace Render {
 
     void VulkanMeshLoader::reset(GPUMeshData &data)
     {
-        static_cast<VulkanMeshData &>(data).reset();
+        static_cast<VulkanMeshData &>(data).mVertices.reset();
+        static_cast<VulkanMeshData &>(data).mIndices.reset();
+        GPUMeshLoader::reset(data);
     }
 
     UniqueResourceBlock VulkanMeshLoader::createResourceBlock(std::vector<const Texture*> textures)
     {
         return VulkanRenderContext::getSingleton().createResourceBlock(std::move(textures));
+    }
+
+    void VulkanMeshLoader::destroyResourceBlock(UniqueResourceBlock &block)
+    {
+        VulkanRenderContext::getSingleton().destroyResourceBlock(block);
     }
 
     Threading::TaskQueue *VulkanMeshLoader::loadingTaskQueue() const

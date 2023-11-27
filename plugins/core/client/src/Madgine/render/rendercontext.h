@@ -69,7 +69,8 @@ namespace Render {
             return mapBufferImpl(buffer).template cast<T>();
         }
 
-        virtual UniqueResourceBlock createResourceBlock(std::vector<const Texture*> textures) { throw 0; };
+        virtual UniqueResourceBlock createResourceBlock(std::vector<const Texture*> textures) = 0;
+        virtual void destroyResourceBlock(UniqueResourceBlock &block) = 0;
 
     protected:
         virtual GPUBuffer<void> allocateBufferImpl(size_t size) { throw 0; };

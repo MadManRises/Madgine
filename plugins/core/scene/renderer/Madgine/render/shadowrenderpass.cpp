@@ -38,7 +38,7 @@ namespace Render {
         addDependency(&mData);
     }
 
-    void ShadowRenderPass::shutdown()
+    void ShadowRenderPass::shutdown(RenderTarget *target)
     {
         removeDependency(&mData);
 

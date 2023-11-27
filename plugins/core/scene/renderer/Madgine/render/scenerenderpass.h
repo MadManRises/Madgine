@@ -18,7 +18,7 @@ namespace Render {
         ~SceneRenderPass();
 
         virtual void setup(RenderTarget *target) override;
-        virtual void shutdown() override;
+        virtual void shutdown(RenderTarget *target) override;
         virtual void render(Render::RenderTarget *target, size_t iteration) override;
 
         virtual int priority() const override;

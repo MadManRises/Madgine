@@ -10,7 +10,7 @@ namespace Render {
         virtual ~RenderPass() = default;
 
         virtual void setup(RenderTarget *target) { }
-        virtual void shutdown() { }
+        virtual void shutdown(RenderTarget *target) { }
         virtual void render(RenderTarget *target, size_t iteration) = 0;
         void preRender(std::vector<Threading::TaskFuture<void>> &dependencies, RenderContext *context);
 

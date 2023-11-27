@@ -20,7 +20,7 @@ namespace Render {
         ~SceneMainWindowComponent();
 
         virtual void setup(RenderTarget *target) override;
-        virtual void shutdown() override;
+        virtual void shutdown(RenderTarget *target) override;
 
         Scene::SceneManager *scene();
 

@@ -35,7 +35,7 @@ namespace Render {
         target->addRenderPass(&mBlur);
     }
 
-    void BloomPass::shutdown()
+    void BloomPass::shutdown(RenderTarget *target)
     {
         mPipeline.reset();
     }

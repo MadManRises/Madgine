@@ -49,9 +49,11 @@ namespace Render {
         }
 
         template <typename T>
-        T release() {
+        T release() noexcept {
             assert(mPtr);
-            return (T)(std::exchange(mPtr, 0));
+            T result = std::move(reinterpret_cast<T &>(mPtr));
+            mPtr = 0;
+            return result;
         }
 
     private:

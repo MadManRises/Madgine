@@ -43,7 +43,7 @@ namespace Render {
         addDependency(&mData);
     }
 
-    void PointShadowRenderPass::shutdown()
+    void PointShadowRenderPass::shutdown(RenderTarget *target)
     {
         removeDependency(&mData);
 

@@ -49,8 +49,19 @@ namespace Render {
         reset(data);
     }
 
+    void GPUMeshLoader::reset(GPUMeshData &data)
+    {
+        for (GPUMeshData::Material &gpuMat : data.mMaterials) {
+            if (gpuMat.mResourceBlock)
+                destroyResourceBlock(gpuMat.mResourceBlock);
+        }
+        data.mMaterials.clear();
+    }
+
     Threading::Task<bool> GPUMeshLoader::generate(GPUMeshData &data, const MeshData &mesh)
     {
+        GPUMeshLoader::reset(data);
+
         data.mFormat = mesh.mFormat;
         data.mVertexSize = mesh.mVertexSize;
         data.mAABB = mesh.mAABB;
@@ -63,7 +74,6 @@ namespace Render {
             data.mElementCount = mesh.mIndices.size();
         }
 
-        data.mMaterials.clear();
         for (const MeshData::Material &mat : mesh.mMaterials) {
             GPUMeshData::Material &gpuMat = data.mMaterials.emplace_back();
             gpuMat.mName = mat.mName;

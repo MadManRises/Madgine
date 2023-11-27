@@ -490,6 +490,12 @@ namespace Render {
         return block;
     }
 
+    void VulkanRenderContext::destroyResourceBlock(UniqueResourceBlock &block)
+    {
+        VkDescriptorSet descriptorSet = block.release<VkDescriptorSet>();
+        vkFreeDescriptorSets(GetDevice(), mDescriptorPool, 1, &descriptorSet);
+    }
+
     VulkanRenderContext &VulkanRenderContext::getSingleton()
     {
         return *sSingleton;

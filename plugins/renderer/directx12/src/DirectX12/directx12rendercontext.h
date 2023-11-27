@@ -45,6 +45,7 @@ namespace Render {
         virtual WritableByteBuffer mapBufferImpl(GPUBuffer<void> &buffer) override;
 
         virtual UniqueResourceBlock createResourceBlock(std::vector<const Texture*> textures) override;
+        virtual void destroyResourceBlock(UniqueResourceBlock &block) override;
 
         static DirectX12RenderContext &getSingleton();
 
@@ -81,6 +82,8 @@ namespace Render {
         LogBucketAllocator<HeapAllocator<DirectX12HeapAllocator &>, 64, 4096, 4> mConstantAllocator;
 
         DirectX12Buffer mConstantBuffer;
+
+        DWORD mCallbackCookie;
     };
 
 }

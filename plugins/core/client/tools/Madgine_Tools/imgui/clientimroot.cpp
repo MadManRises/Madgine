@@ -296,6 +296,8 @@ namespace Tools {
         Im3D::DestroyContext();
         ImGui::DestroyContext();
 
+        mFontTexture.reset();
+
         co_await MainWindowComponentBase::finalize();
 
         co_return;

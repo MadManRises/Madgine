@@ -119,13 +119,12 @@ namespace Render {
             ReleasePtr<ID3D12InfoQueue1> infoQueue;
             hr = GetDevice()->QueryInterface(IID_PPV_ARGS(&infoQueue));
 
-            if (SUCCEEDED(hr)) {
-                DWORD cookie;
+            if (SUCCEEDED(hr)) {                
                 hr = infoQueue->RegisterMessageCallback(
                     &dxDebugOutput,
                     D3D12_MESSAGE_CALLBACK_FLAG_NONE,
                     nullptr,
-                    &cookie);
+                    &mCallbackCookie);
                 DX12_CHECK(hr);
             }
         }
@@ -149,6 +148,14 @@ namespace Render {
 
     DirectX12RenderContext::~DirectX12RenderContext()
     {
+        ReleasePtr<ID3D12InfoQueue1> infoQueue;
+        HRESULT hr = GetDevice()->QueryInterface(IID_PPV_ARGS(&infoQueue));
+
+        if (SUCCEEDED(hr)) {            
+            hr = infoQueue->UnregisterMessageCallback(mCallbackCookie);
+            DX12_CHECK(hr);
+        }
+
         mConstantBuffer.reset();
 
         (*sDevice).reset();
@@ -369,6 +376,12 @@ namespace Render {
         }
 
         return block;
+    }
+
+    void DirectX12RenderContext::destroyResourceBlock(UniqueResourceBlock &block)
+    {
+        D3D12_GPU_DESCRIPTOR_HANDLE handle = block.release<D3D12_GPU_DESCRIPTOR_HANDLE>();
+        mDescriptorHeap.deallocate(handle);
     }
 
     static constexpr const char *vSemantics[] = {

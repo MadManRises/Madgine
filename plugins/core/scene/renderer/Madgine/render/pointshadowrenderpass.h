@@ -13,7 +13,7 @@ namespace Render {
         PointShadowRenderPass(size_t index, SceneMainWindowComponent &scene, int priority);
 
         virtual void setup(RenderTarget *target) override;
-        virtual void shutdown() override;
+        virtual void shutdown(RenderTarget *target) override;
         virtual void render(Render::RenderTarget *target, size_t iteration) override;
 
         virtual int priority() const override;

@@ -12,7 +12,7 @@ namespace Render {
         BlurPass(int priority, size_t iterations = 10);
         
         virtual void setup(RenderTarget *target) override;
-        virtual void shutdown() override;
+        virtual void shutdown(RenderTarget *target) override;
         virtual void render(RenderTarget *target, size_t iteration) override;
         virtual void onTargetResize(const Vector2i &size) override;
 

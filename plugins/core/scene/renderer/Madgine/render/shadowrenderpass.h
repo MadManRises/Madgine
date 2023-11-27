@@ -15,7 +15,7 @@ namespace Render {
         ShadowRenderPass(SceneMainWindowComponent &scene, Render::Camera *camera, int priority);
 
         virtual void setup(RenderTarget *target) override;
-        virtual void shutdown() override;
+        virtual void shutdown(RenderTarget *target) override;
         virtual void render(RenderTarget *target, size_t iteration) override;        
 
         virtual int priority() const override;

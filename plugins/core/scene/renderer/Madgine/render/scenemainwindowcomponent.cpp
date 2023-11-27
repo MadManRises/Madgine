@@ -61,7 +61,7 @@ namespace Render {
         }
     }
 
-    void SceneMainWindowComponent::shutdown()
+    void SceneMainWindowComponent::shutdown(RenderTarget *target)
     {
         if (mScene) {
             removeDependency(mPointShadowMaps[0].get());
