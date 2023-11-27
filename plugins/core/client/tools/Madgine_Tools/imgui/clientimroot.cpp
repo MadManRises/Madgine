@@ -46,7 +46,7 @@ SERIALIZETABLE_BEGIN(Engine::Tools::ClientImRoot)
 SERIALIZETABLE_END(Engine::Tools::ClientImRoot)
 
 COMPONENT_NAME(ClientImRoot, Engine::Tools::ClientImRoot)
-VIRTUALUNIQUECOMPONENTBASE(Engine::Tools::ClientImRoot)
+UNIQUECOMPONENT(Engine::Tools::ClientImRoot)
 
 namespace Engine {
 namespace Tools {
@@ -135,7 +135,7 @@ namespace Tools {
     }
 
     ClientImRoot::ClientImRoot(Window::MainWindow &window)
-        : MainWindowVirtualBase(window, 80)
+        : MainWindowComponent(window, 80)
         , mImGuiIniFilePath(Filesystem::appDataPath() / "imgui.ini")
         , mFrameClock(std::chrono::steady_clock::now())
     {
@@ -361,8 +361,6 @@ namespace Tools {
             io.DisplaySize = ImVec2(size.x / io.DisplayFramebufferScale.x, size.y / io.DisplayFramebufferScale.y);
 
             mWindow.osWindow()->setCursorIcon(convertCursorIcon(ImGui::GetMouseCursor()));
-
-            newFrame();
 
             ImRoot::render();
 

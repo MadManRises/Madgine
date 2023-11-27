@@ -23,7 +23,7 @@ struct ImGuiViewport;
 namespace Engine {
 namespace Tools {
 
-    struct MADGINE_CLIENT_TOOLS_EXPORT ClientImRoot : Window::MainWindowVirtualBase<ClientImRoot>,
+    struct MADGINE_CLIENT_TOOLS_EXPORT ClientImRoot : Window::MainWindowComponent<ClientImRoot>,
                                                       ImRoot {
 
         ClientImRoot(Window::MainWindow &window);
@@ -32,11 +32,10 @@ namespace Tools {
         Threading::Task<bool> init() override;
         Threading::Task<void> finalize() override;
 
-        virtual void newFrame() = 0;
         virtual void setup(Render::RenderTarget *target) override;
         virtual void render(Render::RenderTarget *target, size_t iteration) override;
 
-        virtual void renderViewport(Render::RenderTarget *target, ImGuiViewport *vp);
+        void renderViewport(Render::RenderTarget *target, ImGuiViewport *vp);
 
         void addViewportMapping(Render::RenderTarget *target, ImGuiViewport *vp);
         void removeViewportMapping(Render::RenderTarget *target);

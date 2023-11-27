@@ -27,7 +27,7 @@ endif (WINDOWS)
 set(sources "")
 FolderSources(sources "" tools)
 	FolderSources(sources tools Vulkan_Tools vulkanrendercontexttool.cpp vulkanrendercontexttool.h vulkantoolsforward.h vulkantoolslib.h)
-		FolderSources(sources Vulkan_Tools imgui imgui_impl_vulkan.cpp imgui_impl_vulkan.h vulkanimroot.cpp vulkanimroot.h)
+		#FolderSources(sources Vulkan_Tools imgui imgui_impl_vulkan.cpp imgui_impl_vulkan.h vulkanimroot.cpp vulkanimroot.h)
 
 
 add_tools(Vulkan ${sources} PRECOMPILED_HEADER tools/Vulkan_Tools/vulkantoolslib.h)
