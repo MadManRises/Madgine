@@ -47,9 +47,9 @@ namespace Execution {
 
         template <typename T>
         requires(!tag_invocable<get_stop_token_t, T&>)
-        auto operator()(T &)
+        auto operator()(T &) const
         {
-            return unstoppable_token {};
+            return std::stop_token {};
         }
 
         template <typename T>

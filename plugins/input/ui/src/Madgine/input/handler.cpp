@@ -40,7 +40,8 @@ namespace Input {
 
     Threading::Task<void> HandlerBase::finalize()
     {
-        co_await mLifetime.end();
+        mLifetime.end();
+        co_await mLifetime.ended();
         mWidget = nullptr;
         co_return;
     }
