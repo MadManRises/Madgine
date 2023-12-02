@@ -26,9 +26,8 @@ namespace Render {
 
     Threading::ImmediateTask<void> ShadowSceneRenderData::render(RenderContext *context)
     {
-        {
-            auto guard = co_await mScene.scene()->mutex(AccessMode::READ);
 
+        co_await mScene.scene()->mutex().locked(AccessMode::READ, [this, context]() {
             //TODO Culling
 
             for (auto &[key, transforms] : mInstances)
@@ -53,7 +52,7 @@ namespace Render {
 
                 mInstances[meshData].push_back({ transform->worldMatrix(), bones });
             }
-        }
+        });
 
         for (auto it = mInstances.begin(); it != mInstances.end();) {
             if (it->second.empty()) {

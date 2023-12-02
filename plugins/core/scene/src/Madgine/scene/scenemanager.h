@@ -49,13 +49,13 @@ namespace Scene {
 
         void updateFrame();
 
-        Entity::EntityPtr createEntity(const std::string &behavior = "", const std::string &name = "",
+        Entity::EntityPtr createEntity(const std::string &name = "",
             const std::function<void(Entity::Entity &)> &init = {});
-        void createEntityAsyncImpl(Serialize::GenericMessageReceiver receiver, const std::string &behavior = "", const std::string &name = "",
-            const std::function<void(Entity::Entity &)> &init = {});
+        void createEntityAsyncImpl(Serialize::GenericMessageReceiver receiver, const std::string &name = "",
+            std::function<void(Entity::Entity &)> init = {});
         ASYNC_STUB(createEntityAsync, createEntityAsyncImpl, Serialize::make_message_sender<Entity::EntityPtr>);
 
-        Entity::EntityPtr createLocalEntity(const std::string &behavior = "", const std::string &name = "");
+        Entity::EntityPtr createLocalEntity(const std::string &name = "");
         Entity::EntityPtr findEntity(const std::string &name);
         void remove(Entity::Entity *e);
 
@@ -77,7 +77,7 @@ namespace Scene {
         SceneComponentBase &getComponent(size_t i);
         size_t getComponentCount();
 
-        Threading::DataMutex::Moded mutex(AccessMode mode);
+        Threading::DataMutex &mutex();
 
         Threading::SignalStub<const EntityContainer::iterator &, int> &entitiesSignal();
 

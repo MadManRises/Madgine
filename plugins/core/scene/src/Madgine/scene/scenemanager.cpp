@@ -31,8 +31,6 @@
 
 #include "Generic/projections.h"
 
-#include "Modules/threading/senders/with_lock.h"
-
 UNIQUECOMPONENT(Engine::Serialize::NoParent<Engine::Scene::SceneManager>);
 
 METATABLE_BEGIN(Engine::Scene::SceneManager)
@@ -44,7 +42,7 @@ METATABLE_END(Engine::Scene::SceneManager)
 
 static Engine::Threading::DataMutex::Lock static_lock(Engine::Scene::SceneManager *mgr)
 {
-    return mgr->mutex(Engine::AccessMode::WRITE).lock();
+    return mgr->mutex().lock(Engine::AccessMode::WRITE);
 }
 
 SERIALIZETABLE_BEGIN(Engine::Scene::SceneManager,
@@ -106,9 +104,9 @@ namespace Scene {
         return mSceneComponents.size();
     }
 
-    Threading::DataMutex::Moded SceneManager::mutex(AccessMode mode)
+    Threading::DataMutex &SceneManager::mutex()
     {
-        return mMutex(mode);
+        return mMutex;
     }
 
     void SceneManager::updateFrame()
@@ -206,67 +204,36 @@ namespace Scene {
         return "Entity";
     }
 
-    Entity::EntityPtr SceneManager::createEntity(const std::string &behavior, const std::string &name,
+    Entity::EntityPtr SceneManager::createEntity(const std::string &name,
         const std::function<void(Entity::Entity &)> &init)
     {
-
-
-        //ValueType behaviorTable /* = app().table()[behavior]*/;
-        ObjectPtr table;
-        /*if (behaviorTable.is<ObjectPtr>()) {
-                table = behaviorTable.as<ObjectPtr>();
-            } else*/
-        {
-            if (!behavior.empty())
-                LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
-        }
         auto toPtr = [](const typename RefcountedContainer<std::deque<Entity::Entity>>::iterator &it) { return Entity::EntityPtr { &*it }; };
         if (init)
-            return toPtr(TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_init, this), mEntities.end(), init, createEntityData(name, false), table));
+            return toPtr(TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_init, this), mEntities.end(), init, createEntityData(name, false)));
         else
-            return toPtr(TupleUnpacker::invokeFlatten(emplace, mEntities, mEntities.end(), createEntityData(name, false), table));
+            return toPtr(TupleUnpacker::invokeFlatten(emplace, mEntities, mEntities.end(), createEntityData(name, false)));
     }
 
-    void SceneManager::createEntityAsyncImpl(Serialize::GenericMessageReceiver receiver, const std::string &behavior, const std::string &name, const std::function<void(Entity::Entity &)> &init)
+    void SceneManager::createEntityAsyncImpl(Serialize::GenericMessageReceiver receiver, const std::string &name, std::function<void(Entity::Entity &)> init)
     {
-
-        //ValueType behaviorTable /* = app().table()[behavior]*/;
-        ObjectPtr table;
-        /*if (behaviorTable.is<ObjectPtr>()) {
-                table = behaviorTable.as<ObjectPtr>();
-            } else*/
-        {
-            if (!behavior.empty())
-                LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
-        }
-        auto toPtr = [](const typename RefcountedContainer<std::deque<Entity::Entity>>::iterator &it) { return Entity::EntityPtr { &*it }; };
-        if (init)
-            Execution::detach(
-                Threading::start_with_lock(mutex(AccessMode::WRITE), taskQueue(),
-                    TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_init_async, this), mEntities.end(), init, createEntityData(name, false), table)
-                        | Execution::then(std::move(toPtr)))
-                | Execution::then_receiver(std::move(receiver)));
-        else
-            Execution::detach(
-                Threading::start_with_lock(mutex(AccessMode::WRITE), taskQueue(),
-                    TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_async, this), mEntities.end(), createEntityData(name, false), table)
-                        | Execution::then(std::move(toPtr)))
-                | Execution::then_receiver(std::move(receiver)));
+        Execution::detach(mMutex.locked(AccessMode::WRITE, [this, name, init { std::move(init) }, receiver { std::move(receiver) }]() mutable {
+            auto toPtr = [](const typename RefcountedContainer<std::deque<Entity::Entity>>::iterator &it) { return Entity::EntityPtr { &*it }; };
+            if (init)
+                Execution::detach(
+                    TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_init_async, this), mEntities.end(), init, createEntityData(name, false))
+                    | Execution::then(std::move(toPtr))
+                    | Execution::then_receiver(std::move(receiver)));
+            else
+                Execution::detach(
+                    TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_async, this), mEntities.end(), createEntityData(name, false))
+                    | Execution::then(std::move(toPtr))
+                    | Execution::then_receiver(std::move(receiver)));
+        }));
     }
 
-    Entity::EntityPtr SceneManager::createLocalEntity(const std::string &behavior, const std::string &name)
+    Entity::EntityPtr SceneManager::createLocalEntity(const std::string &name)
     {
-
-        //ValueType behaviorTable /* = app().table()[behavior]*/;
-        ObjectPtr table;
-        /*if (behaviorTable.is<ObjectPtr>()) {
-                table = behaviorTable.as<ObjectPtr>();
-            } else*/
-        {
-            if (!behavior.empty())
-                LOG_ERROR("Behaviour \"" << behavior << "\" not found!");
-        }
-        return &*TupleUnpacker::invokeFlatten(emplace, mLocalEntities, mLocalEntities.end(), createEntityData(name, true), table);
+        return &*TupleUnpacker::invokeFlatten(emplace, mLocalEntities, mLocalEntities.end(), createEntityData(name, true));
     }
 
     Threading::SignalStub<const RefcountedContainer<std::deque<Entity::Entity>>::iterator &, int> &SceneManager::entitiesSignal()

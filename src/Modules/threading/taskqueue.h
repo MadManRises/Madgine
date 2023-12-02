@@ -4,8 +4,6 @@
 
 #include "customclock.h"
 
-#include "datamutex.h"
-
 #if ENABLE_TASK_TRACKING
 #    include "../debug/tasktracking/tasktracker.h"
 #endif
@@ -17,14 +15,8 @@ namespace Threading {
 
         TaskQualifiers() = default;
 
-        TaskQualifiers(CustomTimepoint timepoint, DataMutex::Awaiter *mutex = nullptr)
+        TaskQualifiers(CustomTimepoint timepoint)
             : mScheduledFor(timepoint)
-            , mMutex(mutex)
-        {
-        }
-
-        TaskQualifiers(DataMutex::Awaiter *mutex)
-            : mMutex(mutex)
         {
         }
 
@@ -33,7 +25,6 @@ namespace Threading {
         void await_resume();
 
         CustomTimepoint mScheduledFor = std::chrono::steady_clock::now();
-        DataMutex::Awaiter *mMutex = nullptr;
     };
 
     struct MODULES_EXPORT TaskQueue {

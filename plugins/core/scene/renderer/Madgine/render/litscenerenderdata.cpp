@@ -26,10 +26,7 @@ namespace Render {
 
     Threading::ImmediateTask<void> LitSceneRenderData::render(RenderContext *context)
     {
-        {
-            auto guard = co_await mScene.scene()->mutex(AccessMode::READ);
-            assert(guard.isHeld());
-
+        co_await mScene.scene()->mutex().locked(AccessMode::READ, [this, context]() {
             //TODO Culling
 
             for (auto &[key, transforms] : mInstances)
@@ -62,7 +59,7 @@ namespace Render {
 
                 mInstances[std::tuple<const GPUMeshData *, const GPUMeshData::Material *> { meshData, material }].push_back({ transform->worldMatrix(), bones });
             }
-        }
+        });
 
         for (auto it = mInstances.begin(); it != mInstances.end();) {
             if (it->second.empty()) {

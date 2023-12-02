@@ -37,6 +37,8 @@
 
 #include "Madgine/render/scenemainwindowcomponent.h"
 
+#include "Modules/threading/awaitables/awaitablesender.h"
+
 #include "Madgine/render/rendercontext.h"
 #include "Modules/threading/awaitables/awaitabletimepoint.h"
 
@@ -102,19 +104,21 @@ void GameManager::setWidget(Engine::Widgets::WidgetBase *w)
 Engine::Threading::Task<void> GameManager::updateApp()
 {
     while (mUI.app().taskQueue()->running()) {
-        auto awaiter = mSceneMgr.mutex(Engine::AccessMode::WRITE).operator co_await();
-        co_await Engine::Threading::TaskQualifiers { mSceneMgr.clock()(1ms), &awaiter };
-        std::chrono::microseconds timeSinceLastFrame = mSceneClock.tick(mSceneMgr.clock().now());
+        co_await Engine::Threading::TaskQualifiers { mSceneMgr.clock()(1ms) };
 
-        updateBricks(timeSinceLastFrame);
+        co_await mSceneMgr.mutex().locked(Engine::AccessMode::WRITE, [this]() {
+            std::chrono::microseconds timeSinceLastFrame = mSceneClock.tick(mSceneMgr.clock().now());
 
-        mAcc += timeSinceLastFrame;
-        while (mAcc > mSpawnInterval) {
-            mAcc -= mSpawnInterval;
-            mSpawnInterval *= 999;
-            mSpawnInterval /= 1000;
-            spawnBrick();
-        }
+            updateBricks(timeSinceLastFrame);
+
+            mAcc += timeSinceLastFrame;
+            while (mAcc > mSpawnInterval) {
+                mAcc -= mSpawnInterval;
+                mSpawnInterval *= 999;
+                mSpawnInterval /= 1000;
+                spawnBrick();
+            }
+        });
     }    
 }
 
@@ -200,7 +204,7 @@ void GameManager::onPointerClick(const Engine::Input::PointerEventArgs &evt)
     }
 
     if (hit) {
-        auto guard = mUI.app().getGlobalAPIComponent<Engine::Scene::SceneManager>().mutex(Engine::AccessMode::WRITE).lock();
+        auto guard = mUI.app().getGlobalAPIComponent<Engine::Scene::SceneManager>().mutex().lock(Engine::AccessMode::WRITE);
 
         mBricks.remove(hit);
         hit->remove();
@@ -235,7 +239,7 @@ void GameManager::start()
     mLife = 3;
     mLifeLabel->mText = "Life: " + std::to_string(mLife);
 
-    auto guard = mSceneMgr.mutex(Engine::AccessMode::WRITE).lock();
+    auto guard = mSceneMgr.mutex().lock(Engine::AccessMode::WRITE);
 
     for (const Engine::Scene::Entity::EntityPtr &brick : mBricks) {
         brick->remove();

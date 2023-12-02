@@ -103,21 +103,11 @@ namespace Scene {
         {
         }
 
-        Entity::Entity(SceneManager &sceneMgr, bool local, const std::string &name, const ObjectPtr &behaviour)
+        Entity::Entity(SceneManager &sceneMgr, bool local, const std::string &name)
             : mName(name)
             , mLocal(local)
             , mSceneManager(sceneMgr)
         {
-            if (behaviour) {
-                /*for (const std::pair<std::string, ValueType> &p : behaviour) {
-					if (p.second.is<Scripting::LuaTable>()) {
-                        addComponent(p.first, p.second.as<Scripting::LuaTable>());
-                    } else {
-                        LOG_WARNING("Non-Table value at key \"" << p.first << "\"!");
-                    }
-                }*/
-                throw "Todo";
-            }
         }
 
         Entity::~Entity()

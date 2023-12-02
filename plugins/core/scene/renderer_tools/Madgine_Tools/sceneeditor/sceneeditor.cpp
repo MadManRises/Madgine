@@ -91,7 +91,7 @@ namespace Tools {
 
     void SceneEditor::render()
     {
-        auto guard = mSceneMgr->mutex(AccessMode::WRITE).lock();
+        auto guard = mSceneMgr->mutex().lock(AccessMode::WRITE);
         updateEntityCache();
         renderHierarchy();
         renderToolbar();
@@ -250,7 +250,7 @@ namespace Tools {
 
         mCurrentSceneFile = p;
 
-        auto guard = mSceneMgr->mutex(AccessMode::WRITE).lock();
+        auto guard = mSceneMgr->mutex().lock(AccessMode::WRITE);
 
         Filesystem::FileManager mgr { "Scene" };
         Serialize::FormattedSerializeStream in = mgr.openRead(mCurrentSceneFile, std::make_unique<Serialize::XMLFormatter>());
@@ -264,7 +264,7 @@ namespace Tools {
     {
         mCurrentSceneFile = p;
 
-        auto guard = mSceneMgr->mutex(AccessMode::READ).lock();
+        auto guard = mSceneMgr->mutex().lock(AccessMode::READ);
 
         Filesystem::FileManager mgr { "Scene" };
         Serialize::FormattedSerializeStream out = mgr.openWrite(mCurrentSceneFile, std::make_unique<Serialize::XMLFormatter>());

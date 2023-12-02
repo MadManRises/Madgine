@@ -117,7 +117,7 @@ namespace Threading {
                     auto now = std::chrono::steady_clock::now();
                     auto nextTaskTimepoint = std::chrono::steady_clock::time_point::max();
                     for (auto it = mQueue.begin(); it != mQueue.end(); ++it) {
-                        if ((it->mQualifiers.mScheduledFor <= now || mWorkGroup.state() == WorkGroupState::STOPPING) && (!it->mQualifiers.mMutex || it->mQualifiers.mMutex->tryLock(this))) {
+                        if (it->mQualifiers.mScheduledFor <= now || mWorkGroup.state() == WorkGroupState::STOPPING) {
                             TaskHandle task = std::move(it->mTask);
                             mQueue.erase(it);
                             return task;

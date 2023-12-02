@@ -14,6 +14,9 @@
 
 #include "Madgine/scene/scenemanager.h"
 
+#include "Modules/threading/awaitables/awaitabletimepoint.h"
+#include "Modules/threading/awaitables/awaitablesender.h"
+
 #include "bullet3-3.24/src/BulletSoftBody/btSoftRigidDynamicsWorld.h"
 #include "bullet3-3.24/src/btBulletDynamicsCommon.h"
 
@@ -143,25 +146,25 @@ namespace Physics {
 
     Threading::Task<void> PhysicsManager::update()
     {
-        while (mSceneMgr.taskQueue()->running()) {
+        while (mSceneMgr.taskQueue()->running()) {           
+            co_await 33ms;
+            co_await mSceneMgr.mutex().locked(AccessMode::READ, [this]() {
+                std::chrono::duration<float> timeSinceLastFrame = mClock.tick(mSceneMgr.clock().now());
 
-            auto awaiter = mSceneMgr.mutex(AccessMode::WRITE).operator co_await();
-            co_await Threading::TaskQualifiers { std::chrono::duration_cast<std::chrono::steady_clock::duration>(33ms), &awaiter };
-            std::chrono::duration<float> timeSinceLastFrame = mClock.tick(mSceneMgr.clock().now());
+                if (timeSinceLastFrame.count() > 0.0f) {
+                    mData->mWorld.stepSimulation(timeSinceLastFrame.count(), 1, 1.0f / 30.0f);
+                } else {
+                    mData->mWorld.synchronizeMotionStates();
+                }
 
-            if (timeSinceLastFrame.count() > 0.0f) {
-                mData->mWorld.stepSimulation(timeSinceLastFrame.count(), 1, 1.0f / 30.0f);
-            } else {
-                mData->mWorld.synchronizeMotionStates();
-            }
+                for (const auto &[body, _] : mSceneMgr.entityComponentList<RigidBody>()) {
+                    body.update();
+                }
 
-            for (const auto &[body, _] : sceneMgr().entityComponentList<RigidBody>()) {
-                body.update();
-            }
-
-            for (const auto &[body, _] : sceneMgr().entityComponentList<SoftBodySkeleton>()) {
-                body.update();
-            }
+                for (const auto &[body, _] : mSceneMgr.entityComponentList<SoftBodySkeleton>()) {
+                    body.update();
+                }
+            });
         }
     }
 

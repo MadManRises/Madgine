@@ -27,7 +27,7 @@ namespace Scene {
             Entity(Entity &&, bool local);
             Entity(Entity &&);
 
-            Entity(SceneManager &sceneMgr, bool local, const std::string &name, const ObjectPtr &behavior = {});
+            Entity(SceneManager &sceneMgr, bool local, const std::string &name);
             Entity(const Entity &) = delete;
             ~Entity();
 

@@ -1,84 +1,140 @@
 #pragma once
 
+#include "Generic/execution/concepts.h"
+#include "Generic/type_pack.h"
+#include "Generic/genericresult.h"
+#include "Generic/container/lockfreeunmanagedqueue.h"
+
 namespace Engine {
 namespace Threading {
 
     struct MODULES_EXPORT DataMutex {
 
-        struct MODULES_EXPORT Lock {
-            Lock() = default;
-            Lock(DataMutex &mutex, AccessMode mode
-#if MODULES_ENABLE_TASK_TRACKING
-                ,
-                Threading::TaskQueue *queue = nullptr
-#endif
-            );
-            Lock(const Lock &) = delete;
-            Lock(Lock &&other);
-            ~Lock();
+        struct LockState : LockFreeUnmanagedNode<LockState> {
+            LockState(DataMutex *mutex, AccessMode mode)
+                : mMutex(mutex)
+                , mMode(mode)
+            {
+            }
 
-            Lock &operator=(Lock &&other);
+            virtual void onLockAcquired() = 0;
+
+            DataMutex *mMutex = nullptr;
+            AccessMode mMode;
+        };
+
+        struct MODULES_EXPORT Lock : private LockState {
+            Lock(DataMutex &mutex, AccessMode mode);
+            ~Lock();
 
             bool isHeld() const;
 
+        protected:
+            virtual void onLockAcquired() override;
+
         private:
-            DataMutex *mMutex = nullptr;
-            AccessMode mMode;
-#if MODULES_ENABLE_TASK_TRACKING
-            Threading::TaskQueue *mQueue;
-#endif
+            std::mutex mCvMutex;
+            std::condition_variable mCv;
+            bool mWasTriggered = false;
         };
 
-        struct MODULES_EXPORT Awaiter {
+        template <typename Rec, typename F>
+        struct state : LockState {
 
-            Awaiter(DataMutex *mutex, AccessMode mode);
+            state(DataMutex *mutex, AccessMode mode, Rec &&rec, F &&f)
+                : LockState(mutex, mode)
+                , mRec(std::forward<Rec>(rec))
+                , mF(std::forward<F>(f))
+            {
+            }
 
-            bool await_ready() noexcept;
-            bool await_suspend(TaskHandle task);
-            Lock await_resume();
+            void start()
+            {
+                if (mMutex->lockImpl(this)) {
+                    onLockAcquired();
+                }
+            }
 
-            bool tryLock(TaskQueue *queue);
+            virtual void onLockAcquired() override
+            {
+                if constexpr (std::same_as<std::invoke_result_t<F>, void>) {
+                    mF();
+                    mMutex->unlockImpl(this);
+                    mRec.set_value();
+                } else {
+                    auto &&result = mF();
+                    mMutex->unlockImpl(this);
+                    mRec.set_value(std::forward<decltype(result)>(result));
+                }
+            }
 
-        private:
-            DataMutex *mMutex;
-            AccessMode mMode;
-            Lock mLock;
+            Rec mRec;
+            F mF;
         };
 
-        struct MODULES_EXPORT Moded {
-            Moded(DataMutex *mutex, AccessMode mode);
+        template <typename F>
+        struct sender {
 
-            Lock lock();
+            using is_sender = void;
 
-            Lock tryLock(TaskQueue *queue);
+            template <typename T>
+            static auto return_types_helper()
+            {
+                if constexpr (std::same_as<T, void>) {
+                    return type_pack<> {};
+                } else if constexpr (InstanceOf<T, std::tuple>) {
+                    return to_type_pack<T> {};
+                } else {
+                    return type_pack<T> {};
+                }
+            }
 
-            Awaiter operator co_await();
+            template <template <typename...> typename Tuple>
+            using value_types = typename decltype(return_types_helper<std::invoke_result_t<F>>())::template instantiate<Tuple>;
+            using result_type = GenericResult;
 
-        private:
+            template <typename Rec>
+            friend auto tag_invoke(Execution::connect_t, sender &&sender, Rec &&rec)
+            {
+                return state<Rec, F> { sender.mMutex, sender.mMode, std::forward<Rec>(rec), std::forward<F>(sender.mF) };
+            }
+
             DataMutex *mMutex;
             AccessMode mMode;
+            F mF;
         };
 
         DataMutex(std::string_view name);
-
-        Moded operator()(AccessMode mode);
+        ~DataMutex();
 
         const std::string &name() const;
 
-        Lock tryLock(TaskQueue *queue, AccessMode mode);
-
-    private:
         Lock lock(AccessMode mode);
-        void unlockImpl(AccessMode mode
-#if MODULES_ENABLE_TASK_TRACKING
-            ,
-            TaskQueue *queue
-#endif
-        );
+
+        template <typename F>
+        auto locked(AccessMode mode, F &&f)
+        {
+            return sender<F> { this, mode, std::forward<F>(f) };
+        }
+
+    protected:
+        bool lockImpl(LockState *state);
+        void unlockImpl(LockState *state);
+
+        bool lockRead(LockState *state);
+        bool lockWrite(LockState *state);
+        void unlockRead(LockState *state);
+        void unlockWrite(LockState *state);
+
+        bool unrollRead();
+        bool unrollWrite();
 
     private:
         std::shared_mutex mMutex;
         std::string mName;
+
+        LockFreeUnmanagedQueue<LockState> mReadQueue;
+        LockFreeUnmanagedQueue<LockState> mWriteQueue;        
     };
 
 }
