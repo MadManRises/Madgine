@@ -16,9 +16,9 @@ namespace Render {
     {
     }
 
-    DirectX12Buffer::DirectX12Buffer(const ByteBuffer &data)
+    DirectX12Buffer::DirectX12Buffer(const ByteBuffer &data, D3D12_RESOURCE_STATES targetState)
     {
-        setData(data);
+        setData(data, targetState);
     }
 
     DirectX12Buffer::~DirectX12Buffer()
@@ -65,7 +65,7 @@ namespace Render {
         }
     }
 
-    void DirectX12Buffer::setData(const ByteBuffer &data)
+    void DirectX12Buffer::setData(const ByteBuffer &data, D3D12_RESOURCE_STATES targetState)
     {
         assert(data.mData);
 
@@ -83,10 +83,10 @@ namespace Render {
         auto [res, offset] = context.mConstantMemoryHeap.resolve(mBlock.mAddress);
 
         auto list = context.mGraphicsQueue.fetchCommandList();
-        list.Transition(res, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_COPY_DEST);
+        list.Transition(res, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
         auto [heap, srcOffset] = context.mUploadHeap.resolve(uploadAllocation.mAddress);
         list->CopyBufferRegion(res, offset, heap, srcOffset, expectedSize);
-        list.Transition(res, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
+        list.Transition(res, D3D12_RESOURCE_STATE_COPY_DEST, targetState);
 
         struct Deleter {
 

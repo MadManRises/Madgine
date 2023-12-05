@@ -143,7 +143,7 @@ namespace Render {
         mComputeQueue.setup();
 
         ConstantValues values;
-        mConstantBuffer.setData({ &values, sizeof(values) });
+        mConstantBuffer.setData({ &values, sizeof(values) }, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
     }
 
     DirectX12RenderContext::~DirectX12RenderContext()

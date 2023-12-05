@@ -8,7 +8,7 @@ namespace Render {
     struct MADGINE_DIRECTX12_EXPORT DirectX12Buffer {
 
         DirectX12Buffer() = default;
-        DirectX12Buffer(const ByteBuffer &data);
+        DirectX12Buffer(const ByteBuffer &data, D3D12_RESOURCE_STATES targetState);
         DirectX12Buffer(const DirectX12Buffer &) = delete;
         DirectX12Buffer(DirectX12Buffer &&);
         ~DirectX12Buffer();
@@ -22,7 +22,7 @@ namespace Render {
         void bindIndex(ID3D12GraphicsCommandList *commandList) const;
 
         void reset();
-        void setData(const ByteBuffer &data);
+        void setData(const ByteBuffer &data, D3D12_RESOURCE_STATES targetState);
         
         ID3D12Resource *resource() const;
 

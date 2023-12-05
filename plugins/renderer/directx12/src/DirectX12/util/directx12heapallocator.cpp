@@ -37,10 +37,11 @@ namespace Render {
             &heapProps,
             D3D12_HEAP_FLAG_NONE,
             &resourceDesc, 
-            D3D12_RESOURCE_STATE_GENERIC_READ,
+            D3D12_RESOURCE_STATE_COMMON,
             nullptr,
             IID_PPV_ARGS(&heap.mReservedResource));
         DX12_CHECK(hr);
+        heap.mReservedResource->SetName(L"Persistent Resource");
 
         D3D12_SHADER_RESOURCE_VIEW_DESC desc {};
         desc.Format = DXGI_FORMAT_R32_TYPELESS;
@@ -105,6 +106,7 @@ namespace Render {
             nullptr,
             IID_PPV_ARGS(&page.mResource));
         DX12_CHECK(hr);
+        page.mResource->SetName(L"Temp Resource");
 
         page.mResource->Map(0, nullptr, &page.mMappedAddress);
 

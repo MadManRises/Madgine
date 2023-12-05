@@ -36,10 +36,10 @@ namespace Render {
         DirectX12MeshData &data = static_cast<DirectX12MeshData &>(_data);
 
         if (mesh.mVertices.mData)
-            data.mVertices.setData(mesh.mVertices);
+            data.mVertices.setData(mesh.mVertices, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 
         if (!mesh.mIndices.empty())
-            data.mIndices.setData(mesh.mIndices);
+            data.mIndices.setData(mesh.mIndices, D3D12_RESOURCE_STATE_INDEX_BUFFER);
 
         co_return co_await GPUMeshLoader::generate(_data, mesh);
     }
