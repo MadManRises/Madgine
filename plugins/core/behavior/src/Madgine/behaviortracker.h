@@ -81,20 +81,20 @@ struct MADGINE_BEHAVIOR_EXPORT BehaviorTracker {
         void set_value(V &&...value)
         {
             mState->mContext.mTracker->unregisterState(mState);
-            mRec.set_value(std::forward<V>(value)...);
+            this->mRec.set_value(std::forward<V>(value)...);
         }
 
         void set_done()
         {
             mState->mContext.mTracker->unregisterState(mState);
-            mRec.set_done();
+            this->mRec.set_done();
         }
 
         template <typename... R>
         void set_error(R &&...result)
         {
             mState->mContext.mTracker->unregisterState(mState);
-            mRec.set_error(std::forward<R>(result)...);
+            this->mRec.set_error(std::forward<R>(result)...);
         }
 
         friend BehaviorTrackerContext tag_invoke(get_behavior_context_t, receiver &rec)
@@ -122,7 +122,7 @@ struct MADGINE_BEHAVIOR_EXPORT BehaviorTracker {
 
         void visitStateImpl(CallableView<void(const Execution::StateDescriptor &)> visitor) override
         {
-            Execution::visit_state(mState, visitor);
+            Execution::visit_state(this->mState, visitor);
         }
     };
 

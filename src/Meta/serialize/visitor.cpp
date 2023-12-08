@@ -26,11 +26,11 @@ namespace Serialize {
         return in.readPrimitive<DynamicEnum>(dummy, name);        
     }
 
-    void helper(FormattedSerializeStream &in, const char *name)
+    static void __instantiationHelper(FormattedSerializeStream &in, const char *name)
     {
         TypeUnpacker::forEach<SerializePrimitives>([&]<typename T>() {
             if constexpr (!std::same_as<T, EnumTag>)
-                visitSkipPrimitive<T>(in, name);
+                (void)visitSkipPrimitive<T>(in, name);
         });
     }
 

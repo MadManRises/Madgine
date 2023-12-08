@@ -112,7 +112,7 @@ namespace NodeGraph {
 
         template <auto...>
         using helper = ValueType;
-        using explicit_algorithm = typename replace<Traits::algorithm>::pattern_tagged<Execution::variable_name_tag, helper>;
+        using explicit_algorithm = typename replace<typename Traits::algorithm>::template pattern_tagged<Execution::variable_name_tag, helper>;
 
         static auto buildSender(value_argument_tuple&& values, std::vector<NodeResults>* results = nullptr, NodeResults* variadicBuffer = nullptr)
         {

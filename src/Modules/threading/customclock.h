@@ -9,8 +9,8 @@ namespace Threading {
 
         std::chrono::steady_clock::time_point revert();
 
-        std::strong_ordering operator<=>(const std::chrono::steady_clock::time_point other);
-        std::strong_ordering operator<=>(const CustomTimepoint &other);
+        std::strong_ordering operator<=>(const std::chrono::steady_clock::time_point other) const;
+        std::strong_ordering operator<=>(const CustomTimepoint &other) const;
 
         std::chrono::steady_clock::duration operator-(const CustomTimepoint &other) const;
         CustomTimepoint operator+(const std::chrono::steady_clock::duration other) const;

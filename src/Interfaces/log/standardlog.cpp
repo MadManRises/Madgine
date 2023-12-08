@@ -19,7 +19,7 @@ namespace Log {
     StandardLog::StandardLog(const std::string &name)
         : mName(name)
     {
-        if (!sLog) {
+        if (!Engine::Log::sLog) {
             Engine::Log::sLog = this;
         }
     }

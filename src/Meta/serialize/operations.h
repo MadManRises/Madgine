@@ -297,7 +297,7 @@ namespace Serialize {
             } else if constexpr (InstanceOf<T, EnumType>) {
                 return visitor.visit(PrimitiveHolder<EnumTag> { &T::Representation::sTable }, in, name, tags);
             } else if constexpr (PrimitiveType<T>) {
-                return visitor.visit(PrimitiveHolder<PrimitiveReducer<T>::type> {}, in, name, tags);
+                return visitor.visit(PrimitiveHolder<typename PrimitiveReducer<T>::type> {}, in, name, tags);
             } else if constexpr (std::derived_from<T, SyncableUnitBase>) {
                 return visitor.visit(PrimitiveHolder<SyncableUnitBase> { &serializeTable<T>() }, in, name, tags);
             } else if constexpr (std::derived_from<T, SerializableDataUnit>) {

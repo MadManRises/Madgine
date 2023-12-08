@@ -16,7 +16,7 @@ namespace Threading {
     struct TaskAwaitableSenderImpl;
 
     template <typename Sender>
-    using TaskAwaitableSender = typename Sender::template value_types<type_pack>::prepend<Sender>::instantiate<TaskAwaitableSenderImpl>;
+    using TaskAwaitableSender = typename Sender::template value_types<type_pack>::template prepend<Sender>::template instantiate<TaskAwaitableSenderImpl>;
 
     struct TaskFinalSuspend {
         bool await_ready() noexcept { return !mHandle; }

@@ -57,7 +57,7 @@ namespace Render {
         requires std::is_unbounded_array_v<T>
             ByteBufferImpl<T> mapVertices(RenderTarget *target, size_t count)
         {
-            return mapVertices(target, type_holder<std::remove_extent_t<T>>, count).cast<T>();
+            return mapVertices(target, type_holder<std::remove_extent_t<T>>, count).template cast<T>();
         }       
         virtual void setGroupSize(size_t groupSize) const = 0;
 

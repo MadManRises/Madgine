@@ -47,27 +47,27 @@ void CoroutineBehaviorState::destroy()
     std::coroutine_handle<CoroutineBehaviorState>::from_promise(*this).destroy();
 }
 
-std::suspend_always CoroutineBehaviorState::initial_suspend()
+std::suspend_always CoroutineBehaviorState::initial_suspend() noexcept
 {
     return {};
 }
 
-bool CoroutineBehaviorState::Result::await_ready()
+bool CoroutineBehaviorState::Result::await_ready() noexcept
 {
     return false;
 }
 
-void CoroutineBehaviorState::Result::await_suspend(std::coroutine_handle<CoroutineBehaviorState> handle)
+void CoroutineBehaviorState::Result::await_suspend(std::coroutine_handle<CoroutineBehaviorState> handle) noexcept
 {
     handle.promise().mReceiver->set_value({});
 }
 
-void CoroutineBehaviorState::Result::await_resume()
+void CoroutineBehaviorState::Result::await_resume() noexcept
 {
     throw 0;
 }
 
-CoroutineBehaviorState::Result CoroutineBehaviorState::final_suspend()
+CoroutineBehaviorState::Result CoroutineBehaviorState::final_suspend() noexcept
 {
     return {};
 }

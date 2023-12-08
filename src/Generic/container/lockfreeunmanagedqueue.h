@@ -36,7 +36,7 @@ struct LockFreeUnmanagedQueue {
 
     T *pop()
     {
-        std::unique_lock { mMutex };
+        std::unique_lock lock { mMutex };
         T *head = nullptr;
         T *newHead = nullptr;
         while (!mHead.compare_exchange_weak(head, newHead)) {

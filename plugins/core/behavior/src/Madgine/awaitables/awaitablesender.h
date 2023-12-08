@@ -11,7 +11,7 @@ template <typename Sender, typename... V>
 struct BehaviorAwaitableSenderImpl;
 
 template <typename Sender>
-using BehaviorAwaitableSender = typename Sender::template value_types<type_pack>::prepend<Sender>::instantiate<BehaviorAwaitableSenderImpl>;
+using BehaviorAwaitableSender = typename Sender::template value_types<type_pack>::template prepend<Sender>::template instantiate<BehaviorAwaitableSenderImpl>;
 
 template <typename Sender, typename... V>
 struct BehaviorAwaitableReceiver : Execution::execution_receiver<> {

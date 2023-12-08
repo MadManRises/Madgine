@@ -65,9 +65,9 @@ namespace Serialize {
         virtual StreamResult visit(PrimitiveHolder<T> holder, FormattedSerializeStream &in, const char *name, std::span<std::string_view> tags) const override
         {
             if constexpr (requires {
-                              mF(holder, in, name, tags);
+                              this->mF(holder, in, name, tags);
                           }) {
-                return mF(holder, in, name, tags);
+                return this->mF(holder, in, name, tags);
             } else if constexpr (std::same_as<T, EnumTag>) {
                 return visitSkipEnum(holder.mTable, in, name);
             } else {
@@ -77,8 +77,8 @@ namespace Serialize {
     };
 
     template <typename F>
-    struct StreamVisitorImpl : SerializePrimitives::prepend<F>::instantiate<StreamVisitorImplHelper> {
-        using SerializePrimitives::prepend<F>::instantiate<StreamVisitorImplHelper>::instantiate;
+    struct StreamVisitorImpl : SerializePrimitives::template prepend<F>::template instantiate<StreamVisitorImplHelper> {
+        using SerializePrimitives::template prepend<F>::template instantiate<StreamVisitorImplHelper>::instantiate;
     };
 
     template <typename F>

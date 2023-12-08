@@ -14,6 +14,8 @@ namespace Render {
         , mIsRenderTarget(isRenderTarget)
         , mSamples(samples)
     {
+        bool isDepthTarget = mFormat == FORMAT_D24;
+
         DXGI_FORMAT xFormat;
         D3D12_SRV_DIMENSION dimension;
         size_t byteCount;
@@ -31,7 +33,7 @@ namespace Render {
             byteCount = 4;
             break;
         case FORMAT_D24:
-            xFormat = DXGI_FORMAT_R24G8_TYPELESS;
+            xFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
             byteCount = 4;
             break;
         default:
@@ -48,14 +50,19 @@ namespace Render {
         textureDesc.MipLevels = 1;
         textureDesc.SampleDesc.Count = samples;
         textureDesc.SampleDesc.Quality = 0;
-        textureDesc.Flags = isRenderTarget ? D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET : mFormat == FORMAT_D24 ? D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL : D3D12_RESOURCE_FLAG_NONE;
+        textureDesc.Flags = isRenderTarget ? D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET : isDepthTarget ? D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL : D3D12_RESOURCE_FLAG_NONE;
 
         D3D12_CLEAR_VALUE clear {};
         clear.Format = xFormat;
-        clear.Color[0] = 0.033f;
-        clear.Color[1] = 0.073f;
-        clear.Color[2] = 0.073f;
-        clear.Color[3] = 1.0f;
+        if (isRenderTarget) {
+            clear.Color[0] = 0.033f;
+            clear.Color[1] = 0.073f;
+            clear.Color[2] = 0.073f;
+            clear.Color[3] = 1.0f;
+        } else if (isDepthTarget) {
+            clear.DepthStencil.Depth = 1.0f;
+            clear.DepthStencil.Stencil = 0;
+        }
 
         switch (type) {
         case TextureType_2D:
@@ -78,7 +85,7 @@ namespace Render {
             D3D12_HEAP_FLAG_NONE,
             &textureDesc,
             data.mData ? D3D12_RESOURCE_STATE_COPY_DEST : readStateFlags(),
-            isRenderTarget ? &clear : nullptr,
+            isRenderTarget || isDepthTarget ? &clear : nullptr,
             IID_PPV_ARGS(&mTextureHandle.setupAs<ID3D12Resource *>()));
         DX12_CHECK(hr);
 

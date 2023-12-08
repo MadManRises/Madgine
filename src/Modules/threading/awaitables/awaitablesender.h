@@ -12,7 +12,7 @@ namespace Threading {
     struct TaskAwaitableSenderImpl;
 
     template <typename Sender>
-    using TaskAwaitableSender = typename Sender::template value_types<type_pack>::prepend<Sender>::instantiate<TaskAwaitableSenderImpl>;
+    using TaskAwaitableSender = typename Sender::template value_types<type_pack>::template prepend<Sender>::template instantiate<TaskAwaitableSenderImpl>;
 
     template <typename Sender>
     struct TaskAwaitableReceiver : Execution::execution_receiver<> {

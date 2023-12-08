@@ -21,21 +21,29 @@ namespace Render {
         std::vector<TextureFormat> mTextureFormats;
         size_t mSamples;
     };
-     
-    template <>
-    struct std::hash<PipelineDescriptor> {
-        std::size_t operator()(const PipelineDescriptor &desc) const noexcept
-        {
-            std::size_t h1 = desc.mVertexFormat;
-            std::size_t h2 = desc.mGroupSize;
-            std::size_t h3 = desc.mTextureFormats.size();
-            std::size_t h4 = desc.mSamples;
-            std::size_t h = h1 ^ (h2 << 4) ^ (h3 << 8) ^ (h4 << 12);
-            for (TextureFormat format : desc.mTextureFormats)
-                h = (h << 1) ^ format;
-            return h;
-        }
-    };
+}
+}
+
+namespace std {
+template <>
+struct hash<Engine::Render::PipelineDescriptor> {
+    std::size_t operator()(const Engine::Render::PipelineDescriptor &desc) const noexcept
+    {
+        std::size_t h1 = desc.mVertexFormat;
+        std::size_t h2 = desc.mGroupSize;
+        std::size_t h3 = desc.mTextureFormats.size();
+        std::size_t h4 = desc.mSamples;
+        std::size_t h = h1 ^ (h2 << 4) ^ (h3 << 8) ^ (h4 << 12);
+        for (Engine::Render::TextureFormat format : desc.mTextureFormats)
+            h = (h << 1) ^ format;
+        return h;
+    }
+};
+
+}
+
+namespace Engine {
+namespace Render {
 
     struct MADGINE_DIRECTX12_EXPORT DirectX12Pipeline : Pipeline {
 

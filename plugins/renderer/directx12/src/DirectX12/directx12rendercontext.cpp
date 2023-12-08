@@ -33,6 +33,9 @@ namespace Render {
 
         Log::MessageType lvl;
         switch (severity) {
+        case D3D12_MESSAGE_SEVERITY_CORRUPTION:
+            lvl = Log::MessageType::FATAL_TYPE;
+            break;
         case D3D12_MESSAGE_SEVERITY_ERROR:
             lvl = Log::MessageType::ERROR_TYPE;
             break;

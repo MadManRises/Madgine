@@ -79,25 +79,25 @@ struct MADGINE_BEHAVIOR_EXPORT Behavior {
 
         void set_value(ArgumentList arguments)
         {
-            mState->start(this, std::move(arguments), get_behavior_context(mRec), Execution::get_stop_token(mRec));
+            mState->start(this, std::move(arguments), get_behavior_context(this->mRec), Execution::get_stop_token(this->mRec));
         }
 
         void set_value_inner(ArgumentList arguments) override
         {
-            mRec.set_value(std::move(arguments));
+            this->mRec.set_value(std::move(arguments));
         }
         void set_error(InterpretResult r) override
         {
-            mRec.set_error(r);
+            this->mRec.set_error(r);
         }
         void set_done() override
         {
-            mRec.set_done();
+            this->mRec.set_done();
         }
 
         bool resolveVar(ValueType &retVal, std::string_view name) override
         {
-            return Execution::resolve_var_d(mRec, name, retVal);
+            return Execution::resolve_var_d(this->mRec, name, retVal);
         }
 
         StatePtr mState;
@@ -157,7 +157,7 @@ template <typename Sender, typename... V>
 struct BehaviorAwaitableSenderImpl;
 
 template <typename Sender>
-using BehaviorAwaitableSender = typename Sender::template value_types<type_pack>::prepend<Sender>::instantiate<BehaviorAwaitableSenderImpl>;
+using BehaviorAwaitableSender = typename Sender::template value_types<type_pack>::template prepend<Sender>::template instantiate<BehaviorAwaitableSenderImpl>;
 
 struct MADGINE_BEHAVIOR_EXPORT CoroutineBehaviorState : BehaviorStateBase {
 

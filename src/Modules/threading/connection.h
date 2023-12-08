@@ -75,13 +75,13 @@ namespace Threading {
 
         StoppableConnection(Rec &&rec, SignalStub<Ty...> *stub)
             : Execution::VirtualStateEx<Rec, Connection<Ty...>, type_pack<GenericResult>, Ty...>(std::forward<Rec>(rec), stub)
-            , mCallback(Execution::get_stop_token(mRec), callback { this })
+            , mCallback(Execution::get_stop_token(this->mRec), callback { this })
         {
         }
 
         void start()
         {
-            if (Execution::get_stop_token(mRec).stop_requested())
+            if (Execution::get_stop_token(this->mRec).stop_requested())
                 this->set_done();
             else
                 Connection<Ty...>::start();

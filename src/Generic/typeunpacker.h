@@ -385,7 +385,7 @@ namespace TypeUnpacker {
     template <typename Pack, typename F, size_t... Is>
     auto forEach(F &&f, std::index_sequence<Is...>)
     {
-        return std::tuple { invoke_patch_void(&F::template operator()<typename Pack::select<Is>>, std::forward<F>(f))... };
+        return std::tuple { invoke_patch_void(&F::template operator()<typename Pack::template select<Is>>, std::forward<F>(f))... };
     }
 
     template <typename Pack, typename F>
