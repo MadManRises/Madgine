@@ -43,220 +43,12 @@
                                 </Conditional>
                             </mProperties>
                         </Button>
-                        <TableWidget serId=9>
-                            <mTextRenderData serId=10>
-                                <mFontSize>16</mFontSize>
-                                <mPivot>[0.5, 0.5]</mPivot>
-                                <mColor>(1, 1, 1, 1)</mColor>
-                                <mFont>OpenSans-Light</mFont>
-                            </mTextRenderData>
-                            <mRowCount>36</mRowCount>
-                            <mColumnConfigs>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                                <Item>
-                                    <Element>SizingPolicy::STRETCH</Element>
-                                    <Element>1</Element>
-                                </Item>
-                            </mColumnConfigs>
-                            <mChildren>
-                            </mChildren>
-                            <mName>Unnamed</mName>
-                            <mPos>[0, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
-                            <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
-                            <mConditions>
-                            </mConditions>
-                            <mProperties>
-                            </mProperties>
-                        </TableWidget>
                     </mChildren>
                     <mName>MainMenu</mName>
                     <mPos>[0, 0, 0, 0, 0, 0, 0, 0, 0]</mPos>
                     <mSize>[1, 0, 0, 0, 1, 0, 0, 0, 1]</mSize>
                     <mConditions>
-                        <Item serId=11>
+                        <Item serId=9>
                             <mName>Test</mName>
                             <mFormula>Formula::W_MINUS_H</mFormula>
                             <mOperator>Operator::GREATER</mOperator>
@@ -266,13 +58,13 @@
                     <mProperties>
                     </mProperties>
                 </Widget>
-                <Widget serId=12>
+                <Widget serId=10>
                     <mChildren>
-                        <SceneWindow serId=13>
+                        <SceneWindow serId=11>
                             <mChildren>
-                                <Label serId=14>
+                                <Label serId=12>
                                     <mText>Score: 0</mText>
-                                    <mTextRenderData serId=15>
+                                    <mTextRenderData serId=13>
                                         <mFontSize>35</mFontSize>
                                         <mPivot>[1, 0]</mPivot>
                                         <mColor>(1, 1, 1, 1)</mColor>
@@ -288,9 +80,9 @@
                                     <mProperties>
                                     </mProperties>
                                 </Label>
-                                <Label serId=16>
+                                <Label serId=14>
                                     <mText>Life: -26</mText>
-                                    <mTextRenderData serId=17>
+                                    <mTextRenderData serId=15>
                                         <mFontSize>35</mFontSize>
                                         <mPivot>[0, 0]</mPivot>
                                         <mColor>(1, 1, 1, 1)</mColor>
@@ -324,11 +116,11 @@
                     <mProperties>
                     </mProperties>
                 </Widget>
-                <Widget serId=18>
+                <Widget serId=16>
                     <mChildren>
-                        <Label serId=19>
+                        <Label serId=17>
                             <mText>Game Over</mText>
-                            <mTextRenderData serId=20>
+                            <mTextRenderData serId=18>
                                 <mFontSize>80</mFontSize>
                                 <mPivot>[0.5, 0.5]</mPivot>
                                 <mColor>(1, 1, 1, 1)</mColor>
@@ -344,9 +136,9 @@
                             <mProperties>
                             </mProperties>
                         </Label>
-                        <Label serId=21>
+                        <Label serId=19>
                             <mText>Your Score: 0</mText>
-                            <mTextRenderData serId=22>
+                            <mTextRenderData serId=20>
                                 <mFontSize>35</mFontSize>
                                 <mPivot>[0.5, 0.5]</mPivot>
                                 <mColor>(1, 1, 1, 1)</mColor>
