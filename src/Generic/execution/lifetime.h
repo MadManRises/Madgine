@@ -64,11 +64,17 @@ namespace Execution {
         template <typename Sender>
         struct attach_receiver : execution_receiver<> {
 
+            void set_value() {
+                mState->mLifetime->decreaseCount();
+                delete mState;
+            }
+
             template <typename... V>
-            void set_value(V &&...)
+            [[nodiscard]] std::monostate set_value(V &&...)
             {
                 mState->mLifetime->decreaseCount();
                 delete mState;
+                return {};
             }
             void set_done()
             {
@@ -76,10 +82,9 @@ namespace Execution {
                 delete mState;
             }
             template <typename... R>
-            void set_error(R &&...)
+            [[nodiscard]] std::monostate set_error(R &&...)
             {
-                mState->mLifetime->decreaseCount();
-                delete mState;
+                return {};
             }
 
             friend auto tag_invoke(get_stop_token_t, attach_receiver<Sender> &rec)

@@ -23,7 +23,7 @@ namespace Render {
 
         void registerBuffer(GPUBufferCodeGeneratorData &data);
 
-        NodeGraph::NodeInterpreterState *mInterpreter;
+        NodeGraph::NodeInterpreterStateBase *mInterpreter;
 
         CodeGen::ShaderFile mFile;
 

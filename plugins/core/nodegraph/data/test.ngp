@@ -16,7 +16,7 @@
                 <Item>
                     <Item>
                         <Element>
-                            <Element>2</Element>
+                            <Element>3</Element>
                             <Element>0</Element>
                             <Element>0</Element>
                         </Element>
@@ -43,24 +43,8 @@
                 </Item>
             </mDataOutPins>
         </Node>
-        <Node type="Variable" serId=4>
-            <Name>Foo</Name>
-            <DefaultValue type=1>Bar</DefaultValue>
-            <mFlowOutPins>
-                <Item>
-                </Item>
-            </mFlowOutPins>
-            <mDataInPins>
-                <Item>
-                </Item>
-            </mDataInPins>
-            <mDataOutPins>
-                <Item>
-                </Item>
-            </mDataOutPins>
-        </Node>
-        <Node type="ReadVar" serId=5>
-            <Name>Foo</Name>
+        <Node type="ReadVar" serId=4>
+            <Name>Entity</Name>
             <mFlowOutPins>
                 <Item>
                 </Item>

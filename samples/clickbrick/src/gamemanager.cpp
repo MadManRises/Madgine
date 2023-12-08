@@ -11,8 +11,6 @@
 #include "Madgine/scene/entity/components/mesh.h"
 #include "Madgine/scene/entity/components/transform.h"
 
-#include "brick.h"
-
 #include "Meta/math/geometry3.h"
 
 #include "Meta/math/boundingbox.h"
@@ -42,11 +40,17 @@
 #include "Madgine/render/rendercontext.h"
 #include "Modules/threading/awaitables/awaitabletimepoint.h"
 
+#include "Madgine/awaitables/awaitablesender.h"
+
+#include "Madgine/scene/senders/scenesenders.h"
+
 UNIQUECOMPONENT(ClickBrick::GameManager)
 
 METATABLE_BEGIN_BASE(ClickBrick::GameManager, Engine::Input::HandlerBase)
 MEMBER(mCamera)
 METATABLE_END(ClickBrick::GameManager)
+
+//DEFINE_NATIVE_BEHAVIOR(ClickBrick::Brick)
 
 namespace ClickBrick {
 
@@ -106,53 +110,18 @@ Engine::Threading::Task<void> GameManager::updateApp()
     while (mUI.app().taskQueue()->running()) {
         co_await Engine::Threading::TaskQualifiers { mSceneMgr.clock()(1ms) };
 
-        co_await mSceneMgr.mutex().locked(Engine::AccessMode::WRITE, [this]() {
-            std::chrono::microseconds timeSinceLastFrame = mSceneClock.tick(mSceneMgr.clock().now());
+        std::chrono::microseconds timeSinceLastFrame = mSceneClock.tick(mSceneMgr.clock().now());
 
-            updateBricks(timeSinceLastFrame);
-
-            mAcc += timeSinceLastFrame;
-            while (mAcc > mSpawnInterval) {
-                mAcc -= mSpawnInterval;
-                mSpawnInterval *= 999;
-                mSpawnInterval /= 1000;
+        mAcc += timeSinceLastFrame;
+        while (mAcc > mSpawnInterval) {
+            mAcc -= mSpawnInterval;
+            mSpawnInterval *= 999;
+            mSpawnInterval /= 1000;
+            co_await mSceneMgr.mutex().locked(Engine::AccessMode::WRITE, [this]() {
                 spawnBrick();
-            }
-        });
-    }    
-}
-
-void GameManager::updateBricks(std::chrono::microseconds timeSinceLastFrame)
-{
-    float ratio = (timeSinceLastFrame.count() / 1000000.0f);
-
-    mBricks.remove_if([=](const Engine::Scene::Entity::EntityPtr &e) {
-        if (e.isDead())
-            return true;
-        Scene::Brick *brick = e->getComponent<Scene::Brick>();
-        Engine::Scene::Entity::Transform *t = e->getComponent<Engine::Scene::Entity::Transform>();
-        t->mPosition += brick->mSpeed * ratio * brick->mDir;
-
-        if (t->mPosition.length() > 10.5f) {
-            e->remove();
-            //modLife(-1);
-            return true;
+            });
         }
-
-        brick->mQAcc += brick->mQSpeed * 0.1f * ratio;
-
-        if (brick->mQAcc >= 1.0f) {
-            brick->mQAcc = 0.0f;
-            brick->mQ0 = brick->mQ1;
-
-            Engine::Vector3 orientation = { static_cast<float>(rand() - RAND_MAX / 2), static_cast<float>(rand() - RAND_MAX / 2), static_cast<float>(rand() - RAND_MAX / 2) };
-            brick->mQ1 = { static_cast<float>(rand()), orientation };
-        }
-
-        t->mOrientation = Engine::slerp(brick->mQ0, brick->mQ1, brick->mQAcc);
-
-        return false;
-    });
+    }
 }
 
 void GameManager::spawnBrick()
@@ -172,17 +141,10 @@ void GameManager::spawnBrick()
 
     brick->addComponent<Engine::Scene::Entity::Mesh>().get()->setName("Brick");
     brick->getComponent<Engine::Scene::Entity::Mesh>()->handle().info()->setPersistent(true);
+    
+    float speed = rand() / float(RAND_MAX) * 2.0f + 1.0f;    
 
-    Scene::Brick *b = brick->addComponent<Scene::Brick>().get();
-    b->mSpeed = rand() / float(RAND_MAX) * 2.0f + 1.0f;
-    b->mDir = dir;
-
-    b->mQ0 = q;
-    b->mQ1 = q;
-    b->mQAcc = 1.0f;
-    b->mQSpeed = 1.0f;
-
-    mBricks.push_back(brick);
+    brick->addBehavior(Brick(speed, dir, q));
 }
 
 void GameManager::onPointerClick(const Engine::Input::PointerEventArgs &evt)
@@ -192,7 +154,7 @@ void GameManager::onPointerClick(const Engine::Input::PointerEventArgs &evt)
     Engine::Scene::Entity::EntityPtr hit;
     float distance = std::numeric_limits<float>::max();
 
-    for (const Engine::Scene::Entity::EntityPtr &e : mBricks) {
+    /* for (const Engine::Scene::Entity::EntityPtr &e : mBricks) {
         const Engine::AABB &aabb = e->getComponent<Engine::Scene::Entity::Mesh>()->aabb();
         Engine::BoundingBox bb = e->getComponent<Engine::Scene::Entity::Transform>()->matrix() * aabb;
         if (Engine::UpTo<float, 2> hits = Engine::Intersect(ray, bb)) {
@@ -201,12 +163,9 @@ void GameManager::onPointerClick(const Engine::Input::PointerEventArgs &evt)
                 distance = hits[0];
             }
         }
-    }
+    }*/
 
     if (hit) {
-        auto guard = mUI.app().getGlobalAPIComponent<Engine::Scene::SceneManager>().mutex().lock(Engine::AccessMode::WRITE);
-
-        mBricks.remove(hit);
         hit->remove();
         modScore(1);
     }
@@ -238,13 +197,48 @@ void GameManager::start()
     mScoreLabel->mText = "Score: " + std::to_string(mScore);
     mLife = 3;
     mLifeLabel->mText = "Life: " + std::to_string(mLife);
+}
 
-    auto guard = mSceneMgr.mutex().lock(Engine::AccessMode::WRITE);
+Engine::Behavior Brick(float speed, Engine::Vector3 dir, Engine::Quaternion q)
+{
 
-    for (const Engine::Scene::Entity::EntityPtr &brick : mBricks) {
-        brick->remove();
+    Engine::Scene::Entity::Entity *e = co_await Engine::Scene::get_entity();
+
+    float qAcc = 1.0f;
+    float qSpeed = 1.0f;
+
+    Engine::Quaternion q0 = q;
+    Engine::Quaternion q1 = q;
+
+    bool loop = true;
+    while (loop) {
+
+        std::chrono::microseconds elapsedTime = co_await Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>().animationClock().wait(0s);
+
+        Engine::Scene::Entity::Transform *t = e->getComponent<Engine::Scene::Entity::Transform>();
+
+        float ratio = std::chrono::duration_cast<std::chrono::duration<float>>(elapsedTime).count();
+
+        t->mPosition += speed * ratio * dir;
+
+        qAcc += qSpeed * 0.1f * ratio;
+
+        if (qAcc >= 1.0f) {
+            qAcc = 0.0f;
+            q0 = q1;
+
+            Engine::Vector3 orientation = { static_cast<float>(rand() - RAND_MAX / 2), static_cast<float>(rand() - RAND_MAX / 2), static_cast<float>(rand() - RAND_MAX / 2) };
+            q1 = { static_cast<float>(rand()), orientation };
+        }
+
+        t->mOrientation = Engine::slerp(q0, q1, qAcc);
+
+        loop = t->mPosition.length() < 10.5f;
     }
-    mBricks.clear();
+
+    e->remove();
+
+    co_return;
 }
 
 }

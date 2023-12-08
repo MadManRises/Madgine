@@ -4,35 +4,92 @@
 
 #include "Meta/keyvalue/valuetype.h"
 
-#include "Meta/serialize/serializetable_impl.h"
 #include "Meta/keyvalue/metatable_impl.h"
-
-SERIALIZETABLE_BEGIN(Engine::Behavior)
-SERIALIZETABLE_END(Engine::Behavior)
-
-METATABLE_BEGIN(Engine::Behavior)
-PROXY(mState)
-METATABLE_END(Engine::Behavior)
+#include "Meta/serialize/serializetable_impl.h"
 
 METATABLE_BEGIN(Engine::BehaviorStateBase)
 METATABLE_END(Engine::BehaviorStateBase)
 
 namespace Engine {
 
-Behavior::Behavior(std::unique_ptr<BehaviorStateBase> state)
+void Behavior::destroyState(BehaviorStateBase *state)
+{
+    state->destroy();
+}
+
+Behavior::Behavior(StatePtr state)
     : mState(std::move(state))
 {
 }
 
-Behavior &Behavior::operator=(std::unique_ptr<BehaviorStateBase> state)
+Behavior &Behavior::operator=(StatePtr state)
 {
     mState = std::move(state);
     return *this;
 }
 
-std::string_view Behavior::name() const
+Behavior CoroutineBehaviorState::get_return_object()
 {
-    return mState->name();
+    return Behavior::StatePtr { this };
+}
+
+void CoroutineBehaviorState::start(Behavior::receiver *rec, ArgumentList arguments, BehaviorTrackerContext context, std::stop_token stopToken)
+{
+    mReceiver = rec;
+    mArguments = std::move(arguments);
+    mContext = context;
+    mStopToken = std::move(stopToken);
+    std::coroutine_handle<CoroutineBehaviorState>::from_promise(*this).resume();
+}
+
+void CoroutineBehaviorState::destroy()
+{
+    std::coroutine_handle<CoroutineBehaviorState>::from_promise(*this).destroy();
+}
+
+std::suspend_always CoroutineBehaviorState::initial_suspend()
+{
+    return {};
+}
+
+bool CoroutineBehaviorState::Result::await_ready()
+{
+    return false;
+}
+
+void CoroutineBehaviorState::Result::await_suspend(std::coroutine_handle<CoroutineBehaviorState> handle)
+{
+    handle.promise().mReceiver->set_value({});
+}
+
+void CoroutineBehaviorState::Result::await_resume()
+{
+    throw 0;
+}
+
+CoroutineBehaviorState::Result CoroutineBehaviorState::final_suspend()
+{
+    return {};
+}
+
+void CoroutineBehaviorState::return_void()
+{
+    //mValue = void
+}
+
+void CoroutineBehaviorState::unhandled_exception()
+{
+    throw 0;
+}
+
+void CoroutineBehaviorState::set_error(InterpretResult result)
+{
+    mReceiver->set_error(result);
+}
+
+void CoroutineBehaviorState::set_done()
+{
+    mReceiver->set_done();
 }
 
 }

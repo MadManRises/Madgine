@@ -62,7 +62,8 @@ namespace Scene {
         , mSceneComponents(*this)
         , mMutex("SceneData")
         , mFrameClock(std::chrono::steady_clock::now())
-        , mSceneClock(mClock.now())
+        , mAnimationClock(mClock.now())
+        , mSimulationClock(mClock.now())
     {
     }
 
@@ -82,12 +83,24 @@ namespace Scene {
                 co_return false;
         }
 
+        taskQueue()->queue([this]() -> Threading::Task<void> {
+            while (taskQueue()->running()) {
+                mSimulationClock.tick(mClock.now());
+                co_await std::chrono::microseconds { 1000000 / 60 };
+            }
+        });
+
         co_return true;
     }
 
     Threading::Task<void> SceneManager::finalize()
     {
-        clear();
+        mLifetime.end();
+
+        co_await mLifetime.ended();
+
+        //assert(mEntities.empty());
+        //assert(mLocalEntities.empty());
 
         for (const std::unique_ptr<SceneComponentBase> &component : mSceneComponents) {
             co_await component->callFinalize();
@@ -112,7 +125,7 @@ namespace Scene {
     void SceneManager::updateFrame()
     {
         std::chrono::microseconds frameTimeSinceLastFrame = mFrameClock.tick(std::chrono::steady_clock::now());
-        std::chrono::microseconds sceneTimeSinceLastFrame = mSceneClock.tick(mClock.now());
+        std::chrono::microseconds sceneTimeSinceLastFrame = mAnimationClock.tick(mClock.now());
 
         for (const std::unique_ptr<SceneComponentBase> &comp : mSceneComponents) {
             comp->updateFrame(frameTimeSinceLastFrame, sceneTimeSinceLastFrame);
@@ -145,12 +158,6 @@ namespace Scene {
         }
     }
 
-    void SceneManager::clear()
-    {
-        mEntities.clear();
-        mLocalEntities.clear();
-    }
-
     void SceneManager::pause()
     {
         if (mClock.mPauseStack++ == 0) {
@@ -175,6 +182,16 @@ namespace Scene {
     const Threading::CustomClock &SceneManager::clock() const
     {
         return mClock;
+    }
+
+    IntervalClock<Threading::CustomTimepoint> &SceneManager::simulationClock()
+    {
+        return mSimulationClock;
+    }
+
+    IntervalClock<Threading::CustomTimepoint> &Engine::Scene::SceneManager::animationClock()
+    {
+        return mAnimationClock;
     }
 
     Entity::Entity *SceneManager::makeLocalCopy(Entity::Entity &&e)
@@ -207,7 +224,13 @@ namespace Scene {
     Entity::EntityPtr SceneManager::createEntity(const std::string &name,
         const std::function<void(Entity::Entity &)> &init)
     {
-        auto toPtr = [](const typename RefcountedContainer<std::deque<Entity::Entity>>::iterator &it) { return Entity::EntityPtr { &*it }; };
+        auto toPtr = [this](const typename RefcountedContainer<std::deque<Entity::Entity>>::iterator &it) {
+            Entity::Entity *entity = &*it;
+            mLifetime.attach(Execution::sequence(it->mLifetime.ended(), mMutex.locked(AccessMode::WRITE, [this, entity]() {
+                remove(entity);
+            })));
+            return Entity::EntityPtr { entity };
+        };
         if (init)
             return toPtr(TupleUnpacker::invokeFlatten(LIFT(mEntities.emplace_init, this), mEntities.end(), init, createEntityData(name, false)));
         else

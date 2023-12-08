@@ -19,7 +19,6 @@
 METATABLE_BEGIN(Engine::Scene::Entity::Entity)
 NAMED_MEMBER(Name, mName)
 READONLY_PROPERTY(Components, components)
-NAMED_MEMBER(Behaviors, mBehaviors)
 METATABLE_END(Engine::Scene::Entity::Entity)
 
 using namespace Engine::Serialize;
@@ -74,7 +73,6 @@ static constexpr Serializer sComponentSynchronizer {
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Entity)
 FIELD(mComponents, Serialize::ParentCreator<&Engine::Scene::Entity::Entity::readComponent, &Engine::Scene::Entity::Entity::writeComponent, &Engine::Scene::Entity::Entity::clearComponents>)
 SERIALIZETABLE_ENTRY(sComponentSynchronizer)
-FIELD(mBehaviors, Serialize::ParentCreator<&Engine::Scene::Entity::Entity::readBehavior, &Engine::Scene::Entity::Entity::writeBehavior>)
 SERIALIZETABLE_END(Engine::Scene::Entity::Entity)
 
 namespace Engine {
@@ -213,7 +211,8 @@ namespace Scene {
 
         void Entity::remove()
         {
-            mSceneManager.remove(this);
+            //mSceneManager.remove(this);
+            mLifetime.end();
         }
 
         Serialize::StreamResult Entity::readComponent(Serialize::FormattedSerializeStream &in, EntityComponentOwningHandle<EntityComponentBase> &handle)
@@ -233,28 +232,9 @@ namespace Scene {
             return "Component";
         }
 
-        void Entity::addBehavior(Behavior behavior)
+        BehaviorTracker::AccessGuard Entity::behaviors() const
         {
-            mBehaviors.emplace_back(std::move(behavior));
-        }
-
-        std::vector<Behavior> &Entity::behaviors()
-        {
-            return mBehaviors;
-        }
-
-        Serialize::StreamResult Entity::readBehavior(Serialize::FormattedSerializeStream &in, Behavior &behavior)
-        {
-            STREAM_PROPAGATE_ERROR(in.beginExtendedRead("Behavior", 0));
-            
-            return {};
-        }
-
-        const char *Entity::writeBehavior(Serialize::FormattedSerializeStream &out, const Behavior &behavior) const
-        {
-            out.beginExtendedWrite("Behavior", 1);
-            //write(out, behavior.getName(), "Graph");
-            return "Behavior";
+            return mBehaviorTracker.guarded();
         }
 
         bool Entity::isLocal() const

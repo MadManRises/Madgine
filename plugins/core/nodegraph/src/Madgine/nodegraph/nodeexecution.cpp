@@ -22,15 +22,15 @@ namespace NodeGraph {
         mInterpreter.write(pin, v);
     }
 
-    ValueType NodeInterpretHandleBase::resolveVar(std::string_view name)
+    ValueType NodeInterpretHandleBase::readVar(std::string_view name)
     {
         ValueType v;
-        bool result = mInterpreter.resolveVar(v, name);
+        bool result = mInterpreter.readVar(v, name);
         assert(result);
         return v;
     }
 
-    void continueExecution(NodeInterpreterState &interpreter, const NodeBase &node, Execution::VirtualReceiverBase<InterpretResult> &receiver)
+    void continueExecution(NodeInterpreterStateBase &interpreter, const NodeBase &node, Execution::VirtualReceiverBase<InterpretResult> &receiver)
     {
         Pin pin = node.flowOutTarget(0);
         interpreter.branch(receiver, pin);

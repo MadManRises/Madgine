@@ -107,10 +107,10 @@ namespace NodeGraph {
         void onDataProviderRemove(Pin pin);
         void onNodeReindex(uint32_t oldIndex, uint32_t newIndex);
 
-        virtual void setupInterpret(NodeInterpreterState &interpreter, std::unique_ptr<NodeInterpreterData> &data) const;
+        virtual void setupInterpret(NodeInterpreterStateBase &interpreter, std::unique_ptr<NodeInterpreterData> &data) const;
         virtual void interpret(NodeReceiver<NodeBase> receiver, std::unique_ptr<NodeInterpreterData> &data, uint32_t flowIn, uint32_t group = 0) const;
-        virtual void interpretRead(NodeInterpreterState &interpreter, ValueType &retVal, std::unique_ptr<NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group = 0) const;
-        virtual void interpretWrite(NodeInterpreterState &interpreter, std::unique_ptr<NodeInterpreterData> &data, const ValueType &v, uint32_t receiverIndex, uint32_t group = 0) const;
+        virtual void interpretRead(NodeInterpreterStateBase &interpreter, ValueType &retVal, std::unique_ptr<NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group = 0) const;
+        virtual void interpretWrite(NodeInterpreterStateBase &interpreter, std::unique_ptr<NodeInterpreterData> &data, const ValueType &v, uint32_t receiverIndex, uint32_t group = 0) const;
 
         virtual void generate(CodeGenerator &generator, std::unique_ptr<CodeGeneratorData> &data, uint32_t flowIn, uint32_t group = 0) const;
         virtual CodeGen::Statement generateRead(CodeGenerator &generator, std::unique_ptr<CodeGeneratorData> &data, uint32_t providerIndex, uint32_t group = 0) const;

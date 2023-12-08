@@ -16,6 +16,10 @@
 
 #include "Madgine/behavior.h"
 
+#include "Generic/execution/lifetime.h"
+
+#include "Madgine/behaviortracker.h"
+
 namespace Engine {
 namespace Scene {
     namespace Entity {
@@ -93,9 +97,53 @@ namespace Scene {
             void clearComponents();
             void relocateComponent(EntityComponentHandle<EntityComponentBase> newIndex);
 
+            struct EntityScope {
 
-            void addBehavior(Behavior behavior);
-            std::vector<Behavior> &behaviors();
+                template <typename Rec>
+                struct receiver : Execution::algorithm_receiver<Rec> {
+
+                    template <typename O>
+                    friend bool tag_invoke(Execution::resolve_var_d_t, receiver &rec, std::string_view name, O &out)
+                    {
+                        if (name == "Entity") {
+                            out = rec.mEntity;
+                            return true;
+                        } else {
+                            return Execution::resolve_var_d(rec.mRec, name, out);
+                        }
+                    }
+
+                    Entity *mEntity;
+                };
+
+                template <typename Inner>
+                struct sender : Execution::algorithm_sender<Inner> {
+                    template <typename Rec>
+                    friend auto tag_invoke(Execution::connect_t, sender &&sender, Rec &&rec)
+                    {
+                        return Execution::algorithm_state<Inner, receiver<Rec>> { std::forward<Inner>(sender.mInner), std::forward<Rec>(rec), sender.mEntity };
+                    }
+
+                    Inner mInner;
+                    Entity *mEntity;
+                };
+
+                template <typename Inner>
+                friend auto operator|(Inner &&inner, EntityScope &&scope)
+                {
+                    return sender<Inner> { {}, std::forward<Inner>(inner), scope.mEntity };
+                }
+
+                Entity *mEntity;
+            };
+
+            template <typename Algorithm>
+            void addBehavior(Algorithm &&algorithm)
+            {
+                mLifetime.attach(Execution::just(ArgumentList {}) | std::forward<Algorithm>(algorithm) | EntityScope { this } | mBehaviorTracker);
+            }
+
+            BehaviorTracker::AccessGuard behaviors() const;
 
             bool isLocal() const;
 
@@ -105,6 +153,7 @@ namespace Scene {
             const SceneManager &sceneMgr() const;
 
             friend struct SyncableEntityComponentBase;
+            friend struct SceneManager;
 
         public:
             std::string mName;
@@ -113,16 +162,14 @@ namespace Scene {
             Serialize::StreamResult readComponent(Serialize::FormattedSerializeStream &in, EntityComponentOwningHandle<EntityComponentBase> &handle);
             const char *writeComponent(Serialize::FormattedSerializeStream &out, const EntityComponentOwningHandle<EntityComponentBase> &comp) const;
 
-            Serialize::StreamResult readBehavior(Serialize::FormattedSerializeStream &in, Behavior &behavior);
-            const char *writeBehavior(Serialize::FormattedSerializeStream &out, const Behavior &behavior) const;
-
             bool mLocal;
 
             SERIALIZABLE_CONTAINER(mComponents, mutable_set<EntityComponentOwningHandle<EntityComponentBase>, std::less<>>, ParentFunctor<&Entity::handleEntityEvent>);
 
-            std::vector<Behavior> mBehaviors;
-
             SceneManager &mSceneManager;
+
+            Execution::Lifetime mLifetime;
+            BehaviorTracker mBehaviorTracker;
         };
 
     }

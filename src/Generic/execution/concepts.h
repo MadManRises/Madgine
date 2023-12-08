@@ -41,6 +41,9 @@ namespace Execution {
     inline constexpr get_context_t get_context;
 
     struct unstoppable_token {
+        operator std::stop_token() {
+            return {};
+        }
     };
 
     struct get_stop_token_t {
@@ -49,7 +52,7 @@ namespace Execution {
         requires(!tag_invocable<get_stop_token_t, T&>)
         auto operator()(T &) const
         {
-            return std::stop_token {};
+            return unstoppable_token {};
         }
 
         template <typename T>
@@ -103,10 +106,13 @@ namespace Execution {
 
         Rec mRec;
 
-        template <typename CPO>
-        friend decltype(auto) tag_invoke(CPO f, algorithm_receiver &rec)
+        template <typename CPO, typename... Args>
+        requires(is_tag_invocable_v<CPO, Rec&, Args...>)
+        friend auto tag_invoke(CPO f, algorithm_receiver &rec, Args&&... args) 
+            noexcept(is_nothrow_tag_invocable_v<CPO, Rec &, Args...>)
+            -> tag_invoke_result_t<CPO, Rec &, Args...>
         {
-            return f(rec.mRec);
+            return tag_invoke(f, rec.mRec, std::forward<Args>(args)...);
         }
     };
 

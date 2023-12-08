@@ -1,7 +1,6 @@
 #include "behaviorlib.h"
 
+#include "Modules/uniquecomponent/uniquecomponentcollector.h"
 #include "behaviorcollector.h"
-#include "Modules/uniquecomponent/uniquecomponentregistry.h"
 
-DEFINE_UNIQUE_COMPONENT(Engine, Behavior)
-
+DEFINE_UNIQUE_COMPONENT(Engine, BehaviorList)

@@ -4,8 +4,6 @@
 
 #include "nodebase.h"
 
-#include "Madgine/behavior.h"
-
 namespace Engine {
 namespace NodeGraph {
 
@@ -84,12 +82,7 @@ namespace NodeGraph {
         std::vector<DataInPinPrototype> mDataInPins;
         std::vector<DataOutPinPrototype> mDataOutPins;
 
-        auto interpret(const ArgumentList &args = {}) const
-        {
-            return behavior(args).sender();
-        }
-
-        Behavior behavior(const ArgumentList &args = {}) const;
+        NodeInterpreter interpret() const;
 
     protected:
         std::unique_ptr<NodeBase> createNode(std::string_view name);

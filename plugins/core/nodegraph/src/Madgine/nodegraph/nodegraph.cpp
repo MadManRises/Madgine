@@ -214,8 +214,7 @@ namespace NodeGraph {
             mDataReceiverPins.clear();
             std::transform(std::make_move_iterator(receiverPins.begin()), std::make_move_iterator(receiverPins.end()), std::back_inserter(mDataReceiverPins),
                 [](std::optional<DataReceiverPinPrototype> &&pin) { return DataReceiverPinPrototype { std::move(*pin) }; });
-
-        } 
+        }
         return {};
     }
 
@@ -842,6 +841,11 @@ namespace NodeGraph {
         }
     }
 
+    NodeInterpreter NodeGraph::interpret() const
+    {
+        return { this };
+    }
+
     std::unique_ptr<NodeBase> NodeGraph::createNode(std::string_view name)
     {
         return NodeRegistry::get(NodeRegistry::sComponentsByName().at(name)).construct(*this);
@@ -868,10 +872,6 @@ namespace NodeGraph {
         write(out, node->className(), "type");
 
         return "Node";
-    }
-
-    Behavior NodeGraph::behavior(const ArgumentList& args) const {
-        return Behavior { std::make_unique<NodeInterpreterState>(this, args) };
     }
 
 }

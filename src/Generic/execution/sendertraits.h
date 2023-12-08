@@ -22,7 +22,10 @@ namespace Execution {
     };
 
     template <fixed_string Name>
-    struct variable_type;
+    struct variable_name_tag;
+
+    template <fixed_string Name>
+    using variable_type = TaggedPlaceholder<variable_name_tag<Name>, 0>;
 
     template <size_t I>
     struct dynamic_argument_type {
@@ -62,7 +65,7 @@ namespace Execution {
         static constexpr bool constant = false;
         using argument_types = type_pack<std::vector<int>, algorithm<signature<ValueType>>>;
 
-        static constexpr auto &algorithm = Execution::for_each;
+        using algorithm = Execution::for_each_t;
     };
 
     template <>
@@ -70,7 +73,7 @@ namespace Execution {
         static constexpr bool constant = false;
         using argument_types = type_pack<pred_sender<signature<ValueType>>, algorithm<signature<ValueType>>>;
 
-        static constexpr auto &algorithm = Execution::let_value;
+        using algorithm = Execution::let_value_t;
     };
 
     template <>
@@ -78,7 +81,7 @@ namespace Execution {
         static constexpr bool constant = true;
         using argument_types = type_pack<Execution::just_t::sender<>, ValueType>;
 
-        static constexpr auto &algorithm = Execution::Variable<"Name">;
+        using algorithm = Execution::Variable_t::Inner<"Name">;
 
         using exposedVariables = type_pack<variable<"Name", dynamic_argument_type<1>>>;
         using dynamicVariableNames = type_pack<auto_holder<fixed_string { "Name" }>>;
@@ -89,7 +92,7 @@ namespace Execution {
         static constexpr bool constant = true;
         using argument_types = type_pack<>;
 
-        static constexpr auto &algorithm = Execution::read_var<variable_type<"Name"> &, "Name">;
+        using algorithm = Execution::read_var_t::Inner<"Name", variable_type<"Name"> &>;
 
         using dynamicVariableNames = type_pack<auto_holder<fixed_string { "Name" }>>;
     };
@@ -99,7 +102,7 @@ namespace Execution {
         static constexpr bool constant = false;
         using argument_types = type_pack<pred_sender<signature<ValueType>>>;
 
-        static constexpr auto &algorithm = Execution::write_var<"Name">;
+        using algorithm = Execution::write_var_t::Inner<"Name">;
 
         using dynamicVariableNames = type_pack<auto_holder<fixed_string { "Name" }>>;
     };
@@ -110,7 +113,7 @@ namespace Execution {
         using argument_types = type_pack<>;
         using variadic = type_pack<succ_sender>;
 
-        static constexpr auto &algorithm = Execution::sequence;
+        using algorithm = Execution::sequence_t;
     };
 
     template <>
@@ -118,7 +121,7 @@ namespace Execution {
         static constexpr bool constant = true;
         using argument_types = type_pack<ValueType>;
 
-        static constexpr auto &algorithm = Execution::just;
+        using algorithm = Execution::just_t;
     };
 
     template <>
@@ -126,7 +129,7 @@ namespace Execution {
         static constexpr bool constant = false;
         using argument_types = type_pack<pred_sender<signature<ValueType>>, ValueType>;
 
-        static constexpr auto &algorithm = Execution::assign;
+        using algorithm = Execution::assign_t;
     };
 
     template <typename Sender>
@@ -164,14 +167,14 @@ namespace Execution {
     };
 
     template <typename T, fixed_string Name>
-    struct typed_sender_traits<Execution::read_var_t::sender<T, Name>> {
+    struct typed_sender_traits<Execution::read_var_t::sender<Name, T>> {
         using Algorithm = Execution::read_var_t;
 
         using NameMappings = type_pack<name_mapping<"Name", Name>>;
     };
 
     template <typename Sender, fixed_string Name>
-    struct typed_sender_traits<Execution::write_var_t::sender<Sender, Name>> {
+    struct typed_sender_traits<Execution::write_var_t::sender<Name, Sender>> {
         using Algorithm = Execution::write_var_t;
 
         using Pred = Sender;

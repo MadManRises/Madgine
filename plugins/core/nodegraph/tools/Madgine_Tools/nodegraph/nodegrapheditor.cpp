@@ -38,6 +38,8 @@
 
 #include "Madgine/nodegraph/nodes/util/graphbuilder.h"
 
+#include "Madgine/behavior.h"
+
 UNIQUECOMPONENT(Engine::Tools::NodeGraphEditor);
 
 METATABLE_BEGIN_BASE(Engine::Tools::NodeGraphEditor, Engine::Tools::ToolBase)
@@ -771,7 +773,7 @@ namespace Tools {
         };
 
         auto graph = [&](auto &cont) {
-            return read_var<int &, "test">()
+            return read_var<"test", int &>()
                 | let_value([&](auto &&a) { return for_each(cont, [&](auto &i) { return inner(a, i); }); })
                 | Variable<"test">(12);
         };
@@ -819,7 +821,7 @@ namespace Tools {
                 }
 
                 if (ImGui::MenuItem("Debug", "", false)) {
-                    Execution::detach(mGraph.interpret({ ValueType { 2 } }) | Execution::then([]() { LOG("SUCCESS"); }));
+                    Execution::detach(Execution::just(2) | Behavior { mGraph.interpret() } | Execution::Variable<"Foo">(std::string_view { "Bar" }) | Execution::then([]() { LOG("SUCCESS"); }));
                 }
 
                 if (ImGui::BeginMenu("Test")) {

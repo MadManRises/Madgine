@@ -410,9 +410,14 @@ namespace Tools {
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu(IMGUI_ICON_PLUS " Add Behavior")) {
-                for (auto [name, index] : BehaviorRegistry::sComponentsByName()) {
-                    if (ImGui::MenuItem(name.data())) {
-                        entity->addBehavior(BehaviorRegistry::get(index).construct(nullptr));
+                for (auto [name, index] : BehaviorListRegistry::sComponentsByName()) {
+                    if (ImGui::BeginMenu(name.data())) {
+                        for (auto [innerName, innerIndex] : BehaviorListRegistry::get(index).sComponentsByName()) {
+                            if (ImGui::MenuItem(innerName.data())) {
+                                entity->addBehavior(BehaviorListRegistry::get(index).create(innerIndex));
+                            }
+                        }
+                        ImGui::EndMenu();
                     }
                 }
                 ImGui::EndMenu();
@@ -505,21 +510,29 @@ namespace Tools {
             }*/
         }
 
-        for (Behavior &behavior : entity->behaviors()) {
-            
-            ImGui::BeginGroupPanel(behavior.name().data());
-            if (ImGui::BeginTable("columns", 2, ImGuiTableFlags_Resizable)) {
-                mInspector->drawMembers(&behavior);
-                ImGui::EndTable();
+        for (BehaviorTrackerState *behavior : entity->behaviors()) {
+            bool visible = true;
+            if (behavior->mContext.mParent)
+                visible = ImGui::BeginChild(reinterpret_cast<ImGuiID>(behavior->mContext.mParent), { 0, 0 }, true);
+            if (visible) {
+                visible = ImGui::BeginChild(reinterpret_cast<ImGuiID>(behavior), { 0, 0 }, true);
+                if (visible) {
+                    behavior->visitState([](const Execution::StateDescriptor &desc) {
+                        std::visit(overloaded {
+                                       [](const Execution::State::Text &text) {
+                                           ImGui::Text(text.mText);
+                                       } },
+                            desc);
+                    });
+                }
+                ImGui::EndChild();
             }
-
-            ImGui::ItemSize({ ImGui::GetItemRectSize().x, 0 });
-
-            ImGui::EndGroupPanel();
+            if (behavior->mContext.mParent)
+                ImGui::EndChild();
 
             if (ImGui::BeginPopupCompoundContextItem()) {
-                if (ImGui::MenuItem((IMGUI_ICON_X " Delete " + std::string { behavior.name() }).c_str())) {
-                    throw 0;
+                if (ImGui::MenuItem((IMGUI_ICON_X " Stop " + std::string { behavior->name() }).c_str())) {
+                    behavior->stop();
                 }
                 ImGui::EndPopup();
             }

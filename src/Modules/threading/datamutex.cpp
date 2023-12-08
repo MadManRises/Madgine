@@ -133,7 +133,7 @@ namespace Threading {
     {
         if (!unrollWrite()) {
             mMutex.unlock();
-            if (mReadQueue.empty()) {
+            if (!mReadQueue.empty()) {
                 if (mMutex.try_lock_shared()) {
                     if (!unrollRead())
                         mMutex.unlock_shared();

@@ -14,26 +14,46 @@ namespace UniqueComponent {
         }
     };
 
-    template <typename Base, typename... Args>
+    template <typename R, typename... Args>
 	struct ConstructorImpl {
         template <typename T>
         ConstructorImpl(type_holder_t<T>)
-            : mCtor([](Args &&...args) -> std::unique_ptr<Base>{
+            : mCtor([](Args &&...args) -> R{
                 return std::make_unique<T>(std::forward<Args>(args)...);
             })
         {
         }
 
-        std::unique_ptr<Base> construct(Args&&... args) const
+        R construct(Args&&... args) const
         {
             return mCtor(std::forward<Args>(args)...);
         }
 
-        std::unique_ptr<Base> (*mCtor)(Args&&...);
+        R (*mCtor)(Args&&...);
     };
 
     template <typename... Args>
     using Constructor = ConstructorImpl<Placeholder<0>, Args...>;
+
+
+    template <typename R, typename... Args>
+	struct FactoryImpl {
+        template <typename T>
+        FactoryImpl(type_holder_t<T>)
+            : mFactory(T {})
+        {
+        }
+
+        R create(Args&&... args) const
+        {
+            return mFactory(std::forward<Args>(args)...);
+        }
+
+        R (*mFactory)(Args&&...);
+    };
+
+    template <typename... Args>
+    using Factory = FactoryImpl<Placeholder<0>, Args...>;
 
 }
 }

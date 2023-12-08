@@ -436,7 +436,7 @@ namespace NodeGraph {
         }
     }
 
-    void NodeBase::setupInterpret(NodeInterpreterState &interpreter, std::unique_ptr<NodeInterpreterData> &data) const
+    void NodeBase::setupInterpret(NodeInterpreterStateBase &interpreter, std::unique_ptr<NodeInterpreterData> &data) const
     {
     }
 
@@ -445,12 +445,12 @@ namespace NodeGraph {
         throw 0;
     }
 
-    void NodeBase::interpretRead(NodeInterpreterState &interpreter, ValueType &retVal, std::unique_ptr<NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group) const
+    void NodeBase::interpretRead(NodeInterpreterStateBase &interpreter, ValueType &retVal, std::unique_ptr<NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group) const
     {
         throw 0;
     }
 
-    void NodeBase::interpretWrite(NodeInterpreterState &interpreter, std::unique_ptr<NodeInterpreterData> &data, const ValueType &v, uint32_t receiverIndex, uint32_t group) const
+    void NodeBase::interpretWrite(NodeInterpreterStateBase &interpreter, std::unique_ptr<NodeInterpreterData> &data, const ValueType &v, uint32_t receiverIndex, uint32_t group) const
     {
         throw 0;
     }

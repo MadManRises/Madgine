@@ -34,7 +34,6 @@ namespace Input {
         : mApp(app)
         , mWindow(window)
         , mHandlers(*this)
-        , mFrameClock(std::chrono::steady_clock::now())
     {
         window.taskQueue()->addSetupSteps(
             [this]() { return callInit(); },

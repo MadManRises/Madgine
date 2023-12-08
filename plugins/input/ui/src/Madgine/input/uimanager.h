@@ -70,7 +70,6 @@ namespace Input {
         Vector2 mKeptCursorPosition;
         bool mKeepingCursorPos = false;
 
-        IntervalClock<> mFrameClock;
     };
 }
 }

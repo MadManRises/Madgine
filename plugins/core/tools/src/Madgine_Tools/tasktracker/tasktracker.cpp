@@ -62,7 +62,6 @@ namespace Tools {
             void *hoveredId = nullptr;
             bool renderHovered = true;
             Debug::StackTrace<1> hoveredTraceback;
-            Engine::Threading::DataMutex *hoveredMutex = nullptr;
 
             std::chrono::high_resolution_clock::time_point timeAreaBegin = mStart + std::chrono::nanoseconds { mScroll };
             std::chrono::high_resolution_clock::time_point timeAreaEnd = timeAreaBegin + std::chrono::nanoseconds { static_cast<long long>(1000000000 / mZoom) };
@@ -77,26 +76,6 @@ namespace Tools {
                 Rect2 threadPlotRect = beginPlot();
 
                 isHovered |= ImGui::IsItemHovered(); // Hovered
-
-                struct MutexData {
-                    AccessMode mMode;
-                    bool mLocked = false;
-                    float mLockStart;
-                };
-                std::map<Engine::Threading::DataMutex *, MutexData> mutexData;
-
-                auto plotMutex = [&](float from, float to, AccessMode mode, Engine::Threading::DataMutex *mutex) {
-                    to = std::max(to, from + 1.0f);
-
-                    ImU32 color = mode == AccessMode::WRITE ? IM_COL32(255, 0, 0, 255) : IM_COL32(0, 0, 255, 255);
-                    draw_list->AddRectFilled({ threadPlotRect.mTopLeft.x + from, threadPlotRect.mTopLeft.y }, { threadPlotRect.mTopLeft.x + to, threadPlotRect.bottom() }, color);
-                    ImGui::SetCursorScreenPos({ threadPlotRect.mTopLeft.x + from, threadPlotRect.mTopLeft.y });
-                    ImGui::InvisibleButton("id", { to - from, threadPlotRect.mSize.y }, ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
-
-                    if (ImGui::IsItemHovered()) {
-                        hoveredMutex = mutex;
-                    }
-                };
 
                 ImGui::NextColumn();
 
@@ -212,22 +191,6 @@ namespace Tools {
                         }
                         plots.push({ x, getEventCoordinate(ev.mTimePoint, plotRect.mSize.x), ev.mIdentifier, xs.size() + 1 });
                     } break;
-                    case Debug::Threading::TaskTracker::Event::LOCK_MUTEX: {
-                        MutexData &data = mutexData[ev.mMutex];
-                        assert(!data.mLocked);
-                        data.mLocked = true;
-                        data.mLockStart = getEventCoordinate(ev.mTimePoint, plotRect.mSize.x);
-                        data.mMode = ev.mLockMode;
-                    } break;
-                    case Debug::Threading::TaskTracker::Event::UNLOCK_MUTEX: {
-                        MutexData &data = mutexData[ev.mMutex];
-                        float x = 0.0f;
-                        if (data.mLocked) {
-                            x = data.mLockStart;
-                        }
-                        data.mLocked = false;
-                        plotMutex(x, getEventCoordinate(ev.mTimePoint, plotRect.mSize.x), ev.mLockMode, ev.mMutex);
-                    } break;
                     }
                 }
                 //assert(callDepth > 0 || xs.empty());
@@ -242,12 +205,6 @@ namespace Tools {
                 while (!plots.empty()) {
                     plot(plots.top());
                     plots.pop();
-                }
-
-                for (auto& [mutex, data] : mutexData) {
-                    if (data.mLocked) {
-                        plotMutex(data.mLockStart, plotRect.mSize.x, data.mMode, mutex);
-                    }
                 }
 
                 ImGui::SetCursorScreenPos(keep);
@@ -299,12 +256,6 @@ namespace Tools {
                 for (Debug::TraceBack &tb : hoveredTraceback.calculateReadable()) {
                     ImGui::Text("%s", tb.mFunction);
                 }
-                ImGui::EndTooltip();
-            }
-
-            if (hoveredMutex) {
-                ImGui::BeginTooltip();
-                ImGui::Text("%s", hoveredMutex->name().c_str());
                 ImGui::EndTooltip();
             }
 

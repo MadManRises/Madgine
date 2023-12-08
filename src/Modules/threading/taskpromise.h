@@ -3,12 +3,20 @@
 #include "taskfuture.h"
 #include "taskhandle.h"
 
+#include "Generic/execution/concepts.h"
+
 #if MODULES_ENABLE_TASK_TRACKING
 #    include "../debug/tasktracking/tasktracker.h"
 #endif
 
 namespace Engine {
 namespace Threading {
+
+    template <typename Sender, typename... V>
+    struct TaskAwaitableSenderImpl;
+
+    template <typename Sender>
+    using TaskAwaitableSender = typename Sender::template value_types<type_pack>::prepend<Sender>::instantiate<TaskAwaitableSenderImpl>;
 
     struct TaskFinalSuspend {
         bool await_ready() noexcept { return !mHandle; }
@@ -84,6 +92,16 @@ namespace Threading {
         {
             assert(!mThenReturn);
             mThenReturn = std::move(handle);
+        }
+
+        template <typename T>
+        decltype(auto) await_transform(T &&awaitable)
+        {
+            if constexpr (Execution::Sender<std::remove_reference_t<T>>) {
+                return TaskAwaitableSender<T> { std::forward<T>(awaitable) };
+            } else {
+                return std::forward<T>(awaitable);
+            }
         }
 
         void setQueue(TaskQueue *queue);

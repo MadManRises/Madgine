@@ -62,12 +62,13 @@ namespace Scene {
         //Entity::Entity *makeLocalCopy(Entity::Entity &e);
         Entity::Entity *makeLocalCopy(Entity::Entity &&e);
 
-        void clear();
-
         void pause();
         bool unpause();
         bool isPaused() const;
         const Threading::CustomClock &clock() const;
+
+        IntervalClock<Threading::CustomTimepoint> &simulationClock();        
+        IntervalClock<Threading::CustomTimepoint> &animationClock();
 
         template <typename T>
         T &getComponent()
@@ -112,8 +113,10 @@ namespace Scene {
         } mClock;
 
         Threading::DataMutex mMutex;
+        Execution::Lifetime mLifetime;
 
-        IntervalClock<Threading::CustomTimepoint> mSceneClock;
+        IntervalClock<Threading::CustomTimepoint> mSimulationClock;
+        IntervalClock<Threading::CustomTimepoint> mAnimationClock;
         IntervalClock<std::chrono::steady_clock::time_point> mFrameClock;
 
         ////////////////////////////////////////////// ECS

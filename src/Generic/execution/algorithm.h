@@ -46,6 +46,47 @@ namespace Execution {
 
     inline constexpr just_t just;
 
+    template <typename... T>
+    struct just_error_t {
+
+        template <typename Rec, typename R>
+        struct state : base_state<Rec> {
+
+            void start()
+            {
+                this->mRec.set_error(mError);
+            }
+
+            R mError;
+        };
+
+        template <typename R>
+        struct sender {
+            using result_type = R;
+            template <template <typename...> typename Tuple>
+            using value_types = Tuple<T...>;
+
+            using is_sender = void;
+
+            template <typename Rec>
+            friend auto tag_invoke(connect_t, sender &&sender, Rec &&rec)
+            {
+                return state<Rec, R> { std::forward<Rec>(rec), std::move(sender.mError) };
+            }
+
+            R mError;
+        };
+
+        template <typename R>
+        auto operator()(R && error) const
+        {
+            return sender<R> { std::forward<R>(error) };
+        }
+    };
+
+    template <typename... T>
+    inline constexpr just_error_t<T...> just_error;
+
     struct then_t {
 
         template <typename Rec, typename T>
@@ -54,14 +95,14 @@ namespace Execution {
             template <typename... V>
             void set_value(V &&...values)
             {
-                using V2 = std::invoke_result_t<T, V...>;
+                using V2 = decltype(TupleUnpacker::invoke(mTransform, std::forward<V>(values)...));
                 if constexpr (std::same_as<V2, void>) {
-                    mTransform(std::forward<V>(values)...);
+                    TupleUnpacker::invoke(mTransform, std::forward<V>(values)...);
                     this->mRec.set_value();
                 } else if constexpr (InstanceOf<V2, std::tuple>)
-                    TupleUnpacker::invokeExpand(LIFT(this->mRec.set_value, this), mTransform(std::forward<V>(values)...));
+                    TupleUnpacker::invokeExpand(LIFT(this->mRec.set_value, this), TupleUnpacker::invoke(mTransform, std::forward<V>(values)...));
                 else
-                    this->mRec.set_value(mTransform(std::forward<V>(values)...));
+                    this->mRec.set_value(TupleUnpacker::invoke(mTransform, std::forward<V>(values)...));
             }
 
             T mTransform;
@@ -82,7 +123,7 @@ namespace Execution {
         struct sender : algorithm_sender<Sender> {
 
             template <typename... V>
-            using helper = std::invoke_result_t<T, V...>;
+            using helper = decltype(TupleUnpacker::invoke(std::declval<T>(), std::declval<V>()...));
             using helper_type = typename Sender::template value_types<helper>;
             template <template <typename...> typename Tuple>
             using value_types = typename decltype(return_types_helper<helper_type>())::template instantiate<Tuple>;

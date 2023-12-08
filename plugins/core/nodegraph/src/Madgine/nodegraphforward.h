@@ -10,7 +10,8 @@ namespace NodeGraph {
     struct NodeReceiver;
 
     struct NodeInterpreterData;
-    struct NodeInterpreterState;
+    struct NodeInterpreterStateBase;
+    struct NodeInterpreter;
 
     struct CodeGenerator;
     struct CodeGeneratorData;

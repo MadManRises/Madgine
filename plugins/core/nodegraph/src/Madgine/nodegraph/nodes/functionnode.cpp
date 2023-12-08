@@ -66,7 +66,7 @@ namespace NodeGraph {
         return mFunction->mReturnType;
     }
 
-    void FunctionNode::interpretRead(NodeInterpreterState &interpreter, ValueType &retVal, std::unique_ptr<NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group) const
+    void FunctionNode::interpretRead(NodeInterpreterStateBase &interpreter, ValueType &retVal, std::unique_ptr<NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group) const
     {
         ArgumentList arguments { dataInCount() };
         for (size_t i = 0; i < dataInCount(); ++i) {

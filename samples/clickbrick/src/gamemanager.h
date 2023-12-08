@@ -10,6 +10,8 @@
 
 #include "Generic/intervalclock.h"
 
+#include "Madgine/nativebehaviorcollector.h"
+
 namespace ClickBrick {
 
     struct GameManager : Engine::Input::Handler<GameManager> {
@@ -25,7 +27,6 @@ namespace ClickBrick {
 
         Engine::Threading::Task<void> updateApp();
 
-        void updateBricks(std::chrono::microseconds timeSinceLastFrame);
         void spawnBrick();
 
         void onPointerClick(const Engine::Input::PointerEventArgs &evt) override;
@@ -50,14 +51,15 @@ namespace ClickBrick {
         std::chrono::microseconds mSpawnInterval;
         std::chrono::microseconds mAcc;
         Engine::IntervalClock<Engine::Threading::CustomTimepoint> mSceneClock;
-
-        std::list<Engine::Scene::Entity::EntityPtr> mBricks;
-
         
         Engine::Render::SceneRenderPass mSceneRenderer;
         std::unique_ptr<Engine::Render::RenderTarget> mGameRenderTarget;
     };
 
+    Engine::Behavior Brick(float speed, Engine::Vector3 dir, Engine::Quaternion q);
+
 }
 
 REGISTER_TYPE(ClickBrick::GameManager)
+
+DECLARE_NATIVE_BEHAVIOR(ClickBrick::Brick);

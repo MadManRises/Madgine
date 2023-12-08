@@ -7,32 +7,27 @@
 #include "Madgine/behavior.h"
 #include "Madgine/behaviorcollector.h"
 
-#include "nodegraphloader.h"
-
 namespace Engine {
 namespace NodeGraph {
 
     struct NodeInterpreterData {
         virtual ~NodeInterpreterData() = default;
 
-        virtual bool resolveVar(ValueType &ref, std::string_view name) { return false; }
-        virtual std::map<std::string_view, ValueType> variables() { return {}; }
+        virtual bool readVar(ValueType &ref, std::string_view name) { return false; }
+        virtual bool writeVar(std::string_view name, const ValueType &v) { return false; }
+        virtual std::vector<std::string_view> variables() { return {}; }
     };
 
-    struct MADGINE_NODEGRAPH_EXPORT NodeInterpreterState : BehaviorState<NodeInterpreterState>, VariableScope {
-        NodeInterpreterState() = default;
-        NodeInterpreterState(VariableScope *parent);
-        NodeInterpreterState(const NodeGraph *graph, const ArgumentList &args = {}, VariableScope *parent = nullptr);
-        NodeInterpreterState(NodeGraphLoader::Resource *graph, const ArgumentList &args = {}, VariableScope *parent = nullptr);
-        NodeInterpreterState(std::string_view name, const ArgumentList &args = {}, VariableScope *parent = nullptr);
-        NodeInterpreterState(const NodeInterpreterState &) = delete;
-        NodeInterpreterState(NodeInterpreterState &&) = default;
-        virtual ~NodeInterpreterState() = default;
+    struct MADGINE_NODEGRAPH_EXPORT NodeInterpreterStateBase : Execution::VirtualReceiverBase<InterpretResult> {
+        NodeInterpreterStateBase(const NodeGraph *graph);
+        NodeInterpreterStateBase(const NodeInterpreterStateBase &) = delete;
+        NodeInterpreterStateBase(NodeInterpreterStateBase &&) = default;
+        virtual ~NodeInterpreterStateBase() = default;
 
-        NodeInterpreterState &operator=(const NodeInterpreterState &) = delete;
-        NodeInterpreterState &operator=(NodeInterpreterState &&) = default;
+        NodeInterpreterStateBase &operator=(const NodeInterpreterStateBase &) = delete;
+        NodeInterpreterStateBase &operator=(NodeInterpreterStateBase &&) = default;
 
-        void interpretImpl(Execution::VirtualReceiverBase<InterpretResult> &receiver, uint32_t flowIn) override;
+        void interpretImpl(Execution::VirtualReceiverBase<InterpretResult> &receiver, uint32_t flowIn);
         void interpretImpl(Execution::VirtualReceiverBase<InterpretResult> &receiver, Pin pin);
 
         ASYNC_STUB(interpret, interpretImpl, Execution::make_simple_virtual_sender<InterpretResult>);
@@ -46,36 +41,123 @@ namespace NodeGraph {
         void read(ValueType &retVal, uint32_t dataProvider);
         void write(uint32_t dataReceiver, const ValueType &v);
 
-        void setGraph(const NodeGraph *graph);
         const NodeGraph *graph() const;
 
-        void setArguments(const ArgumentList &args);
-        ArgumentList &arguments();
+        const ArgumentList &arguments() const;
 
         std::unique_ptr<NodeInterpreterData> &data(uint32_t index);
 
-        bool resolveVar(ValueType &result, std::string_view name, bool recursive = true) override;
-        std::map<std::string_view, ValueType> variables() override;
+        virtual bool readVar(ValueType &result, std::string_view name, bool recursive = true);
+        virtual bool writeVar(std::string_view name, const ValueType &v);
+        virtual std::vector<std::string_view> variables();
 
-
-        std::string_view graphName() const;
-
-        void set(NodeGraphLoader::Resource *resource);
-        NodeGraphLoader::Resource *get() const;
+        void start(ArgumentList args);
 
     private:
-        const NodeGraph *mGraph = nullptr;
-
         ArgumentList mArguments;
 
+        const NodeGraph *mGraph;
+
         std::vector<std::unique_ptr<NodeInterpreterData>> mData;
+    };
 
-        VariableScope *mParentScope = nullptr;
+    struct NodeInterpreterReceiver {
 
-        NodeGraphLoader::Handle mGraphHandle;
+        void set_value(ArgumentList arguments)
+        {
+            mState->start(std::move(arguments));
+        }
+
+        void set_done()
+        {
+            mState->set_done();
+        }
+        void set_error(InterpretResult r)
+        {
+            mState->set_error(r);
+        }
+
+        NodeInterpreterStateBase *mState;
+    };
+
+    template <Execution::Sender Inner, typename _Rec>
+    struct NodeInterpreterState : NodeInterpreterStateBase {
+
+        using Rec = _Rec;
+
+        NodeInterpreterState(Inner &&inner, Rec &&rec, const NodeGraph *graph)
+            : NodeInterpreterStateBase { graph }
+            , mState(Execution::connect(std::forward<Inner>(inner), NodeInterpreterReceiver { this }))
+            , mRec(std::forward<Rec>(rec))
+        {
+        }
+
+        void start() {
+            mState.start();
+        }
+
+        virtual void set_done() override
+        {
+            mRec.set_done();
+        }
+        virtual void set_error(InterpretResult r) override
+        {
+            this->mRec.set_error(r);
+        }
+        virtual void set_value() override
+        {
+            this->mRec.set_value(ArgumentList{});
+        }
+
+        bool readVar(ValueType &result, std::string_view name, bool recursive = true) override
+        {
+            if (NodeInterpreterStateBase::readVar(result, name, recursive))
+                return true;
+
+            if (Execution::resolve_var_d(mRec, name, result))
+                return true;
+
+            return false;
+        }
+
+        Execution::connect_result_t<Inner, NodeInterpreterReceiver> mState;
+        Rec mRec;
+    };
+
+    template <Execution::Sender Inner>
+    struct NodeInterpreterSender : Execution::algorithm_sender<Inner> {
+        using result_type = InterpretResult;
+        template <template <typename...> typename Tuple>
+        using value_types = Tuple<ArgumentList>;
+
+        template <typename Rec>
+        friend auto tag_invoke(Execution::connect_t, NodeInterpreterSender &&sender, Rec &&rec)
+        {
+            return NodeInterpreterState<Inner, Rec> { std::forward<Inner>(sender.mInner), std::forward<Rec>(rec), sender.mGraph };
+        }
+
+        Inner mInner;
+        const NodeGraph *mGraph;
+    };
+
+    struct NodeInterpreter {
+
+        template <Execution::Sender Inner>
+        auto operator()(Inner &&inner)
+        {
+            return NodeInterpreterSender<Inner> { {}, std::forward<Inner>(inner), mGraph };
+        }
+
+        template <Execution::Sender Inner>
+        friend auto operator|(Inner &&inner, NodeInterpreter &&interpreter)
+        {
+            return NodeInterpreterSender<Inner> { {}, std::forward<Inner>(inner), interpreter.mGraph };
+        }
+
+        const NodeGraph *mGraph;
     };
 
 }
 }
 
-REGISTER_TYPE(Engine::NodeGraph::NodeInterpreterState);
+REGISTER_TYPE(Engine::NodeGraph::NodeInterpreterStateBase);

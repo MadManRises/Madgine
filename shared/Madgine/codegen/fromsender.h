@@ -80,8 +80,8 @@ struct codegen_connect_t {
         return state { { std::move(sender.mSender), std::forward<Rec>(rec) }, std::forward<Engine::decayed_t<T>>(sender.mInitialValue) };
     }
 
-    template <typename T, Engine::fixed_string Name, typename Rec>
-    friend auto tag_invoke(codegen_connect_t, Engine::Execution::read_var_t::sender<T, Name> &&sender, Rec &&rec)
+    template <Engine::fixed_string Name, typename T, typename Rec>
+    friend auto tag_invoke(codegen_connect_t, Engine::Execution::read_var_t::sender<Name, T> &&sender, Rec &&rec)
     {
         struct state : codegen_base_state<Rec> {
             auto generate()
@@ -92,8 +92,8 @@ struct codegen_connect_t {
         return state { std::forward<Rec>(rec) };
     }
 
-    template <typename Sender, Engine::fixed_string Name, typename Rec>
-    friend auto tag_invoke(codegen_connect_t, Engine::Execution::write_var_t::sender<Sender, Name> &&sender, Rec &&rec)
+    template <Engine::fixed_string Name, typename Sender, typename Rec>
+    friend auto tag_invoke(codegen_connect_t, Engine::Execution::write_var_t::sender<Name, Sender> &&sender, Rec &&rec)
     {
         struct state : codegen_algorithm_state<Sender, Rec> {
             auto generate()
@@ -226,10 +226,10 @@ struct codegen_connect_t {
     }
 
     template <typename Sender, typename Rec>
-    //requires tag_invocable<codegen_connect_t, Sender, Rec>
+    requires tag_invocable<codegen_connect_t, Sender, Rec>
     auto operator()(Sender &&sender, Rec &&rec) const
-    /* noexcept(is_nothrow_tag_invocable_v<codegen_connect_t, Sender, Rec>)
-         -> tag_invoke_result_t<codegen_connect_t, Sender, Rec>*/
+       noexcept(is_nothrow_tag_invocable_v<codegen_connect_t, Sender, Rec>)
+         -> tag_invoke_result_t<codegen_connect_t, Sender, Rec>
     {
         return tag_invoke(*this, std::forward<Sender>(sender), std::forward<Rec>(rec));
     }

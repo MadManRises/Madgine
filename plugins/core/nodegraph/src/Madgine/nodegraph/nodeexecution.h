@@ -19,13 +19,13 @@ namespace Engine {
 namespace NodeGraph {
 
     struct MADGINE_NODEGRAPH_EXPORT NodeInterpretHandleBase {
-        NodeInterpreterState &mInterpreter;
+        NodeInterpreterStateBase &mInterpreter;
 
         void read(const NodeBase &node, ValueType &retVal, uint32_t dataInIndex, uint32_t group = 0);
 
         void write(const NodeBase &node, const ValueType &v, uint32_t dataOutIndex, uint32_t group = 0);
 
-        ValueType resolveVar(std::string_view name);
+        ValueType readVar(std::string_view name);
     };
 
     template <typename Node>
@@ -45,7 +45,7 @@ namespace NodeGraph {
         template <fixed_string Name>
         friend ValueType tag_invoke(Execution::resolve_var_t<Name>, NodeInterpretHandle &handle)
         {
-            return handle.resolveVar(handle.mNode.template getDynamicName<Name>());
+            return handle.readVar(handle.mNode.template getDynamicName<Name>());
         }
     };
 
@@ -188,7 +188,7 @@ namespace NodeGraph {
         std::vector<NodeResults> &mResults;
     };
 
-    MADGINE_NODEGRAPH_EXPORT void continueExecution(NodeInterpreterState &interpreter, const NodeBase &node, Execution::VirtualReceiverBase<InterpretResult> &receiver);
+    MADGINE_NODEGRAPH_EXPORT void continueExecution(NodeInterpreterStateBase &interpreter, const NodeBase &node, Execution::VirtualReceiverBase<InterpretResult> &receiver);
 
     template <typename Node>
     struct NodeReceiver : NodeExecutionReceiver<Node> {

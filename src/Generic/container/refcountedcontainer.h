@@ -146,7 +146,7 @@ public:
 
         pointer operator->() const
         {
-            return &*mIt;
+            return &static_cast<reference>(*mIt);
         }
 
         decltype(auto) get_block() const
@@ -397,6 +397,11 @@ public:
     size_t size() const
     {
         return mData.size();
+    }
+
+    bool empty() const
+    {
+        return mData.empty();
     }
 
 private:

@@ -10,20 +10,11 @@
 
 #include "Madgine/debug/debugger.h"
 
-#include "Meta/keyvalue/metatable_impl.h"
-
-NAMED_UNIQUECOMPONENT(NodeGraph, Engine::NodeGraph::NodeInterpreterState);
-
-METATABLE_BEGIN(Engine::NodeGraph::NodeInterpreterState)
-PROPERTY(Graph, get, set)
-READONLY_PROPERTY(Variables, variables)
-METATABLE_END(Engine::NodeGraph::NodeInterpreterState)
-
 namespace Engine {
 namespace NodeGraph {
 
     struct NodeDebugLocation : Debug::DebugLocation {
-        NodeDebugLocation(const NodeBase *node, NodeInterpreterState *interpreter)
+        NodeDebugLocation(const NodeBase *node, NodeInterpreterStateBase *interpreter)
             : mNode(node)
             , mInterpreter(interpreter)
         {
@@ -42,54 +33,39 @@ namespace NodeGraph {
 
         virtual std::map<std::string_view, ValueType> localVariables() const override
         {
-            return mInterpreter->variables();
+            std::map<std::string_view, ValueType> values;
+            for (std::string_view name : mInterpreter->variables()) {
+                mInterpreter->readVar(values.try_emplace(name).first->second, name);
+            }
+            return values;
         }
 
         const NodeBase *mNode;
-        NodeInterpreterState *mInterpreter;
+        NodeInterpreterStateBase *mInterpreter;
     };
 
-    NodeInterpreterState::NodeInterpreterState(VariableScope *parent)
-        : mParentScope(parent)
+    NodeInterpreterStateBase::NodeInterpreterStateBase(const NodeGraph *graph)
+        : mGraph(graph)
     {
+        mData.resize(mGraph->nodes().size());
+
+        for (size_t i = 0; i < mData.size(); ++i) {
+            mGraph->node(i + 1)->setupInterpret(*this, mData[i]);
+        }
     }
 
-    NodeInterpreterState::NodeInterpreterState(const NodeGraph *graph, const ArgumentList &args, VariableScope *parent)
-        : mArguments(args)
-        , mParentScope(parent)
-    {
-        setGraph(graph);
-    }
-
-    NodeInterpreterState::NodeInterpreterState(NodeGraphLoader::Resource *graph, const ArgumentList &args, VariableScope *parent)
-        : mArguments(args)
-        , mParentScope(parent)
-        , mGraphHandle(graph)
-    {
-        mGraphHandle.info()->loadingTask().then([=](bool result) {if (result)
-                setGraph(&*mGraphHandle); }, NodeGraphLoader::getSingleton().loadingTaskQueue());
-    }
-
-    NodeInterpreterState::NodeInterpreterState(std::string_view name, const ArgumentList &args, VariableScope *parent)
-        : mArguments(args)
-        , mParentScope(parent)
-    {
-        mGraphHandle.load(name).then([=](bool result) {if (result)
-                setGraph(&*mGraphHandle); }, NodeGraphLoader::getSingleton().loadingTaskQueue());
-    }
-
-    void NodeInterpreterState::interpretImpl(Execution::VirtualReceiverBase<InterpretResult> &receiver, uint32_t flowIn)
+    void NodeInterpreterStateBase::interpretImpl(Execution::VirtualReceiverBase<InterpretResult> &receiver, uint32_t flowIn)
     {
         interpretImpl(receiver, mGraph->mFlowOutPins[flowIn].mTarget);
     }
 
-    void NodeInterpreterState::interpretImpl(Execution::VirtualReceiverBase<InterpretResult> &receiver, Pin pin)
+    void NodeInterpreterStateBase::interpretImpl(Execution::VirtualReceiverBase<InterpretResult> &receiver, Pin pin)
     {
         Debug::Debugger::getSingleton().stepInto(&receiver, std::make_unique<NodeDebugLocation>(nullptr, this));
         branch(receiver, pin);
     }
 
-    void NodeInterpreterState::branch(Execution::VirtualReceiverBase<InterpretResult> &receiver, Pin pin)
+    void NodeInterpreterStateBase::branch(Execution::VirtualReceiverBase<InterpretResult> &receiver, Pin pin)
     {
 
         const NodeBase *node = nullptr;
@@ -111,7 +87,7 @@ namespace NodeGraph {
               }));
     }
 
-    void NodeInterpreterState::read(ValueType &retVal, Pin pin)
+    void NodeInterpreterStateBase::read(ValueType &retVal, Pin pin)
     {
         if (!pin) {
             throw 0;
@@ -122,77 +98,60 @@ namespace NodeGraph {
         }
     }
 
-    void NodeInterpreterState::write(Pin pin, const ValueType &v)
+    void NodeInterpreterStateBase::write(Pin pin, const ValueType &v)
     {
         mGraph->node(pin.mNode)->interpretWrite(*this, mData[pin.mNode - 1], v, pin.mIndex, pin.mGroup);
     }
 
-    void NodeInterpreterState::read(ValueType &retVal, uint32_t dataProvider)
+    void NodeInterpreterStateBase::read(ValueType &retVal, uint32_t dataProvider)
     {
         read(retVal, mGraph->mDataInPins[dataProvider].mSource);
     }
 
-    void NodeInterpreterState::write(uint32_t dataReceiver, const ValueType &v)
+    void NodeInterpreterStateBase::write(uint32_t dataReceiver, const ValueType &v)
     {
         write(mGraph->mDataOutPins[dataReceiver].mTarget, v);
     }
 
-    void NodeInterpreterState::setGraph(const NodeGraph *graph)
-    {
-        if (mGraph != graph) {
-            mGraph = graph;
-
-            mData.clear();
-            if (mGraph) {
-                mData.resize(mGraph->nodes().size());
-
-                for (size_t i = 0; i < mData.size(); ++i) {
-                    mGraph->node(i + 1)->setupInterpret(*this, mData[i]);
-                }
-            }
-        }
-    }
-
-    const NodeGraph *NodeInterpreterState::graph() const
+    const NodeGraph *NodeInterpreterStateBase::graph() const
     {
         return mGraph;
     }
 
-    void NodeInterpreterState::setArguments(const ArgumentList &args)
-    {
-        mArguments = args;
-    }
-
-    ArgumentList &NodeInterpreterState::arguments()
-    {
-        return mArguments;
-    }
-
-    std::unique_ptr<NodeInterpreterData> &NodeInterpreterState::data(uint32_t index)
+    std::unique_ptr<NodeInterpreterData> &NodeInterpreterStateBase::data(uint32_t index)
     {
         return mData[index - 1];
     }
 
-    bool NodeInterpreterState::resolveVar(ValueType &result, std::string_view name, bool recursive)
+    bool NodeInterpreterStateBase::readVar(ValueType &result, std::string_view name, bool recursive)
     {
         bool gotValue = false;
         for (const std::unique_ptr<NodeInterpreterData> &data : mData) {
             if (data) {
                 bool hadValue = gotValue;
-                gotValue = data->resolveVar(result, name);
+                gotValue = data->readVar(result, name);
                 assert(!hadValue || !gotValue);
             }
         }
-        if (!gotValue && recursive && mParentScope)
-            return mParentScope->resolveVar(result, name);
         return gotValue;
     }
 
-    std::map<std::string_view, ValueType> NodeInterpreterState::variables()
+    bool NodeInterpreterStateBase::writeVar(std::string_view name, const ValueType &v)
     {
-        std::map<std::string_view, ValueType> variables;
-        if (false && mParentScope)
-            variables = mParentScope->variables();
+        bool gotValue = false;
+        for (const std::unique_ptr<NodeInterpreterData> &data : mData) {
+            if (data) {
+                bool hadValue = gotValue;
+                gotValue = data->writeVar(name, v);
+                assert(!hadValue || !gotValue);
+            }
+        }
+        return gotValue;
+    }
+
+    std::vector<std::string_view> NodeInterpreterStateBase::variables()
+    {
+        std::vector<std::string_view> variables;
         for (const std::unique_ptr<NodeInterpreterData> &data : mData) {
             if (data) {
                 std::ranges::move(data->variables(), std::inserter(variables, variables.end()));
@@ -201,22 +160,10 @@ namespace NodeGraph {
         return variables;
     }
 
-    std::string_view NodeInterpreterState::graphName() const
+    void NodeInterpreterStateBase::start(ArgumentList args)
     {
-        return mGraphHandle.name();
-    }
-
-    void NodeInterpreterState::set(NodeGraphLoader::Resource *resource)
-    {
-        setGraph(nullptr);
-        mGraphHandle = resource;
-        mGraphHandle.info()->loadingTask().then([=](bool result) {if (result)
-                setGraph(&*mGraphHandle); }, NodeGraphLoader::getSingleton().loadingTaskQueue());
-    }
-
-    NodeGraphLoader::Resource *NodeInterpreterState::get() const
-    {
-        return mGraphHandle.resource();
+        mArguments = std::move(args);
+        interpretImpl(*this, 0);
     }
 
 }

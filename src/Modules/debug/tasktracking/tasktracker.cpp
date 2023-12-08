@@ -50,18 +50,6 @@ namespace Debug {
             assert(count == 1);
         }
 
-        void TaskTracker::onLock(Engine::Threading::DataMutex *mutex, Engine::AccessMode mode)
-        {
-            std::lock_guard guard { mMutex };
-            mEvents.emplace_back(Event::LOCK_MUTEX, mutex, mode);
-        }
-
-        void TaskTracker::onUnlock(Engine::Threading::DataMutex *mutex, Engine::AccessMode mode)
-        {
-            std::lock_guard guard { mMutex };
-            mEvents.emplace_back(Event::UNLOCK_MUTEX, mutex, mode);
-        }
-
         const std::deque<TaskTracker::Event> &TaskTracker::events() const
         {
             return mEvents;
@@ -85,16 +73,6 @@ namespace Debug {
         void onReturn(const std::coroutine_handle<> &handle, Engine::Threading::TaskQueue *queue)
         {
             queue->mTracker.onReturn(handle.address());
-        }
-
-        void onLock(Engine::Threading::DataMutex *mutex, Engine::AccessMode mode, Engine::Threading::TaskQueue *queue)
-        {
-            queue->mTracker.onLock(mutex, mode);
-        }
-
-        void onUnlock(Engine::Threading::DataMutex *mutex, Engine::AccessMode mode, Engine::Threading::TaskQueue *queue)
-        {
-            queue->mTracker.onUnlock(mutex, mode);
         }
 
         void onResume(const Engine::Threading::TaskHandle &handle)

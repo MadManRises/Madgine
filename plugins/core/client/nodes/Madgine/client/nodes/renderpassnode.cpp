@@ -76,7 +76,7 @@ namespace Render {
 
     struct RenderPassNodeInterpret : NodeGraph::NodeInterpreterData, Render::RenderPass {
 
-        RenderPassNodeInterpret(NodeGraph::NodeInterpreterState &interpreter, NodeGraph::Pin pin)
+        RenderPassNodeInterpret(NodeGraph::NodeInterpreterStateBase &interpreter, NodeGraph::Pin pin)
             : mInterpreter(interpreter)
             , mTargetPin(pin)
         {
@@ -99,7 +99,7 @@ namespace Render {
             return "NodeGraph";
         }
 
-        NodeGraph::NodeInterpreterState &mInterpreter;
+        NodeGraph::NodeInterpreterStateBase &mInterpreter;
         NodeGraph::Pin mTargetPin;
         Render::RenderTarget *mTarget = nullptr;
         size_t mIteration;
@@ -110,7 +110,7 @@ namespace Render {
         throw 0;
     }
 
-    void RenderPassNode::interpretRead(NodeGraph::NodeInterpreterState &interpreter, ValueType &retVal, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group) const
+    void RenderPassNode::interpretRead(NodeGraph::NodeInterpreterStateBase &interpreter, ValueType &retVal, std::unique_ptr<NodeGraph::NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group) const
     {
         if (!data) {
             data = std::make_unique<RenderPassNodeInterpret>(interpreter, flowOutTarget(0, 1));

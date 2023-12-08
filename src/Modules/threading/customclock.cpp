@@ -12,7 +12,7 @@ namespace Threading {
     }
 
     CustomTimepoint::CustomTimepoint(std::chrono::steady_clock::time_point timepoint)
-        : mTimePoint(timepoint)        
+        : mTimePoint(timepoint)
     {
     }
 
@@ -32,9 +32,23 @@ namespace Threading {
         return mTimePoint - other.mTimePoint;
     }
 
+    CustomTimepoint CustomTimepoint::operator+(const std::chrono::steady_clock::duration other) const
+    {
+        return {
+            mTimePoint + other,
+            mClock
+        };
+    }
+
     std::strong_ordering CustomTimepoint::operator<=>(const std::chrono::steady_clock::time_point other)
     {
         return mTimePoint <=> (mClock ? mClock->get(other) : other);
+    }
+
+    std::strong_ordering CustomTimepoint::operator<=>(const CustomTimepoint &other)
+    {
+        assert(mClock == other.mClock);
+        return mTimePoint <=> other.mTimePoint;
     }
 
 }

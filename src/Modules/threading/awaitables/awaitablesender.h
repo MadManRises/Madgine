@@ -9,13 +9,13 @@ namespace Engine {
 namespace Threading {
 
     template <typename Sender, typename... V>
-    struct AwaitableSenderImpl;
+    struct TaskAwaitableSenderImpl;
 
     template <typename Sender>
-    using AwaitableSender = typename Sender::template value_types<type_pack>::prepend<Sender>::instantiate<AwaitableSenderImpl>;
+    using TaskAwaitableSender = typename Sender::template value_types<type_pack>::prepend<Sender>::instantiate<TaskAwaitableSenderImpl>;
 
     template <typename Sender>
-    struct AwaitableReceiver : Execution::execution_receiver<> {
+    struct TaskAwaitableReceiver : Execution::execution_receiver<> {
 
         template <typename... V>
         void set_value(V &&...value)
@@ -34,20 +34,20 @@ namespace Threading {
             mState->set_error(std::forward<R>(result)...);
         }
 
-        AwaitableSender<Sender> *mState;
+        TaskAwaitableSender<Sender> *mState;
     };
 
     template <typename Sender, typename... V>
-    struct AwaitableSenderImpl;
+    struct TaskAwaitableSenderImpl;
 
     template <typename Sender>
-    struct AwaitableSenderImpl<Sender> {
+    struct TaskAwaitableSenderImpl<Sender> {
 
-        using S = Execution::connect_result_t<Sender, AwaitableReceiver<Sender>>;
+        using S = Execution::connect_result_t<Sender, TaskAwaitableReceiver<Sender>>;
         using R = typename Sender::result_type;
 
-        AwaitableSenderImpl(Sender &&sender)
-            : mState(Execution::connect(std::forward<Sender>(sender), AwaitableReceiver<Sender> { {}, this }))
+        TaskAwaitableSenderImpl(Sender &&sender)
+            : mState(Execution::connect(std::forward<Sender>(sender), TaskAwaitableReceiver<Sender> { {}, this }))
         {
         }
 
@@ -101,13 +101,13 @@ namespace Threading {
     };
 
     template <typename Sender, typename V>
-    struct AwaitableSenderImpl<Sender, V> {
+    struct TaskAwaitableSenderImpl<Sender, V> {
 
-        using S = Execution::connect_result_t<Sender, AwaitableReceiver<Sender>>;
+        using S = Execution::connect_result_t<Sender, TaskAwaitableReceiver<Sender>>;
         using R = typename Sender::result_type;
 
-        AwaitableSenderImpl(Sender &&sender)
-            : mState(Execution::connect(std::forward<Sender>(sender), AwaitableReceiver<Sender> { {}, this }))
+        TaskAwaitableSenderImpl(Sender &&sender)
+            : mState(Execution::connect(std::forward<Sender>(sender), TaskAwaitableReceiver<Sender> { {}, this }))
         {
         }
 
@@ -161,10 +161,4 @@ namespace Threading {
     };
 
 }
-}
-
-template <Engine::Execution::Sender Sender>
-auto operator co_await(Sender &&sender)
-{
-    return Engine::Threading::AwaitableSender<Sender> { std::forward<Sender>(sender) };
 }

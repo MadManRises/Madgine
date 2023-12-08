@@ -4,6 +4,7 @@ namespace Engine {
 
 struct Behavior;
 struct BehaviorStateBase;
-struct VariableScope;
+struct BehaviorTracker;
+struct BehaviorTrackerState;
 
 }

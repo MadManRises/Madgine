@@ -23,7 +23,7 @@ TEST(Execution, Basic)
     };
 
     auto graph = [&](std::vector<int> &cont) {
-        return read_var<int &, "test">()
+        return read_var<"test", int &>()
             | let_value([&](int &a) { return for_each(cont, [&](int &i) { return inner(a, i); }); })
             | Variable<"test">(12);
     };

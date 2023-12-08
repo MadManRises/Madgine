@@ -9,8 +9,10 @@
 namespace Engine {
 namespace UniqueComponent {
 
-    template <typename Registry>
+    template <typename _Registry>
     struct Collector {
+        using Registry = _Registry;
+
         typedef typename Registry::Base Base;
 
         Collector()

@@ -13,7 +13,7 @@ namespace Execution {
         using argument_types = type_pack<pred_sender<signature<recursive<int>>>>;
         using variadic = type_pack<pred_sender<signature<recursive<int>, int>>>;
 
-        static constexpr auto &algorithm = typed_then<NodeGraph::Add>;
+        using algorithm = then_t::typed<NodeGraph::Add>;
     };
 
     template <>
@@ -22,7 +22,7 @@ namespace Execution {
         using argument_types = type_pack<pred_sender<signature<recursive<Vector3>>>>;
         using variadic = type_pack<pred_sender<signature<recursive<Vector3>, float>>>;
 
-        static constexpr auto &algorithm = typed_then<NodeGraph::Divide>;
+        using algorithm = then_t::typed<NodeGraph::Divide>;
     };
 
     template <>
@@ -31,7 +31,7 @@ namespace Execution {
         using argument_types = type_pack<pred_sender<signature<ValueType>>>;
         using variadic = type_pack<pred_sender<signature<ValueType>>>;
 
-        static constexpr auto &algorithm = typed_then<NodeGraph::Log>;
+        using algorithm = then_t::typed<NodeGraph::Log>;
     };
 
     template <>
@@ -39,7 +39,7 @@ namespace Execution {
         static constexpr bool constant = true;
         using argument_types = type_pack<pred_sender<signature<Vector3, float>>>;
 
-        static constexpr auto &algorithm = typed_then<NodeGraph::Vector3To4>;
+        using algorithm = then_t::typed<NodeGraph::Vector3To4>;
     };
 
     template <>
@@ -47,7 +47,7 @@ namespace Execution {
         static constexpr bool constant = true;
         using argument_types = type_pack<pred_sender<signature<Vector3>>>;
 
-        static constexpr auto &algorithm = typed_then<NodeGraph::BreakVector3>;
+        using algorithm = then_t::typed<NodeGraph::BreakVector3>;
     };
 
     template <>
@@ -55,7 +55,7 @@ namespace Execution {
         static constexpr bool constant = true;
         using argument_types = type_pack<pred_sender<signature<Vector4>>>;
 
-        static constexpr auto &algorithm = typed_then<NodeGraph::BreakVector4>;
+        using algorithm = then_t::typed<NodeGraph::BreakVector4>;
     };
         
     template <>
@@ -63,7 +63,7 @@ namespace Execution {
         static constexpr bool constant = true;
         using argument_types = type_pack<pred_sender<signature<float, float, float>>>;
 
-        static constexpr auto &algorithm = typed_then<NodeGraph::MakeVector3>;
+        using algorithm = then_t::typed<NodeGraph::MakeVector3>;
     };
 
 }
