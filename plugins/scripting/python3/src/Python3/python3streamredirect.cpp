@@ -14,8 +14,8 @@ namespace Engine {
 namespace Scripting {
     namespace Python3 {
 
-        Python3StreamRedirect::Python3StreamRedirect(std::streambuf *buf)
-            : mBuf(buf)
+        Python3StreamRedirect::Python3StreamRedirect(Lambda<void(std::string_view)> out)
+            : mOut(std::move(out))
         {
         }
 
@@ -47,22 +47,23 @@ namespace Scripting {
 
         int Python3StreamRedirect::write(std::string_view text)
         {
-            if (mBuf)
-                return mBuf->sputn(text.data(), text.size());
-            else {
+            if (mOut) {
+                mOut(text);
+                return text.size();
+            } else {
                 LOG(text);
                 return text.size();
             }
         }
 
-        void Python3StreamRedirect::setBuf(std::streambuf *buf)
+        void Python3StreamRedirect::setOut(Lambda<void(std::string_view)> out)
         {
-            mBuf = buf;
+            mOut = std::move(out);
         }
 
-        std::streambuf *Python3StreamRedirect::buf() const
+        Lambda<void(std::string_view)> Python3StreamRedirect::out() 
         {
-            return mBuf;
+            return std::move(mOut);
         }
 
     }

@@ -1332,4 +1332,12 @@ void SetWindowDockingDir(ImGuiID dockSpaceId, ImGuiDir dir, float ratio, bool ou
     DockContextQueueDock(GImGui, nullptr, node, window, dir, ratio, outer);
 }
 
+void MakeTabVisible(const char *name)
+{
+    ImGuiWindow *window = ImGui::FindWindowByName(name);
+    if (window == NULL || window->DockNode == NULL || window->DockNode->TabBar == NULL)
+        return;
+    window->DockNode->TabBar->NextSelectedTabId = window->TabId;
+}
+
 }

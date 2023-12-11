@@ -241,4 +241,6 @@ bool EnumCombo(const char* name, E *val) {
     return changed;
 }
 
+IMGUI_API void MakeTabVisible(const char *name);
+
 }

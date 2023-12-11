@@ -1,11 +1,13 @@
 #pragma once
 
+#include "Generic/lambda.h"
+
 namespace Engine {
 namespace Scripting {
     namespace Python3 {
 
         struct MADGINE_PYTHON3_EXPORT Python3Lock {
-            Python3Lock(std::streambuf *o);
+            Python3Lock(Lambda<void(std::string_view)> out = {});
             Python3Lock(const Python3Lock &) = delete;
             ~Python3Lock();
 
@@ -26,10 +28,10 @@ namespace Scripting {
             Python3Unlock(const Python3Unlock &) = delete;
             ~Python3Unlock();
 
-            std::streambuf *out() const;
+            Lambda<void(std::string_view)> out();
 
         private:
-            std::streambuf *mStream;
+            Lambda<void(std::string_view)> mOut;
         };
     }
 }

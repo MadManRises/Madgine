@@ -47,27 +47,31 @@ void CoroutineBehaviorState::destroy()
     std::coroutine_handle<CoroutineBehaviorState>::from_promise(*this).destroy();
 }
 
-std::suspend_always CoroutineBehaviorState::initial_suspend() noexcept
+void CoroutineBehaviorState::visit(CallableView<void(const Execution::StateDescriptor &)> visitor)
+{
+}
+
+CoroutineBehaviorState::InitialSuspend CoroutineBehaviorState::initial_suspend() noexcept
 {
     return {};
 }
 
-bool CoroutineBehaviorState::Result::await_ready() noexcept
+bool CoroutineBehaviorState::FinalSuspend::await_ready() noexcept
 {
     return false;
 }
 
-void CoroutineBehaviorState::Result::await_suspend(std::coroutine_handle<CoroutineBehaviorState> handle) noexcept
+void CoroutineBehaviorState::FinalSuspend::await_suspend(std::coroutine_handle<CoroutineBehaviorState> handle) noexcept
 {
     handle.promise().mReceiver->set_value({});
 }
 
-void CoroutineBehaviorState::Result::await_resume() noexcept
+void CoroutineBehaviorState::FinalSuspend::await_resume() noexcept
 {
     throw 0;
 }
 
-CoroutineBehaviorState::Result CoroutineBehaviorState::final_suspend() noexcept
+CoroutineBehaviorState::FinalSuspend CoroutineBehaviorState::final_suspend() noexcept
 {
     return {};
 }
@@ -90,6 +94,25 @@ void CoroutineBehaviorState::set_error(InterpretResult result)
 void CoroutineBehaviorState::set_done()
 {
     mReceiver->set_done();
+}
+
+std::string CoroutineBehaviorState::name() const
+{
+    return mStacktrace.calculateReadable().front().mFunction;
+}
+
+bool CoroutineBehaviorState::InitialSuspend::await_ready() noexcept
+{
+    return false;
+}
+
+void CoroutineBehaviorState::InitialSuspend::await_suspend(std::coroutine_handle<CoroutineBehaviorState> handle) noexcept
+{
+    handle.promise().mStacktrace = Debug::StackTrace<1>::getCurrent(1);
+}
+
+void CoroutineBehaviorState::InitialSuspend::await_resume() noexcept
+{
 }
 
 }

@@ -10,10 +10,19 @@
 
 #include "Modules/uniquecomponent/uniquecomponentcollector.h"
 
+#include "Python3/python3debugger.h"
 #include "Python3/python3env.h"
 #include "Python3/util/python3lock.h"
 
 #include "Generic/execution/execution.h"
+
+#include "Madgine/debug/debugger.h"
+
+#include "Madgine_Tools/texteditor/texteditor.h"
+
+#include "Generic/execution/algorithm.h"
+
+#include "Madgine_Tools/texteditor/textdocument.h"
 
 METATABLE_BEGIN_BASE(Engine::Tools::Python3ImmediateWindow, Engine::Tools::ToolBase)
 METATABLE_END(Engine::Tools::Python3ImmediateWindow)
@@ -38,6 +47,7 @@ namespace Tools {
 
     Threading::Task<bool> Python3ImmediateWindow::init()
     {
+        Debug::Debugger::getSingleton().addListener(this);
 
         mEnv = &Scripting::Python3::Python3Environment::getSingleton();
 
@@ -46,6 +56,8 @@ namespace Tools {
 
     Threading::Task<void> Python3ImmediateWindow::finalize()
     {
+        Debug::Debugger::getSingleton().removeListener(this);
+
         co_await ToolBase::finalize();
     }
 
@@ -58,29 +70,49 @@ namespace Tools {
     {
         if (ImGui::Begin("Python3ImmediateWindow", &mVisible)) {
 
-            ImVec2 size = ImGui::GetContentRegionAvail();
-            size.y -= 30;
+            if (!mPrompt)
+                mPrompt = std::make_unique<InteractivePrompt>(&getTool<TextEditor>(), this);
 
-            ImGui::InputTextMultiline("Log", const_cast<char *>(mCommandLog.str().c_str()), mCommandLog.tellp(), size, ImGuiInputTextFlags_ReadOnly);
-
-            bool exec = false;
-            if (ImGui::InputText("Command", &mCommandBuffer, ImGuiInputTextFlags_EnterReturnsTrue)) {
-                exec = true;
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Go"))
-                exec = true;
-
-            if (exec) {
-                mCommandLog << ">>> " << mCommandBuffer << "\n";
-                {                    
-                    Execution::detach(mEnv->execute(mCommandBuffer, mCommandLog.rdbuf()));
-                }
-                mCommandBuffer.clear();
-                ImGui::SetKeyboardFocusHere(-1);
-            }
+            mPrompt->render();
         }
         ImGui::End();
+    }
+
+    bool Python3ImmediateWindow::pass(Debug::ContextInfo &context)
+    {
+
+        const Scripting::Python3::Python3DebugLocation *location = dynamic_cast<const Scripting::Python3::Python3DebugLocation *>(context.getLocation());
+        if (location) {
+            const Filesystem::Path &path = location->file();
+
+            if (context.mSingleStepping) {
+                if (!path.empty()) {
+                    TextDocument &doc = getTool<TextEditor>().openDocument(path);
+                    doc.goToLine(location->lineNr());
+                } else {
+                    ImGui::MakeTabVisible("Python3ImmediateWindow");
+                }
+                return false;
+            } else {
+                if (!path.empty()) {
+                    TextDocument *doc = getTool<TextEditor>().getDocument(path);
+                    if (doc && doc->hasBreakpoint(location->lineNr())) {
+                        doc->goToLine(location->lineNr());
+                        return false;
+                    }
+                } 
+            }
+        }
+
+        return true;
+    }
+
+    bool Python3ImmediateWindow::interpret(std::string_view command)
+    {
+        Execution::detach(mEnv->execute(command, [this](std::string_view text) {
+            mPrompt->append(text);
+        }) | Execution::finally([this]() { mPrompt->resume(); }));
+        return false;
     }
 
 }

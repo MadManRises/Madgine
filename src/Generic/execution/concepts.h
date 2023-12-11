@@ -40,8 +40,22 @@ namespace Execution {
 
     inline constexpr get_context_t get_context;
 
+    struct get_receiver_t {
+        template <typename T>
+        requires tag_invocable<get_receiver_t, T &>
+        auto operator()(T &t) const
+            noexcept(is_nothrow_tag_invocable_v<get_receiver_t, T &>)
+                -> tag_invoke_result_t<get_receiver_t, T &>
+        {
+            return tag_invoke(*this, t);
+        }
+    };
+
+    inline constexpr get_receiver_t get_receiver;
+
     struct unstoppable_token {
-        operator std::stop_token() {
+        operator std::stop_token()
+        {
             return {};
         }
     };
@@ -49,8 +63,7 @@ namespace Execution {
     struct get_stop_token_t {
 
         template <typename T>
-        requires(!tag_invocable<get_stop_token_t, T&>)
-        auto operator()(T &) const
+        requires(!tag_invocable<get_stop_token_t, T &>) auto operator()(T &) const
         {
             return unstoppable_token {};
         }
@@ -107,9 +120,7 @@ namespace Execution {
         Rec mRec;
 
         template <typename CPO, typename... Args>
-        requires(is_tag_invocable_v<CPO, Rec&, Args...>)
-        friend auto tag_invoke(CPO f, algorithm_receiver &rec, Args&&... args) 
-            noexcept(is_nothrow_tag_invocable_v<CPO, Rec &, Args...>)
+        requires(is_tag_invocable_v<CPO, Rec &, Args...>) friend auto tag_invoke(CPO f, algorithm_receiver &rec, Args &&...args) noexcept(is_nothrow_tag_invocable_v<CPO, Rec &, Args...>)
             -> tag_invoke_result_t<CPO, Rec &, Args...>
         {
             return tag_invoke(f, rec.mRec, std::forward<Args>(args)...);
@@ -143,10 +154,14 @@ namespace Execution {
 
         Rec mRec;
 
-        template <typename CPO>
-        friend decltype(auto) tag_invoke(CPO f, base_state &state)
+        friend Rec &tag_invoke(get_receiver_t, base_state &state)
         {
-            return f(state.mRec);
+            return state.mRec;
+        }
+
+        friend const Rec &tag_invoke(get_receiver_t, const base_state &state)
+        {
+            return state.mRec;
         }
     };
 
@@ -188,10 +203,18 @@ namespace Execution {
 
         State mState;
 
-        template <typename CPO>
-        friend decltype(auto) tag_invoke(CPO f, algorithm_state_helper &state)
+        template <typename CPO, typename... Args>
+        friend auto tag_invoke(CPO f, algorithm_state_helper &state, Args &&...args)
+            -> tag_invoke_result_t<CPO, State &, Args...>
         {
-            return f(state.mState);
+            return f(state.mState, std::forward<Args>(args)...);
+        }
+
+        template <typename CPO, typename... Args>
+        friend auto tag_invoke(CPO f, const algorithm_state_helper &state, Args &&...args)
+            -> tag_invoke_result_t<CPO, const State &, Args...>
+        {
+            return f(state.mState, std::forward<Args>(args)...);
         }
     };
 

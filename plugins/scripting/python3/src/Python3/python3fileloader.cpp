@@ -53,7 +53,7 @@ namespace Scripting {
 
         Threading::Task<bool> Python3FileLoader::loadImpl(PyModulePtr &module, ResourceDataInfo &info, Filesystem::FileEventType event)
         {
-            Python3Lock lock { nullptr };
+            Python3Lock lock {};
 
             if (!module) {
                 module = { info.resource()->name() };
@@ -66,7 +66,7 @@ namespace Scripting {
 
         void Python3FileLoader::unloadImpl(PyModulePtr &module)
         {
-            Python3Lock lock { nullptr };
+            Python3Lock lock {};
             module.reset();
         }
 

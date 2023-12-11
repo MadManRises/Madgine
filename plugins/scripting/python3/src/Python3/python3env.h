@@ -21,19 +21,19 @@ namespace Scripting {
 
             std::string_view key() const override;
 
-            void execute(KeyValueReceiver &receiver, std::string_view command, std::streambuf *out = nullptr);
+            void execute(KeyValueReceiver &receiver, std::string_view command, Lambda<void(std::string_view)> out = {});
             void execute(KeyValueReceiver &receiver, PyCodeObject *code);
 
-            auto execute(std::string_view command, std::streambuf *out = nullptr)
+            auto execute(std::string_view command, Lambda<void(std::string_view)> out = {})
             {
                 auto f = LIFT(execute, this);
-                return Execution::make_virtual_sender<Execution::SimpleState<decltype(f), std::tuple<std::string_view, std::streambuf *>, KeyValueReceiver>, GenericResult, ArgumentList>(std::move(f), std::make_tuple(command, out));
+                return Execution::make_virtual_sender<Execution::SimpleState<decltype(f), std::tuple<std::string_view, Lambda<void(std::string_view)>>, KeyValueReceiver>, GenericResult, ArgumentList>(std::move(f), std::make_tuple(command, std::move(out)));
             }
 
             static PyGILState_STATE lock();
-            static std::streambuf *unlock(PyGILState_STATE state);
-            static void lock(std::streambuf *buf);
-            static std::streambuf *unlock();
+            static Lambda<void(std::string_view)> unlock(PyGILState_STATE state);
+            static void lock(Lambda<void(std::string_view)> out);
+            static Lambda<void(std::string_view)> unlock();
 
             static size_t totalRefCount();
 

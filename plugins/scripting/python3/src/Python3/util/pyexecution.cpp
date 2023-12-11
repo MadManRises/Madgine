@@ -23,7 +23,8 @@ namespace Scripting {
         struct PySuspendException {
             PyObject **mStacktop;
             int mBlock;
-            PyObjectPtr mSender;
+            Lambda<void(KeyValueReceiver &, std::vector<PyFramePtr>, Lambda<void(std::string_view)>)> mCallback;
+            std::vector<PyFramePtr> mFrames;
         };
 
         struct PySuspendExceptionObject {
@@ -44,79 +45,6 @@ namespace Scripting {
             .tp_new = PyType_GenericNew,
         };
 
-        void PyDeallocSender(PyObject *self)
-        // destruct the object
-        {
-            fromPySender(self).~PySenderBase();
-            Py_TYPE(self)->tp_free(self);
-        }
-
-        PyTypeObject PySenderType = {
-            .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
-                           .tp_name
-            = "PySender",
-            .tp_basicsize = sizeof(PyVarObject),
-            .tp_itemsize = 1,
-            .tp_dealloc = &PyDeallocSender,
-            .tp_flags = Py_TPFLAGS_DEFAULT,
-            .tp_doc = "Allows storing any sender within a Python object",
-            .tp_new = PyType_GenericNew,
-        };
-
-        void PySenderReceiver::set_value()
-        {
-            Python3Lock lock { mSender.mOut };
-            evalFrames(*mSender.mReceiver, std::move(mSender.mFrames));
-
-            Py_DECREF(mSender.getSelf());
-        }
-
-        void PySenderReceiver::set_value(const ArgumentList &args)
-        {
-            *static_cast<PyFrameObject *>(mSender.mFrames.front())->f_stacktop++ = toPyObject(args[0]);
-            set_value();
-        }
-
-        void PySenderReceiver::set_error(GenericResult)
-        {
-            throw 0;
-
-            Py_DECREF(mSender.getSelf());
-        }
-
-        void PySenderReceiver::set_done()
-        {
-            throw 0;
-
-            Py_DECREF(mSender.getSelf());
-        }
-
-        void PySenderBase::connectAndStart(KeyValueReceiver &receiver, std::streambuf *out, std::vector<PyFramePtr> outerFrames)
-        {
-            std::ranges::move(outerFrames, std::back_inserter(mFrames));
-            mReceiver = &receiver;
-            mOut = out;
-
-            Py_INCREF(getSelf());
-            start();
-        }
-
-        PyObject *PySenderBase::getSelf()
-        {
-            return reinterpret_cast<PyObject *>(reinterpret_cast<PyVarObject *>(this) - 1);
-        }
-
-        void PySenderBase::addFrame(PyFramePtr frame)
-        {
-            mFrames.push_back(std::move(frame));
-        }
-
-        PySenderBase &fromPySender(PyObject *sender)
-        {
-            assert(sender->ob_type == &PySenderType);
-            return reinterpret_cast<PySenderBase &>(reinterpret_cast<PySenderObject *>(sender)->mSender);
-        }
-
         PyObject *evalFrame(PyFrameObject *frame, int throwExc)
         {
             frame->f_trace_opcodes = true;
@@ -131,7 +59,7 @@ namespace Scripting {
                 suspend.mStacktop = nullptr;
                 suspend.mBlock = 0;
 
-                fromPySender(suspend.mSender).addFrame(PyFramePtr::fromBorrowed(frame));
+                suspend.mFrames.push_back(PyFramePtr::fromBorrowed(frame));
 
                 return value.release();
             }
@@ -160,14 +88,17 @@ namespace Scripting {
                     assert(suspend.mStacktop == nullptr);
                     assert(suspend.mBlock == 0);
 
-                    PyObjectPtr senderObj = std::move(suspend.mSender);
+                    Lambda<void(KeyValueReceiver &, std::vector<PyFramePtr>, Lambda<void(std::string_view)>)> callback = std::move(suspend.mCallback);
+                    std::vector<PyFramePtr> suspendedFrames = std::move(suspend.mFrames);
 
                     Py_DECREF(result);
 
-                    Python3Unlock unlock;                    
+                    Python3Unlock unlock;      
 
-                    PySenderBase &sender = fromPySender(senderObj);
-                    sender.connectAndStart(receiver, unlock.out(), std::move(frames));                    
+                    std::ranges::move(frames, std::back_inserter(suspendedFrames));
+                    frames.clear();
+
+                    callback(receiver, std::move(suspendedFrames), unlock.out());
 
                 } else {
                     if (frames.empty()) {
@@ -216,7 +147,7 @@ namespace Scripting {
             return sUnwindable;
         }
 
-        PyObject *suspend(PyObject *sender)
+        PyObject *suspend(Lambda<void(KeyValueReceiver &, std::vector<PyFramePtr>, Lambda<void(std::string_view)>)> callback)
         {
             assert(stackUnwindable());
 
@@ -224,7 +155,7 @@ namespace Scripting {
             PySuspendException &suspend = reinterpret_cast<PySuspendExceptionObject *>(static_cast<PyObject *>(suspendEx))->mException;
             new (&suspend) PySuspendException;
 
-            suspend.mSender = sender;
+            suspend.mCallback = std::move(callback);
 
             return suspendEx;
         }

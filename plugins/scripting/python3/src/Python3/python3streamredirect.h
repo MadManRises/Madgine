@@ -1,12 +1,14 @@
 #pragma once
 
+#include "Generic/lambda.h"
+
 namespace Engine {
 namespace Scripting {
     namespace Python3 {
 
         struct Python3StreamRedirect {
 
-            Python3StreamRedirect(std::streambuf *buf = nullptr);
+            Python3StreamRedirect(Lambda<void(std::string_view)> out = {});
             Python3StreamRedirect(const Python3StreamRedirect &) = delete;
             ~Python3StreamRedirect();
 
@@ -15,11 +17,11 @@ namespace Scripting {
 
             int write(std::string_view text);
 
-            void setBuf(std::streambuf *buf);
-            std::streambuf *buf() const;
+            void setOut(Lambda<void(std::string_view)> out);
+            Lambda<void(std::string_view)> out();
 
         private:
-            std::streambuf *mBuf;
+            Lambda<void(std::string_view)> mOut;
             std::map<std::string_view, PyObject *> mOldStreams;
         };
 

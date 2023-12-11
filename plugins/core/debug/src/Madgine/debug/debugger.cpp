@@ -19,13 +19,12 @@ namespace Debug {
         return "Debugger";
     }
 
-    void Debugger::yield(Execution::VirtualReceiverBase<type_pack<>> &receiver, void *address)
+    void Debugger::yield(void *address, Lambda<void()> callback)
     {
         ContextInfo &context = getOrCreateContext(address);
-        if (false)
-            context.suspend(receiver);
-        else
-            receiver.set_value();
+        for (DebugListener *listener : mListeners)
+            listener->onSuspend(context);
+        context.suspend(std::move(callback));
     }
 
     void Debugger::stepInto(void *address, std::unique_ptr<DebugLocation> location, void *parent)
@@ -78,9 +77,17 @@ namespace Debug {
         ContextInfo *context = getContext(address);
         if (!context)
             return nullptr;
-        if (context->mStack.empty())
-            return nullptr;
-        return context->mStack.back().mLocation.get();
+        return context->getLocation();
+    }
+
+    void Debugger::addListener(DebugListener *listener)
+    {
+        mListeners.push_back(listener);
+    }
+
+    void Debugger::removeListener(DebugListener *listener)
+    {
+        std::erase(mListeners, listener);
     }
 
     ContextInfo::ContextInfo(FrameInfo info)
@@ -88,21 +95,56 @@ namespace Debug {
         mStack.emplace_back(std::move(info));
     }
 
-    void ContextInfo::suspend(Execution::VirtualReceiverBase<type_pack<>> &receiver)
+    void ContextInfo::suspend(Lambda<void()> callback)
     {
-        mPaused = &receiver;
+        mPaused = std::move(callback);
     }
 
     void ContextInfo::resume()
     {
         assert(mPaused);
-        Execution::VirtualReceiverBase<type_pack<>> *receiver = std::exchange(mPaused, nullptr);
-        receiver->set_value();
+        mSingleStepping = false;
+        Lambda<void()> receiver = std::move(mPaused);
+        receiver();
+    }
+
+    void ContextInfo::step()
+    {
+        assert(mPaused);
+        mSingleStepping = true;
+        Lambda<void()> receiver = std::move(mPaused);
+        receiver();
     }
 
     bool ContextInfo::alive() const
     {
         return !mStack.empty();
+    }
+
+    DebugLocation *ContextInfo::getLocation() const
+    {
+        if (mStack.empty())
+            return nullptr;
+        return mStack.back().mLocation.get();
+    }
+
+    bool Debugger::pass(void *address)
+    {
+        ContextInfo *context = getContext(address);
+        if (!context)
+            return true;
+        return pass(*context);
+    }
+
+    bool Debugger::pass(ContextInfo &context)
+    {
+        bool pass = true;
+
+        for (DebugListener *listener : mListeners) {
+            pass &= listener->pass(context);
+        }
+
+        return pass;
     }
 
 }

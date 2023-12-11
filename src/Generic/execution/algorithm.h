@@ -182,6 +182,89 @@ namespace Execution {
     template <typename T>
     inline constexpr then_t::typed<T> typed_then;
 
+    struct finally_t {
+
+        template <typename Rec, typename F>
+        struct receiver : algorithm_receiver<Rec> {
+
+            template <typename... V>
+            void set_value(V &&...values)
+            {
+                mFinally();
+                this->mRec.set_value(std::forward<V>(values)...);
+            }
+
+            template <typename... R>
+            void set_error(R &&...errors) {
+                mFinally();
+                this->mRec.set_error(std::forward<R>(errors)...);
+            }
+
+            void set_done() {
+                mFinally();
+                this->mRec.set_done();
+            }
+
+            F mFinally;
+        };
+
+        template <typename Sender, typename F>
+        struct sender : algorithm_sender<Sender> {
+
+            template <typename Rec>
+            friend auto tag_invoke(connect_t, sender &&sender, Rec &&rec)
+            {
+                return algorithm_state<Sender, receiver<Rec, F>> { std::forward<Sender>(sender.mSender), std::forward<Rec>(rec), std::forward<F>(sender.mFinally) };
+            }
+
+            Sender mSender;
+            F mFinally;
+        };
+
+        template <typename Sender, typename F>
+        friend auto tag_invoke(finally_t, Sender &&inner, F &&finally)
+        {
+            return sender<Sender, F> { {}, std::forward<Sender>(inner), std::forward<F>(finally) };
+        }
+
+        template <typename Sender, typename F>
+        requires tag_invocable<finally_t, Sender, F>
+        auto operator()(Sender &&sender, F &&finally) const
+            noexcept(is_nothrow_tag_invocable_v<finally_t, Sender, F>)
+                -> tag_invoke_result_t<finally_t, Sender, F>
+        {
+            return tag_invoke(*this, std::forward<Sender>(sender), std::forward<F>(finally));
+        }
+
+        template <typename F>
+        auto operator()(F &&finally) const
+        {
+            return pipable_from_right(*this, std::forward<F>(finally));
+        }
+
+        template <typename F>
+        struct typed {
+            template <typename Sender>
+            requires tag_invocable<finally_t, Sender, F>
+            auto operator()(Sender &&sender, F &&finally = {}) const
+                noexcept(is_nothrow_tag_invocable_v<finally_t, Sender, F>)
+                    -> tag_invoke_result_t<finally_t, Sender, F>
+            {
+                return tag_invoke(finally_t {}, std::forward<Sender>(sender), std::forward<F>(finally));
+            }
+
+            auto operator()(F &&finally = {}) const
+            {
+                return pipable_from_right(finally_t {}, std::forward<F>(finally));
+            }
+        };
+    };
+
+    inline constexpr finally_t finally;
+
+    template <typename F>
+    inline constexpr finally_t::typed<F> typed_finally;
+
     struct then_receiver_t {
 
         template <typename Sender, typename Rec1, typename Rec2>

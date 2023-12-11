@@ -144,8 +144,6 @@ namespace Scripting {
                 return NULL;
             if (PyType_Ready(&PySuspendExceptionType) < 0)
                 return NULL;
-            if (PyType_Ready(&PySenderType) < 0)
-                return NULL;
 
             PyObject *m = PyModule_Create(&PyEngine_module);
             if (m == NULL)
@@ -231,8 +229,7 @@ namespace Scripting {
 
         Python3Environment::~Python3Environment()
         {
-            std::stringstream ss;
-            lock(ss.rdbuf());
+            lock([](std::string_view) {});
 
             sStream.reset("stdout");
             sStream.reset("stderr");
@@ -248,9 +245,9 @@ namespace Scripting {
 
         extern PyFrameObject *sFrame;
 
-        void Python3Environment::execute(KeyValueReceiver &receiver, std::string_view command, std::streambuf *out)
+        void Python3Environment::execute(KeyValueReceiver &receiver, std::string_view command, Lambda<void(std::string_view)> out)
         {
-            Python3Lock lock { out };
+            Python3Lock lock { std::move(out) };
 
             PyObjectPtr code = Py_CompileString(command.data(), "<eval>", Py_single_input);
             if (code) {
@@ -281,27 +278,27 @@ namespace Scripting {
             return handle;
         }
 
-        std::streambuf *Python3Environment::unlock(PyGILState_STATE handle)
+        Lambda<void(std::string_view)> Python3Environment::unlock(PyGILState_STATE handle)
         {
-            std::streambuf *result = sStream.buf();
+            Lambda<void(std::string_view)> result = std::move(sStream.out());
             assert(PyGILState_Check() == 1);
             PyGILState_Release(handle);
             return result;
         }
 
-        void Python3Environment::lock(std::streambuf *buf)
+        void Python3Environment::lock(Lambda<void(std::string_view)> out)
         {
             //assert(PyGILState_Check() == 0);
             PyGILState_STATE handle = PyGILState_Ensure();
             assert(PyGILState_Check() == 1);
             assert(handle == PyGILState_UNLOCKED);
-            sStream.setBuf(buf);
+            sStream.setOut(std::move(out));
         }
 
-        std::streambuf *Python3Environment::unlock()
+        Lambda<void(std::string_view)> Python3Environment::unlock()
         {
-            std::streambuf *result = sStream.buf();
-            sStream.setBuf(nullptr);
+            Lambda<void(std::string_view)> result = sStream.out();
+            sStream.setOut({});
             assert(PyGILState_Check() == 1);
             PyGILState_Release(PyGILState_UNLOCKED);
             return result;

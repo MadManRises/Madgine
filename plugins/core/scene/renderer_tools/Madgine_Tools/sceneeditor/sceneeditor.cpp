@@ -510,29 +510,59 @@ namespace Tools {
             }*/
         }
 
-        for (BehaviorTrackerState *behavior : entity->behaviors()) {
-            bool visible = true;
-            if (behavior->mContext.mParent)
-                visible = ImGui::BeginChild(reinterpret_cast<ImGuiID>(behavior->mContext.mParent), { 0, 0 }, true);
-            if (visible) {
-                visible = ImGui::BeginChild(reinterpret_cast<ImGuiID>(behavior), { 0, 0 }, true);
-                if (visible) {
-                    behavior->visitState([](const Execution::StateDescriptor &desc) {
-                        std::visit(overloaded {
-                                       [](const Execution::State::Text &text) {
-                                           ImGui::Text(text.mText);
-                                       } },
-                            desc);
-                    });
-                }
-                ImGui::EndChild();
+        struct ContextData {
+            ContextData(BehaviorTrackerState *state)
+                : mState(state)
+            {
             }
-            if (behavior->mContext.mParent)
-                ImGui::EndChild();
+
+            static ContextData *addState(BehaviorTrackerState *state, std::list<ContextData> &data, std::map<BehaviorTrackerState *, ContextData *> &mapping)
+            {
+                auto pib = mapping.try_emplace(state, nullptr);
+                if (pib.second) {
+                    if (state->mContext.mParent)
+                        pib.first->second = &addState(state->mContext.mParent, data, mapping)->mChildren.emplace_back(state);
+                    else
+                        pib.first->second = &data.emplace_back(state);
+                }
+                return pib.first->second;
+            };
+
+            void render()
+            {
+                ImGui::BeginGroupPanel(mState->name().data());
+
+                mState->visitState([](const Execution::StateDescriptor &desc) {
+                    std::visit(overloaded {
+                                   [](const Execution::State::Text &text) {
+                                       ImGui::Text(text.mText);
+                                   } },
+                        desc);
+                });
+
+                for (ContextData &data : mChildren)
+                    data.render();
+
+                ImGui::EndGroupPanel();
+            }
+
+            BehaviorTrackerState *mState;
+            std::list<ContextData> mChildren;
+        };
+
+        std::list<ContextData> data;
+        std::map<BehaviorTrackerState *, ContextData *> mapping;
+
+        for (BehaviorTrackerState *state : entity->behaviors()) {
+            ContextData::addState(state, data, mapping);
+        }
+
+        for (ContextData &data : data) {
+            data.render();
 
             if (ImGui::BeginPopupCompoundContextItem()) {
-                if (ImGui::MenuItem((IMGUI_ICON_X " Stop " + std::string { behavior->name() }).c_str())) {
-                    behavior->stop();
+                if (ImGui::MenuItem((IMGUI_ICON_X " Stop " + std::string { data.mState->name() }).c_str())) {
+                    data.mState->stop();
                 }
                 ImGui::EndPopup();
             }
@@ -671,6 +701,5 @@ namespace Tools {
         if (mRender3DCursor)
             Im3D::Arrow3D(IM3D_LINES, 0.3f, ray.point(10.0f), ray.point(20.0f));
     }
-
 }
 }

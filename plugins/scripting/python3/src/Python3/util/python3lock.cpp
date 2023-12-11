@@ -8,9 +8,9 @@ namespace Engine {
 namespace Scripting {
     namespace Python3 {
 
-        Python3Lock::Python3Lock(std::streambuf *o)
+        Python3Lock::Python3Lock(Lambda<void(std::string_view)> out)
         {
-            Python3Environment::lock(o);
+            Python3Environment::lock(std::move(out));
         }
 
         Python3Lock::~Python3Lock()
@@ -35,18 +35,18 @@ namespace Scripting {
         }
 
         Python3Unlock::Python3Unlock()
-            : mStream(Python3Environment::unlock())
+            : mOut(Python3Environment::unlock())
         {
         }
 
         Python3Unlock::~Python3Unlock()
         {
-            Python3Environment::lock(mStream);
+            Python3Environment::lock(std::move(mOut));
         }
 
-        std::streambuf *Python3Unlock::out() const
+        Lambda<void(std::string_view)> Python3Unlock::out()
         {
-            return mStream;
+            return std::move(mOut);
         }
 
     }

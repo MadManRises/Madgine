@@ -1,9 +1,10 @@
 #pragma once
 
+#include "Generic/execution/virtualsender.h"
+#include "Generic/lambda.h"
 #include "Madgine/root/rootcomponentbase.h"
 #include "Madgine/root/rootcomponentcollector.h"
 #include "Meta/keyvalue/virtualscope.h"
-#include "Generic/execution/virtualsender.h"
 
 namespace Engine {
 namespace Debug {
@@ -28,13 +29,25 @@ namespace Debug {
         ContextInfo &operator=(const ContextInfo &) = delete;
         ContextInfo &operator=(ContextInfo &&) = default;
 
-        void suspend(Execution::VirtualReceiverBase<type_pack<>> &receiver);
+        void suspend(Lambda<void()> callback);
         void resume();
-        
+        void step();
+
         bool alive() const;
-        
-        Execution::VirtualReceiverBase<type_pack<>> *mPaused = nullptr;
+
+        DebugLocation *getLocation() const;
+
+        Lambda<void()> mPaused;
         std::deque<FrameInfo> mStack;
+        bool mSingleStepping = false;
+    };
+
+    struct DebugListener {
+        virtual bool pass(ContextInfo &context)
+        {
+            return true;
+        }
+        virtual void onSuspend(ContextInfo &context) { }
     };
 
     struct MADGINE_DEBUGGER_EXPORT Debugger : Root::RootComponent<Debugger> {
@@ -45,41 +58,28 @@ namespace Debug {
 
         virtual std::string_view key() const override;
 
-        void yield(Execution::VirtualReceiverBase<type_pack<>> &receiver, void *address);
-
-        struct YieldState : Execution::VirtualReceiverBase<type_pack<>> {
-
-            YieldState(Debugger *self, void *address)
-                : mSelf(self)
-                , mAddress(address)
-            {
-            }
-
-            void start()
-            {
-                mSelf->yield(*this, mAddress);
-            }
-
-            Debugger *mSelf;
-            void *mAddress;
-        };
-        
-        auto yield(void *address)
-        {
-            return Execution::make_virtual_sender<YieldState, type_pack<>>(this, std::move(address));
-        }
+        void yield(void *address, Lambda<void()> callback);
 
         DebugLocation *getLocation(void *address);
         void stepInto(void *address, std::unique_ptr<DebugLocation> location, void *parent = nullptr);
         void stepOut(void *address);
+
+        bool pass(void *address);
 
         std::deque<ContextInfo> &infos();
         ContextInfo *getContext(void *address);
         ContextInfo &getOrCreateContext(void *address);
         ContextInfo &createContext(void *address, std::unique_ptr<DebugLocation> location = {});
 
+        void addListener(DebugListener *listener);
+        void removeListener(DebugListener *listener);
+
+    protected:
+        bool pass(ContextInfo &context);
+
     private:
         std::deque<ContextInfo> mContexts;
+        std::vector<DebugListener *> mListeners;
     };
 
 }

@@ -43,6 +43,28 @@ struct get_behavior_context_t {
 
 constexpr get_behavior_context_t get_behavior_context;
 
+struct get_behavior_name_t {
+
+    template <typename T>
+    requires(!tag_invocable<get_behavior_name_t, const T &>)
+        std::string
+        operator()(const T &) const
+    {
+        return "<Unknown>";
+    }
+
+    template <typename T>
+    requires tag_invocable<get_behavior_name_t, const T &>
+    auto operator()(const T &t) const
+        noexcept(is_nothrow_tag_invocable_v<get_behavior_name_t, const T &>)
+            -> tag_invoke_result_t<get_behavior_name_t, const T &>
+    {
+        return tag_invoke(*this, t);
+    }
+};
+
+constexpr get_behavior_name_t get_behavior_name;
+
 struct BehaviorTrackerState {
 
     BehaviorTrackerState(BehaviorTrackerContext context)
@@ -50,10 +72,7 @@ struct BehaviorTrackerState {
     {
     }
 
-    virtual std::string_view name()
-    {
-        return "Behavior";
-    }
+    virtual std::string name() const = 0;
 
     void stop()
     {
@@ -77,8 +96,7 @@ struct MADGINE_BEHAVIOR_EXPORT BehaviorTracker {
     struct receiver : Execution::algorithm_receiver<Rec> {
 
         template <typename... V>
-        requires(requires { std::declval<Rec>().set_value(std::declval<V>()...); })
-        void set_value(V &&...value)
+        requires(requires { std::declval<Rec>().set_value(std::declval<V>()...); }) void set_value(V &&...value)
         {
             mState->mContext.mTracker->unregisterState(mState);
             this->mRec.set_value(std::forward<V>(value)...);
@@ -123,6 +141,11 @@ struct MADGINE_BEHAVIOR_EXPORT BehaviorTracker {
         void visitStateImpl(CallableView<void(const Execution::StateDescriptor &)> visitor) override
         {
             Execution::visit_state(this->mState, visitor);
+        }
+
+        virtual std::string name() const override
+        {
+            return get_behavior_name(this->mState);
         }
     };
 

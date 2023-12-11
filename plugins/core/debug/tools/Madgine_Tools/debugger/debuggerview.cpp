@@ -38,11 +38,14 @@ namespace Tools {
     {
         mInspector = &getTool<Inspector>();
 
+        mDebugger.addListener(this);
+
         co_return co_await ToolBase::init();
     }
 
     Threading::Task<void> DebuggerView::finalize()
     {
+        mDebugger.removeListener(this);
 
         co_await ToolBase::finalize();
     }
@@ -50,6 +53,7 @@ namespace Tools {
     void DebuggerView::render()
     {
         bool resume = false;
+        bool step = false;
 
         if (ImGui::Begin("Debug Contexts")) {
             for (Debug::ContextInfo &info : mDebugger.infos()) {
@@ -61,7 +65,7 @@ namespace Tools {
                 else if (info.mPaused)
                     descriptor << " (paused)";
                 if (ImGui::Selectable(descriptor.str().c_str(), mSelectedContext == &info)) {
-                    mSelectedContext = &info;
+                    setCurrentContext(info);
                 }
             }
         }
@@ -78,8 +82,12 @@ namespace Tools {
             } else {
                 if (!mSelectedContext->alive())
                     ImGui::BeginDisabled();
-                if (ImGui::Button("Continue")) {
+                if (ImGui::Button("Resume")) {
                     resume = true;
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Step")) {
+                    step = true;
                 }
                 if (!mSelectedContext->alive())
                     ImGui::EndDisabled();
@@ -121,11 +129,23 @@ namespace Tools {
 
         if (resume)
             mSelectedContext->resume();
+        if (step)
+            mSelectedContext->step();
     }
 
     void DebuggerView::renderMenu()
     {
         ToolBase::renderMenu();
+    }
+
+    void DebuggerView::setCurrentContext(Debug::ContextInfo &context)
+    {
+        mSelectedContext = &context;
+    }
+
+    void DebuggerView::onSuspend(Debug::ContextInfo &context)
+    {
+        setCurrentContext(context);        
     }
 
     std::string_view DebuggerView::key() const

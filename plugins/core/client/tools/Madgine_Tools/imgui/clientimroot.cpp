@@ -210,26 +210,13 @@ namespace Tools {
         io.KeyMap[ImGuiKey_Space] = Input::Key::Space;
         io.KeyMap[ImGuiKey_Enter] = Input::Key::Return;
         io.KeyMap[ImGuiKey_Escape] = Input::Key::Escape;
-        io.KeyMap[ImGuiKey_KeyPadEnter] = Input::Key::Return;
+        //io.KeyMap[ImGuiKey_KeyPadEnter] = Input::Key::Return;
         io.KeyMap[ImGuiKey_A] = Input::Key::A;
         io.KeyMap[ImGuiKey_C] = Input::Key::C;
         io.KeyMap[ImGuiKey_V] = Input::Key::V;
         io.KeyMap[ImGuiKey_X] = Input::Key::X;
         io.KeyMap[ImGuiKey_Y] = Input::Key::Y;
         io.KeyMap[ImGuiKey_Z] = Input::Key::Z;
-
-        static const ImWchar icons_ranges[] = { 0xf100, 0xf1ff, 0 };
-
-        ImFontConfig config;
-        config.MergeMode = true;
-        config.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_LoadColor;
-        //config.GlyphMinAdvanceX = 13.0f;
-        config.GlyphOffset = { 0.0f, 3.0f };
-
-        io.Fonts->AddFontDefault();
-        co_await Engine::Resources::ResourceManager::getSingleton().state();
-        io.Fonts->AddFontFromFileTTF(Engine::Resources::ResourceManager::getSingleton().findResourceFile("icons.ttf").c_str(), 13, &config, icons_ranges);
-        io.Fonts->Build();
 
         Im3D::GetIO().mFetchFont = [](const char *fontName) {
             Render::FontLoader::Handle font;
@@ -247,13 +234,6 @@ namespace Tools {
             }
         };
 
-        unsigned char *pixels;
-        int width, height;
-        io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-        co_await mFontTexture.create(Render::TextureType_2D, Render::FORMAT_RGBA8, { width, height }, { pixels, static_cast<size_t>(width * height * 4) });
-        
-        io.Fonts->SetTexID(mFontTexture->resource());
-
         ImGui::FilesystemPickerOptions *filepickerOptions = ImGui::GetFilesystemPickerOptions();
 
         filepickerOptions->mIconLookup = [](const Filesystem::Path &path, bool isDir) {
@@ -263,19 +243,31 @@ namespace Tools {
                 return IMGUI_ICON_FILE " ";
         };
 
-        /* const auto toLinear = [](float x) {
-            if (x <= 0.04045f) {
-                return x / 12.92f;
-            } else {
-                return std::pow((x + 0.055f) / 1.055f, 2.4f);
-            }
-        };
-        for (auto &c : std::span { ImGui::GetStyle().Colors, size_t(ImGuiCol_COUNT) }) {
-            c = { toLinear(c.x), toLinear(c.y), toLinear(c.z), c.w };
-        }*/
+        co_await Engine::Resources::ResourceManager::getSingleton().state();
 
         if (!co_await ImRoot::init())
             co_return false;
+
+        io.FontDefault = io.Fonts->AddFontDefault();
+
+        static const ImWchar icons_ranges[] = { 0xf100, 0xf1ff, 0 };
+
+        ImFontConfig config;
+        config.MergeMode = true;
+        config.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_LoadColor;
+        //config.GlyphMinAdvanceX = 13.0f;
+        config.GlyphOffset = { 0.0f, 3.0f };
+
+        io.Fonts->AddFontFromFileTTF(Engine::Resources::ResourceManager::getSingleton().findResourceFile("icons.ttf").c_str(), 13, &config, icons_ranges);
+        
+        io.Fonts->Build();
+
+        unsigned char *pixels;
+        int width, height;
+        io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+        co_await mFontTexture.create(Render::TextureType_2D, Render::FORMAT_RGBA8_SRGB, { width, height }, { pixels, static_cast<size_t>(width * height * 4) });
+
+        io.Fonts->SetTexID(mFontTexture->resource());
 
         co_return true;
     }
@@ -395,12 +387,7 @@ namespace Tools {
             float R = draw_data->DisplayPos.x + draw_data->DisplaySize.x;
             float T = draw_data->DisplayPos.y;
             float B = draw_data->DisplayPos.y + draw_data->DisplaySize.y;
-            *mvp.mData = target->getClipSpaceMatrix() * Matrix4 {
-                2.0f / (R - L), 0.0f, 0.0f, (R + L) / (L - R),
-                0.0f, 2.0f / (T - B), 0.0f, (T + B) / (B - T),
-                0.0f, 0.0f, 0.5f, 0.5f,
-                0.0f, 0.0f, 0.0f, 1.0f
-            };
+            *mvp.mData = target->getClipSpaceMatrix() * Matrix4 { 2.0f / (R - L), 0.0f, 0.0f, (R + L) / (L - R), 0.0f, 2.0f / (T - B), 0.0f, (T + B) / (B - T), 0.0f, 0.0f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f };
         }
 
         using Vertex = Compound<Render::VertexPos2, Render::VertexColor, Render::VertexUV>;
@@ -596,7 +583,7 @@ namespace Tools {
         if (mAreaSize != oldSize)
             mWindow.applyClientSpaceResize(this);
     }
-
+    
     Threading::TaskQueue *ClientImRoot::taskQueue() const
     {
         return mWindow.taskQueue();

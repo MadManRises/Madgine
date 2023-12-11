@@ -20,6 +20,8 @@
 
 #include "behaviortracker.h"
 
+#include "Interfaces/debug/stacktrace.h"
+
 namespace Engine {
 
 ENUM_BASE(InterpretResult, GenericResult);
@@ -109,6 +111,17 @@ struct MADGINE_BEHAVIOR_EXPORT Behavior {
             : Execution::algorithm_state<Inner, receiverImpl<Rec>> { std::forward<Inner>(inner), std::forward<Rec>(rec), std::move(state) }
         {
         }
+
+        template <typename F>
+        friend void tag_invoke(Execution::visit_state_t, state &state, F &&f)
+        {
+            Execution::get_receiver(state).mState->visit(std::forward<F>(f));
+        }
+                        
+        friend std::string tag_invoke(get_behavior_name_t, const state &state)
+        {
+            return Execution::get_receiver(state).mState->name();
+        }
     };
 
     template <Execution::Sender Inner>
@@ -151,6 +164,8 @@ struct BehaviorStateBase {
     {
         delete this;
     }
+    virtual void visit(CallableView<void(const Execution::StateDescriptor &)> visitor) = 0;
+    virtual std::string name() const = 0;
 };
 
 template <typename Sender, typename... V>
@@ -163,17 +178,24 @@ struct MADGINE_BEHAVIOR_EXPORT CoroutineBehaviorState : BehaviorStateBase {
 
     Behavior get_return_object();
 
-    virtual void start(Behavior::receiver *rec, ArgumentList arguments, BehaviorTrackerContext context, std::stop_token stopToken) override;
-    virtual void destroy() override;
+    void start(Behavior::receiver *rec, ArgumentList arguments, BehaviorTrackerContext context, std::stop_token stopToken) override;
+    void destroy() override;
+    void visit(CallableView<void(const Execution::StateDescriptor &)> visitor) override;
 
-    struct MADGINE_BEHAVIOR_EXPORT Result {
+    struct MADGINE_BEHAVIOR_EXPORT InitialSuspend {
         bool await_ready() noexcept;
         void await_suspend(std::coroutine_handle<CoroutineBehaviorState> handle) noexcept;
         void await_resume() noexcept;
     };
 
-    std::suspend_always initial_suspend() noexcept;
-    Result final_suspend() noexcept;
+    struct MADGINE_BEHAVIOR_EXPORT FinalSuspend {
+        bool await_ready() noexcept;
+        void await_suspend(std::coroutine_handle<CoroutineBehaviorState> handle) noexcept;
+        void await_resume() noexcept;
+    };
+
+    InitialSuspend initial_suspend() noexcept;
+    FinalSuspend final_suspend() noexcept;
 
     void return_void();
     void unhandled_exception();
@@ -190,9 +212,13 @@ struct MADGINE_BEHAVIOR_EXPORT CoroutineBehaviorState : BehaviorStateBase {
         }
     }
 
+    virtual std::string name() const override;
+
+    Debug::StackTrace<1> mStacktrace;
+
     Behavior::receiver *mReceiver = nullptr;
     ArgumentList mArguments;
-    BehaviorTrackerContext mContext;    
+    BehaviorTrackerContext mContext;
     std::stop_token mStopToken;
 };
 
@@ -242,11 +268,21 @@ struct AlgorithmBehaviorState : BehaviorStateBase {
     {
     }
 
-    virtual void start(Behavior::receiver *rec, ArgumentList arguments, BehaviorTrackerContext context, std::stop_token stopToken) override
+    void start(Behavior::receiver *rec, ArgumentList arguments, BehaviorTrackerContext context, std::stop_token stopToken) override
     {
         Algorithm algorithm = std::get<Algorithm>(mData);
         mData = DelayedConstruct<State> { [&]() { return Execution::connect(Execution::just(std::move(arguments)) | std::forward<Algorithm>(algorithm), receiver { rec, std::move(stopToken) }); } };
         std::get<State>(mData).start();
+    }
+
+    void visit(CallableView<void(const Execution::StateDescriptor &)> visitor) override
+    {
+        Execution::visit_state(std::get<State>(mData), visitor);
+    }
+
+    std::string name() const override
+    {
+        return get_behavior_name(std::get<State>(mData));
     }
 
     std::variant<Algorithm, State> mData;

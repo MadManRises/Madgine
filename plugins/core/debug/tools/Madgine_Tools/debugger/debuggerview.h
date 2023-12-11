@@ -4,10 +4,12 @@
 
 #include "Madgine_Tools/toolbase.h"
 
+#include "Madgine/debug/debugger.h"
+
 namespace Engine {
 namespace Tools {
 
-    struct DebuggerView : Tool<DebuggerView> {
+    struct DebuggerView : Tool<DebuggerView>, Debug::DebugListener {
 
         SERIALIZABLEUNIT(DebuggerView)
 
@@ -19,6 +21,10 @@ namespace Tools {
 
         virtual void render() override;
         virtual void renderMenu() override;        
+
+        void setCurrentContext(Debug::ContextInfo &context);
+
+        void onSuspend(Debug::ContextInfo &context) override;
 
         std::string_view key() const override;
         
