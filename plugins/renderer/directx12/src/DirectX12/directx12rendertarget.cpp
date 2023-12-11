@@ -182,6 +182,17 @@ namespace Render {
         mCommandList->RSSetScissorRects(1, &scissorRect);
     }
 
+    void DirectX12RenderTarget::setScissorsRect(const Rect2i &space)
+    {
+        D3D12_RECT scissorRect;
+        scissorRect.left = static_cast<float>(space.mTopLeft.x);
+        scissorRect.top = static_cast<float>(space.mTopLeft.y);
+        scissorRect.right = static_cast<float>(space.mTopLeft.x + space.mSize.x);
+        scissorRect.bottom = static_cast<float>(space.mTopLeft.y + space.mSize.y);
+
+        mCommandList->RSSetScissorRects(1, &scissorRect);
+    }
+
     void DirectX12RenderTarget::pushAnnotation(const char *tag)
     {
         PIXBeginEvent(mCommandList, PIX_COLOR(255, 255, 255), tag);

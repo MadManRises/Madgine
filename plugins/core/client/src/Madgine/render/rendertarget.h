@@ -46,6 +46,7 @@ namespace Render {
         virtual void popAnnotation() = 0;
 
         virtual void setRenderSpace(const Rect2i &space) = 0;
+        virtual void setScissorsRect(const Rect2i &space) = 0;
 
         bool canFlipFlop() const;
 

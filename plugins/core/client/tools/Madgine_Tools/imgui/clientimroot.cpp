@@ -444,7 +444,7 @@ namespace Tools {
                         ImTextureID tex = pcmd->GetTexID();
                         mPipeline->bindResources(target, 2, reinterpret_cast<Render::ResourceBlock &>(tex));
 
-                        //target->setScissorsRect(r);
+                        target->setScissorsRect(r);
                         mPipeline->renderRange(target, pcmd->ElemCount, pcmd->VtxOffset + global_vtx_offset, pcmd->IdxOffset + global_idx_offset);
                     }
                 }

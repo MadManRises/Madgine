@@ -32,6 +32,7 @@ namespace Render {
         size_t samples() const;
 
         virtual void setRenderSpace(const Rect2i &space) override;
+        virtual void setScissorsRect(const Rect2i &space) override;
 
         virtual const Texture *depthTexture() const override;
 

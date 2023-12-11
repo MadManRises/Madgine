@@ -19,6 +19,7 @@ namespace Render {
         virtual void clearDepthBuffer() override;
 
         virtual void setRenderSpace(const Rect2i &space) override;
+        virtual void setScissorsRect(const Rect2i &space) override;
 
         virtual void pushAnnotation(const char *tag) override;
         virtual void popAnnotation() override;

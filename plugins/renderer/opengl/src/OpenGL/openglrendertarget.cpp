@@ -62,6 +62,12 @@ namespace Render {
         GL_CHECK();
     }
 
+    void OpenGLRenderTarget::setScissorsRect(const Rect2i &space)
+    {
+        glScissor(space.mTopLeft.x, space.mTopLeft.y, space.mSize.x, space.mSize.y);
+        GL_CHECK();
+    }
+
     Matrix4 OpenGLRenderTarget::getClipSpaceMatrix() const
     {
         return Matrix4 { 1, 0, 0, 0,

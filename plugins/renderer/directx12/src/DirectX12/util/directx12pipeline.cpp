@@ -107,7 +107,7 @@ namespace Render {
             pipelineDesc.RasterizerState.ForcedSampleCount = 0;
             pipelineDesc.RasterizerState.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
 
-            pipelineDesc.BlendState.AlphaToCoverageEnable = TRUE;
+            pipelineDesc.BlendState.AlphaToCoverageEnable = FALSE;
             pipelineDesc.BlendState.RenderTarget[0].BlendEnable = TRUE;
             pipelineDesc.BlendState.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
             pipelineDesc.BlendState.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
