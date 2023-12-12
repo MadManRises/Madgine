@@ -7,15 +7,13 @@ namespace Engine {
 struct BehaviorFactoryList {
     template <typename T>
     BehaviorFactoryList(type_holder_t<T>)
-        : sComponentsByName(&T::Registry::sComponentsByName)
-        , create([](uint32_t index) {
-            return T::Registry::get(index).create();
-        })
+        : names(T::names)
+        , create(T::create)
     {
     }
 
-    const std::map<std::string_view, IndexType<uint32_t>> &(*sComponentsByName)();
-    Behavior (*create)(uint32_t index);
+    std::vector<std::string_view> (*names)();
+    Behavior (*create)(std::string_view name);
 };
 
 template <typename T>
@@ -25,22 +23,14 @@ struct DummyType {
 
 DECLARE_NAMED_UNIQUE_COMPONENT(Engine, BehaviorList, DummyType<BehaviorFactoryList>, BehaviorFactoryList)
 
-namespace Engine {
-
-template <typename _Registry>
-struct BehaviorFactory : BehaviorListComponent<BehaviorFactory<_Registry>> {
-    using Registry = _Registry;
-};
-
-}
 
 REGISTER_TYPE(Engine::BehaviorFactoryList)
 REGISTER_TYPE(Engine::DummyType<Engine::BehaviorFactoryList>)
 
-#define DECLARE_BEHAVIOR_FACTORY(Registry) \
-    REGISTER_TYPE(Engine::BehaviorFactory<Registry>)
+#define DECLARE_BEHAVIOR_FACTORY(Factory) \
+    REGISTER_TYPE(Factory)
 
-#define DEFINE_BEHAVIOR_FACTORY(Registry) \
-    NAMED_UNIQUECOMPONENT(Native, Engine::BehaviorFactory<Registry>)
+#define DEFINE_BEHAVIOR_FACTORY(Name, Factory) \
+    NAMED_UNIQUECOMPONENT(Name, Factory)
 
 

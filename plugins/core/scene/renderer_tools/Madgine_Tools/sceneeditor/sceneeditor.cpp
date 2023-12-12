@@ -412,9 +412,9 @@ namespace Tools {
             if (ImGui::BeginMenu(IMGUI_ICON_PLUS " Add Behavior")) {
                 for (auto [name, index] : BehaviorListRegistry::sComponentsByName()) {
                     if (ImGui::BeginMenu(name.data())) {
-                        for (auto [innerName, innerIndex] : BehaviorListRegistry::get(index).sComponentsByName()) {
-                            if (ImGui::MenuItem(innerName.data())) {
-                                entity->addBehavior(BehaviorListRegistry::get(index).create(innerIndex));
+                        for (std::string_view name : BehaviorListRegistry::get(index).names()) {
+                            if (ImGui::MenuItem(name.data())) {
+                                entity->addBehavior(BehaviorListRegistry::get(index).create(name));
                             }
                         }
                         ImGui::EndMenu();

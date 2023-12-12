@@ -1020,6 +1020,38 @@ namespace Execution {
         {
             return pipable_from_right(*this, std::forward<F>(f));
         }
+
+        template <typename F>
+        struct typed {
+            template <typename Sender>
+            requires tag_invocable<let_value_t, Sender, F>
+            auto operator()(Sender &&sender, F &&finally = {}) const
+                noexcept(is_nothrow_tag_invocable_v<let_value_t, Sender, F>)
+                    -> tag_invoke_result_t<let_value_t, Sender, F>
+            {
+                return tag_invoke(let_value_t {}, std::forward<Sender>(sender), std::forward<F>(finally));
+            }
+
+            auto operator()(F &&finally = {}) const
+            {
+                return pipable_from_right(let_value_t {}, std::forward<F>(finally));
+            }
+        };
+
+        template <typename Sender, typename F>
+        struct Inner {
+            friend auto tag_invoke(const Inner<Sender, F> &)
+            {
+                return sender<Sender, F> {};
+            }
+
+            auto operator()() const
+                noexcept(is_nothrow_tag_invocable_v<Inner<Sender, F>>)
+                    -> tag_invoke_result_t<Inner<Sender, F>>
+            {
+                return tag_invoke(*this);
+            }
+        };
     };
 
     inline constexpr let_value_t let_value;

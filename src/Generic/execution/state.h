@@ -15,7 +15,8 @@ namespace Execution {
         }
 
         template <typename V, typename O>
-        requires(is_tag_invocable_v<resolve_var_d_t, V &, std::string_view, O &>) auto operator()(V &v, std::string_view name, O &out) const
+        requires(is_tag_invocable_v<resolve_var_d_t, V &, std::string_view, O &>)
+        auto operator()(V &v, std::string_view name, O &out) const
             noexcept(is_nothrow_tag_invocable_v<resolve_var_d_t, V &, std::string_view, O &>)
                 -> tag_invoke_result_t<resolve_var_d_t, V &, std::string_view, O &>
         {
@@ -36,7 +37,8 @@ namespace Execution {
         }
 
         template <typename V, typename O>
-        requires(is_tag_invocable_v<resolve_var_t, V, O &>) auto operator()(V &&v, O &out) const
+        requires(is_tag_invocable_v<resolve_var_t, V, O &>) 
+        auto operator()(V &&v, O &out) const
             noexcept(is_nothrow_tag_invocable_v<resolve_var_t, V, O &>)
                 -> tag_invoke_result_t<resolve_var_t, V, O &>
         {

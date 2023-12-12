@@ -213,7 +213,7 @@ Engine::Behavior Brick(float speed, Engine::Vector3 dir, Engine::Quaternion q)
     bool loop = true;
     while (loop) {
 
-        std::chrono::microseconds elapsedTime = co_await Engine::App::Application::getSingleton().getGlobalAPIComponent<Engine::Scene::SceneManager>().animationClock().wait(0s);
+        std::chrono::microseconds elapsedTime = co_await Engine::Scene::yield_simulation();
 
         Engine::Scene::Entity::Transform *t = e->getComponent<Engine::Scene::Entity::Transform>();
 

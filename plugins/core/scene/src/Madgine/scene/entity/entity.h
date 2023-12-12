@@ -108,6 +108,9 @@ namespace Scene {
                         if (name == "Entity") {
                             out = rec.mEntity;
                             return true;
+                        } else if (name == "Scene"){
+                            out = &rec.mEntity->sceneMgr();
+                            return true;
                         } else {
                             return Execution::resolve_var_d(rec.mRec, name, out);
                         }

@@ -8,16 +8,18 @@ namespace Engine {
 
 template <auto f>
 struct NativeBehavior : NativeBehaviorComponent<NativeBehavior<f>> {
-    using helper = Behavior (*)();
-    operator helper()
-    {
-        return f;
-    }
+    
+    static constexpr Behavior (*factory)() = f;
+};
+
+struct NativeBehaviorFactory : BehaviorListComponent<NativeBehaviorFactory> {
+    static std::vector<std::string_view> names();
+    static Behavior create(std::string_view name);
 };
 
 }
 
-DECLARE_BEHAVIOR_FACTORY(Engine::NativeBehaviorRegistry)
+DECLARE_BEHAVIOR_FACTORY(Engine::NativeBehaviorFactory)
 REGISTER_TYPE(Engine::DummyType<Engine::BehaviorStateBase>)
 
 #define DECLARE_NATIVE_BEHAVIOR(Behavior) \

@@ -92,7 +92,7 @@ namespace Execution {
         static constexpr bool constant = true;
         using argument_types = type_pack<>;
 
-        using algorithm = Execution::read_var_t::Inner<"Name", variable_type<"Name"> &>;
+        using algorithm = Execution::read_var_t::Inner<"Name", variable_type<"Name">>;
 
         using dynamicVariableNames = type_pack<auto_holder<fixed_string { "Name" }>>;
     };

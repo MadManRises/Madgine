@@ -22,6 +22,8 @@
 
 #include "Interfaces/debug/stacktrace.h"
 
+#include "Generic/delayedconstruct.h"
+
 namespace Engine {
 
 ENUM_BASE(InterpretResult, GenericResult);

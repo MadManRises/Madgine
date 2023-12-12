@@ -40,7 +40,7 @@ namespace UniqueComponent {
 	struct FactoryImpl {
         template <typename T>
         FactoryImpl(type_holder_t<T>)
-            : mFactory(T {})
+            : mFactory(T::factory)
         {
         }
 

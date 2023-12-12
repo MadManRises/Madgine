@@ -200,3 +200,4 @@ METATABLE_END(MakeVector3Node)
 
 SERIALIZETABLE_INHERIT_BEGIN(MakeVector3Node, Engine::NodeGraph::NodeBase)
 SERIALIZETABLE_END(MakeVector3Node)
+

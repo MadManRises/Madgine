@@ -25,7 +25,7 @@ namespace NodeGraph {
 
         void write(const NodeBase &node, const ValueType &v, uint32_t dataOutIndex, uint32_t group = 0);
 
-        ValueType readVar(std::string_view name);
+        bool readVar(std::string_view name, ValueType &out);
     };
 
     template <typename Node>
@@ -42,10 +42,17 @@ namespace NodeGraph {
             NodeInterpretHandleBase::write(mNode, v, dataOutIndex, group);
         }
 
-        template <fixed_string Name>
-        friend ValueType tag_invoke(Execution::resolve_var_t<Name>, NodeInterpretHandle &handle)
+        template <fixed_string Name, typename O>
+        friend bool tag_invoke(Execution::resolve_var_t<Name>, NodeInterpretHandle &handle, O &out)
         {
-            return handle.readVar(handle.mNode.template getDynamicName<Name>());
+            ValueType v;
+            if (handle.readVar(handle.mNode.template getDynamicName<Name>(), v)) {
+                out = v.as<O>();
+                return true;
+            }
+            else {
+                return false;
+            }
         }
     };
 

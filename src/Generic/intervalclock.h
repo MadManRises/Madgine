@@ -6,7 +6,11 @@
 
 #include "execution/stop_callback.h"
 
+#include "execution/algorithm.h"
+
 namespace Engine {
+
+struct get_behavior_name_t;
 
 template <typename Timepoint = std::chrono::steady_clock::time_point>
 struct IntervalClock {
@@ -43,14 +47,15 @@ struct IntervalClock {
 
     struct WaitState {
 
-        WaitState(IntervalClock *clock, Timepoint waitUntil)
-            : mClock(clock)
-            , mWaitUntil(waitUntil)
+        WaitState(std::chrono::steady_clock::duration duration)
+            : mDuration(duration)
         {
         }
 
-        void start()
+        virtual void start(IntervalClock *clock)
         {
+            mClock = clock;
+            mWaitUntil = mClock->mLastTick + mDuration;
             std::lock_guard guard { mClock->mMutex };
             mClock->mWaitStates.push_back(this);
         }
@@ -64,33 +69,78 @@ struct IntervalClock {
         template <typename F>
         friend void tag_invoke(Execution::visit_state_t, WaitState &state, F &&f)
         {
-            f(Execution::State::Text { "Waiting " + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(state.mWaitUntil - state.mClock->mLastTick).count()) + " ms" });
+            if (state.mDuration.count() > 0)
+                f(Execution::State::Text { "Waiting " + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(state.mWaitUntil - state.mClock->mLastTick).count()) + " ms" });
+        }
+
+        friend std::string tag_invoke(get_behavior_name_t, const WaitState &state)
+        {
+            std::chrono::nanoseconds dur = std::chrono::duration_cast<std::chrono::nanoseconds>(state.mDuration);
+            if (dur.count() == 0) {
+                return "Yield";
+            } else if (dur.count() < 1000) {
+                return std::format("Waiting {} ns", dur.count());
+            } else if (dur.count() < 1000000) {
+                return std::format("Waiting {:.3f} us", std::chrono::duration_cast<std::chrono::duration<float, std::micro>>(dur).count());
+            } else if (dur.count() < 1000000000) {
+                return std::format("Waiting {:.4f} ms", std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(dur).count());
+            } else {
+                return std::format("Waiting {:.4f} s", std::chrono::duration_cast<std::chrono::duration<float>>(dur).count());
+            }
         }
 
         virtual void continueExecution(std::chrono::microseconds elapsed) = 0;
 
-        IntervalClock *mClock;
+        IntervalClock *mClock = nullptr;
+        std::chrono::steady_clock::duration mDuration;
         Timepoint mWaitUntil;
     };
 
-    template <typename _Rec>
-    struct state : WaitState {
+    template <typename Rec>
+    struct receiver : Execution::algorithm_receiver<Rec> {
 
-        using Rec = _Rec;
-
-        state(Rec &&rec, IntervalClock *clock, Timepoint waitUntil)
-            : WaitState(clock, waitUntil)
-            , mRec(std::forward<Rec>(rec))
-            , mCallback(cleanup_cb {this})
+        receiver(Rec &&rec, WaitState *state)
+            : Execution::algorithm_receiver<Rec> { std::forward<Rec>(rec) }
+            , mState(state)
         {
         }
 
-        void start() {
+        void set_value(IntervalClock *clock)
+        {
+            mState->start(clock);
+        }
+
+        void set_value(IntervalClock &clock)
+        {
+            set_value(&clock);
+        }
+
+        WaitState *mState;
+    };
+
+    template <typename Inner, typename Rec>
+    struct state : WaitState, Execution::base_state<Rec> {
+
+        state(Inner &&inner, Rec &&rec, std::chrono::steady_clock::duration duration)
+            : WaitState(duration)
+            , Execution::base_state<Rec>(std::forward<Rec>(rec))
+            , mInnerState(Execution::connect(std::forward<Inner>(inner), receiver<Rec &> { mRec, this }))
+            , mCallback(cleanup_cb { mRec })
+        {
+        }
+
+        void start()
+        {
+            mInnerState.start();
+        }
+
+        virtual void start(IntervalClock *clock) override
+        {
             std::stop_token st = Execution::get_stop_token(mRec);
             if (st.stop_requested()) {
                 mRec.set_done();
             } else {
-                WaitState::start();
+                WaitState::start(clock);
                 mCallback.start(std::move(st), stop_cb { this });
             }
         }
@@ -112,26 +162,27 @@ struct IntervalClock {
         struct cleanup_cb {
             void operator()(std::chrono::microseconds elapsed)
             {
-                if (Execution::get_stop_token(mState->mRec).stop_requested())
-                    mState->mRec.set_done();
+                if (Execution::get_stop_token(mRec).stop_requested())
+                    mRec.set_done();
                 else
-                    mState->mRec.set_value(std::move(elapsed));
+                    mRec.set_value(std::move(elapsed));
             }
 
             void operator()(Execution::cancelled_t)
             {
-                assert(Execution::get_stop_token(mState->mRec).stop_requested());
-                mState->mRec.set_done();
+                assert(Execution::get_stop_token(mRec).stop_requested());
+                mRec.set_done();
             }
 
-            state *mState;
+            Rec &mRec;
         };
 
-        Rec mRec;
+        Execution::connect_result_t<Inner, receiver<Rec &>> mInnerState;
         Execution::stop_callback<stop_cb, cleanup_cb> mCallback;
     };
 
-    struct sender : Execution::base_sender {
+    template <typename Inner>
+    struct sender : Execution::algorithm_sender<Inner> {
 
         using result_type = GenericResult;
         template <template <typename...> typename Tuple>
@@ -140,21 +191,27 @@ struct IntervalClock {
         template <typename Rec>
         friend auto tag_invoke(Execution::connect_t, sender &&sender, Rec &&rec)
         {
-            return state<Rec> { std::forward<Rec>(rec), sender.mClock, sender.mWaitUntil };
+            return state<Inner, Rec> { std::forward<Inner>(sender.mInner), std::forward<Rec>(rec), sender.mDuration };
         }
 
-        IntervalClock *mClock;
-        Timepoint mWaitUntil;
+        Inner mInner;
+        std::chrono::steady_clock::duration mDuration;
     };
 
-    auto wait(Timepoint until)
+    /* auto wait(Timepoint until)
     {
         return sender { {}, this, until };
-    }
+    }*/
 
     auto wait(std::chrono::steady_clock::duration duration)
     {
-        return wait(mLastTick + duration);
+        return sender<Execution::just_t::sender<IntervalClock *>> { {}, Execution::just(this), duration };
+    }
+
+    template <typename Sender>
+    static auto wait(Sender &&inner, std::chrono::steady_clock::duration duration)
+    {
+        return sender<Sender> { {}, std::forward<Sender>(inner), duration };
     }
 
 private:

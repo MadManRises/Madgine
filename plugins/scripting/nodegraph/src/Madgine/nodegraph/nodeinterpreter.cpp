@@ -44,8 +44,9 @@ namespace NodeGraph {
         NodeInterpreterStateBase *mInterpreter;
     };
 
-    NodeInterpreterStateBase::NodeInterpreterStateBase(const NodeGraph *graph)
+    NodeInterpreterStateBase::NodeInterpreterStateBase(const NodeGraph *graph, NodeGraphLoader::Handle handle)
         : mGraph(graph)
+        , mHandle(std::move(handle))
     {
         mData.resize(mGraph->nodes().size());
 
@@ -72,7 +73,7 @@ namespace NodeGraph {
         if (pin && pin.mNode) {
             node = mGraph->node(pin.mNode);
         }
-        
+
         NodeDebugLocation *location = static_cast<NodeDebugLocation *>(Debug::Debugger::getSingleton().getLocation(&receiver));
         if (location)
             location->mNode = node;
@@ -164,6 +165,15 @@ namespace NodeGraph {
     {
         mArguments = std::move(args);
         interpretImpl(*this, 0);
+    }
+
+    void NodeInterpreterStateBase::visitState(CallableView<void(const Execution::StateDescriptor &)> visitor)
+    {
+        for (const std::unique_ptr<NodeInterpreterData> &data : mData) {
+            if (data) {
+                data->visitState(visitor);
+            }
+        }
     }
 
 }

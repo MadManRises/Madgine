@@ -22,12 +22,9 @@ namespace NodeGraph {
         mInterpreter.write(pin, v);
     }
 
-    ValueType NodeInterpretHandleBase::readVar(std::string_view name)
-    {
-        ValueType v;
-        bool result = mInterpreter.readVar(v, name);
-        assert(result);
-        return v;
+    bool NodeInterpretHandleBase::readVar(std::string_view name, ValueType &out)
+    {        
+        return mInterpreter.readVar(out, name);
     }
 
     void continueExecution(NodeInterpreterStateBase &interpreter, const NodeBase &node, Execution::VirtualReceiverBase<InterpretResult> &receiver)

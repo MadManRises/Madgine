@@ -7,6 +7,8 @@
 #include "Madgine/behavior.h"
 #include "Madgine/behaviorcollector.h"
 
+#include "nodegraphloader.h"
+
 namespace Engine {
 namespace NodeGraph {
 
@@ -16,10 +18,11 @@ namespace NodeGraph {
         virtual bool readVar(ValueType &ref, std::string_view name) { return false; }
         virtual bool writeVar(std::string_view name, const ValueType &v) { return false; }
         virtual std::vector<std::string_view> variables() { return {}; }
+        virtual void visitState(CallableView<void(const Execution::StateDescriptor &)> visitor) { }
     };
 
     struct MADGINE_NODEGRAPH_EXPORT NodeInterpreterStateBase : Execution::VirtualReceiverBase<InterpretResult> {
-        NodeInterpreterStateBase(const NodeGraph *graph);
+        NodeInterpreterStateBase(const NodeGraph *graph, NodeGraphLoader::Handle handle);
         NodeInterpreterStateBase(const NodeInterpreterStateBase &) = delete;
         NodeInterpreterStateBase(NodeInterpreterStateBase &&) = default;
         virtual ~NodeInterpreterStateBase() = default;
@@ -52,11 +55,14 @@ namespace NodeGraph {
         virtual std::vector<std::string_view> variables();
 
         void start(ArgumentList args);
+        void visitState(CallableView<void(const Execution::StateDescriptor &)> visitor);
 
     private:
         ArgumentList mArguments;
 
         const NodeGraph *mGraph;
+
+        NodeGraphLoader::Handle mHandle;
 
         std::vector<std::unique_ptr<NodeInterpreterData>> mData;
     };
@@ -85,14 +91,15 @@ namespace NodeGraph {
 
         using Rec = _Rec;
 
-        NodeInterpreterState(Inner &&inner, Rec &&rec, const NodeGraph *graph)
-            : NodeInterpreterStateBase { graph }
+        NodeInterpreterState(Inner &&inner, Rec &&rec, const NodeGraph *graph, NodeGraphLoader::Handle handle)
+            : NodeInterpreterStateBase { graph, std::move(handle) }
             , mState(Execution::connect(std::forward<Inner>(inner), NodeInterpreterReceiver { this }))
             , mRec(std::forward<Rec>(rec))
         {
         }
 
-        void start() {
+        void start()
+        {
             mState.start();
         }
 
@@ -106,7 +113,7 @@ namespace NodeGraph {
         }
         virtual void set_value() override
         {
-            this->mRec.set_value(ArgumentList{});
+            this->mRec.set_value(ArgumentList {});
         }
 
         bool readVar(ValueType &result, std::string_view name, bool recursive = true) override
@@ -123,12 +130,12 @@ namespace NodeGraph {
         template <typename F>
         friend void tag_invoke(Execution::visit_state_t, NodeInterpreterState &state, F &&f)
         {
-            throw 0;
+            state.visitState(std::forward<F>(f));
         }
 
         friend std::string tag_invoke(get_behavior_name_t, const NodeInterpreterState &state)
         {
-            throw 0;
+            return "Graph";
         }
 
         Execution::connect_result_t<Inner, NodeInterpreterReceiver> mState;
@@ -144,27 +151,40 @@ namespace NodeGraph {
         template <typename Rec>
         friend auto tag_invoke(Execution::connect_t, NodeInterpreterSender &&sender, Rec &&rec)
         {
-            return NodeInterpreterState<Inner, Rec> { std::forward<Inner>(sender.mInner), std::forward<Rec>(rec), sender.mGraph };
+            return NodeInterpreterState<Inner, Rec> { std::forward<Inner>(sender.mInner), std::forward<Rec>(rec), sender.mGraph, std::move(sender.mHandle) };
         }
 
         Inner mInner;
         const NodeGraph *mGraph;
+        NodeGraphLoader::Handle mHandle;
     };
 
     struct NodeInterpreter {
 
+        NodeInterpreter(const NodeGraph *graph)
+            : mGraph(graph)
+        {
+        }
+
+        NodeInterpreter(NodeGraphLoader::Handle handle)
+            : mHandle(std::move(handle))
+            , mGraph(mHandle)
+        {
+        }
+
         template <Execution::Sender Inner>
         auto operator()(Inner &&inner)
         {
-            return NodeInterpreterSender<Inner> { {}, std::forward<Inner>(inner), mGraph };
+            return NodeInterpreterSender<Inner> { {}, std::forward<Inner>(inner), mGraph, std::move(mHandle) };
         }
 
         template <Execution::Sender Inner>
         friend auto operator|(Inner &&inner, NodeInterpreter &&interpreter)
         {
-            return NodeInterpreterSender<Inner> { {}, std::forward<Inner>(inner), interpreter.mGraph };
+            return NodeInterpreterSender<Inner> { {}, std::forward<Inner>(inner), interpreter.mGraph, std::move(interpreter.mHandle) };
         }
 
+        NodeGraphLoader::Handle mHandle;
         const NodeGraph *mGraph;
     };
 

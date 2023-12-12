@@ -188,10 +188,10 @@ namespace NodeGraph {
             bool mHasReturned = false;
             NodeResults mValues;
 
-            template <typename CPO>
-            friend decltype(auto) tag_invoke(CPO f, DummyReceiver& receiver)
+            template <typename CPO, typename... Args>
+            friend decltype(auto) tag_invoke(CPO f, DummyReceiver& receiver, Args &&... args)
             {
-                return f(static_cast<NodeExecutionReceiver<SenderNode<Algorithm>>&>(receiver));
+                return f(static_cast<NodeExecutionReceiver<SenderNode<Algorithm>>&>(receiver), std::forward<Args>(args)...);
             }
         };
 
@@ -519,6 +519,11 @@ namespace NodeGraph {
                     (typename Traits::exposedVariables {});
                 } else
                     return {};
+            }
+
+            virtual void visitState(CallableView<void(const Execution::StateDescriptor&)> visitor) override
+            {
+                Execution::visit_state(mState, visitor);
             }
 
             ValueType read(uint32_t providerIndex, uint32_t group) const

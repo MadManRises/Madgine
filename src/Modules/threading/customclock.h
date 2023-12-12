@@ -4,6 +4,7 @@ namespace Engine {
 namespace Threading {
     struct MODULES_EXPORT CustomTimepoint {
 
+        CustomTimepoint() = default;
         CustomTimepoint(std::chrono::steady_clock::time_point timepoint);
         CustomTimepoint(std::chrono::steady_clock::duration dur);
 
