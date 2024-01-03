@@ -17,9 +17,7 @@ namespace Execution {
     struct succ_sender;
 
     template <typename T>
-    struct recursive {
-        using decay_t = T;
-    };
+    struct stream;
 
     template <fixed_string Name>
     struct variable_name_tag;
@@ -36,25 +34,10 @@ namespace Execution {
     struct name_mapping;
 
     template <typename T>
-    using is_recursive = is_instance<T, recursive>;
+    using is_stream = is_instance<T, stream>;
 
     template <typename... T>
     struct signature : type_pack<T...> {
-
-        static constexpr size_t count = sizeof...(T);
-
-        using recursive_t = decayed_t<typename type_pack<T...>::template filter<is_recursive>::template unpack_unique<void>>;
-        using non_recursive_arguments = typename type_pack<T...>::template filter<Not<is_recursive>::type>;
-
-        static constexpr bool variadic = !std::same_as<recursive_t, void>;
-
-        static constexpr size_t variadicIndex = []() {
-            if constexpr (variadic) {
-                return type_pack<T...>::template index<size_t, recursive<recursive_t>>;
-            } else {
-                return std::numeric_limits<size_t>::max();
-            }
-        }();
     };
 
     template <typename Algorithm>

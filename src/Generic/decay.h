@@ -17,6 +17,11 @@ namespace __generic_impl__ {
     struct decayBase<T&, std::void_t<typename T::decay_t>> {
         using type = typename T::decay_t&;
     };
+
+    template <typename T, T v>
+    struct decayBase<std::integral_constant<T, v>, void> {
+        using type = T;
+    };
 }
 
 template <typename T>

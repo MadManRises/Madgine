@@ -10,8 +10,7 @@ namespace Execution {
     template <>
     struct sender_traits<then_t::typed<NodeGraph::Add>> {
         static constexpr bool constant = true;
-        using argument_types = type_pack<pred_sender<signature<recursive<int>>>>;
-        using variadic = type_pack<pred_sender<signature<recursive<int>, int>>>;
+        using argument_types = type_pack<pred_sender<signature<stream<int>>>>;
 
         using algorithm = then_t::typed<NodeGraph::Add>;
     };
@@ -19,8 +18,7 @@ namespace Execution {
     template <>
     struct sender_traits<then_t::typed<NodeGraph::Divide>> {
         static constexpr bool constant = true;
-        using argument_types = type_pack<pred_sender<signature<recursive<Vector3>>>>;
-        using variadic = type_pack<pred_sender<signature<recursive<Vector3>, float>>>;
+        using argument_types = type_pack<pred_sender<signature<stream<Vector3>>>>;
 
         using algorithm = then_t::typed<NodeGraph::Divide>;
     };
@@ -29,7 +27,6 @@ namespace Execution {
     struct sender_traits<then_t::typed<NodeGraph::Log>> {
         static constexpr bool constant = false;
         using argument_types = type_pack<pred_sender<signature<ValueType>>>;
-        using variadic = type_pack<pred_sender<signature<ValueType>>>;
 
         using algorithm = then_t::typed<NodeGraph::Log>;
     };

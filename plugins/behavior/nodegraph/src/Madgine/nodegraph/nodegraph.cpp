@@ -89,14 +89,14 @@ namespace NodeGraph {
                     node->dataOutGroupCount() });
                 for (size_t group = 0; group < maxGroupCount; ++group) {
                     IndexType<size_t> variadicCount;
-                    if (node->flowOutVariadic(group))
+                    if (group < node->flowOutGroupCount() && node->flowOutVariadic(group))
                         variadicCount = node->flowOutCount(group) - node->flowOutBaseCount(group);
-                    if (node->dataInVariadic(group)) {
+                    if (group < node->dataInGroupCount() && node->dataInVariadic(group)) {
                         size_t count = node->dataInCount(group) - node->dataInBaseCount(group);
                         assert(!variadicCount || variadicCount == count);
                         variadicCount = count;
                     }
-                    if (node->dataOutVariadic(group)) {
+                    if (group < node->dataOutGroupCount() && node->dataOutVariadic(group)) {
                         size_t count = node->dataOutCount(group) - node->dataOutBaseCount(group);
                         assert(!variadicCount || variadicCount == count);
                         variadicCount = count;

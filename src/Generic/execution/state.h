@@ -15,8 +15,7 @@ namespace Execution {
         }
 
         template <typename V, typename O>
-        requires(is_tag_invocable_v<resolve_var_d_t, V &, std::string_view, O &>)
-        auto operator()(V &v, std::string_view name, O &out) const
+        requires(is_tag_invocable_v<resolve_var_d_t, V &, std::string_view, O &>) auto operator()(V &v, std::string_view name, O &out) const
             noexcept(is_nothrow_tag_invocable_v<resolve_var_d_t, V &, std::string_view, O &>)
                 -> tag_invoke_result_t<resolve_var_d_t, V &, std::string_view, O &>
         {
@@ -26,19 +25,35 @@ namespace Execution {
 
     inline constexpr resolve_var_d_t resolve_var_d;
 
+    struct store_var_d_t {
+        template <typename V, typename T>
+        requires(!is_tag_invocable_v<store_var_d_t, V &, std::string_view, T>) auto operator()(V &v, std::string_view name, T &&value) const
+        {
+            return false;
+        }
+
+        template <typename V, typename T>
+        requires(is_tag_invocable_v<store_var_d_t, V &, std::string_view, T>) auto operator()(V &v, std::string_view name, T &&value) const
+            noexcept(is_nothrow_tag_invocable_v<store_var_d_t, V &, std::string_view, T>)
+                -> tag_invoke_result_t<store_var_d_t, V &, std::string_view, T>
+        {
+            return tag_invoke(*this, v, name, std::forward<T>(value));
+        }
+    };
+
+    inline constexpr store_var_d_t store_var_d;
+
     template <fixed_string Name>
     struct resolve_var_t {
 
         template <typename V, typename O>
-        requires(!is_tag_invocable_v<resolve_var_t, V, O &>)
-            decltype(auto) operator()(V &&v, O &out) const
+        requires(!is_tag_invocable_v<resolve_var_t, V, O &>) decltype(auto) operator()(V &&v, O &out) const
         {
             return resolve_var_d(std::forward<V>(v), Name, out);
         }
 
         template <typename V, typename O>
-        requires(is_tag_invocable_v<resolve_var_t, V, O &>) 
-        auto operator()(V &&v, O &out) const
+        requires(is_tag_invocable_v<resolve_var_t, V, O &>) auto operator()(V &&v, O &out) const
             noexcept(is_nothrow_tag_invocable_v<resolve_var_t, V, O &>)
                 -> tag_invoke_result_t<resolve_var_t, V, O &>
         {
@@ -48,6 +63,27 @@ namespace Execution {
 
     template <fixed_string Name>
     inline constexpr resolve_var_t<Name> resolve_var;
+
+    template <fixed_string Name>
+    struct store_var_t {
+
+        template <typename V, typename T>
+        requires(!is_tag_invocable_v<store_var_t, V, T>) decltype(auto) operator()(V &&v, T &&value) const
+        {
+            return store_var_d(std::forward<V>(v), Name, std::forward<T>(value));
+        }
+
+        template <typename V, typename T>
+        requires(is_tag_invocable_v<store_var_t, V, T>) auto operator()(V &&v, T &&value) const
+            noexcept(is_nothrow_tag_invocable_v<store_var_t, V, T>)
+                -> tag_invoke_result_t<store_var_t, V, T>
+        {
+            return tag_invoke(*this, std::forward<V>(v), std::forward<T>(value));
+        }
+    };
+
+    template <fixed_string Name>
+    inline constexpr store_var_t<Name> store_var;
 
     struct read_var_t {
         template <fixed_string Name, typename T, typename Rec>
@@ -103,9 +139,11 @@ namespace Execution {
             template <typename V>
             void set_value(V &&value)
             {
-                throw 0;
-                //resolve_var<Name>(this->mRec) = std::forward<V>(value);
-                this->mRec.set_value();
+                if (store_var<Name>(this->mRec, std::forward<V>(value))) {
+                    this->mRec.set_value();
+                } else {
+                    this->mRec.set_error(GenericResult::UNKNOWN_ERROR);
+                }
             }
         };
 
@@ -158,9 +196,18 @@ namespace Execution {
         template <fixed_string Name, typename Rec, typename Sender, typename T>
         struct receiver : algorithm_receiver<Rec> {
 
-            friend T &tag_invoke(resolve_var_t<Name>, receiver &rec)
+            template <typename O>
+            friend bool tag_invoke(resolve_var_t<Name>, receiver &rec, O &out)
             {
-                return rec.mState->mData;
+                out = rec.mState->mData;
+                return true;
+            }
+
+            template <typename T>
+            friend bool tag_invoke(store_var_t<Name>, receiver &rec, T &&value)
+            {
+                rec.mState->mData = std::forward<T>(value);
+                return true;
             }
 
             template <typename O>

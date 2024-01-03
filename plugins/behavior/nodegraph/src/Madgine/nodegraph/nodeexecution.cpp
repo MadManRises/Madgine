@@ -27,6 +27,11 @@ namespace NodeGraph {
         return mInterpreter.readVar(out, name);
     }
 
+    bool NodeInterpretHandleBase::writeVar(std::string_view name, const ValueType &out)
+    {
+        return mInterpreter.writeVar(name, out);
+    }
+
     void continueExecution(NodeInterpreterStateBase &interpreter, const NodeBase &node, Execution::VirtualReceiverBase<InterpretResult> &receiver)
     {
         Pin pin = node.flowOutTarget(0);

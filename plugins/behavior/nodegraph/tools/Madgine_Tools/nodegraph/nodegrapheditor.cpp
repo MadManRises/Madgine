@@ -453,7 +453,7 @@ namespace Tools {
 
                         ImGui::NextColumn();
                     }
-                    if (mDragPin && mDragPin->mType == NodeGraph::PinType::DataInstance && ((node->dataInVariadic(group) && mDragPin->mDir == NodeGraph::PinDir::Out) || (node->dataOutVariadic(group) && mDragPin->mDir == NodeGraph::PinDir::In))) {
+                    if (mDragPin && mDragPin->mType == NodeGraph::PinType::DataInstance && ((group < node->dataInGroupCount() && node->dataInVariadic(group) && mDragPin->mDir == NodeGraph::PinDir::Out) || (group < node->dataOutGroupCount() && node->dataOutVariadic(group) && mDragPin->mDir == NodeGraph::PinDir::In))) {
                         if (node->dataInVariadic(group) && mDragPin->mDir == NodeGraph::PinDir::Out) {
                             uint32_t index = node->dataInCount(group);
 
@@ -791,10 +791,10 @@ namespace Tools {
         */
         //auto graph = just("Foo") | then(NodeGraph::Log {});
 
-        NodeGraph::SenderConnection<0, 0> con;
+        /* NodeGraph::SenderConnection<0, 0> con;
         std::vector<int> c { 1, 2, 3 };
         auto generated = NodeGraph::graphBuilderFromSender<decltype(graph(c)), 1, NodeGraph::SenderConnection<0, 0>, type_pack<>>(mGraph);
-        mGraph.connectFlow(generated.flowInPin(mGraph), { 0, 0 });
+        mGraph.connectFlow(generated.flowInPin(mGraph), { 0, 0 });*/
     }
 
     void NodeGraphEditor::renderMenu()

@@ -3,6 +3,7 @@
 #include "../pipable.h"
 #include "../type_pack.h"
 #include "concepts.h"
+#include "../manuallifetime.h"
 
 namespace Engine {
 namespace Execution {
@@ -78,7 +79,7 @@ namespace Execution {
         };
 
         template <typename R>
-        auto operator()(R && error) const
+        auto operator()(R &&error) const
         {
             return sender<R> { std::forward<R>(error) };
         }
@@ -109,7 +110,8 @@ namespace Execution {
         };
 
         template <typename T>
-        static auto return_types_helper() {
+        static auto return_types_helper()
+        {
             if constexpr (std::same_as<T, void>) {
                 return type_pack<> {};
             } else if constexpr (InstanceOf<T, std::tuple>) {
@@ -182,6 +184,106 @@ namespace Execution {
     template <typename T>
     inline constexpr then_t::typed<T> typed_then;
 
+    struct reduce_stream_t {
+
+        template <typename Rec, typename Stream, typename T, typename F>
+        struct state : base_state<Rec> {
+
+            struct receiver {
+                template <typename CPO, typename... Args>
+                friend auto tag_invoke(CPO f, receiver &rec, Args &&...args)
+                    -> tag_invoke_result_t<CPO, Rec &, Args...>
+                {
+                    return f(rec.mState->mRec, std::forward<Args>(args)...);
+                }
+
+                template <typename U>
+                void set_value(U&& value) {
+                    mState->reduce(std::forward<U>(value));
+                }
+
+                template <typename... R>
+                void set_error(R &&...error) {
+                    throw 0;
+                }
+
+                void set_done() {
+                    mState->done();
+                }
+
+                state *mState;
+            };
+
+            using Sender = std::invoke_result_t<decltype(&Stream::next), Stream>;
+
+            using State = connect_result_t<Sender, receiver>;
+
+            void start()
+            {
+                construct(mState,
+                    DelayedConstruct<State> { [this]() { return connect(mStream.next(), receiver { this }); } });
+                mState->start();
+            }
+
+            void done() {
+                destruct(mState);
+                mRec.set_value(std::forward<T>(mAcc));
+            }
+
+            template <typename U>
+            void reduce(U&& value) {
+                mAcc = mReducer(std::forward<T>(mAcc), std::forward<U>(value));
+                destruct(mState);
+                start();
+            }
+
+            Stream mStream;
+            T mAcc;
+            F mReducer;
+
+            ManualLifetime<State> mState = std::nullopt;
+        };
+
+        template <typename Stream, typename T, typename F>
+        struct sender {
+            template <template <typename...> typename Tuple>
+            using value_types = Tuple<T>;
+
+            template <typename Rec>
+            friend auto tag_invoke(connect_t, sender &&sender, Rec &&rec)
+            {
+                return state<Rec, Stream, T, F> { std::forward<Rec>(rec), std::forward<Stream>(sender.mStream), std::forward<T>(sender.mInitial), std::forward<F>(sender.mReducer) };
+            }
+
+            Stream mStream;
+            T mInitial;
+            F mReducer;
+        };
+
+        template <typename Stream, typename T, typename F>
+        friend auto tag_invoke(reduce_stream_t, Stream &&stream, T &&initial, F &&reducer)
+        {
+            return sender<Stream, T, F> { std::forward<Stream>(stream), std::forward<T>(initial), std::forward<F>(reducer) };
+        }
+
+        template <typename Stream, typename T, typename F>
+        requires tag_invocable<reduce_stream_t, Stream, T, F>
+        auto operator()(Stream &&stream, T &&initial, F &&reducer) const
+            noexcept(is_nothrow_tag_invocable_v<reduce_stream_t, Stream, T, F>)
+                -> tag_invoke_result_t<reduce_stream_t, Stream, T, F>
+        {
+            return tag_invoke(*this, std::forward<Stream>(stream), std::forward<T>(initial), std::forward<F>(reducer));
+        }
+
+        template <typename T, typename F>
+        auto operator()(T &&initial, F &&reducer) const
+        {
+            return pipable_from_right(*this, std::forward<T>(initial), std::forward<F>(reducer));
+        }
+    };
+
+    inline constexpr reduce_stream_t reduce_stream;
+
     struct finally_t {
 
         template <typename Rec, typename F>
@@ -195,12 +297,14 @@ namespace Execution {
             }
 
             template <typename... R>
-            void set_error(R &&...errors) {
+            void set_error(R &&...errors)
+            {
                 mFinally();
                 this->mRec.set_error(std::forward<R>(errors)...);
             }
 
-            void set_done() {
+            void set_done()
+            {
                 mFinally();
                 this->mRec.set_done();
             }

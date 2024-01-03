@@ -536,6 +536,9 @@ namespace Tools {
                     std::visit(overloaded {
                                    [](const Execution::State::Text &text) {
                                        ImGui::Text(text.mText);
+                                   },
+                                   [](const Execution::State::Progress &progress) {
+                                       ImGui::ProgressBar(progress.mRatio, ImVec2 { -1.0f, 10.0f }, "");
                                    } },
                         desc);
                 });

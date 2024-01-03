@@ -141,47 +141,47 @@ struct ctorHelper {
         };                                                                   \
     }
 
-#define METATABLE_ENTRY(Name, Acc)                                                      \
-    namespace Engine {                                                                  \
-        template <>                                                                     \
-        struct LineStruct<MetaTableTag, __LINE__> : MetaTableLineStruct<__LINE__ - 1> { \
-            constexpr const std::pair<const char *, Accessor> *data() const             \
-            {                                                                           \
-                if constexpr (MetaTableLineStruct<__LINE__ - 1>::base)                  \
-                    return &mData;                                                      \
-                else                                                                    \
-                    return MetaTableLineStruct<__LINE__ - 1>::data();                   \
-            }                                                                           \
-            static constexpr const bool base = false;                                   \
-            std::pair<const char *, Accessor> mData = { Name, Acc };                    \
-        };                                                                              \
+#define METATABLE_ENTRY(Name, Acc)                                          \
+    namespace Engine {                                                      \
+        LINE_STRUCT(MetaTableTag)                                           \
+        {                                                                   \
+            constexpr const std::pair<const char *, Accessor> *data() const \
+            {                                                               \
+                if constexpr (BASE_STRUCT(MetaTableTag)::base)              \
+                    return &mData;                                          \
+                else                                                        \
+                    return BASE_STRUCT(MetaTableTag)::data();               \
+            }                                                               \
+            static constexpr const bool base = false;                       \
+            std::pair<const char *, Accessor> mData = { Name, Acc };        \
+        };                                                                  \
     }
 
-#define CONSTRUCTOR(...)                                                                        \
-    namespace Engine {                                                                          \
-        template <>                                                                             \
-        struct LineStruct<MetaTableCtorTag, __LINE__> : MetaTableCtorLineStruct<__LINE__ - 1> { \
-            constexpr const Constructor *data() const                                           \
-            {                                                                                   \
-                if constexpr (MetaTableCtorLineStruct<__LINE__ - 1>::base)                      \
-                    return &mData;                                                              \
-                else                                                                            \
-                    return MetaTableCtorLineStruct<__LINE__ - 1>::data();                       \
-            }                                                                                   \
-            static constexpr const bool base = false;                                           \
-            Constructor mData = ctorHelper<Ty>::ctor<__VA_ARGS__>();                            \
-        };                                                                                      \
+#define CONSTRUCTOR(...)                                             \
+    namespace Engine {                                               \
+        LINE_STRUCT(MetaTableCtorTag)                                \
+        {                                                            \
+            constexpr const Constructor *data() const                \
+            {                                                        \
+                if constexpr (BASE_STRUCT(MetaTableCtorTag)::base)   \
+                    return &mData;                                   \
+                else                                                 \
+                    return BASE_STRUCT(MetaTableCtorTag)::data();    \
+            }                                                        \
+            static constexpr const bool base = false;                \
+            Constructor mData = ctorHelper<Ty>::ctor<__VA_ARGS__>(); \
+        };                                                           \
     }
 
-#define METATABLE_END(T)                                                          \
-    METATABLE_ENTRY(nullptr, SINGLE_ARG({ nullptr, nullptr }))                    \
-    CONSTRUCTOR(void)                                                             \
-    namespace Meta_##T                                                            \
-    {                                                                             \
-        static constexpr ::Engine::MetaTableLineStruct<__LINE__> sMembers = {};   \
-        static constexpr ::Engine::MetaTableCtorLineStruct<__LINE__> sCtors = {}; \
-    }                                                                             \
-    DLL_EXPORT_VARIABLE(constexpr, const ::Engine::MetaTable, , table, SINGLE_ARG({ #T, ::Engine::type_holder<T>, ::Engine::type_holder<::Engine::MetaTableLineStruct<__LINE__>::BaseT>, Meta_##T::sMembers.data(), Meta_##T::sCtors.data() }), T);
+#define METATABLE_END(T)                                                                         \
+    METATABLE_ENTRY(nullptr, SINGLE_ARG({ nullptr, nullptr }))                                   \
+    CONSTRUCTOR(void)                                                                            \
+    namespace Meta_##T                                                                           \
+    {                                                                                            \
+        static constexpr ::Engine::LineStruct<::Engine::MetaTableTag, __LINE__> sMembers = {};   \
+        static constexpr ::Engine::LineStruct<::Engine::MetaTableCtorTag, __LINE__> sCtors = {}; \
+    }                                                                                            \
+    DLL_EXPORT_VARIABLE(constexpr, const ::Engine::MetaTable, , table, SINGLE_ARG({ #T, ::Engine::type_holder<T>, ::Engine::type_holder<Engine::MetaTableLineStruct<__LINE__>::BaseT>, Meta_##T::sMembers.data(), Meta_##T::sCtors.data() }), T);
 
 #define NAMED_MEMBER(Name, M) \
     METATABLE_ENTRY(STRINGIFY(Name), SINGLE_ARG(::Engine::member<Ty, &Ty::M>()))

@@ -13,7 +13,7 @@
 
 namespace Engine {
 namespace NodeGraph {
-
+    /*
     template <uint32_t Node, uint32_t Index, uint32_t Group = 0>
     struct SenderConnection {
         using value_type = SenderConnection;
@@ -277,6 +277,6 @@ namespace NodeGraph {
         using Traits = Execution::typed_sender_traits<Sender>;
 
         return generate<Traits>(graph, std::move(parent));
-    }
+    }*/
 }
 }

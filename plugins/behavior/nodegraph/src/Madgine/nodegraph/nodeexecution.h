@@ -26,6 +26,7 @@ namespace NodeGraph {
         void write(const NodeBase &node, const ValueType &v, uint32_t dataOutIndex, uint32_t group = 0);
 
         bool readVar(std::string_view name, ValueType &out);
+        bool writeVar(std::string_view name, const ValueType &out);
     };
 
     template <typename Node>
@@ -49,10 +50,15 @@ namespace NodeGraph {
             if (handle.readVar(handle.mNode.template getDynamicName<Name>(), v)) {
                 out = v.as<O>();
                 return true;
-            }
-            else {
+            } else {
                 return false;
             }
+        }
+
+        template <fixed_string Name, typename T>
+        friend bool tag_invoke(Execution::store_var_t<Name>, NodeInterpretHandle &handle, T &&value)
+        {
+            return handle.writeVar(handle.mNode.template getDynamicName<Name>(), std::forward<T>(value));
         }
     };
 
@@ -76,6 +82,11 @@ namespace NodeGraph {
         {
             auto &handle = Execution::get_context(mRec);
             Execution::connect(handle.mInterpreter.interpretSubGraph(handle.mNode.flowOutTarget(0, flowOutIndex)), std::forward<Rec>(mRec)).start();
+        }
+
+        friend Rec &tag_invoke(Execution::get_receiver_t, NodeState &state)
+        {
+            return state.mRec;
         }
 
         Rec mRec;
@@ -108,13 +119,14 @@ namespace NodeGraph {
 
     template <typename... T>
     struct NodeReader {
+        using Signature = Execution::signature<T...>;
+
         using result_type = void;
         template <template <typename...> typename Tuple>
         using value_types = Tuple<decayed_t<T>...>;
 
-        NodeReader(size_t *baseIndex = nullptr, NodeResults *variadicBuffer = nullptr)
+        NodeReader(size_t *baseIndex = nullptr)
             : mBaseIndex(baseIndex ? *baseIndex : 0)
-            , mVariadicBuffer(variadicBuffer)
         {
             if (baseIndex)
                 *baseIndex += sizeof...(T);
@@ -134,28 +146,25 @@ namespace NodeGraph {
             template <size_t... I>
             void helper(std::index_sequence<I...>)
             {
-                size_t variadicIndex = 0;
                 auto &handle = Execution::get_context(this->mRec);
-                std::tuple<typed_Value<T>...> data;
-                TupleUnpacker::forEach(data, [&]<typename Ty>(typed_Value<Ty> &v) {
-                    if constexpr (InstanceOf<Ty, Execution::recursive>) {
-                        assert(mVariadicBuffer);
-                        v = (*mVariadicBuffer)[variadicIndex++];
-                    } else {
+                if (handle.mNode.dataInCount() == mIndex) {
+                    this->set_done();
+                } else {
+                    std::tuple<typed_Value<T>...> data;
+                    TupleUnpacker::forEach(data, [&]<typename Ty>(typed_Value<Ty> &v) {
                         handle.read(v, mIndex++);
-                    }
-                });
-                this->set_value(std::get<I>(data).template as<decayed_t<T>>()...);
+                    });
+                    this->set_value(std::get<I>(data).template as<decayed_t<T>>()...);
+                }
             }
 
             size_t mIndex = 0;
-            NodeResults *mVariadicBuffer = nullptr;
         };
 
         template <typename Rec>
         friend auto tag_invoke(Execution::connect_t, NodeReader &&reader, Rec &&rec)
         {
-            return state<Rec> { std::forward<Rec>(rec), reader.mBaseIndex, reader.mVariadicBuffer };
+            return state<Rec> { std::forward<Rec>(rec), reader.mBaseIndex };
         }
 
         template <typename Rec>
@@ -179,11 +188,13 @@ namespace NodeGraph {
         }
 
         size_t mBaseIndex = 0;
-        NodeResults *mVariadicBuffer = nullptr;
     };
 
-    template <uint32_t flowOutIndex>
+    template <size_t flowOutIndex, typename... Arguments>
     struct NodeAlgorithm {
+
+        using Signature = Execution::signature<Arguments...>;
+
         template <typename... Args>
         auto operator()(Args &&...args)
         {
@@ -201,15 +212,29 @@ namespace NodeGraph {
     struct NodeReceiver : NodeExecutionReceiver<Node> {
         Execution::VirtualReceiverBase<InterpretResult> &mReceiver;
 
-        void set_value() {
+        void set_value()
+        {
             continueExecution(this->mInterpreter, this->mNode, mReceiver);
         }
-        void set_done() {
+        void set_done()
+        {
             mReceiver.set_done();
         }
-        void set_error(GenericResult result) {
+        void set_error(GenericResult result)
+        {
             mReceiver.set_error(result);
         }
+    };
+
+    template <typename T>
+    struct NodeStream {
+        using Signature = Execution::signature<T>;
+
+        NodeReader<T> next() {
+            return { &mIndex };
+        }
+
+        size_t mIndex = 0;
     };
 
 }

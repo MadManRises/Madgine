@@ -69,8 +69,10 @@ struct IntervalClock {
         template <typename F>
         friend void tag_invoke(Execution::visit_state_t, WaitState &state, F &&f)
         {
-            if (state.mDuration.count() > 0)
-                f(Execution::State::Text { "Waiting " + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(state.mWaitUntil - state.mClock->mLastTick).count()) + " ms" });
+            if (state.mDuration.count() > 0) {
+                std::chrono::steady_clock::duration elapsed = std::chrono::duration_cast<std::chrono::steady_clock::duration>(state.mWaitUntil - state.mClock->mLastTick);
+                f(Execution::State::Progress { 1.0f - (static_cast<float>(elapsed.count()) / state.mDuration.count()) });
+            }
         }
 
         friend std::string tag_invoke(get_behavior_name_t, const WaitState &state)

@@ -78,14 +78,20 @@ namespace NodeGraph {
         if (location)
             location->mNode = node;
 
-        Debug::Debugger::getSingleton().yield(&receiver, [=, &receiver]() {
+        auto callback = [=, &receiver]() {
             if (pin && pin.mNode) {
                 node->interpret({ *this, *node, receiver }, mData[pin.mNode - 1], pin.mIndex, pin.mGroup);
             } else {
                 Debug::Debugger::getSingleton().stepOut(&receiver);
                 receiver.set_value();
             }
-        });
+        };
+
+        if (Debug::Debugger::getSingleton().pass(&receiver)) {
+            callback();
+        }else{
+            Debug::Debugger::getSingleton().yield(&receiver, std::move(callback));
+        }
     }
 
     void NodeInterpreterStateBase::read(ValueType &retVal, Pin pin)
@@ -129,9 +135,10 @@ namespace NodeGraph {
         bool gotValue = false;
         for (const std::unique_ptr<NodeInterpreterData> &data : mData) {
             if (data) {
-                bool hadValue = gotValue;
-                gotValue = data->readVar(result, name);
-                assert(!hadValue || !gotValue);
+                if (data->readVar(result, name)) {
+                    assert(!gotValue);
+                    gotValue = true;
+                }
             }
         }
         return gotValue;
@@ -142,9 +149,10 @@ namespace NodeGraph {
         bool gotValue = false;
         for (const std::unique_ptr<NodeInterpreterData> &data : mData) {
             if (data) {
-                bool hadValue = gotValue;
-                gotValue = data->writeVar(name, v);
-                assert(!hadValue || !gotValue);
+                if (data->writeVar(name, v)) {
+                    assert(!gotValue);
+                    gotValue = true;
+                }
             }
         }
         return gotValue;

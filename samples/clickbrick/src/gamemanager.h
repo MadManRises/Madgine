@@ -57,9 +57,10 @@ namespace ClickBrick {
     };
 
     Engine::Behavior Brick(float speed, Engine::Vector3 dir, Engine::Quaternion q);
+    Engine::Behavior Test();
 
 }
 
 REGISTER_TYPE(ClickBrick::GameManager)
 
-DECLARE_NATIVE_BEHAVIOR(ClickBrick::Brick);
+DECLARE_NATIVE_BEHAVIOR(ClickBrick::Test);

@@ -182,9 +182,11 @@ struct codegen_connect_t {
         struct state : codegen_base_state<Rec> {
             auto generate()
             {
-                return[this]<size_t... Is>(std::index_sequence<Is...>) {
+                return [this]<size_t... Is>(std::index_sequence<Is...>)
+                {
                     return std::make_tuple(CodeGen::Constant { std::get<Is>(mArgs)... });
-                }(std::index_sequence_for<Args...> {});      
+                }
+                (std::index_sequence_for<Args...> {});
             }
             std::tuple<Args...> mArgs;
         };
@@ -203,6 +205,19 @@ struct codegen_connect_t {
             T mTransform;
         };
         return state { { std::move(sender.mSender), std::forward<Rec>(rec) }, std::forward<T>(sender.mTransform) };
+    }
+
+    template <typename Stream, typename T, typename F, typename Rec>
+    friend auto tag_invoke(codegen_connect_t, Engine::Execution::reduce_stream_t::sender<Stream, T, F> &&sender, Rec &&rec)
+    {
+        struct state {
+            auto generate()
+            {
+                return std::make_tuple();
+            }
+           
+        };
+        return state { };
     }
 
     template <typename C, typename F, typename Rec>
@@ -228,8 +243,8 @@ struct codegen_connect_t {
     template <typename Sender, typename Rec>
     requires tag_invocable<codegen_connect_t, Sender, Rec>
     auto operator()(Sender &&sender, Rec &&rec) const
-       noexcept(is_nothrow_tag_invocable_v<codegen_connect_t, Sender, Rec>)
-         -> tag_invoke_result_t<codegen_connect_t, Sender, Rec>
+        noexcept(is_nothrow_tag_invocable_v<codegen_connect_t, Sender, Rec>)
+            -> tag_invoke_result_t<codegen_connect_t, Sender, Rec>
     {
         return tag_invoke(*this, std::forward<Sender>(sender), std::forward<Rec>(rec));
     }

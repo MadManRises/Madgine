@@ -29,6 +29,19 @@ struct is_instance_auto<U<V...>, U> : std::true_type {
 template <typename T, template <auto...> typename U>
 concept InstanceOfA = is_instance_auto<T, U>::value;
 
+template <typename, template <auto, typename...> typename>
+struct is_instance_auto1 : std::false_type {
+};
+
+template <auto A, typename... V, template <auto, typename...> typename U>
+struct is_instance_auto1<U<A, V...>, U> : std::true_type {
+    using value_argument = auto_holder<A>;
+    using arguments = type_pack<V...>;
+};
+
+template <typename T, template <auto, typename...> typename U>
+concept InstanceOfA1 = is_instance_auto1<T, U>::value;
+
 template <typename T>
 concept Tuple = InstanceOf<T, std::tuple>;
 

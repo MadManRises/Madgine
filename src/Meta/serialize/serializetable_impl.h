@@ -30,10 +30,6 @@ namespace Serialize {
 
         struct SerializerTag;
         struct FunctionTag;
-        template <size_t... Ids>
-        using FunctionLineStruct = LineStruct<FunctionTag, Ids...>;
-        template <size_t... Ids>
-        using SerializerLineStruct = LineStruct<SerializerTag, Ids...>;
 
         template <typename _disambiguate__dont_remove, auto P, auto Getter, auto Setter>
         constexpr Serializer encapsulated_pointer(const char *name)
@@ -338,63 +334,63 @@ namespace Serialize {
 #define SERIALIZETABLE_INHERIT_BEGIN(T, Base, ...) SERIALIZETABLE_BEGIN_IMPL(T, &serializeTable<Base>, __VA_ARGS__)
 #define SERIALIZETABLE_BEGIN(T, ...) SERIALIZETABLE_BEGIN_IMPL(T, nullptr, __VA_ARGS__)
 
-#define SERIALIZETABLE_ENTRY(Ser)                                                                                                                       \
-    namespace Engine {                                                                                                                                  \
-        template <>                                                                                                                                     \
-        struct LineStruct<Serialize::__serialize_impl__::SerializerTag, __LINE__> : Serialize::__serialize_impl__::SerializerLineStruct<__LINE__ - 1> { \
-            constexpr const Serialize::Serializer *data() const                                                                                         \
-            {                                                                                                                                           \
-                if constexpr (Serialize::__serialize_impl__::SerializerLineStruct<__LINE__ - 1>::base)                                                  \
-                    return &mData;                                                                                                                      \
-                else                                                                                                                                    \
-                    return Serialize::__serialize_impl__::SerializerLineStruct<__LINE__ - 1>::data();                                                   \
-            }                                                                                                                                           \
-            static constexpr const bool base = false;                                                                                                   \
-            Serialize::Serializer mData = Ser;                                                                                                          \
-        };                                                                                                                                              \
+#define SERIALIZETABLE_ENTRY(Ser)                                                                      \
+    namespace Engine {                                                                                 \
+        LINE_STRUCT(Serialize::__serialize_impl__::SerializerTag)                                      \
+        {                                                                                              \
+            constexpr const Serialize::Serializer *data() const                                        \
+            {                                                                                          \
+                if constexpr (BASE_STRUCT(Serialize::__serialize_impl__::SerializerTag)::base) \
+                    return &mData;                                                                     \
+                else                                                                                   \
+                    return BASE_STRUCT(Serialize::__serialize_impl__::SerializerTag)::data();  \
+            }                                                                                          \
+            static constexpr const bool base = false;                                                  \
+            Serialize::Serializer mData = Ser;                                                         \
+        };                                                                                             \
     }
 
-#define SYNCFUNCTION(f, ...)                                                                                                                        \
-    namespace Engine {                                                                                                                              \
-        template <>                                                                                                                                 \
-        struct LineStruct<Serialize::__serialize_impl__::FunctionTag, __LINE__> : Serialize::__serialize_impl__::FunctionLineStruct<__LINE__ - 1> { \
-            constexpr const Serialize::SyncFunction *data() const                                                                                   \
-            {                                                                                                                                       \
-                if constexpr (Serialize::__serialize_impl__::FunctionLineStruct<__LINE__ - 1>::base)                                                \
-                    return &mData;                                                                                                                  \
-                else                                                                                                                                \
-                    return Serialize::__serialize_impl__::FunctionLineStruct<__LINE__ - 1>::data();                                                 \
-            }                                                                                                                                       \
-            static constexpr const bool base = false;                                                                                               \
-            static constexpr const size_t count = Serialize::__serialize_impl__::FunctionLineStruct<__LINE__ - 1>::count + 1;                       \
-            Serialize::SyncFunction mData = Serialize::__serialize_impl__::syncFunction<&Ty::f, __VA_ARGS__>();                                     \
-            template <auto g>                                                                                                                       \
-            static constexpr uint16_t getIndex()                                                                                                    \
-            {                                                                                                                                       \
-                if constexpr (FSameAs<&Ty::f, g>)                                                                                                   \
-                    return count - 1;                                                                                                               \
-                else                                                                                                                                \
-                    return Serialize::__serialize_impl__::FunctionLineStruct<__LINE__ - 1>::getIndex<g>();                                          \
-            }                                                                                                                                       \
-        };                                                                                                                                          \
+#define SYNCFUNCTION(f, ...)                                                                                                  \
+    namespace Engine {                                                                                                        \
+        LINE_STRUCT(Serialize::__serialize_impl__::FunctionTag)                                                               \
+        {                                                                                                                     \
+            constexpr const Serialize::SyncFunction *data() const                                                             \
+            {                                                                                                                 \
+                if constexpr (BASE_STRUCT(Serialize::__serialize_impl__::FunctionTag)::base)                          \
+                    return &mData;                                                                                            \
+                else                                                                                                          \
+                    return BASE_STRUCT(Serialize::__serialize_impl__::FunctionTag)::data();                           \
+            }                                                                                                                 \
+            static constexpr const bool base = false;                                                                         \
+            static constexpr const size_t count = BASE_STRUCT(Serialize::__serialize_impl__::FunctionTag)::count + 1; \
+            Serialize::SyncFunction mData = Serialize::__serialize_impl__::syncFunction<&Ty::f, __VA_ARGS__>();               \
+            template <auto g>                                                                                                 \
+            static constexpr uint16_t getIndex()                                                                              \
+            {                                                                                                                 \
+                if constexpr (FSameAs<&Ty::f, g>)                                                                             \
+                    return count - 1;                                                                                         \
+                else                                                                                                          \
+                    return BASE_STRUCT(Serialize::__serialize_impl__::FunctionTag)::getIndex<g>();                    \
+            }                                                                                                                 \
+        };                                                                                                                    \
     }
 
-#define SERIALIZETABLE_END(T)                                                                                         \
-    SERIALIZETABLE_ENTRY({ nullptr })                                                                                 \
-    namespace Serialize_##T                                                                                           \
-    {                                                                                                                 \
-        static constexpr ::Engine::Serialize::__serialize_impl__::SerializerLineStruct<__LINE__> fields = {};         \
-        static constexpr ::Engine::Serialize::__serialize_impl__::FunctionLineStruct<__LINE__> functions = {};        \
-    };                                                                                                                \
-    namespace Engine {                                                                                                \
-        namespace Serialize {                                                                                         \
-            namespace __serialize_impl__ {                                                                            \
-                template <>                                                                                           \
-                struct SyncFunctionTable<T> : ::Engine::Serialize::__serialize_impl__::FunctionLineStruct<__LINE__> { \
-                };                                                                                                    \
-            }                                                                                                         \
-        }                                                                                                             \
-    }                                                                                                                 \
+#define SERIALIZETABLE_END(T)                                                                                                        \
+    SERIALIZETABLE_ENTRY({ nullptr })                                                                                                \
+    namespace Serialize_##T                                                                                                          \
+    {                                                                                                                                \
+        static constexpr ::Engine::LineStruct<::Engine::Serialize::__serialize_impl__::SerializerTag, __LINE__> fields = {};         \
+        static constexpr ::Engine::LineStruct<::Engine::Serialize::__serialize_impl__::FunctionTag, __LINE__> functions = {};        \
+    };                                                                                                                               \
+    namespace Engine {                                                                                                               \
+        namespace Serialize {                                                                                                        \
+            namespace __serialize_impl__ {                                                                                           \
+                template <>                                                                                                          \
+                struct SyncFunctionTable<T> : ::Engine::LineStruct<::Engine::Serialize::__serialize_impl__::FunctionTag, __LINE__> { \
+                };                                                                                                                   \
+            }                                                                                                                        \
+        }                                                                                                                            \
+    }                                                                                                                                \
     DLL_EXPORT_VARIABLE2(constexpr, const ::Engine::Serialize::SerializeTable, ::, serializeTable, SINGLE_ARG({ #T, ::Engine::type_holder<T>, ::Serialize_##T::baseType, ::Serialize_##T::readState, ::Serialize_##T::fields.data(), ::Serialize_##T::functions.data(), std::derived_from<T, ::Engine::Serialize::TopLevelUnitBase> }), T);
 
 #define FIELD(...) \

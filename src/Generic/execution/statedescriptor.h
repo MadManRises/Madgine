@@ -7,9 +7,12 @@ namespace Execution {
         struct Text {
             std::string mText;
         };
+        struct Progress {
+            float mRatio;
+        };
     }
 
-    using StateDescriptor = std::variant<State::Text>;
+    using StateDescriptor = std::variant<State::Text, State::Progress>;
 
     struct visit_state_t {
         template <typename T, typename F>
