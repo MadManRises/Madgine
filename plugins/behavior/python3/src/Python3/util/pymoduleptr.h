@@ -11,6 +11,8 @@ namespace Scripting {
             PyModulePtr() = default;
             PyModulePtr(std::string_view name);
 
+            static PyModulePtr fromBorrowed(PyObject *);
+
             using PyObjectPtr::operator=;
 
             static PyModulePtr create(std::string_view name);

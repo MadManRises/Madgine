@@ -131,8 +131,16 @@ std::string ValueType::toShortString() const
         [](const EnumHolder &e) {
             return std::string { e.toString() };
         },
+        [](const FlagsHolder &f) {
+            std::stringstream ss;
+            ss << f;
+            return ss.str();
+        },
         [](const KeyValueSender &s) {
             return "<sender>"s;
+        },
+        [](std::chrono::nanoseconds dur) {
+            return "<duration>"s;
         },
         [](const auto &v) {
             return std::to_string(v);

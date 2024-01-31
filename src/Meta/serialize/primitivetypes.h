@@ -6,6 +6,7 @@ namespace Engine {
 namespace Serialize {
 
     struct EnumTag;
+    struct FlagsTag;
 
     using SerializePrimitives = type_pack<
         bool,
@@ -28,6 +29,7 @@ namespace Serialize {
         Vector4,
         Matrix3,
         EnumTag,
+        FlagsTag,
         Color3,
         Color4>;
 
@@ -60,8 +62,18 @@ namespace Serialize {
     };
 
     template <>
-    struct PrimitiveReducer<DynamicEnum> {
+    struct PrimitiveReducer<EnumHolder> {
         typedef EnumTag type;
+    };
+
+    template <typename T>
+    struct PrimitiveReducer<Flags<T>> {
+        typedef FlagsTag type;
+    };
+
+    template <>
+    struct PrimitiveReducer<FlagsHolder> {
+        typedef FlagsTag type;
     };
 
     template <typename T, T invalid>
@@ -99,6 +111,10 @@ namespace Serialize {
         const EnumMetaTable *mTable;
     };
 
+    template <>
+    struct PrimitiveHolder<FlagsTag> {
+        const EnumMetaTable *mTable;
+    };
     
 }
 }

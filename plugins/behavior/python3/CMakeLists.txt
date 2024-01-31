@@ -25,7 +25,7 @@ FolderSources(sources src Python3 python3debugger.cpp python3debugger.h python3e
 
 add_plugin(Python3 Madgine Scripting ${sources} PRECOMPILED_HEADER src/Python3/python3lib.h)
 
-target_link_plugins(Python3 Root Resources Debugger)
+target_link_plugins(Python3 Root Resources Debugger Behavior)
 
 target_link_libraries(Python3 PUBLIC Python3::Python)
 
@@ -41,7 +41,7 @@ FolderSources(sources "" tools)
 
 add_tools(Python3 ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/Python3/python3toolslib.h)
 
-target_link_plugins(Python3Tools Tools TextEditor)
+target_link_plugins(Python3Tools Tools TextEditor DebuggerTools)
 
 
 

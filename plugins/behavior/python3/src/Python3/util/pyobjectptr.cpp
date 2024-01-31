@@ -12,6 +12,11 @@
 #include <frameobject.h>
 #include <traceback.h>
 
+#include "python3lock.h"
+#include "../python3debugger.h"
+
+#include "pymoduleptr.h"
+
 namespace Engine {
 namespace Scripting {
     namespace Python3 {
@@ -95,6 +100,19 @@ namespace Scripting {
             return PyObject_Call(mObject, args, kwargs);
         }
 
+        ExecutionSender PyObjectPtr::callAsync() const
+        {
+            PyDictPtr locals = PyDict_New();
+
+            PyFramePtr frame = PyFrame_New(
+                PyThreadState_Get(),
+                reinterpret_cast<PyCodeObject *>(PyFunction_GetCode(mObject)),
+                PyFunction_GetGlobals(mObject),
+                locals);
+
+            return { std::move(frame) };
+        }
+
         PyObjectFieldAccessor PyObjectPtr::operator[](const PyObjectPtr &name) const
         {
             return { *this, name };
@@ -109,32 +127,6 @@ namespace Scripting {
         PyObject *PyObjectPtr::release()
         {
             return std::exchange(mObject, nullptr);
-        }
-
-        void PyObjectPtr::handleError()
-        {
-            if (!mObject) {
-                PyObjectPtr type, value, traceback;
-                PyErr_Fetch(&type, &value, &traceback);
-
-                const char *filename = "";
-                size_t line = 0;
-
-                if (traceback) {
-                    PyTracebackObject *tb = reinterpret_cast<PyTracebackObject *>(static_cast<PyObject *>(traceback));
-                    while (tb->tb_next)
-                        tb = tb->tb_next;
-
-                    filename = PyUnicode_AsUTF8(tb->tb_frame->f_code->co_filename);
-                    line = tb->tb_frame->f_code->co_firstlineno;
-                }
-
-                const char *errorMessage = PyUnicode_AsUTF8(value);
-
-                if (errorMessage)
-                    Engine::Log::LogDummy { Engine::Log::MessageType::ERROR_TYPE, filename, line } << "Unhandled Python Exception:\n"
-                                                                                                     << errorMessage;
-            }
         }
 
         PyObjectPtr::operator bool() const

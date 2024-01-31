@@ -296,6 +296,8 @@ namespace Serialize {
                 return {};
             } else if constexpr (InstanceOf<T, EnumType>) {
                 return visitor.visit(PrimitiveHolder<EnumTag> { &T::Representation::sTable }, in, name, tags);
+            } else if constexpr (InstanceOf<T, Flags>){
+                return visitor.visit(PrimitiveHolder<FlagsTag> { &T::Representation::sTable }, in, name, tags);
             } else if constexpr (PrimitiveType<T>) {
                 return visitor.visit(PrimitiveHolder<typename PrimitiveReducer<T>::type> {}, in, name, tags);
             } else if constexpr (std::derived_from<T, SyncableUnitBase>) {
@@ -481,6 +483,24 @@ namespace Serialize {
             STREAM_PROPAGATE_ERROR(Serialize::visitStream<V>(in, nullptr, callback));
             return in.endCompoundRead(name);
         }
+    };
+
+    template <typename Rep, typename Period, typename... Configs>
+    struct Operations<std::chrono::duration<Rep, Period>, Configs...> {
+
+        static StreamResult read(FormattedSerializeStream &in, std::chrono::duration<Rep, Period> &d, const char *name, const CallerHierarchyBasePtr &hierarchy = {})
+        {
+            std::chrono::nanoseconds::rep value;
+            STREAM_PROPAGATE_ERROR(Serialize::read<std::chrono::nanoseconds::rep>(in, value, name, hierarchy));
+            d = std::chrono::duration_cast<std::chrono::duration<Rep, Period>>(std::chrono::nanoseconds { value });
+            return {};
+        }
+
+        static void write(FormattedSerializeStream &out, const std::chrono::duration<Rep, Period> &d, const char *name, const CallerHierarchyBasePtr &hierarchy = {})
+        {
+            Serialize::write<std::chrono::nanoseconds::rep>(out, std::chrono::duration_cast<std::chrono::nanoseconds>(d).count(), name, hierarchy);
+        }
+
     };
 
 }

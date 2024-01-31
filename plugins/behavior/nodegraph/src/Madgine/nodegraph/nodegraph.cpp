@@ -27,6 +27,8 @@
 
 #include "nodeinterpreter.h"
 
+#include "nodes/util/librarynode.h"
+
 METATABLE_BEGIN(Engine::NodeGraph::NodeGraph)
 METATABLE_END(Engine::NodeGraph::NodeGraph)
 
@@ -841,7 +843,7 @@ namespace NodeGraph {
         }
     }
 
-    NodeInterpreter NodeGraph::interpret() const
+    NodeInterpreterSender NodeGraph::interpret() const
     {
         return { this };
     }
@@ -858,10 +860,23 @@ namespace NodeGraph {
         std::string name;
         STREAM_PROPAGATE_ERROR(read(in, name, "type"));
 
-        if (!NodeRegistry::sComponentsByName().contains(name))
+        bool isNativeNode = NodeRegistry::sComponentsByName().contains(name);
+        BehaviorHandle libraryBehavior;
+        bool isLibraryNode = libraryBehavior.fromString(name);
+
+        if (!isNativeNode && !isLibraryNode)
             return STREAM_INTEGRITY_ERROR(in) << "No Node \"" << name << "\" available.\n"
                                               << "Make sure to check the loaded plugins.";
-        node = createNode(name);
+
+        if (isNativeNode && isLibraryNode)
+            return STREAM_INTEGRITY_ERROR(in) << "Library and Native Nodes found with same name: " << name;
+
+        if (isNativeNode) {
+            node = createNode(name);
+        } else {
+            node = std::make_unique<LibraryNode>(*this, libraryBehavior);
+        }
+        
         return {};
     }
 

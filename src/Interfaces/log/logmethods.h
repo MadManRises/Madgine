@@ -2,6 +2,8 @@
 
 #include "messagetype.h"
 
+#include "Generic/tag_invoke.h"
+
 namespace Engine {
 namespace Log {
 
@@ -41,6 +43,26 @@ namespace Log {
 #define LOG_ONCE(s) ONCE(LOG(s))
 #define LOG_WARNING_ONCE(s) ONCE(LOG_WARNING(s))
 #define LOG_ERROR_ONCE(s) ONCE(LOG_ERROR(s))
+
+    struct log_for_t {
+        template <typename T>
+        friend auto tag_invoke(log_for_t, MessageType lvl, T &value)
+        {
+            return LogDummy { lvl };
+        }
+
+        template <typename T>
+        requires tag_invocable<log_for_t, MessageType, T&>
+        auto operator()(MessageType lvl, T &value) const
+            noexcept(is_nothrow_tag_invocable_v<log_for_t, MessageType, T&>)
+                -> tag_invoke_result_t<log_for_t, MessageType, T&>
+        {
+            return tag_invoke(*this, lvl, value);
+        }
+
+    };
+
+    inline constexpr log_for_t log_for;
 
 }
 }

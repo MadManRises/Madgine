@@ -24,6 +24,13 @@
 
 #include "Madgine_Tools/texteditor/textdocument.h"
 
+#include "Madgine_Tools/debugger/debuggerview.h"
+
+#include "Python3/util/pylistptr.h"
+#include "Python3/util/pymoduleptr.h"
+#include <code.h>
+#include <frameobject.h>
+
 METATABLE_BEGIN_BASE(Engine::Tools::Python3ImmediateWindow, Engine::Tools::ToolBase)
 METATABLE_END(Engine::Tools::Python3ImmediateWindow)
 
@@ -34,6 +41,52 @@ UNIQUECOMPONENT(Engine::Tools::Python3ImmediateWindow)
 
 namespace Engine {
 namespace Tools {
+
+    void visualizeDebugLocation(DebuggerView *view, const Debug::ContextInfo *context, const Scripting::Python3::Python3DebugLocation *location)
+    {
+        ImGui::BeginGroupPanel(PyUnicode_AsUTF8((location->mFrame->f_code)->co_filename));
+        if (ImGui::TreeNode("Code")) {
+
+            if (ImGui::BeginTable("Code", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_SizingFixedFit)) {
+
+                ImGui::TableSetupColumn("Line", 0);
+                ImGui::TableSetupColumn("Source", ImGuiTableColumnFlags_WidthStretch);
+
+                Scripting::Python3::Python3Lock lock;
+
+                Scripting::Python3::PyModulePtr inspect { "inspect" };
+                Scripting::Python3::PyObjectPtr sourcelines = PyObject_CallFunctionObjArgs(inspect.get("getsourcelines"), location->mFrame, NULL);
+                Scripting::Python3::PyListPtr sources = Scripting::Python3::PyListPtr::fromBorrowed(PyTuple_GetItem(sourcelines, 0));
+                size_t baseLine = PyLong_AsLong(PyTuple_GetItem(sourcelines, 1));
+
+                ImGui::PushFont(view->getTool<TextEditor>().font());
+
+                for (PyObject *line : sources) {
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::Text(std::to_string(baseLine));
+                    ImGui::TableNextColumn();
+
+                    float startY = ImGui::GetCursorScreenPos().y;
+
+                    ImGui::Text(PyUnicode_AsUTF8(line));
+
+                    if (baseLine == location->lineNr()) {
+                        DrawDebugMarker(0.5f * (ImGui::GetCursorScreenPos().y + startY) - 7.0f);
+                    }
+
+                    baseLine++;
+                }
+
+                ImGui::PopFont();
+            }
+            ImGui::EndTable();
+
+            ImGui::TreePop();
+        }
+
+        ImGui::EndGroupPanel();
+    }
 
     Python3ImmediateWindow::Python3ImmediateWindow(ImRoot &root)
         : Tool<Python3ImmediateWindow>(root)
@@ -47,6 +100,8 @@ namespace Tools {
 
     Threading::Task<bool> Python3ImmediateWindow::init()
     {
+        getTool<DebuggerView>().registerDebugLocationVisualizer<visualizeDebugLocation>();
+
         Debug::Debugger::getSingleton().addListener(this);
 
         mEnv = &Scripting::Python3::Python3Environment::getSingleton();
@@ -78,40 +133,46 @@ namespace Tools {
         ImGui::End();
     }
 
-    bool Python3ImmediateWindow::pass(Debug::ContextInfo &context)
+    bool Python3ImmediateWindow::pass(Debug::DebugLocation *location)
     {
 
-        const Scripting::Python3::Python3DebugLocation *location = dynamic_cast<const Scripting::Python3::Python3DebugLocation *>(context.getLocation());
-        if (location) {
-            const Filesystem::Path &path = location->file();
+        const Scripting::Python3::Python3DebugLocation *pyLocation = dynamic_cast<const Scripting::Python3::Python3DebugLocation *>(location);
 
-            if (context.mSingleStepping) {
-                if (!path.empty()) {
-                    TextDocument &doc = getTool<TextEditor>().openDocument(path);
-                    doc.goToLine(location->lineNr());
-                } else {
-                    ImGui::MakeTabVisible("Python3ImmediateWindow");
+        if (pyLocation) {
+            const Filesystem::Path &path = pyLocation->file();
+
+            if (!path.empty()) {
+                TextDocument *doc = getTool<TextEditor>().getDocument(path);
+                if (doc && doc->hasBreakpoint(pyLocation->lineNr())) {
+                    doc->goToLine(pyLocation->lineNr());
+                    return false;
                 }
-                return false;
-            } else {
-                if (!path.empty()) {
-                    TextDocument *doc = getTool<TextEditor>().getDocument(path);
-                    if (doc && doc->hasBreakpoint(location->lineNr())) {
-                        doc->goToLine(location->lineNr());
-                        return false;
-                    }
-                } 
             }
         }
 
         return true;
     }
 
+    void Python3ImmediateWindow::onSuspend(Debug::ContextInfo &context)
+    {
+        const Scripting::Python3::Python3DebugLocation *pyLocation = dynamic_cast<const Scripting::Python3::Python3DebugLocation *>(context.currentLocation());
+
+        if (pyLocation) {
+            const Filesystem::Path &path = pyLocation->file();
+
+            if (!path.empty()) {
+                TextDocument &doc = getTool<TextEditor>().openDocument(path);
+                doc.goToLine(pyLocation->lineNr());
+            }
+        }
+    }
+
     bool Python3ImmediateWindow::interpret(std::string_view command)
     {
         Execution::detach(mEnv->execute(command, [this](std::string_view text) {
             mPrompt->append(text);
-        }) | Execution::finally([this]() { mPrompt->resume(); }));
+        }) | Execution::finally([this]() { mPrompt->resume(); })
+            | Execution::with_debug_location<Execution::SenderLocation>() | Execution::with_sub_debug_location(&Debug::Debugger::getSingleton().createContext()));
         return false;
     }
 

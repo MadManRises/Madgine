@@ -22,6 +22,12 @@ namespace Scripting {
             }
         }
 
+        PyListPtr PyListPtr::fromBorrowed(PyObject *object)
+        {
+            Py_INCREF(object);
+            return object;
+        }
+
         PyListPtr::iterator::iterator(PyObjectPtr list)
             : mList(PyList_Size(list) == 0 ? nullptr : list)
         {

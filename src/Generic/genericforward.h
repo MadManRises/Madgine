@@ -51,6 +51,8 @@ struct EnumType;
 template <typename, typename>
 struct BaseEnum;
 struct EnumMetaTable;
+template <typename>
+struct Flags;
 
 template <typename>
 struct Generator;

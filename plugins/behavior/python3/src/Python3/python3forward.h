@@ -6,6 +6,7 @@ namespace Scripting {
 
         struct Python3Environment;
         struct Python3Lock;
+        struct ExecutionSender;
 
     }
 }

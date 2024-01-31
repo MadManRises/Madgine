@@ -199,7 +199,7 @@ namespace Render {
         return "Scene";
     }
 
-    void SceneRenderPass::debugCameras(Lambda<void(const Camera &, std::string_view)> handler) const
+    void SceneRenderPass::debugCameras(Closure<void(const Camera &, std::string_view)> handler) const
     {
         handler(*mData.mCamera, "SceneRenderPass");
     }

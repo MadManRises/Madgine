@@ -50,4 +50,8 @@ VALUETYPE_TYPE(Object, ObjectPtr, const ObjectPtr &)
 VALUETYPE_SEP
 VALUETYPE_TYPE(Enum, EnumHolder, const EnumHolder &)
 VALUETYPE_SEP
+VALUETYPE_TYPE(Flags, FlagsHolder, const FlagsHolder &)
+VALUETYPE_SEP
 VALUETYPE_TYPE(Sender, KeyValueSender, const KeyValueSender &)
+VALUETYPE_SEP
+VALUETYPE_TYPE(Duration, std::chrono::nanoseconds, std::chrono::nanoseconds, std::chrono::microseconds)

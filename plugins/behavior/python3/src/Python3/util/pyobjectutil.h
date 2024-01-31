@@ -35,6 +35,7 @@ namespace Scripting {
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(uint64_t i);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(bool b);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(float f);
+        MADGINE_PYTHON3_EXPORT PyObject *toPyObject(std::chrono::nanoseconds d);
 
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const TypedScopePtr &scope);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const OwnedScopePtr &scope);
@@ -57,11 +58,12 @@ namespace Scripting {
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const CoW<Matrix3> &m);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const CoW<Matrix4> &m);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const EnumHolder &e);
+        MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const FlagsHolder &f);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const KeyValueFunction &f);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const KeyValueSender &s);
 
         MADGINE_PYTHON3_EXPORT ValueType fromPyObject(PyObject *obj);
-        MADGINE_PYTHON3_EXPORT void fromPyObject(KeyValueReceiver &receiver, PyObject *obj);
+        MADGINE_PYTHON3_EXPORT void fromPyObject(BehaviorReceiver &receiver, PyObject *obj);
 
         MADGINE_PYTHON3_EXPORT ExtendedValueTypeDesc PyToValueTypeDesc(PyObject *obj);
 

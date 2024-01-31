@@ -1,9 +1,10 @@
 #pragma once
 
+#include "../delayedconstruct.h"
+#include "../manuallifetime.h"
 #include "../pipable.h"
 #include "../type_pack.h"
 #include "concepts.h"
-#include "../manuallifetime.h"
 
 namespace Engine {
 namespace Execution {
@@ -47,7 +48,6 @@ namespace Execution {
 
     inline constexpr just_t just;
 
-    template <typename... T>
     struct just_error_t {
 
         template <typename Rec, typename R>
@@ -65,7 +65,7 @@ namespace Execution {
         struct sender {
             using result_type = R;
             template <template <typename...> typename Tuple>
-            using value_types = Tuple<T...>;
+            using value_types = Tuple<>;
 
             using is_sender = void;
 
@@ -85,8 +85,7 @@ namespace Execution {
         }
     };
 
-    template <typename... T>
-    inline constexpr just_error_t<T...> just_error;
+    inline constexpr just_error_t just_error;
 
     struct then_t {
 
@@ -136,14 +135,13 @@ namespace Execution {
                 return algorithm_state<Sender, receiver<Rec, T>> { std::forward<Sender>(sender.mSender), std::forward<Rec>(rec), std::forward<T>(sender.mTransform) };
             }
 
-            Sender mSender;
             T mTransform;
         };
 
         template <typename Sender, typename T>
         friend auto tag_invoke(then_t, Sender &&inner, T &&transform)
         {
-            return sender<Sender, T> { {}, std::forward<Sender>(inner), std::forward<T>(transform) };
+            return sender<Sender, T> { { {}, std::forward<Sender>(inner) }, std::forward<T>(transform) };
         }
 
         template <typename Sender, typename T>
@@ -198,16 +196,19 @@ namespace Execution {
                 }
 
                 template <typename U>
-                void set_value(U&& value) {
+                void set_value(U &&value)
+                {
                     mState->reduce(std::forward<U>(value));
                 }
 
                 template <typename... R>
-                void set_error(R &&...error) {
+                void set_error(R &&...error)
+                {
                     throw 0;
                 }
 
-                void set_done() {
+                void set_done()
+                {
                     mState->done();
                 }
 
@@ -225,13 +226,15 @@ namespace Execution {
                 mState->start();
             }
 
-            void done() {
+            void done()
+            {
                 destruct(mState);
                 mRec.set_value(std::forward<T>(mAcc));
             }
 
             template <typename U>
-            void reduce(U&& value) {
+            void reduce(U &&value)
+            {
                 mAcc = mReducer(std::forward<T>(mAcc), std::forward<U>(value));
                 destruct(mState);
                 start();
@@ -245,7 +248,8 @@ namespace Execution {
         };
 
         template <typename Stream, typename T, typename F>
-        struct sender {
+        struct sender : base_sender {
+            using result_type = void;
             template <template <typename...> typename Tuple>
             using value_types = Tuple<T>;
 
@@ -263,7 +267,7 @@ namespace Execution {
         template <typename Stream, typename T, typename F>
         friend auto tag_invoke(reduce_stream_t, Stream &&stream, T &&initial, F &&reducer)
         {
-            return sender<Stream, T, F> { std::forward<Stream>(stream), std::forward<T>(initial), std::forward<F>(reducer) };
+            return sender<Stream, T, F> { {}, std::forward<Stream>(stream), std::forward<T>(initial), std::forward<F>(reducer) };
         }
 
         template <typename Stream, typename T, typename F>
@@ -321,14 +325,13 @@ namespace Execution {
                 return algorithm_state<Sender, receiver<Rec, F>> { std::forward<Sender>(sender.mSender), std::forward<Rec>(rec), std::forward<F>(sender.mFinally) };
             }
 
-            Sender mSender;
             F mFinally;
         };
 
         template <typename Sender, typename F>
         friend auto tag_invoke(finally_t, Sender &&inner, F &&finally)
         {
-            return sender<Sender, F> { {}, std::forward<Sender>(inner), std::forward<F>(finally) };
+            return sender<Sender, F> { { {}, std::forward<Sender>(inner) }, std::forward<F>(finally) };
         }
 
         template <typename Sender, typename F>
@@ -439,14 +442,13 @@ namespace Execution {
                 return state<Sender, Rec1, Rec2> { std::forward<Sender>(sender.mSender), std::forward<Rec1>(sender.mRec1), std::forward<Rec2>(rec) };
             }
 
-            Sender mSender;
             Rec1 mRec1;
         };
 
         template <typename Sender, typename Rec1>
         friend auto tag_invoke(then_receiver_t, Sender &&inner, Rec1 &&rec1)
         {
-            return sender<Sender, Rec1> { {}, std::forward<Sender>(inner), std::forward<Rec1>(rec1) };
+            return sender<Sender, Rec1> { { {}, std::forward<Sender>(inner) }, std::forward<Rec1>(rec1) };
         }
 
         template <typename S, typename Rec1>
@@ -571,7 +573,7 @@ namespace Execution {
         };
 
         template <typename C, typename F>
-        struct sender {
+        struct sender : base_sender {
             using value_type = typename std::remove_reference_t<C>::value_type &;
             using inner_sender_t = std::invoke_result_t<F, value_type>;
             using result_type = typename inner_sender_t::result_type;
@@ -591,7 +593,7 @@ namespace Execution {
         template <typename C, typename F>
         friend auto tag_invoke(for_each_t, C &&c, F &&f)
         {
-            return sender<C, F> { std::forward<C>(c), std::forward<F>(f) };
+            return sender<C, F> { {}, std::forward<C>(c), std::forward<F>(f) };
         }
 
         template <typename C, typename F>
@@ -663,14 +665,12 @@ namespace Execution {
             {
                 return state<Rec, Sender> { std::forward<Rec>(rec), std::forward<Sender>(sender.mSender) };
             }
-
-            Sender mSender;
         };
 
         template <typename Sender>
         friend auto tag_invoke(repeat_t, Sender &&inner)
         {
-            return sender<Sender> { {}, std::forward<Sender>(inner) };
+            return sender<Sender> { { {}, std::forward<Sender>(inner) } };
         }
 
         template <typename Sender>
@@ -859,38 +859,45 @@ namespace Execution {
         template <typename Rec, typename... Sender>
         struct state;
 
-        template <typename Rec, typename Tag, typename... Sender>
-        struct receiver : algorithm_receiver<Rec &> {
+        template <typename Tag, typename State>
+        struct receiver {
+
+            template <typename CPO, typename... Args>
+            friend auto tag_invoke(CPO f, receiver &rec, Args &&...args)
+                -> tag_invoke_result_t<CPO, typename State::Rec &, Args...>
+            {
+                return f(rec.mState->mRec, std::forward<Args>(args)...);
+            }
 
             template <typename... V>
             void set_value(V &&...value)
             {
-                mState->set_value(Tag {}, this->mRec, std::forward<V>(value)...);
+                mState->set_value(Tag {}, std::forward<V>(value)...);
             }
 
             void set_done()
             {
-                mState->set_done(Tag {}, this->mRec);
+                mState->set_done(Tag {});
             }
 
             template <typename... R>
             void set_error(R &&...result)
             {
-                mState->set_error(Tag {}, this->mRec, std::forward<R>(result)...);
+                mState->set_error(Tag {}, std::forward<R>(result)...);
             }
 
-            state<Rec, Sender...> *mState;
+            State *mState;
         };
 
         template <typename Rec, typename... Sender>
         struct state : base_state<Rec> {
 
             template <size_t I>
-            using inner_rec = receiver<Rec, inner_tag<I>, Sender...>;
+            using inner_rec = receiver<inner_tag<I>, state>;
 
             template <size_t... Is>
-            static auto stateTupleHelper(std::index_sequence<Is...>) -> std::tuple<connect_result_t<Sender, inner_rec<Is>>...> { }
-            using StateTuple = decltype(stateTupleHelper(std::make_index_sequence<sizeof...(Sender)> {}));
+            static auto stateTupleHelper(std::index_sequence<Is...>) -> std::variant<std::monostate, connect_result_t<Sender, inner_rec<Is>>...> { }
+            using StateVariant = decltype(stateTupleHelper(std::index_sequence_for<Sender...> {}));
 
             state(Rec &&rec, std::tuple<Sender...> &&senders)
                 : base_state<Rec> { std::forward<Rec>(rec) }
@@ -903,52 +910,52 @@ namespace Execution {
             void start()
             {
                 if constexpr (sizeof...(Sender) == 0)
-                    base_state<Rec>::set_value();
+                    mRec.set_value();
                 else {
-                    new (&std::get<0>(mStates)) std::tuple_element_t<0, StateTuple>(Execution::connect(std::move(std::get<0>(mSenders)), receiver<Rec, inner_tag<0>, Sender...> { this->mRec, this }));
-                    std::get<0>(mStates).start();
+                    mStates.template emplace<1>(
+                               DelayedConstruct<std::variant_alternative_t<1, StateVariant>> {
+                                   [this]() {
+                                       return Execution::connect(std::move(std::get<0>(mSenders)), receiver<inner_tag<0>, state> { this });
+                                   } })
+                        .start();
                 }
             }
 
             template <size_t I, typename... V>
-            void set_value(inner_tag<I>, Rec &rec, V &&...values)
+            void set_value(inner_tag<I>, V &&...values)
             {
-                using E = std::tuple_element_t<I, StateTuple>;
-                std::get<I>(mStates).~E();
                 if constexpr (sizeof...(Sender) == I + 1)
-                    rec.set_value();
+                    mRec.set_value();
                 else {
-                    new (&std::get<I + 1>(mStates)) std::tuple_element_t<I + 1, StateTuple>(Execution::connect(std::move(std::get<I + 1>(mSenders)), receiver<Rec, inner_tag<I + 1>, Sender...> { this->mRec, this }));
-                    std::get<I + 1>(mStates).start();
+                    mStates.template emplace<I + 1 + 1>(
+                               DelayedConstruct<std::variant_alternative_t<I + 1 + 1, StateVariant>> {
+                                   [this]() {
+                                       return Execution::connect(std::move(std::get<I + 1>(mSenders)), receiver<inner_tag<I + 1>, state> { this });
+                                   } })
+                        .start();
                 }
             }
 
             template <size_t I>
-            void set_done(inner_tag<I>, Rec &rec)
+            void set_done(inner_tag<I>)
             {
-                using E = std::tuple_element_t<I, StateTuple>;
-                std::get<I>(mStates).~E();
-                rec.set_done();
+                mRec.set_done();
             }
 
             template <size_t I, typename... R>
-            void set_error(inner_tag<I>, Rec &rec, R &&...result)
+            void set_error(inner_tag<I>, R &&...result)
             {
-                using E = std::tuple_element_t<I, StateTuple>;
-                std::get<I>(mStates).~E();
-                rec.set_error(std::forward<R>(result)...);
+                mRec.set_error(std::forward<R>(result)...);
             }
 
             std::tuple<Sender...> mSenders;
 
-            union {
-                StateTuple mStates;
-            };
+            StateVariant mStates;
         };
 
         template <typename... Sender>
         struct sender : base_sender {
-            using result_type = void;
+            using result_type = typename first_t<Sender...>::result_type;
             template <template <typename...> typename Tuple>
             using value_types = Tuple<>;
 
@@ -1100,14 +1107,13 @@ namespace Execution {
                 return state<Rec, Sender, F> { std::forward<Rec>(rec), std::forward<Sender>(sender.mSender), std::forward<F>(sender.mF) };
             }
 
-            Sender mSender;
             F mF;
         };
 
         template <typename Sender, typename F>
         friend auto tag_invoke(let_value_t, Sender &&inner, F &&f)
         {
-            return sender<Sender, F> { {}, std::forward<Sender>(inner), std::forward<F>(f) };
+            return sender<Sender, F> { { {}, std::forward<Sender>(inner) }, std::forward<F>(f) };
         }
 
         template <typename Sender, typename F>
@@ -1219,14 +1225,13 @@ namespace Execution {
                 return state<Rec, Sender, T> { std::forward<Rec>(rec), std::forward<Sender>(sender.mSender), std::forward<T>(sender.mVar) };
             }
 
-            Sender mSender;
             T mVar;
         };
 
         template <typename Sender, typename T>
         friend auto tag_invoke(assign_t, Sender &&inner, T &&var)
         {
-            return sender<Sender, T> { {}, std::forward<Sender>(inner), std::forward<T>(var) };
+            return sender<Sender, T> { { {}, std::forward<Sender>(inner) }, std::forward<T>(var) };
         }
 
         template <typename Sender, typename T>
@@ -1297,7 +1302,6 @@ namespace Execution {
                 return state<Rec, Sender> { std::forward<Rec>(rec), std::forward<Sender>(sender.mSender), sender.mOnValue, sender.mOnDone };
             }
 
-            Sender mSender;
             R mOnValue;
             R mOnDone;
         };
@@ -1324,5 +1328,54 @@ namespace Execution {
 
     template <typename R>
     inline constexpr to_result_t<R> to_result;
+
+    struct with_query_value_t {
+
+        template <typename Rec, typename CPO, typename T>
+        struct receiver : algorithm_receiver<Rec> {
+
+            friend T tag_invoke(CPO, receiver &rec)
+            {
+                return rec.mQueryResult;
+            }
+
+            T mQueryResult;
+        };
+
+        template <typename Sender, typename CPO, typename T>
+        struct sender : algorithm_sender<Sender> {
+
+            template <typename Rec>
+            friend auto tag_invoke(connect_t, sender &&sender, Rec &&rec)
+            {
+                return algorithm_state<Sender, receiver<Rec, CPO, T>> { std::forward<Sender>(sender.mSender), std::forward<Rec>(rec), std::forward<T>(sender.mQueryResult) };
+            }
+
+            T mQueryResult;
+        };
+
+        template <typename Sender, typename CPO, typename T>
+        friend auto tag_invoke(with_query_value_t, Sender &&inner, CPO cpo, T &&queryResult)
+        {
+            return sender<Sender, CPO, T> { { {}, std::forward<Sender>(inner) }, std::forward<T>(queryResult) };
+        }
+
+        template <typename Sender, typename CPO, typename T>
+        requires tag_invocable<with_query_value_t, Sender, CPO, T>
+        auto operator()(Sender &&sender, CPO cpo, T &&queryResult) const
+            noexcept(is_nothrow_tag_invocable_v<with_query_value_t, Sender, CPO, T>)
+                -> tag_invoke_result_t<with_query_value_t, Sender, CPO, T>
+        {
+            return tag_invoke(*this, std::forward<Sender>(sender), cpo, std::forward<T>(queryResult));
+        }
+
+        template <typename CPO, typename T>
+        auto operator()(CPO cpo, T &&queryResult) const
+        {
+            return pipable_from_right(*this, cpo, std::forward<T>(queryResult));
+        }
+    };
+
+    inline constexpr with_query_value_t with_query_value;
 }
 }

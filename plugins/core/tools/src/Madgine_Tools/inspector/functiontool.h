@@ -3,6 +3,7 @@
 #include "../toolbase.h"
 #include "../toolscollector.h"
 #include "Meta/keyvalue/boundapifunction.h"
+#include "Meta/keyvalue/argumentlist.h"
 
 namespace Engine {
 namespace Tools {

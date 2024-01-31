@@ -10,6 +10,11 @@
 #include "Generic/execution/virtualsender.h"
 #include "Generic/genericresult.h"
 
+#include "Madgine/debug/debuggablesender.h"
+
+#include "Meta/keyvalue/valuetype.h"
+
+#include "util/pyexecution.h"
 
 namespace Engine {
 namespace Scripting {
@@ -21,19 +26,12 @@ namespace Scripting {
 
             std::string_view key() const override;
 
-            void execute(KeyValueReceiver &receiver, std::string_view command, Lambda<void(std::string_view)> out = {});
-            void execute(KeyValueReceiver &receiver, PyCodeObject *code);
-
-            auto execute(std::string_view command, Lambda<void(std::string_view)> out = {})
-            {
-                auto f = LIFT(execute, this);
-                return Execution::make_virtual_sender<Execution::SimpleState<decltype(f), std::tuple<std::string_view, Lambda<void(std::string_view)>>, KeyValueReceiver>, GenericResult, ArgumentList>(std::move(f), std::make_tuple(command, std::move(out)));
-            }
+            ExecutionSender execute(std::string_view command, Closure<void(std::string_view)> out = {});
 
             static PyGILState_STATE lock();
-            static Lambda<void(std::string_view)> unlock(PyGILState_STATE state);
-            static void lock(Lambda<void(std::string_view)> out);
-            static Lambda<void(std::string_view)> unlock();
+            static Closure<void(std::string_view)> unlock(PyGILState_STATE state);
+            static void lock(Closure<void(std::string_view)> out, std::stop_token st);
+            static std::pair<Closure<void(std::string_view)>, std::stop_token> unlock();
 
             static size_t totalRefCount();
 

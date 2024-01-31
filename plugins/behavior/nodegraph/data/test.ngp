@@ -16,7 +16,7 @@
                 <Item>
                     <Item>
                         <Element>
-                            <Element>3</Element>
+                            <Element>5</Element>
                             <Element>0</Element>
                             <Element>0</Element>
                         </Element>
@@ -58,11 +58,81 @@
                 </Item>
             </mDataOutPins>
         </Node>
+        <Node type="Native/Yield_Simulation" serId=5>
+            <mParameters>
+            </mParameters>
+            <mFlowOutPins>
+                <Item>
+                    <Item>
+                        <Element>
+                            <Element>6</Element>
+                            <Element>0</Element>
+                            <Element>0</Element>
+                        </Element>
+                    </Item>
+                </Item>
+            </mFlowOutPins>
+            <mDataInPins>
+                <Item>
+                </Item>
+            </mDataInPins>
+            <mDataOutPins>
+                <Item>
+                </Item>
+            </mDataOutPins>
+        </Node>
+        <Node type="Native/Wait_Simulation" serId=6>
+            <mParameters>
+                <Item>2000000000</Item>
+            </mParameters>
+            <mFlowOutPins>
+                <Item>
+                    <Item>
+                        <Element>
+                            <Element>1</Element>
+                            <Element>0</Element>
+                            <Element>0</Element>
+                        </Element>
+                    </Item>
+                </Item>
+            </mFlowOutPins>
+            <mDataInPins>
+                <Item>
+                </Item>
+            </mDataInPins>
+            <mDataOutPins>
+                <Item>
+                </Item>
+            </mDataOutPins>
+        </Node>
+        <Node type="Python3/testbehavior" serId=7>
+            <mParameters>
+            </mParameters>
+            <mFlowOutPins>
+                <Item>
+                    <Item>
+                        <Element>
+                            <Element>5</Element>
+                            <Element>0</Element>
+                            <Element>0</Element>
+                        </Element>
+                    </Item>
+                </Item>
+            </mFlowOutPins>
+            <mDataInPins>
+                <Item>
+                </Item>
+            </mDataInPins>
+            <mDataOutPins>
+                <Item>
+                </Item>
+            </mDataOutPins>
+        </Node>
     </mNodes>
     <mFlowOutPins>
         <Item>
             <Element>
-                <Element>1</Element>
+                <Element>4</Element>
                 <Element>0</Element>
                 <Element>0</Element>
             </Element>

@@ -2,7 +2,7 @@
 
 #include "formattedserializestream.h"
 
-#include "Generic/lambda.h"
+#include "Generic/closure.h"
 
 #include "Generic/nulledptr.h"
 

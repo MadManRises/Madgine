@@ -18,6 +18,10 @@
 
 #include <iostream>
 
+#include "Madgine/behavior.h"
+
+#include "Madgine/parametertuple.h"
+
 UNIQUECOMPONENT(Engine::Scripting::Python3::Python3FileLoader)
 
 METATABLE_BEGIN(Engine::Scripting::Python3::Python3FileLoader)
@@ -30,6 +34,8 @@ METATABLE_END(Engine::Scripting::Python3::Python3FileLoader)
 METATABLE_BEGIN_BASE(Engine::Scripting::Python3::Python3FileLoader::Resource, Engine::Resources::ResourceBase)
 READONLY_PROPERTY(Data, dataPtr)
 METATABLE_END(Engine::Scripting::Python3::Python3FileLoader::Resource)
+
+DEFINE_BEHAVIOR_FACTORY(Python3, Engine::Scripting::Python3::Python3BehaviorFactory)
 
 namespace Engine {
 namespace Scripting {
@@ -127,7 +133,7 @@ namespace Scripting {
         void Python3FileLoader::create_module(ValueType &result, ObjectPtr spec)
         {
             Python3InnerLock lock;
-            ValueType resourcePtr = fromPyObject(PyObjectPtr { toPyObject(spec) }.get("loader_state"));            
+            ValueType resourcePtr = fromPyObject(PyObjectPtr { toPyObject(spec) }.get("loader_state"));
             Resource *res = resourcePtr.as<TypedScopePtr>().safe_cast<Resource>();
             Handle handle = create(res, Filesystem::FileEventType::FILE_CREATED, this);
             handle.info()->setPersistent(true);
@@ -140,7 +146,7 @@ namespace Scripting {
         void Python3FileLoader::exec_module(ValueType &result, ObjectPtr module)
         {
             Python3InnerLock lock;
-            
+
             PyObjectPtr moduleObject { toPyObject(module) };
             ValueType resourcePtr = fromPyObject(moduleObject.get("__spec__").get("loader_state"));
             Resource *res = resourcePtr.as<TypedScopePtr>().safe_cast<Resource>();
@@ -161,8 +167,43 @@ namespace Scripting {
                     Python3FunctionTable &table = mTables.emplace_back(PyObjectPtr::fromBorrowed(value));
                 }
             }
-
         }
+
+        std::vector<std::string_view> Python3BehaviorFactory::names() const
+        {
+            const auto &names = Python3FileLoader::getSingleton().resources() | std::ranges::views::transform([](Resources::ResourceBase *resource) { return resource->name(); });
+            return { names.begin(), names.end() };
+        }
+
+        Behavior Python3BehaviorFactory::create(std::string_view name, const ParameterTuple &args) const
+        {
+            Python3Lock lock;
+            PyObjectPtr main = Python3FileLoader::load(name)->get("main");
+            if (!main)
+                return Execution::just_error(fetchError());
+            return main.callAsync();
+        }
+
+        Threading::TaskFuture<ParameterTuple> Python3BehaviorFactory::createParameters(std::string_view name) const
+        {
+            return ParameterTuple { std::make_tuple() };
+        }
+
+        bool Python3BehaviorFactory::isConstant(std::string_view name) const
+        {
+            return false;
+        }
+
+        std::vector<ValueTypeDesc> Python3BehaviorFactory::parameterTypes(std::string_view name) const
+        {
+            return {};
+        }
+
+        std::vector<ValueTypeDesc> Python3BehaviorFactory::resultTypes(std::string_view name) const
+        {
+            return {};
+        }
+
     }
 }
 }

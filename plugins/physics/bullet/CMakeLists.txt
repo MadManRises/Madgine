@@ -20,7 +20,7 @@ FolderSources(sources "" tools)
 	FolderSources(sources tools Madgine_Tools)
 		FolderSources(sources Madgine_Tools bulletdebug bulletdebug.cpp bulletdebug.h)
 
-add_tools(Bullet ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/bullettoolslib.h SOURCE_ROOT tools)
+add_tools(Bullet ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/bullettoolslib.h)
 
 target_link_plugins(BulletTools Bullet ClientTools)
 target_link_libraries(BulletTools PRIVATE BulletCollision LinearMath)

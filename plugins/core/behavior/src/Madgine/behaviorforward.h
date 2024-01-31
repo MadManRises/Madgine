@@ -4,7 +4,11 @@ namespace Engine {
 
 struct Behavior;
 struct BehaviorStateBase;
-struct BehaviorTracker;
-struct BehaviorTrackerState;
+struct BehaviorReceiver;
+struct BehaviorError;
+
+struct ParameterTuple;
+
+struct BehaviorFactoryBase;
 
 }

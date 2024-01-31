@@ -65,8 +65,7 @@ namespace Tools {
         cfg.OversampleV = 4;
 
         mFont = io.Fonts->AddFontFromFileTTF(fontPath.c_str(), float(mFontPixelHeight), &cfg, ranges.Data);
-        mDocuments.try_emplace("C:\\Users\\Bub\\Desktop\\GitHub\\Madgine\\plugins\\scripting\\python3\\data\\dump.py", "C:\\Users\\Bub\\Desktop\\GitHub\\Madgine\\plugins\\scripting\\python3\\data\\dump.py", this);
-
+        
         co_return true;
     }
 

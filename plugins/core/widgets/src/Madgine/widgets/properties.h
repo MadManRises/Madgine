@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Generic/enum.h"
-#include "Generic/lambda.h"
 
 namespace Engine {
 namespace Widgets {

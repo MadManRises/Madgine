@@ -5,7 +5,7 @@ FolderSources(sources "" src)
 	FolderSources(sources src Madgine nodegraphforward.h nodegraphlib.h)
 		FolderSources(sources Madgine nodegraph codegenerator.cpp codegenerator.h nodegraph.cpp nodegraph.h nodegraphloader.cpp nodegraphloader.h nodeexecution.cpp nodeexecution.h nodebase.cpp nodebase.h nodecollector.cpp nodecollector.h nodeinterpreter.cpp nodeinterpreter.h)
 			FolderSources(sources nodegraph nodes functionnode.cpp functionnode.h pumpnode.cpp pumpnode.h testnode.cpp testnode.h)
-				FolderSources(sources nodes util sendernode.cpp)
+				FolderSources(sources nodes util librarynode.cpp sendernode.cpp)
 			
 add_plugin(NodeGraph Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/nodegraphlib.h)
 
@@ -13,14 +13,13 @@ target_link_plugins(NodeGraph Resources Debugger Behavior)
 target_link_libraries(NodeGraph PUBLIC FilesystemSerialize CodeGen )
 
 
-Project(SceneRenderer)
 
 set(sources "")
 FolderSources(sources "" tools)
 	FolderSources(sources tools Madgine_Tools nodegraphtoolsforward.h nodegraphtoolslib.h)
 		FolderSources(sources Madgine_Tools nodegraph nodegrapheditor.cpp nodegrapheditor.h)
 
-add_tools(NodeGraph ${sources} SOURCE_ROOT tools PRECOMPILED_HEADER tools/Madgine_Tools/nodegraphtoolslib.h)
+add_tools(NodeGraph ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/nodegraphtoolslib.h)
 
-target_link_plugins(NodeGraphTools Tools)
+target_link_plugins(NodeGraphTools Tools DebuggerTools)
 target_link_libraries(NodeGraphTools PUBLIC imgui_node_editor)

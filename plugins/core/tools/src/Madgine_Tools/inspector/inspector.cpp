@@ -85,7 +85,7 @@ namespace Tools {
             if (drawn.count(it->key()) == 0) {
                 ImGui::TableNextRow();
                 changed |= drawMember(scope, it);
-                drawn.insert(it->key());
+                //drawn.insert(it->key());
             }
         }
 
@@ -348,7 +348,7 @@ namespace Tools {
                 } else if (value.is<OwnedScopePtr>()) {
                     key = "[" + std::to_string(i) + "] " + value.as<OwnedScopePtr>().name() + "##" + key;
                 }
-                std::pair<bool, bool> modified = drawValue(key, value, /*editable && */ vValue.isReference(), false);
+                std::pair<bool, bool> modified = drawValue(key, value, editable, false);
                 if (modified.first)
                     vValue = value;
                 changed |= modified.first || (modified.second && !range.isReference());
@@ -376,7 +376,7 @@ namespace Tools {
                 ImGui::TableNextRow();
                 ValueType value = vValue;
                 std::string key = vKey.toShortString() /* + "##" + std::to_string(i)*/;
-                std::pair<bool, bool> result = drawValue(key, value, /*editable && */ vValue.isReference(), false);
+                std::pair<bool, bool> result = drawValue(key, value, editable, false);
                 if (result.first)
                     vValue = value;
                 changed |= result.second;

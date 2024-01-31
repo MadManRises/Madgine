@@ -18,7 +18,9 @@
 
 #include "Generic/execution/lifetime.h"
 
-#include "Madgine/behaviortracker.h"
+#include "Madgine/debug/debuggablesender.h"
+
+#include "Interfaces/log/logsenders.h"
 
 namespace Engine {
 namespace Scene {
@@ -124,29 +126,30 @@ namespace Scene {
                     template <typename Rec>
                     friend auto tag_invoke(Execution::connect_t, sender &&sender, Rec &&rec)
                     {
-                        return Execution::algorithm_state<Inner, receiver<Rec>> { std::forward<Inner>(sender.mInner), std::forward<Rec>(rec), sender.mEntity };
+                        return Execution::algorithm_state<Inner, receiver<Rec>> { std::forward<Inner>(sender.mSender), std::forward<Rec>(rec), sender.mEntity };
                     }
 
-                    Inner mInner;
                     Entity *mEntity;
                 };
 
                 template <typename Inner>
                 friend auto operator|(Inner &&inner, EntityScope &&scope)
                 {
-                    return sender<Inner> { {}, std::forward<Inner>(inner), scope.mEntity };
+                    return sender<Inner> { { {}, std::forward<Inner>(inner) }, scope.mEntity };
                 }
 
                 Entity *mEntity;
             };
 
-            template <typename Algorithm>
-            void addBehavior(Algorithm &&algorithm)
+            template <typename Sender>
+            void addBehavior(Sender &&sender)
             {
-                mLifetime.attach(Execution::just(ArgumentList {}) | std::forward<Algorithm>(algorithm) | EntityScope { this } | mBehaviorTracker);
+                Debug::ContextInfo *context = &Debug::Debugger::getSingleton().createContext();
+                mLifetime.attach(std::forward<Sender>(sender) | EntityScope { this } | Execution::with_debug_location<Execution::SenderLocation>() | Execution::with_sub_debug_location(context) | Log::log_error());
+                mBehaviorContexts.emplace_back(context);
             }
 
-            BehaviorTracker::AccessGuard behaviors() const;
+            const std::vector<Debug::ContextInfo *> &behaviorContexts();
 
             bool isLocal() const;
 
@@ -172,7 +175,8 @@ namespace Scene {
             SceneManager &mSceneManager;
 
             Execution::Lifetime mLifetime;
-            BehaviorTracker mBehaviorTracker;
+
+            std::vector<Debug::ContextInfo *> mBehaviorContexts;
         };
 
     }

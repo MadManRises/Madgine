@@ -2,7 +2,7 @@
 
 #include "Generic/callerhierarchy.h"
 #include "serializetable_forward.h"
-#include "Generic/lambda.h"
+#include "Generic/closure.h"
 
 #include "../primitivetypes.h"
 

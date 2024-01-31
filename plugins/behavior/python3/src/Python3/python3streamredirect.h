@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Generic/lambda.h"
+#include "Generic/closure.h"
 
 namespace Engine {
 namespace Scripting {
@@ -8,7 +8,7 @@ namespace Scripting {
 
         struct Python3StreamRedirect {
 
-            Python3StreamRedirect(Lambda<void(std::string_view)> out = {});
+            Python3StreamRedirect(Closure<void(std::string_view)> out = {});
             Python3StreamRedirect(const Python3StreamRedirect &) = delete;
             ~Python3StreamRedirect();
 
@@ -17,11 +17,11 @@ namespace Scripting {
 
             int write(std::string_view text);
 
-            void setOut(Lambda<void(std::string_view)> out);
-            Lambda<void(std::string_view)> out();
+            void setOut(Closure<void(std::string_view)> out);
+            Closure<void(std::string_view)> out();
 
         private:
-            Lambda<void(std::string_view)> mOut;
+            Closure<void(std::string_view)> mOut;
             std::map<std::string_view, PyObject *> mOldStreams;
         };
 

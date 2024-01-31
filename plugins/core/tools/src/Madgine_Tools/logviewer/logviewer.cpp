@@ -133,7 +133,7 @@ namespace Tools {
 
                 auto begin = std::ranges::find_if(
                     std::views::reverse(mLookup), [&](float off) { return off <= startOffset; }, &Lookup::mOffset)
-                              .base();
+                                 .base();
                 if (begin != mLookup.begin())
                     --begin;
 
@@ -172,10 +172,7 @@ namespace Tools {
                     }
                 }
 
-                if (!mLookup.empty()) {
-                    const Lookup &last = *std::prev(mLookup.end());
-                    SeekCursorAndSetupPrevLine(startPos + last.mOffset + lossyness, calculateTextHeight(mEntries[last.mIndex].mMsg));
-                }
+                SeekCursorAndSetupPrevLine(startPos + mFilteredOffsetAcc + lossyness, 0.0f);
 
                 ImGui::EndTable();
             }
@@ -223,7 +220,7 @@ namespace Tools {
 
     float LogViewer::calculateTextHeight(std::string_view text)
     {
-        
+
         return ImGui::CalcTextSize(text.data(), text.data() + text.size(), false, 0.0f).y + ImGui::GetCurrentContext()->Style.ItemSpacing.y;
     }
 

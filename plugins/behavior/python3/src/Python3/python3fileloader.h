@@ -8,6 +8,8 @@
 
 #include "Meta/keyvalue/functiontable.h"
 
+#include "Madgine/behaviorcollector.h"
+
 namespace Engine {
 namespace Scripting {
     namespace Python3 {
@@ -51,8 +53,20 @@ namespace Scripting {
             std::list<Python3FunctionTable> mTables;
         };
 
+        struct Python3BehaviorFactory : BehaviorFactory<Python3BehaviorFactory> {
+            std::vector<std::string_view> names() const override;
+            Behavior create(std::string_view name, const ParameterTuple &args) const override;
+            Threading::TaskFuture<ParameterTuple> createParameters(std::string_view name) const override;
+            bool isConstant(std::string_view name) const override;
+            std::vector<ValueTypeDesc> parameterTypes(std::string_view name) const override;
+            std::vector<ValueTypeDesc> resultTypes(std::string_view name) const override;   
+        };
+
     }
 }
 }
+
+DECLARE_BEHAVIOR_FACTORY(Engine::Scripting::Python3::Python3BehaviorFactory)
+
 
 REGISTER_TYPE(Engine::Scripting::Python3::Python3FileLoader)

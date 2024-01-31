@@ -1,5 +1,7 @@
 #pragma once
 
+#include "coroutines/generator.h"
+
 namespace Engine {
 namespace StringUtil {
 
@@ -134,6 +136,23 @@ namespace StringUtil {
             pivot = newPivot + 1;
         }
         return result;
+    }
+
+    inline Generator<std::string_view> tokenize(std::string_view string, char token)
+    {
+        size_t pivot = 0;
+        while (pivot < string.size()) {
+            while (isspace(string[pivot]))
+                ++pivot;
+            size_t newPivot = string.find(token, pivot);
+            if (newPivot == std::string_view::npos)
+                newPivot = string.size();
+            size_t actualEnd = newPivot;
+            while (actualEnd > pivot && isspace(string[actualEnd - 1]))
+                --actualEnd;
+            co_yield string.substr(pivot, actualEnd - pivot);
+            pivot = newPivot + 1;
+        }
     }
 
 }

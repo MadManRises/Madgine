@@ -14,7 +14,7 @@ namespace Engine {
 namespace Scripting {
     namespace Python3 {
 
-        Python3StreamRedirect::Python3StreamRedirect(Lambda<void(std::string_view)> out)
+        Python3StreamRedirect::Python3StreamRedirect(Closure<void(std::string_view)> out)
             : mOut(std::move(out))
         {
         }
@@ -51,17 +51,19 @@ namespace Scripting {
                 mOut(text);
                 return text.size();
             } else {
+                if (text == "\n")
+                    return 0;
                 LOG(text);
                 return text.size();
             }
         }
 
-        void Python3StreamRedirect::setOut(Lambda<void(std::string_view)> out)
+        void Python3StreamRedirect::setOut(Closure<void(std::string_view)> out)
         {
             mOut = std::move(out);
         }
 
-        Lambda<void(std::string_view)> Python3StreamRedirect::out() 
+        Closure<void(std::string_view)> Python3StreamRedirect::out() 
         {
             return std::move(mOut);
         }

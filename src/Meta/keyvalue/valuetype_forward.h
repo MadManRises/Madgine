@@ -8,7 +8,9 @@
 
 #include "valuetype_desc.h"
 
-#include "enumholder.h"
+#include "../enumholder.h"
+
+#include "../flagsholder.h"
 
 namespace Engine {
 
@@ -104,6 +106,8 @@ decltype(auto) ValueType_as(const ValueType &v)
             return ValueType_as_impl<KeyValueVirtualAssociativeRange>(v).safe_cast<T>();
     } else if constexpr (InstanceOf<std::decay_t<T>, EnumType> || InstanceOf<std::decay_t<T>, BaseEnum>) {
         return ValueType_as_impl<EnumHolder>(v).safe_cast<T>();
+    } else if constexpr (InstanceOf<std::decay_t<T>, Flags>) {
+        return ValueType_as_impl<FlagsHolder>(v).safe_cast<T>();
     } else {
         if constexpr (Pointer<T>) {
             return ValueType_as_impl<TypedScopePtr>(v).safe_cast<std::remove_pointer_t<T>>();
@@ -141,6 +145,8 @@ decltype(auto) convert_ValueType(T &&t)
         }
     } else if constexpr (InstanceOf<std::decay_t<T>, EnumType> || InstanceOf<std::decay_t<T>, BaseEnum>) {
         return EnumHolder { std::forward<T>(t) };
+    } else if constexpr (InstanceOf<std::decay_t<T>, Flags>){
+        return FlagsHolder { std::forward<T>(t) };
     } else {
         if constexpr (Pointer<std::decay_t<T>>) {
             return TypedScopePtr { t };

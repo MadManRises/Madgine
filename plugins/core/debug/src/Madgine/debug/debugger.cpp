@@ -19,29 +19,24 @@ namespace Debug {
         return "Debugger";
     }
 
-    void Debugger::yield(void *address, Lambda<void()> callback)
+    void DebugLocation::stepInto(ParentLocation *parent)
     {
-        ContextInfo &context = getOrCreateContext(address);
-        for (DebugListener *listener : mListeners)
-            listener->onSuspend(context);
-        context.suspend(std::move(callback));
+        mContext = parent->mContext;
+        std::unique_lock guard { mContext->mMutex };
+        assert(!parent->mChild);
+        parent->mChild = this;
     }
 
-    void Debugger::stepInto(void *address, std::unique_ptr<DebugLocation> location, void *parent)
+    void DebugLocation::stepOut(ParentLocation *parent)
     {
-        ContextInfo *info = getContext(parent);
-        if (!info) {
-            createContext(address, std::move(location));
-        } else {
-            info->mStack.emplace_back(FrameInfo { address, std::move(location) });
-        }
+        std::unique_lock guard { mContext->mMutex };
+        assert(parent->mChild == this);
+        parent->mChild = nullptr;
     }
 
-    void Debugger::stepOut(void *address)
+    bool DebugLocation::pass()
     {
-        ContextInfo *context = getContext(address);
-        assert(context);
-        context->mStack.pop_back();
+        return !wantsPause() && Debugger::getSingleton().pass(this);
     }
 
     std::deque<ContextInfo> &Debugger::infos()
@@ -49,35 +44,9 @@ namespace Debug {
         return mContexts;
     }
 
-    ContextInfo *Debugger::getContext(void *address)
+    ContextInfo &Debugger::createContext()
     {
-        auto it = std::ranges::find_if(mContexts, [=](ContextInfo &info) { return !info.mStack.empty() && info.mStack.back().mAddress == address; });
-        if (it != mContexts.end())
-            return &*it;
-        else
-            return nullptr;
-    }
-
-    ContextInfo &Debugger::getOrCreateContext(void *address)
-    {
-        auto it = std::ranges::find_if(mContexts, [=](ContextInfo &info) { return !info.mStack.empty() && info.mStack.back().mAddress == address; });
-        if (it != mContexts.end())
-            return *it;
-        else
-            return createContext(address);
-    }
-
-    ContextInfo &Debugger::createContext(void *address, std::unique_ptr<DebugLocation> location)
-    {
-        return mContexts.emplace_back(FrameInfo { address, std::move(location) });
-    }
-
-    DebugLocation *Debugger::getLocation(void *address)
-    {
-        ContextInfo *context = getContext(address);
-        if (!context)
-            return nullptr;
-        return context->getLocation();
+        return mContexts.emplace_back();
     }
 
     void Debugger::addListener(DebugListener *listener)
@@ -90,62 +59,92 @@ namespace Debug {
         std::erase(mListeners, listener);
     }
 
-    ContextInfo::ContextInfo(FrameInfo info)
+    void ContextInfo::suspend(Closure<void(ContinuationMode)> callback, std::stop_token st)
     {
-        mStack.emplace_back(std::move(info));
+        for (DebugListener *listener : Debugger::getSingleton().mListeners)
+            listener->onSuspend(*this);
+        mCallback = std::move(callback);
+        int initialState = 0;
+        mPaused.compare_exchange_strong(initialState, 1);
+        assert(initialState == 0);
+        mStopCallback.start(std::move(st), stop_cb { this });
+        initialState = 1;
+        mPaused.compare_exchange_strong(initialState, 2);
     }
 
-    void ContextInfo::suspend(Lambda<void()> callback)
+    void ContextInfo::continueExecution(ContinuationMode mode)
     {
-        mPaused = std::move(callback);
+        int initialState = 2;
+        if (mPaused.compare_exchange_strong(initialState, 3)) {
+            mStopCallback.finish(mode);
+        }
     }
 
     void ContextInfo::resume()
     {
-        assert(mPaused);
-        mSingleStepping = false;
-        Lambda<void()> receiver = std::move(mPaused);
-        receiver();
+        continueExecution(ContinuationMode::Resume);
     }
 
     void ContextInfo::step()
     {
-        assert(mPaused);
-        mSingleStepping = true;
-        Lambda<void()> receiver = std::move(mPaused);
-        receiver();
+        continueExecution(ContinuationMode::Step);
+    }
+
+    void ContextInfo::abort()
+    {
+        continueExecution(ContinuationMode::Abort);
     }
 
     bool ContextInfo::alive() const
     {
-        return !mStack.empty();
+        return mChild;
     }
 
-    DebugLocation *ContextInfo::getLocation() const
+    bool ContextInfo::isPaused() const
     {
-        if (mStack.empty())
-            return nullptr;
-        return mStack.back().mLocation.get();
+        return mPaused == 2;
     }
 
-    bool Debugger::pass(void *address)
-    {
-        ContextInfo *context = getContext(address);
-        if (!context)
-            return true;
-        return pass(*context);
-    }
-
-    bool Debugger::pass(ContextInfo &context)
+    bool Debugger::pass(DebugLocation *location)
     {
         bool pass = true;
 
         for (DebugListener *listener : mListeners) {
-            pass &= listener->pass(context);
+            pass &= listener->pass(location);
         }
 
         return pass;
     }
 
+    bool ContextInfo::stop_cb::operator()() const
+    {
+        int initialState = 1;
+        if (mContext->mPaused.compare_exchange_strong(initialState, 3))
+            return true;
+        initialState = 2;
+        return mContext->mPaused.compare_exchange_strong(initialState, 3);
+    }
+
+    void ContextInfo::finally_cb::operator()(ContinuationMode mode) const
+    {
+        assert(mContext->mPaused == 3);
+        Closure<void(ContinuationMode)> callback = std::move(mContext->mCallback);
+        mContext->mPaused = 0;
+        callback(mode);
+    }
+
+    void ContextInfo::finally_cb::operator()(Execution::cancelled_t) const
+    {
+        operator()(ContinuationMode::Abort);
+    }
+
+    DebugLocation *ParentLocation::currentLocation() const
+    {
+        if (!mChild)
+            return nullptr;
+        if (!mChild->mChild)
+            return mChild;
+        return mChild->currentLocation();
+    }
 }
 }

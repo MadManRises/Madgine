@@ -163,7 +163,7 @@ namespace Render {
         };
     }
 
-    void ShadowRenderPass::debugFrustums(Lambda<void(const Frustum &, std::string_view)> handler) const
+    void ShadowRenderPass::debugFrustums(Closure<void(const Frustum &, std::string_view)> handler) const
     {
         handler(mLightFrustum, "ShadowRenderPass");
     }

@@ -10,6 +10,7 @@ namespace Serialize {
     META_EXPORT StreamResult visitSkipPrimitive(FormattedSerializeStream &in, const char *name);
 
     META_EXPORT StreamResult visitSkipEnum(const EnumMetaTable *table, FormattedSerializeStream &in, const char *name);
+    META_EXPORT StreamResult visitSkipFlags(const EnumMetaTable *table, FormattedSerializeStream &in, const char *name);
 
     template <typename...>
     struct StreamVisitorBase {
@@ -70,6 +71,8 @@ namespace Serialize {
                 return this->mF(holder, in, name, tags);
             } else if constexpr (std::same_as<T, EnumTag>) {
                 return visitSkipEnum(holder.mTable, in, name);
+            } else if constexpr (std::same_as<T, FlagsTag>) {
+                return visitSkipFlags(holder.mTable, in, name);
             } else {
                 return visitSkipPrimitive<T>(in, name);
             }

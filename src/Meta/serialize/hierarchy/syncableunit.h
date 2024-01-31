@@ -2,7 +2,7 @@
 
 #include "Generic/callerhierarchy.h"
 #include "Generic/execution/sender.h"
-#include "Generic/lambda.h"
+#include "Generic/closure.h"
 #include "serializableunit.h"
 
 #include "../streams/pendingrequest.h"

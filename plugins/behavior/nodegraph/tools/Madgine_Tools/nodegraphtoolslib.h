@@ -4,6 +4,7 @@
 
 #include "Madgine_Tools/toolslib.h"
 #include "Madgine/nodegraphlib.h"
+#include "Madgine_Tools/debugtoolslib.h"
 
 #if defined(NodeGraphTools_EXPORTS)
 #    define MADGINE_NODEGRAPH_TOOLS_EXPORT DLL_EXPORT

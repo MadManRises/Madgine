@@ -232,11 +232,6 @@ namespace Scene {
             return "Component";
         }
 
-        BehaviorTracker::AccessGuard Entity::behaviors() const
-        {
-            return mBehaviorTracker.guarded();
-        }
-
         bool Entity::isLocal() const
         {
             return mLocal;
@@ -266,6 +261,11 @@ namespace Scene {
         const SceneManager &Entity::sceneMgr() const
         {
             return mSceneManager;
+        }
+
+        const std::vector<Debug::ContextInfo *> &Entity::behaviorContexts()
+        {
+            return mBehaviorContexts;
         }
 
         EntityComponentPtr<EntityComponentBase> Entity::Helper::operator()(const EntityComponentOwningHandle<EntityComponentBase> &p) const

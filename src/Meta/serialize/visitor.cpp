@@ -5,10 +5,13 @@
 #include "streams/streamresult.h"
 
 #include "Generic/bytebuffer.h"
-#include "Meta/math/color4.h"
-#include "Meta/math/matrix4.h"
+#include "../math/color4.h"
+#include "../math/matrix4.h"
 
 #include "streams/formattedserializestream.h"
+
+#include "../enumholder.h"
+#include "../flagsholder.h"
 
 namespace Engine {
 namespace Serialize {
@@ -22,14 +25,20 @@ namespace Serialize {
 
     StreamResult visitSkipEnum(const EnumMetaTable *table, FormattedSerializeStream &in, const char *name)
     {
-        DynamicEnum dummy { table };
-        return in.readPrimitive<DynamicEnum>(dummy, name);        
+        EnumHolder dummy { table };
+        return in.readPrimitive<EnumHolder>(dummy, name);        
+    }
+
+    StreamResult visitSkipFlags(const EnumMetaTable *table, FormattedSerializeStream &in, const char *name)
+    {
+        FlagsHolder dummy { table };
+        return in.readPrimitive<FlagsHolder>(dummy, name);        
     }
 
     static void __instantiationHelper(FormattedSerializeStream &in, const char *name)
     {
         TypeUnpacker::forEach<SerializePrimitives>([&]<typename T>() {
-            if constexpr (!std::same_as<T, EnumTag>)
+            if constexpr (!std::same_as<T, EnumTag> && !std::same_as<T, FlagsTag>)
                 (void)visitSkipPrimitive<T>(in, name);
         });
     }

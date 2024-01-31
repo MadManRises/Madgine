@@ -8,7 +8,7 @@
 
 #include "Generic/container/emplace.h"
 
-#include "Generic/lambda.h"
+#include "Generic/closure.h"
 
 #include "../streams/formattedserializestream.h"
 

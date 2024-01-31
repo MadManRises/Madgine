@@ -18,8 +18,14 @@ struct META_EXPORT EnumHolder {
     {
     }
 
+    EnumHolder(const EnumMetaTable *table, int32_t value = 0)
+        : mValue(value)
+        , mTable(table)
+    {
+    }
+
     bool operator==(const EnumHolder &other) const;
-    
+
     std::string_view toString() const;
     const EnumMetaTable *table() const;
 
@@ -27,11 +33,15 @@ struct META_EXPORT EnumHolder {
     void setValue(int32_t val);
 
     template <typename T>
-    T safe_cast() const {
+    T safe_cast() const
+    {
         if (mTable != &T::Representation::sTable)
             throw 0;
         return static_cast<typename T::Representation::EnumType>(mValue);
     }
+
+    META_EXPORT friend std::ostream &operator<<(std::ostream &stream, const EnumHolder &value);
+    META_EXPORT friend std::istream &operator>>(std::istream &stream, EnumHolder &value);
 
 private:
     int32_t mValue;

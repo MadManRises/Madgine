@@ -1,12 +1,10 @@
 #pragma once
 
-#include "Generic/genericresult.h"
+#include "behaviorerror.h"
 
 #include "Generic/execution/virtualsender.h"
 
 #include "Generic/execution/sender.h"
-
-#include "Meta/keyvalue/keyvaluereceiver.h"
 
 #include "Meta/serialize/hierarchy/serializabledataunit.h"
 
@@ -18,24 +16,24 @@
 
 #include "Meta/keyvalue/valuetype.h"
 
-#include "behaviortracker.h"
-
 #include "Interfaces/debug/stacktrace.h"
 
 #include "Generic/delayedconstruct.h"
 
+#include "Madgine/debug/debuggablesender.h"
+
+#include "behaviorreceiver.h"
+
 namespace Engine {
 
-ENUM_BASE(InterpretResult, GenericResult);
-
 template <typename T>
-concept UntypedBehavior = Execution::Sender<T> || true /*is Algorithm*/;
+concept UntypedBehavior = Execution::Sender<T>;
 
 template <typename T, typename R>
 concept TypedBehavior = UntypedBehavior<T>;
 
 template <typename Algorithm>
-struct AlgorithmBehaviorState;
+struct SenderBehaviorState;
 
 struct CoroutineBehaviorState;
 
@@ -47,9 +45,9 @@ struct MADGINE_BEHAVIOR_EXPORT Behavior {
     Behavior() = default;
     Behavior(StatePtr state);
 
-    template <typename Algorithm>
-    Behavior(Algorithm &&alg)
-        : mState(new AlgorithmBehaviorState<Algorithm>(std::forward<Algorithm>(alg)))
+    template <typename Sender>
+    Behavior(Sender &&sender)
+        : mState(new SenderBehaviorState<Sender>(std::forward<Sender>(sender)))
     {
     }
 
@@ -60,98 +58,30 @@ struct MADGINE_BEHAVIOR_EXPORT Behavior {
         return std::move(mState);
     }
 
-    struct receiver {
-        void set_value(ArgumentList arguments)
-        {
-            set_value_inner(std::move(arguments));
-        }
-        virtual void set_value_inner(ArgumentList arguments) = 0;
-        virtual void set_error(InterpretResult r) = 0;
-        virtual void set_done() = 0;
+    StatePtr connect(BehaviorReceiver *receiver);
 
-        virtual bool resolveVar(ValueType &retVal, std::string_view name) = 0;
+    struct MADGINE_BEHAVIOR_EXPORT state : BehaviorReceiver {
+
+        state(StatePtr state);
+
+        void start();
+
+        StatePtr mState;
     };
+
+    using is_sender = void;
+
+    using result_type = BehaviorError;
+    template <template <typename...> typename Tuple>
+    using value_types = Tuple<ArgumentList>;
 
     template <typename Rec>
-    struct receiverImpl : Execution::algorithm_receiver<Rec>, receiver {
-
-        receiverImpl(Rec &&rec, StatePtr state)
-            : Execution::algorithm_receiver<Rec> { std::forward<Rec>(rec) }
-            , mState(std::move(state))
-        {
-        }
-
-        void set_value(ArgumentList arguments)
-        {
-            mState->start(this, std::move(arguments), get_behavior_context(this->mRec), Execution::get_stop_token(this->mRec));
-        }
-
-        void set_value_inner(ArgumentList arguments) override
-        {
-            this->mRec.set_value(std::move(arguments));
-        }
-        void set_error(InterpretResult r) override
-        {
-            this->mRec.set_error(r);
-        }
-        void set_done() override
-        {
-            this->mRec.set_done();
-        }
-
-        bool resolveVar(ValueType &retVal, std::string_view name) override
-        {
-            return Execution::resolve_var_d(this->mRec, name, retVal);
-        }
-
-        StatePtr mState;
-    };
-
-    template <Execution::Sender Inner, typename Rec>
-    struct state : Execution::algorithm_state<Inner, receiverImpl<Rec>> {
-        state(Inner &&inner, Rec &&rec, StatePtr state)
-            : Execution::algorithm_state<Inner, receiverImpl<Rec>> { std::forward<Inner>(inner), std::forward<Rec>(rec), std::move(state) }
-        {
-        }
-
-        template <typename F>
-        friend void tag_invoke(Execution::visit_state_t, state &state, F &&f)
-        {
-            Execution::get_receiver(state).mState->visit(std::forward<F>(f));
-        }
-                        
-        friend std::string tag_invoke(get_behavior_name_t, const state &state)
-        {
-            return Execution::get_receiver(state).mState->name();
-        }
-    };
-
-    template <Execution::Sender Inner>
-    struct sender : Execution::algorithm_sender<Inner> {
-
-        template <typename Rec>
-        friend auto tag_invoke(Execution::connect_t, sender &&sender, Rec &&rec)
-        {
-            return state<Inner, Rec> { std::forward<Inner>(sender.mInner), std::forward<Rec>(rec), std::move(sender.mState) };
-        }
-
-        Inner mInner;
-        StatePtr mState;
-    };
-
-    template <Execution::Sender Inner>
-    auto operator()(Inner &&inner) &&
+    friend auto tag_invoke(Execution::connect_t, Behavior &&behavior, Rec &&rec)
     {
-        assert(mState);
-        return sender<Inner> { {}, std::forward<Inner>(inner), std::move(mState) };
+        return VirtualBehaviorState<Rec, state> { std::forward<Rec>(rec), std::move(behavior.mState) };
     }
 
-    template <Execution::Sender Inner>
-    friend auto operator|(Inner &&inner, Behavior &&behavior)
-    {
-        assert(behavior.mState);
-        return sender<Inner> { {}, std::forward<Inner>(inner), std::move(behavior.mState) };
-    }
+    MADGINE_BEHAVIOR_EXPORT friend void tag_invoke(Execution::visit_state_t, Behavior &behavior, CallableView<void(const Execution::StateDescriptor &)> visitor);
 
     using promise_type = CoroutineBehaviorState;
 
@@ -161,13 +91,13 @@ struct MADGINE_BEHAVIOR_EXPORT Behavior {
 struct BehaviorStateBase {
     virtual ~BehaviorStateBase() = default;
 
-    virtual void start(Behavior::receiver *rec, ArgumentList arguments, BehaviorTrackerContext context, std::stop_token stopToken) = 0;
+    virtual void connect(BehaviorReceiver *rec) = 0;
+    virtual void start() = 0;
     virtual void destroy()
     {
         delete this;
     }
-    virtual void visit(CallableView<void(const Execution::StateDescriptor &)> visitor) = 0;
-    virtual std::string name() const = 0;
+    virtual void visitStateImpl(CallableView<void(const Execution::StateDescriptor &)> visitor) { }
 };
 
 template <typename Sender, typename... V>
@@ -176,13 +106,23 @@ struct BehaviorAwaitableSenderImpl;
 template <typename Sender>
 using BehaviorAwaitableSender = typename Sender::template value_types<type_pack>::template prepend<Sender>::template instantiate<BehaviorAwaitableSenderImpl>;
 
+struct CoroutineLocation : Debug::DebugLocation {
+
+    std::string toString() const override;
+    std::map<std::string_view, ValueType> localVariables() const override;
+    virtual bool wantsPause() const override;
+
+    Debug::StackTrace<1> mStacktrace;
+};
+
 struct MADGINE_BEHAVIOR_EXPORT CoroutineBehaviorState : BehaviorStateBase {
 
     Behavior get_return_object();
 
-    void start(Behavior::receiver *rec, ArgumentList arguments, BehaviorTrackerContext context, std::stop_token stopToken) override;
+    void connect(BehaviorReceiver *rec) override;
+    void start() override;
     void destroy() override;
-    void visit(CallableView<void(const Execution::StateDescriptor &)> visitor) override;
+    void visitStateImpl(CallableView<void(const Execution::StateDescriptor &)> visitor) override;
 
     struct MADGINE_BEHAVIOR_EXPORT InitialSuspend {
         bool await_ready() noexcept;
@@ -201,7 +141,7 @@ struct MADGINE_BEHAVIOR_EXPORT CoroutineBehaviorState : BehaviorStateBase {
 
     void return_void();
     void unhandled_exception();
-    void set_error(InterpretResult result);
+    void set_error(BehaviorError result);
     void set_done();
 
     template <typename T>
@@ -214,80 +154,39 @@ struct MADGINE_BEHAVIOR_EXPORT CoroutineBehaviorState : BehaviorStateBase {
         }
     }
 
-    virtual std::string name() const override;
+    CoroutineLocation mDebugLocation;
 
-    Debug::StackTrace<1> mStacktrace;
-
-    Behavior::receiver *mReceiver = nullptr;
-    ArgumentList mArguments;
-    BehaviorTrackerContext mContext;
-    std::stop_token mStopToken;
+    BehaviorReceiver *mReceiver = nullptr;
 };
 
-template <typename Algorithm>
-struct AlgorithmBehaviorState : BehaviorStateBase {
+template <typename Sender>
+struct SenderBehaviorState : BehaviorStateBase {
 
-    struct receiver {
+    using State = Execution::connect_result_t<Sender, BehaviorReceiverPtr>;
 
-        void set_value(ArgumentList args)
-        {
-            mReceiver->set_value(std::move(args));
-        }
-        void set_error(InterpretResult r)
-        {
-            mReceiver->set_error(r);
-        }
-        void set_done()
-        {
-            mReceiver->set_done();
-        }
-
-        template <typename O>
-        friend auto tag_invoke(Execution::resolve_var_d_t, receiver &rec, std::string_view name, O &out)
-        {
-            ValueType v;
-            if (rec.mReceiver->resolveVar(v, name)) {
-                out = v.as<O>();
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        friend std::stop_token tag_invoke(Execution::get_stop_token_t, receiver &rec)
-        {
-            return rec.mStopToken;
-        }
-
-        Behavior::receiver *mReceiver;
-        std::stop_token mStopToken;
-    };
-
-    using State = Execution::connect_result_t<decltype(Execution::just(std::declval<ArgumentList &>()) | std::declval<Algorithm>()), receiver>;
-
-    AlgorithmBehaviorState(Algorithm &&alg)
-        : mData(std::forward<Algorithm>(alg))
+    SenderBehaviorState(Sender &&sender)
+        : mData(std::forward<Sender>(sender))
     {
     }
 
-    void start(Behavior::receiver *rec, ArgumentList arguments, BehaviorTrackerContext context, std::stop_token stopToken) override
+    void connect(BehaviorReceiver *rec) override
     {
-        Algorithm algorithm = std::get<Algorithm>(mData);
-        mData = DelayedConstruct<State> { [&]() { return Execution::connect(Execution::just(std::move(arguments)) | std::forward<Algorithm>(algorithm), receiver { rec, std::move(stopToken) }); } };
+        Sender sender = std::forward<Sender>(std::get<Sender>(mData));
+        mData.emplace<State>(
+            DelayedConstruct<State> { [&]() { return Execution::connect(std::forward<Sender>(sender), BehaviorReceiverPtr { rec }); } });
+    }
+
+    void start() override
+    {
         std::get<State>(mData).start();
     }
 
-    void visit(CallableView<void(const Execution::StateDescriptor &)> visitor) override
+    void visitStateImpl(CallableView<void(const Execution::StateDescriptor &)> visitor) override
     {
-        Execution::visit_state(std::get<State>(mData), visitor);
+        Execution::visit_state(std::get<Sender>(mData), visitor);
     }
 
-    std::string name() const override
-    {
-        return get_behavior_name(std::get<State>(mData));
-    }
-
-    std::variant<Algorithm, State> mData;
+    std::variant<Sender, State> mData;
 };
 }
 

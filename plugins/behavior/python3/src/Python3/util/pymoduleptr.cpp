@@ -22,6 +22,15 @@ namespace Scripting {
             }
         }
 
+        
+        PyModulePtr PyModulePtr::fromBorrowed(PyObject *module)
+        {
+            Py_INCREF(module);
+            PyModulePtr ptr;
+            ptr.mObject = module;
+            return ptr;
+        }
+
         PyModulePtr PyModulePtr::create(std::string_view name)
         {
             PyModulePtr module;

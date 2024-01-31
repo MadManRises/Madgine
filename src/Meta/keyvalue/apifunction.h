@@ -1,7 +1,5 @@
 #pragma once
 
-#include "keyvaluereceiver.h"
-
 namespace Engine {
 
 struct META_EXPORT ApiFunction {    

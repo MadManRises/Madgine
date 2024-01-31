@@ -30,6 +30,10 @@
 
 #include "python3lock.h"
 
+#include "Madgine/behaviorreceiver.h"
+
+#include "pyexecution.h"
+
 namespace Engine {
 namespace Scripting {
     namespace Python3 {
@@ -119,6 +123,12 @@ namespace Scripting {
         PyObject *toPyObject(float f)
         {
             return PyFloat_FromDouble(f);
+        }
+
+        PyObject *toPyObject(std::chrono::nanoseconds d)
+        {
+            PyErr_SetString(PyExc_NotImplementedError, "Can't convert type <duration> yet");
+            return NULL;
         }
 
         PyObject *toPyObject(const TypedScopePtr &scope)
@@ -270,6 +280,12 @@ namespace Scripting {
             return nullptr;
         }
 
+        PyObject *toPyObject(const FlagsHolder &f)
+        {
+            PyErr_SetString(PyExc_NotImplementedError, "Can't convert type <FlagsHolder> yet");
+            return nullptr;
+        }
+
         PyObject *toPyObject(const KeyValueFunction &f)
         {
             PyErr_SetString(PyExc_NotImplementedError, "Can't convert type <Function> yet");
@@ -330,11 +346,10 @@ namespace Scripting {
             }
         }
 
-        void fromPyObject(KeyValueReceiver &receiver, PyObject *obj)
+        void fromPyObject(BehaviorReceiver &receiver, PyObject *obj)
         {
-            if (!obj) {
-                PyErr_Print();
-                receiver.set_error(GenericResult::UNKNOWN_ERROR);
+            if (!obj) {                
+                receiver.set_error(fetchError());
             } else if (obj == Py_None) {
                 receiver.set_value(std::monostate {});
             } else if (PyUnicode_Check(obj)) {

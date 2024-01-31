@@ -50,7 +50,8 @@ METATABLE_BEGIN_BASE(ClickBrick::GameManager, Engine::Input::HandlerBase)
 MEMBER(mCamera)
 METATABLE_END(ClickBrick::GameManager)
 
-DEFINE_NATIVE_BEHAVIOR(ClickBrick::Test)
+NATIVE_BEHAVIOR(ClickBrick_Test, ClickBrick::Test)
+NATIVE_BEHAVIOR(ClickBrick_Brick, ClickBrick::Brick, Engine::InputParameter<float>, Engine::InputParameter<Engine::Vector3>, Engine::InputParameter<Engine::Quaternion>)
 
 namespace ClickBrick {
 
@@ -141,8 +142,8 @@ void GameManager::spawnBrick()
 
     brick->addComponent<Engine::Scene::Entity::Mesh>().get()->setName("Brick");
     brick->getComponent<Engine::Scene::Entity::Mesh>()->handle().info()->setPersistent(true);
-    
-    float speed = rand() / float(RAND_MAX) * 2.0f + 1.0f;    
+
+    float speed = rand() / float(RAND_MAX) * 2.0f + 1.0f;
 
     brick->addBehavior(Brick(speed, dir, q));
 }
@@ -249,7 +250,11 @@ Engine::Behavior Test()
     bool loop = true;
     while (loop) {
 
-        std::chrono::microseconds elapsedTime = co_await Engine::Scene::wait_simulation(2s);
+        co_await Engine::Execution::sequence(
+            Engine::Scene::wait_simulation(1s),
+            Engine::Scene::wait_simulation(2s),
+            Engine::Scene::wait_simulation(3s),
+            Engine::Scene::wait_simulation(4s));
 
         /* Engine::Scene::Entity::Transform *t = e->getComponent<Engine::Scene::Entity::Transform>();
 
@@ -270,7 +275,7 @@ Engine::Behavior Test()
         t->mOrientation = Engine::slerp(q0, q1, qAcc);
 
         loop = t->mPosition.length() < 10.5f;*/
-    }    
+    }
 
     co_return;
 }

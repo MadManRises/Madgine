@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Generic/lambda.h"
+#include "Generic/closure.h"
 
 namespace Engine {
 namespace Serialize {

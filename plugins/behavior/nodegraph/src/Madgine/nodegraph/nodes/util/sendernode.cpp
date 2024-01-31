@@ -32,11 +32,11 @@ DYNAMIC_NAME(Name)
 ARGUMENT(DefaultValue, 0)
 SENDER_NODE_END(Variable)
 
-VARIABLE_ACCESS_SENDER_NODE_BEGIN(WriteVar, Engine::Execution::write_var<"Name">, Engine::NodeGraph::NodeReader<Engine::ValueType>)
+DEFAULT_VARIABLE_ACCESS_SENDER_NODE_BEGIN(WriteVar, Engine::Execution::write_var<"Name">, Engine::NodeGraph::NodeReader<Engine::ValueType>)
 DYNAMIC_NAME(Name)
 SENDER_NODE_END(WriteVar)
 
-VARIABLE_ACCESS_SENDER_NODE_BEGIN(ReadVar, Engine::Execution::read_var<"Name", Engine::ValueType>)
+CONSTANT_VARIABLE_ACCESS_SENDER_NODE_BEGIN(ReadVar, Engine::Execution::read_var<"Name", Engine::ValueType>)
 DYNAMIC_NAME(Name)
 SENDER_NODE_END(ReadVar)
 

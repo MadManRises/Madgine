@@ -21,7 +21,7 @@ namespace Serialize {
         v.setType(ValueTypeDesc { type });
         return v.visit([&](auto &value) -> StreamResult {
             using T = std::remove_reference_t<decltype(value)>;
-            if constexpr (PrimitiveType<T>) {
+            if constexpr (PrimitiveType<T> || InstanceOf<T, std::chrono::duration>) {
                 return Serialize::read(in, value, name);
             } else if constexpr (std::same_as<T, std::monostate>) {
                 Void v;
@@ -37,7 +37,7 @@ namespace Serialize {
         Serialize::write(out, v.index().mIndex, "type");
         v.visit([&](const auto &value) {
             using T = std::remove_const_t<std::remove_reference_t<decltype(value)>>;
-            if constexpr (PrimitiveType<T>) {
+            if constexpr (PrimitiveType<T> || InstanceOf<T, std::chrono::duration>) {
                 Serialize::write(out, value, name);
             } else if constexpr (std::same_as<T, std::monostate>){
                 Serialize::write(out, Void {}, name);

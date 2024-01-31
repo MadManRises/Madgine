@@ -8,6 +8,8 @@
 
 #include "nodeinterpreter.h"
 
+#include "Madgine/parametertuple.h"
+
 UNIQUECOMPONENT(Engine::NodeGraph::NodeGraphLoader)
 
 METATABLE_BEGIN(Engine::NodeGraph::NodeGraphLoader)
@@ -23,7 +25,7 @@ DEFINE_BEHAVIOR_FACTORY(NodeGraph, Engine::NodeGraph::NodeGraphBehaviorFactory)
 namespace Engine {
 namespace NodeGraph {
 
-    NodeInterpreter NodeGraphLoader::Handle::interpret()
+    NodeInterpreterSender NodeGraphLoader::Handle::interpret()
     {
         return { *this };
     }
@@ -50,17 +52,36 @@ namespace NodeGraph {
     {
     }
 
-    std::vector<std::string_view> NodeGraphBehaviorFactory::names()
+    std::vector<std::string_view> NodeGraphBehaviorFactory::names() const
     {
         const auto &names = NodeGraphLoader::getSingleton().resources() | std::ranges::views::transform([](Resources::ResourceBase *resource) { return resource->name(); });
         return { names.begin(), names.end() };
     }
 
-    Behavior NodeGraphBehaviorFactory::create(std::string_view name)
+    Behavior NodeGraphBehaviorFactory::create(std::string_view name, const ParameterTuple &args) const
     {
         return NodeGraphLoader::Handle { NodeGraphLoader::load(name) }.interpret();
     }
 
-}
-}
+    Threading::TaskFuture<ParameterTuple> NodeGraphBehaviorFactory::createParameters(std::string_view name) const
+    {
+        return ParameterTuple { std::make_tuple() };
+    }
 
+    bool NodeGraphBehaviorFactory::isConstant(std::string_view name) const
+    {
+        return false;
+    }
+
+    std::vector<ValueTypeDesc> NodeGraphBehaviorFactory::parameterTypes(std::string_view name) const
+    {
+        return {};
+    }
+
+    std::vector<ValueTypeDesc> NodeGraphBehaviorFactory::resultTypes(std::string_view name) const
+    {
+        return {};
+    }
+
+}
+}

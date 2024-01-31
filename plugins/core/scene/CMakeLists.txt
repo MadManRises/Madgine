@@ -36,6 +36,6 @@ FolderSources(sources "" renderer_tools)
 
 add_tools(SceneRenderer ${sources} PRECOMPILED_HEADER renderer_tools/Madgine_Tools/scenerenderertoolslib.h SOURCE_ROOT renderer_tools)
 
-target_link_plugins(SceneRendererTools ClientTools PipelineLoader)
+target_link_plugins(SceneRendererTools ClientTools PipelineLoader DebuggerTools)
 
 target_link_libraries(SceneRendererTools PRIVATE MemorySerialize FilesystemSerialize)

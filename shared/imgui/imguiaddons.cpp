@@ -395,6 +395,30 @@ bool ValueTypeDrawer::draw(const Engine::EnumHolder &e)
     return false;
 }
 
+bool ValueTypeDrawer::draw(Engine::FlagsHolder &f)
+{
+    bool changed = false;
+    std::string name { "<flags>" };
+    if (ImGui::BeginCombo("##ValueTypeDrawer", name.c_str())) {
+        for (int32_t i : f.table()->values<int32_t>()) {
+            bool selected = f[i];
+            std::string valueName { f.table()->toString(i) };
+            if (ImGui::Checkbox(valueName.c_str(), &selected)) {
+                f[i] = selected;
+                changed = true;
+            }
+        }
+        ImGui::EndCombo();
+    }
+    return changed;
+}
+
+bool ValueTypeDrawer::draw(const Engine::FlagsHolder &f)
+{
+    Text("<flags>");
+    return false;
+}
+
 bool ValueTypeDrawer::draw(Engine::Color3 &c)
 {
     return ColorEdit3("##ValueTypeDrawer", &c.r, ImGuiColorEditFlags_NoInputs);
@@ -402,7 +426,7 @@ bool ValueTypeDrawer::draw(Engine::Color3 &c)
 
 bool ValueTypeDrawer::draw(const Engine::Color3 &c)
 {
-    return ColorEdit3("##ValueTypeDrawer", const_cast<float*>(&c.r), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoPicker);
+    return ColorEdit3("##ValueTypeDrawer", const_cast<float *>(&c.r), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoPicker);
 }
 
 bool ValueTypeDrawer::draw(Engine::Color4 &c)
@@ -418,6 +442,22 @@ bool ValueTypeDrawer::draw(const Engine::Color4 &c)
 bool ValueTypeDrawer::draw(const Engine::KeyValueSender &s)
 {
     Text("<sender>");
+    return false;
+}
+
+bool ValueTypeDrawer::draw(std::chrono::nanoseconds &d)
+{
+    int64_t count = d.count();
+    if (ImGui::DragScalar("##ValueTypeDrawer", ImGuiDataType_S64, &count, 100000000.0f)) {
+        d = std::chrono::nanoseconds{ count };
+        return true;
+    }
+    return false;
+}
+
+bool ValueTypeDrawer::draw(const std::chrono::nanoseconds &d)
+{
+    Text("<duration>");
     return false;
 }
 
@@ -495,9 +535,10 @@ bool SelectValueTypeTypes(Engine::type_pack<Ty...>, Engine::ValueType *v)
     return (SelectValueTypeType<Ty>(v) || ...);
 }
 
-bool ValueTypeTypePicker(Engine::ValueType* v) {
+bool ValueTypeTypePicker(Engine::ValueType *v)
+{
     bool changed = false;
-    if (ImGui::BeginCombo("##combo", "", ImGuiComboFlags_NoPreview | ImGuiComboFlags_PopupAlignLeft)) {       
+    if (ImGui::BeginCombo("##combo", "", ImGuiComboFlags_NoPreview | ImGuiComboFlags_PopupAlignLeft)) {
         changed |= SelectValueTypeTypes(Engine::ValueTypeList::transform<Engine::type_pack_first>::filter<std::is_default_constructible> {}, v);
         ImGui::EndCombo();
     }
@@ -660,7 +701,9 @@ void RightAlignDuration(std::chrono::nanoseconds dur)
 void RightAlign(float size)
 {
     ImGuiWindow *window = GetCurrentWindow();
-    float avail = ImGui::GetWindowContentRegionWidth();
+    float avail = ImGui::GetContentRegionAvail().x;
+    //ImGui::Dummy({ 0, 0 });
+    //ImGui::SameLine(avail - size);
     //window->DC.CursorPos.x = window->Pos.x - window->Scroll.x + (avail - size) + window->DC.GroupOffset.x + window->DC.ColumnsOffset.x;
 }
 

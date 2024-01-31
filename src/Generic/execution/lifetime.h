@@ -84,6 +84,8 @@ namespace Execution {
             template <typename... R>
             [[nodiscard]] std::monostate set_error(R &&...)
             {
+                mState->mLifetime->decreaseCount();
+                delete mState;
                 return {};
             }
 

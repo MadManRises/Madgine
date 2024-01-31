@@ -49,20 +49,29 @@ namespace Tools {
         bool open = true;
 
         if (ImGui::Begin(mPath.filename().c_str(), &open)) {
-            auto min = ImGui::GetCursorScreenPos();
-            auto max = ImGui::GetContentRegionAvail();
-            max.x = std::max(1.0f, max.x);
-            max.y = std::max(1.0f, max.y);
 
-            // Fill the window
-            max.x = min.x + max.x;
-            max.y = min.y + max.y;
-            mEditor.SetDisplayRegion(Zep::NVec2f { min.x, min.y }, Zep::NVec2f { max.x, max.y });
+            if (ImGui::BeginChild("Debug Panel", { 20, 0 })) {
+            }
+            ImGui::EndChild();
+            ImGui::SameLine();
+            if (ImGui::BeginChild("Content")) {
 
-            mEditor.Display();
+                auto min = ImGui::GetCursorScreenPos();
+                auto max = ImGui::GetContentRegionAvail();
+                max.x = std::max(1.0f, max.x);
+                max.y = std::max(1.0f, max.y);
 
-            if (ImGui::IsWindowFocused())
-                mEditor.HandleInput();
+                // Fill the window
+                max.x = min.x + max.x;
+                max.y = min.y + max.y;
+                mEditor.SetDisplayRegion(Zep::NVec2f { min.x, min.y }, Zep::NVec2f { max.x, max.y });
+
+                mEditor.Display();
+
+                if (ImGui::IsWindowFocused())
+                    mEditor.HandleInput();
+            }
+            ImGui::EndChild();
         }
         ImGui::End();
 

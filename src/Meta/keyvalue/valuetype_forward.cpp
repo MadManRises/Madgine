@@ -2,6 +2,8 @@
 
 #include "keyvaluepair.h"
 
+#include "argumentlist.h"
+
 namespace Engine {
 
 ValueType &KeyValuePair_key(KeyValuePair &p)

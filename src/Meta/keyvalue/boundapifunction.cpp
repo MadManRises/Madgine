@@ -9,6 +9,8 @@
 
 #include "Generic/execution/execution.h"
 
+#include "argumentlist.h"
+
 namespace Engine {
 
 BoundApiFunction::BoundApiFunction(const ApiFunction &f, const TypedScopePtr &scope)

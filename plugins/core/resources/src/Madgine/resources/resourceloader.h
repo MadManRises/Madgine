@@ -16,7 +16,7 @@
 
 #include "Interfaces/filesystem/filewatcher.h"
 
-#include "Generic/lambda.h"
+#include "Generic/closure.h"
 
 #include "Generic/container/emplace.h"
 
@@ -47,8 +47,8 @@ namespace Resources {
         using OriginalHandle = Handle;
         using OriginalPtr = Ptr;
 
-        using Ctor = Lambda<Threading::Task<bool>(T *, Data &, ResourceDataInfo &, Filesystem::FileEventType event)>;
-        using UnnamedCtor = Lambda<Threading::Task<bool>(T *, Data &)>;
+        using Ctor = Closure<Threading::Task<bool>(T *, Data &, ResourceDataInfo &, Filesystem::FileEventType event)>;
+        using UnnamedCtor = Closure<Threading::Task<bool>(T *, Data &)>;
 
         struct Resource : ResourceLoaderBase::Resource {
 
@@ -114,7 +114,7 @@ namespace Resources {
         using Handle = Handle<T, typename traits::handle>;
         using Ptr = Ptr<T, Data>;
 
-        using Ctor = Lambda<Threading::Task<bool>(T *, Data &, ResourceDataInfo &, Filesystem::FileEventType event)>;
+        using Ctor = Closure<Threading::Task<bool>(T *, Data &, ResourceDataInfo &, Filesystem::FileEventType event)>;
 
         using Base::Base;
 

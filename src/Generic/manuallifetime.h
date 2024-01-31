@@ -133,8 +133,8 @@ struct ManualLifetime {
     friend auto tag_invoke(construct_t, ManualLifetime &object, Args &&...args)
     {
         assert(!object.mAlive);
-        new (&object.mData) T(std::forward<Args>(args)...);
         object.mAlive = true;
+        new (&object.mData) T(std::forward<Args>(args)...);
     }
 
     friend auto tag_invoke(destruct_t, ManualLifetime &object)

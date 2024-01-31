@@ -3,6 +3,9 @@
 #include "../toolbase.h"
 #include "../toolscollector.h"
 
+#include "Generic/flags.h"
+#include "Generic/genericresult.h"
+
 #include "Meta/keyvalue/valuetype.h"
 
 namespace Engine {
@@ -22,6 +25,8 @@ namespace Tools {
         int dummy();
 
         ValueType mV;
+
+        Flags<GenericResult> mFlags;
 
     private:
         bool mRenderSphere = false;

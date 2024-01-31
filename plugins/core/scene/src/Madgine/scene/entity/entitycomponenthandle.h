@@ -6,7 +6,7 @@
 
 #include "Modules/uniquecomponent/component_index.h"
 
-#include "Generic/lambda.h"
+#include "Generic/closure.h"
 
 namespace Engine {
 namespace Scene {

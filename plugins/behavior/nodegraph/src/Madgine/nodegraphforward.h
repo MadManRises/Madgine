@@ -11,7 +11,7 @@ namespace NodeGraph {
 
     struct NodeInterpreterData;
     struct NodeInterpreterStateBase;
-    struct NodeInterpreter;
+    struct NodeInterpreterSender;
 
     struct CodeGenerator;
     struct CodeGeneratorData;

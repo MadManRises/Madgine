@@ -94,7 +94,7 @@ namespace Execution {
                 if (resolve_var<Name>(this->mRec, result)) {
                     this->mRec.set_value(std::forward<T>(result));
                 } else {
-                    this->mRec.set_error(GenericResult::UNKNOWN_ERROR);
+                    this->mRec.set_error(GenericResult { GenericResult::UNKNOWN_ERROR });
                 }
             }
         };
@@ -142,7 +142,7 @@ namespace Execution {
                 if (store_var<Name>(this->mRec, std::forward<V>(value))) {
                     this->mRec.set_value();
                 } else {
-                    this->mRec.set_error(GenericResult::UNKNOWN_ERROR);
+                    this->mRec.set_error(GenericResult { GenericResult::UNKNOWN_ERROR });
                 }
             }
         };
@@ -158,8 +158,6 @@ namespace Execution {
             {
                 return algorithm_state<Sender, receiver<Name, Rec>> { std::forward<Sender>(sender.mSender), std::forward<Rec>(rec) };
             }
-
-            Sender mSender;
         };
 
         template <fixed_string Name>
@@ -167,7 +165,7 @@ namespace Execution {
             template <typename Sender>
             friend auto tag_invoke(const Inner &, Sender &&inner)
             {
-                return sender<Name, Sender> { {}, std::forward<Sender>(inner) };
+                return sender<Name, Sender> { { {}, std::forward<Sender>(inner) } };
             }
 
             template <typename Sender>
@@ -244,7 +242,6 @@ namespace Execution {
                 return state<Name, Rec, Sender, T> { std::forward<Rec>(rec), std::forward<Sender>(sender.mSender), std::forward<T>(sender.mInitialValue) };
             }
 
-            Sender mSender;
             T mInitialValue;
         };
 
@@ -253,7 +250,7 @@ namespace Execution {
             template <typename Sender, typename T>
             friend auto tag_invoke(Inner, Sender &&inner, T &&initialValue)
             {
-                return sender<Name, Sender, T> { {}, std::forward<Sender>(inner), std::forward<T>(initialValue) };
+                return sender<Name, Sender, T> { { {}, std::forward<Sender>(inner) }, std::forward<T>(initialValue) };
             }
 
             template <typename Sender, typename T>

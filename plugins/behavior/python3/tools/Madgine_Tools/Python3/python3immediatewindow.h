@@ -23,7 +23,8 @@ namespace Tools {
         virtual void render() override;
 
     protected:
-        bool pass(Debug::ContextInfo &context) override;
+        bool pass(Debug::DebugLocation *location) override;
+        void onSuspend(Debug::ContextInfo &context) override;
 
         bool interpret(std::string_view command) override;
 

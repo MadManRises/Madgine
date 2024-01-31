@@ -4,7 +4,7 @@
 
 #include "Generic/callerhierarchy.h"
 
-#include "Generic/lambda.h"
+#include "Generic/closure.h"
 
 #include "../primitivetypes.h"
 

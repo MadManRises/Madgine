@@ -38,6 +38,10 @@
 
 #include "Madgine/behaviorcollector.h"
 
+#include "Madgine_Tools/debugger/debuggerview.h"
+
+#include "Madgine/parametertuple.h"
+
 UNIQUECOMPONENT(Engine::Tools::SceneEditor);
 
 METATABLE_BEGIN_BASE(Engine::Tools::SceneEditor, Engine::Tools::ToolBase)
@@ -395,6 +399,7 @@ namespace Tools {
         if (entity.isDead())
             return;
 
+        bool showParameters = false;
         if (ImGui::BeginPopupCompoundContextWindow()) {
             if (ImGui::BeginMenu(IMGUI_ICON_PLUS " Add Component")) {
                 for (auto [name, index] : Scene::Entity::EntityComponentRegistry::sComponentsByName()) {
@@ -410,17 +415,48 @@ namespace Tools {
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu(IMGUI_ICON_PLUS " Add Behavior")) {
-                for (auto [name, index] : BehaviorListRegistry::sComponentsByName()) {
+                for (auto [name, index] : BehaviorFactoryRegistry::sComponentsByName()) {
                     if (ImGui::BeginMenu(name.data())) {
-                        for (std::string_view name : BehaviorListRegistry::get(index).names()) {
+                        const BehaviorFactoryBase *factory = BehaviorFactoryRegistry::get(index).mFactory;
+                        for (std::string_view name : factory->names()) {
                             if (ImGui::MenuItem(name.data())) {
-                                entity->addBehavior(BehaviorListRegistry::get(index).create(name));
+                                mPendingBehavior.mTargetEntity = entity;
+                                mPendingBehavior.mName = name;
+                                mPendingBehavior.mFuture = factory->createParameters(name);
+                                mPendingBehavior.mFactory = factory;
+                                mPendingBehavior.mParameters.reset();
+                                showParameters = true;
                             }
                         }
                         ImGui::EndMenu();
                     }
                 }
                 ImGui::EndMenu();
+            }
+            ImGui::EndPopup();
+        }
+
+        if (showParameters)
+            ImGui::OpenPopup("BehaviorParameters");
+
+        if (ImGui::BeginPopup("BehaviorParameters")) {
+            if (!mPendingBehavior.mFuture.is_ready()) {
+                ImGui::Text("Loading...");
+            } else {
+                if (!mPendingBehavior.mParameters)
+                    mPendingBehavior.mParameters = mPendingBehavior.mFuture;
+                if (ImGui::BeginTable("columns", 2)) {
+                    mInspector->drawMembers(&mPendingBehavior.mParameters);
+                    ImGui::EndTable();
+                }
+                if (ImGui::Button("Cancel")) {
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Create Behavior")) {
+                    mPendingBehavior.mTargetEntity->addBehavior(mPendingBehavior.mFactory->create(mPendingBehavior.mName, mPendingBehavior.mParameters));
+                    ImGui::CloseCurrentPopup();
+                }
             }
             ImGui::EndPopup();
         }
@@ -452,7 +488,14 @@ namespace Tools {
             entity->removeComponent(componentToRemove);
         }
 
-        if (Engine::Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> t = entity->getComponent<Scene::Entity::Transform>()) {
+        for (Debug::ContextInfo *context : entity->behaviorContexts()) {
+            Debug::ContinuationMode mode = getTool<DebuggerView>().contextControls(*context);
+            getTool<DebuggerView>().renderDebugContext(context);
+            if (mode != Debug::ContinuationMode::None)
+                context->continueExecution(mode);
+        }
+
+        if (Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> t = entity->getComponent<Scene::Entity::Transform>()) {
             constexpr Color4 colors[] = {
                 { 0.5f, 0, 0, 0.7f },
                 { 0, 0.5f, 0, 0.7f },
@@ -509,67 +552,6 @@ namespace Tools {
                 }
             }*/
         }
-
-        struct ContextData {
-            ContextData(BehaviorTrackerState *state)
-                : mState(state)
-            {
-            }
-
-            static ContextData *addState(BehaviorTrackerState *state, std::list<ContextData> &data, std::map<BehaviorTrackerState *, ContextData *> &mapping)
-            {
-                auto pib = mapping.try_emplace(state, nullptr);
-                if (pib.second) {
-                    if (state->mContext.mParent)
-                        pib.first->second = &addState(state->mContext.mParent, data, mapping)->mChildren.emplace_back(state);
-                    else
-                        pib.first->second = &data.emplace_back(state);
-                }
-                return pib.first->second;
-            };
-
-            void render()
-            {
-                ImGui::BeginGroupPanel(mState->name().data());
-
-                mState->visitState([](const Execution::StateDescriptor &desc) {
-                    std::visit(overloaded {
-                                   [](const Execution::State::Text &text) {
-                                       ImGui::Text(text.mText);
-                                   },
-                                   [](const Execution::State::Progress &progress) {
-                                       ImGui::ProgressBar(progress.mRatio, ImVec2 { -1.0f, 10.0f }, "");
-                                   } },
-                        desc);
-                });
-
-                for (ContextData &data : mChildren)
-                    data.render();
-
-                ImGui::EndGroupPanel();
-            }
-
-            BehaviorTrackerState *mState;
-            std::list<ContextData> mChildren;
-        };
-
-        std::list<ContextData> data;
-        std::map<BehaviorTrackerState *, ContextData *> mapping;
-
-        for (BehaviorTrackerState *state : entity->behaviors()) {
-            ContextData::addState(state, data, mapping);
-        }
-
-        for (ContextData &data : data) {
-            data.render();
-
-            if (ImGui::BeginPopupCompoundContextItem()) {
-                if (ImGui::MenuItem((IMGUI_ICON_X " Stop " + std::string { data.mState->name() }).c_str())) {
-                    data.mState->stop();
-                }
-                ImGui::EndPopup();
-            }
-        }
     }
 
     void SceneEditor::renderCamera(Render::Camera *camera)
@@ -600,7 +582,7 @@ namespace Tools {
                 ImGui::CloseCurrentPopup();
             }
             ImGui::EndPopup();
-        }
+        }        
     }
 
     void SceneEditor::handleInputs()

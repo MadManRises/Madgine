@@ -17,6 +17,8 @@
 
 #include "Madgine_Tools/inspector/inspector.h"
 
+#include "Madgine/debug/debuggablesender.h"
+
 UNIQUECOMPONENT(Engine::Tools::DebuggerView);
 
 METATABLE_BEGIN_BASE(Engine::Tools::DebuggerView, Engine::Tools::ToolBase)
@@ -50,19 +52,91 @@ namespace Tools {
         co_await ToolBase::finalize();
     }
 
+    void DebuggerView::visualizeDebugLocation(const Debug::ContextInfo *context, const Debug::DebugLocation *location)
+    {
+        if (!location)
+            return;
+
+        if (const Execution::SenderLocation *senderLocation = dynamic_cast<const Execution::SenderLocation *>(location)) {
+            CallableView<void(const Execution::StateDescriptor &, const void *)> visitorView;
+            auto visitor = [this, context, location, &visitorView](const Execution::StateDescriptor &desc, const void *contextData) {
+                std::visit(overloaded { [](const Execution::State::Text &text) {
+                                           ImGui::Text(text.mText);
+                                       },
+                               [](const Execution::State::Progress &progress) {
+                                   ImGui::ProgressBar(progress.mRatio, ImVec2 { -1.0f, 10.0f }, "");
+                               },
+                               [](const Execution::State::BeginBlock &begin) {
+                                   ImGui::BeginGroupPanel(begin.mName.data());
+                               },
+                               [](const Execution::State::EndBlock &end) {
+                                   ImGui::EndGroupPanel();
+                               },
+                               [](const Execution::State::PushDisabled &) {
+                                   ImGui::BeginDisabled();
+                               },
+                               [](const Execution::State::PopDisabled &) {
+                                   ImGui::EndDisabled();
+                               },
+                               [this, context, location](const Execution::State::SubLocation &) {
+                                   visualizeDebugLocation(context, location->mChild);
+                               },
+                               [contextData, &visitorView](const Execution::State::Contextual &contextual) mutable {
+                                   visitorView(contextual.mMapping(contextData), std::move(contextData));
+                               } },
+                    desc);
+            };
+            visitorView = visitor;
+            size_t i = 0;
+            for (const Execution::StateDescriptor &state : senderLocation->mState) {
+                float startY = ImGui::GetCursorScreenPos().y;
+                bool current = i++ == senderLocation->mIndex;
+                visitor(state, current ? senderLocation->mContextData : nullptr);
+                if (current && !location->mChild) {
+                    DrawDebugMarker(0.5f * (ImGui::GetCursorScreenPos().y + startY) - 7.0f);
+                }
+            }
+        } else {
+            for (auto debugVisualizer : mDebugLocationVisualizers) {
+                if (debugVisualizer(this, context, location))
+                    return;
+            }
+            ImGui::Text("Unknown ["s + typeid(*location).name() + "]");
+        }
+    }
+
+    Debug::ContinuationMode DebuggerView::contextControls(Debug::ContextInfo &context)
+    {
+        Debug::ContinuationMode mode = Debug::ContinuationMode::None;
+        ImGui::PushID(&context);        
+        if (!context.alive() || !context.isPaused())
+            ImGui::BeginDisabled();
+        if (ImGui::Button("Resume")) {
+            mode = Debug::ContinuationMode::Resume;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Step")) {
+            mode = Debug::ContinuationMode::Step;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Abort")) {
+            mode = Debug::ContinuationMode::Abort;
+        }
+        if (!context.alive() || !context.isPaused())
+            ImGui::EndDisabled();
+        ImGui::PopID();
+        return mode;
+    }
+
     void DebuggerView::render()
     {
-        bool resume = false;
-        bool step = false;
-
         if (ImGui::Begin("Debug Contexts")) {
             for (Debug::ContextInfo &info : mDebugger.infos()) {
                 std::ostringstream descriptor;
-                if (!info.mStack.empty())
-                    descriptor << info.mStack.back().mAddress;
+                descriptor << "Context";
                 if (!info.alive())
                     descriptor << " (dead)";
-                else if (info.mPaused)
+                else if (info.isPaused())
                     descriptor << " (paused)";
                 if (ImGui::Selectable(descriptor.str().c_str(), mSelectedContext == &info)) {
                     setCurrentContext(info);
@@ -71,36 +145,26 @@ namespace Tools {
         }
         ImGui::End();
 
+        Debug::ContinuationMode continuation = Debug::ContinuationMode::None;
         Debug::DebugLocation *prevSelected = mSelectedLocation;
         mSelectedLocation = nullptr;
 
         if (ImGui::Begin("Current Debug Context")) {
             if (!mSelectedContext) {
                 ImGui::Text("No context selected!");
-            } else if (!mSelectedContext->mPaused) {
-                ImGui::Text("Context is not paused!");
             } else {
-                if (!mSelectedContext->alive())
-                    ImGui::BeginDisabled();
-                if (ImGui::Button("Resume")) {
-                    resume = true;
+                continuation = contextControls(*mSelectedContext);
+                
+                Debug::DebugLocation *location = mSelectedContext->mChild;
+                while (location) {
+                    if (!mSelectedLocation && prevSelected == location)
+                        mSelectedLocation = location;
+                    if (ImGui::Selectable(location->toString().c_str(), mSelectedLocation == location))
+                        mSelectedLocation = location;
+                    location = location->mChild;
                 }
-                ImGui::SameLine();
-                if (ImGui::Button("Step")) {
-                    step = true;
-                }
-                if (!mSelectedContext->alive())
-                    ImGui::EndDisabled();
 
-                for (Debug::FrameInfo &frame : mSelectedContext->mStack) {
-                    if (frame.mLocation) {
-                        if (!mSelectedLocation && prevSelected == frame.mLocation.get())
-                            mSelectedLocation = frame.mLocation.get();
-                        if (ImGui::Selectable(frame.mLocation->toString().c_str(), mSelectedLocation == frame.mLocation.get()))
-                            mSelectedLocation = frame.mLocation.get();
-                    } else
-                        ImGui::Text("<Unknown>");
-                }
+                renderDebugContext(mSelectedContext);
             }
         }
         ImGui::End();
@@ -108,14 +172,14 @@ namespace Tools {
         if (ImGui::Begin("Locals")) {
             if (!mSelectedContext) {
                 ImGui::Text("No context selected!");
-            } else if (!mSelectedContext->mPaused) {
+            } else if (!mSelectedContext->isPaused()) {
                 ImGui::Text("Context is not paused!");
             } else if (!mSelectedLocation) {
                 ImGui::Text("No frame selected!");
             } else {
                 if (ImGui::BeginTable("locals", 2, ImGuiTableFlags_Resizable)) {
 
-                    for (auto& [key, value] : mSelectedLocation->localVariables()) {
+                    for (auto &[key, value] : mSelectedLocation->localVariables()) {
                         ValueType v = value;
                         if (mInspector->drawValue(key, v, value.isReference()).first)
                             value = v;
@@ -127,15 +191,22 @@ namespace Tools {
         }
         ImGui::End();
 
-        if (resume)
-            mSelectedContext->resume();
-        if (step)
-            mSelectedContext->step();
+        if (continuation != Debug::ContinuationMode::None)
+            mSelectedContext->continueExecution(continuation);
     }
 
     void DebuggerView::renderMenu()
     {
         ToolBase::renderMenu();
+    }
+
+    void DebuggerView::renderDebugContext(const Debug::ContextInfo *context)
+    {
+        std::unique_lock guard { context->mMutex };
+        if (BeginDebuggablePanel("Debug Context")) {
+            visualizeDebugLocation(context, context->mChild);
+            EndDebuggablePanel();
+        }
     }
 
     void DebuggerView::setCurrentContext(Debug::ContextInfo &context)
@@ -145,12 +216,40 @@ namespace Tools {
 
     void DebuggerView::onSuspend(Debug::ContextInfo &context)
     {
-        setCurrentContext(context);        
+        setCurrentContext(context);
+    }
+
+    bool DebuggerView::pass(Debug::DebugLocation *location)
+    {
+        return true;
     }
 
     std::string_view DebuggerView::key() const
     {
         return "DebuggerView";
+    }
+
+    static float sDebugStartX;
+
+    bool BeginDebuggablePanel(const char *name)
+    {
+        sDebugStartX = ImGui::GetCursorScreenPos().x;
+        ImGui::Indent();
+        return true;
+    }
+
+    void EndDebuggablePanel()
+    {
+        ImGui::Unindent();
+    }
+
+    void DrawDebugMarker(float y)
+    {
+        ImDrawList *draw_list = ImGui::GetWindowDrawList();
+        float x = sDebugStartX;
+        y += 7.0f;
+        draw_list->AddRectFilled({ x + 3.0f, y - 2.0f }, { x + 12.0f, y + 3.0f }, IM_COL32(255, 200, 10, 255));
+        draw_list->AddTriangleFilled({ x + 12.0f, y - 5.0f }, { x + 12.0f, y + 5.0f }, { x + 17.0f, y }, IM_COL32(255, 200, 10, 255));
     }
 
 }

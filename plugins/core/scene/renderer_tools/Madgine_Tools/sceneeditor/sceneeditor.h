@@ -10,6 +10,8 @@
 
 #include "Madgine/scene/entity/entitycomponentptr.h"
 
+#include "Madgine/parametertuple.h"
+
 namespace Engine {
 namespace Tools {
 
@@ -104,6 +106,14 @@ namespace Tools {
 
         int mHoveredAxis = -1;
         Engine::Scene::Entity::EntityComponentPtr<Scene::Entity::Transform> mHoveredTransform;
+
+        struct {
+            Scene::Entity::EntityPtr mTargetEntity;
+            Threading::TaskFuture<ParameterTuple> mFuture;
+            ParameterTuple mParameters;
+            std::string_view mName;
+            const BehaviorFactoryBase *mFactory;
+        } mPendingBehavior;
 
         //Settings
         Vector4 mBoneForward = { 1, 0, 0, 0 };

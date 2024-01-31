@@ -10,7 +10,17 @@ struct META_EXPORT ArgumentList {
 
     ArgumentList();
     ArgumentList(std::initializer_list<ValueType> vals);
+    ArgumentList(std::vector<ValueType> vals);
     ArgumentList(size_t size);
+
+    template <typename... Args>
+    ArgumentList(Args &&...args)
+        : ArgumentList(sizeof...(args))
+    {
+        size_t i = 0;
+        (to_ValueType((*this)[i++], std::forward<Args>(args)), ...);
+    }
+
     ArgumentList(const ArgumentList &other);
     ArgumentList(ArgumentList &&);
     ~ArgumentList();

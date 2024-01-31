@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lambda.h"
+#include "closure.h"
 
 namespace Engine {
 
@@ -11,7 +11,7 @@ struct DelayedConstruct {
         return mConstructor();
     }
 
-    Lambda<T()> mConstructor;
+    Closure<T()> mConstructor;
 };
 
 }

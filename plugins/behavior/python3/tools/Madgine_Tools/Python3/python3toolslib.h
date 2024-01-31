@@ -2,6 +2,7 @@
 
 #include "Madgine_Tools/toolslib.h"
 #include "Madgine_Tools/texteditorlib.h"
+#include "Madgine_Tools/debugtoolslib.h"
 #include "Python3/python3lib.h"
 
 #if defined(Python3Tools_EXPORTS)

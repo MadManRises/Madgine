@@ -8,6 +8,7 @@
 
 #include <frameobject.h>
 
+#include "pydictptr.h"
 #include "pyobjectutil.h"
 
 #include "Meta/keyvalue/argumentlist.h"
@@ -23,7 +24,7 @@ namespace Scripting {
         struct PySuspendException {
             PyObject **mStacktop;
             int mBlock;
-            Lambda<void(KeyValueReceiver &, std::vector<PyFramePtr>, Lambda<void(std::string_view)>)> mCallback;
+            Closure<void(BehaviorReceiver &, std::vector<PyFramePtr>, Closure<void(std::string_view)>, std::stop_token)> mCallback;
             std::vector<PyFramePtr> mFrames;
         };
 
@@ -43,6 +44,72 @@ namespace Scripting {
             .tp_doc = "Utility exception for Python suspension",
             .tp_base = (PyTypeObject *)PyExc_Exception,
             .tp_new = PyType_GenericNew,
+        };
+
+        struct PyBehaviorScope {
+            BehaviorReceiver *mReceiver;
+            PyDictPtr mInner;
+        };
+
+        struct PyBehaviorScopeObject {
+            PyObject_HEAD
+                PyBehaviorScope mScope;
+        };
+
+        static PyObject *
+        PyBehaviorScope_subscript(PyBehaviorScopeObject *self, PyObject *key)
+        {
+            const char *name;
+
+            if (!PyArg_Parse(key, "s", &name))
+                return NULL;
+
+            ValueType v;
+            bool found = self->mScope.mReceiver->resolveVar(name, v);
+            if (found) {
+                return toPyObject(v);
+            } else {
+                return PyObject_GetItem(self->mScope.mInner, key);
+            }
+        }
+
+        /* static PyObject *OwnedScopePtr_iter(const TypedScopePtr &p)
+        {
+            if (!p) {
+                PyErr_SetString(PyExc_TypeError, "Nullptr is not iterable!");
+                return NULL;
+            }
+            ScopeIterator proxyIt = p.find("__proxy");
+            if (proxyIt != p.end()) {
+                ValueType proxy;
+                proxyIt->value(proxy);
+                if (proxy.is<TypedScopePtr>()) {
+                    return OwnedScopePtr_iter(proxy.as<TypedScopePtr>());
+                }
+            }
+            return toPyObject(p.begin());
+        }
+
+        static PyObject *
+        PyOwnedScopePtr_iter(PyBehaviorScopeObject *self)
+        {
+            return OwnedScopePtr_iter(self->mPtr.get());
+        }*/
+
+        static PyMappingMethods PyBehaviorScopeMethods = {
+            .mp_subscript = (binaryfunc)&PyBehaviorScope_subscript,
+        };
+
+        PyTypeObject PyBehaviorScopeType = {
+            .ob_base = PyObject_HEAD_INIT(NULL).tp_name = "Engine.BehaviorScope",
+            .tp_basicsize = sizeof(PyBehaviorScopeObject),
+            .tp_dealloc = &PyDealloc<PyBehaviorScopeObject, &PyBehaviorScopeObject::mScope>,
+            //.tp_getattro = (getattrofunc)PyBehaviorScope_get,
+            .tp_flags = Py_TPFLAGS_DEFAULT,
+            .tp_doc = "Scope wrapper to access Behavior scope variables",
+            //.tp_iter = (getiterfunc)PyOwnedScopePtr_iter,
+            .tp_new = PyType_GenericNew,
+            .tp_as_mapping = &PyBehaviorScopeMethods,
         };
 
         PyObject *evalFrame(PyFrameObject *frame, int throwExc)
@@ -66,14 +133,14 @@ namespace Scripting {
             return result;
         }
 
-        void evalFrame(KeyValueReceiver &receiver, PyFramePtr frame)
+        void evalFrame(BehaviorReceiver &receiver, PyFramePtr frame)
         {
             std::vector<PyFramePtr> frames;
             frames.push_back(std::move(frame));
             evalFrames(receiver, std::move(frames));
         }
 
-        void evalFrames(KeyValueReceiver &receiver, std::vector<PyFramePtr> frames)
+        void evalFrames(BehaviorReceiver &receiver, std::vector<PyFramePtr> frames)
         {
             assert(sUnwindable == false);
             sUnwindable = true;
@@ -88,17 +155,17 @@ namespace Scripting {
                     assert(suspend.mStacktop == nullptr);
                     assert(suspend.mBlock == 0);
 
-                    Lambda<void(KeyValueReceiver &, std::vector<PyFramePtr>, Lambda<void(std::string_view)>)> callback = std::move(suspend.mCallback);
+                    Closure<void(BehaviorReceiver &, std::vector<PyFramePtr>, Closure<void(std::string_view)>, std::stop_token)> callback = std::move(suspend.mCallback);
                     std::vector<PyFramePtr> suspendedFrames = std::move(suspend.mFrames);
 
                     Py_DECREF(result);
 
-                    Python3Unlock unlock;      
+                    Python3Unlock unlock;
 
                     std::ranges::move(frames, std::back_inserter(suspendedFrames));
                     frames.clear();
 
-                    callback(receiver, std::move(suspendedFrames), unlock.out());
+                    callback(receiver, std::move(suspendedFrames), unlock.out(), unlock.st());
 
                 } else {
                     if (frames.empty()) {
@@ -147,7 +214,7 @@ namespace Scripting {
             return sUnwindable;
         }
 
-        PyObject *suspend(Lambda<void(KeyValueReceiver &, std::vector<PyFramePtr>, Lambda<void(std::string_view)>)> callback)
+        PyObject *suspend(Closure<void(BehaviorReceiver &, std::vector<PyFramePtr>, Closure<void(std::string_view)>, std::stop_token)> callback)
         {
             assert(stackUnwindable());
 
@@ -160,11 +227,62 @@ namespace Scripting {
             return suspendEx;
         }
 
+        BehaviorError fetchError()
+        {
+            PyObjectPtr type, value, traceback;
+            PyErr_Fetch(&type, &value, &traceback);
+
+            const char *filename = "";
+            size_t line = 0;
+
+            if (traceback) {
+                PyTracebackObject *tb = reinterpret_cast<PyTracebackObject *>(static_cast<PyObject *>(traceback));
+                while (tb->tb_next)
+                    tb = tb->tb_next;
+
+                filename = PyUnicode_AsUTF8(tb->tb_frame->f_code->co_filename);
+                line = tb->tb_frame->f_code->co_firstlineno;
+            }
+
+            PyObjectPtr str = PyObject_Str(value);
+            const char *errorMessage = PyUnicode_AsUTF8(str);
+
+            std::string msg;
+            if (errorMessage)
+                msg = errorMessage;
+
+            return { BehaviorResult::UNKNOWN_ERROR, msg, filename, line };
+        }
+
         void setupExecution()
         {
             PyGILState_GetThisThreadState()->interp->eval_frame = &evalFrame;
 
             PyEval_SetTrace(&executionTrace, nullptr);
+        }
+
+        ExecutionState::ExecutionState(PyFramePtr frame, Closure<void(std::string_view)> out)
+            : mFrame(std::move(frame))
+            , mOut(std::move(out))
+        {
+        }
+
+        void ExecutionState::start()
+        {
+            Python3Lock lock { std::move(mOut), stopToken() };
+
+            Python3Debugger::Guard guard { debugLocation() };
+
+            PyObject *wrapped = PyObject_CallObject((PyObject *)&PyBehaviorScopeType, NULL);
+            new (&reinterpret_cast<PyBehaviorScopeObject *>(wrapped)->mScope) PyBehaviorScope { this, static_cast<PyFrameObject *>(mFrame)->f_globals };
+            static_cast<PyFrameObject *>(mFrame)->f_globals = wrapped;
+
+            evalFrame(*this, std::move(mFrame));
+        }
+
+        void tag_invoke(Execution::visit_state_t, ExecutionSender &sender, CallableView<void(const Execution::StateDescriptor &)> visitor)
+        {
+            visitor(Execution::State::SubLocation {});
         }
 
     }

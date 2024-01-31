@@ -6,17 +6,24 @@
 namespace Engine {
 namespace Execution {
 
+    enum ExecutionState {
+        FINISH_STARTED = 1 << 0,
+        FINISH_ENDED = 1 << 1,
+        STOP_STARTED = 1 << 2,
+        STOP_FAILED = 1 << 3
+    };
+
     struct cancelled_t {
     };
     constexpr cancelled_t cancelled;
 
-    template <typename stop_cb, typename cleanup_cb>
-    struct stop_callback : cleanup_cb {
+    template <typename stop_cb, typename finally_cb>
+    struct stop_callback : finally_cb {
 
-        template <typename CC>
-        stop_callback(CC &&cc)
-            : cleanup_cb(std::forward<CC>(cc))
-        {            
+        template <typename... FC>
+        stop_callback(FC &&...fc)
+            : finally_cb(std::forward<FC>(fc)...)
+        {
         }
 
         template <typename SC>
@@ -28,10 +35,44 @@ namespace Execution {
         template <typename... Args>
         void finish(Args &&...args)
         {
-            if (mGate.pass([this]() {
+            uint8_t state = mState.fetch_or(FINISH_STARTED);
+            assert(!(state & FINISH_STARTED));
+            assert(!(state & FINISH_ENDED));
+
+            if (!(state & STOP_STARTED) || (state & STOP_FAILED))
+                destruct(mCallback);
+
+            state = mState.fetch_or(FINISH_ENDED);
+            assert(state & FINISH_STARTED);
+            assert(!(state & FINISH_ENDED));
+            assert((state & STOP_FAILED) || !(state & STOP_STARTED));
+            mState = 0;
+            if (state & STOP_FAILED)
+                finally_cb::operator()(cancelled);
+            else
+                finally_cb::operator()(std::forward<Args>(args)...);
+        }
+
+    protected:
+        void stop(stop_cb &cb)
+        {
+            uint8_t state = mState.fetch_or(STOP_STARTED);
+            assert(!(state & STOP_STARTED));
+            assert(!(state & STOP_FAILED));
+
+            bool stopped = cb();
+            assert(!stopped || !(state & FINISH_STARTED));
+            if (stopped) {
+                destruct(mCallback);
+                mState = 0;
+                finally_cb::operator()(cancelled);
+            } else {
+                state = mState.fetch_or(STOP_FAILED);
+                if (state & FINISH_ENDED) {
                     destruct(mCallback);
-                })) {
-                cleanup_cb::operator()(std::forward<Args>(args)...);
+                    mState = 0;
+                    finally_cb::operator()(cancelled);
+                }
             }
         }
 
@@ -47,19 +88,13 @@ namespace Execution {
 
             void operator()()
             {
-                stop_callback &cb = mCallback;
-                if (mCallback.mGate.pass([&]() {
-                        stop_cb::operator()();
-                        destruct(cb.mCallback);
-                    })) {
-                    cb(cancelled);
-                }
+                mCallback.stop(*this);
             }
 
             stop_callback &mCallback;
         };
 
-        Gate mGate;
+        std::atomic<uint8_t> mState;
         ManualLifetime<std::stop_callback<inner_callback>> mCallback = std::nullopt;
     };
 }

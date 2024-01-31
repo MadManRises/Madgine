@@ -5,6 +5,8 @@
 #include "Generic/makeowning.h"
 #include "Generic/withresult.h"
 
+#include "Madgine/debug/debuggablesender.h"
+
 namespace Engine {
 
 template <typename Sender, typename... V>
@@ -32,16 +34,11 @@ struct BehaviorAwaitableReceiver : Execution::execution_receiver<> {
         mState->set_error(std::forward<R>(result)...);
     }
 
-    friend BehaviorTrackerContext tag_invoke(get_behavior_context_t, BehaviorAwaitableReceiver &rec)
-    {
-        return rec.mBehavior->mContext;
-    }
-
     template <typename O>
     friend bool tag_invoke(Execution::resolve_var_d_t, BehaviorAwaitableReceiver &rec, std::string_view name, O &out)
     {
         ValueType v;
-        if (rec.mBehavior->mReceiver->resolveVar(v, name)) {
+        if (rec.mBehavior->mReceiver->resolveVar(name, v)) {
             out = v.as<O>();
             return true;
         } else {
@@ -51,7 +48,12 @@ struct BehaviorAwaitableReceiver : Execution::execution_receiver<> {
 
     friend std::stop_token tag_invoke(Execution::get_stop_token_t, BehaviorAwaitableReceiver &rec)
     {
-        return rec.mBehavior->mStopToken;
+        return rec.mBehavior->mReceiver->stopToken();
+    }
+
+    friend Debug::ParentLocation *tag_invoke(Execution::get_debug_location_t, BehaviorAwaitableReceiver &rec)
+    {
+        return &rec.mBehavior->mDebugLocation;
     }
 
     BehaviorAwaitableSender<Sender> *mState;
@@ -64,25 +66,30 @@ struct BehaviorAwaitableSenderImpl;
 template <typename Sender>
 struct BehaviorAwaitableSenderImpl<Sender> {
 
-    using S = Execution::connect_result_t<BehaviorTracker::sender<Sender>, BehaviorAwaitableReceiver<Sender>>;
+    auto buildState(Sender &&sender, CoroutineBehaviorState *state)
+    {
+        return Execution::connect(std::forward<Sender>(sender) | Execution::with_debug_location<Execution::SenderLocation>(), BehaviorAwaitableReceiver<Sender> { {}, this, state });
+    }
+
+    using S = std::invoke_result_t<decltype(&BehaviorAwaitableSenderImpl::buildState), BehaviorAwaitableSenderImpl, Sender, nullptr_t>;
     using R = typename Sender::result_type;
 
     BehaviorAwaitableSenderImpl(Sender &&sender, CoroutineBehaviorState *state)
-        : mState(Execution::connect(std::forward<Sender>(sender) | state->mContext, BehaviorAwaitableReceiver<Sender> { {}, this, state }))
+        : mState(buildState(std::forward<Sender>(sender), state))
     {
     }
 
     bool await_ready()
     {
         mState.start();
-        return mFlag.test() && mHasValue;
+        return mFlag.test() && mResult;
     }
 
     bool await_suspend(std::coroutine_handle<CoroutineBehaviorState> behavior)
     {
         mBehavior = behavior;
         if (mFlag.test_and_set()) {
-            if (mHasValue) {
+            if (mResult) {
                 return false;
             } else if (mError) {
                 mBehavior.promise().set_error(*mError);
@@ -116,7 +123,7 @@ struct BehaviorAwaitableSenderImpl<Sender> {
 
     void set_error(R result)
     {
-        mError = std::forward<R>(mError);
+        mError = std::forward<R>(result);
         if (mFlag.test_and_set())
             mBehavior.promise().set_error(std::forward<R>(*mError));
     }
@@ -132,11 +139,16 @@ private:
 template <typename Sender, typename V>
 struct BehaviorAwaitableSenderImpl<Sender, V> {
 
-    using S = Execution::connect_result_t<BehaviorTracker::sender<Sender>, BehaviorAwaitableReceiver<Sender, V>>;
+    auto buildState(Sender &&sender, CoroutineBehaviorState *state)
+    {
+        return Execution::connect(std::forward<Sender>(sender) | Execution::with_debug_location<Execution::SenderLocation>(), BehaviorAwaitableReceiver<Sender, V> { {}, this, state });
+    }
+
+    using S = std::invoke_result_t<decltype(&BehaviorAwaitableSenderImpl::buildState), BehaviorAwaitableSenderImpl, Sender, nullptr_t>;
     using R = typename Sender::result_type;
 
     BehaviorAwaitableSenderImpl(Sender &&sender, CoroutineBehaviorState *state)
-        : mState(Execution::connect(std::forward<Sender>(sender) | state->mContext, BehaviorAwaitableReceiver<Sender, V> { {}, this, state }))
+        : mState(buildState(std::forward<Sender>(sender), state))
     {
     }
 

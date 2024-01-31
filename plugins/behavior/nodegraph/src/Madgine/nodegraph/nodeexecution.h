@@ -60,6 +60,11 @@ namespace NodeGraph {
         {
             return handle.writeVar(handle.mNode.template getDynamicName<Name>(), std::forward<T>(value));
         }
+
+        friend Debug::DebugLocation *tag_invoke(Execution::get_debug_location_t, NodeInterpretHandle &handle)
+        {
+            return handle.mInterpreter.debugLocation();
+        }
     };
 
     template <typename Node>
@@ -206,11 +211,11 @@ namespace NodeGraph {
         std::vector<NodeResults> &mResults;
     };
 
-    MADGINE_NODEGRAPH_EXPORT void continueExecution(NodeInterpreterStateBase &interpreter, const NodeBase &node, Execution::VirtualReceiverBase<InterpretResult> &receiver);
+    MADGINE_NODEGRAPH_EXPORT void continueExecution(NodeInterpreterStateBase &interpreter, const NodeBase &node, Execution::VirtualReceiverBase<BehaviorError> &receiver);
 
     template <typename Node>
     struct NodeReceiver : NodeExecutionReceiver<Node> {
-        Execution::VirtualReceiverBase<InterpretResult> &mReceiver;
+        Execution::VirtualReceiverBase<BehaviorError> &mReceiver;
 
         void set_value()
         {
@@ -220,7 +225,7 @@ namespace NodeGraph {
         {
             mReceiver.set_done();
         }
-        void set_error(GenericResult result)
+        void set_error(BehaviorError result)
         {
             mReceiver.set_error(result);
         }

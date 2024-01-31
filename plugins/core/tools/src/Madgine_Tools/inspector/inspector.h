@@ -5,6 +5,8 @@
 #include "Meta/keyvalue/boundapifunction.h"
 #include "Meta/keyvalue/typedscopeptr.h"
 
+#include "Meta/keyvalue/argumentlist.h"
+
 //#include "inspectorlayout.h"
 
 namespace Engine {

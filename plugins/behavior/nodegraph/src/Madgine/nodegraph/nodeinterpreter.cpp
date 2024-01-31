@@ -13,60 +13,46 @@
 namespace Engine {
 namespace NodeGraph {
 
-    struct NodeDebugLocation : Debug::DebugLocation {
-        NodeDebugLocation(const NodeBase *node, NodeInterpreterStateBase *interpreter)
-            : mNode(node)
-            , mInterpreter(interpreter)
-        {
+    std::string NodeDebugLocation::toString() const
+    {
+        std::stringstream ss;
+        if (mNode) {
+            ss << mNode->className() << " [" << mNode << "]";
+        } else {
+            ss << "Graph [" << mInterpreter->graph() << "]";
         }
+        return ss.str();
+    }
 
-        virtual std::string toString() const override
-        {
-            std::stringstream ss;
-            if (mNode) {
-                ss << mNode->className() << " [" << mNode << "]";
-            } else {
-                ss << "Graph [" << mInterpreter->graph() << "]";
-            }
-            return ss.str();
+    std::map<std::string_view, ValueType> NodeDebugLocation::localVariables() const
+    {
+        std::map<std::string_view, ValueType> values;
+        for (std::string_view name : mInterpreter->variables()) {
+            mInterpreter->readVar(values.try_emplace(name).first->second, name);
         }
-
-        virtual std::map<std::string_view, ValueType> localVariables() const override
-        {
-            std::map<std::string_view, ValueType> values;
-            for (std::string_view name : mInterpreter->variables()) {
-                mInterpreter->readVar(values.try_emplace(name).first->second, name);
-            }
-            return values;
-        }
-
-        const NodeBase *mNode;
-        NodeInterpreterStateBase *mInterpreter;
-    };
+        return values;
+    }
 
     NodeInterpreterStateBase::NodeInterpreterStateBase(const NodeGraph *graph, NodeGraphLoader::Handle handle)
         : mGraph(graph)
         , mHandle(std::move(handle))
+        , mDebugLocation(this)
     {
-        mData.resize(mGraph->nodes().size());
 
-        for (size_t i = 0; i < mData.size(); ++i) {
-            mGraph->node(i + 1)->setupInterpret(*this, mData[i]);
-        }
     }
 
-    void NodeInterpreterStateBase::interpretImpl(Execution::VirtualReceiverBase<InterpretResult> &receiver, uint32_t flowIn)
+    void NodeInterpreterStateBase::interpretImpl(Execution::VirtualReceiverBase<BehaviorError> &receiver, uint32_t flowIn)
     {
         interpretImpl(receiver, mGraph->mFlowOutPins[flowIn].mTarget);
     }
 
-    void NodeInterpreterStateBase::interpretImpl(Execution::VirtualReceiverBase<InterpretResult> &receiver, Pin pin)
+    void NodeInterpreterStateBase::interpretImpl(Execution::VirtualReceiverBase<BehaviorError> &receiver, Pin pin)
     {
-        Debug::Debugger::getSingleton().stepInto(&receiver, std::make_unique<NodeDebugLocation>(nullptr, this));
+        mDebugLocation.stepInto(parentDebugLocation());
         branch(receiver, pin);
     }
 
-    void NodeInterpreterStateBase::branch(Execution::VirtualReceiverBase<InterpretResult> &receiver, Pin pin)
+    void NodeInterpreterStateBase::branch(Execution::VirtualReceiverBase<BehaviorError> &receiver, Pin pin)
     {
 
         const NodeBase *node = nullptr;
@@ -74,24 +60,17 @@ namespace NodeGraph {
             node = mGraph->node(pin.mNode);
         }
 
-        NodeDebugLocation *location = static_cast<NodeDebugLocation *>(Debug::Debugger::getSingleton().getLocation(&receiver));
-        if (location)
-            location->mNode = node;
+        mDebugLocation.mNode = node;
 
-        auto callback = [=, &receiver]() {
+        mDebugLocation.pass([=, &receiver](Debug::ContinuationMode mode) {
             if (pin && pin.mNode) {
                 node->interpret({ *this, *node, receiver }, mData[pin.mNode - 1], pin.mIndex, pin.mGroup);
             } else {
-                Debug::Debugger::getSingleton().stepOut(&receiver);
+                mDebugLocation.stepOut(parentDebugLocation());
                 receiver.set_value();
             }
-        };
-
-        if (Debug::Debugger::getSingleton().pass(&receiver)) {
-            callback();
-        }else{
-            Debug::Debugger::getSingleton().yield(&receiver, std::move(callback));
-        }
+        },
+            parentStopToken());
     }
 
     void NodeInterpreterStateBase::read(ValueType &retVal, Pin pin)
@@ -169,19 +148,38 @@ namespace NodeGraph {
         return variables;
     }
 
-    void NodeInterpreterStateBase::start(ArgumentList args)
+    void NodeInterpreterStateBase::start()
     {
-        mArguments = std::move(args);
-        interpretImpl(*this, 0);
+        auto callback = [this](bool) {
+            mData.resize(mGraph->nodes().size());
+
+            for (size_t i = 0; i < mData.size(); ++i) {
+                mGraph->node(i + 1)->setupInterpret(*this, mData[i]);
+            }
+
+            interpretImpl(*this, 0);
+        };
+
+        if (mGraph) {
+            callback(true);
+        } else {
+            assert(mHandle);
+            mHandle.info()->loadingTask().then([this, callback { std::move(callback) }](bool result) {
+                mGraph = mHandle;
+                callback(result);
+            },
+                NodeGraphLoader::getSingleton().loadingTaskQueue());
+        }
     }
 
-    void NodeInterpreterStateBase::visitState(CallableView<void(const Execution::StateDescriptor &)> visitor)
+    Debug::DebugLocation *NodeInterpreterStateBase::debugLocation()
     {
-        for (const std::unique_ptr<NodeInterpreterData> &data : mData) {
-            if (data) {
-                data->visitState(visitor);
-            }
-        }
+        return &mDebugLocation;
+    }
+
+    bool NodeDebugLocation::wantsPause() const
+    {
+        return true;
     }
 
 }

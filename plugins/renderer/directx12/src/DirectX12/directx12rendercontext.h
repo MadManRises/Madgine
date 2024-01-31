@@ -6,8 +6,6 @@
 #include "util/directx12commandlist.h"
 #include "util/directx12descriptorheap.h"
 
-#include "Generic/lambda.h"
-
 #include "Madgine/render/vertexformat.h"
 
 #include "util/directx12buffer.h"

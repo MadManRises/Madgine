@@ -62,5 +62,3 @@ namespace ClickBrick {
 }
 
 REGISTER_TYPE(ClickBrick::GameManager)
-
-DECLARE_NATIVE_BEHAVIOR(ClickBrick::Test);

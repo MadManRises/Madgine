@@ -26,10 +26,9 @@ struct FunctionTable;
 struct FunctionArgument;
 struct KeyValueFunction;
 struct EnumHolder;
+struct FlagsHolder;
 struct KeyValueSender;
 struct ArgumentList;
-
-struct KeyValueReceiver;
 
 struct ExtendedValueTypeDesc;
 struct ValueTypeDesc;

@@ -74,7 +74,7 @@ FolderSources(sources "" tools)
 	FolderSources(sources tools Madgine_Tools)
 		FolderSources(sources Madgine_Tools launcher launchertool.cpp launchertool.h)
 
-add_tools(MadgineLauncher ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/launchertoolslib.h SOURCE_ROOT tools NO_DEFAULT_LINK)
+add_tools(MadgineLauncher ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/launchertoolslib.h NO_DEFAULT_LINK)
 
 target_link_plugins(MadgineLauncherTools Tools ClientTools)
 

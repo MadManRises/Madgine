@@ -102,7 +102,7 @@ namespace NodeGraph {
 
         static auto buildSender(value_argument_tuple&& values, std::vector<NodeResults>* results = nullptr)
         {
-            return TupleUnpacker::invokeFromTuple(Algorithm, buildArgs<0>(std::move(values), argument_types {}, results));
+            return TupleUnpacker::invokeFromTuple(Algorithm, buildArgs<0>(std::move(values), argument_types {}, results)) | Execution::with_debug_location<Execution::SenderLocation>();
         }
 
         template <typename T>
@@ -171,7 +171,8 @@ namespace NodeGraph {
             NodeResults mValues;
 
             template <typename CPO, typename... Args>
-            friend decltype(auto) tag_invoke(CPO f, DummyReceiver& receiver, Args&&... args)
+            friend auto tag_invoke(CPO f, DummyReceiver& receiver, Args&&... args) 
+                -> tag_invoke_result_t<CPO, NodeExecutionReceiver<SenderNode<Config, Algorithm, Arguments...>>&, Args...>
             {
                 return f(static_cast<NodeExecutionReceiver<SenderNode<Config, Algorithm, Arguments...>>&>(receiver), std::forward<Args>(args)...);
             }
@@ -247,7 +248,7 @@ namespace NodeGraph {
                             return Inner::Signature::size;
                         } else {
                             return 0;
-                        }                        
+                        }
                     }()...
                 };
             }
@@ -381,48 +382,14 @@ namespace NodeGraph {
                     NodeReceiver<SenderNode<Config, Algorithm, Arguments...>>::set_done();
                 }
 
-                void set_error(GenericResult result)
+                void set_error(BehaviorError result)
                 {
                     mData->cleanup();
                     NodeReceiver<SenderNode<Config, Algorithm, Arguments...>>::set_error(result);
                 }
             };
 
-            struct RecursiveReceiver {
-                InterpretData* mData;
-
-                template <typename... Args>
-                void set_value(Args&&... args)
-                {
-                    if (mData->mRecursiveBuffer.empty())
-                        mData->mRecursiveBuffer.emplace_back();
-                    mData->mRecursiveBuffer.front() = { ValueType { std::forward<Args>(args) }... };
-                    mData->continueRecursion();
-                }
-
-                void set_done()
-                {
-                    if constexpr (!constant) {
-                        mData->cleanup();
-                    }
-                    throw 0;
-                }
-
-                void set_error(GenericResult result)
-                {
-                    if constexpr (!constant) {
-                        mData->cleanup();
-                    }
-                    throw 0;
-                }
-
-                template <typename CPO>
-                friend decltype(auto) tag_invoke(CPO f, RecursiveReceiver& receiver)
-                {
-                    return f(Execution::get_receiver(receiver.mData->mState));
-                }
-            };
-
+            
             void start(NodeReceiver<SenderNode<Config, Algorithm, Arguments...>> receiver, value_argument_tuple args)
             {
                 static_assert(!Config::constant);
@@ -487,11 +454,6 @@ namespace NodeGraph {
                 (typename Config::exposedVariables {});
             }
 
-            virtual void visitState(CallableView<void(const Execution::StateDescriptor&)> visitor) override
-            {
-                Execution::visit_state(mState, visitor);
-            }
-
             ValueType read(uint32_t providerIndex, uint32_t group) const
             {
                 return mResults[group][providerIndex];
@@ -544,7 +506,7 @@ namespace NodeGraph {
         virtual CodeGen::Statement generateRead(CodeGenerator& generator, std::unique_ptr<CodeGeneratorData>& data, uint32_t providerIndex, uint32_t group) const override
         {
 
-            auto result = CodeGen::generatorFromSender(buildSender(value_argument_tuple { mArguments }), NodeCodegenReceiver { 0, this, generator }).generate();
+            /* auto result = CodeGen::generatorFromSender(buildSender(value_argument_tuple { mArguments }), NodeCodegenReceiver { 0, this, generator }).generate();
             if constexpr (std::tuple_size_v<decltype(result)> < 1)
                 throw 0;
             else {
@@ -554,7 +516,8 @@ namespace NodeGraph {
                     providerIndex);
 
                 return current;
-            }
+            }*/
+            throw 0;
         }
 
         value_argument_tuple mArguments;

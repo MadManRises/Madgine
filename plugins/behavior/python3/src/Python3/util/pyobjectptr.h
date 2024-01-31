@@ -1,5 +1,10 @@
 #pragma once
 
+#include "Generic/execution/sender.h"
+#include "Generic/genericresult.h"
+#include "Madgine/debug/debuggablesender.h"
+#include "Meta/keyvalue/valuetype.h"
+
 namespace Engine {
 namespace Scripting {
     namespace Python3 {
@@ -18,7 +23,7 @@ namespace Scripting {
             ~PyObjectPtr();
 
             PyObjectPtr &operator=(const PyObjectPtr &other);
-            PyObjectPtr &operator=(PyObjectPtr &&other);            
+            PyObjectPtr &operator=(PyObjectPtr &&other);
 
             static PyObjectPtr fromBorrowed(PyObject *object);
 
@@ -28,12 +33,12 @@ namespace Scripting {
             PyObjectPtr call(const PyDictPtr &kwargs, const char *format, ...) const;
             PyObjectPtr call(const PyObjectPtr &args, const PyObjectPtr &kwargs) const;
 
+            ExecutionSender callAsync() const;
+
             PyObjectFieldAccessor operator[](const PyObjectPtr &name) const;
 
             void reset();
             PyObject *release();
-
-            void handleError();
 
             explicit operator bool() const;
             operator PyObject *() const;

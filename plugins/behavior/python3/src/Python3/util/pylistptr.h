@@ -13,9 +13,11 @@ namespace Scripting {
 
             using PyObjectPtr::operator=;
 
+            static PyListPtr fromBorrowed(PyObject *object);
+
             using value_type = PyObject*;
 
-            struct iterator {
+            struct MADGINE_PYTHON3_EXPORT iterator {
                 using value_type = PyObject*;
                 using difference_type = ptrdiff_t;
 

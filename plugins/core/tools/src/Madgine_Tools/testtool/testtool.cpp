@@ -26,9 +26,11 @@ FUNCTION(logTest)
 FUNCTION(logValue, value)
 FUNCTION(dummy)
 MEMBER(mV)
+MEMBER(mFlags)
 METATABLE_END(Engine::Tools::TestTool)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::TestTool, Engine::Tools::ToolBase)
+FIELD(mFlags)
 SERIALIZETABLE_END(Engine::Tools::TestTool)
 
 namespace Engine {

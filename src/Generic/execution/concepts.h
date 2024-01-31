@@ -22,10 +22,30 @@ namespace Execution {
         }
     };
 
-    inline constexpr connect_t connect;
+    struct outer_connect_t {
+        template <typename Sender, typename Rec>
+        requires (!tag_invocable<outer_connect_t, Sender, Rec>)
+        auto operator()(Sender &&sender, Rec &&rec) const
+            noexcept(is_nothrow_tag_invocable_v<connect_t, Sender, Rec>)
+                -> tag_invoke_result_t<connect_t, Sender, Rec>
+        {
+            return tag_invoke(connect_t {}, std::forward<Sender>(sender), std::forward<Rec>(rec));
+        }
+
+        template <typename Sender, typename Rec>
+        requires tag_invocable<outer_connect_t, Sender, Rec>
+        auto operator()(Sender &&sender, Rec &&rec) const
+            noexcept(is_nothrow_tag_invocable_v<outer_connect_t, Sender, Rec>)
+                -> tag_invoke_result_t<outer_connect_t, Sender, Rec>
+        {
+            return tag_invoke(*this, std::forward<Sender>(sender), std::forward<Rec>(rec));
+        }
+    };
+
+    inline constexpr outer_connect_t connect;
 
     template <typename Sender, typename Rec>
-    using connect_result_t = tag_invoke_result_t<connect_t, Sender, Rec>;
+    using connect_result_t = decltype(connect(std::declval<Sender>(), std::declval<Rec>()));
 
     struct get_context_t {
         template <typename T>
@@ -57,6 +77,11 @@ namespace Execution {
         operator std::stop_token()
         {
             return {};
+        }
+
+        static constexpr bool stop_requested()
+        {
+            return false;
         }
     };
 
@@ -230,6 +255,22 @@ namespace Execution {
         using result_type = typename Sender::result_type;
         template <template <typename...> typename Tuple>
         using value_types = typename Sender::template value_types<Tuple>;
+
+        template <typename CPO, typename... Args>
+        friend auto tag_invoke(CPO f, algorithm_sender &sender, Args &&...args)
+            -> tag_invoke_result_t<CPO, Sender &, Args...>
+        {
+            return f(sender.mSender, std::forward<Args>(args)...);
+        }
+        /*
+        template <typename CPO, typename... Args>
+        friend auto tag_invoke(CPO f, const algorithm_sender &sender, Args &&...args)
+            -> tag_invoke_result_t<CPO, const Sender &, Args...>
+        {
+            return f(sender.mSender, std::forward<Args>(args)...);
+        }*/
+
+        Sender mSender;
     };
 
 }

@@ -20,7 +20,7 @@ namespace NodeGraph {
             {
             }
 
-            NodeInterpreter interpret();
+            NodeInterpreterSender interpret();
         };
 
         NodeGraphLoader();
@@ -30,9 +30,13 @@ namespace NodeGraph {
 
     };
 
-    struct NodeGraphBehaviorFactory : BehaviorListComponent<NodeGraphBehaviorFactory> {
-        static std::vector<std::string_view> names();
-        static Behavior create(std::string_view name);
+    struct NodeGraphBehaviorFactory : BehaviorFactory<NodeGraphBehaviorFactory> {
+        std::vector<std::string_view> names() const override;
+        Behavior create(std::string_view name, const ParameterTuple &args) const override;
+        Threading::TaskFuture<ParameterTuple> createParameters(std::string_view name) const override;
+        bool isConstant(std::string_view name) const override;
+        std::vector<ValueTypeDesc> parameterTypes(std::string_view name) const override;
+        std::vector<ValueTypeDesc> resultTypes(std::string_view name) const override;  
     };
 
 }

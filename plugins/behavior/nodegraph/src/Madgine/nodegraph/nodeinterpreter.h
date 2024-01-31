@@ -2,15 +2,29 @@
 
 #include "Generic/genericresult.h"
 
-#include "Meta/keyvalue/keyvaluereceiver.h"
-
 #include "Madgine/behavior.h"
 #include "Madgine/behaviorcollector.h"
 
 #include "nodegraphloader.h"
 
+#include "Meta/keyvalue/argumentlist.h"
+
 namespace Engine {
 namespace NodeGraph {
+
+    struct NodeDebugLocation : Debug::DebugLocation {
+        NodeDebugLocation(NodeInterpreterStateBase *interpreter)
+            : mInterpreter(interpreter)
+        {
+        }
+
+        std::string toString() const override;
+        std::map<std::string_view, ValueType> localVariables() const override;
+        bool wantsPause() const override;
+
+        const NodeBase *mNode = nullptr;
+        NodeInterpreterStateBase *mInterpreter;
+    };
 
     struct NodeInterpreterData {
         virtual ~NodeInterpreterData() = default;
@@ -18,10 +32,9 @@ namespace NodeGraph {
         virtual bool readVar(ValueType &ref, std::string_view name) { return false; }
         virtual bool writeVar(std::string_view name, const ValueType &v) { return false; }
         virtual std::vector<std::string_view> variables() { return {}; }
-        virtual void visitState(CallableView<void(const Execution::StateDescriptor &)> visitor) { }
     };
 
-    struct MADGINE_NODEGRAPH_EXPORT NodeInterpreterStateBase : Execution::VirtualReceiverBase<InterpretResult> {
+    struct MADGINE_NODEGRAPH_EXPORT NodeInterpreterStateBase : Execution::VirtualReceiverBase<BehaviorError> {
         NodeInterpreterStateBase(const NodeGraph *graph, NodeGraphLoader::Handle handle);
         NodeInterpreterStateBase(const NodeInterpreterStateBase &) = delete;
         NodeInterpreterStateBase(NodeInterpreterStateBase &&) = default;
@@ -30,13 +43,13 @@ namespace NodeGraph {
         NodeInterpreterStateBase &operator=(const NodeInterpreterStateBase &) = delete;
         NodeInterpreterStateBase &operator=(NodeInterpreterStateBase &&) = default;
 
-        void interpretImpl(Execution::VirtualReceiverBase<InterpretResult> &receiver, uint32_t flowIn);
-        void interpretImpl(Execution::VirtualReceiverBase<InterpretResult> &receiver, Pin pin);
+        void interpretImpl(Execution::VirtualReceiverBase<BehaviorError> &receiver, uint32_t flowIn);
+        void interpretImpl(Execution::VirtualReceiverBase<BehaviorError> &receiver, Pin pin);
 
-        ASYNC_STUB(interpret, interpretImpl, Execution::make_simple_virtual_sender<InterpretResult>);
-        ASYNC_STUB(interpretSubGraph, branch, Execution::make_simple_virtual_sender<InterpretResult>);
+        ASYNC_STUB(interpret, interpretImpl, Execution::make_simple_virtual_sender<BehaviorError>);
+        ASYNC_STUB(interpretSubGraph, branch, Execution::make_simple_virtual_sender<BehaviorError>);
 
-        void branch(Execution::VirtualReceiverBase<InterpretResult> &receiver, Pin pin);
+        void branch(Execution::VirtualReceiverBase<BehaviorError> &receiver, Pin pin);
 
         void read(ValueType &retVal, Pin pin);
         void write(Pin pin, const ValueType &v);
@@ -54,8 +67,13 @@ namespace NodeGraph {
         virtual bool writeVar(std::string_view name, const ValueType &v);
         virtual std::vector<std::string_view> variables();
 
-        void start(ArgumentList args);
-        void visitState(CallableView<void(const Execution::StateDescriptor &)> visitor);
+        void start();
+
+        Debug::DebugLocation *debugLocation();
+
+    protected:
+        virtual Debug::ParentLocation *parentDebugLocation() = 0;
+        virtual std::stop_token parentStopToken() = 0;
 
     private:
         ArgumentList mArguments;
@@ -65,51 +83,28 @@ namespace NodeGraph {
         NodeGraphLoader::Handle mHandle;
 
         std::vector<std::unique_ptr<NodeInterpreterData>> mData;
+
+        NodeDebugLocation mDebugLocation;
     };
 
-    struct NodeInterpreterReceiver {
-
-        void set_value(ArgumentList arguments)
-        {
-            mState->start(std::move(arguments));
-        }
-
-        void set_done()
-        {
-            mState->set_done();
-        }
-        void set_error(InterpretResult r)
-        {
-            mState->set_error(r);
-        }
-
-        NodeInterpreterStateBase *mState;
-    };
-
-    template <Execution::Sender Inner, typename _Rec>
+    template <typename _Rec>
     struct NodeInterpreterState : NodeInterpreterStateBase {
 
         using Rec = _Rec;
 
-        NodeInterpreterState(Inner &&inner, Rec &&rec, const NodeGraph *graph, NodeGraphLoader::Handle handle)
+        NodeInterpreterState(Rec &&rec, const NodeGraph *graph, NodeGraphLoader::Handle handle)
             : NodeInterpreterStateBase { graph, std::move(handle) }
-            , mState(Execution::connect(std::forward<Inner>(inner), NodeInterpreterReceiver { this }))
             , mRec(std::forward<Rec>(rec))
         {
-        }
-
-        void start()
-        {
-            mState.start();
         }
 
         virtual void set_done() override
         {
             mRec.set_done();
         }
-        virtual void set_error(InterpretResult r) override
+        virtual void set_error(BehaviorError r) override
         {
-            this->mRec.set_error(r);
+            this->mRec.set_error(std::move(r));
         }
         virtual void set_value() override
         {
@@ -127,61 +122,51 @@ namespace NodeGraph {
             return false;
         }
 
-        template <typename F>
-        friend void tag_invoke(Execution::visit_state_t, NodeInterpreterState &state, F &&f)
+        friend Rec &tag_invoke(Execution::get_receiver_t, NodeInterpreterState &state)
         {
-            state.visitState(std::forward<F>(f));
+            return state.mRec;
         }
 
-        friend std::string tag_invoke(get_behavior_name_t, const NodeInterpreterState &state)
+        Debug::ParentLocation *parentDebugLocation() override
         {
-            return "Graph";
+            return Execution::get_debug_location(mRec);
         }
 
-        Execution::connect_result_t<Inner, NodeInterpreterReceiver> mState;
+        std::stop_token parentStopToken() override
+        {
+            return Execution::get_stop_token(mRec);
+        }
+
         Rec mRec;
     };
 
-    template <Execution::Sender Inner>
-    struct NodeInterpreterSender : Execution::algorithm_sender<Inner> {
-        using result_type = InterpretResult;
+    struct NodeInterpreterSender : Execution::base_sender {
+
+        NodeInterpreterSender(const NodeGraph *graph)
+            : mGraph(graph)
+        {
+        }
+
+        NodeInterpreterSender(NodeGraphLoader::Handle handle)
+            : mHandle(std::move(handle))
+            , mGraph(mHandle)
+        {
+        }
+
+        using result_type = BehaviorError;
         template <template <typename...> typename Tuple>
         using value_types = Tuple<ArgumentList>;
 
         template <typename Rec>
         friend auto tag_invoke(Execution::connect_t, NodeInterpreterSender &&sender, Rec &&rec)
         {
-            return NodeInterpreterState<Inner, Rec> { std::forward<Inner>(sender.mInner), std::forward<Rec>(rec), sender.mGraph, std::move(sender.mHandle) };
+            return NodeInterpreterState<Rec> { std::forward<Rec>(rec), sender.mGraph, std::move(sender.mHandle) };
         }
 
-        Inner mInner;
-        const NodeGraph *mGraph;
-        NodeGraphLoader::Handle mHandle;
-    };
-
-    struct NodeInterpreter {
-
-        NodeInterpreter(const NodeGraph *graph)
-            : mGraph(graph)
+        template <typename F>
+        friend void tag_invoke(Execution::visit_state_t, NodeInterpreterSender &sender, F &&f)
         {
-        }
-
-        NodeInterpreter(NodeGraphLoader::Handle handle)
-            : mHandle(std::move(handle))
-            , mGraph(mHandle)
-        {
-        }
-
-        template <Execution::Sender Inner>
-        auto operator()(Inner &&inner)
-        {
-            return NodeInterpreterSender<Inner> { {}, std::forward<Inner>(inner), mGraph, std::move(mHandle) };
-        }
-
-        template <Execution::Sender Inner>
-        friend auto operator|(Inner &&inner, NodeInterpreter &&interpreter)
-        {
-            return NodeInterpreterSender<Inner> { {}, std::forward<Inner>(inner), interpreter.mGraph, std::move(interpreter.mHandle) };
+            f(Execution::State::SubLocation {});
         }
 
         NodeGraphLoader::Handle mHandle;
