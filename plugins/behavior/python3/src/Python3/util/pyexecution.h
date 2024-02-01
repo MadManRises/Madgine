@@ -29,6 +29,7 @@ namespace Scripting {
 
         struct MADGINE_PYTHON3_EXPORT ExecutionState : BehaviorReceiver {
             ExecutionState(PyFramePtr frame, Closure<void(std::string_view)> out);
+            ~ExecutionState();
 
             void start();
 

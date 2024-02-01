@@ -221,7 +221,7 @@ struct InteractiveViewState {
 
 IMGUI_API bool InteractiveView(InteractiveViewState &state);
 
-IMGUI_API void BeginGroupPanel(const char *name, const ImVec2 &size = ImVec2(0.0f, 0.0f));
+IMGUI_API void BeginGroupPanel(const char *name = "", const ImVec2 &size = ImVec2(0.0f, 0.0f));
 IMGUI_API void EndGroupPanel();
 
 IMGUI_API bool BeginPopupCompoundContextItem(const char *str_id = nullptr);

@@ -75,6 +75,7 @@ namespace NodeGraph {
         virtual Debug::ParentLocation *parentDebugLocation() = 0;
         virtual std::stop_token parentStopToken() = 0;
 
+        NodeDebugLocation mDebugLocation;
     private:
         ArgumentList mArguments;
 
@@ -82,9 +83,7 @@ namespace NodeGraph {
 
         NodeGraphLoader::Handle mHandle;
 
-        std::vector<std::unique_ptr<NodeInterpreterData>> mData;
-
-        NodeDebugLocation mDebugLocation;
+        std::vector<std::unique_ptr<NodeInterpreterData>> mData;        
     };
 
     template <typename _Rec>
@@ -100,14 +99,17 @@ namespace NodeGraph {
 
         virtual void set_done() override
         {
+            mDebugLocation.stepOut(parentDebugLocation());
             mRec.set_done();
         }
         virtual void set_error(BehaviorError r) override
         {
+            mDebugLocation.stepOut(parentDebugLocation());
             this->mRec.set_error(std::move(r));
         }
         virtual void set_value() override
         {
+            mDebugLocation.stepOut(parentDebugLocation());
             this->mRec.set_value(ArgumentList {});
         }
 

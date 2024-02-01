@@ -62,6 +62,7 @@ namespace Tools {
 
     static constexpr size_t sLookupStep = 1;
     static constexpr std::array<const char *, 5> sIcons { "D", IMGUI_ICON_INFO, IMGUI_ICON_WARNING, IMGUI_ICON_ERROR, "F" };
+    static constexpr std::array<ImU32, 5> sColors { IM_COL32(0, 200, 255, 255), IM_COL32(255, 255, 255, 255), IM_COL32(255, 200, 0, 255), IM_COL32(255, 0, 0, 255), IM_COL32(255, 0, 0, 255) };
 
     LogViewer::LogViewer(ImRoot &root)
         : Tool<LogViewer>(root, true)
@@ -88,7 +89,9 @@ namespace Tools {
             bool filterChanged = false;
 
             for (Log::MessageType type : Log::MessageType::values()) {
+                ImGui::PushStyleColor(ImGuiCol_Text, sColors[type]);
                 filterChanged |= ImGui::Checkbox(sIcons[type], &mMsgFilters[type]);
+                ImGui::PopStyleColor();
                 ImGui::SameLine();
 
                 if (mMsgFilters[type])
@@ -157,7 +160,9 @@ namespace Tools {
                             {
                                 ImGui::TableNextRow();
                                 ImGui::TableNextColumn();
+                                ImGui::PushStyleColor(ImGuiCol_Text, sColors[entry.mType]);
                                 ImGui::Text("%s", sIcons[entry.mType]);
+                                ImGui::PopStyleColor();
                                 ImGui::TableNextColumn();
                                 ImGui::TextWrapped("%s", entry.mMsg.c_str());
                                 ImGui::TableNextColumn();
@@ -183,7 +188,9 @@ namespace Tools {
     void LogViewer::renderStatus()
     {
         for (Log::MessageType type : Log::MessageType::values()) {
+            ImGui::PushStyleColor(ImGuiCol_Text, sColors[type]);
             ImGui::Text("%s %d", sIcons[type], static_cast<int>(mMsgCounts[type]));
+            ImGui::PopStyleColor();
         }
         ImGui::Separator();
     }

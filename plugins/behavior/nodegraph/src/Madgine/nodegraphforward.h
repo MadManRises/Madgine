@@ -31,5 +31,7 @@ namespace NodeGraph {
 
     using NodeResults = std::vector<ValueType>;
 
+    struct NodeDebugLocation;
+
 }
 }

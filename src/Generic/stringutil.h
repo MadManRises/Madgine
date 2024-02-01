@@ -22,7 +22,7 @@ namespace StringUtil {
 
     constexpr bool contains(std::string_view s, std::string_view content)
     {
-        return startsWith(s, content); //TODO!!
+        return s.find(content) != std::string_view::npos;
     }
 
     CONSTEXPR_ALGORITHM std::string_view trim(std::string_view s)

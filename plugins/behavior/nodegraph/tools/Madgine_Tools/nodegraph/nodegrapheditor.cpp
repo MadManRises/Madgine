@@ -44,6 +44,12 @@
 
 #include "Madgine/nodegraph/nodes/util/librarynode.h"
 
+#include "imguihelpers.h"
+
+#include "debugvisualizer.h"
+
+#include "Interfaces/log/logsenders.h"
+
 UNIQUECOMPONENT(Engine::Tools::NodeGraphEditor);
 
 METATABLE_BEGIN_BASE(Engine::Tools::NodeGraphEditor, Engine::Tools::ToolBase)
@@ -55,224 +61,10 @@ FIELD(mNodeDetailsVisible)
 ENCAPSULATED_FIELD(Current, getCurrentName, load)
 SERIALIZETABLE_END(Engine::Tools::NodeGraphEditor)
 
-static const int sPinIconSize = 24;
 
 namespace Engine {
 namespace Tools {
-
-    void visualizeDebugLocation(DebuggerView *view, const Debug::ContextInfo *context, const NodeGraph::NodeDebugLocation *location);
-
-    void ShowLabel(std::string_view label, ImColor color = { 0.0f, 0.0f, 0.0f })
-    {
-        ImVec2 labelPos = ImGui::GetCursorPos() + ImGui::GetWindowPos();
-        labelPos.y -= ImGui::GetTextLineHeight();
-        auto size = ImGui::CalcTextSize(label.data(), label.data() + label.size());
-
-        auto padding = ImGui::GetStyle().FramePadding;
-        auto spacing = ImGui::GetStyle().ItemSpacing;
-
-        labelPos += ImVec2(spacing.x, -spacing.y);
-
-        auto rectMin = labelPos - padding;
-        auto rectMax = labelPos + size + padding;
-
-        auto drawList = ImGui::GetWindowDrawList();
-        //drawList->ChannelsSetCurrent(3);
-        drawList->AddRectFilled(rectMin, rectMax, color, size.y * 0.15f);
-        //drawList->ChannelsSetCurrent(4);
-        drawList->AddText(labelPos, IM_COL32(255, 255, 255, 255), label.data(), label.data() + label.size());
-    };
-
-    ImColor DataColor(uint32_t mask)
-    {
-        switch (mask) {
-        case NodeGraph::NodeExecutionMask::NONE:
-            return { 50, 50, 50, 255 };
-            break;
-        case NodeGraph::NodeExecutionMask::CPU:
-            return { 0, 255, 0, 255 };
-            break;
-        case NodeGraph::NodeExecutionMask::GPU:
-            return { 160, 160, 255, 255 };
-            break;
-        case NodeGraph::NodeExecutionMask::ALL:
-            return { 0, 255, 255, 255 };
-            break;
-        default:
-            throw 0;
-        }
-    }
-
-    ImColor FlowColor(uint32_t mask)
-    {
-        switch (mask) {
-        case NodeGraph::NodeExecutionMask::NONE:
-            return { 50, 50, 50, 255 };
-            break;
-        case NodeGraph::NodeExecutionMask::CPU:
-            return { 255, 0, 0, 255 };
-            break;
-        case NodeGraph::NodeExecutionMask::GPU:
-            return { 200, 200, 0, 255 };
-            break;
-        case NodeGraph::NodeExecutionMask::ALL:
-            return { 255, 127, 0, 255 };
-            break;
-        default:
-            throw 0;
-        }
-    }
-
-    ImVec2 DataPinIcon(ExtendedValueTypeDesc type, uint32_t mask, bool connected)
-    {
-        ax::Widgets::Icon(ImVec2(sPinIconSize, sPinIconSize), ax::Widgets::IconType::Circle, connected, DataColor(mask), ImColor(32, 32, 32, 255));
-        ImVec2 align { 0.5f, 0.5f };
-        return ImGui::GetItemRectMin() + align * ImGui::GetItemRectSize();
-    }
-
-    ImVec2 DataInstancePinIcon(ExtendedValueTypeDesc type, uint32_t mask, bool connected)
-    {
-        ax::Widgets::Icon(ImVec2(sPinIconSize, sPinIconSize), ax::Widgets::IconType::Square, connected, DataColor(mask), ImColor(32, 32, 32, 255));
-        ImVec2 align { 0.5f, 0.5f };
-        return ImGui::GetItemRectMin() + align * ImGui::GetItemRectSize();
-    }
-
-    ImVec2 FlowPinIcon(uint32_t mask, bool connected)
-    {
-        ax::Widgets::Icon(ImVec2(sPinIconSize, sPinIconSize), ax::Widgets::IconType::Flow, connected, FlowColor(mask), ImColor(32, 32, 32, 255));
-        ImVec2 align { 0.5f, 0.5f };
-        return ImGui::GetItemRectMin() + align * ImGui::GetItemRectSize();
-    }
-
-    ImVec2 FlowOutPin(const char *name, uint32_t mask, bool connected)
-    {
-        float textSize = name ? ImGui::CalcTextSize(name).x : 0.0f;
-        ImGui::RightAlign(textSize + sPinIconSize + 8);
-
-        if (name) {
-            ImGui::Text("%s", name);
-            ImGui::SameLine();
-        }
-        return FlowPinIcon(mask, connected);
-    }
-
-    void FlowOutPin(const char *name, uint32_t nodeId, uint32_t pinId, uint32_t group, uint32_t mask, bool connected)
-    {
-        ed::BeginPin(60000 * nodeId + NodeGraph::NodeBase::flowOutId(pinId, group), ed::PinKind::Output);
-        ImVec2 pos = FlowOutPin(name, mask, connected);
-        ed::PinPivotRect(pos, pos);
-        ed::EndPin();
-    }
-
-    ImVec2 FlowInPin(const char *name, uint32_t mask, bool connected)
-    {
-        ImVec2 pos = FlowPinIcon(mask, connected);
-        if (name) {
-            ImGui::SameLine();
-            ImGui::Text("%s", name);
-        }
-        return pos;
-    }
-
-    void FlowInPin(const char *name, uint32_t nodeId, uint32_t pinId, uint32_t group, uint32_t mask, bool connected)
-    {
-        ed::BeginPin(60000 * nodeId + NodeGraph::NodeBase::flowInId(pinId, group), ed::PinKind::Input);
-        ImVec2 pos = FlowInPin(name, mask, connected);
-        ed::PinPivotRect(pos, pos);
-        ed::EndPin();
-    }
-
-    ImVec2 DataOutPin(const char *name, ExtendedValueTypeDesc type, uint32_t mask, bool connected)
-    {
-        float textSize = name ? ImGui::CalcTextSize(name).x : 0.0f;
-        ImGui::RightAlign(textSize + sPinIconSize + 8);
-        if (name) {
-            ImGui::Text("%s", name);
-            ImGui::SameLine();
-        }
-        return DataPinIcon(type, mask, connected);
-    }
-
-    bool DataOutPin(const char *name, uint32_t nodeId, uint32_t pinId, uint32_t group, ExtendedValueTypeDesc type, uint32_t mask, bool connected)
-    {
-        ed::BeginPin(60000 * nodeId + NodeGraph::NodeBase::dataOutId(pinId, group), ed::PinKind::Output);
-        ImVec2 pos = DataOutPin(name, type, mask, connected);
-        ed::PinPivotRect(pos, pos);
-        ed::EndPin();
-        return ImGui::IsItemHovered();
-    }
-
-    ImVec2 DataInPin(const char *name, ExtendedValueTypeDesc type, uint32_t mask, bool connected)
-    {
-        ImVec2 pos = DataPinIcon(type, mask, connected);
-        if (name) {
-            ImGui::SameLine();
-            ImGui::Text("%s", name);
-        }
-        return pos;
-    }
-
-    bool DataInPin(const char *name, uint32_t nodeId, uint32_t pinId, uint32_t group, ExtendedValueTypeDesc type, uint32_t mask, bool connected)
-    {
-        uintptr_t id = 60000 * nodeId + NodeGraph::NodeBase::dataInId(pinId, group);
-        ed::BeginPin(id, ed::PinKind::Input);
-        ImVec2 pos = DataInPin(name, type, mask, connected);
-        ed::PinPivotRect(pos, pos);
-        ed::EndPin();
-        return ImGui::IsItemHovered();
-    }
-
-    ImVec2 DataProviderPin(const char *name, ExtendedValueTypeDesc type, uint32_t mask, bool connected)
-    {
-        float textSize = name ? ImGui::CalcTextSize(name).x : 0.0f;
-        ImGui::RightAlign(textSize + sPinIconSize + 8);
-        if (name) {
-            ImGui::Text("%s", name);
-            ImGui::SameLine();
-        }
-        return DataInstancePinIcon(type, mask, connected);
-    }
-
-    bool DataProviderPin(const char *name, uint32_t nodeId, uint32_t pinId, uint32_t group, ExtendedValueTypeDesc type, uint32_t mask, bool connected)
-    {
-        ed::BeginPin(60000 * nodeId + NodeGraph::NodeBase::dataProviderId(pinId, group), ed::PinKind::Output);
-        ImVec2 pos = DataProviderPin(name, type, mask, connected);
-        ed::PinPivotRect(pos, pos);
-        ed::EndPin();
-        return ImGui::IsItemHovered();
-    }
-
-    ImVec2 DataReceiverPin(const char *name, ExtendedValueTypeDesc type, uint32_t mask, bool connected)
-    {
-        ImVec2 pos = DataInstancePinIcon(type, mask, connected);
-        if (name) {
-            ImGui::SameLine();
-            ImGui::Text("%s", name);
-        }
-        return pos;
-    }
-
-    bool DataReceiverPin(const char *name, size_t nodeId, size_t pinId, uint32_t group, ExtendedValueTypeDesc type, uint32_t mask, bool connected)
-    {
-        ed::BeginPin(60000 * nodeId + NodeGraph::NodeBase::dataReceiverId(pinId, group), ed::PinKind::Input);
-        ImVec2 pos = DataReceiverPin(name, type, mask, connected);
-        ed::PinPivotRect(pos, pos);
-        ed::EndPin();
-        return ImGui::IsItemHovered();
-    }
-
-    void HoverPin(ExtendedValueTypeDesc type)
-    {
-        ImVec2 cursor = ImGui::GetCursorPos();
-        ImGui::SetCursorScreenPos(ImGui::GetMousePos());
-        if (type.mType.isRegular()) {
-            ShowLabel(type.toString());
-        } else {
-            ShowLabel("*");
-        }
-        ImGui::SetCursorPos(cursor);
-    }
-
+    
     NodeGraphEditor::NodeGraphEditor(ImRoot &root)
         : Tool<NodeGraphEditor>(root)
     {
@@ -419,10 +211,8 @@ namespace Tools {
             uint32_t nodeId = 1;
             NodeGraph::NodeBase *hoveredNode = nullptr;
             for (NodeGraph::NodeBase *node : mGraph.nodes() | std::views::transform(projectionUniquePtrToPtr)) {
-                ed::BeginNode(60000 * nodeId);
-                ImGui::Text(node->name());
 
-                auto it = mNodeMessages.find(node);
+                /* auto it = mNodeMessages.find(node);
                 if (it != mNodeMessages.end()) {
                     bool first = true;
                     if (!it->second.mErrorMessages.empty()) {
@@ -439,10 +229,11 @@ namespace Tools {
                             ImGui::SameLine();
                         ImGui::TextColored({ 1, 1, 0, 1 }, "%zu", it->second.mWarningMessages.size());
                     }
-                }
+                }*/
 
-                std::string id = std::to_string((uintptr_t)node);
-                if (ImGui::BeginTable(id.c_str(), 2, ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoHostExtendX)) {
+                ed::BeginNode(60000 * nodeId);
+
+                if (BeginNode(node)) { 
 
                     //ImGui::SetColumnWidth(0, 100.0f);
                     //ImGui::SetColumnWidth(1, 100.0f);
@@ -540,15 +331,15 @@ namespace Tools {
                             }
                         }
                     }
-                    ImGui::EndTable();
+                    EndNode();
                 }
 
                 ed::EndNode();
 
                 if (ImGui::IsItemHovered()) {
-                    if (it != mNodeMessages.end()) {
+                    //if (it != mNodeMessages.end()) {
                         hoveredNode = node;
-                    }
+                    //}
                 }
 
                 ++nodeId;
@@ -619,37 +410,7 @@ namespace Tools {
                     if (!pin.mPin.mNode) {
                         ed::RejectNewItem();
                     } else {
-
-                        mDragPin = pin;
-                        switch (pin.mType) {
-                        case NodeGraph::PinType::Data:
-                            if (pin.mDir == NodeGraph::PinDir::In) {
-                                mDragType = mGraph.dataInType(pin.mPin);
-                                mDragMask = mGraph.dataInMask(pin.mPin);
-                            } else {
-                                mDragType = mGraph.dataOutType(pin.mPin);
-                                mDragMask = mGraph.dataOutMask(pin.mPin);
-                            }
-                            break;
-                        case NodeGraph::PinType::DataInstance:
-                            if (pin.mDir == NodeGraph::PinDir::In) {
-                                mDragType = mGraph.dataReceiverType(pin.mPin);
-                                mDragMask = mGraph.dataReceiverMask(pin.mPin);
-                            } else {
-                                mDragType = mGraph.dataProviderType(pin.mPin);
-                                mDragMask = mGraph.dataProviderMask(pin.mPin);
-                            }
-                            break;
-                        case NodeGraph::PinType::Flow:
-                            if (pin.mDir == NodeGraph::PinDir::In) {
-                                mDragMask = mGraph.flowInMask(pin.mPin);
-                            } else {
-                                mDragMask = mGraph.flowOutMask(pin.mPin);
-                            }
-                            break;
-                        default:
-                            throw 0;
-                        }
+                        setDragPin(pin);                        
                     }
                 }
             } else {
@@ -811,41 +572,38 @@ namespace Tools {
         }
     }
 
-    void NodeGraphEditor::testSenderCodegen()
+    void NodeGraphEditor::setDragPin(NodeGraph::PinDesc pin)
     {
-        using namespace Engine::Execution;
-
-        auto inner = [](auto a, auto &i) {
-            return just(a, i)
-                | then(NodeGraph::Add {})
-                | let_value([&](auto sum) {
-                      return sequence(just(sum) | write_var<"test">(), just(sum) | assign(i));
-                  });
-        };
-
-        auto graph = [&](auto &cont) {
-            return read_var<"test", int &>()
-                | let_value([&](auto &&a) { return for_each(cont, [&](auto &i) { return inner(a, i); }); })
-                | Variable<"test">(12);
-        };
-
-        /* CodeGen::CppFile file;
-
-        CodeGen::VariableAccess access { "cont" };
-        TupleUnpacker::forEach(CodeGen::generatorFromSender(graph(access)).generate(), [&](auto &&s) {
-            file.statement(s);
-        });
-
-        std::stringstream ss;
-        file.generate(ss);
-        std::string result = ss.str();
-        */
-        //auto graph = just("Foo") | then(NodeGraph::Log {});
-
-        /* NodeGraph::SenderConnection<0, 0> con;
-        std::vector<int> c { 1, 2, 3 };
-        auto generated = NodeGraph::graphBuilderFromSender<decltype(graph(c)), 1, NodeGraph::SenderConnection<0, 0>, type_pack<>>(mGraph);
-        mGraph.connectFlow(generated.flowInPin(mGraph), { 0, 0 });*/
+        mDragPin = pin;
+        switch (pin.mType) {
+        case NodeGraph::PinType::Data:
+            if (pin.mDir == NodeGraph::PinDir::In) {
+                mDragType = mGraph.dataInType(pin.mPin);
+                mDragMask = mGraph.dataInMask(pin.mPin);
+            } else {
+                mDragType = mGraph.dataOutType(pin.mPin);
+                mDragMask = mGraph.dataOutMask(pin.mPin);
+            }
+            break;
+        case NodeGraph::PinType::DataInstance:
+            if (pin.mDir == NodeGraph::PinDir::In) {
+                mDragType = mGraph.dataReceiverType(pin.mPin);
+                mDragMask = mGraph.dataReceiverMask(pin.mPin);
+            } else {
+                mDragType = mGraph.dataProviderType(pin.mPin);
+                mDragMask = mGraph.dataProviderMask(pin.mPin);
+            }
+            break;
+        case NodeGraph::PinType::Flow:
+            if (pin.mDir == NodeGraph::PinDir::In) {
+                mDragMask = mGraph.flowInMask(pin.mPin);
+            } else {
+                mDragMask = mGraph.flowOutMask(pin.mPin);
+            }
+            break;
+        default:
+            throw 0;
+        }
     }
 
     void NodeGraphEditor::renderMenu()
@@ -872,16 +630,8 @@ namespace Tools {
                 }
 
                 if (ImGui::MenuItem("Debug", "", false)) {
-                    Execution::detach(Behavior { mGraph.interpret() } | Execution::Variable<"Foo">(std::string_view { "Bar" }) | Execution::then([](ArgumentList) { LOG("SUCCESS"); }));
-                }
-
-                if (ImGui::BeginMenu("Test")) {
-
-                    if (ImGui::MenuItem("Sender Codegen")) {
-                        testSenderCodegen();
-                    }
-
-                    ImGui::EndMenu();
+                    Debug::ContextInfo *context = &Debug::Debugger::getSingleton().createContext();
+                    Execution::detach(Behavior { mGraph.interpret() } | Execution::then([](ArgumentList) { LOG("SUCCESS"); }) | Execution::with_sub_debug_location(context) | Log::log_error());
                 }
 
                 ImGui::Separator();
@@ -1074,36 +824,7 @@ namespace Tools {
 
             NodeGraph::PinDesc inputPin = NodeGraph::NodeBase::pinFromId(inputPinIdN);
 
-            mDragPin = inputPin;
-            switch (inputPin.mType) {
-            case NodeGraph::PinType::Data:
-                if (inputPin.mDir == NodeGraph::PinDir::In) {
-                    mDragType = mGraph.dataInType(inputPin.mPin);
-                    mDragMask = mGraph.dataInMask(inputPin.mPin);
-                } else {
-                    mDragType = mGraph.dataOutType(inputPin.mPin);
-                    mDragMask = mGraph.dataOutMask(inputPin.mPin);
-                }
-                break;
-            case NodeGraph::PinType::DataInstance:
-                if (inputPin.mDir == NodeGraph::PinDir::In) {
-                    mDragType = mGraph.dataReceiverType(inputPin.mPin);
-                    mDragMask = mGraph.dataReceiverMask(inputPin.mPin);
-                } else {
-                    mDragType = mGraph.dataProviderType(inputPin.mPin);
-                    mDragMask = mGraph.dataProviderMask(inputPin.mPin);
-                }
-                break;
-            case NodeGraph::PinType::Flow:
-                if (inputPin.mDir == NodeGraph::PinDir::In) {
-                    mDragMask = mGraph.flowInMask(inputPin.mPin);
-                } else {
-                    mDragMask = mGraph.flowOutMask(inputPin.mPin);
-                }
-                break;
-            default:
-                throw 0;
-            }
+            setDragPin(inputPin);
 
             uintptr_t outputPinIdN = outputPinId.Get();
 
@@ -1196,228 +917,6 @@ namespace Tools {
                     pib.first->second = std::move(messages);
             }
         }
-    }
-
-    struct ConnectorInfo {
-        ImVec2 mPos;
-        NodeGraph::PinType mType;
-        uint32_t mIndex;
-    };
-
-    void visualizeDebugLocation(DebuggerView *view, const Debug::ContextInfo *context, const NodeGraph::NodeDebugLocation *location)
-    {
-        const NodeGraph::NodeBase *node = location->mNode;
-        const NodeGraph::NodeGraph &graph = *location->mInterpreter->graph();
-
-        if (ImGui::BeginTable("NodeContext", 3)) {
-
-            std::vector<std::tuple<ImVec2, ImVec2, ImColor>> connections;
-
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-
-            ImGui::TableNextColumn();
-
-            struct NodeInfo {
-                const NodeGraph::NodeBase *mNode;
-                std::vector<ConnectorInfo> mConnectors;
-            };
-            std::vector<NodeInfo> predecessors;
-            std::vector<NodeInfo> successors;
-
-            auto insert_unique = [](std::vector<NodeInfo> &vector, const NodeGraph::NodeBase *item, ImVec2 pos, NodeGraph::PinType type, uint32_t index) {
-                if (item) {
-                    NodeInfo *info;
-                    auto it = std::ranges::find(vector, item, &NodeInfo::mNode);
-                    if (it == vector.end())
-                        info = &vector.emplace_back(NodeInfo { item });
-                    else
-                        info = &*it;
-                    info->mConnectors.push_back({ pos, type, index });
-                }
-            };
-
-            if (node) {
-                ImGui::BeginGroupPanel(node->name().data());
-                if (ImGui::BeginTable("NodePins", 2, ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoHostExtendX)) {
-                    uint32_t maxGroupCount = max(max(max(node->flowInGroupCount(), node->flowOutGroupCount()), max(node->dataInGroupCount(), node->dataOutGroupCount())), max(node->dataReceiverGroupCount(), node->dataProviderGroupCount()));
-                    for (uint32_t group = 0; group < maxGroupCount; ++group) {
-
-                        uint32_t inFlowCount = group < node->flowInGroupCount() ? node->flowInCount(group) : 0;
-                        uint32_t outFlowCount = group < node->flowOutGroupCount() ? node->flowOutCount(group) : 0;
-                        for (uint32_t flowIndex = 0; flowIndex < max(inFlowCount, outFlowCount); ++flowIndex) {
-                            ImGui::TableNextColumn();
-                            if (flowIndex < inFlowCount)
-                                FlowInPin(node->flowInName(flowIndex, group).data(), node->flowInMask(flowIndex, group), !node->flowInSources(flowIndex, group).empty());
-
-                            ImGui::TableNextColumn();
-                            if (flowIndex < outFlowCount) {
-                                ImVec2 pos = FlowOutPin(node->flowOutName(flowIndex, group).data(), node->flowOutMask(flowIndex, group), static_cast<bool>(node->flowOutTarget(flowIndex, group)));
-                                NodeGraph::Pin target = node->flowOutTarget(flowIndex, group);
-                                insert_unique(successors, graph.node(target.mNode), pos, NodeGraph::PinType::Flow, target.mIndex);
-                            }
-                        }
-
-                        uint32_t inDataCount = group < node->dataInGroupCount() ? node->dataInCount(group) : 0;
-                        uint32_t outDataCount = group < node->dataOutGroupCount() ? node->dataOutCount(group) : 0;
-                        for (uint32_t dataIndex = 0; dataIndex < max(inDataCount, outDataCount); ++dataIndex) {
-                            ImGui::TableNextColumn();
-                            if (dataIndex < inDataCount) {
-                                NodeGraph::Pin source = node->dataInSource(dataIndex, group);
-
-                                ExtendedValueTypeDesc type = node->dataInType(dataIndex, group);
-
-                                ImVec2 pos = DataInPin(node->dataInName(dataIndex, group).data(), type, node->dataInMask(dataIndex, group), static_cast<bool>(source));
-
-                                insert_unique(predecessors, graph.node(source.mNode), pos, NodeGraph::PinType::Data, source.mIndex);
-                            }
-
-                            ImGui::TableNextColumn();
-                            if (dataIndex < outDataCount) {
-                                NodeGraph::Pin target = node->dataOutTarget(dataIndex, group);
-
-                                ExtendedValueTypeDesc type = node->dataOutType(dataIndex, group);
-
-                                ImVec2 pos = DataOutPin(node->dataOutName(dataIndex, group).data(), type, node->dataOutMask(dataIndex, group), static_cast<bool>(target));
-
-                                insert_unique(successors, graph.node(target.mNode), pos, NodeGraph::PinType::Data, target.mIndex);
-                            }
-                        }
-
-                        uint32_t dataReceiverCount = group < node->dataReceiverGroupCount() ? node->dataReceiverCount(group) : 0;
-                        uint32_t dataProviderCount = group < node->dataProviderGroupCount() ? node->dataProviderCount(group) : 0;
-                        for (uint32_t dataInstanceIndex = 0; dataInstanceIndex < max(dataReceiverCount, dataProviderCount); ++dataInstanceIndex) {
-                            ImGui::TableNextColumn();
-                            if (dataInstanceIndex < dataReceiverCount) {
-                                ExtendedValueTypeDesc type = node->dataReceiverType(dataInstanceIndex, group);
-
-                                DataReceiverPin(node->dataReceiverName(dataInstanceIndex, group).data(), type, node->dataReceiverMask(dataInstanceIndex, group), !node->dataReceiverSources(dataInstanceIndex, group).empty());
-                            }
-
-                            ImGui::TableNextColumn();
-                            if (dataInstanceIndex < dataProviderCount) {
-                                ExtendedValueTypeDesc type = node->dataProviderType(dataInstanceIndex, group);
-
-                                DataProviderPin(node->dataProviderName(dataInstanceIndex, group).data(), type, node->dataProviderMask(dataInstanceIndex, group), !node->dataProviderTargets(dataInstanceIndex, group).empty());
-                            }
-                        }
-                    }
-                    ImGui::EndTable();
-                }
-                ImGui::EndGroupPanel();
-            } else {
-                ImGui::Text("Return");
-            }
-
-            ImGui::TableNextColumn();
-
-            auto renderDependencyNode = [&](const NodeInfo &info) {
-                const NodeGraph::NodeBase *node = info.mNode;
-                ImGui::PushID(node);
-                ImGui::BeginGroupPanel(node->name().data());
-                if (ImGui::BeginTable("NodePins", 2, ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoHostExtendX)) {
-                    uint32_t maxGroupCount = max(max(max(node->flowInGroupCount(), node->flowOutGroupCount()), max(node->dataInGroupCount(), node->dataOutGroupCount())), max(node->dataReceiverGroupCount(), node->dataProviderGroupCount()));
-                    for (uint32_t group = 0; group < maxGroupCount; ++group) {
-
-                        uint32_t inFlowCount = group < node->flowInGroupCount() ? node->flowInCount(group) : 0;
-                        uint32_t outFlowCount = group < node->flowOutGroupCount() ? node->flowOutCount(group) : 0;
-                        for (uint32_t flowIndex = 0; flowIndex < max(inFlowCount, outFlowCount); ++flowIndex) {
-                            ImGui::TableNextColumn();
-                            if (flowIndex < inFlowCount) {
-                                uint32_t mask = node->flowInMask(flowIndex, group);
-                                ImVec2 pos = FlowInPin(node->flowInName(flowIndex, group).data(), mask, !node->flowInSources(flowIndex, group).empty());
-                                auto it = std::ranges::find_if(info.mConnectors, [=](const ConnectorInfo &con) { return con.mType == NodeGraph::PinType::Flow && con.mIndex == flowIndex; });
-                                if (it != info.mConnectors.end())
-                                    connections.emplace_back(pos, it->mPos, FlowColor(mask));
-                            }
-
-                            ImGui::TableNextColumn();
-                            if (flowIndex < outFlowCount)
-                                FlowOutPin(node->flowOutName(flowIndex, group).data(), node->flowOutMask(flowIndex, group), static_cast<bool>(node->flowOutTarget(flowIndex, group)));
-                        }
-
-                        uint32_t inDataCount = group < node->dataInGroupCount() ? node->dataInCount(group) : 0;
-                        uint32_t outDataCount = group < node->dataOutGroupCount() ? node->dataOutCount(group) : 0;
-                        for (uint32_t dataIndex = 0; dataIndex < max(inDataCount, outDataCount); ++dataIndex) {
-                            ImGui::TableNextColumn();
-                            if (dataIndex < inDataCount) {
-                                NodeGraph::Pin source = node->dataInSource(dataIndex, group);
-
-                                ExtendedValueTypeDesc type = node->dataInType(dataIndex, group);
-
-                                DataInPin(node->dataInName(dataIndex, group).data(), type, node->dataInMask(dataIndex, group), static_cast<bool>(source));
-                            }
-
-                            ImGui::TableNextColumn();
-                            if (dataIndex < outDataCount) {
-                                NodeGraph::Pin target = node->dataOutTarget(dataIndex, group);
-
-                                ExtendedValueTypeDesc type = node->dataOutType(dataIndex, group);
-
-                                DataOutPin(node->dataOutName(dataIndex, group).data(), type, node->dataOutMask(dataIndex, group), static_cast<bool>(target));
-                            }
-                        }
-
-                        uint32_t dataReceiverCount = group < node->dataReceiverGroupCount() ? node->dataReceiverCount(group) : 0;
-                        uint32_t dataProviderCount = group < node->dataProviderGroupCount() ? node->dataProviderCount(group) : 0;
-                        for (uint32_t dataInstanceIndex = 0; dataInstanceIndex < max(dataReceiverCount, dataProviderCount); ++dataInstanceIndex) {
-                            ImGui::TableNextColumn();
-                            if (dataInstanceIndex < dataReceiverCount) {
-                                ExtendedValueTypeDesc type = node->dataReceiverType(dataInstanceIndex, group);
-                                uint32_t mask = node->dataReceiverMask(dataInstanceIndex, group);
-                                ImVec2 pos = DataReceiverPin(node->dataReceiverName(dataInstanceIndex, group).data(), type, mask, !node->dataReceiverSources(dataInstanceIndex, group).empty());
-
-                                auto it = std::ranges::find_if(info.mConnectors, [=](const ConnectorInfo &con) { return con.mType == NodeGraph::PinType::Data && con.mIndex == dataInstanceIndex; });
-                                if (it != info.mConnectors.end())
-                                    connections.emplace_back(pos, it->mPos, DataColor(mask));
-                            }
-
-                            ImGui::TableNextColumn();
-                            if (dataInstanceIndex < dataProviderCount) {
-                                ExtendedValueTypeDesc type = node->dataProviderType(dataInstanceIndex, group);
-                                uint32_t mask = node->dataProviderMask(dataInstanceIndex, group);
-                                ImVec2 pos = DataProviderPin(node->dataProviderName(dataInstanceIndex, group).data(), type, mask, !node->dataProviderTargets(dataInstanceIndex, group).empty());
-
-                                auto it = std::ranges::find_if(info.mConnectors, [=](const ConnectorInfo &con) { return con.mType == NodeGraph::PinType::Data && con.mIndex == dataInstanceIndex; });
-                                if (it != info.mConnectors.end())
-                                    connections.emplace_back(pos, it->mPos, DataColor(mask));
-                            }
-                        }
-                    }
-                    ImGui::EndTable();
-                }
-                ImGui::EndGroupPanel();
-                ImGui::PopID();
-            };
-
-            ImGui::TableSetColumnIndex(0);
-
-            for (const NodeInfo &pred : predecessors)
-                renderDependencyNode(pred);
-
-            ImGui::TableSetColumnIndex(2);
-
-            for (const NodeInfo &succ : successors)
-                renderDependencyNode(succ);
-
-            ImGui::EndTable();
-
-            for (const auto &p : connections) {
-                ImVec2 from = std::get<0>(p);
-                ImVec2 to = std::get<1>(p);
-                ImVec2 p2 = {
-                    0.5f * from.x + 0.5f * to.x,
-                    from.y
-                };
-                ImVec2 p3 = {
-                    0.5f * from.x + 0.5f * to.x,
-                    to.y
-                };
-                ImGui::GetWindowDrawList()->AddBezierCubic(from, p2, p3, to, std::get<2>(p), 1.0f, 20);
-            }
-        }
-
-        view->visualizeDebugLocation(context, location->mChild);
     }
 
 }

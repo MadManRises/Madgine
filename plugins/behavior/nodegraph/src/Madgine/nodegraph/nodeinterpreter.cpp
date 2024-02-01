@@ -38,7 +38,6 @@ namespace NodeGraph {
         , mHandle(std::move(handle))
         , mDebugLocation(this)
     {
-
     }
 
     void NodeInterpreterStateBase::interpretImpl(Execution::VirtualReceiverBase<BehaviorError> &receiver, uint32_t flowIn)
@@ -48,7 +47,6 @@ namespace NodeGraph {
 
     void NodeInterpreterStateBase::interpretImpl(Execution::VirtualReceiverBase<BehaviorError> &receiver, Pin pin)
     {
-        mDebugLocation.stepInto(parentDebugLocation());
         branch(receiver, pin);
     }
 
@@ -66,7 +64,6 @@ namespace NodeGraph {
             if (pin && pin.mNode) {
                 node->interpret({ *this, *node, receiver }, mData[pin.mNode - 1], pin.mIndex, pin.mGroup);
             } else {
-                mDebugLocation.stepOut(parentDebugLocation());
                 receiver.set_value();
             }
         },
@@ -150,14 +147,19 @@ namespace NodeGraph {
 
     void NodeInterpreterStateBase::start()
     {
-        auto callback = [this](bool) {
-            mData.resize(mGraph->nodes().size());
+        auto callback = [this](bool success) {
+            if (success) {
+                mData.resize(mGraph->nodes().size());
 
-            for (size_t i = 0; i < mData.size(); ++i) {
-                mGraph->node(i + 1)->setupInterpret(*this, mData[i]);
+                for (size_t i = 0; i < mData.size(); ++i) {
+                    mGraph->node(i + 1)->setupInterpret(*this, mData[i]);
+                }
+
+                mDebugLocation.stepInto(parentDebugLocation());
+                interpretImpl(*this, 0);
+            } else {
+                set_error(BEHAVIOR_UNKNOWN_ERROR());
             }
-
-            interpretImpl(*this, 0);
         };
 
         if (mGraph) {

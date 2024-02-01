@@ -6,10 +6,10 @@
 #include "Madgine/nodegraph/nodegraphloader.h"
 #include "Madgine/nodegraph/pins.h"
 
-namespace ed = ax::NodeEditor;
-
 namespace Engine {
 namespace Tools {
+
+    namespace ed = ax::NodeEditor;
 
     struct NodeGraphEditor : public Tool<NodeGraphEditor> {
 
@@ -48,7 +48,7 @@ namespace Tools {
         void renderSelection();
 
 
-        void testSenderCodegen();
+        void setDragPin(NodeGraph::PinDesc pin);
 
     private:
         std::unique_ptr<ed::EditorContext, void (*)(ed::EditorContext *)> mEditor = { nullptr, nullptr };

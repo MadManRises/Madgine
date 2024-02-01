@@ -267,6 +267,14 @@ namespace Scripting {
         {
         }
 
+        ExecutionState::~ExecutionState()
+        {
+            if (mFrame) {
+                Python3Lock lock;
+                mFrame.reset();
+            }
+        }
+
         void ExecutionState::start()
         {
             Python3Lock lock { std::move(mOut), stopToken() };

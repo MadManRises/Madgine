@@ -102,7 +102,10 @@ namespace NodeGraph {
 
         static auto buildSender(value_argument_tuple&& values, std::vector<NodeResults>* results = nullptr)
         {
-            return TupleUnpacker::invokeFromTuple(Algorithm, buildArgs<0>(std::move(values), argument_types {}, results)) | Execution::with_debug_location<Execution::SenderLocation>();
+            if constexpr (Config::constant)
+                return TupleUnpacker::invokeFromTuple(Algorithm, buildArgs<0>(std::move(values), argument_types {}, results));
+            else
+                return TupleUnpacker::invokeFromTuple(Algorithm, buildArgs<0>(std::move(values), argument_types {}, results)) | Execution::with_debug_location<Execution::SenderLocation>();
         }
 
         template <typename T>
@@ -171,7 +174,7 @@ namespace NodeGraph {
             NodeResults mValues;
 
             template <typename CPO, typename... Args>
-            friend auto tag_invoke(CPO f, DummyReceiver& receiver, Args&&... args) 
+            friend auto tag_invoke(CPO f, DummyReceiver& receiver, Args&&... args)
                 -> tag_invoke_result_t<CPO, NodeExecutionReceiver<SenderNode<Config, Algorithm, Arguments...>>&, Args...>
             {
                 return f(static_cast<NodeExecutionReceiver<SenderNode<Config, Algorithm, Arguments...>>&>(receiver), std::forward<Args>(args)...);
@@ -389,7 +392,6 @@ namespace NodeGraph {
                 }
             };
 
-            
             void start(NodeReceiver<SenderNode<Config, Algorithm, Arguments...>> receiver, value_argument_tuple args)
             {
                 static_assert(!Config::constant);
