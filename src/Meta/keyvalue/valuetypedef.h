@@ -10,7 +10,7 @@ VALUETYPE_TYPE(UInt, uint64_t, uint64_t, uint32_t, uint16_t)
 VALUETYPE_SEP
 VALUETYPE_TYPE(Float, float, float)
 VALUETYPE_SEP
-VALUETYPE_TYPE(Scope, TypedScopePtr, const TypedScopePtr &)
+VALUETYPE_TYPE(Scope, ScopePtr, const ScopePtr &)
 VALUETYPE_SEP
 VALUETYPE_TYPE(OwnedScope, OwnedScopePtr, const OwnedScopePtr &)
 VALUETYPE_SEP

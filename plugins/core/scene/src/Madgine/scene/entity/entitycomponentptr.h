@@ -49,7 +49,7 @@ namespace Scene {
 
             std::string_view name() const;
 
-            TypedScopePtr getTyped() const;
+            ScopePtr getTyped() const;
 
         protected:
             EntityComponentHandle<EntityComponentBase> mHandle;

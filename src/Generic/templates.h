@@ -123,9 +123,11 @@ template <auto a>
 struct auto_holder {
     static constexpr auto value = a;
 };
-	
-template <typename>
-struct type_holder_t {};
+
+template <typename T>
+struct type_holder_t {
+    using type = T;
+};
 
 template <typename T>
 const constexpr type_holder_t<T> type_holder = {};
@@ -157,8 +159,7 @@ decltype(auto) forward_ref(std::remove_reference_t<T> &&t)
 }
 
 template <template <typename> typename Inner>
-struct Not
-{
+struct Not {
     template <typename T>
     struct type : std::bool_constant<!Inner<T>::value> {
     };

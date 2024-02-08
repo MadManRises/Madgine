@@ -12,6 +12,8 @@ target_link_plugins(Resources Root)
 
 target_link_options(Resources PUBLIC "/NATVIS:${CMAKE_CURRENT_LIST_DIR}/src/Resources.natvis")
 
+add_subdirectory(loaders)
+
 set(sources "")
 FolderSources(sources "" tools)
 	FolderSources(sources tools Madgine_Tools resourcestoolconfig.cpp resourcestoolconfig.h resourcestoolsforward.h resourcestoolslib.h)
@@ -19,9 +21,7 @@ FolderSources(sources "" tools)
 
 add_tools(Resources ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/resourcestoolslib.h)
 
-target_link_plugins(ResourcesTools Tools)
-
-add_subdirectory(loaders)
+target_link_plugins(ResourcesTools Tools AudioLoader MeshLoader)
 
 if (MADGINE_CONFIGURATION)
 	set(local_lists ${MADGINE_DATA_LISTS})

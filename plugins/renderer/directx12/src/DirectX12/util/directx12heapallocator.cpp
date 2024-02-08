@@ -17,6 +17,12 @@ namespace Render {
         mDescriptors = mDescriptorHeap.allocate(count);
     }
 
+    void DirectX12HeapAllocator::reset()
+    {
+        mHeaps.clear();
+        mDescriptorHeap.deallocate(mDescriptors);
+    }
+
     Block DirectX12HeapAllocator::allocate(size_t size, size_t alignment)
     {
         GPUPtr<void> ptr;
@@ -89,6 +95,11 @@ namespace Render {
     DirectX12MappedHeapAllocator::DirectX12MappedHeapAllocator(D3D12_HEAP_TYPE type)
         : mType(type)
     {
+    }
+
+    void DirectX12MappedHeapAllocator::reset()
+    {
+        mPages.clear();
     }
 
     Block DirectX12MappedHeapAllocator::allocate(size_t size, size_t alignment)

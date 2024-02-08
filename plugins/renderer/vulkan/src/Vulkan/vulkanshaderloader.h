@@ -29,7 +29,7 @@ namespace Render {
             {
             }
 
-            Threading::TaskFuture<bool> create(const CodeGen::ShaderFile &file, ShaderType type, VulkanShaderLoader *loader = &VulkanShaderLoader::getSingleton());            
+            Threading::TaskFuture<bool> create(const CodeGen::ShaderFile &file, ShaderType type, VulkanShaderLoader *loader = &VulkanShaderLoader::getSingleton());
         };
 
         bool loadImpl(VulkanPtr<VkShaderModule, &vkDestroyShaderModule> &shader, ResourceDataInfo &info);

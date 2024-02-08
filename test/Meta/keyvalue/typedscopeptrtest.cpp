@@ -21,12 +21,12 @@ METATABLE_BEGIN_BASE(Bar, Foo)
 MEMBER(f)
 METATABLE_END(Bar)
 
-TEST(KeyValue, TypedScopePtr)
+TEST(KeyValue, ScopePtr)
 {
     Bar b;
     b.i = 1;
     b.f = 1.6f;
-    Engine::TypedScopePtr ptr = &b;
-    Foo *f = ptr.safe_cast<Foo>();
+    Engine::ScopePtr ptr = &b;
+    Foo *f = scope_cast<Foo>(ptr);
     ASSERT_EQ(f, &b);
 }

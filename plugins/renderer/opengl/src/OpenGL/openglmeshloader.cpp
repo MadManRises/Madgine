@@ -5,19 +5,13 @@
 #include "openglmeshdata.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Madgine/meshloader/meshdata.h"
 
 #include "openglrendercontext.h"
 
-UNIQUECOMPONENT(Engine::Render::OpenGLMeshLoader);
-
-METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader, Engine::Render::GPUMeshLoader)
-MEMBER(mResources)
-METATABLE_END(Engine::Render::OpenGLMeshLoader)
-
-METATABLE_BEGIN_BASE(Engine::Render::OpenGLMeshLoader::Resource, Engine::Render::GPUMeshLoader::Resource)
-METATABLE_END(Engine::Render::OpenGLMeshLoader::Resource)
+VIRTUALRESOURCELOADERIMPL(Engine::Render::OpenGLMeshLoader, Engine::Render::GPUMeshLoader);
 
 namespace Engine {
 namespace Render {

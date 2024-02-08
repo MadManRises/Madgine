@@ -3,6 +3,7 @@
 #include "vulkanshaderloader.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
@@ -11,13 +12,17 @@
 #include "vulkanshadercodegen.h"
 #include "vulkanrendercontext.h"
 
-UNIQUECOMPONENT(Engine::Render::VulkanShaderLoader);
+UNIQUECOMPONENT(Engine::Render::VulkanShaderLoader)
 
 METATABLE_BEGIN(Engine::Render::VulkanShaderLoader)
+MEMBER(mResources)
 METATABLE_END(Engine::Render::VulkanShaderLoader)
 
 METATABLE_BEGIN_BASE(Engine::Render::VulkanShaderLoader::Resource, Engine::Resources::ResourceBase)
 METATABLE_END(Engine::Render::VulkanShaderLoader::Resource)
+
+SERIALIZETABLE_BEGIN(Engine::Render::VulkanShaderLoader::Handle)
+SERIALIZETABLE_END(Engine::Render::VulkanShaderLoader::Handle)
 
 namespace Engine {
 namespace Render {

@@ -31,7 +31,7 @@ namespace Scripting {
             return toPyObject(v);
         }
 
-        static PyObject* OwnedScopePtr_iter(const TypedScopePtr& p) {
+        static PyObject* OwnedScopePtr_iter(const ScopePtr& p) {
             if (!p) {
                 PyErr_SetString(PyExc_TypeError, "Nullptr is not iterable!");
                 return NULL;
@@ -40,8 +40,8 @@ namespace Scripting {
             if (proxyIt != p.end()){
                 ValueType proxy;
                 proxyIt->value(proxy);
-                if (proxy.is<TypedScopePtr>()) {
-                    return OwnedScopePtr_iter(proxy.as<TypedScopePtr>());
+                if (proxy.is<ScopePtr>()) {
+                    return OwnedScopePtr_iter(proxy.as<ScopePtr>());
                 }
             }
             return toPyObject(p.begin());

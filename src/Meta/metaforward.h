@@ -17,7 +17,7 @@ struct MetaTable;
 struct ScopeIterator;
 struct Accessor;
 struct ScopeField;
-struct TypedScopePtr;
+struct ScopePtr;
 struct OwnedScopePtr;
 struct TypeInfo;
 struct ApiFunction;

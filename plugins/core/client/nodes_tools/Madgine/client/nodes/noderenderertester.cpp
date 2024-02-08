@@ -110,7 +110,7 @@ namespace Tools {
                             mTexture->addRenderPass(pass.mPass);
                     }
 
-                    TypedScopePtr ptr = pass.mHandle.resource();
+                    ScopePtr ptr = pass.mHandle.resource();
                     if (mInspector->drawValue("pass", ptr, true).first) {
                         pass.mLoadingHandle = ptr.safe_cast<NodeGraph::NodeGraphLoader::Resource>();
                     }

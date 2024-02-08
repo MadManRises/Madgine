@@ -4,6 +4,11 @@ namespace Engine {
 
 template <typename T>
 struct CaptureHelper {
+    template <typename... Args>
+    decltype(auto) operator()(Args &&...args) const
+    {
+        return mT(std::forward<Args>(args)...);
+    }
     operator T &()
     {
         return mT;

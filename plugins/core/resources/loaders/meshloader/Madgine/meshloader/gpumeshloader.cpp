@@ -5,15 +5,11 @@
 #include "meshloader.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Modules/threading/taskqueue.h"
 
-METATABLE_BEGIN(Engine::Render::GPUMeshLoader)
-METATABLE_END(Engine::Render::GPUMeshLoader)
-
-METATABLE_BEGIN_BASE(Engine::Render::GPUMeshLoader::Resource, Engine::Resources::ResourceBase)
-READONLY_PROPERTY(Data, dataPtr)
-METATABLE_END(Engine::Render::GPUMeshLoader::Resource)
+VIRTUALRESOURCELOADERBASE(Engine::Render::GPUMeshLoader)
 
 METATABLE_BEGIN(Engine::Render::GPUMeshData)
 MEMBER(mMaterials)
@@ -25,8 +21,6 @@ READONLY_PROPERTY(Name, mName)
 MEMBER(mEmissiveTexture)*/
 MEMBER(mDiffuseColor)
 METATABLE_END(Engine::Render::GPUMeshData::Material)
-
-VIRTUALUNIQUECOMPONENTBASE(Engine::Render::GPUMeshLoader)
 
 namespace Engine {
 namespace Render {

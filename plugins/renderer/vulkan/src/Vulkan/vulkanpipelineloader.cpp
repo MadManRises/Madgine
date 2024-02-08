@@ -3,6 +3,7 @@
 #include "vulkanpipelineloader.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
@@ -12,13 +13,7 @@
 
 #include "vulkanrendercontext.h"
 
-UNIQUECOMPONENT(Engine::Render::VulkanPipelineLoader);
-
-METATABLE_BEGIN_BASE(Engine::Render::VulkanPipelineLoader, Engine::Render::PipelineLoader)
-METATABLE_END(Engine::Render::VulkanPipelineLoader)
-
-METATABLE_BEGIN_BASE(Engine::Render::VulkanPipelineLoader::Resource, Engine::Render::PipelineLoader::Resource)
-METATABLE_END(Engine::Render::VulkanPipelineLoader::Resource)
+VIRTUALRESOURCELOADERIMPL(Engine::Render::VulkanPipelineLoader, Engine::Render::PipelineLoader);
 
 namespace Engine {
 namespace Render {

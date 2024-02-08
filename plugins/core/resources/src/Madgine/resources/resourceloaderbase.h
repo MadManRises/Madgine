@@ -47,9 +47,9 @@ namespace Resources {
             }
         }
 
-        virtual std::vector<std::pair<std::string_view, TypedScopePtr>> typedResources() = 0;
+        virtual std::vector<std::pair<std::string_view, ScopePtr>> typedResources() = 0;
         virtual std::vector<const MetaTable *> resourceTypes() const = 0;
-        virtual std::vector<ResourceBase *> resources() = 0; 
+        virtual std::vector<ResourceBase *> resources() = 0;         
 
     protected:
         std::vector<std::string> mExtensions;

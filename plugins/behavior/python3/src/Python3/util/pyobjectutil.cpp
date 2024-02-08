@@ -131,10 +131,10 @@ namespace Scripting {
             return NULL;
         }
 
-        PyObject *toPyObject(const TypedScopePtr &scope)
+        PyObject *toPyObject(const ScopePtr &scope)
         {
             PyObject *obj = PyObject_CallObject((PyObject *)&PyTypedScopePtrType, NULL);
-            new (&reinterpret_cast<PyTypedScopePtr *>(obj)->mPtr) TypedScopePtr(scope);
+            new (&reinterpret_cast<PyTypedScopePtr *>(obj)->mPtr) ScopePtr(scope);
             return obj;
         }
 

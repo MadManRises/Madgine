@@ -3,6 +3,7 @@
 #include "skeletonloader.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Modules/threading/awaitables/awaitablesender.h"
 
@@ -12,15 +13,7 @@
 
 #include "../assimptools.h"
 
-UNIQUECOMPONENT(Engine::Render::SkeletonLoader)
-
-METATABLE_BEGIN(Engine::Render::SkeletonLoader)
-MEMBER(mResources)
-METATABLE_END(Engine::Render::SkeletonLoader)
-
-METATABLE_BEGIN_BASE(Engine::Render::SkeletonLoader::Resource, Engine::Resources::ResourceBase)
-READONLY_PROPERTY(Data, dataPtr)
-METATABLE_END(Engine::Render::SkeletonLoader::Resource)
+RESOURCELOADER(Engine::Render::SkeletonLoader)
 
 METATABLE_BEGIN(Engine::Render::Bone)
 MEMBER(mName)

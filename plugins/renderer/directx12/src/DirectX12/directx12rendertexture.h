@@ -3,7 +3,6 @@
 #include "directx12rendertarget.h"
 #include "util/directx12texture.h"
 
-
 namespace Engine {
 namespace Render {
 
@@ -11,26 +10,34 @@ namespace Render {
 
         DirectX12RenderTexture(DirectX12RenderContext *context, const Vector2i &size, const RenderTextureConfig &config);
         ~DirectX12RenderTexture();
-        
+
         bool resizeImpl(const Vector2i &size) override;
         Vector2i size() const override;
-        
+
+        virtual bool skipFrame() override;
         virtual void beginFrame() override;
         virtual void endFrame() override;
 
         virtual void beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const override;
         virtual void endIteration() const override;
 
-        virtual const DirectX12Texture *texture(size_t index) const override;   
+        virtual const DirectX12Texture *texture(size_t index) const override;
         virtual size_t textureCount() const override;
-        virtual const DirectX12Texture *depthTexture() const override;        
+        virtual const DirectX12Texture *depthTexture() const override;
 
         void blit(RenderTarget *input) const;
-        
+
         const std::vector<DirectX12Texture> &textures() const;
 
-    private:        
+    protected:
+        void resizeBuffers(const Vector2i &size);
+
+    private:
         std::vector<DirectX12Texture> mTextures;
+
+        uint64_t mResizeFence;
+        Vector2i mResizeTarget;
+        bool mResizePending = false;
     };
 
 }

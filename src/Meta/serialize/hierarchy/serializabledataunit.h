@@ -7,6 +7,7 @@ namespace Engine {
 namespace Serialize {
 
     struct META_EXPORT SerializableDataUnit {
+        constexpr auto operator<=>(const SerializableDataUnit &) const = default;
     };
 
 #define SERIALIZABLEUNIT(_Self)                                 \

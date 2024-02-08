@@ -3,21 +3,14 @@
 #include "animationloader.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Modules/threading/awaitables/awaitablesender.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 
-UNIQUECOMPONENT(Engine::Render::AnimationLoader)
-
-METATABLE_BEGIN(Engine::Render::AnimationLoader)
-MEMBER(mResources)
-METATABLE_END(Engine::Render::AnimationLoader)
-
-METATABLE_BEGIN_BASE(Engine::Render::AnimationLoader::Resource, Engine::Resources::ResourceBase)
-READONLY_PROPERTY(Data, dataPtr)
-METATABLE_END(Engine::Render::AnimationLoader::Resource)
+RESOURCELOADER(Engine::Render::AnimationLoader)
 
 METATABLE_BEGIN(Engine::Render::AnimationList)
 MEMBER(mAnimations)

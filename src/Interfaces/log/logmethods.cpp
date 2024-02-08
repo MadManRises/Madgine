@@ -21,7 +21,7 @@ namespace Log {
     void log(std::string_view msg, MessageType level, const char *file, size_t line)
     {
 #if WINDOWS
-        if (level == MessageType::FATAL_TYPE) {
+        if (level == MessageType::FATAL_TYPE || level == MessageType::DEBUG_TYPE) {
             OutputDebugStringA(msg.data());
             OutputDebugStringA("\n");
         }

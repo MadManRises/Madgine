@@ -3,6 +3,7 @@
 #include "layoutloader.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Madgine/serialize/filesystem/filemanager.h"
 
@@ -14,14 +15,7 @@
 
 #include "mainwindow.h"
 
-UNIQUECOMPONENT(Engine::Window::LayoutLoader)
-
-METATABLE_BEGIN(Engine::Window::LayoutLoader)
-MEMBER(mResources)
-METATABLE_END(Engine::Window::LayoutLoader)
-
-METATABLE_BEGIN_BASE(Engine::Window::LayoutLoader::Resource, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Window::LayoutLoader::Resource)
+RESOURCELOADER(Engine::Window::LayoutLoader)
 
 namespace Engine {
 namespace Window {

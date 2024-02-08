@@ -8,7 +8,7 @@ struct META_EXPORT BoundApiFunction {
 
     constexpr BoundApiFunction() = default;
 
-    BoundApiFunction(const ApiFunction &f, const TypedScopePtr &scope);
+    BoundApiFunction(const ApiFunction &f, const ScopePtr &scope);
 
     bool operator==(const BoundApiFunction &other) const
     {
@@ -25,7 +25,7 @@ struct META_EXPORT BoundApiFunction {
         return mFunction.isMemberFunction();
     }
 
-    TypedScopePtr scope() const;
+    ScopePtr scope() const;
 
     void operator()(ValueType &retVal, const ArgumentList &args) const;
 

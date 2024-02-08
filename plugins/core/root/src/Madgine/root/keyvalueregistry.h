@@ -5,13 +5,13 @@
 namespace Engine {
 
 struct MADGINE_ROOT_EXPORT KeyValueRegistry {
-    static void registerGlobal(const char *name, TypedScopePtr ptr);
-    static void registerWorkGroupLocal(const char *name, TypedScopePtr ptr);
-    static void unregisterGlobal(TypedScopePtr ptr);
-    static void unregisterWorkGroupLocal(TypedScopePtr ptr);
+    static void registerGlobal(const char *name, ScopePtr ptr);
+    static void registerWorkGroupLocal(const char *name, ScopePtr ptr);
+    static void unregisterGlobal(ScopePtr ptr);
+    static void unregisterWorkGroupLocal(ScopePtr ptr);
 
-    static const std::map<std::string_view, TypedScopePtr> &globals();
-    static const std::map<std::string_view, TypedScopePtr> &workgroupLocals();
+    static const std::map<std::string_view, ScopePtr> &globals();
+    static const std::map<std::string_view, ScopePtr> &workgroupLocals();
 };
 
 template <typename T>

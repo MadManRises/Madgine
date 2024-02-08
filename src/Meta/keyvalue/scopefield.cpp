@@ -6,7 +6,7 @@
 
 namespace Engine {
 
-ScopeField::ScopeField(const TypedScopePtr &ptr, const std::pair<const char *, Accessor> *pointer)
+ScopeField::ScopeField(const ScopePtr &ptr, const std::pair<const char *, Accessor> *pointer)
     : mScope(ptr)
     , mPointer(pointer)
 {

@@ -9,5 +9,5 @@ add_plugin(Audio Madgine API ${sources} PRECOMPILED_HEADER src/Madgine/audiolib.
 
 plugin_group(Audio EXCLUSIVE)
 
-target_link_plugins(Audio Root AudioLoader)
+target_link_plugins(Audio Root AudioLoader Behavior)
 

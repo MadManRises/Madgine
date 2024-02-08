@@ -123,15 +123,18 @@ PixelShaderOutput main(PixelShaderInput IN)
 		OUT.fragColor = diffuseColor;
 	}
 
-	
+	float3 emissive = float3(0.0, 0.0, 0.0);
+	if (object.hasTexture){
+		emissive = emissiveTex.Sample(texSampler, IN.uv).rgb;
+	}
+
 	if (app.hasHDR){
-		OUT.brightColor = emissiveTex.Sample(texSampler, IN.uv);
-		OUT.brightColor.a = 1.0;
+		OUT.brightColor = float4(emissive, 1.0);		
 		float brightness = dot(OUT.fragColor.rgb, float3(0.2126, 0.7152, 0.0722));
 		if(brightness > 1.0)
 			OUT.brightColor.rgb += OUT.fragColor.rgb;
 	}else{
-		OUT.fragColor.rgb += emissiveTex.Sample(texSampler, IN.uv).rgb;
+		OUT.fragColor.rgb += emissive;
 	}
 	
     return OUT;

@@ -8,7 +8,7 @@
 
 namespace Engine {
 
-ScopeIterator MetaTable::find(std::string_view key, TypedScopePtr scope) const
+ScopeIterator MetaTable::find(std::string_view key, ScopePtr scope) const
 {
     for (const std::pair<const char *, Accessor> *p = mMembers; p->first; ++p) {
         if (key == p->first) {
@@ -22,7 +22,7 @@ ScopeIterator MetaTable::find(std::string_view key, TypedScopePtr scope) const
     }
 }
 
-void MetaTable::call(TypedScopePtr scope, ValueType &retVal, const ArgumentList &args) const
+void MetaTable::call(ScopePtr scope, ValueType &retVal, const ArgumentList &args) const
 {
     ScopeIterator op = find("__call", scope);
     if (op == scope.end())
@@ -32,16 +32,21 @@ void MetaTable::call(TypedScopePtr scope, ValueType &retVal, const ArgumentList 
     f.as<BoundApiFunction>()(retVal, args);
 }
 
+void MetaTable::moveAssign(ScopePtr scope, ScopePtr other) const
+{
+    mMoveAssign(scope, other);
+}
+
 bool MetaTable::isDerivedFrom(const MetaTable *baseType, size_t *offset) const
 {
     if (this == baseType)
         return true;
-    if (offset)
+    if (offset && mBaseOffset)
         *offset += mBaseOffset();
     return mBase && (*mBase)->isDerivedFrom(baseType, offset);
 }
 
-std::string MetaTable::name(TypedScopePtr scope) const
+std::string MetaTable::name(ScopePtr scope) const
 {
     ScopeIterator nameIt = find("Name", scope);
     if (nameIt != scope.end()) {
@@ -55,8 +60,8 @@ std::string MetaTable::name(TypedScopePtr scope) const
     if (proxyIt != scope.end()){
         ValueType proxy;
         proxyIt->value(proxy);
-        if (proxy.is<TypedScopePtr>()) {
-            return proxy.as<TypedScopePtr>().name();
+        if (proxy.is<ScopePtr>()) {
+            return proxy.as<ScopePtr>().name();
         }
     }
     return "<"s + mTypeName + ">";

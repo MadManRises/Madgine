@@ -5,17 +5,11 @@
 #include "util/opengltexture.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "openglrendercontext.h"
 
-UNIQUECOMPONENT(Engine::Render::OpenGLTextureLoader);
-
-METATABLE_BEGIN(Engine::Render::OpenGLTextureLoader)
-MEMBER(mResources)
-METATABLE_END(Engine::Render::OpenGLTextureLoader)
-
-METATABLE_BEGIN_BASE(Engine::Render::OpenGLTextureLoader::Resource, Engine::Render::TextureLoader::Resource)
-METATABLE_END(Engine::Render::OpenGLTextureLoader::Resource)
+RESOURCELOADER(Engine::Render::OpenGLTextureLoader);
 
 namespace Engine {
 namespace Render {

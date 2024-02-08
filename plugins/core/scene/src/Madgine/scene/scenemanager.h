@@ -58,6 +58,7 @@ namespace Scene {
         Entity::EntityPtr createLocalEntity(const std::string &name = "");
         Entity::EntityPtr findEntity(const std::string &name);
         void remove(Entity::Entity *e);
+        void clear();
 
         //Entity::Entity *makeLocalCopy(Entity::Entity &e);
         Entity::Entity *makeLocalCopy(Entity::Entity &&e);

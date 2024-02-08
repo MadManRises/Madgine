@@ -161,7 +161,7 @@ namespace Render {
             view.SizeInBytes = block.mSize;
             view.StrideInBytes = mInstanceDataSize;
             commandList->IASetVertexBuffers(1, 1, &view);
-            DX12_LOG("Bind Instance Buffer -> " << mAddress);
+            DX12_LOG("Bind Instance Buffer -> " << res->GetGPUVirtualAddress() + offset);
         }
 
         
@@ -189,7 +189,7 @@ namespace Render {
         view.SizeInBytes = block.mSize;
         view.StrideInBytes = format.stride();
         commandList->IASetVertexBuffers(0, 1, &view);
-        DX12_LOG("Bind Vertex Buffer -> " << mAddress);
+        DX12_LOG("Bind Vertex Buffer -> " << res->GetGPUVirtualAddress() + offset);
 
         mElementCount = count;
         mFormat = format;
@@ -211,7 +211,7 @@ namespace Render {
         view.SizeInBytes = block.mSize;
         view.Format = DXGI_FORMAT_R32_UINT;
         commandList->IASetIndexBuffer(&view);
-        DX12_LOG("Bind Index Buffer -> " << mAddress);
+        DX12_LOG("Bind Index Buffer -> " << res->GetGPUVirtualAddress() + offset);
 
         mElementCount = count;
         mHasIndices = true;

@@ -35,50 +35,13 @@ namespace Render {
         if (mDepthTexture.size() == size)
             return false;
 
-        size_t count = 1;
-        size_t i = 0;
-        std::vector<std::array<OffsetPtr, 6>> targetViews = std::move(mTargetViews);
-
-        for (DirectX12Texture &tex : mTextures) {
-            tex.setData(size, {});
-            tex.setName((name().empty() ? "RenderTexture" : name()) + "[" + std::to_string(i) + "]");
-
-            D3D12_RENDER_TARGET_VIEW_DESC renderTargetViewDesc {};
-
-            switch (tex.format()) {
-            case FORMAT_RGBA8:
-                renderTargetViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-                break;
-            case FORMAT_RGBA8_SRGB:
-                renderTargetViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-                break;
-            case FORMAT_RGBA16F:
-                renderTargetViewDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
-                break;
-            default:
-                throw 0;
-            }
-            switch (tex.type()) {
-            case TextureType_2D:
-                renderTargetViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-                break;
-            case TextureType_2DMultiSample:
-                renderTargetViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMS;
-                break;
-            default:
-                throw 0;
-            }
-            renderTargetViewDesc.Texture2D.MipSlice = 0;
-
-            for (size_t j = 0; j < count; ++j)
-                GetDevice()->CreateRenderTargetView(tex, &renderTargetViewDesc, DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(targetViews[i][j]));
-
-            ++i;
+        if (context()->graphicsQueue()->isFenceComplete(context()->graphicsQueue()->currentFence())) {
+            resizeBuffers(size);
+        } else {
+            mResizePending = true;
+            mResizeFence = context()->graphicsQueue()->currentFence();
+            mResizeTarget = size;
         }
-
-        mDepthTexture.setData(size, {});
-
-        setup(std::move(targetViews), size);
 
         return true;
     }
@@ -126,9 +89,66 @@ namespace Render {
         return mTextures;
     }
 
+    void DirectX12RenderTexture::resizeBuffers(const Vector2i &size)
+    {
+        size_t count = 1;
+        size_t i = 0;
+        std::vector<std::array<OffsetPtr, 6>> targetViews = std::move(mTargetViews);
+
+        for (DirectX12Texture &tex : mTextures) {
+            tex.setData(size, {});
+            tex.setName((name().empty() ? "RenderTexture" : name()) + "[" + std::to_string(i) + "]");
+
+            D3D12_RENDER_TARGET_VIEW_DESC renderTargetViewDesc {};
+
+            switch (tex.format()) {
+            case FORMAT_RGBA8:
+                renderTargetViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+                break;
+            case FORMAT_RGBA8_SRGB:
+                renderTargetViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+                break;
+            case FORMAT_RGBA16F:
+                renderTargetViewDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+                break;
+            default:
+                throw 0;
+            }
+            switch (tex.type()) {
+            case TextureType_2D:
+                renderTargetViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+                break;
+            case TextureType_2DMultiSample:
+                renderTargetViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMS;
+                break;
+            default:
+                throw 0;
+            }
+            renderTargetViewDesc.Texture2D.MipSlice = 0;
+
+            for (size_t j = 0; j < count; ++j) {
+                GetDevice()->CreateRenderTargetView(tex, &renderTargetViewDesc, DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(targetViews[i][j]));
+            }
+
+            ++i;
+        }
+
+        setup(std::move(targetViews), size);
+    }
+
     Vector2i DirectX12RenderTexture::size() const
     {
         return mDepthTexture.size();
+    }
+
+    bool DirectX12RenderTexture::skipFrame()
+    {
+        if (mResizePending && context()->graphicsQueue()->isFenceComplete(mResizeFence)) {
+            mResizePending = false;
+            resizeBuffers(mResizeTarget);
+        }
+
+        return mResizePending;
     }
 
     void DirectX12RenderTexture::beginFrame()

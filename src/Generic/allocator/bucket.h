@@ -34,6 +34,10 @@ struct BucketAllocatorImpl {
             BucketStrategy::select(block.mSize));
     }
 
+    void deallocateAll() {
+        TupleUnpacker::forEach(mBuckets, [](auto &bucket) { bucket.deallocateAll(); });
+    }
+
 private:
     template <typename T>
     using helper = typename replace<Parent>::template tagged<AllocatorAutoSizeTag, T>;

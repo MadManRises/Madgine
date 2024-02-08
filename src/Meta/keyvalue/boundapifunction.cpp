@@ -13,7 +13,7 @@
 
 namespace Engine {
 
-BoundApiFunction::BoundApiFunction(const ApiFunction &f, const TypedScopePtr &scope)
+BoundApiFunction::BoundApiFunction(const ApiFunction &f, const ScopePtr &scope)
     : mFunction(f)
     , mScope(scope.mScope)
 {
@@ -22,7 +22,7 @@ BoundApiFunction::BoundApiFunction(const ApiFunction &f, const TypedScopePtr &sc
     assert(f.mTable->mIsMemberFunction);
 }
 
-TypedScopePtr BoundApiFunction::scope() const
+ScopePtr BoundApiFunction::scope() const
 {
     return { mScope, *mFunction.mTable->mArguments[0].mType.mSecondary.mMetaTable };
 }

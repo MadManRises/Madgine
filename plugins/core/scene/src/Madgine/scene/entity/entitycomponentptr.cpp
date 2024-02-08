@@ -85,7 +85,7 @@ namespace Scene {
             return std::ranges::find(EntityComponentRegistry::sComponentsByName(), mHandle.mType, projectionPairSecond)->first;
         }
 
-        TypedScopePtr EntityComponentPtrBase<EntityComponentBase>::getTyped() const
+        ScopePtr EntityComponentPtrBase<EntityComponentBase>::getTyped() const
         {
             return mSceneMgr->entityComponentList(mHandle.mType).getTyped(mHandle);
         }

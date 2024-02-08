@@ -3,21 +3,13 @@
 #include "vulkantextureloader.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Modules/uniquecomponent/uniquecomponent.h"
 
 #include "vulkanrendercontext.h"
 
-UNIQUECOMPONENT(Engine::Render::VulkanTextureLoader);
-
-METATABLE_BEGIN(Engine::Render::VulkanTextureLoader)
-MEMBER(mResources)
-METATABLE_END(Engine::Render::VulkanTextureLoader)
-
-METATABLE_BEGIN_BASE(Engine::Render::VulkanTextureLoader::Resource, Engine::Render::TextureLoader::Resource)
-METATABLE_END(Engine::Render::VulkanTextureLoader::Resource)
-
-
+RESOURCELOADER(Engine::Render::VulkanTextureLoader);
 
 namespace Engine {
 namespace Render {

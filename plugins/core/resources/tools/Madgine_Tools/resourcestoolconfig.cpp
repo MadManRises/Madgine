@@ -18,6 +18,14 @@
 
 #include "imgui/imgui.h"
 
+#include "Madgine/audioloader/audioloader.h"
+#include "Madgine/meshloader/gpumeshloader.h"
+
+#include "Generic/projections.h"
+
+#include "Meta/keyvalue/valuetype.h"
+#include "Meta/keyvalue/scopefield.h"
+
 namespace Engine {
 namespace Tools {
 
@@ -30,9 +38,11 @@ namespace Tools {
     {
         Resources::ResourceManager &mgr = Resources::ResourceManager::getSingleton();
 
+        Inspector &inspector = mRoot.getTool<Inspector>();
+
         for (std::unique_ptr<Resources::ResourceLoaderBase> &loader : mgr.mCollector) {
             for (const MetaTable *type : loader->resourceTypes()) {
-                mRoot.getTool<Inspector>().addObjectSuggestion(type, [&]() {
+                inspector.addPtrSuggestion(type, [&]() {
                     return loader->typedResources();
                 });
             }

@@ -7,17 +7,9 @@
 #include "directx12rendercontext.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
-UNIQUECOMPONENT(Engine::Render::DirectX12TextureLoader);
-
-METATABLE_BEGIN(Engine::Render::DirectX12TextureLoader)
-MEMBER(mResources)
-METATABLE_END(Engine::Render::DirectX12TextureLoader)
-
-METATABLE_BEGIN_BASE(Engine::Render::DirectX12TextureLoader::Resource, Engine::Render::TextureLoader::Resource)
-METATABLE_END(Engine::Render::DirectX12TextureLoader::Resource)
-
-
+RESOURCELOADER(Engine::Render::DirectX12TextureLoader);
 
 namespace Engine {
 namespace Render {

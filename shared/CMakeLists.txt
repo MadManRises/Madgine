@@ -123,6 +123,8 @@ if (NOT IOS AND NOT EMSCRIPTEN)
 		CREDITS "Audio-Compression: Vorbis - https://xiph.org/vorbis/")
 endif()
 
+add_definitions(-DPA_ENABLE_MSVC_DEBUG_OUTPUT)
+set(PA_ENABLE_DEBUG_OUTPUT ON CACHE BOOL "" FORCE)
 set(PA_BUILD_STATIC ON CACHE BOOL "" FORCE)
 set(PA_BUILD_SHARED OFF CACHE BOOL "" FORCE)
 add_subdirectory(portaudio-19.7.0)

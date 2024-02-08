@@ -165,6 +165,15 @@ namespace Render {
 
         mConstantBuffer.reset();
 
+        mBufferAllocator.deallocateAll();
+        mTempAllocator.deallocateAll();
+        mConstantAllocator.deallocateAll();
+        mUploadAllocator.deallocateAll();
+
+        mTempMemoryHeap.reset();
+        mConstantMemoryHeap.reset();
+        mBufferMemoryHeap.reset();
+
         (*sDevice).reset();
 
         assert(sSingleton == this);

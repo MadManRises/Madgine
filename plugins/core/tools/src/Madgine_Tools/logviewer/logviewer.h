@@ -58,6 +58,7 @@ namespace Tools {
         };
         std::vector<Lookup> mLookup;
         float mFilteredOffsetAcc = 0.0f;
+        bool mIsDirty = true;
     };
 
 }

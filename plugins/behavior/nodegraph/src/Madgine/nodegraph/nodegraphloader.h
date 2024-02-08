@@ -6,6 +6,8 @@
 
 #include "Madgine/behaviorcollector.h"
 
+#include "Madgine/resources/sender.h"
+
 namespace Engine {
 namespace NodeGraph {
 
@@ -20,7 +22,7 @@ namespace NodeGraph {
             {
             }
 
-            NodeInterpreterSender interpret();
+            Resources::with_handle_t::sender<NodeInterpreterSender, Handle> interpret();
         };
 
         NodeGraphLoader();

@@ -10,6 +10,51 @@
 
 namespace Engine {
 
+DERIVE_FUNCTION(customScopePtr)
+
+template <typename T>
+auto resolveCustomScopePtr(T *t)
+{
+    if constexpr (has_function_customScopePtr_v<T>) {
+        if (t) {
+            return t->customScopePtr();
+        } else {
+            using Ptr = decltype(t->customScopePtr());
+            if constexpr (std::same_as<Ptr, ScopePtr>) {
+                return Ptr { nullptr, table<decayed_t<T>> };
+            } else {
+                return Ptr { nullptr };
+            }
+        }
+    } else {
+        return ScopePtr { t, table<decayed_t<T>> };
+    }
+}
+
+template <typename T>
+auto resolveCustomScopePtr(T &t)
+{
+    return resolveCustomScopePtr(&t);
+}
+
+template <typename T, bool keepPtr = false>
+auto resolveHelper() {
+    using Ptr = decltype(resolveCustomScopePtr(std::declval<T *>()));
+    if constexpr (std::same_as<Ptr, ScopePtr>) {
+        return type_holder<T>;
+    } else {
+        if constexpr (keepPtr) {
+            return type_holder<Ptr>;
+        }
+        else {
+            return type_holder<std::remove_pointer_t<Ptr>>;
+        }
+    }
+}
+
+template <typename T, bool keepPtr = false> 
+using resolveCustomScopePtr_t = typename decltype(resolveHelper<T, keepPtr>())::type;
+
 template <typename T>
 concept ValueTypePrimitive = ValueTypeList::contains<T>;
 
@@ -268,7 +313,7 @@ constexpr ValueTypeIndex toValueTypeIndex()
     static_assert(!std::is_rvalue_reference_v<T>);
     if constexpr (ValueTypePrimitive<T>) {
         return static_cast<ValueTypeEnum>(ValueTypeList::index<size_t, T>);
-    } else if constexpr (InstanceOf<T, Flags>){
+    } else if constexpr (InstanceOf<T, Flags>) {
         return ValueTypeEnum::FlagsValue;
     } else if constexpr (std::ranges::range<T>) {
         if constexpr (std::same_as<KeyType_t<typename T::iterator::value_type>, Void>)
@@ -299,9 +344,9 @@ constexpr ExtendedValueTypeDesc toValueTypeDesc()
         return { toValueTypeIndex<T>() };
     } else if constexpr (std::same_as<T, ValueType>) {
         return { ExtendedValueTypeEnum::GenericType };
-    } else if constexpr (InstanceOf<T, Flags>){
+    } else if constexpr (InstanceOf<T, Flags>) {
         return { { ValueTypeEnum::FlagsValue }, T::Representation::sTable };
-    } else if constexpr (std::same_as<T, TypedScopePtr>) {
+    } else if constexpr (std::same_as<T, ScopePtr>) {
         return { { ValueTypeEnum::ScopeValue }, static_cast<const MetaTable **>(nullptr) };
     } else if constexpr (std::ranges::range<T>) {
         if constexpr (std::same_as<KeyType_t<typename T::iterator::value_type>, Void>)
@@ -313,9 +358,9 @@ constexpr ExtendedValueTypeDesc toValueTypeDesc()
             //return { { ValueTypeEnum::ApiFunctionValue }, nullptr };
             throw 0;
         else
-            return { { ValueTypeEnum::ScopeValue }, &table<std::remove_pointer_t<T>> };
+            return { { ValueTypeEnum::ScopeValue }, &table<std::remove_pointer_t<resolveCustomScopePtr_t<T>>> };
     } else {
-        return { { ValueTypeEnum::OwnedScopeValue }, &table<T> };
+        return { { ValueTypeEnum::OwnedScopeValue }, &table<resolveCustomScopePtr_t<T>> };
     }
 }
 }

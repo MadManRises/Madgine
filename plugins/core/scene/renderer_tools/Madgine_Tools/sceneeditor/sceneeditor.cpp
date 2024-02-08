@@ -445,7 +445,7 @@ namespace Tools {
             } else {
                 if (!mPendingBehavior.mParameters)
                     mPendingBehavior.mParameters = mPendingBehavior.mFuture;
-                if (ImGui::BeginTable("columns", 2)) {
+                if (ImGui::BeginTable("columns", 2, ImGuiTableFlags_SizingStretchProp)) {
                     mInspector->drawMembers(&mPendingBehavior.mParameters);
                     ImGui::EndTable();
                 }

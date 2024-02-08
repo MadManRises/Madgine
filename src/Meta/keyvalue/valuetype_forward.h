@@ -109,10 +109,11 @@ decltype(auto) ValueType_as(const ValueType &v)
     } else if constexpr (InstanceOf<std::decay_t<T>, Flags>) {
         return ValueType_as_impl<FlagsHolder>(v).safe_cast<T>();
     } else {
-        if constexpr (Pointer<T>) {
-            return ValueType_as_impl<TypedScopePtr>(v).safe_cast<std::remove_pointer_t<T>>();
+        using Ty = resolveCustomScopePtr_t<T, true>;
+        if constexpr (Pointer<Ty>) {
+            return scope_cast<std::remove_pointer_t<Ty>>(ValueType_as_impl<ScopePtr>(v));
         } else {
-            return ValueType_as_impl<OwnedScopePtr>(v).safe_cast<T>();
+            return *scope_cast<Ty>(ValueType_as_impl<OwnedScopePtr>(v).get());
         }
     }
     //static_assert(dependent_bool<T, false>::value, "A ValueType can not be converted to the given target type");
@@ -145,15 +146,15 @@ decltype(auto) convert_ValueType(T &&t)
         }
     } else if constexpr (InstanceOf<std::decay_t<T>, EnumType> || InstanceOf<std::decay_t<T>, BaseEnum>) {
         return EnumHolder { std::forward<T>(t) };
-    } else if constexpr (InstanceOf<std::decay_t<T>, Flags>){
+    } else if constexpr (InstanceOf<std::decay_t<T>, Flags>) {
         return FlagsHolder { std::forward<T>(t) };
     } else {
         if constexpr (Pointer<std::decay_t<T>>) {
-            return TypedScopePtr { t };
+            return ScopePtr { t };
         } else if constexpr (InstanceOf<std::decay_t<T>, std::unique_ptr>) {
-            return TypedScopePtr { t.get() };
+            return ScopePtr { t.get() };
         } else if constexpr (reference_as_ptr) {
-            return TypedScopePtr { &t };
+            return ScopePtr { &t };
         } else {
             return OwnedScopePtr { std::forward<T>(t) };
         }
@@ -168,7 +169,11 @@ requires(ValueTypePrimitive<std::decay_t<T>> || std::same_as<ValueType, std::dec
 template <typename T>
 void to_ValueType(ValueType &v, T &&t)
 {
-    to_ValueType_impl(v, convert_ValueType(std::forward<T>(t)));
+    if constexpr (has_function_customScopePtr_v<std::remove_pointer_t<T>>) {
+        to_ValueType_impl(v, convert_ValueType(resolveCustomScopePtr(std::forward<T>(t))));
+    } else {
+        to_ValueType_impl(v, convert_ValueType(std::forward<T>(t)));
+    }    
 }
 
 }

@@ -3,6 +3,7 @@
 #include "directx12pixelshaderloader.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "directx12shadercodegen.h"
 
@@ -10,7 +11,7 @@
 
 #include "directx12rendercontext.h"
 
-UNIQUECOMPONENT(Engine::Render::DirectX12PixelShaderLoader);
+RESOURCELOADER(Engine::Render::DirectX12PixelShaderLoader);
 
 namespace Engine {
 namespace Render {
@@ -131,9 +132,3 @@ namespace Render {
     }
 }
 }
-
-METATABLE_BEGIN(Engine::Render::DirectX12PixelShaderLoader)
-METATABLE_END(Engine::Render::DirectX12PixelShaderLoader)
-
-METATABLE_BEGIN_BASE(Engine::Render::DirectX12PixelShaderLoader::Resource, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Render::DirectX12PixelShaderLoader::Resource)

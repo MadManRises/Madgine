@@ -1,6 +1,7 @@
 #include "../fontloaderlib.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "fontloader.h"
 
@@ -43,14 +44,7 @@
 #    define DLL_IMPORT
 #endif
 
-UNIQUECOMPONENT(Engine::Render::FontLoader)
-
-METATABLE_BEGIN_BASE(Engine::Render::FontLoader::Resource, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Render::FontLoader::Resource)
-
-METATABLE_BEGIN(Engine::Render::FontLoader)
-MEMBER(mResources)
-METATABLE_END(Engine::Render::FontLoader)
+RESOURCELOADER(Engine::Render::FontLoader)
 
 namespace Engine {
 namespace Render {

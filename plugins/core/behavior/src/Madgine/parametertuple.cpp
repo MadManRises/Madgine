@@ -9,7 +9,7 @@ METATABLE_END(Engine::ParameterTuple)
 
 namespace Engine {
 
-TypedScopePtr ParameterTuple::customScopePtr()
+ScopePtr ParameterTuple::customScopePtr()
 {
     return mTuple->customScopePtr();
 }

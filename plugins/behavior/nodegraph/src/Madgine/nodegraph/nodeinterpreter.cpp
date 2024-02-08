@@ -147,31 +147,16 @@ namespace NodeGraph {
 
     void NodeInterpreterStateBase::start()
     {
-        auto callback = [this](bool success) {
-            if (success) {
-                mData.resize(mGraph->nodes().size());
+        if (!mGraph)
+            mGraph = mHandle;
+        mData.resize(mGraph->nodes().size());
 
-                for (size_t i = 0; i < mData.size(); ++i) {
-                    mGraph->node(i + 1)->setupInterpret(*this, mData[i]);
-                }
-
-                mDebugLocation.stepInto(parentDebugLocation());
-                interpretImpl(*this, 0);
-            } else {
-                set_error(BEHAVIOR_UNKNOWN_ERROR());
-            }
-        };
-
-        if (mGraph) {
-            callback(true);
-        } else {
-            assert(mHandle);
-            mHandle.info()->loadingTask().then([this, callback { std::move(callback) }](bool result) {
-                mGraph = mHandle;
-                callback(result);
-            },
-                NodeGraphLoader::getSingleton().loadingTaskQueue());
+        for (size_t i = 0; i < mData.size(); ++i) {
+            mGraph->node(i + 1)->setupInterpret(*this, mData[i]);
         }
+
+        mDebugLocation.stepInto(parentDebugLocation());
+        interpretImpl(*this, 0);
     }
 
     Debug::DebugLocation *NodeInterpreterStateBase::debugLocation()

@@ -14,6 +14,8 @@
 
 #include "Modules/threading/awaitables/awaitablesender.h"
 
+#include "Madgine/resources/sender.h"
+
 METATABLE_BEGIN_BASE(Engine::Audio::PortAudioApi, Engine::Audio::AudioApi)
 METATABLE_END(Engine::Audio::PortAudioApi)
 
@@ -22,18 +24,58 @@ UNIQUECOMPONENT(Engine::Audio::PortAudioApi)
 namespace Engine {
 namespace Audio {
 
-    struct PortAudioApi::PortAudioStream {
+    struct PlaybackState : BehaviorReceiver {
+        PlaybackState(AudioLoader::Handle buffer, PortAudioApi *api)
+            : mBuffer(std::move(buffer))
+            , mApi(api)
+        {
+        }
 
-        PortAudioStream(const AudioInfo &info)
+        void start();
+
+        AudioLoader::Handle mBuffer;
+        PortAudioApi *mApi;
+    };
+
+    template <typename Rec>
+    struct PlaybackStateImpl : VirtualBehaviorState<Rec, PlaybackState> {
+        using VirtualBehaviorState<Rec, PlaybackState>::VirtualBehaviorState;
+    };
+
+    struct PlaybackSender : Execution::base_sender {
+        using result_type = GenericResult;
+        template <template <typename...> typename Tuple>
+        using value_types = Tuple<>;
+
+        template <typename Rec>
+        friend auto tag_invoke(Execution::connect_t, PlaybackSender &&sender, Rec &&rec)
+        {
+            return PlaybackStateImpl<Rec> { std::forward<Rec>(rec), std::move(sender.mBuffer), sender.mApi };
+        }
+
+        AudioLoader::Handle mBuffer;
+        PortAudioApi *mApi;
+    };
+
+    struct PortAudioStream {
+
+        PortAudioStream(const AudioInfo &info, PaDeviceIndex device, const PaDeviceInfo *deviceInfo)
             : mChannels(info.mChannels)
             , mSampleRate(info.mSampleRate)
         {
-            PaError err = Pa_OpenDefaultStream(&mStream,
-                0,
-                info.mChannels,
-                paInt16,
-                info.mSampleRate,
+            PaStreamParameters outputParameters;
+            outputParameters.channelCount = info.mChannels;
+            outputParameters.sampleFormat = paInt16;
+            outputParameters.hostApiSpecificStreamInfo = nullptr;
+            outputParameters.suggestedLatency = deviceInfo->defaultLowOutputLatency;
+            outputParameters.device = device;
+
+            PaError err = Pa_OpenStream(&mStream,
+                nullptr,
+                &outputParameters,
+                /* info.mSampleRate*/ deviceInfo->defaultSampleRate,
                 paFramesPerBufferUnspecified,
+                paNoFlag,
                 sCallback,
                 this);
             if (err != paNoError)
@@ -95,7 +137,7 @@ namespace Audio {
 
             for (size_t i = 0; i < count; ++i) {
                 for (int i = 0; i < mChannels; ++i)
-                    *target++ = *source++;                
+                    *target++ = *source++;
             }
 
             mBuffer = source;
@@ -136,17 +178,60 @@ namespace Audio {
         int mSampleRate;
     };
 
+    void PlaybackState::start()
+    {
+        PortAudioStream &stream = mApi->fetchStream(mBuffer->mInfo);
+        stream.play(*this);
+    }
+
     PortAudioApi::PortAudioApi(Root::Root &root)
         : AudioApiImpl<PortAudioApi>(root)
     {
 
         root.taskQueue()->addSetupSteps(
-            []() {
+            [this]() {
                 PaError err = Pa_Initialize();
                 if (err != paNoError) {
                     LOG_ERROR("PortAudio error: " << Pa_GetErrorText(err));
                     return false;
                 }
+
+                PaHostApiIndex apiCount = Pa_GetHostApiCount();
+                if (apiCount < 0) {
+                    LOG_ERROR("PortAudio API count error: " << apiCount);
+                    PaError err = Pa_Terminate();
+                    if (err != paNoError)
+                        LOG_ERROR("PortAudio error: " << Pa_GetErrorText(err));
+                    return false;
+                }
+
+                PaDeviceIndex bestDeviceNum = -1;
+                float bestDeviceLatency = 100.0f;
+
+                for (PaHostApiIndex i = 0; i < apiCount; ++i) {
+                    const PaHostApiInfo *apiInfo = Pa_GetHostApiInfo(i);
+                    if (apiInfo->defaultOutputDevice >= 0) {
+                        const PaDeviceInfo *info = Pa_GetDeviceInfo(apiInfo->defaultOutputDevice);
+                        if (info->defaultSampleRate == 48000) {
+                            if (info->defaultLowOutputLatency < bestDeviceLatency) {
+                                bestDeviceLatency = info->defaultLowOutputLatency;
+                                bestDeviceNum = apiInfo->defaultOutputDevice;
+                            }
+                        }
+                    }
+                }
+
+                if (bestDeviceNum < 0) {
+                    LOG_ERROR("PortAudio failed to find device!");
+                    PaError err = Pa_Terminate();
+                    if (err != paNoError)
+                        LOG_ERROR("PortAudio error: " << Pa_GetErrorText(err));
+                    return false;
+                }
+
+                mDevice = bestDeviceNum;
+                mDeviceInfo = Pa_GetDeviceInfo(mDevice);
+
                 return true;
             },
             [this](bool wasInitialized) {
@@ -173,18 +258,17 @@ namespace Audio {
         return "PortAudio";
     }
 
-    void PortAudioApi::playSoundImpl(PlaybackState &state)
+    Behavior PortAudioApi::playSound(AudioLoader::Handle buffer)
     {
-        PortAudioStream &stream = fetchStream(state.mBuffer->mInfo);
-        stream.play(state);
+        return PlaybackSender { {}, buffer, this } | Resources::with_handle(AudioLoader::Handle { buffer });
     }
 
-    PortAudioApi::PortAudioStream &PortAudioApi::fetchStream(const AudioInfo &info)
+    PortAudioStream &PortAudioApi::fetchStream(const AudioInfo &info)
     {
         std::unique_lock lock { mMutex };
         auto it = std::ranges::find_if(mStreamPool, [&](const PortAudioStream &stream) { return stream.isCompatible(info); });
         if (it == mStreamPool.end()) {
-            return mBusyStreams.emplace_back(info);
+            return mBusyStreams.emplace_back(info, mDevice, mDeviceInfo);
         } else {
             mBusyStreams.splice(mBusyStreams.end(), mStreamPool, it);
             return *it;
@@ -197,6 +281,8 @@ namespace Audio {
         auto it = std::ranges::find(mBusyStreams, &stream, [](auto &v) { return &v; });
         mStreamPool.splice(mStreamPool.end(), mBusyStreams, it);
     }
+
+
 
 }
 }

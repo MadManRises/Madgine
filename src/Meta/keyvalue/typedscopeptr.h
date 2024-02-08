@@ -1,58 +1,38 @@
 #pragma once
 
 #include "metatable.h"
+#include "valuetype_desc.h"
 
 namespace Engine {
 
-DERIVE_FUNCTION(customScopePtr)
+struct META_EXPORT ScopePtr {
 
-struct META_EXPORT TypedScopePtr {
+    constexpr ScopePtr() = default;
 
-    constexpr TypedScopePtr() = default;
-    
     template <typename T>
-    requires has_function_customScopePtr_v<T>
-    TypedScopePtr(T *t)
-        : TypedScopePtr(t ? t->customScopePtr() : TypedScopePtr {nullptr, table<decayed_t<T>>})
+        ScopePtr(T *t)
+        : ScopePtr(resolveCustomScopePtr(t))
     {
     }
 
-    template <typename T>
-    requires (!has_function_customScopePtr_v<T>)
-    TypedScopePtr(T *t)
-        : mScope(t)
-        , mType(table<decayed_t<T>>)
-    {
-    }
-
-    constexpr TypedScopePtr(const TypedScopePtr &other)
+    constexpr ScopePtr(const ScopePtr &other)
         : mScope(other.mScope)
         , mType(other.mType)
     {
     }
 
-    TypedScopePtr(void *scope, const MetaTable *type)
+    ScopePtr(void *scope, const MetaTable *type)
         : mScope(scope)
         , mType(type)
     {
     }
 
-    bool operator==(const TypedScopePtr &other) const
+    bool operator==(const ScopePtr &other) const
     {
         return mScope == other.mScope && mType == other.mType;
     }
 
-    auto operator<=>(const TypedScopePtr &other) const = default;
-
-    template <typename T>
-    T *safe_cast() const
-    {
-        size_t offset = 0;
-        if (!mType->isDerivedFrom<std::remove_const_t<T>>(&offset))
-            std::terminate();
-
-        return static_cast<T *>(reinterpret_cast<void*>(reinterpret_cast<char*>(mScope) + offset));
-    }
+    auto operator<=>(const ScopePtr &other) const = default;
 
     explicit operator bool() const
     {
@@ -67,10 +47,22 @@ struct META_EXPORT TypedScopePtr {
 
     std::string name() const;
 
+    void moveAssign(ScopePtr other) const;
+
     void call(ValueType &retVal, const ArgumentList &args) const;
 
     void *mScope = nullptr;
-    const MetaTable * mType = nullptr;
+    const MetaTable *mType = nullptr;
 };
+
+template <typename T>
+T *scope_cast(const ScopePtr &ptr)
+{
+    size_t offset = 0;
+    if (!ptr.mType->isDerivedFrom<std::remove_const_t<T>>(&offset))
+        std::terminate();
+
+    return static_cast<T *>(reinterpret_cast<void *>(reinterpret_cast<char *>(ptr.mScope) + offset));
+}
 
 }

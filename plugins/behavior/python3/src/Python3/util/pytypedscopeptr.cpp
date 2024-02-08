@@ -31,7 +31,7 @@ namespace Scripting {
             return toPyObject(v);
         }
 
-        static PyObject* TypedScopePtr_iter(const TypedScopePtr& p) {
+        static PyObject* TypedScopePtr_iter(const ScopePtr& p) {
             if (!p) {
                 PyErr_SetString(PyExc_TypeError, "Nullptr is not iterable!");
                 return NULL;
@@ -40,8 +40,8 @@ namespace Scripting {
             if (proxyIt != p.end()) {
                 ValueType proxy;
                 proxyIt->value(proxy);
-                if (proxy.is<TypedScopePtr>()) {
-                    return TypedScopePtr_iter(proxy.as<TypedScopePtr>());
+                if (proxy.is<ScopePtr>()) {
+                    return TypedScopePtr_iter(proxy.as<ScopePtr>());
                 }
             }
             return toPyObject(p.begin());
@@ -62,7 +62,7 @@ namespace Scripting {
         PyTypeObject PyTypedScopePtrType = {
             .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
                 .tp_name
-            = "Engine.TypedScopePtr",
+            = "Engine.ScopePtr",
             .tp_basicsize = sizeof(PyTypedScopePtr),
             .tp_itemsize = 0,
             .tp_dealloc = &PyDealloc<PyTypedScopePtr, &PyTypedScopePtr::mPtr>,
@@ -70,7 +70,7 @@ namespace Scripting {
             .tp_str = (reprfunc)PyTypedScopePtr_str,
             .tp_getattro = (getattrofunc)PyTypedScopePtr_get,            
             .tp_flags = Py_TPFLAGS_DEFAULT,         
-            .tp_doc = "Python implementation of TypedScopePtr",                        
+            .tp_doc = "Python implementation of ScopePtr",                        
             .tp_iter = (getiterfunc)PyTypedScopePtr_iter,
             .tp_new = PyType_GenericNew,
         };

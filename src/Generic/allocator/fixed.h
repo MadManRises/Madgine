@@ -35,7 +35,16 @@ struct FixedAllocator {
     {
     }
 
-    Block& getBlock() {
+    void deallocateAll()
+    {
+        if (mBlock.mAddress) {
+            mParent.deallocate(mBlock);
+            mBlock = {};
+        }
+    }
+
+    Block &getBlock()
+    {
         return mBlock;
     }
 

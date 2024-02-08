@@ -37,7 +37,7 @@ namespace Scripting {
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(float f);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(std::chrono::nanoseconds d);
 
-        MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const TypedScopePtr &scope);
+        MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const ScopePtr &scope);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const OwnedScopePtr &scope);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const ScopeIterator &it);
         MADGINE_PYTHON3_EXPORT PyObject *toPyObject(const ApiFunction &function);

@@ -16,8 +16,8 @@ typedef int ImGuiTreeNodeFlags;
 typedef int ImGuiInputTextFlags;
 
 struct IMGUI_API ValueTypeDrawer {
-    static bool draw(Engine::TypedScopePtr &scope);
-    static bool draw(const Engine::TypedScopePtr &scope);
+    static bool draw(Engine::ScopePtr &scope);
+    static bool draw(const Engine::ScopePtr &scope);
     static bool draw(bool &b);
     static bool draw(const bool &b);
     static bool draw(Engine::CoWString &s);

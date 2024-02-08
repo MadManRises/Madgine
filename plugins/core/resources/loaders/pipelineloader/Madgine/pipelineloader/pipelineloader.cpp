@@ -3,6 +3,7 @@
 #include "pipelineloader.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Madgine/codegen/codegen_shader.h"
 
@@ -10,16 +11,10 @@
 
 #include "Modules/threading/taskqueue.h"
 
-METATABLE_BEGIN(Engine::Render::PipelineLoader)
-METATABLE_END(Engine::Render::PipelineLoader)
-
-METATABLE_BEGIN_BASE(Engine::Render::PipelineLoader::Resource, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Render::PipelineLoader::Resource)
-
 METATABLE_BEGIN(Engine::Render::PipelineInstance)
 METATABLE_END(Engine::Render::PipelineInstance)
 
-VIRTUALUNIQUECOMPONENTBASE(Engine::Render::PipelineLoader)
+VIRTUALRESOURCELOADERBASE(Engine::Render::PipelineLoader)
 
 namespace Engine {
 namespace Render {

@@ -12,7 +12,7 @@ namespace Engine {
 
 struct ParameterTupleBase {
     virtual std::unique_ptr<ParameterTupleBase> clone() = 0;
-    virtual TypedScopePtr customScopePtr() = 0;
+    virtual ScopePtr customScopePtr() = 0;
 
     virtual Serialize::StreamResult read(Serialize::FormattedSerializeStream &in) = 0;
     virtual void write(Serialize::FormattedSerializeStream &out) = 0;
@@ -33,7 +33,7 @@ struct ParameterTupleInstance : ParameterTupleBase {
         return std::make_unique<ParameterTupleInstance<Ty...>>(mTuple);
     }
 
-    virtual TypedScopePtr customScopePtr() override
+    virtual ScopePtr customScopePtr() override
     {
         return { this, &sMetaTable };
     }
@@ -60,14 +60,14 @@ struct ParameterTupleInstance : ParameterTupleBase {
     static const MetaTable *sMetaTablePtr;
 
     template <typename T>
-    static void sGetter(ValueType &retVal, const TypedScopePtr &scope)
+    static void sGetter(ValueType &retVal, const ScopePtr &scope)
     {
         assert(scope.mType == &sMetaTable);
         to_ValueType(retVal, std::get<T>(static_cast<ParameterTupleInstance *>(scope.mScope)->mTuple));
     }
 
     template <typename T>
-    static void sSetter(const TypedScopePtr &scope, const ValueType &val)
+    static void sSetter(const ScopePtr &scope, const ValueType &val)
     {
         assert(scope.mType == &sMetaTable);
         std::get<T>(static_cast<ParameterTupleInstance *>(scope.mScope)->mTuple) = ValueType_as<T>(val);
@@ -108,7 +108,7 @@ struct MADGINE_BEHAVIOR_EXPORT ParameterTuple {
         return *this;
     }
 
-    TypedScopePtr customScopePtr();
+    ScopePtr customScopePtr();
 
     template <typename... Ty>
     bool get(std::tuple<Ty...> &out) const

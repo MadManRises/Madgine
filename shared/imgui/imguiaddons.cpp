@@ -39,13 +39,13 @@ static Engine::Threading::WorkgroupLocal<FilesystemPickerOptions> sFilesystemPic
 
 static ValueTypePayload sPayload;
 
-bool ValueTypeDrawer::draw(Engine::TypedScopePtr &scope)
+bool ValueTypeDrawer::draw(Engine::ScopePtr &scope)
 {
     Text("<scope>");
     return false;
 }
 
-bool ValueTypeDrawer::draw(const Engine::TypedScopePtr &scope)
+bool ValueTypeDrawer::draw(const Engine::ScopePtr &scope)
 {
     Text("<scope>");
     return false;

@@ -7,18 +7,13 @@
 #include "util/directx12pipelineinstance.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Madgine/codegen/codegen_shader.h"
 
 #include "directx12rendercontext.h"
 
-UNIQUECOMPONENT(Engine::Render::DirectX12PipelineLoader);
-
-METATABLE_BEGIN_BASE(Engine::Render::DirectX12PipelineLoader, Engine::Render::PipelineLoader)
-METATABLE_END(Engine::Render::DirectX12PipelineLoader)
-
-METATABLE_BEGIN_BASE(Engine::Render::DirectX12PipelineLoader::Resource, Engine::Render::PipelineLoader::Resource)
-METATABLE_END(Engine::Render::DirectX12PipelineLoader::Resource)
+VIRTUALRESOURCELOADERIMPL(Engine::Render::DirectX12PipelineLoader, Engine::Render::PipelineLoader);
 
 namespace Engine {
 namespace Render {

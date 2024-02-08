@@ -20,6 +20,8 @@
 
 #include "Generic/container/emplace.h"
 
+#include "Meta/keyvalue/ownedscopeptr.h"
+
 namespace Engine {
 namespace Resources {
 
@@ -56,7 +58,7 @@ namespace Resources {
 
             Handle loadData()
             {
-                return T::load(this);
+                return T::load(static_cast<T::Resource *>(this));
             }
 
             /* Threading::TaskFuture<void> forceUnload()
@@ -64,10 +66,10 @@ namespace Resources {
                 return T::unload(this);
             }*/
 
-            Data *dataPtr()
+            /* Data *dataPtr()
             {
                 return T::getDataPtr(loadData());
-            }
+            }*/
 
             typename Storage::template container_type<typename traits::handle> mData;
         };
@@ -261,7 +263,6 @@ namespace Resources {
 
                 if ((typename traits::handle) * resource->mData == handle.mData)
                     *resource->mData = {};
-
             }
         }
 
@@ -357,9 +358,9 @@ namespace Resources {
             return result;
         }
 
-        virtual std::vector<std::pair<std::string_view, TypedScopePtr>> typedResources() override
+        virtual std::vector<std::pair<std::string_view, ScopePtr>> typedResources() override
         {
-            std::vector<std::pair<std::string_view, TypedScopePtr>> result;
+            std::vector<std::pair<std::string_view, ScopePtr>> result;
             std::ranges::transform(mResources, std::back_inserter(result), [](std::pair<const std::string, Resource> &p) {
                 return std::make_pair(std::string_view { p.first }, &p.second);
             });
@@ -386,3 +387,17 @@ namespace Resources {
 
 }
 }
+
+#define RESOURCELOADER(Loader)                                                    \
+    UNIQUECOMPONENT(Loader)                                                       \
+                                                                                  \
+    METATABLE_BEGIN_EX(1, Loader)                                                 \
+    MEMBER_EX(2, mResources)                                                      \
+    METATABLE_END_EX(4, Loader)                                                   \
+                                                                                  \
+    METATABLE_BEGIN_BASE_EX(5, Loader::Resource, Engine::Resources::ResourceBase) \
+    METATABLE_END_EX(6, Loader::Resource)                                         \
+                                                                                  \
+    SERIALIZETABLE_BEGIN_EX(9, Loader::Handle)                                    \
+    ENCAPSULATED_FIELD_EX(10, Name, name, loadSerialize)                          \
+    SERIALIZETABLE_END_EX(11, Loader::Handle)

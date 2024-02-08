@@ -11,7 +11,7 @@ namespace Scene {
 
             virtual EntityComponentBase *get(const EntityComponentHandle<EntityComponentBase> &index) = 0;
             virtual const EntityComponentBase *get(const EntityComponentHandle<EntityComponentBase> &index) const = 0;
-            virtual TypedScopePtr getTyped(const EntityComponentHandle<EntityComponentBase> &index) = 0;
+            virtual ScopePtr getTyped(const EntityComponentHandle<EntityComponentBase> &index) = 0;
             virtual Serialize::SerializableDataPtr getSerialized(const EntityComponentHandle<EntityComponentBase> &index) = 0;
             virtual Serialize::SerializableDataConstPtr getSerialized(const EntityComponentHandle<EntityComponentBase> &index) const = 0;
             virtual const Serialize::SerializeTable *serializeTable() const = 0;

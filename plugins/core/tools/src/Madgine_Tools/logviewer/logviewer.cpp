@@ -86,24 +86,22 @@ namespace Tools {
             ImGui::SetWindowDockingDir(mRoot.dockSpaceId(), ImGuiDir_Down, 0.3f, true, ImGuiCond_FirstUseEver);
 
             int mTotalMsgCount = 0;
-            bool filterChanged = false;
 
             for (Log::MessageType type : Log::MessageType::values()) {
                 ImGui::PushStyleColor(ImGuiCol_Text, sColors[type]);
-                filterChanged |= ImGui::Checkbox(sIcons[type], &mMsgFilters[type]);
+                mIsDirty |= ImGui::Checkbox(sIcons[type], &mMsgFilters[type]);
                 ImGui::PopStyleColor();
                 ImGui::SameLine();
 
                 if (mMsgFilters[type])
                     mTotalMsgCount += mMsgCounts[type];
             }
-            filterChanged |= ImGui::InputText("Filter", &mMessageWordFilter);
+            mIsDirty |= ImGui::InputText("Filter", &mMessageWordFilter);
 
             std::lock_guard guard { mMutex };
 
-            static bool first = true;
-            if (filterChanged || first) {
-                first = false;
+            if (mIsDirty) {
+                mIsDirty = false;
                 mFilteredMsgCount = 0;
                 mFilteredOffsetAcc = 0.0f;
                 mLookup.clear();
@@ -188,9 +186,11 @@ namespace Tools {
     void LogViewer::renderStatus()
     {
         for (Log::MessageType type : Log::MessageType::values()) {
-            ImGui::PushStyleColor(ImGuiCol_Text, sColors[type]);
-            ImGui::Text("%s %d", sIcons[type], static_cast<int>(mMsgCounts[type]));
-            ImGui::PopStyleColor();
+            if (mMsgCounts[type] > 0) {
+                ImGui::PushStyleColor(ImGuiCol_Text, sColors[type]);
+                ImGui::Text("%s %d", sIcons[type], static_cast<int>(mMsgCounts[type]));
+                ImGui::PopStyleColor();
+            }
         }
         ImGui::Separator();
     }
@@ -221,8 +221,10 @@ namespace Tools {
             mLookup.push_back({ index, mFilteredOffsetAcc });
         }
         ++mFilteredMsgCount;
-        if (ImGui::GetCurrentContext() && ImGui::GetCurrentContext()->Font)
+        if (Threading::WorkGroup::isInitialized() && ImGui::GetCurrentContext() && ImGui::GetCurrentContext()->Font)
             mFilteredOffsetAcc += calculateTextHeight(text);
+        else
+            mIsDirty = true;
     }
 
     float LogViewer::calculateTextHeight(std::string_view text)

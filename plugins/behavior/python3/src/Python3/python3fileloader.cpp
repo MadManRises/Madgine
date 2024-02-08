@@ -32,8 +32,12 @@ FUNCTION(exec_module, module)
 METATABLE_END(Engine::Scripting::Python3::Python3FileLoader)
 
 METATABLE_BEGIN_BASE(Engine::Scripting::Python3::Python3FileLoader::Resource, Engine::Resources::ResourceBase)
-READONLY_PROPERTY(Data, dataPtr)
+//READONLY_PROPERTY(Data, dataPtr)
 METATABLE_END(Engine::Scripting::Python3::Python3FileLoader::Resource)
+
+METATABLE_BEGIN(Engine::Scripting::Python3::Python3FileLoader::Handle)
+//READONLY_PROPERTY(Data, dataPtr)
+METATABLE_END(Engine::Scripting::Python3::Python3FileLoader::Handle)
 
 DEFINE_BEHAVIOR_FACTORY(Python3, Engine::Scripting::Python3::Python3BehaviorFactory)
 
@@ -48,7 +52,7 @@ namespace Scripting {
 
         void Python3FileLoader::setup()
         {
-            auto result = PyList_Append(PyModulePtr { "sys" }.get("meta_path"), toPyObject(TypedScopePtr { this }));
+            auto result = PyList_Append(PyModulePtr { "sys" }.get("meta_path"), toPyObject(ScopePtr { this }));
             assert(result == 0);
         }
 
@@ -126,7 +130,7 @@ namespace Scripting {
             if (!res)
                 return;
             Python3InnerLock lock;
-            PyObjectPtr spec = PyModulePtr { "importlib.machinery" }.get("ModuleSpec").call({ { { "loader_state", toPyObject(TypedScopePtr { res }) } } }, "sO", res->name().data(), toPyObject(TypedScopePtr { this }));
+            PyObjectPtr spec = PyModulePtr { "importlib.machinery" }.get("ModuleSpec").call({ { { "loader_state", toPyObject(ScopePtr { res }) } } }, "sO", res->name().data(), toPyObject(ScopePtr { this }));
             result = fromPyObject(spec);
         }
 
@@ -134,7 +138,7 @@ namespace Scripting {
         {
             Python3InnerLock lock;
             ValueType resourcePtr = fromPyObject(PyObjectPtr { toPyObject(spec) }.get("loader_state"));
-            Resource *res = resourcePtr.as<TypedScopePtr>().safe_cast<Resource>();
+            Resource *res = scope_cast<Resource>(resourcePtr.as<ScopePtr>());
             Handle handle = create(res, Filesystem::FileEventType::FILE_CREATED, this);
             handle.info()->setPersistent(true);
             PyModulePtr &module = *getDataPtr(handle, this, false);
@@ -149,7 +153,7 @@ namespace Scripting {
 
             PyObjectPtr moduleObject { toPyObject(module) };
             ValueType resourcePtr = fromPyObject(moduleObject.get("__spec__").get("loader_state"));
-            Resource *res = resourcePtr.as<TypedScopePtr>().safe_cast<Resource>();
+            Resource *res = scope_cast<Resource>(resourcePtr.as<ScopePtr>());
 
             PyModulePtr importlib { "importlib.util" };
 

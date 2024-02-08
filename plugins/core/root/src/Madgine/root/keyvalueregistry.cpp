@@ -8,39 +8,39 @@
 
 namespace Engine {
 
-std::map<std::string_view, TypedScopePtr> sGlobalRegistry;
-Threading::WorkgroupLocal<std::map<std::string_view, TypedScopePtr>> sWorkGroupLocalRegistry;
+std::map<std::string_view, ScopePtr> sGlobalRegistry;
+Threading::WorkgroupLocal<std::map<std::string_view, ScopePtr>> sWorkGroupLocalRegistry;
 
-void KeyValueRegistry::registerGlobal(const char *name, TypedScopePtr ptr)
+void KeyValueRegistry::registerGlobal(const char *name, ScopePtr ptr)
 {
     auto pib = sGlobalRegistry.try_emplace(name, ptr);
     assert(pib.second);
 }
 
-void KeyValueRegistry::registerWorkGroupLocal(const char *name, TypedScopePtr ptr)
+void KeyValueRegistry::registerWorkGroupLocal(const char *name, ScopePtr ptr)
 {
     auto pib = sWorkGroupLocalRegistry->try_emplace(name, ptr);
     assert(pib.second);
 }
 
-void KeyValueRegistry::unregisterGlobal(TypedScopePtr ptr)
+void KeyValueRegistry::unregisterGlobal(ScopePtr ptr)
 {
     auto it = std::ranges::find(sGlobalRegistry, ptr, projectionPairSecond);
     sGlobalRegistry.erase(it);
 }
 
-void KeyValueRegistry::unregisterWorkGroupLocal(TypedScopePtr ptr)
+void KeyValueRegistry::unregisterWorkGroupLocal(ScopePtr ptr)
 {
     auto it = std::ranges::find(*sWorkGroupLocalRegistry, ptr, projectionPairSecond);
     sWorkGroupLocalRegistry->erase(it);
 }
 
-const std::map<std::string_view, TypedScopePtr> &KeyValueRegistry::globals()
+const std::map<std::string_view, ScopePtr> &KeyValueRegistry::globals()
 {
     return sGlobalRegistry;
 }
 
-const std::map<std::string_view, TypedScopePtr> &KeyValueRegistry::workgroupLocals()
+const std::map<std::string_view, ScopePtr> &KeyValueRegistry::workgroupLocals()
 {
     return sWorkGroupLocalRegistry;
 }

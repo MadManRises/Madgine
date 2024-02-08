@@ -4,6 +4,9 @@
 
 #include "Modules/threading/taskqueue.h"
 
+typedef int PaDeviceIndex;
+struct PaDeviceInfo;
+
 namespace Engine {
 namespace Audio {
 
@@ -14,10 +17,11 @@ namespace Audio {
 
         virtual std::string_view key() const override;
 
-        virtual void playSoundImpl(PlaybackState &state) override;
+        virtual Behavior playSound(AudioLoader::Handle buffer) override;
 
     protected:
-        struct PortAudioStream;
+        friend struct PlaybackState;
+        friend struct PortAudioStream;
         PortAudioStream &fetchStream(const AudioInfo &info);
         void reuseStream(PortAudioStream &stream);
 
@@ -25,6 +29,9 @@ namespace Audio {
         std::mutex mMutex;
         std::list<PortAudioStream> mStreamPool;
         std::list<PortAudioStream> mBusyStreams;
+
+        PaDeviceIndex mDevice;
+        const PaDeviceInfo *mDeviceInfo;
     };
 
 }

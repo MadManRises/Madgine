@@ -53,7 +53,7 @@ std::string ValueType::toShortString() const
         [](std::monostate) {
             return "NULL"s;
         },
-        [](const TypedScopePtr &scope) {
+        [](const ScopePtr &scope) {
             return scope.name();
         },
         [](const OwnedScopePtr &scope) {
@@ -155,7 +155,7 @@ std::string ValueType::getTypeString() const
 bool ValueType::isReference() const
 {
     return visit(overloaded {
-        [](const TypedScopePtr &) {
+        [](const ScopePtr &) {
             return true;
         },
         [](const KeyValueVirtualSequenceRange &range) {
@@ -174,7 +174,7 @@ ValueTypeDesc ValueType::type() const
     ValueTypeIndex i = index();
     switch (i) {
     case ValueTypeEnum::ScopeValue: {
-        const MetaTable *table = as<TypedScopePtr>().mType;
+        const MetaTable *table = as<ScopePtr>().mType;
         return { i, table ? table->mSelf : nullptr };
     }
     default:
@@ -208,7 +208,7 @@ void ValueType::setType(ValueTypeDesc type)
         setTypeHelper(mUnion, type, std::make_index_sequence<std::variant_size_v<Union>>());
         switch (type.mType) {
         case ValueTypeEnum::ScopeValue:
-            std::get<TypedScopePtr>(mUnion).mType = *type.mSecondary.mMetaTable;
+            std::get<ScopePtr>(mUnion).mType = *type.mSecondary.mMetaTable;
             break;
         case ValueTypeEnum::ApiFunctionValue:
             std::get<ApiFunction>(mUnion).mTable = *type.mSecondary.mFunctionTable;
@@ -231,7 +231,10 @@ void ValueType::call(ValueType &retVal, const ArgumentList &args) const
                           [&](const KeyValueFunction &function) {
                               return function(retVal, args);
                           },
-                          [&](const TypedScopePtr &scope) {
+                          [&](const BoundApiFunction &function) {
+                              return function(retVal, args);
+                          },
+                          [&](const ScopePtr &scope) {
                               return scope.call(retVal, args);
                           },
                           [&](const OwnedScopePtr &scope) {

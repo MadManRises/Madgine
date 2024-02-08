@@ -3,6 +3,7 @@
 #include "directx12vertexshaderloader.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "directx12shadercodegen.h"
 
@@ -10,13 +11,7 @@
 
 #include "directx12rendercontext.h"
 
-UNIQUECOMPONENT(Engine::Render::DirectX12VertexShaderLoader);
-
-METATABLE_BEGIN(Engine::Render::DirectX12VertexShaderLoader)
-METATABLE_END(Engine::Render::DirectX12VertexShaderLoader)
-
-METATABLE_BEGIN_BASE(Engine::Render::DirectX12VertexShaderLoader::Resource, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Render::DirectX12VertexShaderLoader::Resource)
+RESOURCELOADER(Engine::Render::DirectX12VertexShaderLoader);
 
 namespace Engine {
 namespace Render {

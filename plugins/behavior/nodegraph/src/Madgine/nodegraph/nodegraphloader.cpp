@@ -3,6 +3,7 @@
 #include "nodegraphloader.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Meta/serialize/streams/streamresult.h"
 
@@ -10,24 +11,16 @@
 
 #include "Madgine/parametertuple.h"
 
-UNIQUECOMPONENT(Engine::NodeGraph::NodeGraphLoader)
-
-METATABLE_BEGIN(Engine::NodeGraph::NodeGraphLoader)
-MEMBER(mResources)
-METATABLE_END(Engine::NodeGraph::NodeGraphLoader)
-
-METATABLE_BEGIN_BASE(Engine::NodeGraph::NodeGraphLoader::Resource, Engine::Resources::ResourceBase)
-READONLY_PROPERTY(Data, dataPtr)
-METATABLE_END(Engine::NodeGraph::NodeGraphLoader::Resource)
+RESOURCELOADER(Engine::NodeGraph::NodeGraphLoader)
 
 DEFINE_BEHAVIOR_FACTORY(NodeGraph, Engine::NodeGraph::NodeGraphBehaviorFactory)
 
 namespace Engine {
 namespace NodeGraph {
 
-    NodeInterpreterSender NodeGraphLoader::Handle::interpret()
+    Resources::with_handle_t::sender<NodeInterpreterSender, NodeGraphLoader::Handle> NodeGraphLoader::Handle::interpret()
     {
-        return { *this };
+        return NodeInterpreterSender { *this } | Resources::with_handle(Handle { *this });
     }
 
     NodeGraphLoader::NodeGraphLoader()

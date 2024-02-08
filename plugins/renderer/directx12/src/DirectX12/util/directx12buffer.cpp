@@ -44,7 +44,7 @@ namespace Render {
         view.SizeInBytes = mBlock.mSize;
         view.StrideInBytes = stride;
         commandList->IASetVertexBuffers(index, 1, &view);
-        DX12_LOG("Bind Vertex Buffer -> " << mAddress);
+        DX12_LOG("Bind Vertex Buffer -> " << gpuAddress());
     }
 
     void DirectX12Buffer::bindIndex(ID3D12GraphicsCommandList *commandList) const
@@ -54,7 +54,7 @@ namespace Render {
         view.SizeInBytes = mBlock.mSize;
         view.Format = DXGI_FORMAT_R32_UINT;
         commandList->IASetIndexBuffer(&view);
-        DX12_LOG("Bind Index Buffer -> " << mAddress);
+        DX12_LOG("Bind Index Buffer -> " << gpuAddress());
     }
 
     void DirectX12Buffer::reset()

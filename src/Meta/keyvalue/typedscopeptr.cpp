@@ -10,32 +10,32 @@
 
 namespace Engine {
 
-ScopeField TypedScopePtr::operator[](std::string_view key) const
+ScopeField ScopePtr::operator[](std::string_view key) const
 {
     return *find(key);
 }
 
-/*bool TypedScopePtr::isEditable(const std::string &key) const
+/*bool ScopePtr::isEditable(const std::string &key) const
 {
     return (*find(key)).isEditable();
 }*/
 
-ScopeIterator TypedScopePtr::find(std::string_view key) const
+ScopeIterator ScopePtr::find(std::string_view key) const
 {
     return mType->find(key, *this);
 }
 
-ScopeIterator TypedScopePtr::begin() const
+ScopeIterator ScopePtr::begin() const
 {
     return { *this, mType ? mType->mMembers : nullptr };
 }
 
-ScopeIterator TypedScopePtr::end() const
+ScopeIterator ScopePtr::end() const
 {
     return { *this, nullptr };
 }
 
-std::string TypedScopePtr::name() const
+std::string ScopePtr::name() const
 {
     if (mScope)
         return mType->name(*this);
@@ -43,7 +43,12 @@ std::string TypedScopePtr::name() const
         return "<NULL>";
 }
 
-void TypedScopePtr::call(ValueType &retVal, const ArgumentList &args) const
+void ScopePtr::moveAssign(ScopePtr other) const
+{
+    mType->moveAssign(*this, other);
+}
+
+void ScopePtr::call(ValueType &retVal, const ArgumentList &args) const
 {
     return mType->call(*this, retVal, args);
 }

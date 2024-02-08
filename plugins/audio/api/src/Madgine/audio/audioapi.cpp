@@ -8,6 +8,8 @@
 
 #include "Generic/execution/execution.h"
 
+#include "Madgine/nativebehaviorcollector.h"
+
 METATABLE_BEGIN(Engine::Audio::AudioApi)
 METATABLE_END(Engine::Audio::AudioApi)
 
@@ -21,32 +23,12 @@ namespace Audio {
     {
     }
 
-    void AudioApi::playSound(std::string_view name)
+    Behavior AudioApi::playSound(std::string_view name)
     {
-        playSound(AudioLoader::load(name));
-    }
-
-    void AudioApi::playSound(AudioLoader::Handle buffer)
-    {
-        Execution::detach(playSoundSender(std::move(buffer)));
-    }
-
-    AudioApi::PlaybackState::PlaybackState(AudioApi *api, AudioLoader::Handle buffer)
-        : mApi(api)
-        , mBuffer(std::move(buffer))
-    {
-    }
-
-    void AudioApi::PlaybackState::start()
-    {
-        mBuffer.info()->loadingTask().then([this](bool success) {
-            if (success)
-                mApi->playSoundImpl(*this);
-            else
-                set_error(AudioResult::UNKNOWN_ERROR);
-        },
-            Root::Root::getSingleton().taskQueue());
+        return playSound(AudioLoader::load(name));
     }
 
 }
 }
+
+NATIVE_BEHAVIOR(play_sound, Engine::Audio::play_sound, Engine::InputParameter<Engine::Audio::AudioLoader::Handle>)

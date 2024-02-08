@@ -44,6 +44,7 @@ namespace Tools {
             Render::FontLoader::Handle handle = font->loadData();
             handle.info()->setPersistent(true);
             ImGui::Image((void *)handle->mTexture->handle(), handle->mTexture->size());
+            return false;
         });
 
         co_return co_await ToolBase::init();

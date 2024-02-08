@@ -5,16 +5,11 @@
 #include "vulkanmeshdata.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "vulkanrendercontext.h"
 
-UNIQUECOMPONENT(Engine::Render::VulkanMeshLoader);
-
-METATABLE_BEGIN_BASE(Engine::Render::VulkanMeshLoader, Engine::Render::GPUMeshLoader)
-METATABLE_END(Engine::Render::VulkanMeshLoader)
-
-METATABLE_BEGIN_BASE(Engine::Render::VulkanMeshLoader::Resource, Engine::Render::GPUMeshLoader::Resource)
-METATABLE_END(Engine::Render::VulkanMeshLoader::Resource)
+VIRTUALRESOURCELOADERIMPL(Engine::Render::VulkanMeshLoader, Engine::Render::GPUMeshLoader);
 
 namespace Engine {
 namespace Render {

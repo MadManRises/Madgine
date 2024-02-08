@@ -3,19 +3,14 @@
 #include "audioloader.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "oggdecode.h"
 
 #include "Generic/stream.h"
 
-UNIQUECOMPONENT(Engine::Audio::AudioLoader)
+RESOURCELOADER(Engine::Audio::AudioLoader)
 
-METATABLE_BEGIN(Engine::Audio::AudioLoader)
-MEMBER(mResources)
-METATABLE_END(Engine::Audio::AudioLoader)
-
-METATABLE_BEGIN_BASE(Engine::Audio::AudioLoader::Resource, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Audio::AudioLoader::Resource)
 
 namespace Engine {
 namespace Audio {

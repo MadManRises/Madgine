@@ -144,11 +144,6 @@ namespace Resources {
             return Loader::unload(this);
         }
 
-        typename Loader::Data *dataPtr()
-        {
-            return Loader::getDataPtr(loadData());
-        }
-
         typename Loader::Ctor mCtor;
     };
 

@@ -5,6 +5,7 @@
 #include "util/openglshader.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "openglshadercodegen.h"
 
@@ -12,13 +13,17 @@
 
 #include "openglrendercontext.h"
 
-UNIQUECOMPONENT(Engine::Render::OpenGLShaderLoader);
+UNIQUECOMPONENT(Engine::Render::OpenGLShaderLoader)
 
 METATABLE_BEGIN(Engine::Render::OpenGLShaderLoader)
+MEMBER(mResources)
 METATABLE_END(Engine::Render::OpenGLShaderLoader)
 
 METATABLE_BEGIN_BASE(Engine::Render::OpenGLShaderLoader::Resource, Engine::Resources::ResourceBase)
 METATABLE_END(Engine::Render::OpenGLShaderLoader::Resource)
+
+SERIALIZETABLE_BEGIN(Engine::Render::OpenGLShaderLoader::Handle)
+SERIALIZETABLE_END(Engine::Render::OpenGLShaderLoader::Handle)
 
 namespace Engine {
 namespace Render {

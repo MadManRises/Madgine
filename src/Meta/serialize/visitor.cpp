@@ -35,7 +35,7 @@ namespace Serialize {
         return in.readPrimitive<FlagsHolder>(dummy, name);        
     }
 
-    static void __instantiationHelper(FormattedSerializeStream &in, const char *name)
+    void __instantiationHelper(FormattedSerializeStream &in, const char *name)
     {
         TypeUnpacker::forEach<SerializePrimitives>([&]<typename T>() {
             if constexpr (!std::same_as<T, EnumTag> && !std::same_as<T, FlagsTag>)

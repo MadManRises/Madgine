@@ -32,7 +32,7 @@ namespace Scripting {
                 mOldStreams[name] = PySys_GetObject(name.data()); // borrowed
             }
 
-            PySys_SetObject(name.data(), Scripting::Python3::toPyObject(TypedScopePtr { this }));
+            PySys_SetObject(name.data(), Scripting::Python3::toPyObject(ScopePtr { this }));
         }
 
         void Python3StreamRedirect::reset(std::string_view name)

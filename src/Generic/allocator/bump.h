@@ -1,7 +1,7 @@
 #pragma once
 
-#include "concepts.h"
 #include "../align.h"
+#include "concepts.h"
 
 namespace Engine {
 
@@ -12,7 +12,6 @@ struct BumpAllocator {
     BumpAllocator(Args &&...args)
         : mParent(std::forward<Args>(args)...)
     {
-
     }
 
     Block allocate(size_t size, size_t alignment = 1)
@@ -34,7 +33,13 @@ struct BumpAllocator {
     {
     }
 
-    Parent &parent() {
+    void deallocateAll()
+    {
+        mParent.deallocateAll();
+    }
+
+    Parent &parent()
+    {
         return mParent;
     }
 

@@ -37,8 +37,8 @@ namespace Tools {
     Inspector::Inspector(ImRoot &root)
         : Tool<Inspector>(root)
     {
-        addObjectSuggestion<FunctionTable>([]() {
-            std::vector<std::pair<std::string_view, TypedScopePtr>> result;
+        addPtrSuggestion<FunctionTable>([]() {
+            std::vector<std::pair<std::string_view, ScopePtr>> result;
             const FunctionTable *table = sFunctionList();
             while (table) {
                 result.emplace_back(table->mName, const_cast<FunctionTable *>(table));
@@ -57,8 +57,8 @@ namespace Tools {
         if (ImGui::Begin("Inspector", &mVisible)) {
             ImGui::SetWindowDockingDir(mRoot.dockSpaceId(), ImGuiDir_Left, 0.2f, false, ImGuiCond_FirstUseEver);
 
-            auto drawList = [this](const std::map<std::string_view, TypedScopePtr> &items) {
-                for (const std::pair<const std::string_view, TypedScopePtr> &p : items) {
+            auto drawList = [this](const std::map<std::string_view, ScopePtr> &items) {
+                for (const std::pair<const std::string_view, ScopePtr> &p : items) {
                     ImGui::TableNextRow();
                     ImGui::TableNextColumn();
                     if (ImGui::TreeNode(p.first.data())) {
@@ -77,7 +77,7 @@ namespace Tools {
         ImGui::End();
     }
 
-    bool Inspector::drawRemainingMembers(TypedScopePtr scope, std::set<std::string> &drawn)
+    bool Inspector::drawRemainingMembers(ScopePtr scope, std::set<std::string> &drawn)
     {
         bool changed = false;
 
@@ -92,12 +92,12 @@ namespace Tools {
         return changed;
     }
 
-    bool Inspector::drawMember(TypedScopePtr parent, const ScopeIterator &it)
+    bool Inspector::drawMember(ScopePtr parent, const ScopeIterator &it)
     {
         ValueType value;
         if (streq(it->key(), "__proxy")) {
             it->value(value);
-            return drawMembers(value.as<TypedScopePtr>(), {});
+            return drawMembers(value.as<ScopePtr>(), {});
         }
 
         std::string_view id = it->key();
@@ -115,7 +115,7 @@ namespace Tools {
     std::pair<bool, bool> Inspector::drawValue(std::string_view id, ValueType &value, bool editable, bool generic)
     {
         std::pair<bool, bool> modified = value.visit(overloaded {
-            [&](TypedScopePtr &scope) {
+            [&](ScopePtr &scope) {
                 return drawValue(id, scope, editable, generic ? &value : nullptr);
             },
             [&](OwnedScopePtr scope) {
@@ -181,13 +181,13 @@ namespace Tools {
         return modified;
     }
 
-    std::pair<bool, bool> Inspector::drawValue(std::string_view id, TypedScopePtr &scope, bool editable, ValueType *generic)
+    std::pair<bool, bool> Inspector::drawValue(std::string_view id, ScopePtr &scope, bool editable, ValueType *generic)
     {
         bool modified = false;
         bool changed = false;
 
-        auto it = mObjectSuggestionsByType.find(scope.mType);
-        bool hasSuggestions = editable && it != mObjectSuggestionsByType.end();
+        auto it = mPtrSuggestionsByType.find(scope.mType);
+        bool hasSuggestions = editable && it != mPtrSuggestionsByType.end();
 
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
@@ -210,7 +210,7 @@ namespace Tools {
             ImGui::PushID(id.data());
             ImGui::PushItemWidth(-1.0f + (-2.0f * ImGui::GetFrameHeight() * bool(generic)));
             if (ImGui::BeginCombo("##suggestions", scope.name().c_str())) {
-                for (std::pair<std::string_view, TypedScopePtr> p : it->second()) {
+                for (std::pair<std::string_view, ScopePtr> p : it->second()) {
                     if (ImGui::Selectable(p.first.data())) {
                         scope = p.second;
                         modified = true;
@@ -233,7 +233,7 @@ namespace Tools {
 
         ImGui::DraggableValueTypeSource(id, scope, ImGuiDragDropFlags_SourceAllowNullID);
         if (editable && ImGui::BeginDragDropTarget()) {
-            if (ImGui::AcceptDraggableValueType(scope, nullptr, [&](const TypedScopePtr &ptr) {
+            if (ImGui::AcceptDraggableValueType(scope, nullptr, [&](const ScopePtr &ptr) {
                     return ptr.mType->isDerivedFrom(scope.mType);
                 })) {
                 modified = true;
@@ -257,7 +257,7 @@ namespace Tools {
 
     std::pair<bool, bool> Inspector::drawValue(std::string_view id, OwnedScopePtr &scope, bool editable, ValueType *generic)
     {
-        TypedScopePtr ptr = scope.get();
+        ScopePtr ptr = scope.get();
         return drawValue(id, ptr, editable, generic);
     }
 
@@ -343,8 +343,8 @@ namespace Tools {
                 ImGui::TableNextRow();
                 ValueType value = vValue;
                 std::string key = std::to_string(i);
-                if (value.is<TypedScopePtr>()) {
-                    key = "[" + std::to_string(i) + "] " + value.as<TypedScopePtr>().name() + "##" + key;
+                if (value.is<ScopePtr>()) {
+                    key = "[" + std::to_string(i) + "] " + value.as<ScopePtr>().name() + "##" + key;
                 } else if (value.is<OwnedScopePtr>()) {
                     key = "[" + std::to_string(i) + "] " + value.as<OwnedScopePtr>().name() + "##" + key;
                 }
@@ -398,7 +398,7 @@ namespace Tools {
         ImGui::DraggableValueTypeSource(id, function);
     }
 
-    bool Inspector::drawMembers(TypedScopePtr scope, std::set<std::string> drawn)
+    bool Inspector::drawMembers(ScopePtr scope, std::set<std::string> drawn)
     {
         assert(scope);
 
@@ -406,7 +406,7 @@ namespace Tools {
 
         auto it2 = mPreviews.find(scope.mType);
         if (it2 != mPreviews.end()) {
-            it2->second(scope);
+            changed |= it2->second(scope);
         }
         return changed;
     }
@@ -416,17 +416,17 @@ namespace Tools {
         return "Inspector";
     }
 
-    void Inspector::addObjectSuggestion(const MetaTable *type, std::function<std::vector<std::pair<std::string_view, TypedScopePtr>>()> getter)
+    void Inspector::addPtrSuggestion(const MetaTable *type, std::function<std::vector<std::pair<std::string_view, ScopePtr>>()> getter)
     {
-        mObjectSuggestionsByType[type] = getter;
+        mPtrSuggestionsByType[type] = getter;
     }
 
-    bool Inspector::hasObjectSuggestion(const MetaTable *type) const
+    bool Inspector::hasPtrSuggestion(const MetaTable *type) const
     {
-        return mObjectSuggestionsByType.contains(type);
+        return mPtrSuggestionsByType.contains(type);
     }
 
-    void Inspector::addPreviewDefinition(const MetaTable *type, std::function<void(TypedScopePtr)> preview)
+    void Inspector::addPreviewDefinition(const MetaTable *type, std::function<bool(ScopePtr)> preview)
     {
         mPreviews[type] = preview;
     }

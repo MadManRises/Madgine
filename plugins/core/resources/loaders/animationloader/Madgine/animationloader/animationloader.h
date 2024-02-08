@@ -11,15 +11,6 @@ namespace Render {
 
         using Base = ResourceLoader<AnimationLoader, AnimationList, std::list<Placeholder<0>>>;
 
-        struct Handle : Base::Handle {
-            using Base::Handle::Handle;
-            Handle(Base::Handle handle)
-                : Base::Handle(std::move(handle))
-            {
-            }
-
-        };
-
         AnimationLoader();
 
         Threading::Task<bool> loadImpl(AnimationList &data, ResourceDataInfo &info);

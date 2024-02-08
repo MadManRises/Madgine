@@ -4,17 +4,35 @@
 
 namespace Engine {
 
+template <typename T>
+T *scope_cast(const ScopePtr &ptr);
+
 using Constructor = OwnedScopePtr (*)();
 
 struct META_EXPORT MetaTable {
 
-    constexpr MetaTable(const MetaTable **self, const char *name, const std::pair<const char *, Accessor> *members, const Constructor *constructors = nullptr)
+    typedef void(MoveAssign)(const ScopePtr &, const ScopePtr &);
+
+    template <typename T>
+    constexpr MoveAssign *moveAssign()
+    {
+        if constexpr (std::is_assignable_v<T, T &&>) {
+            return [](const ScopePtr &target, const ScopePtr &other) {
+                *scope_cast<T>(target) = std::move(*scope_cast<T>(other));
+            };
+        } else {
+            return nullptr;
+        }
+    }
+
+    constexpr MetaTable(const MetaTable **self, const char *name, const std::pair<const char *, Accessor> *members, const Constructor *constructors = nullptr, MoveAssign *moveAssign = nullptr)
         : mSelf(self)
         , mTypeName(name)
         , mBase(nullptr)
         , mBaseOffset(nullptr)
         , mMembers(members)
         , mConstructors(constructors)
+        , mMoveAssign(moveAssign)
     {
     }
 
@@ -26,6 +44,7 @@ struct META_EXPORT MetaTable {
         , mBaseOffset(&Engine::inheritance_offset<Base, T>)
         , mMembers(members)
         , mConstructors(constructors)
+        , mMoveAssign(moveAssign<T>())
     {
     }
 
@@ -37,12 +56,15 @@ struct META_EXPORT MetaTable {
         , mBaseOffset(nullptr)
         , mMembers(members)
         , mConstructors(constructors)
+        , mMoveAssign(moveAssign<T>())
     {
     }
 
-    ScopeIterator find(std::string_view key, TypedScopePtr scope) const;
+    ScopeIterator find(std::string_view key, ScopePtr scope) const;
 
-    void call(TypedScopePtr scope, ValueType &retVal, const ArgumentList &args) const;
+    void call(ScopePtr scope, ValueType &retVal, const ArgumentList &args) const;
+
+    void moveAssign(ScopePtr scope, ScopePtr other) const;
 
     template <typename T>
     bool isDerivedFrom(size_t *offset = nullptr) const
@@ -51,7 +73,7 @@ struct META_EXPORT MetaTable {
     }
     bool isDerivedFrom(const MetaTable *baseType, size_t *offset = nullptr) const;
 
-    std::string name(TypedScopePtr scope) const;
+    std::string name(ScopePtr scope) const;
 
     const MetaTable **mSelf;
     const char *mTypeName;
@@ -59,6 +81,7 @@ struct META_EXPORT MetaTable {
     size_t (*mBaseOffset)();
     const std::pair<const char *, Accessor> *mMembers;
     const Constructor *mConstructors;
+    MoveAssign *mMoveAssign;
 };
 
 }

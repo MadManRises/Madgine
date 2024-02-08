@@ -52,6 +52,14 @@ struct HeapAllocator {
         std::fill(mBlockState.begin() + blockIndex, mBlockState.begin() + blockIndex + blockCount, false);
     }
 
+    void deallocateAll() {
+        if (mParentMemory.mAddress) {
+            mParent.deallocate(mParentMemory);
+            mParentMemory = {};
+        }
+        mBlockState = {};
+    }
+
 private:
     Parent mParent;
     Block mParentMemory;

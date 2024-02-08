@@ -5,6 +5,7 @@
 #include "directx12meshdata.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Madgine/imageloader/imagedata.h"
 #include "Madgine/imageloader/imageloader.h"
@@ -13,13 +14,7 @@
 
 #include "directx12rendercontext.h"
 
-UNIQUECOMPONENT(Engine::Render::DirectX12MeshLoader);
-
-METATABLE_BEGIN_BASE(Engine::Render::DirectX12MeshLoader, Engine::Render::GPUMeshLoader)
-METATABLE_END(Engine::Render::DirectX12MeshLoader)
-
-METATABLE_BEGIN_BASE(Engine::Render::DirectX12MeshLoader::Resource, Engine::Render::GPUMeshLoader::Resource)
-METATABLE_END(Engine::Render::DirectX12MeshLoader::Resource)
+VIRTUALRESOURCELOADERIMPL(Engine::Render::DirectX12MeshLoader, Engine::Render::GPUMeshLoader);
 
 namespace Engine {
 namespace Render {

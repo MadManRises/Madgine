@@ -3,11 +3,13 @@
 #include "Modules/threading/task.h"
 #include "Modules/threading/taskfuture.h"
 
+#include "Meta/serialize/hierarchy/serializabledataunit.h"
+
 namespace Engine {
 namespace Resources {
 
     template <typename Loader, typename Data>
-    struct Handle {
+    struct Handle : Serialize::SerializableDataUnit {
 
         Handle() = default;
 
@@ -132,6 +134,11 @@ namespace Resources {
             return i->loadingTask();
         }
 
+        Threading::TaskFuture<bool> loadSerialize(std::string_view name)
+        {
+            return load(name);
+        }
+
         template <typename C = typename Loader::Ctor>
         Threading::TaskFuture<bool> create(std::string_view name, const Filesystem::Path &path = {}, C &&c = {}, Loader *loader = &Loader::getSingleton())
         {
@@ -163,6 +170,11 @@ namespace Resources {
         Handle refresh() const
         {
             return Loader::refreshHandle(*this);
+        }
+
+        typename Loader::Resource *customScopePtr() const
+        {
+            return resource();
         }
 
         Data mData = {};

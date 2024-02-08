@@ -5,6 +5,7 @@
 #include "openglshaderloader.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Madgine/codegen/codegen_shader.h"
 
@@ -12,15 +13,7 @@
 
 #include "util/openglpipelineinstance.h"
 
-UNIQUECOMPONENT(Engine::Render::OpenGLPipelineLoader);
-
-METATABLE_BEGIN_BASE(Engine::Render::OpenGLPipelineLoader, Engine::Render::PipelineLoader)
-MEMBER(mResources)
-METATABLE_END(Engine::Render::OpenGLPipelineLoader)
-
-METATABLE_BEGIN_BASE(Engine::Render::OpenGLPipelineLoader::Resource, Engine::Render::PipelineLoader::Resource)
-READONLY_PROPERTY(Data, dataPtr)
-METATABLE_END(Engine::Render::OpenGLPipelineLoader::Resource)
+VIRTUALRESOURCELOADERIMPL(Engine::Render::OpenGLPipelineLoader, Engine::Render::PipelineLoader);
 
 namespace Engine {
 namespace Render {

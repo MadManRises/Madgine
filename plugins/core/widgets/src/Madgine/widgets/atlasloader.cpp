@@ -21,14 +21,7 @@
 
 #include "Generic/areaview.h"
 
-UNIQUECOMPONENT(Engine::Widgets::AtlasLoader)
-
-METATABLE_BEGIN(Engine::Widgets::AtlasLoader)
-MEMBER(mResources)
-METATABLE_END(Engine::Widgets::AtlasLoader)
-
-METATABLE_BEGIN_BASE(Engine::Widgets::AtlasLoader::Resource, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Widgets::AtlasLoader::Resource)
+RESOURCELOADER(Engine::Widgets::AtlasLoader)
 
 SERIALIZETABLE_BEGIN(Engine::Widgets::PreprocessedUIAtlas)
 FIELD(mSize)

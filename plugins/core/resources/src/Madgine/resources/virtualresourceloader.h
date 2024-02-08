@@ -163,3 +163,30 @@ namespace Resources {
 
 }
 }
+
+#define VIRTUALRESOURCELOADERBASE(Loader)                                         \
+    VIRTUALUNIQUECOMPONENTBASE(Loader)                                            \
+                                                                                  \
+    METATABLE_BEGIN_EX(1, Loader)                                                 \
+    METATABLE_END_EX(2, Loader)                                                   \
+                                                                                  \
+    METATABLE_BEGIN_BASE_EX(3, Loader::Resource, Engine::Resources::ResourceBase) \
+    METATABLE_END_EX(4, Loader::Resource)                                         \
+                                                                                  \
+    SERIALIZETABLE_BEGIN_EX(8, Loader::Handle)                                    \
+    ENCAPSULATED_FIELD_EX(9, Name, name, loadSerialize)                           \
+    SERIALIZETABLE_END_EX(10, Loader::Handle)
+
+#define VIRTUALRESOURCELOADERIMPL(Loader, Base)                  \
+    UNIQUECOMPONENT(Loader)                                      \
+                                                                 \
+    METATABLE_BEGIN_BASE_EX(1, Loader, Base)                     \
+    MEMBER_EX(2, mResources)                                     \
+    METATABLE_END_EX(3, Loader)                                  \
+                                                                 \
+    METATABLE_BEGIN_BASE_EX(4, Loader::Resource, Base::Resource) \
+    METATABLE_END_EX(5, Loader::Resource)                        \
+                                                                 \
+    SERIALIZETABLE_BEGIN_EX(9, Loader::Handle)                   \
+    ENCAPSULATED_FIELD_EX(10, Name, name, loadSerialize)         \
+    SERIALIZETABLE_END_EX(11, Loader::Handle)

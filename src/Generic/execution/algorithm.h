@@ -6,6 +6,8 @@
 #include "../type_pack.h"
 #include "concepts.h"
 
+#undef ERROR
+
 namespace Engine {
 namespace Execution {
 

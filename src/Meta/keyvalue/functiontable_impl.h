@@ -3,9 +3,9 @@
 #include "Generic/linestruct.h"
 #include "valuetype_forward.h"
 
+#include "argumentlist.h"
 #include "functionargument.h"
 #include "functiontable.h"
-#include "argumentlist.h"
 
 namespace Engine {
 
@@ -58,7 +58,7 @@ static constexpr std::array<FunctionArgument, sizeof...(Args) + 1> metafunctionA
 template <auto F, typename R, typename T, typename... Args, size_t... I>
 static void unpackMemberHelper(const FunctionTable *table, ValueType &retVal, const ArgumentList &args, std::index_sequence<I...>)
 {
-    T *t = ValueType_as<TypedScopePtr>(getArgument(args, 0)).safe_cast<T>();
+    T *t = scope_cast<T>(ValueType_as<ScopePtr>(getArgument(args, 0)));
     to_ValueType(retVal, invoke_patch_void<std::monostate>(F, t, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...));
 }
 
@@ -71,21 +71,21 @@ static void unpackApiHelper(const FunctionTable *table, ValueType &retVal, const
 template <auto F, typename T, typename... Args, size_t... I>
 static void unpackAsyncHelper(const FunctionTable *table, ValueType &retVal, const ArgumentList &args, std::index_sequence<I...>)
 {
-    T *t = ValueType_as<TypedScopePtr>(getArgument(args, 0)).safe_cast<T>();
+    T *t = ValueType_as<ScopePtr>(getArgument(args, 0)).safe_cast<T>();
     (t->*F)(retVal, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...);
 }
 
 template <auto F, typename T, typename... Args, size_t... I>
 static void unpackReturnListHelper(const FunctionTable *table, ValueType &retVal, const ArgumentList &args, std::index_sequence<I...>)
 {
-    T *t = ValueType_as<TypedScopePtr>(getArgument(args, 0)).safe_cast<T>();
+    T *t = ValueType_as<ScopePtr>(getArgument(args, 0)).safe_cast<T>();
     (t->*F)(retVal, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...);
 }
 
 template <auto F, typename T, typename... Args, size_t... I>
 static void unpackReturnHelper(const FunctionTable *table, ValueType &retVal, const ArgumentList &args, std::index_sequence<I...>)
 {
-    T *t = ValueType_as<TypedScopePtr>(getArgument(args, 0)).safe_cast<T>();
+    T *t = scope_cast<T>(ValueType_as<ScopePtr>(getArgument(args, 0)));
     (t->*F)(retVal, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...);
 }
 
@@ -164,4 +164,4 @@ static constexpr typename FunctionTable::FPtr wrapHelper(void (T::*f)(ValueType 
     }
 
 #define FUNCTIONTABLE(F, ...) FUNCTIONTABLE_IMPL(F, , #F, ::Engine::MetaFunctionTag, #__VA_ARGS__)
-#define FUNCTIONTABLE_EX(Name, Tag, F, ArgNames) FUNCTIONTABLE_IMPL(F, static constexpr fixed_string name = Name;, SINGLE_ARG(::Engine::LineStruct<Tag, __LINE__>::name), Tag, ArgNames)
+#define FUNCTIONTABLE_EX(Name, Tag, F, ArgNames) FUNCTIONTABLE_IMPL(SINGLE_ARG(F), static constexpr fixed_string name = SINGLE_ARG(Name);, SINGLE_ARG(::Engine::LineStruct<Tag, __LINE__>::name), SINGLE_ARG(Tag), ArgNames)

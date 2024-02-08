@@ -19,14 +19,7 @@
 #include "bullet3-3.24/src/BulletCollision/CollisionShapes/btSphereShape.h"
 #include "bullet3-3.24/src/BulletCollision/CollisionShapes/btStaticPlaneShape.h"
 
-UNIQUECOMPONENT(Engine::Physics::CollisionShapeManager);
-
-METATABLE_BEGIN(Engine::Physics::CollisionShapeManager::Resource)
-METATABLE_END(Engine::Physics::CollisionShapeManager::Resource)
-
-METATABLE_BEGIN(Engine::Physics::CollisionShapeManager)
-MEMBER(mResources)
-METATABLE_END(Engine::Physics::CollisionShapeManager)
+RESOURCELOADER(Engine::Physics::CollisionShapeManager);
 
 METATABLE_BEGIN(Engine::Physics::CollisionShapeInstance)
 METATABLE_END(Engine::Physics::CollisionShapeInstance)

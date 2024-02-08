@@ -16,7 +16,7 @@
                 <Item>
                     <Item>
                         <Element>
-                            <Element>5</Element>
+                            <Element>2</Element>
                             <Element>0</Element>
                             <Element>0</Element>
                         </Element>
@@ -28,60 +28,7 @@
                 </Item>
             </mDataOutPins>
         </Node>
-        <Node type="Just" serId=3>
-            <Value type=0></Value>
-            <mFlowOutPins>
-                <Item>
-                </Item>
-            </mFlowOutPins>
-            <mDataInPins>
-                <Item>
-                </Item>
-            </mDataInPins>
-            <mDataOutPins>
-                <Item>
-                </Item>
-            </mDataOutPins>
-        </Node>
-        <Node type="ReadVar" serId=4>
-            <Name>Entity</Name>
-            <mFlowOutPins>
-                <Item>
-                </Item>
-            </mFlowOutPins>
-            <mDataInPins>
-                <Item>
-                </Item>
-            </mDataInPins>
-            <mDataOutPins>
-                <Item>
-                </Item>
-            </mDataOutPins>
-        </Node>
-        <Node type="Native/Yield_Simulation" serId=5>
-            <mParameters>
-            </mParameters>
-            <mFlowOutPins>
-                <Item>
-                    <Item>
-                        <Element>
-                            <Element>6</Element>
-                            <Element>0</Element>
-                            <Element>0</Element>
-                        </Element>
-                    </Item>
-                </Item>
-            </mFlowOutPins>
-            <mDataInPins>
-                <Item>
-                </Item>
-            </mDataInPins>
-            <mDataOutPins>
-                <Item>
-                </Item>
-            </mDataOutPins>
-        </Node>
-        <Node type="Native/Wait_Simulation" serId=6>
+        <Node type="Native/Wait_Simulation" serId=3>
             <mParameters>
                 <Item>2000000000</Item>
             </mParameters>
@@ -105,7 +52,7 @@
                 </Item>
             </mDataOutPins>
         </Node>
-        <Node type="Python3/testbehavior" serId=7>
+        <Node type="Python3/testbehavior" serId=4>
             <mParameters>
             </mParameters>
             <mFlowOutPins>
@@ -113,6 +60,55 @@
                     <Item>
                         <Element>
                             <Element>5</Element>
+                            <Element>0</Element>
+                            <Element>0</Element>
+                        </Element>
+                    </Item>
+                </Item>
+            </mFlowOutPins>
+            <mDataInPins>
+                <Item>
+                </Item>
+            </mDataInPins>
+            <mDataOutPins>
+                <Item>
+                </Item>
+            </mDataOutPins>
+        </Node>
+        <Node type="Native/Yield_Simulation" serId=5>
+            <mParameters>
+            </mParameters>
+            <mFlowOutPins>
+                <Item>
+                    <Item>
+                        <Element>
+                            <Element>3</Element>
+                            <Element>0</Element>
+                            <Element>0</Element>
+                        </Element>
+                    </Item>
+                </Item>
+            </mFlowOutPins>
+            <mDataInPins>
+                <Item>
+                </Item>
+            </mDataInPins>
+            <mDataOutPins>
+                <Item>
+                </Item>
+            </mDataOutPins>
+        </Node>
+        <Node type="Native/play_sound" serId=6>
+            <mParameters>
+                <Item serId=7>
+                    <Name>sample</Name>
+                </Item>
+            </mParameters>
+            <mFlowOutPins>
+                <Item>
+                    <Item>
+                        <Element>
+                            <Element>2</Element>
                             <Element>0</Element>
                             <Element>0</Element>
                         </Element>

@@ -12,13 +12,13 @@
 ENTITYCOMPONENT_IMPL(Mesh, Engine::Scene::Entity::Mesh);
 
 METATABLE_BEGIN(Engine::Scene::Entity::Mesh)
-PROPERTY(Mesh, get, set)
+MEMBER(mMesh)
 PROPERTY(Visible, isVisible, setVisible)
 PROPERTY(Material, material, setMaterial)
 METATABLE_END(Engine::Scene::Entity::Mesh)
 
 SERIALIZETABLE_BEGIN(Engine::Scene::Entity::Mesh)
-ENCAPSULATED_FIELD(Mesh, getName, setName)
+FIELD(mMesh)
 ENCAPSULATED_FIELD(Material, material, setMaterial)
 SERIALIZETABLE_END(Engine::Scene::Entity::Mesh)
 

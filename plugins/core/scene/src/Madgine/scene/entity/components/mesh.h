@@ -29,8 +29,8 @@ namespace Scene {
             void setVisible(bool vis);
             bool isVisible() const;
 
-        private:
             typename Render::GPUMeshLoader::Handle mMesh;
+        private:            
             uint32_t mMaterial = 0;
             bool mIsVisible = true;
         };

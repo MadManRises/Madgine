@@ -11,14 +11,6 @@ namespace Render {
 
         using Base = ResourceLoader<SkeletonLoader, SkeletonDescriptor, std::list<Placeholder<0>>>;
 
-        struct Handle : Base::Handle {
-            using Base::Handle::Handle;
-            Handle(Base::Handle handle)
-                : Base::Handle(std::move(handle))
-            {
-            }
-        };
-
         SkeletonLoader();
 
         Threading::Task<bool> loadImpl(SkeletonDescriptor &data, ResourceDataInfo &info);

@@ -3,15 +3,13 @@
 #include "textureloader.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Meta/math/vector2i.h"
 
 #include "Madgine/imageloader/imageloader.h"
 
-METATABLE_BEGIN_BASE(Engine::Render::TextureLoader::Resource, Engine::Resources::ResourceBase)
-METATABLE_END(Engine::Render::TextureLoader::Resource)
-
-VIRTUALUNIQUECOMPONENTBASE(Engine::Render::TextureLoader)
+VIRTUALRESOURCELOADERBASE(Engine::Render::TextureLoader)
 
 namespace Engine {
 namespace Render {

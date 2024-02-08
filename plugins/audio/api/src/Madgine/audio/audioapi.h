@@ -8,6 +8,8 @@
 
 #include "Madgine/audioloader/audioloader.h"
 
+#include "Madgine/behavior.h"
+
 namespace Engine {
 namespace Audio {
 
@@ -17,32 +19,16 @@ namespace Audio {
 
         AudioApi(Root::Root &root);
     
-        auto playSoundSender(AudioLoader::Handle buffer)
-        {
-            return Execution::make_virtual_sender<PlaybackState, AudioResult>(this, std::move(buffer));
-        }
-
-        void playSound(std::string_view name);
-        void playSound(AudioLoader::Handle buffer);
-
-    protected:
-        struct LinkerDummy : Execution::VirtualReceiverBase<AudioResult> {
-        };
-
-        struct MADGINE_AUDIO_EXPORT PlaybackState : LinkerDummy {
-            PlaybackState(AudioApi *api, AudioLoader::Handle buffer);
-
-            void start();
-
-            AudioApi *mApi;
-            AudioLoader::Handle mBuffer;
-        };
-
-        virtual void playSoundImpl(PlaybackState &state) = 0;
+        Behavior playSound(std::string_view name);
+        virtual Behavior playSound(AudioLoader::Handle buffer) = 0;
     };
 
     template <typename T>
     using AudioApiImpl = VirtualScope<T, Root::RootComponentVirtualImpl<T, AudioApi>>;
+
+    inline constexpr auto play_sound = [](AudioLoader::Handle buffer) {
+        return AudioApi::getSingleton().playSound(std::move(buffer));
+    };
 }
 }
 

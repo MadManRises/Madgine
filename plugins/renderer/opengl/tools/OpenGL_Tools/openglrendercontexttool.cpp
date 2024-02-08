@@ -46,6 +46,7 @@ namespace Tools {
                 mImageTexture.setData(data->mSize, data->mBuffer);
                 ImGui::Image((void *)(uintptr_t)mImageTexture.resource(), data->mSize);
             }
+            return false;
         });
 
         co_return co_await RenderContextTool::init();

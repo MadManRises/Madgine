@@ -35,13 +35,7 @@ struct META_EXPORT OwnedScopePtr {
 
     bool operator==(const OwnedScopePtr &other) const;
 
-    TypedScopePtr get() const;
-
-    template <typename T>
-    T &safe_cast() const
-    {
-        return *get().safe_cast<T>();
-    }
+    ScopePtr get() const;
 
     void construct(const MetaTable *type);
 

@@ -158,6 +158,12 @@ namespace Scene {
         }
     }
 
+    void SceneManager::clear()
+    {
+        mLifetime.end();
+        mLifetime.reset();
+    }
+
     void SceneManager::pause()
     {
         if (mClock.mPauseStack++ == 0) {

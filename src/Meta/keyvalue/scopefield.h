@@ -6,7 +6,7 @@ namespace Engine {
 
 struct META_EXPORT ScopeField {
 
-    ScopeField(const TypedScopePtr &ptr, const std::pair<const char *, Accessor> *pointer);
+    ScopeField(const ScopePtr &ptr, const std::pair<const char *, Accessor> *pointer);
 
     void value(ValueType &retVal) const;
 
@@ -18,7 +18,7 @@ struct META_EXPORT ScopeField {
     bool isGeneric() const;
 
 private:
-    TypedScopePtr mScope;
+    ScopePtr mScope;
     const std::pair<const char *, Accessor> *mPointer;
 };
 

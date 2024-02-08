@@ -674,7 +674,7 @@ namespace Tools {
 
                 ImGui::BeginChild("GraphList", { 0.0f, -ImGui::GetFrameHeightWithSpacing() });
 
-                for (const std::pair<std::string_view, TypedScopePtr> &res : NodeGraph::NodeGraphLoader::getSingleton().typedResources()) {
+                for (const std::pair<std::string_view, ScopePtr> &res : NodeGraph::NodeGraphLoader::getSingleton().typedResources()) {
 
                     bool selected = mSelectionTargetBuffer == res.first;
 

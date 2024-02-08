@@ -42,7 +42,7 @@ namespace Scene {
                 return &(get_component(mData.at(index.mIndex)));
             }
 
-            TypedScopePtr getTyped(const EntityComponentHandle<EntityComponentBase> &index) override final
+            ScopePtr getTyped(const EntityComponentHandle<EntityComponentBase> &index) override final
             {
                 return &(get_component(mData.at(index.mIndex)));
             }

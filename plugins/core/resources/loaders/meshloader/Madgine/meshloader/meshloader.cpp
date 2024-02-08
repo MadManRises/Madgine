@@ -3,6 +3,7 @@
 #include "meshloader.h"
 
 #include "Meta/keyvalue/metatable_impl.h"
+#include "Meta/serialize/serializetable_impl.h"
 
 #include "Madgine/render/vertex.h"
 
@@ -14,15 +15,7 @@
 
 #include "Modules/threading/awaitables/awaitablesender.h"
 
-METATABLE_BEGIN(Engine::Render::MeshLoader)
-MEMBER(mResources)
-METATABLE_END(Engine::Render::MeshLoader)
-
-METATABLE_BEGIN_BASE(Engine::Render::MeshLoader::Resource, Engine::Resources::ResourceBase)
-READONLY_PROPERTY(Data, dataPtr)
-METATABLE_END(Engine::Render::MeshLoader::Resource)
-
-UNIQUECOMPONENT(Engine::Render::MeshLoader)
+RESOURCELOADER(Engine::Render::MeshLoader)
 
 namespace Engine {
 namespace Render {

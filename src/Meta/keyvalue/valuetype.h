@@ -145,7 +145,7 @@ struct META_EXPORT ValueType {
     template <typename... Args>
     void call(ValueType &retVal, Args &&...args)
     {
-        return call({ ValueType { std::forward<Args>(args) }... });
+        return call(retVal, { ValueType { std::forward<Args>(args) }... });
     }
 
 private:
@@ -176,9 +176,9 @@ ValueType_Return<T> ValueType::as() const
         return static_cast<T>(std::get<std::underlying_type_t<T>>(mUnion));
     } else {
         if constexpr (Pointer<T>) {
-            return std::get<TypedScopePtr>(mUnion).safe_cast<std::remove_pointer_t<T>>();
+            return scope_cast<std::remove_pointer_t<T>>(std::get<ScopePtr>(mUnion));
         } else {
-            return std::get<OwnedScopePtr>(mUnion).safe_cast<std::remove_reference_t<T>>();
+            return scope_cast<std::remove_reference_t<T>>(std::get<OwnedScopePtr>(mUnion));
         }
     }
     //static_assert(dependent_bool<T, false>::value, "Invalid target type for Valuetype cast provided!");

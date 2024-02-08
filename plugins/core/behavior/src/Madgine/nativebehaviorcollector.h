@@ -31,7 +31,7 @@ struct NativeBehaviorAnnotation {
 
 }
 
-DECLARE_NAMED_UNIQUE_COMPONENT(Engine, NativeBehavior, DummyType<BehaviorStateBase>, Engine::NativeBehaviorAnnotation)
+DECLARE_NAMED_UNIQUE_COMPONENT(Engine, NativeBehavior, NativeBehaviorInfo, Engine::NativeBehaviorAnnotation)
 
 namespace Engine {
 
@@ -178,7 +178,7 @@ struct NativeBehaviorFactory : BehaviorFactory<NativeBehaviorFactory> {
 }
 
 DECLARE_BEHAVIOR_FACTORY(Engine::NativeBehaviorFactory)
-REGISTER_TYPE(Engine::DummyType<Engine::BehaviorStateBase>)
+REGISTER_TYPE(Engine::NativeBehaviorInfo)
 
 #define NATIVE_BEHAVIOR_IMPL(Constant, Name, Sender, ...)                                         \
     struct Name##Linkage {                                                                        \

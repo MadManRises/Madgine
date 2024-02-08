@@ -144,7 +144,7 @@ namespace Tools {
                     }
                     if (changed) {
                         if (i == 0)
-                            function.mScope = v.as<TypedScopePtr>().mScope;
+                            function.mScope = v.as<ScopePtr>().mScope;
                         else
                             args[i - 1] = v;
                     }

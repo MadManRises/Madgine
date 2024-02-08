@@ -10,7 +10,7 @@ namespace Scripting {
 
         struct PyTypedScopePtr {
             PyObject_HEAD
-                TypedScopePtr mPtr;
+                ScopePtr mPtr;
         };
 
     }

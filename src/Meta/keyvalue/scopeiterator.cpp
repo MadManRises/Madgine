@@ -10,7 +10,7 @@
 
 namespace Engine {
 
-ScopeIterator::ScopeIterator(TypedScopePtr scope, const std::pair<const char *, Accessor> *pointer)
+ScopeIterator::ScopeIterator(ScopePtr scope, const std::pair<const char *, Accessor> *pointer)
     : mScope(scope)
     , mCurrentTable(scope.mType)
     , mPointer(scope ? pointer : nullptr)
