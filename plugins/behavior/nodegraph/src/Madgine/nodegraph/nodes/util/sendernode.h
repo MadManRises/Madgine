@@ -67,7 +67,7 @@ namespace NodeGraph {
         using succ_senders = typename argument_types::template filter<is_succ_sender>;
         using in_types = typename argument_types::template filter<is_pred_sender>;
 
-        static constexpr size_t variadicSuccCount = succ_senders::filter<Execution::is_stream>::size;
+        static constexpr size_t variadicSuccCount = succ_senders::template filter<Execution::is_stream>::size;
 
         static_assert(Config::constant || Config::exposedVariables::size == 0);
 

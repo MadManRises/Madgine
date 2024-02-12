@@ -108,8 +108,8 @@ struct IntervalClock {
         state(Inner &&inner, Rec &&rec, std::chrono::steady_clock::duration duration)
             : WaitState(duration)
             , Execution::base_state<Rec>(std::forward<Rec>(rec))
-            , mInnerState(Execution::connect(std::forward<Inner>(inner), receiver<Rec &> { mRec, this }))
-            , mCallback(finally_cb { mRec })
+            , mInnerState(Execution::connect(std::forward<Inner>(inner), receiver<Rec &> { this->mRec, this }))
+            , mCallback(finally_cb { this->mRec })
         {
         }
 
@@ -120,9 +120,9 @@ struct IntervalClock {
 
         virtual void start(IntervalClock *clock) override
         {
-            std::stop_token st = Execution::get_stop_token(mRec);
+            std::stop_token st = Execution::get_stop_token(this->mRec);
             if (st.stop_requested()) {
-                mRec.set_done();
+                this->mRec.set_done();
             } else {
                 WaitState::start(clock);
                 mCallback.start(std::move(st), stop_cb { this });

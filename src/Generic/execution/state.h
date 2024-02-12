@@ -201,10 +201,10 @@ namespace Execution {
                 return true;
             }
 
-            template <typename T>
-            friend bool tag_invoke(store_var_t<Name>, receiver &rec, T &&value)
+            template <typename V>
+            friend bool tag_invoke(store_var_t<Name>, receiver &rec, V &&value)
             {
-                rec.mState->mData = std::forward<T>(value);
+                rec.mState->mData = std::forward<V>(value);
                 return true;
             }
 

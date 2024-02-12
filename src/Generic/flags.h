@@ -22,7 +22,7 @@ struct Flags {
     friend std::ostream &operator<<(std::ostream &stream, const Flags<Enum> &value)
     {
         bool first = true;
-        for (int32_t v : Representation::sTable.values<int32_t>()) {
+        for (int32_t v : Representation::sTable.template values<int32_t>()) {
             if (first)
                 first = false;
             else

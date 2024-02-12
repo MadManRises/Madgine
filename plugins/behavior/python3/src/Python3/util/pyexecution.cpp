@@ -105,11 +105,11 @@ namespace Scripting {
             .tp_basicsize = sizeof(PyBehaviorScopeObject),
             .tp_dealloc = &PyDealloc<PyBehaviorScopeObject, &PyBehaviorScopeObject::mScope>,
             //.tp_getattro = (getattrofunc)PyBehaviorScope_get,
-            .tp_flags = Py_TPFLAGS_DEFAULT,
-            .tp_doc = "Scope wrapper to access Behavior scope variables",
-            //.tp_iter = (getiterfunc)PyOwnedScopePtr_iter,
-            .tp_new = PyType_GenericNew,
             .tp_as_mapping = &PyBehaviorScopeMethods,
+            .tp_flags = Py_TPFLAGS_DEFAULT,            
+            .tp_doc = "Scope wrapper to access Behavior scope variables",
+            //.tp_iter = (getiterfunc)PyOwnedScopePtr_iter,            
+            .tp_new = PyType_GenericNew,            
         };
 
         PyObject *evalFrame(PyFrameObject *frame, int throwExc)

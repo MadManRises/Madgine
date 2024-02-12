@@ -172,7 +172,7 @@ struct SenderBehaviorState : BehaviorStateBase {
     void connect(BehaviorReceiver *rec) override
     {
         Sender sender = std::forward<Sender>(std::get<Sender>(mData));
-        mData.emplace<State>(
+        mData.template emplace<State>(
             DelayedConstruct<State> { [&]() { return Execution::connect(std::forward<Sender>(sender), BehaviorReceiverPtr { rec }); } });
     }
 

@@ -142,9 +142,9 @@ struct NativeBehavior : NativeBehaviorComponent<NativeBehavior<Constant, Factory
     }
 
     static constexpr auto sResultTypes = []() {
-        if constexpr (std::same_as<typename Sender::value_types<type_pack>, type_pack<>>) {
+        if constexpr (std::same_as<typename Sender::template value_types<type_pack>, type_pack<>>) {
             return std::span<const ValueTypeDesc> {};
-        } else if constexpr (std::same_as<typename Sender::value_types<type_pack>, type_pack<ArgumentList>>) {
+        } else if constexpr (std::same_as<typename Sender::template value_types<type_pack>, type_pack<ArgumentList>>) {
             return std::span<const ValueTypeDesc> {};
         } else {
             return []<typename... P>(type_pack<P...>)
@@ -153,7 +153,7 @@ struct NativeBehavior : NativeBehaviorComponent<NativeBehavior<Constant, Factory
                     toValueTypeDesc<P>()...
                 };
             }
-            (typename Sender::value_types<type_pack> {});
+            (typename Sender::template value_types<type_pack> {});
         }
     }();
     virtual std::span<const ValueTypeDesc> resultTypes() const override

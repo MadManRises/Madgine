@@ -41,7 +41,7 @@ namespace Tools {
         template <auto Visualizer>
         void registerDebugLocationVisualizer()
         {
-            using T = typename CallableTraits<decltype(Visualizer)>::argument_types::select<2>;
+            using T = typename CallableTraits<decltype(Visualizer)>::argument_types::template select<2>;
             mDebugLocationVisualizers.push_back([](DebuggerView *view, const Debug::ContextInfo *context, const Debug::DebugLocation *location) {
                 T typedLocation = dynamic_cast<T>(location);
                 if (typedLocation)

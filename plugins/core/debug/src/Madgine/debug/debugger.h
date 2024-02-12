@@ -61,11 +61,6 @@ namespace Debug {
             , mStopCallback(finally_cb { this })
         {
         }
-        ContextInfo(const ContextInfo &) = delete;
-        ContextInfo(ContextInfo &&) = default;
-
-        ContextInfo &operator=(const ContextInfo &) = delete;
-        ContextInfo &operator=(ContextInfo &&) = default;
 
         void suspend(Closure<void(ContinuationMode)> callback, std::stop_token st);
         void continueExecution(ContinuationMode mode);

@@ -19,20 +19,20 @@ namespace Resources {
 
             state(Sender &&sender, Rec &&rec, Handle &&handle)
                 : Execution::base_state<receiver<Rec, Handle>> { { std::forward<Rec>(rec), std::forward<Handle>(handle) } }
-                , mState(Execution::connect(std::forward<Sender>(sender), mRec))                
+                , mState(Execution::connect(std::forward<Sender>(sender), this->mRec))                
             {
             }
 
             void start()
             {
-                if (mRec.mHandle.info()->loadingTask().is_ready()) {
+                if (this->mRec.mHandle.info()->loadingTask().is_ready()) {
                     mState.start();
                 } else {
-                    mRec.mHandle.info()->loadingTask().then([this](bool success) {
+                    this->mRec.mHandle.info()->loadingTask().then([this](bool success) {
                         if (success)
                             mState.start();
                         else
-                            mRec.set_error(GenericResult { GenericResult::UNKNOWN_ERROR });
+                            this->mRec.set_error(GenericResult { GenericResult::UNKNOWN_ERROR });
                     },
                         Root::Root::getSingleton().taskQueue());
                 }

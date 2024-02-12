@@ -264,9 +264,9 @@ namespace Execution {
             void set_value(V &&...value)
             {
                 if constexpr (operation_increment == 0 && stop_increment == 0) {
-                    mRec.set_value(std::forward<V>(value)...);
+                    this->mRec.set_value(std::forward<V>(value)...);
                 } else {
-                    SenderLocation *location = get_debug_location(mRec);
+                    SenderLocation *location = get_debug_location(this->mRec);
 
                     location->mIndex += operation_increment;
 
@@ -275,31 +275,31 @@ namespace Execution {
                         switch (mode) {
                         case Debug::ContinuationMode::Resume:
                         case Debug::ContinuationMode::Step:
-                            mRec.set_value(std::forward<V>(value)...);
+                            this->mRec.set_value(std::forward<V>(value)...);
                             break;
                         case Debug::ContinuationMode::Abort:
-                            mRec.set_done();
+                            this->mRec.set_done();
                             break;
                         }
                     },
-                        get_stop_token(mRec), std::forward<V>(value)...);
+                        get_stop_token(this->mRec), std::forward<V>(value)...);
                 }
             }
 
             void set_done()
             {
                 if constexpr (operation_increment == 0 && stop_increment == 0) {
-                    mRec.set_done();
+                    this->mRec.set_done();
                 } else {
-                    SenderLocation *location = get_debug_location(mRec);
+                    SenderLocation *location = get_debug_location(this->mRec);
 
                     location->mIndex += operation_increment;
 
                     location->pass([=](Debug::ContinuationMode mode) {
                         location->mIndex += stop_increment;
-                        mRec.set_done();
+                        this->mRec.set_done();
                     },
-                        get_stop_token(mRec));
+                        get_stop_token(this->mRec));
                 }
             }
 
@@ -307,9 +307,9 @@ namespace Execution {
             void set_error(R &&...result)
             {
                 if constexpr (operation_increment == 0 && stop_increment == 0) {
-                    mRec.set_error(std::forward<R>(result)...);
+                    this->mRec.set_error(std::forward<R>(result)...);
                 } else {
-                    SenderLocation *location = get_debug_location(mRec);
+                    SenderLocation *location = get_debug_location(this->mRec);
 
                     location->mIndex += operation_increment;
 
@@ -318,14 +318,14 @@ namespace Execution {
                         switch (mode) {
                         case Debug::ContinuationMode::Resume:
                         case Debug::ContinuationMode::Step:
-                            mRec.set_error(std::forward<R>(result)...);
+                            this->mRec.set_error(std::forward<R>(result)...);
                             break;
                         case Debug::ContinuationMode::Abort:
-                            mRec.set_done();
+                            this->mRec.set_done();
                             break;
                         }
                     },
-                        get_stop_token(mRec), std::forward<R>(result)...);
+                        get_stop_token(this->mRec), std::forward<R>(result)...);
                 }
             }
         };

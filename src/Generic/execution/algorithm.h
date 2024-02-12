@@ -231,7 +231,7 @@ namespace Execution {
             void done()
             {
                 destruct(mState);
-                mRec.set_value(std::forward<T>(mAcc));
+                this->mRec.set_value(std::forward<T>(mAcc));
             }
 
             template <typename U>
@@ -912,7 +912,7 @@ namespace Execution {
             void start()
             {
                 if constexpr (sizeof...(Sender) == 0)
-                    mRec.set_value();
+                    this->mRec.set_value();
                 else {
                     mStates.template emplace<1>(
                                DelayedConstruct<std::variant_alternative_t<1, StateVariant>> {
@@ -927,7 +927,7 @@ namespace Execution {
             void set_value(inner_tag<I>, V &&...values)
             {
                 if constexpr (sizeof...(Sender) == I + 1)
-                    mRec.set_value();
+                    this->mRec.set_value();
                 else {
                     mStates.template emplace<I + 1 + 1>(
                                DelayedConstruct<std::variant_alternative_t<I + 1 + 1, StateVariant>> {
@@ -941,13 +941,13 @@ namespace Execution {
             template <size_t I>
             void set_done(inner_tag<I>)
             {
-                mRec.set_done();
+                this->mRec.set_done();
             }
 
             template <size_t I, typename... R>
             void set_error(inner_tag<I>, R &&...result)
             {
-                mRec.set_error(std::forward<R>(result)...);
+                this->mRec.set_error(std::forward<R>(result)...);
             }
 
             std::tuple<Sender...> mSenders;

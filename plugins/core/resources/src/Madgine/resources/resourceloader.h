@@ -58,7 +58,7 @@ namespace Resources {
 
             Handle loadData()
             {
-                return T::load(static_cast<T::Resource *>(this));
+                return T::load(static_cast<typename T::Resource *>(this));
             }
 
             /* Threading::TaskFuture<void> forceUnload()
