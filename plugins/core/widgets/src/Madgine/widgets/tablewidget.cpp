@@ -115,6 +115,7 @@ namespace Widgets {
             for (size_t col = 0; col < columnCount(); ++col) {
                 auto [cellPos, cellSize] = GridLayoutRenderData::getCellContentDimensions(mHorizontalLayoutRenderData, mVerticalLayoutRenderData, row, col);
 
+                cellSize.z = size.z;
                 mTextRenderData.render(renderData, view[row][col], pos + cellPos, cellSize);
             }
             if (row + 1 < mRowCount) {
@@ -132,27 +133,24 @@ namespace Widgets {
             }
         }
 
-        if (mColumnConfigs.size() > 0) {
-            for (size_t col = 0; col < mColumnConfigs.size() - 1; ++col) {
-                auto [colPos, colSize] = mVerticalLayoutRenderData.getElementDimensions(col);
-                float x = colPos + colSize;
-                Line3 line {
-                    { pos.x + x,
-                        pos.y,
-                        pos.z + 0.4f },
-                    { pos.x + x,
-                        pos.y + fullHeight,
-                        pos.z + 0.4f }
-                };
-                renderData.renderLine(line);
-            }
+        for (size_t col = 1; col < mColumnConfigs.size(); ++col) {
+            auto [x, _] = mVerticalLayoutRenderData.getElementDimensions(col);            
+            Line3 line {
+                { pos.x + x,
+                    pos.y,
+                    pos.z + 0.4f },
+                { pos.x + x,
+                    pos.y + fullHeight,
+                    pos.z + 0.4f }
+            };
+            renderData.renderLine(line);
         }
     }
 
     void TableWidget::sizeChanged(const Vector3 &pixelSize)
     {
         if (mTextRenderData.available()) {
-            float lineHeight = mTextRenderData.calculateLineHeight();
+            float lineHeight = mTextRenderData.calculateLineHeight(pixelSize.z);
             SizeConstraints rowHeightConstraints {
                 lineHeight + 0.1f,
                 lineHeight + 6.0f,
@@ -163,7 +161,7 @@ namespace Widgets {
         } else {
             mNeedResize = true;
         }
-        mVerticalLayoutRenderData.update(mColumnConfigs, pixelSize.x);
+        mVerticalLayoutRenderData.update(mColumnConfigs, pixelSize.x, pixelSize.z);
     }
 
 }

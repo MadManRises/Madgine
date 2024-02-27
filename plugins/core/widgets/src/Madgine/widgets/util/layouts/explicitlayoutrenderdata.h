@@ -19,11 +19,11 @@ namespace Widgets {
 
     struct ExplicitLayoutRenderData {
 
-        void update(const std::vector<ExplicitLayoutConfig> &configs, float pixelSize);
+        void update(const std::vector<ExplicitLayoutConfig> &configs, float pixelSize, float z);
         std::pair<float, float> getElementDimensions(size_t index);
         float fullSize();
 
-        static SizeConstraints getConstraints(const ExplicitLayoutConfig &config, float pixelSize);
+        static SizeConstraints getConstraints(const ExplicitLayoutConfig &config, float pixelSize, float z);
 
     private:
         struct ExplicitLayoutElement {
