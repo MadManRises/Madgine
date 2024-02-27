@@ -139,7 +139,7 @@ std::string ValueType::toShortString() const
         [](const KeyValueSender &s) {
             return "<sender>"s;
         },
-        [](std::chrono::nanoseconds dur) {
+        [](std::chrono::duration<uint64_t, std::nano> dur) {
             return "<duration>"s;
         },
         [](const auto &v) {

@@ -1,5 +1,7 @@
 #include "win_wstring.h"
 
+#if WINDOWS
+
 #define NOMINMAX
 #include <Windows.h>
 
@@ -18,3 +20,5 @@ namespace StringUtil {
 
 }
 }
+
+#endif

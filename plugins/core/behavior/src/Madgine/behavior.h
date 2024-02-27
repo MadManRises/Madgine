@@ -112,7 +112,9 @@ struct CoroutineLocation : Debug::DebugLocation {
     std::map<std::string_view, ValueType> localVariables() const override;
     virtual bool wantsPause() const override;
 
+#ifndef NDEBUG
     Debug::StackTrace<1> mStacktrace;
+#endif
 };
 
 struct MADGINE_BEHAVIOR_EXPORT CoroutineBehaviorState : BehaviorStateBase {

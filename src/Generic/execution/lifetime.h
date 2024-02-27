@@ -50,7 +50,6 @@ namespace Execution {
         void decreaseCount()
         {
             if (mCount.fetch_sub(1) == 1) {
-                assert(mStopSource.stop_requested());
                 if (mReceiver) {
                     mReceiver->set_value();
                     mReceiver = nullptr;
@@ -159,8 +158,6 @@ namespace Execution {
             using result_type = GenericResult;
             template <template <typename...> typename Tuple>
             using value_types = Tuple<>;
-
-            using is_sender = void;
 
             template <typename Rec>
             friend auto tag_invoke(connect_t, ended_sender &&sender, Rec &&rec)

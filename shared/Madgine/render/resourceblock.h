@@ -20,7 +20,7 @@ namespace Render {
             return mPtr != 0;
         }
 
-        uintptr_t mPtr;
+        uintptr_t mPtr = 0;
     };
 
     struct UniqueResourceBlock : UniqueOpaquePtr {        

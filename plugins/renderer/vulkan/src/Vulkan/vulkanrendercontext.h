@@ -8,6 +8,7 @@
 #include "util/vulkancommandlist.h"
 
 #include "util/vulkanbuffer.h"
+#include "util/vulkantexture.h"
 
 #include "Madgine/render/vertexformat.h"
 
@@ -17,17 +18,17 @@
 #include "Generic/allocator/bump.h"
 #include "Generic/allocator/fixed.h"
 #include "Generic/allocator/heap.h"
+#include "Generic/allocator/tracked.h"
 
 namespace Engine {
 namespace Render {
 
     struct QueueFamilyIndices {
         std::optional<uint32_t> graphicsFamily;
-        std::optional<uint32_t> presentFamily;
 
         bool isComplete()
         {
-            return graphicsFamily.has_value() && presentFamily.has_value();
+            return graphicsFamily.has_value();
         }
     };
 
@@ -46,11 +47,15 @@ namespace Render {
         virtual bool beginFrame() override;
         virtual void endFrame() override;
 
+        VkDescriptorSet allocateResourceBlock(std::vector<const Texture *> textures);
+        void freeResourceBlock(VkDescriptorSet descriptorSet);
         virtual UniqueResourceBlock createResourceBlock(std::vector<const Texture *> textures) override;
         virtual void destroyResourceBlock(UniqueResourceBlock &block) override;
 
         VulkanCommandList fetchCommandList(std::string_view name, std::vector<VkSemaphore> waitSemaphores = {}, std::vector<VkSemaphore> signalSemaphores = {});
         void ExecuteCommandList(NulledPtr<std::remove_pointer_t<VkCommandBuffer>> buffer, std::vector<VkSemaphore> waitSemaphores, std::vector<VkSemaphore> signalSemaphores, std::vector<Any> attachedResources);
+
+        VkDescriptorSet fetchTempDescriptorSet();
 
         bool isFenceComplete(uint64_t fenceValue);
 
@@ -64,8 +69,9 @@ namespace Render {
 
         static std::pair<std::vector<VkVertexInputBindingDescription>, std::vector<VkVertexInputAttributeDescription>> createVertexLayout(VertexFormat format, size_t instanceDataSize);
 
-        VkQueue mGraphicsQueue;
-        VkQueue mPresentQueue;
+        size_t tempAllocatorMemoryQuota() const;
+
+        VkQueue mGraphicsQueue;        
 
         QueueFamilyIndices mIndices;
 
@@ -77,6 +83,7 @@ namespace Render {
         VulkanPtr<VkCommandPool, &vkDestroyCommandPool> mCommandPool;
 
         std::vector<std::tuple<uint64_t, VkCommandBuffer, std::vector<Any>>> mBufferPool;
+        std::vector<std::tuple<uint64_t, VkDescriptorSet>> mTempDescriptorPool;
 
         VulkanPtr<VkDescriptorSetLayout, &vkDestroyDescriptorSetLayout> mUBODescriptorSetLayout;
         VulkanPtr<VkDescriptorSetLayout, &vkDestroyDescriptorSetLayout> mHeapDescriptorSetLayout;
@@ -84,6 +91,8 @@ namespace Render {
         VulkanPtr<VkDescriptorSetLayout, &vkDestroyDescriptorSetLayout> mResourceBlockDescriptorSetLayout;
         VulkanPtr<VkDescriptorSetLayout, &vkDestroyDescriptorSetLayout> mSamplerDescriptorSetLayout;
         VulkanPtr<VkPipelineLayout, &vkDestroyPipelineLayout> mPipelineLayout;
+
+        VkDescriptorSet mDefaultResourceBlockDescriptorSet;
 
         VulkanPtr<VkSampler, &vkDestroySampler> mSamplers[2];
         VkDescriptorSet mSamplerDescriptorSet;
@@ -95,12 +104,13 @@ namespace Render {
         LogBucketAllocator<HeapAllocator<VulkanHeapAllocator &>, 64, 4096, 4> mBufferAllocator;
 
         VulkanMappedHeapAllocator mTempMemoryHeap;
-        BumpAllocator<FixedAllocator<VulkanMappedHeapAllocator &>> mTempAllocator;
+        TrackedAllocator<BumpAllocator<FixedAllocator<VulkanMappedHeapAllocator &>>> mTempAllocator;
 
         VulkanHeapAllocator mConstantMemoryHeap;
         LogBucketAllocator<HeapAllocator<VulkanHeapAllocator &>, 64, 4096, 4> mConstantAllocator;
 
         VulkanBuffer mConstantBuffer;
+        VulkanTexture mDefaultTexture;
     };
 
     QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);

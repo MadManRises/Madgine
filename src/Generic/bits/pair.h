@@ -21,10 +21,10 @@ struct BitPair {
     {
         auto helper = []<size_t... Is, typename T>(T * target, auto &tuple, std::index_sequence<Is...>)
         {
-            new (target) T(std::get<Is>(std::move(tuple)));
+            new (target) T(std::get<Is>(std::move(tuple))...);
         };
-        helper(&mFirst, firstArgs, std::make_index_sequence_for<FirstArgs...> {});
-        helper(&mFirst, secondArgs, std::make_index_sequence_for<SecondArgs...> {});
+        helper(&mFirst, firstArgs, std::index_sequence_for<FirstArgs...>());
+        helper(&mFirst, secondArgs, std::index_sequence_for<SecondArgs...>());
     }
 
     BitPair()

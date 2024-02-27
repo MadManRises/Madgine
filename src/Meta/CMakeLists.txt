@@ -24,6 +24,8 @@ target_include_directories(Meta PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_
 
 target_link_libraries(Meta PUBLIC Generic)
 
-target_link_options(Meta PUBLIC "/NATVIS:${CMAKE_CURRENT_LIST_DIR}/Meta.natvis")
+if (MSVC)
+	target_link_options(Meta PUBLIC "/NATVIS:${CMAKE_CURRENT_LIST_DIR}/Meta.natvis")
+endif()
 
 install_to_workspace(Madgine TARGETS Meta EXPORT_LIB)

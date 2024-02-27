@@ -168,12 +168,14 @@ namespace Window {
             assert(result);
         }
 
+        applyClientSpaceResize();
+
 #ifdef MADGINE_MAINWINDOW_LAYOUT
         if (!loadLayout(STRINGIFY2(MADGINE_MAINWINDOW_LAYOUT)))
             co_return false;
 #endif
 
-        applyClientSpaceResize();
+        //applyClientSpaceResize();
 
         mTaskQueue.queueTask(renderLoop());
 

@@ -153,6 +153,8 @@ namespace Serialize {
     void setActive(T &t, bool active, bool existenceChanged, CallerHierarchyBasePtr hierarchy = {});
     template <typename T, typename... Configs>
     void setSynced(T &t, bool b, CallerHierarchyBasePtr hierarchy = {});
+    template <typename T, typename... Configs>
+    StreamResult visitStream(FormattedSerializeStream &in, const char *name, const StreamVisitor &visitor);
 
 }
 

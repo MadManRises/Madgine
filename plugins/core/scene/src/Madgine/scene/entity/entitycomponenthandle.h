@@ -8,6 +8,8 @@
 
 #include "Generic/closure.h"
 
+#include "Meta/serialize/hierarchy/serializableunitptr.h"
+
 namespace Engine {
 namespace Scene {
 

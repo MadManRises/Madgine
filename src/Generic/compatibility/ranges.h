@@ -2,6 +2,10 @@
 
 #include "../pipable.h"
 
+#if ANDROID
+#    define __cpp_lib_ranges 202110L
+#endif
+
 #if __cpp_lib_ranges >= 201911L
 #    include <ranges>
 #endif
@@ -294,3 +298,4 @@ inline constexpr bool ranges::enable_borrowed_range<views::TransformView<R, F>> 
 #endif
 
 }
+

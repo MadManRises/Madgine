@@ -22,6 +22,8 @@
 
 #include "pluginmanager.h"
 
+#if ENABLE_PLUGINS
+
 UNIQUECOMPONENT(Engine::Tools::PluginExporter)
 
 METATABLE_BEGIN_BASE(Engine::Tools::PluginExporter, Engine::Root::RootComponentBase)
@@ -107,7 +109,7 @@ namespace Tools {
             for (UniqueComponent::CollectorInfoBase *collector : *reg) {
                 for (const std::vector<const TypeInfo *> &typeInfos : collector->mElementInfos) {
                     const TypeInfo *ti = typeInfos.front();
-                    if (ti != &typeInfo<PluginManager>) {
+                    if (ti != &typeInfo<PluginManager> && ti != &typeInfo<PluginExporter>) {
                         file.beginCondition("BUILD_"s + collector->mBinary->mName);
                         file.include(1, fixInclude(ti->mHeaderPath, collector->mBinary));
                         file.endCondition("BUILD_"s + collector->mBinary->mName);
@@ -134,7 +136,7 @@ std::vector<)"
                 file.beginCondition("BUILD_"s + collector->mBinary->mName);
                 for (const std::vector<const TypeInfo *> &typeInfos : collector->mElementInfos) {
                     const TypeInfo *ti = typeInfos.front();
-                    if (ti != &typeInfo<PluginManager>)
+                    if (ti != &typeInfo<PluginManager> && ti != &typeInfo<PluginExporter>)
                         file << "		type_holder<"
                              << ti->mFullName << ">,\n";
                 }
@@ -158,7 +160,7 @@ std::vector<)"
                      << collector->mBinary->mName << " = ACC;\n";
                 size_t i = 0;
                 for (const std::vector<const TypeInfo *> &typeInfos : collector->mElementInfos) {
-                    if (typeInfos.front() != &typeInfo<PluginManager>) {
+                    if (typeInfos.front() != &typeInfo<PluginManager> && typeInfos.front() != &typeInfo<PluginExporter>) {
                         for (const TypeInfo *typeInfo : typeInfos) {
                             while (typeInfo) {
                                 file << R"(template <>
@@ -197,7 +199,7 @@ const std::map<std::string_view, IndexType<uint32_t>> &)"
                     size_t i = 0;
                     for (const std::vector<const TypeInfo *> &typeInfos : collector->mElementInfos) {
                         const TypeInfo *ti = typeInfos.front();
-                        if (ti != &typeInfo<PluginManager>)
+                        if (ti != &typeInfo<PluginManager> && ti != &typeInfo<PluginExporter>)
                             file << R"(		{")" << collector->mComponentNames[i] << R"(", CollectorBaseIndex_)"
                                  << collector->mBaseInfo->mTypeName << "_"
                                  << collector->mBinary->mName << " + " << i++ << "},\n";
@@ -225,3 +227,5 @@ const std::map<std::string_view, IndexType<uint32_t>> &)"
 
 }
 }
+
+#endif

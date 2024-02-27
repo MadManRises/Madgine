@@ -8,8 +8,13 @@
 #    endif
 
 namespace std {
-struct stop_token { };
-template <typename F>
+struct stop_token { 
+    bool stop_requested()
+    {
+        return false;
+    }
+};
+    template <typename F>
 struct stop_callback { 
     template <typename... T>
     stop_callback(T &&...) { }
@@ -27,6 +32,10 @@ struct stop_source {
     }
     bool stop_possible() {
         return true;
+    }
+    bool stop_requested()
+    {
+        return false;
     }
 };
 }

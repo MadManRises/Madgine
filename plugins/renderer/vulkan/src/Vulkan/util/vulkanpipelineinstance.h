@@ -35,12 +35,11 @@ namespace Render {
 
         std::vector<size_t> mConstantBufferSizes;
         std::vector<uint32_t> mConstantGPUBufferOffsets;
-        mutable std::vector<uint32_t> mTempGPUAddresses;
+        mutable std::vector<VkDescriptorSet> mTempDescriptors;
 
         bool mDepthChecking;
 
-        VkDescriptorSet mUboDescriptorSet;
-        VkDescriptorSet mTempBufferDescriptorSet;
+        VkDescriptorSet mUboDescriptorSet;        
 
         mutable bool mHasIndices = false;
         mutable uint32_t mElementCount;

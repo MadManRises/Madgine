@@ -71,14 +71,14 @@ static void unpackApiHelper(const FunctionTable *table, ValueType &retVal, const
 template <auto F, typename T, typename... Args, size_t... I>
 static void unpackAsyncHelper(const FunctionTable *table, ValueType &retVal, const ArgumentList &args, std::index_sequence<I...>)
 {
-    T *t = ValueType_as<ScopePtr>(getArgument(args, 0)).safe_cast<T>();
+    T *t = scope_cast<T>(ValueType_as<ScopePtr>(getArgument(args, 0)));
     (t->*F)(retVal, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...);
 }
 
 template <auto F, typename T, typename... Args, size_t... I>
 static void unpackReturnListHelper(const FunctionTable *table, ValueType &retVal, const ArgumentList &args, std::index_sequence<I...>)
 {
-    T *t = ValueType_as<ScopePtr>(getArgument(args, 0)).safe_cast<T>();
+    T *t = scope_cast<T>(ValueType_as<ScopePtr>(getArgument(args, 0)));
     (t->*F)(retVal, ValueType_as<std::remove_cv_t<std::remove_reference_t<Args>>>(getArgument(args, I + 1))...);
 }
 

@@ -42,6 +42,10 @@ namespace Tools {
     {
     }
 
+    void ToolBase::renderMetrics()
+    {
+    }
+
     void ToolBase::update()
     {
         if (mVisible)

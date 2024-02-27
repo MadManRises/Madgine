@@ -50,8 +50,8 @@ METATABLE_BEGIN_BASE(ClickBrick::GameManager, Engine::Input::HandlerBase)
 MEMBER(mCamera)
 METATABLE_END(ClickBrick::GameManager)
 
-NATIVE_BEHAVIOR(ClickBrick_Test, ClickBrick::Test)
-NATIVE_BEHAVIOR(ClickBrick_Brick, ClickBrick::Brick, Engine::InputParameter<float>, Engine::InputParameter<Engine::Vector3>, Engine::InputParameter<Engine::Quaternion>)
+//NATIVE_BEHAVIOR(ClickBrick_Test, ClickBrick::Test)
+//NATIVE_BEHAVIOR(ClickBrick_Brick, ClickBrick::Brick, Engine::InputParameter<float>, Engine::InputParameter<Engine::Vector3>, Engine::InputParameter<Engine::Quaternion>)
 
 namespace ClickBrick {
 

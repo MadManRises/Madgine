@@ -208,8 +208,8 @@ private:
 #define ENUM_REGISTRY(Name, Type, MIN_VAL, Base, ...)                                                                                                        \
     struct Name##Representation {                                                                                                                            \
         enum EnumType Type {                                                                                                                                 \
-            MIN = MIN_VAL,                                                                                                                                   \
-            __VA_ARGS__,                                                                                                                                     \
+            MIN = MIN_VAL __VA_OPT__(,)                                                                                                                                   \
+            __VA_ARGS__,                                                                                                                                      \
             MAX,                                                                                                                                             \
             COUNT = MAX - MIN - 1                                                                                                                            \
         };                                                                                                                                                   \

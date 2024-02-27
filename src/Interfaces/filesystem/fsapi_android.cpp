@@ -149,12 +149,12 @@ namespace Filesystem {
 
             switch (dir) {
             case std::ios_base::beg:
-                if (eback() + off >= egptr())
+                if (eback() + off > egptr())
                     return pos_type(off_type(-1));
                 setg(eback(), eback() + off, egptr());
                 break;
             case std::ios_base::cur:
-                if (gptr() + off < eback() || gptr() + off >= egptr())                     
+                if (gptr() + off < eback() || gptr() + off > egptr())                     
                     return pos_type(off_type(-1));
                 setg(eback(), gptr() + off, egptr());
                 break;

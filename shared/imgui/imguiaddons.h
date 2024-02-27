@@ -7,6 +7,8 @@
 
 #include "Generic/coroutines/generator.h"
 
+#include "Modules/debug/history.h"
+
 namespace ImGui {
 
 struct ValueTypePayload;
@@ -95,6 +97,9 @@ IMGUI_API bool EditableTreeNode(const void *id, std::string *s, ImGuiTreeNodeFla
 
 IMGUI_API void Duration(std::chrono::nanoseconds dur);
 IMGUI_API void RightAlignDuration(std::chrono::nanoseconds dur);
+
+IMGUI_API void Bytes(size_t bytes);
+IMGUI_API void RightAlignBytes(size_t bytes);
 
 IMGUI_API void RightAlignText(const char *s, ...);
 IMGUI_API void RightAlign(float size);
@@ -231,7 +236,8 @@ IMGUI_API bool IsNewWindow(const char *name);
 IMGUI_API void SetWindowDockingDir(ImGuiID dockSpaceId, ImGuiDir dir, float ratio, bool outer, ImGuiCond cond = 0);
 
 template <typename E>
-bool EnumCombo(const char* name, E *val) {
+bool EnumCombo(const char *name, E *val)
+{
     bool changed = false;
     if (ImGui::BeginCombo(name, std::string { val->toString() }.c_str())) {
         for (E v : E::values()) {
@@ -246,5 +252,53 @@ bool EnumCombo(const char* name, E *val) {
 }
 
 IMGUI_API void MakeTabVisible(const char *name);
+
+using Unit = std::pair<size_t, const char *>;
+
+static constexpr Unit sByteUnits[] {
+    { 1024, "B" },
+    { 1024, "KB" },
+    { 1024, "MB" },
+    { 1024, "GB" }
+};
+
+static constexpr Unit sDurationUnits[] {
+    { 1000, "ns" },
+    { 1000, "us" },
+    { 1000, "ms" },
+    { 60, "s" }
+};
+
+IMGUI_API void UnitText(float value, std::span<const Unit> units, void (*text)(const char *, ...) = ImGui::Text);
+
+template <size_t S>
+void PlotHistory(Engine::Debug::History<float, S> &data, const char *label, std::span<const Unit> units = {})
+{
+    if (ImGui::BeginTable(label, 3)) {
+        ImGui::TableSetupColumn("plot", ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableSetupColumn("statNames", ImGuiTableColumnFlags_WidthFixed);
+        ImGui::TableSetupColumn("stats", ImGuiTableColumnFlags_WidthFixed);
+        const Engine::Debug::HistoryData<float> &d = data.data();
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        float range = d.mMax - d.mMin;
+        ImGui::SetNextItemWidth(-FLT_MIN);
+        ImGui::PlotHistogram("", data.buffer(), S, static_cast<int>(d.mIndex), nullptr, d.mMin - 0.05f * range, d.mMax + 0.05f * range, ImVec2(0, 80));
+        ImGui::TableNextColumn();
+        ImGui::Text("Average: ");
+        ImGui::Text("Current: ");
+        ImGui::Text("Min: ");
+        ImGui::Text("Max: ");
+        ImGui::TableNextColumn();
+        ImGui::UnitText(data.average(), units, ImGui::RightAlignText);        
+        ImGui::UnitText(data.buffer()[(d.mIndex + S - 1) % S], units, ImGui::RightAlignText);
+        ImGui::UnitText(d.mMin, units, ImGui::RightAlignText);
+        ImGui::UnitText(d.mMax, units, ImGui::RightAlignText);
+
+        /* if (ImGui::Button("Reset extreme values"))
+        data.resetExtremeValues();*/
+        ImGui::EndTable();
+    }
+}
 
 }

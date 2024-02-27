@@ -26,35 +26,7 @@ namespace Debug {
         DebugLocation *mChild = nullptr;
         ContextInfo *mContext = nullptr;
     };
-
-    struct MADGINE_DEBUGGER_EXPORT DebugLocation : ParentLocation {
-        virtual ~DebugLocation() = default;
-        virtual std::string toString() const = 0;
-        virtual std::map<std::string_view, ValueType> localVariables() const = 0;
-        virtual bool wantsPause() const = 0;
-
-        void stepInto(ParentLocation *parent);
-        void stepOut(ParentLocation *parent);
-        template <typename F>
-        void yield(F &&callback, std::stop_token st)
-        {
-            mContext->suspend(std::forward<F>(callback), std::move(st));
-        }
-        bool pass();
-        template <typename F, typename... Args>
-        void pass(F &&callback, std::stop_token st, Args &&...args)
-        {
-            if (pass()) {
-                std::forward<F>(callback)(ContinuationMode::Resume, std::forward<Args>(args)...);
-            } else {
-                yield([callback { forward_capture(std::forward<F>(callback)) }, args = std::tuple<Args...> { std::forward<Args>(args)... }](ContinuationMode mode) mutable {
-                    TupleUnpacker::invokeExpand(std::forward<F>(callback), mode, std::move(args));
-                },
-                    std::move(st));
-            }
-        }
-    };
-
+        
     struct MADGINE_DEBUGGER_EXPORT ContextInfo : ParentLocation {
         ContextInfo()
             : ParentLocation { nullptr, this }       
@@ -89,6 +61,34 @@ namespace Debug {
         Closure<void(ContinuationMode)> mCallback;
         Execution::stop_callback<stop_cb, finally_cb> mStopCallback;
         std::atomic<int> mPaused = 0;
+    };
+
+    struct MADGINE_DEBUGGER_EXPORT DebugLocation : ParentLocation {
+        virtual ~DebugLocation() = default;
+        virtual std::string toString() const = 0;
+        virtual std::map<std::string_view, ValueType> localVariables() const = 0;
+        virtual bool wantsPause() const = 0;
+
+        void stepInto(ParentLocation *parent);
+        void stepOut(ParentLocation *parent);
+        template <typename F>
+        void yield(F &&callback, std::stop_token st)
+        {
+            mContext->suspend(std::forward<F>(callback), std::move(st));
+        }
+        bool pass();
+        template <typename F, typename... Args>
+        void pass(F &&callback, std::stop_token st, Args &&...args)
+        {
+            if (pass()) {
+                std::forward<F>(callback)(ContinuationMode::Resume, std::forward<Args>(args)...);
+            } else {
+                yield([callback { forward_capture(std::forward<F>(callback)) }, args = std::tuple<Args...> { std::forward<Args>(args)... }](ContinuationMode mode) mutable {
+                    TupleUnpacker::invokeExpand(std::forward<F>(callback), mode, std::move(args));
+                },
+                    std::move(st));
+            }
+        }
     };
 
     struct DebugListener {

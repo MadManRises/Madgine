@@ -81,6 +81,12 @@ namespace Filesystem {
         return mHandles.empty();
     }
 
+    bool operator==(const FileQuerySentinel &sen, const FileQueryIterator &self)
+    {
+        assert(self.mQuery == sen.mQuery);
+        return self.mHandles.empty();
+    }
+
     bool FileQueryIterator::operator!=(const FileQuerySentinel &sen) const
     {
         assert(mQuery == sen.mQuery);
@@ -151,6 +157,7 @@ namespace Filesystem {
     {
         return mHandle->path() / filename(*mState);
     }
+
 
 }
 }

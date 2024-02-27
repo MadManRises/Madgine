@@ -28,8 +28,16 @@ namespace Render {
         VkResult result = vkAllocateDescriptorSets(GetDevice(), &allocInfo, &mUboDescriptorSet);
         VK_CHECK(result);
 
+        VkDebugUtilsObjectNameInfoEXT nameInfo {};
+        nameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+        nameInfo.objectType = VK_OBJECT_TYPE_DESCRIPTOR_SET;
+        nameInfo.objectHandle = reinterpret_cast<uintptr_t>(mUboDescriptorSet);
+        nameInfo.pObjectName = "Pipeline UBO Set";
+        result = vkSetDebugUtilsObjectNameEXT(GetDevice(), &nameInfo);
+        VK_CHECK(result);
+
         context.mTempAllocator.allocate(1);
-        Block block = context.mTempAllocator.parent().getBlock();
+        Block block = context.mTempAllocator.parent().parent().getBlock();
         VkBuffer buffer = context.mTempMemoryHeap.resolve(block.mAddress).first;
 
         for (size_t i = 0; i < std::min(config.bufferSizes.size(), size_t { 3 }); ++i) {
@@ -55,34 +63,6 @@ namespace Render {
 
             vkUpdateDescriptorSets(GetDevice(), 1, &descriptorWrite, 0, nullptr);
         }
-
-        allocInfo.pSetLayouts = &std::as_const(context.mTempBufferDescriptorSetLayout);
-        result = vkAllocateDescriptorSets(GetDevice(), &allocInfo, &mTempBufferDescriptorSet);
-        VK_CHECK(result);
-
-        for (size_t i = 0; i < 1; ++i) {
-            VkDescriptorBufferInfo bufferInfo {};
-            bufferInfo.buffer = buffer;
-            bufferInfo.offset = 0;
-            bufferInfo.range = 64;
-            LOG_WARNING_ONCE("Find solution for dynamically sized buffer views in Vulkan");
-
-            VkWriteDescriptorSet descriptorWrite {};
-            descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            descriptorWrite.dstSet = mTempBufferDescriptorSet;
-            descriptorWrite.dstBinding = i;
-            descriptorWrite.dstArrayElement = 0;
-
-            descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
-            descriptorWrite.descriptorCount = 1;
-
-            descriptorWrite.pBufferInfo = &bufferInfo;
-            descriptorWrite.pImageInfo = nullptr; // Optional
-            descriptorWrite.pTexelBufferView = nullptr; // Optional
-
-            vkUpdateDescriptorSets(GetDevice(), 1, &descriptorWrite, 0, nullptr);
-        }
-
     }
 
     VulkanPipelineInstance::~VulkanPipelineInstance()
@@ -106,8 +86,8 @@ namespace Render {
 
         vkCmdBindDescriptorSets(commandList, VK_PIPELINE_BIND_POINT_GRAPHICS, VulkanRenderContext::getSingleton().mPipelineLayout, 0, 1, &mUboDescriptorSet, mConstantGPUBufferOffsets.size(), mConstantGPUBufferOffsets.data());
 
-        mTempGPUAddresses.resize(1);
-        vkCmdBindDescriptorSets(commandList, VK_PIPELINE_BIND_POINT_GRAPHICS, VulkanRenderContext::getSingleton().mPipelineLayout, 2, 1, &mTempBufferDescriptorSet, mTempGPUAddresses.size(), mTempGPUAddresses.data());
+        if (!mTempDescriptors.empty())
+            vkCmdBindDescriptorSets(commandList, VK_PIPELINE_BIND_POINT_GRAPHICS, VulkanRenderContext::getSingleton().mPipelineLayout, 2, mTempDescriptors.size(), mTempDescriptors.data(), 0, nullptr);
 
         return true;
     }
@@ -173,11 +153,35 @@ namespace Render {
     WritableByteBuffer VulkanPipelineInstance::mapTempBuffer(size_t space, size_t size, size_t count) const
     {
         assert(space >= 1);
-        if (mTempGPUAddresses.size() <= space - 1)
-            mTempGPUAddresses.resize(space);
+        if (mTempDescriptors.size() <= space - 1)
+            mTempDescriptors.resize(space);
+
+        VkDescriptorSet set = VulkanRenderContext::getSingleton().fetchTempDescriptorSet();
 
         Block block = VulkanRenderContext::getSingleton().mTempAllocator.allocate(size * count, 256);
-        mTempGPUAddresses[space - 1] = VulkanRenderContext::getSingleton().mTempMemoryHeap.resolve(block.mAddress).second;
+        auto [buffer, offset] = VulkanRenderContext::getSingleton().mTempMemoryHeap.resolve(block.mAddress);
+
+        VkDescriptorBufferInfo bufferInfo {};
+        bufferInfo.buffer = buffer;
+        bufferInfo.offset = offset;
+        bufferInfo.range = size * count;        
+
+        VkWriteDescriptorSet descriptorWrite {};
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = set;
+        descriptorWrite.dstBinding = space - 1;
+        descriptorWrite.dstArrayElement = 0;
+
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        descriptorWrite.descriptorCount = 1;
+
+        descriptorWrite.pBufferInfo = &bufferInfo;
+        descriptorWrite.pImageInfo = nullptr; // Optional
+        descriptorWrite.pTexelBufferView = nullptr; // Optional
+
+        vkUpdateDescriptorSets(GetDevice(), 1, &descriptorWrite, 0, nullptr);
+
+        mTempDescriptors[space - 1] = set;
 
         return { block.mAddress, block.mSize };
     }
@@ -255,15 +259,16 @@ namespace Render {
 
     void VulkanPipelineInstance::bindResources(RenderTarget *_target, size_t space, ResourceBlock block) const
     {
+        assert(space > 1);
+        VulkanRenderTarget *target = static_cast<VulkanRenderTarget *>(_target);
+        VkCommandBuffer commandList = target->mCommandList;
+        VkDescriptorSet set;
         if (block) {
-            VulkanRenderTarget *target = static_cast<VulkanRenderTarget *>(_target);
-            VkCommandBuffer commandList = target->mCommandList;
-
-            const VkDescriptorSet set = block;
-
-            assert(space > 1);
-            vkCmdBindDescriptorSets(commandList, VK_PIPELINE_BIND_POINT_GRAPHICS, target->context()->mPipelineLayout, 1 + space, 1, &set, 0, nullptr);
+            set = block;
+        } else {
+            set = target->context()->mDefaultResourceBlockDescriptorSet;
         }
+        vkCmdBindDescriptorSets(commandList, VK_PIPELINE_BIND_POINT_GRAPHICS, target->context()->mPipelineLayout, 1 + space, 1, &set, 0, nullptr);
     }
 
     VulkanPipelineInstanceHandle::VulkanPipelineInstanceHandle(const PipelineConfiguration &config, VulkanPipelineLoader::Handle pipeline)

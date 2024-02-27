@@ -310,7 +310,7 @@ namespace Serialize {
     namespace Serialize_##T                                                                                         \
     {                                                                                                               \
         static constexpr const ::Engine::Serialize::SerializeTable &(*baseType)() = Base;                           \
-        static constexpr const auto readState = ::Engine::Serialize::__serialize_impl__::readState<T, __VA_ARGS__>; \
+        static constexpr const auto readState = ::Engine::Serialize::__serialize_impl__::readState<T __VA_OPT__(,) __VA_ARGS__>; \
     }                                                                                                               \
     namespace Engine {                                                                                              \
         START_STRUCT(Serialize::__serialize_impl__::SerializerTag, Idx)                                             \
@@ -368,7 +368,7 @@ namespace Serialize {
             }                                                                                                         \
             static constexpr const bool base = false;                                                                 \
             static constexpr const size_t count = BASE_STRUCT(Serialize::__serialize_impl__::FunctionTag, Idx)::count + 1; \
-            Serialize::SyncFunction mData = Serialize::__serialize_impl__::syncFunction<&Ty::f, __VA_ARGS__>();       \
+            Serialize::SyncFunction mData = Serialize::__serialize_impl__::syncFunction<&Ty::f __VA_OPT__(,) __VA_ARGS__>();       \
             template <auto g>                                                                                         \
             static constexpr uint16_t getIndex()                                                                      \
             {                                                                                                         \

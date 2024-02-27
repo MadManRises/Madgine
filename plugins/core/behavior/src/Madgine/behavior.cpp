@@ -33,12 +33,13 @@ Behavior CoroutineBehaviorState::get_return_object()
     return Behavior::StatePtr { this };
 }
 
-void CoroutineBehaviorState::connect(BehaviorReceiver* rec) {
+void CoroutineBehaviorState::connect(BehaviorReceiver *rec)
+{
     mReceiver = rec;
 }
 
 void CoroutineBehaviorState::start()
-{    
+{
     mDebugLocation.stepInto(mReceiver->debugLocation());
     std::coroutine_handle<CoroutineBehaviorState>::from_promise(*this).resume();
 }
@@ -106,7 +107,9 @@ bool CoroutineBehaviorState::InitialSuspend::await_ready() noexcept
 
 void CoroutineBehaviorState::InitialSuspend::await_suspend(std::coroutine_handle<CoroutineBehaviorState> handle) noexcept
 {
+#ifndef NDEBUG
     handle.promise().mDebugLocation.mStacktrace = Debug::StackTrace<1>::getCurrent(1);
+#endif
 }
 
 void CoroutineBehaviorState::InitialSuspend::await_resume() noexcept
@@ -115,7 +118,11 @@ void CoroutineBehaviorState::InitialSuspend::await_resume() noexcept
 
 std::string CoroutineLocation::toString() const
 {
+#ifdef NDEBUG
+    return "<Coroutine>";
+#else
     return mStacktrace.calculateReadable()[0].mFunction;
+#endif
 }
 
 std::map<std::string_view, ValueType> CoroutineLocation::localVariables() const
@@ -140,7 +147,7 @@ Behavior::state::state(StatePtr state)
 }
 
 void Behavior::state::start()
-{    
+{
     mState->start();
 }
 

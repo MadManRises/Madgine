@@ -39,6 +39,8 @@
 
 #include "Madgine_Tools/imguiicons.h"
 
+#include "Modules/threading/awaitables/awaitablesender.h"
+
 METATABLE_BEGIN_BASE(Engine::Tools::ClientImRoot, Engine::Tools::ImRoot)
 METATABLE_END(Engine::Tools::ClientImRoot)
 
@@ -248,7 +250,9 @@ namespace Tools {
         if (!co_await ImRoot::init())
             co_return false;
 
-        io.FontDefault = io.Fonts->AddFontDefault();
+        ImFontConfig defaultConfig {};
+        defaultConfig.SizePixels = 13.0f * Window::platformCapabilities.mScalingFactor;
+        io.FontDefault = io.Fonts->AddFontDefault(&defaultConfig);
 
         static const ImWchar icons_ranges[] = { 0xf100, 0xf1ff, 0 };
 
@@ -256,10 +260,14 @@ namespace Tools {
         config.MergeMode = true;
         config.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_LoadColor;
         //config.GlyphMinAdvanceX = 13.0f;
-        config.GlyphOffset = { 0.0f, 3.0f };
+        config.GlyphOffset = { 0.0f, 3.0f * Window::platformCapabilities.mScalingFactor };
+        config.FontDataOwnedByAtlas = false;
 
-        io.Fonts->AddFontFromFileTTF(Engine::Resources::ResourceManager::getSingleton().findResourceFile("icons.ttf").c_str(), 13, &config, icons_ranges);
-        
+        Filesystem::Path iconsPath = Resources::ResourceManager::getSingleton().findResourceFile("icons.ttf");
+        ByteBuffer iconsData = co_await Filesystem::readFileAsync(iconsPath);
+
+        io.Fonts->AddFontFromMemoryTTF(const_cast<void *>(iconsData.mData), iconsData.mSize, 13.0f * Window::platformCapabilities.mScalingFactor, &config, icons_ranges);
+
         io.Fonts->Build();
 
         unsigned char *pixels;
@@ -268,6 +276,8 @@ namespace Tools {
         co_await mFontTexture.create(Render::TextureType_2D, Render::FORMAT_RGBA8_SRGB, { width, height }, { pixels, static_cast<size_t>(width * height * 4) });
 
         io.Fonts->SetTexID(mFontTexture->resource());
+
+        io.FontGlobalScale = 1.0f / Window::platformCapabilities.mScalingFactor;
 
         co_return true;
     }
@@ -373,20 +383,26 @@ namespace Tools {
         }
     }
 
+    void ClientImRoot::shutdown(Render::RenderTarget *target)
+    {
+        mPipeline.reset();
+    }
+
     void ClientImRoot::renderViewport(Render::RenderTarget *target, ImGuiViewport *vp)
     {
         if (!mPipeline.available())
             return;
 
         ImDrawData *draw_data = vp->DrawData;
+        draw_data->ScaleClipRects(ImGui::GetIO().DisplayFramebufferScale);
 
         {
             auto mvp = mPipeline->mapParameters<Matrix4>(0);
 
             float L = draw_data->DisplayPos.x;
-            float R = draw_data->DisplayPos.x + draw_data->DisplaySize.x;
+            float R = draw_data->DisplayPos.x + draw_data->DisplaySize.x /* / ImGui::GetIO().DisplayFramebufferScale.x*/;
             float T = draw_data->DisplayPos.y;
-            float B = draw_data->DisplayPos.y + draw_data->DisplaySize.y;
+            float B = draw_data->DisplayPos.y + draw_data->DisplaySize.y /* / ImGui::GetIO().DisplayFramebufferScale.y*/;
             *mvp.mData = target->getClipSpaceMatrix() * Matrix4 { 2.0f / (R - L), 0.0f, 0.0f, (R + L) / (L - R), 0.0f, 2.0f / (T - B), 0.0f, (T + B) / (B - T), 0.0f, 0.0f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f };
         }
 
@@ -583,7 +599,7 @@ namespace Tools {
         if (mAreaSize != oldSize)
             mWindow.applyClientSpaceResize(this);
     }
-    
+
     Threading::TaskQueue *ClientImRoot::taskQueue() const
     {
         return mWindow.taskQueue();

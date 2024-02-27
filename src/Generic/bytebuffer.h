@@ -13,10 +13,16 @@ struct ByteBufferDataAccessor {
 
     template <typename T, typename D>
     auto operator()(const std::unique_ptr<T, D> &p) { return p.get(); }
+
+    template <typename T, size_t Size>
+    const T *operator()(const T (&a)[Size]) { return a; }
 };
 struct ByteBufferSizeAccessor {
     template <typename T>
     size_t operator()(const std::vector<T> &v) { return v.size() * sizeof(T); }
+
+    template <typename T, size_t Size>
+    size_t operator()(const T (&)[Size]) { return Size * sizeof(T); }
 };
 
 /**

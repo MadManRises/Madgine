@@ -32,7 +32,7 @@ namespace Root {
 #endif
 
     CLI::Parameter<bool> toolModeParameter { { "--toolMode", "-t" }, false, "If set, no application will be started. Only the root will be initialized and then immediately shutdown again." };
-    CLI::Parameter<Engine::Log::MessageType> logLevel { { "--logLevel", "-l" }, Engine::Log::MessageType::INFO_TYPE, "Specify log-level." };
+    CLI::Parameter<Engine::Log::MessageType> logLevel { { "--logLevel", "-l" }, Engine::Log::MessageType::DEBUG_TYPE, "Specify log-level." };
     CLI::Parameter<Filesystem::Path> logFile { { "--logFile" }, "out.log", "If set, the log output will be written to the specified path" };
 
     Root::Root(int argc, char **argv)

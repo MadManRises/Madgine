@@ -23,7 +23,7 @@ namespace Threading {
         static_assert(!IsTask<T>);
 
         struct promise_type : TaskSuspendablePromise<T> {
-            
+
             promise_type()
                 : TaskSuspendablePromise<T>(Immediate)
             {
@@ -127,7 +127,13 @@ namespace Threading {
         using R = std::invoke_result_t<F, Args...>;
 
         if constexpr (IsTask<R>) {
-            return std::invoke(std::move(f), std::forward<Args>(args)...);
+            if constexpr (sizeof(F) == 1) { //most likely captureless lambda
+                return std::invoke(std::move(f), std::forward<Args>(args)...);
+            } else {
+                return [](F f, Args... args) -> R { //keep f alive during the whole lifetime of the Task
+                    co_return co_await std::invoke(std::move(f), std::forward<Args>(args)...);
+                }(std::move(f), std::forward<Args>(args)...);
+            }
         } else {
             return [](F f, Args... args) -> Task<R> {
                 co_return std::invoke(std::move(f), std::forward<Args>(args)...);

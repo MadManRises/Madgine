@@ -63,6 +63,7 @@ namespace Filesystem {
 
         bool operator!=(const FileQueryIterator &other) const;
         bool operator==(const FileQuerySentinel &sen) const;
+        friend bool operator==(const FileQuerySentinel &sen, const FileQueryIterator &self);
         bool operator!=(const FileQuerySentinel &sen) const;
 
         void enterDir();

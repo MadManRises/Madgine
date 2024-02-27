@@ -8,6 +8,8 @@
 
 #include "Meta/keyvalue/valuetype.h"
 
+#include "behavior.h"
+
 namespace Engine {
 
 struct NativeBehaviorInfo {
@@ -189,7 +191,7 @@ REGISTER_TYPE(Engine::NativeBehaviorInfo)
         }                                                                                         \
     };                                                                                            \
                                                                                                   \
-    using Name##NativeBehavior = Engine::NativeBehavior<Constant, Name##Linkage {}, __VA_ARGS__>; \
+    using Name##NativeBehavior = Engine::NativeBehavior<Constant, Name##Linkage {} __VA_OPT__(,) __VA_ARGS__>; \
                                                                                                   \
     template <>                                                                                   \
     const Name##NativeBehavior Name##NativeBehavior::sInfo { #Name };                             \

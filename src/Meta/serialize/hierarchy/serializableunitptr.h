@@ -4,6 +4,8 @@
 #include "serializetable_forward.h"
 #include "Generic/closure.h"
 
+#include "../streams/streamresult.h"
+
 #include "../primitivetypes.h"
 
 namespace Engine {

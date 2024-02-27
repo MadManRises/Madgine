@@ -12,7 +12,7 @@
 
 #    include "../input/inputevents.h"
 
-#    include "../util/utilmethods.h"
+#    include "../log/logmethods.h"
 
 namespace Engine {
 namespace Window {
@@ -133,9 +133,12 @@ namespace Window {
     }
 
     InterfacesVector OSWindow::renderSize()
-    {
-        // TODO
-        return size();
+    {        
+        ANativeWindow *window = reinterpret_cast<ANativeWindow *>(mHandle);
+        return {
+            ANativeWindow_getWidth(window),
+            ANativeWindow_getHeight(window) - 112
+        };
     }
 
     InterfacesVector OSWindow::pos()
@@ -178,11 +181,6 @@ namespace Window {
     bool OSWindow::isMaximized()
     {
         return false;
-    }
-
-    bool OSWindow::isFullscreen()
-    {
-        return true;
     }
 
     void OSWindow::focus()

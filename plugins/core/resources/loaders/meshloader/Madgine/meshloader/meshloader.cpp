@@ -15,6 +15,8 @@
 
 #include "Modules/threading/awaitables/awaitablesender.h"
 
+#include "Interfaces/filesystem/fsapi.h"
+
 RESOURCELOADER(Engine::Render::MeshLoader)
 
 namespace Engine {
@@ -241,10 +243,12 @@ namespace Render {
             for (size_t i = 0; i < count; ++i) {
                 aiString diffuseTexturePath;
                 if (mat->GetTexture(aiTextureType_DIFFUSE, i, &diffuseTexturePath) == AI_SUCCESS && diffuseTexturePath.length > 0) {
-                    std::string diffuseName { Filesystem::Path { diffuseTexturePath.C_Str() }.stem() };
+                    std::string_view diffuseName { diffuseTexturePath.C_Str() };
+                    auto it = std::ranges::find_if(diffuseName | std::views::reverse, Filesystem::isSeparator).base();
+                    diffuseName = diffuseName.substr(std::distance(diffuseName.begin(), it));
                     if (!targetMat.mDiffuseName.empty() && targetMat.mDiffuseName != diffuseName)
                         throw "Only one diffuse texture is allowed at the moment!";
-                    targetMat.mDiffuseName = diffuseName;
+                    targetMat.mDiffuseName = Filesystem::Path { diffuseName }.stem();
                 }
             }
 
@@ -252,10 +256,12 @@ namespace Render {
             for (size_t i = 0; i < count; ++i) {
                 aiString emissiveTexturePath;
                 if (mat->GetTexture(aiTextureType_EMISSIVE, i, &emissiveTexturePath) == AI_SUCCESS && emissiveTexturePath.length > 0) {
-                    std::string emissiveName { Filesystem::Path { emissiveTexturePath.C_Str() }.stem() };
+                    std::string_view emissiveName { emissiveTexturePath.C_Str() };
+                    auto it = std::ranges::find_if(emissiveName | std::views::reverse, Filesystem::isSeparator).base();
+                    emissiveName = emissiveName.substr(std::distance(emissiveName.begin(), it));
                     if (!targetMat.mEmissiveName.empty() && targetMat.mEmissiveName != emissiveName)
                         throw "Only one emissive texture is allowed at the moment!";
-                    targetMat.mEmissiveName = emissiveName;
+                    targetMat.mEmissiveName = Filesystem::Path { emissiveName }.stem();
                 }
             }
         }

@@ -42,6 +42,11 @@ namespace Debug {
         struct Profiler;
         struct ProfilerThread;
     }
+
+    template <typename T, size_t S>
+    struct History;
+    template <typename T>
+    struct HistoryData;
 }
 
 namespace Plugins {

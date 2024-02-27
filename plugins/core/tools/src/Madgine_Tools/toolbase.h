@@ -22,6 +22,7 @@ namespace Tools {
         virtual void renderStatus();
         virtual bool renderConfiguration(const Filesystem::Path &config);
         virtual void renderSettings();
+        virtual void renderMetrics();
         virtual void update();
 
         virtual void loadConfiguration(const Filesystem::Path &config);

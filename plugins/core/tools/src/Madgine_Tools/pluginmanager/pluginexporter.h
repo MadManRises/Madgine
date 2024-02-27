@@ -3,6 +3,8 @@
 #include "Madgine/root/rootcomponentbase.h"
 #include "Madgine/root/rootcomponentcollector.h"
 
+#if ENABLE_PLUGINS
+
 namespace Engine {
 namespace Tools {
 
@@ -21,3 +23,5 @@ namespace Tools {
 }
 
 REGISTER_TYPE(Engine::Tools::PluginExporter)
+
+#endif

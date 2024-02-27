@@ -1,8 +1,14 @@
-find_package(Vulkan)
+set (VULKAN_DEPENDENCIES)
 
-if (NOT Vulkan_FOUND)
-	MESSAGE(STATUS "Could not locate Vulkan SDK! Vulkan will be disabled")
-	return()
+if (ANDROID)
+	find_package(Vulkan)
+
+	if (NOT Vulkan_FOUND)
+		MESSAGE(STATUS "Could not locate Vulkan SDK! Vulkan on Android will be disabled")
+		return()
+	endif()
+
+	set(VULKAN_DEPENDENCIES Vulkan::Vulkan)
 endif()
 
 Project(Vulkan)
@@ -18,7 +24,7 @@ FolderSources(sources src Vulkan vulkanforward.h vulkanlib.h vulkanmeshdata.h vu
 
 add_plugin(Vulkan Madgine Renderer ${sources} PRECOMPILED_HEADER src/Vulkan/vulkanlib.h)
 
-target_link_libraries(Vulkan PRIVATE Client Vulkan::Vulkan)
+target_link_libraries(Vulkan PRIVATE Client ${VULKAN_DEPENDENCIES})
 
 if (WINDOWS)
 	target_compile_definitions(Vulkan PRIVATE VK_USE_PLATFORM_WIN32_KHR)
@@ -33,13 +39,15 @@ FolderSources(sources "" tools)
 add_tools(Vulkan ${sources} PRECOMPILED_HEADER tools/Vulkan_Tools/vulkantoolslib.h)
 
 target_link_plugins(VulkanTools ClientTools)
-target_link_libraries(VulkanTools PRIVATE Vulkan::Vulkan)
+target_link_libraries(VulkanTools PRIVATE ${VULKAN_DEPENDENCIES})
 
 add_shadergen_target(Vulkan -SPIRV)
 
 
 if (ANDROID)
-	list(APPEND ANDROID_DEPENDENCIES ${CMAKE_CURRENT_SOURCE_DIR}/ext/android_validation_layer;${ANDROID_DEPENDENCIES})
+	list(APPEND ANDROID_DEPENDENCIES 
+		${CMAKE_CURRENT_SOURCE_DIR}/layers/prebuilt
+		)
 	set(ANDROID_DEPENDENCIES "${ANDROID_DEPENDENCIES}" CACHE INTERNAL "")
 endif ()
 

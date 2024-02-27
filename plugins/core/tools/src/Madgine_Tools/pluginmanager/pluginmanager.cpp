@@ -25,7 +25,7 @@
 
 #    include "Modules/ini/inisection.h"
 
-#include "pluginexporter.h"
+#    include "pluginexporter.h"
 
 UNIQUECOMPONENT(Engine::Tools::PluginManager);
 
@@ -43,9 +43,7 @@ namespace Tools {
         ImGui::SetNextWindowSize({ 550, 400 }, ImGuiCond_FirstUseEver);
         if (ImGui::Begin("Plugin Manager", &mVisible)) {
 
-            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 40, 40, 255));
-            ImGui::Text("Changes are only applied on restart!");
-            ImGui::PopStyleColor();
+            ImGui::TextColored(ImColor(255, 40, 40, 255), "Changes are only applied on restart!");
 
             renderPluginSelection(false);
         }

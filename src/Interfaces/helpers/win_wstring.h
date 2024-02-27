@@ -1,5 +1,7 @@
 #pragma once
 
+#if WINDOWS
+
 namespace Engine {
 namespace StringUtil {
 
@@ -8,3 +10,5 @@ namespace StringUtil {
 
 }
 }
+
+#endif

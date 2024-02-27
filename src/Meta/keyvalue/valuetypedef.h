@@ -54,4 +54,4 @@ VALUETYPE_TYPE(Flags, FlagsHolder, const FlagsHolder &)
 VALUETYPE_SEP
 VALUETYPE_TYPE(Sender, KeyValueSender, const KeyValueSender &)
 VALUETYPE_SEP
-VALUETYPE_TYPE(Duration, std::chrono::nanoseconds, std::chrono::nanoseconds, std::chrono::microseconds)
+VALUETYPE_TYPE(Duration, SINGLE_ARG(std::chrono::duration<uint64_t, std::nano>), std::chrono::nanoseconds, std::chrono::microseconds)

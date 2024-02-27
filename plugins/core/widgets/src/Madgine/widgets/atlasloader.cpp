@@ -45,7 +45,9 @@ namespace Widgets {
     {
         mEntries = atlas.entries();
         mSize = atlas.size();
-        mTexture.setData(atlas.imageSize(), atlas.buffer());
+        if (mSize > 0) {
+            mTexture.setData(atlas.imageSize(), atlas.buffer());
+        }
         mAtlas = atlas.atlas();
         for (const std::string &entry : kvKeys(mEntries)) {
             mDummyResources.try_emplace(entry, entry);

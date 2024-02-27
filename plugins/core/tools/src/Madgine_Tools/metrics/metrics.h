@@ -21,7 +21,7 @@ namespace Tools {
         Debug::History<float, 120> mFramesPerSecond;
 
         Debug::History<float, 100> mFramesTrend;
-        float mTimeBank;
+        float mTimeBank = 0.0f;
     };
 
 }

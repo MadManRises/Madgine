@@ -394,7 +394,7 @@ namespace Serialize {
             StreamResult operator()(StreamResult r)
             {
                 STREAM_PROPAGATE_ERROR(std::move(r));
-                return Serialize::visitStream<T>(in, nullptr, callback);
+                return Serialize::visitStream<T>(in, nullptr, visitor);
             }
 
             FormattedSerializeStream &in;
@@ -405,7 +405,7 @@ namespace Serialize {
         {
             STREAM_PROPAGATE_ERROR(in.beginContainerRead(name, false));
             STREAM_PROPAGATE_ERROR(TypeUnpacker::accumulate<type_pack<Ty...>>(
-                VisitHelper { in, callback },
+                VisitHelper { in, visitor },
                 StreamResult {}));
             return in.endContainerRead(name);
         }
@@ -479,8 +479,8 @@ namespace Serialize {
         static StreamResult visitStream(FormattedSerializeStream &in, const char *name, const StreamVisitor &visitor)
         {
             STREAM_PROPAGATE_ERROR(in.beginCompoundRead(name));
-            STREAM_PROPAGATE_ERROR(Serialize::visitStream<U>(in, nullptr, callback));
-            STREAM_PROPAGATE_ERROR(Serialize::visitStream<V>(in, nullptr, callback));
+            STREAM_PROPAGATE_ERROR(Serialize::visitStream<U>(in, nullptr, visitor));
+            STREAM_PROPAGATE_ERROR(Serialize::visitStream<V>(in, nullptr, visitor));
             return in.endCompoundRead(name);
         }
     };
@@ -490,15 +490,15 @@ namespace Serialize {
 
         static StreamResult read(FormattedSerializeStream &in, std::chrono::duration<Rep, Period> &d, const char *name, const CallerHierarchyBasePtr &hierarchy = {})
         {
-            std::chrono::nanoseconds::rep value;
-            STREAM_PROPAGATE_ERROR(Serialize::read<std::chrono::nanoseconds::rep>(in, value, name, hierarchy));
+            uint64_t value;
+            STREAM_PROPAGATE_ERROR(Serialize::read<uint64_t>(in, value, name, hierarchy));
             d = std::chrono::duration_cast<std::chrono::duration<Rep, Period>>(std::chrono::nanoseconds { value });
             return {};
         }
 
         static void write(FormattedSerializeStream &out, const std::chrono::duration<Rep, Period> &d, const char *name, const CallerHierarchyBasePtr &hierarchy = {})
         {
-            Serialize::write<std::chrono::nanoseconds::rep>(out, std::chrono::duration_cast<std::chrono::nanoseconds>(d).count(), name, hierarchy);
+            Serialize::write<uint64_t>(out, std::chrono::duration_cast<std::chrono::nanoseconds>(d).count(), name, hierarchy);
         }
 
     };

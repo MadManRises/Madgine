@@ -35,7 +35,11 @@ namespace Render {
         MeshLoader::Handle handle;
         if (!co_await handle.load(info.resource()->name()))
             co_return false;
-        co_return co_await generate(mesh, *handle);
+        if (!co_await generate(mesh, *handle)) {
+            LOG_ERROR("Failed to upload mesh to GPU: '" << info.resource()->name() << "'");
+            co_return false;
+        }
+        co_return true;
     }
 
     void GPUMeshLoader::unloadImpl(GPUMeshData &data)
@@ -81,8 +85,10 @@ namespace Render {
 
             for (Threading::TaskFuture<bool> &fut : futures) {
                 bool result = co_await fut;
-                if (!result)
+                if (!result) {
+                    LOG_ERROR("Missing Materials!");
                     co_return false;
+                }
             }
 
             gpuMat.mResourceBlock = createResourceBlock({ &*gpuMat.mDiffuseTexture, &*gpuMat.mEmissiveTexture });

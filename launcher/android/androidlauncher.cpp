@@ -13,6 +13,7 @@
 
 #include "../launcher.h"
 #include "Interfaces/filesystem/fsapi.h"
+#include "Interfaces/helpers/android_jni.h"
 
 namespace Engine {
 
@@ -40,6 +41,9 @@ namespace Android {
         activity->callbacks->onInputQueueCreated = delegate<&AndroidLauncher::onInputQueueCreated, AInputQueue *>;
         activity->callbacks->onInputQueueDestroyed = delegate<&AndroidLauncher::onInputQueueDestroyed, AInputQueue *>;
 
+        JNI::setVM(activity->vm, activity->env, activity->clazz);
+        Threading::WorkGroup::addStaticThreadGuards(JNI::initThread, JNI::finalizeThread);
+
         mThread = Threading::WorkGroupHandle("Madgine", &AndroidLauncher::go, this);
     }
 
@@ -47,7 +51,7 @@ namespace Android {
     {
         ANativeActivity *activity = mActivity;
 
-        Engine::Filesystem::setup(activity);
+        Filesystem::setup(activity);
 
         static Engine::Root::Root root;
 

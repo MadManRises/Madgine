@@ -70,7 +70,7 @@ struct IntervalClock {
 
         virtual void continueExecution(std::chrono::microseconds elapsed) = 0;
 
-        friend const void *tag_invoke(Execution::get_debug_data_t, WaitState &state)
+        friend const void *tag_invoke(const Execution::get_debug_data_t &, WaitState &state)
         {
             return &state;
         }
@@ -186,7 +186,7 @@ struct IntervalClock {
                 f(Execution::State::Text { "Yield" });
             } else {
                 std::string title;
-                if (dur.count() < 1000) {
+                /* if (dur.count() < 1000) {
                     title = std::format("Waiting {} ns", dur.count());
                 } else if (dur.count() < 1000000) {
                     title = std::format("Waiting {:.3f} us", std::chrono::duration_cast<std::chrono::duration<float, std::micro>>(dur).count());
@@ -194,7 +194,8 @@ struct IntervalClock {
                     title = std::format("Waiting {:.4f} ms", std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(dur).count());
                 } else {
                     title = std::format("Waiting {:.4f} s", std::chrono::duration_cast<std::chrono::duration<float>>(dur).count());
-                }
+                }*/
+                title = "Waiting";
 
                 f(Execution::State::BeginBlock { title });
 

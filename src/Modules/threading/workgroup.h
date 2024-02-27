@@ -43,7 +43,7 @@ namespace Threading {
 #endif
 
         void addThreadInitializer(std::function<void()> &&task);
-        static void addStaticThreadInitializer(std::function<void()> &&task);
+        static void addStaticThreadGuards(std::function<void()> &&init, std::function<void()> &&finalize = {});
 
         const std::string &name() const;
 

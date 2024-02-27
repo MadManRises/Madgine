@@ -44,6 +44,9 @@ namespace Log {
         case MessageType::ERROR_TYPE:
             prio = ANDROID_LOG_ERROR;
             break;
+        case MessageType::FATAL_TYPE:
+            prio = ANDROID_LOG_FATAL;
+            break;
         default:
             std::terminate();
         }

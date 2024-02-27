@@ -2,6 +2,7 @@
 
 #include "hierarchy/serializableunitptr.h"
 #include "hierarchy/syncableunit.h"
+#include "streams/streamresult.h"
 
 namespace Engine {
 namespace Serialize {

@@ -10,7 +10,9 @@ add_plugin(Resources Madgine Core ${sources})
 
 target_link_plugins(Resources Root)
 
-target_link_options(Resources PUBLIC "/NATVIS:${CMAKE_CURRENT_LIST_DIR}/src/Resources.natvis")
+if (MSVC)
+	target_link_options(Resources PUBLIC "/NATVIS:${CMAKE_CURRENT_LIST_DIR}/src/Resources.natvis")
+endif()
 
 add_subdirectory(loaders)
 

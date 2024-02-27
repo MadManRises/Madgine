@@ -164,6 +164,8 @@ namespace Render {
 
             if (material)
                 mPipeline->bindResources(target, 2, material->mResourceBlock);
+            else
+                mPipeline->bindResources(target, 2, {});
 
             {
                 auto instanceData = mPipeline->mapTempBuffer<SceneInstanceData[]>(1, instance.second.size());

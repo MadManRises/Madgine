@@ -47,9 +47,9 @@ inline void vkCmdEndDebugUtilsLabelEXT(VkCommandBuffer commandBuffer)
 {
     return Engine::Render::vulkanInstanceStub<"vkCmdEndDebugUtilsLabelEXT", void>(commandBuffer);
 }
-inline void vkCmdPushDescriptorSetKHR(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint32_t set, uint32_t descriptorWriteCount, const VkWriteDescriptorSet *pDescriptorWrites)
+inline VkResult vkSetDebugUtilsObjectNameEXT(VkDevice device, const VkDebugUtilsObjectNameInfoEXT *pNameInfo)
 {
-    return Engine::Render::vulkanDeviceStub<"vkCmdPushDescriptorSetKHR", void>(commandBuffer, pipelineBindPoint, layout, set, descriptorWriteCount, pDescriptorWrites);
+    return Engine::Render::vulkanDeviceStub<"vkSetDebugUtilsObjectNameEXT", VkResult>(device, pNameInfo);
 }
 #endif
 

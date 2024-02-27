@@ -47,7 +47,7 @@ namespace Render {
         requires (!std::is_array_v<T>)
         GPUBuffer<T> allocateBuffer()
         {
-            return allocateBufferImpl(sizeof(T)).cast<T>();
+            return static_cast<GPUBuffer<T>>(allocateBufferImpl(sizeof(T)));
         }
 
         template <typename T>

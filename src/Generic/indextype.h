@@ -74,6 +74,18 @@ struct IndexType {
     {
         return mIndex == other;
     }
+        
+    template <std::constructible_from<T> U>
+    friend constexpr bool operator==(const U &other, const IndexType &self)
+    {
+        return self.mIndex == other;
+    }
+
+    template <std::constructible_from<T> U>
+    constexpr bool operator==(const IndexType<U> &other) const
+    {
+        return mIndex == other.mIndex;
+    }
 
     template <std::constructible_from<T> U>
     constexpr bool operator!=(const U &other) const

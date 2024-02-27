@@ -12,6 +12,8 @@
 
 #include "../streams/formattedserializestream.h"
 
+#include "../hierarchy/serializableunitptr.h"
+
 namespace Engine {
 namespace Serialize {
 

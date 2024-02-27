@@ -174,7 +174,7 @@ namespace Render {
 
         presentInfo.pResults = nullptr; // Optional
 
-        VkResult result = vkQueuePresentKHR(context()->mPresentQueue, &presentInfo);
+        VkResult result = vkQueuePresentKHR(context()->mGraphicsQueue, &presentInfo);
         VK_CHECK(result);
     }
 
@@ -227,23 +227,14 @@ namespace Render {
         createInfo2.imageExtent = extent;
         createInfo2.imageArrayLayers = 1;
         createInfo2.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-
-        QueueFamilyIndices indices = findQueueFamilies(GetPhysicalDevice());
-        uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
-
-        if (indices.graphicsFamily != indices.presentFamily) {
-            createInfo2.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-            createInfo2.queueFamilyIndexCount = 2;
-            createInfo2.pQueueFamilyIndices = queueFamilyIndices;
-        } else {
-            createInfo2.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-            createInfo2.queueFamilyIndexCount = 0; // Optional
-            createInfo2.pQueueFamilyIndices = nullptr; // Optional
-        }
-
+        createInfo2.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        createInfo2.queueFamilyIndexCount = 0; // Optional
+        createInfo2.pQueueFamilyIndices = nullptr; // Optional
         createInfo2.preTransform = mSurfaceCapabilities.currentTransform;
 
-        createInfo2.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+        createInfo2.compositeAlpha = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
+        if (!(mSurfaceCapabilities.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR))
+            createInfo2.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;        
 
         createInfo2.presentMode = VK_PRESENT_MODE_FIFO_KHR;
         createInfo2.clipped = VK_TRUE;

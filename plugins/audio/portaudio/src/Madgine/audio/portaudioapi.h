@@ -2,8 +2,6 @@
 
 #include "Madgine/audio/audioapi.h"
 
-#include "Modules/threading/taskqueue.h"
-
 typedef int PaDeviceIndex;
 struct PaDeviceInfo;
 

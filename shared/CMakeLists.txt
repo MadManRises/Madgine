@@ -43,7 +43,10 @@ add_notices(lib_msdfgen
 add_subdirectory(imgui)
 set_target_properties(ImGui PROPERTIES EXCLUDE_FROM_ALL TRUE)
 target_include_directories(ImGui PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
-target_link_options(ImGui PUBLIC "/NATVIS:${CMAKE_CURRENT_LIST_DIR}/imgui/misc/debuggers/imgui.natvis")
+
+if (MSVC)
+	target_link_options(ImGui PUBLIC "/NATVIS:${CMAKE_CURRENT_LIST_DIR}/imgui/misc/debuggers/imgui.natvis")
+endif ()
 
 add_notices(ImGui 
 	LICENSE_FILE imgui/LICENSE.txt 
@@ -70,6 +73,8 @@ add_subdirectory(steamworks)
 
 
 add_subdirectory(EOS)
+
+add_subdirectory(playservices)
 
 set(BUILD_DEMOS OFF CACHE BOOL "" FORCE)
 set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -137,4 +142,13 @@ add_notices(portaudio_static
 set(BUILD_SHARED_LIBS ${OLD_BUILD_SHARED_LIBS})
 set(BUILD_TESTING ${OLD_BUILD_TESTING})
 
+
+if (ANDROID)
+	add_subdirectory(oboe-1.8.1)
+
+	add_notices(oboe
+		READABLE_NAME Oboe
+		LICENSE_FILE oboe-1.8.1/LICENSE
+		CREDITS "Audio-IO: Oboe - https://github.com/google/oboe")
+endif()
 

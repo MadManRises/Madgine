@@ -16,7 +16,11 @@ struct CoWString {
         , mSize(s.size())
         , mOwning(true)
     {
+#if _MSC_VER >= 1400
         strncpy_s(mOwningString, s.size() + 1, s.c_str(), mSize);
+#else
+        strncpy(mOwningString, s.c_str(), mSize);
+#endif
     }
 
     CoWString(std::string &&s)
@@ -82,7 +86,11 @@ struct CoWString {
         reset();
         mSize = s.size();
         mOwningString = new char[mSize + 1];
+#if _MSC_VER >= 1400
         strncpy_s(mOwningString, mSize + 1, s.c_str(), mSize);
+#else
+        strncpy(mOwningString, s.c_str(), mSize);
+#endif
         mOwningString[mSize] = '\0';
         mOwning = true;
         return *this;
@@ -146,7 +154,11 @@ struct CoWString {
     {
         if (!mOwning || mSize < size) {
             char *newString = new char[size + 1];
-            strncpy_s(newString, size + 1, mString, std::min<size_t>(mSize, size));
+#if _MSC_VER >= 1400
+            strncpy_s(newString, mSize + 1, mString, std::min<size_t>(mSize, size));
+#else
+            strncpy(newString, mString, std::min<size_t>(mSize, size));
+#endif
             if (mOwning)
                 delete[] mString;
             mOwningString = newString;
@@ -191,7 +203,11 @@ private:
     {
         if (!mOwning) {
             char *newString = new char[mSize + 1];
+#if _MSC_VER >= 1400
             strncpy_s(newString, mSize + 1, mString, mSize);
+#else
+            strncpy(newString, mString, mSize);
+#endif
             mOwningString = newString;
             mOwningString[mSize] = '\0';
             mOwning = true;

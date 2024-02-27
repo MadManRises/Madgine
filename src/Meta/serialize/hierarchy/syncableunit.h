@@ -3,6 +3,7 @@
 #include "Generic/callerhierarchy.h"
 #include "Generic/execution/sender.h"
 #include "Generic/closure.h"
+#include "Generic/offsetptr.h"
 #include "serializableunit.h"
 
 #include "../streams/pendingrequest.h"

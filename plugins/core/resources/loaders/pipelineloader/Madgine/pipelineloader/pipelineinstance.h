@@ -36,7 +36,7 @@ namespace Render {
             return mapParameters(index).cast<T>();
         }
 
-        virtual WritableByteBuffer mapTempBuffer(size_t space, size_t size, size_t count) const = 0;
+        virtual WritableByteBuffer mapTempBuffer(size_t space, size_t size, size_t count = 1) const = 0;
         template <typename T>
         requires(!std::is_array_v<T>)
             ByteBufferImpl<T> mapTempBuffer(size_t space)

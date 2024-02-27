@@ -55,6 +55,20 @@
     {
       "name": "android",
       "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": {
+          "type": "FILEPATH",
+          "value": "cmake/toolchains/android.cmake"
+        },
+        "INTERFACES_ENABLE_DEBUG_LOGGING": {
+          "type": "BOOL",
+          "value": "ON"
+        },
+        "GooglePlay_Config": {
+          "type": "FILEPATH",
+          "value": "${sourceDir}/test/configs/games-ids.xml"
+        }
+      },
       "toolchainFile": "cmake/toolchains/android.cmake",
       "hidden": true
     },

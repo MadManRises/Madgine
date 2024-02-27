@@ -99,7 +99,7 @@ struct AreaView {
     template <bool isConst>
     struct IteratorImpl {
 
-        using iterator_category = std::forward_iterator_tag;
+        using iterator_category = std::bidirectional_iterator_tag;
         using value_type = const_if<isConst, T>;
         using difference_type = ptrdiff_t;
         using pointer = void;

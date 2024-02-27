@@ -62,7 +62,7 @@ namespace Tools {
 
     static constexpr size_t sLookupStep = 1;
     static constexpr std::array<const char *, 5> sIcons { "D", IMGUI_ICON_INFO, IMGUI_ICON_WARNING, IMGUI_ICON_ERROR, "F" };
-    static constexpr std::array<ImU32, 5> sColors { IM_COL32(0, 200, 255, 255), IM_COL32(255, 255, 255, 255), IM_COL32(255, 200, 0, 255), IM_COL32(255, 0, 0, 255), IM_COL32(255, 0, 0, 255) };
+    static constexpr std::array<ImColor, 5> sColors { { { 0.0f, 0.78f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 0.78f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } } };
 
     LogViewer::LogViewer(ImRoot &root)
         : Tool<LogViewer>(root, true)
@@ -88,7 +88,7 @@ namespace Tools {
             int mTotalMsgCount = 0;
 
             for (Log::MessageType type : Log::MessageType::values()) {
-                ImGui::PushStyleColor(ImGuiCol_Text, sColors[type]);
+                ImGui::PushStyleColor(ImGuiCol_Text, sColors[type].Value);
                 mIsDirty |= ImGui::Checkbox(sIcons[type], &mMsgFilters[type]);
                 ImGui::PopStyleColor();
                 ImGui::SameLine();
@@ -158,9 +158,7 @@ namespace Tools {
                             {
                                 ImGui::TableNextRow();
                                 ImGui::TableNextColumn();
-                                ImGui::PushStyleColor(ImGuiCol_Text, sColors[entry.mType]);
-                                ImGui::Text("%s", sIcons[entry.mType]);
-                                ImGui::PopStyleColor();
+                                ImGui::TextColored(sColors[entry.mType], "%s", sIcons[entry.mType]);
                                 ImGui::TableNextColumn();
                                 ImGui::TextWrapped("%s", entry.mMsg.c_str());
                                 ImGui::TableNextColumn();
@@ -187,9 +185,7 @@ namespace Tools {
     {
         for (Log::MessageType type : Log::MessageType::values()) {
             if (mMsgCounts[type] > 0) {
-                ImGui::PushStyleColor(ImGuiCol_Text, sColors[type]);
-                ImGui::Text("%s %d", sIcons[type], static_cast<int>(mMsgCounts[type]));
-                ImGui::PopStyleColor();
+                ImGui::TextColored(sColors[type], "%s %d", sIcons[type], static_cast<int>(mMsgCounts[type]));
             }
         }
         ImGui::Separator();

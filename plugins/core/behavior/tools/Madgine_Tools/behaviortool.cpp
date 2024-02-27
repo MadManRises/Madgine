@@ -35,7 +35,14 @@ namespace Tools {
 
     void visualizeCoroutineLocation(DebuggerView *view, const Debug::ContextInfo *context, const CoroutineLocation *location)
     {
-        ImGui::BeginGroupPanel(location->mStacktrace.calculateReadable()[0].mFunction);
+        const char *name;
+        Debug::FullStackTrace trace = location->mStacktrace.calculateReadable();
+        if (trace.empty()) {
+            name = "<unknown>";
+        } else {
+            name = trace[0].mFunction;
+        }
+        ImGui::BeginGroupPanel(name);
         view->visualizeDebugLocation(context, location->mChild);
         ImGui::EndGroupPanel();
     }

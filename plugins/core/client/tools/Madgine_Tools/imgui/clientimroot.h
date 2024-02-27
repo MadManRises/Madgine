@@ -34,6 +34,7 @@ namespace Tools {
 
         virtual void setup(Render::RenderTarget *target) override;
         virtual void render(Render::RenderTarget *target, size_t iteration) override;
+        virtual void shutdown(Render::RenderTarget *target) override;
 
         void renderViewport(Render::RenderTarget *target, ImGuiViewport *vp);
 

@@ -28,6 +28,12 @@ namespace Threading {
         return dummy;
     }
 
+    static std::vector<std::function<void()>> &sThreadFinalizers()
+    {
+        static std::vector<std::function<void()>> dummy;
+        return dummy;
+    }
+
     WorkGroup::WorkGroup(std::string_view name)
         : mInstanceCounter(sWorkgroupInstanceCounter++)
         , mName(name.empty() ? "Workgroup_" + std::to_string(mInstanceCounter) : name)
@@ -60,6 +66,10 @@ namespace Threading {
 
     WorkGroup::~WorkGroup()
     {
+        for (const std::function<void()> &task : sThreadFinalizers()) {
+            task();
+        }
+
         WorkGroupStorage::finalize(false);
         WorkGroupStorage::finalize(true);
 
@@ -96,9 +106,11 @@ namespace Threading {
         mThreadInitializers.emplace_back(std::move(task));
     }
 
-    void WorkGroup::addStaticThreadInitializer(std::function<void()> &&task)
+    void WorkGroup::addStaticThreadGuards(std::function<void()> &&init, std::function<void()> &&finalize)
     {
-        sThreadInitializers().emplace_back(std::move(task));
+        sThreadInitializers().emplace_back(std::move(init));
+        if (finalize)
+            sThreadFinalizers().emplace_back(std::move(finalize));
     }
 
     const std::string &WorkGroup::name() const
@@ -176,6 +188,10 @@ namespace Threading {
     {
         assert(sSelf == this);
         sSelf = nullptr;
+
+        for (const std::function<void()> &task : sThreadFinalizers()) {
+            task();
+        }
 
         ThreadStorage::finalize(false);
         ThreadStorage::finalize(true);

@@ -41,6 +41,8 @@
 
 #include "atlasloader.h"
 
+#include "Interfaces/window/windowapi.h"
+
 NAMED_UNIQUECOMPONENT(WidgetManager, Engine::Widgets::WidgetManager)
 
 METATABLE_BEGIN(Engine::Widgets::WidgetManager)
@@ -133,7 +135,7 @@ namespace Widgets {
         if (!parent) {
             w->hide();
         }
-        w->applyGeometry(parent ? parent->getAbsoluteSize() : Vector3 { Vector2 { mClientSpace.mSize }, 1.0f });
+        w->applyGeometry(parent ? parent->getAbsoluteSize() : Vector3 { Vector2 { mClientSpace.mSize }, Window::platformCapabilities.mScalingFactor });
         return w;
     }
 
@@ -570,7 +572,7 @@ namespace Widgets {
     {
         MainWindowComponentBase::onResize(space);
         for (WidgetBase *topLevel : widgets()) {
-            topLevel->applyGeometry(Vector3 { Vector2 { space.mSize }, 1.0f });
+            topLevel->applyGeometry(Vector3 { Vector2 { space.mSize }, Window::platformCapabilities.mScalingFactor });
         }
     }
 
@@ -684,6 +686,9 @@ namespace Widgets {
     void WidgetManager::onActivate(bool active)
     {
         if (active) {
+            for (WidgetBase *topLevel : widgets()) {
+                topLevel->applyGeometry(Vector3 { Vector2 { getScreenSpace().mSize }, Window::platformCapabilities.mScalingFactor });
+            }
             openStartupWidget();
             mUpdatedSignal.emit();
         }

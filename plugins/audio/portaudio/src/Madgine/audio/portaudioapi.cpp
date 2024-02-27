@@ -12,8 +12,6 @@
 
 #include "portaudio.h"
 
-#include "Modules/threading/awaitables/awaitablesender.h"
-
 #include "Madgine/resources/sender.h"
 
 METATABLE_BEGIN_BASE(Engine::Audio::PortAudioApi, Engine::Audio::AudioApi)

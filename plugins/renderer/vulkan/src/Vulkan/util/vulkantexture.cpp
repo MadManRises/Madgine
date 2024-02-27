@@ -252,6 +252,14 @@ namespace Render {
         result = vkAllocateDescriptorSets(GetDevice(), &descAllocInfo, &descriptorSet);
         VK_CHECK(result);
 
+        VkDebugUtilsObjectNameInfoEXT nameInfo {};
+        nameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+        nameInfo.objectType = VK_OBJECT_TYPE_DESCRIPTOR_SET;
+        nameInfo.objectHandle = reinterpret_cast<uintptr_t>(descriptorSet);
+        nameInfo.pObjectName = "Direct Constant Texture Set";
+        result = vkSetDebugUtilsObjectNameEXT(GetDevice(), &nameInfo);
+        VK_CHECK(result);
+
         VkDescriptorImageInfo imageDescriptorInfo {};
         imageDescriptorInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         imageDescriptorInfo.imageView = mImageView;

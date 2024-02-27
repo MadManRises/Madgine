@@ -449,7 +449,7 @@ bool ValueTypeDrawer::draw(std::chrono::nanoseconds &d)
 {
     int64_t count = d.count();
     if (ImGui::DragScalar("##ValueTypeDrawer", ImGuiDataType_S64, &count, 100000000.0f)) {
-        d = std::chrono::nanoseconds{ count };
+        d = std::chrono::nanoseconds { count };
         return true;
     }
     return false;
@@ -672,30 +672,41 @@ bool EditableTreeNode(const void *id, std::string *s, ImGuiTreeNodeFlags flags)
     return EndTreeArrow();
 }
 
+void UnitText(float value, std::span<const Unit> units, void (*text)(const char *, ...))
+{
+    if (units.empty()) {
+        text("%.2f", value);
+    } else {
+        for (size_t i = 0; i < units.size(); ++i) {
+            auto [ratio, unit] = units[i];
+            if (value < ratio || i == units.size() - 1) {
+                text("%.2f %s", value, unit);
+                break;
+            } else {
+                value /= ratio;
+            }
+        }
+    }
+}
+
 void Duration(std::chrono::nanoseconds dur)
 {
-    if (dur.count() < 1000) {
-        ImGui::Text("%lld ns", dur.count());
-    } else if (dur.count() < 1000000) {
-        ImGui::Text("%.3f us", std::chrono::duration_cast<std::chrono::duration<float, std::micro>>(dur).count());
-    } else if (dur.count() < 1000000000) {
-        ImGui::Text("%.4f ms", std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(dur).count());
-    } else {
-        ImGui::Text("%.4f  s", std::chrono::duration_cast<std::chrono::duration<float>>(dur).count());
-    }
+    UnitText(dur.count(), sDurationUnits, Text);
 }
 
 void RightAlignDuration(std::chrono::nanoseconds dur)
 {
-    if (dur.count() < 1000) {
-        ImGui::RightAlignText("%lld ns", dur.count());
-    } else if (dur.count() < 1000000) {
-        ImGui::RightAlignText("%.3f us", std::chrono::duration_cast<std::chrono::duration<float, std::micro>>(dur).count());
-    } else if (dur.count() < 1000000000) {
-        ImGui::RightAlignText("%.4f ms", std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(dur).count());
-    } else {
-        ImGui::RightAlignText("%.4f  s", std::chrono::duration_cast<std::chrono::duration<float>>(dur).count());
-    }
+    UnitText(dur.count(), sDurationUnits, RightAlignText);
+}
+
+void Bytes(size_t bytes)
+{
+    UnitText(bytes, sByteUnits, Text);
+}
+
+void RightAlignBytes(size_t bytes)
+{
+    UnitText(bytes, sByteUnits, RightAlignText);
 }
 
 void RightAlign(float size)
@@ -1024,7 +1035,7 @@ bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *select
             bool mIsDir;
         };
         std::vector<File> files;
-
+        
         std::ranges::transform(Engine::Filesystem::listFilesAndDirs(*path), std::back_inserter(files), [](Engine::Filesystem::FileQueryResult result) { return File { result.path(), result.isDir() }; });
 
         for (const File &file : files) {

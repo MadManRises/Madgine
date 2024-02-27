@@ -8,7 +8,8 @@
     <application
         android:allowBackup="false"
         android:label="com.@PROJECT_NAME@.$<TARGET_FILE_BASE_NAME:@target@>"
-          android:hasCode="false"
+          android:hasCode="true"
+          android:extractNativeLibs="true"
           android:theme="@android:style/Theme.NoTitleBar">
 
           <!-- This name is resolved to com.example.myapp.MainActivity
@@ -23,6 +24,8 @@
                         <category android:name="android.intent.category.LAUNCHER" />
                 </intent-filter>
         </activity>
+        <meta-data android:name="com.google.android.gms.games.APP_ID"
+                   android:value="@string/app_id"/>
     </application>
 
 </manifest>

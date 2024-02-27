@@ -8,6 +8,8 @@
 
 #include "Meta/serialize/operations.h"
 
+#include "Meta/keyvalue/typedscopeptr.h"
+
 namespace Engine {
 
 struct ParameterTupleBase {

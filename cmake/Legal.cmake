@@ -31,37 +31,6 @@ function(add_notices target)
 
 endfunction(add_notices)
 
-function(get_dependencies list target)
-
-	list(FIND ${list} ${target} found_target)
-
-	if (found_target EQUAL -1)
-		list(APPEND ${list} ${target})
-
-		get_target_property(dependencies ${target} MANUALLY_ADDED_DEPENDENCIES)
-
-		if (dependencies)
-			foreach(dep ${dependencies})
-				get_dependencies(${list} ${dep})
-			endforeach()
-		endif()
-
-		get_target_property(dependencies ${target} LINK_LIBRARIES)
-
-		if (dependencies)
-			foreach(dep ${dependencies})
-				if (TARGET ${dep})
-					get_dependencies(${list} ${dep})
-				endif()
-			endforeach()
-		endif()
-
-	endif()
-
-	set(${list} ${${list}} PARENT_SCOPE)
-
-endfunction(get_dependencies)
-
 function(write_notices target)
 
 	MESSAGE(STATUS "Generating legal notices...")
