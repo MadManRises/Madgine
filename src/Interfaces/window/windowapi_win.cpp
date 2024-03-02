@@ -90,7 +90,9 @@ namespace Window {
             } else {
                 switch (msg) {
                 case WM_SIZE:
-                    onResize({ LOWORD(lParam), HIWORD(lParam) });
+                    mMinimized = wParam == SIZE_MINIMIZED;
+                    if (lParam > 0)
+                        onResize({ LOWORD(lParam), HIWORD(lParam) });
                     break;
                 case WM_CLOSE:
                     onClose();
@@ -149,6 +151,7 @@ namespace Window {
 
         BYTE mKeyDown[512];
         InterfacesVector mLastKnownMousePos;
+        bool mMinimized = false;
     };
 
     void OSWindow::update()
@@ -242,10 +245,7 @@ namespace Window {
 
     bool OSWindow::isMinimized()
     {
-        WINDOWPLACEMENT placement;
-        auto result = GetWindowPlacement((HWND)mHandle, &placement);
-        assert(result);
-        return placement.showCmd == SW_MINIMIZE;
+        return static_cast<WindowsWindow *>(this)->mMinimized;
     }
 
     bool OSWindow::isMaximized()

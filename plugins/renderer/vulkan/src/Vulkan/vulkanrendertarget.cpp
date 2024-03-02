@@ -188,7 +188,7 @@ namespace Render {
 
         VkRect2D scissor {};
         scissor.offset = { space.mTopLeft.x, space.mTopLeft.y };
-        scissor.extent = { static_cast<uint32_t>(space.mTopLeft.x + space.mSize.x), static_cast<uint32_t>(space.mTopLeft.y + space.mSize.y) };
+        scissor.extent = { static_cast<uint32_t>(space.mSize.x), static_cast<uint32_t>(space.mSize.y) };
         vkCmdSetScissor(mCommandList, 0, 1, &scissor);
     }
 
@@ -196,7 +196,7 @@ namespace Render {
     {
         VkRect2D scissor {};
         scissor.offset = { space.mTopLeft.x, space.mTopLeft.y };
-        scissor.extent = { static_cast<uint32_t>(space.mTopLeft.x + space.mSize.x), static_cast<uint32_t>(space.mTopLeft.y + space.mSize.y) };
+        scissor.extent = { static_cast<uint32_t>(space.mSize.x), static_cast<uint32_t>(space.mSize.y) };
         vkCmdSetScissor(mCommandList, 0, 1, &scissor);
     }
 

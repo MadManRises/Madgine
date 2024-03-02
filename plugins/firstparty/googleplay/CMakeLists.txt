@@ -8,8 +8,8 @@ endif()
 
 MESSAGE(STATUS "--- Google Play ---")
 
-if (NOT GooglePlay_Config)
-	MESSAGE(STATUS "No GooglePlay_Config provided. Plugin disabled. Set 'GooglePlay_Config' to the location of the games-ids.xml file downloaded from Google Play Console in your toplevel CMakeLists file.")
+if (NOT EXISTS ${MADGINE_CONFIGURATION}/games-ids.xml)
+	MESSAGE(STATUS "No games-ids.xml provided. Plugin disabled. Add games-ids.xml to your MADGINE_CONFIGURATION location.")
 	MESSAGE(STATUS "--- Google Play End ---")
 	return()
 endif ()
@@ -19,7 +19,7 @@ endif ()
 
 #MESSAGE(STATUS "AppId: ${Steam_AppId}")
 
-#MESSAGE(STATUS "--- Steam End ---")
+MESSAGE(STATUS "--- Google Play End ---")
 
 
 
@@ -35,7 +35,7 @@ target_link_plugins(GooglePlayServices FirstParty)
 
 target_link_libraries(GooglePlayServices PRIVATE PlayServices)
 
-	configure_file(${GooglePlay_Config} res/values/games-ids.xml)
+	configure_file(${MADGINE_CONFIGURATION}/games-ids.xml res/values/games-ids.xml)
 	list(APPEND ANDROID_RESOURCES
 		${CMAKE_CURRENT_BINARY_DIR}/res/
 	)

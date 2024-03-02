@@ -48,8 +48,8 @@ namespace ClickBrick {
 
         Engine::Scene::SceneManager &mSceneMgr;
 
-        std::chrono::microseconds mSpawnInterval;
-        std::chrono::microseconds mAcc;
+        std::chrono::microseconds mSpawnInterval = 1s;
+        std::chrono::microseconds mAcc = 0s;
         Engine::IntervalClock<Engine::Threading::CustomTimepoint> mSceneClock;
         
         Engine::Render::SceneRenderPass mSceneRenderer;

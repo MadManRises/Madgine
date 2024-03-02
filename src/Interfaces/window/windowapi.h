@@ -68,14 +68,12 @@ namespace Window {
         static std::string getClipboardString();
         static bool setClipboardString(std::string_view s);
 
-
-        const uintptr_t mHandle;
+        uintptr_t mHandle;
 
     protected:
         void onResize(const InterfacesVector &size)
         {
-            if (size.x > 0 && size.y > 0)
-                mListener->onResize(size);
+            mListener->onResize(size);
         }
 
         void onClose()

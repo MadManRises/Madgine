@@ -70,6 +70,8 @@ namespace Render {
 
     bool DirectX12RenderWindow::skipFrame()
     {
+        if (mWindow->isMinimized())
+            return true;
         if (mTargetViews.empty() && context()->graphicsQueue()->isFenceComplete(mResizeFence)) {
 
             for (size_t i = 0; i < 2; ++i) {
@@ -95,12 +97,10 @@ namespace Render {
         mCommandList = context()->fetchCommandList(D3D12_COMMAND_LIST_TYPE_DIRECT);
 
         mCommandList.Transition(mBackBuffers[mSwapChain->GetCurrentBackBufferIndex()], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-        
-        DirectX12RenderTarget::beginFrame();        
+
+        DirectX12RenderTarget::beginFrame();
 
         //mCommandList.attachResource(mBackBuffers[mSwapChain->GetCurrentBackBufferIndex()]);
-
-        
     }
 
     void DirectX12RenderWindow::endFrame()
@@ -108,7 +108,7 @@ namespace Render {
         DirectX12RenderTarget::endFrame();
 
         mCommandList.Transition(mBackBuffers[mSwapChain->GetCurrentBackBufferIndex()], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-                
+
         mCommandList.reset();
 
         mSwapChain->Present(0, 0);

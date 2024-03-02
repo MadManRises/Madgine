@@ -99,6 +99,13 @@ namespace Render {
         OpenGLRenderTarget::endIteration();        
     }
 
+    bool OpenGLRenderWindow::skipFrame()
+    {
+        if (mOsWindow->isMinimized())
+            return true;
+        return false;
+    }
+
     void OpenGLRenderWindow::beginFrame()
     {
         makeCurrent(getSurface(), mContext);

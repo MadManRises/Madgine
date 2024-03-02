@@ -6,11 +6,18 @@
 
 #include "vulkanrendercontext.h"
 
+#include "Meta/math/rect2i.h"
+
 #if ANDROID
 #    include <vulkan/vulkan_android.h>
 #endif
 
 namespace Engine {
+
+namespace Window {
+    extern void forceResize();
+}
+
 namespace Render {
 
     struct SwapChainSupportDetails {
@@ -87,43 +94,8 @@ namespace Render {
         VkResult result = vkCreateSemaphore(GetDevice(), &binarySemaphoreInfo, nullptr, &mImageSemaphore);
         VK_CHECK(result);
 
-#if WINDOWS
-        VkWin32SurfaceCreateInfoKHR createInfo {};
-        createInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-        createInfo.hwnd = (HWND)w->mHandle;
-        createInfo.hinstance = GetModuleHandle(nullptr);
+        createSurface();
 
-        result = vkCreateWin32SurfaceKHR(GetInstance(), &createInfo, nullptr, &mSurface);
-        VK_CHECK(result);
-#elif ANDROID
-        VkAndroidSurfaceCreateInfoKHR createInfo {};
-        createInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
-        createInfo.window = (ANativeWindow *)w->mHandle;
-
-        result = vkCreateAndroidSurfaceKHR(GetInstance(), &createInfo, nullptr, &mSurface);
-        VK_CHECK(result);
-#else
-#    error "Unsupported Platform!"
-#endif
-
-        SwapChainSupportDetails support = querySwapChainSupport(GetPhysicalDevice(), mSurface);
-        assert(!support.formats.empty() && !support.presentModes.empty());
-
-        mSurfaceCapabilities = support.capabilities;
-
-        mFormat = chooseSwapSurfaceFormat(support.formats);
-
-        VkSubpassDependency dependency {};
-        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-        dependency.dstSubpass = 0;
-        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.srcAccessMask = 0;
-        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        createRenderPass(1, mFormat.format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, false, { &dependency, 1 });
-
-        InterfacesVector size = w->renderSize();
-        create({ size.x, size.y });
     }
 
     VulkanRenderWindow::~VulkanRenderWindow()
@@ -134,14 +106,18 @@ namespace Render {
 
     bool VulkanRenderWindow::skipFrame()
     {
-        if (mSwapChainImages.empty() && context()->isFenceComplete(mResizeFence)) {
-            mFramebuffers.clear();
-            mSwapChainImageViews.clear();
-
+        if (mWindow->mHandle == 0 && mSurface) {
             mSwapChain.reset();
-
-            create(mResizeTarget);
+            mSurface.reset();
         }
+        if (mWindow->isMinimized())
+            return true;
+        if (mWindow->mHandle != 0 && !mSurface)
+            createSurface();
+        if (!mSurface)
+            return true;
+        if (mSwapChainImages.empty() && context()->isFenceComplete(mResizeFence))
+            create(mResizeTarget);
         if (mSwapChainImages.empty())
             return true;
         return VulkanRenderTarget::skipFrame();
@@ -175,7 +151,17 @@ namespace Render {
         presentInfo.pResults = nullptr; // Optional
 
         VkResult result = vkQueuePresentKHR(context()->mGraphicsQueue, &presentInfo);
-        VK_CHECK(result);
+        switch (result) {
+#if ANDROID
+        case VK_SUBOPTIMAL_KHR:
+            Window::forceResize();
+            break;
+#endif
+        case VK_ERROR_OUT_OF_DATE_KHR:
+            break;
+        default:
+            VK_CHECK(result);
+        }
     }
 
     void VulkanRenderWindow::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
@@ -192,6 +178,58 @@ namespace Render {
     {
         InterfacesVector size = mWindow->renderSize();
         return { size.x, size.y };
+    }
+
+    Matrix4 VulkanRenderWindow::getClipSpaceMatrix() const
+    {
+        return VulkanRenderTarget::getClipSpaceMatrix() * mClipSpaceRotation;
+    }
+
+    void VulkanRenderWindow::setRenderSpace(const Rect2i &space)
+    {
+        int x = mClipSpaceRotation[0][0] * space.mTopLeft.x + mClipSpaceRotation[1][0] * space.mTopLeft.y;
+        int y = mClipSpaceRotation[0][1] * space.mTopLeft.x + mClipSpaceRotation[1][1] * space.mTopLeft.y;
+
+        int sizeX = abs(mClipSpaceRotation[0][0] * space.mSize.x + mClipSpaceRotation[1][0] * space.mSize.y);
+        int sizeY = abs(mClipSpaceRotation[0][1] * space.mSize.x + mClipSpaceRotation[1][1] * space.mSize.y);
+
+        if (x < 0)
+            x += mSize.x - sizeX;
+        if (y < 0)
+            y += mSize.y - sizeY;
+
+        VkViewport viewport {};
+        viewport.width = sizeX;
+        viewport.height = sizeY;
+        viewport.x = x;
+        viewport.y = y;
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        vkCmdSetViewport(mCommandList, 0, 1, &viewport);
+
+        VkRect2D scissor {};
+        scissor.offset = { x, y };
+        scissor.extent = { static_cast<uint32_t>(sizeX), static_cast<uint32_t>(sizeY) };
+        vkCmdSetScissor(mCommandList, 0, 1, &scissor);
+    }
+
+    void VulkanRenderWindow::setScissorsRect(const Rect2i &space)
+    {
+        int x = mClipSpaceRotation[0][0] * space.mTopLeft.x + mClipSpaceRotation[1][0] * space.mTopLeft.y;
+        int y = mClipSpaceRotation[0][1] * space.mTopLeft.x + mClipSpaceRotation[1][1] * space.mTopLeft.y;
+
+        int sizeX = abs(mClipSpaceRotation[0][0] * space.mSize.x + mClipSpaceRotation[1][0] * space.mSize.y);
+        int sizeY = abs(mClipSpaceRotation[0][1] * space.mSize.x + mClipSpaceRotation[1][1] * space.mSize.y);
+
+        if (x < 0)
+            x += mSize.x - sizeX;
+        if (y < 0)
+            y += mSize.y - sizeY;
+
+        VkRect2D scissor {};
+        scissor.offset = { x, y };
+        scissor.extent = { static_cast<uint32_t>(sizeX), static_cast<uint32_t>(sizeY) };
+        vkCmdSetScissor(mCommandList, 0, 1, &scissor);
     }
 
     uint32_t VulkanRenderWindow::imageCount() const
@@ -211,6 +249,12 @@ namespace Render {
 
     void VulkanRenderWindow::create(const Vector2i &size)
     {
+        mFramebuffers.clear();
+        mSwapChainImageViews.clear();
+        mSwapChainImages.clear();
+        mSwapChain.reset();        
+
+        mSurfaceCapabilities = querySwapChainSupport(GetPhysicalDevice(), mSurface).capabilities;
         VkExtent2D extent = chooseSwapExtent(mSurfaceCapabilities, size);
 
         uint32_t imageCount = mSurfaceCapabilities.minImageCount + 1;
@@ -224,7 +268,6 @@ namespace Render {
         createInfo2.minImageCount = imageCount;
         createInfo2.imageFormat = mFormat.format;
         createInfo2.imageColorSpace = mFormat.colorSpace;
-        createInfo2.imageExtent = extent;
         createInfo2.imageArrayLayers = 1;
         createInfo2.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
         createInfo2.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -232,9 +275,26 @@ namespace Render {
         createInfo2.pQueueFamilyIndices = nullptr; // Optional
         createInfo2.preTransform = mSurfaceCapabilities.currentTransform;
 
+        mClipSpaceRotation = Matrix4::IDENTITY;
+
+        if (mSurfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR) {
+            mClipSpaceRotation = mClipSpaceRotation * Matrix4 { 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+            std::swap(extent.width, extent.height);
+        }
+
+        if (mSurfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR) {
+            mClipSpaceRotation = mClipSpaceRotation * Matrix4 { -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+        }
+
+        if (mSurfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR) {
+            mClipSpaceRotation = mClipSpaceRotation * Matrix4 { 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+            std::swap(extent.width, extent.height);
+        }
+
+        createInfo2.imageExtent = extent;
         createInfo2.compositeAlpha = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
         if (!(mSurfaceCapabilities.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR))
-            createInfo2.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;        
+            createInfo2.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 
         createInfo2.presentMode = VK_PRESENT_MODE_FIFO_KHR;
         createInfo2.clipped = VK_TRUE;
@@ -244,7 +304,7 @@ namespace Render {
         VkResult result = vkCreateSwapchainKHR(GetDevice(), &createInfo2, nullptr, &mSwapChain);
         VK_CHECK(result);
 
-        setup(size);
+        setup({ static_cast<int>(extent.width), static_cast<int>(extent.height) });
 
         result = vkGetSwapchainImagesKHR(GetDevice(), mSwapChain, &imageCount, nullptr);
         VK_CHECK(result);
@@ -281,13 +341,56 @@ namespace Render {
             framebufferInfo.renderPass = mRenderPass;
             framebufferInfo.attachmentCount = 2;
             framebufferInfo.pAttachments = attachments;
-            framebufferInfo.width = mSize.x;
-            framebufferInfo.height = mSize.y;
+            framebufferInfo.width = extent.width;
+            framebufferInfo.height = extent.height;
             framebufferInfo.layers = 1;
 
             result = vkCreateFramebuffer(GetDevice(), &framebufferInfo, nullptr, &mFramebuffers[i]);
             VK_CHECK(result);
         }
+    }
+
+    void VulkanRenderWindow::createSurface()
+    {
+#if WINDOWS
+        VkWin32SurfaceCreateInfoKHR createInfo {};
+        createInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+        createInfo.hwnd = (HWND)mWindow->mHandle;
+        createInfo.hinstance = GetModuleHandle(nullptr);
+
+        VkResult result = vkCreateWin32SurfaceKHR(GetInstance(), &createInfo, nullptr, &mSurface);
+        VK_CHECK(result);
+#elif ANDROID
+        VkAndroidSurfaceCreateInfoKHR createInfo {};
+        createInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
+        createInfo.window = (ANativeWindow *)mWindow->mHandle;
+
+        VkResult result = vkCreateAndroidSurfaceKHR(GetInstance(), &createInfo, nullptr, &mSurface);
+        VK_CHECK(result);
+#else
+#    error "Unsupported Platform!"
+#endif
+
+        SwapChainSupportDetails support = querySwapChainSupport(GetPhysicalDevice(), mSurface);
+        assert(!support.formats.empty() && !support.presentModes.empty());
+
+        mSurfaceCapabilities = support.capabilities;
+
+        mFormat = chooseSwapSurfaceFormat(support.formats);
+
+        
+        VkSubpassDependency dependency {};
+        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+        dependency.dstSubpass = 0;
+        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependency.srcAccessMask = 0;
+        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        createRenderPass(1, mFormat.format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, false, { &dependency, 1 });
+
+
+        InterfacesVector size = mWindow->renderSize();
+        create({ size.x, size.y });
     }
 
     bool VulkanRenderWindow::resizeImpl(const Vector2i &size)

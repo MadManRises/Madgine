@@ -18,8 +18,7 @@
 namespace Engine {
 
 namespace Window {
-    extern SystemVariable<ANativeWindow *> sNativeWindow;
-    extern AInputQueue *sQueue;
+    void setup(ANativeActivity *activity);
 }
 
 namespace Android {
@@ -36,11 +35,9 @@ namespace Android {
         activity->instance = this;
 
         activity->callbacks->onDestroy = delegate<&AndroidLauncher::onDestroy>;
-        activity->callbacks->onNativeWindowCreated = delegate<&AndroidLauncher::onNativeWindowCreated, ANativeWindow *>;
-        activity->callbacks->onNativeWindowDestroyed = delegate<&AndroidLauncher::onNativeWindowDestroyed, ANativeWindow *>;
-        activity->callbacks->onInputQueueCreated = delegate<&AndroidLauncher::onInputQueueCreated, AInputQueue *>;
-        activity->callbacks->onInputQueueDestroyed = delegate<&AndroidLauncher::onInputQueueDestroyed, AInputQueue *>;
 
+        Window::setup(activity);
+        
         JNI::setVM(activity->vm, activity->env, activity->clazz);
         Threading::WorkGroup::addStaticThreadGuards(JNI::initThread, JNI::finalizeThread);
 
@@ -67,30 +64,6 @@ namespace Android {
         mActivity->instance = nullptr;
         delete this;
     }
-
-    void AndroidLauncher::onNativeWindowCreated(ANativeWindow *window)
-    {
-        assert(!Window::sNativeWindow);
-        Window::sNativeWindow = window;
-    }
-
-    void AndroidLauncher::onNativeWindowDestroyed(ANativeWindow *window)
-    {
-        assert(Window::sNativeWindow == window);
-        Window::sNativeWindow = nullptr;
-    }
-
-    void AndroidLauncher::onInputQueueCreated(AInputQueue *queue)
-    {
-        assert(!Window::sQueue);
-        Window::sQueue = queue;
-    }
-
-    void AndroidLauncher::onInputQueueDestroyed(AInputQueue *queue)
-    {
-        assert(Window::sQueue == queue);
-        Window::sQueue = nullptr;
-    }
-
+        
 }
 }

@@ -2,6 +2,8 @@
 
 #include "vulkanrendertarget.h"
 
+#include "Meta/math/matrix4.h"
+
 namespace Engine {
 namespace Render {
 
@@ -20,6 +22,10 @@ namespace Render {
         virtual bool resizeImpl(const Vector2i &size) override;
         virtual Vector2i size() const override;
 
+        virtual Matrix4 getClipSpaceMatrix() const override;
+        virtual void setRenderSpace(const Rect2i &space) override;
+        virtual void setScissorsRect(const Rect2i &space) override;
+
         uint32_t imageCount() const;
         uint32_t minImageCount() const;
 
@@ -27,12 +33,15 @@ namespace Render {
 
     protected:
         void create(const Vector2i &size);
+        void createSurface();
 
     private:
         Window::OSWindow *mWindow;
 
         uint64_t mResizeFence;
         Vector2i mResizeTarget;
+
+        Matrix4 mClipSpaceRotation;
 
         VulkanPtr<VkSemaphore, &vkDestroySemaphore> mImageSemaphore;
 

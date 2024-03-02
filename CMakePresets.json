@@ -79,6 +79,12 @@
       "hidden": true
     },
     {
+      "name": "android-arm64",
+      "inherits": "android",
+      "cacheVariables": { "ANDROID_ABI": "arm64-v8a" },
+      "hidden": true
+    },
+    {
       "name": "android-x64",
       "inherits": "android",
       "cacheVariables": { "ANDROID_ABI": "x86_64" },
@@ -258,30 +264,6 @@
       "inherits": [ "emscripten", "relwithdebinfo", "OpenGL-Tools" ]
     },
     {
-      "name": "Android-x64-Debug-OpenGL",
-      "inherits": [ "android-x64", "debug", "OpenGL" ]
-    },
-    {
-      "name": "Android-x64-Debug-OpenGL (Tools)",
-      "inherits": [ "android-x64", "debug", "OpenGL-Tools" ]
-    },
-    {
-      "name": "Android-x64-Release-OpenGL",
-      "inherits": [ "android-x64", "release", "OpenGL" ]
-    },
-    {
-      "name": "Android-x64-Release-OpenGL (Tools)",
-      "inherits": [ "android-x64", "release", "OpenGL-Tools" ]
-    },
-    {
-      "name": "Android-x64-RelWithDebInfo-OpenGL",
-      "inherits": [ "android-x64", "relwithdebinfo", "OpenGL" ]
-    },
-    {
-      "name": "Android-x64-RelWithDebInfo-OpenGL (Tools)",
-      "inherits": [ "android-x64", "relwithdebinfo", "OpenGL-Tools" ]
-    },
-    {
       "name": "Android-x64-Debug-Vulkan",
       "inherits": [ "android-x64", "debug", "Vulkan" ]
     },
@@ -328,6 +310,30 @@
     {
       "name": "Android-armv7-RelWithDebInfo-Vulkan (Tools)",
       "inherits": [ "android-armv7", "relwithdebinfo", "Vulkan-Tools" ]
+    },
+    {
+      "name": "Android-arm64-Debug-Vulkan",
+      "inherits": [ "android-arm64", "debug", "Vulkan" ]
+    },
+    {
+      "name": "Android-arm64-Debug-Vulkan (Tools)",
+      "inherits": [ "android-arm64", "debug", "Vulkan-Tools" ]
+    },
+    {
+      "name": "Android-arm64-Release-Vulkan",
+      "inherits": [ "android-arm64", "release", "Vulkan" ]
+    },
+    {
+      "name": "Android-arm64-Release-Vulkan (Tools)",
+      "inherits": [ "android-arm64", "release", "Vulkan-Tools" ]
+    },
+    {
+      "name": "Android-arm64-RelWithDebInfo-Vulkan",
+      "inherits": [ "android-arm64", "relwithdebinfo", "Vulkan" ]
+    },
+    {
+      "name": "Android-arm64-RelWithDebInfo-Vulkan (Tools)",
+      "inherits": [ "android-arm64", "relwithdebinfo", "Vulkan-Tools" ]
     }
   ],
   "buildPresets": [],

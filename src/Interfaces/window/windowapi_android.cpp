@@ -14,6 +14,8 @@
 
 #    include "../log/logmethods.h"
 
+#    include <android/native_activity.h>
+
 namespace Engine {
 namespace Window {
 
@@ -22,9 +24,8 @@ namespace Window {
         3.0f
     };
 
-    DLL_EXPORT SystemVariable<ANativeWindow *> sNativeWindow = nullptr;
-
-    DLL_EXPORT AInputQueue *sQueue = nullptr;
+    SystemVariable<ANativeWindow *> sNativeWindow = nullptr;
+    AInputQueue *sQueue = nullptr;
 
     struct AndroidWindow final : OSWindow {
         AndroidWindow(ANativeWindow *window, WindowEventListener *listener)
@@ -91,11 +92,101 @@ namespace Window {
             return handled;
         }
 
+        void onNativeWindowCreated(ANativeWindow *window)
+        {
+            assert(!sNativeWindow);
+            sNativeWindow = window;
+            if (this)
+                mHandle = (uintptr_t)window;
+        }
+
+        void onNativeWindowDestroyed(ANativeWindow *window)
+        {
+            assert(sNativeWindow == window);
+            sNativeWindow = nullptr;
+            if (this)
+                mHandle = 0;
+        }
+
+        void onNativeWindowResized(ANativeWindow *window)
+        {
+            mResizeNeeded.test_and_set();
+        }
+
+        void onConfigurationChanged()
+        {
+            mResizeNeeded.test_and_set();
+        }
+
+        void onContentRectChanged(const ARect *rect)
+        {
+            mContentPos = {
+                rect->left,
+                rect->top
+            };
+            mContentSize = {
+                rect->right - rect->left,
+                rect->bottom - rect->top
+            };
+        }
+
+        void onPause()
+        {
+            mMinimized = true;
+        }
+
+        void onResume()
+        {
+            mMinimized = false;
+        }
+
+        void onInputQueueCreated(AInputQueue *queue)
+        {
+            assert(!sQueue);
+            sQueue = queue;
+        }
+
+        void onInputQueueDestroyed(AInputQueue *queue)
+        {
+            assert(sQueue == queue);
+            sQueue = nullptr;
+        }
+
         // Input
         InterfacesVector mLastKnownMousePos;
+
+        std::atomic_flag mResizeNeeded;
+        bool mMinimized = false;
+
+        InterfacesVector mContentPos;
+        InterfacesVector mContentSize;
     };
 
     static std::optional<AndroidWindow> sWindow;
+
+    template <auto f, typename... Args>
+    static void delegate(ANativeActivity *activity, Args... args)
+    {
+        (*sWindow.*f)(args...);
+    }
+
+    void setup(ANativeActivity *activity)
+    {
+        activity->callbacks->onNativeWindowCreated = delegate<&AndroidWindow::onNativeWindowCreated, ANativeWindow *>;
+        activity->callbacks->onNativeWindowDestroyed = delegate<&AndroidWindow::onNativeWindowDestroyed, ANativeWindow *>;
+        activity->callbacks->onNativeWindowResized = delegate<&AndroidWindow::onNativeWindowResized, ANativeWindow *>;
+        activity->callbacks->onConfigurationChanged = delegate<&AndroidWindow::onConfigurationChanged>;
+        activity->callbacks->onContentRectChanged = delegate<&AndroidWindow::onContentRectChanged, const ARect *>;
+        activity->callbacks->onPause = delegate<&AndroidWindow::onPause>;
+        activity->callbacks->onResume = delegate<&AndroidWindow::onResume>;
+        activity->callbacks->onInputQueueCreated = delegate<&AndroidWindow::onInputQueueCreated, AInputQueue *>;
+        activity->callbacks->onInputQueueDestroyed = delegate<&AndroidWindow::onInputQueueDestroyed, AInputQueue *>;
+    }
+
+    void forceResize()
+    {
+        sWindow->mResizeNeeded.test_and_set();
+    }
 
     void OSWindow::update()
     {
@@ -108,8 +199,7 @@ namespace Window {
                 bool handled = false;
                 switch (AInputEvent_getType(event)) {
                 case AINPUT_EVENT_TYPE_KEY:
-                    // TODO
-                    std::terminate();
+                    LOG_WARNING("Unhandled Key Event: " << AKeyEvent_getKeyCode(event));
                     break;
                 case AINPUT_EVENT_TYPE_MOTION:
                     handled = static_cast<AndroidWindow *>(this)->handleMotionEvent(event);
@@ -120,6 +210,10 @@ namespace Window {
                 }
                 AInputQueue_finishEvent(sQueue, event, handled);
             }
+        }
+        if (static_cast<AndroidWindow *>(this)->mResizeNeeded.test() && sWindow->mHandle != 0) {
+            static_cast<AndroidWindow *>(this)->mResizeNeeded.clear();
+            onResize(size());
         }
     }
 
@@ -133,12 +227,8 @@ namespace Window {
     }
 
     InterfacesVector OSWindow::renderSize()
-    {        
-        ANativeWindow *window = reinterpret_cast<ANativeWindow *>(mHandle);
-        return {
-            ANativeWindow_getWidth(window),
-            ANativeWindow_getHeight(window) - 112
-        };
+    {
+        return static_cast<AndroidWindow *>(this)->mContentSize;
     }
 
     InterfacesVector OSWindow::pos()
@@ -148,7 +238,7 @@ namespace Window {
 
     InterfacesVector OSWindow::renderPos()
     {
-        return { 0, 0 };
+        return static_cast<AndroidWindow*>(this)->mContentPos;
     }
 
     void OSWindow::setSize(const InterfacesVector &size)
@@ -175,7 +265,7 @@ namespace Window {
 
     bool OSWindow::isMinimized()
     {
-        return false;
+        return static_cast<AndroidWindow *>(this)->mMinimized;
     }
 
     bool OSWindow::isMaximized()
@@ -286,7 +376,6 @@ namespace Window {
 
         return { info };
     }
-
 }
 }
 

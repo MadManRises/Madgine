@@ -16,7 +16,8 @@
              based upon the package attribute -->
         <activity android:name="android.app.NativeActivity"
                   android:label="$<TARGET_FILE_BASE_NAME:@target@>"
-                  android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+                  android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+                  android:configChanges="orientation|keyboardHidden|screenSize">
                 <meta-data android:name="android.app.lib_name"
                         android:value="$<TARGET_FILE_BASE_NAME:@target@>" />
                 <intent-filter>
