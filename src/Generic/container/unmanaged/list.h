@@ -1,23 +1,18 @@
 #pragma once
 
+#include "nodes.h"
+
 namespace Engine {
 
 template <typename T>
-struct LockFreeUnmanagedNode {
-    LockFreeUnmanagedNode() = default;
-    LockFreeUnmanagedNode(const LockFreeUnmanagedNode &) = delete;
-    LockFreeUnmanagedNode(LockFreeUnmanagedNode &&) = delete;
-    LockFreeUnmanagedNode &operator=(LockFreeUnmanagedNode &&) = delete;
-    LockFreeUnmanagedNode &operator=(const LockFreeUnmanagedNode &) = delete;
+struct UnmanagedList {
+    struct Node : UnmanagedSinglyLinkedNode<T> {
+    
+    };
 
-    std::atomic<T *> mNext = nullptr;
-};
+    static_assert(std::derived_from<T, Node>);
 
-template <typename T>
-struct LockFreeUnmanagedQueue {
-    static_assert(std::derived_from<T, LockFreeUnmanagedNode<T>>);
-
-    bool push(T *item)
+    /* bool push(T *item)
     {
         std::unique_lock lock { mMutex };
         T *previous = mTail;
@@ -59,12 +54,11 @@ struct LockFreeUnmanagedQueue {
         std::unique_lock lock { mMutex };
         return !mHead;
     }
-
+    */
 private:
     std::atomic<T *> mHead = nullptr;
     std::atomic<T *> mTail = nullptr;
-#warning "Make it properly lock-free"
-    mutable std::mutex mMutex; //TODO: get rid
+    mutable std::mutex mMutex;
 };
 
 }

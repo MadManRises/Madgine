@@ -100,29 +100,36 @@ namespace Tools {
 
             std::lock_guard guard { mMutex };
 
-            if (mIsDirty) {
-                mIsDirty = false;
-                mFilteredMsgCount = 0;
-                mFilteredOffsetAcc = 0.0f;
-                mLookup.clear();
-                size_t i = 0;
-                for (LogEntry &entry : mEntries) {
-                    if (filter(entry))
-                        addFilteredMessage(i, entry.mMsg);
-                    ++i;
-                }
-            }
-
             if (ImGui::BeginTable("Messages", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Hideable | ImGuiTableFlags_SizingFixedFit)) {
 
-                ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide);
+                ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 12.0f);
                 ImGui::TableSetupColumn("Message", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide);
-                ImGui::TableSetupColumn("Source");
-                ImGui::TableSetupColumn("Line");
+                ImGui::TableSetupColumn("Source", ImGuiTableColumnFlags_WidthStretch, 0.3f);
+                ImGui::TableSetupColumn("Line", ImGuiTableColumnFlags_WidthFixed);
                 ImGui::TableSetupScrollFreeze(0, 1);
                 ImGui::TableHeadersRow();
 
                 ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(1);
+                float messageWidth = ImGui::GetContentRegionAvail().x;
+                if (messageWidth != mCachedWidth) {
+                    mCachedWidth = messageWidth;
+                    mIsDirty = true;
+                }
+
+                if (mIsDirty) {
+                    mIsDirty = false;
+                    mFilteredMsgCount = 0;
+                    mFilteredOffsetAcc = 0.0f;
+                    mLookup.clear();
+                    size_t i = 0;
+                    for (LogEntry &entry : mEntries) {
+                        if (filter(entry))
+                            addFilteredMessage(i, entry.mMsg);
+                        ++i;
+                    }
+                }
+
 
                 ImGuiWindow *window = ImGui::GetCurrentWindow();
                 float lossyness = window->DC.CursorStartPosLossyness.y;
@@ -163,7 +170,7 @@ namespace Tools {
                                 ImGui::TextWrapped("%s", entry.mMsg.c_str());
                                 ImGui::TableNextColumn();
                                 if (entry.mFile)
-                                    ImGui::Text("%s", entry.mFile);
+                                    ImGui::TextWrapped("%s", entry.mFile);
                                 ImGui::TableNextColumn();
                                 if (entry.mFile)
                                     ImGui::Text("%zu", entry.mLine);
@@ -226,7 +233,7 @@ namespace Tools {
     float LogViewer::calculateTextHeight(std::string_view text)
     {
 
-        return ImGui::CalcTextSize(text.data(), text.data() + text.size(), false, 0.0f).y + ImGui::GetCurrentContext()->Style.ItemSpacing.y;
+        return ImGui::CalcTextSize(text.data(), text.data() + text.size(), false, mCachedWidth).y + ImGui::GetCurrentContext()->Style.ItemSpacing.y;
     }
 
 }

@@ -3,14 +3,14 @@
 #include "Generic/execution/concepts.h"
 #include "Generic/type_pack.h"
 #include "Generic/genericresult.h"
-#include "Generic/container/lockfreeunmanagedqueue.h"
+#include "Generic/container/unmanaged/queue.h"
 
 namespace Engine {
 namespace Threading {
 
     struct MODULES_EXPORT DataMutex {
 
-        struct LockState : LockFreeUnmanagedNode<LockState> {
+        struct LockState : UnmanagedQueueNode<LockState> {
             LockState(DataMutex *mutex, AccessMode mode)
                 : mMutex(mutex)
                 , mMode(mode)
@@ -133,8 +133,8 @@ namespace Threading {
         std::shared_mutex mMutex;
         std::string mName;
 
-        LockFreeUnmanagedQueue<LockState> mReadQueue;
-        LockFreeUnmanagedQueue<LockState> mWriteQueue;        
+        UnmanagedQueue<LockState> mReadQueue;
+        UnmanagedQueue<LockState> mWriteQueue;        
     };
 
 }

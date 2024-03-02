@@ -59,6 +59,7 @@ namespace Tools {
         std::vector<Lookup> mLookup;
         float mFilteredOffsetAcc = 0.0f;
         bool mIsDirty = true;
+        float mCachedWidth = 0.0f;
     };
 
 }
