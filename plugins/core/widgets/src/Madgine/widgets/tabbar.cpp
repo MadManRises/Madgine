@@ -95,7 +95,7 @@ namespace Widgets {
 
     void TabBar::sizeChanged(const Vector3 &pixelSize)
     {
-        mTabBarRenderData.update(tabCount(), { 0.0f, 1.0f, 1000.0f }, pixelSize.x);
+        mTabBarRenderData.update(tabCount(), { 0.0f, 1.0f, 100000.0f }, pixelSize.x);
     }
 
     void TabBar::injectPointerMove(const Input::PointerEventArgs &arg)

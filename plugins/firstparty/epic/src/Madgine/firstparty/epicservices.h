@@ -36,7 +36,7 @@ namespace FirstParty {
             } mAggregation;
         };
 
-        virtual Threading::Task<Leaderboard> getLeaderboardTask(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd, uint32_t *fullSize) override;
+        virtual Threading::Task<Leaderboard> getLeaderboardTask(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd) override;
         Threading::Task<std::vector<LeaderboardInfo>> getLeaderboards();
 
         struct LeaderboardCache {

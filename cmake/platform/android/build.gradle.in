@@ -41,7 +41,7 @@ android {
             manifest.srcFile 'AndroidManifest.xml'
             jniLibs.srcDirs = ['@CMAKE_CURRENT_BINARY_DIR@/bin/', '@CMAKE_ANDROID_NDK@/sources/cxx-stl/llvm-libc++/libs/' @ANDROID_ADDITIONAL_DEPENDENCIES@]
 			assets.srcDirs = ['@CMAKE_BINARY_DIR@/data/']
-            res.srcDirs = [@ANDROID_ADDITIONAL_RESOURCES@]
+            res.srcDirs = ['@MADGINE_CONFIGURATION@/res' @ANDROID_ADDITIONAL_RESOURCES@]
             java.srcDirs = [@ANDROID_ADDITIONAL_SOURCES@]
         }
     }

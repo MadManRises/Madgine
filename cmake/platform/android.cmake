@@ -55,7 +55,7 @@ if (ANDROID)
 
 		if (ANDROID_RESOURCES)
 			list(JOIN ANDROID_RESOURCES "', '" ANDROID_ADDITIONAL_RESOURCES)
-			set(ANDROID_ADDITIONAL_RESOURCES "'${ANDROID_ADDITIONAL_RESOURCES}'")			
+			set(ANDROID_ADDITIONAL_RESOURCES ", '${ANDROID_ADDITIONAL_RESOURCES}'")			
 		endif()
 
 		configure_file(${Android_List_dir}/android/build.gradle.in build.gradle @ONLY)

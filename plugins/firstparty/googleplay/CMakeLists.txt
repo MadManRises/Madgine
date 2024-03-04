@@ -8,8 +8,8 @@ endif()
 
 MESSAGE(STATUS "--- Google Play ---")
 
-if (NOT EXISTS ${MADGINE_CONFIGURATION}/games-ids.xml)
-	MESSAGE(STATUS "No games-ids.xml provided. Plugin disabled. Add games-ids.xml to your MADGINE_CONFIGURATION location.")
+if (NOT EXISTS ${MADGINE_CONFIGURATION}/res/values/games-ids.xml)
+	MESSAGE(STATUS "No games-ids.xml provided. Plugin disabled. Add res/values/games-ids.xml to your MADGINE_CONFIGURATION location.")
 	MESSAGE(STATUS "--- Google Play End ---")
 	return()
 endif ()
@@ -21,9 +21,6 @@ endif ()
 
 MESSAGE(STATUS "--- Google Play End ---")
 
-
-
-
 set(sources "")
 FolderSources(sources "" src)
 FolderSources(sources src Madgine)
@@ -34,11 +31,5 @@ add_plugin(GooglePlayServices Madgine FirstParty ${sources} PRECOMPILED_HEADER s
 target_link_plugins(GooglePlayServices FirstParty)
 
 target_link_libraries(GooglePlayServices PRIVATE PlayServices)
-
-	configure_file(${MADGINE_CONFIGURATION}/games-ids.xml res/values/games-ids.xml)
-	list(APPEND ANDROID_RESOURCES
-		${CMAKE_CURRENT_BINARY_DIR}/res/
-	)
-	set(ANDROID_RESOURCES "${ANDROID_RESOURCES}" CACHE INTERNAL "")
 
 

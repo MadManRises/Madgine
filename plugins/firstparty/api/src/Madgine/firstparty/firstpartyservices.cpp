@@ -19,9 +19,9 @@ namespace FirstParty {
     {
     }
 
-    Threading::TaskFuture<Leaderboard> FirstPartyServices::getLeaderboard(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd, uint32_t *fullSize)
+    Threading::TaskFuture<Leaderboard> FirstPartyServices::getLeaderboard(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd)
     {
-        return mRoot.taskQueue()->queueTask(getLeaderboardTask(name, accessmode, referenceRank, rangeBegin, rangeEnd, fullSize));
+        return mRoot.taskQueue()->queueTask(getLeaderboardTask(name, accessmode, referenceRank, rangeBegin, rangeEnd));
     }
 
     Threading::TaskFuture<bool> FirstPartyServices::ingestStat(const char *name, const char *leaderboardName, int32_t value)

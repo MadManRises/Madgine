@@ -21,7 +21,6 @@
 #include "Generic/execution/execution.h"
 
 METATABLE_BEGIN_BASE(Engine::FirstParty::GooglePlayServices, Engine::FirstParty::FirstPartyServices)
-READONLY_PROPERTY(Initialized, mInitialized)
 METATABLE_END(Engine::FirstParty::GooglePlayServices)
 
 UNIQUECOMPONENT(Engine::FirstParty::GooglePlayServices)
@@ -44,13 +43,37 @@ namespace FirstParty {
         return "GooglePlayServices";
     }
 
-    Threading::Task<Leaderboard> GooglePlayServices::getLeaderboardTask(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd, uint32_t *fullSize)
+    Threading::Task<Leaderboard> GooglePlayServices::getLeaderboardTask(const char *name, Leaderboard::AccessMode accessmode, Leaderboard::ReferenceRank referenceRank, int32_t rangeBegin, int32_t rangeEnd)
     {
-        co_return {};        
+        WithResult<std::string, PlayServices::Leaderboards::Scores> result = co_await PlayServices::Leaderboards::getLeaderboard(name, accessmode, referenceRank, rangeBegin, rangeEnd);
+        PlayServices::Leaderboards::Scores scores;
+        std::string errorMsg = result.get(scores);
+        if (!errorMsg.empty()) {
+            LOG_ERROR("Error fetching Leaderboard " << name << ": \n "
+                                             << errorMsg);            
+        }
+        Leaderboard transferredScores;
+
+        std::ranges::transform(scores.mScores, std::back_inserter(transferredScores.mEntries), [](const PlayServices::Leaderboards::Scores::Score &score) {
+            return Leaderboard::Entry {
+                score.mUserId,
+                score.mDisplayName,
+                score.mRank,
+                score.mScore
+            };
+        });
+
+        co_return transferredScores;        
     }
 
     Threading::Task<bool> GooglePlayServices::ingestStatTask(const char *name, const char *leaderboardName, int32_t value)
     {
+        std::optional<std::string> result = co_await PlayServices::Leaderboards::submitScore(leaderboardName, value, name); 
+        if (result) {
+            LOG_ERROR("Error updating Stat " << name << " in Leaderboard " << leaderboardName << ": \n "
+                << *result);
+            co_return false;
+        } 
         co_return false;
     }
 
@@ -58,7 +81,7 @@ namespace FirstParty {
     {
         std::optional<std::string> result = co_await PlayServices::Achievements::unlock(name);
         if (result) {
-            LOG_ERROR("Error unlocking Google Play Achievement: \n" << *result);
+            LOG_ERROR("Error unlocking Achievement: \n" << *result);
             co_return false;
         } 
         co_return true;

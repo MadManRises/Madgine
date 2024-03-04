@@ -169,8 +169,10 @@ namespace Tools {
                                 ImGui::TableNextColumn();
                                 ImGui::TextWrapped("%s", entry.mMsg.c_str());
                                 ImGui::TableNextColumn();
-                                if (entry.mFile)
-                                    ImGui::TextWrapped("%s", entry.mFile);
+                                if (entry.mFile) {
+                                    Filesystem::Path file = entry.mFile;
+                                    ImGui::TextWrapped("%s", file.c_str());
+                                }
                                 ImGui::TableNextColumn();
                                 if (entry.mFile)
                                     ImGui::Text("%zu", entry.mLine);

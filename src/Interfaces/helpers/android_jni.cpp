@@ -68,6 +68,42 @@ void callStaticFunction2(const char *className, const char *functionName, std::s
     sEnv->CallStaticVoidMethod(clazz, method, sEnv->NewStringUTF(string.data()), v);
 }
 
+void callStaticFunction3(const char *className, const char *functionName, std::string_view string1, jint v1, std::string_view string2, jlong v2)
+{
+    jclass clazz = static_cast<jclass>(sEnv->CallObjectMethod(gClassLoader, gFindClassMethod, sEnv->NewStringUTF(className)));
+    jmethodID method = sEnv->GetStaticMethodID(clazz, functionName, "(Ljava/lang/String;ILjava/lang/String;J)V");
+    if (method == NULL) {
+        sEnv->FatalError("method not found");
+    }
+
+    // method execution
+    sEnv->CallStaticVoidMethod(clazz, method, sEnv->NewStringUTF(string1.data()), v1, sEnv->NewStringUTF(string2.data()), v2);
+}
+
+void callStaticFunction4(const char *className, const char *functionName, std::string_view string, jint v1, jint v2, jint v3, jint v4, jlong v5)
+{
+    jclass clazz = static_cast<jclass>(sEnv->CallObjectMethod(gClassLoader, gFindClassMethod, sEnv->NewStringUTF(className)));
+    jmethodID method = sEnv->GetStaticMethodID(clazz, functionName, "(Ljava/lang/String;IIIIJ)V");
+    if (method == NULL) {
+        sEnv->FatalError("method not found");
+    }
+
+    // method execution
+    sEnv->CallStaticVoidMethod(clazz, method, sEnv->NewStringUTF(string.data()), v1, v2, v3, v4, v5);
+}
+
+int callMemberFunction(jobject object, const char *functionName, JNIEnv *env)
+{
+    jclass clazz = env->GetObjectClass(object);
+    jmethodID method = env->GetMethodID(clazz, functionName, "()I");
+    if (method == NULL) {
+        env->FatalError("method not found");
+    }
+
+    // method execution
+    return env->CallIntMethod(object, method);
+}
+
 void registerNatives(const char *className, std::span<const JNINativeMethod> methods)
 {
     jclass clazz = static_cast<jclass>(sEnv->CallObjectMethod(gClassLoader, gFindClassMethod, sEnv->NewStringUTF(className)));
