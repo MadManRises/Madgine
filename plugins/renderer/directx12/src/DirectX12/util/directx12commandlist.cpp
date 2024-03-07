@@ -15,12 +15,12 @@ namespace Render {
 
     DirectX12CommandList::~DirectX12CommandList()
     {
-        reset();
+        assert(!mList);
     }
 
     DirectX12CommandList &DirectX12CommandList::operator=(DirectX12CommandList &&other)
     {
-        reset();
+        assert(!mList);
         mManager = other.mManager;
         mList = std::move(other.mList);
         mAllocator = std::move(other.mAllocator);
@@ -28,11 +28,12 @@ namespace Render {
         return *this;
     }
 
-    void DirectX12CommandList::reset()
+    RenderFuture DirectX12CommandList::execute()
     {
         if (mList) {
-            mManager->ExecuteCommandList(std::move(mList), std::move(mAllocator), std::move(mAttachedResources));
+            return mManager->ExecuteCommandList(std::move(mList), std::move(mAllocator), std::move(mAttachedResources));
         }
+        return {};
     }
 
     DirectX12CommandList::operator ID3D12GraphicsCommandList *()

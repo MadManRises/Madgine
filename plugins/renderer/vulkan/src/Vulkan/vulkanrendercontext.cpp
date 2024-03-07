@@ -680,7 +680,7 @@ namespace Render {
         return { buffer, std::move(waitSemaphores), std::move(signalSemaphores) };
     }
 
-    void VulkanRenderContext::ExecuteCommandList(NulledPtr<std::remove_pointer_t<VkCommandBuffer>> buffer, std::vector<VkSemaphore> waitSemaphores, std::vector<VkSemaphore> signalSemaphores, std::vector<Any> attachedResources)
+    RenderFuture VulkanRenderContext::ExecuteCommandList(NulledPtr<std::remove_pointer_t<VkCommandBuffer>> buffer, std::vector<VkSemaphore> waitSemaphores, std::vector<VkSemaphore> signalSemaphores, std::vector<Any> attachedResources)
     {
         VkResult result = vkEndCommandBuffer(buffer);
         VK_CHECK(result);
@@ -718,12 +718,12 @@ namespace Render {
         submitInfo.signalSemaphoreCount = signalSemaphores.size();
         submitInfo.pSignalSemaphores = signalSemaphores.data();
 
-        ++mNextFenceValue;
-
         result = vkQueueSubmit(mGraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
         VK_CHECK(result);
 
         mBufferPool.emplace_back(mNextFenceValue, buffer, std::move(attachedResources));
+
+        return mNextFenceValue++;
     }
 
     VkDescriptorSet VulkanRenderContext::fetchTempDescriptorSet()

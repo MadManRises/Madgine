@@ -15,7 +15,7 @@ namespace Render {
 
         virtual bool skipFrame() override;
         virtual void beginFrame() override;
-        virtual void endFrame() override;
+        virtual RenderFuture endFrame() override;
 
         virtual bool resizeImpl(const Vector2i &size) override;
         virtual Vector2i size() const override;

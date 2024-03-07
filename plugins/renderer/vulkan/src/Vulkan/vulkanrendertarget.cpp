@@ -148,13 +148,13 @@ namespace Render {
         RenderTarget::beginFrame();
     }
 
-    void VulkanRenderTarget::endFrame()
+    RenderFuture VulkanRenderTarget::endFrame()
     {
         RenderTarget::endFrame();
 
         vkCmdEndRenderPass(mCommandList);
 
-        mCommandList.reset();
+        return mCommandList.reset();
     }
 
     Matrix4 VulkanRenderTarget::getClipSpaceMatrix() const

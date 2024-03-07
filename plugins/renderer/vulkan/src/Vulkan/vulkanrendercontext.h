@@ -53,7 +53,7 @@ namespace Render {
         virtual void destroyResourceBlock(UniqueResourceBlock &block) override;
 
         VulkanCommandList fetchCommandList(std::string_view name, std::vector<VkSemaphore> waitSemaphores = {}, std::vector<VkSemaphore> signalSemaphores = {});
-        void ExecuteCommandList(NulledPtr<std::remove_pointer_t<VkCommandBuffer>> buffer, std::vector<VkSemaphore> waitSemaphores, std::vector<VkSemaphore> signalSemaphores, std::vector<Any> attachedResources);
+        RenderFuture ExecuteCommandList(NulledPtr<std::remove_pointer_t<VkCommandBuffer>> buffer, std::vector<VkSemaphore> waitSemaphores, std::vector<VkSemaphore> signalSemaphores, std::vector<Any> attachedResources);
 
         VkDescriptorSet fetchTempDescriptorSet();
 

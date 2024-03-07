@@ -2,6 +2,7 @@
 
 #include "Modules/threading/taskfuture.h"
 #include "renderdebuggable.h"
+#include "Madgine/render/future.h"
 
 namespace Engine {
 namespace Render {
@@ -12,7 +13,7 @@ namespace Render {
         virtual void setup(RenderTarget *target) { }
         virtual void shutdown(RenderTarget *target) { }
         virtual void render(RenderTarget *target, size_t iteration) = 0;
-        void preRender(std::vector<Threading::TaskFuture<void>> &dependencies, RenderContext *context);
+        RenderFuture preRender(RenderContext *context);
 
         const std::vector<RenderData *> &dependencies() const;
 

@@ -116,6 +116,7 @@ namespace Render {
             list.Transition(mTextureHandle, D3D12_RESOURCE_STATE_COPY_DEST, readStateFlags());
 
             list.attachResource(std::move(uploadHeap));
+            list.execute();
         }
 
         OffsetPtr handle = DirectX12RenderContext::getSingleton().mDescriptorHeap.allocate();

@@ -12,12 +12,12 @@ METATABLE_END(Engine::Render::RenderPass)
 namespace Engine {
 namespace Render {
 
-    void RenderPass::preRender(std::vector<Threading::TaskFuture<void>> &dependencies, RenderContext *context)
+    RenderFuture RenderPass::preRender(RenderContext *context)
     {
+        RenderFuture future;
         for (RenderData *dep : mDependencies)
-            dependencies.push_back(dep->update(context));
-        for (const auto &fut : dependencies)
-            assert(fut.valid());
+            future.merge(dep->update(context));
+        return future;
     }
 
     const std::vector<RenderData *> &RenderPass::dependencies() const

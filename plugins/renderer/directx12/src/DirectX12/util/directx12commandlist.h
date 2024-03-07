@@ -2,6 +2,8 @@
 
 #include "Generic/any.h"
 
+#include "Madgine/render/future.h"
+
 namespace Engine {
 namespace Render {
 
@@ -12,7 +14,7 @@ namespace Render {
 
         DirectX12CommandList &operator=(DirectX12CommandList &&);
 
-        void reset();
+        RenderFuture execute();
 
         operator ID3D12GraphicsCommandList *();
         ID3D12GraphicsCommandList *operator->();

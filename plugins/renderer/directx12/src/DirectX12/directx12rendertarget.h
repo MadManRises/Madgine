@@ -18,7 +18,7 @@ namespace Render {
         void shutdown();
 
         void beginFrame() override;
-        void endFrame() override;
+        RenderFuture endFrame() override;
 
         virtual void beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const override;
         virtual void endIteration() const override;

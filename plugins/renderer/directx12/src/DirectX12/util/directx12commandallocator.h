@@ -2,6 +2,8 @@
 
 #include "directx12commandlist.h"
 
+#include "Madgine/render/future.h"
+
 namespace Engine {
 namespace Render {
 
@@ -11,14 +13,16 @@ namespace Render {
         void setup();
 
         DirectX12CommandList fetchCommandList();
-        void ExecuteCommandList(ReleasePtr<ID3D12GraphicsCommandList> list, ReleasePtr<ID3D12CommandAllocator> allocator, std::vector<Any> discardResources);
+        RenderFuture ExecuteCommandList(ReleasePtr<ID3D12GraphicsCommandList> list, ReleasePtr<ID3D12CommandAllocator> allocator, std::vector<Any> discardResources);
 
         uint64_t currentFence();
 
         bool isFenceCompleteRelative(uint64_t offset);
         bool isFenceComplete(uint64_t fenceValue);
+        bool isComplete(RenderFuture fut);
 
         void signalFence();
+        void wait(RenderFuture fut);
 
         ID3D12CommandQueue *queue();
 

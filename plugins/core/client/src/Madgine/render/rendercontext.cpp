@@ -56,12 +56,9 @@ namespace Render {
     Threading::Task<void> RenderContext::render()
     {
         if (!beginFrame())
-            co_return;
-        std::vector<Threading::TaskFuture<void>> targets;
+            co_return;        
         for (RenderTarget *target : safeIterate(mRenderTargets))
-            targets.push_back(target->update(this));
-        for (Threading::TaskFuture<void> &wait : targets)
-            co_await wait;
+            target->update(this);
         endFrame();
     }
 

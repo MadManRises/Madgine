@@ -248,7 +248,7 @@ namespace Render {
         GL_CHECK();
     }
 
-    void OpenGLRenderTexture::endFrame()
+    RenderFuture OpenGLRenderTexture::endFrame()
     {
         OpenGLRenderTarget::endFrame();
     }

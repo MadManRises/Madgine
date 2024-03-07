@@ -14,7 +14,7 @@ namespace Render {
         virtual void endIteration() const override;
 
         virtual void beginFrame() override;
-        virtual void endFrame() override;
+        virtual RenderFuture endFrame() override;
 
         virtual void clearDepthBuffer() override;
 

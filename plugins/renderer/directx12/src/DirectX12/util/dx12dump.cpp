@@ -23,7 +23,9 @@ void dx12Dump(HRESULT result)
     
     if (result == DXGI_ERROR_DEVICE_REMOVED) {
         HRESULT reason = GetDevice()->GetDeviceRemovedReason();
-        int i = 3;
+        _com_error error { reason };
+        LOG_FATAL("DX12: Device Removal reason: \n"
+            << error.ErrorMessage());
     }
 
     cout << "DX12-State: ---------- \n";

@@ -72,7 +72,7 @@ namespace Render {
         return { this, std::move(list), std::move(alloc) };
     }
 
-    void DirectX12CommandAllocator::ExecuteCommandList(ReleasePtr<ID3D12GraphicsCommandList> list, ReleasePtr<ID3D12CommandAllocator> allocator, std::vector<Any> discardResources)
+    RenderFuture DirectX12CommandAllocator::ExecuteCommandList(ReleasePtr<ID3D12GraphicsCommandList> list, ReleasePtr<ID3D12CommandAllocator> allocator, std::vector<Any> discardResources)
     {
         HRESULT hr = list->Close();
         DX12_CHECK(hr);
@@ -85,6 +85,10 @@ namespace Render {
             mAllocatorPool.emplace_back(mNextFenceValue, std::move(allocator), std::move(discardResources));
 
         mCommandListPool.push_back(std::move(list));
+
+        mCommandQueue->Signal(mFence, mNextFenceValue);
+
+        return mNextFenceValue++;
     }
 
     uint64_t DirectX12CommandAllocator::currentFence()
@@ -107,10 +111,24 @@ namespace Render {
         return fenceValue <= mLastCompletedFenceValue;
     }
 
+    bool DirectX12CommandAllocator::isComplete(RenderFuture fut)
+    {
+        if (!fut)
+            return true;
+        return isFenceComplete(fut.value());
+    }
+
     void DirectX12CommandAllocator::signalFence()
     {
         mCommandQueue->Signal(mFence, mNextFenceValue);
         ++mNextFenceValue;
+    }
+
+    void DirectX12CommandAllocator::wait(RenderFuture fut)
+    {
+        if (fut) {
+            mCommandQueue->Wait(mFence, fut.value());
+        }
     }
 
     ID3D12CommandQueue *DirectX12CommandAllocator::queue()

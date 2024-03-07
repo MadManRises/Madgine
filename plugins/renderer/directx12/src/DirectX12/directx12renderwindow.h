@@ -12,7 +12,7 @@ namespace Render {
 
         virtual bool skipFrame() override;
         virtual void beginFrame() override;
-        virtual void endFrame() override;
+        virtual RenderFuture endFrame() override;
 
         virtual void beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const override;
         virtual void endIteration() const override;

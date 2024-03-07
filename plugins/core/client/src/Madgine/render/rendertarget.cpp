@@ -36,21 +36,16 @@ namespace Render {
             context()->removeRenderTarget(this);
     }
 
-    Threading::ImmediateTask<void> RenderTarget::render(RenderContext *context)
+    RenderFuture RenderTarget::render(RenderContext *context)
     {
         if (skipFrame())
-            co_return;
-
-        std::vector<Threading::TaskFuture<void>> dependencies;
+            return {};
 
         if (mBlitSource)
-            dependencies.push_back(mBlitSource->update(context));
+            mBlitSource->update(context);
 
         for (RenderPass *pass : mRenderPasses)
-            pass->preRender(dependencies, context);
-
-        for (Threading::TaskFuture<void> &dependency : dependencies)
-            co_await dependency;
+            pass->preRender(context);
 
         LOG_DEBUG(mName << ": Begin Frame");
 
@@ -75,9 +70,11 @@ namespace Render {
             popAnnotation();
         }
 
-        endFrame();
+        RenderFuture result = endFrame();
 
         LOG_DEBUG(mName << ": End Frame");
+
+        return result;
     }
 
     void RenderTarget::addRenderPass(RenderPass *pass)
@@ -115,9 +112,10 @@ namespace Render {
         pushAnnotation(mName.empty() ? "<unnamed target>" : mName.c_str());
     }
 
-    void RenderTarget::endFrame()
+    RenderFuture RenderTarget::endFrame()
     {
         popAnnotation();
+        return {};
     }
 
     void RenderTarget::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const

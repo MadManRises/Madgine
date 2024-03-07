@@ -8,15 +8,20 @@
 namespace Engine {
 namespace Render {
 
-    Threading::TaskFuture<void> RenderData::update(RenderContext *context)
+    RenderFuture RenderData::update(RenderContext *context)
     {
         if (context->frame() != mFrame) {
             mFrame = context->frame();
 
-            mCurrentFrame = context->renderQueue()->queueTask(render(context));
+            mLastFrame = render(context);
         }
 
-        return mCurrentFrame;
+        return mLastFrame;
+    }
+
+    RenderFuture RenderData::lastFrame() const
+    {
+        return mLastFrame;
     }
 
 }

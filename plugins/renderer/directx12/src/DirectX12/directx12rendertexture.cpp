@@ -35,7 +35,7 @@ namespace Render {
         if (mDepthTexture.size() == size)
             return false;
 
-        if (context()->graphicsQueue()->isFenceComplete(context()->graphicsQueue()->currentFence())) {
+        if (context()->graphicsQueue()->isComplete(lastFrame())) {
             resizeBuffers(size);
         } else {
             mResizePending = true;
@@ -171,7 +171,7 @@ namespace Render {
             blit(mBlitSource);
     }
 
-    void DirectX12RenderTexture::endFrame()
+    RenderFuture DirectX12RenderTexture::endFrame()
     {
         DirectX12RenderTarget::endFrame();
 
@@ -182,7 +182,7 @@ namespace Render {
             mCommandList.Transition(mTextures[size * offset + index], D3D12_RESOURCE_STATE_RENDER_TARGET, mTextures[size * offset + index].readStateFlags());
         }
 
-        mCommandList.reset();
+        return mCommandList.execute();
     }
 
     void DirectX12RenderTexture::blit(RenderTarget *input) const

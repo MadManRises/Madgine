@@ -47,7 +47,7 @@ namespace Render {
         glEnable(GL_FRAMEBUFFER_SRGB);
     }
 
-    void OpenGLRenderTarget::endFrame()
+    RenderFuture OpenGLRenderTarget::endFrame()
     {
         glDisable(GL_FRAMEBUFFER_SRGB);
 

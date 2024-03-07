@@ -14,6 +14,8 @@
 
 #include "Generic/bytebuffer.h"
 
+#include "Madgine/render/future.h"
+
 namespace Engine {
 namespace Render {
 

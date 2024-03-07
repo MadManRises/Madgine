@@ -29,11 +29,12 @@ namespace Render {
         return *this;
     }
 
-    void VulkanCommandList::reset()
+    RenderFuture VulkanCommandList::reset()
     {
         if (mBuffer) {
-            VulkanRenderContext::getSingleton().ExecuteCommandList(std::move(mBuffer), std::move(mWaitSemaphores), std::move(mSignalSemaphores), std::move(mAttachedResources));
+            return VulkanRenderContext::getSingleton().ExecuteCommandList(std::move(mBuffer), std::move(mWaitSemaphores), std::move(mSignalSemaphores), std::move(mAttachedResources));
         }
+        return {};
     }
 
     VulkanCommandList::operator VkCommandBuffer() const

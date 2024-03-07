@@ -81,8 +81,7 @@ namespace Render {
 
         mCommandList.Transition(mDepthTexture, mDepthTexture.readStateFlags(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
-        context()->setupRootSignature(mCommandList);
-
+                
         mCommandList.attachResource(mDepthTexture.operator ReleasePtr<ID3D12Resource>());
 
         for (RenderPass *pass : renderPasses()) {
@@ -92,8 +91,12 @@ namespace Render {
                     for (const DirectX12Texture &texture : tex->textures())
                         mCommandList.attachResource(texture.operator ReleasePtr<ID3D12Resource>());
                 }
+                context()->mGraphicsQueue.wait(data->lastFrame());
             }
         }
+
+
+        context()->setupRootSignature(mCommandList);
 
         const Vector2i &screenSize = size();
 
@@ -124,14 +127,16 @@ namespace Render {
             }
         }
         clearDepthBuffer();
+
+
     }
 
-    void DirectX12RenderTarget::endFrame()
+    RenderFuture DirectX12RenderTarget::endFrame()
     {
 
         mCommandList.Transition(mDepthTexture, D3D12_RESOURCE_STATE_DEPTH_WRITE, mDepthTexture.readStateFlags());
 
-        RenderTarget::endFrame();
+        return RenderTarget::endFrame();
     }
 
     void DirectX12RenderTarget::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const

@@ -65,7 +65,7 @@ namespace Render {
         }
     }
 
-    void DirectX12Buffer::setData(const ByteBuffer &data, D3D12_RESOURCE_STATES targetState)
+    RenderFuture DirectX12Buffer::setData(const ByteBuffer &data, D3D12_RESOURCE_STATES targetState)
     {
         assert(data.mData);
 
@@ -98,6 +98,7 @@ namespace Render {
             size_t mSize;
         };
         list.attachResource(std::unique_ptr<void, Deleter> { uploadAllocation.mAddress, { uploadAllocation.mSize } });
+        return list.execute();
     }
 
     ID3D12Resource *DirectX12Buffer::resource() const

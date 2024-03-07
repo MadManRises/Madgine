@@ -15,6 +15,8 @@
 
 #include "Modules/threading/awaitables/awaitablesender.h"
 
+#include "Madgine/render/rendercontext.h"
+
 namespace Engine {
 namespace Render {
 
@@ -24,44 +26,46 @@ namespace Render {
     {
     }
 
-    Threading::ImmediateTask<void> ShadowSceneRenderData::render(RenderContext *context)
+    RenderFuture ShadowSceneRenderData::render(RenderContext *context)
     {
+        context->renderQueue()->queue([this, context]() -> Threading::ImmediateTask<void> {
+            co_await mScene.scene()->mutex().locked(AccessMode::READ, [this, context]() {
+                //TODO Culling
 
-        co_await mScene.scene()->mutex().locked(AccessMode::READ, [this, context]() {
-            //TODO Culling
+                for (auto &[key, transforms] : mInstances)
+                    transforms.clear();
 
-            for (auto &[key, transforms] : mInstances)
-                transforms.clear();
+                for (const auto &[mesh, e] : mScene.scene()->entityComponentList<Scene::Entity::Mesh>().data()) {
+                    if (!mesh.isVisible())
+                        continue;
 
-            for (const auto &[mesh, e] : mScene.scene()->entityComponentList<Scene::Entity::Mesh>().data()) {
-                if (!mesh.isVisible())
-                    continue;
+                    const GPUMeshData *meshData = mesh.data();
+                    if (!meshData)
+                        continue;
 
-                const GPUMeshData *meshData = mesh.data();
-                if (!meshData)
-                    continue;
+                    Scene::Entity::Transform *transform = e->getComponent<Scene::Entity::Transform>();
+                    if (!transform)
+                        continue;
 
-                Scene::Entity::Transform *transform = e->getComponent<Scene::Entity::Transform>();
-                if (!transform)
-                    continue;
+                    Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
+                    Engine::Render::GPUPtr<Matrix4[]> bones;
+                    if (skeleton)
+                        bones = skeleton->mBoneMatrices;
 
-                Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
-                Engine::Render::GPUPtr<Matrix4[]> bones;
-                if (skeleton)
-                    bones = skeleton->mBoneMatrices;
+                    mInstances[meshData].push_back({ transform->worldMatrix(), bones });
+                }
+            });
 
-                mInstances[meshData].push_back({ transform->worldMatrix(), bones });
+            for (auto it = mInstances.begin(); it != mInstances.end();) {
+                if (it->second.empty()) {
+                    it = mInstances.erase(it);
+                } else {
+                    ++it;
+                }
             }
         });
 
-        for (auto it = mInstances.begin(); it != mInstances.end();) {
-            if (it->second.empty()) {
-                it = mInstances.erase(it);
-            } else {
-                ++it;
-            }
-        }
+        return {};
     }
-
 }
 }

@@ -134,7 +134,7 @@ namespace Render {
         VulkanRenderTarget::beginFrame();
     }
 
-    void VulkanRenderWindow::endFrame()
+    RenderFuture VulkanRenderWindow::endFrame()
     {
         VulkanRenderTarget::endFrame();
 
@@ -162,6 +162,8 @@ namespace Render {
         default:
             VK_CHECK(result);
         }
+
+        return {};
     }
 
     void VulkanRenderWindow::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const

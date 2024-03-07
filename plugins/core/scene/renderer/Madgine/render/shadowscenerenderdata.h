@@ -13,7 +13,7 @@ namespace Render {
 
         ShadowSceneRenderData(SceneMainWindowComponent &scene, Camera *camera);
 
-        virtual Threading::ImmediateTask<void> render(RenderContext *context) override;
+        virtual RenderFuture render(RenderContext *context) override;
 
         SceneMainWindowComponent &mScene;
 

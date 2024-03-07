@@ -13,7 +13,7 @@ namespace Render {
 
         VulkanCommandList &operator=(VulkanCommandList &&);
 
-        void reset();
+        RenderFuture reset();
 
         operator VkCommandBuffer() const;
 

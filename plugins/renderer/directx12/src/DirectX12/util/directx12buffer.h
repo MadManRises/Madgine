@@ -2,6 +2,8 @@
 
 #include "Generic/allocator/concepts.h"
 
+#include "Madgine/render/future.h"
+
 namespace Engine {
 namespace Render {
 
@@ -22,7 +24,7 @@ namespace Render {
         void bindIndex(ID3D12GraphicsCommandList *commandList) const;
 
         void reset();
-        void setData(const ByteBuffer &data, D3D12_RESOURCE_STATES targetState);
+        RenderFuture setData(const ByteBuffer &data, D3D12_RESOURCE_STATES targetState);
         
         ID3D12Resource *resource() const;
 

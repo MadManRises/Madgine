@@ -18,7 +18,7 @@ namespace Render {
         virtual void endIteration() const override;
 
         virtual void beginFrame() override;
-        virtual void endFrame() override;
+        virtual RenderFuture endFrame() override;
 
         virtual const OpenGLTexture *texture(size_t index) const override;
         virtual size_t textureCount() const override;

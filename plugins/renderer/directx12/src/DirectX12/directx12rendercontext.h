@@ -82,6 +82,8 @@ namespace Render {
         DirectX12Buffer mConstantBuffer;
 
         DWORD mCallbackCookie;
+
+        RenderFuture mFrameFences[2];
     };
 
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Modules/threading/task.h"
+#include "Madgine/render/future.h"
 
 namespace Engine {
 
@@ -8,14 +8,16 @@ namespace Render {
 
     struct MADGINE_CLIENT_EXPORT RenderData {
 
-        Threading::TaskFuture<void> update(RenderContext *context);
+        RenderFuture update(RenderContext *context);
+
+        RenderFuture lastFrame() const;
 
     protected:
-        virtual Threading::ImmediateTask<void> render(RenderContext *context) = 0;
+        virtual RenderFuture render(RenderContext *context) = 0;
 
     private:
         size_t mFrame = 0;
-        Threading::TaskFuture<void> mCurrentFrame;
+        RenderFuture mLastFrame;
     };
 
 }

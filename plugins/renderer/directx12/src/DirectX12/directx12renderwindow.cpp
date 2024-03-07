@@ -103,15 +103,17 @@ namespace Render {
         //mCommandList.attachResource(mBackBuffers[mSwapChain->GetCurrentBackBufferIndex()]);
     }
 
-    void DirectX12RenderWindow::endFrame()
+    RenderFuture DirectX12RenderWindow::endFrame()
     {
         DirectX12RenderTarget::endFrame();
 
         mCommandList.Transition(mBackBuffers[mSwapChain->GetCurrentBackBufferIndex()], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
-        mCommandList.reset();
+        RenderFuture fut = mCommandList.execute();
 
         mSwapChain->Present(0, 0);
+
+        return fut;
     }
 
     void DirectX12RenderWindow::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const

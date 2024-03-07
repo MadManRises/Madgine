@@ -92,7 +92,7 @@ namespace Render {
         , mTempAllocator(mTempMemoryHeap)
         , mConstantMemoryHeap(mDescriptorHeap)
         , mConstantAllocator(mConstantMemoryHeap)
-        
+
     {
 
         assert(!sSingleton);
@@ -108,6 +108,7 @@ namespace Render {
                 ReleasePtr<ID3D12Debug1> debugController1;
                 if (SUCCEEDED(debugController->QueryInterface(IID_PPV_ARGS(&debugController1)))) {
                     debugController1->SetEnableGPUBasedValidation(true);
+                    DX12_LOG("Enabled Debug Layer");
                 }
             }
         }
@@ -119,14 +120,16 @@ namespace Render {
 
         ReleasePtr<IDXGIAdapter1> hardwareAdapter = GetHardwareAdapter(mFactory);
 
+        DX12_LOG("Creating Device...");
         hr = D3D12CreateDevice(hardwareAdapter, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&*sDevice));
         DX12_CHECK(hr);
+        DX12_LOG("Success");
 
         {
             ReleasePtr<ID3D12InfoQueue1> infoQueue;
             hr = GetDevice()->QueryInterface(IID_PPV_ARGS(&infoQueue));
 
-            if (SUCCEEDED(hr)) {                
+            if (SUCCEEDED(hr)) {
                 hr = infoQueue->RegisterMessageCallback(
                     &dxDebugOutput,
                     D3D12_MESSAGE_CALLBACK_FLAG_NONE,
@@ -158,7 +161,7 @@ namespace Render {
         ReleasePtr<ID3D12InfoQueue1> infoQueue;
         HRESULT hr = GetDevice()->QueryInterface(IID_PPV_ARGS(&infoQueue));
 
-        if (SUCCEEDED(hr)) {            
+        if (SUCCEEDED(hr)) {
             hr = infoQueue->UnregisterMessageCallback(mCallbackCookie);
             DX12_CHECK(hr);
         }
@@ -187,7 +190,7 @@ namespace Render {
 
     bool DirectX12RenderContext::beginFrame()
     {
-        if (!mGraphicsQueue.isFenceCompleteRelative(1))
+        if (!mGraphicsQueue.isComplete(mFrameFences[1 - (mFrame % 2)]))
             return false;
         return RenderContext::beginFrame();
     }
@@ -196,7 +199,7 @@ namespace Render {
     {
         RenderContext::endFrame();
 
-        mGraphicsQueue.signalFence();
+        mFrameFences[mFrame % 2] = mGraphicsQueue.currentFence();
     }
 
     DirectX12RenderContext &DirectX12RenderContext::getSingleton()
@@ -332,7 +335,7 @@ namespace Render {
             D3D12_RESOURCE_STATE_GENERIC_READ,
             nullptr,
             IID_PPV_ARGS(&result.mBuffer.setupAs<ID3D12Resource>()));*/
-        result.mBuffer.setupAs<ID3D12Resource*>() = mBufferMemoryHeap.resolve(allocation.mAddress).first;
+        result.mBuffer.setupAs<ID3D12Resource *>() = mBufferMemoryHeap.resolve(allocation.mAddress).first;
         return result;
     }
 
@@ -379,7 +382,7 @@ namespace Render {
         };
     }
 
-    UniqueResourceBlock DirectX12RenderContext::createResourceBlock(std::vector<const Texture*> textures)
+    UniqueResourceBlock DirectX12RenderContext::createResourceBlock(std::vector<const Texture *> textures)
     {
         OffsetPtr offset = mDescriptorHeap.allocate(textures.size());
 

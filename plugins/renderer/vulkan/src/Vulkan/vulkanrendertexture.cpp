@@ -133,9 +133,9 @@ namespace Render {
         VulkanRenderTarget::beginFrame();
     }
 
-    void VulkanRenderTexture::endFrame()
+    RenderFuture VulkanRenderTexture::endFrame()
     {
-        VulkanRenderTarget::endFrame();
+        return VulkanRenderTarget::endFrame();
     }
 
     void VulkanRenderTexture::createRenderPass()

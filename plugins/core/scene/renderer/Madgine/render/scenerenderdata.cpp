@@ -22,26 +22,30 @@ namespace Render {
     {
     }
 
-    Threading::ImmediateTask<void> SceneRenderData::render(RenderContext *context)
+    RenderFuture SceneRenderData::render(RenderContext *context)
     {
-        co_await mScene.mutex().locked(Engine::AccessMode::READ, [this, context]() {
-            mScene.updateFrame();
+        context->renderQueue()->queue([this, context]() -> Threading::ImmediateTask<void> {
+            co_await mScene.mutex().locked(Engine::AccessMode::READ, [this, context]() {
+                mScene.updateFrame();
 
-            for (const auto &[skeleton, entity] : mScene.entityComponentList<Scene::Entity::Skeleton>()) {
-                if (skeleton.data()) {
-                    if (!skeleton.mBoneMatrices.mBuffer) {
-                        const Render::SkeletonDescriptor *data = skeleton.data();
-                        skeleton.mBoneMatrices = context->allocateBuffer<Matrix4[]>(data->mBones.size());
-                    }
-                    auto buffer = context->mapBuffer(skeleton.mBoneMatrices);
-                    if (Scene::Entity::Animation *animation = entity->getComponent<Scene::Entity::Animation>()) {
-                        animation->updateRender(entity, 0ms, 0ms, buffer.mData);
-                    } else {
-                        skeleton.resetMatrices(buffer.mData);
+                for (const auto &[skeleton, entity] : mScene.entityComponentList<Scene::Entity::Skeleton>()) {
+                    if (skeleton.data()) {
+                        if (!skeleton.mBoneMatrices.mBuffer) {
+                            const Render::SkeletonDescriptor *data = skeleton.data();
+                            skeleton.mBoneMatrices = context->allocateBuffer<Matrix4[]>(data->mBones.size());
+                        }
+                        auto buffer = context->mapBuffer(skeleton.mBoneMatrices);
+                        if (Scene::Entity::Animation *animation = entity->getComponent<Scene::Entity::Animation>()) {
+                            animation->updateRender(entity, 0ms, 0ms, buffer.mData);
+                        } else {
+                            skeleton.resetMatrices(buffer.mData);
+                        }
                     }
                 }
-            }
+            });
         });
+
+        return {};
     }
 
 }

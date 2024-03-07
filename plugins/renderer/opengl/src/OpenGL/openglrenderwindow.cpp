@@ -117,7 +117,7 @@ namespace Render {
         OpenGLRenderTarget::beginFrame();
     }
 
-    void OpenGLRenderWindow::endFrame()
+    RenderFuture OpenGLRenderWindow::endFrame()
     {
         OpenGLRenderTarget::endFrame();
 

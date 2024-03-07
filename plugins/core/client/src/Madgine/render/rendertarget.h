@@ -40,7 +40,7 @@ namespace Render {
         virtual bool skipFrame();
 
         virtual void beginFrame();
-        virtual void endFrame();
+        virtual RenderFuture endFrame();
 
         virtual void pushAnnotation(const char *tag) = 0;
         virtual void popAnnotation() = 0;
@@ -57,7 +57,7 @@ namespace Render {
         const RenderTarget *blitSource() const;
 
     protected:
-        virtual Threading::ImmediateTask<void> render(RenderContext *context) override;
+        virtual RenderFuture render(RenderContext *context) override;
 
         RenderTarget *mBlitSource;
 
