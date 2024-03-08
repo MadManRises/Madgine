@@ -16,24 +16,28 @@ namespace Render {
     {
         bool isDepthTarget = mFormat == FORMAT_D24;
 
-        DXGI_FORMAT xFormat;
+        DXGI_FORMAT xFormat, clearFormat;
         D3D12_SRV_DIMENSION dimension;
         size_t byteCount;
         switch (format) {
         case FORMAT_RGBA8:
             xFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+            clearFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
             byteCount = 4;
             break;
         case FORMAT_RGBA16F:
             xFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
+            clearFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
             byteCount = 8;
             break;
         case FORMAT_RGBA8_SRGB:
             xFormat = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+            clearFormat = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
             byteCount = 4;
             break;
         case FORMAT_D24:
-            xFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+            xFormat = DXGI_FORMAT_R24G8_TYPELESS;
+            clearFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
             byteCount = 4;
             break;
         default:
@@ -53,7 +57,7 @@ namespace Render {
         textureDesc.Flags = isRenderTarget ? D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET : isDepthTarget ? D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL : D3D12_RESOURCE_FLAG_NONE;
 
         D3D12_CLEAR_VALUE clear {};
-        clear.Format = xFormat;
+        clear.Format = clearFormat;
         if (isRenderTarget) {
             clear.Color[0] = 0.033f;
             clear.Color[1] = 0.073f;
@@ -232,6 +236,8 @@ namespace Render {
         list.Transition(mTextureHandle, D3D12_RESOURCE_STATE_COPY_DEST, readStateFlags());
 
         list.attachResource(std::move(uploadHeap));
+
+        list.execute();
     }
 
     void DirectX12Texture::createShaderResourceView(OffsetPtr descriptorHandle) const
