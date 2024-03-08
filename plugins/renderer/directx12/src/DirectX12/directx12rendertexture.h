@@ -35,7 +35,7 @@ namespace Render {
     private:
         std::vector<DirectX12Texture> mTextures;
 
-        uint64_t mResizeFence;
+        RenderFuture mResizeFence;
         Vector2i mResizeTarget;
         bool mResizePending = false;
     };

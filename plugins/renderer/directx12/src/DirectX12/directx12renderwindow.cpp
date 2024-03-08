@@ -72,7 +72,7 @@ namespace Render {
     {
         if (mWindow->isMinimized())
             return true;
-        if (mTargetViews.empty() && context()->graphicsQueue()->isFenceComplete(mResizeFence)) {
+        if (mTargetViews.empty() && context()->graphicsQueue()->isComplete(mResizeFence)) {
 
             for (size_t i = 0; i < 2; ++i) {
                 mBackBuffers[i].reset();
@@ -109,11 +109,11 @@ namespace Render {
 
         mCommandList.Transition(mBackBuffers[mSwapChain->GetCurrentBackBufferIndex()], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
-        RenderFuture fut = mCommandList.execute();
+        mCommandList.execute();
 
         mSwapChain->Present(0, 0);
 
-        return fut;
+        return context()->graphicsQueue()->signalFence();
     }
 
     void DirectX12RenderWindow::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const

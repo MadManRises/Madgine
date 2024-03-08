@@ -143,7 +143,7 @@ namespace Render {
 
     bool DirectX12RenderTexture::skipFrame()
     {
-        if (mResizePending && context()->graphicsQueue()->isFenceComplete(mResizeFence)) {
+        if (mResizePending && context()->graphicsQueue()->isComplete(mResizeFence)) {
             mResizePending = false;
             resizeBuffers(mResizeTarget);
         }

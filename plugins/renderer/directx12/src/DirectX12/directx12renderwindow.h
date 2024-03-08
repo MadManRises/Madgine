@@ -34,7 +34,7 @@ namespace Render {
         OffsetPtr mCachedTargetViews[2];
         ReleasePtr<ID3D12Resource> mBackBuffers[2];
 
-        uint64_t mResizeFence;
+        RenderFuture mResizeFence;
         Vector2i mResizeTarget;
     };
 

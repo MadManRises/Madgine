@@ -37,7 +37,7 @@ namespace Render {
         if (!mAllocatorPool.empty()) {
             auto &[fenceValue, allocator, discard] = mAllocatorPool.front();
 
-            if (isFenceComplete(fenceValue)) {
+            if (isComplete(fenceValue)) {
                 alloc = std::move(allocator);
                 mAllocatorPool.erase(mAllocatorPool.begin());
                 HRESULT hr = alloc->Reset();
@@ -86,42 +86,27 @@ namespace Render {
 
         mCommandListPool.push_back(std::move(list));
 
-        mCommandQueue->Signal(mFence, mNextFenceValue);
-
-        return mNextFenceValue++;
+        return signalFence();
     }
 
-    uint64_t DirectX12CommandAllocator::currentFence()
+    RenderFuture DirectX12CommandAllocator::currentFence()
     {
         return mNextFenceValue - 1;
-    }
-
-    bool DirectX12CommandAllocator::isFenceCompleteRelative(uint64_t offset)
-    {
-        return isFenceComplete(mNextFenceValue - 1 - offset);
-    }
-
-    bool DirectX12CommandAllocator::isFenceComplete(uint64_t fenceValue)
-    {
-        // if it's greater than last seen fence value
-        // check fence for latest completed value
-        if (fenceValue > mLastCompletedFenceValue)
-            mLastCompletedFenceValue = std::max(mLastCompletedFenceValue, mFence->GetCompletedValue());
-
-        return fenceValue <= mLastCompletedFenceValue;
     }
 
     bool DirectX12CommandAllocator::isComplete(RenderFuture fut)
     {
         if (!fut)
             return true;
-        return isFenceComplete(fut.value());
+        if (fut.value() > mLastCompletedFenceValue)
+            mLastCompletedFenceValue = std::max(mLastCompletedFenceValue, mFence->GetCompletedValue());
+        return fut.value() <= mLastCompletedFenceValue;
     }
 
-    void DirectX12CommandAllocator::signalFence()
+    RenderFuture DirectX12CommandAllocator::signalFence()
     {
         mCommandQueue->Signal(mFence, mNextFenceValue);
-        ++mNextFenceValue;
+        return mNextFenceValue++;
     }
 
     void DirectX12CommandAllocator::wait(RenderFuture fut)
