@@ -117,16 +117,18 @@ namespace Render {
 
         mCommandList->RSSetScissorRects(1, &scissorRect);
 
-        int bufferCount = canFlipFlop() ? 2 : 1;
-        size_t size = mTargetViews.size() / bufferCount;
-        for (size_t index = 0; index < size; ++index) {
-            int offset = mFlipFlopIndices[index];
-            for (size_t i = 0; i < 6; ++i) {
-                if (mTargetViews[size * offset + index][i])
-                    mCommandList->ClearRenderTargetView(DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(mTargetViews[size * offset + index][i]), sClearColor, 0, nullptr);
+        if (!mBlitSource) {
+            int bufferCount = canFlipFlop() ? 2 : 1;
+            size_t size = mTargetViews.size() / bufferCount;
+            for (size_t index = 0; index < size; ++index) {
+                int offset = mFlipFlopIndices[index];
+                for (size_t i = 0; i < 6; ++i) {
+                    if (mTargetViews[size * offset + index][i])
+                        mCommandList->ClearRenderTargetView(DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(mTargetViews[size * offset + index][i]), sClearColor, 0, nullptr);
+                }
             }
+            clearDepthBuffer();
         }
-        clearDepthBuffer();
 
 
     }

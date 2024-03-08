@@ -162,7 +162,7 @@ namespace Render {
         size_t size = mTextures.size() / bufferCount;
         for (size_t index = 0; index < size; ++index) {
             int offset = mFlipFlopIndices[index];
-            mCommandList.Transition(mTextures[size * offset + index], mTextures[size * offset + index].readStateFlags(), D3D12_RESOURCE_STATE_RENDER_TARGET);
+            mCommandList.Transition(mTextures[size * offset + index], mTextures[size * offset + index].readStateFlags(), mBlitSource ? D3D12_RESOURCE_STATE_RESOLVE_DEST : D3D12_RESOURCE_STATE_RENDER_TARGET);
         }
 
         DirectX12RenderTarget::beginFrame();
@@ -179,7 +179,7 @@ namespace Render {
         size_t size = mTextures.size() / bufferCount;
         for (size_t index = 0; index < size; ++index) {
             int offset = mFlipFlopIndices[index];
-            mCommandList.Transition(mTextures[size * offset + index], D3D12_RESOURCE_STATE_RENDER_TARGET, mTextures[size * offset + index].readStateFlags());
+            mCommandList.Transition(mTextures[size * offset + index], mBlitSource ? D3D12_RESOURCE_STATE_RESOLVE_DEST : D3D12_RESOURCE_STATE_RENDER_TARGET, mTextures[size * offset + index].readStateFlags());
         }
 
         return mCommandList.execute();
@@ -214,9 +214,9 @@ namespace Render {
                 std::terminate();
             }
 
-            mCommandList.Transition(*texture(i), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_RESOLVE_DEST);
+            //mCommandList.Transition(*texture(i), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_RESOLVE_DEST);
             mCommandList->ResolveSubresource(*texture(i), 0, *inputTex->texture(i), 0, xFormat);
-            mCommandList.Transition(*texture(i), D3D12_RESOURCE_STATE_RESOLVE_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
+            //mCommandList.Transition(*texture(i), D3D12_RESOURCE_STATE_RESOLVE_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
         }
     }
 
