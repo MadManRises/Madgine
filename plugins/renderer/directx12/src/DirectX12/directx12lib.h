@@ -24,20 +24,20 @@
 #include <dxcapi.h>
 #include <comdef.h>
 
-MADGINE_DIRECTX12_EXPORT void dx12Dump(HRESULT result);
+MADGINE_DIRECTX12_EXPORT void dx12Dump(HRESULT result, const char *file, size_t line);
 MADGINE_DIRECTX12_EXPORT bool checkDevice(HRESULT &result);
 
-inline void dx12Check(HRESULT result = 0)
+inline void dx12Check(const char *file, size_t line, HRESULT result = 0)
 {
     if (FAILED(result) || !checkDevice(result)) {
         _com_error error { result };
-        LOG_FATAL("DX12-Error: " << error.ErrorMessage());
-        dx12Dump(result);
+        LOG_FATAL("DX12-Error (" << result << "): " << error.ErrorMessage());
+        dx12Dump(result, file, line);
         std::terminate();
     }
 }
 
-#define DX12_CHECK(...) dx12Check(__VA_ARGS__)
+#define DX12_CHECK(...) dx12Check(__FILE__, __LINE__, __VA_ARGS__)
 
 #define DX12_LOG(x) LOG_DEBUG("DX12: " << x)
 //#define DX12_LOG(x)

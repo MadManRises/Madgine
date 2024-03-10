@@ -25,10 +25,12 @@ namespace Render {
 
     Block DirectX12HeapAllocator::allocate(size_t size, size_t alignment)
     {
+        DX12_LOG("Allocating DX12 heap memory: (size: " << size << ", " << alignment << ")");
+
         GPUPtr<void> ptr;
 
         CD3DX12_HEAP_DESC heapDesc = CD3DX12_HEAP_DESC { size, D3D12_HEAP_TYPE_DEFAULT };
-
+        
         Heap &heap = mHeaps.emplace_back();
 
         HRESULT hr = GetDevice()->CreateHeap(

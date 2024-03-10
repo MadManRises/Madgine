@@ -207,13 +207,14 @@ namespace Window {
 
     Threading::Task<void> MainWindow::renderLoop()
     {
-        while (mTaskQueue.running()) {
-            std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
+        std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
+        while (mTaskQueue.running()) {            
             co_await mRenderContext->render();
             mOsWindow->update();
             for (ToolWindow &window : mToolWindows)
                 window.osWindow()->update();
-            co_await(now + (1000000us / 120));
+            now += (1000000us / 1200);
+            co_await 0ms;
         }
     }
 

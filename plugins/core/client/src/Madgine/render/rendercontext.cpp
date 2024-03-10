@@ -17,7 +17,7 @@ namespace Render {
 
     RenderContext::RenderContext(Threading::TaskQueue *queue)
         : mRenderQueue(queue)
-        , mRenderThread(std::this_thread::get_id())        
+        , mRenderThread(std::this_thread::get_id())
     {
         assert(!sContext);
         sContext = this;
@@ -36,7 +36,6 @@ namespace Render {
             co_await res.second.forceUnload();
         }
     }
-    
 
     void RenderContext::addRenderTarget(RenderTarget *target)
     {
@@ -55,11 +54,14 @@ namespace Render {
 
     Threading::Task<void> RenderContext::render()
     {
-        if (!beginFrame())
-            co_return;        
-        for (RenderTarget *target : safeIterate(mRenderTargets))
-            target->update(this);
-        endFrame();
+        if (beginFrame()) {
+            std::vector<Threading::TaskFuture<RenderFuture>> targets;
+            for (RenderTarget *target : safeIterate(mRenderTargets))
+                targets.push_back(target->update(this));
+            for (Threading::TaskFuture<RenderFuture> &wait : targets)
+                co_await wait;
+            endFrame();
+        }
     }
 
     bool RenderContext::beginFrame()
@@ -82,7 +84,8 @@ namespace Render {
         assert(mRenderThread == std::this_thread::get_id());
     }
 
-    Threading::TaskQueue* RenderContext::renderQueue() {
+    Threading::TaskQueue *RenderContext::renderQueue()
+    {
         return sContext->mRenderQueue;
     }
 

@@ -57,7 +57,7 @@ namespace Render {
         const RenderTarget *blitSource() const;
 
     protected:
-        virtual RenderFuture render(RenderContext *context) override;
+        virtual Threading::ImmediateTask<RenderFuture> render(RenderContext *context) override;
 
         RenderTarget *mBlitSource;
 

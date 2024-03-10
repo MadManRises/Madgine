@@ -9,7 +9,7 @@ namespace Render {
 
         SceneRenderData(Scene::SceneManager &scene);
 
-        virtual RenderFuture render(RenderContext *context) override;
+        virtual Threading::ImmediateTask<RenderFuture> render(RenderContext *context) override;
 
     private:
         Scene::SceneManager &mScene;

@@ -26,54 +26,52 @@ namespace Render {
     {
     }
 
-    RenderFuture LitSceneRenderData::render(RenderContext *context)
+    Threading::ImmediateTask<RenderFuture> LitSceneRenderData::render(RenderContext *context)
     {
-        context->renderQueue()->queue([this, context]() -> Threading::ImmediateTask<void> {
-            co_await mScene.scene()->mutex().locked(AccessMode::READ, [this, context]() {
-                //TODO Culling
+        co_await mScene.scene()->mutex().locked(AccessMode::READ, [this, context]() {
+            //TODO Culling
 
-                for (auto &[key, transforms] : mInstances)
-                    transforms.clear();
+            for (auto &[key, transforms] : mInstances)
+                transforms.clear();
 
-                for (const auto &[mesh, e] : mScene.scene()->entityComponentList<Scene::Entity::Mesh>().data()) {
-                    if (!mesh.isVisible())
-                        continue;
+            for (const auto &[mesh, e] : mScene.scene()->entityComponentList<Scene::Entity::Mesh>().data()) {
+                if (!mesh.isVisible())
+                    continue;
 
-                    const GPUMeshData *meshData = mesh.data();
-                    if (!meshData)
-                        continue;
+                const GPUMeshData *meshData = mesh.data();
+                if (!meshData)
+                    continue;
 
-                    Scene::Entity::Transform *transform = e->getComponent<Scene::Entity::Transform>();
-                    if (!transform)
-                        continue;
+                Scene::Entity::Transform *transform = e->getComponent<Scene::Entity::Transform>();
+                if (!transform)
+                    continue;
 
-                    const GPUMeshData::Material *material = nullptr;
-                    Scene::Entity::Material *materialComponent = e->getComponent<Scene::Entity::Material>();
-                    if (materialComponent) {
-                        material = materialComponent->get();
-                    } else if (mesh.material() < meshData->mMaterials.size()) {
-                        material = &meshData->mMaterials[mesh.material()];
-                    }
-
-                    Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
-                    Engine::Render::GPUPtr<Matrix4[]> bones;
-                    if (skeleton)
-                        bones = skeleton->mBoneMatrices;
-
-                    mInstances[std::tuple<const GPUMeshData *, const GPUMeshData::Material *> { meshData, material }].push_back({ transform->worldMatrix(), bones });
+                const GPUMeshData::Material *material = nullptr;
+                Scene::Entity::Material *materialComponent = e->getComponent<Scene::Entity::Material>();
+                if (materialComponent) {
+                    material = materialComponent->get();
+                } else if (mesh.material() < meshData->mMaterials.size()) {
+                    material = &meshData->mMaterials[mesh.material()];
                 }
-            });
 
-            for (auto it = mInstances.begin(); it != mInstances.end();) {
-                if (it->second.empty()) {
-                    it = mInstances.erase(it);
-                } else {
-                    ++it;
-                }
+                Scene::Entity::Skeleton *skeleton = e->getComponent<Scene::Entity::Skeleton>();
+                Engine::Render::GPUPtr<Matrix4[]> bones;
+                if (skeleton)
+                    bones = skeleton->mBoneMatrices;
+
+                mInstances[std::tuple<const GPUMeshData *, const GPUMeshData::Material *> { meshData, material }].push_back({ transform->worldMatrix(), bones });
             }
         });
 
-        return {};
+        for (auto it = mInstances.begin(); it != mInstances.end();) {
+            if (it->second.empty()) {
+                it = mInstances.erase(it);
+            } else {
+                ++it;
+            }
+        }
+
+        co_return {};
     }
 
 }

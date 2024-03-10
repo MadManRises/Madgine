@@ -36,16 +36,18 @@ namespace Render {
             context()->removeRenderTarget(this);
     }
 
-    RenderFuture RenderTarget::render(RenderContext *context)
+    Threading::ImmediateTask<RenderFuture> RenderTarget::render(RenderContext *context)
     {
         if (skipFrame())
-            return {};
+            co_return {};
+
+        std::vector<Threading::TaskFuture<RenderFuture>> dependencies;
 
         if (mBlitSource)
-            mBlitSource->update(context);
+            dependencies.push_back(mBlitSource->update(context));
 
         for (RenderPass *pass : mRenderPasses)
-            pass->preRender(context);
+            pass->preRender(dependencies, context);
 
         LOG_DEBUG(mName << ": Begin Frame");
 
@@ -74,7 +76,7 @@ namespace Render {
 
         LOG_DEBUG(mName << ": End Frame");
 
-        return result;
+        co_return result;
     }
 
     void RenderTarget::addRenderPass(RenderPass *pass)

@@ -13,7 +13,7 @@ namespace Render {
         virtual void setup(RenderTarget *target) { }
         virtual void shutdown(RenderTarget *target) { }
         virtual void render(RenderTarget *target, size_t iteration) = 0;
-        RenderFuture preRender(RenderContext *context);
+        void preRender(std::vector<Threading::TaskFuture<RenderFuture>> &dependencies, RenderContext *context);
 
         const std::vector<RenderData *> &dependencies() const;
 

@@ -31,3 +31,5 @@ target_link_plugins(DirectX12Tools ClientTools)
 target_link_libraries(DirectX12Tools PRIVATE d3d12 dxgi dxcompiler)
 
 add_shadergen_target(DirectX12 -HLSL12)
+
+add_subdirectory(util)

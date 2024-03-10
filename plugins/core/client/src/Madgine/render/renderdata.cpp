@@ -8,12 +8,12 @@
 namespace Engine {
 namespace Render {
 
-    RenderFuture RenderData::update(RenderContext *context)
+    Threading::TaskFuture<RenderFuture> RenderData::update(RenderContext *context)
     {
         if (context->frame() != mFrame) {
             mFrame = context->frame();
 
-            mLastFrame = render(context);
+            mLastFrame = context->renderQueue()->queueTask(render(context));
         }
 
         return mLastFrame;
@@ -21,6 +21,8 @@ namespace Render {
 
     RenderFuture RenderData::lastFrame() const
     {
+        if (!mLastFrame.valid())
+            return {};
         return mLastFrame;
     }
 
