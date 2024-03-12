@@ -2,6 +2,9 @@
 
 #include "Meta/math/matrix3.h"
 
+#include "Madgine/behaviorcollector.h"
+#include "Madgine/parametertuple.h"
+
 namespace Engine {
 namespace Tools {
 
@@ -38,6 +41,12 @@ namespace Tools {
 
         uint16_t mCurrentConditional = 0;
         std::vector<bool> mBoolBuffer;
+
+        struct {
+            Threading::TaskFuture<ParameterTuple> mFuture;
+            ParameterTuple mParameters;
+            BehaviorHandle mHandle;
+        } mPendingBehavior;
     };
 
 }

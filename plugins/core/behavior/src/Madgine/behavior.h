@@ -12,7 +12,7 @@
 
 #include "Generic/execution/algorithm.h"
 
-#include "Generic/execution/state.h"
+#include "state.h"
 
 #include "Meta/keyvalue/valuetype.h"
 
@@ -58,7 +58,7 @@ struct MADGINE_BEHAVIOR_EXPORT Behavior {
         return std::move(mState);
     }
 
-    StatePtr connect(BehaviorReceiver *receiver);
+    StatePtr connect(BehaviorReceiver &receiver);
 
     struct MADGINE_BEHAVIOR_EXPORT state : BehaviorReceiver {
 
@@ -91,7 +91,7 @@ struct MADGINE_BEHAVIOR_EXPORT Behavior {
 struct BehaviorStateBase {
     virtual ~BehaviorStateBase() = default;
 
-    virtual void connect(BehaviorReceiver *rec) = 0;
+    virtual void connect(BehaviorReceiver &rec) = 0;
     virtual void start() = 0;
     virtual void destroy()
     {
@@ -110,7 +110,7 @@ struct CoroutineLocation : Debug::DebugLocation {
 
     std::string toString() const override;
     std::map<std::string_view, ValueType> localVariables() const override;
-    virtual bool wantsPause() const override;
+    virtual bool wantsPause(Debug::ContinuationType type) const override;
 
 #ifndef NDEBUG
     Debug::StackTrace<1> mStacktrace;
@@ -121,7 +121,7 @@ struct MADGINE_BEHAVIOR_EXPORT CoroutineBehaviorState : BehaviorStateBase {
 
     Behavior get_return_object();
 
-    void connect(BehaviorReceiver *rec) override;
+    void connect(BehaviorReceiver &rec) override;
     void start() override;
     void destroy() override;
     void visitStateImpl(CallableView<void(const Execution::StateDescriptor &)> visitor) override;
@@ -164,18 +164,18 @@ struct MADGINE_BEHAVIOR_EXPORT CoroutineBehaviorState : BehaviorStateBase {
 template <typename Sender>
 struct SenderBehaviorState : BehaviorStateBase {
 
-    using State = Execution::connect_result_t<Sender, BehaviorReceiverPtr>;
+    using State = Execution::connect_result_t<Sender, BehaviorReceiver&>;
 
     SenderBehaviorState(Sender &&sender)
         : mData(std::forward<Sender>(sender))
     {
     }
 
-    void connect(BehaviorReceiver *rec) override
+    void connect(BehaviorReceiver &rec) override
     {
         Sender sender = std::forward<Sender>(std::get<Sender>(mData));
         mData.template emplace<State>(
-            DelayedConstruct<State> { [&]() { return Execution::connect(std::forward<Sender>(sender), BehaviorReceiverPtr { rec }); } });
+            DelayedConstruct<State> { [&]() { return Execution::connect(std::forward<Sender>(sender), rec); } });
     }
 
     void start() override

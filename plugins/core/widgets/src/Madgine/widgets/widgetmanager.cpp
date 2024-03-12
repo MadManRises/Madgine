@@ -43,6 +43,8 @@
 
 #include "Interfaces/window/windowapi.h"
 
+#include "Modules/threading/awaitables/awaitablesender.h"
+
 NAMED_UNIQUECOMPONENT(WidgetManager, Engine::Widgets::WidgetManager)
 
 METATABLE_BEGIN(Engine::Widgets::WidgetManager)
@@ -117,6 +119,10 @@ namespace Widgets {
 
     Threading::Task<void> WidgetManager::finalize()
     {
+        mLifetime.end();
+
+        co_await mLifetime.ended();
+
         mTopLevelWidgets.clear();
 
         mData->mAtlas.reset();

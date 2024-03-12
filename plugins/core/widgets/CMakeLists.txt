@@ -6,13 +6,14 @@ set(sources "")
 FolderSources(sources "" src)
 	FolderSources(sources src Madgine widgetsforward.h widgetslib.h)
 		FolderSources(sources Madgine widgets atlasloader.cpp atlasloader.h bar.cpp bar.h button.cpp button.h checkbox.cpp checkbox.h classid.h combobox.cpp combobox.h condition.cpp condition.h image.cpp image.h label.cpp label.h properties.cpp properties.h scenewindow.cpp scenewindow.h tabbar.cpp tabbar.h tablewidget.cpp tablewidget.h textbox.cpp textbox.h textedit.cpp textedit.h widget.cpp widget.h widgetclass.h widgetmanager.cpp widgetmanager.h)
+			FolderSources(sources widgets senders widgetsenders.cpp widgetsenders.h)
 			FolderSources(sources widgets shaders widgets.PS_hlsl widgets.VS_hlsl widgets.sl)
 			FolderSources(sources widgets util colortintrenderdata.cpp multilinetextrenderdata.cpp renderdata.cpp scalableimagerenderdata.cpp tabbarrenderdata.cpp textrenderdata.cpp widgetsrenderdata.cpp)
 				FolderSources(sources util layouts explicitlayoutrenderdata.cpp uniformlayoutrenderdata.cpp)
 
 add_plugin(Widgets Madgine Core ${sources} PRECOMPILED_HEADER src/Madgine/widgetslib.h)
 
-target_link_plugins(Widgets Client)
+target_link_plugins(Widgets Client Behavior)
 
 
 set(sources "")
@@ -22,5 +23,5 @@ FolderSources(sources "" tools)
 
 add_tools(Widgets ${sources} PRECOMPILED_HEADER tools/Madgine_Tools/widgetstoolslib.h)
 
-target_link_plugins(WidgetsTools ClientTools)
+target_link_plugins(WidgetsTools ClientTools BehaviorTools)
 

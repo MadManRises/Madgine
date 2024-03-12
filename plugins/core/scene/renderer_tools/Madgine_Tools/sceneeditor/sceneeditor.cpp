@@ -42,6 +42,8 @@
 
 #include "Madgine/parametertuple.h"
 
+#include "Madgine_Tools/behaviortool.h"
+
 UNIQUECOMPONENT(Engine::Tools::SceneEditor);
 
 METATABLE_BEGIN_BASE(Engine::Tools::SceneEditor, Engine::Tools::ToolBase)
@@ -415,21 +417,12 @@ namespace Tools {
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu(IMGUI_ICON_PLUS " Add Behavior")) {
-                for (auto [name, index] : BehaviorFactoryRegistry::sComponentsByName()) {
-                    if (ImGui::BeginMenu(name.data())) {
-                        const BehaviorFactoryBase *factory = BehaviorFactoryRegistry::get(index).mFactory;
-                        for (std::string_view name : factory->names()) {
-                            if (ImGui::MenuItem(name.data())) {
-                                mPendingBehavior.mTargetEntity = entity;
-                                mPendingBehavior.mName = name;
-                                mPendingBehavior.mFuture = factory->createParameters(name);
-                                mPendingBehavior.mFactory = factory;
-                                mPendingBehavior.mParameters.reset();
-                                showParameters = true;
-                            }
-                        }
-                        ImGui::EndMenu();
-                    }
+                if (BehaviorHandle behavior = ImGui::BehaviorSelector()) {
+                    mPendingBehavior.mTargetEntity = entity;
+                    mPendingBehavior.mHandle = behavior;
+                    mPendingBehavior.mFuture = behavior.createParameters();
+                    mPendingBehavior.mParameters.reset();
+                    showParameters = true;
                 }
                 ImGui::EndMenu();
             }
@@ -454,7 +447,7 @@ namespace Tools {
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Create Behavior")) {
-                    mPendingBehavior.mTargetEntity->addBehavior(mPendingBehavior.mFactory->create(mPendingBehavior.mName, mPendingBehavior.mParameters));
+                    mPendingBehavior.mTargetEntity->addBehavior(mPendingBehavior.mHandle.create(mPendingBehavior.mParameters));
                     ImGui::CloseCurrentPopup();
                 }
             }
@@ -582,7 +575,7 @@ namespace Tools {
                 ImGui::CloseCurrentPopup();
             }
             ImGui::EndPopup();
-        }        
+        }
     }
 
     void SceneEditor::handleInputs()

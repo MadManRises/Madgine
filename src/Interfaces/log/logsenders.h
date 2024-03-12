@@ -1,3 +1,4 @@
+#pragma once
 
 namespace Engine {
 namespace Log {

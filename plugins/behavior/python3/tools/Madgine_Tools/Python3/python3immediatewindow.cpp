@@ -133,7 +133,7 @@ namespace Tools {
         ImGui::End();
     }
 
-    bool Python3ImmediateWindow::pass(Debug::DebugLocation *location)
+    bool Python3ImmediateWindow::pass(Debug::DebugLocation *location, Debug::ContinuationType type)
     {
 
         const Scripting::Python3::Python3DebugLocation *pyLocation = dynamic_cast<const Scripting::Python3::Python3DebugLocation *>(location);
@@ -153,7 +153,7 @@ namespace Tools {
         return true;
     }
 
-    void Python3ImmediateWindow::onSuspend(Debug::ContextInfo &context)
+    void Python3ImmediateWindow::onSuspend(Debug::ContextInfo &context, Debug::ContinuationType type)
     {
         const Scripting::Python3::Python3DebugLocation *pyLocation = dynamic_cast<const Scripting::Python3::Python3DebugLocation *>(context.currentLocation());
 

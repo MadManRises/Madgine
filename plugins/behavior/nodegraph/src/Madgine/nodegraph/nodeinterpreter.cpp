@@ -40,17 +40,12 @@ namespace NodeGraph {
     {
     }
 
-    void NodeInterpreterStateBase::interpretImpl(Execution::VirtualReceiverBase<BehaviorError> &receiver, uint32_t flowIn)
+    void NodeInterpreterStateBase::branch(BehaviorReceiver &receiver, uint32_t flowIn)
     {
-        interpretImpl(receiver, mGraph->mFlowOutPins[flowIn].mTarget);
+        branch(receiver, mGraph->mFlowOutPins[flowIn].mTarget);
     }
 
-    void NodeInterpreterStateBase::interpretImpl(Execution::VirtualReceiverBase<BehaviorError> &receiver, Pin pin)
-    {
-        branch(receiver, pin);
-    }
-
-    void NodeInterpreterStateBase::branch(Execution::VirtualReceiverBase<BehaviorError> &receiver, Pin pin)
+    void NodeInterpreterStateBase::branch(BehaviorReceiver &receiver, Pin pin)
     {
 
         const NodeBase *node = nullptr;
@@ -58,16 +53,18 @@ namespace NodeGraph {
             node = mGraph->node(pin.mNode);
         }
 
-        mDebugLocation.mNode = node;
+        assert(dynamic_cast<NodeDebugLocation *>(static_cast<Debug::DebugLocation *>(receiver.debugLocation())));
+        NodeDebugLocation *location = static_cast<NodeDebugLocation *>(receiver.debugLocation());        
+        location->mNode = node;
 
-        mDebugLocation.pass([=, &receiver](Debug::ContinuationMode mode) {
+        location->pass([=, &receiver](Debug::ContinuationMode mode) {
             if (pin && pin.mNode) {
                 node->interpret({ *this, *node, receiver }, mData[pin.mNode - 1], pin.mIndex, pin.mGroup);
             } else {
                 receiver.set_value();
             }
         },
-            parentStopToken());
+            receiver.stopToken(), Debug::ContinuationType::Flow);
     }
 
     void NodeInterpreterStateBase::read(ValueType &retVal, Pin pin)
@@ -104,6 +101,11 @@ namespace NodeGraph {
     std::unique_ptr<NodeInterpreterData> &NodeInterpreterStateBase::data(uint32_t index)
     {
         return mData[index - 1];
+    }
+
+    bool NodeInterpreterStateBase::resolveVar(std::string_view name, ValueType &out)
+    {
+        return readVar(out, name);
     }
 
     bool NodeInterpreterStateBase::readVar(ValueType &result, std::string_view name, bool recursive)
@@ -145,6 +147,11 @@ namespace NodeGraph {
         return variables;
     }
 
+    Debug::ParentLocation *NodeInterpreterStateBase::debugLocation()
+    {
+        return &mDebugLocation;
+    }
+
     void NodeInterpreterStateBase::start()
     {
         if (!mGraph)
@@ -155,16 +162,10 @@ namespace NodeGraph {
             mGraph->node(i + 1)->setupInterpret(*this, mData[i]);
         }
 
-        mDebugLocation.stepInto(parentDebugLocation());
-        interpretImpl(*this, 0);
+        branch(*this, 0);
     }
 
-    Debug::DebugLocation *NodeInterpreterStateBase::debugLocation()
-    {
-        return &mDebugLocation;
-    }
-
-    bool NodeDebugLocation::wantsPause() const
+    bool NodeDebugLocation::wantsPause(Debug::ContinuationType type) const
     {
         return true;
     }

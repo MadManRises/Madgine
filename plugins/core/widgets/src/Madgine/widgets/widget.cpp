@@ -16,6 +16,8 @@
 #include "Meta/keyvalue/metatable_impl.h"
 #include "Meta/serialize/serializetable_impl.h"
 
+#include "Madgine/behavior.h"
+
 #include "geometry.h"
 
 METATABLE_BEGIN(Engine::Widgets::WidgetBase)
@@ -391,6 +393,16 @@ namespace Widgets {
 
     void WidgetBase::vertices(WidgetsRenderData &renderData, size_t layer)
     {
+    }
+
+    void WidgetBase::attachToLifetime(Behavior behavior)
+    {
+        mManager.attachToLifetime(std::move(behavior));
+    }
+
+    const std::vector<Debug::ContextInfo *> &WidgetBase::behaviorContexts()
+    {
+        return mBehaviorContexts;
     }
 
     Serialize::StreamResult WidgetBase::readWidget(Serialize::FormattedSerializeStream &in, std::unique_ptr<WidgetBase> &widget)

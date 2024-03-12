@@ -20,7 +20,7 @@ namespace NodeGraph {
 
         std::string toString() const override;
         std::map<std::string_view, ValueType> localVariables() const override;
-        bool wantsPause() const override;
+        bool wantsPause(Debug::ContinuationType type) const override;
 
         const NodeBase *mNode = nullptr;
         NodeInterpreterStateBase *mInterpreter;
@@ -34,7 +34,7 @@ namespace NodeGraph {
         virtual std::vector<std::string_view> variables() { return {}; }
     };
 
-    struct MADGINE_NODEGRAPH_EXPORT NodeInterpreterStateBase : Execution::VirtualReceiverBase<BehaviorError> {
+    struct MADGINE_NODEGRAPH_EXPORT NodeInterpreterStateBase : BehaviorReceiver {
         NodeInterpreterStateBase(const NodeGraph *graph, NodeGraphLoader::Handle handle);
         NodeInterpreterStateBase(const NodeInterpreterStateBase &) = delete;
         NodeInterpreterStateBase(NodeInterpreterStateBase &&) = default;
@@ -43,13 +43,8 @@ namespace NodeGraph {
         NodeInterpreterStateBase &operator=(const NodeInterpreterStateBase &) = delete;
         NodeInterpreterStateBase &operator=(NodeInterpreterStateBase &&) = default;
 
-        void interpretImpl(Execution::VirtualReceiverBase<BehaviorError> &receiver, uint32_t flowIn);
-        void interpretImpl(Execution::VirtualReceiverBase<BehaviorError> &receiver, Pin pin);
-
-        ASYNC_STUB(interpret, interpretImpl, Execution::make_simple_virtual_sender<BehaviorError>);
-        ASYNC_STUB(interpretSubGraph, branch, Execution::make_simple_virtual_sender<BehaviorError>);
-
-        void branch(Execution::VirtualReceiverBase<BehaviorError> &receiver, Pin pin);
+        void branch(BehaviorReceiver &receiver, uint32_t flowIn);
+        void branch(BehaviorReceiver &receiver, Pin pin);
 
         void read(ValueType &retVal, Pin pin);
         void write(Pin pin, const ValueType &v);
@@ -63,19 +58,18 @@ namespace NodeGraph {
 
         std::unique_ptr<NodeInterpreterData> &data(uint32_t index);
 
+        bool resolveVar(std::string_view name, ValueType &out) override;
         virtual bool readVar(ValueType &result, std::string_view name, bool recursive = true);
         virtual bool writeVar(std::string_view name, const ValueType &v);
         virtual std::vector<std::string_view> variables();
 
+        Debug::ParentLocation *debugLocation() override;
+
         void start();
 
-        Debug::DebugLocation *debugLocation();
-
     protected:
-        virtual Debug::ParentLocation *parentDebugLocation() = 0;
-        virtual std::stop_token parentStopToken() = 0;
-
         NodeDebugLocation mDebugLocation;
+
     private:
         ArgumentList mArguments;
 
@@ -83,7 +77,7 @@ namespace NodeGraph {
 
         NodeGraphLoader::Handle mHandle;
 
-        std::vector<std::unique_ptr<NodeInterpreterData>> mData;        
+        std::vector<std::unique_ptr<NodeInterpreterData>> mData;
     };
 
     template <typename _Rec>
@@ -97,20 +91,26 @@ namespace NodeGraph {
         {
         }
 
+        void start()
+        {
+            mDebugLocation.stepInto(Execution::get_debug_location(mRec));
+            NodeInterpreterStateBase::start();
+        }
+
         virtual void set_done() override
         {
-            mDebugLocation.stepOut(parentDebugLocation());
+            mDebugLocation.stepOut(Execution::get_debug_location(mRec));
             mRec.set_done();
         }
         virtual void set_error(BehaviorError r) override
         {
-            mDebugLocation.stepOut(parentDebugLocation());
+            mDebugLocation.stepOut(Execution::get_debug_location(mRec));
             this->mRec.set_error(std::move(r));
         }
-        virtual void set_value() override
+        virtual void set_value(ArgumentList result) override
         {
-            mDebugLocation.stepOut(parentDebugLocation());
-            this->mRec.set_value(ArgumentList {});
+            mDebugLocation.stepOut(Execution::get_debug_location(mRec));
+            this->mRec.set_value(std::move(result));
         }
 
         bool readVar(ValueType &result, std::string_view name, bool recursive = true) override
@@ -129,12 +129,7 @@ namespace NodeGraph {
             return state.mRec;
         }
 
-        Debug::ParentLocation *parentDebugLocation() override
-        {
-            return Execution::get_debug_location(mRec);
-        }
-
-        std::stop_token parentStopToken() override
+        std::stop_token stopToken() override
         {
             return Execution::get_stop_token(mRec);
         }

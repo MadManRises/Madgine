@@ -186,7 +186,7 @@ namespace Tools {
 
                                 auto it = std::ranges::find_if(info.mConnectors, [=](const ConnectorInfo &con) { return con.mType == NodeGraph::PinType::Data && con.mIndex == dataInstanceIndex; });
                                 if (it != info.mConnectors.end())
-                                    connections.emplace_back(pos, it->mPos, DataColor(mask));
+                                    connections.emplace_back(pos, it->mPos, DataColor(mask, type));
                             }
 
                             ImGui::TableNextColumn();
@@ -197,7 +197,7 @@ namespace Tools {
 
                                 auto it = std::ranges::find_if(info.mConnectors, [=](const ConnectorInfo &con) { return con.mType == NodeGraph::PinType::Data && con.mIndex == dataInstanceIndex; });
                                 if (it != info.mConnectors.end())
-                                    connections.emplace_back(pos, it->mPos, DataColor(mask));
+                                    connections.emplace_back(pos, it->mPos, DataColor(mask, type));
                             }
                         }
                     }

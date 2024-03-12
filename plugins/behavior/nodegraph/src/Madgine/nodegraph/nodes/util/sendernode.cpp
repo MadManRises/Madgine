@@ -7,12 +7,12 @@
 
 #include "sendernode_impl.h"
 
-DEFAULT_SENDER_NODE_BEGIN(ForEach, Engine::Execution::for_each, std::vector<int>, Engine::NodeGraph::NodeAlgorithm<1, Engine::ValueType>)
+DEFAULT_SENDER_NODE_BEGIN(ForEach, Engine::Execution::for_each, std::vector<int>, Engine::NodeGraph::NodeRouter<1, Engine::ValueType>)
 ARGUMENT(Arguments, 0)
 SENDER_NODE_END(ForEach)
 
 
-DEFAULT_SENDER_NODE_BEGIN(LetValue, Engine::Execution::let_value, Engine::NodeGraph::NodeReader<Engine::ValueType>, Engine::NodeGraph::NodeAlgorithm<0, Engine::ValueType>)
+DEFAULT_SENDER_NODE_BEGIN(LetValue, Engine::Execution::let_value, Engine::NodeGraph::NodeReader<Engine::ValueType>, Engine::NodeGraph::NodeRouter<0, Engine::ValueType>)
 SENDER_NODE_END(LetValue)
 
 CONSTANT_SENDER_NODE_BEGIN(Add, Engine::Execution::reduce_stream, Engine::NodeGraph::NodeStream<int>, std::integral_constant<int, 0>, Engine::NodeGraph::Add)
@@ -52,6 +52,9 @@ SENDER_NODE_END(BreakVector4)
 
 CONSTANT_SENDER_NODE_BEGIN(MakeVector3, Engine::Execution::then, Engine::NodeGraph::NodeReader<float, float, float>, Engine::NodeGraph::MakeVector3)
 SENDER_NODE_END(MakeVector3)
+
+DEFAULT_SENDER_NODE_BEGIN(Connect, Engine::Execution::let_value, Engine::NodeGraph::NodeReader<Engine::KeyValueSender>, Engine::NodeGraph::NodeAlgorithm<1>)
+SENDER_NODE_END(Connect)
 
 /*using SequenceNode = Engine::NodeGraph::SenderNode<Engine::Execution::sequence, false, Engine::type_pack<>, Engine::type_pack<>, Engine::Execution::recursive<Engine::NodeGraph::NodeSender<1>>>;
 

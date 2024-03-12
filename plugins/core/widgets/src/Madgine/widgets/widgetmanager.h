@@ -17,6 +17,8 @@
 
 #include "Generic/projections.h"
 
+#include "Generic/execution/lifetime.h"
+
 namespace Engine {
 namespace Widgets {
 
@@ -88,6 +90,11 @@ namespace Widgets {
         using RenderPass::addDependency;
         using RenderPass::removeDependency;
 
+        template <Execution::Sender Sender>
+        void attachToLifetime(Sender&& sender) {
+            mLifetime.attach(std::forward<Sender>(sender));
+        }
+
     protected:
         WidgetBase *getHoveredWidget(const Vector2 &pos, WidgetBase *current);
         WidgetBase *getHoveredWidgetUp(const Vector2 &pos, WidgetBase *current);
@@ -108,6 +115,8 @@ namespace Widgets {
 
         void onActivate(bool active);
 
+
+
     private:
         std::vector<WidgetBase *> mWidgets;
 
@@ -123,6 +132,8 @@ namespace Widgets {
         std::vector<WidgetBase *> mModalWidgetList;        
 
         Threading::Signal<> mUpdatedSignal;
+
+        Execution::Lifetime mLifetime;
 
         struct WidgetManagerData;
         std::unique_ptr<WidgetManagerData> mData;

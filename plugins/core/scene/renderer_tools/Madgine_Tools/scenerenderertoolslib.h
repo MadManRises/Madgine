@@ -3,6 +3,7 @@
 #include "Madgine_Tools/clienttoolslib.h"
 #include "Madgine/scenerendererlib.h"
 #include "Madgine_Tools/debugtoolslib.h"
+#include "Madgine_Tools/behaviortoolslib.h"
 
 #include "Madgine/serialize/filesystem/filesystemlib.h"
 #include "Madgine/serialize/memory/memorylib.h"

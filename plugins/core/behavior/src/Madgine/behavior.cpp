@@ -33,9 +33,9 @@ Behavior CoroutineBehaviorState::get_return_object()
     return Behavior::StatePtr { this };
 }
 
-void CoroutineBehaviorState::connect(BehaviorReceiver *rec)
+void CoroutineBehaviorState::connect(BehaviorReceiver &rec)
 {
-    mReceiver = rec;
+    mReceiver = &rec;
 }
 
 void CoroutineBehaviorState::start()
@@ -130,7 +130,7 @@ std::map<std::string_view, ValueType> CoroutineLocation::localVariables() const
     return {};
 }
 
-bool CoroutineLocation::wantsPause() const
+bool CoroutineLocation::wantsPause(Debug::ContinuationType type) const
 {
     return true;
 }
@@ -143,7 +143,7 @@ void tag_invoke(Execution::visit_state_t, Behavior &behavior, CallableView<void(
 Behavior::state::state(StatePtr state)
     : mState(std::move(state))
 {
-    mState->connect(this);
+    mState->connect(*this);
 }
 
 void Behavior::state::start()
@@ -151,7 +151,7 @@ void Behavior::state::start()
     mState->start();
 }
 
-Behavior::StatePtr Behavior::connect(BehaviorReceiver *receiver)
+Behavior::StatePtr Behavior::connect(BehaviorReceiver &receiver)
 {
     mState->connect(receiver);
     return std::move(mState);

@@ -6,7 +6,7 @@
 
 #include "Meta/keyvalue/valuetype_forward.h"
 
-#include "Generic/execution/state.h"
+#include "state.h"
 
 namespace Engine {
 
@@ -20,33 +20,12 @@ struct BehaviorReceiver : Execution::VirtualReceiverBase<BehaviorError, Argument
     virtual bool resolveVar(std::string_view name, ValueType &out) = 0;
     virtual Debug::ParentLocation *debugLocation() = 0;
     virtual std::stop_token stopToken() = 0;
-};
-
-struct BehaviorReceiverPtr {
-
-    template <typename... Args>
-    void set_value(Args &&...args)
-    {
-        set_value(ArgumentList { std::forward<Args>(args)... });
-    }
-    void set_value(ArgumentList args)
-    {
-        mReceiver->set_value(std::move(args));
-    }
-    void set_error(BehaviorError r)
-    {
-        mReceiver->set_error(std::move(r));
-    }
-    void set_done()
-    {
-        mReceiver->set_done();
-    }
 
     template <typename O>
-    friend auto tag_invoke(Execution::resolve_var_d_t, BehaviorReceiverPtr &rec, std::string_view name, O &out)
+    friend auto tag_invoke(Execution::resolve_var_d_t, BehaviorReceiver &rec, std::string_view name, O &out)
     {
         ValueType v;
-        if (rec.mReceiver->resolveVar(name, v)) {
+        if (rec.resolveVar(name, v)) {
             out = v.as<O>();
             return true;
         } else {
@@ -54,17 +33,15 @@ struct BehaviorReceiverPtr {
         }
     }
 
-    friend std::stop_token tag_invoke(Execution::get_stop_token_t, BehaviorReceiverPtr &rec)
+    friend std::stop_token tag_invoke(Execution::get_stop_token_t, BehaviorReceiver &rec)
     {
-        return rec.mReceiver->stopToken();
+        return rec.stopToken();
     }
 
-    friend Debug::ParentLocation *tag_invoke(Execution::get_debug_location_t, BehaviorReceiverPtr &rec)
+    friend Debug::ParentLocation *tag_invoke(Execution::get_debug_location_t, BehaviorReceiver &rec)
     {
-        return rec.mReceiver->debugLocation();
+        return rec.debugLocation();
     }
-
-    BehaviorReceiver *mReceiver;
 };
 
 template <typename Rec, typename Base = BehaviorReceiver>
@@ -87,5 +64,13 @@ struct VirtualBehaviorState : Execution::VirtualStateEx<Rec, Base, type_pack<Beh
         return Execution::get_stop_token(this->mRec);
     }
 };
+
+template <typename F, typename... Args>
+auto make_simple_behavior_sender(F &&f, Args&&... args) {
+    return Execution::make_sender<BehaviorError, ArgumentList>(
+        [args = std::tuple<Args...> { std::forward<Args>(args)... }, f { forward_capture<F>(std::forward<F>(f)) }]<typename Rec>(Rec &&rec) mutable {
+            return TupleUnpacker::constructExpand<VirtualBehaviorState<Rec, Execution::SimpleState<F, std::tuple<Args...>, BehaviorReceiver>>>(std::forward<Rec>(rec), std::forward<F>(f), std::move(args));
+        });
+}
 
 }

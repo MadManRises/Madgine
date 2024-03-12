@@ -10,7 +10,7 @@
 
 #include "Madgine/behaviorreceiver.h"
 
-#include "Generic/execution/state.h"
+#include "Madgine/state.h"
 
 namespace Engine {
 namespace Scripting {

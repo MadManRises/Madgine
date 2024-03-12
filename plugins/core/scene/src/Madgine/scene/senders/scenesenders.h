@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Generic/execution/algorithm.h"
-#include "Generic/execution/state.h"
+#include "Madgine/state.h"
 
 #include "../scenemanager.h"
 

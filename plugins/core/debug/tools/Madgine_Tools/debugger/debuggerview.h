@@ -33,8 +33,8 @@ namespace Tools {
 
         void setCurrentContext(Debug::ContextInfo &context);
 
-        void onSuspend(Debug::ContextInfo &context) override;
-        bool pass(Debug::DebugLocation *location) override;
+        void onSuspend(Debug::ContextInfo &context, Debug::ContinuationType type) override;
+        bool pass(Debug::DebugLocation *location, Debug::ContinuationType type) override;
 
         std::string_view key() const override;
 

@@ -38,8 +38,11 @@ namespace Tools {
         drawList->AddText(labelPos, IM_COL32(255, 255, 255, 255), label.data(), label.data() + label.size());
     };
 
-    ImColor DataColor(uint32_t mask)
+    ImColor DataColor(uint32_t mask, ExtendedValueTypeDesc type)
     {
+        if (type.mType == ValueTypeEnum::SenderValue) {
+            return FlowColor(mask);
+        }
         switch (mask) {
         case NodeGraph::NodeExecutionMask::NONE:
             return { 50, 50, 50, 255 };
@@ -80,14 +83,22 @@ namespace Tools {
 
     ImVec2 DataPinIcon(ExtendedValueTypeDesc type, uint32_t mask, bool connected)
     {
-        ax::Widgets::Icon(ImVec2(sPinIconSize, sPinIconSize), ax::Widgets::IconType::Circle, connected, DataColor(mask), ImColor(32, 32, 32, 255));
+        ax::Widgets::IconType icon = ax::Widgets::IconType::Circle;
+        if (type.mType == ValueTypeEnum::SenderValue)
+            icon = ax::Widgets::IconType::Diamond;
+
+        ax::Widgets::Icon(ImVec2(sPinIconSize, sPinIconSize), icon, connected, DataColor(mask, type), ImColor(32, 32, 32, 255));
         ImVec2 align { 0.5f, 0.5f };
         return ImGui::GetItemRectMin() + align * ImGui::GetItemRectSize();
     }
 
     ImVec2 DataInstancePinIcon(ExtendedValueTypeDesc type, uint32_t mask, bool connected)
     {
-        ax::Widgets::Icon(ImVec2(sPinIconSize, sPinIconSize), ax::Widgets::IconType::Square, connected, DataColor(mask), ImColor(32, 32, 32, 255));
+        ax::Widgets::IconType icon = ax::Widgets::IconType::Square;
+        if (type.mType == ValueTypeEnum::SenderValue)
+            icon = ax::Widgets::IconType::Diamond;
+
+        ax::Widgets::Icon(ImVec2(sPinIconSize, sPinIconSize), icon, connected, DataColor(mask, type), ImColor(32, 32, 32, 255));
         ImVec2 align { 0.5f, 0.5f };
         return ImGui::GetItemRectMin() + align * ImGui::GetItemRectSize();
     }

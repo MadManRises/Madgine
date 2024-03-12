@@ -207,6 +207,30 @@ namespace Tools {
             visualizeDebugLocation(context, context->mChild);
             EndDebuggablePanel();
         }
+        if (context->isPaused()) {            
+            std::string arguments = context->getArguments();
+            
+            if (!arguments.empty()) {
+                Debug::ContinuationType type = context->continuationType();
+                switch (type) {
+                case Debug::ContinuationType::Cancelled:
+                case Debug::ContinuationType::Error:
+                    ImGui::PushStyleColor(ImGuiCol_Border, { 1.0f, 0.0f, 0.0f, 1.0f });
+                    //ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.0f, 0.0f, 1.0f });
+                    break;
+                case Debug::ContinuationType::Return:
+                    ImGui::PushStyleColor(ImGuiCol_Border, { 0.0f, 0.78f, 1.0f, 1.0f });
+                    //ImGui::PushStyleColor(ImGuiCol_Text, { 0.0f, 0.78f, 1.0f, 1.0f });
+                    break;
+                }
+                ImGui::BeginGroupPanel();
+                ImGui::Text(arguments);
+                ImGui::EndGroupPanel();
+                if (type != Debug::ContinuationType::Flow) {
+                    ImGui::PopStyleColor(1);
+                }
+            }
+        }
     }
 
     void DebuggerView::setCurrentContext(Debug::ContextInfo &context)
@@ -214,12 +238,12 @@ namespace Tools {
         mSelectedContext = &context;
     }
 
-    void DebuggerView::onSuspend(Debug::ContextInfo &context)
+    void DebuggerView::onSuspend(Debug::ContextInfo &context, Debug::ContinuationType type)
     {
         setCurrentContext(context);
     }
 
-    bool DebuggerView::pass(Debug::DebugLocation *location)
+    bool DebuggerView::pass(Debug::DebugLocation *location, Debug::ContinuationType type)
     {
         return true;
     }

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../fixed_string.h"
-#include "../genericresult.h"
-#include "concepts.h"
+#include "Generic/execution/concepts.h"
+#include "Generic/fixed_string.h"
+#include "behaviorerror.h"
 
 namespace Engine {
 namespace Execution {
@@ -94,7 +94,10 @@ namespace Execution {
                 if (resolve_var<Name>(this->mRec, result)) {
                     this->mRec.set_value(std::forward<T>(result));
                 } else {
-                    this->mRec.set_error(GenericResult { GenericResult::UNKNOWN_ERROR });
+                    std::string errorMsg = "Variable \""s + Name.c_str() + "\" not found.";
+                    this->mRec.set_error(BehaviorError {
+                        GenericResult::UNKNOWN_ERROR,
+                        errorMsg });
                 }
             }
         };
@@ -103,7 +106,7 @@ namespace Execution {
         struct sender {
             using is_sender = void;
 
-            using result_type = GenericResult;
+            using result_type = BehaviorError;
             template <template <typename...> typename Tuple>
             using value_types = Tuple<T>;
 
@@ -142,7 +145,10 @@ namespace Execution {
                 if (store_var<Name>(this->mRec, std::forward<V>(value))) {
                     this->mRec.set_value();
                 } else {
-                    this->mRec.set_error(GenericResult { GenericResult::UNKNOWN_ERROR });
+                    std::string errorMsg = "Variable \""s + Name.c_str() + "\" not found.";
+                    this->mRec.set_error(BehaviorError {
+                        GenericResult::UNKNOWN_ERROR,
+                        errorMsg });
                 }
             }
         };

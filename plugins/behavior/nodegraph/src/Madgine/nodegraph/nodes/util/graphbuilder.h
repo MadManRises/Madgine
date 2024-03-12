@@ -1,13 +1,12 @@
 #pragma once
 
 #include "Generic/execution/concepts.h"
-#include "Generic/execution/state.h"
+#include "Madgine/state.h"
 
 #include "../../nodecollector.h"
 #include "../../nodeinterpreter.h"
 #include "Generic/execution/algorithm.h"
 #include "Generic/execution/execution.h"
-#include "Generic/execution/state.h"
 
 #include "sendernode.h"
 

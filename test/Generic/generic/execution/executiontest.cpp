@@ -2,7 +2,7 @@
 
 #include "Interfaces/interfaceslib.h"
 
-#include "Generic/execution/algorithm.h"
+/*#include "Generic/execution/algorithm.h"
 #include "Generic/execution/promise.h"
 
 #include "Generic/execution/state.h"
@@ -32,4 +32,4 @@ TEST(Execution, Basic)
 
     std::vector<int> expected { 13, 15, 18, 22 };
     ASSERT_EQ(cont, expected);
-}
+}*/

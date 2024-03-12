@@ -3,6 +3,8 @@
 #include "Madgine_Tools/toolbase.h"
 #include "Madgine_Tools/toolscollector.h"
 
+#include "Madgine/behaviorcollector.h"
+
 namespace Engine {
 namespace Tools {
 
@@ -20,3 +22,7 @@ namespace Tools {
 }
 
 REGISTER_TYPE(Engine::Tools::BehaviorTool)
+
+namespace ImGui {
+MADGINE_BEHAVIOR_TOOLS_EXPORT Engine::BehaviorHandle BehaviorSelector();
+}

@@ -29,11 +29,6 @@ Threading::TaskFuture<ParameterTuple> NativeBehaviorFactory::createParameters(st
     return NativeBehaviorRegistry::get(NativeBehaviorRegistry::sComponentsByName().at(name)).mInfo->createParameters();
 }
 
-bool NativeBehaviorFactory::isConstant(std::string_view name) const
-{
-    return NativeBehaviorRegistry::get(NativeBehaviorRegistry::sComponentsByName().at(name)).mInfo->isConstant();
-}
-
 std::vector<ValueTypeDesc> NativeBehaviorFactory::parameterTypes(std::string_view name) const
 {
     auto types = NativeBehaviorRegistry::get(NativeBehaviorRegistry::sComponentsByName().at(name)).mInfo->parameterTypes();

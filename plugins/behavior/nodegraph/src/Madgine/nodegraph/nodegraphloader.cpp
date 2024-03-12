@@ -61,11 +61,6 @@ namespace NodeGraph {
         return ParameterTuple { std::make_tuple() };
     }
 
-    bool NodeGraphBehaviorFactory::isConstant(std::string_view name) const
-    {
-        return false;
-    }
-
     std::vector<ValueTypeDesc> NodeGraphBehaviorFactory::parameterTypes(std::string_view name) const
     {
         return {};

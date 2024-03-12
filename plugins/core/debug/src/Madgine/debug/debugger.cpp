@@ -34,9 +34,9 @@ namespace Debug {
         parent->mChild = nullptr;
     }
 
-    bool DebugLocation::pass()
+    bool DebugLocation::pass(ContinuationType type)
     {
-        return !wantsPause() && Debugger::getSingleton().pass(this);
+        return !wantsPause(type) && Debugger::getSingleton().pass(this, type);
     }
 
     std::deque<ContextInfo> &Debugger::infos()
@@ -59,10 +59,10 @@ namespace Debug {
         std::erase(mListeners, listener);
     }
 
-    void ContextInfo::suspend(Closure<void(ContinuationMode)> callback, std::stop_token st)
+    void ContextInfo::suspend(Continuation callback, std::stop_token st)
     {
         for (DebugListener *listener : Debugger::getSingleton().mListeners)
-            listener->onSuspend(*this);
+            listener->onSuspend(*this, callback.type());
         mCallback = std::move(callback);
         int initialState = 0;
         mPaused.compare_exchange_strong(initialState, 1);
@@ -105,12 +105,24 @@ namespace Debug {
         return mPaused == 2;
     }
 
-    bool Debugger::pass(DebugLocation *location)
+    std::string ContextInfo::getArguments() const
+    {
+        std::stringstream ss;
+        mCallback.visitArguments(ss);
+        return ss.str();
+    }
+
+    ContinuationType ContextInfo::continuationType() const
+    {
+        return mCallback.type();
+    }
+
+    bool Debugger::pass(DebugLocation *location, ContinuationType type)
     {
         bool pass = true;
 
         for (DebugListener *listener : mListeners) {
-            pass &= listener->pass(location);
+            pass &= listener->pass(location, type);
         }
 
         return pass;

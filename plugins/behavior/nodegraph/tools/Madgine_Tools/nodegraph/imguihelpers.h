@@ -9,7 +9,7 @@ namespace Tools {
 
     void ShowLabel(std::string_view label, ImColor color = { 0.0f, 0.0f, 0.0f });
 
-    ImColor DataColor(uint32_t mask);
+    ImColor DataColor(uint32_t mask, ExtendedValueTypeDesc type = ExtendedValueTypeIndex { ExtendedValueTypeEnum::GenericType });
     ImColor FlowColor(uint32_t mask);
 
     ImVec2 DataPinIcon(ExtendedValueTypeDesc type, uint32_t mask, bool connected);

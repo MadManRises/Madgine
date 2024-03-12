@@ -12,6 +12,8 @@
 
 #include "../flagsholder.h"
 
+#include "Generic/execution/concepts.h"
+
 namespace Engine {
 
 META_EXPORT ValueType &KeyValuePair_key(KeyValuePair &p);
@@ -148,6 +150,8 @@ decltype(auto) convert_ValueType(T &&t)
         return EnumHolder { std::forward<T>(t) };
     } else if constexpr (InstanceOf<std::decay_t<T>, Flags>) {
         return FlagsHolder { std::forward<T>(t) };
+    } else if constexpr (Execution::Sender<std::decay_t<T>>) {
+        return KeyValueSender { std::forward<T>(t) };
     } else {
         if constexpr (Pointer<std::decay_t<T>>) {
             return ScopePtr { t };
@@ -173,7 +177,7 @@ void to_ValueType(ValueType &v, T &&t)
         to_ValueType_impl(v, convert_ValueType(resolveCustomScopePtr(std::forward<T>(t))));
     } else {
         to_ValueType_impl(v, convert_ValueType(std::forward<T>(t)));
-    }    
+    }
 }
 
 }

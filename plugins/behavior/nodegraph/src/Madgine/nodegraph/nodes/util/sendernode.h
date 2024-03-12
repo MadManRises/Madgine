@@ -1,14 +1,13 @@
 #pragma once
 
 #include "Generic/execution/concepts.h"
-#include "Generic/execution/state.h"
 
 #include "../../nodecollector.h"
 #include "../../nodeinterpreter.h"
 #include "Generic/delayedconstruct.h"
 #include "Generic/execution/algorithm.h"
 #include "Generic/execution/execution.h"
-#include "Generic/execution/state.h"
+#include "Madgine/state.h"
 #include "Generic/manuallifetime.h"
 
 #include "../../nodeexecution.h"
@@ -24,6 +23,9 @@ namespace Engine {
 namespace NodeGraph {
 
     template <typename T>
+    using is_router = is_instance_auto1<decayed_t<T>, NodeRouter>;
+
+    template <typename T>
     using is_algorithm = is_instance_auto1<decayed_t<T>, NodeAlgorithm>;
 
     template <typename T>
@@ -34,7 +36,10 @@ namespace NodeGraph {
     };
 
     template <typename T>
-    using is_value = std::negation<std::disjunction<is_algorithm<T>, is_pred_sender<T>, is_succ_sender<T>>>;
+    using is_value = std::negation<std::disjunction<is_algorithm<T>, is_pred_sender<T>, is_succ_sender<T>, is_algorithm<T>, is_router<T>>>;
+
+    template <typename T>
+    using is_any_algorithm = std::disjunction<is_algorithm<T>, is_router<T>>;
 
     template <typename T, size_t>
     struct remove_deductors_impl {
@@ -61,7 +66,7 @@ namespace NodeGraph {
     struct SenderNode : Node<SenderNode<Config, Algorithm, Arguments...>, AutoMaskNode<>> {
 
         using argument_types = type_pack<Arguments...>;
-        using algorithms = typename argument_types::template filter<is_algorithm>;
+        using algorithms = typename argument_types::template filter<is_any_algorithm>;
         using value_arguments = typename argument_types::template filter<is_value>;
         using value_argument_tuple = typename value_arguments::template transform_with_index<remove_deductors>::template instantiate<std::tuple>;
         using succ_senders = typename argument_types::template filter<is_succ_sender>;
@@ -87,6 +92,11 @@ namespace NodeGraph {
             } else if constexpr (is_succ_sender<T>::value) {
                 return std::tuple_cat(
                     std::make_tuple(NodeSender<I + 1> {}),
+                    buildArgs<I + 1>(std::move(values), type_pack<Ts...> {}, results));
+            } else if constexpr (is_router<T>::value) {
+                assert(results);
+                return std::tuple_cat(
+                    std::make_tuple(NodeRouter<I + 1> { *results }),
                     buildArgs<I + 1>(std::move(values), type_pack<Ts...> {}, results));
             } else if constexpr (is_algorithm<T>::value) {
                 assert(results);
@@ -374,7 +384,7 @@ namespace NodeGraph {
                 {
                     if (mData->mResults.empty())
                         mData->mResults.emplace_back();
-                    mData->mResults.front() = { ValueType { std::forward<Args>(args) }... };
+                    mData->mResults.front() = { std::forward<Args>(args)... };
                     mData->cleanup();
                     NodeReceiver<SenderNode<Config, Algorithm, Arguments...>>::set_value();
                 }
@@ -490,6 +500,7 @@ namespace NodeGraph {
                 if constexpr (Config::exposedVariables::size > 0) {
                     throw 0; //TODO
                 } else {
+
                     DummyReceiver rec { interpreter, *this };
 
                     InterpretData data { rec, mArguments };

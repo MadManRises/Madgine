@@ -12,6 +12,8 @@
 
 #include "Madgine/parametertuple.h"
 
+#include "Madgine/behaviorcollector.h"
+
 namespace Engine {
 namespace Tools {
 
@@ -111,8 +113,7 @@ namespace Tools {
             Scene::Entity::EntityPtr mTargetEntity;
             Threading::TaskFuture<ParameterTuple> mFuture;
             ParameterTuple mParameters;
-            std::string_view mName;
-            const BehaviorFactoryBase *mFactory;
+            BehaviorHandle mHandle;
         } mPendingBehavior;
 
         //Settings

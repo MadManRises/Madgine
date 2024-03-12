@@ -168,7 +168,7 @@ struct IntervalClock {
     template <typename Inner>
     struct sender : Execution::algorithm_sender<Inner> {
 
-        using result_type = GenericResult;
+        using result_type = typename Inner::result_type;
         template <template <typename...> typename Tuple>
         using value_types = Tuple<std::chrono::microseconds>;
 

@@ -16,7 +16,6 @@ struct NativeBehaviorInfo {
     virtual Behavior create(const ParameterTuple &args) const = 0;
     virtual ParameterTuple createParameters() const = 0;
     virtual std::string_view name() const = 0;
-    virtual bool isConstant() const = 0;
     virtual std::span<const ValueTypeDesc> parameterTypes() const = 0;
     virtual std::span<const ValueTypeDesc> resultTypes() const = 0;
 };
@@ -60,8 +59,8 @@ struct get_type<InputParameter<T>> {
 template <typename T>
 using get_type_t = typename get_type<T>::type;
 
-template <bool Constant, auto Factory, typename... Arguments>
-struct NativeBehavior : NativeBehaviorComponent<NativeBehavior<Constant, Factory, Arguments...>, NativeBehaviorInfo> {
+template <auto Factory, typename... Arguments>
+struct NativeBehavior : NativeBehaviorComponent<NativeBehavior<Factory, Arguments...>, NativeBehaviorInfo> {
 
     using argument_types = type_pack<Arguments...>;
     using parameter_arguments = typename argument_types::template filter<is_parameter>;
@@ -120,11 +119,6 @@ struct NativeBehavior : NativeBehaviorComponent<NativeBehavior<Constant, Factory
         return mName;
     }
 
-    virtual bool isConstant() const override
-    {
-        return Constant;
-    }
-
     static constexpr auto sParameterTypes = []() {
         if constexpr (std::same_as<parameter_arguments, type_pack<>>) {
             return std::span<const ValueTypeDesc> {};
@@ -172,7 +166,6 @@ struct NativeBehaviorFactory : BehaviorFactory<NativeBehaviorFactory> {
     std::vector<std::string_view> names() const override;
     Behavior create(std::string_view name, const ParameterTuple &args) const override;
     Threading::TaskFuture<ParameterTuple> createParameters(std::string_view name) const override;
-    bool isConstant(std::string_view name) const override;
     std::vector<ValueTypeDesc> parameterTypes(std::string_view name) const override;
     std::vector<ValueTypeDesc> resultTypes(std::string_view name) const override;
 };
@@ -182,7 +175,7 @@ struct NativeBehaviorFactory : BehaviorFactory<NativeBehaviorFactory> {
 DECLARE_BEHAVIOR_FACTORY(Engine::NativeBehaviorFactory)
 REGISTER_TYPE(Engine::NativeBehaviorInfo)
 
-#define NATIVE_BEHAVIOR_IMPL(Constant, Name, Sender, ...)                                         \
+#define NATIVE_BEHAVIOR(Name, Sender, ...)                                         \
     struct Name##Linkage {                                                                        \
         template <typename... Args>                                                               \
         auto operator()(Args &&...args) const                                                     \
@@ -191,16 +184,10 @@ REGISTER_TYPE(Engine::NativeBehaviorInfo)
         }                                                                                         \
     };                                                                                            \
                                                                                                   \
-    using Name##NativeBehavior = Engine::NativeBehavior<Constant, Name##Linkage {} __VA_OPT__(,) __VA_ARGS__>; \
+    using Name##NativeBehavior = Engine::NativeBehavior<Name##Linkage {} __VA_OPT__(,) __VA_ARGS__>; \
                                                                                                   \
     template <>                                                                                   \
     const Name##NativeBehavior Name##NativeBehavior::sInfo { #Name };                             \
                                                                                                   \
     REGISTER_TYPE(Name##NativeBehavior)                                                           \
     NAMED_UNIQUECOMPONENT(Name, Name##NativeBehavior)
-
-#define NATIVE_BEHAVIOR(Name, Sender, ...) \
-    NATIVE_BEHAVIOR_IMPL(false, Name, Sender, __VA_ARGS__)
-
-#define CONSTANT_NATIVE_BEHAVIOR(Name, Sender, ...) \
-    NATIVE_BEHAVIOR_IMPL(true, Name, Sender, __VA_ARGS__)

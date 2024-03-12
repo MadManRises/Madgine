@@ -11,7 +11,6 @@ struct BehaviorFactoryBase {
     virtual std::vector<std::string_view> names() const = 0;
     virtual Behavior create(std::string_view name, const ParameterTuple &args) const = 0;
     virtual Threading::TaskFuture<ParameterTuple> createParameters(std::string_view name) const = 0;
-    virtual bool isConstant(std::string_view name) const = 0;
     virtual std::vector<ValueTypeDesc> parameterTypes(std::string_view name) const = 0;
     virtual std::vector<ValueTypeDesc> resultTypes(std::string_view name) const = 0;
 };
@@ -33,14 +32,15 @@ struct DummyType {
 struct MADGINE_BEHAVIOR_EXPORT BehaviorHandle {
     Behavior create(const ParameterTuple &args) const;
     Threading::TaskFuture<ParameterTuple> createParameters() const;
-    bool isConstant() const;
     std::vector<ValueTypeDesc> parameterTypes() const;
     std::vector<ValueTypeDesc> resultTypes() const;
 
     std::string toString() const;
     bool fromString(std::string_view s);
 
-    size_t mIndex;
+    explicit operator bool() const;
+
+    IndexType<uint32_t> mIndex;
     std::string mName;
 };
 }

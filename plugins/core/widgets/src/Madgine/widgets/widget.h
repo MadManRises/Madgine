@@ -17,6 +17,12 @@
 
 #include "Generic/projections.h"
 
+#include "Madgine/debug/debuggablesender.h"
+
+#include "Interfaces/log/logsenders.h"
+
+#include "Madgine/state.h"
+
 namespace Engine {
 namespace Widgets {
 
@@ -111,7 +117,7 @@ namespace Widgets {
 
         bool containsPoint(const Vector2 &point, const Rect2i &screenSpace, float extend = 0.0f) const;
 
-        virtual void vertices(WidgetsRenderData &renderData, size_t layer = 0);        
+        virtual void vertices(WidgetsRenderData &renderData, size_t layer = 0);
 
         uint16_t fetchActiveConditions(std::vector<Condition *> *conditions = nullptr);
 
@@ -123,6 +129,59 @@ namespace Widgets {
 
         void setSizeValue(uint16_t index, float value, uint16_t mask = 0);
         void unsetSizeValue(uint16_t index, uint16_t mask);
+
+        struct WidgetScope {
+
+            template <typename Rec>
+            struct receiver : Execution::algorithm_receiver<Rec> {
+
+                template <typename O>
+                friend bool tag_invoke(Execution::resolve_var_d_t, receiver &rec, std::string_view name, O &out)
+                {
+                    if (name == "Widget") {
+                        out = rec.mWidget;
+                        return true;
+                    } else if (name == "WidgetManager") {
+                        out = &rec.mWidget->manager();
+                        return true;
+                    } else {
+                        return Execution::resolve_var_d(rec.mRec, name, out);
+                    }
+                }
+
+                WidgetBase *mWidget;
+            };
+
+            template <typename Inner>
+            struct sender : Execution::algorithm_sender<Inner> {
+                template <typename Rec>
+                friend auto tag_invoke(Execution::connect_t, sender &&sender, Rec &&rec)
+                {
+                    return Execution::algorithm_state<Inner, receiver<Rec>> { std::forward<Inner>(sender.mSender), std::forward<Rec>(rec), sender.mWidget };
+                }
+
+                WidgetBase *mWidget;
+            };
+
+            template <typename Inner>
+            friend auto operator|(Inner &&inner, WidgetScope &&scope)
+            {
+                return sender<Inner> { { {}, std::forward<Inner>(inner) }, scope.mWidget };
+            }
+
+            WidgetBase *mWidget;
+        };
+
+        template <typename Sender>
+        void addBehavior(Sender &&sender)
+        {
+            Debug::ContextInfo *context = &Debug::Debugger::getSingleton().createContext();
+            attachToLifetime(std::forward<Sender>(sender) | WidgetScope { this } | Execution::with_debug_location<Execution::SenderLocation>() | Execution::with_sub_debug_location(context) | Log::log_error());
+            mBehaviorContexts.emplace_back(context);
+        }
+        void attachToLifetime(Behavior behavior);
+
+        const std::vector<Debug::ContextInfo *> &behaviorContexts();
 
         bool mVisible = true;
         std::string mName = "Unnamed";
@@ -167,6 +226,8 @@ namespace Widgets {
 
         Matrix3 mPos = Matrix3::ZERO;
         Matrix3 mSize = Matrix3::IDENTITY;
+
+        std::vector<Debug::ContextInfo *> mBehaviorContexts;
     };
 
     template <typename T>

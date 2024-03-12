@@ -22,9 +22,11 @@ SERIALIZETABLE_END(Engine::NodeGraph::LibraryNode)
 namespace Engine {
 namespace NodeGraph {
 
+    
+
     struct LibraryInterpretData : NodeInterpreterData, BehaviorReceiver {
         LibraryInterpretData(BehaviorHandle type, const ParameterTuple &args)
-            : mBehavior(type.create(args).connect(this))
+            : mBehavior(type.create(args).connect(*this))
         {
         }
 
@@ -110,12 +112,12 @@ namespace NodeGraph {
 
     size_t LibraryNode::flowInCount(uint32_t group) const
     {
-        return !mBehavior.isConstant();
+        return 1;
     }
 
     size_t LibraryNode::flowOutBaseCount(uint32_t group) const
     {
-        return !mBehavior.isConstant();
+        return 1;
     }
 
     size_t LibraryNode::dataProviderBaseCount(uint32_t group) const
@@ -135,11 +137,7 @@ namespace NodeGraph {
 
     void LibraryNode::interpret(NodeReceiver<NodeBase> receiver, std::unique_ptr<NodeInterpreterData> &data, uint32_t flowIn, uint32_t group) const
     {
-        if (!mBehavior.isConstant()) {
-            static_cast<LibraryInterpretData *>(data.get())->start(std::move(receiver));
-        } else {
-            throw 0;
-        }
+        static_cast<LibraryInterpretData *>(data.get())->start(std::move(receiver));
     }
 
     void LibraryNode::interpretRead(NodeInterpreterStateBase &interpreter, ValueType &retVal, std::unique_ptr<NodeInterpreterData> &data, uint32_t providerIndex, uint32_t group) const

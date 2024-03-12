@@ -29,7 +29,7 @@ namespace NodeGraph {
         DISCONNECT
     };
 
-    using NodeResults = std::vector<ValueType>;
+    using NodeResults = ArgumentList;
 
     struct NodeDebugLocation;
 

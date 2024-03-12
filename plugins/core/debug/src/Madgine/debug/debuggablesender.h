@@ -2,6 +2,7 @@
 
 #include "Generic/execution/statedescriptor.h"
 #include "debugger.h"
+#include "Meta/keyvalue/valuetype.h"
 
 namespace Engine {
 namespace Execution {
@@ -22,7 +23,7 @@ namespace Execution {
             return {};
         }
 
-        virtual bool wantsPause() const override
+        virtual bool wantsPause(Debug::ContinuationType type) const override
         {
             return true;
         }
@@ -282,7 +283,7 @@ namespace Execution {
                             break;
                         }
                     },
-                        get_stop_token(this->mRec), std::forward<V>(value)...);
+                        get_stop_token(this->mRec), Debug::ContinuationType::Return, std::forward<V>(value)...);
                 }
             }
 
@@ -299,7 +300,7 @@ namespace Execution {
                         location->mIndex += stop_increment;
                         this->mRec.set_done();
                     },
-                        get_stop_token(this->mRec));
+                        get_stop_token(this->mRec), Debug::ContinuationType::Cancelled);
                 }
             }
 
@@ -325,7 +326,7 @@ namespace Execution {
                             break;
                         }
                     },
-                        get_stop_token(this->mRec), std::forward<R>(result)...);
+                        get_stop_token(this->mRec), Debug::ContinuationType::Error, std::forward<R>(result)...);
                 }
             }
         };
@@ -356,7 +357,7 @@ namespace Execution {
                         location->mContextData = get_debug_data(mState);
                         mState.start();
                     },
-                        get_stop_token(get_receiver(mState)));
+                        get_stop_token(get_receiver(mState)), Debug::ContinuationType::Flow);
                 }
             }
 

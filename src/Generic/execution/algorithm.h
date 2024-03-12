@@ -522,10 +522,11 @@ namespace Execution {
 
             void stopInner()
             {
-                mState.~inner_state_t();
+                destruct(mState);
             }
 
-            void set_value(Rec &rec)
+            template <typename... Args>
+            void set_value(Rec &rec, Args &&...)
             {
                 stopInner();
                 if (mFlag.test_and_set())
@@ -558,8 +559,12 @@ namespace Execution {
                     return false;
                 } else {
                     mFlag.clear();
-                    new (&mState) inner_state_t { connect(mF(*mIt), receiver<Rec, C, F> { rec, this }) };
-                    mState.start();
+                    construct(mState,
+                        DelayedConstruct<inner_state_t> {
+                            [&]() {
+                                return connect(mF(*mIt), receiver<Rec, C, F> { rec, this });
+                            } });
+                    mState->start();
                     return mFlag.test_and_set();
                 }
             }
@@ -569,9 +574,7 @@ namespace Execution {
             C mC;
             iterator mIt;
             std::atomic_flag mFlag;
-            union {
-                inner_state_t mState;
-            };
+            ManualLifetime<inner_state_t> mState = std::nullopt;
         };
 
         template <typename C, typename F>
@@ -1036,7 +1039,7 @@ namespace Execution {
             struct inner_tag {
             };
             template <typename... V>
-            using helper = std::invoke_result_t<F, V...>;
+            using helper = std::invoke_result_t<F, V &...>;
             using inner_sender_t = typename Sender::template value_types<helper>;
             using Tuple = typename Sender::template value_types<std::tuple>;
             using inner_state = connect_result_t<inner_sender_t, receiver<Rec, Sender, F, Rec &, inner_tag>>;
@@ -1052,17 +1055,19 @@ namespace Execution {
             template <typename... V>
             void set_value(Rec &rec, V &&...values)
             {
-                new (&mValue) Tuple { { std::forward<V>(values)... } };
-                new (&mInnerState) inner_state { connect(TupleUnpacker::invokeFromTuple(mF, mValue), receiver<Rec, Sender, F, Rec &, inner_tag> { rec, this }) };
-                mInnerState.start();
+                construct(mValue, std::forward<V>(values)...);
+                construct(mInnerState,
+                    DelayedConstruct<inner_state> {
+                        [&]() { return connect(TupleUnpacker::invokeFromTuple(mF, static_cast<Tuple &>(mValue)), receiver<Rec, Sender, F, Rec &, inner_tag> { rec, this }); } });
+                mInnerState->start();
             }
             using base::set_done;
             using base::set_error;
 
             void cleanup()
             {
-                mInnerState.~inner_state();
-                mValue.~tuple();
+                destruct(mInnerState);
+                destruct(mValue);
             }
 
             template <typename... V2>
@@ -1086,12 +1091,8 @@ namespace Execution {
             }
 
             F mF;
-            union {
-                Tuple mValue;
-            };
-            union {
-                inner_state mInnerState;
-            };
+            ManualLifetime<Tuple> mValue = std::nullopt;
+            ManualLifetime<inner_state> mInnerState = std::nullopt;
         };
 
         template <typename Sender, typename F>

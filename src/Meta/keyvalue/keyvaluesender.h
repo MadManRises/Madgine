@@ -22,7 +22,8 @@ struct KeyValueSenderState : KeyValueSenderStateBase {
 
     virtual void connect(Execution::VirtualReceiverBase<GenericResult, const ArgumentList &> &receiver) override
     {
-        mState = Execution::connect(std::forward<Sender>(std::get<Sender>(mState)), receiver);
+        mState.emplace<State>(
+            Execution::connect(std::forward<Sender>(std::get<Sender>(mState)), receiver));
     }
 
     virtual void start() override
@@ -36,6 +37,9 @@ struct KeyValueSenderState : KeyValueSenderStateBase {
 struct KeyValueSender {
 
     using is_sender = void;
+    using result_type = GenericResult;
+    template <template <typename...> typename Tuple>
+    using value_types = Tuple<>;
 
     template <Execution::Sender Sender>
     requires DecayedNoneOf<Sender, KeyValueSender>

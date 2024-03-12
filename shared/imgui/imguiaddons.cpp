@@ -1190,7 +1190,10 @@ void ImGui::BeginGroupPanel(const char *name, const ImVec2 &size)
     auto itemWidth = ImGui::CalcItemWidth();
     ImGui::PushItemWidth(ImMax(0.0f, itemWidth - frameHeight));
 
-    sGroupPanelLabelStack->push_back(ImRect(labelMin, labelMax));
+    if (strlen(name) > 0)
+        sGroupPanelLabelStack->push_back(ImRect(labelMin, labelMax));
+    else
+        sGroupPanelLabelStack->push_back(ImRect());
 }
 
 void ImGui::EndGroupPanel()

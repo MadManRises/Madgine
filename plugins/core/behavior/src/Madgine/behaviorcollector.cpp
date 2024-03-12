@@ -9,7 +9,6 @@
 
 METATABLE_BEGIN(Engine::BehaviorHandle)
 CONSTRUCTOR()
-MEMBER(mIndex)
 MEMBER(mName)
 METATABLE_END(Engine::BehaviorHandle)
 
@@ -25,11 +24,6 @@ Behavior BehaviorHandle::create(const ParameterTuple &args) const
 Threading::TaskFuture<ParameterTuple> BehaviorHandle::createParameters() const
 {
     return BehaviorFactoryRegistry::get(mIndex).mFactory->createParameters(mName);
-}
-
-bool BehaviorHandle::isConstant() const
-{
-    return BehaviorFactoryRegistry::get(mIndex).mFactory->isConstant(mName);
 }
 
 std::vector<ValueTypeDesc> BehaviorHandle::parameterTypes() const
@@ -67,6 +61,11 @@ bool BehaviorHandle::fromString(std::string_view s)
     mName = name;
 
     return true;
+}
+
+BehaviorHandle::operator bool() const
+{
+    return static_cast<bool>(mIndex);
 }
 
 }

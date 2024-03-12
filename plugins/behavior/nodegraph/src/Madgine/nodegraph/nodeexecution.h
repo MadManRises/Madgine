@@ -1,12 +1,11 @@
 #pragma once
 
 #include "Generic/execution/concepts.h"
-#include "Generic/execution/state.h"
+#include "Madgine/state.h"
 
 #include "Generic/execution/algorithm.h"
 #include "Generic/execution/execution.h"
 #include "Generic/execution/sendertraits.h"
-#include "Generic/execution/state.h"
 
 #include "Meta/keyvalue/valuetype.h"
 
@@ -60,15 +59,35 @@ namespace NodeGraph {
         {
             return handle.writeVar(handle.mNode.template getDynamicName<Name>(), std::forward<T>(value));
         }
-
-        friend Debug::DebugLocation *tag_invoke(Execution::get_debug_location_t, NodeInterpretHandle &handle)
-        {
-            return handle.mInterpreter.debugLocation();
-        }
     };
 
     template <typename Node>
     using NodeExecutionReceiver = Execution::execution_receiver<NodeInterpretHandle<Node>>;
+
+    template <typename Node>
+    struct NodeReceiver : NodeExecutionReceiver<Node> {
+        BehaviorReceiver &mReceiver;
+
+        void set_value()
+        {
+            continueExecution(this->mInterpreter, this->mNode, mReceiver);
+        }
+        void set_done()
+        {
+            mReceiver.set_done();
+        }
+        void set_error(BehaviorError result)
+        {
+            mReceiver.set_error(result);
+        }
+
+        template <typename CPO, typename... Args>
+        friend auto tag_invoke(CPO f, NodeReceiver &rec, Args &&...args)
+            -> tag_invoke_result_t<CPO, BehaviorReceiver &, Args...>
+        {
+            return f(rec.mReceiver, std::forward<Args>(args)...);
+        }
+    };
 
     struct MADGINE_NODEGRAPH_EXPORT NodeCodegenHandle : CodeGen::CodeGen_Context {
         const NodeBase *mNode;
@@ -79,22 +98,24 @@ namespace NodeGraph {
 
     using NodeCodegenReceiver = Execution::execution_receiver<NodeCodegenHandle>;
 
-    template <uint32_t flowOutIndex, typename _Rec>
-    struct NodeState {
-        using Rec = _Rec;
+    template <uint32_t flowOutIndex, typename Rec>
+    struct NodeState : VirtualBehaviorState<Rec> {
+
+        using VirtualBehaviorState<Rec>::VirtualBehaviorState;
 
         void start()
         {
+            mDebugLocation.stepInto(Execution::get_debug_location(mRec));
             auto &handle = Execution::get_context(mRec);
-            Execution::connect(handle.mInterpreter.interpretSubGraph(handle.mNode.flowOutTarget(0, flowOutIndex)), std::forward<Rec>(mRec)).start();
+            handle.mInterpreter.branch(*this, handle.mNode.flowOutTarget(0, flowOutIndex));
         }
 
-        friend Rec &tag_invoke(Execution::get_receiver_t, NodeState &state)
+        virtual Debug::ParentLocation *debugLocation() override
         {
-            return state.mRec;
+            return &mDebugLocation;
         }
 
-        Rec mRec;
+        NodeDebugLocation mDebugLocation = &Execution::get_context(mRec).mInterpreter;
     };
 
     template <uint32_t flowOutIndex>
@@ -196,7 +217,7 @@ namespace NodeGraph {
     };
 
     template <size_t flowOutIndex, typename... Arguments>
-    struct NodeAlgorithm {
+    struct NodeRouter {
 
         using Signature = Execution::signature<Arguments...>;
 
@@ -205,37 +226,80 @@ namespace NodeGraph {
         {
             if (mResults.size() <= flowOutIndex)
                 mResults.resize(flowOutIndex + 1);
-            mResults[flowOutIndex] = { ValueType { std::forward<Args>(args) }... };
+            mResults[flowOutIndex] = { std::forward<Args>(args)... };
             return NodeSender<flowOutIndex> {};
         }
         std::vector<NodeResults> &mResults;
     };
 
-    MADGINE_NODEGRAPH_EXPORT void continueExecution(NodeInterpreterStateBase &interpreter, const NodeBase &node, Execution::VirtualReceiverBase<BehaviorError> &receiver);
+    template <size_t flowOutIndex>
+    struct NodeAlgorithm {
 
-    template <typename Node>
-    struct NodeReceiver : NodeExecutionReceiver<Node> {
-        Execution::VirtualReceiverBase<BehaviorError> &mReceiver;
+        using Signature = Execution::signature<>;
 
-        void set_value()
+        template <typename Rec>
+        struct receiver : NodeState<flowOutIndex, Rec> {
+
+            receiver(Rec &&rec, std::vector<NodeResults> &results)
+                : NodeState<flowOutIndex, Rec>(std::forward<Rec>(rec))
+                , mResults(results)
+            {
+            }
+
+            template <typename... Args>
+            void set_value(Args &&...args)
+            {
+                if (mResults.size() <= flowOutIndex)
+                    mResults.resize(flowOutIndex + 1);
+                mResults[flowOutIndex] = { std::forward<Args>(args)... };
+                start();
+            }
+
+            void set_error(BehaviorError result)
+            {
+                mRec.set_error(std::move(result));
+            }
+
+            void set_done()
+            {
+                mRec.set_done();
+            }
+
+            std::vector<NodeResults> &mResults;
+        };
+
+        template <typename Inner>
+        struct sender : Execution::base_sender {
+            using result_type = void;
+            template <template <typename...> typename Tuple>
+            using value_types = Tuple<>;
+
+            template <typename Rec>
+            friend auto tag_invoke(Execution::connect_t, sender &&sender, Rec &&rec)
+            {
+                return Execution::connect(std::forward<Inner>(sender.mInner), receiver<Rec> { std::forward<Rec>(rec), sender.mResults });
+            }
+
+            Inner mInner;
+            std::vector<NodeResults> &mResults;
+        };
+
+        template <typename Inner>
+        auto operator()(Inner &&inner)
         {
-            continueExecution(this->mInterpreter, this->mNode, mReceiver);
+            return sender<Inner> { {}, std::forward<Inner>(inner), mResults };
         }
-        void set_done()
-        {
-            mReceiver.set_done();
-        }
-        void set_error(BehaviorError result)
-        {
-            mReceiver.set_error(result);
-        }
+        std::vector<NodeResults> &mResults;
     };
+
+    MADGINE_NODEGRAPH_EXPORT void continueExecution(NodeInterpreterStateBase &interpreter, const NodeBase &node, BehaviorReceiver &receiver);
 
     template <typename T>
     struct NodeStream {
         using Signature = Execution::signature<T>;
 
-        NodeReader<T> next() {
+        NodeReader<T> next()
+        {
             return { &mIndex };
         }
 

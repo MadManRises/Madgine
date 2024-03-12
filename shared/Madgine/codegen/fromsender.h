@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Generic/execution/concepts.h"
-#include "Generic/execution/state.h"
+//#include "Generic/execution/state.h"
 
 namespace CodeGen {
 
@@ -65,7 +65,7 @@ extern const codegen_connect_t codegen_connect;
 
 struct codegen_connect_t {
 
-    template <Engine::fixed_string Name, typename Sender, typename T, typename Rec>
+    /* template <Engine::fixed_string Name, typename Sender, typename T, typename Rec>
     friend auto tag_invoke(codegen_connect_t, Engine::Execution::Variable_t::sender<Name, Sender, T> &&sender, Rec &&rec)
     {
         struct state : codegen_algorithm_state<Sender, Rec> {
@@ -104,7 +104,7 @@ struct codegen_connect_t {
             }
         };
         return state { { std::move(sender.mSender), std::forward<Rec>(rec) } };
-    }
+    }*/
 
     struct codegen_let_value_t {
         template <typename T>

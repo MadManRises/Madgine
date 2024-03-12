@@ -14,6 +14,14 @@
 
 #include "Madgine/widgets/geometry.h"
 
+#include "Madgine_Tools/imguiicons.h"
+
+#include "Madgine_Tools/behaviortool.h"
+
+#include "Madgine/behavior.h"
+
+#include "Madgine_Tools/debugger/debuggerview.h"
+
 namespace Engine {
 namespace Tools {
 
@@ -253,9 +261,56 @@ namespace Tools {
             }
         }
 
+        if (ImGui::CollapsingHeader("Behaviors")) {
+            for (Debug::ContextInfo *context : mWidget->behaviorContexts()) {
+                Debug::ContinuationMode mode = mInspector.getTool<DebuggerView>().contextControls(*context);
+                mInspector.getTool<DebuggerView>().renderDebugContext(context);
+                if (mode != Debug::ContinuationMode::None)
+                    context->continueExecution(mode);
+            }
+        }
+
+        bool showParameters = false;
         if (ImGui::BeginPopupCompoundContextWindow()) {
+
+            if (ImGui::BeginMenu(IMGUI_ICON_PLUS " Add Behavior")) {
+                if (BehaviorHandle behavior = ImGui::BehaviorSelector()) {
+                    mPendingBehavior.mHandle = behavior;
+                    mPendingBehavior.mFuture = behavior.createParameters();
+                    mPendingBehavior.mParameters.reset();
+                    showParameters = true;
+                }
+                ImGui::EndMenu();
+            }
+
             ImGui::EndPopup();
         }
+
+        if (showParameters)
+            ImGui::OpenPopup("BehaviorParameters");
+
+        if (ImGui::BeginPopup("BehaviorParameters")) {
+            if (!mPendingBehavior.mFuture.is_ready()) {
+                ImGui::Text("Loading...");
+            } else {
+                if (!mPendingBehavior.mParameters)
+                    mPendingBehavior.mParameters = mPendingBehavior.mFuture;
+                if (ImGui::BeginTable("columns", 2, ImGuiTableFlags_SizingStretchProp)) {
+                    mInspector.drawMembers(&mPendingBehavior.mParameters);
+                    ImGui::EndTable();
+                }
+                if (ImGui::Button("Cancel")) {
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Create Behavior")) {
+                    mWidget->addBehavior(mPendingBehavior.mHandle.create(mPendingBehavior.mParameters));
+                    ImGui::CloseCurrentPopup();
+                }
+            }
+            ImGui::EndPopup();
+        }
+
     }
 
     void WidgetSettings::saveGeometry()

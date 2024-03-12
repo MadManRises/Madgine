@@ -71,7 +71,7 @@ namespace Scripting {
             return results;
         }
 
-        bool Python3DebugLocation::wantsPause() const
+        bool Python3DebugLocation::wantsPause(Debug::ContinuationType type) const
         {
             return true;
         }
@@ -149,7 +149,7 @@ namespace Scripting {
                     location->mSkipOnce = false;
                     break;
                 }
-                if (!location->mLocation.pass()) {
+                if (!location->mLocation.pass(Debug::ContinuationType::Flow)) {
                     *frame->f_stacktop++ = suspend(
                         [frame, location](BehaviorReceiver &receiver, std::vector<PyFramePtr> frames, Closure<void(std::string_view)> out, std::stop_token st) {
                             PyFrameObject *frame = frames.front();
@@ -157,7 +157,7 @@ namespace Scripting {
                                 frame->f_lasti = 0;
                             else
                                 frame->f_lasti += sizeof(_Py_CODEUNIT);
-                            location->mLocation.yield([location, out { std::move(out) }, &receiver, frames { std::move(frames) }, st](Debug::ContinuationMode mode) mutable {
+                            location->mLocation.yield([location, out { std::move(out) }, &receiver, st](Debug::ContinuationMode mode, std::vector<PyFramePtr> frames) mutable {
                                 Python3Lock lock { std::move(out), std::move(st) };
                                 Guard guard { PyObjectPtr::fromBorrowed(reinterpret_cast<PyObject *>(location)) };
                                 switch (mode) {
@@ -179,7 +179,7 @@ namespace Scripting {
                                     break;
                                 }
                             },
-                                st);
+                                st, Debug::ContinuationType::Flow, std::move(frames));
                         });
                 }
 

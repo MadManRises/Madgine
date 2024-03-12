@@ -193,11 +193,6 @@ namespace Scripting {
             return ParameterTuple { std::make_tuple() };
         }
 
-        bool Python3BehaviorFactory::isConstant(std::string_view name) const
-        {
-            return false;
-        }
-
         std::vector<ValueTypeDesc> Python3BehaviorFactory::parameterTypes(std::string_view name) const
         {
             return {};

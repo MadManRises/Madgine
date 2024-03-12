@@ -31,7 +31,7 @@
 #include "Generic/projections.h"
 
 #include "Generic/execution/algorithm.h"
-#include "Generic/execution/state.h"
+#include "Madgine/state.h"
 
 #include "Madgine/codegen/codegen_cpp.h"
 #include "Madgine/codegen/fromsender.h"
@@ -50,6 +50,8 @@
 
 #include "Interfaces/log/logsenders.h"
 
+#include "Madgine_Tools/behaviortool.h"
+
 UNIQUECOMPONENT(Engine::Tools::NodeGraphEditor);
 
 METATABLE_BEGIN_BASE(Engine::Tools::NodeGraphEditor, Engine::Tools::ToolBase)
@@ -61,10 +63,9 @@ FIELD(mNodeDetailsVisible)
 ENCAPSULATED_FIELD(Current, getCurrentName, load)
 SERIALIZETABLE_END(Engine::Tools::NodeGraphEditor)
 
-
 namespace Engine {
 namespace Tools {
-    
+
     NodeGraphEditor::NodeGraphEditor(ImRoot &root)
         : Tool<NodeGraphEditor>(root)
     {
@@ -233,7 +234,7 @@ namespace Tools {
 
                 ed::BeginNode(60000 * nodeId);
 
-                if (BeginNode(node)) { 
+                if (BeginNode(node)) {
 
                     //ImGui::SetColumnWidth(0, 100.0f);
                     //ImGui::SetColumnWidth(1, 100.0f);
@@ -338,7 +339,7 @@ namespace Tools {
 
                 if (ImGui::IsItemHovered()) {
                     //if (it != mNodeMessages.end()) {
-                        hoveredNode = node;
+                    hoveredNode = node;
                     //}
                 }
 
@@ -410,7 +411,7 @@ namespace Tools {
                     if (!pin.mPin.mNode) {
                         ed::RejectNewItem();
                     } else {
-                        setDragPin(pin);                        
+                        setDragPin(pin);
                     }
                 }
             } else {
@@ -484,16 +485,9 @@ namespace Tools {
                         }
                         ImGui::EndMenu();
                     }
-                    for (auto [name, index] : BehaviorFactoryRegistry::sComponentsByName()) {
-                        if (ImGui::BeginMenu(name.data())) {
-                            for (std::string_view name : BehaviorFactoryRegistry::get(index).mFactory->names()) {
-                                if (ImGui::MenuItem(name.data())) {
-                                    NodeGraph::NodeBase *node = mGraph.addNode(std::make_unique<NodeGraph::LibraryNode>(mGraph, BehaviorHandle { index, std::string { name } }));
-                                    ed::SetNodePosition(ed::NodeId { node }, mPopupPosition);
-                                }
-                            }
-                            ImGui::EndMenu();
-                        }
+                    if (BehaviorHandle behavior = ImGui::BehaviorSelector()) {
+                        NodeGraph::NodeBase *node = mGraph.addNode(std::make_unique<NodeGraph::LibraryNode>(mGraph, behavior));
+                        ed::SetNodePosition(ed::NodeId { node }, mPopupPosition);
                     }
                     ImGui::EndMenu();
                 }

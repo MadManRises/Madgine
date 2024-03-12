@@ -8,6 +8,8 @@
 
 #include "table_forward.h"
 
+#include "Generic/execution/concepts.h"
+
 namespace Engine {
 
 DERIVE_FUNCTION(customScopePtr)
@@ -320,6 +322,8 @@ constexpr ValueTypeIndex toValueTypeIndex()
             return ValueTypeEnum::KeyValueVirtualSequenceRangeValue;
         else
             return ValueTypeEnum::KeyValueVirtualAssociativeRangeValue;
+    } else if constexpr (Execution::Sender<T>){
+        return ValueTypeEnum::SenderValue;
     } else if constexpr (Pointer<T>) {
         if constexpr (std::is_function_v<std::remove_pointer_t<T>>)
             return ValueTypeEnum::FunctionValue;
@@ -346,6 +350,8 @@ constexpr ExtendedValueTypeDesc toValueTypeDesc()
         return { ExtendedValueTypeEnum::GenericType };
     } else if constexpr (InstanceOf<T, Flags>) {
         return { { ValueTypeEnum::FlagsValue }, T::Representation::sTable };
+    } else if constexpr (Execution::Sender<T>){
+        return { { ValueTypeEnum::SenderValue }, nullptr };
     } else if constexpr (std::same_as<T, ScopePtr>) {
         return { { ValueTypeEnum::ScopeValue }, static_cast<const MetaTable **>(nullptr) };
     } else if constexpr (std::ranges::range<T>) {
