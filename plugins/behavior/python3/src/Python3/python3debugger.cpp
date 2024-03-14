@@ -73,7 +73,7 @@ namespace Scripting {
 
         bool Python3DebugLocation::wantsPause(Debug::ContinuationType type) const
         {
-            return true;
+            return type == Debug::ContinuationType::Error;
         }
 
         Filesystem::Path Python3DebugLocation::file() const

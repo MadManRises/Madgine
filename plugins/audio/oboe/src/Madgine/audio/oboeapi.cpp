@@ -33,6 +33,8 @@ namespace Audio {
 
         AudioLoader::Handle mBuffer;
         OboeApi *mApi;
+        const void *mBuffer;
+        const void *mEnd;
     };
 
     template <typename Rec>
@@ -63,9 +65,9 @@ namespace Audio {
         void play(PlaybackState &state)
         {
             assert(!mState);
-            mState = &state;
-            mBuffer = state.mBuffer->mBuffer.begin();
-            mEnd = state.mBuffer->mBuffer.end();
+            state.mBuffer = state.mBuffer->mBuffer.begin();
+            state.mEnd = state.mBuffer->mBuffer.end();
+            mState = &state;            
             mStream->requestStart();
         }
 
@@ -130,8 +132,6 @@ namespace Audio {
 
     private:
         PlaybackState *mState = nullptr;
-        const void *mBuffer;
-        const void *mEnd;
     };
 
     void PlaybackState::start()

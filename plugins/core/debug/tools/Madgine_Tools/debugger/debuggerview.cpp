@@ -52,14 +52,16 @@ namespace Tools {
         co_await ToolBase::finalize();
     }
 
-    void DebuggerView::visualizeDebugLocation(const Debug::ContextInfo *context, const Debug::DebugLocation *location)
+    const Debug::DebugLocation *DebuggerView::visualizeDebugLocation(const Debug::ContextInfo *context, const Debug::DebugLocation *location, bool isInline)
     {
         if (!location)
-            return;
+            return nullptr;
 
         if (const Execution::SenderLocation *senderLocation = dynamic_cast<const Execution::SenderLocation *>(location)) {
+            const Debug::DebugLocation *subLocation = nullptr;
+
             CallableView<void(const Execution::StateDescriptor &, const void *)> visitorView;
-            auto visitor = [this, context, location, &visitorView](const Execution::StateDescriptor &desc, const void *contextData) {
+            auto visitor = [this, context, location, isInline, &visitorView, &subLocation](const Execution::StateDescriptor &desc, const void *contextData) {
                 std::visit(overloaded { [](const Execution::State::Text &text) {
                                            ImGui::Text(text.mText);
                                        },
@@ -78,8 +80,8 @@ namespace Tools {
                                [](const Execution::State::PopDisabled &) {
                                    ImGui::EndDisabled();
                                },
-                               [this, context, location](const Execution::State::SubLocation &) {
-                                   visualizeDebugLocation(context, location->mChild);
+                               [this, context, location, isInline, &subLocation](const Execution::State::SubLocation &) {
+                                   subLocation = visualizeDebugLocation(context, location->mChild, isInline);
                                },
                                [contextData, &visitorView](const Execution::State::Contextual &contextual) mutable {
                                    visitorView(contextual.mMapping(contextData), std::move(contextData));
@@ -96,19 +98,22 @@ namespace Tools {
                     DrawDebugMarker(0.5f * (ImGui::GetCursorScreenPos().y + startY) - 7.0f);
                 }
             }
+            return subLocation;
         } else {
             for (auto debugVisualizer : mDebugLocationVisualizers) {
-                if (debugVisualizer(this, context, location))
-                    return;
+                auto [matched, child] = debugVisualizer(this, context, location, isInline);
+                if (matched)
+                    return child;
             }
             ImGui::Text("Unknown ["s + typeid(*location).name() + "]");
+            return nullptr;
         }
     }
 
     Debug::ContinuationMode DebuggerView::contextControls(Debug::ContextInfo &context)
     {
         Debug::ContinuationMode mode = Debug::ContinuationMode::None;
-        ImGui::PushID(&context);        
+        ImGui::PushID(&context);
         if (!context.alive() || !context.isPaused())
             ImGui::BeginDisabled();
         if (ImGui::Button("Resume")) {
@@ -154,7 +159,7 @@ namespace Tools {
                 ImGui::Text("No context selected!");
             } else {
                 continuation = contextControls(*mSelectedContext);
-                
+
                 Debug::DebugLocation *location = mSelectedContext->mChild;
                 while (location) {
                     if (!mSelectedLocation && prevSelected == location)
@@ -204,12 +209,13 @@ namespace Tools {
     {
         std::unique_lock guard { context->mMutex };
         if (BeginDebuggablePanel("Debug Context")) {
-            visualizeDebugLocation(context, context->mChild);
+            const Debug::DebugLocation *child = visualizeDebugLocation(context, context->mChild, false);
+            assert(!child); //Parents that allow inline rendering need to take care of child rendering.
             EndDebuggablePanel();
         }
-        if (context->isPaused()) {            
+        if (context->isPaused()) {
             std::string arguments = context->getArguments();
-            
+
             if (!arguments.empty()) {
                 Debug::ContinuationType type = context->continuationType();
                 switch (type) {

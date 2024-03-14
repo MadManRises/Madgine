@@ -43,8 +43,8 @@ namespace NodeGraph {
         NodeInterpreterStateBase &operator=(const NodeInterpreterStateBase &) = delete;
         NodeInterpreterStateBase &operator=(NodeInterpreterStateBase &&) = default;
 
-        void branch(BehaviorReceiver &receiver, uint32_t flowIn);
-        void branch(BehaviorReceiver &receiver, Pin pin);
+        void branch(BehaviorReceiver &receiver, uint32_t flowIn, NodeDebugLocation &location);
+        void branch(BehaviorReceiver &receiver, Pin pin, NodeDebugLocation &location);
 
         void read(ValueType &retVal, Pin pin);
         void write(Pin pin, const ValueType &v);
@@ -62,8 +62,6 @@ namespace NodeGraph {
         virtual bool readVar(ValueType &result, std::string_view name, bool recursive = true);
         virtual bool writeVar(std::string_view name, const ValueType &v);
         virtual std::vector<std::string_view> variables();
-
-        Debug::ParentLocation *debugLocation() override;
 
         void start();
 
@@ -132,6 +130,11 @@ namespace NodeGraph {
         std::stop_token stopToken() override
         {
             return Execution::get_stop_token(mRec);
+        }
+
+        Debug::ParentLocation *debugLocation() override
+        {
+            return Execution::get_debug_location(mRec);
         }
 
         Rec mRec;

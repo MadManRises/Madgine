@@ -25,7 +25,7 @@ namespace Execution {
 
         virtual bool wantsPause(Debug::ContinuationType type) const override
         {
-            return true;
+            return type == Debug::ContinuationType::Error;
         }
 
         std::vector<StateDescriptor> mState;
@@ -161,6 +161,7 @@ namespace Execution {
 
             void start()
             {
+                mLocation.mIndex = 0;
                 mLocation.stepInto(get_debug_location(mRec));
                 mState.start();
             }
@@ -267,7 +268,8 @@ namespace Execution {
                 if constexpr (operation_increment == 0 && stop_increment == 0) {
                     this->mRec.set_value(std::forward<V>(value)...);
                 } else {
-                    SenderLocation *location = get_debug_location(this->mRec);
+                    assert(dynamic_cast<SenderLocation *>(static_cast<Debug::DebugLocation *>(get_debug_location(this->mRec))));
+                    SenderLocation *location = static_cast<SenderLocation *>(get_debug_location(this->mRec));
 
                     location->mIndex += operation_increment;
 
@@ -291,7 +293,7 @@ namespace Execution {
             {
                 if constexpr (operation_increment == 0 && stop_increment == 0) {
                     this->mRec.set_done();
-                } else {
+                } else {                    
                     SenderLocation *location = get_debug_location(this->mRec);
 
                     location->mIndex += operation_increment;
@@ -349,7 +351,7 @@ namespace Execution {
                 constexpr size_t increment = get_debug_start_increment<Sender>();
                 if constexpr (increment == 0) {
                     mState.start();
-                } else {
+                } else {                    
                     SenderLocation *location = get_debug_location(get_receiver(mState));
 
                     location->pass([=](Debug::ContinuationMode mode) {

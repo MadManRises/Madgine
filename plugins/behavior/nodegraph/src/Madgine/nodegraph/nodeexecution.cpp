@@ -32,10 +32,10 @@ namespace NodeGraph {
         return mInterpreter.writeVar(name, out);
     }
 
-    void continueExecution(NodeInterpreterStateBase &interpreter, const NodeBase &node, BehaviorReceiver &receiver)
+    void continueExecution(NodeInterpreterStateBase &interpreter, const NodeBase &node, BehaviorReceiver &receiver, NodeDebugLocation &location)
     {
         Pin pin = node.flowOutTarget(0);
-        interpreter.branch(receiver, pin);
+        interpreter.branch(receiver, pin, location);
     }
 
     CodeGen::Statement NodeCodegenHandle::read(uint32_t dataInIndex, uint32_t group)

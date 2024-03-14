@@ -7,8 +7,8 @@
 #include "Generic/delayedconstruct.h"
 #include "Generic/execution/algorithm.h"
 #include "Generic/execution/execution.h"
-#include "Madgine/state.h"
 #include "Generic/manuallifetime.h"
+#include "Madgine/state.h"
 
 #include "../../nodeexecution.h"
 #include "../../nodegraph.h"
@@ -358,9 +358,10 @@ namespace NodeGraph {
                 Receiver>;
             using State = Execution::connect_result_t<Sender, InnerReceiver>;
 
-            InterpretData()
+            InterpretData(value_argument_tuple args)
             {
                 static_assert(!Config::constant);
+                buildState(Receiver { this }, std::move(args));
             }
 
             InterpretData(InnerReceiver receiver, value_argument_tuple args)
@@ -371,12 +372,10 @@ namespace NodeGraph {
 
             ~InterpretData()
             {
-                if constexpr (Config::constant) {
-                    cleanup();
-                }
+                destruct(mState);
             }
 
-            struct Receiver : NodeReceiver<SenderNode<Config, Algorithm, Arguments...>> {
+            struct Receiver {
                 InterpretData* mData;
 
                 template <typename... Args>
@@ -385,27 +384,37 @@ namespace NodeGraph {
                     if (mData->mResults.empty())
                         mData->mResults.emplace_back();
                     mData->mResults.front() = { std::forward<Args>(args)... };
+                    NodeReceiver<SenderNode<Config, Algorithm, Arguments...>> rec = std::move(mData->mReceiver);
                     mData->cleanup();
-                    NodeReceiver<SenderNode<Config, Algorithm, Arguments...>>::set_value();
+                    rec.set_value();
                 }
 
                 void set_done()
                 {
+                    NodeReceiver<SenderNode<Config, Algorithm, Arguments...>> rec = std::move(mData->mReceiver);
                     mData->cleanup();
-                    NodeReceiver<SenderNode<Config, Algorithm, Arguments...>>::set_done();
+                    rec.set_done();
                 }
 
                 void set_error(BehaviorError result)
                 {
+                    NodeReceiver<SenderNode<Config, Algorithm, Arguments...>> rec = std::move(mData->mReceiver);
                     mData->cleanup();
-                    NodeReceiver<SenderNode<Config, Algorithm, Arguments...>>::set_error(result);
+                    rec.set_error(result);
+                }
+
+                template <typename CPO, typename... Args>
+                friend auto tag_invoke(CPO f, Receiver& receiver, Args&&... args)
+                    -> tag_invoke_result_t<CPO, NodeReceiver<SenderNode<Config, Algorithm, Arguments...>>&, Args...>
+                {
+                    return f(*receiver.mData->mReceiver, std::forward<Args>(args)...);
                 }
             };
 
-            void start(NodeReceiver<SenderNode<Config, Algorithm, Arguments...>> receiver, value_argument_tuple args)
+            void start(NodeReceiver<SenderNode<Config, Algorithm, Arguments...>> receiver)
             {
                 static_assert(!Config::constant);
-                buildState(Receiver { receiver, this }, std::move(args));
+                construct(mReceiver, std::move(receiver));
                 start();
             }
 
@@ -422,7 +431,7 @@ namespace NodeGraph {
 
             void cleanup()
             {
-                destruct(mState);
+                destruct(mReceiver);
             }
 
             template <fixed_string Name>
@@ -473,6 +482,7 @@ namespace NodeGraph {
 
             std::vector<NodeResults> mResults;
             ManualLifetime<State> mState = std::nullopt;
+            ManualLifetime<NodeReceiver<SenderNode<Config, Algorithm, Arguments...>>> mReceiver = std::nullopt;
         };
 
         void setupInterpret(NodeInterpreterStateBase& interpreter, std::unique_ptr<NodeInterpreterData>& data) const override
@@ -486,9 +496,9 @@ namespace NodeGraph {
         {
             if constexpr (!Config::constant) {
                 if (!data) {
-                    data = std::make_unique<InterpretData>();
+                    data = std::make_unique<InterpretData>(mArguments);
                 }
-                static_cast<InterpretData*>(data.get())->start({ receiver.mInterpreter, static_cast<const SenderNode<Config, Algorithm, Arguments...>&>(receiver.mNode), receiver.mReceiver }, mArguments);
+                static_cast<InterpretData*>(data.get())->start({ receiver.mInterpreter, static_cast<const SenderNode<Config, Algorithm, Arguments...>&>(receiver.mNode), receiver.mReceiver, receiver.mDebugLocation });
             } else {
                 throw 0;
             }

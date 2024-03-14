@@ -7,7 +7,7 @@ struct PaDeviceInfo;
 
 namespace Engine {
 namespace Audio {
-
+    
     struct PortAudioApi : AudioApiImpl<PortAudioApi> {
 
         PortAudioApi(Root::Root &root);

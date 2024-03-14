@@ -23,6 +23,8 @@
 
 #include "Madgine/state.h"
 
+#include "Generic/execution/lifetime.h"
+
 namespace Engine {
 namespace Widgets {
 
@@ -176,10 +178,10 @@ namespace Widgets {
         void addBehavior(Sender &&sender)
         {
             Debug::ContextInfo *context = &Debug::Debugger::getSingleton().createContext();
-            attachToLifetime(std::forward<Sender>(sender) | WidgetScope { this } | Execution::with_debug_location<Execution::SenderLocation>() | Execution::with_sub_debug_location(context) | Log::log_error());
+            lifetime().attach(std::forward<Sender>(sender) | WidgetScope { this } | Execution::with_debug_location<Execution::SenderLocation>() | Execution::with_sub_debug_location(context) | Log::log_error());
             mBehaviorContexts.emplace_back(context);
         }
-        void attachToLifetime(Behavior behavior);
+        Execution::Lifetime &lifetime();
 
         const std::vector<Debug::ContextInfo *> &behaviorContexts();
 

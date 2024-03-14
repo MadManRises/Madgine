@@ -89,7 +89,7 @@ struct NativeBehavior : NativeBehaviorComponent<NativeBehavior<Factory, Argument
 
     static auto buildSender(parameter_argument_tuple &&parameters)
     {
-        return TupleUnpacker::invokeFromTuple(Factory, buildArgs<0>(std::move(parameters), argument_types {})) | Execution::with_debug_location<Execution::SenderLocation>();
+        return TupleUnpacker::invokeFromTuple(Factory, buildArgs<0>(std::move(parameters), argument_types {}));
     }
 
     using Sender = decltype(buildSender(std::declval<parameter_argument_tuple>()));

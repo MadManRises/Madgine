@@ -51,7 +51,7 @@ namespace Input {
         if (mWidget != widget) {
             mLifetime.reset();
 
-            widget->manager().attachToLifetime(mLifetime.ended());
+            widget->manager().lifetime().attach(mLifetime.ended());
 
             mWidget = widget;
 

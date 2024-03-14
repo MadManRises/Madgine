@@ -1035,7 +1035,7 @@ bool FilePicker(Engine::Filesystem::Path *path, Engine::Filesystem::Path *select
             bool mIsDir;
         };
         std::vector<File> files;
-        
+
         std::ranges::transform(Engine::Filesystem::listFilesAndDirs(*path), std::back_inserter(files), [](Engine::Filesystem::FileQueryResult result) { return File { result.path(), result.isDir() }; });
 
         for (const File &file : files) {
@@ -1162,16 +1162,23 @@ void ImGui::BeginGroupPanel(const char *name, const ImVec2 &size)
         effectiveSize.x = size.x;
     ImGui::Dummy(ImVec2(effectiveSize.x, 0.0f));
 
+    ImVec2 labelMin, labelMax;
+
     ImGui::Dummy(ImVec2(frameHeight * 0.5f, 0.0f));
     ImGui::SameLine(0.0f, 0.0f);
     ImGui::BeginGroup();
-    ImGui::Dummy(ImVec2(frameHeight * 0.5f, 0.0f));
-    ImGui::SameLine(0.0f, 0.0f);
-    ImGui::TextUnformatted(name);
-    auto labelMin = ImGui::GetItemRectMin();
-    auto labelMax = ImGui::GetItemRectMax();
-    ImGui::SameLine(0.0f, 0.0f);
-    ImGui::Dummy(ImVec2(0.0, frameHeight + itemSpacing.y));
+    if (strlen(name) > 0) {
+        ImGui::Dummy(ImVec2(frameHeight * 0.5f, 0.0f));
+        ImGui::SameLine(0.0f, 0.0f);
+        ImGui::TextUnformatted(name);
+        labelMin = ImGui::GetItemRectMin();
+        labelMax = ImGui::GetItemRectMax();
+        ImGui::SameLine(0.0f, 0.0f);
+        ImGui::Dummy(ImVec2(0.0, frameHeight + itemSpacing.y));
+    } else {
+        ImGui::Dummy(ImVec2(0.0, frameHeight * 0.5f + itemSpacing.y));
+    }
+
     ImGui::BeginGroup();
 
     //ImGui::GetWindowDrawList()->AddRect(labelMin, labelMax, IM_COL32(255, 0, 255, 255));

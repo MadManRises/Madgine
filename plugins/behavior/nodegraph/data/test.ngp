@@ -101,7 +101,7 @@
         <Node type="Native/play_sound" serId=6>
             <mParameters>
                 <Item serId=7>
-                    <Name>sample</Name>
+                    <Name>click</Name>
                 </Item>
             </mParameters>
             <mFlowOutPins>

@@ -70,6 +70,8 @@ enum class AccessMode {
 
 namespace Execution {
 
+    struct Lifetime;
+
     template <typename R, typename... V>
     struct VirtualReceiverBaseEx;
 

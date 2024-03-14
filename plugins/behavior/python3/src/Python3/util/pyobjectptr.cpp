@@ -110,7 +110,7 @@ namespace Scripting {
                 PyFunction_GetGlobals(mObject),
                 locals);
 
-            return { std::move(frame) };
+            return { {}, std::move(frame) };
         }
 
         PyObjectFieldAccessor PyObjectPtr::operator[](const PyObjectPtr &name) const

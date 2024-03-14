@@ -45,11 +45,10 @@ namespace Execution {
             state = mState.fetch_or(FINISH_ENDED);
             assert(state & FINISH_STARTED);
             assert(!(state & FINISH_ENDED));
-            assert((state & STOP_FAILED) || !(state & STOP_STARTED));
             mState = 0;
             if (state & STOP_FAILED)
                 finally_cb::operator()(cancelled);
-            else
+            else if (!(state & STOP_STARTED))
                 finally_cb::operator()(std::forward<Args>(args)...);
         }
 

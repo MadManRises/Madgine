@@ -45,6 +45,7 @@ namespace Execution {
         template <typename T, typename F>
         requires(!tag_invocable<visit_state_t, T &, F>) void operator()(T &, F &&f) const
         {
+            f(State::SubLocation {});
         }
 
         template <typename T, typename F>

@@ -21,10 +21,15 @@ namespace Tools {
         uint32_t mIndex;
     };
 
-    void visualizeDebugLocation(DebuggerView *view, const Debug::ContextInfo *context, const NodeGraph::NodeDebugLocation *location)
+    const NodeGraph::NodeDebugLocation *visualizeDebugLocation(DebuggerView *view, const Debug::ContextInfo *context, const NodeGraph::NodeDebugLocation *location, bool isInline)
     {
+        if (isInline)
+            return location;
+
         const NodeGraph::NodeBase *node = location->mNode;
         const NodeGraph::NodeGraph &graph = *location->mInterpreter->graph();
+
+        const Debug::DebugLocation *child = nullptr;
 
         if (ImGui::BeginTable("NodeContext", 3)) {
 
@@ -119,8 +124,11 @@ namespace Tools {
                             }
                         }
                     }
-                    EndNode();
+
+                    EndNode();                    
                 }
+                child = view->visualizeDebugLocation(context, location->mChild, true);
+
                 ImGui::EndGroupPanel();
             } else {
                 ImGui::Text("Return");
@@ -234,7 +242,10 @@ namespace Tools {
             }
         }
 
-        view->visualizeDebugLocation(context, location->mChild);
+        if (child)
+            view->visualizeDebugLocation(context, child, false);
+
+        return nullptr;
     }
 
 }

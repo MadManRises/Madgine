@@ -1,6 +1,6 @@
 <Graph serId=1>
     <mNodes>
-        <Node type="Native/Widget_PointerClick" serId=2>
+        <Node type="Native/Widget_PointerEnter" serId=2>
             <mParameters>
             </mParameters>
             <mFlowOutPins>
@@ -37,7 +37,7 @@
                 <Item>
                     <Item>
                         <Element>
-                            <Element>3</Element>
+                            <Element>5</Element>
                             <Element>0</Element>
                             <Element>0</Element>
                         </Element>
@@ -60,16 +60,18 @@
                 </Item>
             </mDataOutPins>
         </Node>
-        <Node type="Native/Wait_Simulation" serId=4>
+        <Node type="Native/play_sound" serId=4>
             <mParameters>
-                <Item>1000</Item>
+                <Item serId=5>
+                    <Name>sample</Name>
+                </Item>
             </mParameters>
             <mFlowOutPins>
                 <Item>
                     <Item>
                         <Element>
-                            <Element>4</Element>
-                            <Element>0</Element>
+                            <Element>-1</Element>
+                            <Element>-1</Element>
                             <Element>0</Element>
                         </Element>
                     </Item>
@@ -84,18 +86,52 @@
                 </Item>
             </mDataOutPins>
         </Node>
-        <Node type="Native/play_sound" serId=5>
-            <mParameters>
-                <Item serId=6>
-                    <Name>click</Name>
-                </Item>
-            </mParameters>
+        <Node type="StopWhen" serId=6>
             <mFlowOutPins>
                 <Item>
                     <Item>
                         <Element>
                             <Element>-1</Element>
                             <Element>-1</Element>
+                            <Element>0</Element>
+                        </Element>
+                    </Item>
+                </Item>
+                <Item>
+                    <Item>
+                        <Element>
+                            <Element>3</Element>
+                            <Element>0</Element>
+                            <Element>0</Element>
+                        </Element>
+                    </Item>
+                </Item>
+            </mFlowOutPins>
+            <mDataInPins>
+                <Item>
+                    <Item>
+                        <Element>
+                            <Element>5</Element>
+                            <Element>0</Element>
+                            <Element>0</Element>
+                        </Element>
+                    </Item>
+                </Item>
+            </mDataInPins>
+            <mDataOutPins>
+                <Item>
+                </Item>
+            </mDataOutPins>
+        </Node>
+        <Node type="Native/Widget_PointerLeave" serId=7>
+            <mParameters>
+            </mParameters>
+            <mFlowOutPins>
+                <Item>
+                    <Item>
+                        <Element>
+                            <Element>4</Element>
+                            <Element>0</Element>
                             <Element>0</Element>
                         </Element>
                     </Item>

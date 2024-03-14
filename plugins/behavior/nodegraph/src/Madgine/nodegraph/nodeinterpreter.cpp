@@ -40,12 +40,12 @@ namespace NodeGraph {
     {
     }
 
-    void NodeInterpreterStateBase::branch(BehaviorReceiver &receiver, uint32_t flowIn)
+    void NodeInterpreterStateBase::branch(BehaviorReceiver &receiver, uint32_t flowIn, NodeDebugLocation &location)
     {
-        branch(receiver, mGraph->mFlowOutPins[flowIn].mTarget);
+        branch(receiver, mGraph->mFlowOutPins[flowIn].mTarget, location);
     }
 
-    void NodeInterpreterStateBase::branch(BehaviorReceiver &receiver, Pin pin)
+    void NodeInterpreterStateBase::branch(BehaviorReceiver &receiver, Pin pin, NodeDebugLocation &location)
     {
 
         const NodeBase *node = nullptr;
@@ -53,14 +53,13 @@ namespace NodeGraph {
             node = mGraph->node(pin.mNode);
         }
 
-        assert(dynamic_cast<NodeDebugLocation *>(static_cast<Debug::DebugLocation *>(receiver.debugLocation())));
-        NodeDebugLocation *location = static_cast<NodeDebugLocation *>(receiver.debugLocation());        
-        location->mNode = node;
+        location.mNode = node;
 
-        location->pass([=, &receiver](Debug::ContinuationMode mode) {
+        location.pass([=, &receiver, &location](Debug::ContinuationMode mode) {
             if (pin && pin.mNode) {
-                node->interpret({ *this, *node, receiver }, mData[pin.mNode - 1], pin.mIndex, pin.mGroup);
+                node->interpret({ *this, *node, receiver, location }, mData[pin.mNode - 1], pin.mIndex, pin.mGroup);
             } else {
+                location.stepOut(receiver.debugLocation());
                 receiver.set_value();
             }
         },
@@ -147,11 +146,6 @@ namespace NodeGraph {
         return variables;
     }
 
-    Debug::ParentLocation *NodeInterpreterStateBase::debugLocation()
-    {
-        return &mDebugLocation;
-    }
-
     void NodeInterpreterStateBase::start()
     {
         if (!mGraph)
@@ -162,12 +156,12 @@ namespace NodeGraph {
             mGraph->node(i + 1)->setupInterpret(*this, mData[i]);
         }
 
-        branch(*this, 0);
+        branch(*this, 0, mDebugLocation);
     }
 
     bool NodeDebugLocation::wantsPause(Debug::ContinuationType type) const
     {
-        return true;
+        return type == Debug::ContinuationType::Error;
     }
 
 }

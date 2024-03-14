@@ -395,9 +395,9 @@ namespace Widgets {
     {
     }
 
-    void WidgetBase::attachToLifetime(Behavior behavior)
+    Execution::Lifetime &WidgetBase::lifetime()
     {
-        mManager.attachToLifetime(std::move(behavior));
+        return mManager.lifetime();
     }
 
     const std::vector<Debug::ContextInfo *> &WidgetBase::behaviorContexts()

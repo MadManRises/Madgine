@@ -31,6 +31,7 @@ namespace Debug {
     {
         std::unique_lock guard { mContext->mMutex };
         assert(parent->mChild == this);
+        assert(!mChild);
         parent->mChild = nullptr;
     }
 

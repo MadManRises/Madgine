@@ -267,7 +267,7 @@ namespace Scripting {
                     main.getDict(),
                     main.getDict());
 
-                return {std::move(frame), std::move(out)};
+                return { {}, std::move(frame), std::move(out) };
             } else {
                 fetchError();
             }

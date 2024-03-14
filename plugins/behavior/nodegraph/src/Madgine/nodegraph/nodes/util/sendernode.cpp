@@ -1,6 +1,5 @@
 #include "../../../nodegraphlib.h"
 
-
 #include "Generic/execution/algorithm.h"
 
 #include "Meta/keyvalueutil/valuetypeserialize.h"
@@ -10,7 +9,6 @@
 DEFAULT_SENDER_NODE_BEGIN(ForEach, Engine::Execution::for_each, std::vector<int>, Engine::NodeGraph::NodeRouter<1, Engine::ValueType>)
 ARGUMENT(Arguments, 0)
 SENDER_NODE_END(ForEach)
-
 
 DEFAULT_SENDER_NODE_BEGIN(LetValue, Engine::Execution::let_value, Engine::NodeGraph::NodeReader<Engine::ValueType>, Engine::NodeGraph::NodeRouter<0, Engine::ValueType>)
 SENDER_NODE_END(LetValue)
@@ -53,8 +51,29 @@ SENDER_NODE_END(BreakVector4)
 CONSTANT_SENDER_NODE_BEGIN(MakeVector3, Engine::Execution::then, Engine::NodeGraph::NodeReader<float, float, float>, Engine::NodeGraph::MakeVector3)
 SENDER_NODE_END(MakeVector3)
 
-DEFAULT_SENDER_NODE_BEGIN(Connect, Engine::Execution::let_value, Engine::NodeGraph::NodeReader<Engine::KeyValueSender>, Engine::NodeGraph::NodeAlgorithm<1>)
+struct connect_helper_t {
+    auto operator()(auto &&reader, auto &&algorithm) const
+    {
+        return Engine::Execution::let_value(std::move(reader), [algorithm { std::move(algorithm) }](Engine::KeyValueSender sender) mutable {
+            return algorithm(sender) | Engine::Execution::repeat;
+        });
+    }
+};
+
+DEFAULT_SENDER_NODE_BEGIN(Connect, connect_helper_t {}, Engine::NodeGraph::NodeReader<Engine::KeyValueSender>, Engine::NodeGraph::NodeAlgorithm<1>)
 SENDER_NODE_END(Connect)
+
+struct stop_when_helper_t {
+    auto operator()(auto &&reader, auto &&sender) const
+    {
+        return Engine::Execution::let_value(std::move(reader), [sender { std::move(sender) }](Engine::KeyValueSender trigger) mutable {
+            return Engine::Execution::stop_when(std::move(sender), std::move(trigger));
+        });
+    }
+};
+
+DEFAULT_SENDER_NODE_BEGIN(StopWhen, stop_when_helper_t {}, Engine::NodeGraph::NodeReader<Engine::KeyValueSender>, Engine::NodeGraph::NodeSender<0>)
+SENDER_NODE_END(StopWhen)
 
 /*using SequenceNode = Engine::NodeGraph::SenderNode<Engine::Execution::sequence, false, Engine::type_pack<>, Engine::type_pack<>, Engine::Execution::recursive<Engine::NodeGraph::NodeSender<1>>>;
 

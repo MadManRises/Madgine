@@ -713,5 +713,10 @@ namespace Widgets {
         }
     }
 
+    Execution::Lifetime &WidgetManager::lifetime()
+    {
+        return mLifetime;
+    }
+
 }
 }

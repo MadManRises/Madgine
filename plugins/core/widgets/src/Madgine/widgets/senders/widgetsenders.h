@@ -22,5 +22,21 @@ namespace Widgets {
         });
     };
 
+    constexpr auto widget_pointer_enter_sender = []() {
+        return get_widget() | Execution::then([](WidgetBase *w) {
+            return w->pointerEnterEvent().sender() | Execution::then([](const Input::PointerEventArgs &args) {
+                return 3;
+            });
+        });
+    };
+
+    constexpr auto widget_pointer_leave_sender = []() {
+        return get_widget() | Execution::then([](WidgetBase *w) {
+            return w->pointerLeaveEvent().sender() | Execution::then([](const Input::PointerEventArgs &args) {
+                return 3;
+            });
+        });
+    };
+
 }
 }

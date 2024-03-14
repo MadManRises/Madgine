@@ -42,15 +42,17 @@ namespace Tools {
         void registerDebugLocationVisualizer()
         {
             using T = typename CallableTraits<decltype(Visualizer)>::argument_types::template select<2>;
-            mDebugLocationVisualizers.push_back([](DebuggerView *view, const Debug::ContextInfo *context, const Debug::DebugLocation *location) {
+            mDebugLocationVisualizers.push_back([](DebuggerView *view, const Debug::ContextInfo *context, const Debug::DebugLocation *location, bool isInline) {
                 T typedLocation = dynamic_cast<T>(location);
-                if (typedLocation)
-                    Visualizer(view, context, typedLocation);
-                return static_cast<bool>(typedLocation);
+                const Debug::DebugLocation *childLocation = nullptr;
+                if (typedLocation) {
+                    childLocation = Visualizer(view, context, typedLocation, isInline);
+                }
+                return std::make_pair(static_cast<bool>(typedLocation), childLocation);
             });
         }
 
-        void visualizeDebugLocation(const Debug::ContextInfo *context, const Debug::DebugLocation *location);
+        const Debug::DebugLocation *visualizeDebugLocation(const Debug::ContextInfo *context, const Debug::DebugLocation *location, bool isInline);
 
         Debug::ContinuationMode contextControls(Debug::ContextInfo &context);
 
@@ -59,7 +61,7 @@ namespace Tools {
         Debug::ContextInfo *mSelectedContext = nullptr;
         Debug::DebugLocation *mSelectedLocation = nullptr;
 
-        std::vector<bool (*)(DebuggerView*, const Debug::ContextInfo *, const Debug::DebugLocation *)> mDebugLocationVisualizers;
+        std::vector<std::pair<bool, const Debug::DebugLocation*> (*)(DebuggerView*, const Debug::ContextInfo *, const Debug::DebugLocation *, bool)> mDebugLocationVisualizers;
 
         Inspector *mInspector = nullptr;
     };

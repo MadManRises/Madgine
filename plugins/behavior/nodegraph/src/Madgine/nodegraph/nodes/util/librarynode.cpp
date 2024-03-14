@@ -25,6 +25,7 @@ namespace NodeGraph {
     
 
     struct LibraryInterpretData : NodeInterpreterData, BehaviorReceiver {
+
         LibraryInterpretData(BehaviorHandle type, const ParameterTuple &args)
             : mBehavior(type.create(args).connect(*this))
         {

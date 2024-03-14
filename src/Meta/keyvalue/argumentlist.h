@@ -13,7 +13,7 @@ struct META_EXPORT ArgumentList {
     ArgumentList(std::vector<ValueType> vals);
     ArgumentList(size_t size);
 
-    template <typename... Args>
+    template <DecayedNoneOf<ArgumentList>... Args>
     ArgumentList(Args &&...args)
         : ArgumentList(sizeof...(args))
     {

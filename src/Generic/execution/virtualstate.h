@@ -2,6 +2,8 @@
 
 #include "Generic/type_pack.h"
 
+#include "Generic/execution/concepts.h"
+
 namespace Engine {
 namespace Execution {
 
@@ -47,6 +49,11 @@ namespace Execution {
         {
             this->mRec.set_value(std::forward<V>(v)...);
         }
+
+        friend Rec& tag_invoke(Execution::get_receiver_t, VirtualStateEx& state) {
+            return state.mRec;
+        }
+
         Rec mRec;
     };
 

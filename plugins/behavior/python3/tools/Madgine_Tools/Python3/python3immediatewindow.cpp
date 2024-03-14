@@ -42,7 +42,7 @@ UNIQUECOMPONENT(Engine::Tools::Python3ImmediateWindow)
 namespace Engine {
 namespace Tools {
 
-    void visualizeDebugLocation(DebuggerView *view, const Debug::ContextInfo *context, const Scripting::Python3::Python3DebugLocation *location)
+    const Debug::DebugLocation *visualizeDebugLocation(DebuggerView *view, const Debug::ContextInfo *context, const Scripting::Python3::Python3DebugLocation *location, bool isInline)
     {
         ImGui::BeginGroupPanel(PyUnicode_AsUTF8((location->mFrame->f_code)->co_filename));
         if (ImGui::TreeNode("Code")) {
@@ -86,6 +86,8 @@ namespace Tools {
         }
 
         ImGui::EndGroupPanel();
+        
+        return nullptr;
     }
 
     Python3ImmediateWindow::Python3ImmediateWindow(ImRoot &root)

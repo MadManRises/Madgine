@@ -72,7 +72,7 @@ struct ManualLifetime {
     operator T &&() &&
     {
         assert(mAlive);
-        return mData;
+        return std::move(mData);
     }
 
     template <typename U>
@@ -103,6 +103,18 @@ struct ManualLifetime {
     {
         assert(mAlive);
         return &mData;
+    }
+
+    T &operator*()
+    {
+        assert(mAlive);
+        return mData;
+    }
+
+    const T &operator*() const
+    {
+        assert(mAlive);
+        return mData;
     }
 
     T &unsafeAccess()

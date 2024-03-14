@@ -37,7 +37,7 @@ namespace Scripting {
             Closure<void(std::string_view)> mOut;
         };
 
-        struct ExecutionSender {
+        struct ExecutionSender : Execution::base_sender {
             using result_type = BehaviorError;
             template <template <typename...> typename Tuple>
             using value_types = Tuple<ArgumentList>;

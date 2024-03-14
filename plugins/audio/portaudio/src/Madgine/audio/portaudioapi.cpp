@@ -26,15 +26,57 @@ namespace Audio {
         PlaybackState(AudioLoader::Handle buffer, PortAudioApi *api)
             : mBuffer(std::move(buffer))
             , mApi(api)
+            , mStopCallback(this)
         {
         }
 
         void start();
 
+        friend const void *tag_invoke(const Execution::get_debug_data_t &, PlaybackState &state)
+        {
+            return &state;
+        }
+
         AudioLoader::Handle mBuffer;
         PortAudioApi *mApi;
-    };
 
+        const void *mPtr;
+        const void *mEnd;
+
+        bool mLooping = true;
+
+        struct stop_cb {
+            stop_cb(PortAudioStream &stream)
+                : mStream(stream)
+            {
+            }
+
+            bool operator()();
+
+            PortAudioStream &mStream;
+        };
+
+        struct finally_cb {
+            finally_cb(PlaybackState *state)
+                : mState(state)
+            {
+            }
+
+            void operator()(Execution::cancelled_t)
+            {
+                mState->set_done();
+            }
+            void operator()()
+            {
+                mState->set_value();
+            }
+
+            PlaybackState *mState;
+        };
+
+        Execution::stop_callback<stop_cb, finally_cb> mStopCallback;
+    };
+     
     template <typename Rec>
     struct PlaybackStateImpl : VirtualBehaviorState<Rec, PlaybackState> {
         using VirtualBehaviorState<Rec, PlaybackState>::VirtualBehaviorState;
@@ -50,6 +92,32 @@ namespace Audio {
         {
             return PlaybackStateImpl<Rec> { std::forward<Rec>(rec), std::move(sender.mBuffer), sender.mApi };
         }
+
+        template <typename F>
+        friend void tag_invoke(Execution::visit_state_t, PlaybackSender &sender, F &&f)
+        {
+            f(Execution::State::BeginBlock { "Play '"s + std::string { sender.mBuffer.name() } + "'" });
+
+            f(Execution::State::Contextual {
+                [](const void *context) -> Execution::StateDescriptor {
+                    float progress = 0.0f;
+                    if (context) {
+                        const PlaybackState *state = static_cast<const PlaybackState *>(context);
+                        const std::byte *start, *end, *current;
+                        start = static_cast<const std::byte *>(state->mBuffer->mBuffer.begin());
+                        end = static_cast<const std::byte *>(state->mEnd);
+                        current = static_cast<const std::byte *>(state->mPtr);
+                        progress = static_cast<float>(current - start) / (end - start);
+                    }
+                    return Execution::State::Progress { progress };
+                } });
+
+            f(Execution::State::EndBlock {});
+        }
+
+        static constexpr size_t debug_start_increment = 1;
+        static constexpr size_t debug_operation_increment = 1;
+        static constexpr size_t debug_stop_increment = 1;
 
         AudioLoader::Handle mBuffer;
         PortAudioApi *mApi;
@@ -95,21 +163,27 @@ namespace Audio {
         void play(PlaybackState &state)
         {
             assert(!mState);
+            state.mPtr = state.mBuffer->mBuffer.begin();
+            state.mEnd = state.mBuffer->mBuffer.end();
             mState = &state;
-            mBuffer = state.mBuffer->mBuffer.begin();
-            mEnd = state.mBuffer->mBuffer.end();
             abort();
             PaError err = Pa_StartStream(mStream);
-            if (err != paNoError)
-                throw 0;
+            if (err != paNoError) {
+                state.set_error(BEHAVIOR_UNKNOWN_ERROR() << "PortAudio Error: " << err);
+                mState = nullptr;
+                state.mApi->reuseStream(*this);
+            }
         }
 
-        void abort()
+        bool abort()
         {
             if (!Pa_IsStreamStopped(mStream)) {
                 PaError err = Pa_AbortStream(mStream);
                 if (err != paNoError)
                     throw 0;
+                return true;
+            } else {
+                return false;
             }
         }
 
@@ -129,23 +203,32 @@ namespace Audio {
                 return paAbort;
 
             int16_t *target = static_cast<int16_t *>(output);
-            const int16_t *source = static_cast<const int16_t *>(mBuffer);
+            const int16_t *source = static_cast<const int16_t *>(mState->mPtr);
 
-            unsigned long count = std::min<unsigned int>(frameCount, (static_cast<const int16_t *>(mEnd) - source) / mChannels);
+            unsigned long count = std::min<unsigned int>(frameCount, (static_cast<const int16_t *>(mState->mEnd) - source) / mChannels);
 
             for (size_t i = 0; i < count; ++i) {
                 for (int i = 0; i < mChannels; ++i)
                     *target++ = *source++;
             }
 
-            mBuffer = source;
-            return mBuffer == mEnd ? paComplete : paContinue;
+            mState->mPtr = source;
+            if (mState->mPtr == mState->mEnd) {
+                if (mState->mLooping) {
+                    mState->mPtr = mState->mBuffer->mBuffer.begin();
+                    return callback(target, frameCount - count, timeInfo, statusFlags);
+                } else {
+                    return paComplete;
+                }
+            } else {
+                return paContinue;
+            }
         }
 
         void finishedCallback()
         {
             PortAudioApi *api = static_cast<PortAudioApi *>(mState->mApi);
-            mState->set_value();
+            mState->mStopCallback.finish();
             mState = nullptr;
             api->reuseStream(*this);
         }
@@ -169,8 +252,6 @@ namespace Audio {
     private:
         PaStream *mStream = nullptr;
         PlaybackState *mState = nullptr;
-        const void *mBuffer;
-        const void *mEnd;
 
         int mChannels;
         int mSampleRate;
@@ -180,6 +261,12 @@ namespace Audio {
     {
         PortAudioStream &stream = mApi->fetchStream(mBuffer->mInfo);
         stream.play(*this);
+        mStopCallback.start(stopToken(), stream);
+    }
+
+    bool PlaybackState::stop_cb::operator()()
+    {
+        return mStream.abort();
     }
 
     PortAudioApi::PortAudioApi(Root::Root &root)
@@ -279,8 +366,6 @@ namespace Audio {
         auto it = std::ranges::find(mBusyStreams, &stream, [](auto &v) { return &v; });
         mStreamPool.splice(mStreamPool.end(), mBusyStreams, it);
     }
-
-
 
 }
 }

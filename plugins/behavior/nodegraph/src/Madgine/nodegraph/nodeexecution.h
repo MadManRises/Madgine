@@ -67,18 +67,26 @@ namespace NodeGraph {
     template <typename Node>
     struct NodeReceiver : NodeExecutionReceiver<Node> {
         BehaviorReceiver &mReceiver;
+        NodeDebugLocation &mDebugLocation;
 
         void set_value()
         {
-            continueExecution(this->mInterpreter, this->mNode, mReceiver);
+            continueExecution(this->mInterpreter, this->mNode, mReceiver, mDebugLocation);
         }
         void set_done()
         {
+            mDebugLocation.stepOut(mReceiver.debugLocation());
             mReceiver.set_done();
         }
         void set_error(BehaviorError result)
         {
+            mDebugLocation.stepOut(mReceiver.debugLocation());
             mReceiver.set_error(result);
+        }
+
+        friend NodeDebugLocation *tag_invoke(Execution::get_debug_location_t, NodeReceiver &rec)
+        {
+            return &rec.mDebugLocation;
         }
 
         template <typename CPO, typename... Args>
@@ -107,12 +115,7 @@ namespace NodeGraph {
         {
             mDebugLocation.stepInto(Execution::get_debug_location(mRec));
             auto &handle = Execution::get_context(mRec);
-            handle.mInterpreter.branch(*this, handle.mNode.flowOutTarget(0, flowOutIndex));
-        }
-
-        virtual Debug::ParentLocation *debugLocation() override
-        {
-            return &mDebugLocation;
+            handle.mInterpreter.branch(*this, handle.mNode.flowOutTarget(0, flowOutIndex), mDebugLocation);
         }
 
         NodeDebugLocation mDebugLocation = &Execution::get_context(mRec).mInterpreter;
@@ -120,7 +123,7 @@ namespace NodeGraph {
 
     template <uint32_t flowOutIndex>
     struct NodeSender {
-        using result_type = void;
+        using result_type = BehaviorError;
         template <template <typename...> typename Tuple>
         using value_types = Tuple<>;
 
@@ -176,10 +179,12 @@ namespace NodeGraph {
                 if (handle.mNode.dataInCount() == mIndex) {
                     this->set_done();
                 } else {
+                    assert(mIndex == 0);
                     std::tuple<typed_Value<T>...> data;
                     TupleUnpacker::forEach(data, [&]<typename Ty>(typed_Value<Ty> &v) {
                         handle.read(v, mIndex++);
                     });
+                    mIndex = 0;
                     this->set_value(std::get<I>(data).template as<decayed_t<T>>()...);
                 }
             }
@@ -292,7 +297,7 @@ namespace NodeGraph {
         std::vector<NodeResults> &mResults;
     };
 
-    MADGINE_NODEGRAPH_EXPORT void continueExecution(NodeInterpreterStateBase &interpreter, const NodeBase &node, BehaviorReceiver &receiver);
+    MADGINE_NODEGRAPH_EXPORT void continueExecution(NodeInterpreterStateBase &interpreter, const NodeBase &node, BehaviorReceiver &receiver, NodeDebugLocation &location);
 
     template <typename T>
     struct NodeStream {

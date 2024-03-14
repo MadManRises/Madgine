@@ -75,7 +75,7 @@ namespace Widgets {
         virtual bool injectKeyPress(const Input::KeyEventArgs &arg) override;
 
         virtual void onResize(const Rect2i &space) override;
-        virtual void render(Render::RenderTarget *target, size_t iteration) override;        
+        virtual void render(Render::RenderTarget *target, size_t iteration) override;
 
         Threading::SignalStub<> &updatedSignal();
 
@@ -87,13 +87,10 @@ namespace Widgets {
         bool dragging(const WidgetBase *widget);
         void abortDrag(WidgetBase *widget);
 
+        Execution::Lifetime &lifetime();
+
         using RenderPass::addDependency;
         using RenderPass::removeDependency;
-
-        template <Execution::Sender Sender>
-        void attachToLifetime(Sender&& sender) {
-            mLifetime.attach(std::forward<Sender>(sender));
-        }
 
     protected:
         WidgetBase *getHoveredWidget(const Vector2 &pos, WidgetBase *current);
@@ -115,8 +112,6 @@ namespace Widgets {
 
         void onActivate(bool active);
 
-
-
     private:
         std::vector<WidgetBase *> mWidgets;
 
@@ -129,7 +124,7 @@ namespace Widgets {
 
         WidgetBase *mCurrentRoot = nullptr;
 
-        std::vector<WidgetBase *> mModalWidgetList;        
+        std::vector<WidgetBase *> mModalWidgetList;
 
         Threading::Signal<> mUpdatedSignal;
 
