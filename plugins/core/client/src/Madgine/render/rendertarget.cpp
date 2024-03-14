@@ -49,6 +49,9 @@ namespace Render {
         for (RenderPass *pass : mRenderPasses)
             pass->preRender(dependencies, context);
 
+        for (Threading::TaskFuture<RenderFuture> &dependency : dependencies)
+            co_await dependency;
+
         LOG_DEBUG(mName << ": Begin Frame");
 
         beginFrame();
