@@ -12,11 +12,8 @@
 namespace Engine {
 namespace Threading {
 
-    template <typename Sender, typename... V>
-    struct TaskAwaitableSenderImpl;
-
     template <typename Sender>
-    using TaskAwaitableSender = typename Sender::template value_types<type_pack>::template prepend<Sender>::template instantiate<TaskAwaitableSenderImpl>;
+    struct TaskAwaitableSender;
 
     struct TaskFinalSuspend {
         bool await_ready() noexcept { return !mHandle; }

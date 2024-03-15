@@ -100,11 +100,8 @@ struct BehaviorStateBase {
     virtual void visitStateImpl(CallableView<void(const Execution::StateDescriptor &)> visitor) { }
 };
 
-template <typename Sender, typename... V>
-struct BehaviorAwaitableSenderImpl;
-
 template <typename Sender>
-using BehaviorAwaitableSender = typename Sender::template value_types<type_pack>::template prepend<Sender>::template instantiate<BehaviorAwaitableSenderImpl>;
+struct BehaviorAwaitableSender;
 
 struct CoroutineLocation : Debug::DebugLocation {
 

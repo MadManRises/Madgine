@@ -2,17 +2,15 @@
 
 #include "Generic/execution/algorithm.h"
 #include "Generic/execution/sender.h"
+#include "Generic/execution/storage.h"
 #include "Generic/makeowning.h"
 #include "Generic/withresult.h"
 
 namespace Engine {
 namespace Threading {
 
-    template <typename Sender, typename... V>
-    struct TaskAwaitableSenderImpl;
-
     template <typename Sender>
-    using TaskAwaitableSender = typename Sender::template value_types<type_pack>::template prepend<Sender>::template instantiate<TaskAwaitableSenderImpl>;
+    struct TaskAwaitableSender;
 
     template <typename Sender>
     struct TaskAwaitableReceiver : Execution::execution_receiver<> {
@@ -37,16 +35,12 @@ namespace Threading {
         TaskAwaitableSender<Sender> *mState;
     };
 
-    template <typename Sender, typename... V>
-    struct TaskAwaitableSenderImpl;
-
     template <typename Sender>
-    struct TaskAwaitableSenderImpl<Sender> {
+    struct TaskAwaitableSender {
 
         using S = Execution::connect_result_t<Sender, TaskAwaitableReceiver<Sender>>;
-        using R = typename Sender::result_type;
 
-        TaskAwaitableSenderImpl(Sender &&sender)
+        TaskAwaitableSender(Sender &&sender)
             : mState(Execution::connect(std::forward<Sender>(sender), TaskAwaitableReceiver<Sender> { {}, this }))
         {
         }
@@ -68,96 +62,39 @@ namespace Threading {
             }
         }
 
-        std::optional<R> await_resume()
+        Execution::ResultStorage<Sender> await_resume()
         {
             return std::move(mResult);
         }
 
-        void set_value()
+        template <typename... V>
+        void set_value(V &&... v)
         {
-            mResult.reset();
+            mResult.set_value(std::forward<V>(v)...);
             if (mFlag.test_and_set())
                 mTask.resumeInQueue();
         }
 
         void set_done()
         {
+            mResult.set_done();
             if (mFlag.test_and_set())
                 mTask.resumeInQueue();
         }
 
-        void set_error(R result)
+        template <typename... R>
+        void set_error(R&&... result)
         {
-            mResult = std::forward<R>(result);
-            if (mFlag.test_and_set())
-                mTask.resumeInQueue();
-        }
-
-    private:
-        S mState;
-        std::atomic_flag mFlag = ATOMIC_FLAG_INIT;
-        TaskHandle mTask;
-        std::optional<R> mResult;
-    };
-
-    template <typename Sender, typename V>
-    struct TaskAwaitableSenderImpl<Sender, V> {
-
-        using S = Execution::connect_result_t<Sender, TaskAwaitableReceiver<Sender>>;
-        using R = typename Sender::result_type;
-
-        TaskAwaitableSenderImpl(Sender &&sender)
-            : mState(Execution::connect(std::forward<Sender>(sender), TaskAwaitableReceiver<Sender> { {}, this }))
-        {
-        }
-
-        bool await_ready()
-        {
-            mState.start();
-            return mFlag.test();
-        }
-
-        bool await_suspend(TaskHandle task)
-        {
-            mTask = std::move(task);
-            if (mFlag.test_and_set()) {
-                mTask.release();
-                return false;
-            } else {
-                return true;
-            }
-        }
-
-        WithResult<R, MakeOwning_t<V>> await_resume()
-        {
-            return std::move(mResult);
-        }
-
-        void set_value(V values)
-        {
-            mResult = { std::forward<V>(values) };
-            if (mFlag.test_and_set())
-                mTask.resumeInQueue();
-        }
-
-        void set_done()
-        {
-            if (mFlag.test_and_set())
-                mTask.resumeInQueue();
-        }
-
-        void set_error(R result)
-        {
-            mResult = std::forward<R>(result);
+            mResult.set_error(std::forward<R>(result)...);
             if (mFlag.test_and_set())
                 mTask.resumeInQueue();
         }
 
     private:
         S mState;
-        std::atomic_flag mFlag = ATOMIC_FLAG_INIT;
+        std::atomic_flag mFlag;
         TaskHandle mTask;
-        WithResult<R, MakeOwning_t<V>> mResult;
+        Execution::ResultStorage<Sender> mResult;
     };
 
 }

@@ -3,6 +3,7 @@
 #include "../makeowning.h"
 #include "../withresult.h"
 #include "concepts.h"
+#include "storage.h"
 
 namespace Engine {
 namespace Execution {
@@ -67,17 +68,18 @@ namespace Execution {
             template <typename... V>
             void set_value(V &&... v)
             {
-                mState->mResult = { std::forward<V>(v)... };
+                mState->mResult.set_value(std::forward<V>(v)...);
                 mState->mFinished = true;
             }
             void set_done()
             {
+                mState->mResult.set_done();
                 mState->mFinished = true;
             }
-            template <typename R>
-            void set_error(R &&r)
+            template <typename... R>
+            void set_error(R &&...r)
             {
-                mState->mResult = std::forward<R>(r);
+                mState->mResult.set_error(std::forward<R>(r)...);
                 mState->mFinished = true;
             }
 
@@ -96,9 +98,7 @@ namespace Execution {
 
             }
 
-            template <typename... T>
-            using helper = typename type_pack<T...>::template unpack_unique<void>;
-            WithResult<typename Sender::result_type, MakeOwning_t<typename Sender::template value_types<helper>>> mResult;
+            ResultStorage<Sender> mResult;
             bool mFinished;
             connect_result_t<Sender, receiver<Sender>> mState;
         };
@@ -126,17 +126,18 @@ namespace Execution {
             template <typename... V>
             void set_value(V &&...v)
             {
-                mState->mResult = { std::forward<V>(v)... };
+                mState->mResult.set_value(std::forward<V>(v)...);
                 mState->mFinished.test_and_set();
             }
             void set_done()
             {
+                mState->mResult.set_done();
                 mState->mFinished.test_and_set();
             }
-            template <typename R>
-            void set_error(R &&r)
+            template <typename... R>
+            void set_error(R&&...r)
             {
-                mState->mResult = std::forward<R>(r);
+                mState->mResult.set_error(std::forward<R>(r)...);
                 mState->mFinished.test_and_set();
             }
 
@@ -154,9 +155,7 @@ namespace Execution {
                 mState.start();
             }
 
-            template <typename... T>
-            using helper = typename type_pack<T...>::template unpack_unique<void>;
-            WithResult<typename Sender::result_type, MakeOwning_t<typename Sender::template value_types<helper>>> mResult;
+            ResultStorage<Sender> mResult;
             std::atomic_flag mFinished;
             connect_result_t<Sender, receiver<Sender>> mState;
         };

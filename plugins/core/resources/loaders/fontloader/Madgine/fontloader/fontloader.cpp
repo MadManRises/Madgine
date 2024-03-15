@@ -120,8 +120,7 @@ namespace Render {
 
         if (info.resource()->path().extension() == ".msdf") {
 
-            ByteBuffer fileBuffer;
-            GenericResult readResult = (co_await info.resource()->readAsync()).get(fileBuffer);
+            ByteBuffer fileBuffer = (co_await info.resource()->readAsync()).value();
 
 
             Memory::MemoryManager cache("msdf_cache");

@@ -5,6 +5,7 @@
 #include "../pipable.h"
 #include "../type_pack.h"
 #include "concepts.h"
+#include "storage.h"
 
 #undef ERROR
 
@@ -1479,14 +1480,14 @@ namespace Execution {
             void set_value(V &&...values)
             {
                 if (mStopSource.request_stop()) {
-                    mResult.emplace<Value>(/* std::forward<V>(values)...*/);
+                    mResult.set_value(/* std::forward<V>(values)...*/);
                 }
                 signal();
             }
             void set_done()
             {
                 if (mStopSource.request_stop()) {
-                    mResult.emplace<Done>();
+                    mResult.set_done();
                 }
                 signal();
             }
@@ -1494,7 +1495,7 @@ namespace Execution {
             void set_error(R &&...results)
             {
                 if (mStopSource.request_stop()) {
-                    mResult.emplace<Error>(std::forward<R>(results)...);
+                    mResult.set_error(std::forward<R>(results)...);
                 }
                 signal();
             }
@@ -1508,25 +1509,15 @@ namespace Execution {
             void signal()
             {
                 if (mFinished.test_and_set()) {
-                    std::visit(overloaded {
-                                   [this](Value &&v) {
-                                       //TupleUnpacker::invoke(LIFT(mRec.set_value, this), std::move(v));
-                                       mRec.set_value();
-                                   },
-                                   [this](Done &&d) { 
-
-                                       mRec.set_value(); 
-                                   },
-                                   [this](Error &&e) { mRec.set_error(std::move(e)); } },
-                        std::move(mResult));
+                    if (mResult.is_null()) {
+                        mRec.set_value();
+                    } else {
+                        mResult.reproduce(mRec);
+                    }
                 }
             }
 
-            using Value = typename Inner::value_types<std::tuple>;
-            struct Done {
-            };
-            using Error = typename Inner::result_type;
-            std::variant<Done, Value, Error> mResult;
+            ResultStorage<Inner> mResult;
             Rec mRec;
             inner_state mInnerState;
             stop_state mStopState;

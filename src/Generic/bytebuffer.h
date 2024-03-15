@@ -35,7 +35,10 @@ struct ByteBufferImpl {
     ByteBufferImpl() = default;
 
     template <typename T>
-    requires(!Pointer<std::remove_reference_t<T>>)
+    requires(requires(T &t) {
+        ByteBufferSizeAccessor {}(t);
+        ByteBufferDataAccessor {}(t);
+    })
         ByteBufferImpl(T &&t)
         : mKeep(std::forward<T>(t))
         , mSize(ByteBufferSizeAccessor {}(mKeep.as<T>()))
@@ -44,7 +47,9 @@ struct ByteBufferImpl {
     }
 
     template <typename T>
-    requires(!Pointer<std::remove_reference_t<T>>)
+    requires(requires(T &t) {        
+        ByteBufferDataAccessor {}(t);
+    })
         ByteBufferImpl(T &&t, size_t size)
         : mKeep(std::forward<T>(t))
         , mSize(size)

@@ -42,8 +42,7 @@ namespace Render {
     {
         Assimp::Importer importer;
 
-        ByteBuffer buffer;
-        GenericResult result = (co_await info.resource()->readAsync()).get(buffer);
+        ByteBuffer buffer = (co_await info.resource()->readAsync()).value();
 
         const aiScene *scene = importer.ReadFileFromMemory(buffer.mData, buffer.mSize, aiProcess_MakeLeftHanded | aiProcess_Triangulate | aiProcess_LimitBoneWeights | aiProcess_OptimizeGraph);
 

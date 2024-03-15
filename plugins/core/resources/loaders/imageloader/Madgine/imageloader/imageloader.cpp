@@ -27,8 +27,7 @@ namespace Resources {
 
     Threading::Task<bool> ImageLoader::loadImpl(ImageData &data, ResourceDataInfo &info)
     {
-        ByteBuffer buffer;
-        GenericResult result = (co_await info.resource()->readAsync()).get(buffer);
+        ByteBuffer buffer = (co_await info.resource()->readAsync()).value();
 
         data.mChannels = 4;
 

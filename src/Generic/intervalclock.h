@@ -229,7 +229,7 @@ struct IntervalClock {
 
     auto wait(std::chrono::steady_clock::duration duration)
     {
-        return sender<Execution::just_t::sender<IntervalClock *>> { {}, Execution::just(this), duration };
+        return sender<Execution::just_t::sender<IntervalClock *>> { { {}, Execution::just(this) }, duration };
     }
 
     template <typename Sender>

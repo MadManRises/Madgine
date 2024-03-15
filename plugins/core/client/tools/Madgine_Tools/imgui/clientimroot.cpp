@@ -264,7 +264,7 @@ namespace Tools {
         config.FontDataOwnedByAtlas = false;
 
         Filesystem::Path iconsPath = Resources::ResourceManager::getSingleton().findResourceFile("icons.ttf");
-        ByteBuffer iconsData = co_await Filesystem::readFileAsync(iconsPath);
+        ByteBuffer iconsData = (co_await Filesystem::readFileAsync(iconsPath)).value();
 
         io.Fonts->AddFontFromMemoryTTF(const_cast<void *>(iconsData.mData), iconsData.mSize, 13.0f * Window::platformCapabilities.mScalingFactor, &config, icons_ranges);
 
