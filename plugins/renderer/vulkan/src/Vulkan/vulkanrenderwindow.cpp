@@ -166,14 +166,14 @@ namespace Render {
         return {};
     }
 
-    void VulkanRenderWindow::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
+    void VulkanRenderWindow::beginIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
-        VulkanRenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);
+        VulkanRenderTarget::beginIteration(targetIndex, targetCount, targetSubresourceIndex);
     }
 
-    void VulkanRenderWindow::endIteration() const
+    void VulkanRenderWindow::endIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
-        VulkanRenderTarget::endIteration();
+        VulkanRenderTarget::endIteration(targetIndex, targetCount, targetSubresourceIndex);
     }
 
     Vector2i VulkanRenderWindow::size() const

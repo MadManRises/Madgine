@@ -81,7 +81,6 @@ namespace Render {
 
         mCommandList.Transition(mDepthTexture, mDepthTexture.readStateFlags(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
-                
         mCommandList.attachResource(mDepthTexture.operator ReleasePtr<ID3D12Resource>());
 
         for (RenderPass *pass : renderPasses()) {
@@ -94,7 +93,6 @@ namespace Render {
                 context()->mGraphicsQueue.wait(data->lastFrame());
             }
         }
-
 
         context()->setupRootSignature(mCommandList);
 
@@ -129,8 +127,6 @@ namespace Render {
             }
             clearDepthBuffer();
         }
-
-
     }
 
     RenderFuture DirectX12RenderTarget::endFrame()
@@ -141,32 +137,30 @@ namespace Render {
         return RenderTarget::endFrame();
     }
 
-    void DirectX12RenderTarget::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
+    void DirectX12RenderTarget::beginIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
-        RenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);
+        RenderTarget::beginIteration(targetIndex, targetCount, targetSubresourceIndex);
 
         D3D12_CPU_DESCRIPTOR_HANDLE targetViews[8] = { 0 };
         int bufferCount = canFlipFlop() ? 2 : 1;
         size_t size = mTargetViews.size() / bufferCount;
         size_t count = std::min(size, targetCount);
         for (size_t index = 0; index < count; ++index) {
-            int offset = flipFlopping ^ mFlipFlopIndices[index + targetIndex];
+            int offset = mFlipFlopIndices[index + targetIndex];
             targetViews[index] = DirectX12RenderContext::getSingleton().mRenderTargetDescriptorHeap.cpuHandle(mTargetViews[size * offset + index + targetIndex][targetSubresourceIndex]);
-            if (flipFlopping) {
+            if (canFlipFlop())
                 mCommandList->ClearRenderTargetView(targetViews[index], sClearColor, 0, nullptr);
-            }
         }
         D3D12_CPU_DESCRIPTOR_HANDLE depthStencilView = DirectX12RenderContext::getSingleton().mDepthStencilDescriptorHeap.cpuHandle(mDepthStencilViews[targetSubresourceIndex]);
         mCommandList->OMSetRenderTargets(count, targetViews, false, &depthStencilView);
 
-        if (flipFlopping) {
+        if (canFlipFlop())
             mCommandList->ClearDepthStencilView(depthStencilView, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-        }
     }
 
-    void DirectX12RenderTarget::endIteration() const
+    void DirectX12RenderTarget::endIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
-        RenderTarget::endIteration();
+        RenderTarget::endIteration(targetIndex, targetCount, targetSubresourceIndex);
     }
 
     void DirectX12RenderTarget::setRenderSpace(const Rect2i &space)

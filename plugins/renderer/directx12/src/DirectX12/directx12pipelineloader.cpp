@@ -44,6 +44,7 @@ namespace Render {
 #endif
 
         if (!co_await pipeline.create(buffer, {}, [vs { std::string { config.vs } }, ps { std::string { config.ps } }](DirectX12PipelineLoader *loader, DirectX12Pipeline &pipeline, ResourceDataInfo &info) -> Threading::Task<bool> {
+                pipeline.setName(info.resource()->name());
                 DirectX12VertexShaderLoader::Handle vertexShader;
                 if (!co_await vertexShader.load(vs)) {
                     LOG_ERROR("Failed to load VS '" << vs << "'!");

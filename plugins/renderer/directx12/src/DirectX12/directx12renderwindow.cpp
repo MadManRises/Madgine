@@ -116,15 +116,14 @@ namespace Render {
         return context()->graphicsQueue()->signalFence();
     }
 
-    void DirectX12RenderWindow::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
+    void DirectX12RenderWindow::beginIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
-        DirectX12RenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);
+        DirectX12RenderTarget::beginIteration(targetIndex, targetCount, targetSubresourceIndex);
     }
 
-    void DirectX12RenderWindow::endIteration() const
+    void DirectX12RenderWindow::endIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
-
-        DirectX12RenderTarget::endIteration();
+        DirectX12RenderTarget::endIteration(targetIndex, targetCount, targetSubresourceIndex);
     }
 
     Vector2i DirectX12RenderWindow::size() const

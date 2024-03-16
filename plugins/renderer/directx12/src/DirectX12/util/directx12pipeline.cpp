@@ -157,6 +157,8 @@ namespace Render {
 
             HRESULT hr = GetDevice()->CreateGraphicsPipelineState(&pipelineDesc, IID_PPV_ARGS(&pipeline));
             DX12_CHECK(hr);
+
+            pipeline->SetName(StringUtil::toWString(mName).c_str());
         }
 
         return pipeline;
@@ -167,6 +169,11 @@ namespace Render {
         mPipelines.clear();
         mVertexShader = {};
         mPixelShader = {};
+    }
+
+    void DirectX12Pipeline::setName(std::string_view name)
+    {
+        mName = name;
     }
 
 }

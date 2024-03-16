@@ -59,17 +59,14 @@ namespace Render {
         for (RenderPass *pass : mRenderPasses) {
             pushAnnotation(pass->name().data());
             for (size_t iteration = 0; iteration < pass->iterations(); ++iteration) {
-                bool flipFlopping = pass->swapFlipFlopTextures(iteration);
-                assert(mFlipFlop || !flipFlopping);
                 size_t index = pass->targetIndex(iteration);
                 size_t count = pass->targetCount(iteration);
                 size_t subIndex = pass->targetSubresourceIndex(iteration);
-                beginIteration(flipFlopping, index, count, subIndex);
+                beginIteration(index, count, subIndex);
                 pass->render(this, iteration);
-                endIteration();
-                if (flipFlopping) {
-                    for (size_t i = 0; i < count; ++i)
-                        mFlipFlopIndices[index + i] = mFlipFlopIndices[index + i] ^ 1;
+                endIteration(index, count, subIndex);
+                if (pass->swapFlipFlopTextures(iteration)) {
+                    flipTextures(index, count);
                 }
             }
             popAnnotation();
@@ -123,11 +120,11 @@ namespace Render {
         return {};
     }
 
-    void RenderTarget::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
+    void RenderTarget::beginIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
     }
 
-    void RenderTarget::endIteration() const
+    void RenderTarget::endIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
     }
 
@@ -181,6 +178,13 @@ namespace Render {
     const RenderTarget *RenderTarget::blitSource() const
     {
         return mBlitSource;
+    }
+
+    void RenderTarget::flipTextures(size_t startIndex, size_t count)
+    {
+        assert(canFlipFlop());
+        for (size_t i = 0; i < count; ++i)
+            mFlipFlopIndices[startIndex + i] = mFlipFlopIndices[startIndex + i] ^ 1;
     }
 
 }

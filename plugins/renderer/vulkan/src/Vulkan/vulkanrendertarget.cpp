@@ -165,14 +165,14 @@ namespace Render {
             0, 0, 0, 1 };
     }
 
-    void VulkanRenderTarget::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
+    void VulkanRenderTarget::beginIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
-        RenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);
+        RenderTarget::beginIteration(targetIndex, targetCount, targetSubresourceIndex);
     }
 
-    void VulkanRenderTarget::endIteration() const
+    void VulkanRenderTarget::endIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
-        RenderTarget::endIteration();
+        RenderTarget::endIteration(targetIndex, targetCount, targetSubresourceIndex);
     }
 
     void VulkanRenderTarget::setRenderSpace(const Rect2i &space)

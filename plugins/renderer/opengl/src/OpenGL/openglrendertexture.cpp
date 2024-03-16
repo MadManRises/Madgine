@@ -163,18 +163,11 @@ namespace Render {
         return true;
     }
 
-    void OpenGLRenderTexture::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
+    void OpenGLRenderTexture::beginIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
-        BitArray<4> offsets = mFlipFlopIndices;
-        if (flipFlopping) {
-            for (size_t i = 0; i < targetCount; ++i) {
-                offsets[targetIndex + i] = offsets[targetIndex + i] ^ 1;
-            }
-        }
-
-        auto it = mFramebuffers.find(offsets);
+        auto it = mFramebuffers.find(mFlipFlopIndices);
         if (it == mFramebuffers.end()) {
-            it = mFramebuffers.try_emplace(offsets).first;
+            it = mFramebuffers.try_emplace(mFlipFlopIndices).first;
             glGenFramebuffers(mFramebufferCount, it->second.data());
             GL_CHECK();
 
@@ -184,7 +177,7 @@ namespace Render {
                 GL_CHECK();
 
                 for (size_t i = 0; i < textureCount(); ++i) {
-                    const OpenGLTexture &tex = mTextures[offsets[i] * textureCount() + i];
+                    const OpenGLTexture &tex = mTextures[mFlipFlopIndices[i] * textureCount() + i];
                     attachFramebufferTexture(GL_COLOR_ATTACHMENT0 + i, tex, i);
                 }
 
@@ -220,12 +213,12 @@ namespace Render {
         glBindFramebuffer(GL_FRAMEBUFFER, it->second[targetSubresourceIndex]);
         GL_CHECK();
 
-        OpenGLRenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);
+        OpenGLRenderTarget::beginIteration(targetIndex, targetCount, targetSubresourceIndex);
     }
 
-    void OpenGLRenderTexture::endIteration() const
+    void OpenGLRenderTexture::endIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
-        OpenGLRenderTarget::endIteration();
+        OpenGLRenderTarget::endIteration(targetIndex, targetCount, targetSubresourceIndex);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         GL_CHECK();
@@ -267,7 +260,7 @@ namespace Render {
 
     const OpenGLTexture *OpenGLRenderTexture::depthTexture() const
     {
-        return &mDepthTexture;        
+        return &mDepthTexture;
     }
 
     void OpenGLRenderTexture::blit(RenderTarget *input) const
@@ -371,6 +364,13 @@ namespace Render {
         }
 #endif
         return count;
+    }
+
+    void OpenGLRenderTexture::flipTextures(size_t startIndex, size_t count)
+    {
+        for (size_t i = 0; i < count; ++i) {
+            mFlipFlopIndices[startIndex + i] = mFlipFlopIndices[startIndex + i] ^ 1;
+        }
     }
 
     Vector2i OpenGLRenderTexture::size() const

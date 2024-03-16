@@ -87,16 +87,15 @@ namespace Render {
 #endif
     }
 
-    void OpenGLRenderWindow::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
-    {
-        
-        OpenGLRenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);        
+    void OpenGLRenderWindow::beginIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
+    {        
+        OpenGLRenderTarget::beginIteration(targetIndex, targetCount, targetSubresourceIndex);        
 
     }
 
-    void OpenGLRenderWindow::endIteration() const
+    void OpenGLRenderWindow::endIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
-        OpenGLRenderTarget::endIteration();        
+        OpenGLRenderTarget::endIteration(targetIndex, targetCount, targetSubresourceIndex);        
     }
 
     bool OpenGLRenderWindow::skipFrame()

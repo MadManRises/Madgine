@@ -6,7 +6,7 @@ cbuffer Data : register(b0)
 }
 
 Texture2D input : register(t0, space2);
-Texture2D blurred : register(t1, space2);
+Texture2D blurred : register(t0, space3);
 
 SamplerState texSampler : register(s0);
 

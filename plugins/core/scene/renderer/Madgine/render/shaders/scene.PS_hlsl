@@ -133,9 +133,8 @@ PixelShaderOutput main(PixelShaderInput IN)
 		float brightness = dot(OUT.fragColor.rgb, float3(0.2126, 0.7152, 0.0722));
 		if(brightness > 1.0)
 			OUT.brightColor.rgb += OUT.fragColor.rgb;
-	}else{
-		OUT.fragColor.rgb += emissive;
 	}
+	OUT.fragColor.rgb += emissive;
 	
     return OUT;
 }

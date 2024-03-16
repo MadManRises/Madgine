@@ -14,8 +14,8 @@ namespace Render {
         bool resizeImpl(const Vector2i &size) override;
         Vector2i size() const override;
 
-        virtual void beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const override;
-        virtual void endIteration() const override;
+        virtual void beginIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const override;
+        virtual void endIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const override;
 
         virtual void beginFrame() override;
         virtual RenderFuture endFrame() override;
@@ -30,6 +30,8 @@ namespace Render {
 
     protected:
         size_t getFramebufferCount(bool *emulateCube = nullptr) const;
+
+        void flipTextures(size_t startIndex, size_t count) override;
 
     private:
         mutable std::map<BitArray<4>, std::array<GLuint, 6>> mFramebuffers;

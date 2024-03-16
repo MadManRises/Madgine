@@ -34,8 +34,8 @@ namespace Render {
         const std::vector<RenderPass *> &renderPasses();
         std::vector<const RenderPass *> renderPasses() const;
 
-        virtual void beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const;
-        virtual void endIteration() const;
+        virtual void beginIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const;
+        virtual void endIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const;
 
         virtual bool skipFrame();
 
@@ -58,6 +58,8 @@ namespace Render {
 
     protected:
         virtual Threading::ImmediateTask<RenderFuture> render(RenderContext *context) override;
+
+        virtual void flipTextures(size_t startIndex, size_t count);
 
         RenderTarget *mBlitSource;
 

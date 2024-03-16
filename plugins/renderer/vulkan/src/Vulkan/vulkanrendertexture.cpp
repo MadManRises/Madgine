@@ -67,15 +67,15 @@ namespace Render {
         return true;
     }
 
-    void VulkanRenderTexture::beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
+    void VulkanRenderTexture::beginIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
 
-        VulkanRenderTarget::beginIteration(flipFlopping, targetIndex, targetCount, targetSubresourceIndex);
+        VulkanRenderTarget::beginIteration(targetIndex, targetCount, targetSubresourceIndex);
     }
 
-    void VulkanRenderTexture::endIteration() const
+    void VulkanRenderTexture::endIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const
     {
-        VulkanRenderTarget::endIteration();
+        VulkanRenderTarget::endIteration(targetIndex, targetCount, targetSubresourceIndex);
     }
 
     const Texture *VulkanRenderTexture::texture(size_t index) const

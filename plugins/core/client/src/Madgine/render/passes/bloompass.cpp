@@ -11,6 +11,8 @@
 
 #include "Meta/keyvalue/metatable_impl.h"
 
+#include "Madgine/render/texture.h"
+
 METATABLE_BEGIN(Engine::Render::BloomPass)
 MEMBER(mExposure)
 METATABLE_END(Engine::Render::BloomPass)
@@ -45,7 +47,8 @@ namespace Render {
         if (!mPipeline.available())
             return;
 
-        mPipeline->bindResources(target, 2, { /* mInput->texture(mInputIndex), target->texture(1)*/ });
+        mPipeline->bindResources(target, 2, mInput->texture(mInputIndex)->resource());
+        mPipeline->bindResources(target, 3, target->texture(1)->resource());
 
         mPipeline->mapParameters<BloomData>(0)->exposure = mExposure;
 

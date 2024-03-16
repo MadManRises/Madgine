@@ -10,8 +10,8 @@ namespace Render {
         OpenGLRenderTarget(OpenGLRenderContext *context, bool global, std::string name, bool flipFlop = false, RenderTarget *blitSource = nullptr);
         ~OpenGLRenderTarget();
 
-        virtual void beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const override;
-        virtual void endIteration() const override;
+        virtual void beginIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const override;
+        virtual void endIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const override;
 
         virtual void beginFrame() override;
         virtual RenderFuture endFrame() override;

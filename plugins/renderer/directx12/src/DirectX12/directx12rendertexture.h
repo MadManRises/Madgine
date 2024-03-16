@@ -18,8 +18,8 @@ namespace Render {
         virtual void beginFrame() override;
         virtual RenderFuture endFrame() override;
 
-        virtual void beginIteration(bool flipFlopping, size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const override;
-        virtual void endIteration() const override;
+        virtual void beginIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const override;
+        virtual void endIteration(size_t targetIndex, size_t targetCount, size_t targetSubresourceIndex) const override;
 
         virtual const DirectX12Texture *texture(size_t index) const override;
         virtual size_t textureCount() const override;
@@ -31,6 +31,8 @@ namespace Render {
 
     protected:
         void resizeBuffers(const Vector2i &size);
+
+        void flipTextures(size_t startIndex, size_t count) override;
 
     private:
         std::vector<DirectX12Texture> mTextures;

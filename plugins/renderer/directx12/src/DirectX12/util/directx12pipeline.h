@@ -56,11 +56,15 @@ namespace Render {
 
         void reset();
 
+        void setName(std::string_view name);
+
     private:
         mutable std::unordered_map<PipelineDescriptor, ReleasePtr<ID3D12PipelineState>> mPipelines;
 
         std::variant<typename DirectX12VertexShaderLoader::Handle, typename DirectX12VertexShaderLoader::Ptr> mVertexShader;
         std::variant<typename DirectX12PixelShaderLoader::Handle, typename DirectX12PixelShaderLoader::Ptr> mPixelShader;
+
+        std::string mName;
     };
 
 }

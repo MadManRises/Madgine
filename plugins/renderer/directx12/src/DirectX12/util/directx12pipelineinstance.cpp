@@ -62,7 +62,7 @@ namespace Render {
 
     WritableByteBuffer DirectX12PipelineInstance::mapParameters(size_t index)
     {
-        Block block = DirectX12RenderContext::getSingleton().mTempAllocator.allocate(mConstantBufferSizes[index]);
+        Block block = DirectX12RenderContext::getSingleton().mTempAllocator.allocate(mConstantBufferSizes[index], 256);
         auto [res, offset] = DirectX12RenderContext::getSingleton().mTempMemoryHeap.resolve(block.mAddress);
         mConstantGPUAddresses[index] = res->GetGPUVirtualAddress() + offset;
 
