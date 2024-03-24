@@ -18,6 +18,8 @@
 #include "../render/rendercontext.h"
 #include "../render/rendertarget.h"
 
+#include "Modules/debug/profiler/profile.h"
+
 #include "Modules/threading/awaitables/awaitabletimepoint.h"
 
 #include "Madgine/resources/resourcemanager.h"
@@ -210,7 +212,10 @@ namespace Window {
         std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
         while (mTaskQueue.running()) {            
             co_await mRenderContext->render();
-            mOsWindow->update();
+            {
+                PROFILE_NAMED("Window Update");
+                mOsWindow->update();
+            }
             for (ToolWindow &window : mToolWindows)
                 window.osWindow()->update();
             now += (1000000us / 1200);

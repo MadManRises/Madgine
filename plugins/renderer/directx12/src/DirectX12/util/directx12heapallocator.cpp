@@ -115,7 +115,7 @@ namespace Render {
             &heapDesc,
             D3D12_HEAP_FLAG_NONE,
             &resourceDesc,
-            D3D12_RESOURCE_STATE_GENERIC_READ,
+            D3D12_RESOURCE_STATE_COMMON,
             nullptr,
             IID_PPV_ARGS(&page.mResource));
         DX12_CHECK(hr);

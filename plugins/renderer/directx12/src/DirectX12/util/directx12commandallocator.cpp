@@ -3,15 +3,28 @@
 #include "../directx12rendercontext.h"
 #include "directx12commandallocator.h"
 
+#include "Modules/debug/profiler/profile.h"
+#include "Modules/debug/profiler/profiler.h"
+
 namespace Engine {
 namespace Render {
 
-    DirectX12CommandAllocator::DirectX12CommandAllocator(D3D12_COMMAND_LIST_TYPE type, std::string_view name, DirectX12DescriptorHeap *descriptorHeap)
+    DirectX12CommandAllocator::DirectX12CommandAllocator(D3D12_COMMAND_LIST_TYPE type, std::string_view name, DirectX12DescriptorHeap *descriptorHeap, DirectX12QueryHeap *timestampHeap)
         : mType(type)
         , mName(name)
         , mDescriptorHeap(descriptorHeap)
+        , mTimestampHeap(timestampHeap)
+#if ENABLE_PROFILER
+        , mProfiler(mName.c_str())
+        , mStats("Execution")
+#endif
     {
+        Debug::Profiler::Profiler::getCurrent().registerThread(&mProfiler);
+    }
 
+    DirectX12CommandAllocator::~DirectX12CommandAllocator()
+    {
+        Debug::Profiler::Profiler::getCurrent().unregisterThread(&mProfiler);
     }
 
     void DirectX12CommandAllocator::setup()
@@ -21,6 +34,9 @@ namespace Render {
         queueDesc.Type = mType;
 
         HRESULT hr = GetDevice()->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&mCommandQueue));
+        DX12_CHECK(hr);
+
+        hr = mCommandQueue->GetTimestampFrequency(&mTimestampFrequency);
         DX12_CHECK(hr);
 
         mLastCompletedFenceValue = 5;
@@ -66,14 +82,44 @@ namespace Render {
 
         if (mType == D3D12_COMMAND_LIST_TYPE_DIRECT) {
             ID3D12DescriptorHeap *heap = mDescriptorHeap->resource();
-            list->SetDescriptorHeaps(1, &heap);            
+            list->SetDescriptorHeaps(1, &heap);
         }
+
+#if ENABLE_PROFILER
+        size_t index = mTimestampHeap->allocate(2);
+        list->EndQuery(mTimestampHeap->resource(), D3D12_QUERY_TYPE_TIMESTAMP, index);
+        mPendingStats.mIndex = index;
+#endif
 
         return { this, std::move(list), std::move(alloc) };
     }
 
     RenderFuture DirectX12CommandAllocator::ExecuteCommandList(ReleasePtr<ID3D12GraphicsCommandList> list, ReleasePtr<ID3D12CommandAllocator> allocator, std::vector<Any> discardResources)
     {
+#if ENABLE_PROFILER
+        list->EndQuery(mTimestampHeap->resource(), D3D12_QUERY_TYPE_TIMESTAMP, mPendingStats.mIndex + 1);
+        struct ProfileHelper {
+            ProfileHelper(std::pair<uint64_t, uint64_t> *data, DirectX12CommandAllocator *allocator)
+                : mData(data)
+                , mAllocator(allocator)
+            {
+            }
+            ~ProfileHelper()
+            {
+                uint64_t diff = mData->second - mData->first;
+                std::chrono::nanoseconds time { static_cast<uint64_t>((diff / float(mAllocator->mTimestampFrequency)) * 1000000000.0f) };
+                mAllocator->mProfiler.mStats.updateChild(&mAllocator->mStats, mAllocator->mStats.inject(time));
+            }
+            std::pair<uint64_t, uint64_t> *mData;
+            DirectX12CommandAllocator *mAllocator;
+        };
+        void *address = DirectX12RenderContext::getSingleton().mReadbackAllocator.allocate(sizeof(std::pair<uint64_t, uint64_t>)).mAddress;
+        auto [res, offset] = DirectX12RenderContext::getSingleton().mReadbackMemoryHeap.resolve(address);
+        list->ResolveQueryData(mTimestampHeap->resource(), D3D12_QUERY_TYPE_TIMESTAMP, mPendingStats.mIndex, 2, res, offset);
+
+        discardResources.emplace_back(Any::inplace<ProfileHelper>, static_cast<std::pair<uint64_t, uint64_t> *>(address), this);
+#endif
+
         HRESULT hr = list->Close();
         DX12_CHECK(hr);
 
@@ -113,6 +159,16 @@ namespace Render {
     {
         if (fut) {
             mCommandQueue->Wait(mFence, fut.value());
+        }
+    }
+
+    void DirectX12CommandAllocator::waitForIdle()
+    {
+        while (!isComplete(currentFence()))
+            ;
+
+        for (auto& [_1, _2, deleter] : mAllocatorPool) {
+            deleter.clear();
         }
     }
 

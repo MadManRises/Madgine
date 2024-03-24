@@ -33,5 +33,13 @@ namespace Render {
         uint64_t mValue;
     };
 
+    template <typename T>
+    struct DataFuture {
+
+
+        RenderFuture mFuture;
+        uintptr_t mOffset;
+    };
+
 }
 }

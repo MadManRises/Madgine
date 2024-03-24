@@ -19,6 +19,7 @@ namespace Render {
     struct DirectX12ConstantBufferHeap;
 
     struct DirectX12DescriptorHeap;
+    struct DirectX12QueryHeap;
 
     struct DirectX12CommandAllocator;
 

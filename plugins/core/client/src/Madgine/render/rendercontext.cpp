@@ -10,6 +10,8 @@
 
 #include "Madgine/fontloader/fontloader.h"
 
+#include "Modules/debug/profiler/profile.h"
+
 namespace Engine {
 namespace Render {
 
@@ -55,6 +57,7 @@ namespace Render {
     Threading::Task<void> RenderContext::render()
     {
         if (beginFrame()) {
+            PROFILE();
             std::vector<Threading::TaskFuture<RenderFuture>> targets;
             for (RenderTarget *target : safeIterate(mRenderTargets))
                 targets.push_back(target->update(this));

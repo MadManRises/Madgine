@@ -10,3 +10,5 @@
 
 NATIVE_BEHAVIOR(Yield_Simulation, Engine::Scene::yield_simulation)
 NATIVE_BEHAVIOR(Wait_Simulation, Engine::Scene::wait_simulation, Engine::InputParameter<std::chrono::steady_clock::duration>)
+
+NATIVE_BEHAVIOR(Rotate, Engine::Scene::rotate, Engine::InputParameter<Engine::Vector3>, Engine::InputParameter<float>)

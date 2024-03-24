@@ -83,13 +83,14 @@ namespace Render {
 
     DirectX12RenderContext::DirectX12RenderContext(Threading::TaskQueue *queue)
         : Component(queue)
-        , mGraphicsQueue(D3D12_COMMAND_LIST_TYPE_DIRECT, "Graphics", &mDescriptorHeap)
-        , mCopyQueue(D3D12_COMMAND_LIST_TYPE_COPY, "Copy", &mDescriptorHeap)
-        , mComputeQueue(D3D12_COMMAND_LIST_TYPE_COMPUTE, "Compute", &mDescriptorHeap)
+        , mGraphicsQueue(D3D12_COMMAND_LIST_TYPE_DIRECT, "Graphics", &mDescriptorHeap, &mTimestampQueryHeap)
+        , mCopyQueue(D3D12_COMMAND_LIST_TYPE_COPY, "Copy", &mDescriptorHeap, &mTimestampQueryHeap)
+        , mComputeQueue(D3D12_COMMAND_LIST_TYPE_COMPUTE, "Compute", &mDescriptorHeap, &mTimestampQueryHeap)
         , mUploadAllocator(mUploadHeap)
         , mBufferMemoryHeap(mDescriptorHeap)
         , mBufferAllocator(mBufferMemoryHeap)
         , mTempAllocator(mTempMemoryHeap)
+        , mReadbackAllocator(mReadbackMemoryHeap)
         , mConstantMemoryHeap(mDescriptorHeap)
         , mConstantAllocator(mConstantMemoryHeap)
 
@@ -107,7 +108,7 @@ namespace Render {
                 debugController->EnableDebugLayer();
                 ReleasePtr<ID3D12Debug1> debugController1;
                 if (SUCCEEDED(debugController->QueryInterface(IID_PPV_ARGS(&debugController1)))) {
-                    debugController1->SetEnableGPUBasedValidation(true);
+                    //debugController1->SetEnableGPUBasedValidation(true);
                     DX12_LOG("Enabled Debug Layer");
                 }
             }
@@ -142,6 +143,8 @@ namespace Render {
         mDescriptorHeap = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
         mRenderTargetDescriptorHeap = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
         mDepthStencilDescriptorHeap = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+
+        mTimestampQueryHeap = D3D12_QUERY_HEAP_TYPE_TIMESTAMP;
 
         mBufferMemoryHeap.setup(256);
         mConstantMemoryHeap.setup(256);
@@ -309,6 +312,10 @@ namespace Render {
         for (std::pair<const std::string, DirectX12MeshLoader::Resource> &res : DirectX12MeshLoader::getSingleton()) {
             co_await res.second.forceUnload();
         }
+
+        mGraphicsQueue.waitForIdle();
+        mComputeQueue.waitForIdle();
+        mCopyQueue.waitForIdle();
     }
 
     bool DirectX12RenderContext::supportsMultisampling() const

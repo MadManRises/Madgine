@@ -14,6 +14,8 @@
 
 #include "util/directx12commandallocator.h"
 
+#include "util/directx12queryheap.h"
+
 #include "Generic/allocator/bucket.h"
 #include "Generic/allocator/heap.h"
 #include "Generic/allocator/fixed.h"
@@ -63,6 +65,8 @@ namespace Render {
         ReleasePtr<ID3D12RootSignature> mRootSignature;
         ReleasePtr<IDXGIFactory4> mFactory;
 
+        DirectX12QueryHeap mTimestampQueryHeap;
+
         DirectX12CommandAllocator mGraphicsQueue;
         DirectX12CommandAllocator mCopyQueue;
         DirectX12CommandAllocator mComputeQueue;
@@ -75,6 +79,9 @@ namespace Render {
 
         DirectX12MappedHeapAllocator mTempMemoryHeap = D3D12_HEAP_TYPE_UPLOAD;
         BumpAllocator<FixedAllocator<DirectX12MappedHeapAllocator &>> mTempAllocator;
+
+        DirectX12MappedHeapAllocator mReadbackMemoryHeap = D3D12_HEAP_TYPE_READBACK;
+        BumpAllocator<FixedAllocator<DirectX12MappedHeapAllocator &>> mReadbackAllocator;
 
         DirectX12HeapAllocator mConstantMemoryHeap;
         LogBucketAllocator<HeapAllocator<DirectX12HeapAllocator &>, 64, 4096, 4> mConstantAllocator;
