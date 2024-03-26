@@ -183,7 +183,7 @@ namespace FirstParty {
         options.ScopeFlags = EOS_EAuthScopeFlags::EOS_AS_BasicProfile | EOS_EAuthScopeFlags::EOS_AS_FriendsList | EOS_EAuthScopeFlags::EOS_AS_Presence;
         options.Credentials = &credentials;
 
-        EOS_Auth_LoginCallbackInfo info = co_await EOS_sender<EOS_Auth_Login>(mAuthInterface, &options);
+        EOS_Auth_LoginCallbackInfo info = (co_await EOS_sender<EOS_Auth_Login>(mAuthInterface, &options)).value();
 
         switch (info.ResultCode) {
         case EOS_EResult::EOS_Success:
@@ -228,7 +228,7 @@ namespace FirstParty {
             Options.UserLoginInfo = nullptr;
 
             assert(mConnectInterface != nullptr);
-            EOS_Connect_LoginCallbackInfo info = co_await EOS_sender<EOS_Connect_Login>(mConnectInterface, &Options);
+            EOS_Connect_LoginCallbackInfo info = (co_await EOS_sender<EOS_Connect_Login>(mConnectInterface, &Options)).value();
             EOS_Auth_Token_Release(userAuthToken);
 
             switch (info.ResultCode) {
@@ -276,7 +276,7 @@ namespace FirstParty {
             options.LeaderboardId = name;
             options.LocalUserId = userId;
 
-            EOS_Leaderboards_OnQueryLeaderboardRanksCompleteCallbackInfo info = co_await EOS_sender<EOS_Leaderboards_QueryLeaderboardRanks>(mLeaderboardsInterface, &options);
+            EOS_Leaderboards_OnQueryLeaderboardRanksCompleteCallbackInfo info = (co_await EOS_sender<EOS_Leaderboards_QueryLeaderboardRanks>(mLeaderboardsInterface, &options)).value();
 
             if (info.ResultCode != EOS_EResult::EOS_Success) {
                 LOG_ERROR("[EOS SDK] Leaderboards - Query Leaderboard Ranks Error: " << EOS_EResult_ToString(info.ResultCode));
@@ -354,7 +354,7 @@ namespace FirstParty {
         QueryDefinitionsOptions.EndTime = EOS_LEADERBOARDS_TIME_UNDEFINED;
         QueryDefinitionsOptions.LocalUserId = userId;
 
-        EOS_Leaderboards_OnQueryLeaderboardDefinitionsCompleteCallbackInfo info = co_await EOS_sender<EOS_Leaderboards_QueryLeaderboardDefinitions>(mLeaderboardsInterface, &QueryDefinitionsOptions);
+        EOS_Leaderboards_OnQueryLeaderboardDefinitionsCompleteCallbackInfo info = (co_await EOS_sender<EOS_Leaderboards_QueryLeaderboardDefinitions>(mLeaderboardsInterface, &QueryDefinitionsOptions)).value();
 
         if (info.ResultCode != EOS_EResult::EOS_Success) {
             LOG_ERROR("[EOS SDK] Leaderboards - Query Definitions Error: " << EOS_EResult_ToString(info.ResultCode));
@@ -438,7 +438,7 @@ namespace FirstParty {
 
         options.Stats = &data;
 
-        EOS_Stats_IngestStatCompleteCallbackInfo info = co_await EOS_sender<EOS_Stats_IngestStat>(mStatsInterface, &options);
+        EOS_Stats_IngestStatCompleteCallbackInfo info = (co_await EOS_sender<EOS_Stats_IngestStat>(mStatsInterface, &options)).value();
 
         if (info.ResultCode != EOS_EResult::EOS_Success) {
             LOG_ERROR("[EOS SDK] Stats - Ingest Stats Error: " << EOS_EResult_ToString(info.ResultCode));

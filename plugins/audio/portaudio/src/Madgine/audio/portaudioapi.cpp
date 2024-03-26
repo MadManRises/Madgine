@@ -43,7 +43,7 @@ namespace Audio {
         const void *mPtr;
         const void *mEnd;
 
-        bool mLooping = true;
+        bool mLooping = false;
 
         struct stop_cb {
             stop_cb(PortAudioStream &stream)

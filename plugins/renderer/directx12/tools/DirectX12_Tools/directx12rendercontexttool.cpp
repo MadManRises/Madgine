@@ -7,6 +7,14 @@
 
 #include "Madgine_Tools/inspector/inspector.h"
 
+#include "Madgine_Tools/tasktracker/tasktracker.h"
+
+#include "Madgine_Tools/imgui/clientimroot.h"
+
+#include "Madgine/window/mainwindow.h"
+
+#include "DirectX12/directx12rendercontext.h"
+
 #include "imgui/imgui.h"
 
 #include "Madgine/imageloaderlib.h"
@@ -46,6 +54,8 @@ namespace Tools {
             }
             return false;
         });
+
+        getTool<TaskTracker>().registerCustomTracker("Graphics Queue", &static_cast<Render::DirectX12RenderContext *>(static_cast<ClientImRoot &>(mRoot).window().getRenderer())->mGraphicsQueue.mTracker);
 
         co_return co_await RenderContextTool::init();
     }

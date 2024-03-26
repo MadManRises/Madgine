@@ -23,7 +23,10 @@
 
 #include "Generic/coroutines/generator.h"
 
-Engine::Threading::WorkgroupLocal<ImGuiContext *>
+#include "Modules/threading/threadlocal.h"
+
+//Engine::Threading::WorkgroupLocal<ImGuiContext *>
+THREADLOCAL(ImGuiContext*)
     sContext;
 
 ImGuiContext *&getImGuiContext()

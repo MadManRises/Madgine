@@ -13,41 +13,52 @@ namespace Debug {
         void TaskTracker::onAssign(void *ident, StackTrace<1> stacktrace)
         {
             std::lock_guard guard { mMutex };
-            mEvents.emplace_back(Event::ASSIGN, ident, stacktrace);
+
+            //mEvents.emplace_back(Event:: { stacktrace }, ident);
             auto pib = mTasksInFlight.try_emplace(ident, stacktrace);
-            assert(pib.second);
+            //assert(pib.second);
         }
 
-        void TaskTracker::onEnter(void *ident)
+        void TaskTracker::onEnter(void *ident, std::chrono::high_resolution_clock::time_point timePoint)
         {
             std::lock_guard guard { mMutex };
-            mEvents.emplace_back(Event::ENTER, ident, std::this_thread::get_id());
+            mEvents.emplace_back(Event::ENTER, ident, timePoint);
         }
 
-        void TaskTracker::onReturn(void *ident)
+        void TaskTracker::onReturn(void *ident, std::chrono::high_resolution_clock::time_point timePoint)
         {
             std::lock_guard guard { mMutex };
-            mEvents.emplace_back(Event::RETURN, ident, std::this_thread::get_id());
+            mEvents.emplace_back(Event::RETURN, ident, timePoint);
         }
 
-        void TaskTracker::onResume(void *ident)
+        void TaskTracker::onResume(void *ident, std::chrono::high_resolution_clock::time_point timePoint)
         {
             std::lock_guard guard { mMutex };
-            mEvents.emplace_back(Event::RESUME, ident, std::this_thread::get_id());
+            mEvents.emplace_back(Event::RESUME, ident, timePoint);
         }
 
-        void TaskTracker::onSuspend()
+        void TaskTracker::onSuspend(std::chrono::high_resolution_clock::time_point timePoint)
         {
             std::lock_guard guard { mMutex };
-            mEvents.emplace_back(Event::SUSPEND, std::this_thread::get_id());
+            mEvents.emplace_back(Event::SUSPEND, nullptr, timePoint);
         }
 
         void TaskTracker::onDestroy(void *ident)
         {
-            std::lock_guard guard { mMutex };
+            //std::lock_guard guard { mMutex };
             //mEvents.emplace_back(Event::DESTROY, ident);
-            auto count = mTasksInFlight.erase(ident);
-            assert(count == 1);
+            //auto count = mTasksInFlight.erase(ident);
+            //assert(count == 1);
+        }
+
+        TraceBack TaskTracker::getTraceback(void *ident)
+        {
+            std::lock_guard guard { mMutex };
+            FullStackTrace trace = mTasksInFlight.at(ident).calculateReadable();
+            if (!trace.empty())
+                return trace.front();
+            else
+                return {};
         }
 
         const std::deque<TaskTracker::Event> &TaskTracker::events() const

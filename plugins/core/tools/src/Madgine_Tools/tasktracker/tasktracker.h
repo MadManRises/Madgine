@@ -8,7 +8,7 @@
 namespace Engine {
 namespace Tools {
 
-    struct TaskTracker : Tool<TaskTracker> {
+    struct MADGINE_TOOLS_EXPORT TaskTracker : Tool<TaskTracker> {
         SERIALIZABLEUNIT(TaskTracker)
 
         TaskTracker(ImRoot &root);
@@ -17,6 +17,8 @@ namespace Tools {
         virtual void render() override;
 
         std::string_view key() const override;
+
+        void registerCustomTracker(const char *name, Debug::Threading::TaskTracker *tracker);
 
     protected:
         Rect2 beginPlot();
@@ -30,8 +32,10 @@ namespace Tools {
         bool mLocked = false;
         float mZoom = 10.0f;
 
+        std::vector<std::pair<const char *, Debug::Threading::TaskTracker *>> mCustomTrackers;
+
         std::chrono::high_resolution_clock::time_point mHoveredAssignTimepoint;
-        Threading::TaskQueue *mHoveredTaskQueue = nullptr;
+        Debug::Threading::TaskTracker *mHoveredTracker = nullptr;
         void *mHoveredId = nullptr;
     };
 

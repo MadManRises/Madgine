@@ -9,6 +9,17 @@
 namespace Engine {
 namespace Render {
 
+    double getCPUFrequency()
+    {
+        static double freq = []() {
+            LARGE_INTEGER buffer;
+            bool result = QueryPerformanceFrequency(&buffer);
+            assert(result);
+            return buffer.QuadPart / 1000000000.0;
+        }();
+        return freq;
+    }
+
     DirectX12CommandAllocator::DirectX12CommandAllocator(D3D12_COMMAND_LIST_TYPE type, std::string_view name, DirectX12DescriptorHeap *descriptorHeap, DirectX12QueryHeap *timestampHeap)
         : mType(type)
         , mName(name)
@@ -36,8 +47,20 @@ namespace Render {
         HRESULT hr = GetDevice()->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&mCommandQueue));
         DX12_CHECK(hr);
 
-        hr = mCommandQueue->GetTimestampFrequency(&mTimestampFrequency);
+#if ENABLE_PROFILER || ENABLE_TASK_TRACKING
+        UINT64 timestampFrequency;
+        hr = mCommandQueue->GetTimestampFrequency(&timestampFrequency);
         DX12_CHECK(hr);
+
+        mGPUFrequency = timestampFrequency / 1000000000.0f;
+
+        UINT64 gpuTimestamp, cpuTimestamp;
+        hr = mCommandQueue->GetClockCalibration(&gpuTimestamp, &cpuTimestamp);
+        DX12_CHECK(hr);
+        mGPUTimestampOffset = gpuTimestamp - (mGPUFrequency / getCPUFrequency()) * cpuTimestamp;
+#endif
+
+        mTracker.onAssign(this, Debug::StackTrace<1>::getCurrent(0));
 
         mLastCompletedFenceValue = 5;
         hr = GetDevice()->CreateFence(mLastCompletedFenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mFence));
@@ -107,8 +130,19 @@ namespace Render {
             ~ProfileHelper()
             {
                 uint64_t diff = mData->second - mData->first;
-                std::chrono::nanoseconds time { static_cast<uint64_t>((diff / float(mAllocator->mTimestampFrequency)) * 1000000000.0f) };
+                std::chrono::nanoseconds time { static_cast<uint64_t>(diff / mAllocator->mGPUFrequency) };
                 mAllocator->mProfiler.mStats.updateChild(&mAllocator->mStats, mAllocator->mStats.inject(time));
+
+                std::chrono::high_resolution_clock::time_point startTimePoint {
+                    std::chrono::nanoseconds {
+                        static_cast<long long>((mData->first - mAllocator->mGPUTimestampOffset) / mAllocator->mGPUFrequency) }
+                };
+                std::chrono::high_resolution_clock::time_point endTimePoint {
+                    std::chrono::nanoseconds {
+                        static_cast<long long>((mData->second - mAllocator->mGPUTimestampOffset) / mAllocator->mGPUFrequency) }
+                };
+                mAllocator->mTracker.onEnter(mAllocator, startTimePoint);
+                mAllocator->mTracker.onReturn(mAllocator, endTimePoint);
             }
             std::pair<uint64_t, uint64_t> *mData;
             DirectX12CommandAllocator *mAllocator;
@@ -129,7 +163,7 @@ namespace Render {
 
         if (allocator || !discardResources.empty())
             mAllocatorPool.emplace_back(mNextFenceValue, std::move(allocator), std::move(discardResources));
-
+        
         mCommandListPool.push_back(std::move(list));
 
         return signalFence();
@@ -167,7 +201,7 @@ namespace Render {
         while (!isComplete(currentFence()))
             ;
 
-        for (auto& [_1, _2, deleter] : mAllocatorPool) {
+        for (auto &[_1, _2, deleter] : mAllocatorPool) {
             deleter.clear();
         }
     }

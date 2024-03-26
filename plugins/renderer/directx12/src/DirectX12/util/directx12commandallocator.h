@@ -6,6 +6,8 @@
 
 #include "Modules/debug/profiler/profilerthread.h"
 
+#include "Modules/debug/tasktracking/tasktracker.h"
+
 namespace Engine {
 namespace Render {
 
@@ -29,6 +31,10 @@ namespace Render {
 
         ID3D12CommandQueue *queue();
 
+#if ENABLE_TASK_TRACKING
+        Debug::Threading::TaskTracker mTracker;
+#endif
+
     private:
         D3D12_COMMAND_LIST_TYPE mType;
         std::string mName;
@@ -42,15 +48,19 @@ namespace Render {
         uint64_t mNextFenceValue;
         ID3D12Fence *mFence;
 
-        #if ENABLE_PROFILER
+#if ENABLE_PROFILER
         Debug::Profiler::ProfilerThread mProfiler;
         Debug::Profiler::ProcessStats mStats;
         struct PendingStats {
             size_t mIndex;
         };
         PendingStats mPendingStats;
-        UINT64 mTimestampFrequency;
-        #endif
+#endif
+
+#if ENABLE_PROFILER || ENABLE_TASK_TRACKING
+        double mGPUFrequency;
+        UINT64 mGPUTimestampOffset;
+#endif
     };
 
 }

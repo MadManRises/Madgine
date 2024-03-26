@@ -80,11 +80,11 @@ namespace FirstParty {
             co_return {};
         }
 
-        LeaderboardFindResult_t leaderboard = co_await steam_sender<LeaderboardFindResult_t>(SteamUserStats()->FindLeaderboard(name));
+        LeaderboardFindResult_t leaderboard = (co_await steam_sender<LeaderboardFindResult_t>(SteamUserStats()->FindLeaderboard(name))).value();
         if (!leaderboard.m_bLeaderboardFound)
             co_return {};
 
-        LeaderboardScoresDownloaded_t download = co_await steam_sender<LeaderboardScoresDownloaded_t>(SteamUserStats()->DownloadLeaderboardEntries(leaderboard.m_hSteamLeaderboard, requestmode, rangeBegin, rangeEnd));
+        LeaderboardScoresDownloaded_t download = (co_await steam_sender<LeaderboardScoresDownloaded_t>(SteamUserStats()->DownloadLeaderboardEntries(leaderboard.m_hSteamLeaderboard, requestmode, rangeBegin, rangeEnd))).value();
 
         Leaderboard result;
         for (size_t i = 0; i < download.m_cEntryCount; ++i) {
@@ -111,7 +111,7 @@ namespace FirstParty {
         if (!SteamUserStats()->SetStat(name, value))
             co_return false;
 
-        LeaderboardFindResult_t leaderboardFound = co_await steam_sender<LeaderboardFindResult_t>(SteamUserStats()->FindLeaderboard(leaderboardName));
+        LeaderboardFindResult_t leaderboardFound = (co_await steam_sender<LeaderboardFindResult_t>(SteamUserStats()->FindLeaderboard(leaderboardName))).value();
         if (!leaderboardFound.m_bLeaderboardFound)
             co_return false;
 
@@ -119,7 +119,7 @@ namespace FirstParty {
 
         bool success = SteamUserStats()->StoreStats();
 
-        LeaderboardScoreUploaded_t payload = co_await std::move(upload);
+        LeaderboardScoreUploaded_t payload = (co_await std::move(upload)).value();
 
         co_return success &&payload.m_bSuccess;
     }
