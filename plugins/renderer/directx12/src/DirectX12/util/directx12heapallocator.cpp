@@ -29,7 +29,7 @@ namespace Render {
 
         GPUPtr<void> ptr;
 
-        CD3DX12_HEAP_DESC heapDesc = CD3DX12_HEAP_DESC { size, D3D12_HEAP_TYPE_DEFAULT };
+        CD3DX12_HEAP_DESC heapDesc = CD3DX12_HEAP_DESC { size, D3D12_HEAP_TYPE_DEFAULT, 0, D3D12_HEAP_FLAG_DENY_RT_DS_TEXTURES | D3D12_HEAP_FLAG_DENY_NON_RT_DS_TEXTURES };
         
         Heap &heap = mHeaps.emplace_back();
 
