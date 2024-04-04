@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Generic/enum.h"
 #include "Generic/callerhierarchy.h"
+#include "Generic/enum.h"
 
 namespace Engine {
 
@@ -22,6 +22,8 @@ struct OwnedScopePtr;
 struct TypeInfo;
 struct ApiFunction;
 struct BoundApiFunction;
+template <auto f>
+struct TypedBoundApiFunction;
 struct FunctionTable;
 struct FunctionArgument;
 struct KeyValueFunction;

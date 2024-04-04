@@ -82,6 +82,28 @@ struct META_EXPORT MetaTable {
     const std::pair<const char *, Accessor> *mMembers;
     const Constructor *mConstructors;
     MoveAssign *mMoveAssign;
+
+    mutable const MetaTable *mNext = nullptr;
+    mutable const MetaTable **mPrev = nullptr;
+};
+
+
+META_EXPORT const MetaTable *&sTypeList();
+
+META_EXPORT void registerType(const MetaTable &t);
+META_EXPORT void unregisterType(const MetaTable &t);
+
+
+template <typename T>
+struct MetaTableRegistrator {
+    MetaTableRegistrator()
+    {
+        registerType(*table<T>);
+    }
+    ~MetaTableRegistrator()
+    {
+        unregisterType(*table<T>);
+    }
 };
 
 }

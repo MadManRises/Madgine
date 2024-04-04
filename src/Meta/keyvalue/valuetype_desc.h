@@ -40,21 +40,21 @@ auto resolveCustomScopePtr(T &t)
 }
 
 template <typename T, bool keepPtr = false>
-auto resolveHelper() {
+auto resolveHelper()
+{
     using Ptr = decltype(resolveCustomScopePtr(std::declval<T *>()));
     if constexpr (std::same_as<Ptr, ScopePtr>) {
         return type_holder<T>;
     } else {
         if constexpr (keepPtr) {
             return type_holder<Ptr>;
-        }
-        else {
+        } else {
             return type_holder<std::remove_pointer_t<Ptr>>;
         }
     }
 }
 
-template <typename T, bool keepPtr = false> 
+template <typename T, bool keepPtr = false>
 using resolveCustomScopePtr_t = typename decltype(resolveHelper<T, keepPtr>())::type;
 
 template <typename T>
@@ -201,8 +201,23 @@ union ValueTypeSecondaryTypeInfo {
     {
     }
 
+    constexpr ValueTypeSecondaryTypeInfo(nullptr_t)
+        : mDummy(nullptr)
+    {
+    }
+
     constexpr ValueTypeSecondaryTypeInfo(const MetaTable **metaTable)
         : mMetaTable(metaTable)
+    {
+    }
+
+    constexpr ValueTypeSecondaryTypeInfo(const FunctionTable **functionTable)
+        : mFunctionTable(functionTable)
+    {
+    }
+
+    constexpr ValueTypeSecondaryTypeInfo(const EnumMetaTable *enumTable)
+        : mEnumTable(enumTable)
     {
     }
 
@@ -214,6 +229,8 @@ union ValueTypeSecondaryTypeInfo {
         case ValueTypeEnum::ApiFunctionValue:
         case ValueTypeEnum::BoundApiFunctionValue:
             return *mFunctionTable <=> *other.mFunctionTable;
+        case ValueTypeEnum::EnumValue:
+            return mEnumTable <=> other.mEnumTable;
         default:
             return mDummy <=> other.mDummy;
         }
@@ -222,6 +239,7 @@ union ValueTypeSecondaryTypeInfo {
     const void *mDummy;
     const MetaTable **mMetaTable;
     const FunctionTable **mFunctionTable;
+    const EnumMetaTable *mEnumTable;
 };
 
 struct META_EXPORT ValueTypeDesc {
@@ -318,11 +336,11 @@ constexpr ValueTypeIndex toValueTypeIndex()
     } else if constexpr (InstanceOf<T, Flags>) {
         return ValueTypeEnum::FlagsValue;
     } else if constexpr (std::ranges::range<T>) {
-        if constexpr (std::same_as<KeyType_t<typename T::iterator::value_type>, Void>)
+        if constexpr (std::same_as<KeyType_t<std::ranges::range_value_t<T>>, Void>)
             return ValueTypeEnum::KeyValueVirtualSequenceRangeValue;
         else
             return ValueTypeEnum::KeyValueVirtualAssociativeRangeValue;
-    } else if constexpr (Execution::Sender<T>){
+    } else if constexpr (Execution::Sender<T>) {
         return ValueTypeEnum::SenderValue;
     } else if constexpr (Pointer<T>) {
         if constexpr (std::is_function_v<std::remove_pointer_t<T>>)
@@ -349,22 +367,32 @@ constexpr ExtendedValueTypeDesc toValueTypeDesc()
     } else if constexpr (std::same_as<T, ValueType>) {
         return { ExtendedValueTypeEnum::GenericType };
     } else if constexpr (InstanceOf<T, Flags>) {
-        return { { ValueTypeEnum::FlagsValue }, T::Representation::sTable };
-    } else if constexpr (Execution::Sender<T>){
+        return { { ValueTypeEnum::FlagsValue }, &T::Representation::sTable };
+    } else if constexpr (InstanceOf<std::decay_t<T>, EnumType> || InstanceOf<std::decay_t<T>, BaseEnum>) {
+        return { { ValueTypeEnum::EnumValue }, &T::Representation::sTable };
+    } else if constexpr (Execution::Sender<T>) {
         return { { ValueTypeEnum::SenderValue }, nullptr };
     } else if constexpr (std::same_as<T, ScopePtr>) {
         return { { ValueTypeEnum::ScopeValue }, static_cast<const MetaTable **>(nullptr) };
     } else if constexpr (std::ranges::range<T>) {
-        if constexpr (std::same_as<KeyType_t<typename T::iterator::value_type>, Void>)
-            return { { ValueTypeEnum::KeyValueVirtualSequenceRangeValue }, toValueTypeDesc<typename T::iterator::value_type>() };
+        if constexpr (std::same_as<KeyType_t<std::ranges::range_value_t<T>>, Void>)
+            return { { ValueTypeEnum::KeyValueVirtualSequenceRangeValue }, toValueTypeDesc<std::ranges::range_value_t<T>>() };
         else
-            return { { ValueTypeEnum::KeyValueVirtualAssociativeRangeValue }, toValueTypeDesc<KeyType_t<typename T::iterator::value_type>>(), toValueTypeDesc<ValueType_t<typename T::iterator::value_type>>() };
+            return { { ValueTypeEnum::KeyValueVirtualAssociativeRangeValue }, toValueTypeDesc<KeyType_t<std::ranges::range_value_t<T>>>(), toValueTypeDesc<ValueType_t<std::ranges::range_value_t<T>>>() };
+    } else if constexpr (InstanceOfA<T, TypedBoundApiFunction>){
+        return { { ValueTypeEnum::BoundApiFunctionValue }, is_instance_auto<T, TypedBoundApiFunction>::arguments::value };
     } else if constexpr (Pointer<T>) {
-        if constexpr (Function<std::remove_pointer_t<T>> || std::same_as<std::remove_cv_t<std::remove_pointer_t<T>>, FunctionTable>)
+        if constexpr (Function<std::remove_pointer_t<T>>)
             //return { { ValueTypeEnum::ApiFunctionValue }, nullptr };
             throw 0;
-        else
+        else if constexpr (std::same_as<std::remove_cv_t<std::remove_pointer_t<T>>, FunctionTable>)
+            //return { { ValueTypeEnum::ApiFunctionValue }, nullptr };
+            throw 0;
+        else {
             return { { ValueTypeEnum::ScopeValue }, &table<std::remove_pointer_t<resolveCustomScopePtr_t<T>>> };
+        }
+    } else if constexpr (InstanceOf<std::decay_t<T>, std::unique_ptr>) {
+        return { { ValueTypeEnum::ScopeValue }, &table<typename is_instance<std::decay_t<T>, std::unique_ptr>::argument_types::first> };
     } else {
         return { { ValueTypeEnum::OwnedScopeValue }, &table<resolveCustomScopePtr_t<T>> };
     }

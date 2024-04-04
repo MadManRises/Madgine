@@ -2,31 +2,17 @@
 
 #include "Generic/execution/statedescriptor.h"
 #include "debugger.h"
-#include "Meta/keyvalue/valuetype.h"
+//#include "Meta/keyvalue/valuetype.h"
 
 namespace Engine {
 namespace Execution {
 
-    struct SenderLocation : Debug::DebugLocation {
-        SenderLocation(std::vector<StateDescriptor> state)
-            : mState(std::move(state))
-        {
-        }
+    struct MADGINE_DEBUGGER_EXPORT SenderLocation : Debug::DebugLocation {
+        SenderLocation(std::vector<StateDescriptor> state);
 
-        virtual std::string toString() const override
-        {
-            return "Sender";
-        }
-
-        virtual std::map<std::string_view, ValueType> localVariables() const override
-        {
-            return {};
-        }
-
-        virtual bool wantsPause(Debug::ContinuationType type) const override
-        {
-            return type == Debug::ContinuationType::Error;
-        }
+        std::string toString() const override;
+        std::map<std::string_view, ValueType> localVariables() const override;
+        bool wantsPause(Debug::ContinuationType type) const override;
 
         std::vector<StateDescriptor> mState;
         size_t mIndex = 0;

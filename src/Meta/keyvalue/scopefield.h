@@ -15,7 +15,7 @@ struct META_EXPORT ScopeField {
     const char *key() const;
 
     bool isEditable() const;
-    bool isGeneric() const;
+    const ExtendedValueTypeDesc &type() const;
 
 private:
     ScopePtr mScope;

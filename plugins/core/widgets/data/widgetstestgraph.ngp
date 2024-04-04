@@ -1,6 +1,6 @@
 <Graph serId=1>
     <mNodes>
-        <Node type="Native/Widget_PointerEnter" serId=2>
+        <Node type="Native/Get_Widget" serId=2>
             <mParameters>
             </mParameters>
             <mFlowOutPins>
@@ -37,7 +37,7 @@
                 <Item>
                     <Item>
                         <Element>
-                            <Element>5</Element>
+                            <Element>4</Element>
                             <Element>0</Element>
                             <Element>0</Element>
                         </Element>
@@ -48,7 +48,7 @@
                 <Item>
                     <Item>
                         <Element>
-                            <Element>1</Element>
+                            <Element>6</Element>
                             <Element>0</Element>
                             <Element>0</Element>
                         </Element>
@@ -123,22 +123,41 @@
                 </Item>
             </mDataOutPins>
         </Node>
-        <Node type="Native/Widget_PointerLeave" serId=7>
-            <mParameters>
-            </mParameters>
+        <Node type="Accessor/Engine::Widgets::WidgetBase/PointerLeave" serId=7>
             <mFlowOutPins>
+                <Item>
+                </Item>
+            </mFlowOutPins>
+            <mDataInPins>
                 <Item>
                     <Item>
                         <Element>
-                            <Element>4</Element>
+                            <Element>1</Element>
                             <Element>0</Element>
                             <Element>0</Element>
                         </Element>
                     </Item>
                 </Item>
+            </mDataInPins>
+            <mDataOutPins>
+                <Item>
+                </Item>
+            </mDataOutPins>
+        </Node>
+        <Node type="Accessor/Engine::Widgets::WidgetBase/PointerEnter" serId=8>
+            <mFlowOutPins>
+                <Item>
+                </Item>
             </mFlowOutPins>
             <mDataInPins>
                 <Item>
+                    <Item>
+                        <Element>
+                            <Element>1</Element>
+                            <Element>0</Element>
+                            <Element>0</Element>
+                        </Element>
+                    </Item>
                 </Item>
             </mDataInPins>
             <mDataOutPins>

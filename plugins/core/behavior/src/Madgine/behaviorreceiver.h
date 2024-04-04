@@ -8,9 +8,11 @@
 
 #include "state.h"
 
+#include "Madgine/debug/debuggablesender.h"
+
 namespace Engine {
 
-struct BehaviorReceiver : Execution::VirtualReceiverBase<BehaviorError, ArgumentList> {
+struct MADGINE_BEHAVIOR_EXPORT BehaviorReceiver : Execution::VirtualReceiverBase<BehaviorError, ArgumentList> {
     template <typename... Args>
     void set_value(Args &&...args)
     {
@@ -21,15 +23,19 @@ struct BehaviorReceiver : Execution::VirtualReceiverBase<BehaviorError, Argument
     virtual Debug::ParentLocation *debugLocation() = 0;
     virtual std::stop_token stopToken() = 0;
 
+    bool resolveVarHelper(std::string_view name, void (*)(const ValueType &, void *), void *data);
+
     template <typename O>
     friend auto tag_invoke(Execution::resolve_var_d_t, BehaviorReceiver &rec, std::string_view name, O &out)
     {
-        ValueType v;
-        if (rec.resolveVar(name, v)) {
-            out = v.as<O>();
-            return true;
+        if constexpr (std::same_as<O, ValueType> || std::same_as<O, ValueTypeRef>) {
+            return rec.resolveVar(name, out);
         } else {
-            return false;
+            return rec.resolveVarHelper(
+                name, [](const ValueType &v, void *out) {
+                    *static_cast<O *>(out) = ValueType_as<O>(v);
+                },
+                &out);
         }
     }
 
@@ -51,7 +57,8 @@ struct VirtualBehaviorState : Execution::VirtualStateEx<Rec, Base, type_pack<Beh
 
     bool resolveVar(std::string_view name, ValueType &out) override
     {
-        return Execution::resolve_var_d(this->mRec, name, out);
+        ValueTypeRef outRef { out };
+        return Execution::resolve_var_d(this->mRec, name, outRef);
     }
 
     Debug::ParentLocation *debugLocation() override
@@ -66,7 +73,8 @@ struct VirtualBehaviorState : Execution::VirtualStateEx<Rec, Base, type_pack<Beh
 };
 
 template <typename F, typename... Args>
-auto make_simple_behavior_sender(F &&f, Args&&... args) {
+auto make_simple_behavior_sender(F &&f, Args &&...args)
+{
     return Execution::make_sender<BehaviorError, ArgumentList>(
         [args = std::tuple<Args...> { std::forward<Args>(args)... }, f { forward_capture<F>(std::forward<F>(f)) }]<typename Rec>(Rec &&rec) mutable {
             return TupleUnpacker::constructExpand<VirtualBehaviorState<Rec, Execution::SimpleState<F, std::tuple<Args...>, BehaviorReceiver>>>(std::forward<Rec>(rec), std::forward<F>(f), std::move(args));

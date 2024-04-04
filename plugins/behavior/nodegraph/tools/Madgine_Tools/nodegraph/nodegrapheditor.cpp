@@ -52,6 +52,9 @@
 
 #include "Madgine_Tools/behaviortool.h"
 
+#include "Madgine/nodegraph/nodes/functionnode.h"
+#include "Madgine/nodegraph/nodes/accessornode.h"
+
 UNIQUECOMPONENT(Engine::Tools::NodeGraphEditor);
 
 METATABLE_BEGIN_BASE(Engine::Tools::NodeGraphEditor, Engine::Tools::ToolBase)
@@ -480,14 +483,35 @@ namespace Tools {
                         for (const std::pair<const std::string_view, IndexType<uint32_t>> &nodeDesc : NodeGraph::NodeRegistry::sComponentsByName()) {
                             if (ImGui::MenuItem(nodeDesc.first.data())) {
                                 NodeGraph::NodeBase *node = mGraph.addNode(NodeGraph::NodeRegistry::get(nodeDesc.second).construct(mGraph));
-                                ed::SetNodePosition(ed::NodeId { node }, mPopupPosition);
+                                ed::SetNodePosition(60000 * mGraph.nodeIndex(node), mPopupPosition);
                             }
                         }
                         ImGui::EndMenu();
                     }
                     if (BehaviorHandle behavior = ImGui::BehaviorSelector()) {
                         NodeGraph::NodeBase *node = mGraph.addNode(std::make_unique<NodeGraph::LibraryNode>(mGraph, behavior));
-                        ed::SetNodePosition(ed::NodeId { node }, mPopupPosition);
+                        ed::SetNodePosition(60000 * mGraph.nodeIndex(node), mPopupPosition);
+                    }
+                    if (ImGui::BeginMenu("Accessors")) {
+                        const MetaTable *type = sTypeList();
+                        while (type) {
+                            if (ImGui::BeginMenu(type->mTypeName)) {
+                                for (const std::pair<const char *, Accessor> *accessor = type->mMembers; accessor->first; ++accessor) {
+                                    if (ImGui::MenuItem(accessor->first)) {
+                                        NodeGraph::NodeBase *node;
+                                        if (accessor->second.mType.mType == ValueTypeEnum::ApiFunctionValue || accessor->second.mType.mType == ValueTypeEnum::BoundApiFunctionValue) {
+                                            node = mGraph.addNode(std::make_unique<NodeGraph::FunctionNode>(mGraph, *accessor->second.mType.mSecondary.mFunctionTable));
+                                        } else {
+                                            node = mGraph.addNode(std::make_unique<NodeGraph::AccessorNode>(mGraph, type->mSelf, accessor));
+                                        }
+                                        ed::SetNodePosition(60000 * mGraph.nodeIndex(node), mPopupPosition);
+                                    }
+                                }
+                                ImGui::EndMenu();
+                            }
+                            type = type->mNext;
+                        }
+                        ImGui::EndMenu();
                     }
                     ImGui::EndMenu();
                 }

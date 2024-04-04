@@ -91,8 +91,8 @@ private:
     }
 
     static const constexpr std::pair<const char *, Accessor> sMembers[2] {
-        { "__call", { &sGetter, nullptr, false } },
-        { nullptr, { nullptr, nullptr, false } }
+        { "__call", { &sGetter, nullptr, toValueTypeDesc<BoundApiFunction>() } },
+        { nullptr, { nullptr, nullptr, ExtendedValueTypeDesc { ExtendedValueTypeEnum::GenericType } } }
     };
 
     static const constexpr MetaTable sMetaTable {

@@ -2,6 +2,8 @@
 
 #include "ownedscopeptr.h"
 
+#include "keyvaluesender.h"
+
 #include "Generic/container/virtualrange.h"
 
 #include "Generic/keyvalue.h"
@@ -152,6 +154,8 @@ decltype(auto) convert_ValueType(T &&t)
         return FlagsHolder { std::forward<T>(t) };
     } else if constexpr (Execution::Sender<std::decay_t<T>>) {
         return KeyValueSender { std::forward<T>(t) };
+    } else if constexpr (InstanceOfA<std::decay_t<T>, TypedBoundApiFunction>){
+        return BoundApiFunction { std::forward<T>(t) };
     } else {
         if constexpr (Pointer<std::decay_t<T>>) {
             return ScopePtr { t };
@@ -179,5 +183,20 @@ void to_ValueType(ValueType &v, T &&t)
         to_ValueType_impl(v, convert_ValueType(std::forward<T>(t)));
     }
 }
+
+struct ValueTypeRef {
+    ValueType &mRef;
+
+    operator ValueType& () {
+        return mRef;
+    }
+
+    template <typename T>
+    ValueTypeRef& operator=(T&& v) {
+        to_ValueType(mRef, std::forward<T>(v));
+        return *this;
+    }
+
+};
 
 }

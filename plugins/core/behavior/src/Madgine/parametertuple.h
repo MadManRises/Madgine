@@ -76,8 +76,8 @@ struct ParameterTupleInstance : ParameterTupleBase {
     }
 
     static const constexpr std::pair<const char *, Accessor> sMembers[] = {
-        { "Item", { &sGetter<Ty>, &sSetter<Ty>, false } }...,
-        { nullptr, { nullptr, nullptr, false } }
+        { "Item", { &sGetter<Ty>, &sSetter<Ty>, toValueTypeDesc<Ty>() } }...,
+        { nullptr, { nullptr, nullptr, ExtendedValueTypeDesc { ExtendedValueTypeEnum::GenericType } } }
     };
 
     static const constexpr MetaTable sMetaTable {

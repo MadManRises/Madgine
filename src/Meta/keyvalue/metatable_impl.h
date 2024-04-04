@@ -72,7 +72,7 @@ constexpr Accessor property()
             to_ValueType(retVal, forward_ref<T>(value));
         },
         setter,
-        std::is_same_v<ValueType, std::decay_t<T>>
+        toValueTypeDesc<std::decay_t<T>>()
     };
 }
 
@@ -97,9 +97,9 @@ constexpr Accessor member()
 }
 
 template <auto F>
-static constexpr BoundApiFunction method(ScopePtr scope)
+static constexpr TypedBoundApiFunction<&function<F>> method(ScopePtr scope)
 {
-    return { &function<F>(), scope };
+    return { scope };
 }
 
 template <typename T>
@@ -185,15 +185,19 @@ struct ctorHelper {
 #define METATABLE_END(T) \
     METATABLE_END_EX(, T)
 
-#define METATABLE_END_EX(Idx, T)                                                  \
-    METATABLE_ENTRY_EX(Idx, nullptr, SINGLE_ARG({ nullptr, nullptr }))            \
-    CONSTRUCTOR_EX(Idx, void)                                                     \
-    namespace Meta_##T                                                            \
-    {                                                                             \
-        static constexpr GET_STRUCT(::Engine::MetaTableTag, Idx) sMembers = {};   \
-        static constexpr GET_STRUCT(::Engine::MetaTableCtorTag, Idx) sCtors = {}; \
-    }                                                                             \
-    DLL_EXPORT_VARIABLE(constexpr, const ::Engine::MetaTable, , table, SINGLE_ARG({ #T, ::Engine::type_holder<T>, ::Engine::type_holder<GET_STRUCT(::Engine::MetaTableTag, Idx)::BaseT>, Meta_##T::sMembers.data(), Meta_##T::sCtors.data() }), T);
+#define METATABLE_END_EX(Idx, T)                                                                                                                                                                                                                    \
+    METATABLE_ENTRY_EX(Idx, nullptr, SINGLE_ARG(Accessor { nullptr, nullptr, ExtendedValueTypeDesc { ExtendedValueTypeEnum::GenericType } }))                                                                                                       \
+    CONSTRUCTOR_EX(Idx, void)                                                                                                                                                                                                                       \
+    namespace Meta_##T                                                                                                                                                                                                                              \
+    {                                                                                                                                                                                                                                               \
+        static constexpr GET_STRUCT(::Engine::MetaTableTag, Idx) sMembers = {};                                                                                                                                                                     \
+        static constexpr GET_STRUCT(::Engine::MetaTableCtorTag, Idx) sCtors = {};                                                                                                                                                                   \
+    }                                                                                                                                                                                                                                               \
+    DLL_EXPORT_VARIABLE(constexpr, const ::Engine::MetaTable, , table, SINGLE_ARG({ #T, ::Engine::type_holder<T>, ::Engine::type_holder<GET_STRUCT(::Engine::MetaTableTag, Idx)::BaseT>, Meta_##T::sMembers.data(), Meta_##T::sCtors.data() }), T); \
+    namespace Meta_##T                                                                                                                                                                                                                              \
+    {                                                                                                                                                                                                                                               \
+        static ::Engine::MetaTableRegistrator<T> __reg;                                                                                                                                                                                             \
+    }
 
 #define NAMED_MEMBER_EX(Idx, Name, M) \
     METATABLE_ENTRY_EX(Idx, STRINGIFY(Name), SINGLE_ARG(::Engine::member<Ty, &Ty::M>()))
@@ -219,7 +223,7 @@ struct ctorHelper {
 #define PROPERTY(Name, Getter, Setter) \
     PROPERTY_EX(, Name, Getter, Setter)
 
-#define NAMED_FUNCTION_EX(Idx, Name, F, ...)                                                                                                                                                                                                            \
+#define NAMED_FUNCTION_EX(Idx, Name, F, ...)                                                                                                                                                                                              \
     FUNCTIONTABLE_EX(BASE_STRUCT(::Engine::MetaTableTag, Idx)::name + "::" STRINGIFY(Name), ::Engine::MetaMemberFunctionTag<BASE_STRUCT(::Engine::MetaTableTag, Idx)::Ty>, BASE_STRUCT(::Engine::MetaTableTag, Idx)::Ty::F, #__VA_ARGS__) \
     METATABLE_ENTRY_EX(Idx, STRINGIFY(Name), SINGLE_ARG(::Engine::property<Ty, &::Engine::method<&Ty::F>, nullptr>()))
 

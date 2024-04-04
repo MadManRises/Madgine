@@ -102,7 +102,7 @@ namespace Tools {
 
         std::string_view id = it->key();
         bool editable = it->isEditable();
-        bool generic = it->isGeneric();
+        bool generic = it->type().mType == ExtendedValueTypeEnum::GenericType;
 
         it->value(value);
         std::pair<bool, bool> modified = drawValue(id, value, editable, generic);

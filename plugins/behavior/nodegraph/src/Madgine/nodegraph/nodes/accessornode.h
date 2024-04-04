@@ -6,18 +6,14 @@
 namespace Engine {
 namespace NodeGraph {
 
-    struct MADGINE_NODEGRAPH_EXPORT FunctionNode : Serialize::VirtualData<FunctionNode, VirtualScope<FunctionNode, NodeBase>> {
+    struct MADGINE_NODEGRAPH_EXPORT AccessorNode : Serialize::VirtualData<AccessorNode, VirtualScope<AccessorNode, NodeBase>> {
 
-        FunctionNode(NodeGraph &graph, const FunctionTable *function);
-        FunctionNode(const FunctionNode &other, NodeGraph &graph);
+        AccessorNode(NodeGraph &graph, const MetaTable **type, const std::pair<const char *, Accessor> *accessor);
+        AccessorNode(const AccessorNode &other, NodeGraph &graph);
 
         std::string_view name() const override;
         std::string_view className() const override;
         std::unique_ptr<NodeBase> clone(NodeGraph &graph) const override;
-
-        size_t flowInCount(uint32_t group) const override;
-
-        size_t flowOutBaseCount(uint32_t group) const override;
 
         virtual size_t dataInBaseCount(uint32_t group = 0) const override;
         virtual std::string_view dataInName(uint32_t index, uint32_t group) const override;
@@ -30,15 +26,14 @@ namespace NodeGraph {
 
         virtual CodeGen::Statement generateRead(CodeGenerator &generator, std::unique_ptr<CodeGeneratorData> &data, uint32_t providerIndex, uint32_t group = 0) const override;
 
-        const FunctionTable *getFunction() const;
-
-        std::string_view getFunctionName() const;
-
     private:
-        const FunctionTable *mFunction = nullptr;
+        const MetaTable **mType = nullptr;
+        const std::pair<const char *, Accessor> *mAccessor = nullptr;        
+
+        std::string mFullClassName;
     };
 
 }
 }
 
-REGISTER_TYPE(Engine::NodeGraph::FunctionNode)
+REGISTER_TYPE(Engine::NodeGraph::AccessorNode)

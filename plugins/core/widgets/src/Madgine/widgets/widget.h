@@ -109,7 +109,19 @@ namespace Widgets {
         Threading::SignalStub<const Input::PointerEventArgs &> &pointerMoveEvent();
         Threading::SignalStub<const Input::PointerEventArgs &> &pointerClickEvent();
         Threading::SignalStub<const Input::PointerEventArgs &> &pointerEnterEvent();
+        auto pointerEnterSender()
+        {
+            return mPointerEnterSignal.sender() | Execution::then([](const Input::PointerEventArgs &args) {
+                return 3;
+            });
+        }
         Threading::SignalStub<const Input::PointerEventArgs &> &pointerLeaveEvent();
+        auto pointerLeaveSender()
+        {
+            return mPointerLeaveSignal.sender() | Execution::then([](const Input::PointerEventArgs &args) {
+                return 3;
+            });
+        }
         Threading::SignalStub<const Input::PointerEventArgs &> &dragBeginEvent();
         Threading::SignalStub<const Input::PointerEventArgs &> &dragMoveEvent();
         Threading::SignalStub<const Input::PointerEventArgs &> &dragEndEvent();

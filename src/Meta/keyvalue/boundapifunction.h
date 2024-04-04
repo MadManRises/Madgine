@@ -33,4 +33,29 @@ struct META_EXPORT BoundApiFunction {
     void *mScope = nullptr;
 };
 
+template <auto f>
+struct TypedBoundApiFunction : TypedApiFunction<f> {
+
+    constexpr TypedBoundApiFunction() = default;
+
+    TypedBoundApiFunction(const ScopePtr &scope)
+        : mScope(scope.mScope)
+    {
+        /* assert(f->mArguments[0].mType.mType == ValueTypeEnum::ScopeValue);
+        assert(*f->mArguments[0].mType.mSecondary.mMetaTable == scope.mType);
+        assert(f->mIsMemberFunction);*/
+    }
+
+    bool operator==(const TypedBoundApiFunction<f> &other) const
+    {
+        return mScope == other.mScope;
+    }
+
+    operator BoundApiFunction() const {
+        return { *f, { mScope, *(*f)->mArguments[0].mType.mSecondary.mMetaTable } };
+    }
+
+    void *mScope = nullptr;
+};
+
 }

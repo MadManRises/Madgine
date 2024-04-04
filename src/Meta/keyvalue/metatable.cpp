@@ -66,4 +66,24 @@ std::string MetaTable::name(ScopePtr scope) const
     }
     return "<"s + mTypeName + ">";
 }
+
+    const MetaTable *&sTypeList()
+    {
+        static const MetaTable *sDummy = nullptr;
+        return sDummy;
+    }
+
+    void registerType(const MetaTable &f)
+    {
+        if (sTypeList()) {
+            sTypeList()->mPrev = &f.mNext;
+        }
+        f.mNext = std::exchange(sTypeList(), &f);
+    }
+
+    void unregisterType(const MetaTable &f)
+    {
+    }
+
+
 }

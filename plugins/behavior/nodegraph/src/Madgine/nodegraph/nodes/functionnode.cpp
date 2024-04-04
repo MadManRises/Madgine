@@ -16,29 +16,53 @@
 
 #include "../nodeexecution.h"
 
-NODE(FunctionNode, Engine::NodeGraph::FunctionNode)
-
 METATABLE_BEGIN_BASE(Engine::NodeGraph::FunctionNode, Engine::NodeGraph::NodeBase)
-PROPERTY(Function, getFunction, setFunction)
+//PROPERTY(Function, getFunction, setFunction)
 METATABLE_END(Engine::NodeGraph::FunctionNode)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::NodeGraph::FunctionNode, Engine::NodeGraph::NodeBase)
-ENCAPSULATED_FIELD(Function, getFunctionName, setFunctionName)
+//ENCAPSULATED_FIELD(Function, getFunctionName, setFunctionName)
 SERIALIZETABLE_END(Engine::NodeGraph::FunctionNode)
 
 namespace Engine {
 namespace NodeGraph {
 
-    FunctionNode::FunctionNode(NodeGraph &graph)
-        : Node(graph)
+    FunctionNode::FunctionNode(NodeGraph &graph, const FunctionTable *function)
+        : VirtualData(graph)
+        , mFunction(function)
     {
         setup();
     }
 
     FunctionNode::FunctionNode(const FunctionNode &other, NodeGraph &graph)
-        : Node(other, graph)
+        : VirtualData(other, graph)
         , mFunction(other.mFunction)
     {
+    }
+
+    std::string_view FunctionNode::name() const
+    {
+        return "";
+    }
+
+    std::string_view FunctionNode::className() const
+    {
+        return "";
+    }
+
+    std::unique_ptr<NodeBase> FunctionNode::clone(NodeGraph &graph) const
+    {
+        return std::make_unique<FunctionNode>(*this, graph);
+    }
+
+    size_t FunctionNode::flowInCount(uint32_t group) const
+    {
+        return 1;
+    }
+
+    size_t FunctionNode::flowOutBaseCount(uint32_t group) const
+    {
+        return 1;
     }
 
     size_t FunctionNode::dataInBaseCount(uint32_t group) const
@@ -58,7 +82,7 @@ namespace NodeGraph {
 
     size_t FunctionNode::dataProviderBaseCount(uint32_t group) const
     {
-        return mFunction ? 1 : 0;
+        return 1;
     }
 
     ExtendedValueTypeDesc FunctionNode::dataProviderType(uint32_t index, uint32_t group, bool bidir) const
@@ -80,13 +104,7 @@ namespace NodeGraph {
         throw 0;
     }
 
-    void FunctionNode::setFunction(FunctionTable *function)
-    {
-        mFunction = function;
-        setup();
-    }
-
-    FunctionTable *FunctionNode::getFunction() const
+    const FunctionTable *FunctionNode::getFunction() const
     {
         return mFunction;
     }
@@ -94,18 +112,6 @@ namespace NodeGraph {
     std::string_view FunctionNode::getFunctionName() const
     {
         return mFunction ? mFunction->mName : "";
-    }
-
-    void FunctionNode::setFunctionName(std::string_view name)
-    {
-        const FunctionTable *table = sFunctionList();
-        while (table) {
-            if (table->mName == name) {
-                setFunction(const_cast<FunctionTable *>(table));
-                return;
-            }
-            table = table->mNext;
-        }
     }
 
 }

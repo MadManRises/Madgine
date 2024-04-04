@@ -48,7 +48,7 @@ UNIQUECOMPONENT(Engine::Tools::SceneEditor);
 
 METATABLE_BEGIN_BASE(Engine::Tools::SceneEditor, Engine::Tools::ToolBase)
 READONLY_PROPERTY(Views, views)
-READONLY_PROPERTY(CurrentScene, currentSceneFile)
+//READONLY_PROPERTY(CurrentScene, currentSceneFile)
 METATABLE_END(Engine::Tools::SceneEditor)
 
 SERIALIZETABLE_INHERIT_BEGIN(Engine::Tools::SceneEditor, Engine::Tools::ToolBase)
